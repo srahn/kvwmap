@@ -21,8 +21,6 @@
   $strOwsSrs="OWS SRS";
   $strLogo="Biểu tượng";
   $strNoLogoSelected="Chưa ch�?n biểu tượng";
-  $strWaterMark="Hình m�?";
-  $strNoWatermarkSelected="Chưa ch�?n hình m�?";
   $strALBReferencingRegion="Vùng tham chiếu ALB";
   $strALBReferencingRegionKey="Chìa khóa vùng tham chiếu ALB";
   $strMenuPoint="Menu";

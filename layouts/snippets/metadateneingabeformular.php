@@ -32,7 +32,6 @@ else {
 		    echo "<br>(MD_Metadata.mdFileID)";
 			}
 		    ?><input type="text" name="mdfileid" value="<?php echo $this->formvars['mdfileid']; ?>">
-<?php var_dump($this->formvars['mdfileid']); ?>			
           </td>
         </tr>
         <tr> 
@@ -109,7 +108,7 @@ else {
       <table border="0" cellspacing="0" cellpadding="0">
         <tr valign="top"> 
           <td> 
-            <select name="selectedthemekeywords" size="4" multiple>
+            <select name="selectedthemekeywords" size="4" style="width: 200px" multiple>
             </select>
           </td>
           <td align="center" valign="middle" width="1"> 
@@ -128,7 +127,7 @@ else {
       <table border="0" cellspacing="0" cellpadding="0">
         <tr valign="top"> 
           <td> 
-            <select name="selectedplacekeywords" size="4" multiple>
+            <select name="selectedplacekeywords" size="4" style="width: 200px" multiple>
             </select>
           </td>
           <td align="center" valign="middle" width="1"> 

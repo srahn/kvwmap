@@ -1,4 +1,6 @@
-
+<? 
+	include(LAYOUTPATH.'languages/attribut_privileges_form_'.$this->user->rolle->language.'.php');
+?>
 <SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
@@ -11,7 +13,7 @@ Text[1]=["Hilfe:","Auf dieser Seite können Sie festlegen, welche Rechte eine St
 function set_all(attribute_names, stelle, value){
 	names = attribute_names.split('|');
 	for(i = 0; i < names.length; i++){
-		element = document.getElementsByName('privileg_'+names[i]+stelle);
+		element = document.getElementsByName('privileg_'+names[i]+'_'+stelle);
 		element[0].value = value;
 	}
 }
@@ -56,7 +58,7 @@ function save(stelle){
 
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="4"><h2><?php echo $this->titel; ?></h2></td>
+    <td colspan="4"><h2><?php echo $strTitle; ?></h2></td>
   </tr>
   <tr>
   	<td>&nbsp;</td>
@@ -70,7 +72,7 @@ function save(stelle){
 				<tr>
 					<td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3"> 
 			      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.scrollposition.value=0;document.GUI.submit();">
-			      	<option value="">----------- Bitte wählen -----------</option>
+			      	<option value="">----------- <? echo $this->strPleaseSelect; ?> -----------</option>
 			        <?
 			    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
 			    			echo '<option';
@@ -98,6 +100,22 @@ function save(stelle){
   <tr>
   	<td>
   		<table>
+				<tr>
+					<td></td>
+					<td></td>
+					<td>
+						<? 
+						$stellenanzahl = count($this->stellen['ID']);
+						if($stellenanzahl > 0){
+						$width1 = $width = 280*$stellenanzahl;
+						if($width > 840)$width = 840;
+						if($width1 > 840){ ?>
+						<div id="upperscrollbar" style="overflow:auto; overflow-y:hidden;width:840px" onscroll="document.getElementById('stellendiv').scrollLeft=this.scrollLeft">
+							<div style="width:<? echo $width1; ?>px;height:1px"></div>
+						</div>
+						<? } ?>
+					</td>
+				</tr>
   			<tr>
 			  	<td valign="top">
 			  		<div style="border:1px solid black;">
@@ -108,19 +126,15 @@ function save(stelle){
 							</table>
 						</div>
 					<td>	
-					<? $stellenanzahl = count($this->stellen['ID']);
-						 if($stellenanzahl > 0){
-						 	 $width = 280*$stellenanzahl;
-						 	 if($width > 840)$width = 840; ?>
 					<td valign="top">
-						<div id="stellendiv" style="border:1px solid black; width:<? echo $width; ?>px; float:right; overflow:auto; overflow-y:hidden" onscroll="document.GUI.scrollposition.value = this.scrollLeft;">
+						<div id="stellendiv" style="border:1px solid black; width:<? echo $width; ?>px; float:right; overflow:auto; overflow-y:hidden" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
 							<table border="1" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
 								<tr>
 							<?
 								for($s = 0; $s < count($this->stellen['ID']); $s++){
 									$this->stelle = new stelle($this->stellen['ID'][$s], $this->database);
 									$this->layer = $this->stelle->getLayer($this->formvars['selected_layer_id']);
-									$this->attributes_privileges = $this->stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
+									$this->attributes_privileges = $this->stelle->get_attributes_privileges($this->formvars['selected_layer_id'], true);
 									include(LAYOUTPATH.'snippets/attribute_privileges_template.php');
 								}
 							?>
@@ -138,7 +152,7 @@ function save(stelle){
   </tr>
 	<tr>
   	<td align="center">
-  		<input type="button" name="dummy" onclick="location.href='index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>#stellenzuweisung'" value="zur Stellenzuweisung">
+  		<input type="button" name="dummy" onclick="location.href='index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>#stellenzuweisung'" value="<? echo $strToTaskAssignment; ?>">
   	</td>
   </tr>
   <tr> 

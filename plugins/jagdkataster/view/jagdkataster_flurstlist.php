@@ -1,6 +1,14 @@
 <script language="JavaScript" type="text/javascript">
 <!--
 
+function select_all(){
+	var flurstarray = document.getElementsByName("check_flurstueck");
+	var status = !flurstarray[0].checked;
+	for(i = 0; i < flurstarray.length; i++){
+		flurstarray[i].checked = status;      
+	}
+}
+
 function send_selected_flurst(go){
 	var semi = false;
 	var flurstkennz = "";
@@ -91,6 +99,9 @@ function csv_export(){
       <?php  
       }
       ?>
+			<tr>
+				<td colspan="3">&nbsp;<a href="javascript:select_all();">alle auswählen</a></td>
+			</tr>
       <tr>
       	<td valign="top" align="center"><img src="<? echo GRAPHICSPATH?>pfeil_unten-rechts.gif"></td>
       	<td height="29" valign="bottom" colspan="6"><a href="javascript:send_selected_flurst('Flurstueck_Anzeigen');">ausgewählte Flurstücke anzeigen</a> | <a href="javascript:send_selected_flurst('jagdkatastereditor_Flurstuecke_Listen_csv');">ausgewählte Flurstücke als CSV exportieren</a></td>

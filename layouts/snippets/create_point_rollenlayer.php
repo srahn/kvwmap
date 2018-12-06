@@ -43,7 +43,7 @@ function show(){
   <tr>
   	<td>&nbsp;</td>
 		<td align="right"><span class="fett"><?php echo $strFile; ?></span></td>
-		<td><input type="file" name="pointfile"></td>
+		<td><input type="file" name="file1"></td>
 		<td>&nbsp;</td>
 	</tr>
 	<tr align="center">
@@ -65,13 +65,13 @@ function show(){
   </tr>
 	
 	<tr>
-		<td colspan="3" align="center"><input class="button" type="button" name="save1" value="Datei laden" onclick="load();"></td>
+		<td colspan="3" align="center"><input type="button" name="save1" value="Datei laden" onclick="load();"></td>
 	</tr>
 	<? }
 	else{ ?> 
   <tr>
 		<td>
-	<? if(count($this->data_import_export->columns) > 2){ ?>
+	<? if(count($this->data_import_export->columns) > 1){ ?>
 			<table width="100%">
 				<tr>
 					<td>Es wurden <? echo count($this->data_import_export->columns); ?> Spalten erkannt.<br>Sie können nun festlegen, welche Spalten als Koordinaten und welche als Beschriftung verwendet werden sollen.</td>
@@ -100,13 +100,13 @@ function show(){
 			<br>
 			<table width="500px">
 				<tr>
-					<td colspan="3" align="center"><input class="button" type="button" name="save2" value="Anzeigen" onclick="show();"></td>
+					<td colspan="3" align="center"><input type="button" name="save2" value="Anzeigen" onclick="show();"></td>
 				</tr>
 			</table>
 			<? }
-					else echo 'Kein geeignetes Trennzeichen gefunden. Erlaubte Trennzeichen: ";" "," und Leerzeichen' ?>
+					else echo 'Kein geeignetes Trennzeichen gefunden. Erlaubte Trennzeichen: ";" "," Leerzeichen und Tab' ?>
 			<input type="hidden" name="epsg" value="<? echo $this->formvars['epsg']; ?>">
-			<input type="hidden" name="pointfile" value="<? echo $this->data_import_export->pointfile; ?>">
+			<input type="hidden" name="file1" value="<? echo $this->data_import_export->pointfile; ?>">
 			<input type="hidden" name="delimiter" value="<? echo $this->data_import_export->delimiter; ?>">
 		</td>
   </tr>

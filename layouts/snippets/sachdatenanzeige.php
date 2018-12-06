@@ -1,19 +1,28 @@
-<?
-	include(SNIPPETS.'generic_formelement_definitions.php'); 
+<? 
+	global $selectable_limits;
+	include(SNIPPETS.'generic_form_parts.php');
   include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
 	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
  ?>
 	<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
 	<a name="oben"></a>	
-<?php
+<? if($this->user->rolle->querymode == 1){ ?>
+	<script type="text/javascript">
+		if(document.getElementById('overlayfooter') != undefined)document.getElementById('overlayfooter').style.display = 'none';
+		if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'none';
+	</script>
+<? }
+$this->found = 'false';
 $anzLayer=count($this->qlayerset);
 if ($anzLayer==0) {
 	?>
-<span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoLayer; ?></span>	<br/>
-	<?php
-	$this->found = 'false';
+<span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoLayer; ?></span><br/>
+	<?php	
 }
 for($i=0;$i<$anzLayer;$i++){
+	if($i > 0){
+		echo '<hr style="width: 100%; height: 3px; margin: 15 0; color: '.BG_GLEHEADER.'; background: '.BG_GLEHEADER.';">';
+	}
 	if ($this->qlayerset[$i]['template']=='') {
    	if(GLEVIEW == '2'){
     	include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
@@ -60,13 +69,13 @@ for($i=0;$i<$anzLayer;$i++){
 	   	$bis = $gesamt;
 	   }
 	   echo'
-	   <table border="0" cellpadding="2" width="100%" cellspacing="0">
+	   <table border="0" cellpadding="2" width="100%" cellspacing="0" id="sachdatenanzeige_paging">
 
-	   	<tr height="50px" valign="top">
+	   	<tr valign="top">
 	   		<td align="right" width="38%">';
 	   		if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] >= $this->formvars['anzahl'] AND $this->formvars['printversion'] == ''){
-					echo '<a href="javascript:firstdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');"><img src="'.GRAPHICSPATH.'go-first.png" class="hover-border" style="vertical-align:middle" title="'.$strFirstDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
-	   			echo '<a href="javascript:prevdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');"><img src="'.GRAPHICSPATH.'go-previous.png" class="hover-border" style="vertical-align:middle" title="'.$strBackDatasets.'"></a>&nbsp;';
+					echo '<a href="javascript:firstdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-first.png" class="hover-border" style="vertical-align:middle" title="'.$strFirstDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
+	   			echo '<a href="javascript:prevdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-previous.png" class="hover-border" style="vertical-align:middle" title="'.$strBackDatasets.'"></a>&nbsp;';
 	   		}
 	      echo '
 				</td>
@@ -75,8 +84,8 @@ for($i=0;$i<$anzLayer;$i++){
 				</td>
 	      <td width="38%">';
 	      if($bis < $gesamt AND $this->formvars['printversion'] == ''){
-	      	echo '&nbsp;<a href="javascript:nextdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');"><img src="'.GRAPHICSPATH.'go-next.png" class="hover-border" style="vertical-align:middle" title="'.$strForwardDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
-					echo '<a href="javascript:lastdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\', '.$gesamt.');"><img src="'.GRAPHICSPATH.'go-last.png" class="hover-border" style="vertical-align:middle" title="'.$strLastDatasets.'"></a>';
+	      	echo '&nbsp;<a href="javascript:nextdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-next.png" class="hover-border" style="vertical-align:middle" title="'.$strForwardDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
+					echo '<a href="javascript:lastdatasets('.$this->qlayerset[$i]['Layer_ID'].', '.$gesamt.');"><img src="'.GRAPHICSPATH.'go-last.png" class="hover-border" style="vertical-align:middle" title="'.$strLastDatasets.'"></a>';
 	      }
 	      echo '
 				</td>
@@ -86,45 +95,77 @@ for($i=0;$i<$anzLayer;$i++){
    }
 }
 ?>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
+	<tr>
+		<td align="right">
+    <? if ($this->user->rolle->visually_impaired) { ?>
+				<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
+				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
+				<? }else{ ?>
+				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
+				<? } ?>
+		<? } ?>
+
+
+			<a href="javascript:scrolltop();"><img class="hover-border" title="<? echo $strToTop; ?>" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a>&nbsp;&nbsp;&nbsp;
+		</td>
+	</tr>
+</table>
 <?
-	if($this->editable == 'true' AND $this->formvars['printversion'] == ''){ ?>
-		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	if($this->found != 'false' AND $this->formvars['printversion'] == ''){	?>		
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
     <tr>
-    	<td>&nbsp;</td>
-      <td align="center" width="100%"><input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">&nbsp;<input class="button" type="reset" value="<? echo $strReset; ?>"></td>
-      <td align="right"><a href="javascript:scrolltop();"><img class="hover-border" title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a></td>
+    	<td width="49%" class="px13">
+				<? if($this->user->rolle->querymode == 1){ ?>
+					<script type="text/javascript">
+						if(document.getElementById('overlayfooter') != undefined){
+							document.getElementById('overlayfooter').style.display = 'block';
+							document.getElementById('anzahl').value = '<? echo $this->formvars['anzahl']; ?>';
+						}
+					</script>
+				<? }else{
+							echo '&nbsp;'.$strLimit; ?>&nbsp;
+							<select name="anzahl" id="anzahl" onchange="javascript:currentform.go.value = 'get_last_query';overlay_submit(currentform, false);">
+								<? foreach($selectable_limits as $limit){
+								if($this->formvars['anzahl'] != '' AND $custom_limit != true AND !in_array($this->formvars['anzahl'], $selectable_limits) AND $this->formvars['anzahl'] < $limit){
+									$custom_limit = true;	?>
+									<option value="<? echo $this->formvars['anzahl'];?>" selected><? echo $this->formvars['anzahl']; ?></option>
+								<? } ?>
+								<option value="<? echo $limit; ?>" <? if($this->formvars['anzahl'] == $limit)echo 'selected'?>><? echo $limit; ?></option>
+								<? } ?>
+							</select>
+					<? } ?>
+			</td>
+      <td align="center">
+			<?  if($this->editable != ''){
+						if($this->user->rolle->querymode == 1){ ?>
+							<script type="text/javascript">
+								if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'block';
+							</script>
+				<?  }else{ ?>
+							<input type="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">
+				<? 	}
+					}?>
+			</td>
+			<td align="right" width="49%">
+		<? if($this->user->rolle->querymode == 1){ ?>
+					<script type="text/javascript">
+						if(document.getElementById('overlayfooter') != undefined)document.getElementById('overlayfooter').style.display = 'block';
+					</script>
+		<? }else{ ?>
+			<a href="javascript:druck();" class="px13"><? echo $this->printversion; ?></a>&nbsp;
+			<? } ?>
+			</td>
     </tr>
 		<tr>
 			<td height="30" valign="bottom" align="center" colspan="5" id="loader" style="display:none"><img id="loaderimg" src="graphics/ajax-loader.gif"></td>
 		</tr>
   </table>
-<?
-	}
-	else{ ?>
-		<table width="100%" border="0" cellpadding="10" cellspacing="0">
-    <tr>
-    	<td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td align="right"><a href="javascript:scrolltop();"><img title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a></td>
-    </tr>
-  </table>
-<?	}
-?>
+<? } ?>
   <br><div align="center">
 
-
   <?
-		for($i = 0; $i < $anzLayer; $i++){
-			if($this->formvars['qLayer'.$this->qlayerset[$i]['Layer_ID']] == 1){
-				echo '<input name="qLayer'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="1">';
-				echo '<input id="offset_'.$this->qlayerset[$i]['Layer_ID'].'" name="offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']].'">';
-				echo '<input name="sql_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->qlayerset[$i]['sql'].'">';
-			}
-		}
-  ?>
-
-  <?
-  	if($this->search == true){			# wenn man von der Suche kam -> Hidden Felder zum Speichern der Suchparameter
+  	if($this->search == true){			# wenn man von der Suche kam -> Hidden Felder zum Speichern der Suchparameter (die können evtl. weg, da jetzt immer get_last_query verwendet wird)
 		echo '<input name="go" type="hidden" value="Layer-Suche_Suchen">';
 		echo '		<input name="search" type="hidden" value="true">
   					<input name="selected_layer_id" type="hidden" value="'.$this->formvars['selected_layer_id'].'">
@@ -138,32 +179,35 @@ for($i=0;$i<$anzLayer;$i++){
 		      }
 		    }
   		}
-
-			if($this->formvars['quicksearch'] != true){
+			for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
+				if($m > 0){
+					$prefix = $m.'_';
+					echo '<input name="boolean_operator_'.$m.'" type="hidden" value="'.$this->formvars['boolean_operator_'.$m].'">';
+				}
 				for($j = 0; $j < count($this->qlayerset[0]['attributes']['type']); $j++){
-					if($this->qlayerset[0]['attributes']['type'][$j] != 'geometry'){
-						echo '
-							<input name="value_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['value_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-							<input name="value2_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['value2_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-							<input name="operator_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['operator_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-						';
-					}
+					echo '
+						<input name="'.$prefix.'value_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+						<input name="'.$prefix.'value2_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value2_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+						<input name="'.$prefix.'operator_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'operator_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+					';
 				}
 			}
-	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == ''){
-	  		echo '<a href="javascript:back();">'.$strbackToSearch.'</a><br><br>';
+	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
+	  		echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" id="sachdatenanzeige_footer">'.$strbackToSearch.'</a><br><br>';
 	  	}
   	}
   	else{
+			for($i = 0; $i < $anzLayer; $i++){
+				if($this->formvars['qLayer'.$this->qlayerset[$i]['Layer_ID']] == 1){
+					echo '<input name="qLayer'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="1">';
+					echo '<input id="offset_'.$this->qlayerset[$i]['Layer_ID'].'" name="offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']].'">';
+					echo '<input name="sql_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->qlayerset[$i]['sql'].'">';
+				}
+			}
 			echo '<input name="go" type="hidden" value="Sachdaten">';
   	}
-  if($this->found != 'false' AND $this->formvars['printversion'] == ''){
   ?>
-  <a href="javascript:druck();"><? echo $strDataPrint; ?></a>
-  <br><br>
-  <?}?>
   <a name="unten"></a>
-  <input type="hidden" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>">
   <input type="hidden" name="printversion" value="">
   <input type="hidden" name="go_backup" value="">
   <input name="querypolygon" type="hidden" value="<?php echo $this->querypolygon; ?>">
@@ -179,25 +223,26 @@ for($i=0;$i<$anzLayer;$i++){
 	<input name="INPUT_COORD" type="hidden" value="<?php echo $this->formvars['INPUT_COORD']; ?>">
   <INPUT TYPE="HIDDEN" NAME="searchradius" VALUE="<?php echo $this->formvars['searchradius']; ?>">
   <input name="CMD" type="hidden" value="<?php echo $this->formvars['CMD']; ?>">
-	<? if($this->currentform != 'document.GUI2'){ ?>
-  <table width="100%" border="0" cellpadding="2" cellspacing="0">
+	<? if($this->formvars['printversion'] == '' AND $this->currentform != 'document.GUI2'){ ?>
+  <table width="100%" border="0" cellpadding="2" cellspacing="0" id="sachdatenanzeige_footer">
     <tr bgcolor="<?php echo BG_DEFAULT ?>" align="center">
-      <td><a href="index.php?searchradius=<?php echo $this->formvars['searchradius']; ?>"><? echo $strbacktomap;?></a></td>
+      <td><a href="index.php?searchradius=<?php echo $this->formvars['searchradius']; ?>" onclick="checkForUnsavedChanges(event);"><? echo $strbacktomap;?></a></td>
     </tr>
   </table>
 	<? } ?>
 </div>
 <input type="hidden" name="titel" value="<? echo $this->formvars['titel'] ?>">
 <input type="hidden" name="width" value="">
-<input type="hidden" name="document_attributename" value="">
+<input type="hidden" name="delete_documents" value="">
 <input type="hidden" name="map_flag" value="<? echo $this->formvars['map_flag']; ?>">
 <input name="newpath" type="hidden" value="<?php echo $this->formvars['newpath']; ?>">
 <input name="pathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
 <input name="newpathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
 <input name="result" type="hidden" value="">
 <input name="firstpoly" type="hidden" value="<?php echo $this->formvars['firstpoly']; ?>">
-<input name="export_format" type="hidden" value="<?php echo $this->formvars['export_format']; ?>">
+<input type="hidden" name="searchmask_count" value="<? echo $this->formvars['searchmask_count']; ?>">
+<input type="hidden" name="within" value="<? echo $this->formvars['within']; ?>">
 
-<div id="vorschau" style="box-shadow: 12px 10px 14px #777;z-index: 1000; position: fixed; right:20px; top:20px; ">
+<div id="vorschau" style="pointer-events:none; box-shadow: 12px 10px 14px #777;z-index: 1000; position: fixed; right:20px; top:20px; ">
 	<img id="preview_img" src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
 </div>

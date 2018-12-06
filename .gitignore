@@ -1,4 +1,4 @@
-.gitignore
+credentials.php
 config.php
 fonts/custom/*
 layouts/custom/*
@@ -6,3 +6,14 @@ layouts/snippets/custom/*
 symbols/custom/*
 graphics/wappen/*
 graphics/custom/*
+plugins/*/config/config.php
+plugins/*/config/config.sh
+plugins/*/img/*
+plugins/*/results/
+.settings
+.project
+.buildpath
+vendor/
+robots.txt
+.idea
+*.iml

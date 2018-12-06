@@ -15,7 +15,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   </tr>
   <tr>
     <td align="right"><span class="fett">Suche nach Punktkennzeichen:</span></td>
-    <td><input name="pkz" type="text" value="<?php echo $this->formvars['pkz']; ?>" size="25" tabindex="2"></td>
+    <td><input name="pkn" type="text" value="<?php echo $this->formvars['pkn']; ?>" size="25" tabindex="2"></td>
   </tr>
   <tr>
     <td colspan="2" bgcolor="#FFFFCC"><em>Zur Pr&uuml;fung der Einmessungsskizzen

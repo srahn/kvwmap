@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE `used_layer` ADD `use_geom` BOOLEAN NOT NULL DEFAULT '1';
+
+COMMIT;

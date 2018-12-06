@@ -1,0 +1,14 @@
+Windows Registry Editor Version 5.00
+;nur damit geht es in Win7
+
+[HKEY_CLASSES_ROOT\kvwkol]
+@="URL: kvwkol Protocol"
+"URL Protocol"="kvwkol"
+
+[HKEY_CLASSES_ROOT\kvwkol\shell]
+
+[HKEY_CLASSES_ROOT\kvwkol\shell\open]
+
+[HKEY_CLASSES_ROOT\kvwkol\shell\open\command]
+@="\"C:\\kvwkol\\kvwkol.exe\" %1"
+

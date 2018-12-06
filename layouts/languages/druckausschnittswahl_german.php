@@ -8,6 +8,7 @@ $strRotationAngle="Drehwinkel: ";
 $strPrintDetail="Druckausschnitt";
 $strLoad="Laden";
 $strReferenceMap="Übersichtskarte";
+$strExpandedLegend="erweiterte Legende";
 $strLegendExtra="Legende auf Extrablatt";
 $strNoMinMaxscaling="Maßstabseinschränkung aufheben";
 $strWarning1="Bitte aktualisieren Sie den Druckausschnitt durch Klick in die Maßstabseingabe und dann [Enter].";
@@ -22,5 +23,9 @@ $strConfirm1="Gewähltes Drucklayout:\\r\\n";
 $strConfirm2="€\\r\\n\\r\\nFortfahren?";
 $hoch="hoch";
 $quer="quer";
+$strHelp="Hilfe";
+$strRollenlayerLegend="Wenn Sie diese Option aktivieren, werden in der Legende auch Ihre eigenen Suchergebnislayer sowie importierte Layer angezeigt.";
+$strLegendOptions="Legenden-Optionen";
+$strLayers="Themen";
  
 ?>  

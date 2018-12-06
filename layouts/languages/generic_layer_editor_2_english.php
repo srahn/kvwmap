@@ -16,7 +16,7 @@
  $strSelectThisDataset="select record";
  $strNoMatch="No objects found in this layer!";
  $strDeleteThisDataset="delete record";
- $strUseForNewDataset="use for new record";
+ $strUseForNewDataset="use as template for new record";
  $strExportThis="export record";
  $strShowPK="show";
  $strNewPK="new";
@@ -30,4 +30,8 @@
  $strPrintDataset="print record";
  $strSwitchGLEViewColumns="switch to column-based view";
  $strSwitchGLEViewRows="switch to row-based view";
+ $strEditAll="edit multiple";
+ $strCopyDataset="copy record";
+ $strNewDataset="neuen Datensatz anlegen";
+ $strToBottom="to bottom";
 ?>

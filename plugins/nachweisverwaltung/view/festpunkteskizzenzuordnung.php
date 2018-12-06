@@ -15,7 +15,7 @@ if ($this->festpunkte->anzPunkte>0) {
     for ($i=0;$i<$this->festpunkte->anzPunkte;$i++) {
     	$rs=$this->festpunkte->liste[$i];
       ?><tr>
-      <td><input name="pkz[<?php echo $rs['pkz']; ?>]" type="hidden" value="<?php echo $rs['pkz']; ?>"><?php echo $rs['pkz']; ?></td>
+      <td><input name="pkn[<?php echo $rs['pkn']; ?>]" type="hidden" value="<?php echo $rs['pkn']; ?>"><?php echo $rs['pkn']; ?></td>
       <td><?php echo $rs['rw']; ?></td>
       <td><?php echo $rs['hw']; ?></td>        
       <td>
@@ -23,11 +23,11 @@ if ($this->festpunkte->anzPunkte>0) {
 		  # Anzeige von Formularobjekten zur Eingabe eines anderen Dateinamens oder Uploadfunktion
 		  if ($rs['skizze']['tif']) {
 		    # Es ist eine Bilddatei im tif-Format für den Punkt vorhanden. Anzeige des Textfeldes mit Dateinamenvorschlag zur Änderungseingabe
-		    ?><input name="name[<?php echo $rs['pkz'];?>]" type="text" value="<?php echo substr($rs['datei'],0,-3)."*"; ?>" size="25"><?php
+		    ?><input name="name[<?php echo $rs['pkn'];?>]" type="text" value="<?php echo substr($rs['datei'],0,-3)."*"; ?>" size="25"><?php
 		  }
 		  else {	
 		    # Zum Punkt existiert keine Einmessungsskizze im tif-Format. Anzeigen eines Uploadformularfeldes.
-		    ?><input name="tifUpload<?php echo $rs['pkz']; ?>" type="file"><?php
+		    ?><input name="tifUpload<?php echo $rs['pkn']; ?>" type="file"><?php
 		  }
 			?>  
       </td>
@@ -40,7 +40,7 @@ if ($this->festpunkte->anzPunkte>0) {
 			}
 			else {
 			  # Vorschaubilddatei nicht vorhanden. Anzeigen eines UploadFormularelements
-			  ?><input name="pngUpload<?php echo $rs['pkz'];?>" type="file"><?php
+			  ?><input name="pngUpload<?php echo $rs['pkn'];?>" type="file"><?php
 			}
       ?>
 		  </td>

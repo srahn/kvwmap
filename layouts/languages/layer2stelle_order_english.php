@@ -1,8 +1,10 @@
 ﻿<?php
  $strTitle="Layers of the task";
  $strDrawingOrder="Drawing order ";
- $strProperties="Properties of";
- $strGlobal="Global";
+ $strLegendOrder="Legend order ";
+ $strProperties="Properties";
+ $strGlobal="global";
+ $strTask="task related";
  
  
 ?>  

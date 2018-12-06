@@ -9,3 +9,4 @@ garamond			GARAIT.TTF
 comic_sans			comicbd.ttf
 engravers			Engr.TTF
 SourceSansPro	SourceSansPro-Regular.ttf
+alkis_text		alkis_textsymbols.ttf

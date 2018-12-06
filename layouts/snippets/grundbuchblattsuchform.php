@@ -82,7 +82,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     <td align="right"><span class="fett">Grundbuchblatt:</span></td>
     <td>
     	<br>ausgewählte:<br>
-    	<select size="10" style="width:110px" multiple="true"  name="selectedBlatt">
+    	<select size="10" style="width:130px" multiple="true"  name="selectedBlatt">
     		 <?
           for($i=0; $i < count($this->selblattliste); $i++){
           	echo '<option value="'.$this->selblattliste[$i].'">'.$this->selblattliste[$i].'</option>';
@@ -96,7 +96,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     </td>
     <td>
     	<br>vorhandene:<br>
-    	<select size="10" style="width:80px" multiple="true"  name="Blatt">
+    	<select size="10" style="width:100px" multiple="true"  name="Blatt">
     		<?for($i = 0; $i < count($this->blattliste['blatt']); $i++){?>
     			<option
     			<?if($this->formvars['Blatt'] == $this->blattliste['blatt'][$i]){?>
@@ -115,7 +115,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		<td colspan="4" style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
 			<table>
 				<td><input name="importliste" type="file" value="" style="width: 340px" tabindex="2"></td>
-				<td><input type="submit" class="button" value="Laden"></td>
+				<td><input type="submit" value="Laden"></td>
 			</table>
 		</td>
 	</tr>
@@ -127,7 +127,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 
 <input type="hidden" name="selBlatt" value="<? echo $this->formvars['selBlatt']; ?>">
 <input type="hidden" name="go" value="Grundbuchblatt_Auswaehlen">
-<input type="submit" class="button" name="go_plus" value="Suchen" tabindex="6">
+<input type="submit" name="go_plus" value="Suchen" tabindex="6">
 
    </td>
 

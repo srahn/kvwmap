@@ -1,49 +1,85 @@
 <?
+	
+	/**
+	* Trigger für Bearbeitung im GLE
+	*/
+	$GUI->trigger_functions['check_documentpath'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
+		$executed = true;
+		$success = true;
 
-	$GUI = $this;
+		switch(true) {
+			case ($fired == 'AFTER' AND $event == 'UPDATE') : {
+				$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+				$nachweis->hauptarten = $nachweis->getHauptDokumentarten();
+				$nachweis->check_documentpath($old_dataset);
+			} break;
 
-	$this->Datei_Download = function($filename) use ($GUI){
+			default : {
+				$executed = false;
+			}
+		}
+		return array('executed' => $executed, 'success' => $success);
+	};	
+
+	$GUI->Datei_Download = function($filename) use ($GUI){
     $GUI->formvars['filename'] = $filename;
     $GUI->titel='Datei-Download';
 		$GUI->main= PLUGINS.'nachweisverwaltung/view/dateidownload.php';
     $GUI->output();
   };
 	
-	$this->DokumenteOrdnerPacken = function() use ($GUI){
+	$GUI->DokumenteOrdnerPacken = function($light) use ($GUI){
     if ($GUI->formvars['antr_selected']!=''){			
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
 			$antr_selected = $explosion[0];
 			$stelle_id = $explosion[1];
-      $antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
-			$antragsnr = $antrag->nr;
+      $GUI->antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
+			$GUI->antrag->getAntraege(array($antr_selected),'','','',$stelle_id);
+			$GUI->antrag->searches = $GUI->Suchparameter_abfragen($antr_selected, $stelle_id);
+			$antragsnr = $GUI->antrag->nr;
 			if($stelle_id != '')$antragsnr.='~'.$stelle_id;
       if(is_dir(RECHERCHEERGEBNIS_PATH.$antragsnr)){
         chdir(RECHERCHEERGEBNIS_PATH);
 				$GUI->formvars['Riss-Nummer'] = 1;
 				$GUI->formvars['Antrags-Nummer'] = 1;
-				$GUI->formvars['FFR'] = 1;
-				$GUI->formvars['KVZ'] = 1;
-				$GUI->formvars['GN'] = 1;
-				$GUI->formvars['andere'] = 1;
 				$GUI->formvars['Datum'] = 1;
 				$GUI->formvars['Datei'] = 1;
 				$GUI->formvars['gemessendurch'] = 1;
-				$GUI->formvars['Gueltigkeit'] = 1;
-				$GUI->erzeugenUebergabeprotokollNachweise_PDF(RECHERCHEERGEBNIS_PATH.$antragsnr.'/'.$antrag->nr.'_'.date('Y-m-d_H-i-s',time()).'.pdf');
-        $result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);
-				# Loggen der übergebenen Dokumente
-				$uebergabe_logpath = $antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.date('Y-m-d_H-i-s',time()).'.pdf';
-				$GUI->erzeugenUebergabeprotokollNachweise_PDF($uebergabe_logpath, true);
+				$GUI->formvars['Gueltigkeit'] = 1;		
+				$timestamp = date('Y-m-d_H-i-s',time());
+				if($GUI->nachweis->Dokumente != NULL){		# wenn es Nachweise zu diesem Auftrag gibt
+					$GUI->erzeugenUebergabeprotokollNachweise(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebergabeprotokoll.pdf');
+					$GUI->erzeugenUebersicht_HTML(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebersicht.htm', $light);
+					if(!$light){
+						$GUI->erzeugenUebersicht_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Uebersicht.csv');
+						#$GUI->erzeugenZuordnungFlst_CSV(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
+						$GUI->create_Recherche_UKO(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
+						$GUI->nachweis->create_Gesamtpolygon(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/Gesamtpolygon/');
+						$GUI->nachweis->writeIgnoredDokumentarten(RECHERCHEERGEBNIS_PATH.$antragsnr.'/Protokolle/');
+					}
+					# Loggen der übergebenen Dokumente
+					$uebergabe_logpath = $GUI->antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.$timestamp.'.pdf';
+					$GUI->erzeugenUebergabeprotokollNachweise($uebergabe_logpath, true);
+				}
+        if(!$light)$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);		# gesamten Rechercheordner packen
+				else{
+					$result = exec(ZIP_PATH.' -j -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Nachweise');		# Nachweise-Ordnerstruktur verwerfen und nur Nachweise
+					$result = exec(ZIP_PATH.' '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Protokolle/Uebergabeprotokoll.pdf');		# und das Übergabeprotokoll 
+					$result = exec(ZIP_PATH.' '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Protokolle/Uebersicht.htm');		# und Uebersicht.htm
+					$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Vorschaubilder');		# und Vorschaubilder 
+					$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Einmessungsskizzen');		# und, wenn vorhanden, die Einmessungsskizzen
+					$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/KVZ');		# und, wenn vorhanden, die KVZ packen
+				}
       }
     }
     $filename = RECHERCHEERGEBNIS_PATH.$antragsnr.'.zip';
-		$dateiname = $antrag->nr.'_'.date('Y-m-d_H-i-s',time()).'.zip';
+		$dateiname = $GUI->antrag->nr.'_'.date('Y-m-d_H-i-s',time()).'.zip';
     $tmpfilename = copy_file_to_tmp($filename, $dateiname);
     unlink($filename);
     return $tmpfilename;
   };
-
-	$this->DokumenteZumAntragInOrdnerZusammenstellen = function() use ($GUI){
+	
+	$GUI->DokumenteZumAntragInOrdnerZusammenstellen = function() use ($GUI){
     if ($GUI->formvars['antr_selected']!=''){
       if(strpos($GUI->formvars['antr_selected'], '~') == false)$GUI->formvars['antr_selected'] = str_replace('|', '~', $GUI->formvars['antr_selected']); # für Benutzung im GLE
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
@@ -52,23 +88,25 @@
       $antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
       $msg = $antrag->clearRecherchePfad();			
       # Zusammenstellen der Dokumente der Nachweisverwaltung
-      $nachweis=new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-      $ret=$nachweis->getNachw2Antr($antr_selected,$stelle_id);
+      $GUI->nachweis=new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+			$GUI->nachweis->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
+      $ret=$GUI->nachweis->getNachw2Antr($antr_selected,$stelle_id);
       if($ret==''){
-        $ret=$nachweis->getNachweise($nachweis->nachweise_id,'','','','','','','','multibleIDs','','');
+        $ret=$GUI->nachweis->getNachweise($GUI->nachweis->nachweise_id,'','','','','','','','multibleIDs','','');
         if ($ret==''){
-          $ret=$antrag->DokumenteInOrdnerZusammenstellen($nachweis);
+          $ret=$antrag->DokumenteInOrdnerZusammenstellen($GUI->nachweis);
           $msg.=$ret;
         }
       }
 
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
       # Zusammenstellen der Einmessungsskizzen der Festpunkte
       $festpunkte=new Festpunkte('',$GUI->pgdatabase);
-      $ret=$festpunkte->getFestpunkte('',array('0','1'),'','','',$antr_selected,$stelle_id,'','pkz');
+      $ret=$festpunkte->getFestpunkte('',array('TP','AP','SiP','SVP'),'','','',$antr_selected,$stelle_id,'','pkn');
       if ($ret[0]) {
         $errmsg="Festpunkte konnten nicht abgefragt werden.";
       }
-      else {
+      elseif(count($festpunkte->liste) > 0){
         $ret=$antrag->EinmessungsskizzenInOrdnerZusammenstellen($festpunkte);
         $msg.=$ret;
       }
@@ -81,17 +119,15 @@
     return $msg;
   };
 
-	$this->nachweisAenderungsformular = function() use ($GUI){
-    #2005-11-25_pk
-    # Anzeige des Formulars zum Eintragen neuer/Ändern vorhandener Metadaten zu einem Nachweisdokument
-    # (FFR, KVZ oder GN)
+	$GUI->nachweisAenderungsformular = function() use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
     $GUI->menue='menue.php';
     $GUI->main= PLUGINS.'nachweisverwaltung/view/dokumenteneingabeformular.php';
     $GUI->titel='Dokument überarbeiten';    
 		if($GUI->formvars['reset_layers'])$GUI->reset_layers(NULL);
     # Nachweisdaten aus Datenbank abfragen
     $nachweis=new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-    # abfragen der Dokumentarten
+    $GUI->hauptdokumentarten = $nachweis->getHauptDokumentarten();
     $GUI->dokumentarten = $nachweis->getDokumentarten();
     #echo 'Suche nach id:'.$GUI->formvars['id'];
     $ret=$nachweis->getNachweise($GUI->formvars['id'],'','','','','','','','bySingleID','',0,0);
@@ -99,7 +135,7 @@
       # Fehler bei der Abfrage des Nachweises
       # Anzeige des letzten Rechercheergebnisses
       $GUI->nachweisAnzeige();
-      showAlert($ret);
+			$GUI->add_message('error', $ret);
     }
     else {
       # Abfrage war erfolgreich
@@ -112,10 +148,10 @@
 			else{
 				$GUI->loadMap('DataBase');
 			}
-			if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+			if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
       # zoomToMaxLayerExtent
 			if($GUI->formvars['zoom_layer_id'] != '')$GUI->zoomToMaxLayerExtent($GUI->formvars['zoom_layer_id']);
-      $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
+      $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
 	    if(!$GUI->formvars['layer_id']){
 	      $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
 	      $GUI->formvars['layer_id'] = $layerset[0]['Layer_ID'];
@@ -143,42 +179,51 @@
       # Ausführen von Aktionen vor der Anzeige der Karte und der Zeichnung
 			$oldscale=round($GUI->map_scaledenom);  
 			if ($GUI->formvars['CMD']!='') {
+				$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
 				$GUI->navMap($GUI->formvars['CMD']);
 				$GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
 			}
 			elseif($oldscale!=$GUI->formvars['nScale'] AND $GUI->formvars['nScale'] != '') {
 				$GUI->scaleMap($GUI->formvars['nScale']);
 			}
-      elseif($nachweis->document['wkt_umring'] != ''){
-        # Zoom zum Polygon des Dokumentes
-        $GUI->zoomToNachweis($nachweis,10);
-        $GUI->user->rolle->saveSettings($GUI->map->extent);
-        $GUI->user->rolle->readSettings();
-        # Übernahme des Nachweisumrings aus der PostGIS-Datenbank
-        $GUI->formvars['newpath'] = transformCoordsSVG($nachweis->document['svg_umring']);
-        $GUI->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
-        $GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
-      }
       else{
-      	showAlert('Achtung! Nachweis hat noch keine Geometrie!');
-      }
-      # Zuweisen der Werte des Dokumentes zum Formular
-      $GUI->formvars['flurid']=$nachweis->document['flurid'];
-      $GUI->formvars['stammnr']=$nachweis->document['stammnr'];
-      $GUI->formvars['art']=$nachweis->document['art'];
-      $GUI->formvars['Blattnr']=$nachweis->document['blattnummer'];
-      $GUI->formvars['datum']=$nachweis->document['datum'];
-      $GUI->formvars['VermStelle']=$nachweis->document['vermstelle'];
-      $GUI->formvars['Blattformat']=$nachweis->document['format'];
-      $GUI->formvars['gueltigkeit']=$nachweis->document['gueltigkeit'];
-      $GUI->formvars['Gemeinde']=$nachweis->document['Gemeinde'];
-      $GUI->formvars['Gemarkung']=substr($GUI->formvars['flurid'],0,6);
-      $GUI->formvars['Flur']=intval(substr($GUI->formvars['flurid'],6,9));
-      $GUI->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];
-      $GUI->formvars['andere_art']=$nachweis->document['andere_art'];
-      $GUI->formvars['rissnummer']=$nachweis->document['rissnummer'];
-      $GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
-      $GUI->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
+	      # Zuweisen der Werte des Dokumentes zum Formular
+				$GUI->formvars['flurid']=$nachweis->document['flurid'];
+				$GUI->formvars['stammnr']=$nachweis->document['stammnr'];
+				$GUI->formvars['hauptart']=$nachweis->document['hauptart'];
+				$GUI->formvars['unterart']=$nachweis->document['unterart'];				
+				$GUI->formvars['Blattnr']=$nachweis->document['blattnummer'];
+				$GUI->formvars['datum']=$nachweis->document['datum'];
+				$GUI->formvars['VermStelle']=$nachweis->document['vermstelle'];
+				$GUI->formvars['Blattformat']=$nachweis->document['format'];
+				$GUI->formvars['gueltigkeit']=$nachweis->document['gueltigkeit'];
+				$GUI->formvars['geprueft']=$nachweis->document['geprueft'];
+				$GUI->formvars['Gemeinde']=$nachweis->document['Gemeinde'];
+				$GUI->formvars['Gemarkung']=substr($GUI->formvars['flurid'],0,6);
+				$GUI->formvars['Flur']=intval(substr($GUI->formvars['flurid'],6,9));
+				$GUI->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];				
+				$GUI->formvars['rissnummer']=$nachweis->document['rissnummer'];
+				$GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
+				$GUI->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
+				$GUI->formvars['bemerkungen_intern']=$nachweis->document['bemerkungen_intern'];
+				if($nachweis->document['wkt_umring'] != ''){
+					if($GUI->formvars['neuladen'] == ''){
+						# Zoom zum Polygon des Dokumentes
+						$GUI->zoomToNachweis($nachweis,10);
+						$GUI->user->rolle->saveSettings($GUI->map->extent);
+						$GUI->user->rolle->readSettings();
+					}
+					# Übernahme des Nachweisumrings aus der PostGIS-Datenbank
+					$GUI->formvars['newpath'] = transformCoordsSVG($nachweis->document['svg_umring']);
+					$GUI->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
+					$GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
+					$GUI->formvars['firstpoly'] = 'true';
+					$GUI->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
+				}
+				else{
+					$GUI->add_message('error', 'Achtung! Nachweis hat noch keine Geometrie!');
+				}
+			}
 
       # Abfragen der Gemarkungen
       # 2006-01-26 pk
@@ -197,7 +242,7 @@
     }
   };
 	
-	$this->suchparameterSetzen = function() use ($GUI){
+	$GUI->suchparameterSetzen = function() use ($GUI){
     # speichern der Suchparameter und der Markierungsparameter
     if ($GUI->formvars['f'] OR $GUI->formvars['k'] OR $GUI->formvars['g']) {
       if (!$GUI->formvars['f']) {
@@ -271,7 +316,7 @@
     }
   };
 
-	$this->suchparameterLesen = function() use ($GUI){
+	$GUI->suchparameterLesen = function() use ($GUI){
     $GUI->formvars['art_einblenden']=$_SESSION['art_einblenden'];
     $GUI->formvars['art_markieren']=$_SESSION['art_markieren'];
     $GUI->formvars['abfrage_art']=$_SESSION['abfrage_art'];
@@ -287,51 +332,49 @@
     $GUI->suchpolygon=$_SESSION['suchpolygon'];
   };
 
-	$this->DokumenteZuAntraegeAnzeigen = function() use ($GUI){
+	$GUI->DokumenteZuAntraegeAnzeigen = function() use ($GUI){
 		if(strpos($GUI->formvars['antr_selected'], '~') == false)$GUI->formvars['antr_selected'] = str_replace('|', '~', $GUI->formvars['antr_selected']); # für Benutzung im GLE
-    $GUI->formvars['suchffr']=1;
-    $GUI->formvars['suchkvz']=1;
-    $GUI->formvars['suchgn']=1;
-    $GUI->formvars['suchan']=1;
     $GUI->formvars['suchantrnr']=$GUI->formvars['antr_selected'];
     $GUI->formvars['abfrageart']='antr_nr';
     $GUI->nachweiseRecherchieren();
   };
 
-	$this->setNachweisSuchparameter = function($stelle_id, $user_id, $suchffr,$suchkvz,$suchgn,$suchan,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$suchrissnr,$suchfortf,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle) use ($GUI){
+	$GUI->setNachweisSuchparameter = function($stelle_id, $user_id, $suchhauptart,$suchunterart,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$stammnr2,$suchrissnummer,$suchrissnummer2,$suchfortfuehrung,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle, $flur_thematisch, $alle_der_messung) use ($GUI){
+		if($suchhauptart == NULL)$suchhauptart = array();
+		if($suchunterart == NULL)$suchunterart = array();
 		$sql ='UPDATE rolle_nachweise SET ';
-		if ($suchffr!='') { $sql.='suchffr="'.$suchffr.'",'; }else{$sql.='suchffr="0",';}
-		if ($suchkvz!='') { $sql.='suchkvz="'.$suchkvz.'",'; }else{$sql.='suchkvz="0",';}
-		if ($suchgn!='') { $sql.='suchgn="'.$suchgn.'",'; }else{$sql.='suchgn="0",';}
-		if ($suchan!='') { $sql.='suchan="'.$suchan.'",'; }else{$sql.='suchan="0",';}
+		$sql.='suchhauptart="'.implode(',', $suchhauptart).'",';
+		$sql.='suchunterart="'.implode(',', $suchunterart).'",';
 		if ($abfrageart!='') { $sql.='abfrageart="'.$abfrageart.'",'; }
 		$sql.='suchgemarkung="'.$suchgemarkung.'",';
 		$sql.='suchflur="'.$suchflur.'",';
 		$sql.='suchstammnr="'.$stammnr.'",';
-		$sql.='suchrissnr="'.$suchrissnr.'",';
-		if($suchfortf == '')$suchfortf = 'NULL';
-		$sql.='suchfortf='.$suchfortf.',';
+		$sql.='suchstammnr2="'.$stammnr2.'",';
+		$sql.='suchrissnummer="'.$suchrissnummer.'",';
+		$sql.='suchrissnummer2="'.$suchrissnummer2.'",';
+		if($suchfortfuehrung == '')$suchfortfuehrung = 'NULL';
+		$sql.='suchfortfuehrung='.$suchfortfuehrung.',';
 		if ($suchpolygon!='') { $sql.='suchpolygon="'.$suchpolygon.'",'; }
 		if ($suchantrnr!='') { $sql.='suchantrnr="'.$suchantrnr.'",'; }
 		$sql.='sdatum="'.$sdatum.'",';
 		$sql.='sdatum2="'.$sdatum2.'",';
 		if ($svermstelle!='') { $sql.='sVermStelle='.$svermstelle.','; }else{$sql.='sVermStelle= NULL,' ;}
+		$sql.='flur_thematisch="'.$flur_thematisch.'",';
+		$sql.='alle_der_messung="'.$alle_der_messung.'",';
 		$sql .= 'user_id = '.$user_id;
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
+		#echo $sql;
 		$GUI->debug->write("<p>file:users.php class:rolle->setNachweisSuchparameter - Setzen der aktuellen Parameter für die Nachweissuche",4);
 		$GUI->database->execSQL($sql,4, 1);
 		return 1;
 	};
 
-	$this->setNachweisAnzeigeparameter = function($stelle_id, $user_id, $showffr,$showkvz,$showgn,$showan,$markffr,$markkvz,$markgn) use ($GUI){
+	$GUI->setNachweisAnzeigeparameter = function($stelle_id, $user_id, $showhauptart,$markhauptart) use ($GUI){
+		if($showhauptart == NULL)$showhauptart = array();
+		if($markhauptart == NULL)$markhauptart = array();
 		$sql ='UPDATE rolle_nachweise SET ';
-		if ($showffr!='') { $sql.='showffr="'.$showffr.'",'; }else{$sql.='showffr="0",';}
-		if ($showkvz!='') { $sql.='showkvz="'.$showkvz.'",'; }else{$sql.='showkvz="0",';}
-		if ($showgn!='') { $sql.='showgn="'.$showgn.'",'; }else{$sql.='showgn="0",';}
-		if ($showan!='') { $sql.='showan="'.$showan.'",'; }else{$sql.='showan="0",';}
-		if ($markffr!='') { $sql.='markffr="'.$markffr.'",'; }
-		if ($markkvz!='') { $sql.='markkvz="'.$markkvz.'",'; }
-		if ($markgn!='') { $sql.='markgn="'.$markgn.'",'; }
+		$sql.='showhauptart="'.implode(',', $showhauptart).'",';
+		$sql.='markhauptart="'.implode(',', $markhauptart).'",';
 		$sql .= 'user_id = '.$user_id;
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:rolle->setNachweisAnzeigeparameter - Setzen der aktuellen Anzeigeparameter für die Nachweissuche",4);
@@ -339,78 +382,142 @@
 		return 1;
 	};
 
-	$this->getNachweisParameter = function($stelle_id, $user_id) use ($GUI){
-		$sql ='SELECT *,CONCAT(showffr,showkvz,showgn,showan) AS art_einblenden';
-		$sql.=',CONCAT(markffr,markkvz,markgn) AS art_markieren FROM rolle_nachweise';
+	$GUI->getNachweisParameter = function($stelle_id, $user_id) use ($GUI){
+		$sql ='SELECT user_id FROM rolle_nachweise';
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
 		$query=mysql_query($sql,$GUI->database->dbConn);
 		if ($query==0) { $GUI->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		if (mysql_num_rows($query)==0) {
-			echo 'Der User mit der ID:'.$user_id.' fehlt mit der Stellen_ID:'.$stelle_id.' in der Tabelle rolle_nachweise.';
+			$sql ='INSERT INTO rolle_nachweise ';
+			$sql.='SET user_id='.$user_id.', stelle_id='.$stelle_id;
+			$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
+			$query=mysql_query($sql,$GUI->database->dbConn);
 		}
-		else {
-			$rs=mysql_fetch_assoc($query);
-		}
+		$sql ='SELECT * FROM rolle_nachweise';
+		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
+		$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
+		$query=mysql_query($sql,$GUI->database->dbConn);
+		$rs=mysql_fetch_assoc($query);
+		$rs['suchhauptart'] = array_filter(explode(',', $rs['suchhauptart']));
+		$rs['suchunterart'] = array_filter(explode(',', $rs['suchunterart']));
+		$rs['showhauptart'] = array_filter(explode(',', $rs['showhauptart']));
+		$rs['markhauptart'] = array_filter(explode(',', $rs['markhauptart']));
 		return $rs;
 	};
 	
-	$this->Suchparameter_loggen = function($formvars, $stelle_id, $user_id) use ($GUI){
+	$GUI->save_Dokumentauswahl = function($stelle_id, $user_id, $formvars) use ($GUI){
+		$sql ='INSERT INTO rolle_nachweise_dokumentauswahl (stelle_id, user_id, name, suchhauptart, suchunterart) VALUES (';
+		$sql .= $stelle_id.', '.$user_id.', "'.$formvars['dokauswahl_name'].'", "'.implode(',', $formvars['suchhauptart']).'", "'.implode(',', $formvars['suchunterart']).'"';
+		#echo $sql;
+		$GUI->debug->write("<p>file:users.php class:rolle->save_Dokumentauswahl ",4);
+		$GUI->database->execSQL($sql,4, 1);
+		return mysql_insert_id();
+	};
+	
+	$GUI->delete_Dokumentauswahl = function($id) use ($GUI){
+		$sql ='DELETE FROM rolle_nachweise_dokumentauswahl ';
+		$sql.='WHERE id='.$id;
+		#echo $sql;
+		$GUI->debug->write("<p>file:users.php class:rolle->delete_Dokumentauswahl ",4);
+		$GUI->database->execSQL($sql,4, 1);
+	};
+		
+	$GUI->get_Dokumentauswahl = function($stelle_id, $user_id, $dokauswahl_id) use ($GUI){
+		$sql ='SELECT * FROM rolle_nachweise_dokumentauswahl ';
+		$sql.='WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
+		if($dokauswahl_id != '')$sql.=' AND id = '.$dokauswahl_id;
+		#echo $sql;
+		$GUI->debug->write("<p>file:users.php class:rolle->get_Dokumentauswahl ",4);
+		$query=mysql_query($sql,$GUI->database->dbConn);
+		if ($query==0) { $GUI->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		while($rs=mysql_fetch_assoc($query)){
+			$dokauswahlen[] = $rs;
+		}
+		return $dokauswahlen;
+	};
+	
+	$GUI->create_Recherche_UKO = function($pfad) use ($GUI){
+		$searches = $GUI->antrag->searches;
+		if($searches != NULL){
+			foreach($searches as $params){
+				if($params['abfrageart'] == 'poly')$polys[] = "st_geometryfromtext('".$params['suchpolygon']."', 25833)";
+			}
+			if($polys != NULL){
+				$sql = "select st_astext(st_multi(st_union(ARRAY[".implode(',', $polys)."])))";
+				$ret = $GUI->pgdatabase->execSQL($sql, 4, 1);
+				$rs=pg_fetch_row($ret[1]);
+				$uko = WKT2UKO($rs[0]);
+				$ukofile = 'Recherche.uko';
+				$fp = fopen($pfad.$ukofile, 'w');
+				fwrite($fp, $uko);
+				fclose($fp);
+			}
+		}
+	};
+		
+	$GUI->Suchparameter_loggen = function($formvars, $stelle_id, $user_id) use ($GUI){
 		$sql ='INSERT INTO u_consumeNachweise SELECT ';
 		$sql.='"'.$formvars['suchantrnr'].'", ';
 		$sql.=$stelle_id.', ';
 		$sql.='"'.date('Y-m-d H:i:s',time()).'", ';
-		$sql.='`suchffr`, `suchkvz`, `suchgn`, `suchan`, `abfrageart`, `suchgemarkung`, `suchflur`, `suchstammnr`, `suchrissnr`, `suchfortf`, `suchpolygon`, `suchantrnr`, `sdatum`, `sdatum2`, `sVermStelle`,';
-		if($formvars['flur_thematisch']!='') { $sql.='"'.$formvars['flur_thematisch'].'",'; }else{$sql.='"0",';}
-		$sql.='"'.$formvars['such_andere_art'].'"';
+		$sql.='`suchhauptart`, `suchunterart`, `abfrageart`, `suchgemarkung`, `suchflur`, `suchstammnr`, `suchstammnr2`, `suchrissnummer`, `suchrissnummer2`, `suchfortfuehrung`, `suchpolygon`, `suchantrnr`, `sdatum`, `sdatum2`, `sVermStelle`,';
+		if($formvars['flur_thematisch']!='') { $sql.='"'.$formvars['flur_thematisch'].'"'; }else{$sql.='"0"';}
 		$sql.=' FROM rolle_nachweise';
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:rolle->Suchparameter_loggen - Setzen der aktuellen Parameter für die Nachweissuche",4);
 		$GUI->database->execSQL($sql,4, 1);
 	};
 	
-	$this->Suchparameter_loeschen = function($antrag_nr, $stelle_id) use ($GUI){
+	$GUI->Suchparameter_loeschen = function($antrag_nr, $stelle_id) use ($GUI){
 		$sql ="DELETE FROM u_consumeNachweise WHERE antrag_nr = '".$antrag_nr."' AND stelle_id = ".$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:rolle->Suchparameter_loeschen - Löschen der Parameter für die Nachweissuche",4);
 		$GUI->database->execSQL($sql,4, 1);
 	};
 	
-	$this->Suchparameter_anhaengen_PDF = function($pdf, $antrag_nr, $stelle_id) use ($GUI){
-		$row = 0;
-		$options = array('aleft'=>30, 'right'=>30, 'justification'=>'left');
+	$GUI->Suchparameter_abfragen = function($antrag_nr, $stelle_id) use ($GUI){		
 		$sql = "SELECT * FROM u_consumeNachweise ";
 		$sql.= "WHERE antrag_nr='".$antrag_nr."' AND stelle_id=".$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->Suchparameter_anhaengen_PDF <br>".$sql,4);
 		$query=mysql_query($sql,$GUI->database->dbConn);
 		if ($query==0) { $GUI->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		while($rs = mysql_fetch_assoc($query)){
-			switch ($rs['abfrageart']){
+			$searches[] = $rs;
+		}
+		return $searches;
+	};	
+	
+	$GUI->Suchparameter_anhaengen_PDF = function($pdf, $antrag_nr, $stelle_id) use ($GUI){
+		$row = 0;
+		$options = array('aleft'=>30, 'right'=>30, 'justification'=>'left');
+		$searches = $GUI->antrag->searches;
+		foreach($searches as $params){
+			switch ($params['abfrageart']){
 				case 'indiv_nr' : {
-					$keys = array('suchffr'=>0, 'suchkvz'=>0, 'suchgn'=>0, 'suchan'=>0, 'suchgemarkung'=>0, 'suchflur'=>0, 'suchstammnr'=>0, 'suchrissnr'=>0, 'suchfortf'=>0, 'sdatum'=>0, 'sdatum2'=>0, 'sVermStelle'=>0, 'flur_thematisch'=>0, 'such_andere_art'=>0);
+					$keys = array('suchhauptart'=>0, 'suchunterart'=>0, 'suchgemarkung'=>0, 'suchflur'=>0, 'suchstammnr'=>0, 'suchstammnr2'=>0, 'suchrissnummer'=>0, 'suchrissnummer2'=>0, 'suchfortfuehrung'=>0, 'sdatum'=>0, 'sdatum2'=>0, 'sVermStelle'=>0, 'flur_thematisch'=>0);
 				}break;
 				case 'poly' : {
-					$keys = array('suchffr'=>0, 'suchkvz'=>0, 'suchgn'=>0, 'suchan'=>0, 'suchpolygon'=>0, 'such_andere_art'=>0);
+					$keys = array('suchhauptart'=>0, 'suchunterart'=>0, 'suchpolygon'=>0);
 				}break;
 				case 'antr_nr' : {
-					$keys = array('suchffr'=>0, 'suchkvz'=>0, 'suchgn'=>0, 'suchan'=>0, 'suchantrnr'=>0, 'such_andere_art'=>0);
+					$keys = array('suchhauptart'=>0, 'suchunterart'=>0, 'suchantrnr'=>0);
 				}break;				
 			}
-			$params = json_encode(array_intersect_key($rs, $keys));
 			if($row < 100){
 				$pdf->ezNewPage();
 				$row = 800;				
 			}
-			$pdf->ezText('<b>Suche '.$rs['time_id'].': '.$rs['abfrageart'].'</b>', 14, $options);
-			#$pdf->ezText('Suchpolygon: '.$rs['suchpolygon'], 16, $options);
+			$pdf->ezText('<b>Suche '.$params['time_id'].': '.$params['abfrageart'].'</b>', 14, $options);
+			$params = json_encode(array_intersect_key($params, $keys));
 			$pdf->ezText($params, 12, $options);
 			$pdf->ezText(' ', 12, $options);
 		}		
 		return $pdf;
 	};
 	
-	$this->nachweiseRecherchieren = function() use ($GUI){
+	$GUI->nachweiseRecherchieren = function() use ($GUI){
 		$GUI->formvars['suchstammnr'] = trim($GUI->formvars['suchstammnr']);
-		$GUI->formvars['suchrissnr'] = trim($GUI->formvars['suchrissnr']);
+		$GUI->formvars['suchrissnummer'] = trim($GUI->formvars['suchrissnummer']);
     # Suchparameter, die neu gesetzt worden sind in formvars, sollen übernommen werden und gespeichert werden
     # für späterer Suchanfragen und die anderen sollen aus der Datenbank abgefragt werden.
     # Setzen von Such- und Anzeigeparametern die neu gesetzt worden sind
@@ -418,34 +525,30 @@
     if ($GUI->formvars['abfrageart']=='poly') {
       $GUI->formvars['suchpolygon'] = $GUI->formvars['newpathwkt'];
     }
-    $GUI->setNachweisSuchparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchffr'],$GUI->formvars['suchkvz'],$GUI->formvars['suchgn'], $GUI->formvars['suchan'], $GUI->formvars['abfrageart'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchflur'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['suchpolygon'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'],$GUI->formvars['sdatum2'], $GUI->formvars['sVermStelle']);
+    $GUI->setNachweisSuchparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchunterart'], $GUI->formvars['abfrageart'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchflur'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchstammnr2'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchrissnummer2'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchpolygon'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'],$GUI->formvars['sdatum2'], $GUI->formvars['sVermStelle'], $GUI->formvars['flur_thematisch'], $GUI->formvars['alle_der_messung']);
     # Die Anzeigeparameter werden so gesetzt, daß genau das gezeigt wird, wonach auch gesucht wurde.
     # bzw. was als Suchparameter im Formular angegeben wurde.
-    $GUI->setNachweisAnzeigeparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchffr'],$GUI->formvars['suchkvz'],$GUI->formvars['suchgn'],$GUI->formvars['suchan'],$GUI->formvars['suchffr'],$GUI->formvars['suchkvz'],$GUI->formvars['suchgn']);
+    $GUI->setNachweisAnzeigeparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchhauptart']);
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
     $GUI->formvars = array_merge($GUI->formvars, $GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id));
     # Nachweisobjekt bilden
     $GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
     # Suchparameter in Ordnung
     # Recherchieren nach den Nachweisen
-		if($GUI->formvars['such_andere_art'] != NULL)$GUI->formvars['such_andere_art'] = implode(',', $GUI->formvars['such_andere_art']);
-    $ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art']);
+		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['geprueft'], $GUI->formvars['alle_der_messung']);
     #$GUI->nachweis->getAnzahlNachweise($GUI->formvars['suchpolygon']);
     if($ret!=''){
       # Fehler bei der Recherche im Datenbestand
+			$GUI->add_message('error', $ret);
       $GUI->rechercheFormAnzeigen();
-      ?><script type="text/javascript">
-      alert("<?php echo $ret; ?>");
-      </script><?php
     }
     else {
       # Recherche erfolgreich verlaufen
       if ($GUI->nachweis->erg_dokumente==0) {
         # Keine Dokumente zur Auswahl gefunden.
-        $GUI->rechercheFormAnzeigen();
-        ?><script type="text/javascript">
-        alert("Es konnten keine Dokumente zu der Auswahl gefunden werden.\nWählen Sie neue Suchparameter.");
-        </script><?php
+				$GUI->add_message('error', 'Es konnten keine Dokumente zu der Auswahl gefunden werden. Wählen Sie neue Suchparameter.');
+        $GUI->rechercheFormAnzeigen();				
       }
       else {
         # Anzeige des Rechercheergebnisses
@@ -454,15 +557,18 @@
     }
   };
 	
-	$this->erzeugenUebergabeprotokollNachweise = function($antr_nr) use ($GUI){
+	$GUI->zusammenstellenUebergabeprotokollNachweise = function($antr_nr) use ($GUI){
     if ($antr_nr==''){
+			$GUI->add_message('error', 'Wählen Sie bitte eine Antragsnummer aus!');
       $GUI->Antraege_Anzeigen();
-      showAlert('Wählen Sie bitte eine Antragsnummer aus! ');
     }
     else{
 			$explosion = explode('~', $antr_nr);
 			$antr_nr = $explosion[0];
 			$stelle_id = $explosion[1];
+			$GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+			$GUI->hauptarten = $GUI->nachweis->getHauptDokumentarten();
+			if($GUI->formvars['hauptart'] == '')$GUI->formvars['hauptart'] = array_keys($GUI->hauptarten);
       $GUI->antrag = new antrag($antr_nr,$stelle_id,$GUI->pgdatabase);
       $ret=$GUI->antrag->getFFR($GUI->formvars);
       if ($ret[0]) {
@@ -477,18 +583,397 @@
       }
     }
   };
+		
+	$GUI->erzeugenZuordnungFlst_CSV = function($path) use ($GUI){
+		$intersections = $GUI->antrag->getIntersectedFlst();
+		$csv = utf8_decode('Flur;Antragsnummer;Rissnummer;'.(NACHWEIS_SECONDARY_ATTRIBUTE != '' ? NACHWEIS_SECONDARY_ATTRIBUTE.';' : '').'Flurstück;Anteil [m²];Anteil [%]').chr(10);
+		foreach($intersections as $intersection){
+			$csv .= implode(';', $intersection).chr(10);
+		}
+		$fp=fopen($path.'Zuordnung-Flurstuecke.csv','wb');
+		fwrite($fp, $csv);
+		fclose($fp);
+	};
+	
+	$GUI->erzeugenUebersicht_CSV = function($path) use ($GUI){
+		$columns['id'] = 'id';
+		$columns['flurid'] = 'Flur';
+		$columns['stammnr'] = 'Antragsnummer';
+		$columns['blattnummer'] = 'Blattnummer';
+		$columns['rissnummer'] = 'Rissnummer';
+		$columns['unterart_name'] = 'Art';
+		$columns['datum'] = 'Datum';
+		$columns['fortfuehrung'] = 'Fortführung';
+		$columns['vermst'] = 'Vermessungsstelle';
+		$columns['gueltigkeit'] = 'Gültigkeit';
+		$columns['format'] = 'Format';
+		$columns['dokument_path'] = 'Dokument';
+		foreach($columns as $key=>$column){
+			$csv .= utf8_decode($column).';';
+		}
+		$csv.= chr(10);
+		foreach($GUI->nachweis->Dokumente as $nachweis){
+			foreach($columns as $key=>$column){
+				if($key != 'dokument_path'){
+					$strpos = strpos($nachweis[$key], '/');
+					if ($strpos !== false AND $strpos < 3) {		# Excel-Datumsproblem
+						$nachweis[$key] = $nachweis[$key]."\t";
+					}
+				}
+				if($key == 'dokument_path' AND $nachweis[$key] != ''){
+					$csv .= '"=HYPERLINK(""'.$nachweis[$key].'"";""'.basename($nachweis[$key]).'"")"';
+				}
+				else $csv .= utf8_decode($nachweis[$key]).';';
+			}
+			$csv.= chr(10);
+		}
+		$fp=fopen($path,'wb');
+		fwrite($fp, $csv);
+		fclose($fp);
+	};
   
-	$this->erzeugenUebergabeprotokollNachweise_PDF = function($path = NULL, $with_search_params = false) use ($GUI){
+	$GUI->erzeugenUebersicht_HTML = function($path, $light) use ($GUI){
+		$html = "
+<html>
+	<head>
+		<meta http-equiv=Content-Type content=\"text/html; charset=UTF-8\">
+		<style>
+			body{
+				font-family: \"Trebuchet MS\", Helvetica, sans-serif;
+			}
+			table{
+				border-collapse: collapse;
+			}
+			td, th{
+				border: 1px solid #aaaaaa;
+				border-left: 1px solid #dddddd;
+				border-right: 1px solid #dddddd;
+				padding: 2px;
+				font-size: 15px;
+				}
+			th{
+				background: rgba(0, 0, 0, 0) linear-gradient(rgb(218, 228, 236) 0%, lightsteelblue 100%);
+			}
+			input[type=\"text\"]{
+				font-size: 15px;
+				line-height: 15px;
+			}			
+			select{
+				height: 20px;
+			}
+			a{
+				border: medium none;
+				color: firebrick;
+				font-size: 15px;
+				outline: medium none;
+				text-decoration: none;
+			}
+			a:hover{
+				color: black;
+			}
+			#order_div, #nachweise_table, #filter_div, #head_div {
+				margin: 10px;
+			}
+			#nachweise_table{
+				border: 1px solid #aaaaaa;
+				display: inline-block;
+			}				
+			#head_div {
+				font-weight: bold;
+				font-size: 14px;
+			}
+			#head_div #lk {
+				font-size: 20px;
+				margin-bottom: 5px;
+			}
+			#filter_div div{
+				border: 1px solid grey;
+				width: 800px;
+				padding: 3px;
+			}
+			.removeFilter{
+				float: right;
+				cursor: pointer;
+			}
+			#order_output{
+				width: 400px;
+				border: none;
+			}
+			#preview_image{
+				position: fixed;
+				top: 30px;
+				left: 30px;
+			}
+			#preview_image img{
+				max-width: 600px;
+				box-shadow: 10px 9px 11px #777;
+			}
+			.options{
+				margin: 4 2 5 10;
+				padding: 1px;
+				color: grey;
+				border: 1px solid lightgrey;
+				border-radius: 3px;
+				font-size: 10px;
+				line-height: 10px;
+				float: right;
+			}
+			.options:hover{
+				border: 1px solid grey;
+				color: black;
+				cursor: pointer;
+			}
+			#filterform{
+				padding: 0px;
+				background-color: white;
+				border: 1px solid grey;
+				position: absolute;
+				box-shadow: 10px 9px 11px #777;
+			}
+			#filterform .headline{
+				padding: 2 5;
+				color: black;
+				background: rgba(0, 0, 0, 0) linear-gradient(rgb(218, 228, 236) 0%, lightsteelblue 100%);
+				line-height: 20px;
+			}
+			#filterform .content{
+				padding: 5px;
+			}
+			#filterform .close{
+				float: right;
+				cursor: pointer;
+			}
+			.filter_button{
+				margin-top: 10px;
+			}
+		</style>
+		<SCRIPT TYPE=\"text/javascript\">
+			var nachweise = new Array();\n";
+			
+		for($i = 0; $i < count($GUI->nachweis->Dokumente); $i++){
+			$json = str_replace("'", "\'", str_replace('\\r', '\\\r', str_replace('\\n', '\\\n', json_encode($GUI->nachweis->Dokumente[$i]))));
+			$html.= "			nachweise.push(JSON.parse('".$json."'));\n";
+		}	
+		
+		$html.= "
+			var columns = new Array();
+			columns['id'] = 'ID';
+			columns['flurid'] = 'Flur';
+			columns['stammnr'] = 'Antragsnummer';
+			columns['blattnummer'] = 'Blattnummer';
+			columns['rissnummer'] = 'Rissnummer';
+			columns['unterart_name'] = 'Art';
+			columns['datum'] = 'Datum';
+			columns['fortfuehrung'] = 'Fortführung';
+			columns['vermst'] = 'Vermessungsstelle';
+			columns['gueltigkeit'] = 'Gültigkeit';
+			columns['format'] = 'Format';
+			columns['dokument_path'] = 'Dokument';
+			
+			var filters = new Array();
+			
+			var _table_ = document.createElement('table'),
+					_tr_ = document.createElement('tr'),
+					_th_ = document.createElement('th'),
+					_td_ = document.createElement('td');
+								
+			function buildHtmlTable(arr) {
+				var table = _table_.cloneNode(false);
+				var tr = _tr_.cloneNode(false);
+				for(var key in columns){		// Ueberschriften
+					var th = _th_.cloneNode(false);
+					a = document.createElement('a');
+					a.href = 'javascript:changeOrder(\''+key+'\');';
+					a.title = 'sortieren nach '+columns[key];
+					a.innerHTML = columns[key];
+					th.appendChild(a);
+					tr.appendChild(th);
+					table.appendChild(tr);
+				}
+				for(var i=0; i < arr.length; ++i){		// Datenzeilen
+					if(!arr[i]['filtered']){
+						var tr = _tr_.cloneNode(false);
+						for(var key in columns){
+							var value = arr[i][key];
+							var td = _td_.cloneNode(false);
+							if(key == 'dokument_path' && value != null){
+								path_parts = value.split('/');
+								filename = path_parts[path_parts.length-1];
+								a = document.createElement('a');";
+								if($light)$html.="a.href = '../../'+filename;";
+								else $html.= "a.href = value;";
+								$html.="
+								a.target = '_blank';
+								a.setAttribute('onmouseover', \"showPreview('\"+filename+\"')\");
+								a.onmouseout = function(){hidePreview()};
+								a.innerHTML = filename;
+								cellcontent = a;
+							}
+							else cellcontent = document.createTextNode(value || '');
+							td.appendChild(cellcontent);
+							options = document.createElement('input');
+							options.className='options';
+							options.type='button';
+							options.setAttribute('onclick', \"showFilterForm(this.parentNode, '\"+key+\"', '\"+value+\"')\");
+							options.value= '\u25BD';	// 2630
+							td.appendChild(options);
+							tr.appendChild(td);
+						}
+						table.appendChild(tr);
+					}
+				}
+				return table;
+			}					
+			
+			function showPreview(filename){
+				file_parts = filename.split('.');								
+				preview_image = file_parts[0]+'_thumb.jpg';
+				document.getElementById('preview_image').innerHTML = '<img src=\"../Vorschaubilder/'+preview_image+'\">';
+			}
+			
+			function hidePreview(){
+				document.getElementById('preview_image').innerHTML = '';
+			}
+			
+			function changeOrder(column){
+				var found = false;
+				var orderstring = document.getElementById('order').value;
+				var order_output = new Array();
+				if(orderstring == '')var order_columns = new Array();
+				else var order_columns = orderstring.split(';');
+				for(var i = 0; i < order_columns.length; i++){
+					if(order_columns[i] == column){	// wenn schon im order-String vorhanden -> entfernen
+						order_columns.splice(i, 1);
+						found = true;
+					}
+				}
+				if(found == false)order_columns.push(column);		// zum order-String hinzufuegen
+				for(var key in order_columns){
+					order_output.push(columns[order_columns[key]]);
+				}
+				document.getElementById('order').value = order_columns.join(';');
+				document.getElementById('order_output').value = order_output.join(', ');
+				nachweise.sort(sortByColumns(order_columns));
+				output();
+			}
+			
+			function sortByColumns(order_columns){
+				return function(a, b){
+					for(var col in order_columns){
+						var ax = a[order_columns[col]];
+						var bx = b[order_columns[col]];
+						if(ax != bx)return (ax < bx) ? -1 : 1;
+					}
+				}
+			}
+								
+			function showFilterForm(td, key, value){
+				hideFilterForm();			
+				div = document.createElement('div');
+				div.id = 'filterform';
+				div.innerHTML = '<div class=\"headline\">Zeilen filtern<a class=\"close\" onclick=\"hideFilterForm();\">\u274C</a></div><div class=\"content\"><input id=\"filter_key\" value=\"'+key+'\" type=\"hidden\">'+columns[key]+' <select id=\"filter_operator\"><option value=\"=\">=</option><option value=\"!=\">!=</option></select><input id=\"filter_value\" type=\"text\" value=\"'+value+'\"><br><input class=\"filter_button\" type=\"button\" value=\"Filtern\" onclick=\"addFilter()\"></div>';
+				td.appendChild(div);
+			}
+			
+			function hideFilterForm(){
+				if(document.getElementById('filterform') != undefined)document.getElementById('filterform').outerHTML = '';
+			}
+			
+			function addFilter(){
+				var filter = new Array();
+				if(filters.length == 0)filter['id'] = 0;
+				else filter['id'] = filters[filters.length - 1]['id'] + 1;
+				filter['key'] = document.getElementById('filter_key').value;
+				filter['operator'] = document.getElementById('filter_operator').value;
+				filter['value'] = document.getElementById('filter_value').value;
+				filters.push(filter);
+				filter_output = document.createElement('div');
+				filter_output.id = filter['id'];
+				filter_output.innerHTML = columns[filter['key']]+' '+filter['operator']+' '+filter['value'];
+				filter_remove = document.createElement('a');
+				filter_remove.innerHTML = '\u274C';
+				filter_remove.title = 'Filter entfernen';
+				filter_remove.className = 'removeFilter';
+				filter_remove.setAttribute('onclick',  'removeFilter('+filter_output.id+');');
+				filter_output.appendChild(filter_remove);						
+				document.getElementById('filter_div').appendChild(filter_output);
+				filterRows(nachweise, filters);
+				hideFilterForm();
+				output();
+			}
+			
+			function removeFilter(id){
+				for(var j=0; j < filters.length; j++){
+					if(filters[j]['id'] == id){
+						filters.splice(j, 1);
+						break;
+					}
+				}
+				document.getElementById('filter_div').removeChild(document.getElementById(id));						
+				filterRows(nachweise, filters);
+				output();
+			}
+
+			function filterRows(arr, filters){
+				for(var i=0; i < arr.length; i++){		// Datenzeilen
+					arr[i]['filtered'] = false;
+					for(var key in arr[i]){		// Spalten
+						if(!arr[i]['filtered']){
+							for(var j=0; j < filters.length; j++){	// Filter
+								if(filters[j]['key'] == key){
+									match = false;
+									switch(filters[j]['operator']){
+										case '=':
+											if(filters[j]['value'] == arr[i][key])match = true;
+										break;
+										case '!=':
+											if(filters[j]['value'] != arr[i][key])match = true;
+										break;										
+									}
+									arr[i]['filtered'] = !match;
+								}
+							}
+						}
+					}
+				}
+			}
+				
+			function output(){
+				document.getElementById('nachweise_table').innerHTML = '';
+				document.getElementById('nachweise_table').appendChild(buildHtmlTable(nachweise));
+			}
+			
+		</SCRIPT>
+	</head>
+	<body onload=\"output();\">
+		<div id=\"head_div\">
+			<div id=\"lk\">".LANDKREIS."</div>
+			<div id=\"datum\">Datum Antragstellung: ".$GUI->antrag->antragsliste[0]['datum']."</div>
+			<div id=\"antrag\">Antragsnummer: ".$GUI->antrag->antragsliste[0]['antr_nr']."</div>
+			<div id=\"datum\">Datum Download: ".date('d.m.Y',time())."</div>
+		</div>
+		<div id=\"order_div\">Sortiert nach: <input type=\"text\" id=\"order_output\" readonly=\"true\" value=\"\"><input type=\"hidden\" id=\"order\" value=\"\"></div></div>
+		<div id=\"nachweise_table\"></div>
+		<div id=\"filter_div\">Filter:<br></div>
+		<div id=\"preview_image\"></div>
+	</body>
+</html>";
+		$fp=fopen($path,'wb');
+		fwrite($fp, $html);
+		fclose($fp);
+  };	
+	
+	$GUI->erzeugenUebergabeprotokollNachweise = function($path = NULL, $with_search_params = false) use ($GUI){
   	# Erzeugen des Übergabeprotokolls mit der Zuordnung der Nachweise zum gewählten Auftrag als PDF-Dokument
   	if($GUI->formvars['antr_selected'] == ''){
+			$GUI->add_message('error', 'Wählen Sie bitte eine Antragsnummer aus!');
       $GUI->Antraege_Anzeigen();
-      showAlert('Wählen Sie bitte eine Antragsnummer aus! ');
     }
     else{
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
 			$antr_selected = $explosion[0];
 			$stelle_id = $explosion[1];
-      $GUI->antrag = new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
+			if($GUI->antrag == NULL)$GUI->antrag = new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
       $ret=$GUI->antrag->getFFR($GUI->formvars, true);
       if ($ret[0]) {
         $GUI->Fehlermeldung=$ret[1];
@@ -496,7 +981,7 @@
         $GUI->Antraege_Anzeigen();
       }
       else{
-		    include_once (PDFCLASSPATH."class.ezpdf.php");
+		    include_once (CLASSPATH.'class.ezpdf.php');
 		    $pdf=new Cezpdf();
 		    $pdf=$GUI->antrag->erzeugenUbergabeprotokoll_PDF();		    
 				if($path == NULL){					# Ausgabe direkt an den Browser
@@ -522,49 +1007,19 @@
     }
   };
   
-	$this->erzeugenUebergabeprotokollNachweise_CSV = function() use ($GUI){
-  	# Erzeugen des Übergabeprotokolls mit der Zuordnung der Nachweise zum gewählten Auftrag als CSV-Dokument
-  	if($GUI->formvars['antr_selected'] == ''){
-      $GUI->Antraege_Anzeigen();
-      showAlert('Wählen Sie bitte eine Antragsnummer aus! ');
-    }
-    else {
-			$explosion = explode('~', $GUI->formvars['antr_selected']);
-			$GUI->formvars['antr_selected'] = $explosion[0];
-			$stelle_id = $explosion[1];
-      $GUI->antrag = new antrag($GUI->formvars['antr_selected'],$stelle_id,$GUI->pgdatabase);
-      $ret=$GUI->antrag->getFFR($GUI->formvars);
-      if ($ret[0]) {
-        $GUI->Fehlermeldung=$ret[1];
-        # Abbruch mit Fehlermeldung und Rücksprung in Auswahl
-        $GUI->Antraege_Anzeigen();
-      }
-      else{
-		    $csv=$GUI->antrag->erzeugenUbergabeprotokoll_CSV($GUI->formvars);
-		    ob_end_clean();
-		    header("Content-type: application/vnd.ms-excel");
-		    header("Content-disposition:  inline; filename=Übergabeprotokoll_".date('Y-m-d_G-i-s').".csv");
-		    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-		    header('Pragma: public');
-		    print utf8_decode($csv);
-      }
-    }
-  };
-
-	$this->check_nachweis_poly = function() use ($GUI){
+	$GUI->check_nachweis_poly = function() use ($GUI){
 		$GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
 		echo $GUI->nachweis->check_poly_in_flur($GUI->formvars['umring'], $GUI->formvars['flur'], $GUI->formvars['gemkgschl'], $GUI->user->rolle->epsg_code);
 		echo '~check_poly();';
 	};
 
-	$this->nachweisFormSenden = function() use ($GUI){
+	$GUI->nachweisFormSenden = function() use ($GUI){
     #2005-11-24_pk
     $GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-    # Aus Formularvariablen zusammengesetzte Werte bilden.
-    # Zusammensetzen der flurid
+    $hauptarten = $GUI->nachweis->getHauptDokumentarten();
+    $GUI->formvars['artname'] = strtolower($hauptarten[$GUI->formvars['hauptart']]['abkuerzung']);
+		# Zusammensetzen der flurid
     $GUI->formvars['flurid']=$GUI->formvars['Gemarkung'].str_pad(intval(trim($GUI->formvars['Flur'])),3,'0',STR_PAD_LEFT);
-    # Umwandeln des Kodes für die Dokumentenarten in eine Abkürzung
-    $GUI->formvars['artname']=ArtCode2Abk($GUI->formvars['art']);
     # Zusammensetzen der übergebenen Parameter für das Polygon
     $GUI->formvars['umring'] = $GUI->formvars['newpathwkt'];
     ######################################
@@ -572,7 +1027,7 @@
     if ($GUI->formvars['id']=='') {
       # Prüfen der Eingabewerte
       #echo '<br>Prüfen der Eingabewerte.';
-      $ret=$GUI->nachweis->pruefeEingabedaten($GUI->formvars['datum'],$GUI->formvars['VermStelle'],$GUI->formvars['art'],$GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['rissnummer'], $GUI->formvars['fortfuehrung'], $GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['changeDocument'],$GUI->formvars['Bilddatei_name'],$GUI->formvars['pathlength'],$GUI->formvars['umring']);
+      $ret=$GUI->nachweis->pruefeEingabedaten($GUI->formvars['id'], $GUI->formvars['datum'],$GUI->formvars['VermStelle'],$GUI->formvars['hauptart'],$GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['rissnummer'], $GUI->formvars['fortfuehrung'], $GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],true,$GUI->formvars['Bilddatei_name'],$GUI->formvars['pathlength'],$GUI->formvars['umring'], $GUI->formvars['flurid'], $GUI->formvars['Blattnr']);
       if ($ret[0]) {
         #echo '<br>Ergebnis der Prüfung: '.$ret;
         $errmsg=$ret[1];
@@ -583,12 +1038,14 @@
         # 2.1 Speichern der Bilddatei zum Nachweis auf dem Server
         # Zusammensetzen des Dateinamen unter dem das Dokument gespeichert werden soll.
         $GUI->formvars['zieldateiname']=$GUI->nachweis->getZielDateiName($GUI->formvars);
-        $ret=$GUI->nachweis->dokumentenDateiHochladen($GUI->formvars['flurid'], $GUI->nachweis->buildNachweisNr($GUI->formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $GUI->formvars[NACHWEIS_SECONDARY_ATTRIBUTE]),$GUI->formvars['artname'],$GUI->formvars['Bilddatei'],$GUI->formvars['zieldateiname']);
+				$zieldatei = NACHWEISDOCPATH.$GUI->formvars['flurid'].'/'.$GUI->nachweis->buildNachweisNr($GUI->formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $GUI->formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$GUI->formvars['artname'].'/'.$GUI->formvars['zieldateiname'];
+        $ret=$GUI->nachweis->dokumentenDateiHochladen($GUI->formvars['Bilddatei'], $zieldatei);
         if ($ret!='') { $errmsg=$ret; }
         else {
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank
           $GUI->nachweis->database->begintransaction();
-          $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['art'], $GUI->formvars['andere_art'], $GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['artname']."/".$GUI->formvars['zieldateiname'],$GUI->formvars['umring'], $GUI->user);
+          $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['unterart_'.$GUI->formvars['hauptart']], $GUI->formvars['gueltigkeit'], $GUI->formvars['geprueft'], $GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['bemerkungen_intern'],$GUI->formvars['artname']."/".$GUI->formvars['zieldateiname'],$GUI->formvars['umring'], $GUI->user);
+					$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
           if ($ret[0]) {
             $GUI->nachweis->database->rollbacktransaction();
             $errmsg=$ret[1];
@@ -596,14 +1053,14 @@
           else {
             $GUI->nachweis->database->committransaction();
             # Alle Aufgaben erfolgreich ausgeführt
-            $errmsg='Daten zum neuen Dokument erfolgreich eingetragen!';
+            $okmsg='Daten zum neuen Dokument erfolgreich eingetragen!';
           } # ende Speicherung der Metadaten war erfolgreich
         } # ende Speicherung der Bilddatei war erfolgreich
       } # ende Prüfung war erfolgreich
       # Auswertung/Behandlung bei Aufgetretenen Fehlern
-      $GUI->Meldung=$errmsg;
+			if($okmsg)$GUI->add_message('notice', $okmsg);
+			if($errmsg)$GUI->add_message('error', $errmsg);
       $GUI->nachweisFormAnzeige();
-      showAlert($GUI->Meldung);
     } # ende Fall Eintragen Daten zum neuen Dokument
     else {
       ##################################################
@@ -612,18 +1069,18 @@
       if ($ret[0]) {
         # Die Änderung wurde auf Grund eines Fehlers nicht durchgeführt
         # 1.3 Zurück zum Änderungsformular mit Anzeige der Fehlermeldung
-        $GUI->nachweisFormAnzeige();
 				$GUI->Meldung=$ret[1];
-        showAlert($GUI->Meldung);
+				$GUI->add_message('error', $GUI->Meldung);
+        $GUI->nachweisFormAnzeige();
       } # end of fehler bei der Änderung
       else {
+				$GUI->add_message('info', $ret[1]);
 				$GUI->nachweisAenderungsformular();
-        showAlert($ret[1]);
 			}
       # 1.4 Zur zur Anzeige der Rechercheergebnisse mit Meldung über Erfolg der Änderung
       # 1.4.1 Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
       #$GUI->formvars=$GUI->user->rolle->getNachweisParameter();
-      #$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkungflurid'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr']);
+      #$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkungflurid'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr']);
       # 1.4.2 Anzeige der Rechercheergebnisse
       #$GUI->nachweisAnzeige();
       # 1.4.3 Anzeige der Erfolgsmeldung
@@ -633,7 +1090,7 @@
     return 1;
   };
 	
-	$this->nachweisFormAnzeigeVorlage = function() use ($GUI){
+	$GUI->nachweisFormAnzeigeVorlage = function() use ($GUI){
 		# Nachweisdaten aus Datenbank abfragen
     $nachweis=new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
     $ret=$nachweis->getNachweise($GUI->formvars['id'],'','','','','','','','MergeIDs','',0,0);
@@ -642,23 +1099,27 @@
     $GUI->formvars['flurid']=$nachweis->document['flurid'];
     $GUI->formvars['stammnr']=$nachweis->document['stammnr'];
     $GUI->formvars['rissnummer']=$nachweis->document['rissnummer'];
-    $GUI->formvars['art']=$nachweis->document['art'];
+    $GUI->formvars['hauptart']=$nachweis->document['hauptart'];
+		$GUI->formvars['unterart_'.$GUI->formvars['hauptart']] = $nachweis->document['unterart'];
     $GUI->formvars['Blattnr']=$nachweis->document['blattnummer'];
     $GUI->formvars['datum']=$nachweis->document['datum'];
     $GUI->formvars['VermStelle']=$nachweis->document['vermstelle'];
     $GUI->formvars['Blattformat']=$nachweis->document['format'];
     $GUI->formvars['gueltigkeit']=$nachweis->document['gueltigkeit'];
+		$GUI->formvars['geprueft']=$nachweis->document['geprueft'];
     $GUI->formvars['Gemeinde']=$nachweis->document['Gemeinde'];
     $GUI->formvars['Gemarkung']=substr($GUI->formvars['flurid'],0,6);
     $GUI->formvars['Flur']=intval(substr($GUI->formvars['flurid'],6,9));
     $GUI->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];
-    $GUI->formvars['andere_art']=$nachweis->document['andere_art'];
 		$GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
+		$GUI->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
+		$GUI->formvars['bemerkungen_intern']=$nachweis->document['bemerkungen_intern'];
     $GUI->formvars['id'] = '';
     $GUI->nachweisFormAnzeige($nachweis);
 	};
 
-	$this->nachweisFormAnzeige = function($nachweis = NULL) use ($GUI){
+	$GUI->nachweisFormAnzeige = function($nachweis = NULL) use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
 		if($GUI->formvars['reset_layers'])$GUI->reset_layers(NULL);
 
     # Wenn eine oid in formvars übergeben wurde ist es eine Änderung, sonst Neueingabe
@@ -669,7 +1130,7 @@
       $GUI->titel='Dokumenteneingabe (neuer Ausschnitt)';
     }
     $GUI->main = PLUGINS."nachweisverwaltung/view/dokumenteneingabeformular.php";
-    $GUI->formvars['bufferwidth'] = 2;
+    if($GUI->formvars['bufferwidth'] == '')$GUI->formvars['bufferwidth'] = 2;
     $saved_scale = $GUI->reduce_mapwidth(100);
 		if($GUI->formvars['neuladen']){
       $GUI->neuLaden();
@@ -677,8 +1138,8 @@
     else{
       $GUI->loadMap('DataBase');
     }
-		if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
+		if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
   	if(!$GUI->formvars['layer_id']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
       $GUI->formvars['layer_id'] = $layerset[0]['Layer_ID'];
@@ -702,7 +1163,8 @@
 	    }
 	  }
     $oldscale=round($GUI->map_scaledenom);  
-    if ($GUI->formvars['CMD']!='') {
+		$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
+    if ($GUI->formvars['CMD']!=''){			
       $GUI->navMap($GUI->formvars['CMD']);
       $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
@@ -731,10 +1193,13 @@
     
     # Abfragen der Gemarkungen
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
-    $Gemeinde=new gemeinde('',$GUI->pgdatabase);
-    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
-    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
+		if($GemeindenStelle == NULL){
+			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+		}
+		else{
+			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+		}
         
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
     $GUI->GemkgFormObj=new FormObject("Gemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['Gemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
@@ -744,25 +1209,42 @@
 
     # abfragen der Dokumentarten
     $nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$GUI->hauptdokumentarten = $nachweis->getHauptDokumentarten();
     $GUI->dokumentarten = $nachweis->getDokumentarten();
     $GUI->output();
   };
 
-	$this->nachweisAnzeige = function() use ($GUI){
-    $GUI->menue='menue.php';
+	$GUI->nachweisAnzeige = function() use ($GUI){
     $GUI->titel='Rechercheergebnis';
     $GUI->main= PLUGINS.'nachweisverwaltung/view/nachweisanzeige.php';
-    $GUI->FormObjAntr_nr=$GUI->getFormObjAntr_nr($GUI->formvars['suchantrnr']);
+    $GUI->FormObjAntr_nr=$GUI->getFormObjAntr_nr($GUI->formvars['suchantrnr'], 8);
     $GUI->output();
   };
+	
+	$GUI->nachweiseGeometrieuebernahme = function() use ($GUI){
+		$GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
+		$ret=$GUI->nachweis->Geometrieuebernahme($GUI->formvars['ref_geom'],$GUI->formvars['id']);
+    $GUI->formvars = array_merge($GUI->formvars, $GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id));
+		$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['geprueft']);
+    if($ret[0] != ''){
+			$GUI->add_message('error', $ret[0]);
+    }
+    else {
+			$GUI->add_message('notice', $ret[1]);
+    }
+    $GUI->nachweisAnzeige();			
+	};
 
-	$this->nachweiseZuAuftrag = function() use ($GUI){
+	$GUI->nachweiseZuAuftrag = function() use ($GUI){
     # echo 'Start der Zuweisung der Dokumente zum Antrag';
     # Hinzufügen von recherchierten Nachweisen zu einem Auftrag
 		$explosion = explode('~', $GUI->formvars['suchantrnr']);
 		$GUI->formvars['suchantrnr'] = $explosion[0];
 		$stelle_id = $explosion[1];
     $GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
+    $GUI->dokumentarten = $GUI->nachweis->getDokumentarten();
     $ret=$GUI->nachweis->pruefe_Auftrag_hinzufuegen_entfernen($GUI->formvars['suchantrnr'], $stelle_id);
     if ($ret!=''){ # Fehler bei der Prüfung der Eingangsparameter
       $errmsg=$ret;
@@ -781,27 +1263,28 @@
     # Zurück zur Anzeige des Rechercheergebnisses mit Meldung über Zuordnung der Dokumente zum Auftrag
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
     $GUI->formvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
-    $GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur']);
+		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['geprueft']);
     if ($ret!='') {
       $errmsg.=$ret;
-    }
-    # Anzeige der Rechercheergebnisse
-    $GUI->nachweisAnzeige();
+    }    
     if($errmsg!=''){ # Anzeig der Fehlermeldung
-      showAlert($errmsg);
+			$GUI->add_message('error', $errmsg);
     }
     else { # Ohne Fehler bei der Abfrage der Dokumente Anzeige der Erfolgsmeldung
-      showAlert($okmsg);
+			$GUI->add_message('notice', $okmsg);
     }
+		# Anzeige der Rechercheergebnisse
+    $GUI->nachweisAnzeige();		
   };
 
-	$this->nachweiseZuAuftragEntfernen = function() use ($GUI){
+	$GUI->nachweiseZuAuftragEntfernen = function() use ($GUI){
 		$explosion = explode('~', $GUI->formvars['suchantrnr']);
 		$suchantrnr = $explosion[0];
 		$stelle_id = $explosion[1];
     # nachweisobjekt erstellen
     $GUI->nachweis = new nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
+    $GUI->dokumentarten = $GUI->nachweis->getDokumentarten();
     # Abfrage, ob schon Löschvorgang schon bestätigt wurde
     if($GUI->formvars['bestaetigung']=='') {
       # Löschvorgang wurde noch nicht bestätigt
@@ -821,8 +1304,9 @@
         else {
           # Eingabeparameter in Ordnung
           # Nachweise aus Antrag entfernen
-          $ret=$GUI->nachweis->aus_Auftrag_entfernen($suchantrnr,$stelle_id,$GUI->formvars['id']);
-          $errmsg=$ret[1];
+          $result=$GUI->nachweis->aus_Auftrag_entfernen($suchantrnr,$stelle_id,$GUI->formvars['id']);
+          $errmsg=$result[0];
+					$okmsg=$result[1];
         } # ende Eingabeparameter sind ok
       } # ende Löschvorgang wurde bestätigt
       else { # Löschvorgang wurde abgebrochen
@@ -831,21 +1315,19 @@
       # Zurück zur Anzeige des Rechercheergebnisses mit Meldung über Zuordnung der Dokumente zum Auftrag
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
       $GUI->formvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
-      $GUI->nachweis = new nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-			$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur']);
-      $errmsg.=$ret[1];
-      # Anzeige der Rechercheergebnisse
+			$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['geprueft']);
+      # Anzeige der Rechercheergebnisse			
+			if($errmsg)$GUI->add_message('error', $errmsg);
+			if($okmsg)$GUI->add_message('notice', $okmsg);
       $GUI->nachweisAnzeige();
-      showAlert($errmsg);
-
     } # ende Bestätigung ist erfolgt
   };
 
-	$this->nachweisDokumentAnzeigen = function() use ($GUI){
+	$GUI->nachweisDokumentAnzeigen = function() use ($GUI){
     $GUI->nachweis = new nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
     $ret=$GUI->nachweis->getDocLocation($GUI->formvars['id']);
     if($ret[0]!='') {
-      showAlert($ret[0]);
+			$GUI->add_message('error', $ret[0]);
       return 0;
     }
     else {
@@ -863,13 +1345,13 @@
     }
   };
   
-	$this->bestaetigungsformAnzeigen = function() use ($GUI){
+	$GUI->bestaetigungsformAnzeigen = function() use ($GUI){
     $GUI->titel='Bestätigung';
     $GUI->main = PLUGINS.'nachweisverwaltung/view/bestaetigungsformular.php';
     $GUI->output();
   };
 	
-	$this->nachweisLoeschen = function() use ($GUI){
+	$GUI->nachweisLoeschen = function() use ($GUI){
     # Abfragen ob der Löschvorgang schon bestätigt wurde.
     if ($GUI->formvars['bestaetigung']=='') {
       # Der Löschvorgang wurde noch nicht bestätigt
@@ -879,22 +1361,23 @@
     }
     else {
       $GUI->nachweis = new nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+			$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
       # Abfrage ob gelöscht werden soll oder nicht
       if ($GUI->formvars['bestaetigung']=='JA') {
         # Der Löschvorgang wurde bestätigt und wird jetzt ausgeführt
-        $idListe=array_keys($GUI->formvars['id']);
+        $idListe=$GUI->formvars['id'];
         $ret=$GUI->nachweis->nachweiseLoeschen($idListe,1);
         if ($ret[0]) { # Fehler beim Löschen in Fehlermeldung übergeben
           $GUI->Fehlermeldung=$ret[1];
         }
         else {
-          showAlert($ret[1]);
+					$GUI->add_message('info', $ret[1]);
         }
       }
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 			$GUI->formvars = array_merge($GUI->formvars, $GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id));
       # Abfragen der Nachweise entsprechend der eingestellten Suchparameter
-			$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch']);
+			$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['geprueft']);
       if ($ret!='') {
         $GUI->Fehlermeldung.=$ret;
       }
@@ -903,10 +1386,31 @@
     }
   };
 	
-	$this->rechercheFormAnzeigen = function() use ($GUI){
-    # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
-    $nachweisSuchParameter=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
-    $GUI->formvars=array_merge($GUI->formvars,$nachweisSuchParameter);
+	$GUI->rechercheFormAnzeigen = function() use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
+		# Speichern einer neuen Dokumentauswahl
+		if($GUI->formvars['go_plus'] == 'Dokumentauswahl_speichern'){
+			$GUI->formvars['dokauswahlen'] = $GUI->save_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars);
+		}
+		# Löschen einer Dokumentauswahl
+		if($GUI->formvars['go_plus'] == 'Dokumentauswahl_löschen'){
+			$GUI->delete_Dokumentauswahl($GUI->formvars['dokauswahlen']);
+			$GUI->formvars['dokauswahl_name'] = '';
+		}
+		# die Namen aller gespeicherten Dokumentauswahlen dieser Rolle laden
+		$GUI->dokauswahlset=$GUI->get_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, NULL);
+		if($GUI->formvars['CMD'] == ''){		# wenn nicht navigiert wurde
+			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
+			$nachweisSuchParameter=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
+			$GUI->formvars=array_merge($GUI->formvars,$nachweisSuchParameter);
+		}
+		# die Parameter einer gespeicherten Dokumentauswahl laden
+		if($GUI->formvars['dokauswahlen'] != ''){
+			$GUI->selected_dokauswahlset = $GUI->get_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['dokauswahlen']);
+			$GUI->formvars['dokauswahl_name'] = $GUI->selected_dokauswahlset[0]['name'];			
+			$GUI->formvars['suchhauptart'] = $GUI->selected_dokauswahlset[0]['suchhauptart'];
+			$GUI->formvars['suchunterart'] = $GUI->selected_dokauswahlset[0]['suchunterart'];
+		}
     # erzeugen des Formularobjektes für Antragsnr
     $GUI->FormObjAntr_nr=$GUI->getFormObjAntr_nr($GUI->formvars['suchantrnr']);    
     # Wenn eine oid in formvars übergeben wurde ist es eine Änderung, sonst Neueingabe
@@ -919,16 +1423,21 @@
     $GUI->main= PLUGINS."nachweisverwaltung/view/dokumentenabfrageformular.php";
     
 		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$GUI->hauptdokumentarten = $nachweis->getHauptDokumentarten();
     $GUI->dokumentarten = $nachweis->getDokumentarten();
 			
 	# Abfragen der Gemarkungen
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
-    $Gemeinde=new gemeinde('',$GUI->pgdatabase);
-    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
-    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
+		if($GemeindenStelle == NULL){
+			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+		}
+		else{
+			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+		}
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
     $GUI->GemkgFormObj=new FormObject("suchgemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['suchgemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
+		$GUI->GemkgFormObj->addJavaScript("onchange","updateGemarkungsschluessel(this.value)");
 		$GUI->GemkgFormObj->insertOption('',0,'--Auswahl--',0);
 			
     # erzeugen des Formularobjektes für die VermessungsStellen
@@ -937,14 +1446,14 @@
     # aktuellen Kartenausschnitt laden + zeichnen!
     $saved_scale = $GUI->reduce_mapwidth(200);
 		$GUI->loadMap('DataBase');
-		if($_SERVER['REQUEST_METHOD'] == 'GET' AND !isset($GUI->formvars['datum']))$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+		if($saved_scale != NULL AND !isset($GUI->formvars['datum']))$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
     if ($GUI->formvars['CMD']!='') {
       # Nur Navigieren
       $GUI->navMap($GUI->formvars['CMD']);
       $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
 	
-    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
+    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
     # Spaltenname und from-where abfragen
   	if(!$GUI->formvars['layer_id']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -976,7 +1485,7 @@
     $GUI->output();
   };
 
-	$this->vermessungsAntragEingabeForm = function() use ($GUI){
+	$GUI->vermessungsAntragEingabeForm = function() use ($GUI){
     $GUI->menue='menue.php';
     $GUI->main= PLUGINS.'nachweisverwaltung/view/antragsnr_eingabe_form.php';
     $GUI->FormObjVermStelle=$GUI->getFormObjVermStelle('VermStelle', $GUI->formvars['VermStelle']);
@@ -984,7 +1493,7 @@
     $GUI->output();
   };
 	
-	$this->zoomToNachweis = function($nachweis,$border) use ($GUI){
+	$GUI->zoomToNachweis = function($nachweis,$border) use ($GUI){
     # Abfragen der Ausdehnung des Umringes des Nachweises
     $ret=$nachweis->getBBoxAsRectObj($nachweis->document['id'],'nachweis');
     if ($ret[0]) {
@@ -1008,14 +1517,15 @@
     }
   };
 	
-	$this->festpunkteZuAntragZeigen = function() use ($GUI){
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
+	$GUI->festpunkteZuAntragZeigen = function() use ($GUI){
     # Funktion fragt alle Festpunkte zum einem Antrag heraus und übergibt diese an die Funktion
     # zum Anzeigen der Festpunkte in der Karte
 		$explosion = explode('~', $GUI->formvars['antr_selected']);
 		$GUI->formvars['antr_selected'] = $explosion[0];
 		$stelle_id = $explosion[1];
     $festpunkte=new Festpunkte('',$GUI->pgdatabase);
-    $ret=$festpunkte->getFestpunkte('','','','','',$GUI->formvars['antr_selected'],$stelle_id,'','pkz');
+    $ret=$festpunkte->getFestpunkte('','','','','',$GUI->formvars['antr_selected'],$stelle_id,'','pkn');
     if ($ret[0]) {
       $errmsg="Die Festpuntke zum Antrag $GUI->formvars['antr_selected'] konnten nicht abgefragt werden.";
     }
@@ -1026,20 +1536,21 @@
       else {
         # Zuweisen der Punktkennzeichen zu einem Array, welches von der Funktion zum Anzeigen in der Karte verwendet wird.
         foreach($festpunkte->liste AS $punkt) {
-          $GUI->formvars['pkz'][$punkt['pkz']]=$punkt['pkz'];
+          $GUI->formvars['pkn'][$punkt['pkn']]=$punkt['pkn'];
         }
         $GUI->festpunkteZeigen();
       }
     }
   };
 
-	$this->festpunkteZeigen = function() use ($GUI){
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
+	$GUI->festpunkteZeigen = function() use ($GUI){
     $GUI->loadMap('DataBase');
-    if (is_array($GUI->formvars['pkz'])) {
-      $punktliste=array_keys($GUI->formvars['pkz']);
+    if (is_array($GUI->formvars['pkn'])) {
+      $punktliste=array_keys($GUI->formvars['pkn']);
     }
     else {
-      $punktliste=$GUI->formvars['pkz'];
+      $punktliste=$GUI->formvars['pkn'];
     }
     $GUI->zoomToFestpunkte($punktliste,20);
     $GUI->saveMap('');
@@ -1049,7 +1560,7 @@
     $GUI->output();
   };
 
-	$this->zoomToFestpunkte = function($FestpunktListe,$border) use ($GUI){
+	$GUI->zoomToFestpunkte = function($FestpunktListe,$border) use ($GUI){
     # Abfragen der Ausdehnung der Festpunkte in der Liste
     $Festpunkte=new Festpunkte('',$GUI->pgdatabase);
     $ret=$Festpunkte->getBBoxAsRectObj($FestpunktListe);
@@ -1073,7 +1584,7 @@
     }
   };
 
-	$this->festpunkteErgebnisanzeige = function() use ($GUI){
+	$GUI->festpunkteErgebnisanzeige = function() use ($GUI){
     $GUI->titel='Suche nach Festpunkten';
     #$GUI->main='festpunktsuchform.php';
     $GUI->qlayerset[0]['shape']=$GUI->festpunkte->liste;
@@ -1082,22 +1593,25 @@
     $GUI->output();
   };
 
-	$this->festpunkteWahl = function() use ($GUI){
+	$GUI->festpunkteWahl = function() use ($GUI){
     $GUI->titel='Suche nach Festpunkten';
     $GUI->main = PLUGINS.'nachweisverwaltung/view/festpunktsuchform.php';
     $GUI->output();
   };
 
-	$this->festpunkteSuchen = function() use ($GUI){
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
+	$GUI->festpunkteSuchen = function() use ($GUI){
 		$explosion = explode('~', $GUI->formvars['antr_selected']);
 		$GUI->formvars['antr_selected'] = $explosion[0];
 		$stelle_id = $explosion[1];
-    if ($GUI->formvars['antr_selected']=='' AND $GUI->formvars['pkz']=='' AND $GUI->formvars['kiloquad']=='') {
+    if ($GUI->formvars['antr_selected']=='' AND $GUI->formvars['pkn']=='' AND $GUI->formvars['kiloquad']=='') {
       $GUI->Fehlermeldung='<br>Geben Sie mindestens eine Antragsnummer, Kilometerquadrat oder Punktkennzeichen zu Suche an!';
     }
     else {
       $GUI->festpunkte=new festpunkte('',$GUI->pgdatabase);
-      $ret=$GUI->festpunkte->getFestpunkte(array($GUI->formvars['pkz']),array(0,1,2,3,4,5,6),'','','',$GUI->formvars['antr_selected'],$stelle_id,$GUI->formvars['kiloquad'],'pkz');
+# 2016-11-03 H.Riedel, Einschraenken der Punktarten wg zu hoher Treffer --> nachfolgende Operationen brechen ab.
+#      $ret=$GUI->festpunkte->getFestpunkte(array($GUI->formvars['pkn']),array('TP','AP','GP','GebP','BwP','OP','SiP','SVP','TopP'),'','','',$GUI->formvars['antr_selected'],$stelle_id,$GUI->formvars['kiloquad'],'pkn');
+      $ret=$GUI->festpunkte->getFestpunkte(array($GUI->formvars['pkn']),array('TP','AP','OP','SiP','SVP'),'','','',$GUI->formvars['antr_selected'],$stelle_id,$GUI->formvars['kiloquad'],'pkn');
       if ($ret[0]) {
         $GUI->Fehlermeldung='<br>Es konnten keine Festpunkte abgefragt werden'.$ret[1];
       }
@@ -1115,19 +1629,17 @@
     }
   };
 	
-	$this->sendeFestpunktskizze = function($Bild,$Pfad) use ($GUI){
+	$GUI->sendeFestpunktskizze = function($Bild,$Pfad) use ($GUI){
     $dateiname=basename($Bild);
     $dateinamensteil=explode('.',$dateiname);
     ob_end_clean();
-    if (in_array($dateinamensteil[1],array('png','jpg','gif'))) {
+    if (in_array($dateinamensteil[1],array('png','jpg','gif','tif'))) {
       header("Content-type: image/".$dateinamensteil[1]);
     }
     elseif ($dateinamensteil[1]=='pdf') {
       header("Content-type: application/pdf");
     }
-    else{
-    	header("Content-Disposition: attachment; filename=".$dateiname);
-    }
+    header("Content-Disposition: attachment; filename=".$dateiname);
     header('Expires: 0');
     header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
     header('Pragma: public');
@@ -1136,23 +1648,24 @@
     return 1;
   };
 
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
 	$GUI->showFestpunkteSkizze = function() use ($GUI){
     # Daten sind in Datenbank eingelesen. Herausfiltern von Fehlern
 
     # 1) Übergeben der Liste von Punkten, die geprüft werden sollen
-    if (is_array($GUI->formvars['pkz'])) {
-      $abgefragtefestpunkte=array_values($GUI->formvars['pkz']);
+    if (is_array($GUI->formvars['pkn'])) {
+      $abgefragtefestpunkte=array_values($GUI->formvars['pkn']);
     }
 
     # 2) Abfragen der zu prüfenden Festpunkte
     $festpunkte=new Festpunkte('',$GUI->pgdatabase);
-    $festpunkte->getFestpunkte($abgefragtefestpunkte,array(0,1),'','','','','','pkz');
+    $festpunkte->getFestpunkte($abgefragtefestpunkte,array('TP','AP','SiP','SVP'),'','','','','','','pkn');
     # 3) Übernehmen der Punkte in eine Liste, die mindestens eine Datei/Blatt haben.
     for ($i=0;$i<$festpunkte->anzPunkte;$i++) {
-      $festpunkte->liste[$i]['skizze']=$festpunkte->checkSkizzen($festpunkte->liste[$i]['pkz']);
+      $festpunkte->liste[$i]['skizze']=$festpunkte->checkSkizzen($festpunkte->liste[$i]['pkn']);
       if ($festpunkte->liste[$i]['skizze']['is_file']) {
-        # Wenn mindestens eine Datei gefunden wurde, pkz in die Liste aufnehmen
-        $punktnummern[]=trim(str_replace('-','',$festpunkte->liste[$i]['pkz']));
+        # Wenn mindestens eine Datei gefunden wurde, pkn in die Liste aufnehmen
+        $punktnummern[]=trim(str_replace('-','',$festpunkte->liste[$i]['pkn']));
       }
     }
 
@@ -1176,36 +1689,37 @@
     $GUI->output();
   };
 
-	$this->ordneFestpunktSkizzen = function() use ($GUI){
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
+	$GUI->ordneFestpunktSkizzen = function() use ($GUI){
   	$_files = $_FILES;
     ####################################################
     # 1) Verschieben von Dateien, die zu Festpunkten zugeordnet waren,
-    # aber jetzt neu zu anderen pkz zugeordnet werden sollen (aus oberen Formularteil)
+    # aber jetzt neu zu anderen pkn zugeordnet werden sollen (aus oberen Formularteil)
     # Variable $name
     $Festpunkte=new Festpunkte('',$GUI->pgdatabase);
     if (!is_array($GUI->formvars['name'])) {
       $GUI->formvars['name']=array();
     }
-    $vonPkz=array_keys($GUI->formvars['name']);
+    $vonPkn=array_keys($GUI->formvars['name']);
     $nachNameStern=array_values($GUI->formvars['name']);
-    $anzZuordnungen=count($vonPkz);
+    $anzZuordnungen=count($vonPkn);
     # Zerlegen von nachNameStern in Bestandteile :
     # 45601234/45601234120001.*
     # rhhhrzhz/rhhhrzhzapktnr.* davon sind
     # Pfad: 45601234/45601234120001 (rhhhrzhz/rhhhrzhzapktnr)
     # Kiloquadr: 45601234 (rhhhrzhz)
     # Name: 45601234120001 (rhhhrzhzapktnr)
-    # Pkz: 45601234-1-20001 (rhhhrzhz-a-pktnr)
+    # Pkn: 45601234-1-20001 (rhhhrzhz-a-pktnr)
     for ($i=0;$i<$anzZuordnungen;$i++) {
       # extrahieren von Kilometerquadrat, Dateiname und Pfad zur Datei an Hand des Punktkennzeichens
-      $vonKiloquad[$i]=substr(trim($vonPkz[$i]),0,-8);
-      $vonName[$i]=str_replace('-','',trim($vonPkz[$i]));
+      $vonKiloquad[$i]=substr(trim($vonPkn[$i]),0,-8);
+      $vonName[$i]=str_replace('-','',trim($vonPkn[$i]));
       $vonPfad[$i]=$vonKiloquad[$i].'/'.$vonName[$i];
       # extrahieren des Punktkennzeichen, Dateinamen und Pfad zum neuen Speicherort der Datei
       $nachName[$i]=basename(substr($nachNameStern[$i],0,-2));
       $nachKiloquad[$i]=dirname($nachNameStern[$i]); # entnommen aus Verzeichnisnamen
       $nachPfad[$i]=$nachKiloquad[$i].'/'.$nachName[$i];
-      $nachPkz[$i]=$nachKiloquad[$i].'-'.substr($filebasename,-6,-5).'-'.substr($nachName[$i],-5);
+      $nachPkn[$i]=$nachKiloquad[$i].'-'.substr($filebasename,-6,-5).'-'.substr($nachName[$i],-5);
       # Vergleich, ob in einem Feld Änderungen vorgenommen wurden.
       if ($vonPfad[$i]!=$nachPfad[$i]) {
         if ($Festpunkte->is_valid_pfad($nachPfad[$i])) {
@@ -1220,17 +1734,17 @@
     $Festpunkte->moveFiles($moveListe);
 
     #################################################################
-    # 2) Kopieren der hochgeladenen Dateien an die Speicherplätze, die den PKZ entsprechen.
+    # 2) Kopieren der hochgeladenen Dateien an die Speicherplätze, die den PKN entsprechen.
     # Variable $_FILES
     $uploadedFiles=array_values($_files);
-    $uploadedFilesPKZ=array_keys($_files);
+    $uploadedFilesPKN=array_keys($_files);
     $anzUploadedFiles=count($uploadedFiles);
     for ($i=0;$i<$anzUploadedFiles;$i++) {
       if ($uploadedFiles[$i]['tmp_name']!='') {
         # Zusammensetzung der Dateinamen
-        $pkz=substr(trim($uploadedFilesPKZ[$i]),9);
-        $ext=substr(trim($uploadedFilesPKZ[$i]),0,3);
-        $nachDatei=PUNKTDATEIPATH.$Festpunkte->pkz2pfad($pkz).'.'.$ext;
+        $pkn=substr(trim($uploadedFilesPKN[$i]),9);
+        $ext=substr(trim($uploadedFilesPKN[$i]),0,3);
+        $nachDatei=PUNKTDATEIPATH.$Festpunkte->pkn2pfad($pkn).'.'.$ext;
         if (move_uploaded_file($uploadedFiles[$i]['tmp_name'],$nachDatei)) {
           echo '<br>Lade '.$uploadedFiles[$i]['tmp_name'].' nach '.$nachDatei.' hoch';
         }
@@ -1314,32 +1828,19 @@
     $GUI->showFestpunkteSkizze();
   };
 
-	$this->uebernehmeFestpunkte = function() use ($GUI){
-    $Festpunkte=new Festpunkte(PUNKTDATEIPATH.PUNKTDATEINAME,$GUI->pgdatabase);
-    $ret=$Festpunkte->uebernehmen();
-    if ($ret[0]) { # Fehler bei der Aktualisierung der Festpunkte
-      $GUI->Fehlermeldung=$ret[1];
-    }
-    else {
-      $GUI->Protokoll=$ret[1];
-    }
-    $GUI->Festpunkte=$Festpunkte;
-    $GUI->titel='Übernahme der Festpunkte';
-    $GUI->main = PLUGINS.'nachweisverwaltung/view/aktualisierungfestpunkte.php';
-    $GUI->output();
-  };
-
-	$this->festpunkteZuAuftragFormular = function() use ($GUI){
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
+	$GUI->festpunkteZuAuftragFormular = function() use ($GUI){
     $GUI->titel='Festpunkte zum Auftrag Hinzufügen';
     $GUI->main = PLUGINS.'nachweisverwaltung/view/festpunktezuauftragformular.php';
-    $GUI->pkz=array_keys($GUI->formvars['pkz']);
-    $GUI->anzPunkte=count($GUI->pkz);
+    $GUI->pkn=array_keys($GUI->formvars['pkn']);
+    $GUI->anzPunkte=count($GUI->pkn);
     $GUI->FormObjAntr_nr=$GUI->getFormObjAntr_nr('');
     $GUI->FormObjAntr_nr->select['name']='antr_selected';
     $GUI->output();
   };
 
-	$this->festpunkteZuAuftragSenden = function() use ($GUI){
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
+	$GUI->festpunkteZuAuftragSenden = function() use ($GUI){
     # Prüfen, ob eine Auftragsnummer mit übergeben wurde
     if ($GUI->formvars['antr_selected']=='') {
       $GUI->Fehlermeldung='Sie müssen erst eine Antragsnummer angeben.';
@@ -1348,12 +1849,12 @@
 		$explosion = explode('~', $GUI->formvars['antr_selected']);
 		$GUI->formvars['antr_selected'] = $explosion[0];
 		$stelle_id = $explosion[1];
-    $pkz=array_keys($GUI->formvars['pkz']);
-    $anzPunkte=count($pkz);
+    $pkn=array_keys($GUI->formvars['pkn']);
+    $anzPunkte=count($pkn);
     $auftrag=new antrag($GUI->formvars['antr_selected'],$stelle_id,$GUI->pgdatabase);
     $anzPunkteAdd=0;
     for ($i=0;$i<$anzPunkte;$i++) {
-      $ret=$auftrag->addFestpunkt($pkz[$i]);
+      $ret=$auftrag->addFestpunkt($pkn[$i]);
       if (!$ret[0]) {
         if (pg_affected_rows($ret[1])) {
           $anzPunkteAdd++;
@@ -1365,7 +1866,8 @@
     $GUI->Antraege_Anzeigen();
   };
 
-	$this->festpunkteInKVZschreiben = function() use ($GUI){
+# 2016-11-03 H.Riedel - pkz durch pkn ersetzt
+	$GUI->festpunkteInKVZschreiben = function() use ($GUI){
 		$explosion = explode('~', $GUI->formvars['antr_selected']);
 		$antr_selected = $explosion[0];
 		$stelle_id = $explosion[1];
@@ -1374,7 +1876,7 @@
     }
     else {
       $festpunkte=new Festpunkte('',$GUI->pgdatabase);
-      $ret=$festpunkte->createKVZdatei($antr_selected, $stelle_id, $GUI->formvars['pkz']);
+      $ret=$festpunkte->createKVZdatei($antr_selected, $stelle_id, $GUI->formvars['pkn']);
       if ($ret[0]) {
         $GUI->Fehlermeldung=$ret[1];
       }
@@ -1385,28 +1887,7 @@
     }
   };
 
-	$this->aktualisiereFestpunkte = function() use ($GUI){
-    if (is_file(PUNKTDATEIPATH.PUNKTDATEINAME)) {
-      # Datei ist vorhanden, Einlesen und Aufbereiten der Punkte in Datenbank
-      $Festpunkte=new Festpunkte(PUNKTDATEIPATH.PUNKTDATEINAME,$GUI->pgdatabase);
-      $ret=$Festpunkte->aktualisieren();
-      if ($ret[0]) { # Fehler bei der Aktualisierung der Festpunkte
-        $GUI->Fehlermeldung=$ret[1];
-      }
-      else {
-        $GUI->Protokoll=$ret[1];
-      }
-    }
-    else {
-      $GUI->Fehlermeldung='Die Datei '.PUNKTDATEIPATH.PUNKTDATEINAME.' existiert nicht auf dem Server.';
-    }
-    $GUI->Festpunkte=$Festpunkte;
-    $GUI->titel='Aktualisierung der Festpunkte';
-    $GUI->main = PLUGINS.'nachweisverwaltung/view/aktualisierungfestpunkte.php';
-    $GUI->output();
-  };
-
-	$this->vermessungsantragsFormular = function() use ($GUI){
+	$GUI->vermessungsantragsFormular = function() use ($GUI){
 		global $admin_stellen;
 		if($GUI->formvars['antr_nr']!=''){
 			if($GUI->formvars['stelle_id'] == $GUI->Stelle->id OR in_array($GUI->Stelle->id, $admin_stellen)){
@@ -1425,13 +1906,13 @@
 					$GUI->vermessungsAntragEingabeForm();
 				}
 				else {
+					$GUI->add_message('info', $ret[1]);
 					$GUI->Antraege_Anzeigen();
-					showAlert($ret[1]);
 				}
 			}
 			else{
+				$GUI->add_message('error', "Änderung dieses Antrags nicht erlaubt!");
 				$GUI->Antraege_Anzeigen();
-				showAlert("Änderung dieses Antrags nicht erlaubt!");
 			}
 		}		
 		else{
@@ -1441,7 +1922,7 @@
 		}
   };
 	
-	$this->vermessungsantragAnlegen = function() use ($GUI){
+	$GUI->vermessungsantragAnlegen = function() use ($GUI){
     $GUI->antrag= new antrag('','',$GUI->pgdatabase);
     $ret=$GUI->antrag->pruefe_antrag_eintragen($GUI->formvars['antr_nr'],$GUI->formvars['VermStelle'],$GUI->formvars['verm_art'],$GUI->formvars['datum'],$GUI->Stelle->id);
     if($ret==''){
@@ -1449,30 +1930,30 @@
     }
     $GUI->Meldung=$ret;
     $GUI->titel='Neuen Antrag anlegen';
+		$GUI->add_message('info', $ret);
     $GUI->vermessungsAntragEingabeForm();
-    showAlert($ret);
   };
 	
-	$this->vermessungsantragAendern = function() use ($GUI){
+	$GUI->vermessungsantragAendern = function() use ($GUI){
 		global $admin_stellen;
 		if($GUI->formvars['stelle_id'] == $GUI->Stelle->id OR in_array($GUI->Stelle->id, $admin_stellen)){
 			$GUI->antrag= new antrag('','',$GUI->pgdatabase);
 			$ret=$GUI->antrag->antrag_aendern($GUI->formvars['antr_nr'],$GUI->formvars['VermStelle'],$GUI->formvars['verm_art'],$GUI->formvars['datum'],$GUI->formvars['stelle_id']);
+			$GUI->add_message('info', $ret[1]);
 			if ($ret[0]) {
 				$GUI->vermessungsantragsFormular();
 			}
 			else {
 				$GUI->Antraege_Anzeigen();
 			}
-			showAlert($ret[1]);
 		}
 		else{
+			$GUI->add_message('error', "Änderung dieses Antrags nicht erlaubt!");
 			$GUI->Antraege_Anzeigen();
-			showAlert("Änderung dieses Antrags nicht erlaubt!");
 		}
   };
 	
-	$this->Antraege_Anzeigen = function() use ($GUI){
+	$GUI->Antraege_Anzeigen = function() use ($GUI){
     $GUI->titel='Antr&auml;ge';
     $GUI->main = PLUGINS.'nachweisverwaltung/view/antragsanzeige.php';
     $GUI->antrag = new antrag('','',$GUI->pgdatabase);
@@ -1480,16 +1961,19 @@
     $GUI->output();
   };
 
-	$this->Antrag_Loeschen = function() use ($GUI){
+	$GUI->Antrag_Loeschen = function() use ($GUI){
     global $admin_stellen;
 		if($GUI->formvars['stelle_id'] == $GUI->Stelle->id OR in_array($GUI->Stelle->id, $admin_stellen)){
 			if ($GUI->formvars['bestaetigung']=='JA') {
 				$GUI->antrag = new antrag('','',$GUI->pgdatabase);
-				$antragsnummern=array_keys ($GUI->formvars['id']);
+				$antragsnummern=$GUI->formvars['id'];
 				$ret=$GUI->antrag->antrag_loeschen($antragsnummern[0],$GUI->formvars['stelle_id']);
 				if($ret == 'Antrag erfolgreich gelöscht')$GUI->Suchparameter_loeschen($antragsnummern[0], $GUI->formvars['stelle_id']);
-				showAlert($ret);
-				if($GUI->formvars['go_next'] != '')echo "<script>window.location.href='index.php?go=".$GUI->formvars['go_next']."';</script>";
+				$GUI->add_message('info', $ret);
+				if($GUI->formvars['go_next'] != ''){
+					go_switch($GUI->formvars['go_next']);
+					exit();
+				}
 				else $GUI->Antraege_Anzeigen();
 			}
 			else {
@@ -1505,17 +1989,18 @@
 			}
 		}
 		else{
+			$GUI->add_message('error', "Löschen dieses Antrags nicht erlaubt!");
 			$GUI->Antraege_Anzeigen();
-			showAlert("Löschen dieses Antrags nicht erlaubt!");
-		}		
+		}
   };
 	
-	$this->getFormObjVermStelle = function($name, $VermStelle) use ($GUI){
+	$GUI->getFormObjVermStelle = function($name, $VermStelle) use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
     $VermStObj = new Vermessungsstelle($GUI->pgdatabase);
     $back=$VermStObj->getVermStelleListe();
     if ($back[0]=='') {
       # Fehlerfreie Datenabfrage
-      $FormObjVermStelle=new FormObject($name,'select',$back[1]['id'],array($VermStelle),$back[1]['name'],1,0,0,200);
+      $FormObjVermStelle=new FormObject($name,'select',$back[1]['id'],array($VermStelle),$back[1]['name'],1,0,0,NULL);
     }
     else {
       $FormObjVermStelle=new FormObject($name,'text',array($back[0]),'','',25,255,0,NULL);
@@ -1523,7 +2008,8 @@
     return $FormObjVermStelle;
   };
 
-	$this->getFormObjVermArt = function($verm_art) use ($GUI){
+	$GUI->getFormObjVermArt = function($verm_art) use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
     $VermArtObj = new Vermessungsart($GUI->pgdatabase);
     $back=$VermArtObj->getVermArtListe();
     if ($back[0]=='') {
@@ -1536,12 +2022,13 @@
     return $FormObjVermArt;
   };
 
-	$this->getFormObjAntr_nr = function($antr_nr) use ($GUI){
+	$GUI->getFormObjAntr_nr = function($antr_nr, $size = 1) use ($GUI){
+		include_once(CLASSPATH.'FormObject.php');
     $Antrag = new Antrag($antr_nr,$GUI->Stelle->id,$GUI->pgdatabase);
     $back=$Antrag->getAntragsnr_Liste($GUI->Stelle->id);
     if ($back[0]=='') {
       # Fehlerfreie Datenabfrage
-      $FormObjAntr_nr=new FormObject('suchantrnr','select',$back[1]['antr_nr_stelle_id'],array($antr_nr),$back[1]['antr_nr'],1,0,0,NULL);
+      $FormObjAntr_nr=new FormObject('suchantrnr','select',$back[1]['antr_nr_stelle_id'],array($antr_nr),$back[1]['antr_nr'],$size,0,0,NULL);
     }
     else {
       $FormObjAntr_nr=new FormObject('suchantrnr','text',array($back[0]),'','',25,255,0,NULL);
@@ -1549,7 +2036,7 @@
     return $FormObjAntr_nr;
   };
 	
-	$this->sendImage = function($name,$format) use ($GUI){
+	$GUI->sendImage = function($name,$format) use ($GUI){
     #var_dump(gd_info());
     #phpinfo();
     $im = ImageCreateFromPng($name);

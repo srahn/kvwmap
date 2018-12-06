@@ -2,16 +2,19 @@
 <!--
 
 function change_layer(){
-	document.GUI.class_1.disabled = true;
-	document.getElementById('style_div').innerHTML = '';
-	document.getElementById('label_div').innerHTML = '';
-	document.getElementById('selected_style_div').innerHTML = '';
-	document.getElementById('selected_label_div').innerHTML = '';
-	document.GUI.selected_style_id.value = '';
-	document.GUI.selected_label_id.value = '';
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
-	document.GUI.selected_layer_id.value = layer_id;
-	ahah('index.php', 'go=getclasses&layer_id='+layer_id, new Array(document.getElementById('classes_div')), "");
+	if(layer_id != ''){
+		document.GUI.class_1.disabled = true;
+		document.getElementById('style_div').innerHTML = '';
+		document.getElementById('label_div').innerHTML = '';
+		document.getElementById('selected_style_div').innerHTML = '';
+		document.getElementById('selected_label_div').innerHTML = '';
+		document.GUI.selected_style_id.value = '';
+		document.GUI.selected_label_id.value = '';
+		document.GUI.selected_layer_id.value = layer_id;
+		ahah('index.php', 'go=getclasses&layer_id='+layer_id, new Array(document.getElementById('classes_div')), "");
+		document.getElementById('toLayerLink').style='display:inline';
+	}
 }
 
 function change_class(){
@@ -32,8 +35,9 @@ function get_style(style_id){
 	}
 	if(document.getElementById('td1_style_'+style_id))document.getElementById('td1_style_'+style_id).style.backgroundColor='lightsteelblue';
 	if(document.getElementById('td2_style_'+style_id))document.getElementById('td2_style_'+style_id).style.backgroundColor='lightsteelblue';
+	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	document.GUI.selected_style_id.value = style_id;
-	ahah('index.php', 'go=get_style&style_id='+style_id, new Array(document.getElementById('selected_style_div')), "");
+	ahah('index.php', 'go=get_style&style_id='+style_id+'&layer_id='+layer_id, new Array(document.getElementById('selected_style_div')), "");
 }
 
 function get_label(label_id){
@@ -43,8 +47,9 @@ function get_label(label_id){
 	}
 	document.getElementById('td1_label_'+label_id).style.backgroundColor='lightsteelblue';
 	document.getElementById('td2_label_'+label_id).style.backgroundColor='lightsteelblue';
+	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	document.GUI.selected_label_id.value = label_id;
-	ahah('index.php', 'go=get_label&label_id='+label_id, new Array(document.getElementById('selected_label_div')), "");
+	ahah('index.php', 'go=get_label&label_id='+label_id+'&layer_id='+layer_id, new Array(document.getElementById('selected_label_div')), "");
 }
 
 function add_label(){
@@ -112,17 +117,20 @@ function save_style(style_id){
 	data+= '&outlinecolor='+document.GUI.style_outlinecolor.value;
 	data+= '&colorrange='+document.GUI.style_colorrange.value;
 	data+= '&datarange='+document.GUI.style_datarange.value;
+	data+= '&rangeitem='+document.GUI.style_rangeitem.value;
 	data+= '&opacity='+document.GUI.style_opacity.value;
 	data+= '&minsize='+document.GUI.style_minsize.value;
 	data+= '&maxsize='+document.GUI.style_maxsize.value;
+	data+= '&minscale='+document.GUI.style_minscale.value;
+	data+= '&maxscale='+document.GUI.style_maxscale.value;
 	data+= '&angle='+document.GUI.style_angle.value;
 	data+= '&angleitem='+document.GUI.style_angleitem.value;
 	data+= '&width='+document.GUI.style_width.value;
 	data+= '&minwidth='+document.GUI.style_minwidth.value;
 	data+= '&maxwidth='+document.GUI.style_maxwidth.value;
-	data+= '&sizeitem='+document.GUI.style_sizeitem.value;
 	data+= '&offsetx='+document.GUI.style_offsetx.value;
 	data+= '&offsety='+document.GUI.style_offsety.value;
+	data+= '&polaroffset='+document.GUI.style_polaroffset.value;
   data+= '&pattern='+document.GUI.style_pattern.value;
   data+= '&geomtransform='+document.GUI.style_geomtransform.value;  
 	data+= '&gap='+document.GUI.style_gap.value;
@@ -164,6 +172,7 @@ function save_label(label_id){
 	data+= '&minfeaturesize='+document.GUI.label_minfeaturesize.value;
 	data+= '&maxfeaturesize='+document.GUI.label_maxfeaturesize.value;
 	data+= '&partials='+document.GUI.label_partials.value;
+	data+= '&maxlength='+document.GUI.label_maxlength.value;
 	data+= '&wrap='+document.GUI.label_wrap.value;
 	data+= '&the_force='+document.GUI.label_the_force.value;
 	ahah('index.php', data, new Array(document.getElementById('label_div'), document.getElementById('selected_label_div')), "");
@@ -185,6 +194,10 @@ function browser_check(){
 			selobj.options[i].innerHTML = selobj.options[i].id;
 		}
 	}
+}
+
+function toLayerEditor(){	
+	location.href='index.php?go=Layereditor&selected_layer_id='+document.GUI.layer.value;
 }
 
 
@@ -215,7 +228,8 @@ function browser_check(){
 			    			echo '>'.$this->layerdaten['Bezeichnung'][$i].'</option>';
 			    		}
 			    	?>
-			      </select>
+			      </select><br><br><br>
+							&nbsp;<a id="toLayerLink" href="javascript:toLayerEditor();" style="<? if($this->formvars['selected_layer_id'] != '')echo 'display:inline';else echo 'display:none'; ?>">zum Layer</a>
 			    </td>
 			    <td style="border-bottom:1px solid #C3C7C3;" colspan="2">
 			    	<div id="classes_div"> 
@@ -320,7 +334,7 @@ function browser_check(){
 							}
 							echo'
 									<tr>
-										<td height="30" colspan="2" valign="bottom" align="center"><input class="button" type="button" name="style_save" value="Speichern" onclick="save_style('.$this->styledaten['Style_ID'].')"></td>
+										<td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="style_save" value="Speichern" onclick="save_style('.$this->styledaten['Style_ID'].')"></td>
 									</tr>
 								</table>';
 				  	}
@@ -345,7 +359,7 @@ function browser_check(){
 							}
 							echo'
 									<tr>
-										<td height="30" colspan="2" valign="bottom" align="center"><input class="button" type="button" name="label_save" value="Speichern" onclick="save_label('.$this->labeldaten['Label_ID'].')"></td>
+										<td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="label_save" value="Speichern" onclick="save_label('.$this->labeldaten['Label_ID'].')"></td>
 									</tr>
 								</table>';
 				  	}
@@ -421,7 +435,7 @@ function browser_check(){
 			        </tr>
 			        <tr align="left">
 			          <td>
-			          <div align="center"><input type="submit" class="button" name="neuladen" value="neu Laden"></div>
+			          <div align="center"><input type="button" name="neuladen_button" onclick="neuLaden();" value="neu Laden"></div>
 			          <br>
 			        	<div style="width:230; height:<?php echo $this->map->height-59; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 				          &nbsp;
@@ -444,6 +458,7 @@ function browser_check(){
 <input type="hidden" name="selected_style_id" value="<? echo $this->formvars['selected_style_id']; ?>">
 <input type="hidden" name="selected_label_id" value="<? echo $this->formvars['selected_label_id']; ?>">
 <input type="hidden" name="go" value="Style_Label_Editor">
+<input type="hidden" name="neuladen" value="">
 <script type="text/javascript">
 <!--
 browser_check();

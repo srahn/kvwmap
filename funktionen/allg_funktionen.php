@@ -3,11 +3,11 @@
  * Funktionenumfang nicht existieren, in älteren Versionen nicht existiert haben,
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
- 
+
 $errors = array();
-  
+
 function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
-	global $errors;	
+	global $errors;
 	if(!(error_reporting() & $errno)){
 		// This error code is not included in error_reporting
 		return;
@@ -17,9 +17,53 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	return true;
 }
 
+function url2filepath($url, $doc_path, $doc_url){
+	if($doc_path == '')$doc_path = CUSTOM_IMAGE_PATH;
+	$url_parts = explode($doc_url, $url);
+	return $doc_path.$url_parts[1];
+}
+
+function compare_layers($a, $b){
+	$a['alias'] = strtoupper($a['alias']);
+	$b['alias'] = strtoupper($b['alias']);
+	$a['alias'] = str_replace('Ä', 'A', $a['alias']);
+	$a['alias'] = str_replace('Ü', 'U', $a['alias']);
+	$a['alias'] = str_replace('Ö', 'O', $a['alias']);
+	$a['alias'] = str_replace('ß', 's', $a['alias']);
+	$b['alias'] = str_replace('Ä', 'A', $b['alias']);
+	$b['alias'] = str_replace('Ü', 'U', $b['alias']);
+	$b['alias'] = str_replace('Ö', 'O', $b['alias']);
+	$b['alias'] = str_replace('ß', 's', $b['alias']);
+	return strcmp($a['alias'], $b['alias']);
+}
+
+function compare_names($a, $b){
+	return strcmp($a['name'], $b['name']);
+}
+
+function compare_orders($a, $b){
+	if($a->order > $b->order)return 1;
+  else return 0;
+}
+
+function compare_groups($a, $b){
+  if($a->group > $b->group)return 1;
+  else return 0;
+}
+
+function compare_legendorder($a, $b){
+	if($a['legendorder'] > $b['legendorder'])return 1;
+	else return 0;
+}
+
 function strip_pg_escape_string($string){
 	$string = str_replace("''", "'", $string);
+	$string = str_replace('\\\\', '\\', $string);		# \\ wir durch \ ersetzt
 	return $string;
+}
+
+function replace_semicolon($text) {
+  return str_replace(';', '', $text);
 }
 
 function InchesPerUnit($unit, $center_y){
@@ -37,14 +81,14 @@ function InchesPerUnit($unit, $center_y){
 
 function ie_check(){
 	$browser = $_SERVER['HTTP_USER_AGENT'];
-	if (preg_match("/MSIE/i", $browser)){
+	if(preg_match("/MSIE/i", $browser) OR preg_match("/rv:11.0/i", $browser) OR preg_match("/Edge/i", $browser)){
 			return TRUE;
 	}
 	else{
 			return FALSE;
 	}
-} 
- 
+}
+
 if(!function_exists('mb_strrpos')){		# Workaround, falls es die Funktion nicht gibt
 	function mb_strrpos($str, $search, $offset = 0, $encoding){
 		return strrpos($str, $search, $offset);
@@ -80,34 +124,47 @@ function formatFlurstkennzALKIS($FlurstKennzListe){
   return implode(';', $Flurstuecke);
 }
 
+function formatFlurstkennzALKIS_0To_($FlurstKennzListe){
+	$Flurstuecke = explode(';', $FlurstKennzListe);
+	for ($i = 0; $i < count($Flurstuecke); $i++) {
+		$Flurstuecke[$i] = str_pad(
+			substr(
+				$Flurstuecke[$i],
+				0,
+				(intval(substr($Flurstuecke[$i], 14, 4)) == 0 ? 14 : 18)
+			),
+			20,
+			'_',
+			STR_PAD_RIGHT
+		);
+	}
+  return implode(';', $Flurstuecke);
+}
+
 function formatFlurstkennzALK($FlurstKennz){
 	$gem = substr($FlurstKennz, 0, 6);
 	$flur = substr($FlurstKennz, 6, 3);
 	$zaehler = substr($FlurstKennz, 9, 5);
-	$vorkomma = str_pad(intval(substr($FlurstKennz, 15, 3)), 3, '0', STR_PAD_LEFT);  
+	$vorkomma = str_pad(intval(substr($FlurstKennz, 15, 3)), 3, '0', STR_PAD_LEFT);
   $FlurstKennz = $gem.'-'.$flur.'-'.$zaehler.'/'.$vorkomma.'.00';
   return $FlurstKennz;
 }
 
 function tausenderTrenner($number){
-	if(strpos($number, ' ') === false){
-		$explosion = explode('.', $number);
-		$length = strlen($explosion[0]);
-		$length = $length - 3;
-		while($length > 0){
-			$new_number = substr($explosion[0], $length, 3).' '.$new_number;
-			$length = $length-3;
-		}
-		$new_number = substr($explosion[0], 0, $length+3).' '.$new_number;
-		$new_number = trim($new_number);
-		if($explosion[1] != ''){
-			$new_number .= '.'.$explosion[1];
-		}
-		return $new_number;
+	if($number != ''){
+		$explo = explode('.', $number);
+		$formated_number = number_format($explo[0], 0, ',', '.');
+		if($explo[1] != '')$formated_number .= ','.$explo[1];
+		return $formated_number;
 	}
-	else{
+}
+
+function removeTausenderTrenner($number){
+	if($number != ''){
+		$number = str_replace('.', '', $number);		# Punkt entfernen
+		$number = str_replace(',', '.', $number);		# Komma in Punkt umwandeln
 		return $number;
-	}	
+	}
 }
 
 function transformCoordsSVG($path){
@@ -118,7 +175,7 @@ function transformCoordsSVG($path){
     if($svgcoords[$i] == 'M'){
     	$newsvgcoords[] = 'M';
     	$last_startcoordx = $svgcoords[$i+1];
-    	$last_startcoordy = -1 * $svgcoords[$i+2]; 
+    	$last_startcoordy = -1 * $svgcoords[$i+2];
     }
     if($svgcoords[$i] != 'M' AND $svgcoords[$i] != 'Z' AND $svgcoords[$i] != ''){
     	$newsvgcoords[] = $svgcoords[$i];
@@ -145,7 +202,7 @@ function dms2dec($number){
 	$seconds = trim($part2[1], '"');
 	$seconds = $seconds / 60;
 	$minutes = ($minutes+$seconds) / 60;
-	return $degrees + $minutes;  
+	return $degrees + $minutes;
 }
 
 function dec2dms($number){
@@ -164,7 +221,7 @@ function dec2dmin($number){
 	$degrees = $part1[0];
 	$minutes = ('0.'.$part1[1]) * 60;
 	return $degrees."°".round($minutes,3);
-} 
+}
 
 function allocateImageColors($image, $colors) {
 	$imageColors = Array();
@@ -174,85 +231,83 @@ function allocateImageColors($image, $colors) {
 	return $imageColors;
 }
 
-function rgb2hsv($R,$G,$B) {
-	$var_R = $R / 255;                     //RGB from 0 to 255
-	$var_G = $G / 255;
-	$var_B = $B / 255;
-	$var_Min = min(array($var_R,$var_G,$var_B));    //Min. value of RGB
-	$var_Max = max(array($var_R,$var_G,$var_B));    //Max. value of RGB
-	$del_Max = $var_Max - $var_Min;			              //Delta RGB value
-	$V = $var_Max;
-	if($del_Max == 0){                     //This is a gray, no chroma...
-		$H = 0;                                //HSV results from 0 to 1
-		$S = 0;
+function rgb2hsl($r, $g, $b){
+	$oldR = $r;
+	$oldG = $g;
+	$oldB = $b;
+	$r /= 255;
+	$g /= 255;
+	$b /= 255;
+	$max = max( $r, $g, $b );
+	$min = min( $r, $g, $b );
+	$h;
+	$s;
+	$l = ( $max + $min ) / 2;
+	$d = $max - $min;
+	if($d == 0){
+		$h = $s = 0; // achromatic
 	}
-	else{																	//Chromatic data...
-		$S = $del_Max / $var_Max;
-		$del_R = ((($var_Max-$var_R)/6)+($del_Max/2))/$del_Max;
-		$del_G = ((($var_Max-$var_G)/6)+($del_Max/2))/$del_Max;
-		$del_B = ((($var_Max-$var_B)/6)+($del_Max/2))/$del_Max;
-		if($var_R == $var_Max){
-			$H = $del_B - $del_G;
-		}
-	  else{
-			if($var_G == $var_Max){
-				$H = (1/3)+$del_R - $del_B;
-			}
-	   	else{
-				if($var_B == $var_Max){
-					$H = (2/3) + $del_G - $del_R;
-				}
-			}
-		}
-		if($H < 0){
-			$H += 1;
-		}
-		if($H > 1){
-			$H -= 1;
+	else{
+		$s = $d / ( 1 - abs( 2 * $l - 1 ) );
+		switch($max){
+			case $r:
+				$h = 60 * fmod( ( ( $g - $b ) / $d ), 6 );
+				if($b > $g)$h += 360;
+			break;
+			case $g:
+				$h = 60 * ( ( $b - $r ) / $d + 2 );
+			break;
+			case $b:
+				$h = 60 * ( ( $r - $g ) / $d + 4 );
+			break;
 		}
 	}
-	return array($H,$S,$V);
+	return array(round($h, 2), round($s, 2), round($l, 2));
 }
 
-
-function hsv2rgb($Hdeg,$S,$V) {
-  $H = $Hdeg;
-  if ($S==0) {       // HSV values = From 0 to 1
-    $R = $V*255;     // RGB results = From 0 to 255
-    $G = $V*255;
-    $B = $V*255;}
-  else {
-    $var_h = $H*6;
-    $var_i = floor( $var_h );     //Or ... var_i = floor( var_h )
-    $var_1 = $V*(1-$S);
-    $var_2 = $V*(1-$S*($var_h-$var_i));
-    $var_3 = $V*(1-$S*(1-($var_h-$var_i)));
-    if($var_i==0){
-    	$var_r=$V ;    	$var_g=$var_3;    	$var_b=$var_1;
-    }
-    elseif($var_i==1){
-    	$var_r=$var_2; $var_g=$V;     $var_b=$var_1;
-    }
-    elseif($var_i==2){
-    	$var_r=$var_1; $var_g=$V;     $var_b=$var_3;
-    }
-    elseif($var_i==3){
-    	$var_r=$var_1; $var_g=$var_2; $var_b=$V;
-    }
-    elseif($var_i==4){
-    	$var_r=$var_3; $var_g=$var_1; $var_b=$V;
-    }
-    else{
-    	$var_r=$V;     $var_g=$var_1; $var_b=$var_2;
-    }
-    $R = round($var_r*255);   //RGB results = From 0 to 255
-    $G = round($var_g*255);
-    $B = round($var_b*255);
-  }
-  return array($R,$G,$B);
+function hsl2rgb($h, $s, $l){
+	$r;
+	$g;
+	$b;
+	$c = ( 1 - abs( 2 * $l - 1 ) ) * $s;
+	$x = $c * ( 1 - abs( fmod( ( $h / 60 ), 2 ) - 1 ) );
+	$m = $l - ( $c / 2 );
+	if($h < 60){
+		$r = $c;
+		$g = $x;
+		$b = 0;
+	}
+	elseif($h < 120){
+		$r = $x;
+		$g = $c;
+		$b = 0;
+	}
+	elseif($h < 180){
+		$r = 0;
+		$g = $c;
+		$b = $x;
+	}
+	elseif($h < 240){
+		$r = 0;
+		$g = $x;
+		$b = $c;
+	}
+	elseif($h < 300){
+		$r = $x;
+		$g = 0;
+		$b = $c;
+	}
+	else{
+		$r = $c;
+		$g = 0;
+		$b = $x;
+	}
+	$r = ($r + $m) * 255;
+	$g = ($g + $m) * 255;
+	$b = ($b + $m) * 255;
+  return array(floor($r), floor($g), floor($b));
 }
- 
- 
+
 if(!function_exists('imagerotate')){
 	function imagerotate($source_image, $angle, $bgd_color){
 		$angle = 360-$angle; // GD rotates CCW, imagick rotates CW
@@ -278,7 +333,7 @@ if(!function_exists('imagerotate')){
 	}
 }
 
- 
+
 function st_transform($x,$y,$from_epsg,$to_epsg) {
 	#$x = 12.099281283333;
 	#$y = 54.075214183333;
@@ -288,81 +343,139 @@ function st_transform($x,$y,$from_epsg,$to_epsg) {
   $projTO = ms_newprojectionobj("init=epsg:".$to_epsg);
   $point->project($projFROM, $projTO);
   return $point;
-} 
+}
 
-function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
-  $passwordSettingUnixTime=strtotime($passwordSettingTime); # Unix Zeit in Sekunden an dem das Passwort gesetzt wurde
-  $allowedPasswordAgeDays=round($allowedPassordAgeMonth*30.5); # Zeitintervall, wie alt das Password sein darf in Tagen
-  $passwordAgeDays=round((time()-$passwordSettingUnixTime)/60/60/24); # Zeitinterval zwischen setzen des Passwortes und aktueller Zeit in Tagen
-  $allowedPasswordAgeRemainDays=$allowedPasswordAgeDays-$passwordAgeDays; # Zeitinterval wie lange das Passwort noch gilt in Tagen
-	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
+function checkPasswordAge($passwordSettingTime, $allowedPassordAgeMonth) {
+  $passwordSettingUnixTime = strtotime($passwordSettingTime); # Unix Zeit in Sekunden an dem das Passwort gesetzt wurde
+  $allowedPasswordAgeDays = round($allowedPassordAgeMonth * 30.5); # Zeitintervall, wie alt das Password sein darf in Tagen
+  $passwordAgeDays = round((time()-$passwordSettingUnixTime)/60/60/24); # Zeitinterval zwischen setzen des Passwortes und aktueller Zeit in Tagen
+  $allowedPasswordAgeRemainDays = $allowedPasswordAgeDays-$passwordAgeDays; # Zeitinterval wie lange das Passwort noch gilt in Tagen
+	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1
 }
 
 /**
 * Prüft ob ein Passwort ein gutes Passwort ist.
-* 
+*
 * Diese Funktion prüft die Länge, Anzahl wiederholter Zeichen und einfachheit von Passwörtern
 * Code wurde abgeleitet von http://scripts.franciscocharrua.com/check-password.php und
 * http://www.vbforums.com/showthread.php?p=2347960 und wurde stark verändert und ergänzt.
 * Vielen Dank trotzdem an die Autoren.
-* 
+*
 * Reihenfolge: Übersichtssatz - Kommentar - Tags.
-* 
+*
 * @param string password Zu prüfendes Password als Text
 * @return string Fehlermeldung zur Beschreibung, was an dem Password schlecht ist, oder leerer String, wenn Password gut ist.
 * @see    createRandomPassword(), checkPasswordAge, $GUI, $user, $stelle
 */
-function isPasswordValide($oldPassword,$newPassword,$newPassword2) {
+# Passwortprüfung
+function isPasswordValide($oldPassword, $newPassword, $newPassword2) {
+	#echo '<p>allg_funktionen isPasswortValide old: ' . $oldPassword . ' new1: ' . $newPassword . ' new2: ' . $newPassword2;
   $password_errors = array();
-  
-  # Prüft ob überhaupt ein neues Password eingegeben wurde (leerer String)
-  if (strlen($newPassword)==0 OR strlen($newPassword2)==0) {
-  	$password_errors[] = "ist leer oder dessen Wiederholung";
-  }
-  else {
-    # Prüft ob neues Passwort nicht vieleicht genau dem alten Passwort entspricht
-    if ($oldPassword==$newPassword)
-      $password_errors[] = "muß sich vom alten unterscheiden";
+  $check = 0;
 
-    # Prüft ob neues Passwort der Wiederholung entspricht
-    if ($newPassword!=$newPassword2)
-      $password_errors[] = "muß mit der Wiederholung übereinstimmen";
-    
-	  # Prüft die Länge des Passwortes
-	  $strlen = strlen($newPassword);
-	  if($strlen <= 5) {
-	    $password_errors[] = "ist zu kurz";
-	  }
-		
-		if($strlen > PASSWORD_MAXLENGTH) {
-	    $password_errors[] = "ist zu lang";
-	  }
-  
-	  # Prüft die Anzahl unterschiedlicher Zeichen
-	  $count_chars = count_chars($newPassword, 3);
-	  if(strlen($count_chars) < $strlen / 2) {
-	    $password_errors[] = "hat zu viele gleiche Zeichen";
-	  }
-	  
-	  # Prüft die Verwendung von Sonderzeichen
-	  $strength = 0;
-	  $patterns = array('#[a-z]#','#[A-Z]#','#[0-9]#','/[¬!"£$%^&*()`{}\[\]:@~;\'#<>?,.\/\\-=_+\|]/');
-	  foreach($patterns as $pattern) {
-	  	if(preg_match($pattern,$newPassword,$matches)) {
-	      $strength++;
-	    }
-	  }
-	  // strength=
-	  // 1 - weak
-	  // 2 - not weak
-	  // 3 - acceptable
-	  // 4 - strong 
-	  if ($strength<3) {
-	  	$password_errors[] = "hat zu wenig Sonderzeichen";
-	  }
+	# Prüft ob das Password eingegeben wurde
+	if (strlen($newPassword) == 0) {
+		$password_errors[] = "ist leer";
+		$check = 1;
+	}
+
+	# Prüft ob die Passwortwiederholung eingegeben wurde.
+	if ($check == 0 AND strlen($newPassword2) == 0) {
+		$password_errors[] = " hat keine Wiederholung";
+		$check = 1;
+	}
+
+	# Wenn oldPassword angegeben wurde
+	if ($check == 0 AND strlen($oldPassword) > 0) {
+		# Prüft ob neues Passwort genau dem alten Passwort entspricht
+		if ($check == 0 and $oldPassword==$newPassword) {
+			$password_errors[] = "muss sich vom alten unterscheiden";
+			$check = 1;
+		}
+	}
+
+  # Prüft ob neues Passwort der Wiederholung entspricht
+  if ($check == 0 and $newPassword!=$newPassword2) {
+    $password_errors[] = "muss mit der Wiederholung übereinstimmen";
+    $check = 1;
   }
-    
-  //Zusammenstellung der Fehlermeldung, wenn kein Fehler vorlag Rückgabe eines leeren Strings
+
+  # Prüft die Länge des Passwortes
+  $strlen = strlen($newPassword);
+  if($check == 0 and $strlen <= 5) {
+    $password_errors[] = "ist zu kurz";
+    $check = 1;
+  }
+
+  if($check == 0 and $strlen > PASSWORD_MAXLENGTH) {
+    $password_errors[] = "ist zu lang (maximal ".PASSWORD_MAXLENGTH." Zeichen)";
+    $check = 1;
+  }
+
+  if($check == 0 and $strlen < PASSWORD_MINLENGTH) {
+    $password_errors[] = "ist zu kurz (mindestens ".PASSWORD_MINLENGTH." Zeichen)";
+    $check = 1;
+  }
+
+  # Prüft die Anzahl unterschiedlicher Zeichen
+  $count_chars = count_chars($newPassword, 3);
+  if($check == 0 and strlen($count_chars) < $strlen / 2) {
+    $password_errors[] = "hat zu viele gleiche Zeichen";
+    $check = 1;
+  }
+
+  if($check == 0) {
+
+    # Prüft die Stärke des Passworts
+    if (substr(PASSWORD_CHECK,0,1)=='0') {
+      $strength = 0;
+      $patterns = array('#[a-z]#','#[A-Z]#','#[0-9]#','/[¬!"£$%^&*()`{}\[\]:@~;\'#<>?,.\/\\-=_+\|]/');
+      foreach($patterns as $pattern) {
+      	if(preg_match($pattern,$newPassword,$matches)) {
+          $strength++;
+        }
+      }
+      // strength=
+      // 1 - weak
+      // 2 - not weak
+      // 3 - acceptable
+      // 4 - strong
+      if ($strength<3) {
+      	$password_errors[] = "ist zu schwach";
+      }
+    }
+
+    # Prüft auf Kleinbuchstaben
+    if (substr(PASSWORD_CHECK,0,1)=='1' and substr(PASSWORD_CHECK,1,1)=='1') {
+      if(!preg_match('/[a-z]/',$newPassword)) {
+        $password_errors[] = "weist keine Kleinbuchstaben auf";
+      }
+    }
+
+    # Prüft auf Großbuchstaben
+    if (substr(PASSWORD_CHECK,0,1)=='1' and substr(PASSWORD_CHECK,2,1)=='1') {
+      if(!preg_match('/[A-Z]/',$newPassword)) {
+        $password_errors[] = "weist keine Großbuchstaben auf";
+      }
+    }
+
+    # Prüft auf Zahlen
+    if (substr(PASSWORD_CHECK,0,1)=='1' and substr(PASSWORD_CHECK,3,1)=='1') {
+      if(!preg_match('/[0-9]/',$newPassword)) {
+        $password_errors[] = "weist keine Zahlen auf";
+      }
+    }
+
+    # Prüft auf Sonderzeichen
+    if (substr(PASSWORD_CHECK,0,1)=='1' and substr(PASSWORD_CHECK,4,1)=='1') {
+      if(!preg_match('/[¬!"£$%^&*()`{}\[\]:@~;\'#<>?,.\/\\-=_+\|]/',$newPassword)) {
+        $password_errors[] = "weist keine Sonderzeichen auf";
+      }
+    }
+
+  }
+
+  //Zusammenstellung der Fehlermeldung - wenn kein Fehler vorlag: Rückgabe eines leeren Strings
   $return_string = "";
   $anzErrors=count($password_errors);
   for($i=0;$i<$anzErrors;$i++) {
@@ -377,18 +490,61 @@ function isPasswordValide($oldPassword,$newPassword,$newPassword2) {
     }
     $return_string.=$password_errors[$i];
   }
+
   return $return_string;
+}
+
+/*
+* Erzeugt an Hand der Einstellungen für die Passwortstärke einen Hilfetext für die
+* Vergabe eines neuen Passwortes
+*/
+function password_erstellungs_hinweis($lang) {
+	$condition = array();
+	$msg = '';
+	if (substr(PASSWORD_CHECK, 0, 1) == '0') {
+		$msg = 'Das Passwort muss 3 der 4 Kriterien: Kleinbuchstaben, Großbuchstaben, Zahlen und Sonderzeichen enthalten.';
+	}
+	else {
+		if (substr(PASSWORD_CHECK, 1, 1) == '1') {
+			$conditions[] = 'ein Kleinbuchstaben';
+		}
+		if (substr(PASSWORD_CHECK, 2, 1) == '1') {
+			$conditions[] = 'ein Großbuchstaben';
+		}
+		if (substr(PASSWORD_CHECK, 3, 1) == '1') {
+			$conditions[] = 'eine Zahl';
+		}
+		if (substr(PASSWORD_CHECK, 4, 1) == '1') {
+			$conditions[] = 'ein Sonderzeichen';
+		}
+
+		$msg = 'Das Passwort muss mindestens ';
+		$num_conditions = count($conditions);
+		for ($i = 0; $i < $num_conditions; $i++) {
+			$msg .= $conditions[$i];
+			if ($i < $num_conditions - 2) {
+				$msg .= ', ';
+			}
+			else {
+				if ($i < $num_conditions - 1) {
+					$msg .= ' ' . $lang['strAnd'] . ' ';
+				}
+			}
+		}
+		$msg .= ' beinhalten.';
+	}
+	return $msg;
 }
 
 /**
 * Erzeugen eines zufälligen Passwortes
-* 
+*
 * Diese Funktion erzeugt ein zufälliges sicheres Password. Die Funktion wurde von Totally PHP übernommen und mit zusätzlichen Zeichen versehen
 * siehe: http://www.totallyphp.co.uk/code/create_a_random_password.htm
-* Vielen Dank an den Autor. 
-* 
+* Vielen Dank an den Autor.
+*
 * Reihenfolge: Übersichtssatz - Kommentar - Tags.
-* 
+*
 * @return string ein achtstelliges Password
 * @see    isPasswordValide(), checkPasswordAge, $GUI, $user, $stelle
 */
@@ -420,7 +576,7 @@ function createRandomPassword($passwordLength) {
   }
   return $password;
 }
- 
+
 function in_subnet($ip,$net) {
 	$ipparts=explode('.',$ip);
 	$netparts=explode('.',$net);
@@ -464,7 +620,7 @@ function stripScript($request) {
 			$ret[$key]=stripScript($value);
 		}
 		else {
-			$ret[$key]=preg_replace($search, '', $value); 
+			$ret[$key]=preg_replace($search, '', $value);
 		}
 	}
 	return $ret;
@@ -554,7 +710,7 @@ function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite
 	$output = array();
 	$entries = NULL;
 	exec('export LD_LIBRARY_PATH=;unzip -l "'.$src_file.'" -d '.dirname($src_file), $output);
-	#echo 'unzip -l "'.$src_file.'" -d '.dirname($src_file);
+	#echo '<br>unzip -l "'.$src_file.'" -d '.dirname($src_file);
 	for($i = 3; $i < count($output)-2; $i++){
   		$entries[] = array_pop(explode('   ', $output[$i]));
 	}
@@ -584,7 +740,7 @@ function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite
 	            chmod($file_name, 0777);
 	          }
 	          zip_entry_close($zip_entry);
-	        }      
+	        }
 	      }
 	      zip_close($zip);
 	    }
@@ -622,10 +778,10 @@ function umlaute_html($string){
 
 function umlaute_sortieren($array, $second_array){
 	// Diese Funktion sortiert das Array $array unter Berücksichtigung von Umlauten.
-	// Zusätzlich läßt sich ein zweites Array $second_array übergeben, welches genauso viele 
+	// Zusätzlich läßt sich ein zweites Array $second_array übergeben, welches genauso viele
 	// Elemente haben muß wie das erste und dessen Elemente entsprechend der Sortierung des
 	// ersten Arrays angeordnet werden, dadurch bleiben die Index-Beziehungen beider Arrays erhalten.
-	// Außerdem werden alle Array-Elemente unabhängig von Groß/Kleinschreibung sortiert. 
+	// Außerdem werden alle Array-Elemente unabhängig von Groß/Kleinschreibung sortiert.
 	if(is_array($array)){
 		$oldarray = $array;
 		for($i = 0; $i < count($array); $i++){
@@ -656,19 +812,33 @@ function umlaute_sortieren($array, $second_array){
 	}
 }
 
-function umlaute_umwandeln($name){ 
+function umlaute_umwandeln($name){
   $name = str_replace('ä', 'ae', $name);
   $name = str_replace('ü', 'ue', $name);
   $name = str_replace('ö', 'oe', $name);
   $name = str_replace('Ä', 'Ae', $name);
   $name = str_replace('Ü', 'Ue', $name);
   $name = str_replace('Ö', 'Oe', $name);
+  $name = str_replace('a?', 'ae', $name);
+  $name = str_replace('u?', 'ue', $name);
+  $name = str_replace('o?', 'oe', $name);
+  $name = str_replace('A?', 'ae', $name);
+  $name = str_replace('U?', 'ue', $name);
+  $name = str_replace('O?', 'oe', $name);
   $name = str_replace('ß', 'ss', $name);
   $name = str_replace('.', '', $name);
   $name = str_replace(':', '', $name);
+	$name = str_replace('(', '', $name);
+	$name = str_replace(')', '', $name);
   $name = str_replace('/', '-', $name);
   $name = str_replace(' ', '', $name);
   $name = str_replace('-', '_', $name);
+  $name = str_replace('?', '_', $name);
+	$name = str_replace('+', '_', $name);
+	$name = str_replace(',', '_', $name);
+	$name = str_replace('*', '_', $name);
+	$name = str_replace('$', '', $name);
+	$name = str_replace('&', '_', $name);
   return $name;
 }
 
@@ -709,13 +879,6 @@ function translate($polygon, $transx, $transy){
   return $newpolygon;
 }
 
-function compare_groups($a, $b){
-  if($a->group > $b->group){
-    return 1;
-  }
-  else return 0;
-}
-
 function is_dir_empty($path){
 	$handle = opendir($path);
 	$one = readdir($handle);		# .
@@ -734,7 +897,7 @@ function searchdir($path, $recursive){
     # liefert ein Array mit den Pfaden aller Dateien im Verzeichnis
     if (substr($path, strlen($path) - 1 ) != '/' ){
       $path .= '/';
-    }     
+    }
     $dirlist = array() ;
     //$dirlist[] = $path ;
     if ($handle = opendir($path)){
@@ -744,7 +907,7 @@ function searchdir($path, $recursive){
           if (!is_dir($file)){
             $dirlist[] = $file;
           }
-          elseif($recursive == true){ 
+          elseif($recursive == true){
             $result = searchdir($file . '/', true) ;
             $dirlist = array_merge($dirlist,$result) ;
           }
@@ -758,12 +921,15 @@ function searchdir($path, $recursive){
 
 
 function get_select_parts($select){
-	$column = explode(',', $select);
+	$column = explode(',', $select);		# an den Kommas splitten
   for($i = 0; $i < count($column); $i++){
   	$klammerauf = substr_count($column[$i], '(');
   	$klammerzu = substr_count($column[$i], ')');
-  	if($klammerauf > $klammerzu){			# mehr Klammern auf als zu --> hier wurde eine Funktion oder eine Unterabfrage mit Kommas verwendet
-  		$column[$i] = $column[$i].', '.$column[$i+1];
+		$hochkommas = substr_count($column[$i], "'");
+		# Wenn ein Select-Teil eine ungerade Anzahl von Hochkommas oder mehr Klammern auf als zu hat,
+		# wurde hier entweder ein Komma im einem String verwendet (z.B. x||','||y) oder eine Funktion (z.B. round(x, 2)) bzw. eine Unterabfrage mit Kommas verwendet
+  	if($hochkommas % 2 != 0 OR $klammerauf > $klammerzu){
+  		$column[$i] = $column[$i].','.$column[$i+1];
   		array_splice($column, $i+1, 1);
 			$i--;							# und nochmal prüfen, falls mehrere Kommas drin sind
   	}
@@ -771,7 +937,7 @@ function get_select_parts($select){
   return $column;
 }
 
-  
+
 function microtime_float(){
    list($usec, $sec) = explode(" ", microtime());
    return ((float)$usec + (float)$sec);
@@ -793,12 +959,12 @@ function copy_file_to_tmp($frompath, $dateiname = ''){
 
 function read_epsg_codes($database){
   $epsg_codes = $database->read_epsg_codes();
-  return $epsg_codes; 
+  return $epsg_codes;
 }
 
 function read_colors($database){
   $colors = $database->read_colors();
-  return $colors; 
+  return $colors;
 }
 
 function delete_files($target, $exceptions, $output){
@@ -853,48 +1019,15 @@ function showAlert($text) {
   </script><?php
 }
 
-function showMessage($text) {
-  ?>
-  <script type="text/javascript">
-		var Msg = document.getElementById("message_box");
-		if(Msg == undefined){
-			document.write('<div id="message_box" class="message_box_hidden"></div>');
-			var Msg = document.getElementById("message_box");
-		}
-		Msg.className = 'message_box_visible';
-		Msg.innerHTML = '<?php echo $text; ?>';
-		setTimeout(function() {Msg.className = 'message_box_hide';},1000);
-		setTimeout(function() {Msg.className = 'message_box_hidden';},3000);
-  </script><?php
-}
-
-function ArtCode2Abk($code) {
-  switch ($code) {
-    case '100' : {
-      $abk='ffr';
-    } break;
-    case '010' : {
-      $abk='kvz';
-    } break;
-    case '001' : {
-      $abk='gn';
-    } break;
-    case '111' : {
-      $abk='andere';
-    } break;
-  }
-  return $abk;
-}
-
 ########### Funktion wandelt UNIX Zeichen in DOS Zeichen um für Konvertierung WLDGE-Dateien
 function unix2dos($text) {
-   $search  = array ("{", "|", "}", "~","'","[","\\","]","@"); 
+   $search  = array ("{", "|", "}", "~","'","[","\\","]","@");
    $replace = array ("ä", "ö", "ü", "ß","\"","Ä","Ö","Ü","§");
    return str_replace($search, $replace, $text);
 }
 
 function ANSII2DOS($text) {
-  $search  = array ('"',chr(132),chr(142),chr(148),chr(153),chr(129),chr(154),chr(225)); 
+  $search  = array ('"',chr(132),chr(142),chr(148),chr(153),chr(129),chr(154),chr(225));
   $replace = array ('\'','ä','Ä','ö','Ö','ü','Ü','ß');
   return str_replace($search, $replace, $text);
 }
@@ -904,7 +1037,7 @@ function convertDBFCodePage($filename) {
   if ($dbfid==0) {
     echo "<b>Fehler beim öffnen der dbf-Tabelle!</b>";
     return 0;
-  }  
+  }
   echo "<br>Beginne mit schreiben der Tabelle ".$filename."...";
   for ($i=1;$i<=dbase_numrecords($dbfid);$i++) {
     $dbfrs=dbase_get_record ($dbfid,$i);
@@ -924,8 +1057,8 @@ function convertDBFCodePage($filename) {
   dbase_close ($dbfid);
 }
 
-# Funktion bricht $text in Wörtern in ein Array von Zeilen der Länge $laenge um 
-# Beispiel: 
+# Funktion bricht $text in Wörtern in ein Array von Zeilen der Länge $laenge um
+# Beispiel:
 # $block=zeilenumbruch('Dies ist ein Beilspiel.',12);
 # echo $block[0]; # liefert "Dies ist ein"
 # echo $block[1]; # liefert "Beispiel"
@@ -957,7 +1090,7 @@ function runLenComp($liste) {
   $intervalwidth=0;
   for ($i=1;$i<$anz;$i++) {
     if ($liste[$i]==$liste[$i-1]+1) {
-      # der nächste Wert ist eins größer im gleichen Intervall 
+      # der nächste Wert ist eins größer im gleichen Intervall
       $intervalwidth++;
       # wenn das letzte Element erreicht ist Intervall schließen
       if ($i==$anz-1) {
@@ -991,8 +1124,6 @@ function date_ok($date) {
 
 
    $yy = strtok($date,"-");
-   $mm = strtok("-");
-   $dd = strtok("-");
 
    $ok = True;
 
@@ -1095,12 +1226,12 @@ function emailcheck($email) {
   if (strstr(trim($email)," ")) {
     $Meldung.='<br>E-Mail enthält Leerzeichen.';
   }
-  
+
   # hat die Adresse ein @
   if (!strstr($email,"@")) {
     $Meldung.='<br>E-Mail enthält kein @.';
   }
-  
+
   $postfix=strlen(strrchr($email,"."))-1;
   if (!($postfix >1 AND $postfix < 4)) {
     #echo " postfix ist zu kurz oder zu lang";
@@ -1145,6 +1276,20 @@ function buildExpressionString($str) {
   return $expr;
 }
 
+function getNumPagesPdf($filepath){
+	exec('gs -q -dNODISPLAY -c "('.$filepath.') (r) file runpdfbegin pdfpagecount = quit"', $output);
+	return $output[0];
+}
+
+function WKT2UKO($wkt){
+	$uko = str_replace('MULTIPOLYGON(((', 'TYP UPO 2'.chr(10).'KOO ', $wkt);
+	$uko = str_replace(')),((', chr(10).'FL+'.chr(10).'KOO ', $uko);
+	$uko = str_replace('),(', chr(10).'FL-'.chr(10).'KOO ', $uko);
+	$uko = str_replace(',', chr(10).'KOO ', $uko);
+	$uko = str_replace(')))', '', $uko);
+	return $uko;
+}
+
 function rectObj2WKTPolygon($rect) {
   $polygon="";
   if (is_object($rect)) {
@@ -1176,9 +1321,9 @@ function getArrayOfChars() {
 	for ($i=97; $i<=122; $i++) {
 	  $characterNumbers[]=$i; # Kleinbuchstaben
 	}
-	
+
 	array_push($characterNumbers,223,196,228,214,246,220,252); # Sonderzeichen
-	
+
 	foreach ($characterNumbers as $characterNumber) {
 	  $characters[] = chr($characterNumber);
 	}
@@ -1201,7 +1346,7 @@ function url_get_contents($url, $username = NULL, $password = NULL) {
 		if ($response === false) {
 			throw new Exception("Fehler beim Abfragen der URL mit file_get_contents(".$url.")");
 		}
-	}	
+	}
 	catch (Exception $e) {
 		$response = curl_get_contents($url, $username, $password);
 	}
@@ -1213,10 +1358,10 @@ function curl_get_contents($url, $username = NULL, $password = NULL) {
 	parse_str($url_parts[1], $get_array);
   $ch = curl_init($url_parts[0]);		# url
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	if($username)curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);	
+	if($username)curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
 	curl_setopt($ch, CURLOPT_POST, true);
 	#curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $get_array);	
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $get_array);
 	$result = curl_exec($ch);
   if (curl_getinfo($ch, CURLINFO_HTTP_CODE)==404) {
 		$result = "Fehler 404: File not found. Die Resource konnte mit der URL: ".$url." nicht auf dem Server gefunden werden!";
@@ -1225,7 +1370,7 @@ function curl_get_contents($url, $username = NULL, $password = NULL) {
   return $result;
 }
 
-function debug_write($msg) {
+function debug_write($msg, $debug = false) {
   #$fp = fopen(LOGPATH.'debug.htm','a+');
 	#$log = getTimestamp().":\n";
 	#$msg = "- ".$msg."\n";
@@ -1241,121 +1386,182 @@ function getTimestamp() {
 
 function formatBytes($size, $precision = 2) {
   $base = log($size) / log(1024);
-  $suffixes = array('', 'kB', 'MB', 'GB', 'TB');   
+  $suffixes = array('', 'kB', 'MB', 'GB', 'TB');
   return round(pow(1024, $base - floor($base)), $precision) . $suffixes[floor($base)];
 }
 
-function get_upload_error_message($code) { 
-  switch ($code) { 
-    case UPLOAD_ERR_INI_SIZE: 
+function get_upload_error_message($code) {
+  switch ($code) {
+    case UPLOAD_ERR_INI_SIZE:
         $message = "The uploaded file exceeds the upload_max_filesize directive in php.ini";
-        break; 
-    case UPLOAD_ERR_FORM_SIZE: 
-        $message = "The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form"; 
-        break; 
-    case UPLOAD_ERR_PARTIAL: 
-        $message = "The uploaded file was only partially uploaded"; 
-        break; 
-    case UPLOAD_ERR_NO_FILE: 
-        $message = "No file was uploaded"; 
-        break; 
-    case UPLOAD_ERR_NO_TMP_DIR: 
-        $message = "Missing a temporary folder"; 
-        break; 
-    case UPLOAD_ERR_CANT_WRITE: 
-        $message = "Failed to write file to disk"; 
-        break; 
-    case UPLOAD_ERR_EXTENSION: 
-        $message = "File upload stopped by extension"; 
-        break; 
+        break;
+    case UPLOAD_ERR_FORM_SIZE:
+        $message = "The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form";
+        break;
+    case UPLOAD_ERR_PARTIAL:
+        $message = "The uploaded file was only partially uploaded";
+        break;
+    case UPLOAD_ERR_NO_FILE:
+        $message = "No file was uploaded";
+        break;
+    case UPLOAD_ERR_NO_TMP_DIR:
+        $message = "Missing a temporary folder";
+        break;
+    case UPLOAD_ERR_CANT_WRITE:
+        $message = "Failed to write file to disk";
+        break;
+    case UPLOAD_ERR_EXTENSION:
+        $message = "File upload stopped by extension";
+        break;
 
-    default: 
-        $message = "Unknown upload error"; 
-        break; 
-	} 
+    default:
+        $message = "Unknown upload error";
+        break;
+	}
   return $message;
 }
 
-function formvars_strip($formvars, $strip_list) {
-	$strip_array = explode(', ', $strip_list);
+/*
+* This function removes or keeps elements defined in $strip_list from $fromvars array
+* If elements from strip_list shall be removed (default), all other will be keeped in the formvars array.
+* If elements shall be keeped, all other will be removed in the formars array.
+* strip_type 'remove' delete formvars defined in strip_list.
+* strip_type ('keep' | any other than 'remove') keep formvars defined in strip_list.
+*
+* @param $formvars array
+* @param $strip_list comma separated string or array - formvar names to keep or to remove
+* @param $strip_type string - Tells the function to keep or remove the formvars
+*/
+function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
+	#echo '<br>formvars vorher: ' . print_r($formvars, true);
+	#echo '<br>strip_list: ' . print_r($strip_list, true);
+	#echo '<br>strip_type: ' . $strip_type;
+
+	$strip_array = (is_array($strip_list) ? $strip_list : explode(', ', $strip_list));
 	$stripped_formvars = array();
+
 	foreach($formvars AS $key => $value) {
-		if (!in_array($key, $strip_array)) {
-#			if (array_key_exists($key, $stripped_formvars)) {
-#				// 1. occurance of key in stripped_formvars: first_value, 2. occurance: [first_val, second_val], more occurances [first_val, second_val, third_val, ...]
-#				is_array($stripped_formvars[$key]) ? array_push($stripped_formvars[$key], $value) : $stripped_formvars[$key] = array($stripped_formvars[$key], $value);
-#			} else {
-				$pos = strpos($value, '[');
-				if ($pos === false) {
-					$stripped_formvars[$key] = stripslashes($value);	
-				} else {
-					$stripped_formvars[$key] = arrStrToArr(stripslashes($value), ',');
-				}
-#			}
+
+		if ($strip_type == 'remove') {
+			# strip key if in strip_list
+			$strip = in_array($key, $strip_array);
+		}
+		else {
+			# do not strip key if in strip_list
+			$strip = !in_array($key, $strip_array);
+		}
+
+		if (!$strip) {
+			#echo "<br>Keep {$key} in formvars.";
+			$pos = strpos($value, '[');
+			if ($pos === false) {
+				$stripped_formvars[$key] = stripslashes($value);
+			} else {
+				$stripped_formvars[$key] = arrStrToArr(stripslashes($value), ',');
+			}
+		}
+		else {
+			#echo "<br>Strip {$key} from formvars.";
+		}
+
+	}
+	#echo '<br>formvars nachher: ' . print_r($stripped_formvars, true);
+	return $stripped_formvars;
+}
+
+/*
+* Funktion ersetzt in $str die Schlüsselwörter, die in $params
+* als key übergeben werden durch die values von $params
+*/
+function replace_params($str, $params) {
+	if (is_array($params)) {
+		foreach($params AS $key => $value){
+			$str = str_replace('$'.$key, $value, $str);
 		}
 	}
-	return $stripped_formvars;
+	return $str;
 }
 
 /**
 * Funktion sendet e-mail mit Dateien im Anhang
 * siehe http://www.php-einfach.de/codeschnipsel_1114.php
 * @param $anhang Array mit den Elementen "name", "size" und "data" oder Array mit Elementen solcher Arrays
-* $pfad = array(); 
-* $pfad[] = "ordner/datei1.exe"; 
-* $pfad[] = "ordner/datei2.zip"; 
-* $pfad[] = "ordner/datei3.gif"; 
-* 
-* $anhang = array(); 
+* $pfad = array();
+* $pfad[] = "ordner/datei1.exe";
+* $pfad[] = "ordner/datei2.zip";
+* $pfad[] = "ordner/datei3.gif";
+*
+* $anhang = array();
 * foreach($pfad AS $name) {
-*   $name = basename($name); 
-*   $size = filesize($name); 
-*   $data = implode("",file($name)); 
-*   if (function_exists("mime_content_type")) 
-*     $type = mime_content_type($name); 
-*   else 
-*     $type = "application/octet-stream"; 
-*     $anhang[] = array("name"=>$name, "size"=>$size, "type"=>$type, "data"=>$data); 
+*   $name = basename($name);
+*   $size = filesize($name);
+*   $data = implode("",file($name));
+*   if (function_exists("mime_content_type"))
+*     $type = mime_content_type($name);
+*   else
+*     $type = "application/octet-stream";
+*     $anhang[] = array("name"=>$name, "size"=>$size, "type"=>$type, "data"=>$data);
 * }
-* mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang); 
+* mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang);
 **/
-function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement) {
-	$grenze = "---" . md5(uniqid(mt_rand(), 1)) . "---";
+function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port) {
+	$success = false;
+	switch ($mode) {
+		case 'sendEmail async': {
+			# Erstelle Befehl für sendEmail und schreibe in mail queue Verzeichnis.
+			$str = array('to_email' => $to_email, 'from_email' => $from_email, 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
+			if(!is_dir(MAILQUEUEPATH)){
+				mkdir(MAILQUEUEPATH);
+				chmod(MAILQUEUEPATH, 'g+w');
+			}
+			$file = MAILQUEUEPATH . 'email' . date('YmdHis', time()) . '_' . uniqid('', false) . '.txt';
+			$success = file_put_contents(
+				$file,
+				json_encode($str)
+			);
+		} break;
+		default : {
+			$grenze = "---" . md5(uniqid(mt_rand(), 1)) . "---";
 
-	$headers ="MIME-Version: 1.0\r\n";
-	$headers .= 'From: ' . $from_email . "\r\n";
-  $headers .= 'Reply-To: ' . $reply_email . "\r\n";
-  if (!empty($cc_email)) $headers .= 'Cc: ' . $cc_email . "\r\n";
-	$headers .= "Content-Type: multipart/mixed;\n\tboundary=$grenze\r\n";
+			$headers ="MIME-Version: 1.0\r\n";
+			$headers .= 'From: ' . $from_email . "\r\n";
+			$headers .= 'Reply-To: ' . $reply_email . "\r\n";
+			if (!empty($cc_email)) $headers .= 'Cc: ' . $cc_email . "\r\n";
+			$headers .= "Content-Type: multipart/mixed;\n\tboundary=$grenze\r\n";
 
-	$botschaft = "\n--$grenze\n";
-	$botschaft.="Content-transfer-encoding: 7BIT\r\n";
-	$botschaft.="Content-type: text/plain; charset=UTF-8\n\n";
-	$botschaft.= $message;
-  
-  if ($attachement) {
-  	$botschaft.="\n\n";
-  	$botschaft.="\n--$grenze\n";
+			$botschaft = "\n--$grenze\n";
+			$botschaft.="Content-transfer-encoding: 7BIT\r\n";
+			$botschaft.="Content-type: text/plain; charset=UTF-8\n\n";
+			$botschaft.= $message;
 
-  	$botschaft.="Content-Type: application/octetstream;\n\tname=" . basename($attachement) . "\n";
-  	$botschaft.="Content-Transfer-Encoding: base64\n";
-  	$botschaft.="Content-Disposition: attachment;\n\tfilename=" . basename($attachement) . "\n\n";
+			if ($attachement) {
+				$botschaft.="\n\n";
+				$botschaft.="\n--$grenze\n";
 
-  	$zeiger_auf_datei=fopen($attachement,"rb");
-  	$inhalt_der_datei=fread($zeiger_auf_datei,filesize($attachement));
-  	fclose($zeiger_auf_datei);
+				$botschaft.="Content-Type: application/octetstream;\n\tname=" . basename($attachement) . "\n";
+				$botschaft.="Content-Transfer-Encoding: base64\n";
+				$botschaft.="Content-Disposition: attachment;\n\tfilename=" . basename($attachement) . "\n\n";
 
-  	$inhalt_der_datei=chunk_split(base64_encode($inhalt_der_datei));
-  	$botschaft.=$inhalt_der_datei;
-  	$botschaft.="\n\n";
-  	$botschaft.="--$grenze";
-  }
-#  echo 'to_email: '.$to_email.'<br>';
-#  echo 'subject: '.$subject.'<br>';
-#  echo 'botschaft: '.$botschaft.'<br>';
-#  echo 'headers: '.$headers.'<br>';  
-	if (@mail($to_email, $subject, $botschaft, $headers)) return 1;
-	else return 0;
+				$zeiger_auf_datei=fopen($attachement,"rb");
+				$inhalt_der_datei=fread($zeiger_auf_datei,filesize($attachement));
+				fclose($zeiger_auf_datei);
+
+				$inhalt_der_datei=chunk_split(base64_encode($inhalt_der_datei));
+				$botschaft.=$inhalt_der_datei;
+				$botschaft.="\n\n";
+				$botschaft.="--$grenze";
+			}
+			#  echo 'to_email: '.$to_email.'<br>';
+			#  echo 'subject: '.$subject.'<br>';
+			#  echo 'botschaft: '.$botschaft.'<br>';
+			#  echo 'headers: '.$headers.'<br>';
+			$success = @mail($to_email, $subject, $botschaft, $headers);
+		}
+	}
+	if ($success)
+		return 1;
+	else
+		return 0;
 }
 
 /*
@@ -1371,5 +1577,171 @@ function arrStrToArr($str, $delimiter) {
 		$value = trim(stripslashes($value), '"[]"');
 	}
 	return $arr;
+}
+
+/**
+* @param string $form_field_name - used also als form field id
+* @param array $data - array with values and options per array element
+* @param string $selected_value
+* @param string $onchange - javascript to execute on change
+* @param string $title - of the select field
+* @param string $null_option - create a first option with value = '' and the text of $null_option
+* @param string $style - css Style for the select element
+* @return string - the html representing the select form element
+* */
+function output_select($form_field_name, $data, $selected_value = null, $onchange = null, $title = null, $null_option = null, $style = null) {
+	if (!empty($onchange)) {
+		$onchange = " onchange=\"{$onchange}\"";
+	}
+	if (!empty($style)) {
+		$style = " style=\"{$style}\"";
+	}
+	$html = "<select id=\"{$form_field_name}\" name=\"{$form_field_name}\"{$onchange}{$style}>\n";
+	if (!empty($null_option)) {
+		$html .= "\t<option value=\"\">{$null_option}</option>\n";
+	}
+	foreach ($data AS $option) {
+		$selected = ($option['value'] == $selected_value ? ' selected' : '');
+		$html .= "\t<option value=\"{$option['value']}\"{$selected}>{$option['output']}</option>\n";
+	}
+	$html .= "</select>\n";
+	return $html;
+}
+
+/*
+* Die Funktion liefert das erste Word, welches nach $word in $str gefunden wird.
+* Über die optionalen Parameter $delim1 und $delim2 kann man die Trennzeichen vor und nach dem Wort angeben.
+* Wenn der optionale Parameter $last true ist, wird das letzte Vorkommen des Wortes verwendet.
+*/
+function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
+	if($last)$word_pos = strripos($str, $word);
+	else $word_pos = stripos($str, $word);
+	if($word_pos !== false){
+		$str_from_word_pos = substr($str, $word_pos+strlen($word));
+		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+		return $parts[0];
+	}
+}
+
+function geometrytype_to_datatype($geometrytype) {
+	if (stripos($geometrytype, 'POINT') !== false) {
+		$datatype = 0;
+	}
+	elseif (stripos($geometrytype, 'LINESTRING') !== false) {
+		$datatype = 1;
+	}
+	elseif( stripos($geometrytype, 'POLYGON') !== false) {
+		$datatype = 2;
+	}
+	return $datatype;
+}
+
+/*
+* Function erzeugt von den übergebenen formvars hidden input fields
+* außer von denen, dessen keys im except array stehen.
+*/
+function hidden_formvars_fields($formvars, $except = array()) {
+	$params = array();
+	foreach ($formvars AS $key => $value) {
+		if (!in_array($key, $except)) {
+			if (is_array($value)) {
+				$params = array_merge($params, values_from_array($key, $value));
+			}
+			else {
+				$params[$key] = $value;
+			}
+		}
+	}
+	foreach($params AS $key => $value) {
+		$html .= '<input type="hidden" name="' . $key . '" value="' . $value .'">';
+	}
+	return $html;
+}
+
+/*
+* Function liefert eine Liste von Parametern von einem verschachtelten array
+* z.B. wir aus:
+* Array('a' => 1, 'b' => Array(0 => 2, 1 => Array('c' => 3, 'd' => 4)))
+* Array('a' => 1, 'b[0]' => 2, 'b[1][c]' => 3, 'b[1][d]' => 4)
+* Diese Funktion kann verwendet werden, um formvars in Parameter zu wandeln,
+* die in hidden input Feldern ausgegeben werden soll.
+* @param $array_key String Name des Layer_Parameter_speichern
+* @params $array Array Das Array mit den default-Werten
+* @return Die Liste der Parameter
+*/
+function values_from_array($array_key, $array) {
+	$params = array();
+	foreach ($array AS $key => $value) {
+		if (is_array($value)) {
+			$params = array_merge($params, values_from_array($array_key . '[' . $key . ']', $value));
+		}
+		else {
+			$params[$array_key . '[' . $key . ']'] = $value;
+		}
+	}
+	return $params;
+}
+
+function uuid() {
+	return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+		mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+		mt_rand(0, 0xffff),
+		mt_rand(0, 0x0fff) | 0x4000,
+		mt_rand(0, 0x3fff) | 0x8000,
+		mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+	);
+}
+
+/**
+*  Get the file size of any remote resource (using get_headers()), 
+*  either in bytes or - default - as human-readable formatted string.
+*
+*  @author  Stephan Schmitz <eyecatchup@gmail.com>
+*  @license MIT <http://eyecatchup.mit-license.org/>
+*  @url     <https://gist.github.com/eyecatchup/f26300ffd7e50a92bc4d>
+*
+*  @param   string   $url          Takes the remote object's URL.
+*  @param   boolean  $formatSize   Whether to return size in bytes or formatted.
+*  @param   boolean  $useHead      Whether to use HEAD requests. If false, uses GET.
+*  @return  string                 Returns human-readable formatted size
+*                                  or size in bytes (default: formatted).
+*/
+function get_remote_filesize($url, $formatSize = true, $useHead = true) {
+	if (false !== $useHead) {
+		stream_context_set_default(array('http' => array('method' => 'HEAD')));
+	}
+	$head = array_change_key_case(get_headers($url, 1));
+	// content-length of download (in bytes), read from Content-Length: field
+	$clen = isset($head['content-length']) ? $head['content-length'] : 0;
+
+	// cannot retrieve file size, return "-1"
+	if (!$clen) {
+		return -1;
+	}
+
+	if (!$formatSize) {
+		return $clen; // return size in bytes
+	}
+
+	$size = $clen;
+	switch ($clen) {
+		case $clen < 1024:
+		$size = $clen .' B'; break;
+		case $clen < 1048576:
+		$size = round($clen / 1024, 2) .' KiB'; break;
+		case $clen < 1073741824:
+		$size = round($clen / 1048576, 2) . ' MiB'; break;
+		case $clen < 1099511627776:
+		$size = round($clen / 1073741824, 2) . ' GiB'; break;
+	}
+
+	return $size; // return formatted size
+}
+
+/*
+* Function returns a readable message of sql errors optionally with word $find replaced by asterists *****
+*/
+function sql_err_msg($file, $line, $sql, $find = '') {
+	return "<br>Abbruch in " . $file . " Zeile: " . $line . "<br>wegen: " . ($find != '' ? str_replace($find, '*****', $sql) : $sql). "<p>" . INFO1;
 }
 ?>

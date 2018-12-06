@@ -1,87 +1,75 @@
-<HTML><HEAD><TITLE><? echo TITLE; ?></TITLE>
-<META http-equiv=Content-Type content="text/html; charset=UTF-8">
-<? 
-include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
-if($this->user->rolle->querymode == 1){
-	#if(!$this->formvars['anzahl'])$this->formvars['anzahl'] = MAXQUERYROWS;
-}
-?>
-<link rel="shortcut icon" href="graphics/wappen/favicon.ico">
-<link rel="stylesheet" href="<?php echo 'layouts/'.$this->style; ?>">
-<? if(defined('CUSTOM_STYLE') AND CUSTOM_STYLE != ''){ ?>
-<link rel="stylesheet" href="<?php echo 'layouts/custom/'.CUSTOM_STYLE; ?>">
-<? } ?>
-<? include(WWWROOT.APPLVERSION.'funktionen/msgboxes.php'); ?>
-</HEAD>
-<BODY onload="onload_functions();">
-	<div id="sperrdiv" style="position: absolute;height: 100%;z-index: 1000000;opacity: 0.3;background-color: grey;"></div>
-	<a name="oben"></a>
-  <table width="900" align="center" border="0" cellspacing="0" cellpadding="0">
-    <tr>
-      <td align="center" valign="top">
-      <form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">
-        <table cellpadding=0 cellspacing=0>
-					<tr> 
-						<td colspan="2" style="border: 1px solid; border-color: #ffffff #cccccc #bbbbbb;"><?php
-						$this->debug->write("Include <b>".LAYOUTPATH."snippets/".HEADER."</b> in gui.php",4);    
-						include(LAYOUTPATH."snippets/".HEADER); 
-				 ?></td>
-          </tr>
-          <tr> 
-						<td width="1%" valign="top" background="<?php echo GRAPHICSPATH."bg.gif"; ?>" style="border: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;"> 
-							<?php
-								$this->debug->write("Include <b>".LAYOUTPATH."snippets/menue_switch.php</b> in gui.php",4);    
-								include(LAYOUTPATH."snippets/menue_switch.php"); ?>
-						</td>
-            <td align="center" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif" style="border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
-							<div style=" position: relative; overflow: hidden; ">
-							<?php
-              $this->debug->write("Include <b>".$this->main."</b> in gui.php",4);
-				      if(file_exists($this->main)){
-				      	include($this->main);			# Pluginviews
-				      }
-				      else{ 	    
-				      	include(LAYOUTPATH."snippets/".$this->main);		# normale snippets
-				      } ?>
-							</div>
-      			</td>
-          </tr>
-          <tr> 
-            <td colspan="2" style="border: 1px solid; border-color: #cccccc #cccccc #cccccc;"><?php
-              $this->debug->write("Include <b>".LAYOUTPATH."snippets/".FOOTER."</b> in gui.php",4);    
-							include(LAYOUTPATH."snippets/".FOOTER); ?></td>
-          </tr>
-        </table>
-				<input type="hidden" name="overlayx" value="<? echo $this->user->rolle->overlayx; ?>">
-				<input type="hidden" name="overlayy" value="<? echo $this->user->rolle->overlayy; ?>">
-				<input type="hidden" name="browserwidth">
-				<input type="hidden" name="browserheight">
-        </form>
-				<script type="text/javascript">
-					currentform = document.GUI;
-				</script>
-<? if($this->user->rolle->querymode == 1){ ?>
-				<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
-					<div id="overlaydiv" style="display:none;padding:3px;left:150px;top:150px;width:auto;max-width:<? echo $this->map->width+200; ?>px;position:absolute;z-index: 1000;-moz-box-shadow: 12px 10px 14px #777;-webkit-box-shadow: 12px 10px 14px #777;box-shadow: 12px 10px 14px #777;">
-						<div style="position:absolute;left:0px;top:0px;width:100%;height:10px;border-top: 1px solid #bbbbbb;background-color: #dddddd;cursor:n-resize;" onmousedown="resizestart(document.getElementById('contentdiv'), 'n');"></div>
-						<div style="position:absolute;left:0px;top:0px;width:10px;height:100%;border-left: 1px solid #bbbbbb;background-color: #dddddd;cursor:w-resize;" onmousedown="resizestart(document.getElementById('contentdiv'), 'w');"></div>	
-						<div style="position:absolute;right:0px;top:0px;width:10px;height:100%;border-right: 1px solid #bbbbbb;background-color: #dddddd;cursor:e-resize;" onmousedown="resizestart(document.getElementById('contentdiv'), 'e');"></div>
-						<div style="position:absolute;left:0px;bottom:0px;width:100%;height:10px;border-bottom: 1px solid #bbbbbb;background-color: #dddddd;cursor:s-resize;" onmousedown="resizestart(document.getElementById('contentdiv'), 's');"></div>
-						<div style="position:absolute;left:0px;top:0px;width:10px;height:10px;border: 1px solid #bbbbbb;background-color: #dddddd;cursor:nw-resize;" onmousedown="resizestart(document.getElementById('contentdiv'), 'nw');"></div>					
-						<div style="position:absolute;right:0px;top:0px;width:10px;height:10px;border: 1px solid #bbbbbb;background-color: #dddddd;cursor:ne-resize;" onmousedown="resizestart(document.getElementById('contentdiv'), 'ne');"></div>					
-						<div style="position:absolute;left:0px;bottom:0px;width:10px;height:10px;border: 1px solid #bbbbbb;background-color: #dddddd;cursor:sw-resize;" onmousedown="resizestart(document.getElementById('contentdiv'), 'sw');"></div>
-						<div style="position:absolute;right:0px;bottom:0px;width:10px;height:10px;border: 1px solid #bbbbbb;background-color: #dddddd;cursor:se-resize;" onmousedown="resizestart(document.getElementById('contentdiv'), 'se');"></div>
-						<div id="dragdiv" align="right" onmousedown="dragstart(document.getElementById('overlaydiv'))" style="cursor:default; background-color:<? echo BG_DEFAULT; ?>; border: 1px solid #cccccc;height:20px;position:relative;">
-							<a href="javascript:deactivate_overlay();" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH."exit.png"; ?>"></img></a>
+<html>
+	<head>
+		<title><? echo TITLE; ?></title>
+		<? include(SNIPPETS . 'gui_head.php'); ?>
+	</head>
+	<body onload="onload_functions();">
+	<div id="waitingdiv" style="position: absolute;height: 100%; width: 100%; display:none; z-index: 1000000; text-align: center">
+			<div style="position: absolute;  top: 50%; left: 50%; transform: translate(-50%,-50%);">
+				<i class="fa fa-spinner fa-7x wobble-fix spinner"></i>
+			</div>
+		</div>
+		<a name="oben"></a>
+		<table id="gui-table" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td align="center" valign="top">
+					<form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">
+						<div id="message_box"></div>		<!-- muss innerhalb des form stehen -->
+						<table cellpadding=0 cellspacing=0>
+							<tr> 
+								<td colspan="2" id="header"><?php
+									$this->debug->write("<br>Include <b>".LAYOUTPATH."snippets/".HEADER."</b> in gui.php",4);
+									include(LAYOUTPATH."snippets/".HEADER); ?>
+								</td>
+							</tr>
+							<tr>
+								<td id="menuebar" valign="top" align="center"><?php
+									include(SNIPPETS . "menue.php"); ?>
+								</td>
+								<td align="center" width="100%" height="100%" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif" style="border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
+									<div style="height:100%; position: relative; overflow: hidden; ">		<!-- overflow wird für rausfliegende Legende benötigt und height:100% für den Box-Shadow unter der MapFunctionsBar und Legende -->
+										<script type="text/javascript">
+											currentform = document.GUI;
+											<? $this->currentform = 'document.GUI'; ?>
+										</script><?php
+										$this->debug->write("<br>Include <b>".$this->main."</b> in gui.php",4);
+										if(file_exists($this->main)){
+											include($this->main);			# Pluginviews
+										}
+										else {
+											include(LAYOUTPATH."snippets/".$this->main);		# normale snippets
+										} ?>
+									</div>
+								</td>
+							</tr>
+							<tr> 
+								<td colspan="2" id="footer"><?php
+									$this->debug->write("<br>Include <b>".LAYOUTPATH."snippets/".FOOTER."</b> in gui.php",4);
+									include(LAYOUTPATH."snippets/".FOOTER); ?>
+								</td>
+							</tr>
+						</table>
+						<input type="hidden" name="overlayx" value="<? echo $this->user->rolle->overlayx; ?>">
+						<input type="hidden" name="overlayy" value="<? echo $this->user->rolle->overlayy; ?>">
+						<input type="hidden" name="browserwidth">
+						<input type="hidden" name="browserheight">
+						<input type="hidden" name="stopnavigation" value="0">
+						<input type="hidden" name="gle_changed" value="">
+					</form><?
+					if ($this->user->rolle->querymode == 1) {
+						include(LAYOUTPATH.'snippets/overlayframe.php');
+					} ?>
+				</td>
+			</tr><?php
+			if ($this->user->funktion == 'admin' AND DEBUG_LEVEL > 0) { ?>
+				<tr>
+					<td>
+						<div id="log">
+							<?php echo readfile(LOGPATH.$_SESSION['login_name'].basename(DEBUGFILE)); ?>
 						</div>
-						<div id="contentdiv" style="background: url(<? echo GRAPHICSPATH; ?>bg.gif);border: 1px solid #cccccc;max-width:<? echo $this->map->width+200; ?>px;height:100%;max-height:<? echo $this->user->rolle->nImageHeight+30; ?>px;position:relative;overflow-y: scroll;overflow-x: auto;">
-						<? if($this->overlaymain != '')include(LAYOUTPATH.'snippets/overlay.php'); ?>
-						</div>
-					</div>
-				</form>
-<? } ?>
-      </td>
-    </tr>
-</table>
-<div id="message_box" class="message_box_hidden"></div>
-</BODY></HTML>
+					</td>
+				</tr><?php
+			} ?>
+			</table>
+	</body>
+</html>

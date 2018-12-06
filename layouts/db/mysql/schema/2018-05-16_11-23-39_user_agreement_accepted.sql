@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE `user` ADD `agreement_accepted` BOOLEAN NOT NULL DEFAULT FALSE;
+
+COMMIT;

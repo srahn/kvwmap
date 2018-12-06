@@ -2,10 +2,9 @@
 	$layerset = $this->user->rolle->getLayer(LAYER_ID_SCHNELLSPRUNG);
 	if($layerset != NULL){ ?>
 
-<div style="margin-left:10px">
-	<table style="border:1px solid grey">
+<div style="margin: 4 4 2 4;">
+	<table style="border:1px solid lightgrey" width="100%">
 	<?
-		$legendheight -= 48;
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerdb = $mapdb->getlayerdatabase(LAYER_ID_SCHNELLSPRUNG, $this->Stelle->pgdbhost);
 		$layerdb->setClientEncoding();
@@ -18,7 +17,7 @@
 			$qlayerset['shape'][0][$attributes['name'][$i]] = $this->formvars['value_'.$attributes['name'][$i]];
 		}
 		# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-		$attributes = $mapdb->add_attribute_values($attributes, $layerdb, $qlayerset['shape'], true);	
+		$attributes = $mapdb->add_attribute_values($attributes, $layerdb, $qlayerset['shape'], true, $this->Stelle->id);	
 	
 		for($i = 0; $i < count($attributes['name']); $i++){
 			if($attributes['name'][$i] == 'oid'){
@@ -26,7 +25,7 @@
 				?><tr>
 					<td align="left"><?php
 						 if($attributes['form_element_type'][$i] == 'Auswahlfeld'){
-								?><select  
+								?><select class="schnellsprung-select-field" 
 								<?
 									if($attributes['req_by'][$i] != ''){
 										echo 'onchange="update_require_attribute(\''.$attributes['req_by'][$i].'\','.LAYER_ID_SCHNELLSPRUNG.', this.value);" ';

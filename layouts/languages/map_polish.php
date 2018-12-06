@@ -26,4 +26,5 @@
   $strSaveExtent="Mapa sklepu";
   $strMap="Mapa";
   $strMapSize="Zmiana rozmiaru";
+	$strNoLayer="Please select a layer for the data query!";
 ?>

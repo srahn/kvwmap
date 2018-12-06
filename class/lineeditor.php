@@ -75,11 +75,11 @@ class lineeditor {
     $ret[1]='';
     $ret[0]=0;
     if ( $newpathwkt != ''){
-    	$sql = "SELECT st_isvalid(ST_SnapToGrid(st_geomfromtext('".$newpathwkt."'), 0.0001))";
+    	$sql = "SELECT st_isvalid(st_geomfromtext('".$newpathwkt."'))";
     	$ret = $this->database->execSQL($sql, 4, 0);
     	$valid = pg_fetch_row($ret[1]);
 			if($valid[0] == 'f'){
-				$sql = "SELECT st_isvalidreason(ST_SnapToGrid(st_geomfromtext('".$newpathwkt."'), 0.0001))";
+				$sql = "SELECT st_isvalidreason(st_geomfromtext('".$newpathwkt."'))";
 				$ret = $this->database->execSQL($sql, 4, 0);
     		$reason = pg_fetch_row($ret[1]);
 				$ret[1]='\nDie Geometrie des Linienzugs ist fehlerhaft und kann nicht gespeichert werden: \n'.$reason[0];
@@ -89,9 +89,16 @@ class lineeditor {
     return $ret; 
   }
   
-  function eintragenLinie($line, $oid, $tablename, $columnname){
+  function eintragenLinie($line, $oid, $tablename, $columnname, $geomtype){
 		if($line == '')$sql = "UPDATE ".$tablename." SET ".$columnname." = NULL WHERE oid = ".$oid;
-		else $sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(st_multi(st_geometryfromtext('".$line."',".$this->clientepsg.")),".$this->layerepsg.") WHERE oid = ".$oid;
+		else{
+			if(substr($geomtype, 0, 5) == 'MULTI'){
+				$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(ST_MULTI(st_geometryfromtext('".$line."',".$this->clientepsg.")),".$this->layerepsg.") WHERE oid = ".$oid;
+			}
+			else{
+				$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(ST_GeometryN(st_geometryfromtext('".$line."',".$this->clientepsg."), 1),".$this->layerepsg.") WHERE oid = ".$oid;
+			}
+		}
 		$ret = $this->database->execSQL($sql, 4, 1);    
   	if(!$ret[0]){
 			if(pg_affected_rows($ret[1]) == 0){

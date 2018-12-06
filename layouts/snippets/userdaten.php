@@ -2,13 +2,6 @@
  # 2008-01-12 pkvvm
   include(LAYOUTPATH.'languages/userdaten_'.$this->user->rolle->language.'.php');
  ?>
-<script type="text/javascript">
-function Bestaetigung(link,text) {
-  Check = confirm(text);
-  if (Check == true)
-  window.location.href = link;
-}
-</script>
 <a name="oben"></a>
 <table width="1000" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 

@@ -1,7 +1,8 @@
 ﻿<?php
- $strTitle="Layereigenschaften stellenbezogen";
+ $strTitle="Layer properties task related";
  $strTask=" of the Task";
  $strQueryable="Queryable";
+ $strGeomUsable="Geometry Usable";
  $strMinScale="Min scale";
  $strMaxScale="Max scale";
  $strOffSite="Offsite";

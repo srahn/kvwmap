@@ -29,6 +29,8 @@
 	<input name="pathy_second" type="hidden" value="<?php echo $this->formvars['pathy_second']; ?>">
 	<input type="hidden" name="svghelp" id="svghelp">
 	<input type="hidden" name="bufferwidth" value="<? if($this->formvars['bufferwidth'])echo $this->formvars['bufferwidth']; else echo '10'; ?>">
+	<input type="hidden" name="buffersubtract" value="<? if($this->formvars['buffersubtract'])echo $this->formvars['buffersubtract']; ?>">
+	<input type="hidden" name="bufferside" value="<? if($this->formvars['bufferside'])echo $this->formvars['bufferside']; else echo 'left'; ?>">
 	<input type="hidden" name="measured_distance" value="<? echo $this->formvars['measured_distance']; ?>">
 	<?
 	if($this->formvars['last_button'] == '' or $this->formvars['last_doing'] == ''){
@@ -59,7 +61,7 @@
 	<input type="hidden" name="str_pathx" value="<? echo $this->formvars['str_pathx']; ?>">
   <input type="hidden" name="str_pathy" value="<? echo $this->formvars['str_pathy']; ?>">
   <input type="hidden" name="vertices" id="vertices" value="">
-  <input type="hidden" name="stopnavigation" value="0">
+	<input type="hidden" name="ortho_point_vertices" id="ortho_point_vertices" value="<? echo $this->formvars['ortho_point_vertices']; ?>">
 
 <?php
 #
@@ -83,10 +85,11 @@ $svg .= $polygonfunctions;			# Funktionen zum Zeichnen eines Polygons
 $svg .= $vertex_catch_functions;# Punktfangfunktionen
 $svg .= $flurstqueryfunctions;	# Funktionen zum Hinzufügen und Entfernen von Polygonen
 $svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
+$svg .= $ortho_point_functions;	# Funktionen zum Erstellen von orthogonalen Fangpunkten
 $svg .= $bufferfunctions;				# Funktionen zum Erzeugen eines Puffers
 $svg .= $transformfunctions;		# Funktionen zum Transformieren (Verschieben, ...) der Geometrie
 $svg .= $measurefunctions;
-if($_SESSION['mobile'] == 'true'){
+if($this->user->rolle->gps){
 	$svg .= $gps_functions;
 }
 $svg .= $SVGvars_coordscript;
@@ -99,17 +102,23 @@ $svg .='
   </defs>';
 $svg .= $canvaswithall;
 $svg .= $navbuttons;
-$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 26)">';
-$svg .= polygonbuttons($strUndo, $strDeletePolygon, $strDrawPolygon, $strCutByPolygon);
-$svg .= flurstquerybuttons();
-$svg .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
-$svg .= transform_buttons($strMoveGeometry);
-$svg .= vertex_edit_buttons($strCornerPoint);
-$svg .= coord_input_buttons();
-if($_SESSION['mobile'] == 'true'){
-	$svg .= gpsbuttons($strSetGPSPosition, $this->formvars['gps_follow']);
+$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
+$buttons_fs = deletebuttons($strUndo, $strDelete);
+$buttons_fs .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
+$buttons_fs .= flurstquerybuttons();
+$buttons_fs .= polygonbuttons2($strSplitPolygon);
+$buttons_fs .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
+$buttons_fs .= transform_buttons($strMoveGeometry);
+$buttons_fs .= vertex_edit_buttons($strCornerPoint);
+$buttons_fs .= coord_input_buttons();
+$buttons_fs .= ortho_point_buttons();
+if($this->user->rolle->gps){
+	$buttons_fs .= gpsbuttons($strSetGPSPosition, $strGPSFollow, $this->formvars['gps_follow']);
 }
-$svg .= measure_buttons($strRuler);
+$buttons_fs .= measure_buttons($strRuler);
+global $last_x;
+$svg .= '<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>';
+$svg .= $buttons_fs;
 $svg .= '</g>';
 $svg .= $SVG_end;
 

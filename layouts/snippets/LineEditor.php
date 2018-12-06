@@ -68,8 +68,8 @@ function buildwktlinefromsvgpath(svgpath){
     <td align="center" colspan="5"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
   </tr>
   <tr> 
-    <td rowspan="8">&nbsp;</td>
-    <td colspan="4" rowspan="8"> 
+    <td rowspan="9">&nbsp;</td>
+    <td colspan="4" rowspan="9"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_line_query.php')
 			?>
@@ -83,9 +83,9 @@ function buildwktlinefromsvgpath(svgpath){
 				</tr>
 				<tr align="left">
 					<td>
-					<div align="center"><input type="submit" class="button" name="neuladen" value="<?php echo $strLoadNew; ?>"></div>
+					<div align="center"><input type="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>"></div>
 					<br>
-					<div style="width:260px; height:<?php echo $this->map->height-196; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
+					<div style="width:260px; height:<?php echo $this->map->height-247; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 						&nbsp;
 						<img src="graphics/tool_info_2.png" alt="<? echo $strInfoQuery; ?>" title="<? echo $strInfoQuery; ?>" width="17">&nbsp;
 						<img src="graphics/layer.png" alt="<? echo $strLayerControl; ?>" title="<? echo $strLayerControl; ?>" width="20" height="20"><br>
@@ -106,7 +106,7 @@ function buildwktlinefromsvgpath(svgpath){
   </tr>
   <tr>
   	<td>Geometrie übernehmen von:<br>
-  		<select name="layer_id" style="width: 260px" onchange="document.GUI.no_load.value='true';document.GUI.submit();">
+  		<select name="layer_id" style="width: 260px" onchange="startwaiting(true);document.GUI.no_load.value='true';document.GUI.submit();">
   			<?
   				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
   					echo '<option';
@@ -117,6 +117,11 @@ function buildwktlinefromsvgpath(svgpath){
   		</select> 
   	</td>
   </tr>
+	<tr>
+		<td>
+			<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>><? echo $strSingleGeoms; ?>
+		</td>
+	</tr>	
 	<tr> 
     <td colspan="2" style="border-top:1px solid #999999"><img width="240px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
   </tr>
@@ -163,7 +168,7 @@ function buildwktlinefromsvgpath(svgpath){
 	<? } ?>
   	<td align="right">
   		<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
-  		<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
+			<input type="checkbox" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>&nbsp;Punktfang
   	</td>
 		<td align="center">
 			<? if($this->new_entry != true){ ?>
@@ -181,10 +186,12 @@ function buildwktlinefromsvgpath(svgpath){
 <INPUT TYPE="HIDDEN" NAME="geom_nullable" VALUE="<?php echo $this->formvars['geom_nullable']; ?>">
 <INPUT TYPE="HIDDEN" NAME="no_load" VALUE="">
 <INPUT TYPE="HIDDEN" NAME="oid" VALUE="<?php echo $this->formvars['oid']; ?>">
-<INPUT TYPE="HIDDEN" NAME="oldscale" VALUE="<?php echo round($this->map_scaledenom); ?>">   
+<INPUT TYPE="HIDDEN" NAME="oldscale" VALUE="<?php echo round($this->map_scaledenom); ?>">
+<input type="hidden" name="layer_options_open" value=""> 
 <? if($this->formvars['go'] == 'LineEditor'){ ?>
 	<INPUT TYPE="HIDDEN" NAME="go" VALUE="LineEditor" >
 	<INPUT TYPE="HIDDEN" NAME="selected_layer_id" VALUE="<?php echo $this->formvars['selected_layer_id']; ?>">
 <? } ?>
 <INPUT TYPE="HIDDEN" NAME="go_plus" VALUE="" >
+<input type="hidden" name="neuladen" value="">
     	

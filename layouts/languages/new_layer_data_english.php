@@ -4,4 +4,5 @@
  $strSave="Save";
  $strtitle="Create new Dataset"; 
  $strCancel="Cancel";
+ $strCreateAnotherOne = "create another dataset";
 ?>  

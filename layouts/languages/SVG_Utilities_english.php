@@ -2,14 +2,16 @@
   $strCornerPoint="edit vertices";
   $strCutByPolygon="cut by polygon";
   $strDrawPolygon="draw polygon";
-  $strDeletePolygon="delete polygon";
+  $strDelete="delete all";
   $strSplitLine="split lines";
+	$strSplitPolygon="split polygons";
   $strUndo="undo";
   $strSetPosition="set position";
   $strSetGPSPosition="set GPS position";
   $strRuler="ruler";
   $strBuffer="create buffer";
 	$strBufferedLine="add buffered line";
-	$strParallelPolygon="add parallel polygon";
+	$strParallelPolygon="create one-side buffered line";
 	$strMoveGeometry="move geometry";
+	$strReverse="change line orientation";
 ?>  

@@ -50,7 +50,6 @@
 	<input name="last_button" type="hidden" value="<? echo $this->formvars['last_button']; ?>">
 	<input name="last_doing" type="hidden" value="<? echo $this->formvars['last_doing']; ?>">
 	<input name="last_doing2" type="hidden" value="<? echo $this->formvars['last_doing2']; ?>">
-	<input type="hidden" name="stopnavigation" value="0">
   
 <?php
 #
@@ -63,7 +62,7 @@ $svg .= '<script id="pscript" type="text/ecmascript"><![CDATA[';
 $svg .= $scriptdefinitions;	
 $svg .= $SVGvars_navscript;
 $svg .= $basicfunctions;
-if($_SESSION['mobile'] == 'true'){
+if($this->user->rolle->gps){
 	$svg .= $gps_functions;
 }
 $svg .= $SVGvars_coordscript;

@@ -48,7 +48,7 @@
 	<input name="last_doing2" type="hidden" value="<? echo $this->formvars['last_doing2']; ?>">
 	<input type="hidden" name="str_pathx" value="<? echo $this->formvars['str_pathx']; ?>">
   <input type="hidden" name="str_pathy" value="<? echo $this->formvars['str_pathy']; ?>">
-  <input type="hidden" name="stopnavigation" value="0">
+	<input type="hidden" name="vertices" id="vertices" value="">
   
 <?php
 #
@@ -62,10 +62,11 @@ $svg .= $scriptdefinitions;
 $svg .= $polygonANDpoint;	
 $svg .= $SVGvars_navscript;
 $svg .= $basicfunctions;
+$svg .= $vertex_catch_functions;# Punktfangfunktionen
 $svg .= $pointfunctions;
 $svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
 $svg .= $measurefunctions;
-if($_SESSION['mobile'] == 'true'){
+if($this->user->rolle->gps){
 	$svg .= $gps_functions;
 }
 $svg .= $SVGvars_coordscript;
@@ -78,13 +79,16 @@ $svg .='
   </defs>';
 $svg .= $canvaswithall;
 $svg .= $navbuttons;
-$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 26)">';
-$svg .= pointbuttons($strSetPosition);
-$svg .= coord_input_buttons();
-if($_SESSION['mobile'] == 'true'){
-	$svg .= gpsbuttons($strSetGPSPosition, $this->formvars['gps_follow']);
+$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
+$buttons_fs .= pointbuttons($strSetPosition);
+$buttons_fs .= coord_input_buttons();
+if($this->user->rolle->gps){
+	$buttons_fs .= gpsbuttons($strSetGPSPosition, $strGPSFollow, $this->formvars['gps_follow']);
 }
-$svg .= measure_buttons($strRuler);
+$buttons_fs .= measure_buttons($strRuler);
+global $last_x;
+$svg .= '<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>';
+$svg .= $buttons_fs;
 $svg .= '</g>';
 $svg .= $SVG_end;
 

@@ -150,22 +150,6 @@ class adresse {
   var $debug;
   var $database;
 
-  ###################### Liste der Funktionen ####################################
-  #
-  # function adresse($GemeindeSchl,$StrassenSchl,$HausNr) - Construktor
-  # function setDBConn($dbConn)
-  # function getGebaeude()
-  # function getQuelle()
-  # function getFlurstKennzListe()
-  # function updateAdressTable()
-  # function getStrassenListe($GemID,$AdressenListeByExtent,$order)
-  # function getAdressenListeByFlst($FlstListe,$order)
-  # function getAdressenListeByExtent($extent)
-  # function getHausNrListe($GemID,$StrID,$HausNr,$order)
-  # function getStrIDfromName($GemID,$StrName)
-  #
-  ################################################################################
-
   function adresse($GemeindeSchl,$StrassenSchl,$HausNr,$database) {
     global $debug;
     $this->debug=$debug;
@@ -178,7 +162,7 @@ class adresse {
   function setDBConn($dbConn) {
     $this->dbConn=$dbConn;
   }
-
+	
   function getGebaeude() {
     $Gebaeude=new gebaeude($this);
     return $Gebaeude->getGebaeude();
@@ -218,7 +202,7 @@ class adresse {
     }
     # sortiert nach order wenn angegeben
     if ($order!=0 AND $order!='') {
-      $sql.=' ORDER BY '.$order;
+      $sql.=' ORDER BY ' . replace_semicolon($order);
     }
     $this->debug->write("<p>kvwmap->getAdressenListeByFlst->Abfragen der Adressdaten für Flurstuecke:<br>".$sql,4);
     $query=mysql_query($sql);
@@ -941,7 +925,7 @@ class gemeinde {
       $sql.=')';
     }
     if ($order!='') {
-      $sql.=' ORDER BY '.$order;
+      $sql.=' ORDER BY ' . replace_semicolon($order);
     }
     $this->debug->write("<p>kataster.php Gemeinde->getGemeindeListeByExtent Abfragen der Geimeinden aus dem Kartenausschnitt:<br>".$sql,4);
     $query=mysql_query($sql);
@@ -1165,9 +1149,9 @@ class gemarkung {
     return $rs['GemeindeSchl'];
   }
 
-  function getGemarkungListe($GemID,$GemkgID) {
+  function getGemarkungListe($ganzeGemID, $GemkgID) {
     # Abfragen der Gemarkungen mit seinen GemeindeNamen
-    $Liste=$this->database->getGemeindeListeByGemIDByGemkgSchl($GemID,$GemkgID);
+    $Liste=$this->database->getGemeindeListeByGemIDByGemkgSchl($ganzeGemID, $GemkgID);
     return $Liste;
   }
   
@@ -1361,8 +1345,8 @@ class grundbuch {
     $this->database=$database;
   }
 
-  function getBuchungen($flurstkennz,$bvnr,$erbaurechtshinweise,$keine_historischen) {
-    $ret=$this->database->getBuchungenFromGrundbuch('',$this->Bezirk,$this->Blatt);
+  function getBuchungen($flurstkennz,$bvnr,$erbaurechtshinweise,$keine_historischen, $buchungsstelle = NULL) {
+    $ret=$this->database->getBuchungenFromGrundbuch('',$this->Bezirk,$this->Blatt, NULL, NULL, $buchungsstelle);
     if ($ret[0]) {
       $ret[1]='Fehler bei der Datenbank abfrage<br>'.$ret[1];
     }
@@ -1409,16 +1393,16 @@ class grundbuch {
   	return $this->database->getGrundbuchbezirksliste();
   }
 
-  function getGrundbuchbezirkslisteByGemkgIDs($gemkg_ids){
-  	return $this->database->getGrundbuchbezirkslisteByGemkgIDs($gemkg_ids);
+  function getGrundbuchbezirkslisteByGemkgIDs($ganze_gemkg_ids, $eingeschr_gemkg_ids){
+  	return $this->database->getGrundbuchbezirkslisteByGemkgIDs($ganze_gemkg_ids, $eingeschr_gemkg_ids);
   }
   
   function getGrundbuchblattliste($bezirk){
   	return $this->database->getGrundbuchblattliste($bezirk);
   }
 	
-	function getGrundbuchblattlisteByGemkgIDs($bezirk, $gemkg_ids){
-  	return $this->database->getGrundbuchblattlisteByGemkgIDs($bezirk, $gemkg_ids);
+	function getGrundbuchblattlisteByGemkgIDs($bezirk, $ganze_gemkg_ids, $eingeschr_gemkg_ids){
+  	return $this->database->getGrundbuchblattlisteByGemkgIDs($bezirk, $ganze_gemkg_ids, $eingeschr_gemkg_ids);
   }
 }
 
@@ -1455,6 +1439,149 @@ class flurstueck {
     }
     $this->LayerName=LAYERNAME_FLURSTUECKE;
   }
+
+	function outputEigentuemerText($eigentuemer, $adressAenderungen = NULL, $indent, $database = NULL){
+		if($eigentuemer->Nr != '' OR $eigentuemer->zusatz_eigentuemer != ''){
+			$Eigentuemer .= $indent;
+			if($eigentuemer->vorname != '')$Eigentuemer .= $eigentuemer->vorname.' ';
+			$Eigentuemer .= $eigentuemer->nachnameoderfirma;
+			if($eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$eigentuemer->namensbestandteil;
+			if($eigentuemer->akademischergrad != '')$Eigentuemer .= ', '.$eigentuemer->akademischergrad;
+			$Eigentuemer .= ' ';
+			if($eigentuemer->geburtsname != '')$Eigentuemer .= 'geb. '.$eigentuemer->geburtsname.' ';
+			$Eigentuemer .= $eigentuemer->geburtsdatum;
+			foreach($eigentuemer->anschriften as $anschrift){
+				$Eigentuemer .= ' '.$anschrift['strasse'].' '.$anschrift['hausnummer'].' ';
+				$Eigentuemer .= $anschrift['postleitzahlpostzustellung'].' '.$anschrift['ort_post'].' '.$anschrift['ortsteil'].' ';
+			}
+			$Eigentuemer .= $eigentuemer->zusatz_eigentuemer;
+			if($eigentuemer->Anteil != '')$Eigentuemer .= '  zu '.$eigentuemer->Anteil;
+			$Eigentuemer .= "\n";
+			return str_replace('"', '\'', $Eigentuemer);
+		}
+	}
+	
+	function outputEigentuemerNamensnummer($eigentuemer, $adressAenderungen = NULL, $indent, $database = NULL){
+		if($eigentuemer->Nr != '' OR $eigentuemer->zusatz_eigentuemer != ''){
+			$Eigentuemer .= $eigentuemer->Nr.' ';
+			$Eigentuemer .= "\n";
+			return $Eigentuemer;
+		}
+	}	
+	
+	function outputEigentuemerShort($eigentuemer, $adressAenderungen = NULL, $indent = NULL, $database = NULL){
+		$Eigentuemer .= '<tr><td colspan="2"><table cellpadding="0" cellspacing="0"><tr><td valign="top" style="padding-right: 4">'.$eigentuemer->Nr.'</td><td valign="top" style="padding-right: 4">';
+		$Eigentuemer .= '<a href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'">'.$eigentuemer->vorname.' '.$eigentuemer->nachnameoderfirma;
+		if($eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$eigentuemer->namensbestandteil;
+		if($eigentuemer->akademischergrad != '')$Eigentuemer .= ', '.$eigentuemer->akademischergrad;
+		$Eigentuemer .= ' ';
+		if($eigentuemer->geburtsname != '')$Eigentuemer .= 'geb. '.$eigentuemer->geburtsname.' ';
+		$Eigentuemer .= $eigentuemer->geburtsdatum;
+		$Eigentuemer .= '</a>';
+		if($eigentuemer->zusatz_eigentuemer != ''){
+			$Eigentuemer .= '</td></tr><tr><td colspan="2">'.$eigentuemer->zusatz_eigentuemer; if($eigentuemer->Anteil != '')$Eigentuemer .= ' zu '.$eigentuemer->Anteil; $Eigentuemer .= '</td></tr><tr><td>';
+		}
+		elseif($eigentuemer->Anteil)$Eigentuemer .= '&nbsp;&nbsp;&nbsp;zu '.$eigentuemer->Anteil.'<br>';
+		$Eigentuemer .= '</td></tr></table></td></tr>';
+		return $Eigentuemer;
+	}
+	
+	function outputEigentuemerLong($eigentuemer, $adressAenderungen, $indent = NULL, $database){
+		if($eigentuemer->Nr != ''){
+			$Eigentuemer .= '<tr>
+												<td colspan="2">
+													<table>
+														<tr>
+															<td valign="top">'.$eigentuemer->Nr.'&nbsp;&nbsp;&nbsp;</td>
+															<td valign="top">
+																<table border="0" cellspacing="0" cellpadding="0">
+																	<tr>
+																		<td>
+																			<a href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'">';
+			if($eigentuemer->vorname != '')$Eigentuemer .= $eigentuemer->vorname.' ';
+			$Eigentuemer .= $eigentuemer->nachnameoderfirma;
+			if($eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$eigentuemer->namensbestandteil;
+			if($eigentuemer->akademischergrad != '')$Eigentuemer .= ', '.$eigentuemer->akademischergrad;
+			$Eigentuemer .= '</a><br>';
+			if($eigentuemer->geburtsname != '')$Eigentuemer .= 'geb. '.$eigentuemer->geburtsname.' ';
+			$Eigentuemer .= $eigentuemer->geburtsdatum;
+			foreach($eigentuemer->anschriften as $anschrift){
+				$Eigentuemer .= '<table style="margin-top: 2px" cellspacing="0" cellpadding="0">
+													<tr>
+														<td>';
+				$Eigentuemer .= $anschrift['strasse'].' '.$anschrift['hausnummer'].'<br>';
+				$Eigentuemer .= $anschrift['postleitzahlpostzustellung'].' '.$anschrift['ort_post'].' '.$anschrift['ortsteil'];
+				$Eigentuemer .= '</td>';
+				# Adressänderungen
+				if($adressAenderungen){
+					$Eigentuemer .= '<td style="padding-left: 30px">';
+					$adressaenderungen =  $eigentuemer->getAdressaenderungen($eigentuemer->gml_id);
+					$aendatum=substr($adressaenderungen['datum'],0,10);
+					if($adressaenderungen['user_id'] != ''){
+						$user = new user(NULL, $adressaenderungen['user_id'], $database);
+						$Eigentuemer .= '<span class="fett"><u>Aktualisierte Anschrift ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
+						$Eigentuemer .= '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['strasse'].' '.$adressaenderungen['hausnummer'].'</span><br>';
+						$Eigentuemer .= '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['postleitzahlpostzustellung'].' '.$adressaenderungen['ort_post'].' '.$adressaenderungen['ortsteil'].'</span><br>';
+					}
+					if($eigentuemer->Nr != ''){
+						if($adressaenderungen['user_id'] == '')$Eigentuemer .= '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz&reload=true&selected_layer_id='.LAYER_ID_ADRESSAENDERUNGEN_PERSON.'&attributenames[0]=gml_id&attributenames[1]=hat&values[0]='.urlencode($eigentuemer->gml_id).'&values[1]='.urlencode($eigentuemer->anschrift_gml_id).'&embedded=true&fromobject=subform_ax_person_temp'.$eigentuemer->gml_id.'&targetlayer_id=0&targetattribute=leer\', new Array(document.getElementById(\'subform_ax_person_temp'.$eigentuemer->gml_id.'\')), new Array(\'sethtml\'));"><span> Anschrift aktualisieren</span></a>';
+						else	$Eigentuemer .= '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=Layer-Suche_Suchen&reload=true&selected_layer_id='.LAYER_ID_ADRESSAENDERUNGEN_PERSON.'&value_gml_id='.urlencode($eigentuemer->gml_id).'&operator_gml_id==&attributenames[0]=user_id&values[0]='.$this->user->id.'&embedded=true&fromobject=subform_ax_person_temp'.$eigentuemer->gml_id.'&targetlayer_id=0&targetattribute=leer\', new Array(document.getElementById(\'subform_ax_person_temp'.$eigentuemer->gml_id.'\')), \'\');">Anschrift &auml;ndern</a>';
+					}
+					$Eigentuemer .= '</td>';
+				}
+				$Eigentuemer .= '</tr></table>';
+			}
+			$Eigentuemer .=	   '</td>
+														<tr>
+															<td colspan="2"><div id="subform_ax_person_temp'.$eigentuemer->gml_id.'" style="display:inline"></div></td>
+														</tr>
+														</tr>
+													</table>
+													</td>
+												</tr>';
+			$Eigentuemer .= '</table></td></tr>';
+		}
+		if($eigentuemer->zusatz_eigentuemer != ''){
+			$Eigentuemer .=	 '<tr>
+													<td>&nbsp;</td><td>'.$eigentuemer->zusatz_eigentuemer; if($eigentuemer->Anteil != '')$Eigentuemer .= ' zu '.$eigentuemer->Anteil;
+			$Eigentuemer .=	   '</td>
+												</tr>';
+		}
+		elseif($eigentuemer->Anteil != ''){
+			$Eigentuemer .=	 '<tr>
+													<td></td>
+													<td>zu '.$eigentuemer->Anteil.'</td>
+												</tr>';
+		}		
+		return $Eigentuemer;
+	}	
+	
+	function outputEigentuemer($gml_id, $Eigentuemerliste, $type, $adressAenderungen = NULL, $indent = NULL, $database = NULL){
+		if($gml_id != 'wurzel')$style = 'style="border-left: 1px solid lightgrey"';
+		$eigentuemer = $Eigentuemerliste[$gml_id];
+		$Eigentuemer .= $this->{'outputEigentuemer'.$type}($eigentuemer, $adressAenderungen, $indent, $database);
+		if($eigentuemer->children != ''){
+			if(in_array($type, array('Text','Namensnummer')))$indent = $indent.'  ';
+			else $Eigentuemer .= '<tr><td '.$style.'>&nbsp;&nbsp;</td><td><table>';
+			foreach($eigentuemer->children as $child){
+				$Eigentuemer .= $this->outputEigentuemer($child, $Eigentuemerliste, $type, $adressAenderungen, $indent, $database);
+			}
+			if(!in_array($type, array('Text','Namensnummer')))$Eigentuemer .= '</table></td></tr>';
+		}
+		return $Eigentuemer;
+	}
+	
+	function orderEigentuemer($gml_id, &$Eigentuemerliste, $order){
+		# Diese funktion durchläuft den Rechtsverhältnisbaum und vergibt für jeden Eigentümer eine order, die sich fortlaufend erhöht.
+		# Anschliessend kann man die Eigentümerliste an Hand dieser order sortieren und erhält damit eine lineare Liste ohne Verschachtelung.
+		$Eigentuemerliste[$gml_id]->order = $order;
+		if($Eigentuemerliste[$gml_id]->children != ''){
+			foreach($Eigentuemerliste[$gml_id]->children as $child){
+				$order = $this->orderEigentuemer($child, $Eigentuemerliste, $order+1);
+			}
+		}
+		return $order;
+	}
 		
 	function getSonstigesrecht() {
     if ($this->FlurstKennz=="") { return 0; }
@@ -1518,7 +1645,7 @@ class flurstueck {
     $Strassenrecht=$ret[1];
     return $Strassenrecht;
   }
-	
+		
 	function getForstrecht() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getForstrecht Abfrage des Forstrechts zum Flurstück<br>".$sql,4);
@@ -1527,6 +1654,15 @@ class flurstueck {
     $Forstrecht=$ret[1];
     return $Forstrecht;
   }
+	
+	function getStrittigeGrenze() {
+    if ($this->FlurstKennz=="") { return 0; }
+    $this->debug->write("<br>kataster.php->flurstueck->getStrittigeGrenze Abfrage der strittigen Grenzen zum Flurstück<br>".$sql,4);
+    $ret=$this->database->getStrittigeGrenze($this->FlurstKennz);
+    if ($ret[0] AND DBWRITE) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $strittigeGrenze=$ret[1];
+    return $strittigeGrenze;
+  }	
 
   function getKlassifizierung() {
     if ($this->FlurstKennz=="") { return 0; }
@@ -1537,18 +1673,18 @@ class flurstueck {
     return $Klassifizierung;
   }
 
-  function getBuchungen($Bezirk,$Blatt,$hist_alb = false) {
+  function getBuchungen($Bezirk,$Blatt,$hist_alb = false, $without_temporal_filter = false){
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getBuchungen Abfrage der Buchungen zum Flurstück auf dem Grundbuch<br>",4);
     #$ret=$this->database->getBuchungen($this->FlurstKennz);
-    $ret=$this->database->getBuchungenFromGrundbuch($this->FlurstKennz,$Bezirk,$Blatt,$hist_alb, $this->fiktiv);
+    $ret=$this->database->getBuchungenFromGrundbuch($this->FlurstKennz,$Bezirk,$Blatt,$hist_alb, $this->fiktiv, NULL, $without_temporal_filter);
     return $ret[1];
   }
 
-  function getGrundbuecher() {
+  function getGrundbuecher($without_temporal_filter = false) {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getGrundbuecher Abfrage der Angaben zum Grundbuch auf dem das Flurstück gebucht ist<br>",4);
-    $ret=$this->database->getGrundbuecher($this->FlurstKennz, $this->hist_alb);
+    $ret=$this->database->getGrundbuecher($this->FlurstKennz, $this->hist_alb, false, $without_temporal_filter);
 		if($ret['fiktiv'])$this->fiktiv = true;
     return $ret[1];
   }
@@ -1597,14 +1733,14 @@ class flurstueck {
     return $FlstListe;
   }
 
-  function getEigentuemerliste($Bezirk,$Blatt,$BVNR) {
+  function getEigentuemerliste($Bezirk,$Blatt,$BVNR,$without_temporal_filter = false) {
     if ($this->FlurstKennz=="") {
       $Grundbuch = new grundbuch("","",$this->debug);
       $Eigentuemerliste[0] = new eigentuemer($Grundbuch,"");
       return $Eigentuemerliste;
     }
     $this->debug->write("<p>kataster flurstueck->getEigentuemerliste Abfragen der Flurstücksdaten aus dem ALK Bestand:<br>",4);
-    $ret=$this->database->getEigentuemerliste($this->FlurstKennz,$Bezirk,$Blatt,$BVNR);
+    $ret=$this->database->getEigentuemerliste($this->FlurstKennz,$Bezirk,$Blatt,$BVNR,$without_temporal_filter);
     if ($ret[0] AND DBWRITE) {
       $Grundbuch = new grundbuch("","",$this->debug);
       $Eigentuemerliste[0] = new eigentuemer($Grundbuch,"");
@@ -1855,7 +1991,40 @@ class flurstueck {
       break;
     }
   }
-
+	
+	function getVersionen() {
+    if ($this->FlurstKennz=="") { return 0; }
+    $this->debug->write("<p>kataster flurstueck->getVersionen (vom Flurstück):<br>",4);
+		$this->readALB_Data($this->FlurstKennz, true);
+		$Grundbuecher=$this->getGrundbuecher(true);							# die Grundbücher ohne zeitlichen Filter abfragen
+		$Buchungen=$this->getBuchungen(NULL,NULL,false, true);	# die Buchungen ohne zeitlichen Filter abfragen
+		for($b=0; $b < count($Buchungen); $b++){
+			$buchungsstelle_gml_ids[] = $Buchungen[$b]['gml_id'];
+			$Eigentuemerliste = $this->getEigentuemerliste($Buchungen[$b]['bezirk'],$Buchungen[$b]['blatt'],$Buchungen[$b]['bvnr'], true);		# die Eigentümer ohne zeitlichen Filter abfragen
+      $anzEigentuemer=count($Eigentuemerliste);
+      for($e=0;$e<$anzEigentuemer;$e++){
+				$namensnummer_gml_ids[] = $Eigentuemerliste[$e]->n_gml_id;
+				$person_gml_ids[] = $Eigentuemerliste[$e]->gml_id;
+			}
+		}
+		$versionen= $this->database->getVersionen('ax_flurstueck', array($this->gml_id), NULL);
+		$flst_beginnt = $versionen[0]['beginnt'];
+		$versionen= array_merge($versionen, $this->database->getVersionen('ax_buchungsstelle', $buchungsstelle_gml_ids, $flst_beginnt));
+		$versionen= array_merge($versionen, $this->database->getVersionen('ax_namensnummer', $namensnummer_gml_ids, $flst_beginnt));
+		$versionen= array_merge($versionen, $this->database->getVersionen('ax_person', $person_gml_ids, $flst_beginnt));
+		# sortieren
+		usort($versionen, function($a, $b){return DateTime::createFromFormat('d.m.Y H:i:s', $a['beginnt']) > DateTime::createFromFormat('d.m.Y H:i:s', $b['beginnt']);});
+		# gleiche beginnts rausnehmen, Anlässe zusammenfassen
+		for($i = 0; $i < count($versionen); $i++){
+			if($unique_versionen[$versionen[$i]['beginnt']]['endet'] == '' OR $unique_versionen[$versionen[$i]['beginnt']]['endet'] > $versionen[$i]['endet'])$unique_versionen[$versionen[$i]['beginnt']]['endet'] = $versionen[$i]['endet'];
+			$unique_versionen[$versionen[$i]['beginnt']]['anlass'][] = $versionen[$i]['anlass'];
+			$unique_versionen[$versionen[$i]['beginnt']]['anlass'] = array_unique($unique_versionen[$versionen[$i]['beginnt']]['anlass']);
+			$unique_versionen[$versionen[$i]['beginnt']]['table'][] = $versionen[$i]['table'];
+			$unique_versionen[$versionen[$i]['beginnt']]['table'] = array_unique($unique_versionen[$versionen[$i]['beginnt']]['table']);
+		}
+    return $unique_versionen;
+  }
+	
 	function getNachfolger() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<p>kataster flurstueck->getNachfolger (vom Flurstück):<br>",4);
@@ -1878,15 +2047,17 @@ class flurstueck {
       $errmsg.='in line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
-		if($without_temporal_filter AND $ret[1]['hist_alb'] == 0){
-			if($ret[1]['endet'] != '')rolle::$hist_timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $ret[1]['beginnt'])->format('Y-m-d\TH:i:s\Z');
+		if($without_temporal_filter){
+			if($ret[1]['endet'] != '' OR $ret[1]['hist_alb'])rolle::$hist_timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $ret[1]['beginnt'])->format('Y-m-d\TH:i:s\Z');			
 			else rolle::$hist_timestamp = '';
 		}
     $rs=$ret[1];
+		$this->oid=$rs['oid'];
+		$this->gml_id=$rs['gml_id'];
     $this->Zaehler=intval($rs['zaehler']);
     $this->Nenner=intval($rs['nenner']);
     $this->FlurstNr=$this->Zaehler;
-    $this->Flurstkennz_alt = $rs['gemkgschl'].'-'.$rs['flurnr'].'-'.str_pad($rs['zaehler'], 5, '0', STR_PAD_LEFT).'/'.str_pad($rs['nenner'], 3, '0', STR_PAD_LEFT).'.00';
+    $this->Flurstkennz_alt = $rs['gemkgschl'].'-'.$rs['flurnr'].'-'.str_pad($rs['zaehler'], 5, '0', STR_PAD_LEFT).'/'.str_pad($rs['nenner'], 3, '0', STR_PAD_LEFT);
     if ($this->Nenner!='') { $this->FlurstNr.="/".$this->Nenner; }
     $this->KreisID=$rs['kreisid'];
     $this->KreisName=$rs['kreisname'];
@@ -1904,6 +2075,7 @@ class flurstueck {
     $this->Flurkarte=$rs['karte'];
     $this->ALB_Flaeche=$rs['flaeche'];
 		$this->abweichenderrechtszustand=$rs['abweichenderrechtszustand'];
+		$this->zweifelhafterflurstuecksnachweis=$rs['zweifelhafterflurstuecksnachweis'];
     $this->endet=$rs['endet'];
 		$this->beginnt=$rs['beginnt'];
 		$this->hist_alb=$rs['hist_alb'];
@@ -1920,8 +2092,9 @@ class flurstueck {
 		$this->Schutzgebiet=$this->getSchutzgebiet();		
 		$this->NaturUmweltrecht=$this->getNaturUmweltrecht();
 		$this->BauBodenrecht=$this->getBauBodenrecht();
-		$this->Denkmalschutzrecht=$this->getDenkmalschutzrecht();		
+		$this->Denkmalschutzrecht=$this->getDenkmalschutzrecht();
 		$this->Sonstigesrecht=$this->getSonstigesrecht();				
+		$this->strittigeGrenze=$this->getStrittigeGrenze();
     //$this->Grundbuecher=$this->getGrundbuecher();							# steht im Snippet
     //$this->Buchungen=$this->getBuchungen($Bezirk,$Blatt,1);		# steht im Snippet
     $this->Amtsgericht=$this->getAmtsgericht(); 
@@ -1929,9 +2102,6 @@ class flurstueck {
     $this->Nachfolger=$this->getNachfolger();	
     # Abfragen der Nutzungen
     $this->Nutzung=$this->getNutzung();
-    if(ALKIS){}		# ALKIS TODO
-    else $updateDate = $this->database->readLastUpdateDate('');
-    $this->updateDate = $updateDate[1]['lastupdate'];
   }
 
   function is_ALK_Flurstueck($FlurstKennz) {
@@ -2012,13 +2182,13 @@ class flurstueck {
   	for($i = 0; $i < count($gbarray); $i++){
   		$gb = explode('-', $gbarray[$i]);
   		$Flurst = $this->database->getFlurstueckeByGrundbuchblatt($gb[0], $gb[1]);
-  		$Flurstuecke = array_merge($Flurstuecke, $Flurst);
+  		if($Flurst != NULL)$Flurstuecke = array_merge($Flurstuecke, $Flurst);
   	}
     return $Flurstuecke;
   }
 
-  function getNamen($formvars,$gemkgschl) {
-    if ($formvars['name1']=='' AND $formvars['name2']=='' AND $formvars['name3']=='' AND $formvars['name4']=='' AND $formvars['name5']=='' AND $formvars['name6']=='' AND $formvars['name7']=='' AND $formvars['name8']=='') {
+  function getNamen($formvars,$ganze_gemkg_ids, $eingeschr_gemkg_ids) {
+    if ($formvars['name1']=='' AND $formvars['name2']=='' AND $formvars['name3']=='' AND $formvars['name4']=='' AND $formvars['name5']=='' AND $formvars['name6']=='' AND $formvars['name7']=='' AND $formvars['name8']=='' AND $formvars['gml_id']=='') {
       $ret[0]=1;
       $ret[1]='<br>Geben Sie mindestens einen Suchbegriff ein!';
     }
@@ -2026,7 +2196,7 @@ class flurstueck {
     	if($blatt != ''){
     		$blatt = str_pad($blatt, 5, '0', STR_PAD_LEFT);
     	}
-      $ret=$this->database->getNamen($formvars, $gemkgschl);
+      $ret=$this->database->getNamen($formvars, $ganze_gemkg_ids, $eingeschr_gemkg_ids);
       if ($ret[0]) {
         $ret[1]='<br>Fehler bei der Abfrage der Eigentümernamen.'.$ret[1];
       }

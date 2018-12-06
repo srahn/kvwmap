@@ -65,18 +65,15 @@
 				<option value="Festpunkte_in_Karte_Anzeigen">Zugeordnete Festpunkte in Karte Anzeigen</option>
 				<option value="Festpunkte_in_Liste_Anzeigen">Zugeordnete Festpunkte in Liste Anzeigen</option>
 		 		<option value="Festpunkte_in_KVZ_schreiben">Zugeordnete Festpunkte in KVZ Schreiben</option>
-        <option value="Uebergabeprotokoll_Erzeugen"<?php if ($this->formvars['antr_verarbeitung']=='erzeugen') { ?> selected<?php } ?>>Übergabeprotokoll erzeugen</option>
-        <option value="Zusammenstellen_Zippen">Zusammenstellen & Packen</option>
+        <option value="Uebergabeprotokoll_Zusammenstellen"<?php if ($this->formvars['antr_verarbeitung']=='erzeugen') { ?> selected<?php } ?>>Übergabeprotokoll erzeugen</option>
+        <option value="Zusammenstellen_Zippen">Dokumente zusammenstellen & packen</option>
+				<option value="Zusammenstellen_Zippen_mit_Uebersichten">Dokumente mit Übersichten zusammenstellen & packen</option>
       </select>
       <input type="hidden" name="go" value="Antraganzeige">
       <input type="hidden" name="file" value="1">
       <input type="hidden" name="Lfd" value="1">
  			<input type="hidden" name="Riss-Nummer" value="1"> 
  			<input type="hidden" name="Antrags-Nummer" value="1"> 
-			<input type="hidden" name="FFR" value="1">
-			<input type="hidden" name="KVZ" value="1">
-			<input type="hidden" name="GN" value="1">
-			<input type="hidden" name="andere" value="1"> 
 			<input type="hidden" name="Datum" value="1">
 			<input type="hidden" name="Datei" value="1">
  			<input type="hidden" name="gemessendurch" value="1">

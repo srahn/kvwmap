@@ -2,7 +2,7 @@
   $strCornerPoint="Làm việc với các điểm góc";
   $strCutByPolygon="Cắt theo hình đa giác";
   $strDrawPolygon="Vẽ đa giác";
-  $strDeletePolygon="Xóa đa giác";
+  $strDelete="Xóa đa giác";
   $strUndo="Làm lại";  
   $strSetPosition="Set Position";
   $strSetGPSPosition="Set GPS Position";

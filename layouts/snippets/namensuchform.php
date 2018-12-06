@@ -3,7 +3,6 @@
 	include('funktionen/input_check_functions.php');
  ?>
 
-<script type="text/javascript" src="funktionen/calendar.js"></script>
 <script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 Text[0]=["Hilfe:","Zeigt auch die zum Grundbuchblatt geh&ouml;renden Flurst&uuml;cke an"]
@@ -137,15 +136,16 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 ?><p>
 
 <table border="0" cellpadding="0" cellspacing="2" width="100%" style="padding: 10px">
+<? if($this->formvars['gml_id'] == ''){ ?>
   <tr>
-    <td colspan="2" class="menu"><span class="fett">&nbsp;Person</span></td>
+    <td colspan="3" class="menu"><span class="fett">&nbsp;Person</span></td>
   </tr>
   <tr>
-    <td colspan="2" height="10">&nbsp;</td>
+    <td colspan="3" height="10">&nbsp;</td>
   </tr>
   <tr>
     <td height="28" align="right" width="220px"><span class="fett"><?php echo $strName1; ?>:&nbsp;</span></td>
-    <td>
+    <td width="210px">
 			<div style="width:150px;">
 				<input name="name1" type="text" value="<? echo htmlentities($this->formvars['name1'], NULL, 'UTF-8'); ?>" size="25" tabindex="1">
 				<div valign="top" style="height:0px; position:relative;">
@@ -153,6 +153,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 				</div>
 			</div>
 		</td>
+		<td rowspan="2"><input type="checkbox" name="exakt" value="1" <? if($this->formvars['exakt']) echo 'checked'; ?>> exakte Suche</td>
   </tr>
   <tr>
     <td height="28" align="right"><span class="fett"><?php echo $strName2; ?>:&nbsp;</span></td>
@@ -164,6 +165,16 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 				</div>
 			</div>
 		</td>
+  </tr>
+  <tr>
+    <td height="28" align="right"><span class="fett">Namensbestandteil:&nbsp;</span>
+      </td>
+    <td><input name="name9" type="text" value="<?php echo $this->formvars['name9']; ?>" size="25"  tabindex="3"></td>
+  </tr>
+	<tr>
+    <td height="28" align="right"><span class="fett">akademischer Grad:&nbsp;</span>
+      </td>
+    <td><input name="name10" type="text" value="<?php echo $this->formvars['name10']; ?>" size="25"  tabindex="3"></td>
   </tr>
   <tr>
     <td height="28" align="right"><span class="fett"><?php echo $strName3; ?>:&nbsp;</span>
@@ -201,10 +212,10 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 </table>
 <table border="0" cellpadding="0" cellspacing="2" width="100%" style="padding: 10px">
   <tr>
-    <td colspan="2" class="menu"><span class="fett">&nbsp;Gebiet</span></td>
+    <td colspan="3" class="menu"><span class="fett">&nbsp;Gebiet</span></td>
   </tr>
   <tr>
-    <td colspan="2" height="10">&nbsp;</td>
+    <td colspan="3" height="10">&nbsp;</td>
   </tr>
   <tr>
     <td height="28" align="right" width="220px"><span class="fett"><?php echo $strGbbez; ?>:&nbsp;</span></td>
@@ -225,7 +236,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 </table>
 <table border="0" cellpadding="0" cellspacing="2" width="100%" style="padding: 10px">
   <tr>
-    <td colspan="2">&nbsp;</td>
+    <td colspan="3">&nbsp;</td>
   </tr>
   <!--
   <tr>
@@ -233,10 +244,10 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     <input name="caseSensitive" type="checkbox" value="1"<?php if ($this->formvars['caseSensitive']) { ?> checked<?php } ?>><tr><td colspan="2"></td>
   <tr><td colspan="2"></tr>//-->
   <tr bgcolor="#FFFFCC">
-    <td colspan="2"><em><?php echo $strHintWildcard; ?>.</em></td>
+    <td colspan="3"><em><?php echo $strHintWildcard; ?>.</em></td>
   </tr>
   <tr>
-    <td colspan="2" height="10">&nbsp;</td>
+    <td colspan="3" height="10">&nbsp;</td>
   </tr>
   </tr>
 </table>
@@ -254,14 +265,13 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   </tr>
   <tr>
     <td width="290px">&nbsp;</td>
-    <td>
-      <input type="hidden" name="go" value="Namen_Auswaehlen">
+    <td>      
       <input type="submit" onclick="save();" style="width: 0px;height: 0px;border: none">
       <input type="button" name="go_plus" onclick="save();" value="<?php echo $strSearch; ?>" tabindex="0"><br>
    </td>
   </tr>
+<? }
 
-<?php
   $anzNamen=count($this->namen);
   if ($anzNamen>0) {
    ?>
@@ -270,13 +280,13 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 	<span class="fett"><br>
 	<?php echo $strTotalHits; ?>: <?php echo $this->anzNamenGesamt; ?>
     <br>
-    <br>
+		<br>
 </span>	<table border="1" cellpadding="3" cellspacing="0">
       <tr bgcolor="<?php echo BG_DEFAULT ?>">
       	<td class="menu">&nbsp;</td>
         <td class="menu" align="center"><span class="fett"><a href="javascript:changeorder('bezirk');"><?php echo $strGbbezShort; ?></a></span></td>
         <td class="menu" align="center"><span class="fett"><a href="javascript:changeorder('blatt');"><?php echo $strGbblShort; ?></a></span></td>
-        <td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('nachnameoderfirma');"><?php echo $strName1Short; ?></a></span></td>
+        <td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('nachnameoderfirma, vorname');"><?php echo $strName1Short; ?></a></span></td>
         <td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('geburtsname');"><?php echo $strName2Short; ?></a></span></td>
         <td class="menu" align="left" bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett"><a href="javascript:changeorder('strasse,hausnummer');"><?php echo $strName3Short; ?></a></span></td>
         <td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('postleitzahlpostzustellung, ort_post');"><?php echo $strName4Short; ?></a></span></td>
@@ -438,6 +448,13 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   ?>
 
 </table>
+<? if($this->formvars['gml_id'] != ''){ ?>
+		<a href="index.php?go=get_last_query">zurück</a>
+		<input name="anzahl" type="hidden" value="<?php echo $this->formvars['anzahl']; ?>">
+		<input name="withflurst" type="hidden" value="<?php echo $this->formvars['withflurst']; ?>">
+<? } ?>
+<input type="hidden" name="go" value="Namen_Auswaehlen">
+<input name="gml_id" type="hidden" value="<? echo $this->formvars['gml_id']; ?>">
 <input type="hidden" name="go_backup" value="">
 <input name="namensuche" type="hidden" value="true">
 <input name="selBlatt" type="hidden" value="">

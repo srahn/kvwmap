@@ -24,12 +24,15 @@
 	<input name="newpathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
 	<input name="result" type="hidden" value="">
 	<input name="area" type="hidden" value="">
-	<input name="firstpoly" type="hidden" value="<?php echo $this->formvars['firstpoly']; ?>">
+	<input name="firstpoly" type="hidden" value="<?php echo $this->formvars['firstpoly']; ?>" onchange="document.getElementById('abfrageart_poly').checked = true;">
 	<input name="secondpoly" type="hidden" value="<?php echo $this->formvars['secondpoly']; ?>">
+	<input name="secondline" type="hidden" value="<?php echo $this->formvars['secondline']; ?>">
 	<input name="pathx_second" type="hidden" value="<?php echo $this->formvars['pathx_second']; ?>">
 	<input name="pathy_second" type="hidden" value="<?php echo $this->formvars['pathy_second']; ?>">
 	<input type="hidden" name="svghelp" id="svghelp">
 	<input type="hidden" name="bufferwidth" value="<? if($this->formvars['bufferwidth'])echo $this->formvars['bufferwidth']; else echo '10'; ?>">
+	<input type="hidden" name="buffersubtract" value="<? if($this->formvars['buffersubtract'])echo $this->formvars['buffersubtract']; ?>">
+	<input type="hidden" name="bufferside" value="<? if($this->formvars['bufferside'])echo $this->formvars['bufferside']; else echo 'left'; ?>">
 	<input type="hidden" name="measured_distance" value="<? echo $this->formvars['measured_distance']; ?>">
 	<?
 	if($this->formvars['last_button'] == '' or $this->formvars['last_doing'] == ''){
@@ -37,13 +40,14 @@
 		$this->formvars['last_doing'] = 'draw_polygon';
 	}
 	?>
+	<input name="gps_posx" type="hidden" value="<? echo $this->formvars['gps_posx']; ?>">
+	<input name="gps_posy" type="hidden" value="<? echo $this->formvars['gps_posy']; ?>">
+	<input name="gps_follow" type="hidden" value="<? echo $this->formvars['gps_follow'] ?>">
 	<input name="last_button" type="hidden" value="<? echo $this->formvars['last_button']; ?>">
 	<input name="last_doing" type="hidden" value="<? echo $this->formvars['last_doing']; ?>">
 	<input name="last_doing2" type="hidden" value="<? echo $this->formvars['last_doing2']; ?>">
 	<input name="lastcoordx" type="hidden" value="">
-	<input name="lastcoordy" type="hidden" value="">
-	<input type="hidden" name="stopnavigation" value="0">
-	
+	<input name="lastcoordy" type="hidden" value="">	
 
 <?php
 #
@@ -67,6 +71,9 @@ $svg .= $polygonfunctions;			# Funktionen zum Zeichnen eines Polygons
 $svg .= $boxfunctions;
 $svg .= $flurstqueryfunctions;
 $svg .= $bufferfunctions;				# Funktionen zum Erzeugen eines Puffers
+if($this->user->rolle->gps){
+	$svg .= $gps_functions;
+}
 $svg .= $SVGvars_coordscript;
 $svg .= $SVGvars_tooltipscript;
 $svg .= ']]></script>';
@@ -77,12 +84,16 @@ $svg .='
   </defs>';
 $svg .= $canvaswithall;
 $svg .= $navbuttons;
-$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 26)">';
-$svg .= polygonbuttons($strUndo, $strDeletePolygon, $strDrawPolygon, $strCutByPolygon);
-$svg .= boxbuttons();
-$svg .= flurstquerybuttons();
-$svg .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
-$svg .= vertex_edit_buttons($strCornerPoint);
+$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
+$buttons_fs .= deletebuttons($strUndo, $strDelete);
+$buttons_fs .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
+$buttons_fs .= boxbuttons();
+$buttons_fs .= flurstquerybuttons();
+$buttons_fs .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
+$buttons_fs .= vertex_edit_buttons($strCornerPoint);
+global $last_x;
+$svg .= '<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>';
+$svg .= $buttons_fs;
 $svg .= '</g>';
 $svg .= $SVG_end;
 

@@ -11,7 +11,8 @@
   $strZoomOut="Zoom-out";
   $strZoomToFullExtent="Zoom to full extent";
   $strPan="Pan";
-  $strCoordinatesZoom="Zoom by coordinates/query";
+  $strCoordinatesZoom="Zoom to coordinates";
+	$strCoordinatesQuery="Query coordinates";
   $strInfo="Info";
   $strTouchInfo="Info on surrounding objects";
   $strInfoWithRadius="Info with radius";
@@ -27,10 +28,21 @@
 	$strSaveLayers="Save layer selection";
 	$strChooseLayers="Load layer selection";
   $strMap="Map";
-	$strMapSize="Adjust papsize";
+	$strMapSize="Adjust mapsize";
 	$strLayerControl="Layer control";
 	$strDeactivateAllLayer="Click to deactivate all layers.";
 	$strClearAllQuerys="Click to clear all query checkboxes.";
 	$strInfoQuery="Information query";
+	$strGPS="GPS-Follow-Mode";
+	$strExtentURL="Show Extent URL";
+	$this->layerOptions="Options";
+	$strRotationAngle="Angle";
+	$strNoLayer="Please select a layer for the data query!";
+	$strLayerSearch="Search Layer";
+	$strLegendOptions="Legend-Options";
+	$strLegendType="Legend Type";
+	$strLegendTypeGroups="layers in groups";
+	$strLegendTypeAlphabetical="layers alphabetical";
+	$strDrawingOrder="Change Drawingorder";
   
 ?>

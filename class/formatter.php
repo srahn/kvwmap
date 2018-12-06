@@ -80,7 +80,7 @@ class formatter {
 	
 	function output_json() {
 		header('Content-Type: '.$this->content_type.'; charset=utf-8');
-		$this->data ? $json = json_encode($this->data) : $json = '{}';
+		empty($this->data) ? $json = '[]' : $json = json_encode($this->data);
 		return utf8_decode($json);
 	}
 

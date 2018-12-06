@@ -1,8 +1,8 @@
 <h2><?php echo $this->qlayerset[$i]['Name']; ?></h2>
 <?php
   $layer_id=$this->qlayerset[$i]['Layer_ID'];
-	include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
   $this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
+	$hauptdokumentarten = $this->nachweis->getHauptDokumentarten();
 ?>
 
 <table border="1" cellspacing="0" cellpadding="2">
@@ -37,10 +37,7 @@ $dname=NACHWEISDOCPATH.$flurid."/".$nr."/".$this->qlayerset[$i]['shape'][$j]['li
 	<td><span class="fett"><?php echo $this->qlayerset[$i]['shape'][$j][NACHWEIS_PRIMARY_ATTRIBUTE]; ?></span></td>
 	<td><?php echo $this->qlayerset[$i]['shape'][$j]['blattnummer']; ?></td>
         <td><?php
-           if ($art == '100') echo "FFR";
-           if ($art == '010') echo "KVZ";
-           if ($art == '001') echo "GN ";
-           if ($art == '111') echo "ANDERE ";
+           echo $hauptdokumentarten[$art]['abkuerzung'];
         ?></td>
 	<td><?php echo $flurid; ?></td>
         <td><?php echo $this->qlayerset[$i]['shape'][$j]['format']; ?></td>

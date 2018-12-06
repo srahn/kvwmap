@@ -257,7 +257,7 @@ if($this->formvars['gps_follow'] == ''){
           <tr align="left">
             <td><!-- bgcolor=#e3e3e6 -->
             <div align="center"><?php # 2007-12-30 pk
-            ?><input type="submit" class="button" name="senden" value="<?php echo $strLoadNew; ?>" class="send" tabindex="1"></div>
+            ?><input type="submit" name="senden" value="<?php echo $strLoadNew; ?>" class="send" tabindex="1"></div>
             <br>
             &nbsp;
             <a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>

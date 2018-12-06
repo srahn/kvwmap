@@ -3,7 +3,7 @@
 		stopwaiting();	// wenn man aus der Karte abgefragt hatte, Warteanimation beenden		
 <? if($this->formvars['mime_type'] == 'overlay_html' AND $this->zoomed){ ?>		// wenn nicht aus normaler Suchmaske heraus gesucht wurde und (durch die Funktion generischeSuche_Suchen) auf die Treffer gezoomt wurde, Karte neu laden
 		startwaiting();
-		get_map_ajax('go=navMap_ajax');
+		get_map_ajax('go=navMap_ajax', '', '');
 <? } ?>
 	}
 	activate_overlay();

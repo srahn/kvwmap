@@ -32,6 +32,15 @@ else {
 		      		</select>
 		  		</td>
 		  	</tr>
+				<tr>
+		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strGeomUsable; ?></th>
+		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+		      		<select name="use_geom">
+		      			<option <? if($this->formvars['use_geom'] == '0'){echo 'selected ';} ?>value="0"><?php echo $this->strNo; ?></option>
+		      			<option <? if($this->formvars['use_geom'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>		      			
+		      		</select>
+		  		</td>
+		  	</tr>
 		  	<tr>
 		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMinScale; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">

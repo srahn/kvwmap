@@ -1,6 +1,4 @@
 <?php
-
-	include(SNIPPETS.'generic_functions.php'); 
 	
   $doit = false;
   $anzObj = count($this->qlayerset[$i]['shape']);
@@ -113,6 +111,7 @@ update_gebietstyp = function(){
 	$layer = $this->qlayerset[$i];
  	$attributes = $layer['attributes'];
 ?>
+<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
 <table border="0" cellspacing="0" cellpadding="0">
 	<tr>
 		<td>&nbsp;&nbsp;</td>
@@ -625,11 +624,11 @@ update_gebietstyp = function(){
 <table width="100%" border="0" cellpadding="2" cellspacing="0">
   <tr align="center"> 
     <td>
-    	<input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">&nbsp;&nbsp;
-    	<input type="button" class="button" name="savebutton2" value="Datensatz kopieren" onclick="copy_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
-    	<input type="button" class="button" name="deletebutton" value="Löschen" onclick="delete_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
-			<input type="button" class="button" name="rokbutton" value="Flächen aus ROK holen" onclick="update_fplan_from_rok(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
-    	<!--input type="button" class="button" name="mapbutton" value="In die Karte" onclick="zoomto('<? echo $this->qlayerset[$i]['shape'][$k]['lfd_rok_nr']; ?>', '<? echo $this->qlayerset[$i]['shape'][$k]['art']; ?>');"-->
+    	<input type="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">&nbsp;&nbsp;
+    	<input type="button" name="savebutton2" value="Datensatz kopieren" onclick="copy_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
+    	<input type="button" name="deletebutton" value="Löschen" onclick="delete_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
+			<input type="button" name="rokbutton" value="Flächen aus ROK holen" onclick="update_fplan_from_rok(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
+    	<!--input type="button" name="mapbutton" value="In die Karte" onclick="zoomto('<? echo $this->qlayerset[$i]['shape'][$k]['lfd_rok_nr']; ?>', '<? echo $this->qlayerset[$i]['shape'][$k]['art']; ?>');"-->
     </td>
   </tr>
 	<tr>

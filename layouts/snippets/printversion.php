@@ -12,7 +12,6 @@
 
 <link rel="shortcut icon" href="graphics/wappen/favicon.ico">
 <link rel="stylesheet" href="<?php echo 'layouts/'.$this->style; ?>">
-<?php include(WWWROOT.APPLVERSION.'funktionen/msgboxes.php'); ?>
 </HEAD>
 <BODY> <!-- leftmargin="5" topmargin="5" bgcolor="#FFFFFF" link="#FF0000" alink="#FF9999" vlink="#663333"> -->
   <table width="900" align="center" border="0" cellspacing="0" cellpadding="0">

@@ -51,7 +51,7 @@
     			$tileextentwidth = $extentwidth/$width*$tilewidth;
     			$minx = $maxx;													# das minx ist das maxx der letzten Kachel
     			$maxx = $maxx + $tileextentwidth; 			# das maxx ist das maxx der letzten Kachel + die Breite der Kachel
-    			$contents = get_map($url.'&bbox='.$minx.','.$miny.','.$maxx.','.$maxy.'&width='.$tilewidth.'&height='.$tileheight);
+    			$contents = get_map($url.'&bbox='.$minx.','.$miny.','.$maxx.','.$maxy.'&width='.$tilewidth.'&height='.$tileheight, $format);
     			$image  = imagecreatefromstring($contents);
     			
     			#$fp = fopen('/home/fgs/fgs/test/test_'.$x.$y.'.jpg', "w");
@@ -75,13 +75,13 @@
 	    }
     }
     else{
-    	print(get_map($url.'&bbox='.$bbox.'&width='.$width.'&height='.$height));
+    	print(get_map($url.'&bbox='.$bbox.'&width='.$width.'&height='.$height, $format));
     }
   }
   
-  function get_map($url){
+  function get_map($url, $format){
   	ob_end_clean();
-    header('content-type:'.$_REQUEST['format']);
+    header('Content-Type:'.$format);
     header("Pragma: public");
     header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
     #header('Content-Disposition: filename=test.jpg');

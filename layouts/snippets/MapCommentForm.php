@@ -14,7 +14,7 @@
      echo $this->user->rolle->newtime; 
      
      ?><br> 
-    <textarea name="comment" cols="35" rows="4" wrap="VIRTUAL"><?php echo $this->formvars['comment']; ?></textarea>
+    <textarea name="comment" autofocus cols="35" rows="4" wrap="VIRTUAL"><?php echo $this->formvars['comment']; ?></textarea>
 <br>	<input type="hidden" name="go" value="Kartenkommentar">
 	<input type="hidden" name="consumetime" value="<?php echo $this->user->rolle->newtime; ?>">
     <input type="hidden" name="go_plus" id="go_plus" value="">

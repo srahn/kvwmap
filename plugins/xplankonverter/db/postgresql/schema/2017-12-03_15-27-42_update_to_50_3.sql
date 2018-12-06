@@ -1,0 +1,1 @@
+ALTER TYPE xplan_gml.rp_rohstofftypen ADD VALUE '6900' AFTER '6800';

@@ -21,8 +21,6 @@
   $strOwsSrs="OWS SRS"; 
   $strLogo="logo*"; 
   $strNoLogoSelected="nie wybrano loga";  
-  $strWaterMark="znak wodny"; 
-  $strNoWatermarkSelected="nie wybrano znaku wodnego"; 
   $strALBReferencingRegion="odniesienie przestrzenne w ALB (zdygitalizowanym rejestrze nieruchomości)"; 
   $strALBReferencingRegionKey="punkty odniesienia przestrzennego w ALB (zdygitalizowanym rejestrze nieruchomości)"; 
   $strMenuPoint="pozycje menu"; 

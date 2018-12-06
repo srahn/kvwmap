@@ -4,12 +4,98 @@
 ?>
 <script language="javascript" type="text/javascript">
 
+function Bestaetigung(link,text) {
+	Check = confirm(text);
+	if (Check == true) {
+		window.location.href = link;
+	}
+}
+
+// closest() for IE
+if (!Element.prototype.matches)
+    Element.prototype.matches = Element.prototype.msMatchesSelector || 
+                                Element.prototype.webkitMatchesSelector;
+
+if (!Element.prototype.closest)
+    Element.prototype.closest = function(s) {
+        var el = this;
+        if (!document.documentElement.contains(el)) return null;
+        do {
+            if (el.matches(s)) return el;
+            el = el.parentElement || el.parentNode;
+        } while (el !== null && el.nodeType === 1); 
+        return null;
+    };
+
+function roundNumber(num, scale){
+  if(!("" + num).indexOf("e") != -1) {
+    return +(Math.round(num + "e+" + scale)  + "e-" + scale);  
+  } else {
+    var arr = ("" + num).split("e");
+    var sig = ""
+    if(+arr[1] + scale > 0) {
+      sig = "+";
+    }
+    var i = +arr[0] + "e" + sig + (+arr[1] + scale);
+    var j = Math.round(i);
+    var k = +(j + "e-" + scale);
+    return k;  
+  }
+}
+
 function ImageLoadFailed(id) {
   document.getElementById(id).innerHTML = '';
 }
 
 var currentform;
 var doit;
+
+function preventSubmit(){
+	document.GUI.onsubmit = function(){return false;};
+}
+
+function allowSubmit(){
+	document.GUI.onsubmit = function(){};
+}
+
+function printMap(){
+	if(typeof addRedlining != 'undefined'){
+		addRedlining();
+	}
+	document.GUI.go.value = 'Druckausschnittswahl';
+	document.GUI.submit();
+}
+
+function checkForUnsavedChanges(event){
+	var sure = true;
+	if(document.GUI.gle_changed.value == 1){
+		sure = confirm('Es gibt noch ungespeicherte Datensätze. Wollen Sie dennoch fortfahren?');
+	}
+	if(!sure){
+		if(event != undefined)event.preventDefault();
+		preventSubmit();
+	}
+	else{
+		document.GUI.gle_changed.value = 0;
+		allowSubmit();
+	}
+	return sure;
+}
+
+function startwaiting(lock) {
+	var lock = lock || false;
+	document.GUI.stopnavigation.value = 1;
+	waitingdiv = document.getElementById('waitingdiv');
+	waitingdiv.style.display='';
+	if(lock)waitingdiv.className='waitingdiv_spinner_lock';
+	else waitingdiv.className='waitingdiv_spinner';
+}
+
+function stopwaiting() {
+	document.GUI.stopnavigation.value = 0;
+	waitingdiv = document.getElementById('waitingdiv');
+	waitingdiv.style.display='none';
+}
 
 function getBrowserSize(){
 	if(typeof(window.innerWidth) == 'number'){
@@ -37,25 +123,85 @@ function resizemap2window(){
 <? } ?>
 }
 
-function message(text){
-	var Msg = document.getElementById("message_box");
-	if(Msg == undefined){
-		document.write('<div id="message_box" class="message_box_hidden"></div>');
-		var Msg = document.getElementById("message_box");
+/*
+* Function create content to show messages of different types
+* in div message_box
+* @param array or string messages contain the messages as array
+* or as a single string
+*/
+function message(messages, t_visible, t_fade, css_top) {
+	var msgBoxDiv = $('#message_box');
+	if (msgBoxDiv.is(':visible')) {
+		msgBoxDiv.stop().css('opacity', '1').show();
 	}
-	Msg.className = 'message_box_visible';
-	Msg.innerHTML = text;
-	setTimeout(function() {Msg.className = 'message_box_hide';},500);
-	setTimeout(function() {Msg.className = 'message_box_hidden';},2500);
+	else {
+		msgBoxDiv.html('');
+	}
+	if(document.getElementById('messages') == null)msgBoxDiv.append('<div id="messages"></div>');
+	var msgDiv = $('#messages');
+	var confirm = false;
+
+	t_visible   = (typeof t_visible   !== 'undefined') ? t_visible   : 1000;		// Zeit, die die Message-Box komplett zu sehen ist
+	t_fade   = (typeof t_fade   !== 'undefined') ? t_fade   : 2000;							// Dauer des Fadings
+	
+	if(typeof css_top  !== 'undefined')msgBoxDiv.css('top', css_top);
+	
+	types = {
+		'notice': {
+			'description': 'Erfolg',
+			'icon': 'fa-check',
+			'color': 'green',
+			'confirm': false
+		},
+		'info': {
+			'description': 'Info',
+			'icon': 'fa-info-circle',
+			'color': '#ff6200',
+			'confirm': true
+		},
+		'warning': {
+			'description': 'Warnung',
+			'icon': 'fa-exclamation',
+			'color': 'firebrick',
+			'confirm': true
+		},
+		'error': {
+			'description': 'Fehler',
+			'icon': 'fa-ban',
+			'color': 'red',
+			'confirm': true
+		}
+	};
+	//	,confirmMsgDiv = false;
+
+	if (!$.isArray(messages)) {
+		messages = [{
+			'type': 'warning',
+			'msg': messages
+		}];
+	}
+
+	$.each(messages, function (index, msg) {
+		msg.type = (['notice', 'info', 'error'].indexOf(msg.type) > -1 ? msg.type : 'warning');
+		msgDiv.append('<div class="message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
+		if (types[msg.type].confirm && document.getElementById('message_ok_button') == null) {
+			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="$(\'#message_box\').hide();" value="ok" style="margin: 10px 0 10px 0;">');
+		}
+	});
+	
+	if (msgDiv.html() != '') {
+		msgBoxDiv.show();
+	}
+
+	if (document.getElementById('message_ok_button') == null) {		// wenn kein OK-Button da ist, ausblenden
+		setTimeout(function() {msgBoxDiv.fadeOut(t_fade);}, t_visible);
+	}
 }
 
 function onload_functions(){
 	<? if($this->scrolldown){ ?>
 	window.scrollTo(0,document.body.scrollHeight);	
 	<? } ?>
-	if(document.getElementById('scrolldiv') != undefined){
-		document.getElementById('scrolldiv').scrollTop = <? echo $this->user->rolle->scrollposition; ?>;
-	}
 	document.onmousemove = drag;
   document.onmouseup = dragstop;
 	document.onmousedown = stop;
@@ -63,6 +209,7 @@ function onload_functions(){
 	<? if($this->user->rolle->auto_map_resize){ ?>
 	window.onresize = function(){clearTimeout(doit);doit = setTimeout(resizemap2window, 200);};
 	<? } ?>
+	document.fullyLoaded = true;
 }
 
 var dragobjekt = null;
@@ -89,20 +236,25 @@ function stop(event){
 }
 
 function dragstart(element){
-  dragobjekt = element;
-  dragx = posx - dragobjekt.offsetLeft;
-  dragy = posy - dragobjekt.offsetTop;
+	if(document.fullyLoaded){
+		dragobjekt = element;
+		dragx = posx - dragobjekt.offsetLeft;
+		dragy = posy - dragobjekt.offsetTop;
+	}
 }
 
 function resizestart(element, type){
-	resizeobjekt = element;
-	resizetype = type;
-	dragx = posx - resizeobjekt.parentNode.offsetLeft;
-  dragy = posy - resizeobjekt.parentNode.offsetTop;
-  resizex = posx;
-  resizey = posy;
-	width = parseInt(resizeobjekt.offsetWidth);		// da style.width auf 100% steht
-	height = parseInt(resizeobjekt.offsetHeight);	// da style.height auf 100% steht
+	if(document.fullyLoaded){
+		resizeobjekt = element;
+		resizetype = type;
+		dragx = posx - resizeobjekt.parentNode.offsetLeft;
+		dragy = posy - resizeobjekt.parentNode.offsetTop;
+		resizex = posx;
+		resizey = posy;
+		info = resizeobjekt.getBoundingClientRect();
+		width = parseInt(info.width);
+		height = parseInt(info.height);
+	}
 }
 
 
@@ -110,6 +262,8 @@ function dragstop(){
 	if(dragobjekt){
 		document.GUI.overlayx.value = parseInt(dragobjekt.style.left);
 		document.GUI.overlayy.value = parseInt(dragobjekt.style.top);
+		if(document.GUI.overlayx.value < 0)document.GUI.overlayx.value = 10;
+		if(window.innerHeight - 20 - document.GUI.overlayy.value < 0)document.GUI.overlayy.value = window.innerHeight - 20;
 		ahah('index.php', 'go=saveOverlayPosition&overlayx='+document.GUI.overlayx.value+'&overlayy='+document.GUI.overlayy.value, new Array(''), new Array(""));
 	}
   dragobjekt = null;
@@ -161,6 +315,9 @@ function drag(event) {
 			case "e":
 				resizeobjekt.style.width = width + (posx - resizex) + "px";
 			break;
+			case "col_resize":
+				resizeobjekt.style.minWidth = width + (posx - resizex) + "px";
+			break;
 		}
   }
 }
@@ -178,8 +335,10 @@ function activate_overlay(){
 }
 
 function deactivate_overlay(){
-	document.getElementById('contentdiv').scrollTop = 0;
-	document.getElementById('overlaydiv').style.display='none';
+	if(checkForUnsavedChanges()){
+		document.getElementById('contentdiv').scrollTop = 0;
+		document.getElementById('overlaydiv').style.display='none';
+	}
 }
 
 function urlstring2formdata(formdata, string){
@@ -193,10 +352,8 @@ function urlstring2formdata(formdata, string){
 
 function overlay_submit(gui, start){
 	// diese Funktion macht beim Fenstermodus und einer Kartenabfrage oder einem Aufruf aus dem Overlay-Fenster einen ajax-Request mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
+	startwaiting();
 	if(typeof FormData !== 'undefined' && (1 == <? echo $this->user->rolle->querymode; ?> && start || gui.id == 'GUI2')){	
-		<? if($this->last_query_requested){ ?>
-			gui.go.value = 'get_last_query';
-		<? } ?>
 		formdata = new FormData(gui);
 		formdata.append("mime_type", "overlay_html");	
 		ahah("index.php", formdata, new Array(document.getElementById('contentdiv')), new Array("sethtml"));	
@@ -253,6 +410,35 @@ function getlegend(groupid, layerid, fremde){
 		}
 	}
 	else{																	// eine Klasse wurde auf- oder zugeklappt
+		layer = document.getElementById('classes_'+layerid);
+		if(layer.value == 0){
+			layer.value = 1;
+		}
+		else{
+			layer.value = 0;
+		}
+		ahah('index.php', 'go=get_group_legend&layer_id='+layerid+'&show_classes='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
+	}
+}
+
+function getlegend(groupid, layerid, fremde) {
+	groupdiv = document.getElementById('groupdiv_' + groupid);
+	if (layerid == '') {														// eine Gruppe wurde auf- oder zugeklappt
+		group = document.getElementById('group_' + groupid);
+		if (group.value == 0) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
+			group.value = 1;
+			ahah('index.php', 'go=get_group_legend&' + group.name + '=' + group.value + '&group=' + groupid + '&nurFremdeLayer=' + fremde, new Array(groupdiv), "");
+		}
+		else {																// eine Gruppe wurde zugeklappt -> Layerstruktur verstecken und Einstellung per Ajax senden
+			group.value = 0;
+			layergroupdiv = document.getElementById('layergroupdiv_' + groupid);
+			groupimg = document.getElementById('groupimg_' + groupid);
+			layergroupdiv.style.display = 'none';
+			groupimg.src = 'graphics/plus.gif';
+			ahah('index.php', 'go=close_group_legend&' + group.name + '=' + group.value, '', '');
+		}
+	}
+	else {																	// eine Klasse wurde auf- oder zugeklappt
 		layer = document.getElementById('classes_'+layerid);
 		if(layer.value == 0){
 			layer.value = 1;
@@ -327,7 +513,7 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 			}
 		}
   }
-	if(reload)document.GUI.neuladen.click();
+	if(reload)neuLaden();
 }
 
 function updateQuery(event, thema, query, radiolayers, instantreload){
@@ -359,7 +545,12 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
   		}
   	}
   }
-	if(instantreload)document.GUI.neuladen.click();
+	if(instantreload)neuLaden();
+}
+
+function neuLaden(){
+	currentform.neuladen.value='true';
+	overlay_submit(currentform);
 }
 
 function preventDefault(e){
@@ -392,7 +583,7 @@ function selectgroupquery(group, instantreload){
       updateThema('', thema, query, '', '', 0);
     }
   }
-	if(instantreload)document.GUI.neuladen.click();
+	if(instantreload)neuLaden();
 }
 
 function selectgroupthema(group, instantreload){
@@ -414,7 +605,7 @@ function selectgroupthema(group, instantreload){
       updateQuery('', thema, query, '', 0);
     }
   }
-	if(instantreload)document.GUI.neuladen.click();
+	if(instantreload)neuLaden();
 }
 
 function zoomToMaxLayerExtent(zoom_layer_id){
@@ -423,47 +614,307 @@ function zoomToMaxLayerExtent(zoom_layer_id){
 	overlay_submit(currentform);
 }
 
+function getLayerOptions(layer_id){
+	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
+	ahah('index.php', 'go=getLayerOptions&layer_id=' + layer_id, new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'));
+	document.GUI.layer_options_open.value = layer_id;
+}
+
+function getGroupOptions(group_id) {
+	if (document.GUI.group_options_open.value != '') closeGroupOptions(document.GUI.group_options_open.value);
+	ahah('index.php', 'go=getGroupOptions&group_id=' + group_id, new Array(document.getElementById('group_options_' + group_id), ''), new Array('sethtml', 'execute_function'));
+	document.GUI.group_options_open.value = group_id;
+}
+
+function closeLayerOptions(layer_id){
+	document.GUI.layer_options_open.value = '';
+	document.getElementById('options_'+layer_id).innerHTML=' ';
+}
+
+function closeGroupOptions(group_id) {
+	document.GUI.group_options_open.value = '';
+	document.getElementById('group_options_' + group_id).innerHTML = ' ';
+}
+
+function saveLayerOptions(layer_id){	
+	document.GUI.go.value = 'saveLayerOptions';
+	document.GUI.submit();
+}
+
+function resetLayerOptions(layer_id){	
+	document.GUI.go.value = 'resetLayerOptions';
+	document.GUI.submit();
+}
+
+function openLegendOptions(){
+	document.getElementById('legendOptions').style.display = 'inline-block';
+}
+
+function closeLegendOptions(){
+	document.getElementById('legendOptions').style.display = 'none';
+}
+
+function saveLegendOptions(){
+	document.GUI.go.value = 'saveLegendOptions';
+	document.GUI.submit();
+}
+
+function resetLegendOptions(){
+	document.GUI.go.value = 'resetLegendOptions';
+	document.GUI.submit();
+}
+
+function toggleDrawingOrderForm(){
+	drawingOrderForm = document.getElementById('drawingOrderForm');
+	if(drawingOrderForm.innerHTML == ''){
+		ahah('index.php', 'go=loadDrawingOrderForm', new Array(drawingOrderForm), new Array('sethtml'));
+	}
+	else{
+		drawingOrderForm.innerHTML = '';
+	}
+}
+
+
+// --- html5 Drag and Drop der Layer im drawingOrderForm --- //
+ 
+var dragSrcEl = null;
+
+function handleDragStart(e){
+	var dropzones = document.querySelectorAll('#drawingOrderForm .drawingOrderFormDropZone');
+	[].forEach.call(dropzones, function (dropzone){		// DropZones groesser machen
+    dropzone.classList.add('ready');
+  });
+	dragSrcEl = e.target;
+  if(browser == 'firefox')e.dataTransfer.setData('text/html', null);	
+	dragSrcEl.classList.add('dragging');
+	setTimeout(function(){dragSrcEl.classList.add('picked');}, 1);
+}
+
+function handleDragOver(e){
+  if(e.preventDefault)e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  return false;
+}
+
+function handleDragEnter(e){
+  e.target.classList.add('over');
+}
+
+function handleDragLeave(e){
+  e.target.classList.remove('over');
+}
+
+function handleDrop(e){
+  if (e.stopPropagation)e.stopPropagation();
+	dstDropZone = e.target;
+	srcDropZone = dragSrcEl.nextElementSibling;
+	dstDropZone.classList.remove('over');
+	dragSrcEl.classList.remove('dragging');
+	dragSrcEl.classList.remove('picked');
+	if(srcDropZone != dstDropZone){
+		dragSrcEl.parentNode.insertBefore(dragSrcEl, dstDropZone);		// layer verschieben
+		dragSrcEl.parentNode.insertBefore(srcDropZone, dragSrcEl);		// dropzone verschieben
+	}
+  return false;
+}
+
+function handleDragEnd(e){
+	dragSrcEl.classList.remove('dragging');
+	dragSrcEl.classList.remove('picked');
+	var dropzones = document.querySelectorAll('#drawingOrderForm .drawingOrderFormDropZone');
+	[].forEach.call(dropzones, function (dropzone){		// DropZones kleiner machen
+    dropzone.classList.remove('ready');
+  });
+}
+
+// --- html5 Drag and Drop der Layer im drawingOrderForm --- //
+ 
+
+<?
+	if($this->user->rolle->legendtype == 1){ # alphabetisch sortierte Legende
+		echo "layernames = new Array();\n";
+		$layercount = count($this->sorted_layerset);
+		for($j = 0; $j < $layercount; $j++){
+			echo 'layernames['.$j.'] = \''.str_replace('"', '', str_replace("'", '', $this->sorted_layerset[$j]['alias']))."';\n";
+		}
+?>
+		function jumpToLayer(searchtext){
+			if(searchtext.length > 1){
+				found = false;
+				legend_top = document.getElementById('scrolldiv').getBoundingClientRect().top;
+				for(var i = 0; i < layernames.length; i++){
+					if(layernames[i].toLowerCase().search(searchtext.toLowerCase()) != -1){
+						layer = document.getElementById(layernames[i].replace('-', '_'));
+						layer.classList.remove('legend_layer_highlight');
+						void layer.offsetWidth;
+						layer.classList.add('legend_layer_highlight');
+						if(!found){
+							document.getElementById('scrolldiv').style.scrollBehavior = 'smooth';		// erst hier und nicht im css, damit das Scrollen beim Laden nicht animiert wird
+							document.getElementById('scrolldiv').scrollTop = document.getElementById('scrolldiv').scrollTop + (layer.getBoundingClientRect().top - legend_top);
+						}
+						found = true;
+					}
+				}
+			}
+		}
+<?
+	}
+?>
+
+function slide_legend_in(evt) {
+	document.getElementById('legenddiv').className = 'slidinglegend_slidein';
+}
+
+function slide_legend_out(evt) {
+	if(window.outerWidth - evt.pageX > 100) {
+		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
+	}
+}
+
+function switchlegend(){
+	if (document.getElementById('legenddiv').className == 'normallegend') {
+		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
+		ahah('index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
+		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize_legend.png';
+		document.getElementById('LegendMinMax').title="Legende zeigen";
+	}
+	else {
+		document.getElementById('legenddiv').className = 'normallegend';
+		ahah('index.php', 'go=changeLegendDisplay&hide=0', new Array('', ''), new Array("", "execute_function"));
+		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize_legend.png';
+		document.getElementById('LegendMinMax').title="Legende verstecken";
+	}
+}
+
+function home() {
+	document.GUI.go.value = '';
+	document.GUI.submit();
+}
+
+function scrollLayerOptions(){
+	layer_id = document.GUI.layer_options_open.value;
+	if(layer_id != ''){
+		legend_top = document.getElementById('legenddiv').getBoundingClientRect().top;
+		legend_bottom = document.getElementById('legenddiv').getBoundingClientRect().bottom;
+		posy = document.getElementById('options_'+layer_id).getBoundingClientRect().top;
+		if(posy < legend_bottom - 180 && posy > legend_top + 10)document.getElementById('options_content_'+layer_id).style.top = posy - (13+legend_top);		
+	}
+}
+
+function activateAllClasses(class_ids){
+	var classids = class_ids.split(",");
+	for(i = 0; i < classids.length; i++){
+		selClass = document.getElementsByName("class"+classids[i])[0];
+		if(selClass != undefined)selClass.value = 1;
+	}
+	overlay_submit(currentform);
+}
+
+function deactivateAllClasses(class_ids){
+	var classids = class_ids.split(",");
+	for(i = 0; i < classids.length; i++){
+		selClass = document.getElementsByName("class"+classids[i])[0];
+		if(selClass != undefined)selClass.value = 0;
+	}
+	overlay_submit(currentform);
+}
+
 /*Anne*/
-function changeClassStatus(classid,imgsrc,instantreload){
+function changeClassStatus(classid,imgsrc,instantreload,width,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
+	if(height < width)height = 12;
+	else height = 18;
 	if(selClass.value=='0'){
 		selClass.value='1';
 		selImg.src=imgsrc;
 	}else if(selClass.value=='1'){
 		selClass.value='2';
-		selImg.src="graphics/outline.jpg";
+		selImg.src="graphics/outline"+height+".jpg";
 	}else if(selClass.value=='2'){
 		selClass.value='0';
-		selImg.src="graphics/inactive.jpg";
+		selImg.src="graphics/inactive"+height+".jpg";
 	}
-	if(instantreload)document.GUI.neuladen.click();
+	if(instantreload)neuLaden();
 }
 
 /*Anne*/
-function mouseOverClassStatus(classid,imgsrc){
+function mouseOverClassStatus(classid,imgsrc,width,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
+	if(height < width)height = 12;
+	else height = 18;
 	if(selClass.value=='0'){
 		selImg.src=imgsrc;	
 	}else if(selClass.value=='1'){
-		selImg.src="graphics/outline.jpg";
+		selImg.src="graphics/outline"+height+".jpg";
 	}else if(selClass.value=='2'){
-		selImg.src="graphics/inactive.jpg";
+		selImg.src="graphics/inactive"+height+".jpg";
 	}
 }
 
 /*Anne*/
-function mouseOutClassStatus(classid,imgsrc){
+function mouseOutClassStatus(classid,imgsrc,width,height){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
+	if(height < width)height = 12;
+	else height = 18;	
 	if(selClass.value=='0'){
-		selImg.src="graphics/inactive.jpg";	
+		selImg.src="graphics/inactive"+height+".jpg";	
 	}else if(selClass.value=='1'){
 		selImg.src=imgsrc;
 	}else if(selClass.value=='2'){
-		selImg.src="graphics/outline.jpg";
+		selImg.src="graphics/outline"+height+".jpg";
 	}
 }
 
+function showMapParameter(epsg_code, width, height) {
+	var gui = document.GUI,
+			msg = " \
+				<div style=\"text-align: left\"> \
+					<h2>Daten des aktuellen Kartenausschnitts</h2><br> \
+					Koordinatenreferenzsystem: EPSG: " + epsg_code + "<br> \
+					linke untere Ecke: (" + toFixed(gui.minx.value, 3) + ", " + toFixed(gui.miny.value, 3) + ")<br> \
+					rechte obere Ecke: (" + toFixed(gui.maxx.value, 3) + ", " + toFixed(gui.maxy.value, 3) + ")<br> \
+					Ausdehnung: " + toFixed(gui.maxx.value - gui.minx.value, 3) + " x " + toFixed(gui.maxy.value-gui.miny.value,3) + " m<br> \
+					Bildgröße: " + width + " x " + height + " Pixel<br> \
+					Pixelgröße: " + toFixed(gui.pixelsize.value, 3) + " m\
+				</div> \
+			";
+	message([{
+			'type': 'info',
+			'msg': msg
+	}]);
+}
+
+function showExtentURL(epsg_code) {
+	var gui = document.GUI,
+			msg = " \
+				<div style=\"text-align: left\"> \
+					<h2>URL des aktuellen Kartenausschnitts</h2><br> \
+					<input id=\"extenturl\" style=\"width: 350px\" type=\"text\" value=\"<? echo URL.APPLVERSION; ?>index.php?go=zoom2coord&INPUT_COORD="+toFixed(gui.minx.value, 3)+","+toFixed(gui.miny.value, 3)+";"+toFixed(gui.maxx.value, 3)+","+toFixed(gui.maxy.value, 3)+"&epsg_code="+epsg_code+"\"><br> \
+				</div> \
+			";
+	message([{
+			'type': 'info',
+			'msg': msg
+	}]);
+	document.getElementById('extenturl').select();
+}
+
+function toFixed(value, precision) {
+	var power = Math.pow(10, precision || 0);
+	return String(Math.round(value * power) / power);
+}
+
+function exportMapImage(target) {
+	var link = document.GUI.hauptkarte.value;
+	console.log(link);
+	if (target != '') {
+		window.open(link, target);
+	}
+	else {
+		location.href = link;
+	}
+}
 </script>

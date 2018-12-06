@@ -56,9 +56,7 @@
 	<input name="lastcoordy" type="hidden" value="">
 	<input type="hidden" name="str_pathx" value="<? echo $this->formvars['str_pathx']; ?>">
   <input type="hidden" name="str_pathy" value="<? echo $this->formvars['str_pathy']; ?>">
-  <input type="hidden" name="vertices" id="vertices" value="">
-  <input type="hidden" name="stopnavigation" value="0">
-	
+  <input type="hidden" name="vertices" id="vertices" value="">	
 
 <?php
 #
@@ -80,10 +78,11 @@ $svg .= $basicfunctions;				# Basisfunktionen
 $svg .= $SVGvars_navscript;			# Funktionen zur Navigation
 $svg .= $linefunctions;					# Funktionen zum Zeichnen einer Linie
 $svg .= $vertex_catch_functions;# Punktfangfunktionen
+$svg .= $flurstqueryfunctions;	# Funktionen zum Hinzufügen und Entfernen von Polygonen
 $svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
 $svg .= $transformfunctions;		# Funktionen zum Transformieren (Verschieben, ...) der Geometrie
 $svg .= $measurefunctions;
-if($_SESSION['mobile'] == 'true'){
+if($this->user->rolle->gps){
 	$svg .= $gps_functions;
 }
 $svg .= $SVGvars_coordscript;
@@ -96,15 +95,21 @@ $svg .='
   </defs>';
 $svg .= $canvaswithall;
 $svg .= $navbuttons;
-$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 26)">';
-$svg .= linebuttons($strUndo, $strDeleteLine, $strDrawLine, $strDelLine, $strSplitLine);
-$svg .= transform_buttons($strMoveGeometry);
-$svg .= vertex_edit_buttons($strCornerPoint);
-$svg .= coord_input_buttons();
-if($_SESSION['mobile'] == 'true'){
-	$svg .= gpsbuttons($strSetGPSPosition, $this->formvars['gps_follow']);
+$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
+$buttons_fs .= deletebuttons($strUndo, $strDelete);
+$buttons_fs .= linebuttons($strDrawLine, $strDelLine);
+$buttons_fs .= flurstquerybuttons();
+$buttons_fs .= linebuttons2($strSplitLine, $strReverse);
+$buttons_fs .= transform_buttons($strMoveGeometry);
+$buttons_fs .= vertex_edit_buttons($strCornerPoint);
+$buttons_fs .= coord_input_buttons();
+if($this->user->rolle->gps){
+	$buttons_fs .= gpsbuttons($strSetGPSPosition, $strGPSFollow, $this->formvars['gps_follow']);
 }
-$svg .= measure_buttons($strRuler);
+$buttons_fs .= measure_buttons($strRuler);
+global $last_x;
+$svg .= '<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>';
+$svg .= $buttons_fs;
 $svg .= '</g>';
 $svg .= $SVG_end;
 

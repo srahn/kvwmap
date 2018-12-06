@@ -1,7 +1,7 @@
 <?php
-$strPublisherName="";
+$strPublisherName="Map server";
 $strVersion="version ";
-$strPoweredByUMNMapServer=" powered by UMN-MapServer. ";
+$strPoweredByUMNMapServer=" powered by MapServer. ";
 $strDate="Date: ";
 $strUser=" User: ";
 $strTask=" Usergroup: ";

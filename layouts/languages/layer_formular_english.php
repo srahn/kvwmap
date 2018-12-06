@@ -1,5 +1,7 @@
 ﻿<?php
+	$strTitle="Layer Editor";
   $strAsteriskRequired="Fields marked with an asterisk * are required";
+	$strClassItem="Classitem";
   $strLayerID="Layer ID*";
   $strName="Name";
   $strDataType="Datatype*";
@@ -33,47 +35,56 @@
   $strID="ID";
   $strClass="Class";
   $strExpression="Expression";
+	$strText="Text";
   $strSignOrder="Drawingorder";
   $strDelete="Delete";
   $strAddClass="Add class";
+  $strAddAutoClasses="Add auto classes";
   $strOtherExtentions="extended configuration";
   $strBack="Back";
   $strButtonSave="Save";
   $strButtonSaveAsNewLayer="Save as new layer";
   $strCommonData="general information";
   $strtransparency="transparency";
-  $strdrawingorder="drawingorder";
+  $strDrawingOrder="drawingorder";
+	$strLegendOrder="legend order";	
+	$strLegend="legend";
+	$strLegendGraphic="legendgraphic";
+	$strMap="Map";
+	$strOrder="Order";
   $strminscale="minscale";
   $strmaxscale="maxscale";
 	$strsymbolscale="symbolscale";
-  $stroffsite="offsite";
-  $strOWSParameter="OWS-Parameters";
-  $strDefaultValues="Default-Values for Task-Asignment";
-  $strWFS_geom="WFS-Geometry-Attribute";
-  $strQueryMap="QueryMap";
-  $strProcessing="Processing";
-  $strTasks="Tasks";
-  $strSchema="Schema";
-  $strWMSAuthUsername="wms_auth_username";
-  $strWMSAuthPassword="wms_auth_password";
-  $strDocument_path="Document Path";
-  $strDescribtion="Short Description";
-  $strDataOwner="Data-Owner";
-  $strMetaLink="Metadata-Link";
-  $strMaintable="Main Table";
-  $strPrivileges="Set Privileges";
-  $strAlias="Alias";
+	$stroffsite="offsite";
+	$strOWSParameter="OWS-Parameters";
+	$strDefaultValues="Default-Values for Task-Asignment";
+	$strWFS_geom="WFS-Geometry-Attribute";
+	$strQueryMap="QueryMap";
+	$strProcessing="Processing";
+	$strTasks="Tasks";
+	$strSchema="Schema";
+	$strWMSAuthUsername="wms_auth_username";
+	$strWMSAuthPassword="wms_auth_password";
+	$strDocument_path="Document Path";
+	$strDescribtion="Short Description";
+	$strDataOwner="Data-Owner";
+	$strMetaLink="Metadata-Link";
+	$strMaintable="Main Table";
+	$strPrivileges="Set Privileges";
+	$strAlias="Alias";
 	$strStatus="Status";
 	$strPostlabelcache="Postlabelcache";
 	$strrequires="Requires";
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+	$strClusterMaxdistance="Cluster:Maxdistance";
+	$strTriggerFunction="Trigger function";
+	$strClassification="Classification";
+	$strWidth="Width";
+	$strHeight="Height";
+	$strImagefile="Imagefile";
+	$strSync="Sync - Mode";
+	$strSyncHelp="In Sync - Mode all changes on the layer will be stored in a table named 'Main Table'_deltas with a serialised version number. The mode must be switched on, to enable the layer in the mobile App kvmobile.";
+	$strListed="show in Layer-List";
+	$strDocument_url="Document URL";
+	$strAssignDefaultValues="Apply Default-Values to User-Groups";
+	$strStylesLabels="Edit styles and labels";
 ?>  

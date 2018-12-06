@@ -21,8 +21,6 @@
   $strOwsSrs="OWS SRS";
   $strLogo="Wapen*";
   $strNoLogoSelected="du hest keen Wapen utsökt";
-  $strWaterMark="Waderteken";
-  $strNoWatermarkSelected="du hest keen Waderteken utsökt";
   $strALBReferencingRegion="ALB_Ruumbetog";
   $strALBReferencingRegionKey="ALB_Ruumbetogsslötel";
   $strMenuPoint="Menüpunkte";

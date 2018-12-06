@@ -13,7 +13,7 @@ function csv_export(){
 }
 
 function update_form(art){
-	if(art == 'jbe' || art == 'jbf' || art == 'agf' || art == 'atf'){
+	if(art == 'jex' || art == 'jbe' || art == 'jbf' || art == 'agf' || art == 'atf'){
 		document.getElementById('status').style.display = '';
 	}
 	else{
@@ -58,6 +58,7 @@ function zoomto_datasets(layer_id){
 	if(check_for_selection(layer_id)){
 		document.GUI.go.value = 'zoomto_selected_datasets';
 		document.GUI.chosen_layer_id.value = layer_id;
+		document.GUI.no_query.value = 'true';
 		document.GUI.submit();
 	}
 }
@@ -90,7 +91,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   <tr>
     <td align="right"><span class="fett">Name:</span>
       </td>
-    <td><input name="search_name" type="text" value="<?php echo $this->formvars['search_name']; ?>" size="25" tabindex="2"></td>
+    <td><input name="jagd_search_name" type="text" value="<?php echo $this->formvars['jagd_search_name']; ?>" size="25" tabindex="2"></td>
   </tr>
   <tr>
     <td align="right"><span class="fett">Art:</span>
@@ -104,6 +105,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   			<option <? if($this->formvars['search_art'] == 'tjb'){echo 'selected';} ?> value="tjb">Teiljagdbezirk</option>
   			<option <? if($this->formvars['search_art'] == 'sf'){echo 'selected';} ?> value="sf">Sonderfläche</option>
   			<option <? if($this->formvars['search_art'] == 'jbe'){echo 'selected';} ?> value="jbe">Enklave</option>
+				<option <? if($this->formvars['search_art'] == 'jex'){echo 'selected';} ?> value="jex">Exklave</option>
   			<option <? if($this->formvars['search_art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fläche</option>
   			<option <? if($this->formvars['search_art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfläche</option>
   			<option <? if($this->formvars['search_art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfläche</option>
@@ -196,7 +198,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   	if($this->jagdbezirke[$i]['art'] == 'apf'){echo 'Anpachtfläche';}
         ?>
         </td>
-        <td align="center"><a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo LAYER_ID_JAGDBEZIRKE; ?>&value_oid=<? echo $this->jagdbezirke[$i]['oid'] ?>&operator_oid==&search_nummer=<?php echo $this->formvars['search_nummer']; ?>&search_name=<?php echo $this->formvars['search_name']; ?>&search_art=<?php echo $this->formvars['search_art']; ?>&search_status=<?php echo $this->formvars['search_status']; ?>&search_verzicht=<?php echo $this->formvars['search_verzicht']; ?>">Sachdatenanzeige</a></td>
+        <td align="center"><a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo LAYER_ID_JAGDBEZIRKE; ?>&value_oid=<? echo $this->jagdbezirke[$i]['oid'] ?>&operator_oid==&search_nummer=<?php echo $this->formvars['search_nummer']; ?>&jagd_search_name=<?php echo $this->formvars['jagd_search_name']; ?>&search_art=<?php echo $this->formvars['search_art']; ?>&search_status=<?php echo $this->formvars['search_status']; ?>&search_verzicht=<?php echo $this->formvars['search_verzicht']; ?>">Sachdatenanzeige</a></td>
         <td align="center"><a href="index.php?go=zoomtojagdbezirk&oid=<? echo $this->jagdbezirke[$i]['oid'] ?>&nummer=<? echo $this->jagdbezirke[$i]['id'] ?>">zur Karte</a></td>
         <td align="center">
         	<? if($this->Stelle->isFunctionAllowed('Jagdkataster')){ ?>
@@ -235,5 +237,6 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 <input type="hidden" name="chosen_layer_id" value="<? echo LAYER_ID_JAGDBEZIRKE; ?>">
 <input type="hidden" name="layer_columnname" value="the_geom">
 <input type="hidden" name="layer_tablename" value="jagdbezirke">
+<input type="hidden" name="no_query" value="">
 
 

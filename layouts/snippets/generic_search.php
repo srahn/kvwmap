@@ -1,7 +1,6 @@
 <? 
 include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.php');
-include(SNIPPETS.'/generic_functions.php');
-include('funktionen/input_check_functions.php'); 
+include(SNIPPETS.'/sachdatenanzeige_functions.php');
 ?>
 
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
@@ -22,21 +21,13 @@ document.onkeydown = function(ev){
 	}
 }
 
-function changeInputType(oldObject, oType) {
-	if(oldObject != undefined){
-	  var newObject = document.createElement('input');
-	  newObject.type = oType;
-	  if(oldObject.size) newObject.size = oldObject.size;
-	  if(oldObject.value) newObject.value = oldObject.value;
-	  if(oldObject.name) newObject.name = oldObject.name;
-	  if(oldObject.id) newObject.id = oldObject.id;
-	  if(oldObject.className) newObject.className = oldObject.className;
-	  oldObject.parentNode.replaceChild(newObject,oldObject);
-	  return newObject;
+function changeInputType(object, oType) {
+	if(object != undefined){
+		object.type = oType;
 	}
 }
 
-function operatorchange(attributname, searchmask_number){
+function operatorchange(layer_id, attributname, searchmask_number){
 	if(searchmask_number > 0){						// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
 		prefix = searchmask_number+'_';
 	}
@@ -49,40 +40,65 @@ function operatorchange(attributname, searchmask_number){
 	}
 	if(document.getElementById(prefix+"operator_"+attributname).value == "between"){
 		changeInputType(document.getElementById(prefix+"value2_"+attributname), "text");
-		document.getElementById(prefix+"value_"+attributname).size = 9;
+		document.getElementById(prefix+"value_"+attributname).style.width = '144px';
 	}
 	else{
-		changeInputType(document.getElementById(prefix+"value2_"+attributname), "hidden");
-		document.getElementById(prefix+"value2_"+attributname).value = "";
-		document.getElementById(prefix+"value_"+attributname).size = 24;
+		if(document.getElementById(prefix+"value2_"+attributname) != undefined){
+			changeInputType(document.getElementById(prefix+"value2_"+attributname), "hidden");
+			document.getElementById(prefix+"value2_"+attributname).value = "";
+			document.getElementById(prefix+"value_"+attributname).style.width = '293px';
+		}
+	}
+	if(document.getElementById(prefix+"_avf_"+attributname) != undefined){
+		if(document.getElementById(prefix+"operator_"+attributname).value == "LIKE" || document.getElementById(prefix+"operator_"+attributname).value == "NOT LIKE"){
+			document.getElementById(prefix+"_avf_"+attributname).style.display = 'none';
+			document.getElementById(prefix+"_text_"+attributname).style.display = 'inline';
+			document.getElementById(prefix+"text_value_"+attributname).value = '';
+			document.getElementById(layer_id+"_"+attributname+"_"+prefix).disabled = true;
+			document.getElementById(prefix+"text_value_"+attributname).disabled = false;
+		}
+		else{
+			document.getElementById(prefix+"_avf_"+attributname).style.display = 'inline';
+			document.getElementById(prefix+"_text_"+attributname).style.display = 'none';			
+			document.getElementById(attributname+"_"+prefix).value = '';
+			document.getElementById(attributname+"_"+prefix).disabled = false;
+			document.getElementById(prefix+"text_value_"+attributname).disabled = true;
+		}
 	}
 }
 
 function suche(){
 	var nogo = '';
 	<?
-	for($i = 0; $i < count($this->attributes['type']); $i++){ 
-		if($this->attributes['type'][$i] != 'geometry'){		
-			if($this->attributes['mandatory'][$i] == 1){
-				if($this->attributes['alias'][$i] == ''){
-					$this->attributes['alias'][$i] = $this->attributes['name'][$i];
-				}		?>
-				if(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>.value == ''){
-					nogo = 'Das Feld <? echo $this->attributes['alias'][$i]; ?> ist ein Such-Pflichtfeld und muss ausgefüllt werden.';
-				}
-	<?	} ?>
-			test = document.GUI.value_<? echo $this->attributes['name'][$i]; ?>.value + '';
-			if(test.search(/%/) > -1 && document.GUI.operator_<? echo $this->attributes['name'][$i]; ?>.value == 'IN'){
-				nogo = 'Der Platzhalter % darf nur bei der Suche mit ähnlich oder nicht ähnlich verwendet werden.';
-			}
-	<? 	if(strpos($this->attributes['type'][$i], 'time') !== false OR $this->attributes['type'][$i] == 'date'){ ?>
-				test = document.GUI.value_<? echo $this->attributes['name'][$i]; ?>.value + '';
-				if(test != ''){
-					if(!checkDate(test)){
-						nogo = 'Das Datum hat das falsche Format';
+	for($i = 0; $i < count($this->attributes['type']); $i++) {
+		if($this->attributes['mandatory'][$i] == '' or $this->attributes['mandatory'][$i] > -1){
+			if($this->attributes['type'][$i] != 'geometry' AND $this->attributes['form_element_type'][$i] != 'SubFormFK' AND $this->attributes['form_element_type'][$i] != 'dynamicLink') {
+				if($this->attributes['mandatory'][$i] == 1){
+					if($this->attributes['alias'][$i] == ''){
+						$this->attributes['alias'][$i] = $this->attributes['name'][$i];
+					}		?>
+					if(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>.value == ''){
+						if('<? echo $this->attributes['form_element_type'][$i]; ?>' != 'Autovervollständigungsfeld'
+						|| (document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[0].value == '' && document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[0].disabled == false)
+						|| (document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[1].value == '' && document.GUI.value_<? echo $this->attributes['name'][$i]; ?>[1].disabled == false)
+						){
+							nogo = 'Das Feld <? echo $this->attributes['alias'][$i]; ?> ist ein Such-Pflichtfeld und muss ausgefüllt werden.';
+						}
 					}
+		<?	} ?>
+				test = document.GUI.value_<? echo $this->attributes['name'][$i]; ?>.value + '';
+				if(test.search(/%/) > -1 && document.GUI.operator_<? echo $this->attributes['name'][$i]; ?>.value == 'IN'){
+					nogo = 'Der Platzhalter % darf nur bei der Suche mit ähnlich oder nicht ähnlich verwendet werden.';
 				}
-	<?	} 
+		<? 	if(strpos($this->attributes['type'][$i], 'time') !== false OR $this->attributes['type'][$i] == 'date'){ ?>
+					test = document.GUI.value_<? echo $this->attributes['name'][$i]; ?>.value + '';
+					if(test != ''){
+						if(!checkDate(test)){
+							nogo = 'Das Datum hat das falsche Format';
+						}
+					}
+		<?	} 
+			}
 		}
 	}?>
 	if(document.GUI.map_flag.value == 1){
@@ -205,110 +221,17 @@ function add_searchmask(layer_id){
   
 //-->
 </script>
-<br><h2><? if($this->titel != '')echo $this->titel;else echo $strLayerSearch; ?></h2>
-<table border="0" cellpadding="5" cellspacing="2" bgcolor="<? echo $bgcolor; ?>">
-  <tr>
-    <td></td>
-  </tr>
-  <tr> 
-    <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="5"><? echo $strGroups; ?></td>
-  </tr>
-  <tr> 
-    <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
-      <select style="width:250px" size="1"  name="selected_group_id" onchange="document.GUI.selected_layer_id.value='';document.GUI.submit();" <? if(count($this->layergruppen['ID'])==0){ echo 'disabled';}?>>
-        <option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
-        <?
-        for($i = 0; $i < count($this->layergruppen['ID']); $i++){         
-          echo '<option';
-          if($this->layergruppen['ID'][$i] == $this->formvars['selected_group_id']){
-            echo ' selected';
-          }
-          echo ' value="'.$this->layergruppen['ID'][$i].'">'.$this->layergruppen['Bezeichnung'][$i].'</option>';
-        }
-      ?>
-      </select>
-  	</td>
-  </tr>
-  <tr> 
-    <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="5"><? echo $strLayers; ?></td>
-  </tr>
-  <tr> 
-    <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
-      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.submit();" <? if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
-        <option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
-        <?
-        for($i = 0; $i < count($this->layerdaten['ID']); $i++){         
-          echo '<option';
-          if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
-            echo ' selected';
-          }
-          echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
-        }
-      ?>
-      </select>
-  	</td>
-  </tr>
-  <tr>
-    <td id="searches1"><? if($this->formvars['selected_layer_id'] != ''){ ?><a href="javascript:showsearches();"><? echo $strSearches; ?></a><? } ?>&nbsp;</td>
-  </tr>
-  <tr id="searches2" style="display:none"> 
-    <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
-    	<table border="0" cellspacing="0" cellpadding="1">
-    		<tr align="center"> 
-			    <td colspan="2"  align="right">
-			    	<? echo $this->strName; ?>:&nbsp;<input type="text" name="search_name" value="<? echo $this->formvars['searches']; ?>">
-			    	<input class="button" type="button" style="width:74px" name="speichern" value="<? echo $this->strSave; ?>" onclick="save_search();">
-			    </td>
-			  </tr>
-    		<tr>
-			  	<td align="right"  colspan="2">
-			  		<input class="button" type="button" style="width:74px" name="delete" value="<? echo $this->strDelete; ?>" onclick="delete_search();">
-			  		<select name="searches">
-			  			<option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
-			  			<?
-			  				for($i = 0; $i < count($this->searchset); $i++){
-			  					echo '<option value="'.$this->searchset[$i]['name'].'" ';
-			  					if($this->selected_search[0]['name'] == $this->searchset[$i]['name']){echo 'selected ';}
-			  					echo '>'.$this->searchset[$i]['name'].'</option>';
-			  				}
-			  			?>
-			  		</select>
-			  		<input class="button" type="button" style="width:74px" name="laden" value="<? echo $this->strLoad; ?>" onclick="document.GUI.submit();">
-			    </td>
-			  </tr>
-    	</table>
-    </td>
-  </tr>
-  
-  <? if($this->formvars['columnname'] != ''){ ?>
-  <tr>
-    <td id="map1" <? if($this->formvars['map_flag'] != ''){echo 'style="border-top: 1px solid #C3C7C3;border-left: 1px solid #C3C7C3;border-right: 1px solid #C3C7C3"';} ?>><a href="javascript:showmap();"><? echo $strSpatialFiltering; ?></a>&nbsp;</td>
-  </tr>
-  <? if($this->formvars['map_flag'] != ''){ ?>
-  <tr id="map2"> 
-    <td align="right" style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
-    	<? echo $this->strUseGeometryOf; ?>: 
-  		<select name="layer_id" onchange="document.GUI.submit();">
-  			<?
-  				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
-  					echo '<option';
-  					if($this->formvars['layer_id'] == $this->queryable_vector_layers['ID'][$i]){echo ' selected';}
-  					echo ' value="'.$this->queryable_vector_layers['ID'][$i].'">'.$this->queryable_vector_layers['Bezeichnung'][$i].'</option>';
-  				}
-  			?>
-  		</select>
-  		<?
-				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
-			?>
-    </td>
-  </tr>
-  <? }} ?>
-  
-  <? if($this->selected_search != ''){echo '<script type="text/javascript">showsearches();</script>';} ?>
-  <tr> 
-    <td colspan="5" id="searchmasks">
+<br><h2><? if($this->titel != '')echo $this->titel;else echo $strLayerSearch; ?></h2><?php
+	if (!$this->user->rolle->visually_impaired) {
+		include(SNIPPETS.'/generic_search_layer_selector.php');
+	}
 
-<? if(count($this->attributes) > 0){  							
+?><table border="0" cellpadding="5" cellspacing="2" bgcolor="<? echo $bgcolor; ?>"><?php
+	if(!in_array($this->selected_search[0]['name'], array('', '<last_search>'))){echo '<script type="text/javascript">showsearches();</script>';} ?>
+  <tr> 
+    <td id="searchmasks">
+
+<? if(count($this->attributes) > 0){
 		for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){ 
 			$searchmask_number = $m; 		?>
 			<div>
@@ -321,42 +244,49 @@ function add_searchmask(layer_id){
 	<tr> 
     <td colspan="5">
 <? if(count($this->attributes) > 0){ ?>
-						
-			<table width="100%" align="center" border="0" cellspacing="0" cellpadding="3">			
+			<table width="100%" align="center" border="0" cellspacing="0" cellpadding="3">
+<?php if ($this->user->rolle->visually_impaired) { ?>
+					<tr>
+						<td align="center"><br>
+							<input type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
+						</td>
+					</tr>
+<?php } ?>
 			<? if($this->layerset[0]['connectiontype'] == MS_POSTGIS){ ?>
 					<tr>
 						<td><a href="javascript:add_searchmask(<? echo $this->formvars['selected_layer_id']; ?>);"><? echo $strAndOr; ?></a></td>
 					</tr>
 			<? } ?>
 					<tr>
-						<td colspan="5"><br><? echo $strLimit; ?>&nbsp;<input size="2" onkeyup="checknumbers(this, 'int2', '', '');" type="text" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>"></td>
+						<td><br><? echo $strLimit; ?>&nbsp;<input size="2" onkeyup="checknumbers(this, 'int2', '', '');" type="text" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>"></td>
 					</tr>
 					<tr>
-						<td colspan="5"><br><em><? echo $strLikeSearchHint; ?></em></td>
+						<td><br><em><? echo $strLikeSearchHint; ?></em></td>
 					</tr>
 					<tr>
-						<td colspan="5"><br><em><? echo $strDateHint; ?></em></td>
+						<td><br><em><? echo $strDateHint; ?></em></td>
 					</tr>
-					<tr>                
-						<td align="center" colspan="5"><br>
-							<input class="button" type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
+<?php if (!$this->user->rolle->visually_impaired) { ?>
+					<tr>
+						<td align="center"><br>
+							<input type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
 						</td>
 					</tr>
+<?php } ?>
 					<tr>
-						<td height="30" valign="bottom" align="center" colspan="5" id="loader" style="display:none"><img id="loaderimg" src="graphics/ajax-loader.gif"></td>
+						<td height="30" valign="bottom" align="center" id="loader" style="display:none"><img id="loaderimg" src="graphics/ajax-loader.gif"></td>
 					</tr>
 				</table><?
       }
       ?>
 		</td>
   </tr>
-  <tr> 
-    <td colspan="5">&nbsp;</td>
-  </tr>
-  <tr> 
-    <td colspan="5" >&nbsp;</td>
-  </tr>
 </table>
+<?php
+	if ($this->user->rolle->visually_impaired) {
+		include(SNIPPETS.'/generic_search_layer_selector.php');
+	}
+ ?>
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="go" value="Layer-Suche">
 <input type="hidden" name="titel" value="<? echo $this->formvars['titel'] ?>">

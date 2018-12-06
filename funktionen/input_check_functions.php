@@ -1,9 +1,18 @@
 <script type="text/javascript">
 
 	checknumbers = function(input, type, length, decimal_length){
+		var val;
+		val = input.value.replace(String.fromCharCode(126), '');		// Tilde entfernen
+		if(type == 'Zahl'){
+			val = input.value.replace(/[^(0-9| |\.|,|\-)]/g, '');
+		}
 		if(type == 'numeric' || type == 'float4' || type == 'float8'){
-			var val = input.value.replace(/[a-zA-Z]/g, '');
+			val = input.value.replace(/[^(0-9| |\.|,|\-)]/g, '');
 			val = val.replace(/,/g, '.');
+			if(parseInt(decimal_length) == 0 && val.search(/\./) > 0){
+				alert(unescape('F%FCr dieses Feld sind keine Nachkommastellen erlaubt.'));
+				val = val.replace(/\./g, '');
+			}
 			parts = val.split('.');
 			ohne_leerz = parts[0].replace(/ /g, '').length;
 			mit_leerz = parts[0].length;
@@ -20,17 +29,17 @@
 				}
 				val = val+'.'+parts[1];
 			}
-			if(input.value != val){
-				input.value = val;
-			}
 		}
 		if(type == 'int2' || type == 'int4' || type == 'int8'){
-			if(input.value.search(/[^-\d]/g) != -1 || input.value.search(/.-/g) != -1){
+			val = input.value.replace(/[^(0-9|\-)]/g, '');
+			if(input.value.search(/,/g) != -1 || input.value.search(/\./g) != -1){
 				alert('Es sind nur ganzzahlige Angaben erlaubt!');
-				var val = input.value.replace(/[^-\d]/g, '');
-				val = val.replace(/-/g, '');
-				input.value = val;
+				val = val.replace(/,/g, '');
+				val = val.replace(/\./g, '');
 			}
+		}
+		if(input.value != val && val != undefined){
+			input.value = val;
 		}
 	}
 

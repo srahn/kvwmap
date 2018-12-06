@@ -13,7 +13,7 @@ function DruckAufloesung(pixel,breite) {
 
 <? $this->formvars['resolution'] = str_replace(',','.',$this->formvars['resolution']); ?>
 
-<table border="0" cellpadding="5" cellspacing="3" bgcolor="<?php echo $bgcolor; ?>">
+<table width="<?php echo ($this->user->rolle->nImageWidth + $sizes[$this->user->rolle->gui]['legend']['width']); ?>" border="0" cellpadding="5" cellspacing="3" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center">
     <td colspan="3"><h2><?php echo $this->titel; ?></h2></td>
   </tr>
@@ -38,7 +38,7 @@ function DruckAufloesung(pixel,breite) {
 		<td>&nbsp;</td>
 	</tr>
   <tr>
-  	<td colspan="3" align="center"><input class="button" type="submit" name="go_plus" value="TIF-Datei erzeugen"></td>
+  	<td colspan="3" align="center"><input type="submit" name="go_plus" value="TIF-Datei erzeugen"></td>
   </tr>
   <?if($this->tif->tifimage != ''){
   		if($this->tif->tifimage == 'error'){ ?>

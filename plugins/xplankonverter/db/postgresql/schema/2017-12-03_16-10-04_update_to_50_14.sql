@@ -1,0 +1,1 @@
+ALTER TYPE xplan_gml.xp_zweckbestimmungkennzeichnung ADD VALUE '8000' AFTER '7000';

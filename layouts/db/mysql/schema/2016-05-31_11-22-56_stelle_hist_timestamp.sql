@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE `stelle` ADD `hist_timestamp` BOOLEAN NOT NULL DEFAULT '0';
+
+COMMIT;

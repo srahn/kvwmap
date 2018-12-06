@@ -1,8 +1,8 @@
 <?
 
-	$this->goNotExecutedInPlugins = false;
-	
-	switch($this->go){
+function go_switch_geodoc($go){
+	global $GUI;
+	switch($go){
 	  case 'spatialDocIndexing' : {
 			include(PLUGINS.'geodoc/model/kvwmap.php');
 			include(PLUGINS.'geodoc/model/documents.php');
@@ -10,8 +10,9 @@
 	  } break;
 		
 		default : {
-			$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
+			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 		}
 	}
+}
 
 ?>
