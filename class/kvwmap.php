@@ -17818,7 +17818,7 @@ class db_mapObj{
 			', ',
 			array_map(
 				function($language) use ($attrib) {
-					if($language != 'german')return "`Name_" . $language . "` = '" . $attrib['Name_' . $language] . "'";
+					if($language != 'german')return "`Name_" . $language . "` = '" . $attrib['name_' . $language] . "'";
 					else return "`Name` = '".$attrib['name']."'";
 				},
 				$supportedLanguages
