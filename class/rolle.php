@@ -791,7 +791,7 @@ class rolle {
 	}
 
 	function getRollenLayer($LayerName, $typ = NULL) {
-    $sql ="SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, 1 as queryable FROM rollenlayer AS l";
+		$sql ="SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
     if ($LayerName!='') {
       $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
