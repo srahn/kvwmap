@@ -7,7 +7,7 @@ class Gml_extractor {
 		$this->pgdatabase = $database;
 		$this->gml_location = $gml_location;
 		$this->gmlas_schema = $gmlas_schema;
-		$this->xsd_location = '/var/www/html/modell/xsd/5.0.1/XPlanung-Operationen.xsd';
+		$this->xsd_location = '/var/www/html/modell/xsd/5.1/XPlanung-Operationen.xsd';
 		$this->docker_gdal_cmd = 'docker exec gdal';
 	}
 

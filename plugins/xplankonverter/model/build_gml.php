@@ -317,13 +317,13 @@ class Gml_builder {
               $datatype_attribs = $this->typeInfo->getInfo($uml_attribute['type']);
               // retrieve attribute names
               $value_array_keys = array_column($datatype_attribs,'col_name');
-							
+
 							// Adds an extra Association for XP_VerbundenerPlan as they are not present with sequences in xplan_uml
 							if($uml_attribute['col_name'] == 'aendert') {
 								#$gmlStr .= '<note>XP_VerbundenerPlan</note>';
 								array_push($value_array_keys, 'verbundenerplan');
 							}
-							
+
               // wrap singular values into an array in order to
               // unify the processing of singular and multiple values
               if (!$uml_attribute['is_array']) {
@@ -335,12 +335,14 @@ class Gml_builder {
               // process composite data type
               foreach ($value_array as $single_value) {
                 // associate values with attribute names
-								#$gmlStr .= '<note>single_value: ' . count($single_value) . '</note>';
-								#$gmlStr .= '<note>value_array_keys: ' . count($value_array_keys) . '</note>';
+                #$gmlStr .= '<note>single_value: ' . count($single_value) . '</note>';
+                #$gmlStr .= '<note>value_array_keys: ' . count($value_array_keys) . '</note>';
+                // Null-Array-Werte auslassen
+                if($single == null) continue;
                 $single_value = array_combine($value_array_keys, $single_value);
                 // generate GML output (!!! recursive !!!)
                 $gml_attrib_str .= $this->generateGmlForAttributes($single_value, $datatype_attribs,$depth-1);
-								// leere Datentypen auslassen
+                // leere Datentypen auslassen
                 if (strlen($gml_attrib_str) == 0) break;
 
                 $typeElementName = end($datatype_attribs)['origin'];
