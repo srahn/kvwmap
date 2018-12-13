@@ -1423,7 +1423,7 @@ class stelle {
 		if ($query == 0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
 		# dann Attributrechte eintragen
 		for ($i = 0; $i < count($attributes['type']); $i++) {
-			if($formvars['privileg_'.$attributes['name'][$i].$this->id] !== '') {
+			if($formvars['privileg_'.$attributes['name'][$i].'_'.$this->id] !== '') {
 				$sql = "
 					INSERT INTO
 						layer_attributes2stelle
@@ -1431,8 +1431,8 @@ class stelle {
 						`layer_id` = " . $formvars['selected_layer_id'] . ",
 						`stelle_id` = " . $this->id . ",
 						`attributename` = '" . $attributes['name'][$i] . "',
-						`privileg` = " . $formvars['privileg_' . $attributes['name'][$i] . $this->id] .",
-						`tooltip`= " . ($formvars['tooltip_' . $attributes['name'][$i] . $this->id] == 'on' ? "1" : "0") . "
+						`privileg` = " . $formvars['privileg_' . $attributes['name'][$i] .'_'. $this->id] .",
+						`tooltip`= " . ($formvars['tooltip_' . $attributes['name'][$i] .'_'. $this->id] == 'on' ? "1" : "0") . "
 				";
 				#echo '<br>Sql: ' . $sql;
 				$this->debug->write("<p>file:stelle.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>" . $sql, 4);

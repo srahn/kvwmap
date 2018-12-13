@@ -1,5 +1,5 @@
 <?php
-$strPublisherName="";
+$strPublisherName="Map server";
 $strVersion="version ";
 $strPoweredByUMNMapServer=" powered by MapServer. ";
 $strDate="Date: ";

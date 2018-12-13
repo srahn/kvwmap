@@ -11,7 +11,7 @@
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
 	$size = 12;
-	$select_width = 'width: 100px;'; 
+	$select_width = 'width: 100%;'; 
 	if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
 		$layer['Name'] = $layer['alias'];
 	}
@@ -34,6 +34,11 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
 		<? if (!$this->user->rolle->visually_impaired AND $anzObj > 0) { ?>
+		<td align="right" valign="top" style="padding: 0 10 0 0">
+		<?	if($this->search == true AND $this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
+				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" title="'.$strbackToSearch.'"><img class="hover-border" src="'.GRAPHICSPATH.'pfeil_links.gif"></a>';
+			} ?>
+		</td>
 		<td align="right" valign="top" style="padding: 0 10 0 0">
 			<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
 		</td>
@@ -64,6 +69,7 @@
 	}
 
   if($doit == true){
+		echo $layer['paging'];
 ?>
 <table border="0" cellspacing="1" cellpadding="2" width="100%">
 	<tr>

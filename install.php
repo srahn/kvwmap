@@ -611,20 +611,4 @@ function settings() { ?>
   <?php
 }
 
-function versionFormatter($version) {
-  return substr(
-    str_pad(
-      str_replace(
-        '.', 
-        '',
-        $version
-      ),
-      3,
-      '0',
-      STR_PAD_RIGHT
-    ),
-    0,
-    3
-  );
-}
 ?>

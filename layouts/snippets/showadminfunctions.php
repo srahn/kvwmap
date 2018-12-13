@@ -1,3 +1,6 @@
+<?
+	include(LAYOUTPATH.'languages/showadminfunctions_'.$this->user->rolle->language.'.php');
+?>
 <script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 
 <script type="text/javascript">
@@ -18,7 +21,7 @@ function toggleGroup(group, show){
 
 </script>
 
-<br><h2><?php echo $this->titel; ?></h2><br>
+<br><h2><?php echo $strTitle; ?></h2><br>
 <? global $kvwmap_plugins; ?>
 
 <table cellpadding="2" cellspacing="12">
@@ -27,13 +30,13 @@ function toggleGroup(group, show){
 		<td valign="top" align="center" style="border:1px solid #C3C7C3">			
 			<table width="100%" cellpadding="4" cellspacing="2" border="0" style="border:1px solid #C3C7C3;border-collapse:collapse">
 				<tr style="border:1px solid #C3C7C3">
-					<td colspan="3" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17">Aktualisierung des Quellcodes</span></td>
+					<td colspan="3" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17"><? echo $strUpdateCode; ?></span></td>
 				</tr>
 				<tr style="border:1px solid #C3C7C3">
 					<td><? include(SNIPPETS.'git_remote_update.php');include(SNIPPETS.'git_status.php'); ?></td>
 				</tr>
 				<tr >
-					<td colspan="2" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=update_code'" <? if(!$num_commits_behind)echo 'disabled'; ?> value="Aktualisieren"></td>
+					<td colspan="2" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=update_code'" <? if(!$num_commits_behind)echo 'disabled'; ?> value="<? echo $strUpdate; ?>"></td>
 				</tr>
 			</table> 
 		</td>
@@ -43,10 +46,10 @@ function toggleGroup(group, show){
 		<td valign="top" align="center" style="border:1px solid #C3C7C3">			
 			<table width="100%" cellpadding="4" cellspacing="2" border="0" style="border:1px solid #C3C7C3;border-collapse:collapse">
 				<tr style="border:1px solid #C3C7C3">
-					<td colspan="3" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17">Aktualisierung der Datenbanken</span></td>
+					<td colspan="3" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17"><? echo $strUpdateDBs; ?></span></td>
 				</tr>
 				<tr style="border:1px solid #C3C7C3">
-					<td><span class="fett">Komponente</span></td>
+					<td><span class="fett"><? echo $strComponent; ?></span></td>
 					<td align="right"><span class="fett">Status</span></td>
 				</tr>
 				<? foreach($this->administration->schema_migration_files as $component => $component_migrations){
@@ -91,7 +94,7 @@ function toggleGroup(group, show){
 					}
 				}?>
 				<tr >
-					<td colspan="2" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=update_databases'" <? if(!$update_necessary)echo 'disabled'; ?> value="Aktualisieren"></td>
+					<td colspan="2" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=update_databases'" <? if(!$update_necessary)echo 'disabled'; ?> value="<? echo $strUpdate; ?>"></td>
 				</tr>
 			</table> 
 		</td>
@@ -100,7 +103,7 @@ function toggleGroup(group, show){
 		<td valign="top" align="center" style="border:1px solid #C3C7C3">			
 			<table width="100%" cellpadding="4" cellspacing="2" style="width: 584px" class="table_border_collapse">
 				<tr>
-					<td colspan="4" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17">Konfigurationsparameter</span></td>
+					<td colspan="4" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17"><? echo $strConfigParams; ?></span></td>
 				</tr>
 				<? 
 					global $kvwmap_plugins;
@@ -115,7 +118,7 @@ function toggleGroup(group, show){
 							<tr class="constants_<? echo $param['group']; ?>" style="display: none">
 								<td class="fett">Name</td>
 								<td class="fett">Prefix</td>
-								<td class="fett">Wert</td>
+								<td class="fett"><? echo $strValue; ?></td>
 								<td class="fett">Info</td>
 							</tr>
 				<?		}		?>
@@ -146,7 +149,7 @@ function toggleGroup(group, show){
 		<?	}
 			}} ?>
 				<tr >
-					<td colspan="4" align="center"><input type="button" onclick="document.GUI.func.value='save_config';document.GUI.submit();" value="Speichern"></td>
+					<td colspan="4" align="center"><input type="button" onclick="document.GUI.func.value='save_config';document.GUI.submit();" value="<? echo $this->strSave; ?>"></td>
 				</tr>
 			</table> 
 		</td>
@@ -158,13 +161,13 @@ function toggleGroup(group, show){
 		<td valign="top" align="center" style="border:1px solid #C3C7C3">
 			<table width="100%" cellpadding="4" cellspacing="2" border="0" style="border:1px solid #C3C7C3;border-collapse:collapse">
 				<tr style="border:1px solid #C3C7C3;">
-					<td style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17">weitere Funktionen</span></td>
+					<td style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17"><? echo $strFurtherOptions; ?></span></td>
 				</tr>
 				<tr style="border:1px solid #C3C7C3;">
-					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=createRandomPassword">Erzeuge zufälliges Passwort</a></span></td>
+					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=createRandomPassword"><? echo $strCreateRandomPassword; ?></a></span></td>
 				</tr>
 				<tr style="border:1px solid #C3C7C3;">
-					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=save_all_layer_attributes">Alle Layerattribute speichern</a></span></td>
+					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=save_all_layer_attributes"><? echo $strSaveAllLayerAttributes; ?></a></span></td>
 				</tr>  
 			</table>
 		</td>

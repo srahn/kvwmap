@@ -33,4 +33,5 @@
  $strEditAll="edit multiple";
  $strCopyDataset="copy record";
  $strNewDataset="neuen Datensatz anlegen";
+ $strToBottom="to bottom";
 ?>

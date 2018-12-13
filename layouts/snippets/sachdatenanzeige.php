@@ -20,6 +20,42 @@ if ($anzLayer==0) {
 	<?php	
 }
 for($i=0;$i<$anzLayer;$i++){
+	$gesamt = $this->qlayerset[$i]['count'];
+  if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $gesamt > 1){
+	   # Blätterfunktion
+	   if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] == ''){
+		   $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] = 0;
+		 }
+		 $von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + 1;
+	   $bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + $this->formvars['anzahl'];
+	   if($bis > $gesamt){
+	   	$bis = $gesamt;
+	   }
+	   $this->qlayerset[$i]['paging'] = '
+	   <table border="0" cellpadding="2" width="100%" cellspacing="0" class="sachdatenanzeige_paging">
+
+	   	<tr valign="top">
+	   		<td align="right" width="38%">';
+	   		if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] >= $this->formvars['anzahl'] AND $this->formvars['printversion'] == ''){
+					$this->qlayerset[$i]['paging'].= '<a href="javascript:firstdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-first.png" class="hover-border" style="vertical-align:middle" title="'.$strFirstDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
+	   			$this->qlayerset[$i]['paging'].= '<a href="javascript:prevdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-previous.png" class="hover-border" style="vertical-align:middle" title="'.$strBackDatasets.'"></a>&nbsp;';
+	   		}
+	      $this->qlayerset[$i]['paging'].= '
+				</td>
+				<td width="200px" align="center">
+					<span class="fett">'.$von.' - '.$bis.' '.$strFromDatasets.' '.$gesamt.'</span>
+				</td>
+	      <td width="38%">';
+	      if($bis < $gesamt AND $this->formvars['printversion'] == ''){
+	      	$this->qlayerset[$i]['paging'].= '&nbsp;<a href="javascript:nextdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-next.png" class="hover-border" style="vertical-align:middle" title="'.$strForwardDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
+					$this->qlayerset[$i]['paging'].= '<a href="javascript:lastdatasets('.$this->qlayerset[$i]['Layer_ID'].', '.$gesamt.');"><img src="'.GRAPHICSPATH.'go-last.png" class="hover-border" style="vertical-align:middle" title="'.$strLastDatasets.'"></a>';
+	      }
+	      $this->qlayerset[$i]['paging'].= '
+				</td>
+	    </tr>
+
+	   </table>';
+  }
 	if($i > 0){
 		echo '<hr style="width: 100%; height: 3px; margin: 15 0; color: '.BG_GLEHEADER.'; background: '.BG_GLEHEADER.';">';
 	}
@@ -57,42 +93,7 @@ for($i=0;$i<$anzLayer;$i++){
 		}
 	}
 	
-	$gesamt = $this->qlayerset[$i]['count'];
-  if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $gesamt > 1){
-	   # Blätterfunktion
-	   if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] == ''){
-		   $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] = 0;
-		 }
-		 $von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + 1;
-	   $bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + $this->formvars['anzahl'];
-	   if($bis > $gesamt){
-	   	$bis = $gesamt;
-	   }
-	   echo'
-	   <table border="0" cellpadding="2" width="100%" cellspacing="0" id="sachdatenanzeige_paging">
-
-	   	<tr valign="top">
-	   		<td align="right" width="38%">';
-	   		if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] >= $this->formvars['anzahl'] AND $this->formvars['printversion'] == ''){
-					echo '<a href="javascript:firstdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-first.png" class="hover-border" style="vertical-align:middle" title="'.$strFirstDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
-	   			echo '<a href="javascript:prevdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-previous.png" class="hover-border" style="vertical-align:middle" title="'.$strBackDatasets.'"></a>&nbsp;';
-	   		}
-	      echo '
-				</td>
-				<td width="200px" align="center">
-					<span class="fett">'.$von.' - '.$bis.' '.$strFromDatasets.' '.$gesamt.'</span>
-				</td>
-	      <td width="38%">';
-	      if($bis < $gesamt AND $this->formvars['printversion'] == ''){
-	      	echo '&nbsp;<a href="javascript:nextdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-next.png" class="hover-border" style="vertical-align:middle" title="'.$strForwardDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
-					echo '<a href="javascript:lastdatasets('.$this->qlayerset[$i]['Layer_ID'].', '.$gesamt.');"><img src="'.GRAPHICSPATH.'go-last.png" class="hover-border" style="vertical-align:middle" title="'.$strLastDatasets.'"></a>';
-	      }
-	      echo '
-				</td>
-	    </tr>
-
-	   </table>';
-   }
+	echo $this->qlayerset[$i]['paging'];
 }
 ?>
 <table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
@@ -107,7 +108,7 @@ for($i=0;$i<$anzLayer;$i++){
 		<? } ?>
 
 
-			<a href="javascript:scrolltop();"><img class="hover-border" title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a>&nbsp;&nbsp;&nbsp;
+			<a href="javascript:scrolltop();"><img class="hover-border" title="<? echo $strToTop; ?>" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a>&nbsp;&nbsp;&nbsp;
 		</td>
 	</tr>
 </table>

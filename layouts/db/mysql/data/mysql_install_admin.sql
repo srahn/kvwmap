@@ -133,7 +133,7 @@ INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@
 
 #### Volle Ausdehnung (Übersicht) und letzte Kartenansicht
 # Übersicht
-INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`) VALUES ('Übersicht', 'index.php?go=Full_Extent', 0, 1, NULL, 2);
+INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`, `title`, `button_class`) VALUES ('Übersicht', 'index.php?go=Full_Extent', 0, 1, NULL, 2, 'Maximale Kartenausdehnung', 'gesamtansicht');
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,2);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);

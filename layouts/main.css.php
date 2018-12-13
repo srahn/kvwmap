@@ -352,6 +352,10 @@ a.invisiblelayerlink:hover{
 	color: gray;
 }
 
+.sachdatenanzeige_paging{
+	margin-top: 10px;
+}
+
 .code{
 	text-align: left;
 	font-family: courier;

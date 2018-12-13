@@ -264,6 +264,9 @@ class GUI {
 							if($layer[0]['queryable']){
 								echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strSearch.'</a></li>';
 							}
+							if($layer[0]['privileg'] > 0){
+								echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->newDataset.'</a></li>';
+							}
 						}
 						if($layer[0]['Class'][0]['Name'] != ''){
 							if($layer[0]['showclasses'] != ''){
@@ -8575,7 +8578,18 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	}
 
 	function Zwischenablage(){
-		$sql = "SELECT count(z.layer_id) as count, z.layer_id, layer.Name FROM zwischenablage as z, layer WHERE z.layer_id = layer.Layer_ID AND user_id = ".$this->user->id." AND stelle_id = ".$this->Stelle->id." GROUP BY z.layer_id, Name";
+		global $language;
+		if($language != 'german') {
+			$name_column = "
+			CASE
+				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
+				ELSE l.`Name`
+			END AS Name";
+		}
+		else{
+			$name_column = "l.Name";
+		}
+		$sql = "SELECT count(z.layer_id) as count, z.layer_id, ".$name_column." FROM zwischenablage as z, layer as l WHERE z.layer_id = l.Layer_ID AND user_id = ".$this->user->id." AND stelle_id = ".$this->Stelle->id." GROUP BY z.layer_id, l.Name";
 		#echo $sql.'<br>';
 		$ret = $this->database->execSQL($sql,4, 1);
     $this->num_rows=mysql_num_rows($ret[1]);
@@ -13112,23 +13126,23 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 										}
 									}
 								}*/
-							}
 
-							# order by
-							if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
-								$sql_order = ' ORDER BY ' . replace_semicolon($this->formvars['orderby'.$layerset[$i]['Layer_ID']]);
-							}
-							elseif($layerset[$i]['attributes']['orderby'] != ''){														# Fall 2: der Layer hat im Pfad ein ORDER BY
-								$sql_order = $layerset[$i]['attributes']['orderby'];
-							}
-							if($layerset[$i]['template'] == ''){																				# standardmäßig wird nach der oid sortiert
-								$j = 0;
-								foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-									if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
-										if($sql_order == '')$sql_order = ' ORDER BY ' . replace_semicolon($layerset[$i]['maintable']) . '_oid ';
-										else $sql_order .= ', '.$layerset[$i]['maintable'].'_oid ';
+								# order by
+								if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
+									$sql_order = ' ORDER BY ' . replace_semicolon($this->formvars['orderby'.$layerset[$i]['Layer_ID']]);
+								}
+								elseif($layerset[$i]['attributes']['orderby'] != ''){														# Fall 2: der Layer hat im Pfad ein ORDER BY
+									$sql_order = $layerset[$i]['attributes']['orderby'];
+								}
+								if($layerset[$i]['template'] == ''){																				# standardmäßig wird nach der oid sortiert
+									$j = 0;
+									foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
+										if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
+											if($sql_order == '')$sql_order = ' ORDER BY ' . replace_semicolon($layerset[$i]['maintable']) . '_oid ';
+											else $sql_order .= ', '.$layerset[$i]['maintable'].'_oid ';
+										}
+										$j++;
 									}
-									$j++;
 								}
 							}
 							if($this->last_query != '' AND $this->last_query[$layerset[$i]['Layer_ID']]['sql'] != ''){
@@ -17518,13 +17532,13 @@ class db_mapObj{
 
 	function set_default_layer_privileges($formvars, $attributes){
 		for ($i = 0; $i < count($attributes['type']); $i++) {
-			if ($formvars['privileg_'.$attributes['name'][$i]] == '') $formvars['privileg_'.$attributes['name'][$i]] = 'NULL';
+			if ($formvars['privileg_'.$attributes['name'][$i].'_'] == '') $formvars['privileg_'.$attributes['name'][$i].'_'] = 'NULL';
 			$sql = "
 				UPDATE
 					`layer_attributes`
 				SET
-					`privileg` = " . $formvars['privileg_' . $attributes['name'][$i]] . ",
-					`query_tooltip` = " . ($formvars['tooltip_' . $attributes['name'][$i]] == 'on' ? "1" : "0") ."
+					`privileg` = " . $formvars['privileg_' . $attributes['name'][$i].'_'] . ",
+					`query_tooltip` = " . ($formvars['tooltip_' . $attributes['name'][$i].'_'] == 'on' ? "1" : "0") ."
 				WHERE
 					`layer_id` = " . $formvars['selected_layer_id'] . " AND
 					`name` = '" . $attributes['name'][$i] . "'
@@ -17804,7 +17818,7 @@ class db_mapObj{
 			', ',
 			array_map(
 				function($language) use ($attrib) {
-					if($language != 'german')return "`Name_" . $language . "` = '" . $attrib['Name_' . $language] . "'";
+					if($language != 'german')return "`Name_" . $language . "` = '" . $attrib['name_' . $language] . "'";
 					else return "`Name` = '".$attrib['name']."'";
 				},
 				$supportedLanguages
