@@ -552,7 +552,8 @@ class antrag {
 		$sql.="LEFT JOIN nachweisverwaltung.n_nachweise AS n ON n.art = d.id AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
     if ($this->nr!='') {
-			$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2antraege AS n2a ON n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+			$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2antraege AS n2a ON n.id=n2a.nachweis_id";
+			$sql.=" WHERE n2a.antrag_id='".$this->nr."'";
     }
     $sql.=" GROUP BY h.id, h.abkuerzung";
 		$sql.=" ORDER BY h.id";
