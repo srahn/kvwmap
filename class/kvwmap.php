@@ -1180,6 +1180,8 @@ class GUI {
 				  exit;
 				}
 				else {
+					if($this->user->rolle->oGeorefExt->maxx <= $this->user->rolle->oGeorefExt->minx)$this->user->rolle->oGeorefExt->maxx = $this->user->rolle->oGeorefExt->minx +1;
+					if($this->user->rolle->oGeorefExt->maxy <= $this->user->rolle->oGeorefExt->miny)$this->user->rolle->oGeorefExt->maxy = $this->user->rolle->oGeorefExt->miny +1;
 				  $map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
         }
 
