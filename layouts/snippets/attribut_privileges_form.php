@@ -34,11 +34,12 @@ function get_from_default(attribute_names, stellen){
 			element1[0].value = element2[0].value;
 			names = attribute_names.split('|');
 			for(i = 0; i < names.length; i++){
-				element1 = document.getElementsByName('privileg_'+names[i]+stelle[j]);
-				element2 = document.getElementsByName('privileg_'+names[i]);
+				element1 = document.getElementsByName('privileg_'+names[i]+'_'+stelle[j]);
+				element2 = document.getElementsByName('privileg_'+names[i]+'_');
+				console.log(element2);
 				element1[0].value = element2[0].value;
-				tooltip1 = document.getElementsByName('tooltip_'+names[i]+stelle[j]);
-				tooltip2 = document.getElementsByName('tooltip_'+names[i]);
+				tooltip1 = document.getElementsByName('tooltip_'+names[i]+'_'+stelle[j]);
+				tooltip2 = document.getElementsByName('tooltip_'+names[i]+'_');
 				tooltip1[0].checked = tooltip2[0].checked;
 			}
 		}
