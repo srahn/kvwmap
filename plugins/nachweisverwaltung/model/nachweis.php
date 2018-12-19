@@ -756,6 +756,7 @@ class Nachweis {
 			$order="flurid, stammnr, datum";
 		}
 		$order = str_replace('blattnummer', "NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::int", $order);		// nach Blattnummer nummerisch sortieren
+		$order = str_replace('rissnummer', "NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::int", $order);		// nach Rissnummer nummerisch sortieren
     # Die Funktion liefert die Nachweise nach verschiedenen Suchverfahren.
     # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter überprüft    
     if (is_array($id)) { $idListe=$id; } else { $idListe=array($id); }
