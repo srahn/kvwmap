@@ -443,7 +443,7 @@ class Konvertierung extends PgObject {
 					xplan_gml." . strtolower($class_name) . "
 				WHERE
 					konvertierung_id = $1
-			";
+			;";
 			$this->debug->show("Delete Objekte von {$class_name} with konvertierung_id " . $this->get('id') . ' und sql: ' . $sql . ' in reset Mapping.', Konvertierung::$write_debug);
 			#echo '<br>sql: ' . $sql;
 			$query = pg_query_params($this->database->dbConn, $sql, array($this->get('id')));

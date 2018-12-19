@@ -20,16 +20,57 @@ class Standard_shp_extractor {
 			$sql .= "VALUES";
 		}
 		foreach($shapes as $shape) {
-			$sql .= "(";
 			# class_name from UML
 			# TODO could be made more generic (UML-Classname function is e.g. also in extract_gml
 			$cut_shapename = (substr($shape, 0, 4) == 'shp_')? substr($shape, 4) : $shape;
-			if((substr($cut_shapename , -5) == '_poin') or
-				 (substr($cut_shapename , -5) == '_line') or
-				 (substr($cut_shapename , -5) == '_poly')){
-				$cut_shapename = substr($cut_shapename, 0, -5);
+			$endings = array(
+				'_point',
+				'_line',
+				'_poly',
+				'_point',
+				'_punkt',
+				'_linie',
+				'_punkte',
+				'_linien',
+				'_flaeche',
+				'_flaechen'
+			);
+			foreach($endings as $ending) {
+				if(substr($cut_shapename, -strlen($ending)) == $ending) {
+					$cut_shapename = substr($cut_shapename, 0, -strlen($ending));
+				}
 			}
+
 			$uml_class = $this->get_uml_class($cut_shapename);
+			$geom_type = $this->get_geom_type_of_shp($shape_schema, $shape);
+			$regel_name = '';
+			switch($geom_type) {
+				case "ST_Point":
+				case "ST_MultiPoint":
+					$regel_name .= $uml_class . "_standard_shp_" . "Punkte";
+					break;
+				case "ST_LineString":
+				case "ST_MultiLineString":
+					$regel_name .= $uml_class . "_standard_shp_" . "Linien";
+					break;
+				case "ST_Polygon":
+				case "ST_MultiPolygon":
+					$regel_name .= $uml_class . "_standard_shp_" . "Flaechen";
+					break;
+			}
+
+			// Delete existing rule with same name, konvertierung_id and bereich if already exists
+			$delete_sql = "
+				DELETE FROM
+					xplankonverter.regeln
+				WHERE
+					name = '" . $regel_name . "' AND
+					konvertierung_id = " . $this->konvertierung_id . " AND
+					bereich_gml_id = '" . $this->bereich_gml_id . "'::text::uuid
+				;";
+			$ret = $this->pgdatabase->execSQL($delete_sql, 4, 0);
+
+			$sql .= "(";
 			$sql .= "'" . $uml_class . "', ";
 			# factory
 			$sql .= "'sql'::xplankonverter.enum_factory, ";
@@ -42,26 +83,24 @@ class Standard_shp_extractor {
 
 			# beschreibung
 			$sql .= "'regel created automatically from standard shape', ";
-			# geometrietyp und name
-			$geom_type = $this->get_geom_type_of_shp($shape_schema, $shape);
+			# geometrietyp
 			// fallthrough, use as is so these values wont be filled with emtpy shapes (no default case)
 			switch($geom_type) {
-					case "ST_Point":
-					case "ST_MultiPoint":
-						$sql .= " 'Punkte'::xplankonverter.enum_geometrie_typ, ";
-						$sql .= "'" . $uml_class . "_standard_shp_" . "Punkte', ";
-						break;
-					case "ST_LineString":
-					case "ST_MultiLineString":
-						$sql .= " 'Linien'::xplankonverter.enum_geometrie_typ, ";
-						$sql .= "'" . $uml_class . "_standard_shp_" . "Linien', ";
-						break;
-					case "ST_Polygon":
-					case "ST_MultiPolygon":
-						$sql .= " 'Flächen'::xplankonverter.enum_geometrie_typ, ";
-						$sql .= "'" . $uml_class . "_standard_shp_" . "Flaechen', ";
-						break;
-				}
+				case "ST_Point":
+				case "ST_MultiPoint":
+					$sql .= " 'Punkte'::xplankonverter.enum_geometrie_typ, ";
+					break;
+				case "ST_LineString":
+				case "ST_MultiLineString":
+					$sql .= " 'Linien'::xplankonverter.enum_geometrie_typ, ";
+					break;
+				case "ST_Polygon":
+				case "ST_MultiPolygon":
+					$sql .= " 'Flächen'::xplankonverter.enum_geometrie_typ, ";
+					break;
+			}
+			# name
+			$sql .= "'" . $regel_name . "', ";
 			# konvertierung_id
 			$sql .= $this->konvertierung_id . ", ";
 			$sql .= $this->stelle_id . ",";
@@ -81,13 +120,26 @@ class Standard_shp_extractor {
 	*/
 	function standard_shape_to_regel_sql($shape, $schema) {
 		# removes shp_ , _line, _poin, _poly if exists, otherwise use real name
-		# TODO Findother ways to find shape name as it could possibly change from actual xplan-classname?
+		# TODO Find other ways to find shape name as it could possibly change from actual xplan-classname?
 		$target_table = (substr($shape, 0, 4) == 'shp_')? substr($shape, 4) : $shape;
-			if((substr($target_table , -5) == '_poin') or
-				 (substr($target_table , -5) == '_line') or
-				 (substr($target_table , -5) == '_poly')){
-				$target_table = substr($target_table, 0, -5);
+			$endings = array(
+				'_point',
+				'_line',
+				'_poly',
+				'_point',
+				'_punkt',
+				'_linie',
+				'_punkte',
+				'_linien',
+				'_flaeche',
+				'_flaechen'
+			);
+			foreach($endings as $ending) {
+				if(substr($target_table, -strlen($ending)) == $ending) {
+					$target_table = substr($target_table, 0, -strlen($ending));
+				}
 			}
+
 		$mapping_table = $this->mapping_table_shp_to_db($target_table);
 
 		$regel = "INSERT INTO " . XPLANKONVERTER_CONTENT_SCHEMA . "." . $target_table;
@@ -97,6 +149,13 @@ class Standard_shp_extractor {
 		$db_attributes = [];
 		foreach($shape_attributes as $shp_a) {
 			if($shp_a == 'the_geom') {
+				continue; # skip
+			}
+			# will be automatically inserted in the regel
+			if($shp_a == 'gehoertzub') {
+				continue; # skip
+			}
+			if($shp_a == 'gml_id') {
 				continue; # skip
 			}
 			# attributes with 10 or less signs will map 1 to 1 as is but for consistency will be read from table
@@ -111,7 +170,7 @@ class Standard_shp_extractor {
 		# NOTE: position as attribute only works for objects that inherit from xp_objekt
 		# If this is implemented e.g. for an exported plan, it will not work (as the geometry column is raeumlichergeltungsbereich)
 		$db_attributes[] = "position";
-		$select_regel .= "shp.the_geom AS position ";
+		$select_regel .= "the_geom AS position ";
 
 		# enter all attributes here
 		$regel .= "(";

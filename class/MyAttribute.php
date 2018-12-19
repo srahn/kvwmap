@@ -27,7 +27,7 @@ class MyAttribute {
 	function as_form_html() {
 		$html = '';
 		if (!($this->is_identifier and $this->value == '')) {
-			$html .= "<label class=\"fetter\" for=\"" . $this->name . "\">" . $this->name . ($this->is_mandatory() ? ' *' : '' ) . "</label>";
+			$html .= "<label class=\"fetter\" for=\"" . $this->name . "\">" . ucfirst($this->name) . ($this->is_mandatory() ? ' *' : '' ) . "</label>";
 			if ($this->name == 'id') {
 				$html .= "<span style=\"padding-top: 2px; float: left\">" . $this->value . "</span>";
 			}
