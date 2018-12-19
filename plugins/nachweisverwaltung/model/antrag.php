@@ -553,7 +553,7 @@ class antrag {
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
     if ($this->nr!='') {
 			$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2antraege AS n2a ON n.id=n2a.nachweis_id";
-			$sql.=" WHERE n2a.antrag_id='".$this->nr."'";
+			$sql.=" WHERE n2a.antrag_id='".$this->nr."' OR n.id IS NULL";
     }
     $sql.=" GROUP BY h.id, h.abkuerzung";
 		$sql.=" ORDER BY h.id";
