@@ -324,6 +324,7 @@ function drag(event) {
 
 function activate_overlay(){
 	document.getElementById('contentdiv').scrollTop = 0;
+	document.getElementById('contentdiv').style.display = '';
 	overlay = document.getElementById('overlaydiv');
 	overlay.style.left = document.GUI.overlayx.value+'px';
 	overlay.style.top = document.GUI.overlayy.value+'px';
