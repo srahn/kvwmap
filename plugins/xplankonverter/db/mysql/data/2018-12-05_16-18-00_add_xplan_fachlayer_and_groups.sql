@@ -1,9 +1,9 @@
 BEGIN;
 
 	# Obergruppen
-	INSERT INTO u_groups (Gruppenname, obergruppe, order) VALUES ('B-Pläne', NULL, 10);
-	INSERT INTO u_groups (Gruppenname, obergruppe, order) VALUES ('F-Pläne', NULL, 20);
-	INSERT INTO u_groups (Gruppenname, obergruppe, order) VALUES ('B-Pläne', NULL, 30);
+	INSERT INTO u_groups (Gruppenname, obergruppe, `order`) VALUES ('B-Pläne', NULL, 10);
+	INSERT INTO u_groups (Gruppenname, obergruppe, `order`) VALUES ('F-Pläne', NULL, 20);
+	INSERT INTO u_groups (Gruppenname, obergruppe, `order`) VALUES ('SO-Pläne', NULL, 30);
 
 	# Gruppen
 	SET @obergruppe = (SELECT id FROM u_groups WHERE Gruppenname = 'B-Pläne');
