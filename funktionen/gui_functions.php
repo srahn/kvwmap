@@ -341,6 +341,19 @@ function deactivate_overlay(){
 	}
 }
 
+function minimize_overlay(){
+	if(document.getElementById('contentdiv').style.display != 'none'){
+		document.getElementById('contentdiv').style.display = 'none';
+		document.getElementById('overlayfooter').style.display = 'none';
+		document.getElementById('minmaxlink').title = 'Maximieren';
+	}
+	else{
+		document.getElementById('contentdiv').style.display = '';
+		document.getElementById('overlayfooter').style.display = 'block';
+		document.getElementById('minmaxlink').title = 'Minimieren';
+	}
+}
+
 function urlstring2formdata(formdata, string){
 	kvpairs = string.split('&');
 	for(i = 0; i < kvpairs.length; i++) {
