@@ -346,7 +346,7 @@ class Validierung extends PgObject {
 				"select
 					gid,
 					NOT st_within(" . $geometry_col . ", " . $plantype . ".raeumlichergeltungsbereich) AS ausserhalb,
-					st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), " . $plantype . ".raeumlichergeltungsbereich)/1000 AS distance,
+					st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), ST_Transform(" . $plantype . ".raeumlichergeltungsbereich, " . $konvertierung->get('input_epsg') ."))/1000 AS distance,
 				",
 				$sql
 			);
@@ -356,7 +356,7 @@ class Validierung extends PgObject {
 				'select',
 				"select
 					NOT st_within(" . $geometry_col . ", " . $plantype . ".raeumlichergeltungsbereich) AS ausserhalb,
-					st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), " . $plantype . ".raeumlichergeltungsbereich)/1000 AS distance,
+					st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), ST_Transform(" . $plantype . ".raeumlichergeltungsbereich, " . $konvertierung->get('input_epsg') ."))/1000 AS distance,
 				",
 				$sql
 			);
