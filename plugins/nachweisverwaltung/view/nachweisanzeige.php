@@ -145,6 +145,12 @@ function getvorschau(url){
 	document.getElementById('vorschau').innerHTML = img;
 }
 
+function select(row){
+	var current_selected = document.querySelector('.selected');
+	if(current_selected != null)current_selected.className = '';
+	row.className='selected';
+}
+
 //-->
 </script>
 
@@ -193,6 +199,9 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 
 		  ?>
 	  </td>
+				<tr>
+					<td><a href="index.php?go=Nachweisrechercheformular&VermStelle=<? echo $this->formvars['VermStelle']; ?>">&lt;&lt; zur&uuml;ck zur Suche</a></td>
+				</tr>
         </tr>
         <tr> 
           <td>Gesucht nach:<span class="fett"> 
@@ -298,7 +307,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		$bgcolor = '#FFFFFF';
      for ($i=0;$i<$this->nachweis->erg_dokumente;$i++) {
         ?>
-        <tr style="outline: 1px dotted grey;" onmouseout="document.getElementById('vorschau').innerHTML='';" bgcolor="
+        <tr style="outline: 1px dotted grey;" onclick="select(this);" onmouseout="document.getElementById('vorschau').innerHTML='';" bgcolor="
 			<? $orderelem = explode(',', $this->formvars['order']);
 			if ($this->nachweis->Dokumente[$i][$orderelem[0]] != $this->nachweis->Dokumente[$i-1][$orderelem[0]]){
 				if($bgcolor == '#EBEBEB'){
@@ -459,9 +468,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 	  ?>
 	  <span class="fett">Es konnten keine Dokumente zu der Auswahl gefunden werden.<br>
 Wählen Sie neue Suchparameter.</span><br>
-	  <? } ?>
-			<br>
-			<a href="index.php?go=Nachweisrechercheformular&VermStelle=<? echo $this->formvars['VermStelle']; ?>">&lt;&lt; zur&uuml;ck zur Suche</a>
+	  <? } ?>			
 		</td>
   </tr>
   <tr> 

@@ -164,6 +164,13 @@ $legendheight = $this->map->height + 20;
 		margin-left: 10px;
 		flex-grow: 10;	
 	}
+	#dokein-allemessung ul{
+		margin: 0;
+		color: #236dbf;
+		padding: 0px;
+		padding-left: 5px;
+		list-style: square inside none;
+	}	
 	#dokein-image, #dokein-gemkg {
 		margin-right: 20px;
 	}
@@ -242,9 +249,6 @@ $legendheight = $this->map->height + 20;
 	.dokein-draw-child {
 		margin-left: 10px;
 	}
-	#dokein-backtolist {
-		margin: 10px 0px 10px 0px;
-	}
 </style>
 
 
@@ -259,7 +263,10 @@ $legendheight = $this->map->height + 20;
 				</div>
 				<div id="dokein-allemessung">
 					<? if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!=''){ ?>
-					<a href="index.php?go=Nachweisrechercheformular_Senden&abfrageart=indiv_nr&suchhauptart=&suchgemarkung=<? echo $this->formvars['Gemarkung']; ?>&suchflur=<? echo $this->formvars['Flur']; ?>&flur_thematisch=1&such<? echo NACHWEIS_PRIMARY_ATTRIBUTE.'='.$this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]; if(NACHWEIS_SECONDARY_ATTRIBUTE != '')echo '&such'.NACHWEIS_SECONDARY_ATTRIBUTE.'='.$this->formvars[NACHWEIS_SECONDARY_ATTRIBUTE];; ?>">alle der Messung anzeigen</a>
+					<ul>
+						<li><a href="index.php?go=Nachweisrechercheformular_Senden&abfrageart=indiv_nr&suchhauptart=&suchgemarkung=<? echo $this->formvars['Gemarkung']; ?>&suchflur=<? echo $this->formvars['Flur']; ?>&flur_thematisch=1&such<? echo NACHWEIS_PRIMARY_ATTRIBUTE.'='.$this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]; if(NACHWEIS_SECONDARY_ATTRIBUTE != '')echo '&such'.NACHWEIS_SECONDARY_ATTRIBUTE.'='.$this->formvars[NACHWEIS_SECONDARY_ATTRIBUTE];; ?>">alle der Messung anzeigen</a></li>
+						<li><a href="index.php?go=Nachweisanzeige&order=<? echo $this->formvars['order']; ?>&richtung=<? echo $this->formvars['richtung'].'#'.$this->formvars['id']; ?>">zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a></li>
+					</ul>
 					<? } ?>
 				</div>
 				<div id="dokein-image">
@@ -311,9 +318,6 @@ $legendheight = $this->map->height + 20;
 							<input type="checkbox" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>&nbsp;Punktfang
 						</div>
 					</div>
-				</div>
-				<div id="dokein-backtolist">
-					<?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige&order=<? echo $this->formvars['order']; ?>&richtung=<? echo $this->formvars['richtung'].'#'.$this->formvars['id']; ?>">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?>
 				</div>
 			</div>
 			</div>

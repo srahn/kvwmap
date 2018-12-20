@@ -1077,6 +1077,10 @@ span.italic {
 	font-style: italic; 
 }
 
+tr.selected{
+	background-color: ccc;
+}
+
 span.red {
 	font-size: 15px;	
 	color: #a82e2e;
