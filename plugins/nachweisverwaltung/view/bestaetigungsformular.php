@@ -3,7 +3,7 @@
     <td colspan="2" bgcolor="<?php echo BG_FORM ?>"><div align="center"><h2><?php echo $this->titel; ?></h2></div></td>
   </tr>
   <tr> 
-    <td colspan="2" bgcolor="<?php echo BG_FORM ?>"><div align="center"><?php echo $this->formvars['nachfrage']; ?></div></td>
+    <td colspan="2" bgcolor="<?php echo BG_FORM ?>"><div align="center" style="color: #cc0000; font-family: SourceSansPro3"><?php echo $this->formvars['nachfrage']; ?></div></td>
   </tr>
   <tr> 
     <td colspan="2" bgcolor="<?php echo BG_FORM ?>"> </td>
