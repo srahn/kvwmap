@@ -4,6 +4,14 @@
 ?>
 <script language="javascript" type="text/javascript">
 
+if(navigator.userAgent.toLowerCase().indexOf('firefox') >= 0){
+	var browser = 'firefox';
+}
+else{
+	if(navigator.userAgent.toLowerCase().indexOf('chrome') >= 0) var browser = 'chrome';
+	else var browser = 'other';
+}
+
 function Bestaetigung(link,text) {
 	Check = confirm(text);
 	if (Check == true) {
@@ -362,6 +370,61 @@ function urlstring2formdata(formdata, string){
 		formdata.append(el[0], el[1]);	
 	}
 	return formdata;
+}
+	 
+function get_map_ajax(postdata, code2execute_before, code2execute_after){
+	top.startwaiting();
+	if(document.GUI.legendtouched.value == 0){
+		svgdoc = document.SVG.getSVGDocument();	
+		// nix
+		if(browser == 'firefox')var mapimg = svgdoc.getElementById("mapimg2");			
+		else var mapimg = svgdoc.getElementById("mapimg");
+		var scalebar = document.getElementById("scalebar");
+		var refmap = document.getElementById("refmap");
+		var scale = document.getElementById("scale");
+		var lagebezeichnung = document.getElementById("lagebezeichnung");
+		var minx = document.GUI.minx;
+		var miny = document.GUI.miny;
+		var maxx = document.GUI.maxx;
+		var maxy = document.GUI.maxy;			
+		var pixelsize = document.GUI.pixelsize;
+		var polygon = svgdoc.getElementById("polygon");			
+		// nix
+		
+		input_coord = document.GUI.INPUT_COORD.value;
+		cmd = document.GUI.CMD.value;
+		
+		if(browser != 'firefox'){
+			code2execute_before += 'moveback()';
+			code2execute_after += 'startup();';
+		}
+		
+		if(document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
+		
+		ahah("index.php", postdata+"&mime_type=map_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after, 
+		new Array(
+			'',
+			mapimg, 
+			scalebar,
+			refmap, 
+			scale,
+			lagebezeichnung,
+			minx,
+			miny,
+			maxx,
+			maxy,
+			pixelsize,			
+			polygon,
+			''
+		), 			 
+		new Array("execute_function", "xlink:href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "points", "execute_function"));
+					
+		document.GUI.INPUT_COORD.value = '';
+		document.GUI.CMD.value = '';
+	}
+	else{
+		document.GUI.submit();
+	}
 }
 
 function overlay_submit(gui, start){

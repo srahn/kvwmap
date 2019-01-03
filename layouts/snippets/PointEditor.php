@@ -115,7 +115,11 @@ function send(){
 	<? }else{ ?>
 	<td colspan="2"></td>
 	<? } ?>
-	<td align="right"><input type="checkbox" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>&nbsp;Punktfang</td>
+	<td align="right">
+		<input type="checkbox" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>&nbsp;Punktfang
+		&nbsp;<img id="scalebar" valign="top"	style="display:none;margin-top: 5px; padding-right:<? echo ($this->user->rolle->hideLegend ? '35' : '5'); ?>px" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
+		<div id="lagebezeichnung" style="display:none"></div>
+	</td>
 	<td align="center">
 		<? if($this->new_entry != true){ ?>
 		<a href="index.php?go=Layer-Suche&go_plus=Suchen&selected_layer_id=<?php echo $this->formvars['layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>">Sachdatenanzeige</a>

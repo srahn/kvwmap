@@ -2,23 +2,7 @@
 <?
 	include(LAYOUTPATH.'snippets/SVG_Utilities.php');
 ?>
-<div id="map">
-<!-- ----------------------- formular-variabeln fuer navigation ---------------------- -->
-	<INPUT TYPE="HIDDEN" NAME="CMD" VALUE="">
-	<INPUT TYPE="HIDDEN" NAME="INPUT_TYPE" VALUE="">
-	<INPUT TYPE="HIDDEN" NAME="INPUT_COORD" VALUE="">            
-	<input type="hidden" name="imgxy" value="300 300">
-	<input type="hidden" name="imgbox" value="-1 -1 -1 -1">
-	
-<!-- ----------------------- formular-variabeln fuer fachschale ---------------------- -->
-	<input type="hidden" name="oid" value="<?php echo $this->formvars['oid']; ?>">
-	<input type="HIDDEN" name="minx" value="<?php echo $this->map->extent->minx; ?>">
-	<input type="HIDDEN" name="miny" value="<?php echo $this->map->extent->miny; ?>">
-	<input type="HIDDEN" name="maxx" value="<?php echo $this->map->extent->maxx; ?>">
-	<input type="HIDDEN" name="maxy" value="<?php echo $this->map->extent->maxy; ?>">
-	<INPUT TYPE="hidden" NAME="pixelsize" VALUE="<?php echo $pixelsize; ?>">
-	<input type="hidden" name="pathlength" value="<?php echo $this->formvars['pathlength']; ?>">
-	
+<div id="map">	
 	<input name="newpath" type="hidden" value="<?php echo $this->formvars['newpath']; ?>">
 	<input name="pathwkt" type="hidden" value="<?php echo $this->formvars['pathwkt']; ?>">
 	<input name="newpathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
@@ -29,7 +13,6 @@
 	<input name="secondline" type="hidden" value="<?php echo $this->formvars['secondline']; ?>">
 	<input name="pathx_second" type="hidden" value="<?php echo $this->formvars['pathx_second']; ?>">
 	<input name="pathy_second" type="hidden" value="<?php echo $this->formvars['pathy_second']; ?>">
-	<input type="hidden" name="svghelp" id="svghelp">
 	<input type="hidden" name="bufferwidth" value="<? if($this->formvars['bufferwidth'])echo $this->formvars['bufferwidth']; else echo '10'; ?>">
 	<input type="hidden" name="buffersubtract" value="<? if($this->formvars['buffersubtract'])echo $this->formvars['buffersubtract']; ?>">
 	<input type="hidden" name="bufferside" value="<? if($this->formvars['bufferside'])echo $this->formvars['bufferside']; else echo 'left'; ?>">

@@ -106,6 +106,7 @@ define(CASE_COMPRESS, false);																																						  #
 #											- man muss über den Rechteckzoom unter 1:100 zoomen (kein Mausrad!)									#
 #										  - ein räumlich gefilterter Layer muss an sein																				#
 #										  - man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
+#											- man muss in einer Fachschale zoomen (wegen reduce_mapwidth)												#
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
 #   getLayerOptions:  - getRollenLayer() reinkopieren																											#
@@ -187,6 +188,7 @@ function go_switch($go, $exit = false) {
 		switch($go) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
+				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction']);
 				$GUI->loadMap('DataBase');
 				$GUI->navMap($GUI->formvars['CMD']);
 				$GUI->saveMap('');

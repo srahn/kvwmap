@@ -25,13 +25,21 @@
 	
 	function add_ortho_point(world_x, world_y, local_x, local_y, deactivate){
 		document.getElementById("svghelp").SVGadd_ortho_point(world_x, world_y, local_x, local_y, deactivate);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}
+	
+	function moveback(){	
+		document.getElementById("svghelp").SVGmoveback();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}
+	
+	function startup(){
+		document.getElementById("svghelp").SVGstartup();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}	
 
 	var nbh = new Array();
 	
 	function showtooltip(){
 	}
-	
+		
 </script>
  
 <?php
@@ -75,7 +83,7 @@
 	$SVG_begin ='<?xml version="1.0"?>
 	<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
 	  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-	<svg width="'.$res_x.'" height="'.$res_y.'" zoomAndPan="disable" onload="startup()" onmousemove="top.coords_anzeige(evt)"
+	<svg width="'.$res_x.'" height="'.$res_y.'" zoomAndPan="disable" onload="init()" onmousemove="top.coords_anzeige(evt)"
 	  xmlns="http://www.w3.org/2000/svg" version="1.1"
 	  xmlns:xlink="http://www.w3.org/1999/xlink">
 	';
@@ -181,7 +189,39 @@
 	';
 
 	$SVGvars_navscript = '
+	
+	top.document.getElementById("svghelp").SVGmoveback = moveback;
+	
+	top.document.getElementById("svghelp").SVGstartup = startup;
+	
+	function moveback(evt){
+		// bei allen anderen Browsern gibt es kein onload für das Kartenbild, deswegen wird diese Funktion als erstes ausgefuehrt
+		document.getElementById("mapimg").setAttribute("xlink:href", "'.dirname($_SERVER['SCRIPT_NAME']).'/'.GRAPHICSPATH.'leer.gif");
+		document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
+		// Tooltip refreshen
+		oldmousex = undefined;
+		// Navigation wieder erlauben
+		top.stopwaiting();
+	}
+	
+	function moveback_ff(evt){
+		// beim Firefox wird diese Funktion beim onload des Kartenbildes ausgefuehrt
+		document.getElementById("mapimg2").setAttribute("style", "display:block");	
+		window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));startup();\', 200);
+		// Tooltip refreshen
+		oldmousex = undefined;
+		// Navigation wieder erlauben
+		top.stopwaiting();
+		window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 400);
+		window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 400);	
+	}
 
+	function get_map_ajax(postdata){
+		remove_vertices();
+		remove_in_between_vertices();
+		top.get_map_ajax(postdata, \'\', \'\');
+	}
+	
 	function submit(){
 		top.startwaiting();
 		top.overlay_submit(enclosingForm, false);
@@ -426,22 +466,22 @@
      case "zoomin_point":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
       enclosingForm.CMD.value          = "zoomin";
-      submit();
+      get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value);
      break;
      case "zoomout":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
       enclosingForm.CMD.value          = cmd;
-      submit();
+      get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value);
      break;
      case "zoomin_box":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
       enclosingForm.CMD.value          = "zoomin";
-      submit();
+      get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value);
      break;
      case "recentre":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
       enclosingForm.CMD.value = cmd;
-      submit();
+			get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value);
      break;
      case "ppquery_point":
 			if(!checkQueryFields())break;
@@ -531,11 +571,13 @@
 		enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
 		var g = document.getElementById("moveGroup");
 		zx = g.getCTM().inverse();
-		pathx[0] = Math.round(zx.e);
-		pathy[0] = Math.round(zx.f);
-		pathx[2] = Math.round(zx.e + resx*zx.a); 
-		pathy[2] = Math.round(zx.f + resy*zx.a);
-		sendpath("zoomin_box", pathx, pathy);
+		navX = new Array();
+		navY = new Array();
+		navX[0] = Math.round(zx.e);
+		navY[0] = Math.round(zx.f);
+		navX[2] = Math.round(zx.e + resx*zx.a); 
+		navY[2] = Math.round(zx.f + resy*zx.a);
+		sendpath("zoomin_box", navX, navY);
 	}
 	
 	function mousewheelchange(evt){
@@ -576,14 +618,26 @@
 		return p;
 	}
  	
-	function startup(){
+	function init(){
+		startup();
 		if(window.addEventListener){
+			if(top.browser != "other"){
+				document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback_ff(evt); }, true);
+			}
 			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari//IE9
-  		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);		//Firefox
+			window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);		//Firefox
 		}
-		else{	
+		else {
 			top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
 		}
+	}
+	
+	function startup(){
+		minx = parseFloat(enclosingForm.minx.value);
+		miny = parseFloat(enclosingForm.miny.value);
+		maxx = parseFloat(enclosingForm.maxx.value);
+		maxy = parseFloat(enclosingForm.maxy.value);
+		scale = parseFloat(enclosingForm.pixelsize.value);
 		if(measurefunctions == true){
 			get_measure_path();
 			redrawPL();
@@ -2799,7 +2853,7 @@ function mouseup(evt){
 		explosion = pathWelt.split(" ");
 		for(i = 0; i < explosion.length; i++){
 			if(explosion[i] != "M" && explosion[i] != ""){
-				explosion[i] = Math.round((explosion[i] - minx)/scale);
+				explosion[i] = Math.round((explosion[i] - minx)/scale);				
 				explosion[i+1] = Math.round((explosion[i+1] - miny)/scale);
 				i++;
 			}
@@ -3056,11 +3110,9 @@ $vertex_catch_functions = '
 	top.document.getElementById("vertices").SVGtoggle_vertices = toggle_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function toggle_vertices(){
+		remove_foreign_vertices();
 		if(enclosingForm.punktfang.checked){
 			request_foreign_vertices();
-		}
-		else{
-			remove_foreign_vertices();
 		}
 	}
 	
@@ -3375,7 +3427,7 @@ $measurefunctions = '
 	$canvaswithall = '
 	  <rect id="background" style="fill:white" width="100%" height="100%"/>
 		<g id="moveGroup" transform="translate(0 0)">
-		  <image xlink:href="'.$bg_pic.'" height="100%" width="100%" y="0" x="0"/>
+			<image id="mapimg" xlink:href="'.$bg_pic.'" height="100%" width="100%" y="0" x="0"/>
 		  <g id="cartesian" transform="translate(0,'.$res_y.') scale(1,-1)">
 				<path d="" id="line_second" style="fill:none;stroke:red;stroke-width:2" />
 		  	<path d="" id="line_first" style="fill:none;stroke:blue;stroke-width:2"/>
@@ -3393,6 +3445,9 @@ $measurefunctions = '
 			<g id="ortho_point_vertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
 			<g id="foreignvertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
 	  </g>
+		<g id="mapimg2_group">
+			<image id="mapimg2" xlink:href="" height="100%" width="100%" y="0" x="0" style="display:none"/>
+		</g>
 	  <g id="templates">
 	  	<circle style="-moz-user-select: none;" id="kreis" cx="-5000" cy="-5000" r="7" opacity="0.3" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="select_vertex(evt)" onmousemove="move_vertex(evt)" onmouseup="end_vertex_move(evt)" />
 			<line stroke="#111" stroke-width="14" id="linie" x1="-5000" y1="-5000" x2="-5001" y2="-5001" opacity="0.3" onmouseover="activate_line(evt)" onmousemove="activate_line(evt)" />
@@ -3826,3 +3881,18 @@ $measurefunctions = '
 		return $measure_buttons;
 	}
 ?>
+
+<INPUT TYPE="HIDDEN" NAME="CMD" VALUE="">
+<INPUT TYPE="HIDDEN" NAME="INPUT_TYPE" VALUE="">
+<INPUT TYPE="HIDDEN" NAME="INPUT_COORD" VALUE="">
+<input type="hidden" name="imgxy" value="300 300">
+<input type="hidden" name="imgbox" value="-1 -1 -1 -1">
+<input type="hidden" name="legendtouched" value="0">
+<input type="HIDDEN" name="minx" value="<?php echo $this->map->extent->minx; ?>">
+<input type="HIDDEN" name="miny" value="<?php echo $this->map->extent->miny; ?>">
+<input type="HIDDEN" name="maxx" value="<?php echo $this->map->extent->maxx; ?>">
+<input type="HIDDEN" name="maxy" value="<?php echo $this->map->extent->maxy; ?>">
+<INPUT TYPE="hidden" NAME="pixelsize" VALUE="<?php echo $pixelsize; ?>">
+<input type="hidden" name="pathlength" value="<?php echo $this->formvars['pathlength']; ?>">
+<input type="hidden" name="svghelp" id="svghelp">
+<input type="hidden" name="width_reduction" value="<? echo $this->formvars['width_reduction']; ?>">
