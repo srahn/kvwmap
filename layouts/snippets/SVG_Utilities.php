@@ -33,7 +33,7 @@
 	
 	function startup(){
 		document.getElementById("svghelp").SVGstartup();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-	}	
+	}
 
 	var nbh = new Array();
 	
@@ -732,6 +732,9 @@ $basicfunctions.= '
 		if(linefunctions == true){
 			redrawfirstline();
 			linelength();
+		}
+		if(enclosingForm.last_doing.value == "vertex_edit"){
+			edit_vertices();
 		}
 		redrawpoint();
 	}
@@ -3125,7 +3128,7 @@ $vertex_catch_functions = '
 	function remove_foreign_vertices(){
 		var parent = document.getElementById("foreignvertices");
 		var count = parent.childNodes.length;
-		for(i = 0; i < count-2; i++){
+		for(i = 0; i < count; i++){
 			parent.removeChild(parent.lastChild);
 		}
 	}
