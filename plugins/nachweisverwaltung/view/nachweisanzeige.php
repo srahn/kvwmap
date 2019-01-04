@@ -175,6 +175,8 @@ function getvorschau(url){
 <input type="hidden" name="value_id" value="">
 <input type="hidden" name="operator_id" value="IN">
 <input type="hidden" name="keinzurueck" value="true">
+<input type="hidden" name="gueltigkeit" value="<? echo $this->formvars['gueltigkeit']; ?>">
+<input type="hidden" name="geprueft" value="<? echo $this->formvars['geprueft']; ?>">
 
 	
 <table width="0%" border="0" cellpadding="8" cellspacing="0">
