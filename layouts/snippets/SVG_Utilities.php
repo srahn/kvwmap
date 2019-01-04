@@ -577,6 +577,9 @@
 		navY[0] = Math.round(zx.f);
 		navX[2] = Math.round(zx.e + resx*zx.a); 
 		navY[2] = Math.round(zx.f + resy*zx.a);
+		if(enclosingForm.last_doing.value != "vertex_edit"){
+			enclosingForm.always_draw.checked = true;
+		}
 		sendpath("zoomin_box", navX, navY);
 	}
 	
@@ -726,14 +729,14 @@ $basicfunctions.= '
 				enclosingForm.firstpoly.value = true;
 			}
 			//enclosingForm.secondpoly.value = false;
-			redrawfirstpolygon();
+			redrawsecondpolygon();
 			if(enclosingForm.firstpoly.value == "true")polygonarea();
 		}
 		if(linefunctions == true){
 			redrawfirstline();
 			linelength();
 		}
-		if(enclosingForm.last_doing.value == "vertex_edit"){
+		if(enclosingForm.last_doing2.value == "vertex_edit"){
 			edit_vertices();
 		}
 		redrawpoint();
@@ -778,7 +781,9 @@ $basicfunctions.= '
 			if(enclosingForm.last_doing.value == "measure"){
 				save_measure_path();
 			}
-			enclosingForm.always_draw.checked = true;
+			if(enclosingForm.last_doing.value != "vertex_edit"){
+				enclosingForm.always_draw.checked = true;
+			}
 			enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
 			enclosingForm.last_doing.value = "recentre";
 		}
