@@ -46,12 +46,12 @@ function back(){
 	<tr>
 		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 		<td>
-			 <table width=100% cellpadding="2" cellspacing="2" style="border:1px solid #C3C7C3">
+			 <table width=100% cellpadding="4" cellspacing="0" style="border:1px solid #C3C7C3">
         <tr>
           <td class="fett" colspan=3 style="border-bottom:1px solid #C3C7C3">&nbsp;Layout-Auswahl</td>
         </tr>
         <tr>
-          <td>
+          <td style="border-bottom:1px solid #C3C7C3">
             &nbsp;<select  name="aktivesLayout" onchange="document.GUI.go_plus.value = '';document.GUI.submit()">
             <option value="">--- bitte wählen ---</option>
             <?  
@@ -61,13 +61,18 @@ function back(){
             ?>
           </select> 
           </td>
-          <td align="left"> 
+          <td align="left" style="border-bottom:1px solid #C3C7C3"> 
 			    	<input type="button" name="zurueck" value="zurück" onclick="back();">
 			    </td>
-          <td align="left"> 
+          <td align="left" style="border-bottom:1px solid #C3C7C3"> 
 			    	<input type="button" name="drucken" value="Drucken" onclick="print();">
 			    </td>
         </tr>
+				<? if($this->page_numbering){ ?>
+				<tr>
+					<td>&nbsp;Seiten-Nummerierung pro Datensatz&nbsp;<input type="checkbox" name="record_paging" value="1" <? if($this->formvars['record_paging'] == 1)echo 'checked="true"'; ?>></td>
+				</tr>
+				<? } ?>
       </table> 
     </td>
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>

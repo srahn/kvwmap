@@ -9519,8 +9519,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     # aktives Layout abfragen
     if($this->formvars['aktivesLayout'] != ''){
     	$this->ddl->selectedlayout = $this->ddl->load_layouts(NULL, $this->formvars['aktivesLayout'], NULL, array(0,1));
+			for($i = 0; $i < count($this->ddl->selectedlayout[0]['texts']); $i++){
+				if(strpos($this->ddl->selectedlayout[0]['texts'][$i]['text'], '$pagenumber') !== false)$this->page_numbering = true;
+			}
 	    # PDF erzeugen
-	    $pdf_file = $this->ddl->createDataPDF(NULL, NULL, NULL, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $this->ddl->selectedlayout[0], $oids, $result, $this->Stelle, $this->user);
+	    $pdf_file = $this->ddl->createDataPDF(NULL, NULL, NULL, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $this->ddl->selectedlayout[0], $oids, $result, $this->Stelle, $this->user, $this->formvars['record_paging']);
 	    # in jpg umwandeln
 	    $currenttime = date('Y-m-d_H_i_s',time());
 	    exec(IMAGEMAGICKPATH.'convert "'.$pdf_file.'[0]" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"');
@@ -9585,7 +9588,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     if($this->formvars['aktivesLayout'] != ''){
     	$ddl->selectedlayout = $ddl->load_layouts(NULL, $this->formvars['aktivesLayout'], NULL, NULL);
 	    # PDF erzeugen
-	    $output = $ddl->createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $ddl->selectedlayout[0], $oids, $result, $this->Stelle, $this->user);
+	    $output = $ddl->createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $ddl->selectedlayout[0], $oids, $result, $this->Stelle, $this->user, NULL, $this->formvars['record_paging']);
     }
 		if($pdfobject == NULL){			# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF anzeigen
 			$this->outputfile = basename($output);

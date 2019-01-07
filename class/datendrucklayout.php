@@ -533,17 +533,19 @@ class ddl {
 		return $output;
   }
   
-  function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $oids, $result, $stelle, $user, $preview = NULL){
+  function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $oids, $result, $stelle, $user, $preview = NULL, $record_paging = NULL){
 		# Für einen ausgewählten Layer wird das übergebene Result-Set nach den Vorgaben des übergebenen Layouts in ein PDF geschrieben
 		# Werden $pdfobject, $offsetx und $offsety übergeben, wird kein neues PDF-Objekt erzeugt, sondern das übergebene PDF-Objekt eines übergeordneten Layers+Layout verwendet (eingebettete Layouts)
 		$this->layerset = $layerset[0];
-  	$this->layout = $layout;
+  	$this->layout = $layout;		
   	$this->Stelle = $stelle;
 		$this->attributes = $attributes;
 		$this->result = $result;
   	$this->user = $user;
   	$this->maxy = 0;
 		$this->offsety = $offsety;
+		$this->layout['record_paging'] = $record_paging;
+		$this->gui->formvars['record_paging'] = NULL;		# damit in untergeordneten Layouts nicht auch nummeriert wird
   	#$this->miny = 1000000;
   	$this->i_on_page = -1;
 		$this->page_overflow = false;
@@ -673,6 +675,12 @@ class ddl {
 				$this->miny[$lastpage] = 1000000;
 				$this->maxy = 800;
 			}
+			if($this->layout['record_paging']){
+				if($this->pdf->last_page_index == '')$this->pdf->last_page_index = -1;
+				$page_count = count($this->pdf->objects['3']['info']['pages']);
+				$this->pdf->record_page_count[] = $page_count - $this->pdf->last_page_index - 1;				
+				$this->pdf->last_page_index = $page_count - 1;				
+			}
     }
 		if($pdfobject == NULL){		# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF erzeugen
 			# Freitexte hinzufügen, die auf jeder Seite erscheinen sollen (Seitennummerierung etc.)
@@ -707,9 +715,22 @@ class ddl {
 		$this->pdf->ezSetMargins(0,0,0,0);
 		$pages = $this->pdf->objects['3']['info']['pages'];
 		$pagecount = count($pages);
+		$record_paging_index = 0;
+		$record_page_number = 0;
 		for($i = 0; $i < $pagecount; $i++){
 			$this->pdf->reopenObject($pages[$i]+1);		# die Page-IDs sind komischerweise alle um 1 größer
-			$this->add_freetexts(0, 0, 'everypage', $i + 1, $pagecount);
+			if($this->layout['record_paging']){
+				$record_page_count = $this->pdf->record_page_count[$record_paging_index];
+				$record_page_number++;
+				$this->add_freetexts(0, 0, 'everypage', $record_page_number, $record_page_count);
+				if($record_page_number == $record_page_count){
+					$record_paging_index++;		# im Array mit den Seitenzahlen pro Datensatz eins weiter rücken
+					$record_page_number = 0;	# und Seitennummer wieder auf 0 setzen
+				}
+			}
+			else{
+				$this->add_freetexts(0, 0, 'everypage', $i + 1, $pagecount);
+			}
 			$this->add_lines(0, 'everypage');
 			$this->pdf->closeObject();
 		}
