@@ -676,10 +676,10 @@ class ddl {
 				$this->maxy = 800;
 			}
 			if($this->layout['record_paging']){
-				if($this->pdf->last_page_index == '')$this->pdf->last_page_index = -1;
+				if($this->pdf->last_page_index === NULL)$this->pdf->last_page_index = -1;
 				$page_count = count($this->pdf->objects['3']['info']['pages']);
-				$this->pdf->record_page_count[] = $page_count - $this->pdf->last_page_index - 1;				
-				$this->pdf->last_page_index = $page_count - 1;				
+				$this->pdf->record_page_count[] = $page_count - $this->pdf->last_page_index - 1;
+				$this->pdf->last_page_index = $page_count - 1;
 			}
     }
 		if($pdfobject == NULL){		# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF erzeugen
