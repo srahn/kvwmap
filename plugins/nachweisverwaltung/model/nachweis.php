@@ -241,7 +241,7 @@ class Nachweis {
   }	
   
   function getDokumentarten(){
-  	$sql="SELECT * FROM nachweisverwaltung.n_dokumentarten order by art"; 
+  	$sql="SELECT * FROM nachweisverwaltung.n_dokumentarten order by sortierung, art"; 
     $ret=$this->database->execSQL($sql,4, 0);    
     if (!$ret[0]) {
       while($rs=pg_fetch_array($ret[1])){
@@ -1049,7 +1049,7 @@ class Nachweis {
           # Suche mit Suchpolygon
           #echo '<br>Suche mit Suchpolygon.';
           $this->debug->write('Abfragen der Nachweise die das Polygon schneiden',4);
-					$sql ="SELECT distinct n.*, NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::int, st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+					$sql ="SELECT distinct n.*, NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::int, NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::int, st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";					

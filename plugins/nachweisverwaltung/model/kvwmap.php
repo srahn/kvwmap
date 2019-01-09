@@ -339,7 +339,7 @@
     $GUI->nachweiseRecherchieren();
   };
 
-	$GUI->setNachweisSuchparameter = function($stelle_id, $user_id, $suchhauptart,$suchunterart,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$stammnr2,$suchrissnummer,$suchrissnummer2,$suchfortfuehrung,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle, $flur_thematisch, $alle_der_messung) use ($GUI){
+	$GUI->setNachweisSuchparameter = function($stelle_id, $user_id, $suchhauptart,$suchunterart,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$stammnr2,$suchrissnummer,$suchrissnummer2,$suchfortfuehrung,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle, $flur_thematisch, $alle_der_messung, $order) use ($GUI){
 		if($suchhauptart == NULL)$suchhauptart = array();
 		if($suchunterart == NULL)$suchunterart = array();
 		$sql ='UPDATE rolle_nachweise SET ';
@@ -361,6 +361,7 @@
 		if ($svermstelle!='') { $sql.='sVermStelle='.$svermstelle.','; }else{$sql.='sVermStelle= NULL,' ;}
 		$sql.='flur_thematisch="'.$flur_thematisch.'",';
 		$sql.='alle_der_messung="'.$alle_der_messung.'",';
+		$sql.='`order`="'.$order.'",';
 		$sql .= 'user_id = '.$user_id;
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		#echo $sql;
@@ -525,7 +526,7 @@
     if ($GUI->formvars['abfrageart']=='poly') {
       $GUI->formvars['suchpolygon'] = $GUI->formvars['newpathwkt'];
     }
-    $GUI->setNachweisSuchparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchunterart'], $GUI->formvars['abfrageart'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchflur'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchstammnr2'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchrissnummer2'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchpolygon'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'],$GUI->formvars['sdatum2'], $GUI->formvars['sVermStelle'], $GUI->formvars['flur_thematisch'], $GUI->formvars['alle_der_messung']);
+    $GUI->setNachweisSuchparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchunterart'], $GUI->formvars['abfrageart'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchflur'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchstammnr2'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchrissnummer2'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchpolygon'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'],$GUI->formvars['sdatum2'], $GUI->formvars['sVermStelle'], $GUI->formvars['flur_thematisch'], $GUI->formvars['alle_der_messung'], $GUI->formvars['order']);
     # Die Anzeigeparameter werden so gesetzt, daß genau das gezeigt wird, wonach auch gesucht wurde.
     # bzw. was als Suchparameter im Formular angegeben wurde.
     $GUI->setNachweisAnzeigeparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchhauptart']);

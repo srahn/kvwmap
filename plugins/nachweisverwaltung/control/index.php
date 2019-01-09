@@ -102,13 +102,14 @@ function go_switch_nachweisverwaltung($go){
 			else{
 				$GUI->setNachweisAnzeigeparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['showhauptart'],$GUI->formvars['markhauptart']);
 			}
+			$GUI->setNachweisSuchparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchunterart'], $GUI->formvars['abfrageart'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchflur'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchstammnr2'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchrissnummer2'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchpolygon'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'],$GUI->formvars['sdatum2'], $GUI->formvars['sVermStelle'], $GUI->formvars['flur_thematisch'], $GUI->formvars['alle_der_messung'], $GUI->formvars['order']);
 			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 			$GUI->savedformvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
 			$GUI->formvars=array_merge($GUI->savedformvars,$GUI->formvars);
 			if($GUI->formvars['showhauptart'][0] == '')$GUI->formvars['showhauptart'] = $GUI->formvars['suchhauptart'];		# ist bei "alle einblenden" der Fall
 			$GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
 			$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
-			$ret=$GUI->nachweis->getNachweise($ids,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['showhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'], $GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['geprueft']);
+			$ret=$GUI->nachweis->getNachweise($ids,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['showhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'], $GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['geprueft'], $GUI->formvars['alle_der_messung'], $GUI->formvars['alle_der_messung']);
 			if($ret!=''){
 				$GUI->nachweisAnzeige();
 				showAlert($ret);
