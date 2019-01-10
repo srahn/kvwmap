@@ -371,9 +371,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){
 									if($this->nachweis->Dokumente[$i]['geprueft'] == 0 OR $this->Stelle->isFunctionAllowed('gepruefte_Nachweise_bearbeiten')){	?>
 										<a href="index.php?go=Nachweisformular&id=<? echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a>
-									<? } ?>
-									<input type="radio" title="Geometrie für Geometrieübernahme verwenden" onmousedown="set_ref_geom();" value="<? echo $this->nachweis->Dokumente[$i]['id'];?>" name="ref_geom" <? if($this->formvars['ref_geom'] == $this->nachweis->Dokumente[$i]['id'])echo 'checked'; ?>>
-          	<? } ?>
+									<? } 
+									if($this->Stelle->isFunctionAllowed('Nachweise_Geometrie_uebernehmen')){ ?>
+										<input type="radio" title="Geometrie für Geometrieübernahme verwenden" onmousedown="set_ref_geom();" value="<? echo $this->nachweis->Dokumente[$i]['id'];?>" name="ref_geom" <? if($this->formvars['ref_geom'] == $this->nachweis->Dokumente[$i]['id'])echo 'checked'; ?>>
+							<?	}
+							} ?>
 					</td>
           <td style="width: 30">
           	<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>
