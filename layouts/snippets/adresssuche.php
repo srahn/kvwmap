@@ -61,10 +61,13 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     <td colspan="3"><?php echo $this->FormObject["Gemarkungen"]->html; ?><!-- Name GemkgID //-->
     </td>
   </tr>
+	<? if($this->FormObject["Strassen"] != ''){ ?>
   <tr>
     <td align="right"><span class="fett"><?php echo $strStreet; ?>:&nbsp;</span></td>
     <td colspan="3"><?php echo $this->FormObject["Strassen"]->html; ?><!-- Name StrID //--></td>
   </tr>
+	<? }
+			if($this->FormObject["HausNr"] != ''){ ?>
   <tr>
     <td align="right"><span class="fett"><?php echo $strHnr; ?>:&nbsp;</span></td>
     <td>
@@ -82,6 +85,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     	<?php echo $this->FormObject["HausNr"]->html; ?>
     </td>
   </tr>
+	<? } ?>
   <tr align="center">
     <td colspan="4">&nbsp;</td>
   </tr>
