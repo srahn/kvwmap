@@ -318,12 +318,12 @@ include('funktionen/input_check_functions.php');
 		overlay_submit(enclosingForm, false);
 	}
 
-	save_new_dataset = function(){
-		if((geom_not_null && enclosingForm.newpath.value == '' && enclosingForm.loc_x == undefined) || (geom_not_null && enclosingForm.loc_x != undefined && enclosingForm.loc_x.value == '')){ 
+	<? echo $this->currentform; ?>.save_new_dataset = function(){
+		if((geom_not_null && this.newpath.value == '' && this.loc_x == undefined) || (geom_not_null && this.loc_x != undefined && this.loc_x.value == '')){ 
 			message('Sie haben keine Geometrie angegeben.');
 			return;
 		}
-  	form_fieldstring = enclosingForm.form_field_names.value+'';
+  	form_fieldstring = this.form_field_names.value+'';
   	form_fields = form_fieldstring.split('|');
   	for(i = 0; i < form_fields.length; i++){
   		fieldstring = form_fields[i]+'';
@@ -337,10 +337,10 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
   	}
-  	enclosingForm.go.value = 'neuer_Layer_Datensatz_speichern';
+  	this.go.value = 'neuer_Layer_Datensatz_speichern';
 		document.getElementById('go_plus').disabled = true;
 		document.GUI.gle_changed.value = '';
-  	overlay_submit(enclosingForm, false);
+  	overlay_submit(this, false);
 	}
 
 	subdelete_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){
