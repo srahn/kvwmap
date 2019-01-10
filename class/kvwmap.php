@@ -15078,11 +15078,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
       }
     }
-    else {
-      # Es wurde noch keine Gemeinde ausgewählt, Strasse und Hausnummer als Textfelder
-      $StrFormObj=new selectFormObject("StrName","text","","","","25","25","",NULL);
-      $HausNrFormObj=new selectFormObject("HausNr","text","","","","5","5","",NULL);
-    }
 		$this->FormObject["Orte"]=$OrtsFormObj;
     $this->FormObject["Gemeinden"]=$GemFormObj;
     $this->FormObject["Gemarkungen"]=$GemkgFormObj;
