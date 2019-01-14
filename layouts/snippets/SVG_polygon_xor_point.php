@@ -61,7 +61,9 @@ $svg .='
   </defs>';
 $svg .= $canvaswithall;
 $svg .= $navbuttons;
-$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
+if($this->map->width > 680)$button_position = '265 0';
+else $button_position = '0 36';
+$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate('.$button_position.')">';
 $buttons_fs .= deletebuttons($strUndo, $strDelete);
 $buttons_fs .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
 $buttons_fs .= vertex_edit_buttons($strCornerPoint);
