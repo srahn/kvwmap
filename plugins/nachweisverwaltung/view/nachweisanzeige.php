@@ -151,6 +151,22 @@ function select(row){
 	row.className='selected';
 }
 
+function open_bearbeitungshinweise_form(id){	
+	close_all_bearbeitungshinweise();
+	document.getElementById('bearbeitungshinweise_div_'+id).style.display = 'inline-block';
+}
+
+function close_all_bearbeitungshinweise(){
+	all_divs = document.getElementsByClassName('bearbeitungshinweise_div');
+	[].forEach.call(all_divs, function (s){s.style.display = 'none';});
+}
+
+function save_bearbeitungshinweis(id){
+	document.GUI.bearbeitungshinweis_id.value = id;
+	document.GUI.bearbeitungshinweis_text.value = document.getElementById('bearbeitungshinweis_'+id).value;
+	document.GUI.submit();
+}
+
 //-->
 </script>
 
@@ -173,6 +189,42 @@ function select(row){
 	
 ?>
 
+<style>
+	.bearbeitungshinweise{
+		float:right;
+		margin-right: 15px;
+		font-size: 19px;
+		cursor: pointer;
+	}
+	
+	.bearbeitungshinweise:hover{
+		color: red;
+	}
+	
+	.bearbeitungshinweise_div{
+		min-width: 200px;
+		background-color: #EDEFEF;;
+		position: absolute;
+		color: black;
+		display: none;
+		border: 1px solid grey;
+		padding: 5px;
+		left: 45px;
+		box-shadow: 3px 0px 4px #bbb;
+	}
+	
+	.bearbeitungshinweise_div div{
+		white-space: pre-wrap;		
+		background-color: white;
+		padding: 3px;
+		margin: 6px 0 4px 0;
+	}
+	
+	.bearbeitungshinweise_div textarea{
+		min-width: 200px;
+	}
+</style>
+
 <input type="hidden" name="go" value="Nachweisanzeige">
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="order" value="<? echo $this->formvars['order']; ?>">
@@ -183,6 +235,8 @@ function select(row){
 <input type="hidden" name="keinzurueck" value="true">
 <input type="hidden" name="gueltigkeit" value="<? echo $this->formvars['gueltigkeit']; ?>">
 <input type="hidden" name="geprueft" value="<? echo $this->formvars['geprueft']; ?>">
+<input type="hidden" name="bearbeitungshinweis_id" value="">
+<input type="hidden" name="bearbeitungshinweis_text" value="">
 
 	
 <table width="0%" border="0" cellpadding="8" cellspacing="0">
@@ -334,9 +388,19 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 				<? if($this->nachweis->Dokumente[$i]['bemerkungen'] != ''){ ?>
 					<i class="fa fa-exclamation-circle" style="font-size: 19px; color: orange"  title="Bemerkungen: <? echo $this->nachweis->Dokumente[$i]['bemerkungen']; ?>"></i>
 				<? } ?>
-				<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten') AND $this->nachweis->Dokumente[$i]['bemerkungen_intern'] != ''){ ?>
-					<i class="fa fa-exclamation-circle" style="font-size: 19px; color: red" title="Bearbeitungshinweis: <? echo $this->nachweis->Dokumente[$i]['bemerkungen_intern']; ?>"></i>
-				<? } ?>				
+					<i class="fa fa-exclamation-circle bearbeitungshinweise" style="<? if($this->nachweis->Dokumente[$i]['bemerkungen_intern'] != '')echo 'color: red'; ?>" onclick="open_bearbeitungshinweise_form(<? echo $this->nachweis->Dokumente[$i]['id']; ?>);" title="Bearbeitungshinweise:&#13;<? echo $this->nachweis->Dokumente[$i]['bemerkungen_intern']; ?>"></i>
+					<div style="position:relative">
+						<div id="bearbeitungshinweise_div_<? echo $this->nachweis->Dokumente[$i]['id']; ?>" class="bearbeitungshinweise_div">
+							<div style="position: absolute;top: 0px;right: 0px;padding: 0px; margin: 0px"><a href="javascript:close_all_bearbeitungshinweise();" title="Schließen"><img style="border:none" src="graphics/exit2.png"></a></div>
+							<span class="fett">Bearbeitungshinweise:</span><br>
+							<? if($this->nachweis->Dokumente[$i]['bemerkungen_intern'] != ''){ ?>
+								<div><? echo $this->nachweis->Dokumente[$i]['bemerkungen_intern']; ?></div>
+							<? } ?>
+							<span><? echo $this->user->Vorname.' '.$this->user->Name.':'; ?></span>
+							<textarea id="bearbeitungshinweis_<? echo $this->nachweis->Dokumente[$i]['id']; ?>"></textarea>
+							<input type="button" style="margin:auto; display:table;" onclick="save_bearbeitungshinweis(<? echo $this->nachweis->Dokumente[$i]['id']; ?>)" value="Speichern">
+						</div>
+					</div>
           </td>
           <td style="width: 45"><? echo $this->nachweis->Dokumente[$i]['id']; ?></td>
           <td style="width: 80"><div align="center"><? echo $this->formvars['flurid']=$this->nachweis->Dokumente[$i]['flurid']; ?></div></td>

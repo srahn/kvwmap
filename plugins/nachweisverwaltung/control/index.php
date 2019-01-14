@@ -95,6 +95,10 @@ function go_switch_nachweisverwaltung($go){
 	  # Rechercheanfrage an die Datenbank senden / mit prüfen der Eingabedaten
 	  case 'Nachweisanzeige' : {
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
+			$GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+			if($GUI->formvars['bearbeitungshinweis_id'] != ''){
+				$GUI->nachweis->updateBearbeitungshinweis($GUI->user, $GUI->formvars['bearbeitungshinweis_id'], $GUI->formvars['bearbeitungshinweis_text']);
+			}
 			# keine, alle oder alle Nachweise der gleichen Messung markieren oder selektierte Nachweise einblenden (keine Speicherung in rolle_nachweise)
 			if(in_array($GUI->formvars['markhauptart'][0], array('000', '111', '222')) OR $GUI->formvars['showhauptart'][0] == 2222){
 				$ids = $GUI->formvars['id'];
@@ -106,8 +110,7 @@ function go_switch_nachweisverwaltung($go){
 			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 			$GUI->savedformvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
 			$GUI->formvars=array_merge($GUI->savedformvars,$GUI->formvars);
-			if($GUI->formvars['showhauptart'][0] == '')$GUI->formvars['showhauptart'] = $GUI->formvars['suchhauptart'];		# ist bei "alle einblenden" der Fall
-			$GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+			if($GUI->formvars['showhauptart'][0] == '')$GUI->formvars['showhauptart'] = $GUI->formvars['suchhauptart'];		# ist bei "alle einblenden" der Fall			
 			$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
 			$ret=$GUI->nachweis->getNachweise($ids,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['showhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'], $GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['geprueft'], $GUI->formvars['alle_der_messung'], $GUI->formvars['alle_der_messung']);
 			if($ret!=''){

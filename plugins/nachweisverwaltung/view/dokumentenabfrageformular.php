@@ -193,6 +193,7 @@ else {
 			?>
 			<br>
 			<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
+			<input type="checkbox" style="display:none" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>
     </td>
   </tr>
   <tr> 

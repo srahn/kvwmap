@@ -666,6 +666,14 @@ class Nachweis {
 		}
     return $ret; 
   }
+	
+	function updateBearbeitungshinweis($user, $id, $text){
+		$sql="UPDATE nachweisverwaltung.n_nachweise 
+						SET bemerkungen_intern = bemerkungen_intern || CASE WHEN NULLIF(bemerkungen_intern, '') IS NOT NULL THEN '\n\n' ELSE '' END || '".$user->Vorname." ".$user->Name.":\n".$text."'
+					WHERE id = ".$id;
+		#echo $sql;
+		$ret=$this->database->execSQL($sql,4, 1);
+	}
   
   function pruefeSuchParameterIndivNr($stammnr) {
     if ($errmsg!='') { $ret[0]=1; $ret[1]=$errmsg; }
