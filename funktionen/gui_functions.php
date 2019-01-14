@@ -137,7 +137,7 @@ function resizemap2window(){
 * @param array or string messages contain the messages as array
 * or as a single string
 */
-function message(messages, t_visible, t_fade, css_top) {
+function message(messages, t_visible, t_fade, css_top, confirm_value = 'ok') {
 	var msgBoxDiv = $('#message_box');
 	if (msgBoxDiv.is(':visible')) {
 		msgBoxDiv.stop().css('opacity', '1').show();
@@ -193,7 +193,7 @@ function message(messages, t_visible, t_fade, css_top) {
 		msg.type = (['notice', 'info', 'error'].indexOf(msg.type) > -1 ? msg.type : 'warning');
 		msgDiv.append('<div class="message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
 		if (types[msg.type].confirm && document.getElementById('message_ok_button') == null) {
-			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="$(\'#message_box\').hide();" value="ok" style="margin: 10px 0 10px 0;">');
+			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="$(\'#message_box\').hide();" value="' + confirm_value + '" style="margin: 10px 0 10px 0;">');
 		}
 	});
 	
