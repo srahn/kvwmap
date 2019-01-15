@@ -12228,6 +12228,25 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
     # Abfragen der Farben für die Suchergebnisse
     $this->result_colors = read_colors($this->database);
+		# Speichern des neuen Passworts, falls übergeben
+		if($this->formvars['go'] == 'Stelle_waehlen_Passwort_aendern'){
+			if($this->formvars['passwort'] == ''){									# Test ob altes Passwort korrekt angegeben´
+				$this->PasswordError = 'Geben Sie bitte ihr aktuelles Passwort an.';
+			}
+			else{
+				$user = new user($this->user->login_name, 0, $this->database, $this->formvars['passwort']);
+				if($user->login_name != $this->user->login_name){
+					$this->PasswordError = 'Das angegebene Passwort stimmt nicht mit dem aktuellen Passwort überein.';
+				}
+				else{
+					$this->PasswordError = isPasswordValide($this->formvars['passwort'], $this->formvars['new_password'], $this->formvars['new_password_2']);		# Test ob neues Passwort in Ordnung
+					if($this->PasswordError == ''){
+						$this->user->setNewPassword($this->formvars['new_password']);
+						$this->add_message('notice', 'Password ist erfolgreich geändert worden.');
+					}
+				}
+			}
+		}
   }
 
   function flurstSuchen() {

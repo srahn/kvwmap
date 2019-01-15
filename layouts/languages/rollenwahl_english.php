@@ -1,4 +1,8 @@
 <?php
+	$strPassword="current password";
+	$strChangePassword="change password";
+	$strNewPassword="new passwort";
+	$strRepeatPassword="repeat new password";
 	$strCharSet="Character Set";
 	$strLanguage="Language";
 	$strEnglish="English";

@@ -17,32 +17,43 @@
 <script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 
-Text_task=["<? echo $strHelp; ?>:","<? echo $strHintTask; ?>"];
-Text_language=["<? echo $strHelp; ?>:","<? echo $strHintLanguage; ?>"];
-Text_gui=["<? echo $strHelp; ?>:","<? echo $strHintGUI; ?>"];
-Text_buttons=["<? echo $strHelp; ?>:","<? echo $strHintButtons; ?>"];
-Text_color=["<? echo $strHelp; ?>:","<? echo $strHintColor; ?>"];
-Text_instantreload=["<? echo $strHelp; ?>:","<? echo $strHintInstantReload; ?>"];
-Text_menueautoclose=["<? echo $strHelp; ?>:","<? echo $strHintMenuAutoClose; ?>"];
-Text_visuallyimpaired=["<? echo $strHelp; ?>:","<? echo $strHintVisuallyImpaired; ?>"];
-Text_zoomfactor=["<? echo $strHelp; ?>:","<? echo $strHintZoomFactor; ?>"];
-Text_mapsize=["<? echo $strHelp; ?>:","<? echo $strHintMapSize; ?>"];
-Text_mapextent=["<? echo $strHelp; ?>:","<? echo $strHintMapExtent; ?>"];
-Text_mapprojection=["<? echo $strHelp; ?>:","<? echo $strHintMapProjection; ?>"];
-Text_secondmapprojection=["<? echo $strHelp; ?>:","<? echo $strHintSecondMapProjection; ?>"];
-Text_coordtype=["<? echo $strHelp; ?>:","<? echo $strHintCoordType; ?>"];
-Text_runningcoords=["<? echo $strHelp; ?>:","<? echo $strHintRunningCoords; ?>"];
-Text_showmapfunctions=["<? echo $strHelp; ?>:","<? echo $strHintShowMapFunctions; ?>"];
-Text_singlequery=["<? echo $strHelp; ?>:","<? echo $strHintSingleQuery; ?>"];
-Text_querymode=["<? echo $strHelp; ?>:","<? echo $strHintQuerymode; ?>"];
-Text_newdatasetorder=["<? echo $strHelp; ?>:","<? echo $strHintNewDatasetOrder; ?>"];
-Text_fontsizegle=["<? echo $strHelp; ?>:","<? echo $strHintFontSizeGLE; ?>"];
-Text_highlight=["<? echo $strHelp; ?>:","<? echo $strHintHighlight; ?>"];
-Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"];
-Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions; ?>"];
-Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
+	Text_task=["<? echo $strHelp; ?>:","<? echo $strHintTask; ?>"];
+	Text_language=["<? echo $strHelp; ?>:","<? echo $strHintLanguage; ?>"];
+	Text_gui=["<? echo $strHelp; ?>:","<? echo $strHintGUI; ?>"];
+	Text_buttons=["<? echo $strHelp; ?>:","<? echo $strHintButtons; ?>"];
+	Text_color=["<? echo $strHelp; ?>:","<? echo $strHintColor; ?>"];
+	Text_instantreload=["<? echo $strHelp; ?>:","<? echo $strHintInstantReload; ?>"];
+	Text_menueautoclose=["<? echo $strHelp; ?>:","<? echo $strHintMenuAutoClose; ?>"];
+	Text_visuallyimpaired=["<? echo $strHelp; ?>:","<? echo $strHintVisuallyImpaired; ?>"];
+	Text_zoomfactor=["<? echo $strHelp; ?>:","<? echo $strHintZoomFactor; ?>"];
+	Text_mapsize=["<? echo $strHelp; ?>:","<? echo $strHintMapSize; ?>"];
+	Text_mapextent=["<? echo $strHelp; ?>:","<? echo $strHintMapExtent; ?>"];
+	Text_mapprojection=["<? echo $strHelp; ?>:","<? echo $strHintMapProjection; ?>"];
+	Text_secondmapprojection=["<? echo $strHelp; ?>:","<? echo $strHintSecondMapProjection; ?>"];
+	Text_coordtype=["<? echo $strHelp; ?>:","<? echo $strHintCoordType; ?>"];
+	Text_runningcoords=["<? echo $strHelp; ?>:","<? echo $strHintRunningCoords; ?>"];
+	Text_showmapfunctions=["<? echo $strHelp; ?>:","<? echo $strHintShowMapFunctions; ?>"];
+	Text_singlequery=["<? echo $strHelp; ?>:","<? echo $strHintSingleQuery; ?>"];
+	Text_querymode=["<? echo $strHelp; ?>:","<? echo $strHintQuerymode; ?>"];
+	Text_newdatasetorder=["<? echo $strHelp; ?>:","<? echo $strHintNewDatasetOrder; ?>"];
+	Text_fontsizegle=["<? echo $strHelp; ?>:","<? echo $strHintFontSizeGLE; ?>"];
+	Text_highlight=["<? echo $strHelp; ?>:","<? echo $strHintHighlight; ?>"];
+	Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"];
+	Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions; ?>"];
+	Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
 
 	function start1(){
+		document.GUI.submit();
+	}
+	
+	function openPasswordForm(){
+		var form = document.getElementById('password_form');
+		if(form.style.display == 'none')form.style.display = 'block';
+		else form.style.display = 'none';
+	}
+	
+	function savePassword(){
+		document.GUI.go.value = 'Stelle_waehlen_Passwort_aendern';
 		document.GUI.submit();
 	}
 	
@@ -82,6 +93,44 @@ Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
 						</td>
 					</tr><?
 					if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) { ?>
+						<tr>
+							<td valign="top" class="rollenwahl-option-header">
+								<? echo $strPassword; ?>:
+							</td>
+							<td class="rollenwahl-option-data">
+								<a href="javascript:openPasswordForm();"><? echo $strChangePassword; ?></a>
+								<div id="password_form" style="border: 1px solid #cbcbcb;width: 280px;<? if($this->PasswordError == '')echo 'display: none'; ?>">
+									<table cellspacing="3" style="width: 100%">
+										<tr>
+											<td><span class="px16"><? echo $strPassword; ?>: </span></td>
+											<td>
+												<input style="width: 130px" type="password" value="<? echo $this->formvars['passwort']; ?>" name="passwort" />
+											</td>
+										</tr><?
+										if($this->PasswordError){ ?>
+											<tr>
+												<td colspan="2" style="color: red;">
+													<? echo $this->PasswordError; ?>
+												</td>
+											</tr><?
+										} ?>
+										<tr>
+											<td><span class="px16"><? echo $strNewPassword; ?>: </span></td>
+											<td><input style="width: 130px" type="password" value="<? echo $this->formvars['new_password']; ?>" name="new_password"/></td>
+										</tr>
+										<tr>
+											<td><span class="px16"><? echo $strRepeatPassword; ?>: </span></td>
+											<td><input style="width: 130px" type="password" value="<? echo $this->formvars['new_password_2']; ?>" name="new_password_2"/></td>
+										</tr>
+										<tr>
+											<td colspan="2" align="center">
+												<input type="button" value="<? echo $this->strSave; ?>" onclick="savePassword();">
+											</td>
+										</tr>
+									</table>
+								</div>
+							</td>
+						</tr>
 						<tr>
 							<td class="rollenwahl-option-header">
 								<? echo $strLanguage; ?>:

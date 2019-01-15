@@ -1702,8 +1702,8 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			 # Auswählen einer neuen Stelle
-			case 'Stelle_waehlen' : {
-				$GUI->checkCaseAllowed($go);
+			case 'Stelle_waehlen' : case 'Stelle_waehlen_Passwort_aendern' : {
+				$GUI->checkCaseAllowed('Stelle_waehlen');
 				$GUI->rollenwahl($Stelle_ID);
 				$GUI->output();
 			} break;
