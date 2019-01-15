@@ -37,6 +37,8 @@
 	</head>
 	<body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="load()">
 		<form name="login" action="index.php" method="post">
+			<div id="message_box" class="message_box_hidden"></div>		<!-- muss innerhalb des form stehen -->
+			<input type="hidden" value="<? echo $this->formvars['passwort']; ?>" name="passwort"/>
 			<input type="hidden" name="browserwidth">
 			<input type="hidden" name="browserheight"><?
 			echo hidden_formvars_fields($this->formvars, $this->expect); ?>
@@ -53,12 +55,6 @@
 							<tr>
 								<td><span class="px16">Nutzername: </span></td>
 								<td><? echo $this->formvars['login_name']; ?></td>
-							</tr>
-							<tr>
-								<td><span class="px16">Passwort: </span></td>
-								<td>
-									<input style="width: 130px" type="password" value="<? echo $this->formvars['passwort']; ?>" name="passwort" />
-								</td>
 							</tr><?
 							if ($this->Fehlermeldung) { ?>
 								<tr>

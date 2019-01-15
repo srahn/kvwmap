@@ -322,7 +322,7 @@ if (!$show_login_form) {
 					}
 					else {
 						$GUI->debug->write('Passwort ist abgelaufen. Frage neues ab.', 4, $GUI->echo);
-						$GUI->passwort_abgelaufen = true;
+						$GUI->add_message('error', $permission['errmsg']);
 						$show_login_form = true;
 						$go = 'login_new_password';
 						# login case 19
