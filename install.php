@@ -38,7 +38,7 @@ output_header();
 if (!file_exists('config.php')) {
 	# Lade default Konfigurationsparameter
 	init_config();
-
+	include(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');
 	if ($_REQUEST['go'] == 'Installation starten') {
 	  install();
 	}
@@ -317,6 +317,8 @@ function init_config() {
 	define('DEBUGFILE', LOGPATH . 'install.log');
 	define('LOGFILE_MYSQL', DEBUGFILE);
 	define('LOGFILE_POSTRGRES', DEBUGFILE);
+	define('WWWROOT', $installpath.$wwwpath);
+	define('APPLVERSION', $applversion.'/');
 }
 
 function show_constants() { ?>

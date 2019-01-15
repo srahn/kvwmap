@@ -133,8 +133,8 @@ class administration{
 				$pg_migrations[] = $migration;
 			}
 		}
-		$this->execute_migrations('postgresql', $pg_migrations);
 		$this->execute_migrations('mysql', $my_migrations);
+		$this->execute_migrations('postgresql', $pg_migrations);
 
 		foreach($this->seeds_to_execute['mysql'] as $component => $component_seed){
 			$prepath = PLUGINS.$component.'/';

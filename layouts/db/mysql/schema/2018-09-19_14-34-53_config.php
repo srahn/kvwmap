@@ -822,25 +822,7 @@ der Seite immer in den Modus "Polygon zeichnen" wechselt
   'kvwmap_plugins' => 
   array (
     'name' => 'kvwmap_plugins',
-    'value' => '[
-    "alkis",
-    "anliegerbeitraege",
-    "bauleitplanung",
-    "baumfaellantrag",
-    "bevoelkerung",
-    "bodenrichtwerte",
-    "fortfuehrungslisten",
-    "geodoc",
-    "gewaesser",
-    "jagdkataster",
-    "kolibri",
-    "metadata",
-    "mobile",
-    "nachweisverwaltung",
-    "probaug",
-    "ukos",
-    "xplankonverter"
-]',
+    'value' => '[]',
     'prefix' => '',
     'type' => 'array',
     'description' => '',
