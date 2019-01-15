@@ -271,27 +271,34 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
    </td>
   </tr>
 <? }
-
   $anzNamen=count($this->namen);
   if ($anzNamen>0) {
    ?>
-<tr>
+	<tr>
     <td colspan="3" align="center">
-	<span class="fett"><br>
-	<?php echo $strTotalHits; ?>: <?php echo $this->anzNamenGesamt; ?>
-    <br>
-		<br>
-</span>	<table border="1" cellpadding="3" cellspacing="0">
-      <tr bgcolor="<?php echo BG_DEFAULT ?>">
-      	<td class="menu">&nbsp;</td>
-        <td class="menu" align="center"><span class="fett"><a href="javascript:changeorder('bezirk');"><?php echo $strGbbezShort; ?></a></span></td>
-        <td class="menu" align="center"><span class="fett"><a href="javascript:changeorder('blatt');"><?php echo $strGbblShort; ?></a></span></td>
-        <td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('nachnameoderfirma, vorname');"><?php echo $strName1Short; ?></a></span></td>
-        <td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('geburtsname');"><?php echo $strName2Short; ?></a></span></td>
-        <td class="menu" align="left" bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett"><a href="javascript:changeorder('strasse,hausnummer');"><?php echo $strName3Short; ?></a></span></td>
-        <td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('postleitzahlpostzustellung, ort_post');"><?php echo $strName4Short; ?></a></span></td>
-        <td class="menu" align="center" colspan="2"><span class="fett"><?php echo $strFst; ?></span></td>
-      </tr>
+			<span class="fett"><br>
+			<?php echo $strTotalHits; ?>: <?php echo $this->anzNamenGesamt; ?>
+				<br>
+				<br>
+			</span>
+<? if($this->formvars['gml_id'] != ''){ ?>
+			<span class="fett"><?php echo $strShowHits; ?>:&nbsp;</span>
+			<input name="anzahl" onkeyup="checknumbers(this, 'int2', '', '');" type="text" value="<?php echo $this->formvars['anzahl']; ?>" size="2" tabindex="5">
+			<input type="button" onclick="document.GUI.go.value = 'Namen_Auswaehlen_Suchen';document.GUI.submit();" value="aktualisieren">
+			<br>
+			<br>
+<? } ?>			
+			<table border="1" cellpadding="3" cellspacing="0">
+				<tr bgcolor="<?php echo BG_DEFAULT ?>">
+					<td class="menu">&nbsp;</td>
+					<td class="menu" align="center"><span class="fett"><a href="javascript:changeorder('bezirk');"><?php echo $strGbbezShort; ?></a></span></td>
+					<td class="menu" align="center"><span class="fett"><a href="javascript:changeorder('blatt');"><?php echo $strGbblShort; ?></a></span></td>
+					<td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('nachnameoderfirma, vorname');"><?php echo $strName1Short; ?></a></span></td>
+					<td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('geburtsname');"><?php echo $strName2Short; ?></a></span></td>
+					<td class="menu" align="left" bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett"><a href="javascript:changeorder('strasse,hausnummer');"><?php echo $strName3Short; ?></a></span></td>
+					<td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('postleitzahlpostzustellung, ort_post');"><?php echo $strName4Short; ?></a></span></td>
+					<td class="menu" align="center" colspan="2"><span class="fett"><?php echo $strFst; ?></span></td>
+				</tr>
   <?php
   for ($i=0;$i<count($this->namen);$i++) {
 
@@ -450,7 +457,6 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 </table>
 <? if($this->formvars['gml_id'] != ''){ ?>
 		<a href="index.php?go=get_last_query">zurück</a>
-		<input name="anzahl" type="hidden" value="<?php echo $this->formvars['anzahl']; ?>">
 		<input name="withflurst" type="hidden" value="<?php echo $this->formvars['withflurst']; ?>">
 <? } ?>
 <input type="hidden" name="go" value="Namen_Auswaehlen">
