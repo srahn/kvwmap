@@ -265,7 +265,7 @@ $legendheight = $this->map->height + 20;
 					<? if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!=''){ ?>
 					<ul>
 						<li><a href="index.php?go=Nachweisrechercheformular_Senden&abfrageart=indiv_nr&suchhauptart=&suchgemarkung=<? echo $this->formvars['Gemarkung']; ?>&suchflur=<? echo $this->formvars['Flur']; ?>&flur_thematisch=1&such<? echo NACHWEIS_PRIMARY_ATTRIBUTE.'='.$this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]; if(NACHWEIS_SECONDARY_ATTRIBUTE != '')echo '&such'.NACHWEIS_SECONDARY_ATTRIBUTE.'='.$this->formvars[NACHWEIS_SECONDARY_ATTRIBUTE];; ?>">alle der Messung anzeigen</a></li>
-						<li><a href="index.php?go=Nachweisanzeige&gueltigkeit=<? echo $this->formvars['gueltigkeit']; ?>&geprueft=<? echo $this->formvars['geprueft']; ?>&order=<? echo $this->formvars['order']; ?>&richtung=<? echo $this->formvars['richtung'].'#'.$this->formvars['id']; ?>">zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a></li>
+						<li><a href="index.php?go=Nachweisanzeige&suchgueltigkeit=<? echo $this->formvars['suchgueltigkeit']; ?>&suchgeprueft=<? echo $this->formvars['suchgeprueft']; ?>&order=<? echo $this->formvars['order']; ?>&richtung=<? echo $this->formvars['richtung'].'#'.$this->formvars['id']; ?>">zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a></li>
 					</ul>
 					<? } ?>
 				</div>
@@ -551,7 +551,8 @@ $legendheight = $this->map->height + 20;
 <INPUT TYPE="hidden" NAME="check" VALUE="">
 <input type="hidden" name="order" value="<?php echo $this->formvars['order']; ?>">
 <INPUT TYPE="HIDDEN" NAME="richtung" VALUE="<? echo $this->formvars['richtung']; ?>">
-<input type="hidden" name="such_andere_art" value="<? echo $this->formvars['such_andere_art']; ?>">						
+<input type="hidden" name="suchgueltigkeit" value="<? echo $this->formvars['suchgueltigkeit']; ?>">
+<input type="hidden" name="suchgeprueft" value="<? echo $this->formvars['suchgeprueft']; ?>">
 <INPUT TYPE="hidden" NAME="reset_layers" VALUE="">
 <input type="hidden" name="layer_options_open" value="">
 <input type="hidden" name="neuladen" value="">

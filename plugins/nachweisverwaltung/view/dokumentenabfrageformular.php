@@ -267,17 +267,17 @@ else {
   <tr>
 		<td>&nbsp;Gültigkeit:</td>
 		<td>
-			<select style="width: 156px" name="gueltigkeit">
+			<select style="width: 156px" name="suchgueltigkeit">
 				<option value="">--- Auswahl ---</option>
-				<option value="1" <? if($this->formvars['gueltigkeit'] == 1)echo 'selected'; ?>>gültige Nachweise</option>
-				<option value="0" <? if($this->formvars['gueltigkeit'] === '0')echo 'selected'; ?>>ungültige Nachweise</option>
+				<option value="1" <? if($this->formvars['suchgueltigkeit'] == 1)echo 'selected'; ?>>gültige Nachweise</option>
+				<option value="0" <? if($this->formvars['suchgueltigkeit'] === '0')echo 'selected'; ?>>ungültige Nachweise</option>
 			</select>
 		</td>
   </tr>
 	<tr>
 		<td>&nbsp;geprüft:</td>
 		<td>
-			<select style="width: 156px" name="geprueft">
+			<select style="width: 156px" name="suchgeprueft">
 				<option value="">--- Auswahl ---</option>
 				<option value="1">geprüfte Nachweise</option>
 				<option value="0">ungeprüfte Nachweise</option>
