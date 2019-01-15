@@ -313,7 +313,7 @@ $legendheight = $this->map->height + 20;
 					</div>
 				</div>
 				<div id="dokein-backtolist">
-					<?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige&gueltigkeit=<? echo $this->formvars['gueltigkeit']; ?>&geprueft=<? echo $this->formvars['geprueft']; ?>&order=<? echo $this->formvars['order']; ?>&richtung=<? echo $this->formvars['richtung'].'#'.$this->formvars['id']; ?>">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?>
+					<?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige&suchgueltigkeit=<? echo $this->formvars['suchgueltigkeit']; ?>&suchgeprueft=<? echo $this->formvars['suchgeprueft']; ?>&order=<? echo $this->formvars['order']; ?>&richtung=<? echo $this->formvars['richtung'].'#'.$this->formvars['id']; ?>">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?>
 				</div>
 			</div>
 			</div>
@@ -547,7 +547,8 @@ $legendheight = $this->map->height + 20;
 <INPUT TYPE="hidden" NAME="check" VALUE="">
 <input type="hidden" name="order" value="<?php echo $this->formvars['order']; ?>">
 <INPUT TYPE="HIDDEN" NAME="richtung" VALUE="<? echo $this->formvars['richtung']; ?>">
-<input type="hidden" name="such_andere_art" value="<? echo $this->formvars['such_andere_art']; ?>">						
+<input type="hidden" name="suchgueltigkeit" value="<? echo $this->formvars['suchgueltigkeit']; ?>">
+<input type="hidden" name="suchgeprueft" value="<? echo $this->formvars['suchgeprueft']; ?>">
 <INPUT TYPE="hidden" NAME="reset_layers" VALUE="">
 <input type="hidden" name="layer_options_open" value="">
 <input type="hidden" name="neuladen" value="">

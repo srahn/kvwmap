@@ -175,8 +175,8 @@ function getvorschau(url){
 <input type="hidden" name="value_id" value="">
 <input type="hidden" name="operator_id" value="IN">
 <input type="hidden" name="keinzurueck" value="true">
-<input type="hidden" name="gueltigkeit" value="<? echo $this->formvars['gueltigkeit']; ?>">
-<input type="hidden" name="geprueft" value="<? echo $this->formvars['geprueft']; ?>">
+<input type="hidden" name="suchgueltigkeit" value="<? echo $this->formvars['suchgueltigkeit']; ?>">
+<input type="hidden" name="suchgeprueft" value="<? echo $this->formvars['suchgeprueft']; ?>">
 
 	
 <table width="0%" border="0" cellpadding="8" cellspacing="0">
@@ -199,12 +199,12 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
         <tr> 
           <td>Gesucht nach:<span class="fett"> 
             <?
-						if($this->formvars['gueltigkeit'] == 1){ echo ' nur gültige '; }
-						if($this->formvars['gueltigkeit'] == '0'){ echo ' nur ungültige '; }
-						if($this->formvars['gueltigkeit'] == ''){ echo ' gültige und ungültige '; }
-						if($this->formvars['geprueft'] == 1){ echo ' nur geprüfte '; }
-						if($this->formvars['geprueft'] == '0'){ echo ' nur ungeprüfte '; }
-						if($this->formvars['geprueft'] == ''){ echo ' geprüfte und ungeprüfte '; }
+						if($this->formvars['suchgueltigkeit'] == 1){ echo ' nur gültige '; }
+						if($this->formvars['suchgueltigkeit'] == '0'){ echo ' nur ungültige '; }
+						if($this->formvars['suchgueltigkeit'] == ''){ echo ' gültige und ungültige '; }
+						if($this->formvars['suchgeprueft'] == 1){ echo ' nur geprüfte '; }
+						if($this->formvars['suchgeprueft'] == '0'){ echo ' nur ungeprüfte '; }
+						if($this->formvars['suchgeprueft'] == ''){ echo ' geprüfte und ungeprüfte '; }
 						foreach($this->formvars['suchhauptart'] as $suchart){
 							echo $this->hauptdokumentarten[$suchart]['abkuerzung'].', ';
 						}
