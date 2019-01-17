@@ -1,7 +1,6 @@
-<?php
- # 2008-01-12 pkvvm
+<?
   include(LAYOUTPATH.'languages/ows_export_'.$this->user->rolle->language.'.php');
- ?>
+?>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center">
     <td colspan="2"><h2><?php echo $strTitle; ?></h2></td>
@@ -63,7 +62,11 @@
   </tr>
   <tr>
     <td align="right">&nbsp;</td>
-    <td align="center"><input type="hidden" name="go" value="WMS_Export">      <input type="submit" name="go_plus" value="<?php echo $this->strCancel; ?>">&nbsp;
-      <input type="submit" name="go_plus" value="<?php echo $this->strSend; ?>">
-</td></tr>
+    <td align="center">
+			<input type="hidden" name="go" value="WMS_Export">
+			<input type="hidden" name="go_plus" value="">
+			<input type="button" onclick="document.GUI.go_plus.value='Abbrechen';document.GUI.submit();" value="<?php echo $this->strCancel; ?>">&nbsp;
+      <input type="button" onclick="document.GUI.go_plus.value='Senden';document.GUI.submit();" value="<?php echo $this->strSend; ?>">
+		</td>
+	</tr>
 </table>

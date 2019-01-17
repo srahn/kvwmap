@@ -14,6 +14,9 @@ $strEMail="E-Mail (ows_contactelectronicmailaddress):";
 $strFee="Kosten für die Nutzung des Dienstes (ows_fees):";
 $strButtonCancel="Abbrechen";
 $strButtonSend="Senden";
+$strExported1="Die aktuellen Karteneinstellungen wurden in die Mapdatei ".WMS_MAPFILE_PATH.$this->formvars['mapfile_name']." exportiert. Die exportierte Datei kann nun f&uuml;r OWS verwendet werden.";
+$strExported2="Ein getCapabilities-Request zu diesem WMS sieht folgendermaßen aus";
+$strExported3="Die Karte l&auml;&szlig;t sich abfragen mit einem getMap-Request, z.B.";
 
   
 ?>  
