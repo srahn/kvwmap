@@ -547,13 +547,12 @@ class antrag {
   function getAnzArten($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getAnzFFR Abfragen der Anzahl der Blätter eines FFR.',4);
     # Abfrag der Anzahl der zum Riss gehörenden Fortführungsrisse
-    $sql.="SELECT h.abkuerzung, CASE WHEN COUNT(n.id) = 0 THEN '-' ELSE COUNT(n.id)::text END AS anz FROM nachweisverwaltung.n_hauptdokumentarten h " ;
+    $sql.="SELECT h.abkuerzung, CASE WHEN COUNT(n2a.nachweis_id) = 0 THEN '-' ELSE COUNT(n2a.nachweis_id)::text END AS anz FROM nachweisverwaltung.n_hauptdokumentarten h " ;
 		$sql.="LEFT JOIN nachweisverwaltung.n_dokumentarten d ON h.id = d.hauptart ";
 		$sql.="LEFT JOIN nachweisverwaltung.n_nachweise AS n ON n.art = d.id AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
     if ($this->nr!='') {
-			$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2antraege AS n2a ON n.id=n2a.nachweis_id";
-			$sql.=" WHERE n2a.antrag_id='".$this->nr."' OR n.id IS NULL";
+			$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2antraege AS n2a ON n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
     }
     $sql.=" GROUP BY h.id, h.abkuerzung";
 		$sql.=" ORDER BY h.id";
