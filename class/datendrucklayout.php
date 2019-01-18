@@ -457,8 +457,8 @@ class ddl {
 		}
 		$fh = $this->pdf->getFontHeight($fontsize);
 		$y = $y + $fh;
-		$this->pdf->ezSetY($y);		
 		$page_id_before_puttext = $this->pdf->currentContents;
+		$this->pdf->ezSetY($y);		
 		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252//TRANSLIT", $text), $fontsize, $options);
 		$page_id_after_puttext = $this->pdf->currentContents;		
 		#echo $page_id_before_puttext.' '.$page_id_after_puttext.' - '.$y.' - '.$text.'<br>';
@@ -652,7 +652,7 @@ class ddl {
 					}
 					else{
 						$this->page_overflow = false;
-						$this->pdf->transaction('rewind');
+						$this->pdf->transaction('abort');
 						$i--;
 						$this->i_on_page = -1;
 						$this->maxy = 0;
