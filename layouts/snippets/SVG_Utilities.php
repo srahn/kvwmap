@@ -217,8 +217,10 @@
 	}
 
 	function get_map_ajax(postdata){
-		remove_vertices();
-		remove_in_between_vertices();
+		if(polygonfunctions == true || linefunctions == true){
+			remove_vertices();
+			remove_in_between_vertices();
+		}
 		top.get_map_ajax(postdata, \'\', \'\');
 	}
 	
@@ -577,7 +579,7 @@
 		navY[0] = Math.round(zx.f);
 		navX[2] = Math.round(zx.e + resx*zx.a); 
 		navY[2] = Math.round(zx.f + resy*zx.a);
-		if(enclosingForm.last_doing.value != "vertex_edit"){
+		if(enclosingForm.last_doing.value != "vertex_edit" && enclosingForm.always_draw != undefined){
 			enclosingForm.always_draw.checked = true;
 		}
 		sendpath("zoomin_box", navX, navY);
