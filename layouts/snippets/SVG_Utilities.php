@@ -424,7 +424,7 @@
 			}
 		  obj.setAttribute("x", pixel_coordx);
 		  obj.setAttribute("y", pixel_coordy);
-			if(pointfunctions == true)rotate_point_direction();
+			if(pointfunctions == true && enclosingForm.angle != undefined)rotate_point_direction();
 		}
 	}
 
