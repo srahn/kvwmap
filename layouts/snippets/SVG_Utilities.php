@@ -783,7 +783,7 @@ $basicfunctions.= '
 			if(enclosingForm.last_doing.value == "measure"){
 				save_measure_path();
 			}
-			if(enclosingForm.last_doing.value != "vertex_edit"){
+			if(enclosingForm.last_doing.value != "vertex_edit" && enclosingForm.always_draw != undefined){
 				enclosingForm.always_draw.checked = true;
 			}
 			enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
