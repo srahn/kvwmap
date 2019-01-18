@@ -1068,6 +1068,10 @@ class data_import_export {
     $sql.= $orderby;
 		$data_sql = $sql;
 		#echo $sql;
+		
+    $temp_table = 'shp_export_'.rand(1, 10000);
+    $sql = 'CREATE TABLE public.'.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, falls Argumentliste durch das SQL zu lang
+    $ret = $layerdb->execSQL($sql,4, 0);		
 
 		for($s = 0; $s < count($selected_attributes); $s++){
 			# Transformieren der Geometrie
@@ -1077,7 +1081,7 @@ class data_import_export {
 				if (in_array($selected_attr_types[$s], array('text', 'varchar'))) $selected_attributes[$s] = $selected_attributes[$s].'::varchar(254)';
 			}
 		}
-		$sql = "SELECT " . implode(', ', $selected_attributes) . " FROM (".$sql.") as foo"; # auf die ausgewählten Attribute einschränken
+		$sql = "SELECT " . implode(', ', $selected_attributes) . " FROM public." . $temp_table; # auf die ausgewählten Attribute einschränken
 		$ret = $layerdb->execSQL($sql,4, 0);
 		if (!$ret[0]) {
 			$count = pg_num_rows($ret[1]);
@@ -1207,9 +1211,9 @@ class data_import_export {
 				$contenttype = 'application/octet-stream';
 			}
 			# temp. Tabelle wieder löschen
-			// $sql = 'DROP TABLE '.$temp_table;
-			// $ret = $layerdb->execSQL($sql,4, 0);
-			// if($this->formvars['export_format'] != 'CSV')$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
+			$sql = 'DROP TABLE '.$temp_table;
+			$ret = $layerdb->execSQL($sql,4, 0);
+			if($this->formvars['export_format'] != 'CSV')$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
 
 			ob_end_clean();
 			header('Content-type: '.$contenttype);
