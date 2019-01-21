@@ -314,9 +314,9 @@ function init_config() {
 	define('LOG_LEVEL', 4);
 	define('LOGPATH', $installpath . 'logs/');
 	define('DEBUG_LEVEL', 1);
-	define('DEBUGFILE', LOGPATH . 'install.log');
-	define('LOGFILE_MYSQL', DEBUGFILE);
-	define('LOGFILE_POSTRGRES', DEBUGFILE);
+	define('DEBUGFILE', 'install.log');
+	define('LOGFILE_MYSQL', LOGPATH . 'install.log');
+	define('LOGFILE_POSTRGRES', LOGPATH . 'install.log');
 	define('WWWROOT', $installpath.$wwwpath);
 	define('APPLVERSION', $applversion.'/');
 }
