@@ -28,9 +28,6 @@ $ahah = '
 				}
 				var found = false;
 				response = "" + req.responseText;
-				response = response.replace(/\n/,"");
-				response = response.replace(/\n/,"");
-				response = response.replace(/\r/,"");
 				responsevalues = response.split("~");
 				if (actions == undefined || actions == "") {
 					actions = new Array();
