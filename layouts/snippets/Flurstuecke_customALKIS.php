@@ -96,30 +96,42 @@ hide_versions = function(flst){
 		:<br>
 
     <?
+		
+		function sort_flst($a, $b){
+			if($a->Nachfolger == '' AND $b->Nachfolger != '')return 1;
+			if($a->FlurstNr == '' AND $b->FlurstNr != '')return 1;
+			return 0;
+		}
+		
     for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
       if($this->qlayerset[$i]['attributes']['privileg'][$this->qlayerset[$i]['attributes']['name'][$j]] != ''){
         $privileg_[$this->qlayerset[$i]['attributes']['name'][$j]] = true;
         if($j > 0){ $attribute .= ';';}
         $attribute .= $this->qlayerset[$i]['attributes']['name'][$j];
       }
-    }
-		echo '<tr><td align="center"><table><tr><td align="left">';
+    }		
     for ($a=0;$a<$anzObj;$a++){
       $flurstkennz_a=$this->qlayerset[$i]['shape'][$a]['flurstkennz'];
 			$flst=new flurstueck($flurstkennz_a,$this->pgdatabase);
       $flst->readALB_Data($flurstkennz_a, $this->formvars['without_temporal_filter']);	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
-      $gemkg=substr($flurstkennz_a, 0, 6);
-      $flur=substr($flurstkennz_a, 6, 3);
-      $zaehler=ltrim(substr($flurstkennz_a, 9, 5), '0');
-      $nenner=ltrim(rtrim(substr($flurstkennz_a, 14, 6), '_'), '0');
-      if ($nenner!='') {
+			$flst_array[] = $flst;
+		}
+		usort($flst_array, 'sort_flst');
+		echo '<tr><td align="center"><table><tr><td align="left">';
+		for($k=0;$k<count($flst_array);$k++){
+			$flst = $flst_array[$k];
+			echo $flst->FlurstKennz;
+			$gemkg=substr($flst->FlurstKennz, 0, 6);
+      $flur=substr($flst->FlurstKennz, 6, 3);
+      $zaehler=ltrim(substr($flst->FlurstKennz, 9, 5), '0');
+      $nenner=ltrim(rtrim(substr($flst->FlurstKennz, 14, 6), '_'), '0');
+			if ($nenner!='') {
         $nenner="/".$nenner;
       }
 			if($flst->FlurstNr){
-				$flst_array[] = $flst;
-				echo '<a href="#'.$flurstkennz_a.'">Gemarkung: '.$gemkg.' - Flur: '.ltrim($flur,"0").' - Flurst&uuml;ck: '.$zaehler.$nenner.'</a>';
+				echo '<a href="#'.$flst->FlurstKennz.'">Gemarkung: '.$gemkg.' - Flur: '.ltrim($flur,"0").' - Flurst&uuml;ck: '.$zaehler.$nenner.'</a>';
 				if($flst->Nachfolger != '')echo ' (H)';
 				echo '<br>';
 			}
@@ -129,9 +141,10 @@ hide_versions = function(flst){
     }
 		echo '</td></tr></table></td></tr>';
 
-    for ($k=0;$k<count($flst_array);$k++) {
+    for($k=0;$k<count($flst_array);$k++){
+			$flst = $flst_array[$k];
+			if($flst->FlurstNr == '')continue;
 			$set_timestamp = '';
-      $flst = $flst_array[$k];
       if ($flst->FlurstNr!='') {
         if($k > 0){
           $Flurstueckskennz .= ';';
@@ -738,17 +751,17 @@ hide_versions = function(flst){
 												</tr>
 											<? }
 											}
-											$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-											reset($Eigentuemerliste);
-											?>
-											<tr>
-												<td colspan="3">
-													<table>				<?
-											echo $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Long', $this->Stelle->isFunctionAllowed('Adressaenderungen'), NULL, $this->database);
-											?>	</table>
-												</td>
-											</tr>
-								<?	} ?>
+											if($Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr'])){
+												reset($Eigentuemerliste);
+												?>
+												<tr>
+													<td colspan="3">
+														<table>				<?
+												echo $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Long', $this->Stelle->isFunctionAllowed('Adressaenderungen'), NULL, $this->database);
+												?>	</table>
+													</td>
+												</tr>
+								<?	}} ?>
 									</table>
 								</td>
 								</tr>
