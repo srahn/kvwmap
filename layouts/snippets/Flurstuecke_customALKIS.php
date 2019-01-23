@@ -122,7 +122,6 @@ hide_versions = function(flst){
 		echo '<tr><td align="center"><table><tr><td align="left">';
 		for($k=0;$k<count($flst_array);$k++){
 			$flst = $flst_array[$k];
-			echo $flst->FlurstKennz;
 			$gemkg=substr($flst->FlurstKennz, 0, 6);
       $flur=substr($flst->FlurstKennz, 6, 3);
       $zaehler=ltrim(substr($flst->FlurstKennz, 9, 5), '0');
