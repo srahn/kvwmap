@@ -217,6 +217,7 @@
 	}
 
 	function get_map_ajax(postdata){
+		geomload = false;
 		if(polygonfunctions == true || linefunctions == true){
 			remove_vertices();
 			remove_in_between_vertices();
