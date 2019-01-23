@@ -259,7 +259,7 @@ FROM
 				$ret[0] = 1;
 				$ret['success'] = false;
 				$errormessage = pg_last_error($this->dbConn);
-				#header('error: true');		// damit ajax-Requests das auch mitkriegen
+				header('error: true');		// damit ajax-Requests das auch mitkriegen
 				$ret[1] = "Fehler bei SQL Anweisung:<br><br>\n\n" . $sql . "\n\n<br><br>" . $errormessage;
 				$ret['msg'] = $ret[1];
 				$ret['type'] = 'error';

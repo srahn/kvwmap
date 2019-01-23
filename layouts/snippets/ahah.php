@@ -26,6 +26,9 @@ $ahah = '
 					window.location = url;
 					return;
 				}
+				if(req.getResponseHeader(\'error\') == \'true\'){
+					message(req.responseText);
+				}
 				var found = false;
 				response = "" + req.responseText;
 				responsevalues = response.split("~");
