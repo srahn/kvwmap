@@ -2099,7 +2099,8 @@ class flurstueck {
     //$this->Buchungen=$this->getBuchungen($Bezirk,$Blatt,1);		# steht im Snippet
     $this->Amtsgericht=$this->getAmtsgericht(); 
     $this->Vorgaenger=$this->getVorgaenger();	
-    $this->Nachfolger=$this->getNachfolger();	
+    $this->Nachfolger=$this->getNachfolger();
+		if($this->Nachfolger != '')$this->Status = 'H';
     # Abfragen der Nutzungen
     $this->Nutzung=$this->getNutzung();
   }
