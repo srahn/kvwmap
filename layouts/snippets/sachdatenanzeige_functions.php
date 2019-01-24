@@ -34,6 +34,19 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
+	toggle_group = function(id){
+		var group = document.getElementById('group'+id);
+		var group_img = document.getElementById('group_img'+id);
+		if(group.style.display == 'none'){
+			group.style.display = '';
+			group_img.src = 'graphics/minus.gif';
+		}
+		else{
+			group.style.display = 'none';
+			group_img.src = 'graphics/plus.gif';
+		}
+	}	
+	
 	check_visibility = function(layer_id, object, dependents, k){
 		if(object == null)return;
 		var group_display;
@@ -57,11 +70,10 @@ include('funktionen/input_check_functions.php');
 			group_display = 'none';
 			all_trs.forEach(function(tr){
 				if(tr.id != '' && tr.style.display != 'none'){
-					console.log(tr);
 					group_display = '';
 				}
 			})
-			tr_dependent.closest('table').style.display = group_display;
+			tr_dependent.closest('div').style.display = group_display;
 		})
 	}
 	

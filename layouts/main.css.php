@@ -1203,6 +1203,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 
 table.tgle {
  border:1px solid gray;
+ border-bottom: none;
  border-collapse:collapse;
  margin-left:auto;
  margin-right:auto;
@@ -1238,15 +1239,6 @@ thead.gle th {
 tbody.gle tr { 
  border:1px dotted gray;
 }
-
-tbody.nogle tr,tr:hover{ 
- border: none !important;
-}
-
-tbody.gle tr:hover { 
- border:1px solid #03476F;
-}
-
 
 .gle1_table{
 		border-collapse: collapse;
