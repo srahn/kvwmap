@@ -1,26 +1,5 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
-	<head>
-		<title><?php echo TITLE; ?></title>
-		<META http-equiv=Content-Type content="text/html; charset=UTF-8">
-		<link rel="stylesheet" href="layouts/main.css.php">
-		<script type="text/javascript">
-		function logon() {
-			if(typeof(window.innerWidth) == 'number'){
-				width = window.innerWidth;
-				height = window.innerHeight;
-			}else if(document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)){
-				width = document.documentElement.clientWidth;
-				height = document.documentElement.clientHeight;
-			}else if(document.body && (document.body.clientWidth || document.body.clientHeight)){
-				width = document.body.clientWidth;
-				height = document.body.clientHeight;
-			}
-			document.login.browserwidth.value = width;
-			document.login.browserheight.value = height;
-			document.login.submit();
-		}
-		</script>
-	</head>
+	<? include(SNIPPETS . 'login_head.php'); ?>
 	<body onload="logon();">
 		<form name="login" action="index.php" method="post">
 			<input type="hidden" name="browserwidth">
