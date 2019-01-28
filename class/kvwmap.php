@@ -116,7 +116,6 @@ class GUI {
 	}
 
 	function login() {
-		$this->title = 'kvwmap Anmeldung';
 		$this->expect = array('login_name', 'passwort', 'mobile');
 		if ($this->formvars['go'] == 'logout') {
 			$this->expect[] = 'go';
@@ -127,7 +126,6 @@ class GUI {
 
 	function login_failed() {
 		$this->login_failed = $failed;
-		$this->title = 'kvwmap Anmeldung';
 		$this->expect = array('login_name', 'passwort', 'mobile');
 		if ($this->formvars['go'] == 'logout') {
 			$this->expect[] = 'go';
@@ -151,7 +149,6 @@ class GUI {
 	}
 
 	function login_new_password() {
-		$this->title = 'kvwmap Passwort Änderung';
 		$this->expect = array('passwort', 'new_password', 'new_password_2');
 		if ($this->formvars['go'] == 'logout') {
 			# Nicht nochmal go = logout, sonst kommt man da nicht mehr raus.
@@ -163,7 +160,6 @@ class GUI {
 
 	function login_registration() {
 		include_once(CLASSPATH . 'Invitation.php');
-		$this->title='kvwmap Registrierung';
 		$this->invitation = Invitation::find_by_id($this, $this->formvars['token']);
 		if ($this->formvars['login_name'] == '') {
 			$this->formvars['login_name'] = strToLower(substr($this->invitation->inviter->get('Vorname'), 0, 1) . $this->invitation->inviter->get('Name'));
