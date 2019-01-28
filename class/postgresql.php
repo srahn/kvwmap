@@ -1104,7 +1104,7 @@ FROM
 		if ($buchungsstelle!='') {
       $sql.=" AND s.gml_id='".$buchungsstelle."'";
     }		
-		if(!$without_temporal_filter) $sql.= $this->build_temporal_filter(array('f', 's', 'g'));
+		if(!$without_temporal_filter) $sql.= $this->build_temporal_filter(array('f', 's', 'g', 'gem'));
     $sql.=" ORDER BY g.bezirk,g.buchungsblattnummermitbuchstabenerweiterung,ltrim(s.laufendenummer, '~>a')::integer,f.flurstueckskennzeichen";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -1886,7 +1886,10 @@ FROM
     }
     else{
 			if(pg_num_rows($queryret[1]) == 0){			# kein Vorgänger unter ALKIS -> Suche in ALB-Historie
-				$sql = "SELECT flurstueckskennzeichen as vorgaenger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug WHERE ARRAY['" . $FlurstKennz . "'::varchar] <@ nachfolgerflurstueckskennzeichen ORDER BY vorgaenger";
+				$sql = "SELECT flurstueckskennzeichen as vorgaenger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug f ";
+				$sql.= "WHERE ARRAY['" . $FlurstKennz . "'::varchar] <@ nachfolgerflurstueckskennzeichen ";
+				$sql.= $this->build_temporal_filter(array('f'));
+				$sql.= " ORDER BY vorgaenger";
 				$queryret=$this->execSQL($sql, 4, 0);
 				while($rs=pg_fetch_assoc($queryret[1])) {
 					$Vorgaenger[]=$rs;
