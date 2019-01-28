@@ -17512,8 +17512,19 @@ class db_mapObj{
   }
 
   function get_postgis_layers($order) {
-    $sql ='SELECT * FROM layer, u_groups';
-    $sql.=' WHERE layer.Gruppe = u_groups.id AND connectiontype = 6';
+		global $language;
+		if($language != 'german') {
+			$name_column = "
+			CASE
+				WHEN `Name_" . $language . "` != \"\" THEN `Name_" . $language . "`
+				ELSE `Name`
+			END AS Name";
+		}
+		else{
+			$name_column = "Name";
+		}
+    $sql ='SELECT Layer_ID, '.$name_column.' FROM layer';
+    $sql.=' WHERE connectiontype = 6';
     if($order != ''){$sql .= ' ORDER BY ' . replace_semicolon($order);}
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>".$sql,4);
     $query=mysql_query($sql);
