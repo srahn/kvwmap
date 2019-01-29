@@ -3127,7 +3127,7 @@ $vertex_catch_functions = '
 		}
 	}
 	
-	if(enclosingForm.punktfang.checked)toggle_vertices();		// am Anfang einmal aufrufen, damit die Vertices nach Navigation geladen werden, falls der Punktfang an war
+	if(enclosingForm.punktfang != undefined && enclosingForm.punktfang.checked)toggle_vertices();		// am Anfang einmal aufrufen, damit die Vertices nach Navigation geladen werden, falls der Punktfang an war
 
 	function request_foreign_vertices(){
 		top.ahah("index.php", "go=getSVG_foreign_vertices&layer_id="+enclosingForm.layer_id.value+"&oid="+enclosingForm.oid.value, new Array(enclosingForm.vertices, ""), new Array("setvalue", "execute_function"));
