@@ -78,9 +78,14 @@ $svg .='
 '.$SVGvars_defs.'
   </defs>';
 $svg .= $canvaswithall;
-$svg .= $navbuttons;
-if($this->map->width > 740)$button_position = '265 0';
+$svg .= '<g id="buttons_NAV" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()">';
+$SVGvars_navbuttons .= ppquery($strInfo);
+$svg .= '<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>';
+$svg .= $SVGvars_navbuttons;
+$svg .= '</g>';
+if($this->map->width > 740)$button_position = ($last_x+20).' 0';
 else $button_position = '0 36';
+$last_x = 0;
 $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate('.$button_position.')">';
 $buttons_fs .= deletebuttons($strUndo, $strDelete);
 $buttons_fs .= linebuttons($strDrawLine, $strDelLine);
