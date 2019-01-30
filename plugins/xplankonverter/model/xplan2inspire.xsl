@@ -296,46 +296,39 @@
 				</plu:ordinance>
 			</xsl:when>
 			</xsl:choose>
-			<xsl:choose>
-			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungStartDatum">
+			<!-- ForEach as 0..* -->
+			<xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungStartDatum">
 				<plu:ordinance>
 					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungStartDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+						<plu:ordinanceDate><xsl:value-of select="."/>T00:00:00</plu:ordinanceDate>
 						<plu:ordinanceReference>auslegungStartDatum</plu:ordinanceReference>
 					</plu:OrdinanceValue>
 				</plu:ordinance>
-			</xsl:when>
-			</xsl:choose>
-			<xsl:choose>
-			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungEndDatum">
+			</xsl:for-each>
+			<xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungEndDatum">
 				<plu:ordinance>
 					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungEndDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+						<plu:ordinanceDate><xsl:value-of select="."/>T00:00:00</plu:ordinanceDate>
 						<plu:ordinanceReference>auslegungEndDatum</plu:ordinanceReference>
 					</plu:OrdinanceValue>
 				</plu:ordinance>
-			</xsl:when>
-			</xsl:choose>
-			<xsl:choose>
-			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsStartDatum">
+			</xsl:for-each>
+			<xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsStartDatum">
 				<plu:ordinance>
 					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsStartDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+						<plu:ordinanceDate><xsl:value-of select="." />T00:00:00</plu:ordinanceDate>
 						<plu:ordinanceReference>traegerbeteiligungsStartDatum</plu:ordinanceReference>
 					</plu:OrdinanceValue>
 				</plu:ordinance>
-			</xsl:when>
-			</xsl:choose>
-			<xsl:choose>
-			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsEndDatum">
+			</xsl:for-each>
+			<xsl:for-each test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsEndDatum">
 				<plu:ordinance>
 					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsEndDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+						<plu:ordinanceDate><xsl:value-of select="." />T00:00:00</plu:ordinanceDate>
 						<plu:ordinanceReference>traegerbeteiligungsEndDatum</plu:ordinanceReference>
 					</plu:OrdinanceValue>
 				</plu:ordinance>
-			</xsl:when>
-			</xsl:choose>
+			</xsl:for-each>
 			<xsl:choose>
 			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aenderungenBisDatum">
 				<plu:ordinance>
