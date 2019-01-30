@@ -16678,7 +16678,9 @@ class db_mapObj{
     $sql .= "metalink = '".$formvars['metalink']."', ";
 		$sql .= "status = '".$formvars['status']."', ";
 		$sql .= "trigger_function = '".$formvars['trigger_function']."', ";
+		if($formvars['sync'] == '')$formvars['sync'] = 0;
 		$sql .= "sync = '".$formvars['sync']."', ";
+		if($formvars['listed'] == '')$formvars['listed'] = 0;
 		$sql .= "listed = '".$formvars['listed']."'";
     $sql .= " WHERE Layer_ID = ".$formvars['selected_layer_id'];
     #echo $sql;
@@ -16804,7 +16806,9 @@ class db_mapObj{
       $sql .= "'".$formvars['metalink']."', ";
 			$sql .= "'".$formvars['status']."', ";
 			$sql .= "'".$formvars['trigger_function']."', ";
+			if($formvars['sync'] == '')$formvars['sync'] = 0;
 			$sql .= "'".$formvars['sync']."', ";
+			if($formvars['listed'] == '')$formvars['listed'] = 0;
 			$sql .= "'".$formvars['listed']."'";
       $sql .= ")";
 
