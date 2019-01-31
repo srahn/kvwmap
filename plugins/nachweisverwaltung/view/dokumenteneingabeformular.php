@@ -12,7 +12,13 @@ function toggle_vertices(){
 
 function send(){	
 	document.GUI.result2.value = '';
-	if(document.GUI.hauptart.value == '' || (document.getElementsByName('unterart_'+document.GUI.hauptart.value)[0] != undefined && document.getElementsByName('unterart_'+document.GUI.hauptart.value)[0].value == '')){
+	var hauptart_value = '';
+	for(var i = 0; i < document.GUI.hauptart.length; i++){
+		if(document.GUI.hauptart[i].checked){
+			 hauptart_value = document.GUI.hauptart[i].value;
+		}
+  }
+	if(hauptart_value == '' || (document.getElementsByName('unterart_'+hauptart_value)[0] != undefined && document.getElementsByName('unterart_'+hauptart_value)[0].value == '')){
 		alert('Keine Dokumentart ausgewählt.');
 		return;
 	}
