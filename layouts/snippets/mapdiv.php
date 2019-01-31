@@ -41,10 +41,10 @@
 	
 		<div id="scale_bar">
 			<div id="scale_selector_div" style="float: left; margin-top: 4px;">
-				<div style="width:145px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
+				<div style="width:145px;" onmouseenter="document.getElementById('scales').style.display='inline-block';" onmouseleave="document.getElementById('scales').style.display='none';">
 					<div valign="top" style="height:0px; position:relative;">
 						<div id="scales" style="display:none; position:absolute; left:66px; bottom:-1px; width: 70px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
-							<select size="<? echo count($selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.go.value='neu Laden'; document.GUI.submit();">
+							<select size="<? echo count($selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onmousedown="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.go.value='neu Laden'; document.GUI.submit();">
 								<? 
 									foreach($selectable_scales as $scale){
 										echo '<option onmouseover="this.selected = true;" value="'.$scale.'">1:&nbsp;&nbsp;'.$scale.'</option>';
