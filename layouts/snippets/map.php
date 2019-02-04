@@ -103,6 +103,15 @@ function addRedlining(){
 	}
 }
 
+function setScale(select){
+	if(select.value != ''){
+		document.GUI.nScale.value=select.value;
+		document.getElementById('scales').style.display='none';
+		document.GUI.go.value='neu Laden';
+		document.GUI.submit();
+	}
+}
+
 </script>
 <?
 
