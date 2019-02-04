@@ -853,7 +853,7 @@ class Nachweis {
       } break;
 
       case "multibleIDs" : {
-				$sql ="SELECT distinct n.*,st_astext(st_multi(st_transform(n.the_geom, ".$this->client_epsg."))) AS wkt_umring,v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name, h.art as art_name"; 
+				$sql ="SELECT distinct n.*,st_astext(st_multi(st_transform(n.the_geom, ".$this->client_epsg."))) AS wkt_umring,v.name AS vermst, h.id as hauptart, lower(h.abkuerzung) as hauptart_abk, n.art AS unterart, d.art AS unterart_name, h.art as art_name"; 
 				$sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
@@ -909,7 +909,7 @@ class Nachweis {
         $ret=$this->database->execSQL($sql,4, 1);    
         if (!$ret[0]) {
           while ($rs=pg_fetch_assoc($ret[1])) {
-						if($rs['link_datei'] != '')$rs['dokument_path']='../Nachweise/'.$rs['flurid'].'/'.$this->buildNachweisNr($rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$rs['link_datei'];
+						if($rs['link_datei'] != '')$rs['dokument_path']='../Nachweise/'.$rs['flurid'].'/'.$this->buildNachweisNr($rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$rs['hauptart_abk'].'/'.basename($rs['link_datei']);
             $nachweise[]=$rs;
           }
           $this->erg_dokumente=count($nachweise);
