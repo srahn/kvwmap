@@ -321,7 +321,7 @@
 					</plu:OrdinanceValue>
 				</plu:ordinance>
 			</xsl:for-each>
-			<xsl:for-each test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsEndDatum">
+			<xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsEndDatum">
 				<plu:ordinance>
 					<plu:OrdinanceValue>
 						<plu:ordinanceDate><xsl:value-of select="." />T00:00:00</plu:ordinanceDate>
