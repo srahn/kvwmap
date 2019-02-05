@@ -399,7 +399,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 			code2execute_after += 'startup();';
 		}
 		
-		if(document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
+		if(document.GUI.punktfang != undefined && document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
 		
 		ahah("index.php", postdata+"&mime_type=map_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after, 
 		new Array(
