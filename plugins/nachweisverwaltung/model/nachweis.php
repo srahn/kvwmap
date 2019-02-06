@@ -929,7 +929,7 @@ class Nachweis {
           # Suchparameter sind gültig
           # Suche nach individueller Nummer
           #echo '<br>Suche nach individueller Nummer.';
-          $sql ="SELECT DISTINCT NULLIF(regexp_replace(rissnummer, '\D', '', 'g'), '')::int, NULLIF(regexp_replace(blattnummer, '\D', '', 'g'), '')::int, n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+          $sql ="SELECT DISTINCT NULLIF(regexp_replace(rissnummer, '\D', '', 'g'), '')::int, NULLIF(regexp_replace(blattnummer, '\D', '', 'g'), '')::int, n.id, flurid, blattnummer, datum, vermstelle, gueltigkeit, link_datei, format, stammnr, fortfuehrung, rissnummer, bemerkungen, bearbeiter, zeit, erstellungszeit, bemerkungen_intern, geprueft, n.art, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM ";
 					if($gemarkung != '' AND $flur_thematisch == 0){
 						$sql.=" alkis.pp_flur as flur, ";
@@ -1057,7 +1057,7 @@ class Nachweis {
           # Suche mit Suchpolygon
           #echo '<br>Suche mit Suchpolygon.';
           $this->debug->write('Abfragen der Nachweise die das Polygon schneiden',4);
-					$sql ="SELECT distinct n.*, NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::int, NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::int, st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+					$sql ="SELECT distinct NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::int, NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::int, n.id, flurid, blattnummer, datum, vermstelle, gueltigkeit, link_datei, format, stammnr, fortfuehrung, rissnummer, bemerkungen, bearbeiter, zeit, erstellungszeit, bemerkungen_intern, geprueft, n.art, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";					
