@@ -15139,6 +15139,7 @@ class db_mapObj{
     $query=mysql_query($sql);
 		if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
     while ($rs=mysql_fetch_array($query)) {
+			$groups[$rs['id']]['status'] = $rs['status'];
       $groups[$rs['id']]['Gruppenname'] = $rs['Gruppenname'];
 			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
 			$groups[$rs['id']]['id'] = $rs['id'];
