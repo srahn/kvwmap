@@ -51,8 +51,8 @@ function roundNumber(num, scale){
   }
 }
 
-function ImageLoadFailed(id) {
-  document.getElementById(id).innerHTML = '';
+function ImageLoadFailed(img) {
+  img.src = '';
 }
 
 var currentform;

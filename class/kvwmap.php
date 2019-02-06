@@ -705,7 +705,7 @@ class GUI {
 						if($pos !== false)$layersection = substr($layersection, 0, $pos);
 						$layers = explode(',', $layersection);
 						for($l = 0; $l < count($layers); $l++){
-							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(\'lg'.$j.'_'.$l.'\')"></div>';
+							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
 						}
 					}
 					else {
@@ -6877,24 +6877,24 @@ class GUI {
 			$this->formvars['user_id'] = $this->user->id;
 			$this->formvars['stelle_id'] = $this->Stelle->id;
 			$this->formvars['aktivStatus'] = 1;
-			$this->formvars['Name'] = implode(',', $this->formvars['layers']);
 			$this->formvars['Gruppe'] = $groupid;
 			$this->formvars['Typ'] = 'search';
 			$this->formvars['Datentyp'] = MS_LAYER_RASTER;
 			$this->formvars['connectiontype'] = MS_WMS;
 			$this->formvars['transparency'] = 100;
-
 			$wms_epsg_codes = array_flip(explode(' ', str_replace('epsg:', '', strtolower($this->formvars['srs'][0]))));
 			if($wms_epsg_codes[$this->user->rolle->epsg_code] !== '')$this->formvars['epsg_code'] = $this->user->rolle->epsg_code;
 			else $this->formvars['epsg_code'] = 4326;
-
 			if(strpos($this->formvars['wms_url'], '?') !== false)$this->formvars['wms_url'] .= '&';
 			else $this->formvars['wms_url'] .= '?';
-			$this->formvars['connection'] = $this->formvars['wms_url'].'VERSION=1.1.0&FORMAT=image/png&LAYERS='.implode(',', $this->formvars['layers']);
-			$layer_id = $dbmap->newRollenLayer($this->formvars);
-			$classdata['layer_id'] = -$layer_id;
-			$classdata['name'] = '_';
-	    $class_id = $dbmap->new_Class($classdata);
+			for($i = 0; $i < count($this->formvars['layers']); $i++){
+				$this->formvars['Name'] = $this->formvars['layers'][$i];
+				$this->formvars['connection'] = $this->formvars['wms_url'].'VERSION=1.1.1&FORMAT=image/png&transparent=true&LAYERS='.$this->formvars['layers'][$i];
+				$layer_id = $dbmap->newRollenLayer($this->formvars);
+				$classdata['layer_id'] = -$layer_id;
+				$classdata['name'] = '_';
+				$class_id = $dbmap->new_Class($classdata);
+			}
 			$this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 		}
 		$this->loadMap('DataBase');
