@@ -52,7 +52,7 @@ function roundNumber(num, scale){
 }
 
 function ImageLoadFailed(img) {
-  img.src = '';
+  img.parentNode.innerHTML = '';
 }
 
 var currentform;
