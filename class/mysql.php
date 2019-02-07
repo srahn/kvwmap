@@ -1025,7 +1025,15 @@ INSERT INTO u_styles2classes (
       #echo $sql;
       if ($query==0) {
         $ret[0]=1;
-        $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>".mysql_error($this->dbConn);
+				$ret[1] =
+					mysql_error($this->dbConn) . "<br>\n<br>" .
+					"\nAufgetreten bei MySQL Anweisung:<br>\n" .
+					"<textarea id=\"sql_statement\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px;\">" . $sql . "</textarea><br>\n" .
+					"<button type=\"button\" onclick=\"
+						copyText = document.getElementById('sql_statement');
+						copyText.select();
+						document.execCommand('copy');
+					\">In Zwischenablage kopieren</button>";
         $this->debug->write($ret[1], $debuglevel);
         if ($logsql) {
           $this->logfile->write("#".$ret[1]);

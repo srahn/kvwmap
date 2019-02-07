@@ -1834,3 +1834,13 @@ tbody.gle tr {
 .toggle_fa_on i{
 	color: #444444;
 }
+
+.sql-statement {
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.3;
+  min-height: 50px;
+  width: 100%;
+  box-sizing:border-box;
+  -moz-box-sizing:border-box;
+}

@@ -4165,54 +4165,71 @@ class GUI {
     $this->output();
   }
 
-  function PointEditor_Senden(){
-		include_(CLASSPATH.'pointeditor.php');
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
-    $pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-    # eingeabewerte pruefen:
-    $ret = $pointeditor->pruefeEingabedaten($this->formvars['loc_x'], $this->formvars['loc_y']);
-    if ($ret[0]) { # fehlerhafte eingabedaten
-      $this->Meldung=$ret[1];
-      $this->PointEditor();
-      return;
-    }
-    else{
-      $ret = $pointeditor->eintragenPunkt($this->formvars['loc_x'],$this->formvars['loc_y'], $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->formvars['dimension']);
-      if ($ret[0]) { # fehler beim eintrag
-          $this->Meldung=$ret[1];
-      }
-      else { # eintrag erfolgreich
-	      # wenn Time-Attribute vorhanden, aktuelle Zeit speichern
+	function PointEditor_Senden() {
+		include_(CLASSPATH . 'pointeditor.php');
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+		$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+		# eingeabewerte pruefen:
+		$ret = $pointeditor->pruefeEingabedaten($this->formvars['loc_x'], $this->formvars['loc_y']);
+		if ($ret[0]) { # fehlerhafte eingabedaten
+			$this->Meldung = $ret[1];
+			$this->PointEditor();
+			return;
+		}
+		else {
+			$ret = $pointeditor->eintragenPunkt($this->formvars['loc_x'], $this->formvars['loc_y'], $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->formvars['dimension']);
+			if ($ret[0]) { # fehler beim eintrag
+				$this->Meldung=$ret[1];
+			}
+			else { # eintrag erfolgreich
+				# wenn Time-Attribute vorhanden, aktuelle Zeit speichern
 				$this->attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
-				for($i = 0; $i < count($this->attributes['type']); $i++){
-					if($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Time' AND in_array($this->attributes['options'][$i], array('', 'update'))){
-						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".date('Y-m-d G:i:s')."' WHERE oid = '".$this->formvars['oid']."'";
-						$this->debug->write("<p>file:kvwmap :PointEditor_Senden :",4);
-						$ret = $layerdb->execSQL($sql,4, 1);
-					}
-					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'User' AND in_array($this->attributes['options'][$i], array('', 'update'))){
-						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".$this->user->Vorname." ".$this->user->Name."' WHERE oid = '".$this->formvars['oid']."'";
-						$this->debug->write("<p>file:kvwmap :PointEditor_Senden :",4);
-						$ret = $layerdb->execSQL($sql,4, 1);
-					}
-					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'UserID' AND in_array($this->attributes['options'][$i], array('', 'update'))){
-						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = ".$this->user->id." WHERE oid = '".$this->formvars['oid']."'";
-						$this->debug->write("<p>file:kvwmap :PointEditor_Senden :",4);
-						$ret = $layerdb->execSQL($sql,4, 1);
-					}
-					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Winkel'){
-						$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = ".$this->formvars['angle']." WHERE oid = '".$this->formvars['oid']."'";
-						$this->debug->write("<p>file:kvwmap :PointEditor_Senden :",4);
-						$ret = $layerdb->execSQL($sql,4, 1);
+				for ($i = 0; $i < count($this->attributes['type']); $i++) {
+					$value = '';
+					if ($this->attributes['name'][$i] != 'oid') {
+						switch (true) {
+							case (
+								$this->attributes['form_element_type'][$i] == 'Time' AND
+								in_array($this->attributes['options'][$i], array('', 'update'))
+							) : $value = "'" . date('Y-m-d G:i:s') . "'";
+							break;
+							case (
+								$this->attributes['form_element_type'][$i] == 'User' AND
+								in_array($this->attributes['options'][$i], array('', 'update'))
+							) : $value = "'" . $this->user->Vorname . " " . $this->user->Name . "'";
+							break;
+							case (
+								$this->attributes['form_element_type'][$i] == 'UserID' AND
+								in_array($this->attributes['options'][$i], array('', 'update'))
+							) : $value = $this->user->id;
+							break;
+							case (
+								$this->attributes['form_element_type'][$i] == 'Winkel'
+							) : $value = $this->formvars['angle'];
+							break;
+							default : $value = "";
+						}
+						if ($value != "") {
+							$sql = "
+								UPDATE
+									" . $this->formvars['layer_tablename'] . "
+								SET
+									" . $this->attributes['name'][$i] . " = " . $value ."
+								WHERE
+									oid = '" . $this->formvars['oid'] . "'
+							";
+							$this->debug->write("<p>file:kvwmap :PointEditor_Senden :", 4);
+							$ret = $layerdb->execSQL($sql, 4, 1);
+						}
 					}
 				}
-        $this->add_message('notice', 'Eintrag erfolgreich!');
-      }
-      $this->PointEditor();
-    }
-  }
+				$this->add_message('notice', 'Eintrag erfolgreich!');
+			}
+			$this->PointEditor();
+		}
+	}
 
   function LineEditor(){
 		include_once (CLASSPATH.'lineeditor.php');
