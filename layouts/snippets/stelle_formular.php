@@ -109,7 +109,7 @@ else {
           <td colspan="3" style="border-bottom:1px solid #C3C7C3"><em><span class="px13"><?php echo $strAsteriskRequired; ?> </span></em></td>
         </tr><?php if ($this->formvars['selected_stelle_id']>0) {?>
         <tr>
-          <th class="fetter" class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataBankID; ?></th>
+          <th class="fetter" class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><div style="width: 220px;"><?php echo $strDataBankID; ?></div></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
           	<input name="id" type="text" value="<?php echo $this->formvars['selected_stelle_id']; ?>" size="25" maxlength="11">
           </td>
@@ -264,47 +264,6 @@ else {
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWappenLink; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="wappen_link" type="text" value="<?php echo $this->formvars['wappen_link']; ?>" size="50" maxlength="100">
-          </td>
-        </tr>			
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strALBReferencingRegion; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-            <select name="alb_raumbezug" size="1" style="width:160px">
-                  <option value="Gemeinde"
-                  <?php
-                  if($this->formvars['alb_raumbezug'] == "Gemeinde"){
-                    echo " selected";
-                }
-                ?>
-                ><?php echo $strCommunity; ?></option>
-                  <option value="Amtsverwaltung"
-                  <?php
-                  if($this->formvars['alb_raumbezug'] == "Amtsverwaltung"){
-                    echo " selected";
-                  }
-                  ?>
-                  ><?php echo $strAdministrationAgency; ?></option>
-                  <option value="Kreis"
-                  <?php
-                  if($this->formvars['alb_raumbezug'] == "Kreis"){
-                    echo " selected";
-                  }
-                  ?>
-                  ><?php echo $strDistrict; ?></option>
-                  <option value=""
-                  <?php
-                  if($this->formvars['alb_raumbezug'] == ""){
-                    echo " selected";
-                  }
-                  ?>
-                  >kein</option>
-                </select>
-          </td>
-        </tr>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strALBReferencingRegionKey; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="alb_raumbezug_wert" type="text" value="<?php echo $this->formvars['alb_raumbezug_wert']; ?>" size="25" maxlength="100">
           </td>
         </tr>
         <tr>

@@ -10544,8 +10544,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->formvars['ows_fees'] = $this->stellendaten['ows_fees'];
       $this->formvars['ows_srs'] = $this->stellendaten['ows_srs'];
       $this->formvars['wappen'] = $this->stellendaten['wappen'];
-      $this->formvars['alb_raumbezug'] = $this->stellendaten['alb_raumbezug'];
-      $this->formvars['alb_raumbezug_wert'] = $this->stellendaten['alb_raumbezug_wert'];
 			$this->formvars['checkClientIP'] = $this->stellendaten['check_client_ip'];
       $this->formvars['checkPasswordAge'] = $this->stellendaten['check_password_age'];
       $this->formvars['allowedPasswordAge'] = $this->stellendaten['allowed_password_age'];
