@@ -314,7 +314,7 @@ class spatial_processor {
 			}break;
 			
 			case 'add_geometry':{
-				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname'], $formvars['singlegeom'], $formvars['orderby']);
+				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], $formvars['fromwhere'], $formvars['columnname'], $formvars['singlegeom'], $formvars['orderby']);
 				if($querygeometryWKT == ''){
 					break;
 				}
@@ -328,7 +328,7 @@ class spatial_processor {
 			}break;
 			
 			case 'subtract_geometry':{
-				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname'], $formvars['singlegeom'], $formvars['orderby']);
+				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], $formvars['fromwhere'], $formvars['columnname'], $formvars['singlegeom'], $formvars['orderby']);
 				if($querygeometryWKT == ''){
 					break;
 				}
@@ -401,7 +401,7 @@ class spatial_processor {
   }
 		
 	function add_buffer_within_polygon($geom_1, $geom_2, $formvars){
-		$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname'], false, $formvars['orderby']);
+		$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], $formvars['fromwhere'], $formvars['columnname'], false, $formvars['orderby']);
   	if(substr_count($geom_2, ',') == 0){			# wenn Linestring nur aus einem Eckpunkt besteht -> in POINT umwandeln -> Kreis entsteht
   		$geom_2 = $this->pointfromlinestring($geom_2);
   	}

@@ -963,6 +963,79 @@ class pgdatabase {
     $this->version = POSTGRESVERSION;
     return $this->dbConn;
   }
+	
+	function writeCustomType($typname, $schema){		
+		$datatype_id = $this->getDatatypeId($typname, $schema, $this->dbName, $this->host, $this->port);
+		$this->writeDatatypeAttributes($datatype_id, $typname, $schema);
+		return $datatype_id;
+	}
+
+	function getDatatypeId($typname, $schema, $dbname, $host, $port){
+		$sql = "SELECT id FROM datatypes WHERE ";
+		$sql.= "name = '".$typname."' AND `schema` = '".$schema."' AND dbname = '".$dbname."' AND host = '".$host."' AND port = ".$port;
+		$query=mysql_query($sql);
+		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		$rs=mysql_fetch_assoc($query);
+		if($rs == NULL){
+			$sql = "INSERT INTO datatypes (name, `schema`, dbname, host, port) VALUES ('".$typname."', '".$schema."', '".$dbname."', '".$host."', ".$port.")";
+			$query=mysql_query($sql);
+			$datatype_id = mysql_insert_id();
+		}
+		else{	
+			$datatype_id = $rs['id'];
+		}
+		return $datatype_id;
+	}
+	
+	function writeDatatypeAttributes($datatype_id, $typname, $schema){
+		$attr_info = $this->get_attribute_information($schema, $typname);
+		for($i = 0; $i < count($attr_info); $i++){
+			$fields[$i]['real_name'] = $attr_info[$i]['name'];
+			$fields[$i]['name'] = $attr_info[$i]['name'];
+			$fieldtype = $attr_info[$i]['type_name'];
+			$fields[$i]['nullable'] = $attr_info[$i]['nullable']; 
+			$fields[$i]['length'] = $attr_info[$i]['length'];
+			$fields[$i]['decimal_length'] = $attr_info[$i]['decimal_length'];
+			$fields[$i]['default'] = $attr_info[$i]['default'];					
+			if($attr_info[$i]['is_array'] == 't')$prefix = '_'; else $prefix = '';
+			if($attr_info[$i]['type_type'] == 'c'){		# custom datatype
+				$sub_datatype_id = $this->writeCustomType($attr_info[$i]['type'], $attr_info[$i]['type_schema']);
+				$fieldtype = $prefix.$sub_datatype_id; 
+			}
+			$constraintstring = '';
+			if($attr_info[$i]['type_type'] == 'e'){		# enum
+				$fieldtype = $prefix.'text';
+				$constraintstring = $this->getEnumElements($attr_info[$i]['type'], $attr_info[$i]['type_schema']);
+			}
+			$fields[$i]['constraints'] = $constraintstring;
+			$fields[$i]['type'] = $fieldtype;
+			if($fields[$i]['nullable'] == '')$fields[$i]['nullable'] = 'NULL';
+			if($fields[$i]['length'] == '')$fields[$i]['length'] = 'NULL';
+			if($fields[$i]['decimal_length'] == '')$fields[$i]['decimal_length'] = 'NULL';
+			$sql = "INSERT INTO datatype_attributes SET
+								datatype_id = ".$datatype_id.", 
+								name = '".$fields[$i]['name']."', 
+								real_name = '".$fields[$i]['real_name']."', 
+								type = '".$fields[$i]['type']."', 
+								constraints = '".addslashes($fields[$i]['constraints'])."', 
+								nullable = ".$fields[$i]['nullable'].", 
+								length = ".$fields[$i]['length'].", 
+								decimal_length = ".$fields[$i]['decimal_length'].", 
+								`default` = '".addslashes($fields[$i]['default'])."', 
+								`order` = ".$i." 
+							ON DUPLICATE KEY UPDATE
+								real_name = '".$fields[$i]['real_name']."', 
+								type = '".$fields[$i]['type']."', 
+								constraints = '".addslashes($fields[$i]['constraints'])."', 
+								nullable = ".$fields[$i]['nullable'].", 
+								length = ".$fields[$i]['length'].", 
+								decimal_length = ".$fields[$i]['decimal_length'].", 
+								`default` = '".addslashes($fields[$i]['default'])."', 
+								`order` = ".$i;
+			$query=mysql_query($sql);
+			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		}
+	}	
 
   function getFieldsfromSelect($select){
   	$distinctpos = strpos(strtolower($select), 'distinct');
