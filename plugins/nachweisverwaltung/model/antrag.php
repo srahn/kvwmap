@@ -470,7 +470,9 @@ class antrag {
 	function getDatei($flurid,$nr,$secondary, $withFileLinks) {
     $this->debug->write('<br>nachweis.php getDatei Abfragen der Dateien zu einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Datum zu einem Vorgang in der Nachweisführung
-    $sql.="SELECT n.link_datei, datum FROM nachweisverwaltung.n_nachweise AS n";
+    $sql.="SELECT n.link_datei, datum, lower(h.abkuerzung) as hauptart FROM nachweisverwaltung.n_nachweise AS n";
+		$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
+		$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
     if ($this->nr!='') {
       $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
     }
@@ -479,11 +481,11 @@ class antrag {
     }
     $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
-		$sql.= "order by art, blattnummer";
+		$sql.= "order by n.art, n.blattnummer";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
       while($rs=pg_fetch_array($ret[1])) {
-				if($withFileLinks)$dateien[] = '<c:alink:../Nachweise/'.$flurid.'/'.Nachweis::buildNachweisNr($nr, $secondary).'/'.$rs['link_datei'].'>'.basename($rs['link_datei']).'</c:alink>   '.$rs['datum'];
+				if($withFileLinks)$dateien[] = '<c:alink:../Nachweise/'.$flurid.'/'.Nachweis::buildNachweisNr($nr, $secondary).'/'.$rs['hauptart'].'/'.basename($rs['link_datei']).'>'.basename($rs['link_datei']).'</c:alink>   '.$rs['datum'];
         else $dateien[] =basename($rs['link_datei']).' '.$rs['datum'];
       }
       $ret[1] = implode(chr(10), $dateien);

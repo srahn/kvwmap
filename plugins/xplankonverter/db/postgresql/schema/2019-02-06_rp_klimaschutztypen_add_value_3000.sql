@@ -1,0 +1,1 @@
+ALTER TYPE xplan_gml.rp_klimaschutztypen ADD VALUE '3000' AFTER '2000';

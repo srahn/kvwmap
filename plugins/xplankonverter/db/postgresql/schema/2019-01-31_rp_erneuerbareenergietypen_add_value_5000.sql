@@ -1,0 +1,1 @@
+ALTER TYPE xplan_gml.rp_erneuerbareenergietypen ADD VALUE '5000' AFTER '4000';

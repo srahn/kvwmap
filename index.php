@@ -109,7 +109,8 @@ define(CASE_COMPRESS, false);																																						  #
 #											- man muss in einer Fachschale zoomen (wegen reduce_mapwidth)												#
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
-#   getLayerOptions:  - getRollenLayer() reinkopieren																											#
+#   getLayerOptions:  - getRollenLayer(), writeCustomType(), getDatatypeId() 															#
+#												und writeDatatypeAttributes() reinkopieren																				#
 #		get_group_legend:	- compare_legendorder() reinkopieren																								#
 #																																																				  #
 #																																																				  #

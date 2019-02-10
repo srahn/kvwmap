@@ -939,14 +939,14 @@ FROM
   }
 
   function updatepolygon($wkt_string, $srid, $poly_id){
-    $sql = 'UPDATE u_polygon SET the_geom = st_transform(st_geomfromtext(\''.$wkt_string.'\','.$srid.'), (select srid from geometry_columns where f_table_name = \'u_polygon\')) WHERE id = '.$poly_id;
+    $sql = 'UPDATE u_polygon SET the_geom = st_transform(st_geomfromtext(\''.$wkt_string.'\','.$srid.'), (select srid from geometry_columns where f_table_name = \'u_polygon\' and f_table_schema = \'public\')) WHERE id = '.$poly_id;
     #echo $sql;
     $ret = $this->execSQL($sql, 4, 0);
     return $ret;
   }
 
   function insertpolygon($wkt_string, $srid){
-    $sql = 'INSERT into u_polygon (the_geom) VALUES (st_transform(st_geomfromtext(\''.$wkt_string.'\','.$srid.'), (select srid from geometry_columns where f_table_name = \'u_polygon\')))';
+    $sql = 'INSERT into u_polygon (the_geom) VALUES (st_transform(st_geomfromtext(\''.$wkt_string.'\','.$srid.'), (select srid from geometry_columns where f_table_name = \'u_polygon\' and f_table_schema = \'public\')))';
     #echo $sql;
     $ret = $this->execSQL($sql, 4, 0);
     $sql = 'SELECT currval(\'u_polygon_id_seq\')';

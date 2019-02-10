@@ -847,8 +847,6 @@ class stelle {
     $this->MaxGeorefExt=ms_newRectObj();
     $this->MaxGeorefExt->setextent($rs['minxmax'],$rs['minymax'],$rs['maxxmax'],$rs['maxymax']);
     $this->epsg_code=$rs["epsg_code"];
-    $this->alb_raumbezug=$rs["alb_raumbezug"];
-    $this->alb_raumbezug_wert=$rs["alb_raumbezug_wert"];
     $this->pgdbhost = ($rs["pgdbhost"] == 'PGSQL_PORT_5432_TCP_ADDR') ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs["pgdbhost"];
     $this->pgdbname=$rs["pgdbname"];
     $this->pgdbuser=$rs["pgdbuser"];

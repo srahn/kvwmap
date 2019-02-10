@@ -534,7 +534,7 @@
 						$datapart .= '</td></tr>';
 						$datapart .= '<tr><td colspan="2"><span id="image_original_name">'.$original_name.'</span></td></tr>';
 						$datapart .= '</table>';
-						$datapart .= '<input type="hidden" name="'.str_replace(';Dokument;', ';Dokument_alt;', $fieldname).'" value="'.$value.'">';
+						$datapart .= '<input type="hidden" name="'.$fieldname.'_alt" value="'.$value.'">';
 					}
 					if($attribute_privileg != '0' AND !$lock[$k]){
 						$datapart .= '<input tabindex="1" onchange="'.$onchange.'" style="font-size: '.$fontsize.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$layer_id.'_'.$name.'_'.$k.'" title="'.$alias.'" class="'.$field_class.'" name="'.$fieldname.'">';

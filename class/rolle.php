@@ -106,7 +106,8 @@ class rolle {
 				ul.`privileg`,
 				ul.`export_privileg`,
 				`start_aktiv`,
-				r2ul.showclasses
+				r2ul.showclasses,
+				r2ul.geom_from_layer
 			FROM
 				layer AS l,
 				used_layer AS ul,
@@ -255,6 +256,15 @@ class rolle {
     $this->database->execSQL($sql,4, $this->loglevel);
     return 1;
   }
+	
+	function saveGeomFromLayer($layer_id, $geom_from_layer_id){
+    $sql ='UPDATE u_rolle2used_layer SET geom_from_layer = '.$geom_from_layer_id;
+    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND layer_id = '.$layer_id;
+    #echo $sql;
+    $this->debug->write("<p>file:rolle.php class:rolle function:saveGeomFromLayer - Speichern der Einstellungen zur Rolle:",4);
+    $this->database->execSQL($sql,4, $this->loglevel);
+    return 1;
+  }	
 
 	function setHistTimestamp($timestamp, $go_next = '') {
 		$sql ='UPDATE rolle SET ';

@@ -106,11 +106,11 @@ function buildwktlinefromsvgpath(svgpath){
   </tr>
   <tr>
   	<td>Geometrie übernehmen von:<br>
-  		<select name="layer_id" style="width: 260px" onchange="startwaiting(true);document.GUI.no_load.value='true';document.GUI.submit();">
+  		<select name="geom_from_layer" style="width: 260px" onchange="startwaiting(true);document.GUI.no_load.value='true';document.GUI.submit();">
   			<?
   				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
   					echo '<option';
-  					if($this->formvars['layer_id'] == $this->queryable_vector_layers['ID'][$i]){echo ' selected';}
+  					if($this->formvars['geom_from_layer'] == $this->queryable_vector_layers['ID'][$i]){echo ' selected';}
   					echo ' value="'.$this->queryable_vector_layers['ID'][$i].'">'.$this->queryable_vector_layers['Bezeichnung'][$i].'</option>';
   				}
   			?>

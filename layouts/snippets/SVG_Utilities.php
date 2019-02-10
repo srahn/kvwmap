@@ -819,14 +819,14 @@ $basicfunctions.= '
 			case "draw_second_line":
 				addlinepoint_second(world_x, world_y);
 				if(enclosingForm.secondline.value == "true"){
-					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add&geotype=line&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 				}
 				redrawsecondline();
 			break;
 			case "delete_lines":
 				addpoint_second(world_x, world_y);
 				if(enclosingForm.secondpoly.value == "true"){
-					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 				}
 				redrawsecondline();
 			break;
@@ -834,7 +834,7 @@ $basicfunctions.= '
 			case "split_geometry":
 				addlinepoint_second(world_x, world_y);
 				if(enclosingForm.secondline.value == "true"){
-					top.ahah("index.php", "go=spatial_processing&geotype=line&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=split&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+					top.ahah("index.php", "go=spatial_processing&geotype=line&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=split&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 				}
 				//redrawsecondline();
 			break;
@@ -846,13 +846,13 @@ $basicfunctions.= '
 			case "draw_second_polygon":
 				addpoint_second(world_x, world_y);
 				if(enclosingForm.secondpoly.value == "true"){
-					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 				}
 			break;
 			case "subtract_polygon":
 				addpoint_second(world_x, world_y);
 				if(enclosingForm.secondpoly.value == "true"){
-					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 				}
 			break;
 			case "add_geom":
@@ -867,14 +867,14 @@ $basicfunctions.= '
 				addlinepoint_second(world_x, world_y);
 				enclosingForm.firstpoly.value = "true";
 				enclosingForm.secondpoly.value = "true";
-				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_buffered_line&width="+enclosingForm.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_buffered_line&width="+enclosingForm.bufferwidth.value+"&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 			break;
 			case "add_parallel_polygon":
 				addlinepoint_second(world_x, world_y);
 				if(pathx_second.length > 1){
 					enclosingForm.firstpoly.value = "true";
 					enclosingForm.secondpoly.value = true;
-					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+enclosingForm.bufferwidth.value+"&side="+enclosingForm.bufferside.value+"&subtract="+enclosingForm.buffersubtract.value+"&geotype=line&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+enclosingForm.bufferwidth.value+"&side="+enclosingForm.bufferside.value+"&subtract="+enclosingForm.buffersubtract.value+"&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 				}				
 			break;
 			case "add_buffer_within_polygon":
@@ -888,7 +888,7 @@ $basicfunctions.= '
 				enclosingForm.firstpoly.value = "true";
 				enclosingForm.secondpoly.value = "true";
 				buffer_geom = enclosingForm.buffer_geom.value;		// die gesicherte Geometrie, um die gepuffert werden soll
-				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&path3="+buffer_geom+"&operation=add_buffer_within_polygon&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize='.$pixelsize.'&resulttype=svgwkt&fromwhere="+enclosingForm.fromwhere.value+"&orderby="+enclosingForm.orderby.value+"&columnname="+enclosingForm.columnname.value+"&layer_id="+enclosingForm.layer_id.value+"&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));				
+				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&path3="+buffer_geom+"&operation=add_buffer_within_polygon&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize='.$pixelsize.'&resulttype=svgwkt&fromwhere="+enclosingForm.fromwhere.value+"&orderby="+enclosingForm.orderby.value+"&columnname="+enclosingForm.columnname.value+"&geom_from_layer="+enclosingForm.geom_from_layer.value+"&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));				
 			break;
 			case "move_geometry":
 				startMoveGeom(client_x, client_y);
@@ -979,7 +979,7 @@ function mouseup(evt){
 		endPoint(evt);
 		enclosingForm.secondpoly.value = "true";
 		if(enclosingForm.last_doing.value == "add_geom"){
-			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize='.$pixelsize.'&operation=add_geometry&resulttype=svgwkt&fromwhere="+enclosingForm.fromwhere.value+"&singlegeom="+enclosingForm.singlegeom.checked+"&orderby="+enclosingForm.orderby.value+"&columnname="+enclosingForm.columnname.value+"&layer_id="+enclosingForm.layer_id.value,new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize='.$pixelsize.'&operation=add_geometry&resulttype=svgwkt&fromwhere="+enclosingForm.fromwhere.value+"&singlegeom="+enclosingForm.singlegeom.checked+"&orderby="+enclosingForm.orderby.value+"&columnname="+enclosingForm.columnname.value+"&geom_from_layer="+enclosingForm.geom_from_layer.value,new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 			if(polygonfunctions == true){
 				enclosingForm.firstpoly.value = "true";
 			}
@@ -989,7 +989,7 @@ function mouseup(evt){
 		}
 		else{
 			if(enclosingForm.last_doing.value == "subtract_geom"){
-				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize='.$pixelsize.'&operation=subtract_geometry&resulttype=svgwkt&fromwhere="+enclosingForm.fromwhere.value+"&singlegeom="+enclosingForm.singlegeom.checked+"&orderby="+enclosingForm.orderby.value+"&columnname="+enclosingForm.columnname.value+"&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize='.$pixelsize.'&operation=subtract_geometry&resulttype=svgwkt&fromwhere="+enclosingForm.fromwhere.value+"&singlegeom="+enclosingForm.singlegeom.checked+"&orderby="+enclosingForm.orderby.value+"&columnname="+enclosingForm.columnname.value+"&geom_from_layer="+enclosingForm.geom_from_layer.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 			}
 		}
 	}
@@ -1567,7 +1567,7 @@ function mouseup(evt){
 					enclosingForm.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
 					path_second = buildsvglinepath(pathx_second,pathy_second);
 					if(enclosingForm.secondline.value == "true"){
-						top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add&geotype=line&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+						top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 					}
 					redrawsecondline();
 				}
@@ -2062,11 +2062,11 @@ function mouseup(evt){
 			length1 = enclosingForm.linelength;
 		}
 	  if(enclosingForm.newpathwkt.value != ""){
-	  	top.ahah("index.php", "go=spatial_processing&geotype=line&path1="+enclosingForm.newpathwkt.value+"&operation=length&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.linelength, length1), "");
+	  	top.ahah("index.php", "go=spatial_processing&geotype=line&path1="+enclosingForm.newpathwkt.value+"&operation=length&", new Array(enclosingForm.linelength, length1), "");
 	  }
 	  else{
 	  	if(enclosingForm.newpath.value != ""){
-	  		top.ahah("index.php", "go=spatial_processing&geotype=line&path2="+enclosingForm.newpath.value+"&operation=length&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.linelength, length1), "");
+	  		top.ahah("index.php", "go=spatial_processing&geotype=line&path2="+enclosingForm.newpath.value+"&operation=length", new Array(enclosingForm.linelength, length1), "");
 	  	}
 	  	else{
 	  		enclosingForm.linelength.value = "0.0";
@@ -2897,11 +2897,11 @@ function mouseup(evt){
 					enclosingForm.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
 					path_second = buildsvgpath(pathx_second,pathy_second);
 					if(enclosingForm.last_doing.value == "draw_second_polygon"){
-						top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+						top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 					}
 					else{
 						if(enclosingForm.last_doing.value == "subtract_polygon"){				
-							top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+							top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 						}
 					}
 					redrawsecondpolygon();
@@ -2916,7 +2916,7 @@ function mouseup(evt){
 					str = enclosingForm.pathy_second.value;
 					enclosingForm.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
 					path_second = buildsvglinepath(pathx_second, pathy_second);
-					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_buffered_line&width="+enclosingForm.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_buffered_line&width="+enclosingForm.bufferwidth.value+"&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 					redrawsecondpolygon();
 				}
 			break;
@@ -2929,7 +2929,7 @@ function mouseup(evt){
 					str = enclosingForm.pathy_second.value;
 					enclosingForm.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
 					path_second = buildsvglinepath(pathx_second, pathy_second);
-					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+enclosingForm.bufferwidth.value+"&side="+enclosingForm.bufferside.value+"&subtract="+enclosingForm.buffersubtract.value+"&geotype=line&resulttype=svgwkt&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+enclosingForm.bufferwidth.value+"&side="+enclosingForm.bufferside.value+"&subtract="+enclosingForm.buffersubtract.value+"&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 					redrawsecondpolygon();
 				}
 			break;
@@ -3036,19 +3036,19 @@ function mouseup(evt){
 		}
 	  if(enclosingForm.newpathwkt.value != ""){
 	  	if(enclosingForm.areaunit == undefined){
-	  		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.newpathwkt.value+"&operation=area&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.area, area), "");
+	  		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.newpathwkt.value+"&operation=area", new Array(enclosingForm.area, area), "");
 	  	}
 	  	else{
-	  		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.newpathwkt.value+"&operation=area&unit="+enclosingForm.areaunit.value+"&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.area, area), "");
+	  		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.newpathwkt.value+"&operation=area&unit="+enclosingForm.areaunit.value, new Array(enclosingForm.area, area), "");
 	  	}
 	  }
 	  else{
 	  	if(enclosingForm.newpath.value != ""){
 	  		if(enclosingForm.areaunit == undefined){
-	  			top.ahah("index.php", "go=spatial_processing&path2="+enclosingForm.newpath.value+"&operation=area&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.area, area), "");
+	  			top.ahah("index.php", "go=spatial_processing&path2="+enclosingForm.newpath.value+"&operation=area", new Array(enclosingForm.area, area), "");
 	  		}
 	  		else{
-	  			top.ahah("index.php", "go=spatial_processing&path2="+enclosingForm.newpath.value+"&operation=area&unit="+enclosingForm.areaunit.value+"&layer_id="+enclosingForm.layer_id.value, new Array(enclosingForm.area, area), "");
+	  			top.ahah("index.php", "go=spatial_processing&path2="+enclosingForm.newpath.value+"&operation=area&unit="+enclosingForm.areaunit.value, new Array(enclosingForm.area, area), "");
 	  		}
 	  	}
 	  	else{
@@ -3130,7 +3130,7 @@ $vertex_catch_functions = '
 	if(enclosingForm.punktfang != undefined && enclosingForm.punktfang.checked)toggle_vertices();		// am Anfang einmal aufrufen, damit die Vertices nach Navigation geladen werden, falls der Punktfang an war
 
 	function request_foreign_vertices(){
-		top.ahah("index.php", "go=getSVG_foreign_vertices&layer_id="+enclosingForm.layer_id.value+"&oid="+enclosingForm.oid.value, new Array(enclosingForm.vertices, ""), new Array("setvalue", "execute_function"));
+		top.ahah("index.php", "go=getSVG_foreign_vertices&geom_from_layer="+enclosingForm.geom_from_layer.value+"&oid="+enclosingForm.oid.value, new Array(enclosingForm.vertices, ""), new Array("setvalue", "execute_function"));
 	}
 
 	function remove_foreign_vertices(){

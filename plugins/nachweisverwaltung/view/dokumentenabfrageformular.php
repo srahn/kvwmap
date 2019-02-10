@@ -8,7 +8,7 @@
 <script type="text/javascript">
 <!--
 
-Text[1]=["Achtung:","Bei Auswahl von 'räumlich' erfolgt eine räumliche Suche über die aktuelle Flurgeometrie. Soll stattdessen über die in den Nachweisen gespeicherte Flur gesucht werden, muss 'thematisch' ausgewählt werden."]
+Text[1]=["Achtung:","Bei Auswahl von 'räumlich' erfolgt eine räumliche Suche über die aktuelle Flurgeometrie. Soll stattdessen über die in den Metainformationen gespeicherte Flur gesucht werden, muss 'thematisch' ausgewählt werden."]
 
 
 function save(){

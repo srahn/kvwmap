@@ -123,8 +123,6 @@ class stelle {
 		$this->MaxGeorefExt = ms_newRectObj();
 		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
-		$this->alb_raumbezug = $rs['alb_raumbezug'];
-		$this->alb_raumbezug_wert = $rs['alb_raumbezug_wert'];
 		$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
 		$this->pgdbname = $rs['pgdbname'];
 		$this->pgdbuser = $rs['pgdbuser'];
@@ -305,8 +303,6 @@ class stelle {
 		}
 		$sql.=' Bezeichnung="'.$stellendaten['bezeichnung'].'"';
 		$sql.=', Referenzkarte_ID='.$stellendaten['Referenzkarte_ID'];
-		$sql.=', alb_raumbezug="'.$stellendaten['alb_raumbezug'].'"';
-		$sql.=', alb_raumbezug_wert="'.$stellendaten['alb_raumbezug_wert'].'"';
 		$sql.=', minxmax= "'.$stellendaten['minxmax'].'"';
 		$sql.=', minymax= "'.$stellendaten['minymax'].'"';
 		$sql.=', maxxmax= "'.$stellendaten['maxxmax'].'"';
@@ -380,8 +376,6 @@ class stelle {
 				$wappen . "
 				`Bezeichnung` = '" . $stellendaten['bezeichnung'] . "',
 				`Referenzkarte_ID` = " . $stellendaten['Referenzkarte_ID'] . ",
-				`alb_raumbezug` = '" . $stellendaten['alb_raumbezug'] . "',
-				`alb_raumbezug_wert` = '" . $stellendaten['alb_raumbezug_wert'] . "',
 				`minxmax` = '" . $stellendaten['minxmax'] . "',
 				`minymax` = '" . $stellendaten['minymax'] . "',
 				`maxxmax` = '" . $stellendaten['maxxmax'] . "',
@@ -552,7 +546,7 @@ class stelle {
 	}
 
 	function isFunctionAllowed($functionname) {
-		$this->getFunktionen();
+		if($this->funktionen == NULL)$this->getFunktionen();
 		if($this->funktionen[$functionname]['erlaubt']) {
 			return 1;
 		}
