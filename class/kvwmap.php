@@ -4128,9 +4128,11 @@ class GUI {
 				$this->angle_attribute = $attributes['name'][$i];
 			}
 		}
+		$this->formvars['layer_columnname'] = $attributes['the_geom'];
+		$this->formvars['layer_tablename'] = $attributes['table_name'][$attributes['the_geom']];
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
 		$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-		if ($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '') {
+		if (($this->formvars['oldscale'] != '' AND $this->formvars['oldscale'] != $this->formvars['nScale']) OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '') {
 			$this->neuLaden();
 		}
 		else {
@@ -4245,10 +4247,12 @@ class GUI {
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		if($this->formvars['geom_from_layer'] == '')$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
 		$attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+		$this->formvars['layer_columnname'] = $attributes['the_geom'];
+		$this->formvars['layer_tablename'] = $attributes['table_name'][$attributes['the_geom']];
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
     $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-		if($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != ''){
+		if(($this->formvars['oldscale'] != '' AND $this->formvars['oldscale'] != $this->formvars['nScale']) OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != ''){
 			$this->neuLaden();
 			$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
 		}
@@ -4387,10 +4391,12 @@ class GUI {
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		if($this->formvars['geom_from_layer'] == '')$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
 		$attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+		$this->formvars['layer_columnname'] = $attributes['the_geom'];
+		$this->formvars['layer_tablename'] = $attributes['table_name'][$attributes['the_geom']];
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
     $polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-		if($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != ''){
+		if(($this->formvars['oldscale'] != '' AND $this->formvars['oldscale'] != $this->formvars['nScale']) OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != ''){
 			$this->neuLaden();
 			$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
 		}
@@ -9091,6 +9097,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$layerdb->setClientEncoding();
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
+				if($this->formvars['geom_from_layer'] == '')$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
 				$form_fields = explode('|', $this->formvars['form_field_names']);
 				for($i = 0; $i < count($form_fields); $i++) {
 					if ($form_fields[$i] != '') {
@@ -9179,6 +9186,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
 					}
 					else {
+						$this->user->rolle->saveGeomFromLayer($this->formvars['selected_layer_id'], $this->formvars['geom_from_layer']);
 						$this->loadMap('DataBase');
 					}
 					if ($saved_scale != NULL) $this->scaleMap($saved_scale); # nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
@@ -9221,10 +9229,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						#-----Polygoneditor und Linieneditor---#
 						$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
 						# Spaltenname und from-where abfragen
-						if ($this->formvars['layer_id'] == '') {
-							$this->formvars['layer_id'] = $this->formvars['selected_layer_id'];
-						}
-						$data = $mapdb->getData($this->formvars['layer_id']);
+						$data = $mapdb->getData($this->formvars['geom_from_layer']);
 						$space_explosion = explode(' ', $data);
 						$this->formvars['columnname'] = $space_explosion[0];
 						$select = $fromwhere = $mapdb->getSelectFromData($data);
@@ -9241,10 +9246,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$this->formvars['fromwhere'] .= ' where (1=1)';
 						}
 
-						if ($this->formvars['newpath'] == '' AND $this->formvars['layer_id'] < 0) {	# Suchergebnislayer sofort selektieren
-							$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['layer_id']);
+						if ($this->formvars['newpath'] == '' AND $this->formvars['geom_from_layer'] < 0) {	# Suchergebnislayer sofort selektieren
+							$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['geom_from_layer']);
 							if ($rollenlayer[0]['Typ'] == 'search') {
-								$layerdb1 = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+								$layerdb1 = $mapdb->getlayerdatabase($this->formvars['geom_from_layer'], $this->Stelle->pgdbhost);
 								include_once (CLASSPATH.'polygoneditor.php');
 								$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
 								$tablename = '('.$fromwhere.') as foo';
@@ -13236,6 +13241,22 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, $layerset[$i]['shape'], true, $this->Stelle->id);
 
 							if($layerset[$i]['count'] != 0){
+							
+								# wenn nur ein Treffer und "anderes Objekt bearbeiten" eingestellt, in die Geometriebearbeitung gehen
+								if($num_rows == 1 AND $this->formvars['edit_other_object'] == 1){
+									$this->formvars['oid'] = $layerset[$i]['shape'][0][$geometrie_tabelle.'_oid'];
+									$this->formvars['selected_layer_id'] = $layerset[$i]['Layer_ID'];
+									$geomtype = $layerset[$i]['attributes']['geomtype'][$layerset[$i]['attributes']['the_geom']];
+									if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY')$geomtype = 'Polygon';
+									elseif($geomtype == 'POINT')$geomtype = 'Point';
+									elseif($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING')$geomtype = 'Line';
+									$this->formvars['CMD'] = '';
+									$this->formvars['go'] = $geomtype.'Editor';
+									$editor = $geomtype.'Editor';
+									$this->{$editor}();
+									exit();									
+								}
+							
 								if(!$last_query_deleted){			# damit nur die letzte Query gelöscht wird und nicht eine bereits gespeicherte Query eines anderen Layers der aktuellen Abfrage
 									$this->user->rolle->delete_last_query();
 									$last_query_deleted = true;
