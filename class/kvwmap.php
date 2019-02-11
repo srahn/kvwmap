@@ -4115,8 +4115,8 @@ class GUI {
   }
 
 	function PointEditor() {
-		include_once (CLASSPATH.'pointeditor.php');
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		include_once(CLASSPATH . 'pointeditor.php');
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$this->reduce_mapwidth(100);
 		$this->main = 'PointEditor.php';
 		$this->titel = 'Geometrie bearbeiten';
@@ -4170,7 +4170,7 @@ class GUI {
 	}
 
 	function PointEditor_Senden() {
-		include_(CLASSPATH . 'pointeditor.php');
+		include_once(CLASSPATH . 'pointeditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
 		$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
@@ -4178,14 +4178,14 @@ class GUI {
 		# eingeabewerte pruefen:
 		$ret = $pointeditor->pruefeEingabedaten($this->formvars['loc_x'], $this->formvars['loc_y']);
 		if ($ret[0]) { # fehlerhafte eingabedaten
-			$this->Meldung = $ret[1];
+			$this->add_message('error', $ret[1]);
 			$this->PointEditor();
 			return;
 		}
 		else {
 			$ret = $pointeditor->eintragenPunkt($this->formvars['loc_x'], $this->formvars['loc_y'], $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->formvars['dimension']);
 			if ($ret[0]) { # fehler beim eintrag
-				$this->Meldung=$ret[1];
+				$this->add_message('error', $ret[1]);
 			}
 			else { # eintrag erfolgreich
 				# wenn Time-Attribute vorhanden, aktuelle Zeit speichern

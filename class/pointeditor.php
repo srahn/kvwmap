@@ -40,8 +40,13 @@ class pointeditor {
 	}
 
 	function pruefeEingabedaten($locx, $locy) {
-		$ret[1]='';
-		$ret[0]=0;
+		if ($locx == '' OR $locy == '') {
+			$ret[1] = 'Es wurden keine Koordinaten übergeben!';
+		}
+		else {
+			$ret[1] = '';
+			$ret[0] = 0;
+		}
 		return $ret; 
 	}
 
@@ -57,16 +62,16 @@ class pointeditor {
 			$sql = "
 				UPDATE " . $tablename . "
 				SET " . $columnname . " = st_transform(
-					St_GeomFromText('POINT(" . $pointx . " " . $pointy . ($dimension == 3 ? " 0" : "") . "', " . $this->clientepsg . "),
+					St_GeomFromText('POINT(" . $pointx . " " . $pointy . ($dimension == 3 ? " 0" : "") . ")', " . $this->clientepsg . "),
 					" . $this->layerepsg . "
 				)
 				WHERE oid = " . $oid . "
 			";
 		}
-		$ret = $this->database->execSQL($sql, 4, 1);
+		$ret = $this->database->execSQL($sql, 4, 1, true);
 		if ($ret[0]) {
 			# Fehler beim Eintragen in Datenbank
-			$ret[1] = '\nAuf Grund eines Datenbankfehlers konnte die Flaeche nicht eingetragen werden!\n' . $ret[1];
+			$ret[1] = 'Auf Grund eines Datenbankfehlers konnte der Punkt nicht eingetragen werden!<br>' . $ret[1];
 		}
 		return $ret;
 	}
