@@ -4114,37 +4114,39 @@ class GUI {
   	$this->user->rolle->saveOverlayPosition($this->formvars['overlayx'],$this->formvars['overlayy']);
   }
 
-  function PointEditor(){
+	function PointEditor() {
 		include_once (CLASSPATH.'pointeditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->reduce_mapwidth(100);
-    $this->main='PointEditor.php';
-    $this->titel='Geometrie bearbeiten';
-    $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
-    $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+		$this->main = 'PointEditor.php';
+		$this->titel = 'Geometrie bearbeiten';
+		$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
 		$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
-		for($i = 0; $i < count($attributes['name']); $i++){
-			if($attributes['form_element_type'][$i] == 'Winkel')$this->angle_attribute = $attributes['name'][$i];
+		for ($i = 0; $i < count($attributes['name']); $i++) {
+			if ($attributes['form_element_type'][$i] == 'Winkel') {
+				$this->angle_attribute = $attributes['name'][$i];
+			}
 		}
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
-    $pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-    if($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != ''){
+		$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+		if ($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '') {
 			$this->neuLaden();
 		}
-		else{
+		else {
 			$this->loadMap('DataBase');
-			if($this->formvars['oid'] != ''){
+			if ($this->formvars['oid'] != '') {
 				$this->point = $pointeditor->getpoint($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->angle_attribute);
-				if($this->point['pointx'] != ''){
-					$this->formvars['loc_x']=$this->point['pointx'];
-					$this->formvars['loc_y']=$this->point['pointy'];
-					$this->formvars['angle']=$this->point['angle'];
+				if ($this->point['pointx'] != '') {
+					$this->formvars['loc_x'] = $this->point['pointx'];
+					$this->formvars['loc_y'] = $this->point['pointy'];
+					$this->formvars['angle'] = $this->point['angle'];
 					$rect = ms_newRectObj();
-					$rect->minx = $this->point['pointx']-100;
-					$rect->maxx = $this->point['pointx']+100;
-					$rect->miny = $this->point['pointy']-100;
-					$rect->maxy = $this->point['pointy']+100;
-					$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+					$rect->minx = $this->point['pointx'] - 100;
+					$rect->maxx = $this->point['pointx'] + 100;
+					$rect->miny = $this->point['pointy'] - 100;
+					$rect->maxy = $this->point['pointy'] + 100;
+					$this->map->setextent($rect->minx, $rect->miny, $rect->maxx, $rect->maxy);
 					if (MAPSERVERVERSION > 600) {
 						$this->map_scaledenom = $this->map->scaledenom;
 					}
@@ -4153,17 +4155,19 @@ class GUI {
 					}
 				}
 			}
-    }
+		}
 		# zoomToMaxLayerExtent
-		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
-    $this->saveMap('');
-    if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
-    	$currenttime=date('Y-m-d H:i:s',time());
-    	$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    }
-    $this->drawMap();
-    $this->output();
-  }
+		if ($this->formvars['zoom_layer_id'] != '') {
+			$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+		}
+		$this->saveMap('');
+		if ($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next') {
+			$currenttime = date('Y-m-d H:i:s',time());
+			$this->user->rolle->setConsumeActivity($currenttime, 'getMap', $this->user->rolle->last_time_id);
+		}
+		$this->drawMap();
+		$this->output();
+	}
 
 	function PointEditor_Senden() {
 		include_(CLASSPATH . 'pointeditor.php');
