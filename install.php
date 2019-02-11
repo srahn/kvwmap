@@ -316,7 +316,7 @@ function init_config() {
 	define('DEBUG_LEVEL', 1);
 	define('DEBUGFILE', 'install.log');
 	define('LOGFILE_MYSQL', LOGPATH . 'install.log');
-	define('LOGFILE_POSTRGRES', LOGPATH . 'install.log');
+	define('LOGFILE_POSTGRES', LOGPATH . 'install.log');
 	define('WWWROOT', $installpath.$wwwpath);
 	define('APPLVERSION', $applversion.'/');
 }
