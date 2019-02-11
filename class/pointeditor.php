@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fÃ¼r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 # 
@@ -31,45 +31,60 @@
 
 class pointeditor {
 
-  function pointeditor($database, $layerepsg, $clientepsg) {
-    global $debug;
-    $this->debug=$debug;
-    $this->database=$database;
-    $this->clientepsg = $clientepsg;
-    $this->layerepsg = $layerepsg;
-  }
-  
-  function pruefeEingabedaten($locx, $locy) {
-    $ret[1]='';
-    $ret[0]=0;
-    return $ret; 
-  }
-  
-  function eintragenPunkt($pointx, $pointy, $oid, $tablename, $columnname, $dimension){
-		if($pointx == '')$sql = "UPDATE ".$tablename." SET ".$columnname." = NULL WHERE oid = ".$oid;
-		else{
-			if($dimension == 3){  	
-				$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(St_GeomFromText('POINT(".$pointx." ".$pointy." 0)',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
-			}
-			else{
-				$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(St_GeomFromText('POINT(".$pointx." ".$pointy.")',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
-			}
+	function pointeditor($database, $layerepsg, $clientepsg) {
+		global $debug;
+		$this->debug=$debug;
+		$this->database=$database;
+		$this->clientepsg = $clientepsg;
+		$this->layerepsg = $layerepsg;
+	}
+
+	function pruefeEingabedaten($locx, $locy) {
+		$ret[1]='';
+		$ret[0]=0;
+		return $ret; 
+	}
+
+	function eintragenPunkt($pointx, $pointy, $oid, $tablename, $columnname, $dimension) {
+		if ($pointx == '') {
+			$sql = "
+				UPDATE " . $tablename . "
+				SET " . $columnname . " = NULL
+				WHERE oid = " . $oid . "
+			";
+		}
+		else {
+			$sql = "
+				UPDATE " . $tablename . "
+				SET " . $columnname . " = st_transform(
+					St_GeomFromText('POINT(" . $pointx . " " . $pointy . ($dimension == 3 ? " 0" : "") . "', " . $this->clientepsg . "),
+					" . $this->layerepsg . "
+				)
+				WHERE oid = " . $oid . "
+			";
 		}
 		$ret = $this->database->execSQL($sql, 4, 1);
 		if ($ret[0]) {
-      # Fehler beim Eintragen in Datenbank
-      $ret[1]='\nAuf Grund eines Datenbankfehlers konnte die Flaeche nicht eingetragen werden!\n'.$ret[1];
-    }
-    return $ret;
-  }
-	
-	function getpoint($oid, $tablename, $columnname, $angle_column = NULL){
-		$sql = "SELECT st_x(st_transform(".$columnname.",".$this->clientepsg.")) AS pointx, st_y(st_transform(".$columnname.",".$this->clientepsg.")) AS pointy ";
-		if($angle_column != '')$sql.= ", ".$angle_column." as angle ";
-		$sql.= "FROM ".$tablename." WHERE oid = ".$oid;
+			# Fehler beim Eintragen in Datenbank
+			$ret[1] = '\nAuf Grund eines Datenbankfehlers konnte die Flaeche nicht eingetragen werden!\n' . $ret[1];
+		}
+		return $ret;
+	}
+
+	function getpoint($oid, $tablename, $columnname, $angle_column = NULL) {
+		$sql = "
+			SELECT
+				st_x(st_transform(" . $columnname . ", " . $this->clientepsg . ")) AS pointx,
+				st_y(st_transform(".$columnname.",".$this->clientepsg.")) AS pointy" .
+				($angle_column != '' ? ", " . $angle_column . " as angle" : "") . "
+			FROM
+				" . $tablename . "
+			WHERE
+				oid = " . $oid . "
+		";
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$point = pg_fetch_array($ret[1]);
 		return $point;
-	}  
+	}
 }
 ?>
