@@ -519,6 +519,7 @@
       enclosingForm.CMD.value          = "ppquery";
 			enclosingForm.go.value = "Sachdaten";
 			enclosingForm.last_doing.value = "";
+			enclosingForm.geom_from_layer.value = "";
 			enclosingForm.edit_other_object.value = 1;
 			enclosingForm.submit();
      break;
@@ -529,6 +530,7 @@
       enclosingForm.CMD.value          = "ppquery";
 			enclosingForm.go.value = "Sachdaten";
 			enclosingForm.last_doing.value = "";
+			enclosingForm.geom_from_layer.value = "";
 			enclosingForm.edit_other_object.value = 1;
       enclosingForm.submit();
      break;
