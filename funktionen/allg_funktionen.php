@@ -830,32 +830,44 @@ function umlaute_sortieren($array, $second_array){
 }
 
 function umlaute_umwandeln($name){
-  $name = str_replace('ä', 'ae', $name);
-  $name = str_replace('ü', 'ue', $name);
-  $name = str_replace('ö', 'oe', $name);
-  $name = str_replace('Ä', 'Ae', $name);
-  $name = str_replace('Ü', 'Ue', $name);
-  $name = str_replace('Ö', 'Oe', $name);
-  $name = str_replace('a?', 'ae', $name);
-  $name = str_replace('u?', 'ue', $name);
-  $name = str_replace('o?', 'oe', $name);
-  $name = str_replace('A?', 'ae', $name);
-  $name = str_replace('U?', 'ue', $name);
-  $name = str_replace('O?', 'oe', $name);
-  $name = str_replace('ß', 'ss', $name);
-  $name = str_replace('.', '', $name);
-  $name = str_replace(':', '', $name);
+	$name = str_replace('ä', 'ae', $name);
+	$name = str_replace('ü', 'ue', $name);
+	$name = str_replace('ö', 'oe', $name);
+	$name = str_replace('Ä', 'Ae', $name);
+	$name = str_replace('Ü', 'Ue', $name);
+	$name = str_replace('Ö', 'Oe', $name);
+	$name = str_replace('a?', 'ae', $name);
+	$name = str_replace('u?', 'ue', $name);
+	$name = str_replace('o?', 'oe', $name);
+	$name = str_replace('A?', 'ae', $name);
+	$name = str_replace('U?', 'ue', $name);
+	$name = str_replace('O?', 'oe', $name);
+	$name = str_replace('ß', 'ss', $name);
+	$name = str_replace('.', '', $name);
+	$name = str_replace(':', '', $name);
 	$name = str_replace('(', '', $name);
 	$name = str_replace(')', '', $name);
-  $name = str_replace('/', '-', $name);
-  $name = str_replace(' ', '', $name);
-  $name = str_replace('-', '_', $name);
-  $name = str_replace('?', '_', $name);
+	$name = str_replace('/', '-', $name);
+	$name = str_replace(' ', '', $name);
+	$name = str_replace('-', '_', $name);
+	$name = str_replace('?', '_', $name);
 	$name = str_replace('+', '_', $name);
 	$name = str_replace(',', '_', $name);
 	$name = str_replace('*', '_', $name);
 	$name = str_replace('$', '', $name);
 	$name = str_replace('&', '_', $name);
+	return $name;
+}
+
+function umlaute_umwandeln_reverse($name){
+  $name = str_replace('ae', 'ä', $name);
+  $name = str_replace('ue', 'ü', $name);
+  $name = str_replace('oe', 'ö', $name);
+  $name = str_replace('Ae', 'Ä', $name);
+  $name = str_replace('Ue', 'Ü', $name);
+  $name = str_replace('Oe', 'Ö', $name);
+  $name = str_replace('_', ' ', $name);
+  $name = str_replace('aü', 'aue', $name);
   return $name;
 }
 
