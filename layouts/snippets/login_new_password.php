@@ -12,7 +12,7 @@
 					<td align="center">
 						<table cellspacing="0" cellpadding="2" border="0">
 							<tr>
-								<td align="center" colspan="2"><h1><?php echo echo TITLE . ' Passwort Änderung';; ?></h1></td>
+								<td align="center" colspan="2"><h1><?php echo TITLE . ' Passwort Änderung'; ?></h1></td>
 							</tr>
 							<tr>
 								<td>&nbsp;</td>
