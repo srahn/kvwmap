@@ -66,14 +66,16 @@ include('funktionen/input_check_functions.php');
 				tr_dependent.style.display = 'none';
 			}
 			// Gruppe auch ein/ausblenden
-			all_trs = [].slice.call(tr_dependent.closest('table').firstChild.children);		// alle trs in der Gruppe
-			group_display = 'none';
-			all_trs.forEach(function(tr){
-				if(tr.id != '' && tr.style.display != 'none'){
-					group_display = '';
-				}
-			})
-			tr_dependent.closest('div').style.display = group_display;
+			if(tr_dependent.closest('table').firstChild.children != null){
+				all_trs = [].slice.call(tr_dependent.closest('table').firstChild.children);		// alle trs in der Gruppe
+				group_display = 'none';
+				all_trs.forEach(function(tr){
+					if(tr.id != '' && tr.style.display != 'none'){
+						group_display = '';
+					}
+				})
+				tr_dependent.closest('div').style.display = group_display;
+			}
 		})
 	}
 	

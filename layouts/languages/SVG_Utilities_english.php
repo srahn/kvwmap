@@ -14,4 +14,5 @@
 	$strParallelPolygon="create one-side buffered line";
 	$strMoveGeometry="move geometry";
 	$strReverse="change line orientation";
+	$strEditOther="edit other object";
 ?>  

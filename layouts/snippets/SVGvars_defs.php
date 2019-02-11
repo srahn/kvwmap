@@ -339,6 +339,22 @@ $SVGvars_defs = '
   	return $coords2;
 	}
 	
+	function edit_other_object($strEditOther){
+		global $last_x;global $events;
+		$edit_other_object ='
+      <g id="edit_other_object" transform="translate('.$last_x.' 0)">
+        <rect id="edit_other_object0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strEditOther.'\',evt.clientX,evt.clientY)" onmousedown="edit_other_object();hide_tooltip();highlightbyid(this.id);noMeasuring();"' : '').' x="0" y="0" rx="3" ry="3"   width="36" height="36" class="navbutton_frame"/>
+				<g class="navbutton navbutton_stroke" transform="translate(14 13) scale(0.018)">
+					<polygon class="navbutton_semifill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284 379.5,218 378.5,139 357.5,138 260.5,91"
+						transform="translate(-700 -500) scale(2.5)"
+						 style="stroke-width:25"/>
+					<path style="stroke-width: 30" d="M931.9,58.4c-33.3-31.9-70-48.1-109.3-48.1c-61.3,0-106,39.6-118.3,51.7c-17.2,17-604.7,604.7-604.7,604.7c-3.8,3.9-6.6,8.6-8.1,13.9C78.4,729.7,12,946.9,11.4,949.2c-3.4,11.1-0.4,23.3,7.8,31.4c5.9,5.9,13.8,9.1,21.8,9.1c3.2,0,6.4-0.5,9.5-1.5c2.2-0.7,226.5-73.2,263.4-84.2c4.9-1.5,9.3-4.1,12.9-7.7c23.3-23,571.2-564.9,607.6-602.4c37.6-38.8,56.3-79.1,55.6-120C989.3,133.5,969.7,94.7,931.9,58.4z M694.7,159.9c15.5,3.7,52.1,15.9,89.8,53.9c38,38.4,48.2,82.1,50.1,91.9c-120.2,119.6-397,393.4-506,501.2c-10-23.5-26-51.7-52.4-78.2c-32-32.2-64.5-50.4-89.6-60.6C294.5,560.1,576.3,278.2,694.7,159.9z M145.1,719.6c16.8,4.5,51.6,17.3,87.3,53.3c27.4,27.7,40.3,58.1,46.1,76.7c-42.3,13.5-135.3,45.6-194.6,64.8C101.4,856.6,130.9,766.9,145.1,719.6z M890.1,250.1c-1.3,1.3-3.3,3.4-5.8,5.9c-9.7-24.9-26.6-56.8-55.9-86.4c-30.1-30.3-60.4-48-84.9-58.5c2.1-2.1,3.8-3.8,4.4-4.4c3.5-3.5,35.2-33.8,74.8-33.8c22.8,0,45.1,10.4,66.5,30.9C914.5,128,927.5,152,928,175C928.4,198.5,915.6,223.7,890.1,250.1z"/>
+				</g>
+      </g>';
+    $last_x += 36;
+  	return $edit_other_object;
+	}	
+	
 	function ppquery($strInfo){
 		global $last_x;global $events;
 		$ppquery ='

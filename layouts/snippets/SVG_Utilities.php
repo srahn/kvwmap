@@ -275,6 +275,12 @@
 		document.getElementById("canvas").setAttribute("cursor", "pointer");
 	}
 	
+	function edit_other_object(){
+		enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
+		enclosingForm.last_doing.value = "edit_other_object";
+		document.getElementById("canvas").setAttribute("cursor", "pointer");
+	}
+	
 	function noMeasuring(){
 		measuring = false;
 	}	
@@ -506,6 +512,26 @@
       top.overlay_submit(enclosingForm, true);
 			enclosingForm.go.value = go_backup;
      break;
+		 case "edit_other_object_point":
+			if(!checkQueryFields())break;
+      path = navX[0]+","+navY[0]+";"+navX[0]+","+navY[0];
+      enclosingForm.INPUT_COORD.value  = path;
+      enclosingForm.CMD.value          = "ppquery";
+			enclosingForm.go.value = "Sachdaten";
+			enclosingForm.last_doing.value = "";
+			enclosingForm.edit_other_object.value = 1;
+			enclosingForm.submit();
+     break;
+     case "edit_other_object_box":
+			if(!checkQueryFields())break;
+      path = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
+      enclosingForm.INPUT_COORD.value  = path;
+      enclosingForm.CMD.value          = "ppquery";
+			enclosingForm.go.value = "Sachdaten";
+			enclosingForm.last_doing.value = "";
+			enclosingForm.edit_other_object.value = 1;
+      enclosingForm.submit();
+     break;
      case "add_geom_box":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
       enclosingForm.CMD.value = cmd;
@@ -708,6 +734,7 @@
 				}
 			}
 		}
+		if(enclosingForm.punktfang != undefined && enclosingForm.punktfang.checked)toggle_vertices();
 		if(ortho_point_functions == true){
 			if(enclosingForm.ortho_point_vertices.value != ""){
 				o_p_vertices = enclosingForm.ortho_point_vertices.value.split("|");
@@ -802,6 +829,9 @@ $basicfunctions.= '
 				startMove(client_x, client_y);
 			break;
 			case "ppquery":
+				startPoint(client_x, client_y);
+			break;
+			case "edit_other_object":
 				startPoint(client_x, client_y);
 			break;
 
@@ -1025,7 +1055,7 @@ function mouseup(evt){
 				document.getElementById("canvas").setAttribute("cursor", "move");
 				document.getElementById("canvas").setAttribute("cursor", "grab");
 			}
-			else if(id == "ppquery0"){
+			else if(id == "ppquery0" || id == "edit_other_object0"){
 				document.getElementById("canvas").setAttribute("cursor", "help");
 			}
 			else{
@@ -3126,8 +3156,6 @@ $vertex_catch_functions = '
 			request_foreign_vertices();
 		}
 	}
-	
-	if(enclosingForm.punktfang != undefined && enclosingForm.punktfang.checked)toggle_vertices();		// am Anfang einmal aufrufen, damit die Vertices nach Navigation geladen werden, falls der Punktfang an war
 
 	function request_foreign_vertices(){
 		top.ahah("index.php", "go=getSVG_foreign_vertices&geom_from_layer="+enclosingForm.geom_from_layer.value+"&oid="+enclosingForm.oid.value, new Array(enclosingForm.vertices, ""), new Array("setvalue", "execute_function"));
@@ -3896,3 +3924,4 @@ $measurefunctions = '
 <input type="hidden" name="pathlength" value="<?php echo $this->formvars['pathlength']; ?>">
 <input type="hidden" name="svghelp" id="svghelp">
 <input type="hidden" name="width_reduction" value="<? echo $this->formvars['width_reduction']; ?>">
+<input type="hidden" name="edit_other_object" value="">

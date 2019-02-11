@@ -18,4 +18,5 @@
 	$strParallelPolygon="einseitig gepufferte Linie erzeugen";
   $strMoveGeometry="Geometrie verschieben";
 	$strReverse="Linienrichtung drehen";
+	$strEditOther="anderes Objekt bearbeiten";
 ?>  
