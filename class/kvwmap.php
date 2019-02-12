@@ -12687,8 +12687,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
 							$ret = $layerdb[$layer_id]->execSQL($sql, 4, 1, true);
-							if($last_notice = pg_last_notice($layerdb[$layer_id]->dbConn)){
-								$this->add_message('info', $last_notice);
+							if($last_notice = $msg = pg_last_notice($layerdb[$layer_id]->dbConn)){
+								if($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{')), true)){
+									$msg = $notice_result['msg'];
+								}
+								$this->add_message('info', $msg);
 							}
 
 							if ($ret['success']) {
