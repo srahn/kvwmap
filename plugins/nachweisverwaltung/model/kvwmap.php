@@ -752,7 +752,7 @@
 			var nachweise = new Array();\n";
 			
 		for($i = 0; $i < count($GUI->nachweis->Dokumente); $i++){
-			$json = str_replace('\\"', '\\\"', str_replace('\\\"', '"', str_replace("'", "\'", str_replace('\\r', '\\\r', str_replace('\\n', '\\\n', json_encode($GUI->nachweis->Dokumente[$i]))))));
+			$json = str_replace('\\"', '\\\"', str_replace('\\\"', '"', str_replace("'", "\'", str_replace('\\r', '\\\r', str_replace('\\n', '\\\n', str_replace('\\t', '\\\t', json_encode($GUI->nachweis->Dokumente[$i])))))));
 			$html.= "			nachweise.push(JSON.parse('".$json."'));\n";
 		}	
 		
