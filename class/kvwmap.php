@@ -17835,7 +17835,7 @@ class db_mapObj{
 					$sql .= '"' . $attrib['name_' . $language] . '",';
 				}
 			}
-			$sql .= $attrib['layer_id'] . ', "' . $attrib['expression'] . '", "' . $attrib['classification'] . '", "' . $attrib['legendgraphic'] . '", ' . $attrib['legendimagewidth'] . ', ' . $attrib['legendimageheight'] . ', "' . $attrib['order'] . '", "' . $attrib['legendorder'] . '")';
+			$sql .= $attrib['layer_id'] . ', "' . $attrib['expression'] . '", "' . $attrib['classification'] . '", "' . $attrib['legendgraphic'] . '", ' . $attrib['legendimagewidth'] . ', ' . $attrib['legendimageheight'] . ', "' . $attrib['order'] . '", ' . $attrib['legendorder'] . ')';
 		}
 		else {
 			$class = $classdata; # Classobjekt wurde übergeben
