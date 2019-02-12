@@ -17821,6 +17821,7 @@ class db_mapObj{
 			$attrib = $classdata; # Attributarray wurde übergeben
 			if ($attrib['legendimagewidth'] == '') $attrib['legendimagewidth'] = 'NULL';
 			if ($attrib['legendimageheight'] == '') $attrib['legendimageheight'] = 'NULL';
+			if ($attrib['legendorder'] == '') $attrib['legendorder'] = 'NULL';
 			# attrib:(Name, Layer_ID, Expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder)
 			$sql = 'INSERT INTO classes (Name, ';
 			foreach ($supportedLanguages as $language) {
