@@ -74,7 +74,7 @@ include('funktionen/input_check_functions.php');
 						group_display = '';
 					}
 				})
-				tr_dependent.closest('div').style.display = group_display;
+				tr_dependent.closest('div').closest('tr').style.display = group_display;
 			}
 		})
 	}
