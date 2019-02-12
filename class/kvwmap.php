@@ -9088,7 +9088,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					}
 				}
 				######### für neuen Datensatz verwenden -> von der Sachdatenanzeige übergebene Formvars #######
-				if ($this->formvars['chosen_layer_id']) {
+				if($this->formvars['chosen_layer_id'] OR $this->formvars['weiter_erfassen']){
 					$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
 					for($i = 0; $i < count($checkbox_names); $i++) {
 						if ($this->formvars[$checkbox_names[$i]] == 'on') {
@@ -9110,6 +9110,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								$element[3] = '';
 								$this->formvars[implode(';', $element)] = $this->formvars[$form_fields[$i]];
 							}
+							else $this->formvars[implode(';', $element)] = '';
 						}
 					}
 				}
