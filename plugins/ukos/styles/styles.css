@@ -1,0 +1,36 @@
+h2 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.ukos-doppikobjekte-background {
+  margin-top: 10px;
+  margin-left: 23px;
+  margin-bottom: 10px;
+  text-align: left;
+  display: block;
+}
+
+.ukos-map-icon {
+  color: #444;
+  width: 12px;
+  margin-right: 10px
+}
+
+.ukos-doppikobjekt {
+  width: 47%;
+/*  height: 300px; */
+  position: relative;
+  float: left;
+  background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);
+/*  background-color: #c8d6e6; */
+	border: 1px solid #cccccc;
+  border-radius: 3px;
+  padding: 3px;
+  margin-right: 3px;
+  margin-bottom: 3px;
+}
+
+.ukos-doppikobjekt:hover {
+	background: linear-gradient(#DAE4EC, #84accf);
+}

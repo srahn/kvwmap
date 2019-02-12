@@ -36,9 +36,9 @@ SET @kvwmap_password='kvwmap';
 # für die hier angelegten stelle=1 und user_id=1 aus
 ################################################################################
 # Stelle anlegen
-INSERT INTO `stelle` ( `ID` , `Bezeichnung` , `start` , `stop` , `minxmax` , `minymax` , `maxxmax` , `maxymax` , `epsg_code`, `Referenzkarte_ID` , `Authentifizierung` , `ALB_status` , `wappen` , `alb_raumbezug` , `alb_raumbezug_wert` )
+INSERT INTO `stelle` ( `ID` , `Bezeichnung` , `start` , `stop` , `minxmax` , `minymax` , `maxxmax` , `maxymax` , `epsg_code`, `Referenzkarte_ID` , `Authentifizierung` , `ALB_status` , `wappen`)
 VALUES (
-@stelle_id, 'Administration', '0000-00-00', '0000-00-00', 201165, 5867815, 477900, 6081468, 25833, '1', '1', '30', 'Logo_GDI-Service_200x47.png', '', '');
+@stelle_id, 'Administration', '0000-00-00', '0000-00-00', 201165, 5867815, 477900, 6081468, 25833, '1', '1', '30', 'Logo_GDI-Service_200x47.png');
 
 # Nutzer anlegen
 INSERT INTO `user` ( `ID` , `login_name` , `Name` , `Vorname` , `passwort` , `Funktion` , `stelle_id` , `phon` , `email` )

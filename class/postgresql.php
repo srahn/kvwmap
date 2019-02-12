@@ -260,7 +260,15 @@ FROM
 				$ret['success'] = false;
 				$errormessage = pg_last_error($this->dbConn);
 				header('error: true');		// damit ajax-Requests das auch mitkriegen
-				$ret[1] = "Fehler bei SQL Anweisung:<br><br>\n\n" . $sql . "\n\n<br><br>" . $errormessage;
+				$ret[1] =
+					$errormessage . "<br>\n<br>" .
+					"\nAufgetreten bei PostgreSQL Anweisung:<br>\n" .
+					"<textarea id=\"sql_statement\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px;\">" . $sql . "</textarea><br>\n" .
+					"<button type=\"button\" onclick=\"
+							copyText = document.getElementById('sql_statement');
+							copyText.select();
+							document.execCommand('copy');
+						\">In Zwischenablage kopieren</button>";
 				$ret['msg'] = $ret[1];
 				$ret['type'] = 'error';
 				if (!$suppress_error_msg) {

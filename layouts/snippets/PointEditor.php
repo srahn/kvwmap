@@ -30,13 +30,12 @@ function send(){
 </script>
 
 <?php
-	if ($this->Meldung=='') {
-	  $bgcolor=BG_FORM;
-	}
-	else {
-	  $bgcolor=BG_FORMFAIL;
-		showAlert('Fehler bei der Eingabe:\n'.$this->Meldung);
-	}
+if ($this->messages != '') {
+	$bgcolor = BG_FORM;
+}
+else {
+	$bgcolor = BG_FORMFAIL;
+}
 ?>
 
 <table style="border: 1px solid; border-collapse: separate; border-color: #eeeeee; border-left: none; border-right: none" width="760" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
