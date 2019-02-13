@@ -4132,7 +4132,7 @@ class GUI {
 		$this->formvars['layer_tablename'] = $attributes['table_name'][$attributes['the_geom']];
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
 		$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-		if (($this->formvars['oldscale'] != '' AND $this->formvars['oldscale'] != $this->formvars['nScale']) OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '') {
+		if (!$this->formvars['edit_other_object'] AND ($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')) {
 			$this->neuLaden();
 		}
 		else {
@@ -4252,7 +4252,7 @@ class GUI {
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
     $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-		if(($this->formvars['oldscale'] != '' AND $this->formvars['oldscale'] != $this->formvars['nScale']) OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != ''){
+		if(!$this->formvars['edit_other_object'] AND ($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')){
 			$this->neuLaden();
 			$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
 		}
@@ -4396,7 +4396,7 @@ class GUI {
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
     $polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-		if(($this->formvars['oldscale'] != '' AND $this->formvars['oldscale'] != $this->formvars['nScale']) OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != ''){
+		if(!$this->formvars['edit_other_object'] AND ($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')){
 			$this->neuLaden();
 			$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
 		}
@@ -13260,7 +13260,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY')$geomtype = 'Polygon';
 									elseif($geomtype == 'POINT')$geomtype = 'Point';
 									elseif($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING')$geomtype = 'Line';
-									$this->formvars['CMD'] = '';
 									$this->formvars['go'] = $geomtype.'Editor';
 									$editor = $geomtype.'Editor';
 									$this->{$editor}();
