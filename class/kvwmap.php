@@ -8749,7 +8749,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 				else {
 					$this->add_message('notice', 'Löschen erfolgreich');
-					if($notice_result['msg'])$this->add_message('notice', $notice_result['msg']);
+					if($notice_result['msg'])$this->add_message('info', $notice_result['msg']);
 				}
 				$this->last_query = $this->user->rolle->get_last_query();
 				if($this->formvars['search']){ # man kam von der Suche -> nochmal suchen
