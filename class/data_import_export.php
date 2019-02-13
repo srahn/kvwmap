@@ -629,6 +629,7 @@ class data_import_export {
 
 
 	function shp_import_speichern($formvars, $database, $upload_path = UPLOADPATH, $encoding = '') {
+		global $GUI;
 		$this->formvars = $formvars;
 		if (file_exists($upload_path . $this->formvars['dbffile'])) {
 			$importfile = basename($this->formvars['dbffile'], '.dbf');
@@ -749,7 +750,7 @@ class data_import_export {
 					'success' => false,
 					'err_msg' => $ret[1]
 				);
-				showAlert('Import fehlgeschlagen bei Datei: ' . $importfile);
+				$GUI->add_message('error', $ret);
 			}
 		}
 		else {
