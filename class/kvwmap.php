@@ -4120,9 +4120,9 @@ class GUI {
 		$this->reduce_mapwidth(100);
 		$this->main = 'PointEditor.php';
 		$this->titel = 'Geometrie bearbeiten';
-		$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
-		$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-		$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
+		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+		$attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 		for ($i = 0; $i < count($attributes['name']); $i++) {
 			if ($attributes['form_element_type'][$i] == 'Winkel') {
 				$this->angle_attribute = $attributes['name'][$i];
@@ -4174,8 +4174,8 @@ class GUI {
 	function PointEditor_Senden() {
 		include_once(CLASSPATH . 'pointeditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-		$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-		$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
 		# eingeabewerte pruefen:
 		$ret = $pointeditor->pruefeEingabedaten($this->formvars['loc_x'], $this->formvars['loc_y']);
@@ -4191,7 +4191,7 @@ class GUI {
 			}
 			else { # eintrag erfolgreich
 				# wenn Time-Attribute vorhanden, aktuelle Zeit speichern
-				$this->attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
+				$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 				for ($i = 0; $i < count($this->attributes['type']); $i++) {
 					$value = '';
 					if ($this->attributes['name'][$i] != 'oid') {
