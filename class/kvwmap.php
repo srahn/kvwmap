@@ -8707,10 +8707,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$oids[] = $element[3];
 					$ret = $layerdb->execSQL($sql, 4, 1, true);
 					if ($ret['success']) {
+						$last_notice = pg_last_notice($layerdb->dbConn);
+						$notice_result = json_decode(substr($last_notice, strpos($last_notice, '{')), true);
 						$results[] = pg_fetch_row($ret['query']);
-						if (pg_affected_rows($ret['query']) == 0) {
-							$last_notice = pg_last_notice($layerdb->dbConn);
-							$notice_result = json_decode(substr($last_notice, strpos($last_notice, '{')), true);
+						if (pg_affected_rows($ret['query']) == 0) {							
 							if($notice_result['success'] != 'true') {
 								$results[] = '<br>Datensatz wurde nicht gelöscht, weil er nicht existiert!<br>';
 								$this->success = false;
@@ -8749,6 +8749,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 				else {
 					$this->add_message('notice', 'Löschen erfolgreich');
+					if($notice_result['msg'])$this->add_message('notice', $notice_result['msg']);
 				}
 				$this->last_query = $this->user->rolle->get_last_query();
 				if($this->formvars['search']){ # man kam von der Suche -> nochmal suchen
