@@ -17828,6 +17828,7 @@ class db_mapObj{
 			$attrib = $classdata; # Attributarray wurde übergeben
 			if ($attrib['legendimagewidth'] == '') $attrib['legendimagewidth'] = 'NULL';
 			if ($attrib['legendimageheight'] == '') $attrib['legendimageheight'] = 'NULL';
+			if ($attrib['legendorder'] == '') $attrib['legendorder'] = 'NULL';
 			# attrib:(Name, Layer_ID, Expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder)
 			$sql = 'INSERT INTO classes (Name, ';
 			foreach ($supportedLanguages as $language) {
@@ -17841,7 +17842,7 @@ class db_mapObj{
 					$sql .= '"' . $attrib['name_' . $language] . '",';
 				}
 			}
-			$sql .= $attrib['layer_id'] . ', "' . $attrib['expression'] . '", "' . $attrib['classification'] . '", "' . $attrib['legendgraphic'] . '", ' . $attrib['legendimagewidth'] . ', ' . $attrib['legendimageheight'] . ', "' . $attrib['order'] . '", "' . $attrib['legendorder'] . '")';
+			$sql .= $attrib['layer_id'] . ', "' . $attrib['expression'] . '", "' . $attrib['classification'] . '", "' . $attrib['legendgraphic'] . '", ' . $attrib['legendimagewidth'] . ', ' . $attrib['legendimageheight'] . ', "' . $attrib['order'] . '", ' . $attrib['legendorder'] . ')';
 		}
 		else {
 			$class = $classdata; # Classobjekt wurde übergeben
