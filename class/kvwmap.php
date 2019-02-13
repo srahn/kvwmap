@@ -13262,6 +13262,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									elseif($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING')$geomtype = 'Line';
 									$this->formvars['go'] = $geomtype.'Editor';
 									$this->formvars['newpath'] = '';
+									$this->formvars['loc_x'] = '';
+									$this->formvars['loc_y'] = '';
 									$editor = $geomtype.'Editor';
 									$this->{$editor}();
 									exit();									
