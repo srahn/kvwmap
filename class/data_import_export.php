@@ -653,7 +653,7 @@ class data_import_export {
 				$sql .= ' FROM "'.$importfile.'"';
 			}
 			$options = $this->formvars['table_option'];
-			$options.= ' -nlt PROMOTE_TO_MULTI -lco FID=gid';
+			$options.= ' -lco FID=gid';
 			if ($encoding == '') $encoding = $this->getEncoding($upload_path.$this->formvars['dbffile']);
 			$ret = $this->ogr2ogr_import($this->formvars['schema_name'], $this->formvars['table_name'], $this->formvars['epsg'], $upload_path.$importfile.'.shp', $database, NULL, $sql, $options, $encoding);
 
