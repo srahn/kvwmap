@@ -375,7 +375,7 @@ FROM
     return $ret[1];    
   }
   
-  function getFieldsfromSelect($select){
+  function getFieldsfromSelect($select, $assoc = false){
   	$distinctpos = strpos(strtolower($select), 'distinct');
   	if($distinctpos !== false && $distinctpos < 10){
   		$offset = $distinctpos+8;
@@ -385,12 +385,14 @@ FROM
   	}
     $select = $this->eliminate_star($select, $offset);
   	if(substr_count(strtolower($select), ' from ') > 1){
-  		$whereposition = strpos($select, ' WHERE ');
+  		$whereposition = strpos($select, ' WHERE ');			
+			if($whereposition === false)$whereposition = strlen($select);
   		$withoutwhere = substr($select, 0, $whereposition);
   		$fromposition = strpos($withoutwhere, ' FROM ');
   	}
   	else{
   		$whereposition = strpos(strtolower($select), ' where ');
+			if($whereposition === false)$whereposition = strlen($select);
   		$withoutwhere = substr($select, 0, $whereposition);
   		$fromposition = strpos(strtolower($withoutwhere), ' from ');
   	}
@@ -417,17 +419,7 @@ FROM
         }				
 				
         # Tabellenname des Attributs
-        // if(PHPVERSION >= 580){
         $tablename = pg_field_table($ret[1], $i);
-        // }																									# kann ganz weg, wenn Bugfix 2.8.55 sich bewährt
-        // else{
-	        // $table = $this->pg_field_table2($fieldname, $fieldstring[$i], $select);
-	        // $tablename = $table['name'];
-					// if($tablename == NULL AND $name_pair != ''){
-	          // $table = $this->pg_field_table2($name_pair['real_name'], $fieldstring[$i], $select);
-	          // $tablename = $table['name'];
-	        // }
-        // }
         if($tablename != NULL){
           $all_table_names[] = $tablename;
         }
@@ -444,6 +436,12 @@ FROM
 				if($fields[$i]['real_name'] != ''){
 					$constraintstring = '';
 					$attr_info = $this->get_attribute_information($this->schema, $tablename, $fields[$i]['real_name']);
+					if($attr_info[0]['relkind'] == 'v'){		# wenn View, dann Attributinformationen aus View-Definition holen
+						if($view_defintion_attributes[$tablename] == NULL){
+							$view_defintion_attributes[$tablename] = $this->getFieldsfromSelect(substr($attr_info[0]['view_definition'], 0, -1), true);
+						}
+						if($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info[0]['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
+					}
 					$fieldtype = $attr_info[0]['type_name'];
 					$fields[$i]['nullable'] = $attr_info[0]['nullable']; 
 					$fields[$i]['length'] = $attr_info[0]['length'];
@@ -487,18 +485,12 @@ FROM
           $fields[$i]['geomtype'] = $this->get_geom_type($this->schema, $fields[$i]['real_name'], $tablename);
           $fields['the_geom'] = $fieldname;
 					$fields['the_geom_id'] = $i;
-        }				
+        }
+				if($assoc)$fields_assoc[$fieldname] = $fields[$i];
       }
       
-      // if($all_table_names != NULL){   	todo
-	      // $all_table_names = array_unique($all_table_names);
-	      // foreach($all_table_names as $tablename){
-	        // $fields['oids'][] = $this->check_oid($tablename);   # testen ob Tabelle oid hat
-	      // }
-	      // $fields['all_table_names'] = $all_table_names;
-      // }
-            
-      return $fields;
+      if($assoc)return $fields_assoc;
+      else return $fields;
     }
     else return NULL;
   }
@@ -510,6 +502,7 @@ FROM
 			SELECT
 				ns.nspname as schema,
 				c.relname AS table_name,
+				c.relkind,
 				a.attname AS name,
 				NOT a.attnotnull AS nullable,
 				a.attnum AS ordinal_position,
@@ -544,7 +537,8 @@ FROM
 				       ELSE null
 				  END AS decimal_length,
 				i.indisunique,
-				i.indisprimary
+				i.indisprimary,
+				v.definition as view_definition
 			FROM
 				pg_catalog.pg_class c JOIN
 				pg_catalog.pg_attribute a ON (c.oid = a.attrelid) JOIN
@@ -553,7 +547,8 @@ FROM
 				pg_catalog.pg_namespace tns ON (t.typnamespace = tns.oid) LEFT JOIN
 				pg_catalog.pg_type eat ON (t.typelem = eat.oid) LEFT JOIN 
 				pg_index i ON i.indrelid = c.oid AND a.attnum = ANY(i.indkey)	LEFT JOIN 
-				pg_catalog.pg_attrdef ad ON a.attrelid = ad.adrelid AND ad.adnum = a.attnum
+				pg_catalog.pg_attrdef ad ON a.attrelid = ad.adrelid AND ad.adnum = a.attnum LEFT JOIN 
+				pg_catalog.pg_views v ON v.viewname = c.relname AND v.schemaname = ns.nspname
 			WHERE
 				ns.nspname IN ('" .  implode("','", array_map(function($schema) { return trim($schema); }, explode(',', $schema)))  .  "') AND
 				c.relname = '".$table."' AND
