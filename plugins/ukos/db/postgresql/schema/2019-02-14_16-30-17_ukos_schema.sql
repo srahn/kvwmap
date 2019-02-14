@@ -3,6 +3,7 @@
 --
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "postgis_topology"
 
 --
 -- Name: ukos_base; Type: SCHEMA; Schema: -; Owner: -
