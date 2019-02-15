@@ -718,9 +718,17 @@
 				enclosingForm.last_button.value = "line0";
 				if(enclosingForm.secondline.value == "true"){
 					enclosingForm.last_doing.value = "draw_second_line";
+					if(pathx_second.length == 1){				// ersten Punkt darstellen
+						document.getElementById("startvertex").setAttribute("cx", (pathx_second[0]-minx)/scale);
+						document.getElementById("startvertex").setAttribute("cy", (pathy_second[0]-miny)/scale);
+					}
 				}
 				else{
 					enclosingForm.last_doing.value = "draw_line";
+					if(pathx.length == 1){							// ersten Punkt darstellen
+						document.getElementById("startvertex").setAttribute("cx", (pathx[0]-minx)/scale);
+						document.getElementById("startvertex").setAttribute("cy", (pathy[0]-miny)/scale);
+					}
 				}
 			}
 			else{
@@ -766,7 +774,7 @@ $basicfunctions.= '
 		}
 		if(linefunctions == true){
 			redrawfirstline();
-			linelength();
+			if(enclosingForm.firstline.value == "true")linelength();
 		}
 		if(enclosingForm.last_doing2.value == "vertex_edit"){
 			edit_vertices();
