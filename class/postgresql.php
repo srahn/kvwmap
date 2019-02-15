@@ -441,12 +441,13 @@ FROM
 							$view_defintion_attributes[$tablename] = $this->getFieldsfromSelect(substr($attr_info[0]['view_definition'], 0, -1), true);
 						}
 						if($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info[0]['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
+						if($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info[0]['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
 					}
 					$fieldtype = $attr_info[0]['type_name'];
 					$fields[$i]['nullable'] = $attr_info[0]['nullable']; 
 					$fields[$i]['length'] = $attr_info[0]['length'];
 					$fields[$i]['decimal_length'] = $attr_info[0]['decimal_length'];
-					$fields[$i]['default'] = $attr_info[0]['default'];					
+					$fields[$i]['default'] = $attr_info[0]['default'];
 					if($attr_info[0]['is_array'] == 't')$prefix = '_'; else $prefix = '';
 					if($attr_info[0]['type_type'] == 'c'){		# custom datatype
 						$datatype_id = $this->writeCustomType($attr_info[0]['type'], $attr_info[0]['type_schema']);
