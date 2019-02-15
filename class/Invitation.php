@@ -49,7 +49,13 @@ class Invitation extends MyObject {
 	function mailto_text() {
 		# // ToDo Den Einladungstext fertig machen mit richtigem Ansprechpartner etc.
 			#//ToDo Werte des Einladenden mit abfragen.
-		$link = URL . APPLVERSION . 'index.php?go=logout&token=' . $this->get('token') . '&email=' . $this->get('email') . '&stelle_id=' . $this->get('stelle_id') . '&Name=' . urlencode($this->get('name')) . '&Vorname=' . urlencode($this->get('vorname'));
+		$link = URL . APPLVERSION .
+			'index.php?go=logout&token=' . $this->get('token') .
+			'&email=' . $this->get('email') .
+			'&stelle_id=' . $this->get('stelle_id') .
+			'&Name=' . urlencode($this->get('name')) .
+			'&Vorname=' . urlencode($this->get('vorname')) .
+			'&login_name=' . strToLower(substr($this->get('vorname'), 0, 1) . $this->get('name'));
 		$msg = $this->get('email') . 
 '?subject=Einladung zur Registrierung bei ' . TITLE .
 '&body=' . rawurlencode('Einladung für ' . $this->get('vorname') . ' ' . $this->get('name') . ',

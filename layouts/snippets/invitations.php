@@ -3,8 +3,8 @@
 ?>
 <script>
 	function invitation_delete(id) {
-	  Check = confirm('Einladung wirklick löschen?');
-	  if (Check == true) {
+		Check = confirm('Einladung wirklick löschen?');
+		if (Check == true) {
 			$.ajax({
 				url: 'index.php',
 				data: {
@@ -63,7 +63,7 @@
 						<td>&nbsp;
 							<span
 								title="<?php echo $this->strDelete; ?>"
-								onclick="invitation_delete(<?php echo $this->invitations[$i]->get('token'); ?>);"
+								onclick="invitation_delete('<?php echo $this->invitations[$i]->get('token'); ?>');"
 								style="cursor: pointer; color: firebrick;"
 							><i class="fa fa-trash" style="color: firebrick"></i></span>
 						</td>
