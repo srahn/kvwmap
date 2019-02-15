@@ -84,13 +84,20 @@
 							if($j == 0 OR $layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								if($explosion[1] != '')$collapsed = true;else $collapsed = false;
+								$groupname = $explosion[0];
 								if($j > 0){
-									echo $colspan.'" data-colspan="'.$colspan.'">';
-									echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\''.$layer['attributes']['group'][$j].'\')"><img id="img_'.$layer['attributes']['group'][$j].'" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;<span>'.$layer['attributes']['group'][$j].'</span></td><td style="border:none;background: url(graphics/bg.gif);"></td>';
+									if($collapsed)echo '1';
+									else echo $colspan;
+									echo '" data-colspan="'.$colspan.'">';
+									echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\''.$groupname.'\')"><img id="img_'.$groupname.'" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;<span>'.$groupname.'</span></td><td style="border:none;background: url(graphics/bg.gif);"></td>';
 									$colspan = 0;
 								}
 								else $colspan = 1;
-								if($j < count($this->qlayerset[$i]['attributes']['name'])-1)echo '<td id="'.$layer['attributes']['group'][$j+1].'" style="background: '.BG_GLEATTRIBUTE.'" colspan="';								
+								if($j < count($this->qlayerset[$i]['attributes']['name'])-1){
+									$explosion = explode(';', $layer['attributes']['group'][$j+1]);
+									$groupname = $explosion[0];
+									echo '<td id="'.$groupname.'" style="background: '.BG_GLEATTRIBUTE.'" colspan="';								
+								}
 							}
 						}
 						echo '</tr>';
@@ -101,44 +108,46 @@
 			  <?
 					$has_geom = false;
 			  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
+						$explosion = explode(';', $layer['attributes']['group'][$j]);
+						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
+						$groupname = $explosion[0];
 						if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-							echo '<td class="gap_'.$layer['attributes']['group'][$j].'" style="border:none;background: url(graphics/bg.gif);"></td>';
+							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url(graphics/bg.gif);"></td>';
 						}
 						if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
-								echo '<td id="column'.$j.'" class="group_'.$layer['attributes']['group'][$j].'"';
-									//if($layer['attributes']['group'][0] != '')echo 'width="10%"';
-									echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';									
-									if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k]){
-										$this->editable = $layer['Layer_ID'];
-									}
-									if($layer['attributes']['alias'][$j] == ''){
-										$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
-									}
-									echo '<table ';
-									//if($layer['attributes']['group'][0] != '')echo 'width="200px"';
-									echo 'width="100%"';
-									echo '><tr><td>';
-									if($this->formvars['printversion'] == '' AND $layer['attributes']['form_element_type'][$j] != 'SubFormPK' AND $layer['attributes']['form_element_type'][$j] != 'SubFormEmbeddedPK'){
-										echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$layer['attributes']['alias'][$j].'" href="javascript:change_orderby(\''.$layer['attributes']['name'][$j].'\', '.$layer['Layer_ID'].');">
-														'.$layer['attributes']['alias'][$j].'</a>';
-									}
-									else{
-										echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$layer['attributes']['alias'][$j].'</span>';
-									}
-									if($layer['attributes']['nullable'][$j] == '0' AND $layer['attributes']['privileg'][$j] != '0'){
-										echo '<span title="Eingabe erforderlich">*</span>';
-									}
-									if($layer['attributes']['tooltip'][$j]!='' AND $layer['attributes']['form_element_type'][$j] != 'Time'){
-										echo '<td align="right"><a href="javascript:void(0);" title="'.$layer['attributes']['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
-									}
-									if($layer['attributes']['type'][$j] == 'date' OR $layer['attributes']['type'][$j] == 'timestamp' OR $layer['attributes']['type'][$j] == 'time'){
-										echo '<td align="right"><a href="javascript:;" title="(TT.MM.JJJJ)"><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$layer['attributes']['name'][$j].'_'.$k.'"></div></td>';
-									}
-									echo '</td>';
-									echo '<td><div onmousedown="resizestart(document.getElementById(\'column'.$j.'\'), \'col_resize\');" style="transform: translate(8px); float: right; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div></td>';
-									echo '</tr></table>';
-									echo '</td>';									
+								echo '<td id="column'.$j.'" class="group_'.$groupname.'"';
+								if($collapsed)echo 'style="display: none"';
+								echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';									
+								if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k]){
+									$this->editable = $layer['Layer_ID'];
+								}
+								if($layer['attributes']['alias'][$j] == ''){
+									$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
+								}
+								echo '<table ';
+								echo 'width="100%"';
+								echo '><tr><td>';
+								if($this->formvars['printversion'] == '' AND $layer['attributes']['form_element_type'][$j] != 'SubFormPK' AND $layer['attributes']['form_element_type'][$j] != 'SubFormEmbeddedPK'){
+									echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$layer['attributes']['alias'][$j].'" href="javascript:change_orderby(\''.$layer['attributes']['name'][$j].'\', '.$layer['Layer_ID'].');">
+													'.$layer['attributes']['alias'][$j].'</a>';
+								}
+								else{
+									echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$layer['attributes']['alias'][$j].'</span>';
+								}
+								if($layer['attributes']['nullable'][$j] == '0' AND $layer['attributes']['privileg'][$j] != '0'){
+									echo '<span title="Eingabe erforderlich">*</span>';
+								}
+								if($layer['attributes']['tooltip'][$j]!='' AND $layer['attributes']['form_element_type'][$j] != 'Time'){
+									echo '<td align="right"><a href="javascript:void(0);" title="'.$layer['attributes']['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
+								}
+								if($layer['attributes']['type'][$j] == 'date' OR $layer['attributes']['type'][$j] == 'timestamp' OR $layer['attributes']['type'][$j] == 'time'){
+									echo '<td align="right"><a href="javascript:;" title="(TT.MM.JJJJ)"><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$layer['attributes']['name'][$j].'_'.$k.'"></div></td>';
+								}
+								echo '</td>';
+								echo '<td><div onmousedown="resizestart(document.getElementById(\'column'.$j.'\'), \'col_resize\');" style="transform: translate(8px); float: right; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div></td>';
+								echo '</tr></table>';
+								echo '</td>';									
 							}
 							else{
 								$has_geom = true;
@@ -173,15 +182,18 @@
 <?
 
 		for($j = 0; $j < count($layer['attributes']['name']); $j++){
+			$explosion = explode(';', $layer['attributes']['group'][$j]);
+			if($explosion[1] != '')$collapsed = true;else $collapsed = false;
+			$groupname = $explosion[0];
 			if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-				echo '<td class="gap_'.$layer['attributes']['group'][$j].'" style="border:none;background: url(graphics/bg.gif);"></td>';
+				echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url(graphics/bg.gif);"></td>';
 			}
 			if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 				$layer['attributes']['form_element_type'][$j] .= '_not_saveable';
 			}
 			if($layer['attributes']['visible'][$j]){
 				if($layer['attributes']['type'][$j] != 'geometry') {
-					echo '<td' . get_td_class_or_style(array('group_'.$layer['attributes']['group'][$j], $layer['shape'][$k][$layer['attributes']['style']], 'position: relative; text-align: right')) . '>';
+					echo '<td' . get_td_class_or_style(array('group_'.$groupname, $layer['shape'][$k][$layer['attributes']['style']], 'position: relative; text-align: right'.($collapsed ? ';display: none' : ''))) . '>';
 					if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
 						echo calendar($layer['attributes']['type'][$j], $layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
 					}
@@ -250,11 +262,14 @@
 						&Sigma;
 					</td><?
 					for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
+						$explosion = explode(';', $layer['attributes']['group'][$j]);
+						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
+						$groupname = $explosion[0];
 						if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-							echo '<td class="gap_'.$layer['attributes']['group'][$j].'" style="border:none;background: url(graphics/bg.gif);"></td>';
+							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url(graphics/bg.gif);"></td>';
 						}
 						if($layer['attributes']['type'][$j] != 'geometry' AND $layer['attributes']['visible'][$j]){ ?>
-							<td valign="top" class="group_<? echo $layer['attributes']['group'][$j]; ?>">
+							<td valign="top" class="group_<? echo $groupname; ?>" <? if($collapsed)echo 'style="display: none"'; ?> >
 								<div class="statistic_row_<? echo $layer['Layer_ID']; ?>" style="display:none"><?php
 								$column_name = $this->qlayerset[$i]['attributes']['name'][$j];
 								if(in_array($this->qlayerset[$i]['attributes']['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8', 'not_saveable'))) {
@@ -297,35 +312,39 @@
 				<td></td>
 			  <?
 			  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
+						$explosion = explode(';', $layer['attributes']['group'][$j]);
+						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
+						$groupname = $explosion[0];
 						if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-							echo '<td class="gap_'.$layer['attributes']['group'][$j].'" style="border:none;background: url(graphics/bg.gif);"></td>';
+							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url(graphics/bg.gif);"></td>';
 						}
 						if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
-								echo '<td class="group_'.$layer['attributes']['group'][$j].'"';
-									echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
-									if($layer['attributes']['alias'][$j] == ''){
-										$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
+								echo '<td class="group_'.$groupname.'"';
+								if($collapsed)echo 'style="display: none"';
+								echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
+								if($layer['attributes']['alias'][$j] == ''){
+									$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
+								}
+								echo '<table ';
+								echo 'width="100%";';
+								echo '><tr><td>';
+								echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$layer['attributes']['alias'][$j].'</span>';
+								if($layer['attributes']['nullable'][$j] == '0' AND $layer['attributes']['privileg'][$j] != '0'){
+									echo '<span title="Eingabe erforderlich">*</span>';
+								}
+								if($layer['attributes']['tooltip'][$j]!='' AND $layer['attributes']['form_element_type'][$j] != 'Time'){
+									echo '<td align="right"><a href="javascript:void(0);" title="'.$layer['attributes']['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
+								}
+								if($layer['attributes']['type'][$j] == 'date' OR $layer['attributes']['type'][$j] == 'timestamp' OR $layer['attributes']['type'][$j] == 'timestamptz'){
+									echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$layer['attributes']['tooltip'][$j].'" ';
+									if($layer['attributes']['privileg'][$j] == '1' AND !$lock[$k]){
+										echo 'onclick="add_calendar(event, \''.$layer['attributes']['name'][$j].'_'.$k.'\');"';
 									}
-									echo '<table ';
-									echo 'width="100%";';
-									echo '><tr><td>';
-									echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$layer['attributes']['alias'][$j].'</span>';
-									if($layer['attributes']['nullable'][$j] == '0' AND $layer['attributes']['privileg'][$j] != '0'){
-										echo '<span title="Eingabe erforderlich">*</span>';
-									}
-									if($layer['attributes']['tooltip'][$j]!='' AND $layer['attributes']['form_element_type'][$j] != 'Time'){
-										echo '<td align="right"><a href="javascript:void(0);" title="'.$layer['attributes']['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
-									}
-									if($layer['attributes']['type'][$j] == 'date' OR $layer['attributes']['type'][$j] == 'timestamp' OR $layer['attributes']['type'][$j] == 'timestamptz'){
-										echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$layer['attributes']['tooltip'][$j].'" ';
-										if($layer['attributes']['privileg'][$j] == '1' AND !$lock[$k]){
-											echo 'onclick="add_calendar(event, \''.$layer['attributes']['name'][$j].'_'.$k.'\');"';
-										}
-										echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$layer['attributes']['name'][$j].'_'.$k.'"></div></td>';
-									}
-									echo '</td></tr></table>';
-									echo '</td>';
+									echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$layer['attributes']['name'][$j].'_'.$k.'"></div></td>';
+								}
+								echo '</td></tr></table>';
+								echo '</td>';
 							}
 						}
 			  	}
@@ -339,15 +358,18 @@
 					</td>
 					<?					
 						for($j = 0; $j < count($layer['attributes']['name']); $j++){
+							$explosion = explode(';', $layer['attributes']['group'][$j]);
+							if($explosion[1] != '')$collapsed = true;else $collapsed = false;
+							$groupname = $explosion[0];
 							if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-								echo '<td class="gap_'.$layer['attributes']['group'][$j].'" style="border:none;background: url(graphics/bg.gif);"></td>';
+								echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url(graphics/bg.gif);"></td>';
 							}
 							if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 								$layer['attributes']['form_element_type'][$j] .= '_not_saveable';
 							}
 							if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 								if($layer['attributes']['type'][$j] != 'geometry'){
-									echo '<td class="group_'.$layer['attributes']['group'][$j].'">';
+									echo '<td class="group_'.$groupname.'" '.($collapsed? 'style="display: none"' : '').'>';
 									if(!in_array($layer['attributes']['form_element_type'][$j], array('Dokument', 'SubFormPK', 'SubFormEmbeddedPK'))){
 										if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
 											echo calendar($layer['attributes']['type'][$j], $layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
