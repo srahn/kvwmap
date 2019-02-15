@@ -1586,7 +1586,7 @@ function mouseup(evt){
 		if(enclosingForm.split != undefined)enclosingForm.split.style.visibility = "hidden";
 	}
 
-	function deletelastline(evt){
+	function deletelast(evt){
 		switch(enclosingForm.last_doing.value){
 			case "draw_line":
 				if(pathx.length > 2){
