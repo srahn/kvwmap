@@ -5,7 +5,8 @@
 			<div id="message_box"></div> <!-- muss innerhalb des form stehen -->
 			<input type="hidden" name="browserwidth">
 			<input type="hidden" name="browserheight"><?
-			echo hidden_formvars_fields($this->formvars, $this->expect); ?>
+			echo hidden_formvars_fields($this->formvars, $this->expect);
+			 ?>
 			<table align="center" cellspacing="4" cellpadding="12" id="login_table" style="width: 400px">
 				<tr>
 					<td align="center">
