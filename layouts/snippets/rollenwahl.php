@@ -102,7 +102,7 @@
 								<div id="password_form" style="border: 1px solid #cbcbcb;width: 280px;<? if($this->PasswordError == '')echo 'display: none'; ?>">
 									<table cellspacing="3" style="width: 100%">
 										<tr>
-											<td><span class="px16"><? echo $strPassword; ?>: </span></td>
+											<td><span class="px16"><? echo $strCurrentPassword; ?>: </span></td>
 											<td>
 												<input style="width: 130px" type="password" value="<? echo $this->formvars['passwort']; ?>" name="passwort" />
 											</td>

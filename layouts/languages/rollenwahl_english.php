@@ -1,5 +1,6 @@
 <?php
-	$strPassword="current password";
+	$strPassword="password";
+	$strCurrentPassword="current password";
 	$strChangePassword="change password";
 	$strNewPassword="new passwort";
 	$strRepeatPassword="repeat new password";
