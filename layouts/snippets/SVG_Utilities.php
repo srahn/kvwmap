@@ -1151,7 +1151,7 @@ function mouseup(evt){
 	}
 	
 	function remove_second_line(){
-		if(enclosingForm.secondline.value == "true"){
+		if(enclosingForm.secondline.value == "true" || enclosingForm.secondpoly.value == "true"){
 			var length = pathx_second.length;
 			for(i = 0; i < length; i++ ){
 				pathx_second.pop();
@@ -1521,11 +1521,7 @@ function mouseup(evt){
 	}
 	
 	function delete_lines(){
-		var length = poly_pathx_second.length;
-		for(i = 0; i < length; i++ ){
-			poly_pathx_second.pop();
-			poly_pathy_second.pop();
-		}
+		remove_second_line();
 		applylines();
 		enclosingForm.last_doing.value = "delete_lines";
 	}
