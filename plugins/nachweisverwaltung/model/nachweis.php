@@ -669,7 +669,7 @@ class Nachweis {
 	
 	function updateBearbeitungshinweis($user, $id, $text){
 		$sql="UPDATE nachweisverwaltung.n_nachweise 
-						SET bemerkungen_intern = bemerkungen_intern || CASE WHEN NULLIF(bemerkungen_intern, '') IS NOT NULL THEN '\n\n' ELSE '' END || '".$user->Vorname." ".$user->Name.":\n".$text."'
+						SET bemerkungen_intern = coalesce(bemerkungen_intern, '') || CASE WHEN NULLIF(bemerkungen_intern, '') IS NOT NULL THEN '\n\n' ELSE '' END || '".$user->Vorname." ".$user->Name.":\n".$text."'
 					WHERE id = ".$id;
 		#echo $sql;
 		$ret=$this->database->execSQL($sql,4, 1);
