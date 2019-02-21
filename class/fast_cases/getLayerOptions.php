@@ -107,6 +107,7 @@ class GUI {
 		if($layer[0]['connectiontype']==6){
 			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
 			$attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id'], false);
+			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['layer_id']);
 		}
 		$disabled_classes = $mapDB->read_disabled_classes();
 		$layer[0]['Class'] = $mapDB->read_Classes($this->formvars['layer_id'], $disabled_classes);
@@ -152,7 +153,7 @@ class GUI {
 											<select name="layer_options_labelitem">
 												<option value=""> - </option>';
 												for($i = 0; $i < count($attributes)-2; $i++){
-													if($attributes['the_geom'] != $attributes[$i]['name'])echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.$attributes[$i]['name'].'</option>';
+													if($privileges[$attributes[$i]['name']] AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.$attributes[$i]['name'].'</option>';
 												}
 							echo 	 '</select>
 										</li>';
@@ -379,6 +380,29 @@ class stelle {
 		$this->readDefaultValues();
 	}
 
+	function get_attributes_privileges($layer_id) {
+		$sql = "
+			SELECT
+				`attributename`,
+				`privileg`,
+				`tooltip`
+			FROM
+				`layer_attributes2stelle`
+			WHERE
+				`stelle_id` = " . $this->id . " AND
+				`layer_id` = " . $layer_id;
+		#echo '<br>Sql: ' . $sql;
+		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
+		$query = mysql_query($sql, $this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
+		while ($rs = mysql_fetch_array($query)) {
+			$privileges[$rs['attributename']] = $rs['privileg'];
+			$privileges['tooltip_' . $rs['attributename']] = $rs['tooltip'];
+			$privileges['attributenames'][] = $rs['attributename'];
+		}
+		return $privileges;
+	}	
+	
   function getName() {
     $sql ='SELECT ';
     if ($this->language != 'german' AND $this->language != ''){
