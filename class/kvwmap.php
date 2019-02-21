@@ -8712,7 +8712,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$notice_result = json_decode(substr($last_notice, strpos($last_notice, '{')), true);
 						$results[] = pg_fetch_row($ret['query']);
 						if (pg_affected_rows($ret['query']) == 0) {							
-							if($notice_result['success'] != 'true') {
+							if(!$notice_result['success']) {
 								$results[] = '<br>Datensatz wurde nicht gelöscht, weil er nicht existiert!<br>';
 								$this->success = false;
 							}							
