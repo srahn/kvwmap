@@ -83,9 +83,6 @@
 						
 			for($j = 0; $j < count($layer['attributes']['name']); $j++) {
 				$attribute_class = (($this->new_entry == true AND $layer['attributes']['dont_use_for_new'][$j] == -1) ? 'hidden' : 'visible');
-				if($layer['shape'][$k][$layer['attributes']['name'][$j]] == ''){
-					#$layer['shape'][$k][$layer['attributes']['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j]];
-				}
 				if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 					$layer['attributes']['form_element_type'][$j] .= '_not_saveable';
 				}
@@ -112,28 +109,38 @@
 						if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
 						if($layer['attributes']['alias'][$j] == '')$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
 					
-						if($layer['attributes']['arrangement'][$j] != 1){	# wenn Attribut nicht daneben -> neue Zeile beginnen
-							$attributes_in_row_so_far = 1;					# Attributanzahl in dieser Zeile bis zu diesem Attribut
-							$datapart .= '<tr id="tr_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" class="' . $attribute_class . '">';
+						####### wenn Attribut nicht daneben -> neue Zeile beginnen ########
+						if($layer['attributes']['arrangement'][$j] != 1){
+							$row['id'] = 'tr_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
+							$row['class'] = $attribute_class;
 						}
-						else $attributes_in_row_so_far++;
+						else{
+							if($nl){
+								$next_row['sidebyside'] = true;
+							}
+							else{
+								$row['sidebyside'] = true;
+							}
+						}
+						######### Attributname #########
 						if($layer['attributes']['labeling'][$j] != 2){
-							$td = '	<td class="gle-attribute-name" '; if($layer['attributes']['labeling'][$j] == 1 AND $layer['attributes']['arrangement'][$j] == 1 AND $layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20" ';if($layer['attributes']['group'][0] != '' AND $layer['attributes']['arrangement'][$j] != 1)$td .= 'width="1%">';else $td.='width="1%">';
-							$td.= attribute_name($layer['Layer_ID'], $layer['attributes'], $j, $k, $this->user->rolle->fontsize_gle, ($this->formvars['printversion'] == '' AND $anzObj > 1) ? true : false);
-							$td.= '	</td>';
-							if($nl AND $layer['attributes']['labeling'][$j] != 1)$next_line .= $td; else $datapart .= $td;
+							$cell['properties'] = 'class="gle-attribute-name"';
+							$cell['content'] = attribute_name($layer['Layer_ID'], $layer['attributes'], $j, $k, $this->user->rolle->fontsize_gle, ($this->formvars['printversion'] == '' AND $anzObj > 1) ? true : false);
+							if($nl AND $layer['attributes']['labeling'][$j] != 1){
+								$next_row['contains_attribute_names'] = true;
+								$next_row['cells'][] = $cell;
+							}
+							else{
+								$row['contains_attribute_names'] = true;
+								$row['cells'][] = $cell;
+							}
 						}
-						if($layer['attributes']['labeling'][$j] == 1)$nl = true;										# Attributname soll oben stehen -> alle weiteren tds für die nächste Zeile aufsammeln
+						if($layer['attributes']['labeling'][$j] == 1)$nl = true;										# Attributname soll oben stehen -> alle weiteren Zellen für die nächste Zeile aufsammeln
+						######### /Attributname #########
 					
-						# Ermittlung einer geeigneten Größe für das Attribut
-						if($layer['attributes']['arrangement'][$j+1] == 1 OR $layer['attributes']['arrangement'][$j] == 1){
-							$b = $j+1;
-							while($b < $j+4 AND $layer['attributes']['arrangement'][$b] == 1)$b++;			# 4 vorwärts gucken
-							$attributes_in_row = $attributes_in_row_so_far + $b - $j -1;			# Anzahl der bisherigen Attribute in der Zeile dazurechnen
-							$size_backup = $size;
-							$size2 = $size/$attributes_in_row;
-							$sw = 20*$size2;
-							$select_width2 = 'max-width: '.$sw.'px;';
+						if($row['sidebyside'] OR $next_row['sidebyside']){
+							$select_width2 = '';
+							$size2 = '';
 						}
 						else{
 							$size2 = $size;
@@ -141,19 +148,27 @@
 						}
 						if ($select_width2 == '') $select_width2 = 'max-width: 600px;';
 
-						$td = '	<td
-							id="row' . $j . '"
-							colspan="' . ($layer['attributes']['arrangement'][$j+1] != 1 ? 20 - $attributes_in_row_so_far : '') . '"' .
-							get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value')) . '
-						>';
-						$td.=	attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2, $this->user->rolle->fontsize_gle);
-						$td.= '<div onmousedown="resizestart(document.getElementById(\'row'.$j.'\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div>';
-						$td.= '	</td>';
-						if($nl)$next_line .= $td; else $datapart .= $td;
-						if($layer['attributes']['arrangement'][$j+1] != 1)$datapart .= '</tr>';						# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
-						if($layer['attributes']['arrangement'][$j+1] != 1 AND $nl){												# die aufgesammelten tds in neuer Zeile ausgeben
-							$datapart .= '<tr>'.$next_line.'</tr>';
-							$next_line = '';
+						######### Attributwert #########
+						$cell['content'] = attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2, $this->user->rolle->fontsize_gle);
+						$cell['id'] = 'row'.$j;
+						$cell['properties'] = get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value'));
+						if($nl){
+							$next_row['cells'][] = $cell;
+						}
+						else{
+							$row['cells'][] = $cell;
+						}
+						unset($cell);
+						######### /Attributwert #########
+						
+						if($layer['attributes']['arrangement'][$j+1] != 1){		# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
+							$table['rows'][] = $row;
+							if(count($row['cells']) > $table['max_cell_count'])$table['max_cell_count'] = count($row['cells']);
+							unset($row);
+						}
+						if($layer['attributes']['arrangement'][$j+1] != 1 AND $nl){			# die aufgesammelten Zellen in neuer Zeile ausgeben
+							$table['rows'][] = $next_row;
+							unset($next_row);
 							$nl = false;
 						}
 					
@@ -181,8 +196,14 @@
 					$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
 				}
 				if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
+					$datapart .= output_table($table);
+					unset($table);
 					$datapart .= '</table></div></td></tr>';
 				}
+			}
+			if($table){
+				$datapart .= output_table($table);
+				unset($table);
 			}
 			if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY')$geomtype = 'Polygon';
 			elseif($geomtype == 'POINT')$geomtype = 'Point';

@@ -669,7 +669,7 @@ class Nachweis {
 	
 	function updateBearbeitungshinweis($user, $id, $text){
 		$sql="UPDATE nachweisverwaltung.n_nachweise 
-						SET bemerkungen_intern = bemerkungen_intern || CASE WHEN NULLIF(bemerkungen_intern, '') IS NOT NULL THEN '\n\n' ELSE '' END || '".$user->Vorname." ".$user->Name.":\n".$text."'
+						SET bemerkungen_intern = coalesce(bemerkungen_intern, '') || CASE WHEN NULLIF(bemerkungen_intern, '') IS NOT NULL THEN '\n\n' ELSE '' END || '".$user->Vorname." ".$user->Name.":\n".$text."'
 					WHERE id = ".$id;
 		#echo $sql;
 		$ret=$this->database->execSQL($sql,4, 1);
@@ -761,7 +761,7 @@ class Nachweis {
 		$stelle_id = $explosion[1];
 		$n = 'n';
 		if($order==''){
-			$order="flurid, stammnr, datum";
+			$order="n.flurid, n.stammnr, n.datum";
 		}
 		$order = str_replace('blattnummer', "NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::int", $order);		// nach Blattnummer nummerisch sortieren
 		$order = str_replace('rissnummer', "NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::int", $order);		// nach Rissnummer nummerisch sortieren
@@ -1057,7 +1057,7 @@ class Nachweis {
           # Suche mit Suchpolygon
           #echo '<br>Suche mit Suchpolygon.';
           $this->debug->write('Abfragen der Nachweise die das Polygon schneiden',4);
-					$sql ="SELECT distinct NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::int, NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::int, n.id, flurid, blattnummer, datum, vermstelle, gueltigkeit, link_datei, format, stammnr, fortfuehrung, rissnummer, bemerkungen, bearbeiter, zeit, erstellungszeit, bemerkungen_intern, geprueft, n.art, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+					$sql ="SELECT distinct NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::int, NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::int, n.id, n.flurid, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei, n.format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";					

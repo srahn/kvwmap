@@ -7,9 +7,34 @@
 	global $strNewEmbeddedPK;
 	global $hover_preview;
 
+	function output_table($table){
+		foreach($table['rows'] as $row){
+			$output .= '<tr id="'.$row['id'].'" class="'.$row['class'].'">';
+			if($row['sidebyside'] AND !$row['contains_attribute_names'])$width = 'width="'.(100 / $table['max_cell_count']).'%"';			
+			$cell_count = count($row['cells']);
+			$colspan = $table['max_cell_count'] - $cell_count + 1;
+			for($i = 0; $i < $cell_count; $i++){
+				$cell = $row['cells'][$i];
+				if($row['contains_attribute_names']){
+					if($cell['properties'] == 'class="gle-attribute-name"'){
+						if($i == 0)$width = 'width="10%"';
+						else $width = 'width="1%"';
+					}
+					else $width = '';
+				}
+				$output.= '<td '.$width.' '.($cell['id']? 'id="'.$cell['id'].'"':'').$cell['properties'].' '.(($colspan > 1 AND $i == $cell_count-1)? 'colspan="'.$colspan.'"':'').'>';
+				$output.= $cell['content'];
+				if($cell['id'])$output.= '<div onmousedown="resizestart(document.getElementById(\''.$cell['id'].'\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div>';
+				$output.= '</td>';			
+			}
+			$output.= '</tr>';
+		}
+		return $output;
+	}
+	
 	function attribute_name($layer_id, $attributes, $j, $k, $fontsize, $sort_links = true) {
 		$datapart .= '<table ';
-		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j-1] != 1 AND $attributes['arrangement'][$j] != 1)$datapart .= 'width="200px"';
+		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j] != 1)$datapart .= 'width="200px"';
 		else $datapart .= 'width="100%"';
 		$datapart .= '><tr style="border: none"><td' . (($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0') ? ' class="gle-attribute-mandatory"' : '') . '>';
 		if (
@@ -691,14 +716,15 @@
 					if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
 						$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
 					}
-					$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
+					if($size)$datapart .= ' size="'.$size.'"';
+					$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
 					if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
 						if($size == 12){		// spaltenweise
 							$datapart .= htmlspecialchars($value);
 						}
 						else{								// zeilenweise
+							if($size == '')$size = 10;
 							$maxwidth = $size * 11;
-							#$minwidth = $size * 7.1;
 							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.$value.'</div>';
 						}
 					}
