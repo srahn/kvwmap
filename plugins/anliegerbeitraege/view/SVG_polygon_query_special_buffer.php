@@ -2,22 +2,7 @@
 <?
 	include(LAYOUTPATH.'snippets/SVG_Utilities.php');
 ?>
-<div id="map">
-<!-- ----------------------- formular-variabeln fuer navigation ---------------------- -->
-	<INPUT TYPE="HIDDEN" NAME="CMD" VALUE="">
-	<INPUT TYPE="HIDDEN" NAME="INPUT_TYPE" VALUE="">
-	<INPUT TYPE="HIDDEN" NAME="INPUT_COORD" VALUE="">            
-	<input type="hidden" name="imgxy" value="300 300">
-	<input type="hidden" name="imgbox" value="-1 -1 -1 -1">
-	
-<!-- ----------------------- formular-variabeln fuer fachschale ---------------------- -->
-  <input type="HIDDEN" name="minx" value="<?php echo $this->map->extent->minx; ?>">
-	<input type="HIDDEN" name="miny" value="<?php echo $this->map->extent->miny; ?>">
-	<input type="HIDDEN" name="maxx" value="<?php echo $this->map->extent->maxx; ?>">
-	<input type="HIDDEN" name="maxy" value="<?php echo $this->map->extent->maxy; ?>">
-	<INPUT TYPE="hidden" NAME="pixelsize" VALUE="<?php echo $pixelsize; ?>">
-	<input type="hidden" name="pathlength" value="<?php echo $this->formvars['pathlength']; ?>">
-		
+<div id="map">		
 	<input name="newpath" type="hidden" value="<?php echo $this->formvars['newpath']; ?>">
 	<input name="pathwkt" type="hidden" value="<?php echo $this->formvars['pathwkt']; ?>">
 	<input name="newpathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
@@ -97,8 +82,14 @@ $svg .='
 '.$SVGvars_defs.'
   </defs>';
 $svg .= $canvaswithall;
-$svg .= $navbuttons;
-$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 36)">';
+$svg .= '<g id="buttons_NAV" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()">';
+$svg .= '<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>';
+$svg .= $SVGvars_navbuttons;
+$svg .= '</g>';
+if($this->map->width > 880)$button_position = ($last_x+20).' 0';
+else $button_position = '0 36';
+$last_x = 0;
+$svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate('.$button_position.')">';
 $buttons_fs .= deletebuttons($strUndo, $strDelete);
 $buttons_fs .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
 $buttons_fs .= flurstquerybuttons();
@@ -129,7 +120,7 @@ echo'
   <input type="hidden" name="hoehe1" value = "'.$res_y.'">
 ';
 #                  >>> object-tag: wmode="transparent" (hoehere anforderungen beim rendern!) <<<
-echo '<EMBED align="center" SRC="'.TEMPPATH_REL.$svgfile.'" TYPE="image/svg+xml" width="'.$res_x.'" height="'.$res_y.'" PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>';
+echo '<EMBED align="center" name="SVG" SRC="'.TEMPPATH_REL.$svgfile.'" TYPE="image/svg+xml" width="'.$res_x.'" height="'.$res_y.'" PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>';
 # echo '<iframe src="'.TEMPPATH_REL.$svgfile.'" width="'.$res_x.'" height="'.$res_y.'" name="map"></iframe>';
 #echo '<script src="funktionen/Embed.js" language="JavaScript" type="text/javascript"></script>';
 ?>
