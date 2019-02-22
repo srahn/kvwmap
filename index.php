@@ -1740,6 +1740,7 @@ function go_switch($go, $exit = false) {
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
 				$GUI->saveMap('');
 				$GUI->drawMap();
+#				$GUI->add_message('info', 'Die Anwendung wird gerade überarbeitet. Es ist nicht sicher gestellt, dass sie richtig funktioniert und es können Fehlermeldungen auftreten!');
 				$GUI->output();
 			}
 		}

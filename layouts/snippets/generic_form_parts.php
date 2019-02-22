@@ -7,31 +7,46 @@
 	global $strNewEmbeddedPK;
 	global $hover_preview;
 
-	function output_table($table){
-		foreach($table['rows'] as $row){
-			$output .= '<tr id="'.$row['id'].'" class="'.$row['class'].'">';
-			if($row['sidebyside'] AND !$row['contains_attribute_names'])$width = 'width="'.(100 / $table['max_cell_count']).'%"';			
-			$cell_count = count($row['cells']);
-			$colspan = $table['max_cell_count'] - $cell_count + 1;
-			for($i = 0; $i < $cell_count; $i++){
-				$cell = $row['cells'][$i];
-				if($row['contains_attribute_names']){
-					if($cell['properties'] == 'class="gle-attribute-name"'){
-						if($i == 0)$width = 'width="10%"';
-						else $width = 'width="1%"';
-					}
-					else $width = '';
+	function output_table($table) {
+		if (is_array($table)) {
+			foreach($table['rows'] as $row) {
+				$output .= '<tr id="' . $row['id'] . '" class="' . $row['class'] . '">';
+				if ($row['sidebyside'] AND !$row['contains_attribute_names']) {
+					$width = 'width="'.(100 / $table['max_cell_count']).'%"';
 				}
-				$output.= '<td '.$width.' '.($cell['id']? 'id="'.$cell['id'].'"':'').$cell['properties'].' '.(($colspan > 1 AND $i == $cell_count-1)? 'colspan="'.$colspan.'"':'').'>';
-				$output.= $cell['content'];
-				if($cell['id'])$output.= '<div onmousedown="resizestart(document.getElementById(\''.$cell['id'].'\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div>';
-				$output.= '</td>';			
+				$cell_count = count($row['cells']);
+				$colspan = $table['max_cell_count'] - $cell_count + 1;
+				for($i = 0; $i < $cell_count; $i++) {
+					$cell = $row['cells'][$i];
+					if ($row['contains_attribute_names']) {
+						if ($cell['properties'] == 'class="gle-attribute-name"') {
+							$width = 'width="' . ($i == 0 ? '10%' : '1%') . '"';
+						}
+						else {
+							$width = '';
+						}
+					}
+					$output .= '<td ' .
+						$width . ' ' .
+						($cell['id'] ? 'id="' . $cell['id'] . '"' : '') .
+						$cell['properties'] . ' ' .
+						(($colspan > 1 AND $i == $cell_count - 1) ? 'colspan="' . $colspan . '"' : '') .
+					'>';
+					$output .= $cell['content'];
+					if ($cell['id']) {
+						$output .= '<div onmousedown="resizestart(document.getElementById(\'' . $cell['id'] . '\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div>';
+					}
+					$output .= '</td>';
+				}
+				$output .= '</tr>';
 			}
-			$output.= '</tr>';
+		}
+		else {
+			$output = '';
 		}
 		return $output;
 	}
-	
+
 	function attribute_name($layer_id, $attributes, $j, $k, $fontsize, $sort_links = true) {
 		$datapart .= '<table ';
 		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j] != 1)$datapart .= 'width="200px"';
