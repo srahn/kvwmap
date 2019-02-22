@@ -10089,6 +10089,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 	function daten_import(){
 		$this->main='data_import.php';
+		exec('rm '.UPLOADPATH.'/'.$this->user->id.'/*');
 		$this->output();
 	}
 
