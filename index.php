@@ -189,7 +189,7 @@ function go_switch($go, $exit = false) {
 		switch($go) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
-				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction']);
+				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction'], $GUI->formvars['height_reduction']);
 				$GUI->loadMap('DataBase');
 				$GUI->navMap($GUI->formvars['CMD']);
 				$GUI->saveMap('');

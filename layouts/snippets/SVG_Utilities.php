@@ -475,22 +475,22 @@
      case "zoomin_point":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
       enclosingForm.CMD.value          = "zoomin";
-      get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value);
+      get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value+\'&height_reduction=\'+enclosingForm.height_reduction.value);
      break;
      case "zoomout":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
       enclosingForm.CMD.value          = cmd;
-      get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value);
+      get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value+\'&height_reduction=\'+enclosingForm.height_reduction.value);
      break;
      case "zoomin_box":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
       enclosingForm.CMD.value          = "zoomin";
-      get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value);
+      get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value+\'&height_reduction=\'+enclosingForm.height_reduction.value);
      break;
      case "recentre":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
       enclosingForm.CMD.value = cmd;
-			get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value);
+			get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value+\'&height_reduction=\'+enclosingForm.height_reduction.value);
      break;
      case "ppquery_point":
 			if(!checkQueryFields())break;
@@ -3930,4 +3930,5 @@ $measurefunctions = '
 <input type="hidden" name="pathlength" value="<?php echo $this->formvars['pathlength']; ?>">
 <input type="hidden" name="svghelp" id="svghelp">
 <input type="hidden" name="width_reduction" value="<? echo $this->formvars['width_reduction']; ?>">
+<input type="hidden" name="height_reduction" value="<? echo $this->formvars['height_reduction']; ?>">
 <input type="hidden" name="edit_other_object" value="">

@@ -11101,6 +11101,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
   function StyleLabelEditor(){
+		$this->formvars['width_reduction'] = $this->user->rolle->nImageWidth - 500;
+		$this->formvars['height_reduction'] = $this->user->rolle->nImageHeight - 500;
     $this->user->rolle->nImageWidth = 500;
     $this->user->rolle->nImageHeight = 500;
     if($this->formvars['neuladen']){
@@ -12003,15 +12005,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     return $pathxyPixel;
   }
 
-	function reduce_mapwidth($reduction){
-		# Diese Funktion reduziert die aktuelle Kartenbildbreite um $reduction Pixel, damit das Kartenbild in Fachschalen nicht zu groß erscheint.
-		# Diese reduzierte Breite wird aber nicht in der Datenbank gespeichert, sondern gilt nur für den aktuellen Anwendungsfall.
+	function reduce_mapwidth($width_reduction, $height_reduction = NULL){
+		# Diese Funktion reduziert die aktuelle Kartenbildbreite um $width_reduction Pixel (und optional die Kartenbildhöhe um $height_reduction Pixel), damit das Kartenbild in Fachschalen nicht zu groß erscheint.
+		# Diese reduzierte Breite wird aber nicht in der Datenbank gespeichert, sondern gilt nur solange man in der Fachschale bleibt.
 		# Außerdem wird bei Bedarf der aktuelle Maßstab berechnet und zurückgeliefert (er wird berechnet, weil ein loadmap() ja noch nicht aufgerufen wurde).
 		# Mit diesem Maßstab kann dann einmal beim ersten Aufruf der Fachschale von der Hauptkarte aus nach dem loadmap() der Extent wieder so angepasst werden, dass der ursprüngliche Maßstab erhalten bleibt.
 		# Dieser verkleinerte Extent wird wiederum in der Datenbank gespeichert. In der Datenbank steht dann also weiterhin die ursprüngliche Kartenbildgröße und der (dazu eigentlich nicht passende) in der Breite verkleinerte Extent.
 		# Damit der Extent aber nur dann angepasst wird, wenn es notwendig ist (nämlich wenn man von der Hauptkarte kommt), wird der Maßstab nur berechnet, wenn Kartenbildgröße und Extent zusammenpassen.
 		# Am "Nichtzusammenpassen" von Kartenbildgröße und Extent wird also erkannt, dass der Extent schon einmal verkleinert wurde.
-		$this->formvars['width_reduction'] = $reduction;
+		$this->formvars['width_reduction'] = $width_reduction;
+		$this->formvars['height_reduction'] = $height_reduction;
 		$width = $this->user->rolle->nImageWidth;
 		$height = $this->user->rolle->nImageHeight;
 		$extentwidth = $this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx;
@@ -12025,10 +12028,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$gd = $this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx;
 			$scale = $gd/$md;
 		}
-		$width = $width - $reduction;
+		$width = $width - $width_reduction;
+		$height = $height - $height_reduction;
 		if($this->user->rolle->hideMenue == 1){$width = $width - 195;}
 		if($this->user->rolle->hideLegend == 1){$width = $width - 254;}
 		$this->user->rolle->nImageWidth = $width;
+		$this->user->rolle->nImageHeight = $height;
 		return $scale;
 	}
 
