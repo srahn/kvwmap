@@ -5458,17 +5458,13 @@ class GUI {
 
     # Wenn Navigiert werden soll, wird eine eventuell schon gesetzte Position
     # in Weltkoordinaten umgerechnet und danach wieder zurück.
+		$currenttime=date('Y-m-d H:i:s',time());
     if ($this->formvars['CMD']!='') {
     	$this->navMap($this->formvars['CMD']);
-      $this->saveMap('');
-      $currenttime=date('Y-m-d H:i:s',time());
-      $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-      $this->drawMap();
     }
-    else {
-      $this->saveMap('');
-      $this->drawMap();
-    }
+		$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+		$this->saveMap('');
+		$this->drawMap();
     $this->output();
   }
 	
