@@ -11594,7 +11594,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $prevextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
     $ret = $this->user->rolle->getConsume($consumetime);
     $i = 0;
-    while($i < 100 AND (string)$currentextent->minx == (string)$prevextent->minx AND (string)$currentextent->miny == (string)$prevextent->miny AND (string)$currentextent->maxx == (string)$prevextent->maxx AND (string)$currentextent->maxy == (string)$prevextent->maxy){
+    while($i < 100 AND 
+					round($currentextent->minx, 2) == round($prevextent->minx, 2) AND 
+					round($currentextent->miny, 2) == round($prevextent->miny, 2) AND 
+					round($currentextent->maxx, 2) == round($prevextent->maxx, 2) AND 
+					round($currentextent->maxy, 2) == round($prevextent->maxy, 2)){
       # Setzen des next Wertes des vorherigen Kartenausschnittes
       $prevtime=$ret[1]['prev'];
       $this->user->rolle->newtime = $prevtime;
