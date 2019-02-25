@@ -502,7 +502,7 @@ $legendheight = $this->map->height + 20;
 			<table cellpadding="0" cellspacing="0">
 				<tr>
 					<td valign="top">
-						<div id="legenddiv" onmouseleave="slide_legend_out(event);" class="slidinglegend_slideout">
+						<div id="legenddiv" onclick="slide_legend_in(event)" onmouseleave="slide_legend_out(event);" class="slidinglegend_slideout">
 							<table width="100%" border="0" cellpadding="0" cellspacing="0">
 								<tr>
 									<td bgcolor="<?php echo BG_DEFAULT ?>" align="left">
@@ -510,7 +510,7 @@ $legendheight = $this->map->height + 20;
 									</td>
 								</tr>
 							</table>
-							<table class="table1" id="legendTable" onclick="slide_legend_in(event)" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
+							<table class="table1" id="legendTable" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
 								<tr align="left">
 									<td>
 										<div id="legend_layer" style="display: inline-block">
