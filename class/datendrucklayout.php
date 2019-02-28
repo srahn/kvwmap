@@ -842,17 +842,17 @@ class ddl {
 			
 			for($i = 0; $i < $formvars['linecount']; $i++){
         $sql = "INSERT INTO druckfreilinien SET `breite` = '".$formvars['breite'.$i]."'";
-        if($formvars['lineposx'.$i])$sql .= ", `posx` = ".(int)$formvars['lineposx'.$i];
+        if($formvars['lineposx'.$i] !== NULL)$sql .= ", `posx` = ".(int)$formvars['lineposx'.$i];
         else $sql .= ", `posx` = NULL";
-        if($formvars['lineposy'.$i])$sql .= ", `posy` = ".(int)$formvars['lineposy'.$i];
+        if($formvars['lineposy'.$i] !== NULL)$sql .= ", `posy` = ".(int)$formvars['lineposy'.$i];
         else $sql .= ", `posy` = NULL";
-				if($formvars['lineendposx'.$i])$sql .= ", `endposx` = ".(int)$formvars['lineendposx'.$i];
+				if($formvars['lineendposx'.$i] !== NULL)$sql .= ", `endposx` = ".(int)$formvars['lineendposx'.$i];
         else $sql .= ", `endposx` = NULL";
-        if($formvars['lineendposy'.$i])$sql .= ", `endposy` = ".(int)$formvars['lineendposy'.$i];
+        if($formvars['lineendposy'.$i] !== NULL)$sql .= ", `endposy` = ".(int)$formvars['lineendposy'.$i];
         else $sql .= ", `endposy` = NULL";
-				if($formvars['lineoffset_attribute_start'.$i])$sql .= ", `offset_attribute_start` = '".$formvars['lineoffset_attribute_start'.$i]."'";
+				if($formvars['lineoffset_attribute_start'.$i] !== NULL)$sql .= ", `offset_attribute_start` = '".$formvars['lineoffset_attribute_start'.$i]."'";
         else $sql .= ", `offset_attribute_start` = NULL";
-				if($formvars['lineoffset_attribute_end'.$i])$sql .= ", `offset_attribute_end` = '".$formvars['lineoffset_attribute_end'.$i]."'";
+				if($formvars['lineoffset_attribute_end'.$i] !== NULL)$sql .= ", `offset_attribute_end` = '".$formvars['lineoffset_attribute_end'.$i]."'";
         else $sql .= ", `offset_attribute_end` = NULL";
         if($formvars['linetype'.$i] == '')$formvars['linetype'.$i] = 0;
         $sql .= ", `type` = '".$formvars['linetype'.$i]."'";
