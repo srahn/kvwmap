@@ -18,6 +18,7 @@
 <script type="text/javascript">
 
 	Text_task=["<? echo $strHelp; ?>:","<? echo $strHintTask; ?>"];
+	Text_password=["<? echo $strHelp; ?>:","<? echo PASSWORD_INFO; ?>"];
 	Text_language=["<? echo $strHelp; ?>:","<? echo $strHintLanguage; ?>"];
 	Text_gui=["<? echo $strHelp; ?>:","<? echo $strHintGUI; ?>"];
 	Text_buttons=["<? echo $strHelp; ?>:","<? echo $strHintButtons; ?>"];
@@ -99,7 +100,7 @@
 							</td>
 							<td class="rollenwahl-option-data">
 								<a href="javascript:openPasswordForm();"><? echo $strChangePassword; ?></a>
-								<div id="password_form" style="border: 1px solid #cbcbcb;width: 280px;<? if($this->PasswordError == '')echo 'display: none'; ?>">
+								<div id="password_form" style="border: 1px solid #cbcbcb;width: 290px;<? if($this->PasswordError == '')echo 'display: none'; ?>">
 									<table cellspacing="3" style="width: 100%">
 										<tr>
 											<td><span class="px16"><? echo $strCurrentPassword; ?>: </span></td>
@@ -116,7 +117,13 @@
 										} ?>
 										<tr>
 											<td><span class="px16"><? echo $strNewPassword; ?>: </span></td>
-											<td><input style="width: 130px" type="password" value="<? echo $this->formvars['new_password']; ?>" name="new_password"/></td>
+											<td>
+												<input style="width: 130px" type="password" value="<? echo $this->formvars['new_password']; ?>" name="new_password"/>
+												<div style="float: right; margin-left: 5px;">
+													<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_password, Style[0], document.getElementById('Tip1a'))" onmouseout="htm()">
+													<div id="Tip1a" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+												</div>
+											</td>
 										</tr>
 										<tr>
 											<td><span class="px16"><? echo $strRepeatPassword; ?>: </span></td>
