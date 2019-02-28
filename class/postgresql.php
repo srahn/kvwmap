@@ -375,6 +375,18 @@ FROM
     return $ret[1];    
   }
   
+	function pg_field_schema($ret, $i){
+		$table_oid = pg_field_table($ret, $i, true);
+		if($table_oid != ''){
+			$sql = "select nspname as schema from pg_class c, pg_namespace ns
+						where c.relnamespace = ns.oid 
+						and c.oid = ".$table_oid;
+			$ret = $this->execSQL($sql, 4, 0);
+			if($ret[0]==0)$ret = pg_fetch_assoc($ret[1]);
+			return $ret['schema'];
+		}
+	}
+	
   function getFieldsfromSelect($select, $assoc = false){
   	$distinctpos = strpos(strtolower($select), 'distinct');
   	if($distinctpos !== false && $distinctpos < 10){
@@ -385,10 +397,10 @@ FROM
   	}
     $select = $this->eliminate_star($select, $offset);
   	if(substr_count(strtolower($select), ' from ') > 1){
-  		$whereposition = strpos($select, ' WHERE ');			
+  		$whereposition = strrpos($select, ' WHERE ');			
 			if($whereposition === false)$whereposition = strlen($select);
   		$withoutwhere = substr($select, 0, $whereposition);
-  		$fromposition = strpos($withoutwhere, ' FROM ');
+  		$fromposition = strrpos($withoutwhere, ' FROM ');
   	}
   	else{
   		$whereposition = strpos(strtolower($select), ' where ');
@@ -420,6 +432,8 @@ FROM
 				
         # Tabellenname des Attributs
         $tablename = pg_field_table($ret[1], $i);
+				# Schemaname der Tabelle des Attributs
+				$schemaname = $this->pg_field_schema($ret[1], $i);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?
         if($tablename != NULL){
           $all_table_names[] = $tablename;
         }
@@ -435,7 +449,7 @@ FROM
         # Attributeigenschaften
 				if($fields[$i]['real_name'] != ''){
 					$constraintstring = '';
-					$attr_info = $this->get_attribute_information($this->schema, $tablename, $fields[$i]['real_name']);
+					$attr_info = $this->get_attribute_information($schemaname, $tablename, $fields[$i]['real_name']);
 					if($attr_info[0]['relkind'] == 'v'){		# wenn View, dann Attributinformationen aus View-Definition holen
 						if($view_defintion_attributes[$tablename] == NULL){
 							$view_defintion_attributes[$tablename] = $this->getFieldsfromSelect(substr($attr_info[0]['view_definition'], 0, -1), true);
@@ -483,7 +497,7 @@ FROM
 				
         # Geometrietyp
         if($fieldtype == 'geometry'){
-          $fields[$i]['geomtype'] = $this->get_geom_type($this->schema, $fields[$i]['real_name'], $tablename);
+          $fields[$i]['geomtype'] = $this->get_geom_type($schemaname, $fields[$i]['real_name'], $tablename);
           $fields['the_geom'] = $fieldname;
 					$fields['the_geom_id'] = $i;
         }
@@ -673,7 +687,7 @@ FROM
 		if($geomcolumn != '' AND $tablename != ''){
 			$sql = "
 				SELECT coalesce(
-					(select geometrytype(".$geomcolumn.") FROM ".$tablename." limit 1)		-- search_path ist gesetzt, kein Schema erforderlich
+					(select geometrytype(".$geomcolumn.") FROM ".$schema.".".$tablename." limit 1)
 					,  
 					(select type from geometry_columns WHERE 
 					 f_table_schema IN ('".$schema."') and 
@@ -713,9 +727,9 @@ FROM
   
   function eliminate_star($query, $offset){
   	if(substr_count(strtolower($query), ' from ') > 1){
-  		$whereposition = strpos($query, ' WHERE ');
+  		$whereposition = strrpos($query, ' WHERE ');
   		$withoutwhere = substr($query, 0, $whereposition);
-  		$fromposition = strpos($withoutwhere, ' FROM ');
+  		$fromposition = strrpos($withoutwhere, ' FROM ');
   	}
   	else{
   		$whereposition = strpos(strtolower($query), ' where ');
