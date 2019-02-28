@@ -414,54 +414,64 @@ class data_import_export {
 		if(file_exists($filename)){
 			$rows = file($filename);
 			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
+			$i = -1;
 			foreach($rows as $row){
 				$kvp = explode('=', $row);
-				if($kvp[1] != '')$kvps[$kvp[0]] = $kvp[1];
+				if($kvp[0] == 'Typ'){		# ein neues Polygon oder Linie
+					$i++;
+					$geom_start = false;
+					$objects[$i]['Typ'] = $kvp[1];
+				}
+				if($kvp[0] == 'Text'){
+					$objects[$i]['Text'] = $kvp[1];
+				}
 				if($kvp[0] == 'XKoord' OR $kvp[0] == 'XKoord0'){
-					$geom = $kvp[1];
+					$objects[$i]['geom'] = $kvp[1];
 					$geom_start = true;
 					$komma = false;
 				}
-				elseif($geom_start){
+				elseif($geom_start AND (substr($row, 0, 6) == 'YKoord' OR substr($row, 0, 6) == 'XKoord')){
 					if($komma){
-						$geom.= ',';
+						$objects[$i]['geom'].= ',';
 						$komma = false;
 					}
 					else{
-						$geom.= ' ';
+						$objects[$i]['geom'].= ' ';
 						$komma = true;
 					}
-					$geom.= $kvp[1];
-					if($startpoint == '')$startpoint = $geom;
+					$objects[$i]['geom'].= $kvp[1];
+					if($objects[$i]['startpoint'] == '')$objects[$i]['startpoint'] = $objects[$i]['geom'];
 				}
 			}
-			switch($kvps['Typ']){
-				case 2 : case 6:	{
-					$geomtype = 'POINT';
-					$geom = 'POINT('.$geom.')';
-					$custom_table['datatype'] = 0;
-				}break;
+			for($i = 0; $i < count($objects); $i++){
+				switch($objects[0]['Typ']){			# alle Objekte müssen vom gleichen Typ sein
+					case 2 : case 6:	{
+						$geomtype = 'POINT';
+						$objects[$i]['geom'] = 'POINT('.$objects[$i]['geom'].')';
+						$custom_table['datatype'] = 0;
+					}break;
 
-				case 3 :	{
-					$geomtype = 'LINESTRING';
-					$geom = 'LINESTRING('.$geom.')';
-					$custom_table['datatype'] = 1;
-				}break;
-				case 4 :	{
-					$geomtype = 'POLYGON';
-					$geom .= ','.$startpoint;			// Polygonring schliessen
-					$geom = 'POLYGON(('.$geom.'))';
-					$custom_table['datatype'] = 2;
-				}break;
+					case 3 :	{
+						$geomtype = 'LINESTRING';
+						$objects[$i]['geom'] = 'LINESTRING('.$objects[$i]['geom'].')';
+						$custom_table['datatype'] = 1;
+					}break;
+					case 4 :	{
+						$geomtype = 'POLYGON';
+						$objects[$i]['geom'] .= ', '.$objects[$i]['startpoint'];			// Polygonring schliessen
+						$objects[$i]['geom'] = 'POLYGON(('.$objects[$i]['geom'].'))';
+						$custom_table['datatype'] = 2;
+					}break;
+				}
+				$inserts[] = "('".$objects[$i]['Text']."', st_geomfromtext('".$objects[$i]['geom']."', ".$epsg."))";
 			}
 			$sql = "CREATE TABLE ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (";
 			$sql.= "label varchar";
 			$sql.= ")WITH (OIDS=TRUE);";
 			$sql.= "SELECT AddGeometryColumn('".CUSTOM_SHAPE_SCHEMA."', '".$tablename."', 'the_geom', ".$epsg.", '".$geomtype."', 2);";
 
-			$sql.= "INSERT INTO ".CUSTOM_SHAPE_SCHEMA.".".$tablename." VALUES(";
-			$sql.= "'".$kvps['Text']."'";
-			$sql.= ", st_geomfromtext('".$geom."', ".$epsg."));";
+			$sql.= "INSERT INTO ".CUSTOM_SHAPE_SCHEMA.".".$tablename." VALUES ";
+			$sql.= implode(', ', $inserts).";";
 			#echo $sql;
 			$ret = $pgdatabase->execSQL($sql,4, 0);
 			if(!$ret[0]){
