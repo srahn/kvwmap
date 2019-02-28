@@ -929,7 +929,7 @@ class Nachweis {
           # Suchparameter sind gültig
           # Suche nach individueller Nummer
           #echo '<br>Suche nach individueller Nummer.';
-          $sql ="SELECT DISTINCT NULLIF(regexp_replace(rissnummer, '\D', '', 'g'), '')::int, NULLIF(regexp_replace(blattnummer, '\D', '', 'g'), '')::int, n.id, flurid, blattnummer, datum, vermstelle, gueltigkeit, link_datei, format, stammnr, fortfuehrung, rissnummer, bemerkungen, bearbeiter, zeit, erstellungszeit, bemerkungen_intern, geprueft, n.art, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+          $sql ="SELECT DISTINCT NULLIF(regexp_replace(rissnummer, '\D', '', 'g'), '')::int, NULLIF(regexp_replace(blattnummer, '\D', '', 'g'), '')::int, n.id, n.flurid, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei,n. format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM ";
 					if($gemarkung != '' AND $flur_thematisch == 0){
 						$sql.=" alkis.pp_flur as flur, ";
@@ -948,7 +948,7 @@ class Nachweis {
             }
             $sql.=")";
           }
-					if($flur_thematisch != 0){
+					if($gemarkung != '' AND $flur_thematisch != 0){
 						if($flur == '')	$sql.=" AND substr(n.flurid::text, 1, 6) = '".$gemarkung."'";
 						else $sql.=" AND n.flurid='".$gemarkung.str_pad($flur,3,'0',STR_PAD_LEFT)."'";
           }
