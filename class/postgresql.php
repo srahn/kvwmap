@@ -375,8 +375,7 @@ FROM
     return $ret[1];    
   }
   
-	function pg_field_schema($ret, $i){
-		$table_oid = pg_field_table($ret, $i, true);
+	function pg_field_schema($table_oid){
 		if($table_oid != ''){
 			$sql = "select nspname as schema from pg_class c, pg_namespace ns
 						where c.relnamespace = ns.oid 
@@ -388,70 +387,39 @@ FROM
 	}
 	
   function getFieldsfromSelect($select, $assoc = false){
-  	$distinctpos = strpos(strtolower($select), 'distinct');
-  	if($distinctpos !== false && $distinctpos < 10){
-  		$offset = $distinctpos+8;
-  	}
-  	else{
-    	$offset = 7;
-  	}
-    $select = $this->eliminate_star($select, $offset);
-  	if(substr_count(strtolower($select), ' from ') > 1){
-  		$whereposition = strrpos($select, ' WHERE ');			
-			if($whereposition === false)$whereposition = strlen($select);
-  		$withoutwhere = substr($select, 0, $whereposition);
-  		$fromposition = strrpos($withoutwhere, ' FROM ');
-  	}
-  	else{
-  		$whereposition = strpos(strtolower($select), ' where ');
-			if($whereposition === false)$whereposition = strlen($select);
-  		$withoutwhere = substr($select, 0, $whereposition);
-  		$fromposition = strpos(strtolower($withoutwhere), ' from ');
-  	}
-		$sql = $select." LIMIT 0";
-    #$sql = "SET client_min_messages='log';SET log_duration = false;SET debug_print_parse=true;".$select." LIMIT 0";			# noch experimentell: den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
+    $sql = "SET client_min_messages='log';SET log_duration = false;SET debug_print_parse=true;".$select." LIMIT 0";			# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
     $ret = $this->execSQL($sql, 4, 0);
-		#echo pg_last_notice($this->dbConn);
-    if($ret[0]==0){
-      $frompos = $fromposition;
-      $attributesstring = substr($select, $offset, $frompos-$offset);
-      //$fieldstring = explode(',', $attributesstring);
-      $fieldstring = get_select_parts($attributesstring);
+    if($ret[0]==0){			
+			$query_plan = pg_last_notice($this->dbConn);
+			$table_alias_names = $this->get_table_alias_names($query_plan);
+			$field_plan_info = explode("\n      :resno", $query_plan);
       
       for($i = 0; $i < pg_num_fields($ret[1]); $i++){
         # Attributname
-        $fieldname = pg_field_name($ret[1], $i);
-        $fields[$i]['name'] = $fieldname;
+        $fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
 
-        # "richtiger" Name in der Tabelle
-        $name_pair = $this->check_real_attribute_name($fieldstring[$i], $fieldname);
-        if($name_pair != ''){
-          $fields[$i]['real_name'] = $name_pair['real_name'];
-        }
-        else{
-          $fields[$i]['real_name'] = $fieldname;
-        }				
+				# Spaltennummer in der Tabelle
+				$col_num = get_first_word_after($field_plan_info[$i+1], ':resorigcol');
+				
+				# Tabellen-oid des Attributs
+				$table_oid = pg_field_table($ret[1], $i, true);
 				
         # Tabellenname des Attributs
-        $tablename = pg_field_table($ret[1], $i);
-				# Schemaname der Tabelle des Attributs
-				$schemaname = $this->pg_field_schema($ret[1], $i);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?
+        $fields[$i]['table_name'] = $tablename = pg_field_table($ret[1], $i);
         if($tablename != NULL){
           $all_table_names[] = $tablename;
         }
-        $fields[$i]['table_name'] = $tablename;
-        $table['alias'] = $this->get_table_alias($tablename, $fromposition, $withoutwhere);
-        if($table['alias']){
-        	$fields[$i]['table_alias_name'] = $table['alias'];
-        }
-        else{
-        	$fields[$i]['table_alias_name'] = $tablename;
-        }
+				
+				# Tabellenaliasname des Attributs
+				$fields[$i]['table_alias_name'] = $table_alias_names[$table_oid];
+				
+				# Schemaname der Tabelle des Attributs
+				$schemaname = $this->pg_field_schema($table_oid);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?				
 
-        # Attributeigenschaften
-				if($fields[$i]['real_name'] != ''){
+        # wenn das Attribut eine Tabellenspalte ist -> weitere Attributeigenschaften holen
+				if($col_num > 0){
 					$constraintstring = '';
-					$attr_info = $this->get_attribute_information($schemaname, $tablename, $fields[$i]['real_name']);
+					$attr_info = $this->get_attribute_information($schemaname, $tablename, $col_num);
 					if($attr_info[0]['relkind'] == 'v'){		# wenn View, dann Attributinformationen aus View-Definition holen
 						if($view_defintion_attributes[$tablename] == NULL){
 							$view_defintion_attributes[$tablename] = $this->getFieldsfromSelect(substr($attr_info[0]['view_definition'], 0, -1), true);
@@ -459,6 +427,7 @@ FROM
 						if($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info[0]['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
 						if($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info[0]['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
 					}
+					$fields[$i]['real_name'] = $attr_info[0]['name'];
 					$fieldtype = $attr_info[0]['type_name'];
 					$fields[$i]['nullable'] = $attr_info[0]['nullable']; 
 					$fields[$i]['length'] = $attr_info[0]['length'];
@@ -494,7 +463,9 @@ FROM
 					}
 					$fields[$i]['constraints'] = $constraintstring;
 				}
-				if($name_pair != '' AND $name_pair['no_real_attribute']) $fieldtype = 'not_saveable';
+				else{		# Attribut ist keine Tabellenspalte -> nicht speicherbar
+					$fieldtype = 'not_saveable';
+				}
         $fields[$i]['type'] = $fieldtype;
 				
         # Geometrietyp
@@ -512,8 +483,8 @@ FROM
     else return NULL;
   }
 	
-	function get_attribute_information($schema, $table, $column = NULL) {
-		if($column != NULL)$and_column = "a.attname = '".$column."' AND ";
+	function get_attribute_information($schema, $table, $col_num = NULL) {
+		if($col_num != NULL)$and_column = "a.attnum = ".$col_num." AND ";
 		$attributes = array();
 		$sql = "
 			SELECT
@@ -763,172 +734,17 @@ FROM
     }
     return $query;
   }
-
-  function check_real_attribute_name($fieldstring, $fieldname){
-	    # testen ob Attributname durch 'as' umbenannt wurde
-	    if(strpos(strtolower($fieldstring), ' as '.$fieldname)){
-	      $fieldstring = trim($fieldstring);
-	      $explosion = explode(' ', $fieldstring);
-	      $klammerstartpos = strrpos($fieldstring, '(');
-	      if($klammerstartpos !== false){										# eine Funktion wurde auf das Attribut angewendet
-	        $klammerendpos = strpos($fieldstring, ')');
-	        if($klammerendpos){
-						$klammer_inhalt = substr($explosion[0], $klammerstartpos+1, $klammerendpos-$klammerstartpos-1);
-						if(strpos($klammer_inhalt, "'") === false)$name_pair['real_name'] = $klammer_inhalt;
-	        	$name_pair['name'] = $explosion[count($explosion)-1];
-	        	$name_pair['no_real_attribute'] = true;
-	        }
-	      }
-	      elseif(strpos(strtolower($fieldstring), '||') OR strpos(strtolower($fieldstring), '+')){		# irgendwas zusammengesetztes mit || oder +
-	      	$explosion2 = explode('||', $fieldstring);
-	      	for($i = 0; $i < count($explosion2); $i++){
-	      		if(strpos($explosion2[$i], "'") === false){
-	      			$realname = explode('.', $explosion2[$i]);
-	      			$name_pair['real_name'] = $realname[count($realname)-1];
-	          	$name_pair['name'] = $explosion[count($explosion)-1];
-	          	$name_pair['no_real_attribute'] = true;
-	          	break;
-	      		}
-	      	}
-	      }
-	      else{ # 'irgendein String' as ...
-	        $fieldname = explode('.', $explosion[0]);
-					if(strtolower($explosion[0]) == 'case' OR strpos($fieldname[count($fieldname)-1], "'") !== false){
-	          $name_pair['no_real_attribute'] = true;
-	        }
-	        else{		# tabellenname.attributname
-	          $name_pair['real_name'] = $fieldname[count($fieldname)-1];
-	          $name_pair['name'] = $explosion[count($explosion)-1];
-	        }
-	      }
-	      return $name_pair;
-	    }
-	    else{
-	      return NULL;
-	    }
-  }
-
-  function get_table_alias($tablename, $fromposition, $withoutwhere){
-    $tablealias = $tablename;
-    $from = substr($withoutwhere, $fromposition);
-    $tablestring = substr($from, 5);
-    $tables = explode(',', trim($tablestring));
-    $i = 0;
-    $found = false;
-    while($found == false AND $i < count($tables)){
-      $tableexplosion = explode(' ', trim($tables[$i]));
-      if(count($tableexplosion) > 1){
-	      for($j = 0; $j < count($tableexplosion); $j++){
-					if($found)return $tablealias;
-	      	if($tablename == $tableexplosion[$j]){
-	      		if(strtolower($tableexplosion[$j+1]) == 'as'){			# Umbenennung mit AS
-	      			$found = true;
-	        		$tablealias = $tableexplosion[$j+2];
-	      		}
-	      		elseif(strtolower($tableexplosion[$j+1]) != 'on' AND strtolower($tableexplosion[$j+1]) != 'left'){	# Umbenennung ohne AS, wie z.B. beim LEFT JOIN
-	      			$found = true;
-	        		$tablealias = $tableexplosion[$j+1];
-	      		}
-	      	}
-	      }
-      }
-      $i++;
-    }
-    return $tablealias;
-  }
-
-  function getfrom($query){
-  	if(substr_count(strtolower($query), ' from ') > 1){
-  		# wenn Sub-Selects vorhanden sind, mï¿½ssen from und where in der Hauptabfrage groï¿½ geschrieben sein
-  		$whereposition = strpos($query, ' WHERE ');
-	    if($whereposition != false){
-	      $withoutwhere = substr($query, 0, $whereposition);
-	      $fromposition = strpos($withoutwhere, ' FROM ');
-	      $from = substr($withoutwhere, $fromposition+6);
-	    }
-	    else{
-	      $fromposition = strpos($query, ' FROM ');
-	      $from = substr($query, $fromposition+6);
-	    }
-  	}
-  	else{
-  		$whereposition = strpos(strtolower($query), ' where ');
-	    if($whereposition != false){
-	      $withoutwhere = substr($query, 0, $whereposition);
-	      $fromposition = strpos(strtolower($withoutwhere), ' from ');
-	      $from = substr($withoutwhere, $fromposition+6);
-	    }
-	    else{
-	      $fromposition = strpos(strtolower($query), ' from ');
-	      $from = substr($query, $fromposition+6);
-	    }
-  	}
-  	return $from;
-  }
-
-	# kann ganz weg, wenn Bugfix 2.8.55 sich bewährt
-  // function pg_field_table2($columname, $fieldstring, $query){    # gibts in php 4 noch nicht, deswegen hier so handisch
-   	// $from = $this->getfrom($query);
-    // $tables = explode(',', trim($from));
-    // $sql = "SELECT table_name FROM information_schema.columns WHERE column_name = '".$columname."'";
-    // $sql.= " AND table_name IN (";
-    // for($i = 0; $i < count($tables); $i++){
-    	// $tableparts = explode(' ', $tables[$i]);
-    	// for($j = 0; $j < count($tableparts); $j++){
-				// $sql.= "'".pg_escape_string($tableparts[$j])."', ";
-    	// }
-    // }
-    // $schema = str_replace(',', "','", $this->schema);
-    // $sql.= "'bla') AND table_schema IN ('".$schema."')";
-    // #echo $sql.'<br><br>';
-    // $ret = $this->execSQL($sql,4, 0);
-    // if(pg_num_rows($ret[1]) == 1){
-      // $rs = pg_fetch_row($ret[1]);
-      // $tablename = $rs[0];
-    // }
-    // else{     # Tabellenname lï¿½ï¿½t sich nicht eindeutig identifizieren (entweder durch Umbenennung oder weil es mehrere Tabellen mit diesem Attribut gibt)
-      // $klammerstartpos = strrpos($fieldstring, '(');
-      // if($klammerstartpos !== false){
-        // return NULL;
-      // }
-      // else{
-      	// if(strpos($fieldstring, '.') !== false AND strpos($fieldstring, "'") === false){
-        	// $explosion = explode('.', trim($fieldstring));
-        	// $tablealias = $explosion[0];
-					// $tables = explode(',', $from);
-					// $i = 0;
-					// $found = false;
-					// while($found == false AND $i < count($tables)){
-						// $tables2 = explode('join', strtolower($tables[$i]));
-						// $j = 0;
-						// while($found == false AND $j < count($tables2)){
-							// $index = 1;
-							// $tableexplosion = explode(' ', trim($tables2[$j]));
-							// if(count($tableexplosion) > 1){
-								// if($tableexplosion[1] == 'as')$index = 2;
-								// if($tableexplosion[$index] == $tablealias){
-									// $tablename = $tableexplosion[0];
-									// $found = true;
-								// }
-							// }
-							// else{
-								// if($tableexplosion[0] == $tablealias){
-									// $tablename = $tableexplosion[0];
-									// $found = true;
-								// }
-							// }
-							// $j++;
-						// }
-						// $i++;
-					// }
-      	// }
-      // }
-    // }
-    // $table['alias'] = $tablealias;
-    // $table['name'] = $tablename;
-    // return $table;
-  // }
-
+	
+	function get_table_alias_names($query_plan){
+		$table_info = explode(":eref \n         {ALIAS \n         ", $query_plan);
+		for($i = 1; $i < count($table_info); $i++){
+			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
+			$table_oid = get_first_word_after($table_info[$i], ':relid');
+			$table_alias_names[$table_oid] = $table_alias;
+		}
+		return $table_alias_names;
+	}
+	
   function pg_table_constraints($table){
   	if($table != ''){
 	    $sql = "SELECT consrc FROM pg_constraint, pg_class WHERE contype = 'check'";
