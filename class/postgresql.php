@@ -408,8 +408,10 @@ FROM
   		$withoutwhere = substr($select, 0, $whereposition);
   		$fromposition = strpos(strtolower($withoutwhere), ' from ');
   	}
-    $sql = $select." LIMIT 0";
+		$sql = $select." LIMIT 0";
+    #$sql = "SET client_min_messages='log';SET log_duration = false;SET debug_print_parse=true;".$select." LIMIT 0";			# noch experimentell: den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
     $ret = $this->execSQL($sql, 4, 0);
+		#echo pg_last_notice($this->dbConn);
     if($ret[0]==0){
       $frompos = $fromposition;
       $attributesstring = substr($select, $offset, $frompos-$offset);
