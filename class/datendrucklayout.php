@@ -686,17 +686,24 @@ class ddl {
 			# Freitexte hinzufügen, die auf jeder Seite erscheinen sollen (Seitennummerierung etc.)
 			$this->add_everypage_elements();
 			$dateipfad=IMAGEPATH;
+			$currenttime = date('Y-m-d_H_i_s',time());
 			if($this->layout['filename'] != ''){
 				$dateiname = $this->layout['filename'];
+				# Attribute
 				for($j = 0; $j < count($this->attributes['name']); $j++){
 					$dateiname = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output(0, $j, true), $dateiname);
 				}
 				for($j = 0; $j < count($this->attributes['name']); $j++){
 					$dateiname = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output(0, $j, true), $dateiname);
 				}
+				# Nutzer
+				$dateiname = str_replace('$user', $this->user->Vorname.'_'.$this->user->Name, $dateiname);
+				# Stelle
+				$dateiname = str_replace('$stelle', $this->Stelle->Bezeichnung, $dateiname);
+				# Datum
+				$dateiname = str_replace('$date', $currenttime, $dateiname);
 			}
 			if($dateiname == ''){
-				$currenttime = date('Y-m-d_H_i_s',time());
 				$dateiname = umlaute_umwandeln($this->user->Name.'-'.$currenttime);
 			}
 			$dateiname = $dateiname.'.pdf';
