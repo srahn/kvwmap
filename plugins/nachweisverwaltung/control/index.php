@@ -271,6 +271,10 @@ function go_switch_nachweisverwaltung($go){
 			$GUI->ordneFestpunktSkizzen();
 	  } break;
 		
+		case 'get_geom_preview' : {
+			$GUI->getGeomPreview($GUI->formvars['id']);
+	  } break;
+		
 		default : {
 			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 		}
