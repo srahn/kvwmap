@@ -14346,13 +14346,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$whereposition = strpos(strtolower($select), ' where ');
 		$withoutwhere = substr($select, 0, $whereposition);
 		$fromposition = strpos(strtolower($withoutwhere), ' from ');
-		$alias = $this->pgdatabase->get_table_alias('alkis.ax_flurstueck', $fromposition, $withoutwhere);
+		#$alias = $this->pgdatabase->get_table_alias('alkis.ax_flurstueck', $fromposition, $withoutwhere);
 		$orderbyposition = strpos(strtolower($select), ' order by ');
 		if($orderbyposition > 0)$select = substr($select, 0, $orderbyposition);
 		if(strpos(strtolower($select), ' where ') === false)$select .= " WHERE ";
 		else $select .= " AND ";
 		$datastring = $datageom." from (".$select;
-		$datastring.=" ".$alias.".flurstueckskennzeichen IN ('".$FlurstListe[0]."' ";
+		#$datastring.=" ".$alias.".flurstueckskennzeichen IN ('".$FlurstListe[0]."' ";
+		$datastring.=" flurstueckskennzeichen IN ('".$FlurstListe[0]."' ";
     $legendentext="Flurstück";
     if(count($FlurstListe) > 1)$legendentext .= "e";
     $legendentext .= " (".date('d.m. H:i',time())."):<br>".$FlurstListe[0];
@@ -14444,7 +14445,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $alk->database=$this->pgdatabase;
     $ret=$alk->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $this->user->rolle->epsg_code);
     if ($ret[0]) {
-      $this->Fehlermeldung='Es konnten keine Gebäude gefunden werden.<br>'.$ret[1];
+      #$this->Fehlermeldung='Es konnten keine Gebäude gefunden werden.<br>'.$ret[1];
       $rect=$this->user->rolle->oGeorefExt;
     }
     else {
