@@ -281,7 +281,7 @@ class GUI {
 						if($layer[0]['connectiontype']==6 AND ($this->formvars['layer_id'] < 0 OR $layer[0]['original_labelitem'] != '')){		# für Rollenlayer oder normale Layer mit labelitem
 							echo '<li><span>'.$this->label.':</span>
 											<select name="layer_options_labelitem">
-												<option value=""> - </option>';
+												<option value=""> - '.$this->noLabel.' - </option>';
 												for($i = 0; $i < count($attributes)-2; $i++){
 													if($privileges[$attributes[$i]['name']] AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.$attributes[$i]['name'].'</option>';
 												}
@@ -14340,13 +14340,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$whereposition = strpos(strtolower($select), ' where ');
 		$withoutwhere = substr($select, 0, $whereposition);
 		$fromposition = strpos(strtolower($withoutwhere), ' from ');
-		$alias = $this->pgdatabase->get_table_alias('alkis.ax_flurstueck', $fromposition, $withoutwhere);
+		#$alias = $this->pgdatabase->get_table_alias('alkis.ax_flurstueck', $fromposition, $withoutwhere);
 		$orderbyposition = strpos(strtolower($select), ' order by ');
 		if($orderbyposition > 0)$select = substr($select, 0, $orderbyposition);
 		if(strpos(strtolower($select), ' where ') === false)$select .= " WHERE ";
 		else $select .= " AND ";
 		$datastring = $datageom." from (".$select;
-		$datastring.=" ".$alias.".flurstueckskennzeichen IN ('".$FlurstListe[0]."' ";
+		#$datastring.=" ".$alias.".flurstueckskennzeichen IN ('".$FlurstListe[0]."' ";
+		$datastring.=" flurstueckskennzeichen IN ('".$FlurstListe[0]."' ";
     $legendentext="Flurstück";
     if(count($FlurstListe) > 1)$legendentext .= "e";
     $legendentext .= " (".date('d.m. H:i',time())."):<br>".$FlurstListe[0];
@@ -14438,7 +14439,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $alk->database=$this->pgdatabase;
     $ret=$alk->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $this->user->rolle->epsg_code);
     if ($ret[0]) {
-      $this->Fehlermeldung='Es konnten keine Gebäude gefunden werden.<br>'.$ret[1];
+      #$this->Fehlermeldung='Es konnten keine Gebäude gefunden werden.<br>'.$ret[1];
       $rect=$this->user->rolle->oGeorefExt;
     }
     else {

@@ -19,7 +19,86 @@
 			}
 		}
 		return array('executed' => $executed, 'success' => $success);
-	};	
+	};
+	
+	$GUI->getGeomPreview = function($id) use ($GUI){
+		$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
+		$layerset = $GUI->user->rolle->getLayer(LAYER_ID_NACHWEISE);
+		$map = new mapObj(NULL);
+		$map->set('debug', 5);
+		# Auf den Datensatz zoomen
+		$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
+		$sql.=" FROM (SELECT box2D(st_transform(the_geom, ".$GUI->user->rolle->epsg_code.")) as bbox";
+		$sql.=" FROM nachweisverwaltung.n_nachweise WHERE id = ".$id.") AS foo";
+		$ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
+		$rs = pg_fetch_array($ret[1]);
+		$rect = ms_newRectObj();
+		$rect->minx=$rs['minx'];
+		$rect->maxx=$rs['maxx'];
+		$rect->miny=$rs['miny'];
+		$rect->maxy=$rs['maxy'];
+		$randx=($rect->maxx-$rect->minx)*50/100 + 0.01;
+		$randy=($rect->maxy-$rect->miny)*50/100 + 0.01;
+		if($rect->minx != ''){
+			$map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+			# Haupt-Layer erzeugen
+			$layer=ms_newLayerObj($map);
+			$layer->set('data', 'the_geom from (SELECT ogc_fid, wkb_geometry as the_geom FROM alkis.ax_flurstueck WHERE endet IS NULL) as foo using unique ogc_fid using srid='.EPSGCODE_ALKIS);
+			$layer->set('status',MS_ON);
+			$layer->set('template', ' ');
+			$layer->set('name','querymap'.$k);
+			$layer->set('type', 2);
+			$layer->set('symbolscaledenom', 10000);
+			$layer->setConnectionType(6);
+			$layer->set('connection',$layerset[0]['connection']);
+			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
+			$layer->setMetaData('wms_queryable','0');
+			$klasse=ms_newClassObj($layer);
+			$klasse->set('status', MS_ON);
+			$style=ms_newStyleObj($klasse);
+			$style->color->setRGB(12,255,12);
+			$style->set('width', 1);
+			$style->set('maxwidth', 2);
+			$style->outlinecolor->setRGB(110,110,110);
+			# Datensatz-Layer erzeugen
+			$layer=ms_newLayerObj($map);
+			$datastring = "the_geom from (select id, the_geom from nachweisverwaltung.n_nachweise";
+			$datastring.=" WHERE id = '".$id."'";
+			$datastring.=") as foo using unique id using srid=".$layerset[0]['epsg_code'];
+			$layer->set('data',$datastring);
+			$layer->set('status',MS_ON);
+			$layer->set('template', ' ');
+			$layer->set('name','querymap'.$k);
+			$layer->set('type', 2);
+			$layer->setConnectionType(6);
+			$layer->set('connection',$layerset[0]['connection']);
+			$layer->setProjection('+init=epsg:'.$layerset[0]['epsg_code']);
+			$layer->setMetaData('wms_queryable','0');
+			$klasse=ms_newClassObj($layer);
+			$klasse->set('status', MS_ON);
+			$style=ms_newStyleObj($klasse);
+			$style->color->setRGB(255,5,12);
+			$style->set('width', 2);
+			$style->outlinecolor->setRGB(0,0,0);
+			# Karte rendern
+			$map->setProjection('+init=epsg:'.$GUI->user->rolle->epsg_code,MS_TRUE);
+			$map->web->set('imagepath', IMAGEPATH);
+			$map->web->set('imageurl', IMAGEURL);
+			$map->set('width', 50);
+			$map->set('height', 50);
+			$image_map = $map->draw();
+			$filename = $GUI->map_saveWebImage($image_map,'jpeg');
+			$newname = $GUI->user->id.basename($filename);
+			rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+			$type = pathinfo(IMAGEPATH.$newname, PATHINFO_EXTENSION);
+			$data = file_get_contents(IMAGEPATH.$newname);
+			$base64 = 'data:image/'.$type.';base64,'.base64_encode($data);
+			echo $base64;
+		}
+		else{
+			echo GRAPHICSPATH.'nogeom.png';
+		}
+	};
 
 	$GUI->Datei_Download = function($filename) use ($GUI){
     $GUI->formvars['filename'] = $filename;

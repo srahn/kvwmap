@@ -145,6 +145,16 @@ function getvorschau(url){
 	document.getElementById('vorschau').innerHTML = img;
 }
 
+function getGeomPreview(id){
+	img = '<img id="preview_img" style="border: 1px solid black" src="">';
+	document.getElementById('vorschau').innerHTML = img;
+	ahah("index.php", "go=get_geom_preview&id="+id, new Array(document.getElementById('preview_img')), new Array("src"));
+}
+
+function clearVorschau(){
+	document.getElementById('vorschau').innerHTML = '';
+}
+
 function select(row){
 	var current_selected = document.querySelector('.selected');
 	if(current_selected != null)current_selected.className = '';
@@ -308,7 +318,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   <tr>
     <td bgcolor="<? echo BG_FORM ?>"><?
 	 if ($this->nachweis->erg_dokumente > 0) { ie_check();?>
-		<table id="nachweisanzeige_ergebnis" class="<? if (!ie_check()){ ?>scrolltable <? } ?>nw_treffer_table" style="width: 1247px" border="0" cellspacing="0" cellpadding="0">
+		<table id="nachweisanzeige_ergebnis" class="<? if (!ie_check()){ ?>scrolltable <? } ?>nw_treffer_table" style="width: 1277px" border="0" cellspacing="0" cellpadding="0">
 			<thead>
         <tr style="outline: 1px solid grey;" bgcolor="#FFFFFF"> 
           <th height="40" style="width: 80"><div align="center"><span class="fett">Auswahl</span></div></th>
@@ -358,7 +368,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			<? if(strpos($this->formvars['order'], 'format') === false){ ?>
 				<th align="center" style="width: 80"><a href="javascript:add_to_order('format');" title="nach Blattformat sortieren"><span class="fett">Format</span></a></th>
 			<? }else{echo '<th align="center" style="width: 80"><span class="fett">Format</span></th>';} ?>	
-          <th colspan="3" style="width: 110"><div align="center"><?    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></th>
+          <th colspan="3" style="width: 140"><div align="center"><?    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></th>
         </tr>
 			</thead>
 			<tbody>
@@ -366,7 +376,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		$bgcolor = '#FFFFFF';
      for ($i=0;$i<$this->nachweis->erg_dokumente;$i++) {
         ?>
-        <tr style="outline: 1px dotted grey;" <? if($this->formvars['selected_nachweis'] == $this->nachweis->Dokumente[$i]['id'])echo 'class="selected"'; ?> onclick="select(this);" onmouseout="document.getElementById('vorschau').innerHTML='';" bgcolor="
+        <tr style="outline: 1px dotted grey;" <? if($this->formvars['selected_nachweis'] == $this->nachweis->Dokumente[$i]['id'])echo 'class="selected"'; ?> onclick="select(this);" onmouseout="clearVorschau();" bgcolor="
 			<? $orderelem = explode(',', $this->formvars['order']);
 			if ($this->nachweis->Dokumente[$i][$orderelem[0]] != $this->nachweis->Dokumente[$i-1][$orderelem[0]]){
 				if($bgcolor == '#EBEBEB'){
@@ -424,7 +434,10 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 					<td style="width: 80"><div align="center"><? echo $this->formvars['geprueft']=$this->nachweis->Dokumente[$i]['geprueft']; ?></div></td>
           <td style="width: 80"><div align="center"><? echo $this->formvars['format']=$this->nachweis->Dokumente[$i]['format']; ?> 
             </div></td>
-          <td style="width: 40">
+          <td style="width: 30">
+						<a href="javascript:void(0);" onmouseenter="getGeomPreview(<? echo $this->nachweis->Dokumente[$i]['id']; ?>);" onmouseleave=""><img src="graphics/karte.png" border="0"></a>
+					</td>
+					<td style="width: 40">
 					<? 
 						$dateiname = NACHWEISDOCPATH.$this->nachweis->Dokumente[$i]['flurid'].'/'.$this->nachweis->buildNachweisNr($this->nachweis->Dokumente[$i][NACHWEIS_PRIMARY_ATTRIBUTE], $this->nachweis->Dokumente[$i][NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$this->nachweis->Dokumente[$i]['link_datei'];
 						$dateinamensteil=explode('.',$dateiname);

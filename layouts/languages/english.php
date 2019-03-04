@@ -45,5 +45,6 @@
 	$this->transparency = "Transparency";
 	$this->label = "Label";
 	$this->newDataset="new record";
+	$this->noLabel="no label";
 ?>
 	
