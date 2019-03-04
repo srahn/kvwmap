@@ -1223,6 +1223,8 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .message-box-type {
 	float: left;
 	margin-left: 10px;
+	width: 1px;
+	margin-right: 2px;
 }
 
 .message-box-msg {
