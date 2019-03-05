@@ -325,6 +325,16 @@ FROM
 		}
 		return $filter;
 	}
+	
+	function build_temporal_filter_fachdatenverbindung($tablenames){
+		$timestamp = rolle::$hist_timestamp;
+		if($timestamp == ''){
+			foreach($tablenames as $tablename){
+				$filter .= ' AND ('.$tablename.'.zeigtaufexternes_art IS NULL OR NOT \'http://www.lverma-mv.de/_fdv#7040\' = any('.$tablename.'.zeigtaufexternes_art))';
+			}
+		}
+		return $filter;
+	}		
 
   function transformPoly($polygon,$curSRID,$newSRID) {
     $sql ="SELECT st_astext(st_transform(st_geomfromtext('".$polygon."', ".$curSRID."), ".$newSRID."))";
@@ -986,6 +996,7 @@ FROM
 			$sql.=" AND g.schluesselgesamt IN ('".implode("','", $Gemeinden)."')";
     }
 		$sql.= $this->build_temporal_filter(array('g'));
+		$sql.= $this->build_temporal_filter_fachdatenverbindung(array('g'));
     $sql.=" ORDER BY bezeichnung";
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
