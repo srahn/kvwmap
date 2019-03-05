@@ -5458,17 +5458,13 @@ class GUI {
 
     # Wenn Navigiert werden soll, wird eine eventuell schon gesetzte Position
     # in Weltkoordinaten umgerechnet und danach wieder zurück.
+		$currenttime=date('Y-m-d H:i:s',time());
     if ($this->formvars['CMD']!='') {
     	$this->navMap($this->formvars['CMD']);
-      $this->saveMap('');
-      $currenttime=date('Y-m-d H:i:s',time());
-      $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-      $this->drawMap();
     }
-    else {
-      $this->saveMap('');
-      $this->drawMap();
-    }
+		$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+		$this->saveMap('');
+		$this->drawMap();
     $this->output();
   }
 	
@@ -10089,6 +10085,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 	function daten_import(){
 		$this->main='data_import.php';
+		exec('rm '.UPLOADPATH.'/'.$this->user->id.'/*');
 		$this->output();
 	}
 
@@ -11100,6 +11097,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
   function StyleLabelEditor(){
+		$this->formvars['width_reduction'] = $this->user->rolle->nImageWidth - 500;
+		$this->formvars['height_reduction'] = $this->user->rolle->nImageHeight - 500;
     $this->user->rolle->nImageWidth = 500;
     $this->user->rolle->nImageHeight = 500;
     if($this->formvars['neuladen']){
@@ -11591,7 +11590,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $prevextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
     $ret = $this->user->rolle->getConsume($consumetime);
     $i = 0;
-    while($i < 100 AND (string)$currentextent->minx == (string)$prevextent->minx AND (string)$currentextent->miny == (string)$prevextent->miny AND (string)$currentextent->maxx == (string)$prevextent->maxx AND (string)$currentextent->maxy == (string)$prevextent->maxy){
+    while($i < 100 AND 
+					round($currentextent->minx, 2) == round($prevextent->minx, 2) AND 
+					round($currentextent->miny, 2) == round($prevextent->miny, 2) AND 
+					round($currentextent->maxx, 2) == round($prevextent->maxx, 2) AND 
+					round($currentextent->maxy, 2) == round($prevextent->maxy, 2)){
       # Setzen des next Wertes des vorherigen Kartenausschnittes
       $prevtime=$ret[1]['prev'];
       $this->user->rolle->newtime = $prevtime;
@@ -12002,15 +12005,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     return $pathxyPixel;
   }
 
-	function reduce_mapwidth($reduction){
-		# Diese Funktion reduziert die aktuelle Kartenbildbreite um $reduction Pixel, damit das Kartenbild in Fachschalen nicht zu groß erscheint.
-		# Diese reduzierte Breite wird aber nicht in der Datenbank gespeichert, sondern gilt nur für den aktuellen Anwendungsfall.
+	function reduce_mapwidth($width_reduction, $height_reduction = NULL){
+		# Diese Funktion reduziert die aktuelle Kartenbildbreite um $width_reduction Pixel (und optional die Kartenbildhöhe um $height_reduction Pixel), damit das Kartenbild in Fachschalen nicht zu groß erscheint.
+		# Diese reduzierte Breite wird aber nicht in der Datenbank gespeichert, sondern gilt nur solange man in der Fachschale bleibt.
 		# Außerdem wird bei Bedarf der aktuelle Maßstab berechnet und zurückgeliefert (er wird berechnet, weil ein loadmap() ja noch nicht aufgerufen wurde).
 		# Mit diesem Maßstab kann dann einmal beim ersten Aufruf der Fachschale von der Hauptkarte aus nach dem loadmap() der Extent wieder so angepasst werden, dass der ursprüngliche Maßstab erhalten bleibt.
 		# Dieser verkleinerte Extent wird wiederum in der Datenbank gespeichert. In der Datenbank steht dann also weiterhin die ursprüngliche Kartenbildgröße und der (dazu eigentlich nicht passende) in der Breite verkleinerte Extent.
 		# Damit der Extent aber nur dann angepasst wird, wenn es notwendig ist (nämlich wenn man von der Hauptkarte kommt), wird der Maßstab nur berechnet, wenn Kartenbildgröße und Extent zusammenpassen.
 		# Am "Nichtzusammenpassen" von Kartenbildgröße und Extent wird also erkannt, dass der Extent schon einmal verkleinert wurde.
-		$this->formvars['width_reduction'] = $reduction;
+		$this->formvars['width_reduction'] = $width_reduction;
+		$this->formvars['height_reduction'] = $height_reduction;
 		$width = $this->user->rolle->nImageWidth;
 		$height = $this->user->rolle->nImageHeight;
 		$extentwidth = $this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx;
@@ -12024,10 +12028,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$gd = $this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx;
 			$scale = $gd/$md;
 		}
-		$width = $width - $reduction;
+		$width = $width - $width_reduction;
+		$height = $height - $height_reduction;
 		if($this->user->rolle->hideMenue == 1){$width = $width - 195;}
 		if($this->user->rolle->hideLegend == 1){$width = $width - 254;}
 		$this->user->rolle->nImageWidth = $width;
+		$this->user->rolle->nImageHeight = $height;
 		return $scale;
 	}
 
@@ -16442,7 +16448,7 @@ class db_mapObj{
 				$dump_text .= "\n\n-- Class " . $classes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $classes['insert'][$j];
 				$dump_text .= "\nSET @last_class_id=LAST_INSERT_ID();";
 
-				$styles = $database->create_insert_dump('styles', 'Style_ID', 'SELECT styles.Style_ID, `symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth` FROM styles, u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND Class_ID='.$classes['extra'][$j].' ORDER BY drawingorder');
+				$styles = $database->create_insert_dump('styles', 'Style_ID', 'SELECT styles.Style_ID, `symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`, `colorrange`, `datarange`, `rangeitem`, `opacity`, `minsize`,`maxsize`, `minscale`, `maxscale`, `angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`, `offsetx`, `offsety`, `polaroffset`, `pattern`, `geomtransform`, `gap`, `initialgap`, `linecap`, `linejoin`, `linejoinmaxsize` FROM styles, u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND Class_ID='.$classes['extra'][$j].' ORDER BY drawingorder');				
 				for ($k = 0; $k < count($styles['insert']); $k++) {
 					$dump_text .= "\n\n-- Style " . $styles['extra'][$k] . " der Class " . $classes['extra'][$j];
 					$dump_text .= "\n" . $styles['insert'][$k] . "\nSET @last_style_id=LAST_INSERT_ID();";
