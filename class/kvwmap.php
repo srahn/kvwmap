@@ -445,7 +445,7 @@ class GUI {
 
 	function setLayerParams() {
 		$layer_params = array();
-		foreach($this->formvars AS $key => $value) {
+		foreach ($this->formvars AS $key => $value) {
 			$param_key = str_replace('layer_parameter_', '', $key);
 			if ($param_key != $key) {
 				$layer_params[] = '"' . $param_key . '":"' . $value . '"';
@@ -1115,7 +1115,17 @@ class GUI {
 
 					#$layer->set('connection',"http://www.kartenserver.niedersachsen.de/wmsconnector/com.esri.wms.Esrimap/Biotope?LAYERS=7&REQUEST=GetMap&TRANSPARENT=true&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&STYLES=&EXCEPTIONS=application/vnd.ogc.se_xml&SRS=EPSG:31467");
 					#echo '<br>Name: '.$layerset[$i][name];
-					$layer->set('connection', replace_params($layerset[$i][connection], rolle::$layer_params));
+					$layer->set(
+						'connection',
+						replace_params(
+							$layerset[$i][connection],
+							rolle::$layer_params,
+							$this->user->id,
+							$this->stelle_id,
+							rolle::$hist_timestamp,
+							$this->user->rolle->language
+						)
+					);
 					#echo '<br>Connection: ' . replace_params($layerset[$i][connection], rolle::$layer_params);
 					if (MAPSERVERVERSION < 540) {
 						$layer->set('connectiontype', 7);
@@ -1527,13 +1537,18 @@ class GUI {
               }
             }
             else {
-              # Vektorlayer
-              if($layerset['list'][$i]['Data'] != ''){
-								$layerset['list'][$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset['list'][$i]['Data']);
-								$layerset['list'][$i]['Data'] = str_replace('$language', $this->user->rolle->language, $layerset['list'][$i]['Data']);
-								$layerset['list'][$i]['Data'] = replace_params($layerset['list'][$i]['Data'], rolle::$layer_params);
-                $layer->set('data', $layerset['list'][$i]['Data']);
-              }
+							# Vektorlayer
+							if($layerset['list'][$i]['Data'] != '') {
+								$layerset['list'][$i]['Data'] = replace_params(
+									$layerset['list'][$i]['Data'],
+									rolle::$layer_params,
+									$this->user->id,
+									$this->stelle_id,
+									rolle::$hist_timestamp,
+									$this->user->rolle->language
+								);
+								$layer->set('data', $layerset['list'][$i]['Data']);
+							}
 
               # Setzen der Templatedateien für die Sachdatenanzeige inclt. Footer und Header.
               # Template (Body der Anzeige)
@@ -1549,9 +1564,19 @@ class GUI {
                 $layer->set('footer',$layerset['list'][$i]['footer']);
               }
               # Setzen der Spalte nach der der Layer klassifiziert werden soll
-              if ($layerset['list'][$i]['classitem']!='') {
-                $layer->set('classitem', replace_params($layerset['list'][$i]['classitem'], rolle::$layer_params));
-              }
+							if ($layerset['list'][$i]['classitem']!='') {
+								$layer->set(
+									'classitem',
+									replace_params(
+										$layerset['list'][$i]['classitem'],
+										rolle::$layer_params,
+										$this->user->id,
+										$this->stelle_id,
+										rolle::$hist_timestamp,
+										$this->user->rolle->language
+									)
+								);
+							}
               else {
                 #$layer->set('classitem','id');
               }
@@ -3959,7 +3984,14 @@ class GUI {
 
 				$attributes = $mapDB->load_attributes(
 					$layerdb,
-					replace_params($layer['pfad'], rolle::$layer_params)
+					replace_params(
+						$layer['pfad'],
+						rolle::$layer_params,
+						$this->user->id,
+						$this->stelle_id,
+						rolle::$hist_timestamp,
+						$this->user->rolle->language
+					)
 				);
 
 				$mapDB->save_postgis_attributes($layer['Layer_ID'], $attributes, '', '');
@@ -5645,7 +5677,17 @@ class GUI {
     else {
       $layer->setConnectionType($layerset['connectiontype']);
     }
-		$layer->set('connection', replace_params($layerset['connection'], rolle::$layer_params));
+		$layer->set(
+			'connection',
+			replace_params(
+				$layerset['connection'],
+				rolle::$layer_params,
+				$this->user->id,
+				$this->stelle_id,
+				rolle::$hist_timestamp,
+				$this->user->rolle->language
+			)
+		);
     $klasse=ms_newClassObj($layer);
     $klasse->set('status', MS_ON);
     $dbStyle = $mapDB->get_Style($style_id);
@@ -7199,9 +7241,22 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], true);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $this->formvars['Datentyp'] = $this->layerdata['Datentyp'];
-    $this->layerdata['Data'] = replace_params($this->layerdata['Data'], rolle::$layer_params);
-		$this->layerdata['classitem'] = replace_params($this->layerdata['classitem'], rolle::$layer_params);
-
+    $this->layerdata['Data'] = replace_params(
+			$this->layerdata['Data'],
+			rolle::$layer_params,
+			$this->user->id,
+			$this->stelle_id,
+			rolle::$hist_timestamp,
+			$this->user->rolle->language
+		);
+		$this->layerdata['classitem'] = replace_params(
+			$this->layerdata['classitem'],
+			rolle::$layer_params,
+			$this->user->id,
+			$this->stelle_id,
+			rolle::$hist_timestamp,
+			$this->user->rolle->language
+		);
     $begin = strpos($this->layerdata['Data'], '(') + 1;
     $end = strrpos($this->layerdata['Data'], ')');
     $data_sql = substr($this->layerdata['Data'], $begin, $end - $begin);
@@ -7471,7 +7526,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 				$path = strip_pg_escape_string($this->formvars['pfad']);
 				$all_layer_params = $mapDB->get_all_layer_params_default_values();
-			  $attributes = $mapDB->load_attributes($layerdb,	replace_params($path,	$all_layer_params));
+			  $attributes = $mapDB->load_attributes(
+					$layerdb,
+					replace_params(
+						$path,
+						$all_layer_params,
+						$this->user->id,
+						$this->stelle_id,
+						rolle::$hist_timestamp,
+						$this->user->rolle->language
+					)
+				);
 				$mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
 				$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
 				#---------- Speichern der Layerattribute -------------------
@@ -7548,7 +7613,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$layerdb->setClientEncoding();
 					$path = strip_pg_escape_string($this->formvars['pfad']);
 					$all_layer_params = $mapDB->get_all_layer_params_default_values();
-					$attributes = $mapDB->load_attributes($layerdb,	replace_params($path,	$all_layer_params));
+					$attributes = $mapDB->load_attributes(
+						$layerdb,
+						replace_params(
+							$path,
+							$all_layer_params,
+							$this->user->id,
+							$this->stelle_id,
+							rolle::$hist_timestamp,
+							$this->user->rolle->language
+						)
+					);
 					$mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
 					#---------- Speichern der Layerattribute -------------------
 					if ($this->plugin_loaded('mobile')) {
@@ -7899,10 +7974,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
         $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
         $layerdb->setClientEncoding();
-        #$path = $layerset[0]['pfad'];
-				$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
-				$path = str_replace('$language', $this->user->rolle->language, $path);
-				$path = replace_params($path, rolle::$layer_params);
+				$path = replace_params(
+					$layerset[0]['pfad'],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->stelle_id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				);
 
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 				$attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
@@ -9532,7 +9611,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $oids[] = $element[3];
        # echo $sql.'<br><br>';
         $this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
-				$sql = replace_params($sql, rolle::$layer_params);
+				$sql = replace_params(
+					$sql,
+					rolle::$layer_params,
+					$this->user->id,
+					$this->stelle_id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				);
         $ret = $layerdb->execSQL($sql,4, 1);
         if (!$ret[0]) {
           while ($rs=pg_fetch_array($ret[1])) {
@@ -9602,7 +9688,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$oids[] = $element[3];
 					#echo $sql.'<br><br>';
 					$this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
-					$sql = replace_params($sql, rolle::$layer_params);
+					$sql = replace_params(
+						$sql,
+						rolle::$layer_params,
+						$this->user->id,
+						$this->stelle_id,
+						rolle::$hist_timestamp,
+						$this->user->rolle->language
+					);
 					$ret = $layerdb->execSQL($sql,4, 1);
 					if (!$ret[0]) {
 						while ($rs=pg_fetch_array($ret[1])) {
@@ -9637,10 +9730,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
-		$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
-		$path = str_replace('$language', $this->user->rolle->language, $path);
-		$path = replace_params($path, rolle::$layer_params);
-
+		$path = replace_params(
+			$layerset[0]['pfad'],
+			rolle::$layer_params,
+			$this->user->id,
+			$this->stelle_id,
+			rolle::$hist_timestamp,
+			$this->user->rolle->language
+		);
     $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
     $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
     # order by rausnehmen
@@ -12951,8 +13048,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						else {
 							$layer->setConnectionType($layerset[$i]['connectiontype']);
 						}
-
-						$layer->set('connection', replace_params($layerset[$i]['connection'], rolle::$layer_params));
+						$layer->set(
+							'connection',
+							replace_params(
+								$layerset[$i]['connection'],
+								rolle::$layer_params,
+								$this->user->id,
+								$this->stelle_id,
+								rolle::$hist_timestamp,
+								$this->user->rolle->language
+							)
+						);
 						$layer->set('type',$layerset[$i]['Datentyp']);
 						$layer->set('status',MS_ON);
 						if ($layerset[$i]['template']!='') {
@@ -12992,10 +13098,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
 							$layerdb->setClientEncoding();
 							#$path = $layerset[$i]['pfad'];
-							$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
-							$path = str_replace('$language', $this->user->rolle->language, $path);
-							$path = replace_params($path, rolle::$layer_params);
-
+							$path = replace_params(
+								$layerset[$i]['pfad'],
+								rolle::$layer_params,
+								$this->user->id,
+								$this->stelle_id,
+								rolle::$hist_timestamp,
+								$this->user->rolle->language
+							);
 							$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 							$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames'], false, true);
 							$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
@@ -13723,9 +13833,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 				$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
 				#$path = $layerset[$i]['pfad'];
-				$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
-				$path = str_replace('$language', $this->user->rolle->language, $path);
-				$path = replace_params($path, rolle::$layer_params);
+				$path = replace_params(
+					$layerset[$i]['pfad'],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->stelle_id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				);
 
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 				#$path = $this->Stelle->parse_path($layerdb, $path, $privileges);
@@ -14673,8 +14788,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($layer == NULL)$layer = $this->user->rolle->getRollenLayer(-$layer_id);
 		# Abfragen der Datenbankverbindung des Layers
     $layerdb=$this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
-
-		$data = replace_params($layer[0]['Data'], rolle::$layer_params);
+		$data = replace_params(
+			$layer[0]['Data'],
+			rolle::$layer_params,
+			$this->user->id,
+			$this->stelle_id,
+			rolle::$hist_timestamp,
+			$this->user->rolle->language
+		);
 		if($data != ''){
 			# suchen nach dem ersten Vorkommen von using
 			$pos = strpos(strtolower($data),'using ');
@@ -14774,7 +14895,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		    $layer=ms_newLayerObj($map);
 				$layerset['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset['Data']);
 				$layerset['Data'] = str_replace('$language', $language, $layerset['Data']);
-				$layerset['Data'] = replace_params($layerset['Data'], rolle::$layer_params);
+				$layerset['Data'] = replace_params(
+					$layerset['Data'],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->stelle_id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				);
 		    $layer->set('data',$layerset['Data']);
 				if($layerset['Filter'] != ''){
 					$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
@@ -15383,10 +15511,16 @@ class db_mapObj{
 				$rs['alias'] = $rs['Name'];
 			}
 			$rs['id'] = $i;
-			$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
-			$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
-			$rs['connection'] = replace_params($rs['connection'], rolle::$layer_params);
-			$rs['classification'] = replace_params($rs['classification'], rolle::$layer_params);
+			foreach (array('Name', 'alias', 'connection', 'classification') AS $key) {
+				$rs[$key] = replace_params(
+					$rs[$key],
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->rolle->language
+				);
+			}
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
 				# bei withclasses == 2 werden für alle Layer die Klassen geladen,
 				# bei withclasses == 1 werden Klassen nur dann geladen, wenn der Layer aktiv ist
@@ -15793,7 +15927,14 @@ class db_mapObj{
     $query=mysql_query($sql);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs = mysql_fetch_assoc($query);
-    $data = replace_params($rs['Data'], rolle::$layer_params);
+    $data = replace_params(
+			$rs['Data'],
+			rolle::$layer_params,
+			$this->User_ID,
+			$this->Stelle_ID,
+			rolle::$hist_timestamp,
+			$this->rolle->language
+		);
     return $data;
   }
 
@@ -17339,9 +17480,12 @@ class db_mapObj{
 			$attributes['dependents'][$attributes['indizes'][$rs['vcheck_attribute']]][] = $rs['name'];
 			$attributes['privileg'][$i] = $rs['privileg'];
 			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
-			if($rs['form_element_type'] == 'Style'){
+			if ($rs['form_element_type'] == 'Style') {
 				$attributes['style'] = $rs['name'];
 				$attributes['visible'][$i] = 0;
+			}
+			if ($rs['form_element_type'] == 'Editiersperre') {
+				$attributes['Editiersperre'] = $rs['name'];
 			}
 			$i++;
 		}
@@ -17556,15 +17700,23 @@ class db_mapObj{
 
 	function get_all_layer_params_default_values() {
 		$layer_params = array();
-		$sql = "SELECT GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"')) as params FROM layer_parameter p";
+		$sql = "
+			SELECT
+				GROUP_CONCAT(concat('\"', `key`, '\":\"', `default_value`, '\"')) AS params
+			FROM
+				layer_parameter p
+		";
 		$params_result = mysql_query($sql);
-		if($params_result==0) {
+		if ($params_result == 0) {
 			echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
 		}
-		else{
+		else {
 			$rs = mysql_fetch_assoc($params_result);
 		}
-		return (array)json_decode('{' . $rs['params'] . '}');
+		$params = $rs['params'];
+		$params = str_replace('$user_id', $this->User_ID, $params);
+		$params = str_replace('$stelle_id', $this->Stelle_ID, $params);
+		return (array)json_decode('{' . $params . '}');
 	}
 
   function get_stellen_from_layer($layer_id){
@@ -17638,8 +17790,16 @@ class db_mapObj{
     if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
     $layer = mysql_fetch_array($query);
 		if ($replace_class_item) {
-			$layer['classitem'] = replace_params($layer['classitem'],	rolle::$layer_params);
-			$layer['classification'] = replace_params($layer['classification'],	rolle::$layer_params);
+			foreach (array('classitem', 'classification') AS $key) {
+				$layer[$key] = replace_params(
+					$layer[$key],
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->rolle->language
+				);
+			}
 		}
     return $layer;
   }

@@ -4,11 +4,123 @@
 	global $quicksearch_layer_ids;
 	include(LAYOUTPATH.'languages/attribut_editor_'.$this->user->rolle->language.'.php');
 	$form_element_options = array(
-		array('value' => 'Time', 'output' => 'Zeitstempel', 'title' => 'Erzeugt beim Anlegen und Speichern eines Datensatzes automatisch einen Zeitstempel. Dieser läßst sich nicht ändern, auch wenn das Recht des Attributes auf Editieren gesetzt ist.'),
-		array('value' => 'User', 'output' => 'Nutzer', 'title' => 'Trägt beim Anlegen und Speichern eines Datensatzes automatisch den angemeldeten Benutzernamen ein. Dieser läßt sich nicht ändern, auch wenn das Recht des Attributes auf Editieren gesetzt ist.'),
-		array('value' => 'UserID', 'output' => 'NutzerID'),
-		array('value' => 'Stelle', 'output' => 'Stelle'),
-		array('value' => 'StelleID', 'output' => 'StelleID')
+		array(
+			'value' => 'Text',
+			'output' => 'Text',
+			'title' => 'Einfaches Textfeld'
+		),
+		array(
+			'value' => 'Zahl',
+			'output' => 'Zahl',
+			'title' => 'Zahlenfeld'
+		),
+		array(
+			'value' => 'Textfeld',
+			'output' => 'Textfeld',
+			'title' => 'Textfeld mit mehreren Zeilen'
+		),
+		array(
+			'value' => 'Auswahlfeld',
+			'output' => 'Auswahlfeld',
+			'title' => 'Auswahlfeld'
+		),
+		array(
+			'value' => 'Autovervollständigungsfeld',
+			'output' => 'Autovervollständigungsfeld',
+			'title' => 'Autovervollständigungsfeld'
+		),
+		array(
+			'value' => 'Radiobutton',
+			'output' => 'Radiobutton',
+			'title' => 'Radiobutton'
+		),
+		array(
+			'value' => 'Checkbox',
+			'output' => 'Checkbox',
+			'title' => 'Checkbox'
+		),
+		array(
+			'value' => 'SubFormPK',
+			'output' => 'SubFormPK',
+			'title' => 'Unterformular verbunden über Primärschlüssel'
+		),
+		array(
+			'value' => 'SubFormFK',
+			'output' => 'SubFormFK',
+			'title' => 'Unterformular verbunden über Fremdschlüssel'
+		),
+		array(
+			'value' => 'SubFormEmbeddedPK',
+			'output' => 'SubFormEmbeddedPK',
+			'title' => 'Eingebettetes Unterformular verbunden über Primärschlüssel'
+		),
+		array(
+			'value' => 'Time',
+			'output' => 'Zeitstempel',
+			'title' => 'Erzeugt beim Anlegen und Speichern eines Datensatzes automatisch einen Zeitstempel. Dieser läßst sich nicht ändern, auch wenn das Recht des Attributes auf Editieren gesetzt ist.'
+		),
+		array(
+			'value' => 'User',
+			'output' => 'Nutzer',
+			'title' => 'Trägt beim Anlegen und Speichern eines Datensatzes automatisch den angemeldeten Benutzernamen ein. Dieser läßt sich nicht ändern, auch wenn das Recht des Attributes auf Editieren gesetzt ist.'
+		),
+		array(
+			'value' => 'UserID',
+			'output' => 'NutzerID'
+		),
+		array(
+			'value' => 'Stelle',
+			'output' => 'Stelle'
+		),
+		array(
+			'value' => 'StelleID',
+			'output' => 'StelleID'
+		),
+		array(
+			'value' => 'Dokument',
+			'output' => 'Dokument',
+			'title' => 'Dokument'
+		),
+		array(
+			'value' => 'Link',
+			'output' => 'Link',
+			'title' => 'Link'
+		),
+		array(
+			'value' => 'dynamicLink',
+			'output' => 'dynamicLink',
+			'title' => 'dynamischer Link'
+		),
+		array(
+			'value' => 'mailto',
+			'output' => 'mailto',
+			'title' => 'MailTo'
+		),
+		array(
+			'value' => 'Fläche',
+			'output' => 'Fläche',
+			'title' => 'Fläche'
+		),
+		array(
+			'value' => 'Länge',
+			'output' => 'Länge',
+			'title' => 'Länge'
+		),
+		array(
+			'value' => 'Winkel',
+			'output' => 'Winkel',
+			'title' => 'Winkel'
+		),
+		array(
+			'value' => 'Style',
+			'output' => 'Style',
+			'title' => 'Style'
+		),
+		array(
+			'value' => 'Editiersperre',
+			'output' => 'Editierspeerre',
+			'title' => 'Sperrt die Möglichkeit zum Editieren, wenn das Attribut den Wert 1 hat.'
+		)
 	);
 
  ?>
@@ -168,85 +280,29 @@ function alias_replace(name){
 									readonly
 								>
 						  </td>
-						  <td align="left" valign="top"><?
+
+							<td align="left" valign="top"><?
 								$type = ltrim($this->attributes['type'][$i], '_');
 								if(is_numeric($type)){ ?>
 									<a href="index.php?go=Attributeditor&selected_datatype_id=<?php echo $type; ?>"><?php echo $this->attributes['typename'][$i]; ?></a><?php
 								}
 								else {
-									echo '
-							  	<select  style="width:130px" name="form_element_'.$this->attributes['name'][$i].'">';
-							  	if($this->attributes['type'][$i] == 'geometry'){
-							  		echo'<option value="Geometrie" selected>Geometrie</option>';
-							  	}
-							  	elseif($this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){
-							  		echo '<option value="Auswahlfeld" selected>Auswahlfeld</option>';
-							  	}
-							  	else {
-							  		echo '
-							  		<option value="Text" ';
-							  		if($this->attributes['form_element_type'][$i] == 'Text'){echo 'selected';}
-							  		echo ' >Text</option>
-							  		<option value="Zahl" ';
-							  		if($this->attributes['form_element_type'][$i] == 'Zahl'){echo 'selected';}
-							  		echo ' >Zahl</option>
-							  		<option value="Textfeld" ';
-							  		if($this->attributes['form_element_type'][$i] == 'Textfeld'){echo 'selected';}
-							  		echo ' >Textfeld</option>
-							  		<option value="Auswahlfeld" ';
-							  		if($this->attributes['form_element_type'][$i] == 'Auswahlfeld'){echo 'selected';}
-							  		echo ' >Auswahlfeld</option>
-										<option value="Autovervollständigungsfeld" ';
-							  		if($this->attributes['form_element_type'][$i] == 'Autovervollständigungsfeld'){echo 'selected';}
-							  		echo ' >Autovervollständigungsfeld</option>
-										<option value="Radiobutton" ';
-							  		if($this->attributes['form_element_type'][$i] == 'Radiobutton'){echo 'selected';}
-							  		echo ' >Radiobutton</option>
-							  		<option value="Checkbox" ';
-							  		if($this->attributes['form_element_type'][$i] == 'Checkbox'){echo 'selected';}
-							  		echo ' >Checkbox</option>
-							  		<option value="SubFormPK" ';
-							  		if($this->attributes['form_element_type'][$i] == 'SubFormPK'){echo 'selected';}
-							  		echo ' >SubFormPK</option>
-							  		<option value="SubFormFK" ';
-							  		if($this->attributes['form_element_type'][$i] == 'SubFormFK'){echo 'selected';}
-							  		echo ' >SubFormFK</option>
-										<option value="SubFormEmbeddedPK" ';
-							  		if($this->attributes['form_element_type'][$i] == 'SubFormEmbeddedPK'){echo 'selected';}
-							  		echo ' >SubFormEmbeddedPK</option>';
-
-										foreach($form_element_options AS $option) {
+									echo '<select style="width:130px" name="form_element_' . $this->attributes['name'][$i] . '">';
+									if ($this->attributes['type'][$i] == 'geometry') {
+										echo '<option value="Geometrie" selected>Geometrie</option>';
+									}
+									elseif ($this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))) {
+										echo '<option value="Auswahlfeld" selected>Auswahlfeld</option>';
+									}
+									else {
+										foreach ($form_element_options AS $option) {
 											$selected = ($this->attributes['form_element_type'][$i] == $option['value'] ? ' selected' : '');
 											echo '<option value="' . $option['value'] . '" title="' . $option['title'] . '"' .	$selected . '>' . $option['output'] . '</option>';
 										}
-
-							  		echo '<option value="Dokument" ';
-							  		if($this->attributes['form_element_type'][$i] == 'Dokument'){echo 'selected';}
-							  		echo ' >Dokument</option>
-										<option value="Link" ';
-							  		if($this->attributes['form_element_type'][$i] == 'Link'){echo 'selected';}
-							  		echo ' >Link</option>
-										<option value="dynamicLink" ';
-							  		if($this->attributes['form_element_type'][$i] == 'dynamicLink'){echo 'selected';}
-							  		echo ' >dynamischer Link</option>
-										<option value="mailto" ';
-							  		if($this->attributes['form_element_type'][$i] == 'mailto'){echo 'selected';}
-							  		echo ' >MailTo</option>
-										<option value="Fläche" ';
-							  		if($this->attributes['form_element_type'][$i] == 'Fläche'){echo 'selected';}
-							  		echo ' >Fläche</option>
-							  		<option value="Länge" ';
-							  		if($this->attributes['form_element_type'][$i] == 'Länge'){echo 'selected';}
-							  		echo ' >Länge</option>
-										<option value="Winkel" ';
-							  		if($this->attributes['form_element_type'][$i] == 'Winkel'){echo 'selected';}
-							  		echo ' >Winkel</option>
-										<option value="Style"' . ($this->attributes['form_element_type'][$i] == 'Style' ? ' selected' : '') . '>Style</option>';
-							  	}
-							  	echo'
-							  	</select>';
+									}
+									echo'</select>';
 								} ?>
-						  </td>
+							</td>
 
 						  <td align="left" valign="top"><?php
 						  if($this->attributes['options'][$i] == '' AND $this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))) { ?>
