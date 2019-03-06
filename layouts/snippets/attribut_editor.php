@@ -118,7 +118,7 @@
 		),
 		array(
 			'value' => 'Editiersperre',
-			'output' => 'Editierspeerre',
+			'output' => 'Editiersperre',
 			'title' => 'Sperrt die Möglichkeit zum Editieren, wenn das Attribut den Wert 1 hat.'
 		)
 	);
