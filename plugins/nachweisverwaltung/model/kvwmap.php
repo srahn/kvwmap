@@ -37,12 +37,12 @@
 		$rect->maxx=$rs['maxx'];
 		$rect->miny=$rs['miny'];
 		$rect->maxy=$rs['maxy'];
-		$randx=($rect->maxx-$rect->minx)*50/100 + 0.01;
-		$randy=($rect->maxy-$rect->miny)*50/100 + 0.01;
+		$randx=($rect->maxx-$rect->minx)*0.02;
+		$randy=($rect->maxy-$rect->miny)*0.02;
 		if($rect->minx != ''){
 			$map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
 			$map->setFontSet(FONTSET);
-			# Haupt-Layer erzeugen
+			# FST-Layer erzeugen
 			$layer=ms_newLayerObj($map);
 			$layer->set('data', 'the_geom from (SELECT ogc_fid, zaehler||\'/\'||nenner as fsnum, wkb_geometry as the_geom FROM alkis.ax_flurstueck WHERE endet IS NULL) as foo using unique ogc_fid using srid='.EPSGCODE_ALKIS);
 			$layer->set('status',MS_ON);
@@ -55,21 +55,65 @@
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->setMetaData('wms_queryable','0');
+			$layer->setProcessing('CLOSE_CONNECTION=DEFER;');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
 			$style=ms_newStyleObj($klasse);
-			$style->color->setRGB(12,255,12);
-			$style->set('width', 1);
-			$style->set('maxwidth', 1);
-			$style->outlinecolor->setRGB(110,110,110);
+			$style->color->setRGB(-1,-1,-1);
+			$style->set('width', 0.2);
+			$style->set('maxwidth', 0.2);
+			$style->outlinecolor->setRGB(100,100,100);
 			$label=new labelObj();
 			$label->set('size', 8);
 			$label->set('minsize', 8);
 			$label->set('maxsize', 8);
-			$label->color->setRGB(0, 0, 0);
+			$label->color->setRGB(40, 40, 40);
 			$label->set('type', 'TRUETYPE');
 			$label->set('font', 'arial');
 			$klasse->addLabel($label);
+			# Gebäude-Layer erzeugen
+			$layer=ms_newLayerObj($map);
+			$layer->set('data', 'the_geom from (SELECT ogc_fid, wkb_geometry as the_geom FROM alkis.ax_gebaeude WHERE endet IS NULL) as foo using unique ogc_fid using srid='.EPSGCODE_ALKIS);
+			$layer->set('status',MS_ON);
+			$layer->set('template', ' ');
+			$layer->set('name','querymap'.$k);
+			$layer->set('type', 2);
+			$layer->set('maxscaledenom', 2000);
+			$layer->set('symbolscaledenom', 10000);
+			$layer->set('opacity', 5);
+			$layer->setConnectionType(6);
+			$layer->set('connection',$layerset[0]['connection']);
+			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
+			$layer->setMetaData('wms_queryable','0');
+			$layer->setProcessing('CLOSE_CONNECTION=DEFER;');
+			$klasse=ms_newClassObj($layer);
+			$klasse->set('status', MS_ON);
+			$style=ms_newStyleObj($klasse);
+			$style->color->setRGB(40,40,40);
+			$style->set('width', 1);
+			$style->set('maxwidth', 1);
+			$style->outlinecolor->setRGB(0,0,0);
+			# Flur-Layer erzeugen
+			$layer=ms_newLayerObj($map);
+			$layer->set('data', 'the_geom from alkis.pp_flur as foo using unique oid using srid='.EPSGCODE_ALKIS);
+			$layer->set('status',MS_ON);
+			$layer->set('template', ' ');
+			$layer->set('name','querymap'.$k);
+			$layer->set('type', 2);
+			$layer->set('symbolscaledenom', 10000);
+			$layer->set('opacity', 80);
+			$layer->setConnectionType(6);
+			$layer->set('connection',$layerset[0]['connection']);
+			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
+			$layer->setMetaData('wms_queryable','0');
+			$layer->setProcessing('CLOSE_CONNECTION=DEFER;');
+			$klasse=ms_newClassObj($layer);
+			$klasse->set('status', MS_ON);
+			$style=ms_newStyleObj($klasse);
+			$style->color->setRGB(-1,-1,-1);
+			$style->set('width', 1);
+			$style->set('maxwidth', 1);
+			$style->outlinecolor->setRGB(40,80,165);
 			# Datensatz-Layer erzeugen
 			$layer=ms_newLayerObj($map);
 			$datastring = "the_geom from (select id, the_geom from nachweisverwaltung.n_nachweise";
@@ -85,12 +129,13 @@
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.$layerset[0]['epsg_code']);
 			$layer->setMetaData('wms_queryable','0');
+			$layer->setProcessing('CLOSE_CONNECTION=DEFER;');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
 			$style=ms_newStyleObj($klasse);
-			$style->color->setRGB(255,5,12);
+			$style->color->setRGB(252,101,84);
 			$style->set('width', 2);
-			$style->outlinecolor->setRGB(0,0,0);
+			$style->outlinecolor->setRGB(-1,-1,-1);
 			# Karte rendern
 			$map->setProjection('+init=epsg:'.$GUI->user->rolle->epsg_code,MS_TRUE);
 			$map->web->set('imagepath', IMAGEPATH);
