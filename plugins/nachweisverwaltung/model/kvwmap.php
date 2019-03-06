@@ -41,14 +41,16 @@
 		$randy=($rect->maxy-$rect->miny)*50/100 + 0.01;
 		if($rect->minx != ''){
 			$map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+			$map->setFontSet(FONTSET);
 			# Haupt-Layer erzeugen
 			$layer=ms_newLayerObj($map);
-			$layer->set('data', 'the_geom from (SELECT ogc_fid, wkb_geometry as the_geom FROM alkis.ax_flurstueck WHERE endet IS NULL) as foo using unique ogc_fid using srid='.EPSGCODE_ALKIS);
+			$layer->set('data', 'the_geom from (SELECT ogc_fid, zaehler||\'/\'||nenner as fsnum, wkb_geometry as the_geom FROM alkis.ax_flurstueck WHERE endet IS NULL) as foo using unique ogc_fid using srid='.EPSGCODE_ALKIS);
 			$layer->set('status',MS_ON);
 			$layer->set('template', ' ');
 			$layer->set('name','querymap'.$k);
 			$layer->set('type', 2);
 			$layer->set('symbolscaledenom', 10000);
+			$layer->set('labelitem', 'fsnum');
 			$layer->setConnectionType(6);
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
@@ -58,8 +60,16 @@
 			$style=ms_newStyleObj($klasse);
 			$style->color->setRGB(12,255,12);
 			$style->set('width', 1);
-			$style->set('maxwidth', 2);
+			$style->set('maxwidth', 1);
 			$style->outlinecolor->setRGB(110,110,110);
+			$label=new labelObj();
+			$label->set('size', 8);
+			$label->set('minsize', 8);
+			$label->set('maxsize', 8);
+			$label->color->setRGB(0, 0, 0);
+			$label->set('type', 'TRUETYPE');
+			$label->set('font', 'arial');
+			$klasse->addLabel($label);
 			# Datensatz-Layer erzeugen
 			$layer=ms_newLayerObj($map);
 			$datastring = "the_geom from (select id, the_geom from nachweisverwaltung.n_nachweise";
@@ -70,6 +80,7 @@
 			$layer->set('template', ' ');
 			$layer->set('name','querymap'.$k);
 			$layer->set('type', 2);
+			$layer->set('opacity', 50);
 			$layer->setConnectionType(6);
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.$layerset[0]['epsg_code']);
@@ -84,8 +95,8 @@
 			$map->setProjection('+init=epsg:'.$GUI->user->rolle->epsg_code,MS_TRUE);
 			$map->web->set('imagepath', IMAGEPATH);
 			$map->web->set('imageurl', IMAGEURL);
-			$map->set('width', 50);
-			$map->set('height', 50);
+			$map->set('width', 150);
+			$map->set('height', 150);
 			$image_map = $map->draw();
 			$filename = $GUI->map_saveWebImage($image_map,'jpeg');
 			$newname = $GUI->user->id.basename($filename);
