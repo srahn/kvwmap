@@ -56,12 +56,16 @@ function InchesPerUnit($unit, $center_y){
 	}
 }
 
-function replace_params($str, $params) {
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
 		}
 	}
+	if (!is_null($user_id))				 $str = str_replace('$user_id', $user_id, $str);
+	if (!is_null($stelle_id))			 $str = str_replace('$stelle_id', $stelle_id, $str);
+	if (!is_null($hist_timestamp)) $str = str_replace('$hist_timestamp', $hist_timestamp, $str);
+	if (!is_null($language))			 $str = str_replace('$language', $language, $str);
 	return $str;
 }
 
@@ -242,10 +246,14 @@ class GUI {
 				}
 				$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
 				#$path = $layerset[$i]['pfad'];
-				$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
-				$path = str_replace('$language', $this->user->rolle->language, $path);
-				$path = replace_params($path, rolle::$layer_params);
-
+				$path = replace_params(
+					$layerset[$i]['pfad'],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->stelle_id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				);
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 				#$path = $this->Stelle->parse_path($layerdb, $path, $privileges);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
@@ -1068,9 +1076,16 @@ class rolle {
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
 		while ($rs=mysql_fetch_assoc($query)) {
-			$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
-			$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
-			$rs['connection'] = replace_params($rs['connection'], rolle::$layer_params);
+			foreach(array('Name', 'alias', 'connection') AS $key) {
+				$rs[$key] = replace_params(
+					$rs[$key],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->stelle_id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				);
+			}
 			$layer[$i]=$rs;
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];

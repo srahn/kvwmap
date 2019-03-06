@@ -70,8 +70,16 @@
 			<? if($this->new_entry != true AND $this->user->rolle->querymode == 1){ ?>
 			onmouseenter="if(typeof FormData !== 'undefined')highlight_object(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['the_geom']].'_oid']; ?>');"
 			<? } ?>
-			>
-	    <input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
+			><?php
+			$definierte_attribute_privileges = $layer['attributes']['privileg'];
+			$gesperrte_attribute_privileges = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
+			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
+				$layer['attributes']['privileg'] = $gesperrte_attribute_privileges;
+			}
+			else {
+				$layer['attributes']['privileg'] = $definierte_attribute_privileges;
+			}
+			?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 	    <table id="dstable" class="tgle" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" style="width:100%" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
 				<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
         <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle"'; ?>>
@@ -321,34 +329,64 @@
 				<tr>
 					<td>
 						<table cellspacing="0" cellpadding="0" class="button_background" style="box-shadow: none; border: 1px solid #bbb">
-							<tr>
-						<? if($this->formvars['go'] == 'Zwischenablage' OR $this->formvars['go'] == 'gemerkte_Datensaetze_anzeigen'){ ?>
-								<td><a title="<? echo $strDontRememberDataset; ?>" href="javascript:remove_from_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button nicht_mehr_merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-							<? }else{ ?>
-								<td id="merk_link_<? echo $layer['Layer_ID']; ?>"><a title="<? echo $strRemember; ?>" href="javascript:add_to_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-							<? } ?>
-					<? if($layer['privileg'] == '2'){ ?>
-								<td id="delete_link_<? echo $layer['Layer_ID']; ?>"><a title="<? echo $strdelete; ?>" href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><div class="button datensatz_loeschen"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></td>
-					<?} if($layer['export_privileg'] != 0){ ?>
-								<td><a title="<? echo $strExport; ?>" href="javascript:daten_export(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><div class="button datensatz_exportieren"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-					<? } if($layer['layouts']){ ?>
-								<td id="print_link_<? echo $layer['Layer_ID']; ?>"><a title="<? echo $strPrint; ?>" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><div class="button drucken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-					<? } ?>
-					<? if($privileg != ''){ ?>
-								<td id="zoom_link_<? echo $layer['Layer_ID']; ?>" style="padding: 0 0 0 15px"><a title="<? echo $strzoomtodatasets; ?>" href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>');"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-								<td id="classify_link_<? echo $layer['Layer_ID']; ?>" style="padding: 0 5px 0 0">
-									<select style="width: 130px" name="klass_<?php echo $layer['Layer_ID']; ?>">
-										<option value=""><? echo $strClassify; ?>:</option>
-										<?
-										for($j = 0; $j < count($layer['attributes']['name']); $j++){
-											if($layer['attributes']['name'][$j] != $layer['attributes']['the_geom']){
-												echo '<option value="'.$layer['attributes']['name'][$j].'">'.$layer['attributes']['alias'][$j].'</option>';
-											}
-										}
-										?>
-									</select>
-								</td>
-					<?}?>
+							<tr><?
+								if ($this->formvars['go'] == 'Zwischenablage' OR $this->formvars['go'] == 'gemerkte_Datensaetze_anzeigen'){ ?>
+									<td>
+										<a title="<? echo $strDontRememberDataset; ?>" href="javascript:remove_from_clipboard(<? echo $layer['Layer_ID']; ?>);">
+											<div class="button nicht_mehr_merken">
+												<img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
+											</div>
+										</a>
+									</td><?
+								}
+								else { ?>
+									<td id="merk_link_<? echo $layer['Layer_ID']; ?>">
+										<a title="<? echo $strRemember; ?>" href="javascript:add_to_clipboard(<? echo $layer['Layer_ID']; ?>);">
+											<div class="button merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div>
+										</a>
+									</td><?
+								}
+								if ($layer['privileg'] == '2') { ?>
+									<td id="delete_link_<? echo $layer['Layer_ID']; ?>">
+										<a title="<? echo $strdelete; ?>" href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);">
+										<div class="button datensatz_loeschen">
+											<img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
+										</div>
+									</td><?
+								}
+								if ($layer['export_privileg'] != 0) { ?>
+									<td>
+										<a title="<? echo $strExport; ?>" href="javascript:daten_export(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);">
+											<div class="button datensatz_exportieren"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div>
+										</a>
+									</td><?
+								}
+								if ($layer['layouts']) { ?>
+									<td id="print_link_<? echo $layer['Layer_ID']; ?>">
+										<a title="<? echo $strPrint; ?>" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);">
+											<div class="button drucken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div>
+										</a>
+									</td><?
+								}
+								if ($privileg != '') { ?>
+									<td id="zoom_link_<? echo $layer['Layer_ID']; ?>" style="padding: 0 0 0 15px">
+										<a
+											title="<? echo $strzoomtodatasets; ?>"
+											href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>');"
+										><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div>
+										</a>
+									</td>
+									<td id="classify_link_<? echo $layer['Layer_ID']; ?>" style="padding: 0 5px 0 0">
+										<select style="width: 130px" name="klass_<?php echo $layer['Layer_ID']; ?>">
+											<option value=""><? echo $strClassify; ?>:</option><?
+											for($j = 0; $j < count($layer['attributes']['name']); $j++){
+												if ($layer['attributes']['name'][$j] != $layer['attributes']['the_geom']) {
+													echo '<option value="'.$layer['attributes']['name'][$j].'">'.$layer['attributes']['alias'][$j].'</option>';
+												}
+											} ?>
+										</select>
+									</td><?
+								} ?>
 							</tr>
 						</table>
 					</td>

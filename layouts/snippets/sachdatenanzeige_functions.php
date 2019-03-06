@@ -624,8 +624,8 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 
-	delete_datasets = function(layer_id){
-		if(check_for_selection(layer_id)){
+	delete_datasets = function(layer_id) {
+		if (check_for_selection(layer_id)){
 			if(confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')){
 				enclosingForm.chosen_layer_id.value = layer_id;
 				enclosingForm.go.value = 'Layer_Datensaetze_Loeschen';

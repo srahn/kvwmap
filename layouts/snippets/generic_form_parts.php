@@ -696,8 +696,12 @@
 						$datapart .= ' style="font-size: '.$fontsize.'px;"';
 					}
 					$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
-				}break;				
-				
+				}break;
+
+				case 'Editiersperre': {
+					$datapart .= ($value == 't' ? 'Ja' : 'Nein');
+				} break;
+
 				case 'Zahl': {
 					# bei Zahlen Tausendertrennzeichen einfügen 
 					$value = tausenderTrenner($value);

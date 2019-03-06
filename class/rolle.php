@@ -128,9 +128,16 @@ class rolle {
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
 		while ($rs=mysql_fetch_assoc($query)) {
-			$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
-			$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);		
-			$rs['connection'] = replace_params($rs['connection'], rolle::$layer_params);		
+			foreach(array('Name', 'alias', 'connection') AS $key) {
+				$rs[$key] = replace_params(
+					$rs[$key],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->stelle_id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				);
+			}
 			$layer[$i]=$rs;
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
@@ -396,7 +403,10 @@ class rolle {
 			}
 			else {
 				while ($param = mysql_fetch_assoc($params_result[1])) {
-					$options_result = $pgdatabase->execSQL($param['options_sql'], 4, 0);
+					$sql = $param['options_sql'];
+					$sql = str_replace('$user_id', $this->user_id, $sql);
+					$sql = str_replace('$stelle_id', $this->stelle_id, $sql);
+					$options_result = $pgdatabase->execSQL($sql, 4, 0);
 					$param['options'] = array();
 					while ($option = pg_fetch_assoc($options_result[1])) {
 						$param['options'][] = $option;
