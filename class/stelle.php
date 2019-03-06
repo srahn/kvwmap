@@ -937,11 +937,14 @@ class stelle {
 				selectable_layer_params = COALESCE(
 					(
 						SELECT GROUP_CONCAT(id)
-						FROM `layer_parameter` as p, used_layer as ul, layer as l
-						WHERE
-							ul.Stelle_ID = stelle.ID AND
-							ul.Layer_ID = l.Layer_ID AND
-							locate(concat('$', p.key), concat(l.Name, l.alias, l.connection, l.Data, l.pfad, l.classitem, l.classification)) > 0
+						FROM (
+							SELECT DISTINCT id
+							FROM `layer_parameter` as p, used_layer as ul, layer as l
+							WHERE
+								ul.Stelle_ID = stelle.ID AND
+								ul.Layer_ID = l.Layer_ID AND
+								locate(concat('$', p.key), concat(l.Name, l.alias, l.connection, l.Data, l.pfad, l.classitem, l.classification)) > 0
+						)
 					),
 					''
 				)
