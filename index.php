@@ -1733,6 +1733,10 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
 				$GUI->invitation_delete();
 			} break;
+			
+			case 'geo_name_query' : {
+				$GUI->geo_name_query();
+			} break;			
 
 			default : {
 				# Karteninformationen lesen

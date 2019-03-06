@@ -356,6 +356,22 @@ a.invisiblelayerlink:hover{
 	margin-top: 10px;
 }
 
+#geo_name_search_result_div{
+	position: absolute;
+	z-index: 1000000;
+	background-color: white;
+	box-shadow: 12px 10px 14px #777;
+}
+
+#geo_name_search_result_div ul{
+	color: lightsteelblue;
+	margin: 5px;
+	padding: 0px;
+			padding-left: 0px;
+	padding-left: 5px;
+	list-style: square inside none;
+}
+
 .code{
 	text-align: left;
 	font-family: courier;

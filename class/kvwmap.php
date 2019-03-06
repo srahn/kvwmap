@@ -192,6 +192,16 @@ class GUI {
 		}
 		return $trigger_result;
 	}
+	
+	function geo_name_query(){
+		$result = json_decode(url_get_contents(GEO_NAME_SEARCH_URL.urlencode($this->formvars['q'])), true);
+		echo '<ul>';
+		for($i = 0; $i < count($result['features']); $i++){
+			$coord = $result['features'][$i]['geometry']['coordinates'];
+			echo '<li><a href="javascript:location.href=\'index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326\'">'.$result['features'][$i]['properties'][GEO_NAME_SEARCH_PROPERTY].'</a></li>';
+		}
+		echo '</ul>';
+	}
 
 	function show_snippet() {
 		if (empty($this->formvars['snippet'])) {
