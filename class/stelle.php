@@ -930,10 +930,6 @@ class stelle {
 	}
 	
 	function updateLayerParams() {
-		/*
-		Diese Abfrage funktioniert nicht, weil x mal 1 eingetragen wird und macht auch keinen Sinn.
-		Die Einstellung welche Parameter in der Stelle verfügbar sein sollen
-		kann doch nicht automatisch gesetzt werden. Deshalb ist der Code erstmal auskommentiert worden.
 		$sql = "
 			UPDATE
 				stelle
@@ -952,11 +948,10 @@ class stelle {
 			WHERE
 				stelle.ID = " . $this->id . "
 		";
-		echo '<br>SQL: ' . $sql;
+		#echo '<br>SQL: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		*/
 
 		$sql = "UPDATE rolle SET layer_params = ";
 		$sql.= "COALESCE((SELECT GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"')) ";
