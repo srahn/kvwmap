@@ -78,7 +78,7 @@ class pointeditor {
 				if($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true)){
 					$msg = $notice_result['msg'];
 				}
-				$ret[1] = $msg;
+				$ret[2] = $msg;
 			}
 		}
 		return $ret;
