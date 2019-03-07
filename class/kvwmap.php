@@ -4400,6 +4400,7 @@ class GUI {
 			else { # eintrag erfolgreich
 				# wenn Time-Attribute vorhanden, aktuelle Zeit speichern
 				for ($i = 0; $i < count($this->attributes['type']); $i++) {
+					$value = '';
 					if (
 						$this->attributes['name'][$i] != 'oid' AND
 						in_array($this->attributes['form_element_type'][$i], array('Time', 'Länge', 'User', 'UserID'))
@@ -4430,7 +4431,7 @@ class GUI {
 								UPDATE
 									" . $this->formvars['layer_tablename'] . "
 								SET
-									" . $this->attributes['name'][$i] . " = " . $attribute_value . "
+									" . $this->attributes['name'][$i] . " = " . $value . "
 								WHERE
 									oid = " . $this->formvars['oid'] . "
 							";
