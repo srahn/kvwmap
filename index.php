@@ -1696,12 +1696,6 @@ function go_switch($go, $exit = false) {
 				$GUI->ALB_Anzeigen(NULL, $GUI->formvars['formnummer'], $GUI->formvars['Grundbuchbezirk'], $GUI->formvars['Grundbuchblatt']);
 			} break;
 
-			# Auswählen einer neuen Stelle
-			case 'Stelle Wählen' : {
-				$GUI->rollenwahl($Stelle_ID);
-				$GUI->output();
-			} break;
-
 			 # Auswählen einer neuen Stelle
 			case 'Stelle_waehlen' : case 'Stelle_waehlen_Passwort_aendern' : {
 				$GUI->checkCaseAllowed('Stelle_waehlen');
