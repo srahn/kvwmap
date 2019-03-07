@@ -13,13 +13,13 @@
     }
     $GUI->queryable_postgis_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
 
-  	if(!$GUI->formvars['layer_id']){
+  	if(!$GUI->formvars['geom_from_layer']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $GUI->formvars['layer_id'] = $layerset[0]['Layer_ID'];
+      $GUI->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
     }
-    if($GUI->formvars['layer_id']){
-      $layerset = $GUI->user->rolle->getLayer($GUI->formvars['layer_id']);
-      $data = $GUI->mapDB->getData($GUI->formvars['layer_id']);
+    if($GUI->formvars['geom_from_layer']){
+      $layerset = $GUI->user->rolle->getLayer($GUI->formvars['geom_from_layer']);
+      $data = $GUI->mapDB->getData($GUI->formvars['geom_from_layer']);
       $data_explosion = explode(' ', $data);
       $GUI->formvars['columnname'] = $data_explosion[0];
       $select = $fromwhere = $GUI->mapDB->getSelectFromData($data);
