@@ -4283,7 +4283,7 @@ class GUI {
 					}
 				}
 				$this->add_message('notice', 'Eintrag erfolgreich!');
-				if($ret[2])$this->add_message('info', $ret[2]);
+				if($ret[3])$this->add_message('info', $ret[3]);
 			}
 			$this->PointEditor();
 		}
@@ -4611,7 +4611,7 @@ class GUI {
         $this->formvars['firstpoly']="";
         $this->formvars['secondpoly']="";
         $this->add_message('notice', 'Eintrag erfolgreich!');
-				if($ret[2])$this->add_message('info', $ret[2]);
+				if($ret[3])$this->add_message('info', $ret[3]);
       }
       $this->formvars['CMD'] = '';
       $this->PolygonEditor();
