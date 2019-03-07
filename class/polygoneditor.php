@@ -104,6 +104,14 @@ class polygoneditor {
       	$result = pg_fetch_row($ret[1]);
       	$ret[1]='Eintrag nicht erfolgreich.\n'.$result[0];
 			}
+			else{
+				if($last_notice = $msg = pg_last_notice($layerdb[$layer_id]->dbConn)){
+					if($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true)){
+						$msg = $notice_result['msg'];
+					}
+					$ret[1] = $msg;
+				}
+			}
 		}
 		else{
 			$ret[1]='\nAuf Grund eines Datenbankfehlers konnte die Flaeche nicht eingetragen werden!\n';

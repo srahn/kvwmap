@@ -4586,22 +4586,22 @@ class GUI {
 					if($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Time' AND in_array($this->attributes['options'][$i], array('', 'update'))){
 						$sql = "UPDATE " . $this->formvars['layer_tablename']." SET " . $this->attributes['name'][$i]." = '".date('Y-m-d G:i:s')."' WHERE oid = '" . $this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
-						$ret = $layerdb->execSQL($sql,4, 1);
+						$ret2 = $layerdb->execSQL($sql,4, 1);
 					}
 					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Fläche'){
 						$sql = "UPDATE " . $this->formvars['layer_tablename']." SET " . $this->attributes['name'][$i]." = '" . $this->formvars['area']."' WHERE oid = '" . $this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
-						$ret = $layerdb->execSQL($sql,4, 1);
+						$ret2 = $layerdb->execSQL($sql,4, 1);
 					}
 					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'User' AND in_array($this->attributes['options'][$i], array('', 'update'))){
 						$sql = "UPDATE " . $this->formvars['layer_tablename']." SET " . $this->attributes['name'][$i]." = '" . $this->user->Vorname." " . $this->user->Name."' WHERE oid = '" . $this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
-						$ret = $layerdb->execSQL($sql,4, 1);
+						$ret2 = $layerdb->execSQL($sql,4, 1);
 					}
 					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'UserID'  AND in_array($this->attributes['options'][$i], array('', 'update'))){
 						$sql = "UPDATE " . $this->formvars['layer_tablename']." SET " . $this->attributes['name'][$i]." = " . $this->user->id." WHERE oid = '" . $this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
-						$ret = $layerdb->execSQL($sql,4, 1);
+						$ret2 = $layerdb->execSQL($sql,4, 1);
 					}
 				}
         $this->formvars['newpath']="";
@@ -4610,6 +4610,7 @@ class GUI {
         $this->formvars['firstpoly']="";
         $this->formvars['secondpoly']="";
         $this->add_message('notice', 'Eintrag erfolgreich!');
+				if($ret[1])$this->add_message('info', $ret[1]);
       }
       $this->formvars['CMD'] = '';
       $this->PolygonEditor();
