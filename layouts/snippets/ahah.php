@@ -17,6 +17,7 @@ $ahah = '
 			}
 			req.send(data);
 		}
+		return req;
 	}
 
 	function ahahDone(url, targets, req, actions) {

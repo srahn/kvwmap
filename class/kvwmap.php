@@ -195,10 +195,17 @@ class GUI {
 	
 	function geo_name_query(){
 		$result = json_decode(url_get_contents(GEO_NAME_SEARCH_URL.urlencode($this->formvars['q'])), true);
+		$stellen_extent = $this->Stelle->MaxGeorefExt;
+		$projFROM = ms_newprojectionobj("init=epsg:" . $this->Stelle->epsg_code);
+		$projTO = ms_newprojectionobj("init=epsg:4326");
+		$stellen_extent->project($projFROM, $projTO);
 		echo '<ul>';
 		for($i = 0; $i < count($result['features']); $i++){
 			$coord = $result['features'][$i]['geometry']['coordinates'];
-			echo '<li><a href="javascript:location.href=\'index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326\'">'.$result['features'][$i]['properties'][GEO_NAME_SEARCH_PROPERTY].'</a></li>';
+			if($stellen_extent->minx < $coord[0] AND $coord[0] < $stellen_extent->maxx AND $stellen_extent->miny < $coord[1] AND $coord[1] < $stellen_extent->maxy){
+				$name = $result['features'][$i]['properties'][GEO_NAME_SEARCH_PROPERTY];
+				echo '<li><a href="javascript:location.href=\'index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326&name='.$name.'\'">'.$name.'</a></li>';
+			}
 		}
 		echo '</ul>';
 	}
@@ -2256,7 +2263,8 @@ class GUI {
 				$miny = $oPixelPos->y;
 			}
 			#---------- Punkt-Rollenlayer erzeugen --------#
-			$legendentext ="Koordinate: " . $minx." " . $miny;
+			if($this->formvars['name'] != '')$legendentext = $this->formvars['name'];
+			else $legendentext ="Koordinate: " . $minx." " . $miny;
 			if(strpos($minx, '°') !== false){
 				$minx = dms2dec($minx);
 				$miny = dms2dec($miny);
