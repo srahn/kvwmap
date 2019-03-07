@@ -73,6 +73,14 @@ class pointeditor {
 			# Fehler beim Eintragen in Datenbank
 			$ret[1] = 'Auf Grund eines Datenbankfehlers konnte der Punkt nicht eingetragen werden!<br>' . $ret[1];
 		}
+		else{
+			if($last_notice = $msg = pg_last_notice($this->database->dbConn)){
+				if($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true)){
+					$msg = $notice_result['msg'];
+				}
+				$ret[1] = $msg;
+			}
+		}
 		return $ret;
 	}
 

@@ -4278,11 +4278,12 @@ class GUI {
 									oid = '" . $this->formvars['oid'] . "'
 							";
 							$this->debug->write("<p>file:kvwmap :PointEditor_Senden :", 4);
-							$ret = $layerdb->execSQL($sql, 4, 1);
+							$ret2 = $layerdb->execSQL($sql, 4, 1);
 						}
 					}
 				}
 				$this->add_message('notice', 'Eintrag erfolgreich!');
+				if($ret[1])$this->add_message('info', $ret[1]);
 			}
 			$this->PointEditor();
 		}
