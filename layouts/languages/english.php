@@ -46,5 +46,6 @@
 	$this->label = "Label";
 	$this->newDataset="new record";
 	$this->noLabel="no label";
+	$this->histTimestamp="Timestamp for historical data";
 ?>
 	

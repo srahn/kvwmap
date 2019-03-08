@@ -2,7 +2,6 @@
   include(LAYOUTPATH.'languages/PolygonEditor_'.$this->user->rolle->language.'.php');
 ?>
 
-<script type="text/javascript" src="funktionen/calendar.js"></script>
 <script type="text/javascript">
 <!--
 

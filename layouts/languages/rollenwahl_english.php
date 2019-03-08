@@ -34,7 +34,6 @@
 	$strNewDatasetOrder="objectcreation-order";
 	$strGeomSecond="attributes first";
 	$strGeomFirst="geometry first";
-	$strhist_timestamp="Timestamp for historical data";
 	$strGeneralOptions="General Options";
 	$strMapOptions="Map Options";
 	$strDataPresentation="Data Presentation";

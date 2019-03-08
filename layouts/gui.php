@@ -31,7 +31,17 @@
 										<script type="text/javascript">
 											currentform = document.GUI;
 											<? $this->currentform = 'document.GUI'; ?>
-										</script><?php
+											function set_hist_timestamp(){
+												$('#hist_timestamp_form').show();
+											}
+										</script>
+										<div id="hist_timestamp_form" style="display:none;">
+											<i class="fa fa-close" style="cursor: pointer; float: right; margin: 0 5px 0 5px;" onclick="$('#hist_timestamp_form').hide();"></i>
+											<? echo $this->histTimestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp', 'timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_hist_timestamp" class="calendar" style="top:35px;left:150px"></div>
+											<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp" name="hist_timestamp" type="text" value="<? echo $this->user->rolle->hist_timestamp; ?>" size="16">
+											<input type="button" onclick="location.href='index.php?go=setHistTimestamp&timestamp='+document.GUI.hist_timestamp.value" value="ok">
+										</div>
+										<?php
 										$this->debug->write("<br>Include <b>".$this->main."</b> in gui.php",4);
 										if(file_exists($this->main)){
 											include($this->main);			# Pluginviews

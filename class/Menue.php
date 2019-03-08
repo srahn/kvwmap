@@ -22,12 +22,6 @@ class Menue extends MyObject {
 				'option' => null
 			),
 			array(
-				'attribute' => 'links',
-				'condition' => 'not_null',
-				'description' => 'Ein Link muss angegeben werden. Für Obermenüpunkte in der Regel index.php?go=changemenue',
-				'option' => null
-			),
-			array(
 				'attribute' => 'menueebene',
 				'condition' => 'not_null',
 				'description' => 'Es muss eine Menüebene angegeben werden.',
@@ -253,7 +247,12 @@ class Menue extends MyObject {
 			if ($this->get('target') == 'confirm') {
 				$href = "javascript:Bestaetigung('" . $this->get('links') . "', 'Diese Aktion wirklich ausführen?')";
 			}
-			else $href = $this->get('links');
+			elseif($this->get('links') == ''){
+				$href = 'javascript:void(0);';
+			}
+			else{
+				$href = $this->get('links');
+			}
 		}
 		return $href;
 	}

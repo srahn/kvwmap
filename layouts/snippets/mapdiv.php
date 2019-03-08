@@ -1,4 +1,3 @@
-
 		<div id="mapimage">
 			<input type="hidden" name="go" value="neu Laden">
 			<INPUT TYPE="hidden" NAME="minx" VALUE="<?php echo $this->map->extent->minx; ?>">

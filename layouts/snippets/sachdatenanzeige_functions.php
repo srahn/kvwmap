@@ -4,7 +4,6 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 include('funktionen/input_check_functions.php');
 ?>
 
-<script type="text/javascript" src="funktionen/calendar.js"></script>
 <script type="text/javascript">
 
 	var geom_not_null = false;

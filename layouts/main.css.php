@@ -854,6 +854,19 @@ a.menuered:hover {
 	box-shadow: 3px 0px 4px #bbb;
 }
 
+#hist_timestamp_form{
+	position: absolute; 
+	top: 100px;
+	text-align: left;
+	border-top: 1px solid #aaaaaa;
+	border-right: 1px solid #aaaaaa;
+	border-bottom: 1px solid #aaaaaa;
+	padding: 5 0 5 5; 
+	background-color: <? echo BG_MENUETOP; ?>;
+	box-shadow: 3px 3px 4px #bbb;
+	z-index: 100000;
+}
+
 #scale_bar {
 	background: <? echo BG_MENUETOP; ?>;
 	border-top: 1px solid #aaaaaa;

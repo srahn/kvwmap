@@ -47,4 +47,5 @@
 	$this->label = "Beschriftung";
 	$this->newDataset="neuer Datensatz";
 	$this->noLabel="keine";
+	$this->histTimestamp="Zeitpunkt für historische Daten";
 ?>
