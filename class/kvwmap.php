@@ -17701,10 +17701,10 @@ class db_mapObj{
 		$layer_params = array();
 		$sql = "SELECT * FROM layer_parameter";
 		$params_result = mysql_query($sql);
-		if($params_result==0) {
-			echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
+		if ($params_result==0) {
+			$this->GUI->add_message('error', 'Fehler bei der Abfrage der Layerparameter.<br>' . mysql_error($this->GUI->database->dbConn));
 		}
-		else{
+		else {
 			while($rs = mysql_fetch_assoc($params_result)){
 				$params[] = $rs;
 			}
@@ -17735,7 +17735,9 @@ class db_mapObj{
 			}
 		}
 		$result = mysql_query($sql);
-		if ($result==0) echo '<br>Fehler beim Speichern der Layerparameter mit SQL: ' . $sql;
+		if ($result == 0) {
+			$this->GUI->add_message('error', 'Fehler beim Speichern der Layerparameter.<br>' . mysql_error($this->GUI->database->dbConn));
+		}
 	}
 
 	function get_all_layer_params_default_values() {

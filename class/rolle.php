@@ -406,12 +406,17 @@ class rolle {
 					$sql = $param['options_sql'];
 					$sql = str_replace('$user_id', $this->user_id, $sql);
 					$sql = str_replace('$stelle_id', $this->stelle_id, $sql);
-					$options_result = $pgdatabase->execSQL($sql, 4, 0);
-					$param['options'] = array();
-					while ($option = pg_fetch_assoc($options_result[1])) {
-						$param['options'][] = $option;
+					$options_result = $pgdatabase->execSQL($sql, 4, 0, true);
+					if ($options_result['success']) {
+						$param['options'] = array();
+						while ($option = pg_fetch_assoc($options_result[1])) {
+							$param['options'][] = $option;
+						}
+						$layer_params[$param['key']] = $param;
 					}
-					$layer_params[$param['key']] = $param;
+					else {
+						$layer_params['error_message'] = 'Fehler bei der Abfrage der Parameteroptionen: ' . $options_result[1];
+					}
 				}
 			}
 		}
