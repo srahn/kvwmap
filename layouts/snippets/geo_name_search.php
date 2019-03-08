@@ -1,23 +1,17 @@
-
 <script type="text/javascript">
-	
 	var search_requests = new Array();
-	
 	function startQuery(){
 		query = document.GUI.geo_name_query.value;
-		if(query.length > 5){
+		if (query.length > 5) {
 			[].forEach.call(search_requests, function (search_request){
 				search_request.abort();
 			});
-			search_requests.push(ahah("index.php", "go=geo_name_query&q="+query, new Array(document.getElementById('geo_name_search_result_div')), new Array('sethtml')));
+			search_requests.push(ahah("index.php", "go=geo_name_query&q="+query, new Array(document.getElementById('geo_name_search_result_div')), new Array('sethtml', $('#geo_name_search_result_div').show())));
 		}
 	}
-	
 </script>
-
-	
 <div id="search_div">
-	<input type="text" name="geo_name_query" onkeyup="startQuery();">
+	<input id="geo_name_search_field" type="text" name="geo_name_query" onkeyup="startQuery();">
 </div>
 <div id="geo_name_search_result_div">
 </div>
