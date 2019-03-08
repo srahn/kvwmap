@@ -196,7 +196,7 @@ class GUI {
 	function geo_name_query(){
 		$result = json_decode(url_get_contents(GEO_NAME_SEARCH_URL.urlencode($this->formvars['q'])), true);
 		$stellen_extent = $this->Stelle->MaxGeorefExt;
-		$projFROM = ms_newprojectionobj("init=epsg:" . $this->Stelle->epsg_code);
+		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
 		$projTO = ms_newprojectionobj("init=epsg:4326");
 		$stellen_extent->project($projFROM, $projTO);
 		echo '<ul>';
