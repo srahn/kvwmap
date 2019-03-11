@@ -199,15 +199,16 @@ class GUI {
 		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
 		$projTO = ms_newprojectionobj("init=epsg:4326");
 		$stellen_extent->project($projFROM, $projTO);
-		echo '<ul>';
+		$show = false;
 		for($i = 0; $i < count($result['features']); $i++){
 			$coord = $result['features'][$i]['geometry']['coordinates'];
 			if($stellen_extent->minx < $coord[0] AND $coord[0] < $stellen_extent->maxx AND $stellen_extent->miny < $coord[1] AND $coord[1] < $stellen_extent->maxy){
+				$show = true;
 				$name = $result['features'][$i]['properties'][GEO_NAME_SEARCH_PROPERTY];
-				echo '<li><a href="javascript:location.href=\'index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326&name='.$name.'\'">'.$name.'</a></li>';
+				$output .= '<li><a href="javascript:location.href=\'index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326&name='.$name.'\'">'.$name.'</a></li>';
 			}
 		}
-		echo '</ul>';
+		if($show)echo '<ul>'.$output.'</ul>';;
 	}
 
 	function show_snippet() {
@@ -17704,10 +17705,10 @@ class db_mapObj{
 		$layer_params = array();
 		$sql = "SELECT * FROM layer_parameter";
 		$params_result = mysql_query($sql);
-		if ($params_result==0) {
-			$this->GUI->add_message('error', 'Fehler bei der Abfrage der Layerparameter.<br>' . mysql_error($this->GUI->database->dbConn));
+		if($params_result==0) {
+			echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
 		}
-		else {
+		else{
 			while($rs = mysql_fetch_assoc($params_result)){
 				$params[] = $rs;
 			}
@@ -17738,9 +17739,7 @@ class db_mapObj{
 			}
 		}
 		$result = mysql_query($sql);
-		if ($result == 0) {
-			$this->GUI->add_message('error', 'Fehler beim Speichern der Layerparameter.<br>' . mysql_error($this->GUI->database->dbConn));
-		}
+		if ($result==0) echo '<br>Fehler beim Speichern der Layerparameter mit SQL: ' . $sql;
 	}
 
 	function get_all_layer_params_default_values() {
