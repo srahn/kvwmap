@@ -266,7 +266,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		  ?>
 	  </td>
 				<tr>
-					<td><a href="index.php?go=Nachweisrechercheformular&VermStelle=<? echo $this->formvars['VermStelle']; ?>">&lt;&lt; zur&uuml;ck zur Suche</a></td>
+					<td><a href="index.php?go=Nachweisrechercheformular&zurueck=1&VermStelle=<? echo $this->formvars['VermStelle']; ?>">&lt;&lt; zur&uuml;ck zur Suche</a></td>
 				</tr>
         </tr>
         <tr> 

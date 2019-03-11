@@ -2389,6 +2389,7 @@ function mouseup(evt){
 	function redrawfirstpolygon(){
 	  // polygone um punktepfad erweitern
 	  var obj = document.getElementById("polygon_first");
+		if(enclosingForm.newpath.value == "")enclosingForm.newpath.value = buildsvgpolygonfromwkt(enclosingForm.newpathwkt.value);
 		pixel_path = world2pixelsvg(enclosingForm.newpath.value);
 	  obj.setAttribute("d", pixel_path);
 	}
@@ -2838,11 +2839,29 @@ function mouseup(evt){
 	function redrawsecondpolygon(){
 	  // polygone um punktepfad erweitern
 	  var obj = document.getElementById("polygon_first");
+		if(enclosingForm.newpath.value == "")enclosingForm.newpath.value = buildsvgpolygonfromwkt(enclosingForm.newpathwkt.value);
 	  pixel_path = world2pixelsvg(enclosingForm.newpath.value);
 	  obj.setAttribute("d", pixel_path);
 	  pixel_path_second = world2pixelsvg(path_second);
 	  var obj = document.getElementById("polygon_second");
 	  obj.setAttribute("d", pixel_path_second);
+	}
+
+	function buildsvgpolygonfromwkt(wkt){
+		if(wkt != ""){
+			wkt = wkt.substring(9, wkt.length-2);		// geht nur für POLYGON
+			var koords;
+			parts = wkt.split("),(");
+			for(j = 0; j < parts.length; j++){
+				parts[j] = parts[j].replace(/,/g, " ");
+			}
+			svg = "M "+parts.join(" M ");
+			console.log(svg);
+			return svg;
+		}
+		else{
+			return "";
+		}
 	}
 
 	function buildwktpolygonfromsvgpath(svgpath){

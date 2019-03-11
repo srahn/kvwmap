@@ -1541,6 +1541,11 @@
 			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 			$nachweisSuchParameter=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
 			$GUI->formvars=array_merge($GUI->formvars,$nachweisSuchParameter);
+			if($GUI->formvars['zurueck']){
+				$GUI->formvars['pathwkt'] = $GUI->formvars['suchpolygon'];
+				$GUI->formvars['newpathwkt'] = $GUI->formvars['suchpolygon'];
+				$GUI->formvars['firstpoly'] = 'true';
+			}
 		}
 		# die Parameter einer gespeicherten Dokumentauswahl laden
 		if($GUI->formvars['dokauswahlen'] != ''){
