@@ -749,6 +749,10 @@ a.menuered:hover {
 	background-image: url(../graphics/hilfe.png);
 }
 
+.timetravel{
+	background-image: url(../graphics/timetravel.png);
+}
+
 .save_layers{
 	background-image: url(../graphics/save_layers.png);
 }
@@ -856,7 +860,7 @@ a.menuered:hover {
 
 #hist_timestamp_form{
 	position: absolute; 
-	top: 100px;
+	top: 50px;
 	text-align: left;
 	border-top: 1px solid #aaaaaa;
 	border-right: 1px solid #aaaaaa;
