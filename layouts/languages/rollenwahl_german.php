@@ -45,6 +45,9 @@
 	$strdecimal="Dezimal";
 	$strgrad1="Grad,Minuten,Sekunden";
 	$strgrad2="Grad Dezimalminuten";
+	$strPrintScale="Druckmaßstab";
+	$strPrintScaleAuto="automatisch berechnen";
+	$strPrintScaleLast="letzten Druckmaßstab verwenden";
 	$strHintTask="Jede Stelle umfasst verschiedene Themen, Funktionen und Rechte, die für unterschiedliche Aufgaben benötigt werden. Alle weiteren Optionen gelten innerhalb der hier ausgewählten Stelle.";
 	$strHintLanguage="Wählen Sie die Sprache, die in der Oberfläche verwendet werden soll.";
 	$strHintGUI="Wählen Sie die grafische Oberfläche aus.";
@@ -69,4 +72,5 @@
 	$strHintHighlight="Wenn Sie diese Option auswählen, werden Objekte von Themen, die abfragbar geschaltet sind, in der Karte mit blauem Rand hervorgehoben, wenn Sie mit dem Cursor darüber fahren.";
 	$strHinthist_timestamp="Wenn Sie hier ein Datum eingeben, werden ALKIS-Objekte in der Karte mit diesem historischen Stand dargestellt. Abfragen auf Flurstücke liefern ebenfalls Ergebnisse zu diesem historischen Stand.";
 	$strHintMenueButtons="Wenn Sie diese Option auswählen, werden oft verwendete Menüpunkte als separate Schaltfläche über dem Menü angezeigt.";
+	$strHintPrintScale="Wenn Sie die erste Option auswählen, wird ein geeigneter Druckmaßstab automatisch berechnet. Bei der zweiten Option wird der letzte verwendete Druckmaßstab benutzt.";
 ?>

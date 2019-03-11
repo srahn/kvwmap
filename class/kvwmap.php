@@ -5477,7 +5477,7 @@ class GUI {
 		else{
 			$this->meter_pro_einheit = 1;
 		}
-
+		if($this->user->rolle->print_scale != 'auto')$this->formvars['printscale'] = $this->user->rolle->print_scale;
 		if($this->formvars['printscale'] == ''){			# einen geeigneten Druckmaßstab berechnen
 			$dx = $this->map->extent->maxx-$this->map->extent->minx;
 			$dy = $this->map->extent->maxy-$this->map->extent->miny;
@@ -6444,6 +6444,9 @@ class GUI {
 				$this->formvars['refpoint_y'] = $this->formvars['center_y'] = $this->map->extent->miny + ($this->map->extent->maxy-$this->map->extent->miny)/2;
 				$this->formvars['worldprintwidth'] = $this->Docu->activeframe[0]['mapwidth'] * $this->formvars['printscale'] * 0.0003526;
 				$this->formvars['worldprintheight'] = $this->Docu->activeframe[0]['mapheight'] * $this->formvars['printscale'] * 0.0003526;
+			}
+			elseif($this->user->rolle->print_scale != 'auto'){
+				$this->user->rolle->savePrintScale($this->formvars['printscale']);
 			}
 			#echo $this->formvars['center_x'].'<br>';
 			#echo $this->formvars['center_y'].'<br>';

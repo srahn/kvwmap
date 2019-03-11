@@ -41,6 +41,7 @@
 	Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"];
 	Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions; ?>"];
 	Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
+	Text_print_scale=["<? echo $strHelp; ?>:","<? echo $strHintPrintScale; ?>"];
 
 	function start1(){
 		document.GUI.submit();
@@ -385,6 +386,19 @@ if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angem
 							</select>
 							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_coordtype, Style[0], document.getElementById('Tip13'))" onmouseout="htm()">
 							<div id="Tip13" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+						</td>
+					</tr>
+					<tr>
+						<td class="rollenwahl-option-header">
+							<? echo $strPrintScale; ?>:
+						</td>
+						<td class="rollenwahl-option-data">
+							<select name="print_scale">
+								<option value="auto" <? if($this->user->rolle->print_scale == "auto"){ echo "selected"; } ?>><? echo $strPrintScaleAuto; ?></option>
+								<option value="" <? if($this->user->rolle->print_scale != "auto"){ echo "selected"; } ?>><? echo $strPrintScaleLast; ?></option>
+							</select>
+							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_print_scale, Style[0], document.getElementById('Tip15'))" onmouseout="htm()">
+							<div id="Tip15" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 						</td>
 					</tr>
 					<tr>
