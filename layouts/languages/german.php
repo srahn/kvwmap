@@ -48,4 +48,9 @@
 	$this->newDataset="neuer Datensatz";
 	$this->noLabel="keine";
 	$this->histTimestamp="Zeitpunkt für historische Daten";
+	$this->properties="Eigenschaften";
+	$this->layerDefinition="Layerdefinition";
+	$this->attributeditor="Attributeditor";
+	$this->strPrivileges="Rechte";
+	$this->strStyles="Styles";
 ?>

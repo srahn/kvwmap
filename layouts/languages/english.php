@@ -47,5 +47,10 @@
 	$this->newDataset="new record";
 	$this->noLabel="no label";
 	$this->histTimestamp="Timestamp for historical data";
+	$this->properties="properties";
+	$this->layerDefinition="layer definition";
+	$this->attributeditor="attribut editor";
+	$this->strPrivileges="privileges";
+	$this->strStyles="styles";
 ?>
 	

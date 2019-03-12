@@ -125,7 +125,20 @@ class GUI {
 						<ul>';
 						if($this->formvars['layer_id'] < 0){
 							echo '<li><span>'.$this->strName.':</span> <input type="text" name="layer_options_name" value="'.$layer[0]['Name'].'"></li>';
-						}						
+						}
+						else{
+							if($this->Stelle->isMenueAllowed('Layer_Anzeigen')){
+								echo '<li><span><a href="javascript:toggle(document.getElementById(\'layer_properties\'));">'.$this->properties.'</a></span></li>';
+								echo '<div id="layer_properties" style="display: none">
+												<ul>
+													<li><a href="index.php?go=Layereditor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->layerDefinition.'</a></li>
+													<li><a href="index.php?go=Attributeditor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->attributeditor.'</a></li>
+													<li><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strPrivileges.'</a></li>
+													<li><a href="index.php?go=Style_Label_Editor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strStyles.'</a></li>
+												</ul>
+											</div>';
+							}
+						}
 						if($layer[0]['connectiontype']==6){
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
 							if($layer[0]['queryable']){
@@ -379,6 +392,27 @@ class stelle {
 		$this->Bezeichnung = $this->getName();
 		$this->readDefaultValues();
 	}
+	
+	function isMenueAllowed($menuename){
+		$sql = "SELECT distinct a.* from u_menues as a, u_menue2stelle as b ";
+		$sql.= "WHERE links LIKE 'index.php?go=".$menuename."%' AND b.menue_id = a.id AND b.stelle_id = ".$this->id;
+		#echo $sql;
+		$this->debug->write("<p>file:stelle.php class:stelle->isMenueAllowed - Guckt ob der Menuepunkt der Stelle zugeordnet ist:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
+			$errmsg='Fehler bei der Ueberpruefung des Menuepunkts für die Stelle';
+		}
+		else{
+			$rs=mysql_fetch_array($query);
+		}
+		if($rs[0] != '') {
+			return 1;
+		}
+		else {
+			return 0;
+		}
+	}	
 
 	function get_attributes_privileges($layer_id) {
 		$sql = "

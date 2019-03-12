@@ -368,8 +368,8 @@ a.invisiblelayerlink:hover{
 	margin: 5px;
 	padding: 0px;
 			padding-left: 0px;
-	padding-left: 5px;
-	list-style: square inside none;
+	padding-left: 15px;
+	list-style: square outside none;
 }
 
 .code{
@@ -1655,8 +1655,8 @@ tbody.gle tr {
 	color: lightsteelblue;
 	margin: 5px;
 	padding: 0px;
-	padding-left: 5px;
-	list-style: square inside none;
+	padding-left: 15px;
+	list-style: square outside none;
 }
 
 .layerOptions li, #legendOptions li{
@@ -1698,8 +1698,8 @@ tbody.gle tr {
 	color: lightsteelblue;
 	margin: 5px;
 	padding: 0px;
-	padding-left: 5px;
-	list-style: square inside none;
+	padding-left: 15px;
+	list-style: square outside none;
 }
 
 .groupOptions span{

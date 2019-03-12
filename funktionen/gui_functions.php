@@ -51,6 +51,11 @@ function roundNumber(num, scale){
   }
 }
 
+function toggle(obj){
+	if(obj.style.display == 'none')obj.style.display = '';
+	else obj.style.display = 'none';
+}
+
 function ImageLoadFailed(img) {
   img.parentNode.innerHTML = '';
 }
