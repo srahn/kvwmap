@@ -62,6 +62,12 @@ if ($show_legend_graphic) { ?>
 								<a href="javascript:toggleDrawingOrderForm();"><? echo $strDrawingOrder; ?></a>
 								<div id="drawingOrderForm"></div>
 							</li>
+							<li>
+								<a href="index.php?go=delete_rollenlayer&type=import"><? echo $strRemoveAllImportLayers; ?></a>
+							</li>
+							<li>
+								<a href="index.php?go=delete_rollenlayer&type=search"><? echo $strRemoveAllSearchLayers; ?></a>
+							</li>
 					</td>
 				</tr>
 				<tr>

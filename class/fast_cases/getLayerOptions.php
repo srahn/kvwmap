@@ -100,7 +100,7 @@ class GUI {
     include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'.php');
   }
 
-	function getLayerOptions() {
+	function getLayerOptions(){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if($this->formvars['layer_id'] > 0)$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
 		else $layer = $this->user->rolle->getRollenLayer(-$this->formvars['layer_id']);
@@ -124,6 +124,7 @@ class GUI {
 					<td>
 						<ul>';
 						if($this->formvars['layer_id'] < 0){
+							echo '<li><a href="index.php?go=delete_rollenlayer&id='.(-$this->formvars['layer_id']).'">'.$this->strRemove.'</a></li>';
 							echo '<li><span>'.$this->strName.':</span> <input type="text" name="layer_options_name" value="'.$layer[0]['Name'].'"></li>';
 						}
 						else{

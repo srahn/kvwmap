@@ -52,5 +52,6 @@
 	$this->attributeditor="attribut editor";
 	$this->strPrivileges="privileges";
 	$this->strStyles="styles";
+	$this->strRemove="remove";
 ?>
 	

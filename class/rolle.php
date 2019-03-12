@@ -851,45 +851,20 @@ class rolle {
     return $layer;
   }
 	
-	function resetLayers($layer_id) {
+	function resetLayers($layer_id){
 		$mapdb = new db_mapObj($this->stelle_id, $this->user_id);
-
-		if ($layer_id != '') {
-			if ($layer_id > 0) {
+		if($layer_id != ''){
+			if($layer_id > 0){
 				$this->update_layer_status($layer_id, '0');		# 1 normalen Layer deaktivieren
 			}
-			else {
-				# rollen layer
+			else{
 				$mapdb->deleteRollenLayer(-$layer_id);			# 1 Rollenlayer deaktivierten bzw. löschen
-				# auch die Klassen und styles löschen
-				if($rollenlayerset[$i]['Class'] != ''){
-					foreach($rollenlayerset[$i]['Class'] as $class){
-						$mapdb->delete_Class($class['Class_ID']);
-						foreach($class['Style'] as $style){
-							$mapdb->delete_Style($style['Style_ID']);
-						}
-					}
-				}
 			}
 		}
-		else {
+		else{
 			# gemeint sind alle layer
 			$this->update_layer_status(NULL, '0');						# alle normalen Layer deaktivieren
-			$rollenlayerset = $mapdb->read_RollenLayer();	# alle Rollenlayer deaktivieren bzw. löschen
-			for($i = 0; $i < count($rollenlayerset); $i++){
-				if($formvars['thema_rolle'.$rollenlayerset[$i]['id']] == 0){
-					$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
-					# auch die Klassen und styles löschen
-					if($rollenlayerset[$i]['Class'] != ''){
-						foreach($rollenlayerset[$i]['Class'] as $class){
-							$mapdb->delete_Class($class['Class_ID']);
-							foreach($class['Style'] as $style){
-								$mapdb->delete_Style($style['Style_ID']);
-							}
-						}
-					}
-				}
-			}
+			$mapdb->deleteRollenLayer();											# alle Rollenlayer deaktivieren bzw. löschen
 		}
 	}
 
@@ -939,13 +914,20 @@ class rolle {
 			$requires_status = $formvars['thema'.$this->layerset[$i]['requires']];
 			if(isset($aktiv_status) OR isset($requires_status)){										// entweder ist der Layer selber an oder sein requires-Layer
 				$aktiv_status = $aktiv_status + $requires_status;
-				$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
-				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-				$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
-				$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
-				$this->database->execSQL($sql,4, $this->loglevel);
-				
-				#Anne
+				if($this->layerset[$i]['Layer_ID'] > 0){
+					$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
+					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+					$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
+					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
+					$this->database->execSQL($sql,4, $this->loglevel);
+				}
+				else{						# Rollenlayer
+					$sql ='UPDATE rollenlayer SET aktivStatus="'.$aktiv_status.'"';
+					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+					$sql.=' AND id = -'.$this->layerset[$i]['Layer_ID'];
+					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
+					$this->database->execSQL($sql,4, $this->loglevel);
+				}
 				#neu eintragen der deaktiven Klassen
 				if($aktiv_status != 0){
 					$sql = 'SELECT Class_ID FROM classes WHERE Layer_ID='.$this->layerset[$i]['Layer_ID'].';';
@@ -963,30 +945,9 @@ class rolle {
 				}
 			}
 		}
-		if(!$ignore_rollenlayer){
-			$mapdb = new db_mapObj($stelle_id, $user_id);
-			$rollenlayerset = $mapdb->read_RollenLayer();
-			for($i = 0; $i < count($rollenlayerset); $i++){
-				if($formvars['thema'.$rollenlayerset[$i]['Layer_ID']] == 0){
-					$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
-					$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
-					# auch die Klassen und styles löschen
-					if($rollenlayerset[$i]['Class'] != ''){
-						foreach($rollenlayerset[$i]['Class'] as $class){
-							$mapdb->delete_Class($class['Class_ID']);
-							if($class['Style'] != ''){
-								foreach($class['Style'] as $style){
-									$mapdb->delete_Style($style['Style_ID']);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
 		return 1;
 	}
-
+	
 	function setQueryStatus($formvars) {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
 		for ($i=0;$i<count($this->layerset);$i++){

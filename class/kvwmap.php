@@ -248,7 +248,7 @@ class GUI {
 		}
 	}
 
-	function getLayerOptions() {
+	function getLayerOptions(){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if($this->formvars['layer_id'] > 0)$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
 		else $layer = $this->user->rolle->getRollenLayer(-$this->formvars['layer_id']);
@@ -272,6 +272,7 @@ class GUI {
 					<td>
 						<ul>';
 						if($this->formvars['layer_id'] < 0){
+							echo '<li><a href="index.php?go=reset_layers&layer_id='.$this->formvars['layer_id'].'">'.$this->strRemove.'</a></li>';
 							echo '<li><span>'.$this->strName.':</span> <input type="text" name="layer_options_name" value="'.$layer[0]['Name'].'"></li>';
 						}
 						else{
@@ -15438,6 +15439,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->adresswahl();
     }
   }
+	
+	function deleteRollenlayer(){
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$mapDB->deleteRollenlayer($this->formvars['id'], $this->formvars['type']);
+		$this->loadMap('DataBase');
+		$currenttime=date('Y-m-d H:i:s',time());
+		$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+		$this->saveMap('');
+		$this->drawMap();
+		$this->output();
+	}
 
 } # end of class GUI
 
@@ -16740,38 +16752,48 @@ class db_mapObj{
     }
   }
 
-  function deleteRollenLayer($id){
-  	$sql = 'SELECT Typ, Data, Datentyp FROM rollenlayer WHERE id = '.$id;
-  	$query=mysql_query($sql);
-		if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
-    $rs=mysql_fetch_array($query);
-    if($rs['Datentyp'] != 3 AND $rs['Typ'] == 'import'){		# beim Shape-Import-Layern die Tabelle löschen
-    	$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $rs['Data']);
-			$explosion = explode(' ', $explosion[1]);
-			$sql = "SELECT count(id) FROM rollenlayer WHERE Data like '%" . $explosion[0]."%'";
+  function deleteRollenLayer($id = NULL, $type = NULL){
+  	$rollenlayerset = $this->read_RollenLayer($id, $type);
+		for($i = 0; $i < count($rollenlayerset); $i++){
+			if($rollenlayerset[$i]['Datentyp'] != 3 AND $rollenlayerset[$i]['Typ'] == 'import'){		# beim Import-Layern die Tabelle löschen
+				$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $rollenlayerset[$i]['Data']);
+				$explosion = explode(' ', $explosion[1]);
+				$sql = "SELECT count(id) FROM rollenlayer WHERE Data like '%" . $explosion[0]."%'";
+				$query=mysql_query($sql);
+				if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+				$rs=mysql_fetch_array($query);
+				if($rs[0] == 1){		# Tabelle nur löschen, wenn das der einzige Layer ist, der sie benutzt
+					$sql = 'DROP TABLE IF EXISTS '.CUSTOM_SHAPE_SCHEMA.'.'.$explosion[0].';';
+					$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>" . $sql,4);
+					$query=pg_query($sql);
+				}
+			}
+			$sql = 'DELETE FROM rollenlayer WHERE id = '.$rollenlayerset[$i]['id'];
+			#echo $sql;
+			$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>" . $sql,4);
 			$query=mysql_query($sql);
 			if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
-			$rs=mysql_fetch_array($query);
-			if($rs[0] == 1){		# Tabelle nur löschen, wenn das der einzige Layer ist, der sie benutzt
-				$sql = 'DROP TABLE IF EXISTS '.CUSTOM_SHAPE_SCHEMA.'.'.$explosion[0].';';
-				$sql.= 'DELETE FROM geometry_columns WHERE f_table_schema = \''.CUSTOM_SHAPE_SCHEMA.'\' AND f_table_name = \''.$explosion[0].'\'';
-				$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>" . $sql,4);
-				$query=pg_query($sql);
+			if(MYSQLVERSION > 412){
+				# Den Autowert für die Layer_id zurücksetzen
+				$sql ="ALTER TABLE rollenlayer AUTO_INCREMENT = 1";
+				$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Zurücksetzen des Auto_Incrementwertes:<br>" . $sql,4);
+				#echo $sql;
+				$query=mysql_query($sql);
+				if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
 			}
-    }
-    $sql = 'DELETE FROM rollenlayer WHERE id = '.$id;
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>" . $sql,4);
-    $query=mysql_query($sql);
-		if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
-    if(MYSQLVERSION > 412){
-      # Den Autowert für die Layer_id zurücksetzen
-      $sql ="ALTER TABLE rollenlayer AUTO_INCREMENT = 1";
-      $this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Zurücksetzen des Auto_Incrementwertes:<br>" . $sql,4);
-      #echo $sql;
-      $query=mysql_query($sql);
-			if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
-    }
+			$this->delete_layer_attributes(-$rollenlayerset[$i]['id']);
+			# auch die Klassen und styles löschen
+			if($rollenlayerset[$i]['Class'] != ''){
+				foreach($rollenlayerset[$i]['Class'] as $class){
+					$this->delete_Class($class['Class_ID']);
+					if($class['Style'] != ''){
+						foreach($class['Style'] as $style){
+							$this->delete_Style($style['Style_ID']);
+						}
+					}
+				}
+			}
+		}
   }
 
 	function newRollenLayer($formvars){

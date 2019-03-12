@@ -1730,7 +1730,11 @@ function go_switch($go, $exit = false) {
 			
 			case 'geo_name_query' : {
 				$GUI->geo_name_query();
-			} break;			
+			} break;
+
+			case 'delete_rollenlayer' : {
+				$GUI->deleteRollenlayer();
+			} break;
 
 			default : {
 				# Karteninformationen lesen
