@@ -8551,8 +8551,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     	$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
     }
     if($this->formvars['selected_layer_id']){
-    	if($this->formvars['layer_id'] == '')$this->formvars['layer_id'] = $this->formvars['selected_layer_id'];
-    	$data = $mapdb->getData($this->formvars['layer_id']);
+    	if($this->formvars['geom_from_layer'] == '')$this->formvars['geom_from_layer'] = $this->formvars['selected_layer_id'];
+    	$data = $mapdb->getData($this->formvars['geom_from_layer']);
 	    $data_explosion = explode(' ', $data);
 	    $this->formvars['columnname'] = $data_explosion[0];
     	if($this->formvars['map_flag'] != ''){
@@ -10818,14 +10818,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
     $showpolygon = true;
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
-  	if(!$this->formvars['layer_id']){
+  	if(!$this->formvars['geom_from_layer']){
       $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $this->formvars['layer_id'] = $layerset[0]['Layer_ID'];
+      $this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
     }
-    if($this->formvars['layer_id']){
+    if($this->formvars['geom_from_layer']){
 	    # Geometrie-Übernahme-Layer:
 	    # Spaltenname und from-where abfragen
-	    $data = $this->mapDB->getData($this->formvars['layer_id']);
+	    $data = $this->mapDB->getData($this->formvars['geom_from_layer']);
 	    #echo $data;
 	    $data_explosion = explode(' ', $data);
 	    $this->formvars['columnname'] = $data_explosion[0];

@@ -222,7 +222,7 @@
 			remove_vertices();
 			remove_in_between_vertices();
 		}
-		top.get_map_ajax(postdata, \'\', \'\');
+		top.get_map_ajax(postdata, \'\', \'document.GUI.oldscale.value=document.GUI.nScale.value\');
 	}
 	
 	function submit(){
