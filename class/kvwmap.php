@@ -12833,13 +12833,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
 							$ret = $layerdb[$layer_id]->execSQL($sql, 4, 1, true);
-							if ($last_notice = $msg = pg_last_notice($layerdb[$layer_id]->dbConn)) {
-								if ($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true)) {
-									$msg = $notice_result['msg'];
-								}
-								$this->add_message($notice_result['msg_type'], $msg);
-							}
-
 							if ($ret['success']) {
 								$result = pg_fetch_row($ret['query']);
 								if (pg_affected_rows($ret['query']) > 0) {
