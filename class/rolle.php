@@ -264,6 +264,15 @@ class rolle {
     return 1;
   }
 	
+	function savePrintScale($print_scale){
+    $sql ='UPDATE rolle SET print_scale = "'.$print_scale.'"';
+    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+    #echo $sql;
+    $this->debug->write("<p>file:rolle.php class:rolle function:savePrintScale - Speichern der Einstellungen zur Rolle:",4);
+    $this->database->execSQL($sql,4, $this->loglevel);
+    return 1;
+  }	
+	
 	function saveGeomFromLayer($layer_id, $geom_from_layer_id){
     $sql ='UPDATE u_rolle2used_layer SET geom_from_layer = '.$geom_from_layer_id;
     $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND layer_id = '.$layer_id;
@@ -356,6 +365,7 @@ class rolle {
 			$this->visually_impaired = $rs['visually_impaired'];
 			$this->legendtype = $rs['legendtype'];
 			$this->print_legend_separate = $rs['print_legend_separate'];
+			$this->print_scale = $rs['print_scale'];
 			if($rs['hist_timestamp'] != ''){
 				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
@@ -468,10 +478,10 @@ class rolle {
     return $ret;
   }
 
-  # 2006-02-16 pk
-  function  getConsume($consumetime) {
+  function getConsume($consumetime, $user_id = NULL) {
+		if($user_id == NULL)$user_id = $this->user_id;		# man kann auch eine user_id übergeben um den Kartenausschnitt eines anderen Users abzufragen
     $sql ='SELECT * FROM u_consume';
-    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+    $sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$this->stelle_id;
     $sql.=' AND time_id="'.$consumetime.'"';
     #echo '<br>'.$sql;
     $queryret=$this->database->execSQL($sql,4, 0);
@@ -841,45 +851,20 @@ class rolle {
     return $layer;
   }
 	
-	function resetLayers($layer_id) {
+	function resetLayers($layer_id){
 		$mapdb = new db_mapObj($this->stelle_id, $this->user_id);
-
-		if ($layer_id != '') {
-			if ($layer_id > 0) {
+		if($layer_id != ''){
+			if($layer_id > 0){
 				$this->update_layer_status($layer_id, '0');		# 1 normalen Layer deaktivieren
 			}
-			else {
-				# rollen layer
+			else{
 				$mapdb->deleteRollenLayer(-$layer_id);			# 1 Rollenlayer deaktivierten bzw. löschen
-				# auch die Klassen und styles löschen
-				if($rollenlayerset[$i]['Class'] != ''){
-					foreach($rollenlayerset[$i]['Class'] as $class){
-						$mapdb->delete_Class($class['Class_ID']);
-						foreach($class['Style'] as $style){
-							$mapdb->delete_Style($style['Style_ID']);
-						}
-					}
-				}
 			}
 		}
-		else {
+		else{
 			# gemeint sind alle layer
 			$this->update_layer_status(NULL, '0');						# alle normalen Layer deaktivieren
-			$rollenlayerset = $mapdb->read_RollenLayer();	# alle Rollenlayer deaktivieren bzw. löschen
-			for($i = 0; $i < count($rollenlayerset); $i++){
-				if($formvars['thema_rolle'.$rollenlayerset[$i]['id']] == 0){
-					$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
-					# auch die Klassen und styles löschen
-					if($rollenlayerset[$i]['Class'] != ''){
-						foreach($rollenlayerset[$i]['Class'] as $class){
-							$mapdb->delete_Class($class['Class_ID']);
-							foreach($class['Style'] as $style){
-								$mapdb->delete_Style($style['Style_ID']);
-							}
-						}
-					}
-				}
-			}
+			$mapdb->deleteRollenLayer();											# alle Rollenlayer deaktivieren bzw. löschen
 		}
 	}
 
@@ -929,13 +914,20 @@ class rolle {
 			$requires_status = $formvars['thema'.$this->layerset[$i]['requires']];
 			if(isset($aktiv_status) OR isset($requires_status)){										// entweder ist der Layer selber an oder sein requires-Layer
 				$aktiv_status = $aktiv_status + $requires_status;
-				$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
-				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-				$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
-				$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
-				$this->database->execSQL($sql,4, $this->loglevel);
-				
-				#Anne
+				if($this->layerset[$i]['Layer_ID'] > 0){
+					$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
+					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+					$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
+					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
+					$this->database->execSQL($sql,4, $this->loglevel);
+				}
+				else{						# Rollenlayer
+					$sql ='UPDATE rollenlayer SET aktivStatus="'.$aktiv_status.'"';
+					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+					$sql.=' AND id = -'.$this->layerset[$i]['Layer_ID'];
+					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
+					$this->database->execSQL($sql,4, $this->loglevel);
+				}
 				#neu eintragen der deaktiven Klassen
 				if($aktiv_status != 0){
 					$sql = 'SELECT Class_ID FROM classes WHERE Layer_ID='.$this->layerset[$i]['Layer_ID'].';';
@@ -953,30 +945,9 @@ class rolle {
 				}
 			}
 		}
-		if(!$ignore_rollenlayer){
-			$mapdb = new db_mapObj($stelle_id, $user_id);
-			$rollenlayerset = $mapdb->read_RollenLayer();
-			for($i = 0; $i < count($rollenlayerset); $i++){
-				if($formvars['thema'.$rollenlayerset[$i]['Layer_ID']] == 0){
-					$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
-					$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
-					# auch die Klassen und styles löschen
-					if($rollenlayerset[$i]['Class'] != ''){
-						foreach($rollenlayerset[$i]['Class'] as $class){
-							$mapdb->delete_Class($class['Class_ID']);
-							if($class['Style'] != ''){
-								foreach($class['Style'] as $style){
-									$mapdb->delete_Style($style['Style_ID']);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
 		return 1;
 	}
-
+	
 	function setQueryStatus($formvars) {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
 		for ($i=0;$i<count($this->layerset);$i++){
@@ -1431,14 +1402,15 @@ class rolle {
 		return 1;
 	}
 
-	function getMapComments($consumetime) {
-		$sql ='SELECT time_id,comment FROM u_consume2comments WHERE';
-		$sql.=' user_id='.$this->user_id;
-		$sql.=' AND stelle_id='.$this->stelle_id;
+	function getMapComments($consumetime, $public = false) {
+		$sql ='SELECT c.user_id, c.time_id, c.comment, c.public, u.Name, u.Vorname FROM u_consume2comments as c, user as u WHERE c.user_id = u.ID AND (';
+		if($public)$sql.=' c.public OR';
+		$sql.=' c.user_id='.$this->user_id;
+		$sql.=') AND c.stelle_id='.$this->stelle_id;
 		if ($consumetime!='') {
 			$sql.=' AND time_id="'.$consumetime.'"';
 		}
-		$sql.=' ORDER BY time_id DESC';
+		$sql.=' ORDER BY c.time_id DESC';
 		#echo '<br>'.$sql;
 		$queryret=$this->database->execSQL($sql,4, 0);
 		if ($queryret[0]) {
@@ -1491,12 +1463,14 @@ class rolle {
 		return $ret;
 	}
 
-	function insertMapComment($consumetime,$comment) {
+	function insertMapComment($consumetime,$comment,$public) {
+		if($public == '')$public = 0;
 		$sql ='REPLACE INTO u_consume2comments SET';
 		$sql.=' user_id='.$this->user_id;
 		$sql.=', stelle_id='.$this->stelle_id;
 		$sql.=', time_id="'.$consumetime.'"';
 		$sql.=', comment="'.$comment.'"';
+		$sql.=', public = '.$public;
 		#echo '<br>'.$sql;
 		$queryret=$this->database->execSQL($sql,4, 1);
 		if ($queryret[0]) {

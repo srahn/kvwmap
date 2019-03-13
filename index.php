@@ -729,7 +729,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'Kartenkommentar_Zoom' : {
-				$GUI->zoomToStoredMapExtent($GUI->formvars['storetime']);
+				$GUI->zoomToStoredMapExtent($GUI->formvars['storetime'], $GUI->formvars['user_id']);
 			}break;
 
 			case 'Kartenkommentar_loeschen' : {
@@ -1730,7 +1730,11 @@ function go_switch($go, $exit = false) {
 			
 			case 'geo_name_query' : {
 				$GUI->geo_name_query();
-			} break;			
+			} break;
+
+			case 'delete_rollenlayer' : {
+				$GUI->deleteRollenlayer();
+			} break;
 
 			default : {
 				# Karteninformationen lesen

@@ -1543,7 +1543,12 @@ class ALB {
               }
               $pdf->addText($col1,$row-=12,$fontSize,$flst->Nutzung[$i]['flaeche'].' m²');
               $pdf->addText($col2,$row,$fontSize,'('.$flst->Nutzung[$i]['nutzungskennz'].')');
-              $Nutzunglangtext=$flst->Nutzung[$i]['bezeichnung'];
+              $Nutzunglangtext = '';
+							if($flst->Nutzung[$i]['untergliederung2'])$Nutzunglangtext = $flst->Nutzung[$i]['untergliederung2'].' ';
+							if($flst->Nutzung[$i]['untergliederung1'])$Nutzunglangtext.= $flst->Nutzung[$i]['untergliederung1'].' ';
+							if($flst->Nutzung[$i]['nutzungsart'])$Nutzunglangtext.= $flst->Nutzung[$i]['nutzungsart'].' ';
+							if($Nutzunglangtext != '')$Nutzunglangtext.= '(Gruppe: '.$flst->Nutzung[$i]['gruppe'].') ';
+							else $Nutzunglangtext.= $flst->Nutzung[$i]['gruppe'];
               if ($flst->Nutzung[$i]['abkuerzung']!='') {
                 $Nutzunglangtext.=' ('.$flst->Nutzung[$i]['abkuerzung'].')';
               }
@@ -2069,7 +2074,12 @@ class ALB {
             if ($i>=1) {
               $row-=12;
             }
-            $Nutzunglangtext=$flst->Nutzung[$i]['bezeichnung'];
+            $Nutzunglangtext = '';
+						if($flst->Nutzung[$i]['untergliederung2'])$Nutzunglangtext = $flst->Nutzung[$i]['untergliederung2'].' ';
+						if($flst->Nutzung[$i]['untergliederung1'])$Nutzunglangtext.= $flst->Nutzung[$i]['untergliederung1'].' ';
+						if($flst->Nutzung[$i]['nutzungsart'])$Nutzunglangtext.= $flst->Nutzung[$i]['nutzungsart'].' ';
+						if($Nutzunglangtext != '')$Nutzunglangtext.= '(Gruppe: '.$flst->Nutzung[$i]['gruppe'].') ';
+						else $Nutzunglangtext.= $flst->Nutzung[$i]['gruppe'];
             if ($flst->Nutzung[$i]['abkuerzung']!='') {
               $Nutzunglangtext.=' ('.$flst->Nutzung[$i]['abkuerzung'].')';
             }
