@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE `u_consume2comments` ADD `public` BOOLEAN NOT NULL DEFAULT FALSE;
+
+COMMIT;

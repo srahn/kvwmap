@@ -11703,17 +11703,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
 # 2006-03-20 pk
-  function zoomToStoredMapExtent($storetime){
+  function zoomToStoredMapExtent($storetime, $user_id){
     # Karteninformationen lesen
     $this->loadMap('DataBase');
     # Abfragen der gespeicherten Kartenausdehnung
-    $ret=$this->user->rolle->getConsume($storetime);
+    $ret=$this->user->rolle->getConsume($storetime, $user_id);
     if ($ret3[0]) {
       $this->errmsg="Der gespeicherte Kartenausschnitt konnte nicht abgefragt werden.<br>" . $ret[1];
     }
     else {
-      $this->user->rolle->set_last_time_id($storetime);
-      $this->user->rolle->newtime = $storetime;
 			$rect = ms_newRectObj();
 			$rect->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
 			if($ret[1]['epsg_code'] != '' AND $ret[1]['epsg_code'] != $this->user->rolle->epsg_code){
@@ -11733,6 +11731,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       #echo '<br>gewechselt auf Einstellung von:'.$this->consumetime;
     }
     $this->saveMap('');
+		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
     $this->drawMap();
     $this->output();
   }
@@ -11839,7 +11838,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
   function mapCommentStore() {
-    $ret=$this->user->rolle->insertMapComment($this->formvars['consumetime'],$this->formvars['comment']);
+    $ret=$this->user->rolle->insertMapComment($this->formvars['consumetime'],$this->formvars['comment'], $this->formvars['public']);
 		$this->add_message('notice', 'Ausschnitt gespeichert.');
     $ret=$this->user->rolle->getConsume($this->formvars['consumetime']);
     if ($ret[0]) {
@@ -11875,7 +11874,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   function mapCommentSelectForm() {
     $this->main='MapCommentSelectForm.php';
-    $ret=$this->user->rolle->getMapComments(NULL);
+    $ret=$this->user->rolle->getMapComments(NULL, true);
     if ($ret[0]) {
       $this->Fehlermeldung='Es konnten keine gespeicherten Kartenausschnitte abgefragt werden.<br>'.$ret[1];
     }

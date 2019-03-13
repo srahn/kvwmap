@@ -478,10 +478,10 @@ class rolle {
     return $ret;
   }
 
-  # 2006-02-16 pk
-  function  getConsume($consumetime) {
+  function getConsume($consumetime, $user_id = NULL) {
+		if($user_id == NULL)$user_id = $this->user_id;		# man kann auch eine user_id übergeben um den Kartenausschnitt eines anderen Users abzufragen
     $sql ='SELECT * FROM u_consume';
-    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+    $sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$this->stelle_id;
     $sql.=' AND time_id="'.$consumetime.'"';
     #echo '<br>'.$sql;
     $queryret=$this->database->execSQL($sql,4, 0);
@@ -1402,14 +1402,15 @@ class rolle {
 		return 1;
 	}
 
-	function getMapComments($consumetime) {
-		$sql ='SELECT time_id,comment FROM u_consume2comments WHERE';
-		$sql.=' user_id='.$this->user_id;
-		$sql.=' AND stelle_id='.$this->stelle_id;
+	function getMapComments($consumetime, $public = false) {
+		$sql ='SELECT c.user_id, c.time_id, c.comment, c.public, u.Name, u.Vorname FROM u_consume2comments as c, user as u WHERE c.user_id = u.ID AND (';
+		if($public)$sql.=' c.public OR';
+		$sql.=' c.user_id='.$this->user_id;
+		$sql.=') AND c.stelle_id='.$this->stelle_id;
 		if ($consumetime!='') {
 			$sql.=' AND time_id="'.$consumetime.'"';
 		}
-		$sql.=' ORDER BY time_id DESC';
+		$sql.=' ORDER BY c.time_id DESC';
 		#echo '<br>'.$sql;
 		$queryret=$this->database->execSQL($sql,4, 0);
 		if ($queryret[0]) {
@@ -1462,12 +1463,14 @@ class rolle {
 		return $ret;
 	}
 
-	function insertMapComment($consumetime,$comment) {
+	function insertMapComment($consumetime,$comment,$public) {
+		if($public == '')$public = 0;
 		$sql ='REPLACE INTO u_consume2comments SET';
 		$sql.=' user_id='.$this->user_id;
 		$sql.=', stelle_id='.$this->stelle_id;
 		$sql.=', time_id="'.$consumetime.'"';
 		$sql.=', comment="'.$comment.'"';
+		$sql.=', public = '.$public;
 		#echo '<br>'.$sql;
 		$queryret=$this->database->execSQL($sql,4, 1);
 		if ($queryret[0]) {
