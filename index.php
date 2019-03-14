@@ -1695,6 +1695,11 @@ function go_switch($go, $exit = false) {
 			case  'ALB_Anzeige_Bestand' : {
 				$GUI->ALB_Anzeigen(NULL, $GUI->formvars['formnummer'], $GUI->formvars['Grundbuchbezirk'], $GUI->formvars['Grundbuchblatt']);
 			} break;
+			
+			case  'generischer_Flurstuecksauszug' : {
+				$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);
+				$GUI->generischer_Flurstuecksauszug($flurst_array);
+			} break;			
 
 			 # Auswählen einer neuen Stelle
 			case 'Stelle_waehlen' : case 'Stelle_waehlen_Passwort_aendern' : {
