@@ -12373,6 +12373,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
     $this->output();
   }
+	
+	function generischer_Flurstuecksauszug(){
+		$this->formvars['value_flurstueckskennzeichen'] = '132427001001430003__|132427001001400001__';
+		$this->formvars['operator_flurstueckskennzeichen'] = 'IN';
+		$this->GenerischeSuche_Suchen();
+	}
 
   function rollenwahl($Stelle_ID) {
 		include_once(CLASSPATH.'FormObject.php');
