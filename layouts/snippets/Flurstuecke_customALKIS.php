@@ -106,9 +106,9 @@ hide_versions = function(flst){
     <?
 		
 		function sort_flst($a, $b){
-			if($a->Nachfolger == '' AND $b->Nachfolger != '')return 1;
-			if($a->FlurstNr == '' AND $b->FlurstNr != '')return 1;
-			return 0;
+			if($a->Nachfolger != '' AND $b->Nachfolger == '')return -1;		# historische
+			if($a->FlurstNr == '' AND $b->FlurstNr != '')return 1;				# nicht gefundene
+			return strcmp($a->FlurstKennz, $b->FlurstKennz);
 		}
 		
     for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){

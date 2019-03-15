@@ -682,18 +682,20 @@
 		if(polygonfunctions == true){
 			if(enclosingForm.always_draw.checked && !geomload){		// "weiterzeichnen"
 				enclosingForm.last_button.value = "pgon0";
+				enclosingForm.last_doing.value = enclosingForm.last_doing2.value;
+				console.log(enclosingForm.secondpoly.value);
 				if(enclosingForm.secondpoly.value == "started" || enclosingForm.secondpoly.value == "true"){	// am zweiten Polygon oder an einer gepufferten Linie wird weitergezeichnet
 					if(enclosingForm.last_doing2.value == "add_buffered_line")enclosingForm.last_button.value = "buffer1";
 					if(enclosingForm.last_doing2.value == "add_parallel_polygon")enclosingForm.last_button.value = "buffer2";
 					if(enclosingForm.last_doing2.value == "subtract_polygon")enclosingForm.last_button.value = "pgon_subtr0";
-					enclosingForm.last_doing.value = enclosingForm.last_doing2.value;
 					if(pathx_second.length == 1){				// ersten Punkt darstellen
 						document.getElementById("startvertex").setAttribute("cx", (pathx_second[0]-minx)/scale);
 						document.getElementById("startvertex").setAttribute("cy", (pathy_second[0]-miny)/scale);
 					}
 				}
-				else{																												// am ersten Polygon wird weitergezeichnet
-					enclosingForm.last_doing.value = "draw_polygon";
+				else{																											// am ersten Polygon wird weitergezeichnet
+					if(enclosingForm.last_doing2.value == "add_geom")enclosingForm.last_button.value = "ppquery1";
+					if(enclosingForm.last_doing2.value == "subtract_geom")enclosingForm.last_button.value = "ppquery2";
 					if(pathx.length == 1){							// ersten Punkt darstellen
 						document.getElementById("startvertex").setAttribute("cx", (pathx[0]-minx)/scale);
 						document.getElementById("startvertex").setAttribute("cy", (pathy[0]-miny)/scale);
@@ -1048,8 +1050,10 @@ function mouseup(evt){
 
 	function highlightbyid(id){
 		if(id != ""){			
-			//document.querySelector(".active").classList.remove("active");		// kann der IE nicht
-			document.querySelector(".active").className.baseVal = "navbutton_frame";	// deswegen dieser workaround
+			if(document.querySelector(".active")){
+				//document.querySelector(".active").classList.remove("active");		// kann der IE nicht
+				document.querySelector(".active").className.baseVal = "navbutton_frame";	// deswegen dieser workaround
+			}
 			//document.getElementById(id).classList.add("active");						// kann der IE nicht
 			document.getElementById(id).className.baseVal += " active";				// deswegen dieser workaround
 		  if(polygonfunctions == true){
@@ -1079,8 +1083,7 @@ function mouseup(evt){
 		dragdone  = false;
 		moving  = false;
 		moved  = false;
-		//document.getElementById(enclosingForm.last_button.value).classList.add("active");						// kann der IE nicht
-		document.getElementById(enclosingForm.last_button.value).className.baseVal += " active";				// deswegen dieser workaround		
+		highlightbyid(enclosingForm.last_button.value);
 		if(enclosingForm.last_doing.value == "recentre"){
 			document.getElementById("canvas").setAttribute("cursor", "move");
 	  	document.getElementById("canvas").setAttribute("cursor", "grab");
@@ -2302,7 +2305,6 @@ function mouseup(evt){
 					applypolygons();
 					must_redraw = false;
 				}
-				enclosingForm.secondpoly.value = "true";
 			}
 			if(must_redraw){
 				redrawsecondpolygon();
