@@ -78,9 +78,9 @@
 				<? # Gruppennamen
 					if($layer['attributes']['group'][0] != ''){
 						echo '<tr><td style="border:none"></td><td style="border:none"></td>';
-						$colspan = 1;
+						$colspan = 0;
 						for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
-							$colspan++;							
+							if($layer['attributes']['visible'][$j])$colspan++;
 							if($j == 0 OR $layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								if($explosion[1] != '')$collapsed = true;else $collapsed = false;
