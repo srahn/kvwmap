@@ -226,10 +226,16 @@ class rolle {
     return 1;
 	}
 	
-	function switch_gle_view($layer_id) {
-    $sql ='UPDATE u_rolle2used_layer SET gle_view = CASE WHEN gle_view IS NULL THEN 0 ELSE NOT gle_view END';
-    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND layer_id='.$layer_id;
-     #echo $sql;
+	function switch_gle_view($layer_id){
+		if($layer_id > 0){
+			$sql ='UPDATE u_rolle2used_layer SET gle_view = CASE WHEN gle_view IS NULL THEN 0 ELSE NOT gle_view END';
+			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND layer_id='.$layer_id;
+		}
+		else{
+			$sql ='UPDATE rollenlayer SET gle_view = CASE WHEN gle_view IS NULL THEN 0 ELSE NOT gle_view END';
+			$sql.=' WHERE id='.(-$layer_id);
+		}
+    #echo $sql;
     $this->debug->write("<p>file:rolle.php class:rolle function:switch_gle_view - Speichern der Einstellungen zur Rolle:",4);
     $this->database->execSQL($sql,4, $this->loglevel);
     return 1;
@@ -826,7 +832,13 @@ class rolle {
 	}
 
 	function getRollenLayer($LayerName, $typ = NULL) {
-		$sql ="SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable FROM rollenlayer AS l";
+		$sql ="
+			SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, 
+				CASE gle_view
+					WHEN '0' THEN 'generic_layer_editor.php'
+					ELSE ''
+				END as template 
+			FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
     if ($LayerName!='') {
       $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';

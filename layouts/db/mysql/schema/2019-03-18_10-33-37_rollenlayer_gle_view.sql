@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE `rollenlayer` ADD `gle_view` BOOLEAN NOT NULL DEFAULT FALSE;
+
+COMMIT;
