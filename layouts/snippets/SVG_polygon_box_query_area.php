@@ -27,7 +27,7 @@
 	<input name="gps_posy" type="hidden" value="<? echo $this->formvars['gps_posy']; ?>">
 	<input name="gps_follow" type="hidden" value="<? echo $this->formvars['gps_follow'] ?>">
 	<input name="last_button" type="hidden" value="<? echo $this->formvars['last_button']; ?>">
-	<input name="last_doing" type="hidden" value="<? echo $this->formvars['last_doing']; ?>">
+	<input name="last_doing" type="text" value="<? echo $this->formvars['last_doing']; ?>">
 	<input name="last_doing2" type="hidden" value="<? echo $this->formvars['last_doing2']; ?>">
 	<input name="lastcoordx" type="hidden" value="">
 	<input name="lastcoordy" type="hidden" value="">	

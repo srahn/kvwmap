@@ -682,7 +682,7 @@
 		if(polygonfunctions == true){
 			if(enclosingForm.always_draw.checked && !geomload){		// "weiterzeichnen"
 				enclosingForm.last_button.value = "pgon0";
-				enclosingForm.last_doing.value = enclosingForm.last_doing2.value;
+				if(enclosingForm.last_doing2.value != "")enclosingForm.last_doing.value = enclosingForm.last_doing2.value;
 				console.log(enclosingForm.secondpoly.value);
 				if(enclosingForm.secondpoly.value == "started" || enclosingForm.secondpoly.value == "true"){	// am zweiten Polygon oder an einer gepufferten Linie wird weitergezeichnet
 					if(enclosingForm.last_doing2.value == "add_buffered_line")enclosingForm.last_button.value = "buffer1";
