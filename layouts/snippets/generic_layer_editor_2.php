@@ -136,6 +136,7 @@
 						######### Attributname #########
 						if($layer['attributes']['labeling'][$j] != 2){
 							$cell['properties'] = 'class="gle-attribute-name"';
+							$cell['id'] = 'name_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
 							$cell['content'] = attribute_name($layer['Layer_ID'], $layer['attributes'], $j, $k, $this->user->rolle->fontsize_gle, ($this->formvars['printversion'] == '' AND $anzObj > 1) ? true : false);
 							if($nl AND $layer['attributes']['labeling'][$j] != 1){
 								$next_row['contains_attribute_names'] = true;
@@ -161,7 +162,7 @@
 
 						######### Attributwert #########
 						$cell['content'] = attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2, $this->user->rolle->fontsize_gle);
-						$cell['id'] = 'row'.$j;
+						$cell['id'] = 'value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
 						$cell['properties'] = get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value'));
 						if($nl){
 							$next_row['cells'][] = $cell;

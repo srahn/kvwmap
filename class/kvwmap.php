@@ -16330,6 +16330,9 @@ class db_mapObj{
 										if($further_options[$k] == 'embedded'){       # Subformular soll embedded angezeigt werden
                       $attributes['embedded'][$i] = true;
                     }
+                    elseif($further_options[$k] == 'horizontal'){       # Radiobuttons nebeneinander anzeigen
+                      $attributes['horizontal'][$i] = true;
+                    }										
                   }
                 }
               }
