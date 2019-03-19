@@ -12553,7 +12553,23 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       } # ende Suche nach Flur
     }
     else {
-			if($FlstNr != '')$this->flurstAnzeige(array($FlstNr));			# ein Flurstückskennzeichen wurde in das EIngabefeld eingetragen
+			if($FlstNr != ''){
+				if($this->formvars['ALK_Suche'] == 1){
+					$this->zoomToALKFlurst(array($FlstNr),10);
+					if($this->formvars['go_next'] != ''){
+						$this->saveMap('');
+						go_switch($this->formvars['go_next']);
+						exit();
+					}
+					$currenttime=date('Y-m-d H:i:s',time());
+					$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+					$this->drawMap();
+					$this->saveMap('');
+				}
+				else{
+					$this->flurstAnzeige(array($FlstNr));			# ein Flurstückskennzeichen wurde in das EIngabefeld eingetragen
+				}
+			}
 			else{
 				$this->Fehlermeldung='Wählen Sie eine Gemarkung!';
 				$this->flurstwahl();
