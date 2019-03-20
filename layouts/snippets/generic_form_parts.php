@@ -189,7 +189,7 @@
 						case 1 : {
 							$datapart .= '
 								<tr>
-									<td colspan="2" valign="top" class="gle-attribute-name">
+									<td id="name_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" colspan="2" valign="top" class="gle-attribute-name">
 										<table>
 											<tr>
 												<td>' . $type_attributes['alias'][$e] . '</td>
@@ -198,7 +198,7 @@
 									</td>
 								</tr>
 								<tr>
-									<td colspan="2" class="gle_attribute_value">
+									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" colspan="2" class="gle_attribute_value">
 										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
 									</td>
 								</tr>
@@ -207,7 +207,7 @@
 						case 2 : {
 							$datapart .= '
 								<tr>
-									<td colspan="2" class="gle_attribute_value">
+									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" colspan="2" class="gle_attribute_value">
 										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
 									</td>
 								</tr>
@@ -215,15 +215,15 @@
 						} break;
 						default : {
 							$datapart .= '
-								<tr id="tr_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" style="'.($type_attributes['vcheck_attribute'][$e] != ''? 'display: none' : '').'" class="' . $attribute_class . '">
-									<td valign="top" class="gle_attribute_name">
+								<tr id="tr_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" class="' . $attribute_class . '">
+									<td id="name_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" valign="top" class="gle_attribute_name">
 										<table>
 											<tr>
 												<td>' . $type_attributes['alias'][$e] . '</td>
 											</tr>
 										</table>
 									</td>
-									<td class="gle_attribute_value">
+									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" class="gle_attribute_value">
 										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
 									</td>
 								</tr>';

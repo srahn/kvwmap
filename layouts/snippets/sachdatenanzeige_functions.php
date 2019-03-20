@@ -73,7 +73,7 @@ include('funktionen/input_check_functions.php');
 			all_attributes_in_row = [].slice.call(row.childNodes);
 			row_display = 'none';
 			all_attributes_in_row.forEach(function(td){
-				if(td.id != '' && td.style.visibility != 'hidden'){
+				if(td.nodeType == 1 && td.id != '' && td.style.visibility != 'hidden'){
 					row_display = '';
 				}
 			})
