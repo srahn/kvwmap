@@ -14058,25 +14058,26 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
 					$sql_where .= " AND " . $layerset[$i]['Filter'];
 				}
-				#if($the_geom == 'query.the_geom'){
-					$sql = "SELECT * FROM (SELECT " . $pfad.") as query WHERE 1=1 " . $sql_where;
-				/*}
-				else{
-					$sql = "SELECT " . $pfad." " . $sql_where;
-				}
-				*/
 
 				# group by wieder einbauen
 				if($layerset[$i]['attributes']['groupby'] != ''){
-					$sql .= $layerset[$i]['attributes']['groupby'];
+					$pfad .= $layerset[$i]['attributes']['groupby'];
 					$j = 0;
 					foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
 						if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
-							$sql .= ','.$tablename.'_oid ';
+							$pfad .= ','.$tablename.'_oid ';
 						}
 						$j++;
 					}
 				}
+				
+				#if($the_geom == 'query.the_geom'){
+					$sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
+				/*}
+				else{
+					$sql = "SELECT ".$pfad." ".$sql_where;
+				}
+				*/
 
 				# order by wieder einbauen
 				if($layerset[$i]['attributes']['orderby'] != ''){										#  der Layer hat im Pfad ein ORDER BY
