@@ -329,7 +329,7 @@
 							if($enum_value[$e] == $value){
 								$datapart .= 'checked ';
 							}
-							$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$k.'_'.$e.'">'.$enum_output[$e].'</label>&nbsp;&nbsp;';
+							$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$k.'_'.$e.'">'.$enum_output[$e].'</label>&nbsp;&nbsp;&nbsp;&nbsp;';
 							if(!$attributes['horizontal'][$j])$datapart .= '<br>';
 						}
 					}
