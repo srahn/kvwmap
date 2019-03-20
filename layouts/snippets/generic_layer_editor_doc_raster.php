@@ -76,7 +76,7 @@
 <table border="0" cellspacing="0" cellpadding="2">
 	<tr>
 		<td>
-			<div style="max-width: 735px; display: flex; flex-wrap: wrap; align-items: flex-start">
+			<div style="<? if($this->new_entry != true)echo 'max-width: 735px;'; ?> display: flex; flex-wrap: wrap; align-items: flex-start">
 <?
 	$hover_preview = true;
 	$checkbox_names = '';
