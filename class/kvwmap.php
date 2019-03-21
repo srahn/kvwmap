@@ -4183,7 +4183,7 @@ class GUI {
 	function PointEditor() {
 		include_once(CLASSPATH . 'pointeditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-		$this->reduce_mapwidth(100);
+		$this->reduce_mapwidth(30);
 		$this->main = 'PointEditor.php';
 		$this->titel = 'Geometrie bearbeiten';
 		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);

@@ -273,7 +273,7 @@
 
 				if($this->new_entry == true){
 					if($privileg == 1){
-						if(!$this->user->rolle->geom_edit_first)echo $datapart.'</table><table class="tgle" border="0" cellspacing="0" cellpadding="0">';
+						if(!$this->user->rolle->geom_edit_first)echo $datapart.'</table><table style="width: 100%" class="tgle" border="0" cellspacing="0" cellpadding="0">';
 						if($nullable === '0'){ ?>
 							<script type="text/javascript">
     						geom_not_null = true;
