@@ -59,6 +59,7 @@ include('funktionen/input_check_functions.php');
 			var value = scope.querySelector('#vcheck_value_'+dependent).value;
 			if(operator == '=')operator = '==';
 			var tr_dependent = scope.querySelector('#tr_'+layer_id+'_'+dependent+'_'+k);
+			if(tr_dependent == null)return;
 			if(field_has_value(object, operator, value)){
 				tr_dependent.style.display = '';
 			}
