@@ -324,7 +324,7 @@
 							$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
 						}						
 						for($e = 0; $e < count($enum_value); $e++){
-							$datapart .= '<input class="'.$field_class.'" tabindex="1" type="radio" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'_'.$e.'"';
+							$datapart .= '<input class="'.$field_class.'" tabindex="1" type="radio" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'"';
 							$datapart .= ' onchange="'.$onchange.'" ';
 							if($enum_value[$e] == $value){
 								$datapart .= 'checked ';
