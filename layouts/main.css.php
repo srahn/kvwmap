@@ -1683,7 +1683,7 @@ tbody.gle tr {
 
 #legendOptionsIcon{
 	font-size: 1.1em;
-	margin: 0 0 0 42;
+	margin: 0 5px 0 42px;
 	height: 16px;
 	width: 16px;
 	padding: 5px;
