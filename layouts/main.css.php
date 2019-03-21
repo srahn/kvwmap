@@ -1601,6 +1601,61 @@ tbody.gle tr {
 	cursor: pointer;
 }
 
+.user-options {
+	display: none;
+	min-width: 200px;
+	border: 1px solid #cccccc;
+	background-color: #FFFFFF;
+	position:absolute;
+	-moz-box-shadow: 6px 5px 7px #777;
+	-webkit-box-shadow: 6px 5px 7px #777;
+	box-shadow: 6px 5px 7px #777;
+	margin: 0px 0px 0px -207px;
+	z-index: 2000;
+}
+
+.user-options-header {
+	background-color: #c7d9e6;
+	padding: 7px 7px 7px 7px;
+/*	width: 242px; */
+	font-weight: bolder;
+	z-index: 2000;
+}
+
+.user-options-section-header {
+	padding: 7px 0px 7px 7px;
+	z-index: 2000;
+}
+
+.options-devider {
+	background-color: #e1e4e8;
+	height: 1px;
+	margin: 0px 1px 0px 1px;
+	z-index: 2000;
+}
+
+.user-option {
+	padding: 7px 0px 7px 7px;
+	z-index: 2000;
+	cursor: pointer;
+}
+
+.user-option:hover {
+	background: linear-gradient(#dae4ec 0%, #c7d9e6 100%);
+	z-index: 2000;
+}
+
+.sperr-div {
+	display: none;
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	background: rgba(51,51,51,0.2);
+	z-index: 1000;
+}
+
 .layerOptions, #legendOptions{
 	min-width: 220px;
 	border: 1px solid #cccccc;
@@ -1628,7 +1683,7 @@ tbody.gle tr {
 
 #legendOptionsIcon{
 	font-size: 1.1em;
-	margin: 0 5px 0 42px;
+	margin: 0 0 0 42;
 	height: 16px;
 	width: 16px;
 	padding: 5px;
