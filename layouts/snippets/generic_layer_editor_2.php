@@ -80,7 +80,7 @@
 				$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 			}
 			?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
-	    <table id="dstable" class="tgle" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" style="width:100%" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
+	    <table id="dstable" class="tgle" style="width:100%; border-bottom: 1px solid grey" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
 				<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
         <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle"'; ?>>
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
@@ -273,7 +273,7 @@
 
 				if($this->new_entry == true){
 					if($privileg == 1){
-						if(!$this->user->rolle->geom_edit_first)echo $datapart.'</table><table class="tgle" border="0" cellspacing="0" cellpadding="2">';
+						if(!$this->user->rolle->geom_edit_first)echo $datapart.'</table><table class="tgle" border="0" cellspacing="0" cellpadding="0">';
 						if($nullable === '0'){ ?>
 							<script type="text/javascript">
     						geom_not_null = true;

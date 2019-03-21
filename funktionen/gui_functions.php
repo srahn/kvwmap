@@ -632,8 +632,14 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
 }
 
 function neuLaden(){
-	currentform.neuladen.value='true';
-	overlay_submit(currentform);
+	if(checkForUnsavedChanges()){
+		startwaiting(true);
+		if(currentform.neuladen != undefined){		// neu Laden in Fachschale
+			currentform.neuladen.value='true';
+			overlay_submit(currentform);
+		}
+		else document.GUI.go.value='neu Laden';		// neu Laden in Hauptkarte
+	}
 }
 
 function preventDefault(e){

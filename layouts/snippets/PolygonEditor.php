@@ -69,12 +69,11 @@ function buildwktpolygonfromsvgpath(svgpath){
 	}
 ?>
 
-<table style="border: 1px solid; border-collapse: separate; border-color: #eeeeee; border-left: none; border-right: none" width="760" border="0" cellpadding="0" cellspacing="5" bgcolor="<?php echo $bgcolor; ?>">
+<table style="border-bottom: 1px solid grey; border-collapse: separate;" width="760" border="0" cellpadding="0" cellspacing="5" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
-    <td align="center" colspan="5"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
+    <td align="center" colspan="4"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
   </tr>
   <tr> 
-    <td rowspan="9">&nbsp;</td>
     <td colspan="4" rowspan="9"> 
       <?
 				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php');
@@ -83,36 +82,24 @@ function buildwktpolygonfromsvgpath(svgpath){
   </tr>
   <tr>
   	<td>
-			<table cellspacing=4 cellpadding=0 border=0 style="border:1px solid #C3C7C3;" background="<? echo GRAPHICSPATH."bg.gif"; ?>">
-				<tr align="center">
-					<td><?php echo $strAvailableLayer; ?>:</td>
-				</tr>
-				<tr align="left">
-					<td>
-					<div align="center"><input type="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>"></div>
-					<br>
-					<div style="width:260px; height:<?php echo $this->map->height-247; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
-						&nbsp;
-						<img src="graphics/tool_info_2.png" alt="<? echo $strInfoQuery; ?>" title="<? echo $strInfoQuery; ?>" width="17">&nbsp;
-						<img src="graphics/layer.png" alt="<? echo $strLayerControl; ?>" title="<? echo $strLayerControl; ?>" width="20" height="20"><br>
-						<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
-						<div id="legend_div"><? echo $this->legende; ?></div>
-					</div>
-					</td>
-				</tr>
-			</table>
+			<div id="legenddiv" style="height: <? echo $this->map->height-180; ?>px;"	class="normallegend">
+				<?
+				$this->simple_legend = true;
+				include(SNIPPETS . 'legenddiv.php'); 
+				?>
+			</div>
 		</td>
   </tr>
   <tr>
 	  <? if($this->new_entry != true){ ?>
-  	<td align="center"><input type="button" style="visibility:hidden" name="split" value="Geometrie in neue Datensätze aufteilen" onclick="split_geometries();"></td>
+  	<td align="center"><input type="button" style="visibility:hidden" name="split" value="Geometrie in neue Objekte aufteilen" onclick="split_geometries();"></td>
 		<? }else{ ?>
 		<td style="height: 24px">&nbsp;</td>
 		<? } ?>
   </tr>
   <tr>
   	<td><? echo $strGeomFrom; ?>:<br>
-  		<select name="geom_from_layer" style="width: 260px" onchange="startwaiting(true);document.GUI.no_load.value='true';document.GUI.submit();">
+  		<select name="geom_from_layer" style="width: 250px" onchange="startwaiting(true);document.GUI.no_load.value='true';document.GUI.submit();">
 				<option value="0"> - alle - </option>
   			<?
 				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
@@ -150,7 +137,6 @@ function buildwktpolygonfromsvgpath(svgpath){
   </tr>
   <? } ?>
   <tr>
-  	<td>&nbsp;</td>
   	<td>
 			<div style="width:150px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
 				<div valign="top" style="height:0px; position:relative;">
@@ -198,6 +184,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 <INPUT TYPE="HIDDEN" NAME="oldscale" VALUE="<?php echo round($this->map_scaledenom); ?>">    
 <input type="hidden" name="layer_options_open" value="">
 <input type="hidden" name="neuladen" value="">
+<input type="hidden" name="scrollposition" value="">
 <? if($this->formvars['go'] == 'PolygonEditor'){ ?>
 	<INPUT TYPE="HIDDEN" NAME="go" VALUE="PolygonEditor" >
 	<INPUT TYPE="HIDDEN" NAME="selected_layer_id" VALUE="<?php echo $this->formvars['selected_layer_id']; ?>">

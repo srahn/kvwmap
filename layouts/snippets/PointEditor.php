@@ -38,12 +38,11 @@ else {
 }
 ?>
 
-<table style="border: 1px solid; border-collapse: separate; border-color: #eeeeee; border-left: none; border-right: none" width="760" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table style="border-bottom: 1px solid grey; border-collapse: separate;" width="760" border="0" cellpadding="0" cellspacing="5" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
-    <td align="center" colspan="5"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
+    <td align="center" colspan="4"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
   </tr>
   <tr> 
-    <td rowspan="4">&nbsp;</td>
     <td colspan="4" rowspan="4"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_point.php')
@@ -52,24 +51,12 @@ else {
   </tr>
   <tr>
   	<td>
-			<table cellspacing=4 cellpadding=0 border=0 style="border:1px solid #C3C7C3;" background="<? echo GRAPHICSPATH."bg.gif"; ?>">
-				<tr align="center">
-					<td><?php echo $strAvailableLayer; ?>:</td>
-				</tr>
-				<tr align="left">
-					<td>
-					<div align="center"><input type="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>"></div>
-					<br>
-					<div style="width:260px; height:<?php echo $this->map->height-196; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
-						&nbsp;
-						<img src="graphics/tool_info_2.png" alt="<? echo $strInfoQuery; ?>" title="<? echo $strInfoQuery; ?>" width="17">&nbsp;
-						<img src="graphics/layer.png" alt="<? echo $strLayerControl; ?>" title="<? echo $strLayerControl; ?>" width="20" height="20"><br>
-						<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
-						<div id="legend_div"><? echo $this->legende; ?></div>
-					</div>
-					</td>
-				</tr>
-			</table>
+			<div id="legenddiv" style="height: <? echo $this->map->height-80; ?>px;"	class="normallegend">
+				<?
+				$this->simple_legend = true;
+				include(SNIPPETS . 'legenddiv.php'); 
+				?>
+			</div>
 		</td>
   </tr>
 	<tr>
@@ -91,7 +78,6 @@ else {
   </tr>
   <? } ?>
   <tr>
-  	<td>&nbsp;</td>
   	<td>
 			<div style="width:150px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
 				<div valign="top" style="height:0px; position:relative;">
@@ -138,6 +124,7 @@ else {
 <INPUT TYPE="HIDDEN" NAME="oldscale" VALUE="<?php echo round($this->map_scaledenom); ?>"> 
 <input type="hidden" name="layer_options_open" value="">
 <input type="hidden" name="neuladen" value="">
+<input type="hidden" name="scrollposition" value="">
 <? if($this->formvars['go'] == 'PointEditor'){ ?>   
 	<INPUT TYPE="HIDDEN" NAME="go" VALUE="PointEditor" >
 <? } ?>

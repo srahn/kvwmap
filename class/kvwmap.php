@@ -4307,7 +4307,7 @@ class GUI {
   function LineEditor(){
 		include_once (CLASSPATH.'lineeditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$this->reduce_mapwidth(100);
+		$this->reduce_mapwidth(30);
     $this->main='LineEditor.php';
     $this->titel='Geometrie bearbeiten';
     $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -4471,7 +4471,7 @@ class GUI {
   function PolygonEditor(){
 		include_once (CLASSPATH.'polygoneditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$this->reduce_mapwidth(100);
+		$this->reduce_mapwidth(30);
    	$this->main='PolygonEditor.php';
     $this->titel='Geometrie bearbeiten';
     $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -9321,7 +9321,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$this->geomtype = $this->qlayerset[0]['attributes']['geomtype'][$this->qlayerset[0]['attributes']['the_geom']];
 				if ($this->geomtype != '') {
 					$this->user->rolle->saveGeomFromLayer($this->formvars['selected_layer_id'], $this->formvars['geom_from_layer']);
-					$saved_scale = $this->reduce_mapwidth(150);
+					$saved_scale = $this->reduce_mapwidth(30);
 					$oldscale=round($this->map_scaledenom);
 					if ($oldscale != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '') {
 						$this->neuLaden();
