@@ -44,6 +44,7 @@
 	$strgrad1="Degrees,Minutes,Seconds";
 	$strgrad2="Degrees Decimalminutes";
 	$strPrintScale="Print Scale";
+	$strThemeParameters="Theme Parameters";
 	$strPrintScaleAuto="calculate automatically";
 	$strPrintScaleLast="use last used printing scale";
 	$strHintTask="Task means different themes, funktions and rights which are needed for various assignments. All options mentioned below are related to the task you will select here.";
