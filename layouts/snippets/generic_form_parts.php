@@ -307,7 +307,7 @@
 					$enum_value = $attributes['enum_value'][$j];
 					$enum_output = $attributes['enum_output'][$j];
 					if($attributes['nullable'][$j] != '0' OR $gui->new_entry == true)$strPleaseSelect = $gui->strPleaseSelect;
-					if($privileg == '0' OR $lock){
+					if($attribute_privileg == '0' OR $lock){
 						for($e = 0; $e < count($enum_value); $e++){
 							if($enum_value[$e] == $value){
 								$auswahlfeld_output = $enum_output[$e];
