@@ -483,8 +483,9 @@ class GUI {
 				$layer_params[] = '"' . $param_key . '":"' . $value . '"';
 			}
 		}
-		if (!empty($layer_params))
+		if (!empty($layer_params)) {
 			$this->user->rolle->set_layer_params(implode(',', $layer_params));
+		}
 	}
 
 	function getNBH(){
@@ -12406,7 +12407,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=" . $from."&where=stelle_id=3 AND user_id=7";
     $StellenFormObj->outputHTML();
     $this->StellenForm=$StellenFormObj;
-    $this->main='rollenwahl.php';
+    $this->main = 'rollenwahl.php';
     # Suchen nach verfügbaren Layouts
     # aus dem Stammordner layouts (vom System angebotene)
     $this->layoutfiles = searchdir(LAYOUTPATH, false);

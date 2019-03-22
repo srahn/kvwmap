@@ -64,6 +64,50 @@
 
 <? if ($this->Fehlermeldung!='') {
        include(LAYOUTPATH."snippets/Fehlermeldung.php");
+}
+
+if ($this->formvars['nur_einstellungen']) { ?>
+	<div class="rollenwahl-gruppe">
+		<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett"><? echo 'Layer Parameter' ?></span></td>
+			</tr><?
+			$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
+			if ($params['error_message'] != '') {
+				$this->add_message('error', $params['error_message']);
+			}
+			else {
+				if (!empty($params)) { ?>
+					<tr>
+						<td class="rollenwahl-option-data">
+							<table><?
+								foreach($params AS $param) { ?>
+									<tr>
+										<td valign="top" class="rollenwahl-option-header">
+											<?php echo $param['alias']; ?>:
+										</td>
+										<td><?php
+											include_once(CLASSPATH.'FormObject.php');
+											echo FormObject::createSelectField(
+												'layer_parameter_' . $param['key'],		# name
+												$param['options'],										# options
+												rolle::$layer_params[$param['key']],	# value
+												1,																		# size
+												'',																		# style
+												'onLayerParameterChanged(this);',			# onchange
+												'layer_parameter_' . $param['key'],		# id
+												''																		# multiple
+											); ?>
+										</td>
+									</tr><?php
+								} ?>
+							</table>
+						</td>
+					</tr><?
+				}
+			} ?>
+		</table>
+	</div><?
 } ?>
 
 <div class="rollenwahl-gruppe">
@@ -73,26 +117,35 @@
 		</tr>
 		<tr>
 			<td class="rollenwahl-gruppen-options">
-				<table border="0" cellpadding="0" cellspacing="0">
-					<tr>						
-						<td valign="top" class="rollenwahl-option-header">
-							<? echo $strTask; ?>:
-						</td>
-						<td class="rollenwahl-option-data">
-							<div style="display: flex;">
-								<div style="float: left;">
-									<? echo $this->StellenForm->html; ?>
+				<table border="0" cellpadding="0" cellspacing="0"><?
+					if ($this->formvars['nur_einstellungen']) { ?>
+						<tr>
+							<td>
+								<input type="hidden" name="Stelle_ID" value="<? echo $this->user->stelle_id; ?>">
+							</td>
+						</tr><?
+					}
+					else { ?>
+						<tr>
+							<td valign="top" class="rollenwahl-option-header">
+								<? echo $strTask; ?>:
+							</td>
+							<td class="rollenwahl-option-data">
+								<div style="display: flex;">
+									<div style="float: left;">
+										<? echo $this->StellenForm->html; ?>
+									</div>
+									<div style="float: left; margin-left: 5px;">
+										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_task, Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
+										<div id="Tip1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+									</div>
+									<div style="width: 80px; text-align: center;">
+										<i id="sign_in_stelle" title="<? echo $this->strEnter; ?>" class="fa fa-sign-out fa-2x" onclick="document.GUI.submit();" style="cursor: pointer;display: none;"></i>
+									</div>
 								</div>
-								<div style="float: left; margin-left: 5px;">
-									<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_task, Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
-									<div id="Tip1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-								</div>
-								<div style="width: 80px; text-align: center;">
-									<i id="sign_in_stelle" title="<? echo $this->strEnter; ?>" class="fa fa-sign-out fa-2x" onclick="document.GUI.submit();" style="cursor: pointer;display: none;"></i>
-								</div>
-							</div>
-						</td>
-					</tr><?
+							</td>
+						</tr><?
+					}
 					if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) { ?>
 						<tr>
 							<td valign="top" class="rollenwahl-option-header">
@@ -195,7 +248,7 @@
 		</tr>
 	</table>
 </div><?
-
+###
 if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) { ?>
 	<div class="rollenwahl-gruppe">
 	<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">

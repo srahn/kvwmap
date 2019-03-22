@@ -348,13 +348,16 @@ if ($show_login_form) {
 }
 else {
 	$GUI->debug->write('Lade Stelle und ordne Rolle dem User zu.', 4, $GUI->echo);
+
+	$GUI->debug->write('Ordne Nutzer: ' . $GUI->user->id . ' Stelle: ' . $GUI->Stelle->ID . ' zu.', 4, $GUI->echo);
+	$GUI->user->setRolle($GUI->user->stelle_id);
+
 	# Alles was man immer machen muss bevor die go's aufgerufen werden
 	if (new_options_sent($GUI->formvars)) {
 		$GUI->debug->write('Speicher neue Stellenoptionen.', 4, $GUI->echo);
+		$GUI->setLayerParams();
 		$GUI->user->setOptions($GUI->user->stelle_id, $GUI->formvars);
 	}
-	$GUI->debug->write('Ordne Nutzer: ' . $GUI->user->id . ' Stelle: ' . $GUI->Stelle->ID . ' zu.', 4, $GUI->echo);
-	$GUI->user->setRolle($GUI->user->stelle_id);
 
 	#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
 	# Rollenbezogene Stellendaten zuweisen
