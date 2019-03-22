@@ -3087,7 +3087,7 @@ function mouseup(evt){
 	}
 
 	function polygonarea(){
-		area = top.document.getElementById("custom_area");
+		area = top.document.querySelector(".custom_area");
 		if(area == undefined){						// wenn es ein Flaeche-Attribut gibt, wird das verwendet, ansonsten die normale Flaechenanzeige
 			area = enclosingForm.area;
 		}
