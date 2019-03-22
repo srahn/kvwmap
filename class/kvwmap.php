@@ -4005,9 +4005,8 @@ class GUI {
 		return $result;
   }
 
-	function save_all_layer_attributes(){
+	function save_all_layer_attributes() {
 		$this->main='genericTemplate.php';
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->layerdaten = $mapDB->get_postgis_layers(NULL);
 		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
 			$layer = $mapDB->get_Layer($this->layerdaten['ID'][$i]);
@@ -4015,7 +4014,6 @@ class GUI {
 				$this->param['str1'].= 'Layer: '.$layer['Name'].'<br>';
 				echo 'Layer: '.$layer['Name'].'<br>';
 				$layerdb = $mapDB->getlayerdatabase($layer['Layer_ID'], $this->Stelle->pgdbhost);
-
 				$attributes = $mapDB->load_attributes(
 					$layerdb,
 					replace_params(
@@ -16142,32 +16140,32 @@ class db_mapObj{
     return $select;
   }
 
-  function getDataAttributes($database, $layer_id, $ifEmptyUseQuery = false){
-    $data = $this->getData($layer_id);
-    if($data != ''){
-      $select = $this->getSelectFromData($data);
-      if($database->schema != ''){
-      	$select = str_replace($database->schema.'.', '', $select);
-      }
-      $attribute = $database->getFieldsfromSelect($select);
-      return $attribute;
-    }
-    elseif($ifEmptyUseQuery){
+	function getDataAttributes($database, $layer_id, $ifEmptyUseQuery = false) {
+		$data = $this->getData($layer_id);
+		if ($data != '') {
+			$select = $this->getSelectFromData($data);
+			if ($database->schema != ''){
+				$select = str_replace($database->schema.'.', '', $select);
+			}
+			$attribute = $database->getFieldsfromSelect($select);
+			return $attribute;
+		}
+		elseif ($ifEmptyUseQuery){
 			$path = $this->getPath($layer_id);
 			return $this->getPathAttributes($database, $path);
 		}
-		else{
-      echo 'Das Data-Feld des Layers mit der Layer-ID '.$layer_id.' ist leer.';
-      return NULL;
-    }
-  }
+		else {
+			echo 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.';
+			return NULL;
+		}
+	}
 
-  function getPathAttributes($database, $path){
-    if($path != ''){
-      $attribute = $database->getFieldsfromSelect($path);
-      return $attribute;
-    }
-  }
+	function getPathAttributes($database, $path) {
+		if ($path != '') {
+			$attribute = $database->getFieldsfromSelect($path);
+			return $attribute;
+		}
+	}
 
   function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $only_current_enums = false){
     # Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
@@ -16429,11 +16427,11 @@ class db_mapObj{
     return $attributes;
   }
 
-  function load_attributes($database, $path){
-    # Attributname und Typ aus Pfad-Statement auslesen:
-    $attributes = $this->getPathAttributes($database, $path);
-    return $attributes;
-  }
+	function load_attributes($database, $path) {
+		# Attributname und Typ aus Pfad-Statement auslesen:
+		$attributes = $this->getPathAttributes($database, $path);
+		return $attributes;
+	}
 
 	function save_postgis_attributes($layer_id, $attributes, $maintable, $schema){
 		for($i = 0; $i < count($attributes); $i++){

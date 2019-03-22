@@ -66,48 +66,51 @@
        include(LAYOUTPATH."snippets/Fehlermeldung.php");
 }
 
-if ($this->formvars['nur_einstellungen']) { ?>
-	<div class="rollenwahl-gruppe">
-		<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
-			<tr>
-				<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett"><? echo 'Layer Parameter' ?></span></td>
-			</tr><?
-			$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
-			if ($params['error_message'] != '') {
-				$this->add_message('error', $params['error_message']);
-			}
-			else {
-				if (!empty($params)) { ?>
+if ($this->formvars['nur_einstellungen']) {
+	$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
+	if ($params['error_message'] != '') {
+		$this->add_message('error', $params['error_message']);
+	}
+	else {
+		if (!empty($params)) { ?>
+			<div class="rollenwahl-gruppe">
+				<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 					<tr>
-						<td class="rollenwahl-option-data">
-							<table><?
-								foreach($params AS $param) { ?>
-									<tr>
-										<td valign="top" class="rollenwahl-option-header">
-											<?php echo $param['alias']; ?>:
-										</td>
-										<td><?php
-											include_once(CLASSPATH.'FormObject.php');
-											echo FormObject::createSelectField(
-												'layer_parameter_' . $param['key'],		# name
-												$param['options'],										# options
-												rolle::$layer_params[$param['key']],	# value
-												1,																		# size
-												'',																		# style
-												'onLayerParameterChanged(this);',			# onchange
-												'layer_parameter_' . $param['key'],		# id
-												''																		# multiple
-											); ?>
-										</td>
-									</tr><?php
-								} ?>
-							</table>
-						</td>
+						<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett"><? echo $strThemeParameters; ?></span></td>
 					</tr><?
-				}
-			} ?>
-		</table>
-	</div><?
+					$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
+					if (!empty($params)) { ?>
+						<tr>
+							<td class="rollenwahl-option-data">
+								<table><?
+									foreach($params AS $param) { ?>
+										<tr>
+											<td valign="top" class="rollenwahl-option-header">
+												<?php echo $param['alias']; ?>:
+											</td>
+											<td><?php
+												include_once(CLASSPATH.'FormObject.php');
+												echo FormObject::createSelectField(
+													'layer_parameter_' . $param['key'],		# name
+													$param['options'],										# options
+													rolle::$layer_params[$param['key']],	# value
+													1,																		# size
+													'',																		# style
+													'onLayerParameterChanged(this);',			# onchange
+													'layer_parameter_' . $param['key'],		# id
+													''																		# multiple
+												); ?>
+											</td>
+										</tr><?php
+									} ?>
+								</table>
+							</td>
+						</tr><?
+					} ?>
+				</table>
+			</div><?
+		}
+	}
 } ?>
 
 <div class="rollenwahl-gruppe">
@@ -171,7 +174,7 @@ if ($this->formvars['nur_einstellungen']) { ?>
 										<tr>
 											<td><span class="px16"><? echo $strNewPassword; ?>: </span></td>
 											<td>
-												<input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password']; ?>" name="new_password"/><?php
+												<input style="width: 130px" type="password" value="<? echo $this->formvars['new_password']; ?>" name="new_password"/><?php
 												if (defined ('PASSWORD_INFO') AND PASSWORD_INFO != '') { ?>
 													<div style="float: right; margin-left: 5px;">
 														<img
@@ -186,7 +189,7 @@ if ($this->formvars['nur_einstellungen']) { ?>
 										</tr>
 										<tr>
 											<td><span class="px16"><? echo $strRepeatPassword; ?>: </span></td>
-											<td><input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password_2']; ?>" name="new_password_2"/></td>
+											<td><input style="width: 130px" type="password" value="<? echo $this->formvars['new_password_2']; ?>" name="new_password_2"/></td>
 										</tr>
 										<tr>
 											<td colspan="2" align="center">
