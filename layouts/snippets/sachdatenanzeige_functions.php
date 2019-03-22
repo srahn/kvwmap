@@ -93,9 +93,10 @@ include('funktionen/input_check_functions.php');
 	}
 	
 	field_has_value = function(field, operator, value){
-		field_value = field.value;
+		var field_value = field.value;
 		if(field.type == 'radio'){
-			field_value = document.querySelector('input[name="'+field.name+'"]:checked').value;
+			var radio = document.querySelector('input[name="'+field.name+'"]:checked');
+			if(radio != null)field_value = radio.value;
 		}
 		if(field.type == 'checkbox'){
 			if((operator == '==' && value == 't' && field.checked) || 
