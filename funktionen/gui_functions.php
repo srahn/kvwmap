@@ -638,7 +638,10 @@ function neuLaden(){
 			currentform.neuladen.value='true';
 			overlay_submit(currentform);
 		}
-		else document.GUI.go.value='neu Laden';		// neu Laden in Hauptkarte
+		else{
+			document.GUI.go.value='neu Laden';		// neu Laden in Hauptkarte
+			document.GUI.submit();
+		}
 	}
 }
 
