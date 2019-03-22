@@ -118,7 +118,7 @@
 										<tr>
 											<td><span class="px16"><? echo $strNewPassword; ?>: </span></td>
 											<td>
-												<input style="width: 130px" type="password" value="<? echo $this->formvars['new_password']; ?>" name="new_password"/>
+												<input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password']; ?>" name="new_password"/>
 												<div style="float: right; margin-left: 5px;">
 													<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_password, Style[0], document.getElementById('Tip1a'))" onmouseout="htm()">
 													<div id="Tip1a" style="visibility:hidden;position:absolute;z-index:1000;"></div>
@@ -127,7 +127,7 @@
 										</tr>
 										<tr>
 											<td><span class="px16"><? echo $strRepeatPassword; ?>: </span></td>
-											<td><input style="width: 130px" type="password" value="<? echo $this->formvars['new_password_2']; ?>" name="new_password_2"/></td>
+											<td><input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password_2']; ?>" name="new_password_2"/></td>
 										</tr>
 										<tr>
 											<td colspan="2" align="center">

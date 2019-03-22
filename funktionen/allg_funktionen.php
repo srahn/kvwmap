@@ -418,7 +418,7 @@ function isPasswordValide($oldPassword, $newPassword, $newPassword2) {
   }
 
   # Prüft die Länge des Passwortes
-  $strlen = strlen($newPassword);
+  $strlen = mb_strlen($newPassword);
   if($check == 0 and $strlen <= 5) {
     $password_errors[] = "ist zu kurz";
     $check = 1;
