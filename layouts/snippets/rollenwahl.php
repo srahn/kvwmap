@@ -174,7 +174,7 @@ if ($this->formvars['nur_einstellungen']) {
 										<tr>
 											<td><span class="px16"><? echo $strNewPassword; ?>: </span></td>
 											<td>
-												<input style="width: 130px" type="password" value="<? echo $this->formvars['new_password']; ?>" name="new_password"/><?php
+												<input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password']; ?>" name="new_password"/><?php
 												if (defined ('PASSWORD_INFO') AND PASSWORD_INFO != '') { ?>
 													<div style="float: right; margin-left: 5px;">
 														<img
@@ -189,7 +189,7 @@ if ($this->formvars['nur_einstellungen']) {
 										</tr>
 										<tr>
 											<td><span class="px16"><? echo $strRepeatPassword; ?>: </span></td>
-											<td><input style="width: 130px" type="password" value="<? echo $this->formvars['new_password_2']; ?>" name="new_password_2"/></td>
+											<td><input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password_2']; ?>" name="new_password_2"/></td>
 										</tr>
 										<tr>
 											<td colspan="2" align="center">
