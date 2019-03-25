@@ -9,6 +9,9 @@ class Gml_extractor {
 		$this->gmlas_schema = $gmlas_schema;
 		$this->xsd_location = '/var/www/html/modell/xsd/5.1/XPlanung-Operationen.xsd';
 		$this->docker_gdal_cmd = 'docker exec gdal';
+        #TODO parse the input system from the file (e.g. with ogrinfo) or have an input field on upload 
+		$this->input_epsg = '25833';
+		$this->epsg = '25832';
 	}
 
 	/*
@@ -122,7 +125,7 @@ class Gml_extractor {
 			if (preg_match('/id="([^"]+)"/', $line, $matched_gml_id)) {
 				break; #found it
 			}
-			# echo 'could not find BP_Plan gml-id within double quotes. checking single quotes:<br>';
+			# echo 'could not find XPlan gml-id within double quotes. checking single quotes:<br>';
 			if (preg_match('/id=\'([^"]+)\'/', $line, $matched_gml_id)) {
 				break; #found it
 			}
@@ -144,16 +147,17 @@ class Gml_extractor {
 	function ogr2ogr_gmlas() {
 		# For Logging add: . ' >> /var/www/logs/ogr_' . $gml_id . '.log 2>> /var/www/logs/ogr_' . $gml_id . '.err'
 		$cmd = $this->docker_gdal_cmd . ' ' . OGR_BINPATH_GDAL . 'ogr2ogr -f "PostgreSQL" PG:"host=' . $this->pgdatabase->host . ' dbname=' . $this->pgdatabase->dbName . ' user=' . $this->pgdatabase->user . ' password=' . $this->pgdatabase->passwd . ' SCHEMAS=' . $this->gmlas_schema .'" GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location;
-		#echo $cmd;
-		exec($cmd, $output);
-		#echo '<pre>'; print_r($output); echo '</pre>';
+		# echo $cmd;
+		exec($cmd, $output, $error_code);
+		# echo '<pre>'; print_r($output); echo '</pre>';
+		# echo 'Error-Code:' . $error_code;
 		return $output;
 	}
 
 	/*
 	* Cuts the gml_prefix of a gml_id if exists (required for uuid casts)
 	*/
-	function cut_gml_prefix_if_exists($gml_id) {
+	function trim_gml_prefix_if_exists($gml_id) {
 		#Removes prefix 'GML_', 'gml_' or 'Gml_ if it exists'
 		$mod_gml_id = $gml_id;
 		if(substr($gml_id, 0, strlen('GML_')) == 'GML_') $mod_gml_id = substr($gml_id, strlen('GML_'));
@@ -186,8 +190,8 @@ class Gml_extractor {
 	function fill_form_bp_plan($gml_id) {
 		$sql = "
 			SELECT
-				gmlas.oid,
-				trim(leading 'GML_' FROM gmlas.id)::text::uuid AS plan_gml_id,
+				gmlas.oid," . 
+				"'" . $this->trim_gml_prefix_if_exists($gml_id) . "'::text::uuid AS plan_gml_id,
 				gmlas.xplan_name AS name,
 				gmlas.nummer AS nummer,
 				gmlas.internalid AS internalid,
@@ -206,8 +210,8 @@ class Gml_extractor {
 				END AS wurdegeaendertvon,
 				gmlas.erstellungsmassstab AS erstellungsmassstab,
 				gmlas.bezugshoehe AS bezugshoehe,
-				st_assvg(st_transform(gmlas.raeumlichergeltungsbereich,25833), 0, 8) AS newpath,
-				st_astext(st_transform(gmlas.raeumlichergeltungsbereich,25833)) AS newpathwkt,
+				st_assvg(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg ."), 0, 8) AS newpath,
+				st_astext(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg .")) AS newpathwkt,
 				CASE WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
@@ -278,8 +282,8 @@ class Gml_extractor {
 	function fill_form_fp_plan($gml_id) {
 		$sql = "
 			SELECT
-				gmlas.oid,
-				trim(leading 'GML_' FROM gmlas.id)::text::uuid AS plan_gml_id,
+				gmlas.oid," . 
+				"'" . $this->trim_gml_prefix_if_exists($gml_id) . "'::text::uuid AS plan_gml_id,
 				gmlas.xplan_name AS name,
 				gmlas.nummer AS nummer,
 				gmlas.internalid AS internalid,
@@ -298,8 +302,8 @@ class Gml_extractor {
 				END AS wurdegeaendertvon,
 				gmlas.erstellungsmassstab AS erstellungsmassstab,
 				gmlas.bezugshoehe AS bezugshoehe,
-				st_assvg(st_transform(gmlas.raeumlichergeltungsbereich,25833), 0, 8) AS newpath,
-				st_astext(st_transform(gmlas.raeumlichergeltungsbereich,25833)) AS newpathwkt,
+				st_assvg(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg ."), 0, 8) AS newpath,
+				st_astext(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg .")) AS newpathwkt,
 				CASE WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
@@ -363,8 +367,8 @@ class Gml_extractor {
 	function fill_form_so_plan($gml_id) {
 		$sql = "
 			SELECT
-				gmlas.oid,
-				trim(leading 'GML_' FROM gmlas.id)::text::uuid AS plan_gml_id,
+				gmlas.oid," . 
+				"'" . $this->trim_gml_prefix_if_exists($gml_id) . "'::text::uuid AS plan_gml_id,
 				gmlas.xplan_name AS name,
 				gmlas.nummer AS nummer,
 				gmlas.internalid AS internalid,
@@ -383,8 +387,8 @@ class Gml_extractor {
 				END AS wurdegeaendertvon,
 				gmlas.erstellungsmassstab AS erstellungsmassstab,
 				gmlas.bezugshoehe AS bezugshoehe,
-				st_assvg(st_transform(gmlas.raeumlichergeltungsbereich,25833), 0, 8) AS newpath,
-				st_astext(st_transform(gmlas.raeumlichergeltungsbereich,25833)) AS newpathwkt,
+				st_assvg(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg ."), 0, 8) AS newpath,
+				st_astext(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg .")) AS newpathwkt,
 				CASE WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
@@ -450,16 +454,16 @@ class Gml_extractor {
 		$sql .= "
 				gehoertzuplan)
 			SELECT
-				trim(leading 'GML_' FROM gmlas.id)::text::uuid AS gml_id,
+				trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM gmlas.id)))::text::uuid AS gml_id,
 				gmlas.nummer AS nummer,
 				gmlas.xplan_name AS name,
 				gmlas.bedeutung::xplan_gml.xp_bedeutungenbereich AS bedeutung,
 				gmlas.detailliertebedeutung AS detailliertebedeutung,
 				gmlas.erstellungsmassstab AS erstellungsmassstab,
-				st_transform(gmlas.geltungsbereich,25833) AS geltungsbereich,
+				st_transform(gmlas.geltungsbereich,". $this->epsg .") AS geltungsbereich,
 				" . $user_id . " AS user_id,
 				" . $konvertierung_id . " AS konvertierung_id,
-				trim(leading '#GML_' FROM gmlas.rasterbasis_href) AS rasterbasis,";
+				trim(leading '#gml_' FROM lower(gmlas.rasterbasis_href)) AS rasterbasis,";
 
 		switch ($table) {
 			case 'so_bereich' : {
@@ -483,8 +487,10 @@ class Gml_extractor {
 				gmlas.versionbaugbdatum AS versionbaugbdatum,";
 			};
 		}
+		// string needs to be lowered both to simplify cutting #gml_ in all forms and
+		// because uuid (e.g. in gml_id of the associated plan) is always lowercase when cast to text
 		$sql .= "
-				trim(leading '#GML_' FROM gmlas.gehoertzuplan_href) AS gehoertzuplan
+				trim(leading '#gml_' FROM lower(gmlas.gehoertzuplan_href)) AS gehoertzuplan
 			FROM
 				" . $this->gmlas_schema . "." . $table . " gmlas
 			;";
@@ -790,7 +796,7 @@ class Gml_extractor {
 				erschliessungsvertrag boolean,
 				durchfuehrungsvertrag boolean,
 				gruenordnungsplan boolean,
-				raeumlichergeltungsbereich geometry(Geometry,25833),
+				raeumlichergeltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT bp_plan_pkey PRIMARY KEY (ogc_fid)
 			)
 			WITH (
@@ -828,7 +834,7 @@ class Gml_extractor {
 				gehoertzuplan_title character varying,
 				gehoertzuplan_nilreason character varying,
 				gehoertzuplan_pkid character varying,
-				geltungsbereich geometry(Geometry,25833),
+				geltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT bp_bereich_pkey PRIMARY KEY (ogc_fid)
 			)
 			WITH (
@@ -870,7 +876,7 @@ class Gml_extractor {
 				entwurfsbeschlussdatum date,
 				planbeschlussdatum date,
 				wirksamkeitsdatum date,
-				raeumlichergeltungsbereich geometry(Geometry,25833),
+				raeumlichergeltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT fp_plan_pkey PRIMARY KEY (ogc_fid)
 			)
 			WITH (
@@ -908,7 +914,7 @@ class Gml_extractor {
 				gehoertzuplan_title character varying,
 				gehoertzuplan_nilreason character varying,
 				gehoertzuplan_pkid character varying,
-				geltungsbereich geometry(Geometry,25833),
+				geltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT fp_bereich_pkey PRIMARY KEY (ogc_fid)
 			)
 			WITH (
@@ -939,7 +945,7 @@ class Gml_extractor {
 				planart_codespace character varying,
 				planart character varying,
 				plangeber_xp_plangeber_pkid character varying,
-				raeumlichergeltungsbereich geometry(Geometry,25833),
+				raeumlichergeltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT so_plan_pkey PRIMARY KEY (ogc_fid)
 			)
 			WITH (
@@ -971,7 +977,7 @@ class Gml_extractor {
 				gehoertzuplan_title character varying,
 				gehoertzuplan_nilreason character varying,
 				gehoertzuplan_pkid character varying,
-				geltungsbereich geometry(Geometry,25833),
+				geltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT so_bereich_pkey PRIMARY KEY (ogc_fid)
 			)
 			WITH (
@@ -1016,7 +1022,7 @@ class Gml_extractor {
 				datumdesinkrafttretens date,
 				verfahren character varying,
 				amtlicherschluessel integer,
-				raeumlichergeltungsbereich geometry(Geometry,25833),
+				raeumlichergeltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT rp_plan_pkey PRIMARY KEY (ogc_fid)
 			)
 			WITH (
@@ -1053,7 +1059,7 @@ class Gml_extractor {
 				gehoertzuplan_title character varying,
 				gehoertzuplan_nilreason character varying,
 				gehoertzuplan_pkid character varying,
-				geltungsbereich geometry(Geometry,25833),
+				geltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT rp_bereich_pkey PRIMARY KEY (ogc_fid)
 			)
 			WITH (
