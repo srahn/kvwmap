@@ -611,7 +611,7 @@
 					for($a = 0; $a < count($attributes['name']); $a++){
 						if(strpos($options, '$'.$attributes['name'][$a]) !== false){
 							$options = str_replace('$'.$attributes['name'][$a], $dataset[$attributes['name'][$a]], $options);
-							if(empty($dataset[$attributes['name'][$a]])) {
+							if($dataset[$attributes['name'][$a]] == ''){								
 								$one_param_is_null = true;
 							}
 							else {
