@@ -104,6 +104,7 @@ input[type="text"]{
 	font-size: 14px;
 	font-family: SourceSansPro1;
 	height: 22px;
+	padding-top: 0;
 }
 
 input[type="file"] {
