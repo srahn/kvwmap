@@ -630,7 +630,7 @@
 					if ($explosion[3] == 'all_not_null' and $one_param_is_null) {
 						$show_link = false;
 					}
-					$datapart .= '<input class="'.$field_class.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					if ($show_link) {
 						if($explosion[2] == 'embedded'){
 							$datapart .= '<a class="dynamicLink" href="javascript:if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
