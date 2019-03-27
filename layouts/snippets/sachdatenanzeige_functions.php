@@ -107,7 +107,14 @@ include('funktionen/input_check_functions.php');
 			else return false;
 		}
 		else{
-			return eval("'"+field_value+"' "+operator+" '"+value+"'")
+			if(operator == 'IN'){
+				value_array = value.split('|');
+				if(value_array.indexOf(field_value) > -1) return true;
+				else return false;
+			}
+			else{
+				return eval("'"+field_value+"' "+operator+" '"+value+"'")
+			}
 		}
 	}	
 	

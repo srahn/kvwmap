@@ -315,7 +315,7 @@
 								break;
 							}
 						}
-						$datapart .= '<input class="'.$field_class.'" readonly id="'.$layer_id.'_'.$name.'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$fieldname.'" value="'.$auswahlfeld_output.'">';
+						$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" readonly id="'.$layer_id.'_'.$name.'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$fieldname.'" value="'.$auswahlfeld_output.'">';
 						$auswahlfeld_output = '';
 						$auswahlfeld_output_laenge = '';
 					}

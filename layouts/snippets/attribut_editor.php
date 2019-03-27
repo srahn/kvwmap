@@ -429,7 +429,7 @@ function alias_replace(name){
 													<td><?
 														echo FormObject::createSelectField(
 																	'vcheck_operator_' . $this->attributes['name'][$i],
-																	array('=', '!=', '<', '>'),
+																	array('=', '!=', '<', '>', 'IN'),
 																	$this->attributes['vcheck_operator'][$i],
 																	1,
 																	'width: 35px'
