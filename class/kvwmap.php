@@ -8788,89 +8788,126 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$layer = $layers[0];
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
+		$attributes = $mapdb->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, NULL);
+		for($i = 0; $i < count($attributes['name']); $i++){
+			if($attributes['options'][$i] == 'delete'){					# statt zu Löschen soll hier nur ein Auto-Feld gesetzt werden
+				$attribute = $attributes['real_name'][$attributes['name'][$i]];
+				switch($attributes['form_element_type'][$i]){
+					case 'Time' : {
+						$instead_updates[] = $attribute." = '".date('Y-m-d G:i:s')."'";
+					} break;
+					case 'User' : {
+						$instead_updates[] = $attribute." = '".$this->user->Vorname." ".$this->user->Name."'";
+					} break;
+					case 'UserID' : {
+						$instead_updates[] = $attribute.' = '.$this->user->id;
+					} break;
+					case 'Stelle' : {
+						$instead_updates[] = $attribute." = '".$this->Stelle->Bezeichnung."'";
+					} break;
+					case 'StelleID' : {
+						$instead_updates[] = $attribute.' = '.$this->Stelle->id;
+					} break;
+				}
+			}
+		}
 		$results = array();
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
 		for($i = 0; $i < count($checkbox_names); $i++) {
 			if($this->formvars[$checkbox_names[$i]] == 'on') {
 				$element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
-
-				if (!empty($layer['trigger_function'])) {
-					$sql_old = "
-						SELECT
-							oid, *
-						FROM
-							{$element[2]}
-						WHERE
-							oid = {$element[3]}
-					";
-					#echo '<br>Sql before delete: ' . $sql_old; #pk
-					$ret = $layerdb->execSQL($sql_old, 4, 1, true);
-					if ($ret['success']) {
-						$old_dataset = pg_fetch_assoc($ret['query']);
-
-						# Rufe Before Delete trigger
-						$this->exec_trigger_function('BEFORE', 'DELETE', $layer, $element[3], $old_dataset);
-
-						# Rufe Instead Delete trigger auf
-						$trigger_result = $this->exec_trigger_function('INSTEAD', 'DELETE', $layer, $element[3], $old_dataset);
-					}
-					else {
-						$old_dataset = array();
-						$results[] = $ret['msg'];
-						$this->success = false;
-					}
-				}
-
-				if ($trigger_result['executed']) {
-					#echo '<br>Delete Trigger Funktion wurde ausgeführt.';
-					# Instead Triggerfunktion wurde ausgeführt, übergebe Erfolgsmeldung
-					$results[] = $trigger_result['message'];
-					$this->success = $trigger_result['success'];
-				}
-				else {
-					#echo '<br>Delete Trigger Funktion wurde nicht ausgeführt.';
-					# Instead Triggerfuktion wurde nicht ausgeführt
-					# Delete the object regularly in database
+				if(!empty($instead_updates)){			# statt zu Löschen sollen hier nur die Auto-Felder gesetzt werden
 					$sql = "
-						DELETE FROM
-							" . $element[2] . "
-						WHERE
-							oid = " . $element[3] . "
-					";
-					$oids[] = $element[3];
-					$ret = $layerdb->execSQL($sql, 4, 1, true);
-					if ($ret['success']) {
-						$last_notice = pg_last_notice($layerdb->dbConn);
-						$notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
-						$results[] = pg_fetch_row($ret['query']);
-						if (pg_affected_rows($ret['query']) == 0) {
-							if(!$notice_result['success']) {
-								$results[] = '<br>Datensatz wurde nicht gelöscht, weil er nicht existiert!<br>';
-								$this->success = false;
-							}
+							UPDATE
+								".$element[2]."
+							SET
+								".implode(', ', $instead_updates)."
+							WHERE
+								oid = ".$element[3];
+								echo $sql;
+						$ret = $layerdb->execSQL($sql, 4, 1, true);
+						$this->success = $ret['success'];
+				}
+				else{
+					if (!empty($layer['trigger_function'])) {
+						$sql_old = "
+							SELECT
+								oid, *
+							FROM
+								".$element[2]."
+							WHERE
+								oid = ".$element[3];
+						#echo '<br>Sql before delete: ' . $sql_old; #pk
+						$ret = $layerdb->execSQL($sql_old, 4, 1, true);
+						if ($ret['success']) {
+							$old_dataset = pg_fetch_assoc($ret['query']);
+
+							# Rufe Before Delete trigger
+							$this->exec_trigger_function('BEFORE', 'DELETE', $layer, $element[3], $old_dataset);
+
+							# Rufe Instead Delete trigger auf
+							$trigger_result = $this->exec_trigger_function('INSTEAD', 'DELETE', $layer, $element[3], $old_dataset);
+						}
+						else {
+							$old_dataset = array();
+							$results[] = $ret['msg'];
+							$this->success = false;
 						}
 					}
-					else {
-						$results[] = $ret['msg'];
-						$this->success = false;
-					}
-				}
 
-				if ($this->success) {
-					# After delete trigger
-					if (!empty($layer['trigger_function'])) {
-						$this->exec_trigger_function('AFTER', 'DELETE', $layer, '', $old_dataset);
+					if ($trigger_result['executed']) {
+						#echo '<br>Delete Trigger Funktion wurde ausgeführt.';
+						# Instead Triggerfunktion wurde ausgeführt, übergebe Erfolgsmeldung
+						$results[] = $trigger_result['message'];
+						$this->success = $trigger_result['success'];
+					}
+					else {
+						#echo '<br>Delete Trigger Funktion wurde nicht ausgeführt.';
+						# Instead Triggerfuktion wurde nicht ausgeführt
+						# Delete the object regularly in database
+						$sql = "
+							DELETE FROM
+								" . $element[2] . "
+							WHERE
+								oid = " . $element[3] . "
+						";
+						$oids[] = $element[3];
+						$ret = $layerdb->execSQL($sql, 4, 1, true);
+						if ($ret['success']) {
+							$last_notice = pg_last_notice($layerdb->dbConn);
+							$notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
+							$results[] = pg_fetch_row($ret['query']);
+							if (pg_affected_rows($ret['query']) == 0) {
+								if(!$notice_result['success']) {
+									$results[] = '<br>Datensatz wurde nicht gelöscht, weil er nicht existiert!<br>';
+									$this->success = false;
+								}
+							}
+						}
+						else {
+							$results[] = $ret['msg'];
+							$this->success = false;
+						}
+					}
+
+					if ($this->success) {
+						# After delete trigger
+						if (!empty($layer['trigger_function'])) {
+							$this->exec_trigger_function('AFTER', 'DELETE', $layer, '', $old_dataset);
+						}
 					}
 				}
 			}
 		}
 		# Dokumente auch löschen
-		$form_fields = explode('|', $this->formvars['form_field_names']);
-		for($i = 0; $i < count($form_fields); $i++){
-			if($form_fields[$i] != ''){
-				$element = explode(';', $form_fields[$i]);
-				if($element[4] == 'Dokument' AND in_array($element[3], $oids)){
-					$this->deleteDokument($this->formvars[$form_fields[$i].'_alt'], $layer['document_path'], $layer['document_url']);
+		if(empty($instead_updates)){
+			$form_fields = explode('|', $this->formvars['form_field_names']);
+			for($i = 0; $i < count($form_fields); $i++){
+				if($form_fields[$i] != ''){
+					$element = explode(';', $form_fields[$i]);
+					if($element[4] == 'Dokument' AND in_array($element[3], $oids)){
+						$this->deleteDokument($this->formvars[$form_fields[$i].'_alt'], $layer['document_path'], $layer['document_url']);
+					}
 				}
 			}
 		}
