@@ -8824,7 +8824,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								".implode(', ', $instead_updates)."
 							WHERE
 								oid = ".$element[3];
-								echo $sql;
 						$ret = $layerdb->execSQL($sql, 4, 1, true);
 						$this->success = $ret['success'];
 				}
