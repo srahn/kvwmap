@@ -823,12 +823,14 @@ include('funktionen/input_check_functions.php');
 	
 	switch_edit_all = function(layer_id){
 		if(document.getElementById('edit_all3_'+layer_id).style.display == 'none'){
+			var obj = document.getElementById(layer_id+'_0');
+			if(!obj.checked)selectall(layer_id);
 			document.getElementById('edit_all1_'+layer_id).style.display = 'none';			
 			document.getElementById('edit_all2_'+layer_id).style.display = '';
 			document.getElementById('edit_all3_'+layer_id).style.display = '';
 			document.getElementById('edit_all4_'+layer_id).style.display = '';
 		}
-		else{
+		else{			
 			document.getElementById('edit_all1_'+layer_id).style.display = '';			
 			document.getElementById('edit_all2_'+layer_id).style.display = 'none';
 			document.getElementById('edit_all3_'+layer_id).style.display = 'none';
