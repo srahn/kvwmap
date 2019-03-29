@@ -1526,6 +1526,17 @@ class Gml_extractor {
 					if($mapping['t_column'] == 'gehoertzubereich') {
 						continue;
 					}
+                    # fix for varying encountered gml-geometry types that are valid for xplanung (according to konformitaetsbedingungen-document) but can cause problems
+                    # e.g. in display, in export, for wms/wfs services or are not supported by the konverter
+                    if($mapping['t_column'] == 'position') {
+                        if(($geom_type == 'ST_CurvePolygon') or
+                            ($geom_type == 'ST_MultiSurface') or
+                            ($geom_type == 'ST_CompoundCurve') or
+                            ($geom_type == 'ST_MultiCurve'))
+                        {
+                            $mapping['regel'] = 'ST_CurveToLine(gmlas.position) AS position';
+                        }
+                    }
 					$gml_attributes[] = $mapping['t_column'];
 					$select_sql .=  $mapping['regel'];
 					$select_sql .= ",";
