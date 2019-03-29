@@ -10,7 +10,7 @@ class Gml_extractor {
 		$this->xsd_location = '/var/www/html/modell/xsd/5.1/XPlanung-Operationen.xsd';
 		$this->docker_gdal_cmd = 'docker exec gdal';
         #TODO parse the input system from the file (e.g. with ogrinfo) or have an input field on upload 
-		$this->input_epsg = '25833';
+		$this->input_epsg = '25832';
 		$this->epsg = '25832';
 	}
 
@@ -1546,7 +1546,7 @@ class Gml_extractor {
 		}
 		$sql .= ' FROM ' . $this->gmlas_schema . '.' . $gmlas_class . ' gmlas';
 		#Filters only by relevant bereich (in case 2 rules target the same class with different bereich)
-		$sql .= " WHERE gmlas.gehoertzubereich_href LIKE '%" . $bereich_id . "'";
+		$sql .= " WHERE gmlas.gehoertzubereich_href ILIKE '%" . $bereich_id . "'";
 		$sql .= " AND ST_GeometryType(position) = '" . $geom_type . "'";
 		return $sql;
 	}
@@ -1636,11 +1636,14 @@ class Gml_extractor {
 				break;
 			case "ST_LineString":
 			case "ST_MultiLineString":
+			case "ST_CompoundCurve":
 				$sql .= " 'Linien'::xplankonverter.enum_geometrie_typ AS geometrietyp, ";
 				$sql .= "'" . $uml_class . "_" . $bereich_index . "_" . "Linien' AS name, ";
 				break;
 			case "ST_Polygon":
 			case "ST_MultiPolygon":
+			case "ST_CurvePolygon":
+			case "ST_MultiSurface":
 				$sql .= " 'Flächen'::xplankonverter.enum_geometrie_typ AS geometrietyp, ";
 				$sql .= "'" . $uml_class . "_" . $bereich_index . "_" . "Flaechen' AS name, ";
 				break;
@@ -1689,7 +1692,7 @@ class Gml_extractor {
 	*/
 	function check_if_table_has_entries_for_bereich($schema, $table, $bereich_gml_id) {
 		$sql  = "SELECT TRUE FROM " . $schema . "." . $table;
-		$sql .= " WHERE gehoertzubereich_href LIKE '%" . $bereich_gml_id . "' LIMIT 1;";
+		$sql .= " WHERE gehoertzubereich_href ILIKE '%" . $bereich_gml_id . "' LIMIT 1;";
 		$ret = $this->pgdatabase->execSQL($sql,4, 0);
 		$result = pg_fetch_row($ret[1]);
 		return $result[0] ? true : false; 
