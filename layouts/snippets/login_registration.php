@@ -67,11 +67,11 @@
 							</tr>
 							<tr>
 								<td><span class="px16">Neues Passwort: *</span></td>
-								<td><input style="width: 200px" type="password" value="<? echo $this->formvars['new_password']; ?>" name="new_password"/></td>
+								<td><input style="width: 200px" type="password" value="<? echo $this->formvars['new_password']; ?>" id="new_password" name="new_password"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password').attr('type') == 'text') { $('#new_password').attr('type', 'password') } else { $('#new_password').attr('type', 'text'); }"></i></td>
 							</tr>
 							<tr>
 								<td><span class="px16">Wiederholung: *</span></td>
-								<td><input style="width: 200px" type="password" value="<? echo $this->formvars['new_password_2']; ?>" name="new_password_2"/></td>
+								<td><input style="width: 200px" type="password" value="<? echo $this->formvars['new_password_2']; ?>" id="new_password_2" name="new_password_2"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password_2').attr('type') == 'text') { $('#new_password_2').attr('type', 'password') } else { $('#new_password_2').attr('type', 'text'); }"></i></td>
 							</tr>
 							<tr>
 								<td><span class="px16">Telefon: </span></td>
