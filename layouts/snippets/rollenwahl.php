@@ -112,7 +112,6 @@ if ($this->formvars['nur_einstellungen']) {
 		}
 	}
 } ?>
-
 <div class="rollenwahl-gruppe">
 	<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 		<tr>
@@ -131,7 +130,7 @@ if ($this->formvars['nur_einstellungen']) {
 					else { ?>
 						<tr>
 							<td valign="top" class="rollenwahl-option-header">
-								<? echo $strTask; ?>:
+								<? echo $strTask; ?>
 							</td>
 							<td class="rollenwahl-option-data">
 								<div style="display: flex;">
@@ -155,13 +154,13 @@ if ($this->formvars['nur_einstellungen']) {
 								<? echo $strPassword; ?>:
 							</td>
 							<td class="rollenwahl-option-data">
-								<a href="javascript:openPasswordForm();"><? echo $strChangePassword; ?></a>
+								<i class="fa fa-key options-button" aria-hidden="true"></i><a href="javascript:openPasswordForm();"><? echo $strChangePassword; ?></a>
 								<div id="password_form" style="border: 1px solid #cbcbcb;width: 290px;<? if($this->PasswordError == '')echo 'display: none'; ?>">
 									<table cellspacing="3" style="width: 100%">
 										<tr>
 											<td><span class="px16"><? echo $strCurrentPassword; ?>: </span></td>
 											<td>
-												<input style="width: 130px" type="password" value="<? echo $this->formvars['passwort']; ?>" name="passwort" />
+												<input style="width: 130px" type="password" value="<? echo $this->formvars['passwort']; ?>" id="passwort" name="passwort" /><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#passwort').attr('type') == 'text') { $('#passwort').attr('type', 'password') } else { $('#passwort').attr('type', 'text'); }"></i>
 											</td>
 										</tr><?
 										if($this->PasswordError){ ?>
@@ -174,7 +173,7 @@ if ($this->formvars['nur_einstellungen']) {
 										<tr>
 											<td><span class="px16"><? echo $strNewPassword; ?>: </span></td>
 											<td>
-												<input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password']; ?>" name="new_password"/><?php
+												<input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password']; ?>" id="new_password" name="new_password"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password').attr('type') == 'text') { $('#new_password').attr('type', 'password') } else { $('#new_password').attr('type', 'text'); }"></i><?php
 												if (defined ('PASSWORD_INFO') AND PASSWORD_INFO != '') { ?>
 													<div style="float: right; margin-left: 5px;">
 														<img
@@ -189,7 +188,7 @@ if ($this->formvars['nur_einstellungen']) {
 										</tr>
 										<tr>
 											<td><span class="px16"><? echo $strRepeatPassword; ?>: </span></td>
-											<td><input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password_2']; ?>" name="new_password_2"/></td>
+											<td><input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password_2']; ?>" id="new_password_2" name="new_password_2"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password_2').attr('type') == 'text') { $('#new_password_2').attr('type', 'password') } else { $('#new_password_2').attr('type', 'text'); }"></i></td>
 										</tr>
 										<tr>
 											<td colspan="2" align="center">
