@@ -645,6 +645,20 @@ a.menuered:hover {
 /*	background: rgb(205, 208, 208); */
 }
 
+.header-button {
+	float: right;
+	padding: 4px;
+	font-size: 150%;
+}
+
+.header-button:hover {
+	cursor: pointer;
+}
+
+.options-button {
+	width: 18px;
+}
+
 .button-menue{
 	flex: 0 0 auto;
 	margin: 0 0 2 0;
@@ -804,7 +818,7 @@ a.menuered:hover {
 }
 
 #header{
-	height: <? echo ($size['header']['height'] - 2); ?>px;
+	height: <? echo ($size['header']['height'] - 2); ?>px;*/
 	border: 1px solid; 
 	border-color: #ffffff #cccccc #bbbbbb;
 }
@@ -1611,7 +1625,8 @@ tbody.gle tr {
 	-moz-box-shadow: 6px 5px 7px #777;
 	-webkit-box-shadow: 6px 5px 7px #777;
 	box-shadow: 6px 5px 7px #777;
-	margin: 0px 0px 0px -207px;
+	top: 30px;
+	right: 15px;
 	z-index: 2000;
 }
 
