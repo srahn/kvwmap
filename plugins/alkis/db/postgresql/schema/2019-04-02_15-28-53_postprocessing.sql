@@ -480,8 +480,5 @@ UPDATE alkis.n_nutzung SET werteart2 = 0 WHERE werteart2 = 9999;
 $BODY$
   LANGUAGE sql VOLATILE
   COST 100;
-ALTER FUNCTION alkis.postprocessing()
-  OWNER TO kvwmap;
-
 
 COMMIT;
