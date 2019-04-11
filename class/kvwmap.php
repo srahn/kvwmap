@@ -18080,19 +18080,22 @@ class db_mapObj{
 
 				# wenn im Data sowas wie "tabelle.attribut" vorkommt, soll das anstatt dem "attribut" aus der Expression verwendet werden
         //$attributes = explode(',', substr($select, 0, strpos(strtolower($select), ' from ')));
-        $attributes = get_select_parts(substr($select, 0, strpos(strtolower($select), ' from ')));
-        $exp_parts = explode(' ', $exp);
-        for($k = 0; $k < count($exp_parts); $k++){
-	      	for($j = 0; $j < count($attributes); $j++){
-	      		if($exp_parts[$k] != '' AND strpos(strtolower($attributes[$j]), '.'.$exp_parts[$k]) !== false){
-	      			$exp_parts[$k] = str_replace('select ', '', strtolower($attributes[$j]));
-	      		}
-	      	}
-	      }
-	      $exp = implode(' ', $exp_parts);
-				if(count($exp_parts) == 1 AND $classitem != ''){		# Classitem davor setzen
-					$exp = $classitem."::text = '" . $exp."'";
-				}				
+        $attributes = get_select_parts(substr($select, 0, strpos(strtolower($select), ' from ')));        
+				if(substr($exp, 0, 1) == '('){
+					$exp_parts = explode(' ', $exp);
+					for($k = 0; $k < count($exp_parts); $k++){
+						for($j = 0; $j < count($attributes); $j++){
+							if($exp_parts[$k] != '' AND strpos(strtolower($attributes[$j]), '.'.$exp_parts[$k]) !== false){
+								$exp_parts[$k] = str_replace('select ', '', strtolower($attributes[$j]));
+							}
+						}
+					}
+					$exp = implode(' ', $exp_parts);
+				}
+				elseif($classitem != ''){		# Classitem davor setzen
+					if(substr($exp, 0, 1) != "'")$quote = "'";
+					$exp = $classitem."::text = ".$quote.$exp.$quote;
+				}	
 				$sql = 'SELECT * FROM ('.$select.") as foo WHERE (" . $exp.")";
         $this->debug->write("<p>file:kvwmap class:db_mapObj->getClassFromObject - Lesen einer Klasse eines Objektes:<br>" . $sql,4);
         $query=pg_query($sql);
