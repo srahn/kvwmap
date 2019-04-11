@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php
 ###################################################################
 # Lizenz                                                          #
@@ -258,39 +259,38 @@ FROM
 			if ($query == 0) {
 				$ret[0] = 1;
 				$ret['success'] = false;
-				$errormessage = pg_last_error($this->dbConn);
-				header('error: true');	// damit ajax-Requests das auch mitkriegen
-				# Abfrage von Notice
-				if ($errormessage != '' AND strpos($errormessage, '{') !== false AND strpos($errormessage, '}') !== false) {
-					$notice_obj = json_decode(substr($errormessage, strpos($errormessage, '{'), strpos($errormessage, '}') - strpos($errormessage, '{') + 1), true);
-					if (array_key_exists('success', $notice_obj)) {
-						if (!$notice_obj['success']) {
-							$ret[0] = 1;
-							$ret['success'] = false;
-						}
-						if (array_key_exists('msg_type', $notice_obj)) {
-							$ret['type'] = $notice_obj['msg_type'];
-						}
-						if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
-							$ret['msg'] = $ret[1] = $notice_obj['msg'];
+				if(!$suppress_error_msg){
+					$errormessage = pg_last_error($this->dbConn);
+					header('error: true');	// damit ajax-Requests das auch mitkriegen
+					# Abfrage von Notice
+					if ($errormessage != '' AND strpos($errormessage, '{') !== false AND strpos($errormessage, '}') !== false) {
+						$notice_obj = json_decode(substr($errormessage, strpos($errormessage, '{'), strpos($errormessage, '}') - strpos($errormessage, '{') + 1), true);
+						if (array_key_exists('success', $notice_obj)) {
+							if (!$notice_obj['success']) {
+								$ret[0] = 1;
+								$ret['success'] = false;
+							}
+							if (array_key_exists('msg_type', $notice_obj)) {
+								$ret['type'] = $notice_obj['msg_type'];
+							}
+							if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
+								$ret['msg'] = $ret[1] = $notice_obj['msg'];
+							}
 						}
 					}
-				}
-				else {
-					$ret[1] =
-						$errormessage . "<br>\n<br>" .
-						"\nAufgetreten bei PostgreSQL Anweisung:<br>\n" .
-						"<textarea id=\"sql_statement\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px;\">" . $sql . "</textarea><br>\n" .
-						"<button type=\"button\" onclick=\"
-								copyText = document.getElementById('sql_statement');
-								copyText.select();
-								document.execCommand('copy');
-							\">In Zwischenablage kopieren</button>";
-					$ret['msg'] = $ret[1];
-					$ret['type'] = 'error';
-				}
-				if (!$suppress_error_msg) {
-					echo "<br><b>" . $ret[1] . "</b>";
+					else {
+						$ret[1] =
+							$errormessage . "<br>\n<br>" .
+							"\nAufgetreten bei PostgreSQL Anweisung:<br>\n" .
+							"<textarea id=\"sql_statement\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px;\">" . $sql . "</textarea><br>\n" .
+							"<button type=\"button\" onclick=\"
+									copyText = document.getElementById('sql_statement');
+									copyText.select();
+									document.execCommand('copy');
+								\">In Zwischenablage kopieren</button>";
+						$ret['msg'] = $ret[1];
+						$ret['type'] = 'error';
+					}
 				}
 				$this->debug->write("<br><b>" . $ret[1] . "</b>", $debuglevel);
 				if ($logsql) {
