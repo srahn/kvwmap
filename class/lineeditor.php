@@ -96,7 +96,7 @@ class lineeditor {
 				$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(ST_MULTI(st_geometryfromtext('".$line."',".$this->clientepsg.")),".$this->layerepsg.") WHERE oid = ".$oid;
 			}
 			else{
-				$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(ST_GeometryN(ST_MULTI(st_geometryfromtext('".$line."',".$this->clientepsg.")), 1),".$this->layerepsg.") WHERE oid = ".$oid;
+				$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(st_geometryfromtext('".$line."',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
 			}
 		}
 		$ret = $this->database->execSQL($sql, 4, 1);    

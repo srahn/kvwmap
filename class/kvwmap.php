@@ -8941,7 +8941,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								$insert[$table['attributname'][$i]] = "st_transform(ST_Multi(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$client_epsg.")), ".$layer_epsg.")";
 							}
 							else{
-								$insert[$table['attributname'][$i]] = "st_transform(ST_GeometryN(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$client_epsg."), 1), ".$layer_epsg.")";
+								$insert[$table['attributname'][$i]] = "st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$client_epsg."), ".$layer_epsg.")";
 							}
 						}
 					}
