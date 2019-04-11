@@ -188,7 +188,16 @@ class Menue extends MyObject {
 	function is_selected() {
 		$is_selected = true;
 		$formvars = $_REQUEST;
-		$link = parse_url($this->get('links'));
+		$link = parse_url(
+			replace_params(
+				$this->get('links'),
+				rolle::$layer_params,
+				$this->gui->user->id,
+				$this->gui->stelle_id,
+				rolle::$hist_timestamp,
+				$this->gui->user->rolle->language
+			)
+		);
 		if ($link['query'] == '') {
 			$is_selected = false;
 		}
@@ -238,6 +247,14 @@ class Menue extends MyObject {
 
 
 	function get_href($class, $target) {
+		$link = replace_params(
+			$this->get('links'),
+			rolle::$layer_params,
+			$this->gui->user->id,
+			$this->gui->stelle_id,
+			rolle::$hist_timestamp,
+			$this->gui->user->rolle->language
+		);
 		# define click events
 		if($this->obermenue){
 			$href .= "javascript:changemenue(".$this->get('id').", ".$this->gui->user->rolle->menu_auto_close.");";
@@ -245,13 +262,13 @@ class Menue extends MyObject {
 		else {
 			# call a link
 			if ($this->get('target') == 'confirm') {
-				$href = "javascript:Bestaetigung('" . $this->get('links') . "', 'Diese Aktion wirklich ausführen?')";
+				$href = "javascript:Bestaetigung('" . $link . "', 'Diese Aktion wirklich ausführen?')";
 			}
-			elseif($this->get('links') == ''){
+			elseif($link == ''){
 				$href = 'javascript:void(0);';
 			}
 			else{
-				$href = $this->get('links');
+				$href = $link;
 			}
 		}
 		return $href;
