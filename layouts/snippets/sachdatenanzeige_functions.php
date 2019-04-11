@@ -90,7 +90,7 @@ include('funktionen/input_check_functions.php');
 			else return false;
 		}
 		else{
-			return eval("'"+field.value+"' "+operator+" '"+value+"'")
+			return eval("'"+field.value+"' == '"+value+"'")
 		}
 	}	
 	

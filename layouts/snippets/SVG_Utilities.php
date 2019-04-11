@@ -3026,6 +3026,7 @@ function mouseup(evt){
 				enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
 			}
 		}
+		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&operation=isvalid", new Array(""), new Array("execute_function"));
 		remove_second_poly();
 	}
 	
