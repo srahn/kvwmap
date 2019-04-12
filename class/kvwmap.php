@@ -8062,18 +8062,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$newpath = substr($newpath, 0, $groupbyposition);
 		  	}
 
-        if($privileges == NULL){    # kein Eintrag -> alle Attribute lesbar
-          for($j = 0; $j < count($attributes['name']); $j++){
-            $attributes['privileg'][$j] = '0';
-            $attributes['privileg'][$attributes['name'][$j]] = '0';
-          }
-        }
-        else{
-          for($j = 0; $j < count($attributes['name']); $j++){
-            $attributes['privileg'][$j] = $privileges[$attributes['name'][$j]];
-            $attributes['privileg'][$attributes['name'][$j]] = $privileges[$attributes['name'][$j]];
-          }
-        }
+				for($j = 0; $j < count($attributes['name']); $j++){
+					$attributes['privileg'][$j] = $privileges[$attributes['name'][$j]];
+					$attributes['privileg'][$attributes['name'][$j]] = $privileges[$attributes['name'][$j]];
+				}
 
 				for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
 					if($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
@@ -9312,28 +9304,19 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 				######### von einer Sachdatenanzeige übergebene Formvars #######
 
-				if ($privileges == NULL) {    # kein Eintrag -> alle Attribute lesbar
-					for($j = 0; $j < count($layerset[0]['attributes']['name']); $j++) {
-						$layerset[0]['attributes']['privileg'][$j] = '0';
-						$layerset[0]['attributes']['privileg'][$layerset[0]['attributes']['name'][$j]] = '0';
-						if ($layerset[0]['attributes']['form_element_type'][$j] == 'Winkel')$this->angle_attribute = $layerset[0]['attributes']['name'][$j];
+				for ($j = 0; $j < count($layerset[0]['attributes']['name']); $j++) {
+					$layerset[0]['attributes']['privileg'][$j] = $privileges[$layerset[0]['attributes']['name'][$j]];
+					$layerset[0]['attributes']['privileg'][$layerset[0]['attributes']['name'][$j]] = $privileges[$layerset[0]['attributes']['name'][$j]];
+					$layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] = $this->formvars[$layerset[0]['Layer_ID'].';'.$layerset[0]['attributes']['real_name'][$layerset[0]['attributes']['name'][$j]].';'.$layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['name'][$j]].';;'.$layerset[0]['attributes']['form_element_type'][$j].';'.$layerset[0]['attributes']['nullable'][$j].';'.$layerset[0]['attributes']['type'][$j]];
+					if (
+						$layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] == '' AND
+						$layerset[0]['attributes']['default'][$j] != ''
+					) {
+						// Wenn Defaultwert da und Feld leer, Defaultwert setzen
+						$layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] = $layerset[0]['attributes']['default'][$j];
 					}
-				}
-				else {
-					for ($j = 0; $j < count($layerset[0]['attributes']['name']); $j++) {
-						$layerset[0]['attributes']['privileg'][$j] = $privileges[$layerset[0]['attributes']['name'][$j]];
-						$layerset[0]['attributes']['privileg'][$layerset[0]['attributes']['name'][$j]] = $privileges[$layerset[0]['attributes']['name'][$j]];
-						$layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] = $this->formvars[$layerset[0]['Layer_ID'].';'.$layerset[0]['attributes']['real_name'][$layerset[0]['attributes']['name'][$j]].';'.$layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['name'][$j]].';;'.$layerset[0]['attributes']['form_element_type'][$j].';'.$layerset[0]['attributes']['nullable'][$j].';'.$layerset[0]['attributes']['type'][$j]];
-						if (
-							$layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] == '' AND
-							$layerset[0]['attributes']['default'][$j] != ''
-						) {
-							// Wenn Defaultwert da und Feld leer, Defaultwert setzen
-							$layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] = $layerset[0]['attributes']['default'][$j];
-						}
-						if ($layerset[0]['attributes']['form_element_type'][$j] == 'Winkel') {
-							$this->angle_attribute = $layerset[0]['attributes']['name'][$j];
-						}
+					if ($layerset[0]['attributes']['form_element_type'][$j] == 'Winkel') {
+						$this->angle_attribute = $layerset[0]['attributes']['name'][$j];
 					}
 				}
 				$this->formvars['layer_columnname'] = $layerset[0]['attributes']['the_geom'];
@@ -12707,18 +12690,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $privileges = $this->Stelle->get_attributes_privileges($layer[0]['Layer_ID']);
     $layer[0]['attributes'] = $this->mapDB->read_layer_attributes($layer[0]['Layer_ID'], $layerdb, $privileges['attributenames']);
 
-    if($privileges == NULL){    # kein Eintrag -> alle Attribute lesbar
-      for($j = 0; $j < count($layer[0]['attributes']['name']); $j++){
-        $layer[0]['attributes']['privileg'][$j] = '0';
-        $layer[0]['attributes']['privileg'][$layer[0]['attributes']['name'][$j]] = '0';
-      }
-    }
-    else{
-      for($j = 0; $j < count($layer[0]['attributes']['name']); $j++){
-        $layer[0]['attributes']['privileg'][$j] = $privileges[$layer[0]['attributes']['name'][$j]];
-        $layer[0]['attributes']['privileg'][$layer[0]['attributes']['name'][$j]] = $privileges[$layer[0]['attributes']['name'][$j]];
-      }
-    }
+		for($j = 0; $j < count($layer[0]['attributes']['name']); $j++){
+			$layer[0]['attributes']['privileg'][$j] = $privileges[$layer[0]['attributes']['name'][$j]];
+			$layer[0]['attributes']['privileg'][$layer[0]['attributes']['name'][$j]] = $privileges[$layer[0]['attributes']['name'][$j]];
+		}
     $this->qlayerset[] = $layer[0];
     $this->main = $layer[0]['template'];
 
@@ -13238,17 +13213,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								$newpath = substr($newpath, 0, $groupbyposition);
 							}
 
-							if($privileges == NULL){    # kein Eintrag -> alle Attribute lesbar
-								for($j = 0; $j < count($layerset[$i]['attributes']['name']); $j++){
-									$layerset[$i]['attributes']['privileg'][$j] = '0';
-									$layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['name'][$j]] = '0';
-								}
-							}
-							else{
-								for($j = 0; $j < count($layerset[$i]['attributes']['name']); $j++){
-									$layerset[$i]['attributes']['privileg'][$j] = $privileges[$layerset[$i]['attributes']['name'][$j]];
-									$layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['name'][$j]] = $privileges[$layerset[$i]['attributes']['name'][$j]];
-								}
+							for($j = 0; $j < count($layerset[$i]['attributes']['name']); $j++){
+								$layerset[$i]['attributes']['privileg'][$j] = $privileges[$layerset[$i]['attributes']['name'][$j]];
+								$layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['name'][$j]] = $privileges[$layerset[$i]['attributes']['name'][$j]];
 							}
 							# Wenn kein Template --> generischer Layereditor: Pfad um oids der verwendeten Tabellen erweitern (erstmal testweise rausgenommen)
 							#if($layerset[$i]['template'] == ''){
