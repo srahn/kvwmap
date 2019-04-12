@@ -1357,40 +1357,35 @@ class stelle {
 			$withoutwhere = substr($path, 0, $whereposition);
 			$fromposition = strpos(strtolower($withoutwhere), ' from ');
 		}
-		if($privileges == NULL){  # alle Attribute sind abfragbar
-			$newpath = $path;
-		}
-		else{
-			$where = substr($path, $whereposition);
-			$from = substr($withoutwhere, $fromposition);
+		$where = substr($path, $whereposition);
+		$from = substr($withoutwhere, $fromposition);
 
-			$attributesstring = substr($path, $offset, $fromposition-$offset);
-			//$fieldstring = explode(',', $attributesstring);
-			$fieldstring = get_select_parts($attributesstring);
-			$count = count($fieldstring);
-			for($i = 0; $i < $count; $i++){
-				if(strpos(strtolower($fieldstring[$i]), ' as ')){   # Ausdruck AS attributname
-					$explosion = explode(' as ', strtolower($fieldstring[$i]));
-					$attributename = trim(array_pop($explosion));
-					$real_attributename = $explosion[0];
-				}
-				else{   # tabellenname.attributname oder attributname
-					$explosion = explode('.', strtolower($fieldstring[$i]));
-					$attributename = trim($explosion[count($explosion)-1]);
-					$real_attributename = $fieldstring[$i];
-				}
-				if($privileges[$attributename] != ''){
-					$type = $attributes['type'][$attributes['indizes'][$attributename]];
-					if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$real_attributename.') as '.$attributename.', ';		# Array oder Datentyp
-					else $newattributesstring .= $fieldstring[$i].', ';																																			# normal
-				}
-				if(substr_count($fieldstring[$i], '(') - substr_count($fieldstring[$i], ')') > 0){
-					$fieldstring[$i+1] = $fieldstring[$i].','.$fieldstring[$i+1];
-				}
+		$attributesstring = substr($path, $offset, $fromposition-$offset);
+		//$fieldstring = explode(',', $attributesstring);
+		$fieldstring = get_select_parts($attributesstring);
+		$count = count($fieldstring);
+		for($i = 0; $i < $count; $i++){
+			if(strpos(strtolower($fieldstring[$i]), ' as ')){   # Ausdruck AS attributname
+				$explosion = explode(' as ', strtolower($fieldstring[$i]));
+				$attributename = trim(array_pop($explosion));
+				$real_attributename = $explosion[0];
 			}
-			$newattributesstring = substr($newattributesstring, 0, strlen($newattributesstring)-2);
-			$newpath = $offstring.' '.$newattributesstring.' '.$from.$where;
+			else{   # tabellenname.attributname oder attributname
+				$explosion = explode('.', strtolower($fieldstring[$i]));
+				$attributename = trim($explosion[count($explosion)-1]);
+				$real_attributename = $fieldstring[$i];
+			}
+			if($privileges[$attributename] != ''){
+				$type = $attributes['type'][$attributes['indizes'][$attributename]];
+				if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$real_attributename.') as '.$attributename.', ';		# Array oder Datentyp
+				else $newattributesstring .= $fieldstring[$i].', ';																																			# normal
+			}
+			if(substr_count($fieldstring[$i], '(') - substr_count($fieldstring[$i], ')') > 0){
+				$fieldstring[$i+1] = $fieldstring[$i].','.$fieldstring[$i+1];
+			}
 		}
+		$newattributesstring = substr($newattributesstring, 0, strlen($newattributesstring)-2);
+		$newpath = $offstring.' '.$newattributesstring.' '.$from.$where;
 		return $newpath;
 	}
 
