@@ -59,10 +59,10 @@ class rolle {
     return 1;
   }
 
-  function getLayer($LayerName) {
+	function getLayer($LayerName) {
 		global $language;
 
-    # Abfragen der Layer in der Rolle
+		# Abfragen der Layer in der Rolle
 		if($language != 'german') {
 			$name_column = "
 			CASE
@@ -107,6 +107,7 @@ class rolle {
 				ul.`export_privileg`,
 				`start_aktiv`,
 				r2ul.showclasses,
+				r2ul.rollenfilter,
 				r2ul.geom_from_layer
 			FROM
 				layer AS l,
@@ -123,9 +124,9 @@ class rolle {
 				ul.drawingorder desc
 		";
 		#echo $sql.'<br>';
-    $this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
 		while ($rs=mysql_fetch_assoc($query)) {
 			foreach(array('Name', 'alias', 'connection') AS $key) {
@@ -142,9 +143,9 @@ class rolle {
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
-    }
-    return $layer;
-  }
+		}
+		return $layer;
+	}
 
   function getAktivLayer($aktivStatus,$queryStatus,$logconsume) {
     # Abfragen der zu loggenden Layer der Rolle
@@ -1047,17 +1048,17 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->setRollenLayerName:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
-	
-	function setLabelitem($formvars){
-		if(isset($formvars['layer_options_labelitem'])){
-			if($formvars['layer_options_open'] > 0){		# normaler Layer
+
+	function setLabelitem($formvars) {
+		if (isset($formvars['layer_options_labelitem'])) {
+			if ($formvars['layer_options_open'] > 0) { # normaler Layer
 				$sql ='UPDATE u_rolle2used_layer set labelitem = \''.$formvars['layer_options_labelitem'].'\'';
 				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 				$sql.=' AND layer_id='.$formvars['layer_options_open'];
 				$this->debug->write("<p>file:rolle.php class:rolle->setLabelitem:",4);
 				$this->database->execSQL($sql,4, $this->loglevel);
 			}
-			elseif($formvars['layer_options_open'] < 0){		# Rollenlayer
+			elseif($formvars['layer_options_open'] < 0) { # Rollenlayer
 				$sql ='UPDATE rollenlayer set labelitem = \''.$formvars['layer_options_labelitem'].'\'';
 				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 				$sql.=' AND id= -1*'.$formvars['layer_options_open'];
@@ -1066,15 +1067,41 @@ class rolle {
 			}
 		}
 	}
-	
+
 	function removeLabelitem($formvars) {
 		$sql ='UPDATE u_rolle2used_layer set labelitem = NULL';
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		$sql.=' AND layer_id='.$formvars['layer_options_open'];
 		$this->debug->write("<p>file:rolle.php class:rolle->removeLabelitem:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
-	}	
-	
+	}
+
+	function setRollenFilter($formvars) {
+		if (isset($formvars['layer_options_rollenfilter']) AND $formvars['layer_options_open'] <> 0) {
+			if ($formvars['layer_options_open'] > 0) { # normaler Layer
+				$table_name = "u_rolle2used_layer";
+				$where_id = "layer_id = " . $formvars['layer_options_open'];
+			}
+			else { # layer_options_open < 0 Rollenlayer
+				$table_name = "rollenfilter";
+				$where_id = "id = -1*" . $formvars['layer_options_open'];
+			}
+			$sql = "
+				UPDATE
+					" . $table_name . "
+				SET
+					rollenfilter = '" . $formvars['layer_options_rollenfilter'] . "'
+				WHERE
+					user_id = " . $this->user_id . " AND
+					stelle_id = " . $this->stelle_id . " AND
+					" . $where_id . "
+			";
+			#echo '<br>Sql: ' . $sql;
+			$this->debug->write("<p>file:rolle.php class:rolle->setLabelitem:", 4);
+			$this->database->execSQL($sql, 4, $this->loglevel);
+		}
+	}
+
 	function setTransparency($formvars) {
 		if($formvars['layer_options_open'] > 0){		# normaler Layer
 			$sql ='UPDATE u_rolle2used_layer set transparency = '.$formvars['layer_options_transparency'];

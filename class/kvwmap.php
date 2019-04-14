@@ -248,7 +248,7 @@ class GUI {
 		}
 	}
 
-	function getLayerOptions(){
+	function getLayerOptions() {
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if($this->formvars['layer_id'] > 0)$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
 		else $layer = $this->user->rolle->getRollenLayer(-$this->formvars['layer_id']);
@@ -272,7 +272,7 @@ class GUI {
 					<td>
 						<ul>';
 						if($this->formvars['layer_id'] < 0){
-							echo '<li><a href="index.php?go=reset_layers&layer_id='.$this->formvars['layer_id'].'">'.$this->strRemove.'</a></li>';
+							echo '<li><a href="index.php?go=delete_rollenlayer&id='.(-$this->formvars['layer_id']).'">'.$this->strRemove.'</a></li>';
 							echo '<li><span>'.$this->strName.':</span> <input type="text" name="layer_options_name" value="'.$layer[0]['Name'].'"></li>';
 						}
 						else{
@@ -321,6 +321,51 @@ class GUI {
 										</li>';
 						}
 						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>
+							<li>
+								<a href="javascript:$(\'#rollenfilter, #rollenfilterquestionicon, #rollenfilterleeren\').toggle()">Filter</a>
+								<a href="javascript:$(\'#rollenfilter\').val(\'\')">
+									<i
+										id="rollenfilterleeren"
+										title="Filter aus Textfeld löschen."
+										class="fa fa-times-circle button layerOptionsIcon"
+										style="
+											float: right;
+											display: none;
+										"
+									></i>
+								</a>
+								<a href="javascript:message(\'
+									Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Darstellung des Layers auswirkt. Unterstützt werden alle im SELECT Statement verwendeten Attribute. Mehrere Filter werden mit AND oder OR verknüpft.<br>
+									Ist ein Filter gesetzt wird in der Legende neben dem Layernamen ein Filtersymbol angezeigt.<br>
+									Der Filter wird gelöscht in dem das Textfeld geleert wird.<p>
+									Beispiele:<br>
+									<ul>
+										<li>id > 10 AND status = 1</li>
+										<li>type = \\\'Brunnen\\\' OR type = \\\'Quelle\\\'</li>
+										<li>status IN (1, 2)</li>
+										<li>kg.bezeichnung LIKE \\\'Los\\\'</li>
+									</ul>
+									\')">
+									<i
+										id="rollenfilterquestionicon"
+										title="Hilfe zum Filter anzeigen"
+										class="fa fa-question-circle button layerOptionsIcon"
+										style="
+											float: right;
+											display: none;
+										"
+									></i>
+								</a><br>
+								<textarea
+									id="rollenfilter"
+									style="
+										width: 98%;
+										display: none;
+									"
+									placeholder="' . $layer[0]['Data'] . '"
+									name="layer_options_rollenfilter"
+								>' . $layer[0]['rollenfilter'] . '</textarea></li>
+						</ul>
 					</td>
 				</tr>
 				<tr>
@@ -416,7 +461,8 @@ class GUI {
 	function saveLayerOptions(){
 		$this->user->rolle->setTransparency($this->formvars);
 		$this->user->rolle->setLabelitem($this->formvars);
-		if($this->formvars['layer_options_open'] < 0){		# Rollenlayer 
+		$this->user->rolle->setRollenFilter($this->formvars);
+		if ($this->formvars['layer_options_open'] < 0) { # Rollenlayer 
 			$this->user->rolle->setRollenLayerName($this->formvars);
 			# bei Bedarf Label anlegen
 			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -723,9 +769,17 @@ class GUI {
 				$legend .= '</a>';
 
 				# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
-				if($layer['aktivStatus'] == 1 and $this->user->rolle->showlayeroptions) $legend.='&nbsp;<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')">
-				<i class="fa fa-bars pointer button layerOptionsIcon" title="'.$this->layerOptions.'"></i>
-				</a>';
+				if ($layer['aktivStatus'] == 1 and $this->user->rolle->showlayeroptions) {
+					$legend .= '&nbsp';
+					if ($layer['rollenfilter'] != '') {
+						$legend .= '<a href="javascript:getLayerOptions('.$layer['Layer_ID'].');$(\'#rollenfilter\').show()">
+							<i class="fa fa-filter button layerOptionsIcon" title="' . $layer['rollenfilter'] . '"></i>
+						</a>';
+					}
+					$legend .= '<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')">
+						<i class="fa fa-bars pointer button layerOptionsIcon" title="'.$this->layerOptions.'"></i>
+					</a>';
+				}
 				$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
 			}
 			if($layer['aktivStatus'] == 1 AND $layer['Class'][0]['Name'] != ''){
@@ -1580,7 +1634,16 @@ class GUI {
 									rolle::$hist_timestamp,
 									$this->user->rolle->language
 								);
-								$layer->set('data', $layerset['list'][$i]['Data']);
+								$data = $layerset['list'][$i]['Data'];
+								if ($layerset['list'][$i]['rollenfilter'] != '') {
+									if (stripos($layerset['list'][$i]['Data'], ' WHERE ') !== 0) {
+										$data = str_ireplace(' WHERE ', ' WHERE ' . $layerset['list'][$i]['rollenfilter'] . ' AND ', $layerset['list'][$i]['Data']);
+									}
+									else {
+										$data = str_ireplace(') AS ', ' WHERE ' . $layerset['list'][$i]['rollenfilter'] . ') AS ', $layerset['list'][$i]['Data']);
+									}
+								}
+								$layer->set('data', $data);
 							}
 
               # Setzen der Templatedateien für die Sachdatenanzeige inclt. Footer und Header.
@@ -4467,21 +4530,21 @@ class GUI {
 		}
 	}
 
-  function PolygonEditor(){
+	function PolygonEditor() {
 		include_once (CLASSPATH.'polygoneditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->reduce_mapwidth(30);
-   	$this->main='PolygonEditor.php';
-    $this->titel='Geometrie bearbeiten';
-    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-    $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+		$this->main='PolygonEditor.php';
+		$this->titel='Geometrie bearbeiten';
+		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		if($this->formvars['geom_from_layer'] == '')$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
 		$attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 		$this->formvars['layer_columnname'] = $attributes['the_geom'];
 		$this->formvars['layer_tablename'] = $attributes['table_name'][$attributes['the_geom']];
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
-    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
-    $polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
+		$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
 		if(!$this->formvars['edit_other_object'] AND ($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')){
 			$this->neuLaden();
 			$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
@@ -4524,13 +4587,13 @@ class GUI {
 		}		
 		# zoomToMaxLayerExtent
 		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
-    # Geometrie-Übernahme-Layer:
-    # Spaltenname und from-where abfragen
-    $data = $this->mapDB->getData($this->formvars['geom_from_layer']);
-    #echo $data;
-    $data_explosion = explode(' ', $data);
-    $this->formvars['columnname'] = $data_explosion[0];
-    $select = $fromwhere = $this->mapDB->getSelectFromData($data);
+		# Geometrie-Übernahme-Layer:
+		# Spaltenname und from-where abfragen
+		$data = $this->mapDB->getData($this->formvars['geom_from_layer']);
+		#echo $data;
+		$data_explosion = explode(' ', $data);
+		$this->formvars['columnname'] = $data_explosion[0];
+		$select = $fromwhere = $this->mapDB->getSelectFromData($data);
 
 		# order by rausnehmen
 		$this->formvars['orderby'] = '';
@@ -4541,12 +4604,12 @@ class GUI {
 			$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 		}
 
-    $this->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
-    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
-      $this->formvars['fromwhere'] .= ' where (1=1)';
-    }
+		$this->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+		if (strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
+			$this->formvars['fromwhere'] .= ' where (1=1)';
+		}
 
-		if($this->formvars['newpath'] == '' AND $this->formvars['geom_from_layer'] < 0){	# Suchergebnislayer sofort selektieren
+		if ($this->formvars['newpath'] == '' AND $this->formvars['geom_from_layer'] < 0){	# Suchergebnislayer sofort selektieren
 			$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['geom_from_layer']);
 			if($rollenlayer[0]['Typ'] == 'search'){
 				$layerdb1 = $this->mapDB->getlayerdatabase($this->formvars['geom_from_layer'], $this->Stelle->pgdbhost);
@@ -4563,14 +4626,14 @@ class GUI {
 			}
 		}
 
-    if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
-    	$currenttime=date('Y-m-d H:i:s',time());
-    	$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    }
-    $this->drawMap();
-    $this->saveMap('');
-    $this->output();
-  }
+		if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
+			$currenttime=date('Y-m-d H:i:s',time());
+			$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+		}
+		$this->drawMap();
+		$this->saveMap('');
+		$this->output();
+	}
 
   function PolygonEditor_Senden(){
 		include_(CLASSPATH.'polygoneditor.php');
@@ -4590,14 +4653,24 @@ class GUI {
     }
     else{
       $umring = $this->formvars['newpathwkt'];
-      $ret = $polygoneditor->eintragenFlaeche($umring, $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->attributes['geomtype'][$this->attributes['the_geom']]);
-      if ($ret[0]) { # fehler beim eintrag
-          $this->Meldung=$ret[1];
-      }
-      else { # eintrag erfolgreich
-	      # wenn auto-Attribute vorhanden, auto-Werte eintragen
-				for($i = 0; $i < count($this->attributes['type']); $i++){
-					if($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Time' AND in_array($this->attributes['options'][$i], array('', 'update'))){
+      $ret = $polygoneditor->eintragenFlaeche(
+				$umring, $this->formvars['oid'],
+				$this->formvars['layer_tablename'],
+				$this->formvars['layer_columnname'],
+				$this->attributes['geomtype'][$this->attributes['the_geom']]
+			);
+			if ($ret[0]) { # fehler beim eintrag
+				$this->Meldung = $ret[1];
+				$this->add_message('error', $ret[1]);
+			}
+			else { # eintrag erfolgreich
+				# wenn auto-Attribute vorhanden, auto-Werte eintragen
+				for ($i = 0; $i < count($this->attributes['type']); $i++){
+					if (
+						$this->attributes['name'][$i] != 'oid' AND
+						$this->attributes['form_element_type'][$i] == 'Time' AND
+						in_array($this->attributes['options'][$i], array('', 'update'))
+					) {
 						$sql = "UPDATE " . $this->formvars['layer_tablename']." SET " . $this->attributes['name'][$i]." = '".date('Y-m-d G:i:s')."' WHERE oid = '" . $this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
 						$ret2 = $layerdb->execSQL($sql,4, 1);
@@ -8946,7 +9019,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		return $this->success;
 	}
 
-	function neuer_Layer_Datensatz_speichern(){
+	function neuer_Layer_Datensatz_speichern() {
 		$_files = $_FILES;
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
@@ -9134,7 +9207,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 					$this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
 
-					$ret = $layerdb->execSQL($sql, 4, 1, true);
+					$ret = $layerdb->execSQL($sql, 4, 1, false);
 					#echo '<br>Datensatz Speichern SQL: ' . $sql;
 					if($last_notice = $msg = pg_last_notice($layerdb->dbConn)){
 						if($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{')), true)){
@@ -12910,7 +12983,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							#echo '<br>sql for update: ' . $sql;
 
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
-							$ret = $layerdb[$layer_id]->execSQL($sql, 4, 1, true);
+							$ret = $layerdb[$layer_id]->execSQL($sql, 4, 1, false);
 							if ($ret['success']) {
 								$result = pg_fetch_row($ret['query']);
 								if (pg_affected_rows($ret['query']) > 0) {
@@ -15580,7 +15653,7 @@ class db_mapObj{
 
 		$sql = "
 			SELECT DISTINCT
-				coalesce(rl.transparency, ul.transparency, 100) as transparency, rl.`aktivStatus`, rl.`queryStatus`, rl.`gle_view`, rl.`showclasses`, rl.`logconsume`,
+				coalesce(rl.transparency, ul.transparency, 100) as transparency, rl.`aktivStatus`, rl.`queryStatus`, rl.`gle_view`, rl.`showclasses`, rl.`logconsume`, rl.`rollenfilter`,
 				ul.`queryable`, COALESCE(rl.drawingorder, ul.drawingorder) as drawingorder, ul.legendorder, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`postlabelcache`, ul.`Filter`, ul.`template`, ul.`header`, ul.`footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`,
 				l.Layer_ID," .
 				$name_column . ",
