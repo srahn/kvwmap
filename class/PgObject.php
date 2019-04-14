@@ -72,10 +72,12 @@ class PgObject {
 	* @ return an array with all found object
 	*/
 	function find_where($where, $order = NULL, $select = '*') {
+		$select = (empty($select) ? $this->select : $select);
+		$where = (empty($where) ? "true": $where);
 		$order = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
 		$sql = "
 			SELECT
-				{$this->select}
+				" . $select . "
 			FROM
 				" . $this->schema . '.' . $this->tableName . "
 			WHERE
