@@ -9173,13 +9173,24 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								}
 							}
 						}
-						elseif($this->formvars['newpathwkt'] != ''){
-							if(substr($this->formvars['geomtype'], 0, 5) == 'MULTI'){
-								$insert[$table['attributname'][$i]] = "st_transform(ST_Multi(st_geomfromtext('" . $this->formvars['newpathwkt']."', " . $client_epsg.")), " . $layer_epsg.")";
+						elseif ($this->formvars['newpathwkt'] != '') {
+							$geom = "ST_GeomFromText('" . $this->formvars['newpathwkt'] . "', " . $client_epsg . ")";
+							if (substr($this->formvars['geomtype'], 0, 5) == 'MULTI') {
+								# Erzeuge immer Multigeometrie
+								$geom = "ST_Multi(" . $geom . ")";
 							}
-							else{
-								$insert[$table['attributname'][$i]] = "st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$client_epsg."), ".$layer_epsg.")";
+							else {
+								include_once(CLASSPATH . 'PgObject.php');
+								$postgis_version = PgObject::postgis_version($this);
+
+								if ($postgis_version >= 2.0) {
+									if (strtoupper($this->formvars['geomtype']) == 'LINESTRING' OR strtoupper($this->formvars['geomtype']) == 'POLYGON') {
+										# extrahiere die erste Geometrie aus der Multigeometrie
+										$geom = "ST_GeometryN(" . $geom . ", 1)";
+									}
+								}
 							}
+							$insert[$table['attributname'][$i]] = "ST_Transform(" . $geom . ", " . $layer_epsg . ")";
 						}
 					}
 				}
@@ -9201,17 +9212,19 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 					$ret = $layerdb->execSQL($sql, 4, 1, false);
 					#echo '<br>Datensatz Speichern SQL: ' . $sql;
-					if($last_notice = $msg = pg_last_notice($layerdb->dbConn)){
-						if($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{')), true)){
-							$msg = $notice_result['msg'];
+
+					if ($last_notice = pg_last_notice($layerdb->dbConn)) {
+						if (strpos($last_notice, 'CONTEXT: ') !== false) {
+							$last_notice = $msg = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
 						}
-						$this->add_message('info', $msg);
+						if ($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{')), true)) {
+							$last_notice = $notice_result['msg'];
+						}
+						$this->add_message('info', $last_notice);
 					}
 
 					if ($ret['success']) {
-
 						$result = pg_fetch_row($ret['query']);
-
 						if (pg_affected_rows($ret['query']) > 0) {
 							# dataset was created
 							if (is_array($result) and (!array_key_exists(1, $result) OR $result[1] != 'error')) {
