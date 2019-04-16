@@ -57,7 +57,15 @@
 		document.GUI.go.value = 'Stelle_waehlen_Passwort_aendern';
 		document.GUI.submit();
 	}
-	
+
+	/* This function can be overwritten
+	  * when some action should happen
+	 * after parameter changed
+	 */
+	function onLayerParameterChanged(parameter) {
+		/* nothing to do here */
+	}
+
 </script>
 <br>
 <h2><? echo $this->titel.$strTitleRoleSelection; ?></h2>
@@ -73,7 +81,7 @@ if ($this->formvars['nur_einstellungen']) {
 	}
 	else {
 		if (!empty($params)) { ?>
-			<div class="rollenwahl-gruppe">
+			<div id="rollen_wahl_params_div" class="rollenwahl-gruppe">
 				<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 					<tr>
 						<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett"><? echo $strThemeParameters; ?></span></td>
@@ -84,7 +92,7 @@ if ($this->formvars['nur_einstellungen']) {
 							<td class="rollenwahl-option-data">
 								<table><?
 									foreach($params AS $param) { ?>
-										<tr>
+										<tr id="layer_parameter_<?php echo $param['key']; ?>_tr">
 											<td valign="top" class="rollenwahl-option-header">
 												<?php echo $param['alias']; ?>:
 											</td>

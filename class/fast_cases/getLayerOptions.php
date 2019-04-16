@@ -173,6 +173,51 @@ class GUI {
 										</li>';
 						}
 						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>
+							<li>
+								<a href="javascript:$(\'#rollenfilter, #rollenfilterquestionicon, #rollenfilterleeren\').toggle()">Filter</a>
+								<a href="javascript:$(\'#rollenfilter\').val(\'\')">
+									<i
+										id="rollenfilterleeren"
+										title="Filter aus Textfeld löschen."
+										class="fa fa-times-circle button layerOptionsIcon"
+										style="
+											float: right;
+											display: none;
+										"
+									></i>
+								</a>
+								<a href="javascript:message(\'
+									Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Darstellung des Layers auswirkt. Unterstützt werden alle im SELECT Statement verwendeten Attribute. Mehrere Filter werden mit AND oder OR verknüpft.<br>
+									Ist ein Filter gesetzt wird in der Legende neben dem Layernamen ein Filtersymbol angezeigt.<br>
+									Der Filter wird gelöscht in dem das Textfeld geleert wird.<p>
+									Beispiele:<br>
+									<ul>
+										<li>id > 10 AND status = 1</li>
+										<li>type = \\\'Brunnen\\\' OR type = \\\'Quelle\\\'</li>
+										<li>status IN (1, 2)</li>
+										<li>kg.bezeichnung LIKE \\\'Los\\\'</li>
+									</ul>
+									\')">
+									<i
+										id="rollenfilterquestionicon"
+										title="Hilfe zum Filter anzeigen"
+										class="fa fa-question-circle button layerOptionsIcon"
+										style="
+											float: right;
+											display: none;
+										"
+									></i>
+								</a><br>
+								<textarea
+									id="rollenfilter"
+									style="
+										width: 98%;
+										display: none;
+									"
+									placeholder="' . $layer[0]['Data'] . '"
+									name="layer_options_rollenfilter"
+								>' . $layer[0]['rollenfilter'] . '</textarea></li>
+						</ul>
 					</td>
 				</tr>
 				<tr>
@@ -651,7 +696,9 @@ class rolle {
 				ul.`privileg`,
 				ul.`export_privileg`,
 				`start_aktiv`,
-				r2ul.showclasses
+				r2ul.showclasses,
+				r2ul.rollenfilter,
+				r2ul.geom_from_layer
 			FROM
 				layer AS l,
 				used_layer AS ul,

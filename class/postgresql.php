@@ -258,8 +258,9 @@ FROM
 			if ($query == 0) {
 				$ret[0] = 1;
 				$ret['success'] = false;
-				if(!$suppress_error_msg){
+				if (!$suppress_error_msg) {
 					$errormessage = pg_last_error($this->dbConn);
+					$errormessage = substr($errormessage, 0, strpos($errormessage, 'CONTEXT: '));
 					header('error: true');	// damit ajax-Requests das auch mitkriegen
 					# Abfrage von Notice
 					if ($errormessage != '' AND strpos($errormessage, '{') !== false AND strpos($errormessage, '}') !== false) {
@@ -279,14 +280,14 @@ FROM
 					}
 					else {
 						$ret[1] =
-							$errormessage . "<br>\n<br>" .
+							$errormessage . " <a href=\"#\" onclick=\"$('#error_details').toggle()\">Details</a><div id=\"error_details\" style=\"display: none\">\n" .
 							"\nAufgetreten bei PostgreSQL Anweisung:<br>\n" .
 							"<textarea id=\"sql_statement\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px;\">" . $sql . "</textarea><br>\n" .
 							"<button type=\"button\" onclick=\"
 									copyText = document.getElementById('sql_statement');
 									copyText.select();
 									document.execCommand('copy');
-								\">In Zwischenablage kopieren</button>";
+								\">In Zwischenablage kopieren</button></div>";
 						$ret['msg'] = $ret[1];
 						$ret['type'] = 'error';
 					}
