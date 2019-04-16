@@ -100,7 +100,7 @@ class GUI {
     include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'.php');
   }
 
-	function getLayerOptions() {
+	function getLayerOptions(){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if($this->formvars['layer_id'] > 0)$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
 		else $layer = $this->user->rolle->getRollenLayer(-$this->formvars['layer_id']);
@@ -124,8 +124,22 @@ class GUI {
 					<td>
 						<ul>';
 						if($this->formvars['layer_id'] < 0){
+							echo '<li><a href="index.php?go=delete_rollenlayer&id='.(-$this->formvars['layer_id']).'">'.$this->strRemove.'</a></li>';
 							echo '<li><span>'.$this->strName.':</span> <input type="text" name="layer_options_name" value="'.$layer[0]['Name'].'"></li>';
-						}						
+						}
+						else{
+							if($this->Stelle->isMenueAllowed('Layer_Anzeigen')){
+								echo '<li><span><a href="javascript:toggle(document.getElementById(\'layer_properties\'));">'.$this->properties.'</a></span></li>';
+								echo '<div id="layer_properties" style="display: none">
+												<ul>
+													<li><a href="index.php?go=Layereditor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->layerDefinition.'</a></li>
+													<li><a href="index.php?go=Attributeditor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->attributeditor.'</a></li>
+													<li><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strPrivileges.'</a></li>
+													<li><a href="index.php?go=Style_Label_Editor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strStyles.'</a></li>
+												</ul>
+											</div>';
+							}
+						}
 						if($layer[0]['connectiontype']==6){
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
 							if($layer[0]['queryable']){
@@ -153,12 +167,57 @@ class GUI {
 											<select name="layer_options_labelitem">
 												<option value=""> - '.$this->noLabel.' - </option>';
 												for($i = 0; $i < count($attributes)-2; $i++){
-													if($privileges[$attributes[$i]['name']] AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.$attributes[$i]['name'].'</option>';
+													if($privileges[$attributes[$i]['name']] != '' AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.$attributes[$i]['name'].'</option>';
 												}
 							echo 	 '</select>
 										</li>';
 						}
 						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>
+							<li>
+								<a href="javascript:$(\'#rollenfilter, #rollenfilterquestionicon, #rollenfilterleeren\').toggle()">Filter</a>
+								<a href="javascript:$(\'#rollenfilter\').val(\'\')">
+									<i
+										id="rollenfilterleeren"
+										title="Filter aus Textfeld löschen."
+										class="fa fa-times-circle button layerOptionsIcon"
+										style="
+											float: right;
+											display: none;
+										"
+									></i>
+								</a>
+								<a href="javascript:message(\'
+									Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Darstellung des Layers auswirkt. Unterstützt werden alle im SELECT Statement verwendeten Attribute. Mehrere Filter werden mit AND oder OR verknüpft.<br>
+									Ist ein Filter gesetzt wird in der Legende neben dem Layernamen ein Filtersymbol angezeigt.<br>
+									Der Filter wird gelöscht in dem das Textfeld geleert wird.<p>
+									Beispiele:<br>
+									<ul>
+										<li>id > 10 AND status = 1</li>
+										<li>type = \\\'Brunnen\\\' OR type = \\\'Quelle\\\'</li>
+										<li>status IN (1, 2)</li>
+										<li>kg.bezeichnung LIKE \\\'Los\\\'</li>
+									</ul>
+									\')">
+									<i
+										id="rollenfilterquestionicon"
+										title="Hilfe zum Filter anzeigen"
+										class="fa fa-question-circle button layerOptionsIcon"
+										style="
+											float: right;
+											display: none;
+										"
+									></i>
+								</a><br>
+								<textarea
+									id="rollenfilter"
+									style="
+										width: 98%;
+										display: none;
+									"
+									placeholder="' . $layer[0]['Data'] . '"
+									name="layer_options_rollenfilter"
+								>' . $layer[0]['rollenfilter'] . '</textarea></li>
+						</ul>
 					</td>
 				</tr>
 				<tr>
@@ -379,6 +438,27 @@ class stelle {
 		$this->Bezeichnung = $this->getName();
 		$this->readDefaultValues();
 	}
+	
+	function isMenueAllowed($menuename){
+		$sql = "SELECT distinct a.* from u_menues as a, u_menue2stelle as b ";
+		$sql.= "WHERE links LIKE 'index.php?go=".$menuename."%' AND b.menue_id = a.id AND b.stelle_id = ".$this->id;
+		#echo $sql;
+		$this->debug->write("<p>file:stelle.php class:stelle->isMenueAllowed - Guckt ob der Menuepunkt der Stelle zugeordnet ist:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
+			$errmsg='Fehler bei der Ueberpruefung des Menuepunkts für die Stelle';
+		}
+		else{
+			$rs=mysql_fetch_array($query);
+		}
+		if($rs[0] != '') {
+			return 1;
+		}
+		else {
+			return 0;
+		}
+	}	
 
 	function get_attributes_privileges($layer_id) {
 		$sql = "
@@ -616,7 +696,9 @@ class rolle {
 				ul.`privileg`,
 				ul.`export_privileg`,
 				`start_aktiv`,
-				r2ul.showclasses
+				r2ul.showclasses,
+				r2ul.rollenfilter,
+				r2ul.geom_from_layer
 			FROM
 				layer AS l,
 				used_layer AS ul,

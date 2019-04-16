@@ -1,5 +1,13 @@
 <?
-	include_once(SNIPPETS.'sachdatenanzeige_functions.php'); 
+	include_once(SNIPPETS.'sachdatenanzeige_functions.php');
+	global $layer_ids_flst_auszuege;
+	if(!empty($layer_ids_flst_auszuege)){
+		include_once(CLASSPATH.'datendrucklayout.php');
+		$ddl = new ddl($this->database);
+		foreach($layer_ids_flst_auszuege as $layer_id){
+			$generische_auszuege[$layer_id] = $ddl->load_layouts($this->Stelle->id, NULL, $layer_id, array(0,1));
+		}
+	}
 ?>
 <script language="JavaScript" type="text/javascript">
 
@@ -98,9 +106,9 @@ hide_versions = function(flst){
     <?
 		
 		function sort_flst($a, $b){
-			if($a->Nachfolger == '' AND $b->Nachfolger != '')return 1;
-			if($a->FlurstNr == '' AND $b->FlurstNr != '')return 1;
-			return 0;
+			if($a->Nachfolger != '' AND $b->Nachfolger == '')return -1;		# historische
+			if($a->FlurstNr == '' AND $b->FlurstNr != '')return 1;				# nicht gefundene
+			return strcmp($a->FlurstKennz, $b->FlurstKennz);
 		}
 		
     for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
@@ -820,6 +828,16 @@ hide_versions = function(flst){
 													<? if($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=30&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurst&uuml;cksdaten</option><? } ?>
 													<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=35&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurst&uuml;cksdaten&nbsp;mit&nbsp;Eigent&uuml;mer</option><? } ?>
 													<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=40&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>
+													
+													<?
+														if(!empty($generische_auszuege)){
+															foreach($generische_auszuege as $layer_id => $layouts){
+																foreach($layouts as $layout){ ?>
+																	<option onchange="window.open('index.php?go=generischer_Flurstuecksauszug&selected_layer_id=<? echo $layer_id; ?>&formnummer=<? echo $layout['id']; ?>&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')"><? echo $layout['name']; ?></option>
+													<?		}
+															}
+														}
+													?>
 												</select>
 												&nbsp;&nbsp;
 											</div>
@@ -936,6 +954,16 @@ hide_versions = function(flst){
 					<? if($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']){ ?><option onchange="send_selected_flurst('ALB_Anzeige', '30', 1, '_blank');">Flurst&uuml;cksdaten</option><? } ?>
 					<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']){ ?><option onchange="send_selected_flurst('ALB_Anzeige', '35', 1, '_blank');">Flurst&uuml;cksdaten&nbsp;mit&nbsp;Eigent&uuml;mer</option><? } ?>
 					<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']){ ?><option onchange="send_selected_flurst('ALB_Anzeige', '40', 1, '_blank');">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>
+					
+					<?
+						if(!empty($generische_auszuege)){
+							foreach($generische_auszuege as $layer_id => $layouts){
+								foreach($layouts as $layout){ ?>
+									<option onchange="currentform.selected_layer_id.value=<? echo $layer_id; ?>;send_selected_flurst('generischer_Flurstuecksauszug', '<? echo $layout['id']; ?>', 1, '_blank');"><? echo $layout['name']; ?></option>
+					<?		}
+							}
+						}
+					?>
 				</select>
                 &nbsp;&nbsp;
               </div>
@@ -967,6 +995,7 @@ hide_versions = function(flst){
 <input type="hidden" name="FlurstKennz" value="">
 <input type="hidden" name="formnummer" value="">
 <input type="hidden" name="wz" value="">
+<input type="hidden" name="selected_layer_id" value="">
 
 <?
 if($this->formvars['go'] != 'neu Laden' AND $this->formvars['go'] != 'Layer-Suche' AND $this->formvars['go'] != 'Layer-Suche_Suchen' AND $this->formvars['go'] != 'Sachdaten'){

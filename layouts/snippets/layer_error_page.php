@@ -13,7 +13,9 @@ $body = 'Sehr geehrte Damen und Herren,%0D%0A%0D%0Adas Thema '.umlaute_javascrip
 	</head>
 	<body>
 		<div style="width:80%;margin:10px auto;position:relative;font-family: Arial, Verdana, Helvetica,sans-serif;">
-		<? include(LAYOUTPATH."snippets/".HEADER); ?><br><br>
+			<div style="height: 60px">
+				<? include(LAYOUTPATH."snippets/".HEADER); ?>
+			</div><br>
 			<h3 style="background-color:#E6E6E6;padding:5px;">Hoppla!</h3>
 			<div style="width:40%;float:left;">
 			 <p>

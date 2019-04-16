@@ -104,6 +104,7 @@ input[type="text"]{
 	font-size: 14px;
 	font-family: SourceSansPro1;
 	height: 22px;
+	padding-top: 0;
 }
 
 input[type="file"] {
@@ -368,8 +369,8 @@ a.invisiblelayerlink:hover{
 	margin: 5px;
 	padding: 0px;
 			padding-left: 0px;
-	padding-left: 5px;
-	list-style: square inside none;
+	padding-left: 15px;
+	list-style: square outside none;
 }
 
 .code{
@@ -644,6 +645,20 @@ a.menuered:hover {
 /*	background: rgb(205, 208, 208); */
 }
 
+.header-button {
+	float: right;
+	padding: 4px;
+	font-size: 150%;
+}
+
+.header-button:hover {
+	cursor: pointer;
+}
+
+.options-button {
+	width: 18px;
+}
+
 .button-menue{
 	flex: 0 0 auto;
 	margin: 0 0 2 0;
@@ -749,6 +764,10 @@ a.menuered:hover {
 	background-image: url(../graphics/hilfe.png);
 }
 
+.timetravel{
+	background-image: url(../graphics/timetravel.png);
+}
+
 .save_layers{
 	background-image: url(../graphics/save_layers.png);
 }
@@ -799,7 +818,7 @@ a.menuered:hover {
 }
 
 #header{
-	height: <? echo ($size['header']['height'] - 2); ?>px;
+	height: <? echo ($size['header']['height'] - 2); ?>px;*/
 	border: 1px solid; 
 	border-color: #ffffff #cccccc #bbbbbb;
 }
@@ -856,7 +875,7 @@ a.menuered:hover {
 
 #hist_timestamp_form{
 	position: absolute; 
-	top: 100px;
+	top: 50px;
 	text-align: left;
 	border-top: 1px solid #aaaaaa;
 	border-right: 1px solid #aaaaaa;
@@ -1597,6 +1616,62 @@ tbody.gle tr {
 	cursor: pointer;
 }
 
+.user-options {
+	display: none;
+	min-width: 200px;
+	border: 1px solid #cccccc;
+	background-color: #FFFFFF;
+	position:absolute;
+	-moz-box-shadow: 6px 5px 7px #777;
+	-webkit-box-shadow: 6px 5px 7px #777;
+	box-shadow: 6px 5px 7px #777;
+	top: 30px;
+	right: 15px;
+	z-index: 2000;
+}
+
+.user-options-header {
+	background-color: #c7d9e6;
+	padding: 7px 7px 7px 7px;
+/*	width: 242px; */
+	font-weight: bolder;
+	z-index: 2000;
+}
+
+.user-options-section-header {
+	padding: 7px 0px 7px 7px;
+	z-index: 2000;
+}
+
+.options-devider {
+	background-color: #e1e4e8;
+	height: 1px;
+	margin: 0px 1px 0px 1px;
+	z-index: 2000;
+}
+
+.user-option {
+	padding: 7px 0px 7px 7px;
+	z-index: 2000;
+	cursor: pointer;
+}
+
+.user-option:hover {
+	background: linear-gradient(#dae4ec 0%, #c7d9e6 100%);
+	z-index: 2000;
+}
+
+.sperr-div {
+	display: none;
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	background: rgba(51,51,51,0.2);
+	z-index: 1000;
+}
+
 .layerOptions, #legendOptions{
 	min-width: 220px;
 	border: 1px solid #cccccc;
@@ -1624,7 +1699,7 @@ tbody.gle tr {
 
 #legendOptionsIcon{
 	font-size: 1.1em;
-	margin: 0 0 0 42;
+	margin: 0 5px 0 42px;
 	height: 16px;
 	width: 16px;
 	padding: 5px;
@@ -1651,8 +1726,8 @@ tbody.gle tr {
 	color: lightsteelblue;
 	margin: 5px;
 	padding: 0px;
-	padding-left: 5px;
-	list-style: square inside none;
+	padding-left: 15px;
+	list-style: square outside none;
 }
 
 .layerOptions li, #legendOptions li{
@@ -1694,8 +1769,8 @@ tbody.gle tr {
 	color: lightsteelblue;
 	margin: 5px;
 	padding: 0px;
-	padding-left: 5px;
-	list-style: square inside none;
+	padding-left: 15px;
+	list-style: square outside none;
 }
 
 .groupOptions span{

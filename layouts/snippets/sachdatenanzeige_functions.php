@@ -57,38 +57,64 @@ include('funktionen/input_check_functions.php');
 			var operator = scope.querySelector('#vcheck_operator_'+dependent).value;
 			var value = scope.querySelector('#vcheck_value_'+dependent).value;
 			if(operator == '=')operator = '==';
-			var tr_dependent = scope.querySelector('#tr_'+layer_id+'_'+dependent+'_'+k);
+			// visibility of attribute
+			var name_dependent = scope.querySelector('#name_'+layer_id+'_'+dependent+'_'+k);
+			var value_dependent = scope.querySelector('#value_'+layer_id+'_'+dependent+'_'+k);
 			if(field_has_value(object, operator, value)){
-				tr_dependent.style.display = '';
+				if(name_dependent != null)name_dependent.style.visibility = 'visible';
+				value_dependent.style.visibility = 'visible';
 			}
 			else{
-				tr_dependent.style.display = 'none';
+				if(name_dependent != null)name_dependent.style.visibility = 'hidden';
+				value_dependent.style.visibility = 'hidden';
 			}
-			// Gruppe auch ein/ausblenden
-			if(tr_dependent.closest('table').firstChild.children != null){
-				all_trs = [].slice.call(tr_dependent.closest('table').firstChild.children);		// alle trs in der Gruppe
+			// visibility of row
+			var row = value_dependent.parentNode;
+			all_attributes_in_row = [].slice.call(row.childNodes);
+			row_display = 'none';
+			all_attributes_in_row.forEach(function(td){
+				if(td.nodeType == 1 && td.id != '' && td.style.visibility != 'hidden'){
+					row_display = '';
+				}
+			})
+			row.style.display = row_display;
+			// visibility of group
+			if(row.closest('table').firstChild.children != null){
+				all_trs = [].slice.call(row.closest('table').firstChild.children);		// alle trs in der Gruppe
 				group_display = 'none';
 				all_trs.forEach(function(tr){
 					if(tr.id != '' && tr.style.display != 'none'){
 						group_display = '';
 					}
 				})
-				tr_dependent.closest('div').closest('tr').style.display = group_display;
+				row.closest('div').closest('tr').style.display = group_display;
 			}
 		})
 	}
 	
 	field_has_value = function(field, operator, value){
+		var field_value = field.value;
+		if(field.type == 'radio'){
+			var radio = document.querySelector('input[name="'+field.name+'"]:checked');
+			if(radio != null)field_value = radio.value;
+		}
 		if(field.type == 'checkbox'){
 			if((operator == '==' && value == 't' && field.checked) || 
-				 (operator == '==' && value == 'f' && !field.checked) ||
+				 (operator == '==' && value != 't' && !field.checked) ||
 				 (operator == '!=' && value == 't' && !field.checked) ||
-				 (operator == '!=' && value == 'f' && field.checked)
+				 (operator == '!=' && value != 't' && field.checked)
 				 )return true;
 			else return false;
 		}
 		else{
-			return eval("'"+field.value+"' "+operator+" '"+value+"'")
+			if(operator == 'IN'){
+				value_array = value.split('|');
+				if(value_array.indexOf(field_value) > -1) return true;
+				else return false;
+			}
+			else{
+				return eval("'"+field_value+"' "+operator+" '"+value+"'")
+			}
 		}
 	}	
 	
@@ -797,12 +823,14 @@ include('funktionen/input_check_functions.php');
 	
 	switch_edit_all = function(layer_id){
 		if(document.getElementById('edit_all3_'+layer_id).style.display == 'none'){
+			var obj = document.getElementById(layer_id+'_0');
+			if(!obj.checked)selectall(layer_id);
 			document.getElementById('edit_all1_'+layer_id).style.display = 'none';			
 			document.getElementById('edit_all2_'+layer_id).style.display = '';
 			document.getElementById('edit_all3_'+layer_id).style.display = '';
 			document.getElementById('edit_all4_'+layer_id).style.display = '';
 		}
-		else{
+		else{			
 			document.getElementById('edit_all1_'+layer_id).style.display = '';			
 			document.getElementById('edit_all2_'+layer_id).style.display = 'none';
 			document.getElementById('edit_all3_'+layer_id).style.display = 'none';

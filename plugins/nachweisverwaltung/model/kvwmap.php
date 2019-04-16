@@ -474,6 +474,16 @@
     $GUI->nachweiseRecherchieren();
   };
 
+	$GUI->setNachweisOrder = function($stelle_id, $user_id, $order) use ($GUI){
+		$sql ='UPDATE rolle_nachweise SET ';
+		$sql.='`order`="'.$order.'"';
+		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
+		#echo $sql;
+		$GUI->debug->write("<p>file:users.php class:rolle->setNachweisOrder - Setzen der aktuellen Order für die Nachweissuche",4);
+		$GUI->database->execSQL($sql,4, 1);
+		return 1;
+	};
+
 	$GUI->setNachweisSuchparameter = function($stelle_id, $user_id, $suchhauptart,$suchunterart,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$stammnr2,$suchrissnummer,$suchrissnummer2,$suchfortfuehrung,$suchfortfuehrung2,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle, $flur_thematisch, $alle_der_messung, $order) use ($GUI){
 		if($suchhauptart == NULL)$suchhauptart = array();
 		if($suchunterart == NULL)$suchunterart = array();
@@ -1541,6 +1551,11 @@
 			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 			$nachweisSuchParameter=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
 			$GUI->formvars=array_merge($GUI->formvars,$nachweisSuchParameter);
+			if($GUI->formvars['zurueck']){
+				$GUI->formvars['pathwkt'] = $GUI->formvars['suchpolygon'];
+				$GUI->formvars['newpathwkt'] = $GUI->formvars['suchpolygon'];
+				$GUI->formvars['firstpoly'] = 'true';
+			}
 		}
 		# die Parameter einer gespeicherten Dokumentauswahl laden
 		if($GUI->formvars['dokauswahlen'] != ''){

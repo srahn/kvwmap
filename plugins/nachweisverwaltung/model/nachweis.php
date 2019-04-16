@@ -1063,7 +1063,7 @@ class Nachweis {
           $sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";					
 					$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
 					if($alle_der_messung){
-						$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise AS n2 ON n.oid = n2.oid OR (n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "").")";
+						$sql.=" JOIN nachweisverwaltung.n_nachweise AS n2 ON n.oid = n2.oid OR (n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "").")";
 						$n = 'n2';
 					}
  					$sql.=" WHERE 1=1";

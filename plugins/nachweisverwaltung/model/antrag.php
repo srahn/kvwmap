@@ -423,7 +423,7 @@ class antrag {
       if($formvars['Datei']){
 	      $ret=$this->getDatei($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $withFileLinks);
 	      if ($ret[0]) { return $ret; }
-				$FFR[$i]['Datei - Datum'] = $ret[1];
+				$FFR[$i]['Datei - Messungsdatum'] = $ret[1];
       }
 
       # Abfrage der Vermessungsstellen im Vorgang

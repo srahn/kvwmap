@@ -41,6 +41,7 @@
 	Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"];
 	Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions; ?>"];
 	Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
+	Text_print_scale=["<? echo $strHelp; ?>:","<? echo $strHintPrintScale; ?>"];
 
 	function start1(){
 		document.GUI.submit();
@@ -56,15 +57,69 @@
 		document.GUI.go.value = 'Stelle_waehlen_Passwort_aendern';
 		document.GUI.submit();
 	}
-	
+
+	/* This function can be overwritten
+	  * when some action should happen
+	 * after parameter changed
+	 */
+	function onLayerParameterChanged(parameter) {
+		/* nothing to do here */
+	}
+
 </script>
 <br>
 <h2><? echo $this->titel.$strTitleRoleSelection; ?></h2>
 
 <? if ($this->Fehlermeldung!='') {
        include(LAYOUTPATH."snippets/Fehlermeldung.php");
-} ?>
+}
 
+if ($this->formvars['nur_einstellungen']) {
+	$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
+	if ($params['error_message'] != '') {
+		$this->add_message('error', $params['error_message']);
+	}
+	else {
+		if (!empty($params)) { ?>
+			<div id="rollen_wahl_params_div" class="rollenwahl-gruppe">
+				<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett"><? echo $strThemeParameters; ?></span></td>
+					</tr><?
+					$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
+					if (!empty($params)) { ?>
+						<tr>
+							<td class="rollenwahl-option-data">
+								<table><?
+									foreach($params AS $param) { ?>
+										<tr id="layer_parameter_<?php echo $param['key']; ?>_tr">
+											<td valign="top" class="rollenwahl-option-header">
+												<?php echo $param['alias']; ?>:
+											</td>
+											<td><?php
+												include_once(CLASSPATH.'FormObject.php');
+												echo FormObject::createSelectField(
+													'layer_parameter_' . $param['key'],		# name
+													$param['options'],										# options
+													rolle::$layer_params[$param['key']],	# value
+													1,																		# size
+													'',																		# style
+													'onLayerParameterChanged(this);',			# onchange
+													'layer_parameter_' . $param['key'],		# id
+													''																		# multiple
+												); ?>
+											</td>
+										</tr><?php
+									} ?>
+								</table>
+							</td>
+						</tr><?
+					} ?>
+				</table>
+			</div><?
+		}
+	}
+} ?>
 <div class="rollenwahl-gruppe">
 	<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 		<tr>
@@ -72,39 +127,48 @@
 		</tr>
 		<tr>
 			<td class="rollenwahl-gruppen-options">
-				<table border="0" cellpadding="0" cellspacing="0">
-					<tr>						
-						<td valign="top" class="rollenwahl-option-header">
-							<? echo $strTask; ?>:
-						</td>
-						<td class="rollenwahl-option-data">
-							<div style="display: flex;">
-								<div style="float: left;">
-									<? echo $this->StellenForm->html; ?>
+				<table border="0" cellpadding="0" cellspacing="0"><?
+					if ($this->formvars['nur_einstellungen']) { ?>
+						<tr>
+							<td>
+								<input type="hidden" name="Stelle_ID" value="<? echo $this->user->stelle_id; ?>">
+							</td>
+						</tr><?
+					}
+					else { ?>
+						<tr>
+							<td valign="top" class="rollenwahl-option-header">
+								<? echo $strTask; ?>
+							</td>
+							<td class="rollenwahl-option-data">
+								<div style="display: flex;">
+									<div style="float: left;">
+										<? echo $this->StellenForm->html; ?>
+									</div>
+									<div style="float: left; margin-left: 5px;">
+										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_task, Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
+										<div id="Tip1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+									</div>
+									<div style="width: 80px; text-align: center;">
+										<i id="sign_in_stelle" title="<? echo $this->strEnter; ?>" class="fa fa-sign-out fa-2x" onclick="document.GUI.submit();" style="cursor: pointer;display: none;"></i>
+									</div>
 								</div>
-								<div style="float: left; margin-left: 5px;">
-									<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_task, Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
-									<div id="Tip1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-								</div>
-								<div style="width: 80px; text-align: center;">
-									<i id="sign_in_stelle" title="<? echo $this->strEnter; ?>" class="fa fa-sign-out fa-2x" onclick="document.GUI.submit();" style="cursor: pointer;display: none;"></i>
-								</div>
-							</div>
-						</td>
-					</tr><?
+							</td>
+						</tr><?
+					}
 					if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) { ?>
 						<tr>
 							<td valign="top" class="rollenwahl-option-header">
 								<? echo $strPassword; ?>:
 							</td>
 							<td class="rollenwahl-option-data">
-								<a href="javascript:openPasswordForm();"><? echo $strChangePassword; ?></a>
+								<i class="fa fa-key options-button" aria-hidden="true"></i><a href="javascript:openPasswordForm();"><? echo $strChangePassword; ?></a>
 								<div id="password_form" style="border: 1px solid #cbcbcb;width: 290px;<? if($this->PasswordError == '')echo 'display: none'; ?>">
 									<table cellspacing="3" style="width: 100%">
 										<tr>
 											<td><span class="px16"><? echo $strCurrentPassword; ?>: </span></td>
 											<td>
-												<input style="width: 130px" type="password" value="<? echo $this->formvars['passwort']; ?>" name="passwort" />
+												<input style="width: 130px" type="password" value="<? echo $this->formvars['passwort']; ?>" id="passwort" name="passwort" /><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#passwort').attr('type') == 'text') { $('#passwort').attr('type', 'password') } else { $('#passwort').attr('type', 'text'); }"></i>
 											</td>
 										</tr><?
 										if($this->PasswordError){ ?>
@@ -117,7 +181,7 @@
 										<tr>
 											<td><span class="px16"><? echo $strNewPassword; ?>: </span></td>
 											<td>
-												<input style="width: 130px" type="password" value="<? echo $this->formvars['new_password']; ?>" name="new_password"/><?php
+												<input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password']; ?>" id="new_password" name="new_password"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password').attr('type') == 'text') { $('#new_password').attr('type', 'password') } else { $('#new_password').attr('type', 'text'); }"></i><?php
 												if (defined ('PASSWORD_INFO') AND PASSWORD_INFO != '') { ?>
 													<div style="float: right; margin-left: 5px;">
 														<img
@@ -132,7 +196,7 @@
 										</tr>
 										<tr>
 											<td><span class="px16"><? echo $strRepeatPassword; ?>: </span></td>
-											<td><input style="width: 130px" type="password" value="<? echo $this->formvars['new_password_2']; ?>" name="new_password_2"/></td>
+											<td><input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password_2']; ?>" id="new_password_2" name="new_password_2"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password_2').attr('type') == 'text') { $('#new_password_2').attr('type', 'password') } else { $('#new_password_2').attr('type', 'text'); }"></i></td>
 										</tr>
 										<tr>
 											<td colspan="2" align="center">
@@ -194,7 +258,7 @@
 		</tr>
 	</table>
 </div><?
-
+###
 if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) { ?>
 	<div class="rollenwahl-gruppe">
 	<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
@@ -385,6 +449,19 @@ if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angem
 							</select>
 							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_coordtype, Style[0], document.getElementById('Tip13'))" onmouseout="htm()">
 							<div id="Tip13" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+						</td>
+					</tr>
+					<tr>
+						<td class="rollenwahl-option-header">
+							<? echo $strPrintScale; ?>:
+						</td>
+						<td class="rollenwahl-option-data">
+							<select name="print_scale">
+								<option value="auto" <? if($this->user->rolle->print_scale == "auto"){ echo "selected"; } ?>><? echo $strPrintScaleAuto; ?></option>
+								<option value="" <? if($this->user->rolle->print_scale != "auto"){ echo "selected"; } ?>><? echo $strPrintScaleLast; ?></option>
+							</select>
+							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_print_scale, Style[0], document.getElementById('Tip15'))" onmouseout="htm()">
+							<div id="Tip15" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 						</td>
 					</tr>
 					<tr>

@@ -40,5 +40,7 @@
 	$strLegendTypeGroups="Themen in Gruppen";
 	$strLegendTypeAlphabetical="Themen alphabetisch";
 	$strDrawingOrder="Zeichenreihenfolge anpassen";
+	$strRemoveAllImportLayers="alle eigenen Importe entfernen";
+	$strRemoveAllSearchLayers="alle Suchergebnislayer entfernen";
   
 ?>

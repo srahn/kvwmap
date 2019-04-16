@@ -49,7 +49,7 @@
 
 	function attribute_name($layer_id, $attributes, $j, $k, $fontsize, $sort_links = true) {
 		$datapart .= '<table ';
-		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j] != 1)$datapart .= 'width="200px"';
+		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j] != 1 AND $attributes['labeling'][$j] != 1)$datapart .= 'width="200px"';
 		else $datapart .= 'width="100%"';
 		$datapart .= '><tr style="border: none"><td' . (($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0') ? ' class="gle-attribute-mandatory"' : '') . '>';
 		if (
@@ -189,7 +189,7 @@
 						case 1 : {
 							$datapart .= '
 								<tr>
-									<td colspan="2" valign="top" class="gle-attribute-name">
+									<td id="name_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" colspan="2" valign="top" class="gle-attribute-name">
 										<table>
 											<tr>
 												<td>' . $type_attributes['alias'][$e] . '</td>
@@ -198,7 +198,7 @@
 									</td>
 								</tr>
 								<tr>
-									<td colspan="2" class="gle_attribute_value">
+									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" colspan="2" class="gle_attribute_value">
 										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
 									</td>
 								</tr>
@@ -207,7 +207,7 @@
 						case 2 : {
 							$datapart .= '
 								<tr>
-									<td colspan="2" class="gle_attribute_value">
+									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" colspan="2" class="gle_attribute_value">
 										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
 									</td>
 								</tr>
@@ -215,15 +215,15 @@
 						} break;
 						default : {
 							$datapart .= '
-								<tr id="tr_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" style="'.($type_attributes['vcheck_attribute'][$e] != ''? 'display: none' : '').'" class="' . $attribute_class . '">
-									<td valign="top" class="gle_attribute_name">
+								<tr id="tr_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" class="' . $attribute_class . '">
+									<td id="name_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" valign="top" class="gle_attribute_name">
 										<table>
 											<tr>
 												<td>' . $type_attributes['alias'][$e] . '</td>
 											</tr>
 										</table>
 									</td>
-									<td class="gle_attribute_value">
+									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" class="gle_attribute_value">
 										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
 									</td>
 								</tr>';
@@ -306,8 +306,7 @@
 				case 'Radiobutton' : {
 					$enum_value = $attributes['enum_value'][$j];
 					$enum_output = $attributes['enum_output'][$j];
-					if($attributes['nullable'][$j] != '0' OR $gui->new_entry == true)$strPleaseSelect = $gui->strPleaseSelect;
-					if($privileg == '0' OR $lock){
+					if($attribute_privileg == '0' OR $lock){
 						for($e = 0; $e < count($enum_value); $e++){
 							if($enum_value[$e] == $value){
 								$auswahlfeld_output = $enum_output[$e];
@@ -315,7 +314,7 @@
 								break;
 							}
 						}
-						$datapart .= '<input class="'.$field_class.'" readonly id="'.$layer_id.'_'.$name.'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$fieldname.'" value="'.$auswahlfeld_output.'">';
+						$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" readonly id="'.$layer_id.'_'.$name.'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$fieldname.'" value="'.$auswahlfeld_output.'">';
 						$auswahlfeld_output = '';
 						$auswahlfeld_output_laenge = '';
 					}
@@ -324,12 +323,14 @@
 							$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
 						}						
 						for($e = 0; $e < count($enum_value); $e++){
-							$datapart .= '<input class="'.$field_class.'" tabindex="1" type="radio" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'_'.$e.'"';
+							$datapart .= '<input class="'.$field_class.'" tabindex="1" type="radio" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'"';
 							$datapart .= ' onchange="'.$onchange.'" ';
 							if($enum_value[$e] == $value){
 								$datapart .= 'checked ';
 							}
-							$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$k.'_'.$e.'">'.$enum_output[$e].'</label><br>';
+							if($attributes['nullable'][$j] != '0')$datapart .= ' onclick="this.checked = this.checked2;" onmouseup="this.checked = this.checked2;" onmousedown="preventDefault(event); this.checked = !this.checked; this.checked2 = this.checked;"';
+							$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$k.'_'.$e.'">'.$enum_output[$e].'</label>&nbsp;&nbsp;&nbsp;&nbsp;';
+							if(!$attributes['horizontal'][$j])$datapart .= '<br>';
 						}
 					}
 				}break;				
@@ -610,7 +611,7 @@
 					for($a = 0; $a < count($attributes['name']); $a++){
 						if(strpos($options, '$'.$attributes['name'][$a]) !== false){
 							$options = str_replace('$'.$attributes['name'][$a], $dataset[$attributes['name'][$a]], $options);
-							if(empty($dataset[$attributes['name'][$a]])) {
+							if($dataset[$attributes['name'][$a]] == ''){								
 								$one_param_is_null = true;
 							}
 							else {
@@ -629,7 +630,7 @@
 					if ($explosion[3] == 'all_not_null' and $one_param_is_null) {
 						$show_link = false;
 					}
-					$datapart .= '<input class="'.$field_class.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					if ($show_link) {
 						if($explosion[2] == 'embedded'){
 							$datapart .= '<a class="dynamicLink" href="javascript:if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
@@ -666,7 +667,7 @@
 				} break;
 
 				case 'Fläche': {
-					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" id="custom_area" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
+					$datapart .= '<input class="'.$field_class.' custom_area" onchange="'.$onchange.'" id="'.$layer_id.'_'.$name.'_'.$k.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 					}

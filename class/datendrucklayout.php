@@ -187,7 +187,7 @@ class ddl {
 		return $remaining_lines;
 	}	
 	
-	function add_attribute_elements($selected_layer_id, $layerdb, $attributes, $oids, $offsetx, $i, $preview){
+	function add_attribute_elements($selected_layer_id, $layerdb, $attributes, $offsetx, $i, $preview){
 		for($j = 0; $j < count($attributes['name']); $j++){		
 			$wordwrapoffset = 1;
 			if(in_array($attributes['name'][$j], $this->remaining_attributes) AND $this->layout['elements'][$attributes['name'][$j]]['ypos'] > 0){		# wenn Attribut noch nicht geschrieben wurde und einen y-Wert hat
@@ -359,14 +359,15 @@ class ddl {
 					if($this->page_overflow)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 					$this->gui->map->set('width', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
 					$this->gui->map->set('height', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
-					if($oids[$i] != ''){
+					$oid = $this->result[$i][$this->layerset['maintable'].'_oid'];
+					if($oid != ''){
 						if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0)$rand = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];		# bei Geometrie-Attributen wird in fontsize der Zoom-Rand gespeichert
 						elseif(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0)$rand = ZOOMBUFFER;
 						else $rand = 100;
 						if($attributes['geomtype'][$attributes['the_geom']] == 'POINT'){
 							include_(CLASSPATH.'pointeditor.php');
 							$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->gui->user->rolle->epsg_code);							
-							$point = $pointeditor->getpoint($oids[$i], $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom']);
+							$point = $pointeditor->getpoint($oid, $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom']);
 							$rect = ms_newRectObj();
 							$rect->minx = $point['pointx']-$rand;
 							$rect->maxx = $point['pointx']+$rand;
@@ -376,7 +377,7 @@ class ddl {
 						else{
 							include_(CLASSPATH.'polygoneditor.php');
 							$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->gui->user->rolle->epsg_code);
-							$rect = $polygoneditor->zoomTopolygon($oids[$i], $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom'], $rand);
+							$rect = $polygoneditor->zoomTopolygon($oid, $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom'], $rand);
 						}
 						$this->gui->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 					}					
@@ -533,7 +534,7 @@ class ddl {
 		return $output;
   }
   
-  function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $oids, $result, $stelle, $user, $preview = NULL, $record_paging = NULL){
+  function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $result, $stelle, $user, $preview = NULL, $record_paging = NULL){
 		# Für einen ausgewählten Layer wird das übergebene Result-Set nach den Vorgaben des übergebenen Layouts in ein PDF geschrieben
 		# Werden $pdfobject, $offsetx und $offsety übergeben, wird kein neues PDF-Objekt erzeugt, sondern das übergebene PDF-Objekt eines übergeordneten Layers+Layout verwendet (eingebettete Layouts)
 		$this->layerset = $layerset[0];
@@ -622,7 +623,7 @@ class ddl {
 			}
 			$test = 0;			
 			while($test < 100 AND count($this->remaining_attributes) > 0){
-				$this->add_attribute_elements($selected_layer_id, $layerdb, $this->attributes, $oids, $offsetx, $i, $preview);	# übrig sind die, die noch nicht geschrieben wurden, weil sie abhängig sind
+				$this->add_attribute_elements($selected_layer_id, $layerdb, $this->attributes, $offsetx, $i, $preview);	# übrig sind die, die noch nicht geschrieben wurden, weil sie abhängig sind
 				$test++;
 			}			
 			################# Daten schreiben ###############

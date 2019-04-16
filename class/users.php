@@ -1032,6 +1032,7 @@ class user {
 			if($formvars['querymode'] != '') $sql.=',querymode="1"';
 			else $sql.=',querymode="0", overlayx=400, overlayy=150';
 			$sql.=',geom_edit_first="'.$formvars['geom_edit_first'].'"';
+			$sql.=',print_scale = CASE WHEN print_scale = "auto" OR "'.$formvars['print_scale'].'" = "auto" THEN "'.$formvars['print_scale'].'" ELSE print_scale END';
 			if($formvars['hist_timestamp'] != '') $sql.=',hist_timestamp="'.DateTime::createFromFormat('d.m.Y H:i:s', $formvars['hist_timestamp'])->format('Y-m-d H:i:s').'"';
 			else $sql.=',hist_timestamp = NULL';
 			if($formvars['back']){$buttons .= 'back,';}
@@ -1053,7 +1054,6 @@ class user {
 			if($formvars['gps']){$buttons .= 'gps';}
 			if($buttons != '')$sql.=",buttons = '".$buttons."'";
 			$sql.=",selectedButton='zoomin'";
-
 			$sql.=' WHERE stelle_id='.$stelle_id.' AND user_id='.$this->id;
 			#echo $sql;
 			$this->debug->write("<p>file:users.php class:user->setOptions - Setzen der Einstellungen für die Rolle des Users<br>".$sql,4);

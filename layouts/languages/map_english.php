@@ -44,5 +44,7 @@
 	$strLegendTypeGroups="layers in groups";
 	$strLegendTypeAlphabetical="layers alphabetical";
 	$strDrawingOrder="Change Drawingorder";
+	$strRemoveAllImportLayers="remove all import-layers";
+	$strRemoveAllSearchLayers="remove all search-layers";
   
 ?>

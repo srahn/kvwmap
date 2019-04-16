@@ -18,7 +18,7 @@ for ($i = 0; $i < count($kvwmap_plugins); $i++) {
 }
 
 if (!defined('EPSGCODE_ALKIS')) {
-	define('EPSGCODE_ALKIS', 0);	// EPSGCODE_ALKIS ist nur bei Verwendung des Plugin alkis definiert
+	define('EPSGCODE_ALKIS', -1);	// EPSGCODE_ALKIS ist nur bei Verwendung des Plugin alkis definiert
 }
 
 include(CLASSPATH . 'log.php');
@@ -729,7 +729,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'Kartenkommentar_Zoom' : {
-				$GUI->zoomToStoredMapExtent($GUI->formvars['storetime']);
+				$GUI->zoomToStoredMapExtent($GUI->formvars['storetime'], $GUI->formvars['user_id']);
 			}break;
 
 			case 'Kartenkommentar_loeschen' : {
@@ -1695,6 +1695,11 @@ function go_switch($go, $exit = false) {
 			case  'ALB_Anzeige_Bestand' : {
 				$GUI->ALB_Anzeigen(NULL, $GUI->formvars['formnummer'], $GUI->formvars['Grundbuchbezirk'], $GUI->formvars['Grundbuchblatt']);
 			} break;
+			
+			case  'generischer_Flurstuecksauszug' : {
+				$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);
+				$GUI->generischer_Flurstuecksauszug($flurst_array);
+			} break;			
 
 			 # Auswählen einer neuen Stelle
 			case 'Stelle_waehlen' : case 'Stelle_waehlen_Passwort_aendern' : {
@@ -1730,7 +1735,11 @@ function go_switch($go, $exit = false) {
 			
 			case 'geo_name_query' : {
 				$GUI->geo_name_query();
-			} break;			
+			} break;
+
+			case 'delete_rollenlayer' : {
+				$GUI->deleteRollenlayer();
+			} break;
 
 			default : {
 				# Karteninformationen lesen

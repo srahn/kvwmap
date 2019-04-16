@@ -98,7 +98,7 @@ class lineeditor {
 				$geom = "st_transform(ST_MULTI(st_geometryfromtext('" . $line . "', " . $this->clientepsg . ")), " . $this->layerepsg . ")";
 			}
 			else {
-				$geom = "st_transform(ST_GeometryN(ST_MULTI(st_geometryfromtext('" . $line . "', " . $this->clientepsg.")), 1), " . $this->layerepsg . ")";
+				$geom = "st_transform(st_geometryfromtext('" . $line . "', " . $this->clientepsg."), " . $this->layerepsg . ")";
 			}
 		}
 		$sql = "

@@ -4,4 +4,5 @@
  $strTime="Time";
  $strComment="Comment";
  $strName="name";
+ $strUser="User";
 ?>  

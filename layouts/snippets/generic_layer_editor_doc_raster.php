@@ -76,7 +76,7 @@
 <table border="0" cellspacing="0" cellpadding="2">
 	<tr>
 		<td>
-			<div style="max-width: 735px; display: flex; flex-wrap: wrap; align-items: flex-start">
+			<div style="<? if($this->new_entry != true)echo 'max-width: 735px;'; ?> display: flex; flex-wrap: wrap; align-items: flex-start">
 <?
 	$hover_preview = true;
 	$checkbox_names = '';
@@ -177,7 +177,7 @@
 ?>
 					<tr class="<? if($layer['attributes']['raster_visibility'][$j] == 1)echo 'tr_show'; else echo 'tr_hide'; ?>">
 <?				if($layer['attributes']['type'][$j] != 'geometry'){
-						echo '<td  valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
+						echo '<td valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
 						if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k]){
 							$this->editable = $layer['Layer_ID'];
 						}
@@ -210,7 +210,7 @@
 							';
 						}
 						echo '</td></tr></table>';
-						echo '</td><td><div id="formelement">';
+						echo '</td><td '.get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value')).'><div id="formelement">';
 						if($layer['attributes']['constraints'][$j] != '' AND !in_array($layer['attributes']['constraints'][$j], array('PRIMARY KEY', 'UNIQUE'))){
 		  				if($layer['attributes']['privileg'][$j] == '0' OR $lock[$k]){
 								echo '<input readonly style="background-color:#e8e3da;" size="6" type="text" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'" value="'.$layer['shape'][$k][$layer['attributes']['name'][$j]].'">';

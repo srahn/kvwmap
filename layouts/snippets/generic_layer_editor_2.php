@@ -80,7 +80,7 @@
 				$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 			}
 			?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
-	    <table id="dstable" class="tgle" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" style="width:100%" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
+	    <table id="dstable" class="tgle" style="border-bottom: 1px solid grey" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
 				<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
         <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle"'; ?>>
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
@@ -90,6 +90,9 @@
 			}
 						
 			for($j = 0; $j < count($layer['attributes']['name']); $j++) {
+				if($this->success === false){			# nach einem fehlgeschlagenen UPDATE oder INSERT die Formularfelder mit den übergebenen Werten befüllen
+					$layer['shape'][$k][$layer['attributes']['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j]];
+				}
 				$attribute_class = (($this->new_entry == true AND $layer['attributes']['dont_use_for_new'][$j] == -1) ? 'hidden' : 'visible');
 				if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 					$layer['attributes']['form_element_type'][$j] .= '_not_saveable';
@@ -133,6 +136,7 @@
 						######### Attributname #########
 						if($layer['attributes']['labeling'][$j] != 2){
 							$cell['properties'] = 'class="gle-attribute-name"';
+							$cell['id'] = 'name_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
 							$cell['content'] = attribute_name($layer['Layer_ID'], $layer['attributes'], $j, $k, $this->user->rolle->fontsize_gle, ($this->formvars['printversion'] == '' AND $anzObj > 1) ? true : false);
 							if($nl AND $layer['attributes']['labeling'][$j] != 1){
 								$next_row['contains_attribute_names'] = true;
@@ -158,7 +162,7 @@
 
 						######### Attributwert #########
 						$cell['content'] = attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2, $this->user->rolle->fontsize_gle);
-						$cell['id'] = 'row'.$j;
+						$cell['id'] = 'value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
 						$cell['properties'] = get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value'));
 						if($nl){
 							$next_row['cells'][] = $cell;
@@ -269,7 +273,7 @@
 
 				if($this->new_entry == true){
 					if($privileg == 1){
-						if(!$this->user->rolle->geom_edit_first)echo $datapart.'</table><table class="tgle" border="0" cellspacing="0" cellpadding="2">';
+						if(!$this->user->rolle->geom_edit_first)echo $datapart.'</table><table style="width: 100%" class="tgle" border="0" cellspacing="0" cellpadding="0">';
 						if($nullable === '0'){ ?>
 							<script type="text/javascript">
     						geom_not_null = true;

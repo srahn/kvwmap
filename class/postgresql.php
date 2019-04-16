@@ -258,21 +258,39 @@ FROM
 			if ($query == 0) {
 				$ret[0] = 1;
 				$ret['success'] = false;
-				$errormessage = pg_last_error($this->dbConn);
-				header('error: true');		// damit ajax-Requests das auch mitkriegen
-				$ret[1] =
-					$errormessage . "<br>\n<br>" .
-					"\nAufgetreten bei PostgreSQL Anweisung:<br>\n" .
-					"<textarea id=\"sql_statement\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px;\">" . $sql . "</textarea><br>\n" .
-					"<button type=\"button\" onclick=\"
-							copyText = document.getElementById('sql_statement');
-							copyText.select();
-							document.execCommand('copy');
-						\">In Zwischenablage kopieren</button>";
-				$ret['msg'] = $ret[1];
-				$ret['type'] = 'error';
 				if (!$suppress_error_msg) {
-					echo "<br><b>" . $ret[1] . "</b>";
+					$errormessage = pg_last_error($this->dbConn);
+					$errormessage = substr($errormessage, 0, strpos($errormessage, 'CONTEXT: '));
+					header('error: true');	// damit ajax-Requests das auch mitkriegen
+					# Abfrage von Notice
+					if ($errormessage != '' AND strpos($errormessage, '{') !== false AND strpos($errormessage, '}') !== false) {
+						$notice_obj = json_decode(substr($errormessage, strpos($errormessage, '{'), strpos($errormessage, '}') - strpos($errormessage, '{') + 1), true);
+						if (array_key_exists('success', $notice_obj)) {
+							if (!$notice_obj['success']) {
+								$ret[0] = 1;
+								$ret['success'] = false;
+							}
+							if (array_key_exists('msg_type', $notice_obj)) {
+								$ret['type'] = $notice_obj['msg_type'];
+							}
+							if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
+								$ret['msg'] = $ret[1] = $notice_obj['msg'];
+							}
+						}
+					}
+					else {
+						$ret[1] =
+							$errormessage . " <a href=\"#\" onclick=\"$('#error_details').toggle()\">Details</a><div id=\"error_details\" style=\"display: none\">\n" .
+							"\nAufgetreten bei PostgreSQL Anweisung:<br>\n" .
+							"<textarea id=\"sql_statement\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px;\">" . $sql . "</textarea><br>\n" .
+							"<button type=\"button\" onclick=\"
+									copyText = document.getElementById('sql_statement');
+									copyText.select();
+									document.execCommand('copy');
+								\">In Zwischenablage kopieren</button></div>";
+						$ret['msg'] = $ret[1];
+						$ret['type'] = 'error';
+					}
 				}
 				$this->debug->write("<br><b>" . $ret[1] . "</b>", $debuglevel);
 				if ($logsql) {
@@ -283,8 +301,32 @@ FROM
 				# Abfrage wurde erfolgreich ausgeführt
 				$ret[0] = 0;
 				$ret['success'] = true;
-				$ret[1] = $query;
-				$ret['query'] = $ret[1]; 
+				$ret[1] = $ret['query'] = $query;
+				$notice_txt = pg_last_notice($this->dbConn);
+				$this->notices[] = $notice_txt;
+				# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
+				if ($notice_txt != '' AND !in_array($notice_txt, $this->notices)) {
+					if (strpos($notice_txt, '{') !== false AND strpos($notice_txt, '}' !== false)) {
+						# Parse als JSON String
+						$notice_obj = json_decode(substr($notice_txt, strpos($notice_txt, '{'), strpos($notice_txt, '}') - strpos($notice_txt, '{') + 1), true);
+						if (array_key_exists('success', $notice_obj)) {
+							if (!$notice_obj['success']) {
+								$ret[0] = 1;
+								$ret['success'] = false;
+							}
+							if (array_key_exists('msg_type', $notice_obj)) {
+								$ret['type'] = $notice_obj['msg_type'];
+							}
+							if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
+								$ret['msg'] = $ret[1] = $notice_obj['msg'];
+							}
+						}
+					}
+					else {
+						# Gebe Noticetext wie er ist zurück
+						$ret['msg'] = $notice_txt;
+					}
+				}
 				$this->debug->write("<br>" . $sql, $debuglevel);
 				# 2006-07-04 pk $logfile ersetzt durch $this->logfile
 				if ($logsql) {
@@ -2562,7 +2604,7 @@ FROM
   }
 
   function getKeywords($id,$keyword,$keytyp,$thesaname,$metadata_id,$order) {
-    # letzte ï¿½nderung 2005-11-29 pk
+    # letzte Aenderung 2005-11-29 pk
     if (is_array($id)) { $idliste=$id; }  else { $idliste=array($id); }
     $anzid=count($idliste);
     $sql ="SELECT k.id,k.keyword,k.keytyp,k.thesaname FROM md_keywords AS k";
@@ -2702,7 +2744,7 @@ FROM
   }
 
   function rollbacktransaction() {
-    # Rï¿½ckgï¿½ngigmachung aller bisherigen ï¿½nderungen in der Transaktion
+    # Rückgängigmachung aller bisherigen ï¿½nderungen in der Transaktion
     # und Abbrechen der Transaktion
     # rolls back the current transaction and causes all the updates
     # made by the transaction to be discarded
@@ -2713,7 +2755,7 @@ FROM
   }
 
   function committransaction() {
-    # Gï¿½ltigmachen und Beenden der Transaktion
+    # Gueltigmachen und Beenden der Transaktion
     # commits the current transaction. All changes made by the transaction
     # become visible to others and are guaranteed to be durable if a crash occurs
     if ($this->blocktransaction==0) {
@@ -2748,24 +2790,3 @@ FROM
   }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
