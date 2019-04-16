@@ -306,7 +306,6 @@
 				case 'Radiobutton' : {
 					$enum_value = $attributes['enum_value'][$j];
 					$enum_output = $attributes['enum_output'][$j];
-					if($attributes['nullable'][$j] != '0' OR $gui->new_entry == true)$strPleaseSelect = $gui->strPleaseSelect;
 					if($attribute_privileg == '0' OR $lock){
 						for($e = 0; $e < count($enum_value); $e++){
 							if($enum_value[$e] == $value){
@@ -329,6 +328,7 @@
 							if($enum_value[$e] == $value){
 								$datapart .= 'checked ';
 							}
+							if($attributes['nullable'][$j] != '0')$datapart .= ' onclick="this.checked = this.checked2;" onmouseup="this.checked = this.checked2;" onmousedown="preventDefault(event); this.checked = !this.checked; this.checked2 = this.checked;"';
 							$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$k.'_'.$e.'">'.$enum_output[$e].'</label>&nbsp;&nbsp;&nbsp;&nbsp;';
 							if(!$attributes['horizontal'][$j])$datapart .= '<br>';
 						}
