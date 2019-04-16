@@ -1,4 +1,4 @@
-
+BEGIN;
 --
 -- Name: ukos_base; Type: SCHEMA; Schema: -; Owner: -
 --
@@ -51133,4 +51133,4 @@ ALTER TABLE ONLY ukos_topo.edge_data
 --
 -- PostgreSQL database dump complete
 --
-
+COMMIT;
