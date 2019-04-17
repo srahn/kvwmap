@@ -51,6 +51,16 @@ class PgObject {
 		$this->identifier_type = 'integer';
 	}
 
+	public static	function postgis_version($gui) {
+		$query = pg_query(
+			$gui->pgdatabase->dbConn, "
+				SELECT split_part(postgis_version(), ' ', 1) AS postgis_version
+			"
+		);
+		$result = pg_fetch_assoc($query);
+		return floatval($result['postgis_version']);
+	}
+
 	function find_by($attribute, $value) {
 		$this->debug->show('find by attribute ' . $attribute . ' with value ' . $value, false);
 		$sql = "

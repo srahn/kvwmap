@@ -260,7 +260,9 @@ FROM
 				$ret['success'] = false;
 				if (!$suppress_error_msg) {
 					$errormessage = pg_last_error($this->dbConn);
-					$errormessage = substr($errormessage, 0, strpos($errormessage, 'CONTEXT: '));
+					if (strpos($errormessage, 'CONTEXT: ') !== false) {
+						$errormessage = substr($errormessage, 0, strpos($errormessage, 'CONTEXT: '));
+					}
 					header('error: true');	// damit ajax-Requests das auch mitkriegen
 					# Abfrage von Notice
 					if ($errormessage != '' AND strpos($errormessage, '{') !== false AND strpos($errormessage, '}') !== false) {
@@ -303,6 +305,9 @@ FROM
 				$ret['success'] = true;
 				$ret[1] = $ret['query'] = $query;
 				$notice_txt = pg_last_notice($this->dbConn);
+				if (strpos($notice_txt, 'CONTEXT: ') !== false) {
+					$notice_txt = substr($notice_txt, 0, strpos($notice_txt, 'CONTEXT: '));
+				}
 				$this->notices[] = $notice_txt;
 				# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
 				if ($notice_txt != '' AND !in_array($notice_txt, $this->notices)) {
