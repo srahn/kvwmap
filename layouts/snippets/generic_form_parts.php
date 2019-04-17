@@ -328,7 +328,7 @@
 							if($enum_value[$e] == $value){
 								$datapart .= 'checked ';
 							}
-							if($attributes['nullable'][$j] != '0')$datapart .= ' onclick="this.checked = this.checked2;" onmouseup="this.checked = this.checked2;" onmousedown="preventDefault(event); this.checked = !this.checked; this.checked2 = this.checked;"';
+							if($attributes['nullable'][$j] != '0')$datapart .= ' onclick="this.checked = this.checked2;" onmouseup="this.checked = this.checked2;" onmousedown="preventDefault(event); this.checked = !this.checked; this.checked2 = this.checked; this.onchange();"';
 							$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$k.'_'.$e.'">'.$enum_output[$e].'</label>&nbsp;&nbsp;&nbsp;&nbsp;';
 							if(!$attributes['horizontal'][$j])$datapart .= '<br>';
 						}
