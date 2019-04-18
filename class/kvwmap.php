@@ -1951,7 +1951,7 @@ class GUI {
         }
 				
         if ($dbStyle['color']!='') {
-          $RGB=explode(" ",$dbStyle['color']);
+          $RGB = array_filter(explode(" ",$dbStyle['color']));
           if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
           if(is_numeric($RGB[0]))$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
 					else $style->updateFromString("STYLE COLOR [" . $dbStyle['color']."] END");
@@ -1960,12 +1960,12 @@ class GUI {
 					$style->set('opacity', $dbStyle['opacity']);
 				}
         if ($dbStyle['outlinecolor']!='') {
-          $RGB=explode(" ",$dbStyle['outlinecolor']);
+          $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']));
         	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
           $style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
         }
         if ($dbStyle['backgroundcolor']!='') {
-          $RGB=explode(" ",$dbStyle['backgroundcolor']);
+          $RGB = array_filter(explode(" ",$dbStyle['backgroundcolor']));
         	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
           $style->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
         }
@@ -5875,14 +5875,14 @@ class GUI {
     	$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
     }
     #######################################################
-    $RGB=explode(" ",$dbStyle['color']);
+    $RGB = array_filter(explode(" ",$dbStyle['color']));		
     if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
     if(is_numeric($RGB[0]))$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
-		else $style->updateFromString("STYLE COLOR [" . $dbStyle['color']."] END");
-    $RGB=explode(" ",$dbStyle['outlinecolor']);
+		else $style->updateFromString("STYLE COLOR [".$dbStyle['color']."] END");
+    $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']));
     $style->outlinecolor->setRGB(intval($RGB[0]),intval($RGB[1]),intval($RGB[2]));
     if($dbStyle['backgroundcolor']!='') {
-      $RGB=explode(" ",$dbStyle['backgroundcolor']);
+      $RGB = array_filter(explode(" ",$dbStyle['backgroundcolor']));
       if($RGB[0] != '')$style->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
     }
 		if($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
