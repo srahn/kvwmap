@@ -652,6 +652,29 @@ class spatial_processor {
     $WKT .= ')';
     return $WKT;
   }
+	
+	function composePolygonWKTStringFromSVGPath($path){
+    $WKT = 'POLYGON(';
+    $explosion = explode('M', $path);
+    for($i = 0; $i < count($explosion); $i++){
+      if($explosion[$i] != ''){
+        if($i > 1){
+          $WKT .= ',';
+        }
+        $WKT .= '(';
+        $polygon = explode(' ', $explosion[$i]);
+        $WKT .= $polygon[1].' '.$polygon[2];
+        for($j = 3; $j < count($polygon)-1; $j=$j+2){
+          if($polygon[$j] != ''){
+            $WKT .= ','.$polygon[$j].' '.$polygon[$j+1];
+          }
+        }
+        $WKT .= ')';
+      }
+    }
+    $WKT .= ')';
+    return $WKT;
+  }	
   
 	function isvalid($pathwkt){
     if($pathwkt != ''){
@@ -795,30 +818,7 @@ class spatial_processor {
   	}
     return $wkt;
   }
-  
-  function composeMultilineWKTStringFromSVGPath($path){
-  	$WKT = 'MULTILINESTRING(';
-    $explosion = explode('M', $path);
-    for($i = 0; $i < count($explosion); $i++){
-      if($explosion[$i] != ''){
-        if($i > 1){
-          $WKT .= ',';
-        }
-        $WKT .= '(';
-        $polygon = explode(' ', $explosion[$i]);
-        $WKT .= $polygon[1].' '.$polygon[2];
-        for($j = 3; $j < count($polygon)-1; $j=$j+2){
-          if($polygon[$j] != ''){
-            $WKT .= ','.$polygon[$j].' '.$polygon[$j+1];
-          }
-        }
-        $WKT .= ')';
-      }
-    }
-    $WKT .= ')';
-    return $WKT;
-  }
-	
+  	
 	function composeLineWKTStringFromSVGPath($path){
   	$WKT = 'LINESTRING';
     $explosion = explode('M', $path);

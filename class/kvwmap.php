@@ -9074,7 +9074,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			if($this->formvars['newpathwkt'] == '' AND $this->formvars['newpath'] != ''){   # wenn keine WKT-Geoemtrie da ist, muss die WKT-Geometrie aus dem SVG erzeugt werden
 				include_(CLASSPATH.'spatial_processor.php');
 				$spatial_pro = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
-				$this->formvars['newpathwkt'] = $spatial_pro->composeMultipolygonWKTStringFromSVGPath($this->formvars['newpath']);
+				$this->formvars['newpathwkt'] = $spatial_pro->composePolygonWKTStringFromSVGPath($this->formvars['newpath']);
 			}
 			if($this->formvars['newpathwkt'] != ''){
 				include_(CLASSPATH.'polygoneditor.php');
@@ -9092,7 +9092,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			if($this->formvars['newpathwkt'] == '' AND $this->formvars['newpath'] != ''){   # wenn keine WKT-Geoemtrie da ist, muss die WKT-Geometrie aus dem SVG erzeugt werden
 				include_(CLASSPATH.'spatial_processor.php');
 				$spatial_pro = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
-				$this->formvars['newpathwkt'] = $spatial_pro->composeMultilineWKTStringFromSVGPath($this->formvars['newpath']);
+				$this->formvars['newpathwkt'] = $spatial_pro->composeLineWKTStringFromSVGPath($this->formvars['newpath']);
 			}
 			if($this->formvars['newpathwkt'] != ''){
 				include_(CLASSPATH.'lineeditor.php');
@@ -9175,20 +9175,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						}
 						elseif ($this->formvars['newpathwkt'] != '') {
 							$geom = "ST_GeomFromText('" . $this->formvars['newpathwkt'] . "', " . $client_epsg . ")";
-							if (substr($this->formvars['geomtype'], 0, 5) == 'MULTI') {
-								# Erzeuge immer Multigeometrie
+							if (substr($this->formvars['geomtype'], 0, 5) == 'MULTI') {					# Erzeuge immer Multigeometrie
 								$geom = "ST_Multi(" . $geom . ")";
-							}
-							else {
-								include_once(CLASSPATH . 'PgObject.php');
-								$postgis_version = PgObject::postgis_version($this);
-
-								if ($postgis_version >= 2.0) {
-									if (strtoupper($this->formvars['geomtype']) == 'LINESTRING' OR strtoupper($this->formvars['geomtype']) == 'POLYGON') {
-										# extrahiere die erste Geometrie aus der Multigeometrie
-										$geom = "ST_GeometryN(" . $geom . ", 1)";
-									}
-								}
 							}
 							$insert[$table['attributname'][$i]] = "ST_Transform(" . $geom . ", " . $layer_epsg . ")";
 						}
