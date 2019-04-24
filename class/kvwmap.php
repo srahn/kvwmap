@@ -13541,9 +13541,18 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 							$layerset[$i]['sql'] = $sql;
 
-							$ret=$layerdb->execSQL($sql.$sql_order.$sql_limit,4, 0);
+							$ret=$layerdb->execSQL($sql.$sql_order.$sql_limit,4 , 0);
 							#echo $sql.$sql_order.$sql_limit;
-							if (!$ret[0]) {
+							if ($ret[0]) {
+								$this->add_message('error', $ret[1]);
+								$this->loadMap('DataBase');
+								$this->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+								$this->saveMap('');
+								$this->drawMap();
+								$this->output();
+								exit;
+							}
+							else {
 								while ($rs = pg_fetch_array($ret[1])) {
 									$layerset[$i]['shape'][] = $rs;
 								}
@@ -13559,6 +13568,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									}
 								}
 							}
+
 							# Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
 							# Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
 							$layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, $layerset[$i]['shape'], true, $this->Stelle->id);
@@ -16380,7 +16390,10 @@ class db_mapObj{
                     $sql = $attributes['dependent_options'][$i][$k];
                     if($sql != '') {
                       $ret = $database->execSQL($sql, 4, 0);
-											if ($ret[0]) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+											if ($ret[0]) {
+												$this->GUI->add_message('error', 'Fehler bei der Abfrage der Optionen für das Attribut "' . $attributes['name'][$i] . '"<br>' . sql_err_msg($PHP_SELF, __LINE__, $ret[1]));
+												return 0;
+											}
                       while($rs = pg_fetch_array($ret[1])){
                         $attributes['enum_value'][$i][$k][] = $rs['value'];
                         $attributes['enum_output'][$i][$k][] = $rs['output'];
