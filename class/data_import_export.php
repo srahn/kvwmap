@@ -264,41 +264,15 @@ class data_import_export {
 	}
 
 	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1') {
-		if (file_exists($uploadpath . $file . '.dbf') OR file_exists($uploadpath . $file . '.DBF')) {
-	    $command = POSTGRESBINPATH .
-				'shp2pgsql' .
-				' -g the_geom' .
-				' -I' .
-				' -s ' . $epsg .
-				' -W ' . $encoding .
-				' -c "' . $uploadpath . $file . '"' .
-				' ' . $schemaname . '.' . $tablename .
-				' > "' . $uploadpath . $file . '.sql"';
-	    exec($command, $output, $ret);
-			if($ret == 1){	# bei Fehlschlag, das andere Encoding probieren
-				if($encoding == 'UTF-8')$new_encoding = 'LATIN1';
-				else $new_encoding = 'UTF-8';
-				$command2 = str_replace($encoding, $new_encoding, $command);
-				$errorfile = rand(0, 1000000);
-				$command2 .= ' 2> '.IMAGEPATH.$errorfile.'.err';
-				exec($command2, $output, $ret);
-			}
-			if($ret != 0){
-				$custom_table['error'] = 'Fehler beim Importieren !<br><br>Befehl:<div class="code">'.$command.'</div><a href="' . IMAGEURL . $errorfile . '.err" target="_blank">Fehlerprotokoll</a>';
+		if (file_exists($uploadpath . $file . '.dbf') OR file_exists($uploadpath . $file . '.DBF')) {			
+			$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $uploadpath.$file.'.shp', $pgdatabase, NULL, $sql, '-lco FID=gid', $encoding);
+			if($ret !== 0){
+				$custom_table['error'] = $ret;
 				return array($custom_table);
 			}
 			else{
-				#echo $command;
-				$command = POSTGRESBINPATH .
-					'psql' .
-					' -h ' . $pgdatabase->host .
-					' -f "' . $uploadpath . $file . '.sql"' .
-					' ' . $pgdatabase->dbName . ' ' . $pgdatabase->user;
-				if ($pgdatabase->passwd != '')
-					$command = 'export PGPASSWORD="' . $pgdatabase->passwd . '"; ' . $command;
-				exec($command);
-				#echo $command;
 				$sql = 'ALTER TABLE '.$schemaname.'.'.$tablename.' SET WITH OIDS;
+				 SELECT convert_column_names(\''.$schemaname.'\', \''.$tablename.'\');
 				'.$this->rename_reserved_attribute_names($schemaname, $tablename).'
 					SELECT geometrytype(the_geom) AS geometrytype FROM '.$schemaname.'.'.$tablename.' LIMIT 1;';
 				$ret = $pgdatabase->execSQL($sql,4, 0);
@@ -888,7 +862,7 @@ class data_import_export {
 		$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
 		$output = array();
 		exec($command, $output, $ret);
-		if ($ret != 0) { $ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br>Befehl: ' . $command . '<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; }
+		if ($ret != 0) { $ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; }
 		return $ret;
 	}
 

@@ -13268,7 +13268,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							);
 							$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 							$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames'], false, true);
-							$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
+							if($layerset[$i]['Layer_ID'] > 0){			# bei Rollenlayern nicht
+								$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
+							}
+							else $newpath = $path;
 
 							# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)  ---> steht weiter unten
 
