@@ -1321,6 +1321,7 @@ class GUI {
 				$map->setMetaData("ows_keywordlist", OWS_KEYWORDLIST);
 				$map->setMetaData("ows_contactvoicetelephone", OWS_CONTACTVOICETELEPHONE);
 				$map->setMetaData("ows_contactfacsimiletelephone", OWS_CONTACTFACSIMILETELEPHONE);
+				$map->setMetaData("ows_addresstype", 'postal');
 				$map->setMetaData("ows_address", OWS_ADDRESS);
 				$map->setMetaData("ows_city", OWS_CITY);
 				$map->setMetaData("ows_stateorprovince", OWS_STATEORPROVINCE);
@@ -1450,7 +1451,7 @@ class GUI {
 						$layer->setMetaData('ows_auth_password', $layerset['list'][$i]['wms_auth_password']);
 						$layer->setMetaData('ows_auth_type', 'basic');
 						$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
-						#$layer->setMetaData("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
+						$layer->setMetaData("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
 						$layer->setMetaData("gml_featureid", "ogc_fid");
 						$layer->setMetaData("gml_include_items", "all");
 
