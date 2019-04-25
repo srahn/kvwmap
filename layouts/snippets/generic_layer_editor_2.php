@@ -72,12 +72,16 @@
 			<? } ?>
 			><?php
 			$definierte_attribute_privileges = $layer['attributes']['privileg'];
-			$gesperrte_attribute_privileges = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
+			if (is_array($layer['attributes']['privileg'])) {
+				$gesperrte_attribute_privileges = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
+			}
 			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
 				$layer['attributes']['privileg'] = $gesperrte_attribute_privileges;
 			}
 			else {
-				$layer['attributes']['privileg'] = $definierte_attribute_privileges;
+				if (is_array($layer['attributes']['privileg'])) {
+					$layer['attributes']['privileg'] = $definierte_attribute_privileges;
+				}
 			}
 			?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 	    <table id="dstable" class="tgle" style="border-bottom: 1px solid grey" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
