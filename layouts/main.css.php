@@ -1282,6 +1282,10 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	max-width: 480px
 }
 
+#dstable{
+	max-width: 900px;
+}
+
 table.tgle {
  border:1px solid gray;
  border-bottom: none;

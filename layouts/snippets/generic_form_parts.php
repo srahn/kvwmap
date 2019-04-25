@@ -743,9 +743,7 @@
 							$datapart .= htmlspecialchars($value);
 						}
 						else{								// zeilenweise
-							if($size == '')$size = 10;
-							$maxwidth = $size * 11;
-							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.$value.'</div>';
+							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; font-size: '.$fontsize.'px;">'.$value.'</div>';
 						}
 					}
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
