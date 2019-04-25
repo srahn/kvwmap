@@ -7736,9 +7736,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->formvars['selected_layer_id'] = $this->formvars['id'];
 		}
 
-		if ($this->formvars['connectiontype'] == 6){
-			if($this->formvars['connection'] != ''){
-				if($this->formvars['pfad'] != ''){
+		if ($this->formvars['connectiontype'] == 6) {
+			if ($this->formvars['connection'] != '') {
+				if ($this->formvars['pfad'] != '') {
 					#---------- Speichern der Layerattribute -------------------
 					$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 					$layerdb->setClientEncoding();
@@ -16292,10 +16292,17 @@ class db_mapObj{
 	}
 
 	function getPathAttributes($database, $path) {
+		$pathAttributes = array();
 		if ($path != '') {
-			$attribute = $database->getFieldsfromSelect($path);
-			return $attribute;
+			$ret = $database->getFieldsfromSelect($path);
+			if ($ret[0]) {
+				$this->GUI->add_message('error', $ret[1]);
+			}
+			else {
+				$pathAttributes = $ret[1]; # Gebe die Attribute zurück
+			}
 		}
+		return $pathAttributes;
 	}
 
   function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $only_current_enums = false){
@@ -16568,7 +16575,7 @@ class db_mapObj{
 	}
 
 	function save_postgis_attributes($layer_id, $attributes, $maintable, $schema){
-		for($i = 0; $i < count($attributes); $i++){
+		for ($i = 0; $i < count($attributes); $i++) {
 			if($attributes[$i] == NULL)continue;
 			if($attributes[$i]['nullable'] == '')$attributes[$i]['nullable'] = 'NULL';
 			if($attributes[$i]['length'] == '')$attributes[$i]['length'] = 'NULL';

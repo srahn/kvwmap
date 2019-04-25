@@ -444,14 +444,15 @@ FROM
 	}
 
 	function getFieldsfromSelect($select, $assoc = false) {
+		$err_msgs = array();
 		$sql = "SET client_min_messages='log';SET log_duration = false;SET debug_print_parse=true;".$select." LIMIT 0";			# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
 		$ret = $this->execSQL($sql, 4, 0);
-		if ($ret[0]==0) {
+		if ($ret['success']) {
 			$query_plan = pg_last_notice($this->dbConn);
 			$table_alias_names = $this->get_table_alias_names($query_plan);
 			$field_plan_info = explode("\n      :resno", $query_plan);
 
-			for ($i = 0; $i < pg_num_fields($ret[1]); $i++){
+			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
 				# Attributname
 				$fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
 
@@ -478,8 +479,16 @@ FROM
 					$constraintstring = '';
 					$attr_info = $this->get_attribute_information($schemaname, $tablename, $col_num);
 					if($attr_info[0]['relkind'] == 'v'){		# wenn View, dann Attributinformationen aus View-Definition holen
-						if($view_defintion_attributes[$tablename] == NULL){
-							$view_defintion_attributes[$tablename] = $this->getFieldsfromSelect(substr($attr_info[0]['view_definition'], 0, -1), true);
+						if($view_defintion_attributes[$tablename] == NULL) {
+							$ret2 = $this->getFieldsfromSelect(substr($attr_info[0]['view_definition'], 0, -1), true);
+							if ($ret2['success']) {
+								$view_defintion_attributes[$tablename] = $ret2[1];
+							}
+							else {
+								# Füge Fehlermeldung hinzu und setze leeres Array
+								$err_msgs[] = $ret2[1];
+								$view_defintion_attributes[$tablename] = array();
+							}
 						}
 						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info[0]['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
 						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info[0]['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
@@ -526,19 +535,28 @@ FROM
 				$fields[$i]['type'] = $fieldtype;
 
 				# Geometrietyp
-				if ($fieldtype == 'geometry'){
+				if ($fieldtype == 'geometry') {
 					$fields[$i]['geomtype'] = $this->get_geom_type($schemaname, $fields[$i]['real_name'], $tablename);
 					$fields['the_geom'] = $fieldname;
 					$fields['the_geom_id'] = $i;
 				}
-				if($assoc)$fields_assoc[$fieldname] = $fields[$i];
+				if ($assoc) {
+					$fields_assoc[$fieldname] = $fields[$i];
+				}
 			}
-
-			return ($assoc ? $fields_assoc : $fields);
+			$ret[1] = ($assoc ? $fields_assoc : $fields);
 		}
 		else {
-			return NULL;
+			# Füge Fehlermeldung hinzu
+			$err_msgs[] = $ret[1];
 		}
+
+		if (count($err_msgs) > 0) {
+			# Wenn Fehler auftraten liefer nur die Fehler zurück
+			$ret[0] = 1;
+			$ret[1] = implode('<br>', $err_msgs);
+		}
+		return $ret;
 	}
 
 	function get_attribute_information($schema, $table, $col_num = NULL) {
