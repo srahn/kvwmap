@@ -46,38 +46,58 @@ include('funktionen/input_check_functions.php');
 		}
 	}	
 	
-	check_visibility = function(layer_id, object, dependents, k){
-		if(object == null)return;
+	check_visibility = function(layer_id, object, dependents, k, arrangement) {
+		var selectField = '#further_attributes_add_select_field_' + layer_id + '_' + k,
+				addButton   = '#further_attributes_add_button_' + layer_id + '_' + k;
+		if (object == null) return;
 		var group_display;
-		dependents.forEach(function(dependent){
-			var scope = object.closest('table');		// zuerst in der gleichen Tabelle suchen
-			if(scope.querySelector('#vcheck_operator_'+dependent) == undefined){
-				scope = document;			// ansonsten global
+		dependents.forEach(function(dependent) {
+			var scope = object.closest('table'); // zuerst in der gleichen Tabelle suchen
+			if (scope.querySelector('#vcheck_operator_' + dependent) == undefined) {
+				scope = document; // ansonsten global
 			}
-			var operator = scope.querySelector('#vcheck_operator_'+dependent).value;
-			var value = scope.querySelector('#vcheck_value_'+dependent).value;
-			if(operator == '=')operator = '==';
+			var operator = scope.querySelector('#vcheck_operator_' + dependent).value;
+			var value = scope.querySelector('#vcheck_value_' + dependent).value;
+			if (operator == '=') {
+				operator = '==';
+			}
 			// visibility of attribute
-			var name_dependent = scope.querySelector('#name_'+layer_id+'_'+dependent+'_'+k);
-			var value_dependent = scope.querySelector('#value_'+layer_id+'_'+dependent+'_'+k);
-			if(field_has_value(object, operator, value)){
-				if(name_dependent != null)name_dependent.style.visibility = 'visible';
+			var name_dependent = scope.querySelector('#name_' + layer_id + '_' + dependent + '_' + k);
+			var value_dependent = scope.querySelector('#value_' + layer_id + '_' + dependent +'_' + k);
+			if (field_has_value(object, operator, value)) {
+				if (name_dependent != null) {
+					name_dependent.style.visibility = 'visible';
+				}
 				value_dependent.style.visibility = 'visible';
 			}
-			else{
-				if(name_dependent != null)name_dependent.style.visibility = 'hidden';
+			else {
+				if (name_dependent != null) {
+					name_dependent.style.visibility = 'hidden';
+				}
 				value_dependent.style.visibility = 'hidden';
+				if (arrangement == 2) {
+					// Füge das Zusatzattribut in die Auswahlliste der further attributes ein, wenn es das dort noch nicht gibt.
+					// und zeige add Button wenn es das erste ist, welches hinzugefügt wird.
+					if ($(selectField + ' option[value=\'' + dependent + '\']').length == 0) {
+						$(selectField).append(new Option(dependent, dependent));
+						if ($(selectField + ' option').length == 2) {
+							$(addButton).show();
+						}
+					}
+				}
 			}
+
 			// visibility of row
 			var row = value_dependent.parentNode;
 			all_attributes_in_row = [].slice.call(row.childNodes);
 			row_display = 'none';
-			all_attributes_in_row.forEach(function(td){
-				if(td.nodeType == 1 && td.id != '' && td.style.visibility != 'hidden'){
+			all_attributes_in_row.forEach(function(td) {
+				if (td.nodeType == 1 && td.id != '' && td.style.visibility != 'hidden') {
 					row_display = '';
 				}
 			})
 			row.style.display = row_display;
+
 			// visibility of group
 			if(row.closest('table').firstChild.children != null){
 				all_trs = [].slice.call(row.closest('table').firstChild.children);		// alle trs in der Gruppe
@@ -91,33 +111,55 @@ include('funktionen/input_check_functions.php');
 			}
 		})
 	}
-	
-	field_has_value = function(field, operator, value){
-		var field_value = field.value;
-		if(field.type == 'radio'){
+
+	field_has_value = function (field, operator, value) {
+		var field_value = field.value || "";
+		if (field.type == 'radio') {
 			var radio = document.querySelector('input[name="'+field.name+'"]:checked');
-			if(radio != null)field_value = radio.value;
+			if(radio != null) field_value = radio.value;
 		}
-		if(field.type == 'checkbox'){
-			if((operator == '==' && value == 't' && field.checked) || 
+		if (field.type == 'checkbox') {
+			if ((operator == '==' && value == 't' && field.checked) ||
 				 (operator == '==' && value != 't' && !field.checked) ||
 				 (operator == '!=' && value == 't' && !field.checked) ||
 				 (operator == '!=' && value != 't' && field.checked)
-				 )return true;
+			) return true;
 			else return false;
 		}
-		else{
-			if(operator == 'IN'){
+		else {
+			if (operator == 'IN') {
 				value_array = value.split('|');
 				if(value_array.indexOf(field_value) > -1) return true;
 				else return false;
 			}
-			else{
-				return eval("'"+field_value+"' "+operator+" '"+value+"'")
+			else {
+				if (value == "''") value = "";
+				return eval("'" + field_value + "' " + operator + " '" + value + "'");
 			}
 		}
-	}	
-	
+	}
+
+	showFurtherAttributes = function(layer_id, attr_name, k) {
+		var grp_id = layer_id + '_' + k,
+				field = $('#' + layer_id + '_' + attr_name + '_' + k);
+
+		console.log('field %o', field);
+		if (field.attr('type') == 'checkbox') {
+			field.prop('checked', true).trigger('input').prop('checked', false);
+		}
+		else if (field[0].nodeName == 'SELECT') {
+			$('#' + layer_id + '_' + attr_name + '_' + k + ' option:eq(1)').attr('selected', 'selected').trigger('change');
+			$('#' + layer_id + '_' + attr_name + '_' + k + ' option:eq(0)').attr('selected', 'selected');
+		}
+		else {
+			field.val('-').trigger('input').val('');
+		}
+		$("#further_attributes_add_select_field_" + grp_id + " option[value='" + attr_name + "']").remove();
+		if ($("#further_attributes_add_select_field_" + grp_id + " option").length == 1) {
+			$('#further_attributes_add_select_field_' + grp_id +', #further_attributes_min_button_' + grp_id).hide();
+		}
+	}
+
 	toggleGroup = function(groupname){			// fuer die spaltenweise Ansicht
 		var group_elements = document.querySelectorAll('.group_'+groupname);
 		var gap_elements = document.querySelectorAll('.gap_'+groupname);

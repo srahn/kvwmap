@@ -106,17 +106,54 @@
 					$explosion = explode(';', $layer['attributes']['group'][$j]);
 					if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 					$groupname = $explosion[0];
+					$attr_id = $layer['Layer_ID'] . '_' . $j . '_' . $k;
+					$grp_id = $layer['Layer_ID'] . '_' . $k;
 					$datapart .= '<tr>
 									<td colspan="2" width="100%">
 										<div style="border-bottom: 1px solid grey">
 											<table width="100%" class="tgle" border="2"><tbody class="gle">
 												<tr>
-													<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="40">&nbsp;<a href="javascript:void(0);" onclick="toggle_group(\''.$layer['Layer_ID'].'_'.$j.'_'.$k.'\')">
-														<img id="group_img'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" border="0" src="'.GRAPHICSPATH.'/'; if($collapsed)$datapart .= 'plus.gif'; else $datapart .= 'minus.gif'; $datapart .= '"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span>
+													<td
+														bgcolor="' . BG_GLEATTRIBUTE . '"
+														colspan="40"
+													>
+														<a href="javascript:void(0);" style="margin-left: 4px" onclick="toggle_group(\'' . $attr_id . '\')">
+															<img id="group_img' . $attr_id . '" border="0" src="' . GRAPHICSPATH . '/' . ($collapsed ? 'plus.gif' : 'minus.gif') . '">
+														</a>
+														<span class="fett" style="margin-left: 4px;">' . $groupname . '</span>' .
+														($groupname == 'Zusatzparameter' ? '<div style="float: right; margin-right: 4px;">
+															<i
+																id="further_attributes_add_button_' . $grp_id . '"
+																class="fa fa-plus-square"
+																aria-hidden="true"
+																onclick="
+																	$(\'#further_attributes_add_select_field_' . $grp_id . ', #further_attributes_min_button_' . $grp_id . ', #further_attributes_add_button_' . $grp_id . ' \').toggle()
+																"
+															></i>' .
+															FormObject::createSelectField(
+																'further_attributes_add_select_field_' . $grp_id,
+																array('auswählen'),
+																array('0'),
+																1,
+																'display: none;',
+																'showFurtherAttributes(\'' . $layer['Layer_ID'] . '\', $(this).val(), \'' . $k . '\')',
+																'further_attributes_add_select_field_' . $grp_id
+															) . '
+															<i
+																id="further_attributes_min_button_' . $grp_id . '"
+																style="display: none;"
+																class="fa fa-times"
+																aria-hidden="true"
+																onclick="
+																	$(\'#further_attributes_add_select_field_' . $grp_id . ', #further_attributes_min_button_' . $grp_id . ', #further_attributes_add_button_' . $grp_id . ' \').toggle()
+																"
+															></i>
+														</div>' : '') . '
 													</td>
 												</tr>
 											</table>
-											<table width="100%" class="tgle" id="group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" '; if($collapsed)$datapart .= 'style="display:none"'; $datapart .= 'border="2"><tbody class="gle">';
+											<table width="100%" class="tgle" id="group' . $attr_id . '"' . ($collapsed ? ' style="display:none"' : '') . ' border="2">
+												<tbody class="gle">';
 				}
 
 				if($layer['attributes']['visible'][$j]){

@@ -1,6 +1,8 @@
 ﻿<?php
 	$strAsteriskRequired="Weerte mit een * mööst du indragen";
 	$strClassItem="Classitem";
+	$strMaintable="Main Table";
+	$strFurtherAttributeTable="Table for further parameter";
 	$strLayerID="Layer ID*";
 	$strName="Naam*";
 	$strDataType="Datentyp*";
@@ -32,6 +34,7 @@
 	$strSelectionType="SelectionType";
 	$strClasses="Klassen";
 	$strID="ID";
+	$strIdColumnName = "Column with unique Values";
 	$strClass="Klass";
 	$strExpression="Expression";
 	$strDelete="löschen";

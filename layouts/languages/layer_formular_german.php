@@ -32,6 +32,7 @@
 	$strSelectionType="SelectionType";
 	$strClasses="Klassen";
 	$strID="ID";
+	$strIdColumnName = "Spalte mit eindeutigen Werten";
 	$strClass="Klasse";
 	$strExpression="Expression";
 	$strText="Text";
@@ -69,6 +70,7 @@
 	$strDataOwner="Datenherr";
 	$strMetaLink="Metadatenlink";
 	$strMaintable="Haupttabelle";
+	$strFurtherAttributeTable="Tabelle für Zusatzparameter";
 	$strPrivileges="Rechte festlegen";
 	$strAlias="Aliasname";
 	$strStatus="Status";
