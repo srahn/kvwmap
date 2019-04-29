@@ -8346,6 +8346,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						}
 					}
         }
+				else{
+					$this->add_message('error', $ret['msg']);
+				}
 
         # Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
         # Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
@@ -8444,11 +8447,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     elseif($this->formvars['embedded_subformPK'] != ''){
       header('Content-type: text/html; charset=UTF-8');
       include(LAYOUTPATH.'snippets/embedded_subformPK.php');			# listenförmige Ausgabe mit Links untereinander
+			if(!$ret['success'])echo $ret['msg'];
     }
     elseif($this->formvars['embedded'] != ''){
     	ob_end_clean();
       header('Content-type: text/html; charset=UTF-8');
       include(LAYOUTPATH.'snippets/sachdatenanzeige_embedded.php');		# ein aufgeklappter Link
+			if(!$ret['success']){
+				ob_end_clean();
+				echo $ret['msg'];
+			}
     }
     else{
       $this->main = 'sachdatenanzeige.php';
