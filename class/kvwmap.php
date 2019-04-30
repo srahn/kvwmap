@@ -8161,6 +8161,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					for($i = 0; $i < count($attributes['name']); $i++){
 						$value = $this->formvars[$prefix.'value_'.$attributes['name'][$i]];
 						$operator = $this->formvars[$prefix.'operator_'.$attributes['name'][$i]];
+						if(is_array($value)){
+							$operator = 'IN';
+							$value = implode($value, '|');
+						}
 						if($value != ''){
 							switch($operator){
 								case 'LIKE' : case 'NOT LIKE' : {
@@ -8351,6 +8355,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						}
 					}
         }
+				else{
+					$this->add_message('error', $ret['msg']);
+				}
 
         # Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
         # Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
@@ -8449,11 +8456,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     elseif($this->formvars['embedded_subformPK'] != ''){
       header('Content-type: text/html; charset=UTF-8');
       include(LAYOUTPATH.'snippets/embedded_subformPK.php');			# listenförmige Ausgabe mit Links untereinander
+			if(!$ret['success'])echo $ret['msg'];
     }
     elseif($this->formvars['embedded'] != ''){
     	ob_end_clean();
       header('Content-type: text/html; charset=UTF-8');
       include(LAYOUTPATH.'snippets/sachdatenanzeige_embedded.php');		# ein aufgeklappter Link
+			if(!$ret['success']){
+				ob_end_clean();
+				echo $ret['msg'];
+			}
     }
     else{
       $this->main = 'sachdatenanzeige.php';
@@ -15404,6 +15416,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		else{
 			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
 		}
+		$this->land_schluessel = substr($GemkgListe['GemkgID'][0], 0, 2);
     // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
     $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
     $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
