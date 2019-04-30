@@ -140,7 +140,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 												echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['selected_layer_id'].', new Array(\''.implode($this->attributes['name'], "','").'\'), '.$searchmask_number.');" ';
 											}
 											else{
-												echo ' multiple="true" size="1" style="z-index:'.($z_index-=1).';position: absolute;top: 3px" onmouseenter="this.size=this.length" onmouseleave="this.size=1;scrollToSelected(this);"';
+												echo ' multiple="true" size="1" style="z-index:'.($z_index-=1).';position: absolute;top: 3px;max-height: 300px" onmouseenter="this.size=this.length" onmouseleave="this.size=1;scrollToSelected(this);"';
 											}
 										?> 
 	                  	id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>[]"><?echo "\n"; ?>
