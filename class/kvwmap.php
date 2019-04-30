@@ -8156,6 +8156,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					for($i = 0; $i < count($attributes['name']); $i++){
 						$value = $this->formvars[$prefix.'value_'.$attributes['name'][$i]];
 						$operator = $this->formvars[$prefix.'operator_'.$attributes['name'][$i]];
+						if(is_array($value)){
+							$operator = 'IN';
+							$value = implode($value, '|');
+						}
 						if($value != ''){
 							switch($operator){
 								case 'LIKE' : case 'NOT LIKE' : {
