@@ -4026,48 +4026,48 @@ class GUI {
 		ms_ioresethandlers();
 	}
 
-  function adminFunctions() {
+	function adminFunctions() {
 		include_once(CLASSPATH.'administration.php');
 		$this->administration = new administration($this->database, $this->pgdatabase);
 		$this->administration->get_database_status();
 		$this->administration->get_config_params();
-    switch ($this->formvars['func']) {
+		switch ($this->formvars['func']) {
 			case "update_databases" : {
-        $this->administration->update_databases();
+				$this->administration->update_databases();
 				$this->administration->get_database_status();
 				$this->administration->get_config_params();
 				$this->showAdminFunctions();
-      } break;
+			} break;
 			case "update_code" : {
-        $result = $this->administration->update_code();
+				$result = $this->administration->update_code();
 				$this->administration->get_database_status();
 				$this->showAdminFunctions();
-      } break;
+			} break;
 			case "save_config" : {
-        $result = $this->administration->save_config($this->formvars);
+				$result = $this->administration->save_config($this->formvars);
 				$this->showAdminFunctions();
-      } break;
-      case "createRandomPassword" : {
-        $this->createRandomPassword();
-      } break;
-      case "save_all_layer_attributes" : {
-        $this->save_all_layer_attributes();
-      } break;
-      case "custom"  : {
-        $admin_function_file = LAYOUTPATH . 'custom/adminfunctions.php';
-        if (file_exists($admin_function_file)) {
-          $this->main = $admin_function_file;
-          $this->titel = 'Eigene Administrationsfunktionen';
-        } else {
-          $this->showAdminFunctions();
-        }
-      } break;
-      default : {
-        $this->showAdminFunctions();
-      }
-    }
+			} break;
+			case "createRandomPassword" : {
+				$this->createRandomPassword();
+			} break;
+			case "save_all_layer_attributes" : {
+				$this->save_all_layer_attributes();
+			} break;
+			case "custom"	: {
+				$admin_function_file = LAYOUTPATH . 'custom/adminfunctions.php';
+				if (file_exists($admin_function_file)) {
+					$this->main = $admin_function_file;
+					$this->titel = 'Eigene Administrationsfunktionen';
+				} else {
+					$this->showAdminFunctions();
+				}
+			} break;
+			default : {
+				$this->showAdminFunctions();
+			}
+		}
 		return $result;
-  }
+	}
 
 	function save_all_layer_attributes() {
 		$this->main='genericTemplate.php';
@@ -12829,35 +12829,37 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $i = 0;
   }
 
-  function sachdaten_speichern() {
-		if($this->formvars['document_attributename'] != '')$_FILES[$this->formvars['document_attributename']]['name'] = 'delete';		# das zu löschende Dokument
-  	$_files = $_FILES;
-    $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $form_fields = explode('|', $this->formvars['form_field_names']);
-    $this->success = true;
-    $old_layer_id = '';
-    for($i = 0; $i < count($form_fields); $i++){
-      if($form_fields[$i] != ''){
+	function sachdaten_speichern() {
+		if ($this->formvars['document_attributename'] != '') {
+			$_FILES[$this->formvars['document_attributename']]['name'] = 'delete'; # das zu löschende Dokument
+		}
+		$_files = $_FILES;
+		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
+		$form_fields = explode('|', $this->formvars['form_field_names']);
+		$this->success = true;
+		$old_layer_id = '';
+		for ($i = 0; $i < count($form_fields); $i++) {
+			if ($form_fields[$i] != '') {
 				$eintrag = NULL;
-        $element = explode(';', $form_fields[$i]);
-        $layer_id = $element[0];
-        $attributname = $element[1];
-        $tablename = $element[2];
-        $oid = $element[3];
+				$element = explode(';', $form_fields[$i]);
+				$layer_id = $element[0];
+				$attributname = $element[1];
+				$tablename = $element[2];
+				$oid = $element[3];
 				$attributenames[$oid][] = $attributname;
 				$attributevalues[$oid][] = $this->formvars[$form_fields[$i]];
-        $formtype = $element[4];
-        $datatype = $element[6];
-				if($layerset[$layer_id] == NULL){
-					$layerset[$layer_id] = $this->user->rolle->getLayer($layer_id);
+				$formtype = $element[4];
+				$datatype = $element[6];
+				if ($layerset[$layer_id] == NULL) {
+					$layerset[$layer_id] = $this->user->rolle->getLayer ($layer_id);
 				}
-        if($layer_id != $old_layer_id AND $tablename != ''){
-          $layerdb[$layer_id] = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
-          $layerdb[$layer_id]->setClientEncoding();
+				if ($layer_id != $old_layer_id AND $tablename != '') {
+					$layerdb[$layer_id] = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+					$layerdb[$layer_id]->setClientEncoding();
 					$attributes = $mapdb->read_layer_attributes($layer_id, $layerdb[$layer_id], NULL);
-          #$filter = $mapdb->getFilter($layer_id, $this->Stelle->id);		# siehe unten
-          $old_layer_id = $layer_id;
-        }
+					#$filter = $mapdb->getFilter ($layer_id, $this->Stelle->id);		# siehe unten
+					$old_layer_id = $layer_id;
+				}
 
 				if (
 					(
@@ -12869,125 +12871,139 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$tablename != '' AND
 					$datatype != 'not_saveable' AND
 					$tablename == $layerset[$layer_id][0]['maintable']
-				) { # nur Attribute aus der Haupttabelle werden gespeichert
-
-          switch($formtype) {
-            case 'Dokument' : {
-							# die Dokument-Attribute werden hier zusammen gesammelt, weil der Datei-Upload gemacht werden muss, nachdem alle Attribute durchlaufen worden sind (wegen dem DocumentPath)
-              if($_files[$form_fields[$i]]['name'] OR $this->formvars[$form_fields[$i]]){
+				) {
+					# nur Attribute aus der Haupttabelle werden gespeichert
+					switch ($formtype) {
+						case 'Dokument' : {
+							# die Dokument-Attribute werden hier zusammen gesammelt,
+							# weil der Datei-Upload gemacht werden muss,
+							# nachdem alle Attribute durchlaufen worden sind (wegen dem DocumentPath)
+							if ($_files[$form_fields[$i]]['name'] OR $this->formvars[$form_fields[$i]]) {
 								$attr_oid['layer_id'] = $layer_id;
 								$attr_oid['tablename'] = $tablename;
 								$attr_oid['attributename'] = $attributname;
 								$attr_oid['datatype'] = $datatype;
 								$attr_oid['oid'] = $oid;
 								$document_attributes[$i] = $attr_oid;
-              }
-            } break; # ende case Bild
-            case 'Time' : {
-							if(in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = date('Y-m-d G:i:s');
-            } break;
-            case 'User' : {
-							if(in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = $this->user->Vorname." " . $this->user->Name;
-            } break;
-            case 'UserID' : {
-							if(in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = $this->user->id;
-            } break;
-            case 'Stelle' : {
-							if(in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = $this->Stelle->Bezeichnung;
-            } break;
-						case 'StelleID' : {
-							if(in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = $this->Stelle->id;
-            } break;
-            case 'Geometrie' : {
-              # nichts machen
-            } break;
-            case 'Checkbox' : {
-            	if($this->formvars[$form_fields[$i]] == '')$this->formvars[$form_fields[$i]] = 'f';
-							$eintrag = $this->formvars[$form_fields[$i]];
-            } break;
-						case 'Zahl' : {
-							$eintrag = removeTausenderTrenner($this->formvars[$form_fields[$i]]);		# bei Zahlen den Punkt (Tausendertrenner) entfernen
-							if($this->formvars[$form_fields[$i]] == '')$eintrag = 'NULL';
+							}
+						} break; # ende case Bild
+						case 'Time' : {
+							if (in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = date('Y-m-d G:i:s');
 						} break;
-            default : {
-              if($tablename AND $formtype != 'dynamicLink' AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){
-                if($this->formvars[$form_fields[$i]] == ''){
+						case 'User' : {
+							if (in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = $this->user->Vorname." " . $this->user->Name;
+						} break;
+						case 'UserID' : {
+							if (in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = $this->user->id;
+						} break;
+						case 'Stelle' : {
+							if (in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = $this->Stelle->Bezeichnung;
+						} break;
+						case 'StelleID' : {
+							if (in_array($attributes['options'][$attributname], array('', 'update')))$eintrag = $this->Stelle->id;
+						} break;
+						case 'Geometrie' : {
+							# nichts machen
+						} break;
+						case 'Checkbox' : {
+							if ($this->formvars[$form_fields[$i]] == '')$this->formvars[$form_fields[$i]] = 'f';
+							$eintrag = $this->formvars[$form_fields[$i]];
+						} break;
+						case 'Zahl' : {
+							$eintrag = removeTausenderTrenner ($this->formvars[$form_fields[$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
+							if ($this->formvars[$form_fields[$i]] == '')$eintrag = 'NULL';
+						} break;
+						default : {
+							if ($tablename AND $formtype != 'dynamicLink' AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom') {
+								if ($this->formvars[$form_fields[$i]] == '') {
 									$eintrag = 'NULL';
-                }
-                else{
-									if(POSTGRESVERSION >= 930 AND (substr($datatype, 0, 1) == '_' OR is_numeric($datatype))){
-										$eintrag = $this->processJSON($this->formvars[$form_fields[$i]], $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']);		# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
+								}
+								else {
+									if (POSTGRESVERSION >= 930 AND (substr ($datatype, 0, 1) == '_' OR is_numeric($datatype))) {
+										$eintrag = $this->processJSON($this->formvars[$form_fields[$i]], $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']); # bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
 									}
 									else $eintrag = $this->formvars[$form_fields[$i]];
-                }
-              }
-            } # end of default case
-          } # end of switch for type
-					if($eintrag !== NULL){
+								}
+							}
+						} # end of default case
+					} # end of switch for type
+					if ($eintrag !== NULL) {
 						$updates[$layer_id][$tablename][$oid][$attributname]['value'] = $eintrag;
 					}
-        }
-      }
-    }
-		if(count($document_attributes)> 0){
-			foreach($document_attributes as $i => $attr_oid){
+				}
+			}
+		}
+		if (count($document_attributes) > 0) {
+			foreach ($document_attributes as $i => $attr_oid) {
 				$doc_path = $layerset[$attr_oid['layer_id']][0]['document_path'];
 				$doc_url = $layerset[$attr_oid['layer_id']][0]['document_url'];
 				$options = $attributes['options'][$attr_oid['attributename']];
 				$attribute_names = $attributenames[$attr_oid['oid']];
 				$attribute_values = $attributevalues[$attr_oid['oid']];
 				$layer_db = $layerdb[$attr_oid['layer_id']];
-				if(substr($attr_oid['datatype'], 0, 1) == '_'){
-					// ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen,
-					// nicht geänderten Datei-Pfaden und File-input-Feldnamen, die noch verarbeitet werden müssen
+				if (substr ($attr_oid['datatype'], 0, 1) == '_') {
+					# ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen,
+					# nicht geänderten Datei-Pfaden und File-input-Feldnamen, die noch verarbeitet werden müssen
 					$update = $this->processJSON($this->formvars[$form_fields[$i]], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);
 				}
-				else $update = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);	// normales Dokument-Attribut
+				else {
+					# normales Dokument-Attribut
+					$update = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);
+				}
 				$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $update;
 			}
 		}
-		if($this->formvars['delete_documents'] != ''){		// in diesem input-Feld stehen die Pfade von Dokumenten, die zu entfernten Array-Elementen gehörten und gelöscht werden müssen
+		if ($this->formvars['delete_documents'] != '') {
+			# in diesem input-Feld stehen die Pfade von Dokumenten, die zu entfernten Array-Elementen gehörten und gelöscht werden müssen
 			$documents = explode('|', $this->formvars['delete_documents']);
-			foreach($documents as $path){
-				$this->deleteDokument($path, $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']);		# geht erstmal nur für einen einzelnen Layer
+			foreach ($documents as $path) {
+				# geht erstmal nur für einen einzelnen Layer
+				$this->deleteDokument($path, $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']);
 			}
 		}
-		if($updates != NULL){
-			foreach($updates as $layer_id => $layer) {
-				foreach($layer as $tablename => $table) {
-					foreach($table as $oid => $attributes) {
-						if(count($attributes) > 0){
-							if(!$layerset[$layer_id][0]['maintable_is_view'])$sql = "LOCK TABLE " . $tablename." IN SHARE ROW EXCLUSIVE MODE;";
-							else $sql = '';
-							$sql .= "UPDATE " . $tablename." SET ";
-							$i = 0;
-							foreach($attributes as $attribute => $properties) {
-								if($i > 0)$sql .= ', ';
-								if(is_array($properties['value'])){			// ist bei Dokumenten in einem Array der Fall
-									$array_sql = array();
-									for($a=0; $a < count($properties['value']); $a++){
-										if($properties['value'][$a] != NULL)$array_sql[] = $attribute."[".($a+1)."] = '" . $properties['value'][$a]."'";		// $a + 1 da postgres-Arrays bei 1 beginnen
+		if ($updates != NULL) {
+			foreach ($updates as $layer_id => $layer) {
+				foreach ($layer as $tablename => $table) {
+					foreach ($table as $oid => $attributes) {
+						if (count($attributes) > 0) {
+							if (!$layerset[$layer_id][0]['maintable_is_view']) {
+								$sql_lock = "LOCK TABLE " . $tablename." IN SHARE ROW EXCLUSIVE MODE;";
+							}
+
+							$attributs_set = array();
+							foreach ($attributes AS $attribute => $properties) {
+								if (is_array($properties['value'])) {
+									# ist bei Dokumenten in einem Array der Fall
+									for ($a = 0; $a < count($properties['value']); $a++) {
+										if ($properties['value'][$a] != NULL) {
+											 # $a + 1 da postgres-Arrays bei 1 beginnen
+											$attributs_set[] = $attribute . "[" . ($a + 1) . "] = '" . $properties['value'][$a] . "'";
+										}
 									}
-									$sql .= implode(', ', $array_sql);
 								}
-								else{
-									$sql .= $attribute." = ";
-									if($properties['value'] == 'NULL')$sql .= 'NULL';
-									else $sql .= "'" . $properties['value']."'";
+								else {
+									$attributs_set[] = $attribute . " = " . ($properties['value'] == 'NULL' ? "NULL" : "'" . $properties['value'] . "'");
 								}
-								$i++;
-							}
-							$sql .= " WHERE";
-
-							if ($this->plugin_loaded('mobile') AND array_key_exists('uuid', $attributes)) {
-								$sql .= " uuid = '" . $attributes['uuid']['value'] . "'";
-							}
-							else {
-								$sql .= " oid = " . $oid;
 							}
 
-							#if($filter != ''){							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
-							#  $sql .= " AND " . $filter;
+							$where_condition = (
+								$this->plugin_loaded('mobile') AND array_key_exists('uuid', $attributes)
+								? " uuid = '" . $attributes['uuid']['value'] . "'"
+								: "oid = " . $oid
+							);
+
+							$sql = $sql_lock . "
+								UPDATE
+									" . $tablename . "
+								SET
+									" . implode(', ', $attribute_set) . "
+								WHERE
+									" . $where_condition . "
+							";
+
+							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
+							#if ($filter != '') {
+							#	$sql .= " AND " . $filter;
 							#}
 
 							# Before Update trigger
@@ -13005,10 +13021,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[$layer_id][0], $oid, $old_dataset);
 							}
 
-							#echo '<br>sql for update: ' . $sql;
+							# echo '<br>sql for update: ' . $sql;
 
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
-							$ret = $layerdb[$layer_id]->execSQL($sql, 4, 1, false);
+							$ret = $layerdb[$layer_id]->execSQL($sql, 4, 1, true);
 							if ($ret['success']) {
 								$result = pg_fetch_row($ret['query']);
 								if (pg_affected_rows($ret['query']) > 0) {
@@ -13035,45 +13051,49 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$this->add_message('error', 'Änderung fehlgeschlagen.<br>' . $result[0]);
 			}
 			else {
-				if($this->formvars['close_window'] == ""){
+				if ($this->formvars['close_window'] == "") {
 					$this->add_message('notice', 'Änderung erfolgreich');
-					if($result[0] != '')$this->add_message('warning', $result[0]);
+					if ($result[0] != '')$this->add_message('warning', $result[0]);
 				}
 			}
 		}
 		else {
 			$this->add_message('warning', 'Keine Änderung.');
 		}
-    if ($this->formvars['embedded'] != ''){    # wenn es ein Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
-      header('Content-type: text/html; charset=UTF-8');
-      $attributenames[0] = $this->formvars['targetattribute'];
+		if ($this->formvars['embedded'] != '') {
+			# wenn es ein Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
+			header ('Content-type: text/html; charset=UTF-8');
+			$attributenames[0] = $this->formvars['targetattribute'];
 			$targetlayerdb = $mapdb->getlayerdatabase($this->formvars['targetlayer_id'], $this->Stelle->pgdbhost);
-      $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $targetlayerdb, $attributenames);
-      switch ($attributes['form_element_type'][0]){
-        case 'SubFormEmbeddedPK' : {
-          $this->formvars['embedded_subformPK'] = true;
-          echo '~';
-          $this->GenerischeSuche_Suchen();
-        }break;
-      }
+			$attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $targetlayerdb, $attributenames);
+			switch ($attributes['form_element_type'][0]) {
+				case 'SubFormEmbeddedPK' : {
+					$this->formvars['embedded_subformPK'] = true;
+					echo '~';
+					$this->GenerischeSuche_Suchen();
+				} break;
+			}
 			echo '~';
 			$this->output_messages('without_script_tags');
-			if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+			if ($this->formvars['reload']) {
+				# in diesem Fall wird die komplette Seite neu geladen
 				echo '~~';
 				echo "document.GUI.go.value='get_last_query';
 							document.GUI.submit();";
 			}
-    }
-    else{
+		}
+		else {
 			$this->last_query = $this->user->rolle->get_last_query();
-      if($this->formvars['search']){        # man kam von der Suche   -> nochmal suchen
-        $this->GenerischeSuche_Suchen();
-      }
-      else{                                 # man kam aus einer Sachdatenabfrage    -> nochmal abfragen
-        $this->queryMap();
-      }
-    }
-  }
+			if ($this->formvars['search']) {
+				# man kam von der Suche	 -> nochmal suchen
+				$this->GenerischeSuche_Suchen();
+			}
+			else {
+				# man kam aus einer Sachdatenabfrage -> nochmal abfragen
+				$this->queryMap();
+			}
+		}
+	}
 
 	function processJSON($json, $doc_path = NULL, $doc_url = NULL, $options = NULL, $attribute_names = NULL, $attribute_values = NULL, $layer_db = NULL, $quote = ''){
 		# Diese Funktion wandelt den übergebenen JSON-String in ein PostgeSQL-Struct um.
