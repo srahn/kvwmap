@@ -15335,6 +15335,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		else{
 			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
 		}
+		$this->land_schluessel = substr($GemkgListe['GemkgID'][0], 0, 2);
     // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
     $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
     $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
