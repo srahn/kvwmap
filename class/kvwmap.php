@@ -13028,7 +13028,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							# echo '<br>sql for update: ' . $sql;
 
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
-							$ret = $layerdb[$layer_id]->execSQL($sql, 4, 1, true);
+							$ret = $layerdb[$layer_id]->execSQL($sql, 4, 1);
 							if ($ret['success']) {
 								$result = pg_fetch_row($ret['query']);
 								if (pg_affected_rows($ret['query']) > 0) {
