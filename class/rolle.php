@@ -398,6 +398,7 @@ class rolle {
 			$this->freetext = in_array('freetext', $buttons);
 			$this->freearrow = in_array('freearrow', $buttons);
 			$this->gps = in_array('gps', $buttons);
+			$this->geom_buttons = explode(',', $rs['geom_buttons']);
 			return 1;
 		}else return 0;
   }
