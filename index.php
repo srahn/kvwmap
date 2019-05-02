@@ -112,6 +112,7 @@ define(CASE_COMPRESS, false);																																						  #
 #   getLayerOptions:  - getRollenLayer(), writeCustomType(), getDatatypeId() 															#
 #												und writeDatatypeAttributes() reinkopieren																				#
 #		get_group_legend:	- compare_legendorder() reinkopieren																								#
+#		get_select_list:  - read_datatype_attributes() reinkopieren																						#
 #																																																				  #
 #																																																				  #
 ###########################################################################################################
