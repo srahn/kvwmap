@@ -3377,27 +3377,31 @@ class GUI {
     $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
     $layerdb->setClientEncoding();
     $attributenames[0] = $this->formvars['attribute'];
-    $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
+		if($this->formvars['datatype_id'] != '')
+			$attributes = $mapDB->read_datatype_attributes($this->formvars['datatype_id'], $layerdb, $attributenames);
+    else{
+			$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
+		}
 		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
     $reqby_start = strpos(strtolower($options), "<required by>");
-    if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options;
+    if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options; 
 		$attributenames = explode('|', $this->formvars['attributenames']);
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
 		for($i = 0; $i < count($attributenames); $i++){
-			$sql = str_replace('<requires>'.$attributenames[$i].'</requires>', "'" . $attributevalues[$i]."'", $sql);
+			$sql = str_replace('<requires>'.$attributenames[$i].'</requires>', "'".$attributevalues[$i]."'", $sql);
 		}
 		#echo $sql;
 		$ret=$layerdb->execSQL($sql,4,0);
-    if ($ret[0]) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+		if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
 		switch($this->formvars['type']) {
-			case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden
+			case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
 				$html = '>';			# Workaround für dummen IE Bug
 				$html .= '<option value="">-- Auswahl --</option>';
 				while($rs = pg_fetch_array($ret[1])){
 					$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
 				}
 			}break;
-
+			
 			case 'text' : {								#  ein Textfeld soll nur mit dem ersten Wert aufgefüllt werden
 				$rs = pg_fetch_array($ret[1]);
 				$html = $rs['output'];
@@ -17594,6 +17598,7 @@ class db_mapObj{
     if ($query==0) { echo sql_err_msg($PHP_SELF, __LINE__, $sql); return 0; }
 		$i = 0;
 		while($rs = mysql_fetch_array($query)){
+			$attributes['datatype_id'][$i] = $rs['datatype_id'];
 			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
 			$attributes['real_name'][$rs['name']]= $rs['real_name'];

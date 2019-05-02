@@ -302,7 +302,7 @@
 					}
 					if($attributes['nullable'][$j] != '0')$strPleaseSelect = '-';
 					if($gui->new_entry == true)$strPleaseSelect = '-- '.$gui->strPleaseSelect.' --';
-					$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class);
+					$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class, $attributes['datatype_id'][$j]);
 				}break;
 				
 				case 'Autovervollständigungsfeld' : {
@@ -802,7 +802,7 @@
 		return $datapart;
 	}
 	
-	function Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $req_by, $req, $attributenames, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class){
+	function Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $req_by, $req, $attributenames, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class, $datatype_id = ''){
 		if($privileg == '0' OR $lock){
 			for($e = 0; $e < count($enum_value); $e++){
 				if($enum_value[$e] == $value){
@@ -822,9 +822,10 @@
 			}
 			$datapart .= '<select class="'.$field_class.'" tabindex="1" title="'.$alias.'" style="'.$select_width.'font-size: '.$fontsize.'px"';
 			if($req_by != ''){
-				$onchange .= 'update_require_attribute(\''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode($attributenames, "','").'\'));';
+				$onchange .= 'update_require_attribute(this, \''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode($attributenames, "','").'\'));';
 			}
 			$datapart .= ' onchange="'.$onchange.'" ';
+			if($datatype_id != '')$datapart .= ' data-datatype_id="'.$datatype_id.'" ';
 			$datapart .= 'id="'.$layer_id.'_'.$name.'_'.$k.'" name="'.$fieldname.'">';
 			if($strPleaseSelect)$datapart .= '<option value="">'.$strPleaseSelect.'</option>';
 			for($e = 0; $e < count($enum_value); $e++){

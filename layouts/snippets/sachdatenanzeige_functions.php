@@ -831,22 +831,40 @@ include('funktionen/input_check_functions.php');
 	}
 
 
-	update_require_attribute = function(attributes, k,layer_id, attributenamesarray){
-		// attributes ist eine Liste von zu aktualisierenden Attributen, k die Nummer des Datensatzes und attributenamesarray ein Array aller Attribute im Formular
+	update_require_attribute = function(object, attributes, k,layer_id, attributenamesarray){
+		// object ist das Objekt welches diese Funktion ausgeloest hat
+		// attributes ist eine Liste von zu aktualisierenden Attributen
+		// k die Nummer des Datensatzes
+		// attributenamesarray ein Array aller Attribute im Formular
+		var datatype = '';
+		if(object.dataset.datatype_id)datatype = '&datatype_id='+object.dataset.datatype_id;
 		var attributenames = '';
 		var attributevalues = '';
+		// die Layer-ID muss aufgesplittet werden, um sie für css zu escapen
+		var id = layer_id.toString();;
+		var id1 = id.substring(0, 1);
+		var id2 = id.substring(1);
 		for(var i = 0; i < attributenamesarray.length; i++){
-			if(document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k) != undefined){
+			var scope = object.closest('table'); // zuerst in der gleichen Tabelle suchen
+			if (scope.querySelector('#\\3'+id1+' '+id2+'_'+attributenamesarray[i]+'_'+k) == undefined) {
+				scope = document; // ansonsten global
+			}
+			if(scope.querySelector('#\\3'+id1+' '+id2+'_'+attributenamesarray[i]+'_'+k) != undefined){
 				attributenames += attributenamesarray[i] + '|';
-				attributevalues += document.getElementById(layer_id+'_'+attributenamesarray[i]+'_'+k).value + '|';
+				attributevalues += scope.querySelector('#\\3'+id1+' '+id2+'_'+attributenamesarray[i]+'_'+k).value + '|';
 			}
 		}
 		attribute = attributes.split(',');
 		for(var i = 0; i < attribute.length; i++){
-			type = document.getElementById(layer_id+'_'+attribute[i]+'_'+k).type;
+			var scope = object.closest('table'); // zuerst in der gleichen Tabelle suchen
+			if (scope.querySelector('#\\3'+id1+' '+id2+'_'+attribute[i]+'_'+k) == undefined) {
+				scope = document; // ansonsten global
+			}
+			var element = scope.querySelector('#\\3'+id1+' '+id2+'_'+attribute[i]+'_'+k);
+			type = element.type;
 			if(type == 'text'){action = 'setvalue'};
 			if(type == 'select-one'){action = 'sethtml'};
-			ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type="+type, new Array(document.getElementById(layer_id+'_'+attribute[i]+'_'+k)), new Array(action));
+			ahah("index.php", "go=get_select_list&layer_id="+layer_id+datatype+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type="+type, new Array(element), new Array(action));
 		}
 	}
 
