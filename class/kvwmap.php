@@ -13083,11 +13083,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 										VALUES " . implode(',
 										', $insert_values) . "
 									";
-									echo '<br>delete und insert sql: ' . $delete_sql . '; ' . $insert_sql;
-									$ret = $layerdb[$layer_id]->execSQL($delete_sql . '; ' . $insert_sql, 4, 1);
-									if (!$ret['success']) {
-										$this->add_message('error', $ret[1]);
-									}
+									#echo '<br>delete und insert sql: ' . $delete_sql . '; ' . $insert_sql;
+									#$ret = $layerdb[$layer_id]->execSQL($delete_sql . '; ' . $insert_sql, 4, 1);
+									#if (!$ret['success']) {
+									#	$this->add_message('error', $ret[1]);
+									#}
 
 									# After Update trigger
 									if (!empty($layerset[$layer_id][0]['trigger_function'])) {
