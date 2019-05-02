@@ -90,23 +90,21 @@ $SVGvars_navbuttons .= edit_other_object($strEditOther);
 $svg .= '<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>';
 $svg .= $SVGvars_navbuttons;
 $svg .= '</g>';
-if($this->map->width > 880)$button_position = ($last_x+20).' 0';
+if($this->map->width > (520 + (count($this->user->rolle->geom_buttons) * 36)))$button_position = ($last_x+20).' 0';
 else $button_position = '0 36';
 $last_x = 0;
 $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate('.$button_position.')">';
-$buttons_fs = deletebuttons($strUndo, $strDelete);
-$buttons_fs .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
-$buttons_fs .= flurstquerybuttons();
-$buttons_fs .= polygonbuttons2($strSplitPolygon);
-$buttons_fs .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
-$buttons_fs .= transform_buttons($strMoveGeometry);
-$buttons_fs .= vertex_edit_buttons($strCornerPoint);
-$buttons_fs .= coord_input_buttons();
-$buttons_fs .= ortho_point_buttons();
-if($this->user->rolle->gps){
-	$buttons_fs .= gpsbuttons($strSetGPSPosition, $strGPSFollow, $this->formvars['gps_follow']);
-}
-$buttons_fs .= measure_buttons($strRuler);
+if(in_array('delete', $this->user->rolle->geom_buttons))$buttons_fs = deletebuttons($strUndo, $strDelete);
+if(in_array('polygon', $this->user->rolle->geom_buttons))$buttons_fs .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
+if(in_array('flurstquery', $this->user->rolle->geom_buttons))$buttons_fs .= flurstquerybuttons();
+if(in_array('polygon2', $this->user->rolle->geom_buttons))$buttons_fs .= polygonbuttons2($strSplitPolygon);
+if(in_array('buffer', $this->user->rolle->geom_buttons))$buttons_fs .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
+if(in_array('transform', $this->user->rolle->geom_buttons))$buttons_fs .= transform_buttons($strMoveGeometry);
+if(in_array('vertex_edit', $this->user->rolle->geom_buttons))$buttons_fs .= vertex_edit_buttons($strCornerPoint);
+if(in_array('coord_input', $this->user->rolle->geom_buttons))$buttons_fs .= coord_input_buttons();
+if(in_array('ortho_point', $this->user->rolle->geom_buttons))$buttons_fs .= ortho_point_buttons();
+if($this->user->rolle->gps)$buttons_fs .= gpsbuttons($strSetGPSPosition, $strGPSFollow, $this->formvars['gps_follow']);
+if(in_array('measure', $this->user->rolle->geom_buttons))$buttons_fs .= measure_buttons($strRuler);
 
 $svg .= '<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>';
 $svg .= $buttons_fs;
