@@ -4033,7 +4033,10 @@ class GUI {
 		$this->administration->get_config_params();
 		switch ($this->formvars['func']) {
 			case "update_databases" : {
-				$this->administration->update_databases();
+				$err_msgs = $this->administration->update_databases();
+				if (count($err_msgs) > 0) {
+					$this->add_message('error', implode('<br>', $err_msgs));
+				}
 				$this->administration->get_database_status();
 				$this->administration->get_config_params();
 				$this->showAdminFunctions();
@@ -7728,6 +7731,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		# trim attributes to prevent big surprise if layer not work as expected
 		# due to spaces in string concatenations with these attributes
 		$this->formvars['maintable'] = trim($this->formvars['maintable']);
+		$this->formvars['further_attribute_table'] = trim($this->formvars['further_attribute_table']);
+		$this->formvars['id_column'] = trim($this->formvars['id_column']);
 		$this->formvars['schema'] = trim($this->formvars['schema']);
 
 		$mapDB->updateLayer($this->formvars);
@@ -12974,24 +12979,24 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								$sql_lock = "LOCK TABLE " . $tablename." IN SHARE ROW EXCLUSIVE MODE;";
 							}
 
-							$attributs_set = array();
+							$attributes_set = array();
 							foreach ($attributes AS $attribute => $properties) {
 								if (is_array($properties['value'])) {
 									# ist bei Dokumenten in einem Array der Fall
 									for ($a = 0; $a < count($properties['value']); $a++) {
 										if ($properties['value'][$a] != NULL) {
 											 # $a + 1 da postgres-Arrays bei 1 beginnen
-											$attributs_set[] = $attribute . "[" . ($a + 1) . "] = '" . $properties['value'][$a] . "'";
+											$attributes_set[] = $attribute . "[" . ($a + 1) . "] = '" . $properties['value'][$a] . "'";
 										}
 									}
 								}
 								else {
-									$attributs_set[] = $attribute . " = " . ($properties['value'] == 'NULL' ? "NULL" : "'" . $properties['value'] . "'");
+									$attributes_set[] = $attribute . " = " . ($properties['value'] == 'NULL' ? "NULL" : "'" . $properties['value'] . "'");
 								}
 							}
 
 							$where_condition = (
-								$this->plugin_loaded('mobile') AND array_key_exists('uuid', $attributes)
+								($this->plugin_loaded('mobile') AND array_key_exists('uuid', $attributes))
 								? " uuid = '" . $attributes['uuid']['value'] . "'"
 								: "oid = " . $oid
 							);
@@ -13000,7 +13005,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								UPDATE
 									" . $tablename . "
 								SET
-									" . implode(', ', $attribute_set) . "
+									" . implode(', ', $attributes_set) . "
 								WHERE
 									" . $where_condition . "
 							";
@@ -13025,13 +13030,65 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[$layer_id][0], $oid, $old_dataset);
 							}
 
-							# echo '<br>sql for update: ' . $sql;
+							#echo '<br>sql for update: ' . $sql;
 
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
 							$ret = $layerdb[$layer_id]->execSQL($sql, 4, 1);
 							if ($ret['success']) {
 								$result = pg_fetch_row($ret['query']);
 								if (pg_affected_rows($ret['query']) > 0) {
+									# Save further attributes
+									include_once(CLASSPATH . 'LayerAttribute.php');
+									
+									$further_attributes = LayerAttribute::find($this, "layer_id = " . $layer_id . " AND arrangement = 2");
+									$further_attribut_table = (
+										$layerset[$layer_id][0]['further_attribute_table'] != ''
+										? $layerset[$layer_id][0]['further_attribute_table']
+										: $layerset[$layer_id][0]['schema'] . '.' . $layerset[$layer_id][0]['maintable'] . '_kvp'
+									);
+									$dataset_id = $attributes[$layerset[$layer_id][0]['id_column']]['value'];
+
+									# Delete existing values
+									$delete_sql = "
+										DELETE FROM " . $further_attribut_table . "
+										WHERE
+											dataset_id = " . $dataset_id . " AND
+											attribute_name IN (" .
+												implode(
+													', ',
+													array_map(
+														function($further_attribute) {
+															return "'" . $further_attribute->get('name') . "'";
+														},
+														$further_attributes
+													)
+												) . ")
+									";
+
+									# Insert new values
+									$insert_values = array();
+									foreach ($further_attributes AS $attribute) {
+										$value = $this->formvars[$layer_id . ';' . $attribute->get('name') . ';;;Text_not_saveable;;not_saveable'];
+										if ($value != '') {
+											$insert_values[] = "("
+												. $dataset_id . ",
+												'" . $attribute->get('name') . "',
+												'"  . $value . "'
+											)";
+										}
+									}
+
+									$insert_sql = "
+										INSERT INTO " . $further_attribut_table . " (dataset_id, attribute_name, value)
+										VALUES " . implode(',
+										', $insert_values) . "
+									";
+									echo '<br>delete und insert sql: ' . $delete_sql . '; ' . $insert_sql;
+									$ret = $layerdb[$layer_id]->execSQL($delete_sql . '; ' . $insert_sql, 4, 1);
+									if (!$ret['success']) {
+										$this->add_message('error', $ret[1]);
+									}
+
 									# After Update trigger
 									if (!empty($layerset[$layer_id][0]['trigger_function'])) {
 										$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[$layer_id][0], $oid, $old_dataset);
@@ -17093,6 +17150,8 @@ class db_mapObj{
     $sql .= "Gruppe = '" . $formvars['Gruppe']."', ";
     $sql .= "pfad = '" . $formvars['pfad']."', ";
     $sql .= "maintable = '" . $formvars['maintable']."', ";
+    $sql .= "further_attribute_table = '" . $formvars['further_attribute_table'] . "', ";
+    $sql .= "id_column = '" . $formvars['id_column'] . "', ";
     $sql .= "Data = '" . $formvars['Data']."', ";
     $sql .= "`schema` = '" . $formvars['schema']."', ";
     $sql .= "document_path = '" . $formvars['document_path']."', ";

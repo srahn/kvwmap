@@ -118,6 +118,7 @@ class administration{
 	}
 	
 	function update_databases() {
+		$err_msgs = array();
 		foreach ($this->migrations_to_execute['mysql'] as $component => $component_migration) {
 			foreach ($component_migration as $file) {
 				$migration['component'] = $component;
@@ -133,8 +134,8 @@ class administration{
 				$pg_migrations[] = $migration;
 			}
 		}
-		$this->execute_migrations('mysql', $my_migrations);
-		$this->execute_migrations('postgresql', $pg_migrations);
+		$err_msgs = array_merge($err_msgs, $this->execute_migrations('mysql', $my_migrations));
+		$err_msgs = array_merge($err_msgs, $this->execute_migrations('postgresql', $pg_migrations));
 
 		foreach ($this->seeds_to_execute['mysql'] as $component => $component_seed) {
 			$prepath = PLUGINS.$component.'/';
@@ -157,20 +158,22 @@ class administration{
 				}
 			}
 		}
+		return $err_msgs;
 	}
 
 	function execute_migrations($database_type, $migrations) {
+		$err_msgs = array();
 		if ($migrations != NULL) {
 			usort($migrations, 'compare_migration_filenames');		# sortieren, damit die Migrationen in der richtigen Reihenfolge ausgeführt werden
 			foreach ($migrations as $migration) {
 				$component = $migration['component'];
 				$file = $migration['file'];
 				if ($component == 'kvwmap')$prepath = LAYOUTPATH; else $prepath = PLUGINS.$component.'/';
-				$filepath = $prepath.'db/'.$database_type.'/schema/'.$file;
-				$filetype = pathinfo($filepath)['extension'];
+				$filepath = $prepath . 'db/' . $database_type.'/schema/';
+				$filetype = pathinfo($filepath . $file)['extension'];
 				switch ($filetype) {
 					case 'sql' : {
-						$sql = file_get_contents($filepath);
+						$sql = file_get_contents($filepath . $file);
 						if ($sql != '') {
 							$sql = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $sql);
 							$sql = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $sql);
@@ -198,11 +201,12 @@ class administration{
 					}break;
 					
 					case 'php' : {
-						include $filepath;
+						include $filepath . $file;
 					}break;
 				}
 				if ($result[0]) {
-					echo $result[1] . '<br>Fehler beim Ausführen von migration-Datei: ' . $filepath . '<br>';
+					$err_msgs[] = 'Fehler beim Ausführen von migration-Datei:<br>' . $file . '<br>in Pfad: ' . str_replace(WWWROOT.APPLVERSION, '../', $filepath) . '<br>' . $result[1];
+					$result = $this->pgdatabase->execSQL('ROLLBACK;', 0, 0, false);
 				}
 				else{
 					$sql = "
@@ -220,6 +224,7 @@ class administration{
 				}
 			}
 		}
+		return $err_msgs;
 	}
 	
 	function update_code() {
@@ -232,7 +237,12 @@ class administration{
 	
 	function get_config_params() {
 		$this->config_params = array();
-		$sql = "SELECT * FROM config ORDER BY `group`, name";
+		$sql = "
+			SELECT *
+			FROM config
+			ORDER BY `group`, name
+		";
+		#echo 'SQL: ' . $sql;
 		$result=$this->database->execSQL($sql,0, 0);
     if ($result[0]) {
       #echo '<br>Fehler bei der Abfrage der Tabelle config.<br>';

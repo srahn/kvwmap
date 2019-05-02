@@ -281,12 +281,21 @@ FROM
 						}
 					}
 					else {
+						$div_id = rand(1, 99999);
 						$ret[1] =
-							$errormessage . " <a href=\"#\" onclick=\"$('#error_details').toggle()\">Details</a><div id=\"error_details\" style=\"display: none\">\n" .
-							"\nAufgetreten bei PostgreSQL Anweisung:<br>\n" .
-							"<textarea id=\"sql_statement\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px;\">" . $sql . "</textarea><br>\n" .
-							"<button type=\"button\" onclick=\"
-									copyText = document.getElementById('sql_statement');
+							$errormessage . " <a href=\"#\" onclick=\"$('#error_details_" . $div_id . "').toggle()\">Details</a>
+								<div
+									id=\"error_details_" . $div_id . "\"
+									style=\"display: none\"
+								>\n" . "\nAufgetreten bei PostgreSQL Anweisung:<br>\n" . "
+									<textarea
+										id=\"sql_statement_" . $div_id . "\"
+										class=\"sql-statement\" type=\"text\"
+										style=\"height: " . round(strlen($sql) / 2) . "px;\">"
+										. $sql . "
+									</textarea><br>\n" . "
+									<button type=\"button\" onclick=\"
+									copyText = document.getElementById('sql_statement_" . $div_id . "');
 									copyText.select();
 									document.execCommand('copy');
 								\">In Zwischenablage kopieren</button></div>";

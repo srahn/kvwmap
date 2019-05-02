@@ -1025,15 +1025,15 @@ INSERT INTO u_styles2classes (
       #echo $sql;
       if ($query==0) {
         $ret[0]=1;
-				$ret[1] =
-					mysql_error($this->dbConn) . "<br>\n<br>" .
+				$div_id = rand(1, 99999);
+				$ret[1] = mysql_error($this->dbConn) . " <a href=\"#\" onclick=\"$('#error_details_" . $div_id . "').toggle()\">Details</a><div id=\"error_details_" . $div_id . "\" style=\"display: none\">\n" .
 					"\nAufgetreten bei MySQL Anweisung:<br>\n" .
-					"<textarea id=\"sql_statement\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px;\">" . $sql . "</textarea><br>\n" .
+					"<textarea id=\"sql_statement_" . $div_id . "\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px; max-height: 600px\">" . $sql . "</textarea><br>\n" .
 					"<button type=\"button\" onclick=\"
-						copyText = document.getElementById('sql_statement');
-						copyText.select();
-						document.execCommand('copy');
-					\">In Zwischenablage kopieren</button>";
+							copyText = document.getElementById('sql_statement_" . $div_id . "');
+							copyText.select();
+							document.execCommand('copy');
+						\">In Zwischenablage kopieren</button></div>";
         $this->debug->write($ret[1], $debuglevel);
         if ($logsql) {
           $this->logfile->write("#".$ret[1]);
