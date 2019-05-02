@@ -261,6 +261,9 @@
 			switch ($attributes['form_element_type'][$j]){
 				case 'Textfeld' : {
 					$datapart .= '<textarea class="'.$field_class.'" title="'.$alias.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" id="'.$layer_id.'_'.$name.'_'.$k.'" cols="'.$size.'" onchange="'.$onchange.'"';
+					if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
+						$datapart .= ' maxlength="'.$attributes['length'][$j].'" ';
+					}
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' readonly style="display: none"';
 					}
