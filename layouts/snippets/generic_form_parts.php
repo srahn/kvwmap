@@ -573,10 +573,10 @@
 						else{
 							$datapart .= '<a href="'.$url.$dokumentpfad.'" '.$target.'><img class="preview_doc" src="'.$url.$thumbname.'"></a>';									
 						}
-						$datapart .= '</td><td>';
+						$datapart .= '<br>';
 						if($attribute_privileg != '0' AND !$lock[$k]){
 							//$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\');"><span>Dokument <br>löschen</span></a>';
-							$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\', '.$layer_id.', \''.$gui->formvars['fromobject'].'\', \''.$gui->formvars['targetobject'].'\', \''.$gui->formvars['targetlayer_id'].'\', \''.$gui->formvars['targetattribute'].'\', \''.$gui->formvars['data'].'\', \''.$gui->formvars['reload'].'\');"><span>Dokument <br>löschen</span></a>';
+							$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\', '.$layer_id.', \''.$gui->formvars['fromobject'].'\', \''.$gui->formvars['targetobject'].'\', \''.$gui->formvars['targetlayer_id'].'\', \''.$gui->formvars['targetattribute'].'\', \''.$gui->formvars['data'].'\', \''.$gui->formvars['reload'].'\');"><span>Dokument löschen</span></a>';
 						}
 						$datapart .= '</td></tr>';
 						$datapart .= '<tr><td colspan="2"><span id="image_original_name">'.$original_name.'</span></td></tr>';
