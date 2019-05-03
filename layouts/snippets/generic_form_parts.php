@@ -80,7 +80,7 @@
 		$datapart .= '</td></tr></table>';
 		return $datapart;
 	}
-	
+
 	function calendar($type, $field_id, $privileg){
 		$date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss', 'time' => 'hh:mm:ss');
 		$cal = '<a id="caldbl" href="javascript:;" title="('.$date_types[$type].')"'.
@@ -122,7 +122,7 @@
 		}
 		
 		if ($attributes['dependents'][$j] != NULL) {
-			$field_class .= 'visibility_changer';
+			$field_class .= ' visibility_changer';
 			$onchange .= 'this.oninput();" oninput="check_visibility(' . $layer_id . ', this, [\'' . implode('\',\'', $attributes['dependents'][$j]) . '\'], ' . $k . ', ' . $arrangement . ');';
 		}
 		
@@ -291,7 +291,7 @@
 					}
 				}break;
 
-				case 'Auswahlfeld' : case 'Auswahlfeld_not_saveable' : {
+				case 'Auswahlfeld' : case 'Auswahlfeld_not_saveable' : {					
 					if(is_array($attributes['dependent_options'][$j])){
 						$enum_value = $attributes['enum_value'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 						$enum_output = $attributes['enum_output'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
