@@ -1145,12 +1145,25 @@ class rolle {
 
 	function setRollen($user_id,$stellen) {
 		# trägt die Stellen für einen Benutzer ein.
-		$sql ='INSERT IGNORE INTO rolle (user_id, stelle_id, epsg_code) ';
-		$sql.= 'SELECT '.$user_id.', ID, epsg_code FROM stelle WHERE ID IN ('.implode($stellen, ',').')';
+		$sql = "
+			INSERT IGNORE INTO rolle (user_id, stelle_id, epsg_code, minx, miny, maxx, maxy)
+			SELECT" .
+				$user_id . ",
+				ID,
+				epsg_code,
+				minxmax,
+				minymax,
+				maxxmax,
+				maxymax
+			FROM
+				stelle
+			WHERE
+				ID IN (" . implode(',', $stellen) . ")
+		";
 		#echo '<br>'.$sql;
-		$this->debug->write("<p>file:rolle.php class:rolle function:setRollen - Einfügen neuen Rollen:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->debug->write("<p>file:rolle.php class:rolle function:setRollen - Einfügen neuen Rollen:<br>" . $sql, 4);
+		$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		return 1;
 	}
 
