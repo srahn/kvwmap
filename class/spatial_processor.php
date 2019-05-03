@@ -885,7 +885,7 @@ class spatial_processor {
   	}
     $polygons = explode('<gml:Polygon', $geom);
     for($i = 1; $i < count($polygons); $i++){
-    	$wkt_polygon[$i-1] = 'geomfromtext(\'POLYGON(';
+    	$wkt_polygon[$i-1] = 'st_geomfromtext(\'POLYGON(';
     	$rings = explode('<gml:coordinates', $polygons[$i]);
       for($j = 1; $j < count($rings); $j++){
       	if($j > 1){$wkt_polygon[$i-1] .= ',';}
