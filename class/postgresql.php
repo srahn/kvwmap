@@ -230,6 +230,7 @@ FROM
 
 	function execSQL($sql, $debuglevel, $loglevel, $suppress_error_msg = false) {
 		$ret = array(); // Array with results to return
+		$strip_context = false;
 
 		switch ($this->loglevel) {
 			case 0 : {
@@ -256,83 +257,50 @@ FROM
 			$query = @pg_query($this->dbConn, $sql);
 			//$query=0;
 			if ($query == 0) {
-				$ret[0] = 1;
 				$ret['success'] = false;
 				if (!$suppress_error_msg) {
-					$errormessage = pg_last_error($this->dbConn);
-					if (strpos($errormessage, 'CONTEXT: ') !== false) {
-						$errormessage = substr($errormessage, 0, strpos($errormessage, 'CONTEXT: '));
-					}
-					header('error: true');	// damit ajax-Requests das auch mitkriegen
-					# Abfrage von Notice
-					if ($errormessage != '' AND strpos($errormessage, '{') !== false AND strpos($errormessage, '}') !== false) {
-						$notice_obj = json_decode(substr($errormessage, strpos($errormessage, '{'), strpos($errormessage, '}') - strpos($errormessage, '{') + 1), true);
-						if (array_key_exists('success', $notice_obj)) {
-							if (!$notice_obj['success']) {
-								$ret[0] = 1;
-								$ret['success'] = false;
-							}
-							if (array_key_exists('msg_type', $notice_obj)) {
-								$ret['type'] = $notice_obj['msg_type'];
-							}
-							if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
-								$ret['msg'] = $ret[1] = $notice_obj['msg'];
-							}
-						}
+					$last_error = pg_last_error($this->dbConn);
+					if ($strip_context AND strpos($last_error, 'CONTEXT: ') !== false) {
+						$ret['msg'] = substr($last_error, 0, strpos($last_error, 'CONTEXT: '));
 					}
 					else {
-						$div_id = rand(1, 99999);
-						$ret[1] =
-							$errormessage . " <a href=\"#\" onclick=\"$('#error_details_" . $div_id . "').toggle()\">Details</a>
-								<div
-									id=\"error_details_" . $div_id . "\"
-									style=\"display: none\"
-								>\n" . "\nAufgetreten bei PostgreSQL Anweisung:<br>\n" . "
-									<textarea
-										id=\"sql_statement_" . $div_id . "\"
-										class=\"sql-statement\" type=\"text\"
-										style=\"height: " . round(strlen($sql) / 2) . "px;\">"
-										. $sql . "
-									</textarea><br>\n" . "
-									<button type=\"button\" onclick=\"
-									copyText = document.getElementById('sql_statement_" . $div_id . "');
-									copyText.select();
-									document.execCommand('copy');
-								\">In Zwischenablage kopieren</button></div>";
-						$ret['msg'] = $ret[1];
-						$ret['type'] = 'error';
+						$ret['msg'] = $last_error;
 					}
+					$div_id = rand(1, 99999);
+					$ret['msg'] = sql_err_msg('PostgreSQL', $sql, $ret['msg'], $div_id);
+					$ret['type'] = 'error';
 				}
-				$this->debug->write("<br><b>" . $ret[1] . "</b>", $debuglevel);
+				$this->debug->write("<br><b>" . $last_error . "</b>", $debuglevel);
 				if ($logsql) {
-					$this->logfile->write($this->commentsign . " " . $ret[1]);
+					$this->logfile->write($this->commentsign . ' ' . $sql . ' ' . $last_error);
 				}
 			}
 			else {
-				# Abfrage wurde erfolgreich ausgeführt
+				# Abfrage wurde zunächst erfolgreich ausgeführt
 				$ret[0] = 0;
 				$ret['success'] = true;
 				$ret[1] = $ret['query'] = $query;
-				$notice_txt = pg_last_notice($this->dbConn);
-				if (strpos($notice_txt, 'CONTEXT: ') !== false) {
-					$notice_txt = substr($notice_txt, 0, strpos($notice_txt, 'CONTEXT: '));
+
+				# Prüfe ob eine Fehlermeldung in der Notice steckt
+				$last_notice = pg_last_notice($this->dbConn);
+				if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
+					$ret['msg'] = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
 				}
-				$this->notices[] = $notice_txt;
+				$this->notices[] = $last_notice;
 				# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
-				if ($notice_txt != '' AND !in_array($notice_txt, $this->notices)) {
-					if (strpos($notice_txt, '{') !== false AND strpos($notice_txt, '}' !== false)) {
+				if ($last_notice != '' AND !in_array($last_notice, $this->notices)) {
+					if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}' !== false)) {
 						# Parse als JSON String
-						$notice_obj = json_decode(substr($notice_txt, strpos($notice_txt, '{'), strpos($notice_txt, '}') - strpos($notice_txt, '{') + 1), true);
+						$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
 						if (array_key_exists('success', $notice_obj)) {
 							if (!$notice_obj['success']) {
-								$ret[0] = 1;
 								$ret['success'] = false;
 							}
 							if (array_key_exists('msg_type', $notice_obj)) {
 								$ret['type'] = $notice_obj['msg_type'];
 							}
 							if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
-								$ret['msg'] = $ret[1] = $notice_obj['msg'];
+								$ret['msg'] = sql_err_msg('PostgreSQL', $sql, $notice_obj['msg'], $div_id);
 							}
 						}
 					}
@@ -341,8 +309,9 @@ FROM
 						$ret['msg'] = $notice_txt;
 					}
 				}
+
+				# Schreibe Meldungen in Log und Debugfile
 				$this->debug->write("<br>" . $sql, $debuglevel);
-				# 2006-07-04 pk $logfile ersetzt durch $this->logfile
 				if ($logsql) {
 					$this->logfile->write($sql . ';');
 				}
@@ -363,6 +332,11 @@ FROM
 				$this->logfile->write($sql . ';');
 			}
 			$this->debug->write("<br>" . $sql, $debuglevel);
+		}
+		if (!$ret['success']) {
+			$ret[0] = 1;
+			$ret[1] = $ret['msg'];
+			header('error: true');	// damit ajax-Requests das auch mitkriegen
 		}
 		return $ret;
 	}

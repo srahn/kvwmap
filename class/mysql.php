@@ -1028,26 +1028,10 @@ INSERT INTO u_styles2classes (
 			if ($query == 0) {
 				$ret[0]=1;
 				$div_id = rand(1, 99999);
-				$mysql_error = mysql_error($this->dbConn);
-				$ret[1] = "
-					<div style=\"text-align: left;\">
-						Fehler bei der Abfrage der MySQL-Datenbank:<br>" .
-						$mysql_error . "
-						<a href=\"#\" onclick=\"$('#error_details_" . $div_id . "').toggle()\" style=\"float: right;\">Details</a>
-						<div id=\"error_details_" . $div_id . "\" style=\"display: none\">
-							Aufgetreten bei MySQL Anweisung:<br>
-							<textarea id=\"sql_statement_" . $div_id . "\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px; max-height: 600px\">
-								" . $sql . "
-							</textarea><br>
-							<button type=\"button\" onclick=\"
-								copyText = document.getElementById('sql_statement_" . $div_id . "');
-								copyText.select();
-								document.execCommand('copy');
-							\">In Zwischenablage kopieren</button>
-						</div>
-					</div>";
+				$errormessage = mysql_error($this->dbConn);
+				$ret[1] = sql_err_msg('MySQL', $sql, $errormessage, $div_id);
 				if ($logsql) {
-					$this->logfile->write("#" . $mysql_error);
+					$this->logfile->write("#" . $errormessage);
 				}
 				$this->gui->add_message('error', $ret[1]);
 			}
