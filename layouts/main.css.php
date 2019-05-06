@@ -912,7 +912,7 @@ a.menuered:hover {
 	z-index: 1000;
 	margin: 0;
 	height: 0px;
-	width: 177px;
+	width: 100%;
 }
 
 .drawingOrderFormDropZone.ready{
