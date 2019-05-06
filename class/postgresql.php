@@ -38,6 +38,8 @@ class pgdatabase {
 
 	function pgdatabase() {
 		global $debug;
+		global $GUI;
+		$this->gui = $GUI;
 		$this->debug=$debug;
 		$this->loglevel=LOG_LEVEL;
 		$this->defaultloglevel=LOG_LEVEL;
@@ -336,6 +338,7 @@ FROM
 		if (!$ret['success']) {
 			$ret[0] = 1;
 			$ret[1] = $ret['msg'];
+			$this->gui->add_message($ret['type'], $ret['msg']);
 			header('error: true');	// damit ajax-Requests das auch mitkriegen
 		}
 		return $ret;
