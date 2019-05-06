@@ -295,6 +295,7 @@
 			enclosingForm.str_pathy.value = "";
 		}
 		else{
+			measured_distance = 0;
 	  	measuring = false;
 	  	restart_m();
 		}
