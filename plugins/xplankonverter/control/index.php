@@ -1174,21 +1174,28 @@ function go_switch_xplankonverter($go){
 		} break;
 
 		case 'xplankonverter_extract_standardshapes_to_regeln' : {
-			//$GUI->checkCaseAllowed($go);
-			$bereich_gml_id = $_REQUEST['bereich_gml_id'];
-			$konvertierung_id = $_REQUEST['konvertierung_id'];
-			$stelle_id = $_REQUEST['stelle_id'];
+			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+			if ($GUI->konvertierung->get('id') != '') {
+				if (isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
+					$bereich_gml_id = $_REQUEST['bereich_gml_id'];
+					$konvertierung_id = $_REQUEST['konvertierung_id'];
+					$stelle_id = $_REQUEST['stelle_id'];
 
-			$shp_extractor = new Standard_shp_extractor($GUI->pgdatabase,
-																									$konvertierung_id,
-																									$bereich_gml_id,
-																									$stelle_id);
-			# Writes all regeln for all standard shapes for the specific konvertierung_id
-			# into the xplankonverter.regeln list and associates it with bereich_gml_id
-			# Nonstandard shapes should be skipped (if their names differ) or their attributes should be skipped
-			# if they differ
-			$shp_extractor->create_regeln_for_standard_shps();
-		}
+					$shp_extractor = new Standard_shp_extractor($GUI->pgdatabase,
+																											$konvertierung_id,
+																											$bereich_gml_id,
+																											$stelle_id);
+					# Writes all regeln for all standard shapes for the specific konvertierung_id
+					# into the xplankonverter.regeln list and associates it with bereich_gml_id
+					# Nonstandard shapes should be skipped (if their names differ) or their attributes should be skipped
+					# if they differ
+					$shp_extractor->create_regeln_for_standard_shps();
+				}
+				else {
+					$GUI->add_message('error', 'Die Konvertierung mit der ID: ' . $GUI->formvars['konvertierung_id'] . ' wurde nicht gefunden!');
+				}
+			}
+		} break;
 
 		default : {
 			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt

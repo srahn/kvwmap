@@ -1,5 +1,7 @@
 ﻿<?php
 	$strAsteriskRequired="Cần điền đủ thông tin cho những trường có dấu *";  
+	$strMaintable="Main Table";
+	$strFurtherAttributeTable="Table for further parameter";
 	$strDataBankID="Số ID cơ sở dữ liệu*";
 	$strLayerID="Id lớp*";
 	$strName="Tên*";
@@ -33,6 +35,7 @@
 	$strSelectionType="SelectionType";
 	$strClasses="Các lớp";
 	$strID="Số ID";
+	$strIdColumnName = "Column with unique Values";
 	$strAddAutoClasses="Thêm lớp";
 	$strClass="Lớp";
 	$strExpression="Biểu thức";

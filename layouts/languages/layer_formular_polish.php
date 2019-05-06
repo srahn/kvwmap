@@ -2,6 +2,8 @@
 	$strAsteriskRequired="wartości oznaczone * muszą zostać wpisane";
 	$strDataBankID="warstwa ID*";
 	$strName="nazwa*";
+	$strMaintable="Main Table";
+	$strFurtherAttributeTable="Table for further parameter";
 	$strDataType="rodzaj danych*";
 	$strGroup="grupa*";
 	$strPath="ścieżka";
@@ -33,6 +35,7 @@
 	$strClasses="klasa";
 	$strAddAutoClasses="Dodaj klas";
 	$strID="ID";
+	$strIdColumnName = "Column with unique Values";
 	$strClass="klasa";
 	$strExpression="wyrażenie";
 	$strDelete="usuń";

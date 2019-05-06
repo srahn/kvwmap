@@ -338,7 +338,7 @@ class Gml_builder {
                 #$gmlStr .= '<note>single_value: ' . count($single_value) . '</note>';
                 #$gmlStr .= '<note>value_array_keys: ' . count($value_array_keys) . '</note>';
                 // Null-Array-Werte auslassen
-                if($single == null) continue;
+                if($single_value == null) continue;
                 $single_value = array_combine($value_array_keys, $single_value);
                 // generate GML output (!!! recursive !!!)
                 $gml_attrib_str .= $this->generateGmlForAttributes($single_value, $datatype_attribs,$depth-1);
@@ -350,9 +350,9 @@ class Gml_builder {
                 "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
                 // wrap all data-types with their data-type-element-tag
                 $this->wrapWithElement("{$xplan_ns_prefix}{$typeElementName}", $gml_attrib_str));
-								$gml_attrib_str = '';
+                $gml_attrib_str = '';
               }
-							break;
+              break;
             default:
           }
           break;

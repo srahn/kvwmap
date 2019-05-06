@@ -36,6 +36,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 				$this->attributes = $this->{'attributes'.$searchmask_number};   # dieses Attributarray nehmen, weil eine gespeicherte Suche geladen wurde
 			}
 			$last_attribute_index = NULL;
+			$z_index = 500;
 			for($i = 0; $i < count($this->attributes['name']); $i++) {
 				if ($this->attributes['mandatory'][$i] == '' or $this->attributes['mandatory'][$i] > -1) {
 					$operator = $this->formvars[$prefix . 'operator_' . $this->attributes['name'][$i]];
@@ -130,16 +131,21 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 								if ($operator == '') $operator = '=';
 								echo "<input type=\"hidden\" name=\"{$prefix}operator_{$this->attributes['name'][$i]}\" value=\"{$operator}\">";
 							} ?>
-	            <td align="left" width="40%"><?
+	            <td align="left" width="40%" style="position: relative"><?
 	            	switch ($this->attributes['form_element_type'][$i]) {
 	            		case 'Auswahlfeld' : {
-	                  ?><select  
+	                  ?><select 
 	                  <?
 	                  	if($this->attributes['req_by'][$i] != ''){
 												echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['selected_layer_id'].', new Array(\''.implode($this->attributes['name'], "','").'\'), '.$searchmask_number.');" ';
+												$array = '';
+											}
+											else{
+												$array = '[]';
+												echo ' multiple="true" size="1" style="z-index:'.($z_index-=1).';position: absolute;top: 3px;max-height: 300px" onmouseenter="this.size=this.length" onmouseleave="this.size=1;scrollToSelected(this);"';
 											}
 										?> 
-	                  	id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
+	                  	id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i].$array; ?>"><?echo "\n"; ?>
 	                      <option value="">-- <? echo $this->strChoose; ?> --</option><? echo "\n";
 	                      if(is_array($this->attributes['enum_value'][$i][0])){
 	                      	$this->attributes['enum_value'][$i] = $this->attributes['enum_value'][$i][0];

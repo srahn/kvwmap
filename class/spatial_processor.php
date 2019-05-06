@@ -451,19 +451,36 @@ class spatial_processor {
 		if($geom_1 == ''){
 			$geom_1 = 'GEOMETRYCOLLECTION EMPTY';
 		}
-		if($subtract == 1){
-			$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_astext(st_difference(st_geomfromtext('".$geom_1."'), geom)) as geom FROM st_dump((SELECT ST_Polygonize(st_union(ST_Boundary(ST_Buffer(the_geom, ".$width.", 'endcap=flat join=round')), the_geom)) AS buffer_sides FROM (SELECT ST_GeomFromText('".$geom_2."') AS the_geom) AS table1))) as foo";
+		if($subtract == 1)$operation = 'ST_Difference';	else $operation = 'ST_Union';
+		if($side == 'right'){
+			$width = -1 * $width;
+			$reverse = 'ST_Reverse';			// bei rechts die Richtung des Linienzugs umdrehen, damit das Polygon mit ST_Polygonize korrekt gebildet werden kann
 		}
-		else{
-			$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_astext(st_union(st_geomfromtext('".$geom_1."'), geom)) as geom FROM st_dump((SELECT ST_Polygonize(st_union(ST_Boundary(ST_Buffer(the_geom, ".$width.", 'endcap=flat join=round')), the_geom)) AS buffer_sides FROM (SELECT ST_GeomFromText('".$geom_2."') AS the_geom) AS table1))) as foo";
-		}
+		$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg 
+						FROM (
+							SELECT ".$operation."(
+								st_geomfromtext('".$geom_1."'),  
+								ST_CollectionExtract(
+									ST_Polygonize(
+										ARRAY[
+											offset_line,
+											st_makeline(ST_StartPoint(offset_line), ST_StartPoint(the_geom)),
+											the_geom,
+											st_makeline(ST_EndPoint(offset_line), ST_EndPoint(the_geom))
+										]
+									)
+							 ,3)
+							) as geom
+							FROM (SELECT ".$reverse."(ST_OffsetCurve(the_geom, ".$width.", 'join=round')) as offset_line, the_geom 
+										FROM (SELECT ST_GeomFromText('".$geom_2."') AS the_geom) as foo
+							) as fooo
+						) as foooo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
-    	$rs = pg_fetch_array($ret[1]);												# linke Seite
-			if($side == 'right')$rs = pg_fetch_array($ret[1]);		# rechte Seite
+    	$rs = pg_fetch_array($ret[1]);
     }
     return $rs;
   }
@@ -868,7 +885,7 @@ class spatial_processor {
   	}
     $polygons = explode('<gml:Polygon', $geom);
     for($i = 1; $i < count($polygons); $i++){
-    	$wkt_polygon[$i-1] = 'geomfromtext(\'POLYGON(';
+    	$wkt_polygon[$i-1] = 'st_geomfromtext(\'POLYGON(';
     	$rings = explode('<gml:coordinates', $polygons[$i]);
       for($j = 1; $j < count($rings); $j++){
       	if($j > 1){$wkt_polygon[$i-1] .= ',';}

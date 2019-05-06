@@ -57,7 +57,8 @@
 			!(
 				in_array($attributes['form_element_type'][$j], array('SubFormPK', 'SubFormEmbeddedPK', 'SubFormFK', 'dynamicLink')) OR
 				is_numeric($attributes['type'][$j]) OR
-				substr($attributes['type'][$j], 0, 1) == '_'
+				substr($attributes['type'][$j], 0, 1) == '_' OR
+				$attributes['arrangement'][$j] == 2
 			)
 		) {
 			$datapart .= '<a style="font-size: '.$fontsize.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer_id.');">'.$attributes['alias'][$j].'</a>';
@@ -79,7 +80,7 @@
 		$datapart .= '</td></tr></table>';
 		return $datapart;
 	}
-	
+
 	function calendar($type, $field_id, $privileg){
 		$date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss', 'time' => 'hh:mm:ss');
 		$cal = '<a id="caldbl" href="javascript:;" title="('.$date_types[$type].')"'.
@@ -108,6 +109,8 @@
 		$tablename = $attributes['table_name'][$name];									# der Tabellenname des Attributs
 		$oid = $dataset[$tablename.'_oid'];															# die oid des Datensatzes
 		$attribute_privileg = $attributes['privileg'][$j];							# das Recht des Attributs
+		$arrangement = $attributes['arrangement'][$j];
+
 		if($field_name == NULL)$fieldname = $layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j];
 		else $fieldname = $field_name;
 				
@@ -118,9 +121,9 @@
 			$onchange .= 'change_all('.$layer_id.', '.$k.', \''.$layer_id.'_'.$name.'\');';
 		}
 		
-		if($attributes['dependents'][$j] != NULL){
+		if ($attributes['dependents'][$j] != NULL) {
 			$field_class .= ' visibility_changer';
-			$onchange .= 'this.oninput();" oninput="check_visibility('.$layer_id.', this, [\''.implode('\',\'', $attributes['dependents'][$j]).'\'], '.$k.');';
+			$onchange .= 'this.oninput();" oninput="check_visibility(' . $layer_id . ', this, [\'' . implode('\',\'', $attributes['dependents'][$j]) . '\'], ' . $k . ', ' . $arrangement . ');';
 		}
 		
 		if($attributes['vcheck_attribute'][$j] != ''){
@@ -258,6 +261,9 @@
 			switch ($attributes['form_element_type'][$j]){
 				case 'Textfeld' : {
 					$datapart .= '<textarea class="'.$field_class.'" title="'.$alias.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" id="'.$layer_id.'_'.$name.'_'.$k.'" cols="'.$size.'" onchange="'.$onchange.'"';
+					if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
+						$datapart .= ' maxlength="'.$attributes['length'][$j].'" ';
+					}
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' readonly style="display: none"';
 					}
@@ -285,7 +291,7 @@
 					}
 				}break;
 
-				case 'Auswahlfeld' : case 'Auswahlfeld_not_saveable' : {
+				case 'Auswahlfeld' : case 'Auswahlfeld_not_saveable' : {					
 					if(is_array($attributes['dependent_options'][$j])){
 						$enum_value = $attributes['enum_value'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 						$enum_output = $attributes['enum_output'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
@@ -296,7 +302,7 @@
 					}
 					if($attributes['nullable'][$j] != '0')$strPleaseSelect = '-';
 					if($gui->new_entry == true)$strPleaseSelect = '-- '.$gui->strPleaseSelect.' --';
-					$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class);
+					$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class, $attributes['datatype_id'][$j]);
 				}break;
 				
 				case 'Autovervollständigungsfeld' : {
@@ -567,10 +573,10 @@
 						else{
 							$datapart .= '<a href="'.$url.$dokumentpfad.'" '.$target.'><img class="preview_doc" src="'.$url.$thumbname.'"></a>';									
 						}
-						$datapart .= '</td><td>';
+						$datapart .= '<br>';
 						if($attribute_privileg != '0' AND !$lock[$k]){
 							//$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\');"><span>Dokument <br>löschen</span></a>';
-							$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\', '.$layer_id.', \''.$gui->formvars['fromobject'].'\', \''.$gui->formvars['targetobject'].'\', \''.$gui->formvars['targetlayer_id'].'\', \''.$gui->formvars['targetattribute'].'\', \''.$gui->formvars['data'].'\', \''.$gui->formvars['reload'].'\');"><span>Dokument <br>löschen</span></a>';
+							$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\', '.$layer_id.', \''.$gui->formvars['fromobject'].'\', \''.$gui->formvars['targetobject'].'\', \''.$gui->formvars['targetlayer_id'].'\', \''.$gui->formvars['targetattribute'].'\', \''.$gui->formvars['data'].'\', \''.$gui->formvars['reload'].'\');"><span>Dokument löschen</span></a>';
 						}
 						$datapart .= '</td></tr>';
 						$datapart .= '<tr><td colspan="2"><span id="image_original_name">'.$original_name.'</span></td></tr>';
@@ -796,7 +802,7 @@
 		return $datapart;
 	}
 	
-	function Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $req_by, $req, $attributenames, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class){
+	function Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $req_by, $req, $attributenames, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class, $datatype_id = ''){
 		if($privileg == '0' OR $lock){
 			for($e = 0; $e < count($enum_value); $e++){
 				if($enum_value[$e] == $value){
@@ -816,9 +822,10 @@
 			}
 			$datapart .= '<select class="'.$field_class.'" tabindex="1" title="'.$alias.'" style="'.$select_width.'font-size: '.$fontsize.'px"';
 			if($req_by != ''){
-				$onchange .= 'update_require_attribute(\''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode($attributenames, "','").'\'));';
+				$onchange .= 'update_require_attribute(this, \''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode($attributenames, "','").'\'));';
 			}
 			$datapart .= ' onchange="'.$onchange.'" ';
+			if($datatype_id != '')$datapart .= ' data-datatype_id="'.$datatype_id.'" ';
 			$datapart .= 'id="'.$layer_id.'_'.$name.'_'.$k.'" name="'.$fieldname.'">';
 			if($strPleaseSelect)$datapart .= '<option value="">'.$strPleaseSelect.'</option>';
 			for($e = 0; $e < count($enum_value); $e++){
