@@ -97,11 +97,14 @@ hide_versions = function(flst){
 
     <?
 		
-		function sort_flst($a, $b){
-			if($a->Nachfolger != '' AND $b->Nachfolger == '')return -1;		# historische
-			if($a->FlurstNr == '' AND $b->FlurstNr != '')return 1;				# nicht gefundene
-			return strcmp($a->FlurstKennz, $b->FlurstKennz);
+		if (!function_exists('sort_flst')) {
+			function sort_flst($a, $b){
+				if($a->Nachfolger != '' AND $b->Nachfolger == '')return -1;		# historische
+				if($a->FlurstNr == '' AND $b->FlurstNr != '')return 1;				# nicht gefundene
+				return strcmp($a->FlurstKennz, $b->FlurstKennz);
+			}
 		}
+		$flst_array = array();
 		
     for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
       if($this->qlayerset[$i]['attributes']['privileg'][$this->qlayerset[$i]['attributes']['name'][$j]] != ''){
