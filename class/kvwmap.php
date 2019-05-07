@@ -7745,9 +7745,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->formvars['selected_layer_id'] = $this->formvars['id'];
 		}
 
-		if ($this->formvars['connectiontype'] == 6){
-			if($this->formvars['connection'] != ''){
-				if($this->formvars['pfad'] != ''){
+		if ($this->formvars['connectiontype'] == 6) {
+			if ($this->formvars['connection'] != '') {
+				if ($this->formvars['pfad'] != '') {
 					#---------- Speichern der Layerattribute -------------------
 					$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 					$layerdb->setClientEncoding();
@@ -16387,10 +16387,17 @@ class db_mapObj{
 	}
 
 	function getPathAttributes($database, $path) {
+		$pathAttributes = array();
 		if ($path != '') {
-			$attribute = $database->getFieldsfromSelect($path);
-			return $attribute;
+			$ret = $database->getFieldsfromSelect($path);
+			if ($ret[0]) {
+				$this->GUI->add_message('error', $ret[1]);
+			}
+			else {
+				$pathAttributes = $ret[1]; # Gebe die Attribute zurück
+			}
 		}
+		return $pathAttributes;
 	}
 
   function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $only_current_enums = false){
@@ -16668,7 +16675,7 @@ class db_mapObj{
 	}
 
 	function save_postgis_attributes($layer_id, $attributes, $maintable, $schema){
-		for($i = 0; $i < count($attributes); $i++){
+		for ($i = 0; $i < count($attributes); $i++) {
 			if($attributes[$i] == NULL)continue;
 			if($attributes[$i]['nullable'] == '')$attributes[$i]['nullable'] = 'NULL';
 			if($attributes[$i]['length'] == '')$attributes[$i]['length'] = 'NULL';
@@ -17141,98 +17148,125 @@ class db_mapObj{
 		}
 	}
 
-  function updateLayer($formvars){
+	function updateLayer($formvars) {
 		global $supportedLanguages;
-  	$formvars['pfad'] = str_replace(array("\r\n", "\n"), '', $formvars['pfad']);
+		$formvars['pfad'] = str_replace(array("\r\n", "\n"), '', $formvars['pfad']);
+		$formvars['Layer_ID'] = $formvars['id'];
 
-    $sql = 'UPDATE layer SET ';
-    if($formvars['id'] != ''){
-      $sql.="Layer_ID = " . $formvars['id'].", ";
-    }
-    $sql .= "Name = '" . $formvars['Name']."', ";
-		foreach($supportedLanguages as $language){
-			if($language != 'german'){
-				$sql .= "`Name_" . $language."` = '" . $formvars['Name_'.$language]."', ";
+		$attribute_sets = array();
+
+		# Scheibt alle unterstützten Language Attribute, außer german
+		foreach($supportedLanguages as $language) {
+			if ($language != 'german') {
+				$attribute_sets[] = "`Name_" . $language . "` = '" . $formvars['Name_'.$language] . "'";
 			}
 		}
-    $sql .= "alias = '" . $formvars['alias']."', ";
-    $sql .= "Datentyp = '" . $formvars['Datentyp']."', ";
-    $sql .= "Gruppe = '" . $formvars['Gruppe']."', ";
-    $sql .= "pfad = '" . $formvars['pfad']."', ";
-    $sql .= "maintable = '" . $formvars['maintable']."', ";
-    $sql .= "further_attribute_table = '" . $formvars['further_attribute_table'] . "', ";
-    $sql .= "id_column = '" . $formvars['id_column'] . "', ";
-    $sql .= "Data = '" . $formvars['Data']."', ";
-    $sql .= "`schema` = '" . $formvars['schema']."', ";
-    $sql .= "document_path = '" . $formvars['document_path']."', ";
-		$sql .= "document_url = '" . $formvars['document_url']."', ";
-    $sql .= "tileindex = '" . $formvars['tileindex']."', ";
-    $sql .= "tileitem = '" . $formvars['tileitem']."', ";
-    $sql .= "labelangleitem = '" . $formvars['labelangleitem']."', ";
-    $sql .= "labelitem = '" . $formvars['labelitem']."', ";
-    if ($formvars['labelmaxscale']!='') {
-      $sql .= "labelmaxscale = " . $formvars['labelmaxscale'].", ";
-    }
-    if ($formvars['labelminscale']!='') {
-      $sql .= "labelminscale = " . $formvars['labelminscale'].", ";
-    }
-    $sql .= "labelrequires = '" . $formvars['labelrequires']."', ";
-		$sql .= "postlabelcache = '" . $formvars['postlabelcache']."', ";
-    $sql .= "`connection` = '" . $formvars['connection']."', ";
-    $sql .= "`printconnection` = '" . $formvars['printconnection']."', ";
-    $sql .= "connectiontype = '" . $formvars['connectiontype']."', ";
-    $sql .= "classitem = '" . $formvars['classitem']."', ";
-		$sql .= "classification = '" . $formvars['layer_classification']."', ";
-    $sql .= "filteritem = '" . $formvars['filteritem']."', ";
-		if($formvars['cluster_maxdistance'] == '')$formvars['cluster_maxdistance'] = 'NULL';
-		$sql .= "cluster_maxdistance = " . $formvars['cluster_maxdistance'].", ";
-    $sql .= "tolerance = '" . $formvars['tolerance']."', ";
-    $sql .= "toleranceunits = '" . $formvars['toleranceunits']."', ";
-    $sql .= "epsg_code = '" . $formvars['epsg_code']."', ";
-    $sql .= "template = '" . $formvars['template']."', ";
-    $sql .= "queryable = '" . $formvars['queryable']."', ";
-    if($formvars['transparency'] == ''){$formvars['transparency'] = 'NULL';}
-    $sql .= "transparency = " . $formvars['transparency'].", ";
-    if($formvars['drawingorder'] == ''){$formvars['drawingorder'] = 'NULL';}
-    $sql .= "drawingorder = " . $formvars['drawingorder'].", ";
-		if($formvars['legendorder'] == ''){$formvars['legendorder'] = 'NULL';}
-    $sql .= "legendorder = " . $formvars['legendorder'].", ";
-    if($formvars['minscale'] == ''){$formvars['minscale'] = 'NULL';}
-    $sql .= "minscale = " . $formvars['minscale'].", ";
-    if($formvars['maxscale'] == ''){$formvars['maxscale'] = 'NULL';}
-    $sql .= "maxscale = " . $formvars['maxscale'].", ";
-		if($formvars['symbolscale'] == ''){$formvars['symbolscale'] = 'NULL';}
-    $sql .= "symbolscale = " . $formvars['symbolscale'].", ";
-    $sql .= "offsite = '" . $formvars['offsite']."', ";
-		if($formvars['requires'] == ''){$formvars['requires'] = 'NULL';}
-		$sql .= "requires = " . $formvars['requires'].", ";
-    $sql .= "ows_srs = '" . $formvars['ows_srs']."', ";
-    $sql .= "wms_name = '" . $formvars['wms_name']."', ";
-    $sql .= "wms_server_version = '" . $formvars['wms_server_version']."', ";
-    $sql .= "wms_format = '" . $formvars['wms_format']."', ";
-    $sql .= "wms_connectiontimeout = '" . $formvars['wms_connectiontimeout']."', ";
-    $sql .= "wms_auth_username = '" . $formvars['wms_auth_username']."', ";
-    $sql .= "wms_auth_password = '" . $formvars['wms_auth_password']."', ";
-    $sql .= "wfs_geom = '" . $formvars['wfs_geom']."', ";
-    $sql .= "selectiontype = '" . $formvars['selectiontype']."',";
-    $sql .= "querymap = '" . $formvars['querymap']."',";
-    $sql .= "processing = '" . $formvars['processing']."',";
-    $sql .= "kurzbeschreibung = '" . $formvars['kurzbeschreibung']."',";
-    $sql .= "datenherr = '" . $formvars['datenherr']."',";
-    $sql .= "metalink = '" . $formvars['metalink']."', ";
-		$sql .= "status = '" . $formvars['status']."', ";
-		$sql .= "trigger_function = '" . $formvars['trigger_function']."', ";
-		if($formvars['sync'] == '')$formvars['sync'] = 0;
-		$sql .= "sync = '" . $formvars['sync']."', ";
-		if($formvars['listed'] == '')$formvars['listed'] = 0;
-		$sql .= "listed = '" . $formvars['listed']."'";
-    $sql .= " WHERE Layer_ID = " . $formvars['selected_layer_id'];
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>" . $sql,4);
-    $query=mysql_query($sql);
-		 if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql, $this->connection); return 0; }
-    if ($query==0) { $this->GUI->add_message('error', err_msg($PHP_SELF, __LINE__, $sql, $formvars['connection'])); return 0; }
-  }
+
+		# Schreibt alle Attribute, die nur geschrieben werden sollen wenn Wert != '' ist
+		foreach(
+			array(
+				'Layer_ID',
+				'labelmaxscale',
+				'labelminscale'
+			) AS $key
+		) {
+			if ($formvars[$key]	!= '') {
+				$attribute_sets[] = "`" . $key . "` = '" . $formvars[$key] . "'";
+			}
+		}
+
+		# Schreibt alle Attribute, die NULL bekommen sollen wenn Wert == '' ist
+		foreach(
+			array(
+				'cluster_maxdistance',
+				'transparency',
+				'drawingorder',
+				'legendorder',
+				'minscale',
+				'maxscale',
+				'symbolscale',
+				'requires'
+			) AS $key
+		) {
+			$attribute_sets[] = $key . " = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
+		}
+
+		# Schreibt alle Attribute, die '0' bekommen sollen wenn Wert == '' ist
+		foreach(
+			array(
+				'sync',
+				'listed'
+			) AS $key
+		) {
+			$attribute_sets[] = $key . " = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
+		}
+
+		# Schreibt alle Attribute, die immer geschrieben werden sollen, egal wie der Wert ist
+		foreach(
+			array(
+				'Name',
+				'alias',
+				'Datentyp',
+				'Gruppe',
+				'pfad',
+				'maintable',
+				'Data',
+				'schema',
+				'document_path',
+				'document_url',
+				'tileindex',
+				'tileitem',
+				'labelangleitem',
+				'labelitem',
+				'offsite',
+				'labelrequires',
+				'postlabelcache',
+				'connection',
+				'printconnection',
+				'connectiontype',
+				'classitem',
+				'classification',
+				'filteritem',
+				'tolerance',
+				'toleranceunits',
+				'epsg_code',
+				'template',
+				'queryable',
+				'ows_srs',
+				'wms_name',
+				'wms_server_version',
+				'wms_format',
+				'wms_connectiontimeout',
+				'wms_auth_username',
+				'wms_auth_password',
+				'wfs_geom',
+				'selectiontype',
+				'querymap',
+				'processing',
+				'kurzbeschreibung',
+				'datenherr',
+				'metalink',
+				'status',
+				'trigger_function'
+			) AS $key
+		) {
+			$attribute_sets[] = "`" . $key . "` = '" . $formvars[$key] . "'";
+		}
+
+		$sql = "
+			UPDATE
+				layer
+			SET
+				" . implode(', ', $attribute_sets) . "
+			WHERE
+				Layer_ID = " . $formvars['selected_layer_id'] . "
+		";
+		#echo '<br>Update Layer mit SQL: ' . $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>" . $sql,4);
+		$query=mysql_query($sql);
+		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql, $this->connection); return 0; }
+		if ($query==0) { $this->GUI->add_message('error', sql_err_msg($PHP_SELF, __LINE__, $sql, $formvars['connection'])); return 0; }
+	}
 
   function newLayer($layerdata) {
 		global $supportedLanguages;
@@ -17583,7 +17617,7 @@ class db_mapObj{
 				`visible`,
 				`vcheck_attribute`,
 				`vcheck_operator`,
-				`vcheck_value`,				
+				`vcheck_value`,
 				`arrangement`,
 				`labeling`
 			FROM

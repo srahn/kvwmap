@@ -204,11 +204,11 @@ else {
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTelephone;?></th>
-					<td style="border-bottom:1px solid #C3C7C3"><input name="phon" type="text" value="<?php echo $this->formvars['phon']; ?>" size="15" maxlength="15"></td>
+					<td style="border-bottom:1px solid #C3C7C3"><input name="phon" type="text" value="<?php echo $this->formvars['phon']; ?>" size="25" maxlength="25"></td>
 				</tr>
 					<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEmail;?></th>
-					<td style="border-bottom:1px solid #C3C7C3"><input name="email" type="text" value="<?php echo $this->formvars['email']; ?>" size="30" maxlength="50"></td>
+					<td style="border-bottom:1px solid #C3C7C3"><input name="email" type="text" value="<?php echo $this->formvars['email']; ?>" size="50" maxlength="100"></td>
 				</tr>
 			</table>
 		</td>

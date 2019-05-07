@@ -1024,7 +1024,6 @@ INSERT INTO u_styles2classes (
 		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
 			#echo '<br>sql in execSQL: ' . $sql;
 			$query = mysql_query($sql, $this->dbConn);
-			#echo $sql;
 			if ($query == 0) {
 				$ret[0]=1;
 				$div_id = rand(1, 99999);
