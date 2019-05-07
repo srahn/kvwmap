@@ -26,6 +26,16 @@ function get_select_parts($select){
   return $column;
 }
 
+function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
+	if($last)$word_pos = strripos($str, $word);
+	else $word_pos = stripos($str, $word);
+	if($word_pos !== false){
+		$str_from_word_pos = substr($str, $word_pos+strlen($word));
+		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+		return $parts[0];
+	}
+}
+
 
 class GUI {
 
@@ -1146,6 +1156,17 @@ class pgdatabase {
 		}
 	}	
 
+	function pg_field_schema($table_oid){
+		if($table_oid != ''){
+			$sql = "select nspname as schema from pg_class c, pg_namespace ns
+						where c.relnamespace = ns.oid 
+						and c.oid = ".$table_oid;
+			$ret = $this->execSQL($sql, 4, 0);
+			if($ret[0]==0)$ret = pg_fetch_assoc($ret[1]);
+			return $ret['schema'];
+		}
+	}
+
 	function getFieldsfromSelect($select, $assoc = false) {
 		$err_msgs = array();
 		$sql = "SET client_min_messages='log';SET log_duration = false;SET debug_print_parse=true;".$select." LIMIT 0";			# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
@@ -1261,6 +1282,16 @@ class pgdatabase {
 		}
 		return $ret;
 	}
+	
+	function get_table_alias_names($query_plan){
+		$table_info = explode(":eref \n         {ALIAS \n         ", $query_plan);
+		for($i = 1; $i < count($table_info); $i++){
+			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
+			$table_oid = get_first_word_after($table_info[$i], ':relid');
+			$table_alias_names[$table_oid] = $table_alias;
+		}
+		return $table_alias_names;
+	}	
 
   function eliminate_star($query, $offset){
   	if(substr_count(strtolower($query), ' from ') > 1){
