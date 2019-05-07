@@ -10438,7 +10438,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			if(!in_array($filetype, array('tiff', 'tif', 'geotif'))){
 				switch ($after_import_action) {
 					case 'use_geometry' : {
-						echo '&nbsp;=>&nbsp;<a href="javascript:void(0);" onclick="javascript:ahah(\'index.php\', \'go=spatial_processing&path1=\'+enclosingForm.pathwkt.value+\'&operation=add_geometry&resulttype=svgwkt&geom_from_layer='.$layer_id.'\', new Array(enclosingForm.result, \'\'), new Array(\'setvalue\', \'execute_function\'));">Geometrie übernehmen</a>';
+						echo '&nbsp;=>&nbsp;<a href="javascript:void(0);" onclick="enclosingForm.last_doing.value=\'add_geom\';enclosingForm.secondpoly.value=\'true\';ahah(\'index.php\', \'go=spatial_processing&path1=\'+enclosingForm.pathwkt.value+\'&operation=add_geometry&resulttype=svgwkt&geom_from_layer='.$layer_id.'\', new Array(enclosingForm.result, \'\'), new Array(\'setvalue\', \'execute_function\'));">Geometrie übernehmen</a>';
 					}break;
 					
 					default : {
