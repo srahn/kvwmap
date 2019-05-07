@@ -81,7 +81,7 @@ class spatial_processor {
   	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_difference(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."')) as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0, true);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_assoc($ret[1]);
@@ -93,7 +93,7 @@ class spatial_processor {
   	$sql = "SELECT round(st_area_utm(st_geomfromtext('".$geom."'), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")::numeric, 2)";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0, true);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
@@ -693,21 +693,26 @@ class spatial_processor {
     return $WKT;
   }	
   
-	function isvalid($pathwkt){
-    if($pathwkt != ''){
-    	$sql = "SELECT st_isvalid(st_geomfromtext('".$pathwkt."'))";
-    	$ret = $this->pgdatabase->execSQL($sql, 4, 0);
-    	$valid = pg_fetch_row($ret[1]);
-			if($valid[0] == 'f'){
-				$sql = "SELECT st_isvalidreason(st_geomfromtext('".$pathwkt."'))";
-				$ret = $this->pgdatabase->execSQL($sql, 4, 0);
-    		$reason = pg_fetch_row($ret[1]);
-				$msg='Die Geometrie des Polygons ist fehlerhaft:<br>'.$reason[0];
-				return 'message(\''.$msg.'\');';
+	function isvalid($pathwkt) {
+		if ($pathwkt != '') {
+			if ($pathwkt == "\\") {
+				$msg .= 'Die Geometrie des Polygons ist fehlerhaft! Laden Sie den Geometrieeditor neu und vermeiden Sie Selbstüberschneidungen beim Zeichnen.';
 			}
-    }
+			else {
+				$sql = "SELECT st_isvalid(st_geomfromtext('".$pathwkt."'))";
+				$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+				$valid = pg_fetch_row($ret[1]);
+				if ($valid[0] == 'f') {
+					$sql = "SELECT st_isvalidreason(st_geomfromtext('".$pathwkt."'))";
+					$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+					$reason = pg_fetch_row($ret[1]);
+					$msg = 'Die Geometrie des Polygons ist fehlerhaft:<br>' . $reason[0];
+				}
+			}
+		}
+		return ($msg != '' ? "message('" . $msg . "');" : "");
 	}
-	
+
   function validize_polygon_svg($path){
   	$explosion = explode('M', $path);
     for($i = 0; $i < count($explosion); $i++){

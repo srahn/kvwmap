@@ -338,8 +338,11 @@ FROM
 		if (!$ret['success']) {
 			$ret[0] = 1;
 			$ret[1] = $ret['msg'];
-			$this->gui->add_message($ret['type'], $ret['msg']);
-			header('error: true');	// damit ajax-Requests das auch mitkriegen
+			if (!$suppress_error_msg) {
+				$ret[0] = 0;
+				$this->gui->add_message($ret['type'], $ret['msg']);
+				header('error: true');	// damit ajax-Requests das auch mitkriegen
+			}
 		}
 		return $ret;
 	}
