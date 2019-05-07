@@ -10901,6 +10901,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->formvars['sellayer'] = $Stelle->getLayers(NULL, 'Name');
       $this->formvars['selusers'] = $Stelle->getUser();
 			$this->formvars['selparents'] = $Stelle->getParents("ORDER BY `Bezeichnung`"); // formatted mysql resultset, ordered by Bezeichnung
+			$this->formvars['default_user_id'] = $this->stellendaten['default_user_id'];
 			$where = 'ID != ' . $this->formvars['selected_stelle_id'];
     }
 

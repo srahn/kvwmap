@@ -2,6 +2,7 @@
   $strTitle="Stäeeditor";
   $strAsteriskRequired="Weerte mit een * mööst du indragen";
   $strDataBankID="Datenbank ID";
+	$strDefaultUserID="Standardnutzer ID";
   $strTask="Nomen*";
   $strReferenceMapID="Referenzkoort ID*";
   $strMaxExtent="Max Utmoot*";

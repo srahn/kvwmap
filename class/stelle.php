@@ -285,8 +285,14 @@ class stelle {
 	}
 
 	function getstellendaten() {
-		$sql ='SELECT * FROM stelle';
-		$sql.=' WHERE ID = '.$this->id;
+		$sql = "
+			SELECT
+				*
+			FROM
+				stelle
+			WHERE
+				ID = " . $this->id . "
+		";
 		$this->debug->write("<p>file:stelle.php class:stelle->getstellendaten - Abfragen der Stellendaten<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -397,11 +403,12 @@ class stelle {
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
 				`ows_srs` = '" . $stellendaten['ows_srs'] . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
-				`check_client_ip` =				'" . ($stellendaten['checkClientIP'] 				== '1'	? "1" : "0") . "',
-				`check_password_age` =		'" . ($stellendaten['checkPasswordAge'] 		== '1'	? "1" : "0") . "',
-				`use_layer_aliases` = 		'" . ($stellendaten['use_layer_aliases'] 		== '1'	? "1" : "0") . "',
-				`hist_timestamp` = 				'" . ($stellendaten['hist_timestamp'] 			== '1'	? "1" : "0") . "',
-				`allowed_password_age` = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "'
+				`check_client_ip` =				'" . ($stellendaten['checkClientIP'] 			== '1'	? "1" : "0") . "',
+				`check_password_age` =		'" . ($stellendaten['checkPasswordAge'] 	== '1'	? "1" : "0") . "',
+				`use_layer_aliases` = 		'" . ($stellendaten['use_layer_aliases'] 	== '1'	? "1" : "0") . "',
+				`hist_timestamp` = 				'" . ($stellendaten['hist_timestamp'] 		== '1'	? "1" : "0") . "',
+				`allowed_password_age` = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "',
+				`default_user_id` = " . $stellendaten['default_user_id'] . "
 			WHERE
 				ID = " . $this->id . "
 		";
