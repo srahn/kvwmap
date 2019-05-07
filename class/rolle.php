@@ -10,8 +10,10 @@ class rolle {
 	static $hist_timestamp;
 	static $layer_params;
 
-	function rolle($user_id,$stelle_id,$database) {
+	function rolle($user_id, $stelle_id, $database) {
 		global $debug;
+		global $GUI;
+		$this->gui_object = $GUI;
 		$this->debug=$debug;
 		$this->user_id=$user_id;
 		$this->stelle_id=$stelle_id;
@@ -388,7 +390,7 @@ class rolle {
 			$this->zoomall = in_array('zoomall', $buttons);
 			$this->recentre = in_array('recentre', $buttons);
 			$this->jumpto = in_array('jumpto', $buttons);
-			$this->coord_query = in_array('coord_query', $buttons);			
+			$this->coord_query = in_array('coord_query', $buttons);
 			$this->query = in_array('query', $buttons);
 			$this->queryradius = in_array('queryradius', $buttons);
 			$this->polyquery = in_array('polyquery', $buttons);
@@ -398,10 +400,13 @@ class rolle {
 			$this->freetext = in_array('freetext', $buttons);
 			$this->freearrow = in_array('freearrow', $buttons);
 			$this->gps = in_array('gps', $buttons);
-			$this->geom_buttons = explode(',', $rs['geom_buttons']);
+			$this->geom_buttons = explode(',', str_replace(' ', '', $rs['geom_buttons']));
 			return 1;
-		}else return 0;
-  }
+		}
+		else {
+			return 0;
+		}
+	}
 
 	function get_layer_params($selectable_layer_params, $pgdatabase) {
 		$layer_params = array();
@@ -1143,11 +1148,11 @@ class rolle {
 		return 1;
 	}
 
-	function setRollen($user_id,$stellen) {
+	function setRollen($user_id, $stellen) {
 		# trägt die Stellen für einen Benutzer ein.
 		$sql = "
 			INSERT IGNORE INTO rolle (user_id, stelle_id, epsg_code, minx, miny, maxx, maxy)
-			SELECT" .
+			SELECT " .
 				$user_id . ",
 				ID,
 				epsg_code,
@@ -1158,29 +1163,50 @@ class rolle {
 			FROM
 				stelle
 			WHERE
-				ID IN (" . implode(',', $stellen) . ")
+				ID IN (" . implode(', ', $stellen) . ")
 		";
 		#echo '<br>'.$sql;
 		$this->debug->write("<p>file:rolle.php class:rolle function:setRollen - Einfügen neuen Rollen:<br>" . $sql, 4);
-		$query = mysql_query($sql,$this->database->dbConn);
-		if ($query == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$ret = $this->database->execSQL($sql, 4, 0);
+		if (!$ret['success']) {
+			$this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . $ret[1], 4);
+			return 0;
+		}
 		return 1;
 	}
 
-	function deleteRollen($user_id,$stellen) {
+	function deleteRollen($user_id, $stellen) {
 		# löscht die übergebenen Stellen für einen Benutzer.
-		for ($i=0;$i<count($stellen);$i++) {
-			$sql ='DELETE FROM `rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i];
+		for ($i = 0; $i < count($stellen); $i++) {
+			$sql = "
+				DELETE FROM `rolle`
+				WHERE
+					`user_id` = " . $user_id . ' AND
+					`stelle_id` = ' . $stellen[$i] . "
+			";
 			#echo '<br>'.$sql;
-			$this->debug->write("<p>file:rolle.php class:rolle function:deleteRollen - Löschen der Rollen:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$this->debug->write("<p>file:rolle.php class:rolle function:deleteRollen - Löschen der Rollen:<br>" . $sql, 4);
+			$ret = $this->database->execSQL($sql, 4, 0);
+			if (!$ret['success']) {
+				$this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . $ret[1], 4);
+				return 0;
+			}
 			# rolle_nachweise
-			$sql ='DELETE FROM `rolle_nachweise` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i];
-			#echo '<br>'.$sql;
-			$this->debug->write("<p>file:rolle.php class:rolle function:deleteRollen - Löschen der Rollen:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			if ($this->gui_object->plugin_loaded('nachweisverwaltung')) {
+				$sql = "
+					DELETE FROM `rolle_nachweise`
+					WHERE
+						`user_id` = " . $user_id . " AND
+						`stelle_id` = " . $stellen[$i] . "
+				";
+				#echo '<br>'.$sql;
+				$this->debug->write("<p>file:rolle.php class:rolle function:deleteRollen - Löschen der Rollen:<br>".$sql,4);
+				$ret = $this->database->execSQL($sql, 4, 0);
+				if (!$ret['success']) {
+					$this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . $ret[1], 4);
+					return 0;
+				}
+			}
 		}
 		return 1;
 	}

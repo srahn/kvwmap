@@ -36,6 +36,8 @@ class database {
 
   function database() {
     global $debug;
+		global $GUI;
+		$this->gui = $GUI;
     $this->debug=$debug;
     $this->loglevel=LOG_LEVEL;
  		$this->defaultloglevel=LOG_LEVEL;
@@ -1004,58 +1006,51 @@ INSERT INTO u_styles2classes (
   	}
   }
 
-  function execSQL($sql, $debuglevel, $loglevel) {
-  	switch ($this->loglevel) {
-  		case 0 : {
-  			$logsql=0;
-  		} break;
-  		case 1 : {
-  			$logsql=1;
-  		} break;
-  		case 2 : {
-  			$logsql=$loglevel;
-  		} break;
-  	}
-    # SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
-    # wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
-    # (lesend immer, aber schreibend nur mit DBWRITE=1)
-    if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
+	function execSQL($sql, $debuglevel, $loglevel) {
+		switch ($this->loglevel) {
+			case 0 : {
+				$logsql=0;
+			} break;
+			case 1 : {
+				$logsql=1;
+			} break;
+			case 2 : {
+				$logsql=$loglevel;
+			} break;
+		}
+		# SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
+		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
+		# (lesend immer, aber schreibend nur mit DBWRITE=1)
+		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
 			#echo '<br>sql in execSQL: ' . $sql;
-      $query=mysql_query($sql,$this->dbConn);
-      #echo $sql;
-      if ($query==0) {
-        $ret[0]=1;
+			$query = mysql_query($sql, $this->dbConn);
+			if ($query == 0) {
+				$ret[0]=1;
 				$div_id = rand(1, 99999);
-				$ret[1] = mysql_error($this->dbConn) . " <a href=\"#\" onclick=\"$('#error_details_" . $div_id . "').toggle()\">Details</a><div id=\"error_details_" . $div_id . "\" style=\"display: none\">\n" .
-					"\nAufgetreten bei MySQL Anweisung:<br>\n" .
-					"<textarea id=\"sql_statement_" . $div_id . "\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px; max-height: 600px\">" . $sql . "</textarea><br>\n" .
-					"<button type=\"button\" onclick=\"
-							copyText = document.getElementById('sql_statement_" . $div_id . "');
-							copyText.select();
-							document.execCommand('copy');
-						\">In Zwischenablage kopieren</button></div>";
-        $this->debug->write($ret[1], $debuglevel);
-        if ($logsql) {
-          $this->logfile->write("#".$ret[1]);
-        }
-      }
-      else {
-        $ret[0] = 0;
+				$errormessage = mysql_error($this->dbConn);
+				$ret[1] = sql_err_msg('MySQL', $sql, $errormessage, $div_id);
+				if ($logsql) {
+					$this->logfile->write("#" . $errormessage);
+				}
+				$this->gui->add_message('error', $ret[1]);
+			}
+			else {
+				$ret[0] = 0;
 				$ret['success'] = true;
-        $ret[1] = $ret['query'] = $query;
-        if ($logsql) {
-          $this->logfile->write($sql.';');
-        }
-        $this->debug->write(date('H:i:s')."<br>".$sql,$debuglevel);
-      }
-      $ret[2] = $sql;
-    }
-    else {
-    	if ($logsql) {
-    		$this->logfile->write($sql.';');
-    	}
-    	$this->debug->write("<br>".$sql,$debuglevel);
-    }
-    return $ret;
-  }
+				$ret[1] = $ret['query'] = $query;
+				if ($logsql) {
+					$this->logfile->write($sql . ';');
+				}
+				$this->debug->write(date('H:i:s')."<br>" . $sql, $debuglevel);
+			}
+			$ret[2] = $sql;
+		}
+		else {
+			if ($logsql) {
+				$this->logfile->write($sql . ';');
+			}
+			$this->debug->write("<br>" . $sql, $debuglevel);
+		}
+		return $ret;
+	}
 }
