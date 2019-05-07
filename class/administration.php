@@ -178,7 +178,7 @@ class administration{
 							$sql = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $sql);
 							$sql = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $sql);
 							if ($database_type == 'mysql') {
-								$result = $this->database->exec_commands($sql, NULL, NULL);	# mysql
+								$result = $this->database->exec_commands($sql, 4, 0, false, true);	# mysql
 							}
 							else {
 								if (stripos($sql, '-- exec statements separated') !== false) {
@@ -193,7 +193,7 @@ class administration{
 								foreach ($sql_parts AS $sql) {
 									$sql = trim($sql);
 									if ($sql != '') {
-										$result = $this->pgdatabase->execSQL($sql, 0, 0, false);	# postgresql
+										$result = $this->pgdatabase->execSQL($sql, 4, 0, true);	# postgresql
 									}
 								}
 							}
@@ -220,7 +220,7 @@ class administration{
 							'" . $file . "'
 						);
 					";
-					$result=$this->database->execSQL($sql,0, 0);
+					$result=$this->database->execSQL($sql, 4, 0);
 				}
 			}
 		}

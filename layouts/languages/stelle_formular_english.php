@@ -2,7 +2,7 @@
   $strTitle="Task Editor";
   $strAsteriskRequired="Fields marked with an asterisk * are required";
   $strDataBankID="Data bank ID";
-	$strDefaultUserID="Standard user ID";
+	$strDefaultUserID="Standard user";
   $strTask="Task*";
   $strReferenceMapID="Reference map ID*";
   $strMaxExtent="Max Extent*";

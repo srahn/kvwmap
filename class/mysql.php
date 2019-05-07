@@ -914,8 +914,8 @@ INSERT INTO u_styles2classes (
     return mysql_close($this->dbConn);
   }
 
-	function exec_commands($commands_string, $search, $replace, $replace_constants = false) {
-		if($commands_string != ''){
+	function exec_commands($commands_string, $search, $replace, $replace_constants = false, $suppress_err_msg = false) {
+		if ($commands_string != '') {
 			foreach (explode(';' . chr(10), $commands_string) as $query2) { // verschiedene Varianten des Zeilenumbruchs berücksichtigen
 				foreach (explode(';' . chr(13), $query2) as $query) {
 					$query_to_execute = '';
@@ -936,8 +936,8 @@ INSERT INTO u_styles2classes (
 							}
 						}
 						#echo '<br>exec sql: ' . $query_to_execute;
-						$ret=$this->execSQL($query_to_execute, 0, 0);
-						if($ret[0] == 1) {
+						$ret = $this->execSQL($query_to_execute, 0, 0, $suppress_err_msg);
+						if ($ret[0] == 1) {
 							return $ret;
 						}
 					}
@@ -1006,7 +1006,7 @@ INSERT INTO u_styles2classes (
   	}
   }
 
-	function execSQL($sql, $debuglevel, $loglevel) {
+	function execSQL($sql, $debuglevel, $loglevel, $suppress_error_msg = false) {
 		switch ($this->loglevel) {
 			case 0 : {
 				$logsql=0;
@@ -1032,7 +1032,9 @@ INSERT INTO u_styles2classes (
 				if ($logsql) {
 					$this->logfile->write("#" . $errormessage);
 				}
-				$this->gui->add_message('error', $ret[1]);
+				if (!$suppress_error_msg) {
+					$this->gui->add_message('error', $ret[1]);
+				}
 			}
 			else {
 				$ret[0] = 0;

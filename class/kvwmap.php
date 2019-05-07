@@ -11007,15 +11007,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
     }
-    if($this->formvars['stelle'] != ''){
+    if ($this->formvars['stelle'] != '') {
       $stelle = new stelle($this->formvars['stelle'], $this->database);
       $this->layerdaten = $stelle->getLayers(NULL, 'Name');
-      if($this->formvars['selected_layers'] != ''){
+      if ($this->formvars['selected_layers'] != '') {
         $this->selected_layers = explode(', ', $this->formvars['selected_layers']);
         $layerdb = $this->mapDB->getlayerdatabase($this->selected_layers[0], $this->Stelle->pgdbhost);
         $this->attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[0], true);
         $poly_id = $this->mapDB->getPolygonID($this->formvars['stelle'],$this->selected_layers[0]);
-        for($i = 1; $i < count($this->selected_layers); $i++){
+        for ($i = 1; $i < count($this->selected_layers); $i++) {
           $layerdb = $this->mapDB->getlayerdatabase($this->selected_layers[$i], $this->Stelle->pgdbhost);
           $attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[$i], true);
           $this->attributes = array_values(array_uintersect($this->attributes, $attributes, "compare_names"));
@@ -11025,16 +11025,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           }
           $poly_id = $next_poly_id;
         }
-				for($i = 0; $i < count($this->attributes); $i++){
-					$this->formvars['operator_'.$this->attributes[$i]['name']] = '';
-					$this->formvars['value_'.$this->attributes[$i]['name']] = '';
-        }
-        for($j = 0; $j < count($this->selected_layers); $j++){
-          $filter = $this->mapDB->readAttributeFilter($this->formvars['stelle'], $this->selected_layers[$j]);
-          for($i = 0; $i < count($filter); $i++){
-            if($this->formvars['value_'.$filter[$i]['attributname']] == NULL OR
-              ($this->formvars['value_'.$filter[$i]['attributname']] == $filter[$i]['attributvalue'] AND
-               $this->formvars['operator_'.$filter[$i]['attributname']] == $filter[$i]['operator'])){
+				for ($i = 0; $i < count($this->attributes); $i++) {
+					$this->formvars['operator_' . $this->attributes[$i]['name']] = '';
+					$this->formvars['value_' . $this->attributes[$i]['name']] = '';
+				}
+				for ($j = 0; $j < count($this->selected_layers); $j++){
+					$filter = $this->mapDB->readAttributeFilter($this->formvars['stelle'], $this->selected_layers[$j]);
+					for ($i = 0; $i < count($filter); $i++) {
+						if (
+							$this->formvars['value_'.$filter[$i]['attributname']] == NULL OR
+							(
+								$this->formvars['value_'.$filter[$i]['attributname']] == $filter[$i]['attributvalue'] AND
+								$this->formvars['operator_'.$filter[$i]['attributname']] == $filter[$i]['operator']
+							)
+						) {
               $this->formvars['value_'.$filter[$i]['attributname']] = pg_escape_string($filter[$i]['attributvalue']);
               $this->formvars['operator_'.$filter[$i]['attributname']] = $filter[$i]['operator'];
               $setKeys[$filter[$i]['attributname']]++;
@@ -16379,11 +16383,14 @@ class db_mapObj{
 		$data = $this->getData($layer_id);
 		if ($data != '') {
 			$select = $this->getSelectFromData($data);
-			if ($database->schema != ''){
+			if ($database->schema != '') {
 				$select = str_replace($database->schema.'.', '', $select);
 			}
-			$attribute = $database->getFieldsfromSelect($select);
-			return $attribute;
+			$ret = $database->getFieldsfromSelect($select);
+			if ($ret[0]) {
+				$this->GUI->add_message('error', $ret[1]);
+			}
+			return $ret[1];
 		}
 		elseif ($ifEmptyUseQuery){
 			$path = $this->getPath($layer_id);
