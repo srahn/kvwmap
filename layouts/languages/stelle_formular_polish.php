@@ -2,6 +2,7 @@
   $strTitle="tytuł"; 
   $strAsteriskRequired="Wartości oznaczone * muszą zostać wpisane"; 
   $strDataBankID="baza danych ID*"; 
+	$strDefaultUserID="Standard user";
   $strTask="nazwa*"; 
   $strReferenceMapID="numer referencyjny karty ID*"; 
   $strMaxExtent="maxymalne rozszerzenie*"; 

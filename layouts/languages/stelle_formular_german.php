@@ -2,7 +2,7 @@
   $strTitle="Stelleneditor";
   $strAsteriskRequired="Werte mit * mussen eingetragen werden";
   $strDataBankID="Datenbank ID";
-	$strDefaultUserID="Standardnutzer ID";
+	$strDefaultUserID="Standardnutzer";
   $strTask="Bezeichnung*";
   $strReferenceMapID="ReferenzkarteID*";
   $strMaxExtent="Max Ausdehnung*";
