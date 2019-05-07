@@ -315,14 +315,17 @@ class Gml_builder {
 
               // fetch information about attributes and their properties
               $datatype_attribs = $this->typeInfo->getInfo($uml_attribute['type']);
+
               // retrieve attribute names
               $value_array_keys = array_column($datatype_attribs,'col_name');
 
-							// Adds an extra Association for XP_VerbundenerPlan as they are not present with sequences in xplan_uml
-							if($uml_attribute['col_name'] == 'aendert') {
-								#$gmlStr .= '<note>XP_VerbundenerPlan</note>';
-								array_push($value_array_keys, 'verbundenerplan');
-							}
+              // Adds an extra Association for XP_VerbundenerPlan as they are not present with sequences in xplan_uml
+              if($uml_attribute['col_name'] == 'aendert') {
+                array_push($value_array_keys, 'verbundenerplan');
+              }
+              if($uml_attribute['col_name'] == 'wurdegeaendertvon') {
+                array_push($value_array_keys, 'verbundenerplan');
+              }
 
               // wrap singular values into an array in order to
               // unify the processing of singular and multiple values
@@ -335,8 +338,8 @@ class Gml_builder {
               // process composite data type
               foreach ($value_array as $single_value) {
                 // associate values with attribute names
-                #$gmlStr .= '<note>single_value: ' . count($single_value) . '</note>';
-                #$gmlStr .= '<note>value_array_keys: ' . count($value_array_keys) . '</note>';
+                #$gmlStr .= '<note>single_value: ' . implode(', ', $single_value) . '</note>';
+                #$gmlStr .= '<note>value_array_keys: ' . implode(', ', $value_array_keys) . '</note>';
                 // Null-Array-Werte auslassen
                 if($single_value == null) continue;
                 $single_value = array_combine($value_array_keys, $single_value);
