@@ -347,11 +347,15 @@ function go_switch_xplankonverter($go){
 
 						# unzip and copy files to upload folder
 						$uploaded_files = xplankonverter_unzip_and_check_and_copy($_FILES['shape_files'], $upload_path);
-						# get layerGroupId or create a group if not exists
-						$layer_group_id = $GUI->konvertierung->get('layer_group_id');
-						if (empty($layer_group_id))
-							$layer_group_id = $GUI->konvertierung->create_layer_group('Shape');
-						foreach($uploaded_files AS $uploaded_file) {
+						if (XPLANKONVERTER_CREATE_UPLOAD_SHAPE_LAYER) {
+							# get layerGroupId or create a group if not exists
+							$layer_group_id = $GUI->konvertierung->get('layer_group_id');
+							if (empty($layer_group_id)) {
+								$layer_group_id = $GUI->konvertierung->create_layer_group('Shape');
+							}
+						}
+
+						foreach ($uploaded_files AS $uploaded_file) {
 							if ($uploaded_file['extension'] == 'dbf' and $uploaded_file['state'] != 'ignoriert') {
 
 								# delete existing shape file
@@ -394,51 +398,55 @@ function go_switch_xplankonverter($go){
 									# Set datatype for shapefile
 									$shapeFile->set('datatype', $result['datatype']);
 									$shapeFile->update();
+									if (XPLANKONVERTER_CREATE_UPLOAD_SHAPE_LAYER) {
+										echo '<p>create Layer';
+										# create layer
+										$GUI->formvars['Name'] = $shapeFile->get('filename');
+										$GUI->formvars['Datentyp'] = $shapeFile->get('datatype');
+										$GUI->formvars['Gruppe'] = $layer_group_id;
+										$GUI->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
+										$GUI->formvars['Data'] = 'the_geom from (
+											SELECT oid, *
+											FROM ' . $shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() . '
+											WHERE 1=1
+										) as foo using unique oid using srid=' . $shapeFile->get('epsg_code');
+										$GUI->formvars['maintable'] = $shapeFile->dataTableName();
+										$GUI->formvars['schema'] = $shapeFile->dataSchemaName();
+										$GUI->formvars['connection'] = $GUI->pgdatabase->connect_string;
+										$GUI->formvars['connectiontype'] = '6';
+										$GUI->formvars['filteritem'] = 'oid';
+										$GUI->formvars['tolerance'] = '5';
+										$GUI->formvars['toleranceunits'] = 'pixels';
+										$GUI->formvars['epsg_code'] = $shapeFile->get('epsg_code');
+										$GUI->formvars['querymap'] = '1';
+										$GUI->formvars['queryable'] = '1';
+										$GUI->formvars['transparency'] = '75';
+										$GUI->formvars['postlabelcache'] = '0';
+										$GUI->formvars['allstellen'] = '2300';
+										$GUI->formvars['ows_srs'] = 'EPSG:' . $shapeFile->get('epsg_code') . ' EPSG:25833 EPSG:4326 EPSG:2398';
+										$GUI->formvars['wms_server_version'] = '1.1.0';
+										$GUI->formvars['wms_format'] = 'image/png';
+										$GUI->formvars['wms_connectiontimeout'] = '60';
+										$GUI->formvars['selstellen'] = '1, ' . $GUI->konvertierung->get('stelle_id') . ', 1, ' . $GUI->konvertierung->get('stelle_id');
+										$GUI->LayerAnlegen();
 
-									# create layer
-									$GUI->formvars['Name'] = $shapeFile->get('filename');
-									$GUI->formvars['Datentyp'] = $shapeFile->get('datatype');
-									$GUI->formvars['Gruppe'] = $layer_group_id;
-									$GUI->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
-									$GUI->formvars['Data'] = 'the_geom from (select oid, * from ' .
-										$shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() .
-										' where 1=1) as foo using unique oid using srid=' . $shapeFile->get('epsg_code');
-									$GUI->formvars['maintable'] = $shapeFile->dataTableName();
-									$GUI->formvars['schema'] = $shapeFile->dataSchemaName();
-									$GUI->formvars['connection'] = $GUI->pgdatabase->connect_string;
-									$GUI->formvars['connectiontype'] = '6';
-									$GUI->formvars['filteritem'] = 'oid';
-									$GUI->formvars['tolerance'] = '5';
-									$GUI->formvars['toleranceunits'] = 'pixels';
-									$GUI->formvars['epsg_code'] = $shapeFile->get('epsg_code');
-									$GUI->formvars['querymap'] = '1';
-									$GUI->formvars['queryable'] = '1';
-									$GUI->formvars['transparency'] = '75';
-									$GUI->formvars['postlabelcache'] = '0';
-									$GUI->formvars['allstellen'] = '2300';
-									$GUI->formvars['ows_srs'] = 'EPSG:' . $shapeFile->get('epsg_code') . ' EPSG:25833 EPSG:4326 EPSG:2398';
-									$GUI->formvars['wms_server_version'] = '1.1.0';
-									$GUI->formvars['wms_format'] = 'image/png';
-									$GUI->formvars['wms_connectiontimeout'] = '60';
-									$GUI->formvars['selstellen'] = '1, ' . $GUI->konvertierung->get('stelle_id') . ', 1, ' . $GUI->konvertierung->get('stelle_id');
-									$GUI->LayerAnlegen();
+										# Assign layer_id to shape file record
+										$shapeFile->set('layer_id', $GUI->formvars['selected_layer_id']);
+										$shapeFile->update();
 
-									# Assign layer_id to shape file record
-									$shapeFile->set('layer_id', $GUI->formvars['selected_layer_id']);
-									$shapeFile->update();
+										# Ordne layer zur Stelle
+										$GUI->Stellenzuweisung(
+											array($shapeFile->get('layer_id')),
+											array($GUI->konvertierung->get('stelle_id'))
+										);
 
-									# Ordne layer zur Stelle
-									$GUI->Stellenzuweisung(
-										array($shapeFile->get('layer_id')),
-										array($GUI->konvertierung->get('stelle_id'))
-									);
+										# Füge eine Klasse zum neuen Layer hinzu.
+										$GUI->formvars['class_name'] = 'alle';
+										$GUI->formvars['class_id'] = $GUI->Layereditor_KlasseHinzufuegen();
 
-									# Füge eine Klasse zum neuen Layer hinzu.
-									$GUI->formvars['class_name'] = 'alle';
-									$GUI->formvars['class_id'] = $GUI->Layereditor_KlasseHinzufuegen();
-
-									# Füge einen Style zur Klasse hinzu
-									$GUI->add_style();
+										# Füge einen Style zur Klasse hinzu
+										$GUI->add_style();
+									}
 								}
 								else {
 									$GUI->add_message('error', $result['err_msg']);

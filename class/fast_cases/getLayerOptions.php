@@ -841,8 +841,11 @@ class db_mapObj {
       if($database->schema != ''){
       	$select = str_replace($database->schema.'.', '', $select);
       }
-      $attribute = $database->getFieldsfromSelect($select);
-      return $attribute;
+      $ret = $database->getFieldsfromSelect($select);
+			if ($ret[0]) {
+				$this->GUI->add_message('error', $ret[1]);
+			}
+      return $ret[1];
     }
     elseif($ifEmptyUseQuery){
 			$path = $this->getPath($layer_id);
@@ -1143,80 +1146,62 @@ class pgdatabase {
 		}
 	}	
 
-  function getFieldsfromSelect($select){
-  	$distinctpos = strpos(strtolower($select), 'distinct');
-  	if($distinctpos !== false && $distinctpos < 10){
-  		$offset = $distinctpos+8;
-  	}
-  	else{
-    	$offset = 7;
-  	}
-    $select = $this->eliminate_star($select, $offset);
-  	if(substr_count(strtolower($select), ' from ') > 1){
-  		$whereposition = strpos($select, ' WHERE ');
-  		$withoutwhere = substr($select, 0, $whereposition);
-  		$fromposition = strpos($withoutwhere, ' FROM ');
-  	}
-  	else{
-  		$whereposition = strpos(strtolower($select), ' where ');
-  		$withoutwhere = substr($select, 0, $whereposition);
-  		$fromposition = strpos(strtolower($withoutwhere), ' from ');
-  	}
-    $sql = $select." LIMIT 0";
-    $ret = $this->execSQL($sql, 4, 0);
-    if($ret[0]==0){
-      $frompos = $fromposition;
-      $attributesstring = substr($select, $offset, $frompos-$offset);
-      //$fieldstring = explode(',', $attributesstring);
-      $fieldstring = get_select_parts($attributesstring);
-      
-      for($i = 0; $i < pg_num_fields($ret[1]); $i++){
-        # Attributname
-        $fieldname = pg_field_name($ret[1], $i);
-        $fields[$i]['name'] = $fieldname;
+	function getFieldsfromSelect($select, $assoc = false) {
+		$err_msgs = array();
+		$sql = "SET client_min_messages='log';SET log_duration = false;SET debug_print_parse=true;".$select." LIMIT 0";			# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
+		$ret = $this->execSQL($sql, 4, 0);
+		if ($ret['success']) {
+			$query_plan = pg_last_notice($this->dbConn);
+			$table_alias_names = $this->get_table_alias_names($query_plan);
+			$field_plan_info = explode("\n      :resno", $query_plan);
 
-        # "richtiger" Name in der Tabelle
-        $name_pair = $this->check_real_attribute_name($fieldstring[$i], $fieldname);
-        if($name_pair != ''){
-          $fields[$i]['real_name'] = $name_pair['real_name'];
-        }
-        else{
-          $fields[$i]['real_name'] = $fieldname;
-        }				
+			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
+				# Attributname
+				$fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
+
+				# Spaltennummer in der Tabelle
+				$col_num = get_first_word_after($field_plan_info[$i+1], ':resorigcol');
 				
-        # Tabellenname des Attributs
-        // if(PHPVERSION >= 580){
-        $tablename = pg_field_table($ret[1], $i);
-        // }																									# kann ganz weg, wenn Bugfix 2.8.55 sich bewährt
-        // else{
-	        // $table = $this->pg_field_table2($fieldname, $fieldstring[$i], $select);
-	        // $tablename = $table['name'];
-					// if($tablename == NULL AND $name_pair != ''){
-	          // $table = $this->pg_field_table2($name_pair['real_name'], $fieldstring[$i], $select);
-	          // $tablename = $table['name'];
-	        // }
-        // }
-        if($tablename != NULL){
-          $all_table_names[] = $tablename;
-        }
-        $fields[$i]['table_name'] = $tablename;
-        $table['alias'] = $this->get_table_alias($tablename, $fromposition, $withoutwhere);
-        if($table['alias']){
-        	$fields[$i]['table_alias_name'] = $table['alias'];
-        }
-        else{
-        	$fields[$i]['table_alias_name'] = $tablename;
-        }
+				# Tabellen-oid des Attributs
+				$table_oid = pg_field_table($ret[1], $i, true);
 
-        # Attributeigenschaften
-				if($fields[$i]['real_name'] != ''){
+				# Tabellenname des Attributs
+				$fields[$i]['table_name'] = $tablename = pg_field_table($ret[1], $i);
+				if ($tablename != NULL) {
+					$all_table_names[] = $tablename;
+				}
+
+				# Tabellenaliasname des Attributs
+				$fields[$i]['table_alias_name'] = $table_alias_names[$table_oid];
+
+				# Schemaname der Tabelle des Attributs
+				$schemaname = $this->pg_field_schema($table_oid);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?				
+
+				# wenn das Attribut eine Tabellenspalte ist -> weitere Attributeigenschaften holen
+				if ($col_num > 0){
 					$constraintstring = '';
-					$attr_info = $this->get_attribute_information($this->schema, $tablename, $fields[$i]['real_name']);
+					$attr_info = $this->get_attribute_information($schemaname, $tablename, $col_num);
+					if($attr_info[0]['relkind'] == 'v'){		# wenn View, dann Attributinformationen aus View-Definition holen
+						if($view_defintion_attributes[$tablename] == NULL) {
+							$ret2 = $this->getFieldsfromSelect(substr($attr_info[0]['view_definition'], 0, -1), true);
+							if ($ret2['success']) {
+								$view_defintion_attributes[$tablename] = $ret2[1];
+							}
+							else {
+								# Füge Fehlermeldung hinzu und setze leeres Array
+								$err_msgs[] = $ret2[1];
+								$view_defintion_attributes[$tablename] = array();
+							}
+						}
+						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info[0]['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
+						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info[0]['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
+					}
+					$fields[$i]['real_name'] = $attr_info[0]['name'];
 					$fieldtype = $attr_info[0]['type_name'];
 					$fields[$i]['nullable'] = $attr_info[0]['nullable']; 
 					$fields[$i]['length'] = $attr_info[0]['length'];
 					$fields[$i]['decimal_length'] = $attr_info[0]['decimal_length'];
-					$fields[$i]['default'] = $attr_info[0]['default'];					
+					$fields[$i]['default'] = $attr_info[0]['default'];
 					if($attr_info[0]['is_array'] == 't')$prefix = '_'; else $prefix = '';
 					if($attr_info[0]['type_type'] == 'c'){		# custom datatype
 						$datatype_id = $this->writeCustomType($attr_info[0]['type'], $attr_info[0]['type_schema']);
@@ -1247,29 +1232,35 @@ class pgdatabase {
 					}
 					$fields[$i]['constraints'] = $constraintstring;
 				}
-				if($name_pair != '' AND $name_pair['no_real_attribute']) $fieldtype = 'not_saveable';
-        $fields[$i]['type'] = $fieldtype;
-				
-        # Geometrietyp
-        if($fieldtype == 'geometry'){
-          $fields[$i]['geomtype'] = $this->get_geom_type($this->schema, $fields[$i]['real_name'], $tablename);
-          $fields['the_geom'] = $fieldname;
+				else { # Attribut ist keine Tabellenspalte -> nicht speicherbar
+					$fieldtype = 'not_saveable';
+				}
+				$fields[$i]['type'] = $fieldtype;
+
+				# Geometrietyp
+				if ($fieldtype == 'geometry') {
+					$fields[$i]['geomtype'] = $this->get_geom_type($schemaname, $fields[$i]['real_name'], $tablename);
+					$fields['the_geom'] = $fieldname;
 					$fields['the_geom_id'] = $i;
-        }				
-      }
-      
-      // if($all_table_names != NULL){   	todo
-	      // $all_table_names = array_unique($all_table_names);
-	      // foreach($all_table_names as $tablename){
-	        // $fields['oids'][] = $this->check_oid($tablename);   # testen ob Tabelle oid hat
-	      // }
-	      // $fields['all_table_names'] = $all_table_names;
-      // }
-            
-      return $fields;
-    }
-    else return NULL;
-  }
+				}
+				if ($assoc) {
+					$fields_assoc[$fieldname] = $fields[$i];
+				}
+			}
+			$ret[1] = ($assoc ? $fields_assoc : $fields);
+		}
+		else {
+			# Füge Fehlermeldung hinzu
+			$err_msgs[] = $ret[1];
+		}
+
+		if (count($err_msgs) > 0) {
+			# Wenn Fehler auftraten liefer nur die Fehler zurück
+			$ret[0] = 1;
+			$ret[1] = implode('<br>', $err_msgs);
+		}
+		return $ret;
+	}
 
   function eliminate_star($query, $offset){
   	if(substr_count(strtolower($query), ' from ') > 1){
