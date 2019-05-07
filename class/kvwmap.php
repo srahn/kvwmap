@@ -8165,12 +8165,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					for($i = 0; $i < count($attributes['name']); $i++){
 						$value = $this->formvars[$prefix.'value_'.$attributes['name'][$i]];
 						$operator = $this->formvars[$prefix.'operator_'.$attributes['name'][$i]];
-						if(is_array($value)){
+						if (is_array($value)) {
 							$operator = 'IN';
 							$value = implode($value, '|');
 						}
-						if($value != ''){
-							switch($operator){
+						if ($value != '') {
+							# Entferne Leerzeichen, wenn der Wert danach noch Zeichen enthalten würde
+							if (strlen(trim($value)) > 0) {
+								$value = trim($value);
+							}
+							switch($operator) {
 								case 'LIKE' : case 'NOT LIKE' : {
 									################  Autovervollständigungsfeld ########################################
 									if($attributes['form_element_type'][$i] == 'Autovervollständigungsfeld' AND $attributes['options'][$i] != ''){
@@ -8191,7 +8195,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 										continue;		# dieses Attribut nochmal behandeln aber diesmal mit dem Operator IN und den gefundenen Schlüsseln der LIKE-Suche
 									}
 									#####################################################################################
-									if(strpos($value, '%') === false)$value = '%'.$value.'%';
+									if (strpos($value, '%') === false) {
+										$value = '%' . $value . '%';
+									}
 									$sql_where .= ' AND LOWER(CAST(query.'.$attributes['name'][$i].' AS TEXT)) '.$operator.' ';
 									$sql_where.='LOWER(\''.$value.'\')';
 								}break;
@@ -8214,12 +8220,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								}break;
 
 								default : {
-									if($operator != 'IS NULL' AND $operator != 'IS NOT NULL'){
-										$sql_where .= ' AND (query.'.$attributes['name'][$i].' '.$operator.' \''.$value.'\'';
-										if($this->formvars[$prefix.'value2_'.$attributes['name'][$i]] != ''){
+									if ($operator != 'IS NULL' AND $operator != 'IS NOT NULL') {
+										$sql_where .= ' AND (query.' . $attributes['name'][$i] . ' ' . $operator . ' \'' . $value . '\'';
+										if ($this->formvars[$prefix.'value2_'.$attributes['name'][$i]] != '') {
 											$sql_where.=' AND \''.$this->formvars[$prefix.'value2_'.$attributes['name'][$i]].'\'';
 										}
-										if($operator == '!='){
+										if ($operator == '!=') {
 											$sql_where .= ' OR query.'.$attributes['name'][$i].' IS NULL';
 										}
 										$sql_where .= ')';
@@ -8293,15 +8299,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           $pfad = 'DISTINCT '.$pfad;
         }
 
-        # group by wieder einbauen
+				# group by wieder einbauen
 				if($attributes['groupby'] != ''){
 					$pfad .= $attributes['groupby'];
 					$j = 0;
 					foreach($attributes['all_table_names'] as $tablename){
-								if($tablename == $layerset[0]['maintable'] AND $attributes['oids'][$j]){		# hat Haupttabelle oids?
-									$pfad .= ','.$tablename.'_oid ';
-								}
-								$j++;
+						if($tablename == $layerset[0]['maintable'] AND $attributes['oids'][$j]){		# hat Haupttabelle oids?
+							$pfad .= ','.$tablename.'_oid ';
+						}
+						$j++;
 					}
   			}
         $sql = "SELECT * FROM (SELECT " . $pfad.") as query WHERE 1=1 " . $sql_where;
@@ -8342,30 +8348,37 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 				$layerset[0]['sql'] = $sql;
 				#echo "<p>Abfragestatement: " . $sql.$sql_order.$sql_limit;
-        $ret=$layerdb->execSQL('SET enable_seqscan=off;' . $sql . $sql_order . $sql_limit, 4, 0);
-        if(!$ret[0]){
-          while ($rs=pg_fetch_assoc($ret[1])) {
-            $layerset[0]['shape'][]=$rs;
-          }
+				$ret = $layerdb->execSQL('SET enable_seqscan=off;' . $sql . $sql_order . $sql_limit, 4, 0, true);
+				if ($ret['success']) {
+					while ($rs = pg_fetch_assoc($ret[1])) {
+						$layerset[0]['shape'][] = $rs;
+					}
 					$num_rows = pg_num_rows($ret[1]);
-					if($this->formvars['offset_'.$layerset[0]['Layer_ID']] == '' AND $num_rows < $this->formvars['anzahl'])$layerset[0]['count'] = $num_rows;
-					else{
+					if ($this->formvars['offset_'.$layerset[0]['Layer_ID']] == '' AND $num_rows < $this->formvars['anzahl']) {
+						$layerset[0]['count'] = $num_rows;
+					}
+					else {
 						# Anzahl der Datensätze abfragen
-						$sql_count = "SELECT count(*) FROM (" . $sql.") as foo";
+						$sql_count = "
+							SELECT
+								count(*)
+							FROM
+								(" . $sql . ") as foo
+						";
 						$ret=$layerdb->execSQL($sql_count,4, 0);
 						if(!$ret[0]){
 							$rs=pg_fetch_array($ret[1]);
 							$layerset[0]['count'] = $rs[0];
 						}
 					}
-        }
-				else{
-					$this->add_message('error', $ret['msg']);
+				}
+				else {
+					$this->add_message('error', err_msg('Datei: kvwmap.php<br>Funktion: GenerischeSuche_Suchen<br>', __LINE__, $ret['msg']));
 				}
 
-        # Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
-        # Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
-        $attributes = $mapDB->add_attribute_values($attributes, $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
+				# Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
+				# Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
+				$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
 
 				# Datendrucklayouts abfragen
 				include_(CLASSPATH.'datendrucklayout.php');
