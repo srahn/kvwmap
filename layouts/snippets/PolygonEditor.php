@@ -153,6 +153,18 @@ function buildwktpolygonfromsvgpath(svgpath){
 						<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>><? echo $strSingleGeoms; ?>
 					</td>
 				</tr>
+				<tr>
+					<td>
+						<a href="javascript:show_data_import();">Daten-Import</a>
+						<div style="position: fixed; top: 50%; left: 50%; margin-top: -220px; margin-left: -300px;">
+							<div style="position: absolute;top: 16px;right: 0px"><a href="javascript:void(0)" onclick="" title="Schlie&szlig;en"><img style="border:none" src="graphics/exit2.png"></img></a></div>
+							<? 
+								$this->after_import_action = 'use_geometry';
+								include(SNIPPETS.'data_import.php'); 
+							?>
+						</div>
+					</td>
+				</tr>
 				<tr> 
 					<td colspan="2" style="border-top:1px solid #999999"></td>
 				</tr>
