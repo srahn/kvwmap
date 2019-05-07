@@ -12,7 +12,7 @@ class Standard_shp_extractor {
 	/*
 	* Creates and inserts regeln for all uploaded standardized shape in a schema
 	*/
-	function create_regeln_for_standard_shps() { 
+	function create_regeln_for_standard_shps() {
 		$shape_schema = 'xplan_shapes_' . $this->konvertierung_id;
 		$shapes = $this->get_all_tables_of_schema($shape_schema);
 		$sql = "INSERT INTO xplankonverter.regeln(class_name, factory, sql, beschreibung, geometrietyp, name, konvertierung_id, stelle_id, bereich_gml_id) ";
