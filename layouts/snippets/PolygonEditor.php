@@ -8,6 +8,8 @@
 <script language="JavaScript">
 <!--
 
+var enclosingForm = <? echo $this->currentform; ?>;
+
 function toggle_vertices(){	
 	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
