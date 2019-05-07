@@ -616,9 +616,9 @@ class GUI {
 				</tr>
 				<tr>
 					<td>
-						<div id="layergroupdiv_'.$group_id.'" style="width:100%"><table cellspacing="0" cellpadding="0">';
+						<div id="layergroupdiv_'.$group_id.'" style="width:100%;'.($this->group_has_active_layers[$group_id] != '' ? 'display: none' : '').'"><table cellspacing="0" cellpadding="0">';
 		$layercount = count($this->layerset['layers_of_group'][$group_id]);
-    if($groupstatus == 1){		# Gruppe aufgeklappt
+    if($groupstatus == 1 OR $this->group_has_active_layers[$group_id]){		# Gruppe aufgeklappt oder hat aktive Layer
 			for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
 				$legend .= '<tr><td colspan="3"><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td><img src="'.GRAPHICSPATH.'leer.gif" width="13" height="1" border="0"></td><td style="width: 100%">';
 				$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u]);
@@ -10413,13 +10413,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						foreach ($files as $file) {
 							$dateityp = strtolower(array_pop(explode('.', $file)));
 							if (!in_array($dateityp, array('dbf', 'shx'))) { // damit gezippte Shapes nur einmal bearbeitet werden
-								$this->daten_import_process($this->formvars['upload_id'], $file_number, $file, NULL);
+								$this->daten_import_process($this->formvars['upload_id'], $file_number, $file, NULL, $this->formvars['after_import_action']);
 								$file_number++;
 							}
 						}
 					}
 					else {
-						$this->daten_import_process($this->formvars['upload_id'], $file_number, $_files['uploadfile']['name'], NULL);
+						$this->daten_import_process($this->formvars['upload_id'], $file_number, $_files['uploadfile']['name'], NULL, $this->formvars['after_import_action']);
 					}
 					echo '~startNextUpload();';
 				}
@@ -10427,7 +10427,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 	}
 
-	function daten_import_process($upload_id, $file_number, $filename, $epsg) {
+	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action) {
 		include_once (CLASSPATH.'data_import_export.php');
 		$this->data_import_export = new data_import_export();
 		$user_upload_folder = UPLOADPATH . $this->user->id.'/';
@@ -10435,7 +10435,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$filetype = array_pop(explode('.', $filename));
 		if($layer_id != NULL){
 			echo $filename.' importiert';
-			if(!in_array($filetype, array('tiff', 'tif', 'geotif')))echo '&nbsp;=>&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom auf Layer</a>';
+			if(!in_array($filetype, array('tiff', 'tif', 'geotif'))){
+				switch ($after_import_action) {
+					case 'use_geometry' : {
+						echo '&nbsp;=>&nbsp;<a href="javascript:void(0);" onclick="enclosingForm.last_doing.value=\'add_geom\';enclosingForm.secondpoly.value=\'true\';ahah(\'index.php\', \'go=spatial_processing&path1=\'+enclosingForm.pathwkt.value+\'&operation=add_geometry&resulttype=svgwkt&geom_from_layer='.$layer_id.'\', new Array(enclosingForm.result, \'\'), new Array(\'setvalue\', \'execute_function\'));">Geometrie übernehmen</a>';
+					}break;
+					
+					default : {
+						echo '&nbsp;=>&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom auf Layer</a>';
+					}
+				}
+			}
 		}
 	}
 

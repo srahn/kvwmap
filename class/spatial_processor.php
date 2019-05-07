@@ -360,19 +360,21 @@ class spatial_processor {
 	function queryMap($input_coord, $pixsize, $layer_id, $fromwhere, $columnname, $singlegeom, $orderby) {
 		# pixsize wird übergeben, weil sie aus dem Geometrieeditor anders sein kann, da es dort eine andere Kartengröße geben kann
     # Abfragebereich berechnen
-    $corners=explode(';',$input_coord);
-    $lo=explode(',',$corners[0]); # linke obere Ecke in Bildkoordinaten von links oben gesehen
-    $ru=explode(',',$corners[1]); # reche untere Ecke des Auswahlbereiches in Bildkoordinaten von links oben gesehen
-    $width=$pixsize*($ru[0]-$lo[0]); # Breite des Auswahlbereiches in m
-    $height=$pixsize*($ru[1]-$lo[1]); # H�he des Auswahlbereiches in m
-    #echo 'Abfragerechteck im Bild: '.$lo[0].' '.$lo[1].' '.$ru[0].' '.$ru[1];
-    # linke obere Ecke im Koordinatensystem in m
-    $minx=$this->rolle->oGeorefExt->minx+$pixsize*$lo[0]; # x Wert
-    $miny=$this->rolle->oGeorefExt->miny+$pixsize*($this->rolle->nImageHeight-$ru[1]); # y Wert
-    $maxx=$minx+$width;
-    $maxy=$miny+$height;
-    $rect=ms_newRectObj();
-    $rect->setextent($minx,$miny,$maxx,$maxy);
+		if($input_coord){
+			$corners=explode(';',$input_coord);
+			$lo=explode(',',$corners[0]); # linke obere Ecke in Bildkoordinaten von links oben gesehen
+			$ru=explode(',',$corners[1]); # reche untere Ecke des Auswahlbereiches in Bildkoordinaten von links oben gesehen
+			$width=$pixsize*($ru[0]-$lo[0]); # Breite des Auswahlbereiches in m
+			$height=$pixsize*($ru[1]-$lo[1]); # H�he des Auswahlbereiches in m
+			#echo 'Abfragerechteck im Bild: '.$lo[0].' '.$lo[1].' '.$ru[0].' '.$ru[1];
+			# linke obere Ecke im Koordinatensystem in m
+			$minx=$this->rolle->oGeorefExt->minx+$pixsize*$lo[0]; # x Wert
+			$miny=$this->rolle->oGeorefExt->miny+$pixsize*($this->rolle->nImageHeight-$ru[1]); # y Wert
+			$maxx=$minx+$width;
+			$maxy=$miny+$height;
+			$rect=ms_newRectObj();
+			$rect->setextent($minx,$miny,$maxx,$maxy);
+		}
     $geom = $this->getgeometrybyquery($rect, $layer_id, $fromwhere, $columnname, $singlegeom, $orderby);
     return $geom;
   }
@@ -548,45 +550,62 @@ class spatial_processor {
 	      	$columnname = 'the_geom';
 	      }
 	      
-	      # Wenn das Koordinatenssystem des Views anders ist als vom Layer wird die Suchbox und die Suchgeometrie
-	      # in epsg des layers transformiert
-	      if ($client_epsg!=$layer_epsg) {
-	        $sql_where =" AND ".$columnname." && st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
-	      }
-	      else {
-	        $sql_where =" AND ".$columnname." && st_geomfromtext('".$searchbox_wkt."',".$client_epsg.")";
-	      }
-	      
-	      # Wenn es sich bei der Suche um eine punktuelle Suche handelt, wird die where Klausel um eine
-	      # Umkreissuche mit dem Suchradius weiter eingeschr�nkt.
-	      if ($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy) {
-	        # Behandlung der Suchanfrage mit Punkt, exakte Suche im Kreis
-	        if ($client_epsg!=$layer_epsg) {
-	          $sql_where.=" AND st_distance(".$columnname.",st_transform(st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
-	        }
-	        else {
-	          $sql_where.=" AND st_distance(".$columnname.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
-	        }
-	        $sql_where.=" <= ".$rand;
-					$punktuell = true;
-	      }
-	      else {
-	        # Behandlung der Suchanfrage mit Rechteck, exakte Suche im Rechteck
-	        if ($client_epsg!=$layer_epsg) {
-	          $sql_where.=" AND st_intersects(".$columnname.",st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
-	        }
-	        else {
-	          $sql_where.=" AND st_intersects(".$columnname.",st_geomfromtext('".$searchbox_wkt."',".$client_epsg."))";
-	        }
-	      }
+				if($rect){
+					# Wenn das Koordinatenssystem des Views anders ist als vom Layer wird die Suchbox und die Suchgeometrie
+					# in epsg des layers transformiert
+					if ($client_epsg!=$layer_epsg) {
+						$sql_where =" AND ".$columnname." && st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
+					}
+					else {
+						$sql_where =" AND ".$columnname." && st_geomfromtext('".$searchbox_wkt."',".$client_epsg.")";
+					}
+					
+					# Wenn es sich bei der Suche um eine punktuelle Suche handelt, wird die where Klausel um eine
+					# Umkreissuche mit dem Suchradius weiter eingeschr�nkt.
+					if ($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy) {
+						# Behandlung der Suchanfrage mit Punkt, exakte Suche im Kreis
+						if ($client_epsg!=$layer_epsg) {
+							$sql_where.=" AND st_distance(".$columnname.",st_transform(st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
+						}
+						else {
+							$sql_where.=" AND st_distance(".$columnname.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
+						}
+						$sql_where.=" <= ".$rand;
+						$punktuell = true;
+					}
+					else {
+						# Behandlung der Suchanfrage mit Rechteck, exakte Suche im Rechteck
+						if ($client_epsg!=$layer_epsg) {
+							$sql_where.=" AND st_intersects(".$columnname.",st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
+						}
+						else {
+							$sql_where.=" AND st_intersects(".$columnname.",st_geomfromtext('".$searchbox_wkt."',".$client_epsg."))";
+						}
+					}
+				}
+				
 	      # 2006-06-12 sr   Filter zur Where-Klausel hinzugef�gt
 	      if($layerset[0]['Filter'] != ''){
 	      	$layerset[0]['Filter'] = str_replace('$userid', $this->rolle->user_id, $layerset[0]['Filter']);
 	        $sql_where .= " AND ".$layerset[0]['Filter'];
 	      }
-	      # Ersetzen des Platzhalters f�r die r�umliche Einschr�nkung der Sachdatenabfrage
-	      # durch die Geometrie des Abfragefensters
 	   
+				$data = $layerset[0]['Data'];
+				$data_explosion = explode(' ', $data);
+				$columnname = $data_explosion[0];
+				$select = $fromwhere = $dbmap->getSelectFromData($data);
+				# order by rausnehmen
+				$orderby = '';
+				$orderbyposition = strrpos(strtolower($select), 'order by');
+				$lastfromposition = strrpos(strtolower($select), 'from');
+				if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+					$fromwhere = substr($select, 0, $orderbyposition);
+					$orderby = ' '.substr($select, $orderbyposition);
+				}
+				$fromwhere = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+				if(strpos(strtolower($fromwhere), ' where ') === false){
+					$fromwhere .= ' where (1=1)';
+				}
 	   			   
 	 			if($fromwhere != ''){
 					if($singlegeom == 'true')$fromwhere = preg_replace('/ ([a-z_]*\.)?'.$columnname.'/', ' (st_dump($0)).geom as the_geom', $fromwhere);		# Einzelgeometrien abfragen

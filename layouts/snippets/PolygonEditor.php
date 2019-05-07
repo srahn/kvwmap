@@ -8,6 +8,8 @@
 <script language="JavaScript">
 <!--
 
+var enclosingForm = <? echo $this->currentform; ?>;
+
 function toggle_vertices(){	
 	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
@@ -119,7 +121,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 			<table cellspacing="0" cellpadding="0">
 				<tr>
 					<td>
-						<div id="legenddiv" style="height: <? echo $this->map->height-180; ?>px;"	class="normallegend">
+						<div id="legenddiv" style="height: <? echo $this->map->height-205; ?>px;"	class="normallegend">
 							<?
 							$this->simple_legend = true;
 							include(SNIPPETS . 'legenddiv.php'); 
@@ -127,12 +129,13 @@ function buildwktpolygonfromsvgpath(svgpath){
 						</div>
 					</td>
 				</tr>
-				<tr>
-					<? if($this->new_entry != true){ ?>
-					<td align="center"><input type="button" style="visibility:hidden" name="split" value="Geometrie in neue Objekte aufteilen" onclick="split_geometries();"></td>
-					<? }else{ ?>
-					<td style="height: 24px">&nbsp;</td>
-					<? } ?>
+				<tr><?
+					if ($this->new_entry != true) { ?>
+						<td align="center"><input type="button" style="visibility:hidden" name="split" value="Geometrie in neue Objekte aufteilen" onclick="split_geometries();"></td><?
+					}
+					else { ?>
+						<td style="height: 24px">&nbsp;</td><?
+					} ?>
 				</tr>
 				<tr>
 					<td><? echo $strGeomFrom; ?>:<br>
@@ -151,6 +154,18 @@ function buildwktpolygonfromsvgpath(svgpath){
 				<tr>
 					<td style="height: 34px">
 						<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>><? echo $strSingleGeoms; ?>
+					</td>
+				</tr>			
+				<tr>
+					<td align="center" height="30">
+						<input type="button" onclick="document.getElementById('data_import').style.display='';" value="Daten-Import">
+						<div id="data_import" style="position: fixed; top: 50%; left: 50%; margin-top: -220px; margin-left: -300px;display: none;box-shadow: 6px 5px 7px #777;">
+							<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="document.getElementById('data_import').style.display='none';" title="Schlie&szlig;en"><img style="border:none" src="graphics/exit2.png"></img></a></div>
+							<? 
+								$this->after_import_action = 'use_geometry';
+								include(SNIPPETS.'data_import.php'); 
+							?>
+						</div>
 					</td>
 				</tr>
 				<tr> 
