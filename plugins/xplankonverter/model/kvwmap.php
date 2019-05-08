@@ -119,7 +119,7 @@
 				$GUI->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
 				$konvertierung->set_status();
 
-				if(!empty($GUI->formvars['layer_schemaname'])) {
+				if ($GUI->formvars['20;;;;Text_not_saveable;;not_saveable'] == 'xplan_gmlas_' . $GUI->user->id) {
 					# Creates Bereiche for each Plan loaded with GMLAS
 					$gml_extractor = new Gml_extractor($GUI->pgdatabase, 'placeholder', 'xplan_gmlas_' . $GUI->user->id);
 					$gml_extractor->insert_into_bereich($bereichtable, $konvertierung_id, $GUI->user->id);

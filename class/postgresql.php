@@ -253,25 +253,23 @@ FROM
 			if (stristr($sql, 'SELECT')) {
 				$sql = "SET datestyle TO 'German';" . $sql;
 			};
-			if ($this->schema != ''){
+			if ($this->schema != '') {
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
 			$query = @pg_query($this->dbConn, $sql);
 			//$query=0;
 			if ($query == 0) {
 				$ret['success'] = false;
-				if (!$suppress_error_msg) {
-					$last_error = pg_last_error($this->dbConn);
-					if ($strip_context AND strpos($last_error, 'CONTEXT: ') !== false) {
-						$ret['msg'] = substr($last_error, 0, strpos($last_error, 'CONTEXT: '));
-					}
-					else {
-						$ret['msg'] = $last_error;
-					}
-					$div_id = rand(1, 99999);
-					$ret['msg'] = sql_err_msg('PostgreSQL', $sql, $ret['msg'], $div_id);
-					$ret['type'] = 'error';
+				# erzeuge eine Fehlermeldung
+				$last_error = pg_last_error($this->dbConn);
+				if ($strip_context AND strpos($last_error, 'CONTEXT: ') !== false) {
+					$ret['msg'] = substr($last_error, 0, strpos($last_error, 'CONTEXT: '));
 				}
+				else {
+					$ret['msg'] = $last_error;
+				}
+				$ret['msg'] = sql_err_msg('PostgreSQL', $sql, $ret['msg'], rand(1, 99999));
+				$ret['type'] = 'error';
 				$this->debug->write("<br><b>" . $last_error . "</b>", $debuglevel);
 				if ($logsql) {
 					$this->logfile->write($this->commentsign . ' ' . $sql . ' ' . $last_error);
@@ -335,10 +333,18 @@ FROM
 			}
 			$this->debug->write("<br>" . $sql, $debuglevel);
 		}
-		if (!$ret['success']) {
+		if ($ret['success']) {
+			# alles ok mach nichts weiter
+		}
+		else {
+			# Fehler setze entsprechende Fags und Fehlermeldung
 			$ret[0] = 1;
 			$ret[1] = $ret['msg'];
-			if (!$suppress_error_msg) {
+			if ($suppress_error_msg) {
+				# mache nichts, den die Fehlermeldung wird unterdrückt
+			}
+			else {
+				# gebe Fehlermeldung aus.
 				$ret[0] = 0;
 				$this->gui->add_message($ret['type'], $ret['msg']);
 				header('error: true');	// damit ajax-Requests das auch mitkriegen

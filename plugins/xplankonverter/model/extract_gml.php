@@ -82,7 +82,8 @@ class Gml_extractor {
 
 		$GUI->formvars['checkbox_names_' . $GUI->formvars['chosen_layer_id']] = 'check;' . $layername . ';' . $tablename . ';' . $oid . '|';
 		$GUI->formvars['check;' . $layername .';' . $tablename . ';' . $oid] = 'on';
-		$GUI->formvars['layer_schemaname'] = $this->gmlas_schema;
+		$GUI->formvars['attributenames'][] = 'layer_schemaname';
+		$GUI->formvars['values'][] = $this->gmlas_schema;
 		# print_r($GUI->formvars);
 	}
 

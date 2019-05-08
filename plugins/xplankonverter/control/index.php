@@ -1183,7 +1183,7 @@ function go_switch_xplankonverter($go){
 
 		case 'xplankonverter_extract_standardshapes_to_regeln' : {
 			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
-			if ($GUI->konvertierung->get('id') != '') {
+/*			if ($GUI->konvertierung->get('id') != '') {
 				if (isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
 					$bereich_gml_id = $_REQUEST['bereich_gml_id'];
 					$konvertierung_id = $_REQUEST['konvertierung_id'];
@@ -1203,6 +1203,25 @@ function go_switch_xplankonverter($go){
 					$GUI->add_message('error', 'Die Konvertierung mit der ID: ' . $GUI->formvars['konvertierung_id'] . ' wurde nicht gefunden!');
 				}
 			}
+*/
+
+			# go to layer search with layer of planbereich
+			switch ($GUI->konvertierung->get('planart')) {
+				case 'BP-Plan' : $layer_id = XPLANKONVERTER_BP_BEREICHE_LAYER_ID; break;
+				case 'FP-Plan' : $layer_id = XPLANKONVERTER_FP_BEREICHE_LAYER_ID; break;
+				case 'SO-Plan' : $layer_id = XPLANKONVERTER_SO_BEREICHE_LAYER_ID; break;
+				case 'RP-Plan' : $layer_id = XPLANKONVERTER_RP_BEREICHE_LAYER_ID; break;
+			}
+
+			$GUI->go = 'Layer-Suche_Suchen';
+			$GUI->formvars = array(
+				'go' => $GUI->go,
+				'selected_layer_id' => $layer_id,
+				'operator_gml_id' => '=',
+				'value_gml_id' => $GUI->formvars['bereich_gml_id'],
+			);
+
+			$GUI->goNotExecutedInPlugins = true;
 		} break;
 
 		default : {
