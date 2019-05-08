@@ -647,7 +647,7 @@
 						else{
 							$datapart .= '<a ';
 							if($explosion[2] != 'no_new_window'){$datapart .= 'target="_blank"';}
-							$datapart .= ' class="dynamicLink" style="font-size: '.$fontsize.'px" href="'.$href.'">';
+							$datapart .= ' class="dynamicLink" style="font-size: '.$fontsize.'px" '.($explosion[2] == 'no_new_window' ? 'onclick="checkForUnsavedChanges(event);"' : '').' href="'.$href.'">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
 						}
