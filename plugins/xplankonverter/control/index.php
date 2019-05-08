@@ -39,6 +39,7 @@ include(PLUGINS . 'xplankonverter/model/extract_standard_shp.php');
 * xplankonverter_konvertierungen_index
 * xplankonverter_konvertierung_loeschen
 * xplankonverter_konvertierung_status
+* xplankonverter_konvertierung_veroffentlichen
 * xplankonverter_plaene_index
 * xplankonverter_regeleditor
 * xplankonverter_regeleditor_getshapeattributes
@@ -484,7 +485,7 @@ function go_switch_xplankonverter($go){
 			echo json_encode($response);
 		} break;
 
-	  case 'xplankonverter_konvertierung_status': {
+		case 'xplankonverter_konvertierung_status': {
 	    header('Content-Type: application/json');
 	    $response = array();
 	    if ($GUI->formvars['konvertierung_id'] == '') {
@@ -590,6 +591,39 @@ function go_switch_xplankonverter($go){
 	    $response['msg'] = 'Status wurde gesetzt';
 	    echo json_encode($response);
 	  } break;
+	
+		case 'xplankonverter_konvertierung_veroffentlichen': {
+			header('Content-Type: application/json');
+			$response = array();
+			if ($GUI->formvars['konvertierung_id'] == '') {
+				$response['success'] = false;
+				$response['msg'] = 'Konvertierung wurde nicht angegeben';
+				return;
+			}
+			if (!in_array($GUI->formvars['veroeffentlicht'], array('t', 'f'))) {
+				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn das Attribut veroeffentlicht einen Wert t oder f hat.';
+				$response['success'] = false;
+				$response['msg'] = 'Attribut veroeffentlicht muss t oder f sein. Statt dessen ist es -' . print_r($GUI->formvars, true) . '-';
+				echo json_encode($response);
+				return;
+			}
+			// now get konvertierung
+			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+
+			// check stelle
+			if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) return;
+
+			$GUI->konvertierung->data = array(
+				"id" => $GUI->formvars['konvertierung_id'],
+				"veroeffentlicht" => $GUI->formvars['veroeffentlicht']
+			);
+			$GUI->konvertierung->update();
+			$response['success'] = true;
+			$response['veroeffentlicht'] = $GUI->formvars['veroeffentlicht'];
+			$response['konvertierung_id'] = $GUI->formvars['konvertierung_id'];
+			echo json_encode($response);
+			return;
+		} break;
 
 		case 'xplankonverter_create_konvertierung_directories' : {
 			$konvertierung = new Konvertierung($GUI);

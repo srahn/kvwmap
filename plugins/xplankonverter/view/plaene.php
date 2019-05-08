@@ -228,6 +228,41 @@
 		}
 	};
 
+	toggleVeroeffentlicht = function(konvertierung_id, veroeffentlicht) {
+		var veroeffentlicht = (veroeffentlicht == 't' ? 'f' : 't');
+
+		$('#veroeffentlicht_button_' + konvertierung_id).hide();
+		$('#veroeffentlicht_spinner_' + konvertierung_id).show();
+		$.ajax({
+			url: 'index.php',
+			data: {
+				go: 'xplankonverter_konvertierung_veroffentlichen',
+				veroeffentlicht: veroeffentlicht,
+				konvertierung_id: konvertierung_id
+			},
+			success: function(result) {
+				if (result.success) {
+					var konvertierung_id = result.konvertierung_id,
+							row = $('#konvertierungen_table').bootstrapTable('getRowByUniqueId', konvertierung_id);
+
+					row.veroeffentlicht = result.veroeffentlicht;
+					$('#konvertierungen_table').bootstrapTable('updateByUniqueId', { id: konvertierung_id, row: row});
+
+					message([{
+						"type": "notice",
+						"msg" : 'Plan' + (result.veroeffentlicht == 't' ? ' erfolgreich veröffentlicht' : 'veröffentlichung zurückgenommen') + '!'
+					}]);
+				}
+				else {
+					message([{
+						"type": "error",
+						"msg": result.msg
+					}]);
+				}
+			}
+		});
+	};
+
 	// formatter functions
 	function konvertierungGemeindeFormatter(value, row) {
 		var gemeinden = JSON.parse(value);
@@ -237,6 +272,12 @@
 				return gemeinde.gemeindename;
 			}
 		).join(', ')
+	}
+
+	// formatter functions
+	function konvertierungStatusFormatter(value, row) {
+		var output = value;
+		return output;
 	}
 
 	function konvertierungBundeslandFormatter(value, row) {
@@ -284,7 +325,7 @@
                  || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']; ?>"
                  || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
                  || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Validierungsergebnisse anzeigen" class="btn btn-link btn-xs xpk-func-btn' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=xplankonverter_validierungsergebnisse&konvertierung_id=' + value + '" onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"><i class="btn-link fa fa-lg fa-eye"></i></a>';
+		output += '<a title="Validierungsergebnisse anzeigen" class="btn btn-link btn-xs xpk-func-btn' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=xplankonverter_validierungsergebnisse&konvertierung_id=' + value + '" onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"><i class="btn-link fa fa-lg fa-list"></i></a>';
 
 		// GML-Erzeugen
 		funcIsAllowed =  row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'          ]; ?>"
@@ -302,6 +343,21 @@
 			funcIsInProgress = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']; ?>";
 			output += '<a title="INSPIRE-GML-Datei erzeugen" class="btn btn-link btn-xs xpk-func-btn xpk-func-generate-inspire-gml' + (funcIsAllowed ? '' : disableFrag) + '" href="#"><i class="' + (funcIsInProgress ? 'btn-link fa fa-spinner fa-pulse fa-fw' : 'btn-link fa fa-lg fa-globe') + '"></i></a>';
 		}
+
+		output += '<a\
+			title="' + (row.veroeffentlicht == 't' ? 'Planveröffentlichung zurücknehmen' : 'Plan veröffentlichen') + '"\
+			class="btn btn-link btn-xs xpk-func-btn"\
+			href="#"\
+			onclick="toggleVeroeffentlicht(' + row.konvertierung_id + ', \'' + row.veroeffentlicht + '\')");\
+		><i\
+			id="veroeffentlicht_button_' + row.konvertierung_id + '"\
+			class="btn-link fa fa-lg ' + (row.veroeffentlicht == 't' ? 'fa-eye' : 'fa-eye-slash') + '"\
+		></i></a>\
+		<i\
+			id="veroeffentlicht_spinner_' + row.konvertierung_id + '"\
+			class="color: fa fa-spinner fa-spin"\
+			style="display: none"\
+		></i>';
 
 		output += '</span>';
 		return output;
@@ -380,6 +436,7 @@
 	data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
 	data-toggle="table"
 	data-toolbar="#toolbar"
+	data-unique-id="konvertierung_id"
 >
 	<thead>
 		<tr>
@@ -430,6 +487,7 @@
 						data-field="konvertierung_status"
 						data-visible="true"
 						data-sortable="true"
+						data-formatter="konvertierungStatusFormatter"
 						class="col-md-2"
 					>Status</th><?php
 				} ?>
@@ -439,7 +497,7 @@
 				data-formatter="konvertierungFunctionsFormatter"
 				data-switchable="false"
 				class="col-md-2"
-			>Funktionen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+			>Funktionen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 			<th
 				data-field="konvertierung_id"
 				data-visible="true"
