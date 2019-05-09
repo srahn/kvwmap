@@ -818,7 +818,7 @@ function go_switch_xplankonverter($go){
 			if (empty($konvertierung_id)) {
 				if (!empty($bereich_gml_id)) {
 					# Hole konvertierung_id über den Bereich
-					$bereich = RP_Bereich::find_by_id($GUI, 'gml_id', $bereich_gml_id);
+					$bereich = XP_Bereich::find_by_id($GUI, 'gml_id', $bereich_gml_id);
 					$plan = $bereich->get_plan();
 					$konvertierung_id = $plan->get('konvertierung_id');
 				}
