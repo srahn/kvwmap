@@ -17233,6 +17233,10 @@ class db_mapObj{
 		}
 
 		# Schreibt alle Attribute, die immer geschrieben werden sollen, egal wie der Wert ist
+		# Besonderheit beim Attribut classification, kommt aus Field layer_classification,
+		# weil classification schon belegt ist von den Classes
+		$attribute_sets[] = "`classification` = '" . $formvars['layer_classification'] . "'";
+		# the rest where column names equal to the field names in layer editor form
 		foreach(
 			array(
 				'Name',
@@ -17256,7 +17260,6 @@ class db_mapObj{
 				'printconnection',
 				'connectiontype',
 				'classitem',
-				'classification',
 				'filteritem',
 				'tolerance',
 				'toleranceunits',
