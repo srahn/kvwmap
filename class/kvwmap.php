@@ -2749,26 +2749,43 @@ class GUI {
     }
   } # end of function output
 
-	function autocomplete_request(){	# layer_id, attribute, inputvalue, field_id
+	function autocomplete_request() { # layer_id, attribute, inputvalue, field_id
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    $layerdb->setClientEncoding();
-    $attributenames[0] = $this->formvars['attribute'];
-    $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
+		$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+		$layerdb->setClientEncoding();
+		$attributenames[0] = $this->formvars['attribute'];
+		$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		# value und output ermitteln
 		$optionen = explode(';', $attributes['options'][0]);
 		$sql = $optionen[0];
-		if($optionen[1] != ''){
-			$further_options = explode(' ', $optionen[1]);      # die weiteren Optionen exploden (opt1 opt2 opt3)
-			for($k = 0; $k < count($further_options); $k++){
-				if($further_options[$k] == 'anywhere'){       # der eingegebene Text kann überall in den Auswahlmöglichkeiten vorkommen
+		if ($optionen[1] != '') {
+			$further_options = explode(' ', $optionen[1]); # die weiteren Optionen exploden (opt1 opt2 opt3)
+			for ($k = 0; $k < count($further_options); $k++) {
+				if ($further_options[$k] == 'anywhere') { # der eingegebene Text kann überall in den Auswahlmöglichkeiten vorkommen
 					$wildcard = '%';
 				}
 			}
 		}
-		if(strpos(strtolower($sql), 'order by') === false)$orderby = 'ORDER BY output';	# nur sortieren, wenn noch nicht sortiert
-		$sql = 'SELECT * FROM ('.$sql.') as foo WHERE';
-		$sql .= " lower(output::text) like lower('" . $wildcard.$this->formvars['inputvalue']."%') " . $orderby." LIMIT 15";
+		# setze Order Klausel
+		if (strpos(strtolower($sql), 'order by') === false) {
+			$orderby = "ORDER BY output";	# nur sortieren, wenn noch nicht sortiert
+		}
+
+		# setze Like Ausdruck
+		if ($this->formvars['listentyp'] == 'zweispaltig' && strpos(' ', $this->formvars['inputvalue']) !== 0) {
+			$like .= str_replace(' ', '%', $this->formvars['inputvalue']);
+		}
+		else {
+			$like = $this->formvars['inputvalue'];
+		}
+		$sql = "
+			SELECT *
+			FROM (" . $sql . ") as foo
+			WHERE
+				lower(output::text) LIKE lower('" . $wildcard . $like . "%')
+			" . $orderby ."
+			LIMIT 15
+		";
 		#echo $sql;
   	$ret=$layerdb->execSQL($sql,4, 1);
 		$count = pg_num_rows($ret[1]);
