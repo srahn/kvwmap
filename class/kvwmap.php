@@ -13082,7 +13082,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							#echo '<br>sql for update: ' . $sql;
 
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
-							$ret = $layerdb[$layer_id]->execSQL($sql, 4, 1);
+							$ret = $layerdb[$layer_id]->execSQL($sql, 4, 9999999, true);
 							if ($ret['success']) {
 								$result = pg_fetch_row($ret['query']);
 								if (pg_affected_rows($ret['query']) > 0) {
@@ -13151,7 +13151,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							else {
 								# query not successfull set query error message
 								$this->success = false;
-								$this->add_message($ret['type'], $ret['msg']);
+								$this->add_message(
+									$ret['type'],
+									sql_err_msg('Kann Datensatz nicht speichern:<br>', $sql, $ret['msg'], 'error_div_' . rand(1, 99999))
+								);
 							}
 						}
 					}
@@ -13679,7 +13682,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 							$layerset[$i]['sql'] = $sql;
 
-							$ret=$layerdb->execSQL($sql.$sql_order.$sql_limit,4 , 0);
+							$this->suppress_err_msg = 1;
+							$ret = $layerdb->execSQL($sql . $sql_order . $sql_limit, 4, 0);
 							#echo $sql.$sql_order.$sql_limit;
 							if ($ret[0]) {
 								$this->add_message('error', $ret[1]);

@@ -230,9 +230,9 @@ FROM
     return $ret;
   }
 
-	function execSQL($sql, $debuglevel, $loglevel, $suppress_error_msg = false) {
+	function execSQL($sql, $debuglevel, $loglevel, $suppress_err_msg = false) {
 		$ret = array(); // Array with results to return
-		$strip_context = false;
+		$strip_context = true;
 
 		switch ($this->loglevel) {
 			case 0 : {
@@ -260,7 +260,7 @@ FROM
 			//$query=0;
 			if ($query == 0) {
 				$ret['success'] = false;
-				# erzeuge eine Fehlermeldung
+				# erzeuge eine Fehlermeldung;
 				$last_error = pg_last_error($this->dbConn);
 				if ($strip_context AND strpos($last_error, 'CONTEXT: ') !== false) {
 					$ret['msg'] = substr($last_error, 0, strpos($last_error, 'CONTEXT: '));
@@ -268,8 +268,20 @@ FROM
 				else {
 					$ret['msg'] = $last_error;
 				}
-				$ret['msg'] = sql_err_msg('PostgreSQL', $sql, $ret['msg'], rand(1, 99999));
-				$ret['type'] = 'error';
+
+				if (strpos($last_error, '{') !== false AND strpos($last_error, '}') !== false) {
+					# Parse als JSON String;
+					$error_obj = json_decode(substr($last_error, strpos($last_error, '{'), strpos($last_error, '}') - strpos($last_error, '{') + 1), true);
+					if (array_key_exists('msg_type', $error_obj)) {
+						$ret['type'] = $error_obj['msg_type'];
+					}
+					if (array_key_exists('msg', $error_obj) AND $error_obj['msg'] != '') {
+						$ret['msg'] = $error_obj['msg'];
+					}
+				}
+				else {
+					$ret['type'] = 'error';
+				}
 				$this->debug->write("<br><b>" . $last_error . "</b>", $debuglevel);
 				if ($logsql) {
 					$this->logfile->write($this->commentsign . ' ' . $sql . ' ' . $last_error);
@@ -289,7 +301,7 @@ FROM
 				$this->notices[] = $last_notice;
 				# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
 				if ($last_notice != '' AND !in_array($last_notice, $this->notices)) {
-					if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}' !== false)) {
+					if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
 						# Parse als JSON String
 						$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
 						if (array_key_exists('success', $notice_obj)) {
@@ -300,7 +312,7 @@ FROM
 								$ret['type'] = $notice_obj['msg_type'];
 							}
 							if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
-								$ret['msg'] = sql_err_msg('PostgreSQL', $sql, $notice_obj['msg'], $div_id);
+								$ret['msg'] = $notice_obj['msg'];
 							}
 						}
 					}
@@ -340,12 +352,13 @@ FROM
 			# Fehler setze entsprechende Fags und Fehlermeldung
 			$ret[0] = 1;
 			$ret[1] = $ret['msg'];
-			if ($suppress_error_msg) {
+			if ($suppress_err_msg) {
 				# mache nichts, den die Fehlermeldung wird unterdrückt
 			}
 			else {
 				# gebe Fehlermeldung aus.
 				$ret[0] = 0;
+				$ret['msg'] = sql_err_msg('Fehler bei der Abfrage der PostgreSQL-Datenbank:', $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
 				$this->gui->add_message($ret['type'], $ret['msg']);
 				header('error: true');	// damit ajax-Requests das auch mitkriegen
 			}

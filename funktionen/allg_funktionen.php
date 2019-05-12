@@ -1780,10 +1780,10 @@ function err_msg($file, $line, $msg, $find = '') {
 	return "<br>Abbruch in " . $file . " Zeile: " . $line . "<br>wegen: " . ($find != '' ? str_replace($find, '*****', $msg) : $msg). "<p>" . INFO1;
 }
 
-function sql_err_msg($database_type, $sql, $msg, $div_id) {
+function sql_err_msg($title, $sql, $msg, $div_id) {
 	$err_msg = "
-		<div style=\"text-align: left;\">
-		Fehler bei der Abfrage der " . $database_type . "-Datenbank:<br>" .
+		<div style=\"text-align: left;\">" .
+		$title . "<br>" .
 		$msg . "
 		<a href=\"#\" onclick=\"$('#error_details_" . $div_id . "').toggle()\" style=\"float: right;\">Details</a>
 		<div id=\"error_details_" . $div_id . "\" style=\"display: none\">
