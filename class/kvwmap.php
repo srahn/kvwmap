@@ -124,13 +124,32 @@ class GUI {
 		$this->output();
 	}
 
+	function is_login_granted($user, $login_name) {
+		if($user->login_name != $login_name){
+			$this->login_failed_reason = 'authentication';
+			return false;
+		}
+		if($user->stop != '0000-00-00' AND date('Y-m-d') > $user->stop){
+			$this->login_failed_reason = 'expired';
+			return false;
+		}
+		return true;
+	}
+
 	function login_failed() {
 		$this->login_failed = $failed;
 		$this->expect = array('login_name', 'passwort', 'mobile');
 		if ($this->formvars['go'] == 'logout') {
 			$this->expect[] = 'go';
 		}
-		$this->add_message('error', 'Benutzername oder Passwort ' . ($this->formvars['num_failed'] > 0 ? $this->formvars['num_failed'] . ' mal' : '') . ' falsch eingegeben!<br>Versuchen Sie es noch einmal.');
+		switch ($this->login_failed_reason) {
+			case 'authentication' : {
+				$this->add_message('error', 'Benutzername oder Passwort ' . ($this->formvars['num_failed'] > 0 ? $this->formvars['num_failed'] . ' mal' : '') . ' falsch eingegeben!<br>Versuchen Sie es noch einmal.');
+			}break;
+			case 'expired' : {
+				$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers ist abgelaufen.');
+			}break;
+		}
 		$this->log_loginfail->write(
 			date("Y:m:d H:i:s", time()) .
 			' IP: ' . $_SERVER['REMOTE_ADDR'] .

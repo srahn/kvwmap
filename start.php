@@ -164,7 +164,7 @@ else {
 			# Frage den Nutzer mit dem login_namen ab
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
 
-			if (is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
+			if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
 				$GUI->debug->write('Set Session', 4, $GUI->echo);
 				set_session_vars($GUI->formvars);
 				$GUI->debug->write('Anmeldung war erfolgreich, Benutzer wurde mit angegebenem Passwort gefunden.', 4, $GUI->echo);
@@ -195,8 +195,10 @@ else {
 			}
 			else { # Anmeldung ist fehlgeschlagen
 				$GUI->debug->write('Anmeldung ist fehlgeschlagen.', 4, $GUI->echo);
-				$GUI->formvars['num_failed'] = Nutzer::increase_num_login_failed($GUI, $GUI->formvars['login_name']);
-				sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
+				if($GUI->login_failed_reason == 'authentication'){
+					$GUI->formvars['num_failed'] = Nutzer::increase_num_login_failed($GUI, $GUI->formvars['login_name']);
+					sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
+				}
 				$show_login_form = true;
 				$go = 'login_failed';
 				# login case 7
@@ -545,10 +547,6 @@ function has_width_and_height($var) {
 
 function is_login($formvars) {
 	return $formvars['login_name'] != '' AND $formvars['passwort'] != '';
-}
-
-function is_login_granted($user, $login_name) {
-	return $user->login_name == $login_name;
 }
 
 function is_agreement_accepted($user) {
