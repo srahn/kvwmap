@@ -471,7 +471,7 @@ class data_import_export {
 			';
 			$ret = $pgdatabase->execSQL($sql,4, 0);
 			if(!$ret[0]){
-				$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'POLYGON' => 2);
+				$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'MULTILINESTRING' => 1, 'POLYGON' => 2, 'MULTIPOLYGON' => 2);
 				while($result = pg_fetch_assoc($ret[1])){
 					if($result['count'] > 0 AND $geom_types[$result['geometrytype']] !== NULL){
 						$custom_table['datatype'] = $geom_types[$result['geometrytype']];
