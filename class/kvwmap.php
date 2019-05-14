@@ -16437,7 +16437,8 @@ class db_mapObj{
 			$type = ltrim($attributes['type'][$i], '_');
 			if(is_numeric($type)){			# Attribut ist ein Datentyp
 				for($k = 0; $k < count($query_result); $k++){
-					@$datatype_query_result = json_decode($query_result[$k][$attributes['name'][$i]], true);
+					$json = str_replace('}"', '}', str_replace('"{', '{', str_replace("\\", "", $query_result[$k][$attributes['name'][$i]])));	# warum diese Zeichen dort reingekommen sind, ist noch nicht klar...
+					@$datatype_query_result = json_decode($json, true);
 					if($attributes['type'][$i] != $type)$datatype_query_result = $datatype_query_result[0];		# falls das Attribut ein Array von Datentypen ist, behelfsweise erstmal nur das erste Array-Element berücksichtigen
 					$query_result2[$k] = $datatype_query_result;
 				}			
