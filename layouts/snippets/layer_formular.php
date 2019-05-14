@@ -546,6 +546,12 @@
 					</td>
 				</tr>
 				<tr>
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSKeywordlist; ?></th>
+					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="wms_keywordlist" type="text" value="<?php echo $this->layerdata['wms_keywordlist']; ?>" size="36" maxlength="100">
+					</td>
+				</tr>				
+				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSServerVersion; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<select name="wms_server_version">

@@ -1456,6 +1456,7 @@ class GUI {
 						$layer = ms_newLayerObj($map);
 						$layer->setMetaData('wfs_request_method', 'GET');
 						$layer->setMetaData('wms_name', $layerset['list'][$i]['wms_name']);
+						if($layerset['list'][$i]['wms_keywordlist'])$layer->setMetaData('ows_keywordlist', $layerset['list'][$i]['wms_keywordlist']);
 						$layer->setMetaData('wfs_typename', $layerset['list'][$i]['wms_name']);
 						$layer->setMetaData('ows_title', $layerset['list'][$i]['Name']); # required
 						$layer->setMetaData('wms_group_title',$layerset['list'][$i]['Gruppenname']);
@@ -1463,6 +1464,11 @@ class GUI {
 						$layer->setMetaData('wms_format',$layerset['list'][$i]['wms_format']);
 						$layer->setMetaData('ows_server_version',$layerset['list'][$i]['wms_server_version']);
 						$layer->setMetaData('ows_version',$layerset['list'][$i]['wms_server_version']);
+						if($layerset['list'][$i]['metalink']){
+							$layer->setMetaData('ows_metadataurl_href',$layerset['list'][$i]['metalink']);
+							$layer->setMetaData('ows_metadataurl_type', 'ISO 19115');
+							$layer->setMetaData('ows_metadataurl_format', 'text/plain');
+						}
 						if($layerset['list'][$i]['ows_srs'] == '') $layerset['list'][$i]['ows_srs'] = 'EPSG:' . $layerset['list'][$i]['epsg_code'];
 						$layer->setMetaData('ows_srs', $layerset['list'][$i]['ows_srs']);
 						$layer->setMetaData('wms_connectiontimeout',$layerset['list'][$i]['wms_connectiontimeout']);
@@ -2986,7 +2992,7 @@ class GUI {
 				if($data_attributes['the_geom'] != ''){
 					switch($layer[$i]['Datentyp']){
 						case MS_LAYER_POINT : {
-							$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform('.$data_attributes['the_geom'].', '.$this->user->rolle->epsg_code.') as the_geom '.$fromwhere.') foo LIMIT 10000';
+							$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(ST_GeometryN('.$data_attributes['the_geom'].', 1), '.$this->user->rolle->epsg_code.') as the_geom '.$fromwhere.') foo LIMIT 10000';
 						}break;
 
 						case MS_LAYER_LINE : {
@@ -7049,6 +7055,14 @@ class GUI {
     if($this->formvars['nurAktiveLayer'] == 1)$this->class_load_level = 1;    # die Klassen von aktiven Layern laden
 		else $this->class_load_level = 2;    # die Klassen von allen Layern laden
     $this->loadMap('DataBase');
+		# grid-Layer rausnehmen
+		@$gridlayer = $this->map->getLayerByName('grid');
+		if($gridlayer)$this->map->removeLayer($gridlayer->index);
+		# Layernamen anpassen
+		for($i = 0; $i < $this->map->numlayers; $i++){
+      $layer = $this->map->getlayer($i);
+      $layer->set('name', umlaute_umwandeln($layer->name));
+    }
     # setzen der WMS-Metadaten
     $this->map->setMetaData("ows_title",$this->formvars['ows_title']);
     $this->map->setMetaData("ows_abstract",$this->formvars['ows_abstract']);
@@ -7066,10 +7080,7 @@ class GUI {
 		$this->map->setMetaData("wms_enable_request",'*');
     $this->saveMap(WMS_MAPFILE_PATH.$this->formvars['mapfile_name']);
     $getMapRequestExample=$this->wms_onlineresource.'request=getMap&VERSION='.SUPORTED_WMS_VERSION;
-    $getMapRequestExample.='&layers='.$this->layerset[0]['alias'];
-    for ($i=1; $i < $this->mapDB->anzLayer; $i++){
-      $getMapRequestExample.=','.$this->layerset[$i]['alias'];
-    }
+    $getMapRequestExample.='&layers='.$layer->name;
     $getMapRequestExample.='&srs=EPSG:'.$this->user->rolle->epsg_code;
     $getMapRequestExample.='&bbox='.$this->map->extent->minx.','.$this->map->extent->miny.','.$this->map->extent->maxx.','.$this->map->extent->maxy;
     $getMapRequestExample.='&width='.$this->map->width.'&height='.$this->map->height;
@@ -15811,9 +15822,16 @@ class db_mapObj{
 				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
 				ELSE l.`Name`
 			END AS Name";
+			$group_column = '
+			CASE 
+				WHEN `Gruppenname_'.$language.'` IS NOT NULL THEN `Gruppenname_'.$language.'` 
+				ELSE `Gruppenname` 
+			END AS Gruppenname';
 		}
-		else
+		else{
 			$name_column = "l.Name";
+			$group_column = 'Gruppenname';
+		}
 
 		$sql = "
 			SELECT DISTINCT
@@ -15824,9 +15842,9 @@ class db_mapObj{
 				l.alias,
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem,
 				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
-				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version,
+				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
-				g.*
+				g.id, ".$group_column.", g.obergruppe, g.order
 			FROM
 				u_rolle2used_layer AS rl,
 				used_layer AS ul,
@@ -17285,6 +17303,7 @@ class db_mapObj{
 				'queryable',
 				'ows_srs',
 				'wms_name',
+				'wms_keywordlist',
 				'wms_server_version',
 				'wms_format',
 				'wms_connectiontimeout',
@@ -17335,7 +17354,7 @@ class db_mapObj{
 					$sql .= "`Name_" . $language."`, ";
 				}
 			}
-			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`) VALUES(";
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'" . $formvars['id']."', ";
       }
@@ -17418,6 +17437,7 @@ class db_mapObj{
       $sql .= $formvars['requires'].", ";
       $sql .= "'" . $formvars['ows_srs']."', ";
       $sql .= "'" . $formvars['wms_name']."', ";
+			$sql .= "'" . $formvars['wms_keywordlist']."', ";			
       $sql .= "'" . $formvars['wms_server_version']."', ";
       $sql .= "'" . $formvars['wms_format']."', ";
       if ($formvars['wms_connectiontimeout']=='') {
