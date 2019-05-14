@@ -124,15 +124,22 @@ class PgObject {
 		return array_values($this->data);
 	}
 
-	function getKVP($escaped = false) {
+	function getKVP($escaped = false, $without_identifier = false) {
 		$kvp = array();
-		foreach($this->data AS $key => $value) {
-			if (is_array($value))
-				$value = "{" . implode(", ", $value) . "}";
-			if ('' . $value == '')
-				$value = 'NULL';
+		foreach ($this->data AS $key => $value) {
+			if ($without_identifier AND ($key == $this->identifier)) {
+				# identifier nicht ausgehen
+			}
+			else {
+				if (is_array($value)) {
+					$value = "{" . implode(", ", $value) . "}";
+				}
+				if ('' . $value == '') {
+					$value = 'NULL';
+				}
 
-			$kvp[] = "\"" . $key . "\" = " . ($value == 'NULL' ? $value : "'" . ($escaped ? pg_escape_string($value) : $value) . "'");
+				$kvp[] = "\"" . $key . "\" = " . ($value == 'NULL' ? $value : "'" . ($escaped ? pg_escape_string($value) : $value) . "'");
+			}
 		}
 		return $kvp;
 	}
@@ -227,7 +234,7 @@ class PgObject {
 			UPDATE
 				\"" . $this->schema . "\".\"" . $this->tableName . "\"
 			SET
-				" . implode(', ', $this->getKVP(true)) . "
+				" . implode(', ', $this->getKVP(true, true)) . "
 			WHERE
 				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
 		";
