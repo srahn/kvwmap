@@ -27,6 +27,10 @@
 		document.getElementById("svghelp").SVGadd_ortho_point(world_x, world_y, local_x, local_y, deactivate);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
 	
+	function remove_ortho_points(){
+		document.getElementById("svghelp").SVGremove_ortho_points();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}
+	
 	function moveback(){	
 		document.getElementById("svghelp").SVGmoveback();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
@@ -1249,6 +1253,8 @@ function mouseup(evt){
 	ortho_point_functions = true;
 	
 	top.document.getElementById("svghelp").SVGadd_ortho_point = add_ortho_point;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	
+	top.document.getElementById("svghelp").SVGremove_ortho_points = remove_ortho_points;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function ortho_point(){
 		enclosingForm.last_doing.value = "ortho_point";
@@ -1262,7 +1268,7 @@ function mouseup(evt){
 		content = \'<div style="height: 30px">Orthogonalpunktberechnung</div>\';
 		content+= \'<span class="px15">1. Setzen Sie in der Karte durch 2 Klicks die beiden Punkte für die Bezugslinie.</span>\';
 		content+= \'<div id="ortho_points"></div>\';
-		content+= \'<br><input id="ortho_point_button" type="button" style="display:none;margin-right: 10px" value="neuer Punkt" onclick="add_ortho_point(null, null, 0, 0, false)"><input type="button" value="Beenden" onclick="$(\\\'#message_box\\\').hide();">\';
+		content+= \'<br><input id="ortho_point_button" type="button" style="display:none;margin-right: 10px" value="neuer Punkt" onclick="add_ortho_point(null, null, 0, 0, false)"><input type="button" value="Beenden" onclick="remove_ortho_points();$(\\\'#message_box\\\').hide();">\';
 		Msg.html(content);
 		create_all_ortho_points();
 	}
