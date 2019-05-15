@@ -307,7 +307,7 @@ class GUI {
 											</div>';
 							}
 						}
-						if($layer[0]['connectiontype']==6 OR $layer[0]['Datentyp']==MS_LAYER_RASTER){
+						if($layer[0]['connectiontype']==6 OR($layer[0]['Datentyp']==MS_LAYER_RASTER AND $layer[0]['connectiontype']!=7)){
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
 						}
 						if($layer[0]['connectiontype']==6 AND $layer[0]['queryable']){
