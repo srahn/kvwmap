@@ -150,14 +150,14 @@ class GUI {
 											</div>';
 							}
 						}
-						if($layer[0]['connectiontype']==6){
+						if($layer[0]['connectiontype']==6 OR $layer[0]['Datentyp']==MS_LAYER_RASTER){
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
-							if($layer[0]['queryable']){
-								echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strSearch.'</a></li>';
-							}
-							if($layer[0]['privileg'] > 0){
-								echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->newDataset.'</a></li>';
-							}
+						}
+						if($layer[0]['connectiontype']==6 AND $layer[0]['queryable']){
+							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strSearch.'</a></li>';
+						}
+						if($layer[0]['privileg'] > 0){
+							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->newDataset.'</a></li>';
 						}
 						if($layer[0]['Class'][0]['Name'] != ''){
 							if($layer[0]['showclasses'] != ''){
