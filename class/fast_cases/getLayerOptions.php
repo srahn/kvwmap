@@ -150,14 +150,14 @@ class GUI {
 											</div>';
 							}
 						}
-						if($layer[0]['connectiontype']==6){
+						if($layer[0]['connectiontype']==6 OR($layer[0]['Datentyp']==MS_LAYER_RASTER AND $layer[0]['connectiontype']!=7)){
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
-							if($layer[0]['queryable']){
-								echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strSearch.'</a></li>';
-							}
-							if($layer[0]['privileg'] > 0){
-								echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->newDataset.'</a></li>';
-							}
+						}
+						if($layer[0]['connectiontype']==6 AND $layer[0]['queryable']){
+							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strSearch.'</a></li>';
+						}
+						if($layer[0]['privileg'] > 0){
+							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->newDataset.'</a></li>';
 						}
 						if($layer[0]['Class'][0]['Name'] != ''){
 							if($layer[0]['showclasses'] != ''){
@@ -177,36 +177,31 @@ class GUI {
 											<select name="layer_options_labelitem">
 												<option value=""> - '.$this->noLabel.' - </option>';
 												for($i = 0; $i < count($attributes)-2; $i++){
-													if($privileges[$attributes[$i]['name']] != '' AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.$attributes[$i]['name'].'</option>';
+													if(($this->formvars['layer_id'] < 0 OR $privileges[$attributes[$i]['name']] != '') AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.$attributes[$i]['name'].'</option>';
 												}
 							echo 	 '</select>
 										</li>';
 						}
 						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>
 							<li>
-								<a href="javascript:$(\'#rollenfilter, #rollenfilterquestionicon, #rollenfilterleeren\').toggle()">Filter</a>
-								<a href="javascript:$(\'#rollenfilter\').val(\'\')">
-									<i
-										id="rollenfilterleeren"
-										title="Filter aus Textfeld löschen."
-										class="fa fa-times-circle button layerOptionsIcon"
-										style="
-											float: right;
-											display: none;
-										"
-									></i>
-								</a>
-								<a href="javascript:message(\'
-									Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Darstellung des Layers auswirkt. Unterstützt werden alle im SELECT Statement verwendeten Attribute. Mehrere Filter werden mit AND oder OR verknüpft.<br>
-									Ist ein Filter gesetzt wird in der Legende neben dem Layernamen ein Filtersymbol angezeigt.<br>
-									Der Filter wird gelöscht in dem das Textfeld geleert wird.<p>
-									Beispiele:<br>
-									<ul>
-										<li>id > 10 AND status = 1</li>
-										<li>type = \\\'Brunnen\\\' OR type = \\\'Quelle\\\'</li>
-										<li>status IN (1, 2)</li>
-										<li>kg.bezeichnung LIKE \\\'Los\\\'</li>
-									</ul>
+								<a href="javascript:void(0);" onclick="$(\'#rollenfilter, #rollenfilterquestionicon\').toggle()">Filter</a>
+								<a href="javascript:void(0);" onclick="message(\'\
+									Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Darstellung des Layers auswirkt.<br>\
+									In diesem Thema stehen dafür folgende Attribute zur Verfügung:<br>\
+									<ul>';
+									for($i = 0; $i < count($attributes)-2; $i++){
+										if(($this->formvars['layer_id'] < 0 OR $privileges[$attributes[$i]['name']] != '') AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<li>'.$attributes[$i]['name'].'</li>';
+									}									
+						echo	'</ul>\
+									Mehrere Filter werden mit AND oder OR verknüpft.<br>\
+									Ist ein Filter gesetzt wird in der Legende neben dem Themanamen ein Filtersymbol angezeigt.<br>\
+									Der Filter wird gelöscht indem das Textfeld geleert wird.<p>\
+									Beispiele:<br>\
+									<ul>\
+										<li>id > 10 AND status = 1</li>\
+										<li>type = \\\'Brunnen\\\' OR type = \\\'Quelle\\\'</li>\
+										<li>status IN (1, 2)</li>\
+									</ul>\
 									\')">
 									<i
 										id="rollenfilterquestionicon"
@@ -214,7 +209,7 @@ class GUI {
 										class="fa fa-question-circle button layerOptionsIcon"
 										style="
 											float: right;
-											display: none;
+											'.($layer[0]['rollenfilter'] == ''? 'display: none' : '').'
 										"
 									></i>
 								</a><br>
@@ -222,11 +217,11 @@ class GUI {
 									id="rollenfilter"
 									style="
 										width: 98%;
-										display: none;
+										'.($layer[0]['rollenfilter'] == ''? 'display: none' : '').'
 									"
-									placeholder="' . $layer[0]['Data'] . '"
 									name="layer_options_rollenfilter"
-								>' . $layer[0]['rollenfilter'] . '</textarea></li>
+								>' . $layer[0]['rollenfilter'] . '</textarea>
+							</li>
 						</ul>
 					</td>
 				</tr>
@@ -252,7 +247,7 @@ class GUI {
 		legend_bottom = document.getElementById(\'legenddiv\').getBoundingClientRect().bottom;
 		posy = document.getElementById(\'options_'.$this->formvars['layer_id'].'\').getBoundingClientRect().top;
 		if(posy > legend_bottom - 150)posy = legend_bottom - 150;
-		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = posy - (13+legend_top);
+		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = document.getElementById(\'map\').offsetTop + posy - (13+legend_top);
 		';
 	}
 }
@@ -1478,13 +1473,14 @@ class pgdatabase {
     return $tablealias;
   }
 
-	function get_attribute_information($schema, $table, $column = NULL) {
-		if($column != NULL)$and_column = "a.attname = '".$column."' AND ";
+	function get_attribute_information($schema, $table, $col_num = NULL) {
+		if($col_num != NULL)$and_column = "a.attnum = ".$col_num." AND ";
 		$attributes = array();
 		$sql = "
 			SELECT
 				ns.nspname as schema,
 				c.relname AS table_name,
+				c.relkind,
 				a.attname AS name,
 				NOT a.attnotnull AS nullable,
 				a.attnum AS ordinal_position,
@@ -1519,7 +1515,8 @@ class pgdatabase {
 				       ELSE null
 				  END AS decimal_length,
 				i.indisunique,
-				i.indisprimary
+				i.indisprimary,
+				v.definition as view_definition
 			FROM
 				pg_catalog.pg_class c JOIN
 				pg_catalog.pg_attribute a ON (c.oid = a.attrelid) JOIN
@@ -1528,7 +1525,8 @@ class pgdatabase {
 				pg_catalog.pg_namespace tns ON (t.typnamespace = tns.oid) LEFT JOIN
 				pg_catalog.pg_type eat ON (t.typelem = eat.oid) LEFT JOIN 
 				pg_index i ON i.indrelid = c.oid AND a.attnum = ANY(i.indkey)	LEFT JOIN 
-				pg_catalog.pg_attrdef ad ON a.attrelid = ad.adrelid AND ad.adnum = a.attnum
+				pg_catalog.pg_attrdef ad ON a.attrelid = ad.adrelid AND ad.adnum = a.attnum LEFT JOIN 
+				pg_catalog.pg_views v ON v.viewname = c.relname AND v.schemaname = ns.nspname
 			WHERE
 				ns.nspname IN ('" .  implode("','", array_map(function($schema) { return trim($schema); }, explode(',', $schema)))  .  "') AND
 				c.relname = '".$table."' AND

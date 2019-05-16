@@ -26,6 +26,7 @@
 	$strQueryable="Queryable";
 	$strOwsSrs="OWS-SRS*";
 	$strWMSName="WMS-Name/Typename";
+	$strWMSKeywordlist="WMS-Keywordlist";
 	$strWMSServerVersion="OWS-Serverversion*";
 	$strWMSFormat="WMS-format*";
 	$strWMSConnectionTimeout="WMS-connection-timeout";

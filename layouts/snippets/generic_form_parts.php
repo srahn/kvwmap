@@ -307,7 +307,11 @@
 				
 				case 'Autovervollständigungsfeld' : {
 					$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $change_all, $size, $onchange, $field_class);
-				}break;
+				} break;
+
+				case 'Autovervollständigungsfeld zweispaltig' : {
+					$datapart .= Autovervollstaendigungsfeld_zweiSpaltig($layer_id, $name, $j, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $change_all, $size, $onchange, $field_class);
+				} break;
 				
 				case 'Radiobutton' : {
 					$enum_value = $attributes['enum_value'][$j];
@@ -412,6 +416,10 @@
 							case 'Autovervollständigungsfeld' : {
 								if($attributes['subform_layer_privileg'][$index] != '0')$gui->editable = $layer_id;
 								$datapart .= Autovervollstaendigungsfeld($layer_id, $name_, $index, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $attributes['enum_output'][$index][$k], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize, $change_all, $size, $onchange, $field_class);
+							}break;
+							case 'Autovervollständigungsfeld zweispaltig' : {
+								if($attributes['subform_layer_privileg'][$index] != '0')$gui->editable = $layer_id;
+								$datapart .= Autovervollstaendigungsfeld_zweispaltig($layer_id, $name_, $index, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $attributes['enum_output'][$index][$k], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize, $change_all, $size, $onchange, $field_class);
 							}break;
 							case 'Auswahlfeld' : {
 								if($attributes['subform_layer_privileg'][$index] != '0')$gui->editable = $layer_id;
@@ -767,41 +775,210 @@
 	}
 
 	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $fontsize, $change_all, $size, $onchange, $field_class){
-		if($change_all){
+		$element_id = $layer_id . '_' . $name . '_' . $k;
+		$dataparts = array();
+
+		if ($change_all) {
 			$onchange = 'change_all('.$layer_id.', '.$k.', \''.$layer_id.'_'.$name.'\');';
 			$onchange_output = 'change_all('.$layer_id.', '.$k.', \'output_'.$layer_id.'_'.$name.'\');';
 		}
-		$datapart = '<table cellpadding="0" cellspacing="0"><tr><td><div>';
-		$datapart .= '<input autocomplete="off" title="'.$alias.'" onkeydown="if(this.backup_value==undefined){this.backup_value=this.value; document.getElementById(\''.$layer_id.'_'.$name.'_'.$k.'\').backup_value=document.getElementById(\''.$layer_id.'_'.$name.'_'.$k.'\').value;}" onkeyup="autocomplete1(\''.$layer_id.'\', \''.$name.'\', \''.$layer_id.'_'.$name.'_'.$k.'\', this.value);" onchange="if(document.getElementById(\'suggests_'.$layer_id.'_'.$name.'_'.$k.'\').style.display==\'block\'){this.value=this.backup_value; document.getElementById(\''.$layer_id.'_'.$name.'_'.$k.'\').value=document.getElementById(\''.$layer_id.'_'.$name.'_'.$k.'\').backup_value; setTimeout(function(){document.getElementById(\'suggests_'.$layer_id.'_'.$name.'_'.$k.'\').style.display = \'none\';}, 500);}'.$onchange_output.'if(\''.$oid.'\' != \'\')set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"';
-		if($privileg == '0' OR $lock){
-			$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
-		}
-		else{
-			$datapart .= ' tabindex="1" style="font-size: '.$fontsize.'px;"';
-		}
-		$datapart .= ' size="'.$size.'" type="text" id="output_'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($output).'">';
-		$datapart .= '<input class="'.$field_class.'" type="hidden" onchange="'.$onchange.';" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
-		$datapart .= '<div valign="top" style="height:0px; position:relative;">
-				<div id="suggests_'.$layer_id.'_'.$name.'_'.$k.'" style="z-index: 3000;display:none; position:absolute; left:0px; top:0px; width: 400px; vertical-align:top; overflow:hidden; border:solid grey 1px;"></div>
-			</div>
-		</div>';
-		
-		if($subform_layer_id != ''){
-			$datapart .= '</td><td>';
-			if($subform_layer_privileg > 0){
-				if($embedded == true){
-					$datapart .= '&nbsp;&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id='.$subform_layer_id.'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject='.$layer_id.'_'.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name.'\', new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));">&nbsp;neu&nbsp;</a>';
-					$datapart .= '</td></tr><tr><td><div style="display:inline" id="subform'.$layer_id.'_'.$k.'_'.$j.'"></div>';
-				}
-				else{
-					$datapart .= '&nbsp;&nbsp;<a class="buttonlink" href="index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$subform_layer_id.'">&nbsp;neu&nbsp;</a>';
-				}
+		# datapart besteht aus
+		# - autofeld_zweispaltig_auswahl_und_suggest_div
+		# - bei Subformverknüpfung und Anlegerechten entweder
+		# 	- bei embedded der Neu Button und ein div für subform
+		#		- oder ein Link zum Anlegen eines neuen Datensatzes
+		# - dargestellt in 1, 2 oder 3 Spalten		
+		if ($subform_layer_id != '' AND $subform_layer_privileg > 0) {
+			if ($embedded == true) {
+				$href = 'javascript:ahah(
+					\'index.php\',
+					\'go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id.'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject=' . $element_id . '&targetlayer_id=' . $layer_id.'&targetattribute='.$name.'\',
+					new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\')),
+					new Array(\'sethtml\')
+				)';
+				$subform_div = '<td><div style="display:inline" id="subform' . $layer_id . '_' . $k . '_' . $j . '"></div></td>';
 			}
+			else {
+				$href = 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id;
+			}
+			$new_button = '<td>&nbsp;&nbsp;<a class="buttonlink" href="' . $href . '">&nbsp;neu&nbsp;</a></td>';
 		}
-		$datapart .= '</td></tr></table>';
+		$datapart = '
+			<table cellpadding="0" cellspacing="0">
+				<tr>
+					<td>
+						<div id="autofeld_zweispaltig_auswahl_und_suggest_div">
+							<input
+								autocomplete="off"
+								title="' . $alias . '"
+								onkeydown="
+									if (this.backup_value == undefined) {
+										this.backup_value = this.value;
+										document.getElementById(\'' . $element_id . '\').backup_value = document.getElementById(\'' . $element_id . '\').value;
+									}
+								"
+								onkeyup="
+									autocomplete1(\'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value);
+								"
+								onchange="
+									if(document.getElementById(\'suggests_' . $element_id . '\').style.display == \'block\') {
+										this.value = this.backup_value;
+										document.getElementById(\'' . $element_id . '\').value = document.getElementById(\'' . $element_id . '\').backup_value;
+										setTimeout(function(){
+											document.getElementById(\'suggests_' . $element_id . '\').style.display = \'none\';
+											},
+											500
+										);
+									}' . $onchange_output . '
+									if (\'' . $oid . '\' != \'\') {
+										set_changed_flag(currentform.changed_' . $layer_id . '_' . $oid . ')
+									}
+								"' .
+								($privileg == '0' OR $lock
+									? ' readonly style="border:0px;background-color:transparent;font-size: ' . $fontsize . 'px;"'
+									: ' tabindex="1" style="font-size: ' . $fontsize . 'px;"'
+								) . '
+								size="' . $size . '"
+								type="text"
+								id="output_' . $element_id . '"
+								value="' . htmlspecialchars($output) . '"
+							>
+							<input
+								class="' . $field_class . '"
+								type="hidden"
+								onchange="' . $onchange . ';"
+								name="' . $fieldname . '"
+								id="' . $element_id . '"
+								value="' . htmlspecialchars($value) . '"
+							>
+							<div valign="top" style="height:0px; position:relative;">
+								<div
+									id="suggests_' . $element_id . '"
+									style="
+										z-index: 3000;
+										display:none;
+										position:absolute;
+										left:0px; top:0px;
+										width: 400px;
+										vertical-align:top;
+										overflow:hidden;
+										border:solid grey 1px;
+									"
+								></div>
+							</div>
+						</div>
+					</td>
+					' . $new_button . '
+					' . $subform_div . '
+				</tr>
+			</table>
+		';
 		return $datapart;
 	}
-	
+
+	function Autovervollstaendigungsfeld_zweispaltig($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $fontsize, $change_all, $size, $onchange, $field_class) {
+		$element_id = $layer_id . '_' . $name . '_' . $k;
+		$dataparts = array();
+
+		if ($change_all) {
+			$onchange = 				'change_all(' . $layer_id . ', ' . $k . ', \'' . $layer_id . '_' . $name . '\');';
+			$onchange_output = 	'change_all(' . $layer_id . ', ' . $k . ', \'output_' . $layer_id.'_'.$name . '\');';
+		}
+		# datapart besteht aus
+		# - autofeld_zweispaltig_auswahl_und_suggest_div
+		# - bei Subformverknüpfung und Anlegerechten entweder
+		# 	- bei embedded der Neu Button und ein div für subform
+		#		- oder ein Link zum Anlegen eines neuen Datensatzes
+		# - dargestellt in 1, 2 oder 3 Spalten		
+		if ($subform_layer_id != '' AND $subform_layer_privileg > 0) {
+			if ($embedded == true) {
+				$href = 'javascript:ahah(
+					\'index.php\',
+					\'go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id.'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject=' . $element_id . '&targetlayer_id=' . $layer_id.'&targetattribute='.$name.'\',
+					new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\')),
+					new Array(\'sethtml\')
+				)';
+				$subform_div = '<td><div style="display:inline" id="subform' . $layer_id . '_' . $k . '_' . $j . '"></div></td>';
+			}
+			else {
+				$href = 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id;
+			}
+			$new_button = '<td>&nbsp;&nbsp;<a class="buttonlink" href="' . $href . '">&nbsp;neu&nbsp;</a></td>';
+		}
+		$datapart = '
+			<table cellpadding="0" cellspacing="0">
+				<tr>
+					<td>
+						<div id="autofeld_zweispaltig_auswahl_und_suggest_div">
+							<input
+								id="output_' . $element_id . '"
+								title="' . $alias . '"
+								autocomplete="off"
+								onkeydown="
+									if (this.backup_value == undefined) {
+										this.backup_value = this.value;
+										document.getElementById(\'' . $element_id . '\').backup_value = document.getElementById(\'' . $element_id . '\').value;
+									}
+								"
+								onkeyup="
+									autocomplete1(\'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value, \'zweispaltig\');
+								"
+								onchange="
+									if (document.getElementById(\'suggests_' . $element_id . '\').style.display == \'block\') {
+										this.value = this.backup_value;
+										document.getElementById(\'' . $element_id . '\').value = document.getElementById(\'' . $element_id . '\').backup_value;
+										setTimeout(function() {
+												document.getElementById(\'suggests_' . $element_id . '\').style.display = \'none\';
+											},
+											500
+										);
+									}
+									' . $onchange_output . '
+									if (\'' . $oid . '\' != \'\') {
+										set_changed_flag(currentform.changed_' . $layer_id . '_' . $oid . ')
+									}
+								"' .
+								($privileg == '0' OR $lock
+									? ' readonly style="border:0px;background-color:transparent;font-size: ' . $fontsize . 'px;"'
+									: ' tabindex="1" style="font-size: ' . $fontsize . 'px;"'
+								) . '
+								size="' . $size . '"
+								type="text"
+								value="' . htmlspecialchars($output) . '"
+							>
+							<input
+								id="' . $element_id . '"
+								class="' . $field_class . '"
+								type="hidden"
+								onchange="' . $onchange . ';"
+								name="' . $fieldname . '"
+								value="' . htmlspecialchars($value) . '"
+							>
+							<div valign="top" style="height:0px; position:relative;">
+								<div
+									id="suggests_' . $element_id . '"
+									style="
+										z-index: 3000;
+										display:none;
+										position:absolute;
+										left:0px; top:0px;
+										width: 400px;
+										vertical-align:top;
+										overflow:hidden;
+										border:solid grey 1px;
+									"
+								></div>
+							</div>
+						</div>
+					</td>
+					' . $new_button . '
+					' . $subform_div . '
+				</tr>
+			</table>
+		';
+		return $datapart;
+	}
+
 	function Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $req_by, $req, $attributenames, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class, $datatype_id = ''){
 		if($privileg == '0' OR $lock){
 			for($e = 0; $e < count($enum_value); $e++){

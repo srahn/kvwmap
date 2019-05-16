@@ -29,6 +29,7 @@
 	$strChooseLayers="Load layer selection";
   $strMap="Map";
 	$strMapSize="Adjust mapsize";
+	$strPointSnap="Point Snap";
 	$strLayerControl="Layer control";
 	$strDeactivateAllLayer="Click to deactivate all layers.";
 	$strClearAllQuerys="Click to clear all query checkboxes.";

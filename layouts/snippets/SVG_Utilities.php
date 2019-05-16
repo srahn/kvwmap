@@ -27,6 +27,10 @@
 		document.getElementById("svghelp").SVGadd_ortho_point(world_x, world_y, local_x, local_y, deactivate);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
 	
+	function remove_ortho_points(){
+		document.getElementById("svghelp").SVGremove_ortho_points();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}
+	
 	function moveback(){	
 		document.getElementById("svghelp").SVGmoveback();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
@@ -130,6 +134,8 @@
 	}
 	if(enclosingForm.ortho_point_vertices != undefined){
 		var ortho_point_vertices = new Array();
+		var o_p_local_x = ['.implode(',', $this->formvars['ortho_point_x']).'];
+		var o_p_local_y = ['.implode(',', $this->formvars['ortho_point_y']).'];
 	}
 	var helmert;
 	var textx = '.$text_x.';
@@ -684,7 +690,6 @@
 			if(enclosingForm.always_draw.checked && !geomload){		// "weiterzeichnen"
 				enclosingForm.last_button.value = "pgon0";
 				if(enclosingForm.last_doing2.value != "")enclosingForm.last_doing.value = enclosingForm.last_doing2.value;
-				console.log(enclosingForm.secondpoly.value);
 				if(enclosingForm.secondpoly.value == "started" || enclosingForm.secondpoly.value == "true"){	// am zweiten Polygon oder an einer gepufferten Linie wird weitergezeichnet
 					if(enclosingForm.last_doing2.value == "add_buffered_line")enclosingForm.last_button.value = "buffer1";
 					if(enclosingForm.last_doing2.value == "add_parallel_polygon")enclosingForm.last_button.value = "buffer2";
@@ -748,22 +753,8 @@
 			}
 		}
 		if(enclosingForm.punktfang != undefined && enclosingForm.punktfang.checked)toggle_vertices();
-		if(ortho_point_functions == true){
-			if(enclosingForm.ortho_point_vertices.value != ""){
-				o_p_vertices = enclosingForm.ortho_point_vertices.value.split("|");
-				enclosingForm.last_button.value = "ortho_point1";
-				enclosingForm.always_draw.checked = false;
-				ortho_point();';
-				for($o = 0; $o < count($this->formvars['ortho_point_x']); $o++){
-					if($o < 2){
-						$basicfunctions.= '
-						var a = o_p_vertices['.$o.'].split(" ");
-						add_ortho_point(a[0], a[1], '.$this->formvars['ortho_point_x'][$o].', '.$this->formvars['ortho_point_y'][$o].', false);';
-					}
-					else $basicfunctions.= 'add_ortho_point(null, null, '.$this->formvars['ortho_point_x'][$o].', '.$this->formvars['ortho_point_y'][$o].', false);';
-				}
-$basicfunctions.= '			
-			}
+		if(ortho_point_functions == true && enclosingForm.ortho_point_vertices.value != ""){
+			ortho_point();
 		}
 		fachschale();
 		if(polygonfunctions == true){
@@ -1262,22 +1253,56 @@ function mouseup(evt){
 	ortho_point_functions = true;
 	
 	top.document.getElementById("svghelp").SVGadd_ortho_point = add_ortho_point;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	
+	top.document.getElementById("svghelp").SVGremove_ortho_points = remove_ortho_points;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function ortho_point(){
 		enclosingForm.last_doing.value = "ortho_point";
-		if(enclosingForm.ortho_point_vertices.value == "" || ortho_point_vertices.length == 0){
-			if(enclosingForm.ortho_point_vertices.value == "")ortho_point_vertices = new Array();
-			helmert = new top.HelmertTransformation4Js(0, 0, 0, 0);
-			mittex = Math.round(minx+(maxx-minx)/2);
-			mittey = Math.round(miny+(maxy-miny)/2);
-			var Msg = top.$("#message_box");
-			Msg[0].style.left = "70%";
-			Msg.show();
-			content = \'<div style="height: 30px">Orthogonalpunktberechnung</div>\';
-			content+= \'<span class="px15">1. Setzen Sie in der Karte durch 2 Klicks die beiden Punkte für die Bezugslinie.</span>\';
-			content+= \'<div id="ortho_points"></div>\';
-			content+= \'<br><input id="ortho_point_button" type="button" style="display:none;margin-right: 10px" value="neuer Punkt" onclick="add_ortho_point(null, null, 0, 0, false)"><input type="button" value="Beenden" onclick="currentform.ortho_point_vertices.value = \\\'\\\';$(\\\'#message_box\\\').hide();">\';
-			Msg.html(content);
+		if(enclosingForm.ortho_point_vertices.value == "")ortho_point_vertices = new Array();
+		helmert = new top.HelmertTransformation4Js(0, 0, 0, 0);
+		mittex = Math.round(minx+(maxx-minx)/2);
+		mittey = Math.round(miny+(maxy-miny)/2);
+		var Msg = top.$("#message_box");
+		Msg[0].style.left = "70%";
+		Msg.show();
+		content = \'<div style="height: 30px">Orthogonalpunktberechnung</div>\';
+		content+= \'<span class="px15">1. Setzen Sie in der Karte durch 2 Klicks die beiden Punkte für die Bezugslinie.</span>\';
+		content+= \'<div id="ortho_points"></div>\';
+		content+= \'<br><input id="ortho_point_button" type="button" style="display:none;margin-right: 10px" value="neuer Punkt" onclick="add_ortho_point(null, null, 0, 0, false)"><input type="button" value="Beenden" onclick="remove_ortho_points();$(\\\'#message_box\\\').hide();">\';
+		Msg.html(content);
+		create_all_ortho_points();
+	}
+	
+	function create_all_ortho_points(){
+		if(enclosingForm.ortho_point_vertices.value != ""){
+			var o_p_local_x2 = o_p_local_x;
+			var o_p_local_y2 = o_p_local_y;
+			enclosingForm.last_button.value = "ortho_point1";
+			enclosingForm.always_draw.checked = false;
+			var o_p_vertices = enclosingForm.ortho_point_vertices.value.split("|");
+			remove_ortho_points();
+			for(var o = 0; o < o_p_vertices.length; o++){
+				if(o < 2){
+					var a = o_p_vertices[o].split(" ");
+					add_ortho_point(a[0], a[1], o_p_local_x2[o], o_p_local_y2[o], false);
+				}
+				else add_ortho_point(null, null, o_p_local_x2[o], o_p_local_y2[o], false);
+			}
+		}
+	}
+	
+	function remove_ortho_points(){
+		o_p_local_x = new Array();
+		o_p_local_y = new Array();
+		ortho_point_vertices = new Array();
+		enclosingForm.ortho_point_vertices.value = "";
+		var ortho_point_div = top.document.getElementById("ortho_points");
+		while(ortho_point_div.firstChild){
+			ortho_point_div.removeChild(ortho_point_div.firstChild);
+		}
+		var ortho_point_vertices_group = document.getElementById("ortho_point_vertices");
+		while(ortho_point_vertices_group.firstChild){
+			ortho_point_vertices_group.removeChild(ortho_point_vertices_group.firstChild);
 		}
 	}
 	
@@ -1310,7 +1335,9 @@ function mouseup(evt){
 		point_x = top.document.createElement("input");
 		point_y = top.document.createElement("input");
 		point_x.value = local_x;
+		o_p_local_x.push(local_x);
 		point_y.value = local_y;
+		o_p_local_y.push(local_y);
 		point_x.name="ortho_point_x[]";
 		point_y.name="ortho_point_y[]";
 		point_x.type = point_y.type = "text";
