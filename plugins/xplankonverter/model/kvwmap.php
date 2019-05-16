@@ -164,7 +164,7 @@
 			} break;
 
 			case ($fired == 'AFTER' AND $event == 'UPDATE') : {
-				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, false);
+				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, true);
 				$regel = Regel::find_by_id($GUI, 'oid', $oid);
 				$regel->delete_gml_layer();
 				$regel->create_gml_layer();

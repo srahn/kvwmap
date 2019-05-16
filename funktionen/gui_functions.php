@@ -1009,4 +1009,15 @@ function exportMapImage(target) {
 		location.href = link;
 	}
 }
+
+function htmlspecialchars(value) {
+	var map = {
+		'&': '&amp;',
+		'<': '&lt;',
+		'>': '&gt;',
+		'"': '&quot;',
+		"'": '&#039;'
+	};
+	return value.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
 </script>

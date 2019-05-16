@@ -88,14 +88,19 @@ function replace_tags($text, $tags) {
 	}
 	return $text;
 }
+
 foreach($_REQUEST as $key => $value) {
-	if (is_string($value)) $_REQUEST[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
+	if (is_string($value)) {
+		$_REQUEST[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
+	}
 }
+
 reset($_REQUEST);
 $formvars = $_REQUEST;
 
 $go = $formvars['go'];
-if($formvars['go_plus'] != '') $go = $go.'_'.$formvars['go_plus'];
+if ($formvars['go_plus'] != '') $go = $go.'_'.$formvars['go_plus'];
+
 ###########################################################################################################
 define(CASE_COMPRESS, false);																																						  #
 #																																																					#
@@ -172,6 +177,7 @@ function go_switch($go, $exit = false) {
 	global $newPassword;
 	global $passwort;
 	global $username;
+
 	if (!FAST_CASE) {
 		$old_go = $GUI->go;
 		$GUI->go_switch_plugins($go);
@@ -186,8 +192,7 @@ function go_switch($go, $exit = false) {
 			$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
 			$GUI->formvars['go'] = $go = $GUI->last_query['go'];
 		}
-
-		switch($go) {
+		switch ($go) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction'], $GUI->formvars['height_reduction']);
@@ -199,7 +204,7 @@ function go_switch($go, $exit = false) {
 				$GUI->drawMap();
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
-			}break;
+			} break;
 
 			case 'login' : {
 				$GUI->login();
