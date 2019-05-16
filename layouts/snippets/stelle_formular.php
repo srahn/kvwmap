@@ -501,6 +501,7 @@ else {
 							<tr valign="top">
 								<td>
 									<select name="selectedusers" size="6" multiple style="width:300px"><?
+										$seluseroptions[] = array('value' => '', 'output' => '-- Auswahl --');
 										for ($i = 0; $i < count($this->formvars['selusers']["Bezeichnung"]); $i++) {
 											$seluseroptions[] = array(
 												'value'  => $this->formvars['selusers']["ID"][$i],
