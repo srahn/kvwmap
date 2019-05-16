@@ -854,7 +854,8 @@ class rolle {
 				CASE gle_view
 					WHEN '0' THEN 'generic_layer_editor.php'
 					ELSE ''
-				END as template 
+				END as template,
+				concat('(', rollenfilter, ')') as Filter
 			FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
     if ($LayerName!='') {

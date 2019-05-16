@@ -209,7 +209,7 @@ class GUI {
 										class="fa fa-question-circle button layerOptionsIcon"
 										style="
 											float: right;
-											display: none;
+											'.($layer[0]['rollenfilter'] == ''? 'display: none' : '').'
 										"
 									></i>
 								</a><br>
