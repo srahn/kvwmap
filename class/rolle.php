@@ -1101,7 +1101,7 @@ class rolle {
 				$where_id = "layer_id = " . $formvars['layer_options_open'];
 			}
 			else { # layer_options_open < 0 Rollenlayer
-				$table_name = "rollenfilter";
+				$table_name = "rollenlayer";
 				$where_id = "id = -1*" . $formvars['layer_options_open'];
 			}
 			$sql = "
