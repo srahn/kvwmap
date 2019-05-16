@@ -267,7 +267,7 @@ class GUI {
 		}
 	}
 
-	function getLayerOptions() {
+	function getLayerOptions(){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if($this->formvars['layer_id'] > 0)$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
 		else $layer = $this->user->rolle->getRollenLayer(-$this->formvars['layer_id']);
@@ -341,29 +341,24 @@ class GUI {
 						}
 						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>
 							<li>
-								<a href="javascript:$(\'#rollenfilter, #rollenfilterquestionicon, #rollenfilterleeren\').toggle()">Filter</a>
-								<a href="javascript:$(\'#rollenfilter\').val(\'\')">
-									<i
-										id="rollenfilterleeren"
-										title="Filter aus Textfeld löschen."
-										class="fa fa-times-circle button layerOptionsIcon"
-										style="
-											float: right;
-											display: none;
-										"
-									></i>
-								</a>
-								<a href="javascript:message(\'
-									Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Darstellung des Layers auswirkt. Unterstützt werden alle im SELECT Statement verwendeten Attribute. Mehrere Filter werden mit AND oder OR verknüpft.<br>
-									Ist ein Filter gesetzt wird in der Legende neben dem Layernamen ein Filtersymbol angezeigt.<br>
-									Der Filter wird gelöscht in dem das Textfeld geleert wird.<p>
-									Beispiele:<br>
-									<ul>
-										<li>id > 10 AND status = 1</li>
-										<li>type = \\\'Brunnen\\\' OR type = \\\'Quelle\\\'</li>
-										<li>status IN (1, 2)</li>
-										<li>kg.bezeichnung LIKE \\\'Los\\\'</li>
-									</ul>
+								<a href="javascript:void(0);" onclick="$(\'#rollenfilter, #rollenfilterquestionicon\').toggle()">Filter</a>
+								<a href="javascript:void(0);" onclick="message(\'\
+									Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Darstellung des Layers auswirkt.<br>\
+									In diesem Thema stehen dafür folgende Attribute zur Verfügung:<br>\
+									<ul>';
+									for($i = 0; $i < count($attributes)-2; $i++){
+										if($privileges[$attributes[$i]['name']] != '' AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<li>'.$attributes[$i]['name'].'</li>';
+									}									
+						echo	'</ul>\
+									Mehrere Filter werden mit AND oder OR verknüpft.<br>\
+									Ist ein Filter gesetzt wird in der Legende neben dem Themanamen ein Filtersymbol angezeigt.<br>\
+									Der Filter wird gelöscht indem das Textfeld geleert wird.<p>\
+									Beispiele:<br>\
+									<ul>\
+										<li>id > 10 AND status = 1</li>\
+										<li>type = \\\'Brunnen\\\' OR type = \\\'Quelle\\\'</li>\
+										<li>status IN (1, 2)</li>\
+									</ul>\
 									\')">
 									<i
 										id="rollenfilterquestionicon"
@@ -379,11 +374,11 @@ class GUI {
 									id="rollenfilter"
 									style="
 										width: 98%;
-										display: none;
+										'.($layer[0]['rollenfilter'] == ''? 'display: none' : '').'
 									"
-									placeholder="' . $layer[0]['Data'] . '"
 									name="layer_options_rollenfilter"
-								>' . $layer[0]['rollenfilter'] . '</textarea></li>
+								>' . $layer[0]['rollenfilter'] . '</textarea>
+							</li>
 						</ul>
 					</td>
 				</tr>
@@ -791,7 +786,7 @@ class GUI {
 				if ($layer['aktivStatus'] == 1 and $this->user->rolle->showlayeroptions) {
 					$legend .= '&nbsp';
 					if ($layer['rollenfilter'] != '') {
-						$legend .= '<a href="javascript:getLayerOptions('.$layer['Layer_ID'].');$(\'#rollenfilter\').show()">
+						$legend .= '<a href="javascript:void(0);" onclick="getLayerOptions('.$layer['Layer_ID'].');">
 							<i class="fa fa-filter button layerOptionsIcon" title="' . $layer['rollenfilter'] . '"></i>
 						</a>';
 					}
@@ -1661,14 +1656,6 @@ class GUI {
 									$this->user->rolle->language
 								);
 								$data = $layerset['list'][$i]['Data'];
-								if ($layerset['list'][$i]['rollenfilter'] != '') {
-									if (stripos($layerset['list'][$i]['Data'], ' WHERE ') !== 0) {
-										$data = str_ireplace(' WHERE ', ' WHERE ' . $layerset['list'][$i]['rollenfilter'] . ' AND ', $layerset['list'][$i]['Data']);
-									}
-									else {
-										$data = str_ireplace(') AS ', ' WHERE ' . $layerset['list'][$i]['rollenfilter'] . ') AS ', $layerset['list'][$i]['Data']);
-									}
-								}
 								$layer->set('data', $data);
 							}
 
@@ -13352,7 +13339,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $map=ms_newMapObj('');
     $map->set('shapepath', SHAPEPATH);
     for ($i=0;$i<$anzLayer;$i++) {
-
     	$sql_order = '';
       if($layerset[$i]['queryable'] AND
 				($this->formvars['qLayer'.$layerset[$i]['Layer_ID']]=='1' OR $this->formvars['qLayer'.$layerset[$i]['requires']]=='1') 	AND
@@ -15942,6 +15928,14 @@ class db_mapObj{
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
     while ($rs=mysql_fetch_assoc($query)){
+			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
+				if($rs['Filter'] == ''){
+					$rs['Filter'] = '('.$rs['rollenfilter'].')';
+				}
+				else {
+					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
+				}
+			}
 			if($rs['alias'] == '' OR !$useLayerAliases){
 				$rs['alias'] = $rs['Name'];
 			}
