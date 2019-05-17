@@ -6,16 +6,14 @@
 ?>
 	<script type="text/javascript" src="funktionen/keyfunctions.js"></script>
 	<script>
-		keypress_bound_submit_button_id = 'sachdatenanzeige_save_button';
+		keypress_bound_ctrl_s_button_id = 'sachdatenanzeige_save_button';
 	</script>
 	<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
 	<a name="oben"></a><?
 	if ($this->user->rolle->querymode == 1) { ?>
-		<script language="JavaScript" src="funktionen/keyfunctions.js" type="text/javascript"></script>
 		<script type="text/javascript">
 			if (document.getElementById('overlayfooter') != undefined) 	document.getElementById('overlayfooter').style.display = 'none';
 			if (document.getElementById('savebutton') != undefined) 		document.getElementById('savebutton').style.display = 'none';
-			keypress_bound_submit_button_id = 'sachdatenanzeige_save_button';
 		</script><?
 	}
 $this->found = 'false';

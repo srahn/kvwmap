@@ -49,7 +49,7 @@
 		}
 	}
 
-	keypress_bound_submit_button_id = 'layer_formular_submit_button';
+	keypress_bound_ctrl_s_button_id = 'layer_formular_submit_button';
 </script>
 
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
