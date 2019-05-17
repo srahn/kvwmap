@@ -46,7 +46,7 @@
 										} 
 									} break;
 
-									case 'Autovervollständigungsfeld' : {
+									case 'Autovervollständigungsfeld' : case 'Autovervollständigungsfeld_zweispaltig' :{
 										$output[$p] = $attributes['enum_output'][$j][$k];
 									} break;
 

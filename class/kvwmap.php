@@ -4556,25 +4556,31 @@ class GUI {
 	}
 
 	function PolygonEditor() {
-		include_once (CLASSPATH.'polygoneditor.php');
+		include_once (CLASSPATH . 'polygoneditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->reduce_mapwidth(30);
 		$this->main='PolygonEditor.php';
 		$this->titel='Geometrie bearbeiten';
 		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-		if($this->formvars['geom_from_layer'] == '')$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
+		if ($this->formvars['geom_from_layer'] == '') {
+			$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
+		}
 		$attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 		$this->formvars['layer_columnname'] = $attributes['the_geom'];
 		$this->formvars['layer_tablename'] = $attributes['table_name'][$attributes['the_geom']];
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
 		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
 		$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-		if(!$this->formvars['edit_other_object'] AND ($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')){
+
+		if (
+			!$this->formvars['edit_other_object'] AND
+			($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')
+		) {
 			$this->neuLaden();
 			$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
 		}
-		else{
+		else {
 			$this->user->rolle->saveGeomFromLayer($this->formvars['selected_layer_id'], $this->formvars['geom_from_layer']);
 			$this->loadMap('DataBase');
 			if($this->formvars['oid'] != '' AND $this->formvars['no_load'] != 'true'){
@@ -4650,7 +4656,6 @@ class GUI {
 				}
 			}
 		}
-
 		if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
 			$currenttime=date('Y-m-d H:i:s',time());
 			$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
@@ -4660,33 +4665,34 @@ class GUI {
 		$this->output();
 	}
 
-  function PolygonEditor_Senden(){
+	function PolygonEditor_Senden(){
 		include_(CLASSPATH.'polygoneditor.php');
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-    $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-    $polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-    # eingeabewerte pruefen:
-    $ret = $polygoneditor->pruefeEingabedaten($this->formvars['newpathwkt']);
-    if ($ret[0]) { # fehlerhafte eingabedaten
-			$this->error_position = explode(' ', trim(substr($ret[1], strpos($ret[1], '[')), '[]'));
-			$this->formvars['no_load'] = 'true';
-      $this->Meldung=$ret[1];
-      $this->PolygonEditor();
-      return;
-    }
-    else{
-      $umring = $this->formvars['newpathwkt'];
-      $ret = $polygoneditor->eintragenFlaeche(
+		$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+		# eingeabewerte pruefen:
+		$ret = $polygoneditor->pruefeEingabedaten($this->formvars['newpathwkt']);
+		if ($ret[0]) { # fehlerhafte eingabedaten
+			if (strpos($ret[1], '[') !== false) {
+				$this->error_position = explode(' ', trim(substr($ret[1], strpos($ret[1], '[')), '[]'));
+				$this->formvars['no_load'] = 'true';
+			}
+			$this->Meldung = $ret[1];
+			$this->PolygonEditor();
+			return;
+		}
+		else {
+			$umring = $this->formvars['newpathwkt'];
+			$ret = $polygoneditor->eintragenFlaeche(
 				$umring, $this->formvars['oid'],
 				$this->formvars['layer_tablename'],
 				$this->formvars['layer_columnname'],
 				$this->attributes['geomtype'][$this->attributes['the_geom']]
 			);
-			if ($ret[0]) { # fehler beim eintrag
+			if (!$ret['success']) { # fehler beim eintrag
 				$this->Meldung = $ret[1];
-				$this->add_message('error', $ret[1]);
 			}
 			else { # eintrag erfolgreich
 				# wenn auto-Attribute vorhanden, auto-Werte eintragen
@@ -16575,7 +16581,7 @@ class db_mapObj{
             }
           }break;
 
-					case 'Autovervollständigungsfeld' : {
+					case 'Autovervollständigungsfeld' : case 'Autovervollständigungsfeld_zweispaltig' : {
             if($attributes['options'][$i] != ''){
               if(strpos(strtolower($attributes['options'][$i]), "select") === 0){     # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
                 $optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen

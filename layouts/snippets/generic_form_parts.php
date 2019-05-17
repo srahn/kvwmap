@@ -309,7 +309,7 @@
 					$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $change_all, $size, $onchange, $field_class);
 				} break;
 
-				case 'Autovervollständigungsfeld zweispaltig' : {
+				case 'Autovervollständigungsfeld_zweispaltig' : {
 					$datapart .= Autovervollstaendigungsfeld_zweiSpaltig($layer_id, $name, $j, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $change_all, $size, $onchange, $field_class);
 				} break;
 				
