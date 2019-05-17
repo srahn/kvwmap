@@ -263,6 +263,10 @@
 		});
 	};
 
+	function konvertierungHtmlSpecialchars(value) {
+		return htmlspecialchars(value);
+	}
+
 	// formatter functions
 	function konvertierungGemeindeFormatter(value, row) {
 		var gemeinden = JSON.parse(value);
@@ -289,7 +293,7 @@
 		var funcIsAllowed,
 				funcIsInProgress,
 				disableFrag = ' disabled" onclick="return false',
-				output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" plan_name="' + row.anzeigename + '">';
+				output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" plan_name="' + htmlspecialchars(row.anzeigename) + '">';
 		output += '<a title="Plan bearbeiten" class="btn btn-link btn-xs xpk-func-btn" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&operator_plan_gml_id==&value_plan_gml_id=' + row.plan_gml_id + '"><i class="btn-link fa fa-lg fa-pencil"></i></a>';
 		output += '<a id="delButton' + value + '" title="Konvertierung l&ouml;schen" class="btn btn-link btn-xs xpk-func-btn xpk-func-del-konvertierung" href="#"><i class="btn-link fa fa-lg fa-trash"></i></a>';
 		output += '</span>';
@@ -344,7 +348,12 @@
 			output += '<a title="INSPIRE-GML-Datei erzeugen" class="btn btn-link btn-xs xpk-func-btn xpk-func-generate-inspire-gml' + (funcIsAllowed ? '' : disableFrag) + '" href="#"><i class="' + (funcIsInProgress ? 'btn-link fa fa-spinner fa-pulse fa-fw' : 'btn-link fa fa-lg fa-globe') + '"></i></a>';
 		}
 
-		output += '<a\
+		output += '</span>';
+		return output;
+	}
+
+	function konvertierungVeroeffentlichtFormatter(value, row) {
+		var output = '<a\
 			title="' + (row.veroeffentlicht == 't' ? 'Planveröffentlichung zurücknehmen' : 'Plan veröffentlichen') + '"\
 			class="btn btn-link btn-xs xpk-func-btn"\
 			href="#"\
@@ -352,6 +361,7 @@
 		><i\
 			id="veroeffentlicht_button_' + row.konvertierung_id + '"\
 			class="btn-link fa fa-lg ' + (row.veroeffentlicht == 't' ? 'fa-eye' : 'fa-eye-slash') + '"\
+			style="color: ' + (row.veroeffentlicht == 't' ? '#2cb03c' : '#d82c2c') + '"\
 		></i></a>\
 		<i\
 			id="veroeffentlicht_spinner_' + row.konvertierung_id + '"\
@@ -359,7 +369,6 @@
 			style="display: none"\
 		></i>';
 
-		output += '</span>';
 		return output;
 	}
 
@@ -409,9 +418,19 @@
 	}
 
 </script>
-<h2><?php echo $this->title; ?></h2>
-<button type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo $this->plan_layer_id ?>'">neu</button>
-<button type="button" id="new_konvertierung_from_gml" name="go_plus" onclick="location.href='index.php?go=xplankonverter_upload_xplan_gml&planart=<?php echo $this->formvars['planart'] ?>'">Neuer Plan aus XPlanGML</button>
+<h2><?php echo htmlspecialchars($this->title); ?></h2><?php
+if ($this->Stelle->id > 200) { ?>
+	<button type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo $this->plan_layer_id ?>'">neu</button>
+	<button type="button" id="new_konvertierung_from_gml" name="go_plus" onclick="location.href='index.php?go=xplankonverter_upload_xplan_gml&planart=<?php echo $this->formvars['planart'] ?>'">Neuer Plan aus XPlanGML</button><?
+}
+else { ?>
+	Neue Pläne können nur in Amts oder Gemeindestellen angelegt werden. Wechseln Sie dazu die Stelle über <a href="#" onclick="
+		$('#user_options').toggle();
+		$('#sperr_div').toggle()
+	">Einstellungen</a>. <?
+}
+?>
+
 <!--div class="alert alert-success" style="white-space: pre-wrap" id="eventsResult">
 		Here is the result of event.
 </div//-->
@@ -431,7 +450,7 @@
 	data-show-columns="true"
 	data-query-params="go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&anzahl=10000&mime_type=formatter&format=json"
 	data-pagination="true"
-	data-page-size="100"
+	data-page-size="25"
 	data-show-export="false"
 	data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
 	data-toggle="table"
@@ -462,8 +481,15 @@
 				data-field="anzeigename"
 				data-sortable="true"
 				data-visible="true"
+				data-formatter="konvertierungHtmlSpecialchars"
 				class="col-md-7"
-			>Name</th><?php
+			>Name</th>
+			<th
+				data-field="nummer"
+				data-sortable="true"
+				data-visible="false"
+				class="col-md-2"
+			>Nr</th><?php
 				if ($this->plan_layer_id == XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
 					<th
 						data-field="bundesland"
@@ -491,6 +517,13 @@
 						class="col-md-2"
 					>Status</th><?php
 				} ?>
+			<th
+				data-field="veroeffentlicht"
+				data-visible="true"
+				data-sortable="true"
+				data-formatter="konvertierungVeroeffentlichtFormatter"
+				data-switchable="true"
+			><i title="Veröffentlichung" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th>
 			<th
 				data-field="konvertierung_id"
 				data-visible="true"

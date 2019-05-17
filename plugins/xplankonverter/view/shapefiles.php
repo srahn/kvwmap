@@ -72,6 +72,8 @@
 		$('#GUI').submit();
 	}
 </script>
+
+<h4><?php echo  htmlspecialchars($this->konvertierung->plan->get_anzeige_name()); ?></h4>
 <table
   id="shapefiles_table"
   data-toggle="table"

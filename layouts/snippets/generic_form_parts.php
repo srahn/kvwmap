@@ -242,7 +242,7 @@
 		if($attributes['constraints'][$j] != '' AND !in_array($attributes['constraints'][$j], array('PRIMARY KEY', 'UNIQUE'))){
 			if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 				$size1 = 1.3*strlen($dataset[$attributes['name'][$j]]);
-				$datapart .= '<input class="'.$field_class.'" readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$size1.'" type="text" name="'.$fieldname.'" value="'.$value.'">';
+				$datapart .= '<input class="'.$field_class.'" readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$size1.'" type="text" name="'.$fieldname.'" value="' . htmlspecialchars($value) . '">';
 			}
 			else{
 				$datapart .= '<select class="'.$field_class.'" id="'.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'" onchange="'.$onchange.'" title="'.$attributes['alias'][$j].'"  style="'.$select_width.'font-size: '.$fontsize.'px" name="'.$fieldname.'">';
@@ -270,7 +270,7 @@
 					else{
 						$datapart .= ' tabindex="1" style="width: 100%;font-size: '.$fontsize.'px"';
 					}
-					$datapart .= ' rows="3" name="'.$fieldname.'">'.$value.'</textarea>';
+					$datapart .= ' rows="3" name="'.$fieldname.'">' . htmlspecialchars($value) . '</textarea>';
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
 						if(strtolower(substr($attributes['options'][$j], 0, 6)) == 'select'){
 							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
@@ -286,7 +286,7 @@
 						else{								// zeilenweise
 							$maxwidth = $size * 11;
 							$minwidth = $size * 7.1;
-							$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;"><pre>'.$value.'</pre></div>';
+							$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;"><pre>' . htmlspecialchars($value) . '</pre></div>';
 						}
 					}
 				}break;
@@ -320,7 +320,7 @@
 						for($e = 0; $e < count($enum_value); $e++){
 							if($enum_value[$e] == $value){
 								$auswahlfeld_output = $enum_output[$e];
-								$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
+								$auswahlfeld_output_laenge = strlen($auswahlfeld_output)+1;
 								break;
 							}
 						}
@@ -335,7 +335,7 @@
 						for($e = 0; $e < count($enum_value); $e++){
 							$datapart .= '<input class="'.$field_class.'" tabindex="1" type="radio" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'"';
 							$datapart .= ' onchange="'.$onchange.'" ';
-							if($enum_value[$e] == $value){
+							if ($enum_value[$e] == $value) {
 								$datapart .= 'checked ';
 							}
 							if($attributes['nullable'][$j] != '0')$datapart .= ' onclick="this.checked = this.checked2 || true; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';							
@@ -354,7 +354,7 @@
 						$datapart .= ' tabindex="1" ';
 					}
 					$datapart .= 'value="t" name="'.$fieldname.'"';
-					if($value == 't')$datapart .= 'checked=true';
+					if ($value == 't') $datapart .= 'checked=true';
 					$datapart .= '>';
 				}break;
 
@@ -366,12 +366,12 @@
 					else{								// zeilenweise
 						$maxwidth = $size * 8;
 						$minwidth = $size * 4;
-						$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.htmlspecialchars($value).'</div>';
+						$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">' . htmlspecialchars($value) . '</div>';
 					}
 					$datapart .= '</td>';
 					if($gui->new_entry != true){
 						$datapart .= '<td width="100%" align="right">';
-						if($value != ''){
+						if ($value != ''){
 							$params = 'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j].'&subform_link=true';
 							for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 								$params .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
@@ -548,11 +548,11 @@
 
 				case 'Time': {
 					$datapart .= '<input readonly style="padding: 0 0 0 3;border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
-					$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" value="'.$value.'">';
+					$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" value="' . htmlspecialchars($value) . '">';
 				}break;
 
 				case 'Dokument': {
-					if ($value!='') {
+					if ($value != '') {
 						$dokumentpfad = $value;
 						$pfadteil = explode('&original_name=', $dokumentpfad);
 						$dateiname = $pfadteil[0];
@@ -589,7 +589,7 @@
 						$datapart .= '</td></tr>';
 						$datapart .= '<tr><td colspan="2"><span id="image_original_name">'.$original_name.'</span></td></tr>';
 						$datapart .= '</table>';
-						$datapart .= '<input type="hidden" name="'.$fieldname.'_alt" value="'.$value.'">';
+						$datapart .= '<input type="hidden" name="'.$fieldname.'_alt" value="' . htmlspecialchars($value) . '">';
 					}
 					if($attribute_privileg != '0' AND !$lock[$k]){
 						$datapart .= '<input tabindex="1" onchange="'.$onchange.'" style="font-size: '.$fontsize.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$layer_id.'_'.$name.'_'.$k.'" title="'.$alias.'" class="'.$field_class.'" name="'.$fieldname.'">';
@@ -601,13 +601,13 @@
 
 				case 'Link': {
 					if ($value!='') {
-						if(substr($value, 0, 4) == 'http')$target = '_blank';
-						$datapart .= '<a style="padding: 0 0 0 3;" class="link" target="'.$target.'" style="font-size: '.$fontsize.'px" href="'.$value.'">';
+						if (substr($value, 0, 4) == 'http') $target = '_blank';
+						$datapart .= '<a style="padding: 0 0 0 3;" class="link" target="'.$target.'" style="font-size: '.$fontsize.'px" href="' . htmlspecialchars($value) .'">';
 						if($attributes['options'][$j] != ''){
 							$datapart .= $attributes['options'][$j];
 						}
 						else{
-							$datapart .= basename($value);
+							$datapart .= htmlspecialchars(basename($value));
 						}
 						$datapart .= '</a><br>';
 					}
@@ -664,12 +664,12 @@
 				
 				case 'mailto': {
 					if ($value!='') {
-						$datapart .= '<a style="padding: 0 0 0 3;" class="link" target="_blank" style="font-size: '.$fontsize.'px" href="mailto:'.$value.'">';
+						$datapart .= '<a style="padding: 0 0 0 3;" class="link" target="_blank" style="font-size: '.$fontsize.'px" href="mailto:' . htmlspecialchars($value) . '">';
 						if($attributes['options'][$j] != ''){
 							$datapart .= $attributes['options'][$j];
 						}
 						else{
-							$datapart .= basename($value);
+							$datapart .= htmlspecialchars(basename($value));
 						}
 						$datapart .= '</a><br>';
 					}
@@ -757,7 +757,7 @@
 							$datapart .= htmlspecialchars($value);
 						}
 						else{								// zeilenweise
-							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; font-size: '.$fontsize.'px;">'.$value.'</div>';
+							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; font-size: '.$fontsize.'px;">' . htmlspecialchars($value) . '</div>';
 						}
 					}
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
@@ -989,7 +989,7 @@
 				}
 			}
 			$datapart .= '<input readonly id="'.$layer_id.'_'.$name.'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$fieldname.'" value="'.$auswahlfeld_output.'">';
-			$datapart .= '<input type="hidden" class="'.$field_class.'" onchange="'.$onchange.'" value="'.$value.'">';		// falls das Attribut ein visibility-changer ist
+			$datapart .= '<input type="hidden" class="'.$field_class.'" onchange="'.$onchange.'" value="' . htmlspecialchars($value) . '">';		// falls das Attribut ein visibility-changer ist
 			$auswahlfeld_output = '';
 			$auswahlfeld_output_laenge = '';
 		}

@@ -818,7 +818,7 @@ function go_switch_xplankonverter($go){
 			if (empty($konvertierung_id)) {
 				if (!empty($bereich_gml_id)) {
 					# Hole konvertierung_id über den Bereich
-					$bereich = RP_Bereich::find_by_id($GUI, 'gml_id', $bereich_gml_id);
+					$bereich = XP_Bereich::find_by_id($GUI, 'gml_id', $bereich_gml_id);
 					$plan = $bereich->get_plan();
 					$konvertierung_id = $plan->get('konvertierung_id');
 				}
@@ -1212,12 +1212,17 @@ function go_switch_xplankonverter($go){
 			$gml_extractor = new Gml_extractor($GUI->pgdatabase, $gml_location, 'xplan_gmlas_' . $GUI->user->id);
 			$gml_extractor->extract_gml_class($GUI->plan_class);
 
+			$GUI->user->rolle->oGeorefExt->minx = $GUI->formvars['minx'];
+			$GUI->user->rolle->oGeorefExt->miny = $GUI->formvars['miny'];
+			$GUI->user->rolle->oGeorefExt->maxx = $GUI->formvars['maxx'];
+			$GUI->user->rolle->oGeorefExt->maxy = $GUI->formvars['maxy'];
+
 			$GUI->neuer_Layer_Datensatz();
 		} break;
 
 		case 'xplankonverter_extract_standardshapes_to_regeln' : {
 			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
-/*			if ($GUI->konvertierung->get('id') != '') {
+			if ($GUI->konvertierung->get('id') != '') {
 				if (isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
 					$bereich_gml_id = $_REQUEST['bereich_gml_id'];
 					$konvertierung_id = $_REQUEST['konvertierung_id'];
@@ -1237,7 +1242,6 @@ function go_switch_xplankonverter($go){
 					$GUI->add_message('error', 'Die Konvertierung mit der ID: ' . $GUI->formvars['konvertierung_id'] . ' wurde nicht gefunden!');
 				}
 			}
-*/
 
 			# go to layer search with layer of planbereich
 			switch ($GUI->konvertierung->get('planart')) {
