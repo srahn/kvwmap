@@ -57,8 +57,7 @@
 			!(
 				in_array($attributes['form_element_type'][$j], array('SubFormPK', 'SubFormEmbeddedPK', 'SubFormFK', 'dynamicLink')) OR
 				is_numeric($attributes['type'][$j]) OR
-				substr($attributes['type'][$j], 0, 1) == '_' OR
-				$attributes['arrangement'][$j] == 2
+				substr($attributes['type'][$j], 0, 1) == '_'
 			)
 		) {
 			$datapart .= '<a style="font-size: '.$fontsize.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer_id.');">'.$attributes['alias'][$j].'</a>';
@@ -109,7 +108,6 @@
 		$tablename = $attributes['table_name'][$name];									# der Tabellenname des Attributs
 		$oid = $dataset[$tablename.'_oid'];															# die oid des Datensatzes
 		$attribute_privileg = $attributes['privileg'][$j];							# das Recht des Attributs
-		$arrangement = $attributes['arrangement'][$j];
 
 		if($field_name == NULL)$fieldname = $layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j];
 		else $fieldname = $field_name;
@@ -123,7 +121,7 @@
 		
 		if ($attributes['dependents'][$j] != NULL) {
 			$field_class .= ' visibility_changer';
-			$onchange .= 'this.oninput();" oninput="check_visibility(' . $layer_id . ', this, [\'' . implode('\',\'', $attributes['dependents'][$j]) . '\'], ' . $k . ', ' . $arrangement . ');';
+			$onchange .= 'this.oninput();" oninput="check_visibility('.$layer_id.', this, [\''.implode('\',\'', $attributes['dependents'][$j]).'\'], '.$k.');';
 		}
 		
 		if($attributes['vcheck_attribute'][$j] != ''){

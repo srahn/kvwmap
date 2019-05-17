@@ -7769,8 +7769,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		# trim attributes to prevent big surprise if layer not work as expected
 		# due to spaces in string concatenations with these attributes
 		$this->formvars['maintable'] = trim($this->formvars['maintable']);
-		$this->formvars['further_attribute_table'] = trim($this->formvars['further_attribute_table']);
-		$this->formvars['id_column'] = trim($this->formvars['id_column']);
 		$this->formvars['schema'] = trim($this->formvars['schema']);
 
 		$mapDB->updateLayer($this->formvars);
@@ -13102,53 +13100,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$ret = $layerdb[$layer_id]->execSQL($sql, 4, 1);
 							if ($ret['success']) {
 								$result = pg_fetch_row($ret['query']);
-								if (pg_affected_rows($ret['query']) > 0) {
-									# Save further attributes
-									include_once(CLASSPATH . 'LayerAttribute.php');
-									
-									$further_attributes = LayerAttribute::find($this, "layer_id = " . $layer_id . " AND arrangement = 2");
-									$further_attribut_table = (
-										$layerset[$layer_id][0]['further_attribute_table'] != ''
-										? $layerset[$layer_id][0]['further_attribute_table']
-										: $layerset[$layer_id][0]['schema'] . '.' . $layerset[$layer_id][0]['maintable'] . '_kvp'
-									);
-									$dataset_id = $attributes[$layerset[$layer_id][0]['id_column']]['value'];
-
-									# Delete existing values
-									$delete_sql = "
-										DELETE FROM " . $further_attribut_table . "
-										WHERE
-											dataset_id = " . $dataset_id . " AND
-											attribute_name IN (" .
-												implode(
-													', ',
-													array_map(
-														function($further_attribute) {
-															return "'" . $further_attribute->get('name') . "'";
-														},
-														$further_attributes
-													)
-												) . ")
-									";
-
-									# Insert new values
-									$insert_values = array();
-									foreach ($further_attributes AS $attribute) {
-										$value = $this->formvars[$layer_id . ';' . $attribute->get('name') . ';;;Text_not_saveable;;not_saveable'];
-										if ($value != '') {
-											$insert_values[] = "("
-												. $dataset_id . ",
-												'" . $attribute->get('name') . "',
-												'"  . $value . "'
-											)";
-										}
-									}
-
-									$insert_sql = "
-										INSERT INTO " . $further_attribut_table . " (dataset_id, attribute_name, value)
-										VALUES " . implode(',
-										', $insert_values) . "
-									";
+								if (pg_affected_rows($ret['query']) > 0) {									
 									#echo '<br>delete und insert sql: ' . $delete_sql . '; ' . $insert_sql;
 									#$ret = $layerdb[$layer_id]->execSQL($delete_sql . '; ' . $insert_sql, 4, 1);
 									#if (!$ret['success']) {

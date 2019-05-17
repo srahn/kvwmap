@@ -70,7 +70,6 @@
 	$strDataOwner="Data-Owner";
 	$strMetaLink="Metadata-Link";
 	$strMaintable="Main Table";
-	$strFurtherAttributeTable="Table for further parameter";
 	$strPrivileges="Set Privileges";
 	$strAlias="Alias";
 	$strStatus="Status";

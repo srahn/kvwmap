@@ -341,15 +341,13 @@ function alias_replace(name){
 							
 							<?php
 							if ($this->attributes['arrangement'][$i] == 0) { $bgcolor = 'white'; }
-							if ($this->attributes['arrangement'][$i] == 1) { $bgcolor = '#faef1e'; }
-							if ($this->attributes['arrangement'][$i] == 2) { $bgcolor = '#ade6b1'; } ?>
+							if ($this->attributes['arrangement'][$i] == 1) { $bgcolor = '#faef1e'; } ?>
 							<td align="center" valign="top"><?php
 								echo FormObject::createSelectField(
 											'arrangement_' . $this->attributes['name'][$i],
 											array(
 												array('value' => 0, 'output' => 'unter dem vorigen'),
-												array('value' => 1, 'output' => 'neben dem vorigen', 'style' => 'background-color: #faef1e'),
-												array('value' => 2, 'output' => 'unten als Zusatzattribut', 'style' => 'background-color: #ade6b1')
+												array('value' => 1, 'output' => 'neben dem vorigen', 'style' => 'background-color: #faef1e')
 											),
 											$this->attributes['arrangement'][$i],
 											1,

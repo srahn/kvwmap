@@ -13,8 +13,6 @@
 	Text[5] = ["Hilfe:","Für einen Layer lassen sich verschiedene Klassifizierungen erstellen. Klassen mit dem gleichen Eintrag im Klassen-Feld \"Klassifizierung\" gehören zu einer Klassifizierung. Welche Klassifizierung in einem Layer verwendet wird, wird über das Layer-Feld \"Klassifizierung\" festgelegt."];
 	Text[6] = ["Hilfe:","Wird hier der Name einer Grafikdatei aus dem Ordner <?php echo GRAPHICSPATH; ?>custom angegeben, wird diese Grafik an Stelle der vom MapServer erzeugten Grafik in der Legende angezeigt. Außerdem kann hier die Höhe und Breite der Legendengrafik angegeben werden."];
 	Text[7] = ["Hilfe:","Hier kann die Zeichenreihenfolge in der Karte und optional eine abweichende Reihenfolge für die Legende festgelegt werden."];
-	Text[8] = ["Hilfe:", "In die hier angegebene Tabelle werden Attribute gespeichert, die im Attribut-Editor unter Anordnung mit 'unten als Zusatzparameter' gekennzeichnet sind. Die Attribute und ihre Werte werden als Key-Value-Paare gespeichert. Die Tabelle muss die Spalten dataset_id typ: integer, attribute_name typ: character varying 255 und value typ: text haben. Sind im Attribut-Editor Zusatzparameter definiert, ohne dass hier eine Tabelle angegeben wurde, wird eine Tabelle mit dem Namen {maintable}_kvp angelegt und der Name automatisch hier eingetragen bevor Daten abgefragt oder gespeichert werden."];
-	Text[9] = ["Hilfe:", "Name der Spalte in der Haupttabelle mit eindeutigen Werten. Ist hier nichts angegeben, wird die oid als eindeutige Spalte verwendet. Die Werte in der ID-Spalte werden für die Verknüpfung mit den Zusatzparametern in der Tabelle Zusatzparametertabelle verwendet."];
 
 	function testConnection() {
 		if (document.getElementById('connectiontype').value == 7) {
@@ -145,20 +143,6 @@
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 						<input name="maintable" type="text" value="<?php echo $this->layerdata['maintable']; ?>" size="36" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1], Style[0], document.getElementById('TipLayer1'))" onmouseout="htm()">
 						<div id="TipLayer1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-					</td>
-				</tr>
-				<tr>
-					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strFurtherAttributeTable; ?></th>
-					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-						<input name="further_attribute_table" type="text" value="<?php echo $this->layerdata['further_attribute_table']; ?>" size="36" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[8], Style[0], document.getElementById('TipLayer8'))" onmouseout="htm()">
-						<div id="TipLayer8" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-					</td>
-				</tr>
-				<tr>
-					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strIdColumnName; ?></th>
-					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-						<input name="id_column" type="text" value="<?php echo $this->layerdata['id_column']; ?>" size="36" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[9], Style[0], document.getElementById('TipLayer9'))" onmouseout="htm()">
-						<div id="TipLayer9" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 					</td>
 				</tr>
 				<tr>
