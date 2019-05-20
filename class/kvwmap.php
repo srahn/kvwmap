@@ -18788,6 +18788,7 @@ class db_mapObj{
     $sql ="UPDATE labels SET ";
     if($formvars["font"]){$sql.="font = '" . $formvars["font"]."',";}
     if($formvars["type"]){$sql.="type = '" . $formvars["type"]."',";}
+		if($formvars["type"]){$sql.="type = '".$formvars["type"]."',";}else{$sql.="type = NULL,";}
     if($formvars["color"]){$sql.="color = '" . $formvars["color"]."',";}
     if($formvars["outlinecolor"] != ''){$sql.="outlinecolor = '" . $formvars["outlinecolor"]."',";}else{$sql.="outlinecolor = NULL,";}
     if($formvars["shadowcolor"] != ''){$sql.="shadowcolor = '" . $formvars["shadowcolor"]."',";}else{$sql.="shadowcolor = NULL,";}
