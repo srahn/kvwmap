@@ -463,7 +463,7 @@ public static	function find_by_id($gui, $by, $id) {
 				r.id = " . $this->get('id')
 */
 
-			echo '<br>SQL zum Abfragen der konvertierung_id der Regel: ' . $sql;
+			#echo '<br>SQL zum Abfragen der konvertierung_id der Regel: ' . $sql;
 			$result = pg_query($this->database->dbConn, $sql);
 			if (pg_num_rows($result) > 0) {
 				$row = pg_fetch_assoc($result);
@@ -483,7 +483,7 @@ public static	function find_by_id($gui, $by, $id) {
 			$layertyp = $this->get_layertyp();
 			$this->debug->show('Erzeuge Layer ' . $this->get_layername(), $this->write_debug);
 			
-			$this->debug->show('<p>Suche nach Templatelayer ' . $this->get('class_name') . ' ' . $this->layertypen[$layertyp] . ' in Obergruppe ' . GML_LAYER_TEMPLATE_GROUP, Regel::$write_debug);
+			$this->debug->show('<p>Suche nach Templatelayer ' . $this->get_layername() . ' in Obergruppe ' . GML_LAYER_TEMPLATE_GROUP, Regel::$write_debug);
 			$template_layer = Layer::find_by_obergruppe_und_name(
 				$this->gui,
 				GML_LAYER_TEMPLATE_GROUP,
@@ -492,6 +492,7 @@ public static	function find_by_id($gui, $by, $id) {
 
 			if (empty($template_layer)) {
 				# ToDo: Kein Template Layer vorhanden, erzeuge einen Dummy
+				echo 'Layer ' . $this->get_layername() . ' für gewählte GML-Klasse nicht vorhanden. Bitte anlegen.';
 			}
 			else {
 				$this->debug->show('<p>Kopiere Templatelayer in gml layer gruppe id: ' . $this->konvertierung->get('gml_layer_group_id'), Regel::$write_debug);
@@ -504,17 +505,17 @@ public static	function find_by_id($gui, $by, $id) {
 				);
 
 				$formvars_before = $this->gui->formvars;
+
+				$stellen = $this->gui->Stellenzuweisung(
+					array($gml_layer->get($gml_layer->identifier)),
+					array($this->gui->Stelle->id),
+					'(konvertierung_id = ' . $this->konvertierung->get('id') .')'
+				);
+
+				# Assign layer_id to Konvertierung
+				$this->set('layer_id', $gml_layer->get($gml_layer->identifier));
+				$this->update();
 			}
-
-			$stellen = $this->gui->Stellenzuweisung(
-				array($gml_layer->get($gml_layer->identifier)),
-				array($this->gui->Stelle->id),
-				'(konvertierung_id = ' . $this->konvertierung->get('id') .')'
-			);
-
-			# Assign layer_id to Konvertierung
-			$this->set('layer_id', $gml_layer->get($gml_layer->identifier));
-			$this->update();
 
 			$this->gui->formvars = $formvars_before;
 		}
