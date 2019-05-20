@@ -25,11 +25,11 @@ function update_selection(selection){
 		case '000': {			// keine
 			condition = 'true';
 			checked = false;
-			clear_selections('markhauptart[]', 000);
+			clear_selections('markhauptart[]', '000');
 		}break;
 		case '222': {			// alle der Messung
 			condition = create_condition();
-			clear_selections('markhauptart[]', 222);
+			clear_selections('markhauptart[]', '222');
 		}break;
 		default: {				// nach Dokumentart
 			checked = selection.checked;
@@ -44,9 +44,27 @@ function update_selection(selection){
   });
 }
 
-function clear_selections(name, except){
+function clear_selections(name, except){		// alle Haken rausnehmen außer einem
 	var selections = document.getElementsByName(name);
-	[].forEach.call(selections, function (s){if(s.value != except)s.checked = false;});
+	[].forEach.call(selections, 
+		function (s){
+			if(s.value != except)s.checked = false;
+		}
+	);
+}
+
+function set_selections(name, except){			// alle Haken setzen außer einem Array von Ausnahmen
+	var selections = document.getElementsByName(name);
+	[].forEach.call(selections, 
+		function (s){
+			if(except.indexOf(s.value) < 0){
+					s.checked = true;
+			}
+			else{
+					s.checked = false;
+			}
+		}
+	);
 }
 
 function create_condition(){		// fuer alle der Messung
@@ -464,8 +482,8 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 							</tr>
 							<tr>
 								<td>
-									<input type="checkbox" name="showhauptart[]" value=""> alle<br>
-									<input type="checkbox" name="showhauptart[]" onchange="clear_selections('showhauptart[]', 2222);" value="2222"<? if(in_array(2222, $this->formvars['showhauptart']))echo ' checked="true" '; ?>> alle ausgewählten<br>
+									<input type="checkbox" name="showhauptart[]" onchange="set_selections('showhauptart[]', ['2222', '']);"" value=""> alle<br>
+									<input type="checkbox" name="showhauptart[]" onchange="clear_selections('showhauptart[]', '2222');" value="2222"<? if(in_array(2222, $this->formvars['showhauptart']))echo ' checked="true" '; ?>> alle ausgewählten<br>
 					<? 			foreach($this->hauptdokumentarten as $hauptart){  ?>
 										<input type="checkbox" name="showhauptart[]" value="<? echo $hauptart['id']; ?>"<? if(in_array($hauptart['id'], $this->formvars['showhauptart']))echo ' checked="true" '; ?>> <? echo $hauptart['abkuerzung']; ?><br>
 					<?			}		?>
