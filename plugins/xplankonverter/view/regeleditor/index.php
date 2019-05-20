@@ -3,11 +3,11 @@
 	<HEAD>
 		<TITLE>Regeleditor</TITLE>
 		<META charset="UTF-8">
-		<script src="<?php echo JQUERY_PATH; ?>jquery-1.12.0.min.js"></script>
+		<?php include('config.php'); ?>
+		<?php include(PLUGINS . 'xplankonverter/view/header.php'); ?>
 		<script src="plugins/xplankonverter/view/regeleditor/control.js">"use strict";</script>
 		<!-- Setzt PHP Variable als (Global) Javascript Variable -->
 		<script>konvertierung_id = '<?php echo $konvertierung_id; ?>';</script>
-		<link rel="stylesheet" href="<?php echo FONTAWESOME_PATH; ?>css/font-awesome.min.css" type="text/css"/>
 		<link rel="stylesheet" href="plugins/xplankonverter/view/regeleditor/styles.css" type="text/css"/>
 	</HEAD>
 	<BODY>
@@ -186,7 +186,7 @@
 					<td align="top left">
 						<!--<div class="halbe-breite box">-->
 						<?php
-							featuretype_liste($this->pgdatabase->dbConn, $class_name);
+							featuretype_liste($GUI->pgdatabase->dbConn, $class_name);
 						?>
 						<div id="target_table"></div>
 						</div>
