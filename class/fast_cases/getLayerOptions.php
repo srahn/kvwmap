@@ -20,7 +20,7 @@ function get_select_parts($select){
   	if($hochkommas % 2 != 0 OR $klammerauf > $klammerzu){
   		$column[$i] = $column[$i].','.$column[$i+1];
   		array_splice($column, $i+1, 1);
-			$i--;							# und nochmal prüfen, falls mehrere Kommas drin sind
+			#$i--;							# und nochmal prüfen, falls mehrere Kommas drin sind
   	}
   }
   return $column;
@@ -1071,12 +1071,14 @@ class pgdatabase {
   	}
     $select = $this->eliminate_star($select, $offset);
   	if(substr_count(strtolower($select), ' from ') > 1){
-  		$whereposition = strpos($select, ' WHERE ');
+  		$whereposition = strrpos($select, ' WHERE ');			
+			if($whereposition === false)$whereposition = strlen($select);
   		$withoutwhere = substr($select, 0, $whereposition);
-  		$fromposition = strpos($withoutwhere, ' FROM ');
+  		$fromposition = strrpos(strtolower($withoutwhere), ' from ');
   	}
   	else{
   		$whereposition = strpos(strtolower($select), ' where ');
+			if($whereposition === false)$whereposition = strlen($select);
   		$withoutwhere = substr($select, 0, $whereposition);
   		$fromposition = strpos(strtolower($withoutwhere), ' from ');
   	}
@@ -1193,7 +1195,7 @@ class pgdatabase {
   	if(substr_count(strtolower($query), ' from ') > 1){
   		$whereposition = strpos($query, ' WHERE ');
   		$withoutwhere = substr($query, 0, $whereposition);
-  		$fromposition = strpos($withoutwhere, ' FROM ');
+  		$fromposition = strrpos(strtolower($withoutwhere), ' from ');
   	}
   	else{
   		$whereposition = strpos(strtolower($query), ' where ');
