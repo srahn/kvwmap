@@ -457,7 +457,8 @@
 				<span style="color:#FF0000;"><? echo $strNoMatch; ?></span>
 		</td>
   </tr>
-	<? if($layer['privileg'] > 0){ ?>
+<? 	$layer_new_dataset = $this->Stelle->getqueryablePostgisLayers(1, NULL, true, $layer['Layer_ID']);		// Abfrage ob Datensatzerzeugung möglich
+		if($layer_new_dataset != NULL){ ?>
 	<tr align="center">
 		<td><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=<? echo $layer['Layer_ID']; ?>"><? echo $strNewDataset; ?></a></td>
 	</tr>
