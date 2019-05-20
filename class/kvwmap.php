@@ -4107,12 +4107,13 @@ class GUI {
 
 	function save_all_layer_attributes() {
 		$this->main='genericTemplate.php';
+		$this->title='Speicherung aller Layerattribute';
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$this->layerdaten = $mapDB->get_postgis_layers(NULL);
-		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
+		for ($i = 0; $i < count($this->layerdaten['ID']); $i++) {
 			$layer = $mapDB->get_Layer($this->layerdaten['ID'][$i]);
-			if($layer['pfad'] != '' AND strpos($layer['connection'], 'host') === false){
-				$this->param['str1'].= 'Layer: '.$layer['Name'].'<br>';
-				echo 'Layer: '.$layer['Name'].'<br>';
+			if ($layer['pfad'] != '' AND $layer['connectiontype'] == 6) {
+				$this->param['str1'] .= 'Layer: ' . $layer['Name'] . '<br>';
 				$layerdb = $mapDB->getlayerdatabase($layer['Layer_ID'], $this->Stelle->pgdbhost);
 				$attributes = $mapDB->load_attributes(
 					$layerdb,
@@ -15755,7 +15756,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 ##############################################################
 # Klasse db_mapObj #
 ####################
-
 class db_mapObj{
   var $debug;
   var $referenceMap;
@@ -19498,5 +19498,4 @@ class point {
     $this->y=round(($this->y-$minY)/$pixSize);
   }
 }
-
 ?>
