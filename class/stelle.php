@@ -1125,7 +1125,7 @@ class stelle {
 		}
 	}
 
-	function getqueryablePostgisLayers($privileg, $export_privileg = NULL, $no_subform_layers = false){
+	function getqueryablePostgisLayers($privileg, $export_privileg = NULL, $no_subform_layers = false, $layer_id = NULL){
 		$sql = 'SELECT distinct Layer_ID, Name, alias, export_privileg FROM (';
 		$sql .='SELECT layer.Layer_ID, layer.Name, layer.alias, used_layer.export_privileg, form_element_type as subformfk, las.privileg as privilegfk ';
 		$sql .='FROM u_groups, layer, used_layer ';
@@ -1140,6 +1140,9 @@ class stelle {
 		}
 		if($export_privileg != NULL){
 			$sql .=' AND used_layer.export_privileg > 0';
+		}
+		if($layer_id != NULL){
+			$sql .= ' AND layer.Layer_ID = '.$layer_id;
 		}
 		$sql .= ' ORDER BY Name) as foo ';
 		if($privileg > 0 AND $no_subform_layers){
@@ -1161,11 +1164,13 @@ class stelle {
 				$layer['export_privileg'][]=$rs['export_privileg'];
 			}
 			// Sortieren der User unter Berücksichtigung von Umlauten
-			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
-			$sorted_arrays2 = umlaute_sortieren($layer['Bezeichnung'], $layer['export_privileg']);
-			$layer['Bezeichnung'] = $sorted_arrays['array'];
-			$layer['ID'] = $sorted_arrays['second_array'];
-			$layer['export_privileg'] = $sorted_arrays2['second_array'];
+			if($layer['Bezeichnung'] != NULL){
+				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
+				$sorted_arrays2 = umlaute_sortieren($layer['Bezeichnung'], $layer['export_privileg']);
+				$layer['Bezeichnung'] = $sorted_arrays['array'];
+				$layer['ID'] = $sorted_arrays['second_array'];
+				$layer['export_privileg'] = $sorted_arrays2['second_array'];
+			}
 		}
 		return $layer;
 	}

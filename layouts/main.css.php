@@ -1922,7 +1922,7 @@ tbody.gle tr {
 }
 
 .scrolltable tbody {
-	height: 590px;
+	max-height: 590px;
 	overflow-y: auto;
 	overflow-x: hidden;
 }
