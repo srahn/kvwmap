@@ -160,13 +160,15 @@
 				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, false);
 				$regel = Regel::find_by_id($GUI, 'oid', $oid);
 				$regel->create_gml_layer();
+				$regel->set('konvertierung_id', $regel->konvertierung->get('id'));
+				$regel->update();
 				$regel->konvertierung->set_status();
 			} break;
 
 			case ($fired == 'AFTER' AND $event == 'UPDATE') : {
 				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, true);
 				$regel = Regel::find_by_id($GUI, 'oid', $oid);
-				$regel->delete_gml_layer();
+				#$regel->delete_gml_layer();
 				$regel->create_gml_layer();
 				$regel->konvertierung->set_status();
 			} break;
@@ -182,7 +184,7 @@
 				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus.', false);
 				if (empty($old_dataset['konvertierung_id'])) {
 					# hole konvertierung_id ueber plan und bereich_gml_id
-					$bereich = RP_Bereich::find_by_id($GUI, 'gml_id', $old_dataset['bereich_gml_id']);
+					$bereich = XP_Bereich::find_by_id($GUI, 'gml_id', $old_dataset['bereich_gml_id']);
 					$plan = XP_Plan::find_by_id($GUI, 'gml_id', $bereich->get('gehoertzuplan'));
 					$konvertierung_id = $plan->get('konvertierung_id');
 				}
