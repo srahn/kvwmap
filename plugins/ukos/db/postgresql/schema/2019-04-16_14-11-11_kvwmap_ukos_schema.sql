@@ -1,4 +1,20 @@
-BEGIN;
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 9.6.11
+-- Dumped by pg_dump version 11.1 (Debian 11.1-1.pgdg90+1)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET row_security = off;
+
 --
 -- Name: ukos_base; Type: SCHEMA; Schema: -; Owner: -
 --
@@ -3304,7 +3320,7 @@ CREATE FUNCTION ukos_okstra.update_with_sep() RETURNS trigger
     ', TG_TABLE_NAME)
     INTO target_table_name;
 
-    -- Im Updatefall geht punktgeometrie vor auf_strassenelement_id, damit man den SAP auch mit der Geometrie einem anderen SEP zuordnen oder die Geometrie des aktuellen verschieben kann
+    -- Im Updatefall geht punktgeometrie vor bei_strassenelementpunkt_id, damit man den SAP auch mit der Geometrie einem anderen SEP zuordnen oder die Geometrie des aktuellen SEP verschieben kann
     -- Wenn es an der neuen Position schon einen SEP gibt wird einfach dieser genommen.
     -- ansonsten wird geprüft, ob der alte SEP verschoben oder ein neuer angelegt werden soll.
     -- Der alte kann nur verschoben werden, wenn ein bei_sep_id angegeben wurde und wenn am alten sep
@@ -3875,8 +3891,6 @@ CREATE FUNCTION ukos_okstra.validate_verbindungspunkt() RETURNS trigger
   END;
 $_$;
 
-
-SET default_tablespace = '';
 
 SET default_with_oids = false;
 
@@ -5899,7 +5913,6 @@ CREATE VIEW ukos_doppik.sep_anschlagsaeule AS
 CREATE VIEW ukos_doppik.sep_aufstellvorrichtung_schild AS
  SELECT a.oid,
     a.id,
-    a.stelle_id,
     a.gueltig_von,
     a.gueltig_bis,
     a.id_strassenelement,
@@ -5943,6 +5956,7 @@ CREATE VIEW ukos_doppik.sep_aufstellvorrichtung_schild AS
     a.hat_vorgaenger_hist_objekt,
     a.hat_nachfolger_hist_objekt,
     a.ident,
+    a.stelle_id,
     a.bei_strassenelementpunkt_id,
     a.kreuzungszuordnung,
     a.unterhaltsbezug_sp,
@@ -5956,15 +5970,6 @@ CREATE VIEW ukos_doppik.sep_aufstellvorrichtung_schild AS
     a.rfid,
     a.migrationshinweise,
     a.unscharf,
-    a.lage,
-    a.art,
-    a.detaillierungsgrad,
-    a.stellt_teilhindernis_dar,
-    a.dokument,
-    a.hat_rechtliches_ereignis,
-    a.hat_zustaendigkeit,
-    a.zu_hausnummernblock,
-    a.zu_hausnummerbereich,
     a.geometrie_netzbezugsobjekt_vpunkt,
     a.geometrie_netzbezugsobjekt_kompknoten,
     a.nummer_aufstellvorrichtung,
@@ -5972,13 +5977,23 @@ CREATE VIEW ukos_doppik.sep_aufstellvorrichtung_schild AS
     a.abstand_rechter_pfosten,
     a.position_linker_pfosten,
     a.position_rechter_pfosten,
+    a.lage,
+    a.art,
     a.durchmesser,
     a.hoehe,
     a.material,
+    a.detaillierungsgrad,
+    a.dokument,
+    a.hat_rechtliches_ereignis,
+    a.hat_zustaendigkeit,
+    a.zu_hausnummernblock,
+    a.zu_hausnummerbereich,
     a.an_verbindungspunkt,
     a.an_komplexem_knoten,
     a.hat_schild,
+    a.stellt_teilhindernis_dar,
     a.ist_teilbauwerk,
+    a.geaendert_von_ereignis,
     sep.station,
     sep.abstand_zur_bestandsachse,
     sep.punktgeometrie
@@ -6163,77 +6178,12 @@ CREATE VIEW ukos_doppik.sep_bank AS
 
 
 --
--- Name: sep_bankett; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_bankett AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.deckschicht,
-    a.material
-   FROM ukos_doppik.bankett a;
-
-
---
 -- Name: sep_baum; Type: VIEW; Schema: ukos_doppik; Owner: -
 --
 
 CREATE VIEW ukos_doppik.sep_baum AS
  SELECT a.oid,
     a.id,
-    a.stelle_id,
     a.gueltig_von,
     a.gueltig_bis,
     a.id_strassenelement,
@@ -6277,6 +6227,7 @@ CREATE VIEW ukos_doppik.sep_baum AS
     a.hat_vorgaenger_hist_objekt,
     a.hat_nachfolger_hist_objekt,
     a.ident,
+    a.stelle_id,
     a.bei_strassenelementpunkt_id,
     a.kreuzungszuordnung,
     a.unterhaltsbezug_sp,
@@ -6324,72 +6275,13 @@ CREATE VIEW ukos_doppik.sep_baum AS
     a.stellt_teilhindernis_dar,
     a.hat_baumschaeden,
     a.zu_baumreihenabschnitt,
-    a.material
-   FROM ukos_doppik.baum a;
-
-
---
--- Name: sep_baumscheibe; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_baumscheibe AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.deckschicht,
-    a.material
-   FROM ukos_doppik.baumscheibe a;
+    a.material,
+    a.geaendert_von_ereignis,
+    sep.station,
+    sep.abstand_zur_bestandsachse,
+    sep.punktgeometrie
+   FROM (ukos_doppik.baum a
+     JOIN ukos_okstra.strassenelementpunkt sep ON (((a.bei_strassenelementpunkt_id)::text = (sep.id)::text)));
 
 
 --
@@ -6399,7 +6291,6 @@ CREATE VIEW ukos_doppik.sep_baumscheibe AS
 CREATE VIEW ukos_doppik.sep_bewuchs AS
  SELECT a.oid,
     a.id,
-    a.stelle_id,
     a.gueltig_von,
     a.gueltig_bis,
     a.id_strassenelement,
@@ -6443,6 +6334,7 @@ CREATE VIEW ukos_doppik.sep_bewuchs AS
     a.hat_vorgaenger_hist_objekt,
     a.hat_nachfolger_hist_objekt,
     a.ident,
+    a.stelle_id,
     a.bei_strassenelementpunkt_id,
     a.kreuzungszuordnung,
     a.unterhaltsbezug_sp,
@@ -6470,8 +6362,14 @@ CREATE VIEW ukos_doppik.sep_bewuchs AS
     a.hat_pflegemassnahme,
     a.hat_dokument,
     a.breite,
-    a.hoehe
-   FROM ukos_doppik.bewuchs a;
+    a.hoehe,
+    a.material,
+    a.geaendert_von_ereignis,
+    sep.station,
+    sep.abstand_zur_bestandsachse,
+    sep.punktgeometrie
+   FROM (ukos_doppik.bewuchs a
+     JOIN ukos_okstra.strassenelementpunkt sep ON (((a.bei_strassenelementpunkt_id)::text = (sep.id)::text)));
 
 
 --
@@ -6560,72 +6458,6 @@ CREATE VIEW ukos_doppik.sep_blumenkuebel AS
     sep.punktgeometrie
    FROM (ukos_doppik.blumenkuebel a
      JOIN ukos_okstra.strassenelementpunkt sep ON (((a.bei_strassenelementpunkt_id)::text = (sep.id)::text)));
-
-
---
--- Name: sep_bord_flaeche; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_bord_flaeche AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.deckschicht,
-    a.ausbauzustand,
-    a.bauklasse,
-    a.material
-   FROM ukos_doppik.bord_flaeche a;
 
 
 --
@@ -7052,7 +6884,6 @@ CREATE VIEW ukos_doppik.sep_dammschuettung AS
 CREATE VIEW ukos_doppik.sep_denkmal AS
  SELECT a.oid,
     a.id,
-    a.stelle_id,
     a.gueltig_von,
     a.gueltig_bis,
     a.id_strassenelement,
@@ -7096,6 +6927,7 @@ CREATE VIEW ukos_doppik.sep_denkmal AS
     a.hat_vorgaenger_hist_objekt,
     a.hat_nachfolger_hist_objekt,
     a.ident,
+    a.stelle_id,
     a.bei_strassenelementpunkt_id,
     a.geometrie_streckenobjekt,
     a.hat_objekt_id,
@@ -7180,89 +7012,13 @@ CREATE VIEW ukos_doppik.sep_denkmal AS
     a.hat_vorspannungen,
     a.bauwerk,
     a.baudienststelle,
-    a.material
-   FROM ukos_doppik.denkmal a;
-
-
---
--- Name: sep_dueker; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_dueker AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.geometrie_streckenobjekt,
-    a.kreuzungszuordnung,
-    a.unterhaltsbezug_sp,
-    a.erfassungsdatum,
-    a.systemdatum,
-    a.textfeld,
-    a.art_der_erfassung,
-    a.art_der_erfassung_sonst,
-    a.quelle_der_information,
-    a.quelle_der_information_sonst,
-    a.rfid,
-    a.migrationshinweise,
-    a.unscharf,
-    a.lage,
-    a.art,
-    a.art_sonst,
-    a.dauereinrichtung,
-    a.tatsaechliche_laenge,
-    a.multigeometrie,
-    a.dokument,
-    a.hat_rechtliches_ereignis,
-    a.hat_zustaendigkeit,
-    a.zu_hausnummernblock,
-    a.zu_hausnummerbereich,
-    a.hat_strecke,
-    a.hat_strassenausstattung_punkt,
-    a.material
-   FROM ukos_doppik.dueker a;
+    a.material,
+    a.geaendert_von_ereignis,
+    sep.station,
+    sep.abstand_zur_bestandsachse,
+    sep.punktgeometrie
+   FROM (ukos_doppik.denkmal a
+     JOIN ukos_okstra.strassenelementpunkt sep ON (((a.bei_strassenelementpunkt_id)::text = (sep.id)::text)));
 
 
 --
@@ -7272,7 +7028,6 @@ CREATE VIEW ukos_doppik.sep_dueker AS
 CREATE VIEW ukos_doppik.sep_durchlass AS
  SELECT a.oid,
     a.id,
-    a.stelle_id,
     a.gueltig_von,
     a.gueltig_bis,
     a.id_strassenelement,
@@ -7316,6 +7071,8 @@ CREATE VIEW ukos_doppik.sep_durchlass AS
     a.hat_vorgaenger_hist_objekt,
     a.hat_nachfolger_hist_objekt,
     a.ident,
+    a.stelle_id,
+    a.bei_strassenelementpunkt_id,
     a.geometrie_streckenobjekt,
     a.kreuzungszuordnung,
     a.unterhaltsbezug_sp,
@@ -7356,8 +7113,13 @@ CREATE VIEW ukos_doppik.sep_durchlass AS
     a.zu_hausnummernbereich,
     a.hat_strecke,
     a.material,
-    a.pflasterflaeche
-   FROM ukos_doppik.durchlass a;
+    a.pflasterflaeche,
+    a.geaendert_von_ereignis,
+    sep.station,
+    sep.abstand_zur_bestandsachse,
+    sep.punktgeometrie
+   FROM (ukos_doppik.durchlass a
+     JOIN ukos_okstra.strassenelementpunkt sep ON (((a.bei_strassenelementpunkt_id)::text = (sep.id)::text)));
 
 
 --
@@ -7537,76 +7299,6 @@ CREATE VIEW ukos_doppik.sep_fahne AS
 
 
 --
--- Name: sep_fahrbahn; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_fahrbahn AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.deckschicht,
-    a.ausbauzustand,
-    a.bauklasse,
-    a.von_netzknoten,
-    a.nach_netzknoten,
-    a.anzahl_fahrspuren_in_fahrtrichtung,
-    a.anzahl_fahrspuren_in_gegenrichtung,
-    a.material
-   FROM ukos_doppik.fahrbahn a;
-
-
---
 -- Name: sep_fahrradstaender; Type: VIEW; Schema: ukos_doppik; Owner: -
 --
 
@@ -7700,137 +7392,6 @@ CREATE VIEW ukos_doppik.sep_fahrradstaender AS
 
 
 --
--- Name: sep_gehweg; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_gehweg AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.deckschicht,
-    a.bauklasse,
-    a.material
-   FROM ukos_doppik.gehweg a;
-
-
---
--- Name: sep_gruenflaeche; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_gruenflaeche AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.deckschicht,
-    a.ausbauzustand,
-    a.bauklasse,
-    a.material
-   FROM ukos_doppik.gruenflaeche a;
-
-
---
 -- Name: sep_haltestelle; Type: VIEW; Schema: ukos_doppik; Owner: -
 --
 
@@ -7916,72 +7477,6 @@ CREATE VIEW ukos_doppik.sep_haltestelle AS
     sep.punktgeometrie
    FROM (ukos_doppik.haltestelle a
      JOIN ukos_okstra.strassenelementpunkt sep ON (((a.bei_strassenelementpunkt_id)::text = (sep.id)::text)));
-
-
---
--- Name: sep_hecke; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_hecke AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.laenge,
-    a.breite,
-    a.hoehe,
-    a.material
-   FROM ukos_doppik.hecke a;
 
 
 --
@@ -9138,87 +8633,6 @@ CREATE VIEW ukos_doppik.sep_leitplanke AS
 
 
 --
--- Name: sep_leitung; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_leitung AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.geometrie_streckenobjekt,
-    a.kreuzungszuordnung,
-    a.unterhaltsbezug_sp,
-    a.erfassungsdatum,
-    a.systemdatum,
-    a.textfeld,
-    a.art_der_erfassung,
-    a.art_der_erfassung_sonst,
-    a.quelle_der_information,
-    a.quelle_der_information_sonst,
-    a.rfid,
-    a.migrationshinweise,
-    a.unscharf,
-    a.lage,
-    a.art,
-    a.art_sonst,
-    a.dauereinrichtung,
-    a.tatsaechliche_laenge,
-    a.multigeometrie,
-    a.dokument,
-    a.hat_rechtliches_ereignis,
-    a.hat_zustaendigkeit,
-    a.zu_hausnummernblock,
-    a.zu_hausnummerbereich,
-    a.hat_strecke,
-    a.hat_strassenausstattung_punkt,
-    a.material
-   FROM ukos_doppik.leitung a;
-
-
---
 -- Name: sep_loeschwasserentnahmestelle_saugstutzen; Type: VIEW; Schema: ukos_doppik; Owner: -
 --
 
@@ -9485,87 +8899,6 @@ CREATE VIEW ukos_doppik.sep_mast AS
 
 
 --
--- Name: sep_mauer; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_mauer AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.geometrie_streckenobjekt,
-    a.kreuzungszuordnung,
-    a.unterhaltsbezug_sp,
-    a.erfassungsdatum,
-    a.systemdatum,
-    a.textfeld,
-    a.art_der_erfassung,
-    a.art_der_erfassung_sonst,
-    a.quelle_der_information,
-    a.quelle_der_information_sonst,
-    a.rfid,
-    a.migrationshinweise,
-    a.unscharf,
-    a.lage,
-    a.art,
-    a.art_sonst,
-    a.dauereinrichtung,
-    a.tatsaechliche_laenge,
-    a.multigeometrie,
-    a.dokument,
-    a.hat_rechtliches_ereignis,
-    a.hat_zustaendigkeit,
-    a.zu_hausnummernblock,
-    a.zu_hausnummerbereich,
-    a.hat_strecke,
-    a.hat_strassenausstattung_punkt,
-    a.material
-   FROM ukos_doppik.mauer a;
-
-
---
 -- Name: sep_medien; Type: VIEW; Schema: ukos_doppik; Owner: -
 --
 
@@ -9742,72 +9075,6 @@ CREATE VIEW ukos_doppik.sep_papierkorb AS
 
 
 --
--- Name: sep_parkplatz; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_parkplatz AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.deckschicht,
-    a.ausbauzustand,
-    a.bauklasse,
-    a.material
-   FROM ukos_doppik.parkplatz a;
-
-
---
 -- Name: sep_parkscheinautomat; Type: VIEW; Schema: ukos_doppik; Owner: -
 --
 
@@ -9894,138 +9161,6 @@ CREATE VIEW ukos_doppik.sep_parkscheinautomat AS
     sep.punktgeometrie
    FROM (ukos_doppik.parkscheinautomat a
      JOIN ukos_okstra.strassenelementpunkt sep ON (((a.bei_strassenelementpunkt_id)::text = (sep.id)::text)));
-
-
---
--- Name: sep_parkstreifen; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_parkstreifen AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.deckschicht,
-    a.ausbauzustand,
-    a.bauklasse,
-    a.material
-   FROM ukos_doppik.parkstreifen a;
-
-
---
--- Name: sep_platz; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_platz AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.deckschicht,
-    a.ausbauzustand,
-    a.bauklasse,
-    a.material
-   FROM ukos_doppik.platz a;
 
 
 --
@@ -10121,228 +9256,12 @@ CREATE VIEW ukos_doppik.sep_poller AS
 
 
 --
--- Name: sep_rad_und_gehweg; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_rad_und_gehweg AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.deckschicht,
-    a.ausbauzustand,
-    a.bauklasse,
-    a.material
-   FROM ukos_doppik.rad_und_gehweg a;
-
-
---
--- Name: sep_radweg; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_radweg AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.deckschicht,
-    a.ausbauzustand,
-    a.bauklasse,
-    a.material
-   FROM ukos_doppik.radweg a;
-
-
---
--- Name: sep_rinne; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_rinne AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.geometrie_streckenobjekt,
-    a.kreuzungszuordnung,
-    a.unterhaltsbezug_sp,
-    a.erfassungsdatum,
-    a.systemdatum,
-    a.textfeld,
-    a.art_der_erfassung,
-    a.art_der_erfassung_sonst,
-    a.quelle_der_information,
-    a.quelle_der_information_sonst,
-    a.rfid,
-    a.migrationshinweise,
-    a.unscharf,
-    a.lage,
-    a.art,
-    a.art_sonst,
-    a.dauereinrichtung,
-    a.tatsaechliche_laenge,
-    a.multigeometrie,
-    a.dokument,
-    a.hat_rechtliches_ereignis,
-    a.hat_zustaendigkeit,
-    a.zu_hausnummernblock,
-    a.zu_hausnummerbereich,
-    a.hat_strecke,
-    a.hat_strassenausstattung_punkt,
-    a.material,
-    a.laenge,
-    a.breite
-   FROM ukos_doppik.rinne a;
-
-
---
 -- Name: sep_schacht; Type: VIEW; Schema: ukos_doppik; Owner: -
 --
 
 CREATE VIEW ukos_doppik.sep_schacht AS
  SELECT a.oid,
     a.id,
-    a.stelle_id,
     a.gueltig_von,
     a.gueltig_bis,
     a.id_strassenelement,
@@ -10386,6 +9305,7 @@ CREATE VIEW ukos_doppik.sep_schacht AS
     a.hat_vorgaenger_hist_objekt,
     a.hat_nachfolger_hist_objekt,
     a.ident,
+    a.stelle_id,
     a.bei_strassenelementpunkt_id,
     a.kreuzungszuordnung,
     a.unterhaltsbezug_sp,
@@ -10417,8 +9337,13 @@ CREATE VIEW ukos_doppik.sep_schacht AS
     a.medium,
     a.bauform,
     a.abmasse,
-    a.sonstige_unterhaltungspflichtige
-   FROM ukos_doppik.schacht a;
+    a.sonstige_unterhaltungspflichtige,
+    a.geaendert_von_ereignis,
+    sep.station,
+    sep.abstand_zur_bestandsachse,
+    sep.punktgeometrie
+   FROM (ukos_doppik.schacht a
+     JOIN ukos_okstra.strassenelementpunkt sep ON (((a.bei_strassenelementpunkt_id)::text = (sep.id)::text)));
 
 
 --
@@ -10695,180 +9620,6 @@ CREATE VIEW ukos_doppik.sep_schranke AS
 
 
 --
--- Name: sonstige_flaeche; Type: TABLE; Schema: ukos_doppik; Owner: -
---
-
-CREATE TABLE ukos_doppik.sonstige_flaeche (
-    deckschicht character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    ausbauzustand character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    bauklasse character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL
-)
-INHERITS (ukos_okstra.verkehrsflaeche);
-
-
---
--- Name: sep_sonstige_flaeche; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_sonstige_flaeche AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.deckschicht,
-    a.ausbauzustand,
-    a.bauklasse,
-    a.material
-   FROM ukos_doppik.sonstige_flaeche a;
-
-
---
--- Name: sonstige_linie; Type: TABLE; Schema: ukos_doppik; Owner: -
---
-
-CREATE TABLE ukos_doppik.sonstige_linie (
-    material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    laenge numeric,
-    breite numeric
-)
-INHERITS (ukos_okstra.strassenausstattung_strecke);
-
-
---
--- Name: sep_sonstige_linie; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_sonstige_linie AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.geometrie_streckenobjekt,
-    a.kreuzungszuordnung,
-    a.unterhaltsbezug_sp,
-    a.erfassungsdatum,
-    a.systemdatum,
-    a.textfeld,
-    a.art_der_erfassung,
-    a.art_der_erfassung_sonst,
-    a.quelle_der_information,
-    a.quelle_der_information_sonst,
-    a.rfid,
-    a.migrationshinweise,
-    a.unscharf,
-    a.lage,
-    a.art,
-    a.art_sonst,
-    a.dauereinrichtung,
-    a.tatsaechliche_laenge,
-    a.multigeometrie,
-    a.dokument,
-    a.hat_rechtliches_ereignis,
-    a.hat_zustaendigkeit,
-    a.zu_hausnummernblock,
-    a.zu_hausnummerbereich,
-    a.hat_strecke,
-    a.hat_strassenausstattung_punkt,
-    a.material,
-    a.laenge,
-    a.breite
-   FROM ukos_doppik.sonstige_linie a;
-
-
---
 -- Name: sonstiges_punktobjekt; Type: TABLE; Schema: ukos_doppik; Owner: -
 --
 
@@ -11069,164 +9820,6 @@ CREATE VIEW ukos_doppik.sep_spielgeraet AS
 
 
 --
--- Name: spielplatz; Type: TABLE; Schema: ukos_doppik; Owner: -
---
-
-CREATE TABLE ukos_doppik.spielplatz (
-    standort character varying,
-    material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    zweck character varying,
-    deckschicht character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL
-)
-INHERITS (ukos_okstra.verkehrsflaeche);
-
-
---
--- Name: sep_spielplatz; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_spielplatz AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.standort,
-    a.material,
-    a.zweck,
-    a.deckschicht
-   FROM ukos_doppik.spielplatz a;
-
-
---
--- Name: sportplatz; Type: TABLE; Schema: ukos_doppik; Owner: -
---
-
-CREATE TABLE ukos_doppik.sportplatz (
-    standort character varying,
-    material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    zweck character varying,
-    deckschicht character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL
-)
-INHERITS (ukos_okstra.verkehrsflaeche);
-
-
---
--- Name: sep_sportplatz; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_sportplatz AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.standort,
-    a.material,
-    a.zweck,
-    a.deckschicht
-   FROM ukos_doppik.sportplatz a;
-
-
---
 -- Name: spundwand; Type: TABLE; Schema: ukos_doppik; Owner: -
 --
 
@@ -11423,87 +10016,6 @@ CREATE VIEW ukos_doppik.sep_stationaere_geschwindigkeitsueberwachung AS
 
 
 --
--- Name: strasse; Type: TABLE; Schema: ukos_doppik; Owner: -
---
-
-CREATE TABLE ukos_doppik.strasse (
-    standort character varying,
-    material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    zweck character varying,
-    bauklasse character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    deckschicht character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL
-)
-INHERITS (ukos_okstra.verkehrsflaeche);
-
-
---
--- Name: sep_strasse; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_strasse AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.standort,
-    a.material,
-    a.zweck,
-    a.bauklasse,
-    a.deckschicht
-   FROM ukos_doppik.strasse a;
-
-
---
 -- Name: strassenablauf; Type: TABLE; Schema: ukos_okstra; Owner: -
 --
 
@@ -11556,7 +10068,6 @@ INHERITS (ukos_okstra.strassenablauf);
 CREATE VIEW ukos_doppik.sep_strassenablauf AS
  SELECT a.oid,
     a.id,
-    a.stelle_id,
     a.gueltig_von,
     a.gueltig_bis,
     a.id_strassenelement,
@@ -11600,6 +10111,7 @@ CREATE VIEW ukos_doppik.sep_strassenablauf AS
     a.hat_vorgaenger_hist_objekt,
     a.hat_nachfolger_hist_objekt,
     a.ident,
+    a.stelle_id,
     a.bei_strassenelementpunkt_id,
     a.kreuzungszuordnung,
     a.unterhaltsbezug_sp,
@@ -11628,87 +10140,13 @@ CREATE VIEW ukos_doppik.sep_strassenablauf AS
     a.zu_hausnummernbereich,
     a.material,
     a.art_des_ablaufes,
-    a.abmasse_abdeckung
-   FROM ukos_doppik.strassenablauf a;
-
-
---
--- Name: strassengraben; Type: TABLE; Schema: ukos_doppik; Owner: -
---
-
-CREATE TABLE ukos_doppik.strassengraben (
-    deckschicht character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    ausbauzustand character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    bauklasse character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL
-)
-INHERITS (ukos_okstra.verkehrsflaeche);
-
-
---
--- Name: sep_strassengraben; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_strassengraben AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.deckschicht,
-    a.ausbauzustand,
-    a.bauklasse,
-    a.material
-   FROM ukos_doppik.strassengraben a;
+    a.abmasse_abdeckung,
+    a.geaendert_von_ereignis,
+    sep.station,
+    sep.abstand_zur_bestandsachse,
+    sep.punktgeometrie
+   FROM (ukos_doppik.strassenablauf a
+     JOIN ukos_okstra.strassenelementpunkt sep ON (((a.bei_strassenelementpunkt_id)::text = (sep.id)::text)));
 
 
 --
@@ -12530,85 +10968,6 @@ CREATE VIEW ukos_doppik.sep_ueberdachung_fahrradstaender AS
 
 
 --
--- Name: ueberfahrt; Type: TABLE; Schema: ukos_doppik; Owner: -
---
-
-CREATE TABLE ukos_doppik.ueberfahrt (
-    deckschicht character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    ausbauzustand character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    bauklasse character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL
-)
-INHERITS (ukos_okstra.verkehrsflaeche);
-
-
---
--- Name: sep_ueberfahrt; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_ueberfahrt AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.deckschicht,
-    a.ausbauzustand,
-    a.bauklasse,
-    a.material
-   FROM ukos_doppik.ueberfahrt a;
-
-
---
 -- Name: ueberwachungsanlage; Type: TABLE; Schema: ukos_doppik; Owner: -
 --
 
@@ -12706,85 +11065,6 @@ CREATE VIEW ukos_doppik.sep_ueberwachungsanlage AS
     sep.punktgeometrie
    FROM (ukos_doppik.ueberwachungsanlage a
      JOIN ukos_okstra.strassenelementpunkt sep ON (((a.bei_strassenelementpunkt_id)::text = (sep.id)::text)));
-
-
---
--- Name: ueberweg; Type: TABLE; Schema: ukos_doppik; Owner: -
---
-
-CREATE TABLE ukos_doppik.ueberweg (
-    deckschicht character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    ausbauzustand character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    bauklasse character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
-    material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL
-)
-INHERITS (ukos_okstra.verkehrsflaeche);
-
-
---
--- Name: sep_ueberweg; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_ueberweg AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.flaeche,
-    a.hat_flaechenbezugsobjekt,
-    a.besteht_aus_querschnittstreifen,
-    a.hat_verkehrsnutzungsflaeche,
-    a.zu_kommunale_strasse,
-    a.zu_segment_kommunale_strasse,
-    a.zu_strasse,
-    a.flaecheninhalt,
-    a.deckschicht,
-    a.ausbauzustand,
-    a.bauklasse,
-    a.material
-   FROM ukos_doppik.ueberweg a;
 
 
 --
@@ -13531,6 +11811,110 @@ CREATE VIEW ukos_doppik.sep_wehr AS
 
 
 --
+-- Name: sonstige_flaeche; Type: TABLE; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TABLE ukos_doppik.sonstige_flaeche (
+    deckschicht character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    ausbauzustand character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    bauklasse character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL
+)
+INHERITS (ukos_okstra.verkehrsflaeche);
+
+
+--
+-- Name: sonstige_linie; Type: TABLE; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TABLE ukos_doppik.sonstige_linie (
+    material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    laenge numeric,
+    breite numeric
+)
+INHERITS (ukos_okstra.strassenausstattung_strecke);
+
+
+--
+-- Name: spielplatz; Type: TABLE; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TABLE ukos_doppik.spielplatz (
+    standort character varying,
+    material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    zweck character varying,
+    deckschicht character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL
+)
+INHERITS (ukos_okstra.verkehrsflaeche);
+
+
+--
+-- Name: sportplatz; Type: TABLE; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TABLE ukos_doppik.sportplatz (
+    standort character varying,
+    material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    zweck character varying,
+    deckschicht character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL
+)
+INHERITS (ukos_okstra.verkehrsflaeche);
+
+
+--
+-- Name: strasse; Type: TABLE; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TABLE ukos_doppik.strasse (
+    standort character varying,
+    material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    zweck character varying,
+    bauklasse character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    deckschicht character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL
+)
+INHERITS (ukos_okstra.verkehrsflaeche);
+
+
+--
+-- Name: strassengraben; Type: TABLE; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TABLE ukos_doppik.strassengraben (
+    deckschicht character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    ausbauzustand character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    bauklasse character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL
+)
+INHERITS (ukos_okstra.verkehrsflaeche);
+
+
+--
+-- Name: ueberfahrt; Type: TABLE; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TABLE ukos_doppik.ueberfahrt (
+    deckschicht character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    ausbauzustand character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    bauklasse character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL
+)
+INHERITS (ukos_okstra.verkehrsflaeche);
+
+
+--
+-- Name: ueberweg; Type: TABLE; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TABLE ukos_doppik.ueberweg (
+    deckschicht character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    ausbauzustand character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    bauklasse character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL,
+    material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL
+)
+INHERITS (ukos_okstra.verkehrsflaeche);
+
+
+--
 -- Name: zaun; Type: TABLE; Schema: ukos_doppik; Owner: -
 --
 
@@ -13541,90 +11925,6 @@ CREATE TABLE ukos_doppik.zaun (
     material character varying DEFAULT '00000000-0000-0000-0000-000000000000'::character varying NOT NULL
 )
 INHERITS (ukos_okstra.strassenausstattung_strecke);
-
-
---
--- Name: sep_zaun; Type: VIEW; Schema: ukos_doppik; Owner: -
---
-
-CREATE VIEW ukos_doppik.sep_zaun AS
- SELECT a.oid,
-    a.id,
-    a.stelle_id,
-    a.gueltig_von,
-    a.gueltig_bis,
-    a.id_strassenelement,
-    a.id_preisermittlung,
-    a.id_zustand,
-    a.id_zustandsbewertung_01,
-    a.id_zustandsbewertung_02,
-    a.id_zustandsbewertung_03,
-    a.id_zustandsbewertung_04,
-    a.id_zustandsbewertung_05,
-    a.id_eigentuemer,
-    a.id_baulasttraeger,
-    a.ahk,
-    a.baujahr,
-    a.angelegt_am,
-    a.angelegt_von,
-    a.geaendert_am,
-    a.geaendert_von,
-    a.ident_hist,
-    a.bemerkung,
-    a.objektname,
-    a.zusatzbezeichnung,
-    a.objekt_id,
-    a.objektart,
-    a.objektart_kurz,
-    a.objektnummer,
-    a.zustandsnote,
-    a.datum_der_benotung,
-    a.pauschalpreis,
-    a.baulasttraeger,
-    a.baulasttraeger_dritter,
-    a.abschreibung,
-    a.art_der_preisermittlung,
-    a.eroeffnungsbilanzwert,
-    a.zeitwert,
-    a.fremdobjekt,
-    a.fremddatenbestand,
-    a.kommunikationsobjekt,
-    a.erzeugt_von_ereignis,
-    a.geloescht_von_ereignis,
-    a.hat_vorgaenger_hist_objekt,
-    a.hat_nachfolger_hist_objekt,
-    a.ident,
-    a.geometrie_streckenobjekt,
-    a.kreuzungszuordnung,
-    a.unterhaltsbezug_sp,
-    a.erfassungsdatum,
-    a.systemdatum,
-    a.textfeld,
-    a.art_der_erfassung,
-    a.art_der_erfassung_sonst,
-    a.quelle_der_information,
-    a.quelle_der_information_sonst,
-    a.rfid,
-    a.migrationshinweise,
-    a.unscharf,
-    a.lage,
-    a.art,
-    a.art_sonst,
-    a.dauereinrichtung,
-    a.tatsaechliche_laenge,
-    a.multigeometrie,
-    a.dokument,
-    a.hat_rechtliches_ereignis,
-    a.hat_zustaendigkeit,
-    a.zu_hausnummernblock,
-    a.zu_hausnummerbereich,
-    a.hat_strecke,
-    a.hat_strassenausstattung_punkt,
-    a.laenge,
-    a.breite,
-    a.hoehe,
-    a.material
-   FROM ukos_doppik.zaun a;
 
 
 --
@@ -44646,41 +42946,6 @@ CREATE TRIGGER tr_idents_remove_ident AFTER DELETE ON ukos_doppik.ueberweg FOR E
 
 
 --
--- Name: sep_bankett tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_bankett FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_baum tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_baum FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_baumscheibe tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_baumscheibe FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_bewuchs tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_bewuchs FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_bord_flaeche tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_bord_flaeche FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
 -- Name: sep_bruecke tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
@@ -44692,55 +42957,6 @@ CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR 
 --
 
 CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_dammschuettung FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_denkmal tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_denkmal FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_dueker tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_dueker FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_durchlass tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_durchlass FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_fahrbahn tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_fahrbahn FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_gehweg tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_gehweg FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_gruenflaeche tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_gruenflaeche FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_hecke tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_hecke FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
 
 
 --
@@ -44758,122 +42974,10 @@ CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR 
 
 
 --
--- Name: sep_leitung tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_leitung FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_mauer tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_mauer FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_parkplatz tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_parkplatz FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_parkstreifen tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_parkstreifen FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_platz tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_platz FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_rad_und_gehweg tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_rad_und_gehweg FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_radweg tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_radweg FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_rinne tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_rinne FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_schacht tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_schacht FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
 -- Name: sep_schild tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
 CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_schild FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_sonstige_flaeche tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_sonstige_flaeche FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_sonstige_linie tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_sonstige_linie FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_spielplatz tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_spielplatz FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_sportplatz tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_sportplatz FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_strasse tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_strasse FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_strassenablauf tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_strassenablauf FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_strassengraben tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_strassengraben FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
 
 
 --
@@ -44891,20 +42995,6 @@ CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR 
 
 
 --
--- Name: sep_ueberfahrt tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_ueberfahrt FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_ueberweg tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_ueberweg FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
 -- Name: sep_verkehrszeichenbruecke tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
@@ -44916,13 +43006,6 @@ CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR 
 --
 
 CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_vorwegweiser FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
-
-
---
--- Name: sep_zaun tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_zaun FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
 
 
 --
@@ -44954,6 +43037,13 @@ CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR 
 
 
 --
+-- Name: sep_aufstellvorrichtung_schild tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_aufstellvorrichtung_schild FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
+
+
+--
 -- Name: sep_auslauf tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
@@ -44965,6 +43055,13 @@ CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR 
 --
 
 CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_bank FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
+
+
+--
+-- Name: sep_bewuchs tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_bewuchs FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
 
 
 --
@@ -44986,6 +43083,13 @@ CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR 
 --
 
 CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_dalben FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
+
+
+--
+-- Name: sep_durchlass tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_durchlass FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
 
 
 --
@@ -45136,6 +43240,13 @@ CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR 
 
 
 --
+-- Name: sep_schacht tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_schacht FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
+
+
+--
 -- Name: sep_schaukasten tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
@@ -45175,6 +43286,13 @@ CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR 
 --
 
 CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_stationaere_geschwindigkeitsueberwachung FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
+
+
+--
+-- Name: sep_strassenablauf tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_strassenablauf FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
 
 
 --
@@ -45241,38 +43359,17 @@ CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR 
 
 
 --
--- Name: sep_bankett tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+-- Name: sep_baum tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_bankett FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_baum tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_baum FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
+CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_baum FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
 
 
 --
--- Name: sep_baumscheibe tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+-- Name: sep_denkmal tr_instead_10_insert_or_update_validate_sap; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_baumscheibe FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_bewuchs tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_bewuchs FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_bord_flaeche tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_bord_flaeche FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
+CREATE TRIGGER tr_instead_10_insert_or_update_validate_sap INSTEAD OF INSERT OR UPDATE ON ukos_doppik.sep_denkmal FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.validate_sap();
 
 
 --
@@ -45290,55 +43387,6 @@ CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_do
 
 
 --
--- Name: sep_denkmal tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_denkmal FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_dueker tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_dueker FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_durchlass tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_durchlass FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_fahrbahn tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_fahrbahn FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_gehweg tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_gehweg FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_gruenflaeche tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_gruenflaeche FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_hecke tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_hecke FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
 -- Name: sep_laermschutzbauwerk tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
@@ -45353,122 +43401,10 @@ CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_do
 
 
 --
--- Name: sep_leitung tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_leitung FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_mauer tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_mauer FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_parkplatz tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_parkplatz FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_parkstreifen tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_parkstreifen FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_platz tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_platz FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_rad_und_gehweg tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_rad_und_gehweg FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_radweg tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_radweg FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_rinne tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_rinne FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_schacht tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_schacht FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
 -- Name: sep_schild tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
 CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_schild FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_sonstige_flaeche tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_sonstige_flaeche FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_sonstige_linie tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_sonstige_linie FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_spielplatz tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_spielplatz FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_sportplatz tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_sportplatz FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_strasse tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_strasse FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_strassenablauf tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_strassenablauf FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_strassengraben tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_strassengraben FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
 
 
 --
@@ -45486,20 +43422,6 @@ CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_do
 
 
 --
--- Name: sep_ueberfahrt tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_ueberfahrt FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_ueberweg tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_ueberweg FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
 -- Name: sep_verkehrszeichenbruecke tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
@@ -45511,13 +43433,6 @@ CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_do
 --
 
 CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_vorwegweiser FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
-
-
---
--- Name: sep_zaun tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_zaun FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
 
 
 --
@@ -45549,6 +43464,13 @@ CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_do
 
 
 --
+-- Name: sep_aufstellvorrichtung_schild tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_aufstellvorrichtung_schild FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
+
+
+--
 -- Name: sep_auslauf tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
@@ -45560,6 +43482,13 @@ CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_do
 --
 
 CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_bank FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
+
+
+--
+-- Name: sep_bewuchs tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_bewuchs FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
 
 
 --
@@ -45581,6 +43510,13 @@ CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_do
 --
 
 CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_dalben FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
+
+
+--
+-- Name: sep_durchlass tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_durchlass FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
 
 
 --
@@ -45731,6 +43667,13 @@ CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_do
 
 
 --
+-- Name: sep_schacht tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_schacht FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
+
+
+--
 -- Name: sep_schaukasten tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
@@ -45770,6 +43713,13 @@ CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_do
 --
 
 CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_stationaere_geschwindigkeitsueberwachung FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
+
+
+--
+-- Name: sep_strassenablauf tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_strassenablauf FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
 
 
 --
@@ -45836,38 +43786,17 @@ CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_do
 
 
 --
--- Name: sep_bankett tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+-- Name: sep_baum tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_bankett FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_baum tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_baum FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_baum FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
 
 
 --
--- Name: sep_baumscheibe tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+-- Name: sep_denkmal tr_instead_20_insert_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_baumscheibe FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_bewuchs tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_bewuchs FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_bord_flaeche tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_bord_flaeche FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+CREATE TRIGGER tr_instead_20_insert_create_with_sep INSTEAD OF INSERT ON ukos_doppik.sep_denkmal FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.create_with_sep();
 
 
 --
@@ -45885,55 +43814,6 @@ CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_do
 
 
 --
--- Name: sep_denkmal tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_denkmal FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_dueker tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_dueker FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_durchlass tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_durchlass FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_fahrbahn tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_fahrbahn FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_gehweg tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_gehweg FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_gruenflaeche tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_gruenflaeche FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_hecke tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_hecke FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
 -- Name: sep_laermschutzbauwerk tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
@@ -45948,122 +43828,10 @@ CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_do
 
 
 --
--- Name: sep_leitung tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_leitung FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_mauer tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_mauer FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_parkplatz tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_parkplatz FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_parkstreifen tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_parkstreifen FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_platz tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_platz FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_rad_und_gehweg tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_rad_und_gehweg FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_radweg tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_radweg FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_rinne tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_rinne FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_schacht tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_schacht FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
 -- Name: sep_schild tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
 CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_schild FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_sonstige_flaeche tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_sonstige_flaeche FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_sonstige_linie tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_sonstige_linie FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_spielplatz tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_spielplatz FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_sportplatz tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_sportplatz FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_strasse tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_strasse FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_strassenablauf tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_strassenablauf FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_strassengraben tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_strassengraben FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
 
 
 --
@@ -46081,20 +43849,6 @@ CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_do
 
 
 --
--- Name: sep_ueberfahrt tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_ueberfahrt FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_ueberweg tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_ueberweg FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
 -- Name: sep_verkehrszeichenbruecke tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
@@ -46109,45 +43863,367 @@ CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_do
 
 
 --
--- Name: sep_zaun tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+-- Name: sep_abfallbehaelter tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
-CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_zaun FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
-
-
---
--- Name: sep_bankett tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_bankett FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_abfallbehaelter FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
 
 
 --
--- Name: sep_baum tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+-- Name: sep_ampel tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_baum FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_baumscheibe tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_baumscheibe FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_ampel FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
 
 
 --
--- Name: sep_bewuchs tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+-- Name: sep_anleger tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_bewuchs FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_anleger FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
 
 
 --
--- Name: sep_bord_flaeche tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+-- Name: sep_anschlagsaeule tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_bord_flaeche FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_anschlagsaeule FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_aufstellvorrichtung_schild tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_aufstellvorrichtung_schild FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_auslauf tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_auslauf FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_bank tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_bank FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_bewuchs tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_bewuchs FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_blumenkuebel tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_blumenkuebel FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_brunnen tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_brunnen FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_dalben tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_dalben FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_durchlass tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_durchlass FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_einlauf tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_einlauf FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_fahne tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_fahne FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_fahrradstaender tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_fahrradstaender FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_haltestelle tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_haltestelle FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_hinweistafel tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_hinweistafel FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_hydrant tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_hydrant FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_infoterminal tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_infoterminal FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_kabelkasten tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_kabelkasten FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_kabelschacht tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_kabelschacht FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_kilometerstein tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_kilometerstein FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_klaeranlage tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_klaeranlage FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_kunstwerk tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_kunstwerk FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_lampe tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_lampe FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_leitpfosten tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_leitpfosten FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_loeschwasserentnahmestelle_saugstutzen tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_loeschwasserentnahmestelle_saugstutzen FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_markierung tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_markierung FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_mast tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_mast FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_medien tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_medien FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_papierkorb tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_papierkorb FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_parkscheinautomat tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_parkscheinautomat FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_poller tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_poller FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_schacht tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_schacht FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_schaukasten tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_schaukasten FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_schranke tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_schranke FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_sonstiges_punktobjekt tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_sonstiges_punktobjekt FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_spielgeraet tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_spielgeraet FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_spundwand tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_spundwand FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_stationaere_geschwindigkeitsueberwachung tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_stationaere_geschwindigkeitsueberwachung FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_strassenablauf tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_strassenablauf FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_telefon tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_telefon FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_tor tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_tor FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_turm tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_turm FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_ueberdachung_fahrradstaender tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_ueberdachung_fahrradstaender FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_ueberwachungsanlage tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_ueberwachungsanlage FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_uhr tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_uhr FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_verkehrsspiegel tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_verkehrsspiegel FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_wartestelle tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_wartestelle FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_wehr tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_wehr FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_baum tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_baum FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
+
+
+--
+-- Name: sep_denkmal tr_instead_20_update_create_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_20_update_create_with_sep INSTEAD OF UPDATE ON ukos_doppik.sep_denkmal FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.update_with_sep();
 
 
 --
@@ -46165,55 +44241,6 @@ CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppi
 
 
 --
--- Name: sep_denkmal tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_denkmal FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_dueker tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_dueker FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_durchlass tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_durchlass FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_fahrbahn tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_fahrbahn FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_gehweg tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_gehweg FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_gruenflaeche tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_gruenflaeche FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_hecke tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_hecke FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
 -- Name: sep_laermschutzbauwerk tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
@@ -46228,122 +44255,10 @@ CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppi
 
 
 --
--- Name: sep_leitung tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_leitung FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_mauer tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_mauer FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_parkplatz tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_parkplatz FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_parkstreifen tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_parkstreifen FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_platz tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_platz FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_rad_und_gehweg tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_rad_und_gehweg FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_radweg tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_radweg FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_rinne tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_rinne FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_schacht tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_schacht FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
 -- Name: sep_schild tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
 CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_schild FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_sonstige_flaeche tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_sonstige_flaeche FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_sonstige_linie tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_sonstige_linie FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_spielplatz tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_spielplatz FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_sportplatz tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_sportplatz FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_strasse tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_strasse FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_strassenablauf tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_strassenablauf FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_strassengraben tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_strassengraben FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
 
 
 --
@@ -46361,20 +44276,6 @@ CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppi
 
 
 --
--- Name: sep_ueberfahrt tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_ueberfahrt FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_ueberweg tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_ueberweg FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
 -- Name: sep_verkehrszeichenbruecke tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
@@ -46386,13 +44287,6 @@ CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppi
 --
 
 CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_vorwegweiser FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
-
-
---
--- Name: sep_zaun tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
---
-
-CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_zaun FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
 
 
 --
@@ -46424,6 +44318,13 @@ CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppi
 
 
 --
+-- Name: sep_aufstellvorrichtung_schild tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_aufstellvorrichtung_schild FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
+
+
+--
 -- Name: sep_auslauf tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
@@ -46435,6 +44336,13 @@ CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppi
 --
 
 CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_bank FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
+
+
+--
+-- Name: sep_bewuchs tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_bewuchs FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
 
 
 --
@@ -46456,6 +44364,13 @@ CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppi
 --
 
 CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_dalben FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
+
+
+--
+-- Name: sep_durchlass tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_durchlass FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
 
 
 --
@@ -46606,6 +44521,13 @@ CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppi
 
 
 --
+-- Name: sep_schacht tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_schacht FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
+
+
+--
 -- Name: sep_schaukasten tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
 --
 
@@ -46645,6 +44567,13 @@ CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppi
 --
 
 CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_stationaere_geschwindigkeitsueberwachung FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
+
+
+--
+-- Name: sep_strassenablauf tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_strassenablauf FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
 
 
 --
@@ -46708,6 +44637,20 @@ CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppi
 --
 
 CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_wehr FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
+
+
+--
+-- Name: sep_baum tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_baum FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
+
+
+--
+-- Name: sep_denkmal tr_instead_delete_delete_with_sep; Type: TRIGGER; Schema: ukos_doppik; Owner: -
+--
+
+CREATE TRIGGER tr_instead_delete_delete_with_sep INSTEAD OF DELETE ON ukos_doppik.sep_denkmal FOR EACH ROW EXECUTE PROCEDURE ukos_okstra.delete_with_sep();
 
 
 --
@@ -51133,4 +49076,4 @@ ALTER TABLE ONLY ukos_topo.edge_data
 --
 -- PostgreSQL database dump complete
 --
-COMMIT;
+
