@@ -4,7 +4,6 @@
   include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
 	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
 ?>
-	<script type="text/javascript" src="funktionen/keyfunctions.js"></script>
 	<script>
 		keypress_bound_ctrl_s_button_id = 'sachdatenanzeige_save_button';
 	</script>
