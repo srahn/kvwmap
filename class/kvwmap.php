@@ -3155,18 +3155,18 @@ class GUI {
 		$this->output();
 	}
 
-	function dublicate_dataset(){
+	function dublicate_dataset() {
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
-		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
-    for($i = 0; $i < count($checkbox_names); $i++){
-      if($this->formvars[$checkbox_names[$i]] == 'on'){
-        $element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
-        $oid = $element[3];
+		$checkbox_names = explode('|', $this->formvars['checkbox_names_' . $this->formvars['chosen_layer_id']]);
+		for ($i = 0; $i < count($checkbox_names); $i++) {
+			if ($this->formvars[$checkbox_names[$i]] == 'on') {
+				$element = explode(';', $checkbox_names[$i]); #  check;table_alias;table;oid
+				$oid = $element[3];
 				break;
-      }
-    }
-		if($new_oids = $this->copy_dataset($mapdb, $this->formvars['chosen_layer_id'], array('oid'), array($oid), 1)){
+			}
+		}
+		if ($new_oids = $this->copy_dataset($mapdb, $this->formvars['chosen_layer_id'], array('oid'), array($oid), 1)) {
 			$this->add_message('notice', 'Der Datensatz wurde kopiert.');
 			$this->formvars['value_'.$layerset[0]['maintable'].'_oid'] = $new_oids[0];
 			$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
@@ -3174,6 +3174,7 @@ class GUI {
 		}
 		else{
 			$this->add_message('error', 'Kopiervorgang fehlgeschlagen.');
+			$this->GenerischeSuche_Suchen();
 		}
 	}
 
@@ -3191,78 +3192,123 @@ class GUI {
 		$layerattributes = $mapdb->read_layer_attributes($layer_id, $layerdb, NULL);
 
 		# Attribute, die kopiert werden sollen ermitteln
-		$sql = "SELECT column_name FROM information_schema.columns WHERE table_name = '" . $layerset[0]['maintable']."' AND table_schema = '" . $layerdb->schema."' ";
+		$sql = "
+			SELECT column_name
+			FROM information_schema.columns
+			WHERE
+				table_name = '" . $layerset[0]['maintable'] . "' AND
+				table_schema = '" . $layerdb->schema . "'
+			";
+		$ret = $layerdb->execSQL($sql,4, 0);
+		if (!$ret['success']) {
+			return array();
+		}
+		while ($rs = pg_fetch_row($ret[1])) {
+			if(!in_array($layerattributes['constraints'][$rs[0]], array('PRIMARY KEY', 'UNIQUE'))) $attributes[] = $rs[0];		# PRIMARY KEY und UNIQUE Attribute auslassen
+			if($layerattributes['form_element_type'][$rs[0]] == 'Dokument')$document_attributes[] = $rs[0];				# Dokument-Attribute sammeln
+		}
 
-		$ret=$layerdb->execSQL($sql,4, 0);
-		if(!$ret[0]){
-			while ($rs=pg_fetch_row($ret[1])){
-				if(!in_array($layerattributes['constraints'][$rs[0]], array('PRIMARY KEY', 'UNIQUE'))) $attributes[] = $rs[0];		# PRIMARY KEY und UNIQUE Attribute auslassen
-				if($layerattributes['form_element_type'][$rs[0]] == 'Dokument')$document_attributes[] = $rs[0];				# Dokument-Attribute sammeln
-			}
+		for ($n = 0; $n < count($id_names); $n++) {
+			$where[] = $id_names[$n] . " = '" . $id_values[$n] . "'";
 		}
 
 		# Dokument-Pfade abfragen
-		if(count($document_attributes) > 0){
-			$sql = "SELECT ".implode(',', $document_attributes)." FROM " . $layerset[0]['maintable']." WHERE ";
-			for($n = 0; $n < count($id_names); $n++){
-				$sql.= $id_names[$n]." = '" . $id_values[$n]."' AND ";
-			}
-			$sql.= "1=1";
-			#echo $sql.'<br>';
+		if (count($document_attributes) > 0) {
+			$sql = "
+				SELECT " . implode(',', $document_attributes) . "
+				FROM " . $layerset[0]['maintable'] . "
+				WHERE " . implode(' AND ', $where) . "
+			";
+			#echo 'SQL zur Abfrage der Dokument-Pfade: ' . $sql;
 			$ret = $layerdb->execSQL($sql,4, 0);
 			$dokument_paths = array();
-			if(!$ret[0]){
-				while($rs=pg_fetch_row($ret[1])){		# dieser Schleifendurchlauf entspricht den original Datensätzen, die kopiert werden sollen
-					$orig_dataset[]['document_paths'] = $rs;		# jeder dieser Datensätze hat ein Array mit den Dokument-Pfaden der Dokument-Attribute
-				}
+			if (!$ret['success']) {
+				return array();
+			}
+
+			while($rs=pg_fetch_row($ret[1])) { # dieser Schleifendurchlauf entspricht den original Datensätzen, die kopiert werden sollen
+				$orig_dataset[]['document_paths'] = $rs;		# jeder dieser Datensätze hat ein Array mit den Dokument-Pfaden der Dokument-Attribute
 			}
 		}
 
 		# Erzeugen der neuen Datensätze
-		for($i = 0; $i < $count; $i++){		# das ist die Schleife, wie oft insgesamt kopiert werden soll
+		for ($i = 0; $i < $count; $i++) { # das ist die Schleife, wie oft insgesamt kopiert werden soll
 			# zunächst als reine Kopie
-			$sql = "INSERT INTO " . $layerset[0]['maintable']." (".implode(',', $attributes).") SELECT ".implode(',', $attributes)." FROM " . $layerset[0]['maintable']." WHERE ";
-			for($n = 0; $n < count($id_names); $n++){
-				$sql.= $id_names[$n]." = '" . $id_values[$n]."' AND ";
+			$sql = "
+				SELECT Coalesce(max(oid), 0) AS oid FROM " . $layerset[0]['maintable'] . "
+			";
+			#echo '<br>SQL zur Abfrage der letzen oid: ' . $sql;
+			$ret = $layerdb->execSQL($sql, 4, 0);
+			if (!$ret['success']) {
+				return array();
 			}
-			$sql.= "1=1 RETURNING oid";
-			#echo $sql.'<br>';
-			$ret = $layerdb->execSQL($sql,4, 0);
+			$rs = pg_fetch_assoc($ret[1]);
+			$max_oid = $rs['oid'];
+
+			$sql = "
+				INSERT INTO " . $layerset[0]['maintable'] . " (" . implode(',', $attributes) . ")
+				SELECT " . implode(',', $attributes) . "
+				FROM " . $layerset[0]['maintable'] . "
+				WHERE " . implode(' AND ', $where) . "
+			";
+			#echo '<br>SQL zum kopieren eines Datensatzes: ' . $sql;
+			$ret = $layerdb->execSQL($sql, 4, 0);
+			if (!$ret['success']) {
+				return array();
+			}
+			$sql = "
+				SELECT oid
+				FROM " . $layerset[0]['maintable'] . "
+				WHERE
+					oid > " . $max_oid . "
+			";
+			#echo '<br>SQL zum Abfragen der neuen oids: ' . $sql;
+			$ret = $layerdb->execSQL($sql, 4, 0);
+			if (!$ret['success']) {
+				return array();
+			}
+
 			$new_oids = array();
-			if(!$ret[0]){
-				$d = 0;		# Zähler der kopierten Datensätze pro Kopiervorgang
-				while($rs=pg_fetch_row($ret[1])){		# das ist die Schleife der kopierten Datensätze pro Kopiervorgang
-					$new_oids[] = $rs[0];
-					$all_new_oids[] = $rs[0];
-					# Dokumente kopieren
-					for($p = 0; $p < count($orig_dataset[$d]['document_paths']); $p++){		# diese Schleife durchläuft alle Dokument-Attribute innerhalb eines kopierten Datensatzes
-						if($orig_dataset[$d]['document_paths'][$p] != ''){
-							$path_parts = explode('&', $orig_dataset[$d]['document_paths'][$p]);		# &original_name=... abtrennen
-							$orig_path = $path_parts[0];
-							$name_parts = explode('.', $orig_path);		# Dateiendung ermitteln
-							$new_file_name = date('Y-m-d_H_i_s',time()).'-'.rand(100000, 999999).'.'.$name_parts[1];;
-							$new_path = dirname($orig_path).'/'.$new_file_name;
-							copy($orig_path, $new_path);
-							$complete_new_path = $new_path.'&'.$path_parts[1];
-							$sql = "UPDATE " . $layerset[0]['maintable']." SET " . $document_attributes[$p]." = '" . $complete_new_path."' WHERE oid = " . $rs[0];
-							#echo $sql.'<br>';
-							$ret1 = $layerdb->execSQL($sql,4, 0);
-						}
+			$d = 0; # Zähler der kopierten Datensätze pro Kopiervorgang
+			while ($rs = pg_fetch_row($ret[1])) { # das ist die Schleife der kopierten Datensätze pro Kopiervorgang
+				$new_oids[] = $rs[0];
+				$all_new_oids[] = $rs[0];
+				# Dokumente kopieren
+				for ($p = 0; $p < count($orig_dataset[$d]['document_paths']); $p++) { # diese Schleife durchläuft alle Dokument-Attribute innerhalb eines kopierten Datensatzes
+					if ($orig_dataset[$d]['document_paths'][$p] != '') {
+						$path_parts = explode('&', $orig_dataset[$d]['document_paths'][$p]);		# &original_name=... abtrennen
+						$orig_path = $path_parts[0];
+						$name_parts = explode('.', $orig_path);		# Dateiendung ermitteln
+						$new_file_name = date('Y-m-d_H_i_s',time()).'-'.rand(100000, 999999).'.'.$name_parts[1];;
+						$new_path = dirname($orig_path).'/'.$new_file_name;
+						copy($orig_path, $new_path);
+						$complete_new_path = $new_path.'&'.$path_parts[1];
+						$sql = "
+							UPDATE " . $layerset[0]['maintable'] . "
+							SET " . $document_attributes[$p] . " = '" . $complete_new_path . "'
+							WHERE oid = " . $rs[0] . "
+						";
+						#echo 'SQL zum Update der Dokumentattribute: ' . $sql;
+						$ret1 = $layerdb->execSQL($sql,4, 0);
 					}
-					$d++;
 				}
+				$d++;
 			}
 			# dann die Attribute updaten, die sich unterscheiden sollen
-			if($new_oids[0] != ''){
-				for($u = 0; $u < count($update_columns); $u++){
-					$sql = "UPDATE " . $layerset[0]['maintable']." SET " . $update_columns[$u]." = '" . $update_values[$i][$u]."' WHERE oid IN (".implode(',', $new_oids).")";
-					#echo $sql.'<br>';
+			if ($new_oids[0] != '') {
+				for ($u = 0; $u < count($update_columns); $u++) {
+					$sql = "
+						UPDATE " . $layerset[0]['maintable'] . "
+						SET " . $update_columns[$u] . " = '" . $update_values[$i][$u] . "'
+						WHERE oid IN (" . implode(',', $new_oids) . ")
+					";
+					#echo 'SQL zum Update der Attribute, die sich unterscheiden sollen: ' . $sql;
 					$ret = $layerdb->execSQL($sql,4, 0);
 				}
 			}
 		}
 
-		if($all_new_oids[0] != ''){
+		if ($all_new_oids[0] != '') {
 			# über SubFormEmbeddedPK oder SubFormPK verknüpfte Datensätze auch rekursiv kopieren
 			for($l = 0; $l < count($layerattributes['name']); $l++){
 	    	if(in_array($layerattributes['form_element_type'][$l], array('SubFormEmbeddedPK', 'SubFormPK'))){
@@ -3303,15 +3349,19 @@ class GUI {
 						}
 						$this->copy_dataset($mapdb, $subform_layerid, $subform_pks_realnames2, $pkvalues, count($next_update_values), $subform_pks_realnames2, $next_update_values, $delete_original);
 					}
-		    }
-			}
-			# Original löschen
-			if($delete_original){
-				$sql = "DELETE FROM " . $layerset[0]['maintable']." WHERE ";
-				for($n = 0; $n < count($id_names); $n++){
-					$sql.= $id_names[$n]." = '" . $id_values[$n]."' AND ";
 				}
-				$sql.= "1=1";#
+			}
+
+			for ($n = 0; $n < count($id_names); $n++) {
+				$where[] = $id_names[$n] . " = '" . $id_values[$n] . "'";
+			}
+
+			# Original löschen
+			if ($delete_original) {
+				$sql = "
+					DELETE FROM " . $layerset[0]['maintable'] . "
+					WHERE " . implode(' AND ', $where) . "
+				";
 				#echo $sql.'<br>';
 				$ret = $layerdb->execSQL($sql,4, 0);
 			}
@@ -9406,9 +9456,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$layerdb->setClientEncoding();
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
-				if($this->formvars['geom_from_layer'] == '')$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
+				if ($this->formvars['geom_from_layer'] == '') {
+					$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
+				}
 				$form_fields = explode('|', $this->formvars['form_field_names']);
-				for($i = 0; $i < count($form_fields); $i++) {
+				for ($i = 0; $i < count($form_fields); $i++) {
 					if ($form_fields[$i] != '') {
 						$element = explode(';', $form_fields[$i]);
 						$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
@@ -9418,15 +9470,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					}
 				}
 				######### für neuen Datensatz verwenden -> von der Sachdatenanzeige übergebene Formvars #######
-				if($this->formvars['chosen_layer_id'] OR $this->formvars['weiter_erfassen']){
+				if ($this->formvars['chosen_layer_id'] OR $this->formvars['weiter_erfassen']) {
 					$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
-					for($i = 0; $i < count($checkbox_names); $i++) {
+					for ($i = 0; $i < count($checkbox_names); $i++) {
 						if ($this->formvars[$checkbox_names[$i]] == 'on') {
 							$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
 							$oid = $element[3];
 						}
 					}
-					for($i = 0; $i < count($form_fields); $i++) {
+					for ($i = 0; $i < count($form_fields); $i++) {
 						if ($form_fields[$i] != '') {
 							$element = explode(';', $form_fields[$i]);
 							$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
