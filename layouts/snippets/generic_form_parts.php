@@ -480,7 +480,7 @@
 						$subform_request = true;
 						$onload = 'onload="ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
 						$data = '';
-						for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
+						for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++) {
 							if($dataset[$attributes['subform_pkeys'][$j][$p]] == '')$subform_request = false;		// eines der Verknüpfungsattribute ist leer -> keinen Subform-Request machen
 							$data .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
 							$data .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
@@ -499,15 +499,29 @@
 					"';
 					}
 					$datapart .= ($subform_request? $onload : '').'></div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
-					if($gui->new_entry != true AND $subform_request){
+					if ($gui->new_entry != true AND $subform_request) {
+						$params[] = 'go=Layer-Suche_Suchen';
+						$params[] = 'selected_layer_id=' . $attributes['subform_layer_id'][$j];
+						$params[] = 'embedded_subformPK_liste=true';
+						for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++) {
+							$params[] = 'value_' . $attributes['subform_pkeys'][$j][$p] . '=' . $dataset[$attributes['subform_pkeys'][$j][$p]];
+							$params[] = 'operator_' . $attributes['subform_pkeys'][$j][$p] . '==';
+						}
+						$datapart .= '<a
+							id="edit_all_' . $layer_id . '_' . $name . '_' . $k . '"
+							style="font-size: ' . $linksize . 'px;"
+							class="buttonlink"
+							href="javascript:ahah(\'index.php\', \'' . implode('&', $params) . '\', new Array(document.getElementById(\'' . $layer_id . '_' . $name . '_' . $k . '\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms(' . $attributes['subform_layer_id'][$j] . ');"
+						><span>In Liste bearbeiten</span></a>&nbsp;';
+
 						$datapart .= '<a id="show_all_'.$layer_id.'_'.$name.'_'.$k.'" style="font-size: '.$linksize.'px;display:none" class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
-						for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
+						for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 							$datapart .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
 							$datapart .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
 						}
 						$datapart .= 	'&subform_link=true\')"><span>'.$strShowAll.'</span></a>';
-						if($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
-							if($attributes['embedded'][$j] == true){
+						if ($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
+							if ($attributes['embedded'][$j] == true){
 								$datapart .= '&nbsp;<a id="new_'.$layer_id.'_'.$name.'_'.$k.'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
 								$data = '';
 								for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){

@@ -1,5 +1,5 @@
 <?
-	include(SNIPPETS.'generic_form_parts.php');
+	include(SNIPPETS . 'generic_form_parts.php');
 	# dies ist das Snippet für die SubformEmbeddedPK-Liste mit Links untereinander
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
@@ -19,7 +19,7 @@
 		else { ?>
 			<table border="0" cellspacing="0" cellpadding="2" width="100%"><?
 				$preview_attributes = explode(' ', $this->formvars['preview_attribute']);
-				for ($k=0;$k<$anzObj;$k++) {
+				for ($k = 0; $k < $anzObj; $k++) {
 					$dataset = $layer['shape'][$k]; # der aktuelle Datensatz
 					for ($p = 0; $p < count($preview_attributes); $p++) {
 						$output[$p] = $preview_attributes[$p];
@@ -28,7 +28,8 @@
 								$output[$p] = '';
 								switch ($attributes['form_element_type'][$j]) {
 									case 'Auswahlfeld' : {
-										if (is_array($attributes['dependent_options'][$j])) {		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+										if (is_array($attributes['dependent_options'][$j])) {
+											# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 											for ($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++) {
 												if ($attributes['enum_value'][$j][$k][$e] == $dataset[$attributes['name'][$j]]) {
 													$output[$p] = $attributes['enum_output'][$j][$k][$e];
@@ -112,7 +113,7 @@
 										if ($this->formvars['no_new_window'] != true) {
 											echo 	' target="_blank"';
 										}
-						echo ' href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&subform_link=true\')">'.implode(' ', $output).'</a></td>
+						echo ' href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&subform_link=true\')">' . implode(' ', $output) . '</a></td>
 									</tr>';
 					}
 				} ?>
