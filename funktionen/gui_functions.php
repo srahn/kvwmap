@@ -703,6 +703,7 @@ function selectgroupthema(group, instantreload){
 function zoomToMaxLayerExtent(zoom_layer_id){
 	console.log(currentform.go.value);
 	currentform.zoom_layer_id.value = zoom_layer_id;
+	if(currentform.no_load != undefined)currentform.no_load.value = 'true';
 	overlay_submit(currentform);
 }
 

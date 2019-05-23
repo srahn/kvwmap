@@ -218,6 +218,23 @@ function save_bearbeitungshinweis(id){
 ?>
 
 <style>
+
+	.nw_treffer_table tr:hover {
+		background-color: lightgrey;
+	}
+
+	.nw_treffer_table td {
+		padding: 5 0 5 0;
+	}
+	
+	.nw_treffer_table td:first-child {
+		padding: 5 0 5 3;
+	}
+	
+	.nw_treffer_table td:last-child {
+		padding: 5 3 5 0;
+	}
+
 	.bearbeitungshinweise{
 		float:right;
 		margin-right: 15px;
@@ -336,7 +353,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   <tr>
     <td bgcolor="<? echo BG_FORM ?>"><?
 	 if ($this->nachweis->erg_dokumente > 0) { ie_check();?>
-		<table id="nachweisanzeige_ergebnis" class="<? if (!ie_check()){ ?>scrolltable <? } ?>nw_treffer_table" style="width: 1276px" border="0" cellspacing="0" cellpadding="0">
+		<table id="nachweisanzeige_ergebnis" class="<? if (!ie_check()){ ?>scrolltable <? } ?>nw_treffer_table" style="width: 1282px" border="0" cellspacing="0" cellpadding="0">
 			<thead>
         <tr style="outline: 1px solid grey;" bgcolor="#FFFFFF"> 
           <th height="40" style="width: 80"><div align="center"><span class="fett">Auswahl</span></div></th>
@@ -386,7 +403,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			<? if(strpos($this->formvars['order'], 'format') === false){ ?>
 				<th align="center" style="width: 80"><a href="javascript:add_to_order('format');" title="nach Blattformat sortieren"><span class="fett">Format</span></a></th>
 			<? }else{echo '<th align="center" style="width: 80"><span class="fett">Format</span></th>';} ?>	
-          <th colspan="3" style="width: 144"><div align="center"><?    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></th>
+          <th colspan="3" style="width: 150"><div align="center"><?    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></th>
         </tr>
 			</thead>
 			<tbody style="outline: 1px solid gray;">
@@ -460,26 +477,28 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 						$this->allowed_documents[] = addslashes($thumbname);
 						$url = IMAGEURL.$this->document_loader_name.'?dokument='.$thumbname;
 					?>
-						<a target="_blank" onmouseover="getvorschau('<? echo $url; ?>');" href="index.php?go=document_anzeigen&ohnesession=1&id=<? echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Ansicht"><img src="graphics/button_ansicht.png" border="0"></a>
+						<a target="_blank" onmouseover="getvorschau('<? echo $url; ?>');" href="index.php?go=document_anzeigen&ohnesession=1&id=<? echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Dokument anzeigen"><img src="graphics/button_ansicht.png" border="0"></a>
 					</td>
 					<td style="width: 30">
-						<a href="javascript:void(0);" onmouseenter="getGeomPreview(<? echo $this->nachweis->Dokumente[$i]['id']; ?>);" onmouseleave=""><img src="graphics/umring.png" border="0"></a>
+						<a href="javascript:void(0);" title="Geltungsbereich" onmouseenter="getGeomPreview(<? echo $this->nachweis->Dokumente[$i]['id']; ?>);" onmouseleave=""><img src="graphics/umring.png" border="0"></a>
 					</td>
-          <td style="width: 54">
+          <td style="width: 30">
           	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){
 									if($this->nachweis->Dokumente[$i]['geprueft'] == 0 OR $this->Stelle->isFunctionAllowed('gepruefte_Nachweise_bearbeiten')){	?>
 										<a href="index.php?go=Nachweisformular&id=<? echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a>
-									<? } 
-									if($this->Stelle->isFunctionAllowed('Nachweise_Geometrie_uebernehmen')){ ?>
-										<input type="radio" title="Geometrie für Geometrieübernahme verwenden" onmousedown="set_ref_geom();" value="<? echo $this->nachweis->Dokumente[$i]['id'];?>" name="ref_geom" <? if($this->formvars['ref_geom'] == $this->nachweis->Dokumente[$i]['id'])echo 'checked'; ?>>
-							<?	}
-							} ?>
+							<? 	} 
+							 } ?>
 					</td>
           <td style="width: 30">
           	<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>
           	<a href="index.php?go=Nachweisloeschen&id=<? echo $this->nachweis->Dokumente[$i]['id']; ?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>"  title="löschen"><img src="graphics/button_drop.png" border="0"></a>
           	<? } ?>
           </td>
+					<td style="width: 24">
+					<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten') AND $this->Stelle->isFunctionAllowed('Nachweise_Geometrie_uebernehmen')){ ?>
+								<input type="radio" title="Geometrie für Geometrieübernahme verwenden" onmousedown="set_ref_geom();" value="<? echo $this->nachweis->Dokumente[$i]['id'];?>" name="ref_geom" <? if($this->formvars['ref_geom'] == $this->nachweis->Dokumente[$i]['id'])echo 'checked'; ?>>
+					<? } ?>
+					</td>
         </tr>
         <?
     }

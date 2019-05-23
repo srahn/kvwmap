@@ -2,7 +2,6 @@
 	global $supportedLanguages;
 	include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php'); ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
-<script language="JavaScript" src="funktionen/keyfunctions.js" type="text/javascript"></script>
 <script src="funktionen/tooltip.js" language="JavaScript"	type="text/javascript"></script>
 <script type="text/javascript">
 	Text[0] = ["Hilfe:","Wendet eine Prozessierungsanweisung für den Layer an. Die unterstützten Anweisungen hängen vom Layertyp und dem verwendeten Treiber ab. Es gibt Anweisungen für Attribute, Connection Pooling, OGR Styles und Raster. siehe Beschreibung zum Layerattribut PROCESSING unter: http://www.mapserver.org/mapfile/layer.html. Mehrere Prozessinganweisungen werden hier eingegeben getrennt durch Semikolon. z.B. CHART_SIZE=60;CHART_TYPE=pie für die Darstellung eines Tortendiagramms des Typs MS_LAYER_CHART"];

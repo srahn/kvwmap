@@ -186,7 +186,7 @@ class GUI {
 							<li>
 								<a href="javascript:void(0);" onclick="$(\'#rollenfilter, #rollenfilterquestionicon\').toggle()">Filter</a>
 								<a href="javascript:void(0);" onclick="message(\'\
-									Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Darstellung des Layers auswirkt.<br>\
+									Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Kartendarstellung und Sachdatenanzeige des Layers auswirkt.<br>\
 									In diesem Thema stehen dafür folgende Attribute zur Verfügung:<br>\
 									<ul>';
 									for($i = 0; $i < count($attributes)-2; $i++){

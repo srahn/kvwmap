@@ -1927,14 +1927,6 @@ tbody.gle tr {
 	overflow-x: hidden;
 }
 
-.nw_treffer_table tr:hover {
-	background-color: lightgrey;
-}
-
-.nw_treffer_table td {
-	padding: 5 0 5 0;
-}
-
 .toggle_fa_off i{
 	color: #888888;
 }

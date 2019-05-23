@@ -343,7 +343,7 @@ class GUI {
 							<li>
 								<a href="javascript:void(0);" onclick="$(\'#rollenfilter, #rollenfilterquestionicon\').toggle()">Filter</a>
 								<a href="javascript:void(0);" onclick="message(\'\
-									Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Darstellung des Layers auswirkt.<br>\
+									Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Kartendarstellung und Sachdatenanzeige des Layers auswirkt.<br>\
 									In diesem Thema stehen dafür folgende Attribute zur Verfügung:<br>\
 									<ul>';
 									for($i = 0; $i < count($attributes)-2; $i++){
@@ -2783,23 +2783,28 @@ class GUI {
 			$orderby = "ORDER BY output";	# nur sortieren, wenn noch nicht sortiert
 		}
 
-		# setze Like Ausdruck
+		# setze Where Ausdruck
 		if ($this->formvars['listentyp'] == 'zweispaltig' && strpos(' ', $this->formvars['inputvalue']) !== 0) {
-			$like .= str_replace(' ', '%', $this->formvars['inputvalue']);
+			$parts = explode(' ', $this->formvars['inputvalue']);
+			$where = "
+				lower(split_part(output::text, ' ', 1)) LIKE lower('" . $wildcard . $parts[0] . "%') AND
+				lower(split_part(output::text, ' ', 2)) LIKE lower('" . $wildcard . $parts[1] . "%')
+			";
 		}
 		else {
-			$like = $this->formvars['inputvalue'];
+			$where = "lower(output::text) LIKE lower('" . $wildcard . $this->formvars['inputvalue'] . "%')";
 		}
+
 		$sql = "
 			SELECT *
 			FROM (" . $sql . ") as foo
 			WHERE
-				lower(output::text) LIKE lower('" . $wildcard . $like . "%')
-			" . $orderby ."
+				" . $where . "
+			" . $orderby . "
 			LIMIT 15
 		";
 		#echo $sql;
-  	$ret=$layerdb->execSQL($sql,4, 1);
+		$ret = $layerdb->execSQL($sql, 4, 1);
 		$count = pg_num_rows($ret[1]);
 		if($count == 1)$rs = pg_fetch_array($ret[1]);
 		if($count == 1 AND strtolower($rs['output']) == strtolower($this->formvars['inputvalue'])){	# wenn nur ein Treffer gefunden wurde und der dem Eingabewert entspricht
@@ -10536,7 +10541,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			switch ($after_import_action) {
 				case 'use_geometry' : {
 					if (!in_array($filetype, array('tiff', 'tif', 'geotif'))) {
-						echo '&nbsp;=>&nbsp;<a href="javascript:void(0);" onclick="enclosingForm.last_doing.value=\'add_geom\';enclosingForm.secondpoly.value=\'true\';ahah(\'index.php\', \'go=spatial_processing&path1=\'+enclosingForm.pathwkt.value+\'&operation=add_geometry&resulttype=svgwkt&geom_from_layer='.$layer_id.'\', new Array(enclosingForm.result, \'\'), new Array(\'setvalue\', \'execute_function\'));">Geometrie übernehmen</a>';
+						echo '&nbsp;=>&nbsp;<a href="javascript:void(0);" onclick="enclosingForm.last_doing.value=\'add_geom\';enclosingForm.secondpoly.value=\'true\';ahah(\'index.php\', \'go=spatial_processing&path1=\'+enclosingForm.pathwkt.value+\'&operation=add_geometry&resulttype=svgwkt&geom_from_layer='.$layer_id.'&code2execute=zoomToMaxLayerExtent('.$layer_id.');\', new Array(enclosingForm.result, \'\', \'\'), new Array(\'setvalue\', \'execute_function\', \'execute_function\'));">Geometrie übernehmen</a>';
 					}
 				} break;
 				
