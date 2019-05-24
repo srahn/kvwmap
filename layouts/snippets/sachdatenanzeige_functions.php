@@ -334,6 +334,11 @@ include('funktionen/input_check_functions.php');
 		enclosingForm.printversion.value = 'true';
 		enclosingForm.submit();
 	}
+	
+	reload_subform_list = function(list_div_id){
+		list_div = document.getElementById(list_div_id);
+		ahah('index.php?go=Layer-Suche_Suchen', list_div.dataset.reload_params, new Array(list_div), new Array('sethtml'));
+	}
 
 	save = function(){
 		form_fieldstring = enclosingForm.form_field_names.value+'';
@@ -403,14 +408,10 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 
-	subsave_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload){
+	subsave_data = function(layer_id, fromobject, targetobject, targetattribute, data, reload){
 		// layer_id ist die von dem Layer, in dem der Datensatz gespeichert werden soll
 		// fromobject ist die id von dem div, welches das Formular des Datensatzes enthaelt
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des Datensatzes aktualisiert werden soll
-		// targetlayer_id ist die von dem Layer, zu dem das targetobject gehoert
-		// targetattribute ist das Attribut, zu dem das targetobject gehoert
-		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
-		data_r = data.replace(/<und>/g, "&");
   	form_fieldstring = document.getElementById('sub_'+layer_id+'_form_field_names').value;
   	form_fields = form_fieldstring.split('|');
   	for(i = 0; i < form_fields.length-1; i++){
@@ -424,16 +425,13 @@ include('funktionen/input_check_functions.php');
   			message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
   			return;
   		}
-			if(document.getElementsByName(form_fields[i])[0] != undefined){
-				//data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;		// kann evtl. weg
-			}
   	}
-  	data = 'go=Sachdaten_speichern&reload='+reload+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
+  	data = 'go=Sachdaten_speichern&reload='+reload+'&selected_layer_id='+layer_id+'&targetobject='+targetobject+'&form_field_names='+form_fieldstring+'&embedded=true';
 		if(typeof (window.FormData) != 'undefined'){		// in alten IEs gibts FormData nicht
 			formdata = new FormData(enclosingForm);
 			data = urlstring2formdata(formdata, data);
 		}
-		ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject), ''), new Array('sethtml', 'sethtml', 'execute_function'));
+		ahah('index.php', data, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
 	}
 
 	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload){
@@ -442,8 +440,6 @@ include('funktionen/input_check_functions.php');
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des neuen Datensatzes aktualisiert werden soll
 		// targetlayer_id ist die von dem Layer, zu dem das targetobject gehoert
 		// targetattribute ist das Attribut, zu dem das targetobject gehoert
-		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
-		data_r = data.replace(/<und>/g, "&");
   	form_fieldstring = document.getElementById('sub_new_'+layer_id+'_form_field_names').value;
   	form_fields = form_fieldstring.split('|');
   	for(i = 0; i < form_fields.length-1; i++){
@@ -461,7 +457,7 @@ include('funktionen/input_check_functions.php');
   			//data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;			// kann evtl. weg
   		}
   	}
-  	data = 'go=neuer_Layer_Datensatz_speichern&reload='+reload+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
+  	data = 'go=neuer_Layer_Datensatz_speichern&reload='+reload+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&form_field_names='+form_fieldstring+'&embedded=true';
 		if(typeof (window.FormData) != 'undefined'){		// in alten IEs gibts FormData nicht
 			formdata = new FormData(enclosingForm);
 			data = urlstring2formdata(formdata, data);

@@ -473,28 +473,25 @@
 				}break;
 
 				case 'SubFormEmbeddedPK' : {
-					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'"><img src="'.GRAPHICSPATH.'leer.gif" ';
+					$reloadParams= '&selected_layer_id='.$attributes['subform_layer_id'][$j];
+					for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
+						if($dataset[$attributes['subform_pkeys'][$j][$p]] == '')$subform_request = false;		// eines der Verknüpfungsattribute ist leer -> keinen Subform-Request machen
+						$reloadParams .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
+						$reloadParams .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
+					}
+					$reloadParams .= '&preview_attribute='.$attributes['preview_attribute'][$j];
+					$reloadParams .= '&count='.$k;
+					$reloadParams .= '&no_new_window='.$attributes['no_new_window'][$j];
+					$reloadParams .= '&embedded_subformPK=true';
+					if($attributes['embedded'][$j] == true){
+						$reloadParams .= '&embedded=true';
+					}
+					$reloadParams .= '&targetobject='.$layer_id.'_'.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name;
+					
+					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'"><img src="'.GRAPHICSPATH.'leer.gif" ';
 					if($gui->new_entry != true){
 						$subform_request = true;
-						$onload = 'onload="ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
-						$data = '';
-						for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
-							if($dataset[$attributes['subform_pkeys'][$j][$p]] == '')$subform_request = false;		// eines der Verknüpfungsattribute ist leer -> keinen Subform-Request machen
-							$data .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
-							$data .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
-						}
-						$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
-						$data .= '&count='.$k;
-						$data .= '&no_new_window='.$attributes['no_new_window'][$j];
-						$onload .= $data;
-						$onload .= '&data='.str_replace('&', '<und>', $data);
-						$onload .= '&embedded_subformPK=true';
-						if($attributes['embedded'][$j] == true){
-							$onload .= '&embedded=true';
-						}
-						$onload .= '&targetobject='.$layer_id.'_'.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name;
-						$onload .= '\', new Array(document.getElementById(\''.$layer_id.'_'.$name.'_'.$k.'\')), new Array(\'sethtml\'));
-					"';
+						$onload = 'onload="reload_subform_list(\''.$layer_id.'_'.$name.'_'.$k.'\')"';
 					}
 					$datapart .= ($subform_request? $onload : '').'></div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
 					if($gui->new_entry != true AND $subform_request){

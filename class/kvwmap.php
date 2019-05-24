@@ -9319,7 +9319,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 		}
 
-		if ($this->formvars['embedded'] != '') {    # wenn es ein neuer Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
+		if ($this->formvars['embedded'] != '') {    
+			# wenn es ein neuer Datensatz aus einem embedded-Formular ist, 
+			# muss das entsprechende Attribut des Hauptformulars aktualisiert werden
 			header('Content-type: text/html; charset=UTF-8');
 			$attributename[0] = $this->formvars['targetattribute'];
 			$attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, NULL);
@@ -9348,17 +9350,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         } break;
 
         case 'SubFormEmbeddedPK' : {
-          $this->formvars['embedded_subformPK'] = true;
-          echo '~';
-          $this->GenerischeSuche_Suchen();
-					echo '~';
+          echo '~~reload_subform_list(\''.$this->formvars['targetobject'].'\');';
 					if($this->formvars['weiter_erfassen'] == 1){
 						echo 'href_save = document.getElementById("new_'.$this->formvars['targetobject'].'").href;';
 						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = document.getElementById("new_'.$this->formvars['targetobject'].'").href.replace("go=neuer_Layer_Datensatz", "go=neuer_Layer_Datensatz&weiter_erfassen=1'.$formfieldstring.'");';
 						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").click();';
 						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = href_save;';
 					}
-					$this->output_messages('without_script_tags');
         } break;
       }
 
@@ -13146,26 +13144,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->add_message('warning', 'Keine Änderung.');
 		}
 		if ($this->formvars['embedded'] != '') {
-			# wenn es ein Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
-			header ('Content-type: text/html; charset=UTF-8');
-			$attributenames[0] = $this->formvars['targetattribute'];
-			$targetlayerdb = $mapdb->getlayerdatabase($this->formvars['targetlayer_id'], $this->Stelle->pgdbhost);
-			$attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $targetlayerdb, $attributenames);
-			switch ($attributes['form_element_type'][0]) {
-				case 'SubFormEmbeddedPK' : {
-					$this->formvars['embedded_subformPK'] = true;
-					echo '~';
-					$this->GenerischeSuche_Suchen();
-				} break;
-			}
-			echo '~';
-			$this->output_messages('without_script_tags');
-			if ($this->formvars['reload']) {
-				# in diesem Fall wird die komplette Seite neu geladen
-				echo '~~';
-				echo "document.GUI.go.value='get_last_query';
-							document.GUI.submit();";
-			}
+			# wenn es ein Datensatz aus einem embedded-Formular ist, 
+			# muss das embedded-Formular entfernt werden und 
+			# das Listen-DIV neu geladen werden (getrennt durch ~)
+			echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\');';
 		}
 		else {
 			$this->last_query = $this->user->rolle->get_last_query();
