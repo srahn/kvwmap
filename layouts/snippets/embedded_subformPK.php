@@ -17,7 +17,7 @@
 			include(SNIPPETS.'sachdatenanzeige_embedded.php');
 		}
 		else { 
-			if(false){		?>
+			if(0){		?>
 				<table border="0" cellspacing="0" cellpadding="2" width="100%"><?
 					for ($k=0;$k<$anzObj;$k++) {
 						echo '<tr>';
@@ -29,9 +29,9 @@
 						echo '</tr>';
 					}
 ?>				<tr>
-						<td><input type="button" value="Speichern" onclick=""></td>
+						<td><input type="button" value="Speichern" onclick="subsave_data(<? echo $layer['Layer_ID']; ?>, this.closest('div').id, this.closest('div').id, false);"></td>
 					</tr>
-				</table>';
+				</table>
 <?		}
 			else{ ?>
 				<table border="0" cellspacing="0" cellpadding="2" width="100%"><?
@@ -118,7 +118,7 @@
 						}
 						if ($this->formvars['embedded'] == 'true') {
 							echo '<tr style="border: none">
-											<td'. get_td_class_or_style(array($dataset[$attributes['style']], 'subFormListItem')) . '><a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:if (document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&targetlayer_id='.$this->formvars['targetlayer_id'].'&targetattribute='.$this->formvars['targetattribute'].'&data='.$this->formvars['data'].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$layer['Layer_ID'].');">'.implode(' ', $output).'</a><div id="subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
+											<td'. get_td_class_or_style(array($dataset[$attributes['style']], 'subFormListItem')) . '><a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:if (document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$layer['Layer_ID'].');">'.implode(' ', $output).'</a><div id="subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
 										</tr>
 				';
 						}

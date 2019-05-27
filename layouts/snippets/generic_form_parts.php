@@ -486,7 +486,7 @@
 					if($attributes['embedded'][$j] == true){
 						$reloadParams .= '&embedded=true';
 					}
-					$reloadParams .= '&targetobject='.$layer_id.'_'.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name;
+					$reloadParams .= '&targetobject='.$layer_id.'_'.$name.'_'.$k;
 					
 					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'"><img src="'.GRAPHICSPATH.'leer.gif" ';
 					if($gui->new_entry != true){
@@ -512,7 +512,6 @@
 									$data .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
 								}
 								$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
-								$datapart .= '&data='.str_replace('&', '<und>', $data);
 								$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j] .
 														 '&embedded=true&fromobject=subform' . $layer_id . '_' . $k . '_' . $j .
 														 '&targetobject=' . $layer_id . '_' . $name . '_' . $k .

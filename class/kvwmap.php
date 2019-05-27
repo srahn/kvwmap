@@ -9068,16 +9068,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 			}
 			else{
-				header('Content-type: text/html; charset=UTF-8');
-				$attributenames[0] = $this->formvars['targetattribute'];
-				$attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributenames);
-				switch ($attributes['form_element_type'][0]){
-					case 'SubFormEmbeddedPK' : {
-						$this->formvars['embedded_subformPK'] = true;
-						echo '~';
-						$this->GenerischeSuche_Suchen();
-					}break;
-				}
+				# wenn es ein Datensatz aus einem embedded-Formular ist, 
+				# muss das embedded-Formular entfernt werden und 
+				# das Listen-DIV neu geladen werden (getrennt durch ~)
+				echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\');';
 			}
 		}
 
@@ -12937,7 +12931,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					#$filter = $mapdb->getFilter ($layer_id, $this->Stelle->id);		# siehe unten
 					$old_layer_id = $layer_id;
 				}
-
 				if (
 					(
 						$this->formvars['go'] == 'Dokument_Loeschen' OR
