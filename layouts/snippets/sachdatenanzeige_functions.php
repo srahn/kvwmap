@@ -647,6 +647,10 @@ include('funktionen/input_check_functions.php');
 	}
 
 	delete_datasets = function(layer_id) {
+		var no_edit_checkboxes = document.querySelectorAll('.no_edit');
+		[].forEach.call(no_edit_checkboxes, function (checkbox){
+				checkbox.checked = false;		// nicht editierbare Datensaetze deselektieren
+			});
 		if (check_for_selection(layer_id)){
 			if(confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')){
 				enclosingForm.chosen_layer_id.value = layer_id;
