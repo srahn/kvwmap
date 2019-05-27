@@ -30,10 +30,8 @@ if ($this->new_entry != true AND $this->formvars['printversion'] == '') {
 								<td><a title="<? echo $strRememberDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);add_to_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
 							}
 							if ($layer['privileg'] > '0') { ?>
-								<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);use_for_new_dataset(<? echo $layer['Layer_ID']; ?>)" title="<? echo $strUseForNewDataset; ?>"><div class="button use_for_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?php
-								if (false) { ?>
-									<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);dublicate_dataset(<? echo $layer['Layer_ID']; ?>)" title="<? echo $strCopyDataset; ?>"><div class="button copy_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
-								}
+								<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);use_for_new_dataset(<? echo $layer['Layer_ID']; ?>)" title="<? echo $strUseForNewDataset; ?>"><div class="button use_for_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+								<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);dublicate_dataset(<? echo $layer['Layer_ID']; ?>)" title="<? echo $strCopyDataset; ?>"><div class="button copy_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
 							}
 							if ($layer['connectiontype'] == 6 AND $layer['export_privileg'] != 0) { ?>
 								<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);daten_export(<? echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);" title="<? echo $strExportThis; ?>"><div class="button datensatz_exportieren"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
