@@ -498,15 +498,11 @@ include('funktionen/input_check_functions.php');
 		if(document.getElementById('layer').calendar != undefined)document.getElementById('layer').calendar.destroy();
 	}
 
-	autocomplete1 = function(layer_id, attribute, field_id, inputvalue, listentyp = '') {
+	autocomplete1 = function(layer_id, attribute, field_id, inputvalue, listentyp) {
+		listentyp = listentyp || 'ok';
 		document.getElementById('suggests_' + field_id).style.display = 'none';
 		if (inputvalue.length > 0) {
-			ahah(
-				'index.php',
-				'go=autocomplete_request&layer_id=' + layer_id + '&attribute=' + attribute + '&inputvalue=' + inputvalue + '&field_id=' + field_id + (listentyp != '' ? '&listentyp=' + listentyp : ''),
-				new Array(document.getElementById('suggests_' + field_id), ""),
-				new Array("sethtml", "execute_function")
-			);
+			ahah('index.php',	'go=autocomplete_request&layer_id=' + layer_id + '&attribute=' + attribute + '&inputvalue=' + inputvalue + '&field_id=' + field_id + (listentyp != '' ? '&listentyp=' + listentyp : ''), new Array(document.getElementById('suggests_' + field_id), ""), new Array("sethtml", "execute_function"));
 		}
 		else{
 			document.getElementById(field_id).value = '';
