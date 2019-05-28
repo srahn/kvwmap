@@ -534,7 +534,7 @@ class spatial_processor {
     switch ($layerset[0]['connectiontype']){
     	case 6 : {
 	      #Abfrage eines postgislayers
-	      # Aktueller EPSG in der die Abfrage ausgef�hrt wurde
+	      # Aktueller EPSG in der die Abfrage ausgeführt wurde
 	      $client_epsg=$this->rolle->epsg_code;
 	      # EPSG-Code des Layers der Abgefragt werden soll
 	      $layer_epsg=$layerset[0]['epsg_code'];
@@ -584,13 +584,20 @@ class spatial_processor {
 					}
 				}
 				
-	      # 2006-06-12 sr   Filter zur Where-Klausel hinzugef�gt
+	      # 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
 	      if($layerset[0]['Filter'] != ''){
 	      	$layerset[0]['Filter'] = str_replace('$userid', $this->rolle->user_id, $layerset[0]['Filter']);
 	        $sql_where .= " AND ".$layerset[0]['Filter'];
 	      }
-	   
-				$data = $layerset[0]['Data'];
+
+				$data = replace_params(
+					$layerset[0]['Data'],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->stelle_id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				);
 				$data_explosion = explode(' ', $data);
 				$columnname = $data_explosion[0];
 				$select = $fromwhere = $dbmap->getSelectFromData($data);
@@ -602,36 +609,46 @@ class spatial_processor {
 					$fromwhere = substr($select, 0, $orderbyposition);
 					$orderby = ' '.substr($select, $orderbyposition);
 				}
-				$fromwhere = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
-				if(strpos(strtolower($fromwhere), ' where ') === false){
+
+				#$fromwhere = pg_escape_string('from (' . $fromwhere . ') as foo where 1=1');
+				$fromwhere = 'from (' . $fromwhere . ') as foo where 1=1';
+
+
+				if (strpos(strtolower($fromwhere), ' where ') === false) {
 					$fromwhere .= ' where (1=1)';
 				}
-	   			   
-	 			if($fromwhere != ''){
-					if($singlegeom == 'true')$fromwhere = preg_replace('/ ([a-z_]*\.)?'.$columnname.'/', ' (st_dump($0)).geom as the_geom', $fromwhere);		# Einzelgeometrien abfragen
-					if(!$punktuell)$columnname = "st_union(".$columnname.")";			# bei punktueller Abfrage wird immer nur eine Objektgeometrie geholt, bei Rechteck-Abfrage die Vereinigung aller getroffenen Geometrien
-	 				if ($client_epsg!=$layer_epsg) {
-		        $sql = "SELECT st_astext(st_transform(".$columnname.",".$client_epsg.")) AS geomwkt ".$fromwhere." ".$sql_where;
-		      }
-		      else {
-		        $sql = "SELECT st_astext(".$columnname.") AS geomwkt ".$fromwhere." ".$sql_where;
-		      }  
-	 			}
-	   
-	   		# order by wieder einbauen
-				if($punktuell)$sql .= $orderby;
-	   
-	      # Anh�ngen des Begrenzers zur Einschr�nkung der Anzahl der Ergebniszeilen
-	      $sql.=' LIMIT '.MAXQUERYROWS;
-	      $ret=$this->pgdatabase->execSQL($sql,4, 0);
-	      #echo $sql;
-	      if (!$ret[0]) {
-	        while ($rs=pg_fetch_array($ret[1])) {
-	          $layerset[0]['shape'][]=$rs;
-	        }
-	      }
-	      return $layerset[0]['shape'][0]['geomwkt'];
-    	}break; # ende Layer ist aus postgis
+				if ($fromwhere != '') {
+					if ($singlegeom == 'true') {
+						$fromwhere = preg_replace('/ ([a-z_]*\.)?'.$columnname.'/', ' (st_dump($0)).geom as the_geom', $fromwhere);		# Einzelgeometrien abfragen
+					}
+					if (!$punktuell) {
+						# bei punktueller Abfrage wird immer nur eine Objektgeometrie geholt, bei Rechteck-Abfrage die Vereinigung aller getroffenen Geometrien
+						$columnname = "st_union(".$columnname.")";
+					}
+					$sql = "
+						SELECT ST_AsText(" . ($client_epsg != $layer_epsg ? "ST_Transform(" . $columnname . ", " . $client_epsg . ")" : $columnname) . ") AS geomwkt
+						" . $fromwhere . "
+						" . $sql_where . "
+					";
+				}
+
+				# order by wieder einbauen
+				if ($punktuell) {
+					$sql .= $orderby;
+				}
+
+				# Anhängen des Begrenzers zur Einschränkung der Anzahl der Ergebniszeilen
+				$sql .= ' LIMIT ' . MAXQUERYROWS;
+				$ret = $this->pgdatabase->execSQL($sql,4, 0);
+				#echo '<br>SQL: ' . $sql;
+				if (!$ret[0]) {
+					while ($rs=pg_fetch_array($ret[1])) {
+						$layerset[0]['shape'][]=$rs;
+					}
+				}
+				#echo '<br>geomwkt: ' . $layerset[0]['shape'][0]['geomwkt'];
+				return $layerset[0]['shape'][0]['geomwkt'];
+			} break; # ende Layer ist aus postgis
     	
     	case 9 : {
     		# Abfrage eines WFS-Layers
@@ -718,7 +735,10 @@ class spatial_processor {
 				$msg .= 'Die Geometrie des Polygons ist fehlerhaft! Laden Sie den Geometrieeditor neu und vermeiden Sie Selbstüberschneidungen beim Zeichnen.';
 			}
 			else {
-				$sql = "SELECT st_isvalid(st_geomfromtext('".$pathwkt."'))";
+				$sql = "
+					SELECT st_isvalid(st_geomfromtext('" . $pathwkt . "'))
+				";
+				#echo '<br>Sql: ' . $sql;
 				$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 				if($ret['success']){
 					$valid = pg_fetch_row($ret[1]);

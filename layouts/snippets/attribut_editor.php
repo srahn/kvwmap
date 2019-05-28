@@ -30,7 +30,7 @@
 			'title' => 'Autovervollständigungsfeld'
 		),
 		array(
-			'value' => 'Autovervollständigungsfeld zweispaltig',
+			'value' => 'Autovervollständigungsfeld_zweispaltig',
 			'output' => 'zweispaltiges Autovervollständigungsfeld',
 			'title' => 'Autovervollständigungsfeld getrennt durch Leerzeichen'
 		),

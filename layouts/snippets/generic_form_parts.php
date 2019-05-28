@@ -307,7 +307,7 @@
 					$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $change_all, $size, $onchange, $field_class);
 				} break;
 
-				case 'Autovervollständigungsfeld zweispaltig' : {
+				case 'Autovervollständigungsfeld_zweispaltig' : {
 					$datapart .= Autovervollstaendigungsfeld_zweiSpaltig($layer_id, $name, $j, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $change_all, $size, $onchange, $field_class);
 				} break;
 				
@@ -494,15 +494,15 @@
 						$onload = 'onload="reload_subform_list(\''.$layer_id.'_'.$name.'_'.$k.'\')"';
 					}
 					$datapart .= ($subform_request? $onload : '').'></div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
-					if($gui->new_entry != true AND $subform_request){
+					if ($gui->new_entry != true AND $subform_request) {
 						$datapart .= '<a id="show_all_'.$layer_id.'_'.$name.'_'.$k.'" style="font-size: '.$linksize.'px;display:none" class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
-						for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
+						for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 							$datapart .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
 							$datapart .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
 						}
 						$datapart .= 	'&subform_link=true\')"><span>'.$strShowAll.'</span></a>';
-						if($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
-							if($attributes['embedded'][$j] == true){
+						if ($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
+							if ($attributes['embedded'][$j] == true){
 								$datapart .= '&nbsp;<a id="new_'.$layer_id.'_'.$name.'_'.$k.'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
 								$data = '';
 								for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
@@ -828,7 +828,7 @@
 										set_changed_flag(currentform.changed_' . $layer_id . '_' . $oid . ')
 									}
 								"' .
-								($privileg == '0' OR $lock
+								(($privileg == '0' OR $lock)
 									? ' readonly style="border:0px;background-color:transparent;font-size: ' . $fontsize . 'px;"'
 									: ' tabindex="1" style="font-size: ' . $fontsize . 'px;"'
 								) . '
@@ -932,7 +932,7 @@
 										set_changed_flag(currentform.changed_' . $layer_id . '_' . $oid . ')
 									}
 								"' .
-								($privileg == '0' OR $lock
+								(($privileg == '0' OR $lock)
 									? ' readonly style="border:0px;background-color:transparent;font-size: ' . $fontsize . 'px;"'
 									: ' tabindex="1" style="font-size: ' . $fontsize . 'px;"'
 								) . '

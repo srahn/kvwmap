@@ -500,12 +500,27 @@ include('funktionen/input_check_functions.php');
 
 	autocomplete1 = function(layer_id, attribute, field_id, inputvalue, listentyp) {
 		listentyp = listentyp || 'ok';
-		document.getElementById('suggests_' + field_id).style.display = 'none';
-		if (inputvalue.length > 0) {
-			ahah('index.php',	'go=autocomplete_request&layer_id=' + layer_id + '&attribute=' + attribute + '&inputvalue=' + inputvalue + '&field_id=' + field_id + (listentyp != '' ? '&listentyp=' + listentyp : ''), new Array(document.getElementById('suggests_' + field_id), ""), new Array("sethtml", "execute_function"));
+		var suggest_field = document.getElementById('suggests_' + field_id);
+		if(event.key == 'ArrowDown'){
+			suggest_field.firstChild.selectedIndex = suggest_field.firstChild.selectedIndex + 1;
+		}
+		else if(event.key == 'ArrowUp'){
+			suggest_field.firstChild.selectedIndex = suggest_field.firstChild.selectedIndex - 1;
+		}
+		else if(event.key == 'Enter'){
+			suggest_field.firstChild.click();
+		}
+		else if(event.key == 'Tab'){
+			// nix machen
 		}
 		else{
-			document.getElementById(field_id).value = '';
+			suggest_field.style.display = 'none';
+			if (inputvalue.length > 0) {
+				ahah('index.php', 'go=autocomplete_request&layer_id=' + layer_id + '&attribute=' + attribute + '&inputvalue=' + inputvalue + '&field_id=' + field_id + (listentyp != '' ? '&listentyp=' + listentyp : ''), new Array(suggest_field, ""), new Array("sethtml", "execute_function"));
+			}
+			else{
+				document.getElementById(field_id).value = '';
+			}
 		}
 	}
 

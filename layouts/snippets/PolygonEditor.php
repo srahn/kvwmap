@@ -220,6 +220,6 @@ function buildwktpolygonfromsvgpath(svgpath){
 
 <?
 	if ($this->Meldung!='') {
-		$this->alert = 'Fehler bei der Eingabe:\n'.$this->Meldung;
+		$this->add_message('error', 'Fehler bei der Eingabe:<p>' . $this->Meldung);
 	}
 ?>  	

@@ -1,5 +1,5 @@
 <?
-	include(SNIPPETS.'generic_form_parts.php');
+	include(SNIPPETS . 'generic_form_parts.php');
 	# dies ist das Snippet für die SubformEmbeddedPK-Liste mit Links untereinander
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
@@ -62,8 +62,8 @@
 												}
 											} 
 										} break;
-
-										case 'Autovervollständigungsfeld' : {
+										
+										case 'Autovervollständigungsfeld' : case 'Autovervollständigungsfeld_zweispaltig' :{
 											$output[$p] = $attributes['enum_output'][$j][$k];
 										} break;
 

@@ -69,40 +69,46 @@ class polygoneditor {
     return $rect;
   }
 
-  function pruefeEingabedaten($newpathwkt) {
-    $ret[1]='';
-    $ret[0]=0;
-    if($newpathwkt != ''){
-    	$sql = "SELECT st_isvalid(st_geomfromtext('".$newpathwkt."'))";
-    	$ret = $this->database->execSQL($sql, 4, 0);
-    	$valid = pg_fetch_row($ret[1]);
-			if($valid[0] == 'f'){
-				$sql = "SELECT st_isvalidreason(st_geomfromtext('".$newpathwkt."'))";
-				$ret = $this->database->execSQL($sql, 4, 0);
-    		$reason = pg_fetch_row($ret[1]);
-				$ret[1]='\nDie Geometrie des Polygons ist fehlerhaft und kann nicht gespeichert werden: \n\n'.$reason[0];
-      	$ret[0]=1;
-			}
-    }
-    return $ret;
-  }
-
-  function eintragenFlaeche($umring, $oid, $tablename, $columnname, $geomtype) {
-		if ($umring == '')$sql = "UPDATE ".$tablename." SET ".$columnname." = NULL WHERE oid = ".$oid;
-		else {
-			if(substr($geomtype, 0, 5) == 'MULTI') {
-				$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(ST_MULTI(st_geometryfromtext('".$umring."',".$this->clientepsg.")),".$this->layerepsg.") WHERE oid = ".$oid;
+	function pruefeEingabedaten($newpathwkt) {
+		$ret[1] = '';
+		$ret[0] = 0;
+		if ($newpathwkt != '') {
+			if ($newpathwkt == '\\') {
+				$ret[1] = 'Die Geometrie des Polygons ist fehlerhaft und kann nicht gespeichert werden:<p>';
+				$ret[0] = 1;
 			}
 			else {
-				$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(st_geometryfromtext('".$umring."',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
+				$sql = "
+					SELECT st_isvalid(st_geomfromtext('" . $newpathwkt . "'))
+				";
+				$ret = $this->database->execSQL($sql, 4, 0);
+				$valid = pg_fetch_row($ret[1]);
+				if ($valid[0] == 'f') {
+					$sql = "
+						SELECT st_isvalidreason(st_geomfromtext('".$newpathwkt."'))
+					";
+					$ret = $this->database->execSQL($sql, 4, 0);
+					$reason = pg_fetch_row($ret[1]);
+					$ret[1] = 'Die Geometrie des Polygons ist fehlerhaft und kann nicht gespeichert werden:<p>' . $reason[0];
+					$ret[0] = 1;
+				}
 			}
 		}
-		$ret = $this->database->execSQL($sql, 4, 1);
-		if (!$ret[0]) {
-			if (pg_affected_rows($ret[1]) == 0) {
-				$ret[0] = 1;
+		return $ret;
+	}
+
+  function eintragenFlaeche($umring, $oid, $tablename, $columnname, $geomtype) {
+		$geometry = ($umring == '' ? "NULL" : "ST_Transform(ST_GeometryFromText('" . $umring . "', " . $this->clientepsg . "), " . $this->layerepsg . ")");
+		$sql = "
+			UPDATE " . $tablename . "
+			SET " . $columnname . " = " . (substr($geomtype, 0, 5) == 'MULTI' ? "ST_Multi(" . $geometry . ")" : $geometry) . "
+			WHERE oid = " . $oid . "
+		";
+		$ret = $this->database->execSQL($sql, 4, 1, true);
+		if (!$ret['success']) {
+			if (is_resource($ret[1]) AND pg_affected_rows($ret[1]) == 0) {
 				$result = pg_fetch_row($ret[1]);
-				$ret[1] = 'Eintrag nicht erfolgreich.\n' . $result[0];
+				$ret[1] = 'Eintrag der Geometrie nicht erfolgreich!' . $result[0];
 			}
 			else {
 				if ($last_notice = $msg = pg_last_notice($this->database->dbConn)) {
@@ -111,13 +117,13 @@ class polygoneditor {
 					}
 					$ret[3] = $msg;
 				}
+				else {
+					$ret[1] = sql_err_msg('Auf Grund eines Datenbankfehlers konnte die Flaeche nicht eingetragen werden!', $sql, $ret[1], 'error_div_' . rand(1, 99999));
+				}
 			}
 		}
-		else {
-			$ret[1] = 'Auf Grund eines Datenbankfehlers konnte die Flaeche nicht eingetragen werden!<br>' . $ret[1];
-		}
-    return $ret;
-  }
+		return $ret;
+	}
 
 	function getpolygon($oid, $tablename, $columnname, $extent, $schemaname = ''){
 		$sql = "SELECT st_assvg(st_transform(st_union(".$columnname."),".$this->clientepsg."), 0, 8) AS svggeom, st_astext(st_transform(st_union(".$columnname."),".$this->clientepsg.")) AS wktgeom FROM " . ($schemaname != '' ? $schemaname . '.' : '') . $tablename;

@@ -159,16 +159,10 @@
 			  </tr>
 <?
 	for ($k=0;$k<$anzObj;$k++) {
-		$definierte_attribute_privileges = $layer['attributes']['privileg'];
+		$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
 		if (is_array($layer['attributes']['privileg'])) {
 			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
-				$gesperrte_attribute_privileges = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
-				$layer['attributes']['privileg'] = $gesperrte_attribute_privileges;
-			}
-			else {
-				if (is_array($layer['attributes']['privileg'])) {
-					$layer['attributes']['privileg'] = $definierte_attribute_privileges;
-				}
+				$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
 			}
 		}
 		$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
@@ -268,7 +262,8 @@
 			    </td>
 		<? 	} ?>
 				</tr>
-<?	} ?>
+<?		$layer['attributes']['privileg'] = $definierte_attribute_privileges;
+		} ?>
 				<tr onclick="toggle_statistic_row(<? echo $layer['Layer_ID']; ?>);">
 					<td style="background-color:<? echo BG_TR; ?>;" valign="top" align="center">
 						&Sigma;
