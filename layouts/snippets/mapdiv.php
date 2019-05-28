@@ -161,7 +161,7 @@
 					</div>
 				</div>
 				<div class="special-options" style="float: right; margin-top: 5px; margin-right: 5px">
-					<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
+					<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;<? echo $strPointSnap; ?>
 					<div id="options" style="padding-left: 10px;float: right"></div><!-- hier werden die Spezialoptionen eingefügt -->
 				</div>
 			</div><?

@@ -30,6 +30,7 @@
 	$strChooseLayers="Themenauswahl laden";
   $strMap="Kartenausschnitt";
   $strMapSize="Größe anpassen";
+	$strPointSnap="Punktfang";
 	$strDeactivateAllLayer="alle Themen deaktivieren";
 	$strClearAllQuerys="alle Abfragehaken entfernen";
 	$strRotationAngle="Richtungswinkel";

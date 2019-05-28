@@ -740,12 +740,17 @@ class spatial_processor {
 				";
 				#echo '<br>Sql: ' . $sql;
 				$ret = $this->pgdatabase->execSQL($sql, 4, 0);
-				$valid = pg_fetch_row($ret[1]);
-				if ($valid[0] == 'f') {
-					$sql = "SELECT st_isvalidreason(st_geomfromtext('".$pathwkt."'))";
-					$ret = $this->pgdatabase->execSQL($sql, 4, 0);
-					$reason = pg_fetch_row($ret[1]);
-					$msg = 'Die Geometrie des Polygons ist fehlerhaft:<br>' . $reason[0];
+				if($ret['success']){
+					$valid = pg_fetch_row($ret[1]);
+					if ($valid[0] == 'f') {
+						$sql = "SELECT st_isvalidreason(st_geomfromtext('".$pathwkt."'))";
+						$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+						$reason = pg_fetch_row($ret[1]);
+						$msg = 'Die Geometrie des Polygons ist fehlerhaft:<br>' . $reason[0];
+					}
+				}
+				else{
+					echo $ret['msg'];
 				}
 			}
 		}

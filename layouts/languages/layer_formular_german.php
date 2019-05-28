@@ -26,13 +26,13 @@
 	$strQueryable="Queryable";
 	$strOwsSrs="OWS-SRS*";
 	$strWMSName="WMS-Name/Typename";
+	$strWMSKeywordlist="WMS-Keywordlist";
 	$strWMSServerVersion="OWS-Serverversion*";
 	$strWMSFormat="WMS-format*";
 	$strWMSConnectionTimeout="WMS-connection-timeout";
 	$strSelectionType="SelectionType";
 	$strClasses="Klassen";
 	$strID="ID";
-	$strIdColumnName = "Spalte mit eindeutigen Werten";
 	$strClass="Klasse";
 	$strExpression="Expression";
 	$strText="Text";
@@ -70,7 +70,6 @@
 	$strDataOwner="Datenherr";
 	$strMetaLink="Metadatenlink";
 	$strMaintable="Haupttabelle";
-	$strFurtherAttributeTable="Tabelle für Zusatzparameter";
 	$strPrivileges="Rechte festlegen";
 	$strAlias="Aliasname";
 	$strStatus="Status";

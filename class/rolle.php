@@ -86,7 +86,7 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, further_attribute_table, id_column, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, connection, printconnection,
+				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, connection, printconnection,
 				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
@@ -131,6 +131,14 @@ class rolle {
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
 		while ($rs=mysql_fetch_assoc($query)) {
+			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
+				if($rs['Filter'] == ''){
+					$rs['Filter'] = '('.$rs['rollenfilter'].')';
+				}
+				else {
+					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
+				}
+			}
 			foreach(array('Name', 'alias', 'connection') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
@@ -852,7 +860,8 @@ class rolle {
 				CASE gle_view
 					WHEN '0' THEN 'generic_layer_editor.php'
 					ELSE ''
-				END as template 
+				END as template,
+				concat('(', rollenfilter, ')') as Filter
 			FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
     if ($LayerName!='') {
@@ -1092,12 +1101,14 @@ class rolle {
 
 	function setRollenFilter($formvars) {
 		if (isset($formvars['layer_options_rollenfilter']) AND $formvars['layer_options_open'] <> 0) {
+			# SQL-Injection verhindern
+			$formvars['layer_options_rollenfilter'] = str_replace([';', '--'], '', $formvars['layer_options_rollenfilter']);
 			if ($formvars['layer_options_open'] > 0) { # normaler Layer
 				$table_name = "u_rolle2used_layer";
 				$where_id = "layer_id = " . $formvars['layer_options_open'];
 			}
 			else { # layer_options_open < 0 Rollenlayer
-				$table_name = "rollenfilter";
+				$table_name = "rollenlayer";
 				$where_id = "id = -1*" . $formvars['layer_options_open'];
 			}
 			$sql = "

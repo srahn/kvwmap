@@ -4,7 +4,6 @@
 	<head>
 		<title>Shape-Datei mit Geltungsbereich des Planes hochladen</title>
 		<?php include(SNIPPETS . 'gui_head.php')?>
-		<script src="<?php echo JQUERY_PATH; ?>jquery-1.12.0.min.js"></script>
 	</head>
 	<body style="text-align: center;">
 		<h2>Shape-Datei mit Geltungsbereich des Planes hochladen</h2>

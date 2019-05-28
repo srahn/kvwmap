@@ -23,7 +23,7 @@
 								<a href="javascript:deactivate_overlay();" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH."exit.png"; ?>"></img></a>
 							</div>
 						</div>						
-						<div id="contentdiv" style="background: url(<? echo GRAPHICSPATH; ?>bg.gif);border: 1px solid #cccccc;max-width:<? echo $width; ?>px;height:100%;max-height:<? echo $this->user->rolle->nImageHeight+30; ?>px;position:relative;overflow-y: scroll;overflow-x: auto;">
+						<div id="contentdiv" style="background: url(<? echo GRAPHICSPATH; ?>bg.gif);border: 1px solid #cccccc;max-width:<? echo $width; ?>px;height:100%;max-height:<? echo $this->user->rolle->nImageHeight+30; ?>px;position:relative;overflow-y: scroll;overflow-x: hidden;">
 						<? if($this->overlaymain != '')include(LAYOUTPATH.'snippets/overlay.php'); ?>
 						</div>
 						<div id="overlayfooter" style="<? if($this->found == 'false' OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo GRAPHICSPATH; ?>bg.gif);border: 1px solid #cccccc;max-width:<? echo $width; ?>px;position:relative;">
@@ -40,7 +40,7 @@
 											<? } ?>
 										</select>
 									</td>
-									<td align="center"><div id="savebutton" <? if($this->editable == '')echo 'style="display:none"'; ?>><input type="button" name="savebutton" value="<? echo $this->strSave; ?>" onclick="save();"></div></td>
+									<td align="center"><div id="savebutton" <? if($this->editable == '')echo 'style="display:none"'; ?>><input type="button" id="sachdatenanzeige_save_button" name="savebutton" value="<? echo $this->strSave; ?>" onclick="save();"></div></td>
 									<td style="width:40%" align="right"><a href="javascript:druck();" class="px13"><? echo $this->printversion; ?></a>&nbsp;</td>
 								</tr>
 							</table>

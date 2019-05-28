@@ -732,6 +732,8 @@ class user {
 		$this->funktion = $rs['Funktion'];
 		$this->password_setting_time = $rs['password_setting_time'];
 		$this->agreement_accepted = $rs['agreement_accepted'];
+		$this->start = $rs['start'];
+		$this->stop = $rs['stop'];
 	}
 
 	/*

@@ -26,6 +26,7 @@
   $strQueryable="Queryable";
   $strOwsSrs="OWS-SRS*";
   $strWMSName="WMS-name";
+	$strWMSKeywordlist="WMS-Keywordlist";
   $strWMSServerVersion="WMS-serverversion*";
   $strWMSFormat="WMS format*";
   $strWMSConnectionTimeout="WMS-connectiontimeout";
@@ -69,7 +70,6 @@
 	$strDataOwner="Data-Owner";
 	$strMetaLink="Metadata-Link";
 	$strMaintable="Main Table";
-	$strFurtherAttributeTable="Table for further parameter";
 	$strPrivileges="Set Privileges";
 	$strAlias="Alias";
 	$strStatus="Status";

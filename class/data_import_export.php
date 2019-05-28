@@ -236,10 +236,10 @@ class data_import_export {
 	
 	function get_epsg_from_wkt($wkt, $pgdatabase){
 		global $supportedSRIDs;
-		# 1. Versuch: Suche nach AUTHORITY
-		for($i = 0; $i < count($supportedSRIDs); $i++){
-			if(strpos($wkt, 'AUTHORITY["EPSG","'.$supportedSRIDs[$i].'"]') > 0)return $supportedSRIDs[$i];
-		}
+		# 1. Versuch: Suche nach AUTHORITY			// erstmal rausgenommen, weil es auch mehrere AUTHORITY-Einträge geben kann
+		// for($i = 0; $i < count($supportedSRIDs); $i++){
+			// if(strpos($wkt, 'AUTHORITY["EPSG","'.$supportedSRIDs[$i].'"]') > 0)return $supportedSRIDs[$i];
+		// }
 		# 2. Versuch: Abgleich bestimmter Parameter im prj-String mit spatial_ref_sys_alias
 		$datum = get_first_word_after($wkt, 'DATUM[', '"', '"');
 		$projection = get_first_word_after($wkt, 'PROJECTION[', '"', '"');
@@ -476,7 +476,7 @@ class data_import_export {
 			';
 			$ret = $pgdatabase->execSQL($sql,4, 0);
 			if(!$ret[0]){
-				$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'POLYGON' => 2);
+				$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'MULTILINESTRING' => 1, 'POLYGON' => 2, 'MULTIPOLYGON' => 2);
 				while($result = pg_fetch_assoc($ret[1])){
 					if($result['count'] > 0 AND $geom_types[$result['geometrytype']] !== NULL){
 						$custom_table['datatype'] = $geom_types[$result['geometrytype']];

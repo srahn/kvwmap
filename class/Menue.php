@@ -292,10 +292,10 @@ class Menue extends MyObject {
 		$style = $this->get_style();
 
 		$html .= '<div class="'.$style.'-menue" id="menue_div_'.$this->get('id').'">';
-		$html .= '<a href="'.$href.'" target="'.$target.'" onclick="'.$onclick.'">';
-		if($style == 'button'){		# Button-Menüpunkt
+		$html .= '<a href="' .  htmlspecialchars($href) . '" target="' . $target . '" onclick="' . $onclick . '">';
+		if ($style == 'button') {		# Button-Menüpunkt
 			$html .= '<div class="button_background">';
-			$html .= '	<div class="button '.$this->get('button_class').'" title="'.$this->get('name').'"></div>';
+			$html .= '	<div class="button ' .  htmlspecialchars($this->get('button_class')) . '" title="' .  htmlspecialchars($this->get('name')) . '"></div>';
 			$html .= '</div>';
 		}
 		else{				# textueller Menüpunkt

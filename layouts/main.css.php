@@ -1279,7 +1279,8 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	float: left;
 	margin-left: 20px;
 	padding: 0px;
-	max-width: 480px
+	max-width: 480px;
+	text-align: left;
 }
 
 #dstable{
@@ -1921,17 +1922,9 @@ tbody.gle tr {
 }
 
 .scrolltable tbody {
-	height: 590px;
+	max-height: 590px;
 	overflow-y: auto;
 	overflow-x: hidden;
-}
-
-.nw_treffer_table tr:hover {
-	background-color: lightgrey;
-}
-
-.nw_treffer_table td {
-	padding: 5 0 5 0;
 }
 
 .toggle_fa_off i{
