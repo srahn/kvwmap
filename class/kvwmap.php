@@ -16145,6 +16145,7 @@ class db_mapObj{
 					" : ""
 				) . "
 			ORDER BY
+				NULLIF(classification, '') IS NULL,
 				classification,
 				drawingorder,
 				Class_ID
