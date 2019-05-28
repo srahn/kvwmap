@@ -471,7 +471,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
             </div></td>
 					<td style="width: 30">
 					<? 
-						$dateiname = NACHWEISDOCPATH.$this->nachweis->Dokumente[$i]['flurid'].'/'.$this->nachweis->buildNachweisNr($this->nachweis->Dokumente[$i][NACHWEIS_PRIMARY_ATTRIBUTE], $this->nachweis->Dokumente[$i][NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$this->nachweis->Dokumente[$i]['link_datei'];
+						$dateiname = $this->nachweis->Dokumente[$i]['link_datei'];
 						$dateinamensteil=explode('.',$dateiname);
 						$thumbname = $dateinamensteil[0].'_thumb.jpg';
 						$this->allowed_documents[] = addslashes($thumbname);
