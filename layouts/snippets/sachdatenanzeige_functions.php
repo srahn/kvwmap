@@ -877,13 +877,15 @@ include('funktionen/input_check_functions.php');
 		for(var i = 0; i < k; i++){			
 			if(document.getElementById(layer_id+'_'+i).checked){
 				formfield = document.getElementById(layerid_attribute+'_'+i);
-				if(formfield.type == 'checkbox'){
-					formfield.checked = allfield.checked;
+				if(formfield.onchange){		// nur editierbare Felder aendern
+					if(formfield.type == 'checkbox'){
+						formfield.checked = allfield.checked;
+					}
+					else{
+						formfield.value = allfield.value;
+					}
+					document.getElementById(layerid_attribute+'_'+i).onchange();
 				}
-				else{
-					formfield.value = allfield.value;
-				}
-				document.getElementById(layerid_attribute+'_'+i).onchange();
 			}
 		}		
 	}
