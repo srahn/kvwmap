@@ -1301,6 +1301,8 @@ thead.gle th {
 }
 
 .gle-attribute-name { 
+ position: relative;
+ background-clip: padding-box;
  padding-left: 2px;
  padding-right: 2px;
  vertical-align: top;
