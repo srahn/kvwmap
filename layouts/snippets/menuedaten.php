@@ -34,6 +34,7 @@
 				<tr>
 					<th><a href="index.php?go=Menues_Anzeigen&view_sort=id&sort_direction=<?php echo $this->formvars['sort_direction']; ?>"><?php echo $this->strID; ?></a></th>
 					<th><a href="index.php?go=Menues_Anzeigen&view_sort=name&sort_direction=<?php echo $this->formvars['sort_direction']; ?>"><?php echo $this->strName; ?></a></th>
+					<th><a href="index.php?go=Menues_Anzeigen&view_sort=obermenue&sort_direction=<?php echo $this->formvars['sort_direction']; ?>">Obermenü</a></th>
 					<th><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene&sort_direction=<?php echo $this->formvars['sort_direction']; ?>">Ebene</th>
 					<th><a href="index.php?go=Menues_Anzeigen&view_sort=order&sort_direction=<?php echo $this->formvars['sort_direction']; ?>">Order</a></th>
 					<th colspan="2"><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,order&sort_direction=<?php echo $this->formvars['sort_direction']; ?>">Ebene und Order</a><br><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,name">Ebene und Name</a></td>
@@ -46,6 +47,9 @@
 						</td>
 						<td>
 							<span style="font-size: <?php echo $font_size; ?>"><?php echo $this->menuedaten[$i]->get('name') ?></span>
+						</td>
+						<td>
+							<span style="font-size: <?php echo $font_size; ?>"><?php echo $this->menuedaten[$i]->get('obermenue') ?></span>
 						</td>
 						<td>
 							<span style="font-size: <?php echo $font_size; ?>"><?php echo $this->menuedaten[$i]->get('menueebene'); ?></span>

@@ -26,6 +26,16 @@ function get_select_parts($select){
   return $column;
 }
 
+function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
+	if($last)$word_pos = strripos($str, $word);
+	else $word_pos = stripos($str, $word);
+	if($word_pos !== false){
+		$str_from_word_pos = substr($str, $word_pos+strlen($word));
+		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+		return $parts[0];
+	}
+}
+
 
 class GUI {
 
@@ -140,14 +150,14 @@ class GUI {
 											</div>';
 							}
 						}
-						if($layer[0]['connectiontype']==6){
+						if($layer[0]['connectiontype']==6 OR($layer[0]['Datentyp']==MS_LAYER_RASTER AND $layer[0]['connectiontype']!=7)){
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
-							if($layer[0]['queryable']){
-								echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strSearch.'</a></li>';
-							}
-							if($layer[0]['privileg'] > 0){
-								echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->newDataset.'</a></li>';
-							}
+						}
+						if($layer[0]['connectiontype']==6 AND $layer[0]['queryable']){
+							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strSearch.'</a></li>';
+						}
+						if($layer[0]['privileg'] > 0){
+							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->newDataset.'</a></li>';
 						}
 						if($layer[0]['Class'][0]['Name'] != ''){
 							if($layer[0]['showclasses'] != ''){
@@ -167,36 +177,31 @@ class GUI {
 											<select name="layer_options_labelitem">
 												<option value=""> - '.$this->noLabel.' - </option>';
 												for($i = 0; $i < count($attributes)-2; $i++){
-													if($privileges[$attributes[$i]['name']] != '' AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.$attributes[$i]['name'].'</option>';
+													if(($this->formvars['layer_id'] < 0 OR $privileges[$attributes[$i]['name']] != '') AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.$attributes[$i]['name'].'</option>';
 												}
 							echo 	 '</select>
 										</li>';
 						}
 						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>
 							<li>
-								<a href="javascript:$(\'#rollenfilter, #rollenfilterquestionicon, #rollenfilterleeren\').toggle()">Filter</a>
-								<a href="javascript:$(\'#rollenfilter\').val(\'\')">
-									<i
-										id="rollenfilterleeren"
-										title="Filter aus Textfeld löschen."
-										class="fa fa-times-circle button layerOptionsIcon"
-										style="
-											float: right;
-											display: none;
-										"
-									></i>
-								</a>
-								<a href="javascript:message(\'
-									Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Darstellung des Layers auswirkt. Unterstützt werden alle im SELECT Statement verwendeten Attribute. Mehrere Filter werden mit AND oder OR verknüpft.<br>
-									Ist ein Filter gesetzt wird in der Legende neben dem Layernamen ein Filtersymbol angezeigt.<br>
-									Der Filter wird gelöscht in dem das Textfeld geleert wird.<p>
-									Beispiele:<br>
-									<ul>
-										<li>id > 10 AND status = 1</li>
-										<li>type = \\\'Brunnen\\\' OR type = \\\'Quelle\\\'</li>
-										<li>status IN (1, 2)</li>
-										<li>kg.bezeichnung LIKE \\\'Los\\\'</li>
-									</ul>
+								<a href="javascript:void(0);" onclick="$(\'#rollenfilter, #rollenfilterquestionicon\').toggle()">Filter</a>
+								<a href="javascript:void(0);" onclick="message(\'\
+									Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Kartendarstellung und Sachdatenanzeige des Layers auswirkt.<br>\
+									In diesem Thema stehen dafür folgende Attribute zur Verfügung:<br>\
+									<ul>';
+									for($i = 0; $i < count($attributes)-2; $i++){
+										if(($this->formvars['layer_id'] < 0 OR $privileges[$attributes[$i]['name']] != '') AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<li>'.$attributes[$i]['name'].'</li>';
+									}									
+						echo	'</ul>\
+									Mehrere Filter werden mit AND oder OR verknüpft.<br>\
+									Ist ein Filter gesetzt wird in der Legende neben dem Themanamen ein Filtersymbol angezeigt.<br>\
+									Der Filter wird gelöscht indem das Textfeld geleert wird.<p>\
+									Beispiele:<br>\
+									<ul>\
+										<li>id > 10 AND status = 1</li>\
+										<li>type = \\\'Brunnen\\\' OR type = \\\'Quelle\\\'</li>\
+										<li>status IN (1, 2)</li>\
+									</ul>\
 									\')">
 									<i
 										id="rollenfilterquestionicon"
@@ -204,7 +209,7 @@ class GUI {
 										class="fa fa-question-circle button layerOptionsIcon"
 										style="
 											float: right;
-											display: none;
+											'.($layer[0]['rollenfilter'] == ''? 'display: none' : '').'
 										"
 									></i>
 								</a><br>
@@ -212,11 +217,11 @@ class GUI {
 									id="rollenfilter"
 									style="
 										width: 98%;
-										display: none;
+										'.($layer[0]['rollenfilter'] == ''? 'display: none' : '').'
 									"
-									placeholder="' . $layer[0]['Data'] . '"
 									name="layer_options_rollenfilter"
-								>' . $layer[0]['rollenfilter'] . '</textarea></li>
+								>' . $layer[0]['rollenfilter'] . '</textarea>
+							</li>
 						</ul>
 					</td>
 				</tr>
@@ -242,7 +247,7 @@ class GUI {
 		legend_bottom = document.getElementById(\'legenddiv\').getBoundingClientRect().bottom;
 		posy = document.getElementById(\'options_'.$this->formvars['layer_id'].'\').getBoundingClientRect().top;
 		if(posy > legend_bottom - 150)posy = legend_bottom - 150;
-		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = posy - (13+legend_top);
+		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = document.getElementById(\'map\').offsetTop + posy - (13+legend_top);
 		';
 	}
 }
@@ -841,8 +846,11 @@ class db_mapObj {
       if($database->schema != ''){
       	$select = str_replace($database->schema.'.', '', $select);
       }
-      $attribute = $database->getFieldsfromSelect($select);
-      return $attribute;
+      $ret = $database->getFieldsfromSelect($select);
+			if ($ret[0]) {
+				$this->GUI->add_message('error', $ret[1]);
+			}
+      return $ret[1];
     }
     elseif($ifEmptyUseQuery){
 			$path = $this->getPath($layer_id);
@@ -1143,80 +1151,73 @@ class pgdatabase {
 		}
 	}	
 
-  function getFieldsfromSelect($select){
-  	$distinctpos = strpos(strtolower($select), 'distinct');
-  	if($distinctpos !== false && $distinctpos < 10){
-  		$offset = $distinctpos+8;
-  	}
-  	else{
-    	$offset = 7;
-  	}
-    $select = $this->eliminate_star($select, $offset);
-  	if(substr_count(strtolower($select), ' from ') > 1){
-  		$whereposition = strpos($select, ' WHERE ');
-  		$withoutwhere = substr($select, 0, $whereposition);
-  		$fromposition = strpos($withoutwhere, ' FROM ');
-  	}
-  	else{
-  		$whereposition = strpos(strtolower($select), ' where ');
-  		$withoutwhere = substr($select, 0, $whereposition);
-  		$fromposition = strpos(strtolower($withoutwhere), ' from ');
-  	}
-    $sql = $select." LIMIT 0";
-    $ret = $this->execSQL($sql, 4, 0);
-    if($ret[0]==0){
-      $frompos = $fromposition;
-      $attributesstring = substr($select, $offset, $frompos-$offset);
-      //$fieldstring = explode(',', $attributesstring);
-      $fieldstring = get_select_parts($attributesstring);
-      
-      for($i = 0; $i < pg_num_fields($ret[1]); $i++){
-        # Attributname
-        $fieldname = pg_field_name($ret[1], $i);
-        $fields[$i]['name'] = $fieldname;
+	function pg_field_schema($table_oid){
+		if($table_oid != ''){
+			$sql = "select nspname as schema from pg_class c, pg_namespace ns
+						where c.relnamespace = ns.oid 
+						and c.oid = ".$table_oid;
+			$ret = $this->execSQL($sql, 4, 0);
+			if($ret[0]==0)$ret = pg_fetch_assoc($ret[1]);
+			return $ret['schema'];
+		}
+	}
 
-        # "richtiger" Name in der Tabelle
-        $name_pair = $this->check_real_attribute_name($fieldstring[$i], $fieldname);
-        if($name_pair != ''){
-          $fields[$i]['real_name'] = $name_pair['real_name'];
-        }
-        else{
-          $fields[$i]['real_name'] = $fieldname;
-        }				
+	function getFieldsfromSelect($select, $assoc = false) {
+		$err_msgs = array();
+		$sql = "SET client_min_messages='log';SET log_duration = false;SET debug_print_parse=true;".$select." LIMIT 0";			# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
+		$ret = $this->execSQL($sql, 4, 0);
+		if ($ret['success']) {
+			$query_plan = pg_last_notice($this->dbConn);
+			$table_alias_names = $this->get_table_alias_names($query_plan);
+			$field_plan_info = explode("\n      :resno", $query_plan);
+
+			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
+				# Attributname
+				$fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
+
+				# Spaltennummer in der Tabelle
+				$col_num = get_first_word_after($field_plan_info[$i+1], ':resorigcol');
 				
-        # Tabellenname des Attributs
-        // if(PHPVERSION >= 580){
-        $tablename = pg_field_table($ret[1], $i);
-        // }																									# kann ganz weg, wenn Bugfix 2.8.55 sich bewährt
-        // else{
-	        // $table = $this->pg_field_table2($fieldname, $fieldstring[$i], $select);
-	        // $tablename = $table['name'];
-					// if($tablename == NULL AND $name_pair != ''){
-	          // $table = $this->pg_field_table2($name_pair['real_name'], $fieldstring[$i], $select);
-	          // $tablename = $table['name'];
-	        // }
-        // }
-        if($tablename != NULL){
-          $all_table_names[] = $tablename;
-        }
-        $fields[$i]['table_name'] = $tablename;
-        $table['alias'] = $this->get_table_alias($tablename, $fromposition, $withoutwhere);
-        if($table['alias']){
-        	$fields[$i]['table_alias_name'] = $table['alias'];
-        }
-        else{
-        	$fields[$i]['table_alias_name'] = $tablename;
-        }
+				# Tabellen-oid des Attributs
+				$table_oid = pg_field_table($ret[1], $i, true);
 
-        # Attributeigenschaften
-				if($fields[$i]['real_name'] != ''){
+				# Tabellenname des Attributs
+				$fields[$i]['table_name'] = $tablename = pg_field_table($ret[1], $i);
+				if ($tablename != NULL) {
+					$all_table_names[] = $tablename;
+				}
+
+				# Tabellenaliasname des Attributs
+				$fields[$i]['table_alias_name'] = $table_alias_names[$table_oid];
+
+				# Schemaname der Tabelle des Attributs
+				$schemaname = $this->pg_field_schema($table_oid);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?				
+
+				# wenn das Attribut eine Tabellenspalte ist -> weitere Attributeigenschaften holen
+				if ($col_num > 0){
 					$constraintstring = '';
-					$attr_info = $this->get_attribute_information($this->schema, $tablename, $fields[$i]['real_name']);
+					$attr_info = $this->get_attribute_information($schemaname, $tablename, $col_num);
+					if($attr_info[0]['relkind'] == 'v'){		# wenn View, dann Attributinformationen aus View-Definition holen
+						if($view_defintion_attributes[$tablename] == NULL) {
+							$ret2 = $this->getFieldsfromSelect(substr($attr_info[0]['view_definition'], 0, -1), true);
+							if ($ret2['success']) {
+								$view_defintion_attributes[$tablename] = $ret2[1];
+							}
+							else {
+								# Füge Fehlermeldung hinzu und setze leeres Array
+								$err_msgs[] = $ret2[1];
+								$view_defintion_attributes[$tablename] = array();
+							}
+						}
+						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info[0]['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
+						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info[0]['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
+					}
+					$fields[$i]['real_name'] = $attr_info[0]['name'];
 					$fieldtype = $attr_info[0]['type_name'];
 					$fields[$i]['nullable'] = $attr_info[0]['nullable']; 
 					$fields[$i]['length'] = $attr_info[0]['length'];
 					$fields[$i]['decimal_length'] = $attr_info[0]['decimal_length'];
-					$fields[$i]['default'] = $attr_info[0]['default'];					
+					$fields[$i]['default'] = $attr_info[0]['default'];
 					if($attr_info[0]['is_array'] == 't')$prefix = '_'; else $prefix = '';
 					if($attr_info[0]['type_type'] == 'c'){		# custom datatype
 						$datatype_id = $this->writeCustomType($attr_info[0]['type'], $attr_info[0]['type_schema']);
@@ -1247,29 +1248,45 @@ class pgdatabase {
 					}
 					$fields[$i]['constraints'] = $constraintstring;
 				}
-				if($name_pair != '' AND $name_pair['no_real_attribute']) $fieldtype = 'not_saveable';
-        $fields[$i]['type'] = $fieldtype;
-				
-        # Geometrietyp
-        if($fieldtype == 'geometry'){
-          $fields[$i]['geomtype'] = $this->get_geom_type($this->schema, $fields[$i]['real_name'], $tablename);
-          $fields['the_geom'] = $fieldname;
+				else { # Attribut ist keine Tabellenspalte -> nicht speicherbar
+					$fieldtype = 'not_saveable';
+				}
+				$fields[$i]['type'] = $fieldtype;
+
+				# Geometrietyp
+				if ($fieldtype == 'geometry') {
+					$fields[$i]['geomtype'] = $this->get_geom_type($schemaname, $fields[$i]['real_name'], $tablename);
+					$fields['the_geom'] = $fieldname;
 					$fields['the_geom_id'] = $i;
-        }				
-      }
-      
-      // if($all_table_names != NULL){   	todo
-	      // $all_table_names = array_unique($all_table_names);
-	      // foreach($all_table_names as $tablename){
-	        // $fields['oids'][] = $this->check_oid($tablename);   # testen ob Tabelle oid hat
-	      // }
-	      // $fields['all_table_names'] = $all_table_names;
-      // }
-            
-      return $fields;
-    }
-    else return NULL;
-  }
+				}
+				if ($assoc) {
+					$fields_assoc[$fieldname] = $fields[$i];
+				}
+			}
+			$ret[1] = ($assoc ? $fields_assoc : $fields);
+		}
+		else {
+			# Füge Fehlermeldung hinzu
+			$err_msgs[] = $ret[1];
+		}
+
+		if (count($err_msgs) > 0) {
+			# Wenn Fehler auftraten liefer nur die Fehler zurück
+			$ret[0] = 1;
+			$ret[1] = implode('<br>', $err_msgs);
+		}
+		return $ret;
+	}
+	
+	function get_table_alias_names($query_plan){
+		$table_info = explode(":eref \n         {ALIAS \n         ", $query_plan);
+		for($i = 1; $i < count($table_info); $i++){
+			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
+			$table_oid = get_first_word_after($table_info[$i], ':relid');
+			$table_alias_names[$table_oid] = $table_alias;
+		}
+		return $table_alias_names;
+	}	
 
   function eliminate_star($query, $offset){
   	if(substr_count(strtolower($query), ' from ') > 1){
@@ -1456,13 +1473,14 @@ class pgdatabase {
     return $tablealias;
   }
 
-	function get_attribute_information($schema, $table, $column = NULL) {
-		if($column != NULL)$and_column = "a.attname = '".$column."' AND ";
+	function get_attribute_information($schema, $table, $col_num = NULL) {
+		if($col_num != NULL)$and_column = "a.attnum = ".$col_num." AND ";
 		$attributes = array();
 		$sql = "
 			SELECT
 				ns.nspname as schema,
 				c.relname AS table_name,
+				c.relkind,
 				a.attname AS name,
 				NOT a.attnotnull AS nullable,
 				a.attnum AS ordinal_position,
@@ -1497,7 +1515,8 @@ class pgdatabase {
 				       ELSE null
 				  END AS decimal_length,
 				i.indisunique,
-				i.indisprimary
+				i.indisprimary,
+				v.definition as view_definition
 			FROM
 				pg_catalog.pg_class c JOIN
 				pg_catalog.pg_attribute a ON (c.oid = a.attrelid) JOIN
@@ -1506,7 +1525,8 @@ class pgdatabase {
 				pg_catalog.pg_namespace tns ON (t.typnamespace = tns.oid) LEFT JOIN
 				pg_catalog.pg_type eat ON (t.typelem = eat.oid) LEFT JOIN 
 				pg_index i ON i.indrelid = c.oid AND a.attnum = ANY(i.indkey)	LEFT JOIN 
-				pg_catalog.pg_attrdef ad ON a.attrelid = ad.adrelid AND ad.adnum = a.attnum
+				pg_catalog.pg_attrdef ad ON a.attrelid = ad.adrelid AND ad.adnum = a.attnum LEFT JOIN 
+				pg_catalog.pg_views v ON v.viewname = c.relname AND v.schemaname = ns.nspname
 			WHERE
 				ns.nspname IN ('" .  implode("','", array_map(function($schema) { return trim($schema); }, explode(',', $schema)))  .  "') AND
 				c.relname = '".$table."' AND

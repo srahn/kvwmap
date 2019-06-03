@@ -57,6 +57,7 @@ function validierungsergebnisseRowAttribs(row, index){
   };
 }
 </script>
+<h4><?php echo  htmlspecialchars($this->konvertierung->plan->get_anzeige_name()); ?></h4>
 <table
   id="validierungsergebnis_table"
   data-toggle="table"

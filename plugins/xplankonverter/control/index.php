@@ -39,6 +39,7 @@ include(PLUGINS . 'xplankonverter/model/extract_standard_shp.php');
 * xplankonverter_konvertierungen_index
 * xplankonverter_konvertierung_loeschen
 * xplankonverter_konvertierung_status
+* xplankonverter_konvertierung_veroffentlichen
 * xplankonverter_plaene_index
 * xplankonverter_regeleditor
 * xplankonverter_regeleditor_getshapeattributes
@@ -347,11 +348,15 @@ function go_switch_xplankonverter($go){
 
 						# unzip and copy files to upload folder
 						$uploaded_files = xplankonverter_unzip_and_check_and_copy($_FILES['shape_files'], $upload_path);
-						# get layerGroupId or create a group if not exists
-						$layer_group_id = $GUI->konvertierung->get('layer_group_id');
-						if (empty($layer_group_id))
-							$layer_group_id = $GUI->konvertierung->create_layer_group('Shape');
-						foreach($uploaded_files AS $uploaded_file) {
+						if (XPLANKONVERTER_CREATE_UPLOAD_SHAPE_LAYER) {
+							# get layerGroupId or create a group if not exists
+							$layer_group_id = $GUI->konvertierung->get('layer_group_id');
+							if (empty($layer_group_id)) {
+								$layer_group_id = $GUI->konvertierung->create_layer_group('Shape');
+							}
+						}
+
+						foreach ($uploaded_files AS $uploaded_file) {
 							if ($uploaded_file['extension'] == 'dbf' and $uploaded_file['state'] != 'ignoriert') {
 
 								# delete existing shape file
@@ -394,51 +399,55 @@ function go_switch_xplankonverter($go){
 									# Set datatype for shapefile
 									$shapeFile->set('datatype', $result['datatype']);
 									$shapeFile->update();
+									if (XPLANKONVERTER_CREATE_UPLOAD_SHAPE_LAYER) {
+										echo '<p>create Layer';
+										# create layer
+										$GUI->formvars['Name'] = $shapeFile->get('filename');
+										$GUI->formvars['Datentyp'] = $shapeFile->get('datatype');
+										$GUI->formvars['Gruppe'] = $layer_group_id;
+										$GUI->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
+										$GUI->formvars['Data'] = 'the_geom from (
+											SELECT oid, *
+											FROM ' . $shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() . '
+											WHERE 1=1
+										) as foo using unique oid using srid=' . $shapeFile->get('epsg_code');
+										$GUI->formvars['maintable'] = $shapeFile->dataTableName();
+										$GUI->formvars['schema'] = $shapeFile->dataSchemaName();
+										$GUI->formvars['connection'] = $GUI->pgdatabase->connect_string;
+										$GUI->formvars['connectiontype'] = '6';
+										$GUI->formvars['filteritem'] = 'oid';
+										$GUI->formvars['tolerance'] = '5';
+										$GUI->formvars['toleranceunits'] = 'pixels';
+										$GUI->formvars['epsg_code'] = $shapeFile->get('epsg_code');
+										$GUI->formvars['querymap'] = '1';
+										$GUI->formvars['queryable'] = '1';
+										$GUI->formvars['transparency'] = '75';
+										$GUI->formvars['postlabelcache'] = '0';
+										$GUI->formvars['allstellen'] = '2300';
+										$GUI->formvars['ows_srs'] = 'EPSG:' . $shapeFile->get('epsg_code') . ' EPSG:25833 EPSG:4326 EPSG:2398';
+										$GUI->formvars['wms_server_version'] = '1.1.0';
+										$GUI->formvars['wms_format'] = 'image/png';
+										$GUI->formvars['wms_connectiontimeout'] = '60';
+										$GUI->formvars['selstellen'] = '1, ' . $GUI->konvertierung->get('stelle_id') . ', 1, ' . $GUI->konvertierung->get('stelle_id');
+										$GUI->LayerAnlegen();
 
-									# create layer
-									$GUI->formvars['Name'] = $shapeFile->get('filename');
-									$GUI->formvars['Datentyp'] = $shapeFile->get('datatype');
-									$GUI->formvars['Gruppe'] = $layer_group_id;
-									$GUI->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
-									$GUI->formvars['Data'] = 'the_geom from (select oid, * from ' .
-										$shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() .
-										' where 1=1) as foo using unique oid using srid=' . $shapeFile->get('epsg_code');
-									$GUI->formvars['maintable'] = $shapeFile->dataTableName();
-									$GUI->formvars['schema'] = $shapeFile->dataSchemaName();
-									$GUI->formvars['connection'] = $GUI->pgdatabase->connect_string;
-									$GUI->formvars['connectiontype'] = '6';
-									$GUI->formvars['filteritem'] = 'oid';
-									$GUI->formvars['tolerance'] = '5';
-									$GUI->formvars['toleranceunits'] = 'pixels';
-									$GUI->formvars['epsg_code'] = $shapeFile->get('epsg_code');
-									$GUI->formvars['querymap'] = '1';
-									$GUI->formvars['queryable'] = '1';
-									$GUI->formvars['transparency'] = '75';
-									$GUI->formvars['postlabelcache'] = '0';
-									$GUI->formvars['allstellen'] = '2300';
-									$GUI->formvars['ows_srs'] = 'EPSG:' . $shapeFile->get('epsg_code') . ' EPSG:25833 EPSG:4326 EPSG:2398';
-									$GUI->formvars['wms_server_version'] = '1.1.0';
-									$GUI->formvars['wms_format'] = 'image/png';
-									$GUI->formvars['wms_connectiontimeout'] = '60';
-									$GUI->formvars['selstellen'] = '1, ' . $GUI->konvertierung->get('stelle_id') . ', 1, ' . $GUI->konvertierung->get('stelle_id');
-									$GUI->LayerAnlegen();
+										# Assign layer_id to shape file record
+										$shapeFile->set('layer_id', $GUI->formvars['selected_layer_id']);
+										$shapeFile->update();
 
-									# Assign layer_id to shape file record
-									$shapeFile->set('layer_id', $GUI->formvars['selected_layer_id']);
-									$shapeFile->update();
+										# Ordne layer zur Stelle
+										$GUI->Stellenzuweisung(
+											array($shapeFile->get('layer_id')),
+											array($GUI->konvertierung->get('stelle_id'))
+										);
 
-									# Ordne layer zur Stelle
-									$GUI->Stellenzuweisung(
-										array($shapeFile->get('layer_id')),
-										array($GUI->konvertierung->get('stelle_id'))
-									);
+										# Füge eine Klasse zum neuen Layer hinzu.
+										$GUI->formvars['class_name'] = 'alle';
+										$GUI->formvars['class_id'] = $GUI->Layereditor_KlasseHinzufuegen();
 
-									# Füge eine Klasse zum neuen Layer hinzu.
-									$GUI->formvars['class_name'] = 'alle';
-									$GUI->formvars['class_id'] = $GUI->Layereditor_KlasseHinzufuegen();
-
-									# Füge einen Style zur Klasse hinzu
-									$GUI->add_style();
+										# Füge einen Style zur Klasse hinzu
+										$GUI->add_style();
+									}
 								}
 								else {
 									$GUI->add_message('error', $result['err_msg']);
@@ -476,7 +485,7 @@ function go_switch_xplankonverter($go){
 			echo json_encode($response);
 		} break;
 
-	  case 'xplankonverter_konvertierung_status': {
+		case 'xplankonverter_konvertierung_status': {
 	    header('Content-Type: application/json');
 	    $response = array();
 	    if ($GUI->formvars['konvertierung_id'] == '') {
@@ -582,6 +591,39 @@ function go_switch_xplankonverter($go){
 	    $response['msg'] = 'Status wurde gesetzt';
 	    echo json_encode($response);
 	  } break;
+	
+		case 'xplankonverter_konvertierung_veroffentlichen': {
+			header('Content-Type: application/json');
+			$response = array();
+			if ($GUI->formvars['konvertierung_id'] == '') {
+				$response['success'] = false;
+				$response['msg'] = 'Konvertierung wurde nicht angegeben';
+				return;
+			}
+			if (!in_array($GUI->formvars['veroeffentlicht'], array('t', 'f'))) {
+				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn das Attribut veroeffentlicht einen Wert t oder f hat.';
+				$response['success'] = false;
+				$response['msg'] = 'Attribut veroeffentlicht muss t oder f sein. Statt dessen ist es -' . print_r($GUI->formvars, true) . '-';
+				echo json_encode($response);
+				return;
+			}
+			// now get konvertierung
+			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+
+			// check stelle
+			if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) return;
+
+			$GUI->konvertierung->data = array(
+				"id" => $GUI->formvars['konvertierung_id'],
+				"veroeffentlicht" => $GUI->formvars['veroeffentlicht']
+			);
+			$GUI->konvertierung->update();
+			$response['success'] = true;
+			$response['veroeffentlicht'] = $GUI->formvars['veroeffentlicht'];
+			$response['konvertierung_id'] = $GUI->formvars['konvertierung_id'];
+			echo json_encode($response);
+			return;
+		} break;
 
 		case 'xplankonverter_create_konvertierung_directories' : {
 			$konvertierung = new Konvertierung($GUI);
@@ -776,7 +818,7 @@ function go_switch_xplankonverter($go){
 			if (empty($konvertierung_id)) {
 				if (!empty($bereich_gml_id)) {
 					# Hole konvertierung_id über den Bereich
-					$bereich = RP_Bereich::find_by_id($GUI, 'gml_id', $bereich_gml_id);
+					$bereich = XP_Bereich::find_by_id($GUI, 'gml_id', $bereich_gml_id);
 					$plan = $bereich->get_plan();
 					$konvertierung_id = $plan->get('konvertierung_id');
 				}
@@ -1170,25 +1212,55 @@ function go_switch_xplankonverter($go){
 			$gml_extractor = new Gml_extractor($GUI->pgdatabase, $gml_location, 'xplan_gmlas_' . $GUI->user->id);
 			$gml_extractor->extract_gml_class($GUI->plan_class);
 
+			$GUI->user->rolle->oGeorefExt->minx = $GUI->formvars['minx'];
+			$GUI->user->rolle->oGeorefExt->miny = $GUI->formvars['miny'];
+			$GUI->user->rolle->oGeorefExt->maxx = $GUI->formvars['maxx'];
+			$GUI->user->rolle->oGeorefExt->maxy = $GUI->formvars['maxy'];
+
 			$GUI->neuer_Layer_Datensatz();
 		} break;
 
 		case 'xplankonverter_extract_standardshapes_to_regeln' : {
-			//$GUI->checkCaseAllowed($go);
-			$bereich_gml_id = $_REQUEST['bereich_gml_id'];
-			$konvertierung_id = $_REQUEST['konvertierung_id'];
-			$stelle_id = $_REQUEST['stelle_id'];
+			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+			if ($GUI->konvertierung->get('id') != '') {
+				if (isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
+					$bereich_gml_id = $_REQUEST['bereich_gml_id'];
+					$konvertierung_id = $_REQUEST['konvertierung_id'];
+					$stelle_id = $_REQUEST['stelle_id'];
 
-			$shp_extractor = new Standard_shp_extractor($GUI->pgdatabase,
-																									$konvertierung_id,
-																									$bereich_gml_id,
-																									$stelle_id);
-			# Writes all regeln for all standard shapes for the specific konvertierung_id
-			# into the xplankonverter.regeln list and associates it with bereich_gml_id
-			# Nonstandard shapes should be skipped (if their names differ) or their attributes should be skipped
-			# if they differ
-			$shp_extractor->create_regeln_for_standard_shps();
-		}
+					$shp_extractor = new Standard_shp_extractor($GUI->pgdatabase,
+																											$konvertierung_id,
+																											$bereich_gml_id,
+																											$stelle_id);
+					# Writes all regeln for all standard shapes for the specific konvertierung_id
+					# into the xplankonverter.regeln list and associates it with bereich_gml_id
+					# Nonstandard shapes should be skipped (if their names differ) or their attributes should be skipped
+					# if they differ
+					$shp_extractor->create_regeln_for_standard_shps();
+				}
+				else {
+					$GUI->add_message('error', 'Die Konvertierung mit der ID: ' . $GUI->formvars['konvertierung_id'] . ' wurde nicht gefunden!');
+				}
+			}
+
+			# go to layer search with layer of planbereich
+			switch ($GUI->konvertierung->get('planart')) {
+				case 'BP-Plan' : $layer_id = XPLANKONVERTER_BP_BEREICHE_LAYER_ID; break;
+				case 'FP-Plan' : $layer_id = XPLANKONVERTER_FP_BEREICHE_LAYER_ID; break;
+				case 'SO-Plan' : $layer_id = XPLANKONVERTER_SO_BEREICHE_LAYER_ID; break;
+				case 'RP-Plan' : $layer_id = XPLANKONVERTER_RP_BEREICHE_LAYER_ID; break;
+			}
+
+			$GUI->go = 'Layer-Suche_Suchen';
+			$GUI->formvars = array(
+				'go' => $GUI->go,
+				'selected_layer_id' => $layer_id,
+				'operator_gml_id' => '=',
+				'value_gml_id' => $GUI->formvars['bereich_gml_id'],
+			);
+
+			$GUI->goNotExecutedInPlugins = true;
+		} break;
 
 		default : {
 			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt

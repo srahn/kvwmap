@@ -1,4 +1,6 @@
-<?function in_subnet($ip,$net) {
+<?
+
+function in_subnet($ip,$net) {
 	$ipparts=explode('.',$ip);
 	$netparts=explode('.',$net);
 
@@ -32,14 +34,49 @@
 	}
 	return 0;
 }
-function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
+
+function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
   $passwordSettingUnixTime=strtotime($passwordSettingTime); # Unix Zeit in Sekunden an dem das Passwort gesetzt wurde
   $allowedPasswordAgeDays=round($allowedPassordAgeMonth*30.5); # Zeitintervall, wie alt das Password sein darf in Tagen
   $passwordAgeDays=round((time()-$passwordSettingUnixTime)/60/60/24); # Zeitinterval zwischen setzen des Passwortes und aktueller Zeit in Tagen
   $allowedPasswordAgeRemainDays=$allowedPasswordAgeDays-$passwordAgeDays; # Zeitinterval wie lange das Passwort noch gilt in Tagen
 	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
 }
-class GUI {  var $layout;  var $style;  var $mime_type;  var $menue;  var $pdf;  var $addressliste;  var $debug;  var $dbConn;  var $flst;  var $formvars;  var $legende;  var $map;  var $mapDB;  var $img;  var $FormObject;  var $StellenForm;  var $Fehlermeldung;  var $Hinweis;  var $Stelle;  var $ALB;  var $activeLayer;  var $nImageWidth;  var $nImageHeight;  var $user;  var $qlayerset;  var $scaleUnitSwitchScale;  var $map_scaledenom;  var $map_factor;  var $formatter;  function GUI($main, $style, $mime_type) {
+
+
+class GUI {
+
+  var $layout;
+  var $style;
+  var $mime_type;
+  var $menue;
+  var $pdf;
+  var $addressliste;
+  var $debug;
+  var $dbConn;
+  var $flst;
+  var $formvars;
+  var $legende;
+  var $map;
+  var $mapDB;
+  var $img;
+  var $FormObject;
+  var $StellenForm;
+  var $Fehlermeldung;
+  var $Hinweis;
+  var $Stelle;
+  var $ALB;
+  var $activeLayer;
+  var $nImageWidth;
+  var $nImageHeight;
+  var $user;
+  var $qlayerset;
+  var $scaleUnitSwitchScale;
+  var $map_scaledenom;
+  var $map_factor;
+  var $formatter;
+
+  function GUI($main, $style, $mime_type) {
     # Debugdatei setzen
     global $debug;
     $this->debug=$debug;
@@ -57,18 +94,24 @@
     if (isset ($mime_type)) $this->mime_type=$mime_type;
 		$this->scaleUnitSwitchScale = 239210;
   }
-		function loadMultiLingualText($language) {
+	
+	function loadMultiLingualText($language) {
     #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
     $this->Stelle->language=$language;
     $this->Stelle->getName();
     include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'.php');
   }
-  function get_select_list(){
+
+  function get_select_list(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
     $layerdb->setClientEncoding();
     $attributenames[0] = $this->formvars['attribute'];
-    $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
+		if($this->formvars['datatype_id'] != '')
+			$attributes = $mapDB->read_datatype_attributes($this->formvars['datatype_id'], $layerdb, $attributenames);
+    else{
+			$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
+		}
 		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
     $reqby_start = strpos(strtolower($options), "<required by>");
     if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options; 
@@ -96,7 +139,18 @@
 		}
 		echo $html;
   }
-}class database {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $logfile;  var $commentsign;  var $blocktransaction;  function database() {
+}
+
+class database {
+
+  var $ist_Fortfuehrung;
+  var $debug;
+  var $loglevel;
+  var $logfile;
+  var $commentsign;
+  var $blocktransaction;
+
+  function database() {
     global $debug;
     $this->debug=$debug;
     $this->loglevel=LOG_LEVEL;
@@ -116,13 +170,15 @@
     # Dazu Fehlerausschriften bearchten.
     $this->blocktransaction=0;
   }
-  function open() {
+
+  function open() {
     $this->debug->write("<br>MySQL Verbindung öffnen mit Host: ".$this->host." User: ".$this->user,4);
     $this->dbConn=mysql_connect($this->host,$this->user,$this->passwd);
     $this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswählen.",4);
     return mysql_select_db($this->dbName,$this->dbConn);
   }
-  function execSQL($sql,$debuglevel, $loglevel) {
+
+  function execSQL($sql,$debuglevel, $loglevel) {
   	switch ($this->loglevel) {
   		case 0 : {
   			$logsql=0;
@@ -166,14 +222,32 @@
     }
     return $ret;
   }
-  function close() {
+
+  function close() {
     $this->debug->write("<br>MySQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     if (LOG_LEVEL>0){
     	$this->logfile->close();
     }
     return mysql_close($this->dbConn);
   }
-}class user {  var $id;  var $Name;  var $Vorname;  var $login_name;  var $funktion;  var $dbConn;  var $Stellen;  var $nZoomFactor;  var $nImageWidth;  var $nImageHeight;  var $database;  var $remote_addr;	function user($login_name,$id,$database) {
+}
+
+class user {
+
+  var $id;
+  var $Name;
+  var $Vorname;
+  var $login_name;
+  var $funktion;
+  var $dbConn;
+  var $Stellen;
+  var $nZoomFactor;
+  var $nImageWidth;
+  var $nImageHeight;
+  var $database;
+  var $remote_addr;
+
+	function user($login_name,$id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->database=$database;
@@ -187,7 +261,8 @@
 			$this->readUserDaten($id,0);
 		}
 	}
-  function readUserDaten($id,$login_name) {
+
+  function readUserDaten($id,$login_name) {
     $sql ='SELECT * FROM user WHERE 1=1';
     if ($id>0) {
       $sql.=' AND ID='.$id;
@@ -212,7 +287,8 @@
     }
     $this->password_setting_time=$rs['password_setting_time'];
   }
-  function getLastStelle() {
+
+  function getLastStelle() {
     $sql = 'SELECT stelle_id FROM user WHERE ID='.$this->id;
     $this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
@@ -220,14 +296,16 @@
     $rs=mysql_fetch_array($query);
     return $rs['stelle_id'];
   }
-	function StellenZugriff($stelle_id) {
+
+	function StellenZugriff($stelle_id) {
 		$this->Stellen=$this->getStellen($stelle_id);
 		if (count($this->Stellen['ID'])>0) {
 			return 1;
 		}
 		return 0;
 	}
-	function getStellen($stelle_ID) {
+
+	function getStellen($stelle_ID) {
 		$sql ='SELECT s.ID,s.Bezeichnung FROM stelle AS s,rolle AS r';
 		$sql.=' WHERE s.ID=r.stelle_id AND r.user_id='.$this->id;
 		if ($stelle_ID>0) {
@@ -252,7 +330,8 @@
 		}
 		return $stellen;
 	}
-	function clientIpIsValide($remote_addr) {
+
+	function clientIpIsValide($remote_addr) {
     # Prüfen ob die übergebene IP Adresse zu den für den Nutzer eingetragenen Adressen passt
     $ips=explode(';',$this->ips);
     foreach ($ips AS $ip) {
@@ -268,7 +347,8 @@
     }
     return 0;
   }
-	function setRolle($stelle_id) {
+
+	function setRolle($stelle_id) {
 		# Abfragen und zuweisen der Einstellungen für die Rolle		
 		$rolle=new rolle($this->id,$stelle_id,$this->database);		
 		if ($rolle->readSettings()) {
@@ -277,7 +357,21 @@
 		}
 		return 0;
 	}
-}class stelle {  var $id;  var $Bezeichnung;  var $debug;  var $nImageWidth;  var $nImageHeight;  var $oGeorefExt;  var $pixsize;  var $selectedButton;  var $database;	function stelle($id,$database) {
+}
+
+class stelle {
+
+  var $id;
+  var $Bezeichnung;
+  var $debug;
+  var $nImageWidth;
+  var $nImageHeight;
+  var $oGeorefExt;
+  var $pixsize;
+  var $selectedButton;
+  var $database;
+
+	function stelle($id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->id=$id;
@@ -285,7 +379,8 @@
 		$this->Bezeichnung=$this->getName();
 		$this->readDefaultValues();
 	}
-  function getName() {
+
+  function getName() {
     $sql ='SELECT ';
     if ($this->language != 'german' AND $this->language != ''){
       $sql.='`Bezeichnung_'.$this->language.'` AS ';
@@ -299,7 +394,8 @@
     $this->Bezeichnung=$rs['Bezeichnung'];
     return $rs['Bezeichnung'];
   }
-  function readDefaultValues() {
+
+  function readDefaultValues() {
     $sql ='SELECT * FROM stelle WHERE ID='.$this->id;
     $this->debug->write("<p>file:users.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
@@ -329,7 +425,8 @@
     $this->allowedPasswordAge=$rs["allowed_password_age"];
     $this->useLayerAliases=$rs["use_layer_aliases"];
   }
-  function checkClientIpIsOn() {
+
+  function checkClientIpIsOn() {
     $sql ='SELECT check_client_ip FROM stelle WHERE ID = '.$this->id;
     $this->debug->write("<p>file:users.php class:stelle->checkClientIpIsOn- Abfragen ob IP's der Nutzer in der Stelle getestet werden sollen<br>".$sql,4);
     #echo '<br>'.$sql;
@@ -341,7 +438,18 @@
     }
     return 0;
   }
-}class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;  static $hist_timestamp;	function rolle($user_id,$stelle_id,$database) {
+}
+
+class rolle {
+
+  var $user_id;
+  var $stelle_id;
+  var $debug;
+  var $database;
+  var $loglevel;
+  static $hist_timestamp;
+
+	function rolle($user_id,$stelle_id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->user_id=$user_id;
@@ -351,7 +459,8 @@
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
 	}
-  function readSettings() {
+
+  function readSettings() {
 		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql ='SELECT * FROM rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
@@ -424,13 +533,26 @@
 			return 1;
 		}else return 0;
   }
-}class db_mapObj {  var $debug;  var $referenceMap;  var $Layer;  var $anzLayer;  var $nurAufgeklappteLayer;  var $Stelle_ID;  var $User_ID;  function db_mapObj($Stelle_ID,$User_ID) {
+}
+
+class db_mapObj {
+
+  var $debug;
+  var $referenceMap;
+  var $Layer;
+  var $anzLayer;
+  var $nurAufgeklappteLayer;
+  var $Stelle_ID;
+  var $User_ID;
+
+  function db_mapObj($Stelle_ID,$User_ID) {
     global $debug;
     $this->debug=$debug;
     $this->Stelle_ID=$Stelle_ID;
     $this->User_ID=$User_ID;
   }
-  function getlayerdatabase($layer_id, $host){
+
+  function getlayerdatabase($layer_id, $host){
   	if($layer_id < 0){	# Rollenlayer
   		$sql ='SELECT `connection`, "'.CUSTOM_SHAPE_SCHEMA.'" as `schema` FROM rollenlayer WHERE -id = '.$layer_id.' AND connectiontype = 6';
   	}
@@ -483,7 +605,155 @@
     }
     return $layerdb;
   }
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false){
+	
+  function read_datatype_attributes($datatype_id, $datatypedb, $attributenames, $all_languages = false, $recursive = false){
+		global $language;
+
+		$alias_column = (
+			(!$all_languages AND $language != 'german') ?
+			"
+				CASE
+					WHEN `alias_" . $language. "` != '' THEN `alias_" . $language . "`
+					ELSE `alias`
+				END AS alias
+			" :
+			"
+				`alias`
+			"
+		);
+
+		if ($attributenames != NULL) {
+			$einschr = " AND a.name IN ('" . implode("', '", $attributenames) . "')";
+		}
+
+		$sql = "
+			SELECT " .
+				$alias_column . ", `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`,
+				`datatype_id`,
+				a.`name`,
+				`real_name`,
+				`tablename`,
+				`table_alias_name`,
+				`type`,
+				d.`name` as typename,
+				`geometrytype`,
+				`constraints`,
+				`nullable`,
+				`length`,
+				`decimal_length`,
+				`default`,
+				`form_element_type`,
+				`options`,
+				`tooltip`,
+				`group`,
+				`raster_visibility`,
+				`mandatory`,
+				`quicksearch`,
+				`order`,
+				`privileg`,
+				`query_tooltip`,
+				`visible`,
+				`vcheck_attribute`,
+				`vcheck_operator`,
+				`vcheck_value`,				
+				`arrangement`,
+				`labeling`
+			FROM
+				`datatype_attributes` as a LEFT JOIN
+				`datatypes` as d ON d.`id` = REPLACE(`type`, '_', '')
+			WHERE
+				`datatype_id` = " . $datatype_id .
+				$einschr . "
+			ORDER BY
+				`order`
+		";
+		/* Attributes die fehlen im Vergleich zu layer_attributes
+		`dont_use_for_new`
+		*/
+		#echo '<br>Sql read_datatype_attributes: ' . $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_datatype_attributes:<br>" . $sql,4);
+		$query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+		$i = 0;
+		while($rs = mysql_fetch_array($query)){
+			$attributes['datatype_id'][$i] = $rs['datatype_id'];
+			$attributes['name'][$i] = $rs['name'];
+			$attributes['indizes'][$rs['name']] = $i;
+			$attributes['real_name'][$rs['name']]= $rs['real_name'];
+			if($rs['tablename']){
+				if(strpos($rs['tablename'], '.') !== false){
+					$explosion = explode('.', $rs['tablename']);
+					$rs['tablename'] = $explosion[1];		# Tabellenname ohne Schema
+					$attributes['schema_name'][$rs['tablename']] = $explosion[0];
+				}
+				$attributes['table_name'][$i]= $rs['tablename'];
+				$attributes['table_name'][$rs['name']] = $rs['tablename'];
+			}
+			if($rs['table_alias_name'])$attributes['table_alias_name'][$i]= $rs['table_alias_name'];
+			if($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']]= $rs['table_alias_name'];
+			$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
+			$attributes['type'][$i]= $rs['type'];
+			$attributes['typename'][$i]= $rs['typename'];
+			$type = ltrim($rs['type'], '_');
+			if($recursive AND is_numeric($type)){
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
+			}
+			if($rs['type'] == 'geometry'){
+				$attributes['the_geom'] = $rs['name'];
+			}
+			$attributes['geomtype'][$i]= $rs['geometrytype'];
+			$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
+			$attributes['constraints'][$i]= $rs['constraints'];
+			$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
+			$attributes['nullable'][$i]= $rs['nullable'];
+			$attributes['length'][$i]= $rs['length'];
+			$attributes['decimal_length'][$i]= $rs['decimal_length'];
+			if($datatypedb != NULL){
+				if(substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+					$ret1 = $datatypedb->execSQL($rs['default'], 4, 0);
+					if($ret1[0]==0){
+						$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
+					}
+				}
+				else{															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den datatype in dieser Version einmal gespeichert hat
+					$attributes['default'][$i]= $rs['default'];
+				}
+			}
+			$attributes['form_element_type'][$i]= $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
+			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
+			$rs['options'] = str_replace('$language', $this->user->rolle->language, $rs['options']);
+			$attributes['options'][$i]= $rs['options'];
+			$attributes['options'][$rs['name']]= $rs['options'];
+			$attributes['alias'][$i]= $rs['alias'];
+			$attributes['alias'][$attributes['name'][$i]]= $rs['alias'];
+			$attributes['alias_low-german'][$i]= $rs['alias_low-german'];
+			$attributes['alias_english'][$i]= $rs['alias_english'];
+			$attributes['alias_polish'][$i]= $rs['alias_polish'];
+			$attributes['alias_vietnamese'][$i]= $rs['alias_vietnamese'];
+			$attributes['tooltip'][$i]= $rs['tooltip'];
+			$attributes['group'][$i]= $rs['group'];
+			$attributes['arrangement'][$i]= $rs['arrangement'];
+			$attributes['labeling'][$i]= $rs['labeling'];
+			$attributes['raster_visibility'][$i]= $rs['raster_visibility'];
+			$attributes['mandatory'][$i]= $rs['mandatory'];
+			$attributes['quicksearch'][$i]= $rs['quicksearch'];
+			$attributes['privileg'][$i]= $rs['privileg'];
+			$attributes['query_tooltip'][$i]= $rs['query_tooltip'];
+			$attributes['visible'][$i]= $rs['visible'];
+			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
+			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
+			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
+			$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			$dependents[$rs['vcheck_attribute']][] = $rs['name'];
+			$attributes['arrangement'][$i]= $rs['arrangement'];
+			$attributes['labeling'][$i]= $rs['labeling'];
+			$i++;
+		}
+		return $attributes;
+  }	
+
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false){
 		global $language;
 		if($attributenames != NULL){
 			$einschr = ' AND name IN (\'';
@@ -569,7 +839,20 @@
 		}
 		return $attributes;
   }
-}class pgdatabase {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $defaultloglevel;  var $logfile;  var $defaultlogfile;  var $commentsign;  var $blocktransaction;	function pgdatabase() {
+}
+
+class pgdatabase {
+
+  var $ist_Fortfuehrung;
+  var $debug;
+  var $loglevel;
+  var $defaultloglevel;
+  var $logfile;
+  var $defaultlogfile;
+  var $commentsign;
+  var $blocktransaction;
+
+	function pgdatabase() {
 	  global $debug;
     $this->debug=$debug;
     $this->loglevel=LOG_LEVEL;
@@ -589,7 +872,8 @@
     # Dazu Fehlerausschriften bearchten.
     $this->blocktransaction=0;
   }
-  function open() {
+
+  function open() {
   	if($this->port == '') $this->port = 5432;
     #$this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
 		$connect_string = 'dbname='.$this->dbName.' port='.$this->port.' user='.$this->user.' password='.$this->passwd;
@@ -600,13 +884,15 @@
     $this->version = POSTGRESVERSION;
     return $this->dbConn;
   }
-  function setClientEncoding() {
+
+  function setClientEncoding() {
     $sql ="SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     return $ret[1];    	
   }  
-  function execSQL($sql,$debuglevel, $loglevel) {
+
+  function execSQL($sql,$debuglevel, $loglevel) {
   	switch ($this->loglevel) {
   		case 0 : {
   			$logsql=0;
@@ -669,7 +955,8 @@
 
     return $ret;
   }
-  function check_oid($tablename){
+
+  function check_oid($tablename){
     $sql = 'SELECT oid from '.$tablename.' limit 0';
     if($this->schema != ''){
     	$sql = "SET search_path = ".$this->schema.", public;".$sql;
@@ -683,4 +970,5 @@
       return true;
     }
   }
-}?>
+}
+?>

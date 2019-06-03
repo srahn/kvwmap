@@ -236,10 +236,10 @@ class data_import_export {
 	
 	function get_epsg_from_wkt($wkt, $pgdatabase){
 		global $supportedSRIDs;
-		# 1. Versuch: Suche nach AUTHORITY
-		for($i = 0; $i < count($supportedSRIDs); $i++){
-			if(strpos($wkt, 'AUTHORITY["EPSG","'.$supportedSRIDs[$i].'"]') > 0)return $supportedSRIDs[$i];
-		}
+		# 1. Versuch: Suche nach AUTHORITY			// erstmal rausgenommen, weil es auch mehrere AUTHORITY-Einträge geben kann
+		// for($i = 0; $i < count($supportedSRIDs); $i++){
+			// if(strpos($wkt, 'AUTHORITY["EPSG","'.$supportedSRIDs[$i].'"]') > 0)return $supportedSRIDs[$i];
+		// }
 		# 2. Versuch: Abgleich bestimmter Parameter im prj-String mit spatial_ref_sys_alias
 		$datum = get_first_word_after($wkt, 'DATUM[', '"', '"');
 		$projection = get_first_word_after($wkt, 'PROJECTION[', '"', '"');
@@ -265,42 +265,18 @@ class data_import_export {
 
 	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1') {
 		if (file_exists($uploadpath . $file . '.dbf') OR file_exists($uploadpath . $file . '.DBF')) {
-	    $command = POSTGRESBINPATH .
-				'shp2pgsql' .
-				' -g the_geom' .
-				' -I' .
-				' -s ' . $epsg .
-				' -W ' . $encoding .
-				' -c "' . $uploadpath . $file . '"' .
-				' ' . $schemaname . '.' . $tablename .
-				' > "' . $uploadpath . $file . '.sql"';
-	    exec($command, $output, $ret);
-			if($ret == 1){	# bei Fehlschlag, das andere Encoding probieren
-				if($encoding == 'UTF-8')$new_encoding = 'LATIN1';
-				else $new_encoding = 'UTF-8';
-				$command2 = str_replace($encoding, $new_encoding, $command);
-				$errorfile = rand(0, 1000000);
-				$command2 .= ' 2> '.IMAGEPATH.$errorfile.'.err';
-				exec($command2, $output, $ret);
-			}
-			if($ret != 0){
-				$custom_table['error'] = 'Fehler beim Importieren !<br><br>Befehl:<div class="code">'.$command.'</div><a href="' . IMAGEURL . $errorfile . '.err" target="_blank">Fehlerprotokoll</a>';
+			$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $uploadpath.$file.'.shp', $pgdatabase, NULL, $sql, '-lco FID=gid', $encoding);
+			if ($ret !== 0) {
+				$custom_table['error'] = $ret;
 				return array($custom_table);
 			}
-			else{
-				#echo $command;
-				$command = POSTGRESBINPATH .
-					'psql' .
-					' -h ' . $pgdatabase->host .
-					' -f "' . $uploadpath . $file . '.sql"' .
-					' ' . $pgdatabase->dbName . ' ' . $pgdatabase->user;
-				if ($pgdatabase->passwd != '')
-					$command = 'export PGPASSWORD="' . $pgdatabase->passwd . '"; ' . $command;
-				exec($command);
-				#echo $command;
-				$sql = 'ALTER TABLE '.$schemaname.'.'.$tablename.' SET WITH OIDS;
-				'.$this->rename_reserved_attribute_names($schemaname, $tablename).'
-					SELECT geometrytype(the_geom) AS geometrytype FROM '.$schemaname.'.'.$tablename.' LIMIT 1;';
+			else {
+				$sql = "
+					ALTER TABLE ".$schemaname.".".$tablename." SET WITH OIDS;
+					SELECT convert_column_names('".$schemaname . "', '" . $tablename . "');
+					" . $this->rename_reserved_attribute_names($schemaname, $tablename) . "
+					SELECT geometrytype(the_geom) AS geometrytype FROM " . $schemaname . "." . $tablename . " LIMIT 1;
+				";
 				$ret = $pgdatabase->execSQL($sql,4, 0);
 				if (!$ret[0]) {
 					$rs = pg_fetch_assoc($ret[1]);
@@ -312,15 +288,14 @@ class data_import_export {
 		}
 	}
 
-	function rename_reserved_attribute_names($schema, $table){
+	function rename_reserved_attribute_names($schema, $table) {
 		$reserved_words = array('desc', 'number', 'end');
 		foreach($reserved_words as $word){
-			$sql .= "SELECT rename_if_exists('".$schema."', '".$table."', '".$word."');
-			";
+			$sql .= "SELECT rename_if_exists('".$schema."', '".$table."', '".$word."');";
 		}
 		return $sql;
 	}
-	
+
 	function import_custom_geotif($filename, $pgdatabase, $epsg){
 		$custom_rasterfile = CUSTOM_RASTER.basename($filename);
 		if(copy($filename, $custom_rasterfile)){
@@ -337,18 +312,22 @@ class data_import_export {
 	}
 	
 	function import_custom_shape($filenameparts, $user, $pgdatabase, $epsg){
-		if($filenameparts[0] != ''){
-			if((file_exists($filenameparts[0].'.shp') AND file_exists($filenameparts[0].'.dbf') AND file_exists($filenameparts[0].'.shx')) OR
-				(file_exists($filenameparts[0].'.SHP') AND file_exists($filenameparts[0].'.DBF') AND file_exists($filenameparts[0].'.SHX'))){
-				$formvars['shapefile'] = $filenameparts[0];				
-				if($epsg == NULL)$epsg = $this->get_shp_epsg($filenameparts[0], $pgdatabase);		# EPSG-Code aus prj-Datei ermitteln
-				if($epsg == NULL){
+		if ($filenameparts[0] != '') {
+			if ((file_exists($filenameparts[0].'.shp') AND file_exists($filenameparts[0].'.dbf') AND file_exists($filenameparts[0].'.shx')) OR
+				 (file_exists($filenameparts[0].'.SHP') AND file_exists($filenameparts[0].'.DBF') AND file_exists($filenameparts[0].'.SHX'))) {
+				$formvars['shapefile'] = $filenameparts[0];
+				if ($epsg == NULL) {
+					$epsg = $this->get_shp_epsg($filenameparts[0], $pgdatabase);		# EPSG-Code aus prj-Datei ermitteln
+				}
+				if ($epsg == NULL){
 					$this->ask_epsg = true;		# EPSG-Code konnte nicht aus prj-Datei ermittelt werden => nachfragen
 					return;
 				}
 			}
-			else return;
-			$encoding = $this->getEncoding($filenameparts[0].'.dbf');
+			else {
+				return;
+			}
+			$encoding = $this->getEncoding($filenameparts[0] . '.dbf');
 			$custom_table = $this->load_shp_into_pgsql($pgdatabase, '', $formvars['shapefile'], $epsg, CUSTOM_SHAPE_SCHEMA, 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['shapefile']), 0, 15))).rand(1,1000000), $encoding);
 			if($custom_table != NULL){
 				exec('rm '.UPLOADPATH.'/'.$user->id.'/'.basename($formvars['shapefile']).'.*');	# aus Sicherheitsgründen rm mit Uploadpfad davor
@@ -497,7 +476,7 @@ class data_import_export {
 			';
 			$ret = $pgdatabase->execSQL($sql,4, 0);
 			if(!$ret[0]){
-				$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'POLYGON' => 2);
+				$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'MULTILINESTRING' => 1, 'POLYGON' => 2, 'MULTIPOLYGON' => 2);
 				while($result = pg_fetch_assoc($ret[1])){
 					if($result['count'] > 0 AND $geom_types[$result['geometrytype']] !== NULL){
 						$custom_table['datatype'] = $geom_types[$result['geometrytype']];
@@ -878,7 +857,7 @@ class data_import_export {
 	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1') {
 		$command = 'export PGCLIENTENCODING='.$encoding.';'.OGR_BINPATH.'ogr2ogr ';
 		if ($options != NULL) $command.= $options;
-		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco precision=NO -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
+		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco precision=NO -nlt PROMOTE_TO_MULTI -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
 		if ($sql != NULL) $command.= ' -sql \''.$sql.'\'';
 		$command .= ' -append PG:"dbname=' . $database->dbName . ' user=' . $database->user . ' active_schema=' . $schema;
 		if ($database->passwd != '') $command .= ' password=' . $database->passwd;
@@ -888,7 +867,7 @@ class data_import_export {
 		$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
 		$output = array();
 		exec($command, $output, $ret);
-		if ($ret != 0) { $ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br>Befehl: ' . $command . '<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; }
+		if ($ret != 0) { $ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; }
 		return $ret;
 	}
 

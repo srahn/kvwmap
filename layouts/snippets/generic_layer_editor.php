@@ -159,6 +159,12 @@
 			  </tr>
 <?
 	for ($k=0;$k<$anzObj;$k++) {
+		$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
+		if (is_array($layer['attributes']['privileg'])) {
+			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
+				$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
+			}
+		}
 		$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
 ?>
 	<tr 
@@ -172,7 +178,7 @@
 				<tr>
 					<td style="line-height: 1px; ">
 						<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
-						<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
+						<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't')echo 'no_edit'; ?>" name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
 					</td>
 				</tr>
 		  </table>
@@ -256,7 +262,8 @@
 			    </td>
 		<? 	} ?>
 				</tr>
-<?	} ?>
+<?		$layer['attributes']['privileg'] = $definierte_attribute_privileges;
+		} ?>
 				<tr onclick="toggle_statistic_row(<? echo $layer['Layer_ID']; ?>);">
 					<td style="background-color:<? echo BG_TR; ?>;" valign="top" align="center">
 						&Sigma;

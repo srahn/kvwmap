@@ -54,7 +54,7 @@ class Nachweis {
 			$this->Dokumente[0]['Bilddatei_name'] = $this->Dokumente[0]['link_datei'];
 			$this->Dokumente[0]['Blattnr'] = $this->Dokumente[0]['blattnummer'];
 			$formvars['zieldateiname']=$this->getZielDateiName($this->Dokumente[0]);
-			$oldpath = NACHWEISDOCPATH.$old_dataset['flurid'].'/'.$this->buildNachweisNr($old_dataset[NACHWEIS_PRIMARY_ATTRIBUTE], $old_dataset[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$old_dataset['link_datei'];
+			$oldpath = $this->Dokumente[0]['link_datei'];
 			$newpath = NACHWEISDOCPATH.$this->Dokumente[0]['flurid'].'/'.$this->buildNachweisNr($this->Dokumente[0][NACHWEIS_PRIMARY_ATTRIBUTE], $this->Dokumente[0][NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$this->Dokumente[0]['artname'].'/'.$formvars['zieldateiname'];
 			#echo $oldpath.'<br>';
 			#echo $newpath.'<br>';
@@ -564,7 +564,7 @@ class Nachweis {
           # Abfrage war erfolgreich
           # Es wurde ein Eintrag in Datenbank gefunden, das löschen der Datei kann erfolgen
           # Abfrage, ob die Datei überhaupt existiert
-          $nachweisDatei=NACHWEISDOCPATH.$this->Dokumente[0]['flurid'].'/'.$this->buildNachweisNr($this->Dokumente[0][NACHWEIS_PRIMARY_ATTRIBUTE], $this->Dokumente[0][NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$this->Dokumente[0]['link_datei'];
+          $nachweisDatei=$this->Dokumente[0]['link_datei'];
           if (file_exists($nachweisDatei)) {
             # Datei existiert und kann jetzt im Filesystem gelöscht werden
 						$ret = $this->dokumentenDateiLoeschen($nachweisDatei);
@@ -763,8 +763,8 @@ class Nachweis {
 		if($order==''){
 			$order="n.flurid, n.stammnr, n.datum";
 		}
-		$order = str_replace('blattnummer', "NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::int", $order);		// nach Blattnummer nummerisch sortieren
-		$order = str_replace('rissnummer', "NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::int", $order);		// nach Rissnummer nummerisch sortieren
+		$order = str_replace('blattnummer', "NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint", $order);		// nach Blattnummer nummerisch sortieren
+		$order = str_replace('rissnummer', "NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::bigint", $order);		// nach Rissnummer nummerisch sortieren
     # Die Funktion liefert die Nachweise nach verschiedenen Suchverfahren.
     # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter überprüft    
     if (is_array($id)) { $idListe=$id; } else { $idListe=array($id); }
@@ -929,7 +929,7 @@ class Nachweis {
           # Suchparameter sind gültig
           # Suche nach individueller Nummer
           #echo '<br>Suche nach individueller Nummer.';
-          $sql ="SELECT DISTINCT NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::int, NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::int, n.id, n.flurid, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei,n. format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+          $sql ="SELECT DISTINCT NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::bigint, NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei,n. format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM ";
 					if($gemarkung != '' AND $flur_thematisch == 0){
 						$sql.=" alkis.pp_flur as flur, ";
@@ -962,9 +962,9 @@ class Nachweis {
 					}
           if($stammnr!=''){
 						if($stammnr2!=''){
-							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.stammnr, '[^0-9]+' ,'', 'g'), ''), '0')::integer between 
-											COALESCE(NULLIF(REGEXP_REPLACE('".$stammnr."', '[^0-9]+' ,'', 'g'), ''), '0')::integer AND 
-											COALESCE(NULLIF(REGEXP_REPLACE('".$stammnr2."', '[^0-9]+' ,'', 'g'), ''), '0')::integer";
+							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.stammnr, '[^0-9]+' ,'', 'g'), ''), '0')::bigint between 
+											COALESCE(NULLIF(REGEXP_REPLACE('".$stammnr."', '[^0-9]+' ,'', 'g'), ''), '0')::bigint AND 
+											COALESCE(NULLIF(REGEXP_REPLACE('".$stammnr2."', '[^0-9]+' ,'', 'g'), ''), '0')::bigint";
 						}
 						else{
 							if(is_numeric($stammnr)){
@@ -977,9 +977,9 @@ class Nachweis {
           }
 	        if($rissnr!=''){
 						if($rissnr2!=''){
-							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.rissnummer, '[^0-9]+' ,'', 'g'), ''), '0')::integer between 
-											COALESCE(NULLIF(REGEXP_REPLACE('".$rissnr."', '[^0-9]+' ,'', 'g'), ''), '0')::integer AND 
-											COALESCE(NULLIF(REGEXP_REPLACE('".$rissnr2."', '[^0-9]+' ,'', 'g'), ''), '0')::integer";
+							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.rissnummer, '[^0-9]+' ,'', 'g'), ''), '0')::bigint between 
+											COALESCE(NULLIF(REGEXP_REPLACE('".$rissnr."', '[^0-9]+' ,'', 'g'), ''), '0')::bigint AND 
+											COALESCE(NULLIF(REGEXP_REPLACE('".$rissnr2."', '[^0-9]+' ,'', 'g'), ''), '0')::bigint";
 						}
 						else{
 							if(is_numeric($rissnr)){
@@ -1057,7 +1057,7 @@ class Nachweis {
           # Suche mit Suchpolygon
           #echo '<br>Suche mit Suchpolygon.';
           $this->debug->write('Abfragen der Nachweise die das Polygon schneiden',4);
-					$sql ="SELECT distinct NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::int, NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::int, n.id, n.flurid, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei, n.format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+					$sql ="SELECT distinct NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::bigint, NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei, n.format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";					
@@ -1103,7 +1103,7 @@ class Nachweis {
         # Suche nach Antragsnummer
         # echo '<br>Suche nach Antragsnummer.';
         $this->debug->write('Abfragen der Nachweise die zum Antrag gehören',4);
-				$sql ="SELECT distinct NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::int, NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::int, n.*,v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+				$sql ="SELECT distinct NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::bigint, NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.*,v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
         $sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
@@ -1283,7 +1283,7 @@ class Nachweis {
   
   function getDocLocation($id){
     #2005-11-24_pk
-    $sql='SELECT * FROM nachweisverwaltung.n_nachweise WHERE id ='.$id;
+    $sql='SELECT link_datei FROM nachweisverwaltung.n_nachweise WHERE id ='.$id;
     $this->debug->write("<br>nachweis.php getDocLocation zum Anzeigen der Nachweise.",4);
     $queryret=$this->database->execSQL($sql,4, 0);    
     if ($queryret[0]) {
@@ -1291,8 +1291,8 @@ class Nachweis {
     }
     else {
       $ret[0]=0;
-      $rs=pg_fetch_array($queryret[1]);
-      $ret[1]=NACHWEISDOCPATH.$rs['flurid'].'/'.$this->buildNachweisNr($rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$rs['link_datei'];
+      $rs=pg_fetch_assoc($queryret[1]);
+      $ret[1]=$rs['link_datei'];
     }
     return $ret;
   }

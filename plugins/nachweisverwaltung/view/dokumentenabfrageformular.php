@@ -42,10 +42,6 @@ function save(){
 					return;
 				}
 			}
-			else{
-				alert('Bitte geben Sie ein zweites Datum ein.');
-				return;
-			}
 		}
 	}
 	if(art[1].checked == true && document.GUI.newpathwkt.value == ''){

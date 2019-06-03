@@ -68,16 +68,14 @@
 			<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
 	    <div id="datensatz" 
 			<? if($this->new_entry != true AND $this->user->rolle->querymode == 1){ ?>
-			onmouseenter="if(typeof FormData !== 'undefined')highlight_object(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['the_geom']].'_oid']; ?>');"
+			onmouseenter="highlight_object(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['the_geom']].'_oid']; ?>');"
 			<? } ?>
 			><?php
-			$definierte_attribute_privileges = $layer['attributes']['privileg'];
-			$gesperrte_attribute_privileges = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
-			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
-				$layer['attributes']['privileg'] = $gesperrte_attribute_privileges;
-			}
-			else {
-				$layer['attributes']['privileg'] = $definierte_attribute_privileges;
+			$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
+			if (is_array($layer['attributes']['privileg'])) {
+				if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
+					$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
+				}
 			}
 			?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 	    <table id="dstable" class="tgle" style="border-bottom: 1px solid grey" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
@@ -300,6 +298,7 @@
 		</td>
 	</tr>
 <?
+		$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 	}
 	if($this->formvars['printversion'] == ''){
 ?>
@@ -499,7 +498,8 @@
 				<span style="color:#FF0000;"><? echo $strNoMatch; ?></span>
 		</td>
   </tr>
-	<? if($layer['privileg'] > 0){ ?>
+<? 	$layer_new_dataset = $this->Stelle->getqueryablePostgisLayers(1, NULL, true, $layer['Layer_ID']);		// Abfrage ob Datensatzerzeugung möglich
+		if($layer_new_dataset != NULL){ ?>
 	<tr align="center">
 		<td><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=<? echo $layer['Layer_ID']; ?>"><? echo $strNewDataset; ?></a></td>
 	</tr>

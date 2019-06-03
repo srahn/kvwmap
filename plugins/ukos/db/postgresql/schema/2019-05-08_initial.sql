@@ -14279,8 +14279,8 @@ CREATE TABLE ukos_okstra.strassenelement (
     nachrichtlich boolean DEFAULT false NOT NULL
 )
 INHERITS (ukos_base.streckenobjekt);
-SELECT topology.AddTopoGeometryColumn('ukos_topo', 'ukos_okstra', 'strassenelement', 'liniengeometrie_topo', 'LINE');
 
+SELECT topology.AddTopoGeometryColumn('ukos_topo', 'ukos_okstra', 'strassenelement', 'liniengeometrie_topo', 'LINE');
 
 --
 -- Name: streckenobjekt_to_teilelement; Type: TABLE; Schema: ukos_okstra; Owner: -

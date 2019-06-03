@@ -19,7 +19,6 @@
   </tr>
   <?php
   for ($j=0;$j<count($this->qlayerset[$i]['shape']);$j++) {
-    $nr= $this->nachweis->buildNachweisNr($this->qlayerset[$i]['shape'][$j][NACHWEIS_PRIMARY_ATTRIBUTE], $this->qlayerset[$i]['shape'][$j][NACHWEIS_SECONDARY_ATTRIBUTE]);
     $oid=$this->qlayerset[$i]['shape'][$j]['oid'];
     $id=$this->qlayerset[$i]['shape'][$j]['id'];
     $flur=$this->qlayerset[$i]['shape'][$j]['flur'];
@@ -31,7 +30,7 @@
     {
       $stammnr="0".$stammnr;
     }
-$dname=NACHWEISDOCPATH.$flurid."/".$nr."/".$this->qlayerset[$i]['shape'][$j]['link_datei'];
+$dname=$this->qlayerset[$i]['shape'][$j]['link_datei'];
     ?>
   <tr>
 	<td><span class="fett"><?php echo $this->qlayerset[$i]['shape'][$j][NACHWEIS_PRIMARY_ATTRIBUTE]; ?></span></td>

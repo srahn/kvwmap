@@ -109,7 +109,7 @@ else {
           <td colspan="3" style="border-bottom:1px solid #C3C7C3"><em><span class="px13"><?php echo $strAsteriskRequired; ?> </span></em></td>
         </tr><?php if ($this->formvars['selected_stelle_id']>0) {?>
         <tr>
-          <th class="fetter" class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><div style="width: 220px;"><?php echo $strDataBankID; ?></div></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><div style="width: 220px;"><?php echo $strDataBankID; ?></div></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
           	<input name="id" type="text" value="<?php echo $this->formvars['selected_stelle_id']; ?>" size="25" maxlength="11">
           </td>
@@ -501,7 +501,12 @@ else {
 							<tr valign="top">
 								<td>
 									<select name="selectedusers" size="6" multiple style="width:300px"><?
-										for ($i = 0; $i < count($this->formvars['selusers']["Bezeichnung"]); $i++) { ?>
+										$seluseroptions[] = array('value' => '', 'output' => '-- Auswahl --');
+										for ($i = 0; $i < count($this->formvars['selusers']["Bezeichnung"]); $i++) {
+											$seluseroptions[] = array(
+												'value'  => $this->formvars['selusers']["ID"][$i],
+												'output' => $this->formvars['selusers']["Bezeichnung"][$i]
+											); ?>
 											<option
 												title="<?php echo str_replace(' ', '&nbsp;', $this->formvars['selusers']["Bezeichnung"][$i]); ?>"
 												value="<?php echo $this->formvars['selusers']["ID"][$i]; ?>"
@@ -589,6 +594,15 @@ else {
 						</td>
 					</tr><?php
 				} ?>
+
+				<tr>
+					<td class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<?php echo $strDefaultUserID; ?>
+					</td>
+					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php
+						echo FormObject::createSelectField('default_user_id', $seluseroptions, $this->formvars['default_user_id'], 1); ?>
+					</td>
+				</tr>
 
         <tr>
           <td align="right" style="border-bottom:1px solid #C3C7C3">
