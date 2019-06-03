@@ -227,7 +227,7 @@ else {
 						<th class="fetter" align="right" valign="top" style="width: 173px;border-bottom:1px solid #C3C7C3"><?php echo $strActiveLayers;?></th>
 						<td style="border-bottom:1px solid #C3C7C3">
 							<table cellpadding="0" cellspacing="0">
-						<?	for($i = 0; $i < count($this->active_layers)-1; $i++){ ?>
+						<?	for($i = 0; $i < count($this->active_layers); $i++){ ?>
 								<tr id="layer_<? echo $this->active_layers[$i]['Layer_ID']; ?>" class="tr_hover">
 									<td style="padding: 0 10 0 2">
 										<? echo $this->active_layers[$i]['alias'].'</td><td><a title="deaktivieren" href="javascript:deactivate_layer('.$this->formvars['selected_user_id'].', '.$this->userdaten[0]['stelle_id'].', '.$this->active_layers[$i]['Layer_ID'].');"><i style="font-size: 19px; color: firebrick" class="fa fa-times" aria-hidden="true"></i></a>'; ?>
