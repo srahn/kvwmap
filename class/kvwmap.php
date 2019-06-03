@@ -7982,8 +7982,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $stelle->addLayer($layer_ids,	0, $filter, $assign_default_values);
       $users = $stelle->getUser();
       for($j = 0; $j < count($users['ID']); $j++){
-        $this->user->rolle->setGroups($users['ID'][$j], array($stellen_ids[$i]), $layer_ids, 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
-        $this->user->rolle->setLayer($users['ID'][$j], array($stellen_ids[$i]), 0); # Hinzufügen der Layer zur Rolle
+        $this->user->rolle->setGroups($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id, $layer_ids); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+        $this->user->rolle->setLayer($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id); # Hinzufügen der Layer zur Rolle
       }
 			$stelle->updateLayerParams();
     }
@@ -10821,7 +10821,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 
       $stelle_id = explode(',',$stelleid);
-      $new_stelle_id = explode(',',$new_stelleid);
       $new_stelle->deleteMenue(0); // erst alle Menüs rausnehmen
       $new_stelle->addMenue($menues); // und dann hinzufügen, damit die Reihenfolge stimmt
       if($layer[0] != NULL) {
@@ -10847,13 +10846,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
       }
       for ($i = 0; $i < count($selectedusers); $i++) {
-        $this->user->rolle->setRollen($selectedusers[$i], $new_stelle_id); # Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
-        $this->user->rolle->setMenue($selectedusers[$i], $new_stelle_id); # Hinzufügen der selectierten Obermenüs zur Rolle
-        $this->user->rolle->setGroups($selectedusers[$i], $new_stelle_id, $layer, 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
-        $this->user->rolle->setLayer($selectedusers[$i], $new_stelle_id, 0); # Hinzufügen der Layer zur Rolle
+				$this->user->rolle->setRolle($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+        $this->user->rolle->setMenue($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
+        $this->user->rolle->setLayer($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
+				$this->user->rolle->setGroups($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id, $layer); 											# Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+				$this->user->rolle->setSavedLayersFromDefaultUser($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);
         $this->selected_user = new user(0,$selectedusers[$i],$this->user->database);
         $this->selected_user->checkstelle();
       }
+			// ToDo: Löschen der Einträge in u_menue2rolle, bei denen der Menüpunkt nicht mehr der Stelle zugeordnet ist
       $stellenlayer = $Stelle->getLayers(NULL);
 			$deletelayer = array();
       for($i = 0; $i < count($stellenlayer['ID']); $i++){
@@ -10952,7 +10953,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $frames = explode(', ',$this->formvars['selframes']);
         $layer = explode(', ',$this->formvars['sellayer']);
         $users = explode(', ',$this->formvars['selusers']);
-        $neue_stelle_id = explode(',',$neue_stelle_id);
         # wenn Stelle ausgewählt, Daten kopieren
         if($this->formvars['selected_stelle_id']){
           $Stelle->copyLayerfromStelle($layer, $this->formvars['selected_stelle_id']);
@@ -10967,14 +10967,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $document = new Document($this->database);
         if($frames[0] != NULL){
           for($i = 0; $i < count($frames); $i++){
-            $document->add_frame2stelle($frames[$i], $neue_stelle_id[0]); # Hinzufügen der Druckrahmen zur Stelle
+            $document->add_frame2stelle($frames[$i], $neue_stelle_id); # Hinzufügen der Druckrahmen zur Stelle
           }
         }
         for($i=0; $i<count($users); $i++){
-          $this->user->rolle->setRollen($users[$i],$neue_stelle_id);
-          $this->user->rolle->setMenue($users[$i],$neue_stelle_id);
-          $this->user->rolle->setGroups($users[$i], $neue_stelle_id, $layer, 0);
-          $this->user->rolle->setLayer($users[$i], $neue_stelle_id, 0);
+          $this->user->rolle->setRolle($selectedusers[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+					$this->user->rolle->setMenue($selectedusers[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
+					$this->user->rolle->setLayer($selectedusers[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
+					$this->user->rolle->setGroups($selectedusers[$i], $Stelle->id, $Stelle->default_user_id, $layer);
+					$this->user->rolle->setSavedLayersFromDefaultUser($selectedusers[$i], $Stelle->id, $Stelle->default_user_id);
           $this->selected_user = new user(0,$users[$i],$this->user->database);
           $this->selected_user->checkstelle();
         }
@@ -11762,15 +11763,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $this->Meldung=$ret[1];
       }
       else {
-        $neue_user_id=$ret[1];
+        $this->formvars['selected_user_id']=$ret[1];
         $stellen = explode(', ',$this->formvars['selstellen']);
-        $this->user->rolle->setRollen($neue_user_id,$stellen);
-        $this->user->rolle->setMenue($neue_user_id,$stellen);
-        $this->user->rolle->setLayer($neue_user_id, $stellen, 0);
 				for($i = 0; $i < count($stellen); $i++){
 					$stelle = new stelle($stellen[$i], $this->database);
+					$this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
+					$this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
+					$this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					$layers = $stelle->getLayers(NULL);
-					$this->user->rolle->setGroups($neue_user_id, array($stellen[$i]), $layers['ID'], 0);
+					$this->user->rolle->setGroups($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id, $layers['ID']);
+					$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				}
         if ($ret[0]) {
           $this->Meldung=$ret[1];
@@ -11780,7 +11782,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
       }
     }
-    $this->formvars['selected_user_id'] = $neue_user_id;
     $this->BenutzerdatenFormular();
   }
 
@@ -11791,18 +11792,19 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->Meldung=$ret[1];
     }
     else {
-      $stellen = explode(', ',$this->formvars['selstellen']);
+      $stellen = array_filter(explode(', ',$this->formvars['selstellen']));
       $ret=$this->user->Aendern($this->formvars);
       if($this->formvars['id'] != ''){
         $this->formvars['selected_user_id'] = $this->formvars['id'];
       }
-      $this->user->rolle->setRollen($this->formvars['selected_user_id'], $stellen);
-      $this->user->rolle->setMenue($this->formvars['selected_user_id'], $stellen);
-      $this->user->rolle->setLayer($this->formvars['selected_user_id'], $stellen, 0);
 			for($i = 0; $i < count($stellen); $i++){
 				$stelle = new stelle($stellen[$i], $this->database);
+				$this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
+				$this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
+				$this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				$layers = $stelle->getLayers(NULL);
-				$this->user->rolle->setGroups($this->formvars['selected_user_id'], array($stellen[$i]), $layers['ID'], 0);
+				$this->user->rolle->setGroups($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id, $layers['ID']);
+				$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 			}
       $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
       # Löschen der in der Selectbox entfernten Stellen
