@@ -376,6 +376,7 @@ class rolle {
 			$this->runningcoords=$rs['runningcoords'];
 			$this->showmapfunctions=$rs['showmapfunctions'];
 			$this->showlayeroptions=$rs['showlayeroptions'];
+			$this->showrollenfilter=$rs['showrollenfilter'];
 			$this->menue_buttons=$rs['menue_buttons'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
@@ -1230,6 +1231,7 @@ class rolle {
 					`runningcoords`,
 					`showmapfunctions`,
 					`showlayeroptions`,
+					`showrollenfilter`,
 					`singlequery`,
 					`querymode`,
 					`geom_edit_first`,
@@ -1266,6 +1268,7 @@ class rolle {
 					`runningcoords`,
 					`showmapfunctions`,
 					`showlayeroptions`,
+					`showrollenfilter`,
 					`singlequery`,
 					`querymode`,
 					`geom_edit_first`,

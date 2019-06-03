@@ -339,47 +339,50 @@ class GUI {
 							echo 	 '</select>
 										</li>';
 						}
-						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>
-							<li>
-								<a href="javascript:void(0);" onclick="$(\'#rollenfilter, #rollenfilterquestionicon\').toggle()">Filter</a>
-								<a href="javascript:void(0);" onclick="message(\'\
-									Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Kartendarstellung und Sachdatenanzeige des Layers auswirkt.<br>\
-									In diesem Thema stehen dafür folgende Attribute zur Verfügung:<br>\
-									<ul>';
-									for($i = 0; $i < count($attributes)-2; $i++){
-										if(($this->formvars['layer_id'] < 0 OR $privileges[$attributes[$i]['name']] != '') AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<li>'.$attributes[$i]['name'].'</li>';
-									}									
-						echo	'</ul>\
-									Mehrere Filter werden mit AND oder OR verknüpft.<br>\
-									Ist ein Filter gesetzt wird in der Legende neben dem Themanamen ein Filtersymbol angezeigt.<br>\
-									Der Filter wird gelöscht indem das Textfeld geleert wird.<p>\
-									Beispiele:<br>\
-									<ul>\
-										<li>id > 10 AND status = 1</li>\
-										<li>type = \\\'Brunnen\\\' OR type = \\\'Quelle\\\'</li>\
-										<li>status IN (1, 2)</li>\
-									</ul>\
-									\')">
-									<i
-										id="rollenfilterquestionicon"
-										title="Hilfe zum Filter anzeigen"
-										class="fa fa-question-circle button layerOptionsIcon"
+						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>';
+						if($this->user->rolle->showrollenfilter){
+							echo '	
+									<li>
+									<a href="javascript:void(0);" onclick="$(\'#rollenfilter, #rollenfilterquestionicon\').toggle()">Filter</a>
+									<a href="javascript:void(0);" onclick="message(\'\
+										Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Kartendarstellung und Sachdatenanzeige des Layers auswirkt.<br>\
+										In diesem Thema stehen dafür folgende Attribute zur Verfügung:<br>\
+										<ul>';
+										for($i = 0; $i < count($attributes)-2; $i++){
+											if(($this->formvars['layer_id'] < 0 OR $privileges[$attributes[$i]['name']] != '') AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<li>'.$attributes[$i]['name'].'</li>';
+										}									
+										echo	'</ul>\
+										Mehrere Filter werden mit AND oder OR verknüpft.<br>\
+										Ist ein Filter gesetzt wird in der Legende neben dem Themanamen ein Filtersymbol angezeigt.<br>\
+										Der Filter wird gelöscht indem das Textfeld geleert wird.<p>\
+										Beispiele:<br>\
+										<ul>\
+											<li>id > 10 AND status = 1</li>\
+											<li>type = \\\'Brunnen\\\' OR type = \\\'Quelle\\\'</li>\
+											<li>status IN (1, 2)</li>\
+										</ul>\
+										\')">
+										<i
+											id="rollenfilterquestionicon"
+											title="Hilfe zum Filter anzeigen"
+											class="fa fa-question-circle button layerOptionsIcon"
+											style="
+												float: right;
+												'.($layer[0]['rollenfilter'] == ''? 'display: none' : '').'
+											"
+										></i>
+									</a><br>
+									<textarea
+										id="rollenfilter"
 										style="
-											float: right;
+											width: 98%;
 											'.($layer[0]['rollenfilter'] == ''? 'display: none' : '').'
 										"
-									></i>
-								</a><br>
-								<textarea
-									id="rollenfilter"
-									style="
-										width: 98%;
-										'.($layer[0]['rollenfilter'] == ''? 'display: none' : '').'
-									"
-									name="layer_options_rollenfilter"
-								>' . $layer[0]['rollenfilter'] . '</textarea>
-							</li>
-						</ul>
+										name="layer_options_rollenfilter"
+									>' . $layer[0]['rollenfilter'] . '</textarea>
+								</li>';
+						}
+echo '			</ul>
 					</td>
 				</tr>
 				<tr>
@@ -12709,12 +12712,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     # Liste der Formularelementnamen, die betroffen sind in der Reihenfolge,
     # wie die Spalten in der Abfrage
     $select ="nZoomFactor,gui,CONCAT(nImageWidth,'x',nImageHeight) AS mapsize";
-    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, highlighting, runningcoords, showmapfunctions, showlayeroptions, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T')";
+    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, highlighting, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T')";
     $from ='rolle';
     $where ="stelle_id='+this.form.Stelle_ID.value+' AND user_id=" . $this->user->id;
     $StellenFormObj->addJavaScript(
 			"onchange",
-			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,showmapfunctions,showlayeroptions,menu_auto_close,menue_buttons,hist_timestamp));" : "")
+			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,showmapfunctions,showlayeroptions,showrollenfilter,menu_auto_close,menue_buttons,hist_timestamp));" : "")
 		);
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=" . $from."&where=stelle_id=3 AND user_id=7";
     $StellenFormObj->outputHTML();
