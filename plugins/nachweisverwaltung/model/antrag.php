@@ -167,7 +167,7 @@ class antrag {
 					else{	
 						# Vorschaubild kopieren
 						$vorschaudatei = $dateinamensteil[0].'_thumb.jpg';
-						$quelle=$quellpfad.$vorschaudatei;
+						$quelle=$quellpfad.'/'.$vorschaudatei;
 						$erfolg=copy($quelle,$vorschaupfad.$vorschaudatei);
 						# Nachweis-UKOs erzeugen
 						$uko = WKT2UKO($nachweis->Dokumente[$i]['wkt_umring']);
