@@ -96,10 +96,8 @@ class rolle {
 				l.labelitem as original_labelitem,
 				ul.`postlabelcache`,
 				`Filter`,
-				CASE r2ul.gle_view
-					WHEN '0' THEN 'generic_layer_editor.php'
-					ELSE ul.`template`
-				END as template,
+				r2ul.gle_view,
+				ul.`template`,
 				`header`,
 				`footer`,
 				ul.`symbolscale`,
@@ -857,11 +855,7 @@ class rolle {
 
 	function getRollenLayer($LayerName, $typ = NULL) {
 		$sql ="
-			SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, 
-				CASE gle_view
-					WHEN '0' THEN 'generic_layer_editor.php'
-					ELSE ''
-				END as template,
+			SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, gle_view,
 				concat('(', rollenfilter, ')') as Filter
 			FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;

@@ -628,7 +628,7 @@ echo '			</ul>
 							</a//-->' .
 							html_umlaute($groupname) . '
 							'.($groupname == 'Suchergebnis' ? '<a href="index.php?go=delete_rollenlayer&type=search"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
-							'.($groupname == 'Eigene Importe' ? '<a href="index.php?go=delete_rollenlayer&type=import"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
+							'.(($groupname == 'Eigene Importe' OR $groupname == 'WMS-Importe') ? '<a href="index.php?go=delete_rollenlayer&type=import"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
 							<div style="position:static;" id="group_options_' . $group_id . '"></div>
 						</span>
 					</td>
@@ -7204,7 +7204,7 @@ echo '			</ul>
 			$this->formvars['stelle_id'] = $this->Stelle->id;
 			$this->formvars['aktivStatus'] = 1;
 			$this->formvars['Gruppe'] = $groupid;
-			$this->formvars['Typ'] = 'search';
+			$this->formvars['Typ'] = 'import';
 			$this->formvars['Datentyp'] = MS_LAYER_RASTER;
 			$this->formvars['connectiontype'] = MS_WMS;
 			$this->formvars['transparency'] = 100;
