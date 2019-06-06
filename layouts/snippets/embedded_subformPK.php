@@ -40,6 +40,7 @@
 							}
 							echo '&selected_layer_id='.$this->formvars['selected_layer_id'].
 									 '&embedded=true&fromobject=new_dataset_'.$this->formvars['targetobject'].
+									 '&weiter_erfassen='.$this->formvars['weiter_erfassen'].
 									 '&targetobject='.$this->formvars['targetobject'].
 									 '&targetlayer_id='.$this->formvars['targetlayer_id'].
 									 '&targetattribute='.$this->formvars['targetattribute'].
