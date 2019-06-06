@@ -10807,7 +10807,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $frames = explode(', ', $this->formvars['selframes']);
 			$layouts = (trim($this->formvars['sellayouts']) == '' ? array() : explode(', ', $this->formvars['sellayouts']));
       $layer = (trim($this->formvars['sellayer']) == '' ? array() : explode(', ', $this->formvars['sellayer']));
-      $selectedusers = explode(', ',$this->formvars['selusers']);
+      $selectedusers = array_filter(explode(', ',$this->formvars['selusers']));
       $users= $Stelle->getUser();
 			$selectedparents = ($this->formvars['selparents'] == '' ? array() : explode(', ', $this->formvars['selparents']));
 
@@ -10978,11 +10978,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           }
         }
         for($i=0; $i<count($users); $i++){
-          $this->user->rolle->setRolle($selectedusers[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
-					$this->user->rolle->setMenue($selectedusers[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
-					$this->user->rolle->setLayer($selectedusers[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
-					$this->user->rolle->setGroups($selectedusers[$i], $Stelle->id, $Stelle->default_user_id, $layer);
-					$this->user->rolle->setSavedLayersFromDefaultUser($selectedusers[$i], $Stelle->id, $Stelle->default_user_id);
+          $this->user->rolle->setRolle($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+					$this->user->rolle->setMenue($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
+					$this->user->rolle->setLayer($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
+					$this->user->rolle->setGroups($users[$i], $Stelle->id, $Stelle->default_user_id, $layer);
+					$this->user->rolle->setSavedLayersFromDefaultUser($users[$i], $Stelle->id, $Stelle->default_user_id);
           $this->selected_user = new user(0,$users[$i],$this->user->database);
           $this->selected_user->checkstelle();
         }
