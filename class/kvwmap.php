@@ -9175,7 +9175,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				# wenn es ein Datensatz aus einem embedded-Formular ist, 
 				# muss das embedded-Formular entfernt werden und 
 				# das Listen-DIV neu geladen werden (getrennt durch ~)
-				echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\');';
+				echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\', 0);';
 			}
 		}
 
@@ -9448,13 +9448,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         } break;
 
         case 'SubFormEmbeddedPK' : {
-          echo '~~reload_subform_list(\''.$this->formvars['targetobject'].'\');';
-					if($this->formvars['weiter_erfassen'] == 1){
-						echo 'href_save = document.getElementById("new_'.$this->formvars['targetobject'].'").href;';
-						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = document.getElementById("new_'.$this->formvars['targetobject'].'").href.replace("go=neuer_Layer_Datensatz", "go=neuer_Layer_Datensatz&weiter_erfassen=1'.$formfieldstring.'");';
-						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").click();';
-						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = href_save;';
-					}
+          echo '~~reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['edit'].'\', \''.$this->formvars['weiter_erfassen'].'\');';
         } break;
       }
 
@@ -13251,7 +13245,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			# wenn es ein Datensatz aus einem embedded-Formular ist, 
 			# muss das embedded-Formular entfernt werden und 
 			# das Listen-DIV neu geladen werden (getrennt durch ~)
-			echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\');';
+			echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\', 0);';
 		}
 		else {
 			$this->last_query = $this->user->rolle->get_last_query();

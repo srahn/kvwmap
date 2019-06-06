@@ -29,7 +29,27 @@
 					echo '</tr>';
 				}
 ?>				<tr>
-					<td><input type="button" value="Speichern" onclick="subsave_data(<? echo $layer['Layer_ID']; ?>, this.closest('div').id, this.closest('div').id, false);"></td>
+					<td>
+						<input type="button" tabindex="1" value="Speichern" onclick="subsave_data(<? echo $layer['Layer_ID']; ?>, this.closest('div').id, this.closest('div').id, false);">
+<?
+						if ($layer['privileg'] > 0){
+							echo '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
+							for($p = 0; $p < count($this->formvars['attributenames']); $p++){
+								echo '&attributenames['.$p.']='.$this->formvars['attributenames'][$p];
+								echo '&values['.$p.']='.$this->formvars['values'][$p];
+							}
+							echo '&selected_layer_id='.$this->formvars['selected_layer_id'].
+									 '&embedded=true&fromobject=new_dataset_'.$this->formvars['targetobject'].
+									 '&targetobject='.$this->formvars['targetobject'].
+									 '&targetlayer_id='.$this->formvars['targetlayer_id'].
+									 '&targetattribute='.$this->formvars['targetattribute'].
+									 '&edit=1\', 
+									 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
+									 new Array(\'sethtml\', \'execute_function\'));
+									 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
+						}
+?>						
+					</td>
 				</tr>
 			</table>
 <?		}
@@ -135,39 +155,42 @@
 				} ?>
 			</table>
 
-			<table style="float: right">
-				<tr> <?
+			<table width="100%">
+				<tr>
+					<td align="right"><?
 			# Liste bearbeiten
-			echo '<td><a tabindex="1" id="edit_list_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:reload_subform_list(\''.$this->formvars['targetobject'].'\', 1)"><span>'.$strEditList.'</span></a></td>';
+			if ($this->formvars['embedded'] == 'true'){
+				echo '<a tabindex="1" id="edit_list_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:reload_subform_list(\''.$this->formvars['targetobject'].'\', 1)"><span>'.$strEditList.'</span></a>';
+			}
 			# alle anzeigen
 			if ($anzObj > 1) {
-				echo '<td><a tabindex="1" style="font-size: '.$linksize.'px;" class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
+				echo '&nbsp;<a tabindex="1" style="font-size: '.$linksize.'px;" class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
 				for($p = 0; $p < count($this->formvars['attributenames']); $p++){
 					echo '&value_'.$this->formvars['attributenames'][$p].'='.$this->formvars['values'][$p];
 					echo '&operator_'.$this->formvars['attributenames'][$p].'==';
 				}				
-				echo '&subform_link=true\')"><span>'.$strShowAll.'</span></a></td>';
+				echo '&subform_link=true\')"><span>'.$strShowAll.'</span></a>';
 			}
 			# neu
 			if ($layer['privileg'] > 0){
 				if ($this->formvars['embedded'] == 'true'){
-					echo '<td><a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
+					echo '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
 					for($p = 0; $p < count($this->formvars['attributenames']); $p++){
 						echo '&attributenames['.$p.']='.$this->formvars['attributenames'][$p];
 						echo '&values['.$p.']='.$this->formvars['values'][$p];
 					}
 					echo '&selected_layer_id='.$this->formvars['selected_layer_id'].
 							 '&embedded=true&fromobject=new_dataset_'.$this->formvars['targetobject'].
+							 '&weiter_erfassen='.$this->formvars['weiter_erfassen'].
 							 '&targetobject='.$this->formvars['targetobject'].
 							 '&targetlayer_id='.$this->formvars['targetlayer_id'].
 							 '&targetattribute='.$this->formvars['targetattribute'].'\', 
 							 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
 							 new Array(\'sethtml\', \'execute_function\'));
 							 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
-					echo '<div style="display:inline" id="new_dataset_'.$this->formvars['targetobject'].'"></div></td>';
 				}
 				else{
-					echo '<td><a class="buttonlink"';
+					echo '&nbsp;<a class="buttonlink"';
 					#if($attributes['no_new_window'][$j] != true){
 						echo 	' target="_blank"';
 					#}
@@ -181,9 +204,18 @@
 					$datapart .= '&oid='.$this->formvars['oid'];									# die oid des Datensatzes und die Layer-ID wird mit übergeben, für evtl. Zoom auf den Datensatz
 					$datapart .= '&tablename='.$this->formvars['tablename'];			# dito
 					$datapart .= '&columnname='.$this->formvars['columnname'];		# dito
-					echo '<span>&nbsp;'.$strNewEmbeddedPK.'</span></a></td>';
+					echo '<span>&nbsp;'.$strNewEmbeddedPK.'</span></a>';
 				}
 			}
+			?>
+					</td>
+				</tr>
+			</table>
+			<?
+		}
+		echo '<div style="display:inline" id="new_dataset_'.$this->formvars['targetobject'].'"></div>';
+		if($this->formvars['weiter_erfassen'] == 1){
+			echo '<script type="text/javascript">document.getElementById("new_'.$this->formvars['targetobject'].'").click();</script>';
 		}
 	}
 ?>

@@ -498,7 +498,7 @@
 					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'"><img src="'.GRAPHICSPATH.'leer.gif" ';
 					if($gui->new_entry != true){
 						$subform_request = true;
-						$onload = 'onload="reload_subform_list(\''.$layer_id.'_'.$name.'_'.$k.'\', 0)"';
+						$onload = 'onload="reload_subform_list(\''.$layer_id.'_'.$name.'_'.$k.'\', 0, 0)"';
 					}
 					$datapart .= ($subform_request? $onload : '').'></div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
 					if ($gui->new_entry != true AND $subform_request) {

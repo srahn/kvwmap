@@ -335,9 +335,9 @@ include('funktionen/input_check_functions.php');
 		enclosingForm.submit();
 	}
 	
-	reload_subform_list = function(list_div_id, edit){
+	reload_subform_list = function(list_div_id, edit, weiter_erfassen){
 		list_div = document.getElementById(list_div_id);
-		ahah('index.php?go=Layer-Suche_Suchen', list_div.dataset.reload_params+'&edit='+edit, new Array(list_div), new Array('sethtml'));
+		ahah('index.php?go=Layer-Suche_Suchen', list_div.dataset.reload_params+'&edit='+edit+'&weiter_erfassen='+weiter_erfassen, new Array(list_div), new Array('sethtml'));
 	}
 
 	save = function(){
@@ -432,7 +432,7 @@ include('funktionen/input_check_functions.php');
 		ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
 	}
 
-	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, reload){
+	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, reload, edit){
 		// layer_id ist die von dem Layer, in dem ein neuer Datensatz gespeichert werden soll
 		// fromobject ist die id von dem div, welches das Formular zur Eingabe des neuen Datensatzes enthaelt
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des neuen Datensatzes aktualisiert werden soll
@@ -462,6 +462,7 @@ include('funktionen/input_check_functions.php');
 		formData.append('targetattribute', targetattribute);
 		formData.append('form_field_names', form_fieldstring);
 		formData.append('embedded', 'true');
+		formData.append('edit', edit);
 		ahah('index.php', formData, new Array(document.getElementById(fromobject), document.getElementById(targetobject), ''), new Array('sethtml', 'sethtml', 'execute_function'));
 	}
 
