@@ -314,32 +314,18 @@
 				case 'Radiobutton' : {
 					$enum_value = $attributes['enum_value'][$j];
 					$enum_output = $attributes['enum_output'][$j];
-					if($attribute_privileg == '0' OR $lock){
-						for($e = 0; $e < count($enum_value); $e++){
-							if($enum_value[$e] == $value){
-								$auswahlfeld_output = $enum_output[$e];
-								$auswahlfeld_output_laenge = strlen($auswahlfeld_output)+1;
-								break;
-							}
+					if($change_all){
+						$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
+					}						
+					for($e = 0; $e < count($enum_value); $e++){
+						$datapart .= '<input class="'.$field_class.'" tabindex="1" type="radio" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'"';
+						$datapart .= ' onchange="'.$onchange.'" ';
+						if ($enum_value[$e] == $value) {
+							$datapart .= 'checked ';
 						}
-						$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" readonly id="'.$layer_id.'_'.$name.'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$fieldname.'" value="'.$auswahlfeld_output.'">';
-						$auswahlfeld_output = '';
-						$auswahlfeld_output_laenge = '';
-					}
-					else{
-						if($change_all){
-							$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
-						}						
-						for($e = 0; $e < count($enum_value); $e++){
-							$datapart .= '<input class="'.$field_class.'" tabindex="1" type="radio" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'"';
-							$datapart .= ' onchange="'.$onchange.'" ';
-							if ($enum_value[$e] == $value) {
-								$datapart .= 'checked ';
-							}
-							if($attributes['nullable'][$j] != '0')$datapart .= ' onclick="this.checked = this.checked2 || true; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';							
-							$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$k.'_'.$e.'">'.$enum_output[$e].'</label>&nbsp;&nbsp;&nbsp;&nbsp;';
-							if(!$attributes['horizontal'][$j])$datapart .= '<br>';
-						}
+						if($attributes['nullable'][$j] != '0')$datapart .= ' onclick="'.($attribute_privileg == '0'? 'return false;' : '').'this.checked = this.checked2 || true; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';							
+						$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$k.'_'.$e.'">'.$enum_output[$e].'</label>&nbsp;&nbsp;&nbsp;&nbsp;';
+						if(!$attributes['horizontal'][$j])$datapart .= '<br>';
 					}
 				}break;				
 				
@@ -497,7 +483,7 @@
 					"';
 					}
 					$datapart .= ($subform_request? $onload : '').'></div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
-					if ($gui->new_entry != true AND $subform_request) {
+					if ($gui->new_entry != true AND $subform_request AND $gui->formvars['printversion'] == '') {
 						$params[] = 'go=Layer-Suche_Suchen';
 						$params[] = 'selected_layer_id=' . $attributes['subform_layer_id'][$j];
 						$params[] = 'embedded_subformPK_liste=true';
@@ -655,6 +641,9 @@
 					}
 					if ($explosion[3] == 'all_not_null' and $one_param_is_null) {
 						$show_link = false;
+					}
+					if ($explosion[3] == 'all_null'){
+						$show_link = true;
 					}
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					if ($show_link) {
