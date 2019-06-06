@@ -19,10 +19,12 @@
   $anzObj = count($layer['shape']);
   if ($anzObj > 0) {
   	$this->found = 'true';
+		$k = 0;
   	$doit = true;
   }
   if($this->new_entry == true){
-  	$anzObj = 1;
+  	$anzObj = 0;
+		$k = -1;
   	$doit = true;
   }
 ?>
@@ -59,7 +61,7 @@
 ?>
 <table id="<? echo $table_id; ?>" border="0" cellspacing="0" cellpadding="2">
 <?
-	for ($k=0;$k<$anzObj;$k++) {
+	for ($k; $k<$anzObj; $k++) {
 		$datapart = '';
 		$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
 ?>
