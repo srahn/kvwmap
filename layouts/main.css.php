@@ -493,7 +493,7 @@ a.invisiblelayerlink:hover{
 	border-radius: 5px;
 }
 
-.buttonlink:hover{
+.buttonlink:hover, .buttonlink:focus{
 	background: linear-gradient(#DAE4EC, #84accf);
 }
 

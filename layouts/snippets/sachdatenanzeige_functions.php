@@ -335,9 +335,9 @@ include('funktionen/input_check_functions.php');
 		enclosingForm.submit();
 	}
 	
-	reload_subform_list = function(list_div_id){
+	reload_subform_list = function(list_div_id, edit){
 		list_div = document.getElementById(list_div_id);
-		ahah('index.php?go=Layer-Suche_Suchen', list_div.dataset.reload_params, new Array(list_div), new Array('sethtml'));
+		ahah('index.php?go=Layer-Suche_Suchen', list_div.dataset.reload_params+'&edit='+edit, new Array(list_div), new Array('sethtml'));
 	}
 
 	save = function(){
