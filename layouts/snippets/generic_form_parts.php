@@ -104,7 +104,7 @@
 		}
 		$name = $attributes['name'][$j];																# der Name des Attributs
 		$alias = $attributes['alias'][$j];															# der Aliasname des Attributs
-		echo $value = $dataset[$name];																				# der Wert des Attributs
+		$value = $dataset[$name];																				# der Wert des Attributs
 		$tablename = $attributes['table_name'][$name];									# der Tabellenname des Attributs
 		$oid = $dataset[$tablename.'_oid'];															# die oid des Datensatzes
 		$attribute_privileg = $attributes['privileg'][$j];							# das Recht des Attributs
