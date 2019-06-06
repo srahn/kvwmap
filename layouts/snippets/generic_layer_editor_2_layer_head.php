@@ -7,17 +7,19 @@ if ($this->new_entry != true AND $this->formvars['printversion'] == '') {
 		<table width="100%" cellspacing="0" cellpadding="0">
 			<tr><?
 				if ($layer['connectiontype'] == 6 AND $layer['Layer_ID'] > 0) { ?>
-					<td style="padding: 3px"><?
-						if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { ?>
-							<span style="margin-left: 5px; color: red;"><? echo 'Dieser Datensatz ist zur Bearbeitung gesperrt'; ?></span><?
-						}
-						else { ?>
+					<td style="padding: 3px">
 							<input
 							id="<? echo $layer['Layer_ID'] . '_' . $k; ?>"
 							type="checkbox"
+							class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't')echo 'no_edit'; ?>"
 							name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"
 						>&nbsp;<span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span><?
-						} ?>
+						if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { ?>
+							<span class="editier_sperre fa-stack" title="Dieser Datensatz ist zur Bearbeitung gesperrt">
+								<i class="fa fa-pencil fa-stack-1x" style="font-size:15px"></i>
+								<i class="fa fa-ban fa-stack-1x fa-flip-horizontal" style="color: tomato;font-size:29px"></i>
+							</span>
+<?					} ?>
 					</td><?
 				} ?>
 				<td align="right">
@@ -30,10 +32,8 @@ if ($this->new_entry != true AND $this->formvars['printversion'] == '') {
 								<td><a title="<? echo $strRememberDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);add_to_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
 							}
 							if ($layer['privileg'] > '0') { ?>
-								<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);use_for_new_dataset(<? echo $layer['Layer_ID']; ?>)" title="<? echo $strUseForNewDataset; ?>"><div class="button use_for_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?php
-								if (false) { ?>
-									<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);dublicate_dataset(<? echo $layer['Layer_ID']; ?>)" title="<? echo $strCopyDataset; ?>"><div class="button copy_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
-								}
+								<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);use_for_new_dataset(<? echo $layer['Layer_ID']; ?>)" title="<? echo $strUseForNewDataset; ?>"><div class="button use_for_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+								<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);dublicate_dataset(<? echo $layer['Layer_ID']; ?>)" title="<? echo $strCopyDataset; ?>"><div class="button copy_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
 							}
 							if ($layer['connectiontype'] == 6 AND $layer['export_privileg'] != 0) { ?>
 								<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);daten_export(<? echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);" title="<? echo $strExportThis; ?>"><div class="button datensatz_exportieren"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
@@ -41,7 +41,7 @@ if ($this->new_entry != true AND $this->formvars['printversion'] == '') {
 							if ($layer['layouts']) { ?>
 								<td><a onclick="checkForUnsavedChanges(event);" title="<? echo $strPrintDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);print_data(<?php echo $layer['Layer_ID']; ?>);"><div class="button drucken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
 							}
-							if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] != 't' AND $layer['privileg'] == '2') { ?>
+							if ($layer['privileg'] == '2' AND $layer['shape'][$k][$layer['attributes']['Editiersperre']] != 't') { ?>
 								<td>
 									<a
 										onclick="checkForUnsavedChanges(event);"

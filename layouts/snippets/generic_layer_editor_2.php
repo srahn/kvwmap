@@ -68,19 +68,13 @@
 			<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
 	    <div id="datensatz" 
 			<? if($this->new_entry != true AND $this->user->rolle->querymode == 1){ ?>
-			onmouseenter="if(typeof FormData !== 'undefined')highlight_object(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['the_geom']].'_oid']; ?>');"
+			onmouseenter="highlight_object(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['the_geom']].'_oid']; ?>');"
 			<? } ?>
 			><?php
-			$definierte_attribute_privileges = $layer['attributes']['privileg'];
+			$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
 			if (is_array($layer['attributes']['privileg'])) {
-				$gesperrte_attribute_privileges = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
-			}
-			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
-				$layer['attributes']['privileg'] = $gesperrte_attribute_privileges;
-			}
-			else {
-				if (is_array($layer['attributes']['privileg'])) {
-					$layer['attributes']['privileg'] = $definierte_attribute_privileges;
+				if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
+					$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
 				}
 			}
 			?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
@@ -304,6 +298,7 @@
 		</td>
 	</tr>
 <?
+		$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 	}
 	if($this->formvars['printversion'] == ''){
 ?>

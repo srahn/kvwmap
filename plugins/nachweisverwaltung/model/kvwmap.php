@@ -336,7 +336,7 @@
 				$GUI->formvars['Gemeinde']=$nachweis->document['Gemeinde'];
 				$GUI->formvars['Gemarkung']=substr($GUI->formvars['flurid'],0,6);
 				$GUI->formvars['Flur']=intval(substr($GUI->formvars['flurid'],6,9));
-				$GUI->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];				
+				$GUI->formvars['Bilddatei']=$nachweis->document['link_datei'];				
 				$GUI->formvars['rissnummer']=$nachweis->document['rissnummer'];
 				$GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
 				$GUI->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
@@ -1258,7 +1258,7 @@
     $GUI->formvars['Gemeinde']=$nachweis->document['Gemeinde'];
     $GUI->formvars['Gemarkung']=substr($GUI->formvars['flurid'],0,6);
     $GUI->formvars['Flur']=intval(substr($GUI->formvars['flurid'],6,9));
-    $GUI->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];
+    $GUI->formvars['Bilddatei']=$nachweis->document['link_datei'];
 		$GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
 		$GUI->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
 		$GUI->formvars['bemerkungen_intern']=$nachweis->document['bemerkungen_intern'];

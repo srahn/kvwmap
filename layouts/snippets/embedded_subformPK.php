@@ -1,5 +1,6 @@
 <?
 	include(SNIPPETS . 'generic_form_parts.php');
+	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
 	# dies ist das Snippet für die SubformEmbeddedPK-Liste mit Links untereinander
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
@@ -12,14 +13,50 @@
 		$doit = true;
   }
 
-	if ($doit == true) {
-		if ($layer['template']=='generic_layer_editor_doc_raster.php') { # die Raster-Darstellung kann auch anstatt der SubFormEmbedded-Liste verwendet werden
-			include(SNIPPETS.'sachdatenanzeige_embedded.php');
-		}
-		else { ?>
+	if ($layer['template']=='generic_layer_editor_doc_raster.php') { # die Raster-Darstellung kann auch anstatt der SubFormEmbedded-Liste verwendet werden
+		include(SNIPPETS.'sachdatenanzeige_embedded.php');
+	}
+	else {
+		if($this->formvars['edit']){		?>
+			<table border="0" cellspacing="0" cellpadding="2" width="100%"><?
+				for ($k=0;$k<$anzObj;$k++) {
+					echo '<tr>';
+					for ($j = 0; $j < count($attributes['name']); $j++) {
+						if($layer['attributes']['privileg'][$j] >= '0'){
+							echo '<td>'.attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, false, NULL, NULL, NULL, 'subform_'.$layer['Layer_ID']).'</td>';
+						}
+					}
+					echo '</tr>';
+				}
+?>				<tr>
+					<td>
+						<input type="button" tabindex="1" value="Speichern" onclick="subsave_data(<? echo $layer['Layer_ID']; ?>, this.closest('div').id, this.closest('div').id, false);">
+<?
+						if ($layer['privileg'] > 0){
+							echo '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
+							for($p = 0; $p < count($this->formvars['attributenames']); $p++){
+								echo '&attributenames['.$p.']='.$this->formvars['attributenames'][$p];
+								echo '&values['.$p.']='.$this->formvars['values'][$p];
+							}
+							echo '&selected_layer_id='.$this->formvars['selected_layer_id'].
+									 '&embedded=true&fromobject=new_dataset_'.$this->formvars['targetobject'].
+									 '&targetobject='.$this->formvars['targetobject'].
+									 '&targetlayer_id='.$this->formvars['targetlayer_id'].
+									 '&targetattribute='.$this->formvars['targetattribute'].
+									 '&edit=1\', 
+									 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
+									 new Array(\'sethtml\', \'execute_function\'));
+									 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
+						}
+?>						
+					</td>
+				</tr>
+			</table>
+<?		}
+		else{ ?>
 			<table border="0" cellspacing="0" cellpadding="2" width="100%"><?
 				$preview_attributes = explode(' ', $this->formvars['preview_attribute']);
-				for ($k = 0; $k < $anzObj; $k++) {
+				for ($k=0;$k<$anzObj;$k++) {
 					$dataset = $layer['shape'][$k]; # der aktuelle Datensatz
 					for ($p = 0; $p < count($preview_attributes); $p++) {
 						$output[$p] = $preview_attributes[$p];
@@ -28,8 +65,7 @@
 								$output[$p] = '';
 								switch ($attributes['form_element_type'][$j]) {
 									case 'Auswahlfeld' : {
-										if (is_array($attributes['dependent_options'][$j])) {
-											# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+										if (is_array($attributes['dependent_options'][$j])) {		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 											for ($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++) {
 												if ($attributes['enum_value'][$j][$k][$e] == $dataset[$attributes['name'][$j]]) {
 													$output[$p] = $attributes['enum_output'][$j][$k][$e];
@@ -46,7 +82,7 @@
 											}
 										} 
 									} break;
-
+									
 									case 'Autovervollständigungsfeld' : case 'Autovervollständigungsfeld_zweispaltig' :{
 										$output[$p] = $attributes['enum_output'][$j][$k];
 									} break;
@@ -102,7 +138,7 @@
 					}
 					if ($this->formvars['embedded'] == 'true') {
 						echo '<tr style="border: none">
-										<td'. get_td_class_or_style(array($dataset[$attributes['style']], 'subFormListItem')) . '><a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:if (document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&targetlayer_id='.$this->formvars['targetlayer_id'].'&targetattribute='.$this->formvars['targetattribute'].'&data='.$this->formvars['data'].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$layer['Layer_ID'].');">'.implode(' ', $output).'</a><div id="subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
+										<td'. get_td_class_or_style(array($dataset[$attributes['style']], 'subFormListItem')) . '><a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:if (document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$layer['Layer_ID'].');">'.implode(' ', $output).'</a><div id="subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
 									</tr>
 			';
 					}
@@ -113,19 +149,73 @@
 										if ($this->formvars['no_new_window'] != true) {
 											echo 	' target="_blank"';
 										}
-						echo ' href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&subform_link=true\')">' . implode(' ', $output) . '</a></td>
+						echo ' href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&subform_link=true\')">'.implode(' ', $output).'</a></td>
 									</tr>';
 					}
 				} ?>
-			</table><?
+			</table>
+
+			<table width="100%">
+				<tr>
+					<td align="right"><?
+			# Liste bearbeiten
+			if ($this->formvars['embedded'] == 'true'){
+				echo '<a tabindex="1" id="edit_list_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:reload_subform_list(\''.$this->formvars['targetobject'].'\', 1)"><span>'.$strEditList.'</span></a>';
+			}
+			# alle anzeigen
+			if ($anzObj > 1) {
+				echo '&nbsp;<a tabindex="1" style="font-size: '.$linksize.'px;" class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
+				for($p = 0; $p < count($this->formvars['attributenames']); $p++){
+					echo '&value_'.$this->formvars['attributenames'][$p].'='.$this->formvars['values'][$p];
+					echo '&operator_'.$this->formvars['attributenames'][$p].'==';
+				}				
+				echo '&subform_link=true\')"><span>'.$strShowAll.'</span></a>';
+			}
+			# neu
+			if ($layer['privileg'] > 0){
+				if ($this->formvars['embedded'] == 'true'){
+					echo '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
+					for($p = 0; $p < count($this->formvars['attributenames']); $p++){
+						echo '&attributenames['.$p.']='.$this->formvars['attributenames'][$p];
+						echo '&values['.$p.']='.$this->formvars['values'][$p];
+					}
+					echo '&selected_layer_id='.$this->formvars['selected_layer_id'].
+							 '&embedded=true&fromobject=new_dataset_'.$this->formvars['targetobject'].
+							 '&weiter_erfassen='.$this->formvars['weiter_erfassen'].
+							 '&targetobject='.$this->formvars['targetobject'].
+							 '&targetlayer_id='.$this->formvars['targetlayer_id'].
+							 '&targetattribute='.$this->formvars['targetattribute'].'\', 
+							 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
+							 new Array(\'sethtml\', \'execute_function\'));
+							 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
+				}
+				else{
+					echo '&nbsp;<a class="buttonlink"';
+					#if($attributes['no_new_window'][$j] != true){
+						echo 	' target="_blank"';
+					#}
+					echo ' href="javascript:overlay_link(\'go=neuer_Layer_Datensatz&subform=true';
+					for($p = 0; $p < count($this->formvars['attributenames']); $p++){
+						echo '&attributenames['.$p.']='.$this->formvars['attributenames'][$p];
+						echo '&values['.$p.']='.$this->formvars['values'][$p];
+					}
+					echo '&selected_layer_id='.$this->formvars['selected_layer_id'].
+					$datapart .= '&layer_id='.$this->formvars['targetlayer_id'];
+					$datapart .= '&oid='.$this->formvars['oid'];									# die oid des Datensatzes und die Layer-ID wird mit übergeben, für evtl. Zoom auf den Datensatz
+					$datapart .= '&tablename='.$this->formvars['tablename'];			# dito
+					$datapart .= '&columnname='.$this->formvars['columnname'];		# dito
+					echo '<span>&nbsp;'.$strNewEmbeddedPK.'</span></a>';
+				}
+			}
+			?>
+					</td>
+				</tr>
+			</table>
+			<?
 		}
-		if ($anzObj > 1) { ?>
-			<script type="text/javascript">
-				document.getElementById('show_all_<? echo $this->formvars['targetobject'];?>').style.display = '';
-			</script><?
+		echo '<div style="display:inline" id="new_dataset_'.$this->formvars['targetobject'].'"></div>';
+		if($this->formvars['weiter_erfassen'] == 1){
+			echo '<script type="text/javascript">document.getElementById("new_'.$this->formvars['targetobject'].'").click();</script>';
 		}
-	} 
-  else {
-		# nix machen
-  }
+	}
 ?>

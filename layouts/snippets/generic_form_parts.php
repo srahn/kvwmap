@@ -73,7 +73,7 @@
 			else $title_link = 'href="javascript:void(0);"';
 			$datapart .= '<td align="right"><a '.$title_link.' title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
 		}
-		if(in_array($attributes['type'][$j], array('date', 'time', 'timestamp'))){
+		if(in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
 			$datapart .= '<td align="right">'.calendar($attributes['type'][$j], $layer_id.'_'.$attributes['name'][$j].'_'.$k, $attributes['privileg'][$j]).'</td>';
 		}
 		$datapart .= '</td></tr></table>';
@@ -104,7 +104,7 @@
 		}
 		$name = $attributes['name'][$j];																# der Name des Attributs
 		$alias = $attributes['alias'][$j];															# der Aliasname des Attributs
-		$value = $dataset[$name];																				# der Wert des Attributs
+		echo $value = $dataset[$name];																				# der Wert des Attributs
 		$tablename = $attributes['table_name'][$name];									# der Tabellenname des Attributs
 		$oid = $dataset[$tablename.'_oid'];															# die oid des Datensatzes
 		$attribute_privileg = $attributes['privileg'][$j];							# das Recht des Attributs
@@ -459,88 +459,34 @@
 				}break;
 
 				case 'SubFormEmbeddedPK' : {
-					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'"><img src="'.GRAPHICSPATH.'leer.gif" ';
+					$reloadParams= '&selected_layer_id='.$attributes['subform_layer_id'][$j];
+					for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
+						if($dataset[$attributes['subform_pkeys'][$j][$p]] == '')$subform_request = false;		// eines der Verknüpfungsattribute ist leer -> keinen Subform-Request machen
+						$reloadParams .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
+						$reloadParams .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
+						$reloadParams .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
+						$reloadParams .= '&values['.$p.']='.$dataset[$attributes['subform_pkeys'][$j][$p]];
+					}
+					$reloadParams .= '&preview_attribute='.$attributes['preview_attribute'][$j];
+					$reloadParams .= '&count='.$k;
+					$reloadParams .= '&no_new_window='.$attributes['no_new_window'][$j];
+					$reloadParams .= '&embedded_subformPK=true';
+					if($attributes['embedded'][$j] == true){
+						$reloadParams .= '&embedded=true';
+					}
+					$reloadParams .= '&targetobject='.$layer_id.'_'.$name.'_'.$k;
+					$reloadParams .= '&targetlayer_id='.$layer_id;
+					$reloadParams .= '&targetattribute='.$name;
+					$reloadParams .= '&oid='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
+					$reloadParams .= '&tablename='.$attributes['table_name'][$attributes['the_geom']];											# dito
+					$reloadParams .= '&columnname='.$attributes['the_geom'];																								# dito
+					
+					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'"><img src="'.GRAPHICSPATH.'leer.gif" ';
 					if($gui->new_entry != true){
 						$subform_request = true;
-						$onload = 'onload="ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
-						$data = '';
-						for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++) {
-							if($dataset[$attributes['subform_pkeys'][$j][$p]] == '')$subform_request = false;		// eines der Verknüpfungsattribute ist leer -> keinen Subform-Request machen
-							$data .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
-							$data .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
-						}
-						$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
-						$data .= '&count='.$k;
-						$data .= '&no_new_window='.$attributes['no_new_window'][$j];
-						$onload .= $data;
-						$onload .= '&data='.str_replace('&', '<und>', $data);
-						$onload .= '&embedded_subformPK=true';
-						if($attributes['embedded'][$j] == true){
-							$onload .= '&embedded=true';
-						}
-						$onload .= '&targetobject='.$layer_id.'_'.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name;
-						$onload .= '\', new Array(document.getElementById(\''.$layer_id.'_'.$name.'_'.$k.'\')), new Array(\'sethtml\'));
-					"';
+						$onload = 'onload="reload_subform_list(\''.$layer_id.'_'.$name.'_'.$k.'\', 0, 0)"';
 					}
 					$datapart .= ($subform_request? $onload : '').'></div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
-					if ($gui->new_entry != true AND $subform_request AND $gui->formvars['printversion'] == '') {
-						$params[] = 'go=Layer-Suche_Suchen';
-						$params[] = 'selected_layer_id=' . $attributes['subform_layer_id'][$j];
-						$params[] = 'embedded_subformPK_liste=true';
-						for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++) {
-							$params[] = 'value_' . $attributes['subform_pkeys'][$j][$p] . '=' . $dataset[$attributes['subform_pkeys'][$j][$p]];
-							$params[] = 'operator_' . $attributes['subform_pkeys'][$j][$p] . '==';
-						}
-						$datapart .= '<a
-							id="edit_all_' . $layer_id . '_' . $name . '_' . $k . '"
-							style="font-size: ' . $linksize . 'px;"
-							class="buttonlink"
-							href="javascript:ahah(\'index.php\', \'' . implode('&', $params) . '\', new Array(document.getElementById(\'' . $layer_id . '_' . $name . '_' . $k . '\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms(' . $attributes['subform_layer_id'][$j] . ');"
-						><span>In Liste bearbeiten</span></a>&nbsp;';
-
-						$datapart .= '<a id="show_all_'.$layer_id.'_'.$name.'_'.$k.'" style="font-size: '.$linksize.'px;display:none" class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
-						for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
-							$datapart .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
-							$datapart .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
-						}
-						$datapart .= 	'&subform_link=true\')"><span>'.$strShowAll.'</span></a>';
-						if ($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
-							if ($attributes['embedded'][$j] == true){
-								$datapart .= '&nbsp;<a id="new_'.$layer_id.'_'.$name.'_'.$k.'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
-								$data = '';
-								for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
-									$datapart .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
-									$datapart .= '&values['.$p.']=\'+document.getElementById(\''.$layer_id.'_'.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
-									$data .= '&value_'.$attributes['subform_pkeys'][$j][$p].'=\'+document.getElementById(\''.$layer_id.'_'.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
-									$data .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
-								}
-								$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
-								$datapart .= '&data='.str_replace('&', '<und>', $data);
-								$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j] .
-														 '&embedded=true&fromobject=subform' . $layer_id . '_' . $k . '_' . $j .
-														 '&targetobject=' . $layer_id . '_' . $name . '_' . $k .
-														 '&targetlayer_id=' . $layer_id .
-														 '&targetattribute=' . $name . '\', new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
-								$datapart .= '<div style="display:inline" id="subform'.$layer_id.'_'.$k.'_'.$j.'"></div>';
-							}
-							else{
-								$datapart .= '&nbsp;<a class="buttonlink"';
-								if($attributes['no_new_window'][$j] != true){
-									$datapart .= 	' target="_blank"';
-								}
-								$datapart .= ' href="javascript:overlay_link(\'go=neuer_Layer_Datensatz&subform=true';
-								for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
-									$datapart .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
-									$datapart .= '&values['.$p.']=\'+document.getElementById(\''.$layer_id.'_'.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
-								}
-								$datapart .= '&layer_id='.$layer_id;
-								$datapart .= '&oid='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und die Layer-ID wird mit übergeben, für evtl. Zoom auf den Datensatz
-								$datapart .= '&tablename='.$attributes['table_name'][$attributes['the_geom']];											# dito
-								$datapart .= '&columnname='.$attributes['the_geom'];																								# dito
-								$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j].'\')"><span>&nbsp;'.$strNewEmbeddedPK.'</span></a>';
-							}
-						}
-					}
 					$datapart .= '</td></tr></table>';
 				}break;
 
@@ -835,7 +781,7 @@
 										set_changed_flag(currentform.changed_' . $layer_id . '_' . $oid . ')
 									}
 								"' .
-								($privileg == '0' OR $lock
+								(($privileg == '0' OR $lock)
 									? ' readonly style="border:0px;background-color:transparent;font-size: ' . $fontsize . 'px;"'
 									: ' tabindex="1" style="font-size: ' . $fontsize . 'px;"'
 								) . '
@@ -939,7 +885,7 @@
 										set_changed_flag(currentform.changed_' . $layer_id . '_' . $oid . ')
 									}
 								"' .
-								($privileg == '0' OR $lock
+								(($privileg == '0' OR $lock)
 									? ' readonly style="border:0px;background-color:transparent;font-size: ' . $fontsize . 'px;"'
 									: ' tabindex="1" style="font-size: ' . $fontsize . 'px;"'
 								) . '

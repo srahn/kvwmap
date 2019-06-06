@@ -54,7 +54,7 @@ class Nachweis {
 			$this->Dokumente[0]['Bilddatei_name'] = $this->Dokumente[0]['link_datei'];
 			$this->Dokumente[0]['Blattnr'] = $this->Dokumente[0]['blattnummer'];
 			$formvars['zieldateiname']=$this->getZielDateiName($this->Dokumente[0]);
-			$oldpath = NACHWEISDOCPATH.$old_dataset['flurid'].'/'.$this->buildNachweisNr($old_dataset[NACHWEIS_PRIMARY_ATTRIBUTE], $old_dataset[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$old_dataset['link_datei'];
+			$oldpath = $this->Dokumente[0]['link_datei'];
 			$newpath = NACHWEISDOCPATH.$this->Dokumente[0]['flurid'].'/'.$this->buildNachweisNr($this->Dokumente[0][NACHWEIS_PRIMARY_ATTRIBUTE], $this->Dokumente[0][NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$this->Dokumente[0]['artname'].'/'.$formvars['zieldateiname'];
 			#echo $oldpath.'<br>';
 			#echo $newpath.'<br>';
@@ -564,7 +564,7 @@ class Nachweis {
           # Abfrage war erfolgreich
           # Es wurde ein Eintrag in Datenbank gefunden, das löschen der Datei kann erfolgen
           # Abfrage, ob die Datei überhaupt existiert
-          $nachweisDatei=NACHWEISDOCPATH.$this->Dokumente[0]['flurid'].'/'.$this->buildNachweisNr($this->Dokumente[0][NACHWEIS_PRIMARY_ATTRIBUTE], $this->Dokumente[0][NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$this->Dokumente[0]['link_datei'];
+          $nachweisDatei=$this->Dokumente[0]['link_datei'];
           if (file_exists($nachweisDatei)) {
             # Datei existiert und kann jetzt im Filesystem gelöscht werden
 						$ret = $this->dokumentenDateiLoeschen($nachweisDatei);
@@ -1283,7 +1283,7 @@ class Nachweis {
   
   function getDocLocation($id){
     #2005-11-24_pk
-    $sql='SELECT * FROM nachweisverwaltung.n_nachweise WHERE id ='.$id;
+    $sql='SELECT link_datei FROM nachweisverwaltung.n_nachweise WHERE id ='.$id;
     $this->debug->write("<br>nachweis.php getDocLocation zum Anzeigen der Nachweise.",4);
     $queryret=$this->database->execSQL($sql,4, 0);    
     if ($queryret[0]) {
@@ -1291,8 +1291,8 @@ class Nachweis {
     }
     else {
       $ret[0]=0;
-      $rs=pg_fetch_array($queryret[1]);
-      $ret[1]=NACHWEISDOCPATH.$rs['flurid'].'/'.$this->buildNachweisNr($rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$rs['link_datei'];
+      $rs=pg_fetch_assoc($queryret[1]);
+      $ret[1]=$rs['link_datei'];
     }
     return $ret;
   }

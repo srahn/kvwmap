@@ -3,9 +3,9 @@
 	include(LAYOUTPATH.'snippets/SVG_Utilities.php');
 ?>
 <div id="map">		
-	<input name="newpath" type="hidden" value="<?php echo $this->formvars['newpath']; ?>">
+	<input name="newpath" class="<? echo $this->subform_classname; ?>" type="hidden" value="<?php echo $this->formvars['newpath']; ?>">
 	<input name="pathwkt" type="hidden" value="<?php echo $this->formvars['pathwkt']; ?>">
-	<input name="newpathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
+	<input name="newpathwkt" class="<? echo $this->subform_classname; ?>" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
 	<input name="result" type="hidden" value="">
 	<input name="firstpoly" type="hidden" value="<?php echo $this->formvars['firstpoly']; ?>">
 	<input name="secondpoly" type="hidden" value="<?php echo $this->formvars['secondpoly']; ?>">

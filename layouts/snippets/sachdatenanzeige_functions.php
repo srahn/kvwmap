@@ -334,6 +334,11 @@ include('funktionen/input_check_functions.php');
 		enclosingForm.printversion.value = 'true';
 		enclosingForm.submit();
 	}
+	
+	reload_subform_list = function(list_div_id, edit, weiter_erfassen){
+		list_div = document.getElementById(list_div_id);
+		ahah('index.php?go=Layer-Suche_Suchen', list_div.dataset.reload_params+'&edit='+edit+'&weiter_erfassen='+weiter_erfassen, new Array(list_div), new Array('sethtml'));
+	}
 
 	save = function(){
 		form_fieldstring = enclosingForm.form_field_names.value+'';
@@ -382,91 +387,83 @@ include('funktionen/input_check_functions.php');
   	overlay_submit(this, false);
 	}
 
-	subdelete_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){
+	subdelete_data = function(layer_id, fromobject, targetobject){
 		// layer_id ist die von dem Layer, in dem der Datensatz geloescht werden soll
 		// fromobject ist die id von dem div, welches das Formular des Datensatzes enthaelt
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Loeschung des Datensatzes aktualisiert werden soll
-		// targetlayer_id ist die von dem Layer, zu dem das targetobject gehoert
-		// targetattribute ist das Attribut, zu dem das targetobject gehoert
-		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
 		if(confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')){
-			data_r = data.replace(/<und>/g, "&");
-			form_fieldstring = document.getElementById('sub_'+layer_id+'_form_field_names').value;
-			data = 'go=Layer_Datensaetze_Loeschen&chosen_layer_id='+layer_id+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
-			data += '&checkbox_names_'+layer_id+'='+document.getElementsByName('checkbox_names_'+layer_id)[0].value;
-			data += '&'+document.getElementsByName('checkbox_names_'+layer_id)[0].value+'=on';			
-			if(typeof (window.FormData) != 'undefined'){		// in alten IEs gibts FormData nicht
-				formdata = new FormData(enclosingForm);
-				data = urlstring2formdata(formdata, data);
-			}			
-			ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml', 'sethtml'));
+			var formData = new FormData();
+			formData.append('go', 'Layer_Datensaetze_Loeschen');
+			formData.append('chosen_layer_id', layer_id);
+			formData.append('targetobject', targetobject);
+			formData.append('embedded', 'true');
+			formData.append('checkbox_names_'+layer_id, document.getElementsByName('checkbox_names_'+layer_id)[0].value);
+			formData.append(document.getElementsByName('checkbox_names_'+layer_id)[0].value, 'on');
+			ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
 		}
 	}
 
-	subsave_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload){
-		// layer_id ist die von dem Layer, in dem der Datensatz gespeichert werden soll
-		// fromobject ist die id von dem div, welches das Formular des Datensatzes enthaelt
+	subsave_data = function(layer_id, fromobject, targetobject, reload){
+		// layer_id ist die von dem Layer, in dem die Datensätze gespeichert werden soll
+		// fromobject ist die id von dem div, welches das Formular der Datensätze enthält
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des Datensatzes aktualisiert werden soll
-		// targetlayer_id ist die von dem Layer, zu dem das targetobject gehoert
-		// targetattribute ist das Attribut, zu dem das targetobject gehoert
-		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
-		data_r = data.replace(/<und>/g, "&");
-  	form_fieldstring = document.getElementById('sub_'+layer_id+'_form_field_names').value;
-  	form_fields = form_fieldstring.split('|');
-  	for(i = 0; i < form_fields.length-1; i++){
-  		fieldstring = form_fields[i]+'';
-  		field = fieldstring.split(';');
-  		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && document.getElementsByName(fieldstring)[0].readOnly != true && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-  			message('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
+		form_fields = Array.prototype.slice.call(document.getElementById(fromobject).querySelectorAll('.subform_'+layer_id));
+		form_fieldstring = '';
+		var formData = new FormData();
+  	for(i = 0; i < form_fields.length; i++){
+			form_fieldstring += form_fields[i].name+'|';
+  		field = form_fields[i].name.split(';');
+  		if(field[4] != 'Dokument' && form_fields[i].readOnly != true && field[5] == '0' && form_fields[i].value == ''){
+  			message('Das Feld '+form_fields[i].title+' erfordert eine Eingabe.');
   			return;
   		}
-  		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-  			message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+  		if(field[6] == 'date' && field[4] != 'Time' && form_fields[i].value != '' && !checkDate(form_fields[i].value)){
+  			message('Das Datumsfeld '+form_fields[i].title+' hat nicht das Format TT.MM.JJJJ.');
   			return;
   		}
-			if(document.getElementsByName(form_fields[i])[0] != undefined){
-				//data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;		// kann evtl. weg
-			}
+			formData.append(form_fields[i].name, form_fields[i].value);
   	}
-  	data = 'go=Sachdaten_speichern&reload='+reload+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
-		if(typeof (window.FormData) != 'undefined'){		// in alten IEs gibts FormData nicht
-			formdata = new FormData(enclosingForm);
-			data = urlstring2formdata(formdata, data);
-		}
-		ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject), ''), new Array('sethtml', 'sethtml', 'execute_function'));
+		formData.append('go', 'Sachdaten_speichern');
+		formData.append('reload', reload);
+		formData.append('selected_layer_id', layer_id);
+		formData.append('targetobject', targetobject);
+		formData.append('form_field_names', form_fieldstring);
+		formData.append('embedded', 'true');
+		ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
 	}
 
-	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload){
+	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, reload, edit){
 		// layer_id ist die von dem Layer, in dem ein neuer Datensatz gespeichert werden soll
 		// fromobject ist die id von dem div, welches das Formular zur Eingabe des neuen Datensatzes enthaelt
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des neuen Datensatzes aktualisiert werden soll
 		// targetlayer_id ist die von dem Layer, zu dem das targetobject gehoert
 		// targetattribute ist das Attribut, zu dem das targetobject gehoert
-		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
-		data_r = data.replace(/<und>/g, "&");
-  	form_fieldstring = document.getElementById('sub_new_'+layer_id+'_form_field_names').value;
-  	form_fields = form_fieldstring.split('|');
-  	for(i = 0; i < form_fields.length-1; i++){
-  		fieldstring = form_fields[i]+'';
-  		field = fieldstring.split(';');
-  		if(document.getElementsByName(fieldstring)[0] != undefined && document.getElementsByName(fieldstring)[0].readOnly != true && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-  			message('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
-  			//return;
-  		}
-  		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-  			message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+  	form_fields = Array.prototype.slice.call(document.getElementById(fromobject).querySelectorAll('.subform_'+layer_id));
+		form_fieldstring = '';
+		var formData = new FormData();
+  	for(i = 0; i < form_fields.length; i++){
+			form_fieldstring += form_fields[i].name+'|';
+  		field = form_fields[i].name.split(';');
+  		if(field[4] != 'Dokument' && form_fields[i].readOnly != true && field[5] == '0' && form_fields[i].value == ''){
+  			message('Das Feld '+form_fields[i].title+' erfordert eine Eingabe.');
   			return;
   		}
-  		if(document.getElementsByName(form_fields[i])[0] != undefined){
-  			//data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;			// kann evtl. weg
+  		if(field[6] == 'date' && field[4] != 'Time' && form_fields[i].value != '' && !checkDate(form_fields[i].value)){
+  			message('Das Datumsfeld '+form_fields[i].title+' hat nicht das Format TT.MM.JJJJ.');
+  			return;
   		}
+			formData.append(form_fields[i].name, form_fields[i].value);
   	}
-  	data = 'go=neuer_Layer_Datensatz_speichern&reload='+reload+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
-		if(typeof (window.FormData) != 'undefined'){		// in alten IEs gibts FormData nicht
-			formdata = new FormData(enclosingForm);
-			data = urlstring2formdata(formdata, data);
-		}
-		ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject), ''), new Array('sethtml', 'sethtml', 'execute_function'));
+		formData.append('go', 'neuer_Layer_Datensatz_speichern');
+		formData.append('reload', reload);
+		formData.append('selected_layer_id', layer_id);
+		formData.append('targetobject', targetobject);
+		formData.append('targetlayer_id', targetlayer_id);
+		formData.append('targetattribute', targetattribute);
+		formData.append('form_field_names', form_fieldstring);
+		formData.append('embedded', 'true');
+		formData.append('edit', edit);
+		ahah('index.php', formData, new Array(document.getElementById(fromobject), document.getElementById(targetobject), ''), new Array('sethtml', 'sethtml', 'execute_function'));
 	}
 
 	clearsubforms = function(layer_id){
@@ -502,7 +499,8 @@ include('funktionen/input_check_functions.php');
 		if(document.getElementById('layer').calendar != undefined)document.getElementById('layer').calendar.destroy();
 	}
 
-	autocomplete1 = function(layer_id, attribute, field_id, inputvalue, listentyp = '') {
+	autocomplete1 = function(layer_id, attribute, field_id, inputvalue, listentyp) {
+		listentyp = listentyp || 'ok';
 		var suggest_field = document.getElementById('suggests_' + field_id);
 		if(event.key == 'ArrowDown'){
 			suggest_field.firstChild.selectedIndex = suggest_field.firstChild.selectedIndex + 1;
@@ -519,12 +517,7 @@ include('funktionen/input_check_functions.php');
 		else{
 			suggest_field.style.display = 'none';
 			if (inputvalue.length > 0) {
-				ahah(
-					'index.php',
-					'go=autocomplete_request&layer_id=' + layer_id + '&attribute=' + attribute + '&inputvalue=' + inputvalue + '&field_id=' + field_id + (listentyp != '' ? '&listentyp=' + listentyp : ''),
-					new Array(suggest_field, ""),
-					new Array("sethtml", "execute_function")
-				);
+				ahah('index.php', 'go=autocomplete_request&layer_id=' + layer_id + '&attribute=' + attribute + '&inputvalue=' + inputvalue + '&field_id=' + field_id + (listentyp != '' ? '&listentyp=' + listentyp : ''), new Array(suggest_field, ""), new Array("sethtml", "execute_function"));
 			}
 			else{
 				document.getElementById(field_id).value = '';
@@ -670,6 +663,10 @@ include('funktionen/input_check_functions.php');
 	}
 
 	delete_datasets = function(layer_id) {
+		var no_edit_checkboxes = document.querySelectorAll('.no_edit');
+		[].forEach.call(no_edit_checkboxes, function (checkbox){
+				checkbox.checked = false;		// nicht editierbare Datensaetze deselektieren
+			});
 		if (check_for_selection(layer_id)){
 			if(confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')){
 				enclosingForm.chosen_layer_id.value = layer_id;
@@ -881,13 +878,15 @@ include('funktionen/input_check_functions.php');
 		for(var i = 0; i < k; i++){			
 			if(document.getElementById(layer_id+'_'+i).checked){
 				formfield = document.getElementById(layerid_attribute+'_'+i);
-				if(formfield.type == 'checkbox'){
-					formfield.checked = allfield.checked;
+				if(formfield.onchange){		// nur editierbare Felder aendern
+					if(formfield.type == 'checkbox'){
+						formfield.checked = allfield.checked;
+					}
+					else{
+						formfield.value = allfield.value;
+					}
+					document.getElementById(layerid_attribute+'_'+i).onchange();
 				}
-				else{
-					formfield.value = allfield.value;
-				}
-				document.getElementById(layerid_attribute+'_'+i).onchange();
 			}
 		}		
 	}

@@ -31,8 +31,8 @@ if (DEBUG_LEVEL > 0) {
 if (LOG_LEVEL > 0) {
  $log_mysql = new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: ' . date("Y:m:d H:i:s", time()));
  $log_postgres = new LogFile(LOGFILE_POSTGRES, 'text', 'Log-Datei Postgres', '------v: ' . date("Y:m:d H:i:s", time()));
- $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '');
 }
+$log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '');
 
 ###################################################################
 # kvwmap - Kartenserver für die Verwaltung raumbezogener Daten.   #

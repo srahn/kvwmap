@@ -339,47 +339,50 @@ class GUI {
 							echo 	 '</select>
 										</li>';
 						}
-						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>
-							<li>
-								<a href="javascript:void(0);" onclick="$(\'#rollenfilter, #rollenfilterquestionicon\').toggle()">Filter</a>
-								<a href="javascript:void(0);" onclick="message(\'\
-									Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Kartendarstellung und Sachdatenanzeige des Layers auswirkt.<br>\
-									In diesem Thema stehen dafür folgende Attribute zur Verfügung:<br>\
-									<ul>';
-									for($i = 0; $i < count($attributes)-2; $i++){
-										if(($this->formvars['layer_id'] < 0 OR $privileges[$attributes[$i]['name']] != '') AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<li>'.$attributes[$i]['name'].'</li>';
-									}									
-						echo	'</ul>\
-									Mehrere Filter werden mit AND oder OR verknüpft.<br>\
-									Ist ein Filter gesetzt wird in der Legende neben dem Themanamen ein Filtersymbol angezeigt.<br>\
-									Der Filter wird gelöscht indem das Textfeld geleert wird.<p>\
-									Beispiele:<br>\
-									<ul>\
-										<li>id > 10 AND status = 1</li>\
-										<li>type = \\\'Brunnen\\\' OR type = \\\'Quelle\\\'</li>\
-										<li>status IN (1, 2)</li>\
-									</ul>\
-									\')">
-									<i
-										id="rollenfilterquestionicon"
-										title="Hilfe zum Filter anzeigen"
-										class="fa fa-question-circle button layerOptionsIcon"
+						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>';
+						if($this->user->rolle->showrollenfilter){
+							echo '	
+									<li>
+									<a href="javascript:void(0);" onclick="$(\'#rollenfilter, #rollenfilterquestionicon\').toggle()">Filter</a>
+									<a href="javascript:void(0);" onclick="message(\'\
+										Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Kartendarstellung und Sachdatenanzeige des Layers auswirkt.<br>\
+										In diesem Thema stehen dafür folgende Attribute zur Verfügung:<br>\
+										<ul>';
+										for($i = 0; $i < count($attributes)-2; $i++){
+											if(($this->formvars['layer_id'] < 0 OR $privileges[$attributes[$i]['name']] != '') AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<li>'.$attributes[$i]['name'].'</li>';
+										}									
+										echo	'</ul>\
+										Mehrere Filter werden mit AND oder OR verknüpft.<br>\
+										Ist ein Filter gesetzt wird in der Legende neben dem Themanamen ein Filtersymbol angezeigt.<br>\
+										Der Filter wird gelöscht indem das Textfeld geleert wird.<p>\
+										Beispiele:<br>\
+										<ul>\
+											<li>id > 10 AND status = 1</li>\
+											<li>type = \\\'Brunnen\\\' OR type = \\\'Quelle\\\'</li>\
+											<li>status IN (1, 2)</li>\
+										</ul>\
+										\')">
+										<i
+											id="rollenfilterquestionicon"
+											title="Hilfe zum Filter anzeigen"
+											class="fa fa-question-circle button layerOptionsIcon"
+											style="
+												float: right;
+												'.($layer[0]['rollenfilter'] == ''? 'display: none' : '').'
+											"
+										></i>
+									</a><br>
+									<textarea
+										id="rollenfilter"
 										style="
-											float: right;
+											width: 98%;
 											'.($layer[0]['rollenfilter'] == ''? 'display: none' : '').'
 										"
-									></i>
-								</a><br>
-								<textarea
-									id="rollenfilter"
-									style="
-										width: 98%;
-										'.($layer[0]['rollenfilter'] == ''? 'display: none' : '').'
-									"
-									name="layer_options_rollenfilter"
-								>' . $layer[0]['rollenfilter'] . '</textarea>
-							</li>
-						</ul>
+										name="layer_options_rollenfilter"
+									>' . $layer[0]['rollenfilter'] . '</textarea>
+								</li>';
+						}
+echo '			</ul>
 					</td>
 				</tr>
 				<tr>
@@ -624,6 +627,8 @@ class GUI {
 								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
 							</a//-->' .
 							html_umlaute($groupname) . '
+							'.($groupname == 'Suchergebnis' ? '<a href="index.php?go=delete_rollenlayer&type=search"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
+							'.(($groupname == 'Eigene Importe' OR $groupname == 'WMS-Importe') ? '<a href="index.php?go=delete_rollenlayer&type=import"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
 							<div style="position:static;" id="group_options_' . $group_id . '"></div>
 						</span>
 					</td>
@@ -1288,10 +1293,14 @@ class GUI {
 				  exit;
 				}
 				else {
-					if($this->user->rolle->oGeorefExt->maxx <= $this->user->rolle->oGeorefExt->minx)$this->user->rolle->oGeorefExt->maxx = $this->user->rolle->oGeorefExt->minx +1;
-					if($this->user->rolle->oGeorefExt->maxy <= $this->user->rolle->oGeorefExt->miny)$this->user->rolle->oGeorefExt->maxy = $this->user->rolle->oGeorefExt->miny +1;
-				  $map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
-        }
+					if ($this->user->rolle->oGeorefExt->minx < $this->Stelle->MaxGeorefExt->minx)			$this->user->rolle->oGeorefExt->minx = $this->Stelle->MaxGeorefExt->minx;
+					if ($this->user->rolle->oGeorefExt->miny < $this->Stelle->MaxGeorefExt->miny)			$this->user->rolle->oGeorefExt->miny = $this->Stelle->MaxGeorefExt->miny;
+					if ($this->user->rolle->oGeorefExt->maxx > $this->Stelle->MaxGeorefExt->maxx)			$this->user->rolle->oGeorefExt->maxx = $this->Stelle->MaxGeorefExt->maxx;
+					if ($this->user->rolle->oGeorefExt->maxy > $this->Stelle->MaxGeorefExt->maxy)			$this->user->rolle->oGeorefExt->maxy = $this->Stelle->MaxGeorefExt->maxy;
+					if ($this->user->rolle->oGeorefExt->maxx <= $this->user->rolle->oGeorefExt->minx) $this->user->rolle->oGeorefExt->maxx = $this->user->rolle->oGeorefExt->minx + 1;
+					if ($this->user->rolle->oGeorefExt->maxy <= $this->user->rolle->oGeorefExt->miny) $this->user->rolle->oGeorefExt->maxy = $this->user->rolle->oGeorefExt->miny + 1;
+					$map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
+				}
 
         # OWS Metadaten
 
@@ -7199,7 +7208,7 @@ class GUI {
 			$this->formvars['stelle_id'] = $this->Stelle->id;
 			$this->formvars['aktivStatus'] = 1;
 			$this->formvars['Gruppe'] = $groupid;
-			$this->formvars['Typ'] = 'search';
+			$this->formvars['Typ'] = 'import';
 			$this->formvars['Datentyp'] = MS_LAYER_RASTER;
 			$this->formvars['connectiontype'] = MS_WMS;
 			$this->formvars['transparency'] = 100;
@@ -7980,8 +7989,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $stelle->addLayer($layer_ids,	0, $filter, $assign_default_values);
       $users = $stelle->getUser();
       for($j = 0; $j < count($users['ID']); $j++){
-        $this->user->rolle->setGroups($users['ID'][$j], array($stellen_ids[$i]), $layer_ids, 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
-        $this->user->rolle->setLayer($users['ID'][$j], array($stellen_ids[$i]), 0); # Hinzufügen der Layer zur Rolle
+        $this->user->rolle->setGroups($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id, $layer_ids); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+        $this->user->rolle->setLayer($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id); # Hinzufügen der Layer zur Rolle
       }
 			$stelle->updateLayerParams();
     }
@@ -8775,7 +8784,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->titel=$this->formvars['titel'];
     $this->main='generic_search.php';
     $this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, 'import');
-		$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
+		if($this->layerdaten['Gruppe'])$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
 		$this->layergruppen = $mapdb->get_Groups($this->layergruppen);		# Gruppen mit Pfaden versehen
 
     # wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe
@@ -9163,16 +9172,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 			}
 			else{
-				header('Content-type: text/html; charset=UTF-8');
-				$attributenames[0] = $this->formvars['targetattribute'];
-				$attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributenames);
-				switch ($attributes['form_element_type'][0]){
-					case 'SubFormEmbeddedPK' : {
-						$this->formvars['embedded_subformPK'] = true;
-						echo '~';
-						$this->GenerischeSuche_Suchen();
-					}break;
-				}
+				# wenn es ein Datensatz aus einem embedded-Formular ist, 
+				# muss das embedded-Formular entfernt werden und 
+				# das Listen-DIV neu geladen werden (getrennt durch ~)
+				echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\', 0);';
 			}
 		}
 
@@ -9414,7 +9417,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 		}
 
-		if ($this->formvars['embedded'] != '') {    # wenn es ein neuer Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
+		if ($this->formvars['embedded'] != '') {    
+			# wenn es ein neuer Datensatz aus einem embedded-Formular ist, 
+			# muss das entsprechende Attribut des Hauptformulars aktualisiert werden
 			header('Content-type: text/html; charset=UTF-8');
 			$attributename[0] = $this->formvars['targetattribute'];
 			$attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, NULL);
@@ -9443,17 +9448,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         } break;
 
         case 'SubFormEmbeddedPK' : {
-          $this->formvars['embedded_subformPK'] = true;
-          echo '~';
-          $this->GenerischeSuche_Suchen();
-					echo '~';
-					if($this->formvars['weiter_erfassen'] == 1){
-						echo 'href_save = document.getElementById("new_'.$this->formvars['targetobject'].'").href;';
-						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = document.getElementById("new_'.$this->formvars['targetobject'].'").href.replace("go=neuer_Layer_Datensatz", "go=neuer_Layer_Datensatz&weiter_erfassen=1'.$formfieldstring.'");';
-						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").click();';
-						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = href_save;';
-					}
-					$this->output_messages('without_script_tags');
+          echo '~~reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['edit'].'\', \''.$this->formvars['weiter_erfassen'].'\');';
         } break;
       }
 
@@ -10806,7 +10801,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $frames = explode(', ', $this->formvars['selframes']);
 			$layouts = (trim($this->formvars['sellayouts']) == '' ? array() : explode(', ', $this->formvars['sellayouts']));
       $layer = (trim($this->formvars['sellayer']) == '' ? array() : explode(', ', $this->formvars['sellayer']));
-      $selectedusers = explode(', ',$this->formvars['selusers']);
+      $selectedusers = array_filter(explode(', ',$this->formvars['selusers']));
       $users= $Stelle->getUser();
 			$selectedparents = ($this->formvars['selparents'] == '' ? array() : explode(', ', $this->formvars['selparents']));
 
@@ -10827,7 +10822,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 
       $stelle_id = explode(',',$stelleid);
-      $new_stelle_id = explode(',',$new_stelleid);
       $new_stelle->deleteMenue(0); // erst alle Menüs rausnehmen
       $new_stelle->addMenue($menues); // und dann hinzufügen, damit die Reihenfolge stimmt
       if($layer[0] != NULL) {
@@ -10853,13 +10847,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
       }
       for ($i = 0; $i < count($selectedusers); $i++) {
-        $this->user->rolle->setRollen($selectedusers[$i], $new_stelle_id); # Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
-        $this->user->rolle->setMenue($selectedusers[$i], $new_stelle_id); # Hinzufügen der selectierten Obermenüs zur Rolle
-        $this->user->rolle->setGroups($selectedusers[$i], $new_stelle_id, $layer, 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
-        $this->user->rolle->setLayer($selectedusers[$i], $new_stelle_id, 0); # Hinzufügen der Layer zur Rolle
+				$this->user->rolle->setRolle($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+        $this->user->rolle->setMenue($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
+        $this->user->rolle->setLayer($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
+				$this->user->rolle->setGroups($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id, $layer); 											# Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+				$this->user->rolle->setSavedLayersFromDefaultUser($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);
         $this->selected_user = new user(0,$selectedusers[$i],$this->user->database);
         $this->selected_user->checkstelle();
       }
+			// ToDo: Löschen der Einträge in u_menue2rolle, bei denen der Menüpunkt nicht mehr der Stelle zugeordnet ist
       $stellenlayer = $Stelle->getLayers(NULL);
 			$deletelayer = array();
       for($i = 0; $i < count($stellenlayer['ID']); $i++){
@@ -10958,7 +10954,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $frames = explode(', ',$this->formvars['selframes']);
         $layer = explode(', ',$this->formvars['sellayer']);
         $users = explode(', ',$this->formvars['selusers']);
-        $neue_stelle_id = explode(',',$neue_stelle_id);
         # wenn Stelle ausgewählt, Daten kopieren
         if($this->formvars['selected_stelle_id']){
           $Stelle->copyLayerfromStelle($layer, $this->formvars['selected_stelle_id']);
@@ -10973,14 +10968,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $document = new Document($this->database);
         if($frames[0] != NULL){
           for($i = 0; $i < count($frames); $i++){
-            $document->add_frame2stelle($frames[$i], $neue_stelle_id[0]); # Hinzufügen der Druckrahmen zur Stelle
+            $document->add_frame2stelle($frames[$i], $neue_stelle_id); # Hinzufügen der Druckrahmen zur Stelle
           }
         }
         for($i=0; $i<count($users); $i++){
-          $this->user->rolle->setRollen($users[$i],$neue_stelle_id);
-          $this->user->rolle->setMenue($users[$i],$neue_stelle_id);
-          $this->user->rolle->setGroups($users[$i], $neue_stelle_id, $layer, 0);
-          $this->user->rolle->setLayer($users[$i], $neue_stelle_id, 0);
+          $this->user->rolle->setRolle($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+					$this->user->rolle->setMenue($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
+					$this->user->rolle->setLayer($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
+					$this->user->rolle->setGroups($users[$i], $Stelle->id, $Stelle->default_user_id, $layer);
+					$this->user->rolle->setSavedLayersFromDefaultUser($users[$i], $Stelle->id, $Stelle->default_user_id);
           $this->selected_user = new user(0,$users[$i],$this->user->database);
           $this->selected_user->checkstelle();
         }
@@ -11768,15 +11764,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $this->Meldung=$ret[1];
       }
       else {
-        $neue_user_id=$ret[1];
+        $this->formvars['selected_user_id']=$ret[1];
         $stellen = explode(', ',$this->formvars['selstellen']);
-        $this->user->rolle->setRollen($neue_user_id,$stellen);
-        $this->user->rolle->setMenue($neue_user_id,$stellen);
-        $this->user->rolle->setLayer($neue_user_id, $stellen, 0);
 				for($i = 0; $i < count($stellen); $i++){
 					$stelle = new stelle($stellen[$i], $this->database);
+					$this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
+					$this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
+					$this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					$layers = $stelle->getLayers(NULL);
-					$this->user->rolle->setGroups($neue_user_id, array($stellen[$i]), $layers['ID'], 0);
+					$this->user->rolle->setGroups($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id, $layers['ID']);
+					$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				}
         if ($ret[0]) {
           $this->Meldung=$ret[1];
@@ -11786,7 +11783,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
       }
     }
-    $this->formvars['selected_user_id'] = $neue_user_id;
     $this->BenutzerdatenFormular();
   }
 
@@ -11797,18 +11793,19 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->Meldung=$ret[1];
     }
     else {
-      $stellen = explode(', ',$this->formvars['selstellen']);
+      $stellen = array_filter(explode(', ',$this->formvars['selstellen']));
       $ret=$this->user->Aendern($this->formvars);
       if($this->formvars['id'] != ''){
         $this->formvars['selected_user_id'] = $this->formvars['id'];
       }
-      $this->user->rolle->setRollen($this->formvars['selected_user_id'], $stellen);
-      $this->user->rolle->setMenue($this->formvars['selected_user_id'], $stellen);
-      $this->user->rolle->setLayer($this->formvars['selected_user_id'], $stellen, 0);
 			for($i = 0; $i < count($stellen); $i++){
 				$stelle = new stelle($stellen[$i], $this->database);
+				$this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
+				$this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
+				$this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				$layers = $stelle->getLayers(NULL);
-				$this->user->rolle->setGroups($this->formvars['selected_user_id'], array($stellen[$i]), $layers['ID'], 0);
+				$this->user->rolle->setGroups($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id, $layers['ID']);
+				$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 			}
       $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
       # Löschen der in der Selectbox entfernten Stellen
@@ -12713,12 +12710,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     # Liste der Formularelementnamen, die betroffen sind in der Reihenfolge,
     # wie die Spalten in der Abfrage
     $select ="nZoomFactor,gui,CONCAT(nImageWidth,'x',nImageHeight) AS mapsize";
-    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, highlighting, runningcoords, showmapfunctions, showlayeroptions, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T')";
+    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, highlighting, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T')";
     $from ='rolle';
     $where ="stelle_id='+this.form.Stelle_ID.value+' AND user_id=" . $this->user->id;
     $StellenFormObj->addJavaScript(
 			"onchange",
-			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,showmapfunctions,showlayeroptions,menu_auto_close,menue_buttons,hist_timestamp));" : "")
+			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,showmapfunctions,showlayeroptions,showrollenfilter,menu_auto_close,menue_buttons,hist_timestamp));" : "")
 		);
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=" . $from."&where=stelle_id=3 AND user_id=7";
     $StellenFormObj->outputHTML();
@@ -13036,7 +13033,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					#$filter = $mapdb->getFilter ($layer_id, $this->Stelle->id);		# siehe unten
 					$old_layer_id = $layer_id;
 				}
-
 				if (
 					(
 						$this->formvars['go'] == 'Dokument_Loeschen' OR
@@ -13246,26 +13242,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->add_message('warning', 'Keine Änderung.');
 		}
 		if ($this->formvars['embedded'] != '') {
-			# wenn es ein Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
-			header ('Content-type: text/html; charset=UTF-8');
-			$attributenames[0] = $this->formvars['targetattribute'];
-			$targetlayerdb = $mapdb->getlayerdatabase($this->formvars['targetlayer_id'], $this->Stelle->pgdbhost);
-			$attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $targetlayerdb, $attributenames);
-			switch ($attributes['form_element_type'][0]) {
-				case 'SubFormEmbeddedPK' : {
-					$this->formvars['embedded_subformPK'] = true;
-					echo '~';
-					$this->GenerischeSuche_Suchen();
-				} break;
-			}
-			echo '~';
-			$this->output_messages('without_script_tags');
-			if ($this->formvars['reload']) {
-				# in diesem Fall wird die komplette Seite neu geladen
-				echo '~~';
-				echo "document.GUI.go.value='get_last_query';
-							document.GUI.submit();";
-			}
+			# wenn es ein Datensatz aus einem embedded-Formular ist, 
+			# muss das embedded-Formular entfernt werden und 
+			# das Listen-DIV neu geladen werden (getrennt durch ~)
+			echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\', 0);';
 		}
 		else {
 			$this->last_query = $this->user->rolle->get_last_query();
@@ -14555,7 +14535,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
   }
 
-	function setFullExtent() { 		$this->map->setextent($this->Stelle->MaxGeorefExt->minx,$this->Stelle->MaxGeorefExt->miny,$this->Stelle->MaxGeorefExt->maxx,$this->Stelle->MaxGeorefExt->maxy);
+	function setFullExtent() {
+		$this->map->setextent($this->Stelle->MaxGeorefExt->minx,$this->Stelle->MaxGeorefExt->miny,$this->Stelle->MaxGeorefExt->maxx,$this->Stelle->MaxGeorefExt->maxy);
 	}
 
   function zoomToALKGemeinde($Gemeinde,$border) {

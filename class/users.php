@@ -1022,6 +1022,7 @@ class user {
 			$sql .= ', runningcoords = "' . ($formvars['runningcoords'] == '' ? '0' : '1') . '"';
 			$sql .= ', showmapfunctions = "' . ($formvars['showmapfunctions'] == '' ? '0' : '1') . '"';
 			$sql .= ', showlayeroptions = "' . ($formvars['showlayeroptions'] == '' ? '0' : '1') . '"';
+			$sql .= ', showrollenfilter = "' . ($formvars['showrollenfilter'] == '' ? '0' : '1') . '"';
 			$sql .= ', menue_buttons = "' . ($formvars['menue_buttons'] == '' ? '0' : '1') . '"';
 
 			if($formvars['singlequery'] != '') $sql.=',singlequery="1"';

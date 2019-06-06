@@ -625,6 +625,7 @@ class spatial_processor {
 						# bei punktueller Abfrage wird immer nur eine Objektgeometrie geholt, bei Rechteck-Abfrage die Vereinigung aller getroffenen Geometrien
 						$columnname = "st_union(".$columnname.")";
 					}
+					$columnname = 'ST_Force2D(' . $columnname . ')';
 					$sql = "
 						SELECT ST_AsText(" . ($client_epsg != $layer_epsg ? "ST_Transform(" . $columnname . ", " . $client_epsg . ")" : $columnname) . ") AS geomwkt
 						" . $fromwhere . "

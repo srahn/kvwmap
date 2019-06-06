@@ -493,7 +493,7 @@ a.invisiblelayerlink:hover{
 	border-radius: 5px;
 }
 
-.buttonlink:hover{
+.buttonlink:hover, .buttonlink:focus{
 	background: linear-gradient(#DAE4EC, #84accf);
 }
 
@@ -1301,6 +1301,8 @@ thead.gle th {
 }
 
 .gle-attribute-name { 
+ position: relative;
+ background-clip: padding-box;
  padding-left: 2px;
  padding-right: 2px;
  vertical-align: top;

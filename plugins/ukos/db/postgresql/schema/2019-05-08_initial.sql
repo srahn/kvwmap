@@ -57,7 +57,7 @@ COMMENT ON SCHEMA ukos_okstra IS 'This schema contains relevant OKSTRA	features 
 
 CREATE EXTENSION IF NOT EXISTS postgis_topology;
 
-SELECT CreateTopology('ukos_topo', 25833, 0.1);
+SELECT topology.CreateTopology('ukos_topo', 25833, 0.1);
 
 --
 -- Name: delete_topo_func(character varying); Type: FUNCTION; Schema: ukos_base; Owner: -
@@ -14279,8 +14279,8 @@ CREATE TABLE ukos_okstra.strassenelement (
     nachrichtlich boolean DEFAULT false NOT NULL
 )
 INHERITS (ukos_base.streckenobjekt);
-SELECT AddTopoGeometryColumn('ukos_topo', 'ukos_okstra', 'strassenelement', 'liniengeometrie_topo', 'LINE');
 
+SELECT topology.AddTopoGeometryColumn('ukos_topo', 'ukos_okstra', 'strassenelement', 'liniengeometrie_topo', 'LINE');
 
 --
 -- Name: streckenobjekt_to_teilelement; Type: TABLE; Schema: ukos_okstra; Owner: -
@@ -14408,7 +14408,7 @@ CREATE TABLE ukos_okstra.strasse (
     hat_strassenbezeichnung_zusatzbuchstabe character varying,
     hat_strassenbezeichnung_identifizierungskennzeichen character varying DEFAULT 'nicht zugewiesen'::character varying NOT NULL,
     bezeichnung character varying DEFAULT 'nicht zugewiesen'::character varying NOT NULL,
-    schluessel character(5) DEFAULT '00000'::character varying NOT NULL,
+    schluessel character varying DEFAULT '00000'::character varying NOT NULL,
     nachrichtlich boolean DEFAULT false NOT NULL,
     kennung character varying
 )
