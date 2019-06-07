@@ -23,7 +23,12 @@
 					echo '<tr>';
 					for ($j = 0; $j < count($attributes['name']); $j++) {
 						if($layer['attributes']['privileg'][$j] >= '0'){
-							echo '<td>'.attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, false, NULL, NULL, NULL, 'subform_'.$layer['Layer_ID']).'</td>';
+							if($layer['attributes']['visible'][$j]){
+								echo '<td>'.attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, false, NULL, NULL, NULL, 'subform_'.$layer['Layer_ID']).'</td>';
+							}
+							else{
+								$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" class="'.$this->subform_classname.'" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
+							}
 						}
 					}
 					echo '</tr>';
@@ -53,7 +58,11 @@
 					</td>
 				</tr>
 			</table>
-<?		}
+<?	
+			for($l = 0; $l < count($invisible_attributes[$layer['Layer_ID']]); $l++){
+				echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
+			}
+		}
 		else{ ?>
 			<table border="0" cellspacing="0" cellpadding="2" width="100%"><?
 				$preview_attributes = explode(' ', $this->formvars['preview_attribute']);
