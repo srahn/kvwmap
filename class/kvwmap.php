@@ -9546,13 +9546,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				for ($j = 0; $j < count($layerset[0]['attributes']['name']); $j++) {
 					$layerset[0]['attributes']['privileg'][$j] = $privileges[$layerset[0]['attributes']['name'][$j]];
 					$layerset[0]['attributes']['privileg'][$layerset[0]['attributes']['name'][$j]] = $privileges[$layerset[0]['attributes']['name'][$j]];
-					$layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] = $this->formvars[$layerset[0]['Layer_ID'].';'.$layerset[0]['attributes']['real_name'][$layerset[0]['attributes']['name'][$j]].';'.$layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['name'][$j]].';;'.$layerset[0]['attributes']['form_element_type'][$j].';'.$layerset[0]['attributes']['nullable'][$j].';'.$layerset[0]['attributes']['type'][$j]];
+					$layerset[0]['shape'][-1][$layerset[0]['attributes']['name'][$j]] = $this->formvars[$layerset[0]['Layer_ID'].';'.$layerset[0]['attributes']['real_name'][$layerset[0]['attributes']['name'][$j]].';'.$layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['name'][$j]].';;'.$layerset[0]['attributes']['form_element_type'][$j].';'.$layerset[0]['attributes']['nullable'][$j].';'.$layerset[0]['attributes']['type'][$j]];
 					if (
-						$layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] == '' AND
+						$layerset[0]['shape'][-1][$layerset[0]['attributes']['name'][$j]] == '' AND
 						$layerset[0]['attributes']['default'][$j] != ''
 					) {
 						// Wenn Defaultwert da und Feld leer, Defaultwert setzen
-						$layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] = $layerset[0]['attributes']['default'][$j];
+						$layerset[0]['shape'][-1][$layerset[0]['attributes']['name'][$j]] = $layerset[0]['attributes']['default'][$j];
 					}
 					if ($layerset[0]['attributes']['form_element_type'][$j] == 'Winkel') {
 						$this->angle_attribute = $layerset[0]['attributes']['name'][$j];
@@ -9568,7 +9568,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$values = array_values($this->formvars['values']);
 				}
 				for ($i = 0; $i < count($attributenames); $i++) {
-					$this->qlayerset[0]['shape'][0][$attributenames[$i]] = $values[$i];
+					$this->qlayerset[0]['shape'][-1][$attributenames[$i]] = $values[$i];
 				}
 
 				# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
@@ -16126,6 +16126,7 @@ class db_mapObj{
 					" : ""
 				) . "
 			ORDER BY
+				NULLIF(classification, '') IS NULL,
 				classification,
 				drawingorder,
 				Class_ID

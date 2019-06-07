@@ -216,7 +216,11 @@
 		}
 		echo '<div style="display:inline" id="new_dataset_'.$this->formvars['targetobject'].'"></div>';
 		if($this->formvars['weiter_erfassen'] == 1){
-			echo '<script type="text/javascript">document.getElementById("new_'.$this->formvars['targetobject'].'").click();</script>';
+			echo '
+				<script type="text/javascript">
+					document.getElementById("new_'.$this->formvars['targetobject'].'").click();
+					document.getElementById("new_'.$this->formvars['targetobject'].'").focus();
+				</script>';
 		}
 	}
 ?>

@@ -19,10 +19,12 @@
   $anzObj = count($layer['shape']);
   if ($anzObj > 0) {
   	$this->found = 'true';
+		$k = 0;
   	$doit = true;
   }
   if($this->new_entry == true){
-  	$anzObj = 1;
+  	$anzObj = 0;
+		$k = -1;
   	$doit = true;
   }
 ?>
@@ -158,7 +160,7 @@
 			  ?>
 			  </tr>
 <?
-	for ($k=0;$k<$anzObj;$k++) {
+	for ($k; $k<$anzObj; $k++) {
 		$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
 		if (is_array($layer['attributes']['privileg'])) {
 			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {

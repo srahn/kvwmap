@@ -4,6 +4,7 @@
  
  # Variablensubstitution
  $layer = $this->qlayerset[$i];
+ 
  $size = 40;
  $select_width = 'width:290px;';
 ?>
@@ -13,10 +14,12 @@
 	  $anzObj = count($this->qlayerset[$i]['shape']);
 	  if ($anzObj > 0) {
 	  	$this->found = 'true';
+			$k = 0;
 	  	$doit = true;
 	  }
 	  if($this->new_entry == true){
-	  	$anzObj = 1;
+	  	$anzObj = 0;
+			$k  = -1;
 	  	$doit = true;
 	  }
 	  if($doit == true){
@@ -31,7 +34,7 @@
 	$dimension = '';
 	$privileg = '';
 	$this->subform_classname = 'subform_'.$layer['Layer_ID'];
-	for ($k=0;$k<$anzObj;$k++) {
+	for ($k; $k<$anzObj; $k++) {
 		$checkbox_name .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'];
 ?>
 	<tr>

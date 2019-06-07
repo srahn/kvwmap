@@ -314,32 +314,18 @@
 				case 'Radiobutton' : {
 					$enum_value = $attributes['enum_value'][$j];
 					$enum_output = $attributes['enum_output'][$j];
-					if($attribute_privileg == '0' OR $lock){
-						for($e = 0; $e < count($enum_value); $e++){
-							if($enum_value[$e] == $value){
-								$auswahlfeld_output = $enum_output[$e];
-								$auswahlfeld_output_laenge = strlen($auswahlfeld_output)+1;
-								break;
-							}
+					if($change_all){
+						$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
+					}						
+					for($e = 0; $e < count($enum_value); $e++){
+						$datapart .= '<input class="'.$field_class.'" tabindex="1" type="radio" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'"';
+						$datapart .= ' onchange="'.$onchange.'" ';
+						if ($enum_value[$e] == $value) {
+							$datapart .= 'checked ';
 						}
-						$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" readonly id="'.$layer_id.'_'.$name.'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$fieldname.'" value="'.$auswahlfeld_output.'">';
-						$auswahlfeld_output = '';
-						$auswahlfeld_output_laenge = '';
-					}
-					else{
-						if($change_all){
-							$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
-						}						
-						for($e = 0; $e < count($enum_value); $e++){
-							$datapart .= '<input class="'.$field_class.'" tabindex="1" type="radio" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'"';
-							$datapart .= ' onchange="'.$onchange.'" ';
-							if ($enum_value[$e] == $value) {
-								$datapart .= 'checked ';
-							}
-							if($attributes['nullable'][$j] != '0')$datapart .= ' onclick="this.checked = this.checked2 || true; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';							
-							$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$k.'_'.$e.'">'.$enum_output[$e].'</label>&nbsp;&nbsp;&nbsp;&nbsp;';
-							if(!$attributes['horizontal'][$j])$datapart .= '<br>';
-						}
+						if($attributes['nullable'][$j] != '0')$datapart .= ' onclick="'.($attribute_privileg == '0'? 'return false;' : '').'this.checked = this.checked2 || true; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';							
+						$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$k.'_'.$e.'">'.$enum_output[$e].'</label>&nbsp;&nbsp;&nbsp;&nbsp;';
+						if(!$attributes['horizontal'][$j])$datapart .= '<br>';
 					}
 				}break;				
 				
@@ -501,50 +487,6 @@
 						$onload = 'onload="reload_subform_list(\''.$layer_id.'_'.$name.'_'.$k.'\', 0, 0)"';
 					}
 					$datapart .= ($subform_request? $onload : '').'></div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
-					if ($gui->new_entry != true AND $subform_request) {
-						# Liste bearbeiten
-						// $datapart .= '<input type="button" value="Liste bearbeiten" onclick="reload_subform_list(\''.$layer_id.'_'.$name.'_'.$k.'\', 1)">';
-						// # alle anzeigen
-						// $datapart .= '<a id="show_all_'.$layer_id.'_'.$name.'_'.$k.'" style="font-size: '.$linksize.'px;display:none" class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
-						// for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
-							// $datapart .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
-							// $datapart .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
-						// }
-						// $datapart .= 	'&subform_link=true\')"><span>'.$strShowAll.'</span></a>';
-						// # neu
-						// if ($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
-							// if ($attributes['embedded'][$j] == true){
-								// $datapart .= '&nbsp;<a id="new_'.$layer_id.'_'.$name.'_'.$k.'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
-								// $data = '';
-								// for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
-									// $datapart .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
-									// $datapart .= '&values['.$p.']=\'+document.getElementById(\''.$layer_id.'_'.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
-								// }
-								// $datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j] .
-														 // '&embedded=true&fromobject=subform' . $layer_id . '_' . $k . '_' . $j .
-														 // '&targetobject=' . $layer_id . '_' . $name . '_' . $k .
-														 // '&targetlayer_id=' . $layer_id .
-														 // '&targetattribute=' . $name . '\', new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
-								// $datapart .= '<div style="display:inline" id="subform'.$layer_id.'_'.$k.'_'.$j.'"></div>';
-							// }
-							// else{
-								// $datapart .= '&nbsp;<a class="buttonlink"';
-								// if($attributes['no_new_window'][$j] != true){
-									// $datapart .= 	' target="_blank"';
-								// }
-								// $datapart .= ' href="javascript:overlay_link(\'go=neuer_Layer_Datensatz&subform=true';
-								// for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
-									// $datapart .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
-									// $datapart .= '&values['.$p.']=\'+document.getElementById(\''.$layer_id.'_'.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
-								// }
-								// $datapart .= '&layer_id='.$layer_id;
-								// $datapart .= '&oid='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und die Layer-ID wird mit übergeben, für evtl. Zoom auf den Datensatz
-								// $datapart .= '&tablename='.$attributes['table_name'][$attributes['the_geom']];											# dito
-								// $datapart .= '&columnname='.$attributes['the_geom'];																								# dito
-								// $datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j].'\')"><span>&nbsp;'.$strNewEmbeddedPK.'</span></a>';
-							// }
-						// }
-					}
 					$datapart .= '</td></tr></table>';
 				}break;
 
@@ -645,6 +587,9 @@
 					}
 					if ($explosion[3] == 'all_not_null' and $one_param_is_null) {
 						$show_link = false;
+					}
+					if ($explosion[3] == 'all_null'){
+						$show_link = true;
 					}
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					if ($show_link) {
