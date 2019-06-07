@@ -10531,7 +10531,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->titel='GeoJSON-Import';
     $this->main='geojson_import.php';
 		$this->data_import_export = new data_import_export();
-    $this->result = $this->data_import_export->geojson_import($this->pgdatabase, $this->formvars['schema_name'], $this->formvars['table_name']);
+    $this->result = $this->data_import_export->import_geojson($this->pgdatabase, $this->formvars['schema_name'], $this->formvars['table_name']);
     $this->output();
   }
 
