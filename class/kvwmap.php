@@ -10082,6 +10082,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->main='geojson_import.php';
 		$this->data_import_export = new data_import_export();
     $this->result = $this->data_import_export->import_geojson($this->pgdatabase, $this->formvars['schema_name'], $this->formvars['table_name']);
+		if($this->result[0]['error'] != '')$this->add_message('error', $this->result[0]['error']);
     $this->output();
   }
 
@@ -10448,7 +10449,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			# /Löschen der in der Selectbox entfernten User
 
 			if ($ret[0]) {
-				$this->add_messages('error', $ret[1]);
+				$this->add_message('error', $ret[1]);
 			}
 
 			if (

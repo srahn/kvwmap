@@ -336,24 +336,30 @@ class data_import_export {
 		if(file_exists($filename)){
 			# tracks
 			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
-			$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, NULL);
-			$sql = '
-				ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
-				'.$this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename).'
-				SELECT geometrytype(the_geom), count(*) FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' GROUP BY geometrytype(the_geom);
-			';
-			$ret = $pgdatabase->execSQL($sql,4, 0);
-			if(!$ret[0]){
-				$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'MULTILINESTRING' => 1, 'POLYGON' => 2, 'MULTIPOLYGON' => 2);
-				while($result = pg_fetch_assoc($ret[1])){
-					if($result['count'] > 0 AND $geom_types[$result['geometrytype']] !== NULL){
-						$custom_table['datatype'] = $geom_types[$result['geometrytype']];
-						$custom_table['tablename'] = $tablename;
-						$custom_table['where'] = " AND geometrytype(the_geom) = '".$result['geometrytype']."'";
-						$custom_tables[] = $custom_table;
+			$ret = $this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, NULL);
+			if($ret !== 0){
+				$custom_table['error'] = $ret;
+				return array($custom_table);
+			}
+			else{
+				$sql = '
+					ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
+					'.$this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename).'
+					SELECT geometrytype(the_geom), count(*) FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' GROUP BY geometrytype(the_geom);
+				';
+				$ret = $pgdatabase->execSQL($sql,4, 0);
+				if(!$ret[0]){
+					$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'MULTILINESTRING' => 1, 'POLYGON' => 2, 'MULTIPOLYGON' => 2);
+					while($result = pg_fetch_assoc($ret[1])){
+						if($result['count'] > 0 AND $geom_types[$result['geometrytype']] !== NULL){
+							$custom_table['datatype'] = $geom_types[$result['geometrytype']];
+							$custom_table['tablename'] = $tablename;
+							$custom_table['where'] = " AND geometrytype(the_geom) = '".$result['geometrytype']."'";
+							$custom_tables[] = $custom_table;
+						}
 					}
+					return $custom_tables;
 				}
-				return $custom_tables;
 			}
 		}
 	}	
@@ -362,24 +368,30 @@ class data_import_export {
 		if(file_exists($filename)){
 			# tracks
 			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
-			$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, 'tracks', NULL, NULL, 'UTF8');
-			$sql = 'ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
-				'.$this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename);
-			$ret = $pgdatabase->execSQL($sql,4, 0);
-			$custom_table['datatype'] = 1;
-			$custom_table['tablename'] = $tablename;
-			$custom_tables[] = $custom_table;
-			# waypoints
-			$tablename = 'a'.strtolower(umlaute_umwandeln(basename($filename))).rand(1,1000000);
-			$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, 'waypoints', NULL, NULL, 'UTF8');
-			$sql = 'ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
-				'.$this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename);
-			$ret = $pgdatabase->execSQL($sql,4, 0);
-			$custom_table['datatype'] = 0;
-			$custom_table['tablename'] = $tablename;
-			$custom_tables[] = $custom_table;
-			if(!$ret[0]){
-				return $custom_tables;
+			$ret = $this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, 'tracks', NULL, NULL, 'UTF8');
+			if($ret !== 0){
+				$custom_table['error'] = $ret;
+				return array($custom_table);
+			}
+			else{
+				$sql = 'ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
+					'.$this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename);
+				$ret = $pgdatabase->execSQL($sql,4, 0);
+				$custom_table['datatype'] = 1;
+				$custom_table['tablename'] = $tablename;
+				$custom_tables[] = $custom_table;
+				# waypoints
+				$tablename = 'a'.strtolower(umlaute_umwandeln(basename($filename))).rand(1,1000000);
+				$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, 'waypoints', NULL, NULL, 'UTF8');
+				$sql = 'ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
+					'.$this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename);
+				$ret = $pgdatabase->execSQL($sql,4, 0);
+				$custom_table['datatype'] = 0;
+				$custom_table['tablename'] = $tablename;
+				$custom_tables[] = $custom_table;
+				if(!$ret[0]){
+					return $custom_tables;
+				}
 			}
 		}
 	}
@@ -464,23 +476,29 @@ class data_import_export {
 			}
 			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
 			$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, NULL);
-			$sql = '
-				ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
+			if($ret !== 0){
+				$custom_table['error'] = $ret;
+				return array($custom_table);
+			}
+			else{
+				$sql = '
+					ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
 
-				SELECT geometrytype(the_geom), count(*) FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' GROUP BY geometrytype(the_geom);
-			';
-			$ret = $pgdatabase->execSQL($sql,4, 0);
-			if(!$ret[0]){
-				$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'MULTILINESTRING' => 1, 'POLYGON' => 2, 'MULTIPOLYGON' => 2);
-				while($result = pg_fetch_assoc($ret[1])){
-					if($result['count'] > 0 AND $geom_types[$result['geometrytype']] !== NULL){
-						$custom_table['datatype'] = $geom_types[$result['geometrytype']];
-						$custom_table['tablename'] = $tablename;
-						$custom_table['where'] = " AND geometrytype(the_geom) = '".$result['geometrytype']."'";
-						$custom_tables[] = $custom_table;
+					SELECT geometrytype(the_geom), count(*) FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' GROUP BY geometrytype(the_geom);
+				';
+				$ret = $pgdatabase->execSQL($sql,4, 0);
+				if(!$ret[0]){
+					$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'MULTILINESTRING' => 1, 'POLYGON' => 2, 'MULTIPOLYGON' => 2);
+					while($result = pg_fetch_assoc($ret[1])){
+						if($result['count'] > 0 AND $geom_types[$result['geometrytype']] !== NULL){
+							$custom_table['datatype'] = $geom_types[$result['geometrytype']];
+							$custom_table['tablename'] = $tablename;
+							$custom_table['where'] = " AND geometrytype(the_geom) = '".$result['geometrytype']."'";
+							$custom_tables[] = $custom_table;
+						}
 					}
+					return $custom_tables;
 				}
-				return $custom_tables;
 			}
 		}
 	}
@@ -505,20 +523,26 @@ class data_import_export {
 			if(strpos($json->crs->properties->name, 'EPSG::') !== false)$epsg = array_pop(explode('EPSG::', $json->crs->properties->name));
 			else $epsg = 4326;
 			if($tablename == NULL)$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
-			$this->ogr2ogr_import($schema, $tablename, $epsg, $filename, $pgdatabase, NULL, NULL, NULL, 'UTF8');
-			$sql = '
-				ALTER TABLE '.$schema.'.'.$tablename.' SET WITH OIDS;
-				SELECT geometrytype(the_geom) AS geometrytype FROM '.$schema.'.'.$tablename.' LIMIT 1;';
-			$ret = $pgdatabase->execSQL($sql,4, 0);
-			if(!$ret[0]) {
-				$rs = pg_fetch_assoc($ret[1]);
-				$datatype = geometrytype_to_datatype($rs['geometrytype']);
+			$ret = $this->ogr2ogr_import($schema, $tablename, $epsg, $filename, $pgdatabase, NULL, NULL, NULL, 'UTF8');
+			if($ret !== 0){
+				$custom_table['error'] = $ret;
+				return array($custom_table);
 			}
-			$custom_tables[0]['datatype'] = $datatype;
-			$custom_tables[0]['tablename'] = $tablename;
-			$custom_tables[0]['epsg'] = $epsg;
-			if(!$ret[0]){
-				return $custom_tables;
+			else{
+				$sql = '
+					ALTER TABLE '.$schema.'.'.$tablename.' SET WITH OIDS;
+					SELECT geometrytype(the_geom) AS geometrytype FROM '.$schema.'.'.$tablename.' LIMIT 1;';
+				$ret = $pgdatabase->execSQL($sql,4, 0);
+				if(!$ret[0]) {
+					$rs = pg_fetch_assoc($ret[1]);
+					$datatype = geometrytype_to_datatype($rs['geometrytype']);
+				}
+				$custom_tables[0]['datatype'] = $datatype;
+				$custom_tables[0]['tablename'] = $tablename;
+				$custom_tables[0]['epsg'] = $epsg;
+				if(!$ret[0]){
+					return $custom_tables;
+				}
 			}
 		}
 	}
