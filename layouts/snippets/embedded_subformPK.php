@@ -6,6 +6,8 @@
 	$layer = $this->qlayerset[$i];
 	$attributes = $layer['attributes'];
 
+	$size = 50;
+
 	$doit = false;
 	$anzObj = count($layer['shape']);
   if ($anzObj > 0) {
@@ -18,13 +20,28 @@
 	}
 	else {
 		if($this->formvars['list_edit']){		?>
-			<table border="0" cellspacing="0" cellpadding="2" width="100%"><?
+			<table border="1" cellspacing="0" cellpadding="2" style="border-collapse: collapse" width="100%">
+				<tr><?
+				for ($j = 0; $j < count($attributes['name']); $j++) {
+					if($layer['attributes']['privileg'][$j] >= '0'){
+						if($layer['attributes']['visible'][$j]){
+							$explosion = explode(';', $layer['attributes']['group'][$j]);
+							if($explosion[1] != 'collapsed'){
+								echo '<td class="gle-attribute-name">'.attribute_name($layer['Layer_ID'], $layer['attributes'], $j, 0, $this->user->rolle->fontsize_gle, false).'</td>';
+							}
+						}
+					}
+				}
+				echo '</tr>';
 				for ($k=0;$k<$anzObj;$k++) {
 					echo '<tr>';
 					for ($j = 0; $j < count($attributes['name']); $j++) {
 						if($layer['attributes']['privileg'][$j] >= '0'){
 							if($layer['attributes']['visible'][$j]){
-								echo '<td>'.attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, false, NULL, NULL, NULL, 'subform_'.$layer['Layer_ID']).'</td>';
+								$explosion = explode(';', $layer['attributes']['group'][$j]);
+								if($explosion[1] != 'collapsed'){
+									echo '<td>'.attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, false, NULL, NULL, NULL, 'subform_'.$layer['Layer_ID']).'</td>';
+								}
 							}
 							else{
 								$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" class="'.$this->subform_classname.'" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
@@ -32,33 +49,31 @@
 						}
 					}
 					echo '</tr>';
-				}
-?>				<tr>
-					<td>
-						<input type="button" tabindex="1" value="Speichern" onclick="subsave_data(<? echo $layer['Layer_ID']; ?>, this.closest('div').id, this.closest('div').id, false);">
-<?
-						if ($layer['privileg'] > 0){
-							echo '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
-							for($p = 0; $p < count($this->formvars['attributenames']); $p++){
-								echo '&attributenames['.$p.']='.$this->formvars['attributenames'][$p];
-								echo '&values['.$p.']='.$this->formvars['values'][$p];
-							}
-							echo '&selected_layer_id='.$this->formvars['selected_layer_id'].
-									 '&embedded=true&fromobject=new_dataset_'.$this->formvars['targetobject'].
-									 '&weiter_erfassen='.$this->formvars['weiter_erfassen'].
-									 '&targetobject='.$this->formvars['targetobject'].
-									 '&targetlayer_id='.$this->formvars['targetlayer_id'].
-									 '&targetattribute='.$this->formvars['targetattribute'].
-									 '&list_edit=1\', 
-									 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
-									 new Array(\'sethtml\', \'execute_function\'));
-									 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
-						}
-?>						
-					</td>
-				</tr>
+				} ?>
 			</table>
-<?	
+
+			<div style="width: 100%;text-align: center;margin-top: 4px">
+				<input type="button" tabindex="1" value="Speichern" onclick="subsave_data(<? echo $layer['Layer_ID']; ?>, this.closest('div').id, this.closest('div').id, false);">
+<?
+				if ($layer['privileg'] > 0){
+					echo '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
+					for($p = 0; $p < count($this->formvars['attributenames']); $p++){
+						echo '&attributenames['.$p.']='.$this->formvars['attributenames'][$p];
+						echo '&values['.$p.']='.$this->formvars['values'][$p];
+					}
+					echo '&selected_layer_id='.$this->formvars['selected_layer_id'].
+							 '&embedded=true&fromobject=new_dataset_'.$this->formvars['targetobject'].
+							 '&weiter_erfassen='.$this->formvars['weiter_erfassen'].
+							 '&targetobject='.$this->formvars['targetobject'].
+							 '&targetlayer_id='.$this->formvars['targetlayer_id'].
+							 '&targetattribute='.$this->formvars['targetattribute'].
+							 '&list_edit=1\', 
+							 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
+							 new Array(\'sethtml\', \'execute_function\'));
+							 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
+				} ?>
+			</div>
+<?
 			for($l = 0; $l < count($invisible_attributes[$layer['Layer_ID']]); $l++){
 				echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 			}

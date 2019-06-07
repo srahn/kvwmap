@@ -480,7 +480,7 @@
 					$reloadParams .= '&tablename='.$attributes['table_name'][$attributes['the_geom']];											# dito
 					$reloadParams .= '&columnname='.$attributes['the_geom'];																								# dito
 					
-					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'"><img src="'.GRAPHICSPATH.'leer.gif" ';
+					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'" style="margin-top: 3px"><img src="'.GRAPHICSPATH.'leer.gif" ';
 					if($gui->new_entry != true){
 						$subform_request = true;
 						$onload = 'onload="reload_subform_list(\''.$layer_id.'_'.$name.'_'.$k.'\', 0, 0)"';
