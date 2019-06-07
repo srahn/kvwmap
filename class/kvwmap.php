@@ -9448,7 +9448,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         } break;
 
         case 'SubFormEmbeddedPK' : {
-          echo '~~reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['edit'].'\', \''.$this->formvars['weiter_erfassen'].'\');';
+          echo '~~reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\');';
         } break;
       }
 
@@ -13246,7 +13246,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			# wenn es ein Datensatz aus einem embedded-Formular ist, 
 			# muss das embedded-Formular entfernt werden und 
 			# das Listen-DIV neu geladen werden (getrennt durch ~)
-			echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\', 0);';
+			echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
 		}
 		else {
 			$this->last_query = $this->user->rolle->get_last_query();
@@ -16818,6 +16818,9 @@ class db_mapObj{
                     }break;
                     case 'embedded': {                            # Subformular soll embedded angezeigt werden
                       $attributes['embedded'][$i] = true;
+                    }break;
+										case 'list_edit': {                            # nur Listen-Editier-Modus
+                      $attributes['list_edit'][$i] = true;
                     }break;
                   }
                 }

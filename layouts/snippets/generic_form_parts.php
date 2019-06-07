@@ -471,9 +471,8 @@
 					$reloadParams .= '&count='.$k;
 					$reloadParams .= '&no_new_window='.$attributes['no_new_window'][$j];
 					$reloadParams .= '&embedded_subformPK=true';
-					if($attributes['embedded'][$j] == true){
-						$reloadParams .= '&embedded=true';
-					}
+					if($attributes['embedded'][$j] == true)$reloadParams .= '&embedded=true';
+					if($attributes['list_edit'][$j] == true)$reloadParams .= '&list_edit=true';
 					$reloadParams .= '&targetobject='.$layer_id.'_'.$name.'_'.$k;
 					$reloadParams .= '&targetlayer_id='.$layer_id;
 					$reloadParams .= '&targetattribute='.$name;

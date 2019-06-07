@@ -1,7 +1,7 @@
 <?
 	include(SNIPPETS . 'generic_form_parts.php');
 	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
-	# dies ist das Snippet für die SubformEmbeddedPK-Liste mit Links untereinander
+	# dies ist das Snippet für die SubformEmbeddedPK-Liste mit Links bzw. editierbaren Datensätzen untereinander
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
 	$attributes = $layer['attributes'];
@@ -17,7 +17,7 @@
 		include(SNIPPETS.'sachdatenanzeige_embedded.php');
 	}
 	else {
-		if($this->formvars['edit']){		?>
+		if($this->formvars['list_edit']){		?>
 			<table border="0" cellspacing="0" cellpadding="2" width="100%"><?
 				for ($k=0;$k<$anzObj;$k++) {
 					echo '<tr>';
@@ -44,7 +44,7 @@
 									 '&targetobject='.$this->formvars['targetobject'].
 									 '&targetlayer_id='.$this->formvars['targetlayer_id'].
 									 '&targetattribute='.$this->formvars['targetattribute'].
-									 '&edit=1\', 
+									 '&list_edit=1\', 
 									 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
 									 new Array(\'sethtml\', \'execute_function\'));
 									 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
