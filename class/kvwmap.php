@@ -8498,7 +8498,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					}
 				}
 				else {
-					$this->add_message('error', err_msg('Datei: kvwmap.php<br>Funktion: GenerischeSuche_Suchen<br>', __LINE__, $ret['msg']));
+					$ret['msg'] = sql_err_msg(
+						'Fehler bei der Datenbankabfrage von Sachdaten in der Funktion GenerischeSuche_Suchen Zeile ' . __LINE__, $sql,
+						$ret['msg'],
+						'error_div_' . rand(1, 99999)
+					);
+					$this->add_message('error', $ret['msg']);
+					#err_msg('Datei: kvwmap.php<br>Funktion: GenerischeSuche_Suchen<br>', __LINE__, $ret['msg']);
 				}
 
 				# Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
@@ -8601,7 +8607,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			header('Content-type: text/html; charset=UTF-8');
 			include(LAYOUTPATH . 'snippets/embedded_subformPK.php'); # listenförmige Ausgabe mit Links untereinander
 			if (!$ret['success']) {
-				echo "<script>message([{ \"type\" : 'error', \"msg\" : '" . $ret['msg'] . "'}]);</script>";
+				echo "<script>message([{ \"type\" : 'error', \"msg\" : '" . addslashes(str_replace('
+', '', $ret['msg'])) . "'}]);</script>";
 			}
 		}
 		elseif ($this->formvars['embedded_subformPK_liste'] != '') {

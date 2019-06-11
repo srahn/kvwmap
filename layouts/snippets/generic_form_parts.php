@@ -379,7 +379,7 @@
 							if($attributes['no_new_window'][$j] != true){
 								$datapart .= 	' target="_blank"';
 							}
-							$datapart .= 	' class="buttonlink"><span>'.$strNewPK.'</span></a>&nbsp;';
+							$datapart .= 	' class="buttonlink"><span>' . $strNewPK . '</span></a>&nbsp;';
 						}
 						$datapart .= '</td>';
 					}
