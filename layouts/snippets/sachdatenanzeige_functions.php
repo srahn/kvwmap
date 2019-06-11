@@ -390,18 +390,41 @@ include('funktionen/input_check_functions.php');
   	overlay_submit(this, false);
 	}
 
+	/**
+	*	Funktion löscht Datensatz mit oid im Layer mit layer_id
+	*/
+	delete_subform_dataset = function(layer_id, oid, element_id) {
+		console.log('Sende Anfrage zum Löschen des Elementes mit id: ' + element_id);
+		if (confirm('Wollen Sie die Datensatz oid: ' + oid + ' im Layer id: ' + layer_id + ' wirklich löschen?')) {
+			$.ajax({
+				url : 'index.php',
+				data: {
+					go: 'Layer_Datensaetze_Loeschen',
+					chosen_layer_id: layer_id,
+					oid: oid
+				},
+				type: 'GET',
+				success: function(data) {
+					console.log('Response vom Löschen des Datensatzes: %o', data);
+					console.log('Lösche Element mit id: ' + element_id);
+					$('#' + element_id).remove();
+				}
+			});
+		}
+	}
+
 	subdelete_data = function(layer_id, fromobject, targetobject){
 		// layer_id ist die von dem Layer, in dem der Datensatz geloescht werden soll
 		// fromobject ist die id von dem div, welches das Formular des Datensatzes enthaelt
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Loeschung des Datensatzes aktualisiert werden soll
-		if(confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')){
+		if (confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')) {
 			var formData = new FormData();
 			formData.append('go', 'Layer_Datensaetze_Loeschen');
 			formData.append('chosen_layer_id', layer_id);
 			formData.append('targetobject', targetobject);
 			formData.append('embedded', 'true');
-			formData.append('checkbox_names_'+layer_id, document.getElementsByName('checkbox_names_'+layer_id)[0].value);
-			formData.append(document.getElementsByName('checkbox_names_'+layer_id)[0].value, 'on');
+			formData.append('checkbox_names_' + layer_id, document.getElementsByName('checkbox_names_' + layer_id)[0].value);
+			formData.append(document.getElementsByName('checkbox_names_' + layer_id)[0].value, 'on');
 			ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
 		}
 	}
