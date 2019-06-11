@@ -214,22 +214,26 @@
 							 new Array(\'sethtml\', \'execute_function\'));
 							 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
 				}
-				else{
-					echo '&nbsp;<a class="buttonlink"';
-					#if($attributes['no_new_window'][$j] != true){
-						echo 	' target="_blank"';
-					#}
-					echo ' href="javascript:overlay_link(\'go=neuer_Layer_Datensatz&subform=true';
-					for($p = 0; $p < count($this->formvars['attributenames']); $p++){
-						echo '&attributenames['.$p.']='.$this->formvars['attributenames'][$p];
-						echo '&values['.$p.']='.$this->formvars['values'][$p];
+				else {
+					$data = array();
+					$data[] = 'go=neuer_Layer_Datensatz';
+					$data[] = 'subform=true';
+					for ($p = 0; $p < count($this->formvars['attributenames']); $p++) {
+						$data[] = 'attributenames[' . $p . ']=' . $this->formvars['attributenames'][$p];
+						$data[] = 'values[' . $p . ']=' . $this->formvars['values'][$p];
 					}
-					echo '&selected_layer_id='.$this->formvars['selected_layer_id'].
-					$datapart .= '&layer_id='.$this->formvars['targetlayer_id'];
-					$datapart .= '&oid='.$this->formvars['oid'];									# die oid des Datensatzes und die Layer-ID wird mit übergeben, für evtl. Zoom auf den Datensatz
-					$datapart .= '&tablename='.$this->formvars['tablename'];			# dito
-					$datapart .= '&columnname='.$this->formvars['columnname'];		# dito
-					echo '<span>&nbsp;'.$strNewEmbeddedPK.'</span></a>';
+					$data[] = 'selected_layer_id=' . $this->formvars['selected_layer_id'];
+					$data[] = 'layer_id=' . $this->formvars['targetlayer_id'];
+					$data[] = 'oid=' . $this->formvars['oid'];
+					$data[] = 'tablename=' . $this->formvars['tablename'];
+					$data[] = 'columnname=' . $this->formvars['columnname']; ?>
+					<a
+						class="buttonlink"
+						target="_blank" <? # war mal $attributes['no_new_window'][$j] != true ?>
+						href="javascript:overlay_link('go=neuer_Layer_Datensatz&<? echo implode('&', $data); ?>')"
+					>
+						<span>&nbsp;<?php echo $strNewEmbeddedPK; ?></span>
+					</a><?
 				}
 			}
 			?>
