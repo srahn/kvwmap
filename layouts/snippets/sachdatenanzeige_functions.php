@@ -391,23 +391,32 @@ include('funktionen/input_check_functions.php');
 	}
 
 	/**
-	*	Funktion löscht Datensatz mit oid im Layer mit layer_id
+	*	Funktion löscht einzelnen Datensatz mit oid im Layer mit layer_id,
+	* entfernt Datensatz in Liste des Subforms und
+	* zeigt Meldungen des Löschvorgangs an
 	*/
 	delete_subform_dataset = function(layer_id, oid, element_id) {
-		console.log('Sende Anfrage zum Löschen des Elementes mit id: ' + element_id);
 		if (confirm('Wollen Sie die Datensatz oid: ' + oid + ' im Layer id: ' + layer_id + ' wirklich löschen?')) {
 			$.ajax({
 				url : 'index.php',
 				data: {
-					go: 'Layer_Datensaetze_Loeschen',
+					go: 'Layer_Datensatz_Loeschen',
 					chosen_layer_id: layer_id,
 					oid: oid
 				},
 				type: 'GET',
 				success: function(data) {
-					console.log('Response vom Löschen des Datensatzes: %o', data);
-					console.log('Lösche Element mit id: ' + element_id);
-					$('#' + element_id).remove();
+					var result = JSON.parse(data),
+							success = true;
+					$.each(result, function(index, value) {
+						if (value.type == 'error') {
+							success = false;
+						}
+					});
+					if (success) {
+						$('#' + element_id).remove();
+					}
+					message(result);
 				}
 			});
 		}

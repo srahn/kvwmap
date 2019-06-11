@@ -1147,6 +1147,10 @@ function go_switch($go, $exit = false) {
 				$GUI->dublicate_dataset();
 			} break;
 
+			case 'Layer_Datensatz_Loeschen' : {
+				$GUI->layer_Datensatz_Loeschen($GUI->formvars['chosen_layer_id'], $GUI->formvars['oid']);
+			} break;
+
 			case 'Layer_Datensaetze_Loeschen' : {
 				$GUI->layer_Datensaetze_loeschen();
 			} break;

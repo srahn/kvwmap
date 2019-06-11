@@ -2,7 +2,6 @@
 $ahah = '
 <script language="javascript" type="text/javascript">
 	function ahah(url, data, target, action, progress){
-		console.log(\'formobject: %o\', target);
 		for(k = 0; k < target.length; ++k){
 			if(target[k] != null && target[k].tagName == "DIV" && target[k].innerHTML == ""){
 				target[k].innerHTML = \'<img src="graphics/ajax-loader.gif">\';
