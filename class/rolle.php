@@ -1598,7 +1598,7 @@ class rolle {
 
 	function setLayer($user_id, $stelle_id, $default_user_id) {
 		# trägt die Layer der entsprehenden Rolle für einen Benutzer ein.
-		if ($default_user_id > 0) {
+		if ($default_user_id > 0 AND $default_user_id != $user_id) {
 			# Layereinstellungen von Defaultrolle abfragen
 			$rolle2used_layer_select_sql = "
 				SELECT " .
