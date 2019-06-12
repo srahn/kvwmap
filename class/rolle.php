@@ -1607,6 +1607,7 @@ class rolle {
 					`layer_id`,
 					`aktivStatus`,
 					`queryStatus`,
+					`gle_view`,
 					`showclasses`,
 					`logconsume`
 				FROM
@@ -1626,6 +1627,7 @@ class rolle {
 					`start_aktiv`,
 					`start_aktiv`,
 					1,
+					1,
 					0
 				FROM
 					used_layer
@@ -1641,6 +1643,7 @@ class rolle {
 				`layer_id`,
 				`aktivStatus`,
 				`queryStatus`,
+				`gle_view`,
 				`showclasses`,
 				`logconsume`
 			) " .
