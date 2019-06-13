@@ -42,6 +42,7 @@
 	Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions; ?>"];
 	Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
 	Text_print_scale=["<? echo $strHelp; ?>:","<? echo $strHintPrintScale; ?>"];
+	Text_showrollenfilter=["<? echo $strHelp; ?>:","<? echo $strHintShowRollenFilter; ?>"];
 
 	function start1(){
 		document.GUI.submit();
@@ -316,6 +317,16 @@ if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angem
 							<input name="showlayeroptions" type="checkbox" value="1" <? if($this->user->rolle->showlayeroptions == '1') { echo 'checked="true"'; } ?> >
 							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_showlayeroptions, Style[0], document.getElementById('Tip22'))" onmouseout="htm()">
 							<div id="Tip22" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+						</td>
+					</tr>
+					<tr>
+						<td class="rollenwahl-option-header">
+							<? echo $strShowRollenFilter; ?>:
+						</td>
+						<td class="rollenwahl-option-data">
+							<input name="showrollenfilter" type="checkbox" value="1" <? if($this->user->rolle->showrollenfilter == '1') { echo 'checked="true"'; } ?> >
+							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_showrollenfilter, Style[0], document.getElementById('Tip25'))" onmouseout="htm()">
+							<div id="Tip25" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 						</td>
 					</tr>
 					<tr>

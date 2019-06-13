@@ -33,7 +33,7 @@ function save(){
   <tr> 
     <td colspan="6">&nbsp;</td>
   </tr>
-	<? if($this->result != NULL){?>
+	<? if($this->result AND $this->result[0]['error'] == ''){?>
 	<tr>
 		<td colspan="6" align="center"><? echo $strSucces; ?></td>
 	</tr>

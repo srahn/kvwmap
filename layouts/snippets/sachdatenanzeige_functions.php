@@ -335,9 +335,12 @@ include('funktionen/input_check_functions.php');
 		enclosingForm.submit();
 	}
 	
-	reload_subform_list = function(list_div_id){
+	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen){
 		list_div = document.getElementById(list_div_id);
-		ahah('index.php?go=Layer-Suche_Suchen', list_div.dataset.reload_params, new Array(list_div), new Array('sethtml'));
+		var params = list_div.dataset.reload_params;
+		if(list_edit)params += '&list_edit='+list_edit;
+		if(weiter_erfassen)params += '&weiter_erfassen='+weiter_erfassen;
+		ahah('index.php?go=Layer-Suche_Suchen', params, new Array(list_div), new Array('sethtml'));
 	}
 
 	save = function(){
@@ -421,7 +424,9 @@ include('funktionen/input_check_functions.php');
   			message('Das Datumsfeld '+form_fields[i].title+' hat nicht das Format TT.MM.JJJJ.');
   			return;
   		}
-			formData.append(form_fields[i].name, form_fields[i].value);
+			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
+				formData.append(form_fields[i].name, form_fields[i].value);
+			}
   	}
 		formData.append('go', 'Sachdaten_speichern');
 		formData.append('reload', reload);
@@ -432,7 +437,7 @@ include('funktionen/input_check_functions.php');
 		ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
 	}
 
-	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, reload){
+	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, reload, list_edit){
 		// layer_id ist die von dem Layer, in dem ein neuer Datensatz gespeichert werden soll
 		// fromobject ist die id von dem div, welches das Formular zur Eingabe des neuen Datensatzes enthaelt
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des neuen Datensatzes aktualisiert werden soll
@@ -452,7 +457,9 @@ include('funktionen/input_check_functions.php');
   			message('Das Datumsfeld '+form_fields[i].title+' hat nicht das Format TT.MM.JJJJ.');
   			return;
   		}
-			formData.append(form_fields[i].name, form_fields[i].value);
+			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
+				formData.append(form_fields[i].name, form_fields[i].value);
+			}
   	}
 		formData.append('go', 'neuer_Layer_Datensatz_speichern');
 		formData.append('reload', reload);
@@ -462,6 +469,7 @@ include('funktionen/input_check_functions.php');
 		formData.append('targetattribute', targetattribute);
 		formData.append('form_field_names', form_fieldstring);
 		formData.append('embedded', 'true');
+		formData.append('list_edit', list_edit);
 		ahah('index.php', formData, new Array(document.getElementById(fromobject), document.getElementById(targetobject), ''), new Array('sethtml', 'sethtml', 'execute_function'));
 	}
 

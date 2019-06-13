@@ -63,12 +63,17 @@ for($i=0;$i<$anzLayer;$i++){
 		echo '<hr style="width: 100%; height: 3px; margin: 15 0; color: '.BG_GLEHEADER.'; background: '.BG_GLEHEADER.';">';
 	}
 	if ($this->qlayerset[$i]['template']=='') {
-   	if(GLEVIEW == '2'){
-    	include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
-   	}
-   	else{
-   		include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
-   	}
+		if($this->qlayerset[$i]['connectiontype'] == MS_WMS){
+			include(SNIPPETS.'getfeatureinfo.php');			# getfeatureinfo bei WMS
+		}
+		else{
+			if($this->qlayerset[$i]['gle_view'] == '1'){
+				include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
+			}
+			else{
+				include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
+			}
+		}
 	}
 	else{
 		if(is_file(SNIPPETS.$this->qlayerset[$i]['template'])){

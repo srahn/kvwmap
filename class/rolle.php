@@ -96,10 +96,8 @@ class rolle {
 				l.labelitem as original_labelitem,
 				ul.`postlabelcache`,
 				`Filter`,
-				CASE r2ul.gle_view
-					WHEN '0' THEN 'generic_layer_editor.php'
-					ELSE ul.`template`
-				END as template,
+				r2ul.gle_view,
+				ul.`template`,
 				`header`,
 				`footer`,
 				ul.`symbolscale`,
@@ -376,6 +374,7 @@ class rolle {
 			$this->runningcoords=$rs['runningcoords'];
 			$this->showmapfunctions=$rs['showmapfunctions'];
 			$this->showlayeroptions=$rs['showlayeroptions'];
+			$this->showrollenfilter=$rs['showrollenfilter'];
 			$this->menue_buttons=$rs['menue_buttons'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
@@ -856,11 +855,7 @@ class rolle {
 
 	function getRollenLayer($LayerName, $typ = NULL) {
 		$sql ="
-			SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, 
-				CASE gle_view
-					WHEN '0' THEN 'generic_layer_editor.php'
-					ELSE ''
-				END as template,
+			SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, gle_view,
 				concat('(', rollenfilter, ')') as Filter
 			FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
@@ -1167,7 +1162,7 @@ class rolle {
 
 	function setSavedLayersFromDefaultUser($user_id, $stelle_id, $default_user_id){
 		# Gespeicherte Themeneinstellungen von default user übernehmen
-		if ($default_user_id > 0) {
+		if ($default_user_id > 0 AND $default_user_id != $user_id) {
 			$sql = "
 				INSERT INTO `rolle_saved_layers` (
 					`user_id`,
@@ -1201,7 +1196,7 @@ class rolle {
 
 	function setRolle($user_id, $stelle_id, $default_user_id) {
 		# trägt die Rolle für einen Benutzer ein.
-		if ($default_user_id > 0) {
+		if ($default_user_id > 0 AND $default_user_id != $user_id) {
 			# Rolleneinstellungen vom Defaultnutzer verwenden
 			$sql = "
 				INSERT IGNORE INTO `rolle` (
@@ -1230,6 +1225,7 @@ class rolle {
 					`runningcoords`,
 					`showmapfunctions`,
 					`showlayeroptions`,
+					`showrollenfilter`,
 					`singlequery`,
 					`querymode`,
 					`geom_edit_first`,
@@ -1266,6 +1262,7 @@ class rolle {
 					`runningcoords`,
 					`showmapfunctions`,
 					`showlayeroptions`,
+					`showrollenfilter`,
 					`singlequery`,
 					`querymode`,
 					`geom_edit_first`,
@@ -1348,7 +1345,7 @@ class rolle {
 
 	function setMenue($user_id, $stelle_id, $default_user_id) {
 		# trägt die Menuepunkte der übergebenen Stellenid für einen Benutzer ein.
-		if ($default_user_id > 0) {
+		if ($default_user_id > 0 AND $default_user_id != $user_id) {
 			# Menueeinstellungen von Defaultrolle abfragen
 			$menue2rolle_select_sql = "
 				SELECT " .
@@ -1475,7 +1472,7 @@ class rolle {
 
 	function setGroups($user_id, $stelle_id, $default_user_id, $layerids) {
 		# trägt die Gruppen und Obergruppen der übergebenen Stellenid und Layerids für einen Benutzer ein. Gruppen, die aktive Layer enthalten werden aufgeklappt
-		if ($default_user_id > 0) {
+		if ($default_user_id > 0 AND $default_user_id != $user_id) {
 			$sql = "
 				INSERT IGNORE INTO 
 					u_groups2rolle
@@ -1601,7 +1598,7 @@ class rolle {
 
 	function setLayer($user_id, $stelle_id, $default_user_id) {
 		# trägt die Layer der entsprehenden Rolle für einen Benutzer ein.
-		if ($default_user_id > 0) {
+		if ($default_user_id > 0 AND $default_user_id != $user_id) {
 			# Layereinstellungen von Defaultrolle abfragen
 			$rolle2used_layer_select_sql = "
 				SELECT " .
@@ -1610,6 +1607,7 @@ class rolle {
 					`layer_id`,
 					`aktivStatus`,
 					`queryStatus`,
+					`gle_view`,
 					`showclasses`,
 					`logconsume`
 				FROM
@@ -1629,6 +1627,7 @@ class rolle {
 					`start_aktiv`,
 					`start_aktiv`,
 					1,
+					1,
 					0
 				FROM
 					used_layer
@@ -1644,6 +1643,7 @@ class rolle {
 				`layer_id`,
 				`aktivStatus`,
 				`queryStatus`,
+				`gle_view`,
 				`showclasses`,
 				`logconsume`
 			) " .

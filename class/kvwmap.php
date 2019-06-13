@@ -339,47 +339,50 @@ class GUI {
 							echo 	 '</select>
 										</li>';
 						}
-						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>
-							<li>
-								<a href="javascript:void(0);" onclick="$(\'#rollenfilter, #rollenfilterquestionicon\').toggle()">Filter</a>
-								<a href="javascript:void(0);" onclick="message(\'\
-									Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Kartendarstellung und Sachdatenanzeige des Layers auswirkt.<br>\
-									In diesem Thema stehen dafür folgende Attribute zur Verfügung:<br>\
-									<ul>';
-									for($i = 0; $i < count($attributes)-2; $i++){
-										if(($this->formvars['layer_id'] < 0 OR $privileges[$attributes[$i]['name']] != '') AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<li>'.$attributes[$i]['name'].'</li>';
-									}									
-						echo	'</ul>\
-									Mehrere Filter werden mit AND oder OR verknüpft.<br>\
-									Ist ein Filter gesetzt wird in der Legende neben dem Themanamen ein Filtersymbol angezeigt.<br>\
-									Der Filter wird gelöscht indem das Textfeld geleert wird.<p>\
-									Beispiele:<br>\
-									<ul>\
-										<li>id > 10 AND status = 1</li>\
-										<li>type = \\\'Brunnen\\\' OR type = \\\'Quelle\\\'</li>\
-										<li>status IN (1, 2)</li>\
-									</ul>\
-									\')">
-									<i
-										id="rollenfilterquestionicon"
-										title="Hilfe zum Filter anzeigen"
-										class="fa fa-question-circle button layerOptionsIcon"
+						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>';
+						if($this->user->rolle->showrollenfilter){
+							echo '	
+									<li>
+									<a href="javascript:void(0);" onclick="$(\'#rollenfilter, #rollenfilterquestionicon\').toggle()">Filter</a>
+									<a href="javascript:void(0);" onclick="message(\'\
+										Sie können im Textfeld einen SQL-Ausdruck eintragen, der sich als Filter auf die Kartendarstellung und Sachdatenanzeige des Layers auswirkt.<br>\
+										In diesem Thema stehen dafür folgende Attribute zur Verfügung:<br>\
+										<ul>';
+										for($i = 0; $i < count($attributes)-2; $i++){
+											if(($this->formvars['layer_id'] < 0 OR $privileges[$attributes[$i]['name']] != '') AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<li>'.$attributes[$i]['name'].'</li>';
+										}									
+										echo	'</ul>\
+										Mehrere Filter werden mit AND oder OR verknüpft.<br>\
+										Ist ein Filter gesetzt wird in der Legende neben dem Themanamen ein Filtersymbol angezeigt.<br>\
+										Der Filter wird gelöscht indem das Textfeld geleert wird.<p>\
+										Beispiele:<br>\
+										<ul>\
+											<li>id > 10 AND status = 1</li>\
+											<li>type = \\\'Brunnen\\\' OR type = \\\'Quelle\\\'</li>\
+											<li>status IN (1, 2)</li>\
+										</ul>\
+										\')">
+										<i
+											id="rollenfilterquestionicon"
+											title="Hilfe zum Filter anzeigen"
+											class="fa fa-question-circle button layerOptionsIcon"
+											style="
+												float: right;
+												'.($layer[0]['rollenfilter'] == ''? 'display: none' : '').'
+											"
+										></i>
+									</a><br>
+									<textarea
+										id="rollenfilter"
 										style="
-											float: right;
+											width: 98%;
 											'.($layer[0]['rollenfilter'] == ''? 'display: none' : '').'
 										"
-									></i>
-								</a><br>
-								<textarea
-									id="rollenfilter"
-									style="
-										width: 98%;
-										'.($layer[0]['rollenfilter'] == ''? 'display: none' : '').'
-									"
-									name="layer_options_rollenfilter"
-								>' . $layer[0]['rollenfilter'] . '</textarea>
-							</li>
-						</ul>
+										name="layer_options_rollenfilter"
+									>' . $layer[0]['rollenfilter'] . '</textarea>
+								</li>';
+						}
+echo '			</ul>
 					</td>
 				</tr>
 				<tr>
@@ -625,7 +628,7 @@ class GUI {
 							</a//-->' .
 							html_umlaute($groupname) . '
 							'.($groupname == 'Suchergebnis' ? '<a href="index.php?go=delete_rollenlayer&type=search"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
-							'.($groupname == 'Eigene Importe' ? '<a href="index.php?go=delete_rollenlayer&type=import"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
+							'.(($groupname == 'Eigene Importe' OR $groupname == 'WMS-Importe') ? '<a href="index.php?go=delete_rollenlayer&type=import"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
 							<div style="position:static;" id="group_options_' . $group_id . '"></div>
 						</span>
 					</td>
@@ -7205,7 +7208,7 @@ class GUI {
 			$this->formvars['stelle_id'] = $this->Stelle->id;
 			$this->formvars['aktivStatus'] = 1;
 			$this->formvars['Gruppe'] = $groupid;
-			$this->formvars['Typ'] = 'search';
+			$this->formvars['Typ'] = 'import';
 			$this->formvars['Datentyp'] = MS_LAYER_RASTER;
 			$this->formvars['connectiontype'] = MS_WMS;
 			$this->formvars['transparency'] = 100;
@@ -8495,7 +8498,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					}
 				}
 				else {
-					$this->add_message('error', err_msg('Datei: kvwmap.php<br>Funktion: GenerischeSuche_Suchen<br>', __LINE__, $ret['msg']));
+					$ret['msg'] = sql_err_msg(
+						'Fehler bei der Datenbankabfrage von Sachdaten in der Funktion GenerischeSuche_Suchen Zeile ' . __LINE__, $sql,
+						$ret['msg'],
+						'error_div_' . rand(1, 99999)
+					);
+					$this->add_message('error', $ret['msg']);
+					#err_msg('Datei: kvwmap.php<br>Funktion: GenerischeSuche_Suchen<br>', __LINE__, $ret['msg']);
 				}
 
 				# Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
@@ -8598,7 +8607,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			header('Content-type: text/html; charset=UTF-8');
 			include(LAYOUTPATH . 'snippets/embedded_subformPK.php'); # listenförmige Ausgabe mit Links untereinander
 			if (!$ret['success']) {
-				echo "<script>message([{ \"type\" : 'error', \"msg\" : '" . $ret['msg'] . "'}]);</script>";
+				echo "<script>message([{ \"type\" : 'error', \"msg\" : '" . addslashes(str_replace('
+', '', $ret['msg'])) . "'}]);</script>";
 			}
 		}
 		elseif ($this->formvars['embedded_subformPK_liste'] != '') {
@@ -8781,7 +8791,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->titel=$this->formvars['titel'];
     $this->main='generic_search.php';
     $this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, 'import');
-		$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
+		if($this->layerdaten['Gruppe'])$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
 		$this->layergruppen = $mapdb->get_Groups($this->layergruppen);		# Gruppen mit Pfaden versehen
 
     # wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe
@@ -9172,7 +9182,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				# wenn es ein Datensatz aus einem embedded-Formular ist, 
 				# muss das embedded-Formular entfernt werden und 
 				# das Listen-DIV neu geladen werden (getrennt durch ~)
-				echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\');';
+				echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\', 0);';
 			}
 		}
 
@@ -9445,13 +9455,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         } break;
 
         case 'SubFormEmbeddedPK' : {
-          echo '~~reload_subform_list(\''.$this->formvars['targetobject'].'\');';
-					if($this->formvars['weiter_erfassen'] == 1){
-						echo 'href_save = document.getElementById("new_'.$this->formvars['targetobject'].'").href;';
-						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = document.getElementById("new_'.$this->formvars['targetobject'].'").href.replace("go=neuer_Layer_Datensatz", "go=neuer_Layer_Datensatz&weiter_erfassen=1'.$formfieldstring.'");';
-						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").click();';
-						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = href_save;';
-					}
+          echo '~~reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\');';
         } break;
       }
 
@@ -9549,13 +9553,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				for ($j = 0; $j < count($layerset[0]['attributes']['name']); $j++) {
 					$layerset[0]['attributes']['privileg'][$j] = $privileges[$layerset[0]['attributes']['name'][$j]];
 					$layerset[0]['attributes']['privileg'][$layerset[0]['attributes']['name'][$j]] = $privileges[$layerset[0]['attributes']['name'][$j]];
-					$layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] = $this->formvars[$layerset[0]['Layer_ID'].';'.$layerset[0]['attributes']['real_name'][$layerset[0]['attributes']['name'][$j]].';'.$layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['name'][$j]].';;'.$layerset[0]['attributes']['form_element_type'][$j].';'.$layerset[0]['attributes']['nullable'][$j].';'.$layerset[0]['attributes']['type'][$j]];
+					$layerset[0]['shape'][-1][$layerset[0]['attributes']['name'][$j]] = $this->formvars[$layerset[0]['Layer_ID'].';'.$layerset[0]['attributes']['real_name'][$layerset[0]['attributes']['name'][$j]].';'.$layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['name'][$j]].';;'.$layerset[0]['attributes']['form_element_type'][$j].';'.$layerset[0]['attributes']['nullable'][$j].';'.$layerset[0]['attributes']['type'][$j]];
 					if (
-						$layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] == '' AND
+						$layerset[0]['shape'][-1][$layerset[0]['attributes']['name'][$j]] == '' AND
 						$layerset[0]['attributes']['default'][$j] != ''
 					) {
 						// Wenn Defaultwert da und Feld leer, Defaultwert setzen
-						$layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] = $layerset[0]['attributes']['default'][$j];
+						$layerset[0]['shape'][-1][$layerset[0]['attributes']['name'][$j]] = $layerset[0]['attributes']['default'][$j];
 					}
 					if ($layerset[0]['attributes']['form_element_type'][$j] == 'Winkel') {
 						$this->angle_attribute = $layerset[0]['attributes']['name'][$j];
@@ -9571,7 +9575,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$values = array_values($this->formvars['values']);
 				}
 				for ($i = 0; $i < count($attributenames); $i++) {
-					$this->qlayerset[0]['shape'][0][$attributenames[$i]] = $values[$i];
+					$this->qlayerset[0]['shape'][-1][$attributenames[$i]] = $values[$i];
 				}
 
 				# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
@@ -10534,7 +10538,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->titel='GeoJSON-Import';
     $this->main='geojson_import.php';
 		$this->data_import_export = new data_import_export();
-    $this->result = $this->data_import_export->geojson_import($this->pgdatabase, $this->formvars['schema_name'], $this->formvars['table_name']);
+    $this->result = $this->data_import_export->import_geojson($this->pgdatabase, $this->formvars['schema_name'], $this->formvars['table_name']);
+		if($this->result[0]['error'] != '')$this->add_message('error', $this->result[0]['error']);
     $this->output();
   }
 
@@ -10804,7 +10809,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $frames = explode(', ', $this->formvars['selframes']);
 			$layouts = (trim($this->formvars['sellayouts']) == '' ? array() : explode(', ', $this->formvars['sellayouts']));
       $layer = (trim($this->formvars['sellayer']) == '' ? array() : explode(', ', $this->formvars['sellayer']));
-      $selectedusers = explode(', ',$this->formvars['selusers']);
+      $selectedusers = array_filter(explode(', ',$this->formvars['selusers']));
       $users= $Stelle->getUser();
 			$selectedparents = ($this->formvars['selparents'] == '' ? array() : explode(', ', $this->formvars['selparents']));
 
@@ -10912,7 +10917,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			# /Löschen der in der Selectbox entfernten User
 
 			if ($ret[0]) {
-				$this->add_messages('error', $ret[1]);
+				$this->add_message('error', $ret[1]);
 			}
 
 			if (
@@ -10975,11 +10980,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           }
         }
         for($i=0; $i<count($users); $i++){
-          $this->user->rolle->setRolle($selectedusers[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
-					$this->user->rolle->setMenue($selectedusers[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
-					$this->user->rolle->setLayer($selectedusers[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
-					$this->user->rolle->setGroups($selectedusers[$i], $Stelle->id, $Stelle->default_user_id, $layer);
-					$this->user->rolle->setSavedLayersFromDefaultUser($selectedusers[$i], $Stelle->id, $Stelle->default_user_id);
+          $this->user->rolle->setRolle($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+					$this->user->rolle->setMenue($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
+					$this->user->rolle->setLayer($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
+					$this->user->rolle->setGroups($users[$i], $Stelle->id, $Stelle->default_user_id, $layer);
+					$this->user->rolle->setSavedLayersFromDefaultUser($users[$i], $Stelle->id, $Stelle->default_user_id);
           $this->selected_user = new user(0,$users[$i],$this->user->database);
           $this->selected_user->checkstelle();
         }
@@ -12713,12 +12718,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     # Liste der Formularelementnamen, die betroffen sind in der Reihenfolge,
     # wie die Spalten in der Abfrage
     $select ="nZoomFactor,gui,CONCAT(nImageWidth,'x',nImageHeight) AS mapsize";
-    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, highlighting, runningcoords, showmapfunctions, showlayeroptions, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T')";
+    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, highlighting, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T')";
     $from ='rolle';
     $where ="stelle_id='+this.form.Stelle_ID.value+' AND user_id=" . $this->user->id;
     $StellenFormObj->addJavaScript(
 			"onchange",
-			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,showmapfunctions,showlayeroptions,menu_auto_close,menue_buttons,hist_timestamp));" : "")
+			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,showmapfunctions,showlayeroptions,showrollenfilter,menu_auto_close,menue_buttons,hist_timestamp));" : "")
 		);
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=" . $from."&where=stelle_id=3 AND user_id=7";
     $StellenFormObj->outputHTML();
@@ -13248,7 +13253,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			# wenn es ein Datensatz aus einem embedded-Formular ist, 
 			# muss das embedded-Formular entfernt werden und 
 			# das Listen-DIV neu geladen werden (getrennt durch ~)
-			echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\');';
+			echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
 		}
 		else {
 			$this->last_query = $this->user->rolle->get_last_query();
@@ -16129,6 +16134,7 @@ class db_mapObj{
 					" : ""
 				) . "
 			ORDER BY
+				NULLIF(classification, '') IS NULL,
 				classification,
 				drawingorder,
 				Class_ID
@@ -16819,6 +16825,9 @@ class db_mapObj{
                     }break;
                     case 'embedded': {                            # Subformular soll embedded angezeigt werden
                       $attributes['embedded'][$i] = true;
+                    }break;
+										case 'list_edit': {                            # nur Listen-Editier-Modus
+                      $attributes['list_edit'][$i] = true;
                     }break;
                   }
                 }
