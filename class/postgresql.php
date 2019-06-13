@@ -739,17 +739,20 @@ FROM
 	* @return string Geometrytyp
 	*/
 	function get_geom_type($schema, $geomcolumn, $tablename){
-		if($schema == '')$schema = 'public';
+		if ($schema == '') {
+			$schema = 'public';
+		}
 		$schema = str_replace(',', "','", $schema);
-		if($geomcolumn != '' AND $tablename != ''){
+		if ($geomcolumn != '' AND $tablename != '') {
+			#-- search_path ist zwar gesetzt, aber nur auf custom_shapes, daher ist das Schema der Tabelle erforderlich
 			$sql = "
 				SELECT coalesce(
-					(select geometrytype(".$geomcolumn.") FROM ".$schema.".".$tablename." limit 1)
+					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . $tablename . " limit 1)
 					,  
 					(select type from geometry_columns WHERE 
-					 f_table_schema IN ('".$schema."') and 
-					 f_table_name = '".$tablename."' AND 
-					 f_geometry_column = '".$geomcolumn."')
+					 f_table_schema IN ('" . $schema . "') and 
+					 f_table_name = '" . $tablename . "' AND 
+					 f_geometry_column = '" . $geomcolumn . "')
 				) as type
 			";
 			$ret1 = $this->execSQL($sql, 4, 0);
