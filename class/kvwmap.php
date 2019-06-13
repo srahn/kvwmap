@@ -8498,7 +8498,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					}
 				}
 				else {
-					$this->add_message('error', err_msg('Datei: kvwmap.php<br>Funktion: GenerischeSuche_Suchen<br>', __LINE__, $ret['msg']));
+					$ret['msg'] = sql_err_msg(
+						'Fehler bei der Datenbankabfrage von Sachdaten in der Funktion GenerischeSuche_Suchen Zeile ' . __LINE__, $sql,
+						$ret['msg'],
+						'error_div_' . rand(1, 99999)
+					);
+					$this->add_message('error', $ret['msg']);
+					#err_msg('Datei: kvwmap.php<br>Funktion: GenerischeSuche_Suchen<br>', __LINE__, $ret['msg']);
 				}
 
 				# Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
@@ -8601,7 +8607,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			header('Content-type: text/html; charset=UTF-8');
 			include(LAYOUTPATH . 'snippets/embedded_subformPK.php'); # listenförmige Ausgabe mit Links untereinander
 			if (!$ret['success']) {
-				echo "<script>message([{ \"type\" : 'error', \"msg\" : '" . $ret['msg'] . "'}]);</script>";
+				echo "<script>message([{ \"type\" : 'error', \"msg\" : '" . addslashes(str_replace('
+', '', $ret['msg'])) . "'}]);</script>";
 			}
 		}
 		elseif ($this->formvars['embedded_subformPK_liste'] != '') {
@@ -8784,7 +8791,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->titel=$this->formvars['titel'];
     $this->main='generic_search.php';
     $this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, 'import');
-		$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
+		if($this->layerdaten['Gruppe'])$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
 		$this->layergruppen = $mapdb->get_Groups($this->layergruppen);		# Gruppen mit Pfaden versehen
 
     # wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe
@@ -9175,7 +9182,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				# wenn es ein Datensatz aus einem embedded-Formular ist, 
 				# muss das embedded-Formular entfernt werden und 
 				# das Listen-DIV neu geladen werden (getrennt durch ~)
-				echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\');';
+				echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\', 0);';
 			}
 		}
 
@@ -9448,13 +9455,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         } break;
 
         case 'SubFormEmbeddedPK' : {
-          echo '~~reload_subform_list(\''.$this->formvars['targetobject'].'\');';
-					if($this->formvars['weiter_erfassen'] == 1){
-						echo 'href_save = document.getElementById("new_'.$this->formvars['targetobject'].'").href;';
-						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = document.getElementById("new_'.$this->formvars['targetobject'].'").href.replace("go=neuer_Layer_Datensatz", "go=neuer_Layer_Datensatz&weiter_erfassen=1'.$formfieldstring.'");';
-						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").click();';
-						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = href_save;';
-					}
+          echo '~~reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\');';
         } break;
       }
 
@@ -9552,13 +9553,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				for ($j = 0; $j < count($layerset[0]['attributes']['name']); $j++) {
 					$layerset[0]['attributes']['privileg'][$j] = $privileges[$layerset[0]['attributes']['name'][$j]];
 					$layerset[0]['attributes']['privileg'][$layerset[0]['attributes']['name'][$j]] = $privileges[$layerset[0]['attributes']['name'][$j]];
-					$layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] = $this->formvars[$layerset[0]['Layer_ID'].';'.$layerset[0]['attributes']['real_name'][$layerset[0]['attributes']['name'][$j]].';'.$layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['name'][$j]].';;'.$layerset[0]['attributes']['form_element_type'][$j].';'.$layerset[0]['attributes']['nullable'][$j].';'.$layerset[0]['attributes']['type'][$j]];
+					$layerset[0]['shape'][-1][$layerset[0]['attributes']['name'][$j]] = $this->formvars[$layerset[0]['Layer_ID'].';'.$layerset[0]['attributes']['real_name'][$layerset[0]['attributes']['name'][$j]].';'.$layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['name'][$j]].';;'.$layerset[0]['attributes']['form_element_type'][$j].';'.$layerset[0]['attributes']['nullable'][$j].';'.$layerset[0]['attributes']['type'][$j]];
 					if (
-						$layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] == '' AND
+						$layerset[0]['shape'][-1][$layerset[0]['attributes']['name'][$j]] == '' AND
 						$layerset[0]['attributes']['default'][$j] != ''
 					) {
 						// Wenn Defaultwert da und Feld leer, Defaultwert setzen
-						$layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] = $layerset[0]['attributes']['default'][$j];
+						$layerset[0]['shape'][-1][$layerset[0]['attributes']['name'][$j]] = $layerset[0]['attributes']['default'][$j];
 					}
 					if ($layerset[0]['attributes']['form_element_type'][$j] == 'Winkel') {
 						$this->angle_attribute = $layerset[0]['attributes']['name'][$j];
@@ -9574,7 +9575,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$values = array_values($this->formvars['values']);
 				}
 				for ($i = 0; $i < count($attributenames); $i++) {
-					$this->qlayerset[0]['shape'][0][$attributenames[$i]] = $values[$i];
+					$this->qlayerset[0]['shape'][-1][$attributenames[$i]] = $values[$i];
 				}
 
 				# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
@@ -10537,7 +10538,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->titel='GeoJSON-Import';
     $this->main='geojson_import.php';
 		$this->data_import_export = new data_import_export();
-    $this->result = $this->data_import_export->geojson_import($this->pgdatabase, $this->formvars['schema_name'], $this->formvars['table_name']);
+    $this->result = $this->data_import_export->import_geojson($this->pgdatabase, $this->formvars['schema_name'], $this->formvars['table_name']);
+		if($this->result[0]['error'] != '')$this->add_message('error', $this->result[0]['error']);
     $this->output();
   }
 
@@ -10807,7 +10809,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $frames = explode(', ', $this->formvars['selframes']);
 			$layouts = (trim($this->formvars['sellayouts']) == '' ? array() : explode(', ', $this->formvars['sellayouts']));
       $layer = (trim($this->formvars['sellayer']) == '' ? array() : explode(', ', $this->formvars['sellayer']));
-      $selectedusers = explode(', ',$this->formvars['selusers']);
+      $selectedusers = array_filter(explode(', ',$this->formvars['selusers']));
       $users= $Stelle->getUser();
 			$selectedparents = ($this->formvars['selparents'] == '' ? array() : explode(', ', $this->formvars['selparents']));
 
@@ -10915,7 +10917,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			# /Löschen der in der Selectbox entfernten User
 
 			if ($ret[0]) {
-				$this->add_messages('error', $ret[1]);
+				$this->add_message('error', $ret[1]);
 			}
 
 			if (
@@ -10978,11 +10980,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           }
         }
         for($i=0; $i<count($users); $i++){
-          $this->user->rolle->setRolle($selectedusers[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
-					$this->user->rolle->setMenue($selectedusers[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
-					$this->user->rolle->setLayer($selectedusers[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
-					$this->user->rolle->setGroups($selectedusers[$i], $Stelle->id, $Stelle->default_user_id, $layer);
-					$this->user->rolle->setSavedLayersFromDefaultUser($selectedusers[$i], $Stelle->id, $Stelle->default_user_id);
+          $this->user->rolle->setRolle($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+					$this->user->rolle->setMenue($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
+					$this->user->rolle->setLayer($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
+					$this->user->rolle->setGroups($users[$i], $Stelle->id, $Stelle->default_user_id, $layer);
+					$this->user->rolle->setSavedLayersFromDefaultUser($users[$i], $Stelle->id, $Stelle->default_user_id);
           $this->selected_user = new user(0,$users[$i],$this->user->database);
           $this->selected_user->checkstelle();
         }
@@ -13251,7 +13253,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			# wenn es ein Datensatz aus einem embedded-Formular ist, 
 			# muss das embedded-Formular entfernt werden und 
 			# das Listen-DIV neu geladen werden (getrennt durch ~)
-			echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\');';
+			echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
 		}
 		else {
 			$this->last_query = $this->user->rolle->get_last_query();
@@ -16132,6 +16134,7 @@ class db_mapObj{
 					" : ""
 				) . "
 			ORDER BY
+				NULLIF(classification, '') IS NULL,
 				classification,
 				drawingorder,
 				Class_ID
@@ -16822,6 +16825,9 @@ class db_mapObj{
                     }break;
                     case 'embedded': {                            # Subformular soll embedded angezeigt werden
                       $attributes['embedded'][$i] = true;
+                    }break;
+										case 'list_edit': {                            # nur Listen-Editier-Modus
+                      $attributes['list_edit'][$i] = true;
                     }break;
                   }
                 }

@@ -1162,7 +1162,7 @@ class rolle {
 
 	function setSavedLayersFromDefaultUser($user_id, $stelle_id, $default_user_id){
 		# Gespeicherte Themeneinstellungen von default user übernehmen
-		if ($default_user_id > 0) {
+		if ($default_user_id > 0 AND $default_user_id != $user_id) {
 			$sql = "
 				INSERT INTO `rolle_saved_layers` (
 					`user_id`,
@@ -1196,7 +1196,7 @@ class rolle {
 
 	function setRolle($user_id, $stelle_id, $default_user_id) {
 		# trägt die Rolle für einen Benutzer ein.
-		if ($default_user_id > 0) {
+		if ($default_user_id > 0 AND $default_user_id != $user_id) {
 			# Rolleneinstellungen vom Defaultnutzer verwenden
 			$sql = "
 				INSERT IGNORE INTO `rolle` (
@@ -1345,7 +1345,7 @@ class rolle {
 
 	function setMenue($user_id, $stelle_id, $default_user_id) {
 		# trägt die Menuepunkte der übergebenen Stellenid für einen Benutzer ein.
-		if ($default_user_id > 0) {
+		if ($default_user_id > 0 AND $default_user_id != $user_id) {
 			# Menueeinstellungen von Defaultrolle abfragen
 			$menue2rolle_select_sql = "
 				SELECT " .
@@ -1472,7 +1472,7 @@ class rolle {
 
 	function setGroups($user_id, $stelle_id, $default_user_id, $layerids) {
 		# trägt die Gruppen und Obergruppen der übergebenen Stellenid und Layerids für einen Benutzer ein. Gruppen, die aktive Layer enthalten werden aufgeklappt
-		if ($default_user_id > 0) {
+		if ($default_user_id > 0 AND $default_user_id != $user_id) {
 			$sql = "
 				INSERT IGNORE INTO 
 					u_groups2rolle
@@ -1598,7 +1598,7 @@ class rolle {
 
 	function setLayer($user_id, $stelle_id, $default_user_id) {
 		# trägt die Layer der entsprehenden Rolle für einen Benutzer ein.
-		if ($default_user_id > 0) {
+		if ($default_user_id > 0 AND $default_user_id != $user_id) {
 			# Layereinstellungen von Defaultrolle abfragen
 			$rolle2used_layer_select_sql = "
 				SELECT " .
@@ -1607,6 +1607,7 @@ class rolle {
 					`layer_id`,
 					`aktivStatus`,
 					`queryStatus`,
+					`gle_view`,
 					`showclasses`,
 					`logconsume`
 				FROM
@@ -1626,6 +1627,7 @@ class rolle {
 					`start_aktiv`,
 					`start_aktiv`,
 					1,
+					1,
 					0
 				FROM
 					used_layer
@@ -1641,6 +1643,7 @@ class rolle {
 				`layer_id`,
 				`aktivStatus`,
 				`queryStatus`,
+				`gle_view`,
 				`showclasses`,
 				`logconsume`
 			) " .

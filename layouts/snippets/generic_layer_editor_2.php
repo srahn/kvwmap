@@ -19,10 +19,12 @@
   $anzObj = count($layer['shape']);
   if ($anzObj > 0) {
   	$this->found = 'true';
+		$k = 0;
   	$doit = true;
   }
   if($this->new_entry == true){
-  	$anzObj = 1;
+  	$anzObj = 0;
+		$k = -1;
   	$doit = true;
   }
 ?>
@@ -59,7 +61,7 @@
 ?>
 <table id="<? echo $table_id; ?>" border="0" cellspacing="0" cellpadding="2">
 <?
-	for ($k=0;$k<$anzObj;$k++) {
+	for ($k; $k<$anzObj; $k++) {
 		$datapart = '';
 		$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
 ?>
@@ -203,7 +205,8 @@
 					}
 				}
 				else{
-					$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
+					$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
+					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'|';
 				}
 				if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
 					$datapart .= output_table($table);

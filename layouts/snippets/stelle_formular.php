@@ -685,7 +685,7 @@ else {
 
 <input
 	name="selusers"
-	value="<?php echo implode(', ', $this->formvars['selusers']['ID']); ?>"
+	value="<?php if(!empty($this->formvars['selusers']['ID']))echo implode(', ', $this->formvars['selusers']['ID']); ?>"
 	type="hidden"
 >
 
