@@ -3492,6 +3492,8 @@ echo '			</ul>
     else{
 			$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		}
+		$attributes['options'][$this->formvars['attribute']] = str_replace('$user_id', $this->user->id, $attributes['options'][$this->formvars['attribute']]);
+		$attributes['options'][$this->formvars['attribute']] = str_replace('$stelle_id', $this->stelle->id, $attributes['options'][$this->formvars['attribute']]);
 		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
     $reqby_start = strpos(strtolower($options), "<required by>");
     if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options; 
@@ -16620,13 +16622,18 @@ class db_mapObj{
 		return $pathAttributes;
 	}
 
-  function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $only_current_enums = false){
+  function add_attribute_values($attributes, $database, $values, $withvalues = true, $stelle_id, $only_current_enums = false){
+		$k0 = ((is_array($values) AND array_key_exists(-1, $values)) ? -1 : 0);
     # Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
-    for($i = 0; $i < count($attributes['name']); $i++){
+    for($i = 0; $i < count($attributes['name']); $i++) {
+			if ($attributes['options'][$i] != '') {
+				$attributes['options'][$i] = str_replace('$user_id', $this->GUI->user->id, $attributes['options'][$i]);
+				$attributes['options'][$i] = str_replace('$stelle_id', $this->GUI->stelle->id, $attributes['options'][$i]);
+			}
 			$type = ltrim($attributes['type'][$i], '_');
 			if(is_numeric($type)){			# Attribut ist ein Datentyp
-				for($k = 0; $k < count($query_result); $k++){
-					$json = str_replace('}"', '}', str_replace('"{', '{', str_replace("\\", "", $query_result[$k][$attributes['name'][$i]])));	# warum diese Zeichen dort reingekommen sind, ist noch nicht klar...
+				for($k = $k0; $k < count($values); $k++){
+					$json = str_replace('}"', '}', str_replace('"{', '{', str_replace("\\", "", $values[$k][$attributes['name'][$i]])));	# warum diese Zeichen dort reingekommen sind, ist noch nicht klar...
 					@$datatype_query_result = json_decode($json, true);
 					if($attributes['type'][$i] != $type)$datatype_query_result = $datatype_query_result[0];		# falls das Attribut ein Array von Datentypen ist, behelfsweise erstmal nur das erste Array-Element berücksichtigen
 					$query_result2[$k] = $datatype_query_result;
@@ -16683,25 +16690,26 @@ class db_mapObj{
 										$explo1 = explode(' as value', strtolower($attributes['options'][$i]));
 										$attribute_value_column = array_pop(explode(' ', $explo1[0]));
 									}
-                  if($query_result != NULL){
+                  if($values != NULL){
 										foreach($attributes['name'] as $attributename){
 											if(strpos($attributes['options'][$i], '<requires>'.$attributename.'</requires>') !== false){
 												$attributes['req'][$i][] = $attributename;			# die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
 											}
 										}
-                    for($k = 0; $k < count($query_result); $k++){
+                    for($k = $k0; $k < count($values); $k++){
 											$options = $attributes['options'][$i];
 											foreach($attributes['req'][$i] as $attributename){
-												if($query_result[$k][$attributename] != ''){
+
+												if($values[$k][$attributename] != ''){
 													if($only_current_enums){	# in diesem Fall werden nicht alle Auswahlmöglichkeiten abgefragt, sondern nur die aktuellen Werte des Datensatzes (wird z.B. beim Daten-Export verwendet, da hier nur lesend zugegriffen wird und die Datenmengen sehr groß sein können)
-														$options = str_ireplace('where', 'where '.$attribute_value_column.'::text = \''.$query_result[$k][$attributes['name'][$i]].'\' AND ', $options);
+														$options = str_ireplace('where', 'where '.$attribute_value_column.'::text = \''.$values[$k][$attributes['name'][$i]].'\' AND ', $options);
 													}
-													$options = str_replace('<requires>'.$attributename.'</requires>', "'" . $query_result[$k][$attributename]."'", $options);
+													$options = str_replace('<requires>'.$attributename.'</requires>', "'" . $values[$k][$attributename]."'", $options);
 												}
 											}
 											if(strpos($options, '<requires>') !== false){
 												#$options = '';    # wenn in diesem Datensatz des Query-Results ein benötigtes Attribut keinen Wert hat (also nicht alle <requires>-Einträge ersetzt wurden), sind die abhängigen Optionen für diesen Datensatz leer
-												$attribute_value = $query_result[$k][$attributes['name'][$i]];
+												$attribute_value = $values[$k][$attributes['name'][$i]];
 												if($attribute_value != '')$options = "select '" . $attribute_value."' as value, '" . $attribute_value."' as output";
 												else $options = '';		# wenn in diesem Datensatz des Query-Results ein benötigtes Attribut keinen Wert hat (also nicht alle <requires>-Einträge ersetzt wurden) aber das eigentliche Attribut einen Wert hat, wird dieser Wert als value und output genommen, ansonsten sind die Optionen leer
 											}
@@ -16714,7 +16722,7 @@ class db_mapObj{
                 }
                 # -----<requires>------
                 if(is_array($attributes['dependent_options'][$i])){   # mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-                  for($k = 0; $k < count($query_result); $k++){
+                  for($k = $k0; $k < count($values); $k++){
                     $sql = $attributes['dependent_options'][$i][$k];
                     if($sql != '') {
                       $ret = $database->execSQL($sql, 4, 0);
@@ -16749,10 +16757,10 @@ class db_mapObj{
               if(strpos(strtolower($attributes['options'][$i]), "select") === 0){     # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
                 $optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
                 $attributes['options'][$i] = $optionen[0];
-								if($query_result != NULL){
-									for($k = 0; $k < count($query_result); $k++){
+								if($values != NULL){
+									for($k = 0; $k < count($values); $k++){
 										$sql = $attributes['options'][$i];
-										$value = $query_result[$k][$attributes['name'][$i]];
+										$value = $values[$k][$attributes['name'][$i]];
 										if($value != '' AND !in_array($attributes['operator'][$i], array('LIKE', 'NOT LIKE', 'IN'))){			# falls eine LIKE-Suche oder eine IN-Suche durchgeführt wurde
 											$sql = 'SELECT * FROM ('.$sql.') as foo WHERE value = \''.pg_escape_string($value).'\'';
 											$ret = $database->execSQL($sql, 4, 0);
