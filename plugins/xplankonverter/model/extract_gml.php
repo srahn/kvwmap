@@ -1688,7 +1688,10 @@ class Gml_extractor {
 				information_schema.tables i INNER JOIN xplan_uml.uml_classes u ON (i.table_name = LOWER(u.name))
 			WHERE
 				i.table_schema = '" . $schema . "' AND
-				i.table_name NOT LIKE 'xp_%' AND
+				(
+					i.table_name IN('xp_ppo','xp_lpo','xp_fpo','xp_tpo','xp_pto','xp_lto') OR
+					i.table_name NOT LIKE 'xp_%'
+				) AND
 				i.table_name NOT LIKE '%_plan' AND
 				i.table_name NOT LIKE '%_bereich' AND
 				i.table_name NOT LIKE '%_textabschnitt';
