@@ -17181,6 +17181,17 @@ class db_mapObj{
     }
   }
 
+	function deleteRollenFilter(){
+		$sql = 'UPDATE u_rolle2used_layer SET rollenfilter = NULL WHERE user_id = '.$this->User_ID;
+		#echo $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenFilter:<br>" . $sql,4);
+		$query=mysql_query($sql);
+		$sql = 'UPDATE rollenlayer SET rollenfilter = NULL WHERE user_id = '.$this->User_ID;
+		#echo $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenFilter:<br>" . $sql,4);
+		$query=mysql_query($sql);
+	}
+
   function deleteRollenLayer($id = NULL, $type = NULL){
   	$rollenlayerset = $this->read_RollenLayer($id, $type);
 		for($i = 0; $i < count($rollenlayerset); $i++){
