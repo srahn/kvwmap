@@ -133,7 +133,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 							} ?>
 	            <td align="left" width="40%" style="position: relative"><?
 	            	switch ($this->attributes['form_element_type'][$i]) {
-	            		case 'Auswahlfeld' : {
+	            		case 'Auswahlfeld' : case 'Radiobutton' : {
 	                  ?><select 
 	                  <?
 	                  	if($this->attributes['req_by'][$i] != ''){
