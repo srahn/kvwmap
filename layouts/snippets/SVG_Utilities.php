@@ -665,8 +665,8 @@
 			if(top.browser != "other"){
 				document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback_ff(evt); }, true);
 			}
-			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari//IE9
-			window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);		//Firefox
+			window.addEventListener(\'mousewheel\', mousewheelchange, {passive: false}); // Chrome/Safari//IE9
+			window.addEventListener(\'DOMMouseScroll\', mousewheelchange, {passive: false});		//Firefox
 		}
 		else {
 			top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
