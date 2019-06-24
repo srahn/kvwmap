@@ -16731,13 +16731,13 @@ class db_mapObj{
 
           case 'Radiobutton' : {
             if($attributes['options'][$i] != ''){     # das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
+							$optionen = explode(';', $attributes['options'][$i]);  # Optionen; weitere Optionen
+							$attributes['options'][$i] = $optionen[0];
               if(strpos($attributes['options'][$i], "'") === 0){      # Aufzählung wie 'wert1','wert2','wert3'
                 $attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['options'][$i]));
                 $attributes['enum_output'][$i] = $attributes['enum_value'][$i];
               }
               elseif(strpos(strtolower($attributes['options'][$i]), "select") === 0){     # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
-                $optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
-                $attributes['options'][$i] = $optionen[0];
 								if($attributes['options'][$i] != ''){
                   $sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
                   $ret = $database->execSQL($sql, 4, 0);
@@ -16747,19 +16747,19 @@ class db_mapObj{
                     $attributes['enum_output'][$i][] = $rs['output'];
                   }
                 }
-								# weitere Optionen
-                if($optionen[1] != ''){
-                  $further_options = explode(' ', $optionen[1]);      # die weiteren Optionen exploden (opt1 opt2 opt3)
-                  for($k = 0; $k < count($further_options); $k++){
-										if($further_options[$k] == 'embedded'){       # Subformular soll embedded angezeigt werden
-                      $attributes['embedded'][$i] = true;
-                    }
-                    elseif($further_options[$k] == 'horizontal'){       # Radiobuttons nebeneinander anzeigen
-                      $attributes['horizontal'][$i] = true;
-                    }										
-                  }
-                }
               }
+							# weitere Optionen
+							if($optionen[1] != ''){
+								$further_options = explode(' ', $optionen[1]);      # die weiteren Optionen exploden (opt1 opt2 opt3)
+								for($k = 0; $k < count($further_options); $k++){
+									if($further_options[$k] == 'embedded'){       # Subformular soll embedded angezeigt werden
+										$attributes['embedded'][$i] = true;
+									}
+									elseif($further_options[$k] == 'horizontal'){       # Radiobuttons nebeneinander anzeigen
+										$attributes['horizontal'][$i] = true;
+									}										
+								}
+							}
             }
           }break;
 
