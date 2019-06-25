@@ -54,4 +54,6 @@
 	$this->strPrivileges="Rechte";
 	$this->strStyles="Styles";
 	$this->strRemove="entfernen";
+	$this->strShowMore="Mehr anzeigen";
+	$this->strShowLess="Weniger anzeigen";
 ?>

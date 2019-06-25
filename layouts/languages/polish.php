@@ -20,4 +20,6 @@
 	$this->strReset = "ustaw na nowo"; 
 	$this->strSaveMapViewCommittMassage = "fragment mapy został zapisany";
 	$this->strExceeded = "przekroczona";
+	$this->strShowMore="Pokaż więcej";
+	$this->strShowLess="Pokaż mniej";
 ?>

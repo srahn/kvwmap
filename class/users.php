@@ -1192,6 +1192,12 @@ class user {
 		if ($userdaten['email']!='') {
 			$sql.=',email="'.$userdaten['email'].'"';
 		}
+		if ($userdaten['organisation']!='') {
+			$sql.=',organisation="'.$userdaten['organisation'].'"';
+		}
+		if ($userdaten['position']!='') {
+			$sql.=',position="'.$userdaten['position'].'"';
+		}
 		$sql.=',start="'.$userdaten['start'].'"';
 		$sql.=',stop="'.$userdaten['stop'].'"';
 		if ($userdaten['ips']!='') {
@@ -1218,6 +1224,12 @@ class user {
 			}
 			if ($userdaten['email']!='') {
 				$sql.=' AND email="'.$userdaten['email'].'"';
+			}
+			if ($userdaten['organisation']!='') {
+				$sql.=' AND organisation="'.$userdaten['organisation'].'"';
+			}
+			if ($userdaten['position']!='') {
+				$sql.=' AND position="'.$userdaten['position'].'"';
 			}
 			# Starten der Anfrage
 			$ret=$this->database->execSQL($sql,4, 0);
@@ -1255,9 +1267,11 @@ class user {
 				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
 				`start` = '" . $userdaten['start'] . "',
 				`stop`= '" . $userdaten['stop'] . "', " .
-				($userdaten['id'] 		!= '' ? "`ID` 			=  " . $userdaten['id'] . "," 								: "") .
-				($userdaten['phon'] 	!= '' ? "`phon` 		= '" . $userdaten['phon'] . "'," 						: "") .
-				($userdaten['email']	!= '' ? "`email` 		= '" . $userdaten['email'] . "',"						: "") . "
+				($userdaten['id'] 					!= '' ? "`ID` 					=  " . $userdaten['id'] . "," 						: "") .
+				($userdaten['phon'] 				!= '' ? "`phon` 				= '" . $userdaten['phon'] . "'," 					: "") .
+				($userdaten['email']				!= '' ? "`email` 				= '" . $userdaten['email'] . "',"					: "") .
+				($userdaten['organisation']	!= '' ? "`organisation`	= '" . $userdaten['organisation'] . "'," 	: "") .
+				($userdaten['position']			!= '' ? "`position` 		= '" . $userdaten['position'] . "',"			: "") . "
 				`ips` = '" . $userdaten['ips'] . "'" .
 				$passwort_column .
 				$passwort_setting_time_column . "

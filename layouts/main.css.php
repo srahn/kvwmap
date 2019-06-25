@@ -1950,3 +1950,8 @@ tbody.gle tr {
   box-sizing:border-box;
   -moz-box-sizing:border-box;
 }
+
+.small-gray {
+	color: gray;
+	font-size: 12px;
+}

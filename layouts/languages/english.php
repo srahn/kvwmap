@@ -53,5 +53,6 @@
 	$this->strPrivileges="privileges";
 	$this->strStyles="styles";
 	$this->strRemove="remove";
+	$this->strShowMore="Show more";
+	$this->strShowLess="Show less";
 ?>
-	
