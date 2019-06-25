@@ -14369,7 +14369,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					if($layerset[$i]['attributes']['geomtype'][$the_geom] != 'POINT'){
 						$rand = $this->map_scaledenom/1000;
 						$tolerance = $this->map_scaledenom/10000;
-						if($layer_epsg == 4326)$tolerance = $tolerance / 60000;		# wegen der Einheit Grad
+						if($client_epsg == 4326){
+							$tolerance = $tolerance / 60000;		# wegen der Einheit Grad
+							$rand = $rand / 60000;		# wegen der Einheit Grad
+						}
 						$box_wkt ="POLYGON((";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
