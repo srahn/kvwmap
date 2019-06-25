@@ -12,6 +12,13 @@ Text[1]=["Achtung:","Bei Auswahl von 'räumlich' erfolgt eine räumliche Suche �
 
 
 function save(){
+	var dokument_art_selected = false;
+	dokument_arten = document.getElementsByName('suchhauptart[]');
+	[].forEach.call(dokument_arten, function (d){if(d.checked)dokument_art_selected = true;});
+	if(!dokument_art_selected){
+		alert('Bitte wählen Sie mindestens eine Dokumentart aus.');
+		return;
+	}
 	art = document.getElementsByName('abfrageart');
 	if(art[0].checked == true){
 		if(document.GUI.suchgemarkung.value == '' && (document.GUI.suchflur.value != '' || document.GUI.suchrissnummer.value != '' || document.GUI.suchfortfuehrung.value != '')){
