@@ -295,6 +295,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 						if ($this->formvars['suchan']){ echo ' andere'; }
             switch ($this->formvars['abfrageart']) {
               case 'indiv_nr' : { 
+								if($this->formvars['flur_thematisch']) echo ' thematisch'; else echo ' räumlich';
 								if($this->formvars['suchgemarkung'] != '') echo ' in Gemarkung: '.$this->formvars['suchgemarkung'];
 								if($this->formvars['suchflur'] != '') echo ' in Flur: '.str_pad($this->formvars['suchflur'],3,'0',STR_PAD_LEFT);
                 if($this->formvars['suchstammnr'] != '')echo ' mit Antragsnummer: '.$this->formvars['suchstammnr'];
