@@ -155,11 +155,11 @@ class Nachweis {
           $formvars['Bilddatei_name']=$doclocation;
         }
         # Zusammensetzen des Dateinamen unter dem das Dokument gespeichert werden soll
-        $formvars['zieldateiname']=$this->getZielDateiName($formvars);
+				$formvars['zieldateiname']=$this->getZielDateiName($formvars);
 				$zieldatei=NACHWEISDOCPATH.$formvars['flurid'].'/'.$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$formvars['artname'].'/'.$formvars['zieldateiname'];
 
         # 4. Ändern der Eintragung in der Datenbank
-        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['unterart_'.$formvars['hauptart']],$formvars['gueltigkeit'],$formvars['geprueft'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['bemerkungen'],$formvars['bemerkungen_intern'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname'], $user);
+        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['unterart_'.$formvars['hauptart']],$formvars['gueltigkeit'],$formvars['geprueft'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['bemerkungen'],$formvars['bemerkungen_intern'],$formvars['umring'],$zieldatei, $user);
         if ($ret[0]) {
           # Aktualisierungsvorgang in der Datenbank nicht erfolgreich
           $errmsg=$ret[1];
