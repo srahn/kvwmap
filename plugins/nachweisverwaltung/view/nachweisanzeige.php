@@ -166,16 +166,16 @@ function set_magnifier(evt, magnifier){
 	magnifier.style.left = mousex - (width/2);
 	magnifier.style.top = mousey - (height/2);
 	img = magnifier.firstElementChild;
-	img.style.transform = 'translate('+(-1*((mousex*2)-(width/2)))+'px, '+(-1*((mousey*2)-(height/2)))+'px)';
+	img.style.transform = 'translate('+(-1*((mousex*3)-(width/2)))+'px, '+(-1*((mousey*3)-(height/2)))+'px)';
 }
 
 function getvorschau(url){
 	img = '\
 		<div onmousemove="set_magnifier(event, this.nextElementSibling);">\
-			<img style="width: 700; border: 1px solid black" src="'+url+'">\
+			<img style="width: 600px; border: 1px solid black" src="'+url+'">\
 		</div>\
 		<div class="magnifier" style="left: -500px; top: -500px;">\
-			<img style="width: 1400px; transform: translate(-300px, -300px);" src="'+url+'">\
+			<img style="width: 1800px; transform: translate(-300px, -300px);" src="'+url+'">\
 		</div>\
 	';
 	document.getElementById('vorschau').innerHTML = img;
@@ -631,7 +631,7 @@ Wählen Sie neue Suchparameter.</span><br>
 
 
 <!--[IF !IE]> -->
-<div id="vorschau" style="z-index: 1000; position: fixed; left:50%; margin-left:-410px;  top:50px; "></div>
+<div id="vorschau" style="z-index: 1000; position: fixed; left:50%; margin-left:-100px;  top:20px; "></div>
 <!-- <![ENDIF]-->
  <!--[IF IE]>
 <div id="vorschau" style="position: absolute; left:50%; margin-left:-150px; top: expression((190 + (ignoreMe = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop)) + 'px');"></div>
