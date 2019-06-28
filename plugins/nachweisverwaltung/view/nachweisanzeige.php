@@ -289,10 +289,13 @@ function save_bearbeitungshinweis(id){
 	
 	.magnifier{
 		position: absolute;
-		width: 200px;
-		height: 200px;
+		width: 250px;
+		height: 250px;
 		overflow: hidden;
 		pointer-events: none;
+		border: 1px solid grey;
+		box-shadow: 3px 0px 4px rgba(0, 0, 0, 0.2);;
+		border-radius: 125px;
 	}
 </style>
 
