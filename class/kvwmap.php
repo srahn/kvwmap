@@ -4107,14 +4107,15 @@ echo '			</ul>
 		$contenttype = ms_iostripstdoutbuffercontenttype();
 		ob_end_clean();   //Ausgabepuffer leeren (sonst funktioniert header() nicht)
 		ob_start();
-		switch (strtolower($_REQUEST['REQUEST'])) {
+		$request = array_change_key_case($_REQUEST);
+		switch (strtolower($request['request'])) {
 			case 'getmap' : {
 				if ( $contenttype != 'image/png') {
 					$contenttype = 'image/jpeg';
 				}
 			} break;
 			case 'getfeature': {
-				switch ($_REQUEST['OUTPUTFORMAT']) {
+				switch ($request['outputformat']) {
 					case 'text/plain' : {
 						$contenttype = 'text/plain';
 					} break;
