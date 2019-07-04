@@ -480,7 +480,7 @@ class data_import_export {
 				return;
 			}
 			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
-			$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, NULL);
+			$ret = $this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, NULL);
 			if($ret !== 0){
 				$custom_table['error'] = $ret;
 				return array($custom_table);
@@ -1296,7 +1296,7 @@ class data_import_export {
 				ob_end_clean();
 				header('Content-type: '.$contenttype);
 				header("Content-disposition:	attachment; filename=".basename($exportfile));
-				header("Content-Length: ".filesize($exportfile));
+				#header("Content-Length: ".filesize($exportfile));			# hat bei großen Datenmengen dazu geführt, dass der Download abgeschnitten wird
 				header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 				header('Pragma: public');
 				readfile($exportfile);
@@ -1334,6 +1334,7 @@ class data_import_export {
 		}
 		else{
 			$GUI->add_message('error', 'Abfrage fehlgeschlagen!');
+			$GUI->daten_export();
 		}
 	}
 }
