@@ -16576,7 +16576,7 @@ class db_mapObj{
     for($i = 0; $i < count($attributes['name']); $i++){
 			$type = ltrim($attributes['type'][$i], '_');
 			if(is_numeric($type)){			# Attribut ist ein Datentyp
-				for($k = 0; $k < count($query_result); $k++){
+				foreach($query_result as $k => $record){	# bei Erfassung eines neuen DS hat $k den Wert -1
 					$json = str_replace('}"', '}', str_replace('"{', '{', str_replace("\\", "", $query_result[$k][$attributes['name'][$i]])));	# warum diese Zeichen dort reingekommen sind, ist noch nicht klar...
 					@$datatype_query_result = json_decode($json, true);
 					if($attributes['type'][$i] != $type)$datatype_query_result = $datatype_query_result[0];		# falls das Attribut ein Array von Datentypen ist, behelfsweise erstmal nur das erste Array-Element berücksichtigen
@@ -16640,7 +16640,7 @@ class db_mapObj{
 												$attributes['req'][$i][] = $attributename;			# die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
 											}
 										}
-                    for($k = 0; $k < count($query_result); $k++){
+										foreach($query_result as $k => $record){	# bei Erfassung eines neuen DS hat $k den Wert -1
 											$options = $attributes['options'][$i];
 											foreach($attributes['req'][$i] as $attributename){
 												if($query_result[$k][$attributename] != ''){
@@ -16665,7 +16665,7 @@ class db_mapObj{
                 }
                 # -----<requires>------
                 if(is_array($attributes['dependent_options'][$i])){   # mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-                  for($k = 0; $k < count($query_result); $k++){
+									foreach($query_result as $k => $record){	# bei Erfassung eines neuen DS hat $k den Wert -1
                     $sql = $attributes['dependent_options'][$i][$k];
                     if($sql != '') {
                       $ret = $database->execSQL($sql, 4, 0);
@@ -16701,7 +16701,7 @@ class db_mapObj{
                 $optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
                 $attributes['options'][$i] = $optionen[0];
 								if($query_result != NULL){
-									for($k = 0; $k < count($query_result); $k++){
+									foreach($query_result as $k => $record){	# bei Erfassung eines neuen DS hat $k den Wert -1
 										$sql = $attributes['options'][$i];
 										$value = $query_result[$k][$attributes['name'][$i]];
 										if($value != '' AND !in_array($attributes['operator'][$i], array('LIKE', 'NOT LIKE', 'IN'))){			# falls eine LIKE-Suche oder eine IN-Suche durchgeführt wurde
