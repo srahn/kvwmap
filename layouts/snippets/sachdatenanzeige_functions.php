@@ -385,7 +385,7 @@ include('funktionen/input_check_functions.php');
   		}
   	}
   	this.go.value = 'neuer_Layer_Datensatz_speichern';
-		document.getElementById('go_plus').disabled = true;
+		document.getElementById('sachdatenanzeige_save_button').disabled = true;
 		document.GUI.gle_changed.value = '';
   	overlay_submit(this, false);
 	}

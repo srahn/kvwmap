@@ -43,7 +43,6 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
 }
 
-
 class GUI {
 
   var $layout;
@@ -112,6 +111,8 @@ class GUI {
     else{
 			$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		}
+		$attributes['options'][$this->formvars['attribute']] = str_replace('$user_id', $this->user->id, $attributes['options'][$this->formvars['attribute']]);
+		$attributes['options'][$this->formvars['attribute']] = str_replace('$stelle_id', $this->stelle->id, $attributes['options'][$this->formvars['attribute']]);
 		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
     $reqby_start = strpos(strtolower($options), "<required by>");
     if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options; 
@@ -126,7 +127,7 @@ class GUI {
 		switch($this->formvars['type']) {
 			case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
 				$html = '>';			# Workaround für dummen IE Bug
-				$html .= '<option value="">-- Auswahl --</option>';
+				$html .= '<option value="">-- Bitte Auswählen --</option>';
 				while($rs = pg_fetch_array($ret[1])){
 					$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
 				}

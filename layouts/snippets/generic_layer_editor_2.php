@@ -102,7 +102,9 @@
 					$explosion = explode(';', $layer['attributes']['group'][$j]);
 					if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 					$groupname = $explosion[0];
-					$datapart .= '<tr>
+					$groupname_short = explode('<br>', $groupname);
+					$groupname_short = str_replace(' ', '_', $groupname_short[0]);
+					$datapart .= '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.'">
 									<td colspan="2" width="100%">
 										<div style="border-bottom: 1px solid grey">
 											<table width="100%" class="tgle" border="2"><tbody class="gle">
