@@ -158,8 +158,26 @@ function set_richtung(richtung){
 	document.GUI.submit();
 }
 
+function set_magnifier(evt, magnifier){
+	mousex = evt.clientX - document.getElementById('vorschau').offsetLeft;
+	mousey = evt.clientY - document.getElementById('vorschau').offsetTop;
+	width = magnifier.offsetWidth;
+	height = magnifier.offsetHeight;
+	magnifier.style.left = mousex - (width/2);
+	magnifier.style.top = mousey - (height/2);
+	img = magnifier.firstElementChild;
+	img.style.transform = 'translate('+(-1*((mousex*3)-(width/2)))+'px, '+(-1*((mousey*3)-(height/2)))+'px)';
+}
+
 function getvorschau(url){
-	img = '<img style="border: 1px solid black" src="'+url+'">';
+	img = '\
+		<div onmousemove="set_magnifier(event, this.nextElementSibling);">\
+			<img style="width: 600px; border: 1px solid black" src="'+url+'">\
+		</div>\
+		<div class="magnifier" style="left: -500px; top: -500px;">\
+			<img style="width: 1800px; transform: translate(-300px, -300px);" src="'+url+'">\
+		</div>\
+	';
 	document.getElementById('vorschau').innerHTML = img;
 }
 
@@ -268,6 +286,17 @@ function save_bearbeitungshinweis(id){
 	.bearbeitungshinweise_div textarea{
 		min-width: 200px;
 	}
+	
+	.magnifier{
+		position: absolute;
+		width: 250px;
+		height: 250px;
+		overflow: hidden;
+		pointer-events: none;
+		border: 1px solid grey;
+		box-shadow: 3px 0px 4px rgba(0, 0, 0, 0.2);;
+		border-radius: 125px;
+	}
 </style>
 
 <input type="hidden" name="go" value="Nachweisanzeige">
@@ -285,7 +314,7 @@ function save_bearbeitungshinweis(id){
 
 	
 <table width="0%" border="0" cellpadding="8" cellspacing="0">
-  <tr> 
+  <tr onmouseenter="clearVorschau();"> 
     <td bgcolor="<? echo BG_FORM ?>"><table width="100%" border="0" cellpadding="5" cellspacing="0">
         <tr> 
           <td><div align="center"><h2><? echo $this->titel; ?></h2></div></td>
@@ -412,7 +441,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		$bgcolor = '#FFFFFF';
      for ($i=0;$i<$this->nachweis->erg_dokumente;$i++) {
         ?>
-        <tr style="outline: 1px dotted grey;" <? if($this->formvars['selected_nachweis'] == $this->nachweis->Dokumente[$i]['id'])echo 'class="selected"'; ?> onclick="select(this);" onmouseout="clearVorschau();" bgcolor="
+        <tr style="outline: 1px dotted grey;" <? if($this->formvars['selected_nachweis'] == $this->nachweis->Dokumente[$i]['id'])echo 'class="selected"'; ?> onclick="select(this);" onmouseenter="clearVorschau();" bgcolor="
 			<? $orderelem = explode(',', $this->formvars['order']);
 			if ($this->nachweis->Dokumente[$i][$orderelem[0]] != $this->nachweis->Dokumente[$i-1][$orderelem[0]]){
 				if($bgcolor == '#EBEBEB'){
@@ -506,87 +535,89 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     ?>
 				</tbody>
       </table>
-      <table width="0%" border="1" cellspacing="0" cellpadding="0" id="nachweisanzeige_optionen">
-			  <tr>
-					<td valign="top" style="padding: 5px;">
-						<table cellspacing="4">
-							<tr>
-								<td colspan="2" align="center"><span class="fett">Einblenden</span></td>
-							</tr>
-							<tr>
-								<td>
-									<input type="checkbox" name="showhauptart[]" onchange="set_selections('showhauptart[]', ['2222', '']);" value=""> alle<br>
-									<input type="checkbox" name="showhauptart[]" onchange="clear_selections('showhauptart[]', '2222');" value="2222"<? if(in_array(2222, $this->formvars['showhauptart']))echo ' checked="true" '; ?>> alle ausgewählten<br>
-					<? 			foreach($this->hauptdokumentarten as $hauptart){  ?>
-										<input type="checkbox" name="showhauptart[]" value="<? echo $hauptart['id']; ?>"<? if(in_array($hauptart['id'], $this->formvars['showhauptart']))echo ' checked="true" '; ?>> <? echo $hauptart['abkuerzung']; ?><br>
-					<?			}		?>
-								</td>
-							</tr>
-							<tr>
-								<td align="center">
-									<input type="submit" value="Aktualisieren">
-								</td>
-							</tr>
-						</table>
-					</td>
-					<td valign="top" style="padding: 5px;">
-						<table cellspacing="4">
-							<tr> 
-								<td colspan="2" align="center"><span class="fett">Markieren</span></td>
-							</tr>
-							<tr>
-								<td>
-									<input type="checkbox" name="markhauptart[]" onchange="update_selection(this);" value="111"<? if(in_array(111, $this->formvars['markhauptart']))echo ' checked="true" '; ?>> alle<br>
-									<input type="checkbox" name="markhauptart[]" onchange="update_selection(this);" value="222"<? if(in_array(222, $this->formvars['markhauptart']))echo ' checked="true" '; ?>> alle der Messung<br>
-									<input type="checkbox" name="markhauptart[]" onchange="update_selection(this);" value="000"<? if(in_array(000, $this->formvars['markhauptart']))echo ' checked="true" '; ?>> keine<br>
-					<? 			foreach($this->hauptdokumentarten as $hauptart){  ?>
-										<input type="checkbox" name="markhauptart[]" onchange="update_selection(this);" value="<? echo $hauptart['id']; ?>"<? if(in_array($hauptart['id'], $this->formvars['markhauptart']))echo ' checked="true" '; ?>> <? echo $hauptart['abkuerzung']; ?><br>
-					<?			}		?>
-								</td>							
-								<td valign="bottom">
-									<br>
-									<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
-										<a href="javascript:updategeoms();" id="updateGeomLink" <? if($this->formvars['ref_geom'] == '')echo 'style="display: none"'; ?>><span class="fett">Geometrie übernehmen</span></a>
-									<? } ?>
-									<br><br>
-									<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
-										<a href="javascript:vorlage();"><span class="fett">als Vorlage verwenden</span></a>
-									<? } ?>
-									<br><br>
-									<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>          		
-										<a href="javascript:bearbeiten();"><span class="fett">bearbeiten</span></a>
-									<? } ?>
-									<br><br>
-									<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>
-										<a href="javascript:loeschen();"><span class="fett">löschen</span></a>
-									<? } ?>
-								</td>		
-							</tr>
-						</table>
-					</td>
-					<td valign="top" style="padding: 5px;">
-						<table cellspacing="4">
-							<tr> 
-								<td colspan="2" align="center"><span class="fett">Vorbereitungsnummer</span></td>
-							</tr>
-							<tr>
-								<td>
-									<span class="fett">
-									<? $this->FormObjAntr_nr->outputHTML();
-										echo $this->FormObjAntr_nr->html;?>
-									</span>
-								</td>
-								<td valign="top">
-									<br>
-									<a href="javascript:zum_Auftrag_hinzufuegen();"><span class="fett">zu Auftrag hinzufügen</span></a>
-									<br><br>
-									<a href="javascript:aus_Auftrag_entfernen();"><span class="fett">aus Auftrag entfernen</span></a>
-								</td>
-							</tr>							
-						</table>
-					</td>
-				</tr>
-      </table>
+			<div onmouseenter="clearVorschau();" style="width: 100%">
+				<table width="0%" border="1" cellspacing="0" cellpadding="0" id="nachweisanzeige_optionen">
+					<tr>
+						<td valign="top" style="padding: 5px;">
+							<table cellspacing="4">
+								<tr>
+									<td colspan="2" align="center"><span class="fett">Einblenden</span></td>
+								</tr>
+								<tr>
+									<td>
+										<input type="checkbox" name="showhauptart[]" onchange="set_selections('showhauptart[]', ['2222', '']);" value=""> alle<br>
+										<input type="checkbox" name="showhauptart[]" onchange="clear_selections('showhauptart[]', '2222');" value="2222"<? if(in_array(2222, $this->formvars['showhauptart']))echo ' checked="true" '; ?>> alle ausgewählten<br>
+						<? 			foreach($this->hauptdokumentarten as $hauptart){  ?>
+											<input type="checkbox" name="showhauptart[]" value="<? echo $hauptart['id']; ?>"<? if(in_array($hauptart['id'], $this->formvars['showhauptart']))echo ' checked="true" '; ?>> <? echo $hauptart['abkuerzung']; ?><br>
+						<?			}		?>
+									</td>
+								</tr>
+								<tr>
+									<td align="center">
+										<input type="submit" value="Aktualisieren">
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td valign="top" style="padding: 5px;">
+							<table cellspacing="4">
+								<tr> 
+									<td colspan="2" align="center"><span class="fett">Markieren</span></td>
+								</tr>
+								<tr>
+									<td>
+										<input type="checkbox" name="markhauptart[]" onchange="update_selection(this);" value="111"<? if(in_array(111, $this->formvars['markhauptart']))echo ' checked="true" '; ?>> alle<br>
+										<input type="checkbox" name="markhauptart[]" onchange="update_selection(this);" value="222"<? if(in_array(222, $this->formvars['markhauptart']))echo ' checked="true" '; ?>> alle der Messung<br>
+										<input type="checkbox" name="markhauptart[]" onchange="update_selection(this);" value="000"<? if(in_array(000, $this->formvars['markhauptart']))echo ' checked="true" '; ?>> keine<br>
+						<? 			foreach($this->hauptdokumentarten as $hauptart){  ?>
+											<input type="checkbox" name="markhauptart[]" onchange="update_selection(this);" value="<? echo $hauptart['id']; ?>"<? if(in_array($hauptart['id'], $this->formvars['markhauptart']))echo ' checked="true" '; ?>> <? echo $hauptart['abkuerzung']; ?><br>
+						<?			}		?>
+									</td>							
+									<td valign="bottom">
+										<br>
+										<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
+											<a href="javascript:updategeoms();" id="updateGeomLink" <? if($this->formvars['ref_geom'] == '')echo 'style="display: none"'; ?>><span class="fett">Geometrie übernehmen</span></a>
+										<? } ?>
+										<br><br>
+										<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
+											<a href="javascript:vorlage();"><span class="fett">als Vorlage verwenden</span></a>
+										<? } ?>
+										<br><br>
+										<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>          		
+											<a href="javascript:bearbeiten();"><span class="fett">bearbeiten</span></a>
+										<? } ?>
+										<br><br>
+										<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>
+											<a href="javascript:loeschen();"><span class="fett">löschen</span></a>
+										<? } ?>
+									</td>		
+								</tr>
+							</table>
+						</td>
+						<td valign="top" style="padding: 5px;">
+							<table cellspacing="4">
+								<tr> 
+									<td colspan="2" align="center"><span class="fett">Vorbereitungsnummer</span></td>
+								</tr>
+								<tr>
+									<td>
+										<span class="fett">
+										<? $this->FormObjAntr_nr->outputHTML();
+											echo $this->FormObjAntr_nr->html;?>
+										</span>
+									</td>
+									<td valign="top">
+										<br>
+										<a href="javascript:zum_Auftrag_hinzufuegen();"><span class="fett">zu Auftrag hinzufügen</span></a>
+										<br><br>
+										<a href="javascript:aus_Auftrag_entfernen();"><span class="fett">aus Auftrag entfernen</span></a>
+									</td>
+								</tr>							
+							</table>
+						</td>
+					</tr>
+				</table>
+			</div>
 	  <? 
 	  } else {
 	  ?>
@@ -603,7 +634,7 @@ Wählen Sie neue Suchparameter.</span><br>
 
 
 <!--[IF !IE]> -->
-<div id="vorschau" style="z-index: 1000; position: fixed; left:50%; margin-left:-410px;  top:50px; "></div>
+<div id="vorschau" style="z-index: 1000; position: fixed; left:50%; margin-left:-100px;  top:20px; "></div>
 <!-- <![ENDIF]-->
  <!--[IF IE]>
 <div id="vorschau" style="position: absolute; left:50%; margin-left:-150px; top: expression((190 + (ignoreMe = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop)) + 'px');"></div>
