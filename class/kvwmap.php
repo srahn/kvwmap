@@ -8172,7 +8172,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->invitation = new Invitation($this);
 		$this->invitation->data = formvars_strip($this->formvars, $this->invitation->setKeysFromTable(), 'keep');
 
-
 		$results = $this->invitation->validate();
 		if (empty($results)) {
 			$results = $this->invitation->create();
@@ -8180,7 +8179,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if ($results[0]['success']) {
 			$this->invitation = Invitation::find_by_id($this, $this->invitation->get('token'));
 			$this->add_message('info', 'Neuer Nutzer ist vorgemerkt.<br>
-				<a href="mailto:' . $this->invitation->mailto_text() . '">Einladung per E-Mail verschicken</a>');
+				Zum Einladen per E-Mail<br>
+				klicken Sie <a href="mailto:' . $this->invitation->mailto_text() . '">hier</a>!<br>
+				Die E-Mail enthält den Link zur Einladung.');
 			$this->invitations_list();
 		}
 		else {
