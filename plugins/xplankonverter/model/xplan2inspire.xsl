@@ -266,113 +266,131 @@
 		    </xsl:otherwise>
 		  </xsl:choose>
           <!-- ordinance -->
-			<xsl:choose>
-			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:technHerstellDatum">
-				<plu:ordinance>
-					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:technHerstellDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
-						<plu:ordinanceReference>technHerstellDatum</plu:ordinanceReference>
-					</plu:OrdinanceValue>
-				</plu:ordinance>
-			</xsl:when>
-			</xsl:choose>
-			<xsl:choose>
-			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:genehmigungsDatum">
-				<plu:ordinance>
-					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:genehmigungsDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
-						<plu:ordinanceReference>genehmigungsDatum</plu:ordinanceReference>
-					</plu:OrdinanceValue>
-				</plu:ordinance>
-			</xsl:when>
-			</xsl:choose>
-			<xsl:choose>
-			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aufstellungsbeschlussDatum">
-				<plu:ordinance>
-					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aufstellungsbeschlussDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
-						<plu:ordinanceReference>aufstellungsbeschlussDatum</plu:ordinanceReference>
-					</plu:OrdinanceValue>
-				</plu:ordinance>
-			</xsl:when>
-			</xsl:choose>
-			<!-- ForEach as 0..* -->
-			<xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungStartDatum">
-				<plu:ordinance>
-					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:value-of select="."/>T00:00:00</plu:ordinanceDate>
-						<plu:ordinanceReference>auslegungStartDatum</plu:ordinanceReference>
-					</plu:OrdinanceValue>
-				</plu:ordinance>
-			</xsl:for-each>
-			<xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungEndDatum">
-				<plu:ordinance>
-					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:value-of select="."/>T00:00:00</plu:ordinanceDate>
-						<plu:ordinanceReference>auslegungEndDatum</plu:ordinanceReference>
-					</plu:OrdinanceValue>
-				</plu:ordinance>
-			</xsl:for-each>
-			<xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsStartDatum">
-				<plu:ordinance>
-					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:value-of select="." />T00:00:00</plu:ordinanceDate>
-						<plu:ordinanceReference>traegerbeteiligungsStartDatum</plu:ordinanceReference>
-					</plu:OrdinanceValue>
-				</plu:ordinance>
-			</xsl:for-each>
-			<xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsEndDatum">
-				<plu:ordinance>
-					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:value-of select="." />T00:00:00</plu:ordinanceDate>
-						<plu:ordinanceReference>traegerbeteiligungsEndDatum</plu:ordinanceReference>
-					</plu:OrdinanceValue>
-				</plu:ordinance>
-			</xsl:for-each>
-			<xsl:choose>
-			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aenderungenBisDatum">
-				<plu:ordinance>
-					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aenderungenBisDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
-						<plu:ordinanceReference>traegerbeteiligungsEndDatum</plu:ordinanceReference>
-					</plu:OrdinanceValue>
-				</plu:ordinance>
-			</xsl:when>
-			</xsl:choose>
-			<xsl:choose>
-			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:entwurfsbeschlussDatum">
-				<plu:ordinance>
-					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:entwurfsbeschlussDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
-						<plu:ordinanceReference>entwurfsbeschlussDatum</plu:ordinanceReference>
-					</plu:OrdinanceValue>
-				</plu:ordinance>
-			</xsl:when>
-			</xsl:choose>
-			<xsl:choose>
-			<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planbeschlussDatum">
-				<plu:ordinance>
-					<plu:OrdinanceValue>
-						<plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planbeschlussDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
-						<plu:ordinanceReference>planbeschlussDatum</plu:ordinanceReference>
-					</plu:OrdinanceValue>
-				</plu:ordinance>
-			</xsl:when>
-			</xsl:choose>
-			<xsl:choose>
-				<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:hatGenerAttribut/xplan:XP_DatumAttribut">
-					<plu:ordinance>
-						<plu:OrdinanceValue>
-							<plu:ordinanceDate>
-								<xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:hatGenerAttribut/xplan:XP_DatumAttribut/wert"></xsl:apply-templates>
-							</plu:ordinanceDate>
-							<plu:ordinanceReference>
-								<xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:hatGenerAttribut/xplan:XP_DatumAttribut/name"></xsl:apply-templates>
-							</plu:ordinanceReference>
-						</plu:OrdinanceValue>
-					</plu:ordinance>
-				</xsl:when>
-			</xsl:choose>
+            <xsl:choose>
+                <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:technHerstellDatum or
+                xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:genehmigungsDatum or 
+                xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aufstellungsbeschlussDatum or 
+                xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungStartDatum or 
+                xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungEndDatum or 
+                xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsStartDatum or 
+                xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsEndDatum or 
+                xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aenderungenBisDatum or 
+                xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:entwurfsbeschlussDatum or 
+                xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planbeschlussDatum or 
+                xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:hatGenerAttribut/xplan:XP_DatumAttribut
+                ">
+                <xsl:choose>
+                <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:technHerstellDatum">
+                    <plu:ordinance>
+                        <plu:OrdinanceValue>
+                            <plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:technHerstellDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+                            <plu:ordinanceReference>technHerstellDatum</plu:ordinanceReference>
+                        </plu:OrdinanceValue>
+                    </plu:ordinance>
+                </xsl:when>
+                </xsl:choose>
+                <xsl:choose>
+                <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:genehmigungsDatum">
+                    <plu:ordinance>
+                        <plu:OrdinanceValue>
+                            <plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:genehmigungsDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+                            <plu:ordinanceReference>genehmigungsDatum</plu:ordinanceReference>
+                        </plu:OrdinanceValue>
+                    </plu:ordinance>
+                </xsl:when>
+                </xsl:choose>
+                <xsl:choose>
+                <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aufstellungsbeschlussDatum">
+                    <plu:ordinance>
+                        <plu:OrdinanceValue>
+                            <plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aufstellungsbeschlussDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+                            <plu:ordinanceReference>aufstellungsbeschlussDatum</plu:ordinanceReference>
+                        </plu:OrdinanceValue>
+                    </plu:ordinance>
+                </xsl:when>
+                </xsl:choose>
+                <!-- ForEach as 0..* -->
+                <xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungStartDatum">
+                    <plu:ordinance>
+                        <plu:OrdinanceValue>
+                            <plu:ordinanceDate><xsl:value-of select="."/>T00:00:00</plu:ordinanceDate>
+                            <plu:ordinanceReference>auslegungStartDatum</plu:ordinanceReference>
+                        </plu:OrdinanceValue>
+                    </plu:ordinance>
+                </xsl:for-each>
+                <xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:auslegungEndDatum">
+                    <plu:ordinance>
+                        <plu:OrdinanceValue>
+                            <plu:ordinanceDate><xsl:value-of select="."/>T00:00:00</plu:ordinanceDate>
+                            <plu:ordinanceReference>auslegungEndDatum</plu:ordinanceReference>
+                        </plu:OrdinanceValue>
+                    </plu:ordinance>
+                </xsl:for-each>
+                <xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsStartDatum">
+                    <plu:ordinance>
+                        <plu:OrdinanceValue>
+                            <plu:ordinanceDate><xsl:value-of select="." />T00:00:00</plu:ordinanceDate>
+                            <plu:ordinanceReference>traegerbeteiligungsStartDatum</plu:ordinanceReference>
+                        </plu:OrdinanceValue>
+                    </plu:ordinance>
+                </xsl:for-each>
+                <xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:traegerbeteiligungsEndDatum">
+                    <plu:ordinance>
+                        <plu:OrdinanceValue>
+                            <plu:ordinanceDate><xsl:value-of select="." />T00:00:00</plu:ordinanceDate>
+                            <plu:ordinanceReference>traegerbeteiligungsEndDatum</plu:ordinanceReference>
+                        </plu:OrdinanceValue>
+                    </plu:ordinance>
+                </xsl:for-each>
+                <xsl:choose>
+                <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aenderungenBisDatum">
+                    <plu:ordinance>
+                        <plu:OrdinanceValue>
+                            <plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:aenderungenBisDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+                            <plu:ordinanceReference>traegerbeteiligungsEndDatum</plu:ordinanceReference>
+                        </plu:OrdinanceValue>
+                    </plu:ordinance>
+                </xsl:when>
+                </xsl:choose>
+                <xsl:choose>
+                <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:entwurfsbeschlussDatum">
+                    <plu:ordinance>
+                        <plu:OrdinanceValue>
+                            <plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:entwurfsbeschlussDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+                            <plu:ordinanceReference>entwurfsbeschlussDatum</plu:ordinanceReference>
+                        </plu:OrdinanceValue>
+                    </plu:ordinance>
+                </xsl:when>
+                </xsl:choose>
+                <xsl:choose>
+                <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planbeschlussDatum">
+                    <plu:ordinance>
+                        <plu:OrdinanceValue>
+                            <plu:ordinanceDate><xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planbeschlussDatum"></xsl:apply-templates>T00:00:00</plu:ordinanceDate>
+                            <plu:ordinanceReference>planbeschlussDatum</plu:ordinanceReference>
+                        </plu:OrdinanceValue>
+                    </plu:ordinance>
+                </xsl:when>
+                </xsl:choose>
+                <xsl:choose>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:hatGenerAttribut/xplan:XP_DatumAttribut">
+                        <plu:ordinance>
+                            <plu:OrdinanceValue>
+                                <plu:ordinanceDate>
+                                    <xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:hatGenerAttribut/xplan:XP_DatumAttribut/wert"></xsl:apply-templates>
+                                </plu:ordinanceDate>
+                                <plu:ordinanceReference>
+                                    <xsl:apply-templates select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:hatGenerAttribut/xplan:XP_DatumAttribut/name"></xsl:apply-templates>
+                                </plu:ordinanceReference>
+                            </plu:OrdinanceValue>
+                        </plu:ordinance>
+                    </xsl:when>
+                </xsl:choose>
+              </xsl:when>
+              <xsl:otherwise>
+                <plu:ordinance nilReason="unknown" xsi:nil="true" />
+              </xsl:otherwise>
+          </xsl:choose>
           <!-- Association SpatialPlan zu OfficialDocumentation-->
           <!-- Setzt Verknüpfung für jedes existierende RP_TextAbschnitt-Element, für welches auf RP_Plan eine Relation über +texte besteht. Setzt nilReason falls keine Relation vorhanden ist-->
           <xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:texte">

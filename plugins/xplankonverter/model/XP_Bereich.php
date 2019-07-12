@@ -18,8 +18,8 @@ class XP_Bereich extends PgObject {
 		$this->identifier_type = 'text';
 	}
 
-	public static	function find_by_id($gui, $by, $id) {
-		$xp_bereich = new XP_Bereich($gui, $this->planart);
+	public static	function find_by_id($gui, $by, $id, $planart) {
+		$xp_bereich = new XP_Bereich($gui, $planart);
 		$xp_bereich->find_by($by, $id);
 		return $xp_bereich;
 	}

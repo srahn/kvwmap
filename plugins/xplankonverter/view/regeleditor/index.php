@@ -3,6 +3,8 @@
 	<HEAD>
 		<TITLE>Regeleditor</TITLE>
 		<META charset="UTF-8">
+        <?php include('config.php'); ?>
+		<?php include(PLUGINS . 'xplankonverter/view/header.php'); ?>
 		<script src="<?php echo JQUERY_PATH; ?>jquery-1.12.0.min.js"></script>
 		<script src="plugins/xplankonverter/view/regeleditor/control.js">"use strict";</script>
 		<!-- Setzt PHP Variable als (Global) Javascript Variable -->
@@ -186,7 +188,7 @@
 					<td align="top left">
 						<!--<div class="halbe-breite box">-->
 						<?php
-							featuretype_liste($this->pgdatabase->dbConn, $class_name);
+							featuretype_liste($GUI->pgdatabase->dbConn, $class_name);
 						?>
 						<div id="target_table"></div>
 						</div>
@@ -196,7 +198,7 @@
 						<select id="source_selector" onChange="setShapefile()">
 						<option value="">Shape Datei waehlen ...</option>
 							<?php
-								shapeTables($this->pgdatabase->dbConn, $konvertierung_id);
+								shapeTables($GUI->pgdatabase->dbConn, $konvertierung_id);
 							?>
 						</div>
 					</td>
@@ -304,18 +306,23 @@
 		# Wählt zuerst alle Featuretypes aus xplan_gml aus, auf die Regeln geschrieben werden können
 		$gml_classes = array();
 		$sql = "
-			SELECT 
+			SELECT
+				TRIM(leading '" . XPLANKONVERTER_CONTENT_SCHEMA . "' || '.' FROM inhrelid::regclass::text) AS table_name
+				--inhparent::regclass::text AS inherits_from,
+				--inhseqno
+			FROM
+				pg_inherits
+			WHERE
+				inhparent IN (
+					'xplan_gml.rp_geometrieobjekt'::regclass,
+                    'xplan_gml.rp_geometrieobjekt'::regclass,
+					'xplan_gml.rp_freiraum'::regclass,
+					'xplan_gml.rp_verkehr'::regclass,
+					'xplan_gml.rp_siedlung'::regclass
+				)
+			ORDER BY
 				table_name
-			FROM 
-				information_schema.tables 
-			WHERE 
-				table_schema = 'xplan_gml'
-			AND
-				table_name LIKE 'rp_%'
-			AND
-				table_name NOT IN ('rp_plan', 'rp_geometrieobjekt', 'rp_objekt', 'rp_bereich', 'rp_status', 'rp_bereich_zu_rp_objekt', 'rp_bereich_zu_rp_rasterplanaenderung', 'rp_featuretypeliste', 'rp_praesentationsobjekt', 'rp_textabschnitt', 'rp_spezifischegrenzetypen', 'rp_generischesobjekttypen', 'rp_rasterplanaenderung', 'rp_sonstgrenzetypen', 'rp_sonstplanart')
-			ORDER BY table_name
-		";
+			;";
 		$result = pg_query($conn, $sql);
 		# Setzt ein Selektorfeld, das jeden Featuretype beinhaltet und speichert die Werte in einer Variable
 		echo '<select id="target_selector" onChange="chooseFeatureTable()">';
