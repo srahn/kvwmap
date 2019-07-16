@@ -38,6 +38,8 @@ class pgdatabase {
 
 	function pgdatabase() {
 		global $debug;
+		global $GUI;
+		$this->gui = $GUI;
 		$this->debug=$debug;
 		$this->loglevel=LOG_LEVEL;
 		$this->defaultloglevel=LOG_LEVEL;
@@ -228,8 +230,9 @@ FROM
     return $ret;
   }
 
-	function execSQL($sql, $debuglevel, $loglevel, $suppress_error_msg = false) {
+	function execSQL($sql, $debuglevel, $loglevel, $suppress_err_msg = false) {
 		$ret = array(); // Array with results to return
+		$strip_context = true;
 
 		switch ($this->loglevel) {
 			case 0 : {
@@ -250,75 +253,66 @@ FROM
 			if (stristr($sql, 'SELECT')) {
 				$sql = "SET datestyle TO 'German';" . $sql;
 			};
-			if ($this->schema != ''){
+			if ($this->schema != '') {
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
 			$query = @pg_query($this->dbConn, $sql);
 			//$query=0;
 			if ($query == 0) {
-				$ret[0] = 1;
 				$ret['success'] = false;
-				$errormessage = pg_last_error($this->dbConn);
-				header('error: true');	// damit ajax-Requests das auch mitkriegen
-				# Abfrage von Notice
-				if ($errormessage != '' AND strpos($errormessage, '{') !== false AND strpos($errormessage, '}') !== false) {
-					$notice_obj = json_decode(substr($errormessage, strpos($errormessage, '{'), strpos($errormessage, '}') - strpos($errormessage, '{') + 1), true);
-					if (array_key_exists('success', $notice_obj)) {
-						if (!$notice_obj['success']) {
-							$ret[0] = 1;
-							$ret['success'] = false;
-						}
-						if (array_key_exists('msg_type', $notice_obj)) {
-							$ret['type'] = $notice_obj['msg_type'];
-						}
-						if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
-							$ret['msg'] = $ret[1] = $notice_obj['msg'];
-						}
+				# erzeuge eine Fehlermeldung;
+				$last_error = pg_last_error($this->dbConn);
+				if ($strip_context AND strpos($last_error, 'CONTEXT: ') !== false) {
+					$ret['msg'] = substr($last_error, 0, strpos($last_error, 'CONTEXT: '));
+				}
+				else {
+					$ret['msg'] = $last_error;
+				}
+
+				if (strpos($last_error, '{') !== false AND strpos($last_error, '}') !== false) {
+					# Parse als JSON String;
+					$error_obj = json_decode(substr($last_error, strpos($last_error, '{'), strpos($last_error, '}') - strpos($last_error, '{') + 1), true);
+					if (array_key_exists('msg_type', $error_obj)) {
+						$ret['type'] = $error_obj['msg_type'];
+					}
+					if (array_key_exists('msg', $error_obj) AND $error_obj['msg'] != '') {
+						$ret['msg'] = $error_obj['msg'];
 					}
 				}
 				else {
-					$ret[1] =
-						$errormessage . "<br>\n<br>" .
-						"\nAufgetreten bei PostgreSQL Anweisung:<br>\n" .
-						"<textarea id=\"sql_statement\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px;\">" . $sql . "</textarea><br>\n" .
-						"<button type=\"button\" onclick=\"
-								copyText = document.getElementById('sql_statement');
-								copyText.select();
-								document.execCommand('copy');
-							\">In Zwischenablage kopieren</button>";
-					$ret['msg'] = $ret[1];
 					$ret['type'] = 'error';
 				}
-				if (!$suppress_error_msg) {
-					echo "<br><b>" . $ret[1] . "</b>";
-				}
-				$this->debug->write("<br><b>" . $ret[1] . "</b>", $debuglevel);
+				$this->debug->write("<br><b>" . $last_error . "</b>", $debuglevel);
 				if ($logsql) {
-					$this->logfile->write($this->commentsign . " " . $ret[1]);
+					$this->logfile->write($this->commentsign . ' ' . $sql . ' ' . $last_error);
 				}
 			}
 			else {
-				# Abfrage wurde erfolgreich ausgeführt
+				# Abfrage wurde zunächst erfolgreich ausgeführt
 				$ret[0] = 0;
 				$ret['success'] = true;
 				$ret[1] = $ret['query'] = $query;
-				$notice_txt = pg_last_notice($this->dbConn);
-				$this->notices[] = $notice_txt;
+
+				# Prüfe ob eine Fehlermeldung in der Notice steckt
+				$last_notice = pg_last_notice($this->dbConn);
+				if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
+					$ret['msg'] = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
+				}
+				$this->notices[] = $last_notice;
 				# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
-				if ($notice_txt != '' AND !in_array($notice_txt, $this->notices)) {
-					if (strpos($notice_txt, '{') !== false AND strpos($notice_txt, '}' !== false)) {
+				if ($last_notice != '' AND !in_array($last_notice, $this->notices)) {
+					if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
 						# Parse als JSON String
-						$notice_obj = json_decode(substr($notice_txt, strpos($notice_txt, '{'), strpos($notice_txt, '}') - strpos($notice_txt, '{') + 1), true);
+						$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
 						if (array_key_exists('success', $notice_obj)) {
 							if (!$notice_obj['success']) {
-								$ret[0] = 1;
 								$ret['success'] = false;
 							}
 							if (array_key_exists('msg_type', $notice_obj)) {
 								$ret['type'] = $notice_obj['msg_type'];
 							}
 							if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
-								$ret['msg'] = $ret[1] = $notice_obj['msg'];
+								$ret['msg'] = $notice_obj['msg'];
 							}
 						}
 					}
@@ -327,8 +321,9 @@ FROM
 						$ret['msg'] = $notice_txt;
 					}
 				}
+
+				# Schreibe Meldungen in Log und Debugfile
 				$this->debug->write("<br>" . $sql, $debuglevel);
-				# 2006-07-04 pk $logfile ersetzt durch $this->logfile
 				if ($logsql) {
 					$this->logfile->write($sql . ';');
 				}
@@ -349,6 +344,24 @@ FROM
 				$this->logfile->write($sql . ';');
 			}
 			$this->debug->write("<br>" . $sql, $debuglevel);
+		}
+
+		if ($ret['success']) {
+			# alles ok mach nichts weiter
+		}
+		else {
+			# Fehler setze entsprechende Fags und Fehlermeldung
+			$ret[0] = 1;
+			$ret[1] = $ret['msg'];
+			if ($suppress_err_msg) {
+				# mache nichts, den die Fehlermeldung wird unterdrückt
+			}
+			else {
+				# gebe Fehlermeldung aus.
+				$ret[1] = $ret['msg'] = sql_err_msg('Fehler bei der Abfrage der PostgreSQL-Datenbank:', $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
+				$this->gui->add_message($ret['type'], $ret['msg']);
+				header('error: true');	// damit ajax-Requests das auch mitkriegen
+			}
 		}
 		return $ret;
 	}
@@ -437,49 +450,59 @@ FROM
 			return $ret['schema'];
 		}
 	}
-	
-  function getFieldsfromSelect($select, $assoc = false){
-    $sql = "SET client_min_messages='log';SET log_duration = false;SET debug_print_parse=true;".$select." LIMIT 0";			# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
-    $ret = $this->execSQL($sql, 4, 0);
-    if($ret[0]==0){			
-			$query_plan = pg_last_notice($this->dbConn);
-			$table_alias_names = $this->get_table_alias_names($query_plan);
-			$field_plan_info = explode("\n      :resno", $query_plan);
-      
-      for($i = 0; $i < pg_num_fields($ret[1]); $i++){
-        # Attributname
-        $fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
 
-				# Spaltennummer in der Tabelle
-				$col_num = get_first_word_after($field_plan_info[$i+1], ':resorigcol');
+	function getFieldsfromSelect($select, $assoc = false) {
+		$err_msgs = array();
+		$sql = $select." LIMIT 0";
+		$ret = $this->execSQL($sql, 4, 0);
+		if ($ret['success']) {
+			$sql = "EXPLAIN (FORMAT JSON,ANALYZE False,VERBOSE True,COSTS False,TIMING False,BUFFERS False) ".$select." LIMIT 0";			# den Queryplan mitabfragen um an Infos zur Query zu kommen
+			$exp = $this->execSQL($sql, 4, 0);
+			$query_plan = json_decode(pg_fetch_assoc($exp[1])['QUERY PLAN'], true);
+
+			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
+				$plan_info = explode('.', $query_plan[0]['Plan']['Output'][$i]);
+				
+				# Attributname
+				$fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
 				
 				# Tabellen-oid des Attributs
-				$table_oid = pg_field_table($ret[1], $i, true);
-				
-        # Tabellenname des Attributs
-        $fields[$i]['table_name'] = $tablename = pg_field_table($ret[1], $i);
-        if($tablename != NULL){
-          $all_table_names[] = $tablename;
-        }
-				
-				# Tabellenaliasname des Attributs
-				$fields[$i]['table_alias_name'] = $table_alias_names[$table_oid];
-				
-				# Schemaname der Tabelle des Attributs
-				$schemaname = $this->pg_field_schema($table_oid);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?				
+				$table_oid = pg_field_table($ret[1], $i, true);			
 
-        # wenn das Attribut eine Tabellenspalte ist -> weitere Attributeigenschaften holen
-				if($col_num > 0){
-					$constraintstring = '';
-					$attr_info = $this->get_attribute_information($schemaname, $tablename, $col_num);
-					if($attr_info[0]['relkind'] == 'v'){		# wenn View, dann Attributinformationen aus View-Definition holen
-						if($view_defintion_attributes[$tablename] == NULL){
-							$view_defintion_attributes[$tablename] = $this->getFieldsfromSelect(substr($attr_info[0]['view_definition'], 0, -1), true);
-						}
-						if($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info[0]['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
-						if($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info[0]['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
+				# wenn das Attribut eine Tabellenspalte ist -> weitere Attributeigenschaften holen
+				if ($table_oid > 0){
+					# realer Name der Spalte in der Tabelle
+					$fields[$i]['real_name'] = $plan_info[1];
+					
+					# Tabellenname des Attributs
+					$fields[$i]['table_name'] = $tablename = pg_field_table($ret[1], $i);
+					if ($tablename != NULL) {
+						$all_table_names[] = $tablename;
 					}
-					$fields[$i]['real_name'] = $attr_info[0]['name'];
+
+					# Tabellenaliasname des Attributs
+					$fields[$i]['table_alias_name'] = $plan_info[0];
+
+					# Schemaname der Tabelle des Attributs
+					$schemaname = $this->pg_field_schema($table_oid);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?	
+					
+					$constraintstring = '';
+					$attr_info = $this->get_attribute_information($schemaname, $tablename, $fields[$i]['real_name']);
+					if($attr_info[0]['relkind'] == 'v'){		# wenn View, dann Attributinformationen aus View-Definition holen
+						if($view_defintion_attributes[$tablename] == NULL) {
+							$ret2 = $this->getFieldsfromSelect(substr($attr_info[0]['view_definition'], 0, -1), true);
+							if ($ret2['success']) {
+								$view_defintion_attributes[$tablename] = $ret2[1];
+							}
+							else {
+								# Füge Fehlermeldung hinzu und setze leeres Array
+								$err_msgs[] = $ret2[1];
+								$view_defintion_attributes[$tablename] = array();
+							}
+						}
+						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info[0]['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
+						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info[0]['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
+					}
 					$fieldtype = $attr_info[0]['type_name'];
 					$fields[$i]['nullable'] = $attr_info[0]['nullable']; 
 					$fields[$i]['length'] = $attr_info[0]['length'];
@@ -515,28 +538,38 @@ FROM
 					}
 					$fields[$i]['constraints'] = $constraintstring;
 				}
-				else{		# Attribut ist keine Tabellenspalte -> nicht speicherbar
+				else { # Attribut ist keine Tabellenspalte -> nicht speicherbar
 					$fieldtype = 'not_saveable';
 				}
-        $fields[$i]['type'] = $fieldtype;
-				
-        # Geometrietyp
-        if($fieldtype == 'geometry'){
-          $fields[$i]['geomtype'] = $this->get_geom_type($schemaname, $fields[$i]['real_name'], $tablename);
-          $fields['the_geom'] = $fieldname;
+				$fields[$i]['type'] = $fieldtype;
+
+				# Geometrietyp
+				if ($fieldtype == 'geometry') {
+					$fields[$i]['geomtype'] = $this->get_geom_type($schemaname, $fields[$i]['real_name'], $tablename);
+					$fields['the_geom'] = $fieldname;
 					$fields['the_geom_id'] = $i;
-        }
-				if($assoc)$fields_assoc[$fieldname] = $fields[$i];
-      }
-      
-      if($assoc)return $fields_assoc;
-      else return $fields;
-    }
-    else return NULL;
-  }
-	
-	function get_attribute_information($schema, $table, $col_num = NULL) {
-		if($col_num != NULL)$and_column = "a.attnum = ".$col_num." AND ";
+				}
+				if ($assoc) {
+					$fields_assoc[$fieldname] = $fields[$i];
+				}
+			}
+			$ret[1] = ($assoc ? $fields_assoc : $fields);
+		}
+		else {
+			# Füge Fehlermeldung hinzu
+			$err_msgs[] = $ret[1];
+		}
+
+		if (count($err_msgs) > 0) {
+			# Wenn Fehler auftraten liefer nur die Fehler zurück
+			$ret[0] = 1;
+			$ret[1] = implode('<br>', $err_msgs);
+		}
+		return $ret;
+	}
+
+	function get_attribute_information($schema, $table, $name = NULL) {
+		if($name != NULL)$and_column = "a.attname = '".$name."' AND ";
 		$attributes = array();
 		$sql = "
 			SELECT
@@ -707,17 +740,20 @@ FROM
 	* @return string Geometrytyp
 	*/
 	function get_geom_type($schema, $geomcolumn, $tablename){
-		if($schema == '')$schema = 'public';
+		if ($schema == '') {
+			$schema = 'public';
+		}
 		$schema = str_replace(',', "','", $schema);
-		if($geomcolumn != '' AND $tablename != ''){
+		if ($geomcolumn != '' AND $tablename != '') {
+			#-- search_path ist zwar gesetzt, aber nur auf custom_shapes, daher ist das Schema der Tabelle erforderlich
 			$sql = "
 				SELECT coalesce(
-					(select geometrytype(".$geomcolumn.") FROM ".$schema.".".$tablename." limit 1)
+					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . $tablename . " limit 1)
 					,  
 					(select type from geometry_columns WHERE 
-					 f_table_schema IN ('".$schema."') and 
-					 f_table_name = '".$tablename."' AND 
-					 f_geometry_column = '".$geomcolumn."')
+					 f_table_schema IN ('" . $schema . "') and 
+					 f_table_name = '" . $tablename . "' AND 
+					 f_geometry_column = '" . $geomcolumn . "')
 				) as type
 			";
 			$ret1 = $this->execSQL($sql, 4, 0);
@@ -786,16 +822,6 @@ FROM
     }
     return $query;
   }
-	
-	function get_table_alias_names($query_plan){
-		$table_info = explode(":eref \n         {ALIAS \n         ", $query_plan);
-		for($i = 1; $i < count($table_info); $i++){
-			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
-			$table_oid = get_first_word_after($table_info[$i], ':relid');
-			$table_alias_names[$table_oid] = $table_alias;
-		}
-		return $table_alias_names;
-	}
 	
   function pg_table_constraints($table){
   	if($table != ''){
@@ -1955,7 +1981,7 @@ FROM
 		$caseSensitive = $formvars['caseSensitive'];
 		$order = $formvars['order'];
 			
-    $sql = "set enable_seqscan = off;set enable_mergejoin = off;set enable_hashjoin = off;SELECT distinct p.nachnameoderfirma, p.vorname, p.namensbestandteil, p.akademischergrad, p.geburtsname, p.geburtsdatum, array_to_string(p.hat, ',') as hat, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, g.buchungsblattnummermitbuchstabenerweiterung as blatt, b.schluesselgesamt as bezirk ";
+    $sql = "set enable_seqscan = off;set enable_mergejoin = off;set enable_hashjoin = off;SELECT distinct n.gml_id, p.nachnameoderfirma, p.vorname, p.namensbestandteil, p.akademischergrad, p.geburtsname, p.geburtsdatum, array_to_string(p.hat, ',') as hat, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, g.buchungsblattnummermitbuchstabenerweiterung as blatt, b.schluesselgesamt as bezirk ";
 		$sql.= "FROM alkis.ax_person p ";
 		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = p.hat[1] ";		# da die meisten Eigentümer nur eine Anschrift haben, diese gleiche in dieser Abfrage mit abfragen
 		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.benennt = p.gml_id ";

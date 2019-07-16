@@ -1,6 +1,6 @@
 <?php
 ?>
-<div id="<?php echo $this->formvars['featuretype']; ?>_attributes_table">
+<div id="<?php echo $GUI->formvars['featuretype']; ?>_attributes_table">
 <table border="1" cellspacing="0" cellpadding="2" style="width:100%; margin-top: 6px">
 <tr>
 	<th style="background-color: <?php echo BG_DEFAULT; ?>"><b>Attributname</b></th>
@@ -10,7 +10,7 @@
 </tr><?php
 
 // Insert a new row for each attribute
-while ($row = pg_fetch_row($this->result)){
+while ($row = pg_fetch_row($GUI->result)){
 	// entnimmt Metadaten u. Assoziationen
 	if ($row[0]!='gml_id' 
 		and $row[0]!='stellen_id'
@@ -59,7 +59,7 @@ while ($row = pg_fetch_row($this->result)){
 		echo '</span></td><td>';
 		#Gibt keine Add/Remove Buttons für Position aus
 		if($row[0] != "position"){
-			echo '<button id="add_' . $row[0] . '" title="Wert hinzufuegen" onclick="addAttribut(this.id)"><i class="fa fa-plus fa-lg"></i></button>';
+			echo '<button id="add_' . $row[0] . '" title="Wert hinzufuegen" onclick="addAttribut(this.id)"><i class="btn-link fa fa-plus fa-lg"></i></button>';
 			echo '<button id="remove_' . $row[0] . '" title="Wert leeren" onclick="removeAttribut(this.id)" style="display:none"><i class="fa fa-trash-o fa-lg"></i></button>';
 		}
 		echo '</td></tr>';

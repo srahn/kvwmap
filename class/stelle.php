@@ -185,6 +185,7 @@ class stelle {
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 
+		/*		erstmal rausgenommen, weil sonst beim Ändern einer Stelle die Menüeinstellungen der Nutzer, insbesondere des Default-Nutzers verloren gehen
 		# Löschen der Zuordnung der Menüs zu den Rollen der Stelle
 		$sql = "
 			DELETE FROM
@@ -197,6 +198,7 @@ class stelle {
 		$this->debug->write("<p>file:stelle.php class:stelle function:deleteMenue - Löschen der Menuepunkte der Rollen der Stelle in menue2rolle:<br>" . $sql, 4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		*/
 		return 1;
 	}
 
@@ -285,8 +287,14 @@ class stelle {
 	}
 
 	function getstellendaten() {
-		$sql ='SELECT * FROM stelle';
-		$sql.=' WHERE ID = '.$this->id;
+		$sql = "
+			SELECT
+				*
+			FROM
+				stelle
+			WHERE
+				ID = " . $this->id . "
+		";
 		$this->debug->write("<p>file:stelle.php class:stelle->getstellendaten - Abfragen der Stellendaten<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -397,11 +405,12 @@ class stelle {
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
 				`ows_srs` = '" . $stellendaten['ows_srs'] . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
-				`check_client_ip` =				'" . ($stellendaten['checkClientIP'] 				== '1'	? "1" : "0") . "',
-				`check_password_age` =		'" . ($stellendaten['checkPasswordAge'] 		== '1'	? "1" : "0") . "',
-				`use_layer_aliases` = 		'" . ($stellendaten['use_layer_aliases'] 		== '1'	? "1" : "0") . "',
-				`hist_timestamp` = 				'" . ($stellendaten['hist_timestamp'] 			== '1'	? "1" : "0") . "',
-				`allowed_password_age` = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "'
+				`check_client_ip` =				'" . ($stellendaten['checkClientIP'] 			== '1'	? "1" : "0") . "',
+				`check_password_age` =		'" . ($stellendaten['checkPasswordAge'] 	== '1'	? "1" : "0") . "',
+				`use_layer_aliases` = 		'" . ($stellendaten['use_layer_aliases'] 	== '1'	? "1" : "0") . "',
+				`hist_timestamp` = 				'" . ($stellendaten['hist_timestamp'] 		== '1'	? "1" : "0") . "',
+				`allowed_password_age` = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "',
+				`default_user_id` = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . "
 			WHERE
 				ID = " . $this->id . "
 		";
@@ -1118,7 +1127,7 @@ class stelle {
 		}
 	}
 
-	function getqueryablePostgisLayers($privileg, $export_privileg = NULL, $no_subform_layers = false){
+	function getqueryablePostgisLayers($privileg, $export_privileg = NULL, $no_subform_layers = false, $layer_id = NULL){
 		$sql = 'SELECT distinct Layer_ID, Name, alias, export_privileg FROM (';
 		$sql .='SELECT layer.Layer_ID, layer.Name, layer.alias, used_layer.export_privileg, form_element_type as subformfk, las.privileg as privilegfk ';
 		$sql .='FROM u_groups, layer, used_layer ';
@@ -1133,6 +1142,9 @@ class stelle {
 		}
 		if($export_privileg != NULL){
 			$sql .=' AND used_layer.export_privileg > 0';
+		}
+		if($layer_id != NULL){
+			$sql .= ' AND layer.Layer_ID = '.$layer_id;
 		}
 		$sql .= ' ORDER BY Name) as foo ';
 		if($privileg > 0 AND $no_subform_layers){
@@ -1154,11 +1166,13 @@ class stelle {
 				$layer['export_privileg'][]=$rs['export_privileg'];
 			}
 			// Sortieren der User unter Berücksichtigung von Umlauten
-			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
-			$sorted_arrays2 = umlaute_sortieren($layer['Bezeichnung'], $layer['export_privileg']);
-			$layer['Bezeichnung'] = $sorted_arrays['array'];
-			$layer['ID'] = $sorted_arrays['second_array'];
-			$layer['export_privileg'] = $sorted_arrays2['second_array'];
+			if($layer['Bezeichnung'] != NULL){
+				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
+				$sorted_arrays2 = umlaute_sortieren($layer['Bezeichnung'], $layer['export_privileg']);
+				$layer['Bezeichnung'] = $sorted_arrays['array'];
+				$layer['ID'] = $sorted_arrays['second_array'];
+				$layer['export_privileg'] = $sorted_arrays2['second_array'];
+			}
 		}
 		return $layer;
 	}
@@ -1373,40 +1387,35 @@ class stelle {
 			$withoutwhere = substr($path, 0, $whereposition);
 			$fromposition = strpos(strtolower($withoutwhere), ' from ');
 		}
-		if($privileges == NULL){  # alle Attribute sind abfragbar
-			$newpath = $path;
-		}
-		else{
-			$where = substr($path, $whereposition);
-			$from = substr($withoutwhere, $fromposition);
+		$where = substr($path, $whereposition);
+		$from = substr($withoutwhere, $fromposition);
 
-			$attributesstring = substr($path, $offset, $fromposition-$offset);
-			//$fieldstring = explode(',', $attributesstring);
-			$fieldstring = get_select_parts($attributesstring);
-			$count = count($fieldstring);
-			for($i = 0; $i < $count; $i++){
-				if(strpos(strtolower($fieldstring[$i]), ' as ')){   # Ausdruck AS attributname
-					$explosion = explode(' as ', strtolower($fieldstring[$i]));
-					$attributename = trim(array_pop($explosion));
-					$real_attributename = $explosion[0];
-				}
-				else{   # tabellenname.attributname oder attributname
-					$explosion = explode('.', strtolower($fieldstring[$i]));
-					$attributename = trim($explosion[count($explosion)-1]);
-					$real_attributename = $fieldstring[$i];
-				}
-				if($privileges[$attributename] != ''){
-					$type = $attributes['type'][$attributes['indizes'][$attributename]];
-					if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$real_attributename.') as '.$attributename.', ';		# Array oder Datentyp
-					else $newattributesstring .= $fieldstring[$i].', ';																																			# normal
-				}
-				if(substr_count($fieldstring[$i], '(') - substr_count($fieldstring[$i], ')') > 0){
-					$fieldstring[$i+1] = $fieldstring[$i].','.$fieldstring[$i+1];
-				}
+		$attributesstring = substr($path, $offset, $fromposition-$offset);
+		//$fieldstring = explode(',', $attributesstring);
+		$fieldstring = get_select_parts($attributesstring);
+		$count = count($fieldstring);
+		for($i = 0; $i < $count; $i++){
+			if(strpos(strtolower($fieldstring[$i]), ' as ')){   # Ausdruck AS attributname
+				$explosion = explode(' as ', strtolower($fieldstring[$i]));
+				$attributename = trim(array_pop($explosion));
+				$real_attributename = $explosion[0];
 			}
-			$newattributesstring = substr($newattributesstring, 0, strlen($newattributesstring)-2);
-			$newpath = $offstring.' '.$newattributesstring.' '.$from.$where;
+			else{   # tabellenname.attributname oder attributname
+				$explosion = explode('.', strtolower($fieldstring[$i]));
+				$attributename = trim($explosion[count($explosion)-1]);
+				$real_attributename = $fieldstring[$i];
+			}
+			if($privileges[$attributename] != ''){
+				$type = $attributes['type'][$attributes['indizes'][$attributename]];
+				if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$real_attributename.') as '.$attributename.', ';		# Array oder Datentyp
+				else $newattributesstring .= $fieldstring[$i].', ';																																			# normal
+			}
+			if(substr_count($fieldstring[$i], '(') - substr_count($fieldstring[$i], ')') > 0){
+				$fieldstring[$i+1] = $fieldstring[$i].','.$fieldstring[$i+1];
+			}
 		}
+		$newattributesstring = substr($newattributesstring, 0, strlen($newattributesstring)-2);
+		$newpath = $offstring.' '.$newattributesstring.' '.$from.$where;
 		return $newpath;
 	}
 

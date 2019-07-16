@@ -632,8 +632,17 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
 }
 
 function neuLaden(){
-	currentform.neuladen.value='true';
-	overlay_submit(currentform);
+	if(checkForUnsavedChanges()){
+		startwaiting(true);
+		if(currentform.neuladen != undefined){		// neu Laden in Fachschale
+			currentform.neuladen.value='true';
+			overlay_submit(currentform);
+		}
+		else{
+			document.GUI.go.value='neu Laden';		// neu Laden in Hauptkarte
+			document.GUI.submit();
+		}
+	}
 }
 
 function preventDefault(e){
@@ -694,6 +703,7 @@ function selectgroupthema(group, instantreload){
 function zoomToMaxLayerExtent(zoom_layer_id){
 	console.log(currentform.go.value);
 	currentform.zoom_layer_id.value = zoom_layer_id;
+	if(currentform.no_load != undefined)currentform.no_load.value = 'true';
 	overlay_submit(currentform);
 }
 
@@ -999,5 +1009,16 @@ function exportMapImage(target) {
 	else {
 		location.href = link;
 	}
+}
+
+function htmlspecialchars(value) {
+	var map = {
+		'&': '&amp;',
+		'<': '&lt;',
+		'>': '&gt;',
+		'"': '&quot;',
+		"'": '&#039;'
+	};
+	return value.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
 </script>

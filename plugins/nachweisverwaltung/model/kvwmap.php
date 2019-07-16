@@ -336,7 +336,7 @@
 				$GUI->formvars['Gemeinde']=$nachweis->document['Gemeinde'];
 				$GUI->formvars['Gemarkung']=substr($GUI->formvars['flurid'],0,6);
 				$GUI->formvars['Flur']=intval(substr($GUI->formvars['flurid'],6,9));
-				$GUI->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];				
+				$GUI->formvars['Bilddatei']=$nachweis->document['link_datei'];				
 				$GUI->formvars['rissnummer']=$nachweis->document['rissnummer'];
 				$GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
 				$GUI->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
@@ -1185,14 +1185,14 @@
         # 2. Eingabewerte in Ordnung
         # 2.1 Speichern der Bilddatei zum Nachweis auf dem Server
         # Zusammensetzen des Dateinamen unter dem das Dokument gespeichert werden soll.
-        $GUI->formvars['zieldateiname']=$GUI->nachweis->getZielDateiName($GUI->formvars);
+				$GUI->formvars['zieldateiname']=$GUI->nachweis->getZielDateiName($GUI->formvars);
 				$zieldatei = NACHWEISDOCPATH.$GUI->formvars['flurid'].'/'.$GUI->nachweis->buildNachweisNr($GUI->formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $GUI->formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$GUI->formvars['artname'].'/'.$GUI->formvars['zieldateiname'];
         $ret=$GUI->nachweis->dokumentenDateiHochladen($GUI->formvars['Bilddatei'], $zieldatei);
         if ($ret!='') { $errmsg=$ret; }
         else {
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank
           $GUI->nachweis->database->begintransaction();
-          $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['unterart_'.$GUI->formvars['hauptart']], $GUI->formvars['gueltigkeit'], $GUI->formvars['geprueft'], $GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['bemerkungen_intern'],$GUI->formvars['artname']."/".$GUI->formvars['zieldateiname'],$GUI->formvars['umring'], $GUI->user);
+          $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['unterart_'.$GUI->formvars['hauptart']], $GUI->formvars['gueltigkeit'], $GUI->formvars['geprueft'], $GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['bemerkungen_intern'],$zieldatei,$GUI->formvars['umring'], $GUI->user);
 					$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
           if ($ret[0]) {
             $GUI->nachweis->database->rollbacktransaction();
@@ -1258,7 +1258,7 @@
     $GUI->formvars['Gemeinde']=$nachweis->document['Gemeinde'];
     $GUI->formvars['Gemarkung']=substr($GUI->formvars['flurid'],0,6);
     $GUI->formvars['Flur']=intval(substr($GUI->formvars['flurid'],6,9));
-    $GUI->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];
+    $GUI->formvars['Bilddatei']=$nachweis->document['link_datei'];
 		$GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
 		$GUI->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
 		$GUI->formvars['bemerkungen_intern']=$nachweis->document['bemerkungen_intern'];

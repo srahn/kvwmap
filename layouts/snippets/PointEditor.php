@@ -38,93 +38,89 @@ else {
 }
 ?>
 
-<table style="border: 1px solid; border-collapse: separate; border-color: #eeeeee; border-left: none; border-right: none" width="760" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table style="border-bottom: 1px solid grey; border-collapse: separate; width: 100%" border="0" cellpadding="0" cellspacing="5" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
-    <td align="center" colspan="5"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
+    <td align="center" colspan="4"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
   </tr>
   <tr> 
-    <td rowspan="4">&nbsp;</td>
-    <td colspan="4" rowspan="4"> 
-      <?php
-				include(LAYOUTPATH.'snippets/SVG_point.php')
-			?>
-    </td>
-  </tr>
-  <tr>
-  	<td>
-			<table cellspacing=4 cellpadding=0 border=0 style="border:1px solid #C3C7C3;" background="<? echo GRAPHICSPATH."bg.gif"; ?>">
-				<tr align="center">
-					<td><?php echo $strAvailableLayer; ?>:</td>
+    <td>
+			<table cellspacing="0" cellpadding="0">
+				<tr>
+					<td colspan="5">
+						<? include(LAYOUTPATH.'snippets/SVG_point.php'); ?>
+					</td>
 				</tr>
-				<tr align="left">
+				<tr>
 					<td>
-					<div align="center"><input type="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>"></div>
-					<br>
-					<div style="width:260px; height:<?php echo $this->map->height-196; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
-						&nbsp;
-						<img src="graphics/tool_info_2.png" alt="<? echo $strInfoQuery; ?>" title="<? echo $strInfoQuery; ?>" width="17">&nbsp;
-						<img src="graphics/layer.png" alt="<? echo $strLayerControl; ?>" title="<? echo $strLayerControl; ?>" width="20" height="20"><br>
-						<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
-						<div id="legend_div"><? echo $this->legende; ?></div>
-					</div>
+						<div style="width:150px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
+							<div valign="top" style="height:0px; position:relative;">
+								<div id="scales" style="display:none; position:absolute; left:66px; bottom:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
+									<select size="<? echo count($selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.submit();">
+										<? 
+											foreach($selectable_scales as $scale){
+												echo '<option onmouseover="this.selected = true;" value="'.$scale.'">1:&nbsp;&nbsp;'.$scale.'</option>';
+											}
+										?>
+									</select>
+								</div>
+							</div>
+							&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
+						</div>
+					</td>
+					<? if($this->user->rolle->runningcoords != '0'){ ?>
+					<td><span class="fett">&nbsp;<?php echo $this->strCoordinates; ?>:</span>&nbsp;</td>
+					<td><input type="text" style="border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
+					<? }else{ ?>
+					<td colspan="2"></td>
+					<? } ?>
+					<td align="right">
+						<input type="checkbox" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>&nbsp;Punktfang
+						&nbsp;<img id="scalebar" valign="top"	style="display:none;margin-top: 5px; padding-right:<? echo ($this->user->rolle->hideLegend ? '35' : '5'); ?>px" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
+						<div id="lagebezeichnung" style="display:none"></div>
 					</td>
 				</tr>
 			</table>
 		</td>
-  </tr>
-	<tr>
-		<td><? if($this->angle_attribute != ''){
-			echo $strRotationAngle; ?>: <input type="text" size="3" name="angle" onchange="angle_slider.value=parseInt(angle.value);rotate_point_direction(this.value);" value="<? echo $this->formvars['angle']; ?>">&nbsp;°<br>
-			<input type="range" id="angle_slider" min="-180" max="180" style="width: 120px" value="<? echo $this->formvars['angle']; ?>" oninput="angle.value=parseInt(angle_slider.value);angle.onchange();" onchange="angle.value=parseInt(angle_slider.value);angle.onchange();">
-			<? } ?>
+		<td valign="top" width="100%">
+			<table cellspacing="0" cellpadding="0">
+				<tr>
+					<td>
+						<div id="legenddiv" style="height: <? echo $this->map->height-120; ?>px;"	class="normallegend">
+							<?
+							$this->simple_legend = true;
+							include(SNIPPETS . 'legenddiv.php'); 
+							?>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td align="center" style="height: 60px"><? if($this->angle_attribute != ''){
+						echo $strRotationAngle; ?>: <input type="text" size="3" name="angle" onchange="angle_slider.value=parseInt(angle.value);rotate_point_direction(this.value);" value="<? echo $this->formvars['angle']; ?>">&nbsp;°<br>
+						<input type="range" id="angle_slider" min="-180" max="180" style="width: 120px" value="<? echo $this->formvars['angle']; ?>" oninput="angle.value=parseInt(angle_slider.value);angle.onchange();" onchange="angle.value=parseInt(angle_slider.value);angle.onchange();">
+						<? } ?>
+					</td>
+				</tr>
+				<? if($this->new_entry != true){ ?>
+				<tr> 
+					<td align="center" style="height: 50px">
+						<input type="button" name="senden" value="Speichern" onclick="send();"><br>
+					</td>
+				</tr>
+				<? }else{ ?>
+				<tr>
+					<td></td>
+				</tr>
+		<? } ?>
+				<tr>
+					<td align="center">
+						<? if($this->new_entry != true){ ?>
+						<a href="index.php?go=Layer-Suche&go_plus=Suchen&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>">Sachdatenanzeige</a>
+						<? } ?>&nbsp;
+					</td>
+				</tr>
+			</table>
 		</td>
 	</tr>
-  <? if($this->new_entry != true){ ?>
-  <tr> 
-    <td align="center">
-    	<input type="button" name="senden" value="Speichern" onclick="send();"><br>
-    </td>
-  </tr>
-  <? }else{ ?>
-  <tr>
-  	<td></td>
-  </tr>
-  <? } ?>
-  <tr>
-  	<td>&nbsp;</td>
-  	<td>
-			<div style="width:150px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
-				<div valign="top" style="height:0px; position:relative;">
-					<div id="scales" style="display:none; position:absolute; left:66px; bottom:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
-						<select size="<? echo count($selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.submit();">
-							<? 
-								foreach($selectable_scales as $scale){
-									echo '<option onmouseover="this.selected = true;" value="'.$scale.'">1:&nbsp;&nbsp;'.$scale.'</option>';
-								}
-							?>
-						</select>
-					</div>
-				</div>
-				&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
-			</div>
-		</td>
-	<? if($this->user->rolle->runningcoords != '0'){ ?>
-	<td><span class="fett">&nbsp;<?php echo $this->strCoordinates; ?>:</span>&nbsp;</td>
-	<td><input type="text" style="border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
-	<? }else{ ?>
-	<td colspan="2"></td>
-	<? } ?>
-	<td align="right">
-		<input type="checkbox" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>&nbsp;Punktfang
-		&nbsp;<img id="scalebar" valign="top"	style="display:none;margin-top: 5px; padding-right:<? echo ($this->user->rolle->hideLegend ? '35' : '5'); ?>px" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
-		<div id="lagebezeichnung" style="display:none"></div>
-	</td>
-	<td align="center">
-		<? if($this->new_entry != true){ ?>
-		<a href="index.php?go=Layer-Suche&go_plus=Suchen&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>">Sachdatenanzeige</a>
-		<? } ?>&nbsp;
-	</td>
-  </tr>
 </table>
 <INPUT TYPE="HIDDEN" NAME="dimension" VALUE="<?php echo $this->formvars['dimension']; ?>">
 <INPUT TYPE="HIDDEN" NAME="selected_layer_id" VALUE="<?php echo $this->formvars['selected_layer_id']; ?>">
@@ -138,6 +134,7 @@ else {
 <INPUT TYPE="HIDDEN" NAME="oldscale" VALUE="<?php echo round($this->map_scaledenom); ?>"> 
 <input type="hidden" name="layer_options_open" value="">
 <input type="hidden" name="neuladen" value="">
+<input type="hidden" name="scrollposition" value="">
 <? if($this->formvars['go'] == 'PointEditor'){ ?>   
 	<INPUT TYPE="HIDDEN" NAME="go" VALUE="PointEditor" >
 <? } ?>

@@ -315,14 +315,17 @@ class Gml_builder {
 
               // fetch information about attributes and their properties
               $datatype_attribs = $this->typeInfo->getInfo($uml_attribute['type']);
+
               // retrieve attribute names
               $value_array_keys = array_column($datatype_attribs,'col_name');
 
-							// Adds an extra Association for XP_VerbundenerPlan as they are not present with sequences in xplan_uml
-							if($uml_attribute['col_name'] == 'aendert') {
-								#$gmlStr .= '<note>XP_VerbundenerPlan</note>';
-								array_push($value_array_keys, 'verbundenerplan');
-							}
+              // Adds an extra Association for XP_VerbundenerPlan as they are not present with sequences in xplan_uml
+              if($uml_attribute['col_name'] == 'aendert') {
+                array_push($value_array_keys, 'verbundenerplan');
+              }
+              if($uml_attribute['col_name'] == 'wurdegeaendertvon') {
+                array_push($value_array_keys, 'verbundenerplan');
+              }
 
               // wrap singular values into an array in order to
               // unify the processing of singular and multiple values
@@ -335,10 +338,10 @@ class Gml_builder {
               // process composite data type
               foreach ($value_array as $single_value) {
                 // associate values with attribute names
-                #$gmlStr .= '<note>single_value: ' . count($single_value) . '</note>';
-                #$gmlStr .= '<note>value_array_keys: ' . count($value_array_keys) . '</note>';
+                #$gmlStr .= '<note>single_value: ' . implode(', ', $single_value) . '</note>';
+                #$gmlStr .= '<note>value_array_keys: ' . implode(', ', $value_array_keys) . '</note>';
                 // Null-Array-Werte auslassen
-                if($single == null) continue;
+                if($single_value == null) continue;
                 $single_value = array_combine($value_array_keys, $single_value);
                 // generate GML output (!!! recursive !!!)
                 $gml_attrib_str .= $this->generateGmlForAttributes($single_value, $datatype_attribs,$depth-1);
@@ -350,9 +353,9 @@ class Gml_builder {
                 "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
                 // wrap all data-types with their data-type-element-tag
                 $this->wrapWithElement("{$xplan_ns_prefix}{$typeElementName}", $gml_attrib_str));
-								$gml_attrib_str = '';
+                $gml_attrib_str = '';
               }
-							break;
+              break;
             default:
           }
           break;
@@ -416,23 +419,23 @@ class Gml_builder {
 							$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $value);
 						} break;
 						case 'float8': {
-							// Handles float values for angles, volumne, area,length, decimal. These elements need an XML uom-attribute
-							// values are defined by Konformitaetsbedingung 2.1.2 (%, grad, m3, m2, m, (decimal is not specified: here, also m))
+							// Handles float values for angles, volume, area,length, decimal. Angle, volume, area, length elements need an XML uom-attribute, decimal has no uom-attribute
+							// values are defined by Konformitaetsbedingung 2.1.2 (%, grad, m3, m2, m, (decimal does not have uom Attribute and is not specified: here, also m))
 							$xml_attributename = "uom";
 								switch ($uml_attribute['uml_dtype']) {
-									case 'Angle':		{$xml_attributevalue = "grad";}  break;
+									case 'Angle':	{$xml_attributevalue = "grad";} break;
 									case 'Volume':	{$xml_attributevalue = "m3";} break;
-									case 'Area': 		{$xml_attributevalue = "m2";} break;
-									case 'Length': 	{$xml_attributevalue = "m";}  break;
-									case 'Decimal': {$xml_attributevalue = "m";}  break;
-									default: 				{$xml_attributevalue = "m";}  break;
+									case 'Area': 	{$xml_attributevalue = "m2";} break;
+									case 'Length':	{$xml_attributevalue = "m";} break;
+									//case 'Decimal':	{$xml_attributevalue = "m";} break;
+									default: 		{$xml_attributevalue = "m";} break;
 								}
 							$gml_value = trim($gml_object[$uml_attribute['col_name']]);
-							 // check for array values
+							// check for array values
 							if ($gml_value[0] == '{' && substr($gml_value,-1) == '}') {
 								$gml_value_array = explode(',',substr($gml_value, 1, -1));
 								for ($j = 0; $j < count($gml_value_array); $j++){
-										$gmlStr .= $this->wrapWithElementAndAttribute(
+									$gmlStr .= $this->wrapWithElementAndAttribute(
 										"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
 										htmlspecialchars($gml_value_array[$j],ENT_QUOTES|ENT_XML1,"UTF-8"),
 										$xml_attributename,
@@ -440,12 +443,19 @@ class Gml_builder {
 									);
 								}
 							} else {
-								$gmlStr .= $this->wrapWithElementAndAttribute(
+								// no uom here
+								if($uml_attribute['uml_dtype'] == 'Decimal') {
+									$gmlStr .= $this->wrapWithElement(
 									"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
-									htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"),
-									$xml_attributename,
-									$xml_attributevalue
-								);
+									htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"));
+								} else {
+									$gmlStr .= $this->wrapWithElementAndAttribute(
+										"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+										htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"),
+										$xml_attributename,
+										$xml_attributevalue
+									);
+								}
 							}
 						} break;
 						default: {

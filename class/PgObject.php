@@ -51,6 +51,16 @@ class PgObject {
 		$this->identifier_type = 'integer';
 	}
 
+	public static	function postgis_version($gui) {
+		$query = pg_query(
+			$gui->pgdatabase->dbConn, "
+				SELECT split_part(postgis_version(), ' ', 1) AS postgis_version
+			"
+		);
+		$result = pg_fetch_assoc($query);
+		return floatval($result['postgis_version']);
+	}
+
 	function find_by($attribute, $value) {
 		$this->debug->show('find by attribute ' . $attribute . ' with value ' . $value, false);
 		$sql = "
@@ -72,10 +82,12 @@ class PgObject {
 	* @ return an array with all found object
 	*/
 	function find_where($where, $order = NULL, $select = '*') {
+		$select = (empty($select) ? $this->select : $select);
+		$where = (empty($where) ? "true": $where);
 		$order = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
 		$sql = "
 			SELECT
-				{$this->select}
+				" . $select . "
 			FROM
 				" . $this->schema . '.' . $this->tableName . "
 			WHERE
@@ -112,15 +124,22 @@ class PgObject {
 		return array_values($this->data);
 	}
 
-	function getKVP($escaped = false) {
+	function getKVP($escaped = false, $without_identifier = false) {
 		$kvp = array();
-		foreach($this->data AS $key => $value) {
-			if (is_array($value))
-				$value = "{" . implode(", ", $value) . "}";
-			if ('' . $value == '')
-				$value = 'NULL';
+		foreach ($this->data AS $key => $value) {
+			if ($without_identifier AND ($key == $this->identifier)) {
+				# identifier nicht ausgehen
+			}
+			else {
+				if (is_array($value)) {
+					$value = "{" . implode(", ", $value) . "}";
+				}
+				if ('' . $value == '') {
+					$value = 'NULL';
+				}
 
-			$kvp[] = "\"" . $key . "\" = " . ($value == 'NULL' ? $value : "'" . ($escaped ? pg_escape_string($value) : $value) . "'");
+				$kvp[] = "\"" . $key . "\" = " . ($value == 'NULL' ? $value : "'" . ($escaped ? pg_escape_string($value) : $value) . "'");
+			}
 		}
 		return $kvp;
 	}
@@ -215,7 +234,7 @@ class PgObject {
 			UPDATE
 				\"" . $this->schema . "\".\"" . $this->tableName . "\"
 			SET
-				" . implode(', ', $this->getKVP(true)) . "
+				" . implode(', ', $this->getKVP(true, true)) . "
 			WHERE
 				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
 		";

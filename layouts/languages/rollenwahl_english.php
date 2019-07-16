@@ -44,6 +44,7 @@
 	$strgrad1="Degrees,Minutes,Seconds";
 	$strgrad2="Degrees Decimalminutes";
 	$strPrintScale="Print Scale";
+	$strThemeParameters="Theme Parameters";
 	$strPrintScaleAuto="calculate automatically";
 	$strPrintScaleLast="use last used printing scale";
 	$strHintTask="Task means different themes, funktions and rights which are needed for various assignments. All options mentioned below are related to the task you will select here.";
@@ -73,4 +74,6 @@
 	$strHintShowLayerOptions="If you activate this option, a button appears on mouse over the layer names in legend. The button shows extended functions and settings for the layer.";
 	$strHintMenueButtons="If you activate this option, often used menu options will be shown as seperate buttons above the menue bar.";
 	$strHintPrintScale="If you activate the first option, a suitable printing scale will be calculated automatically. On the second option, the last used printing scale is used.";
+	$strShowRollenFilter="Show Layer Filter";
+	$strHintShowRollenFilter="If you activate this option, you are able to set a filter in the layer-options.";
 ?>  

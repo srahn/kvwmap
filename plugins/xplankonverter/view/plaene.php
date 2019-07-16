@@ -228,6 +228,45 @@
 		}
 	};
 
+	toggleVeroeffentlicht = function(konvertierung_id, veroeffentlicht) {
+		var veroeffentlicht = (veroeffentlicht == 't' ? 'f' : 't');
+
+		$('#veroeffentlicht_button_' + konvertierung_id).hide();
+		$('#veroeffentlicht_spinner_' + konvertierung_id).show();
+		$.ajax({
+			url: 'index.php',
+			data: {
+				go: 'xplankonverter_konvertierung_veroffentlichen',
+				veroeffentlicht: veroeffentlicht,
+				konvertierung_id: konvertierung_id
+			},
+			success: function(result) {
+				if (result.success) {
+					var konvertierung_id = result.konvertierung_id,
+							row = $('#konvertierungen_table').bootstrapTable('getRowByUniqueId', konvertierung_id);
+
+					row.veroeffentlicht = result.veroeffentlicht;
+					$('#konvertierungen_table').bootstrapTable('updateByUniqueId', { id: konvertierung_id, row: row});
+
+					message([{
+						"type": "notice",
+						"msg" : 'Plan' + (result.veroeffentlicht == 't' ? ' erfolgreich veröffentlicht' : 'veröffentlichung zurückgenommen') + '!'
+					}]);
+				}
+				else {
+					message([{
+						"type": "error",
+						"msg": result.msg
+					}]);
+				}
+			}
+		});
+	};
+
+	function konvertierungHtmlSpecialchars(value) {
+		return htmlspecialchars(value);
+	}
+
 	// formatter functions
 	function konvertierungGemeindeFormatter(value, row) {
 		var gemeinden = JSON.parse(value);
@@ -239,6 +278,12 @@
 		).join(', ')
 	}
 
+	// formatter functions
+	function konvertierungStatusFormatter(value, row) {
+		var output = value;
+		return output;
+	}
+
 	function konvertierungBundeslandFormatter(value, row) {
 		var bundeslaender = JSON.parse(value);
 		return bundeslaender;
@@ -248,7 +293,7 @@
 		var funcIsAllowed,
 				funcIsInProgress,
 				disableFrag = ' disabled" onclick="return false',
-				output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" plan_name="' + row.anzeigename + '">';
+				output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" plan_name="' + htmlspecialchars(row.anzeigename) + '">';
 		output += '<a title="Plan bearbeiten" class="btn btn-link btn-xs xpk-func-btn" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&operator_plan_gml_id==&value_plan_gml_id=' + row.plan_gml_id + '"><i class="btn-link fa fa-lg fa-pencil"></i></a>';
 		output += '<a id="delButton' + value + '" title="Konvertierung l&ouml;schen" class="btn btn-link btn-xs xpk-func-btn xpk-func-del-konvertierung" href="#"><i class="btn-link fa fa-lg fa-trash"></i></a>';
 		output += '</span>';
@@ -284,7 +329,7 @@
                  || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']; ?>"
                  || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
                  || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Validierungsergebnisse anzeigen" class="btn btn-link btn-xs xpk-func-btn' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=xplankonverter_validierungsergebnisse&konvertierung_id=' + value + '" onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"><i class="btn-link fa fa-lg fa-eye"></i></a>';
+		output += '<a title="Validierungsergebnisse anzeigen" class="btn btn-link btn-xs xpk-func-btn' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=xplankonverter_validierungsergebnisse&konvertierung_id=' + value + '" onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"><i class="btn-link fa fa-lg fa-list"></i></a>';
 
 		// GML-Erzeugen
 		funcIsAllowed =  row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'          ]; ?>"
@@ -304,6 +349,26 @@
 		}
 
 		output += '</span>';
+		return output;
+	}
+
+	function konvertierungVeroeffentlichtFormatter(value, row) {
+		var output = '<a\
+			title="' + (row.veroeffentlicht == 't' ? 'Planveröffentlichung zurücknehmen' : 'Plan veröffentlichen') + '"\
+			class="btn btn-link btn-xs xpk-func-btn"\
+			href="#"\
+			onclick="toggleVeroeffentlicht(' + row.konvertierung_id + ', \'' + row.veroeffentlicht + '\')");\
+		><i\
+			id="veroeffentlicht_button_' + row.konvertierung_id + '"\
+			class="btn-link fa fa-lg ' + (row.veroeffentlicht == 't' ? 'fa-eye' : 'fa-eye-slash') + '"\
+			style="color: ' + (row.veroeffentlicht == 't' ? '#2cb03c' : '#d82c2c') + '"\
+		></i></a>\
+		<i\
+			id="veroeffentlicht_spinner_' + row.konvertierung_id + '"\
+			class="color: fa fa-spinner fa-spin"\
+			style="display: none"\
+		></i>';
+
 		return output;
 	}
 
@@ -353,9 +418,19 @@
 	}
 
 </script>
-<h2><?php echo $this->title; ?></h2>
-<button type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo $this->plan_layer_id ?>'">neu</button>
-<button type="button" id="new_konvertierung_from_gml" name="go_plus" onclick="location.href='index.php?go=xplankonverter_upload_xplan_gml&planart=<?php echo $this->formvars['planart'] ?>'">Neuer Plan aus XPlanGML</button>
+<h2><?php echo htmlspecialchars($this->title); ?></h2><?php
+if ($this->Stelle->id > 200) { ?>
+	<button type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo $this->plan_layer_id ?>'">neu</button>
+	<button type="button" id="new_konvertierung_from_gml" name="go_plus" onclick="location.href='index.php?go=xplankonverter_upload_xplan_gml&planart=<?php echo $this->formvars['planart'] ?>'">Neuer Plan aus XPlanGML</button><?
+}
+else { ?>
+	Neue Pläne können nur in Amts oder Gemeindestellen angelegt werden. Wechseln Sie dazu die Stelle über <a href="#" onclick="
+		$('#user_options').toggle();
+		$('#sperr_div').toggle()
+	">Einstellungen</a>. <?
+}
+?>
+
 <!--div class="alert alert-success" style="white-space: pre-wrap" id="eventsResult">
 		Here is the result of event.
 </div//-->
@@ -375,11 +450,12 @@
 	data-show-columns="true"
 	data-query-params="go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&anzahl=10000&mime_type=formatter&format=json"
 	data-pagination="true"
-	data-page-size="100"
+	data-page-size="25"
 	data-show-export="false"
 	data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
 	data-toggle="table"
 	data-toolbar="#toolbar"
+	data-unique-id="konvertierung_id"
 >
 	<thead>
 		<tr>
@@ -405,8 +481,15 @@
 				data-field="anzeigename"
 				data-sortable="true"
 				data-visible="true"
+				data-formatter="konvertierungHtmlSpecialchars"
 				class="col-md-7"
-			>Name</th><?php
+			>Name</th>
+			<th
+				data-field="nummer"
+				data-sortable="true"
+				data-visible="false"
+				class="col-md-2"
+			>Nr</th><?php
 				if ($this->plan_layer_id == XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
 					<th
 						data-field="bundesland"
@@ -430,8 +513,18 @@
 						data-field="konvertierung_status"
 						data-visible="true"
 						data-sortable="true"
+						data-formatter="konvertierungStatusFormatter"
 						class="col-md-2"
 					>Status</th><?php
+				}
+				if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
+					<th
+						data-field="veroeffentlicht"
+						data-visible="true"
+						data-sortable="true"
+						data-formatter="konvertierungVeroeffentlichtFormatter"
+						data-switchable="true"
+					><i title="Veröffentlichung" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
 				} ?>
 			<th
 				data-field="konvertierung_id"
@@ -439,7 +532,7 @@
 				data-formatter="konvertierungFunctionsFormatter"
 				data-switchable="false"
 				class="col-md-2"
-			>Funktionen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+			>Funktionen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 			<th
 				data-field="konvertierung_id"
 				data-visible="true"

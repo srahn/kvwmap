@@ -3,15 +3,18 @@
 	include(SNIPPETS.'generic_form_parts.php');
   include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
 	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
- ?>
-	<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
-	<a name="oben"></a>	
-<? if($this->user->rolle->querymode == 1){ ?>
-	<script type="text/javascript">
-		if(document.getElementById('overlayfooter') != undefined)document.getElementById('overlayfooter').style.display = 'none';
-		if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'none';
+?>
+	<script>
+		keypress_bound_ctrl_s_button_id = 'sachdatenanzeige_save_button';
 	</script>
-<? }
+	<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
+	<a name="oben"></a><?
+	if ($this->user->rolle->querymode == 1) { ?>
+		<script type="text/javascript">
+			if (document.getElementById('overlayfooter') != undefined) 	document.getElementById('overlayfooter').style.display = 'none';
+			if (document.getElementById('savebutton') != undefined) 		document.getElementById('savebutton').style.display = 'none';
+		</script><?
+	}
 $this->found = 'false';
 $anzLayer=count($this->qlayerset);
 if ($anzLayer==0) {
@@ -60,12 +63,17 @@ for($i=0;$i<$anzLayer;$i++){
 		echo '<hr style="width: 100%; height: 3px; margin: 15 0; color: '.BG_GLEHEADER.'; background: '.BG_GLEHEADER.';">';
 	}
 	if ($this->qlayerset[$i]['template']=='') {
-   	if(GLEVIEW == '2'){
-    	include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
-   	}
-   	else{
-   		include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
-   	}
+		if($this->qlayerset[$i]['connectiontype'] == MS_WMS){
+			include(SNIPPETS.'getfeatureinfo.php');			# getfeatureinfo bei WMS
+		}
+		else{
+			if($this->qlayerset[$i]['gle_view'] == '1'){
+				include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
+			}
+			else{
+				include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
+			}
+		}
 	}
 	else{
 		if(is_file(SNIPPETS.$this->qlayerset[$i]['template'])){
@@ -144,7 +152,7 @@ for($i=0;$i<$anzLayer;$i++){
 								if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'block';
 							</script>
 				<?  }else{ ?>
-							<input type="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">
+							<input id="sachdatenanzeige_save_button" type="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">
 				<? 	}
 					}?>
 			</td>

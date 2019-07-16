@@ -36,6 +36,8 @@ class database {
 
   function database() {
     global $debug;
+		global $GUI;
+		$this->gui = $GUI;
     $this->debug=$debug;
     $this->loglevel=LOG_LEVEL;
  		$this->defaultloglevel=LOG_LEVEL;
@@ -187,320 +189,16 @@ class database {
 		$row = mysql_fetch_row($query);
 		$new_user_id = $row[0];
 
-		# ID des Defaultnutzers abfragen
-		$sql = "
-			SELECT
-				s.default_user_id
-			FROM
-				stelle s JOIN
-				rolle r ON (s.ID = r.stelle_id AND s.default_user_id = r.user_id)
-			WHERE
-				s.ID = " . $gast_stelle . "
-		";
-		#echo '<br>sql: ' . $sql;
-		$query = mysql_query($sql);
-		if (mysql_num_rows($query) > 0) {
-			$row = mysql_fetch_assoc($query);
-			$default_user_id = $row['default_user_id'];
-		}
-		else {
-			$default_user_id = 0;
-		}
-		#echo '<br>Default user id: ' . $default_user_id;
-
-		if ($default_user_id > 0) {
-			# Rolleneinstellungen vom Defaultnutzer verwenden
-			$row = mysql_fetch_assoc($query);
-			$rolle_select_sql = "
-				SELECT " .
-					$new_user_id . ", " .
-					$gast_stelle . ",
-					`nImageWidth`, `nImageHeight`,
-					`auto_map_resize`,
-					`minx`, `miny`, `maxx`, `maxy`,
-					`nZoomFactor`,
-					`selectedButton`,
-					`epsg_code`,
-					`epsg_code2`,
-					`coordtype`,
-					`active_frame`,
-					`last_time_id`,
-					`gui`,
-					`language`,
-					`hidemenue`,
-					`hidelegend`,
-					`fontsize_gle`,
-					`highlighting`,
-					`buttons`,
-					`scrollposition`,
-					`result_color`,
-					`always_draw`,
-					`runningcoords`,
-					`showmapfunctions`,
-					`showlayeroptions`,
-					`singlequery`,
-					`querymode`,
-					`geom_edit_first`,
-					`overlayx`, `overlayy`,
-					`instant_reload`,
-					`menu_auto_close`,
-					`layer_params`,
-					`visually_impaired`
-				FROM
-					`rolle`
-				WHERE
-					`user_id` = " . $default_user_id . " AND
-					`stelle_id` = " . $gast_stelle . "
-			";
-		}
-		else {
-			# Default - Rolleneinstellungen verwenden
-			$rolle_select_sql = "
-				SELECT " .
-					$new_user_id . ", " .
-					$gast_stelle . ",
-					'800', '600',
-					1,
-					minxmax, minymax, maxxmax, maxymax,
-					'2',
-					'recentre',
-					`epsg_code`,
-					NULL,
-					'dec',
-					NULL,
-					'0000-00-00 00:00:00',
-					'gui.php',
-					'german',
-					'0',
-					'0',
-					'15',
-					'1',
-					'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure',
-					'0',
-					'1',
-					'1',
-					'1',
-					'1',
-					'1',
-					'1',
-					'0',
-					'0',
-					'400', '150',
-					'1',
-					'0',
-					'0',
-					NULL
-				FROM
-					stelle
-				WHERE
-					ID = " . $gast_stelle . "
-			";
-		}
-
-		# Rolle für Gastnutzer eintragen
-		$sql = "
-			INSERT INTO `rolle` (
-				`user_id`,
-				`stelle_id`,
-				`nImageWidth`, `nImageHeight`,
-				`auto_map_resize`,
-				`minx`, `miny`, `maxx`, `maxy`,
-				`nZoomFactor`,
-				`selectedButton`,
-				`epsg_code`,
-				`epsg_code2`,
-				`coordtype`,
-				`active_frame`,
-				`last_time_id`,
-				`gui`,
-				`language`,
-				`hidemenue`,
-				`hidelegend`,
-				`fontsize_gle`,
-				`highlighting`,
-				`buttons`,
-				`scrollposition`,
-				`result_color`,
-				`always_draw`,
-				`runningcoords`,
-				`showmapfunctions`,
-				`showlayeroptions`,
-				`singlequery`,
-				`querymode`,
-				`geom_edit_first`,
-				`overlayx`, `overlayy`,
-				`instant_reload`,
-				`menu_auto_close`,
-				`layer_params`,
-				`visually_impaired`
-			) " .
-			$rolle_select_sql . "
-		";
-		#echo '<br>sql: ' . $sql;
-		$query = mysql_query($sql);
-
 		include_once(CLASSPATH . 'stelle.php');
 		include_once(CLASSPATH . 'rolle.php');
 		$stelle = new stelle($gast_stelle, $this);
 		$rolle = new rolle(NULL, $gast_stelle, $this);
 		$layers = $stelle->getLayers(NULL);
-		$rolle->setGroups($new_user_id, array($gast_stelle), $layers['ID'], '0');
-
-		# Menüeinstellungen der Rolle eintragen
-		if ($default_user_id > 0) {
-			# Menueeinstellungen von Defaultrolle abfragen
-			$menue2rolle_select_sql = "
-				SELECT " .
-					$new_user_id . ", " .
-					$gast_stelle . ",
-					`menue_id`,
-					`status`
-				FROM
-					`u_menue2rolle`
-				WHERE
-					`stelle_id` = " . $gast_stelle . " AND
-					`user_id` = " . $default_user_id . "
-			";
-		}
-		else {
-			# Menueeinstellungen mit status 0 von stelle abfragen
-			$menue2rolle_select_sql = "
-				SELECT " .
-					$new_user_id . ", " .
-					$gast_stelle . ",
-					`menue_id`,
-					'0'
-				FROM
-					`u_menue2stelle`
-				WHERE
-					`stelle_id` = " . $gast_stelle . "
-			";
-		}
-		$sql = "
-			INSERT INTO `u_menue2rolle` (
-				`user_id`,
-				`stelle_id`,
-				`menue_id`,
-				`status`
-			) " .
-			$menue2rolle_select_sql . "
-		";
-		#echo '<br>sql: ' . $sql;
-		$query = mysql_query($sql);
-
-		if ($default_user_id > 0) {
-			# Layereinstellungen von Defaultrolle abfragen
-			$rolle2used_layer_select_sql = "
-				SELECT " .
-					$new_user_id . ", " .
-					$gast_stelle . ",
-					`layer_id`,
-					`aktivStatus`,
-					`queryStatus`,
-					`showclasses`,
-					`logconsume`
-				FROM
-					u_rolle2used_layer
-				WHERE
-					user_id = " . $default_user_id . " AND
-					stelle_id = " . $gast_stelle . "
-			";
-		}
-		else {
-			# Layereinstellungen von Defaultlayerzuordnung abfragen
-			$rolle2used_layer_select_sql = "
-				SELECT " .
-					$new_user_id . ", " .
-					$gast_stelle . ",
-					`Layer_ID`,
-					`start_aktiv`,
-					`start_aktiv`,
-					1,
-					0
-				FROM
-					used_layer
-				WHERE
-					Stelle_ID = " . (int)$gast_stelle . "
-			";
-		}
-
-		# Layereinstellungen der Rolle eintragen
-		$sql = "
-			INSERT INTO `u_rolle2used_layer` (
-				`user_id`,
-				`stelle_id`,
-				`layer_id`,
-				`aktivStatus`,
-				`queryStatus`,
-				`showclasses`,
-				`logconsume`
-			) " .
-			$rolle2used_layer_select_sql . "
-		";
-		#echo '<br>sql: ' . $sql;
-		$query = mysql_query($sql);
-
-		if ($default_user_id > 0) {
-			$sql = "
-				UPDATE
-					u_groups2rolle AS n,
-					u_groups2rolle AS d
-				SET
-					n.status = d.status
-				WHERE
-					n.stelle_id = d.stelle_id AND
-					n.id = d.id AND
-					n.stelle_id = " . $gast_stelle . " AND
-					n.user_id = " . $new_user_id . " AND
-					d.user_id = " . $default_user_id . "
-			";
-		}
-		else {
-			$sql = "
-				UPDATE
-					u_groups2rolle,
-					u_rolle2used_layer,
-					layer
-				SET
-					u_groups2rolle.status = 1
-				WHERE
-					u_groups2rolle.user_id = " . $new_user_id . " AND
-					u_groups2rolle.stelle_id = " . $gast_stelle . " AND
-					u_rolle2used_layer.user_id = " . $new_user_id . " AND
-					u_rolle2used_layer.stelle_id = " . $gast_stelle. " AND
-					u_rolle2used_layer.aktivStatus = '1' AND
-					u_rolle2used_layer.layer_id = layer.Layer_ID AND
-					layer.Gruppe = u_groups2rolle.id
-			";
-		}
-		#echo '<br>sql: ' . $sql;
-		$query = mysql_query($sql);
-
-		# Gespeicherte Themeneinstellungen von default user übernehmen
-		if ($default_user_id > 0) {
-			$sql = "
-				INSERT INTO `rolle_saved_layers` (
-					`user_id`,
-					`stelle_id`,
-					`name`,
-					`layers`,
-					`query`
-				)
-				SELECT " .
-					$new_user_id . "," .
-					$gast_stelle . ",
-					`name`,
-					`layers`,
-					`query`
-				FROM
-					`rolle_saved_layers`
-				WHERE
-					`user_id` = " . $default_user_id . " AND
-					`stelle_id` = " . $gast_stelle . "
-			";
-		}
-		#echo '<br>Sql: ' . $sql;
-		$query = mysql_query($sql);
+		$rolle->setRolle($new_user_id, $gast_stelle, $stelle->default_user_id);
+		$rolle->setMenue($new_user_id, $gast_stelle, $stelle->default_user_id);
+		$rolle->setLayer($new_user_id, $gast_stelle, $stelle->default_user_id);
+		$rolle->setGroups($new_user_id, $gast_stelle, $stelle->default_user_id, $layers['ID']);
+		$rolle->setSavedLayersFromDefaultUser($new_user_id, $gast_stelle, $stelle->default_user_id);
 
 		$gast['username'] = $loginname;
 		$gast['passwort'] = 'gast';
@@ -912,8 +610,8 @@ INSERT INTO u_styles2classes (
     return mysql_close($this->dbConn);
   }
 
-	function exec_commands($commands_string, $search, $replace, $replace_constants = false) {
-		if($commands_string != ''){
+	function exec_commands($commands_string, $search, $replace, $replace_constants = false, $suppress_err_msg = false) {
+		if ($commands_string != '') {
 			foreach (explode(';' . chr(10), $commands_string) as $query2) { // verschiedene Varianten des Zeilenumbruchs berücksichtigen
 				foreach (explode(';' . chr(13), $query2) as $query) {
 					$query_to_execute = '';
@@ -934,8 +632,8 @@ INSERT INTO u_styles2classes (
 							}
 						}
 						#echo '<br>exec sql: ' . $query_to_execute;
-						$ret=$this->execSQL($query_to_execute, 0, 0);
-						if($ret[0] == 1) {
+						$ret = $this->execSQL($query_to_execute, 0, 0, $suppress_err_msg);
+						if ($ret[0] == 1) {
 							return $ret;
 						}
 					}
@@ -1004,58 +702,53 @@ INSERT INTO u_styles2classes (
   	}
   }
 
-  function execSQL($sql, $debuglevel, $loglevel) {
-  	switch ($this->loglevel) {
-  		case 0 : {
-  			$logsql=0;
-  		} break;
-  		case 1 : {
-  			$logsql=1;
-  		} break;
-  		case 2 : {
-  			$logsql=$loglevel;
-  		} break;
-  	}
-    # SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
-    # wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
-    # (lesend immer, aber schreibend nur mit DBWRITE=1)
-    if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
+	function execSQL($sql, $debuglevel, $loglevel, $suppress_error_msg = false) {
+		switch ($this->loglevel) {
+			case 0 : {
+				$logsql=0;
+			} break;
+			case 1 : {
+				$logsql=1;
+			} break;
+			case 2 : {
+				$logsql=$loglevel;
+			} break;
+		}
+		# SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
+		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
+		# (lesend immer, aber schreibend nur mit DBWRITE=1)
+		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
 			#echo '<br>sql in execSQL: ' . $sql;
-      $query=mysql_query($sql,$this->dbConn);
-      #echo $sql;
-      if ($query==0) {
-        $ret[0]=1;
-				$ret[1] =
-					mysql_error($this->dbConn) . "<br>\n<br>" .
-					"\nAufgetreten bei MySQL Anweisung:<br>\n" .
-					"<textarea id=\"sql_statement\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px;\">" . $sql . "</textarea><br>\n" .
-					"<button type=\"button\" onclick=\"
-						copyText = document.getElementById('sql_statement');
-						copyText.select();
-						document.execCommand('copy');
-					\">In Zwischenablage kopieren</button>";
-        $this->debug->write($ret[1], $debuglevel);
-        if ($logsql) {
-          $this->logfile->write("#".$ret[1]);
-        }
-      }
-      else {
-        $ret[0] = 0;
+			$query = mysql_query($sql, $this->dbConn);
+			if ($query == 0) {
+				$ret[0]=1;
+				$div_id = rand(1, 99999);
+				$errormessage = mysql_error($this->dbConn);
+				$ret[1] = sql_err_msg('MySQL', $sql, $errormessage, $div_id);
+				if ($logsql) {
+					$this->logfile->write("#" . $errormessage);
+				}
+				if (!$suppress_error_msg) {
+					$this->gui->add_message('error', $ret[1]);
+				}
+			}
+			else {
+				$ret[0] = 0;
 				$ret['success'] = true;
-        $ret[1] = $ret['query'] = $query;
-        if ($logsql) {
-          $this->logfile->write($sql.';');
-        }
-        $this->debug->write(date('H:i:s')."<br>".$sql,$debuglevel);
-      }
-      $ret[2] = $sql;
-    }
-    else {
-    	if ($logsql) {
-    		$this->logfile->write($sql.';');
-    	}
-    	$this->debug->write("<br>".$sql,$debuglevel);
-    }
-    return $ret;
-  }
+				$ret[1] = $ret['query'] = $query;
+				if ($logsql) {
+					$this->logfile->write($sql . ';');
+				}
+				$this->debug->write(date('H:i:s')."<br>" . $sql, $debuglevel);
+			}
+			$ret[2] = $sql;
+		}
+		else {
+			if ($logsql) {
+				$this->logfile->write($sql . ';');
+			}
+			$this->debug->write("<br>" . $sql, $debuglevel);
+		}
+		return $ret;
+	}
 }

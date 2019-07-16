@@ -39,6 +39,7 @@ class Nutzer extends MyObject {
 	public static function register($gui, $stelle_id) {
 		$gui->debug->show('Nutzer register', Nutzer::$write_debug);
 		$user = new Nutzer($gui);
+		$stelle = new stelle($stelle_id, $gui->database);
 		$results = $user->create(
 			array(
 				'login_name' => $gui->formvars['login_name'],
@@ -55,12 +56,12 @@ class Nutzer extends MyObject {
 		if ($results[0]['success']) {
 			$result['success'] = false;
 			$rolle = new rolle($user->get('ID'), $stelle_id, $gui->database);
-			if ($rolle->setRollen($user->get('ID'), array($stelle_id))) {
-				if ($rolle->setMenue($user->get('ID'), array($stelle_id))) {
-					if ($rolle->setLayer($user->get('ID'), array($stelle_id), 0)) {
-						$stelle = new stelle($stelle_id, $gui->database);
+			if ($rolle->setRolle($user->get('ID'), $stelle_id, $stelle->default_user_id)) {
+				if ($rolle->setMenue($user->get('ID'), $stelle_id, $stelle->default_user_id)) {
+					if ($rolle->setLayer($user->get('ID'), $stelle_id, $stelle->default_user_id)) {
 						$layers = $stelle->getLayers(NULL);
-						if ($rolle->setGroups($user->get('ID'), array($stelle_id), $layers['ID'], 0)) {
+						if ($rolle->setGroups($user->get('ID'), $stelle_id, $stelle->default_user_id, $layers['ID'])) {
+							$rolle->setSavedLayersFromDefaultUser($user->get('ID'), $stelle_id, $stelle->default_user_id);
 							$result['success'] = true;
 						}
 					}

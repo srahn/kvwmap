@@ -4,6 +4,7 @@
  
  # Variablensubstitution
  $layer = $this->qlayerset[$i];
+ 
  $size = 40;
  $select_width = 'width:290px;';
 ?>
@@ -13,10 +14,12 @@
 	  $anzObj = count($this->qlayerset[$i]['shape']);
 	  if ($anzObj > 0) {
 	  	$this->found = 'true';
+			$k = 0;
 	  	$doit = true;
 	  }
 	  if($this->new_entry == true){
-	  	$anzObj = 1;
+	  	$anzObj = 0;
+			$k  = -1;
 	  	$doit = true;
 	  }
 	  if($doit == true){
@@ -30,7 +33,8 @@
 	$geomtype = '';
 	$dimension = '';
 	$privileg = '';
-	for ($k=0;$k<$anzObj;$k++) {
+	$this->subform_classname = 'subform_'.$layer['Layer_ID'];
+	for ($k; $k<$anzObj; $k++) {
 		$checkbox_name .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'];
 ?>
 	<tr>
@@ -69,21 +73,21 @@
 											<table width="100%" class="tgle" id="group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" '; if($collapsed)$datapart .= 'style="display:none"'; $datapart .= 'border="2"><tbody class="gle">';
 				}
 
-				if($layer['attributes']['visible'][$j]){
+				if($layer['attributes']['visible'][$j] AND ($this->new_entry != true OR $layer['attributes']['dont_use_for_new'][$j] != -1)){
 					if($layer['attributes']['type'][$j] != 'geometry'){
 						if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
 						if($layer['attributes']['alias'][$j] == '')$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
 						
 						if($layer['attributes']['arrangement'][$j] != 1)$datapart .= '<tr id="tr_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'">';							# wenn Attribut nicht daneben -> neue Zeile beginnen
 						if($layer['attributes']['labeling'][$j] != 2){
-							$td = '	<td class="gle-attribute-name" '; if($layer['attributes']['labeling'][$j] == 1 AND $layer['attributes']['arrangement'][$j] == 1 AND $layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20" ';if($layer['attributes']['group'][0] != '' AND $layer['attributes']['arrangement'][$j] != 1)$td .= 'width="1%">';else $td.='width="1%">';
+							$td = '	<td class="gle-attribute-name" id="'.'name_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'"'; if($layer['attributes']['labeling'][$j] == 1 AND $layer['attributes']['arrangement'][$j] == 1 AND $layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20" ';if($layer['attributes']['group'][0] != '' AND $layer['attributes']['arrangement'][$j] != 1)$td .= 'width="1%">';else $td.='width="1%">';
 							$td.= 			attribute_name($layer['Layer_ID'], $layer['attributes'], $j, $k, $this->user->rolle->fontsize_gle, false);
 							$td.= '	</td>';
 							if($nl AND $layer['attributes']['labeling'][$j] != 1)$next_line .= $td; else $datapart .= $td;
 						}
 						if($layer['attributes']['labeling'][$j] == 1)$nl = true;										# Attributname soll oben stehen -> alle weiteren tds für die nächste Zeile aufsammeln
-						$td = '	<td width="100%" class="gle_attribute_value"'; if($layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20"'; $td .= '>';												
-						$td.= 			attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle);
+						$td = '	<td width="100%" id="value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" class="gle_attribute_value"'; if($layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20"'; $td .= '>';												
+						$td.= 			attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, false, NULL, NULL, NULL, $this->subform_classname);
 						$td.= '	</td>';
 						if($nl)$next_line .= $td; else $datapart .= $td;
 						if($layer['attributes']['arrangement'][$j+1] != 1)$datapart .= '</tr>';						# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
@@ -92,9 +96,6 @@
 							$next_line = '';
 							$nl = false;
 						}
-						if($layer['attributes']['privileg'][$j] >= '0'){
-							$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'|';
-						}
 					}
 		  		else{
 		  			$columnname = $layer['attributes']['name'][$j];
@@ -102,12 +103,17 @@
 		  			$geomtype = $layer['attributes']['geomtype'][$layer['attributes']['name'][$j]];
 		  			$dimension = $layer['attributes']['dimension'][$j];
 		  			$privileg = $layer['attributes']['privileg'][$j];
-		  			$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].'|';
 		  		}
 				}
 				else{
-					$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
-				}
+					$vc_class = '';
+					$onchange = '';
+					if ($layer['attributes']['dependents'][$j] != NULL) {
+						$vc_class = ' visibility_changer';
+						$onchange = 'this.oninput();" oninput="check_visibility('.$layer['Layer_ID'].', this, [\''.implode('\',\'', $layer['attributes']['dependents'][$j]).'\'], '.$k.');';
+					}
+					$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" class="'.$this->subform_classname.$vc_class.'" onchange="'.$onchange.'" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
+				}				
 				if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
 					$datapart .= '</table></div></td></tr>';
 				}
@@ -124,6 +130,7 @@
 						echo '
 						<tr>
 							<td colspan="2" align="center">';
+								echo '<input type="hidden" class="'.$this->subform_classname.'" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].'">';
 								include(LAYOUTPATH.'snippets/'.$geomtype.'Editor.php');
 						echo'
 							</td>

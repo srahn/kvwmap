@@ -147,12 +147,12 @@ class antrag {
       }
       # Wie heißt die Datei, die in den Ordner kopiert werden soll
       # Pfad zur Quelle erstellen
-      $quellpfad=NACHWEISDOCPATH.$flurid.'/'.$nr.'/';
-      $quelle=$quellpfad.$nachweis->Dokumente[$i]['link_datei'];
+      $quellpfad = dirname($nachweis->Dokumente[$i]['link_datei']);
+      $quelle = $nachweis->Dokumente[$i]['link_datei'];
       # Pfad zum Ziel erstellen
 			$ziel = $zielpfad.basename($nachweis->Dokumente[$i]['link_datei']);
       #echo '<br>von:'.$quelle.' nach:'.$ziel;
-			$dateinamensteil = explode('.', $nachweis->Dokumente[$i]['link_datei']);
+			$dateinamensteil = explode('.', basename($nachweis->Dokumente[$i]['link_datei']));
       if (!file_exists($quelle)) {
         $errmsg.='Die Datei '.$quelle.' existiert nicht.<br>';
       }
@@ -167,8 +167,8 @@ class antrag {
 					else{	
 						# Vorschaubild kopieren
 						$vorschaudatei = $dateinamensteil[0].'_thumb.jpg';
-						$quelle=$quellpfad.$vorschaudatei;
-						$erfolg=copy($quelle,$vorschaupfad.basename($vorschaudatei));
+						$quelle=$quellpfad.'/'.$vorschaudatei;
+						$erfolg=copy($quelle,$vorschaupfad.$vorschaudatei);
 						# Nachweis-UKOs erzeugen
 						$uko = WKT2UKO($nachweis->Dokumente[$i]['wkt_umring']);
 						$ukofile = $nachweiseUKOpfad.basename($dateinamensteil[0]).'.uko';

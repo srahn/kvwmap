@@ -27,6 +27,18 @@ extract_zip_files() {
 				done
 				rm $ZIP_FILE
 			done
+			find ${DATA_PATH} -iname '*.xml.gz' | sort | while read GZ_FILE ; do
+				GZ_FILE_=${GZ_FILE// /_} # ersetzt Leerzeichen durch _ in Dateiname
+				if [ ! "$GZ_FILE" = "$GZ_FILE_" ] ; then
+					log "Benenne Datei: ${GZ_FILE} um in ${GZ_FILE_}"
+					mv "$GZ_FILE" "$GZ_FILE_"
+					GZ_FILE="$GZ_FILE_"
+				fi
+				mv $GZ_FILE $IMPORT_PATH
+				log "Extrahiere: ${GZ_FILE}"
+				BASENAME_GZ=$(basename "${GZ_FILE}")
+				gunzip $IMPORT_PATH/$BASENAME_GZ
+			done			
 		else
 			log "Dateieingangsverzeichnis: ${DATA_PATH} ist leer."
 		fi

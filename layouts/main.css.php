@@ -104,6 +104,7 @@ input[type="text"]{
 	font-size: 14px;
 	font-family: SourceSansPro1;
 	height: 22px;
+	padding-top: 0;
 }
 
 input[type="file"] {
@@ -492,7 +493,7 @@ a.invisiblelayerlink:hover{
 	border-radius: 5px;
 }
 
-.buttonlink:hover{
+.buttonlink:hover, .buttonlink:focus{
 	background: linear-gradient(#DAE4EC, #84accf);
 }
 
@@ -642,6 +643,20 @@ a.menuered:hover {
 
 .ausgewaehltes-menue {
 /*	background: rgb(205, 208, 208); */
+}
+
+.header-button {
+	float: right;
+	padding: 4px;
+	font-size: 150%;
+}
+
+.header-button:hover {
+	cursor: pointer;
+}
+
+.options-button {
+	width: 18px;
 }
 
 .button-menue{
@@ -944,7 +959,7 @@ a.menuered:hover {
 	z-index: 1000;
 	margin: 0;
 	height: 0px;
-	width: 177px;
+	width: 100%;
 }
 
 .drawingOrderFormDropZone.ready{
@@ -1264,7 +1279,12 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	float: left;
 	margin-left: 20px;
 	padding: 0px;
-	max-width: 480px
+	max-width: 480px;
+	text-align: left;
+}
+
+#dstable{
+	max-width: 900px;
 }
 
 table.tgle {
@@ -1281,6 +1301,8 @@ thead.gle th {
 }
 
 .gle-attribute-name { 
+ position: relative;
+ background-clip: padding-box;
  padding-left: 2px;
  padding-right: 2px;
  vertical-align: top;
@@ -1303,7 +1325,7 @@ thead.gle th {
 }
 
 tbody.gle tr { 
- border:1px dotted gray;
+ border:1px solid #999;
 }
 
 .gle1_table{
@@ -1601,6 +1623,62 @@ tbody.gle tr {
 	cursor: pointer;
 }
 
+.user-options {
+	display: none;
+	min-width: 200px;
+	border: 1px solid #cccccc;
+	background-color: #FFFFFF;
+	position:absolute;
+	-moz-box-shadow: 6px 5px 7px #777;
+	-webkit-box-shadow: 6px 5px 7px #777;
+	box-shadow: 6px 5px 7px #777;
+	top: 30px;
+	right: 15px;
+	z-index: 2000;
+}
+
+.user-options-header {
+	background-color: #c7d9e6;
+	padding: 7px 7px 7px 7px;
+/*	width: 242px; */
+	font-weight: bolder;
+	z-index: 2000;
+}
+
+.user-options-section-header {
+	padding: 7px 0px 7px 7px;
+	z-index: 2000;
+}
+
+.options-devider {
+	background-color: #e1e4e8;
+	height: 1px;
+	margin: 0px 1px 0px 1px;
+	z-index: 2000;
+}
+
+.user-option {
+	padding: 7px 0px 7px 7px;
+	z-index: 2000;
+	cursor: pointer;
+}
+
+.user-option:hover {
+	background: linear-gradient(#dae4ec 0%, #c7d9e6 100%);
+	z-index: 2000;
+}
+
+.sperr-div {
+	display: none;
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	background: rgba(51,51,51,0.2);
+	z-index: 1000;
+}
+
 .layerOptions, #legendOptions{
 	min-width: 220px;
 	border: 1px solid #cccccc;
@@ -1628,7 +1706,7 @@ tbody.gle tr {
 
 #legendOptionsIcon{
 	font-size: 1.1em;
-	margin: 0 0 0 42;
+	margin: 0 5px 0 42px;
 	height: 16px;
 	width: 16px;
 	padding: 5px;
@@ -1846,17 +1924,9 @@ tbody.gle tr {
 }
 
 .scrolltable tbody {
-	height: 590px;
+	max-height: 590px;
 	overflow-y: auto;
 	overflow-x: hidden;
-}
-
-.nw_treffer_table tr:hover {
-	background-color: lightgrey;
-}
-
-.nw_treffer_table td {
-	padding: 5 0 5 0;
 }
 
 .toggle_fa_off i{
@@ -1879,4 +1949,9 @@ tbody.gle tr {
   width: 100%;
   box-sizing:border-box;
   -moz-box-sizing:border-box;
+}
+
+.small-gray {
+	color: gray;
+	font-size: 12px;
 }

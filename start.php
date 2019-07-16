@@ -164,7 +164,7 @@ else {
 			# Frage den Nutzer mit dem login_namen ab
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
 
-			if (is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
+			if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
 				$GUI->debug->write('Set Session', 4, $GUI->echo);
 				set_session_vars($GUI->formvars);
 				$GUI->debug->write('Anmeldung war erfolgreich, Benutzer wurde mit angegebenem Passwort gefunden.', 4, $GUI->echo);
@@ -195,8 +195,10 @@ else {
 			}
 			else { # Anmeldung ist fehlgeschlagen
 				$GUI->debug->write('Anmeldung ist fehlgeschlagen.', 4, $GUI->echo);
-				$GUI->formvars['num_failed'] = Nutzer::increase_num_login_failed($GUI, $GUI->formvars['login_name']);
-				sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
+				if($GUI->login_failed_reason == 'authentication'){
+					$GUI->formvars['num_failed'] = Nutzer::increase_num_login_failed($GUI, $GUI->formvars['login_name']);
+					sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
+				}
 				$show_login_form = true;
 				$go = 'login_failed';
 				# login case 7
@@ -348,13 +350,16 @@ if ($show_login_form) {
 }
 else {
 	$GUI->debug->write('Lade Stelle und ordne Rolle dem User zu.', 4, $GUI->echo);
+
+	$GUI->debug->write('Ordne Nutzer: ' . $GUI->user->id . ' Stelle: ' . $GUI->Stelle->ID . ' zu.', 4, $GUI->echo);
+	$GUI->user->setRolle($GUI->user->stelle_id);
+
 	# Alles was man immer machen muss bevor die go's aufgerufen werden
 	if (new_options_sent($GUI->formvars)) {
 		$GUI->debug->write('Speicher neue Stellenoptionen.', 4, $GUI->echo);
+		$GUI->setLayerParams();
 		$GUI->user->setOptions($GUI->user->stelle_id, $GUI->formvars);
 	}
-	$GUI->debug->write('Ordne Nutzer: ' . $GUI->user->id . ' Stelle: ' . $GUI->Stelle->ID . ' zu.', 4, $GUI->echo);
-	$GUI->user->setRolle($GUI->user->stelle_id);
 
 	#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
 	# Rollenbezogene Stellendaten zuweisen
@@ -414,7 +419,7 @@ else {
 		$GUI->epsg_codes = $GUI->pgdatabase->read_epsg_codes(false);
 		# Umrechnen der für die Stelle eingetragenen Koordinaten in das aktuelle System der Rolle
 		# wenn die EPSG-Codes voneinander abweichen
-		if ($GUI->Stelle->epsg_code != $GUI->user->rolle->epsg_code){
+		if ($GUI->Stelle->epsg_code != $GUI->user->rolle->epsg_code) {
 			$user_epsg = $epsg_codes[$GUI->user->rolle->epsg_code];
 			if($user_epsg['minx'] != ''){							// Koordinatensystem ist räumlich eingegrenzt
 				if($GUI->Stelle->epsg_code != 4326){
@@ -431,7 +436,7 @@ else {
 				$projTO = ms_newprojectionobj("init=epsg:".$GUI->user->rolle->epsg_code);
 				$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);				// Transformation in das System des Nutzers
 			}
-			else{
+			else {
 				# Umrechnen der maximalen Kartenausdehnung der Stelle
 				$projFROM = ms_newprojectionobj("init=epsg:".$GUI->Stelle->epsg_code);
 				$projTO = ms_newprojectionobj("init=epsg:".$GUI->user->rolle->epsg_code);
@@ -442,10 +447,12 @@ else {
 
 	if($_SESSION['login_routines'] == true) {
 		define('AFTER_LOGIN', true);
-	# hier befinden sich Routinen, die beim einloggen des Nutzers einmalig durchgeführt werden
+		$mapdb = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
+		# hier befinden sich Routinen, die beim einloggen des Nutzers einmalig durchgeführt werden
+		# Löschen der Rollenfilter
+		$mapdb->deleteRollenFilter();
 		# Löschen der Rollenlayer
 		if(DELETE_ROLLENLAYER == 'true'){
-			$mapdb = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 			$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search');
 	    for($i = 0; $i < count($rollenlayerset); $i++){
 	      $mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
@@ -545,10 +552,6 @@ function has_width_and_height($var) {
 
 function is_login($formvars) {
 	return $formvars['login_name'] != '' AND $formvars['passwort'] != '';
-}
-
-function is_login_granted($user, $login_name) {
-	return $user->login_name == $login_name;
 }
 
 function is_agreement_accepted($user) {

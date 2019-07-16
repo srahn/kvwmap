@@ -30,6 +30,11 @@
 			'title' => 'Autovervollständigungsfeld'
 		),
 		array(
+			'value' => 'Autovervollständigungsfeld_zweispaltig',
+			'output' => 'zweispaltiges Autovervollständigungsfeld',
+			'title' => 'Autovervollständigungsfeld getrennt durch Leerzeichen'
+		),
+		array(
 			'value' => 'Radiobutton',
 			'output' => 'Radiobutton',
 			'title' => 'Radiobutton'
@@ -429,7 +434,7 @@ function alias_replace(name){
 													<td><?
 														echo FormObject::createSelectField(
 																	'vcheck_operator_' . $this->attributes['name'][$i],
-																	array('=', '!=', '<', '>'),
+																	array('=', '!=', '<', '>', 'IN'),
 																	$this->attributes['vcheck_operator'][$i],
 																	1,
 																	'width: 35px'

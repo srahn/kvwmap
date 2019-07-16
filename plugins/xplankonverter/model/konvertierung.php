@@ -389,12 +389,9 @@ class Konvertierung extends PgObject {
 			$layerGroup = new MyObject($this->gui, 'u_groups');
 			if ($layer_type == 'GML') {
 				$layerGroup = $layerGroup->find_by('Gruppenname', 'XPlanung');
-				/*
-					ToDo create also a new group if no exists allready
 				$layerGroup->create(array(
 					'Gruppenname' => 'XPlanung'
 				));
-				*/
 			}
 			else {
 				$layerGroup->create(array(

@@ -31,8 +31,8 @@ if (DEBUG_LEVEL > 0) {
 if (LOG_LEVEL > 0) {
  $log_mysql = new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: ' . date("Y:m:d H:i:s", time()));
  $log_postgres = new LogFile(LOGFILE_POSTGRES, 'text', 'Log-Datei Postgres', '------v: ' . date("Y:m:d H:i:s", time()));
- $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '');
 }
+$log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '');
 
 ###################################################################
 # kvwmap - Kartenserver für die Verwaltung raumbezogener Daten.   #
@@ -112,6 +112,7 @@ define(CASE_COMPRESS, false);																																						  #
 #   getLayerOptions:  - getRollenLayer(), writeCustomType(), getDatatypeId() 															#
 #												und writeDatatypeAttributes() reinkopieren																				#
 #		get_group_legend:	- compare_legendorder() reinkopieren																								#
+#		get_select_list:  - read_datatype_attributes() reinkopieren																						#
 #																																																				  #
 #																																																				  #
 ###########################################################################################################
@@ -1076,7 +1077,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Daten_Import_Process' : {
-				$GUI->daten_import_process($GUI->formvars['upload_id'], $GUI->formvars['filenumber'], $GUI->formvars['filename'], $GUI->formvars['epsg']);
+				$GUI->daten_import_process($GUI->formvars['upload_id'], $GUI->formvars['filenumber'], $GUI->formvars['filename'], $GUI->formvars['epsg'], $GUI->formvars['after_import_action']);
 			} break;
 
 			case 'Daten_Export' : {
@@ -1144,6 +1145,10 @@ function go_switch($go, $exit = false) {
 
 			case 'Datensatz_dublizieren' : {
 				$GUI->dublicate_dataset();
+			} break;
+
+			case 'Layer_Datensatz_Loeschen' : {
+				$GUI->layer_Datensatz_Loeschen($GUI->formvars['chosen_layer_id'], $GUI->formvars['oid']);
 			} break;
 
 			case 'Layer_Datensaetze_Loeschen' : {

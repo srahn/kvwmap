@@ -19,10 +19,12 @@
   $anzObj = count($layer['shape']);
   if ($anzObj > 0) {
   	$this->found = 'true';
+		$k = 0;
   	$doit = true;
   }
   if($this->new_entry == true){
-  	$anzObj = 1;
+  	$anzObj = 0;
+		$k = -1;
   	$doit = true;
   }
 ?>
@@ -59,7 +61,7 @@
 ?>
 <table id="<? echo $table_id; ?>" border="0" cellspacing="0" cellpadding="2">
 <?
-	for ($k=0;$k<$anzObj;$k++) {
+	for ($k; $k<$anzObj; $k++) {
 		$datapart = '';
 		$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
 ?>
@@ -68,19 +70,17 @@
 			<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
 	    <div id="datensatz" 
 			<? if($this->new_entry != true AND $this->user->rolle->querymode == 1){ ?>
-			onmouseenter="if(typeof FormData !== 'undefined')highlight_object(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['the_geom']].'_oid']; ?>');"
+			onmouseenter="highlight_object(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['the_geom']].'_oid']; ?>');"
 			<? } ?>
 			><?php
-			$definierte_attribute_privileges = $layer['attributes']['privileg'];
-			$gesperrte_attribute_privileges = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
-			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
-				$layer['attributes']['privileg'] = $gesperrte_attribute_privileges;
-			}
-			else {
-				$layer['attributes']['privileg'] = $definierte_attribute_privileges;
+			$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
+			if (is_array($layer['attributes']['privileg'])) {
+				if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
+					$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
+				}
 			}
 			?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
-	    <table id="dstable" class="tgle" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" style="width:100%" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
+	    <table id="dstable" class="tgle" style="border-bottom: 1px solid grey" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
 				<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
         <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle"'; ?>>
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
@@ -102,7 +102,9 @@
 					$explosion = explode(';', $layer['attributes']['group'][$j]);
 					if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 					$groupname = $explosion[0];
-					$datapart .= '<tr>
+					$groupname_short = explode('<br>', $groupname);
+					$groupname_short = str_replace(' ', '_', $groupname_short[0]);
+					$datapart .= '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.'">
 									<td colspan="2" width="100%">
 										<div style="border-bottom: 1px solid grey">
 											<table width="100%" class="tgle" border="2"><tbody class="gle">
@@ -205,7 +207,8 @@
 					}
 				}
 				else{
-					$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
+					$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
+					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'|';
 				}
 				if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
 					$datapart .= output_table($table);
@@ -273,7 +276,7 @@
 
 				if($this->new_entry == true){
 					if($privileg == 1){
-						if(!$this->user->rolle->geom_edit_first)echo $datapart.'</table><table class="tgle" border="0" cellspacing="0" cellpadding="2">';
+						if(!$this->user->rolle->geom_edit_first)echo $datapart.'</table><table style="width: 100%" class="tgle" border="0" cellspacing="0" cellpadding="0">';
 						if($nullable === '0'){ ?>
 							<script type="text/javascript">
     						geom_not_null = true;
@@ -300,6 +303,7 @@
 		</td>
 	</tr>
 <?
+		$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 	}
 	if($this->formvars['printversion'] == ''){
 ?>
@@ -499,7 +503,8 @@
 				<span style="color:#FF0000;"><? echo $strNoMatch; ?></span>
 		</td>
   </tr>
-	<? if($layer['privileg'] > 0){ ?>
+<? 	$layer_new_dataset = $this->Stelle->getqueryablePostgisLayers(1, NULL, true, $layer['Layer_ID']);		// Abfrage ob Datensatzerzeugung möglich
+		if($layer_new_dataset != NULL){ ?>
 	<tr align="center">
 		<td><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=<? echo $layer['Layer_ID']; ?>"><? echo $strNewDataset; ?></a></td>
 	</tr>

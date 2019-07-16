@@ -41,6 +41,7 @@
 	$strdecimal="Dezimal";
 	$strgrad1="Grod, Minüten, Sekunn";
 	$strgrad2="Grod, Dezimalminüten";
+	$strThemeParameters="Themen Parameter";
 	$strHintTask="De Stell hett ünnerscheedlich Themen, Funktschoneer´s un Rechtstüüch, de för ünnerscheedlich Upgaben brukt ward. All wiedere Optschoonen gellen binnen de hie utsökt Stell.";
 	$strHintLanguage="Sök de Spraak ut, de in de Bovensied brukt ward.";
 	$strHintGUI="Sök de grafisch Bovensied ut.";
@@ -65,4 +66,6 @@
 	$strHintHighlight="Deist du de Optschoon utwähln, kieken de affrogen Themenobjekte in de Koort mit blaach Suum rut wenn du mit de Cursor överfleigst.";
 	$strHinthist_timestamp="Deist du een Dach ingeven, warn de ALKIS-Objekt mit düsse verleden Tied vörstellt. Affraag to´n Flurstück ergewen ok düsse verleden Tied.";
 	$strHintMenueButtons="Sökst du disse Opschoon ut, warrn fake bruken  Spiespuenkte as egens  Knoop över de Spies anwiest.";
+	$strShowRollenFilter="Wies up Themen-Filter";
+	$strHintShowRollenFilter="Sök disse Opschoon ut, denn hest du de Mööglichkeit dat Thema to filtern.";
 ?>

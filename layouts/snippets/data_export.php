@@ -332,12 +332,12 @@ $j=0;
 			<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>>
 			<? echo $strSingleGeoms; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			<? echo $this->strUseGeometryOf; ?>:
-  		<select name="layer_id" onchange="document.GUI.submit();">
+  		<select name="geom_from_layer" onchange="document.GUI.submit();">
   			<option value=""><?php echo $this->strPleaseSelect; ?></option>
   			<?
   				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
   					echo '<option';
-  					if($this->formvars['layer_id'] == $this->queryable_vector_layers['ID'][$i]){echo ' selected';}
+  					if($this->formvars['geom_from_layer'] == $this->queryable_vector_layers['ID'][$i]){echo ' selected';}
   					echo ' value="'.$this->queryable_vector_layers['ID'][$i].'">'.$this->queryable_vector_layers['Bezeichnung'][$i].'</option>';
   				}
   			?>
