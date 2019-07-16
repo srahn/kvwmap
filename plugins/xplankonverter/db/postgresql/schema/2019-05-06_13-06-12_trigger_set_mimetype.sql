@@ -1,8 +1,11 @@
 BEGIN;
 
-CREATE OR REPLACE FUNCTION xplankonverter.set_mimetype()
-  RETURNS trigger AS
-$BODY$
+CREATE FUNCTION xplankonverter.set_mimetype()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF 
+AS $BODY$
 DECLARE
 	mimetype json := '{
 		"xls" : "application/msexcel",
@@ -28,7 +31,8 @@ DECLARE
 		"txt" : "text/plain"
 		}';
 BEGIN
-	IF ((TG_OP = 'INSERT' AND NEW.externereferenz is NOT NULL) OR (TG_OP = 'UPDATE' AND NEW.externereferenz IS NOT NULL AND NEW.externereferenz != OLD.externereferenz)) THEN
+	IF ((TG_OP = 'INSERT' AND NEW.externereferenz is NOT NULL) OR (TG_OP = 'UPDATE' AND NEW.externereferenz IS NOT NULL AND (OLD.externereferenz IS NULL OR NEW.externereferenz != OLD.externereferenz))) THEN
+		RAISE NOTICE 'Check mimetype';
 		SELECT
 			ARRAY_AGG(
 				ROW(
@@ -54,11 +58,8 @@ BEGIN
 	END IF;
 	RETURN NEW;
 END;
-$BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
-	
-	
+$BODY$;
+
 CREATE TRIGGER set_mimetype
   BEFORE INSERT OR UPDATE
   ON xplan_gml.bp_plan
