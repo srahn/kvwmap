@@ -20,4 +20,6 @@
 	$this->strReset="Trüggsetten";
 	$this->strSaveMapViewCommittMassage="Koortutsnitt is spiekert woorn";
 	$this->strExceeded = "überschritten";
+	$this->strShowMore="Mehr anzeigen";
+	$this->strShowLess="Weniger anzeigen";
 ?>

@@ -17,6 +17,11 @@ class Regel extends PgObject {
 			'Linien',
 			'Flächen'
 		);
+		$this->layername_postfix = array(
+			'points',
+			'lines',
+			'polygons'
+		);
 	}
 
 public static	function find_by_id($gui, $by, $id) {
@@ -374,10 +379,9 @@ public static	function find_by_id($gui, $by, $id) {
 	}
 
 	function gml_layer_exists() {
-		$this->debug->show("Layer mit Gruppe: {$this->konvertierung->get('gml_layer_group_id')} Name: {$this->get('class_name')} {$this->get('geometrietyp')} Datentyp: {$this->get_layertyp()}", $this->write_debug);
+		$this->debug->show("Prüfe ob Layer: " . $this->get_layername() . " mit Typ: " . $this->get_layertyp() . " in Gruppe: " . $this->konvertierung->get('gml_layer_group_id') . " existiert", Regel::$write_debug);
 		$layers = Layer::find($this->gui, "
-			`Gruppe` = {$this->konvertierung->get('gml_layer_group_id')} AND
-			`Name` = '{$this->get('class_name')} {$this->get('geometrietyp')}' AND
+			`Name` = '{$this->get_layername()}' AND
 			`Datentyp`= {$this->get_layertyp()}
 		");
 		if (count($layers) > 0) {
@@ -395,6 +399,10 @@ public static	function find_by_id($gui, $by, $id) {
 		if (strpos($this->get('geometrietyp'), 'Punkt') !== false) $layertyp = 0;
 		if (strpos($this->get('geometrietyp'), 'Linie') !== false) $layertyp = 1;
 		return $layertyp;
+	}
+
+	function get_layername() {
+		return strtolower($this->get('class_name')) . '_' . $this->layername_postfix[$this->get_layertyp()];
 	}
 
 	function get_bereich() {
@@ -427,24 +435,34 @@ public static	function find_by_id($gui, $by, $id) {
 			#echo '<br>Regel gehört über einen Bereich und Plan zur Konvertierung.';
 			$sql = "
 				SELECT
-					coalesce(bp.konvertierung_id, rp.konvertierung_id) AS konvertierung_id
+					b.konvertierung_id
 				FROM
-					xplankonverter.regeln r LEFT JOIN
-					xplan_gml.bp_bereich bb ON r.bereich_gml_id = bb.gml_id LEFT JOIN
-					xplan_gml.fp_bereich fb ON r.bereich_gml_id = fb.gml_id LEFT JOIN
-					xplan_gml.rp_bereich rb ON r.bereich_gml_id = rb.gml_id LEFT JOIN
-					xplan_gml.so_bereich sb ON r.bereich_gml_id = sb.gml_id LEFT JOIN
-					xplan_gml.bp_plan bp ON bp.gml_id::text = bb.gehoertzuplan LEFT JOIN
-					xplan_gml.fp_plan fp ON fp.gml_id::text = fb.gehoertzuplan LEFT JOIN
-					xplan_gml.rp_plan rp ON rp.gml_id::text = rb.gehoertzuplan LEFT JOIN
-					xplan_gml.so_plan sp ON sp.gml_id::text = sb.gehoertzuplan LEFT JOIN
-					xplan_gml.rp_plan bpp ON bpp.konvertierung_id = r.konvertierung_id LEFT JOIN
-					xplan_gml.rp_plan fpp ON fpp.konvertierung_id = r.konvertierung_id LEFT JOIN
-					xplan_gml.rp_plan rpp ON rpp.konvertierung_id = r.konvertierung_id LEFT JOIN
-					xplan_gml.rp_plan spp ON spp.konvertierung_id = r.konvertierung_id
+					xplan_gml.xp_bereich b JOIN
+					xplankonverter.regeln r ON b.gml_id = r.bereich_gml_id
 				WHERE
 					r.id = " . $this->get('id') . "
 			";
+/*
+			SELECT
+				coalesce(bp.konvertierung_id, rp.konvertierung_id) AS konvertierung_id
+			FROM
+				xplankonverter.regeln r LEFT JOIN
+				xplan_gml.bp_bereich bb ON r.bereich_gml_id = bb.gml_id LEFT JOIN
+				xplan_gml.fp_bereich fb ON r.bereich_gml_id = fb.gml_id LEFT JOIN
+				xplan_gml.rp_bereich rb ON r.bereich_gml_id = rb.gml_id LEFT JOIN
+				xplan_gml.so_bereich sb ON r.bereich_gml_id = sb.gml_id LEFT JOIN
+				xplan_gml.bp_plan bp ON bp.gml_id::text = bb.gehoertzuplan LEFT JOIN
+				xplan_gml.fp_plan fp ON fp.gml_id::text = fb.gehoertzuplan LEFT JOIN
+				xplan_gml.rp_plan rp ON rp.gml_id::text = rb.gehoertzuplan LEFT JOIN
+				xplan_gml.so_plan sp ON sp.gml_id::text = sb.gehoertzuplan LEFT JOIN
+				xplan_gml.rp_plan bpp ON bpp.konvertierung_id = r.konvertierung_id LEFT JOIN
+				xplan_gml.rp_plan fpp ON fpp.konvertierung_id = r.konvertierung_id LEFT JOIN
+				xplan_gml.rp_plan rpp ON rpp.konvertierung_id = r.konvertierung_id LEFT JOIN
+				xplan_gml.rp_plan spp ON spp.konvertierung_id = r.konvertierung_id
+			WHERE
+				r.id = " . $this->get('id')
+*/
+
 			#echo '<br>SQL zum Abfragen der konvertierung_id der Regel: ' . $sql;
 			$result = pg_query($this->database->dbConn, $sql);
 			if (pg_num_rows($result) > 0) {
@@ -463,17 +481,18 @@ public static	function find_by_id($gui, $by, $id) {
 		
 		if (!$this->gml_layer_exists()) {
 			$layertyp = $this->get_layertyp();
-			$this->debug->show('Erzeuge Layer ' . $this->get('class_name') . ' ' . $this->layertypen[$layertyp] . ' in Gruppe ' . $this->konvertierung->get('bezeichnung') . ' layertyp ' . $layertyp, $this->write_debug);
+			$this->debug->show('Erzeuge Layer ' . $this->get_layername(), $this->write_debug);
 			
-			$this->debug->show('<p>Suche nach Templatelayer ' . $this->get('class_name') . ' ' . $this->layertypen[$layertyp] . ' in Obergruppe ' . GML_LAYER_TEMPLATE_GROUP, Regel::$write_debug);
+			$this->debug->show('<p>Suche nach Templatelayer ' . $this->get_layername() . ' in Obergruppe ' . GML_LAYER_TEMPLATE_GROUP, Regel::$write_debug);
 			$template_layer = Layer::find_by_obergruppe_und_name(
 				$this->gui,
 				GML_LAYER_TEMPLATE_GROUP,
-				$this->get('class_name') . ' ' . $this->layertypen[$layertyp]
+				$this->get_layername()
 			);
 
 			if (empty($template_layer)) {
 				# ToDo: Kein Template Layer vorhanden, erzeuge einen Dummy
+				echo 'Layer ' . $this->get_layername() . ' für gewählte GML-Klasse nicht vorhanden. Bitte anlegen.';
 			}
 			else {
 				$this->debug->show('<p>Kopiere Templatelayer in gml layer gruppe id: ' . $this->konvertierung->get('gml_layer_group_id'), Regel::$write_debug);
@@ -486,17 +505,17 @@ public static	function find_by_id($gui, $by, $id) {
 				);
 
 				$formvars_before = $this->gui->formvars;
+
+				$stellen = $this->gui->Stellenzuweisung(
+					array($gml_layer->get($gml_layer->identifier)),
+					array($this->gui->Stelle->id),
+					'(konvertierung_id = ' . $this->konvertierung->get('id') .')'
+				);
+
+				# Assign layer_id to Konvertierung
+				$this->set('layer_id', $gml_layer->get($gml_layer->identifier));
+				$this->update();
 			}
-
-			$stellen = $this->gui->Stellenzuweisung(
-				array($gml_layer->get($gml_layer->identifier)),
-				array($this->gui->Stelle->id),
-				'(konvertierung_id = ' . $this->konvertierung->get('id') .')'
-			);
-
-			# Assign layer_id to Konvertierung
-			$this->set('layer_id', $gml_layer->get($gml_layer->identifier));
-			$this->update();
 
 			$this->gui->formvars = $formvars_before;
 		}
@@ -529,10 +548,10 @@ public static	function find_by_id($gui, $by, $id) {
 						p.konvertierung_id = {$this->konvertierung->get('id')}
 				) regeln
 			WHERE
-				lower(class_name) || ' ' || geometrietyp = (
-				SELECT
-					lower(class_name) || ' ' || geometrietyp
-					from
+				lower(class_name) || '_' || geometrietyp = (
+					SELECT
+						lower(class_name) || '_' || geometrietyp
+					FROM
 						xplankonverter.regeln
 					WHERE
 						id = {$this->get('id')}
@@ -560,7 +579,7 @@ public static	function find_by_id($gui, $by, $id) {
 
 	function destroy() {
 		$this->debug->show('destroy regel ' . $this->get('name'), Regel::$write_debug);
-		$this->delete_gml_layer();
+		#$this->delete_gml_layer();
 		$this->delete();
 	}
 

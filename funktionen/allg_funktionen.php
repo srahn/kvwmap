@@ -848,7 +848,7 @@ function umlaute_umwandeln($name){
 	$name = str_replace('(', '', $name);
 	$name = str_replace(')', '', $name);
 	$name = str_replace('/', '-', $name);
-	$name = str_replace(' ', '', $name);
+	$name = str_replace(' ', '_', $name);
 	$name = str_replace('-', '_', $name);
 	$name = str_replace('?', '_', $name);
 	$name = str_replace('+', '_', $name);
@@ -1776,7 +1776,28 @@ function get_remote_filesize($url, $formatSize = true, $useHead = true) {
 /*
 * Function returns a readable message of sql errors optionally with word $find replaced by asterists *****
 */
-function sql_err_msg($file, $line, $sql, $find = '') {
-	return "<br>Abbruch in " . $file . " Zeile: " . $line . "<br>wegen: " . ($find != '' ? str_replace($find, '*****', $sql) : $sql). "<p>" . INFO1;
+function err_msg($file, $line, $msg, $find = '') {
+	return "<br>Abbruch in " . $file . " Zeile: " . $line . "<br>wegen: " . ($find != '' ? str_replace($find, '*****', $msg) : $msg). "<p>" . INFO1;
+}
+
+function sql_err_msg($title, $sql, $msg, $div_id) {
+	$err_msg = "
+		<div style=\"text-align: left;\">" .
+		$title . "<br>" .
+		$msg . "
+		<a href=\"#\" onclick=\"$('#error_details_" . $div_id . "').toggle()\" style=\"float: right;\">Details</a>
+		<div id=\"error_details_" . $div_id . "\" style=\"display: none\">
+			Aufgetreten bei SQL-Anweisung:<br>
+			<textarea id=\"sql_statement_" . $div_id . "\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px; max-height: 600px\">
+				" . $sql . "
+			</textarea><br>
+			<button type=\"button\" onclick=\"
+				copyText = document.getElementById('sql_statement_" . $div_id . "');
+				copyText.select();
+				document.execCommand('copy');
+			\">In Zwischenablage kopieren</button>
+		</div>
+	</div>";
+	return $err_msg;
 }
 ?>

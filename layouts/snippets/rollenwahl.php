@@ -42,6 +42,7 @@
 	Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions; ?>"];
 	Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
 	Text_print_scale=["<? echo $strHelp; ?>:","<? echo $strHintPrintScale; ?>"];
+	Text_showrollenfilter=["<? echo $strHelp; ?>:","<? echo $strHintShowRollenFilter; ?>"];
 
 	function start1(){
 		document.GUI.submit();
@@ -57,7 +58,15 @@
 		document.GUI.go.value = 'Stelle_waehlen_Passwort_aendern';
 		document.GUI.submit();
 	}
-	
+
+	/* This function can be overwritten
+	  * when some action should happen
+	 * after parameter changed
+	 */
+	function onLayerParameterChanged(parameter) {
+		/* nothing to do here */
+	}
+
 </script>
 <br>
 <h2><? echo $this->titel.$strTitleRoleSelection; ?></h2>
@@ -73,7 +82,7 @@ if ($this->formvars['nur_einstellungen']) {
 	}
 	else {
 		if (!empty($params)) { ?>
-			<div class="rollenwahl-gruppe">
+			<div id="rollen_wahl_params_div" class="rollenwahl-gruppe">
 				<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 					<tr>
 						<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett"><? echo $strThemeParameters; ?></span></td>
@@ -84,7 +93,7 @@ if ($this->formvars['nur_einstellungen']) {
 							<td class="rollenwahl-option-data">
 								<table><?
 									foreach($params AS $param) { ?>
-										<tr>
+										<tr id="layer_parameter_<?php echo $param['key']; ?>_tr">
 											<td valign="top" class="rollenwahl-option-header">
 												<?php echo $param['alias']; ?>:
 											</td>
@@ -112,7 +121,6 @@ if ($this->formvars['nur_einstellungen']) {
 		}
 	}
 } ?>
-
 <div class="rollenwahl-gruppe">
 	<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 		<tr>
@@ -131,7 +139,7 @@ if ($this->formvars['nur_einstellungen']) {
 					else { ?>
 						<tr>
 							<td valign="top" class="rollenwahl-option-header">
-								<? echo $strTask; ?>:
+								<? echo $strTask; ?>
 							</td>
 							<td class="rollenwahl-option-data">
 								<div style="display: flex;">
@@ -155,13 +163,13 @@ if ($this->formvars['nur_einstellungen']) {
 								<? echo $strPassword; ?>:
 							</td>
 							<td class="rollenwahl-option-data">
-								<a href="javascript:openPasswordForm();"><? echo $strChangePassword; ?></a>
+								<i class="fa fa-key options-button" aria-hidden="true"></i><a href="javascript:openPasswordForm();"><? echo $strChangePassword; ?></a>
 								<div id="password_form" style="border: 1px solid #cbcbcb;width: 290px;<? if($this->PasswordError == '')echo 'display: none'; ?>">
 									<table cellspacing="3" style="width: 100%">
 										<tr>
 											<td><span class="px16"><? echo $strCurrentPassword; ?>: </span></td>
 											<td>
-												<input style="width: 130px" type="password" value="<? echo $this->formvars['passwort']; ?>" name="passwort" />
+												<input style="width: 130px" type="password" value="<? echo $this->formvars['passwort']; ?>" id="passwort" name="passwort" /><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#passwort').attr('type') == 'text') { $('#passwort').attr('type', 'password') } else { $('#passwort').attr('type', 'text'); }"></i>
 											</td>
 										</tr><?
 										if($this->PasswordError){ ?>
@@ -174,7 +182,7 @@ if ($this->formvars['nur_einstellungen']) {
 										<tr>
 											<td><span class="px16"><? echo $strNewPassword; ?>: </span></td>
 											<td>
-												<input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password']; ?>" name="new_password"/><?php
+												<input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password']; ?>" id="new_password" name="new_password"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password').attr('type') == 'text') { $('#new_password').attr('type', 'password') } else { $('#new_password').attr('type', 'text'); }"></i><?php
 												if (defined ('PASSWORD_INFO') AND PASSWORD_INFO != '') { ?>
 													<div style="float: right; margin-left: 5px;">
 														<img
@@ -189,7 +197,7 @@ if ($this->formvars['nur_einstellungen']) {
 										</tr>
 										<tr>
 											<td><span class="px16"><? echo $strRepeatPassword; ?>: </span></td>
-											<td><input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password_2']; ?>" name="new_password_2"/></td>
+											<td><input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password_2']; ?>" id="new_password_2" name="new_password_2"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password_2').attr('type') == 'text') { $('#new_password_2').attr('type', 'password') } else { $('#new_password_2').attr('type', 'text'); }"></i></td>
 										</tr>
 										<tr>
 											<td colspan="2" align="center">
@@ -309,6 +317,16 @@ if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angem
 							<input name="showlayeroptions" type="checkbox" value="1" <? if($this->user->rolle->showlayeroptions == '1') { echo 'checked="true"'; } ?> >
 							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_showlayeroptions, Style[0], document.getElementById('Tip22'))" onmouseout="htm()">
 							<div id="Tip22" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+						</td>
+					</tr>
+					<tr>
+						<td class="rollenwahl-option-header">
+							<? echo $strShowRollenFilter; ?>:
+						</td>
+						<td class="rollenwahl-option-data">
+							<input name="showrollenfilter" type="checkbox" value="1" <? if($this->user->rolle->showrollenfilter == '1') { echo 'checked="true"'; } ?> >
+							<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_showrollenfilter, Style[0], document.getElementById('Tip25'))" onmouseout="htm()">
+							<div id="Tip25" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 						</td>
 					</tr>
 					<tr>

@@ -119,7 +119,7 @@
 				$GUI->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
 				$konvertierung->set_status();
 
-				if(!empty($GUI->formvars['layer_schemaname'])) {
+				if ($GUI->formvars['20;;;;Text_not_saveable;;not_saveable'] == 'xplan_gmlas_' . $GUI->user->id) {
 					# Creates Bereiche for each Plan loaded with GMLAS
 					$gml_extractor = new Gml_extractor($GUI->pgdatabase, 'placeholder', 'xplan_gmlas_' . $GUI->user->id);
 					$gml_extractor->insert_into_bereich($bereichtable, $konvertierung_id, $GUI->user->id);
@@ -160,13 +160,15 @@
 				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, false);
 				$regel = Regel::find_by_id($GUI, 'oid', $oid);
 				$regel->create_gml_layer();
+				$regel->set('konvertierung_id', $regel->konvertierung->get('id'));
+				$regel->update();
 				$regel->konvertierung->set_status();
 			} break;
 
 			case ($fired == 'AFTER' AND $event == 'UPDATE') : {
-				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, false);
+				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, true);
 				$regel = Regel::find_by_id($GUI, 'oid', $oid);
-				$regel->delete_gml_layer();
+				#$regel->delete_gml_layer();
 				$regel->create_gml_layer();
 				$regel->konvertierung->set_status();
 			} break;
@@ -182,7 +184,7 @@
 				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus.', false);
 				if (empty($old_dataset['konvertierung_id'])) {
 					# hole konvertierung_id ueber plan und bereich_gml_id
-					$bereich = RP_Bereich::find_by_id($GUI, 'gml_id', $old_dataset['bereich_gml_id']);
+					$bereich = XP_Bereich::find_by_id($GUI, 'gml_id', $old_dataset['bereich_gml_id']);
 					$plan = XP_Plan::find_by_id($GUI, 'gml_id', $bereich->get('gehoertzuplan'));
 					$konvertierung_id = $plan->get('konvertierung_id');
 				}

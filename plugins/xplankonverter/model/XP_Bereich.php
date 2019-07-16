@@ -5,9 +5,9 @@
 
 class XP_Bereich extends PgObject {
 
-  static $schema = 'xplan_gml';
+	static $schema = 'xplan_gml';
 
-  function XP_Bereich($gui, $planart) {
+	function XP_Bereich($gui, $planart) {
 		$this->planart = $planart;
 		$this->planartAbk = strtolower(substr($planart, 0, 2));
 		$this->tableName = $this->planartAbk . '_bereich';
@@ -24,9 +24,9 @@ class XP_Bereich extends PgObject {
 		return $xp_bereich;
 	}
 
-  function holeObjekte($konvertierung_id) {
-    $this->xp_objekte;
-  }
+	function holeObjekte($konvertierung_id) {
+		$this->xp_objekte;
+	}
 
 	function get_regeln() {
 		$regel = new Regel($this->gui);
@@ -68,7 +68,5 @@ class XP_Bereich extends PgObject {
 		$this->destroy_associated_objekte();
 		$this->delete();
 	}
-
 }
-
 ?>

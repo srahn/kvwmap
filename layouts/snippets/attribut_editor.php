@@ -30,6 +30,11 @@
 			'title' => 'Autovervollständigungsfeld'
 		),
 		array(
+			'value' => 'Autovervollständigungsfeld_zweispaltig',
+			'output' => 'zweispaltiges Autovervollständigungsfeld',
+			'title' => 'Autovervollständigungsfeld getrennt durch Leerzeichen'
+		),
+		array(
 			'value' => 'Radiobutton',
 			'output' => 'Radiobutton',
 			'title' => 'Radiobutton'

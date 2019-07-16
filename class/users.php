@@ -732,6 +732,8 @@ class user {
 		$this->funktion = $rs['Funktion'];
 		$this->password_setting_time = $rs['password_setting_time'];
 		$this->agreement_accepted = $rs['agreement_accepted'];
+		$this->start = $rs['start'];
+		$this->stop = $rs['stop'];
 	}
 
 	/*
@@ -1020,6 +1022,7 @@ class user {
 			$sql .= ', runningcoords = "' . ($formvars['runningcoords'] == '' ? '0' : '1') . '"';
 			$sql .= ', showmapfunctions = "' . ($formvars['showmapfunctions'] == '' ? '0' : '1') . '"';
 			$sql .= ', showlayeroptions = "' . ($formvars['showlayeroptions'] == '' ? '0' : '1') . '"';
+			$sql .= ', showrollenfilter = "' . ($formvars['showrollenfilter'] == '' ? '0' : '1') . '"';
 			$sql .= ', menue_buttons = "' . ($formvars['menue_buttons'] == '' ? '0' : '1') . '"';
 
 			if($formvars['singlequery'] != '') $sql.=',singlequery="1"';
@@ -1189,6 +1192,12 @@ class user {
 		if ($userdaten['email']!='') {
 			$sql.=',email="'.$userdaten['email'].'"';
 		}
+		if ($userdaten['organisation']!='') {
+			$sql.=',organisation="'.$userdaten['organisation'].'"';
+		}
+		if ($userdaten['position']!='') {
+			$sql.=',position="'.$userdaten['position'].'"';
+		}
 		$sql.=',start="'.$userdaten['start'].'"';
 		$sql.=',stop="'.$userdaten['stop'].'"';
 		if ($userdaten['ips']!='') {
@@ -1215,6 +1224,12 @@ class user {
 			}
 			if ($userdaten['email']!='') {
 				$sql.=' AND email="'.$userdaten['email'].'"';
+			}
+			if ($userdaten['organisation']!='') {
+				$sql.=' AND organisation="'.$userdaten['organisation'].'"';
+			}
+			if ($userdaten['position']!='') {
+				$sql.=' AND position="'.$userdaten['position'].'"';
 			}
 			# Starten der Anfrage
 			$ret=$this->database->execSQL($sql,4, 0);
@@ -1252,9 +1267,11 @@ class user {
 				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
 				`start` = '" . $userdaten['start'] . "',
 				`stop`= '" . $userdaten['stop'] . "', " .
-				($userdaten['id'] 		!= '' ? "`ID` 			=  " . $userdaten['id'] . "," 								: "") .
-				($userdaten['phon'] 	!= '' ? "`phon` 		= '" . $userdaten['phon'] . "'," 						: "") .
-				($userdaten['email']	!= '' ? "`email` 		= '" . $userdaten['email'] . "',"						: "") . "
+				($userdaten['id'] 					!= '' ? "`ID` 					=  " . $userdaten['id'] . "," 						: "") .
+				($userdaten['phon'] 				!= '' ? "`phon` 				= '" . $userdaten['phon'] . "'," 					: "") .
+				($userdaten['email']				!= '' ? "`email` 				= '" . $userdaten['email'] . "',"					: "") .
+				($userdaten['organisation']	!= '' ? "`organisation`	= '" . $userdaten['organisation'] . "'," 	: "") .
+				($userdaten['position']			!= '' ? "`position` 		= '" . $userdaten['position'] . "',"			: "") . "
 				`ips` = '" . $userdaten['ips'] . "'" .
 				$passwort_column .
 				$passwort_setting_time_column . "

@@ -204,11 +204,28 @@ else {
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTelephone;?></th>
-					<td style="border-bottom:1px solid #C3C7C3"><input name="phon" type="text" value="<?php echo $this->formvars['phon']; ?>" size="15" maxlength="15"></td>
+					<td style="border-bottom:1px solid #C3C7C3"><input name="phon" type="text" value="<?php echo $this->formvars['phon']; ?>" size="25" maxlength="25"></td>
 				</tr>
-					<tr>
+				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEmail;?></th>
-					<td style="border-bottom:1px solid #C3C7C3"><input name="email" type="text" value="<?php echo $this->formvars['email']; ?>" size="30" maxlength="50"></td>
+					<td style="border-bottom:1px solid #C3C7C3"><input name="email" type="text" value="<?php echo $this->formvars['email']; ?>" size="50" maxlength="100"></td>
+				</tr>
+				<tr class="mehr-toggle" style="display: none;">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOrganisation;?></th>
+					<td style="border-bottom:1px solid #C3C7C3"><input name="organisation" type="text" value="<?php echo $this->formvars['organisation']; ?>" size="50" maxlength="255" style="width: 100%"></td>
+				</tr>
+				<tr class="mehr-toggle" style="display: none;">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPosition;?></th>
+					<td style="border-bottom:1px solid #C3C7C3"><input name="position" type="text" value="<?php echo $this->formvars['position']; ?>" size="50" maxlength="255" style="width: 100%"></td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td><td>
+						<a class="small-gray" href="#" onclick="$('.mehr-toggle').toggle();$('#mehr_button').toggleClass('fa-angle-down, fa-angle-up');">
+							<span class="mehr-toggle"><?php echo $this->strShowMore; ?></span>
+							<span class="mehr-toggle" style="display: none"><?php echo $this->strShowLess; ?></span>
+							<i id="mehr_button" class="fa fa-angle-down" aria-hidden="true"></i>
+						</a>
+					</td>
 				</tr>
 			</table>
 		</td>
@@ -227,7 +244,7 @@ else {
 						<th class="fetter" align="right" valign="top" style="width: 173px;border-bottom:1px solid #C3C7C3"><?php echo $strActiveLayers;?></th>
 						<td style="border-bottom:1px solid #C3C7C3">
 							<table cellpadding="0" cellspacing="0">
-						<?	for($i = 0; $i < count($this->active_layers)-1; $i++){ ?>
+						<?	for($i = 0; $i < count($this->active_layers); $i++){ ?>
 								<tr id="layer_<? echo $this->active_layers[$i]['Layer_ID']; ?>" class="tr_hover">
 									<td style="padding: 0 10 0 2">
 										<? echo $this->active_layers[$i]['alias'].'</td><td><a title="deaktivieren" href="javascript:deactivate_layer('.$this->formvars['selected_user_id'].', '.$this->userdaten[0]['stelle_id'].', '.$this->active_layers[$i]['Layer_ID'].');"><i style="font-size: 19px; color: firebrick" class="fa fa-times" aria-hidden="true"></i></a>'; ?>

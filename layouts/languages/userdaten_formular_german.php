@@ -21,4 +21,6 @@
 	$strActiveStelle="aktive Stelle";
 	$strChangeUser="Nutzer wechseln";
 	$strLoginAsUser="als dieser Nutzer anmelden";
+	$strOrganisation="Organisation";
+	$strPosition="Position";
 ?>

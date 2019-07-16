@@ -493,7 +493,7 @@ a.invisiblelayerlink:hover{
 	border-radius: 5px;
 }
 
-.buttonlink:hover{
+.buttonlink:hover, .buttonlink:focus{
 	background: linear-gradient(#DAE4EC, #84accf);
 }
 
@@ -643,6 +643,20 @@ a.menuered:hover {
 
 .ausgewaehltes-menue {
 /*	background: rgb(205, 208, 208); */
+}
+
+.header-button {
+	float: right;
+	padding: 4px;
+	font-size: 150%;
+}
+
+.header-button:hover {
+	cursor: pointer;
+}
+
+.options-button {
+	width: 18px;
 }
 
 .button-menue{
@@ -945,7 +959,7 @@ a.menuered:hover {
 	z-index: 1000;
 	margin: 0;
 	height: 0px;
-	width: 177px;
+	width: 100%;
 }
 
 .drawingOrderFormDropZone.ready{
@@ -1265,7 +1279,12 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	float: left;
 	margin-left: 20px;
 	padding: 0px;
-	max-width: 480px
+	max-width: 480px;
+	text-align: left;
+}
+
+#dstable{
+	max-width: 900px;
 }
 
 table.tgle {
@@ -1282,6 +1301,8 @@ thead.gle th {
 }
 
 .gle-attribute-name { 
+ position: relative;
+ background-clip: padding-box;
  padding-left: 2px;
  padding-right: 2px;
  vertical-align: top;
@@ -1304,7 +1325,7 @@ thead.gle th {
 }
 
 tbody.gle tr { 
- border:1px dotted gray;
+ border:1px solid #999;
 }
 
 .gle1_table{
@@ -1611,7 +1632,8 @@ tbody.gle tr {
 	-moz-box-shadow: 6px 5px 7px #777;
 	-webkit-box-shadow: 6px 5px 7px #777;
 	box-shadow: 6px 5px 7px #777;
-	margin: 0px 0px 0px -207px;
+	top: 30px;
+	right: 15px;
 	z-index: 2000;
 }
 
@@ -1902,17 +1924,9 @@ tbody.gle tr {
 }
 
 .scrolltable tbody {
-	height: 590px;
+	max-height: 590px;
 	overflow-y: auto;
 	overflow-x: hidden;
-}
-
-.nw_treffer_table tr:hover {
-	background-color: lightgrey;
-}
-
-.nw_treffer_table td {
-	padding: 5 0 5 0;
 }
 
 .toggle_fa_off i{
@@ -1935,4 +1949,9 @@ tbody.gle tr {
   width: 100%;
   box-sizing:border-box;
   -moz-box-sizing:border-box;
+}
+
+.small-gray {
+	color: gray;
+	font-size: 12px;
 }

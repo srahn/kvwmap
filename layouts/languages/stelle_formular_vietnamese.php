@@ -1,7 +1,8 @@
 ﻿<?php
   $strTitle="Biên tập tác vụ";
   $strAsteriskRequired="Cần đi�?n đủ thông tin cho những trư�?ng có dấu *";  
-  $strDataBankID="Số ID của CSDL";  
+  $strDataBankID="Số ID của CSDL";
+	$strDefaultUserID="Standard user";
   $strTask="Tên tác vụ*";
   $strReferenceMapID="Số ID bản đồ tham chiếu*";
   $strMaxExtent="Phạm vi tối đa*";

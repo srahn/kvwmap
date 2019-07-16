@@ -1,6 +1,4 @@
-<?php
-	include('header.php');
-?>
+<?php include('header.php'); ?>
 <script language="javascript" type="text/javascript">
 	$('#gui-table').css('width', '100%');
 	$(function () {

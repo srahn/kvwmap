@@ -26,17 +26,17 @@
 	<table width="100%" border="0" cellpadding="2" cellspacing="0">
 		<tr align="right"> 
 	  	<td height="30" valign="middle">
-	  		<input type="button" name="go_plus" id="go_plus" value="<? echo $strSave; ?>" onclick="subsave_new_layer_data(<? echo $this->formvars['selected_layer_id']; ?>, '<? echo $this->formvars['fromobject'] ?>', '<? echo $this->formvars['targetobject'] ?>', '<? echo $this->formvars['targetlayer_id'] ?>', '<? echo $this->formvars['targetattribute'] ?>', '<? echo $this->formvars['data'] ?>', '<? echo $this->formvars['reload'] ?>');">
-	  		<input type="button" name="cancelbutton" value="<? echo $strCancel; ?>" onclick="clearsubform('<? echo $this->formvars['fromobject'] ?>');">&nbsp;&nbsp;&nbsp;&nbsp;
+	  		<input type="button" tabindex="1" name="go_plus" id="go_plus" value="<? echo $strSave; ?>" onclick="subsave_new_layer_data(<? echo $this->formvars['selected_layer_id']; ?>, '<? echo $this->formvars['fromobject'] ?>', '<? echo $this->formvars['targetobject'] ?>', '<? echo $this->formvars['targetlayer_id'] ?>', '<? echo $this->formvars['targetattribute'] ?>', '<? echo $this->formvars['reload'] ?>', '<? echo $this->formvars['list_edit'] ?>');">
+	  		<input type="button" tabindex="1" name="cancelbutton" value="<? echo $strCancel; ?>" onclick="clearsubform('<? echo $this->formvars['fromobject'] ?>');">&nbsp;&nbsp;&nbsp;&nbsp;
 				<?if($CreateAnotherOne){?>
-					<input type="checkbox" name="weiter_erfassen" value="1" <? if($this->formvars['weiter_erfassen'] == 1)echo 'checked="true"'; ?>><? echo $strCreateAnotherOne; ?>
+					<input type="checkbox" tabindex="1" class="subform_<? echo $this->formvars['selected_layer_id']; ?>" name="weiter_erfassen" value="1" <? if($this->formvars['weiter_erfassen'] == 1)echo 'checked="true"'; ?>><? echo $strCreateAnotherOne; ?>
 				<? } ?>
 	  	</td>
 		</tr>
 	</table>
 	
 	
-	<input name="sub_new_<? echo $this->formvars['selected_layer_id']; ?>_form_field_names" id="sub_new_<? echo $this->formvars['selected_layer_id']; ?>_form_field_names" type="hidden" value="<?php echo $this->form_field_names; ?>">
+	<input type="hidden" name="geomtype" class="<? echo $this->subform_classname; ?>" value="<? echo $this->geomtype; ?>">
 	
 ~
 var overlay_bottom = parseInt(<? echo $this->user->rolle->nImageHeight+30; ?>) + parseInt(document.GUI.overlayy.value);

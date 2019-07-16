@@ -2,6 +2,7 @@
 	$strAsteriskRequired="wartości oznaczone * muszą zostać wpisane";
 	$strDataBankID="warstwa ID*";
 	$strName="nazwa*";
+	$strMaintable="Main Table";
 	$strDataType="rodzaj danych*";
 	$strGroup="grupa*";
 	$strPath="ścieżka";

@@ -62,28 +62,32 @@ class Gml_extractor {
 		$rect = ms_newRectObj();
 
 		# iterate over all attributes as formvars
-		foreach($formdata as $r_key => $r_value) {
+		foreach ($formdata as $r_key => $r_value) {
 			#echo 'key:' . $r_key . ' value:' . $r_value . '<br>';
 			$GUI->formvars['attributenames'][] = $r_key;
 			$GUI->formvars['values'][] = $r_value;
 			# for filling the geometry data
-			if($r_key == 'newpathwkt') {
+			if ($r_key == 'newpathwkt') {
 				$GUI->formvars['newpathwkt'] = $r_value;
 				$GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
 			}
 			# for drawing the data onto the polygoneditor
-			if($r_key == 'newpath') {
-				$GUI->formvars['newpath'] = $r_value;
+			if ($r_key == 'newpath') {
+				$GUI->formvars['newpath'] = transformCoordsSVG($r_value);
 			}
-			if($r_key == 'oid') {
+			if ($r_key == 'oid') {
 				$oid = $r_value;
 			}
 		}
-
+		# get extent of geometry for zooming 
+		$extent = $this->get_bbox_from_wkt($GUI->formvars['pathwkt']);
+		$GUI->formvars = $GUI->formvars + $extent;		
+		
 		$GUI->formvars['checkbox_names_' . $GUI->formvars['chosen_layer_id']] = 'check;' . $layername . ';' . $tablename . ';' . $oid . '|';
 		$GUI->formvars['check;' . $layername .';' . $tablename . ';' . $oid] = 'on';
-		$GUI->formvars['layer_schemaname'] = $this->gmlas_schema;
-		# print_r($GUI->formvars);
+		$GUI->formvars['attributenames'][] = 'layer_schemaname';
+		$GUI->formvars['values'][] = $this->gmlas_schema;
+		 #print_r($GUI->formvars);
 	}
 
 	/*
@@ -177,6 +181,21 @@ class Gml_extractor {
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$result = pg_fetch_all($ret[1]);
 		$result = (!empty($result)) ? array_column($result, 'table_name') : array();
+		return $result;
+	}
+
+	function get_bbox_from_wkt($wkt){
+		$sql ="
+			SELECT 
+				st_xmin(extent) as minx,
+				st_xmax(extent) as maxx,
+				st_ymin(extent) as miny,
+				st_ymax(extent) as maxy
+			FROM
+				box2D(st_geometryfromtext('".$wkt."')) as extent
+		";
+		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+		$result = pg_fetch_assoc($ret[1]);
 		return $result;
 	}
 

@@ -1,6 +1,7 @@
 ﻿<?php
 	$strAsteriskRequired="Weerte mit een * mööst du indragen";
 	$strClassItem="Classitem";
+	$strMaintable="Main Table";
 	$strLayerID="Layer ID*";
 	$strName="Naam*";
 	$strDataType="Datentyp*";

@@ -10,8 +10,10 @@ class rolle {
 	static $hist_timestamp;
 	static $layer_params;
 
-	function rolle($user_id,$stelle_id,$database) {
+	function rolle($user_id, $stelle_id, $database) {
 		global $debug;
+		global $GUI;
+		$this->gui_object = $GUI;
 		$this->debug=$debug;
 		$this->user_id=$user_id;
 		$this->stelle_id=$stelle_id;
@@ -59,10 +61,10 @@ class rolle {
     return 1;
   }
 
-  function getLayer($LayerName) {
+	function getLayer($LayerName) {
 		global $language;
 
-    # Abfragen der Layer in der Rolle
+		# Abfragen der Layer in der Rolle
 		if($language != 'german') {
 			$name_column = "
 			CASE
@@ -94,10 +96,8 @@ class rolle {
 				l.labelitem as original_labelitem,
 				ul.`postlabelcache`,
 				`Filter`,
-				CASE r2ul.gle_view
-					WHEN '0' THEN 'generic_layer_editor.php'
-					ELSE ul.`template`
-				END as template,
+				r2ul.gle_view,
+				ul.`template`,
 				`header`,
 				`footer`,
 				ul.`symbolscale`,
@@ -107,6 +107,7 @@ class rolle {
 				ul.`export_privileg`,
 				`start_aktiv`,
 				r2ul.showclasses,
+				r2ul.rollenfilter,
 				r2ul.geom_from_layer
 			FROM
 				layer AS l,
@@ -123,11 +124,19 @@ class rolle {
 				ul.drawingorder desc
 		";
 		#echo $sql.'<br>';
-    $this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
 		while ($rs=mysql_fetch_assoc($query)) {
+			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
+				if($rs['Filter'] == ''){
+					$rs['Filter'] = '('.$rs['rollenfilter'].')';
+				}
+				else {
+					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
+				}
+			}
 			foreach(array('Name', 'alias', 'connection') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
@@ -142,9 +151,9 @@ class rolle {
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
-    }
-    return $layer;
-  }
+		}
+		return $layer;
+	}
 
   function getAktivLayer($aktivStatus,$queryStatus,$logconsume) {
     # Abfragen der zu loggenden Layer der Rolle
@@ -278,15 +287,21 @@ class rolle {
     $this->database->execSQL($sql,4, $this->loglevel);
     return 1;
   }	
-	
-	function saveGeomFromLayer($layer_id, $geom_from_layer_id){
-    $sql ='UPDATE u_rolle2used_layer SET geom_from_layer = '.$geom_from_layer_id;
-    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND layer_id = '.$layer_id;
-    #echo $sql;
-    $this->debug->write("<p>file:rolle.php class:rolle function:saveGeomFromLayer - Speichern der Einstellungen zur Rolle:",4);
-    $this->database->execSQL($sql,4, $this->loglevel);
-    return 1;
-  }	
+
+	function saveGeomFromLayer($layer_id, $geom_from_layer_id) {
+		$sql = "
+			UPDATE u_rolle2used_layer
+			SET geom_from_layer = " . $geom_from_layer_id . "
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . " AND
+				layer_id = " . $layer_id . "
+		";
+		#echo $sql;
+		$this->debug->write("<p>file:rolle.php class:rolle function:saveGeomFromLayer - Speichern der Einstellungen zur Rolle:", 4);
+		$this->database->execSQL($sql, 4, $this->loglevel);
+		return 1;
+	}
 
 	function setHistTimestamp($timestamp, $go_next = '') {
 		$sql ='UPDATE rolle SET ';
@@ -359,6 +374,7 @@ class rolle {
 			$this->runningcoords=$rs['runningcoords'];
 			$this->showmapfunctions=$rs['showmapfunctions'];
 			$this->showlayeroptions=$rs['showlayeroptions'];
+			$this->showrollenfilter=$rs['showrollenfilter'];
 			$this->menue_buttons=$rs['menue_buttons'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
@@ -387,7 +403,7 @@ class rolle {
 			$this->zoomall = in_array('zoomall', $buttons);
 			$this->recentre = in_array('recentre', $buttons);
 			$this->jumpto = in_array('jumpto', $buttons);
-			$this->coord_query = in_array('coord_query', $buttons);			
+			$this->coord_query = in_array('coord_query', $buttons);
 			$this->query = in_array('query', $buttons);
 			$this->queryradius = in_array('queryradius', $buttons);
 			$this->polyquery = in_array('polyquery', $buttons);
@@ -397,9 +413,13 @@ class rolle {
 			$this->freetext = in_array('freetext', $buttons);
 			$this->freearrow = in_array('freearrow', $buttons);
 			$this->gps = in_array('gps', $buttons);
+			$this->geom_buttons = explode(',', str_replace(' ', '', $rs['geom_buttons']));
 			return 1;
-		}else return 0;
-  }
+		}
+		else {
+			return 0;
+		}
+	}
 
 	function get_layer_params($selectable_layer_params, $pgdatabase) {
 		$layer_params = array();
@@ -422,7 +442,8 @@ class rolle {
 					$sql = $param['options_sql'];
 					$sql = str_replace('$user_id', $this->user_id, $sql);
 					$sql = str_replace('$stelle_id', $this->stelle_id, $sql);
-					$options_result = $pgdatabase->execSQL($sql, 4, 0, true);
+					#echo '<br>sql: ' . $sql;
+					$options_result = $pgdatabase->execSQL($sql, 4, 0, false);
 					if ($options_result['success']) {
 						$param['options'] = array();
 						while ($option = pg_fetch_assoc($options_result[1])) {
@@ -751,6 +772,7 @@ class rolle {
 			}
 			for($i = 0; $i < count($attributes['name']); $i++){
 				if($formvars[$prefix.'value_'.$attributes['name'][$i]] != '' OR $formvars[$prefix.'operator_'.$attributes['name'][$i]] == 'IS NULL' OR $formvars[$prefix.'operator_'.$attributes['name'][$i]] == 'IS NOT NULL'){
+					if(is_array($formvars[$prefix.'value_'.$attributes['name'][$i]]))$formvars[$prefix.'value_'.$attributes['name'][$i]] = $formvars[$prefix.'value_'.$attributes['name'][$i]][0];
 					$search_params_set = true;
 					$sql = 'INSERT INTO search_attributes2rolle VALUES ("'.$formvars['search_name'].'", '.$this->user_id.', '.$this->stelle_id.', '.$formvars['selected_layer_id'].', "'.$attributes['name'][$i].'", "'.$formvars[$prefix.'operator_'.$attributes['name'][$i]].'", "'.$formvars[$prefix.'value_'.$attributes['name'][$i]].'", "'.$formvars[$prefix.'value2_'.$attributes['name'][$i]].'", '.$m.', "'.$formvars['boolean_operator_'.$m].'");';
 					$this->debug->write("<p>file:rolle.php class:rolle->save_search - Speichern einer Suchabfrage:",4);
@@ -833,11 +855,8 @@ class rolle {
 
 	function getRollenLayer($LayerName, $typ = NULL) {
 		$sql ="
-			SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, 
-				CASE gle_view
-					WHEN '0' THEN 'generic_layer_editor.php'
-					ELSE ''
-				END as template 
+			SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, gle_view,
+				concat('(', rollenfilter, ')') as Filter
 			FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
     if ($LayerName!='') {
@@ -1047,17 +1066,17 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->setRollenLayerName:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
-	
-	function setLabelitem($formvars){
-		if(isset($formvars['layer_options_labelitem'])){
-			if($formvars['layer_options_open'] > 0){		# normaler Layer
+
+	function setLabelitem($formvars) {
+		if (isset($formvars['layer_options_labelitem'])) {
+			if ($formvars['layer_options_open'] > 0) { # normaler Layer
 				$sql ='UPDATE u_rolle2used_layer set labelitem = \''.$formvars['layer_options_labelitem'].'\'';
 				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 				$sql.=' AND layer_id='.$formvars['layer_options_open'];
 				$this->debug->write("<p>file:rolle.php class:rolle->setLabelitem:",4);
 				$this->database->execSQL($sql,4, $this->loglevel);
 			}
-			elseif($formvars['layer_options_open'] < 0){		# Rollenlayer
+			elseif($formvars['layer_options_open'] < 0) { # Rollenlayer
 				$sql ='UPDATE rollenlayer set labelitem = \''.$formvars['layer_options_labelitem'].'\'';
 				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 				$sql.=' AND id= -1*'.$formvars['layer_options_open'];
@@ -1066,15 +1085,43 @@ class rolle {
 			}
 		}
 	}
-	
+
 	function removeLabelitem($formvars) {
 		$sql ='UPDATE u_rolle2used_layer set labelitem = NULL';
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		$sql.=' AND layer_id='.$formvars['layer_options_open'];
 		$this->debug->write("<p>file:rolle.php class:rolle->removeLabelitem:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
-	}	
-	
+	}
+
+	function setRollenFilter($formvars) {
+		if (isset($formvars['layer_options_rollenfilter']) AND $formvars['layer_options_open'] <> 0) {
+			# SQL-Injection verhindern
+			$formvars['layer_options_rollenfilter'] = str_replace([';', '--'], '', $formvars['layer_options_rollenfilter']);
+			if ($formvars['layer_options_open'] > 0) { # normaler Layer
+				$table_name = "u_rolle2used_layer";
+				$where_id = "layer_id = " . $formvars['layer_options_open'];
+			}
+			else { # layer_options_open < 0 Rollenlayer
+				$table_name = "rollenlayer";
+				$where_id = "id = -1*" . $formvars['layer_options_open'];
+			}
+			$sql = "
+				UPDATE
+					" . $table_name . "
+				SET
+					rollenfilter = '" . $formvars['layer_options_rollenfilter'] . "'
+				WHERE
+					user_id = " . $this->user_id . " AND
+					stelle_id = " . $this->stelle_id . " AND
+					" . $where_id . "
+			";
+			#echo '<br>Sql: ' . $sql;
+			$this->debug->write("<p>file:rolle.php class:rolle->setLabelitem:", 4);
+			$this->database->execSQL($sql, 4, $this->loglevel);
+		}
+	}
+
 	function setTransparency($formvars) {
 		if($formvars['layer_options_open'] > 0){		# normaler Layer
 			$sql ='UPDATE u_rolle2used_layer set transparency = '.$formvars['layer_options_transparency'];
@@ -1113,56 +1160,233 @@ class rolle {
 		return 1;
 	}
 
-	function setRollen($user_id,$stellen) {
-		# trägt die Stellen für einen Benutzer ein.
-		$sql ='INSERT IGNORE INTO rolle (user_id, stelle_id, epsg_code) ';
-		$sql.= 'SELECT '.$user_id.', ID, epsg_code FROM stelle WHERE ID IN ('.implode($stellen, ',').')';
-		#echo '<br>'.$sql;
-		$this->debug->write("<p>file:rolle.php class:rolle function:setRollen - Einfügen neuen Rollen:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		return 1;
-	}
-
-	function deleteRollen($user_id,$stellen) {
-		# löscht die übergebenen Stellen für einen Benutzer.
-		for ($i=0;$i<count($stellen);$i++) {
-			$sql ='DELETE FROM `rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i];
+	function setSavedLayersFromDefaultUser($user_id, $stelle_id, $default_user_id){
+		# Gespeicherte Themeneinstellungen von default user übernehmen
+		if ($default_user_id > 0 AND $default_user_id != $user_id) {
+			$sql = "
+				INSERT INTO `rolle_saved_layers` (
+					`user_id`,
+					`stelle_id`,
+					`name`,
+					`layers`,
+					`query`
+				)
+				SELECT " .
+					$user_id . "," .
+					$stelle_id . ",
+					`name`,
+					`layers`,
+					`query`
+				FROM
+					`rolle_saved_layers`
+				WHERE
+					`user_id` = " . $default_user_id . " AND
+					`stelle_id` = " . $stelle_id . "
+			";
 			#echo '<br>'.$sql;
-			$this->debug->write("<p>file:rolle.php class:rolle function:deleteRollen - Löschen der Rollen:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-			# rolle_nachweise
-			$sql ='DELETE FROM `rolle_nachweise` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i];
-			#echo '<br>'.$sql;
-			$this->debug->write("<p>file:rolle.php class:rolle function:deleteRollen - Löschen der Rollen:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$this->debug->write("<p>file:rolle.php class:rolle function:setSavedLayersFromDefaultUser :<br>" . $sql, 4);
+			$ret = $this->database->execSQL($sql, 4, 0);
+			if (!$ret['success']) {
+				$this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . $ret[1], 4);
+				return 0;
+			}
 		}
 		return 1;
 	}
 
-	function setMenue($user_id, $stellen) {
-		# trägt die Menuepunkte der übergebenen Stellenids für einen Benutzer ein.
+	function setRolle($user_id, $stelle_id, $default_user_id) {
+		# trägt die Rolle für einen Benutzer ein.
+		if ($default_user_id > 0 AND $default_user_id != $user_id) {
+			# Rolleneinstellungen vom Defaultnutzer verwenden
+			$sql = "
+				INSERT IGNORE INTO `rolle` (
+					`user_id`,
+					`stelle_id`,
+					`nImageWidth`, `nImageHeight`,
+					`auto_map_resize`,
+					`minx`, `miny`, `maxx`, `maxy`,
+					`nZoomFactor`,
+					`selectedButton`,
+					`epsg_code`,
+					`epsg_code2`,
+					`coordtype`,
+					`active_frame`,
+					`last_time_id`,
+					`gui`,
+					`language`,
+					`hidemenue`,
+					`hidelegend`,
+					`fontsize_gle`,
+					`highlighting`,
+					`buttons`,
+					`scrollposition`,
+					`result_color`,
+					`always_draw`,
+					`runningcoords`,
+					`showmapfunctions`,
+					`showlayeroptions`,
+					`showrollenfilter`,
+					`singlequery`,
+					`querymode`,
+					`geom_edit_first`,
+					`overlayx`, `overlayy`,
+					`instant_reload`,
+					`menu_auto_close`,
+					`layer_params`,
+					`visually_impaired`,
+					`menue_buttons`
+				) 
+				SELECT ".
+					$user_id.", ".
+					$stelle_id.",
+					`nImageWidth`, `nImageHeight`,
+					`auto_map_resize`,
+					`minx`, `miny`, `maxx`, `maxy`,
+					`nZoomFactor`,
+					`selectedButton`,
+					`epsg_code`,
+					`epsg_code2`,
+					`coordtype`,
+					`active_frame`,
+					`last_time_id`,
+					`gui`,
+					`language`,
+					`hidemenue`,
+					`hidelegend`,
+					`fontsize_gle`,
+					`highlighting`,
+					`buttons`,
+					`scrollposition`,
+					`result_color`,
+					`always_draw`,
+					`runningcoords`,
+					`showmapfunctions`,
+					`showlayeroptions`,
+					`showrollenfilter`,
+					`singlequery`,
+					`querymode`,
+					`geom_edit_first`,
+					`overlayx`, `overlayy`,
+					`instant_reload`,
+					`menu_auto_close`,
+					`layer_params`,
+					`visually_impaired`,
+					`menue_buttons`
+				FROM
+					`rolle`
+				WHERE
+					`user_id` = ".$default_user_id." AND
+					`stelle_id` = ".$stelle_id."
+			";
+		}
+		else {
+			# Default - Rolleneinstellungen verwenden
+			$sql = "
+				INSERT IGNORE INTO rolle (user_id, stelle_id, epsg_code, minx, miny, maxx, maxy)
+				SELECT " .
+					$user_id . ",
+					ID,
+					epsg_code,
+					minxmax,
+					minymax,
+					maxxmax,
+					maxymax
+				FROM
+					stelle
+				WHERE
+					ID = ".$stelle_id."
+			";
+		}
+		#echo '<br>'.$sql;
+		$this->debug->write("<p>file:rolle.php class:rolle function:setRolle - Einfügen einer neuen Rolle:<br>" . $sql, 4);
+		$ret = $this->database->execSQL($sql, 4, 0);
+		if (!$ret['success']) {
+			$this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . $ret[1], 4);
+			return 0;
+		}
+		return 1;
+	}
+
+	function deleteRollen($user_id, $stellen) {
+		# löscht die übergebenen Stellen für einen Benutzer.
 		for ($i = 0; $i < count($stellen); $i++) {
 			$sql = "
-				INSERT IGNORE INTO
-					u_menue2rolle
+				DELETE FROM `rolle`
+				WHERE
+					`user_id` = " . $user_id . ' AND
+					`stelle_id` = ' . $stellen[$i] . "
+			";
+			#echo '<br>'.$sql;
+			$this->debug->write("<p>file:rolle.php class:rolle function:deleteRollen - Löschen der Rollen:<br>" . $sql, 4);
+			$ret = $this->database->execSQL($sql, 4, 0);
+			if (!$ret['success']) {
+				$this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . $ret[1], 4);
+				return 0;
+			}
+			# rolle_nachweise
+			if ($this->gui_object->plugin_loaded('nachweisverwaltung')) {
+				$sql = "
+					DELETE FROM `rolle_nachweise`
+					WHERE
+						`user_id` = " . $user_id . " AND
+						`stelle_id` = " . $stellen[$i] . "
+				";
+				#echo '<br>'.$sql;
+				$this->debug->write("<p>file:rolle.php class:rolle function:deleteRollen - Löschen der Rollen:<br>".$sql,4);
+				$ret = $this->database->execSQL($sql, 4, 0);
+				if (!$ret['success']) {
+					$this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . $ret[1], 4);
+					return 0;
+				}
+			}
+		}
+		return 1;
+	}
+
+	function setMenue($user_id, $stelle_id, $default_user_id) {
+		# trägt die Menuepunkte der übergebenen Stellenid für einen Benutzer ein.
+		if ($default_user_id > 0 AND $default_user_id != $user_id) {
+			# Menueeinstellungen von Defaultrolle abfragen
+			$menue2rolle_select_sql = "
 				SELECT " .
 					$user_id . ", " .
-					$stellen[$i] . ",
-					menue_id,
+					$stelle_id . ",
+					`menue_id`,
+					`status`
+				FROM
+					`u_menue2rolle`
+				WHERE
+					`stelle_id` = " . $stelle_id . " AND
+					`user_id` = " . $default_user_id . "
+			";
+		}
+		else {
+			# Menueeinstellungen mit status 0 von stelle abfragen
+			$menue2rolle_select_sql = "
+				SELECT " .
+					$user_id . ", " .
+					$stelle_id . ",
+					`menue_id`,
 					0
 				FROM
-					u_menue2stelle
+					`u_menue2stelle`
 				WHERE
-					u_menue2stelle.stelle_id = " . $stellen[$i] . "
+					`stelle_id` = " . $stelle_id . "
 			";
-			#echo '<br>sql: ' . $sql;
-			$this->debug->write("<p>file:rolle.php class:rolle function:setMenue - Setzen der Menuepunkte der Rollen:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
+		$sql = "
+			INSERT IGNORE INTO `u_menue2rolle` (
+				`user_id`,
+				`stelle_id`,
+				`menue_id`,
+				`status`
+			) " .
+			$menue2rolle_select_sql . "
+		";
+		#echo '<br>sql: ' . $sql;
+		$this->debug->write("<p>file:rolle.php class:rolle function:setMenue - Setzen der Menuepunkte der Rolle:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		return 1;
 	}
 
@@ -1246,16 +1470,46 @@ class rolle {
 		return 1;
 	}
 
-	function setGroups($user_id, $stellen, $layerids, $open) {
-		# trägt die Gruppen und Obergruppen der übergebenen Stellenids und Layerids für einen Benutzer ein.
-		for($i = 0; $i < count($stellen); $i++) {
+	function setGroups($user_id, $stelle_id, $default_user_id, $layerids) {
+		# trägt die Gruppen und Obergruppen der übergebenen Stellenid und Layerids für einen Benutzer ein. Gruppen, die aktive Layer enthalten werden aufgeklappt
+		if ($default_user_id > 0 AND $default_user_id != $user_id) {
+			$sql = "
+				INSERT IGNORE INTO 
+					u_groups2rolle
+				SELECT 
+					".$user_id.",
+					stelle_id,
+					id,
+					status
+				FROM 
+						u_groups2rolle
+				WHERE
+					stelle_id = ".$stelle_id." AND
+					user_id = ".$default_user_id;
+			#echo '<br>Gruppen: '.$sql;
+			$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rolle:<br>".$sql,4);
+			$query=mysql_query($sql,$this->database->dbConn);
+			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		}
+		else {
 			for($j = 0; $j < count($layerids); $j++){
-				$sql ='INSERT IGNORE INTO u_groups2rolle SELECT DISTINCT '.$user_id.', '.$stellen[$i].', u_groups.id, '.$open;
-				$sql.=' FROM (SELECT @id AS id, @id := IF(@id IS NOT NULL, (SELECT obergruppe FROM u_groups WHERE id = @id), NULL) AS obergruppe';
-				$sql.='       FROM u_groups, (SELECT @id := (SELECT Gruppe FROM layer where layer.Layer_ID = '.$layerids[$j].')) AS vars';
-				$sql.='       WHERE @id IS NOT NULL';
-				$sql.='	    ) AS dat';
-				$sql.='	JOIN u_groups ON dat.id = u_groups.id';
+				$sql = "
+					INSERT IGNORE INTO u_groups2rolle 
+					SELECT DISTINCT 
+						".$user_id.", 
+						".$stelle_id.", 
+						u_groups.id, 
+						0
+					FROM (
+						SELECT 
+							@id AS id, 
+							@id := IF(@id IS NOT NULL, (SELECT obergruppe FROM u_groups WHERE id = @id), NULL) AS obergruppe
+						FROM 
+							u_groups, 
+							(SELECT @id := (SELECT Gruppe FROM layer where layer.Layer_ID = ".$layerids[$j].")) AS vars
+						WHERE @id IS NOT NULL
+					) AS dat
+					JOIN u_groups ON dat.id = u_groups.id";
 				#echo '<br>Gruppen: '.$sql;
 				$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
 				$query=mysql_query($sql,$this->database->dbConn);
@@ -1342,17 +1596,62 @@ class rolle {
 		return 1;
 	}
 
-	function setLayer($user_id, $stellen, $active) {
-		#
-		# trägt die Layer der entsprehenden Rollen für einen Benutzer ein.
-		for ($i=0;$i<count($stellen);$i++) {
-			$sql ='INSERT IGNORE INTO u_rolle2used_layer (user_id, stelle_id, layer_id, aktivStatus, queryStatus, showclasses, logconsume) SELECT '.$user_id.', used_layer.Stelle_ID, used_layer.Layer_ID, "'.$active.'", "0", "1","0"';
-			$sql.=' FROM `used_layer`';
-			$sql.=' WHERE used_layer.Stelle_ID = '.$stellen[$i];
-			$this->debug->write("<p>file:rolle.php class:rolle function:setLayer - Setzen der Layer der Rollen:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+	function setLayer($user_id, $stelle_id, $default_user_id) {
+		# trägt die Layer der entsprehenden Rolle für einen Benutzer ein.
+		if ($default_user_id > 0 AND $default_user_id != $user_id) {
+			# Layereinstellungen von Defaultrolle abfragen
+			$rolle2used_layer_select_sql = "
+				SELECT " .
+					$user_id . ", " .
+					$stelle_id . ",
+					`layer_id`,
+					`aktivStatus`,
+					`queryStatus`,
+					`gle_view`,
+					`showclasses`,
+					`logconsume`
+				FROM
+					u_rolle2used_layer
+				WHERE
+					user_id = " . $default_user_id . " AND
+					stelle_id = " . $stelle_id . "
+			";
 		}
+		else {
+			# Layereinstellungen von Defaultlayerzuordnung abfragen
+			$rolle2used_layer_select_sql = "
+				SELECT " .
+					$user_id . ", " .
+					$stelle_id . ",
+					`Layer_ID`,
+					`start_aktiv`,
+					`start_aktiv`,
+					1,
+					1,
+					0
+				FROM
+					used_layer
+				WHERE
+					Stelle_ID = " . (int)$stelle_id . "
+			";
+		}
+		# Layereinstellungen der Rolle eintragen
+		$sql = "
+			INSERT IGNORE INTO `u_rolle2used_layer` (
+				`user_id`,
+				`stelle_id`,
+				`layer_id`,
+				`aktivStatus`,
+				`queryStatus`,
+				`gle_view`,
+				`showclasses`,
+				`logconsume`
+			) " .
+			$rolle2used_layer_select_sql . "
+		";
+		$this->debug->write("<p>file:rolle.php class:rolle function:setLayer - Setzen der Layer der Rolle:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		return 1;
 	}
 

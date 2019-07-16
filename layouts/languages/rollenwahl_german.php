@@ -65,7 +65,7 @@
 	$strHintCoordType="Nur wenn Sie eine geografische Kartenprojektion gewählt haben: Wählen Sie, wie Ihnen die geografischen Koordinaten angezeigt werden sollen.";
 	$strHintRunningCoords="Wenn Sie diese Option auswählen, erscheint unterhalb der Karte die Koordinate der Cursorposition unter Angabe der ausgewählten Kartenprojektion.";
 	$strHintShowMapFunctions="Mit dieser Option können Sie die Menüleiste mit den Kartenfunktionen unterhalb der Karte ein- und ausschalten.";
-	$strHintShowLayerOptions="Wenn Sie diese Option auwählen, erscheint hinter aktiven Themen in der Legende ein Button, der erweiterte Funktionen und Einstellungsmöglichkeiten für das Thema anbietet.";
+	$strHintShowLayerOptions="Wenn Sie diese Option auswählen, erscheint hinter aktiven Themen in der Legende ein Button, der erweiterte Funktionen und Einstellungsmöglichkeiten für das Thema anbietet.";
 	$strHintSingleQuery="Wenn Sie diese Option auswählen, erscheinen die Abfragehäkchenfelder in der Legende als sog. Radiobutton. Es kann dann immer nur genau ein Thema abfragbar geschaltet werden.";
 	$strHintQuerymode="Wenn Sie diese Option auswählen, erscheinen Sachdatenabfragen als eigene Fenster, die über der Karte schweben.";
 	$strHintNewDatasetOrder="Wählen Sie, ob bei der Erfassung neuer Daten der Geometrie-Editor oberhalb der Sachdaten erscheinen soll oder darunter.";
@@ -74,4 +74,6 @@
 	$strHinthist_timestamp="Wenn Sie hier ein Datum eingeben, werden ALKIS-Objekte in der Karte mit diesem historischen Stand dargestellt. Abfragen auf Flurstücke liefern ebenfalls Ergebnisse zu diesem historischen Stand.";
 	$strHintMenueButtons="Wenn Sie diese Option auswählen, werden oft verwendete Menüpunkte als separate Schaltfläche über dem Menü angezeigt.";
 	$strHintPrintScale="Wenn Sie die erste Option auswählen, wird ein geeigneter Druckmaßstab automatisch berechnet. Bei der zweiten Option wird der letzte verwendete Druckmaßstab benutzt.";
+	$strShowRollenFilter="Zeige Themen-Filter";
+	$strHintShowRollenFilter="Wenn Sie diese Option auswählen, gibt es in den Optionen eines Themas die Möglichkeit, das Thema zu filtern.";
 ?>

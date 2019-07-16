@@ -5,20 +5,43 @@
 	$GUI->ukos_show_doppikklassen = function() use ($GUI) {
 		$sql = "
 			SELECT
-				cn.nspname AS schema_name,
-				c.relname AS table_name,
-				CASE WHEN p.relname LIKE '%punkt' THEN '0' WHEN p.relname LIKE '%strecke' THEN '1' ELSE '2' END AS geometry_type
+				objektart,
+				schema_name,
+				CASE WHEN objektart = 'punktobjekt' THEN 'sep_' ELSE '' END || table_name AS table_name,
+				table_name AS doppik_objekt_name,
+				CASE WHEN objektart = 'punktobjekt' THEN '0' WHEN objektart = 'streckenobjekt' THEN '1' ELSE '2' END AS geometry_type
 			FROM
-				pg_inherits i JOIN
-				pg_class AS c ON i.inhrelid = c.oid JOIN
-				pg_class as p ON i.inhparent = p.oid JOIN
-				pg_namespace AS pn ON p.relnamespace = pn.oid JOIN
-				pg_namespace AS cn ON c.relnamespace = cn.oid
+				(
+					SELECT
+						COALESCE(
+							CASE WHEN p3.relname = 'basisobjekt' THEN NULL ELSE p3.relname END,
+							CASE WHEN p2.relname = 'basisobjekt' THEN NULL ELSE p2.relname END,
+							p.relname
+						) AS objektart,
+						pn3.nspname || '.' || p3.relname ebene_0,
+						pn2.nspname || '.' || p2.relname ebene_1,
+						pn.nspname || '.' || p.relname parent_name,
+						cn.nspname AS schema_name,
+						c.relname AS table_name
+					FROM
+						pg_inherits i JOIN
+						pg_class AS c ON i.inhrelid = c.oid JOIN
+						pg_class as p ON i.inhparent = p.oid JOIN
+						pg_namespace AS pn ON p.relnamespace = pn.oid JOIN
+						pg_namespace AS cn ON c.relnamespace = cn.oid JOIN
+						pg_inherits i2 ON p.oid = i2.inhrelid JOIN
+						pg_class AS p2 ON i2.inhparent = p2.oid JOIN
+						pg_namespace AS pn2 ON p2.relnamespace = pn2.oid LEFT JOIN
+						pg_inherits i3 ON p2.oid = i3.inhrelid LEFT JOIN
+						pg_class AS p3 ON i3.inhparent = p3.oid LEFT JOIN
+						pg_namespace AS pn3 ON p3.relnamespace = pn3.oid
+				) AS hierarchy
 			WHERE
-				pn.nspname = 'ukos_okstra' AND
-			  p.relname IN ('strassenausstattung_punkt', 'strassenausstattung_strecke', 'verkehrsflaeche')
+				schema_name = 'ukos_doppik'
+				AND objektart IN ('punktobjekt', 'streckenobjekt', 'verkehrsflaeche') -- damit werden punktundstreckenobjekt sowie schild erstmal ausgelassen
+				OR (schema_name = 'ukos_okstra' AND table_name = 'verkehrseinschraenkung')
 			ORDER BY
-				c.relname
+				doppik_objekt_name
 		";
 		#echo '<br>Sql: ' . $sql;
 		$ret = $GUI->pgdatabase->execSQL($sql, 1, 4);
@@ -40,7 +63,7 @@
 				`layer`
 			WHERE
 				`schema` LIKE '%" . $schema_name . "%' AND
-				`maintable` LIKE '%" . $table_name . "%' AND
+				`maintable` = '" . $table_name . "' AND
 				`Datentyp` = " . $geometry_type . "
 		";
 		#echo '<br>Sql: ' . $sql;
