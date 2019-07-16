@@ -11,7 +11,7 @@ if ($this->new_entry != true AND $this->formvars['printversion'] == '') {
 							<input
 							id="<? echo $layer['Layer_ID'] . '_' . $k; ?>"
 							type="checkbox"
-							class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't')echo 'no_edit'; ?>"
+							class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
 							name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"
 						>&nbsp;<span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span><?
 						if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { ?>

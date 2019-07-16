@@ -665,8 +665,8 @@
 			if(top.browser != "other"){
 				document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback_ff(evt); }, true);
 			}
-			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari//IE9
-			window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);		//Firefox
+			window.addEventListener(\'mousewheel\', mousewheelchange, {passive: false}); // Chrome/Safari//IE9
+			window.addEventListener(\'DOMMouseScroll\', mousewheelchange, {passive: false});		//Firefox
 		}
 		else {
 			top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
@@ -1175,7 +1175,44 @@ function mouseup(evt){
 	
 	top.document.getElementById("svghelp").SVGcoord_input_submit = coord_input_submit;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
+	function dec2dms(number, coordtype){
+		number = number+"";
+		part1 = number.split(".");
+		degrees = part1[0];
+		minutes = parseFloat("0."+part1[1]) * 60;
+		if(coordtype == "dmin"){
+			minutes = Math.round(minutes*1000)/1000;
+			minutes = minutes+"";
+			return degrees+"°"+minutes;
+		}
+		else{
+			minutes = minutes+"";
+			part2 = minutes.split(".");
+			minutes = part2[0];
+			if(part2[1] != undefined)seconds = Math.round(parseFloat("."+part2[1]) * 60);
+			else seconds = "00";
+			return degrees+"°"+minutes+"\'"+seconds+"\'\'";
+		}			
+	}
+	
+	function dms2dec(number, coordtype){
+		var seconds = 0;
+		number = number+"";
+		part1 = number.split("°");
+		degrees = parseFloat(part1[0]);
+		part2 = part1[1].split("\'");
+		minutes = parseFloat(part2[0]);
+		if(coordtype == "dms"){
+			seconds = part2[1].replace(/\'\'/g, "");
+			seconds = parseFloat(seconds)/60;
+		}
+		minutes = (minutes+seconds)/60;
+		return Math.round((degrees + minutes)*10000)/10000;  
+	}
+
 	function coord_input(){
+		coordtype = \''.$this->user->rolle->coordtype.'\';
+		viewer_epsg = \''.$this->user->rolle->epsg_code.'\';
 		doing = enclosingForm.last_doing.value;
 		if(doing == "recentre" || doing == "zoomout" || doing == "zoomin"){
 			if(polygonfunctions){
@@ -1195,6 +1232,10 @@ function mouseup(evt){
 		}
 		mittex = Math.round(minx+(maxx-minx)/2);
 		mittey = Math.round(miny+(maxy-miny)/2);
+		if(viewer_epsg == 4326 && coordtype != "dec"){
+			mittex = dec2dms(mittex);
+			mittey = dec2dms(mittey);
+		}
 		var Msg = top.$("#message_box");
 		Msg.show();
 		content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="top.$(\\\'#message_box\\\').hide();" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';

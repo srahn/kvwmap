@@ -447,10 +447,12 @@ else {
 
 	if($_SESSION['login_routines'] == true) {
 		define('AFTER_LOGIN', true);
-	# hier befinden sich Routinen, die beim einloggen des Nutzers einmalig durchgeführt werden
+		$mapdb = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
+		# hier befinden sich Routinen, die beim einloggen des Nutzers einmalig durchgeführt werden
+		# Löschen der Rollenfilter
+		$mapdb->deleteRollenFilter();
 		# Löschen der Rollenlayer
 		if(DELETE_ROLLENLAYER == 'true'){
-			$mapdb = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 			$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search');
 	    for($i = 0; $i < count($rollenlayerset); $i++){
 	      $mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);

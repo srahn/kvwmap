@@ -284,7 +284,7 @@
 						else{								// zeilenweise
 							$maxwidth = $size * 11;
 							$minwidth = $size * 7.1;
-							$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;"><pre>' . htmlspecialchars($value) . '</pre></div>';
+							$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;"><pre>' . $value . '</pre></div>';
 						}
 					}
 				}break;
@@ -323,7 +323,7 @@
 						if ($enum_value[$e] == $value) {
 							$datapart .= 'checked ';
 						}
-						if($attributes['nullable'][$j] != '0')$datapart .= ' onclick="'.($attribute_privileg == '0'? 'return false;' : '').'this.checked = this.checked2 || true; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';							
+						if($attributes['nullable'][$j] != '0')$datapart .= ' onclick="'.($attribute_privileg == '0'? 'return false;' : '').'if(this.checked2 == undefined){this.checked2 = true;}this.checked = this.checked2; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';							
 						$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$k.'_'.$e.'">'.$enum_output[$e].'</label>&nbsp;&nbsp;&nbsp;&nbsp;';
 						if(!$attributes['horizontal'][$j])$datapart .= '<br>';
 					}
@@ -599,9 +599,9 @@
 							$datapart .= '<div style="display:inline" id="dynamicLink'.$layer_id.'_'.$k.'_'.$j.'"></div>';
 						}
 						else{
-							$datapart .= '<a ';
+							$datapart .= '<a tabindex="1"';
 							if($explosion[2] != 'no_new_window'){$datapart .= 'target="_blank"';}
-							$datapart .= ' class="dynamicLink" style="font-size: '.$fontsize.'px" '.($explosion[2] == 'no_new_window' ? 'onclick="checkForUnsavedChanges(event);"' : '').' href="'.$href.'">';
+							$datapart .= ' class="dynamicLink" style="font-size: '.$fontsize.'px" '.(($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') ? 'onclick="checkForUnsavedChanges(event);"' : '').' href="'.$href.'">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
 						}

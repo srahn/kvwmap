@@ -155,11 +155,11 @@ class Nachweis {
           $formvars['Bilddatei_name']=$doclocation;
         }
         # Zusammensetzen des Dateinamen unter dem das Dokument gespeichert werden soll
-        $formvars['zieldateiname']=$this->getZielDateiName($formvars);
+				$formvars['zieldateiname']=$this->getZielDateiName($formvars);
 				$zieldatei=NACHWEISDOCPATH.$formvars['flurid'].'/'.$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$formvars['artname'].'/'.$formvars['zieldateiname'];
 
         # 4. Ändern der Eintragung in der Datenbank
-        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['unterart_'.$formvars['hauptart']],$formvars['gueltigkeit'],$formvars['geprueft'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['bemerkungen'],$formvars['bemerkungen_intern'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname'], $user);
+        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['unterart_'.$formvars['hauptart']],$formvars['gueltigkeit'],$formvars['geprueft'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['bemerkungen'],$formvars['bemerkungen_intern'],$formvars['umring'],$zieldatei, $user);
         if ($ret[0]) {
           # Aktualisierungsvorgang in der Datenbank nicht erfolgreich
           $errmsg=$ret[1];
@@ -478,7 +478,7 @@ class Nachweis {
 			$pagecount = getNumPagesPdf($dateiname);
 			if($pagecount > 1)$label = "-fill black -undercolor white -gravity North -pointsize 18 -annotate +0+15 ' ".$pagecount." Seiten '";
 		}
-		$command = IMAGEMAGICKPATH.'convert '.$dateiname.'[0] -quality 75 -background white '.$label.' -flatten -resize 1000x1000\> '.$dateinamensteil[0].'_thumb.jpg';
+		$command = IMAGEMAGICKPATH.'convert -density 300x300 '.$dateiname.'[0] -quality 75 -background white '.$label.' -flatten -resize 1800x1800\> '.$dateinamensteil[0].'_thumb.jpg';
 		exec($command, $ausgabe, $ret);
 		if($ret == 1){
 			$type = $dateinamensteil[1];
