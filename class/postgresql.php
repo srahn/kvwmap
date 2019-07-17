@@ -256,6 +256,7 @@ FROM
 			if ($this->schema != '') {
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
+			#echo "<br>SQL in execSQL: " . $sql;
 			$query = @pg_query($this->dbConn, $sql);
 			//$query=0;
 			if ($query == 0) {
