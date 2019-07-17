@@ -1256,17 +1256,17 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	z-index: 1000000;
 }
 
+.message-box {
+	padding: 5px 5px 5px 0px;
+}
 .message-box-notice {
 	background-color: #d3ffd3;
-	padding: 5px;
 }
 .message-box-warning {
 	background-color: #dae4ec;
-	padding: 5px;
 }
 .message-box-error {
 	background-color: #ffd9d9;
-	padding: 5px;
 }
 .message-box-type {
 	float: left;
@@ -1274,7 +1274,6 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	width: 1px;
 	margin-right: 2px;
 }
-
 .message-box-msg {
 	float: left;
 	margin-left: 20px;
@@ -1954,4 +1953,12 @@ tbody.gle tr {
 .small-gray {
 	color: gray;
 	font-size: 12px;
+}
+
+.green {
+	color: green;
+}
+
+.red {
+	color: red;
 }

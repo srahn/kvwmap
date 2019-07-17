@@ -141,6 +141,13 @@ function resizemap2window(){
 * in div message_box
 * @param array or string messages contain the messages as array
 * or as a single string
+* Examples:
+*		message('Dieser Text wird immer als Warung ausgegeben.');
+*		message([
+*			{ type: 'error', msg: 'Dieser Text ist eine Fehlermeldung'},
+*			{ type: 'info', msg: 'Hier noch eine Info.'},
+*			{ type: 'notice', msg: 'und eine Notiz'},
+*		]);
 */
 function message(messages, t_visible, t_fade, css_top, confirm_value) {
 	confirm_value = confirm_value || 'ok';
@@ -197,9 +204,9 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 
 	$.each(messages, function (index, msg) {
 		msg.type = (['notice', 'info', 'error'].indexOf(msg.type) > -1 ? msg.type : 'warning');
-		msgDiv.append('<div class="message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
+		msgDiv.append('<div class="message-box message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
 		if (types[msg.type].confirm && document.getElementById('message_ok_button') == null) {
-			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="$(\'#message_box\').hide();" value="' + confirm_value + '" style="margin: 10px 0 10px 0;">');
+			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="$(\'#message_box\').hide();" value="' + confirm_value + '" style="margin: 10px 0px 0px 0px;">');
 		}
 	});
 	

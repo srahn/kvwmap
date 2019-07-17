@@ -27,7 +27,7 @@
 									include(SNIPPETS . "menue.php"); ?>
 								</td>
 								<td align="center" width="100%" height="100%" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif" style="border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
-									<div id="container_paint" style="height:100%; position: relative; overflow: hidden;">		<!-- overflow wird für rausfliegende Legende benötigt und height:100% für den Box-Shadow unter der MapFunctionsBar und Legende -->
+									<div id="container_paint" style="height:100%; position: relative; overflow: hidden;">		<!-- overflow wird fÃ¼r rausfliegende Legende benÃ¶tigt und height:100% fÃ¼r den Box-Shadow unter der MapFunctionsBar und Legende -->
 										<script type="text/javascript">
 											currentform = document.GUI;
 											<? $this->currentform = 'document.GUI'; ?>
