@@ -122,7 +122,6 @@ function save_layout(){
 			<i id="save_check_button" style="padding: 6px;" class="fa fa-check buttonlink green" aria-hidden="true"></i>
 		</a><?php
 	}
-	$this->ddl->fehlermeldung = 'test';
 	if ($this->ddl->fehlermeldung != '') { ?>
 		<script>
 			message([{ type: 'error', msg: '<? echo $this->ddl->fehlermeldung; ?>' }]);
