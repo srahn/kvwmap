@@ -818,9 +818,13 @@ function go_switch_xplankonverter($go){
 			if (empty($konvertierung_id)) {
 				if (!empty($bereich_gml_id)) {
 					# Hole konvertierung_id über den Bereich
-					$bereich = XP_Bereich::find_by_id($GUI, 'gml_id', $bereich_gml_id);
-					$plan = $bereich->get_plan();
-					$konvertierung_id = $plan->get('konvertierung_id');
+					$pg_object = new PgObject($GUI, 'xplan_gml', 'xp_bereich');
+					$bereich = $pg_object->find_by('gml_id', $bereich_gml_id);
+					$konvertierung_id = $bereich->get('konvertierung_id');
+
+#					$bereich = XP_Bereich::find_by_id($GUI, 'gml_id', $bereich_gml_id, 'RP-Plan');
+#					$plan = $bereich->get_plan();
+#					$konvertierung_id = $plan->get('konvertierung_id');
 				}
 			}
 
@@ -836,7 +840,7 @@ function go_switch_xplankonverter($go){
 				information_schema.columns
 			WHERE
 				table_name='" . $GUI->formvars['featuretype'] . "' AND
-				table_schema='xplan_gml'
+				table_schema='" . XPLANKONVERTER_CONTENT_SCHEMA . "'
 			ORDER BY
 				column_name
 			";
@@ -941,9 +945,9 @@ function go_switch_xplankonverter($go){
 				FROM
 					information_schema.columns
 				WHERE
-					table_name='" . $GUI->formvars['featuretype'] . "' AND
+					table_name = '" . $GUI->formvars['featuretype'] . "' AND
 					column_name = '" . $GUI->formvars['xplanattribut'] . "' AND
-					table_schema='xplan_classes'
+					table_schema = '" . XPLANKONVERTER_CONTENT_SCHEMA . "'
 				ORDER BY
 					column_name
 			";
@@ -967,9 +971,8 @@ function go_switch_xplankonverter($go){
 					wert,
 					beschreibung
 				FROM
-					xplan_classes. " . $enumerationsliste . "
+					" . XPLANKONVERTER_CONTENT_SCHEMA . ".enum_" . $enumerationsliste . "
 			";
-
 			$GUI->result = pg_query($GUI->pgdatabase->dbConn, $sql);
 
 			include(PLUGINS . 'xplankonverter/view/regeleditor/getxplanenumerationattributes.php');
@@ -985,7 +988,7 @@ function go_switch_xplankonverter($go){
 				WHERE
 					table_name='" . $GUI->formvars['featuretype'] . "' AND
 					column_name = '" . $GUI->formvars['xplanattribut'] . "' AND
-					table_schema='xplan_classes'
+					table_schema = '" . XPLANKONVERTER_CONTENT_SCHEMA . "'
 				ORDER BY
 					column_name
 			";
@@ -1010,7 +1013,7 @@ function go_switch_xplankonverter($go){
 					wert,
 					beschreibung
 				FROM
-					xplan_classes." . $enumerationsliste . "
+					" . XPLANKONVERTER_CONTENT_SCHEMA . ".enum_" . $enumerationsliste . "
 				";
 			#echo '<br>Sql: ' . $sql;
 			$GUI->result = pg_query($GUI->pgdatabase->dbConn, $sql);

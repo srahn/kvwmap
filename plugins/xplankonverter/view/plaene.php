@@ -516,14 +516,16 @@ else { ?>
 						data-formatter="konvertierungStatusFormatter"
 						class="col-md-2"
 					>Status</th><?php
+				}
+				if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
+					<th
+						data-field="veroeffentlicht"
+						data-visible="true"
+						data-sortable="true"
+						data-formatter="konvertierungVeroeffentlichtFormatter"
+						data-switchable="true"
+					><i title="Veröffentlichung" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
 				} ?>
-			<th
-				data-field="veroeffentlicht"
-				data-visible="true"
-				data-sortable="true"
-				data-formatter="konvertierungVeroeffentlichtFormatter"
-				data-switchable="true"
-			><i title="Veröffentlichung" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th>
 			<th
 				data-field="konvertierung_id"
 				data-visible="true"
