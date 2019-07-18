@@ -35,7 +35,14 @@ function setValue() {
 		return;
 	}
 	// Sets the sql in the kvwmap-form
-	top.document.getElementById("5_sql_0").value = sqlString;
+	console.log("x");
+	if(top.document.getElementById("5_sql_-1") != null) {
+		top.document.getElementById("5_sql_-1").value = sqlString;
+		console.log("y");
+	} else {
+		top.document.getElementById("5_sql_0").value = sqlString;
+		console.log("z");
+	}
 	top.closeCustomSubform();
 }
 
