@@ -3,6 +3,7 @@
   include(LAYOUTPATH.'languages/rollenwahl_'.$this->user->rolle->language.'.php');
 	include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
 	include(LAYOUTPATH.'snippets/SVGvars_defs.php');
+	include(SNIPPETS . 'sachdatenanzeige_functions.php');
 	global $supportedLanguages;
 	global $last_x;
 ?>
@@ -70,11 +71,24 @@
 </script>
 <br>
 <h2><? echo $this->titel.$strTitleRoleSelection; ?></h2>
-
-<? if ($this->Fehlermeldung!='') {
-       include(LAYOUTPATH."snippets/Fehlermeldung.php");
-}
-
+<a
+	style="float: right; margin-top: -20px; margin-right: 10px;"
+	href="javascript:scrollbottom();"
+	title="Zum Ende der Seite"
+>
+	<i style="padding: 6px" class="fa fa-arrow-down buttonlink" aria-hidden="true"></i>
+</a>
+<a
+	style="float: right; margin-top: -20px; margin-right: 8px;"
+	href="javascript:$('#save_options_button').trigger('click');"
+	title="Speichern"
+>
+	<i id="save_check_button" style="padding: 6px;" class="fa fa-check buttonlink green" aria-hidden="true"></i>
+</a><?php
+if ($this->Fehlermeldung!='') {
+	include(LAYOUTPATH."snippets/Fehlermeldung.php");
+} ?>
+<div id="rollenwahl_optionen_div"><?
 if ($this->formvars['nur_einstellungen']) {
 	$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
 	if ($params['error_message'] != '') {
@@ -613,7 +627,24 @@ if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angem
 <table>
   <tr>
     <td></td>
-    <td><input type="button" name="starten" onclick="start1();" value="<? echo $this->strEnter; ?>" style="margin-bottom: 10px"></td>
+    <td><input id="save_options_button" type="button" name="starten" onclick="start1();" value="<? echo $this->strEnter; ?>" style="margin-bottom: 10px"></td>
   </tr>
 </table>
 <input type="hidden" name="go" value="">
+</div>
+<a href="#" title="Zum Anfang der Seite"
+	style="
+		float: right;
+		margin-right: 10px;
+		margin-top: -40px;
+	"
+>
+	<i style="padding: 6px" class="fa fa-arrow-up buttonlink" aria-hidden="true" onclick="window.scrollTo(0, 0)"></i>
+</a>
+<script>
+	$('#rollenwahl_optionen_div :input').change(function() {
+		console.log('change class to red');
+		$('#save_check_button').removeClass('green');
+		$('#save_check_button').addClass('red');
+	});
+</script>
