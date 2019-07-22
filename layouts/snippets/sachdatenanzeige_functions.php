@@ -396,7 +396,7 @@ include('funktionen/input_check_functions.php');
 	* zeigt Meldungen des Löschvorgangs an
 	*/
 	delete_subform_dataset = function(layer_id, oid, element_id) {
-		if (confirm('Wollen Sie die Datensatz oid: ' + oid + ' im Layer id: ' + layer_id + ' wirklich löschen?')) {
+		if (confirm('Wollen Sie diesen Datensatz wirklich löschen?')) {
 			$.ajax({
 				url : 'index.php',
 				data: {

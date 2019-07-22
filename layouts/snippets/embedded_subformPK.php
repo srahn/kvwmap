@@ -33,8 +33,10 @@
 								}
 							}
 						}
-					} ?>
-					<td class="gle-attribute-name">&nbsp;</td>
+					}
+					if ($layer['privileg'] == 2){	?>
+						<td class="gle-attribute-name">&nbsp;</td>
+					<? } ?>
 				</tr><?
 				for ($k = 0; $k < $anzObj; $k++) {
 					$element_id = 'subform_dataset_tr_' . $layer['Layer_ID'] . '_' . $layer['shape'][$k][$layer['maintable'] . '_oid']; ?>
@@ -53,7 +55,8 @@
 									$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" class="'.$this->subform_classname.'" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
 								}
 							}
-						} ?>
+						} 
+						if ($layer['privileg'] == 2){	?>
 						<td style="text-align: center">
 							<i
 								class="fa fa-times buttonlink"
@@ -66,6 +69,7 @@
 								);"
 							></i>
 						</td>
+						<? } ?>
 					</tr><?
 				} ?>
 			</table>

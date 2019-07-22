@@ -9200,7 +9200,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			# Delete the object regularly in database
 			$sql = "
 				DELETE FROM
-					" . $layer['schema'] . '.' . $layer['maintable'] . "
+					" . $layer['maintable'] . "
 				WHERE
 					oid = " . $oid . "
 			";
