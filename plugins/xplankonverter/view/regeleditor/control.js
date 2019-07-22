@@ -11,7 +11,7 @@ function setValue() {
 	// Strips the HTML tags from sql_ausgabe
 	var sqlString = $("#sql_ausgabefenster")[0];
 	var sqlString = $(sqlString).text();
-	// Strips empty lines at the beginning and end of the string
+	// Strips empty lines at the beginning and end
 	sqlString = sqlString.trim();
 	//Replaces multiple spaces with a single space
 	sqlString = sqlString.replace(/\s\s+/g, " ");
@@ -21,20 +21,28 @@ function setValue() {
 		//removes last word WHERE and last space
 		sqlString = sqlString.substring(0,sqlString.length -6);
 	}
-	// Ueberprueft ob Pflichtelemente vorhanden sind
+	// Checks for required attributes
 	// Rechtscharakter
 	if(sqlString.indexOf("rechtscharakter") == -1) {
 		alert("Warnung: Das Pflichtattribut Rechtscharakter ist noch nicht befüllt! Die Regel kann ohne Rechtscharakter kein valides XPlanGML erzeugen.");
 		return;
 	}
-	// Typ bei Klasse ZentralerOrt
+	// TODO Find a generic way to find required attributes
+	// typ for class RP_ZentralerOrt
 	var target = $("#target").text();
 	if(target == 'rp_zentralerort' && sqlString.indexOf("typ") == -1) {
 		alert("Warnung: Für die Klasse RP_ZentralerOrt ist das Pflichtattribut typ noch nicht befüllt. Die Regel kann ohne das Attribut Typ kein valides XPlanGML erzeugen.");
 		return;
 	}
 	// Sets the sql in the kvwmap-form
-	top.document.getElementById("9_sql_0").value = sqlString;
+	console.log("x");
+	if(top.document.getElementById("5_sql_-1") != null) {
+		top.document.getElementById("5_sql_-1").value = sqlString;
+		console.log("y");
+	} else {
+		top.document.getElementById("5_sql_0").value = sqlString;
+		console.log("z");
+	}
 	top.closeCustomSubform();
 }
 
@@ -265,9 +273,11 @@ function setSelectorVisibility() {
 		"rp_generischesobjekttypen"
 	]
 	var datatypes = [
+		"xp_spezexternereferenz",
 		"xp_externereferenz",
 		"xp_generattribut",
-		"xp_hoehenangabe"
+		"xp_hoehenangabe",
+		"xp_wirksamkeitbedingung",
 	]
 	$("#add_zuweisung").hide();
 	$("#attribut_assignment_area_normal").show();
