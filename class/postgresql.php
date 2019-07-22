@@ -451,6 +451,19 @@ FROM
 		}
 	}
 
+	function getTableAliasNames($plans){
+		$table_aliases = array();
+		foreach($plans as $plan){
+			if($plan['Parent Relationship'] != 'SubPlan'){
+				if($plan['Relation Name'] != ''){
+					$table_aliases[$plan['Relation Name']] = $plan['Alias'];
+				}
+				if($plan['Plans'] != NULL)$table_aliases = $table_aliases + $this->getTableAliasNames($plan['Plans']);
+			}
+		}
+		return $table_aliases;
+	}
+
 	function getFieldsfromSelect($select, $assoc = false) {
 		$err_msgs = array();
 		$sql = $select." LIMIT 0";
@@ -459,6 +472,7 @@ FROM
 			$sql = "EXPLAIN (FORMAT JSON,ANALYZE False,VERBOSE True,COSTS False,TIMING False,BUFFERS False) ".$select." LIMIT 0";			# den Queryplan mitabfragen um an Infos zur Query zu kommen
 			$exp = $this->execSQL($sql, 4, 0);
 			$query_plan = json_decode(pg_fetch_assoc($exp[1])['QUERY PLAN'], true);
+			$table_aliases = $this->getTableAliasNames($query_plan[0]['Plan']['Plans']);
 
 			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
 				$plan_info = explode('.', $query_plan[0]['Plan']['Output'][$i]);
@@ -472,7 +486,7 @@ FROM
 				# wenn das Attribut eine Tabellenspalte ist -> weitere Attributeigenschaften holen
 				if ($table_oid > 0){
 					# realer Name der Spalte in der Tabelle
-					$fields[$i]['real_name'] = $plan_info[1];
+					$fields[$i]['real_name'] = end($plan_info);
 					
 					# Tabellenname des Attributs
 					$fields[$i]['table_name'] = $tablename = pg_field_table($ret[1], $i);
@@ -481,7 +495,12 @@ FROM
 					}
 
 					# Tabellenaliasname des Attributs
-					$fields[$i]['table_alias_name'] = $plan_info[0];
+					if($plan_info[1] != NULL){
+						$fields[$i]['table_alias_name'] = $plan_info[0];
+					}
+					else{
+						$fields[$i]['table_alias_name'] = $table_aliases[$tablename];
+					}
 
 					# Schemaname der Tabelle des Attributs
 					$schemaname = $this->pg_field_schema($table_oid);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?	
