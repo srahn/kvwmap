@@ -891,7 +891,10 @@ class data_import_export {
 		$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
 		$output = array();
 		exec($command, $output, $ret);
-		if ($ret != 0) { $ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; }
+		if ($ret != 0) {
+			exec("sed -i -e 's/".$database->passwd."/xxxx/g' ".IMAGEPATH.$tablename.'.err');		# falls das DB-Passwort in der Fehlermeldung vorkommt => ersetzen
+			$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; 
+		}
 		return $ret;
 	}
 
