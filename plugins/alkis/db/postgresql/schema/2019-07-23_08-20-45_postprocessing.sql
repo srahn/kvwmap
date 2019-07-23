@@ -23,7 +23,7 @@ SET enable_seqscan = off;
       JOIN alkis.ax_flurstueck      f ON f.gml_id = any(p.dientzurdarstellungvon)
      AND p.art = 'ZAE_NEN';
 
--- Tabelle aus View befüllen
+-- Tabelle aus View befÃ¼llen
 TRUNCATE alkis.pp_strassenname;
 INSERT INTO alkis.pp_strassenname (gml_id, schriftinhalt, hor, ver, art, winkel, the_geom, gemeinde, lage)
        SELECT gml_id, schriftinhalt, hor, ver, art, winkel, wkb_geometry, gemeinde, lage
@@ -64,12 +64,12 @@ INSERT INTO alkis.pp_strassenname (gml_id, schriftinhalt, hor, ver, art, winkel,
          )
 			 )as foo; -- View sucht das passende advstandardmodell
 
--- Schriftinhalt ergänzen
+-- Schriftinhalt ergÃ¤nzen
 -- Das sind die Standardschreibweisen aus dem Katalog, die nicht mehr redundant in ap_pto sind.
 UPDATE alkis.pp_strassenname  p
    SET schriftinhalt =     -- Hier ist der Label noch leer
-   -- Subquery "Gib mir den Straßennamen":
-   ( SELECT k.bezeichnung                         -- Straßenname ..
+   -- Subquery "Gib mir den StraÃŸennamen":
+   ( SELECT k.bezeichnung                         -- StraÃŸenname ..
        FROM alkis.ax_lagebezeichnungkatalogeintrag k    --  .. aus Katalog
        JOIN alkis.ax_lagebezeichnungohnehausnummer l    -- verwendet als Lage o.H.
          ON (k.land=l.land AND k.regierungsbezirk=l.regierungsbezirk AND k.kreis=l.kreis AND k.gemeinde=l.gemeinde AND k.lage=l.lage )
@@ -147,7 +147,7 @@ INSERT INTO alkis.pp_amt
   ORDER BY        g.land, g.regierungsbezirk, g.kreis;
 	 
 -- ==============================================================================
--- Geometrien der Flurstücke schrittweise zu groesseren Einheiten zusammen fassen
+-- Geometrien der FlurstÃ¼cke schrittweise zu groesseren Einheiten zusammen fassen
 -- ==============================================================================
 
 DELETE FROM alkis.pp_flur;
@@ -164,7 +164,7 @@ INSERT INTO alkis.pp_flur (land, regierungsbezirk, kreis, gemarkung, flurnummer,
 -- Fluren zu Gemarkungen zusammen fassen
 -- -------------------------------------
 
--- Flächen vereinigen
+-- FlÃ¤chen vereinigen
 UPDATE alkis.pp_gemarkung a
   SET the_geom = 
    ( SELECT st_multi(st_union(b.the_geom)) AS the_geom		-- angepasst am 10.03.2016
@@ -187,31 +187,31 @@ UPDATE alkis.pp_gemarkung a
 -- Gemarkungen zu Gemeinden zusammen fassen
 -- ----------------------------------------
 
--- Flächen vereinigen (aus der bereits vereinfachten Geometrie)
+-- FlÃ¤chen vereinigen (aus der bereits vereinfachten Geometrie)
 UPDATE alkis.pp_gemeinde a
   SET the_geom = 
    ( SELECT st_multi(st_union(b.the_geom)) AS the_geom		-- angepasst am 10.03.2016
      FROM    alkis.pp_gemarkung b
      WHERE a.land     = b.land 
-			AND a.regierungsbezirk = b.regierungsbezirk			-- hinzugefügt am 18.09.2015
-			AND	a.kreis = b.kreis														-- hinzugefügt am 18.09.2015
+			AND a.regierungsbezirk = b.regierungsbezirk			-- hinzugefÃ¼gt am 18.09.2015
+			AND	a.kreis = b.kreis														-- hinzugefÃ¼gt am 18.09.2015
       AND a.gemeinde = b.gemeinde
    );
 	 
 
--- Gemarkungen zählen
+-- Gemarkungen zÃ¤hlen
 UPDATE alkis.pp_gemeinde a
   SET anz_gemarkg = 
    ( SELECT count(gemarkung) AS anz_gemarkg 
      FROM    alkis.pp_gemarkung b
      WHERE a.land     = b.land 
-		 AND a.regierungsbezirk = b.regierungsbezirk				-- hinzugefügt am 18.09.2015
-		 AND	a.kreis = b.kreis															-- hinzugefügt am 18.09.2015
+		 AND a.regierungsbezirk = b.regierungsbezirk				-- hinzugefÃ¼gt am 18.09.2015
+		 AND	a.kreis = b.kreis															-- hinzugefÃ¼gt am 18.09.2015
      AND a.gemeinde = b.gemeinde
    );
 
 	 
--- Flächen vereinigen (aus der bereits vereinfachten Geometrie)
+-- FlÃ¤chen vereinigen (aus der bereits vereinfachten Geometrie)
 UPDATE alkis.pp_amt a
   SET the_geom = 
    (SELECT st_multi(st_union(b.the_geom)) AS the_geom			-- angepasst am 10.03.2016
@@ -223,7 +223,7 @@ UPDATE alkis.pp_amt a
    );
 	 
 
--- Gemeinden zählen
+-- Gemeinden zÃ¤hlen
 UPDATE alkis.pp_amt a
   SET anz_gemeinden = 
    ( SELECT count(gemeinde) AS anz_gemeinden 
@@ -235,7 +235,7 @@ UPDATE alkis.pp_amt a
     GROUP BY c.amt_name
    );
 
--- Ämter zu Kreis zusammenfassen
+-- Ã„mter zu Kreis zusammenfassen
 -- ----------------------------------------
 
 DELETE FROM alkis.pp_kreis;
@@ -248,15 +248,15 @@ AND k.endet IS NULL
 GROUP BY a.land, a.regierungsbezirk, a.kreis, k.bezeichnung;
 
 
--- Löcher schliessen	 
-UPDATE alkis.pp_flur SET the_geom = Filter_Rings(the_geom, 10);		-- hinzugefügt am 10.03.2016	 
-UPDATE alkis.pp_gemarkung SET the_geom = Filter_Rings(the_geom, 10);		-- hinzugefügt am 10.03.2016
-UPDATE alkis.pp_gemeinde SET the_geom = Filter_Rings(the_geom, 10);		-- hinzugefügt am 10.03.2016
-UPDATE alkis.pp_amt SET the_geom = Filter_Rings(the_geom, 10);		-- hinzugefügt am 10.03.2016
-UPDATE alkis.pp_kreis SET the_geom = Filter_Rings(the_geom, 10);		-- hinzugefügt am 10.03.2016
+-- LÃ¶cher schliessen	 
+UPDATE alkis.pp_flur SET the_geom = Filter_Rings(the_geom, 10);		-- hinzugefÃ¼gt am 10.03.2016	 
+UPDATE alkis.pp_gemarkung SET the_geom = Filter_Rings(the_geom, 10);		-- hinzugefÃ¼gt am 10.03.2016
+UPDATE alkis.pp_gemeinde SET the_geom = Filter_Rings(the_geom, 10);		-- hinzugefÃ¼gt am 10.03.2016
+UPDATE alkis.pp_amt SET the_geom = Filter_Rings(the_geom, 10);		-- hinzugefÃ¼gt am 10.03.2016
+UPDATE alkis.pp_kreis SET the_geom = Filter_Rings(the_geom, 10);		-- hinzugefÃ¼gt am 10.03.2016
 	 
--- Geometrie glätten / vereinfachen
--- Diese "simplen" Geometrien sollen nur für die Darstellung einer Übersicht verwendet werden.
+-- Geometrie glÃ¤tten / vereinfachen
+-- Diese "simplen" Geometrien sollen nur fÃ¼r die Darstellung einer Ãœbersicht verwendet werden.
 -- Ablage der simplen Geometrie in einem alternativen Geometriefeld im gleichen Datensatz.
 
 UPDATE alkis.pp_flur      SET simple_geom = st_simplify(the_geom, 0.4); -- Flur 
@@ -285,7 +285,7 @@ SELECT l.ogc_fid, st_azimuth(st_pointn(l.wkb_geometry, 1), st_pointn(l.wkb_geome
    JOIN alkis.ax_bodenschaetzung b ON b.gml_id = any(l.dientzurdarstellungvon)
   WHERE l.art::text = 'Pfeil' AND ('DKKM1000' ~~ ANY (l.advstandardmodell)) AND b.endet IS NULL AND l.endet IS NULL;
 
-UPDATE alkis.ax_anschrift SET postleitzahlpostzustellung = lpad(postleitzahlpostzustellung, 5, '0') WHERE bestimmungsland is null;		-- Hinzugefügt am 18.01.2016
+UPDATE alkis.ax_anschrift SET postleitzahlpostzustellung = lpad(postleitzahlpostzustellung, 5, '0') WHERE bestimmungsland is null;		-- HinzugefÃ¼gt am 18.01.2016
 
 
 
