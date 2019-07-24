@@ -1,12 +1,10 @@
 <?
-
 	global $strShowPK;
 	global $strNewPK;
 	global $strShowFK;
 	global $strShowAll;
 	global $strNewEmbeddedPK;
 	global $hover_preview;
-
 	function output_table($table) {
 		if (is_array($table)) {
 			foreach($table['rows'] as $row) {
@@ -659,10 +657,6 @@
 					$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 				}break;
 
-				case 'Editiersperre': {
-					$datapart .= ($value == 't' ? 'Ja' : 'Nein');
-				} break;
-
 				case 'Zahl': {
 					# bei Zahlen Tausendertrennzeichen einfügen 
 					$value = tausenderTrenner($value);
@@ -683,6 +677,12 @@
 				}break;
 				
 				default : {
+					if ($value == 't') {
+						$value = $gui->strYes;
+					}
+					if ($value == 'f') {
+						$value = $gui->strNo;
+					}
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' readonly style="display:none;"';

@@ -250,7 +250,7 @@ class GUI {
 					$layerset[$i]['pfad'],
 					rolle::$layer_params,
 					$this->user->id,
-					$this->stelle_id,
+					$this->Stelle->id,
 					rolle::$hist_timestamp,
 					$this->user->rolle->language
 				);

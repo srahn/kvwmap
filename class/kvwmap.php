@@ -7884,7 +7884,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$path,
 							$all_layer_params,
 							$this->user->id,
-							$this->stelle_id,
+							$this->Stelle->id,
 							rolle::$hist_timestamp,
 							$this->user->rolle->language
 						)
@@ -8249,7 +8249,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$layerset[0]['pfad'],
 					rolle::$layer_params,
 					$this->user->id,
-					$this->stelle_id,
+					$this->Stelle->id,
 					rolle::$hist_timestamp,
 					$this->user->rolle->language
 				);
