@@ -1556,8 +1556,8 @@ class GUI {
 
               # Setzen der Templatedateien für die Sachdatenanzeige inclt. Footer und Header.
               # Template (Body der Anzeige)
-              if ($layerset['list'][$i]['template']!='') {
-                $layer->set('template',$layerset['list'][$i]['template']);
+              if ($this->formvars['go'] == 'OWS') {
+                $layer->set('template', 'dummy');
               }
               # Header (Kopfdatei)
               if ($layerset['list'][$i]['header']!='') {
@@ -3875,52 +3875,86 @@ class GUI {
   }
 
 	function createOWSResponse(){
-		$this->map_factor = $this->formvars['mapfactor'];   # der durchgeschleifte MapFactor
-		$this->class_load_level = 2;    # die Klassen von allen Layern laden
-		$this->loadMap('DataBase');
-		$requestobject = ms_newOwsRequestObj();
-		$params = array_keys($this->formvars);
-		for($i = 0; $i < count($this->formvars); $i++){
-			$requestobject->setParameter($params[$i],$this->formvars[$params[$i]]);
-		}
-		//$requestobject->loadparams();   # geht nur wenn php als cgi läuft
-		ms_ioinstallstdouttobuffer();
-		$this->map->owsdispatch($requestobject);
-		$contenttype = ms_iostripstdoutbuffercontenttype();
-		ob_end_clean();   //Ausgabepuffer leeren (sonst funktioniert header() nicht)
-		ob_start();
-		$request = array_change_key_case($_REQUEST);
-		switch (strtolower($request['request'])) {
-			case 'getmap' : {
-				if ( $contenttype != 'image/png') {
-					$contenttype = 'image/jpeg';
+		$_REQUEST = array_change_key_case($_REQUEST, CASE_UPPER);
+		if(strtolower($_REQUEST['REQUEST']) == 'getfeatureinfo'){
+			$extent = explode(',', $_REQUEST['BBOX']);
+			if($_REQUEST['VERSION'] == '1.3.0'){
+				$_REQUEST['X'] = $_REQUEST['I'];
+				$_REQUEST['Y'] = $_REQUEST['J'];
+				$_REQUEST['SRS'] = $_REQUEST['CRS'];
+				if($_REQUEST['SRS'] == 'EPSG:4326'){
+					$save = $extent[1];
+					$extent[1] = $extent[0];
+					$extent[0] = $save;
+					$save = $extent[3];
+					$extent[3] = $extent[2];
+					$extent[2] = $save;
 				}
-			} break;
-			case 'getfeature': {
-				switch ($request['outputformat']) {
-					case 'text/plain' : {
-						$contenttype = 'text/plain';
-					} break;
-					case 'application/x-gzip;subtype=text/xml' : {
-						$contenttype = 'application/x-gzip';
-					} break;
-					default : {
-						$contenttype = 'text/xml';
-					}
-				}
-			} break;
-			default : {
-				$contenttype = 'application/xml';
 			}
+			$epsg = explode(':', $_REQUEST['SRS']);
+			$this->user->rolle->epsg_code = $epsg[1];
+			$query_layers = explode(',', $_REQUEST['QUERY_LAYERS']);
+			$this->user->rolle->oGeorefExt->minx = $extent[0];
+			$this->user->rolle->oGeorefExt->miny = $extent[1];
+			$this->user->rolle->oGeorefExt->maxx = $extent[2];
+			$this->user->rolle->oGeorefExt->maxy = $extent[3];
+			$this->user->rolle->nImageWidth = $_REQUEST['WIDTH'];
+			$this->user->rolle->nImageHeight = $_REQUEST['HEIGHT'];
+			$this->formvars['INPUT_COORD'] = $_REQUEST['X'].','.$_REQUEST['Y'].';'.$_REQUEST['X'].','.$_REQUEST['Y'];
+			$this->formvars['printversion'] = 1;
+			foreach($query_layers as $query_layer){
+				$layer=$this->user->rolle->getLayer($query_layer);
+				$this->formvars['qLayer'.$layer[0]['Layer_ID']] = 1;
+			}
+			$this->queryMap();
 		}
-		header('Content-type: ' . $contenttype);
-		ms_iogetStdoutBufferBytes();
-		if ($this->writeTmpFile) {
-			$wms_response = new wms_response_obj($this->tmpfile);
-			$wms_response->save(ob_get_contents());
+		else{
+			$this->map_factor = $this->formvars['mapfactor'];   # der durchgeschleifte MapFactor
+			$this->class_load_level = 2;    # die Klassen von allen Layern laden
+			$this->loadMap('DataBase');
+			$requestobject = ms_newOwsRequestObj();
+			$params = array_keys($this->formvars);
+			for($i = 0; $i < count($this->formvars); $i++){
+				$requestobject->setParameter($params[$i],$this->formvars[$params[$i]]);
+			}
+			//$requestobject->loadparams();   # geht nur wenn php als cgi läuft
+			ms_ioinstallstdouttobuffer();
+			$this->map->owsdispatch($requestobject);
+			$contenttype = ms_iostripstdoutbuffercontenttype();
+			ob_end_clean();   //Ausgabepuffer leeren (sonst funktioniert header() nicht)
+			ob_start();
+			switch (strtolower($_REQUEST['REQUEST'])) {
+				case 'getmap' : {
+					if ( $contenttype != 'image/png') {
+						$contenttype = 'image/jpeg';
+					}
+				} break;
+				case 'getfeature': {
+					switch ($_REQUEST['OUTPUTFORMAT']) {
+						case 'text/plain' : {
+							$contenttype = 'text/plain';
+						} break;
+						case 'application/x-gzip;subtype=text/xml' : {
+							$contenttype = 'application/x-gzip';
+						} break;
+						default : {
+							$contenttype = 'text/xml';
+						}
+					}
+				} break;
+				default : {
+					$contenttype = 'application/xml';
+				}
+			}
+			header('Content-type: ' . $contenttype);
+			ms_iogetStdoutBufferBytes();
+			if ($this->writeTmpFile) {
+				$wms_response = new wms_response_obj($this->tmpfile);
+				$wms_response->save(ob_get_contents());
+			}
+			ob_end_flush();
+			ms_ioresethandlers();
 		}
-		ob_end_flush();
-		ms_ioresethandlers();
 	}
 
   function adminFunctions() {
