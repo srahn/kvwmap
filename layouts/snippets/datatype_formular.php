@@ -571,7 +571,9 @@ else {
 		<?}?>
 		</td>
 		<td valign="top">
-			<a href="javascript:window.scrollTo(0, document.body.scrollHeight);"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>
+			<a style="float: right; margin-top: -20px; margin-right: 10px;" href="javascript:window.scrollTo(0, document.body.scrollHeight);"	title="nach unten">
+				<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
+			</a>
 		</td>
   </tr>
   <tr>
@@ -588,7 +590,9 @@ else {
      } ?>&nbsp;<input type="button" name="dummy" value="<?php echo $strButtonSaveAsNewLayer; ?>" onclick="submitWithValue('GUI','go_plus','Als neuen Layer eintragen')">     
 		</td>
 		<td valign="top">
-			<a href="javascript:window.scrollTo(0, 0);"><img class="hover-border" title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a>
+			<a style="float: right; margin-top: -20px; margin-right: 10px;" href="javascript:window.scrollTo(0, 0);"	title="nach oben">
+				<i class="fa fa-arrow-up hover-border" aria-hidden="true"></i>
+			</a>
 		</td>
   </tr>
   <tr>

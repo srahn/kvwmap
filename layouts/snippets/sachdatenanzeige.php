@@ -114,9 +114,9 @@ for($i=0;$i<$anzLayer;$i++){
 				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
 				<? } ?>
 		<? } ?>
-
-
-			<a href="javascript:scrolltop();"><img class="hover-border" title="<? echo $strToTop; ?>" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a>&nbsp;&nbsp;&nbsp;
+			<a style="margin-right: 8px" href="javascript:scrolltop();"	title="<? echo $strToTop; ?>">
+				<i class="fa fa-arrow-up hover-border" aria-hidden="true"></i>
+			</a>
 		</td>
 	</tr>
 </table>
