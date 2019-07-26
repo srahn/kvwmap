@@ -142,7 +142,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 											}
 											else{
 												$array = '[]';
-												echo ' multiple="true" size="1" style="z-index:'.($z_index-=1).';position: absolute;top: 3px;max-height: 270px; max-width: 293px" onmouseenter="this.size=this.length" onmouseleave="this.size=1;scrollToSelected(this);"';
+												echo ' multiple="true" size="1" style="z-index:'.($z_index-=1).';position: absolute;top: 3px;max-height: 270px; width: 293px" onmouseenter="this.size=this.length" onmouseleave="this.size=1;scrollToSelected(this);"';
 											}
 										?> 
 	                  	id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i].$array; ?>"><?echo "\n"; ?>
