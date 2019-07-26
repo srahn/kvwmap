@@ -222,7 +222,7 @@ function add_searchmask(layer_id){
 function scrollToSelected(select){
   for(var i = 0; i < select.options.length; i++){
 		if(select.options[i].selected){
-			select.scrollTop = i * 18;
+			select.scrollTop = i * select.clientHeight;
 		}
 	}
 }
