@@ -137,7 +137,7 @@
 			$datapart .= '<div id="'.$id.'_elements" style="">';
 			$elements = json_decode($value);		# diese Funktion decodiert immer den kommpletten String
 			$attributes2 = $attributes;
-			$attributes2['name'][$j] = '';
+			#$attributes2['name'][$j] = '';		// rausgenommen weil sonst in dynamischen Links nicht richtig ersetzt wird, aber es hatte wahrscheinlich einen Grund
 			$attributes2['dependents'][$j] = '';		// die Array-Elemente sollen keine Visibility-Changer sein, nur das gemeinsame Hidden-Feld oben
 			$attributes2['table_name'][$attributes2['name'][$j]] = $tablename;
 			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);			
