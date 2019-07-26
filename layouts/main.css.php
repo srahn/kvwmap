@@ -1259,8 +1259,8 @@ thead.gle th {
 .gle_attribute_value {
  background-clip: padding-box;
  position: relative;
- padding-left: 4px;
- padding-right: 5px;
+ padding: 4px 5px 0 4px;
+ vertical-align: top;
  min-width: 30px;
 }
 
@@ -1794,6 +1794,7 @@ tbody.gle tr {
 
 .dynamicLink{
 	padding: 0 0 0 3;
+	line-height: 22px;
 }
 
 .attribute-editor-table td {
