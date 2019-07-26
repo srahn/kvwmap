@@ -1905,7 +1905,6 @@ tbody.gle tr {
 
 .dynamicLink{
 	padding: 0 0 0 3;
-	line-height: 22px;
 }
 
 .attribute-editor-table td {
