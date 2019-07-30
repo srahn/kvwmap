@@ -71,25 +71,19 @@
 </script>
 <br>
 <h2><? echo $this->titel.$strTitleRoleSelection; ?></h2>
-<a
-	style="float: right; margin-top: -20px; margin-right: 10px;"
-	href="javascript:scrollbottom();"
-	title="Zum Ende der Seite"
->
-	<i style="padding: 6px" class="fa fa-arrow-down buttonlink" aria-hidden="true"></i>
+<a style="float: right; margin-top: -20px; margin-right: 10px;" href="javascript:scrollbottom();"	title="nach unten">
+	<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
 </a>
-<a
-	style="float: right; margin-top: -20px; margin-right: 8px;"
-	href="javascript:$('#save_options_button').trigger('click');"
-	title="Speichern"
->
+<? if ($this->formvars['hide_stellenwahl']) { ?>
+<a style="float: right; margin-top: -20px; margin-right: 40px;" href="javascript:$('#save_options_button').trigger('click');" title="Speichern">
 	<i id="save_check_button" style="padding: 6px;" class="fa fa-check buttonlink green" aria-hidden="true"></i>
-</a><?php
+</a>
+<? }
 if ($this->Fehlermeldung!='') {
 	include(LAYOUTPATH."snippets/Fehlermeldung.php");
 } ?>
 <div id="rollenwahl_optionen_div"><?
-if ($this->formvars['nur_einstellungen']) {
+if ($this->formvars['show_layer_parameter']) {
 	$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
 	if ($params['error_message'] != '') {
 		$this->add_message('error', $params['error_message']);
@@ -143,7 +137,7 @@ if ($this->formvars['nur_einstellungen']) {
 		<tr>
 			<td class="rollenwahl-gruppen-options">
 				<table border="0" cellpadding="0" cellspacing="0"><?
-					if ($this->formvars['nur_einstellungen']) { ?>
+					if ($this->formvars['hide_stellenwahl']) { ?>
 						<tr>
 							<td>
 								<input type="hidden" name="Stelle_ID" value="<? echo $this->user->stelle_id; ?>">
@@ -632,15 +626,10 @@ if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angem
 </table>
 <input type="hidden" name="go" value="">
 </div>
-<a href="#" title="Zum Anfang der Seite"
-	style="
-		float: right;
-		margin-right: 10px;
-		margin-top: -40px;
-	"
->
-	<i style="padding: 6px" class="fa fa-arrow-up buttonlink" aria-hidden="true" onclick="window.scrollTo(0, 0)"></i>
+<a style="float: right; margin-top: -25px; margin-right: 10px;" href="javascript:window.scrollTo(0, 0);"	title="nach oben">
+	<i class="fa fa-arrow-up hover-border" aria-hidden="true"></i>
 </a>
+<? if ($this->formvars['hide_stellenwahl']) { ?>
 <script>
 	$('#rollenwahl_optionen_div :input').change(function() {
 		console.log('change class to red');
@@ -648,3 +637,4 @@ if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angem
 		$('#save_check_button').addClass('red');
 	});
 </script>
+<? } ?>

@@ -891,11 +891,13 @@ class user {
 
 		$sql = "
 			SELECT DISTINCT
-				u.*
+				u.*, max(c.time_id) as last_timestamp
 			FROM
-				user u" .
+				user u
+			LEFT JOIN u_consume c ON u.ID = c.user_id" .
 				$more_from .
 			(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") .
+			" GROUP BY u.ID " .
 			$order . "
 		";
 		#echo '<br>sql: ' . $sql;

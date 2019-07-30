@@ -54,7 +54,9 @@
 			<? } ?>
 		</td>
 		<td align="right" valign="top">			
-			<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
+			<a href="javascript:scrollbottom();"	title="<? echo $strToBottom; ?>">
+				<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
+			</a>
 		</td>
 	</tr>
 	<tr><td><img height="7" src="<? echo GRAPHICSPATH ?>leer.gif"></td></tr>

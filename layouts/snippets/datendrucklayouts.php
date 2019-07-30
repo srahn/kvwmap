@@ -107,20 +107,13 @@ function save_layout(){
 
 <h2><?php echo $this->titel; ?></h2><?
 	if ($this->formvars['selected_layer_id']) { ?>
-		<a
-			style="float: right; margin-top: -20px; margin-right: 10px;"
-			href="javascript:scrollbottom();"
-			title="Zum Ende der Seite"
-		>
-			<i style="padding: 6px" class="fa fa-arrow-down buttonlink" aria-hidden="true"></i>
+		<a style="float: right; margin-top: -20px; margin-right: 10px;" href="javascript:scrollbottom();"	title="nach unten">
+			<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
 		</a>
-		<a
-			style="float: right; margin-top: -20px; margin-right: 8px;"
-			href="javascript:$('#save_submit_button').trigger('click');"
-			title="Speichern"
-		>
+		<a style="float: right; margin-top: -20px; margin-right: 40px;" href="javascript:$('#save_submit_button').trigger('click');" title="Speichern">
 			<i id="save_check_button" style="padding: 6px;" class="fa fa-check buttonlink green" aria-hidden="true"></i>
-		</a><?php
+		</a>
+		<?php
 	}
 	if ($this->ddl->fehlermeldung != '') { ?>
 		<script>
@@ -638,7 +631,11 @@ function save_layout(){
 				<input id="save_submit_button" type="submit" name="go_plus" value="Änderungen Speichern">&nbsp;
 				<input type="button" name="go_plus" onclick="save_layout();" value="als neues Layout speichern">
 			</td>
-			<td><a href="#" title="Zum Anfang der Seite"><i style="padding: 6px" class="fa fa-arrow-up buttonlink" aria-hidden="true" onclick="window.scrollTo(0, 0)"></i></a></td>
+			<td>
+				<a style="float: right; margin-right: 10px;" href="javascript:window.scrollTo(0, 0);"	title="nach oben">
+					<i class="fa fa-arrow-up hover-border" aria-hidden="true"></i>
+				</a>
+			</td>
 		</tr><?
 	} ?>
 </table>

@@ -2,28 +2,36 @@
  # 2008-09-30 sr
   include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
  
- # Variablensubstitution
- $layer = $this->qlayerset[$i];
- 
- $size = 40;
- $select_width = 'width:290px;';
-?>
+	# Variablensubstitution
+	$layer = $this->qlayerset[$i];
+	
+	# falls das Geometrie-Attribut editierbar ist, zum nicht eingebetteten Formular wechseln
+	if($layer['attributes']['privileg'][$layer['attributes']['indizes'][$layer['attributes']['the_geom']]] == 1){
+		$this->formvars['embedded'] = '';
+		echo '
+		<script type="text/javascript">
+			location.href = \'index.php?'.http_build_query($this->formvars).'\'
+		</script>';
+		exit;
+	}
 
-<?
-  	$doit = false;
-	  $anzObj = count($this->qlayerset[$i]['shape']);
-	  if ($anzObj > 0) {
-	  	$this->found = 'true';
-			$k = 0;
-	  	$doit = true;
-	  }
-	  if($this->new_entry == true){
-	  	$anzObj = 0;
-			$k  = -1;
-	  	$doit = true;
-	  }
-	  if($doit == true){
-			$table_id = rand(0, 100000);
+	$size = 40;
+	$select_width = 'width:290px;';
+
+	$doit = false;
+	$anzObj = count($this->qlayerset[$i]['shape']);
+	if ($anzObj > 0) {
+		$this->found = 'true';
+		$k = 0;
+		$doit = true;
+	}
+	if($this->new_entry == true){
+		$anzObj = 0;
+		$k  = -1;
+		$doit = true;
+	}
+	if($doit == true){
+		$table_id = rand(0, 100000);
 ?>
 <table id="<? echo $table_id; ?>" border="0" cellspacing="0" cellpadding="2">
 <?

@@ -361,7 +361,7 @@ a.invisiblelayerlink:hover{
 	position: absolute;
 	z-index: 1000000;
 	background-color: white;
-	box-shadow: 12px 10px 14px #777;
+	box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.3);
 }
 
 #geo_name_search_result_div ul{
@@ -383,7 +383,7 @@ a.invisiblelayerlink:hover{
 #login_table{
 	margin-top: 20px; 
 	background-color: <? echo BG_DEFAULT; ?>;
-	box-shadow: 12px 10px 14px #777; 
+	box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.4); 
 	border: 1px solid #bbbbbb; 
 	background: linear-gradient(<? echo BG_GLEATTRIBUTE; ?> 0%, <? echo BG_DEFAULT ?> 100%);
 }
@@ -830,7 +830,7 @@ a.menuered:hover {
 }
 
 #agreement_message{
-	box-shadow: 12px 10px 14px #777;
+	box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.4);
 	background-color: #ffffff;
 	border: 2px solid #000000;
 	position: absolute;
@@ -870,7 +870,7 @@ a.menuered:hover {
 	border-right: 1px solid #aaaaaa;
 	padding: 5 0 5 5; 
 	background-color: <? echo BG_MENUETOP; ?>;
-	box-shadow: 3px 0px 4px #bbb;
+	box-shadow: 3px 0px 4px rgba(0, 0, 0, 0.3);
 }
 
 #hist_timestamp_form{
@@ -882,7 +882,7 @@ a.menuered:hover {
 	border-bottom: 1px solid #aaaaaa;
 	padding: 5 0 5 5; 
 	background-color: <? echo BG_MENUETOP; ?>;
-	box-shadow: 3px 3px 4px #bbb;
+	box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
 	z-index: 100000;
 }
 
@@ -1252,7 +1252,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	border: 1px solid grey;
 /*	border-radius: 5px;*/
 	background-color: #DAE4EC;
-	box-shadow: 10px 10px 14px #777;
+	box-shadow: 10px 10px 14px rgba(0, 0, 0, 0.4);
 	z-index: 1000000;
 }
 
@@ -1314,8 +1314,8 @@ thead.gle th {
 .gle_attribute_value {
  background-clip: padding-box;
  position: relative;
- padding-left: 4px;
- padding-right: 5px;
+ padding: 4px 5px 0 4px;
+ vertical-align: top;
  min-width: 30px;
 }
 
@@ -1628,9 +1628,7 @@ tbody.gle tr {
 	border: 1px solid #cccccc;
 	background-color: #FFFFFF;
 	position:absolute;
-	-moz-box-shadow: 6px 5px 7px #777;
-	-webkit-box-shadow: 6px 5px 7px #777;
-	box-shadow: 6px 5px 7px #777;
+	box-shadow: 6px 5px 7px rgba(0, 0, 0, 0.3);
 	top: 30px;
 	right: 15px;
 	z-index: 2000;
@@ -1685,9 +1683,7 @@ tbody.gle tr {
 	padding:0px;
 	position:absolute;
 	z-index: 1000;
-	-moz-box-shadow: 6px 5px 7px #777;
-	-webkit-box-shadow: 6px 5px 7px #777;
-	box-shadow: 6px 5px 7px #777;
+	box-shadow: 6px 5px 7px rgba(0, 0, 0, 0.4);
 }
 
 .layerOptions{
@@ -1761,9 +1757,7 @@ tbody.gle tr {
 	width: 200px;
 	position:absolute;
 	z-index: 1000;
-	-moz-box-shadow: 6px 5px 7px #777;
-	-webkit-box-shadow: 6px 5px 7px #777;
-	box-shadow: 6px 5px 7px #777;
+	box-shadow: 6px 5px 7px rgba(0, 0, 0, 0.4);
 }
 
 .groupOptionsHeader{

@@ -770,7 +770,7 @@
 			redrawfirstline();
 			if(enclosingForm.firstline.value == "true")linelength();
 		}
-		if((enclosingForm.always_draw.checked && enclosingForm.last_doing2.value == "vertex_edit") || enclosingForm.last_button.value == "vertex_edit1"){
+		if((enclosingForm.always_draw != undefined && enclosingForm.always_draw.checked && enclosingForm.last_doing2.value == "vertex_edit") || enclosingForm.last_button.value == "vertex_edit1"){
 			edit_vertices();
 		}
 		redrawpoint();
