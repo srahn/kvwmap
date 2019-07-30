@@ -229,7 +229,7 @@
 	};
 
 	toggleVeroeffentlicht = function(konvertierung_id, veroeffentlicht) {
-		var veroeffentlicht = (veroeffentlicht == 't' ? 'f' : 't');
+		var veroeffentlicht = (veroeffentlicht == 'Ja' ? 'f' : 't');
 
 		$('#veroeffentlicht_button_' + konvertierung_id).hide();
 		$('#veroeffentlicht_spinner_' + konvertierung_id).show();
@@ -354,14 +354,14 @@
 
 	function konvertierungVeroeffentlichtFormatter(value, row) {
 		var output = '<a\
-			title="' + (row.veroeffentlicht == 't' ? 'Planveröffentlichung zurücknehmen' : 'Plan veröffentlichen') + '"\
+			title="' + (row.veroeffentlicht == 'Ja' ? 'Planveröffentlichung zurücknehmen' : 'Plan veröffentlichen') + '"\
 			class="btn btn-link btn-xs xpk-func-btn"\
 			href="#"\
 			onclick="toggleVeroeffentlicht(' + row.konvertierung_id + ', \'' + row.veroeffentlicht + '\')");\
 		><i\
 			id="veroeffentlicht_button_' + row.konvertierung_id + '"\
-			class="btn-link fa fa-lg ' + (row.veroeffentlicht == 't' ? 'fa-eye' : 'fa-eye-slash') + '"\
-			style="color: ' + (row.veroeffentlicht == 't' ? '#2cb03c' : '#d82c2c') + '"\
+			class="btn-link fa fa-lg ' + (row.veroeffentlicht == 'Ja' ? 'fa-eye' : 'fa-eye-slash') + '"\
+			style="color: ' + (row.veroeffentlicht == 'Ja' ? '#2cb03c' : '#d82c2c') + '"\
 		></i></a>\
 		<i\
 			id="veroeffentlicht_spinner_' + row.konvertierung_id + '"\
