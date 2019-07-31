@@ -8298,6 +8298,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		else {
 			$layerset=$this->user->rolle->getRollenlayer(-$this->formvars['selected_layer_id']);
 		}
+		if($layerset == NULL){
+			$ret['success'] = false;
+			$ret['msg'] = 'Der Layer mit der ID '.$this->formvars['selected_layer_id'].' ist der aktuellen Stelle nicht zugeordnet.';
+		}
 		switch ($layerset[0]['connectiontype']) {
 			case MS_POSTGIS : {
 				$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
