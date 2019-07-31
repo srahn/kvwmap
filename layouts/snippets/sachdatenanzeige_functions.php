@@ -457,7 +457,9 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
 			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
-				formData.append(form_fields[i].name, form_fields[i].value);
+				if(form_fields[i].type == 'file')value = form_fields[i].files[0];
+				else value = form_fields[i].value;
+				formData.append(form_fields[i].name, value);
 			}
   	}
 		formData.append('go', 'Sachdaten_speichern');
@@ -490,7 +492,9 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
 			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
-				formData.append(form_fields[i].name, form_fields[i].value);
+				if(form_fields[i].type == 'file')value = form_fields[i].files[0];
+				else value = form_fields[i].value;
+				formData.append(form_fields[i].name, value);
 			}
   	}
 		formData.append('go', 'neuer_Layer_Datensatz_speichern');
