@@ -1,0 +1,5 @@
+BEGIN;
+
+  ALTER TABLE `rollenlayer` ALTER COLUMN `gle_view` SET DEFAULT 1;
+
+COMMIT;

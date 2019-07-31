@@ -619,7 +619,7 @@ function go_switch_xplankonverter($go){
 			);
 			$GUI->konvertierung->update();
 			$response['success'] = true;
-			$response['veroeffentlicht'] = $GUI->formvars['veroeffentlicht'];
+			$response['veroeffentlicht'] = $GUI->formvars['veroeffentlicht'] == 't' ? 'Ja' : 'Nein';
 			$response['konvertierung_id'] = $GUI->formvars['konvertierung_id'];
 			echo json_encode($response);
 			return;

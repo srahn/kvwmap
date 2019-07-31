@@ -1,5 +1,8 @@
-<script src="funktionen/tooltip.js" language="JavaScript"	type="text/javascript"></script>
-<?php include(SNIPPETS . 'sachdatenanzeige_functions.php'); ?>
+<script src="funktionen/tooltip.js" language="JavaScript"	type="text/javascript"></script><?php
+	include(SNIPPETS . 'sachdatenanzeige_functions.php');
+	include_once(CLASSPATH . 'FormObject.php');
+?>
+
 <script type="text/javascript">
 <!--
 
@@ -107,13 +110,27 @@ function save_layout(){
 
 <h2><?php echo $this->titel; ?></h2><?
 	if ($this->formvars['selected_layer_id']) { ?>
-		<a style="float: right; margin-top: -20px; margin-right: 10px;" href="javascript:scrollbottom();"	title="nach unten">
-			<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
+		<a
+			style="float: right; margin-top: -20px; margin-right: 10px;"
+			href="javascript:scrollbottom();"
+			title="Zum Ende der Seite"
+		>
+			<i style="padding: 6px" class="fa fa-arrow-down buttonlink" aria-hidden="true"></i>
 		</a>
-		<a style="float: right; margin-top: -20px; margin-right: 40px;" href="javascript:$('#save_submit_button').trigger('click');" title="Speichern">
+		<a
+			style="float: right; margin-top: -20px; margin-right: 8px;"
+			href="javascript:document.getElementById('add_freitexte').scrollIntoView();"
+			title="zu den Freitexten"
+		>
+			<i style="padding: 6px;" class="fa fa-font buttonlink" aria-hidden="true"></i>
+		</a>
+		<a
+			style="float: right; margin-top: -20px; margin-right: 8px;"
+			href="javascript:$('#save_submit_button').trigger('click');"
+			title="Speichern"
+		>
 			<i id="save_check_button" style="padding: 6px;" class="fa fa-check buttonlink green" aria-hidden="true"></i>
-		</a>
-		<?php
+		</a><?php
 	}
 	if ($this->ddl->fehlermeldung != '') { ?>
 		<script>
@@ -212,7 +229,7 @@ function save_layout(){
 						<td style="border-bottom:1px solid #C3C7C3">
 							<span class="fett">Typ:</span>
 						</td>
-						<td style="text-align: right; border-bottom:1px solid #C3C7C3">
+						<td style="border-bottom:1px solid #C3C7C3">
 							<select name="type" onchange="update_options();">
 								<option value="0" <? if($this->ddl->selectedlayout[0]['type'] == 0)echo 'selected' ?>>neue Seite für jeden Datensatz</option>
 								<option value="1" <? if($this->ddl->selectedlayout[0]['type'] == 1)echo 'selected' ?>>Datensätze fortlaufend</option>
@@ -222,15 +239,28 @@ function save_layout(){
 					</tr>
 					<tr>
 						<td style="border-bottom:1px solid #C3C7C3">
-							<span class="fett">Dateiname:</span>
+							<span class="fett">Dateiname:</span> <img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1], Style[0], document.getElementById('Tip2'))" onmouseout="htm()">
 						</td>
-						<td colspan="3" style="border-bottom:1px solid #C3C7C3">
+						<td style="border-bottom:1px solid #C3C7C3">
 							<input type="text" name="filename" value="<? echo $this->ddl->selectedlayout[0]['filename'] ?>" size="35">
-							<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1], Style[0], document.getElementById('Tip2'))" onmouseout="htm()">
 							<div style="position:relative">
 								<div id="Tip2" style="visibility:hidden;position:absolute;bottom:20px;z-index:1000;"></div>
 							</div>
 						</td>
+						<td>
+							<span class="fett">Vorschau:</span>
+						</td>
+						<td style="border-bottom:1px solid #C3C7C3"><?
+							echo FormObject::createSelectField(
+								'page',
+								array(
+									array('value' => 0, 'output' => 'Seite 1'),
+									array('value' => 1, 'output' => 'Seite 2'),
+									array('value' => 2, 'output' => 'Seite 3')
+								),
+								$this->formvars['page']
+							);
+						?></td>
 					</tr>
 					<tr id="list_type_options" style="display:<? if($this->ddl->selectedlayout[0]['type'] == 0)echo 'none' ?>">
 						<td colspan="4" style="border-bottom:1px solid #C3C7C3">
@@ -539,7 +569,7 @@ function save_layout(){
 						</tr>
 					<? } ?>
 					<tr>
-						<td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;<a href="javascript:addfreetext();">Freitext hinzufügen</a></td>
+						<td style="border-top:2px solid #C3C7C3" colspan=8 align="left"><span id="add_freitexte">&nbsp;<a href="javascript:addfreetext();">Freitext hinzufügen</a></span></td>
 					</tr>				
 				</table>
 				<br>
