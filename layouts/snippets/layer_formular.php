@@ -63,12 +63,13 @@
 		background-color: <?php echo BG_DEFAULT ?>;
 	}
 	
-	#layerform input[type="text"], #layerform select, #layerform textarea{
+	#form input[type="text"], #form select, #form textarea{
 		width: 340px;
 	}
 		
 	#stellenzuweisung{
 		display: none;
+		width: 100%;
 	}
 </style>
 
@@ -103,16 +104,20 @@
 				<tr>
 					<th class="fetter"><a href="javascript:toggleForm('layerform');"><div style="background-color: <?php echo BG_DEFAULT ?>; width: 100%" id="layerform_link"><? echo $strCommonData; ?></div></a></th>
 					<th class="fetter"><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
+					<? if($this->layerdata['connectiontype'] == 6){ ?>
 					<th class="fetter"><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
-					<th class="fetter"><a href="javascript:toggleForm('stellenzuweisung');"><div style="width: 100%" id="stellenzuweisung_link"><? echo $strStellenAsignment; ?></div></th>
-					<th class="fetter"><? echo $strPrivileges; ?></th>
+					<? } ?>
+					<th class="fetter"><a href="javascript:toggleForm('stellenzuweisung');"><div style="width: 100%" id="stellenzuweisung_link"><? echo $strStellenAsignment; ?></div></a></th>
+					<? if($this->layerdata['connectiontype'] == 6){ ?>
+					<th class="fetter"><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>
+					<? } ?>
 				</tr>
 			</table>
 		</td>
 	</tr>	
 </table>
 
-<table border="0" cellpadding="0" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" style="width: 100%">
+<table id="form" border="0" cellpadding="0" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" style="width: 100%">
 	<tr>
 		<td align="center" style="padding: 10px;">
 			<div id="layerform" style="width: 100%;">
@@ -427,12 +432,12 @@
 					</tr>				
 				</table>
 				
-				<table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
+				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid <?php echo BG_DEFAULT ?>">
 					<tr align="center">
-						<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" width="670" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strOWSParameter; ?></th>
+						<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strOWSParameter; ?></th>
 					</tr>	
 					<tr>
-						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
+						<th class="fetter" width="300" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="ows_srs" type="text" value="<?php echo $this->layerdata['ows_srs']; ?>" size="50" maxlength="255">
 						</td>
@@ -499,9 +504,9 @@
 		</div>
 		
 		<div id="stellenzuweisung">
-			<table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
+			<table border="0" cellspacing="0" cellpadding="3" style="width: 100%; border:1px solid <?php echo BG_DEFAULT ?>">
 				<tr align="center">
-					<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" width="670" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strDefaultValues; ?></th>
+					<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strDefaultValues; ?></th>
 				</tr>
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTemplate; ?></th>
@@ -592,13 +597,13 @@
 				</tr>
 				<? } ?>
 			</table>
-			<table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
+			<table border="0" cellspacing="0" cellpadding="3" style="width: 100%; border:1px solid <?php echo BG_DEFAULT ?>">
 				<tr align="center">
 					<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" width="670" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strTasks; ?></th>
 				</tr>
 				<tr valign="top"> 
 					<td align="right">Zugeordnete<br>
-						<select name="selectedstellen" size="4" multiple style="width:300px">
+						<select name="selectedstellen" size="10" multiple">
 						<? 
 						for($i=0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++){
 								echo '<option value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
@@ -611,7 +616,7 @@
 						<input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedstellen,document.GUI.selstellen,'value')>
 					</td>
 					<td>verfügbare<br>
-						<select name="allstellen" size="4" multiple style="width:300px">
+						<select name="allstellen" size="10" multiple>
 						<? for($i=0; $i < count($this->stellen["Bezeichnung"]); $i++){
 								echo '<option value="'.$this->stellen["ID"][$i].'" title="'.$this->stellen["Bezeichnung"][$i].'">'.$this->stellen["Bezeichnung"][$i].'</option>';
 							 }
@@ -767,3 +772,9 @@
 		echo ', '.$this->formvars['selstellen']["ID"][$i];
 	}
 ?>">
+
+<? if($this->formvars['stellenzuweisung'] == 1){ ?>
+	<script type="text/javascript">
+		toggleForm('stellenzuweisung');
+	</script>
+<? }?>

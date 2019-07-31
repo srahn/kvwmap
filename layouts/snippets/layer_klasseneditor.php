@@ -77,16 +77,20 @@
 				<tr>
 					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
 					<th bgcolor="<?php echo BG_DEFAULT ?>" class="fetter"><? echo $strClasses; ?></th>
+					<? if($this->layerdata['connectiontype'] == 6){ ?>
 					<th class="fetter"><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
-					<th class="fetter"><? echo $strStellenAsignment; ?></th>
-					<th class="fetter"><? echo $strPrivileges; ?></th>
+					<? } ?>
+					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
+					<? if($this->layerdata['connectiontype'] == 6){ ?>
+					<th class="fetter"><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>
+					<? } ?>
 				</tr>
 			</table>
 		</td>
 	</tr>
 	<tr>
 		<td align="center" style="padding-top: 10px;">
-		<table border="0" cellspacing="0" cellpadding="0" style="border:1px solid <?php echo BG_DEFAULT ?>">
+		<table border="0" cellspacing="0" cellpadding="0" style="width: 100%; border:1px solid <?php echo BG_DEFAULT ?>">
 			<tr>
 				<td style="border-bottom:1px solid #C3C7C3">&nbsp;<?php echo $strID; ?></td>
 				<td style="border-bottom:1px solid #C3C7C3">&nbsp;<?php echo $strClass; ?></td><?

@@ -7505,7 +7505,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->titel='Layer Editor';
 		$this->main='layer_formular.php';
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$this->layerdaten = $mapDB->get_postgis_layers('Name');
+		$this->layerdaten = $mapDB->getall_Layer('Name', false, $this->user->id, $this->Stelle->id);
 		# Abfragen der Layerdaten wenn eine layer_id zur Änderung selektiert ist
 		if ($this->formvars['selected_layer_id'] > 0) {
 			$this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], false);

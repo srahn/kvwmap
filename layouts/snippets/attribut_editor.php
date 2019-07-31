@@ -206,7 +206,7 @@ function alias_replace(name){
 	}
 </style>
 
-<table style="width: 700px; margin: 20px 40px 0 40px">
+<table style="width: 700px; margin: 0 40px 0 40px">
 	<tr>
     <td align="center">
 			<span class="px17 fetter"><? echo $strLayer;?>:</span>
@@ -253,8 +253,8 @@ function alias_replace(name){
 					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
 					<th class="fetter"><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
 					<th bgcolor="<?php echo BG_DEFAULT ?>" class="fetter"><? echo $strAttributes; ?></th>
-					<th class="fetter"><? echo $strStellenAsignment; ?></th>
-					<th class="fetter"><? echo $strPrivileges; ?></th>
+					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
+					<th class="fetter"><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>
 				</tr>
 			</table>
 		</td>
