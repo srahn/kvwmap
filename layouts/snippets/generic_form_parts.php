@@ -488,7 +488,7 @@
 				}break;
 
 				case 'Time': {
-					$datapart .= '<input readonly style="padding: 0 0 0 3;border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
+					$datapart .= '<input class="'.$field_class.'" readonly style="padding: 0 0 0 3;border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 					$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" value="' . htmlspecialchars($value) . '">';
 				}break;
 
