@@ -1922,6 +1922,11 @@ tbody.gle tr {
 	overflow-x: hidden;
 }
 
+.scrolltable_header{
+	position: absolute;
+	margin-top: -25px;
+}
+
 .toggle_fa_off i{
 	color: #888888;
 }
