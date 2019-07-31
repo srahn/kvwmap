@@ -1919,7 +1919,7 @@ tbody.gle tr {
 .scrolltable tbody {
 	max-height: 590px;
 	overflow-y: auto;
-	overflow-x: hidden;
+	overflow-x: visible;
 }
 
 .scrolltable_header{
