@@ -1,4 +1,5 @@
 ﻿<?php
+	$strLayer="Layer";
 	$strAsteriskRequired="wartości oznaczone * muszą zostać wpisane";
 	$strDataBankID="warstwa ID*";
 	$strName="nazwa*";
@@ -38,7 +39,7 @@
 	$strExpression="wyrażenie";
 	$strDelete="usuń";
 	$strAddClass="dodaj klasę";
-	$strOtherExtentions="zaawansowane ustawienia";
+	$strAttributes="Attributes";
 	$strButtonSave="zmień";
 	$strBack="cofnij";
 	$strSave="zmień";
@@ -54,6 +55,8 @@
 	$strmaxscale="maksymalna skal";
 	$stroffsite="Offsite";
 	$strOWSParameter="parametry OWS";
+	$strStellenAsignment="Usergroup-Asignment";
+	$strPrivileges="Privileges";
 	$strDefaultValues="wartości domyślne";
 	$strWFS_geom="protokół przekazywania danych";
 	$strQueryMap="QueryMap";

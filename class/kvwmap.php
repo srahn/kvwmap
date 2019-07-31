@@ -7505,10 +7505,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->titel='Layer Editor';
 		$this->main='layer_formular.php';
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->layerdaten = $mapDB->get_postgis_layers('Name');
 		# Abfragen der Layerdaten wenn eine layer_id zur Änderung selektiert ist
 		if ($this->formvars['selected_layer_id'] > 0) {
-			$this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id'], NULL, true);
 			$this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], false);
+			$this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id'], NULL, true);
 			# Abfragen der Stellen des Layer
 			$this->formvars['selstellen']=$mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
 			$this->grouplayers = $mapDB->get_layersfromgroup($this->layerdata['Gruppe']);
@@ -7518,24 +7519,82 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
 		$this->output();
 	}
+	
+	function Klasseneditor() {
+		$this->main='layer_klasseneditor.php';
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->layerdaten = $mapDB->get_postgis_layers('Name');
+		# Abfragen der Layerdaten wenn eine layer_id zur Änderung selektiert ist
+		if ($this->formvars['selected_layer_id'] > 0) {
+			$this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], false);
+			$this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id'], NULL, true);
+		}
+		$this->output();
+	}
+		
+	function Klasseneditor_speichern(){
+		global $supportedLanguages;
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->user->rolle->readSettings();
+		if ($this->formvars['id'] != '') {
+			$this->formvars['selected_layer_id'] = $this->formvars['id'];
+		}
+		# Klassen
+		$name = @array_values($this->formvars['name']);
+		foreach($supportedLanguages as $language){
+			if($language != 'german'){
+				$name_[$language] = @array_values($this->formvars['name_'.$language]);
+			}
+		}
+		$expression = @array_values($this->formvars['expression']);
+		$text = @array_values($this->formvars['text']);
+		$classification = @array_values($this->formvars['classification']);
+		$legendgraphic = @array_values($this->formvars['legendgraphic']);
+		$legendimagewidth = @array_values($this->formvars['legendimagewidth']);
+		$legendimageheight = @array_values($this->formvars['legendimageheight']);
+		$order = @array_values($this->formvars['order']);
+		$legendorder = @array_values($this->formvars['classlegendorder']);
+		$this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id']);
+		for($i = 0; $i < count($name); $i++) {
+			$attrib['name'] = $name[$i];
+			foreach($supportedLanguages as $language){
+				if($language != 'german'){
+					$attrib['name_'.$language] = $name_[$language][$i];
+				}
+			}
+			$attrib['layer_id'] = $this->formvars['selected_layer_id'];
+			$attrib['expression'] = $expression[$i];
+			$attrib['text'] = $text[$i];
+			$attrib['classification'] = $classification[$i];
+			$attrib['legendgraphic'] = $legendgraphic[$i];
+			$attrib['legendimagewidth'] = $legendimagewidth[$i];
+			$attrib['legendimageheight'] = $legendimageheight[$i];
+			$attrib['order'] = $order[$i];
+			$attrib['legendorder'] = ($legendorder[$i] == '' ? 'NULL' : $legendorder[$i]);
+			$attrib['class_id'] = $this->classes[$i]['Class_ID'];
+			$mapDB->update_Class($attrib);
+		}
+		$this->Klasseneditor();
+	}	
 
-  function Layereditor_KlasseLoeschen(){
+  function Klasseneditor_KlasseLoeschen(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $mapDB->delete_Class($this->formvars['class_id']);
-    $this->Layereditor();
+    $this->Klasseneditor();
   }
 
-  function Layereditor_KlasseHinzufuegen(){
+  function Klasseneditor_KlasseHinzufuegen(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $attrib['name'] = $this->formvars['class_name'];
     $attrib['layer_id'] = $this->formvars['selected_layer_id'];
 		$attrib['classification'] = $this->formvars['classification'];
     $attrib['order'] = ($this->formvars['class_order'] != '') ? $this->formvars['class_order'] : 1;
     $attrib['expression'] = ($this->formvars['class_expression'] != '') ? $this->formvars['class_expression'] : '';
-    return $mapDB->new_Class($attrib);
+    $mapDB->new_Class($attrib);
+		$this->Klasseneditor();
   }
 
-  function Layereditor_AutoklassenHinzufuegen() {
+  function Klasseneditor_AutoklassenHinzufuegen() {
     $num_classes = (empty($this->formvars['num_classes'])) ? 5 : $this->formvars['num_classes'];
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], true);
@@ -7574,6 +7633,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->formvars['style_outlinecolor'] = $auto_classes[$i]['style_outlinecolor'];
       $this->add_style();
     }
+		$this->Klasseneditor();
   }
 
   function AutoklassenErzeugen($layerdb, $data_sql, $class_item, $method, $num_classes, $classification_name, $classification_color) {
@@ -7976,42 +8036,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       }
     }
     # /Löschen der in der Selectbox entfernten Stellen
-
-		# Klassen
-		$name = @array_values($this->formvars['name']);
-		foreach($supportedLanguages as $language){
-			if($language != 'german'){
-				$name_[$language] = @array_values($this->formvars['name_'.$language]);
-			}
-		}
-		$expression = @array_values($this->formvars['expression']);
-		$text = @array_values($this->formvars['text']);
-		$classification = @array_values($this->formvars['classification']);
-		$legendgraphic = @array_values($this->formvars['legendgraphic']);
-		$legendimagewidth = @array_values($this->formvars['legendimagewidth']);
-		$legendimageheight = @array_values($this->formvars['legendimageheight']);
-		$order = @array_values($this->formvars['order']);
-		$legendorder = @array_values($this->formvars['classlegendorder']);
-		$this->classes = $mapDB->read_Classes($old_layer_id);
-		for($i = 0; $i < count($name); $i++) {
-			$attrib['name'] = $name[$i];
-			foreach($supportedLanguages as $language){
-				if($language != 'german'){
-					$attrib['name_'.$language] = $name_[$language][$i];
-				}
-			}
-			$attrib['layer_id'] = $this->formvars['selected_layer_id'];
-			$attrib['expression'] = $expression[$i];
-			$attrib['text'] = $text[$i];
-			$attrib['classification'] = $classification[$i];
-			$attrib['legendgraphic'] = $legendgraphic[$i];
-			$attrib['legendimagewidth'] = $legendimagewidth[$i];
-			$attrib['legendimageheight'] = $legendimageheight[$i];
-			$attrib['order'] = $order[$i];
-			$attrib['legendorder'] = ($legendorder[$i] == '' ? 'NULL' : $legendorder[$i]);
-			$attrib['class_id'] = $this->classes[$i]['Class_ID'];
-			$mapDB->update_Class($attrib);
-		}
 		$this->Layereditor();
 	}
 

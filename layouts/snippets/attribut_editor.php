@@ -2,6 +2,7 @@
 	include_once(CLASSPATH.'FormObject.php');
 	global $supportedLanguages;
 	global $quicksearch_layer_ids;
+	include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php');
 	include(LAYOUTPATH.'languages/attribut_editor_'.$this->user->rolle->language.'.php');
 	$form_element_options = array(
 		array(
@@ -182,16 +183,33 @@ function alias_replace(name){
 
 //-->
 </script>
-<table cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
-  <tr align="center">
-    <td colspan="2"><h2><?php echo $this->titel; ?></h2></td>
-  </tr>
-  <tr>
-    <td colspan="2">&nbsp;</td>
-  </tr>
-  <tr>
-    <td style="border: 1px solid #C3C7C3;">
-			<?php echo $strLayer;?><br>
+
+<style>
+	.navigation{
+		border-collapse: collapse; 
+		width: 100%;
+		min-width: 900px;
+	}
+
+	.navigation th{
+		border: 1px solid <?php echo BG_DEFAULT ?>;
+		border-collapse: collapse;
+		width: 20%;
+	}
+	
+	.navigation th div{
+		padding: 3px;
+	}		
+	
+	.navigation th:hover{
+		background-color: <?php echo BG_DEFAULT ?>;
+	}
+</style>
+
+<table style="width: 700px; margin: 20px 40px 0 40px">
+	<tr>
+    <td align="center">
+			<span class="px17 fetter"><? echo $strLayer;?>:</span>
       <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="submitLayerSelector();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
       <option value=""><?php echo $strPleaseSelect; ?></option>
         <?
@@ -204,10 +222,10 @@ function alias_replace(name){
     		}
     	?>
       </select>
-			&nbsp;&nbsp;<a id="toLayerLink" href="javascript:toLayerEditor();" style="<? if($this->formvars['selected_layer_id'] != '')echo 'display:inline';else echo 'display:none'; ?>">zum Layer</a>
 		</td>
-    <td style="border:1px solid #C3C7C3;<? if(count($this->datatypes) == 0)echo 'display: none'; ?>">
-			<?php echo $strDatatype;?><br>
+		<? if($this->formvars['selected_layer_id'] == '' AND count($this->datatypes) > 0){ ?>
+    <td style="padding-left: 40px">
+			<span class="px17 fetter"><? echo $strDatatype;?>:</span>
       <select id="selected_datatype_id" style="width:250px" size="1"  name="selected_datatype_id" onchange="submitDatatypeSelector();" <?php if(count($this->datatypes)==0){ echo 'disabled';}?>>
       <option value=""><?php echo $strPleaseSelect; ?></option>
         <?
@@ -221,7 +239,32 @@ function alias_replace(name){
     	?>
       </select>
 		</td>
+		<? } ?>
   </tr>
+</table>
+
+<? if($this->formvars['selected_layer_id'] != ''){ ?>
+
+<table border="0" cellpadding="0" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" style="margin: 10px">
+	<tr align="center"> 
+		<td style="width: 100%;">
+			<table cellpadding="0" cellspacing="0" class="navigation">
+				<tr>
+					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
+					<th class="fetter"><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
+					<th bgcolor="<?php echo BG_DEFAULT ?>" class="fetter"><? echo $strAttributes; ?></th>
+					<th class="fetter"><? echo $strStellenAsignment; ?></th>
+					<th class="fetter"><? echo $strPrivileges; ?></th>
+				</tr>
+			</table>
+		</td>
+	</tr>	
+</table>
+
+<? }
+	if($this->formvars['selected_layer_id'] != '' OR $this->formvars['selected_datatype_id']){ ?>
+
+<table cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr>
     <td colspan="2">&nbsp;</td>
   </tr>
@@ -482,5 +525,7 @@ function alias_replace(name){
     <td colspan="2" >&nbsp;</td>
   </tr>
 </table>
+
+<? } ?>
 
 <input type="hidden" name="go" value="Attributeditor">
