@@ -1851,7 +1851,7 @@ class rolle {
 		if (LOG_CONSUME_ACTIVITY==1) {
 			for($i = 0; $i < count($log_number); $i++){
 				# function setzt eine ALB-PDF-EXportaktivität
-				$sql ='INSERT INTO u_consumeALB SET';
+				$sql ='INSERT IGNORE INTO u_consumeALB SET';
 				$sql.=' user_id='.$this->user_id;
 				$sql.=', stelle_id='.$this->stelle_id;
 				$sql.=', time_id="'.$time.'"';
