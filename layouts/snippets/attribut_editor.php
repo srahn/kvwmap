@@ -264,15 +264,16 @@ function alias_replace(name){
 <? }
 	if($this->formvars['selected_layer_id'] != '' OR $this->formvars['selected_datatype_id']){ ?>
 
-<table style="position: relative; display: block; max-width: 1700px; overflow-x: auto;" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
+<table style="position: relative; display: block; max-width: 1670px; overflow-x: auto;" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr>
     <td colspan="2">&nbsp;</td>
   </tr>
   <tr> 
     <td colspan="2">
 
-			<table align="center" border="0" cellspacing="0" class="scrolltable attribute-editor-table"><?
-				if ((count($this->attributes))!=0) { 
+			<table align="center" border="0" cellspacing="0" class="scrolltable attribute-editor-table">
+				<tbody style="max-height: <? echo ($this->user->rolle->nImageHeight - 100); ?>px">
+		<?	if ((count($this->attributes))!=0) { 
 					for ($i = 0; $i < count($this->attributes['type']); $i++){ ?>
 						<tr>
 						  <td align="left" valign="top">
@@ -471,29 +472,27 @@ function alias_replace(name){
 								<? if($i == 0)echo '<div class="fett scrolltable_header"><i class="fa fa-windows" style="font-size:20px" title="Im Rastertemplate als Vorschau-Attribut verwenden"></i></div>'; ?>
 						  	<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>
 						  </td>
+							<td>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							</td>
 
 						</tr><?php
 					}
 				} ?>
+				</tbody>
 			</table>
 
 		</td>
   </tr>
-  <tr>
-    <td colspan="2">&nbsp;</td>
-  </tr>
 	<?
 		if(count($this->attributes) > 0 AND ($this->layer['editable'] OR $this->formvars['selected_datatype_id'])){ ?>
 			<tr>
-				<td align="center" colspan="19"><br><br>
+				<td align="center" style="height: 50px">
 					<input type="submit" name="go_plus" value="speichern">
 				</td>
 			</tr><?php
 		}	
 	?>
-  <tr>
-    <td colspan="2" >&nbsp;</td>
-  </tr>
 </table>
 
 <? } ?>
