@@ -272,7 +272,7 @@ function alias_replace(name){
     <td colspan="2">
 
 			<table align="center" border="0" cellspacing="0" class="scrolltable attribute-editor-table">
-				<tbody style="max-height: <? echo ($this->user->rolle->nImageHeight - 100); ?>px">
+				<tbody style="max-height: <? echo ($this->user->rolle->nImageHeight - 120); ?>px">
 		<?	if ((count($this->attributes))!=0) { 
 					for ($i = 0; $i < count($this->attributes['type']); $i++){ ?>
 						<tr>
