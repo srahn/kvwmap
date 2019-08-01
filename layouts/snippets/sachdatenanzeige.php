@@ -113,10 +113,12 @@ for($i=0;$i<$anzLayer;$i++){
 				<? }else{ ?>
 				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
 				<? } ?>
-		<? } ?>
+		<? }
+if($this->formvars['printversion'] == ''){ ?>
 			<a style="margin-right: 8px" href="javascript:scrolltop();"	title="<? echo $strToTop; ?>">
 				<i class="fa fa-arrow-up hover-border" aria-hidden="true"></i>
 			</a>
+<? } ?>
 		</td>
 	</tr>
 </table>

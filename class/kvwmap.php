@@ -1367,7 +1367,8 @@ echo '			</ul>
         else{
           $map->setMetaData("ows_srs",OWS_SRS);
         }
-        $ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&Stelle_ID=' . $this->Stelle->id .'&login_name=' . $_REQUEST['login_name'] . '&passwort=' .  $_REQUEST['passwort'];
+        if($_REQUEST['onlineresource'] != '')$ows_onlineresource = $_REQUEST['onlineresource'];
+        else $ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&Stelle_ID=' . $this->Stelle->id .'&login_name=' . $_REQUEST['login_name'] . '&passwort=' .  $_REQUEST['passwort'];
         $map->setMetaData("ows_onlineresource", $ows_onlineresource);
 				$map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
 
@@ -4098,14 +4099,14 @@ echo '			</ul>
   }
 
 	function createOWSResponse(){
-		$_REQUEST = array_change_key_case($_REQUEST, CASE_UPPER);
-		if(strtolower($_REQUEST['REQUEST']) == 'getfeatureinfo'){
-			$extent = explode(',', $_REQUEST['BBOX']);
-			if($_REQUEST['VERSION'] == '1.3.0'){
-				$_REQUEST['X'] = $_REQUEST['I'];
-				$_REQUEST['Y'] = $_REQUEST['J'];
-				$_REQUEST['SRS'] = $_REQUEST['CRS'];
-				if($_REQUEST['SRS'] == 'EPSG:4326'){
+		$request = array_change_key_case($_REQUEST, CASE_UPPER);
+		if(strtolower($request['REQUEST']) == 'getfeatureinfo'){
+			$extent = explode(',', $request['BBOX']);
+			if($request['VERSION'] == '1.3.0'){
+				$request['X'] = $request['I'];
+				$request['Y'] = $request['J'];
+				$request['SRS'] = $request['CRS'];
+				if($request['SRS'] == 'EPSG:4326'){
 					$save = $extent[1];
 					$extent[1] = $extent[0];
 					$extent[0] = $save;
@@ -4114,16 +4115,16 @@ echo '			</ul>
 					$extent[2] = $save;
 				}
 			}
-			$epsg = explode(':', $_REQUEST['SRS']);
+			$epsg = explode(':', $request['SRS']);
 			$this->user->rolle->epsg_code = $epsg[1];
-			$query_layers = explode(',', $_REQUEST['QUERY_LAYERS']);
+			$query_layers = explode(',', $request['QUERY_LAYERS']);
 			$this->user->rolle->oGeorefExt->minx = $extent[0];
 			$this->user->rolle->oGeorefExt->miny = $extent[1];
 			$this->user->rolle->oGeorefExt->maxx = $extent[2];
 			$this->user->rolle->oGeorefExt->maxy = $extent[3];
-			$this->user->rolle->nImageWidth = $_REQUEST['WIDTH'];
-			$this->user->rolle->nImageHeight = $_REQUEST['HEIGHT'];
-			$this->formvars['INPUT_COORD'] = $_REQUEST['X'].','.$_REQUEST['Y'].';'.$_REQUEST['X'].','.$_REQUEST['Y'];
+			$this->user->rolle->nImageWidth = $request['WIDTH'];
+			$this->user->rolle->nImageHeight = $request['HEIGHT'];
+			$this->formvars['INPUT_COORD'] = $request['X'].','.$request['Y'].';'.$request['X'].','.$request['Y'];
 			$this->formvars['printversion'] = 1;
 			foreach($query_layers as $query_layer){
 				$layer=$this->user->rolle->getLayer($query_layer);
@@ -4146,14 +4147,14 @@ echo '			</ul>
 			$contenttype = ms_iostripstdoutbuffercontenttype();
 			ob_end_clean();   //Ausgabepuffer leeren (sonst funktioniert header() nicht)
 			ob_start();
-			switch (strtolower($_REQUEST['REQUEST'])) {
+			switch (strtolower($request['REQUEST'])) {
 				case 'getmap' : {
 					if ( $contenttype != 'image/png') {
 						$contenttype = 'image/jpeg';
 					}
 				} break;
 				case 'getfeature': {
-					switch ($_REQUEST['OUTPUTFORMAT']) {
+					switch ($request['OUTPUTFORMAT']) {
 						case 'text/plain' : {
 							$contenttype = 'text/plain';
 						} break;
