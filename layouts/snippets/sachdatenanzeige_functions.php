@@ -719,15 +719,15 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 
-	delete_document = function(attributename, layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload){
+	delete_document = function(attributename, layer_id, fromobject, targetobject, reload){
 		if(confirm('Wollen Sie das ausgewählte Dokument wirklich löschen?')){
 			field = document.getElementsByName(attributename);
 			field[0].type = 'hidden'; // bei einem Typ "file" kann man sonst den value nicht setzen
 			field[0].value = 'file:'+attributename;	// damit der JSON-String eines evtl. vorhandenen übergeordneten Attributs richtig gebildet wird
 			field[0].onchange(); // --||--
 			field[0].value = 'delete';
-			if(targetlayer_id != ''){		// SubForm-Layer
-				subsave_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload);
+			if(fromobject != ''){		// SubForm-Layer
+				subsave_data(layer_id, fromobject, targetobject, reload);
 			}
 			else{												// normaler Layer
 				enclosingForm.go.value = 'Sachdaten_speichern';
