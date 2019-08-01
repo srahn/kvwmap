@@ -92,7 +92,7 @@ function save(stelle){
 	<tr>
     <td align="center">
 			<span class="px17 fetter"><? echo $strLayer;?>:</span>
-      <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="submitLayerSelector();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+      <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
       <option value=""><?php echo $strPleaseSelect; ?></option>
         <?
     		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
