@@ -7260,7 +7260,7 @@ echo '			</ul>
 			else $this->formvars['wms_url'] .= '?';
 			for($i = 0; $i < count($this->formvars['layers']); $i++){
 				$this->formvars['Name'] = $this->formvars['layers'][$i];
-				$this->formvars['connection'] = $this->formvars['wms_url'].'VERSION=1.1.1&FORMAT=image/png&transparent=true&LAYERS='.$this->formvars['layers'][$i];
+				$this->formvars['connection'] = $this->formvars['wms_url'].'VERSION=1.1.1&FORMAT=image/png&transparent=true&styles=&LAYERS='.$this->formvars['layers'][$i];
 				$layer_id = $dbmap->newRollenLayer($this->formvars);
 				$classdata['layer_id'] = -$layer_id;
 				$classdata['name'] = '_';
