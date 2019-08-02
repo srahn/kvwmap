@@ -470,7 +470,7 @@ FROM
 		$sql = $select." LIMIT 0";
 		$ret = $this->execSQL($sql, 4, 0);
 		if ($ret['success']) {
-			$sql = "EXPLAIN (FORMAT JSON,ANALYZE False,VERBOSE True,COSTS False,TIMING False,BUFFERS False) ".$select." LIMIT 0";			# den Queryplan mitabfragen um an Infos zur Query zu kommen
+			$sql = "EXPLAIN (FORMAT JSON,ANALYZE False,VERBOSE True,COSTS False,BUFFERS False) ".$select." LIMIT 0";			# den Queryplan mitabfragen um an Infos zur Query zu kommen
 			$exp = $this->execSQL($sql, 4, 0);
 			$query_plan = json_decode(pg_fetch_assoc($exp[1])['QUERY PLAN'], true);
 			$table_aliases = $this->getTableAliasNames($query_plan[0]['Plan']['Plans']);
