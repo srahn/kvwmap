@@ -630,8 +630,8 @@ echo '			</ul>
 								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
 							</a//-->' .
 							html_umlaute($groupname) . '
-							'.($groupname == 'Suchergebnis' ? '<a href="index.php?go=delete_rollenlayer&type=search"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
-							'.(($groupname == 'Eigene Importe' OR $groupname == 'WMS-Importe') ? '<a href="index.php?go=delete_rollenlayer&type=import"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
+							'.($groupname == 'Suchergebnis' ? '<a href="javascript:deleteRollenlayer(\'search\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
+							'.(($groupname == 'Eigene Importe' OR $groupname == 'WMS-Importe') ? '<a href="javascript:deleteRollenlayer(\'import\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
 							<div style="position:static;" id="group_options_' . $group_id . '"></div>
 						</span>
 					</td>
@@ -12126,6 +12126,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   function neuLaden() {
 		$this->saveLegendRoleParameters();
 		if(in_array($this->formvars['last_button'], array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->setSelectedButton($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
+		if($this->formvars['delete_rollenlayer'] != '')$this->deleteRollenlayer($this->formvars['type']);
     # Karteninformationen lesen
     $this->loadMap('DataBase');
     # zwischenspeichern des vorherigen Maßstabs
