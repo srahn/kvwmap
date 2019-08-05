@@ -115,3 +115,6 @@
 if ($show_legend_graphic) { ?>
 	<div id="legend_graphic" style="height:<?php echo $legend_height; ?>"><?php include(SNIPPETS . LEGEND_GRAPHIC_FILE); ?></div><?php
 } ?>
+
+<input type="hidden" name="delete_rollenlayer" value="">
+<input type="hidden" name="delete_rollenlayer_type" value="">
