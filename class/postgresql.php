@@ -452,62 +452,63 @@ FROM
 		}
 	}
 
-	function getTableAliasNames($plans){
-		$table_aliases = array();
-		foreach($plans as $plan){
-			if($plan['Parent Relationship'] != 'SubPlan'){
-				if($plan['Relation Name'] != ''){
-					$table_aliases[$plan['Relation Name']] = $plan['Alias'];
-				}
-				if($plan['Plans'] != NULL)$table_aliases = $table_aliases + $this->getTableAliasNames($plan['Plans']);
-			}
+	function get_table_alias_names($query_plan){
+		$table_info = explode(":eref \n         {ALIAS \n         ", $query_plan);
+		for($i = 1; $i < count($table_info); $i++){
+			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
+			$table_oid = get_first_word_after($table_info[$i], ':relid');
+			$table_alias_names[$table_oid] = $table_alias;
 		}
-		return $table_aliases;
+		return $table_alias_names;
 	}
 
 	function getFieldsfromSelect($select, $assoc = false) {
 		$err_msgs = array();
-		$sql = $select." LIMIT 0";
+		$error_reporting = error_reporting();
+		error_reporting(E_NOTICE);
+		ini_set("pgsql.log_notice", '1');
+		ini_set("pgsql.ignore_notice", '0');
+		ini_set("display_errors", '0');
+		$error_list = array();
+		$myErrorHandler = function ($error_level, $error_message, $error_file, $error_line, $error_context) use (&$error_list) {
+			$error_list[] = $error_message;
+			return false;
+		};
+		set_error_handler($myErrorHandler);
+		$sql = 'SET client_min_messages=\'log\';SET debug_print_parse=true;'.$select." LIMIT 0";		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
 		$ret = $this->execSQL($sql, 4, 0);
+		error_reporting($error_reporting);		
 		if ($ret['success']) {
-			$sql = "EXPLAIN (FORMAT JSON,ANALYZE False,VERBOSE True,COSTS False,BUFFERS False) ".$select." LIMIT 0";			# den Queryplan mitabfragen um an Infos zur Query zu kommen
-			$exp = $this->execSQL($sql, 4, 0);
-			$query_plan = json_decode(pg_fetch_assoc($exp[1])['QUERY PLAN'], true);
-			$table_aliases = $this->getTableAliasNames($query_plan[0]['Plan']['Plans']);
-
-			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
-				$plan_info = explode('.', $query_plan[0]['Plan']['Output'][$i]);
-				
+			$query_plan = $error_list[0];
+			$table_alias_names = $this->get_table_alias_names($query_plan);
+			$field_plan_info = explode("\n      :resno", $query_plan);
+			
+			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {				
 				# Attributname
 				$fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
+				
+				# Spaltennummer in der Tabelle
+				$col_num = get_first_word_after($field_plan_info[$i+1], ':resorigcol');				
 				
 				# Tabellen-oid des Attributs
 				$table_oid = pg_field_table($ret[1], $i, true);			
 
 				# wenn das Attribut eine Tabellenspalte ist -> weitere Attributeigenschaften holen
-				if ($table_oid > 0){
-					# realer Name der Spalte in der Tabelle
-					$fields[$i]['real_name'] = end($plan_info);
-					
+				if ($table_oid > 0){					
 					# Tabellenname des Attributs
 					$fields[$i]['table_name'] = $tablename = pg_field_table($ret[1], $i);
 					if ($tablename != NULL) {
 						$all_table_names[] = $tablename;
 					}
-
+										
 					# Tabellenaliasname des Attributs
-					if($plan_info[1] != NULL){
-						$fields[$i]['table_alias_name'] = $plan_info[0];
-					}
-					else{
-						$fields[$i]['table_alias_name'] = $table_aliases[$tablename];
-					}
+					$fields[$i]['table_alias_name'] = $table_alias_names[$table_oid];
 
 					# Schemaname der Tabelle des Attributs
 					$schemaname = $this->pg_field_schema($table_oid);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?	
 					
 					$constraintstring = '';
-					$attr_info = $this->get_attribute_information($schemaname, $tablename, $fields[$i]['real_name']);
+					$attr_info = $this->get_attribute_information($schemaname, $tablename, $col_num);
 					if($attr_info[0]['relkind'] == 'v'){		# wenn View, dann Attributinformationen aus View-Definition holen
 						if($view_defintion_attributes[$tablename] == NULL) {
 							$ret2 = $this->getFieldsfromSelect(substr($attr_info[0]['view_definition'], 0, -1), true);
@@ -523,6 +524,8 @@ FROM
 						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info[0]['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
 						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info[0]['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
 					}
+					# realer Name der Spalte in der Tabelle
+					$fields[$i]['real_name'] = $attr_info[0]['name'];
 					$fieldtype = $attr_info[0]['type_name'];
 					$fields[$i]['nullable'] = $attr_info[0]['nullable']; 
 					$fields[$i]['length'] = $attr_info[0]['length'];
@@ -588,8 +591,8 @@ FROM
 		return $ret;
 	}
 
-	function get_attribute_information($schema, $table, $name = NULL) {
-		if($name != NULL)$and_column = "a.attname = '".$name."' AND ";
+	function get_attribute_information($schema, $table, $col_num = NULL) {
+		if($col_num != NULL)$and_column = "a.attnum = ".$col_num." AND ";
 		$attributes = array();
 		$sql = "
 			SELECT
