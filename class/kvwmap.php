@@ -12107,7 +12107,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   function neuLaden() {
 		$this->saveLegendRoleParameters();
 		if(in_array($this->formvars['last_button'], array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->setSelectedButton($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
-		if($this->formvars['delete_rollenlayer'] != '')$this->deleteRollenlayer($this->formvars['type']);
+		if($this->formvars['delete_rollenlayer'] != ''){
+			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+			$mapDB->deleteRollenlayer(NULL, $this->formvars['type']);
+		}
     # Karteninformationen lesen
     $this->loadMap('DataBase');
     # zwischenspeichern des vorherigen Maßstabs
