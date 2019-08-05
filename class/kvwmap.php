@@ -244,7 +244,7 @@ class GUI {
 
 		if (empty($error_msg)) {
 			$this->main = 'custom/' . $snippet_file;
-			if (strtolower($this->formvars['format']) == 'json') {
+			if (strtolower($this->formvars['format']) == 'json' OR $this->formvars['only_main']) {
 				include_once(SNIPPETS . $this->main);
 			}
 		}
