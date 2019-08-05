@@ -362,15 +362,18 @@ a.invisiblelayerlink:hover{
 	z-index: 1000000;
 	background-color: white;
 	box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.3);
+	border: 1px solid #ddd;
 }
 
 #geo_name_search_result_div ul{
 	color: lightsteelblue;
 	margin: 5px;
-	padding: 0px;
-			padding-left: 0px;
-	padding-left: 15px;
+	padding: 10px 0 6px 15px;
 	list-style: square outside none;
+}
+
+#geo_name_search_result_div ul li{
+	margin-top: 4px;
 }
 
 .code{

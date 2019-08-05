@@ -227,7 +227,12 @@ class GUI {
 				$output .= '<li><a href="javascript:location.href=\'index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326&name='.$name.'\'">'.$name.'</a></li>';
 			}
 		}
-		if($show)echo '<ul>'.$output.'</ul>';;
+		if($show)echo '<div style="position: absolute;top: 0px;right: 0px">
+										<a href="javascript:void(0)" onclick="document.getElementById(\'geo_name_search_result_div\').innerHTML=\'\';" title="Schlie&szlig;en">
+											<img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img>
+										</a>
+									</div>
+									<ul>'.$output.'</ul>';;
 	}
 
 	function show_snippet() {
