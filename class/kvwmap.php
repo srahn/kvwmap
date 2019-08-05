@@ -7530,7 +7530,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	function Klasseneditor() {
 		$this->main='layer_klasseneditor.php';
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$this->layerdaten = $mapDB->get_postgis_layers('Name');
+		$this->layerdaten = $mapDB->getall_Layer('Name', false, $this->user->id, $this->Stelle->id);
 		# Abfragen der Layerdaten wenn eine layer_id zur Änderung selektiert ist
 		if ($this->formvars['selected_layer_id'] > 0) {
 			$this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], false);
@@ -16274,7 +16274,7 @@ class db_mapObj{
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
 		$query = mysql_query($sql);
-		if ($query == 0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__; return 0; }
+		if ($query == 0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ .'<br>'.$sql; return 0; }
 		$index = 0;
 		while ($rs = mysql_fetch_assoc($query)) {
 			$rs['Style'] = $this->read_Styles($rs['Class_ID']);

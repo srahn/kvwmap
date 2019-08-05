@@ -28,6 +28,7 @@
 	
 	function toggleForm(id){
 		if(id == 'stellenzuweisung'){
+			document.GUI.stellenzuweisung.value = 1;
 			document.getElementById('layerform').style.display = 'none';
 			document.getElementById('layerform_link').style.backgroundColor = '';
 		}
@@ -764,6 +765,7 @@
 	<i class="fa fa-arrow-up hover-border" aria-hidden="true"></i>
 </a>
 
+<input type="hidden" name="stellenzuweisung" value="<? echo $this->formvars['stellenzuweisung']; ?>">
 <input type="hidden" name="go" value="Layereditor">
 <input type="hidden" name="assign_default_values" value="0">
 <input type="hidden" name="selstellen" value="<? 
