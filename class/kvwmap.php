@@ -546,10 +546,10 @@ echo '			</ul>
 		$this->output();
 	}
 
-	function setLayerParams() {
+	function setLayerParams($prefix = '') {
 		$layer_params = array();
 		foreach ($this->formvars AS $key => $value) {
-			$param_key = str_replace('layer_parameter_', '', $key);
+			$param_key = str_replace($prefix.'layer_parameter_', '', $key);		// $prefix dient zur Unterscheidung zwischen den Layer-Parametern im Header und denen in den Optionen
 			if ($param_key != $key) {
 				$layer_params[] = '"' . $param_key . '":"' . $value . '"';
 			}

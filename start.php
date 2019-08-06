@@ -357,7 +357,7 @@ else {
 	# Alles was man immer machen muss bevor die go's aufgerufen werden
 	if (new_options_sent($GUI->formvars)) {
 		$GUI->debug->write('Speicher neue Stellenoptionen.', 4, $GUI->echo);
-		$GUI->setLayerParams();
+		$GUI->setLayerParams('options_');
 		$GUI->user->setOptions($GUI->user->stelle_id, $GUI->formvars);
 	}
 

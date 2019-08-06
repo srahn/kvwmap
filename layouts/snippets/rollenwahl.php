@@ -108,7 +108,7 @@ if ($this->formvars['show_layer_parameter']) {
 											<td><?php
 												include_once(CLASSPATH.'FormObject.php');
 												echo FormObject::createSelectField(
-													'layer_parameter_' . $param['key'],		# name
+													'options_layer_parameter_' . $param['key'],		# name
 													$param['options'],										# options
 													rolle::$layer_params[$param['key']],	# value
 													1,																		# size
