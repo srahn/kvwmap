@@ -2080,6 +2080,7 @@ FROM
 				if($rs['geburtsname'] != '')$namen[$i]['name2'] .= ' geb. '.$rs['geburtsname'];
 				
 				$anschriften_gml_ids = explode(',', $rs['hat']);
+				$anschriften = array();
 				if(count($anschriften_gml_ids) > 1){
 					$anschriften = $this->getAnschriften($anschriften_gml_ids, $without_temporal_filter);
 				}
