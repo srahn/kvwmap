@@ -18182,7 +18182,8 @@ class db_mapObj{
 			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
 			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
 			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
-			$attributes['dependents'][$attributes['indizes'][$rs['vcheck_attribute']]][] = $rs['name'];
+			$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			$dependents[$rs['vcheck_attribute']][] = $rs['name'];
 			$attributes['privileg'][$i] = $rs['privileg'];
 			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
 			if ($rs['form_element_type'] == 'Style') {
