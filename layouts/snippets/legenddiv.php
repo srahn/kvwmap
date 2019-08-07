@@ -57,7 +57,7 @@
 				</tr>
 				<tr>
 					<td>
-						<div style="overflow-y: auto; width: 250px; max-height: 180px">
+						<div style="overflow-y: auto; max-height: <? echo ($legend_height - 80); ?>px">
 							<ul>
 								<li>
 									<span><? echo $strLegendType; ?>:</span><br>
