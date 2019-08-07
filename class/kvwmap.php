@@ -7558,6 +7558,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$name_[$language] = @array_values($this->formvars['name_'.$language]);
 			}
 		}
+		$new_class_id = @array_values($this->formvars['new_class_id']);
 		$expression = @array_values($this->formvars['expression']);
 		$text = @array_values($this->formvars['text']);
 		$classification = @array_values($this->formvars['classification']);
@@ -7575,6 +7576,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 			}
 			$attrib['layer_id'] = $this->formvars['selected_layer_id'];
+			$attrib['new_class_id'] = $new_class_id[$i];
 			$attrib['expression'] = $expression[$i];
 			$attrib['text'] = $text[$i];
 			$attrib['classification'] = $classification[$i];
@@ -18813,6 +18815,7 @@ class db_mapObj{
 			UPDATE
 				classes
 			SET
+				`Class_ID` = ' . $attrib['new_class_id'] . ',
 				'.$names.',
 				`Layer_ID` = ' . $attrib['layer_id'] . ',
 				`Expression` = "' . $attrib['expression'] . '",
