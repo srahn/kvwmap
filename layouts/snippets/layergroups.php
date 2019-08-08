@@ -36,7 +36,7 @@
 					<td colspan="2" align="right"><a class="btn btn-new" href="index.php?go=Layergruppe_Editor"><i titel="Legt eine neue Layergruppe an." class="fa fa-plus" style="color: white; margin-bottom: 10px"></i>&nbsp;Neue&nbsp;Gruppe</a></td>
 				</tr><?php
 				for ($i = 0; $i < count($this->layergruppen); $i++) { ?>
-					<tr id="group_<?php echo $this->layergruppen[$i]->get('id'); ?>">
+					<tr id="group_<?php echo $this->layergruppen[$i]->get('id'); ?>" onMouseover="this.bgColor='<?php echo BG_TR; ?>'" onMouseout="this.bgColor=''">
 						<td>
 							<a name="group_<?php echo $this->layergruppen[$i]->get('id'); ?>" style="color: black;"><?php echo $this->layergruppen[$i]->get('id'); ?></a>
 						</td>
@@ -49,18 +49,18 @@
 						<td>
 							<span><?php echo $this->layergruppen[$i]->get('order'); ?></span>
 						</td>
-						<td>&nbsp;
+						<td align="right">
 							<a
 								title="<?php echo $this->strChange; ?>"
 								href="index.php?go=Layergruppe_Editor&selected_group_id=<?php echo $this->layergruppen[$i]->get('id'); ?>"
-							><i class="fa fa-pencil" style="color: firebrick"></i></a>
+							><i class="fa fa-pencil" style="padding: 3px"></i></a>
 						</td>
-						<td>&nbsp;
+						<td>
 							<span
 								title="<?php echo $this->strDelete; ?>"
 								onclick="group_delete(<?php echo $this->layergruppen[$i]->get('id'); ?>);"
-								style="cursor: pointer; color: firebrick;"
-							><i class="fa fa-trash" style="color: firebrick"></i></span>
+								style="padding: 3px"
+							><i class="fa fa-trash"></i></span>
 						</td>
 					</tr><?php
 				} ?>
