@@ -18801,6 +18801,8 @@ class db_mapObj{
 		global $supportedLanguages;
 		if($attrib['legendimagewidth'] == '')$attrib['legendimagewidth'] = 'NULL';
 		if($attrib['legendimageheight'] == '')$attrib['legendimageheight'] = 'NULL';
+		if($attrib['order'] == '')$attrib['order'] = 'NULL';
+		if($attrib['legendorder'] == '')$attrib['legendorder'] = 'NULL';
 		$names = implode(
 			', ',
 			array_map(
