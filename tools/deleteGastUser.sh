@@ -23,4 +23,5 @@ SQL="DELETE FROM user WHERE Name LIKE 'gast' AND Vorname LIKE 'gast' AND passwor
 #echo "SQL: ${SQL}"
 
 mysql --host=${MYSQL_HOST} --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} -e "${SQL}" ${MYSQL_DATABASE} > /dev/null 2>&1
-#echo "exec: mysql --host=${MYSQL_HOST} --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} -e \"${SQL}\" ${MYSQL_DATABASE} > /dev/null 2>&1"
+#echo "exec: mysql --host=${MYSQL_HOST} --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} -e \"${SQL}\" ${MYSQL_DATABASE}"
+echo "`date` Gastnutzer gelöscht."
