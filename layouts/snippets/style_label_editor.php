@@ -1,9 +1,12 @@
+<? include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php'); ?>
+
 <script type="text/javascript">
 <!--
 
 function change_layer(){
-	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
+	layer_id = document.GUI.selected_layer_id.value;
 	if(layer_id != ''){
+		document.getElementById('form').style.display = 'inline-block';
 		document.GUI.class_1.disabled = true;
 		document.getElementById('style_div').innerHTML = '';
 		document.getElementById('label_div').innerHTML = '';
@@ -11,7 +14,6 @@ function change_layer(){
 		document.getElementById('selected_label_div').innerHTML = '';
 		document.GUI.selected_style_id.value = '';
 		document.GUI.selected_label_id.value = '';
-		document.GUI.selected_layer_id.value = layer_id;
 		ahah('index.php', 'go=getclasses&layer_id='+layer_id, new Array(document.getElementById('classes_div')), "");
 		document.getElementById('toLayerLink').style='display:inline';
 	}
@@ -23,7 +25,7 @@ function change_class(){
 	document.getElementById('selected_style_div').innerHTML = '';
 	document.getElementById('selected_label_div').innerHTML = '';
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
-	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
+	layer_id = document.GUI.selected_layer_id.value;
 	document.GUI.selected_class_id.value = class_id;
 	ahah('index.php', 'go=getstyles_labels&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div'), document.getElementById('label_div')), "");
 }
@@ -35,7 +37,7 @@ function get_style(style_id){
 	}
 	if(document.getElementById('td1_style_'+style_id))document.getElementById('td1_style_'+style_id).style.backgroundColor='lightsteelblue';
 	if(document.getElementById('td2_style_'+style_id))document.getElementById('td2_style_'+style_id).style.backgroundColor='lightsteelblue';
-	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
+	layer_id = document.GUI.selected_layer_id.value;
 	document.GUI.selected_style_id.value = style_id;
 	ahah('index.php', 'go=get_style&style_id='+style_id+'&layer_id='+layer_id, new Array(document.getElementById('selected_style_div')), "");
 }
@@ -47,14 +49,14 @@ function get_label(label_id){
 	}
 	document.getElementById('td1_label_'+label_id).style.backgroundColor='lightsteelblue';
 	document.getElementById('td2_label_'+label_id).style.backgroundColor='lightsteelblue';
-	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
+	layer_id = document.GUI.selected_layer_id.value;
 	document.GUI.selected_label_id.value = label_id;
 	ahah('index.php', 'go=get_label&label_id='+label_id+'&layer_id='+layer_id, new Array(document.getElementById('selected_label_div')), "");
 }
 
 function add_label(){
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
-	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
+	layer_id = document.GUI.selected_layer_id.value;
 	label_id = document.GUI.selected_label_id.value;
 	ahah('index.php', 'go=add_label&label_id='+label_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('label_div')), "");
 }
@@ -66,13 +68,13 @@ function delete_label(label_id){
 	}
 	selected_label_id = document.GUI.selected_label_id.value;
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
-	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
+	layer_id = document.GUI.selected_layer_id.value;
 	ahah('index.php', 'go=delete_label&selected_label_id='+selected_label_id+'&label_id='+label_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('label_div')), "");
 }
 
 function add_style(){
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
-	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
+	layer_id = document.GUI.selected_layer_id.value;
 	style_id = document.GUI.selected_style_id.value;
 	ahah('index.php', 'go=add_style&style_id='+style_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div')), "");
 }
@@ -84,26 +86,26 @@ function delete_style(style_id){
 	}
 	selected_style_id = document.GUI.selected_style_id.value;
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
-	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
+	layer_id = document.GUI.selected_layer_id.value;
 	ahah('index.php', 'go=delete_style&selected_style_id='+selected_style_id+'&style_id='+style_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div')), "");
 }
 
 function moveup_style(style_id){
 	selected_style_id = document.GUI.selected_style_id.value;
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
-	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
+	layer_id = document.GUI.selected_layer_id.value;
 	ahah('index.php', 'go=moveup_style&selected_style_id='+selected_style_id+'&style_id='+style_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div')), "");	
 }
 
 function movedown_style(style_id){
 	selected_style_id = document.GUI.selected_style_id.value;
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
-	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
+	layer_id = document.GUI.selected_layer_id.value;
 	ahah('index.php', 'go=movedown_style&selected_style_id='+selected_style_id+'&style_id='+style_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div')), "");	
 }
 
 function save_style(style_id){
-	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
+	layer_id = document.GUI.selected_layer_id.value;
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value
 	data = 'go=save_style&class_id='+class_id;
 	data+= '&style_id='+style_id;
@@ -142,7 +144,7 @@ function save_style(style_id){
 }
 
 function save_label(label_id){
-	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
+	layer_id = document.GUI.selected_layer_id.value;
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value
 	data = 'go=save_label&class_id='+class_id;
 	data+= '&label_id='+label_id;
@@ -196,44 +198,87 @@ function browser_check(){
 	}
 }
 
-function toLayerEditor(){	
-	location.href='index.php?go=Layereditor&selected_layer_id='+document.GUI.layer.value;
+function navigate(params){	
+	location.href='index.php?'+params+'&selected_layer_id='+document.GUI.selected_layer_id.value;
 }
 
 
 //-->
 </script>
 
-<table border="0" cellpadding="2" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
-  <tr align="center"> 
-    <td colspan="4" height="30"><h2><?php echo $this->titel; ?></h2></td>
+<style>
+	.navigation{
+		border-collapse: collapse; 
+		width: 100%;
+		min-width: 940px;
+	}
+
+	.navigation th{
+		border: 1px solid <?php echo BG_DEFAULT ?>;
+		border-collapse: collapse;
+		width: 17%;
+	}
+	
+	.navigation th div{
+		padding: 3px;
+	}
+	
+	.navigation th:hover{
+		background-color: <?php echo BG_DEFAULT ?>;
+	}
+</style>
+
+<table>
+	<tr>
+    <td style="">
+			<span class="px17 fetter"><? echo $strLayer;?>:</span>
+      <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="change_layer();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+      <option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option>
+        <?
+    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
+    			echo '<option';
+    			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
+    				echo ' selected';
+    			}
+    			echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
+    		}
+    	?>
+      </select>
+		</td>
   </tr>
+</table>
+
+<div id="form" style="<? if($this->formvars['selected_layer_id'] == '')echo 'display: none'; ?>">
+<table border="0" cellpadding="0" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" style="margin: 10px">
+	<tr align="center"> 
+		<td style="width: 100%;">
+			<table cellpadding="0" cellspacing="0" class="navigation">
+				<tr>
+					<th class="fetter"><a href="javascript:navigate('go=Layereditor');"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
+					<th class="fetter"><a href="javascript:navigate('go=Klasseneditor');"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
+					<th bgcolor="<?php echo BG_DEFAULT ?>" class="fetter"><? echo $strStylesLabels; ?></th>
+					<? if($this->layerdata['connectiontype'] == 6){ ?>
+					<th class="fetter"><a href="javascript:navigate('go=Attributeditor');"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
+					<? } ?>
+					<th class="fetter"><a href="javascript:navigate('go=Layereditor&stellenzuweisung=1');"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
+					<th class="fetter"><a href="javascript:navigate('go=Layerattribut-Rechteverwaltung');"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>
+				</tr>
+			</table>
+		</td>
+	</tr>	
+</table>
+
+<table border="0" cellpadding="2" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr>
   	<td valign="top">
 		  <table cellpadding="3" cellspacing="0" style="border:1px solid #C3C7C3;">
 			  <tr> 
-			  	<td style="border-right:1px solid #C3C7C3;" colspan="2">Layer</td>
-			    <td colspan="2">Klassen</td>
+			    <td colspan="4" class="fett">Klassen</td>
 			  </tr>
 			  <tr>
-			  	<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3;">
-			      <select style="width:200px"  name="layer" onchange="change_layer();">
-			        <option value="">------------------- Bitte wählen ----------------</option>
-			        <?
-			    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
-			    			echo '<option value="'.$this->layerdaten['ID'][$i].'" ';
-			    			if($this->formvars['selected_layer_id'] == $this->layerdaten['ID'][$i]){
-			    				echo 'selected';
-			    			}
-			    			echo '>'.$this->layerdaten['Bezeichnung'][$i].'</option>';
-			    		}
-			    	?>
-			      </select><br><br><br>
-							&nbsp;<a id="toLayerLink" href="javascript:toLayerEditor();" style="<? if($this->formvars['selected_layer_id'] != '')echo 'display:inline';else echo 'display:none'; ?>">zum Layer</a>
-			    </td>
-			    <td style="border-bottom:1px solid #C3C7C3;" colspan="2">
+			    <td style="border-bottom:1px solid #C3C7C3;" colspan="4">
 			    	<div id="classes_div"> 
-			      <select style="width:200px" size="4"  name="class_1" onchange="change_class();" <?php if(count($this->allclassdaten)==0){ echo 'disabled';}?>>
+			      <select style="width:430px" size="4"  name="class_1" onchange="change_class();" <?php if(count($this->allclassdaten)==0){ echo 'disabled';}?>>
 			        <?
 			    		for($i = 0; $i < count($this->allclassdaten); $i++){
 			    			echo '<option';
@@ -316,7 +361,7 @@ function toLayerEditor(){
 					</td>
 				</tr>
 				<tr>
-					<td valign="top" colspan="2" style="border-right:1px solid #C3C7C3;">
+					<td valign="top" colspan="2" style="width: 50%; border-right:1px solid #C3C7C3;">
 						<div id="selected_style_div">
 						<?
 						if(count($this->styledaten) > 0){
@@ -403,7 +448,7 @@ function toLayerEditor(){
 								<? }else{ ?>
 									<select size="1" class="imagebacked" name="font" style="background-image:url('<? echo @$this->createFontSampleImage($this->fonts['filename'][0], $this->fonts['name'][0]); ?>');">
 									<? for($i = 0; $i < count($this->fonts['name']); $i++){?>
-										<option onclick="this.parentNode.setAttribute('style',this.getAttribute('style'));" class="imagebacked" style="background-image:url('<? echo @$this->createFontSampleImage($this->fonts['filename'][$i], $this->fonts['name'][$i]); ?>');" id="<? echo $this->fonts['name'][$i]; ?>" value="<? echo $this->fonts['name'][$i]; ?>"></option>		
+										<option onclick="this.parentNode.setAttribute('style',this.getAttribute('style'));" class="imagebacked" style="background-image:url('<? echo @$this->createFontSampleImage($this->fonts['filename'][$i], $this->fonts['name'][$i]); ?>');" id="<? echo $this->fonts['name'][$i]; ?>" value="<? echo $this->fonts['name'][$i]; ?>"><? echo $this->fonts['name'][$i]; ?></option>		
 									<? } ?>
 									</select>
 								<? } ?>
@@ -453,7 +498,9 @@ function toLayerEditor(){
 		</td>
 	</tr>
 </table>
-<input type="hidden" name="selected_layer_id" value="<? echo $this->formvars['selected_layer_id']; ?>">
+
+</div>
+
 <input type="hidden" name="selected_class_id" value="<? echo $this->formvars['selected_class_id']; ?>">
 <input type="hidden" name="selected_style_id" value="<? echo $this->formvars['selected_style_id']; ?>">
 <input type="hidden" name="selected_label_id" value="<? echo $this->formvars['selected_label_id']; ?>">

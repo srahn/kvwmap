@@ -30,13 +30,13 @@
 	.navigation{
 		border-collapse: collapse; 
 		width: 100%;
-		min-width: 900px;
+		min-width: 940px;
 	}
 
 	.navigation th{
 		border: 1px solid <?php echo BG_DEFAULT ?>;
 		border-collapse: collapse;
-		width: 20%;
+		width: 17%;
 	}
 	
 	.navigation th div{
@@ -77,6 +77,7 @@
 				<tr>
 					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
 					<th bgcolor="<?php echo BG_DEFAULT ?>" class="fetter"><? echo $strClasses; ?></th>
+					<th class="fetter"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
 					<? if($this->layerdata['connectiontype'] == 6){ ?>
 					<th class="fetter"><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
 					<? } ?>
@@ -191,7 +192,7 @@
 				<td align="center" style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
 					<? if($this->layerdata['editable']){ ?>
 					<a href="javascript:Bestaetigung('index.php?go=Klasseneditor_Klasse_Löschen&class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>',	'<?php echo $this->strDeleteWarningMessage; ?>');" title="<? echo $this->strDelete; ?>">
-						<i style="padding: 6px" class="fa fa-trash buttonlink" aria-hidden="true"></i>
+						<i style="padding: 6px" class="fa fa-trash" aria-hidden="true"></i>
 					</a>
 					<? } ?>
 				</td>
@@ -207,9 +208,9 @@
 					</a>
 				</td>
 			</tr>
-			<tr>
+			<tr id="autoClassForm" style="display:none">
 				<td style="border-bottom:1px solid #C3C7C3" colspan="10">
-					<div id="autoClassForm" style="display:none">
+					<div>
 						<table>
 							<tr>
 								<td colspan="3" class="fett"><? echo $strAddAutoClasses; ?></td>
@@ -260,9 +261,6 @@
 				</td>
 			</tr>
 			<? } ?>
-			<tr>
-				<td colspan="10"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><? echo $strStylesLabels; ?></a></td>
-			</tr>
 		</table>
 		</td>
 		<td valign="top">

@@ -1111,13 +1111,15 @@ a.menuered:hover {
 
 
 select.imagebacked { 
-	padding: 2px 0 3px 155px; 
+	#padding: 2px 0 3px 155px; 
+	color: rgba(255, 255, 255, 0);
 	background-repeat: no-repeat; 
 	background-position: 0px 0px; 
 	vertical-align: middle; 
 }
 
 option.imagebacked {
+	color: black;
 	padding: 2px 0 3px 1px; 
 	background-repeat: no-repeat; 
 	background-position: 0px 0px; 

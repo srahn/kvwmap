@@ -62,13 +62,13 @@ function save(stelle){
 	.navigation{
 		border-collapse: collapse; 
 		width: 100%;
-		min-width: 900px;
+		min-width: 940px;
 	}
 
 	.navigation th{
 		border: 1px solid <?php echo BG_DEFAULT ?>;
 		border-collapse: collapse;
-		width: 20%;
+		width: 17%;
 	}
 	
 	.navigation th div{
@@ -117,6 +117,7 @@ function save(stelle){
 				<tr>
 					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
 					<th class="fetter"><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
+					<th class="fetter"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
 					<th class="fetter"><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
 					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
 					<th bgcolor="<?php echo BG_DEFAULT ?>" class="fetter"><? echo $strPrivileges; ?></th>

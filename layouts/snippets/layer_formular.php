@@ -31,10 +31,12 @@
 			document.GUI.stellenzuweisung.value = 1;
 			document.getElementById('layerform').style.display = 'none';
 			document.getElementById('layerform_link').style.backgroundColor = '';
+			document.getElementById('saveAsNewLayerButton').style.display = 'none';
 		}
 		else{
 			document.getElementById('stellenzuweisung').style.display = 'none';
 			document.getElementById('stellenzuweisung_link').style.backgroundColor = '';
+			document.getElementById('saveAsNewLayerButton').style.display = 'inline-block';
 		}
 		document.getElementById(id).style.display = 'inline-block';
 		document.getElementById(id+'_link').style.backgroundColor = '<?php echo BG_DEFAULT ?>';
@@ -47,13 +49,13 @@
 	.navigation{
 		border-collapse: collapse; 
 		width: 100%;
-		min-width: 900px;
+		min-width: 940px;
 	}
 
 	.navigation th{
 		border: 1px solid <?php echo BG_DEFAULT ?>;
 		border-collapse: collapse;
-		width: 20%;
+		width: 17%;
 	}
 	
 	.navigation th div{
@@ -105,6 +107,7 @@
 				<tr>
 					<th class="fetter"><a href="javascript:toggleForm('layerform');"><div style="background-color: <?php echo BG_DEFAULT ?>; width: 100%" id="layerform_link"><? echo $strCommonData; ?></div></a></th>
 					<th class="fetter"><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
+					<th class="fetter"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
 					<? if($this->layerdata['connectiontype'] == 6){ ?>
 					<th class="fetter"><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
 					<? } ?>
@@ -747,13 +750,13 @@
 	<tr> 
 		<td align="center">
 			<input type="hidden" name="go_plus" id="go_plus" value="">
-			<input type="button" name="dummy2" value="<?php echo $this->strButtonBack; ?>" onclick="location.href='index.php?go=Layer_Anzeigen'">&nbsp;<?php
-		 if ($this->formvars['selected_layer_id'] > 0) { ?>
+			<?
+		if ($this->formvars['selected_layer_id'] > 0) { ?>
 			<? if($this->layerdata['editable']){ ?>
 			<input id="layer_formular_submit_button" type="button" name="dummy" value="<?php echo $strButtonSave; ?>" onclick="submitWithValue('GUI','go_plus','Speichern')">
 			<?
 			}
-		 } ?>&nbsp;<input type="button" name="dummy" value="<?php echo $strButtonSaveAsNewLayer; ?>" onclick="submitWithValue('GUI','go_plus','Als neuen Layer eintragen')">		 
+		} ?>&nbsp;<input type="button" id="saveAsNewLayerButton" name="dummy" value="<?php echo $strButtonSaveAsNewLayer; ?>" onclick="submitWithValue('GUI','go_plus','Als neuen Layer eintragen')">		 
 		</td>
 	</tr>
 	<tr>
