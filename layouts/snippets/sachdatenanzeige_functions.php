@@ -542,7 +542,7 @@ include('funktionen/input_check_functions.php');
 		if(document.getElementById('layer').calendar != undefined)document.getElementById('layer').calendar.destroy();
 	}
 
-	autocomplete1 = function(layer_id, attribute, field_id, inputvalue, listentyp) {
+	autocomplete1 = function(event, layer_id, attribute, field_id, inputvalue, listentyp) {
 		listentyp = listentyp || 'ok';
 		var suggest_field = document.getElementById('suggests_' + field_id);
 		if(event.key == 'ArrowDown'){
