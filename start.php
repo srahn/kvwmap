@@ -359,6 +359,7 @@ else {
 		$GUI->debug->write('Speicher neue Stellenoptionen.', 4, $GUI->echo);
 		$GUI->setLayerParams('options_');
 		$GUI->user->setOptions($GUI->user->stelle_id, $GUI->formvars);
+		$GUI->user->rolle->readSettings();
 	}
 
 	#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
