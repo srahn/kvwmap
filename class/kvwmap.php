@@ -13990,16 +13990,18 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
               case 'meters' : $pixsize=1; break;
               default : $pixsize=$this->user->rolle->pixsize;
             }
-            if($rect->minx == $rect->maxx AND $rect->miny == $rect->maxy){
+						$rect2 = ms_newRectObj();
+						$rect2->setextent($rect->minx, $rect->miny, $rect->maxx, $rect->maxy);		// rect kopieren, damit das Original nicht umprojeziert wird und beim nächsten Layer einen Fehler verursacht
+            if($rect2->minx == $rect2->maxx AND $rect2->miny == $rect2->maxy){
             	$rand=$layerset[$i]['tolerance']*$pixsize;
             }
             $projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
             $projTO = ms_newprojectionobj("init=epsg:" . $layerset[$i]['epsg_code']);
-            $rect->project($projFROM, $projTO);
-            $searchbox_minx=strval($rect->minx-$rand);
-            $searchbox_miny=strval($rect->miny-$rand);
-            $searchbox_maxx=strval($rect->maxx+$rand);
-            $searchbox_maxy=strval($rect->maxy+$rand);
+            $rect2->project($projFROM, $projTO);
+            $searchbox_minx=strval($rect2->minx-$rand);
+            $searchbox_miny=strval($rect2->miny-$rand);
+            $searchbox_maxx=strval($rect2->maxx+$rand);
+            $searchbox_maxy=strval($rect2->maxy+$rand);
 
 						$bbox=$searchbox_minx.','.$searchbox_miny.','.$searchbox_maxx.','.$searchbox_maxy;
             $url = $layerset[$i]['connection'];
