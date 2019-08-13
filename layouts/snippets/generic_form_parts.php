@@ -764,7 +764,7 @@
 									}
 								"
 								onkeyup="
-									autocomplete1(\'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value);
+									autocomplete1(event, \'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value);
 								"
 								onchange="
 									if(document.getElementById(\'suggests_' . $element_id . '\').style.display == \'block\') {
@@ -867,7 +867,7 @@
 									}
 								"
 								onkeyup="
-									autocomplete1(\'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value, \'zweispaltig\');
+									autocomplete1(event, \'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value, \'zweispaltig\');
 								"
 								onchange="
 									if (document.getElementById(\'suggests_' . $element_id . '\').style.display == \'block\') {
