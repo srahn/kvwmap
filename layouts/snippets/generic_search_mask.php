@@ -153,7 +153,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 	                      }
 	                    for($o = 0; $o < count($this->attributes['enum_value'][$i]); $o++){
 	                      ?>
-	                      <option <? if($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
+	                      <option <? if($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o] AND $this->attributes['enum_value'][$i][$o] != ''){ echo 'selected';} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
 	                    } ?>
 	                    </select>
 	                    <input style="width:145px" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">
