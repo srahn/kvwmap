@@ -87,5 +87,5 @@
 	$strListed="show in Layer-List";
 	$strDocument_url="Document URL";
 	$strAssignDefaultValues="Apply Default-Values to User-Groups";
-	$strStylesLabels="Edit styles and labels";
+	$strStylesLabels="Styles and Labels";
 ?>  

@@ -123,16 +123,14 @@ function data_export(){
 }
 
 function selectall(geom){
-	var k = 0;
-	var obj = document.getElementById('check_attribute_'+k);
+	var obj = document.getElementById('check_attribute_0');
 	var status = obj.checked;
-	while(obj != undefined){
-		if(obj.name != 'check_'+geom){
-			obj.checked = !status;			
+	var attribute_selectors = document.querySelectorAll('.attribute_selector');
+	[].forEach.call(attribute_selectors, function (attribute_selector){		// DropZones groesser machen    
+		if(attribute_selector.name != 'check_'+geom){
+			attribute_selector.checked = !status;			
 		}
-		k++;
-		obj = document.getElementById('check_attribute_'+k);
-	}
+  });
 }
 
 function select_document_attributes(ids){
@@ -267,7 +265,7 @@ $j=0;
 											if($this->formvars['export_format'] == 'CSV' OR $this->data_import_export->layerdaten['export_privileg'][$selectindex] != 1){echo 'display:none"';} echo '" id="geom_div"';
 										} ?>
 									">
-										<input id="check_attribute_<? echo $j; ?>" type="checkbox" <? if($this->formvars['load'] OR $this->formvars['check_'.$this->data_import_export->attributes['name'][$j]] == 1)echo 'checked'; ?> value="1" name="check_<? echo $this->data_import_export->attributes['name'][$j]; ?>"><?php
+										<input class="attribute_selector" id="check_attribute_<? echo $j; ?>" type="checkbox" <? if($this->formvars['load'] OR $this->formvars['check_'.$this->data_import_export->attributes['name'][$j]] == 1)echo 'checked'; ?> value="1" name="check_<? echo $this->data_import_export->attributes['name'][$j]; ?>"><?php
 										if($this->data_import_export->attributes['alias'][$j] != ''){
 											echo $this->data_import_export->attributes['alias'][$j];
 										}

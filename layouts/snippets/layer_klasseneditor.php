@@ -30,13 +30,13 @@
 	.navigation{
 		border-collapse: collapse; 
 		width: 100%;
-		min-width: 900px;
+		min-width: 940px;
 	}
 
 	.navigation th{
 		border: 1px solid <?php echo BG_DEFAULT ?>;
 		border-collapse: collapse;
-		width: 20%;
+		width: 17%;
 	}
 	
 	.navigation th div{
@@ -77,6 +77,7 @@
 				<tr>
 					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
 					<th bgcolor="<?php echo BG_DEFAULT ?>" class="fetter"><? echo $strClasses; ?></th>
+					<th class="fetter"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
 					<? if($this->layerdata['connectiontype'] == 6){ ?>
 					<th class="fetter"><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
 					<? } ?>
@@ -110,7 +111,7 @@
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strOrder; ?>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[7], Style[0], document.getElementById('TipLayer8'))" onmouseout="htm()">
 						<div id="TipLayer8" style="visibility:hidden;right: 20px;position:absolute;z-index:1000;"></div>
 				</td>
-				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strDelete; ?></td>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><i style="padding: 6px" class="fa fa-trash" aria-hidden="true"></i></td>
 	<!--			<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">ändern</td>	-->
 			</tr>
 			<?
@@ -123,8 +124,9 @@
 				}
 				echo '
 			<tr style="background-color:'.$tr_color.'">
-				<input type="hidden" name="ID['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['Class_ID'].'">
-				<td style="border-bottom:1px solid #C3C7C3">'.$this->classes[$i]['Class_ID'].'</td>'; ?>
+				<td style="border-bottom:1px solid #C3C7C3">
+					<input type="text" size="6" name="new_class_id['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['Class_ID'].'">
+				</td>'; ?>
 				<td style="border-bottom:1px solid #C3C7C3">
 					<input size="12" type="text" name="name[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['Name']; ?>">
 				</td><?php
@@ -187,9 +189,11 @@
 						</tr>
 					</table>
 				</td>				
-				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
+				<td align="center" style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
 					<? if($this->layerdata['editable']){ ?>
-					<a href="javascript:Bestaetigung('index.php?go=Klasseneditor_Klasse_Löschen&class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>#Klassen',	'<?php echo $this->strDeleteWarningMessage; ?>');"><?php echo $this->strDelete; ?></a>
+					<a href="javascript:Bestaetigung('index.php?go=Klasseneditor_Klasse_Löschen&class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>',	'<?php echo $this->strDeleteWarningMessage; ?>');" title="<? echo $this->strDelete; ?>">
+						<i style="padding: 6px" class="fa fa-trash" aria-hidden="true"></i>
+					</a>
 					<? } ?>
 				</td>
 			</tr><?php
@@ -197,15 +201,20 @@
 			if($this->layerdata['editable']){
 			?>
 			<tr>
-				<td style="border-bottom:1px solid #C3C7C3" colspan="10">
-					<a href="index.php?go=Klasseneditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><?php echo $strAddClass; ?></a>
+				<td style="border-bottom:1px solid #C3C7C3" colspan="10">					
+					<a href="javascript:void(0);" onclick="toggleAutoClassForm();" class="buttonlink" style="padding: 6px; line-height: 13px;" title="<? echo $strAddAutoClasses; ?>">AUTO</a>
+					<a style="float: right;" href="index.php?go=Klasseneditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>" title="<? echo $strAddClass; ?>">
+						<i style="padding: 6px" class="fa fa-plus buttonlink" aria-hidden="true"></i>
+					</a>
 				</td>
 			</tr>
-			<tr>
+			<tr id="autoClassForm" style="display:none">
 				<td style="border-bottom:1px solid #C3C7C3" colspan="10">
-					<a href="javascript:void(0);" onclick="toggleAutoClassForm();"><? echo $strAddAutoClasses; ?></a>
-					<div id="autoClassForm" style="display:none">
+					<div>
 						<table>
+							<tr>
+								<td colspan="3" class="fett"><? echo $strAddAutoClasses; ?></td>
+							</tr>
 							<tr>
 								<td>Methode:</td>
 								<td>
@@ -252,9 +261,6 @@
 				</td>
 			</tr>
 			<? } ?>
-			<tr>
-				<td colspan="10"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><? echo $strStylesLabels; ?></a></td>
-			</tr>
 		</table>
 		</td>
 		<td valign="top">
@@ -269,8 +275,7 @@
 	<tr> 
 		<td align="center">
 			<input type="hidden" name="go_plus" id="go_plus" value="">
-			<input type="button" name="dummy2" value="<?php echo $this->strButtonBack; ?>" onclick="location.href='index.php?go=Layer_Anzeigen'">&nbsp;<?php
-		 if ($this->formvars['selected_layer_id'] > 0) { ?>
+		<? if ($this->formvars['selected_layer_id'] > 0) { ?>
 			<? if($this->layerdata['editable']){ ?>
 			<input id="layer_formular_submit_button" type="button" name="dummy" value="<?php echo $strButtonSave; ?>" onclick="submitWithValue('GUI','go_plus','Speichern')">
 			<?

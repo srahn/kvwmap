@@ -648,6 +648,12 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
 	if(instantreload)neuLaden();
 }
 
+function deleteRollenlayer(type){
+	document.GUI.delete_rollenlayer.value = 'true';
+	document.GUI.delete_rollenlayer_type.value = type;
+	neuLaden();
+}
+
 function neuLaden(){
 	if(checkForUnsavedChanges()){
 		startwaiting(true);

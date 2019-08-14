@@ -362,15 +362,18 @@ a.invisiblelayerlink:hover{
 	z-index: 1000000;
 	background-color: white;
 	box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.3);
+	border: 1px solid #ddd;
 }
 
 #geo_name_search_result_div ul{
 	color: lightsteelblue;
 	margin: 5px;
-	padding: 0px;
-			padding-left: 0px;
-	padding-left: 15px;
+	padding: 10px 0 6px 15px;
 	list-style: square outside none;
+}
+
+#geo_name_search_result_div ul li{
+	margin-top: 4px;
 }
 
 .code{
@@ -1108,13 +1111,15 @@ a.menuered:hover {
 
 
 select.imagebacked { 
-	padding: 2px 0 3px 155px; 
+	#padding: 2px 0 3px 155px; 
+	color: rgba(255, 255, 255, 0);
 	background-repeat: no-repeat; 
 	background-position: 0px 0px; 
 	vertical-align: middle; 
 }
 
 option.imagebacked {
+	color: black;
 	padding: 2px 0 3px 1px; 
 	background-repeat: no-repeat; 
 	background-position: 0px 0px; 
