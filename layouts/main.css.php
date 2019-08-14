@@ -1595,6 +1595,10 @@ tbody.gle tr {
 	color: gray;
 }
 
+.fa:hover {
+	color: #555;
+}
+
 .fa-7x {
 	font-size: 7em !important;
 }

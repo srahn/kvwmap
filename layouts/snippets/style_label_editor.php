@@ -105,79 +105,33 @@ function movedown_style(style_id){
 }
 
 function save_style(style_id){
-	layer_id = document.GUI.selected_layer_id.value;
-	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value
-	data = 'go=save_style&class_id='+class_id;
-	data+= '&style_id='+style_id;
-	data+= '&layer_id='+layer_id;
-	data+= '&new_style_id='+document.GUI.style_Style_ID.value;
-	data+= '&symbol='+document.GUI.style_symbol.value;
-	data+= '&symbolname='+document.GUI.style_symbolname.value;
-	data+= '&size='+document.GUI.style_size.value;
-	data+= '&color='+document.GUI.style_color.value;
-	data+= '&backgroundcolor='+document.GUI.style_backgroundcolor.value;
-	data+= '&outlinecolor='+document.GUI.style_outlinecolor.value;
-	data+= '&colorrange='+document.GUI.style_colorrange.value;
-	data+= '&datarange='+document.GUI.style_datarange.value;
-	data+= '&rangeitem='+document.GUI.style_rangeitem.value;
-	data+= '&opacity='+document.GUI.style_opacity.value;
-	data+= '&minsize='+document.GUI.style_minsize.value;
-	data+= '&maxsize='+document.GUI.style_maxsize.value;
-	data+= '&minscale='+document.GUI.style_minscale.value;
-	data+= '&maxscale='+document.GUI.style_maxscale.value;
-	data+= '&angle='+document.GUI.style_angle.value;
-	data+= '&angleitem='+document.GUI.style_angleitem.value;
-	data+= '&width='+document.GUI.style_width.value;
-	data+= '&minwidth='+document.GUI.style_minwidth.value;
-	data+= '&maxwidth='+document.GUI.style_maxwidth.value;
-	data+= '&offsetx='+document.GUI.style_offsetx.value;
-	data+= '&offsety='+document.GUI.style_offsety.value;
-	data+= '&polaroffset='+document.GUI.style_polaroffset.value;
-  data+= '&pattern='+document.GUI.style_pattern.value;
-  data+= '&geomtransform='+document.GUI.style_geomtransform.value;  
-	data+= '&gap='+document.GUI.style_gap.value;
-	data+= '&initialgap='+document.GUI.style_initialgap.value;
-	data+= '&linecap='+document.GUI.style_linecap.value;
-	data+= '&linejoin='+document.GUI.style_linejoin.value;
-	data+= '&linejoinmaxsize='+document.GUI.style_linejoinmaxsize.value;
-	ahah('index.php', data, new Array(document.getElementById('style_div'), document.getElementById('selected_style_div')), "");
+	form_fields = Array.prototype.slice.call(document.querySelectorAll('.styleFormField'));
+	var formData = new FormData();
+	for(i = 0; i < form_fields.length; i++){
+		if(form_fields[i].type != 'checkbox' || form_fields[i].checked){
+			formData.append(form_fields[i].name, form_fields[i].value);
+		}
+	}
+	formData.append('go', 'save_style');
+	formData.append('layer_id', document.GUI.selected_layer_id.value);
+	formData.append('class_id', document.GUI.class_1.value);
+	formData.append('style_id', style_id);	
+	ahah('index.php', formData, new Array(document.getElementById('style_div'), document.getElementById('selected_style_div')), "");
 }
 
 function save_label(label_id){
-	layer_id = document.GUI.selected_layer_id.value;
-	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value
-	data = 'go=save_label&class_id='+class_id;
-	data+= '&label_id='+label_id;
-	data+= '&layer_id='+layer_id;
-	data+= '&new_label_id='+document.GUI.label_Label_ID.value;
-	data+= '&font='+document.GUI.label_font.value;
-	data+= '&type='+document.GUI.label_type.value;
-	data+= '&color='+document.GUI.label_color.value;
-	data+= '&outlinecolor='+document.GUI.label_outlinecolor.value;
-	data+= '&shadowcolor='+document.GUI.label_shadowcolor.value;
-	data+= '&shadowsizex='+document.GUI.label_shadowsizex.value;
-	data+= '&shadowsizey='+document.GUI.label_shadowsizey.value;
-	data+= '&backgroundcolor='+document.GUI.label_backgroundcolor.value;
-	data+= '&backgroundshadowcolor='+document.GUI.label_backgroundshadowcolor.value;
-	data+= '&backgroundshadowsizex='+document.GUI.label_backgroundshadowsizex.value;
-	data+= '&backgroundshadowsizey='+document.GUI.label_backgroundshadowsizey.value;
-	data+= '&size='+document.GUI.label_size.value;
-	data+= '&minsize='+document.GUI.label_minsize.value;
-	data+= '&maxsize='+document.GUI.label_maxsize.value;
-	data+= '&position='+document.GUI.label_position.value;
-	data+= '&offsetx='+document.GUI.label_offsetx.value;
-	data+= '&offsety='+document.GUI.label_offsety.value;
-	data+= '&angle='+document.GUI.label_angle.value;
-	data+= '&autoangle='+document.GUI.label_autoangle.value;
-	data+= '&buffer='+document.GUI.label_buffer.value;
-	data+= '&antialias='+document.GUI.label_antialias.value;
-	data+= '&minfeaturesize='+document.GUI.label_minfeaturesize.value;
-	data+= '&maxfeaturesize='+document.GUI.label_maxfeaturesize.value;
-	data+= '&partials='+document.GUI.label_partials.value;
-	data+= '&maxlength='+document.GUI.label_maxlength.value;
-	data+= '&wrap='+document.GUI.label_wrap.value;
-	data+= '&the_force='+document.GUI.label_the_force.value;
-	ahah('index.php', data, new Array(document.getElementById('label_div'), document.getElementById('selected_label_div')), "");
+	form_fields = Array.prototype.slice.call(document.querySelectorAll('.labelFormField'));
+	var formData = new FormData();
+	for(i = 0; i < form_fields.length; i++){
+		if(form_fields[i].type != 'checkbox' || form_fields[i].checked){
+			formData.append(form_fields[i].name, form_fields[i].value);
+		}
+	}
+	formData.append('go', 'save_label');
+	formData.append('layer_id', document.GUI.selected_layer_id.value);
+	formData.append('class_id', document.GUI.class_1.value);
+	formData.append('label_id', label_id);
+	ahah('index.php', formData, new Array(document.getElementById('label_div'), document.getElementById('selected_label_div')), "");
 }
 
 function applyfont(){

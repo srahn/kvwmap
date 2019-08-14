@@ -3665,8 +3665,8 @@ echo '			</ul>
         echo'
           <tr>
             <td style="';
-            if($this->formvars['style_id'] == $this->classdaten[0]['Style'][$i]['Style_ID']){echo 'background-color:lightsteelblue; ';}
-            echo 'border-top: 1px solid #aaa;" id="td1_style_'.$this->classdaten[0]['Style'][$i]['Style_ID'].'" onclick="get_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');">';
+							if($this->formvars['style_id'] == $this->classdaten[0]['Style'][$i]['Style_ID']){echo 'background-color:lightsteelblue; ';}
+							echo 'cursor: pointer; border-top: 1px solid #aaa;" id="td1_style_'.$this->classdaten[0]['Style'][$i]['Style_ID'].'" onclick="get_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');">';
               echo '<img src="'.IMAGEURL.$this->getlegendimage($this->formvars['layer_id'], $this->classdaten[0]['Style'][$i]['Style_ID']).'"></td>';
               echo '<td align="right" id="td2_style_'.$this->classdaten[0]['Style'][$i]['Style_ID'].'" style="';
               if($this->formvars['style_id'] == $this->classdaten[0]['Style'][$i]['Style_ID']){echo 'background-color:lightsteelblue; ';}
@@ -3702,9 +3702,9 @@ echo '			</ul>
         for($i = 0; $i < count($this->classdaten[0]['Label']); $i++){
           echo'
             <tr>
-              <td ';
-              if($this->formvars['label_id'] == $this->classdaten[0]['Label'][$i]['Label_ID']){echo 'style="background-color:lightsteelblue;" ';}
-              echo' id="td1_label_'.$this->classdaten[0]['Label'][$i]['Label_ID'].'" onclick="get_label('.$this->classdaten[0]['Label'][$i]['Label_ID'].');">';
+              <td style="';
+								if($this->formvars['label_id'] == $this->classdaten[0]['Label'][$i]['Label_ID']){echo 'background-color:lightsteelblue; ';}
+								echo 'cursor: pointer" id="td1_label_'.$this->classdaten[0]['Label'][$i]['Label_ID'].'" onclick="get_label('.$this->classdaten[0]['Label'][$i]['Label_ID'].');">';
                 echo 'Label '.$this->classdaten[0]['Label'][$i]['Label_ID'].'</td>';
                 echo '<td align="right" id="td2_label_'.$this->classdaten[0]['Label'][$i]['Label_ID'].'" ';
                 if($this->formvars['label_id'] == $this->classdaten[0]['Label'][$i]['Label_ID']){echo 'style="background-color:lightsteelblue;" ';}
@@ -3822,7 +3822,7 @@ echo '			</ul>
         echo'
           <tr>
             <td class="px13">';
-              echo key($this->styledaten).'</td><td><input ';
+              echo key($this->styledaten).'</td><td><input class="styleFormField"';
               if($i === 0)echo 'onkeyup="if(event.keyCode != 8)get_style(this.value)"';
               echo ' name="style_'.key($this->styledaten).'" size="11" type="text" value="'.$this->styledaten[key($this->styledaten)].'">';
         echo'
@@ -3849,6 +3849,7 @@ echo '			</ul>
   }
 
   function get_label(){
+		include_once(CLASSPATH.'FormObject.php');
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->layer = $mapDB->get_Layer($this->formvars['layer_id']);
     $this->labeldaten = $mapDB->get_Label($this->formvars['label_id']);
@@ -3858,8 +3859,41 @@ echo '			</ul>
       for($i = 0; $i < count($this->labeldaten); $i++){
         echo'
           <tr>
-            <td class="px13">';
-              echo key($this->labeldaten).'</td><td><input name="label_'.key($this->labeldaten).'" size="11" type="text" value="'.$this->labeldaten[key($this->labeldaten)].'">';
+            <td class="px13">
+							'.key($this->labeldaten).'</td><td>';
+							switch(key($this->labeldaten)){
+								case 'position' : {
+									echo FormObject::createSelectField(
+											'label_'.key($this->labeldaten),
+											array(
+												array('value' => NULL, 'output' => ''),
+												array('value' => 0, 'output' => 'oben links'),
+												array('value' => 6, 'output' => 'oben mittig'),
+												array('value' => 2, 'output' => 'oben rechts'),
+												array('value' => 5, 'output' => 'mittig links'),
+												array('value' => 8, 'output' => 'mittig'),
+												array('value' => 4, 'output' => 'mittig rechts'),
+												array('value' => 3, 'output' => 'unten links'),
+												array('value' => 7, 'output' => 'unten mittig'),
+												array('value' => 1, 'output' => 'unten rechts'),
+												array('value' => 9, 'output' => 'auto')
+											),
+											$this->labeldaten[key($this->labeldaten)],
+											1,
+											"width: 87px",
+											"",
+											"",
+											"",
+											'labelFormField'
+										);
+							}break;
+							
+							case 'antialias' : case 'the_force' : case 'partials' :{
+								echo '<input class="labelFormField" name="label_'.key($this->labeldaten).'" type="checkbox" value="1" '.($this->labeldaten[key($this->labeldaten)] == 1 ? 'checked="true"' : '').'>';
+							}break;
+							
+              default : echo '<input class="labelFormField" name="label_'.key($this->labeldaten).'" size="11" type="text" value="'.$this->labeldaten[key($this->labeldaten)].'">';
+							}
         echo'
             </td>
           </tr>';
@@ -19000,37 +19034,37 @@ class db_mapObj{
   	$classes = $this->get_classes2style($formvars["style_id"]);
   	if(!in_array($formvars["class_id"], $classes))$this->addStyle2Class($formvars["class_id"], $formvars["style_id"], NULL);
     $sql ="UPDATE styles SET ";
-    if($formvars["symbol"]){$sql.="symbol = '" . $formvars["symbol"]."',";}else{$sql.="symbol = NULL,";}
-    $sql.="symbolname = '" . $formvars["symbolname"]."',";
-    if($formvars["size"] != ''){$sql.="size = '" . $formvars["size"]."',";}else{$sql.="size = NULL,";}
-    if($formvars["color"] != ''){$sql.="color = '" . $formvars["color"]."',";}else{$sql.="color = NULL,";}
-    if($formvars["backgroundcolor"] != ''){$sql.="backgroundcolor = '" . $formvars["backgroundcolor"]."',";}else{$sql.="backgroundcolor = NULL,";}
-    if($formvars["outlinecolor"] != ''){$sql.="outlinecolor = '" . $formvars["outlinecolor"]."',";}else{$sql.="outlinecolor = NULL,";}
-		if($formvars["colorrange"] != ''){$sql.="colorrange = '" . $formvars["colorrange"]."',";}else{$sql.="colorrange = NULL,";}
-		if($formvars["datarange"] != ''){$sql.="datarange = '" . $formvars["datarange"]."',";}else{$sql.="datarange = NULL,";}
-		if($formvars["rangeitem"] != ''){$sql.="rangeitem = '" . $formvars["rangeitem"]."',";}else{$sql.="rangeitem = NULL,";}
-    if($formvars["minsize"] != ''){$sql.="minsize = '" . $formvars["minsize"]."',";}else{$sql.="minsize = NULL,";}
-    if($formvars["maxsize"] != ''){$sql.="maxsize = '" . $formvars["maxsize"]."',";}else{$sql.="maxsize = NULL,";}
-		if($formvars["minscale"] != ''){$sql.="minscale = '" . $formvars["minscale"]."',";}else{$sql.="minscale = NULL,";}
-    if($formvars["maxscale"] != ''){$sql.="maxscale = '" . $formvars["maxscale"]."',";}else{$sql.="maxscale = NULL,";}
-    if($formvars["angle"] != ''){$sql.="angle = '" . $formvars["angle"]."',";}else{$sql.="angle = NULL,";}
-    $sql.="angleitem = '" . $formvars["angleitem"]."',";
-    if($formvars["antialias"] != ''){$sql.="antialias = '" . $formvars["antialias"]."',";}else{$sql.="antialias = NULL,";}
-    if($formvars["width"] != ''){$sql.="width = '" . $formvars["width"]."',";}else{$sql.="width = NULL,";}
-    if($formvars["minwidth"] != ''){$sql.="minwidth = '" . $formvars["minwidth"]."',";}else{$sql.="minwidth = NULL,";}
-    if($formvars["maxwidth"] != ''){$sql.="maxwidth = '" . $formvars["maxwidth"]."',";}else{$sql.="maxwidth = NULL,";}
-    if($formvars["offsetx"] != ''){$sql.="offsetx = '" . $formvars["offsetx"]."',";}else{$sql.="offsetx = NULL,";}
-    if($formvars["offsety"] != ''){$sql.="offsety = '" . $formvars["offsety"]."',";}else{$sql.="offsety = NULL,";}
-		if($formvars["polaroffset"] != ''){$sql.="polaroffset = '" . $formvars["polaroffset"]."',";}else{$sql.="polaroffset = NULL,";}
-    if($formvars["pattern"] != ''){$sql.="pattern = '" . $formvars["pattern"]."',";}else{$sql.="pattern = NULL,";}
-  	if($formvars["geomtransform"] != ''){$sql.="geomtransform = '" . $formvars["geomtransform"]."',";}else{$sql.="geomtransform = NULL,";}
-		if($formvars["gap"] != ''){$sql.="gap = " . $formvars["gap"].",";}else{$sql.="gap = NULL,";}
-		if($formvars["initialgap"] != ''){$sql.="initialgap = " . $formvars["initialgap"].",";}else{$sql.="initialgap = NULL,";}
-		if($formvars["opacity"] != ''){$sql.="opacity = " . $formvars["opacity"].",";}else{$sql.="opacity = NULL,";}
-		if($formvars["linecap"] != ''){$sql.="linecap = '" . $formvars["linecap"]."',";}else{$sql.="linecap = NULL,";}
-		if($formvars["linejoin"] != ''){$sql.="linejoin = '" . $formvars["linejoin"]."',";}else{$sql.="linejoin = NULL,";}
-		if($formvars["linejoinmaxsize"] != ''){$sql.="linejoinmaxsize = " . $formvars["linejoinmaxsize"].",";}else{$sql.="linejoinmaxsize = NULL,";}
-    $sql.="Style_ID = " . $formvars["new_style_id"];
+    if($formvars["style_symbol"]){$sql.="symbol = '" . $formvars["style_symbol"]."',";}else{$sql.="symbol = NULL,";}
+    $sql.="symbolname = '" . $formvars["style_symbolname"]."',";
+    if($formvars["style_size"] != ''){$sql.="size = '" . $formvars["style_size"]."',";}else{$sql.="size = NULL,";}
+    if($formvars["style_color"] != ''){$sql.="color = '" . $formvars["style_color"]."',";}else{$sql.="color = NULL,";}
+    if($formvars["style_backgroundcolor"] != ''){$sql.="backgroundcolor = '" . $formvars["style_backgroundcolor"]."',";}else{$sql.="backgroundcolor = NULL,";}
+    if($formvars["style_outlinecolor"] != ''){$sql.="outlinecolor = '" . $formvars["style_outlinecolor"]."',";}else{$sql.="outlinecolor = NULL,";}
+		if($formvars["style_colorrange"] != ''){$sql.="colorrange = '" . $formvars["style_colorrange"]."',";}else{$sql.="colorrange = NULL,";}
+		if($formvars["style_datarange"] != ''){$sql.="datarange = '" . $formvars["style_datarange"]."',";}else{$sql.="datarange = NULL,";}
+		if($formvars["style_rangeitem"] != ''){$sql.="rangeitem = '" . $formvars["style_rangeitem"]."',";}else{$sql.="rangeitem = NULL,";}
+    if($formvars["style_minsize"] != ''){$sql.="minsize = '" . $formvars["style_minsize"]."',";}else{$sql.="minsize = NULL,";}
+    if($formvars["style_maxsize"] != ''){$sql.="maxsize = '" . $formvars["style_maxsize"]."',";}else{$sql.="maxsize = NULL,";}
+		if($formvars["style_minscale"] != ''){$sql.="minscale = '" . $formvars["style_minscale"]."',";}else{$sql.="minscale = NULL,";}
+    if($formvars["style_maxscale"] != ''){$sql.="maxscale = '" . $formvars["style_maxscale"]."',";}else{$sql.="maxscale = NULL,";}
+    if($formvars["style_angle"] != ''){$sql.="angle = '" . $formvars["style_angle"]."',";}else{$sql.="angle = NULL,";}
+    $sql.="angleitem = '" . $formvars["style_angleitem"]."',";
+    if($formvars["style_antialias"] != ''){$sql.="antialias = '" . $formvars["style_antialias"]."',";}else{$sql.="antialias = NULL,";}
+    if($formvars["style_width"] != ''){$sql.="width = '" . $formvars["style_width"]."',";}else{$sql.="width = NULL,";}
+    if($formvars["style_minwidth"] != ''){$sql.="minwidth = '" . $formvars["style_minwidth"]."',";}else{$sql.="minwidth = NULL,";}
+    if($formvars["style_maxwidth"] != ''){$sql.="maxwidth = '" . $formvars["style_maxwidth"]."',";}else{$sql.="maxwidth = NULL,";}
+    if($formvars["style_offsetx"] != ''){$sql.="offsetx = '" . $formvars["style_offsetx"]."',";}else{$sql.="offsetx = NULL,";}
+    if($formvars["style_offsety"] != ''){$sql.="offsety = '" . $formvars["style_offsety"]."',";}else{$sql.="offsety = NULL,";}
+		if($formvars["style_polaroffset"] != ''){$sql.="polaroffset = '" . $formvars["style_polaroffset"]."',";}else{$sql.="polaroffset = NULL,";}
+    if($formvars["style_pattern"] != ''){$sql.="pattern = '" . $formvars["style_pattern"]."',";}else{$sql.="pattern = NULL,";}
+  	if($formvars["style_geomtransform"] != ''){$sql.="geomtransform = '" . $formvars["style_geomtransform"]."',";}else{$sql.="geomtransform = NULL,";}
+		if($formvars["style_gap"] != ''){$sql.="gap = " . $formvars["style_gap"].",";}else{$sql.="gap = NULL,";}
+		if($formvars["style_initialgap"] != ''){$sql.="initialgap = " . $formvars["style_initialgap"].",";}else{$sql.="initialgap = NULL,";}
+		if($formvars["style_opacity"] != ''){$sql.="opacity = " . $formvars["style_opacity"].",";}else{$sql.="opacity = NULL,";}
+		if($formvars["style_linecap"] != ''){$sql.="linecap = '" . $formvars["style_linecap"]."',";}else{$sql.="linecap = NULL,";}
+		if($formvars["style_linejoin"] != ''){$sql.="linejoin = '" . $formvars["style_linejoin"]."',";}else{$sql.="linejoin = NULL,";}
+		if($formvars["style_linejoinmaxsize"] != ''){$sql.="linejoinmaxsize = " . $formvars["style_linejoinmaxsize"].",";}else{$sql.="linejoinmaxsize = NULL,";}
+    $sql.="Style_ID = " . $formvars["style_Style_ID"];
     $sql.=" WHERE Style_ID = " . $formvars["style_id"];
 		#echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->save_Style - Speichern der Styledaten:<br>" . $sql,4);
@@ -19052,36 +19086,35 @@ class db_mapObj{
 
   function save_Label($formvars){
     $sql ="UPDATE labels SET ";
-    if($formvars["font"]){$sql.="font = '" . $formvars["font"]."',";}
-    if($formvars["type"]){$sql.="type = '" . $formvars["type"]."',";}
-		if($formvars["type"]){$sql.="type = '".$formvars["type"]."',";}else{$sql.="type = NULL,";}
-    if($formvars["color"]){$sql.="color = '" . $formvars["color"]."',";}
-    if($formvars["outlinecolor"] != ''){$sql.="outlinecolor = '" . $formvars["outlinecolor"]."',";}else{$sql.="outlinecolor = NULL,";}
-    if($formvars["shadowcolor"] != ''){$sql.="shadowcolor = '" . $formvars["shadowcolor"]."',";}else{$sql.="shadowcolor = NULL,";}
-    if($formvars["shadowsizex"] != ''){$sql.="shadowsizex = '" . $formvars["shadowsizex"]."',";}else{$sql.="shadowsizex = NULL,";}
-    if($formvars["shadowsizey"] != ''){$sql.="shadowsizey = '" . $formvars["shadowsizey"]."',";}else{$sql.="shadowsizey = NULL,";}
-    if($formvars["backgroundcolor"] != ''){$sql.="backgroundcolor = '" . $formvars["backgroundcolor"]."',";}else{$sql.="backgroundcolor = NULL,";}
-    if($formvars["backgroundshadowcolor"] != ''){$sql.="backgroundshadowcolor = '" . $formvars["backgroundshadowcolor"]."',";}else{$sql.="backgroundshadowcolor = NULL,";}
-    if($formvars["backgroundshadowsizex"] != ''){$sql.="backgroundshadowsizex = '" . $formvars["backgroundshadowsizex"]."',";}else{$sql.="backgroundshadowsizex = NULL,";}
-    if($formvars["backgroundshadowsizey"] != ''){$sql.="backgroundshadowsizey = '" . $formvars["backgroundshadowsizey"]."',";}else{$sql.="backgroundshadowsizey = NULL,";}
-    if($formvars["size"]){$sql.="size = '" . $formvars["size"]."',";}
-    if($formvars["minsize"]){$sql.="minsize = '" . $formvars["minsize"]."',";}
-    if($formvars["maxsize"]){$sql.="maxsize = '" . $formvars["maxsize"]."',";}
-    if($formvars["position"]){$sql.="position = '" . $formvars["position"]."',";}
-    if($formvars["offsetx"] != ''){$sql.="offsetx = '" . $formvars["offsetx"]."',";}else{$sql.="offsetx = NULL,";}
-    if($formvars["offsety"] != ''){$sql.="offsety = '" . $formvars["offsety"]."',";}else{$sql.="offsety = NULL,";}
-    if($formvars["angle"] != ''){$sql.="angle = '" . $formvars["angle"]."',";}else{$sql.="angle = NULL,";}
-    if($formvars["autoangle"]){$sql.="autoangle = '" . $formvars["autoangle"]."',";}
-		else $sql.="autoangle = NULL,";
-    if($formvars["buffer"]){$sql.="buffer = '" . $formvars["buffer"]."',";}
-    if($formvars["antialias"] != ''){$sql.="antialias = '" . $formvars["antialias"]."',";}else{$sql.="antialias = NULL,";}
-    if($formvars["minfeaturesize"]){$sql.="minfeaturesize = '" . $formvars["minfeaturesize"]."',";}
-    if($formvars["maxfeaturesize"]){$sql.="maxfeaturesize = '" . $formvars["maxfeaturesize"]."',";}
-    if($formvars["partials"] != ''){$sql.="partials = '" . $formvars["partials"]."',";}
-		if($formvars["maxlength"] != ''){$sql.="maxlength = '" . $formvars["maxlength"]."',";}
-    if($formvars["wrap"] != ''){$sql.="wrap = '" . $formvars["wrap"]."',";}
-    if($formvars["the_force"] != ''){$sql.="the_force = '" . $formvars["the_force"]."',";}
-    $sql.="Label_ID = " . $formvars["new_label_id"];
+    if($formvars["label_font"]){$sql.="font = '" . $formvars["label_font"]."',";}
+    if($formvars["label_type"]){$sql.="type = '" . $formvars["label_type"]."',";}
+		if($formvars["label_type"]){$sql.="type = '".$formvars["label_type"]."',";}else{$sql.="type = NULL,";}
+    if($formvars["label_color"]){$sql.="color = '" . $formvars["label_color"]."',";}
+    if($formvars["label_outlinecolor"] != ''){$sql.="outlinecolor = '" . $formvars["label_outlinecolor"]."',";}else{$sql.="outlinecolor = NULL,";}
+    if($formvars["label_shadowcolor"] != ''){$sql.="shadowcolor = '" . $formvars["label_shadowcolor"]."',";}else{$sql.="shadowcolor = NULL,";}
+    if($formvars["label_shadowsizex"] != ''){$sql.="shadowsizex = '" . $formvars["label_shadowsizex"]."',";}else{$sql.="shadowsizex = NULL,";}
+    if($formvars["label_shadowsizey"] != ''){$sql.="shadowsizey = '" . $formvars["label_shadowsizey"]."',";}else{$sql.="shadowsizey = NULL,";}
+    if($formvars["label_backgroundcolor"] != ''){$sql.="backgroundcolor = '" . $formvars["label_backgroundcolor"]."',";}else{$sql.="backgroundcolor = NULL,";}
+    if($formvars["label_backgroundshadowcolor"] != ''){$sql.="backgroundshadowcolor = '" . $formvars["label_backgroundshadowcolor"]."',";}else{$sql.="backgroundshadowcolor = NULL,";}
+    if($formvars["label_backgroundshadowsizex"] != ''){$sql.="backgroundshadowsizex = '" . $formvars["label_backgroundshadowsizex"]."',";}else{$sql.="backgroundshadowsizex = NULL,";}
+    if($formvars["label_backgroundshadowsizey"] != ''){$sql.="backgroundshadowsizey = '" . $formvars["label_backgroundshadowsizey"]."',";}else{$sql.="backgroundshadowsizey = NULL,";}
+    if($formvars["label_size"]){$sql.="size = '" . $formvars["label_size"]."',";}
+    if($formvars["label_minsize"]){$sql.="minsize = '" . $formvars["label_minsize"]."',";}
+    if($formvars["label_maxsize"]){$sql.="maxsize = '" . $formvars["label_maxsize"]."',";}
+    if($formvars["label_position"]){$sql.="position = '" . $formvars["label_position"]."',";}
+    if($formvars["label_offsetx"] != ''){$sql.="offsetx = '" . $formvars["label_offsetx"]."',";}else{$sql.="offsetx = NULL,";}
+    if($formvars["label_offsety"] != ''){$sql.="offsety = '" . $formvars["label_offsety"]."',";}else{$sql.="offsety = NULL,";}
+    if($formvars["label_angle"] != ''){$sql.="angle = '" . $formvars["label_angle"]."',";}else{$sql.="angle = NULL,";}
+    if($formvars["label_autoangle"]){$sql.="autoangle = '" . $formvars["label_autoangle"]."',";}else $sql.="autoangle = NULL,";
+    if($formvars["label_buffer"]){$sql.="buffer = '" . $formvars["label_buffer"]."',";}
+    if($formvars["label_antialias"] != ''){$sql.="antialias = '" . $formvars["label_antialias"]."',";}else{$sql.="antialias = NULL,";}
+    if($formvars["label_minfeaturesize"]){$sql.="minfeaturesize = '" . $formvars["label_minfeaturesize"]."',";}
+    if($formvars["label_maxfeaturesize"]){$sql.="maxfeaturesize = '" . $formvars["label_maxfeaturesize"]."',";}
+    if($formvars["label_partials"] != ''){$sql.="partials = '" . $formvars["label_partials"]."',";}
+		if($formvars["label_maxlength"] != ''){$sql.="maxlength = '" . $formvars["label_maxlength"]."',";}
+    if($formvars["label_wrap"] != ''){$sql.="wrap = '" . $formvars["label_wrap"]."',";}
+    if($formvars["label_the_force"] != ''){$sql.="the_force = '" . $formvars["label_the_force"]."',";}
+    $sql.="Label_ID = " . $formvars["label_Label_ID"];
     $sql.=" WHERE Label_ID = " . $formvars["label_id"];
     $this->debug->write("<p>file:kvwmap class:db_mapObj->save_Label - Speichern der Labeldaten:<br>" . $sql,4);
     $query=mysql_query($sql);
