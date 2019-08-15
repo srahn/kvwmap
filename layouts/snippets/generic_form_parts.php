@@ -69,7 +69,7 @@
 		if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
 			if(substr($attributes['tooltip'][$j], 0, 4) == 'http')$title_link = 'href="'.$attributes['tooltip'][$j].'" target="_blank"';
 			else $title_link = 'href="javascript:void(0);"';
-			$datapart .= '<td align="right"><a '.$title_link.' title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
+			$datapart .= '<td align="right"><a '.$title_link.' title="'.htmlentities($attributes['tooltip'][$j]).'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
 		}
 		if(in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
 			$datapart .= '<td align="right">'.calendar($attributes['type'][$j], $layer_id.'_'.$attributes['name'][$j].'_'.$k, $attributes['privileg'][$j]).'</td>';
