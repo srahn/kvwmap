@@ -677,12 +677,6 @@
 				}break;
 				
 				default : {
-					if ($value == 't') {
-						$value = $gui->strYes;
-					}
-					if ($value == 'f') {
-						$value = $gui->strNo;
-					}
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' readonly style="display:none;"';
@@ -699,11 +693,12 @@
 					if($size)$datapart .= ' size="'.$size.'"';
 					$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
 					if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
+						$angezeigter_value = (($attributes['type'][$j] == 'bool' OR $attributes['form_element_type'][$j] == 'Editiersperre') ? ($value == 't' ? $gui->strYes : $gui->strNo) : $value);
 						if($size == 12){		// spaltenweise
-							$datapart .= htmlspecialchars($value);
+							$datapart .= htmlspecialchars($angezeigter_value);
 						}
 						else{								// zeilenweise
-							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; font-size: '.$fontsize.'px;">' . htmlspecialchars($value) . '</div>';
+							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; font-size: '.$fontsize.'px;">' . htmlspecialchars($angezeigter_value) . '</div>';
 						}
 					}
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
