@@ -887,9 +887,7 @@ include('funktionen/input_check_functions.php');
 	}
 
 	change_orderby = function(attribute, layer_id){
-		if(enclosingForm.go_backup.value != ''){
-			enclosingForm.go.value = enclosingForm.go_backup.value;
-		}
+		enclosingForm.go.value = 'get_last_query';
 		if(document.getElementById('orderby'+layer_id).value == attribute){
 			document.getElementById('orderby'+layer_id).value = attribute+' DESC';
 		}
