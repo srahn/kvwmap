@@ -178,6 +178,7 @@
 				}				
 				
 				if($layer['attributes']['visible'][$j]){
+					if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
 ?>
 					<tr class="<? if($layer['attributes']['raster_visibility'][$j] == 1)echo 'tr_show'; else echo 'tr_hide'; ?>">
 <?				if($layer['attributes']['type'][$j] != 'geometry'){
@@ -250,7 +251,8 @@
 						</div>
 					</td>
 				</tr>
-<?				}
+<?					}
+					}
 					else{
 						$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
 					}

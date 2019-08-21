@@ -83,26 +83,28 @@
 
 				if($layer['attributes']['visible'][$j] AND ($this->new_entry != true OR $layer['attributes']['dont_use_for_new'][$j] != -1)){
 					if($layer['attributes']['type'][$j] != 'geometry'){
-						if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
-						if($layer['attributes']['alias'][$j] == '')$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
-						
-						if($layer['attributes']['arrangement'][$j] != 1)$datapart .= '<tr id="tr_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'">';							# wenn Attribut nicht daneben -> neue Zeile beginnen
-						if($layer['attributes']['labeling'][$j] != 2){
-							$td = '	<td class="gle-attribute-name" id="'.'name_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'"'; if($layer['attributes']['labeling'][$j] == 1 AND $layer['attributes']['arrangement'][$j] == 1 AND $layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20" ';if($layer['attributes']['group'][0] != '' AND $layer['attributes']['arrangement'][$j] != 1)$td .= 'width="1%">';else $td.='width="1%">';
-							$td.= 			attribute_name($layer['Layer_ID'], $layer['attributes'], $j, $k, $this->user->rolle->fontsize_gle, false);
+						if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
+							if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
+							if($layer['attributes']['alias'][$j] == '')$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
+							
+							if($layer['attributes']['arrangement'][$j] != 1)$datapart .= '<tr id="tr_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'">';							# wenn Attribut nicht daneben -> neue Zeile beginnen
+							if($layer['attributes']['labeling'][$j] != 2){
+								$td = '	<td class="gle-attribute-name" id="'.'name_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'"'; if($layer['attributes']['labeling'][$j] == 1 AND $layer['attributes']['arrangement'][$j] == 1 AND $layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20" ';if($layer['attributes']['group'][0] != '' AND $layer['attributes']['arrangement'][$j] != 1)$td .= 'width="1%">';else $td.='width="1%">';
+								$td.= 			attribute_name($layer['Layer_ID'], $layer['attributes'], $j, $k, $this->user->rolle->fontsize_gle, false);
+								$td.= '	</td>';
+								if($nl AND $layer['attributes']['labeling'][$j] != 1)$next_line .= $td; else $datapart .= $td;
+							}
+							if($layer['attributes']['labeling'][$j] == 1)$nl = true;										# Attributname soll oben stehen -> alle weiteren tds für die nächste Zeile aufsammeln
+							$td = '	<td width="100%" id="value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" class="gle_attribute_value"'; if($layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20"'; $td .= '>';												
+							$td.= 			attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, false, NULL, NULL, NULL, $this->subform_classname);
 							$td.= '	</td>';
-							if($nl AND $layer['attributes']['labeling'][$j] != 1)$next_line .= $td; else $datapart .= $td;
-						}
-						if($layer['attributes']['labeling'][$j] == 1)$nl = true;										# Attributname soll oben stehen -> alle weiteren tds für die nächste Zeile aufsammeln
-						$td = '	<td width="100%" id="value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" class="gle_attribute_value"'; if($layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20"'; $td .= '>';												
-						$td.= 			attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, false, NULL, NULL, NULL, $this->subform_classname);
-						$td.= '	</td>';
-						if($nl)$next_line .= $td; else $datapart .= $td;
-						if($layer['attributes']['arrangement'][$j+1] != 1)$datapart .= '</tr>';						# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
-						if($layer['attributes']['arrangement'][$j+1] != 1 AND $nl){												# die aufgesammelten tds in neuer Zeile ausgeben
-							$datapart .= '<tr>'.$next_line.'</tr>';
-							$next_line = '';
-							$nl = false;
+							if($nl)$next_line .= $td; else $datapart .= $td;
+							if($layer['attributes']['arrangement'][$j+1] != 1)$datapart .= '</tr>';						# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
+							if($layer['attributes']['arrangement'][$j+1] != 1 AND $nl){												# die aufgesammelten tds in neuer Zeile ausgeben
+								$datapart .= '<tr>'.$next_line.'</tr>';
+								$next_line = '';
+								$nl = false;
+							}
 						}
 					}
 		  		else{

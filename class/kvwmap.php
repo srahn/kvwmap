@@ -16977,7 +16977,7 @@ class db_mapObj{
 							$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
 							for($k = 1; $k < count($subform); $k++) {
 								$attributes['subform_fkeys'][$i][] = $subform[$k];
-								$attributes['visible'][$attributes['indizes'][$subform[$k]]] = 0;
+								$attributes['SubFormFK_hidden'][$attributes['indizes'][$subform[$k]]] = 1;
 							}
 							if ($options[1] != '') {
 								if ($options[1] == 'no_new_window') {
