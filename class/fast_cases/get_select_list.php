@@ -122,21 +122,22 @@ class GUI {
 			$sql = str_replace('<requires>'.$attributenames[$i].'</requires>', "'".$attributevalues[$i]."'", $sql);
 		}
 		#echo $sql;
-		$ret=$layerdb->execSQL($sql,4,0);
-		if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
-		switch($this->formvars['type']) {
-			case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
-				$html = '>';			# Workaround für dummen IE Bug
-				$html .= '<option value="">-- Bitte Auswählen --</option>';
-				while($rs = pg_fetch_array($ret[1])){
-					$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
-				}
-			}break;
-			
-			case 'text' : {								#  ein Textfeld soll nur mit dem ersten Wert aufgefüllt werden
-				$rs = pg_fetch_array($ret[1]);
-				$html = $rs['output'];
-			}break;
+		@$ret=$layerdb->execSQL($sql,4,0);
+		if (!$ret[0]) {
+			switch($this->formvars['type']) {
+				case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
+					$html = '>';			# Workaround für dummen IE Bug
+					$html .= '<option value="">-- Bitte Auswählen --</option>';
+					while($rs = pg_fetch_array($ret[1])){
+						$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
+					}
+				}break;
+				
+				case 'text' : {								#  ein Textfeld soll nur mit dem ersten Wert aufgefüllt werden
+					$rs = pg_fetch_array($ret[1]);
+					$html = $rs['output'];
+				}break;
+			}
 		}
 		echo $html;
   }
@@ -918,7 +919,6 @@ class pgdatabase {
       //$query=0;
       if ($query==0) {
 				$errormessage = pg_last_error($this->dbConn);
-				header('error: true');		// damit ajax-Requests das auch mitkriegen
         $ret[0]=1;
         $ret[1]="Fehler bei SQL Anweisung:<br><br>\n\n".$sql."\n\n<br><br>".$errormessage;
         echo "<br><b>".$ret[1]."</b>";
