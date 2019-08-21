@@ -9160,7 +9160,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$this->success = $ret['success'];
 				}
 				else {
-					array_merge($results, $this->Datensatz_Loeschen($layerdb, $layer, $element[3]));
+					$results = $results + $this->Datensatz_Loeschen($layerdb, $layer, $element[3]);
 				}
 			}
 		}
@@ -9181,7 +9181,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			if ($this->formvars['embedded'] == '') {
 				if ($this->success == false) {
 					foreach ($results AS $result) {
-						$this->add_message($result->type, $result->msg);
+						$this->add_message($result['type'], $result['msg']);
 					}
 				}
 				else {
@@ -9272,14 +9272,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 				# Frage Meldung über SQL result ab
 				$sql_result = pg_fetch_row($ret['query']);
-				if ($sql_result['success']) {
-					if ($sql_result['msg']) {
-						$results[] = array('type' => 'info', 'msg' => $sql_result['msg']);
-					}
+				if ($sql_result[0] != '') {
+					$results[] = array('type' => 'info', 'msg' => $sql_result[0]);
 				}
 				# Prüfe ob Löschung kein Datensatz betroffen hat
 				if (pg_affected_rows($ret['query']) == 0) {
-					$results[] = array('type' => 'error', 'msg' => '<br>Datensatz wurde nicht gelöscht, weil er nicht existiert!<br>');
+					$results[] = array('type' => 'error', 'msg' => '<br>Datensatz wurde nicht gelöscht.<br>');
 					$this->success = false;
 				}
 				else {
