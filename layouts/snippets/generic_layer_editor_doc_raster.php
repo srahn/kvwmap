@@ -64,15 +64,17 @@
 <?
 		}
   	$doit = false;
-	  $anzObj = count($this->qlayerset[$i]['shape']);
-	  if ($anzObj > 0) {
-	  	$this->found = 'true';
-	  	$doit = true;
-	  }
-	  if($this->new_entry == true){
-	  	$anzObj = 1;
-	  	$doit = true;
-	  }
+	  $anzObj = count($layer['shape']);
+		if ($anzObj > 0) {
+			$this->found = 'true';
+			$k = 0;
+			$doit = true;
+		}
+		if($this->new_entry == true){
+			$anzObj = 0;
+			$k = -1;
+			$doit = true;
+		}
 	  if($doit == true){
 ?>
 <table border="0" cellspacing="0" cellpadding="2">
@@ -89,7 +91,7 @@
 	$privileg = '';
 	if($this->formvars['embedded_subformPK'] == '')$records_per_row = 5;
 	else $records_per_row = 3;
-	for ($k=0;$k<$anzObj;$k++) {
+	for ($k;$k<$anzObj;$k++) {
 		$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|'; ?>
 		
 		<div <? if($this->new_entry != true)echo 'class="raster_record" onclick="open_record(event, this)"'; ?> id="record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>" <? if($k%5==0)echo 'style="clear: both;"'?>>
