@@ -3519,21 +3519,22 @@ echo '			</ul>
 			$sql = str_replace('<requires>'.$attributenames[$i].'</requires>', "'".$attributevalues[$i]."'", $sql);
 		}
 		#echo $sql;
-		$ret=$layerdb->execSQL($sql,4,0);
-		if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
-		switch($this->formvars['type']) {
-			case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
-				$html = '>';			# Workaround für dummen IE Bug
-				$html .= '<option value="">-- Auswahl --</option>';
-				while($rs = pg_fetch_array($ret[1])){
-					$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
-				}
-			}break;
-			
-			case 'text' : {								#  ein Textfeld soll nur mit dem ersten Wert aufgefüllt werden
-				$rs = pg_fetch_array($ret[1]);
-				$html = $rs['output'];
-			}break;
+		@$ret=$layerdb->execSQL($sql,4,0);
+		if (!$ret[0]) {
+			switch($this->formvars['type']) {
+				case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
+					$html = '>';			# Workaround für dummen IE Bug
+					$html .= '<option value="">-- Bitte Auswählen --</option>';
+					while($rs = pg_fetch_array($ret[1])){
+						$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
+					}
+				}break;
+				
+				case 'text' : {								#  ein Textfeld soll nur mit dem ersten Wert aufgefüllt werden
+					$rs = pg_fetch_array($ret[1]);
+					$html = $rs['output'];
+				}break;
+			}
 		}
 		echo $html;
   }
