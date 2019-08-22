@@ -166,35 +166,37 @@ include('funktionen/input_check_functions.php');
 			value = elements[i].value;
 			name = elements[i].name;
 			type = elements[i].type;
-			if (type == 'file') { // Spezialfall bei Datei-Upload-Feldern:
-				if (value != '') {
-					value = 'file:' + name; // wenn value vorhanden, wurde eine Datei ausgewählt, dann den Namen des Input-Feldes einsammeln + einem Prefix "file:"
-				}
-				else {
-					old_file_path = document.getElementsByName(name+'_alt');
-					if (old_file_path[0] != undefined) {
-						value = old_file_path[0].value; // ansonsten den gespeicherten alten Dateipfad
-					}
-				}
-			}
-			if (!is_array) { // Datentyp
-				if (value == '') {
-					value = 'null';
-				}
-				else {
-					if (value.substring(0,1) != '{') {
-						value = '"' + value + '"';
-					}
-				}
-				id_parts = elements[i].id.split('_');
-				if(id_parts.length == 3)attribute_name = id_parts[1];		// normales Attribut
-				else attribute_name = id_parts.pop();										// Nutzerdatentyp-Attribut
-				values.push('"' + attribute_name + '":' + value);
-			}
-			else {
-				if (i > 0) { // Array (hier ist das erste Element ein Dummy -> auslassen)
+			if(name.slice(-4) != '_alt'){
+				if (type == 'file') { // Spezialfall bei Datei-Upload-Feldern:
 					if (value != '') {
-						values.push(value);
+						value = 'file:' + name; // wenn value vorhanden, wurde eine Datei ausgewählt, dann den Namen des Input-Feldes einsammeln + einem Prefix "file:"
+					}
+					else {
+						old_file_path = document.getElementsByName(name+'_alt');
+						if (old_file_path[0] != undefined) {
+							value = old_file_path[0].value; // ansonsten den gespeicherten alten Dateipfad
+						}
+					}
+				}
+				if (!is_array) { // Datentyp
+					if (value == '') {
+						value = 'null';
+					}
+					else {
+						if (value.substring(0,1) != '{') {
+							value = '"' + value + '"';
+						}
+					}
+					id_parts = elements[i].id.split('_');
+					if(id_parts.length == 3)attribute_name = id_parts[1];		// normales Attribut
+					else attribute_name = id_parts.pop();										// Nutzerdatentyp-Attribut
+					values.push('"' + attribute_name + '":' + value);
+				}
+				else {
+					if (i > 0) { // Array (hier ist das erste Element ein Dummy -> auslassen)
+						if (value != '') {
+							values.push(value);
+						}
 					}
 				}
 			}
@@ -446,7 +448,7 @@ include('funktionen/input_check_functions.php');
 		form_fieldstring = '';
 		var formData = new FormData();
   	for(i = 0; i < form_fields.length; i++){
-			form_fieldstring += form_fields[i].name+'|';
+			if(form_fields[i].name.slice(-4) != '_alt')form_fieldstring += form_fields[i].name+'|';
   		field = form_fields[i].name.split(';');
   		if(field[4] != 'Dokument' && form_fields[i].readOnly != true && field[5] == '0' && form_fields[i].value == ''){
   			message('Das Feld '+form_fields[i].title+' erfordert eine Eingabe.');
@@ -457,7 +459,7 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
 			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
-				if(form_fields[i].type == 'file')value = form_fields[i].files[0];
+				if(form_fields[i].type == 'file' && form_fields[i].files[0] != undefined)value = form_fields[i].files[0];
 				else value = form_fields[i].value;
 				formData.append(form_fields[i].name, value);
 			}
@@ -481,7 +483,7 @@ include('funktionen/input_check_functions.php');
 		form_fieldstring = '';
 		var formData = new FormData();
   	for(i = 0; i < form_fields.length; i++){
-			form_fieldstring += form_fields[i].name+'|';
+			if(form_fields[i].name.slice(-4) != '_alt')form_fieldstring += form_fields[i].name+'|';
   		field = form_fields[i].name.split(';');
   		if(field[4] != 'Dokument' && form_fields[i].readOnly != true && field[5] == '0' && form_fields[i].value == ''){
   			message('Das Feld '+form_fields[i].title+' erfordert eine Eingabe.');
@@ -492,7 +494,7 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
 			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
-				if(form_fields[i].type == 'file')value = form_fields[i].files[0];
+				if(form_fields[i].type == 'file' && form_fields[i].files[0] != undefined)value = form_fields[i].files[0];
 				else value = form_fields[i].value;
 				formData.append(form_fields[i].name, value);
 			}
