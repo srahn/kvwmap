@@ -1460,7 +1460,7 @@ class GUI {
 						if($pos !== false)$layersection = substr($layersection, 0, $pos);
 						$layers = explode(',', $layersection);
 						for($l = 0; $l < count($layers); $l++){
-							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
+							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
 						}
 					}
 					else {
