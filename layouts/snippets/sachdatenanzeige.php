@@ -62,13 +62,15 @@ for($i=0;$i<$anzLayer;$i++){
 	if($i > 0){
 		echo '<hr style="width: 100%; height: 3px; margin: 15 0; color: '.BG_GLEHEADER.'; background: '.BG_GLEHEADER.';">';
 	}
-	if ($this->qlayerset[$i]['template']=='') {
+	$template = $this->qlayerset[$i]['template'];
+	if (in_array($template, array('', 'generic_layer_editor.php', 'generic_layer_editor_doc_raster.php'))) {
 		if($this->qlayerset[$i]['connectiontype'] == MS_WMS){
 			include(SNIPPETS.'getfeatureinfo.php');			# getfeatureinfo bei WMS
 		}
 		else{
+			if($template == '')$template = 'generic_layer_editor_2.php';
 			if($this->qlayerset[$i]['gle_view'] == '1'){
-				include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
+				include(SNIPPETS.$template);			# Attribute zeilenweise bzw. Raster-Template
 			}
 			else{
 				include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
@@ -76,17 +78,17 @@ for($i=0;$i<$anzLayer;$i++){
 		}
 	}
 	else{
-		if(is_file(SNIPPETS.$this->qlayerset[$i]['template'])){
-   		include(SNIPPETS.$this->qlayerset[$i]['template']);
+		if(is_file(SNIPPETS.$template)){			# ein eigenes custom Template
+   		include(SNIPPETS.$template);
     }
 		else{
-			if(file_exists(PLUGINS.$this->qlayerset[$i]['template'])){
-				include(PLUGINS.$this->qlayerset[$i]['template']);			# Pluginviews
+			if(file_exists(PLUGINS.$template)){
+				include(PLUGINS.$template);			# Pluginviews
 			}
    	 	else {
    	 	 #Version 1.6.5 pk 2007-04-17
    	 	 echo '<p>Das in den stellenbezogenen Layereigenschaften angegebene Templatefile:';
-   	 	 echo '<br><span class="fett">'.SNIPPETS.$this->qlayerset[$i]['template'].'</span>';
+   	 	 echo '<br><span class="fett">'.SNIPPETS.$template.'</span>';
    	 	 echo '<br>kann nicht gefunden werden. Überprüfen Sie ob der angegebene Dateiname richtig ist oder eventuell Leerzeichen angegeben sind.';
    	 	 echo ' Die Templatezuordnung für die Sachdatenanzeige ändern Sie über Stellen anzeigen, Ändern, Layer bearbeiten, stellenbezogen bearbeiten.';
    	 	 #echo '<p><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&selected_stelle_id='.$this->Stelle->id.'&stellen_name='.$this->Stelle->Bezeichnung.'">zum Stellenbezogener Layereditor</a> (nur mit Berechtigung mÃ¶glich)';
