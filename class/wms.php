@@ -32,7 +32,7 @@ class wms_request_obj {
 	function parseCapabilities($onlineResource){
 		if(strpos($onlineResource, '?') !== false)$onlineResource .= '&';
 		else $onlineResource .= '?';
-		$doc = file_get_contents($onlineResource.'SERVICE=WMS&VERSION=1.1.0&REQUEST=GetCapabilities');
+		$doc = url_get_contents($onlineResource.'SERVICE=WMS&VERSION=1.1.0&REQUEST=GetCapabilities');
 		$parser = xml_parser_create();
 		xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE,1);
 		xml_parse_into_struct($parser, $doc, $values, $index);

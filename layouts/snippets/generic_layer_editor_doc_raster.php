@@ -64,15 +64,17 @@
 <?
 		}
   	$doit = false;
-	  $anzObj = count($this->qlayerset[$i]['shape']);
-	  if ($anzObj > 0) {
-	  	$this->found = 'true';
-	  	$doit = true;
-	  }
-	  if($this->new_entry == true){
-	  	$anzObj = 1;
-	  	$doit = true;
-	  }
+	  $anzObj = count($layer['shape']);
+		if ($anzObj > 0) {
+			$this->found = 'true';
+			$k = 0;
+			$doit = true;
+		}
+		if($this->new_entry == true){
+			$anzObj = 0;
+			$k = -1;
+			$doit = true;
+		}
 	  if($doit == true){
 ?>
 <table border="0" cellspacing="0" cellpadding="2">
@@ -89,7 +91,7 @@
 	$privileg = '';
 	if($this->formvars['embedded_subformPK'] == '')$records_per_row = 5;
 	else $records_per_row = 3;
-	for ($k=0;$k<$anzObj;$k++) {
+	for ($k;$k<$anzObj;$k++) {
 		$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|'; ?>
 		
 		<div <? if($this->new_entry != true)echo 'class="raster_record" onclick="open_record(event, this)"'; ?> id="record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>" <? if($k%5==0)echo 'style="clear: both;"'?>>
@@ -176,6 +178,7 @@
 				}				
 				
 				if($layer['attributes']['visible'][$j]){
+					if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
 ?>
 					<tr class="<? if($layer['attributes']['raster_visibility'][$j] == 1)echo 'tr_show'; else echo 'tr_hide'; ?>">
 <?				if($layer['attributes']['type'][$j] != 'geometry'){
@@ -230,7 +233,7 @@
 		  				}
 		  			}
 		  			else{
-							echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle);
+							echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, false, NULL, NULL, NULL, $this->subform_classname);
 		  			}
 						if($layer['attributes']['privileg'][$j] >= '0' AND !($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld')){
 							$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'|';
@@ -248,7 +251,8 @@
 						</div>
 					</td>
 				</tr>
-<?				}
+<?					}
+					}
 					else{
 						$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
 					}

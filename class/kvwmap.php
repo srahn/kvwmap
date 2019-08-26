@@ -820,7 +820,7 @@ echo '			</ul>
 						if($pos !== false)$layersection = substr($layersection, 0, $pos);
 						$layers = explode(',', $layersection);
 						for($l = 0; $l < count($layers); $l++){
-							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
+							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
 						}
 					}
 					else {
@@ -3519,21 +3519,22 @@ echo '			</ul>
 			$sql = str_replace('<requires>'.$attributenames[$i].'</requires>', "'".$attributevalues[$i]."'", $sql);
 		}
 		#echo $sql;
-		$ret=$layerdb->execSQL($sql,4,0);
-		if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
-		switch($this->formvars['type']) {
-			case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
-				$html = '>';			# Workaround für dummen IE Bug
-				$html .= '<option value="">-- Auswahl --</option>';
-				while($rs = pg_fetch_array($ret[1])){
-					$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
-				}
-			}break;
-			
-			case 'text' : {								#  ein Textfeld soll nur mit dem ersten Wert aufgefüllt werden
-				$rs = pg_fetch_array($ret[1]);
-				$html = $rs['output'];
-			}break;
+		@$ret=$layerdb->execSQL($sql,4,0);
+		if (!$ret[0]) {
+			switch($this->formvars['type']) {
+				case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
+					$html = '>';			# Workaround für dummen IE Bug
+					$html .= '<option value="">-- Bitte Auswählen --</option>';
+					while($rs = pg_fetch_array($ret[1])){
+						$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
+					}
+				}break;
+				
+				case 'text' : {								#  ein Textfeld soll nur mit dem ersten Wert aufgefüllt werden
+					$rs = pg_fetch_array($ret[1]);
+					$html = $rs['output'];
+				}break;
+			}
 		}
 		echo $html;
   }
@@ -7639,8 +7640,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$attrib['classification'] = $this->formvars['classification'];
     $attrib['order'] = ($this->formvars['class_order'] != '') ? $this->formvars['class_order'] : 1;
     $attrib['expression'] = ($this->formvars['class_expression'] != '') ? $this->formvars['class_expression'] : '';
-    $mapDB->new_Class($attrib);
+    $new_class = $mapDB->new_Class($attrib);
 		$this->Klasseneditor();
+		return $new_class;
   }
 
   function Klasseneditor_AutoklassenHinzufuegen() {
@@ -7677,7 +7679,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->formvars['class_order'] = $auto_classes[$i]['order'];
       $this->formvars['class_expression'] = $auto_classes[$i]['expression'];
 
-      $this->formvars['class_id'] = $this->Layereditor_KlasseHinzufuegen();
+      $this->formvars['class_id'] = $this->Klasseneditor_KlasseHinzufuegen();
       $this->formvars['style_color'] = $auto_classes[$i]['style_color'];
       $this->formvars['style_outlinecolor'] = $auto_classes[$i]['style_outlinecolor'];
       $this->add_style();
@@ -9207,6 +9209,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		for ($i = 0; $i < count($checkbox_names); $i++) {
 			if ($this->formvars[$checkbox_names[$i]] == 'on') {
 				$element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
+				$oids[] = $element[3];
 				if (!empty($instead_updates)) {			# statt zu Löschen sollen hier nur die Auto-Felder gesetzt werden
 					$sql = "
 							UPDATE
@@ -9219,7 +9222,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$this->success = $ret['success'];
 				}
 				else {
-					array_merge($results, $this->Datensatz_Loeschen($layerdb, $layer, $element[3]));
+					$results = $results + $this->Datensatz_Loeschen($layerdb, $layer, $element[3]);
 				}
 			}
 		}
@@ -9240,7 +9243,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			if ($this->formvars['embedded'] == '') {
 				if ($this->success == false) {
 					foreach ($results AS $result) {
-						$this->add_message($result->type, $result->msg);
+						$this->add_message($result['type'], $result['msg']);
 					}
 				}
 				else {
@@ -9331,14 +9334,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 				# Frage Meldung über SQL result ab
 				$sql_result = pg_fetch_row($ret['query']);
-				if ($sql_result['success']) {
-					if ($sql_result['msg']) {
-						$results[] = array('type' => 'info', 'msg' => $sql_result['msg']);
-					}
+				if ($sql_result[0] != '') {
+					$results[] = array('type' => 'info', 'msg' => $sql_result[0]);
 				}
 				# Prüfe ob Löschung kein Datensatz betroffen hat
 				if (pg_affected_rows($ret['query']) == 0) {
-					$results[] = array('type' => 'error', 'msg' => '<br>Datensatz wurde nicht gelöscht, weil er nicht existiert!<br>');
+					$results[] = array('type' => 'error', 'msg' => '<br>Datensatz wurde nicht gelöscht.<br>');
 					$this->success = false;
 				}
 				else {
@@ -16753,7 +16754,7 @@ class db_mapObj{
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
 		for($i = 0; $i < count($attributes['name']); $i++) {
 			$type = ltrim($attributes['type'][$i], '_');
-			if (is_numeric($type)) {			# Attribut ist ein Datentyp
+			if (is_numeric($type) AND $query_result != NULL) {			# Attribut ist ein Datentyp
 				$query_result2 = array();
 				foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
 					$json = str_replace('}"', '}', str_replace('"{', '{', str_replace("\\", "", $query_result[$k][$attributes['name'][$i]])));	# warum diese Zeichen dort reingekommen sind, ist noch nicht klar...
@@ -16978,7 +16979,7 @@ class db_mapObj{
 							$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
 							for($k = 1; $k < count($subform); $k++) {
 								$attributes['subform_fkeys'][$i][] = $subform[$k];
-								$attributes['visible'][$attributes['indizes'][$subform[$k]]] = 0;
+								$attributes['SubFormFK_hidden'][$attributes['indizes'][$subform[$k]]] = 1;
 							}
 							if ($options[1] != '') {
 								if ($options[1] == 'no_new_window') {
