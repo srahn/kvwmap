@@ -4,7 +4,7 @@
   $strDataBankID="Số ID của CSDL";
 	$strDefaultUserID="Standard user";
   $strTask="Tên tác vụ*";
-  $strReferenceMapID="Số ID bản đồ tham chiếu*";
+  $strReferenceMapID="Số bản đồ tham chiếu*";
   $strMaxExtent="Phạm vi tối đa*";
   $strMinExtent="Phạm vi tối thiểu*";  
   $strPostgisHost="Máy chủ lưu số liệu PostGIS";
