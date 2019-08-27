@@ -1363,10 +1363,11 @@ function url_get_contents($url, $username = NULL, $password = NULL) {
 	$hostname = parse_url($url, PHP_URL_HOST);
 	try {
 		$ctx['http']['timeout'] = 20;
-		$ctx['http']['header'] = 'Referer: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+		#$ctx['http']['header'] = 'Referer: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];		// erstmal wieder rausgenommen, da sonst Authorization nicht funktioniert
 		if($username)$ctx['http']['header'].= "Authorization: Basic ".base64_encode($username.':'.$password);
-		if(defined('HTTP_PROXY') AND $hostname != 'localhost'){
-			$ctx['http']['proxy'] = HTTP_PROXY;
+		$proxy = getenv('HTTP_PROXY');
+		if($proxy != '' AND $hostname != 'localhost'){
+			$ctx['http']['proxy'] = $proxy;
 			$ctx['http']['request_fulluri'] = true;
 			$ctx['ssl']['SNI_server_name'] = $hostname;
 			$ctx['ssl']['SNI_enabled'] = true;

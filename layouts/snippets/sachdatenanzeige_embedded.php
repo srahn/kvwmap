@@ -1,6 +1,5 @@
 <?
 	# dies ist das Snippet für die Sachdatenanzeige eines aufgeklappten Links aus einer SubformEmbeddedPK-Liste
-	# es wird aber auch als Rahmen für das eingebettete Rasterlayout verwendet, damit hier ein Speichern-Button erscheint
 	include_once(SNIPPETS.'generic_form_parts.php'); 
   include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
   
@@ -11,10 +10,12 @@
 	}
   else{																																		# falls man mal ein eigenes Subformular einbinden will
 	  if(is_file(SNIPPETS.$this->qlayerset[$i]['template'])){
+			$this->subform_classname = 'subform_'.$this->qlayerset[$i]['Layer_ID'];
 	   	include(SNIPPETS.$this->qlayerset[$i]['template']);
 	  }
 		else{
 			if(file_exists(PLUGINS.$this->qlayerset[$i]['template'])){
+				$this->subform_classname = 'subform_'.$this->qlayerset[$i]['Layer_ID'];
 				include(PLUGINS.$this->qlayerset[$i]['template']);			# Pluginviews
 			}
 		}  	 
@@ -38,15 +39,6 @@
       </td>
     </tr>
   </table>
-  
- 
-<?	// für das eingebettete Rasterlayout
-		if($anzObj > 1){ ?>
-		<script type="text/javascript">
-			document.getElementById('show_all_<? echo $this->formvars['targetobject'];?>').style.display = '';
-		</script>
-<? } ?>
-	
 ~
 var overlay_bottom = parseInt(<? echo $this->user->rolle->nImageHeight+30; ?>) + parseInt(document.GUI.overlayy.value);
 var button_bottom = document.getElementById('savebutton').getBoundingClientRect().bottom;

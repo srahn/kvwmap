@@ -418,7 +418,7 @@
 								$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $enum_value, $enum_output, $attributes['req_by'][$index], $attributes['req'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class);
 							}break;
 							default : {
-								$datapart .= '<input style="font-size: '.(0.9*$fontsize).'px';
+								$datapart .= '<input class="'.$field_class.'" style="font-size: '.(0.9*$fontsize).'px';
 								if($attributes['privileg'][$name_] == '0' OR $lock[$k]){
 									$datapart .= ';background-color:transparent;border:0px;display:none;background-color:#e8e3da;" readonly ';
 								}

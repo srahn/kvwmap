@@ -596,7 +596,7 @@
 				<? if(count($this->formvars['selstellen']["Bezeichnung"]) > 0){ ?>
 				<tr>
 					<td align="center" colspan=3 style="height: 30px;border-bottom:1px solid #C3C7C3">
-						<a href="javascript:document.GUI.assign_default_values.value=1;submitWithValue('GUI','go_plus','Ändern')"><? echo $strAssignDefaultValues; ?></a>
+						<a href="javascript:document.GUI.assign_default_values.value=1;submitWithValue('GUI','go_plus','Speichern')"><? echo $strAssignDefaultValues; ?></a>
 					</td>
 				</tr>
 				<? } ?>
