@@ -133,7 +133,7 @@
 												<td style="padding: 0"><a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);delete_datasets(<?php echo $layer['Layer_ID']; ?>);" title="<? echo $strDeleteThisDataset; ?>"><div class="button_background"><div class="button datensatz_loeschen"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td> <?
 											}
 											else{ ?>
-												<td style="padding: 0"><a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);subdelete_data(<? echo $layer['Layer_ID']; ?>, '<? echo $this->formvars['fromobject'] ?>', '<? echo $this->formvars['targetobject'] ?>', '<? echo $this->formvars['targetlayer_id'] ?>', '<? echo $this->formvars['targetattribute'] ?>', '<? echo $this->formvars['data'] ?>');" title="<? echo $strDeleteThisDataset; ?>"><div class="button_background"><div class="button datensatz_loeschen"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td> <?
+												<td style="padding: 0"><a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);subdelete_data(<? echo $layer['Layer_ID']; ?>, 'record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', '<? echo $this->formvars['targetobject'] ?>');" title="<? echo $strDeleteThisDataset; ?>"><div class="button_background"><div class="button datensatz_loeschen"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td> <?
 											}
 										} ?>
 											<td><img src="<? echo GRAPHICSPATH; ?>leer.gif" style="padding: 0 0 0 30"></td>
