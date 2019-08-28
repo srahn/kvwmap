@@ -471,11 +471,13 @@ FROM
 		ini_set("display_errors", '0');
 		$error_list = array();
 		$myErrorHandler = function ($error_level, $error_message, $error_file, $error_line, $error_context) use (&$error_list) {
-			$error_list[] = $error_message;
+			if(strpos($error_message, "\n      :resno") !== false){
+				$error_list[] = $error_message;
+			}
 			return false;
 		};
 		set_error_handler($myErrorHandler);
-		$sql = 'SET client_min_messages=\'log\';SET debug_print_parse=true;'.$select." LIMIT 0";		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
+		$sql = 'SET client_min_messages=\'log\';SET debug_print_parse=true;'.$select." LIMIT 0;";		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
 		$ret = $this->execSQL($sql, 4, 0);
 		error_reporting($error_reporting);		
 		if ($ret['success']) {
