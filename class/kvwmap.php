@@ -9153,26 +9153,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->GenerischeSuche_Suchen();
 	}
 
-	function layer_Datensatz_loeschen($layer_id, $oid) {
+	function layer_Datensatz_loeschen($layer_id, $oid, $reload_object) {
 		$layers = $this->user->rolle->getLayer($layer_id);
 		$layer = $layers[0];
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 		$results = $this->Datensatz_Loeschen($layerdb, $layer, $oid);
 		# ToDo Dokumente werden noch nicht mit gelöscht.
-		if (count($results) > 0) {
-			$result = array(
-				'success' => false,
-				'msg' => implode('<br>', $results)
-			);
-		}
-		else {
-			$result = array(
-				'success' => true,
-				'msg' => 'Datensatz gelöscht!'
-			);
-		}
-		echo json_encode($results);
+		echo '~';
+		if($reload_object != '')echo 'reload_subform_list(\''.$reload_object.'\', 0);';
 	}
 
 	function layer_Datensaetze_loeschen($output = true) {

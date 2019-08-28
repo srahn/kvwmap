@@ -64,10 +64,11 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 								class="fa fa-times buttonlink"
 								aria-hidden="true"
 								style=""
-								onclick="delete_subform_dataset(
+								onclick="subdelete_data(
 									<? echo $layer['Layer_ID']; ?>,
+									'<? echo $element_id; ?>',
 									<? echo $layer['shape'][$k][$layer['maintable'] . '_oid']; ?>,
-									'<? echo $element_id; ?>'
+									''
 								);"
 							></i>
 						</td>
@@ -82,8 +83,9 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 		}
 	} ?>
 	<div style="width: 100%;text-align: center;margin-top: 4px">
+<? if ($anzObj > 0){ ?>
 		<input id="subform_save_button_<? echo $layer['Layer_ID']; ?>" type="button" tabindex="1" value="Speichern" onclick="subsave_data(<? echo $layer['Layer_ID']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', false);">
-<?
+<?	}
 		if ($layer['privileg'] > 0){
 			echo '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
 			for($p = 0; $p < count($this->formvars['attributenames']); $p++){
