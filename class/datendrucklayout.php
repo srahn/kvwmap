@@ -554,6 +554,7 @@ class ddl {
 		if($pdfobject == NULL){
 			include (CLASSPATH . 'class.ezpdf.php');
 			$this->pdf=new Cezpdf();
+			$this->pdf->ezSetMargins($this->layout['margin_top'], $this->layout['margin_bottom'], $this->layout['margin_left'], $this->layout['margin_right']);
 		}
 		else{
 			$this->pdf = $pdfobject;			# ein PDF-Objekt wurde aus einem übergeordneten Druckrahmen/Layer übergeben
@@ -561,7 +562,6 @@ class ddl {
 		$this->miny[$this->pdf->currentContents] = 1000000;
 		$this->max_dataset_height = 0;
 		if($this->offsety)$this->miny[$this->pdf->currentContents] = 842 - $this->offsety;
-		$this->pdf->ezSetMargins(40,30,0,0);
     if($this->layout['elements'][$attributes['the_geom']]['xpos'] > 0){		# wenn ein Geometriebild angezeigt werden soll -> loadmap()
     	$this->gui->map_factor = MAPFACTOR;
     	$this->gui->loadmap('DataBase');
@@ -592,7 +592,7 @@ class ddl {
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
 				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
-				if($this->layout['type'] == 2)$this->offsety = 50; else $this->offsety = 0;
+				if($this->layout['type'] == 2)$this->offsety = $this->pdf->ez['topMargin']; else $this->offsety = 0;
 				$this->pdf->newPage();
 				$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
 				$this->miny[$lastpage] = 1000000;
@@ -659,7 +659,7 @@ class ddl {
 						$this->i_on_page = -1;
 						$this->maxy = 0;
 						if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
-						if($this->layout['type'] == 2)$this->offsety = 50; else $this->offsety = 0;
+						if($this->layout['type'] == 2)$this->offsety = $this->pdf->ez['topMargin']; else $this->offsety = 0;
 						$this->pdf->newPage();
 						$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
 						$this->miny[$lastpage] = 0;
@@ -776,6 +776,10 @@ class ddl {
 			if($formvars['gap'] != '')$sql .= ", `gap` = ".(int)$formvars['gap'];
       if($formvars['type'] != '')$sql .= ", `type` = ".(int)$formvars['type'];
       else $sql .= ", `type` = NULL";
+			$sql .= ", `margin_top` = ".(int)$formvars['margin_top'];
+			$sql .= ", `margin_bottom` = ".(int)$formvars['margin_bottom'];
+			$sql .= ", `margin_left` = ".(int)$formvars['margin_left'];
+			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
 			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
       else $sql .= ", `filename` = NULL";			
@@ -910,6 +914,10 @@ class ddl {
 			$sql .= ", `gap` = ".(int)$formvars['gap'];
       if($formvars['type'])$sql .= ", `type` = ".(int)$formvars['type'];
       else $sql .= ", `type` = NULL";
+			$sql .= ", `margin_top` = ".(int)$formvars['margin_top'];
+			$sql .= ", `margin_bottom` = ".(int)$formvars['margin_bottom'];
+			$sql .= ", `margin_left` = ".(int)$formvars['margin_left'];
+			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
 			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
       else $sql .= ", `filename` = NULL";			
