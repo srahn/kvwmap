@@ -247,7 +247,7 @@ function save_layout(){
 								<div id="Tip2" style="visibility:hidden;position:absolute;bottom:20px;z-index:1000;"></div>
 							</div>
 						</td>
-						<td>
+						<td style="border-bottom:1px solid #C3C7C3">
 							<span class="fett">Vorschau:</span>
 						</td>
 						<td style="border-bottom:1px solid #C3C7C3"><?
@@ -268,6 +268,21 @@ function save_layout(){
 							<input type="text" name="gap" title="Der Abstand zwischen den Datensätzen." value="<? echo $this->ddl->selectedlayout[0]['gap'] ?>" size="2">
 							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fett">nicht durch Seitenumbruch unterbrechen:</span>
 							<input type="checkbox" name="no_record_splitting" title="Wenn angehakt, wird ein Seitenumbruch nicht innerhalb eines Datensatzes gemacht, sondern davor." value="1" <? if($this->ddl->selectedlayout[0]['no_record_splitting']) echo 'checked'; ?>>
+						</td>
+					</tr>
+					<tr>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<span class="fett">Ränder:</span>
+						</td>
+						<td colspan="3" style="border-bottom:1px solid #C3C7C3">
+						oben:
+							<input type="text" name="margin_top" value="<? echo $this->ddl->selectedlayout[0]['margin_top'] ?>" size="2">&nbsp;&nbsp;
+						unten:
+							<input type="text" name="margin_bottom" value="<? echo $this->ddl->selectedlayout[0]['margin_bottom'] ?>" size="2">&nbsp;&nbsp;
+						links:
+							<input type="text" name="margin_left" value="<? echo $this->ddl->selectedlayout[0]['margin_left'] ?>" size="2">&nbsp;&nbsp;
+						rechts:
+							<input type="text" name="margin_right" value="<? echo $this->ddl->selectedlayout[0]['margin_right'] ?>" size="2">&nbsp;&nbsp;
 						</td>
 					</tr>
 				</table>
