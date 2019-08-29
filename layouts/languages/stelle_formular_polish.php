@@ -4,7 +4,7 @@
   $strDataBankID="baza danych ID*"; 
 	$strDefaultUserID="Standard user";
   $strTask="nazwa*"; 
-  $strReferenceMapID="numer referencyjny karty ID*"; 
+  $strReferenceMap="numer referencyjny karty*"; 
   $strMaxExtent="maxymalne rozszerzenie*"; 
   $strMinExtent="minimalne rozszerzenie*"; 
   $strPostgisHost="nazwa serwera PostGIS"; 

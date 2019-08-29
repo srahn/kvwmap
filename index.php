@@ -431,6 +431,11 @@ function go_switch($go, $exit = false) {
 				$GUI->showMapImage();
 			} break;
 
+			case 'showRefMapImage' : {
+				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->getRefMapImage($GUI->formvars['ID']);
+			} break;
+
 			# Klassen abfragen
 			case 'getclasses' : {
 				$GUI->get_classes();

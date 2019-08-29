@@ -1404,18 +1404,26 @@ echo '			</ul>
         //$map->web->set('ERRORFILE', LOGPATH.'mapserver_error.log');
 
         # Referenzkarte
-				$this->ref=$mapDB->read_ReferenceMap();
 				if(MAPSERVERVERSION < 600){
 					$reference_map = ms_newMapObj(DEFAULTMAPFILE);
 				}
 				else {
 					$reference_map = new mapObj(DEFAULTMAPFILE);
 				}
+				$this->ref=$mapDB->read_ReferenceMap();
+				if (!is_array($this->ref)) {
+					$this->ref = array(
+						'epsg_code' => 25833,
+						'refMapImg' => WWWROOT . APPLVERSION . GRAPHICSPATH . 'karte.png'
+					);
+				}
+				else {
+					$this->ref['refMapImg'] = REFERENCEMAPPATH.$this->ref['Dateiname'];
+				}
 				$reference_map->web->set('imagepath', IMAGEPATH);
-				$reference_map->setProjection('+init=epsg:'.$this->ref['epsg_code'],MS_FALSE);
-				#$reference_map->extent->setextent in drawreferencemap() ausgelagert, da der Extent sich geändert haben kann nach dem loadmap
+				$reference_map->setProjection('+init=epsg:'.$this->ref['epsg_code'], MS_FALSE);
 				$reference_map->reference->extent->setextent(round($this->ref['xmin']),round($this->ref['ymin']),round($this->ref['xmax']),round($this->ref['ymax']));
-        $reference_map->reference->set('image',REFERENCEMAPPATH.$this->ref['Dateiname']);
+				$reference_map->reference->set('image', $this->ref['refMapImg']);
         $reference_map->reference->set('width',$this->ref['width']);
         $reference_map->reference->set('height',$this->ref['height']);
         $reference_map->reference->set('status','MS_ON');
@@ -1425,8 +1433,8 @@ echo '			</ul>
 				else {
 				  $extent = new rectObj();
 				}
-        $reference_map->reference->color->setRGB(-1,-1,-1);
-        $reference_map->reference->outlinecolor->setRGB(255,0,0);
+				$reference_map->reference->color->setRGB(-1,-1,-1);
+				$reference_map->reference->outlinecolor->setRGB(255,0,0);
 
         # Scalebarobject
         $map->scalebar->set('status', MS_ON);
@@ -3631,6 +3639,26 @@ echo '			</ul>
 			</html>
 			";
   }
+
+	/*
+	* This function return the image of the referenzkarte with given ID
+	* if refmap not found return alternative not found image
+	*/
+	function getRefMapImage($id) {
+		include_once(CLASSPATH . 'Referenzkarte.php');
+		$referenzkarte = Referenzkarte::find_by_id($this, $id);
+		if ($referenzkarte->get('Dateiname') != '' AND file_exists(REFERENCEMAPPATH . $referenzkarte->get('Dateiname'))) {
+			$path_parts = pathinfo(REFERENCEMAPPATH . $referenzkarte->get('Dateiname'));
+			header('Content-type: image/' . $path_parts['extension']);
+			header("Pragma: public");
+			header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+			header('Content-Disposition: filename=' . $referenzkarte->get('Dateiname'));
+			echo file_get_contents(REFERENCEMAPPATH . $referenzkarte->get('Dateiname'));
+		}
+		else {
+			send_image_not_found(REFERENCEMAPPATH . $referenzkarte->get('Dateiname'));
+		}
+	}
 
   function get_classes(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -16051,6 +16079,8 @@ class db_mapObj{
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs=mysql_fetch_array($query);
     $this->referenceMap=$rs;
+#		echo '<br>sql: ' . print_r($sql, true);
+#		echo '<br>ref: ' . print_r($this->referenceMap, true);
     return $rs;
   }
 
