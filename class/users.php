@@ -983,12 +983,13 @@ class user {
 
 	function setOptions($stelle_id, $formvars) {
 		# Setzen der Werte, die aktuell für die Nutzung der Stelle durch den Nutzer gelten sollen.
-		# Zerlegen der Variable für die Kartengröße
-		$teil=explode('x',$formvars['mapsize']);
-		$nImageWidth=$teil[0];
-		$nImageHeight=$teil[1];
-		if($teil[2] == 'auto')$auto_map_resize = '1';
-		else $auto_map_resize = '0';
+		if($formvars['mapsize'] == 'auto')$auto_map_resize = '1';
+		else{
+			$auto_map_resize = '0';
+			$teil=explode('x',$formvars['mapsize']);
+			$nImageWidth=$teil[0];
+			$nImageHeight=$teil[1];
+		}
 		# Zoomfaktor (Wenn 1 erfolgt kein Zoom durch einfaches klicken in die Karte)
 		if ($formvars['nZoomFactor']=='' OR $formvars['nZoomFactor']==0) {
 			$formvars['nZoomFactor']=2;
@@ -1005,8 +1006,12 @@ class user {
 
 		# Eintragen der neuen Einstellungen für die Rolle
 		if($formvars['gui'] != '' AND $formvars['mapsize'] != ''){
-			$sql ='UPDATE rolle SET nZoomFactor='.$formvars['nZoomFactor'].',nImageWidth='.$nImageWidth;
-			$sql.=',nImageHeight='.$nImageHeight.',gui="'.$formvars['gui'].'"';
+			$sql ='UPDATE rolle SET nZoomFactor='.$formvars['nZoomFactor'];
+			if($nImageWidth != ''){
+				$sql.=',nImageWidth='.$nImageWidth;
+				$sql.=',nImageHeight='.$nImageHeight;
+			}
+			$sql.=',gui="'.$formvars['gui'].'"';
 			$sql.=',auto_map_resize='.$auto_map_resize;
 			$sql.=',epsg_code="'.$formvars['epsg_code'].'"';
 			$sql.=',epsg_code2="'.$formvars['epsg_code2'].'"';
