@@ -1480,334 +1480,9 @@ echo '			</ul>
 					}
 
 					if($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
-						$layer = ms_newLayerObj($map);
-						$layer->setMetaData('wfs_request_method', 'GET');
-						$layer->setMetaData('wms_name', $layerset['list'][$i]['wms_name']);
-						if($layerset['list'][$i]['wms_keywordlist'])$layer->setMetaData('ows_keywordlist', $layerset['list'][$i]['wms_keywordlist']);
-						$layer->setMetaData('wfs_typename', $layerset['list'][$i]['wms_name']);
-						$layer->setMetaData('ows_title', $layerset['list'][$i]['Name']); # required
-						$layer->setMetaData('wms_group_title',$layerset['list'][$i]['Gruppenname']);
-						$layer->setMetaData('wms_queryable',$layerset['list'][$i]['queryable']);
-						$layer->setMetaData('wms_format',$layerset['list'][$i]['wms_format']);
-						$layer->setMetaData('ows_server_version',$layerset['list'][$i]['wms_server_version']);
-						$layer->setMetaData('ows_version',$layerset['list'][$i]['wms_server_version']);
-						if($layerset['list'][$i]['metalink']){
-							$layer->setMetaData('ows_metadataurl_href',$layerset['list'][$i]['metalink']);
-							$layer->setMetaData('ows_metadataurl_type', 'ISO 19115');
-							$layer->setMetaData('ows_metadataurl_format', 'text/plain');
-						}
-						if($layerset['list'][$i]['ows_srs'] == '') $layerset['list'][$i]['ows_srs'] = 'EPSG:' . $layerset['list'][$i]['epsg_code'];
-						$layer->setMetaData('ows_srs', $layerset['list'][$i]['ows_srs']);
-						$layer->setMetaData('wms_connectiontimeout',$layerset['list'][$i]['wms_connectiontimeout']);
-						$layer->setMetaData('ows_auth_username', $layerset['list'][$i]['wms_auth_username']);
-						$layer->setMetaData('ows_auth_password', $layerset['list'][$i]['wms_auth_password']);
-						$layer->setMetaData('ows_auth_type', 'basic');
-						$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
-						# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
-						#$layer->setMetaData("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
-						$layer->setMetaData("gml_featureid", "ogc_fid");
-						$layer->setMetaData("gml_include_items", "all");
-
-						$layer->set('dump', 0);
-						$layer->set('type',$layerset['list'][$i]['Datentyp']);
-						$layer->set('group',$layerset['list'][$i]['Gruppenname']);
-
-						$layer->set('name', $layerset['list'][$i]['alias']);
-
-						if($layerset['list'][$i]['status'] != ''){
-							$layerset['list'][$i]['aktivStatus'] = 0;
-						}
-
-						//---- wenn die Layer einer eingeklappten Gruppe nicht in der Karte //
-						//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
-						//---- der layer_status auf 0 gesetzt werden//
-						if($layerset['list'][$i]['aktivStatus'] == 0){
-						$layer->set('status', 0);
-						}
-						else{
-						$layer->set('status', 1);
-						}
-						$layer->set('debug',MS_ON);
-
-						# fremde Layer werden auf Verbindung getestet
-						if (
-							$layerset['list'][$i]['aktivStatus'] != 0 AND
-							$layerset['list'][$i]['connectiontype'] == 6 AND
-							strpos($layerset['list'][$i]['connection'], 'host') !== false AND
-							strpos($layerset['list'][$i]['connection'], 'host=localhost') === false AND
-							strpos($layerset['list'][$i]['connection'], 'host=pgsql') === false
-						) {
-							$connection = explode(' ', trim($layerset['list'][$i]['connection']));
-							for ($j = 0; $j < count($connection); $j++) {
-								if ($connection[$j] != '') {
-									$value = explode('=', $connection[$j]);
-									if (strtolower($value[0]) == 'host') {
-										$host = $value[1];
-									}
-									if(strtolower($value[0]) == 'port') {
-										$port = $value[1];
-									}
-								}
-							}
-							if ($port == '') $port = '5432';
-							$fp = @fsockopen($host, $port, $errno, $errstr, 5);
-							if(!$fp) {			# keine Verbindung --> Layer ausschalten
-								$layer->set('status', 0);
-								$layer->setMetaData('queryStatus', 0);
-								$this->Fehlermeldung = $errstr.' für Layer: '.$layerset['list'][$i]['Name'].'<br>';
-							}
-						}
-
-						if($layerset['list'][$i]['aktivStatus'] != 0){
-							$collapsed = false;
-							$group = $this->groupset[$layerset['list'][$i]['Gruppe']];				# die Gruppe des Layers
-							if($group['status'] == 0){
-								$this->group_has_active_layers[$layerset['list'][$i]['Gruppe']] = 1;  	# die zugeklappte Gruppe hat aktive Layer
-								$collapsed = true;
-							}
-							while($group['obergruppe'] != ''){
-								$group = $this->groupset[$group['obergruppe']];
-								if($collapsed OR $group['status'] == 0){
-									$this->group_has_active_layers[$group['id']] = 1;  	# auch alle Obergruppen durchlaufen
-									$collapsed = true;
-								}
-							}
-						}
-
-						if(!$this->noMinMaxScaling AND $layerset['list'][$i]['minscale']>=0) {
-							if($this->map_factor != ''){
-								if(MAPSERVERVERSION > 500){
-									$layer->set('minscaledenom', $layerset['list'][$i]['minscale']/$this->map_factor*1.414);
-								}
-								else{
-									$layer->set('minscale', $layerset['list'][$i]['minscale']/$this->map_factor*1.414);
-								}
-							}
-							else{
-								if(MAPSERVERVERSION > 500){
-									$layer->set('minscaledenom', $layerset['list'][$i]['minscale']);
-								}
-								else{
-									$layer->set('minscale', $layerset['list'][$i]['minscale']);
-								}
-							}
-						}
-						if(!$this->noMinMaxScaling AND $layerset['list'][$i]['maxscale']>0) {
-							if($this->map_factor != ''){
-								if(MAPSERVERVERSION > 500){
-									$layer->set('maxscaledenom', $layerset['list'][$i]['maxscale']/$this->map_factor*1.414);
-								}
-								else{
-									$layer->set('maxscale', $layerset['list'][$i]['maxscale']/$this->map_factor*1.414);
-								}
-							}
-							else{
-								if(MAPSERVERVERSION > 500){
-									$layer->set('maxscaledenom', $layerset['list'][$i]['maxscale']);
-								}
-								else{
-									$layer->set('maxscale', $layerset['list'][$i]['maxscale']);
-								}
-							}
-						}
-						$layer->setProjection('+init=epsg:'.$layerset['list'][$i]['epsg_code']); # recommended
-						if ($layerset['list'][$i]['connection']!='') {
-							if ($this->map_factor != '' AND $layerset['list'][$i]['connectiontype'] == 7) {		# WMS-Layer
-								if ($layerset['list'][$i]['printconnection']!=''){
-									$layerset['list'][$i]['connection'] = $layerset['list'][$i]['printconnection']; 		# wenn es eine Druck-Connection gibt, wird diese verwendet
-								}
-								else{
-									//$layerset['list'][$i]['connection'] .= '&mapfactor='.$this->map_factor;			# bei WMS-Layern wird der map_factor durchgeschleift (für die eigenen WMS) erstmal rausgenommen, weil einige WMS-Server der zusätzliche Parameter mapfactor stört
-								}
-							}
-							if ($layerset['list'][$i]['connectiontype'] == 6) {
-								# z.B. für Klassen mit Umlauten
-								$layerset['list'][$i]['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";
-							}
-							$layer->set('connection', $layerset['list'][$i]['connection']);
-						}
-
-						if ($layerset['list'][$i]['connectiontype'] > 0) {
-							if (MAPSERVERVERSION >= 540) {
-								$layer->setConnectionType($layerset['list'][$i]['connectiontype']);
-							}
-							else {
-								$layer->set('connectiontype',$layerset['list'][$i]['connectiontype']);
-							}
-						}
-
-						if ($layerset['list'][$i]['connectiontype'] == 6) {
-							$layerset['list'][$i]['processing'] = 'CLOSE_CONNECTION=DEFER;' . $layerset['list'][$i]['processing'];		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
-						}
-
-						if ($layerset['list'][$i]['processing'] != "") {
-							$processings = explode(";",$layerset['list'][$i]['processing']);
-							foreach ($processings as $processing) {
-								$layer->setProcessing($processing);
-							}
-						}
-
-						if ($layerset['list'][$i]['postlabelcache'] != 0) {
-							$layer->set('postlabelcache',$layerset['list'][$i]['postlabelcache']);
-						}
-
-						if($layerset['list'][$i]['Datentyp'] == MS_LAYER_POINT AND $layerset['list'][$i]['cluster_maxdistance'] != ''){
-							$layer->cluster->maxdistance = $layerset['list'][$i]['cluster_maxdistance'];
-							$layer->cluster->region = 'ellipse';
-						}
-
-            if ($layerset['list'][$i]['Datentyp']=='3') {
-              if($layerset['list'][$i]['transparency'] != ''){
-                if(MAPSERVERVERSION > 500){
-                  $layer->set('opacity',$layerset['list'][$i]['transparency']);
-                }
-                else{
-                  $layer->set('transparency',$layerset['list'][$i]['transparency']);
-                }
-              }
-              if ($layerset['list'][$i]['tileindex']!='') {
-                $layer->set('tileindex',SHAPEPATH.$layerset['list'][$i]['tileindex']);
-              }
-              else {
-                $layer->set('data', $layerset['list'][$i]['Data']);
-              }
-              $layer->set('tileitem',$layerset['list'][$i]['tileitem']);
-              if ($layerset['list'][$i]['offsite']!='') {
-                $RGB=explode(' ',$layerset['list'][$i]['offsite']);
-                $layer->offsite->setRGB($RGB[0],$RGB[1],$RGB[2]);
-              }
-            }
-            else {
-							# Vektorlayer
-							if($layerset['list'][$i]['Data'] != '') {
-								$layerset['list'][$i]['Data'] = replace_params(
-									$layerset['list'][$i]['Data'],
-									rolle::$layer_params,
-									$this->user->id,
-									$this->stelle_id,
-									rolle::$hist_timestamp,
-									$this->user->rolle->language
-								);
-								$data = $layerset['list'][$i]['Data'];
-								$layer->set('data', $data);
-							}
-
-              # Setzen der Templatedateien für die Sachdatenanzeige inclt. Footer und Header.
-              # Template (Body der Anzeige)
-              if ($this->formvars['go'] == 'OWS') {
-                $layer->set('template', 'dummy');
-              }
-              # Header (Kopfdatei)
-              if ($layerset['list'][$i]['header']!='') {
-                $layer->set('header',$layerset['list'][$i]['header']);
-              }
-              # Footer (Fusszeile)
-              if ($layerset['list'][$i]['footer']!='') {
-                $layer->set('footer',$layerset['list'][$i]['footer']);
-              }
-              # Setzen der Spalte nach der der Layer klassifiziert werden soll
-							if ($layerset['list'][$i]['classitem']!='') {
-								$layer->set(
-									'classitem',
-									replace_params(
-										$layerset['list'][$i]['classitem'],
-										rolle::$layer_params,
-										$this->user->id,
-										$this->stelle_id,
-										rolle::$hist_timestamp,
-										$this->user->rolle->language
-									)
-								);
-							}
-              else {
-                #$layer->set('classitem','id');
-              }
-              # Setzen des Filters
-              if($layerset['list'][$i]['Filter'] != ''){
-              	$layerset['list'][$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset['list'][$i]['Filter']);
-               if (substr($layerset['list'][$i]['Filter'],0,1)=='(') {
-                 $expr=$layerset['list'][$i]['Filter'];
-               }
-               else {
-                 $expr=buildExpressionString($layerset['list'][$i]['Filter']);
-               }
-               $layer->setFilter($expr);
-              }
-              # Layerweite Labelangaben
-              if (MAPSERVERVERSION < 500 AND $layerset['list'][$i]['labelangleitem']!='') {
-                $layer->set('labelangleitem',$layerset['list'][$i]['labelangleitem']);
-              }
-              if ($layerset['list'][$i]['labelitem']!='') {
-                $layer->set('labelitem',$layerset['list'][$i]['labelitem']);
-              }
-              if ($layerset['list'][$i]['labelmaxscale']!='') {
-                if(MAPSERVERVERSION > 500){
-                  $layer->set('labelmaxscaledenom',$layerset['list'][$i]['labelmaxscale']);
-                }
-                else{
-                  $layer->set('labelmaxscale',$layerset['list'][$i]['labelmaxscale']);
-                }
-              }
-              if ($layerset['list'][$i]['labelminscale']!='') {
-                if(MAPSERVERVERSION > 500){
-                  $layer->set('labelminscaledenom',$layerset['list'][$i]['labelminscale']);
-                }
-                else{
-                  $layer->set('labelminscale',$layerset['list'][$i]['labelminscale']);
-                }
-              }
-              if ($layerset['list'][$i]['labelrequires']!='') {
-                $layer->set('labelrequires',$layerset['list'][$i]['labelrequires']);
-              }
-              if ($layerset['list'][$i]['tolerance']!='3') {
-                $layer->set('tolerance',$layerset['list'][$i]['tolerance']);
-              }
-              if ($layerset['list'][$i]['toleranceunits']!='pixels') {
-                $layer->set('toleranceunits',$layerset['list'][$i]['toleranceunits']);
-              }
-              if ($layerset['list'][$i]['transparency']!=''){
-                if(MAPSERVERVERSION > 500){
-                  if ($layerset['list'][$i]['transparency']==-1) {
-                      $layer->set('opacity',MS_GD_ALPHA);
-                  }
-                  else {
-                      $layer->set('opacity',$layerset['list'][$i]['transparency']);
-                  }
-                }
-                else {
-                  if ($layerset['list'][$i]['transparency']==-1) {
-                      $layer->set('transparency',MS_GD_ALPHA);
-                  }
-                  else {
-                      $layer->set('transparency',$layerset['list'][$i]['transparency']);
-                  }
-                }
-              }
-              if ($layerset['list'][$i]['symbolscale']!='') {
-                if($this->map_factor != ''){
-                  if(MAPSERVERVERSION > 500){
-                    $layer->set('symbolscaledenom',$layerset['list'][$i]['symbolscale']/$this->map_factor*1.414);
-                  }
-                  else{
-                    $layer->set('symbolscale',$layerset['list'][$i]['symbolscale']/$this->map_factor*1.414);
-                  }
-                }
-                else{
-                  if(MAPSERVERVERSION > 500){
-                    $layer->set('symbolscaledenom',$layerset['list'][$i]['symbolscale']);
-                  }
-                  else{
-                    $layer->set('symbolscale',$layerset['list'][$i]['symbolscale']);
-                  }
-                }
-              }
-            } # ende of Vektorlayer
-            # Klassen
-            $classset=$layerset['list'][$i]['Class'];
-            $this->loadclasses($layer, $layerset['list'][$i], $classset, $map);
-          } # Ende Layer ist aktiv
-        } # end of Schleife layer
-
+						$this->loadlayer($map, $layerset['list'][$i]);
+          }
+        }
 				$this->layerset = $layerset;
         $this->map=$map;
 				$this->reference_map = $reference_map;
@@ -1822,6 +1497,270 @@ echo '			</ul>
     } # end of switch loadMapSource
     return 1;
   }
+
+	function loadlayer($map, $layerset){
+		$layer = ms_newLayerObj($map);
+		$layer->setMetaData('wfs_request_method', 'GET');
+		$layer->setMetaData('wms_name', $layerset['wms_name']);
+		if($layerset['wms_keywordlist'])$layer->setMetaData('ows_keywordlist', $layerset['wms_keywordlist']);
+		$layer->setMetaData('wfs_typename', $layerset['wms_name']);
+		$layer->setMetaData('ows_title', $layerset['Name']); # required
+		$layer->setMetaData('wms_group_title',$layerset['Gruppenname']);
+		$layer->setMetaData('wms_queryable',$layerset['queryable']);
+		$layer->setMetaData('wms_format',$layerset['wms_format']);
+		$layer->setMetaData('ows_server_version',$layerset['wms_server_version']);
+		$layer->setMetaData('ows_version',$layerset['wms_server_version']);
+		if($layerset['metalink']){
+			$layer->setMetaData('ows_metadataurl_href',$layerset['metalink']);
+			$layer->setMetaData('ows_metadataurl_type', 'ISO 19115');
+			$layer->setMetaData('ows_metadataurl_format', 'text/plain');
+		}
+		if($layerset['ows_srs'] == '') $layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
+		$layer->setMetaData('ows_srs', $layerset['ows_srs']);
+		$layer->setMetaData('wms_connectiontimeout',$layerset['wms_connectiontimeout']);
+		$layer->setMetaData('ows_auth_username', $layerset['wms_auth_username']);
+		$layer->setMetaData('ows_auth_password', $layerset['wms_auth_password']);
+		$layer->setMetaData('ows_auth_type', 'basic');
+		$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
+		# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
+		#$layer->setMetaData("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
+		$layer->setMetaData("gml_featureid", "ogc_fid");
+		$layer->setMetaData("gml_include_items", "all");
+
+		$layer->set('dump', 0);
+		$layer->set('type',$layerset['Datentyp']);
+		$layer->set('group',$layerset['Gruppenname']);
+
+		$layer->set('name', $layerset['alias']);
+
+		if($layerset['status'] != ''){
+			$layerset['aktivStatus'] = 0;
+		}
+
+		//---- wenn die Layer einer eingeklappten Gruppe nicht in der Karte //
+		//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
+		//---- der layer_status auf 0 gesetzt werden//
+		if($layerset['aktivStatus'] == 0){
+		$layer->set('status', 0);
+		}
+		else{
+		$layer->set('status', 1);
+		}
+		$layer->set('debug',MS_ON);
+
+		# fremde Layer werden auf Verbindung getestet
+		if (
+			$layerset['aktivStatus'] != 0 AND
+			$layerset['connectiontype'] == 6 AND
+			strpos($layerset['connection'], 'host') !== false AND
+			strpos($layerset['connection'], 'host=localhost') === false AND
+			strpos($layerset['connection'], 'host=pgsql') === false
+		) {
+			$connection = explode(' ', trim($layerset['connection']));
+			for ($j = 0; $j < count($connection); $j++) {
+				if ($connection[$j] != '') {
+					$value = explode('=', $connection[$j]);
+					if (strtolower($value[0]) == 'host') {
+						$host = $value[1];
+					}
+					if(strtolower($value[0]) == 'port') {
+						$port = $value[1];
+					}
+				}
+			}
+			if ($port == '') $port = '5432';
+			$fp = @fsockopen($host, $port, $errno, $errstr, 5);
+			if(!$fp) {			# keine Verbindung --> Layer ausschalten
+				$layer->set('status', 0);
+				$layer->setMetaData('queryStatus', 0);
+				$this->Fehlermeldung = $errstr.' für Layer: '.$layerset['Name'].'<br>';
+			}
+		}
+
+		if($layerset['aktivStatus'] != 0){
+			$collapsed = false;
+			$group = $this->groupset[$layerset['Gruppe']];				# die Gruppe des Layers
+			if($group['status'] == 0){
+				$this->group_has_active_layers[$layerset['Gruppe']] = 1;  	# die zugeklappte Gruppe hat aktive Layer
+				$collapsed = true;
+			}
+			while($group['obergruppe'] != ''){
+				$group = $this->groupset[$group['obergruppe']];
+				if($collapsed OR $group['status'] == 0){
+					$this->group_has_active_layers[$group['id']] = 1;  	# auch alle Obergruppen durchlaufen
+					$collapsed = true;
+				}
+			}
+		}
+
+		if(!$this->noMinMaxScaling AND $layerset['minscale']>=0) {
+			if($this->map_factor != ''){
+				$layer->set('minscaledenom', $layerset['minscale']/$this->map_factor*1.414);
+			}
+			else{
+				$layer->set('minscaledenom', $layerset['minscale']);
+			}
+		}
+		if(!$this->noMinMaxScaling AND $layerset['maxscale']>0) {
+			if($this->map_factor != ''){
+				$layer->set('maxscaledenom', $layerset['maxscale']/$this->map_factor*1.414);
+			}
+			else{
+				$layer->set('maxscaledenom', $layerset['maxscale']);
+			}
+		}
+		$layer->setProjection('+init=epsg:'.$layerset['epsg_code']); # recommended
+		if ($layerset['connection']!='') {
+			if ($this->map_factor != '' AND $layerset['connectiontype'] == 7) {		# WMS-Layer
+				if ($layerset['printconnection']!=''){
+					$layerset['connection'] = $layerset['printconnection']; 		# wenn es eine Druck-Connection gibt, wird diese verwendet
+				}
+				else{
+					//$layerset['connection'] .= '&mapfactor='.$this->map_factor;			# bei WMS-Layern wird der map_factor durchgeschleift (für die eigenen WMS) erstmal rausgenommen, weil einige WMS-Server der zusätzliche Parameter mapfactor stört
+				}
+			}
+			if ($layerset['connectiontype'] == 6) {
+				# z.B. für Klassen mit Umlauten
+				$layerset['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";
+			}
+			$layer->set('connection', $layerset['connection']);
+		}
+
+		if ($layerset['connectiontype'] > 0) {
+			$layer->setConnectionType($layerset['connectiontype']);			
+		}
+
+		if ($layerset['connectiontype'] == 6) {
+			$layerset['processing'] = 'CLOSE_CONNECTION=DEFER;' . $layerset['processing'];		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
+		}
+
+		if ($layerset['processing'] != "") {
+			$processings = explode(";",$layerset['processing']);
+			foreach ($processings as $processing) {
+				$layer->setProcessing($processing);
+			}
+		}
+
+		if ($layerset['postlabelcache'] != 0) {
+			$layer->set('postlabelcache',$layerset['postlabelcache']);
+		}
+
+		if($layerset['Datentyp'] == MS_LAYER_POINT AND $layerset['cluster_maxdistance'] != ''){
+			$layer->cluster->maxdistance = $layerset['cluster_maxdistance'];
+			$layer->cluster->region = 'ellipse';
+		}
+
+		if ($layerset['Datentyp']=='3') {
+			if($layerset['transparency'] != ''){
+				$layer->set('opacity',$layerset['transparency']);				
+			}
+			if ($layerset['tileindex']!='') {
+				$layer->set('tileindex',SHAPEPATH.$layerset['tileindex']);
+			}
+			else {
+				$layer->set('data', $layerset['Data']);
+			}
+			$layer->set('tileitem',$layerset['tileitem']);
+			if ($layerset['offsite']!='') {
+				$RGB=explode(' ',$layerset['offsite']);
+				$layer->offsite->setRGB($RGB[0],$RGB[1],$RGB[2]);
+			}
+		}
+		else {
+			# Vektorlayer
+			if($layerset['Data'] != '') {
+				$layerset['Data'] = replace_params(
+					$layerset['Data'],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->stelle_id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				);
+				$data = $layerset['Data'];
+				$layer->set('data', $data);
+			}
+
+			# Setzen der Templatedateien für die Sachdatenanzeige inclt. Footer und Header.
+			# Template (Body der Anzeige)
+			if ($this->formvars['go'] == 'OWS') {
+				$layer->set('template', 'dummy');
+			}
+			# Header (Kopfdatei)
+			if ($layerset['header']!='') {
+				$layer->set('header',$layerset['header']);
+			}
+			# Footer (Fusszeile)
+			if ($layerset['footer']!='') {
+				$layer->set('footer',$layerset['footer']);
+			}
+			# Setzen der Spalte nach der der Layer klassifiziert werden soll
+			if ($layerset['classitem']!='') {
+				$layer->set(
+					'classitem',
+					replace_params(
+						$layerset['classitem'],
+						rolle::$layer_params,
+						$this->user->id,
+						$this->stelle_id,
+						rolle::$hist_timestamp,
+						$this->user->rolle->language
+					)
+				);
+			}
+			else {
+				#$layer->set('classitem','id');
+			}
+			# Setzen des Filters
+			if($layerset['Filter'] != ''){
+				$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
+			 if (substr($layerset['Filter'],0,1)=='(') {
+				 $expr=$layerset['Filter'];
+			 }
+			 else {
+				 $expr=buildExpressionString($layerset['Filter']);
+			 }
+			 $layer->setFilter($expr);
+			}
+			# Layerweite Labelangaben
+			if ($layerset['labelitem']!='') {
+				$layer->set('labelitem',$layerset['labelitem']);
+			}
+			if ($layerset['labelmaxscale']!='') {
+				$layer->set('labelmaxscaledenom',$layerset['labelmaxscale']);
+			}
+			if ($layerset['labelminscale']!='') {
+				$layer->set('labelminscaledenom',$layerset['labelminscale']);
+			}
+			if ($layerset['labelrequires']!='') {
+				$layer->set('labelrequires',$layerset['labelrequires']);
+			}
+			if ($layerset['tolerance']!='3') {
+				$layer->set('tolerance',$layerset['tolerance']);
+			}
+			if ($layerset['toleranceunits']!='pixels') {
+				$layer->set('toleranceunits',$layerset['toleranceunits']);
+			}
+			if ($layerset['transparency']!=''){
+				if ($layerset['transparency']==-1) {
+						$layer->set('opacity',MS_GD_ALPHA);
+				}
+				else {
+						$layer->set('opacity',$layerset['transparency']);
+				}
+			}
+			if ($layerset['symbolscale']!='') {
+				if($this->map_factor != ''){
+					$layer->set('symbolscaledenom',$layerset['symbolscale']/$this->map_factor*1.414);
+				}
+				else{
+					$layer->set('symbolscaledenom',$layerset['symbolscale']);
+				}
+			}
+		} # ende of Vektorlayer
+		$classset=$layerset['Class'];
+		$this->loadclasses($layer, $layerset, $classset, $map);
+	}
 
   function loadclasses($layer, $layerset, $classset, $map){
     $anzClass=count($classset);
@@ -5229,7 +5168,7 @@ echo '			</ul>
 		$this->formvars['Datentyp'] = $layerset[0]['Datentyp'];
 		$this->formvars['Data'] = $datastring;
 		$this->formvars['connectiontype'] = 6;
-		$this->formvars['labelitem'] = $layerset[0]['labelitem'];
+		if($layerset[0]['labelitem'] != 'Cluster:FeatureCount')$this->formvars['labelitem'] = $layerset[0]['labelitem'];
 		$this->formvars['classitem'] = $layerset[0]['classitem'];
 		$connectionstring ='user='.$layerdb->user;
 		if($layerdb->passwd != ''){
@@ -5316,6 +5255,7 @@ echo '			</ul>
 			$this->user->rolle->setOneLayer($this->formvars['layer_id'], 0);
 		}
 		$this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
+		return $layer_id;
 	}
 
   function zoom_toLine(){

@@ -356,18 +356,19 @@ class ddl {
 					}
 				}
 				elseif($attributes['name'][$j] == $attributes['the_geom'] AND $this->layout['elements'][$attributes['name'][$j]]['xpos'] > 0){		# Geometrie
-					#if($this->page_overflow)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
-					$this->pdf->reopenObject($this->pdf->objects['3']['info']['pages'][0]+1);			# Kartenbild immer auf die erste Seite
+					if($this->page_overflow)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+					#$this->pdf->reopenObject($this->pdf->objects['3']['info']['pages'][0]+1);			# Kartenbild immer auf die erste Seite
 					$this->gui->map->set('width', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
 					$this->gui->map->set('height', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
 					$oid = $this->result[$i][$this->layerset['maintable'].'_oid'];
+					# Rollenlayer zum Highlighten erzeugen und auf Objekt zoomen
 					if($oid != ''){
 						if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0)$rand = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];		# bei Geometrie-Attributen wird in fontsize der Zoom-Rand gespeichert
 						elseif(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0)$rand = ZOOMBUFFER;
 						else $rand = 100;
 						if($attributes['geomtype'][$attributes['the_geom']] == 'POINT'){
 							include_(CLASSPATH.'pointeditor.php');
-							$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->gui->user->rolle->epsg_code);							
+							$pointeditor = new pointeditor($layerdb, $this->layerset['epsg_code'], $this->gui->user->rolle->epsg_code);							
 							$point = $pointeditor->getpoint($oid, $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom']);
 							$rect = ms_newRectObj();
 							$rect->minx = $point['pointx']-$rand;
@@ -377,15 +378,26 @@ class ddl {
 						}
 						else{
 							include_(CLASSPATH.'polygoneditor.php');
-							$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->gui->user->rolle->epsg_code);
+							$polygoneditor = new polygoneditor($layerdb, $this->layerset['epsg_code'], $this->gui->user->rolle->epsg_code);
 							$rect = $polygoneditor->zoomTopolygon($oid, $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom'], $rand);
 						}
+						$this->gui->formvars['layer_id'] = $selected_layer_id;
+						$this->gui->formvars['oid'] = $oid;
+						$this->gui->formvars['selektieren'] = 'false';
+						$rollenlayer_id = $this->gui->createZoomRollenlayer($this->gui->mapDB, $layerdb, array($this->layerset));
+						$rollenlayer = $this->gui->mapDB->read_RollenLayer($rollenlayer_id);
+						$this->gui->loadlayer($this->gui->map, $rollenlayer[0]);
 						$this->gui->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 					}					
 					if($this->gui->map->selectOutputFormat('jpeg_print') == 1){
 						$this->gui->map->selectOutputFormat('jpeg');
 					}
 					$image_map = $this->gui->map->draw();
+					# Rollenlayer wieder entfernen
+					if($oid != ''){
+						$this->gui->mapDB->deleteRollenLayer($rollenlayer_id);
+						$this->gui->map->removeLayer($this->gui->map->numlayers-1);
+					}
 					$filename = $this->gui->map_saveWebImage($image_map,'jpeg');
 					$newname = $this->user->id.basename($filename);
 					rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
