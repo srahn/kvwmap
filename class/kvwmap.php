@@ -1235,7 +1235,7 @@ echo '			</ul>
 							$layerset[$i][connection],
 							rolle::$layer_params,
 							$this->user->id,
-							$this->stelle_id,
+							$this->Stelle->id,
 							rolle::$hist_timestamp,
 							$this->user->rolle->language
 						)
@@ -1673,7 +1673,7 @@ echo '			</ul>
 					$layerset['Data'],
 					rolle::$layer_params,
 					$this->user->id,
-					$this->stelle_id,
+					$this->Stelle->id,
 					rolle::$hist_timestamp,
 					$this->user->rolle->language
 				);
@@ -1702,7 +1702,7 @@ echo '			</ul>
 						$layerset['classitem'],
 						rolle::$layer_params,
 						$this->user->id,
-						$this->stelle_id,
+						$this->Stelle->id,
 						rolle::$hist_timestamp,
 						$this->user->rolle->language
 					)
@@ -4257,7 +4257,7 @@ echo '			</ul>
 						$layer['pfad'],
 						rolle::$layer_params,
 						$this->user->id,
-						$this->stelle_id,
+						$this->Stelle->id,
 						rolle::$hist_timestamp,
 						$this->user->rolle->language
 					)
@@ -5991,7 +5991,7 @@ echo '			</ul>
 				$layerset['connection'],
 				rolle::$layer_params,
 				$this->user->id,
-				$this->stelle_id,
+				$this->Stelle->id,
 				rolle::$hist_timestamp,
 				$this->user->rolle->language
 			)
@@ -7623,7 +7623,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->layerdata['Data'],
 			rolle::$layer_params,
 			$this->user->id,
-			$this->stelle_id,
+			$this->Stelle->id,
 			rolle::$hist_timestamp,
 			$this->user->rolle->language
 		);
@@ -7631,7 +7631,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->layerdata['classitem'],
 			rolle::$layer_params,
 			$this->user->id,
-			$this->stelle_id,
+			$this->Stelle->id,
 			rolle::$hist_timestamp,
 			$this->user->rolle->language
 		);
@@ -7911,7 +7911,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$path,
 						$all_layer_params,
 						$this->user->id,
-						$this->stelle_id,
+						$this->Stelle->id,
 						rolle::$hist_timestamp,
 						$this->user->rolle->language
 					)
@@ -10093,7 +10093,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$sql,
 					rolle::$layer_params,
 					$this->user->id,
-					$this->stelle_id,
+					$this->Stelle->id,
 					rolle::$hist_timestamp,
 					$this->user->rolle->language
 				);
@@ -10190,7 +10190,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$sql,
 						rolle::$layer_params,
 						$this->user->id,
-						$this->stelle_id,
+						$this->Stelle->id,
 						rolle::$hist_timestamp,
 						$this->user->rolle->language
 					);
@@ -10232,7 +10232,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$layerset[0]['pfad'],
 			rolle::$layer_params,
 			$this->user->id,
-			$this->stelle_id,
+			$this->Stelle->id,
 			rolle::$hist_timestamp,
 			$this->user->rolle->language
 		);
@@ -13595,7 +13595,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								$layerset[$i]['connection'],
 								rolle::$layer_params,
 								$this->user->id,
-								$this->stelle_id,
+								$this->Stelle->id,
 								rolle::$hist_timestamp,
 								$this->user->rolle->language
 							)
@@ -13643,7 +13643,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								$layerset[$i]['pfad'],
 								rolle::$layer_params,
 								$this->user->id,
-								$this->stelle_id,
+								$this->Stelle->id,
 								rolle::$hist_timestamp,
 								$this->user->rolle->language
 							);
@@ -14387,7 +14387,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$layerset[$i]['pfad'],
 					rolle::$layer_params,
 					$this->user->id,
-					$this->stelle_id,
+					$this->Stelle->id,
 					rolle::$hist_timestamp,
 					$this->user->rolle->language
 				);
@@ -15349,7 +15349,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$layer[0]['Data'],
 					rolle::$layer_params,
 					$this->user->id,
-					$this->stelle_id,
+					$this->Stelle->id,
 					rolle::$hist_timestamp,
 					$this->user->rolle->language
 				);
@@ -15494,7 +15494,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$layerset['Data'],
 					rolle::$layer_params,
 					$this->user->id,
-					$this->stelle_id,
+					$this->Stelle->id,
 					rolle::$hist_timestamp,
 					$this->user->rolle->language
 				);
