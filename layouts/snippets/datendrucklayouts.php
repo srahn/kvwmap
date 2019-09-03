@@ -101,6 +101,10 @@ function save_layout(){
 		}
 	}
 }
+
+function scrolltop(){
+	document.getElementById('datendrucklayouteditor_formular_scroll').scrollTop = 0;
+}
 	
 //-->
 </script>
@@ -123,6 +127,9 @@ function save_layout(){
 			title="zu den Freitexten"
 		>
 			<i style="padding: 6px;" class="fa fa-font buttonlink" aria-hidden="true"></i>
+		</a>
+		<a style="float: right; margin-top: -20px; margin-right: 8px;" href="javascript:scrolltop();"	title="nach oben">
+			<i style="padding: 6px;" class="fa fa-arrow-up buttonlink" aria-hidden="true"></i>
 		</a><?php
 	}
 	if ($this->ddl->fehlermeldung != '') { ?>
@@ -148,7 +155,10 @@ function save_layout(){
 											array('value' => 1, 'output' => 'Seite 2'),
 											array('value' => 2, 'output' => 'Seite 3')
 										),
-										$this->formvars['page']
+										$this->formvars['page'],
+										1,
+										'',
+										'document.getElementById(\'save_submit_button\').click();'
 									);
 								?>
 							</div>
