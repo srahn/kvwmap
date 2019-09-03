@@ -131,7 +131,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 								if ($operator == '') $operator = '=';
 								echo "<input type=\"hidden\" name=\"{$prefix}operator_{$this->attributes['name'][$i]}\" value=\"{$operator}\">";
 							} ?>
-	            <td align="left" width="40%" style="position: relative"><?
+	            <td align="left" width="40%" style="position: relative; min-width: 300px"><?
 	            	switch ($this->attributes['form_element_type'][$i]) {
 	            		case 'Auswahlfeld' : case 'Radiobutton' : {
 	                  ?><select 
