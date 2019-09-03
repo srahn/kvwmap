@@ -10,6 +10,7 @@ plugins/*/config/config.php
 plugins/*/config/config.sh
 plugins/*/img/*
 plugins/*/results/
+tools/copy_kvwmap_config.json
 .settings
 .project
 .buildpath
