@@ -16637,7 +16637,7 @@ class db_mapObj{
 												$attributes['req'][$i][] = $attributename;			# die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
 											}
 										}
-                    for($k = 0; $k < count($query_result); $k++){
+                    foreach($query_result as $k => $record){
 											$options = $attributes['options'][$i];
 											foreach($attributes['req'][$i] as $attributename){
 												if($query_result[$k][$attributename] != ''){
@@ -16662,7 +16662,7 @@ class db_mapObj{
                 }
                 # -----<requires>------
                 if(is_array($attributes['dependent_options'][$i])){   # mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-                  for($k = 0; $k < count($query_result); $k++){
+                  foreach($query_result as $k => $record){
                     $sql = $attributes['dependent_options'][$i][$k];
                     if($sql != '') {
                       $ret = $database->execSQL($sql, 4, 0);
