@@ -51,9 +51,8 @@ function update_options(){
 	else document.getElementById('list_type_options').style.display = 'none';
 }
 
-function addfreetext(){
-	document.GUI.go.value = 'sachdaten_druck_editor_Freitexthinzufuegen';
-	document.GUI.submit();
+function addfreetext(layer_id, ddl_id){
+	ahah('index.php?go=sachdaten_druck_editor_Freitexthinzufuegen&selected_layer_id='+layer_id+'&aktivesLayout='+ddl_id, '', new Array(document.getElementById('add_freetext')), new Array('prependhtml'));
 }
 
 function addline(){
@@ -331,33 +330,33 @@ function scrolltop(){
 								</tr>
 							
 				 <? if($this->formvars['selected_layer_id'] != ''){
-							for($i = 0; $i < count($this->attributes['type']); $i++){
-								if($this->attributes['type'][$i] != 'geometry'){
-									if($this->attributes['alias'][$i] == '')$this->attributes['alias'][$i] = $this->attributes['name'][$i]; ?>
+							for($i = 0; $i < count($this->ddl->attributes['type']); $i++){
+								if($this->ddl->attributes['type'][$i] != 'geometry'){
+									if($this->ddl->attributes['alias'][$i] == '')$this->ddl->attributes['alias'][$i] = $this->ddl->attributes['name'][$i]; ?>
 									<tr>
-										<td class="fett" align="left" style="border-top:2px solid #C3C7C3" colspan="8" onclick="toggle('<? echo $this->attributes['name'][$i]; ?>');">
-										<? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos'] == ''){ ?>
-											<img id="img_<? echo $this->attributes['name'][$i]; ?>" src="<? echo GRAPHICSPATH.'plus.gif'?>">&nbsp;<? echo $this->attributes['alias'][$i].' ($'.$this->attributes['name'][$i].')'; ?>
+										<td class="fett" align="left" style="border-top:2px solid #C3C7C3" colspan="8" onclick="toggle('<? echo $this->ddl->attributes['name'][$i]; ?>');">
+										<? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos'] == ''){ ?>
+											<img id="img_<? echo $this->ddl->attributes['name'][$i]; ?>" src="<? echo GRAPHICSPATH.'plus.gif'?>">&nbsp;<? echo $this->ddl->attributes['alias'][$i].' ($'.$this->ddl->attributes['name'][$i].')'; ?>
 										<? }else{ ?>
-											<img id="img_<? echo $this->attributes['name'][$i]; ?>" src="<? echo GRAPHICSPATH.'minus.gif'?>">&nbsp;<? echo $this->attributes['alias'][$i].' ($'.$this->attributes['name'][$i].')'; ?>
+											<img id="img_<? echo $this->ddl->attributes['name'][$i]; ?>" src="<? echo GRAPHICSPATH.'minus.gif'?>">&nbsp;<? echo $this->ddl->attributes['alias'][$i].' ($'.$this->ddl->attributes['name'][$i].')'; ?>
 										<? } ?>
 										</td>
 									</tr>		
-				<?				switch ($this->attributes['form_element_type'][$i]){ 
+				<?				switch ($this->ddl->attributes['form_element_type'][$i]){ 
 										case 'SubFormPK' : case 'SubFormEmbeddedPK' : {
-											$subformlayouts = $this->ddl->load_layouts(NULL, NULL, $this->attributes['subform_layer_id'][$i], array(2));
+											$subformlayouts = $this->ddl->load_layouts(NULL, NULL, $this->ddl->attributes['subform_layer_id'][$i], array(2));
 										?>
-											<tr id="tr1_<? echo $this->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
+											<tr id="tr1_<? echo $this->ddl->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
 												<td style="border-top:1px solid #C3C7C3">&nbsp;&nbsp;&nbsp;x:</td>
-												<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="posx_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos']; ?>" size="5"></td>
+												<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="posx_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos']; ?>" size="5"></td>
 												<td style="border-top:1px solid #C3C7C3" align="left" colspan="5" align="center">
 													&nbsp;Druckrahmen:&nbsp;
-													<select title="Druckrahmen" name="font_<? echo $this->attributes['name'][$i]; ?>">
+													<select title="Druckrahmen" name="font_<? echo $this->ddl->attributes['name'][$i]; ?>">
 														<option value=""> - Bitte wählen - </option>
 														<?																																											# die font-Spalte wird hier zum Speichern des eingebetteten Layouts genutzt
 														for($j = 0; $j < count($subformlayouts); $j++){
 															echo '<option ';
-															if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['font'] == $subformlayouts[$j]['id']){
+															if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['font'] == $subformlayouts[$j]['id']){
 																echo 'selected ';
 															}
 															echo 'value="'.$subformlayouts[$j]['id'].'">'.$subformlayouts[$j]['name'].'</option>';
@@ -366,21 +365,21 @@ function scrolltop(){
 													</select>
 												</td>
 											</tr>
-											<tr id="tr2_<? echo $this->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
+											<tr id="tr2_<? echo $this->ddl->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
 												<td>&nbsp;&nbsp;&nbsp;y:</td>
-												<td style="border-right:1px solid #C3C7C3"><input type="text" name="posy_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['ypos']; ?>" size="5"></td>							
+												<td style="border-right:1px solid #C3C7C3"><input type="text" name="posy_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['ypos']; ?>" size="5"></td>							
 												<td width="60px">&nbsp;unterhalb&nbsp;von:</td>
 												<td>
-													<select name="offset_attribute_<? echo $this->attributes['name'][$i]; ?>">
+													<select name="offset_attribute_<? echo $this->ddl->attributes['name'][$i]; ?>">
 														<option value="">- Auswahl -</option>
 														<?
-														for($j = 0; $j < count($this->attributes['name']); $j++){
-															if($this->attributes['name'][$j] != $this->attributes['name'][$i]){
+														for($j = 0; $j < count($this->ddl->attributes['name']); $j++){
+															if($this->ddl->attributes['name'][$j] != $this->ddl->attributes['name'][$i]){
 																echo '<option ';
-																if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['offset_attribute'] == $this->attributes['name'][$j]){
+																if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['offset_attribute'] == $this->ddl->attributes['name'][$j]){
 																	echo 'selected ';
 																}
-																echo 'value="'.$this->attributes['name'][$j].'">'.$this->attributes['name'][$j].'</option>';
+																echo 'value="'.$this->ddl->attributes['name'][$j].'">'.$this->ddl->attributes['name'][$j].'</option>';
 															}
 														}
 														?>
@@ -390,87 +389,87 @@ function scrolltop(){
 					 <?				} break;
 				 
 										case 'Dokument' : { ?>
-											<tr id="tr1_<? echo $this->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
+											<tr id="tr1_<? echo $this->ddl->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
 												<td>&nbsp;&nbsp;&nbsp;x:</td>
-												<td><input type="text" title="negative Werte bewirken eine rechtsbündige Ausrichtung" name="posx_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos']; ?>" size="5"></td>
+												<td><input type="text" title="negative Werte bewirken eine rechtsbündige Ausrichtung" name="posx_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos']; ?>" size="5"></td>
 												<td width="60px">&nbsp;Breite:</td>
-												<td><input	type="text" name="width_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['width']; ?>" size="5"></td>
+												<td><input	type="text" name="width_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['width']; ?>" size="5"></td>
 												<td colspan="3"></td>
 											</tr>
-											<tr id="tr2_<? echo $this->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
+											<tr id="tr2_<? echo $this->ddl->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
 												<td>&nbsp;&nbsp;&nbsp;y:</td>
-												<td><input type="text" name="posy_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['ypos']; ?>" size="5"></td>
+												<td><input type="text" name="posy_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['ypos']; ?>" size="5"></td>
 												<td colspan="5">&nbsp;</td>
 											</tr>	
 							<?			}break;
 								
 										default : {	?>
-											<tr id="tr1_<? echo $this->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
+											<tr id="tr1_<? echo $this->ddl->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
 												<td style="border-top:1px solid #C3C7C3">&nbsp;x:</td>
-												<td style="border-top:1px solid #C3C7C3"><input type="text" title="negative Werte bewirken eine rechtsbündige Ausrichtung" name="posx_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos']; ?>" size="5"></td>
+												<td style="border-top:1px solid #C3C7C3"><input type="text" title="negative Werte bewirken eine rechtsbündige Ausrichtung" name="posx_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos']; ?>" size="5"></td>
 												<td style="border-top:1px solid #C3C7C3" width="60px">&nbsp;Breite:</td>
-												<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3"><input	type="text" name="width_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['width']; ?>" size="5"></td>
+												<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3"><input	type="text" name="width_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['width']; ?>" size="5"></td>
 												<td style="border-top:1px solid #C3C7C3" align="left" colspan="2" align="center">
 													<?php echo output_select(
-														'font_' . $this->attributes['name'][$i],
+														'font_' . $this->ddl->attributes['name'][$i],
 														$this->ddl->fonts,
-														$this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['font'],
+														$this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['font'],
 														null,
 														'Schriftart',
 														' - Bitte wählen - '
 													); ?>
 												</td>
-												<td style="border-top:1px solid #C3C7C3" align="left" align="center"><input type="text" title="Schriftgröße" name="fontsize_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['fontsize']; ?>" size="2">&nbsp;pt</td>
+												<td style="border-top:1px solid #C3C7C3" align="left" align="center"><input type="text" title="Schriftgröße" name="fontsize_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['fontsize']; ?>" size="2">&nbsp;pt</td>
 											</tr>
-											<tr id="tr2_<? echo $this->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
+											<tr id="tr2_<? echo $this->ddl->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
 												<td>&nbsp;y:</td>
-												<td><input type="text" name="posy_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['ypos']; ?>" size="5"></td>
+												<td><input type="text" name="posy_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['ypos']; ?>" size="5"></td>
 												<td width="60px">&nbsp;unterhalb&nbsp;von:</td>
 												<td style="border-right:1px solid #C3C7C3">
-													<select name="offset_attribute_<? echo $this->attributes['name'][$i]; ?>">
+													<select name="offset_attribute_<? echo $this->ddl->attributes['name'][$i]; ?>">
 														<option value="">- Auswahl -</option>
 														<?
-														for($j = 0; $j < count($this->attributes['name']); $j++){
-															if($this->attributes['name'][$j] != $this->attributes['name'][$i]){
+														for($j = 0; $j < count($this->ddl->attributes['name']); $j++){
+															if($this->ddl->attributes['name'][$j] != $this->ddl->attributes['name'][$i]){
 																echo '<option ';
-																if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['offset_attribute'] == $this->attributes['name'][$j]){
+																if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['offset_attribute'] == $this->ddl->attributes['name'][$j]){
 																	echo 'selected ';
 																}
-																echo 'value="'.$this->attributes['name'][$j].'">'.$this->attributes['name'][$j].'</option>';
+																echo 'value="'.$this->ddl->attributes['name'][$j].'">'.$this->ddl->attributes['name'][$j].'</option>';
 															}
 														}
 														?>
 													</select>
 												</td>
 												<td>&nbsp;Rahmen:</td>
-												<td><input type="checkbox" name="border_<? echo $this->attributes['name'][$i]; ?>" value="1" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['border'] == '1'){echo 'checked="true"';} ?> size="5"></td>
+												<td><input type="checkbox" name="border_<? echo $this->ddl->attributes['name'][$i]; ?>" value="1" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['border'] == '1'){echo 'checked="true"';} ?> size="5"></td>
 											</tr>
 					 <?				}
 									}
 								}	
 							}
-							if($this->attributes['the_geom'] != ''){ ?>
+							if($this->ddl->attributes['the_geom'] != ''){ ?>
 								<tr>
-									<td class="fett" align="left" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="8" onclick="toggle('<? echo $this->attributes['the_geom']; ?>');">
-									<? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['xpos'] == ''){ ?>
-										<img id="img_<? echo $this->attributes['the_geom']; ?>" src="<? echo GRAPHICSPATH.'plus.gif'?>">&nbsp;Geometrie
+									<td class="fett" align="left" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="8" onclick="toggle('<? echo $this->ddl->attributes['the_geom']; ?>');">
+									<? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['xpos'] == ''){ ?>
+										<img id="img_<? echo $this->ddl->attributes['the_geom']; ?>" src="<? echo GRAPHICSPATH.'plus.gif'?>">&nbsp;Geometrie
 									<? }else{ ?>
-										<img id="img_<? echo $this->attributes['the_geom']; ?>" src="<? echo GRAPHICSPATH.'minus.gif'?>">&nbsp;Geometrie
+										<img id="img_<? echo $this->ddl->attributes['the_geom']; ?>" src="<? echo GRAPHICSPATH.'minus.gif'?>">&nbsp;Geometrie
 									<? } ?>
 									</td>
 								</tr>
-								<tr id="tr1_<? echo $this->attributes['the_geom']; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['xpos'] == ''){echo 'style="display:none"';} ?>>
+								<tr id="tr1_<? echo $this->ddl->attributes['the_geom']; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['xpos'] == ''){echo 'style="display:none"';} ?>>
 									<td>&nbsp;&nbsp;&nbsp;x:</td>
-									<td><input type="text" title="negative Werte bewirken eine rechtsbündige Ausrichtung" name="posx_<? echo $this->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['xpos']; ?>" size="5"></td>
+									<td><input type="text" title="negative Werte bewirken eine rechtsbündige Ausrichtung" name="posx_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['xpos']; ?>" size="5"></td>
 									<td width="60px">&nbsp;Breite:</td>
-									<td><input	type="text" name="width_<? echo $this->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['width']; ?>" size="5"></td>
+									<td><input	type="text" name="width_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['width']; ?>" size="5"></td>
 									<td colspan="3"></td>
 								</tr>
-								<tr id="tr2_<? echo $this->attributes['the_geom']; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['xpos'] == ''){echo 'style="display:none"';} ?>>
+								<tr id="tr2_<? echo $this->ddl->attributes['the_geom']; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['xpos'] == ''){echo 'style="display:none"';} ?>>
 									<td>&nbsp;&nbsp;&nbsp;y:</td>
-									<td><input type="text" name="posy_<? echo $this->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['ypos']; ?>" size="5"></td>
+									<td><input type="text" name="posy_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['ypos']; ?>" size="5"></td>
 									<td width="60px">&nbsp;Rand:</td>
-									<td><input	type="text" name="fontsize_<? echo $this->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['fontsize']; ?>" size="5">m</td>
+									<td><input	type="text" name="fontsize_<? echo $this->ddl->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['the_geom']]['fontsize']; ?>" size="5">m</td>
 									<td colspan="3"></td>
 								</tr>	
 				<?	 	}
@@ -528,66 +527,9 @@ function scrolltop(){
 										</div>
 									</td>
 								</tr>
-								<? for($i = 0; $i < count($this->ddl->selectedlayout[0]['texts']); $i++){
-										$this->ddl->selectedlayout[0]['texts'][$i]['text'] = str_replace(';', chr(10), $this->ddl->selectedlayout[0]['texts'][$i]['text']);
-									 ?>
-									<tr>
-										<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
-										<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" title="negative Werte bewirken eine rechtsbündige Ausrichtung" name="textposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['texts'][$i]['posx'] ?>" size="5"></td>						
-										<td rowspan="4" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan=3>
-											<textarea name="text<? echo $i ?>" cols="37" rows="6"><? echo $this->ddl->selectedlayout[0]['texts'][$i]['text'] ?></textarea>
-										</td>
-										<td style="border-top:2px solid #C3C7C3;" colspan=2 align="left">
-											<?php echo output_select(
-												'textfont' . $i,
-												$this->ddl->fonts,
-												$this->ddl->selectedlayout[0]['texts'][$i]['font'],
-												null,
-												'Schriftart',
-												'--- bitte wählen ---'
-											); ?>
-										</td>
-									</tr>
-									<tr>
-										<td>&nbsp;y:</td>
-										<td style="border-right:1px solid #C3C7C3"><input type="text" name="textposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['texts'][$i]['posy'] ?>" size="5"><input type="hidden" name="text_id<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['texts'][$i]['id'] ?>"></td>
-										<td colspan="2"><input type="text" title="Schriftgröße" name="textsize<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['texts'][$i]['size'] ?>" size="5">&nbsp;pt</td>
-									</tr>
-									<tr>
-										<td colspan="2" valign="bottom" style="border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
-										<td colspan="2" valign="bottom">&nbsp;Platzierung:</td>
-									</tr>
-									<tr>
-										<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
-											<select name="textoffset_attribute<? echo $i ?>" style="width: 100px">
-												<option value="">- Auswahl -</option>
-												<?
-												for($j = 0; $j < count($this->attributes['name']); $j++){
-													echo '<option ';
-													if($this->ddl->selectedlayout[0]['texts'][$i]['offset_attribute'] == $this->attributes['name'][$j]){
-														echo 'selected ';
-													}
-													echo 'value="'.$this->attributes['name'][$j].'">'.$this->attributes['name'][$j].'</option>';
-												}
-												?>
-											</select>
-										</td>
-										<td align="left" valign="top">
-											<select style="width: 110px" name="texttype<? echo $i ?>">
-												<option value="0">normal</option>
-												<? if($this->ddl->selectedlayout[0]['type'] != 0){ ?>
-												<option value="1" <? if($this->ddl->selectedlayout[0]['texts'][$i]['type'] == 1)echo ' selected '; ?>>fixiert</option>
-												<? } ?>
-												<option value="2" <? if($this->ddl->selectedlayout[0]['texts'][$i]['type'] == 2)echo ' selected '; ?>>auf jeder Seite</option>
-											</select>
-										</td>
-										<td align="right">
-											<a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Freitextloeschen&freitext_id=<? echo $this->ddl->selectedlayout[0]['texts'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie den Freitext wirklich löschen?');">löschen&nbsp;</a>
-										</td>
-									</tr>
-								<? } ?>
-								<tr>
-									<td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;<a href="javascript:addfreetext();">Freitext hinzufügen</a></td>
+						<?  echo $this->ddl->output_freetext_form($this->ddl->selectedlayout[0]['texts'], $this->formvars['selected_layer_id'], $this->formvars['aktivesLayout']); ?>
+								<tr id="add_freetext">
+									<td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;<a href="javascript:addfreetext(<? echo $this->formvars['selected_layer_id']; ?>, <? echo $this->formvars['aktivesLayout']; ?>);">Freitext hinzufügen</a></td>
 								</tr>				
 							</table>
 							<br>
@@ -627,12 +569,12 @@ function scrolltop(){
 											<select name="lineoffset_attribute_start<? echo $i ?>" style="width: 200px">
 												<option value="">- Auswahl -</option>
 												<?
-												for($j = 0; $j < count($this->attributes['name']); $j++){
+												for($j = 0; $j < count($this->ddl->attributes['name']); $j++){
 													echo '<option ';
-													if($this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute_start'] == $this->attributes['name'][$j]){
+													if($this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute_start'] == $this->ddl->attributes['name'][$j]){
 														echo 'selected ';
 													}
-													echo 'value="'.$this->attributes['name'][$j].'">'.$this->attributes['name'][$j].'</option>';
+													echo 'value="'.$this->ddl->attributes['name'][$j].'">'.$this->ddl->attributes['name'][$j].'</option>';
 												}
 												?>
 											</select>
@@ -641,12 +583,12 @@ function scrolltop(){
 											<select name="lineoffset_attribute_end<? echo $i ?>" style="width: 200px">
 												<option value="">- Auswahl -</option>
 												<?
-												for($j = 0; $j < count($this->attributes['name']); $j++){
+												for($j = 0; $j < count($this->ddl->attributes['name']); $j++){
 													echo '<option ';
-													if($this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute_end'] == $this->attributes['name'][$j]){
+													if($this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute_end'] == $this->ddl->attributes['name'][$j]){
 														echo 'selected ';
 													}
-													echo 'value="'.$this->attributes['name'][$j].'">'.$this->attributes['name'][$j].'</option>';
+													echo 'value="'.$this->ddl->attributes['name'][$j].'">'.$this->ddl->attributes['name'][$j].'</option>';
 												}
 												?>
 											</select>
