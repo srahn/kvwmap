@@ -891,11 +891,13 @@ class user {
 
 		$sql = "
 			SELECT DISTINCT
-				u.*
+				u.*, max(c.time_id) as last_timestamp
 			FROM
-				user u" .
+				user u
+			LEFT JOIN u_consume c ON u.ID = c.user_id" .
 				$more_from .
 			(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") .
+			" GROUP BY u.ID " .
 			$order . "
 		";
 		#echo '<br>sql: ' . $sql;
@@ -983,12 +985,13 @@ class user {
 
 	function setOptions($stelle_id, $formvars) {
 		# Setzen der Werte, die aktuell für die Nutzung der Stelle durch den Nutzer gelten sollen.
-		# Zerlegen der Variable für die Kartengröße
-		$teil=explode('x',$formvars['mapsize']);
-		$nImageWidth=$teil[0];
-		$nImageHeight=$teil[1];
-		if($teil[2] == 'auto')$auto_map_resize = '1';
-		else $auto_map_resize = '0';
+		if($formvars['mapsize'] == 'auto')$auto_map_resize = '1';
+		else{
+			$auto_map_resize = '0';
+			$teil=explode('x',$formvars['mapsize']);
+			$nImageWidth=$teil[0];
+			$nImageHeight=$teil[1];
+		}
 		# Zoomfaktor (Wenn 1 erfolgt kein Zoom durch einfaches klicken in die Karte)
 		if ($formvars['nZoomFactor']=='' OR $formvars['nZoomFactor']==0) {
 			$formvars['nZoomFactor']=2;
@@ -1005,8 +1008,12 @@ class user {
 
 		# Eintragen der neuen Einstellungen für die Rolle
 		if($formvars['gui'] != '' AND $formvars['mapsize'] != ''){
-			$sql ='UPDATE rolle SET nZoomFactor='.$formvars['nZoomFactor'].',nImageWidth='.$nImageWidth;
-			$sql.=',nImageHeight='.$nImageHeight.',gui="'.$formvars['gui'].'"';
+			$sql ='UPDATE rolle SET nZoomFactor='.$formvars['nZoomFactor'];
+			if($nImageWidth != ''){
+				$sql.=',nImageWidth='.$nImageWidth;
+				$sql.=',nImageHeight='.$nImageHeight;
+			}
+			$sql.=',gui="'.$formvars['gui'].'"';
 			$sql.=',auto_map_resize='.$auto_map_resize;
 			$sql.=',epsg_code="'.$formvars['epsg_code'].'"';
 			$sql.=',epsg_code2="'.$formvars['epsg_code2'].'"';
@@ -1192,6 +1199,12 @@ class user {
 		if ($userdaten['email']!='') {
 			$sql.=',email="'.$userdaten['email'].'"';
 		}
+		if ($userdaten['organisation']!='') {
+			$sql.=',organisation="'.$userdaten['organisation'].'"';
+		}
+		if ($userdaten['position']!='') {
+			$sql.=',position="'.$userdaten['position'].'"';
+		}
 		$sql.=',start="'.$userdaten['start'].'"';
 		$sql.=',stop="'.$userdaten['stop'].'"';
 		if ($userdaten['ips']!='') {
@@ -1218,6 +1231,12 @@ class user {
 			}
 			if ($userdaten['email']!='') {
 				$sql.=' AND email="'.$userdaten['email'].'"';
+			}
+			if ($userdaten['organisation']!='') {
+				$sql.=' AND organisation="'.$userdaten['organisation'].'"';
+			}
+			if ($userdaten['position']!='') {
+				$sql.=' AND position="'.$userdaten['position'].'"';
 			}
 			# Starten der Anfrage
 			$ret=$this->database->execSQL($sql,4, 0);
@@ -1255,9 +1274,11 @@ class user {
 				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
 				`start` = '" . $userdaten['start'] . "',
 				`stop`= '" . $userdaten['stop'] . "', " .
-				($userdaten['id'] 		!= '' ? "`ID` 			=  " . $userdaten['id'] . "," 								: "") .
-				($userdaten['phon'] 	!= '' ? "`phon` 		= '" . $userdaten['phon'] . "'," 						: "") .
-				($userdaten['email']	!= '' ? "`email` 		= '" . $userdaten['email'] . "',"						: "") . "
+				($userdaten['id'] 					!= '' ? "`ID` 					=  " . $userdaten['id'] . "," 						: "") .
+				($userdaten['phon'] 				!= '' ? "`phon` 				= '" . $userdaten['phon'] . "'," 					: "") .
+				($userdaten['email']				!= '' ? "`email` 				= '" . $userdaten['email'] . "',"					: "") .
+				($userdaten['organisation']	!= '' ? "`organisation`	= '" . $userdaten['organisation'] . "'," 	: "") .
+				($userdaten['position']			!= '' ? "`position` 		= '" . $userdaten['position'] . "',"			: "") . "
 				`ips` = '" . $userdaten['ips'] . "'" .
 				$passwort_column .
 				$passwort_setting_time_column . "

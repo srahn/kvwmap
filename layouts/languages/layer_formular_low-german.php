@@ -1,4 +1,5 @@
 ﻿<?php
+	$strLayer="Layer";
 	$strAsteriskRequired="Weerte mit een * mööst du indragen";
 	$strClassItem="Classitem";
 	$strMaintable="Main Table";
@@ -38,7 +39,7 @@
 	$strDelete="löschen";
 	$strAddClass="Klass tau fögen";
   $strAddAutoClasses="Klassen van süllmst tau fögen";
-	$strOtherExtentions="tosett Instellen";
+	$strAttributes="Attribute";
 	$strButtonSave="Ännern";
 	$strBack="Trüggsetten";
 	$strSave="Ännern";
@@ -54,7 +55,9 @@
 	$strmaxscale="Maxscale";
 	$stroffsite="Offsite";
 	$strOWSParameter="OWS-Parameter";
+	$strStellenAsignment="Towiesen to'n Stäen";
 	$strDefaultValues="Vörinstellt Weerte förs Towiesen to'n Stäen";
+	$strPrivileges="Rechte";
 	$strWFS_geom="WFS-Geometrieattribut";
 	$strQueryMap="QueryMap";
 	$strProcessing="Processing";
@@ -67,4 +70,5 @@
 	$strTriggerFunction="Trigger function";
 	$strSync="Sync - Mode";
 	$strSyncHelp="In Sync - Mode all changes on the layer will be stored in a table named (Main Table)_deltas with a serialised version number. The mode must be switched on, to enable the layer in the mobile App kvmobile."
+	$strStylesLabels="Styles und Labels";
 ?>

@@ -431,6 +431,11 @@ function go_switch($go, $exit = false) {
 				$GUI->showMapImage();
 			} break;
 
+			case 'showRefMapImage' : {
+				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->getRefMapImage($GUI->formvars['ID']);
+			} break;
+
 			# Klassen abfragen
 			case 'getclasses' : {
 				$GUI->get_classes();
@@ -1147,6 +1152,10 @@ function go_switch($go, $exit = false) {
 				$GUI->dublicate_dataset();
 			} break;
 
+			case 'Layer_Datensatz_Loeschen' : {
+				$GUI->layer_Datensatz_Loeschen($GUI->formvars['chosen_layer_id'], $GUI->formvars['oid'], $GUI->formvars['reload_object']);
+			} break;
+
 			case 'Layer_Datensaetze_Loeschen' : {
 				$GUI->layer_Datensaetze_loeschen();
 			} break;
@@ -1250,24 +1259,7 @@ function go_switch($go, $exit = false) {
 			case 'Layereditor' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Layereditor();
-			} break;
-
-			case 'Layereditor_Klasse_Löschen' : {
-				$GUI->checkCaseAllowed('Layereditor');
-				$GUI->Layereditor_KlasseLoeschen();
-			} break;
-
-			case 'Layereditor_Klasse_Hinzufügen' : {
-				$GUI->checkCaseAllowed('Layereditor');
-				$GUI->Layereditor_KlasseHinzufuegen();
-				$GUI->Layereditor();
-			} break;
-
-			case 'Layereditor_Autoklassen_Hinzufügen' : {
-				$GUI->checkCaseAllowed('Layereditor');
-				$GUI->Layereditor_AutoklassenHinzufuegen();
-				$GUI->Layereditor();
-			} break;
+			} break;			
 
 			case 'Layereditor_Als neuen Layer eintragen' : {
 				$GUI->checkCaseAllowed('Layereditor');
@@ -1275,14 +1267,34 @@ function go_switch($go, $exit = false) {
 				$GUI->Layereditor();
 			} break;
 
-			case 'Layereditor_Ändern' : {
+			case 'Layereditor_Speichern' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->LayerAendern();
 			} break;
 
-			case 'Layereditor_erweiterte Einstellungen' : {
-				$GUI->checkCaseAllowed('Attributeditor');
-				$GUI->Attributeditor();
+			case 'Klasseneditor' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->Klasseneditor();
+			} break;
+			
+			case 'Klasseneditor_Speichern' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->Klasseneditor_speichern();
+			} break;			
+
+			case 'Klasseneditor_Klasse_Löschen' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->Klasseneditor_KlasseLoeschen();
+			} break;
+
+			case 'Klasseneditor_Klasse_Hinzufügen' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->Klasseneditor_KlasseHinzufuegen();
+			} break;
+
+			case 'Klasseneditor_Autoklassen_Hinzufügen' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->Klasseneditor_AutoklassenHinzufuegen();
 			} break;
 
 			case 'Attributeditor' : {

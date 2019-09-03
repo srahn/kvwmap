@@ -43,7 +43,6 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
 }
 
-
 class GUI {
 
   var $layout;
@@ -112,6 +111,8 @@ class GUI {
     else{
 			$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		}
+		$attributes['options'][$this->formvars['attribute']] = str_replace('$user_id', $this->user->id, $attributes['options'][$this->formvars['attribute']]);
+		$attributes['options'][$this->formvars['attribute']] = str_replace('$stelle_id', $this->stelle->id, $attributes['options'][$this->formvars['attribute']]);
 		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
     $reqby_start = strpos(strtolower($options), "<required by>");
     if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options; 
@@ -121,21 +122,22 @@ class GUI {
 			$sql = str_replace('<requires>'.$attributenames[$i].'</requires>', "'".$attributevalues[$i]."'", $sql);
 		}
 		#echo $sql;
-		$ret=$layerdb->execSQL($sql,4,0);
-		if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
-		switch($this->formvars['type']) {
-			case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
-				$html = '>';			# Workaround für dummen IE Bug
-				$html .= '<option value="">-- Auswahl --</option>';
-				while($rs = pg_fetch_array($ret[1])){
-					$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
-				}
-			}break;
-			
-			case 'text' : {								#  ein Textfeld soll nur mit dem ersten Wert aufgefüllt werden
-				$rs = pg_fetch_array($ret[1]);
-				$html = $rs['output'];
-			}break;
+		@$ret=$layerdb->execSQL($sql,4,0);
+		if (!$ret[0]) {
+			switch($this->formvars['type']) {
+				case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
+					$html = '>';			# Workaround für dummen IE Bug
+					$html .= '<option value="">-- Bitte Auswählen --</option>';
+					while($rs = pg_fetch_array($ret[1])){
+						$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
+					}
+				}break;
+				
+				case 'text' : {								#  ein Textfeld soll nur mit dem ersten Wert aufgefüllt werden
+					$rs = pg_fetch_array($ret[1]);
+					$html = $rs['output'];
+				}break;
+			}
 		}
 		echo $html;
   }
@@ -917,7 +919,6 @@ class pgdatabase {
       //$query=0;
       if ($query==0) {
 				$errormessage = pg_last_error($this->dbConn);
-				header('error: true');		// damit ajax-Requests das auch mitkriegen
         $ret[0]=1;
         $ret[1]="Fehler bei SQL Anweisung:<br><br>\n\n".$sql."\n\n<br><br>".$errormessage;
         echo "<br><b>".$ret[1]."</b>";

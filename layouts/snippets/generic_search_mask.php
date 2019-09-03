@@ -133,7 +133,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 							} ?>
 	            <td align="left" width="40%" style="position: relative"><?
 	            	switch ($this->attributes['form_element_type'][$i]) {
-	            		case 'Auswahlfeld' : {
+	            		case 'Auswahlfeld' : case 'Radiobutton' : {
 	                  ?><select 
 	                  <?
 	                  	if($this->attributes['req_by'][$i] != ''){
@@ -142,7 +142,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 											}
 											else{
 												$array = '[]';
-												echo ' multiple="true" size="1" style="z-index:'.($z_index-=1).';position: absolute;top: 3px;max-height: 300px" onmouseenter="this.size=this.length" onmouseleave="this.size=1;scrollToSelected(this);"';
+												echo ' multiple="true" size="1" style="height: 20px;z-index:'.($z_index-=1).';position: absolute;top: 3px; width: 293px" onmouseenter="this.style.height=300" onmouseleave="this.style.height=20;scrollToSelected(this);"';
 											}
 										?> 
 	                  	id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i].$array; ?>"><?echo "\n"; ?>
@@ -153,7 +153,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 	                      }
 	                    for($o = 0; $o < count($this->attributes['enum_value'][$i]); $o++){
 	                      ?>
-	                      <option <? if($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
+	                      <option <? if($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o] AND $this->attributes['enum_value'][$i][$o] != ''){ echo 'selected';} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
 	                    } ?>
 	                    </select>
 	                    <input style="width:145px" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">

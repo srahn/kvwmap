@@ -57,23 +57,25 @@
 				</tr>
 				<tr>
 					<td>
-						<ul>
-							<li>
-								<span><? echo $strLegendType; ?>:</span><br>
-								<label><input type="radio" name="legendtype" value="0" <? if($this->user->rolle->legendtype == 0)echo 'checked'; ?>><? echo $strLegendTypeGroups; ?></label><br>
-								<label><input type="radio" name="legendtype" value="1" <? if($this->user->rolle->legendtype == 1)echo 'checked'; ?>><? echo $strLegendTypeAlphabetical; ?></label>
-							</li>
-							<li>
-								<a href="index.php?go=delete_rollenlayer&type=import"><? echo $strRemoveAllImportLayers; ?></a>
-							</li>
-							<li>
-								<a href="index.php?go=delete_rollenlayer&type=search"><? echo $strRemoveAllSearchLayers; ?></a>
-							</li>
-							<li>
-								<a href="javascript:toggleDrawingOrderForm();"><? echo $strDrawingOrder; ?></a>
-								<div id="drawingOrderForm"></div>
-							</li>
-						</ul>
+						<div style="overflow-y: auto; max-height: <? echo ($legend_height - 80); ?>px">
+							<ul>
+								<li>
+									<span><? echo $strLegendType; ?>:</span><br>
+									<label><input type="radio" name="legendtype" value="0" <? if($this->user->rolle->legendtype == 0)echo 'checked'; ?>><? echo $strLegendTypeGroups; ?></label><br>
+									<label><input type="radio" name="legendtype" value="1" <? if($this->user->rolle->legendtype == 1)echo 'checked'; ?>><? echo $strLegendTypeAlphabetical; ?></label>
+								</li>
+								<li>
+									<a href="index.php?go=delete_rollenlayer&type=import"><? echo $strRemoveAllImportLayers; ?></a>
+								</li>
+								<li>
+									<a href="index.php?go=delete_rollenlayer&type=search"><? echo $strRemoveAllSearchLayers; ?></a>
+								</li>
+								<li>
+									<a href="javascript:toggleDrawingOrderForm();"><? echo $strDrawingOrder; ?></a>
+									<div id="drawingOrderForm"></div>
+								</li>
+							</ul>
+						</div>
 					</td>
 				</tr>
 				<tr>
@@ -115,3 +117,6 @@
 if ($show_legend_graphic) { ?>
 	<div id="legend_graphic" style="height:<?php echo $legend_height; ?>"><?php include(SNIPPETS . LEGEND_GRAPHIC_FILE); ?></div><?php
 } ?>
+
+<input type="hidden" name="delete_rollenlayer" value="">
+<input type="hidden" name="delete_rollenlayer_type" value="">

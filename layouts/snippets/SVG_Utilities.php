@@ -665,8 +665,8 @@
 			if(top.browser != "other"){
 				document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback_ff(evt); }, true);
 			}
-			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari//IE9
-			window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);		//Firefox
+			window.addEventListener(\'mousewheel\', mousewheelchange, {passive: false}); // Chrome/Safari//IE9
+			window.addEventListener(\'DOMMouseScroll\', mousewheelchange, {passive: false});		//Firefox
 		}
 		else {
 			top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
@@ -688,7 +688,7 @@
 		}
 		if(polygonfunctions == true){
 			if(enclosingForm.always_draw.checked && !geomload){		// "weiterzeichnen"
-				enclosingForm.last_button.value = "pgon0";
+				if(enclosingForm.last_doing2.value == "draw_polygon" || enclosingForm.last_doing2.value == "draw_second_polygon")enclosingForm.last_button.value = "pgon0";
 				if(enclosingForm.last_doing2.value != "")enclosingForm.last_doing.value = enclosingForm.last_doing2.value;
 				if(enclosingForm.secondpoly.value == "started" || enclosingForm.secondpoly.value == "true"){	// am zweiten Polygon oder an einer gepufferten Linie wird weitergezeichnet
 					if(enclosingForm.last_doing2.value == "add_buffered_line")enclosingForm.last_button.value = "buffer1";
@@ -770,7 +770,7 @@
 			redrawfirstline();
 			if(enclosingForm.firstline.value == "true")linelength();
 		}
-		if(enclosingForm.last_doing2.value == "vertex_edit"){
+		if((enclosingForm.always_draw != undefined && enclosingForm.always_draw.checked && enclosingForm.last_doing2.value == "vertex_edit") || enclosingForm.last_button.value == "vertex_edit1"){
 			edit_vertices();
 		}
 		redrawpoint();
@@ -1175,7 +1175,44 @@ function mouseup(evt){
 	
 	top.document.getElementById("svghelp").SVGcoord_input_submit = coord_input_submit;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
+	function dec2dms(number, coordtype){
+		number = number+"";
+		part1 = number.split(".");
+		degrees = part1[0];
+		minutes = parseFloat("0."+part1[1]) * 60;
+		if(coordtype == "dmin"){
+			minutes = Math.round(minutes*1000)/1000;
+			minutes = minutes+"";
+			return degrees+"°"+minutes;
+		}
+		else{
+			minutes = minutes+"";
+			part2 = minutes.split(".");
+			minutes = part2[0];
+			if(part2[1] != undefined)seconds = Math.round(parseFloat("."+part2[1]) * 60);
+			else seconds = "00";
+			return degrees+"°"+minutes+"\'"+seconds+"\'\'";
+		}			
+	}
+	
+	function dms2dec(number, coordtype){
+		var seconds = 0;
+		number = number+"";
+		part1 = number.split("°");
+		degrees = parseFloat(part1[0]);
+		part2 = part1[1].split("\'");
+		minutes = parseFloat(part2[0]);
+		if(coordtype == "dms"){
+			seconds = part2[1].replace(/\'\'/g, "");
+			seconds = parseFloat(seconds)/60;
+		}
+		minutes = (minutes+seconds)/60;
+		return Math.round((degrees + minutes)*10000)/10000;  
+	}
+
 	function coord_input(){
+		coordtype = \''.$this->user->rolle->coordtype.'\';
+		viewer_epsg = \''.$this->user->rolle->epsg_code.'\';
 		doing = enclosingForm.last_doing.value;
 		if(doing == "recentre" || doing == "zoomout" || doing == "zoomin"){
 			if(polygonfunctions){
@@ -1195,6 +1232,10 @@ function mouseup(evt){
 		}
 		mittex = Math.round(minx+(maxx-minx)/2);
 		mittey = Math.round(miny+(maxy-miny)/2);
+		if(viewer_epsg == 4326 && coordtype != "dec"){
+			mittex = dec2dms(mittex);
+			mittey = dec2dms(mittey);
+		}
 		var Msg = top.$("#message_box");
 		Msg.show();
 		content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="top.$(\\\'#message_box\\\').hide();" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
@@ -2101,6 +2142,7 @@ function mouseup(evt){
 	}
 
 	function edit_vertices(){
+		highlightbyid("vertex_edit1");
 		remove_second_line();
 		save_geometry_for_undo();
 		enclosingForm.last_doing.value = "vertex_edit";
@@ -2843,6 +2885,7 @@ function mouseup(evt){
 	}
 
 	function edit_vertices(){
+		highlightbyid("vertex_edit1");
 		remove_second_poly()
 		save_geometry_for_undo();
 		enclosingForm.last_doing.value = "vertex_edit";
@@ -3905,7 +3948,7 @@ $measurefunctions = '
 		global $last_x;
 		$vertex_edit_buttons ='
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
-				<rect id="vertex_edit1" onmouseover="show_tooltip(\''.$strCornerPoint.'\',evt.clientX,evt.clientY)" onmousedown="highlightbyid(\'vertex_edit1\');edit_vertices();hide_tooltip();" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<rect id="vertex_edit1" onmouseover="show_tooltip(\''.$strCornerPoint.'\',evt.clientX,evt.clientY)" onmousedown="edit_vertices();hide_tooltip();" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(4 4) scale(1)">
 					<g transform="translate(-10.8 -9.5)">
 						<path d="M16.25,29 C17.5,29 18.5,28 18.5,26.75 C18.5,25.5 17.5,24.5 16.25,24.5 C15.0,24.5 14.0,25.5 14,26.75 C14,28 15.0,29 16.25,29"/>

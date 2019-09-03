@@ -542,8 +542,8 @@ function init(){
 		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback_ff(evt); }, true);
 	}
 	if (window.addEventListener) {
-			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari//IE9
-  		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);		//Firefox
+			window.addEventListener(\'mousewheel\', mousewheelchange, {passive: false}); // Chrome/Safari//IE9
+  		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, {passive: false});		//Firefox
 			document.getElementById(\'canvas\').addEventListener(\'touchstart\', touchstart, false);		//touchstart
 			document.getElementById(\'canvas\').addEventListener(\'touchmove\', touchmove, false);		//touchmove
 			document.getElementById(\'canvas\').addEventListener(\'touchend\', touchend, false);		//touchend

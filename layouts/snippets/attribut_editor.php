@@ -2,6 +2,7 @@
 	include_once(CLASSPATH.'FormObject.php');
 	global $supportedLanguages;
 	global $quicksearch_layer_ids;
+	include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php');
 	include(LAYOUTPATH.'languages/attribut_editor_'.$this->user->rolle->language.'.php');
 	$form_element_options = array(
 		array(
@@ -144,7 +145,7 @@ function update_visibility_form(visibility, attributename){
 
 function submitLayerSelector() {
 	var element = document.getElementById('selected_datatype_id');
-	    element.value = '<?php echo $strPleaseSelect; ?>';
+	if(element != undefined)element.value = '<?php echo $strPleaseSelect; ?>';
 	document.GUI.submit();
 }
 
@@ -182,16 +183,33 @@ function alias_replace(name){
 
 //-->
 </script>
-<table cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
-  <tr align="center">
-    <td colspan="2"><h2><?php echo $this->titel; ?></h2></td>
-  </tr>
-  <tr>
-    <td colspan="2">&nbsp;</td>
-  </tr>
-  <tr>
-    <td style="border: 1px solid #C3C7C3;">
-			<?php echo $strLayer;?><br>
+
+<style>
+	.navigation{
+		border-collapse: collapse; 
+		width: 100%;
+		min-width: 940px;
+	}
+
+	.navigation th{
+		border: 1px solid <?php echo BG_DEFAULT ?>;
+		border-collapse: collapse;
+		width: 17%;
+	}
+	
+	.navigation th div{
+		padding: 3px;
+	}		
+	
+	.navigation th:hover{
+		background-color: <?php echo BG_DEFAULT ?>;
+	}
+</style>
+
+<table style="width: 700px; margin: 0 40px 0 40px">
+	<tr>
+    <td align="center">
+			<span class="px17 fetter"><? echo $strLayer;?>:</span>
       <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="submitLayerSelector();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
       <option value=""><?php echo $strPleaseSelect; ?></option>
         <?
@@ -204,10 +222,10 @@ function alias_replace(name){
     		}
     	?>
       </select>
-			&nbsp;&nbsp;<a id="toLayerLink" href="javascript:toLayerEditor();" style="<? if($this->formvars['selected_layer_id'] != '')echo 'display:inline';else echo 'display:none'; ?>">zum Layer</a>
 		</td>
-    <td style="border:1px solid #C3C7C3;<? if(count($this->datatypes) == 0)echo 'display: none'; ?>">
-			<?php echo $strDatatype;?><br>
+		<? if($this->formvars['selected_layer_id'] == '' AND count($this->datatypes) > 0){ ?>
+    <td style="padding-left: 40px">
+			<span class="px17 fetter"><? echo $strDatatype;?>:</span>
       <select id="selected_datatype_id" style="width:250px" size="1"  name="selected_datatype_id" onchange="submitDatatypeSelector();" <?php if(count($this->datatypes)==0){ echo 'disabled';}?>>
       <option value=""><?php echo $strPleaseSelect; ?></option>
         <?
@@ -221,64 +239,46 @@ function alias_replace(name){
     	?>
       </select>
 		</td>
+		<? } ?>
   </tr>
+</table>
+
+<? if($this->formvars['selected_layer_id'] != ''){ ?>
+
+<table border="0" cellpadding="0" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" style="margin: 10px">
+	<tr align="center"> 
+		<td style="width: 100%;">
+			<table cellpadding="0" cellspacing="0" class="navigation">
+				<tr>
+					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
+					<th class="fetter"><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
+					<th class="fetter"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
+					<th bgcolor="<?php echo BG_DEFAULT ?>" class="fetter"><? echo $strAttributes; ?></th>
+					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
+					<th class="fetter"><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>
+				</tr>
+			</table>
+		</td>
+	</tr>	
+</table>
+
+<? }
+	if($this->formvars['selected_layer_id'] != '' OR $this->formvars['selected_datatype_id']){ ?>
+
+<table style="position: relative; display: block; max-width: 1670px; overflow-x: auto;" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr>
     <td colspan="2">&nbsp;</td>
   </tr>
   <tr> 
     <td colspan="2">
 
-			<table align="center" border="0" cellspacing="0" class="attribute-editor-table"><?
-				if ((count($this->attributes))!=0) { ?>
-					<tr>
-						<td align="center"><span class="fett">Attribut</span></td>
-
-						<td align="center"><span class="fett">Formularelement</span></td>
-
-						<td align="center"><span class="fett">Optionen</span></td>
-
-						<td align="center"><span class="fett">Aliasname</span>&nbsp;<a title="aus Attributname erzeugen" href="javascript:create_aliasnames();"><img src="<? echo GRAPHICSPATH; ?>autogen.png"></a></td><?php
-
-						foreach($supportedLanguages as $language) {
-							if($language != 'german') { ?>
-								<td align="center"><span class="fett">Aliasname <?php echo $language; ?></span></td><?php
-							}
-						} ?>
-
-						<td align="center"><span class="fett">Erläuterungen</span></td>
-
-						<td align="center"><span class="fett">Gruppe</span></td>
-
-						<td align="center"><span class="fett">Anordnung</span></td>
-
-						<td align="center"><span class="fett">Beschriftung</span></td>
-						
-						<td align="center"><span class="fett">Bei der Suche</span></td>
-
-						<td align="center">
-							<span	class="fett" style="cursor: pointer">F&uuml;r neuen<br>Datensatz</span>
-						</td>
-
-						<td align="center"><span class="fett">sichtbar</span></td>
-						
-						<?
-						if (in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){
-							$msg = "Für die Schnellsuche verwenden."; ?>
-							<td align="center">
-								<i class="fa fa-search" style="font-size:20px" title="<?php echo $msg; ?>"></i>
-							</td>	<?
-						}
-						
-						$msg = "Im Rastertemplate als Vorschau-Attribut verwenden."; ?>
-						<td align="center">
-							<i class="fa fa-windows" style="font-size:20px" title="<?php echo $msg; ?>"></i>
-						</td>
-
-					</tr><?php
-
+			<table align="center" border="0" cellspacing="0" class="scrolltable attribute-editor-table">
+				<tbody style="max-height: <? echo ($this->user->rolle->nImageHeight - 120); ?>px">
+		<?	if ((count($this->attributes))!=0) { 
 					for ($i = 0; $i < count($this->attributes['type']); $i++){ ?>
 						<tr>
 						  <td align="left" valign="top">
+								<? if($i == 0)echo '<div class="fett scrolltable_header">Attribut</div>'; ?>
 						  	<input type="text"
 								  name="attribute_<?php echo $this->attributes['name'][$i]; ?>"
 									value="<?php echo $this->attributes['name'][$i]; ?>"
@@ -286,7 +286,8 @@ function alias_replace(name){
 								>
 						  </td>
 
-							<td align="left" valign="top"><?
+							<td align="left" valign="top">
+								<? if($i == 0)echo '<div class="fett scrolltable_header">Formularelement</div>';
 								$type = ltrim($this->attributes['type'][$i], '_');
 								if(is_numeric($type)){ ?>
 									<a href="index.php?go=Attributeditor&selected_datatype_id=<?php echo $type; ?>"><?php echo $this->attributes['typename'][$i]; ?></a><?php
@@ -309,7 +310,8 @@ function alias_replace(name){
 								} ?>
 							</td>
 
-						  <td align="left" valign="top"><?php
+						  <td align="left" valign="top">
+								<? if($i == 0)echo '<div class="fett scrolltable_header">Optionen</div>';
 						  if($this->attributes['options'][$i] == '' AND $this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))) { ?>
 						  	<input style="width:180px" name="options_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo $this->attributes['constraints'][$i]; ?>"><?php
 						  }
@@ -319,6 +321,7 @@ function alias_replace(name){
 						  </td>
 
 						  <td align="left" valign="top">
+								<? if($i == 0)echo '<div class="fett scrolltable_header">Aliasname</div>'; ?>
 						  	<input name="alias_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['alias'][$i]); ?>">
 						  </td>
 							
@@ -326,23 +329,27 @@ function alias_replace(name){
 							foreach ($supportedLanguages as $language){
 								if($language != 'german') { ?>
 									<td align="left" valign="top">
+										<? if($i == 0)echo '<div class="fett scrolltable_header">Aliasname '.$language.'</div>'; ?>
 										<input name="alias_<?php echo $language; ?>_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['alias_' . $language][$i]); ?>">
 									</td><?php
 								}
 							} ?>
 
 						  <td align="left" valign="top">
+								<? if($i == 0)echo '<div class="fett scrolltable_header">Erläuterungen</div>'; ?>
 								<textarea name="tooltip_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:120px"><?php echo htmlspecialchars($this->attributes['tooltip'][$i]); ?></textarea>
 							</td>
 
 							<td align="left" valign="top">
+								<? if($i == 0)echo '<div class="fett scrolltable_header">Gruppe</div>'; ?>
 								<input name="group_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['group'][$i]); ?>">
 							</td>
 							
 							<?php
 							if ($this->attributes['arrangement'][$i] == 0) { $bgcolor = 'white'; }
 							if ($this->attributes['arrangement'][$i] == 1) { $bgcolor = '#faef1e'; } ?>
-							<td align="center" valign="top"><?php
+							<td align="center" valign="top">
+								<? if($i == 0)echo '<div class="fett scrolltable_header">Anordnung</div>';
 								echo FormObject::createSelectField(
 											'arrangement_' . $this->attributes['name'][$i],
 											array(
@@ -351,7 +358,7 @@ function alias_replace(name){
 											),
 											$this->attributes['arrangement'][$i],
 											1,
-											"outline: 1px solid lightgrey; border: none; width: 57px; height: 18px; background-color: " . $bgcolor,
+											"outline: 1px solid lightgrey; border: none; width: 78px; height: 18px; background-color: " . $bgcolor,
 											"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;' + this.options[this.selectedIndex].getAttribute('style'));"
 										); ?>
 						  </td>
@@ -360,7 +367,8 @@ function alias_replace(name){
 							if($this->attributes['labeling'][$i] == 0) $bgcolor = 'white';
 							if($this->attributes['labeling'][$i] == 1) $bgcolor = '#faef1e';
 							if($this->attributes['labeling'][$i] == 2) $bgcolor = '#ff6600'; ?>
-						  <td align="center" valign="top"><?php
+						  <td align="center" valign="top">
+								<? if($i == 0)echo '<div class="fett scrolltable_header">Beschriftung</div>';
 								echo FormObject::createSelectField(
 											'labeling_' . $this->attributes['name'][$i],
 											array(
@@ -370,12 +378,13 @@ function alias_replace(name){
 											),
 											$this->attributes['labeling'][$i],
 											1,
-											"outline: 1px solid lightgrey; border: none; width: 53px; height: 18px; background-color: " . $bgcolor,
+											"outline: 1px solid lightgrey; border: none; width: 88px; height: 18px; background-color: " . $bgcolor,
 											"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;' + this.options[this.selectedIndex].getAttribute('style'));"
 										); ?>
 							</td>
 							
-						  <td align="center" valign="top"><?php
+						  <td align="center" valign="top">
+								<? if($i == 0)echo '<div style="margin-top: -40px;" class="fett scrolltable_header">Bei der<br>Suche</div>';
 								echo FormObject::createSelectField(
 											'mandatory_' . $this->attributes['name'][$i],
 											array(
@@ -389,7 +398,8 @@ function alias_replace(name){
 										); ?>
 							</td>
 
-							<td align="center" valign="top"><?php
+							<td align="center" valign="top">
+								<? if($i == 0)echo '<div style="margin-top: -40px;" class="fett scrolltable_header">Für neuen<br>Datensatz</div>';
 								echo FormObject::createSelectField(
 											'dont_use_for_new_' . $this->attributes['name'][$i],
 											array(
@@ -404,6 +414,7 @@ function alias_replace(name){
 							</td>
 							
 							<td align="center" valign="top">
+								<? if($i == 0)echo '<div class="fett scrolltable_header">sichtbar</div>'; ?>
 								<table style="width: 100%" cellspacing="0" cellpadding="0">
 									<tr>
 										<td align="left"><?
@@ -453,34 +464,38 @@ function alias_replace(name){
 							<?php
 							if (in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)) { ?>
 								<td align="center" valign="top">
+									<? if($i == 0)echo '<div class="fett scrolltable_header"><i class="fa fa-search" style="font-size:20px" title="Für die Schnellsuche verwenden"></i></div>'; ?>
 						  		<input name="quicksearch_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['quicksearch'][$i] ? ' checked="true"' : ''); ?>>
 						  	</td><?php
 							} ?>							
 							
 							<td align="center" valign="top">
+								<? if($i == 0)echo '<div class="fett scrolltable_header"><i class="fa fa-windows" style="font-size:20px" title="Im Rastertemplate als Vorschau-Attribut verwenden"></i></div>'; ?>
 						  	<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>
 						  </td>
+							<td>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							</td>
 
 						</tr><?php
 					}
-					if(count($this->attributes) > 0 AND ($this->layer['editable'] OR $this->formvars['selected_datatype_id'])){ ?>
-						<tr>
-							<td align="center" colspan="19"><br><br>
-								<input type="submit" name="go_plus" value="speichern">
-							</td>
-						</tr><?php
-					}
 				} ?>
+				</tbody>
 			</table>
 
 		</td>
   </tr>
-  <tr>
-    <td colspan="2">&nbsp;</td>
-  </tr>
-  <tr>
-    <td colspan="2" >&nbsp;</td>
-  </tr>
+	<?
+		if(count($this->attributes) > 0 AND ($this->layer['editable'] OR $this->formvars['selected_datatype_id'])){ ?>
+			<tr>
+				<td align="center" style="height: 50px">
+					<input type="submit" name="go_plus" value="speichern">
+				</td>
+			</tr><?php
+		}	
+	?>
 </table>
+
+<? } ?>
 
 <input type="hidden" name="go" value="Attributeditor">

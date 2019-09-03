@@ -220,9 +220,14 @@ function add_searchmask(layer_id){
 }
 
 function scrollToSelected(select){
+	<? if(ie_check()){ ?>
+		var height = 17.6;		// IE
+	<? }else{ ?> 
+		var height = select.clientHeight;
+	<? } ?>
   for(var i = 0; i < select.options.length; i++){
-		if(select.options[i].selected){
-			select.scrollTop = i * 18;
+		if(select.options[i].selected){			
+			select.scrollTop = i * height;
 		}
 	}
 }

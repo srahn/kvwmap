@@ -419,23 +419,23 @@ class Gml_builder {
 							$gmlStr .= $this->wrapWithElement("{$xplan_ns_prefix}{$uml_attribute['uml_name']}", $value);
 						} break;
 						case 'float8': {
-							// Handles float values for angles, volumne, area,length, decimal. These elements need an XML uom-attribute
-							// values are defined by Konformitaetsbedingung 2.1.2 (%, grad, m3, m2, m, (decimal is not specified: here, also m))
+							// Handles float values for angles, volume, area,length, decimal. Angle, volume, area, length elements need an XML uom-attribute, decimal has no uom-attribute
+							// values are defined by Konformitaetsbedingung 2.1.2 (%, grad, m3, m2, m, (decimal does not have uom Attribute and is not specified: here, also m))
 							$xml_attributename = "uom";
 								switch ($uml_attribute['uml_dtype']) {
-									case 'Angle':		{$xml_attributevalue = "grad";}  break;
+									case 'Angle':	{$xml_attributevalue = "grad";} break;
 									case 'Volume':	{$xml_attributevalue = "m3";} break;
-									case 'Area': 		{$xml_attributevalue = "m2";} break;
-									case 'Length': 	{$xml_attributevalue = "m";}  break;
-									case 'Decimal': {$xml_attributevalue = "m";}  break;
-									default: 				{$xml_attributevalue = "m";}  break;
+									case 'Area': 	{$xml_attributevalue = "m2";} break;
+									case 'Length':	{$xml_attributevalue = "m";} break;
+									//case 'Decimal':	{$xml_attributevalue = "m";} break;
+									default: 		{$xml_attributevalue = "m";} break;
 								}
 							$gml_value = trim($gml_object[$uml_attribute['col_name']]);
-							 // check for array values
+							// check for array values
 							if ($gml_value[0] == '{' && substr($gml_value,-1) == '}') {
 								$gml_value_array = explode(',',substr($gml_value, 1, -1));
 								for ($j = 0; $j < count($gml_value_array); $j++){
-										$gmlStr .= $this->wrapWithElementAndAttribute(
+									$gmlStr .= $this->wrapWithElementAndAttribute(
 										"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
 										htmlspecialchars($gml_value_array[$j],ENT_QUOTES|ENT_XML1,"UTF-8"),
 										$xml_attributename,
@@ -443,12 +443,19 @@ class Gml_builder {
 									);
 								}
 							} else {
-								$gmlStr .= $this->wrapWithElementAndAttribute(
+								// no uom here
+								if($uml_attribute['uml_dtype'] == 'Decimal') {
+									$gmlStr .= $this->wrapWithElement(
 									"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
-									htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"),
-									$xml_attributename,
-									$xml_attributevalue
-								);
+									htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"));
+								} else {
+									$gmlStr .= $this->wrapWithElementAndAttribute(
+										"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+										htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"),
+										$xml_attributename,
+										$xml_attributevalue
+									);
+								}
 							}
 						} break;
 						default: {

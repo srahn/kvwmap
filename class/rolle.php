@@ -939,7 +939,7 @@ class rolle {
 			$this->layerset = array_merge($this->layerset, $rollenlayer);
 		}
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
-		for ($i=0;$i<count($this->layerset);$i++) {
+		for ($i=0;$i<count($this->layerset)-1;$i++) {
 			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>';
 			$aktiv_status = $formvars['thema'.$this->layerset[$i]['Layer_ID']];
 			$requires_status = $formvars['thema'.$this->layerset[$i]['requires']];
@@ -1851,7 +1851,7 @@ class rolle {
 		if (LOG_CONSUME_ACTIVITY==1) {
 			for($i = 0; $i < count($log_number); $i++){
 				# function setzt eine ALB-PDF-EXportaktivität
-				$sql ='INSERT INTO u_consumeALB SET';
+				$sql ='INSERT IGNORE INTO u_consumeALB SET';
 				$sql.=' user_id='.$this->user_id;
 				$sql.=', stelle_id='.$this->stelle_id;
 				$sql.=', time_id="'.$time.'"';

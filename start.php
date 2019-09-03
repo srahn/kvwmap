@@ -357,8 +357,9 @@ else {
 	# Alles was man immer machen muss bevor die go's aufgerufen werden
 	if (new_options_sent($GUI->formvars)) {
 		$GUI->debug->write('Speicher neue Stellenoptionen.', 4, $GUI->echo);
-		$GUI->setLayerParams();
+		$GUI->setLayerParams('options_');
 		$GUI->user->setOptions($GUI->user->stelle_id, $GUI->formvars);
+		$GUI->user->rolle->readSettings();
 	}
 
 	#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
@@ -447,10 +448,12 @@ else {
 
 	if($_SESSION['login_routines'] == true) {
 		define('AFTER_LOGIN', true);
-	# hier befinden sich Routinen, die beim einloggen des Nutzers einmalig durchgeführt werden
+		$mapdb = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
+		# hier befinden sich Routinen, die beim einloggen des Nutzers einmalig durchgeführt werden
+		# Löschen der Rollenfilter
+		$mapdb->deleteRollenFilter();
 		# Löschen der Rollenlayer
 		if(DELETE_ROLLENLAYER == 'true'){
-			$mapdb = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 			$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search');
 	    for($i = 0; $i < count($rollenlayerset); $i++){
 	      $mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);

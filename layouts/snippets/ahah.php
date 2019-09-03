@@ -77,6 +77,14 @@ $ahah = '
 									}
 								}
 							break;
+							
+							case "prependhtml":
+								targets[i].insertAdjacentHTML(\'beforebegin\', responsevalues[i]);
+							break;
+							
+							case "appendhtml":
+								targets[i].insertAdjacentHTML(\'beforeend\', responsevalues[i]);
+							break;
 
 							case "setvalue":
 								targets[i].value = responsevalues[i];

@@ -28,7 +28,7 @@
 		loginName = $('form[name="GUI"] input[name="loginname"]').val();
 		$('#resetPassword').attr(
 			'href',
-			'mailto:' + $('form[name="GUI"] input[name="email"]').val() + '?subject=Neues Passwort für kvwmap&body=Einladung%20f%C3%BCr%20kvwmap%20Nutzer%20' + loginName + '%0A%0ASie werden von der Anwendung auf <?php echo $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['CONTEXT_PREFIX']; ?> aufgefordert ein neues Passwort für kvwmap einzugeben.%0A%0AKlicken Sie dazu bitte auf folgenden Link:%0A<?php echo $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['CONTEXT_PREFIX']; ?>/index.php%3Fgo=logout%26login_name=' + loginName + '%26passwort=' + newPassword + '%0AMelden Sie sich mit dem Passwort: ' + newPassword + ' an und vergeben ein neues.%0A%0AMit freundlichen Grüßen%0AIhr GIS-Administrator%0A'
+			'mailto:' + $('form[name="GUI"] input[name="email"]').val() + '?subject=Neues Passwort für kvwmap&body=Einladung%20f%C3%BCr%20kvwmap%20Nutzer%20' + loginName + '%0A%0ASie werden von der Anwendung auf <?php echo (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['CONTEXT_PREFIX']; ?> aufgefordert ein neues Passwort für kvwmap einzugeben.%0A%0AKlicken Sie dazu bitte auf folgenden Link:%0A<?php echo $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['CONTEXT_PREFIX']; ?>/index.php%3Fgo=logout%26login_name=' + loginName + '%26passwort=' + newPassword + '%0AMelden Sie sich mit dem Passwort: ' + newPassword + ' an und vergeben ein neues.%0A%0AMit freundlichen Grüßen%0AIhr GIS-Administrator%0A'
 		);
 		$('#resetPassword').parent().html('Neues Passwort vergeben!');
 		message('<span style="font-size: larger;">Neues Passwort vergeben</span><br><br>Warten Sie bitte bis sich das E-Mail-Fenster mit einer vorgefertigten Meldung öffnet. Verschicken Sie dann die Einladung mit dem automatisch generierten Passwort an den Nutzer.<br><span style="color: red">Speichern Sie unbeding den Datensatz des Benutzers mit den neuen Angaben nachdem Sie dieses Fenster geschlossen haben, sonst wird das neue Passwort nicht wirksam und der Nutzer kann kein neues Passwort vergeben!</span>',1000,2000,'', 'Verstanden');
@@ -206,9 +206,26 @@ else {
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTelephone;?></th>
 					<td style="border-bottom:1px solid #C3C7C3"><input name="phon" type="text" value="<?php echo $this->formvars['phon']; ?>" size="25" maxlength="25"></td>
 				</tr>
-					<tr>
+				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEmail;?></th>
 					<td style="border-bottom:1px solid #C3C7C3"><input name="email" type="text" value="<?php echo $this->formvars['email']; ?>" size="50" maxlength="100"></td>
+				</tr>
+				<tr class="mehr-toggle" style="display: none;">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOrganisation;?></th>
+					<td style="border-bottom:1px solid #C3C7C3"><input name="organisation" type="text" value="<?php echo $this->formvars['organisation']; ?>" size="50" maxlength="255" style="width: 100%"></td>
+				</tr>
+				<tr class="mehr-toggle" style="display: none;">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPosition;?></th>
+					<td style="border-bottom:1px solid #C3C7C3"><input name="position" type="text" value="<?php echo $this->formvars['position']; ?>" size="50" maxlength="255" style="width: 100%"></td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td><td>
+						<a class="small-gray" href="#" onclick="$('.mehr-toggle').toggle();$('#mehr_button').toggleClass('fa-angle-down, fa-angle-up');">
+							<span class="mehr-toggle"><?php echo $this->strShowMore; ?></span>
+							<span class="mehr-toggle" style="display: none"><?php echo $this->strShowLess; ?></span>
+							<i id="mehr_button" class="fa fa-angle-down" aria-hidden="true"></i>
+						</a>
+					</td>
 				</tr>
 			</table>
 		</td>
