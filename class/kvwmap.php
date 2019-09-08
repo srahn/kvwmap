@@ -240,7 +240,7 @@ class GUI {
 			$error_msg = 'Geben Sie im Parameter snippets einen Namen für eine Datei an!';
 		}
 		else {
-			$snippet_path = SNIPPETS . 'custom/';
+			$snippet_path = WWWROOT . CUSTOM_PATH . 'layouts/';
 			$snippet_file = $this->formvars['snippet'] . '.php';
 			if (!file_exists($snippet_path . $snippet_file)) {
 				$error_msg = 'Die Datei ' . $snippet_path . $snippet_file . ' existiert nicht. Geben Sie einen anderen Namen im Parameter snippet an!';
@@ -248,9 +248,8 @@ class GUI {
 		}
 
 		if (empty($error_msg)) {
-			$this->main = 'custom/' . $snippet_file;
 			if (strtolower($this->formvars['format']) == 'json' OR $this->formvars['only_main']) {
-				include_once(SNIPPETS . $this->main);
+				include_once(WWWROOT . CUSTOM_PATH . 'layouts/' . $snippet_file);
 			}
 		}
 		else {
@@ -260,6 +259,7 @@ class GUI {
 			$this->saveMap('');
 			$this->drawMap();
 		}
+		$this->main = '../../../' . CUSTOM_PATH . $snippet_file;
 		$this->output();
 	}
 
@@ -863,9 +863,9 @@ echo '			</ul>
 								if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
 								$padding = 1;
 								###### eigenes Klassenbild ######
-								if($layer['Class'][$k]['legendgraphic'] != ''){
-									$imagename = $original_class_image = GRAPHICSPATH . 'custom/' . $layer['Class'][$k]['legendgraphic'];
-									if($width == ''){
+								if ($layer['Class'][$k]['legendgraphic'] != '') {
+									$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
+									if ($width == '') {
 										$size = getimagesize($imagename);
 										$width = $size[0];
 										$height = $size[1];
@@ -1834,7 +1834,7 @@ echo '			</ul>
         $klasse -> settext($classset[$j]['text']);
       }
       if ($classset[$j]['legendgraphic'] != '') {
-				$imagename = WWWROOT.APPLVERSION.GRAPHICSPATH . 'custom/' . $classset[$j]['legendgraphic'];
+				$imagename = '../' . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
 				$klasse->set('keyimage', $imagename);
 			}
       for ($k=0;$k<count($classset[$j]['Style']);$k++) {
@@ -4259,7 +4259,7 @@ echo '			</ul>
 				$this->save_all_layer_attributes();
 			} break;
 			case "custom"	: {
-				$admin_function_file = LAYOUTPATH . 'custom/adminfunctions.php';
+				$admin_function_file = WWWROOT . CUSTOM_PATH . 'layouts/adminfunctions.php';
 				if (file_exists($admin_function_file)) {
 					$this->main = $admin_function_file;
 					$this->titel = 'Eigene Administrationsfunktionen';
@@ -7036,10 +7036,11 @@ echo '			</ul>
 				$bild=$this->Docu->activeframe[0]['bilder'][$j];
 				#var_dump($bild);
 				if ($bild['height']>0) {
-					$pdf->addJpegFromFile(GRAPHICSPATH.'custom/'.$bild['src'],$bild['posx'],$bild['posy'],$bild['width'],$bild['height']);
+					$pdf->addJpegFromFile(WWWROOT . CUSTOM_PATH . 'graphics/' . $bild['src'], $bild['posx'],$bild['posy'],$bild['width'],$bild['height']);
 				}
 				else {
-					$pdf->addJpegFromFile(GRAPHICSPATH.'custom/'.$bild['src'],$bild['posx'],$bild['posy'],$bild['width']);
+					$pdf->addJpegFromFile(WWWROOT . CUSTOM_PATH . 'graphics/' . $bild['src'],
+					$bild['posx'],$bild['posy'],$bild['width']);
 				}
 			}
 
@@ -12915,9 +12916,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       }
     }
     # aus dem Customordner (vom Nutzer hinzugefügte Layouts)
-    $this->customlayoutfiles = searchdir(LAYOUTPATH.'custom', true);
-    for($i = 0; $i < count($this->customlayoutfiles); $i++){
-      if(strpos($this->customlayoutfiles[$i], '.php') > 0){
+    $this->customlayoutfiles = searchdir(WWWROOT . CUSTOM_PATH . 'layouts/', true);
+    for ($i = 0; $i < count($this->customlayoutfiles); $i++) {
+      if (strpos($this->customlayoutfiles[$i], '.php') > 0) {
         $this->customguifiles[] = $this->customlayoutfiles[$i];
       }
     }
@@ -16610,7 +16611,9 @@ class db_mapObj{
   function getDocument_Path($doc_path, $doc_url, $dynamic_path_sql, $attributenames, $attributevalues, $layerdb, $originalname){
 		// diese Funktion liefert den Pfad des Dokuments, welches hochgeladen werden soll (absoluter Pfad mit Dateiname ohne Dateiendung)
 		// sowie die URL des Dokuments, falls eine verwendet werden soll
-    if($doc_path == '')$doc_path = CUSTOM_IMAGE_PATH;
+		if ($doc_path == '') {
+			$doc_path = CUSTOM_IMAGE_PATH;
+		}
 		if(strtolower(substr($dynamic_path_sql, 0, 6)) == 'select'){		// ist im Optionenfeld eine SQL-Abfrage definiert, diese ausführen und mit dem Ergebnis den Dokumentenpfad erweitern
 			$sql = $dynamic_path_sql;
 			for($a = 0; $a < count($attributenames); $a++){

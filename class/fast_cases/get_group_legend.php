@@ -848,7 +848,7 @@ class GUI {
         $klasse -> settext($classset[$j]['text']);
       }
       if ($classset[$j]['legendgraphic'] != '') {
-				$imagename = WWWROOT.APPLVERSION.GRAPHICSPATH . 'custom/' . $classset[$j]['legendgraphic'];
+				$imagename = '../' . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
 				$klasse->set('keyimage', $imagename);
 			}
       for ($k=0;$k<count($classset[$j]['Style']);$k++) {
@@ -1504,7 +1504,7 @@ class GUI {
 								$padding = 1;
 								###### eigenes Klassenbild ######
 								if($layer['Class'][$k]['legendgraphic'] != ''){
-									$imagename = $original_class_image = GRAPHICSPATH . 'custom/' . $layer['Class'][$k]['legendgraphic'];
+									$imagename = $original_class_image = '../' . CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
 									if($width == ''){
 										$size = getimagesize($imagename);
 										$width = $size[0];
