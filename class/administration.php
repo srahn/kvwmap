@@ -178,7 +178,7 @@ class administration{
 							$sql = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $sql);
 							$sql = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $sql);
 							if ($database_type == 'mysql') {
-								$result = $this->database->exec_commands($sql, 4, 0, false, true);	# mysql
+								$result = $this->database->exec_commands($sql, NULL, NULL, false, true);	# mysql
 							}
 							else {
 								if (stripos($sql, '-- exec statements separated') !== false) {

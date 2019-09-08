@@ -1801,4 +1801,24 @@ function sql_err_msg($title, $sql, $msg, $div_id) {
 	</div>";
 	return $err_msg;
 }
+
+function send_image_not_found($img) {
+	$empty_img = imagecreate(600, 45);
+	$background = imagecolorallocate($empty_img, 255, 139, 129);
+	$text_colour = imagecolorallocate($empty_img, 0, 0, 0);
+	$line_colour = imagecolorallocate($empty_img, 255, 255, 0);
+	imagestring($empty_img, 4, 30, 15, "Bild " . $img . " nicht gefunden!", $text_colour);
+	imagestring($empty_img, 4, 90, 55, ";-(", $text_colour);
+	imagesetthickness ( $empty_img, 1);
+	imageline($empty_img, 2, 2, 2, 42, $line_colour);
+	imageline($empty_img, 2, 2, 597, 2, $line_colour);
+	imageline($empty_img, 2, 42, 597, 42, $line_colour);
+	imageline($empty_img, 597, 2, 597, 42, $line_colour);
+	header("Content-type: image/png");
+	imagepng($empty_img);
+	imagecolordeallocate($line_color);
+	imagecolordeallocate($text_color);
+	imagecolordeallocate($background);
+	imagedestroy($empty_img);
+}
 ?>

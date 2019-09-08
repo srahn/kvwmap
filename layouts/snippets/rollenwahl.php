@@ -391,7 +391,7 @@ if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angem
 						<td class="rollenwahl-option-data">  
 							<select name="mapsize">
 								<? $selected = false; ?>
-								<option value="<? echo $this->user->rolle->mapsize; ?>xauto" <? if($this->user->rolle->auto_map_resize){ echo "selected"; $selected = true;}?>><? echo $strAutoResize; ?></option>              	
+								<option value="auto" <? if($this->user->rolle->auto_map_resize){ echo "selected"; $selected = true;}?>><? echo $strAutoResize; ?></option>              	
 								<option value="300x300" <?php if ($this->user->rolle->mapsize=="300x300"){ echo "selected"; $selected = true;} ?>>300x300</option>
 								<option value="400x400" <?php if ($this->user->rolle->mapsize=="400x400"){ echo "selected"; $selected = true;} ?>>400x400</option>
 								<option value="500x500" <?php if ($this->user->rolle->mapsize=="500x500"){ echo "selected"; $selected = true;} ?>>500x500</option>

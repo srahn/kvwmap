@@ -357,6 +357,34 @@ a.invisiblelayerlink:hover{
 	margin-top: 10px;
 }
 
+#datendrucklayouteditor{
+	display: flex;
+	margin: 10px;
+}
+
+#datendrucklayouteditor_formular{
+	margin-left: 5px;
+}
+
+#datendrucklayouteditor_formular_scroll{
+	background-color: white;
+	border: 1px solid #aaa;
+	overflow-y: auto;
+	max-height: 800px;
+	width: 100%;
+	min-width: 600px;
+	margin-right: 15px;
+}
+
+#datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table{
+	width: 100%;
+	background: url('../graphics/bg.gif');
+}
+
+#datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table>tbody>tr:first-of-type{
+	background-color: #c5d4e7;
+}
+
 #geo_name_search_result_div{
 	position: absolute;
 	z-index: 1000000;
