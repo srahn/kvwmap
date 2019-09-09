@@ -44,6 +44,13 @@
 	$this->subform_classname = 'subform_'.$layer['Layer_ID'];
 	for ($k; $k<$anzObj; $k++) {
 		$checkbox_name .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'];
+		
+		$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
+		if (is_array($layer['attributes']['privileg'])) {
+			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
+				$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
+			}
+		}
 ?>
 	<tr>
 		<td>
@@ -182,6 +189,7 @@
 		</td>
 	</tr>
 <?
+	$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 	}
 ?>
 </table>
