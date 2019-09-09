@@ -98,7 +98,7 @@ SYMBOLSET
 	SYMBOL				#14
 		NAME "Denkmal_Bild"
 		TYPE PIXMAP
-		IMAGE "denkmal.png"
+		IMAGE "../../../symbols/denkmal.png"
 		TRANSPARENT 255
 	END
 
@@ -678,7 +678,7 @@ SYMBOLSET
 	SYMBOL
 		NAME "ukos_abfallbehaelter"
 		TYPE SVG
-		IMAGE "ukos/abfallbehaelter.svg"
+		IMAGE "abfallbehaelter.svg"
 	END
 
 	SYMBOL # 62
@@ -713,25 +713,25 @@ SYMBOLSET
 	SYMBOL
 		NAME "ukos_blumenkuebel"
 		TYPE SVG
-		IMAGE "ukos/blumenkuebel.svg"
+		IMAGE "blumenkuebel.svg"
 	END
 
 	SYMBOL
 		NAME "ukos_brunnen"
 		TYPE SVG
-		IMAGE "ukos/brunnen.svg"
+		IMAGE "brunnen.svg"
 	END
 
 	SYMBOL
 		NAME "ukos_castle"
 		TYPE SVG
-		IMAGE "ukos/castle-15.svg"
+		IMAGE "castle-15.svg"
 	END
 
 	SYMBOL
 		NAME "ukos_fahrradstaender"
 		TYPE SVG
-		IMAGE "ukos/fahrradstaender.svg"
+		IMAGE "fahrradstaender.svg"
 	END
 
 	SYMBOL
@@ -752,48 +752,48 @@ SYMBOLSET
 	SYMBOL
 		NAME "ukos_fahne"
 		TYPE SVG
-		IMAGE "ukos/fahne.svg"
+		IMAGE "fahne.svg"
 	END
 
 	SYMBOL
 		NAME "ukos_hinweistafel"
 		TYPE SVG
-		IMAGE "ukos/hinweistafel.svg"
+		IMAGE "hinweistafel.svg"
 	END
 
 	SYMBOL
 		NAME "ukos_lampe"
 		TYPE SVG
-		IMAGE "ukos/lampe.svg"
+		IMAGE "lampe.svg"
 	END
 
 	SYMBOL
 		NAME "ukos_information"
 		TYPE SVG
-		IMAGE "ukos/information-15.svg"
+		IMAGE "information-15.svg"
 	END
 
 	SYMBOL
 		NAME "ukos_kabelkasten"
 		TYPE SVG
-		IMAGE "ukos/kabelkasten.svg"
+		IMAGE "kabelkasten.svg"
 	END
 
 	SYMBOL
 		NAME "ukos_klaeranlage"
 		TYPE SVG
-		IMAGE "ukos/klaeranlage.svg"
+		IMAGE "klaeranlage.svg"
 	END
 
 	SYMBOL
 		NAME "ukos_lighthouse"
 		TYPE SVG
-		IMAGE "ukos/lighthouse-15.svg"
+		IMAGE "lighthouse-15.svg"
 	END
 
 	SYMBOL
 		NAME "ukos_markierung"
 		TYPE SVG
-		IMAGE "ukos/markierung.svg"
+		IMAGE "markierung.svg"
 	END
 END
