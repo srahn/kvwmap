@@ -97,8 +97,11 @@
 					}
 					$layer = $GUI->mobile_reformat_layer($layerset[0]);
 					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID);
-
 					$layer['attributes'] = $GUI->mobile_reformat_attributes($attributes);
+
+					$classes = $mapDB->read_Classes($layer_id, NULL, false, $layerset[0]['classification']);
+					$layer['classes'] = $GUI->mobile_reformat_classes($classes);
+
 					$mobile_layers[] = $layer;
 				}
 			}
@@ -278,6 +281,19 @@
 			);
 		}
 		return $attributes;
+	};
+
+	$GUI->mobile_reformat_classes = function($classes) use ($GUI) {
+		return array_map(
+			function($class) {
+				return array(
+					'id' => $class['Class_ID'],
+					'name' => $class['Name'],
+					'expression' => $class['Expression']
+				);
+			},
+			$classes
+		);
 	};
 
 	$GUI->mobile_prepare_layer_sync = function($layerdb, $id, $sync) use ($GUI) {
