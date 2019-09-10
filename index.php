@@ -278,6 +278,10 @@ function go_switch($go, $exit = false) {
 				$GUI->getNBH();
 			}break;
 
+			case 'getLayerParamsForm' : {
+				$GUI->get_layer_params_form($GUI->formvars['stelle_id']);
+			} break;
+
 			case 'setLayerParams' : {
 				$GUI->setLayerParams();
 				echo "onLayerParamsUpdated('success')";

@@ -10681,7 +10681,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 	function daten_import(){
 		$this->main='data_import.php';
-		exec('rm '.UPLOADPATH.'/'.$this->user->id.'/*');
+		exec('rm '.UPLOADPATH.$this->user->id.'/*');
 		$this->output();
 	}
 
@@ -12864,6 +12864,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $StellenFormObj->addJavaScript(
 			"onchange",
 			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,showmapfunctions,showlayeroptions,showrollenfilter,menu_auto_close,menue_buttons,hist_timestamp));" : "")
+			.(($this->formvars['show_layer_parameter']) ? "ahah('index.php','go=getLayerParamsForm&stelle_id='+document.GUI.Stelle_ID.value, new Array(document.getElementById('layer_parameters_div')), new Array('sethtml'))" : "")
 		);
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=" . $from."&where=stelle_id=3 AND user_id=7";
     $StellenFormObj->outputHTML();
@@ -15987,6 +15988,60 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->saveMap('');
 		$this->drawMap();
 		$this->output();
+	}
+	
+	function get_layer_params_form($stelle_id = NULL){
+		include_once(CLASSPATH.'FormObject.php');
+		if($stelle_id == NULL){			# Parameter der aktuellen Stelle abfragen
+			$stelle = $this->Stelle;
+			$rolle = $this->user->rolle;
+		}
+		else{												# Parameter einer anderen Stelle abfragen
+			$stelle = new stelle($stelle_id, $this->database);
+			$rolle = new rolle($this->user->id, $stelle_id, $this->database);
+			$rolle->readSettings();
+		}
+		$params = $rolle->get_layer_params($stelle->selectable_layer_params, $this->pgdatabase);
+		if ($params['error_message'] != '') {
+			$this->add_message('error', $params['error_message']);
+		}
+		else {
+			if (!empty($params)) {
+				echo '
+					<table style="border: 1px solid #ccc" class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett">'.$this->strLayerParameters.'</span></td>
+						</tr>
+						<tr>
+							<td class="rollenwahl-option-data">
+								<table>';
+									foreach($params AS $param) {
+										echo '
+										<tr id="layer_parameter_'.$param['key'].'_tr">
+											<td valign="top" class="rollenwahl-option-header">
+												'.$param['alias'].':
+											</td>
+											<td>
+												'.FormObject::createSelectField(
+													'options_layer_parameter_' . $param['key'],		# name
+													$param['options'],										# options
+													rolle::$layer_params[$param['key']],	# value
+													1,																		# size
+													'',																		# style
+													'onLayerParameterChanged(this);',			# onchange
+													'layer_parameter_' . $param['key'],		# id
+													''																		# multiple
+												).'
+											</td>
+										</tr>';
+									}
+					echo'	</table>
+							</td>
+						</tr>
+					</table>
+					';
+			}
+		}
 	}
 
 } # end of class GUI

@@ -473,10 +473,13 @@ class Nachweis {
   }
   
 	function CreateNachweisDokumentVorschau($dateiname){		
+		$dir = dirname($dateiname);
 		$dateinamensteil=explode('.',$dateiname);
 		if(mb_strtolower($dateinamensteil[1]) == 'pdf'){
 			$pagecount = getNumPagesPdf($dateiname);
-			if($pagecount > 1)$label = "-fill black -undercolor white -gravity North -pointsize 18 -annotate +0+15 ' ".$pagecount." Seiten '";
+			if($pagecount > 1)$label = '-pointsize 11 -draw "stroke #0009 fill #0007 stroke-width 2 circle 120,120 200,120 
+																											 stroke none fill white text 98,102 \''.$pagecount.'\'
+																																							text 60,150 \'Seiten\'"';
 		}
 		$command = IMAGEMAGICKPATH.'convert -density 300x300 '.$dateiname.'[0] -quality 75 -background white '.$label.' -flatten -resize 1800x1800\> '.$dateinamensteil[0].'_thumb.jpg';
 		exec($command, $ausgabe, $ret);

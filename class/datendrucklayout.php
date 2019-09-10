@@ -837,24 +837,24 @@ class ddl {
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
 
-      for($i = 0; $i < $formvars['textcount']; $i++){
-        $formvars['text'.$i] = str_replace(chr(10), ';', $formvars['text'.$i]);
-        $formvars['text'.$i] = str_replace(chr(13), '', $formvars['text'.$i]);
-        if($formvars['text'.$i] == 'NULL')$formvars['text'.$i] = NULL;
-        if($formvars['textfont'.$i] == 'NULL')$formvars['textfont'.$i] = NULL;
-        $sql = "INSERT INTO druckfreitexte SET `text` = '".$formvars['text'.$i]."'";
-        if($formvars['textposx'.$i] !== NULL)$sql .= ", `posx` = ".(int)$formvars['textposx'.$i];
+      for($i = 0; $i < count($formvars['text']); $i++){
+        $formvars['text'][$i] = str_replace(chr(10), ';', $formvars['text'][$i]);
+        $formvars['text'][$i] = str_replace(chr(13), '', $formvars['text'][$i]);
+        if($formvars['text'][$i] == 'NULL')$formvars['text'][$i] = NULL;
+        if($formvars['textfont'][$i] == 'NULL')$formvars['textfont'][$i] = NULL;
+        $sql = "INSERT INTO druckfreitexte SET `text` = '".$formvars['text'][$i]."'";
+        if($formvars['textposx'][$i] !== NULL)$sql .= ", `posx` = ".(int)$formvars['textposx'][$i];
         else $sql .= ", `posx` = 0";
-        if($formvars['textposy'.$i] !== NULL)$sql .= ", `posy` = ".(int)$formvars['textposy'.$i];
+        if($formvars['textposy'][$i] !== NULL)$sql .= ", `posy` = ".(int)$formvars['textposy'][$i];
         else $sql .= ", `posy` = 0";
-				if($formvars['textoffset_attribute'.$i])$sql .= ", `offset_attribute` = '".$formvars['textoffset_attribute'.$i]."'";
+				if($formvars['textoffset_attribute'][$i])$sql .= ", `offset_attribute` = '".$formvars['textoffset_attribute'][$i]."'";
         else $sql .= ", `offset_attribute` = NULL";
-        if($formvars['textsize'.$i] !== NULL)$sql .= ", `size` = ".(int)$formvars['textsize'.$i];
+        if($formvars['textsize'][$i] !== NULL)$sql .= ", `size` = ".(int)$formvars['textsize'][$i];
         else $sql .= ", `size` = 0";
-        if($formvars['textangle'.$i])$sql .= ", `angle` = ".(int)$formvars['textangle'.$i];
+        if($formvars['textangle'][$i])$sql .= ", `angle` = ".(int)$formvars['textangle'][$i];
         else $sql .= ", `angle` = NULL";
-        $sql .= ", `font` = '".$formvars['textfont'.$i]."'";
-        $sql .= ", `type` = '".$formvars['texttype'.$i]."'";
+        $sql .= ", `font` = '".$formvars['textfont'][$i]."'";
+        $sql .= ", `type` = '".$formvars['texttype'][$i]."'";
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
         $this->database->execSQL($sql,4, 1);
