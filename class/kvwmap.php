@@ -8436,7 +8436,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 								default : {
 									if ($operator != 'IS NULL' AND $operator != 'IS NOT NULL') {
-										$sql_where .= ' AND (query.' . $attributes['name'][$i] . ' ' . $operator . ' \'' . $value . '\'';
+										if(substr($attributes['type'][$i], 0, 1) == '_'){		# Array-Datentyp
+											if($operator == '=')$sql_where .= ' AND (query.'.$attributes['name'][$i].'::jsonb @> \'["'.$value.'"]\'::jsonb';
+											else $sql_where .= ' AND (NOT query.'.$attributes['name'][$i].'::jsonb @> \'["'.$value.'"]\'::jsonb';
+										}
+										else $sql_where .= ' AND (query.' . $attributes['name'][$i] . ' ' . $operator . ' \'' . $value . '\'';
 										if ($this->formvars[$prefix.'value2_'.$attributes['name'][$i]] != '') {
 											$sql_where.=' AND \''.$this->formvars[$prefix.'value2_'.$attributes['name'][$i]].'\'';
 										}

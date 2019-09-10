@@ -104,7 +104,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 								<? if($this->attributes['type'][$i] != 'geometry'){ ?>
 	                <option title="<? echo $strNotEqualHint; ?>" value="!=" <? if($operator == '!='){ echo 'selected';} ?> >!=</option>
 								<? }
-									if(!in_array($this->attributes['type'][$i], array('bool'))){
+									if(!in_array($this->attributes['type'][$i], array('bool')) AND substr($this->attributes['type'][$i], 0, 1) != '_'){		# bei boolean und Array-Datentypen nur = und !=
 										if($this->attributes['type'][$i] != 'geometry'){ ?>
 									<? if(!in_array($this->attributes['type'][$i], array('text'))){ ?>
 	                <option title="<? echo $strLowerHint; ?>" value="<" <? if($operator == '<'){ echo 'selected';} ?> ><</option>
