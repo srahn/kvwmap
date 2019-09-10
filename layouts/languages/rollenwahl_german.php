@@ -46,7 +46,6 @@
 	$strgrad1="Grad,Minuten,Sekunden";
 	$strgrad2="Grad Dezimalminuten";
 	$strPrintScale="Druckmaßstab";
-	$strThemeParameters="Themen Parameter";
 	$strPrintScaleAuto="automatisch berechnen";
 	$strPrintScaleLast="letzten Druckmaßstab verwenden";
 	$strHintTask="Jede Stelle umfasst verschiedene Themen, Funktionen und Rechte, die für unterschiedliche Aufgaben benötigt werden. Alle weiteren Optionen gelten innerhalb der hier ausgewählten Stelle.";

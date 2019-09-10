@@ -41,7 +41,6 @@
 	$strdecimal="Dezimal";
 	$strgrad1="Grod, Minüten, Sekunn";
 	$strgrad2="Grod, Dezimalminüten";
-	$strThemeParameters="Themen Parameter";
 	$strHintTask="De Stell hett ünnerscheedlich Themen, Funktschoneer´s un Rechtstüüch, de för ünnerscheedlich Upgaben brukt ward. All wiedere Optschoonen gellen binnen de hie utsökt Stell.";
 	$strHintLanguage="Sök de Spraak ut, de in de Bovensied brukt ward.";
 	$strHintGUI="Sök de grafisch Bovensied ut.";
