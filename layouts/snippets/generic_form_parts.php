@@ -957,7 +957,7 @@
 			if($subform_layer_id != ''){
 				if($subform_layer_privileg > 0){
 					if($embedded == true){
-						$datapart .= '&nbsp;&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id='.$subform_layer_id;
+						$datapart .= '&nbsp;&nbsp;<a class="buttonlink" href="javascript:void(0);" onclick="ahah(\'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id='.$subform_layer_id;
 						for($p = 0; $p < count($req); $p++){
 							$datapart .= '&attributenames['.$p.']='.$req[$p];
 							$datapart .= '&values['.$p.']=\'+document.getElementById(\''.$layer_id.'_'.$req[$p].'_'.$k.'\').value+\'';
