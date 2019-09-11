@@ -1822,6 +1822,4 @@ function send_image_not_found($img) {
 	imagedestroy($empty_img);
 }
 
-sprintf('%s%s', date('H:i:s'), substr(microtime(true) - floor(microtime(true)), 1, 4))
-
 ?>
