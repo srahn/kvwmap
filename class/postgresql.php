@@ -1152,9 +1152,10 @@ FROM
   function getFlurstKennzListeByGemSchlByStrSchl($GemeindeSchl,$StrassenSchl,$HausNr) {
   	$sql.=" SELECT f.flurstueckskennzeichen as flurstkennz";
     $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_flurstueck as f";
-    $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
-    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage = lpad(s.lage,5,'0')";
-    $sql.=" WHERE g.gemeinde = l.gemeinde";
+    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
+		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungohnehausnummer lo ON lo.gml_id = ANY(f.zeigtauf)";
+    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage = s.lage OR (lo.kreis=s.kreis AND lo.gemeinde=s.gemeinde AND lo.lage = s.lage)";
+    $sql.=" WHERE f.gemeindezugehoerigkeit_gemeinde = g.gemeinde AND g.gemeinde = s.gemeinde";
     if ($HausNr!='') {
     	if($HausNr == 'ohne'){
     		$HausNr = '';
@@ -1169,9 +1170,9 @@ FROM
     }
     else{
     	$sql.=" AND g.schluesselgesamt='".$GemeindeSchl."'";
-    	$sql.=" AND l.lage='".$StrassenSchl."'";
+    	$sql.=" AND s.lage='".$StrassenSchl."'";
     }
-		$sql.= $this->build_temporal_filter(array('g', 'f', 'l', 's'));
+		$sql.= $this->build_temporal_filter(array('g', 'f', 'l', 'lo', 's'));
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
@@ -2318,16 +2319,17 @@ FROM
     $sql.=" UNION";
     $sql.=" SELECT DISTINCT g.gemeinde, s.lage as strasse, s.bezeichnung as strassenname, array_to_string(array_agg(distinct gem.bezeichnung), ', ') as gemkgname";
     $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_gemarkung as gem, alkis.ax_flurstueck as f";
-    $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
-    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = l.lage";
-		$sql.=" WHERE g.gemeinde = f.gemeindezugehoerigkeit_gemeinde AND g.kreis=f.gemeindezugehoerigkeit_kreis AND f.gemarkungsnummer = gem.gemarkungsnummer AND f.gemeindezugehoerigkeit_gemeinde = l.gemeinde";
+    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
+		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungohnehausnummer lo ON lo.gml_id = ANY(f.zeigtauf)";
+    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = l.lage OR (lo.kreis=s.kreis AND lo.gemeinde=s.gemeinde AND lo.lage=s.lage)";
+		$sql.=" WHERE g.gemeinde = f.gemeindezugehoerigkeit_gemeinde AND g.kreis=f.gemeindezugehoerigkeit_kreis AND f.gemarkungsnummer = gem.gemarkungsnummer AND f.gemeindezugehoerigkeit_gemeinde = s.gemeinde";
     if ($GemID!='') {
       $sql.=" AND g.schluesselgesamt='".$GemID."'";
     }
     if ($GemkgID!='') {
       $sql.=" AND f.land||f.gemarkungsnummer='".$GemkgID."'";
     }
-		$sql.= $this->build_temporal_filter(array('g', 'gem', 'f', 'l', 's'));
+		$sql.= $this->build_temporal_filter(array('g', 'gem', 'f', 'l', 'lo', 's'));
 		$sql.=" GROUP BY g.gemeinde, s.bezeichnung, s.lage";
     $sql.=" ORDER BY gemeinde, strassenname, strasse";
     #echo $sql;
