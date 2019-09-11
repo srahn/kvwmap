@@ -85,7 +85,6 @@ COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.kds IS 'Kartendarstellung';
 COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.des IS 'AX_Datenerhebung_Punktort';
 COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.nam IS 'Name';
 COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.art IS 'Art des Punktes';
-COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.idn IS 'Individualname';
 COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.vwl IS 'Vertrauenswürdigkeit';
 COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.lzk IS 'Lagezuverlaessigkeit';
 COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.gst IS 'Genauigkeitsstufe';
@@ -196,10 +195,6 @@ COMMENT ON VIEW nachweisverwaltung.fp_pp_afismv
   IS '30.11.2016, H.Riedel
 Abrage zum Befuellen der fp_punkte_alkis mit den Lagefestpunkten aus AFIS MV';
 
-	
-  
-
-
 CREATE OR REPLACE VIEW nachweisverwaltung.fp_aufnahmepunkt AS 
  SELECT ap.gml_id,
     au.gml_id AS gml_id_punktort,
@@ -211,8 +206,8 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_aufnahmepunkt AS
     ap.advstandardmodell,
     ap.sonstigesmodell,
     ap.anlass,
-    ap.land,
-    ap.stelle AS zst,
+    ap.zustaendigestelle_land,
+    ap.zustaendigestelle_stelle AS zst,
     ap.punktkennung AS pkn,
     ltrim(substr(ap.punktkennung::text, 10, 6), '0'::text) AS pktnr,
     st_x(au.wkb_geometry)::character varying(11) AS rw,
@@ -271,9 +266,8 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_aufnahmepunkt AS
     ap.vermarkung_marke AS abm,
     ap.relativehoehe AS rho,
     au.kartendarstellung AS kds,
-    au.ax_datenerhebung_punktort AS des,
-    au.name AS nam,
-    au.individualname AS idn,
+    au.processstep_ax_datenerhebung_punktort[1] AS des,
+    au.zeigtaufexternes_name AS nam,
     au.vertrauenswuerdigkeit AS vwl,
     au.genauigkeitsstufe AS gst,
     au.koordinatenstatus AS kst,
@@ -284,9 +278,6 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_aufnahmepunkt AS
    FROM alkis.ax_aufnahmepunkt ap,
     alkis.ax_punktortau au
   WHERE ap.gml_id::text = au.istteilvon::text;
-
-
-
 
 CREATE OR REPLACE VIEW nachweisverwaltung.fp_besondererbauwerkspunkt AS 
  SELECT bwp.gml_id,
@@ -299,8 +290,8 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_besondererbauwerkspunkt AS
     bwp.advstandardmodell,
     bwp.sonstigesmodell,
     bwp.anlass,
-    bwp.land,
-    bwp.stelle AS zst,
+    bwp.zustaendigestelle_land,
+    bwp.zustaendigestelle_stelle AS zst,
     bwp.punktkennung AS pkn,
     ltrim(substr(bwp.punktkennung::text, 10, 6), '0'::text) AS pktnr,
     st_x(au.wkb_geometry)::character varying(11) AS rw,
@@ -357,10 +348,9 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_besondererbauwerkspunkt AS
             ELSE NULL::text
         END) AS soe_weitere,
     au.kartendarstellung AS kds,
-    au.ax_datenerhebung_punktort AS des,
-    au.name AS nam,
+    au.processstep_ax_datenerhebung_punktort[1] AS des,
+    au.zeigtaufexternes_name AS nam,
     NULL::character varying[] AS art,
-    au.individualname AS idn,
     au.vertrauenswuerdigkeit AS vwl,
     au.genauigkeitsstufe AS gst,
     au.koordinatenstatus AS kst,
@@ -380,8 +370,8 @@ UNION
     bwp.advstandardmodell,
     bwp.sonstigesmodell,
     bwp.anlass,
-    bwp.land,
-    bwp.stelle AS zst,
+    bwp.zustaendigestelle_land,
+    bwp.zustaendigestelle_stelle AS zst,
     bwp.punktkennung AS pkn,
     ltrim(substr(bwp.punktkennung::text, 10, 6), '0'::text) AS pktnr,
     st_x(ag.wkb_geometry)::character varying(11) AS rw,
@@ -438,10 +428,9 @@ UNION
             ELSE NULL::text
         END) AS soe_weitere,
     ag.kartendarstellung AS kds,
-    ag.ax_datenerhebung_punktort AS des,
-    ag.name AS nam,
-    ag.art,
-    NULL::character varying AS idn,
+    ag.processstep_ax_datenerhebung_punktort[1] AS des,
+    ag.zeigtaufexternes_name AS nam,
+    ag.zeigtaufexternes_art AS art,
     ag.vertrauenswuerdigkeit AS vwl,
     ag.genauigkeitsstufe AS gst,
     ag.koordinatenstatus AS kst,
@@ -450,11 +439,6 @@ UNION
    FROM alkis.ax_besondererbauwerkspunkt bwp,
     alkis.ax_punktortag ag
   WHERE bwp.gml_id::text = ag.istteilvon::text;
-
-
-
-
-
 
 CREATE OR REPLACE VIEW nachweisverwaltung.fp_besonderergebaeudepunkt AS 
  SELECT gebp.gml_id,
@@ -467,8 +451,8 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_besonderergebaeudepunkt AS
     gebp.advstandardmodell,
     gebp.sonstigesmodell,
     gebp.anlass,
-    gebp.land,
-    gebp.stelle AS zst,
+    gebp.zustaendigestelle_land,
+    gebp.zustaendigestelle_stelle AS zst,
     gebp.punktkennung AS pkn,
     ltrim(substr(gebp.punktkennung::text, 10, 6), '0'::text) AS pktnr,
     st_x(au.wkb_geometry)::character varying(11) AS rw,
@@ -525,10 +509,9 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_besonderergebaeudepunkt AS
             ELSE NULL::text
         END) AS soe_weitere,
     au.kartendarstellung AS kds,
-    au.ax_datenerhebung_punktort AS des,
-    gebp.name AS nam,
+    au.processstep_ax_datenerhebung_punktort[1] AS des,
+    gebp.zeigtaufexternes_name AS nam,
     string_to_array(gebp.art::text, ''::text) AS art,
-    au.individualname AS idn,
     au.vertrauenswuerdigkeit AS vwl,
     au.genauigkeitsstufe AS gst,
     au.koordinatenstatus AS kst,
@@ -548,8 +531,8 @@ UNION
     gebp.advstandardmodell,
     gebp.sonstigesmodell,
     gebp.anlass,
-    gebp.land,
-    gebp.stelle AS zst,
+    gebp.zustaendigestelle_land,
+    gebp.zustaendigestelle_stelle AS zst,
     gebp.punktkennung AS pkn,
     ltrim(substr(gebp.punktkennung::text, 10, 6), '0'::text) AS pktnr,
     st_x(ag.wkb_geometry)::character varying(11) AS rw,
@@ -606,10 +589,9 @@ UNION
             ELSE NULL::text
         END) AS soe_weitere,
     ag.kartendarstellung AS kds,
-    ag.ax_datenerhebung_punktort AS des,
-    gebp.name AS nam,
+    ag.processstep_ax_datenerhebung_punktort[1] AS des,
+    gebp.zeigtaufexternes_name AS nam,
     string_to_array(gebp.art::text, ''::text) AS art,
-    NULL::character varying AS idn,
     ag.vertrauenswuerdigkeit AS vwl,
     ag.genauigkeitsstufe AS gst,
     ag.koordinatenstatus AS kst,
@@ -618,9 +600,6 @@ UNION
    FROM alkis.ax_besonderergebaeudepunkt gebp,
     alkis.ax_punktortag ag
   WHERE gebp.gml_id::text = ag.istteilvon::text;
-
-
-
 
 CREATE OR REPLACE VIEW nachweisverwaltung.fp_besonderertopographischerpunkt AS 
  SELECT topp.gml_id,
@@ -633,8 +612,8 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_besonderertopographischerpunkt AS
     topp.advstandardmodell,
     topp.sonstigesmodell,
     topp.anlass,
-    topp.land,
-    topp.stelle AS zst,
+    topp.zustaendigestelle_land,
+    topp.zustaendigestelle_stelle AS zst,
     topp.punktkennung AS pkn,
     ltrim(substr(topp.punktkennung::text, 10, 6), '0'::text) AS pktnr,
     st_x(au.wkb_geometry)::character varying(11) AS rw,
@@ -691,9 +670,8 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_besonderertopographischerpunkt AS
             ELSE NULL::text
         END) AS soe_weitere,
     au.kartendarstellung AS kds,
-    au.ax_datenerhebung_punktort AS des,
-    au.name AS nam,
-    au.individualname AS idn,
+    au.processstep_ax_datenerhebung_punktort[1] AS des,
+    au.zeigtaufexternes_name AS nam,
     au.vertrauenswuerdigkeit AS vwl,
     au.genauigkeitsstufe AS gst,
     au.koordinatenstatus AS kst,
@@ -702,9 +680,6 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_besonderertopographischerpunkt AS
    FROM alkis.ax_besonderertopographischerpunkt topp,
     alkis.ax_punktortau au
   WHERE topp.gml_id::text = au.istteilvon::text;
-
-
-
 
 CREATE OR REPLACE VIEW nachweisverwaltung.fp_grenzpunkt AS 
  SELECT gp.gml_id,
@@ -717,8 +692,8 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_grenzpunkt AS
     gp.advstandardmodell,
     gp.sonstigesmodell,
     gp.anlass,
-    gp.land,
-    gp.stelle AS zst,
+    gp.zustaendigestelle_land,
+    gp.zustaendigestelle_stelle AS zst,
     gp.punktkennung AS pkn,
     ltrim(substr(gp.punktkennung::text, 10, 6), '0'::text) AS pktnr,
     st_x(au.wkb_geometry)::character varying(11) AS rw,
@@ -782,10 +757,9 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_grenzpunkt AS
     gp.zeitpunktderentstehung AS zde,
     gp.relativehoehe AS rho,
     au.kartendarstellung AS kds,
-    au.ax_datenerhebung_punktort AS des,
-    gp.name AS nam,
+    au.processstep_ax_datenerhebung_punktort[1] AS des,
+    gp.zeigtaufexternes_name AS nam,
     NULL::character varying[] AS art,
-    au.individualname AS idn,
     au.vertrauenswuerdigkeit AS vwl,
     NULL::boolean AS lzk,
     au.genauigkeitsstufe AS gst,
@@ -813,8 +787,8 @@ UNION
     gp.advstandardmodell,
     gp.sonstigesmodell,
     gp.anlass,
-    gp.land,
-    gp.stelle AS zst,
+    gp.zustaendigestelle_land,
+    gp.zustaendigestelle_stelle AS zst,
     gp.punktkennung AS pkn,
     ltrim(substr(gp.punktkennung::text, 10, 6), '0'::text) AS pktnr,
     st_x(ta.wkb_geometry)::character varying(11) AS rw,
@@ -878,10 +852,9 @@ UNION
     gp.zeitpunktderentstehung AS zde,
     gp.relativehoehe AS rho,
     ta.kartendarstellung AS kds,
-    ta.ax_datenerhebung_punktort AS des,
-    gp.name AS nam,
+    ta.processstep_ax_datenerhebung_punktort[1] AS des,
+    gp.zeigtaufexternes_name AS nam,
     NULL::character varying[] AS art,
-    ''::character varying AS idn,
     ta.vertrauenswuerdigkeit AS vwl,
     NULL::boolean AS lzk,
     ta.genauigkeitsstufe AS gst,
@@ -899,10 +872,6 @@ UNION
     alkis.ax_punktortta ta
   WHERE gp.gml_id::text = ta.istteilvon::text;
 
-
-
-
-
 CREATE OR REPLACE VIEW nachweisverwaltung.fp_sicherungspunkt AS 
  SELECT sip.gml_id,
     au.gml_id AS gml_id_punktort,
@@ -914,8 +883,8 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_sicherungspunkt AS
     sip.advstandardmodell,
     sip.sonstigesmodell,
     sip.anlass,
-    sip.land,
-    sip.stelle AS zst,
+    sip.zustaendigestelle_land,
+    sip.zustaendigestelle_stelle AS zst,
     sip.punktkennung AS pkn,
     ltrim(substr(sip.punktkennung::text, 10, 6), '0'::text) AS pktnr,
     st_x(au.wkb_geometry)::character varying(11) AS rw,
@@ -974,9 +943,8 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_sicherungspunkt AS
     sip.vermarkung_marke AS abm,
     sip.relativehoehe AS rho,
     au.kartendarstellung AS kds,
-    au.ax_datenerhebung_punktort AS des,
-    sip.name AS nam,
-    au.individualname AS idn,
+    au.processstep_ax_datenerhebung_punktort[1] AS des,
+    sip.zeigtaufexternes_name AS nam,
     au.vertrauenswuerdigkeit AS vwl,
     au.genauigkeitsstufe AS gst,
     au.koordinatenstatus AS kst,
@@ -989,9 +957,6 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_sicherungspunkt AS
     alkis.ax_punktortau au
   WHERE sip.gml_id::text = au.istteilvon::text;
 
-
-
-
 CREATE OR REPLACE VIEW nachweisverwaltung.fp_sonstigervermessungspunkt AS 
  SELECT svp.gml_id,
     au.gml_id AS gml_id_punktort,
@@ -1003,8 +968,8 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_sonstigervermessungspunkt AS
     svp.advstandardmodell,
     svp.sonstigesmodell,
     svp.anlass,
-    svp.land,
-    svp.stelle AS zst,
+    svp.zustaendigestelle_land,
+    svp.zustaendigestelle_stelle AS zst,
     svp.punktkennung AS pkn,
     ltrim(substr(svp.punktkennung::text, 10, 6), '0'::text) AS pktnr,
     st_x(au.wkb_geometry)::character varying(11) AS rw,
@@ -1063,9 +1028,8 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_sonstigervermessungspunkt AS
     svp.vermarkung_marke AS abm,
     svp.relativehoehe AS rho,
     au.kartendarstellung AS kds,
-    au.ax_datenerhebung_punktort AS des,
-    au.name AS nam,
-    au.individualname AS idn,
+    au.processstep_ax_datenerhebung_punktort[1] AS des,
+    au.zeigtaufexternes_name AS nam,
     au.vertrauenswuerdigkeit AS vwl,
     au.genauigkeitsstufe AS gst,
     au.koordinatenstatus AS kst,
