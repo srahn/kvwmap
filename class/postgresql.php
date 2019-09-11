@@ -1173,6 +1173,7 @@ FROM
     	$sql.=" AND s.lage='".$StrassenSchl."'";
     }
 		$sql.= $this->build_temporal_filter(array('g', 'f', 'l', 'lo', 's'));
+		$sql.= $this->build_temporal_filter_fachdatenverbindung(array('s'));
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
@@ -2329,6 +2330,7 @@ FROM
       $sql.=" AND f.land||f.gemarkungsnummer='".$GemkgID."'";
     }
 		$sql.= $this->build_temporal_filter(array('g', 'gem', 'f', 'l', 'lo', 's'));
+		$sql.= $this->build_temporal_filter_fachdatenverbindung(array('s'));
 		$sql.=" GROUP BY g.gemeinde, s.bezeichnung, s.lage";
     $sql.=" ORDER BY gemeinde, strassenname, strasse";
     #echo $sql;
