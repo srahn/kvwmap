@@ -2005,6 +2005,7 @@ FROM
 		$limitStart = $formvars['offset'];
 		$caseSensitive = $formvars['caseSensitive'];
 		$order = $formvars['order'];
+		if($order == '')$order = 'nachnameoderfirma, vorname';
 			
     $sql = "set enable_seqscan = off;set enable_mergejoin = off;set enable_hashjoin = off;SELECT distinct p.gml_id, p.nachnameoderfirma, p.vorname, p.namensbestandteil, p.akademischergrad, p.geburtsname, p.geburtsdatum, array_to_string(p.hat, ',') as hat, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, g.buchungsblattnummermitbuchstabenerweiterung as blatt, b.schluesselgesamt as bezirk ";
 		$sql.= "FROM alkis.ax_person p ";
@@ -2053,9 +2054,7 @@ FROM
 			$sql.=")";
 		}
 		$sql.= $this->build_temporal_filter(array('p', 'anschrift', 'n', 'g', 'b'));
-    if ($order != ''){
-    	$sql .= " ORDER BY ". replace_semicolon($order);
-    }
+    $sql .= " ORDER BY ". replace_semicolon($order);
     if ($limitStart!='' OR $limitAnzahl != '') {
       $sql .= " LIMIT ";
       if ($limitStart!='' AND $limitAnzahl != '') {
