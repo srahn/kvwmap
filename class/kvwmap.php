@@ -13460,7 +13460,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			else{
 				$db_input = $nachDatei."&original_name=" . $_files[$input_name]['name'];			# absoluter Dateipfad wird gespeichert
 			}
-			if($this->formvars[$input_name] == 'delete')$db_input = '';
+			if($this->formvars[$input_name] == 'delete')$db_input = 'NULL';
 			# Bild in das Datenverzeichnis kopieren
 			if(move_uploaded_file($_files[$input_name]['tmp_name'],$nachDatei) OR $this->formvars[$input_name] == 'delete'){
 				# bei dynamischem Dateipfad das Vorschaubild löschen

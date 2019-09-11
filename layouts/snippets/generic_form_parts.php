@@ -472,6 +472,7 @@
 					if($attributes['embedded'][$j] == true)$reloadParams .= '&embedded=true';
 					if($attributes['list_edit'][$j] == true)$reloadParams .= '&list_edit=true';
 					$reloadParams .= '&targetobject='.$layer_id.'_'.$name.'_'.$k;
+					$reloadParams .= '&fromobject='.$layer_id.'_'.$name.'_'.$k;
 					$reloadParams .= '&targetlayer_id='.$layer_id;
 					$reloadParams .= '&targetattribute='.$name;
 					$reloadParams .= '&oid='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
