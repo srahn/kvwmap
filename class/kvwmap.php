@@ -16753,7 +16753,14 @@ class db_mapObj{
 			return $ret[1];
 		}
 		elseif ($ifEmptyUseQuery){
-			$path = $this->getPath($layer_id);
+			$path = replace_params(
+				$this->getPath($layer_id),
+				$all_layer_params,
+				$this->User_ID,
+				$this->Stelle_ID,
+				rolle::$hist_timestamp,
+				$this->user->rolle->language
+			);
 			return $this->getPathAttributes($database, $path);
 		}
 		else {
