@@ -307,7 +307,7 @@ function init_config() {
 	define('POSTGRES_HOST', ($formvars['POSTGRES_HOST'] != '' ? $formvars['POSTGRES_HOST'] : 'pgsql'));
 	define('POSTGRES_USER', ($formvars['POSTGRES_USER'] != '' ? $formvars['POSTGRES_USER'] : 'kvwmap'));
 	define('POSTGRES_PASSWORD', ($formvars['POSTGRES_PASSWORD'] != '' ? $formvars['POSTGRES_PASSWORD'] : (getenv('KVWMAP_INIT_PASSWORD') == '' ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'))));
-	define('POSTGRES_ROOT_PASSWORD', ($formvars['POSTGRES_ROOT_PASSWORD'] != '' ? $formvars['POSTGRES_ROOT_PASSWORD'] : getenv('PGSQL_ROOT_PASSWORD')));
+	define('POSTGRES_ROOT_PASSWORD', ($formvars['POSTGRES_ROOT_PASSWORD'] != '' ? $formvars['POSTGRES_ROOT_PASSWORD'] : getenv('POSTGRES_PASSWORD')));
 	define('POSTGRES_DBNAME', ($formvars['POSTGRES_DBNAME'] != '' ? $formvars['POSTGRES_DBNAME'] : 'kvwmapsp'));
 	define('CLASSPATH', 'class/');
 	define('LAYOUTPATH', 'layouts/');
@@ -579,11 +579,11 @@ function settings() { ?>
 			</tr>
 			<tr>
 				<td>MYSQL_PASSWORD:</td>
-				<td><input type="text" name="MYSQL_PASSWORD" value="<?php echo MYSQL_PASSWORD; ?>"></td>
+				<td><input type="password" name="MYSQL_PASSWORD" value="<?php echo MYSQL_PASSWORD; ?>"></td>
 			</tr>
 			<tr>
 				<td>MYSQL_ROOT_PASSWORD:</td>
-				<td><input type="text" name="MYSQL_ROOT_PASSWORD" value="<?php echo MYSQL_ROOT_PASSWORD; ?>"></td>
+				<td><input type="password" name="MYSQL_ROOT_PASSWORD" value="<?php echo MYSQL_ROOT_PASSWORD; ?>"></td>
 			</tr>
 			<tr>
 				<td>POSTGRES_HOST:</td>
@@ -599,11 +599,11 @@ function settings() { ?>
 			</tr>
 			<tr>
 				<td>POSTGRES_PASSWORD:</td>
-				<td><input type="text" name="POSTGRES_PASSWORD" value="<?php echo POSTGRES_PASSWORD; ?>"></td>
+				<td><input type="password" name="POSTGRES_PASSWORD" value="<?php echo POSTGRES_PASSWORD; ?>"></td>
 			</tr>
 			<tr>
 				<td>POSTGRES_ROOT_PASSWORD:</td>
-				<td><input type="text" name="POSTGRES_ROOT_PASSWORD" value="<?php echo POSTGRES_ROOT_PASSWORD; ?>"></td>
+				<td><input type="password" name="POSTGRES_ROOT_PASSWORD" value="<?php echo POSTGRES_ROOT_PASSWORD; ?>"></td>
 			</tr>
 			<tr>
 				<td colspan="2" align="center"><input type="submit" name="go" value="Installation starten"></td>
