@@ -76,8 +76,9 @@ function install() {
   #
   # Teste ob MySQL-Server läuft
   #
+
   include(CLASSPATH . 'mysql.php');
-  $mysqlRootDb = new database;
+  $mysqlRootDb = new database();
   $mysqlRootDb->host = MYSQL_HOST;
   $mysqlRootDb->user = 'root';
   $mysqlRootDb->passwd = MYSQL_ROOT_PASSWORD;
@@ -491,7 +492,9 @@ function install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb) { ?>
 function migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb) {
   include(CLASSPATH . 'administration.php');
   $administration = new administration($mysqlKvwmapDb, $pgsqlKvwmapDb);
+	echo '<br>Frage Datenbankstati ab.';
   $administration->get_database_status();
+	echo '<br>Aktualisiere Datenbanken.';
   $administration->update_databases();
   $administration->get_database_status();
   if (count($administration->migrations_to_execute['mysql']) == 0 AND count($administration->migrations_to_execute['postgresql']) == 0) { ?>

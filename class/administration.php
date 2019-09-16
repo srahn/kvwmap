@@ -47,17 +47,23 @@ class administration{
 	}
 	
 	function get_migration_logs() {
+		#echo '<br>Get Migration logs';
 		$migrations = array();
-		$sql = "SELECT * FROM migrations";
-		$result=$this->database->execSQL($sql,0, 0);
-    if ($result[0]) {
-      #echo '<br>Fehler bei der Abfrage der Tabelle migrations.<br>'; 	// bei Neuinstallation gibt es diese Tabelle noch nicht
-    }
-    else {
-      while($rs=mysql_fetch_array($result[1])) {
+		$sql = "
+			SELECT *
+			FROM migrations
+		";
+		#echo '<br>SQL zur Abfrage der registrierten Migrationen: ' . $sql;
+		$result = $this->database->execSQL($sql,0, 0);
+		if ($result[0]) {
+			echo '<br>Fehler bei der Abfrage der Tabelle migrations.<br>'; 	// bei Neuinstallation gibt es diese Tabelle noch nicht
+		}
+		else {
+			while($rs=mysql_fetch_array($result[1])) {
 				$migrations[$rs['component']][$rs['type']][$rs['filename']] = 1;
 			}
 		}
+		#echo '<br>Gefundene Migrationen: ' . print_r($migrations, true);
 		return $migrations;
 	}
 	
