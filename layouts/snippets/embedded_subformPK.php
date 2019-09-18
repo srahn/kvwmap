@@ -265,7 +265,7 @@ else{ ?>
 								<a class="buttonlink"<?
 									if ($this->formvars['no_new_window'] != true) {
 										echo ' target="_blank"';
-									}	?>	href="javascript:overlay_link('go=neuer_Layer_Datensatz&<? echo implode('&', $data); ?>')">
+									}	?>	href="javascript:overlay_link('&<? echo implode('&', $data); ?>')">
 									<span>&nbsp;<?php echo $strNewEmbeddedPK; ?></span>
 								</a><?
 							}
