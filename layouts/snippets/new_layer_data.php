@@ -48,6 +48,17 @@
 
 <?
 if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
+	
+	# falls das Geometrie-Attribut editierbar ist und wir uns im Overlay-Fenster befinden, das Ganze ohne Overlay aufrufen
+	if($this->currentform == 'document.GUI2' AND $this->qlayerset[0]['attributes']['privileg'][$this->qlayerset[0]['attributes']['indizes'][$this->qlayerset[0]['attributes']['the_geom']]] == 1){
+		$this->formvars['mime_type'] = '';
+		echo '
+		<script type="text/javascript">
+			location.href = \'index.php?'.http_build_query($this->formvars).'\'
+		</script>';
+		exit;
+	}	
+	
 	$i = 0;	
 	if($this->qlayerset[0]['template']=='generic_layer_editor.php' OR $this->qlayerset[0]['template']==''){
 		include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise auch bei spaltenweiser Darstellung
