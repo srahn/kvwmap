@@ -552,7 +552,7 @@ echo '			</ul>
 	function setLayerParams($prefix = '') {
 		$layer_params = array();
 		foreach ($this->formvars AS $key => $value) {
-			$param_key = str_replace($prefix.'layer_parameter_', '', $key);		// $prefix dient zur Unterscheidung zwischen den Layer-Parametern im Header und denen in den Optionen
+			$param_key = str_replace($prefix . 'layer_parameter_', '', $key);		// $prefix dient zur Unterscheidung zwischen den Layer-Parametern im Header und denen in den Optionen
 			if ($param_key != $key) {
 				$layer_params[] = '"' . $param_key . '":"' . $value . '"';
 			}
@@ -7513,11 +7513,63 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	}
 
 	function layer_parameter_speichern(){
-    $this->main='layer_parameter.php';
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->main='layer_parameter.php';
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$mapDB->save_all_layer_params($this->formvars);
 		$this->params = $mapDB->get_all_layer_params();
-    $this->output();
+		# Ergänze und lösche Layerparameter in Rollen
+		$this->update_layer_parameter_in_rollen($this->params);
+		$this->output();
+	}
+
+	/**
+	* for all rollen do
+	* add param with default value if not exists
+	* delete param if not defined in given list $params
+	* @param $params Array of layer parameter in structure function get_all_layer_params returns it
+	* @return null
+	*/
+	function update_layer_parameter_in_rollen($params) {
+		$default_params = array();
+		foreach ($params AS $param) {
+			$default_params[$param['key']] = $param['default_value'];
+		}
+		$myObject = new MyObject(
+			$this,
+			'rolle',
+			array(
+				array(
+					'key' => 'user_id',
+					'type' => 'integer'
+				),
+				array(
+					'key' => 'stelle_id',
+					'type' => 'integer'
+				)
+			),
+			'array'
+		);
+		$rollen = $myObject->find_by_sql(array(
+			'select' => 'user_id, stelle_id, layer_params'
+		));
+		foreach ($rollen AS $rolle) {
+			$rolle_params = (array)json_decode('{' . $rolle->get('layer_params') . '}');
+
+			# Parameter, die die Rolle noch nicht hat anhängen
+			$add = array_diff_key($default_params, $rolle_params);
+			$rolle_params = array_merge($rolle_params, $add);
+
+			# Parameter, die der Layer nicht mehr, aber die Rolle noch hat löschen
+			$del = array_diff_key($rolle_params, $default_params);
+			$rolle_params = array_intersect_key($rolle_params, $default_params);
+
+			$new_params = array();
+			foreach ($rolle_params AS $key => $value) {
+				$new_params[] = '"' . $key . '":"' . $value . '"';
+			}
+			# speicher die neuen parameter
+			$rolle->update(array('layer_params' => implode(',', $new_params)));
+		}
 	}
 
 	function Layereditor() {
