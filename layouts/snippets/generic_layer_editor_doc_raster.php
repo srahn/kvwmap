@@ -92,6 +92,13 @@
 	if($this->formvars['embedded_subformPK'] == '')$records_per_row = 5;
 	else $records_per_row = 3;
 	for ($k;$k<$anzObj;$k++) {
+		$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
+		if (is_array($layer['attributes']['privileg'])) {
+			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
+				$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
+			}
+		}
+		
 		$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|'; ?>
 		
 		<div <? if($this->new_entry != true)echo 'class="raster_record" onclick="open_record(event, this)"'; ?> id="record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>" <? if($k%5==0)echo 'style="clear: both;"'?>>
@@ -330,6 +337,7 @@
 			</table>
 		</div>
 <?
+		$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 	}
 ?>
 			</div>
