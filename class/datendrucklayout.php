@@ -536,8 +536,12 @@ class ddl {
 				}	
 				else $output = $this->attributes['enum_output'][$j][$i];
 			}break;
+			case 'Checkbox' : {
+				$option = (json_decode($this->attributes['options'][$j]));
+				$output = ($this->result[$i][$this->attributes['name'][$j]] == 't' ? $option->print->true : $option->print->false);
+			} break;
 			default: {
-				if(!$preview AND $this->attributes['type'][$j] == 'bool'){
+				if(!$preview AND $this->attributes['type'][$j] == 'bool') {
 					$this->result[$i][$this->attributes['name'][$j]] = str_replace('t', "ja", $this->result[$i][$this->attributes['name'][$j]]);	
 					$this->result[$i][$this->attributes['name'][$j]] = str_replace('f', "nein", $this->result[$i][$this->attributes['name'][$j]]);
 				}
