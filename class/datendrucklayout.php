@@ -346,12 +346,10 @@ class ddl {
 									$text = $this->get_result_value_output($i, $j, $preview);
 									$y = $this->putText($text, $zeilenhoehe, $width, $x, $y, $offsetx);
 								}								
-																
 								if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y){
 									if(($this->miny[$this->pdf->currentContents] - $y) > $this->max_dataset_height)$this->max_dataset_height = $this->miny[$this->pdf->currentContents] - $y;
 									$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes									
-								}
-								
+								}								
 								$this->layout['offset_attributes'][$attributes['name'][$j]] = $y;					# den unteren y-Wert dieses Elements in das Offset-Array schreiben
 								$this->layout['page_id'][$attributes['name'][$j]] = $this->pdf->currentContents;		# und die Page-ID merken, in der das Attribut beendet wurde
 								if($this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
@@ -614,11 +612,13 @@ class ddl {
     	}
 			# spaltenweiser Typ
 			if($this->layout['columns'] AND $this->i_on_page > 0 AND $this->i_on_page % $rowcount == 0){
-				$this->xoffset_onpage = $this->xoffset_onpage + 198;
+				$this->xoffset_onpage = $this->xoffset_onpage + 170;
 				$this->miny[$lastpage] = $this->maxy;
+				$new_column = true;
 			}
+			else $new_column = false;
 			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];					# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
-			if($this->yoffset_onpage > 0)$this->yoffset_onpage = $this->yoffset_onpage + $this->layout['gap'];	# Abstand zwischen den Datensätzen addieren
+			if(!$new_column)$this->yoffset_onpage = $this->yoffset_onpage + $this->layout['gap'];	# Abstand zwischen den Datensätzen addieren
 			if($this->layout['type'] != 0 AND $this->miny[$lastpage] != '' AND ($this->miny[$lastpage] - $this->layout['gap']) < 60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
