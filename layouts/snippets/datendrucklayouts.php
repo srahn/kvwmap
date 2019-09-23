@@ -283,7 +283,9 @@ function scrolltop(){
 									<td colspan="4" style="border-bottom:1px solid #C3C7C3">
 										<span class="fett">Datensätze:</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fett">Abstand:</span>
 										<input type="text" name="gap" title="Der Abstand zwischen den Datensätzen." value="<? echo $this->ddl->selectedlayout[0]['gap'] ?>" size="2">
-										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fett">nicht durch Seitenumbruch unterbrechen:</span>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fett">in Spalten anordnen:</span>
+										<input type="checkbox" name="columns" title="" value="1" <? if($this->ddl->selectedlayout[0]['columns'])echo 'checked="true"'; ?>>
+										<br><span style="margin-left: 90px" class="fett">nicht durch Seitenumbruch unterbrechen:</span>
 										<input type="checkbox" name="no_record_splitting" title="Wenn angehakt, wird ein Seitenumbruch nicht innerhalb eines Datensatzes gemacht, sondern davor." value="1" <? if($this->ddl->selectedlayout[0]['no_record_splitting']) echo 'checked'; ?>>
 									</td>
 								</tr>

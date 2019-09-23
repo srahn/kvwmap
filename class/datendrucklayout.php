@@ -95,7 +95,8 @@ class ddl {
 							if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
 						}						
 						if($offset_attribute == '' AND $this->i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben (aber nur bei absolut positionierten)
-							$y = $y - $this->yoffset_onpage-$this->layout['gap'];
+							$y = $y - $this->yoffset_onpage;
+							$x = $x + $this->xoffset_onpage;
 						}
 					}
 					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);					
@@ -166,8 +167,9 @@ class ddl {
 							#if($this->maxy < $endy)$this->maxy = $endy;		# beim ersten Datensatz das maxy ermitteln							
 						}						
 						if($offset_attribute_start == '' AND $this->i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben (aber nur bei absolut positionierten)
-							$y = $y - $this->yoffset_onpage-$this->layout['gap'];
-							$endy = $endy - $this->yoffset_onpage-$this->layout['gap'];
+							$y = $y - $this->yoffset_onpage;
+							$endy = $endy - $this->yoffset_onpage;
+							$x = $x + $this->xoffset_onpage;
 						}
 					}
 					$this->pdf->setLineStyle($this->layout['lines'][$j]['breite'], 'square');
@@ -230,7 +232,8 @@ class ddl {
 								
 								$offy = 842 - $ypos + $this->offsety;
 								if($this->layout['type'] != 0 AND $offset_attribute == '' AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei abolut positionierten)
-									$offy = $offy + $this->yoffset_onpage+$this->layout['gap'];
+									$offy = $offy + $this->yoffset_onpage;
+									$offx = $offx + $this->xoffset_onpage;
 								}
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
 								if($this->i_on_page == 0){
@@ -310,7 +313,8 @@ class ddl {
 								if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$y = $y + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 								if($offset_attribute == '')$y = $y - $this->offsety;
 								if($this->layout['type'] != 0 AND $offset_attribute == '' AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei absolut positionierten)
-									$y = $y - $this->yoffset_onpage-$this->layout['gap'];
+									$y = $y - $this->yoffset_onpage;
+									$x = $x + $this->xoffset_onpage;
 								}			
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
 								if($this->i_on_page == 0){
@@ -407,7 +411,8 @@ class ddl {
 						if($this->maxy < $y+$this->layout['elements'][$attributes['name'][$j]]['width'])$this->maxy = $y+$this->layout['elements'][$attributes['name'][$j]]['width'];		# beim ersten Datensatz das maxy ermitteln
 					}    
 					if($this->layout['type'] != 0 AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
-						$y = $y - $this->yoffset_onpage-$this->layout['gap'];
+						$y = $y - $this->yoffset_onpage;
+						$x = $x - $this->xoffset_onpage;
 					}
 					$this->pdf->addJpegFromFile(IMAGEPATH.$newname, $x, $y, $this->layout['elements'][$attributes['name'][$j]]['width']);
 					# Rechteck um die Karte
@@ -562,6 +567,7 @@ class ddl {
 		$this->gui->formvars['record_paging'] = NULL;		# damit in untergeordneten Layouts nicht auch nummeriert wird
   	#$this->miny = 1000000;
   	$this->i_on_page = -1;
+		$this->xoffset_onpage = 0;
 		$this->page_overflow = false;
 		if($pdfobject == NULL){
 			include (CLASSPATH . 'class.ezpdf.php');
@@ -585,6 +591,9 @@ class ddl {
 				$layout_with_sublayout = true;
 			}
 		}
+		if($this->layout['columns']){	# spaltenweiser Typ
+			$rowcount = ceil(count($result) / 3);
+		}
     for($i = 0; $i < count($result); $i++){
 			$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
     	$this->i_on_page++;
@@ -599,7 +608,13 @@ class ddl {
     		$this->pdf->newPage();
 				$this->add_static_elements($offsetx);
     	}
-			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
+			# spaltenweiser Typ
+			if($this->layout['columns'] AND $this->i_on_page > 0 AND $this->i_on_page % $rowcount == 0){
+				$this->xoffset_onpage = $this->xoffset_onpage + 198;
+				$this->miny[$lastpage] = $this->maxy;
+			}
+			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];					# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
+			if($this->yoffset_onpage > 0)$this->yoffset_onpage = $this->yoffset_onpage + $this->layout['gap'];	# Abstand zwischen den Datensätzen addieren
 			if($this->layout['type'] != 0 AND $this->miny[$lastpage] != '' AND ($this->miny[$lastpage] - $this->layout['gap']) < 60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
@@ -793,6 +808,7 @@ class ddl {
 			$sql .= ", `margin_left` = ".(int)$formvars['margin_left'];
 			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
+			$sql .= ", `columns` = ".(int)$formvars['columns'];
 			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
       else $sql .= ", `filename` = NULL";			
       if($_files['bgsrc']['name']){
@@ -931,6 +947,7 @@ class ddl {
 			$sql .= ", `margin_left` = ".(int)$formvars['margin_left'];
 			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
+			$sql .= ", `columns` = ".(int)$formvars['columns'];
 			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
       else $sql .= ", `filename` = NULL";			
       if($_files['bgsrc']['name']){
