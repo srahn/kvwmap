@@ -28,7 +28,7 @@
 	
 	function load_search_attributes(layer_id){
 		if(layer_id != undefined){
-			ahah("index.php", "go=get_quicksearch_attributes&layer_id="+layer_id, new Array(document.getElementById('search_div')), new Array('sethtml'));
+			ahah("index.php", "go=get_quicksearch_attributes&layer_id="+layer_id, new Array(document.getElementById('quick_search_div')), new Array('sethtml'));
 		}
 	}
 	
@@ -75,7 +75,7 @@
 					</select>
 				</td>
 				<td>	
-					<div id="search_div"></div>
+					<div id="quick_search_div"></div>
 				</td>
 			</tr>
 		</table>
