@@ -960,20 +960,34 @@ class stelle {
 			WHERE
 				stelle.ID = " . $this->id . "
 		";
-		#echo '<br>SQL: ' . $sql;
+		#echo '<br>SQL zur Aktualisierung der LayerParams: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+	#	$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 
-		$sql = "UPDATE rolle SET layer_params = ";
-		$sql.= "COALESCE((SELECT GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"')) ";
-		$sql.= "FROM layer_parameter p, stelle ";
-		$sql.= "WHERE FIND_IN_SET(p.id, stelle.selectable_layer_params) ";
-		$sql.= "AND stelle.ID = rolle.stelle_id), '') ";
-		$sql.= "WHERE rolle.stelle_id = ".$this->id;
+		$sql = "
+			UPDATE
+				rolle
+			SET
+				layer_params = COALESCE(
+					(
+						SELECT
+							GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"'))
+						FROM
+							layer_parameter p, stelle
+						WHERE
+							FIND_IN_SET(p.id, stelle.selectable_layer_params) AND
+							stelle.ID = rolle.stelle_id
+					),
+					''
+				)
+			WHERE
+				rolle.stelle_id = " . $this->id . "
+		";
+		#echo '<br>SQL zum Aktualisieren der Layerparameter in den Rollen: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+	#	$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 	}
 
 	function updateLayer($formvars){
