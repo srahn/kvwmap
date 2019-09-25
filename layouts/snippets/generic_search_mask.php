@@ -136,7 +136,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 	            		case 'Auswahlfeld' : case 'Radiobutton' : {
 	                  ?><select 
 	                  <?
-	                  	if($this->attributes['req_by'][$i] != ''){
+	                  	if($this->attributes['req_by'][$i] != '' OR substr($this->attributes['type'][$i], 0, 1) == '_'){		# bei abhängigen Auswahlfeldern oder Array-Typen keine multible Auswahl
 												echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['selected_layer_id'].', new Array(\''.implode($this->attributes['name'], "','").'\'), '.$searchmask_number.');" ';
 												$array = '';
 											}
