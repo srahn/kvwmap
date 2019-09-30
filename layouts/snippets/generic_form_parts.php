@@ -498,6 +498,7 @@
 						$dokumentpfad = $value;
 						$pfadteil = explode('&original_name=', $dokumentpfad);
 						$dateiname = $pfadteil[0];
+						$filesize = human_filesize($dateiname);
 						if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
 						$dateinamensteil = explode('.', $dateiname);
 						$type = strtolower($dateinamensteil[1]);
@@ -529,7 +530,7 @@
 							$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\', '.$layer_id.', \''.$gui->formvars['fromobject'].'\', \''.$gui->formvars['targetobject'].'\',  \''.$gui->formvars['reload'].'\');"><span>Dokument löschen</span></a>';
 						}
 						$datapart .= '</td></tr>';
-						$datapart .= '<tr><td colspan="2"><span id="image_original_name">'.$original_name.'</span></td></tr>';
+						$datapart .= '<tr><td colspan="2"><span id="image_original_name">'.$original_name.' ('.$filesize.')</span></td></tr>';
 						$datapart .= '</table>';
 						$datapart .= '<input type="hidden" name="'.$fieldname.'_alt" class="'.$field_class.'" value="' . htmlspecialchars($value) . '">';
 					}

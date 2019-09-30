@@ -6,6 +6,13 @@
 
 $errors = array();
 
+function human_filesize($file){
+	$bytes = filesize($file);
+  $sz = 'BKMGTP';
+  $factor = floor((strlen($bytes) - 1) / 3);
+  return sprintf("%.2f", $bytes / pow(1024, $factor)).' '.@$sz[$factor].'B';
+}
+
 function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	global $errors;
 	if(!(error_reporting() & $errno)){
