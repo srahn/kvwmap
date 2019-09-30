@@ -941,23 +941,27 @@ class Nachweis {
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
+					if($alle_der_messung){
+						$sql.=" JOIN nachweisverwaltung.n_nachweise AS n2 ON n.oid = n2.oid OR (n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "").")";
+						$n = 'n2';
+					}					
           $sql.=" WHERE 1=1 ";
 					if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
 					if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
           if ($idselected[0]!=0) {
-            $sql.=" AND n.id IN ('".$idselected[0]."'";
+            $sql.=" AND ".$n.".id IN ('".$idselected[0]."'";
             for ($i=1;$i<count($idselected);$i++) {
               $sql.=",'".$idselected[$i]."'";
             }
             $sql.=")";
           }
 					if($gemarkung != '' AND $flur_thematisch != 0){
-						if($flur == '')	$sql.=" AND substr(n.flurid::text, 1, 6) = '".$gemarkung."'";
-						else $sql.=" AND n.flurid='".$gemarkung.str_pad($flur,3,'0',STR_PAD_LEFT)."'";
+						if($flur == '')	$sql.=" AND substr(".$n.".flurid::text, 1, 6) = '".$gemarkung."'";
+						else $sql.=" AND ".$n.".flurid='".$gemarkung.str_pad($flur,3,'0',STR_PAD_LEFT)."'";
           }
 					else{
 						if($gemarkung != ''){
-							$sql.=" AND flur.land||flur.gemarkung = '".$gemarkung."' AND st_intersects(st_transform(flur.the_geom, ".EPSGCODE."), n.the_geom)";
+							$sql.=" AND flur.land||flur.gemarkung = '".$gemarkung."' AND st_intersects(st_transform(flur.the_geom, ".EPSGCODE."), ".$n.".the_geom)";
 						}
 						if($flur != ''){
 							$sql.=" AND flur.flurnummer = ".$flur." ";
@@ -965,67 +969,67 @@ class Nachweis {
 					}
           if($stammnr!=''){
 						if($stammnr2!=''){
-							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.stammnr, '[^0-9]+' ,'', 'g'), ''), '0')::bigint between 
+							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(".$n.".stammnr, '[^0-9]+' ,'', 'g'), ''), '0')::bigint between 
 											COALESCE(NULLIF(REGEXP_REPLACE('".$stammnr."', '[^0-9]+' ,'', 'g'), ''), '0')::bigint AND 
 											COALESCE(NULLIF(REGEXP_REPLACE('".$stammnr2."', '[^0-9]+' ,'', 'g'), ''), '0')::bigint";
 						}
 						else{
 							if(is_numeric($stammnr)){
-								$sql.=" AND REGEXP_REPLACE(COALESCE(n.stammnr, ''), '[^0-9]+' ,'', 'g') = '".$stammnr."'";
+								$sql.=" AND REGEXP_REPLACE(COALESCE(".$n.".stammnr, ''), '[^0-9]+' ,'', 'g') = '".$stammnr."'";
 							}
 							else{
-								$sql.=" AND lower(n.stammnr)='".mb_strtolower($stammnr)."'";
+								$sql.=" AND lower(".$n.".stammnr)='".mb_strtolower($stammnr)."'";
 							}
 						}
           }
 	        if($rissnr!=''){
 						if($rissnr2!=''){
-							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.rissnummer, '[^0-9]+' ,'', 'g'), ''), '0')::bigint between 
+							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(".$n.".rissnummer, '[^0-9]+' ,'', 'g'), ''), '0')::bigint between 
 											COALESCE(NULLIF(REGEXP_REPLACE('".$rissnr."', '[^0-9]+' ,'', 'g'), ''), '0')::bigint AND 
 											COALESCE(NULLIF(REGEXP_REPLACE('".$rissnr2."', '[^0-9]+' ,'', 'g'), ''), '0')::bigint";
 						}
 						else{
 							if(is_numeric($rissnr)){
-								$sql.=" AND REGEXP_REPLACE(COALESCE(n.rissnummer, ''), '[^0-9]+' ,'', 'g') = '".$rissnr."'";
+								$sql.=" AND REGEXP_REPLACE(COALESCE(".$n.".rissnummer, ''), '[^0-9]+' ,'', 'g') = '".$rissnr."'";
 							}
 							else{
-								$sql.=" AND lower(n.rissnummer)='".mb_strtolower($rissnr)."'";
+								$sql.=" AND lower(".$n.".rissnummer)='".mb_strtolower($rissnr)."'";
 							}
 						}
 	        }
 	      	if($fortf!=''){
 						if($fortf2!=''){
-							$sql.=" AND n.fortfuehrung between ".(int)$fortf." AND ".(int)$fortf2;
+							$sql.=" AND ".$n.".fortfuehrung between ".(int)$fortf." AND ".(int)$fortf2;
 						}
 						else{
-							$sql.=" AND n.fortfuehrung=".(int)$fortf;
+							$sql.=" AND ".$n.".fortfuehrung=".(int)$fortf;
 						}
 	        }
 					if($blattnr!=''){
-	          $sql.=" AND n.blattnummer='".$blattnr."'";
+	          $sql.=" AND ".$n.".blattnummer='".$blattnr."'";
 	        }					
           if($datum != ''){
 						if($datum2 != ''){
-							$sql.=" AND n.datum between '".$datum."' AND '".$datum2."'";
+							$sql.=" AND ".$n.".datum between '".$datum."' AND '".$datum2."'";
 						}
 						else{
-							$sql.=" AND n.datum = '".$datum."'";
+							$sql.=" AND ".$n.".datum = '".$datum."'";
 						}
           }
           if($VermStelle!=''){
-            $sql.=" AND n.vermstelle = '".$VermStelle."'";
+            $sql.=" AND ".$n.".vermstelle = '".$VermStelle."'";
           }
 					if(!empty($hauptart)){
 						if($hauptart[0] == '2222' AND $idselected[0] != ''){
-							$sql.=" AND n.id IN (".implode(',', $idselected).")";
+							$sql.=" AND ".$n.".id IN (".implode(',', $idselected).")";
 						}
 						else{
 							$sql.=" AND h.id IN (".implode(',', $hauptart).")";
 						}
 					}
-					if(!empty($unterart))$sql.=" AND ((n.art IN (".implode(',', $unterart).")) OR (d.hauptart NOT IN (select distinct hauptart from nachweisverwaltung.n_dokumentarten where id IN (".implode(',', $unterart)."))))";					
+					if(!empty($unterart))$sql.=" AND ((".$n.".art IN (".implode(',', $unterart).")) OR (d.hauptart NOT IN (select distinct hauptart from nachweisverwaltung.n_dokumentarten where id IN (".implode(',', $unterart)."))))";					
 					if($suchbemerkung != ''){
-						$sql.=" AND lower(n.bemerkungen) LIKE '%".mb_strtolower($suchbemerkung)."%'";
+						$sql.=" AND lower(".$n.".bemerkungen) LIKE '%".mb_strtolower($suchbemerkung)."%'";
 					}
           if ($richtung=='' OR $richtung=='ASC'){
             $richtung=="ASC";

@@ -1505,7 +1505,8 @@
     if ($GUI->formvars['bestaetigung']=='') {
       # Der Löschvorgang wurde noch nicht bestätigt
       $GUI->suchparameterSetzen();
-      $GUI->formvars['nachfrage']='Möchten Sie den Nachweis wirklich löschen? ';
+			if(count($GUI->formvars['id']) > 1) $GUI->formvars['nachfrage']='Möchten Sie die Nachweise wirklich löschen? ';
+      else $GUI->formvars['nachfrage']='Möchten Sie den Nachweis wirklich löschen? ';
       $GUI->bestaetigungsformAnzeigen();
     }
     else {
@@ -1556,6 +1557,9 @@
 				$GUI->formvars['pathwkt'] = $GUI->formvars['suchpolygon'];
 				$GUI->formvars['newpathwkt'] = $GUI->formvars['suchpolygon'];
 				$GUI->formvars['firstpoly'] = 'true';
+			}
+			else{
+				$GUI->formvars['alle_der_messung'] = NULL;
 			}
 		}
 		# die Parameter einer gespeicherten Dokumentauswahl laden

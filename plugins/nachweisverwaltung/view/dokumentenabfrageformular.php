@@ -392,10 +392,7 @@ else {
 			<input type="radio" name="abfrageart" id="abfrageart_poly" value="poly" <?php if ($this->formvars['abfrageart']=='poly' OR $this->formvars['abfrageart']=='') { ?> checked<?php } ?>> 
 			<span class="fett">Auswahl im Kartenausschnitt über Suchpolygon</span>
 		</td>
-  </tr>
-	<tr>
-		<td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" name="alle_der_messung" value="1" <? if($this->formvars['alle_der_messung'] == 1)echo 'checked'; ?>>&nbsp;alle der Messung</td>
-	</tr>	
+  </tr>	
   <tr> 
     <td valign="top" colspan="3">
 			<input type="radio" name="abfrageart" value="antr_nr" <?php if ($this->formvars['abfrageart']=='antr_nr') { ?> checked<?php } ?>>
@@ -404,6 +401,9 @@ else {
         echo $this->FormObjAntr_nr->html;?>
     </td>
   </tr>
+	<tr>
+		<td colspan="2"><input type="checkbox" name="alle_der_messung" value="1" <? if($this->formvars['alle_der_messung'] == 1)echo 'checked'; ?>>&nbsp;alle der Messung</td>
+	</tr>
   <tr>	
   	<td>&nbsp;</td>
   </tr>
