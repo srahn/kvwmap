@@ -337,11 +337,12 @@ include('funktionen/input_check_functions.php');
 		enclosingForm.submit();
 	}
 	
-	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen){
+	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen, weiter_erfassen_params){
 		list_div = document.getElementById(list_div_id);
 		var params = list_div.dataset.reload_params;
 		if(list_edit)params += '&list_edit='+list_edit;
 		if(weiter_erfassen)params += '&weiter_erfassen='+weiter_erfassen;
+		if(weiter_erfassen_params)params += '&weiter_erfassen_params='+weiter_erfassen_params;
 		ahah('index.php?go=Layer-Suche_Suchen', params, new Array(list_div), new Array('sethtml'));
 	}
 
