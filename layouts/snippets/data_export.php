@@ -123,10 +123,9 @@ function data_export(){
 }
 
 function selectall(geom){
-	var obj = document.getElementById('check_attribute_0');
-	var status = obj.checked;
 	var attribute_selectors = document.querySelectorAll('.attribute_selector');
-	[].forEach.call(attribute_selectors, function (attribute_selector){		// DropZones groesser machen    
+	var status = attribute_selectors[0].checked;
+	[].forEach.call(attribute_selectors, function (attribute_selector){
 		if(attribute_selector.name != 'check_'+geom){
 			attribute_selector.checked = !status;			
 		}
