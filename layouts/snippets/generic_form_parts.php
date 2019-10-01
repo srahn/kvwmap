@@ -732,7 +732,7 @@
 		# - dargestellt in 1, 2 oder 3 Spalten		
 		if ($subform_layer_id != '' AND $subform_layer_privileg > 0) {
 			if ($embedded == true) {
-				$href = 'javascript:ahah(
+				$href = 'javascript:void(0);" onclick="ahah(
 					\'index.php\',
 					\'go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id.'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject=' . $element_id . '&targetlayer_id=' . $layer_id.'&targetattribute='.$name.'\',
 					new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\')),
@@ -834,7 +834,7 @@
 		# - dargestellt in 1, 2 oder 3 Spalten		
 		if ($subform_layer_id != '' AND $subform_layer_privileg > 0) {
 			if ($embedded == true) {
-				$href = 'javascript:ahah(
+				$href = 'javascript:void(0);" onclick="ahah(
 					\'index.php\',
 					\'go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id.'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject=' . $element_id . '&targetlayer_id=' . $layer_id.'&targetattribute='.$name.'\',
 					new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\')),
