@@ -1326,7 +1326,7 @@ thead.gle th {
 	word-wrap: break-word;
 }
 
-tbody.gle tr { 
+tbody.gle>tr { 
  border:1px solid #999;
 }
 
