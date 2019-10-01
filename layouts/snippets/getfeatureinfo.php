@@ -23,7 +23,7 @@
 
 		$response = url_get_contents($this->qlayerset[$i][GetFeatureInfoRequest]);		
 		
-		if(strpos(strtolower($response), 'charset=utf-8') === false) $response = utf8_encode($response);
+		if(strpos(strtolower($response), 'utf-8') === false) $response = utf8_encode($response);
 		$response = str_replace('css', '', $response);
 		if ($response=='') {
 			?><br>An dieser Position konnten zu diesem Layer keine Objekte gefunden werden.<br><?php
