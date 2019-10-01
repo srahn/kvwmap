@@ -17605,7 +17605,6 @@ class db_mapObj{
 
 	function updateLayer($formvars) {
 		global $supportedLanguages;
-		$formvars['pfad'] = str_replace(array("\r\n", "\n"), '', $formvars['pfad']);
 		$formvars['Layer_ID'] = $formvars['id'];
 
 		$attribute_sets = array();
