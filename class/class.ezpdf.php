@@ -1195,8 +1195,8 @@ function ezTable(&$data,$cols='',$title='',$options=''){
 function ezProcessText($text){
   // this function will intially be used to implement underlining support, but could be used for a range of other
   // purposes
-  $search = array('<u>','<U>','</u>','</U>');
-  $replace = array('<c:uline>','<c:uline>','</c:uline>','</c:uline>');
+  $search = array('<u>','<U>','</u>','</U>', '<box>', '</box>');
+  $replace = array('<c:uline>','<c:uline>','</c:uline>','</c:uline>', '<c:box>', '</c:box>');
   return str_replace($search,$replace,$text);
 }
 
@@ -1544,6 +1544,40 @@ function uline($info){
       $dropx = cos($a)*$drop;
       $dropy = -sin($a)*$drop;
       $this->line($start['x']-$dropx,$start['y']-$dropy,$info['x']-$dropx,$info['y']-$dropy);
+      $this->restoreState();
+      break;
+  }
+}
+
+function box($info){
+  // a callback function to create a box around the text
+  $lineFactor=0.05; // the thickness of the line as a proportion of the height. also the drop of the line.
+  switch($info['status']){
+    case 'start':
+    case 'sol':
+    
+      // the beginning of the underline zone
+      if (!isset($this->ez['links'])){
+        $this->ez['links']=array();
+      }
+      $i = $info['nCallback'];
+      $this->ez['links'][$i] = array('x'=>$info['x'],'y'=>$info['y'],'angle'=>$info['angle'],'decender'=>$info['decender'],'height'=>$info['height']);
+      $this->saveState();
+      $thick = $info['height']*$lineFactor;
+      $this->setLineStyle($thick);
+      break;
+    case 'end':
+    case 'eol':
+      // the end of the link
+      // assume that it is the most recent opening which has closed
+      $i = $info['nCallback'];
+      $start = $this->ez['links'][$i];
+      // add underlining
+      $a = deg2rad((float)$start['angle']-90.0);
+      $drop = $start['height']*$lineFactor*1.5;
+      $dropx = cos($a)*$drop;
+      $dropy = -sin($a)*$drop;
+			$this->rectangle($start['x']-$dropx, $start['y']-$dropy-1, $info['x']-$start['x'], $start['height']);
       $this->restoreState();
       break;
   }
