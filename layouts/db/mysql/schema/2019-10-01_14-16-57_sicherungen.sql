@@ -39,7 +39,7 @@ BEGIN;
     connectiontype = 6
   GROUP BY host, port, dbname, `user`, `password`;
   
-  ALTER TABLE `layer` ADD COLUMN `connection_id` bigint(20) UNSIGNED;
+  ALTER TABLE `layer` ADD COLUMN `connection_id` bigint(20) UNSIGNED AFTER `connection`;
 
   UPDATE
     `layer` AS l JOIN
@@ -89,7 +89,7 @@ BEGIN;
   (2, 'data', 'Alles im Datenverzeichnis packen und zippen.', 'Verzeichnissicherung', '/var/www/data', NULL, 'data', 1, 1),
   (3, 'kvwmapdb', 'Sicherung der Kartendatenbank kvwmapdb.', 'Mysql Dump', 'kvwmapdb', NULL, 'kvwmapdb.sql', 1, 1),
   (4, 'kvwmapsp', 'Sicherung der Geodatenbank kvwmapsp.', 'Postgres Dump', 'kvwmapsp', (SELECT id FROM connections WHERE dbname LIKE 'kvwmapsp' LIMIT 1), 'kvwmapsp.dump', 1, 1),
-  (5, 'Wochensicherung', 'Alle Inhalte der letzten Tagessicherung als Wochensicherung sichern.', 'Verzeichnisinhalte kopieren', 'day/5', '/var/www/backups/week/$((($(date +%-d)-1)/7+1))', 1, 2),
-  (6, 'Monatssicherung', 'Alle Inhalte der letzten Tagessicherung als Monatssicherung sichern.', 'Verzeichnisinhalte kopieren', 'day/5', '/var/www/backups/month/$(date +%m)', 1, 3);
+  (5, 'Wochensicherung', 'Alle Inhalte der letzten Tagessicherung als Wochensicherung sichern.', 'Verzeichnisinhalte kopieren', 'day/5', NULL, '/var/www/backups/week/$((($(date +%-d)-1)/7+1))', 1, 2),
+  (6, 'Monatssicherung', 'Alle Inhalte der letzten Tagessicherung als Monatssicherung sichern.', 'Verzeichnisinhalte kopieren', 'day/5', NULL, '/var/www/backups/month/$(date +%m)', 1, 3);
 
 COMMIT;
