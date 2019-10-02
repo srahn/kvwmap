@@ -539,6 +539,19 @@ class ddl {
 				}	
 				else $output = $this->attributes['enum_output'][$j][$i];
 			}break;
+			case 'Radiobutton' : {
+				for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
+					if($this->attributes['enum_value'][$j][$e] == $this->result[$i][$this->attributes['name'][$j]]){
+						$output .= '[<b>x</b>] ';
+					}
+					else $output .= '[  ] ';
+					$output .= $this->attributes['enum_output'][$j][$e].'   ';
+					if(!$this->attributes['horizontal'][$j])$output .= chr(10);
+				}
+				if(count($this->attributes['enum_value'][$j]) == 0){	
+					$output = $this->result[$i][$this->attributes['name'][$j]];
+				}			
+			}break;			
 			case 'Checkbox' : {
 				$option = (json_decode($this->attributes['options'][$j]));
 				$output = ($this->result[$i][$this->attributes['name'][$j]] == 't' ? $option->print->true : $option->print->false);
