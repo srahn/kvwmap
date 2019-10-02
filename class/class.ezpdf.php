@@ -1551,7 +1551,7 @@ function uline($info){
 
 function box($info){
   // a callback function to create a box around the text
-  $lineFactor=0.05; // the thickness of the line as a proportion of the height. also the drop of the line.
+  $lineFactor=0.1; // the thickness of the line as a proportion of the height. also the drop of the line.
   switch($info['status']){
     case 'start':
     case 'sol':
@@ -1577,7 +1577,7 @@ function box($info){
       $drop = $start['height']*$lineFactor*1.5;
       $dropx = cos($a)*$drop;
       $dropy = -sin($a)*$drop;
-			$this->rectangle($start['x']-$dropx, $start['y']-$dropy-1, $info['x']-$start['x'], $start['height']);
+			$this->rectangle($start['x']-$dropx, $start['y']-$dropy-1, $info['x']-$start['x'], $start['height']+1);
       $this->restoreState();
       break;
   }

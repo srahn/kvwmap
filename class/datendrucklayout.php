@@ -542,7 +542,7 @@ class ddl {
 			case 'Radiobutton' : {
 				for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
 					if($this->attributes['enum_value'][$j][$e] == $this->result[$i][$this->attributes['name'][$j]]){
-						$output .= '<box> <b>X</b> </box>  ';
+						$output .= '<box><b> X </b></box>  ';
 					}
 					else $output .= ' <box>    </box>  ';
 					$output .= $this->attributes['enum_output'][$j][$e].'   ';
