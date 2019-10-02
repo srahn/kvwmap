@@ -1,5 +1,6 @@
 credentials.php
 config.php
+custom/*
 fonts/custom/*
 layouts/custom/*
 layouts/snippets/custom/*
