@@ -1,0 +1,67 @@
+class/fast_cases/getLayerOptions.php:			if($attr_info[$i]['type_type'] == 'c'){		# custom datatype
+class/fast_cases/getLayerOptions.php:					if($attr_info[0]['type_type'] == 'c'){		# custom datatype
+class/fast_cases/getLayerOptions.php:			#-- search_path ist zwar gesetzt, aber nur auf custom_shapes, daher ist das Schema der Tabelle erforderlich
+class/fast_cases/navMap_ajax.php:				$imagename = WWWROOT.APPLVERSION.GRAPHICSPATH . 'custom/' . $classset[$j]['legendgraphic'];
+class/postgresql.php:					if($attr_info[0]['type_type'] == 'c'){		# custom datatype
+class/postgresql.php:			if($attr_info[$i]['type_type'] == 'c'){		# custom datatype
+class/postgresql.php:			#-- search_path ist zwar gesetzt, aber nur auf custom_shapes, daher ist das Schema der Tabelle erforderlich
+config.php:#define('CUSTOM_SHAPEPATH', 'custom_shps/');							# Version 1.7.4		# in Version 1.11.0 gelöscht
+config.php:define('CUSTOM_SHAPE_SCHEMA', 'custom_shapes');					# Version 1.11.0
+layouts/custom/gui_xplan.php:	<link rel="stylesheet" href="<?php echo 'layouts/custom/'.CUSTOM_STYLE; ?>">
+layouts/custom/gui_xplan.php:								$this->debug->write("Include <b>".LAYOUTPATH."snippets/custom/menue_switch.php</b> in gui.php",4);    
+layouts/custom/gui_xplan.php:								include(LAYOUTPATH."snippets/custom/menue_switch_xplan.php"); ?>
+layouts/db/mysql/schema/2018-09-19_14-34-53_config.php:z.B. custom/ds_gvo.htm',
+layouts/db/mysql/schema/2018-09-19_14-34-53_config.php:    'value' => 'custom.css',
+layouts/db/mysql/schema/2018-09-19_14-34-53_config.php:    'value' => 'custom_shapes',
+layouts/db/mysql/schema/2018-11-26_11-29-39_custom_raster.sql:('CUSTOM_RASTER', 'SHAPEPATH', 'custom_raster/', 'Das Verzeichnis, in dem die von den Nutzern hochgeladenen Rasterdateien abgelegt werden.', 'string', 'Pfadeinstellungen', NULL, 0);
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	# - custom Font sets must be located in CUSTOM_PATH . 'fonts/'
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	# - custom Graphics must be located in CUSTOM_PATH . 'graphics/'
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	# - custom Wappen must be located in CUSTOM_PATH . 'graphics/wappen/'
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	# - custom Styles must be located in CUSTOM_PATH . 'layouts/'
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	# - custom Snippets must be located in CUSTOM_PATH . 'layouts/snippets/'
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	# - custom Symbols must be located in CUSTOM_PATH . 'symbols/'
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	# check if custom folder already exists, append random number to default name if exists
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	$constants['CUSTOM_PATH'] = (dir_exists(WWWROOT . 'kvwmap_custom/') ? 'kvwmap_custom' . random(3) . '/' : 'kvwmap_custom/');
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	# create a new custom_folder from kvwmap_custom repository
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	$command = 'git clone https://github.com/srahn/kvwmap_custom ' . WWWROOT . $constants['CUSTOM_PATH'];
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	exec('tar cvzf ' . WWWROOT . $constants['CUSTOM_PATH'] . 'kvwmap_before_custom_migration.tar.gz ' . WWWROOT . APPLVERSION);
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:  # Move all custom files in the new custom folder if exists and change Config parameter
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	if (dir_exists(WWWROOT . APPLVERSION . 'fonts/custom')) {
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:		rename(WWWROOT . APPLVERSION . 'fonts/custom/*', WWWROOT . $constants['CUSTOM_PATH'] . 'fonts/');
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	if (dir_exists(WWWROOT . APPLVERSION . 'graphics/custom')) {
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:		rename(WWWROOT . APPLVERSION . 'graphics/custom/*', WWWROOT . $constants['CUSTOM_PATH'] . 'graphics/');
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	if (dir_exists(WWWROOT . APPLVERSION . 'layouts/custom')) {
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:		rename(WWWROOT . APPLVERSION . 'layouts/custom/*', WWWROOT . $constants['CUSTOM_PATH'] . 'layouts/');
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:		rename(WWWROOT . APPLVERSION . 'layouts/custom/' . CUSTOM_STYLE, WWWROOT . $constants['CUSTOM_PATH'] . 'layouts/' . basename(CUSTOM_STYLE));
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	if (dir_exists(WWWROOT . APPLVERSION . 'layouts/snippets/custom')) {
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:		rename(WWWROOT . APPLVERSION . 'layouts/snippets/custom/*', WWWROOT . $constants['CUSTOM_PATH'] . 'layouts/snippets/');
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	if (dir_exists(WWWROOT . APPLVERSION . 'symbols/custom')) {
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:		rename(WWWROOT . APPLVERSION . 'symbols/custom/*', WWWROOT . $constants['CUSTOM_PATH'] . 'symbols/');
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	# replace mit sed in all custom files in layouts/custom and layouts/snippets/custom
+layouts/db/mysql/schema/2019-08-25_16-40-16_outsource_custom_files.php:	# layouts/custom/ => '../' . CUSTOM_PATH . 'layouts/'
+layouts/db/postgresql/postgis_update.sql:CREATE SCHEMA custom_shapes;	-- kann auch anders hei�en, ist der config.php �ber CUSTOM_SHAPE_SCHEMA definierbar
+layouts/db/postgresql/schema/2014-09-12_16-33-22_Version2.0.sql:CREATE SCHEMA custom_shapes;	-- kann auch anders heißen, ist der config.php über CUSTOM_SHAPE_SCHEMA definierbar
+layouts/snippets/generic_form_parts.php:					$datapart .= '<input class="'.$field_class.' custom_area" onchange="'.$onchange.'" id="'.$layer_id.'_'.$name.'_'.$k.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
+layouts/snippets/generic_form_parts.php:					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" id="custom_length" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
+layouts/snippets/generic_form_parts.php:					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" id="custom_angle" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
+layouts/snippets/layer_error_page.php:// Sie können diese Seite nach Ihren Wünschen verändern, sollten sie dann aber nach .../snippets/custom kopieren und die Konstante LAYER_ERROR_PAGE entsprechend anpassen
+layouts/snippets/layer_klasseneditor.php:	Text[6] = ["Hilfe:","Wird hier der Name einer Grafikdatei aus dem Ordner <?php echo GRAPHICSPATH; ?>custom angegeben, wird diese Grafik an Stelle der vom MapServer erzeugten Grafik in der Legende angezeigt. Außerdem kann hier die Höhe und Breite der Legendengrafik angegeben werden."];
+layouts/snippets/overlayframe.php:											if($this->formvars['anzahl'] != '' AND $custom_limit != true AND !in_array($this->formvars['anzahl'], $selectable_limits) AND $this->formvars['anzahl'] < $limit){
+layouts/snippets/overlayframe.php:												$custom_limit = true;	?>
+layouts/snippets/rollenwahl.php:									# Anzeige der GUI´s, die Admins in ihren custom Verzeichnissen haben
+layouts/snippets/rollenwahl.php:									for($i = 0; $i < count($this->customguifiles); $i++){ ?>
+layouts/snippets/rollenwahl.php:										<option value="<? echo 'custom/'.basename($this->customguifiles[$i]); ?>" <? if ($this->user->rolle->gui == 'custom/'.basename($this->customguifiles[$i])) { echo "selected"; } ?>><? echo 'custom/'.basename($this->customguifiles[$i]); ?></option><?
+layouts/snippets/sachdatenanzeige.php:		if(is_file(SNIPPETS.$template)){			# ein eigenes custom Template
+layouts/snippets/sachdatenanzeige.php:								if($this->formvars['anzahl'] != '' AND $custom_limit != true AND !in_array($this->formvars['anzahl'], $selectable_limits) AND $this->formvars['anzahl'] < $limit){
+layouts/snippets/sachdatenanzeige.php:									$custom_limit = true;	?>
+layouts/snippets/sachdatenanzeige_functions.php:		subform += '<iframe id="customSubform" style="width:100%; height:100%" src=""></iframe>';
+layouts/snippets/sachdatenanzeige_functions.php:		ahah("index.php", "go=openCustomSubform&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1]+"&field_id="+field_id, new Array(document.getElementById('customSubform')), new Array("src"));
+layouts/snippets/SVG_Utilities.php:		custom_angle = top.document.getElementById("custom_angle");
+layouts/snippets/SVG_Utilities.php:		if(custom_angle != undefined)custom_angle.value = angle;
+layouts/snippets/SVG_Utilities.php:		length1 = top.document.getElementById("custom_length");
+layouts/snippets/SVG_Utilities.php:		area = top.document.querySelector(".custom_area");
+plugins/bauleitplanung/view/bplan_gebiete.php:										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" class="custom_area" id="'.$layer_id.'_'.$name.'_'.$k.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
+Binary file plugins/wasserrecht/templates/Aufforderung_Erklaerung.docx matches
+Binary file plugins/wasserrecht/templates/Festsetzung_Sammelbescheid.docx matches
+plugins/xplankonverter/control/index.php:			# load shapes to custom schema
+plugins/xplankonverter/model/build_gml.php:        case 'c': // custom datatype

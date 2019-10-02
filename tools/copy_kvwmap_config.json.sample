@@ -1,0 +1,30 @@
+{
+  "prod" : {
+    "app_dir" : "kvwmap",
+    "data_dir" : "data",
+    "data_handler" : "none",
+    "mysql_dbname" : "kvwmapdb",
+    "pgsql_dbname" : "kvwmapsp"
+  },
+  "dev" : {
+    "app_dir" : "kvwmap_dev",
+    "data_dir" : "data_dev",
+    "data_handler" : "link",
+    "mysql_dbname" : "kvwmapdb_dev",
+    "pgsql_dbname" : "kvwmapsp_dev"
+  },
+  "demo" : {
+    "app_dir" : "kvwmap_demo",
+    "data_dir" : "data_demo",
+    "data_handler" : "none",
+    "mysql_dbname" : "kvwmapdb_dev",
+    "pgsql_dbname" : "kvwmapsp_dev"
+  },
+  "test" : {
+    "app_dir" : "kvwmap_test",
+    "data_dir" : "data_test",
+    "data_handler" : "copy",
+    "mysql_dbname" : "kvwmapdb_test",
+    "pgsql_dbname" : "kvwmapsp_test"
+  }
+}

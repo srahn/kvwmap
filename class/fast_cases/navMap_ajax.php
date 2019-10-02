@@ -834,7 +834,7 @@ class GUI {
         $klasse -> settext($classset[$j]['text']);
       }
       if ($classset[$j]['legendgraphic'] != '') {
-				$imagename = WWWROOT.APPLVERSION.GRAPHICSPATH . 'custom/' . $classset[$j]['legendgraphic'];
+				$imagename = WWWROOT . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
 				$klasse->set('keyimage', $imagename);
 			}
       for ($k=0;$k<count($classset[$j]['Style']);$k++) {

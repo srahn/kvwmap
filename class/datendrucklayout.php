@@ -116,7 +116,7 @@ class ddl {
     for($j = 0; $j < count($this->layout['lines']); $j++){
 			if($type != 'everypage' AND $this->page_overflow){
 				$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
-				if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???							
+				#if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???		muss auskommentiert bleiben, sonst ist die Karte im MVBIO-Drucklayout auf der zweiten Seite
 			}
 			# die Linie wurde noch nicht geschrieben und ist entweder eine feste Linie oder eine fortlaufende oder eine, der auf jeder Seite erscheinen soll
     	if(in_array($this->layout['lines'][$j]['id'], $this->remaining_lines) AND $this->layout['lines'][$j]['posy'] != ''){	# nur Linien mit einem y-Wert werden geschrieben
@@ -970,26 +970,26 @@ class ddl {
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
 
-      for($i = 0; $i < $formvars['textcount']; $i++){
-        $formvars['text'.$i] = str_replace(chr(10), ';', $formvars['text'.$i]);
-        $formvars['text'.$i] = str_replace(chr(13), '', $formvars['text'.$i]);
-        if($formvars['text'.$i] == 'NULL')$formvars['text'.$i] = NULL;
-        if($formvars['textfont'.$i] == 'NULL')$formvars['textfont'.$i] = NULL;
-        $sql = "UPDATE druckfreitexte SET `text` = '".$formvars['text'.$i]."'";
-        if($formvars['textposx'.$i])$sql .= ", `posx` = ".(int)$formvars['textposx'.$i];
+      for($i = 0; $i < count($formvars['text']); $i++){
+        $formvars['text'][$i] = str_replace(chr(10), ';', $formvars['text'][$i]);
+        $formvars['text'][$i] = str_replace(chr(13), '', $formvars['text'][$i]);
+        if($formvars['text'][$i] == 'NULL')$formvars['text'][$i] = NULL;
+        if($formvars['textfont'][$i] == 'NULL')$formvars['textfont'][$i] = NULL;
+        $sql = "UPDATE druckfreitexte SET `text` = '".$formvars['text'][$i]."'";
+        if($formvars['textposx'][$i])$sql .= ", `posx` = ".(int)$formvars['textposx'][$i];
         else $sql .= ", `posx` = NULL";
-        if($formvars['textposy'.$i])$sql .= ", `posy` = ".(int)$formvars['textposy'.$i];
+        if($formvars['textposy'][$i])$sql .= ", `posy` = ".(int)$formvars['textposy'][$i];
         else $sql .= ", `posy` = NULL";
-				if($formvars['textoffset_attribute'.$i])$sql .= ", `offset_attribute` = '".$formvars['textoffset_attribute'.$i]."'";
+				if($formvars['textoffset_attribute'][$i])$sql .= ", `offset_attribute` = '".$formvars['textoffset_attribute'][$i]."'";
         else $sql .= ", `offset_attribute` = NULL";
-        if($formvars['textsize'.$i])$sql .= ", `size` = ".(int)$formvars['textsize'.$i];
+        if($formvars['textsize'][$i])$sql .= ", `size` = ".(int)$formvars['textsize'][$i];
         else $sql .= ", `size` = NULL";
-        if($formvars['textangle'.$i])$sql .= ", `angle` = ".(int)$formvars['textangle'.$i];
+        if($formvars['textangle'][$i])$sql .= ", `angle` = ".(int)$formvars['textangle'][$i];
         else $sql .= ", `angle` = NULL";
-        $sql .= ", `font` = '".$formvars['textfont'.$i]."'";
-        if($formvars['texttype'.$i] == '')$formvars['texttype'.$i] = 0;
-        $sql .= ", `type` = '".$formvars['texttype'.$i]."'";
-        $sql .= " WHERE id = ".(int)$formvars['text_id'.$i];
+        $sql .= ", `font` = '".$formvars['textfont'][$i]."'";
+        if($formvars['texttype'][$i] == '')$formvars['texttype'][$i] = 0;
+        $sql .= ", `type` = '".$formvars['texttype'][$i]."'";
+        $sql .= " WHERE id = ".(int)$formvars['text_id'][$i];
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->update_layout :",4);
         $this->database->execSQL($sql,4, 1);
@@ -1104,10 +1104,11 @@ class ddl {
     return $elements;
   }
   
-  function load_texts($ddl_id){
+  function load_texts($ddl_id, $freetext_id = NULL){
     $sql = 'SELECT druckfreitexte.* FROM druckfreitexte, ddl2freitexte';
     $sql.= ' WHERE ddl2freitexte.ddl_id = '.$ddl_id;
     $sql.= ' AND ddl2freitexte.freitext_id = druckfreitexte.id';
+		if($freetext_id != NULL)$sql.= ' AND druckfreitexte.id = '.$freetext_id;
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:ddl->load_texts :<br>".$sql,4);
     $query=mysql_query($sql);
@@ -1117,6 +1118,66 @@ class ddl {
     }
     return $texts;
   }
+	
+	function output_freetext_form($texts, $layer_id, $ddl_id){
+		for($i = 0; $i < count($texts); $i++){
+			$texts[$i]['text'] = str_replace(';', chr(10), $texts[$i]['text']);
+			echo '
+			<tr>
+				<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
+				<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" title="negative Werte bewirken eine rechtsbündige Ausrichtung" name="textposx[]" value="'.$texts[$i]['posx'].'" size="5"></td>						
+				<td rowspan="4" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan=3>
+					<textarea name="text[]" cols="37" rows="6">'.$texts[$i]['text'].'</textarea>
+				</td>
+				<td style="border-top:2px solid #C3C7C3;" colspan=2 align="left">
+					'.output_select(
+						'textfont[]',
+						$this->fonts,
+						$texts[$i]['font'],
+						null,
+						'Schriftart',
+						'--- bitte wählen ---'
+					).'
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;y:</td>
+				<td style="border-right:1px solid #C3C7C3"><input type="text" name="textposy[]" value="'.$texts[$i]['posy'].'" size="5"><input type="hidden" name="text_id[]" value="'.$texts[$i]['id'].'"></td>
+				<td colspan="2"><input type="text" title="Schriftgröße" name="textsize[]" value="'.$texts[$i]['size'].'" size="5">&nbsp;pt</td>
+			</tr>
+			<tr>
+				<td colspan="2" valign="bottom" style="border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
+				<td colspan="2" valign="bottom">&nbsp;Platzierung:</td>
+			</tr>
+			<tr>
+				<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
+					<select name="textoffset_attribute[]" style="width: 100px">
+						<option value="">- Auswahl -</option>';
+						for($j = 0; $j < count($this->attributes['name']); $j++){
+							echo '<option ';
+							if($texts[$i]['offset_attribute'] == $this->attributes['name'][$j]){
+								echo 'selected ';
+							}
+							echo 'value="'.$this->attributes['name'][$j].'">'.$this->attributes['name'][$j].'</option>';
+						}
+				echo '
+					</select>
+				</td>
+				<td align="left" valign="top">
+					<select style="width: 110px" name="texttype[]">
+						<option value="0">normal</option>';
+						if($this->ddl->selectedlayout[0]['type'] != 0){
+							echo '<option value="1" '; if($texts[$i]['type'] == 1)echo ' selected '; echo '>fixiert</option>';
+						}
+						echo '<option value="2" '; if($texts[$i]['type'] == 2)echo ' selected '; echo '>auf jeder Seite</option>
+					</select>
+				</td>
+				<td align="right">
+					<a href="javascript:Bestaetigung(\'index.php?go=sachdaten_druck_editor_Freitextloeschen&freitext_id='.$texts[$i]['id'].'&selected_layer_id='.$layer_id.'&aktivesLayout='.$ddl_id.'\', \'Wollen Sie den Freitext wirklich löschen?\');">löschen&nbsp;</a>
+				</td>
+			</tr>';
+		}
+	}
 	
   function load_lines($ddl_id){
     $sql = 'SELECT druckfreilinien.* FROM druckfreilinien, ddl2freilinien';
@@ -1151,6 +1212,7 @@ class ddl {
     $sql = 'INSERT INTO ddl2freitexte (ddl_id, freitext_id) VALUES ('.$formvars['aktivesLayout'].', '.$lastinsert_id.')';
     $this->debug->write("<p>file:kvwmap class:ddl->addfreetext :",4);
     $this->database->execSQL($sql,4, 1);
+		return $lastinsert_id;
   }
   
   function removefreetext($formvars){

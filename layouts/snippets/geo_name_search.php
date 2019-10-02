@@ -2,7 +2,7 @@
 	var search_requests = new Array();
 	function startQuery(){
 		query = document.GUI.geo_name_query.value;
-		if (query.length > 5) {
+		if (query.length > 3) {
 			[].forEach.call(search_requests, function (search_request){
 				search_request.abort();
 			});
