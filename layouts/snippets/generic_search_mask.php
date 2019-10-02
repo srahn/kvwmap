@@ -104,7 +104,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 								<? if($this->attributes['type'][$i] != 'geometry'){ ?>
 	                <option title="<? echo $strNotEqualHint; ?>" value="!=" <? if($operator == '!='){ echo 'selected';} ?> >!=</option>
 								<? }
-									if(!in_array($this->attributes['type'][$i], array('bool'))){
+									if(!in_array($this->attributes['type'][$i], array('bool')) AND substr($this->attributes['type'][$i], 0, 1) != '_'){		# bei boolean und Array-Datentypen nur = und !=
 										if($this->attributes['type'][$i] != 'geometry'){ ?>
 									<? if(!in_array($this->attributes['type'][$i], array('text'))){ ?>
 	                <option title="<? echo $strLowerHint; ?>" value="<" <? if($operator == '<'){ echo 'selected';} ?> ><</option>
@@ -131,12 +131,12 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 								if ($operator == '') $operator = '=';
 								echo "<input type=\"hidden\" name=\"{$prefix}operator_{$this->attributes['name'][$i]}\" value=\"{$operator}\">";
 							} ?>
-	            <td align="left" width="40%" style="position: relative"><?
+	            <td align="left" width="40%" style="position: relative; min-width: 300px"><?
 	            	switch ($this->attributes['form_element_type'][$i]) {
 	            		case 'Auswahlfeld' : case 'Radiobutton' : {
 	                  ?><select 
 	                  <?
-	                  	if($this->attributes['req_by'][$i] != ''){
+	                  	if($this->attributes['req_by'][$i] != '' OR substr($this->attributes['type'][$i], 0, 1) == '_'){		# bei abhängigen Auswahlfeldern oder Array-Typen keine multible Auswahl
 												echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['selected_layer_id'].', new Array(\''.implode($this->attributes['name'], "','").'\'), '.$searchmask_number.');" ';
 												$array = '';
 											}

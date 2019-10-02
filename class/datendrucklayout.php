@@ -95,7 +95,8 @@ class ddl {
 							if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
 						}						
 						if($offset_attribute == '' AND $this->i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben (aber nur bei absolut positionierten)
-							$y = $y - $this->yoffset_onpage-$this->layout['gap'];
+							$y = $y - $this->yoffset_onpage;
+							$x = $x + $this->xoffset_onpage;
 						}
 					}
 					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);					
@@ -166,8 +167,9 @@ class ddl {
 							#if($this->maxy < $endy)$this->maxy = $endy;		# beim ersten Datensatz das maxy ermitteln							
 						}						
 						if($offset_attribute_start == '' AND $this->i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben (aber nur bei absolut positionierten)
-							$y = $y - $this->yoffset_onpage-$this->layout['gap'];
-							$endy = $endy - $this->yoffset_onpage-$this->layout['gap'];
+							$y = $y - $this->yoffset_onpage;
+							$endy = $endy - $this->yoffset_onpage;
+							$x = $x + $this->xoffset_onpage;
 						}
 					}
 					$this->pdf->setLineStyle($this->layout['lines'][$j]['breite'], 'square');
@@ -230,7 +232,8 @@ class ddl {
 								
 								$offy = 842 - $ypos + $this->offsety;
 								if($this->layout['type'] != 0 AND $offset_attribute == '' AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei abolut positionierten)
-									$offy = $offy + $this->yoffset_onpage+$this->layout['gap'];
+									$offy = $offy + $this->yoffset_onpage;
+									$offx = $offx + $this->xoffset_onpage;
 								}
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
 								if($this->i_on_page == 0){
@@ -310,7 +313,8 @@ class ddl {
 								if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$y = $y + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 								if($offset_attribute == '')$y = $y - $this->offsety;
 								if($this->layout['type'] != 0 AND $offset_attribute == '' AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei absolut positionierten)
-									$y = $y - $this->yoffset_onpage-$this->layout['gap'];
+									$y = $y - $this->yoffset_onpage;
+									$x = $x + $this->xoffset_onpage;
 								}			
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
 								if($this->i_on_page == 0){
@@ -342,12 +346,10 @@ class ddl {
 									$text = $this->get_result_value_output($i, $j, $preview);
 									$y = $this->putText($text, $zeilenhoehe, $width, $x, $y, $offsetx);
 								}								
-																
 								if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y){
 									if(($this->miny[$this->pdf->currentContents] - $y) > $this->max_dataset_height)$this->max_dataset_height = $this->miny[$this->pdf->currentContents] - $y;
 									$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes									
-								}
-								
+								}								
 								$this->layout['offset_attributes'][$attributes['name'][$j]] = $y;					# den unteren y-Wert dieses Elements in das Offset-Array schreiben
 								$this->layout['page_id'][$attributes['name'][$j]] = $this->pdf->currentContents;		# und die Page-ID merken, in der das Attribut beendet wurde
 								if($this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
@@ -407,7 +409,8 @@ class ddl {
 						if($this->maxy < $y+$this->layout['elements'][$attributes['name'][$j]]['width'])$this->maxy = $y+$this->layout['elements'][$attributes['name'][$j]]['width'];		# beim ersten Datensatz das maxy ermitteln
 					}    
 					if($this->layout['type'] != 0 AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
-						$y = $y - $this->yoffset_onpage-$this->layout['gap'];
+						$y = $y - $this->yoffset_onpage;
+						$x = $x - $this->xoffset_onpage;
 					}
 					$this->pdf->addJpegFromFile(IMAGEPATH.$newname, $x, $y, $this->layout['elements'][$attributes['name'][$j]]['width']);
 					# Rechteck um die Karte
@@ -536,6 +539,23 @@ class ddl {
 				}	
 				else $output = $this->attributes['enum_output'][$j][$i];
 			}break;
+			case 'Radiobutton' : {
+				for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
+					if($this->attributes['enum_value'][$j][$e] == $this->result[$i][$this->attributes['name'][$j]]){
+						$output .= '<box><b> X </b></box>  ';
+					}
+					else $output .= ' <box>    </box>  ';
+					$output .= $this->attributes['enum_output'][$j][$e].'   ';
+					if(!$this->attributes['horizontal'][$j])$output .= chr(10);
+				}
+				if(count($this->attributes['enum_value'][$j]) == 0){	
+					$output = $this->result[$i][$this->attributes['name'][$j]];
+				}			
+			}break;			
+			case 'Checkbox' : {
+				$option = (json_decode($this->attributes['options'][$j]));
+				$output = ($this->result[$i][$this->attributes['name'][$j]] == 't' ? $option->print->true : $option->print->false);
+			} break;			
 			default: {
 				if(!$preview AND $this->attributes['type'][$j] == 'bool'){
 					$this->result[$i][$this->attributes['name'][$j]] = str_replace('t', "ja", $this->result[$i][$this->attributes['name'][$j]]);	
@@ -562,6 +582,7 @@ class ddl {
 		$this->gui->formvars['record_paging'] = NULL;		# damit in untergeordneten Layouts nicht auch nummeriert wird
   	#$this->miny = 1000000;
   	$this->i_on_page = -1;
+		$this->xoffset_onpage = 0;
 		$this->page_overflow = false;
 		if($pdfobject == NULL){
 			include (CLASSPATH . 'class.ezpdf.php');
@@ -585,6 +606,9 @@ class ddl {
 				$layout_with_sublayout = true;
 			}
 		}
+		if($this->layout['columns']){	# spaltenweiser Typ
+			$rowcount = ceil(count($result) / 3);
+		}
     for($i = 0; $i < count($result); $i++){
 			$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
     	$this->i_on_page++;
@@ -599,7 +623,15 @@ class ddl {
     		$this->pdf->newPage();
 				$this->add_static_elements($offsetx);
     	}
-			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
+			# spaltenweiser Typ
+			if($this->layout['columns'] AND $this->i_on_page > 0 AND $this->i_on_page % $rowcount == 0){
+				$this->xoffset_onpage = $this->xoffset_onpage + 170;
+				$this->miny[$lastpage] = $this->maxy;
+				$new_column = true;
+			}
+			else $new_column = false;
+			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];					# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
+			if(!$new_column)$this->yoffset_onpage = $this->yoffset_onpage + $this->layout['gap'];	# Abstand zwischen den Datensätzen addieren
 			if($this->layout['type'] != 0 AND $this->miny[$lastpage] != '' AND ($this->miny[$lastpage] - $this->layout['gap']) < 60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
@@ -793,6 +825,7 @@ class ddl {
 			$sql .= ", `margin_left` = ".(int)$formvars['margin_left'];
 			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
+			$sql .= ", `columns` = ".(int)$formvars['columns'];
 			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
       else $sql .= ", `filename` = NULL";			
       if($_files['bgsrc']['name']){
@@ -837,24 +870,24 @@ class ddl {
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
 
-      for($i = 0; $i < $formvars['textcount']; $i++){
-        $formvars['text'.$i] = str_replace(chr(10), ';', $formvars['text'.$i]);
-        $formvars['text'.$i] = str_replace(chr(13), '', $formvars['text'.$i]);
-        if($formvars['text'.$i] == 'NULL')$formvars['text'.$i] = NULL;
-        if($formvars['textfont'.$i] == 'NULL')$formvars['textfont'.$i] = NULL;
-        $sql = "INSERT INTO druckfreitexte SET `text` = '".$formvars['text'.$i]."'";
-        if($formvars['textposx'.$i] !== NULL)$sql .= ", `posx` = ".(int)$formvars['textposx'.$i];
+      for($i = 0; $i < count($formvars['text']); $i++){
+        $formvars['text'][$i] = str_replace(chr(10), ';', $formvars['text'][$i]);
+        $formvars['text'][$i] = str_replace(chr(13), '', $formvars['text'][$i]);
+        if($formvars['text'][$i] == 'NULL')$formvars['text'][$i] = NULL;
+        if($formvars['textfont'][$i] == 'NULL')$formvars['textfont'][$i] = NULL;
+        $sql = "INSERT INTO druckfreitexte SET `text` = '".$formvars['text'][$i]."'";
+        if($formvars['textposx'][$i] !== NULL)$sql .= ", `posx` = ".(int)$formvars['textposx'][$i];
         else $sql .= ", `posx` = 0";
-        if($formvars['textposy'.$i] !== NULL)$sql .= ", `posy` = ".(int)$formvars['textposy'.$i];
+        if($formvars['textposy'][$i] !== NULL)$sql .= ", `posy` = ".(int)$formvars['textposy'][$i];
         else $sql .= ", `posy` = 0";
-				if($formvars['textoffset_attribute'.$i])$sql .= ", `offset_attribute` = '".$formvars['textoffset_attribute'.$i]."'";
+				if($formvars['textoffset_attribute'][$i])$sql .= ", `offset_attribute` = '".$formvars['textoffset_attribute'][$i]."'";
         else $sql .= ", `offset_attribute` = NULL";
-        if($formvars['textsize'.$i] !== NULL)$sql .= ", `size` = ".(int)$formvars['textsize'.$i];
+        if($formvars['textsize'][$i] !== NULL)$sql .= ", `size` = ".(int)$formvars['textsize'][$i];
         else $sql .= ", `size` = 0";
-        if($formvars['textangle'.$i])$sql .= ", `angle` = ".(int)$formvars['textangle'.$i];
+        if($formvars['textangle'][$i])$sql .= ", `angle` = ".(int)$formvars['textangle'][$i];
         else $sql .= ", `angle` = NULL";
-        $sql .= ", `font` = '".$formvars['textfont'.$i]."'";
-        $sql .= ", `type` = '".$formvars['texttype'.$i]."'";
+        $sql .= ", `font` = '".$formvars['textfont'][$i]."'";
+        $sql .= ", `type` = '".$formvars['texttype'][$i]."'";
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
         $this->database->execSQL($sql,4, 1);
@@ -931,6 +964,7 @@ class ddl {
 			$sql .= ", `margin_left` = ".(int)$formvars['margin_left'];
 			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
+			$sql .= ", `columns` = ".(int)$formvars['columns'];
 			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
       else $sql .= ", `filename` = NULL";			
       if($_files['bgsrc']['name']){

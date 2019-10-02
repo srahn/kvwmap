@@ -729,7 +729,12 @@ INSERT INTO u_styles2classes (
 					$this->logfile->write("#" . $errormessage);
 				}
 				if (!$suppress_error_msg) {
-					$this->gui->add_message('error', $ret[1]);
+					if (gettype($this->gui) == 'object') {
+						$this->gui->add_message('error', $ret[1]);
+					}
+					else {
+						echo '<br>error: ' . $ret[1];
+					}
 				}
 			}
 			else {

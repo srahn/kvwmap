@@ -1,11 +1,15 @@
 <?
 
-function replace_params($str, $params) {
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
 		}
 	}
+	if (!is_null($user_id))				 $str = str_replace('$user_id', $user_id, $str);
+	if (!is_null($stelle_id))			 $str = str_replace('$stelle_id', $stelle_id, $str);
+	if (!is_null($hist_timestamp)) $str = str_replace('$hist_timestamp', $hist_timestamp, $str);
+	if (!is_null($language))			 $str = str_replace('$language', $language, $str);
 	return $str;
 }
 
@@ -176,8 +180,11 @@ class GUI {
 							echo '<li><span>'.$this->label.':</span>
 											<select name="layer_options_labelitem">
 												<option value=""> - '.$this->noLabel.' - </option>';
+												if($this->formvars['layer_id'] > 0){
+													echo '<option value="'.$layer[0]['original_labelitem'].'" '.($layer[0]['labelitem'] == $layer[0]['original_labelitem'] ? 'selected' : '').'>'.$layer[0]['original_labelitem'].'</option>';
+												}
 												for($i = 0; $i < count($attributes)-2; $i++){
-													if(($this->formvars['layer_id'] < 0 OR $privileges[$attributes[$i]['name']] != '') AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.$attributes[$i]['name'].'</option>';
+													if(($this->formvars['layer_id'] < 0 OR ($privileges[$attributes[$i]['name']] != '' AND $attributes[$i]['name'] != $layer[0]['original_labelitem'])) AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.$attributes[$i]['name'].'</option>';
 												}
 							echo 	 '</select>
 										</li>';
@@ -728,9 +735,16 @@ class rolle {
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
 		while ($rs=mysql_fetch_assoc($query)) {
-			$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
-			$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);		
-			$rs['connection'] = replace_params($rs['connection'], rolle::$layer_params);		
+			foreach (array('Name', 'alias', 'connection', 'classification') AS $key) {
+				$rs[$key] = replace_params(
+					$rs[$key],
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->rolle->language
+				);
+			}		
 			$layer[$i]=$rs;
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
@@ -857,7 +871,14 @@ class db_mapObj {
       return $ret[1];
     }
     elseif($ifEmptyUseQuery){
-			$path = $this->getPath($layer_id);
+			$path = replace_params(
+				$this->getPath($layer_id),
+				$all_layer_params,
+				$this->User_ID,
+				$this->Stelle_ID,
+				rolle::$hist_timestamp,
+				$this->user->rolle->language
+			);
 			return $this->getPathAttributes($database, $path);
 		}
 		else{
@@ -892,7 +913,14 @@ class db_mapObj {
     $query=mysql_query($sql);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs = mysql_fetch_assoc($query);
-    $data = replace_params($rs['Data'], rolle::$layer_params);
+    $data = replace_params(
+			$rs['Data'],
+			rolle::$layer_params,
+			$this->User_ID,
+			$this->Stelle_ID,
+			rolle::$hist_timestamp,
+			$this->rolle->language
+		);
     return $data;
   }
 

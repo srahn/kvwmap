@@ -1,6 +1,6 @@
 BEGIN;
 
-  DROP VIEW IF EXISTS sep_bankett, sep_baumscheibe, sep_bord_flaeche, sep_dammschuettung, sep_duecker, sep_fahrbahn, sep_gruenflaeche, sep_hecke, sep_parkplatz, sep_platz, sep_sonstige_flaeche, sep_spielplatz, sep_sportplatz, sep_strassengraben, sep_ueberfahrt, sep_ueberweg, sep_leitung, sep_mauer, sep_rinne, sep_sonstige_flaeche, sep_sonstige_linie, sep_strasse, sep_zaun; sep_gehweg, sep_rad_und_gehweg, sep_radweg, sep_leitplanke;
+  DROP VIEW IF EXISTS sep_bankett, sep_baumscheibe, sep_bord_flaeche, sep_dammschuettung, sep_duecker, sep_fahrbahn, sep_gruenflaeche, sep_hecke, sep_parkplatz, sep_platz, sep_sonstige_flaeche, sep_spielplatz, sep_sportplatz, sep_strassengraben, sep_ueberfahrt, sep_ueberweg, sep_leitung, sep_mauer, sep_rinne, sep_sonstige_flaeche, sep_sonstige_linie, sep_strasse, sep_zaun, sep_gehweg, sep_rad_und_gehweg, sep_radweg, sep_leitplanke;
 
   DROP VIEW IF EXISTS ukos_doppik.sep_baum;
 

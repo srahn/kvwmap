@@ -41,6 +41,12 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 					<? } ?>
 				</tr><?
 				for ($k = 0; $k < $anzObj; $k++) {
+					$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
+					if (is_array($layer['attributes']['privileg'])) {
+						if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
+							$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
+						}
+					}
 					$element_id = 'subform_dataset_tr_' . $layer['Layer_ID'] . '_' . $layer['shape'][$k][$layer['maintable'] . '_oid']; ?>
 					<tr id="<? echo $element_id; ?>"><?
 						for ($j = 0; $j < count($attributes['name']); $j++) {
@@ -58,7 +64,7 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 								}
 							}
 						} 
-						if ($layer['privileg'] == 2){	?>
+						if ($layer['privileg'] == 2 and $layer['shape'][$k][$layer['attributes']['Editiersperre']] != 't'){	?>
 						<td style="text-align: center">
 							<i
 								class="fa fa-times buttonlink"
@@ -74,6 +80,7 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 						</td>
 						<? } ?>
 					</tr><?
+					$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 				} ?>
 			</table>
 <?
@@ -258,7 +265,7 @@ else{ ?>
 								<a class="buttonlink"<?
 									if ($this->formvars['no_new_window'] != true) {
 										echo ' target="_blank"';
-									}	?>	href="javascript:overlay_link('go=neuer_Layer_Datensatz&<? echo implode('&', $data); ?>')">
+									}	?>	href="javascript:overlay_link('&<? echo implode('&', $data); ?>')">
 									<span>&nbsp;<?php echo $strNewEmbeddedPK; ?></span>
 								</a><?
 							}
@@ -273,8 +280,11 @@ else{ ?>
 		if($this->formvars['weiter_erfassen'] == 1){
 			echo '
 				<script type="text/javascript">
+					href_save = document.getElementById("new_'.$this->formvars['targetobject'].'").href;
+					document.getElementById("new_'.$this->formvars['targetobject'].'").href = document.getElementById("new_'.$this->formvars['targetobject'].'").href.replace("go=neuer_Layer_Datensatz", "go=neuer_Layer_Datensatz&weiter_erfassen=1'.urldecode($this->formvars['weiter_erfassen_params']).'")
 					document.getElementById("new_'.$this->formvars['targetobject'].'").click();
 					document.getElementById("new_'.$this->formvars['targetobject'].'").focus();
+					document.getElementById("new_'.$this->formvars['targetobject'].'").href = href_save;
 				</script>';
 		}
 ?>

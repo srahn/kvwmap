@@ -22,4 +22,5 @@
 	$this->strExceeded = "przekroczona";
 	$this->strShowMore="Pokaż więcej";
 	$this->strShowLess="Pokaż mniej";
+	$this->strLayerParameters="Layer Parameter";
 ?>

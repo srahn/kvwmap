@@ -43,12 +43,16 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
 }
 
-function replace_params($str, $params) {
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
 		}
 	}
+	if (!is_null($user_id))				 $str = str_replace('$user_id', $user_id, $str);
+	if (!is_null($stelle_id))			 $str = str_replace('$stelle_id', $stelle_id, $str);
+	if (!is_null($hist_timestamp)) $str = str_replace('$hist_timestamp', $hist_timestamp, $str);
+	if (!is_null($language))			 $str = str_replace('$language', $language, $str);
 	return $str;
 }
 
@@ -675,9 +679,14 @@ class GUI {
             else {
               # Vektorlayer
               if($layerset[$i]['Data'] != ''){
-								$layerset[$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['Data']);
-								$layerset[$i]['Data'] = str_replace('$language', $this->user->rolle->language, $layerset[$i]['Data']);
-								$layerset[$i]['Data'] = replace_params($layerset[$i]['Data'], rolle::$layer_params);
+								$layerset[$i]['Data'] = replace_params(
+									$layerset[$i]['Data'],
+									rolle::$layer_params,
+									$this->user->id,
+									$this->Stelle->id,
+									rolle::$hist_timestamp,
+									$this->user->rolle->language
+								);
                 $layer->set('data', $layerset[$i]['Data']);
               }
 
@@ -2484,10 +2493,16 @@ class db_mapObj {
 				$rs['alias'] = $rs['Name'];
 			}
 			$rs['id'] = $i;
-			$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
-			$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
-			$rs['connection'] = replace_params($rs['connection'], rolle::$layer_params);
-			$rs['classification'] = replace_params($rs['classification'], rolle::$layer_params);
+			foreach (array('Name', 'alias', 'connection', 'classification') AS $key) {
+				$rs[$key] = replace_params(
+					$rs[$key],
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->rolle->language
+				);
+			}
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
 				# bei withclasses == 2 werden für alle Layer die Klassen geladen,
 				# bei withclasses == 1 werden Klassen nur dann geladen, wenn der Layer aktiv ist

@@ -950,30 +950,44 @@ class stelle {
 							SELECT DISTINCT id
 							FROM `layer_parameter` as p, used_layer as ul, layer as l
 							WHERE
-								ul.Stelle_ID = stelle.ID AND
+								ul.Stelle_ID = " . $this->id . " AND
 								ul.Layer_ID = l.Layer_ID AND
 								locate(concat('$', p.key), concat(l.Name, l.alias, l.connection, l.Data, l.pfad, l.classitem, l.classification)) > 0
-						)
+						) as foo
 					),
 					''
 				)
 			WHERE
 				stelle.ID = " . $this->id . "
 		";
-		#echo '<br>SQL: ' . $sql;
+		#echo '<br>SQL zur Aktualisierung der LayerParams: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+	#	$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 
-		$sql = "UPDATE rolle SET layer_params = ";
-		$sql.= "COALESCE((SELECT GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"')) ";
-		$sql.= "FROM layer_parameter p, stelle ";
-		$sql.= "WHERE FIND_IN_SET(p.id, stelle.selectable_layer_params) ";
-		$sql.= "AND stelle.ID = rolle.stelle_id), '') ";
-		$sql.= "WHERE rolle.stelle_id = ".$this->id;
+		$sql = "
+			UPDATE
+				rolle
+			SET
+				layer_params = COALESCE(
+					(
+						SELECT
+							GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"'))
+						FROM
+							layer_parameter p, stelle
+						WHERE
+							FIND_IN_SET(p.id, stelle.selectable_layer_params) AND
+							stelle.ID = rolle.stelle_id
+					),
+					''
+				)
+			WHERE
+				rolle.stelle_id = " . $this->id . "
+		";
+		#echo '<br>SQL zum Aktualisieren der Layerparameter in den Rollen: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+	#	$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 	}
 
 	function updateLayer($formvars){
@@ -1368,6 +1382,7 @@ class stelle {
 	}
 
 	function parse_path($database, $path, $privileges, $attributes = NULL){
+		$path = str_replace(array("\r\n", "\n"), ' ', $path);
 		$distinctpos = strpos(strtolower($path), 'distinct');
 		if($distinctpos !== false && $distinctpos < 10){
 			$offset = $distinctpos+8;

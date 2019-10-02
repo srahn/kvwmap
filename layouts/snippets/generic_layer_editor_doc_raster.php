@@ -92,6 +92,13 @@
 	if($this->formvars['embedded_subformPK'] == '')$records_per_row = 5;
 	else $records_per_row = 3;
 	for ($k;$k<$anzObj;$k++) {
+		$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
+		if (is_array($layer['attributes']['privileg'])) {
+			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
+				$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
+			}
+		}
+		
 		$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|'; ?>
 		
 		<div <? if($this->new_entry != true)echo 'class="raster_record" onclick="open_record(event, this)"'; ?> id="record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>" <? if($k%5==0)echo 'style="clear: both;"'?>>
@@ -106,9 +113,19 @@
 						<table width="100%" cellspacing="0" cellpadding="0">
 							<tr>
 								<? if($layer['connectiontype'] == 6){ ?>
-								<td align="left">
-									<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
-									<span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span>
+								<td align="left" style="padding: 3px">
+									<input
+										id="<? echo $layer['Layer_ID'] . '_' . $k; ?>"
+										type="checkbox"
+										class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
+										name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"
+									>&nbsp;<span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span><?
+									if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { ?>
+										<span class="editier_sperre fa-stack" title="Dieser Datensatz ist zur Bearbeitung gesperrt">
+											<i class="fa fa-pencil fa-stack-1x" style="font-size:15px; margin-top: 5px;"></i>
+											<i class="fa fa-ban fa-stack-1x fa-flip-horizontal" style="color: tomato; font-size:29px; margin-top: 5px;"></i>
+										</span>
+			<?					} ?>
 								</td>
 								<? } ?>
 								<td align="right" style="padding: 0">
@@ -128,7 +145,7 @@
 										if($layer['layouts']){ ?>
 											<td style="padding: 0"><a title="<? echo $strPrintDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);print_data(<?php echo $layer['Layer_ID']; ?>);"><div class="button_background"><div class="button drucken"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
 								<?	}
-										if($layer['privileg'] == '2'){
+										if($layer['privileg'] == '2' and $layer['shape'][$k][$layer['attributes']['Editiersperre']] != 't'){
 											if($this->formvars['embedded_subformPK'] == ''){ ?>											
 												<td style="padding: 0"><a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);delete_datasets(<?php echo $layer['Layer_ID']; ?>);" title="<? echo $strDeleteThisDataset; ?>"><div class="button_background"><div class="button datensatz_loeschen"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td> <?
 											}
@@ -330,6 +347,7 @@
 			</table>
 		</div>
 <?
+		$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 	}
 ?>
 			</div>

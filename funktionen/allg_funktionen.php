@@ -6,6 +6,13 @@
 
 $errors = array();
 
+function human_filesize($file){
+	$bytes = filesize($file);
+  $sz = 'BKMGTP';
+  $factor = floor((strlen($bytes) - 1) / 3);
+  return sprintf("%.2f", $bytes / pow(1024, $factor)).' '.@$sz[$factor].'B';
+}
+
 function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	global $errors;
 	if(!(error_reporting() & $errno)){
@@ -972,6 +979,7 @@ function microtime_float(){
    return ((float)$usec + (float)$sec);
 }
 
+
 function copy_file_to_tmp($frompath, $dateiname = ''){
   $dateityp = explode('.',$frompath);
   $dateipfad=IMAGEPATH;
@@ -1409,10 +1417,9 @@ function debug_write($msg, $debug = false) {
 	#fclose($fp);
 }
 
-function getTimestamp() {
-  $microtime = floatval(substr((string)microtime(), 1, 8));
-  $rounded = round($microtime, 5);
-  return date("d.m.Y H:i:s") . substr((string)$rounded, 1, strlen($rounded));
+function getTimestamp($format = 'd.m.Y H:i:s', $digits = 4) {
+	$microtime = microtime(true);
+	return date($format) . substr($microtime - floor($microtime),1 , $digits + 1);
 }
 
 function formatBytes($size, $precision = 2) {
@@ -1821,4 +1828,5 @@ function send_image_not_found($img) {
 	imagecolordeallocate($background);
 	imagedestroy($empty_img);
 }
+
 ?>

@@ -256,6 +256,6 @@ if($this->formvars['printversion'] == ''){ ?>
 <input type="hidden" name="searchmask_count" value="<? echo $this->formvars['searchmask_count']; ?>">
 <input type="hidden" name="within" value="<? echo $this->formvars['within']; ?>">
 
-<div id="vorschau" style="pointer-events:none; box-shadow: 12px 10px 14px #777;z-index: 1000; position: fixed; right:20px; top:20px; ">
-	<img id="preview_img" src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
+<div id="vorschau" style="pointer-events:none; box-shadow: 12px 10px 14px #777;z-index: 1000000; position: fixed; right:10px; top:5px; ">
+	<img id="preview_img" style="max-height: 940px" src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
 </div>

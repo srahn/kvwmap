@@ -341,8 +341,11 @@ class GUI {
 							echo '<li><span>'.$this->label.':</span>
 											<select name="layer_options_labelitem">
 												<option value=""> - '.$this->noLabel.' - </option>';
+												if($this->formvars['layer_id'] > 0){
+													echo '<option value="'.$layer[0]['original_labelitem'].'" '.($layer[0]['labelitem'] == $layer[0]['original_labelitem'] ? 'selected' : '').'>'.$layer[0]['original_labelitem'].'</option>';
+												}
 												for($i = 0; $i < count($attributes)-2; $i++){
-													if(($this->formvars['layer_id'] < 0 OR $privileges[$attributes[$i]['name']] != '') AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.$attributes[$i]['name'].'</option>';
+													if(($this->formvars['layer_id'] < 0 OR ($privileges[$attributes[$i]['name']] != '' AND $attributes[$i]['name'] != $layer[0]['original_labelitem'])) AND $attributes['the_geom'] != $attributes[$i]['name'])echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.$attributes[$i]['name'].'</option>';
 												}
 							echo 	 '</select>
 										</li>';
@@ -549,7 +552,7 @@ echo '			</ul>
 	function setLayerParams($prefix = '') {
 		$layer_params = array();
 		foreach ($this->formvars AS $key => $value) {
-			$param_key = str_replace($prefix.'layer_parameter_', '', $key);		// $prefix dient zur Unterscheidung zwischen den Layer-Parametern im Header und denen in den Optionen
+			$param_key = str_replace($prefix . 'layer_parameter_', '', $key);		// $prefix dient zur Unterscheidung zwischen den Layer-Parametern im Header und denen in den Optionen
 			if ($param_key != $key) {
 				$layer_params[] = '"' . $param_key . '":"' . $value . '"';
 			}
@@ -825,7 +828,7 @@ echo '			</ul>
 					}
 					else {
 						$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
-						$maplayer = $this->map->getLayerByName($layer['alias']);
+						$maplayer = $this->map->getLayer($layer['layer_index_mapobject']);
 						if($layer['Class'][0]['legendorder'] != ''){
 							usort($layer['Class'], 'compare_legendorder');
 						}
@@ -1480,6 +1483,7 @@ echo '			</ul>
 					}
 
 					if($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
+						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
 						$this->loadlayer($map, $layerset['list'][$i]);
           }
         }
@@ -7522,11 +7526,63 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	}
 
 	function layer_parameter_speichern(){
-    $this->main='layer_parameter.php';
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->main='layer_parameter.php';
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$mapDB->save_all_layer_params($this->formvars);
 		$this->params = $mapDB->get_all_layer_params();
-    $this->output();
+		# Ergänze und lösche Layerparameter in Rollen
+		$this->update_layer_parameter_in_rollen($this->params);
+		$this->output();
+	}
+
+	/**
+	* for all rollen do
+	* add param with default value if not exists
+	* delete param if not defined in given list $params
+	* @param $params Array of layer parameter in structure function get_all_layer_params returns it
+	* @return null
+	*/
+	function update_layer_parameter_in_rollen($params) {
+		$default_params = array();
+		foreach ($params AS $param) {
+			$default_params[$param['key']] = $param['default_value'];
+		}
+		$myObject = new MyObject(
+			$this,
+			'rolle',
+			array(
+				array(
+					'key' => 'user_id',
+					'type' => 'integer'
+				),
+				array(
+					'key' => 'stelle_id',
+					'type' => 'integer'
+				)
+			),
+			'array'
+		);
+		$rollen = $myObject->find_by_sql(array(
+			'select' => 'user_id, stelle_id, layer_params'
+		));
+		foreach ($rollen AS $rolle) {
+			$rolle_params = (array)json_decode('{' . $rolle->get('layer_params') . '}');
+
+			# Parameter, die die Rolle noch nicht hat anhängen
+			$add = array_diff_key($default_params, $rolle_params);
+			$rolle_params = array_merge($rolle_params, $add);
+
+			# Parameter, die der Layer nicht mehr, aber die Rolle noch hat löschen
+			$del = array_diff_key($rolle_params, $default_params);
+			$rolle_params = array_intersect_key($rolle_params, $default_params);
+
+			$new_params = array();
+			foreach ($rolle_params AS $key => $value) {
+				$new_params[] = '"' . $key . '":"' . $value . '"';
+			}
+			# speicher die neuen parameter
+			$rolle->update(array('layer_params' => implode(',', $new_params)));
+		}
 	}
 
 	function Layereditor() {
@@ -8445,7 +8501,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 								default : {
 									if ($operator != 'IS NULL' AND $operator != 'IS NOT NULL') {
-										$sql_where .= ' AND (query.' . $attributes['name'][$i] . ' ' . $operator . ' \'' . $value . '\'';
+										if(substr($attributes['type'][$i], 0, 1) == '_'){		# Array-Datentyp
+											if($operator == '=')$sql_where .= ' AND (query.'.$attributes['name'][$i].'::jsonb @> \'["'.$value.'"]\'::jsonb';
+											else $sql_where .= ' AND (NOT query.'.$attributes['name'][$i].'::jsonb @> \'["'.$value.'"]\'::jsonb';
+										}
+										else $sql_where .= ' AND (query.' . $attributes['name'][$i] . ' ' . $operator . ' \'' . $value . '\'';
 										if ($this->formvars[$prefix.'value2_'.$attributes['name'][$i]] != '') {
 											$sql_where.=' AND \''.$this->formvars[$prefix.'value2_'.$attributes['name'][$i]].'\'';
 										}
@@ -9597,7 +9657,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
         case 'SubFormEmbeddedPK' : {
           if(!$this->success)echo $ret['msg'];
-          else echo '~~reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\');';
+          else echo '~~reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
         } break;
       }
 
@@ -9725,7 +9785,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$this->new_entry = true;
 
 				$this->geomtype = $this->qlayerset[0]['attributes']['geomtype'][$this->qlayerset[0]['attributes']['the_geom']];
-				if ($this->geomtype != '') {
+				if ($this->geomtype != '' AND $this->formvars['mime_type'] != 'overlay_html') {
 					$this->user->rolle->saveGeomFromLayer($this->formvars['selected_layer_id'], $this->formvars['geom_from_layer']);
 					$saved_scale = $this->reduce_mapwidth(40);
 					$oldscale=round($this->map_scaledenom);
@@ -10693,7 +10753,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 	function daten_import(){
 		$this->main='data_import.php';
-		exec('rm '.UPLOADPATH.'/'.$this->user->id.'/*');
+		exec('rm '.UPLOADPATH.$this->user->id.'/*');
 		$this->output();
 	}
 
@@ -12876,6 +12936,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $StellenFormObj->addJavaScript(
 			"onchange",
 			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,showmapfunctions,showlayeroptions,showrollenfilter,menu_auto_close,menue_buttons,hist_timestamp));" : "")
+			.(($this->formvars['show_layer_parameter']) ? "ahah('index.php','go=getLayerParamsForm&stelle_id='+document.GUI.Stelle_ID.value, new Array(document.getElementById('layer_parameters_div')), new Array('sethtml'))" : "")
 		);
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=" . $from."&where=stelle_id=3 AND user_id=7";
     $StellenFormObj->outputHTML();
@@ -13464,7 +13525,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			else{
 				$db_input = $nachDatei."&original_name=" . $_files[$input_name]['name'];			# absoluter Dateipfad wird gespeichert
 			}
-			if($this->formvars[$input_name] == 'delete')$db_input = '';
+			if($this->formvars[$input_name] == 'delete')$db_input = 'NULL';
 			# Bild in das Datenverzeichnis kopieren
 			if(move_uploaded_file($_files[$input_name]['tmp_name'],$nachDatei) OR $this->formvars[$input_name] == 'delete'){
 				# bei dynamischem Dateipfad das Vorschaubild löschen
@@ -16000,6 +16061,60 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->drawMap();
 		$this->output();
 	}
+	
+	function get_layer_params_form($stelle_id = NULL){
+		include_once(CLASSPATH.'FormObject.php');
+		if($stelle_id == NULL){			# Parameter der aktuellen Stelle abfragen
+			$stelle = $this->Stelle;
+			$rolle = $this->user->rolle;
+		}
+		else{												# Parameter einer anderen Stelle abfragen
+			$stelle = new stelle($stelle_id, $this->database);
+			$rolle = new rolle($this->user->id, $stelle_id, $this->database);
+			$rolle->readSettings();
+		}
+		$params = $rolle->get_layer_params($stelle->selectable_layer_params, $this->pgdatabase);
+		if ($params['error_message'] != '') {
+			$this->add_message('error', $params['error_message']);
+		}
+		else {
+			if (!empty($params)) {
+				echo '
+					<table style="border: 1px solid #ccc" class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett">'.$this->strLayerParameters.'</span></td>
+						</tr>
+						<tr>
+							<td class="rollenwahl-option-data">
+								<table>';
+									foreach($params AS $param) {
+										echo '
+										<tr id="layer_parameter_'.$param['key'].'_tr">
+											<td valign="top" class="rollenwahl-option-header">
+												'.$param['alias'].':
+											</td>
+											<td>
+												'.FormObject::createSelectField(
+													'options_layer_parameter_' . $param['key'],		# name
+													$param['options'],										# options
+													rolle::$layer_params[$param['key']],	# value
+													1,																		# size
+													'',																		# style
+													'onLayerParameterChanged(this);',			# onchange
+													'layer_parameter_' . $param['key'],		# id
+													''																		# multiple
+												).'
+											</td>
+										</tr>';
+									}
+					echo'	</table>
+							</td>
+						</tr>
+					</table>
+					';
+			}
+		}
+	}
 
 } # end of class GUI
 
@@ -16705,7 +16820,14 @@ class db_mapObj{
 			return $ret[1];
 		}
 		elseif ($ifEmptyUseQuery){
-			$path = $this->getPath($layer_id);
+			$path = replace_params(
+				$this->getPath($layer_id),
+				$all_layer_params,
+				$this->User_ID,
+				$this->Stelle_ID,
+				rolle::$hist_timestamp,
+				$this->user->rolle->language
+			);
 			return $this->getPathAttributes($database, $path);
 		}
 		else {
@@ -17497,7 +17619,6 @@ class db_mapObj{
 
 	function updateLayer($formvars) {
 		global $supportedLanguages;
-		$formvars['pfad'] = str_replace(array("\r\n", "\n"), '', $formvars['pfad']);
 		$formvars['Layer_ID'] = $formvars['id'];
 
 		$attribute_sets = array();

@@ -56,4 +56,5 @@
 	$this->strRemove="entfernen";
 	$this->strShowMore="Mehr anzeigen";
 	$this->strShowLess="Weniger anzeigen";
+	$this->strLayerParameters="Themenparameter";
 ?>
