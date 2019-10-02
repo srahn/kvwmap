@@ -4234,6 +4234,17 @@ echo '			</ul>
 					$this->showAdminFunctions();
 				}
 			} break;
+			case "save_sicherungsinhalt" : {
+				$this->administration->save_sicherungsinhalt($this->formvars);
+			} break;
+			case "save_sicherung" : {
+				$this->administration->save_sicherung($this->formvars);
+			} break;
+			case "write_backup_plan" : {
+				$this->administration->write_backup_scripts();
+				$this->administration->update_backups_in_crontab();
+				$this->showAdminFunctions();
+			} break;
 			default : {
 				$this->showAdminFunctions();
 			}

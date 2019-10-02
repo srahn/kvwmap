@@ -389,7 +389,80 @@ class administration{
 		}
 		return $constants;
 	}
-	
+
+	/*
+	* Insert, Update und Delete Settings for backup content in database
+	*/
+	function save_sicherungsinhalte($params) {
+		
+	}
+
+	/*
+	* Insert, Update und Delete backup settings in database
+	*/
+	function save_sicherungen($params) {
+		
+	}
+
+	/*
+	* This function write backup scripts based on table sicherungen_inhalte
+	*/
+	function write_backup_scripts() {
+		global $GUI;
+		include_once(CLASSPATH . 'Sicherung.php');
+		include_once(CLASSPATH . 'Sicherungsinhalt.php');
+		$sicherungen = Sicherung::find($GUI);
+		$backup_path = WWWROOT . 'backups/';
+		foreach($sicherungen AS $sicherung) {
+			echo '<p>Sicherung: ' . print_r($sicherung->data, true);
+			if (!file_exists(INSTALLPATH . 'cron/')) {
+				mkdir(INSTALLPATH . 'cron/', 0777, true);
+			}
+			$script_path = INSTALLPATH . 'cron/' . $sicherung->get('name') . '.sh';
+			echo '<br>Schreibe backup_script ' . $script_path;
+			$sf = fopen($script_path, "w");
+			fwrite($sf, "#!/bin/bash\n");
+			fwrite($sf, 'logfile=' . LOGPATH . 'cron/' . $sicherung->get('name') . ".log\n");
+			fwrite($sf, 'target_dir=' . $backup_path . $sicherung->get('target_dir') . "\n");
+			fwrite($sf, 'mkdir -p $target_dir' . "\n");
+
+			if (!file_exists(LOGPATH . 'cron/')) {
+				mkdir(LOGPATH . 'cron/', 0777, true);
+			}
+			foreach($sicherung->inhalte AS $inhalt) {
+				echo '<br>Inhalt: ' . print_r($inhalt->data, true);
+				fwrite($sf, "\n# " . $inhalt->get('name') . "\n");
+				switch ($inhalt->get('methode')) {
+					case 'Verzeichnissicherung' : {
+						$cmd = 'tar cvfz ${target_dir}/' . $inhalt->get('target') . '.tar.gz ' . $inhalt->get('source') . ' > /dev/null 2>> $logfile' . "\n";
+					} break;
+					case 'Verzeichnisinhalte kopieren' : {
+						$cmd = 'cp ' . $inhalt->get('source') . '/* ' . $inhalt->get('target');
+					} break;
+					case 'Postgres Dump' : {
+						$cmd = 'pg_dump -h pgsql -U kvwmap -Fc -f ${target_dir}/' . $inhalt->get('target') . ' ' . $inhalt->get('source') . ' &>> $logfile' . "\n";
+					} break;
+					case 'Mysql Dump' : {
+						$cmd = 'mysqldump -h mysql --user=kvwmap --password=${PASSWORD} --databases ' . $inhalt->get('source') . ' > ${target_dir}/' . $inhalt->get('target') . "\n";
+					} break;
+					default : { # Datei kopieren
+						$cmd = "cp " . $inhalt->get('source') . ' ' . $inhalt->get('target') . "\n";
+					} break;
+				}
+				fwrite($sf, $cmd);
+			}
+			fclose($sf);
+			chgrp($script_path, 'gisadmin');
+			chmod($script_path, 0775);
+		}
+	}
+
+	/*
+	* and update the crontab based on table sicherungen
+	*/
+	function update_backups_in_crontab() {
+		
+	}
 }
 
 ?>
