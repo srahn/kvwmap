@@ -313,15 +313,15 @@
       
       # Ausführen von Aktionen vor der Anzeige der Karte und der Zeichnung
 			$oldscale=round($GUI->map_scaledenom);  
+			$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
 			if ($GUI->formvars['CMD']!='') {
-				$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
 				$GUI->navMap($GUI->formvars['CMD']);
 				$GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
 			}
 			elseif($oldscale!=$GUI->formvars['nScale'] AND $GUI->formvars['nScale'] != '') {
 				$GUI->scaleMap($GUI->formvars['nScale']);
 			}
-      else{
+      elseif($GUI->formvars['rissnummer'] == '' AND $GUI->formvars['stammnr'] == ''){		# nur am Anfang setzen
 	      # Zuweisen der Werte des Dokumentes zum Formular
 				$GUI->formvars['flurid']=$nachweis->document['flurid'];
 				$GUI->formvars['stammnr']=$nachweis->document['stammnr'];
@@ -1223,7 +1223,7 @@
         $GUI->nachweisFormAnzeige();
       } # end of fehler bei der Änderung
       else {
-				$GUI->add_message('info', $ret[1]);
+				$GUI->add_message('notice', $ret[1]);
 				$GUI->nachweisAenderungsformular();
 			}
       # 1.4 Zur zur Anzeige der Rechercheergebnisse mit Meldung über Erfolg der Änderung

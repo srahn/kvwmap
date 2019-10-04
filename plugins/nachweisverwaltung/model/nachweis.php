@@ -1278,10 +1278,12 @@ class Nachweis {
 	
 	function Geometrieuebernahme($ref_geom, $id){
 		$sql = "UPDATE nachweisverwaltung.n_nachweise n 
-						SET the_geom = n2.the_geom 
-						FROM nachweisverwaltung.n_nachweise n2
-						WHERE n2.id = ".$ref_geom."
-						AND n.id IN (".implode(',', $id).")";
+						SET the_geom = (
+							SELECT st_union(n2.the_geom) 
+							FROM nachweisverwaltung.n_nachweise n2
+							WHERE n2.id IN (".implode(',', $ref_geom).")
+						)
+						WHERE n.id IN (".implode(',', $id).")";
 		$ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0])$result[0]='Fehler bei der Geometrieübernahme!';
     else $result[1]='Geometrien erfolgreich übernommen!';
