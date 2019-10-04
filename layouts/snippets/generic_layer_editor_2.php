@@ -27,6 +27,8 @@
 		$k = -1;
   	$doit = true;
   }
+	
+	if($doit == true){
 ?>
 <div id="layer" onclick="remove_calendar();">
 <input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
@@ -52,8 +54,6 @@
 	</tr>
 </table>
 <? }
-
-  if($doit == true){
 		$table_id = rand(0, 100000);
 		echo $layer['paging'];
 ?>
@@ -497,22 +497,7 @@
 <?
   }
   elseif($layer['requires'] == '' AND $layer['required'] == ''){
-?>
-<table border="0" cellspacing="10" cellpadding="2">
-  <tr>
-		<td>
-				<span style="color:#FF0000;"><? echo $strNoMatch; ?></span>
-		</td>
-  </tr>
-<? 	$layer_new_dataset = $this->Stelle->getqueryablePostgisLayers(1, NULL, true, $layer['Layer_ID']);		// Abfrage ob Datensatzerzeugung möglich
-		if($layer_new_dataset != NULL){ ?>
-	<tr align="center">
-		<td><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=<? echo $layer['Layer_ID']; ?>"><? echo $strNewDataset; ?></a></td>
-	</tr>
-	<? } ?>
-</table>
-
-<?
-  }
+		$this->noMatchLayers[$layer['Layer_ID']] = $layer['Name'];
+	}
 ?>
 </div>
