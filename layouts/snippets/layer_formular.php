@@ -126,13 +126,12 @@
 		<td align="center" style="padding: 10px;">
 			<div id="layerform" style="width: 100%;">
 				<table border="0" cellspacing="0" cellpadding="3" style="width: 100%;border:1px solid <?php echo BG_DEFAULT ?>">
-				<?php if ($this->formvars['selected_layer_id']>0) { ?>
 					<tr>
 						<th class="fetter" width="300px" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLayerID; ?></th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="id" type="text" value="<?php echo $this->formvars['selected_layer_id']; ?>" size="50" maxlength="11">
 						</td>
-					</tr><?php } ?>
+					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strName; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
