@@ -8393,7 +8393,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 				$attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
-				$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
+				if($this->formvars['selected_layer_id'] > 0){			# bei Rollenlayern nicht
+					$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
+				}
+				else $newpath = $path;
 
 		    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 		   	# $attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true); kann weg, weils weiter unten steht
