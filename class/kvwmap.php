@@ -10926,7 +10926,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 	function Layerattribute_speichern() {
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-		$path = $mapdb->getPath($this->formvars['selected_layer_id']);
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL, true);
 		$mapdb->save_layer_attributes($this->attributes, $this->database, $this->formvars);
@@ -10935,7 +10934,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 	function Datentypattribute_speichern() {
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-		$path = $mapdb->getPath($this->formvars['selected_datatype_id']);
 		$this->attributes = $mapdb->read_datatype_attributes($this->formvars['selected_datatype_id'], NULL, NULL, true);
 		$mapdb->save_datatype_attributes($this->attributes, $this->database, $this->formvars);
 		$this->Attributeditor();
@@ -17124,6 +17122,7 @@ class db_mapObj{
 	}
 
 	function save_postgis_attributes($layer_id, $attributes, $maintable, $schema){
+		$insert_count = 0;
 		for ($i = 0; $i < count($attributes); $i++) {
 			if($attributes[$i] == NULL)continue;
 			if($attributes[$i]['nullable'] == '')$attributes[$i]['nullable'] = 'NULL';
@@ -17157,11 +17156,12 @@ class db_mapObj{
 					length = " . $attributes[$i]['length'] . ",
 					decimal_length = " . $attributes[$i]['decimal_length'] . ",
 					`default` = '" . addslashes($attributes[$i]['default']) . "',
-					`order` = " . $i . "
+					`order` = `order` + ".$insert_count."
 			";
 			#echo '<br>Sql: ' . $sql;
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>" . $sql,4);
 			$query=mysql_query($sql);
+			if(mysql_affected_rows() == 1)$insert_count++;		# ein neues Attribut wurde per Insert eingefügt
 			if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
 		}
 
@@ -17981,6 +17981,7 @@ class db_mapObj{
 				$formvars['vcheck_value_'.$attributes['name'][$i]] = '';
 			}
 			$rows = "
+				`order` = " . $formvars['order_' . $attributes['name'][$i]] . ",
 				`name` = '" . $attributes['name'][$i] . "', " .
 				$alias_rows . "
 				`form_element_type` = '" . $formvars['form_element_' . $attributes['name'][$i]] . "',
@@ -18202,7 +18203,8 @@ class db_mapObj{
 		}
 
 		$sql = "
-			SELECT " .
+			SELECT 
+				`order`, " .
 				$alias_column . ", `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`,
 				`layer_id`,
 				a.`name`,
@@ -18249,6 +18251,7 @@ class db_mapObj{
     if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
 		$i = 0;
 		while ($rs = mysql_fetch_array($query)){
+			$attributes['order'][$i] = $rs['order'];
 			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
 			$attributes['real_name'][$rs['name']] = $rs['real_name'];
