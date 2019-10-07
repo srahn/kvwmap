@@ -8351,8 +8351,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					for($i = 0; $i < count($attributes['name']); $i++){
 						$value = $this->formvars[$prefix.'value_'.$attributes['name'][$i]];
 						$operator = $this->formvars[$prefix.'operator_'.$attributes['name'][$i]];
-						if (is_array($value)) {
-							$operator = 'IN';
+						if (is_array($value)) {			# multible-Auswahlfelder
+							if($operator == '=')$operator = 'IN';
+							else $operator = 'NOT IN';
 							$value = implode($value, '|');
 						}
 						if ($value != '') {
@@ -8388,7 +8389,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									$sql_where.='LOWER(\''.$value.'\')';
 								}break;
 
-								case 'IN' : {
+								case 'IN' : case 'NOT IN' : {
 									$parts = explode('|', $value);
 									for($j = 0; $j < count($parts); $j++){
 										if(substr($parts[$j], 0, 1) != '\''){$parts[$j] = '\''.$parts[$j];}
