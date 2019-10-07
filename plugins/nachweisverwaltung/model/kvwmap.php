@@ -1553,7 +1553,10 @@
 			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 			$nachweisSuchParameter=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
 			$GUI->formvars=array_merge($GUI->formvars,$nachweisSuchParameter);
-			if($GUI->formvars['zurueck']){
+			if($GUI->formvars['FlurstKennz'] != ''){		# über die Flurstückssuche gefundene Flurstücke -> Geometrie als Suchpolygon übernehmen
+				$GUI->formvars['suchpolygon'] = $GUI->pgdatabase->getGeomfromFlurstuecke($GUI->formvars['FlurstKennz'], $GUI->user->rolle->epsg_code);
+			}
+			if($GUI->formvars['zurueck'] OR $GUI->formvars['FlurstKennz'] != ''){
 				$GUI->formvars['pathwkt'] = $GUI->formvars['suchpolygon'];
 				$GUI->formvars['newpathwkt'] = $GUI->formvars['suchpolygon'];
 				$GUI->formvars['firstpoly'] = 'true';

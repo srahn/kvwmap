@@ -2488,7 +2488,19 @@ FROM
     }
     return $ret;
   }
-	
+
+  function getGeomfromFlurstuecke($flurstkennz, $epsgcode) {
+    $sql =" SELECT 
+							st_astext(st_transform(st_union(wkb_geometry), ".$epsgcode.")) AS wkt
+						FROM 
+							alkis.ax_flurstueck AS f
+						WHERE 
+							f.flurstueckskennzeichen IN ('".implode("','", $flurstkennz)."')"
+							.$this->build_temporal_filter(array('f'));
+    $ret=$this->execSQL($sql, 4, 0);
+    $rs=pg_fetch_assoc($ret[1]);
+    return $rs['wkt'];
+  }	
 	
   function getMERfromFlurstuecke($flurstkennz, $epsgcode) {
     $this->debug->write("<br>postgres.php->database->getMERfromFlurstuecke, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Flurstï¿½cke",4);

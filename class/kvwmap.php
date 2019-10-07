@@ -13063,6 +13063,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             if($this->formvars['ALK_Suche'] == 1){
 		          $this->zoomToALKFlurst($FlurstKennz,10);
 							if($this->formvars['go_next'] != ''){
+								$this->formvars['FlurstKennz'] = $FlurstKennz;
 								$this->saveMap('');
 								go_switch($this->formvars['go_next']);
 								exit();
