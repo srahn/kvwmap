@@ -278,7 +278,7 @@ function alias_replace(name){
 					for ($i = 0; $i < count($this->attributes['type']); $i++){ ?>
 						<tr>
 							<td align="left" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header">#</div>'; ?>
+								<? if($i == 0)echo '<div class="fett scrolltable_header" title="Reihenfolge">#</div>'; ?>
 						  	<input type="text"
 								  name="order_<?php echo $this->attributes['name'][$i]; ?>"
 									value="<?php echo $this->attributes['order'][$i]; ?>"
