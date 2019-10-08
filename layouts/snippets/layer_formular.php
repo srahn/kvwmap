@@ -228,7 +228,35 @@
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="document_url" type="text" value="<?php echo $this->layerdata['document_url']; ?>" size="50" maxlength="100">
 						</td>
-					</tr>				
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDdlAttribute; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3"><?php
+							include(CLASSPATH . 'LayerAttribute.php');
+							include(CLASSPATH . 'FormObject.php');
+							$attributes = LayerAttribute::find($this, 'layer_id = ' . $this->layerdata['Layer_ID']);
+							echo FormObject::createSelectField(
+								'ddl_attribute',
+								array_map(
+									function($attribute) {
+										return array(
+											'value' => $attribute->get('name'),
+											'output' => $attribute->get('name')
+										);
+									},
+									$attributes
+								),
+								$this->layerdata['ddl_attribute'],
+								1,
+								'',
+								'',
+								'ddl_attribute',
+								'',
+								'',
+								true
+							); ?>
+						</td>
+					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTileIndex; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
