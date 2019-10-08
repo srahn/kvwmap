@@ -330,13 +330,17 @@ class administration{
 		if ($config != '') {
 			if ($plugin != '') {
 				$prepath = PLUGINS.$plugin.'/config/';
-				if (!file_exists($prepath))mkdir($prepath);
+				if (!file_exists($prepath)) {
+					mkdir($prepath);
+				}
 			}
 			if (file_put_contents($prepath.'config.php', "<?\n\n".$config."?>") === false) {
 				$result[0] = 1;
 				$result[1] = 'Fehler beim Schreiben der config-Datei ' . $prepath . 'config.php';
 			}
-			else $result[0]=0;
+			else {
+				$result[0] = 0;
+			}
 		}
 		return $result;
 	}

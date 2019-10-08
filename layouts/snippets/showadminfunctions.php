@@ -124,7 +124,42 @@ function toggleGroup(group, show){
 				<?		}		?>
 				<tr class="constants_<? echo $param['group']; ?> config_param_saved_<? echo $param['saved']; ?>" style="display: none">
 					<td><? echo $param['name']; ?></td>
-					<td><? echo $param['prefix']; ?></td>
+					<td><?
+						if (
+							$param['type'] == 'string' AND
+							strpos(rtrim($param['value']), ' ') === false
+						) {
+							#createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '') {
+							echo FormObject::createSelectField(
+								$param['name'],
+								array_map(
+									function($param) {
+										return array(
+											'value' => $param['name'],
+											'output' => $param['name']
+										);
+									},
+									array_filter(
+										$this->administration->config_params,
+										function($param) {
+											return (
+												$param['type'] == 'string' AND
+												strpos(rtrim($param['value']), ' ') === false
+											);
+										}
+									)
+								),
+								$param['prefix'],
+								1,
+								'',
+								'',
+								'prefix_select_field_' . $param['name']
+							);
+						}
+						else {
+							echo $param['prefix'];
+						} ?>
+					</td>
 					<td>
 						<? 
 							if($param['type'] == 'array'){

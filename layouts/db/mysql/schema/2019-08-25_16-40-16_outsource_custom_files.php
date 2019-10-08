@@ -15,11 +15,31 @@
 
 	$constants = array ();
 
-	# check if custom folder already exists, append random number to default name if exists
+	$sql = "
+		INSERT INTO `config` (
+			`name`,
+			`value`,
+			`description`,
+			`type`,
+			`group`,
+			`saved`
+		) VALUES (
+			'CUSTOM_PATH',
+			'custom/',
+			'Pfad in dem sich Dateien befinden, die nicht vom kvwmap Repository getrackt werden.',
+			'string',
+			'Pfadeinstellungen',
+			'0'
+		);
+	";
+	$this->database->execSQL($sql, 4, 1);
+
+	# default folder is custom, if custom already exists add random number
 	$constants['CUSTOM_PATH'] = array(
 		'prefix' => 'WWWROOT.APPLVERSION',
 		'wert' => 'custom' . (file_exists(WWWROOT . APPLVERSION . 'custom/') ? '_' . rand(1, 3) : '') . '/'
 	);
+
 /*
 	$constants['CUSTOM_PATH'] = array(
 		'prefix' => 'WWWROOT.APPLVERSION',
@@ -35,13 +55,13 @@
 	chmod(CUSTOM_PATH, 0775);
 
 	# Backing up alle files application folder
-  exec('tar cvzf ' . WWWROOT . 'kvwmap_before_custom_migration.tar.gz ' . WWWROOT . APPLVERSION);
+#  exec('tar cvzf ' . WWWROOT . 'kvwmap_before_custom_migration.tar.gz ' . WWWROOT . APPLVERSION);
 
 	# Move all custom files to the new custom folder if exists and change Config parameter
 
 	# FONTSET
 	if (file_exists(WWWROOT . APPLVERSION . 'fonts/custom')) {
-		echo '<br>rename: ' . WWWROOT . APPLVERSION . 'fonts/custom to: ' . CUSTOM_PATH . 'fonts';
+		echo '<br>move: ' . WWWROOT . APPLVERSION . 'fonts/custom to: ' . CUSTOM_PATH . 'fonts';
 		rename(WWWROOT . APPLVERSION . 'fonts/custom', CUSTOM_PATH . 'fonts');
 	}
 	if (strpos(FONTSET, 'fonts/custom') !== false) {
@@ -54,12 +74,11 @@
 
 	# SYMBOLSET
 	if (file_exists(WWWROOT . APPLVERSION . 'symbols/custom')) {
-		echo '<br>rename: ' . WWWROOT . APPLVERSION . 'symbols/custom to: ' . CUSTOM_PATH . 'symbols';
+		echo '<br>move: ' . WWWROOT . APPLVERSION . 'symbols/custom to: ' . CUSTOM_PATH . 'symbols';
 		rename(WWWROOT . APPLVERSION . 'symbols/custom', CUSTOM_PATH . 'symbols');
 	}
 	if (strpos(SYMBOLSET, 'symbols/custom') !== false) {
 		echo '<br>set: ' . SYMBOLSET . ' to: ' . str_replace('symbols/custom', $constants['CUSTOM_PATH']['wert'] . 'symobls', str_replace(WWWROOT . APPLVERSION, '', SYMBOLSET));
-		# Replace the old symbols/custom by custom_path/symbols
 		$constants['SYMBOLSET'] = array(
 			'prefix' => 'WWWROOT.APPLVERSION',
 			'wert' => str_replace('symbols/custom', $constants['CUSTOM_PATH']['wert'] . 'symobls', str_replace(WWWROOT . APPLVERSION, '', SYMBOLSET))
@@ -68,7 +87,7 @@
 
 	# GRAPHICSPATH
 	if (file_exists(WWWROOT . APPLVERSION . 'graphics/custom')) {
-		echo '<br>rename: ' . WWWROOT . APPLVERSION . 'graphics/custom to: ' . CUSTOM_PATH . 'graphics';
+		echo '<br>move: ' . WWWROOT . APPLVERSION . 'graphics/custom to: ' . CUSTOM_PATH . 'graphics';
 		rename(WWWROOT . APPLVERSION . 'graphics/custom', CUSTOM_PATH . 'graphics');
 	}
 	if (strpos(GRAPHICSPATH, 'graphics/custom') !== false) {
@@ -81,7 +100,7 @@
 
 	# WAPPENPATH
 	if (file_exists(WWWROOT . APPLVERSION . WAPPENPATH)) {
-		echo '<br>rename: ' . WWWROOT . APPLVERSION . WAPPENPATH . ' to: ' . CUSTOM_PATH . 'wappen';
+		echo '<br>move: ' . WWWROOT . APPLVERSION . WAPPENPATH . ' to: ' . CUSTOM_PATH . 'wappen';
 		rename(WWWROOT . APPLVERSION . WAPPENPATH, CUSTOM_PATH . 'wappen');
 	}
 	$constants['WAPPENPATH'] = array(
@@ -94,7 +113,7 @@
 
 	# LAYOUTS
 	if (file_exists(WWWROOT . APPLVERSION . 'layouts/custom')) {
-		echo '<br>rename: ' . WWWROOT . APPLVERSION . 'layouts/custom to: ' . CUSTOM_PATH . 'layouts';
+		echo '<br>move: ' . WWWROOT . APPLVERSION . 'layouts/custom to: ' . CUSTOM_PATH . 'layouts';
 		rename(WWWROOT . APPLVERSION . 'layouts/custom', CUSTOM_PATH . 'layouts');
 	}
 	if (strpos(LAYOUTPATH, 'layouts/custom') !== false) {
@@ -107,36 +126,50 @@
 
 	# SNIPPETS
 	if (file_exists(WWWROOT . APPLVERSION . 'layouts/snippets/custom')) {
-		echo '<br>rename: ' . WWWROOT . APPLVERSION . 'layouts/snippets/custom to: ' . CUSTOM_PATH . 'layouts/snippets';
+		echo '<br>move: ' . WWWROOT . APPLVERSION . 'layouts/snippets/custom to: ' . CUSTOM_PATH . 'layouts/snippets';
 		rename(WWWROOT . APPLVERSION . 'layouts/snippets/custom', CUSTOM_PATH . 'layouts/snippets');
 	}
 	if (strpos(SNIPPETS, 'snippets/custom') !== false) {
 		echo '<br>set: ' . SNIPPETS . ' to: ' . str_replace('snippets/custom', '../' . $constants['CUSTOM_PATH']['wert'] . 'layouts/snippets', SNIPPETS);
-		$constants['LAYOUTPATH'] = array(
-			'prefix' => 'LAYOUTPATH',
-			'wert' => str_replace('snippets/custom', '../' . $constants['CUSTOM_PATH']['wert'] . 'layouts/snippets', LAYOUTPATH)
+		$constants['SNIPPETS'] = array(
+			'prefix' => 'CUSTOM_PATH',
+			'wert' => str_replace('snippets/custom', $constants['CUSTOM_PATH']['wert'] . 'layouts/snippets', LAYOUTPATH)
 		);
 	}
 
-	echo '<p>Constants: ' . print_r($constants, true);
-		/*
 	$sql = '';
 	foreach ($constants AS $key => $value) {
 		$sql .= "
 			UPDATE
 				config
 			SET
-				value = '" . $value . "'
+				value = '" . $value['wert'] . "',
+				prefix = '" . $value['prefix'] . "',
+				saved = 0
 			WHERE
 				name = '" . $key . "';
 		";
 	}
-	$result = $this->database->exec_commands($sql, NULL, NULL);
-	$result = $this->write_config_file('');
+	echo '<br>Update Konstants mit SQL: ' . $sql;
+	$this->database->exec_commands($sql, NULL, NULL);
 
-	# ToDos
-	# replace mit sed in all custom files in layouts/custom and layouts/snippets/custom
-	# layouts/custom/ => '../' . CUSTOM_PATH . 'layouts/'
-*/
-	throw new Exeption('Stop');
+	$sql = "
+		UPDATE
+			u_menues
+		SET
+			link = REPLACE(link, 'layouts/snippets/custom/', '" . CUSTOM_PATH . "layouts/snippets/')
+		WHERE
+			link LIKE '%layouts/snippets/custom/%'
+	";
+	$this->database->execSQL($sql, 4, 1);
+	
+	$cmd = 'sed -i -e "s|layouts/snippets/custom/|' . CUSTOM_PATH . 'layouts/snippets/|g" ' . WWWROOT. APPLVERSION . CUSTOM_PATH . '*';
+	echo '<br>Replace path by cmd: ' . $cmd;
+	exec($cmd);
+	$cmd = 'sed -i -e "s|layouts/custom/|' . CUSTOM_PATH . 'layouts/|g" ' . WWWROOT. APPLVERSION . CUSTOM_PATH . '*';
+	echo '<br>Replace path by cmd: ' . $cmd;
+	exec($cmd);
+
+	$this->get_config_params();
+	$result = $this->write_config_file('');
 ?>

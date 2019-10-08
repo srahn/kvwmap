@@ -120,7 +120,7 @@ class GUI {
 		if ($this->formvars['go'] == 'logout') {
 			$this->expect[] = 'go';
 		}
-		$this->user->rolle->gui = 'snippets/' . (file_exists(LAYOUTPATH . 'snippets/' . LOGIN) ? LOGIN : 'login.php');
+		$this->user->rolle->gui = 'snippets/' . (file_exists(LAYOUTPATH . 'snippets/' . LOGIN) ? LOGIN : 'snippets/login.php');
 		$this->output();
 	}
 
@@ -12085,6 +12085,155 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->stellen['user'][0] = $this->Stelle->getUser();
     $this->output();
   }
+
+	function connections_anzeigen() {
+		include_once(CLASSPATH . 'Connection.php');
+		$this->connections = Connection::find($this);
+		$this->main = 'connections.php';
+		$this->output();
+	}
+
+	function connection_create() {
+		include_once(CLASSPATH . 'Connection.php');
+		$this->connection = new Connection($this);
+		$this->connection->data = formvars_strip($this->formvars, $this->connection->getKeys(), 'keep');
+		$results = $this->connection->validate();
+		if (count($results) > 0) {
+			$result = array(
+				'success' => false,
+				'err_msg' => implode(
+					'<br>',
+					array_map(
+						function($result) {
+							return $result['msg'];
+						},
+						$results
+					)
+				)
+			);
+		}
+		else {
+			$results = $this->connection->create();
+			$result = $results[0];
+		}
+		# return success and id of created connection or error and error msg in json format
+		$this->mime_type = 'application/json';
+		$this->formvars['format'] = 'json';
+		$this->qlayerset[0]['shape'] = array($result);
+		$this->output();
+	}
+
+	function connection_update() {
+		if ($this->formvars['id'] == '') {
+			$result = array(
+				'success' => false,
+				'err_msg' => 'Datensatz kann nicht aktualisiert werden. Es muss eine id angegeben sein!'
+			);
+		}
+		else {
+			include_once(CLASSPATH . 'Connection.php');
+			$this->connection = Connection::find_by_id($this, $this->formvars['id']);
+			if ($this->connection->get('id') != $this->formvars['id']) {
+				$result = array(
+					'success' => false,
+					'err_msg' => 'Der Datensatz mit der ID: '. $this->formcars['id'] . ' kann nicht aktualisiert werden, weil er in der Datenbank nicht existiert.'
+				);
+			}
+			else {
+				$this->connection->data = formvars_strip($this->formvars, $this->connection->getKeys(), 'keep');
+				$results = $this->connection->validate();
+				if (count($result) > 0) {
+					$result = array(
+						'success' => false,
+						'err_msg' => implode(', ', $results)
+					);
+				}
+				else {
+					$results = $this->connection->update($data);
+					if ($results[0]['success']) {
+						$result = array(
+							'success' => true,
+							'msg' => 'Der Datensatz mit der ID: ' . $this->connection->get('id') . ' konnte erfolgreich aktualisiert werden.'
+						);
+					}
+					else {
+						$result = array(
+							'success' => false,
+							'err_msg' => 'Fehler beim Aktualisieren des Datensatzes mit der ID: ' . $this->connection->get('id') . ' Meldung: ' . $results[0]['err_msg']
+						);
+					}
+
+				}
+			}
+		}
+		# return success or error with error message in json format
+		$this->mime_type = 'application/json';
+		$this->formvars['format'] = 'json';
+		$this->qlayerset[0]['shape'] = array($result);
+		$this->output();
+	}
+
+	function connection_delete() {
+		if ($this->formvars['id'] == '') {
+			$result = array(
+				'success' => false,
+				'err_msg' => 'Datensatz kann nicht gelöscht werden. Es muss eine id angegeben sein!'
+			);
+		}
+		else {
+			include_once(CLASSPATH . 'Connection.php');
+			$this->connection = Connection::find_by_id($this, $this->formvars['id']);
+			if ($this->connection->get('id') != $this->formvars['id']) {
+				$result = array(
+					'success' => false,
+					'err_msg' => 'Der Datensatz mit der ID: '. $this->formvars['id'] . ' kann nicht gelöscht werden, weil er in der Datenbank nicht existiert.'
+				);
+			}
+			else {
+				$result = $this->connection->delete();
+				if (!$result) {
+					$result = array(
+						'success' => false,
+						'err_msg' => mysql_error()
+					);
+				}
+				else {
+					$num_affected_rows = mysql_affected_rows();
+					switch ($num_affected_rows) {
+						case (-1) : {
+							$result = array(
+								'success' => false,
+								'err_msg' => 'Fehler beim Löschen des Datensatzes mit der ID: ' . $this->connection->get('id')
+							);
+						} break;
+						case (0) : {
+							$result = array(
+								'success' => false,
+								'err_msg' => 'Achtung! Es wurde kein Datensatz gelöscht. Der Datensatz mit der ID: ' . $this->connection->get('id') . ' ist nicht mehr vorhanden.'
+							);
+						} break;
+						case (1) : {
+							$result = array(
+								'success' => true,
+								'msg' => 'Datensatz mit der ID: ' . $this->connection->get('id') . ' erfolgreich gelöscht.'
+							);
+						} break;
+						default : {
+							$result = array(
+								'success' => false,
+								'err_msg' => 'Achtung! Es wurden ' . $num_affected_rows . ' Datensätze gelöscht statt nur einer.'
+							);
+						}
+					}
+				}
+			}
+		}
+		# return success or error with error msg in json format
+		$this->mime_type = 'application/json';
+		$this->formvars['format'] = 'json';
+		$this->qlayerset[0]['shape'] = array($result);
+		$this->output();
+	}
 
 	function cronjobs_anzeigen() {
 		include_once(CLASSPATH . 'CronJob.php');
