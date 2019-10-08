@@ -772,9 +772,11 @@ class rolle {
 			}
 			for($i = 0; $i < count($attributes['name']); $i++){
 				if($formvars[$prefix.'value_'.$attributes['name'][$i]] != '' OR $formvars[$prefix.'operator_'.$attributes['name'][$i]] == 'IS NULL' OR $formvars[$prefix.'operator_'.$attributes['name'][$i]] == 'IS NOT NULL'){
-					if(is_array($formvars[$prefix.'value_'.$attributes['name'][$i]]))$formvars[$prefix.'value_'.$attributes['name'][$i]] = $formvars[$prefix.'value_'.$attributes['name'][$i]][0];
+					if(is_array($formvars[$prefix.'value_'.$attributes['name'][$i]])){
+						$formvars[$prefix.'value_'.$attributes['name'][$i]] = json_encode($formvars[$prefix.'value_'.$attributes['name'][$i]], JSON_UNESCAPED_UNICODE);
+					}
 					$search_params_set = true;
-					$sql = 'INSERT INTO search_attributes2rolle VALUES ("'.$formvars['search_name'].'", '.$this->user_id.', '.$this->stelle_id.', '.$formvars['selected_layer_id'].', "'.$attributes['name'][$i].'", "'.$formvars[$prefix.'operator_'.$attributes['name'][$i]].'", "'.$formvars[$prefix.'value_'.$attributes['name'][$i]].'", "'.$formvars[$prefix.'value2_'.$attributes['name'][$i]].'", '.$m.', "'.$formvars['boolean_operator_'.$m].'");';
+					$sql = "INSERT INTO search_attributes2rolle VALUES ('".$formvars['search_name']."', ".$this->user_id.", ".$this->stelle_id.", ".$formvars['selected_layer_id'].", '".$attributes['name'][$i]."', '".$formvars[$prefix.'operator_'.$attributes['name'][$i]]."', '".$formvars[$prefix.'value_'.$attributes['name'][$i]]."', '".$formvars[$prefix.'value2_'.$attributes['name'][$i]]."', ".$m.", '".$formvars['boolean_operator_'.$m]."');";
 					$this->debug->write("<p>file:rolle.php class:rolle->save_search - Speichern einer Suchabfrage:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
 				}
@@ -815,6 +817,8 @@ class rolle {
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		while ($rs=mysql_fetch_assoc($query)) {
+			$json_test = json_decode($rs['value1']);
+			if(is_array($json_test))$rs['value1'] = $json_test;
 			$search[]=$rs;
 		}
 		return $search;

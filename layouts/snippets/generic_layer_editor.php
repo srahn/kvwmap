@@ -27,6 +27,8 @@
 		$k = -1;
   	$doit = true;
   }
+	
+	if($doit == true){
 ?>
 <SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 
@@ -65,9 +67,7 @@
 </table>
 <?
 	}
-
-  if($doit == true){
-		echo $layer['paging'];
+	echo $layer['paging'];
 ?>
 <table border="0" cellspacing="1" cellpadding="2" width="100%">
 	<tr>
@@ -548,22 +548,12 @@
 	
 ?>
 	
-<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
-<input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
-
+	<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
+	<input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
+</div>
 <?
   }
   elseif($layer['requires'] == ''){
-?>
-<table border="0" cellspacing="10" cellpadding="2">
-  <tr>
-	<td>
-      <span style="font-size:12px; color:#FF0000;"><? echo $strNoMatch; ?></span>
-	</td>
-  </tr>
-</table>
-
-<?
+		$this->noMatchLayers[$layer['Layer_ID']] = $layer['Name'];
   }
 ?>
-</div>

@@ -103,7 +103,8 @@ function toggleBetweenSearch(toggle_button, secondfield){
 }
 
 function updateGemarkungsauswahl(){
-	document.GUI.gemschl.value = document.GUI.gemschl1.value+document.GUI.gemschl2.value;
+	if(document.GUI.gemschl2.value == '')document.GUI.gemschl.value = '';
+	else document.GUI.gemschl.value = document.GUI.gemschl1.value+document.GUI.gemschl2.value;
 	selectbyString(document.GUI.suchgemarkung, document.GUI.gemschl.value);
 }
 
