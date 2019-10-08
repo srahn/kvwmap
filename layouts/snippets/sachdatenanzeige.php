@@ -103,7 +103,7 @@ for($i=0;$i<$anzLayer;$i++){
 	echo $this->qlayerset[$i]['paging'];
 	
 	if($gesamt > 0){
-		echo '<hr style="width: 100%; height: 3px; margin: 15 0; color: '.BG_GLEHEADER.'; background: '.BG_GLEHEADER.';">';
+		echo '<hr style="height: 3px; margin: 15 0; color: '.BG_GLEHEADER.'; background: '.BG_GLEHEADER.';">';
 	}
 }
 
@@ -126,7 +126,7 @@ if(!empty($this->noMatchLayers)){
 		</tr>
 		<? } ?>
 	</table>
-	<hr style="width: 100%; height: 3px; margin: 15 0; color: <? echo BG_GLEHEADER; ?>; background: <? echo BG_GLEHEADER; ?>;">
+	<hr style="height: 3px; margin: 15 0; color: <? echo BG_GLEHEADER; ?>; background: <? echo BG_GLEHEADER; ?>;">
 <? }
 } ?>
 
