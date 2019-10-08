@@ -821,7 +821,7 @@ hide_versions = function(flst){
 											<div class="fstanzeigehover">
 												&nbsp;&nbsp;
 												Auszug:
-												<select style="width: 130px" onchange="this.options[this.selectedIndex].onchange();">
+												<select style="width: 130px" onchange="this.options[this.selectedIndex].onchange();this.selectedIndex=0">
 													<option>-- Auswahl --</option>
 													<? if($this->Stelle->funktionen['MV0510']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0510&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis</option><? } ?>
 													<? if($this->Stelle->funktionen['MV0550']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0550&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis</option><? } ?>
@@ -947,7 +947,7 @@ hide_versions = function(flst){
               <div class="fstanzeigehover">
                 &nbsp;&nbsp;
 				Auszug:
-				<select style="width: 130px" onchange="this.options[this.selectedIndex].onchange();">
+				<select style="width: 130px" onchange="this.options[this.selectedIndex].onchange();this.selectedIndex=0">
 					<option>-- Auswahl --</option>
 					<? if($this->Stelle->funktionen['MV0510']['erlaubt']){ ?><option onchange="send_selected_flurst('ALKIS_Auszug', 'MV0510', 1, '_blank');">Flurstücksnachweis</option><? } ?>
 					<? if($this->Stelle->funktionen['MV0550']['erlaubt']){ ?><option onchange="send_selected_flurst('ALKIS_Auszug', 'MV0550', 1, '_blank');">Flurstücks- und Eigentumsnachweis</option><? } ?>
