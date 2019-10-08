@@ -10119,7 +10119,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 	}
 
-	function generischer_sachdaten_druck(){
+	function generischer_sachdaten_druck() {
 		include_(CLASSPATH.'datendrucklayout.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->ddl = new ddl($this->database, $this);
@@ -10188,15 +10188,22 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->attributes = $attributes;
     # Layouts abfragen
     $this->ddl->layouts = $this->ddl->load_layouts($this->Stelle->id, NULL, $this->formvars['chosen_layer_id'], array(0,1));
-    if(count($this->ddl->layouts) == 1)$this->formvars['aktivesLayout'] = $this->ddl->layouts[0]['id'];
-    # aktives Layout abfragen
-    if($this->formvars['aktivesLayout'] != ''){
-    	$this->ddl->selectedlayout = $this->ddl->load_layouts(NULL, $this->formvars['aktivesLayout'], NULL, array(0,1));
-			for($i = 0; $i < count($this->ddl->selectedlayout[0]['texts']); $i++){
+
+		if (count($this->ddl->layouts) == 1) {
+			$this->formvars['aktivesLayout'] = $this->ddl->layouts[0]['id'];
+		}
+		else {
+			$this->formvars['aktivesLayout'] = $result[0][$layerset[0]['ddl_attribute']];
+		}
+
+		# aktives Layout abfragen
+		if($this->formvars['aktivesLayout'] != ''){
+			$this->ddl->selectedlayout = $this->ddl->load_layouts(NULL, $this->formvars['aktivesLayout'], NULL, array(0,1));
+			for ($i = 0; $i < count($this->ddl->selectedlayout[0]['texts']); $i++){
 				if(strpos($this->ddl->selectedlayout[0]['texts'][$i]['text'], '$pagenumber') !== false)$this->page_numbering = true;
 			}
-	    # PDF erzeugen
-	    $pdf_file = $this->ddl->createDataPDF(NULL, NULL, NULL, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $this->ddl->selectedlayout[0], $result, $this->Stelle, $this->user, $this->formvars['record_paging']);
+			# PDF erzeugen
+			$pdf_file = $this->ddl->createDataPDF(NULL, NULL, NULL, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $this->ddl->selectedlayout[0], $result, $this->Stelle, $this->user, $this->formvars['record_paging']);
 	    # in jpg umwandeln
 	    $currenttime = date('Y-m-d_H_i_s',time());
 	    exec(IMAGEMAGICKPATH.'convert "'.$pdf_file.'[0]" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"');
@@ -17840,6 +17847,7 @@ class db_mapObj{
 				'schema',
 				'document_path',
 				'document_url',
+				'ddl_attribute',
 				'tileindex',
 				'tileitem',
 				'labelangleitem',

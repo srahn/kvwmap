@@ -88,4 +88,5 @@
 	$strDocument_url="Dokumente URL";
 	$strAssignDefaultValues="Default-Werte an Stellen übertragen";
 	$strStylesLabels="Styles und Labels";
+	$strDdlAttribute="DDL Default Attribut";
 ?>
