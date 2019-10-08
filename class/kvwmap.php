@@ -17980,6 +17980,10 @@ class db_mapObj{
 				$formvars['vcheck_operator_'.$attributes['name'][$i]] = '';
 				$formvars['vcheck_value_'.$attributes['name'][$i]] = '';
 			}
+			if($formvars['group_' . $attributes['name'][$i]] == '' AND $last_group != ''){
+				$formvars['group_' . $attributes['name'][$i]] = $last_group;
+			}
+			$last_group = $formvars['group_' . $attributes['name'][$i]];
 			$rows = "
 				`order` = " . $formvars['order_' . $attributes['name'][$i]] . ",
 				`name` = '" . $attributes['name'][$i] . "', " .
