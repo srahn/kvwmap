@@ -12,7 +12,7 @@
 							<tr>
 								<td colspan="2">
 									<div>
-										<? include(CUSTOM_PATH . 'layouts/snippets/' . AGREEMENT_MESSAGE); ?>
+										<? include(AGREEMENT_MESSAGE); ?>
 									</div>
 								</td>
 							</tr>

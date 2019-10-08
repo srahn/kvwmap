@@ -18,8 +18,8 @@
 						<table cellpadding=0 cellspacing=0>
 							<tr> 
 								<td colspan="2" id="header"><?php
-									$this->debug->write("<br>Include <b>".LAYOUTPATH."snippets/".HEADER."</b> in gui.php",4);
-									include(LAYOUTPATH."snippets/".HEADER); ?>
+									$this->debug->write("<br>Include <b>".HEADER."</b> in gui.php",4);
+									include(HEADER); ?>
 								</td>
 							</tr>
 							<tr>
@@ -54,8 +54,8 @@
 							</tr>
 							<tr> 
 								<td colspan="2" id="footer"><?php
-									$this->debug->write("<br>Include <b>".LAYOUTPATH."snippets/".FOOTER."</b> in gui.php",4);
-									include(LAYOUTPATH."snippets/".FOOTER); ?>
+									$this->debug->write("<br>Include <b>".FOOTER."</b> in gui.php",4);
+									include(FOOTER); ?>
 								</td>
 							</tr>
 						</table>

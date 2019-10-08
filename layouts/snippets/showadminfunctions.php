@@ -59,9 +59,11 @@ function toggleGroup(group, show){
 				?>
 					<tr style="border:1px solid #C3C7C3;">
 						<td><?	echo $component; ?></td>
-						<td align="right">
-						<?	if($mysql_counter == 0 AND $postgresql_counter == 0)echo ' Schemata aktuell'; 
-								else {
+						<td align="right"><?
+							if ($mysql_counter == 0 AND $postgresql_counter == 0) {
+								echo ' Schemata aktuell';
+							}
+							else {
 									$title = @implode('&#10;', $this->administration->migrations_to_execute['mysql'][$component]).'&#10;';
 									$title.= @implode('&#10;', $this->administration->migrations_to_execute['postgresql'][$component]);
 									echo '<span class="fett red" title="'.$title.'">';
@@ -69,31 +71,29 @@ function toggleGroup(group, show){
 									if($mysql_counter > 0)echo 'MySQL-Schema ';
 									if($postgresql_counter > 0)echo 'PostgreSQL-Schema ';
 									echo ' nicht aktuell</span>';
-								}
-								if($seed_counter > 0){
-									$update_necessary = true;
-									echo ',<br> neue Menüs- bzw. Layer verfügbar';
-								}
-								?>
+							}
+							if ($seed_counter > 0) {
+								$update_necessary = true;
+								echo ',<br> neue Menüs- bzw. Layer verfügbar';
+							} ?>
 						</td>
-					</tr>
-				<? }
-				if($this->administration->seed_files != ''){
-					foreach($this->administration->seed_files as $component => $component_seeds){			// die restlichen Plugins, die kein DB-Schema haben
-						if($this->administration->schema_migration_files[$component] == NULL AND count($this->administration->seeds_to_execute['mysql'][$component]) > 0){
-					?>
-						<tr style="border:1px solid #C3C7C3;">
-							<td><?	echo $component; ?></td>
-							<td align="right">
-							<?	$update_necessary = true;
-									echo 'neue Menüs- bzw. Layer verfügbar';
-									?>
-							</td>
-						</tr>
-					<? }
+					</tr><?
+				}
+				if ($this->administration->seed_files != '') {
+					foreach ($this->administration->seed_files as $component => $component_seeds){			// die restlichen Plugins, die kein DB-Schema haben
+						if ($this->administration->schema_migration_files[$component] == NULL AND count($this->administration->seeds_to_execute['mysql'][$component]) > 0) { ?>
+							<tr style="border:1px solid #C3C7C3;">
+								<td><?	echo $component; ?></td>
+								<td align="right">
+								<?	$update_necessary = true;
+										echo 'neue Menüs- bzw. Layer verfügbar';
+										?>
+								</td>
+							</tr><?
+						}
 					}
-				}?>
-				<tr >
+				} ?>
+				<tr>
 					<td colspan="2" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=update_databases'" <? if(!$update_necessary)echo 'disabled'; ?> value="<? echo $strUpdate; ?>"></td>
 				</tr>
 			</table> 
@@ -104,87 +104,70 @@ function toggleGroup(group, show){
 			<table width="100%" cellpadding="4" cellspacing="2" style="width: 584px" class="table_border_collapse">
 				<tr>
 					<td colspan="4" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17"><? echo $strConfigParams; ?></span></td>
-				</tr>
-				<? 
+				</tr><? 
 					global $kvwmap_plugins;
 					$last_group = '';
-					foreach($this->administration->config_params as $param){
-						if($param['plugin'] == '' OR in_array($param['plugin'], $kvwmap_plugins)){
-							if($last_group != $param['group']){
-								$last_group = $param['group'];			?>
-							<tr>
-								<td colspan="4" class="fett" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><a href="javascript:toggleGroup('<? echo $param['group']; ?>', false);"><img id="<? echo $param['group']; ?>" src="<? echo GRAPHICSPATH.'plus.gif'; ?>"></a>&nbsp;<? echo $param['group']; ?></td>
-							</tr>
-							<tr class="constants_<? echo $param['group']; ?>" style="display: none">
-								<td class="fett">Name</td>
-								<td class="fett">Prefix</td>
-								<td class="fett"><? echo $strValue; ?></td>
-								<td class="fett">Info</td>
-							</tr>
-				<?		}		?>
-				<tr class="constants_<? echo $param['group']; ?> config_param_saved_<? echo $param['saved']; ?>" style="display: none">
-					<td><? echo $param['name']; ?></td>
-					<td><?
-						if (
-							$param['type'] == 'string' AND
-							strpos(rtrim($param['value']), ' ') === false
-						) {
-							#createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '') {
-							echo FormObject::createSelectField(
-								$param['name'],
-								array_map(
-									function($param) {
-										return array(
-											'value' => $param['name'],
-											'output' => $param['name']
-										);
-									},
-									array_filter(
-										$this->administration->config_params,
-										function($param) {
-											return (
-												$param['type'] == 'string' AND
-												strpos(rtrim($param['value']), ' ') === false
-											);
+					foreach ($this->administration->config_params as $param){
+						if ($param['plugin'] == '' OR in_array($param['plugin'], $kvwmap_plugins)) {
+							if ($last_group != $param['group']) {
+								$last_group = $param['group']; ?>
+								<tr>
+									<td colspan="4" class="fett" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><a href="javascript:toggleGroup('<? echo $param['group']; ?>', false);"><img id="<? echo $param['group']; ?>" src="<? echo GRAPHICSPATH.'plus.gif'; ?>"></a>&nbsp;<? echo $param['group']; ?></td>
+								</tr>
+								<tr class="constants_<? echo $param['group']; ?>" style="display: none">
+									<td class="fett">Name</td>
+									<td class="fett">Prefix</td>
+									<td class="fett"><? echo $strValue; ?></td>
+									<td class="fett">Info</td>
+								</tr><?
+							} ?>
+							<tr class="constants_<? echo $param['group']; ?> config_param_saved_<? echo $param['saved']; ?>" style="display: none">
+								<td><? echo $param['name']; ?></td>
+								<td><?
+									if (in_array($param['editable'], array(1, 3))) { ?>
+										<input type="text" name="<? echo $param['name']; ?>_prefix" value="<? echo $param['prefix']; ?>" size="50"><?
+									}
+									else {
+										echo $param['prefix'];
+									} ?>
+								</td>
+								<td><?
+									if ($param['editable'] > 1) {
+										if ($param['type'] == 'array'){
+											echo '<textarea style="width: 300px" rows="'.substr_count($param['value'], "\n").'" name="'.$param['name'].'">' . $param['value'] . '</textarea>';
 										}
-									)
-								),
-								$param['prefix'],
-								1,
-								'',
-								'',
-								'prefix_select_field_' . $param['name']
-							);
+										else {
+											$type = ($param['type'] == 'password' ? 'password' : 'text');
+											echo '<input type="' . $type . '" style="width: 300px" name="' . $param['name'] . '" value="' . $param['value'] . '">';
+										}
+									}
+									else {
+										echo $param['value'];
+									} ?>
+								</td>
+								<td align="center"><?
+									if ($param['description'] != '') { ?>
+										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(['Beschreibung:', '<? echo str_replace(array("\r\n", "\r", "\n"), '<br>', htmlentities($param['description'], ENT_QUOTES)); ?>'], Style[0], document.getElementById('Tip_<? echo $param['name']; ?>'))" onmouseout="htm()">
+										<div id="Tip_<? echo $param['name']; ?>" style="right: 10px;visibility:hidden;position:absolute;z-index:1000;"></div><?
+									} ?>
+								</td>
+							</tr><?
+							if ($param['saved'] == 0) { ?>
+								<script type="text/javascript">toggleGroup('<? echo $param['group']; ?>', true);</script><?
+							}
 						}
-						else {
-							echo $param['prefix'];
-						} ?>
-					</td>
-					<td>
-						<? 
-							if($param['type'] == 'array'){
-								echo '<textarea style="width: 300px" rows="'.substr_count($param['value'], "\n").'" name="'.$param['name'].'">'.$param['value'].'</textarea>';
-							}
-							else{
-								if($param['type'] == 'password')$type = 'password';
-								else $type = 'text';
-								echo '<input type="'.$type.'" style="width: 300px" name="'.$param['name'].'" value="'.$param['value'].'">';
-							}
-						?>
-					</td>
-					<td align="center">
-						<? if($param['description'] != ''){ ?>
-						<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(['Beschreibung:', '<? echo str_replace(array("\r\n", "\r", "\n"), '<br>', htmlentities($param['description'], ENT_QUOTES)); ?>'], Style[0], document.getElementById('Tip_<? echo $param['name']; ?>'))" onmouseout="htm()">
-						<div id="Tip_<? echo $param['name']; ?>" style="right: 10px;visibility:hidden;position:absolute;z-index:1000;"></div>
-						<? } ?>
-					</td>
-				</tr>
-<?			if($param['saved'] == 0){ ?>
-					<script type="text/javascript">toggleGroup('<? echo $param['group']; ?>', true);</script>
-		<?	}
-			}} ?>
+					} ?>
 				<tr >
-					<td colspan="4" align="center"><input type="button" onclick="document.GUI.func.value='save_config';document.GUI.submit();" value="<? echo $this->strSave; ?>"></td>
+					<td colspan="4" align="center">
+						<input
+							type="button"
+							onclick="
+								document.GUI.func.value = 'save_config';
+								document.GUI.submit();
+							"
+							value="<? echo $this->strSave; ?>"
+						>
+					</td>
 				</tr>
 			</table> 
 		</td>

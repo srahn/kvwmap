@@ -253,7 +253,7 @@
 								'ddl_attribute',
 								'',
 								'',
-								true
+								'-- Auswahl --'
 							); ?>
 						</td>
 					</tr>

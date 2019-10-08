@@ -256,12 +256,12 @@ class administration{
 			ORDER BY `group`, name
 		";
 		#echo 'SQL: ' . $sql;
-		$result=$this->database->execSQL($sql,0, 0);
-    if ($result[0]) {
-      #echo '<br>Fehler bei der Abfrage der Tabelle config.<br>';
-    }
-    else {
-      while($rs=mysql_fetch_assoc($result[1])) {
+		$result = $this->database->execSQL($sql, 0, 0);
+		if ($result[0]) {
+			#echo '<br>Fehler bei der Abfrage der Tabelle config.<br>';
+		}
+		else {
+			while ($rs = mysql_fetch_assoc($result[1])) {
 				$this->config_params[$rs['name']] = $rs;
 			}
 			foreach ($this->config_params as &$param) {
@@ -271,33 +271,44 @@ class administration{
 	}
 	
 	function get_real_value($name) {
+		$name = trim($name);
 		if ($this->config_params[$name]['prefix'] != '') {
-			if ($this->config_params[$name]['value'] == '')return NULL;
+			if ($this->config_params[$name]['value'] == '') {
+				return NULL;
+			}
 			foreach (explode('.', $this->config_params[$name]['prefix']) as $prefix_constant) {
 				$prefix_value .= $this->get_real_value($prefix_constant);
 			}
-			return $prefix_value.$this->config_params[$name]['value'];
+			return $prefix_value . $this->config_params[$name]['value'];
 		}
-		else{
+		else {
 			return $this->config_params[$name]['value'];
 		}
 	}
-	
+
 	function save_config($formvars) {
 		global $kvwmap_plugins;
 		foreach ($this->config_params as $param) {
 			if (isset($formvars[$param['name']])) {
-				$sql = "UPDATE config SET value = '".$formvars[$param['name']]."', saved = 1 WHERE name = '".$param['name']."'";
-				#echo $sql.'<br>';
-				$result=$this->database->execSQL($sql,0, 0);
+				$sql = "
+					UPDATE
+						config
+					SET
+						prefix = '" . $formvars[$param['name'] . '_prefix'] . "',
+						value = '" . $formvars[$param['name']] . "',
+						saved = 1
+					WHERE
+						name = '" . $param['name'] . "'
+				";
+				#echo 'Update config with sql: ' . $sql . ' prefix: ' . $param['prefix'] . ' formvar: ' . $formvars[$param['prefix']] . ' <br>';
+				$result = $this->database->execSQL($sql,0, 0);
 				if ($result[0]) {
 					echo '<br>Fehler beim Update der Tabelle config.<br>';
 				}
 			}
 		}
-		$this->get_config_params();
 		$this->write_config_file('');
-		for($i = 0; $i < count($kvwmap_plugins); $i++) {
+		for ($i = 0; $i < count($kvwmap_plugins); $i++) {
 			$this->write_config_file($kvwmap_plugins[$i]);
 		}
 	}
@@ -306,35 +317,40 @@ class administration{
 		$this->get_config_params();
 		$config = '';
 		foreach ($this->config_params as $param) {
+			#echo '<br>p: ' . $param['name'] . ' real: ' . $param['real_value'];
 			if ($param['plugin'] == $plugin) {
 				if ($param['description'] != '') {
 					$param['description'] = rtrim($param['description']);
 					$lines = explode("\n", $param['description']);
 					for($l = 0; $l < count($lines); $l++) {
-						$config.= "# ".$lines[$l]."\n";
+						$config .= "# " . $lines[$l] . "\n";
 					}
 				}
 				if ($param['type'] == 'array') {
-					$config.= "$".$param['name']." = ".preg_replace('/stdClass::__set_state/', '', var_export(json_decode($param['value']), true)).";\n\n";
+					$config .= "$" . $param['name'] . " = " . preg_replace('/stdClass::__set_state/', '', var_export(json_decode($param['value']), true)) . ";\n\n";
 				}
-				else{
-					if ($param['type'] == 'string' OR $param['type'] == 'password')$quote = "'";
-					else{
-						$quote = '';
-						if ($param['real_value'] == '')$param['real_value'] = 'NULL';
+				else {
+					if ($param['type'] == 'string' OR $param['type'] == 'password') {
+						$quote = "'";
 					}
-					$config.= "define('".$param['name']."', ".$quote.$param['real_value'].$quote.");\n\n";
+					else {
+						$quote = '';
+						if ($param['real_value'] == '') {
+							$param['real_value'] = 'NULL';
+						}
+					}
+					$config .= "define('" . $param['name'] . "', " . $quote . $param['real_value'] . $quote . ");\n\n";
 				}
 			}
 		}
 		if ($config != '') {
 			if ($plugin != '') {
-				$prepath = PLUGINS.$plugin.'/config/';
+				$prepath = PLUGINS . $plugin . '/config/';
 				if (!file_exists($prepath)) {
 					mkdir($prepath);
 				}
 			}
-			if (file_put_contents($prepath.'config.php', "<?\n\n".$config."?>") === false) {
+			if (file_put_contents($prepath . 'config.php', "<?\n\n" . $config . "?>") === false) {
 				$result[0] = 1;
 				$result[1] = 'Fehler beim Schreiben der config-Datei ' . $prepath . 'config.php';
 			}

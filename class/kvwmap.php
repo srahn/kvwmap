@@ -4200,7 +4200,7 @@ echo '			</ul>
 	}
 
 	function adminFunctions() {
-		include_once(CLASSPATH.'administration.php');
+		include_once(CLASSPATH . 'administration.php');
 		$this->administration = new administration($this->database, $this->pgdatabase);
 		$this->administration->get_database_status();
 		$this->administration->get_config_params();
