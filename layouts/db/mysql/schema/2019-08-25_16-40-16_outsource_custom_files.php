@@ -64,6 +64,7 @@
 			`editable` = 0
 		WHERE
 			`name` IN (
+				'CUSTOMPATH'
 				'CLASSPATH',
 				'GRAPHICSPATH',
 				'LAYOUTPATH',
@@ -85,7 +86,8 @@
 				'SYMBOLSET',
 				'FOOTER',
 				'HEADER',
-				'LAYER_ERROR_PAGE'
+				'LAYER_ERROR_PAGE',
+				'WMS_MAPFILE_PATH'
 			)
 	";
 	$this->database->execSQL($sql, 4, 1);
@@ -299,8 +301,8 @@
 			'prefix' => 'SNIPPETS'
 		);
 	}
-	$cmd = 'sed -i -e "s|LAYOUTPATH.\"snippets/\".HEADER|HEADER|g" ' . WWWROOT. APPLVERSION . CUSTOM_PATH . 'layouts/*';
-	$cmd = 'sed -i -e "s|LAYOUTPATH.\"snippets/\".HEADER|HEADER|g" ' . WWWROOT. APPLVERSION . CUSTOM_PATH . 'layouts/snippets/*';
+	$cmd = 'sed -i -e "s|LAYOUTPATH.\"snippets/\".HEADER|HEADER|g" ' . CUSTOM_PATH . 'layouts/*';
+	$cmd = 'sed -i -e "s|LAYOUTPATH.\"snippets/\".HEADER|HEADER|g" ' . CUSTOM_PATH . 'layouts/snippets/*';
 	echo '<br>Replace cmd: ' . $cmd;
 	exec($cmd);
 
@@ -319,10 +321,17 @@
 			'prefix' => 'SNIPPETS'
 		);
 	}
-	$cmd = 'sed -i -e "s|LAYOUTPATH.\"snippets/\".LAYER_ERROR_PAGE|LAYER_ERROR_PAGE|g" ' . WWWROOT. APPLVERSION . CUSTOM_PATH . 'layouts/*';
-	$cmd = 'sed -i -e "s|LAYOUTPATH.\"snippets/\".LAYER_ERROR_PAGE|LAYER_ERROR_PAGE|g" ' . WWWROOT. APPLVERSION . CUSTOM_PATH . 'layouts/snippets/*';
+	$cmd = 'sed -i -e "s|LAYOUTPATH.\"snippets/\".LAYER_ERROR_PAGE|LAYER_ERROR_PAGE|g" ' . CUSTOM_PATH . 'layouts/*';
+	$cmd = 'sed -i -e "s|LAYOUTPATH.\"snippets/\".LAYER_ERROR_PAGE|LAYER_ERROR_PAGE|g" ' . CUSTOM_PATH . 'layouts/snippets/*';
 	echo '<br>Replace cmd: ' . $cmd;
 	exec($cmd);
+
+	echo '<p>sizes' . $this->config_params['sizes']['value']
+	echo '<br>Replace "gui.php" by "layouts/gui.php"';
+	echo '<br>Replace "custom/" by "custom/layouts/"';
+	$constants['sizes'] = array(
+		'value' => str_replace('"custom/"', '"custom/layouts/"', str_replace('"gui.php"', '"layouts/gui.php"', $this->config_params['sizes']['value']))
+	);
 
 	foreach ($constants AS $name => $constant) {
 		$sql = "
@@ -343,16 +352,24 @@
 		UPDATE
 			u_menues
 		SET
-			links = REPLACE(links, 'layouts/snippets/custom/', '" . CUSTOM_PATH . "layouts/snippets/')
+			links = REPLACE(links, 'layouts/snippets/custom/', '" . $constants['CUSTOM_PATH']['value'] . "layouts/snippets/')
 		WHERE
 			links LIKE '%layouts/snippets/custom/%'
 	";
 	$this->database->execSQL($sql, 4, 1);
-	
-	$cmd = 'sed -i -e "s|layouts/snippets/custom/|custom/layouts/snippets/|g" ' . WWWROOT. APPLVERSION . 'custom/layouts/snippets/*';
+
+	$sql = "
+		UPDATE
+			rolle
+		SET
+			gui = CASE WHEN gui LIKE '%custom/%' THEN concat(" . $constants['CUSTOM_PATH']['value'] . "'layouts/', SUBSTRING_INDEX(gui, '/', -1)) ELSE concat('layouts/', gui) END
+	";
+	$this->database->execSQL($sql, 4, 1);
+
+	$cmd = 'sed -i -e "s|layouts/snippets/custom/|' . $constants['CUSTOM_PATH']['value'] . '/layouts/snippets/|g" ' . WWWROOT. APPLVERSION . 'custom/layouts/snippets/*';
 	echo '<br>Replace path by cmd: ' . $cmd;
 	exec($cmd);
-	$cmd = 'sed -i -e "s|layouts/custom/|' . 'custom/layouts|g" ' . WWWROOT. APPLVERSION . 'custom/layouts/*';
+	$cmd = 'sed -i -e "s|layouts/custom/|' . $constants['CUSTOM_PATH']['value'] . '/layouts/|g" ' . WWWROOT. APPLVERSION . 'custom/layouts/*';
 	echo '<br>Replace path by cmd: ' . $cmd;
 	exec($cmd);
 

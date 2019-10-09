@@ -43,9 +43,9 @@ class Connection extends MyObject {
 		return $connection->find_by('id', $id);
 	}
 
-	public static	function find($gui, $where = '1=1') {
+	public static	function find($gui, $order = '', $sort = '') {
 		$connection = new Connection($gui);
-		return $connection->find_where($where, 'name');
+		return $connection->find_where('', ($order == '' ? 'name' : $order), $sort);
 	}
 }
 ?>

@@ -120,7 +120,7 @@ class GUI {
 		if ($this->formvars['go'] == 'logout') {
 			$this->expect[] = 'go';
 		}
-		$this->user->rolle->gui = 'snippets/' . (file_exists(LAYOUTPATH . 'snippets/' . LOGIN) ? LOGIN : 'snippets/login.php');
+		$this->gui = LOGIN;
 		$this->output();
 	}
 
@@ -158,12 +158,12 @@ class GUI {
 			' User agent: ' .
 			getenv('HTTP_USER_AGENT')
 		);
-		$this->user->rolle->gui = 'snippets/' . (file_exists(LAYOUTPATH . 'snippets/' . LOGIN) ? LOGIN : 'login.php');
+		$this->gui = (file_exists(LOGIN) ? LOGIN : SNIPPETS . 'login.php');
 		$this->output();
 	}
 
 	function login_browser_size() {
-		$this->user->rolle->gui = 'snippets/login_browser_size.php';
+		$this->gui = SNIPPETS . 'login_browser_size.php';
 		$this->output();
 	}
 
@@ -173,7 +173,7 @@ class GUI {
 			# Nicht nochmal go = logout, sonst kommt man da nicht mehr raus.
 			$this->expect[] = 'go';
 		}
-		$this->user->rolle->gui = 'snippets/'.LOGIN_NEW_PASSWORD;
+		$this->gui = LOGIN_NEW_PASSWORD;
 		$this->output();
 	}
 
@@ -184,13 +184,13 @@ class GUI {
 			$this->formvars['login_name'] = strToLower(substr($this->invitation->inviter->get('Vorname'), 0, 1) . $this->invitation->inviter->get('Name'));
 		}
 		$this->expect = array('login_name', 'new_password', 'new_password_2');
-		$this->user->rolle->gui = 'snippets/'.LOGIN_REGISTRATION;
+		$this->gui = LOGIN_REGISTRATION;
 		$this->output();
 	}
 
 	function login_agreement() {
 		$this->expect = array('agreement_accepted');
-		$this->user->rolle->gui = 'snippets/'.LOGIN_AGREEMENT;
+		$this->gui = LOGIN_AGREEMENT;
 		$this->output();
 	}
 
@@ -2646,6 +2646,27 @@ echo '			</ul>
 		return $result;
 	}
 
+	/*
+	* This function returns the file that sould be included as gui file in output
+	* The gui will be retrieved from $this->gui if exists or
+	* otherwise from $this->user->rolle->gui
+	* The value of $this->user->rolle->gui can have 2 cases
+	* if value containing basename(CUSTOM_PATH) . '/' e.g. custom/ at the beginning than replace it BY CUSTOM_PATH
+	* else prepend WWWROOT . APPLVERSION
+	*/
+	function get_guifile() {
+		if ($this->gui != '') {
+			return $this->gui;
+		}
+
+		if (strpos($this->user->rolle->gui, basename(CUSTOM_PATH) . '/') === 0) {
+			return str_replace(basename(CUSTOM_PATH) . '/', CUSTOM_PATH, $this->user->rolle->gui);
+		}
+		else {
+			return WWWROOT . APPLVERSION . $this->user->rolle->gui;
+		}
+	}
+
 	function add_message($type, $msg) {
 		if (is_array($msg) AND array_key_exists('success', $msg) AND is_array($msg)) {
 			$type = 'notice';
@@ -2688,12 +2709,11 @@ echo '			</ul>
 				include (LAYOUTPATH.'snippets/printversion.php');
 			} break;
 			case 'html' : {
-				$this->debug->write("<br>Include <b>".LAYOUTPATH.$this->user->rolle->gui."</b> in kvwmap.php function output()",4);
-				if (basename($this->user->rolle->gui)=='') {
-					$this->user->rolle->gui='gui.php';
-				}
-				include (LAYOUTPATH . $this->user->rolle->gui);
-				if($this->alert != ''){
+				$guifile = $this->get_guifile();
+				$this->debug->write("<br>Include <b>" . $guifile . "</b> in kvwmap.php function output()",4);
+				include($guifile);
+
+				if ($this->alert != '') {
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
 				}
 				if (!empty($this->messages)) {
@@ -3106,7 +3126,7 @@ echo '			</ul>
 		$this->user->rolle->resetQuerys('');
 	}
 
-	function resizeMap2Window(){
+	function resizeMap2Window() {
 		global $sizes;
 
 		$size = $sizes[$this->user->rolle->gui];
@@ -12097,7 +12117,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 	function connections_anzeigen() {
 		include_once(CLASSPATH . 'Connection.php');
-		$this->connections = Connection::find($this);
+		$this->connections = Connection::find($this, $this->formvars['order'], $this->formvars['sort']);
 		$this->main = 'connections.php';
 		$this->output();
 	}
@@ -13103,18 +13123,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     # Suchen nach verfügbaren Layouts
     # aus dem Stammordner layouts (vom System angebotene)
     $this->layoutfiles = searchdir(LAYOUTPATH, false);
-    for($i = 0; $i < count($this->layoutfiles); $i++){
-      if(strpos($this->layoutfiles[$i], '.php') > 0  AND strpos($this->layoutfiles[$i], 'main.css.php') === false){
-        $this->guifiles[] = $this->layoutfiles[$i];
-      }
-    }
-    # aus dem Customordner (vom Nutzer hinzugefügte Layouts)
-    $this->customlayoutfiles = searchdir(WWWROOT . CUSTOM_PATH . 'layouts/', true);
-    for ($i = 0; $i < count($this->customlayoutfiles); $i++) {
-      if (strpos($this->customlayoutfiles[$i], '.php') > 0) {
-        $this->customguifiles[] = $this->customlayoutfiles[$i];
-      }
-    }
+		for ($i = 0; $i < count($this->layoutfiles); $i++) {
+			if (strpos($this->layoutfiles[$i], '.php') > 0 AND strpos($this->layoutfiles[$i], 'main.css.php') === false) {
+				$this->guifiles[] = basename($this->layoutfiles[$i]);
+			}
+		}
+		echo '<br>' . print_r($this->guifiles, true);
+		# aus dem Customordner (vom Nutzer hinzugefügte Layouts)
+		$this->customlayoutfiles = searchdir(CUSTOM_PATH . 'layouts/', false);
+		for ($i = 0; $i < count($this->customlayoutfiles); $i++) {
+			if (strpos($this->customlayoutfiles[$i], '.php') > 0) {
+				$this->customguifiles[] = basename(CUSTOM_PATH) . '/' . basename($this->customlayoutfiles[$i]);
+			}
+		}
+		echo '<br>' . print_r($this->customguifiles, true);
     # Abfrage der verfügbaren Kartenprojektionen in PostGIS (Tabelle spatial_ref_sys)
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
     # Voreinstellen des aktuellen EPSG-Codes der Rolle

@@ -266,19 +266,25 @@ class administration{
 			}
 			foreach ($this->config_params as &$param) {
 				$param['real_value'] = $this->get_real_value($param['name']);
+				#echo '<br>' . $param['name'] . ' real_value: ' . $param['real_value'];
 			}
 		}
 	}
-	
+
 	function get_real_value($name) {
 		$name = trim($name);
+		#echo '<p>' . $name . ' prefix vor behandlung' . $this->config_params[$name]['prefix'];
 		if ($this->config_params[$name]['prefix'] != '') {
 			if ($this->config_params[$name]['value'] == '') {
 				return NULL;
 			}
+			#echo '<p>' . $name . ' prefix' . print_r(explode('.', $this->config_params[$name]['prefix']), true);
 			foreach (explode('.', $this->config_params[$name]['prefix']) as $prefix_constant) {
+				#echo '<br>part : ' . $prefix_constant;
 				$prefix_value .= $this->get_real_value($prefix_constant);
+				#echo '<br>ordne zu: ' . $prefix_value;
 			}
+			#echo '<br>ordne prefix ' . $prefix_value . ' zu ' . $this->config_params[$name]['value'];
 			return $prefix_value . $this->config_params[$name]['value'];
 		}
 		else {
@@ -294,7 +300,7 @@ class administration{
 					UPDATE
 						config
 					SET
-						prefix = '" . $formvars[$param['name'] . '_prefix'] . "',
+						" . ($formvars[$param['name'] . '_prefix'] != '' ? "prefix = '" . $formvars[$param['name'] . '_prefix'] . "'," : "") . "
 						value = '" . $formvars[$param['name']] . "',
 						saved = 1
 					WHERE
