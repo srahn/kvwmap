@@ -13982,7 +13982,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							if($layerset[$i]['count'] != 0){
 							
 								# wenn nur ein Treffer und "anderes Objekt bearbeiten" eingestellt, in die Geometriebearbeitung gehen
-								if($num_rows == 1 AND $this->formvars['edit_other_object'] == 1){
+								if($num_rows == 1 AND $this->formvars['edit_other_object'] == 1 AND $layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['the_geom']]){
 									$this->formvars['oid'] = $layerset[$i]['shape'][0][$geometrie_tabelle.'_oid'];
 									$this->formvars['selected_layer_id'] = $layerset[$i]['Layer_ID'];
 									$geomtype = $layerset[$i]['attributes']['geomtype'][$layerset[$i]['attributes']['the_geom']];
