@@ -632,18 +632,18 @@ class ddl {
 			// else $new_column = false;
 			# spaltenweiser Typ von links nach rechts
 			if($this->layout['columns'] AND $this->i_on_page > 0){
-				$this->xoffset_onpage = $this->xoffset_onpage + 170;
 				if($this->i_on_page % 3 == 0){
 					$this->xoffset_onpage = 0;
 					$new_column = false;
 				}
 				else{
+					$this->xoffset_onpage = $this->xoffset_onpage + 170;
 					$new_column = true;
 				}
 			}
 			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];					# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
 			if(!$new_column)$this->yoffset_onpage = $this->yoffset_onpage + $this->layout['gap'];	# Abstand zwischen den Datensätzen addieren
-			if($this->layout['type'] != 0 AND $this->miny[$lastpage] != '' AND ($this->miny[$lastpage] - $this->layout['gap']) < 60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
+			if(!$new_column AND $this->layout['type'] != 0 AND $this->miny[$lastpage] != '' AND ($this->miny[$lastpage] - $this->layout['gap']) < 60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
 				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
