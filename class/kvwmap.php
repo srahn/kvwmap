@@ -10181,7 +10181,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->formvars['aktivesLayout'] = $this->ddl->layouts[0]['id'];
 		}
 		else {
-			$this->formvars['aktivesLayout'] = $result[0][$layerset[0]['ddl_attribute']];
+			if($this->formvars['aktivesLayout'] == '')$this->formvars['aktivesLayout'] = $result[0][$layerset[0]['ddl_attribute']];
 		}
 
 		# aktives Layout abfragen
