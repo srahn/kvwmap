@@ -623,13 +623,24 @@ class ddl {
     		$this->pdf->newPage();
 				$this->add_static_elements($offsetx);
     	}
-			# spaltenweiser Typ
-			if($this->layout['columns'] AND $this->i_on_page > 0 AND $this->i_on_page % $rowcount == 0){
+			# spaltenweiser Typ von oben nach unten
+			// if($this->layout['columns'] AND $this->i_on_page > 0 AND $this->i_on_page % $rowcount == 0){
+				// $this->xoffset_onpage = $this->xoffset_onpage + 170;
+				// $this->miny[$lastpage] = $this->maxy;
+				// $new_column = true;
+			// }
+			// else $new_column = false;
+			# spaltenweiser Typ von links nach rechts
+			if($this->layout['columns'] AND $this->i_on_page > 0){
 				$this->xoffset_onpage = $this->xoffset_onpage + 170;
-				$this->miny[$lastpage] = $this->maxy;
-				$new_column = true;
+				if($this->i_on_page % 3 == 0){
+					$this->xoffset_onpage = 0;
+					$new_column = false;
+				}
+				else{
+					$new_column = true;
+				}
 			}
-			else $new_column = false;
 			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];					# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
 			if(!$new_column)$this->yoffset_onpage = $this->yoffset_onpage + $this->layout['gap'];	# Abstand zwischen den Datensätzen addieren
 			if($this->layout['type'] != 0 AND $this->miny[$lastpage] != '' AND ($this->miny[$lastpage] - $this->layout['gap']) < 60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
