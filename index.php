@@ -1161,7 +1161,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Layer_Datensaetze_Loeschen' : {
-				$GUI->layer_Datensaetze_loeschen();
+				$GUI->layer_Datensaetze_loeschen(($GUI->formvars['output'] == 'false' ? false : true));
 			} break;
 
 			case 'Dokument_Loeschen' : {
