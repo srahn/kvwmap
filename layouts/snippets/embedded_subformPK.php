@@ -244,7 +244,8 @@ else{ ?>
 										 '&weiter_erfassen='.$this->formvars['weiter_erfassen'].
 										 '&targetobject='.$this->formvars['targetobject'].
 										 '&targetlayer_id='.$this->formvars['targetlayer_id'].
-										 '&targetattribute='.$this->formvars['targetattribute'].'\', 
+										 '&targetattribute='.$this->formvars['targetattribute'].
+										 '&mime_type='.$this->formvars['mime_type'].'\', 
 										 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
 										 new Array(\'sethtml\', \'execute_function\'));
 										 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
