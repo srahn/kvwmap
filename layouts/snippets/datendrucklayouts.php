@@ -18,12 +18,9 @@ function highlight_line(id){
 	void form.offsetWidth;
 	form.classList.add('legend_layer_highlight');
 	svg_line = document.getElementById('line_'+id)
-	if(svg_line){
-		svg_line.className.baseVal = '';
-		void svg_line.className;
-		console.log(svg_line);		
-		if(svg_line.className.baseVal == 'line line_highlight')svg_line.classList.toggle('line_highlight');
-		svg_line.className.baseVal = 'line line_highlight';
+	if(svg_line){	
+		svg_line.classList.add('line_highlight');
+		setTimeout(function(){ svg_line.classList.remove('line_highlight'); }, 1500);
 	}
 }
 
@@ -207,7 +204,7 @@ function scrolltop(){
 									$this->ddl->lines = array_values($this->ddl->lines);
 									$lines = $this->ddl->lines[$this->formvars['page']];
 									for($l = 0; $l < count($lines); $l++){
-										echo '<line id="line_'.$lines[$l]['id'].'" x1="'.$lines[$l]['x1'].'" y1="'.$lines[$l]['y1'].'" x2="'.$lines[$l]['x2'].'" y2="'.$lines[$l]['y2'].'" class="line" onmouseover="highlight_line('.$lines[$l]['id'].')" onclick="jump_to_line('.$lines[$l]['id'].')"/>';
+										echo '<line id="line_'.$lines[$l]['id'].'" x1="'.$lines[$l]['x1'].'" y1="'.$lines[$l]['y1'].'" x2="'.$lines[$l]['x2'].'" y2="'.$lines[$l]['y2'].'" class="line" onmouseenter="highlight_line('.$lines[$l]['id'].')" onclick="jump_to_line('.$lines[$l]['id'].')"/>';
 									}
 								?>
 									</g>
@@ -595,7 +592,7 @@ function scrolltop(){
 								</tr>
 								<? for($i = 0; $i < count($this->ddl->selectedlayout[0]['lines']); $i++){
 									 ?>
-									<tbody id="line_form_<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>">
+									<tbody id="line_form_<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>" onmouseenter="highlight_line(<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>)">
 									<tr>
 										<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Start<input type="hidden" name="line_id<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>"></td>
 										<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Ende</td>
