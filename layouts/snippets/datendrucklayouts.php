@@ -11,6 +11,27 @@ var counter = 0;
 Text[0]=["Hilfe:","In Freitexten können folgende Schlüsselwörter verwendet werden, die dann durch andere Texte ersetzt werden:<ul><li>$stelle: die aktuelle Stellenbezeichung</li><li>$user: der Name des Nutzers</li><li>$pagenumber: die aktuelle Seitennummer<br>(Platzierung \"auf jeder Seite\" erforderlich)</li><li>$pagecount: die Gesamtseitenzahl<br>(Platzierung \"auf jeder Seite\" erforderlich)</li><li>${<i>&lt;attributname&gt;</i>}: der Wert des Attributs</li></ul>"]
 Text[1]=["Hilfe:","Hier kann der Name der erzeugten PDF-Datei angegeben werden. Im Dateinamen können auch Attribute in der Form ${<i>&lt;attributname&gt;</i>} und die Schlüsselwörter $user, $stelle und $date verwendet werden, wodurch der Dateiname dynamisch wird. Wird kein Dateiname angegeben, erhält die PDF-Datei einen automatisch generierten Namen."]
 
+function highlight_line(id){
+	last_one = document.querySelector('.legend_layer_highlight');
+	if(last_one)last_one.classList.remove('legend_layer_highlight');
+	var form = document.getElementById('line_form_'+id);
+	void form.offsetWidth;
+	form.classList.add('legend_layer_highlight');
+	svg_line = document.getElementById('line_'+id)
+	if(svg_line){
+		svg_line.className.baseVal = '';
+		void svg_line.className;
+		console.log(svg_line);		
+		if(svg_line.className.baseVal == 'line line_highlight')svg_line.classList.toggle('line_highlight');
+		svg_line.className.baseVal = 'line line_highlight';
+	}
+}
+
+function jump_to_line(id){
+	var form = document.getElementById('line_form_'+id);
+	form.scrollIntoView({behavior: 'smooth'});
+}
+
 function image_coords(event){
 	document.getElementById('coords').style.visibility='';
 	var pointer_div = document.getElementById("preview_div");
@@ -136,6 +157,8 @@ function scrolltop(){
 			message([{ type: 'error', msg: '<? echo $this->ddl->fehlermeldung; ?>' }]);
 		</script><?
 	}
+	
+	if($this->formvars['page'] == NULL)$this->formvars['page'] = 0;
 ?>
 <div id="datendrucklayouteditor">
 	<div id="datendrucklayouteditor_vorschau">
@@ -143,8 +166,8 @@ function scrolltop(){
 			<tr>
 				<td colspan="8" align="center">
 					<? if($this->previewfile){ ?>
-						<div id="preview_div" align="left" onmouseenter="document.getElementById('preview_page').style.visibility='';" onmouseleave="document.getElementById('preview_page').style.visibility='hidden';document.getElementById('coords').style.visibility='hidden';" onmousemove="image_coords(event)" style="border:1px solid black;width:595px;height:842px;background-image:url('<? echo $this->previewfile; ?>');">
-							<div id="preview_page" style="background-color: white; visibility: hidden; margin: auto; width: 150px; padding: 10px">
+						<div id="preview_div" align="left" onmouseenter="document.getElementById('preview_page').style.visibility='';" onmouseleave="document.getElementById('preview_page').style.visibility='hidden';document.getElementById('coords').style.visibility='hidden';" onmousemove="image_coords(event)" style="position: relative; border:1px solid black;width:595px;height:842px;background-image:url('<? echo $this->previewfile; ?>');">
+							<div id="preview_page" style="background-color: white; visibility: hidden; margin: auto; width: 150px; padding: 10px; position: relative; z-index: 2">
 									<span class="fett">Vorschau:</span>
 								<?
 									echo FormObject::createSelectField(
@@ -160,6 +183,35 @@ function scrolltop(){
 										'document.getElementById(\'save_submit_button\').click();'
 									);
 								?>
+							</div>
+							<div style="position: absolute; top: 0px; z-index: 1">
+								<svg xmlns="http://www.w3.org/2000/svg" width="595" height="842">
+									<style type="text/css"><![CDATA[
+										.line{
+											stroke: steelblue;
+											stroke-width: 6;
+											opacity: 0.01;
+										}
+
+										.line_highlight{
+											animation: highlight2 1.5s ease-in-out;
+										}
+
+										@keyframes highlight2{
+											100% { opacity: 0.01 }
+											0%,60% { opacity: 0.6 }
+										}
+									]]></style>
+									<g transform="translate(0, 842) scale(1, -1)">
+								<?
+									$this->ddl->lines = array_values($this->ddl->lines);
+									$lines = $this->ddl->lines[$this->formvars['page']];
+									for($l = 0; $l < count($lines); $l++){
+										echo '<line id="line_'.$lines[$l]['id'].'" x1="'.$lines[$l]['x1'].'" y1="'.$lines[$l]['y1'].'" x2="'.$lines[$l]['x2'].'" y2="'.$lines[$l]['y2'].'" class="line" onmouseover="highlight_line('.$lines[$l]['id'].')" onclick="jump_to_line('.$lines[$l]['id'].')"/>';
+									}
+								?>
+									</g>
+								</svg>
 							</div>
 							<div id="coords" style="background-color: white;width:65px;visibility: hidden;position:relative;border: 1px solid black">
 								&nbsp;x:&nbsp;<input type="text" id="posx" size="2" style="border:none"><br>
@@ -543,6 +595,7 @@ function scrolltop(){
 								</tr>
 								<? for($i = 0; $i < count($this->ddl->selectedlayout[0]['lines']); $i++){
 									 ?>
+									<tbody id="line_form_<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>">
 									<tr>
 										<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Start<input type="hidden" name="line_id<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>"></td>
 										<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Ende</td>
@@ -553,13 +606,14 @@ function scrolltop(){
 										<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="lineposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posx'] ?>" size="5"></td>
 										<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
 										<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="lineendposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposx'] ?>" size="5"></td>
-										<td>Breite:&nbsp;<input type="text" name="breite<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['breite'] ?>" size="5"></td>
+										<td colspan="2">Breite:&nbsp;<input type="text" name="breite<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['breite'] ?>" size="5"></td>
 									</tr>
 									<tr>
 										<td>&nbsp;y:</td>
 										<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posy'] ?>" size="5"></td>
 										<td>&nbsp;y:</td>
 										<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposy'] ?>" size="5"></td>
+										<td colspan="2"></td>
 									</tr>
 									<tr>
 										<td colspan="2" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
@@ -608,6 +662,7 @@ function scrolltop(){
 											<a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Linieloeschen&line_id=<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie die Linie wirklich löschen?');">löschen&nbsp;</a>
 										</td>
 									</tr>
+									</tbody>
 								<? } ?>
 								<tr>
 									<td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;<a href="javascript:addline();">Linie hinzufügen</a></td>

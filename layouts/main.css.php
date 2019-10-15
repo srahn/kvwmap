@@ -381,7 +381,7 @@ a.invisiblelayerlink:hover{
 	background: url('../graphics/bg.gif');
 }
 
-#datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table>tbody>tr:first-of-type{
+#datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table>tbody:first-of-type>tr:first-of-type{
 	background-color: #c5d4e7;
 }
 
