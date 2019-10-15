@@ -13434,8 +13434,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				# bei dynamischem Dateipfad das Vorschaubild löschen
 				if(strtolower(substr($options, 0, 6)) == 'select')$this->deleteDokument($nachDatei, $doc_path, $doc_url, true);
 				# Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
-				$old = $this->formvars[$input_name.'_alt'];
-				if ($old != '' AND $old != $db_input) {
+				$old = array_shift(explode('&original_name', $this->formvars[$input_name.'_alt']));
+				if ($old != '' AND $old != $nachDatei) {
 					$this->deleteDokument($old, $doc_path, $doc_url);
 				}
 			}
