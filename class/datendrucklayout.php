@@ -179,7 +179,7 @@ class ddl {
 					$line['x2'] = $endx;
 					$line['y2'] = $endy;
 					$line['id'] = $this->layout['lines'][$j]['id'];
-					$this->lines[$this->pdf->currentContents][] = $line;
+					$this->gui->lines[$this->pdf->currentContents][] = $line;
 					#echo 'zeichne Linie: '.$x.' '.$y.' '.$endx.' '.$endy.'<br>';
 					if($this->layout['lines'][$j]['type'] === 0){
 						#if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
