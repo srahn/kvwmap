@@ -76,7 +76,7 @@ class rolle {
 			$name_column = "l.Name";
 
 		if ($LayerName != '') {
-			$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "'";
+			$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "'";
 			if(is_numeric($LayerName))
 				$layer_name_filter .= " OR l.Layer_ID = " . $LayerName;
 			$layer_name_filter .= ")";
