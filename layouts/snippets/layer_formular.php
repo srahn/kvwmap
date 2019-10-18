@@ -12,6 +12,7 @@
 	Text[5] = ["Hilfe:","Für einen Layer lassen sich verschiedene Klassifizierungen erstellen. Klassen mit dem gleichen Eintrag im Klassen-Feld \"Klassifizierung\" gehören zu einer Klassifizierung. Welche Klassifizierung in einem Layer verwendet wird, wird über das Layer-Feld \"Klassifizierung\" festgelegt."];
 	Text[6] = ["Hilfe:","Wird hier der Name einer Grafikdatei aus dem Ordner <?php echo GRAPHICSPATH; ?>custom angegeben, wird diese Grafik an Stelle der vom MapServer erzeugten Grafik in der Legende angezeigt. Außerdem kann hier die Höhe und Breite der Legendengrafik angegeben werden."];
 	Text[7] = ["Hilfe:","Hier kann die Zeichenreihenfolge in der Karte und optional eine abweichende Reihenfolge für die Legende festgelegt werden."];
+	Text[8] = ["Hilfe:","Hier muss das Attribut aus der Haupttabelle angegeben werden, mit dem die Datensätze identifiziert werden können (z.B. der Primärschlüssel oder die oid)."];
 
 	function testConnection() {
 		if (document.getElementById('connectiontype').value == 7) {
@@ -144,6 +145,13 @@
 						<div id="TipLayer1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 					</td>
 				</tr>
+				<tr>
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strIdAttribute; ?></th>
+					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+						<input name="oid" type="text" value="<?php echo $this->layerdata['oid']; ?>" size="36" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[8], Style[0], document.getElementById('TipLayer8'))" onmouseout="htm()">
+						<div id="TipLayer8" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+					</td>
+				</tr>				
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSchema; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">

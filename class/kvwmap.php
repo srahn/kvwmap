@@ -3285,7 +3285,7 @@ echo '			</ul>
 		for ($i = 0; $i < $count; $i++) { # das ist die Schleife, wie oft insgesamt kopiert werden soll
 			# zunächst als reine Kopie
 			$sql = "
-				SELECT Coalesce(max(oid), 0) AS oid FROM " . $layerset[0]['maintable'] . "
+				SELECT Coalesce(max(".$layerset[0]['oid']."), 0) AS oid FROM " . $layerset[0]['maintable'] . "
 			";
 			#echo '<br>SQL zur Abfrage der letzen oid: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 0);
@@ -3307,10 +3307,10 @@ echo '			</ul>
 				return array();
 			}
 			$sql = "
-				SELECT oid
+				SELECT ".$layerset[0]['oid']."
 				FROM " . $layerset[0]['maintable'] . "
 				WHERE
-					oid > " . $max_oid . "
+					".$layerset[0]['oid']." > " . $max_oid . "
 			";
 			#echo '<br>SQL zum Abfragen der neuen oids: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 0);
@@ -3336,9 +3336,9 @@ echo '			</ul>
 						$sql = "
 							UPDATE " . $layerset[0]['maintable'] . "
 							SET " . $document_attributes[$p] . " = '" . $complete_new_path . "'
-							WHERE oid = " . $rs[0] . "
+							WHERE ".$layerset[0]['oid']." = " . $rs[0] . "
 						";
-						#echo 'SQL zum Update der Dokumentattribute: ' . $sql;
+						#echo '<br>SQL zum Update der Dokumentattribute: ' . $sql;
 						$ret1 = $layerdb->execSQL($sql,4, 0);
 					}
 				}
@@ -3350,9 +3350,9 @@ echo '			</ul>
 					$sql = "
 						UPDATE " . $layerset[0]['maintable'] . "
 						SET " . $update_columns[$u] . " = '" . $update_values[$i][$u] . "'
-						WHERE oid IN (" . implode(',', $new_oids) . ")
+						WHERE ".$layerset[0]['oid']." IN (" . implode(',', $new_oids) . ")
 					";
-					#echo 'SQL zum Update der Attribute, die sich unterscheiden sollen: ' . $sql;
+					#echo '<br>SQL zum Update der Attribute, die sich unterscheiden sollen: ' . $sql;
 					$ret = $layerdb->execSQL($sql,4, 0);
 				}
 			}
@@ -3389,8 +3389,8 @@ echo '			</ul>
 							$pkvalues=pg_fetch_row($ret[1]);
 						}
 						$sql = "SELECT ".implode(',', $subform_pks_realnames)." FROM " . $layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus den neuen Datensätzen abfragen
-						$sql.= "oid IN (".implode(',', $all_new_oids).")";
-						#echo $sql.'<br>';
+						$sql.= "".$layerset[0]['oid']." IN (".implode(',', $all_new_oids).")";
+						#echo '<br>'.$sql.'<br>';
 						$ret=$layerdb->execSQL($sql,4, 0);
 						if(!$ret[0]){
 							while($rs=pg_fetch_row($ret[1])){
@@ -17582,6 +17582,7 @@ class db_mapObj{
 				'Gruppe',
 				'pfad',
 				'maintable',
+				'oid',
 				'Data',
 				'schema',
 				'document_path',
@@ -17658,7 +17659,7 @@ class db_mapObj{
 					$sql .= "`Name_" . $language."`, ";
 				}
 			}
-			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`) VALUES(";
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'" . $formvars['id']."', ";
       }
@@ -17683,6 +17684,7 @@ class db_mapObj{
       else{
         $sql .= "'" . $formvars['maintable']."', ";
       }
+			$sql .= "'" . $formvars['oid']."', ";
       if($formvars['Data'] == ''){
         $sql .= "NULL, ";
       }
