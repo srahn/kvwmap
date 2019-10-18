@@ -8400,7 +8400,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									}
 									$instring = implode(',', $parts);
 									$sql_where .= ' AND LOWER(CAST(query.'.$attributes['name'][$i].' AS TEXT)) '.$operator.' ';
-									$sql_where .= '('.strtolower($instring).')';
+									$sql_where .= '('.mb_strtolower($instring).')';
 									if($value_like != ''){			# Parameter wieder auf die der LIKE-Suche setzen
 										$this->formvars[$prefix.'operator_'.$attributes['name'][$i]] = $operator_like;
 										$this->formvars[$prefix.'value_'.$attributes['name'][$i]] = $value_like;
