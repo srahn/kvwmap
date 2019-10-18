@@ -5844,7 +5844,7 @@ echo '			</ul>
     imagejpeg($mapimage,IMAGEPATH.basename($this->img['hauptkarte']), 100);
   }
 
-  function createlegend($size){
+  function createlegend($size, $all_active_layers = false){
     $this->map->set('resolution',72);
     $this->map->legend->set("keysizex", $size*1.8*$this->map_factor);
     $this->map->legend->set("keysizey", $size*1.8*$this->map_factor);
@@ -5875,7 +5875,7 @@ echo '			</ul>
     for($i = 0; $i < count($layerset['list']); $i++){
       if($layerset['list'][$i]['aktivStatus'] != 0){
         if(($layerset['list'][$i]['minscale'] < $scale OR $layerset['list'][$i]['minscale'] == 0) AND ($layerset['list'][$i]['maxscale'] > $scale OR $layerset['list'][$i]['maxscale'] == 0)){
-					if($this->formvars['legendlayer'.$layerset['list'][$i]['Layer_ID']] == 'on'){
+					if($all_active_layers OR $this->formvars['legendlayer'.$layerset['list'][$i]['Layer_ID']] == 'on'){
 						if($layerset['list'][$i]['alias'] != '' AND $this->Stelle->useLayerAliases)$name = $layerset['list'][$i]['alias'];
 						else $name = $layerset['list'][$i]['Name'];
 						$layer = $this->map->getLayerByName($name);
@@ -7151,7 +7151,7 @@ echo '			</ul>
 
 			# Legende
 			if($this->Docu->activeframe[0]['legendsize'] > 0){
-				$legend = $this->createlegend($this->Docu->activeframe[0]['legendsize']);
+				$legend = $this->createlegend($this->Docu->activeframe[0]['legendsize'], $fast);
 				if($this->formvars['legend_extra']){
 					$pdf->newPage();
 					$this->Docu->activeframe[0]['legendposx'] = 50;
