@@ -13498,7 +13498,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 		elseif(is_object($json)){		// Nutzer-Datentyp
 			if($quote == '')$new_quote = '"';
-			else $new_quote = '\\'.$quote;
+			else $new_quote = '\\'.$quote;		# Hinweis: das ist eigentlich nur ein Backslash
 			foreach($json as $elem){
 				$elems[] = $this->processJSON($elem, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $new_quote);
 			}
@@ -13506,7 +13506,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 		else{		// normaler Datentyp
 			if(substr($json, 0, 5) == 'file:')$json = $this->save_uploaded_file(substr($json, 5), $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);		// Datei-Uploads verarbeiten
-			$result = $json;
+			$result = $quote.$json.$quote;
 		}
 		return $result;
 	}
