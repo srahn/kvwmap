@@ -8399,7 +8399,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 										if(substr($parts[$j], -1) != '\''){$parts[$j] = $parts[$j].'\'';}
 									}
 									$instring = implode(',', $parts);
-									$sql_where .= ' AND LOWER(CAST(query.'.$attributes['name'][$i].' AS TEXT)) '.$operator.' ';
+									if($attributes['type'][$i] != 'bool')$attr = 'LOWER(CAST(query.'.$attributes['name'][$i].' AS TEXT))';
+									else $attr = $attributes['name'][$i];
+									$sql_where .= ' AND '.$attr.' '.$operator.' ';
 									$sql_where .= '('.mb_strtolower($instring).')';
 									if($value_like != ''){			# Parameter wieder auf die der LIKE-Suche setzen
 										$this->formvars[$prefix.'operator_'.$attributes['name'][$i]] = $operator_like;
