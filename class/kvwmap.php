@@ -501,6 +501,7 @@ echo '			</ul>
 				$empty_label->size = '8';
 				$empty_label->minsize = '6';
 				$empty_label->maxsize = '10';
+				$empty_label->position = '6';
 				$new_label_id = $mapDB->new_Label($empty_label);
 				$mapDB->addLabel2Class($classes[0]['Class_ID'], $new_label_id, 0);
 			}
@@ -19287,7 +19288,7 @@ class db_mapObj{
 	    if($label->backgroundshadowsizex){$sql.= "backgroundshadowsizex = '" . $label->backgroundshadowsizex."', ";}
 	    if($label->backgroundshadowsizey){$sql.= "backgroundshadowsizey = '" . $label->backgroundshadowsizey."', ";}
 	    if($label->outlinecolor){$sql.= "outlinecolor = '" . $label->outlinecolor->red." " . $label->outlinecolor->green." " . $label->outlinecolor->blue."', ";}
-	    if($label->position){$sql.= "position = '" . $label->position."', ";}
+	    if($label->position !== NULL){$sql.= "position = '" . $label->position."', ";}
 	    if($label->offsetx){$sql.= "offsetx = '" . $label->offsetx."', ";}
 	    if($label->offsety){$sql.= "offsety = '" . $label->offsety."', ";}
 	    if($label->angle){$sql.= "angle = '" . $label->angle."', ";}
