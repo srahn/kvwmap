@@ -2770,10 +2770,10 @@ echo '			</ul>
 		# setze Where Ausdruck
 		if ($this->formvars['listentyp'] == 'zweispaltig' && strpos(' ', $this->formvars['inputvalue']) !== 0) {
 			$parts = explode(' ', $this->formvars['inputvalue']);
-			$where = "
-				lower(split_part(output::text, ' ', 1)) LIKE lower('" . $wildcard . $parts[0] . "%') AND
-				lower(split_part(output::text, ' ', 2)) LIKE lower('" . $wildcard . $parts[1] . "%')
-			";
+			for($p = 0; $p < count($parts); $p++){
+				$wheres[] = "lower(split_part(output::text, ' ', ".($p+1).")) LIKE lower('" . $wildcard . $parts[$p] . "%')";
+			}
+			$where = implode(' AND ', $wheres);
 		}
 		else {
 			$where = "lower(output::text) LIKE lower('" . $wildcard . $this->formvars['inputvalue'] . "%')";
