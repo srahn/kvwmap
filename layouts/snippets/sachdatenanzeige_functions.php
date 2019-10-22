@@ -527,6 +527,9 @@ include('funktionen/input_check_functions.php');
 		else if(event.key == 'Tab'){
 			// nix machen
 		}
+		else if(event.key == 'Escape'){
+			document.getElementById('output_'+field_id).onchange();
+		}
 		else{
 			suggest_field.style.display = 'none';
 			if (inputvalue.length > 0) {
