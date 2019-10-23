@@ -9780,7 +9780,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$this->new_entry = true;
 
 				$this->geomtype = $this->qlayerset[0]['attributes']['geomtype'][$this->qlayerset[0]['attributes']['the_geom']];
-				if ($this->geomtype != '' AND $this->formvars['mime_type'] != 'overlay_html') {
+				if ($this->geomtype != '' AND ($this->formvars['mime_type'] != 'overlay_html' OR $this->formvars['embedded'] == '')) {
 					$this->user->rolle->saveGeomFromLayer($this->formvars['selected_layer_id'], $this->formvars['geom_from_layer']);
 					$saved_scale = $this->reduce_mapwidth(40);
 					$oldscale=round($this->map_scaledenom);
