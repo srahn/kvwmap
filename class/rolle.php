@@ -1717,7 +1717,7 @@ class rolle {
 		return 1;
 	}
 
-	function getMapComments($consumetime, $public = false) {
+	function getMapComments($consumetime, $public = false, $order) {
 		$sql ='SELECT c.user_id, c.time_id, c.comment, c.public, u.Name, u.Vorname FROM u_consume2comments as c, user as u WHERE c.user_id = u.ID AND (';
 		if($public)$sql.=' c.public OR';
 		$sql.=' c.user_id='.$this->user_id;
@@ -1725,7 +1725,7 @@ class rolle {
 		if ($consumetime!='') {
 			$sql.=' AND time_id="'.$consumetime.'"';
 		}
-		$sql.=' ORDER BY c.time_id DESC';
+		$sql.=' ORDER BY '.replace_semicolon($order);
 		#echo '<br>'.$sql;
 		$queryret=$this->database->execSQL($sql,4, 0);
 		if ($queryret[0]) {

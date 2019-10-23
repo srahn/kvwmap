@@ -8186,7 +8186,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->layergruppen = LayerGroup::find(
 			$this,
 			'', # default alle
-			($this->formvars['order'] == '' ? 'Gruppenname' : '')  # default nach Name
+			($this->formvars['order'] == '' ? 'Gruppenname' : $this->formvars['order'])  # default nach Name
 		);
 		$this->main = 'layergroups.php';
 		$this->output();
@@ -12408,7 +12408,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   function mapCommentSelectForm() {
     $this->main='MapCommentSelectForm.php';
-    $ret=$this->user->rolle->getMapComments(NULL, true);
+		if($this->formvars['order'] == '')$this->formvars['order'] = 'time_id DESC';
+    $ret=$this->user->rolle->getMapComments(NULL, true, $this->formvars['order']);
     if ($ret[0]) {
       $this->Fehlermeldung='Es konnten keine gespeicherten Kartenausschnitte abgefragt werden.<br>'.$ret[1];
     }
