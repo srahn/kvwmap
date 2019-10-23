@@ -94,7 +94,59 @@
               </base:localId>
               <!--Namespace derzeit DE_ + bundesland ID von INSPIRE-->
               <base:namespace>
-                <xsl:value-of select="concat('DE_', xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland)"/>
+                <xsl:choose>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1000" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bb/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1100" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'be/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1200" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bw/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1300" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.','by/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1400" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hb/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1500" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'he/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1600" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hh/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1700" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'mv/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1800" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'ni/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1900" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'nw/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2000" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'rp/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2100" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sh/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2200" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sl/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2300" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sn/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2400" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'st/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2500" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'th/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=3000" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bund/')" />
+                    </xsl:when>
+                </xsl:choose>
               </base:namespace>
               <base:versionId nilReason="unknown" xsi:nil="true" />
             </base:Identifier>
@@ -453,9 +505,61 @@
                     </base:localId>
                   </xsl:otherwise>
                 </xsl:choose>
-                <base:namespace>
-                  <xsl:value-of select="concat('DE_', /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland)"/>
-                </base:namespace>
+              <base:namespace>
+                <xsl:choose>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1000" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bb/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1100" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'be/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1200" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bw/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1300" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.','by/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1400" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hb/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1500" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'he/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1600" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hh/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1700" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'mv/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1800" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'ni/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1900" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'nw/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2000" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'rp/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2100" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sh/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2200" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sl/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2300" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sn/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2400" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'st/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2500" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'th/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=3000" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bund/')" />
+                    </xsl:when>
+                </xsl:choose>
+              </base:namespace>
                 <base:versionId nilReason="unknown" xsi:nil="true" />
               </base:Identifier>
             </plu:inspireId>
@@ -507,7 +611,59 @@
                       <xsl:value-of select="concat('inspirelocalid_' , generate-id())"/>
                     </base:localId>
                     <base:namespace>
-                      <xsl:value-of select="concat('DE_', /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland)"/>
+                        <xsl:choose>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1000" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bb/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1100" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'be/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1200" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bw/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1300" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.','by/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1400" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hb/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1500" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'he/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1600" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hh/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1700" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'mv/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1800" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'ni/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1900" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'nw/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2000" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'rp/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2100" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sh/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2200" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sl/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2300" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sn/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2400" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'st/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2500" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'th/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=3000" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bund/')" />
+                            </xsl:when>
+                        </xsl:choose>
                     </base:namespace>
                     <base:versionId nilReason="unknown" xsi:nil="true" />
                   </base:Identifier>
@@ -2879,8 +3035,60 @@
                       <xsl:value-of select="concat('inspirelocalid_' , generate-id())"/>
                     </base:localId>
                     <base:namespace>
-                      <xsl:value-of select="concat('DE_', /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland)"/>
-                    </base:namespace>
+                        <xsl:choose>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1000" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bb/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1100" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'be/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1200" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bw/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1300" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.','by/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1400" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hb/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1500" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'he/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1600" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hh/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1700" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'mv/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1800" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'ni/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1900" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'nw/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2000" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'rp/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2100" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sh/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2200" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sl/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2300" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sn/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2400" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'st/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2500" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'th/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=3000" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bund/')" />
+                            </xsl:when>
+                        </xsl:choose>
+                      </base:namespace>
                     <base:versionId nilReason="unknown" xsi:nil="true" />
                   </base:Identifier>
                 </plu:inspireId>
@@ -3181,9 +3389,7 @@
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_4_4_UrbanArea')}"/>
                       </xsl:when>
                       <xsl:when test="child::xplan:typ=1800 or
-                                                child::xplan:typ=1300 or
-                                                child::xplan:typ=1800 or
-                                                child::xplan:typ=1300 or
+												child::xplan:typ=1300 or
                                                 child::xplan:typ=1301 or
                                                 child::xplan:typ=2000">
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_4_6_FunctionalUrbanArea')}"/>
