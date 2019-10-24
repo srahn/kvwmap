@@ -1379,6 +1379,14 @@ tbody.gle>tr {
 	padding: 0;
 }
 
+.gle_hr{
+	width: 100%; 
+	height: 3px; 
+	margin: 15 0; 
+	color: <? echo BG_GLEHEADER; ?>; 
+	background: <? echo BG_GLEHEADER; ?>;
+}
+
 .subFormListItem > a:before{
 	content:url('../graphics/submenue.png');
 	vertical-align: top;
