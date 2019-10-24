@@ -990,7 +990,7 @@ class data_import_export {
 						if ($strpos !== false AND $strpos < 3) {		# Excel-Datumsproblem
 							$value = $value."\t";
 						}
-						if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
+						if(is_numeric($value)){
 							$value = str_replace('.', ",", $value);				#  Excel-Datumsproblem
 						}
 					}
