@@ -575,7 +575,7 @@ function scrolltop(){
 										<span id="freitexte">Freitexte</span>
 										<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[0], Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
 										<div style="position:relative">
-											<div id="Tip1" style="visibility:hidden;position:absolute;bottom:20px;z-index:1000;"></div>
+											<div id="Tip1" style="visibility:hidden;position:absolute;top:15px;z-index:1000;"></div>
 										</div>
 									</td>
 								</tr>
