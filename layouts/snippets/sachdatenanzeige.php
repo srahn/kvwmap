@@ -60,7 +60,7 @@ for($i=0;$i<$anzLayer;$i++){
 	   </table>';
   }
 	if($i > 0){
-		echo '<hr style="width: 100%; height: 3px; margin: 15 0; color: '.BG_GLEHEADER.'; background: '.BG_GLEHEADER.';">';
+		echo '<hr class="gle_hr">';
 	}
 	$template = $this->qlayerset[$i]['template'];
 	if (in_array($template, array('', 'generic_layer_editor.php', 'generic_layer_editor_doc_raster.php'))) {
