@@ -15668,6 +15668,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$_files = $_FILES;
     if($_files['importliste']['name']){
 			$importliste = file($_files['importliste']['tmp_name'], FILE_IGNORE_NEW_LINES);
+			$bom = pack('H*','EFBBBF');
+			$importliste[0] = preg_replace("/^$bom/", '', $importliste[0]);
 			if(strpos($importliste[0], '/') !== false){
 				$importliste_string = implode('; ', $importliste);
 				$importliste_string = formatFlurstkennzALKIS($importliste_string);
