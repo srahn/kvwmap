@@ -622,7 +622,7 @@ class Nachweis {
     $sql ="INSERT INTO nachweisverwaltung.n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,geprueft,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen,bemerkungen_intern,bearbeiter,zeit,erstellungszeit)";
     $sql.=" VALUES (".$flurid.",'".trim($stammnr)."',".$unterart.",'".trim($blattnr)."','".$datum."'";
     $sql.=",'".$VermStelle."','".$gueltigkeit."','".$geprueft."','".$blattformat."','".$zieldatei."',st_transform(st_geometryfromtext('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise'))";
-    $sql.=",".$fortf.",'".$rissnummer."','".$bemerkungen."','".$bemerkungen_intern."','".$user->Vorname." ".$user->Name."', '".date('Y-m-d G:i:s')."', '".date('Y-m-d G:i:s')."')";
+    $sql.=",".trim($fortf).",'".trim($rissnummer)."','".$bemerkungen."','".$bemerkungen_intern."','".$user->Vorname." ".$user->Name."', '".date('Y-m-d G:i:s')."', '".date('Y-m-d G:i:s')."')";
 		#echo '<br>Polygon-SQL: '.$sql;
     $ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0]) {
@@ -655,7 +655,7 @@ class Nachweis {
 		}
 		if($rissnr !== NULL){
 			if($rissnr === '')$sql.="rissnummer=NULL, ";
-			else $sql.="rissnummer='".$rissnr."', ";
+			else $sql.="rissnummer='".trim($rissnr)."', ";
 		}
 		$sql.="bemerkungen='".$bemerkungen."', ";
 		$sql.="bemerkungen_intern='".$bemerkungen_intern."', ";
