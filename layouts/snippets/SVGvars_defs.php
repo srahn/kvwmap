@@ -81,7 +81,7 @@ $SVGvars_defs = '
     </filter>
 		
 		<linearGradient id="LinearGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-			<stop offset="0%" stop-color="#fdfdfd" stop-opacity="0%" />
+			<stop offset="0%" stop-color="#fdfdfd" stop-opacity="100%" />
 			<stop offset="100%" stop-color="#DAE4EC" stop-opacity="100%" />
 		</linearGradient>
 
