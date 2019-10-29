@@ -12,16 +12,20 @@ class wfs{
 		$this->epsg = $epsg;
 	}
 	
-	function get_feature_request($bbox, $filter, $maxfeatures){
-		$request = $this->url.'&service=WFS&request=GetFeature&version='.$this->version.'&typename='.$this->typename;
-		if($bbox != ''){
-			$request .= '&bbox='.$bbox;
-			if($this->version == '1.1.0')$request .= ',EPSG:'.$this->epsg;
+	function get_feature_request($request, $bbox, $filter, $maxfeatures){
+		# entweder wird eine fertige request-URL übergeben oder an Hand der bbox bzw. des Filters gebildet
+		if($request == NULL){
+			$request = $this->url.'&service=WFS&request=GetFeature&version='.$this->version.'&typename='.$this->typename;
+			if($bbox != ''){
+				$request .= '&bbox='.$bbox;
+				if($this->version == '1.1.0')$request .= ',EPSG:'.$this->epsg;
+			}
+			if($filter != ''){$request .= '&filter='.urlencode($filter);}
+			if($maxfeatures != ''){$request .= '&maxfeatures='.$maxfeatures;}
 		}
-		if($filter != ''){$request .= '&filter='.urlencode($filter);}
-		if($maxfeatures != ''){$request .= '&maxfeatures='.$maxfeatures;}
 		#echo $request;
-    $this->gml = url_get_contents($request, $this->username, $this->password);
+		$this->gml = url_get_contents($request, $this->username, $this->password);
+		return $request;
 	}
 	
 	function describe_featuretype_request(){
@@ -130,7 +134,8 @@ class wfs{
 		else $this->parse_gml('gml:featureMember');		
 		if(strpos($this->gml, 'gmlx:posList') !== false)$geomtag = 'gmlx:posList';
 		elseif(strpos($this->gml, 'gml:posList') !== false)$geomtag = 'gml:posList';
-		else $geomtag = 'gml:coordinates';
+		elseif(strpos($this->gml, 'gml:coordinates') !== false)$geomtag = 'gml:coordinates';
+		else $geomtag = 'gml:pos';
 		for($i=0; $i < count($this->objects); $i++){		# durchläuft alle Objekte
 			for($j = 0; $j < count($this->objects[$i]); $j++){		# durchläuft alle Tags im Objekt
 				$coord_pair = array();
@@ -174,7 +179,8 @@ class wfs{
 			if(strpos($this->objects[0][$j]["tag"], 'element') !== false AND ($this->objects[0][$j]["type"] == 'complete' OR $this->objects[0][$j]["type"] == 'open')){
 				# und keine Geometrie-Tags
 				if($this->objects[0][$j]["attributes"]["type"] != 'gml:GeometryPropertyType' AND $this->objects[0][$j]["attributes"]["type"] != 'gml:MultiPolygonPropertyType' AND $this->objects[0][$j]["attributes"]["type"] != 'gml:PolygonPropertyType' AND $this->objects[0][$j]["attributes"]["type"] != 'gml:PointPropertyType'){
-	  			$attributes['name'][] = $this->objects[0][$j]["attributes"]["name"];
+	  			$attribute['name'] = $this->objects[0][$j]["attributes"]["name"];
+					$attributes[] = $attribute;
 				}
 			}
 		}

@@ -329,7 +329,7 @@ function alias_replace(name){
 						  </td>
 
 						  <td align="left" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header">Aliasname</div>'; ?>
+								<? if($i == 0)echo '<div class="fett scrolltable_header">Aliasname&nbsp;<a title="aus Attributname erzeugen" href="javascript:create_aliasnames();"><img src="graphics/autogen.png"></a></div>'; ?>
 						  	<input name="alias_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['alias'][$i]); ?>">
 						  </td>
 							

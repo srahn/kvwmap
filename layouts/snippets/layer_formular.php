@@ -109,7 +109,7 @@
 					<th class="fetter"><a href="javascript:toggleForm('layerform');"><div style="background-color: <?php echo BG_DEFAULT ?>; width: 100%" id="layerform_link"><? echo $strCommonData; ?></div></a></th>
 					<th class="fetter"><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
 					<th class="fetter"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
-					<? if($this->layerdata['connectiontype'] == 6){ ?>
+					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
 					<th class="fetter"><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
 					<? } ?>
 					<th class="fetter"><a href="javascript:toggleForm('stellenzuweisung');"><div style="width: 100%" id="stellenzuweisung_link"><? echo $strStellenAsignment; ?></div></a></th>

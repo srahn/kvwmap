@@ -318,7 +318,7 @@ class GUI {
 						if($layer[0]['connectiontype']==6 OR($layer[0]['Datentyp']==MS_LAYER_RASTER AND $layer[0]['connectiontype']!=7)){
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
 						}
-						if($layer[0]['connectiontype']==6 AND $layer[0]['queryable']){
+						if(in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
 							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strSearch.'</a></li>';
 						}
 						if($layer[0]['privileg'] > 0){
@@ -4250,7 +4250,7 @@ echo '			</ul>
 		$this->main='genericTemplate.php';
 		$this->title='Speicherung aller Layerattribute';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-		$this->layerdaten = $mapDB->get_postgis_layers(NULL);
+		$this->layerdaten = $mapDB->get_layers_of_type(MS_POSTGIS, NULL);
 		for ($i = 0; $i < count($this->layerdaten['ID']); $i++) {
 			$layer = $mapDB->get_Layer($this->layerdaten['ID'][$i]);
 			if ($layer['pfad'] != '' AND $layer['connectiontype'] == 6) {
@@ -7977,6 +7977,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
 				#---------- Speichern der Layerattribute -------------------
 			}
+			if($this->formvars['connectiontype'] == MS_WFS){
+				include_(CLASSPATH.'wfs.php');
+				$url = $this->formvars['connection'];
+				$version = $this->formvars['wms_server_version'];
+				$epsg = $this->formvars['epsg_code'];
+				$typename = $this->formvars['wms_name'];
+				$namespace = substr($typename, 0, strpos($typename, ':'));
+				$username = $this->formvars['wms_auth_username'];
+				$password = $this->formvars['wms_auth_password'];
+				$wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
+				$wfs->describe_featuretype_request();
+				$attributes = $wfs->get_attributes();
+				$mapDB->save_attributes($this->formvars['selected_layer_id'], $attributes);
+			}
 
 			# Klassen übernehmen (aber als neue Klassen anlegen)
 			$name = @array_values($this->formvars['name']);
@@ -8075,6 +8089,23 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 			else{
 				showAlert('Keine connection angegeben.');
+			}
+		}
+		if($this->formvars['connectiontype'] == MS_WFS){
+			include_(CLASSPATH.'wfs.php');
+			$url = $this->formvars['connection'];
+			$version = $this->formvars['wms_server_version'];
+			$epsg = $this->formvars['epsg_code'];
+			$typename = $this->formvars['wms_name'];
+			$namespace = substr($typename, 0, strpos($typename, ':'));
+			$username = $this->formvars['wms_auth_username'];
+			$password = $this->formvars['wms_auth_password'];
+			$wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
+			$wfs->describe_featuretype_request();
+			$attributes = $wfs->get_attributes();
+			$mapDB->save_attributes($this->formvars['selected_layer_id'], $attributes);
+			if($attributes != NULL){
+				$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
 			}
 		}
     # Stellenzuweisung
@@ -8378,9 +8409,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$ret['success'] = false;
 			$ret['msg'] = 'Der Layer mit der ID '.$this->formvars['selected_layer_id'].' ist der aktuellen Stelle nicht zugeordnet.';
 		}
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		switch ($layerset[0]['connectiontype']) {
 			case MS_POSTGIS : {
-				$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 				$layerdb->setClientEncoding();
 				$path = replace_params(
@@ -8721,10 +8752,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$username = $layerset[0]['wms_auth_username'];
 				$password = $layerset[0]['wms_auth_password'];
         $wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
-        # Attributnamen ermitteln
-        $wfs->describe_featuretype_request();
-				$wfs->getTargetNamespace();
-        $attributes = $wfs->get_attributes();
+				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
+        $attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], NULL, $privileges['attributenames'], false, true);
         # Filterstring erstellen
         for($i = 0; $i < count($attributes['name']); $i++){
           if($this->formvars['value_'.$attributes['name'][$i]] != '' OR $this->formvars['operator_'.$attributes['name'][$i]] == 'IS NULL' OR $this->formvars['operator_'.$attributes['name'][$i]] == 'IS NOT NULL'){
@@ -8738,7 +8767,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         if($this->formvars['anzahl'] == ''){
           $this->formvars['anzahl'] = MAXQUERYROWS;
         }
-        $wfs->get_feature_request(NULL, $filter, $this->formvars['anzahl']);
+				if ($this->last_query != ''){
+					$request = $this->last_query[$layerset[0]['Layer_ID']]['sql'];
+					if($this->formvars['anzahl'] == '')$this->formvars['anzahl'] = $this->last_query[$layerset[0]['Layer_ID']]['limit'];
+				}
+        $wfs->get_feature_request($request, NULL, $filter, $this->formvars['anzahl']);
         $features = $wfs->extract_features();
         for($j = 0; $j < count($features); $j++){
           for($k = 0; $k < count($attributes['name']); $k++){
@@ -8748,6 +8781,18 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           }
           $layerset[0]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
         }
+				# last_search speichern
+				if($this->last_query == ''){
+					$this->formvars['search_name'] = '<last_search>';
+					$this->user->rolle->delete_search($this->formvars['search_name']);		# das muss hier stehen bleiben, denn in save_search wird mit der Layer-ID gelöscht
+					$this->user->rolle->save_search($attributes, $this->formvars);
+				}
+				if(count($features) > 0){
+					# last_query speichern
+					$this->user->rolle->delete_last_query();
+					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $request, NULL, $this->formvars['anzahl'], NULL);
+				}
+				$attributes = $mapDB->add_attribute_values($attributes, $this->pgdatabase, $layerset[0]['shape'], true, $this->Stelle->id);
       }break;
 		}   # Ende switch connectiontype
 
@@ -8849,17 +8894,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }break;
 
         case MS_WFS : {
-					include_(CLASSPATH.'wfs.php');
-          $url = $this->layerset[0]['connection'];
-					$version = $this->layerset[0]['wms_server_version'];
-					$epsg = $this->layerset[0]['epsg_code'];
-          $typename = $this->layerset[0]['wms_name'];
-					$namespace = substr($typename, 0, strpos($typename, ':'));
-					$username = $this->layerset[0]['wms_auth_username'];
-					$password = $this->layerset[0]['wms_auth_password'];
-          $wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
-          $wfs->describe_featuretype_request();
-          $this->attributes = $wfs->get_attributes();
+					$privileges = $this->Stelle->get_attributes_privileges($this->formvars['layer_id']);
+					$this->attributes = $mapdb->read_layer_attributes($this->formvars['layer_id'], NULL, $privileges['attributenames']);
         }break;
       }
 			?><table><tr><?
@@ -9084,20 +9120,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }break;
 
         case MS_WFS : {
-					include_(CLASSPATH.'wfs.php');
-          $url = $this->layerset[0]['connection'];
-					$version = $this->layerset[0]['wms_server_version'];
-					$epsg = $this->layerset[0]['epsg_code'];
-          $typename = $this->layerset[0]['wms_name'];
-					$namespace = substr($typename, 0, strpos($typename, ':'));
-					$username = $this->layerset[0]['wms_auth_username'];
-					$password = $this->layerset[0]['wms_auth_password'];
-					$wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
-          $wfs->describe_featuretype_request();
-          $this->attributes = $wfs->get_attributes();
+					$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
+          $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], NULL, $privileges['attributenames']);
 					for($i = 0; $i < count($this->attributes['name']); $i++){
 	          $this->qlayerset['shape'][0][$this->attributes['name'][$i]] = $this->formvars['value_'.$this->attributes['name'][$i]];
 	        }
+					$this->attributes = $mapdb->add_attribute_values($this->attributes, $this->pgdatabase, $this->qlayerset['shape'], true, $this->Stelle->id);
         }break;
       }
     }
@@ -9969,7 +9997,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->ddl=$ddl;
     if(in_array($this->Stelle->id, $admin_stellen)){										# eine Admin-Stelle darf alle Layer und Stellen sehen
-			$this->layerdaten = $mapdb->get_postgis_layers('Name');
+			$this->layerdaten = $mapdb->get_layers_of_type(MS_POSTGIS, 'Name');
 			$this->stellendaten=$this->user->getStellen('Bezeichnung');
 		}
 		else{																																# eine normale Stelle nur die eigenen Layer und die eigene Stelle
@@ -10908,7 +10936,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->titel='Attribut-Editor';
 		$this->main='attribut_editor.php';
-		$this->layerdaten = $mapdb->get_postgis_layers('Name');
+		$this->layerdaten = $mapdb->get_layers_of_type(MS_POSTGIS.', '.MS_WFS, 'Name');
 		$this->datatypes = $mapdb->getall_Datatypes('name');
 		if($this->formvars['selected_layer_id']){
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -10953,7 +10981,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->titel='Layer-Rechteverwaltung';
     $this->main='attribut_privileges_form.php';
-		$this->layerdaten = $mapdb->get_postgis_layers('Name');
+		$this->layerdaten = $mapdb->get_layers_of_type(MS_POSTGIS.','.MS_WFS, 'Name');
     if($this->formvars['selected_layer_id'] != ''){
     	$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     	$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
@@ -13605,6 +13633,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $anzLayer=count($layerset);
     $map=ms_newMapObj('');
     $map->set('shapepath', SHAPEPATH);
+		if($this->formvars['anzahl'] == ''){
+			$this->formvars['anzahl'] = MAXQUERYROWS;
+		}
     for ($i=0;$i<$anzLayer;$i++) {
     	$sql_order = '';
       if($layerset[$i]['queryable'] AND
@@ -13953,9 +13984,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							}
 
 							# Anhängen des Begrenzers zur Einschränkung der Anzahl der Ergebniszeilen
-							if($this->formvars['anzahl'] == ''){
-								$this->formvars['anzahl'] = MAXQUERYROWS;
-							}
 							$sql_limit =' LIMIT ' . intval($this->formvars['anzahl']);
 							if($this->formvars['offset_'.$layerset[$i]['Layer_ID']] != ''){
 								$sql_limit.=' OFFSET ' . intval($this->formvars['offset_'.$layerset[$i]['Layer_ID']]);
@@ -14117,21 +14145,35 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$namespace = substr($typename, 0, strpos($typename, ':'));
 						$username = $layerset[$i]['wms_auth_username'];
 						$password = $layerset[$i]['wms_auth_password'];
-						$wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
-            # Attributnamen ermitteln
-            $wfs->describe_featuretype_request();
-            $layerset[$i]['attributes'] = $wfs->get_attributes();
+						$wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);						
+						$this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+						$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
+						$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], NULL, $privileges['attributenames']);
+						if($this->last_query != '' AND $this->last_query[$layerset[$i]['Layer_ID']]['sql'] != ''){
+							$request = $this->last_query[$layerset[$i]['Layer_ID']]['sql'];
+							if($this->formvars['anzahl'] == '')$this->formvars['anzahl'] = $this->last_query[$layerset[$i]['Layer_ID']]['limit'];
+						}
             # Abfrage absetzen
-            $wfs->get_feature_request($bbox, NULL, MAXQUERYROWS);
+            $request = $wfs->get_feature_request($request, $bbox, NULL, intval($this->formvars['anzahl']));
             $features = $wfs->extract_features();
             for($j = 0; $j < count($features); $j++){
               for($k = 0; $k < count($layerset[$i]['attributes']['name']); $k++){
 								$layerset[$i]['shape'][$j][$layerset[$i]['attributes']['name'][$k]] = $features[$j]['value'][$layerset[$i]['attributes']['name'][$k]];
-                $layerset[$i]['attributes']['privileg'][$k] = 0;
-								$layerset[$i]['attributes']['visible'][$k] = true;
               }
               $layerset[$i]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
             }
+						for($j = 0; $j < count($layerset[$i]['attributes']['name']); $j++){
+							$layerset[$i]['attributes']['privileg'][$j] = $privileges[$layerset[$i]['attributes']['name'][$j]];
+							$layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['name'][$j]] = $privileges[$layerset[$i]['attributes']['name'][$j]];
+						}
+						if(count($features) > 0){
+							if(!$last_query_deleted){			# damit nur die letzte Query gelöscht wird und nicht eine bereits gespeicherte Query eines anderen Layers der aktuellen Abfrage
+								$this->user->rolle->delete_last_query();
+								$last_query_deleted = true;
+							}
+							$this->user->rolle->save_last_query('Sachdaten', $layerset[$i]['Layer_ID'], $request, NULL, $this->formvars['anzahl'], NULL);
+						}
+						$layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $this->pgdatabase, $layerset[$i]['shape'], true, $this->Stelle->id);
             $this->qlayerset[]=$layerset[$i];
           } break;
 
@@ -17139,8 +17181,8 @@ class db_mapObj{
 		$attributes = $this->getPathAttributes($database, $path);
 		return $attributes;
 	}
-
-	function save_postgis_attributes($layer_id, $attributes, $maintable, $schema){
+	
+	function save_attributes($layer_id, $attributes){
 		$insert_count = 0;
 		for ($i = 0; $i < count($attributes); $i++) {
 			if($attributes[$i] == NULL)continue;
@@ -17183,7 +17225,11 @@ class db_mapObj{
 			if(mysql_affected_rows() == 1)$insert_count++;		# ein neues Attribut wurde per Insert eingefügt
 			if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
 		}
+	}		
 
+	function save_postgis_attributes($layer_id, $attributes, $maintable, $schema){
+		$this->save_attributes($layer_id, $attributes);
+	
 		if($maintable == ''){
 			$maintable = $attributes[0]['table_name'];
 			$sql = "UPDATE layer SET maintable = '" . $maintable."' WHERE (maintable IS NULL OR maintable = '') AND Layer_ID = " . $layer_id;
@@ -18611,7 +18657,7 @@ class db_mapObj{
     return $stellen;
   }
 
-  function get_postgis_layers($order) {
+  function get_layers_of_type($types, $order) {
 		global $language;
 		if($language != 'german') {
 			$name_column = "
@@ -18624,7 +18670,7 @@ class db_mapObj{
 			$name_column = "Name";
 		}
     $sql ='SELECT Layer_ID, '.$name_column.' FROM layer';
-    $sql.=' WHERE connectiontype = 6';
+    $sql.=' WHERE connectiontype IN ('.$types.')';
     if($order != ''){$sql .= ' ORDER BY ' . replace_semicolon($order);}
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>" . $sql,4);
     $query=mysql_query($sql);
