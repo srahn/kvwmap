@@ -7718,7 +7718,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			case 1 : {		# für jeden Wert eine Klasse
         $sql = "
           SELECT DISTINCT " . $class_item."
-          FROM (" . $data_sql.") AS data ORDER BY " . replace_semicolon($class_item) . " LIMIT 50";
+          FROM (" . $data_sql.") AS data ORDER BY " . replace_semicolon($class_item) . " LIMIT 100";
 
         $ret=$layerdb->execSQL($sql, 4, 0);
 				if ($ret['success']==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
