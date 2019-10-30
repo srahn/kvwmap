@@ -1110,6 +1110,20 @@ class pgdatabase {
     return $this->dbConn;
   }
 	
+	function getEnumElements($name, $schema){
+		$sql = "SELECT array_to_string(array_agg(''''||e.enumlabel||''''), ',') as enum_string ";
+		$sql.= "FROM pg_enum e ";
+		$sql.= "JOIN pg_type t ON e.enumtypid = t.oid ";
+		$sql.= "JOIN pg_namespace ns ON (t.typnamespace = ns.oid) ";
+		$sql.= "WHERE t.typname = '".$name."' ";
+		$sql.= "AND ns.nspname = '".$schema."'";
+		$ret1 = $this->execSQL($sql, 4, 0);
+		if($ret1[0]==0){
+			$result = pg_fetch_assoc($ret1[1]);
+		}
+		return $result['enum_string'];
+	}
+	
 	function writeCustomType($typname, $schema){		
 		$datatype_id = $this->getDatatypeId($typname, $schema, $this->dbName, $this->host, $this->port);
 		$this->writeDatatypeAttributes($datatype_id, $typname, $schema);
