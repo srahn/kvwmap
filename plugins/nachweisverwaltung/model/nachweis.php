@@ -657,9 +657,10 @@ class Nachweis {
 			if($rissnr === '')$sql.="rissnummer=NULL, ";
 			else $sql.="rissnummer='".trim($rissnr)."', ";
 		}
-		$sql.="bemerkungen='".$bemerkungen."', ";
-		$sql.="bemerkungen_intern='".$bemerkungen_intern."', ";
-		$sql.=" bearbeiter='".$user->Vorname." ".$user->Name."', zeit='".date('Y-m-d G:i:s')."'";
+		if($bemerkungen !== NULL)$sql.="bemerkungen='".$bemerkungen."', ";
+		if($bemerkungen_intern !== NULL)$sql.="bemerkungen_intern='".$bemerkungen_intern."', ";
+		if($user !== NULL)$sql.=" bearbeiter='".$user->Vorname." ".$user->Name."', ";
+		$sql.=" zeit='".date('Y-m-d G:i:s')."'";
     $sql.=" WHERE id = ".$id;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
