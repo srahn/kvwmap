@@ -240,29 +240,31 @@
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDdlAttribute; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3"><?php
-							include(CLASSPATH . 'LayerAttribute.php');
-							include_once(CLASSPATH . 'FormObject.php');
-							$attributes = LayerAttribute::find($this, 'layer_id = ' . $this->layerdata['Layer_ID']);
-							echo FormObject::createSelectField(
-								'ddl_attribute',
-								array_map(
-									function($attribute) {
-										return array(
-											'value' => $attribute->get('name'),
-											'output' => $attribute->get('name')
-										);
-									},
-									$attributes
-								),
-								$this->layerdata['ddl_attribute'],
-								1,
-								'',
-								'',
-								'ddl_attribute',
-								'',
-								'',
-								true
-							); ?>
+							if($this->layerdata['Layer_ID']){
+								include_once(CLASSPATH . 'LayerAttribute.php');
+								include_once(CLASSPATH . 'FormObject.php');
+								$attributes = LayerAttribute::find($this, 'layer_id = ' . $this->layerdata['Layer_ID']);
+								echo FormObject::createSelectField(
+									'ddl_attribute',
+									array_map(
+										function($attribute) {
+											return array(
+												'value' => $attribute->get('name'),
+												'output' => $attribute->get('name')
+											);
+										},
+										$attributes
+									),
+									$this->layerdata['ddl_attribute'],
+									1,
+									'',
+									'',
+									'ddl_attribute',
+									'',
+									'',
+									true
+								);
+							} ?>
 						</td>
 					</tr>
 					<tr>
