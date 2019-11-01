@@ -887,47 +887,68 @@ class rolle {
   }
 	
 	function resetLayers($layer_id){
-		$mapdb = new db_mapObj($this->stelle_id, $this->user_id);
-		if($layer_id != ''){
-			if($layer_id > 0){
-				$this->update_layer_status($layer_id, '0');		# 1 normalen Layer deaktivieren
-			}
-			else{
-				$mapdb->deleteRollenLayer(-$layer_id);			# 1 Rollenlayer deaktivierten bzw. löschen
-			}
-		}
-		else{
-			# gemeint sind alle layer
-			$this->update_layer_status(NULL, '0');						# alle normalen Layer deaktivieren
-			$mapdb->deleteRollenLayer();											# alle Rollenlayer deaktivieren bzw. löschen
-		}
+		$this->update_layer_status($layer_id, '0');
 	}
 
 	function update_layer_status($layer_id, $status) {
-		$mapdb = new db_mapObj($this->stelle_id, $this->user_id);
-
-		$sql = "
-			UPDATE
-				u_rolle2used_layer
-			SET
-				aktivStatus = '" . $status . "'
-			WHERE
-				user_id = " . $this->user_id . " AND
-				stelle_id = " . $this->stelle_id .
-				($layer_id != '' ? " AND layer_id = " . $layer_id : "") . "
-		";
-		#echo '<br>Sql: ' . $sql;
-
-		$this->debug->write("<p>file:rolle.php class:rolle->update_layer_status - schalte ein oder alle Layer Stati der Rolle um:", 4);
-		$this->database->execSQL($sql, 4, $this->loglevel);		
+		if($layer_id > 0 OR $layer_id == NULL){
+			$sql = "
+				UPDATE
+					u_rolle2used_layer
+				SET
+					aktivStatus = '" . $status . "'
+				WHERE
+					user_id = " . $this->user_id . " AND
+					stelle_id = " . $this->stelle_id .
+					($layer_id != '' ? " AND layer_id = " . $layer_id : "");
+			#echo '<br>Sql: ' . $sql;
+			$this->debug->write("<p>file:rolle.php class:rolle->update_layer_status - schalte ein oder alle Layer Stati der Rolle um:", 4);
+			$this->database->execSQL($sql, 4, $this->loglevel);		
+		}
+		if($layer_id < 0 OR $layer_id == NULL){
+			$sql = "
+				UPDATE
+					rollenlayer
+				SET
+					aktivStatus = '" . $status . "'
+				WHERE
+					user_id = " . $this->user_id . " AND
+					stelle_id = " . $this->stelle_id .
+					($layer_id != '' ? " AND layer_id = " . abs($layer_id) : "") . "
+			";
+			#echo '<br>Sql: ' . $sql;
+			$this->debug->write("<p>file:rolle.php class:rolle->update_layer_status - schalte ein oder alle Layer Stati der Rolle um:", 4);
+			$this->database->execSQL($sql, 4, $this->loglevel);		
+		}
 	}
 
 	function resetQuerys($layer_id){
-		$sql ="UPDATE u_rolle2used_layer SET queryStatus='0'";
-		$sql.=" WHERE user_id=".$this->user_id." AND stelle_id=".$this->stelle_id;
-		if($layer_id != '')$sql.=" AND layer_id = ".$layer_id;
-		$this->debug->write("<p>file:rolle.php class:rolle->resetQuerys - resetten aller aktiven Layer zur Rolle:",4);
-		$this->database->execSQL($sql,4, $this->loglevel);
+		if($layer_id > 0 OR $layer_id == NULL){
+			$sql ="
+				UPDATE 
+					u_rolle2used_layer 
+				SET 
+					queryStatus = '0'
+				WHERE 
+					user_id=".$this->user_id." AND 
+					stelle_id=".$this->stelle_id.
+					($layer_id != '' ? " AND layer_id = ".$layer_id : "");
+			$this->debug->write("<p>file:rolle.php class:rolle->resetQuerys - resetten aller aktiven Layer zur Rolle:",4);
+			$this->database->execSQL($sql,4, $this->loglevel);
+		}
+		if($layer_id < 0 OR $layer_id == NULL){
+			$sql ="
+				UPDATE 
+					rollenlayer 
+				SET 
+					queryStatus = '0'
+				WHERE 
+					user_id=".$this->user_id." AND 
+					stelle_id=".$this->stelle_id.
+					($layer_id != '' ? " AND layer_id = ".abs($layer_id) : "");
+			$this->debug->write("<p>file:rolle.php class:rolle->resetQuerys - resetten aller aktiven Layer zur Rolle:",4);
+			$this->database->execSQL($sql,4, $this->loglevel);
+		}
 	}
 
 	function resetClasses(){
@@ -959,7 +980,7 @@ class rolle {
 				else{						# Rollenlayer
 					$sql ='UPDATE rollenlayer SET aktivStatus="'.$aktiv_status.'"';
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-					$sql.=' AND id = -'.$this->layerset[$i]['Layer_ID'];
+					$sql.=' AND id = '.abs($this->layerset[$i]['Layer_ID']);
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
 				}
