@@ -159,8 +159,10 @@ $GUI->go = $go;
 $GUI->requeststring = $QUERY_STRING;
 
 # Laden der Plugins index.phps
-for($i = 0; $i < count($kvwmap_plugins); $i++) {
-	include(PLUGINS.$kvwmap_plugins[$i].'/control/index.php');
+if(!FAST_CASE){
+	for($i = 0; $i < count($kvwmap_plugins); $i++) {
+		include(PLUGINS.$kvwmap_plugins[$i].'/control/index.php');
+	}
 }
 
 # Übergeben des Anwendungsfalles
