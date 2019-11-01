@@ -12235,7 +12235,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if(in_array($this->formvars['last_button'], array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->setSelectedButton($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
 		if($this->formvars['delete_rollenlayer'] != ''){
 			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-			$mapDB->deleteRollenlayer(NULL, $this->formvars['type']);
+			$mapDB->deleteRollenlayer(NULL, $this->formvars['delete_rollenlayer_type']);
 		}
     # Karteninformationen lesen
     $this->loadMap('DataBase');
@@ -16105,7 +16105,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	
 	function deleteRollenlayer(){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$mapDB->deleteRollenlayer($this->formvars['id'], $this->formvars['type']);
+		$mapDB->deleteRollenlayer($this->formvars['id'], $this->formvars['delete_rollenlayer_type']);
 		$this->loadMap('DataBase');
 		$currenttime=date('Y-m-d H:i:s',time());
 		$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
