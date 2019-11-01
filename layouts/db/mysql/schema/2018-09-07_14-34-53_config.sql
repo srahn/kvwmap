@@ -2,7 +2,7 @@ BEGIN;
 
 CREATE TABLE `config` ( 
 	`id` INT(11) NOT NULL AUTO_INCREMENT , 
-	`name` VARCHAR(50) NOT NULL , 
+	`name` VARCHAR(100) NOT NULL , 
 	`prefix` VARCHAR(100) NOT NULL , 
 	`value` TEXT NOT NULL , 
 	`description` TEXT NULL , 
