@@ -18692,7 +18692,7 @@ class db_mapObj{
     }
     else{
       for($i = 0; $i < $anzahl; $i++){
-        $exp = str_replace(array("'[", "]'", '[', ']', ')', '('), '', $classes[$i]['Expression']);
+        $exp = str_replace(array("'[", "]'", '[', ']'), '', $classes[$i]['Expression']);
         $exp = str_replace(' eq ', '=', $exp);
         $exp = str_replace(' ne ', '!=', $exp);
 
@@ -18714,7 +18714,7 @@ class db_mapObj{
 					if(substr($exp, 0, 1) != "'")$quote = "'";
 					$exp = $classitem."::text = ".$quote.$exp.$quote;
 				}	
-				$sql = 'SELECT * FROM ('.$select.") as foo WHERE (" . $exp.")";
+				echo $sql = 'SELECT * FROM ('.$select.") as foo WHERE (" . $exp.")";
         $this->debug->write("<p>file:kvwmap class:db_mapObj->getClassFromObject - Lesen einer Klasse eines Objektes:<br>" . $sql,4);
         $query=pg_query($sql);
     		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
