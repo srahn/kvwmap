@@ -15565,15 +15565,21 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$corners=explode(';', $input_coords);
 			if(count($corners) < 3){
 				$lo=explode(',',$corners[0]); # linke obere Ecke in Bildkoordinaten von links oben gesehen
-				$ru=explode(',',$corners[1]); # reche untere Ecke des Auswahlbereiches in Bildkoordinaten von links oben gesehen
-				$width=$this->user->rolle->pixsize*($ru[0]-$lo[0]); # Breite des Auswahlbereiches in m
-				$height=$this->user->rolle->pixsize*($ru[1]-$lo[1]); # Höhe des Auswahlbereiches in m
-				#echo 'Abfragerechteck im Bild: '.$lo[0].' '.$lo[1].' '.$ru[0].' '.$ru[1];
-				# linke obere Ecke im Koordinatensystem in m
-				$minx=$this->user->rolle->oGeorefExt->minx+$this->user->rolle->pixsize*$lo[0]; # x Wert
-				$miny=$this->user->rolle->oGeorefExt->miny+$this->user->rolle->pixsize*($this->user->rolle->nImageHeight-$ru[1]); # y Wert
-				$maxx=$minx+$width;
-				$maxy=$miny+$height;
+				if(count($corners) == 1){		# Polygonquery mit nur einer Koordinate (Doppelklick)
+					$minx = $maxx = $lo[0];
+					$miny = $maxy = $lo[1];
+				}
+				else{		# normale Query (Punkt oder Rechteck)
+					$ru=explode(',',$corners[1]); # reche untere Ecke des Auswahlbereiches in Bildkoordinaten von links oben gesehen
+					$width=$this->user->rolle->pixsize*($ru[0]-$lo[0]); # Breite des Auswahlbereiches in m
+					$height=$this->user->rolle->pixsize*($ru[1]-$lo[1]); # Höhe des Auswahlbereiches in m
+					#echo 'Abfragerechteck im Bild: '.$lo[0].' '.$lo[1].' '.$ru[0].' '.$ru[1];
+					# linke obere Ecke im Koordinatensystem in m
+					$minx=$this->user->rolle->oGeorefExt->minx+$this->user->rolle->pixsize*$lo[0]; # x Wert
+					$miny=$this->user->rolle->oGeorefExt->miny+$this->user->rolle->pixsize*($this->user->rolle->nImageHeight-$ru[1]); # y Wert
+					$maxx=$minx+$width;
+					$maxy=$miny+$height;
+				}
 				$rect=ms_newRectObj();
 				$rect->setextent($minx,$miny,$maxx,$maxy);
 			}
