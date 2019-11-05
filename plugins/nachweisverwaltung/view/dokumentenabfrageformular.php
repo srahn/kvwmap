@@ -204,7 +204,7 @@ else {
 	<tr>
 		<td colspan="2">
 			<table border="0" cellpadding="4" cellspacing="0" style="margin-left: -8px;">
-		<?	$z_index = count($this->hauptdokumentarten);
+		<?	$z_index = count($this->hauptdokumentarten)+1;
 				foreach($this->hauptdokumentarten as $hauptdokumentart){	?>
 					<tr> 
 						<td>
