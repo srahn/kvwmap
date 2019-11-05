@@ -38,6 +38,7 @@ $ahah = '
 				}
 				for (i = 0; i < targets.length; ++i) {
 					if (targets[i] != undefined) {
+						if(responsevalues[i])responsevalues[i] = responsevalues[i].replace(/°tilde°/g, "~");
 						if (actions[i] == undefined) {
 							actions[i] = "";
 						}

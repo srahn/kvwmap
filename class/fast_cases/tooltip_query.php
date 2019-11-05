@@ -454,6 +454,7 @@ class GUI {
 					$highlight_geom .= $layer['shape'][$k]['highlight_geom'].' ';
           for($j = 0; $j < count($attributes['name']); $j++){
             if($attributes['tooltip'][$j]){
+							$layer['shape'][$k][$attributes['name'][$j]] = str_replace('~', '°tilde°', $layer['shape'][$k][$attributes['name'][$j]]);					# der Wert des Attributs
 							if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
             	switch ($attributes['form_element_type'][$j]){
 				        case 'Dokument' : {
