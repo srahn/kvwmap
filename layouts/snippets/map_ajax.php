@@ -22,19 +22,19 @@ $pixelsize    = ($dx/$res_x+$dy/$res_y)/2;		# ist $scale in SVG_map.php
 
 
 $response = $this->formvars['code2execute_before'].
-'~'.$this->img['hauptkarte'].'~
-'.$this->img['scalebar'].'~
-'.$this->img['referenzkarte'].'~
-'.round($this->map_scaledenom).'~';
+'?'.$this->img['hauptkarte'].'?
+'.$this->img['scalebar'].'?
+'.$this->img['referenzkarte'].'?
+'.round($this->map_scaledenom).'?';
 if($this->Lagebezeichung != ''){
 	$response.= '<span class="fett">Gemeinde:&nbsp;</span>'.$this->Lagebezeichung['gemeindename'].' <span class="fett">Gemarkung:</span>&nbsp;'.$this->Lagebezeichung['gemkgname'].' ('.$this->Lagebezeichung['gemkgschl'].') <span class="fett">Flur:</span>&nbsp;'.$this->Lagebezeichung['flur'];
 }
-$response.= '~
-'.$this->map->extent->minx.'~
-'.$this->map->extent->miny.'~
-'.$this->map->extent->maxx.'~
-'.$this->map->extent->maxy.'~
-'.$pixelsize.'~~update_legend(\''.$this->layerhiddenstring.'\');'.$this->formvars['code2execute_after'];		# die zwei ~~ müssen hier sein, da sonst der Zeilenumbruch in das Attribut points vom polygon geschrieben wird
+$response.= '?
+'.$this->map->extent->minx.'?
+'.$this->map->extent->miny.'?
+'.$this->map->extent->maxx.'?
+'.$this->map->extent->maxy.'?
+'.$pixelsize.'??update_legend(\''.$this->layerhiddenstring.'\');'.$this->formvars['code2execute_after'];		# die zwei ?? müssen hier sein, da sonst der Zeilenumbruch in das Attribut points vom polygon geschrieben wird
 
 ob_end_clean();
 header('Content-Type: text/html; charset=utf-8');

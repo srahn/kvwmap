@@ -102,7 +102,7 @@ class spatial_processor {
     	$rs[0] = $rs[0]/10000;
     	$rs[0] = round($rs[0],1);
     }
-    return $rs[0].'~'.$rs[0];
+    return $rs[0].'█'.$rs[0];
   }
   
 	function length($geom){
@@ -114,7 +114,7 @@ class spatial_processor {
     else {
     	$rs = pg_fetch_array($ret[1]);
     }
-    return $rs[0].'~'.$rs[0];
+    return $rs[0].'█'.$rs[0];
   }
 	
 	function translate($geom, $x, $y){
@@ -351,9 +351,9 @@ class spatial_processor {
 			if($formvars['resulttype'] != 'wkt'){
 				$result = $this->transformCoordsSVG($result);
 			}
-			$result .= '~update_geometry();';
+			$result .= '█update_geometry();';
 		}
-		if($formvars['code2execute'] != '')$result .= '~'.$formvars['code2execute'];
+		if($formvars['code2execute'] != '')$result .= '█'.$formvars['code2execute'];
 		echo $result;
 	}
 	

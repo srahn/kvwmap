@@ -454,7 +454,6 @@ class GUI {
 					$highlight_geom .= $layer['shape'][$k]['highlight_geom'].' ';
           for($j = 0; $j < count($attributes['name']); $j++){
             if($attributes['tooltip'][$j]){
-							$layer['shape'][$k][$attributes['name'][$j]] = str_replace('~', '°tilde°', $layer['shape'][$k][$attributes['name'][$j]]);					# der Wert des Attributs
 							if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
             	switch ($attributes['form_element_type'][$j]){
 				        case 'Dokument' : {
@@ -547,7 +546,7 @@ class GUI {
       }
       # highlighting-Geometrie anfügen
       $output .= '||| '.$highlight_geom;
-      echo umlaute_javascript(umlaute_html($output)).'~showtooltip(top.document.GUI.result.value, '.$showdata.');';
+      echo umlaute_javascript(umlaute_html($output)).'█showtooltip(top.document.GUI.result.value, '.$showdata.');';
     }
   }
 

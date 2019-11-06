@@ -413,7 +413,7 @@ echo '			</ul>
 				</tr>
 			</table>
 		</div>
-		~
+		█
 		legend_top = document.getElementById(\'legenddiv\').getBoundingClientRect().top;
 		legend_bottom = document.getElementById(\'legenddiv\').getBoundingClientRect().bottom;
 		posy = document.getElementById(\'options_'.$this->formvars['layer_id'].'\').getBoundingClientRect().top;
@@ -454,7 +454,7 @@ echo '			</ul>
 				</tr>
 			</table>
 		</div>
-		~
+		█
 		legend_top = document.getElementById(\'legenddiv\').getBoundingClientRect().top;
 		legend_bottom = document.getElementById(\'legenddiv\').getBoundingClientRect().bottom;
 		posy = document.getElementById(\'group_options_' . $this->formvars['group_id'] . '\').getBoundingClientRect().top;
@@ -2847,11 +2847,11 @@ echo '			</ul>
 				$rs = pg_fetch_array($ret[1]);
 			}
 			if ($count == 1 AND strtolower($rs['output']) == strtolower($this->formvars['inputvalue'])) {	# wenn nur ein Treffer gefunden wurde und der dem Eingabewert entspricht
-				echo '~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';';
+				echo '█document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';';
 				echo 'document.getElementById(\''.$this->formvars['field_id'].'\').value=\''.$rs['value'].'\';';
 			}
 			elseif ($count == 0 ) {		# wenn nichts gefunden wurde
-				echo '~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';';
+				echo '█document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';';
 				echo 'document.getElementById(\''.$this->formvars['field_id'].'\').value = document.getElementById(\''.$this->formvars['field_id'].'\').backup_value;';
 				echo 'output = document.getElementById(\'output_'.$this->formvars['field_id'].'\').value;';
 				echo 'document.getElementById(\'output_'.$this->formvars['field_id'].'\').value = output.substring(0, output.length-1);';
@@ -2867,12 +2867,12 @@ echo '			</ul>
 					echo '<option onmouseover="this.selected = true;"  value="'.$rs['value'].'">'.$rs['output'].'</option>';
 				}
 				echo '</select>
-				~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'block\';';
+				█document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'block\';';
 			}
 		}
 		else {
 			$this->add_message('error', $ret[1]);
-			echo '~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';';
+			echo '█document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';';
 		}
 	}
 
@@ -3078,7 +3078,7 @@ echo '			</ul>
 				}
 			}
 		}
-		echo '~show_vertices();';
+		echo '█show_vertices();';
 	}
 
 	function getSVG_foreign_vertices(){
@@ -3145,7 +3145,7 @@ echo '			</ul>
       	while ($rs=pg_fetch_array($ret[1])){
         	echo $rs[0].' '.$rs[1].'|';
         }
-				echo '~show_vertices();';
+				echo '█show_vertices();';
       }
 		}
 	}
@@ -3727,7 +3727,7 @@ echo '			</ul>
 
   function get_styles_labels(){
     $this->get_styles();
-    echo '~';
+    echo '█';
     $this->get_labels();
   }
 
@@ -3735,7 +3735,7 @@ echo '			</ul>
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $mapDB->save_Style($this->formvars);
     $this->get_styles();
-    echo '~';
+    echo '█';
     $this->get_style();
   }
 
@@ -3849,7 +3849,7 @@ echo '			</ul>
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $mapDB->save_Label($this->formvars);
     $this->get_labels();
-    echo '~';
+    echo '█';
     $this->get_label();
   }
 
@@ -4402,17 +4402,17 @@ echo '			</ul>
     $this->drawMap();
     $this->user->rolle->hideMenue(0);
     include(LAYOUTPATH . "snippets/menue.php");
-		echo '~if(typeof resizemap2window != "undefined")resizemap2window();';
+		echo '█if(typeof resizemap2window != "undefined")resizemap2window();';
   }
 
   function hideMenueWithAjax() {
     $this->user->rolle->hideMenue(1);
-		echo '~if(typeof resizemap2window != "undefined")resizemap2window();';
+		echo '█if(typeof resizemap2window != "undefined")resizemap2window();';
   }
 
 	function changeLegendDisplay(){
 		$this->user->rolle->changeLegendDisplay($this->formvars['hide']);
-		echo 'hide: ' . $this->formvars['hide'] . '~resizemap2window();';
+		echo 'hide: ' . $this->formvars['hide'] . '█resizemap2window();';
 	}
 
 	function saveOverlayPosition(){
@@ -9113,7 +9113,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$layerdb = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 		$results = $this->Datensatz_Loeschen($layerdb, $layer, $oid);
 		# ToDo Dokumente werden noch nicht mit gelöscht.
-		echo '~';
+		echo '█';
 		if($reload_object != '')echo 'reload_subform_list(\''.$reload_object.'\', 0);';
 	}
 
@@ -9203,8 +9203,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			else{
 				# wenn es ein Datensatz aus einem embedded-Formular ist, 
 				# muss das embedded-Formular entfernt werden und 
-				# das Listen-DIV neu geladen werden (getrennt durch ~)
-				echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\', 0);';
+				# das Listen-DIV neu geladen werden (getrennt durch █)
+				echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0);';
 			}
 		}
 
@@ -9565,17 +9565,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						if($last_oid == $enum_oid[$e]){$html .= 'selected ';}
 						$html .= 'value="'.$enum_value[$e].'">'.$enum_output[$e].'</option>';
 					}
-					echo '~'.$html.'~document.getElementById("'.$this->formvars['targetobject'].'").onchange();';
+					echo '█'.$html.'█document.getElementById("'.$this->formvars['targetobject'].'").onchange();';
         } break;
 
         case 'SubFormEmbeddedPK' : {
           if(!$this->success)echo $ret['msg'];
-          else echo '~~reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+          else echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
         } break;
       }
 
 			if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
-				echo '~~';
+				echo '██';
 				echo "currentform.go.value='get_last_query';
 							overlay_submit(currentform, false);";
 			}
@@ -10687,7 +10687,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					else {
 						$this->daten_import_process($this->formvars['upload_id'], $file_number, $_files['uploadfile']['name'], NULL, $this->formvars['after_import_action']);
 					}
-					echo '~startNextUpload();';
+					echo '█startNextUpload();';
 				}
 			}
 		}
@@ -13371,8 +13371,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if ($this->formvars['embedded'] != '') {
 			# wenn es ein Datensatz aus einem embedded-Formular ist, 
 			# muss das embedded-Formular entfernt werden und 
-			# das Listen-DIV neu geladen werden (getrennt durch ~)
-			echo '~reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
+			# das Listen-DIV neu geladen werden (getrennt durch █)
+			echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
 		}
 		else {
 			$this->last_query = $this->user->rolle->get_last_query();
@@ -14152,7 +14152,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $first=1;
     while (list($key, $val) = each($ret[1])) {
       if (!$first) {
-        echo "~";
+        echo "█";
       }
       echo $val;
       $first=0;
@@ -14571,7 +14571,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$highlight_geom .= $layer['shape'][$k]['highlight_geom'].' ';
           for($j = 0; $j < count($attributes['name']); $j++){
             if($attributes['tooltip'][$j]){
-							$layer['shape'][$k][$attributes['name'][$j]] = str_replace('~', '°tilde°', $layer['shape'][$k][$attributes['name'][$j]]);					# der Wert des Attributs
 							if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
             	switch ($attributes['form_element_type'][$j]){
 				        case 'Dokument' : {
@@ -14664,7 +14663,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       }
       # highlighting-Geometrie anfügen
       $output .= '||| '.$highlight_geom;
-      echo umlaute_javascript(umlaute_html($output)).'~showtooltip(top.document.GUI.result.value, '.$showdata.');';
+      echo umlaute_javascript(umlaute_html($output)).'█showtooltip(top.document.GUI.result.value, '.$showdata.');';
     }
   }
 
