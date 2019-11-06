@@ -32,13 +32,12 @@ $ahah = '
 				}
 				var found = false;
 				response = "" + req.responseText;
-				responsevalues = response.split("~");
+				responsevalues = response.split("█");
 				if (actions == undefined || actions == "") {
 					actions = new Array();
 				}
 				for (i = 0; i < targets.length; ++i) {
 					if (targets[i] != undefined) {
-						if(responsevalues[i])responsevalues[i] = responsevalues[i].replace(/°tilde°/g, "~");
 						if (actions[i] == undefined) {
 							actions[i] = "";
 						}

@@ -1161,7 +1161,7 @@
 	$GUI->check_nachweis_poly = function() use ($GUI){
 		$GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
 		echo $GUI->nachweis->check_poly_in_flur($GUI->formvars['umring'], $GUI->formvars['flur'], $GUI->formvars['gemkgschl'], $GUI->user->rolle->epsg_code);
-		echo '~check_poly();';
+		echo '█check_poly();';
 	};
 
 	$GUI->nachweisFormSenden = function() use ($GUI){
