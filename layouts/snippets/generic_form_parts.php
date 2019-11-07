@@ -498,8 +498,8 @@
 						$dokumentpfad = $value;
 						$pfadteil = explode('&original_name=', $dokumentpfad);
 						$dateiname = $pfadteil[0];
-						$filesize = human_filesize($dateiname);
 						if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
+						$filesize = human_filesize($dateiname);
 						$dateinamensteil = explode('.', $dateiname);
 						$type = strtolower($dateinamensteil[1]);
 						$thumbname = $gui->get_dokument_vorschau($dateinamensteil);
