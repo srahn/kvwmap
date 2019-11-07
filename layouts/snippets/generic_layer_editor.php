@@ -90,7 +90,9 @@
 									echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\''.$groupname.'\')"><img id="img_'.$groupname.'" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;<span>'.$groupname.'</span></td><td style="border:none;background: url(graphics/bg.gif);"></td>';
 									$colspan = 0;
 								}
-								else $colspan = 1;
+								elseif($layer['attributes']['SubFormFK_hidden'][$j] != 1){
+									$colspan = 1;
+								}
 								if($j < count($this->qlayerset[$i]['attributes']['name'])-1){
 									$explosion = explode(';', $layer['attributes']['group'][$j+1]);
 									$groupname = $explosion[0];
