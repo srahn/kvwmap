@@ -39,7 +39,7 @@
       </td>
     </tr>
   </table>
-~
+█
 var overlay_bottom = parseInt(<? echo $this->user->rolle->nImageHeight+30; ?>) + parseInt(document.GUI.overlayy.value);
 var button_bottom = document.getElementById('savebutton').getBoundingClientRect().bottom;
 if(button_bottom > overlay_bottom)document.getElementById('savebutton').scrollIntoView({block: "end", behavior: "smooth"});

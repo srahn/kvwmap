@@ -89,4 +89,5 @@
 	$strAssignDefaultValues="Default-Werte an Stellen übertragen";
 	$strStylesLabels="Styles und Labels";
 	$strDdlAttribute="DDL Default Attribut";
+	$strIdAttribute="ID-Spalte";
 ?>

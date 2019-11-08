@@ -30,7 +30,7 @@ class LayerGroup extends MyObject {
 				$group->layers = $group->get_Layer();
 				return $group;
 			},
-			$group->find_where($where, $order)
+			$group->find_where($where, $order, 'ASC')
 		);
 	}
 

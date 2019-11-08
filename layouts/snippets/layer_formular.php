@@ -9,6 +9,7 @@
 	Text[2] = ["Hilfe:","Das Query-SQL ist das SQL-Statement, welches für die Sachdatenabfrage verwendet wird. Es kann eine beliebige Abfrage auf Tabellen oder Sichten sein, eine WHERE-Bedingung ist aber erforderlich. Der Schemaname wird hier nicht angegeben, sondern im Feld 'Schema'"];
 	Text[3] = ["Hilfe:","Das Data-Feld wird vom Mapserver für die Kartendarstellung verwendet (siehe Mapserver-Doku). Etwaige Schemanamen müssen hier angegeben werden."];
 	Text[4] = ["Hilfe:","Bei Punktlayern kann durch Angabe dieses Wertes die Clusterbildung aktiviert werden. Der Wert ist der Radius in Pixeln, in dem Punktobjekte zu einem Cluster zusammengefasst werden. <br>Damit die Cluster dargestellt werden können, muss es eine Klasse mit der Expression \"('[Cluster:FeatureCount]' != '1')\" geben. Cluster:FeatureCount kann auch als Labelitem verwendet werden, um die Anzahl der Punkte pro Cluster anzuzeigen."];	
+	Text[5] = ["Hilfe:","Hier muss die Spalte aus der Haupttabelle angegeben werden, mit dem die Datensätze identifiziert werden können (z.B. der Primärschlüssel oder die oid)."];
 
 	function testConnection() {
 		if (document.getElementById('connectiontype').value == 7) {
@@ -108,7 +109,7 @@
 					<th class="fetter"><a href="javascript:toggleForm('layerform');"><div style="background-color: <?php echo BG_DEFAULT ?>; width: 100%" id="layerform_link"><? echo $strCommonData; ?></div></a></th>
 					<th class="fetter"><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
 					<th class="fetter"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
-					<? if($this->layerdata['connectiontype'] == 6){ ?>
+					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
 					<th class="fetter"><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
 					<? } ?>
 					<th class="fetter"><a href="javascript:toggleForm('stellenzuweisung');"><div style="width: 100%" id="stellenzuweisung_link"><? echo $strStellenAsignment; ?></div></a></th>
@@ -211,6 +212,13 @@
 							<div id="TipLayer1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 						</td>
 					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strIdAttribute; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="oid" type="text" value="<?php echo $this->layerdata['oid']; ?>" size="36" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[5], Style[0], document.getElementById('TipLayer5'))" onmouseout="htm()">
+							<div id="TipLayer5" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+						</td>
+					</tr>					
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSchema; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">

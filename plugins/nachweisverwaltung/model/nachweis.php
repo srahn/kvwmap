@@ -60,7 +60,7 @@ class Nachweis {
 			#echo $newpath.'<br>';
 			if($oldpath != $newpath){
 				$this->adjust_documentpath($oldpath, $newpath);
-				$this->aktualisierenDokument($old_dataset['id'],NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,$this->Dokumente[0]['artname'].'/'.$formvars['zieldateiname'],NULL);
+				$this->aktualisierenDokument($old_dataset['id'],NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,$newpath,NULL);
 			}
 		}
 	}
@@ -622,7 +622,7 @@ class Nachweis {
     $sql ="INSERT INTO nachweisverwaltung.n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,geprueft,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen,bemerkungen_intern,bearbeiter,zeit,erstellungszeit)";
     $sql.=" VALUES (".$flurid.",'".trim($stammnr)."',".$unterart.",'".trim($blattnr)."','".$datum."'";
     $sql.=",'".$VermStelle."','".$gueltigkeit."','".$geprueft."','".$blattformat."','".$zieldatei."',st_transform(st_geometryfromtext('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise'))";
-    $sql.=",".$fortf.",'".$rissnummer."','".$bemerkungen."','".$bemerkungen_intern."','".$user->Vorname." ".$user->Name."', '".date('Y-m-d G:i:s')."', '".date('Y-m-d G:i:s')."')";
+    $sql.=",".trim($fortf).",'".trim($rissnummer)."','".$bemerkungen."','".$bemerkungen_intern."','".$user->Vorname." ".$user->Name."', '".date('Y-m-d G:i:s')."', '".date('Y-m-d G:i:s')."')";
 		#echo '<br>Polygon-SQL: '.$sql;
     $ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0]) {
@@ -655,11 +655,12 @@ class Nachweis {
 		}
 		if($rissnr !== NULL){
 			if($rissnr === '')$sql.="rissnummer=NULL, ";
-			else $sql.="rissnummer='".$rissnr."', ";
+			else $sql.="rissnummer='".trim($rissnr)."', ";
 		}
-		$sql.="bemerkungen='".$bemerkungen."', ";
-		$sql.="bemerkungen_intern='".$bemerkungen_intern."', ";
-		$sql.=" bearbeiter='".$user->Vorname." ".$user->Name."', zeit='".date('Y-m-d G:i:s')."'";
+		if($bemerkungen !== NULL)$sql.="bemerkungen='".$bemerkungen."', ";
+		if($bemerkungen_intern !== NULL)$sql.="bemerkungen_intern='".$bemerkungen_intern."', ";
+		if($user !== NULL)$sql.=" bearbeiter='".$user->Vorname." ".$user->Name."', ";
+		$sql.=" zeit='".date('Y-m-d G:i:s')."'";
     $sql.=" WHERE id = ".$id;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);

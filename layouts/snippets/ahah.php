@@ -32,7 +32,7 @@ $ahah = '
 				}
 				var found = false;
 				response = "" + req.responseText;
-				responsevalues = response.split("~");
+				responsevalues = response.split("█");
 				if (actions == undefined || actions == "") {
 					actions = new Array();
 				}
@@ -61,9 +61,6 @@ $ahah = '
 							case "sethtml":
 								if (targets[i] != undefined && req.getResponseHeader(\'error\') != \'true\') {
 									targets[i].innerHTML = responsevalues[i];
-									if (targets[i].tagName == "SELECT" && targets[i].outerHTML != undefined) {
-										targets[i].outerHTML = targets[i].outerHTML; // Bug-Workaround fuer den IE 8 beim setzen eines select-Objekts
-									}
 									scripts = targets[i].getElementsByTagName("script"); // Alle script-Bloecke evaln damit diese Funktionen bekannt sind
 									for (s = 0; s < scripts.length; s++) {
 										if (scripts[s].hasAttribute("src")) {

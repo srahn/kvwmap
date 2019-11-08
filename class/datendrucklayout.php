@@ -69,7 +69,7 @@ class ddl {
 				OR ($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['texts'][$j]['type'] == 0)
 				OR ($type == 'everypage' AND $this->layout['texts'][$j]['type'] == 2)){
 					if($type != 'everypage' AND $this->page_overflow){
-						$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+						$this->pdf->reopenObject(7);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 						$this->i_on_page = 0;		# evtl. nicht 0 setzen, sondern ein eigenes i_on_page für jede Seite machen
 						#$this->page_overflow = false;		# muss auskommentiert bleiben, da sonst Fehler in EN-Liste1
 					}
@@ -116,7 +116,7 @@ class ddl {
 		if(count($this->remaining_lines) == 0)return;
     for($j = 0; $j < count($this->layout['lines']); $j++){
 			if($type != 'everypage' AND $this->page_overflow){
-				$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+				$this->pdf->reopenObject(7);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 				#if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???		muss auskommentiert bleiben, sonst ist die Karte im MVBIO-Drucklayout auf der zweiten Seite
 			}
 			# die Linie wurde noch nicht geschrieben und ist entweder eine feste Linie oder eine fortlaufende oder eine, der auf jeder Seite erscheinen soll
@@ -174,6 +174,12 @@ class ddl {
 					}
 					$this->pdf->setLineStyle($this->layout['lines'][$j]['breite'], 'square');
 					$this->pdf->line($x,$y,$endx,$endy);
+					$line['x1'] = $x;
+					$line['y1'] = $y;
+					$line['x2'] = $endx;
+					$line['y2'] = $endy;
+					$line['id'] = $this->layout['lines'][$j]['id'];
+					$this->gui->lines[$this->pdf->currentContents][] = $line;
 					#echo 'zeichne Linie: '.$x.' '.$y.' '.$endx.' '.$endy.'<br>';
 					if($this->layout['lines'][$j]['type'] === 0){
 						#if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
@@ -230,11 +236,16 @@ class ddl {
 								$pagecount = count($this->pdf->objects['3']['info']['pages']);								
 								if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$ypos = $ypos + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 								
-								$offy = 842 - $ypos + $this->offsety;
-								if($this->layout['type'] != 0 AND $offset_attribute == '' AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei abolut positionierten)
-									$offy = $offy + $this->yoffset_onpage;
-									$offx = $offx + $this->xoffset_onpage;
+								$offy = 842 - $ypos;
+								
+								if($offset_attribute == ''){
+									$offy = $offy + $this->offsety;
+									if($this->layout['type'] != 0 AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei abolut positionierten)
+										$offy = $offy + $this->yoffset_onpage;
+										$offx = $offx + $this->xoffset_onpage;
+									}
 								}
+								
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
 								if($this->i_on_page == 0){
 									if($this->maxy < 842-$offy)$this->maxy = 842-$offy;		# beim ersten Datensatz das maxy ermitteln
@@ -263,10 +274,7 @@ class ddl {
 									$y = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy);
 									$page_id_after_sublayout = $this->pdf->currentContents;
 									if($page_id_before_sublayout != $page_id_after_sublayout){
-										$this->page_overflow = true;		# bei einem Seitenüberlauf, der durch ein Sublayout verursacht wurde, wird sich hier die vorhergehende Page-ID gemerkt
-										$this->page_id_before_sublayout = $page_id_before_sublayout;
-										#$this->miny_on_new_page = $y;
-										#$this->miny[$this->pdf->currentContents] = $y;
+										$this->page_overflow = true;
 									}
 								}
 								# den letzten y-Wert dieses Elements in das Offset-Array schreiben
@@ -286,7 +294,7 @@ class ddl {
 						}break;
 						
 						default : {
-							if($this->page_overflow)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+							if($this->page_overflow)$this->pdf->reopenObject(7);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 							$this->pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['elements'][$attributes['name'][$j]]['font']);
 							if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0 OR $attributes['form_element_type'][$j] == 'Dokument'){
 								$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
@@ -358,7 +366,7 @@ class ddl {
 					}
 				}
 				elseif($attributes['name'][$j] == $attributes['the_geom'] AND $this->layout['elements'][$attributes['name'][$j]]['xpos'] > 0){		# Geometrie
-					if($this->page_overflow)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+					if($this->page_overflow)$this->pdf->reopenObject(7);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 					#$this->pdf->reopenObject($this->pdf->objects['3']['info']['pages'][0]+1);			# Kartenbild immer auf die erste Seite
 					$this->gui->map->set('width', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
 					$this->gui->map->set('height', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
@@ -371,7 +379,7 @@ class ddl {
 						if($attributes['geomtype'][$attributes['the_geom']] == 'POINT'){
 							include_(CLASSPATH.'pointeditor.php');
 							$pointeditor = new pointeditor($layerdb, $this->layerset['epsg_code'], $this->gui->user->rolle->epsg_code);							
-							$point = $pointeditor->getpoint($oid, $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom']);
+							$point = $pointeditor->getpoint($oid, $attributes['table_name'][$attributes['the_geom']], $attributes['real_name'][$attributes['the_geom']]);
 							$rect = ms_newRectObj();
 							$rect->minx = $point['pointx']-$rand;
 							$rect->maxx = $point['pointx']+$rand;
@@ -381,7 +389,7 @@ class ddl {
 						else{
 							include_(CLASSPATH.'polygoneditor.php');
 							$polygoneditor = new polygoneditor($layerdb, $this->layerset['epsg_code'], $this->gui->user->rolle->epsg_code);
-							$rect = $polygoneditor->zoomTopolygon($oid, $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom'], $rand);
+							$rect = $polygoneditor->zoomTopolygon($oid, $attributes['table_name'][$attributes['the_geom']], $attributes['real_name'][$attributes['the_geom']], $rand);
 						}
 						$this->gui->formvars['layer_id'] = $selected_layer_id;
 						$this->gui->formvars['oid'] = $oid;
@@ -394,6 +402,12 @@ class ddl {
 					if($this->gui->map->selectOutputFormat('jpeg_print') == 1){
 						$this->gui->map->selectOutputFormat('jpeg');
 					}
+					$this->gui->switchScaleUnitIfNecessary();
+					$this->gui->map->scalebar->set('status', MS_EMBED);
+					$this->gui->map->scalebar->position = MS_LR;
+					$this->gui->map->scalebar->label->size = 16;
+					$this->gui->map->scalebar->width = 300;
+					$this->gui->map->scalebar->height = 4;
 					$image_map = $this->gui->map->draw();
 					# Rollenlayer wieder entfernen
 					if($oid != ''){
@@ -434,13 +448,11 @@ class ddl {
 				$this->pdf->reopenObject($next_page);		# die nächste Seite der Seite des Offset-Attributes nehmen
 			}
 			else{																			# wenns noch keine gibt, neue Seite erstellen
-				$page_id_before = $this->pdf->currentContents;
 				$this->pdf->ezNewPage();			# eine neue Seite beginnen
 				$this->miny[$this->pdf->currentContents] = 842;
 				$this->maxy = 800;
 				if($this->layout['type'] == 2)$this->offsety = 50;
 				$this->page_overflow = true;
-				$this->page_id_before_sublayout = $page_id_before;
 			}
 		}
 		elseif($backto_oldpage){
@@ -481,7 +493,6 @@ class ddl {
 		#echo $page_id_before_puttext.' '.$page_id_after_puttext.' - '.$y.' - '.$text.'<br>';
 		if($page_id_before_puttext != $page_id_after_puttext){
 			$this->page_overflow = true;
-			$this->page_id_before_sublayout = $page_id_before_puttext;
 			if($this->getNextPage($page_id_before_puttext) != $page_id_after_puttext)$this->pdf->overflow_error = true;		# eine oder mehr Seiten übersprungen -> Fehler
 		}
 		return $ret;
@@ -623,16 +634,27 @@ class ddl {
     		$this->pdf->newPage();
 				$this->add_static_elements($offsetx);
     	}
-			# spaltenweiser Typ
-			if($this->layout['columns'] AND $this->i_on_page > 0 AND $this->i_on_page % $rowcount == 0){
-				$this->xoffset_onpage = $this->xoffset_onpage + 170;
-				$this->miny[$lastpage] = $this->maxy;
-				$new_column = true;
+			# spaltenweiser Typ von oben nach unten
+			// if($this->layout['columns'] AND $this->i_on_page > 0 AND $this->i_on_page % $rowcount == 0){
+				// $this->xoffset_onpage = $this->xoffset_onpage + 170;
+				// $this->miny[$lastpage] = $this->maxy;
+				// $new_column = true;
+			// }
+			// else $new_column = false;
+			# spaltenweiser Typ von links nach rechts
+			if($this->layout['columns'] AND $this->i_on_page > 0){
+				if($this->i_on_page % 3 == 0){
+					$this->xoffset_onpage = 0;
+					$new_column = false;
+				}
+				else{
+					$this->xoffset_onpage = $this->xoffset_onpage + 170;
+					$new_column = true;
+				}
 			}
-			else $new_column = false;
 			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];					# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
 			if(!$new_column)$this->yoffset_onpage = $this->yoffset_onpage + $this->layout['gap'];	# Abstand zwischen den Datensätzen addieren
-			if($this->layout['type'] != 0 AND $this->miny[$lastpage] != '' AND ($this->miny[$lastpage] - $this->layout['gap']) < 60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
+			if(!$new_column AND $this->layout['type'] != 0 AND $this->miny[$lastpage] != '' AND ($this->miny[$lastpage] - $this->layout['gap']) < 60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
 				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen

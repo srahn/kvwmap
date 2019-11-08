@@ -157,7 +157,7 @@ class GUI {
 						if($layer[0]['connectiontype']==6 OR($layer[0]['Datentyp']==MS_LAYER_RASTER AND $layer[0]['connectiontype']!=7)){
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
 						}
-						if($layer[0]['connectiontype']==6 AND $layer[0]['queryable']){
+						if(in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
 							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strSearch.'</a></li>';
 						}
 						if($layer[0]['privileg'] > 0){
@@ -252,7 +252,7 @@ echo '			</ul>
 				</tr>
 			</table>
 		</div>
-		~
+		█
 		legend_top = document.getElementById(\'legenddiv\').getBoundingClientRect().top;
 		legend_bottom = document.getElementById(\'legenddiv\').getBoundingClientRect().bottom;
 		posy = document.getElementById(\'options_'.$this->formvars['layer_id'].'\').getBoundingClientRect().top;
@@ -1110,6 +1110,20 @@ class pgdatabase {
     return $this->dbConn;
   }
 	
+	function getEnumElements($name, $schema){
+		$sql = "SELECT array_to_string(array_agg(''''||e.enumlabel||''''), ',') as enum_string ";
+		$sql.= "FROM pg_enum e ";
+		$sql.= "JOIN pg_type t ON e.enumtypid = t.oid ";
+		$sql.= "JOIN pg_namespace ns ON (t.typnamespace = ns.oid) ";
+		$sql.= "WHERE t.typname = '".$name."' ";
+		$sql.= "AND ns.nspname = '".$schema."'";
+		$ret1 = $this->execSQL($sql, 4, 0);
+		if($ret1[0]==0){
+			$result = pg_fetch_assoc($ret1[1]);
+		}
+		return $result['enum_string'];
+	}
+	
 	function writeCustomType($typname, $schema){		
 		$datatype_id = $this->getDatatypeId($typname, $schema, $this->dbName, $this->host, $this->port);
 		$this->writeDatatypeAttributes($datatype_id, $typname, $schema);
@@ -1209,47 +1223,53 @@ class pgdatabase {
 
 	function getFieldsfromSelect($select, $assoc = false) {
 		$err_msgs = array();
-		$sql = $select." LIMIT 0";
+		$error_reporting = error_reporting();
+		error_reporting(E_NOTICE);
+		ini_set("pgsql.log_notice", '1');
+		ini_set("pgsql.ignore_notice", '0');
+		ini_set("display_errors", '0');
+		$error_list = array();
+		$myErrorHandler = function ($error_level, $error_message, $error_file, $error_line, $error_context) use (&$error_list) {
+			if(strpos($error_message, "\n      :resno") !== false){
+				$error_list[] = $error_message;
+			}
+			return false;
+		};
+		set_error_handler($myErrorHandler);
+		$sql = 'SET client_min_messages=\'log\';SET debug_print_parse=true;'.$select." LIMIT 0;";		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
 		$ret = $this->execSQL($sql, 4, 0);
+		error_reporting($error_reporting);		
 		if ($ret['success']) {
-			$sql = "EXPLAIN (FORMAT JSON,ANALYZE False,VERBOSE True,COSTS False,TIMING False,BUFFERS False) ".$select." LIMIT 0";			# den Queryplan mitabfragen um an Infos zur Query zu kommen
-			$exp = $this->execSQL($sql, 4, 0);
-			$query_plan = json_decode(pg_fetch_assoc($exp[1])['QUERY PLAN'], true);
-			$table_aliases = $this->getTableAliasNames($query_plan[0]['Plan']['Plans']);
-
-			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
-				$plan_info = explode('.', $query_plan[0]['Plan']['Output'][$i]);
-				
+			$query_plan = $error_list[0];
+			$table_alias_names = $this->get_table_alias_names($query_plan);
+			$field_plan_info = explode("\n      :resno", $query_plan);
+			
+			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {				
 				# Attributname
 				$fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
+				
+				# Spaltennummer in der Tabelle
+				$col_num = get_first_word_after($field_plan_info[$i+1], ':resorigcol');				
 				
 				# Tabellen-oid des Attributs
 				$table_oid = pg_field_table($ret[1], $i, true);			
 
 				# wenn das Attribut eine Tabellenspalte ist -> weitere Attributeigenschaften holen
-				if ($table_oid > 0){
-					# realer Name der Spalte in der Tabelle
-					$fields[$i]['real_name'] = end($plan_info);
-					
+				if ($table_oid > 0){					
 					# Tabellenname des Attributs
 					$fields[$i]['table_name'] = $tablename = pg_field_table($ret[1], $i);
 					if ($tablename != NULL) {
 						$all_table_names[] = $tablename;
 					}
-
+										
 					# Tabellenaliasname des Attributs
-					if($plan_info[1] != NULL){
-						$fields[$i]['table_alias_name'] = $plan_info[0];
-					}
-					else{
-						$fields[$i]['table_alias_name'] = $table_aliases[$tablename];
-					}
+					$fields[$i]['table_alias_name'] = $table_alias_names[$table_oid];
 
 					# Schemaname der Tabelle des Attributs
 					$schemaname = $this->pg_field_schema($table_oid);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?	
 					
 					$constraintstring = '';
-					$attr_info = $this->get_attribute_information($schemaname, $tablename, $fields[$i]['real_name']);
+					$attr_info = $this->get_attribute_information($schemaname, $tablename, $col_num);
 					if($attr_info[0]['relkind'] == 'v'){		# wenn View, dann Attributinformationen aus View-Definition holen
 						if($view_defintion_attributes[$tablename] == NULL) {
 							$ret2 = $this->getFieldsfromSelect(substr($attr_info[0]['view_definition'], 0, -1), true);
@@ -1265,6 +1285,8 @@ class pgdatabase {
 						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info[0]['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
 						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info[0]['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
 					}
+					# realer Name der Spalte in der Tabelle
+					$fields[$i]['real_name'] = $attr_info[0]['name'];
 					$fieldtype = $attr_info[0]['type_name'];
 					$fields[$i]['nullable'] = $attr_info[0]['nullable']; 
 					$fields[$i]['length'] = $attr_info[0]['length'];
@@ -1328,6 +1350,83 @@ class pgdatabase {
 			$ret[1] = implode('<br>', $err_msgs);
 		}
 		return $ret;
+	}
+
+	function get_attribute_information($schema, $table, $col_num = NULL) {
+		if($col_num != NULL)$and_column = " a.attnum = ".$col_num." ";
+		else $and_column = " a.attnum > 0 ";
+		$attributes = array();
+		$sql = "
+			SELECT
+				ns.nspname as schema,
+				c.relname AS table_name,
+				c.relkind,
+				a.attname AS name,
+				NOT a.attnotnull AS nullable,
+				a.attnum AS ordinal_position,
+				ad.adsrc as default,
+				t.typname AS type_name,
+				tns.nspname as type_schema,
+				CASE WHEN t.typarray = 0 THEN eat.typname ELSE t.typname END AS type,
+				t.oid AS attribute_type_oid,
+				coalesce(eat.typtype, t.typtype) as type_type,
+				case when t.typarray = 0 THEN true ELSE false END AS is_array,
+				CASE WHEN t.typname = 'varchar' AND a.atttypmod > 0 THEN a.atttypmod - 4 ELSE NULL END as character_maximum_length,
+				CASE a.atttypid
+				 WHEN 21 /*int2*/ THEN 16
+				 WHEN 23 /*int4*/ THEN 32
+				 WHEN 20 /*int8*/ THEN 64
+				 WHEN 1700 /*numeric*/ THEN
+				      CASE WHEN atttypmod = -1
+					   THEN null
+					   ELSE ((atttypmod - 4) >> 16) & 65535
+					   END
+				 WHEN 700 /*float4*/ THEN 24 /*FLT_MANT_DIG*/
+				 WHEN 701 /*float8*/ THEN 53 /*DBL_MANT_DIG*/
+				 ELSE null
+				END   AS numeric_precision,
+				CASE 
+				    WHEN atttypid IN (21, 23, 20) THEN 0
+				    WHEN atttypid IN (1700) THEN
+					CASE 
+					    WHEN atttypmod = -1 THEN null
+					    ELSE (atttypmod - 4) & 65535
+					END
+				       ELSE null
+				  END AS decimal_length,
+				i.indisunique,
+				i.indisprimary,
+				v.definition as view_definition
+			FROM
+				pg_catalog.pg_class c JOIN
+				pg_catalog.pg_attribute a ON (c.oid = a.attrelid) JOIN
+				pg_catalog.pg_namespace ns ON (c.relnamespace = ns.oid) JOIN
+				pg_catalog.pg_type t ON (a.atttypid = t.oid) LEFT JOIN
+				pg_catalog.pg_namespace tns ON (t.typnamespace = tns.oid) LEFT JOIN
+				pg_catalog.pg_type eat ON (t.typelem = eat.oid) LEFT JOIN 
+				pg_index i ON i.indrelid = c.oid AND a.attnum = ANY(i.indkey)	LEFT JOIN 
+				pg_catalog.pg_attrdef ad ON a.attrelid = ad.adrelid AND ad.adnum = a.attnum LEFT JOIN 
+				pg_catalog.pg_views v ON v.viewname = c.relname AND v.schemaname = ns.nspname
+			WHERE
+				ns.nspname IN ('" .  implode("','", array_map(function($schema) { return trim($schema); }, explode(',', $schema)))  .  "') AND
+				c.relname = '".$table."' AND
+				".$and_column."
+			ORDER BY a.attnum, indisunique desc, indisprimary desc
+		";
+		#echo '<br><br>' . $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		if($ret[0]==0){
+			while($attr_info = pg_fetch_assoc($ret[1])){
+				if($attr_info['nullable'] == 'f' AND substr($attr_info['default'], 0, 7) != 'nextval'){$attr_info['nullable'] = '0';}else{$attr_info['nullable'] = '1';}
+        if($attr_info['numeric_precision'] != '')$attr_info['length'] = $attr_info['numeric_precision'];
+        else $attr_info['length'] = $attr_info['character_maximum_length'];
+	      if($attr_info['decimal_length'] == ''){$attr_info['decimal_length'] = 'NULL';}	      
+	      if($attr_info['default'] != '' AND substr($attr_info['default'], 0, 7) != 'nextval')$attr_info['default'] = 'SELECT '.$attr_info['default'];
+	  		else $attr_info['default'] = '';
+				$attributes[] = $attr_info;
+			}
+		}
+		return $attributes;
 	}
 	
 	function get_table_alias_names($query_plan){
@@ -1524,83 +1623,6 @@ class pgdatabase {
     }
     return $tablealias;
   }
-
-	function get_attribute_information($schema, $table, $name = NULL) {
-		if($name != NULL)$and_column = "a.attname = '".$name."' AND ";
-		$attributes = array();
-		$sql = "
-			SELECT
-				ns.nspname as schema,
-				c.relname AS table_name,
-				c.relkind,
-				a.attname AS name,
-				NOT a.attnotnull AS nullable,
-				a.attnum AS ordinal_position,
-				ad.adsrc as default,
-				t.typname AS type_name,
-				tns.nspname as type_schema,
-				CASE WHEN t.typarray = 0 THEN eat.typname ELSE t.typname END AS type,
-				t.oid AS attribute_type_oid,
-				coalesce(eat.typtype, t.typtype) as type_type,
-				case when t.typarray = 0 THEN true ELSE false END AS is_array,
-				CASE WHEN t.typname = 'varchar' AND a.atttypmod > 0 THEN a.atttypmod - 4 ELSE NULL END as character_maximum_length,
-				CASE a.atttypid
-				 WHEN 21 /*int2*/ THEN 16
-				 WHEN 23 /*int4*/ THEN 32
-				 WHEN 20 /*int8*/ THEN 64
-				 WHEN 1700 /*numeric*/ THEN
-				      CASE WHEN atttypmod = -1
-					   THEN null
-					   ELSE ((atttypmod - 4) >> 16) & 65535
-					   END
-				 WHEN 700 /*float4*/ THEN 24 /*FLT_MANT_DIG*/
-				 WHEN 701 /*float8*/ THEN 53 /*DBL_MANT_DIG*/
-				 ELSE null
-				END   AS numeric_precision,
-				CASE 
-				    WHEN atttypid IN (21, 23, 20) THEN 0
-				    WHEN atttypid IN (1700) THEN
-					CASE 
-					    WHEN atttypmod = -1 THEN null
-					    ELSE (atttypmod - 4) & 65535
-					END
-				       ELSE null
-				  END AS decimal_length,
-				i.indisunique,
-				i.indisprimary,
-				v.definition as view_definition
-			FROM
-				pg_catalog.pg_class c JOIN
-				pg_catalog.pg_attribute a ON (c.oid = a.attrelid) JOIN
-				pg_catalog.pg_namespace ns ON (c.relnamespace = ns.oid) JOIN
-				pg_catalog.pg_type t ON (a.atttypid = t.oid) LEFT JOIN
-				pg_catalog.pg_namespace tns ON (t.typnamespace = tns.oid) LEFT JOIN
-				pg_catalog.pg_type eat ON (t.typelem = eat.oid) LEFT JOIN 
-				pg_index i ON i.indrelid = c.oid AND a.attnum = ANY(i.indkey)	LEFT JOIN 
-				pg_catalog.pg_attrdef ad ON a.attrelid = ad.adrelid AND ad.adnum = a.attnum LEFT JOIN 
-				pg_catalog.pg_views v ON v.viewname = c.relname AND v.schemaname = ns.nspname
-			WHERE
-				ns.nspname IN ('" .  implode("','", array_map(function($schema) { return trim($schema); }, explode(',', $schema)))  .  "') AND
-				c.relname = '".$table."' AND
-				".$and_column."
-				a.attnum > 0
-			ORDER BY a.attnum, indisunique desc, indisprimary desc
-		";
-		#echo '<br><br>' . $sql;
-		$ret = $this->execSQL($sql, 4, 0);
-		if($ret[0]==0){
-			while($attr_info = pg_fetch_assoc($ret[1])){
-				if($attr_info['nullable'] == 'f' AND substr($attr_info['default'], 0, 7) != 'nextval'){$attr_info['nullable'] = '0';}else{$attr_info['nullable'] = '1';}
-        if($attr_info['numeric_precision'] != '')$attr_info['length'] = $attr_info['numeric_precision'];
-        else $attr_info['length'] = $attr_info['character_maximum_length'];
-	      if($attr_info['decimal_length'] == ''){$attr_info['decimal_length'] = 'NULL';}	      
-	      if($attr_info['default'] != '' AND substr($attr_info['default'], 0, 7) != 'nextval')$attr_info['default'] = 'SELECT '.$attr_info['default'];
-	  		else $attr_info['default'] = '';
-				$attributes[] = $attr_info;
-			}
-		}
-		return $attributes;
-	}
 
   function pg_table_constraints($table){
   	if($table != ''){

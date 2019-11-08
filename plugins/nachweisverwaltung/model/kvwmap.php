@@ -665,19 +665,21 @@
 	};
 	
 	$GUI->nachweiseRecherchieren = function() use ($GUI){
-		$GUI->formvars['suchstammnr'] = trim($GUI->formvars['suchstammnr']);
-		$GUI->formvars['suchrissnummer'] = trim($GUI->formvars['suchrissnummer']);
-    # Suchparameter, die neu gesetzt worden sind in formvars, sollen übernommen werden und gespeichert werden
-    # für späterer Suchanfragen und die anderen sollen aus der Datenbank abgefragt werden.
-    # Setzen von Such- und Anzeigeparametern die neu gesetzt worden sind
-    # (nur neu gesetzte werden überschrieben)
-    if ($GUI->formvars['abfrageart']=='poly') {
-      $GUI->formvars['suchpolygon'] = $GUI->formvars['newpathwkt'];
-    }
-    $GUI->setNachweisSuchparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchunterart'], $GUI->formvars['abfrageart'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchflur'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchstammnr2'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchrissnummer2'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchfortfuehrung2'],$GUI->formvars['suchpolygon'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'],$GUI->formvars['sdatum2'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchbemerkung'], $GUI->formvars['flur_thematisch'], $GUI->formvars['alle_der_messung'], $GUI->formvars['order']);
-    # Die Anzeigeparameter werden so gesetzt, daß genau das gezeigt wird, wonach auch gesucht wurde.
-    # bzw. was als Suchparameter im Formular angegeben wurde.
-    $GUI->setNachweisAnzeigeparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchhauptart']);
+		if($GUI->formvars['abfrageart'] != ''){		# nur wenn man aus dem Suchformular kommt, Suchparameter speichern
+			$GUI->formvars['suchstammnr'] = trim($GUI->formvars['suchstammnr']);
+			$GUI->formvars['suchrissnummer'] = trim($GUI->formvars['suchrissnummer']);
+			# Suchparameter, die neu gesetzt worden sind in formvars, sollen übernommen werden und gespeichert werden
+			# für späterer Suchanfragen und die anderen sollen aus der Datenbank abgefragt werden.
+			# Setzen von Such- und Anzeigeparametern die neu gesetzt worden sind
+			# (nur neu gesetzte werden überschrieben)
+			if ($GUI->formvars['abfrageart']=='poly') {
+				$GUI->formvars['suchpolygon'] = $GUI->formvars['newpathwkt'];
+			}
+			$GUI->setNachweisSuchparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchunterart'], $GUI->formvars['abfrageart'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchflur'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchstammnr2'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchrissnummer2'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchfortfuehrung2'],$GUI->formvars['suchpolygon'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'],$GUI->formvars['sdatum2'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchbemerkung'], $GUI->formvars['flur_thematisch'], $GUI->formvars['alle_der_messung'], $GUI->formvars['order']);
+			# Die Anzeigeparameter werden so gesetzt, daß genau das gezeigt wird, wonach auch gesucht wurde.
+			# bzw. was als Suchparameter im Formular angegeben wurde.
+			$GUI->setNachweisAnzeigeparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchhauptart']);
+		}
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
     $GUI->formvars = array_merge($GUI->formvars, $GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id));
     # Nachweisobjekt bilden
@@ -1159,7 +1161,7 @@
 	$GUI->check_nachweis_poly = function() use ($GUI){
 		$GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
 		echo $GUI->nachweis->check_poly_in_flur($GUI->formvars['umring'], $GUI->formvars['flur'], $GUI->formvars['gemkgschl'], $GUI->user->rolle->epsg_code);
-		echo '~check_poly();';
+		echo '█check_poly();';
 	};
 
 	$GUI->nachweisFormSenden = function() use ($GUI){

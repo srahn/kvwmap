@@ -340,6 +340,7 @@ include('funktionen/input_check_functions.php');
 	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen, weiter_erfassen_params){
 		list_div = document.getElementById(list_div_id);
 		var params = list_div.dataset.reload_params;
+		if(enclosingForm.name == 'GUI2')params += '&mime_type=overlay_html';
 		if(list_edit)params += '&list_edit='+list_edit;
 		if(weiter_erfassen)params += '&weiter_erfassen='+weiter_erfassen;
 		if(weiter_erfassen_params)params += '&weiter_erfassen_params='+weiter_erfassen_params;
@@ -525,6 +526,9 @@ include('funktionen/input_check_functions.php');
 		}
 		else if(event.key == 'Tab'){
 			// nix machen
+		}
+		else if(event.key == 'Escape'){
+			document.getElementById('output_'+field_id).onchange();
 		}
 		else{
 			suggest_field.style.display = 'none';
