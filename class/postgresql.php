@@ -594,8 +594,12 @@ FROM
 	}
 
 	function get_attribute_information($schema, $table, $col_num = NULL) {
-		if($col_num != NULL)$and_column = " a.attnum = ".$col_num." ";
-		else $and_column = " a.attnum > 0 ";
+		if ($col_num != NULL) {
+			$and_column = " a.attnum = " . $col_num . " ";
+		}
+		else {
+			$and_column = " a.attnum > 0 ";
+		}
 		$attributes = array();
 		$sql = "
 			SELECT
@@ -650,8 +654,8 @@ FROM
 				pg_catalog.pg_views v ON v.viewname = c.relname AND v.schemaname = ns.nspname
 			WHERE
 				ns.nspname IN ('" .  implode("','", array_map(function($schema) { return trim($schema); }, explode(',', $schema)))  .  "') AND
-				c.relname = '".$table."' AND
-				".$and_column."
+				c.relname = '" . $table . "' AND
+				" . $and_column . "
 			ORDER BY a.attnum, indisunique desc, indisprimary desc
 		";
 		#echo '<br><br>' . $sql;
