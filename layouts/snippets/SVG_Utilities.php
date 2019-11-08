@@ -2922,14 +2922,24 @@ function mouseup(evt){
 
 	function buildsvgpolygonfromwkt(wkt){
 		if(wkt != ""){
-			wkt = wkt.substring(9, wkt.length-2);		// geht nur für POLYGON
+			var type = wkt.substring(0, 9);
+			if(type == "MULTIPOLY"){
+				var start = 15;
+				var end = wkt.length-3;
+				var delim = ")),((";
+			}
+			else{			// POLYGON
+				var start = 9;
+				var end = wkt.length-2;
+				var delim = "),(";
+			}
+			wkt = wkt.substring(start, end);
 			var koords;
-			parts = wkt.split("),(");
+			parts = wkt.split(delim);
 			for(j = 0; j < parts.length; j++){
 				parts[j] = parts[j].replace(/,/g, " ");
 			}
 			svg = "M "+parts.join(" M ");
-			console.log(svg);
 			return svg;
 		}
 		else{

@@ -1558,6 +1558,8 @@
 				$GUI->formvars['pathwkt'] = $GUI->formvars['suchpolygon'];
 				$GUI->formvars['newpathwkt'] = $GUI->formvars['suchpolygon'];
 				$GUI->formvars['firstpoly'] = 'true';
+				$GUI->formvars['last_doing'] = 'draw_second_polygon';
+				$GUI->formvars['last_button'] = 'pgon0';
 			}
 		}
 		# die Parameter einer gespeicherten Dokumentauswahl laden
