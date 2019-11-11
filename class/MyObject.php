@@ -3,13 +3,13 @@ class MyObject {
 
 	static $write_debug = false;
 
-	function MyObject($gui, $tableName) {
+	function MyObject($gui, $tableName, $identifier = 'id', $identifier_type = 'integer') {
 		$this->gui = $gui;
 		$this->debug = $gui->debug;
 		$this->database = $gui->database;
 		$this->tableName = $tableName;
-		$this->identifier = 'id';
-		$this->identifier_type = 'integer';
+		$this->identifier = $identifier;
+		$this->identifier_type = $identifier_type;
 		$this->data = array();
 		$this->children_ids = array();
 		$this->debug->show('<p>New MyObject for table: '. $this->tableName, MyObject::$write_debug);
@@ -38,7 +38,7 @@ class MyObject {
 	}
 
 	/*
-	* Search for an record in the database
+	* Search for records in the database
 	* by the given where clause
 	* @ return all objects
 	*/
@@ -77,9 +77,8 @@ class MyObject {
 				" . (!empty($params['select']) ? $params['select'] : '*') . "
 			FROM
 				" . (!empty($params['from']) ? $params['from'] : "`" . $this->tableName . "`") . "
-			WHERE
-				" . (!empty($params['where']) ? $params['where'] : '') . "
-				" . (!empty($params['order']) ? 'ORDER BY ' . replace_semicolon($params['order']) : '') . "
+			" . (!empty($params['where']) ? "WHERE " . $params['where'] : "") . "
+			" . (!empty($params['order']) ? "ORDER BY " . replace_semicolon($params['order']) : "") . "
 		";
 		$this->debug->show('mysql find_by_sql sql: ' . $sql, MyObject::$write_debug);
 		$this->debug->write('#mysql find_by_sql sql:<br> ' . $sql.';<br>',4);
@@ -222,7 +221,7 @@ class MyObject {
 					", ",
 					array_map(
 						function ($value) {
-							if ($value === NULL) {
+							if ($value === NULL OR $value == '') {
 								$v = 'NULL';
 							}
 							else if (is_numeric($value)) {
@@ -261,9 +260,22 @@ class MyObject {
 
 	function update($data = array()) {
 		$results = array();
-		$quote = ($this->identifier_type == 'text') ? "'" : "";
-		if (!empty($data))
+		if ($this->identifier_type == 'array' AND getType($this->identifier) == 'array') {
+			$where = array_map(
+				function($id) {
+					$quote = ($id['type'] == 'text' ? "'" : "");
+					return $id['key'] . " = " . $quote . $this->get($id['key']) . $quote;
+				},
+				$this->identifier
+			);
+		}
+		else {
+			$quote = ($this->identifier_type == 'text' ? "'" : "");
+			$where = array($this->identifier . " = " . $quote . $this->get($this->identifier) . $quote);
+		}
+		if (!empty($data)) {
 			$this->data = $data;
+		}
 
 		$sql = "
 			UPDATE
@@ -271,7 +283,7 @@ class MyObject {
 			SET
 				" . implode(', ', $this->getKVP()) . "
 			WHERE
-				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
+				" . implode(' AND ', $where) . "
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
 		$query = mysql_query($sql);

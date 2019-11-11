@@ -688,7 +688,7 @@
 		}
 		if(polygonfunctions == true){
 			if(enclosingForm.always_draw.checked && !geomload){		// "weiterzeichnen"
-				enclosingForm.last_button.value = "pgon0";
+				if(enclosingForm.last_doing2.value == "draw_polygon" || enclosingForm.last_doing2.value == "draw_second_polygon")enclosingForm.last_button.value = "pgon0";
 				if(enclosingForm.last_doing2.value != "")enclosingForm.last_doing.value = enclosingForm.last_doing2.value;
 				if(enclosingForm.secondpoly.value == "started" || enclosingForm.secondpoly.value == "true"){	// am zweiten Polygon oder an einer gepufferten Linie wird weitergezeichnet
 					if(enclosingForm.last_doing2.value == "add_buffered_line")enclosingForm.last_button.value = "buffer1";
@@ -770,7 +770,7 @@
 			redrawfirstline();
 			if(enclosingForm.firstline.value == "true")linelength();
 		}
-		if(enclosingForm.last_doing2.value == "vertex_edit"){
+		if((enclosingForm.always_draw != undefined && enclosingForm.always_draw.checked && enclosingForm.last_doing2.value == "vertex_edit") || enclosingForm.last_button.value == "vertex_edit1"){
 			edit_vertices();
 		}
 		redrawpoint();
@@ -2142,6 +2142,7 @@ function mouseup(evt){
 	}
 
 	function edit_vertices(){
+		highlightbyid("vertex_edit1");
 		remove_second_line();
 		save_geometry_for_undo();
 		enclosingForm.last_doing.value = "vertex_edit";
@@ -2884,6 +2885,7 @@ function mouseup(evt){
 	}
 
 	function edit_vertices(){
+		highlightbyid("vertex_edit1");
 		remove_second_poly()
 		save_geometry_for_undo();
 		enclosingForm.last_doing.value = "vertex_edit";
@@ -2920,14 +2922,24 @@ function mouseup(evt){
 
 	function buildsvgpolygonfromwkt(wkt){
 		if(wkt != ""){
-			wkt = wkt.substring(9, wkt.length-2);		// geht nur für POLYGON
+			var type = wkt.substring(0, 9);
+			if(type == "MULTIPOLY"){
+				var start = 15;
+				var end = wkt.length-3;
+				var delim = ")),((";
+			}
+			else{			// POLYGON
+				var start = 9;
+				var end = wkt.length-2;
+				var delim = "),(";
+			}
+			wkt = wkt.substring(start, end);
 			var koords;
-			parts = wkt.split("),(");
+			parts = wkt.split(delim);
 			for(j = 0; j < parts.length; j++){
 				parts[j] = parts[j].replace(/,/g, " ");
 			}
 			svg = "M "+parts.join(" M ");
-			console.log(svg);
 			return svg;
 		}
 		else{
@@ -3946,7 +3958,7 @@ $measurefunctions = '
 		global $last_x;
 		$vertex_edit_buttons ='
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
-				<rect id="vertex_edit1" onmouseover="show_tooltip(\''.$strCornerPoint.'\',evt.clientX,evt.clientY)" onmousedown="highlightbyid(\'vertex_edit1\');edit_vertices();hide_tooltip();" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<rect id="vertex_edit1" onmouseover="show_tooltip(\''.$strCornerPoint.'\',evt.clientX,evt.clientY)" onmousedown="edit_vertices();hide_tooltip();" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(4 4) scale(1)">
 					<g transform="translate(-10.8 -9.5)">
 						<path d="M16.25,29 C17.5,29 18.5,28 18.5,26.75 C18.5,25.5 17.5,24.5 16.25,24.5 C15.0,24.5 14.0,25.5 14,26.75 C14,28 15.0,29 16.25,29"/>

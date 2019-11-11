@@ -79,6 +79,16 @@ function printMap(){
 	document.GUI.submit();
 }
 
+function printMapFast(){
+	if(typeof addRedlining != 'undefined'){
+		addRedlining();
+	}
+	document.GUI.go.value = 'Schnelle_Druckausgabe';
+	document.GUI.target = '_blank';
+	document.GUI.submit();
+	document.GUI.target = '';
+}
+
 function checkForUnsavedChanges(event){
 	var sure = true;
 	if(document.GUI.gle_changed.value == 1){
@@ -636,6 +646,12 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
   	}
   }
 	if(instantreload)neuLaden();
+}
+
+function deleteRollenlayer(type){
+	document.GUI.delete_rollenlayer.value = 'true';
+	document.GUI.delete_rollenlayer_type.value = type;
+	neuLaden();
 }
 
 function neuLaden(){

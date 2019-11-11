@@ -357,20 +357,51 @@ a.invisiblelayerlink:hover{
 	margin-top: 10px;
 }
 
+#datendrucklayouteditor{
+	display: flex;
+	margin: 10px;
+}
+
+#datendrucklayouteditor_formular{
+	margin-left: 5px;
+}
+
+#datendrucklayouteditor_formular_scroll{
+	background-color: white;
+	border: 1px solid #aaa;
+	overflow-y: auto;
+	max-height: 800px;
+	width: 100%;
+	min-width: 600px;
+	margin-right: 15px;
+}
+
+#datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table{
+	width: 100%;
+	background: url('../graphics/bg.gif');
+}
+
+#datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table>tbody:first-of-type>tr:first-of-type{
+	background-color: #c5d4e7;
+}
+
 #geo_name_search_result_div{
 	position: absolute;
 	z-index: 1000000;
 	background-color: white;
-	box-shadow: 12px 10px 14px #777;
+	box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.3);
+	border: 1px solid #ddd;
 }
 
 #geo_name_search_result_div ul{
 	color: lightsteelblue;
 	margin: 5px;
-	padding: 0px;
-			padding-left: 0px;
-	padding-left: 15px;
+	padding: 10px 0 6px 15px;
 	list-style: square outside none;
+}
+
+#geo_name_search_result_div ul li{
+	margin-top: 4px;
 }
 
 .code{
@@ -383,7 +414,7 @@ a.invisiblelayerlink:hover{
 #login_table{
 	margin-top: 20px; 
 	background-color: <? echo BG_DEFAULT; ?>;
-	box-shadow: 12px 10px 14px #777; 
+	box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.4); 
 	border: 1px solid #bbbbbb; 
 	background: linear-gradient(<? echo BG_GLEATTRIBUTE; ?> 0%, <? echo BG_DEFAULT ?> 100%);
 }
@@ -830,7 +861,7 @@ a.menuered:hover {
 }
 
 #agreement_message{
-	box-shadow: 12px 10px 14px #777;
+	box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.4);
 	background-color: #ffffff;
 	border: 2px solid #000000;
 	position: absolute;
@@ -870,7 +901,7 @@ a.menuered:hover {
 	border-right: 1px solid #aaaaaa;
 	padding: 5 0 5 5; 
 	background-color: <? echo BG_MENUETOP; ?>;
-	box-shadow: 3px 0px 4px #bbb;
+	box-shadow: 3px 0px 4px rgba(0, 0, 0, 0.3);
 }
 
 #hist_timestamp_form{
@@ -882,7 +913,7 @@ a.menuered:hover {
 	border-bottom: 1px solid #aaaaaa;
 	padding: 5 0 5 5; 
 	background-color: <? echo BG_MENUETOP; ?>;
-	box-shadow: 3px 3px 4px #bbb;
+	box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
 	z-index: 100000;
 }
 
@@ -1108,13 +1139,15 @@ a.menuered:hover {
 
 
 select.imagebacked { 
-	padding: 2px 0 3px 155px; 
+	#padding: 2px 0 3px 155px; 
+	color: rgba(255, 255, 255, 0);
 	background-repeat: no-repeat; 
 	background-position: 0px 0px; 
 	vertical-align: middle; 
 }
 
 option.imagebacked {
+	color: black;
 	padding: 2px 0 3px 1px; 
 	background-repeat: no-repeat; 
 	background-position: 0px 0px; 
@@ -1168,6 +1201,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record .gle tr{border:none;}
 .raster_record .tgle{border:none;}
 .raster_record a{font-size: 0.0001px;transition: all 0.25s ease;}
+.raster_record #formelement{width: 135px;overflow: hidden;}
 /* Attribute, die ausgeblendet werden sollen: */
 .raster_record .tr_hide{visibility:collapse;}
 .raster_record .tr_hide td{font-size: 0.0001px;line-height: 0.0001px;padding: 0.0001px !important;transition: all 0.25s ease;}
@@ -1181,7 +1215,6 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record .tr_hide .datensatz_header{display: none}
 /* Attribute, die eingeblendet werden sollen: */
 .raster_record .tr_show{visibility:visible;}
-.raster_record .tr_show #formelement{width: 129px;overflow: hidden;}
 .raster_record .tr_show .readonly_text{font-size: 15px;min-width: 122px !important;max-width: 122px !important;transition: all 0.25s ease;}
 .raster_record .tr_show td{border:none;padding: 0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_show select{width: 112%;height:22px;transition: all 0.25s ease;}									/* Selectfelder werden auf 130px Breite verkleinert*/
@@ -1252,7 +1285,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	border: 1px solid grey;
 /*	border-radius: 5px;*/
 	background-color: #DAE4EC;
-	box-shadow: 10px 10px 14px #777;
+	box-shadow: 10px 10px 14px rgba(0, 0, 0, 0.4);
 	z-index: 1000000;
 }
 
@@ -1314,8 +1347,8 @@ thead.gle th {
 .gle_attribute_value {
  background-clip: padding-box;
  position: relative;
- padding-left: 4px;
- padding-right: 5px;
+ padding: 4px 5px 0 4px;
+ vertical-align: top;
  min-width: 30px;
 }
 
@@ -1323,7 +1356,7 @@ thead.gle th {
 	word-wrap: break-word;
 }
 
-tbody.gle tr { 
+tbody.gle>tr { 
  border:1px solid #999;
 }
 
@@ -1344,6 +1377,14 @@ tbody.gle tr {
 .subFormListItem{
 	height: 20px;
 	padding: 0;
+}
+
+.gle_hr{
+	width: 100%; 
+	height: 3px; 
+	margin: 15 0; 
+	color: <? echo BG_GLEHEADER; ?>; 
+	background: <? echo BG_GLEHEADER; ?>;
 }
 
 .subFormListItem > a:before{
@@ -1590,6 +1631,10 @@ tbody.gle tr {
 	color: gray;
 }
 
+.fa:hover {
+	color: #555;
+}
+
 .fa-7x {
 	font-size: 7em !important;
 }
@@ -1628,9 +1673,7 @@ tbody.gle tr {
 	border: 1px solid #cccccc;
 	background-color: #FFFFFF;
 	position:absolute;
-	-moz-box-shadow: 6px 5px 7px #777;
-	-webkit-box-shadow: 6px 5px 7px #777;
-	box-shadow: 6px 5px 7px #777;
+	box-shadow: 6px 5px 7px rgba(0, 0, 0, 0.3);
 	top: 30px;
 	right: 15px;
 	z-index: 2000;
@@ -1685,9 +1728,7 @@ tbody.gle tr {
 	padding:0px;
 	position:absolute;
 	z-index: 1000;
-	-moz-box-shadow: 6px 5px 7px #777;
-	-webkit-box-shadow: 6px 5px 7px #777;
-	box-shadow: 6px 5px 7px #777;
+	box-shadow: 6px 5px 7px rgba(0, 0, 0, 0.4);
 }
 
 .layerOptions{
@@ -1761,9 +1802,7 @@ tbody.gle tr {
 	width: 200px;
 	position:absolute;
 	z-index: 1000;
-	-moz-box-shadow: 6px 5px 7px #777;
-	-webkit-box-shadow: 6px 5px 7px #777;
-	box-shadow: 6px 5px 7px #777;
+	box-shadow: 6px 5px 7px rgba(0, 0, 0, 0.4);
 }
 
 .groupOptionsHeader{
@@ -1923,9 +1962,13 @@ tbody.gle tr {
 }
 
 .scrolltable tbody {
-	max-height: 590px;
 	overflow-y: auto;
 	overflow-x: hidden;
+}
+
+.scrolltable_header{
+	position: absolute;
+	margin-top: -25px;
 }
 
 .toggle_fa_off i{

@@ -2,28 +2,36 @@
  # 2008-09-30 sr
   include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
  
- # Variablensubstitution
- $layer = $this->qlayerset[$i];
- 
- $size = 40;
- $select_width = 'width:290px;';
-?>
+	# Variablensubstitution
+	$layer = $this->qlayerset[$i];
+	
+	# falls das Geometrie-Attribut editierbar ist, zum nicht eingebetteten Formular wechseln
+	if($layer['attributes']['privileg'][$layer['attributes']['indizes'][$layer['attributes']['the_geom']]] == 1){
+		$this->formvars['embedded'] = '';
+		echo '
+		<script type="text/javascript">
+			location.href = \'index.php?'.http_build_query($this->formvars).'\'
+		</script>';
+		exit;
+	}
 
-<?
-  	$doit = false;
-	  $anzObj = count($this->qlayerset[$i]['shape']);
-	  if ($anzObj > 0) {
-	  	$this->found = 'true';
-			$k = 0;
-	  	$doit = true;
-	  }
-	  if($this->new_entry == true){
-	  	$anzObj = 0;
-			$k  = -1;
-	  	$doit = true;
-	  }
-	  if($doit == true){
-			$table_id = rand(0, 100000);
+	$size = 40;
+	$select_width = 'width:290px;';
+
+	$doit = false;
+	$anzObj = count($this->qlayerset[$i]['shape']);
+	if ($anzObj > 0) {
+		$this->found = 'true';
+		$k = 0;
+		$doit = true;
+	}
+	if($this->new_entry == true){
+		$anzObj = 0;
+		$k  = -1;
+		$doit = true;
+	}
+	if($doit == true){
+		$table_id = rand(0, 100000);
 ?>
 <table id="<? echo $table_id; ?>" border="0" cellspacing="0" cellpadding="2">
 <?
@@ -36,6 +44,13 @@
 	$this->subform_classname = 'subform_'.$layer['Layer_ID'];
 	for ($k; $k<$anzObj; $k++) {
 		$checkbox_name .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'];
+		
+		$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
+		if (is_array($layer['attributes']['privileg'])) {
+			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
+				$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
+			}
+		}
 ?>
 	<tr>
 		<td>
@@ -75,26 +90,28 @@
 
 				if($layer['attributes']['visible'][$j] AND ($this->new_entry != true OR $layer['attributes']['dont_use_for_new'][$j] != -1)){
 					if($layer['attributes']['type'][$j] != 'geometry'){
-						if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
-						if($layer['attributes']['alias'][$j] == '')$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
-						
-						if($layer['attributes']['arrangement'][$j] != 1)$datapart .= '<tr id="tr_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'">';							# wenn Attribut nicht daneben -> neue Zeile beginnen
-						if($layer['attributes']['labeling'][$j] != 2){
-							$td = '	<td class="gle-attribute-name" id="'.'name_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'"'; if($layer['attributes']['labeling'][$j] == 1 AND $layer['attributes']['arrangement'][$j] == 1 AND $layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20" ';if($layer['attributes']['group'][0] != '' AND $layer['attributes']['arrangement'][$j] != 1)$td .= 'width="1%">';else $td.='width="1%">';
-							$td.= 			attribute_name($layer['Layer_ID'], $layer['attributes'], $j, $k, $this->user->rolle->fontsize_gle, false);
+						if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
+							if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
+							if($layer['attributes']['alias'][$j] == '')$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
+							
+							if($layer['attributes']['arrangement'][$j] != 1)$datapart .= '<tr id="tr_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'">';							# wenn Attribut nicht daneben -> neue Zeile beginnen
+							if($layer['attributes']['labeling'][$j] != 2){
+								$td = '	<td class="gle-attribute-name" id="'.'name_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'"'; if($layer['attributes']['labeling'][$j] == 1 AND $layer['attributes']['arrangement'][$j] == 1 AND $layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20" ';if($layer['attributes']['group'][0] != '' AND $layer['attributes']['arrangement'][$j] != 1)$td .= 'width="1%">';else $td.='width="1%">';
+								$td.= 			attribute_name($layer['Layer_ID'], $layer['attributes'], $j, $k, $this->user->rolle->fontsize_gle, false);
+								$td.= '	</td>';
+								if($nl AND $layer['attributes']['labeling'][$j] != 1)$next_line .= $td; else $datapart .= $td;
+							}
+							if($layer['attributes']['labeling'][$j] == 1)$nl = true;										# Attributname soll oben stehen -> alle weiteren tds für die nächste Zeile aufsammeln
+							$td = '	<td width="100%" id="value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" class="gle_attribute_value"'; if($layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20"'; $td .= '>';												
+							$td.= 			attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, false, NULL, NULL, NULL, $this->subform_classname);
 							$td.= '	</td>';
-							if($nl AND $layer['attributes']['labeling'][$j] != 1)$next_line .= $td; else $datapart .= $td;
-						}
-						if($layer['attributes']['labeling'][$j] == 1)$nl = true;										# Attributname soll oben stehen -> alle weiteren tds für die nächste Zeile aufsammeln
-						$td = '	<td width="100%" id="value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" class="gle_attribute_value"'; if($layer['attributes']['arrangement'][$j+1] != 1)$td .= 'colspan="20"'; $td .= '>';												
-						$td.= 			attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, false, NULL, NULL, NULL, $this->subform_classname);
-						$td.= '	</td>';
-						if($nl)$next_line .= $td; else $datapart .= $td;
-						if($layer['attributes']['arrangement'][$j+1] != 1)$datapart .= '</tr>';						# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
-						if($layer['attributes']['arrangement'][$j+1] != 1 AND $nl){												# die aufgesammelten tds in neuer Zeile ausgeben
-							$datapart .= '<tr>'.$next_line.'</tr>';
-							$next_line = '';
-							$nl = false;
+							if($nl)$next_line .= $td; else $datapart .= $td;
+							if($layer['attributes']['arrangement'][$j+1] != 1)$datapart .= '</tr>';						# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
+							if($layer['attributes']['arrangement'][$j+1] != 1 AND $nl){												# die aufgesammelten tds in neuer Zeile ausgeben
+								$datapart .= '<tr>'.$next_line.'</tr>';
+								$next_line = '';
+								$nl = false;
+							}
 						}
 					}
 		  		else{
@@ -172,6 +189,7 @@
 		</td>
 	</tr>
 <?
+	$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 	}
 ?>
 </table>

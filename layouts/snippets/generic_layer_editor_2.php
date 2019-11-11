@@ -27,6 +27,8 @@
 		$k = -1;
   	$doit = true;
   }
+	
+	if($doit == true){
 ?>
 <div id="layer" onclick="remove_calendar();">
 <input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
@@ -39,23 +41,19 @@
 			} ?>
 		</td>
 		<td width="99%" align="center"><h2 id="layername"><? echo $layer['Name']; ?></h2></td>
-    <? if (!$this->user->rolle->visually_impaired AND $anzObj > 0) { ?>
+    <? if (!$this->user->rolle->visually_impaired AND $anzObj > 0 AND $this->formvars['printversion'] == '') { ?>
 			<td valign="top" style="padding: 0 10 0 0" class="layer_header">
-				<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
 				<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
-				<? }else{ ?>
-				<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
-				<? } ?>
 			</td>
-			<td align="right" class="layer_header">			
-				<a href="javascript:scrollbottom();"><img class="hover-border" title="<? echo $strToBottom; ?>" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
+			<td>
+				<a href="javascript:scrollbottom();"	title="<? echo $strToBottom; ?>">
+					<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
+				</a>
 			</td>
 		<? } ?>
 	</tr>
 </table>
 <? }
-
-  if($doit == true){
 		$table_id = rand(0, 100000);
 		echo $layer['paging'];
 ?>
@@ -120,75 +118,77 @@
 
 				if($layer['attributes']['visible'][$j]){
 					if($layer['attributes']['type'][$j] != 'geometry'){
-						if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
-						if($layer['attributes']['alias'][$j] == '')$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
-					
-						####### wenn Attribut nicht daneben -> neue Zeile beginnen ########
-						if($layer['attributes']['arrangement'][$j] != 1){
-							$row['id'] = 'tr_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
-							$row['class'] = $attribute_class;
-						}
-						else{
-							if($nl){
-								$next_row['sidebyside'] = true;
+						if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
+							if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
+							if($layer['attributes']['alias'][$j] == '')$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
+						
+							####### wenn Attribut nicht daneben -> neue Zeile beginnen ########
+							if($layer['attributes']['arrangement'][$j] != 1){
+								$row['id'] = 'tr_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
+								$row['class'] = $attribute_class;
 							}
 							else{
-								$row['sidebyside'] = true;
+								if($nl){
+									$next_row['sidebyside'] = true;
+								}
+								else{
+									$row['sidebyside'] = true;
+								}
 							}
-						}
-						######### Attributname #########
-						if($layer['attributes']['labeling'][$j] != 2){
-							$cell['properties'] = 'class="gle-attribute-name"';
-							$cell['id'] = 'name_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
-							$cell['content'] = attribute_name($layer['Layer_ID'], $layer['attributes'], $j, $k, $this->user->rolle->fontsize_gle, ($this->formvars['printversion'] == '' AND $anzObj > 1) ? true : false);
-							if($nl AND $layer['attributes']['labeling'][$j] != 1){
-								$next_row['contains_attribute_names'] = true;
+							######### Attributname #########
+							if($layer['attributes']['labeling'][$j] != 2){
+								$cell['properties'] = 'class="gle-attribute-name"';
+								$cell['id'] = 'name_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
+								$cell['content'] = attribute_name($layer['Layer_ID'], $layer['attributes'], $j, $k, $this->user->rolle->fontsize_gle, ($this->formvars['printversion'] == '' AND $anzObj > 1) ? true : false);
+								if($nl AND $layer['attributes']['labeling'][$j] != 1){
+									$next_row['contains_attribute_names'] = true;
+									$next_row['cells'][] = $cell;
+								}
+								else{
+									$row['contains_attribute_names'] = true;
+									$row['cells'][] = $cell;
+								}
+							}
+							if($layer['attributes']['labeling'][$j] == 1)$nl = true;										# Attributname soll oben stehen -> alle weiteren Zellen für die nächste Zeile aufsammeln
+							######### /Attributname #########
+						
+							if($row['sidebyside'] OR $next_row['sidebyside']){
+								$select_width2 = '';
+								$size2 = '';
+							}
+							else{
+								$size2 = $size;
+								$select_width2 = $select_width;
+							}
+							if ($select_width2 == '') $select_width2 = 'max-width: 600px;';
+
+							######### Attributwert #########
+							$cell['content'] = attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2, $this->user->rolle->fontsize_gle);
+							$cell['id'] = 'value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
+							$cell['properties'] = get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value'));
+							if($nl){
 								$next_row['cells'][] = $cell;
 							}
 							else{
-								$row['contains_attribute_names'] = true;
 								$row['cells'][] = $cell;
 							}
-						}
-						if($layer['attributes']['labeling'][$j] == 1)$nl = true;										# Attributname soll oben stehen -> alle weiteren Zellen für die nächste Zeile aufsammeln
-						######### /Attributname #########
-					
-						if($row['sidebyside'] OR $next_row['sidebyside']){
-							$select_width2 = '';
-							$size2 = '';
-						}
-						else{
-							$size2 = $size;
-							$select_width2 = $select_width;
-						}
-						if ($select_width2 == '') $select_width2 = 'max-width: 600px;';
-
-						######### Attributwert #########
-						$cell['content'] = attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2, $this->user->rolle->fontsize_gle);
-						$cell['id'] = 'value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
-						$cell['properties'] = get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value'));
-						if($nl){
-							$next_row['cells'][] = $cell;
-						}
-						else{
-							$row['cells'][] = $cell;
-						}
-						unset($cell);
-						######### /Attributwert #########
+							unset($cell);
+							######### /Attributwert #########
+							
+							if($layer['attributes']['arrangement'][$j+1] != 1){		# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
+								$table['rows'][] = $row;
+								if(count($row['cells']) > $table['max_cell_count'])$table['max_cell_count'] = count($row['cells']);
+								unset($row);
+							}
+							if($layer['attributes']['arrangement'][$j+1] != 1 AND $nl){			# die aufgesammelten Zellen in neuer Zeile ausgeben
+								$table['rows'][] = $next_row;
+								unset($next_row);
+								$nl = false;
+							}
 						
-						if($layer['attributes']['arrangement'][$j+1] != 1){		# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
-							$table['rows'][] = $row;
-							if(count($row['cells']) > $table['max_cell_count'])$table['max_cell_count'] = count($row['cells']);
-							unset($row);
-						}
-						if($layer['attributes']['arrangement'][$j+1] != 1 AND $nl){			# die aufgesammelten Zellen in neuer Zeile ausgeben
-							$table['rows'][] = $next_row;
-							unset($next_row);
-							$nl = false;
-						}
-					
-						if($layer['attributes']['privileg'][$j] >= '0'){
-							$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'|';
+							if($layer['attributes']['privileg'][$j] >= '0'){
+								$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'|';
+							}
 						}
 					}
 					else {
@@ -208,7 +208,7 @@
 					}
 				}
 				else{
-					$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
+					$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'" readonly="true" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
 					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'|';
 				}
 				if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
@@ -491,28 +491,12 @@
 	[].forEach.call(vchangers, function(vchanger){vchanger.oninput();});
 </script>
 
-<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
-<input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
-
+	<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
+	<input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
+</div>
 <?
   }
   elseif($layer['requires'] == '' AND $layer['required'] == ''){
+		$this->noMatchLayers[$layer['Layer_ID']] = $layer['Name'];
+	}
 ?>
-<table border="0" cellspacing="10" cellpadding="2">
-  <tr>
-		<td>
-				<span style="color:#FF0000;"><? echo $strNoMatch; ?></span>
-		</td>
-  </tr>
-<? 	$layer_new_dataset = $this->Stelle->getqueryablePostgisLayers(1, NULL, true, $layer['Layer_ID']);		// Abfrage ob Datensatzerzeugung möglich
-		if($layer_new_dataset != NULL){ ?>
-	<tr align="center">
-		<td><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=<? echo $layer['Layer_ID']; ?>"><? echo $strNewDataset; ?></a></td>
-	</tr>
-	<? } ?>
-</table>
-
-<?
-  }
-?>
-</div>

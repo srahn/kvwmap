@@ -166,35 +166,37 @@ include('funktionen/input_check_functions.php');
 			value = elements[i].value;
 			name = elements[i].name;
 			type = elements[i].type;
-			if (type == 'file') { // Spezialfall bei Datei-Upload-Feldern:
-				if (value != '') {
-					value = 'file:' + name; // wenn value vorhanden, wurde eine Datei ausgewählt, dann den Namen des Input-Feldes einsammeln + einem Prefix "file:"
-				}
-				else {
-					old_file_path = document.getElementsByName(name+'_alt');
-					if (old_file_path[0] != undefined) {
-						value = old_file_path[0].value; // ansonsten den gespeicherten alten Dateipfad
-					}
-				}
-			}
-			if (!is_array) { // Datentyp
-				if (value == '') {
-					value = 'null';
-				}
-				else {
-					if (value.substring(0,1) != '{') {
-						value = '"' + value + '"';
-					}
-				}
-				id_parts = elements[i].id.split('_');
-				if(id_parts.length == 3)attribute_name = id_parts[1];		// normales Attribut
-				else attribute_name = id_parts.pop();										// Nutzerdatentyp-Attribut
-				values.push('"' + attribute_name + '":' + value);
-			}
-			else {
-				if (i > 0) { // Array (hier ist das erste Element ein Dummy -> auslassen)
+			if(name.slice(-4) != '_alt'){
+				if (type == 'file') { // Spezialfall bei Datei-Upload-Feldern:
 					if (value != '') {
-						values.push(value);
+						value = 'file:' + name; // wenn value vorhanden, wurde eine Datei ausgewählt, dann den Namen des Input-Feldes einsammeln + einem Prefix "file:"
+					}
+					else {
+						old_file_path = document.getElementsByName(name+'_alt');
+						if (old_file_path[0] != undefined) {
+							value = old_file_path[0].value; // ansonsten den gespeicherten alten Dateipfad
+						}
+					}
+				}
+				if (!is_array) { // Datentyp
+					if (value == '') {
+						value = 'null';
+					}
+					else {
+						if (value.substring(0,1) != '{') {
+							value = '"' + value + '"';
+						}
+					}
+					id_parts = elements[i].id.split('_');
+					if(id_parts.length == 3)attribute_name = id_parts[1];		// normales Attribut
+					else attribute_name = id_parts.pop();										// Nutzerdatentyp-Attribut
+					values.push('"' + attribute_name + '":' + value);
+				}
+				else {
+					if (i > 0) { // Array (hier ist das erste Element ein Dummy -> auslassen)
+						if (value != '') {
+							values.push(value);
+						}
 					}
 				}
 			}
@@ -335,11 +337,13 @@ include('funktionen/input_check_functions.php');
 		enclosingForm.submit();
 	}
 	
-	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen){
+	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen, weiter_erfassen_params){
 		list_div = document.getElementById(list_div_id);
 		var params = list_div.dataset.reload_params;
+		if(enclosingForm.name == 'GUI2')params += '&mime_type=overlay_html';
 		if(list_edit)params += '&list_edit='+list_edit;
 		if(weiter_erfassen)params += '&weiter_erfassen='+weiter_erfassen;
+		if(weiter_erfassen_params)params += '&weiter_erfassen_params='+weiter_erfassen_params;
 		ahah('index.php?go=Layer-Suche_Suchen', params, new Array(list_div), new Array('sethtml'));
 	}
 
@@ -390,50 +394,16 @@ include('funktionen/input_check_functions.php');
   	overlay_submit(this, false);
 	}
 
-	/**
-	*	Funktion löscht einzelnen Datensatz mit oid im Layer mit layer_id,
-	* entfernt Datensatz in Liste des Subforms und
-	* zeigt Meldungen des Löschvorgangs an
-	*/
-	delete_subform_dataset = function(layer_id, oid, element_id) {
-		if (confirm('Wollen Sie die Datensatz oid: ' + oid + ' im Layer id: ' + layer_id + ' wirklich löschen?')) {
-			$.ajax({
-				url : 'index.php',
-				data: {
-					go: 'Layer_Datensatz_Loeschen',
-					chosen_layer_id: layer_id,
-					oid: oid
-				},
-				type: 'GET',
-				success: function(data) {
-					var result = JSON.parse(data),
-							success = true;
-					$.each(result, function(index, value) {
-						if (value.type == 'error') {
-							success = false;
-						}
-					});
-					if (success) {
-						$('#' + element_id).remove();
-					}
-					message(result);
-				}
-			});
-		}
-	}
-
-	subdelete_data = function(layer_id, fromobject, targetobject){
+	subdelete_data = function(layer_id, fromobject, oid, reload_object){
 		// layer_id ist die von dem Layer, in dem der Datensatz geloescht werden soll
-		// fromobject ist die id von dem div, welches das Formular des Datensatzes enthaelt
-		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Loeschung des Datensatzes aktualisiert werden soll
+		// fromobject ist die id von dem div, welches das Formular des Datensatzes enthaelt, welches entfernt wird
+		// reload_object ist die id vom gesamten Subformular, welches nach Loeschung des Datensatzes aktualisiert werden soll (optional)
 		if (confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')) {
 			var formData = new FormData();
-			formData.append('go', 'Layer_Datensaetze_Loeschen');
+			formData.append('go', 'Layer_Datensatz_Loeschen');
 			formData.append('chosen_layer_id', layer_id);
-			formData.append('targetobject', targetobject);
-			formData.append('embedded', 'true');
-			formData.append('checkbox_names_' + layer_id, document.getElementsByName('checkbox_names_' + layer_id)[0].value);
-			formData.append(document.getElementsByName('checkbox_names_' + layer_id)[0].value, 'on');
+			formData.append('oid', oid);
+			formData.append('reload_object', reload_object);
 			ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
 		}
 	}
@@ -446,7 +416,7 @@ include('funktionen/input_check_functions.php');
 		form_fieldstring = '';
 		var formData = new FormData();
   	for(i = 0; i < form_fields.length; i++){
-			form_fieldstring += form_fields[i].name+'|';
+			if(form_fields[i].name.slice(-4) != '_alt')form_fieldstring += form_fields[i].name+'|';
   		field = form_fields[i].name.split(';');
   		if(field[4] != 'Dokument' && form_fields[i].readOnly != true && field[5] == '0' && form_fields[i].value == ''){
   			message('Das Feld '+form_fields[i].title+' erfordert eine Eingabe.');
@@ -457,7 +427,9 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
 			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
-				formData.append(form_fields[i].name, form_fields[i].value);
+				if(form_fields[i].type == 'file' && form_fields[i].files[0] != undefined)value = form_fields[i].files[0];
+				else value = form_fields[i].value;
+				formData.append(form_fields[i].name, value);
 			}
   	}
 		formData.append('go', 'Sachdaten_speichern');
@@ -479,7 +451,7 @@ include('funktionen/input_check_functions.php');
 		form_fieldstring = '';
 		var formData = new FormData();
   	for(i = 0; i < form_fields.length; i++){
-			form_fieldstring += form_fields[i].name+'|';
+			if(form_fields[i].name.slice(-4) != '_alt')form_fieldstring += form_fields[i].name+'|';
   		field = form_fields[i].name.split(';');
   		if(field[4] != 'Dokument' && form_fields[i].readOnly != true && field[5] == '0' && form_fields[i].value == ''){
   			message('Das Feld '+form_fields[i].title+' erfordert eine Eingabe.');
@@ -490,7 +462,9 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
 			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
-				formData.append(form_fields[i].name, form_fields[i].value);
+				if(form_fields[i].type == 'file' && form_fields[i].files[0] != undefined)value = form_fields[i].files[0];
+				else value = form_fields[i].value;
+				formData.append(form_fields[i].name, value);
 			}
   	}
 		formData.append('go', 'neuer_Layer_Datensatz_speichern');
@@ -538,7 +512,7 @@ include('funktionen/input_check_functions.php');
 		if(document.getElementById('layer').calendar != undefined)document.getElementById('layer').calendar.destroy();
 	}
 
-	autocomplete1 = function(layer_id, attribute, field_id, inputvalue, listentyp) {
+	autocomplete1 = function(event, layer_id, attribute, field_id, inputvalue, listentyp) {
 		listentyp = listentyp || 'ok';
 		var suggest_field = document.getElementById('suggests_' + field_id);
 		if(event.key == 'ArrowDown'){
@@ -552,6 +526,9 @@ include('funktionen/input_check_functions.php');
 		}
 		else if(event.key == 'Tab'){
 			// nix machen
+		}
+		else if(event.key == 'Escape'){
+			document.getElementById('output_'+field_id).onchange();
 		}
 		else{
 			suggest_field.style.display = 'none';
@@ -715,15 +692,15 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 
-	delete_document = function(attributename, layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload){
+	delete_document = function(attributename, layer_id, fromobject, targetobject, reload){
 		if(confirm('Wollen Sie das ausgewählte Dokument wirklich löschen?')){
 			field = document.getElementsByName(attributename);
 			field[0].type = 'hidden'; // bei einem Typ "file" kann man sonst den value nicht setzen
 			field[0].value = 'file:'+attributename;	// damit der JSON-String eines evtl. vorhandenen übergeordneten Attributs richtig gebildet wird
 			field[0].onchange(); // --||--
 			field[0].value = 'delete';
-			if(targetlayer_id != ''){		// SubForm-Layer
-				subsave_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload);
+			if(fromobject != ''){		// SubForm-Layer
+				subsave_data(layer_id, fromobject, targetobject, reload);
 			}
 			else{												// normaler Layer
 				enclosingForm.go.value = 'Sachdaten_speichern';
@@ -883,9 +860,7 @@ include('funktionen/input_check_functions.php');
 	}
 
 	change_orderby = function(attribute, layer_id){
-		if(enclosingForm.go_backup.value != ''){
-			enclosingForm.go.value = enclosingForm.go_backup.value;
-		}
+		enclosingForm.go.value = 'get_last_query';
 		if(document.getElementById('orderby'+layer_id).value == attribute){
 			document.getElementById('orderby'+layer_id).value = attribute+' DESC';
 		}

@@ -104,7 +104,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 								<? if($this->attributes['type'][$i] != 'geometry'){ ?>
 	                <option title="<? echo $strNotEqualHint; ?>" value="!=" <? if($operator == '!='){ echo 'selected';} ?> >!=</option>
 								<? }
-									if(!in_array($this->attributes['type'][$i], array('bool'))){
+									if(!in_array($this->attributes['type'][$i], array('bool')) AND substr($this->attributes['type'][$i], 0, 1) != '_'){		# bei boolean und Array-Datentypen nur = und !=
 										if($this->attributes['type'][$i] != 'geometry'){ ?>
 									<? if(!in_array($this->attributes['type'][$i], array('text'))){ ?>
 	                <option title="<? echo $strLowerHint; ?>" value="<" <? if($operator == '<'){ echo 'selected';} ?> ><</option>
@@ -131,18 +131,18 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 								if ($operator == '') $operator = '=';
 								echo "<input type=\"hidden\" name=\"{$prefix}operator_{$this->attributes['name'][$i]}\" value=\"{$operator}\">";
 							} ?>
-	            <td align="left" width="40%" style="position: relative"><?
+	            <td align="left" width="40%" style="position: relative; min-width: 300px"><?
 	            	switch ($this->attributes['form_element_type'][$i]) {
 	            		case 'Auswahlfeld' : case 'Radiobutton' : {
 	                  ?><select 
 	                  <?
-	                  	if($this->attributes['req_by'][$i] != ''){
+	                  	if($this->layerset[0]['connectiontype'] == MS_WFS OR $this->attributes['req_by'][$i] != '' OR substr($this->attributes['type'][$i], 0, 1) == '_'){		# bei WFS-Layern, abhängigen Auswahlfeldern oder Array-Typen keine multible Auswahl
 												echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['selected_layer_id'].', new Array(\''.implode($this->attributes['name'], "','").'\'), '.$searchmask_number.');" ';
 												$array = '';
 											}
 											else{
 												$array = '[]';
-												echo ' multiple="true" size="1" style="z-index:'.($z_index-=1).';position: absolute;top: 3px;max-height: 300px" onmouseenter="this.size=this.length" onmouseleave="this.size=1;scrollToSelected(this);"';
+												echo ' multiple="true" size="1" style="height: 20px;z-index:'.($z_index-=1).';position: absolute;top: 3px; width: 293px" onmouseenter="this.style.height=300" onmouseleave="this.style.height=20;scrollToSelected(this);"';
 											}
 										?> 
 	                  	id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i].$array; ?>"><?echo "\n"; ?>
@@ -153,7 +153,9 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 	                      }
 	                    for($o = 0; $o < count($this->attributes['enum_value'][$i]); $o++){
 	                      ?>
-	                      <option <? if($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
+	                      <option <? 
+													if(!is_array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]))$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]);
+													if(in_array($this->attributes['enum_value'][$i][$o], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]) AND $this->attributes['enum_value'][$i][$o] != ''){ echo 'selected';} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
 	                    } ?>
 	                    </select>
 	                    <input style="width:145px" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">

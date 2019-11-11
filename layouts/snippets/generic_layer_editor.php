@@ -27,6 +27,8 @@
 		$k = -1;
   	$doit = true;
   }
+	
+	if($doit == true){
 ?>
 <SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 
@@ -42,36 +44,30 @@
 			} ?>
 		</td>
 		<td align="right" valign="top" style="padding: 0 10 0 0">
-			<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
+			<a href="javascript:scrollbottom();"	title="<? echo $strToBottom; ?>">
+				<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
+			</a>
 		</td>
 		<td valign="top" style="padding: 0 0 0 0">
-			<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
-			<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
-			<? }else{ ?>
 			<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
-			<? } ?>
 		</td>
 		<? } ?>
 		<td height="30" width="99%" align="center"><h2><? echo $layer['Name']; ?></h2></td>
 		<? if (!$this->user->rolle->visually_impaired AND $anzObj > 0) { ?>
 		<td valign="top" style="padding: 0 10 0 0">
-			<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
-			<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
-			<? }else{ ?>
 			<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
-			<? } ?>
 		</td>
 		<td align="right" valign="top">
-			<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
+			<a href="javascript:scrollbottom();"	title="<? echo $strToBottom; ?>">
+				<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
+			</a>
 		</td>
 		<? } ?>
 	</tr>
 </table>
 <?
 	}
-
-  if($doit == true){
-		echo $layer['paging'];
+	echo $layer['paging'];
 ?>
 <table border="0" cellspacing="1" cellpadding="2" width="100%">
 	<tr>
@@ -82,7 +78,7 @@
 						echo '<tr><td style="border:none"></td><td style="border:none"></td>';
 						$colspan = 0;
 						for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
-							if($layer['attributes']['visible'][$j])$colspan++;
+							if($layer['attributes']['visible'][$j] AND $layer['attributes']['SubFormFK_hidden'][$j] != 1)$colspan++;
 							if($j == 0 OR $layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								if($explosion[1] != '')$collapsed = true;else $collapsed = false;
@@ -94,7 +90,9 @@
 									echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\''.$groupname.'\')"><img id="img_'.$groupname.'" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;<span>'.$groupname.'</span></td><td style="border:none;background: url(graphics/bg.gif);"></td>';
 									$colspan = 0;
 								}
-								else $colspan = 1;
+								elseif($layer['attributes']['SubFormFK_hidden'][$j] != 1){
+									$colspan = 1;
+								}
 								if($j < count($this->qlayerset[$i]['attributes']['name'])-1){
 									$explosion = explode(';', $layer['attributes']['group'][$j+1]);
 									$groupname = $explosion[0];
@@ -118,38 +116,40 @@
 						}
 						if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
-								echo '<td id="column'.$j.'" class="group_'.$groupname.'"';
-								if($collapsed)echo 'style="display: none"';
-								echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';									
-								if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k]){
-									$this->editable = $layer['Layer_ID'];
+								if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
+									echo '<td id="column'.$j.'" class="group_'.$groupname.'"';
+									if($collapsed)echo 'style="display: none"';
+									echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';									
+									if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k]){
+										$this->editable = $layer['Layer_ID'];
+									}
+									if($layer['attributes']['alias'][$j] == ''){
+										$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
+									}
+									echo '<table ';
+									echo 'width="100%"';
+									echo '><tr><td>';
+									if($this->formvars['printversion'] == '' AND $layer['attributes']['form_element_type'][$j] != 'SubFormPK' AND $layer['attributes']['form_element_type'][$j] != 'SubFormEmbeddedPK'){
+										echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$layer['attributes']['alias'][$j].'" href="javascript:change_orderby(\''.$layer['attributes']['name'][$j].'\', '.$layer['Layer_ID'].');">
+														'.$layer['attributes']['alias'][$j].'</a>';
+									}
+									else{
+										echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$layer['attributes']['alias'][$j].'</span>';
+									}
+									if($layer['attributes']['nullable'][$j] == '0' AND $layer['attributes']['privileg'][$j] != '0'){
+										echo '<span title="Eingabe erforderlich">*</span>';
+									}
+									if($layer['attributes']['tooltip'][$j]!='' AND $layer['attributes']['form_element_type'][$j] != 'Time'){
+										echo '<td align="right"><a href="javascript:void(0);" title="'.$layer['attributes']['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
+									}
+									if($layer['attributes']['type'][$j] == 'date' OR $layer['attributes']['type'][$j] == 'timestamp' OR $layer['attributes']['type'][$j] == 'time'){
+										echo '<td align="right"><a href="javascript:;" title="(TT.MM.JJJJ)"><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$layer['attributes']['name'][$j].'_'.$k.'"></div></td>';
+									}
+									echo '</td>';
+									echo '<td><div onmousedown="resizestart(document.getElementById(\'column'.$j.'\'), \'col_resize\');" style="transform: translate(8px); float: right; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div></td>';
+									echo '</tr></table>';
+									echo '</td>';
 								}
-								if($layer['attributes']['alias'][$j] == ''){
-									$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
-								}
-								echo '<table ';
-								echo 'width="100%"';
-								echo '><tr><td>';
-								if($this->formvars['printversion'] == '' AND $layer['attributes']['form_element_type'][$j] != 'SubFormPK' AND $layer['attributes']['form_element_type'][$j] != 'SubFormEmbeddedPK'){
-									echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$layer['attributes']['alias'][$j].'" href="javascript:change_orderby(\''.$layer['attributes']['name'][$j].'\', '.$layer['Layer_ID'].');">
-													'.$layer['attributes']['alias'][$j].'</a>';
-								}
-								else{
-									echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$layer['attributes']['alias'][$j].'</span>';
-								}
-								if($layer['attributes']['nullable'][$j] == '0' AND $layer['attributes']['privileg'][$j] != '0'){
-									echo '<span title="Eingabe erforderlich">*</span>';
-								}
-								if($layer['attributes']['tooltip'][$j]!='' AND $layer['attributes']['form_element_type'][$j] != 'Time'){
-									echo '<td align="right"><a href="javascript:void(0);" title="'.$layer['attributes']['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
-								}
-								if($layer['attributes']['type'][$j] == 'date' OR $layer['attributes']['type'][$j] == 'timestamp' OR $layer['attributes']['type'][$j] == 'time'){
-									echo '<td align="right"><a href="javascript:;" title="(TT.MM.JJJJ)"><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$layer['attributes']['name'][$j].'_'.$k.'"></div></td>';
-								}
-								echo '</td>';
-								echo '<td><div onmousedown="resizestart(document.getElementById(\'column'.$j.'\'), \'col_resize\');" style="transform: translate(8px); float: right; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div></td>';
-								echo '</tr></table>';
-								echo '</td>';									
 							}
 							else{
 								$has_geom = true;
@@ -201,15 +201,17 @@
 			}
 			if($layer['attributes']['visible'][$j]){
 				if($layer['attributes']['type'][$j] != 'geometry') {
-					echo '<td' . get_td_class_or_style(array('group_'.$groupname, $layer['shape'][$k][$layer['attributes']['style']], 'position: relative; text-align: right'.($collapsed ? ';display: none' : ''))) . '>';
-					if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
-						echo calendar($layer['attributes']['type'][$j], $layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
-					}
-					echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle);
-					echo '<div onmousedown="resizestart(document.getElementById(\'column'.$j.'\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 100%; width: 8px; cursor: e-resize;"></div>';
-					echo '</td>';
-					if($layer['attributes']['privileg'][$j] >= '0'){
-						$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'|';
+					if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
+						echo '<td' . get_td_class_or_style(array('group_'.$groupname, $layer['shape'][$k][$layer['attributes']['style']], 'position: relative; text-align: right'.($collapsed ? ';display: none' : ''))) . '>';
+						if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
+							echo calendar($layer['attributes']['type'][$j], $layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
+						}
+						echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle);
+						echo '<div onmousedown="resizestart(document.getElementById(\'column'.$j.'\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 100%; width: 8px; cursor: e-resize;"></div>';
+						echo '</td>';
+						if($layer['attributes']['privileg'][$j] >= '0'){
+							$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'|';
+						}
 					}
 				}
 				else {
@@ -278,7 +280,7 @@
 						if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url(graphics/bg.gif);"></td>';
 						}
-						if($layer['attributes']['type'][$j] != 'geometry' AND $layer['attributes']['visible'][$j]){ ?>
+						if($layer['attributes']['type'][$j] != 'geometry' AND $layer['attributes']['visible'][$j] AND $layer['attributes']['SubFormFK_hidden'][$j] != 1){ ?>
 							<td valign="top" class="group_<? echo $groupname; ?>" <? if($collapsed)echo 'style="display: none"'; ?> >
 								<div class="statistic_row_<? echo $layer['Layer_ID']; ?>" style="display:none"><?php
 								$column_name = $this->qlayerset[$i]['attributes']['name'][$j];
@@ -330,31 +332,33 @@
 						}
 						if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
-								echo '<td class="group_'.$groupname.'"';
-								if($collapsed)echo 'style="display: none"';
-								echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
-								if($layer['attributes']['alias'][$j] == ''){
-									$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
-								}
-								echo '<table ';
-								echo 'width="100%";';
-								echo '><tr><td>';
-								echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$layer['attributes']['alias'][$j].'</span>';
-								if($layer['attributes']['nullable'][$j] == '0' AND $layer['attributes']['privileg'][$j] != '0'){
-									echo '<span title="Eingabe erforderlich">*</span>';
-								}
-								if($layer['attributes']['tooltip'][$j]!='' AND $layer['attributes']['form_element_type'][$j] != 'Time'){
-									echo '<td align="right"><a href="javascript:void(0);" title="'.$layer['attributes']['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
-								}
-								if($layer['attributes']['type'][$j] == 'date' OR $layer['attributes']['type'][$j] == 'timestamp' OR $layer['attributes']['type'][$j] == 'timestamptz'){
-									echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$layer['attributes']['tooltip'][$j].'" ';
-									if($layer['attributes']['privileg'][$j] == '1' AND !$lock[$k]){
-										echo 'onclick="add_calendar(event, \''.$layer['attributes']['name'][$j].'_'.$k.'\');"';
+								if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
+									echo '<td class="group_'.$groupname.'"';
+									if($collapsed)echo 'style="display: none"';
+									echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
+									if($layer['attributes']['alias'][$j] == ''){
+										$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
 									}
-									echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$layer['attributes']['name'][$j].'_'.$k.'"></div></td>';
+									echo '<table ';
+									echo 'width="100%";';
+									echo '><tr><td>';
+									echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$layer['attributes']['alias'][$j].'</span>';
+									if($layer['attributes']['nullable'][$j] == '0' AND $layer['attributes']['privileg'][$j] != '0'){
+										echo '<span title="Eingabe erforderlich">*</span>';
+									}
+									if($layer['attributes']['tooltip'][$j]!='' AND $layer['attributes']['form_element_type'][$j] != 'Time'){
+										echo '<td align="right"><a href="javascript:void(0);" title="'.$layer['attributes']['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
+									}
+									if($layer['attributes']['type'][$j] == 'date' OR $layer['attributes']['type'][$j] == 'timestamp' OR $layer['attributes']['type'][$j] == 'timestamptz'){
+										echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$layer['attributes']['tooltip'][$j].'" ';
+										if($layer['attributes']['privileg'][$j] == '1' AND !$lock[$k]){
+											echo 'onclick="add_calendar(event, \''.$layer['attributes']['name'][$j].'_'.$k.'\');"';
+										}
+										echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$layer['attributes']['name'][$j].'_'.$k.'"></div></td>';
+									}
+									echo '</td></tr></table>';
+									echo '</td>';
 								}
-								echo '</td></tr></table>';
-								echo '</td>';
 							}
 						}
 			  	}
@@ -379,14 +383,16 @@
 							}
 							if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 								if($layer['attributes']['type'][$j] != 'geometry'){
-									echo '<td class="group_'.$groupname.'" '.($collapsed? 'style="display: none"' : '').'>';
-									if(!in_array($layer['attributes']['form_element_type'][$j], array('Dokument', 'SubFormPK', 'SubFormEmbeddedPK'))){
-										if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
-											echo calendar($layer['attributes']['type'][$j], $layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
+									if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
+										echo '<td class="group_'.$groupname.'" '.($collapsed? 'style="display: none"' : '').'>';
+										if(!in_array($layer['attributes']['form_element_type'][$j], array('Dokument', 'SubFormPK', 'SubFormEmbeddedPK'))){
+											if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
+												echo calendar($layer['attributes']['type'][$j], $layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
+											}
+											echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, true);
 										}
-										echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, true);
+										echo '</td>';
 									}
-									echo '</td>';
 								}
 							}
 						}
@@ -544,22 +550,12 @@
 	
 ?>
 	
-<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
-<input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
-
+	<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
+	<input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
+</div>
 <?
   }
   elseif($layer['requires'] == ''){
-?>
-<table border="0" cellspacing="10" cellpadding="2">
-  <tr>
-	<td>
-      <span style="font-size:12px; color:#FF0000;"><? echo $strNoMatch; ?></span>
-	</td>
-  </tr>
-</table>
-
-<?
+		$this->noMatchLayers[$layer['Layer_ID']] = $layer['Name'];
   }
 ?>
-</div>

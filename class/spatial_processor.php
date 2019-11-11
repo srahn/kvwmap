@@ -102,7 +102,7 @@ class spatial_processor {
     	$rs[0] = $rs[0]/10000;
     	$rs[0] = round($rs[0],1);
     }
-    return $rs[0].'~'.$rs[0];
+    return $rs[0].'█'.$rs[0];
   }
   
 	function length($geom){
@@ -114,7 +114,7 @@ class spatial_processor {
     else {
     	$rs = pg_fetch_array($ret[1]);
     }
-    return $rs[0].'~'.$rs[0];
+    return $rs[0].'█'.$rs[0];
   }
 	
 	function translate($geom, $x, $y){
@@ -351,9 +351,9 @@ class spatial_processor {
 			if($formvars['resulttype'] != 'wkt'){
 				$result = $this->transformCoordsSVG($result);
 			}
-			$result .= '~update_geometry();';
+			$result .= '█update_geometry();';
 		}
-		if($formvars['code2execute'] != '')$result .= '~'.$formvars['code2execute'];
+		if($formvars['code2execute'] != '')$result .= '█'.$formvars['code2execute'];
 		echo $result;
 	}
 	
@@ -662,7 +662,7 @@ class spatial_processor {
 	      $searchbox_maxy=strval($rect->maxy+$rand);
 	      $request = $layerset[0]['connection'].'&service=wfs&version=1.0.0&request=getfeature&typename='.$layerset[0]['wms_name'].'&bbox='.$searchbox_minx.','.$searchbox_miny.','.$searchbox_maxx.','.$searchbox_maxy;
         $this->debug->write("<br>WFS-Request: ".$request,4);
-	      $gml = url_get_contents($request);
+	      $gml = url_get_contents($request, $layerset[0]['wms_auth_username'], $layerset[0]['wms_auth_password']);
         #$this->debug->write("<br>WFS-Response: ".$gml,4);
 	      $wkt = $this->composeMultipolygonWKTStringFromGML($gml, $layerset[0]['wfs_geom']);
 	      #$this->debug->write("<br>WKT von GML-Geometrie: ".$wkt,4);

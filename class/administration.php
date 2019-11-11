@@ -47,17 +47,23 @@ class administration{
 	}
 	
 	function get_migration_logs() {
+		#echo '<br>Get Migration logs';
 		$migrations = array();
-		$sql = "SELECT * FROM migrations";
-		$result=$this->database->execSQL($sql,0, 0);
-    if ($result[0]) {
-      #echo '<br>Fehler bei der Abfrage der Tabelle migrations.<br>'; 	// bei Neuinstallation gibt es diese Tabelle noch nicht
-    }
-    else {
-      while($rs=mysql_fetch_array($result[1])) {
+		$sql = "
+			SELECT *
+			FROM migrations
+		";
+		#echo '<br>SQL zur Abfrage der registrierten Migrationen: ' . $sql;
+		$result = $this->database->execSQL($sql,0, 0);
+		if ($result[0]) {
+			echo '<br>Fehler bei der Abfrage der Tabelle migrations.<br>'; 	// bei Neuinstallation gibt es diese Tabelle noch nicht
+		}
+		else {
+			while($rs=mysql_fetch_array($result[1])) {
 				$migrations[$rs['component']][$rs['type']][$rs['filename']] = 1;
 			}
 		}
+		#echo '<br>Gefundene Migrationen: ' . print_r($migrations, true);
 		return $migrations;
 	}
 	
@@ -145,7 +151,7 @@ class administration{
 				if ($this->pgdatabase->host != '')$connection .= ' host='.$this->pgdatabase->host;
 				$result = $this->database->exec_commands(file_get_contents($filepath), 'user=xxxx password=xxxx dbname=kvwmapsp', $connection, true); # replace known constants
 				if ($result[0]) {
-					echo $result[1].'<br>Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
+					echo $result[1] . getTimestamp('H:i:s', 4). ' Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
 				}
 				else{
 					$sql = "
@@ -168,8 +174,13 @@ class administration{
 			foreach ($migrations as $migration) {
 				$component = $migration['component'];
 				$file = $migration['file'];
-				if ($component == 'kvwmap')$prepath = LAYOUTPATH; else $prepath = PLUGINS.$component.'/';
-				$filepath = $prepath . 'db/' . $database_type.'/schema/';
+				if ($component == 'kvwmap') {
+					$prepath = LAYOUTPATH;
+				}
+				else {
+					$prepath = PLUGINS . $component.'/';
+				}
+				$filepath = $prepath . 'db/' . $database_type . '/schema/';
 				$filetype = pathinfo($filepath . $file)['extension'];
 				switch ($filetype) {
 					case 'sql' : {
@@ -178,7 +189,7 @@ class administration{
 							$sql = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $sql);
 							$sql = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $sql);
 							if ($database_type == 'mysql') {
-								$result = $this->database->exec_commands($sql, 4, 0, false, true);	# mysql
+								$result = $this->database->exec_commands($sql, NULL, NULL, false, true);	# mysql
 							}
 							else {
 								if (stripos($sql, '-- exec statements separated') !== false) {
@@ -205,7 +216,7 @@ class administration{
 					}break;
 				}
 				if ($result[0]) {
-					$err_msgs[] = 'Fehler beim Ausführen von migration-Datei:<br>' . $file . '<br>in Pfad: ' . str_replace(WWWROOT.APPLVERSION, '../', $filepath) . '<br>' . $result[1];
+					$err_msgs[] = getTimestamp('H:i:s', 4) . ': Fehler beim Ausführen von migration-Datei:<br>' . $file . '<br>in Pfad: ' . str_replace(WWWROOT.APPLVERSION, '../', $filepath) . '<br>' . $result[1];
 					$result = $this->pgdatabase->execSQL('ROLLBACK;', 0, 0, false);
 				}
 				else{
@@ -231,7 +242,9 @@ class administration{
 		$folder = WWWROOT.APPLVERSION;
 		if (defined('HTTP_PROXY'))putenv('https_proxy='.HTTP_PROXY);
 		exec('cd '.$folder.' && sudo -u '.GIT_USER.' git stash && sudo -u '.GIT_USER.' git pull origin', $ausgabe, $ret);
-		if ($ret != 0)showAlert('Fehler bei der Ausführung von "git pull origin".');
+		if ($ret != 0) {
+			showAlert('Fehler bei der Ausführung von "git pull origin".');
+		}
 		return $ausgabe;
 	}
 	
@@ -320,8 +333,8 @@ class administration{
 				if (!file_exists($prepath))mkdir($prepath);
 			}
 			if (file_put_contents($prepath.'config.php', "<?\n\n".$config."?>") === false) {
-				$result[0]=1;
-				$result[1]='Fehler beim Schreiben der config-Datei '.$prepath.'config.php';
+				$result[0] = 1;
+				$result[1] = 'Fehler beim Schreiben der config-Datei ' . $prepath . 'config.php';
 			}
 			else $result[0]=0;
 		}

@@ -1,5 +1,5 @@
 ﻿<?php
-	$strTitle="Layer Editor";
+	$strLayer="Layer";
   $strAsteriskRequired="Fields marked with an asterisk * are required";
   $strLayerID="Layer ID*";
   $strName="Name";
@@ -40,7 +40,7 @@
   $strDelete="Delete";
   $strAddClass="Add class";
   $strAddAutoClasses="Add auto classes";
-  $strOtherExtentions="extended configuration";
+  $strAttributes="Attributes";
   $strBack="Back";
   $strButtonSave="Save";
   $strButtonSaveAsNewLayer="Save as new layer";
@@ -57,7 +57,8 @@
 	$strsymbolscale="symbolscale";
 	$stroffsite="offsite";
 	$strOWSParameter="OWS-Parameters";
-	$strDefaultValues="Default-Values for Task-Asignment";
+	$strStellenAsignment="Usergroup-Asignment";
+	$strDefaultValues="Default-Values for Usergroup-Asignment";
 	$strWFS_geom="WFS-Geometry-Attribute";
 	$strQueryMap="QueryMap";
 	$strProcessing="Processing";
@@ -70,7 +71,7 @@
 	$strDataOwner="Data-Owner";
 	$strMetaLink="Metadata-Link";
 	$strMaintable="Main Table";
-	$strPrivileges="Set Privileges";
+	$strPrivileges="Privileges";
 	$strAlias="Alias";
 	$strStatus="Status";
 	$strPostlabelcache="Postlabelcache";
@@ -86,5 +87,7 @@
 	$strListed="show in Layer-List";
 	$strDocument_url="Document URL";
 	$strAssignDefaultValues="Apply Default-Values to User-Groups";
-	$strStylesLabels="Edit styles and labels";
+	$strStylesLabels="Styles and Labels";
+	$strDdlAttribute="DDL Default Attribute";
+	$strIdAttribute="ID-Column";
 ?>  

@@ -13,10 +13,12 @@
 		}
 		else{																																		# falls man mal ein eigenes Subformular einbinden will			
 		  if(is_file(SNIPPETS.$this->qlayerset[$i]['template'])){
+				$this->subform_classname = 'subform_'.$this->qlayerset[$i]['Layer_ID'];
 		   	include(SNIPPETS.$this->qlayerset[$i]['template']);
 		  }
 			else{
 				if(file_exists(PLUGINS.$this->qlayerset[$i]['template'])){
+					$this->subform_classname = 'subform_'.$this->qlayerset[$i]['Layer_ID'];
 					include(PLUGINS.$this->qlayerset[$i]['template']);			# Pluginviews
 				}
 			}  	 
@@ -38,7 +40,7 @@
 	
 	<input type="hidden" name="geomtype" class="<? echo $this->subform_classname; ?>" value="<? echo $this->geomtype; ?>">
 	
-~
+█
 var overlay_bottom = parseInt(<? echo $this->user->rolle->nImageHeight+30; ?>) + parseInt(document.GUI.overlayy.value);
 var button_bottom = document.getElementById('go_plus').getBoundingClientRect().bottom;
 if(button_bottom > overlay_bottom)document.getElementById('go_plus').scrollIntoView({block: "end", behavior: "smooth"});

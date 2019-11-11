@@ -55,4 +55,5 @@
 	$this->strRemove="remove";
 	$this->strShowMore="Show more";
 	$this->strShowLess="Show less";
+	$this->strLayerParameters="Layer Parameter";
 ?>

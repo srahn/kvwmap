@@ -6,6 +6,13 @@
 
 $errors = array();
 
+function human_filesize($file){
+	$bytes = filesize($file);
+  $sz = 'BKMGTP';
+  $factor = floor((strlen($bytes) - 1) / 3);
+  return sprintf("%.2f", $bytes / pow(1024, $factor)).' '.@$sz[$factor].'B';
+}
+
 function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	global $errors;
 	if(!(error_reporting() & $errno)){
@@ -972,6 +979,7 @@ function microtime_float(){
    return ((float)$usec + (float)$sec);
 }
 
+
 function copy_file_to_tmp($frompath, $dateiname = ''){
   $dateityp = explode('.',$frompath);
   $dateipfad=IMAGEPATH;
@@ -1363,10 +1371,11 @@ function url_get_contents($url, $username = NULL, $password = NULL) {
 	$hostname = parse_url($url, PHP_URL_HOST);
 	try {
 		$ctx['http']['timeout'] = 20;
-		$ctx['http']['header'] = 'Referer: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+		#$ctx['http']['header'] = 'Referer: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];		// erstmal wieder rausgenommen, da sonst Authorization nicht funktioniert
 		if($username)$ctx['http']['header'].= "Authorization: Basic ".base64_encode($username.':'.$password);
-		if(defined('HTTP_PROXY') AND $hostname != 'localhost'){
-			$ctx['http']['proxy'] = HTTP_PROXY;
+		$proxy = getenv('HTTP_PROXY');
+		if($proxy != '' AND $hostname != 'localhost'){
+			$ctx['http']['proxy'] = $proxy;
 			$ctx['http']['request_fulluri'] = true;
 			$ctx['ssl']['SNI_server_name'] = $hostname;
 			$ctx['ssl']['SNI_enabled'] = true;
@@ -1408,10 +1417,9 @@ function debug_write($msg, $debug = false) {
 	#fclose($fp);
 }
 
-function getTimestamp() {
-  $microtime = floatval(substr((string)microtime(), 1, 8));
-  $rounded = round($microtime, 5);
-  return date("d.m.Y H:i:s") . substr((string)$rounded, 1, strlen($rounded));
+function getTimestamp($format = 'd.m.Y H:i:s', $digits = 4) {
+	$microtime = microtime(true);
+	return date($format) . substr($microtime - floor($microtime),1 , $digits + 1);
 }
 
 function formatBytes($size, $precision = 2) {
@@ -1800,4 +1808,25 @@ function sql_err_msg($title, $sql, $msg, $div_id) {
 	</div>";
 	return $err_msg;
 }
+
+function send_image_not_found($img) {
+	$empty_img = imagecreate(600, 45);
+	$background = imagecolorallocate($empty_img, 255, 139, 129);
+	$text_colour = imagecolorallocate($empty_img, 0, 0, 0);
+	$line_colour = imagecolorallocate($empty_img, 255, 255, 0);
+	imagestring($empty_img, 4, 30, 15, "Bild " . $img . " nicht gefunden!", $text_colour);
+	imagestring($empty_img, 4, 90, 55, ";-(", $text_colour);
+	imagesetthickness ( $empty_img, 1);
+	imageline($empty_img, 2, 2, 2, 42, $line_colour);
+	imageline($empty_img, 2, 2, 597, 2, $line_colour);
+	imageline($empty_img, 2, 42, 597, 42, $line_colour);
+	imageline($empty_img, 597, 2, 597, 42, $line_colour);
+	header("Content-type: image/png");
+	imagepng($empty_img);
+	imagecolordeallocate($line_color);
+	imagecolordeallocate($text_color);
+	imagecolordeallocate($background);
+	imagedestroy($empty_img);
+}
+
 ?>

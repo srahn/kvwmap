@@ -1,5 +1,5 @@
 ﻿<?php
-	$strTitle="Layer Editor";
+	$strLayer="Layer";
 	$strAsteriskRequired="Werte mit * mussen eingetragen werden";
 	$strLayerID="Layer ID*";
 	$strName="Name";
@@ -39,8 +39,8 @@
 	$strDelete="löschen";
 	$strAddClass="Klasse hinzufügen";
   $strAddAutoClasses="Klassen automatisch hinzufügen";
-	$strOtherExtentions="Attributeditor";
-	$strButtonSave="Ändern";
+	$strAttributes="Attribute";
+	$strButtonSave="Speichern";
 	$strBack="Zurücksetzen";
 	$strSave="Ändern";
 	$strButtonSaveAsNewLayer="Als neuen Layer eintragen";
@@ -57,6 +57,7 @@
 	$strsymbolscale="Symbolscale";
 	$stroffsite="Offsite";
 	$strOWSParameter="OWS-Parameter";
+	$strStellenAsignment="Stellen-Zuweisung";
 	$strDefaultValues="Default-Werte für Stellen-Zuweisung";
 	$strWFS_geom="WFS-Geometrieattribut";
 	$strQueryMap="QueryMap";
@@ -70,7 +71,7 @@
 	$strDataOwner="Datenherr";
 	$strMetaLink="Metadatenlink";
 	$strMaintable="Haupttabelle";
-	$strPrivileges="Rechte festlegen";
+	$strPrivileges="Rechte";
 	$strAlias="Aliasname";
 	$strStatus="Status";
 	$strPostlabelcache="Postlabelcache";
@@ -86,5 +87,7 @@
 	$strListed="Themenübersicht";
 	$strDocument_url="Dokumente URL";
 	$strAssignDefaultValues="Default-Werte an Stellen übertragen";
-	$strStylesLabels="Styles und Labels bearbeiten";
+	$strStylesLabels="Styles und Labels";
+	$strDdlAttribute="DDL Default Attribut";
+	$strIdAttribute="ID-Spalte";
 ?>

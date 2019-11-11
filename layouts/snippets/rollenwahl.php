@@ -3,6 +3,7 @@
   include(LAYOUTPATH.'languages/rollenwahl_'.$this->user->rolle->language.'.php');
 	include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
 	include(LAYOUTPATH.'snippets/SVGvars_defs.php');
+	include(SNIPPETS . 'sachdatenanzeige_functions.php');
 	global $supportedLanguages;
 	global $last_x;
 ?>
@@ -70,57 +71,24 @@
 </script>
 <br>
 <h2><? echo $this->titel.$strTitleRoleSelection; ?></h2>
-
-<? if ($this->Fehlermeldung!='') {
-       include(LAYOUTPATH."snippets/Fehlermeldung.php");
-}
-
-if ($this->formvars['nur_einstellungen']) {
-	$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
-	if ($params['error_message'] != '') {
-		$this->add_message('error', $params['error_message']);
-	}
-	else {
-		if (!empty($params)) { ?>
-			<div id="rollen_wahl_params_div" class="rollenwahl-gruppe">
-				<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
-					<tr>
-						<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett"><? echo $strThemeParameters; ?></span></td>
-					</tr><?
-					$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
-					if (!empty($params)) { ?>
-						<tr>
-							<td class="rollenwahl-option-data">
-								<table><?
-									foreach($params AS $param) { ?>
-										<tr id="layer_parameter_<?php echo $param['key']; ?>_tr">
-											<td valign="top" class="rollenwahl-option-header">
-												<?php echo $param['alias']; ?>:
-											</td>
-											<td><?php
-												include_once(CLASSPATH.'FormObject.php');
-												echo FormObject::createSelectField(
-													'layer_parameter_' . $param['key'],		# name
-													$param['options'],										# options
-													rolle::$layer_params[$param['key']],	# value
-													1,																		# size
-													'',																		# style
-													'onLayerParameterChanged(this);',			# onchange
-													'layer_parameter_' . $param['key'],		# id
-													''																		# multiple
-												); ?>
-											</td>
-										</tr><?php
-									} ?>
-								</table>
-							</td>
-						</tr><?
-					} ?>
-				</table>
-			</div><?
-		}
-	}
+<br>
+<a style="float: right; margin-top: -20px; margin-right: 10px;" href="javascript:scrollbottom();"	title="nach unten">
+	<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
+</a>
+<? if ($this->formvars['hide_stellenwahl']) { ?>
+<a style="float: right; margin-top: -20px; margin-right: 40px;" href="javascript:$('#save_options_button').trigger('click');" title="Speichern">
+	<i id="save_check_button" style="padding: 6px;" class="fa fa-check buttonlink green" aria-hidden="true"></i>
+</a>
+<? }
+if ($this->Fehlermeldung!='') {
+	include(LAYOUTPATH."snippets/Fehlermeldung.php");
 } ?>
+<div id="rollenwahl_optionen_div">
+	<div id="layer_parameters_div" ><?
+		if ($this->formvars['show_layer_parameter']) {
+			$this->get_layer_params_form();
+		} ?>
+	</div>
 <div class="rollenwahl-gruppe">
 	<table class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 		<tr>
@@ -129,7 +97,7 @@ if ($this->formvars['nur_einstellungen']) {
 		<tr>
 			<td class="rollenwahl-gruppen-options">
 				<table border="0" cellpadding="0" cellspacing="0"><?
-					if ($this->formvars['nur_einstellungen']) { ?>
+					if ($this->formvars['hide_stellenwahl']) { ?>
 						<tr>
 							<td>
 								<input type="hidden" name="Stelle_ID" value="<? echo $this->user->stelle_id; ?>">
@@ -380,7 +348,7 @@ if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angem
 						<td class="rollenwahl-option-data">  
 							<select name="mapsize">
 								<? $selected = false; ?>
-								<option value="<? echo $this->user->rolle->mapsize; ?>xauto" <? if($this->user->rolle->auto_map_resize){ echo "selected"; $selected = true;}?>><? echo $strAutoResize; ?></option>              	
+								<option value="auto" <? if($this->user->rolle->auto_map_resize){ echo "selected"; $selected = true;}?>><? echo $strAutoResize; ?></option>              	
 								<option value="300x300" <?php if ($this->user->rolle->mapsize=="300x300"){ echo "selected"; $selected = true;} ?>>300x300</option>
 								<option value="400x400" <?php if ($this->user->rolle->mapsize=="400x400"){ echo "selected"; $selected = true;} ?>>400x400</option>
 								<option value="500x500" <?php if ($this->user->rolle->mapsize=="500x500"){ echo "selected"; $selected = true;} ?>>500x500</option>
@@ -613,7 +581,20 @@ if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angem
 <table>
   <tr>
     <td></td>
-    <td><input type="button" name="starten" onclick="start1();" value="<? echo $this->strEnter; ?>" style="margin-bottom: 10px"></td>
+    <td><input id="save_options_button" type="button" name="starten" onclick="start1();" value="<? echo $this->strEnter; ?>" style="margin-bottom: 10px"></td>
   </tr>
 </table>
 <input type="hidden" name="go" value="">
+</div>
+<a style="float: right; margin-top: -25px; margin-right: 10px;" href="javascript:window.scrollTo(0, 0);"	title="nach oben">
+	<i class="fa fa-arrow-up hover-border" aria-hidden="true"></i>
+</a>
+<? if ($this->formvars['hide_stellenwahl']) { ?>
+<script>
+	$('#rollenwahl_optionen_div :input').change(function() {
+		console.log('change class to red');
+		$('#save_check_button').removeClass('green');
+		$('#save_check_button').addClass('red');
+	});
+</script>
+<? } ?>
