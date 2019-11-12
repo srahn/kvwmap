@@ -3045,29 +3045,16 @@ echo '			</ul>
           $fromwhere .= " AND " . $layer[$i]['Filter'];
         }
 				if($data_attributes['the_geom'] != ''){
-					switch($layer[$i]['Datentyp']){
-						case MS_LAYER_POINT : {
-							$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(ST_GeometryN('.$data_attributes['the_geom'].', 1), '.$this->user->rolle->epsg_code.') as the_geom '.$fromwhere.') foo LIMIT 10000';
-						}break;
-
-						case MS_LAYER_LINE : {
-							$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
-							FROM (SELECT generate_series(0, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
-							SELECT st_GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
-							SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(st_intersection('.$data_attributes['the_geom'].', '.$extent.')) AS linestring '.$fromwhere.') foo5) foo2
-							) foo4) foo
-							WHERE (foo.count1) <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
-						}break;
-
-						case MS_LAYER_POLYGON : {
-							$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
-							FROM (SELECT generate_series(0, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
-							SELECT st_GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
-							SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection('.$data_attributes['the_geom'].', '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
-							) foo4) foo
-							WHERE (foo.count1) <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
-						}break;
-					}
+					$sql = '
+						SELECT st_x((dump).geom), st_y((dump).geom) 
+						FROM (
+							SELECT st_dumppoints(intersection) AS dump
+							FROM (
+								select 	st_transform(st_intersection('.$data_attributes['the_geom'].', '.$extent.'), 25833) as intersection
+									'.$fromwhere.'
+							) foo1
+						) foo2 
+						LIMIT 10000';
 					#echo $sql;
 					$ret=$layerdb->execSQL($sql,4, 0);
 					if(!$ret[0]){
@@ -3115,30 +3102,16 @@ echo '			</ul>
 				$layer['Filter'] = str_replace('$userid', $this->user->id, $layer['Filter']);
 				$fromwhere .= " AND " . $layer['Filter'];
 			}
-			switch($layer['Datentyp']){
-				case MS_LAYER_POINT : {
-					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform('.$data_attributes['the_geom'].', '.$this->user->rolle->epsg_code.') as the_geom '.$fromwhere.') foo LIMIT 10000';
-				}break;
-
-				case MS_LAYER_LINE : {
-					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
-					FROM (SELECT generate_series(0, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
-					SELECT st_GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
-					SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(st_intersection('.$data_attributes['the_geom'].', '.$extent.')) AS linestring '.$fromwhere.') foo5) foo2
-					) foo4) foo
-					WHERE (foo.count1) <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
-				}break;
-
-				case MS_LAYER_POLYGON : {
-					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
-					FROM (SELECT generate_series(0, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
-					SELECT st_GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
-					SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection('.$data_attributes['the_geom'].', '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
-					) foo4) foo
-					WHERE (foo.count1 +1) <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
-				}break;
-			}
-
+			$sql = '
+				SELECT st_x((dump).geom), st_y((dump).geom) 
+				FROM (
+					SELECT st_dumppoints(intersection) AS dump
+					FROM (
+						select 	st_transform(st_intersection('.$data_attributes['the_geom'].', '.$extent.'), 25833) as intersection
+							'.$fromwhere.'
+					) foo1
+				) foo2 
+				LIMIT 10000';
 			#echo $sql;
 			$ret=$layerdb->execSQL($sql,4, 0);
       if(!$ret[0]){
@@ -16713,7 +16686,14 @@ class db_mapObj{
         $select = stristr($select, 'select');
       }
     }
-    return $select;
+		return replace_params(
+						$select,
+						rolle::$layer_params,
+						$this->User_ID,
+						$this->Stelle_ID,
+						rolle::$hist_timestamp,
+						$this->user->rolle->language
+					);
   }
 
 	function getDataAttributes($database, $layer_id, $ifEmptyUseQuery = false) {
@@ -16732,7 +16712,7 @@ class db_mapObj{
 		elseif ($ifEmptyUseQuery){
 			$path = replace_params(
 				$this->getPath($layer_id),
-				$all_layer_params,
+				rolle::$layer_params,
 				$this->User_ID,
 				$this->Stelle_ID,
 				rolle::$hist_timestamp,
