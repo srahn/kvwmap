@@ -1253,7 +1253,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	padding-left: 35px;
 }
 
-#datensatz {
+.datensatz {
 	border:0px solid gray;
 	border-collapse:collapse;
 	padding:0px 0px 0px 0px;
@@ -1315,7 +1315,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	text-align: left;
 }
 
-#dstable{
+.dstable{
 	max-width: 900px;
 }
 
