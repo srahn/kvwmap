@@ -310,40 +310,46 @@
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnection; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<!--textarea id="connection" name="connection" cols="33" rows="2"><?
-								echo $this->layerdata['connection']; ?>
-							</textarea//--><?
-							include_once(CLASSPATH . 'Connection.php');
-							$connections = Connection::find($this);
-							echo FormObject::createSelectField(
-								'connection_id',
-								array_map(
-									function($connection) {
-										return array(
-											'value' => $connection->get('id'),
-											'output' => $connection->get('name')
-										);
-									},
-									$connections
-								),
-								$this->layerdata['connection_id']
-							); ?><a href="index.php?go=connections_anzeigen"><i class="fa fa-pencil fa_lg" style="margin-left: 5px; color: #a82e2e;"></i></a>
-							<input
-								type="button"
-								onclick="testConnection();"
-								value="Test"
-								style="display: <? echo (in_array($this->layerdata['connectiontype'], array(7, 9)) ? 'inline' : 'none'); ?>;"
-							><br>
-							<img border="1" id ="test_img" src="" style="display: none;"><br>
-							<a id="test_link" href="" target="_blank"></a>
+				<? 	if($this->layerdata['connectiontype'] != MS_POSTGIS){ ?>
+								<textarea id="connection" name="connection" cols="33" rows="2"><?
+									echo $this->layerdata['connection']; ?>
+								</textarea>
+								<input
+									type="button"
+									onclick="testConnection();"
+									value="Test"
+									style="display: <? echo (in_array($this->layerdata['connectiontype'], array(7)) ? 'inline' : 'none'); ?>;"
+								><br>
+								<img border="1" id ="test_img" src="" style="display: none;"><br>
+								<a id="test_link" href="" target="_blank"></a>
+					<? 	}
+							else{
+								include_once(CLASSPATH . 'Connection.php');
+								$connections = Connection::find($this);
+								echo FormObject::createSelectField(
+									'connection_id',
+									array_map(
+										function($connection) {
+											return array(
+												'value' => $connection->get('id'),
+												'output' => $connection->get('name')
+											);
+										},
+										$connections
+									),
+									$this->layerdata['connection_id']
+								); ?><a href="index.php?go=connections_anzeigen"><i class="fa fa-pencil fa_lg" style="margin-left: 5px; color: #a82e2e;"></i></a>
+					<? 	} ?>
 						</td>
 					</tr>
+		<? 	if($this->layerdata['connectiontype'] == MS_WMS){ ?>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPrintConnection; ?></th>
 						<td style="border-bottom:1px solid #C3C7C3">
 							<textarea name="printconnection" cols="33" rows="2"><? echo $this->layerdata['printconnection'] ?></textarea>
 						</td>
 					</tr>
+		<?  } ?>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnectionType; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">

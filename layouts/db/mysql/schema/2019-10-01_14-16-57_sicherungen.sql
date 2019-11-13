@@ -29,7 +29,7 @@ BEGIN;
       @row_nr := @row_nr + 1
     ) AS `name`,
     SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(connection, LOCATE('host', LOWER(connection))), ' ', 1), '=', -1) AS `host`,
-    SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(connection, LOCATE('port', LOWER(connection))), ' ', 1), '=', -1) AS `port`,
+		coalesce(NULLIF(SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(connection, LOCATE('port', LOWER(connection))), ' ', 1), '=', -1), ''), 5432) AS `port`,
     SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(connection, LOCATE('dbname', LOWER(connection))), ' ', 1), '=', -1) AS `dbname`,
     SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(connection, LOCATE('user', LOWER(connection))), ' ', 1), '=', -1) AS `user`,
     SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(connection, LOCATE('password', LOWER(connection))), ' ', 1), '=', -1) AS `password`
@@ -45,7 +45,7 @@ BEGIN;
     `layer` AS l JOIN
     `connections` c ON (
       SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(connection, LOCATE('host', LOWER(l.connection))), ' ', 1), '=', -1)  = c.`host` AND
-      SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(connection, LOCATE('port', LOWER(l.connection))), ' ', 1), '=', -1) = c.`port` AND
+      coalesce(NULLIF(SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(connection, LOCATE('port', LOWER(connection))), ' ', 1), '=', -1), ''), 5432) = c.`port` AND
       SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(connection, LOCATE('dbname', LOWER(l.connection))), ' ', 1), '=', -1) = c.`dbname` AND
       SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(connection, LOCATE('user', LOWER(l.connection))), ' ', 1), '=', -1) = c.`user` AND
       SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(connection, LOCATE('password', LOWER(l.connection))), ' ', 1), '=', -1) = c.`password`
@@ -80,8 +80,7 @@ BEGIN;
     `target` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'kvwmap' NOT NULL COMMENT 'Ziel der Sicherung. Ist immer ein Dateiname mit Verzeichnisangabe.',
     `overwrite` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Ob das Ziel überschrieben werden soll wenn es existiert oder nicht.',
     `sicherung_id` bigint(20) UNSIGNED NOT NULL COMMENT 'ID der Sicherung in der der Inhalt gesichert werden soll.',
-    FOREIGN KEY fk_sicherung_id (`sicherung_id`) REFERENCES `sicherungen` (`id`),
-    FOREIGN KEY fk_connection_id (`connection_id`) REFERENCES `connections` (`id`)
+    FOREIGN KEY fk_sicherung_id (`sicherung_id`) REFERENCES `sicherungen` (`id`)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
   INSERT INTO `sicherungsinhalte` (`id`, `name`, `beschreibung`, `methode`, `source`, `connection_id`, `target`, `overwrite`, `sicherung_id`) VALUES
