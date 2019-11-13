@@ -13134,7 +13134,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$this->guifiles[] = basename($this->layoutfiles[$i]);
 			}
 		}
-		echo '<br>' . print_r($this->guifiles, true);
 		# aus dem Customordner (vom Nutzer hinzugefügte Layouts)
 		$this->customlayoutfiles = searchdir(CUSTOM_PATH . 'layouts/', false);
 		for ($i = 0; $i < count($this->customlayoutfiles); $i++) {
