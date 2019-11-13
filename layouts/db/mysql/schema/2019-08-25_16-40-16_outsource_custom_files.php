@@ -82,7 +82,7 @@
 				`editable` = 0
 			WHERE
 				`name` IN (
-					'CUSTOMPATH',
+					'CUSTOM_PATH',
 					'CLASSPATH',
 					'GRAPHICSPATH',
 					'LAYOUTPATH',
