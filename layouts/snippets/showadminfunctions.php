@@ -124,11 +124,16 @@ function toggleGroup(group, show){
 							<tr class="constants_<? echo $param['group']; ?> config_param_saved_<? echo $param['saved']; ?>" style="display: none">
 								<td><? echo $param['name']; ?></td>
 								<td><?
+									$real_prefix_value = '';
+									$prefixes = explode('.', $param['prefix']);
+									foreach($prefixes as $prefix){
+										$real_prefix_value .= $this->administration->config_params[$prefix]['real_value'];
+									}
 									if (in_array($param['editable'], array(1, 3))) { ?>
-										<input type="text" name="<? echo $param['name']; ?>_prefix" value="<? echo $param['prefix']; ?>" size="50"><?
+										<input title="<? echo $real_prefix_value; ?>" type="text" name="<? echo $param['name']; ?>_prefix" value="<? echo $param['prefix']; ?>" size="50"><?
 									}
 									else {
-										echo $param['prefix'];
+										echo '<span title="'.$real_prefix_value.'">'.$param['prefix'].'</span>';
 									} ?>
 								</td>
 								<td><?
