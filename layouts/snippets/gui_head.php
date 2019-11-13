@@ -14,5 +14,5 @@ if (true) { ?>
 <link rel="shortcut icon" href="graphics/wappen/favicon.ico">
 <link rel="stylesheet" href="<?php echo 'layouts/' . $this->style . '?gui=' . $this->user->rolle->gui; ?>"><?
 if (defined('CUSTOM_STYLE') AND CUSTOM_STYLE != '') { ?>
-	<link rel="stylesheet" href="<?php echo basename(CUSTOM_PATH) . '/layouts/' . CUSTOM_STYLE; ?>"><?
+	<link rel="stylesheet" href="<?php echo CUSTOM_STYLE; ?>"><?
 } ?>
