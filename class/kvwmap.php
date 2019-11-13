@@ -3050,7 +3050,7 @@ echo '			</ul>
 						FROM (
 							SELECT st_dumppoints(intersection) AS dump
 							FROM (
-								select 	st_transform(st_intersection('.$data_attributes['the_geom'].', '.$extent.'), 25833) as intersection
+								select st_transform(st_intersection('.$data_attributes['the_geom'].', '.$extent.'), '.$this->user->rolle->epsg_code.') as intersection
 									'.$fromwhere.'
 							) foo1
 						) foo2 
@@ -3107,7 +3107,7 @@ echo '			</ul>
 				FROM (
 					SELECT st_dumppoints(intersection) AS dump
 					FROM (
-						select 	st_transform(st_intersection('.$data_attributes['the_geom'].', '.$extent.'), 25833) as intersection
+						select 	st_transform(st_intersection('.$data_attributes['the_geom'].', '.$extent.'), '.$this->user->rolle->epsg_code.') as intersection
 							'.$fromwhere.'
 					) foo1
 				) foo2 
