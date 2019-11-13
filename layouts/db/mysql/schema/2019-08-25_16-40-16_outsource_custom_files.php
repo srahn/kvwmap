@@ -37,7 +37,7 @@
 	
 	if(mkdir(CUSTOM_PATH) === false){
 		$result[0]=1;
-		$result[1]='Fehler beim Anlegen des custom-Ordners im kvwmap-Ordner. Keine Schreibrechte vorhanden.';
+		$result[1]='<br>Fehler beim Anlegen des custom-Ordners im kvwmap-Ordner. Keine Schreibrechte vorhanden.<br>Setzen Sie rekursiv für alle Dateien Schreibrechte für die Gruppe:<br>chmod -R g+w '.APPLVERSION;
 	}
 	else{
 		chgrp(CUSTOM_PATH, 'gisadmin');
