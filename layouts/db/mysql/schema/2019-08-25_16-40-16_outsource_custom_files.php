@@ -82,7 +82,7 @@
 				`editable` = 0
 			WHERE
 				`name` IN (
-					'CUSTOMPATH'
+					'CUSTOMPATH',
 					'CLASSPATH',
 					'GRAPHICSPATH',
 					'LAYOUTPATH',
@@ -99,13 +99,16 @@
 				`editable` = 3
 			WHERE
 				`name` IN (
-					'CUSTOM_PATH',
 					'FONTSET',
 					'SYMBOLSET',
 					'FOOTER',
 					'HEADER',
 					'LAYER_ERROR_PAGE',
-					'WMS_MAPFILE_PATH'
+					'WMS_MAPFILE_PATH',
+					'LOGIN',
+					'LOGIN_AGREEMENT',
+					'LOGIN_NEW_PASSWORD',
+					'LOGIN_REGISTRATION'
 				)
 		";
 		$this->database->execSQL($sql, 4, 1);
@@ -155,7 +158,7 @@
 		}
 		echo '<br>value: ' . $this->config_params['WAPPENPATH']['value'] . ' => ' . $this->config_params['WAPPENPATH']['value'];
 		$constants['WAPPENPATH'] = array(
-			'value' => 'custom/' . $this->config_params['WAPPENPATH']['value']
+			'prefix' => 'CUSTOM_PATH'
 		);
 
 		# Set deleted wappen files as untracked as they sould in .gitignore
@@ -261,7 +264,7 @@
 		echo '<p>CUSTOM_STYLE';
 		$constants['CUSTOM_STYLE'] = array(
 			'prefix' => 'CUSTOM_PATH',
-			'value' => 'layouts/'.$this->config_params['CUSTOM_STYLE']['value'])
+			'value' => 'layouts/'.$this->config_params['CUSTOM_STYLE']['value']
 		);
 
 		echo '<p>FOOTER: ' . $this->config_params['FOOTER']['value'];
