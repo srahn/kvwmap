@@ -59,7 +59,6 @@ VALUES (
 # Sicherheitskritische Anwendungsfälle Werte für go Variablen              #
 ############################################################################
 INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
-(1, 'ALB-Auszug 35', NULL),
 (2, 'FestpunktDateiAktualisieren', NULL),
 (3, 'FestpunktDateiUebernehmen', NULL),
 (4, 'Antrag_loeschen', NULL),
@@ -71,15 +70,11 @@ INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
 (10, 'Flurstueck_Anzeigen', NULL),
 (11, 'Bauakteneinsicht', NULL),
 (12, 'Namensuche', NULL),
-(13, 'ALB-Auszug 40', NULL),
 (14, 'Nachweisloeschen', NULL),
-(15, 'ALB-Auszug 20', NULL),
-(16, 'ALB-Auszug 25', NULL),
 (17, 'Externer_Druck', NULL),
 (18, 'Adressaenderungen', NULL),
 (19, 'sendeFestpunktskizze', NULL),
 (20, 'Nachweise_bearbeiten', NULL),
-(21, 'ALB-Auszug 30', NULL),
 (22, 'Kolibristart', NULL),
 (23, 'Administratorfunktionen', NULL);
 
@@ -87,8 +82,6 @@ INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
 # Eintragen von Berechtigungen für einen Administrator zum Ausführen von Funktionen
 ####################################################################################
 # 2006-05-12
-
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (1,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (2,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (3,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (4,@stelle_id);
@@ -100,15 +93,11 @@ INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (9,@stelle_id
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (10,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (11,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (12,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (13,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (14,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (15,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (16,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (17,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (18,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (19,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (20,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (21,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (22,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (23,@stelle_id);
 
@@ -280,6 +269,18 @@ INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@
 INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Nutzer anzeigen', 'index.php?go=Benutzerdaten_Anzeigen', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,72);
+INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
+
+# Nutzer einladen
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Nutzer einladen', 'index.php?go=Einladung_Editor', @last_level1menue_id, 2, NULL);
+SET @last_menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,73);
+INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
+
+# Nutzer einladen
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Einladungen anzeigen', 'index.php?go=Einladungen_Anzeigen', @last_level1menue_id, 2, NULL);
+SET @last_menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,74);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 #### Layerverwaltung

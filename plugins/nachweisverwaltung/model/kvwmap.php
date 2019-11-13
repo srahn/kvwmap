@@ -313,15 +313,15 @@
       
       # Ausführen von Aktionen vor der Anzeige der Karte und der Zeichnung
 			$oldscale=round($GUI->map_scaledenom);  
+			$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
 			if ($GUI->formvars['CMD']!='') {
-				$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
 				$GUI->navMap($GUI->formvars['CMD']);
 				$GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
 			}
 			elseif($oldscale!=$GUI->formvars['nScale'] AND $GUI->formvars['nScale'] != '') {
 				$GUI->scaleMap($GUI->formvars['nScale']);
 			}
-      else{
+      elseif($GUI->formvars['rissnummer'] == '' AND $GUI->formvars['stammnr'] == ''){		# nur am Anfang setzen
 	      # Zuweisen der Werte des Dokumentes zum Formular
 				$GUI->formvars['flurid']=$nachweis->document['flurid'];
 				$GUI->formvars['stammnr']=$nachweis->document['stammnr'];
@@ -484,7 +484,7 @@
 		return 1;
 	};
 
-	$GUI->setNachweisSuchparameter = function($stelle_id, $user_id, $suchhauptart,$suchunterart,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$stammnr2,$suchrissnummer,$suchrissnummer2,$suchfortfuehrung,$suchfortfuehrung2,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle, $flur_thematisch, $alle_der_messung, $order) use ($GUI){
+	$GUI->setNachweisSuchparameter = function($stelle_id, $user_id, $suchhauptart,$suchunterart,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$stammnr2,$suchrissnummer,$suchrissnummer2,$suchfortfuehrung,$suchfortfuehrung2,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle, $suchbemerkung, $flur_thematisch, $alle_der_messung, $order) use ($GUI){
 		if($suchhauptart == NULL)$suchhauptart = array();
 		if($suchunterart == NULL)$suchunterart = array();
 		$sql ='UPDATE rolle_nachweise SET ';
@@ -506,6 +506,7 @@
 		$sql.='sdatum="'.$sdatum.'",';
 		$sql.='sdatum2="'.$sdatum2.'",';
 		if ($svermstelle!='') { $sql.='sVermStelle='.$svermstelle.','; }else{$sql.='sVermStelle= NULL,' ;}
+		$sql.='suchbemerkung="'.$suchbemerkung.'",';
 		$sql.='flur_thematisch="'.$flur_thematisch.'",';
 		$sql.='alle_der_messung="'.$alle_der_messung.'",';
 		$sql.='`order`="'.$order.'",';
@@ -664,19 +665,21 @@
 	};
 	
 	$GUI->nachweiseRecherchieren = function() use ($GUI){
-		$GUI->formvars['suchstammnr'] = trim($GUI->formvars['suchstammnr']);
-		$GUI->formvars['suchrissnummer'] = trim($GUI->formvars['suchrissnummer']);
-    # Suchparameter, die neu gesetzt worden sind in formvars, sollen übernommen werden und gespeichert werden
-    # für späterer Suchanfragen und die anderen sollen aus der Datenbank abgefragt werden.
-    # Setzen von Such- und Anzeigeparametern die neu gesetzt worden sind
-    # (nur neu gesetzte werden überschrieben)
-    if ($GUI->formvars['abfrageart']=='poly') {
-      $GUI->formvars['suchpolygon'] = $GUI->formvars['newpathwkt'];
-    }
-    $GUI->setNachweisSuchparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchunterart'], $GUI->formvars['abfrageart'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchflur'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchstammnr2'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchrissnummer2'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchfortfuehrung2'],$GUI->formvars['suchpolygon'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'],$GUI->formvars['sdatum2'], $GUI->formvars['sVermStelle'], $GUI->formvars['flur_thematisch'], $GUI->formvars['alle_der_messung'], $GUI->formvars['order']);
-    # Die Anzeigeparameter werden so gesetzt, daß genau das gezeigt wird, wonach auch gesucht wurde.
-    # bzw. was als Suchparameter im Formular angegeben wurde.
-    $GUI->setNachweisAnzeigeparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchhauptart']);
+		if($GUI->formvars['abfrageart'] != ''){		# nur wenn man aus dem Suchformular kommt, Suchparameter speichern
+			$GUI->formvars['suchstammnr'] = trim($GUI->formvars['suchstammnr']);
+			$GUI->formvars['suchrissnummer'] = trim($GUI->formvars['suchrissnummer']);
+			# Suchparameter, die neu gesetzt worden sind in formvars, sollen übernommen werden und gespeichert werden
+			# für späterer Suchanfragen und die anderen sollen aus der Datenbank abgefragt werden.
+			# Setzen von Such- und Anzeigeparametern die neu gesetzt worden sind
+			# (nur neu gesetzte werden überschrieben)
+			if ($GUI->formvars['abfrageart']=='poly') {
+				$GUI->formvars['suchpolygon'] = $GUI->formvars['newpathwkt'];
+			}
+			$GUI->setNachweisSuchparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchunterart'], $GUI->formvars['abfrageart'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchflur'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchstammnr2'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchrissnummer2'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchfortfuehrung2'],$GUI->formvars['suchpolygon'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'],$GUI->formvars['sdatum2'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchbemerkung'], $GUI->formvars['flur_thematisch'], $GUI->formvars['alle_der_messung'], $GUI->formvars['order']);
+			# Die Anzeigeparameter werden so gesetzt, daß genau das gezeigt wird, wonach auch gesucht wurde.
+			# bzw. was als Suchparameter im Formular angegeben wurde.
+			$GUI->setNachweisAnzeigeparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchhauptart'],$GUI->formvars['suchhauptart']);
+		}
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
     $GUI->formvars = array_merge($GUI->formvars, $GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id));
     # Nachweisobjekt bilden
@@ -1158,7 +1161,7 @@
 	$GUI->check_nachweis_poly = function() use ($GUI){
 		$GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
 		echo $GUI->nachweis->check_poly_in_flur($GUI->formvars['umring'], $GUI->formvars['flur'], $GUI->formvars['gemkgschl'], $GUI->user->rolle->epsg_code);
-		echo '~check_poly();';
+		echo '█check_poly();';
 	};
 
 	$GUI->nachweisFormSenden = function() use ($GUI){
@@ -1222,7 +1225,7 @@
         $GUI->nachweisFormAnzeige();
       } # end of fehler bei der Änderung
       else {
-				$GUI->add_message('info', $ret[1]);
+				$GUI->add_message('notice', $ret[1]);
 				$GUI->nachweisAenderungsformular();
 			}
       # 1.4 Zur zur Anzeige der Rechercheergebnisse mit Meldung über Erfolg der Änderung
@@ -1504,7 +1507,8 @@
     if ($GUI->formvars['bestaetigung']=='') {
       # Der Löschvorgang wurde noch nicht bestätigt
       $GUI->suchparameterSetzen();
-      $GUI->formvars['nachfrage']='Möchten Sie den Nachweis wirklich löschen? ';
+			if(count($GUI->formvars['id']) > 1) $GUI->formvars['nachfrage']='Möchten Sie die Nachweise wirklich löschen? ';
+      else $GUI->formvars['nachfrage']='Möchten Sie den Nachweis wirklich löschen? ';
       $GUI->bestaetigungsformAnzeigen();
     }
     else {
@@ -1551,10 +1555,18 @@
 			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 			$nachweisSuchParameter=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
 			$GUI->formvars=array_merge($GUI->formvars,$nachweisSuchParameter);
-			if($GUI->formvars['zurueck']){
+			if($GUI->formvars['FlurstKennz'] != ''){		# über die Flurstückssuche gefundene Flurstücke -> Geometrie als Suchpolygon übernehmen
+				$GUI->formvars['suchpolygon'] = $GUI->pgdatabase->getGeomfromFlurstuecke($GUI->formvars['FlurstKennz'], $GUI->user->rolle->epsg_code);
+			}
+			if($GUI->formvars['zurueck'] OR $GUI->formvars['FlurstKennz'] != ''){
 				$GUI->formvars['pathwkt'] = $GUI->formvars['suchpolygon'];
 				$GUI->formvars['newpathwkt'] = $GUI->formvars['suchpolygon'];
 				$GUI->formvars['firstpoly'] = 'true';
+				$GUI->formvars['last_doing'] = 'draw_second_polygon';
+				$GUI->formvars['last_button'] = 'pgon0';
+			}
+			else{
+				$GUI->formvars['alle_der_messung'] = NULL;
 			}
 		}
 		# die Parameter einer gespeicherten Dokumentauswahl laden

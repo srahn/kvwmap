@@ -88,4 +88,6 @@
 	$strDocument_url="Document URL";
 	$strAssignDefaultValues="Apply Default-Values to User-Groups";
 	$strStylesLabels="Styles and Labels";
+	$strDdlAttribute="DDL Default Attribute";
+	$strIdAttribute="ID-Column";
 ?>  

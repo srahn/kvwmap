@@ -466,6 +466,7 @@ class GUI {
 					}
 
 					if($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
+						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
 						$layer = ms_newLayerObj($map);
 						$layer->setMetaData('wfs_request_method', 'GET');
 						$layer->setMetaData('wms_name', $layerset['list'][$i]['wms_name']);
@@ -1460,12 +1461,12 @@ class GUI {
 						if($pos !== false)$layersection = substr($layersection, 0, $pos);
 						$layers = explode(',', $layersection);
 						for($l = 0; $l < count($layers); $l++){
-							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
+							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div><br>';
 						}
 					}
 					else {
 						$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
-						$maplayer = $this->map->getLayerByName($layer['alias']);
+						$maplayer = $this->map->getLayer($layer['layer_index_mapobject']);
 						if($layer['Class'][0]['legendorder'] != ''){
 							usort($layer['Class'], 'compare_legendorder');
 						}

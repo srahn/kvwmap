@@ -277,6 +277,14 @@ function alias_replace(name){
 		<?	if ((count($this->attributes))!=0) { 
 					for ($i = 0; $i < count($this->attributes['type']); $i++){ ?>
 						<tr>
+							<td align="left" valign="top">
+								<? if($i == 0)echo '<div class="fett scrolltable_header" title="Reihenfolge">#</div>'; ?>
+						  	<input type="text"
+								  name="order_<?php echo $this->attributes['name'][$i]; ?>"
+									value="<?php echo $this->attributes['order'][$i]; ?>"
+									size="1"
+								>
+						  </td>
 						  <td align="left" valign="top">
 								<? if($i == 0)echo '<div class="fett scrolltable_header">Attribut</div>'; ?>
 						  	<input type="text"
@@ -321,7 +329,7 @@ function alias_replace(name){
 						  </td>
 
 						  <td align="left" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header">Aliasname</div>'; ?>
+								<? if($i == 0)echo '<div class="fett scrolltable_header">Aliasname&nbsp;<a title="aus Attributname erzeugen" href="javascript:create_aliasnames();"><img src="graphics/autogen.png"></a></div>'; ?>
 						  	<input name="alias_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['alias'][$i]); ?>">
 						  </td>
 							

@@ -264,26 +264,27 @@ class data_import_export {
 	}
 
 	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1') {
-		if (file_exists($uploadpath . $file . '.dbf') OR file_exists($uploadpath . $file . '.DBF')) {
-			$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $uploadpath.$file.'.shp', $pgdatabase, NULL, $sql, '-lco FID=gid', $encoding);
-			if ($ret !== 0) {
-				$custom_table['error'] = $ret;
+		if(file_exists($uploadpath.$file.'.dbf'))$filename = $uploadpath.$file.'.dbf';
+		elseif(file_exists($uploadpath.$file.'.DBF'))$filename = $uploadpath.$file.'.DBF';
+		else return;
+		$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $filename, $pgdatabase, NULL, $sql, '-lco FID=gid', $encoding);
+		if ($ret !== 0) {
+			$custom_table['error'] = $ret;
+			return array($custom_table);
+		}
+		else {
+			$sql = "
+				ALTER TABLE ".$schemaname.".".$tablename." SET WITH OIDS;
+				SELECT convert_column_names('".$schemaname . "', '" . $tablename . "');
+				" . $this->rename_reserved_attribute_names($schemaname, $tablename) . "
+				SELECT geometrytype(the_geom) AS geometrytype FROM " . $schemaname . "." . $tablename . " LIMIT 1;
+			";
+			$ret = $pgdatabase->execSQL($sql,4, 0);
+			if (!$ret[0]) {
+				$rs = pg_fetch_assoc($ret[1]);
+				$custom_table['datatype'] = geometrytype_to_datatype($rs['geometrytype']);
+				$custom_table['tablename'] = $tablename;
 				return array($custom_table);
-			}
-			else {
-				$sql = "
-					ALTER TABLE ".$schemaname.".".$tablename." SET WITH OIDS;
-					SELECT convert_column_names('".$schemaname . "', '" . $tablename . "');
-					" . $this->rename_reserved_attribute_names($schemaname, $tablename) . "
-					SELECT geometrytype(the_geom) AS geometrytype FROM " . $schemaname . "." . $tablename . " LIMIT 1;
-				";
-				$ret = $pgdatabase->execSQL($sql,4, 0);
-				if (!$ret[0]) {
-					$rs = pg_fetch_assoc($ret[1]);
-					$custom_table['datatype'] = geometrytype_to_datatype($rs['geometrytype']);
-					$custom_table['tablename'] = $tablename;
-					return array($custom_table);
-				}
 			}
 		}
 	}
@@ -330,7 +331,7 @@ class data_import_export {
 			$encoding = $this->getEncoding($filenameparts[0] . '.dbf');
 			$custom_table = $this->load_shp_into_pgsql($pgdatabase, '', $formvars['shapefile'], $epsg, CUSTOM_SHAPE_SCHEMA, 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['shapefile']), 0, 15))).rand(1,1000000), $encoding);
 			if($custom_table != NULL){
-				exec('rm '.UPLOADPATH.'/'.$user->id.'/'.basename($formvars['shapefile']).'.*');	# aus Sicherheitsgründen rm mit Uploadpfad davor
+				exec('rm '.UPLOADPATH.$user->id.'/'.basename($formvars['shapefile']).'.*');	# aus Sicherheitsgründen rm mit Uploadpfad davor
 			}
 			$custom_table[0]['epsg'] = $epsg;
 			return $custom_table;
@@ -989,7 +990,7 @@ class data_import_export {
 						if ($strpos !== false AND $strpos < 3) {		# Excel-Datumsproblem
 							$value = $value."\t";
 						}
-						if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
+						if(is_numeric($value)){
 							$value = str_replace('.', ",", $value);				#  Excel-Datumsproblem
 						}
 					}

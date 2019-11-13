@@ -79,7 +79,7 @@ class FormObject {
 		$this->outputHTML();
 	} # ende constructor
 
-static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '') {
+static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $please_select = true) {
 	$id = ($id == '' ? $name : $id);
 	if ($multiple != '') $multiple = ' multiple';
 	if ($style != '') $style = 'style="' . $style . '"';
@@ -87,6 +87,9 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 	if ($class != '') $class = 'class="' . $class . '"';
 
 	$options_html = array();
+	if ($please_select) {
+		$options_html[] = "<option value=\"\">-- bitte wählen --</option>";
+	}
 	foreach($options AS $option) {
 		if (is_string($option)) {
 			$option = array('value' => $option, 'output' => $option);		// falls die Optionen kein value und output haben

@@ -44,7 +44,7 @@
 			</div>
 		</a>
 		<? } ?>
-		<input type="submit" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>" tabindex="1" style="height: 27px; vertical-align: top; margin: auto; transform: <? if(!$this->simple_legend){ echo 'translateX(15px);'; } ?>">
+		<input type="button" name="neuladen_button" onclick="neuLaden();" value="<?php echo $strLoadNew; ?>" tabindex="1" style="height: 27px; vertical-align: top; margin: auto; transform: <? if(!$this->simple_legend){ echo 'translateX(15px);'; } ?>">
 		<? if(!$this->simple_legend){ ?>
 		<i id="legendOptionsIcon" class="fa fa-bars pointer button" title="<? echo $strLegendOptions; ?>" onclick="openLegendOptions();"></i>
 		<div id="legendOptions">

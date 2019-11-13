@@ -1,4 +1,4 @@
-
+<!-- generischer_sachdaten_druck.php //-->
 <script type="text/javascript">
 <!--
 
@@ -52,10 +52,10 @@ function back(){
         </tr>
         <tr>
           <td style="border-bottom:1px solid #C3C7C3">
-            &nbsp;<select  name="aktivesLayout" onchange="document.GUI.go_plus.value = '';document.GUI.submit()">
+            &nbsp;<select name="aktivesLayout" onchange="document.GUI.go_plus.value = '';document.GUI.submit()">
             <option value="">--- bitte wählen ---</option>
             <?  
-            for($i = 0; $i < count($this->ddl->layouts); $i++){
+            for ($i = 0; $i < count($this->ddl->layouts); $i++){
               echo ($this->formvars['aktivesLayout']<>$this->ddl->layouts[$i]['id']) ? '<option value="'.$this->ddl->layouts[$i]['id'].'">'.$this->ddl->layouts[$i]['name'].'</option>' : '<option value="'.$this->ddl->layouts[$i]['id'].'" selected>'.$this->ddl->layouts[$i]['name'].'</option>';
             }
             ?>

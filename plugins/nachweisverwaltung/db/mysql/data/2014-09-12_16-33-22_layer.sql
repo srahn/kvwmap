@@ -63,12 +63,12 @@ INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_a
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`decimal_length`,`default`,`form_element_type`,`options`,`alias`,`alias_low-german`,`alias_english`,`alias_polish`,`alias_vietnamese`,`tooltip`,`group`,`raster_visibility`,`mandatory`,`order`,`privileg`,`query_tooltip`) VALUES(@last_layer_id5210,'zst','zst','fp_punkte_alkis','fp_punkte_alkis','int4','','','1','32','0','','Text','','','','','','','','',NULL,NULL,'12','0','0');
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('Aufnahmepunkt',@last_layer_id5210,'/^AP/','1','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'circle','10','255 255 255','','0 0 0','5.00','10.00','','',NULL,'1.00','1.00','1.00','');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'circle','10','255 255 255','','0 0 0','5.00','10.00','','',NULL,'1.00','1.00','1.00');
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
 
 
-###########################################
+###########################################si
 # Layer Punktnummer AP									  #
 ###########################################
 
@@ -140,18 +140,18 @@ INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_a
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`decimal_length`,`default`,`form_element_type`,`options`,`alias`,`alias_low-german`,`alias_english`,`alias_polish`,`alias_vietnamese`,`tooltip`,`group`,`raster_visibility`,`mandatory`,`order`,`privileg`,`query_tooltip`) VALUES(@last_layer_id5200,'zst','zst','fp_punkte_alkis','fp_punkte_alkis','int4','','','1','32','0','','Text','','','','','','','','',NULL,NULL,'12','0','0');
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('TP',@last_layer_id5200,'/^TP/','1','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'glseitstehdreieck','10','255 255 255','','0 50 150','5.00','10.00','','',NULL,'1.00','1.00','1.00','');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'glseitstehdreieck','10','255 255 255','','0 50 150','5.00','10.00','','',NULL,'1.00','1.00','1.00');
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'circle','1','0 0 0','','0 50 150','1.00','2.00','','',NULL,'1.00','1.00','1.00','');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'circle','1','0 0 0','','0 50 150','1.00','2.00','','',NULL,'1.00','1.00','1.00');
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 1);
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('OP',@last_layer_id5200,'/^OP/','10','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'glseitkopfdreieck','10','255 255 255','','0 50 150','5.00','10.00','','',NULL,'1.00','1.00','1.00','');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'glseitkopfdreieck','10','255 255 255','','0 50 150','5.00','10.00','','',NULL,'1.00','1.00','1.00');
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'circle','1','0 0 0','','0 50 150','1.00','2.00','','',NULL,'1.00','1.00','1.00','');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'circle','1','0 0 0','','0 50 150','1.00','2.00','','',NULL,'1.00','1.00','1.00');
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 1);
 
@@ -232,12 +232,12 @@ INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_a
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`decimal_length`,`default`,`form_element_type`,`options`,`alias`,`alias_low-german`,`alias_english`,`alias_polish`,`alias_vietnamese`,`tooltip`,`group`,`raster_visibility`,`mandatory`,`order`,`privileg`,`query_tooltip`) VALUES(@last_layer_id5240,'zst','zst','fp_punkte_alkis','fp_punkte_alkis','int4','','','1','32','0','','Text','','','','','','','','',NULL,NULL,'12','0','0');
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('erfasst',@last_layer_id5240,'/./','1','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'circle','5','128 255 128','','0 0 0','4.00','6.00','','',NULL,'1.00','1.00','1.00','');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'circle','5','128 255 128','','0 0 0','4.00','6.00','','',NULL,'1.00','1.00','1.00');
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('digitalisiert',@last_layer_id5240,'','1','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'circle','5','255 128 255','','0 0 0','4.00','6.00','','',NULL,'1.00','1.00','1.00','');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'circle','5','255 128 255','','0 0 0','4.00','6.00','','',NULL,'1.00','1.00','1.00');
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
 
@@ -363,15 +363,15 @@ INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_a
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`decimal_length`,`default`,`form_element_type`,`options`,`alias`,`alias_low-german`,`alias_english`,`alias_polish`,`alias_vietnamese`,`tooltip`,`group`,`raster_visibility`,`mandatory`,`order`,`privileg`,`query_tooltip`) VALUES(@last_layer_id5230,'zst','zst','fp_punkte_alkis','fp_punkte_alkis','int4','','','1','32','0','','Text','','ZST','','','','','','',NULL,NULL,'12','0','0');
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('nicht festgestellt',@last_layer_id5230,'','2','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'circle','5','255 255 255','','255 255 255','3.00','7.00','','',NULL,'1.00','1.00','1.00','');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'circle','5','255 255 255','','255 255 255','3.00','7.00','','',NULL,'1.00','1.00','1.00');
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'circle','2','0 0 0','','0 0 0','1.00','2.00','','',NULL,'1.00','1.00','1.00','');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'circle','2','0 0 0','','0 0 0','1.00','2.00','','',NULL,'1.00','1.00','1.00');
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 1);
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('festgestellt',@last_layer_id5230,'/true/','1','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'circle','8','255 255 255','','0 0 0','4.00','8.00','','',NULL,'1.00','1.00','1.00','');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'circle','8','255 255 255','','0 0 0','4.00','8.00','','',NULL,'1.00','1.00','1.00');
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
 
@@ -497,7 +497,7 @@ INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_a
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`decimal_length`,`default`,`form_element_type`,`options`,`alias`,`alias_low-german`,`alias_english`,`alias_polish`,`alias_vietnamese`,`tooltip`,`group`,`raster_visibility`,`mandatory`,`order`,`privileg`,`query_tooltip`) VALUES(@last_layer_id5215,'zst','zst','fp_punkte_alkis','fp_punkte_alkis','int4','','','1','32','0','','Text','','','','','','','','',NULL,NULL,'12','0','0');
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('SiP',@last_layer_id5215,'/^SiP/','1','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'circle','7','255 255 255','','0 0 0','6.00','8.00','','',NULL,'1.00','1.00','1.00','');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'circle','7','255 255 255','','0 0 0','6.00','8.00','','',NULL,'1.00','1.00','1.00');
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
 
@@ -573,7 +573,7 @@ INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_a
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`decimal_length`,`default`,`form_element_type`,`options`,`alias`,`alias_low-german`,`alias_english`,`alias_polish`,`alias_vietnamese`,`tooltip`,`group`,`raster_visibility`,`mandatory`,`order`,`privileg`,`query_tooltip`) VALUES(@last_layer_id5217,'zst','zst','fp_punkte_alkis','fp_punkte_alkis','int4','','','1','32','0','','Text','','','','','','','','',NULL,NULL,'12','0','0');
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('Sonst. Vermpkt',@last_layer_id5217,'/^SVP/','1','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'circle','8','255 255 255','','0 0 0','6.00','8.00','','',NULL,'1.00','1.00','1.00','');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'circle','8','255 255 255','','0 0 0','6.00','8.00','','',NULL,'1.00','1.00','1.00');
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
 
@@ -649,7 +649,7 @@ INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_a
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`decimal_length`,`default`,`form_element_type`,`options`,`alias`,`alias_low-german`,`alias_english`,`alias_polish`,`alias_vietnamese`,`tooltip`,`group`,`raster_visibility`,`mandatory`,`order`,`privileg`,`query_tooltip`) VALUES(@last_layer_id5250,'zst','zst','fp_punkte_alkis','fp_punkte_alkis','int4','','','1','32','0','','Text','','','','','','','','',NULL,NULL,'12','0','0');
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('Top. Punkte',@last_layer_id5250,'','1','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'circle','5','230 179 179','','-1 -1 -1','4.00','6.00','','',NULL,'1.00','1.00','1.00','');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'circle','5','230 179 179','','-1 -1 -1','4.00','6.00','','',NULL,'1.00','1.00','1.00');
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
 
@@ -749,22 +749,22 @@ INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_a
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`decimal_length`,`default`,`form_element_type`,`options`,`alias`,`alias_low-german`,`alias_english`,`alias_polish`,`alias_vietnamese`,`tooltip`,`group`,`raster_visibility`,`mandatory`,`order`,`privileg`,`query_tooltip`) VALUES(@last_layer_id786,'zeit','zeit','n_nachweise','n_nachweise','timestamp','','','1',NULL,NULL,'','Time','','letzte Änderung','','','','','','',NULL,NULL,'14','0','0');
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('FFR',@last_layer_id786,'1','1','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES('0','','0','255 0 0','','0 0 0',NULL,NULL,'','',NULL,NULL,NULL,NULL,'');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES('0','','0','255 0 0','','0 0 0',NULL,NULL,'','',NULL,NULL,NULL,NULL);
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('KVZ',@last_layer_id786,'2','2','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES('0','','0','255 85 0','','0 0 0',NULL,NULL,'','',NULL,NULL,NULL,NULL,'');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES('0','','0','255 85 0','','0 0 0',NULL,NULL,'','',NULL,NULL,NULL,NULL);
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('GN',@last_layer_id786,'3','3','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES('0','','0','255 190 0','','0 0 0',NULL,NULL,'','',NULL,NULL,NULL,NULL,'');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES('0','','0','255 190 0','','0 0 0',NULL,NULL,'','',NULL,NULL,NULL,NULL);
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('andere',@last_layer_id786,'4','4','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'','1','155 203 0','','',NULL,'1','360','',NULL,NULL,NULL,NULL,'');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'','1','155 203 0','','',NULL,'1','360','',NULL,NULL,NULL,NULL);
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
  

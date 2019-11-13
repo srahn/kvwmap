@@ -109,7 +109,7 @@ define(CASE_COMPRESS, false);																																						  #
 #											- man muss in einer Fachschale zoomen (wegen reduce_mapwidth)												#
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
-#   getLayerOptions:  - getRollenLayer(), writeCustomType(), getDatatypeId() 															#
+#   getLayerOptions:  - getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
 #												und writeDatatypeAttributes() reinkopieren																				#
 #		get_group_legend:	- compare_legendorder() reinkopieren																								#
 #		get_select_list:  - read_datatype_attributes() reinkopieren																						#
@@ -159,8 +159,10 @@ $GUI->go = $go;
 $GUI->requeststring = $QUERY_STRING;
 
 # Laden der Plugins index.phps
-for($i = 0; $i < count($kvwmap_plugins); $i++) {
-	include(PLUGINS.$kvwmap_plugins[$i].'/control/index.php');
+if(!FAST_CASE){
+	for($i = 0; $i < count($kvwmap_plugins); $i++) {
+		include(PLUGINS.$kvwmap_plugins[$i].'/control/index.php');
+	}
 }
 
 # Übergeben des Anwendungsfalles
@@ -277,6 +279,10 @@ function go_switch($go, $exit = false) {
 			case 'getNBH' : {
 				$GUI->getNBH();
 			}break;
+
+			case 'getLayerParamsForm' : {
+				$GUI->get_layer_params_form($GUI->formvars['stelle_id']);
+			} break;
 
 			case 'setLayerParams' : {
 				$GUI->setLayerParams();
@@ -1153,11 +1159,11 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Layer_Datensatz_Loeschen' : {
-				$GUI->layer_Datensatz_Loeschen($GUI->formvars['chosen_layer_id'], $GUI->formvars['oid']);
+				$GUI->layer_Datensatz_Loeschen($GUI->formvars['chosen_layer_id'], $GUI->formvars['oid'], $GUI->formvars['reload_object']);
 			} break;
 
 			case 'Layer_Datensaetze_Loeschen' : {
-				$GUI->layer_Datensaetze_loeschen();
+				$GUI->layer_Datensaetze_loeschen(($GUI->formvars['output'] == 'false' ? false : true));
 			} break;
 
 			case 'Dokument_Loeschen' : {

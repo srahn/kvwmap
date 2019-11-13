@@ -3,7 +3,7 @@
   include(LAYOUTPATH.'languages/userdaten_'.$this->user->rolle->language.'.php');
  ?>
 <a name="oben"></a>
-<table width="1000" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table width="1300" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
     <td><h2><?php echo $strTitle; ?></h2></td>
   </tr>
@@ -28,6 +28,8 @@
         <th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=Name"><?php echo $this->strName;?></a></th>
 				<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=stop"><?php echo $strIntervall;?></a></th>
 				<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=last_timestamp"><?php echo $strLastActivity;?></a></th>
+				<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=organisation"><?php echo $strOrganisation;?></a></th>
+				<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=position"><?php echo $strPosition;?></a></th>
         <th align="left"><?php echo $strTel;?></th>
         <th align="left"><?php echo $strEMail;?></th>
         <td>&nbsp;</td>
@@ -69,7 +71,7 @@
             }
           } ?>
         </th>
-        <td colspan="7" align="right" style="border-top:1px solid #808080; margin:0px;">
+        <td colspan="10" align="right" style="border-top:1px solid #808080; margin:0px;">
           <a href="#oben"><img src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a>
         </td>
       </tr>
@@ -84,6 +86,8 @@
         <td><?php echo $this->userdaten[$i]['Namenszusatz'].' '; ?><?php echo $this->userdaten[$i]['Name']; ?>,&nbsp;<?php echo $this->userdaten[$i]['Vorname']; ?></td>
 				<td><? if($this->userdaten[$i]['stop'] != '0000-00-00') echo $this->userdaten[$i]['start'].'&nbsp;- '.$this->userdaten[$i]['stop']; ?>&nbsp;</td>
 				<td><?php echo $this->userdaten[$i]['last_timestamp']; ?>&nbsp;</td>
+				<td><?php echo $this->userdaten[$i]['organisation']; ?>&nbsp;</td>
+				<td><?php echo $this->userdaten[$i]['position']; ?>&nbsp;</td>
         <td><?php echo $this->userdaten[$i]['phon']; ?>&nbsp;</td>
         <td><?php echo $this->userdaten[$i]['email']; ?>&nbsp;</td>
         <td><a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>" title="<?php echo $this->strChange; ?>"><i class="fa fa-pencil" style="padding: 3px"></a></td>

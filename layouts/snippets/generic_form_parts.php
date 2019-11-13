@@ -146,7 +146,7 @@
 				if(is_array($elements[$e]) OR is_object($elements[$e]))$elements[$e] = json_encode($elements[$e]);		# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
 				$dataset2[$attributes2['name'][$j]] = $elements[$e];
 				$datapart .= '<div id="div_'.$id.'_'.$e.'" style="display: '.($e==-1 ? 'none' : 'block').'"><table cellpadding="0" cellspacing="0"><tr><td style="height: 22px">';
-				$datapart .= attribute_value($gui, $layer, $attributes2, $j, $k, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id);
+				$datapart .= attribute_value($gui, $layer, $attributes2, $j, $k, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id.' '.$field_class);
 				$datapart .= '</td>';
 				if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
 					$datapart .= '<td valign="top"><a href="#" onclick="removeArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a></td>';
@@ -321,8 +321,8 @@
 						if ($enum_value[$e] == $value) {
 							$datapart .= 'checked ';
 						}
-						if($attributes['nullable'][$j] != '0')$datapart .= ' onclick="'.($attribute_privileg == '0'? 'return false;' : '').'if(this.checked2 == undefined){this.checked2 = true;}this.checked = this.checked2; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';							
-						$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$k.'_'.$e.'">'.$enum_output[$e].'</label>&nbsp;&nbsp;&nbsp;&nbsp;';
+						if($attributes['nullable'][$j] != '0')$datapart .= ' onclick="'.($attribute_privileg == '0'? 'return false;' : '').'if(this.checked2 == undefined){this.checked2 = true;}this.checked = this.checked2; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';
+						$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="margin-right: 15px">'.$enum_output[$e].'</label>';
 						if(!$attributes['horizontal'][$j])$datapart .= '<br>';
 					}
 				}break;				
@@ -472,6 +472,7 @@
 					if($attributes['embedded'][$j] == true)$reloadParams .= '&embedded=true';
 					if($attributes['list_edit'][$j] == true)$reloadParams .= '&list_edit=true';
 					$reloadParams .= '&targetobject='.$layer_id.'_'.$name.'_'.$k;
+					$reloadParams .= '&fromobject='.$layer_id.'_'.$name.'_'.$k;
 					$reloadParams .= '&targetlayer_id='.$layer_id;
 					$reloadParams .= '&targetattribute='.$name;
 					$reloadParams .= '&oid='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
@@ -498,6 +499,7 @@
 						$pfadteil = explode('&original_name=', $dokumentpfad);
 						$dateiname = $pfadteil[0];
 						if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
+						$filesize = human_filesize($dateiname);
 						$dateinamensteil = explode('.', $dateiname);
 						$type = strtolower($dateinamensteil[1]);
 						$thumbname = $gui->get_dokument_vorschau($dateinamensteil);
@@ -528,7 +530,7 @@
 							$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\', '.$layer_id.', \''.$gui->formvars['fromobject'].'\', \''.$gui->formvars['targetobject'].'\',  \''.$gui->formvars['reload'].'\');"><span>Dokument löschen</span></a>';
 						}
 						$datapart .= '</td></tr>';
-						$datapart .= '<tr><td colspan="2"><span id="image_original_name">'.$original_name.'</span></td></tr>';
+						$datapart .= '<tr><td colspan="2"><span id="image_original_name">'.$original_name.' ('.$filesize.')</span></td></tr>';
 						$datapart .= '</table>';
 						$datapart .= '<input type="hidden" name="'.$fieldname.'_alt" class="'.$field_class.'" value="' . htmlspecialchars($value) . '">';
 					}
@@ -731,7 +733,7 @@
 		# - dargestellt in 1, 2 oder 3 Spalten		
 		if ($subform_layer_id != '' AND $subform_layer_privileg > 0) {
 			if ($embedded == true) {
-				$href = 'javascript:ahah(
+				$href = 'javascript:void(0);" onclick="ahah(
 					\'index.php\',
 					\'go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id.'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject=' . $element_id . '&targetlayer_id=' . $layer_id.'&targetattribute='.$name.'\',
 					new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\')),
@@ -833,7 +835,7 @@
 		# - dargestellt in 1, 2 oder 3 Spalten		
 		if ($subform_layer_id != '' AND $subform_layer_privileg > 0) {
 			if ($embedded == true) {
-				$href = 'javascript:ahah(
+				$href = 'javascript:void(0);" onclick="ahah(
 					\'index.php\',
 					\'go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id.'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject=' . $element_id . '&targetlayer_id=' . $layer_id.'&targetattribute='.$name.'\',
 					new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\')),
@@ -940,7 +942,7 @@
 			}
 			$datapart .= '<select class="'.$field_class.'" tabindex="1" title="'.$alias.'" style="'.$select_width.'font-size: '.$fontsize.'px"';
 			if($req_by != ''){
-				$onchange .= 'update_require_attribute(this, \''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode($attributenames, "','").'\'));';
+				$onchange = 'update_require_attribute(this, \''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode($attributenames, "','").'\'));'.$onchange;
 			}
 			$datapart .= ' onchange="'.$onchange.'" ';
 			if($datatype_id != '')$datapart .= ' data-datatype_id="'.$datatype_id.'" ';
@@ -957,7 +959,7 @@
 			if($subform_layer_id != ''){
 				if($subform_layer_privileg > 0){
 					if($embedded == true){
-						$datapart .= '&nbsp;&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id='.$subform_layer_id;
+						$datapart .= '&nbsp;&nbsp;<a class="buttonlink" href="javascript:void(0);" onclick="ahah(\'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id='.$subform_layer_id;
 						for($p = 0; $p < count($req); $p++){
 							$datapart .= '&attributenames['.$p.']='.$req[$p];
 							$datapart .= '&values['.$p.']=\'+document.getElementById(\''.$layer_id.'_'.$req[$p].'_'.$k.'\').value+\'';

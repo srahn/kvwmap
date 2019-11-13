@@ -546,7 +546,7 @@ class GUI {
       }
       # highlighting-Geometrie anfügen
       $output .= '||| '.$highlight_geom;
-      echo umlaute_javascript(umlaute_html($output)).'~showtooltip(top.document.GUI.result.value, '.$showdata.');';
+      echo umlaute_javascript(umlaute_html($output)).'█showtooltip(top.document.GUI.result.value, '.$showdata.');';
     }
   }
 

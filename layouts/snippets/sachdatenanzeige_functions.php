@@ -337,11 +337,13 @@ include('funktionen/input_check_functions.php');
 		enclosingForm.submit();
 	}
 	
-	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen){
+	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen, weiter_erfassen_params){
 		list_div = document.getElementById(list_div_id);
 		var params = list_div.dataset.reload_params;
+		if(enclosingForm.name == 'GUI2')params += '&mime_type=overlay_html';
 		if(list_edit)params += '&list_edit='+list_edit;
 		if(weiter_erfassen)params += '&weiter_erfassen='+weiter_erfassen;
+		if(weiter_erfassen_params)params += '&weiter_erfassen_params='+weiter_erfassen_params;
 		ahah('index.php?go=Layer-Suche_Suchen', params, new Array(list_div), new Array('sethtml'));
 	}
 
@@ -392,50 +394,16 @@ include('funktionen/input_check_functions.php');
   	overlay_submit(this, false);
 	}
 
-	/**
-	*	Funktion löscht einzelnen Datensatz mit oid im Layer mit layer_id,
-	* entfernt Datensatz in Liste des Subforms und
-	* zeigt Meldungen des Löschvorgangs an
-	*/
-	delete_subform_dataset = function(layer_id, oid, element_id) {
-		if (confirm('Wollen Sie diesen Datensatz wirklich löschen?')) {
-			$.ajax({
-				url : 'index.php',
-				data: {
-					go: 'Layer_Datensatz_Loeschen',
-					chosen_layer_id: layer_id,
-					oid: oid
-				},
-				type: 'GET',
-				success: function(data) {
-					var result = JSON.parse(data),
-							success = true;
-					$.each(result, function(index, value) {
-						if (value.type == 'error') {
-							success = false;
-						}
-					});
-					if (success) {
-						$('#' + element_id).remove();
-					}
-					message(result);
-				}
-			});
-		}
-	}
-
-	subdelete_data = function(layer_id, fromobject, targetobject){
+	subdelete_data = function(layer_id, fromobject, oid, reload_object){
 		// layer_id ist die von dem Layer, in dem der Datensatz geloescht werden soll
-		// fromobject ist die id von dem div, welches das Formular des Datensatzes enthaelt
-		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Loeschung des Datensatzes aktualisiert werden soll
+		// fromobject ist die id von dem div, welches das Formular des Datensatzes enthaelt, welches entfernt wird
+		// reload_object ist die id vom gesamten Subformular, welches nach Loeschung des Datensatzes aktualisiert werden soll (optional)
 		if (confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')) {
 			var formData = new FormData();
-			formData.append('go', 'Layer_Datensaetze_Loeschen');
+			formData.append('go', 'Layer_Datensatz_Loeschen');
 			formData.append('chosen_layer_id', layer_id);
-			formData.append('targetobject', targetobject);
-			formData.append('embedded', 'true');
-			formData.append('checkbox_names_' + layer_id, document.getElementsByName('checkbox_names_' + layer_id)[0].value);
-			formData.append(document.getElementsByName('checkbox_names_' + layer_id)[0].value, 'on');
+			formData.append('oid', oid);
+			formData.append('reload_object', reload_object);
 			ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
 		}
 	}
@@ -558,6 +526,9 @@ include('funktionen/input_check_functions.php');
 		}
 		else if(event.key == 'Tab'){
 			// nix machen
+		}
+		else if(event.key == 'Escape'){
+			document.getElementById('output_'+field_id).onchange();
 		}
 		else{
 			suggest_field.style.display = 'none';

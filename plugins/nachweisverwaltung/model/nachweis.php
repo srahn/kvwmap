@@ -60,7 +60,7 @@ class Nachweis {
 			#echo $newpath.'<br>';
 			if($oldpath != $newpath){
 				$this->adjust_documentpath($oldpath, $newpath);
-				$this->aktualisierenDokument($old_dataset['id'],NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,$this->Dokumente[0]['artname'].'/'.$formvars['zieldateiname'],NULL);
+				$this->aktualisierenDokument($old_dataset['id'],NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,$newpath,NULL);
 			}
 		}
 	}
@@ -473,10 +473,13 @@ class Nachweis {
   }
   
 	function CreateNachweisDokumentVorschau($dateiname){		
+		$dir = dirname($dateiname);
 		$dateinamensteil=explode('.',$dateiname);
 		if(mb_strtolower($dateinamensteil[1]) == 'pdf'){
 			$pagecount = getNumPagesPdf($dateiname);
-			if($pagecount > 1)$label = "-fill black -undercolor white -gravity North -pointsize 18 -annotate +0+15 ' ".$pagecount." Seiten '";
+			if($pagecount > 1)$label = '-pointsize 11 -draw "stroke #0009 fill #0007 stroke-width 2 circle 120,120 200,120 
+																											 stroke none fill white text 98,102 \''.$pagecount.'\'
+																																							text 60,150 \'Seiten\'"';
 		}
 		$command = IMAGEMAGICKPATH.'convert -density 300x300 '.$dateiname.'[0] -quality 75 -background white '.$label.' -flatten -resize 1800x1800\> '.$dateinamensteil[0].'_thumb.jpg';
 		exec($command, $ausgabe, $ret);
@@ -619,7 +622,7 @@ class Nachweis {
     $sql ="INSERT INTO nachweisverwaltung.n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,geprueft,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen,bemerkungen_intern,bearbeiter,zeit,erstellungszeit)";
     $sql.=" VALUES (".$flurid.",'".trim($stammnr)."',".$unterart.",'".trim($blattnr)."','".$datum."'";
     $sql.=",'".$VermStelle."','".$gueltigkeit."','".$geprueft."','".$blattformat."','".$zieldatei."',st_transform(st_geometryfromtext('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise'))";
-    $sql.=",".$fortf.",'".$rissnummer."','".$bemerkungen."','".$bemerkungen_intern."','".$user->Vorname." ".$user->Name."', '".date('Y-m-d G:i:s')."', '".date('Y-m-d G:i:s')."')";
+    $sql.=",".trim($fortf).",'".trim($rissnummer)."','".$bemerkungen."','".$bemerkungen_intern."','".$user->Vorname." ".$user->Name."', '".date('Y-m-d G:i:s')."', '".date('Y-m-d G:i:s')."')";
 		#echo '<br>Polygon-SQL: '.$sql;
     $ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0]) {
@@ -652,11 +655,12 @@ class Nachweis {
 		}
 		if($rissnr !== NULL){
 			if($rissnr === '')$sql.="rissnummer=NULL, ";
-			else $sql.="rissnummer='".$rissnr."', ";
+			else $sql.="rissnummer='".trim($rissnr)."', ";
 		}
-		$sql.="bemerkungen='".$bemerkungen."', ";
-		$sql.="bemerkungen_intern='".$bemerkungen_intern."', ";
-		$sql.=" bearbeiter='".$user->Vorname." ".$user->Name."', zeit='".date('Y-m-d G:i:s')."'";
+		if($bemerkungen !== NULL)$sql.="bemerkungen='".$bemerkungen."', ";
+		if($bemerkungen_intern !== NULL)$sql.="bemerkungen_intern='".$bemerkungen_intern."', ";
+		if($user !== NULL)$sql.=" bearbeiter='".$user->Vorname." ".$user->Name."', ";
+		$sql.=" zeit='".date('Y-m-d G:i:s')."'";
     $sql.=" WHERE id = ".$id;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
@@ -938,23 +942,27 @@ class Nachweis {
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
+					if($alle_der_messung){
+						$sql.=" JOIN nachweisverwaltung.n_nachweise AS n2 ON n.oid = n2.oid OR (n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "").")";
+						$n = 'n2';
+					}					
           $sql.=" WHERE 1=1 ";
 					if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
 					if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
           if ($idselected[0]!=0) {
-            $sql.=" AND n.id IN ('".$idselected[0]."'";
+            $sql.=" AND ".$n.".id IN ('".$idselected[0]."'";
             for ($i=1;$i<count($idselected);$i++) {
               $sql.=",'".$idselected[$i]."'";
             }
             $sql.=")";
           }
 					if($gemarkung != '' AND $flur_thematisch != 0){
-						if($flur == '')	$sql.=" AND substr(n.flurid::text, 1, 6) = '".$gemarkung."'";
-						else $sql.=" AND n.flurid='".$gemarkung.str_pad($flur,3,'0',STR_PAD_LEFT)."'";
+						if($flur == '')	$sql.=" AND substr(".$n.".flurid::text, 1, 6) = '".$gemarkung."'";
+						else $sql.=" AND ".$n.".flurid='".$gemarkung.str_pad($flur,3,'0',STR_PAD_LEFT)."'";
           }
 					else{
 						if($gemarkung != ''){
-							$sql.=" AND flur.land||flur.gemarkung = '".$gemarkung."' AND st_intersects(st_transform(flur.the_geom, ".EPSGCODE."), n.the_geom)";
+							$sql.=" AND flur.land||flur.gemarkung = '".$gemarkung."' AND st_intersects(st_transform(flur.the_geom, ".EPSGCODE."), ".$n.".the_geom)";
 						}
 						if($flur != ''){
 							$sql.=" AND flur.flurnummer = ".$flur." ";
@@ -962,67 +970,67 @@ class Nachweis {
 					}
           if($stammnr!=''){
 						if($stammnr2!=''){
-							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.stammnr, '[^0-9]+' ,'', 'g'), ''), '0')::bigint between 
+							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(".$n.".stammnr, '[^0-9]+' ,'', 'g'), ''), '0')::bigint between 
 											COALESCE(NULLIF(REGEXP_REPLACE('".$stammnr."', '[^0-9]+' ,'', 'g'), ''), '0')::bigint AND 
 											COALESCE(NULLIF(REGEXP_REPLACE('".$stammnr2."', '[^0-9]+' ,'', 'g'), ''), '0')::bigint";
 						}
 						else{
 							if(is_numeric($stammnr)){
-								$sql.=" AND REGEXP_REPLACE(COALESCE(n.stammnr, ''), '[^0-9]+' ,'', 'g') = '".$stammnr."'";
+								$sql.=" AND REGEXP_REPLACE(COALESCE(".$n.".stammnr, ''), '[^0-9]+' ,'', 'g') = '".$stammnr."'";
 							}
 							else{
-								$sql.=" AND lower(n.stammnr)='".mb_strtolower($stammnr)."'";
+								$sql.=" AND lower(".$n.".stammnr)='".mb_strtolower($stammnr)."'";
 							}
 						}
           }
 	        if($rissnr!=''){
 						if($rissnr2!=''){
-							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(n.rissnummer, '[^0-9]+' ,'', 'g'), ''), '0')::bigint between 
+							$sql.=" AND COALESCE(NULLIF(REGEXP_REPLACE(".$n.".rissnummer, '[^0-9]+' ,'', 'g'), ''), '0')::bigint between 
 											COALESCE(NULLIF(REGEXP_REPLACE('".$rissnr."', '[^0-9]+' ,'', 'g'), ''), '0')::bigint AND 
 											COALESCE(NULLIF(REGEXP_REPLACE('".$rissnr2."', '[^0-9]+' ,'', 'g'), ''), '0')::bigint";
 						}
 						else{
 							if(is_numeric($rissnr)){
-								$sql.=" AND REGEXP_REPLACE(COALESCE(n.rissnummer, ''), '[^0-9]+' ,'', 'g') = '".$rissnr."'";
+								$sql.=" AND REGEXP_REPLACE(COALESCE(".$n.".rissnummer, ''), '[^0-9]+' ,'', 'g') = '".$rissnr."'";
 							}
 							else{
-								$sql.=" AND lower(n.rissnummer)='".mb_strtolower($rissnr)."'";
+								$sql.=" AND lower(".$n.".rissnummer)='".mb_strtolower($rissnr)."'";
 							}
 						}
 	        }
 	      	if($fortf!=''){
 						if($fortf2!=''){
-							$sql.=" AND n.fortfuehrung between ".(int)$fortf." AND ".(int)$fortf2;
+							$sql.=" AND ".$n.".fortfuehrung between ".(int)$fortf." AND ".(int)$fortf2;
 						}
 						else{
-							$sql.=" AND n.fortfuehrung=".(int)$fortf;
+							$sql.=" AND ".$n.".fortfuehrung=".(int)$fortf;
 						}
 	        }
 					if($blattnr!=''){
-	          $sql.=" AND n.blattnummer='".$blattnr."'";
+	          $sql.=" AND ".$n.".blattnummer='".$blattnr."'";
 	        }					
           if($datum != ''){
 						if($datum2 != ''){
-							$sql.=" AND n.datum between '".$datum."' AND '".$datum2."'";
+							$sql.=" AND ".$n.".datum between '".$datum."' AND '".$datum2."'";
 						}
 						else{
-							$sql.=" AND n.datum = '".$datum."'";
+							$sql.=" AND ".$n.".datum = '".$datum."'";
 						}
           }
           if($VermStelle!=''){
-            $sql.=" AND n.vermstelle = '".$VermStelle."'";
+            $sql.=" AND ".$n.".vermstelle = '".$VermStelle."'";
           }
 					if(!empty($hauptart)){
 						if($hauptart[0] == '2222' AND $idselected[0] != ''){
-							$sql.=" AND n.id IN (".implode(',', $idselected).")";
+							$sql.=" AND ".$n.".id IN (".implode(',', $idselected).")";
 						}
 						else{
 							$sql.=" AND h.id IN (".implode(',', $hauptart).")";
 						}
 					}
-					if(!empty($unterart))$sql.=" AND ((n.art IN (".implode(',', $unterart).")) OR (d.hauptart NOT IN (select distinct hauptart from nachweisverwaltung.n_dokumentarten where id IN (".implode(',', $unterart)."))))";					
+					if(!empty($unterart))$sql.=" AND ((".$n.".art IN (".implode(',', $unterart).")) OR (d.hauptart NOT IN (select distinct hauptart from nachweisverwaltung.n_dokumentarten where id IN (".implode(',', $unterart)."))))";					
 					if($suchbemerkung != ''){
-						$sql.=" AND lower(n.bemerkungen) LIKE '%".mb_strtolower($suchbemerkung)."%'";
+						$sql.=" AND lower(".$n.".bemerkungen) LIKE '%".mb_strtolower($suchbemerkung)."%'";
 					}
           if ($richtung=='' OR $richtung=='ASC'){
             $richtung=="ASC";
@@ -1271,10 +1279,12 @@ class Nachweis {
 	
 	function Geometrieuebernahme($ref_geom, $id){
 		$sql = "UPDATE nachweisverwaltung.n_nachweise n 
-						SET the_geom = n2.the_geom 
-						FROM nachweisverwaltung.n_nachweise n2
-						WHERE n2.id = ".$ref_geom."
-						AND n.id IN (".implode(',', $id).")";
+						SET the_geom = (
+							SELECT st_union(n2.the_geom) 
+							FROM nachweisverwaltung.n_nachweise n2
+							WHERE n2.id IN (".implode(',', $ref_geom).")
+						)
+						WHERE n.id IN (".implode(',', $id).")";
 		$ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0])$result[0]='Fehler bei der Geometrieübernahme!';
     else $result[1]='Geometrien erfolgreich übernommen!';

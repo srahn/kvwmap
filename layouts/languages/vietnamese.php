@@ -22,4 +22,5 @@
 	$this->strExceeded = "vượt quá";
 	$this->strShowMore="Hiển thị thêm";
 	$this->strShowLess="Hiển thị ít hơn";
+	$this->strLayerParameters="Layer Parameter";
 ?>

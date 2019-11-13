@@ -15,7 +15,6 @@
   $strZoomFactor="Hệ số phóng";
   $strButtonNext="Tiếp tục";
   $strFontSizeGLE="GLE-Fontsize";
-	$strThemeParameters="Theme Parameters";
   $strHighlight="Tooltip-Highlighting";
   $strPlatt="Lower German";
   $strSearchColor="Result-Color";
