@@ -2651,17 +2651,13 @@ echo '			</ul>
 	* This function returns the file that sould be included as gui file in output
 	* The gui will be retrieved from $this->gui if exists or
 	* otherwise from $this->user->rolle->gui
-	* The value of $this->user->rolle->gui can have 2 cases
-	* if value containing basename(CUSTOM_PATH) . '/' e.g. custom/ at the beginning than replace it BY CUSTOM_PATH
-	* else prepend WWWROOT . APPLVERSION
 	*/
 	function get_guifile() {
 		if ($this->gui != '') {
 			return $this->gui;
 		}
-		if (strpos($this->user->rolle->gui, basename(CUSTOM_PATH) . '/') === 0) {
-			# Es ist eine GUI im Custom path eingestellt, setze CUSTOM_PATH davor
-			return str_replace(basename(CUSTOM_PATH) . '/', CUSTOM_PATH, $this->user->rolle->gui);
+		if(strpos($this->user->rolle->gui, 'layouts') === false){		# Berücksichtigung des alten gui-Pfads
+			return WWWROOT . APPLVERSION . 'layouts/' . $this->user->rolle->gui;
 		}
 		else {
 			return WWWROOT . APPLVERSION . $this->user->rolle->gui;

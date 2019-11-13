@@ -326,7 +326,7 @@
 	echo '<br>Replace cmd: ' . $cmd;
 	exec($cmd);
 
-	echo '<p>sizes' . $this->config_params['sizes']['value']
+	echo '<p>sizes' . $this->config_params['sizes']['value'];
 	echo '<br>Replace "gui.php" by "layouts/gui.php"';
 	echo '<br>Replace "custom/" by "custom/layouts/"';
 	$constants['sizes'] = array(
@@ -362,7 +362,7 @@
 		UPDATE
 			rolle
 		SET
-			gui = CASE WHEN gui LIKE '%custom/%' THEN concat(" . $constants['CUSTOM_PATH']['value'] . "'layouts/', SUBSTRING_INDEX(gui, '/', -1)) ELSE concat('layouts/', gui) END
+			gui = CASE WHEN gui LIKE '%custom/%' THEN concat('" . $constants['CUSTOM_PATH']['value'] . "layouts/', SUBSTRING_INDEX(gui, '/', -1)) ELSE concat('layouts/', gui) END
 	";
 	$this->database->execSQL($sql, 4, 1);
 
