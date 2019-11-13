@@ -59,7 +59,7 @@
 				'Pfad in dem sich Dateien befinden, die nicht vom kvwmap Repository getrackt werden.',
 				'string',
 				'Pfadeinstellungen',
-				'0'
+				'1'
 			)
 		";
 		$this->database->execSQL($sql, 4, 1);
