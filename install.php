@@ -490,6 +490,7 @@ function install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb) { ?>
 * 
 */
 function migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb) {
+	$mysqlKvwmapDb->execSQL("SET NAMES 'UTF8'",0,0);
   include(CLASSPATH . 'administration.php');
   $administration = new administration($mysqlKvwmapDb, $pgsqlKvwmapDb);
 	echo '<br>Frage Datenbankstati ab.';
