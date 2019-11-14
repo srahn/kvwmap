@@ -201,8 +201,8 @@ if ($this->Fehlermeldung!='') {
 									# Anzeige der GUI´s, die kvwmap bereitstellt
 									for ($i = 0; $i < count($this->guifiles); $i++) { ?>
 										<option
-											value="<? echo basename($this->guifiles[$i]); ?>"<?
-											echo ($this->user->rolle->gui == basename($this->guifiles[$i]) ? ' selected' : ''); ?>
+											value="<? echo $this->guifiles[$i]; ?>"<?
+											echo ($this->user->rolle->gui == $this->guifiles[$i] ? ' selected' : ''); ?>
 										><? echo $this->guifiles[$i]; ?></option><?
 									}
 									# Anzeige der GUI´s, die Admins in ihren custom Verzeichnissen haben

@@ -13131,17 +13131,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->layoutfiles = searchdir(LAYOUTPATH, false);
 		for ($i = 0; $i < count($this->layoutfiles); $i++) {
 			if (strpos($this->layoutfiles[$i], '.php') > 0 AND strpos($this->layoutfiles[$i], 'main.css.php') === false) {
-				$this->guifiles[] = basename($this->layoutfiles[$i]);
+				$this->guifiles[] = 'layouts/'.basename($this->layoutfiles[$i]);
 			}
 		}
 		# aus dem Customordner (vom Nutzer hinzugefügte Layouts)
 		$this->customlayoutfiles = searchdir(CUSTOM_PATH . 'layouts/', false);
 		for ($i = 0; $i < count($this->customlayoutfiles); $i++) {
 			if (strpos($this->customlayoutfiles[$i], '.php') > 0) {
-				$this->customguifiles[] = basename(CUSTOM_PATH) . '/' . basename($this->customlayoutfiles[$i]);
+				$this->customguifiles[] = CUSTOM_PATH . '/' . basename($this->customlayoutfiles[$i]);
 			}
 		}
-		echo '<br>' . print_r($this->customguifiles, true);
     # Abfrage der verfügbaren Kartenprojektionen in PostGIS (Tabelle spatial_ref_sys)
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
     # Voreinstellen des aktuellen EPSG-Codes der Rolle
