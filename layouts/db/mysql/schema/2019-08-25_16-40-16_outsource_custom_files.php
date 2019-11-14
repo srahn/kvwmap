@@ -140,7 +140,7 @@
 			# echo '<br>prefix: ' . $this->config_params['SYMBOLSET']['prefix'] . ' => CUSTOM_PATH';
 			# echo '<br>value: ' . $this->config_params['SYMBOLSET']['value'] . ' => ' . str_replace('symbols/custom/', 'symbols/', $this->config_params['SYMBOLSET']['value']);
 			$constants['SYMBOLSET'] = array(
-				'prefix' => 'CUSTOM_PATH',
+				'prefix' => 'WWWROOT.APPLVERSION.CUSTOM_PATH',
 				'value' => str_replace('symbols/custom/', 'symbols/', $this->config_params['SYMBOLSET']['value'])
 			);
 		}
