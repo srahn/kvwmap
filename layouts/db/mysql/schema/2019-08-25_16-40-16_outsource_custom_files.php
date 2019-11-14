@@ -126,7 +126,7 @@
 			# echo '<br>prefix: ' . $this->config_params['FONTSET']['prefix'] . ' => CUSTOM_PATH';
 			# echo '<br>value: ' . $this->config_params['FONTSET']['value'] . ' => ' . str_replace('fonts/custom/', 'fonts/', $this->config_params['FONTSET']['value']);
 			$constants['FONTSET'] = array(
-				'prefix' => 'CUSTOM_PATH',
+				'prefix' => 'WWWROOT.APPLVERSION.CUSTOM_PATH',
 				'value' => str_replace('fonts/custom', 'fonts', $this->config_params['FONTSET']['value'])
 			);
 		}
@@ -143,6 +143,8 @@
 				'prefix' => 'WWWROOT.APPLVERSION.CUSTOM_PATH',
 				'value' => str_replace('symbols/custom/', 'symbols/', $this->config_params['SYMBOLSET']['value'])
 			);
+			$cmd = 'sed -i -e "s|../|../../symbols/|g" ' . WWWROOT. APPLVERSION . CUSTOM_PATH . 'symbols/*.sym';
+			exec($cmd);
 		}
 
 		# echo '<p>GRAPHICSPATH';
