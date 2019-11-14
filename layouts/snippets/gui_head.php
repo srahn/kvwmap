@@ -15,4 +15,8 @@ if (true) { ?>
 <link rel="stylesheet" href="<?php echo 'layouts/' . $this->style . '?gui=' . $this->user->rolle->gui; ?>"><?
 if (defined('CUSTOM_STYLE') AND CUSTOM_STYLE != '') { ?>
 	<link rel="stylesheet" href="<?php echo CUSTOM_STYLE; ?>"><?
-} ?>
+}
+if ($this->Stelle->style != '') { ?>
+	<link rel="stylesheet" href="<? echo $this->Stelle->style; ?>"><?
+}
+?>
