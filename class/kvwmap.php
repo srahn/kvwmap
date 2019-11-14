@@ -8061,7 +8061,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->formvars['selected_layer_id'] = $this->formvars['id'];
 		}
 		if ($this->formvars['connectiontype'] == 6) {
-			if ($this->formvars['connection'] != '') {
+			if ($this->formvars['connection_id'] != '') {
 				if ($this->formvars['pfad'] != '') {
 					#---------- Speichern der Layerattribute -------------------
 					$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
