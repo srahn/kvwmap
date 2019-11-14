@@ -126,7 +126,7 @@
 			# echo '<br>prefix: ' . $this->config_params['FONTSET']['prefix'] . ' => CUSTOM_PATH';
 			# echo '<br>value: ' . $this->config_params['FONTSET']['value'] . ' => ' . str_replace('fonts/custom/', 'fonts/', $this->config_params['FONTSET']['value']);
 			$constants['FONTSET'] = array(
-				'prefix' => 'CUSTOM_PATH',
+				'prefix' => 'WWWROOT.APPLVERSION.CUSTOM_PATH',
 				'value' => str_replace('fonts/custom', 'fonts', $this->config_params['FONTSET']['value'])
 			);
 		}
