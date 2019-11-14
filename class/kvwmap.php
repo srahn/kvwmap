@@ -16419,7 +16419,7 @@ class db_mapObj{
 				$name_column . ",
 				l.alias,
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem,
-				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				g.id, ".$group_column.", g.obergruppe, g.order
@@ -16427,12 +16427,14 @@ class db_mapObj{
 				u_rolle2used_layer AS rl,
 				used_layer AS ul,
 				layer AS l,
+				connections as c,
 				u_groups AS g,
 				u_groups2rolle as gr
 			WHERE
 				rl.stelle_id = ul.Stelle_ID AND
 				rl.layer_id = ul.Layer_ID AND
 				l.Layer_ID = ul.Layer_ID AND
+				l.connection_id = c.id AND 
 				(ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID = " . $this->Stelle_ID . " AND rl.user_id = " . $this->User_ID . " AND
 				gr.id = g.id AND
 				gr.stelle_id = " . $this->Stelle_ID . " AND
@@ -16951,7 +16953,7 @@ class db_mapObj{
 			$sql ='SELECT `connection`, "'.CUSTOM_SHAPE_SCHEMA.'" as `schema` FROM rollenlayer WHERE -id = '.$layer_id.' AND connectiontype = 6';
 		}
 		else{
-			$sql ='SELECT `connection`, `schema` FROM layer WHERE Layer_ID = '.$layer_id.' AND connectiontype = 6';
+			$sql ="SELECT concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as `connection`, `schema` FROM layer as l, connections as c WHERE l.Layer_ID = ".$layer_id." AND l.connection_id = c.id AND l.connectiontype = 6";
 		}
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Lesen des connection-Strings des Layers:<br>" . $sql,4);
 		$query=mysql_query($sql);
