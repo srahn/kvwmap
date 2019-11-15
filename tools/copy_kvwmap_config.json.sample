@@ -17,8 +17,8 @@
     "app_dir" : "kvwmap_demo",
     "data_dir" : "data_demo",
     "data_handler" : "none",
-    "mysql_dbname" : "kvwmapdb_dev",
-    "pgsql_dbname" : "kvwmapsp_dev"
+    "mysql_dbname" : "kvwmapdb_demo",
+    "pgsql_dbname" : "kvwmapsp_demo"
   },
   "test" : {
     "app_dir" : "kvwmap_test",
