@@ -220,18 +220,17 @@ else{ ?>
 					<td align="right"><?
 						# alle anzeigen
 						if ($anzObj > 1) {
-							# Liste bearbeiten ?>
-							<span id="test47"><?
-								if ($this->formvars['embedded'] == 'true') {
-									echo '<a tabindex="1" id="edit_list_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:reload_subform_list(\''.$this->formvars['targetobject'].'\', 1)"><span>'.$strEditList.'</span></a>';
-								}
-								echo '&nbsp;<a tabindex="1" style="font-size: '.$linksize.'px;" class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
-								for($p = 0; $p < count($this->formvars['attributenames']); $p++){
-									echo '&value_'.$this->formvars['attributenames'][$p].'='.$this->formvars['values'][$p];
-									echo '&operator_'.$this->formvars['attributenames'][$p].'==';
-								}				
-								echo '&subform_link=true\')"><span>'.$strShowAll.'</span></a>'; ?>
-							</span><?
+							# Liste bearbeiten 
+							if ($this->formvars['embedded'] == 'true') {
+								echo '<a tabindex="1" id="edit_list_'.$this->formvars['targetobject'].'" class="list_edit_button buttonlink" href="javascript:reload_subform_list(\''.$this->formvars['targetobject'].'\', 1)"><span>'.$strEditList.'</span></a>';
+							}
+							echo '&nbsp;<a tabindex="1" style="font-size: '.$linksize.'px;" class="show_all_button buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
+							for($p = 0; $p < count($this->formvars['attributenames']); $p++){
+								echo '&value_'.$this->formvars['attributenames'][$p].'='.$this->formvars['values'][$p];
+								echo '&operator_'.$this->formvars['attributenames'][$p].'==';
+							}				
+							echo '&subform_link=true\')"><span>'.$strShowAll.'</span></a>'; ?>
+							<?
 						}
 						# neu
 						if ($layer['privileg'] > 0){
