@@ -240,7 +240,7 @@ class GUI {
 			$error_msg = 'Geben Sie im Parameter snippets einen Namen für eine Datei an!';
 		}
 		else {
-			$snippet_path = WWWROOT . CUSTOM_PATH . 'layouts/';
+			$snippet_path = WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/snippets/';
 			$snippet_file = $this->formvars['snippet'] . '.php';
 			if (!file_exists($snippet_path . $snippet_file)) {
 				$error_msg = 'Die Datei ' . $snippet_path . $snippet_file . ' existiert nicht. Geben Sie einen anderen Namen im Parameter snippet an!';
