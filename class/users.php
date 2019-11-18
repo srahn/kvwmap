@@ -1271,12 +1271,12 @@ class user {
 				`login_name` = '" . $userdaten['loginname'] . "',
 				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
 				`start` = '" . $userdaten['start'] . "',
-				`stop`= '" . $userdaten['stop'] . "', " .
-				($userdaten['id'] 					!= '' ? "`ID` 					=  " . $userdaten['id'] . "," 						: "") .
-				($userdaten['phon'] 				!= '' ? "`phon` 				= '" . $userdaten['phon'] . "'," 					: "") .
-				($userdaten['email']				!= '' ? "`email` 				= '" . $userdaten['email'] . "',"					: "") .
-				($userdaten['organisation']	!= '' ? "`organisation`	= '" . $userdaten['organisation'] . "'," 	: "") .
-				($userdaten['position']			!= '' ? "`position` 		= '" . $userdaten['position'] . "',"			: "") . "
+				`stop`= '" . $userdaten['stop'] . "',
+				`ID` =  ".$userdaten['id'].",
+				`phon` = '".$userdaten['phon']."',
+				`email` = '".$userdaten['email']."',
+				`organisation` = '".$userdaten['organisation']."',
+				`position` = '".$userdaten['position']."',
 				`ips` = '" . $userdaten['ips'] . "'" .
 				$passwort_column .
 				$passwort_setting_time_column . "
