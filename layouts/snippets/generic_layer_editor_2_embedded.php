@@ -5,16 +5,6 @@
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
 	
-	# falls das Geometrie-Attribut editierbar ist, zum nicht eingebetteten Formular wechseln
-	if($layer['attributes']['privileg'][$layer['attributes']['indizes'][$layer['attributes']['the_geom']]] == 1){
-		$this->formvars['embedded'] = '';
-		echo '
-		<script type="text/javascript">
-			location.href = \'index.php?'.http_build_query($this->formvars).'\'
-		</script>';
-		exit;
-	}
-
 	$size = 40;
 	$select_width = 'width:290px;';
 
