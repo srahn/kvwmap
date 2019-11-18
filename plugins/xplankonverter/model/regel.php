@@ -433,7 +433,7 @@ public static	function find_by_id($gui, $by, $id) {
 		}
 		else {
 			#echo '<br>Regel gehört über einen Bereich und Plan zur Konvertierung.';
-			$sql = "
+			/*$sql = "
 				SELECT
 					b.konvertierung_id
 				FROM
@@ -442,8 +442,9 @@ public static	function find_by_id($gui, $by, $id) {
 				WHERE
 					r.id = " . $this->get('id') . "
 			";
-/*
-			SELECT
+			*/
+
+			$sql = "SELECT
 				coalesce(bp.konvertierung_id, rp.konvertierung_id) AS konvertierung_id
 			FROM
 				xplankonverter.regeln r LEFT JOIN
@@ -460,8 +461,8 @@ public static	function find_by_id($gui, $by, $id) {
 				xplan_gml.rp_plan rpp ON rpp.konvertierung_id = r.konvertierung_id LEFT JOIN
 				xplan_gml.rp_plan spp ON spp.konvertierung_id = r.konvertierung_id
 			WHERE
-				r.id = " . $this->get('id')
-*/
+				r.id = " . $this->get('id') . "
+			";
 
 			#echo '<br>SQL zum Abfragen der konvertierung_id der Regel: ' . $sql;
 			$result = pg_query($this->database->dbConn, $sql);
