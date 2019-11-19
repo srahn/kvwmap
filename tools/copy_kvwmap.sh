@@ -22,9 +22,9 @@ usage() {
   echo "  -h --help Hilfe"
 }
 
-exec_sql() {
+exec_pgsql() {
   echo "Execute: psql -h $PGSQL_SERVER -U $PGSQL_USER -c "${sql}" ${SOURCE_PGSQL_DBNAME}";
-  docker exec pgsql-server psql -U $PGSQL_USER -c "${sql}" ${SOURCE_PGSQL_DBNAME}
+  docker exec pgsql-server psql -U $PGSQL_USER -c "${sql}" ${PGSQL_DBNAME}
 }
 
 exec_mysql() {
@@ -204,23 +204,37 @@ sql="
     datname='${TARGET_PGSQL_DBNAME}' AND
   state = 'idle'
 "
-exec_sql
+PGSQL_DBNAME=${SOURCE_PGSQL_DBNAME}
+exec_pgsql
 
 echo "Aktualisierung der Testdatenbank."
 echo "Lösche Datenbank ${TARGET_PGSQL_DBNAME}"
 sql="
   DROP DATABASE IF EXISTS ${TARGET_PGSQL_DBNAME}
 "
-exec_sql
+exec_pgsql
 
 echo "Erzeuge neue leere Datenbank ${TARGET_PGSQL_DBNAME}"
 sql="
   CREATE DATABASE ${TARGET_PGSQL_DBNAME}
 "
-exec_sql
+exec_pgsql
 
 echo "Stelle Produktionsdatenbank ${SOURCE_PGSQL_DBNAME} in Datenbank ${TARGET_PGSQL_DBNAME} wieder her"
 docker exec pgsql-server ${PGSQL_BIN}/pg_restore -U $PGSQL_USER -Fc -d ${TARGET_PGSQL_DBNAME} /var/${DUMP_DIR}/${TARGET_PGSQL_DBNAME}.dump
+
+echo "Nehme Ersetzungen in PostgreSQL-Datenbank ${TARGET_PGSQL_DBNAME} vor"
+sql="
+  UPDATE
+    xplan_gml.xp_plan SET externereferenz = replace(
+      externereferenz::text,
+      '${SOURCE_DOCUMENT_URL}',
+      '${TARGET_DOCUMENT_URL}'
+    )::xplan_gml.xp_spezexternereferenz[]
+"
+PGSQL_DBNAME=${TARGET_PGSQL_DBNAME}
+exec_pgsql
+
 
 MYSQL_DBNAME=$SOURCE_MYSQ_DBNAME
 echo "Lösche Testdatenbank ${TARGET_MYSQL_DBNAME}, erzeuge eine neue leere und spiele die Sicherung von ${SOURCE_MYSQL_DBNAME} ein"
