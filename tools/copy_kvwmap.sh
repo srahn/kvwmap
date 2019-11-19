@@ -126,6 +126,7 @@ TARGET_PGSQL_DBNAME="$(jq -r .$TARGET.pgsql_dbname $COPY_CONFIG_FILE)"
 echo "TARGET_PGSQL_DBNAME: ${TARGET_PGSQL_DBNAME}"
 TARGET_DOCUMENT_URL="$(jq -r .${TARGET}.document_url $COPY_CONFIG_FILE)"
 echo "TARGET_DOCUMENT_URL: ${TARGET_DOCUMENT_URL}"
+TARGET_PGSQL_UPDATE="$(jq -r .${TARGET}.pgsql_update $COPY_CONFIG_FILE)"
 
 CONFIG_FILE="${SOURCE_APP_DIR}/config.php"
 echo "CONFIG_FILE: ${CONFIG_FILE}"
@@ -224,17 +225,9 @@ echo "Stelle Produktionsdatenbank ${SOURCE_PGSQL_DBNAME} in Datenbank ${TARGET_P
 docker exec pgsql-server ${PGSQL_BIN}/pg_restore -U $PGSQL_USER -Fc -d ${TARGET_PGSQL_DBNAME} /var/${DUMP_DIR}/${TARGET_PGSQL_DBNAME}.dump
 
 echo "Nehme Ersetzungen in PostgreSQL-Datenbank ${TARGET_PGSQL_DBNAME} vor"
-sql="
-  UPDATE
-    xplan_gml.xp_plan SET externereferenz = replace(
-      externereferenz::text,
-      '${SOURCE_DOCUMENT_URL}',
-      '${TARGET_DOCUMENT_URL}'
-    )::xplan_gml.xp_spezexternereferenz[]
-"
+sql="${TARGET_PGSQL_UPDATE}"
 PGSQL_DBNAME=${TARGET_PGSQL_DBNAME}
 exec_pgsql
-
 
 MYSQL_DBNAME=$SOURCE_MYSQ_DBNAME
 echo "Lösche Testdatenbank ${TARGET_MYSQL_DBNAME}, erzeuge eine neue leere und spiele die Sicherung von ${SOURCE_MYSQL_DBNAME} ein"
