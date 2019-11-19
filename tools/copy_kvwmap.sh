@@ -97,7 +97,7 @@ if [ ! -f "$COPY_CONFIG_FILE" ] ; then
   COPY_CONFIG_FILE="${COPY_CONFIG_FILE}.sample"
 fi
 echo "COPY_CONFIG_FILE: ${COPY_CONFIG_FILE}"
-SOURCE_APP_NAME="$(jq -r .$SOURCE.app_dir $COPY_CONFIG_FILE)"
+SOURCE_APP_NAME="$(jq -r .$SOURCE.app_name $COPY_CONFIG_FILE)"
 echo "SOURCE_APP_NAME: ${SOURCE_APP_NAME}"
 SOURCE_APP_DIR="${APPS_DIR}/${SOURCE_APP_NAME}"
 echo "SOURCE_APP_DIR: ${SOURCE_APP_DIR}"
@@ -107,7 +107,10 @@ SOURCE_MYSQL_DBNAME="$(jq -r .$SOURCE.mysql_dbname $COPY_CONFIG_FILE)"
 echo "SOURCE_MYSQL_DBNAME: ${SOURCE_MYSQL_DBNAME}"
 SOURCE_PGSQL_DBNAME="$(jq -r .${SOURCE}.pgsql_dbname $COPY_CONFIG_FILE)"
 echo "SOURCE_PGSQL_DBNAME: ${SOURCE_PGSQL_DBNAME}"
-TARGET_APP_NAME="$(jq -r .$TARGET.app_dir $COPY_CONFIG_FILE)"
+SOURCE_DOCUMENT_URL="$(jq -r .${SOURCE}.document_url $COPY_CONFIG_FILE)"
+echo "SOURCE_DOCUMENT_URL: ${SOURCE_DOCUMENT_URL}"
+
+TARGET_APP_NAME="$(jq -r .$TARGET.app_name $COPY_CONFIG_FILE)"
 echo "TARGET_APP_NAME: ${TARGET_APP_NAME}"
 TARGET_APP_DIR="${APPS_DIR}/${TARGET_APP_NAME}"
 echo "TARGET_APP_DIR: ${TARGET_APP_DIR}"
@@ -121,6 +124,8 @@ TARGET_MYSQL_DBNAME="$(jq -r .$TARGET.mysql_dbname $COPY_CONFIG_FILE)"
 echo "TARGET_MYSQL_DBNAME: ${TARGET_MYSQL_DBNAME}"
 TARGET_PGSQL_DBNAME="$(jq -r .$TARGET.pgsql_dbname $COPY_CONFIG_FILE)"
 echo "TARGET_PGSQL_DBNAME: ${TARGET_PGSQL_DBNAME}"
+TARGET_DOCUMENT_URL="$(jq -r .${TARGET}.document_url $COPY_CONFIG_FILE)"
+echo "TARGET_DOCUMENT_URL: ${TARGET_DOCUMENT_URL}"
 
 CONFIG_FILE="${SOURCE_APP_DIR}/config.php"
 echo "CONFIG_FILE: ${CONFIG_FILE}"
@@ -239,6 +244,10 @@ exec_mysql
 sql="UPDATE config SET \`value\` = '${TARGET_DATA_NAME}/' WHERE \`name\` = 'SHAPEPATH'"
 exec_mysql
 sql="UPDATE config SET \`value\` = '${TARGET_PGSQL_DBNAME}' WHERE \`name\` = 'POSTGRES_DBNAME'"
+exec_mysql
+sql="UPDATE layer SET \`document_url\` = replace(document_url, '${SOURCE_DOCUMENT_URL}', '${TARGET_DOCUMENT_URL}')"
+exec_mysql
+sql="UPDATE layer SET \`document_path\` = replace(document_path, '/var/www/${SOURCE_APP_NAME}/', '/var/www/${TARGET_APP_NAME}/')"
 exec_mysql
 
 # Behandle Datenverzeichnis
