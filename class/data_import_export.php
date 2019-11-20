@@ -1056,10 +1056,15 @@ class data_import_export {
 		$this->formvars = $formvars;
 		$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
 		$mapdb = new db_mapObj($stelle->id,$user->id);
-		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
-		$sql = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
-		$sql = str_replace('$language', $language, $sql);
-		$sql = replace_params($sql, rolle::$layer_params);
+		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);		
+		$sql = replace_params(
+			$layerset[0]['pfad'],
+			rolle::$layer_params,
+			$user->id,
+			$stelle->id,
+			rolle::$hist_timestamp,
+			$user->rolle->language
+		);
 		$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 		$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 		$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
