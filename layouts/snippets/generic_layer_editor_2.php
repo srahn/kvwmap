@@ -66,7 +66,7 @@
 	<tr>
 		<td>
 			<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
-			<div id="<? echo $layer['Layer_ID'].'_'.$k; ?>" class="datensatz"
+			<div id="datensatz_<? echo $layer['Layer_ID'].'_'.$k; ?>" class="datensatz"
 				<?
 				if ($this->new_entry != true AND $this->user->rolle->querymode == 1) { ?>
 					onmouseenter="highlight_object(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['the_geom']].'_oid']; ?>');"<?
