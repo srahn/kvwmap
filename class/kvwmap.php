@@ -19058,7 +19058,7 @@ class db_mapObj{
         $query=pg_query($sql);
     		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
         $count=pg_num_rows($query);
-        if($count == 1){
+        if($count > 0){
           return $classes[$i]['Class_ID'];
         }
       }
