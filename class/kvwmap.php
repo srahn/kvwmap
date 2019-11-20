@@ -249,7 +249,7 @@ class GUI {
 
 		if (empty($error_msg)) {
 			if (strtolower($this->formvars['format']) == 'json' OR $this->formvars['only_main']) {
-				include_once(WWWROOT . CUSTOM_PATH . 'layouts/' . $snippet_file);
+				include_once($snippet_path . $snippet_file);
 			}
 		}
 		else {
@@ -259,7 +259,8 @@ class GUI {
 			$this->saveMap('');
 			$this->drawMap();
 		}
-		$this->main = '../../../' . CUSTOM_PATH . $snippet_file;
+		
+		$this->main = $snippet_path . $snippet_file;
 		$this->output();
 	}
 
@@ -2656,7 +2657,7 @@ echo '			</ul>
 		if ($this->gui != '') {
 			return $this->gui;
 		}
-		if(strpos($this->user->rolle->gui, 'layouts') === false){		# Berücksichtigung des alten gui-Pfads
+		if (strpos($this->user->rolle->gui, 'layouts') === false) {		# Berücksichtigung des alten gui-Pfads
 			return WWWROOT . APPLVERSION . 'layouts/' . $this->user->rolle->gui;
 		}
 		else {
