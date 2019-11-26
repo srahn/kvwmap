@@ -1199,6 +1199,7 @@
 					$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
           if ($ret[0]) {
             $GUI->nachweis->database->rollbacktransaction();
+						$GUI->nachweis->dokumentenDateiLoeschen($zieldatei);
             $errmsg=$ret[1];
           }
           else {
