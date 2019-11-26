@@ -3844,7 +3844,6 @@ echo '			</ul>
 									echo FormObject::createSelectField(
 											'label_'.key($this->labeldaten),
 											array(
-												array('value' => NULL, 'output' => ''),
 												array('value' => 0, 'output' => 'oben links'),
 												array('value' => 6, 'output' => 'oben mittig'),
 												array('value' => 2, 'output' => 'oben rechts'),
@@ -3862,7 +3861,8 @@ echo '			</ul>
 											"",
 											"",
 											"",
-											'labelFormField'
+											'labelFormField',
+											' '
 										);
 							}break;
 							
