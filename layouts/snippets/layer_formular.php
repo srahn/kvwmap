@@ -237,6 +237,7 @@
 								<input name="document_url" type="text" value="<?php echo $this->layerdata['document_url']; ?>" size="50" maxlength="100">
 						</td>
 					</tr>
+					<? if($this->formvars['selected_layer_id']){ ?>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDdlAttribute; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3"><?php
@@ -265,6 +266,7 @@
 							); ?>
 						</td>
 					</tr>
+					<? } ?>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTileIndex; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -338,7 +340,7 @@
 										$connections
 									),
 									$this->layerdata['connection_id']
-								); ?><a href="index.php?go=connections_anzeigen"><i class="fa fa-pencil fa_lg" style="margin-left: 5px; color: #a82e2e;"></i></a>
+								); ?><a href="index.php?go=connections_anzeigen"><i class="fa fa-pencil fa_lg" style="margin-left: 5px;"></i></a>
 					<? 	} ?>
 						</td>
 					</tr>

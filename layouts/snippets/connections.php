@@ -152,7 +152,7 @@
 		window.location = 'index.php?go=connection_speichern' + data;
 	}
 </script>
-<table width="100%" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" style="margin-bottom: 40px;">
+<table width="1000" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" style="margin-bottom: 40px;">
   <tr>
     <td align="center" colspan="7"><h2><?php echo $strTitle; ?></h2></td>
 	</tr>
@@ -179,10 +179,10 @@
 			<td class="editable" name="user" type="text" size="15"><?php echo $connection->get('user'); ?></td>
 			<td class="editable" name="password" type="password" value="<?php echo $connection->get('password'); ?>" size="12">****</td>
 			<td width="40px">
-				<a id="edit_link_<?php echo $connection->get('id'); ?>" href="#" onclick="edit(this);" style="margin-left: 1px;" class="control"><i class="fa fa-pencil fa_lg" style="color: #b22222;" title="Ändern"></i></a>
-				<a id="drop_link_<?php echo $connection->get('id'); ?>" href="#" onclick="drop(this);" style="margin-left: 5px;" class="control"><i class="fa fa-trash-o fa_lg" style="color: #b22222" title="Löschen"></i></a>
+				<a id="edit_link_<?php echo $connection->get('id'); ?>" href="#" onclick="edit(this);" style="margin-left: 1px;" class="control"><i class="fa fa-pencil fa_lg" title="Ändern"></i></a>
+				<a id="drop_link_<?php echo $connection->get('id'); ?>" href="#" onclick="drop(this);" style="margin-left: 5px;" class="control"><i class="fa fa-trash-o fa_lg" title="Löschen"></i></a>
 				<a id="save_link_<?php echo $connection->get('id'); ?>" href="#" onclick="save(this);" style="margin-left: 1px; display: none" class="mod"><i class="fa fa-check fa_lg" style="color: #087e08;" title="Speichern"></i></a>
-				<a id="quit_link_<?php echo $connection->get('id'); ?>" href="#" onclick="quit(this);" style="margin-left: 5px; display: none" class="mod"><i class="fa fa-times fa_lg" style="color: #b22222" title="Abbrechen"></i></a>
+				<a id="quit_link_<?php echo $connection->get('id'); ?>" href="#" onclick="quit(this);" style="margin-left: 5px; display: none" class="mod"><i class="fa fa-times fa_lg" title="Abbrechen"></i></a>
 			</td>
 		<tr><?php
 	} ?>
