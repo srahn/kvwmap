@@ -1827,7 +1827,12 @@ echo '			</ul>
             $style->linecap = 'butt';
           }
 					if($dbStyle['gap'] != '') {
-	          $style->set('gap', $dbStyle['gap']);
+						if($this->map_factor != ''){
+							$style->set('gap', $dbStyle['gap']*$this->map_factor/1.414);
+						}
+						else{
+							$style->set('gap', $dbStyle['gap']);
+						}
 	        }
 					if($dbStyle['initialgap'] != '') {
             $style->set('initialgap', $dbStyle['initialgap']);
