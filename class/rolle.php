@@ -915,7 +915,7 @@ class rolle {
 				WHERE
 					user_id = " . $this->user_id . " AND
 					stelle_id = " . $this->stelle_id .
-					($layer_id != '' ? " AND layer_id = " . abs($layer_id) : "") . "
+					($layer_id != '' ? " AND id = " . abs($layer_id) : "") . "
 			";
 			#echo '<br>Sql: ' . $sql;
 			$this->debug->write("<p>file:rolle.php class:rolle->update_layer_status - schalte ein oder alle Layer Stati der Rolle um:", 4);
@@ -946,7 +946,7 @@ class rolle {
 				WHERE 
 					user_id=".$this->user_id." AND 
 					stelle_id=".$this->stelle_id.
-					($layer_id != '' ? " AND layer_id = ".abs($layer_id) : "");
+					($layer_id != '' ? " AND id = ".abs($layer_id) : "");
 			$this->debug->write("<p>file:rolle.php class:rolle->resetQuerys - resetten aller aktiven Layer zur Rolle:",4);
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
