@@ -241,7 +241,7 @@
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDdlAttribute; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3"><?php
-							include(CLASSPATH . 'LayerAttribute.php');
+							include_once(CLASSPATH . 'LayerAttribute.php');
 							include_once(CLASSPATH . 'FormObject.php');
 							$attributes = LayerAttribute::find($this, 'layer_id = ' . $this->layerdata['Layer_ID']);
 							echo FormObject::createSelectField(
