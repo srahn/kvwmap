@@ -11,6 +11,17 @@
 	Text[4] = ["Hilfe:","Bei Punktlayern kann durch Angabe dieses Wertes die Clusterbildung aktiviert werden. Der Wert ist der Radius in Pixeln, in dem Punktobjekte zu einem Cluster zusammengefasst werden. <br>Damit die Cluster dargestellt werden können, muss es eine Klasse mit der Expression \"('[Cluster:FeatureCount]' != '1')\" geben. Cluster:FeatureCount kann auch als Labelitem verwendet werden, um die Anzahl der Punkte pro Cluster anzuzeigen."];	
 	Text[5] = ["Hilfe:","Hier muss die Spalte aus der Haupttabelle angegeben werden, mit dem die Datensätze identifiziert werden können (z.B. der Primärschlüssel oder die oid)."];
 
+	function updateConnection(){
+		if(document.getElementById('connectiontype').value == 6){
+			document.getElementById('connection_div').style.display = 'none';
+			document.getElementById('connection_id_div').style.display = '';
+		}
+		else{
+			document.getElementById('connection_div').style.display = '';
+			document.getElementById('connection_id_div').style.display = 'none';
+		}
+	}
+
 	function testConnection() {
 		if (document.getElementById('connectiontype').value == 7) {
 			getCapabilitiesURL=document.getElementById('connection').value+'&service=WMS&request=GetCapabilities';		
@@ -310,52 +321,9 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnection; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-				<? 	if($this->layerdata['connectiontype'] != MS_POSTGIS){ ?>
-								<textarea id="connection" name="connection" cols="33" rows="2"><?
-									echo $this->layerdata['connection']; ?>
-								</textarea>
-								<input
-									type="button"
-									onclick="testConnection();"
-									value="Test"
-									style="display: <? echo (in_array($this->layerdata['connectiontype'], array(7)) ? 'inline' : 'none'); ?>;"
-								><br>
-								<img border="1" id ="test_img" src="" style="display: none;"><br>
-								<a id="test_link" href="" target="_blank"></a>
-					<? 	}
-							else{
-								include_once(CLASSPATH . 'Connection.php');
-								$connections = Connection::find($this);
-								echo FormObject::createSelectField(
-									'connection_id',
-									array_map(
-										function($connection) {
-											return array(
-												'value' => $connection->get('id'),
-												'output' => $connection->get('name')
-											);
-										},
-										$connections
-									),
-									$this->layerdata['connection_id']
-								); ?><a href="index.php?go=connections_anzeigen"><i class="fa fa-pencil fa_lg" style="margin-left: 5px;"></i></a>
-					<? 	} ?>
-						</td>
-					</tr>
-		<? 	if($this->layerdata['connectiontype'] == MS_WMS){ ?>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPrintConnection; ?></th>
-						<td style="border-bottom:1px solid #C3C7C3">
-							<textarea name="printconnection" cols="33" rows="2"><? echo $this->layerdata['printconnection'] ?></textarea>
-						</td>
-					</tr>
-		<?  } ?>
-					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnectionType; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<select id="connectiontype" name="connectiontype">
+								<select id="connectiontype" name="connectiontype" onchange="updateConnection();">
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>
 									<option <? if($this->layerdata['connectiontype'] == '0'){echo 'selected ';} ?>value="0">MS_INLINE</option>
 									<option <? if($this->layerdata['connectiontype'] == 1){echo 'selected ';} ?>value="1">MS_SHAPEFILE</option>
@@ -372,6 +340,50 @@
 								</select>
 						</td>
 					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnection; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<div id="connection_div" <? if($this->layerdata['connectiontype'] == MS_POSTGIS){echo 'style="display: none"';} ?>>
+								<textarea id="connection" name="connection" cols="33" rows="2"><?
+									echo $this->layerdata['connection']; ?>
+								</textarea>
+								<input
+									type="button"
+									onclick="testConnection();"
+									value="Test"
+									style="display: <? echo (in_array($this->layerdata['connectiontype'], array(7)) ? 'inline' : 'none'); ?>;"
+								><br>
+								<img border="1" id ="test_img" src="" style="display: none;"><br>
+								<a id="test_link" href="" target="_blank"></a>
+							</div>
+							<div id="connection_id_div" <? if($this->layerdata['connectiontype'] != MS_POSTGIS){echo 'style="display: none"';} ?>>
+					<? 		include_once(CLASSPATH . 'Connection.php');
+								$connections = Connection::find($this);
+								echo FormObject::createSelectField(
+									'connection_id',
+									array_map(
+										function($connection) {
+											return array(
+												'value' => $connection->get('id'),
+												'output' => $connection->get('name')
+											);
+										},
+										$connections
+									),
+									$this->layerdata['connection_id']
+								); ?>
+								<a href="index.php?go=connections_anzeigen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>"><i class="fa fa-pencil fa_lg" style="margin-left: 5px;"></i></a>
+							</div>
+						</td>
+					</tr>
+		<? 	if($this->layerdata['connectiontype'] == MS_WMS){ ?>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPrintConnection; ?></th>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<textarea name="printconnection" cols="33" rows="2"><? echo $this->layerdata['printconnection'] ?></textarea>
+						</td>
+					</tr>
+		<?  } ?>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClassItem; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">

@@ -187,3 +187,6 @@
 		<tr><?php
 	} ?>
 </table>
+<? if($this->formvars['selected_layer_id']){ ?>
+	<input type="button" value="zurück zum Layer" onclick="location.href='index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>'">
+<? } ?>
