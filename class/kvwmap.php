@@ -7599,7 +7599,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		# Abfragen der Layerdaten wenn eine layer_id zur Änderung selektiert ist
 		if ($this->formvars['selected_layer_id'] > 0) {
 			$this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], false);
-			$this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id'], NULL, true);
+			$this->formvars = array_merge($this->layerdata, $this->formvars);
 			# Abfragen der Stellen des Layer
 			$this->formvars['selstellen']=$mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
 			$this->grouplayers = $mapDB->get_layersfromgroup($this->layerdata['Gruppe']);
