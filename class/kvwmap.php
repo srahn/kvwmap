@@ -9311,6 +9311,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					if($_files[$form_fields[$i]]['name'] OR $this->formvars[$form_fields[$i]]){
 						$document_attributes[$i]['layer_id'] = $layer_id;
 						$document_attributes[$i]['attributename'] = $attributname;
+						$document_attributes[$i]['datatype'] = $element[6];
 					}
 				}
 			}
@@ -9320,7 +9321,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if(count($document_attributes)> 0){
 			foreach($document_attributes as $i => $document_attribute){
 				$options = $attributes['options'][$document_attribute['attributename']];
-				if(substr($attr_oid['datatype'], 0, 1) == '_'){
+				if(substr($document_attribute['datatype'], 0, 1) == '_'){
 					// ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen,
 					// nicht geänderten Datei-Pfaden und File-input-Feldnamen, die noch verarbeitet werden müssen
 					$insert = $this->processJSON($this->formvars[$form_fields[$i]], $doc_path, $doc_url, $options, $attributenames, $attributevalues, $layerdb);
