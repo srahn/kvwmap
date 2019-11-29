@@ -202,10 +202,10 @@
 			?>
 			<tr>
 				<td style="border-bottom:1px solid #C3C7C3" colspan="10">					
-					<a href="javascript:void(0);" onclick="toggleAutoClassForm();" class="buttonlink" style="padding: 6px; line-height: 13px;" title="<? echo $strAddAutoClasses; ?>">AUTO</a>
-					<a style="float: right;" href="index.php?go=Klasseneditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>" title="<? echo $strAddClass; ?>">
+					<a style="float: left;" href="index.php?go=Klasseneditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>" title="<? echo $strAddClass; ?>">
 						<i style="padding: 6px" class="fa fa-plus buttonlink" aria-hidden="true"></i>
 					</a>
+					<a href="javascript:void(0);" onclick="toggleAutoClassForm();" class="buttonlink" style="margin-left: 10px; padding: 6px; line-height: 13px;" title="<? echo $strAddAutoClasses; ?>">AUTO</a>
 				</td>
 			</tr>
 			<tr id="autoClassForm" style="display:none">
