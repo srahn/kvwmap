@@ -11970,6 +11970,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->formvars['ips']=$this->userdaten[0]['ips'];
       $this->formvars['phon']=$this->userdaten[0]['phon'];
       $this->formvars['email']=$this->userdaten[0]['email'];
+			$this->formvars['organisation']=$this->userdaten[0]['organisation'];
+			$this->formvars['position']=$this->userdaten[0]['position'];
     # Abfragen der Stellen des Nutzers
       $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
       $this->formvars['selstellen']=$this->selected_user->getStellen(0);
