@@ -43,7 +43,7 @@
 								<i id="openLayerParamBarIcon" class="fa fa-bars button pointer" onclick="toggleLayerParamsBar();"></i>
 							</div>
 							<div id="layerParamsBar" class="layerOptions">
-								<div style="position: absolute; top: 2px; right: 2px;">
+								<div style="position: absolute; top: 2px; right: 2px; cursor: pointer">
 									<img style="border:none" src="graphics/exit2.png" onclick="toggleLayerParamsBar();">
 								</div>
 								<table>
