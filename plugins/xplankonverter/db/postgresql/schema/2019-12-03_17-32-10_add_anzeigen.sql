@@ -141,6 +141,6 @@ BEGIN;
 	COMMENT ON COLUMN xplankonverter.az_anzeige.verfahren IS 'Name des Anzeigeverfahrens. Zur Auswahl stehen zwei Verfahren aus der Aufzählung az_anzeigeverfahren.';
 	COMMENT ON COLUMN xplankonverter.az_anzeige.planungsabsichtsart IS 'Art der Planungsabsicht. Danach richtet sich welche Unterlagen eingereicht werden müssen. Zur Auswahl stehen die Werte aus der Aufzählung az_planungsabsichtsart';
 	COMMENT ON COLUMN xplankonverter.az_anzeige.externereferenz IS 'Verweis auf ein oder mehrere Planungsunterlagen vom Typ az_anzeigeexternereferenz[].';
-	COMMENT ON COLUMN xplankonverter.az_anzeige.raemlichergeltungsbereich IS 'Die Geometrie von dem räumlichen Gebiet für die die Anzeige gilt. Das kann ein Polygon oder Multipolygon sein.';
+	COMMENT ON COLUMN xplankonverter.az_anzeige.raeumlichergeltungsbereich IS 'Die Geometrie von dem räumlichen Gebiet für die die Anzeige gilt. Das kann ein Polygon oder Multipolygon sein.';
 	COMMENT ON COLUMN xplankonverter.az_anzeige.zeitpunkt IS 'Das Datum zu dem die Anzeige veröffentlicht wurde bzw. gelten soll.';
 COMMIT;
