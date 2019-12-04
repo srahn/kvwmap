@@ -259,7 +259,7 @@ class GUI {
 			$this->saveMap('');
 			$this->drawMap();
 		}
-		$this->main = '../../../' . CUSTOM_PATH . $snippet_file;
+		$this->main = '../../' . CUSTOM_PATH . 'layouts/snippets/' . $snippet_file;
 		$this->output();
 	}
 
