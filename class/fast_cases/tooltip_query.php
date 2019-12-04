@@ -1540,6 +1540,7 @@ class db_mapObj {
                 }
                 elseif($attributes['options'][$i] != ''){
                   $sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
+									$sql = str_replace('$userid', $this->User_ID, $sql);
                   $ret=$database->execSQL($sql,4,0);
                   if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
                   while($rs = pg_fetch_array($ret[1])){
