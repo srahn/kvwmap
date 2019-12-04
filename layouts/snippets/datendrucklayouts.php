@@ -265,7 +265,7 @@ function scrolltop(){
 										<option value="">--- bitte wählen ---</option>
 										<?	
 										for($i = 0; $i < count($this->ddl->layouts); $i++){
-											echo ($this->formvars['aktivesLayout']<>$this->ddl->layouts[$i]['id']) ? '<option value="'.$this->ddl->layouts[$i]['id'].'">'.$this->ddl->layouts[$i]['name'].'</option>' : '<option value="'.$this->ddl->layouts[$i]['id'].'" selected>'.$this->ddl->layouts[$i]['name'].'</option>';
+											echo ($this->formvars['aktivesLayout']<>$this->ddl->layouts[$i]['id']) ? '<option value="'.$this->ddl->layouts[$i]['id'].'">'.$this->ddl->layouts[$i]['name'].' ('.$this->ddl->layouts[$i]['id'].')</option>' : '<option value="'.$this->ddl->layouts[$i]['id'].'" selected>'.$this->ddl->layouts[$i]['name'].' ('.$this->ddl->layouts[$i]['id'].')</option>';
 										}
 										?>
 									</select> 

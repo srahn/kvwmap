@@ -1520,6 +1520,26 @@ function go_switch($go, $exit = false) {
 				header('location: index.php');
 			} break;
 
+			case 'connections_anzeigen' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->connections_anzeigen();
+			} break;
+
+			case 'connection_create' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->connection_create();
+			} break;
+
+			case 'connection_update' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->connection_update();
+			} break;
+
+			case 'connection_delete' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->connection_delete();
+			} break;
+
 			case 'cronjobs_anzeigen' : {
 				$GUI->checkCaseAllowed('cronjobs_anzeigen');
 				$GUI->cronjobs_anzeigen();

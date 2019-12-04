@@ -199,12 +199,18 @@ if ($this->Fehlermeldung!='') {
 							<td class="rollenwahl-option-data">
 								<select name="gui"><?
 									# Anzeige der GUI´s, die kvwmap bereitstellt
-									for($i = 0; $i < count($this->guifiles); $i++){ ?>
-										<option value="<? echo basename($this->guifiles[$i]); ?>" <? if ($this->user->rolle->gui == basename($this->guifiles[$i])) { echo "selected"; } ?>><? echo basename($this->guifiles[$i]); ?></option><?
+									for ($i = 0; $i < count($this->guifiles); $i++) { ?>
+										<option
+											value="<? echo $this->guifiles[$i]; ?>"<?
+											echo ($this->user->rolle->gui == $this->guifiles[$i] ? ' selected' : ''); ?>
+										><? echo $this->guifiles[$i]; ?></option><?
 									}
 									# Anzeige der GUI´s, die Admins in ihren custom Verzeichnissen haben
-									for($i = 0; $i < count($this->customguifiles); $i++){ ?>
-										<option value="<? echo 'custom/'.basename($this->customguifiles[$i]); ?>" <? if ($this->user->rolle->gui == 'custom/'.basename($this->customguifiles[$i])) { echo "selected"; } ?>><? echo 'custom/'.basename($this->customguifiles[$i]); ?></option><?
+									for ($i = 0; $i < count($this->customguifiles); $i++) { ?>
+										<option
+											value="<? echo basename($this->customguifiles[$i]); ?>"<?
+											echo ($this->user->rolle->gui == basename($this->customguifiles[$i]) ? ' selected' : '') ?>
+										><? echo $this->customguifiles[$i]; ?></option><?
 									} ?>
 								</select>
 								<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_gui, Style[0], document.getElementById('Tip3'))" onmouseout="htm()">

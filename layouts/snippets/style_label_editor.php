@@ -211,11 +211,13 @@ function navigate(params){
 					<th class="fetter"><a href="javascript:navigate('go=Layereditor');"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
 					<th class="fetter"><a href="javascript:navigate('go=Klasseneditor');"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
 					<th bgcolor="<?php echo BG_DEFAULT ?>" class="fetter"><? echo $strStylesLabels; ?></th>
-					<? if($this->layerdata['connectiontype'] == 6){ ?>
+					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
 					<th class="fetter"><a href="javascript:navigate('go=Attributeditor');"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
 					<? } ?>
 					<th class="fetter"><a href="javascript:navigate('go=Layereditor&stellenzuweisung=1');"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
+					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
 					<th class="fetter"><a href="javascript:navigate('go=Layerattribut-Rechteverwaltung');"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>
+					<? } ?>
 				</tr>
 			</table>
 		</td>

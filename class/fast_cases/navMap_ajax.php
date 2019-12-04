@@ -843,7 +843,7 @@ class GUI {
         $klasse -> settext($classset[$j]['text']);
       }
       if ($classset[$j]['legendgraphic'] != '') {
-				$imagename = WWWROOT.APPLVERSION.GRAPHICSPATH . 'custom/' . $classset[$j]['legendgraphic'];
+				$imagename = WWWROOT . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
 				$klasse->set('keyimage', $imagename);
 			}
       for ($k=0;$k<count($classset[$j]['Style']);$k++) {
@@ -1510,6 +1510,78 @@ class GUI {
 		}
 		return $Flurbezeichnung;
   }
+	# extrahiert die Daten aus qlayerset in ein Array
+	function qlayersetParamStrip() {
+		$result = array();
+		# Nehme ersten layerset
+		$layerset = $this->qlayerset[0]['shape'];
+    if (is_array($layerset)) {
+  		# Durchlaufe alle gefundenen Datensätze im Layerset
+  		foreach ($layerset AS $record) {
+  			$data = array();
+  			if ($this->formvars['selectors'] != '') {
+  				$selectors = explode(',', $this->formvars['selectors']);
+  				foreach ($selectors AS $selector) {
+  					$selector = trim($selector);
+  					$data[$selector] = $record[strtolower($selector)];
+  				}
+  			}
+  			else {
+  				$data = $record;
+  			}
+  			$result[] = $data;
+  		}
+    }
+#		if (count($result) == 1) $result = $result[0];
+		return $result;
+	}
+
+	/*
+	* This function returns the file that sould be included as gui file in output
+	* The gui will be retrieved from $this->gui if exists or
+	* otherwise from $this->user->rolle->gui
+	* The value of $this->user->rolle->gui can have 2 cases
+	* if value containing basename(CUSTOM_PATH) . '/' e.g. custom/ at the beginning than replace it BY CUSTOM_PATH
+	* else prepend WWWROOT . APPLVERSION
+	*/
+	function get_guifile() {
+		if ($this->gui != '') {
+			return $this->gui;
+		}
+
+		if (strpos($this->user->rolle->gui, basename(CUSTOM_PATH) . '/') === 0) {
+			return str_replace(basename(CUSTOM_PATH) . '/', CUSTOM_PATH, $this->user->rolle->gui);
+		}
+		else {
+			return WWWROOT . APPLVERSION . $this->user->rolle->gui;
+		}
+	}
+
+	function add_message($type, $msg) {
+		if (is_array($msg) AND array_key_exists('success', $msg) AND is_array($msg)) {
+			$type = 'notice';
+			$msg = $msg['msg'];
+		}
+		if ($type == 'array' or is_array($msg)) {
+			foreach($msg AS $m) {
+				$this->add_message($m['type'], $m['msg']);
+			}
+		}
+		else {
+			$this->messages[] = array(
+				'type' => $type,
+				'msg' => $msg
+			);
+		}
+	}
+
+	function output_messages($option = 'with_script_tags') {
+		$html = "message(" . json_encode($this->messages) . ");";
+		if ($option == 'with_script_tags') {
+			$html = "<script type=\"text/javascript\">" . $html . "</script>";
+		}
+		echo $html;
+	}
 
   function output() {
 		global $sizes;
@@ -1524,12 +1596,11 @@ class GUI {
         include (LAYOUTPATH.'snippets/printversion.php');
       } break;
       case 'html' : {
-        $this->debug->write("<br>Include <b>".LAYOUTPATH.$this->user->rolle->gui."</b> in kvwmap.php function output()",4);
-        if (basename($this->user->rolle->gui)=='') {
-          $this->user->rolle->gui='gui.php';
-        }
-        include (LAYOUTPATH . $this->user->rolle->gui);
-				if($this->alert != ''){
+				$guifile = $this->get_guifile();
+				$this->debug->write("<br>Include <b>" . $guifile . "</b> in kvwmap.php function output()",4);
+				include($guifile);
+
+				if ($this->alert != '') {
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
 				}
 				if (!empty($this->messages)) {
@@ -2438,16 +2509,17 @@ class db_mapObj {
 				$name_column . ",
 				l.alias,
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem,
-				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status,
 				g.*
 			FROM
 				u_rolle2used_layer AS rl,
 				used_layer AS ul,
-				layer AS l,
 				u_groups AS g,
-				u_groups2rolle as gr
+				u_groups2rolle as gr,
+				layer AS l
+				LEFT JOIN connections as c ON l.connection_id = c.id
 			WHERE
 				rl.stelle_id = ul.Stelle_ID AND
 				rl.layer_id = ul.Layer_ID AND

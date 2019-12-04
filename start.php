@@ -99,7 +99,9 @@ if (is_logout($GUI->formvars)) {
 	$GUI->debug->write('Logout angefragt.', 4, $GUI->echo);
 	if (is_logged_in()) {
 		$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
-		if(LOGOUT_ROUTINE != '')include(LOGOUT_ROUTINE);
+		if (LOGOUT_ROUTINE != '') {
+			include(LOGOUT_ROUTINE);
+		}
 		$GUI->debug->write('Logout.', 4, $GUI->echo);
 		logout();
 	}
@@ -446,7 +448,7 @@ else {
 		}
 	}
 
-	if($_SESSION['login_routines'] == true) {
+	if ($_SESSION['login_routines'] == true) {
 		define('AFTER_LOGIN', true);
 		$mapdb = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 		# hier befinden sich Routinen, die beim einloggen des Nutzers einmalig durchgeführt werden

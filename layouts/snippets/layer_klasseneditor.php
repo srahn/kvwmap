@@ -78,11 +78,11 @@
 					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
 					<th bgcolor="<?php echo BG_DEFAULT ?>" class="fetter"><? echo $strClasses; ?></th>
 					<th class="fetter"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
-					<? if($this->layerdata['connectiontype'] == 6){ ?>
+					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
 					<th class="fetter"><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
 					<? } ?>
 					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
-					<? if($this->layerdata['connectiontype'] == 6){ ?>
+					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
 					<th class="fetter"><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>
 					<? } ?>
 				</tr>
@@ -202,10 +202,10 @@
 			?>
 			<tr>
 				<td style="border-bottom:1px solid #C3C7C3" colspan="10">					
-					<a href="javascript:void(0);" onclick="toggleAutoClassForm();" class="buttonlink" style="padding: 6px; line-height: 13px;" title="<? echo $strAddAutoClasses; ?>">AUTO</a>
-					<a style="float: right;" href="index.php?go=Klasseneditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>" title="<? echo $strAddClass; ?>">
+					<a style="float: left;" href="index.php?go=Klasseneditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>" title="<? echo $strAddClass; ?>">
 						<i style="padding: 6px" class="fa fa-plus buttonlink" aria-hidden="true"></i>
 					</a>
+					<a href="javascript:void(0);" onclick="toggleAutoClassForm();" class="buttonlink" style="margin-left: 10px; padding: 6px; line-height: 13px;" title="<? echo $strAddAutoClasses; ?>">AUTO</a>
 				</td>
 			</tr>
 			<tr id="autoClassForm" style="display:none">

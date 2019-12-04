@@ -707,7 +707,7 @@ function selectgroupthema(group, instantreload){
 	var check;
   for(i = 0; i < layers.length; i++){			// erst den ersten checkbox-Layer suchen und den check-Status merken
     thema = document.getElementById("thema_"+layers[i]);
-    if(thema && thema.type == 'checkbox'){
+		if(thema && thema.type == 'checkbox' && !thema.disabled){
 			check = !thema.checked;
 			break;
     }
