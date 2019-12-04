@@ -124,8 +124,8 @@ BEGIN;
 	CREATE TABLE xplankonverter.az_anzeige (
 		gml_id uuid NOT NULL DEFAULT uuid_generate_v1mc() Primary Key,
 		konvertierung_id integer,
-		created_at time without time zone,
-		updated_at time without time zone,
+		created_at timestamp without time zone NOT NULL DEFAULT now(),
+		updated_at timestamp without time zone NOT NULL DEFAULT now(),
 		name character varying NOT NULL,
 		beschreibung text,
 		gemeinde xplan_gml.xp_gemeinde[] NOT NULL,
