@@ -501,6 +501,23 @@ if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angem
 							<div id="Tip5" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 						</td>
 					</tr>
+					<tr>
+						<td class="rollenwahl-option-header">
+							<? echo $strSearchHatching; ?>:
+						</td>
+						<td class="rollenwahl-option-data">
+							<input name="result_hatching" type="checkbox" value="1" <? if($this->user->rolle->result_hatching == '1'){echo 'checked="true"';} ?> >
+						</td>
+					</tr>
+					<tr>
+						<td class="rollenwahl-option-header">
+							<? echo $strSearchTransparency; ?>:
+						</td>
+						<td class="rollenwahl-option-data">
+							<input name="result_transparency" onchange="transparency_slider.value=parseInt(result_transparency.value);" style="width: 30px" value="<? echo $this->user->rolle->result_transparency; ?>">
+							<input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px; height: 6px" value="<? echo $this->user->rolle->result_transparency; ?>" onchange="result_transparency.value=parseInt(transparency_slider.value);result_transparency.onchange()" oninput="result_transparency.value=parseInt(transparency_slider.value);result_transparency.onchange()">
+						</td>
+					</tr>
 				</table>
 			</td>
 		</tr>

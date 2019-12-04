@@ -29,6 +29,8 @@
 	$strHighlight="Objekt-Highlighting";
 	$strPlatt="Plattdeutsch";
 	$strSearchColor="Suchergebnis/Import-Farbe";
+	$strSearchHatching="Suchergebnis/Import-Schraffur";
+	$strSearchTransparency="Suchergebnis/Import-Transparenz";
 	$strPolish="Polnisch";
 	$strCoordType="Koordinatendarstellung";
 	$strSingleQuery="nur ein Thema abfragbar";

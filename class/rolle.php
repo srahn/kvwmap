@@ -371,6 +371,8 @@ class rolle {
 			$this->highlighting=$rs['highlighting'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
+			$this->result_hatching=$rs['result_hatching'];
+			$this->result_transparency=$rs['result_transparency'];
 			$this->always_draw=$rs['always_draw'];
 			$this->runningcoords=$rs['runningcoords'];
 			$this->showmapfunctions=$rs['showmapfunctions'];
@@ -1247,6 +1249,8 @@ class rolle {
 					`buttons`,
 					`scrollposition`,
 					`result_color`,
+					`result_hatching`,
+					`result_transparency`,
 					`always_draw`,
 					`runningcoords`,
 					`showmapfunctions`,
@@ -1284,6 +1288,8 @@ class rolle {
 					`buttons`,
 					`scrollposition`,
 					`result_color`,
+					`result_hatching`,
+					`result_transparency`,					
 					`always_draw`,
 					`runningcoords`,
 					`showmapfunctions`,

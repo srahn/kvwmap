@@ -1025,12 +1025,13 @@ class user {
 			if($formvars['highlighting'] != '')	$sql.=',highlighting="1"';
 			else $sql.=',highlighting="0"';
 			$sql.=',result_color="'.$formvars['result_color'].'"';
-
-			$sql .= ', runningcoords = "' . ($formvars['runningcoords'] == '' ? '0' : '1') . '"';
-			$sql .= ', showmapfunctions = "' . ($formvars['showmapfunctions'] == '' ? '0' : '1') . '"';
-			$sql .= ', showlayeroptions = "' . ($formvars['showlayeroptions'] == '' ? '0' : '1') . '"';
-			$sql .= ', showrollenfilter = "' . ($formvars['showrollenfilter'] == '' ? '0' : '1') . '"';
-			$sql .= ', menue_buttons = "' . ($formvars['menue_buttons'] == '' ? '0' : '1') . '"';
+			$sql.=',result_hatching = "' . ($formvars['result_hatching'] == '' ? '0' : '1') . '"';
+			$sql.=',result_transparency="'.$formvars['result_transparency'].'"';
+			$sql.=',runningcoords = "' . ($formvars['runningcoords'] == '' ? '0' : '1') . '"';
+			$sql.=',showmapfunctions = "' . ($formvars['showmapfunctions'] == '' ? '0' : '1') . '"';
+			$sql.=',showlayeroptions = "' . ($formvars['showlayeroptions'] == '' ? '0' : '1') . '"';
+			$sql.=',showrollenfilter = "' . ($formvars['showrollenfilter'] == '' ? '0' : '1') . '"';
+			$sql.=',menue_buttons = "' . ($formvars['menue_buttons'] == '' ? '0' : '1') . '"';
 
 			if($formvars['singlequery'] != '') $sql.=',singlequery="1"';
 			else $sql.=',singlequery="0"';

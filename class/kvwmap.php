@@ -5204,7 +5204,7 @@ echo '			</ul>
 		}
 		$this->formvars['connection'] = $connectionstring;
 		$this->formvars['epsg_code'] = $layerset[0]['epsg_code'];
-		if($layerset[0]['Datentyp'] == MS_LAYER_POLYGON)$this->formvars['transparency'] = 60;
+		if($layerset[0]['Datentyp'] == MS_LAYER_POLYGON)$this->formvars['transparency'] = $this->user->rolle->result_transparency;
 		else $this->formvars['transparency'] = 100;
 
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
@@ -5260,11 +5260,16 @@ echo '			</ul>
 					$style['outlinecolorblue'] = 0;
 					$style['size'] = 1;
 					$style['symbol'] = NULL;
-					$style['symbolname'] = NULL;
+					if($this->user->rolle->result_hatching){
+						$style['symbolname'] = 'hatch';
+						$style['size'] = 11;
+						$style['width'] = 5;
+						$style['angle'] = 45;
+					}
+					else{
+						$style['symbolname'] = NULL;
+					}
 					$style['backgroundcolor'] = NULL;
-					$style['minsize'] = NULL;
-					$style['maxsize'] = 100000;
-					$style['angle'] = 360;
 					$style_id = $dbmap->new_Style($style);
 				}break;
 			}

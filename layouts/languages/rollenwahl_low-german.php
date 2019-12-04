@@ -24,6 +24,8 @@
   $strHighlight="Textverkloren-Rutstrieken";
   $strPlatt="Plattdüütsch";
   $strSearchColor="Faarf van de Sökergebnis";
+	$strSearchHatching="Suchergebnis/Import-Schraffur";
+	$strSearchTransparency="Suchergebnis/Import-Transparenz";
   $strPolish="Polnisch";
 	$strCoordType="Utsehn van de Koordinaten";
 	$strSingleQuery="blot een Thema affraagbar";

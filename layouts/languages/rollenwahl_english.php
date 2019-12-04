@@ -27,6 +27,8 @@
 	$strHighlight="Object-Highlighting";
 	$strPlatt="Lower German";
 	$strSearchColor="Result/Import-Color";
+	$strSearchHatching="Result/Import-Hatching";
+	$strSearchTransparency="Result/Import-Transparency";
 	$strPolish="Polish";
 	$strCoordType="Coordinate Presentation";
 	$strSingleQuery="only one layer queryable";
