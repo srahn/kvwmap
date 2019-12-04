@@ -256,6 +256,8 @@ sql="UPDATE layer SET \`document_url\` = replace(document_url, '${SOURCE_DOCUMEN
 exec_mysql
 sql="UPDATE layer SET \`document_path\` = replace(document_path, '/var/www/${SOURCE_APP_NAME}/', '/var/www/${TARGET_APP_NAME}/')"
 exec_mysql
+sql="UPDATE datatypes SET \`dbname\` = '${TARGET_PGSQL_DBNAME}'"
+exec_mysql
 
 # Behandle Datenverzeichnis
 # Fälle von TARGET_DATA_HANDLER
