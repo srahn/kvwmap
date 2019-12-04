@@ -8490,87 +8490,94 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							else $operator = 'NOT IN';
 							$value = implode($value, '|');
 						}
-						if ($value != '') {
-							# Entferne Leerzeichen, wenn der Wert danach noch Zeichen enthalten würde
-							if (strlen(trim($value)) > 0) {
-								$value = trim($value);
-							}
-							switch($operator) {
-								case 'LIKE' : case 'NOT LIKE' : {
-									################  Autovervollständigungsfeld ########################################
-									if($attributes['form_element_type'][$i] == 'Autovervollständigungsfeld' AND $attributes['options'][$i] != ''){
-										$optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
-										if(strpos($value, '%') === false)$value2 = '%'.$value.'%';else $value2 = $value;
-										$sql = 'SELECT * FROM ('.$optionen[0].') as foo WHERE LOWER(CAST(output AS TEXT)) '.$operator.' LOWER(\''.$value2.'\')';
-										$ret=$layerdb->execSQL($sql,4,0);
-										if ($ret[0]) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
-										while($rs = pg_fetch_assoc($ret[1])){
-											$keys[] = $rs['value'];
-										}
-										$value_like = $value;					# Value sichern
-										$operator_like = $operator;			# Operator sichern
-										if($keys == NULL)$keys[0] = '####';		# Dummy-Wert, damit in der IN-Suche nichts gefunden wird
-										$this->formvars[$prefix.'value_'.$attributes['name'][$i]] = implode('|', $keys);
-										$this->formvars[$prefix.'operator_'.$attributes['name'][$i]] = 'IN';
-										$i--;
-										continue;		# dieses Attribut nochmal behandeln aber diesmal mit dem Operator IN und den gefundenen Schlüsseln der LIKE-Suche
-									}
-									#####################################################################################
-									if (strpos($value, '%') === false) {
-										$value = '%' . $value . '%';
-									}
-									$sql_where .= ' AND LOWER(CAST(query.'.$attributes['name'][$i].' AS TEXT)) '.$operator.' ';
-									$sql_where.='LOWER(\''.$value.'\')';
-								}break;
-
-								case 'IN' : case 'NOT IN' : {
-									$parts = explode('|', $value);
-									for($j = 0; $j < count($parts); $j++){
-										if(substr($parts[$j], 0, 1) != '\''){$parts[$j] = '\''.$parts[$j];}
-										if(substr($parts[$j], -1) != '\''){$parts[$j] = $parts[$j].'\'';}
-									}
-									$instring = implode(',', $parts);
-									if($attributes['type'][$i] != 'bool')$attr = 'LOWER(CAST(query.'.$attributes['name'][$i].' AS TEXT))';
-									else $attr = $attributes['name'][$i];
-									$sql_where .= ' AND '.$attr.' '.$operator.' ';
-									$sql_where .= '('.mb_strtolower($instring).')';
-									if($value_like != ''){			# Parameter wieder auf die der LIKE-Suche setzen
-										$this->formvars[$prefix.'operator_'.$attributes['name'][$i]] = $operator_like;
-										$this->formvars[$prefix.'value_'.$attributes['name'][$i]] = $value_like;
-										$value_like = '';
-										$operator_like = '';
-									}
-								}break;
-
-								default : {
-									if ($operator != 'IS NULL' AND $operator != 'IS NOT NULL') {
-										if(substr($attributes['type'][$i], 0, 1) == '_'){		# Array-Datentyp
-											if($operator == '=')$sql_where .= ' AND (query.'.$attributes['name'][$i].'::jsonb @> \'["'.$value.'"]\'::jsonb';
-											else $sql_where .= ' AND (NOT query.'.$attributes['name'][$i].'::jsonb @> \'["'.$value.'"]\'::jsonb';
-										}
-										else $sql_where .= ' AND (query.' . $attributes['name'][$i] . ' ' . $operator . ' \'' . $value . '\'';
-										if ($this->formvars[$prefix.'value2_'.$attributes['name'][$i]] != '') {
-											$sql_where.=' AND \''.$this->formvars[$prefix.'value2_'.$attributes['name'][$i]].'\'';
-										}
-										if ($operator == '!=') {
-											$sql_where .= ' OR query.'.$attributes['name'][$i].' IS NULL';
-										}
-										$sql_where .= ')';
-									}
-								}
-							}
-						}
-						if($operator == 'IS NULL' OR $operator == 'IS NOT NULL'){
-							if(in_array($attributes['type'][$i], array('bpchar', 'varchar', 'text', 'not_saveable'))){
-								if($operator == 'IS NULL'){
-									$sql_where .= ' AND (query.'.$attributes['name'][$i].' '.$operator.' OR query.'.$attributes['name'][$i].' = \'\') ';
-								}
-								else{
-									$sql_where .= ' AND query.'.$attributes['name'][$i].' '.$operator.' AND query.'.$attributes['name'][$i].' != \'\' ';
-								}
+						if($value != '' OR $operator == 'IS NULL' OR $operator == 'IS NOT NULL'){
+							if(substr($attributes['type'][$i], 0, 1) == '_' AND $operator != 'IS NULL'){		# Array-Datentyp
+								$sql_where.=' AND (SELECT DISTINCT true FROM (SELECT json_array_elements_text(query.'.$attributes['name'][$i].') a) foo where true ';
+								$attr = 'a';
 							}
 							else{
-								$sql_where .= ' AND query.'.$attributes['name'][$i].' '.$operator.' ';
+								$attr = 'query.'.$attributes['name'][$i];		# normaler Datentyp
+							}
+							if ($value != '') {
+								# Entferne Leerzeichen, wenn der Wert danach noch Zeichen enthalten würde
+								if (strlen(trim($value)) > 0) {
+									$value = trim($value);
+								}
+								switch($operator) {
+									case 'LIKE' : case 'NOT LIKE' : {
+										################  Autovervollständigungsfeld ########################################
+										if($attributes['form_element_type'][$i] == 'Autovervollständigungsfeld' AND $attributes['options'][$i] != ''){
+											$optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
+											if(strpos($value, '%') === false)$value2 = '%'.$value.'%';else $value2 = $value;
+											$sql = 'SELECT * FROM ('.$optionen[0].') as foo WHERE LOWER(CAST(output AS TEXT)) '.$operator.' LOWER(\''.$value2.'\')';
+											$ret=$layerdb->execSQL($sql,4,0);
+											if ($ret[0]) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+											while($rs = pg_fetch_assoc($ret[1])){
+												$keys[] = $rs['value'];
+											}
+											$value_like = $value;					# Value sichern
+											$operator_like = $operator;			# Operator sichern
+											if($keys == NULL)$keys[0] = '####';		# Dummy-Wert, damit in der IN-Suche nichts gefunden wird
+											$this->formvars[$prefix.'value_'.$attributes['name'][$i]] = implode('|', $keys);
+											$this->formvars[$prefix.'operator_'.$attributes['name'][$i]] = 'IN';
+											$i--;
+											continue;		# dieses Attribut nochmal behandeln aber diesmal mit dem Operator IN und den gefundenen Schlüsseln der LIKE-Suche
+										}
+										#####################################################################################
+										if (strpos($value, '%') === false) {
+											$value = '%' . $value . '%';
+										}
+										$sql_where .= ' AND LOWER(CAST('.$attr.' AS TEXT)) '.$operator.' ';
+										$sql_where.='LOWER(\''.$value.'\')';
+									}break;
+
+									case 'IN' : case 'NOT IN' : {
+										$parts = explode('|', $value);
+										for($j = 0; $j < count($parts); $j++){
+											if(substr($parts[$j], 0, 1) != '\''){$parts[$j] = '\''.$parts[$j];}
+											if(substr($parts[$j], -1) != '\''){$parts[$j] = $parts[$j].'\'';}
+										}
+										$instring = implode(',', $parts);
+										if($attributes['type'][$i] != 'bool')$attr = 'LOWER(CAST('.$attr.' AS TEXT))';
+										$sql_where .= ' AND '.$attr.' '.$operator.' ';
+										$sql_where .= '('.mb_strtolower($instring).')';
+										if($value_like != ''){			# Parameter wieder auf die der LIKE-Suche setzen
+											$this->formvars[$prefix.'operator_'.$attributes['name'][$i]] = $operator_like;
+											$this->formvars[$prefix.'value_'.$attributes['name'][$i]] = $value_like;
+											$value_like = '';
+											$operator_like = '';
+										}
+									}break;
+
+									default : {
+										if ($operator != 'IS NULL' AND $operator != 'IS NOT NULL') {
+											$sql_where .= ' AND ('.$attr.' '.$operator.' \''.$value.'\'';
+											if ($this->formvars[$prefix.'value2_'.$attributes['name'][$i]] != '') {
+												$sql_where.=' AND \''.$this->formvars[$prefix.'value2_'.$attributes['name'][$i]].'\'';
+											}
+											if ($operator == '!=') {
+												$sql_where .= ' OR '.$attr.' IS NULL';
+											}
+											$sql_where .= ')';
+										}
+									}
+								}
+							}
+							if($operator == 'IS NULL' OR $operator == 'IS NOT NULL'){
+								if(in_array($attributes['type'][$i], array('bpchar', 'varchar', 'text', 'not_saveable'))){
+									if($operator == 'IS NULL'){
+										$sql_where .= ' AND ('.$attr.' '.$operator.' OR '.$attr.' = \'\') ';
+									}
+									else{
+										$sql_where .= ' AND '.$attr.' '.$operator.' AND '.$attr.' != \'\' ';
+									}
+								}
+								else{
+									$sql_where .= ' AND '.$attr.' '.$operator.' ';
+								}
+							}
+							if(substr($attributes['type'][$i], 0, 1) == '_' AND $operator != 'IS NULL'){		# Array-Datentyp
+								$sql_where .= ')';
 							}
 						}
 						# räumliche Einschränkung
