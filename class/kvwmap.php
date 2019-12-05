@@ -2707,7 +2707,7 @@ echo '			</ul>
 		global $sizes;
 		foreach($this->formvars as $key => $value) {
 			#if(is_string($value))$this->formvars[$key] = stripslashes($value);
-			if(is_string($value))$this->formvars[$key] = strip_pg_escape_string($value);
+			#if(is_string($value))$this->formvars[$key] = strip_pg_escape_string($value);		# rausgenommen, weil sonst im Layerformular in der Query aus '' -> ' wird
 		}
 		# bisher gibt es folgenden verschiedenen Dokumente die angezeigt werden können
 		if ($this->formvars['mime_type'] != '') {
