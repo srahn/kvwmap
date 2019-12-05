@@ -259,7 +259,7 @@ class GUI {
 			$this->saveMap('');
 			$this->drawMap();
 		}
-		$this->main = '../../../' . CUSTOM_PATH . $snippet_file;
+		$this->main = '../../' . CUSTOM_PATH . 'layouts/snippets/' . $snippet_file;
 		$this->output();
 	}
 
@@ -8270,6 +8270,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 		if ($results[0]['success']) {
 			$this->add_message('notice', 'Layergruppe erfolgreich angelegt.');
+			$this->formvars['order'] = 'Gruppenname';
 			$this->Layergruppen_Anzeigen();
 		}
 		else {
