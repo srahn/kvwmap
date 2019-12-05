@@ -91,7 +91,7 @@
 
 nav label {
 	float: left;
-	padding: 15px 0 15px 0;
+	padding: 9px 0 9px 0;
 	border-right: 1px solid #ccc;
 	border-bottom: 1px solid #ccc;
 	color: #888;
@@ -100,7 +100,9 @@ nav label {
 }
 
 nav label:hover { background: rgb(238, 238, 239); color: #666; }
-nav label:active { background: #c7d9e6; }
+nav label:active{
+	background: #c7d9e6;
+}
 
 #tab1:checked ~ nav label[for="tab1"],
 #tab2:checked ~ nav label[for="tab2"],
@@ -110,6 +112,7 @@ nav label:active { background: #c7d9e6; }
 	background: #c7d9e6;
 	color: #111;
 	border-bottom: none;
+	font-family: SourceSansPro2;
 }
 
 </style>
@@ -136,12 +139,12 @@ if ($this->Fehlermeldung!='') {
 			<table width="100%" cellpadding="0" cellspacing="0">
 				<tr>
 					<? if ($this->formvars['show_layer_parameter']){ ?>
-					<td width="20%" align="center"><label for="tab1"><? echo $this->strLayerParameters; ?></label></td>
+					<th width="20%" align="center"><label for="tab1"><? echo $this->strLayerParameters; ?></label></th>
 					<? } ?>
-					<td width="20%" align="center"><label for="tab2"><? echo $strGeneralOptions; ?></label></td>
-					<td width="20%" align="center"><label for="tab3"><? echo $strButtons; ?></label></td>
-					<td width="20%" align="center"><label for="tab4"><? echo $strMapOptions; ?></label></td>
-					<td width="20%" align="center"><label for="tab5"><? echo $strDataPresentation; ?></label></td>
+					<th width="20%" align="center"><label for="tab2"><? echo $strGeneralOptions; ?></label></th>
+					<th width="20%" align="center"><label for="tab3"><? echo $strButtons; ?></label></th>
+					<th width="20%" align="center"><label for="tab4"><? echo $strMapOptions; ?></label></th>
+					<th width="20%" align="center"><label for="tab5"><? echo $strDataPresentation; ?></label></th>
 				</tr>
 			</table>
 		</nav>

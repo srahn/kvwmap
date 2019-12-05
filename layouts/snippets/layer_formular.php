@@ -43,15 +43,18 @@
 			document.GUI.stellenzuweisung.value = 1;
 			document.getElementById('layerform').style.display = 'none';
 			document.getElementById('layerform_link').style.backgroundColor = '';
+			document.getElementById('layerform_link').style.color = '#888';
 			document.getElementById('saveAsNewLayerButton').style.display = 'none';
 		}
 		else{
 			document.getElementById('stellenzuweisung').style.display = 'none';
 			document.getElementById('stellenzuweisung_link').style.backgroundColor = '';
+			document.getElementById('stellenzuweisung_link').style.color = '#888';
 			document.getElementById('saveAsNewLayerButton').style.display = 'inline-block';
 		}
 		document.getElementById(id).style.display = 'inline-block';
-		document.getElementById(id+'_link').style.backgroundColor = '<?php echo BG_DEFAULT ?>';
+		document.getElementById(id+'_link').style.backgroundColor = '#c7d9e6';
+		document.getElementById(id+'_link').style.color = '#111';
 	}
 
 	keypress_bound_ctrl_s_button_id = 'layer_formular_submit_button';
@@ -62,20 +65,27 @@
 		border-collapse: collapse; 
 		width: 100%;
 		min-width: 940px;
+		background:rgb(248, 248, 249);
 	}
 
 	.navigation th{
-		border: 1px solid <?php echo BG_DEFAULT ?>;
+		border: 1px solid #bbb;
 		border-collapse: collapse;
 		width: 17%;
 	}
 	
 	.navigation th div{
 		padding: 3px;
+		padding: 9px 0 9px 0;
+	}	
+	
+	.navigation th a{
+		color: #888;
 	}	
 	
 	.navigation th:hover{
-		background-color: <?php echo BG_DEFAULT ?>;
+		background-color: rgb(238, 238, 239);
+		color: #666;
 	}
 	
 	#form input[type="text"], #form select, #form textarea{
@@ -117,15 +127,15 @@
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th class="fetter"><a href="javascript:toggleForm('layerform');"><div style="background-color: <?php echo BG_DEFAULT ?>; width: 100%" id="layerform_link"><? echo $strCommonData; ?></div></a></th>
-					<th class="fetter"><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
-					<th class="fetter"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
+					<th><a href="javascript:toggleForm('layerform');" style="color: #111;"><div style="background-color: #c7d9e6; width: 100%" id="layerform_link"><? echo $strCommonData; ?></div></a></th>
+					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
+					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
 					<? if(in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th class="fetter"><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
+					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
 					<? } ?>
-					<th class="fetter"><a href="javascript:toggleForm('stellenzuweisung');"><div style="width: 100%" id="stellenzuweisung_link"><? echo $strStellenAsignment; ?></div></a></th>
+					<th><a href="javascript:toggleForm('stellenzuweisung');"><div style="width: 100%" id="stellenzuweisung_link"><? echo $strStellenAsignment; ?></div></a></th>
 					<? if(in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th class="fetter"><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>
+					<th><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>
 					<? } ?>
 				</tr>
 			</table>
@@ -133,11 +143,11 @@
 	</tr>	
 </table>
 
-<table id="form" border="0" cellpadding="0" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" style="width: 100%">
+<table id="form" border="0" cellpadding="0" cellspacing="0" style="width: 100%">
 	<tr>
 		<td align="center" style="padding: 10px;">
-			<div id="layerform" style="width: 100%;">
-				<table border="0" cellspacing="0" cellpadding="3" style="width: 100%;border:1px solid <?php echo BG_DEFAULT ?>">
+			<div id="layerform" style="width: 100%; background-color: #f8f8f9">
+				<table border="0" cellspacing="0" cellpadding="3" style="width: 100%;border:1px solid #bbb">
 					<tr>
 						<th class="fetter" width="300px" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLayerID; ?></th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -509,7 +519,7 @@
 					</tr>				
 				</table>
 				
-				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid <?php echo BG_DEFAULT ?>">
+				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
 					<tr align="center">
 						<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strOWSParameter; ?></th>
 					</tr>	
@@ -580,8 +590,8 @@
 			</table>
 		</div>
 		
-		<div id="stellenzuweisung">
-			<table border="0" cellspacing="0" cellpadding="3" style="width: 100%; border:1px solid <?php echo BG_DEFAULT ?>">
+		<div id="stellenzuweisung" style="background-color: #f8f8f9;">
+			<table border="0" cellspacing="0" cellpadding="3" style="width: 100%; border:1px solid #bbb">
 				<tr align="center">
 					<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strDefaultValues; ?></th>
 				</tr>
@@ -674,7 +684,7 @@
 				</tr>
 				<? } ?>
 			</table>
-			<table border="0" cellspacing="0" cellpadding="3" style="width: 100%; border:1px solid <?php echo BG_DEFAULT ?>">
+			<table border="0" cellspacing="0" cellpadding="3" style="width: 100%; border:1px solid #bbb">
 				<tr align="center">
 					<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" width="670" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strTasks; ?></th>
 				</tr>
@@ -706,7 +716,7 @@
 		
 		
 		<? if($this->formvars['selected_layer_id']){ # Klassen werden nicht angezeigt aber fürs Kopieren eines Layers im Formular benötigt ?>
-		<table border="0" cellspacing="0" cellpadding="3" style="display: none; border:1px solid <?php echo BG_DEFAULT ?>">
+		<table border="0" cellspacing="0" cellpadding="3" style="display: none; border:1px solid #bbb">
 			<tr>
 				<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" style="border-bottom:1px solid #C3C7C3" colspan="10"><a name="Klassen"></a><?php echo $strClasses; ?></th>
 			</tr>
