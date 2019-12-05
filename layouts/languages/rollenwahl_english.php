@@ -9,7 +9,7 @@
 	$strEnglish="English";
 	$strGerman="German";
 	$strGUI="Graphical User Interface";
-	$strButtons="Buttons and Menus";
+	$strButtons="Interface";
 	$strMenueButtons="Menus as Buttons";
 	$strMapExtent="Map Extent";
 	$strMapProjection="1.Map Projection (EPSG-Code)";
@@ -36,7 +36,7 @@
 	$strNewDatasetOrder="objectcreation-order";
 	$strGeomSecond="attributes first";
 	$strGeomFirst="geometry first";
-	$strGeneralOptions="General Options";
+	$strGeneralOptions="General";
 	$strMapOptions="Map Options";
 	$strDataPresentation="Data Presentation";
 	$strInstantReload="Instant Map Reload";

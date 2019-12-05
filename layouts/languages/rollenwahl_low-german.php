@@ -5,7 +5,7 @@
   $strEnglish="Engelsch";
   $strGerman="Düütsch";
   $strGUI="Grafische Överflach";
-  $strButtons="Schaltknöpp";
+  $strButtons="Överflach";
 	$strMapTools="Warktüüch för de Koort";
   $strMapExtent="Opstunns Koortutmoot";
   $strMapProjection="1.Koortprojektschoon (EPSG-Code)";
@@ -34,7 +34,7 @@
 	$strGeomSecond="toeerst de Tüüchdaten";
 	$strGeomFirst="toeerst de Geometrie";
 	$strhist_timestamp="Tiedpunkt för de verleden Tied";
-	$strGeneralOptions="allgemeen Optschoonen";
+	$strGeneralOptions="allgemeen";
 	$strMapOptions="Koort Instellungen";
 	$strDataPresentation="Tüüchdatenaffraag";
 	$strInstantReload="Kort gliek nieg loden";

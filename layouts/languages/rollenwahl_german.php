@@ -9,7 +9,7 @@
 	$strEnglish="Englisch";
 	$strGerman="Deutsch";
 	$strGUI="Graphische&nbsp;Oberfl&auml;che";
-	$strButtons="Schaltflächen und Menüs";
+	$strButtons="Oberfläche";
 	$strMapTools="Kartenwerkzeuge";
 	$strMapExtent="Aktuelle Kartenausdehnung";
 	$strMapProjection="1.Kartenprojektion (EPSG-Code)";
@@ -38,7 +38,7 @@
 	$strNewDatasetOrder="Reihenfolge Datensatz-Erfassung";
 	$strGeomSecond="Sachdaten zuerst";
 	$strGeomFirst="Geometrie zuerst";
-	$strGeneralOptions="allgemeine Optionen";
+	$strGeneralOptions="Allgemein";
 	$strMapOptions="Karteneinstellungen";
 	$strDataPresentation="Sachdatenanzeige";
 	$strInstantReload="Karte sofort neu laden";

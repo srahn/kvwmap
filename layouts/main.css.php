@@ -1577,22 +1577,19 @@ tbody.gle>tr {
 	border-right: 1px solid #CCCCCC;
 }
 
-.rollenwahl-gruppe {
+#rollenwahl_optionen_div {
+	background:rgb(248, 248, 249);
 	margin: 10px;
-	padding: 20px;
-	border: 1px solid #cccccc;
-	background: url('../graphics/bg.gif'); 
-	z-index: 2;
+	border: 1px solid #bbb;
+}
+
+.rollenwahl-gruppe {
+	margin:0;
+	border:0;
 }
 
 .rollenwahl-table {
-	width: 700px;
-}
-
-.rollenwahl-gruppen-header {
-	background-color: #c7d9e6; 
-	padding: 2px;
-	padding-left: 8px
+	width: 100%;
 }
 
 .rollenwahl-gruppen-options{
@@ -1600,7 +1597,7 @@ tbody.gle>tr {
 }
 
 .rollenwahl-option-header {
-	width: 221px;
+	width: 266px;
 	padding : 4px;
 }
 
