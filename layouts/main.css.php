@@ -1579,6 +1579,7 @@ tbody.gle>tr {
 
 .rollenwahl-gruppe {
 	margin: 10px;
+	padding: 20px;
 	border: 1px solid #cccccc;
 	background: url('../graphics/bg.gif'); 
 	z-index: 2;
