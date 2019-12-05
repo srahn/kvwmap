@@ -89,6 +89,7 @@
 #tab4:checked ~ figure .tab4,
 #tab5:checked ~ figure .tab5 { display: block; }
 
+
 nav label {
 	float: left;
 	padding: 9px 0 9px 0;
@@ -139,12 +140,12 @@ if ($this->Fehlermeldung!='') {
 			<table width="100%" cellpadding="0" cellspacing="0">
 				<tr>
 					<? if ($this->formvars['show_layer_parameter']){ ?>
-					<th width="20%" align="center"><label for="tab1"><? echo $this->strLayerParameters; ?></label></th>
+					<th width="20%" align="center"><label for="tab1">&nbsp;<? echo $this->strLayerParameters; ?>&nbsp;</label></th>
 					<? } ?>
 					<th width="20%" align="center"><label for="tab2"><? echo $strGeneralOptions; ?></label></th>
 					<th width="20%" align="center"><label for="tab3"><? echo $strButtons; ?></label></th>
-					<th width="20%" align="center"><label for="tab4"><? echo $strMapOptions; ?></label></th>
-					<th width="20%" align="center"><label for="tab5"><? echo $strDataPresentation; ?></label></th>
+					<th width="20%" align="center"><label for="tab4">&nbsp;<? echo $strMapOptions; ?>&nbsp;</label></th>
+					<th width="20%" align="center"><label for="tab5">&nbsp;<? echo $strDataPresentation; ?>&nbsp;</label></th>
 				</tr>
 			</table>
 		</nav>
