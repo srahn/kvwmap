@@ -1470,7 +1470,7 @@ class db_mapObj {
 				$attributes['type_attributes'][$i] = $this->add_attribute_values($attributes['type_attributes'][$i], $database, $query_result, $withvalues, $stelle_id, $only_current_enums);
 			}
 			if($attributes['options'][$i] == '' AND $attributes['constraints'][$i] != '' AND !in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
-      	$attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['constraints'][$i]));
+				$attributes['enum_value'][$i] = explode("','", trim($attributes['constraints'][$i], "'"));
       	$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
       }
       if($withvalues == true){
@@ -1479,7 +1479,7 @@ class db_mapObj {
           case 'Auswahlfeld' : {
             if($attributes['options'][$i] != ''){     # das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
               if(strpos($attributes['options'][$i], "'") === 0){      # Aufzählung wie 'wert1','wert2','wert3'
-                $attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['options'][$i]));
+								$attributes['enum_value'][$i] = explode("','", trim($attributes['options'][$i], "'"));
                 $attributes['enum_output'][$i] = $attributes['enum_value'][$i];
               }
               elseif(strpos(strtolower($attributes['options'][$i]), "select") === 0){     # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
