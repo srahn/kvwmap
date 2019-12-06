@@ -1185,9 +1185,20 @@ span.black {
 	clear: both;
 }
 
-a .preview_image{border:1px solid black;width: 125px;transition: all 0.25s ease;}	/* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf 250px vergrößert */
+/* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf PREVIEW_IMAGE_WIDTH vergrößert */
+a .preview_image{
+	border:1px solid black;
+	max-width: 125px;
+	max-height: 125px;
+	transition: all 0.25s ease;
+}
 
-a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 0.25s ease;}
+a:hover .preview_image{
+	max-width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;
+	max-height: <? echo PREVIEW_IMAGE_WIDTH; ?>px;
+	transition: all 0.25s ease;
+	transition-delay: 0.5s;
+}
 
 .preview_doc{}
 
