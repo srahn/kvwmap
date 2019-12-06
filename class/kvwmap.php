@@ -14084,9 +14084,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								}
 							}
 							# Filter zur Where-Klausel hinzufügen
+							$filter = '';
 							if($layerset[$i]['Filter'] != ''){
 								$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
-								$sql_where .= " AND " . $layerset[$i]['Filter'];
+								$filter = " AND " . $layerset[$i]['Filter'];
 							}
 							if($this->formvars['CMD'] == 'touchquery'){
 								if(substr_count(strtolower($pfad), ' from ') > 1){			# mehrere froms -> das FROM der Hauptabfrage muss groß geschrieben sein
@@ -14111,7 +14112,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								if(count($geoms) > 0)$sql = '';
 								for($g = 0; $g < count($geoms); $g++){
 									if($g > 0)$sql .= " UNION ";
-									$sql .= "SELECT " . $pfad." AND " . $the_geom." && ('" . $geoms[$g]."') AND (st_intersects(" . $the_geom.", ('" . $geoms[$g]."'::geometry)) OR " . $the_geom." = ('" . $geoms[$g]."'))";
+									$sql .= "SELECT " . $pfad . $filter . " AND " . $the_geom." && ('" . $geoms[$g]."') AND (st_intersects(" . $the_geom.", ('" . $geoms[$g]."'::geometry)) OR " . $the_geom." = ('" . $geoms[$g]."'))";
 								}
 							}
 							else{
@@ -14127,7 +14128,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 													$j++;
 										}
 									}
-									$sql = "SELECT * FROM (SELECT " . $pfad.") as query WHERE 1=1 " . $sql_where;
+									$sql = "SELECT * FROM (SELECT " . $pfad.") as query WHERE 1=1 " . $filter . $sql_where;
 								#}
 								/*else{
 									$sql = "SELECT " . $pfad." " . $sql_where;
