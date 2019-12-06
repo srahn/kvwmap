@@ -2705,10 +2705,6 @@ echo '			</ul>
 	# Ausgabe der Seite
 	function output() {
 		global $sizes;
-		foreach($this->formvars as $key => $value) {
-			#if(is_string($value))$this->formvars[$key] = stripslashes($value);
-			#if(is_string($value))$this->formvars[$key] = strip_pg_escape_string($value);		# rausgenommen, weil sonst im Layerformular in der Query aus '' -> ' wird
-		}
 		# bisher gibt es folgenden verschiedenen Dokumente die angezeigt werden können
 		if ($this->formvars['mime_type'] != '') {
 			$this->mime_type = $this->formvars['mime_type'];
@@ -3544,7 +3540,7 @@ echo '			</ul>
   xmlns="http://www.w3.org/2000/svg" version="1.1"
   xmlns:xlink="http://www.w3.org/1999/xlink">
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>';
-		$this->formvars['svg_string'] = str_replace(IMAGEURL, IMAGEPATH, strip_pg_escape_string($this->formvars['svg_string'])).'</svg>';
+		$this->formvars['svg_string'] = str_replace(IMAGEURL, IMAGEPATH, $this->formvars['svg_string']).'</svg>';
 		$svg.= str_replace('points=""', 'points="-1000,-1000 -2000,-2000 -3000,-3000 -1000,-1000"', $this->formvars['svg_string']);
 		fputs($fpsvg, $svg);
   	fclose($fpsvg);
@@ -4632,7 +4628,7 @@ echo '			</ul>
 			$fromwhere = substr($select, 0, $orderbyposition);
 			$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 		}
-    $this->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+    $this->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
     if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
       $this->formvars['fromwhere'] .= ' where (1=1)';
     }
@@ -4805,7 +4801,7 @@ echo '			</ul>
 			$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 		}
 
-		$this->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+		$this->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
 		if (strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 			$this->formvars['fromwhere'] .= ' where (1=1)';
 		}
@@ -7980,6 +7976,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->use_form_data = true;
 		}
 		else {
+			$this->formvars['pfad'] = pg_escape_string($this->formvars['pfad']);
 			$this->formvars['selected_layer_id'] = $mapDB->newLayer($this->formvars);
 
 			if($this->formvars['connectiontype'] == 6 AND $this->formvars['pfad'] != ''){
@@ -8073,7 +8070,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		# due to spaces in string concatenations with these attributes
 		$this->formvars['maintable'] = trim($this->formvars['maintable']);
 		$this->formvars['schema'] = trim($this->formvars['schema']);
-
+		$this->formvars['pfad'] = pg_escape_string($this->formvars['pfad']);
 		$mapDB->updateLayer($this->formvars);
 		$old_layer_id = $this->formvars['selected_layer_id'];
 		if ($this->formvars['id'] != '') {
@@ -8266,7 +8263,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->layergruppe = new LayerGroup($this);
 		$this->layergruppe->data = formvars_strip($this->formvars, $this->layergruppe->setKeysFromTable(), 'keep');
 
-		$this->layergruppe->set('Gruppenname', strip_pg_escape_string($this->formvars['Gruppenname']));
+		$this->layergruppe->set('Gruppenname', $this->formvars['Gruppenname']);
 		$results = $this->layergruppe->validate();
 		if (empty($results)) {
 			$results = $this->layergruppe->create();
@@ -9045,7 +9042,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$fromwhere = substr($select, 0, $orderbyposition);
 					$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 				}
-				$this->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+				$this->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
 		    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 		      $this->formvars['fromwhere'] .= ' where (1=1)';
 		    }
@@ -9447,6 +9444,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	}
 
 	function neuer_Layer_Datensatz_speichern() {
+		foreach($this->formvars as $key => $value) {
+			if (is_string($value)) $this->formvars[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
+		}
 		$_files = $_FILES;
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
@@ -9905,7 +9905,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$fromwhere = substr($select, 0, $orderbyposition);
 							$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 						}
-						$this->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+						$this->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
 						if (strpos(strtolower($this->formvars['fromwhere']), ' where ') === false) {
 							$this->formvars['fromwhere'] .= ' where (1=1)';
 						}
@@ -10902,7 +10902,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$fromwhere = substr($select, 0, $orderbyposition);
 				$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 			}
-			$this->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+			$this->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
 	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
@@ -11424,7 +11424,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$fromwhere = substr($select, 0, $orderbyposition);
 				$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 			}
-			$this->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+			$this->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
 	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
@@ -11461,7 +11461,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								$this->formvars['operator_'.$filter[$i]['attributname']] == $filter[$i]['operator']
 							)
 						) {
-              $this->formvars['value_'.$filter[$i]['attributname']] = pg_escape_string($filter[$i]['attributvalue']);
+              $this->formvars['value_'.$filter[$i]['attributname']] = $filter[$i]['attributvalue'];
               $this->formvars['operator_'.$filter[$i]['attributname']] = $filter[$i]['operator'];
               $setKeys[$filter[$i]['attributname']]++;
             }
@@ -11646,7 +11646,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->menue = new Menue($this);
 		$this->menue->data = formvars_strip($this->formvars, $this->menue->setKeysFromTable(), 'keep');
 
-		$this->menue->set('title', strip_pg_escape_string($this->formvars['title']));
+		$this->menue->set('title', $this->formvars['title']);
 		$results = $this->menue->validate();
 		if (empty($results)) {
 			$results = $this->menue->create();
@@ -12317,7 +12317,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		include_once(CLASSPATH . 'CronJob.php');
 		$this->cronjob = new CronJob($this);
 		$this->cronjob->data = formvars_strip($this->formvars, $this->cronjob->getKeys(), 'keep');
-		$this->cronjob->set('query', strip_pg_escape_string($this->formvars['query']));
+		$this->cronjob->set('query', $this->formvars['query']);
 		$results = $this->cronjob->validate();
 		if (empty($results)) {
 			$results = $this->cronjob->create();
@@ -12340,7 +12340,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->cronjob->data = formvars_strip($this->formvars, $this->cronjob->getKeys(), 'keep');
 		$results = $this->cronjob->update();
 		if ($results[0]['success']) {
-			#		$this->cronjob->set('query', strip_pg_escape_string($this->cronjob->get('query')));
+			#		$this->cronjob->set('query', $this->cronjob->get('query'));
 			$this->cronjobs = CronJob::find($this);
 			$this->main = 'cronjobs.php';
 		}
@@ -13439,6 +13439,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
 	function sachdaten_speichern() {
+		foreach($this->formvars as $key => $value) {
+			if (is_string($value)) $this->formvars[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
+		}
 		if ($this->formvars['document_attributename'] != '') {
 			$_FILES[$this->formvars['document_attributename']]['name'] = 'delete'; # das zu löschende Dokument
 		}
@@ -13702,7 +13705,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		# Wenn der JSON-String mit "file:" gekennzeichnete File-Input-Feld-Namen von Datei-Uploads enthält,
 		# werden diese Uploads gespeichert und der entstandene Dateipfad an die enstdprechende Stelle im String eingefügt
 		if(is_string($json) AND (strpos($json, '{') !== false OR strpos($json, '[') !== false)){			// bei Bedarf den JSON-String decodieren
-			$json = strip_pg_escape_string($json);
 			$json = json_decode($json);
 		}
 		if(is_array($json)){		// Array-Datentyp

@@ -82,12 +82,6 @@ function umlaute_umwandeln($name){
   return $name;
 }
 
-function strip_pg_escape_string($string){
-	$string = str_replace("''", "'", $string);
-	return $string;
-}
-
-
 class GUI {
 
   var $layout;
@@ -1585,10 +1579,6 @@ class GUI {
 
   function output() {
 		global $sizes;
-	  foreach($this->formvars as $key => $value){
-			#if(is_string($value))$this->formvars[$key] = stripslashes($value);
-			if(is_string($value))$this->formvars[$key] = strip_pg_escape_string($value);
-	  }
     # bisher gibt es folgenden verschiedenen Dokumente die angezeigt werden können
 		if ($this->formvars['mime_type'] != '') $this->mime_type = $this->formvars['mime_type'];
     switch ($this->mime_type) {
