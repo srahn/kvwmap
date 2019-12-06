@@ -93,7 +93,7 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 <? if ($anzObj > 0){ ?>
 		<input id="subform_save_button_<? echo $layer['Layer_ID']; ?>" type="button" tabindex="1" value="Speichern" onclick="subsave_data(<? echo $layer['Layer_ID']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', false);">
 <?	}
-		if ($layer['privileg'] > 0){
+		if ($layer['privileg'] > 0 AND $this->formvars['attribute_privileg'] > 0){
 			echo '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
 			for($p = 0; $p < count($this->formvars['attributenames']); $p++){
 				echo '&attributenames['.$p.']='.$this->formvars['attributenames'][$p];
@@ -233,7 +233,7 @@ else{ ?>
 							<?
 						}
 						# neu
-						if ($layer['privileg'] > 0){
+						if ($layer['privileg'] > 0 AND $this->formvars['attribute_privileg'] > 0){
 							if ($this->formvars['embedded'] == 'true'){
 								echo '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
 								for($p = 0; $p < count($this->formvars['attributenames']); $p++){

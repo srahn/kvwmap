@@ -368,7 +368,7 @@
 							}
 							$datapart .= 	' class="buttonlink"><span>'.$strShowPK.'</span></a>&nbsp;';
 						}
-						if($attributes['subform_layer_privileg'][$j] > 0){
+						if($attributes['subform_layer_privileg'][$j] > 0 AND $attribute_privileg > 0){
 							$datapart .= '<a href="" onclick="this.href=\'index.php?go=neuer_Layer_Datensatz&subform=true&selected_layer_id='.$attributes['subform_layer_id'][$j];
 							for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 								$datapart .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
@@ -479,6 +479,7 @@
 					$reloadParams .= '&oid='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
 					$reloadParams .= '&tablename='.$attributes['table_name'][$attributes['the_geom']];											# dito
 					$reloadParams .= '&columnname='.$attributes['the_geom'];																								# dito
+					$reloadParams .= '&attribute_privileg='.$attribute_privileg;
 					
 					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'" style="margin-top: 3px"><img src="'.GRAPHICSPATH.'leer.gif" ';
 					if($gui->new_entry != true){
