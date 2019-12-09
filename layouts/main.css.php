@@ -378,7 +378,7 @@ a.invisiblelayerlink:hover{
 
 #datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table{
 	width: 100%;
-	background: url('..<? echo BG_IMAGE; ?>');
+	background: url('../<? echo BG_IMAGE; ?>');
 }
 
 #datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table>tbody:first-of-type>tr:first-of-type{
@@ -548,7 +548,7 @@ a.invisiblelayerlink:hover{
 
 #menuebar{
 	width: <? echo ($size['menue']['width'] - 2); ?>px;
-	background: url('..<? echo BG_IMAGE; ?>');
+	background: url('../<? echo BG_IMAGE; ?>');
 	border: 1px solid;
 	border-color: #CCC; 
 	border-top: none;
@@ -952,7 +952,7 @@ a.menuered:hover {
 	box-shadow: 0px 1px 0px #bbb;
 	display: flex; 
 	flex-direction: column;
-	background-image: url(..<? echo BG_IMAGE; ?>);
+	background-image: url(../<? echo BG_IMAGE; ?>);
 }
 
 #legend_layer{
