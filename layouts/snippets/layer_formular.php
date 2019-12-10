@@ -361,7 +361,7 @@
 									type="button"
 									onclick="testConnection();"
 									value="Test"
-									style="display: <? echo (in_array($this->formvars['connectiontype'], array(7)) ? 'inline' : 'none'); ?>;"
+									style="display: <? echo (in_array($this->formvars['connectiontype'], array(MS_WMS, MS_WFS)) ? 'inline' : 'none'); ?>;"
 								><br>
 								<img border="1" id ="test_img" src="" style="display: none;"><br>
 								<a id="test_link" href="" target="_blank"></a>
