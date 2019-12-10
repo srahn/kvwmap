@@ -941,7 +941,7 @@
 			}
 			$datapart .= '<select class="'.$field_class.'" tabindex="1" title="'.$alias.'" style="'.$select_width.'font-size: '.$fontsize.'px"';
 			if($req_by != ''){
-				$onchange .= 'update_require_attribute(this, \''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode($attributenames, "','").'\'));';
+				$onchange = 'update_require_attribute(this, \''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode($attributenames, "','").'\'));'.$onchange;
 			}
 			$datapart .= ' onchange="'.$onchange.'" ';
 			if($datatype_id != '')$datapart .= ' data-datatype_id="'.$datatype_id.'" ';
