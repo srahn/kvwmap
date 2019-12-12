@@ -32,5 +32,21 @@
 					document.login.anmelden.click();
 				}
 			}
+
+			function setRandomPassword() {
+				var randomPassword = Math.random().toString(36).slice(-8);
+				$('#new_password, #new_password_2').val(randomPassword);
+			}
+
+			function togglePasswordVisibility(t, p1, p2) {
+				$(t).toggleClass('fa-eye fa-eye-slash');
+
+				if ($('#' + p1).attr('type') == 'text') {
+					$('#' + p1 + ', #' + p2).attr('type', 'password');
+				}
+				else {
+					$('#' + p1 + ', #' + p2).attr('type', 'text');
+				}
+			}
 		</script>
 	</head>

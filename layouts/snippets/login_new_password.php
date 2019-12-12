@@ -7,6 +7,14 @@
 			<input type="hidden" name="browserwidth">
 			<input type="hidden" name="browserheight"><?
 			echo hidden_formvars_fields($this->formvars, $this->expect); ?>
+			<style>
+				.pointer {
+					margin-left: 5px;
+				}
+				.pointer:hover {
+					cursor: pointer;
+				}
+			</style>
 			<table align="center" cellspacing="4" cellpadding="12" id="login_table">
 				<tr>
 					<td align="center">
@@ -30,14 +38,18 @@
 							} ?>
 							<tr>
 								<td><span class="px16">Neues Passwort: </span></td>
-								<td><input style="width: 130px" type="password" value="<? echo $this->formvars['new_password']; ?>" id="new_password" name="new_password"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password').attr('type') == 'text') { $('#new_password').attr('type', 'password') } else { $('#new_password').attr('type', 'text'); }"></i></td>
+								<td>
+									<input style="width: 130px;" type="password" value="<? echo $this->formvars['new_password']; ?>" id="new_password" name="new_password"/>
+									<i title="Sichtbarkeit des Passwortes" style="margin-left: 5px" class="fa fa-eye-slash pointer" aria-hidden="true" onclick="togglePasswordVisibility(this, 'new_password', 'new_password_2')"></i>
+									<i title="Sicheres Passwort generieren" class="fa fa-random pointer" aria-hidden="true" style="margin-left: 5px" onclick="setRandomPassword()"></i>
+								</td>
 							</tr>
 							<tr>
 								<td><span class="px16">Wiederholung: </span></td>
-								<td><input style="width: 130px" type="password" value="<? echo $this->formvars['new_password_2']; ?>" id="new_password_2" name="new_password_2"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password_2').attr('type') == 'text') { $('#new_password_2').attr('type', 'password') } else { $('#new_password_2').attr('type', 'text'); }"></i></td>
+								<td><input style="width: 130px" type="password" value="<? echo $this->formvars['new_password_2']; ?>" id="new_password_2" name="new_password_2"/></td>
 							</tr>
 							<tr>
-								<td style="height: 40px" colspan="2">Ihre IP-Adresse: <?php echo   $remote_addr = getenv('REMOTE_ADDR'); ?></td>
+								<td style="height: 40px" colspan="2">Ihre IP-Adresse: <?php echo	 $remote_addr = getenv('REMOTE_ADDR'); ?></td>
 							</tr>
 							<tr>
 								<td colspan="2" align="center"><input id="anmelden" type="button" name="anmelden" onclick="logon();" value="Absenden und Anmelden"/></td>
