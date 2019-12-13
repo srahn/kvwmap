@@ -5146,7 +5146,7 @@ echo '			</ul>
 			$select = str_replace($datageom, $datageom.', oid', $select);
 		}
 
-		if(strpos(strtolower($select), ' where ') === false){
+		if(strpos(strtolower($select), 'where') === false){
 			$select .= " WHERE ";
 		}
 		else{
