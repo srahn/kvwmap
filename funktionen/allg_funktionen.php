@@ -34,7 +34,7 @@ function replace_tags($text, $tags) {
 }
 
 function human_filesize($file){
-	$bytes = filesize($file);
+	$bytes = @filesize($file);
   $sz = 'BKMGTP';
   $factor = floor((strlen($bytes) - 1) / 3);
   return sprintf("%.2f", $bytes / pow(1024, $factor)).' '.@$sz[$factor].'B';
