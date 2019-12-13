@@ -17701,9 +17701,7 @@ class db_mapObj{
 		# Schreibt alle Attribute, die nur geschrieben werden sollen wenn Wert != '' ist
 		foreach(
 			array(
-				'Layer_ID',
-				'labelmaxscale',
-				'labelminscale'
+				'Layer_ID'
 			) AS $key
 		) {
 			if ($formvars[$key]	!= '') {
@@ -17718,6 +17716,8 @@ class db_mapObj{
 				'transparency',
 				'drawingorder',
 				'legendorder',
+				'labelmaxscale',
+				'labelminscale',
 				'minscale',
 				'maxscale',
 				'symbolscale',

@@ -67,9 +67,13 @@
 			$datapart .= '<span title="Eingabe erforderlich">*</span>';
 		}
 		if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
-			if(substr($attributes['tooltip'][$j], 0, 4) == 'http')$title_link = 'href="'.$attributes['tooltip'][$j].'" target="_blank"';
-			else $title_link = 'href="javascript:void(0);"';
-			$datapart .= '<td align="right"><a '.$title_link.' title="'.htmlentities($attributes['tooltip'][$j]).'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
+			if (substr($attributes['tooltip'][$j], 0, 4) == 'http') {
+				$title_link = 'href="'.$attributes['tooltip'][$j].'" target="_blank"';
+			}
+			else {
+				$title_link = 'href="javascript:void(0);"';
+			}
+			$datapart .= '<td align="right"><a ' . $title_link . ' title="' . htmlentities($attributes['tooltip'][$j]) . '"><img src="' . GRAPHICSPATH . 'emblem-important.png" border="0" onclick="message([{\'type\': \'info\', \'msg\': \'' . htmlentities($attributes['tooltip'][$j]) . '\'}])"></a></td>';
 		}
 		if(in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
 			$datapart .= '<td align="right">'.calendar($attributes['type'][$j], $layer_id.'_'.$attributes['name'][$j].'_'.$k, $attributes['privileg'][$j]).'</td>';
@@ -498,46 +502,69 @@
 						$dokumentpfad = $value;
 						$pfadteil = explode('&original_name=', $dokumentpfad);
 						$dateiname = $pfadteil[0];
-						if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
-						$filesize = human_filesize($dateiname);
-						$dateinamensteil = explode('.', $dateiname);
-						$type = strtolower($dateinamensteil[1]);
-						$thumbname = $gui->get_dokument_vorschau($dateinamensteil);
-						if($layer['document_url'] != ''){
-							$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
-							$target = 'target="_blank"';
-							$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+						if ($layer['document_url'] != '') {
+							$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
 						}
-						else{
-							$original_name = $pfadteil[1];							
-							$gui->allowed_documents[] = addslashes($dateiname);
-							$gui->allowed_documents[] = addslashes($thumbname);
-							$url = IMAGEURL.$gui->document_loader_name.'?dokument=';			# absoluter Dateipfad
+						if (file_exists($dateiname)) {
+							$dateinamensteil = explode('.', $dateiname);
+							$type = strtolower($dateinamensteil[1]);
+							$thumbname = $gui->get_dokument_vorschau($dateinamensteil);
+							if ($layer['document_url'] != '') {
+								$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
+								$target = 'target="_blank"';
+								$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+							}
+							else {
+								$original_name = $pfadteil[1];
+								$gui->allowed_documents[] = addslashes($dateiname);
+								$gui->allowed_documents[] = addslashes($thumbname);
+								$url = IMAGEURL.$gui->document_loader_name.'?dokument='; # absoluter Dateipfad
+							}
+							$datapart .= '<table border="0"><tr><td>';
+							if ($hover_preview) {
+								$onmouseover = 'onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
+							}
+							if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
+								$datapart .= '<a href="' . $url . $dokumentpfad . '" ' . $target . '><img class="preview_image" src="' . $url . $thumbname . '" ' . $onmouseover . '></a>';
+							}
+							else {
+								$datapart .= '<a href="' . $url . $dokumentpfad . '" ' . $target . '><img class="preview_doc" src="' . $url . $thumbname . '"></a>';
+							}
+							$datapart .= '<br>';
+							if ($attribute_privileg != '0' AND !$lock[$k]) {
+								//$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\');"><span>Dokument <br>löschen</span></a>';
+								$datapart .= '<a href="javascript:delete_document(\'' . $fieldname . '\', ' . $layer_id . ', \'' . $gui->formvars['fromobject'] . '\', \'' . $gui->formvars['targetobject'] . '\',  \'' . $gui->formvars['reload'] . '\');"><span>Dokument löschen</span></a>';
+							}
+							$datapart .= '</td></tr>';
+							$datapart .= '<tr><td colspan="2"><span id="image_original_name">' . $original_name . ' (' . human_filesize($dateiname) . ')</span></td></tr>';
+							$datapart .= '</table>';
 						}
-						$datapart .= '<table border="0"><tr><td>';
-						if($hover_preview){
-							$onmouseover='onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
+						else {
+							$datapart .= '<div>';
+							$datapart .= 'Oooops!<p>';
+							$datapart .= 'Die Datei ' . $dateiname . ' wurde nicht auf dem Server gefunden.';
+							if ($layer['document_url'] == '') {
+								$datapart .= '<br>Der originale Name der Datei war ' . $pfadteil[1];
+							}
+							$datapart .= '<br>Laden Sie die Datei neu auf den Server hoch oder fragen Sie Ihren Administrator warum die Datei auf dem Server fehlt und lassen Sie sie wiederherstellen.';
+							$datapart .= '</div>';
 						}
-						if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){
-							$datapart .= '<a href="'.$url.$dokumentpfad.'" '.$target.'><img class="preview_image" src="'.$url.$thumbname.'" '.$onmouseover.'></a>';									
-						}
-						else{
-							$datapart .= '<a href="'.$url.$dokumentpfad.'" '.$target.'><img class="preview_doc" src="'.$url.$thumbname.'"></a>';									
-						}
-						$datapart .= '<br>';
-						if($attribute_privileg != '0' AND !$lock[$k]){
-							//$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\');"><span>Dokument <br>löschen</span></a>';
-							$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\', '.$layer_id.', \''.$gui->formvars['fromobject'].'\', \''.$gui->formvars['targetobject'].'\',  \''.$gui->formvars['reload'].'\');"><span>Dokument löschen</span></a>';
-						}
-						$datapart .= '</td></tr>';
-						$datapart .= '<tr><td colspan="2"><span id="image_original_name">'.$original_name.' ('.$filesize.')</span></td></tr>';
-						$datapart .= '</table>';
-						$datapart .= '<input type="hidden" name="'.$fieldname.'_alt" class="'.$field_class.'" value="' . htmlspecialchars($value) . '">';
+						$datapart .= '<input type="hidden" name="'.$fieldname.'_alt" class="' . $field_class . '" value="' . htmlspecialchars($value) . '">';
 					}
-					if($attribute_privileg != '0' AND !$lock[$k]){
-						$datapart .= '<input tabindex="1" onchange="'.$onchange.'" style="font-size: '.$fontsize.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$layer_id.'_'.$name.'_'.$k.'" title="'.$alias.'" class="'.$field_class.'" name="'.$fieldname.'">';
+					if ($attribute_privileg != '0' AND !$lock[$k]) {
+						$datapart .= '<input
+							tabindex="1"
+							onchange="' . $onchange . '"
+							style="font-size: ' . $fontsize . 'px"
+							size="43"
+							type="file"
+							onchange="this.title=this.value;"
+							id="' . $layer_id . '_' . $name . '_' . $k . '"
+							title="' . $alias . '"
+							class="' . $field_class . '" name="' . $fieldname . '"
+						>';
 					}
-					else{
+					else {
 						$datapart .= '&nbsp;';
 					}
 				} break;
