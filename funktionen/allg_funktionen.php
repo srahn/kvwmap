@@ -6,6 +6,15 @@
 
 $errors = array();
 
+function str_replace_first($search, $replace, $subject){
+	$newstring = $subject;
+	$pos = strpos($subject, $search);
+	if($pos !== false){
+		$newstring = substr_replace($subject, $replace, $pos, strlen($search));
+	}
+	return $newstring;
+}
+
 function replace_tags($text, $tags) {
 	$first_right = strpos($text, '>');
 	if ($first_right !== false) {
