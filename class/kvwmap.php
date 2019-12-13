@@ -5143,7 +5143,7 @@ echo '			</ul>
 		}
 		if(strpos(strtolower($select), 'oid') === false){
 			$select = str_replace('*', '*, oid', $select);
-			$select = str_replace($datageom, $datageom.', oid', $select, 1);
+			$select = str_replace($datageom, $datageom.', oid', $select);
 		}
 
 		if(strpos(strtolower($select), 'where') === false){
