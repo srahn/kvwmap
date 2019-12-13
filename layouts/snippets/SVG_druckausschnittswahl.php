@@ -191,9 +191,9 @@ $svg='<?xml version="1.0"?>
 function startup() {
 	if(window.addEventListener){
 		if(navigator.userAgent.toLowerCase().indexOf(\'webkit\') >= 0)
-			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari
+			window.addEventListener(\'mousewheel\', mousewheelchange, {passive: false}); // Chrome/Safari
 		else
-  		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);
+  		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, {passive: false});
   }
   else{
 		top.document.getElementById("map").onmousewheel = mousewheelchange;

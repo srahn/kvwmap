@@ -197,7 +197,8 @@ class Konvertierung extends PgObject {
 
 	function create_export_file($file_type) {
 		$path = $this->get_file_path($file_type);
-		exec(ZIP_PATH . ' ' . $path . ' ' . $path . '/*');
+		// -j for removing directory structure in .zip
+		exec(ZIP_PATH . ' -j ' . $path . ' ' . $path . '/*');
 		
 		$exportfile = $path . '.zip';
 		return $exportfile;

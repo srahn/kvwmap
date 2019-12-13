@@ -31,7 +31,7 @@
 				$fromwhere = substr($select, 0, $orderbyposition);
 				$GUI->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 			}
-			$GUI->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+			$GUI->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
       if(strpos(strtolower($GUI->formvars['fromwhere']), ' where ') === false){
         $GUI->formvars['fromwhere'] .= ' where (1=1)';
       }

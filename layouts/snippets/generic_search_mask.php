@@ -104,7 +104,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 								<? if($this->attributes['type'][$i] != 'geometry'){ ?>
 	                <option title="<? echo $strNotEqualHint; ?>" value="!=" <? if($operator == '!='){ echo 'selected';} ?> >!=</option>
 								<? }
-									if(!in_array($this->attributes['type'][$i], array('bool')) AND substr($this->attributes['type'][$i], 0, 1) != '_'){		# bei boolean und Array-Datentypen nur = und !=
+									if(!in_array($this->attributes['type'][$i], array('bool'))){		# bei boolean und Array-Datentypen nur = und !=
 										if($this->attributes['type'][$i] != 'geometry'){ ?>
 									<? if(!in_array($this->attributes['type'][$i], array('text'))){ ?>
 	                <option title="<? echo $strLowerHint; ?>" value="<" <? if($operator == '<'){ echo 'selected';} ?> ><</option>
@@ -142,7 +142,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 											}
 											else{
 												$array = '[]';
-												echo ' multiple="true" size="1" style="height: 20px;z-index:'.($z_index-=1).';position: absolute;top: 3px; width: 293px" onmouseenter="this.style.height=300" onmouseleave="this.style.height=20;scrollToSelected(this);"';
+												echo ' multiple="true" size="1" style="height: 20px;z-index:'.($z_index-=1).';position: absolute;top: 3px; width: 293px" onmousedown="if(this.style.height==\'20px\'){this.style.height=300;preventDefault(event);}" onmouseleave="this.style.height=20;scrollToSelected(this);"';
 											}
 										?> 
 	                  	id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i].$array; ?>"><?echo "\n"; ?>

@@ -9,7 +9,7 @@
 	$strEnglish="English";
 	$strGerman="German";
 	$strGUI="Graphical User Interface";
-	$strButtons="Buttons and Menus";
+	$strButtons="Interface";
 	$strMenueButtons="Menus as Buttons";
 	$strMapExtent="Map Extent";
 	$strMapProjection="1.Map Projection (EPSG-Code)";
@@ -27,6 +27,8 @@
 	$strHighlight="Object-Highlighting";
 	$strPlatt="Lower German";
 	$strSearchColor="Result/Import-Color";
+	$strSearchHatching="Result/Import-Hatching";
+	$strSearchTransparency="Result/Import-Transparency";
 	$strPolish="Polish";
 	$strCoordType="Coordinate Presentation";
 	$strSingleQuery="only one layer queryable";
@@ -34,7 +36,7 @@
 	$strNewDatasetOrder="objectcreation-order";
 	$strGeomSecond="attributes first";
 	$strGeomFirst="geometry first";
-	$strGeneralOptions="General Options";
+	$strGeneralOptions="General";
 	$strMapOptions="Map Options";
 	$strDataPresentation="Data Presentation";
 	$strInstantReload="Instant Map Reload";

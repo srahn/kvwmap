@@ -145,6 +145,7 @@ class stelle {
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
 		$this->hist_timestamp = $rs['hist_timestamp'];
 		$this->default_user_id = $rs['default_user_id'];
+		$this->style = $rs['style'];
 	}
 
   function checkClientIpIsOn() {
@@ -1565,20 +1566,33 @@ class stelle {
 	}
 
 	function getWappen() {
-		$sql ='SELECT wappen FROM stelle WHERE ID='.$this->id;
-		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		$rs=mysql_fetch_array($query);
+		$sql = "
+			SELECT
+				wappen
+			FROM
+				stelle
+			WHERE
+				ID = " . $this->id . "
+		";
+		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>" . $sql, 4);
+		$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
+		$rs = mysql_fetch_array($query);
 		return $rs['wappen'];
 	}
-	
+
 	function getWappenLink() {
-		$sql ='SELECT wappen_link FROM stelle WHERE ID='.$this->id;
-		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		$rs=mysql_fetch_array($query);
+		$sql = "
+			SELECT
+				wappen_link
+			FROM
+				stelle
+			WHERE ID = " . $this->id . "
+		";
+		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>" . $sql, 4);
+		$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
+		$rs = mysql_fetch_array($query);
 		return $rs['wappen_link'];
 	}
 }

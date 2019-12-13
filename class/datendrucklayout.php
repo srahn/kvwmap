@@ -334,6 +334,11 @@ class ddl {
 								if($attributes['form_element_type'][$j] == 'Dokument'){
 									if($width == '')$width = 50;
 									$dokumentpfad = $this->result[$i][$this->attributes['name'][$j]];
+									if(substr($dokumentpfad, 0, 4) == 'http'){
+										$file = file_get_contents($dokumentpfad);
+										$dokumentpfad = IMAGEPATH.rand(0,100000).'.jpg';
+										file_put_contents($dokumentpfad, $file);
+									}
 									$pfadteil = explode('&original_name=', $dokumentpfad);
 									$dateiname = $pfadteil[0];
 									if($dateiname == $this->attributes['alias'][$j] AND $preview)$dateiname = WWWROOT.APPLVERSION.GRAPHICSPATH.'nogeom.png';		// als Platzhalter im Editor

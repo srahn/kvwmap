@@ -86,7 +86,7 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, ddl_attribute, connection, printconnection,
+				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
 				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
@@ -110,9 +110,10 @@ class rolle {
 				r2ul.rollenfilter,
 				r2ul.geom_from_layer
 			FROM
-				layer AS l,
 				used_layer AS ul,
-				u_rolle2used_layer as r2ul
+				u_rolle2used_layer as r2ul,
+				layer AS l
+				LEFT JOIN connections as c ON l.connection_id = c.id
 			WHERE
 				l.Layer_ID=ul.Layer_ID AND
 				r2ul.Stelle_ID=ul.Stelle_ID AND
@@ -370,6 +371,8 @@ class rolle {
 			$this->highlighting=$rs['highlighting'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
+			$this->result_hatching=$rs['result_hatching'];
+			$this->result_transparency=$rs['result_transparency'];
 			$this->always_draw=$rs['always_draw'];
 			$this->runningcoords=$rs['runningcoords'];
 			$this->showmapfunctions=$rs['showmapfunctions'];
@@ -914,7 +917,7 @@ class rolle {
 				WHERE
 					user_id = " . $this->user_id . " AND
 					stelle_id = " . $this->stelle_id .
-					($layer_id != '' ? " AND layer_id = " . abs($layer_id) : "") . "
+					($layer_id != '' ? " AND id = " . abs($layer_id) : "") . "
 			";
 			#echo '<br>Sql: ' . $sql;
 			$this->debug->write("<p>file:rolle.php class:rolle->update_layer_status - schalte ein oder alle Layer Stati der Rolle um:", 4);
@@ -945,7 +948,7 @@ class rolle {
 				WHERE 
 					user_id=".$this->user_id." AND 
 					stelle_id=".$this->stelle_id.
-					($layer_id != '' ? " AND layer_id = ".abs($layer_id) : "");
+					($layer_id != '' ? " AND id = ".abs($layer_id) : "");
 			$this->debug->write("<p>file:rolle.php class:rolle->resetQuerys - resetten aller aktiven Layer zur Rolle:",4);
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
@@ -1246,6 +1249,8 @@ class rolle {
 					`buttons`,
 					`scrollposition`,
 					`result_color`,
+					`result_hatching`,
+					`result_transparency`,
 					`always_draw`,
 					`runningcoords`,
 					`showmapfunctions`,
@@ -1283,6 +1288,8 @@ class rolle {
 					`buttons`,
 					`scrollposition`,
 					`result_color`,
+					`result_hatching`,
+					`result_transparency`,					
 					`always_draw`,
 					`runningcoords`,
 					`showmapfunctions`,

@@ -56,7 +56,7 @@ class MyObject {
 			FROM
 				`" . $this->tableName . "`
 			" . $where .
-			($order != '' ? " ORDER BY `" . implode('`, `', $orders) . "`" . ($sort_direction == 'ASC' ? ' ASC' : ' DESC') : "") . "
+			($order != '' ? " ORDER BY `" . implode('`, `', $orders) . "`" . ($sort_direction == 'DESC' ? ' DESC' : ' ASC') : "") . "
 		";
 		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
 		$query = mysql_query($sql, $this->database->dbConn);
@@ -99,7 +99,7 @@ class MyObject {
 	function exists($key) {
 		$types = $this->getTypesFromColumns();
 
-		$quote = ($types[$key] == 'text') ? "'" : "";
+		$quote = ($types[$key] == 'text' OR strpos($types[$key], 'varchar') !== false) ? "'" : "";
 		$sql = "
 			SELECT
 				`" . $key . "`
@@ -245,7 +245,8 @@ class MyObject {
 			$this->set($this->identifier, $new_id);
 			$results[] = array(
 				'success' => true,
-				'msg' => 'Datensatz erfolgreich angelegt.'
+				'msg' => 'Datensatz erfolgreich angelegt.',
+				'id' => $new_id
 			);
 		}
 		else {
@@ -289,8 +290,8 @@ class MyObject {
 		$query = mysql_query($sql);
 		$err_msg = mysql_error($this->database->dbConn);
 		$results[] = array(
-			'success' => ($errmsg == ''),
-			'err_msg' => $err_msg
+			'success' => ($err_msg == ''),
+			'err_msg' => $err_msg . ' Aufgetreten bei SQL: ' . $sql
 		);
 		return $results;
 	}

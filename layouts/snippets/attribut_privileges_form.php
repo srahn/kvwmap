@@ -63,28 +63,27 @@ function save(stelle){
 		border-collapse: collapse; 
 		width: 100%;
 		min-width: 940px;
+		background:rgb(248, 248, 249);
 	}
 
 	.navigation th{
-		border: 1px solid <?php echo BG_DEFAULT ?>;
+		border: 1px solid #bbb;
 		border-collapse: collapse;
 		width: 17%;
 	}
 	
 	.navigation th div{
 		padding: 3px;
+		padding: 9px 0 9px 0;
+	}	
+	
+	.navigation th a{
+		color: #888;
 	}	
 	
 	.navigation th:hover{
-		background-color: <?php echo BG_DEFAULT ?>;
-	}
-	
-	#layerform input[type="text"], #layerform select, #layerform textarea{
-		width: 340px;
-	}
-		
-	#stellenzuweisung{
-		display: none;
+		background-color: rgb(238, 238, 239);
+		color: #666;
 	}
 </style>
 
@@ -115,12 +114,12 @@ function save(stelle){
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
-					<th class="fetter"><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
-					<th class="fetter"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
-					<th class="fetter"><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
-					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
-					<th bgcolor="<?php echo BG_DEFAULT ?>" class="fetter"><? echo $strPrivileges; ?></th>
+					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
+					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
+					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
+					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
+					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
+					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="background-color: #c7d9e6; color: #111; width: 100%"><? echo $strPrivileges; ?></div></a></th>
 				</tr>
 			</table>
 		</td>
@@ -160,7 +159,7 @@ function save(stelle){
 				</tr>
   			<tr>
 			  	<td valign="top">
-			  		<div style="border:1px solid black;">
+			  		<div style="background-color: #f8f8f9; border:1px solid black;">
 							<table border="1" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
 								<tr>  	
 			  					<? include(LAYOUTPATH.'snippets/attribute_privileges_template.php'); ?>
@@ -169,7 +168,7 @@ function save(stelle){
 						</div>
 					<td>	
 					<td valign="top">
-						<div id="stellendiv" style="border:1px solid black; width:<? echo $width; ?>px; float:right; overflow:auto; overflow-y:hidden" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
+						<div id="stellendiv" style="background-color: #f8f8f9; border:1px solid black; width:<? echo $width; ?>px; float:right; overflow:auto; overflow-y:hidden" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
 							<table border="1" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
 								<tr>
 							<?

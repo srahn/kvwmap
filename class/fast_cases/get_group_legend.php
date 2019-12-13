@@ -849,7 +849,7 @@ class GUI {
         $klasse -> settext($classset[$j]['text']);
       }
       if ($classset[$j]['legendgraphic'] != '') {
-				$imagename = WWWROOT.APPLVERSION.GRAPHICSPATH . 'custom/' . $classset[$j]['legendgraphic'];
+				$imagename = '../' . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
 				$klasse->set('keyimage', $imagename);
 			}
       for ($k=0;$k<count($classset[$j]['Style']);$k++) {
@@ -1456,12 +1456,18 @@ class GUI {
 				}
 				if ($layer['showclasses'] != 0) {
 					if($layer['connectiontype'] == 7){      # WMS
-						$layersection = substr($layer['connection'], strpos(strtolower($layer['connection']), 'layers')+7);
-						$pos = strpos($layersection, '&');
-						if($pos !== false)$layersection = substr($layersection, 0, $pos);
-						$layers = explode(',', $layersection);
-						for($l = 0; $l < count($layers); $l++){
-							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div><br>';
+						if($layer['Class'][$k]['legendgraphic'] != ''){
+							$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
+							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><img src="'.$imagename.'"></div><br>';
+						}
+						else{
+							$layersection = substr($layer['connection'], strpos(strtolower($layer['connection']), 'layers')+7);
+							$pos = strpos($layersection, '&');
+							if($pos !== false)$layersection = substr($layersection, 0, $pos);
+							$layers = explode(',', $layersection);
+							for($l = 0; $l < count($layers); $l++){
+								$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div><br>';
+							}
 						}
 					}
 					else {
@@ -1505,7 +1511,7 @@ class GUI {
 								$padding = 1;
 								###### eigenes Klassenbild ######
 								if($layer['Class'][$k]['legendgraphic'] != ''){
-									$imagename = $original_class_image = GRAPHICSPATH . 'custom/' . $layer['Class'][$k]['legendgraphic'];
+									$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
 									if($width == ''){
 										$size = getimagesize($imagename);
 										$width = $size[0];
