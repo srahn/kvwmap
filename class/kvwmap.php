@@ -7977,6 +7977,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 		else {
 			$this->formvars['pfad'] = pg_escape_string($this->formvars['pfad']);
+			$this->formvars['Data'] = pg_escape_string($this->formvars['Data']);
 			$this->formvars['selected_layer_id'] = $mapDB->newLayer($this->formvars);
 
 			if($this->formvars['connectiontype'] == 6 AND $this->formvars['pfad'] != ''){
@@ -8071,6 +8072,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->formvars['maintable'] = trim($this->formvars['maintable']);
 		$this->formvars['schema'] = trim($this->formvars['schema']);
 		$this->formvars['pfad'] = pg_escape_string($this->formvars['pfad']);
+		$this->formvars['Data'] = pg_escape_string($this->formvars['Data']);
 		$mapDB->updateLayer($this->formvars);
 		$old_layer_id = $this->formvars['selected_layer_id'];
 		if ($this->formvars['id'] != '') {
@@ -12045,7 +12047,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       }
       else {
         $this->formvars['selected_user_id']=$ret[1];
-        $stellen = explode(', ',$this->formvars['selstellen']);
+        $stellen = array_filter(explode(', ',$this->formvars['selstellen']));
 				for($i = 0; $i < count($stellen); $i++){
 					$stelle = new stelle($stellen[$i], $this->database);
 					$this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
