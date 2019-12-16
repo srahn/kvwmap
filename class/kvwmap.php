@@ -12047,7 +12047,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       }
       else {
         $this->formvars['selected_user_id']=$ret[1];
-        $stellen = explode(', ',$this->formvars['selstellen']);
+        $stellen = array_filter(explode(', ',$this->formvars['selstellen']));
 				for($i = 0; $i < count($stellen); $i++){
 					$stelle = new stelle($stellen[$i], $this->database);
 					$this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
