@@ -258,6 +258,8 @@ sql="UPDATE layer SET \`document_path\` = replace(document_path, '/var/www/${SOU
 exec_mysql
 sql="UPDATE datatypes SET \`dbname\` = '${TARGET_PGSQL_DBNAME}'"
 exec_mysql
+sql="UPDATE connections SET \`dbname\` = '${TARGET_PGSQL_DBNAME}'"
+exec_mysql
 
 # Behandle Datenverzeichnis
 # Fälle von TARGET_DATA_HANDLER
@@ -268,10 +270,8 @@ exec_mysql
 #      Lege Link SOURCE_DATA_DIR an der auf TARGET_DATA_DIR zeigt
 if [ "${TARGET_DATA_HANDLER}" = "copy" ] ; then
   if [ ! "${TARGET_DATA_DIR}" = "${SOURCE_DATA_DIR}" ] ; then
-    if [ -d "${TARGET_DATA_DIR}" ]; then
-      echo "Lösche TARGET Datenverzeichnis ${TARGET_DATA_DIR}"
-      rm -Rf ${TARGET_DATA_DIR}; 
-    fi
+    echo "Lösche TARGET Datenverzeichnis oder Link ${TARGET_DATA_DIR}"
+    rm -Rf ${TARGET_DATA_DIR}; 
     echo "Kopiere SOURCE Datenverzeichnis ${SOURCE_DATA_DIR} nach TARGET Datenverzeichnis ${TARGET_DATA_DIR}"
     cp -R ${SOURCE_DATA_DIR} ${TARGET_DATA_DIR}
     chown -R gisadmin.gisadmin ${TARGET_DATA_DIR}
