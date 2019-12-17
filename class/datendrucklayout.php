@@ -1227,9 +1227,9 @@ class ddl {
 				<td align="left" valign="top">
 					<select style="width: 110px" name="texttype[]">
 						<option value="0">normal</option>';
-						if($this->ddl->selectedlayout[0]['type'] != 0){
+						#if($this->ddl->selectedlayout[0]['type'] != 0){
 							echo '<option value="1" '; if($texts[$i]['type'] == 1)echo ' selected '; echo '>fixiert</option>';
-						}
+						#}
 						echo '<option value="2" '; if($texts[$i]['type'] == 2)echo ' selected '; echo '>auf jeder Seite</option>
 					</select>
 				</td>
