@@ -202,10 +202,12 @@ function scrolltop(){
 									]]></style>
 									<g transform="translate(0, 842) scale(1, -1)">
 								<?
-									$this->lines = array_values($this->lines);
-									$lines = $this->lines[$this->formvars['page']];
-									for($l = 0; $l < count($lines); $l++){
-										echo '<line id="line_'.$lines[$l]['id'].'" x1="'.$lines[$l]['x1'].'" y1="'.$lines[$l]['y1'].'" x2="'.$lines[$l]['x2'].'" y2="'.$lines[$l]['y2'].'" class="line" onmouseenter="highlight_line('.$lines[$l]['id'].')" onmouseleave="de_highlight_line('.$lines[$l]['id'].')" onclick="jump_to_line('.$lines[$l]['id'].')"/>';
+									if($this->lines){
+										$this->lines = array_values($this->lines);
+										$lines = $this->lines[$this->formvars['page']];
+										for($l = 0; $l < count($lines); $l++){
+											echo '<line id="line_'.$lines[$l]['id'].'" x1="'.$lines[$l]['x1'].'" y1="'.$lines[$l]['y1'].'" x2="'.$lines[$l]['x2'].'" y2="'.$lines[$l]['y2'].'" class="line" onmouseenter="highlight_line('.$lines[$l]['id'].')" onmouseleave="de_highlight_line('.$lines[$l]['id'].')" onclick="jump_to_line('.$lines[$l]['id'].')"/>';
+										}
 									}
 								?>
 									</g>
