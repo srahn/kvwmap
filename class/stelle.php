@@ -435,8 +435,8 @@ class stelle {
 
 		if ($user_id > 0 AND !in_array($this->id, $admin_stellen)) {
 			$where = "
-				JOIN `rolle` AS r ON s.ID = r.stelle_id
-				WHERE r.user_id = " . $user_id . "
+				LEFT JOIN `rolle` AS r ON s.ID = r.stelle_id
+				WHERE r.user_id = ".$user_id." OR r.stelle_id IS NULL
 			";
 		}
 
