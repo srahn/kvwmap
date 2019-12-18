@@ -34,11 +34,12 @@
 			}
 
 			var password_check = '<? echo PASSWORD_CHECK; ?>';
+			var password_minlength = <? echo PASSWORD_MINLENGTH; ?>;
 
-			function getRandomString(chars, size){
-				var i = 0;
+			function getRandomString(chars, length){
+				var i = 1;
 				randomString = '';
-				while ( i <= size ) {
+				while ( i <= length ) {
 					$max = chars.length-1;
 					$num = Math.floor(Math.random()*$max);
 					$temp = chars.substr($num, 1);
@@ -47,23 +48,43 @@
 				}
 				return randomString;
 			}
+			
+			function shuffle(string) {
+				var parts = string.split('');
+				for (var i = parts.length; i > 0;) {
+						var random = parseInt(Math.random() * i);
+						var temp = parts[--i];
+						parts[i] = parts[random];
+						parts[random] = temp;
+				}
+				return parts.join('');
+			}
 
 			function setRandomPassword() {
 				var check_condition = password_check.split('');
+				var check_count = password_check.substring(1).split('1').length - 1;
+				if(check_condition[0] == '0')check_count = 4;
+				if(check_count == 0)check_count = 1;
 				var lower_chars = 'abcdefghijklmnopqrstuvwxyz';
 				var upper_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 				var numbers = '0123456789';
 				var special_chars = '!@#$_+?%^&)';
-				var size = 10;
-				var	i = 1;
+				var length = Math.ceil(password_minlength/check_count);
 				var randomPassword;
-				
-				randomPassword = getRandomString(lower_chars, size);
-				
-				//if(check_condition[0] == '1')
 
+				randomPassword = getRandomString(lower_chars, length);
 				
-				$('#new_password, #new_password_2').val(randomPassword);
+				if(check_condition[0] == '0' || check_condition[2] == '1'){
+					randomPassword += getRandomString(upper_chars, length);
+				}
+				if(check_condition[0] == '0' || check_condition[3] == '1'){
+					randomPassword += getRandomString(numbers, length);
+				}
+				if(check_condition[0] == '0' || check_condition[4] == '1'){
+					randomPassword += getRandomString(special_chars, length);
+				}
+
+				$('#new_password, #new_password_2').val(shuffle(randomPassword));
 			}
 
 			function togglePasswordVisibility(t, p1, p2) {
