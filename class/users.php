@@ -871,10 +871,10 @@ class user {
 
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
-				JOIN rolle rall ON u.ID = rall.user_id
-				JOIN rolle radm ON radm.stelle_id = rall.stelle_id
+				LEFT JOIN rolle rall ON u.ID = rall.user_id
+				LEFT JOIN rolle radm ON radm.stelle_id = rall.stelle_id
 			";
-			$where[] = "radm.user_id = " . $admin_id;
+			$where[] = "(radm.user_id = ".$admin_id." OR rall.user_id IS NULL)";
 		}
 
 		if ($id > 0) {
@@ -891,13 +891,11 @@ class user {
 
 		$sql = "
 			SELECT DISTINCT
-				u.*, max(c.time_id) as last_timestamp
+				u.*, (select max(c.time_id) from u_consume c where u.ID = c.user_id ) as last_timestamp
 			FROM
-				user u
-			LEFT JOIN u_consume c ON u.ID = c.user_id" .
+				user u " .
 				$more_from .
 			(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") .
-			" GROUP BY u.ID " .
 			$order . "
 		";
 		#echo '<br>sql: ' . $sql;
@@ -1182,7 +1180,7 @@ class user {
 	}
 
 	function NeuAnlegen($userdaten) {
-		$stellen = explode(', ',$userdaten['selstellen']);
+		$stellen = array_filter(explode(', ',$userdaten['selstellen']));
 		# Neuen Nutzer anlegen
 		$sql ='INSERT INTO user SET';
 		if($userdaten['id'] != ''){
