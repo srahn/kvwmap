@@ -33,19 +33,36 @@
 				}
 			}
 
-			function setRandomPassword() {
-				var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$_+?%^&)",
-						size = 10,
-						i = 1,
-						randomPassword = '';
+			var password_check = '<? echo PASSWORD_CHECK; ?>';
 
+			function getRandomString(chars, size){
+				var i = 0;
+				randomString = '';
 				while ( i <= size ) {
 					$max = chars.length-1;
 					$num = Math.floor(Math.random()*$max);
 					$temp = chars.substr($num, 1);
-					randomPassword += $temp;
+					randomString += $temp;
 					i++;
 				}
+				return randomString;
+			}
+
+			function setRandomPassword() {
+				var check_condition = password_check.split('');
+				var lower_chars = 'abcdefghijklmnopqrstuvwxyz';
+				var upper_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+				var numbers = '0123456789';
+				var special_chars = '!@#$_+?%^&)';
+				var size = 10;
+				var	i = 1;
+				var randomPassword;
+				
+				randomPassword = getRandomString(lower_chars, size);
+				
+				//if(check_condition[0] == '1')
+
+				
 				$('#new_password, #new_password_2').val(randomPassword);
 			}
 
