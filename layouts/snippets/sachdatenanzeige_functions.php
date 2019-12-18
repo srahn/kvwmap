@@ -453,7 +453,7 @@ include('funktionen/input_check_functions.php');
   	for(i = 0; i < form_fields.length; i++){
 			if(form_fields[i].name.slice(-4) != '_alt')form_fieldstring += form_fields[i].name+'|';
   		field = form_fields[i].name.split(';');
-  		if(field[4] != 'Dokument' && form_fields[i].readOnly != true && field[5] == '0' && form_fields[i].value == ''){
+			if(field[4] != 'Dokument' && form_fields[i].readOnly != true && form_fields[i].type != 'hidden' && field[5] == '0' && form_fields[i].value == ''){
   			message('Das Feld '+form_fields[i].title+' erfordert eine Eingabe.');
   			return;
   		}
