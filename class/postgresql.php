@@ -297,11 +297,11 @@ FROM
 				# Prüfe ob eine Fehlermeldung in der Notice steckt
 				$last_notice = pg_last_notice($this->dbConn);
 				if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
-					$ret['msg'] = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
+					$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
 				}
-				$this->notices[] = $last_notice;
 				# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
-				if ($last_notice != '' AND !in_array($last_notice, $this->notices)) {
+				if ($last_notice != '' AND ($this->gui->notices == NULL OR !in_array($last_notice, $this->gui->notices))) {
+					$this->gui->notices[] = $last_notice;
 					if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
 						# Parse als JSON String
 						$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
@@ -319,7 +319,7 @@ FROM
 					}
 					else {
 						# Gebe Noticetext wie er ist zurück
-						$ret['msg'] = $notice_txt;
+						$ret['msg'] = $last_notice;
 					}
 				}
 

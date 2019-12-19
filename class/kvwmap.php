@@ -13336,6 +13336,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				if ($this->formvars['close_window'] == "") {
 					$this->add_message('notice', 'Änderung erfolgreich');
 					if ($result[0] != '')$this->add_message('warning', $result[0]);
+					if ($ret['msg'] != '')$this->add_message('warning', $ret['msg']);
 				}
 			}
 		}
