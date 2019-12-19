@@ -21,7 +21,7 @@
       <form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">
         <table border=1 cellpadding=0 cellspacing=0 bordercolor="#FFFFFF" bordercolorlight="#CCCCCC" bordercolordark="#CCCCCC">
           <tr>         
-            <td align="center" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif"> <?php
+            <td align="center" valign="top" background="<? echo BG_IMAGE; ?>"> <?php
               $this->debug->write("Include <b>".LAYOUTPATH."snippets/".$this->main."</b> in gui.php",4);    
        include(LAYOUTPATH."snippets/".$this->main); ?> </td>
           </tr>

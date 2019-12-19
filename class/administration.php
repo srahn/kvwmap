@@ -47,17 +47,23 @@ class administration{
 	}
 	
 	function get_migration_logs() {
+		#echo '<br>Get Migration logs';
 		$migrations = array();
-		$sql = "SELECT * FROM migrations";
-		$result=$this->database->execSQL($sql,0, 0);
-    if ($result[0]) {
-      #echo '<br>Fehler bei der Abfrage der Tabelle migrations.<br>'; 	// bei Neuinstallation gibt es diese Tabelle noch nicht
-    }
-    else {
-      while($rs=mysql_fetch_array($result[1])) {
+		$sql = "
+			SELECT *
+			FROM migrations
+		";
+		#echo '<br>SQL zur Abfrage der registrierten Migrationen: ' . $sql;
+		$result = $this->database->execSQL($sql,0, 0);
+		if ($result[0]) {
+			echo '<br>Fehler bei der Abfrage der Tabelle migrations.<br>'; 	// bei Neuinstallation gibt es diese Tabelle noch nicht
+		}
+		else {
+			while($rs=mysql_fetch_array($result[1])) {
 				$migrations[$rs['component']][$rs['type']][$rs['filename']] = 1;
 			}
 		}
+		#echo '<br>Gefundene Migrationen: ' . print_r($migrations, true);
 		return $migrations;
 	}
 	
@@ -145,7 +151,7 @@ class administration{
 				if ($this->pgdatabase->host != '')$connection .= ' host='.$this->pgdatabase->host;
 				$result = $this->database->exec_commands(file_get_contents($filepath), 'user=xxxx password=xxxx dbname=kvwmapsp', $connection, true); # replace known constants
 				if ($result[0]) {
-					echo $result[1].'<br>Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
+					echo $result[1] . getTimestamp('H:i:s', 4). ' Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
 				}
 				else{
 					$sql = "
@@ -168,8 +174,13 @@ class administration{
 			foreach ($migrations as $migration) {
 				$component = $migration['component'];
 				$file = $migration['file'];
-				if ($component == 'kvwmap')$prepath = LAYOUTPATH; else $prepath = PLUGINS.$component.'/';
-				$filepath = $prepath . 'db/' . $database_type.'/schema/';
+				if ($component == 'kvwmap') {
+					$prepath = LAYOUTPATH;
+				}
+				else {
+					$prepath = PLUGINS . $component.'/';
+				}
+				$filepath = $prepath . 'db/' . $database_type . '/schema/';
 				$filetype = pathinfo($filepath . $file)['extension'];
 				switch ($filetype) {
 					case 'sql' : {
@@ -205,7 +216,7 @@ class administration{
 					}break;
 				}
 				if ($result[0]) {
-					$err_msgs[] = 'Fehler beim Ausführen von migration-Datei:<br>' . $file . '<br>in Pfad: ' . str_replace(WWWROOT.APPLVERSION, '../', $filepath) . '<br>' . $result[1];
+					$err_msgs[] = getTimestamp('H:i:s', 4) . ': Fehler beim Ausführen von migration-Datei:<br>' . $file . '<br>in Pfad: ' . str_replace(WWWROOT.APPLVERSION, '../', $filepath) . '<br>' . $result[1];
 					$result = $this->pgdatabase->execSQL('ROLLBACK;', 0, 0, false);
 				}
 				else{
@@ -231,7 +242,9 @@ class administration{
 		$folder = WWWROOT.APPLVERSION;
 		if (defined('HTTP_PROXY'))putenv('https_proxy='.HTTP_PROXY);
 		exec('cd '.$folder.' && sudo -u '.GIT_USER.' git stash && sudo -u '.GIT_USER.' git pull origin', $ausgabe, $ret);
-		if ($ret != 0)showAlert('Fehler bei der Ausführung von "git pull origin".');
+		if ($ret != 0) {
+			showAlert('Fehler bei der Ausführung von "git pull origin".');
+		}
 		return $ausgabe;
 	}
 	
@@ -243,48 +256,65 @@ class administration{
 			ORDER BY `group`, name
 		";
 		#echo 'SQL: ' . $sql;
-		$result=$this->database->execSQL($sql,0, 0);
-    if ($result[0]) {
-      #echo '<br>Fehler bei der Abfrage der Tabelle config.<br>';
-    }
-    else {
-      while($rs=mysql_fetch_assoc($result[1])) {
+		$result = $this->database->execSQL($sql, 0, 0);
+		if ($result[0]) {
+			#echo '<br>Fehler bei der Abfrage der Tabelle config.<br>';
+		}
+		else {
+			while ($rs = mysql_fetch_assoc($result[1])) {
 				$this->config_params[$rs['name']] = $rs;
 			}
 			foreach ($this->config_params as &$param) {
 				$param['real_value'] = $this->get_real_value($param['name']);
+				#echo '<br>' . $param['name'] . ' real_value: ' . $param['real_value'];
 			}
 		}
 	}
-	
+
 	function get_real_value($name) {
+		$name = trim($name);
+		#echo '<p>' . $name . ' prefix vor behandlung' . $this->config_params[$name]['prefix'];
 		if ($this->config_params[$name]['prefix'] != '') {
-			if ($this->config_params[$name]['value'] == '')return NULL;
-			foreach (explode('.', $this->config_params[$name]['prefix']) as $prefix_constant) {
-				$prefix_value .= $this->get_real_value($prefix_constant);
+			if ($this->config_params[$name]['value'] == '') {
+				return NULL;
 			}
-			return $prefix_value.$this->config_params[$name]['value'];
+			#echo '<p>' . $name . ' prefix' . print_r(explode('.', $this->config_params[$name]['prefix']), true);
+			foreach (explode('.', $this->config_params[$name]['prefix']) as $prefix_constant) {
+				#echo '<br>part : ' . $prefix_constant;
+				$prefix_value .= $this->get_real_value($prefix_constant);
+				#echo '<br>ordne zu: ' . $prefix_value;
+			}
+			#echo '<br>ordne prefix ' . $prefix_value . ' zu ' . $this->config_params[$name]['value'];
+			return $prefix_value . $this->config_params[$name]['value'];
 		}
-		else{
+		else {
 			return $this->config_params[$name]['value'];
 		}
 	}
-	
+
 	function save_config($formvars) {
 		global $kvwmap_plugins;
 		foreach ($this->config_params as $param) {
 			if (isset($formvars[$param['name']])) {
-				$sql = "UPDATE config SET value = '".$formvars[$param['name']]."', saved = 1 WHERE name = '".$param['name']."'";
-				#echo $sql.'<br>';
-				$result=$this->database->execSQL($sql,0, 0);
+				$sql = "
+					UPDATE
+						config
+					SET
+						" . ($formvars[$param['name'] . '_prefix'] != '' ? "prefix = '" . $formvars[$param['name'] . '_prefix'] . "'," : "") . "
+						value = '" . $formvars[$param['name']] . "',
+						saved = 1
+					WHERE
+						name = '" . $param['name'] . "'
+				";
+				#echo 'Update config with sql: ' . $sql . ' prefix: ' . $param['prefix'] . ' formvar: ' . $formvars[$param['prefix']] . ' <br>';
+				$result = $this->database->execSQL($sql,0, 0);
 				if ($result[0]) {
 					echo '<br>Fehler beim Update der Tabelle config.<br>';
 				}
 			}
 		}
-		$this->get_config_params();
 		$this->write_config_file('');
-		for($i = 0; $i < count($kvwmap_plugins); $i++) {
+		for ($i = 0; $i < count($kvwmap_plugins); $i++) {
 			$this->write_config_file($kvwmap_plugins[$i]);
 		}
 	}
@@ -293,37 +323,46 @@ class administration{
 		$this->get_config_params();
 		$config = '';
 		foreach ($this->config_params as $param) {
+			#echo '<br>p: ' . $param['name'] . ' real: ' . $param['real_value'];
 			if ($param['plugin'] == $plugin) {
 				if ($param['description'] != '') {
 					$param['description'] = rtrim($param['description']);
 					$lines = explode("\n", $param['description']);
 					for($l = 0; $l < count($lines); $l++) {
-						$config.= "# ".$lines[$l]."\n";
+						$config .= "# " . $lines[$l] . "\n";
 					}
 				}
 				if ($param['type'] == 'array') {
-					$config.= "$".$param['name']." = ".preg_replace('/stdClass::__set_state/', '', var_export(json_decode($param['value']), true)).";\n\n";
+					$config .= "$" . $param['name'] . " = " . preg_replace('/stdClass::__set_state/', '', var_export(json_decode($param['value']), true)) . ";\n\n";
 				}
-				else{
-					if ($param['type'] == 'string' OR $param['type'] == 'password')$quote = "'";
-					else{
-						$quote = '';
-						if ($param['real_value'] == '')$param['real_value'] = 'NULL';
+				else {
+					if ($param['type'] == 'string' OR $param['type'] == 'password') {
+						$quote = "'";
 					}
-					$config.= "define('".$param['name']."', ".$quote.$param['real_value'].$quote.");\n\n";
+					else {
+						$quote = '';
+						if ($param['real_value'] == '') {
+							$param['real_value'] = 'NULL';
+						}
+					}
+					$config .= "define('" . $param['name'] . "', " . $quote . $param['real_value'] . $quote . ");\n\n";
 				}
 			}
 		}
 		if ($config != '') {
 			if ($plugin != '') {
-				$prepath = PLUGINS.$plugin.'/config/';
-				if (!file_exists($prepath))mkdir($prepath);
+				$prepath = PLUGINS . $plugin . '/config/';
+				if (!file_exists($prepath)) {
+					mkdir($prepath);
+				}
 			}
-			if (file_put_contents($prepath.'config.php', "<?\n\n".$config."?>") === false) {
-				$result[0]=1;
-				$result[1]='Fehler beim Schreiben der config-Datei '.$prepath.'config.php';
+			if (file_put_contents($prepath . 'config.php', "<?\n\n" . $config . "?>") === false) {
+				$result[0] = 1;
+				$result[1] = 'Fehler beim Schreiben der config-Datei ' . $prepath . 'config.php';
 			}
-			else $result[0]=0;
+			else {
+				$result[0] = 0;
+			}
 		}
 		return $result;
 	}
@@ -389,7 +428,80 @@ class administration{
 		}
 		return $constants;
 	}
-	
+
+	/*
+	* Insert, Update und Delete Settings for backup content in database
+	*/
+	function save_sicherungsinhalte($params) {
+		
+	}
+
+	/*
+	* Insert, Update und Delete backup settings in database
+	*/
+	function save_sicherungen($params) {
+		
+	}
+
+	/*
+	* This function write backup scripts based on table sicherungen_inhalte
+	*/
+	function write_backup_scripts() {
+		global $GUI;
+		include_once(CLASSPATH . 'Sicherung.php');
+		include_once(CLASSPATH . 'Sicherungsinhalt.php');
+		$sicherungen = Sicherung::find($GUI);
+		$backup_path = WWWROOT . 'backups/';
+		foreach($sicherungen AS $sicherung) {
+			echo '<p>Sicherung: ' . print_r($sicherung->data, true);
+			if (!file_exists(INSTALLPATH . 'cron/')) {
+				mkdir(INSTALLPATH . 'cron/', 0777, true);
+			}
+			$script_path = INSTALLPATH . 'cron/' . $sicherung->get('name') . '.sh';
+			echo '<br>Schreibe backup_script ' . $script_path;
+			$sf = fopen($script_path, "w");
+			fwrite($sf, "#!/bin/bash\n");
+			fwrite($sf, 'logfile=' . LOGPATH . 'cron/' . $sicherung->get('name') . ".log\n");
+			fwrite($sf, 'target_dir=' . $backup_path . $sicherung->get('target_dir') . "\n");
+			fwrite($sf, 'mkdir -p $target_dir' . "\n");
+
+			if (!file_exists(LOGPATH . 'cron/')) {
+				mkdir(LOGPATH . 'cron/', 0777, true);
+			}
+			foreach($sicherung->inhalte AS $inhalt) {
+				echo '<br>Inhalt: ' . print_r($inhalt->data, true);
+				fwrite($sf, "\n# " . $inhalt->get('name') . "\n");
+				switch ($inhalt->get('methode')) {
+					case 'Verzeichnissicherung' : {
+						$cmd = 'tar cvfz ${target_dir}/' . $inhalt->get('target') . '.tar.gz ' . $inhalt->get('source') . ' > /dev/null 2>> $logfile' . "\n";
+					} break;
+					case 'Verzeichnisinhalte kopieren' : {
+						$cmd = 'cp ' . $inhalt->get('source') . '/* ' . $inhalt->get('target');
+					} break;
+					case 'Postgres Dump' : {
+						$cmd = 'pg_dump -h pgsql -U kvwmap -Fc -f ${target_dir}/' . $inhalt->get('target') . ' ' . $inhalt->get('source') . ' &>> $logfile' . "\n";
+					} break;
+					case 'Mysql Dump' : {
+						$cmd = 'mysqldump -h mysql --user=kvwmap --password=${PASSWORD} --databases ' . $inhalt->get('source') . ' > ${target_dir}/' . $inhalt->get('target') . "\n";
+					} break;
+					default : { # Datei kopieren
+						$cmd = "cp " . $inhalt->get('source') . ' ' . $inhalt->get('target') . "\n";
+					} break;
+				}
+				fwrite($sf, $cmd);
+			}
+			fclose($sf);
+			chgrp($script_path, 'gisadmin');
+			chmod($script_path, 0775);
+		}
+	}
+
+	/*
+	* and update the crontab based on table sicherungen
+	*/
+	function update_backups_in_crontab() {
+		
+	}
 }
 
 ?>

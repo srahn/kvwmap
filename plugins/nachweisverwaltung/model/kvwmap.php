@@ -305,7 +305,7 @@
 					$fromwhere = substr($select, 0, $orderbyposition);
 					$GUI->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 				}
-				$GUI->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+				$GUI->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
 		    if(strpos(strtolower($GUI->formvars['fromwhere']), ' where ') === false){
 		      $GUI->formvars['fromwhere'] .= ' where (1=1)';
 		    }
@@ -313,15 +313,15 @@
       
       # Ausführen von Aktionen vor der Anzeige der Karte und der Zeichnung
 			$oldscale=round($GUI->map_scaledenom);  
+			$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
 			if ($GUI->formvars['CMD']!='') {
-				$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
 				$GUI->navMap($GUI->formvars['CMD']);
 				$GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
 			}
 			elseif($oldscale!=$GUI->formvars['nScale'] AND $GUI->formvars['nScale'] != '') {
 				$GUI->scaleMap($GUI->formvars['nScale']);
 			}
-      else{
+      elseif($GUI->formvars['rissnummer'] == '' AND $GUI->formvars['stammnr'] == ''){		# nur am Anfang setzen
 	      # Zuweisen der Werte des Dokumentes zum Formular
 				$GUI->formvars['flurid']=$nachweis->document['flurid'];
 				$GUI->formvars['stammnr']=$nachweis->document['stammnr'];
@@ -1226,7 +1226,7 @@
         $GUI->nachweisFormAnzeige();
       } # end of fehler bei der Änderung
       else {
-				$GUI->add_message('info', $ret[1]);
+				$GUI->add_message('notice', $ret[1]);
 				$GUI->nachweisAenderungsformular();
 			}
       # 1.4 Zur zur Anzeige der Rechercheergebnisse mit Meldung über Erfolg der Änderung
@@ -1309,7 +1309,7 @@
 				$fromwhere = substr($select, 0, $orderbyposition);
 				$GUI->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 			}
-			$GUI->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+			$GUI->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
 	    if(strpos(strtolower($GUI->formvars['fromwhere']), ' where ') === false){
 	      $GUI->formvars['fromwhere'] .= ' where (1=1)';
 	    }
@@ -1508,7 +1508,8 @@
     if ($GUI->formvars['bestaetigung']=='') {
       # Der Löschvorgang wurde noch nicht bestätigt
       $GUI->suchparameterSetzen();
-      $GUI->formvars['nachfrage']='Möchten Sie den Nachweis wirklich löschen? ';
+			if(count($GUI->formvars['id']) > 1) $GUI->formvars['nachfrage']='Möchten Sie die Nachweise wirklich löschen? ';
+      else $GUI->formvars['nachfrage']='Möchten Sie den Nachweis wirklich löschen? ';
       $GUI->bestaetigungsformAnzeigen();
     }
     else {
@@ -1555,12 +1556,18 @@
 			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 			$nachweisSuchParameter=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
 			$GUI->formvars=array_merge($GUI->formvars,$nachweisSuchParameter);
-			if($GUI->formvars['zurueck']){
+			if($GUI->formvars['FlurstKennz'] != ''){		# über die Flurstückssuche gefundene Flurstücke -> Geometrie als Suchpolygon übernehmen
+				$GUI->formvars['suchpolygon'] = $GUI->pgdatabase->getGeomfromFlurstuecke($GUI->formvars['FlurstKennz'], $GUI->user->rolle->epsg_code);
+			}
+			if($GUI->formvars['zurueck'] OR $GUI->formvars['FlurstKennz'] != ''){
 				$GUI->formvars['pathwkt'] = $GUI->formvars['suchpolygon'];
 				$GUI->formvars['newpathwkt'] = $GUI->formvars['suchpolygon'];
 				$GUI->formvars['firstpoly'] = 'true';
 				$GUI->formvars['last_doing'] = 'draw_second_polygon';
 				$GUI->formvars['last_button'] = 'pgon0';
+			}
+			else{
+				$GUI->formvars['alle_der_messung'] = NULL;
 			}
 		}
 		# die Parameter einer gespeicherten Dokumentauswahl laden
@@ -1631,7 +1638,7 @@
 				$fromwhere = substr($select, 0, $orderbyposition);
 				$GUI->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 			}
-			$GUI->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+			$GUI->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
 	    if(strpos(strtolower($GUI->formvars['fromwhere']), ' where ') === false){
 	      $GUI->formvars['fromwhere'] .= ' where (1=1)';
 	    }

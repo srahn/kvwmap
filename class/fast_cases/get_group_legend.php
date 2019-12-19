@@ -466,6 +466,7 @@ class GUI {
 					}
 
 					if($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
+						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
 						$layer = ms_newLayerObj($map);
 						$layer->setMetaData('wfs_request_method', 'GET');
 						$layer->setMetaData('wms_name', $layerset['list'][$i]['wms_name']);
@@ -848,7 +849,7 @@ class GUI {
         $klasse -> settext($classset[$j]['text']);
       }
       if ($classset[$j]['legendgraphic'] != '') {
-				$imagename = WWWROOT.APPLVERSION.GRAPHICSPATH . 'custom/' . $classset[$j]['legendgraphic'];
+				$imagename = '../' . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
 				$klasse->set('keyimage', $imagename);
 			}
       for ($k=0;$k<count($classset[$j]['Style']);$k++) {
@@ -1455,17 +1456,23 @@ class GUI {
 				}
 				if ($layer['showclasses'] != 0) {
 					if($layer['connectiontype'] == 7){      # WMS
-						$layersection = substr($layer['connection'], strpos(strtolower($layer['connection']), 'layers')+7);
-						$pos = strpos($layersection, '&');
-						if($pos !== false)$layersection = substr($layersection, 0, $pos);
-						$layers = explode(',', $layersection);
-						for($l = 0; $l < count($layers); $l++){
-							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
+						if($layer['Class'][$k]['legendgraphic'] != ''){
+							$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
+							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><img src="'.$imagename.'"></div><br>';
+						}
+						else{
+							$layersection = substr($layer['connection'], strpos(strtolower($layer['connection']), 'layers')+7);
+							$pos = strpos($layersection, '&');
+							if($pos !== false)$layersection = substr($layersection, 0, $pos);
+							$layers = explode(',', $layersection);
+							for($l = 0; $l < count($layers); $l++){
+								$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div><br>';
+							}
 						}
 					}
 					else {
 						$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
-						$maplayer = $this->map->getLayerByName($layer['alias']);
+						$maplayer = $this->map->getLayer($layer['layer_index_mapobject']);
 						if($layer['Class'][0]['legendorder'] != ''){
 							usort($layer['Class'], 'compare_legendorder');
 						}
@@ -1504,7 +1511,7 @@ class GUI {
 								$padding = 1;
 								###### eigenes Klassenbild ######
 								if($layer['Class'][$k]['legendgraphic'] != ''){
-									$imagename = $original_class_image = GRAPHICSPATH . 'custom/' . $layer['Class'][$k]['legendgraphic'];
+									$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
 									if($width == ''){
 										$size = getimagesize($imagename);
 										$width = $size[0];

@@ -57,11 +57,8 @@ for($i=0;$i<$anzLayer;$i++){
 				</td>
 	    </tr>
 
-	   </table>';
+	   </table>';	 
   }
-	if($i > 0){
-		echo '<hr class="gle_hr">';
-	}
 	$template = $this->qlayerset[$i]['template'];
 	if (in_array($template, array('', 'generic_layer_editor.php', 'generic_layer_editor_doc_raster.php'))) {
 		if($this->qlayerset[$i]['connectiontype'] == MS_WMS){
@@ -104,8 +101,35 @@ for($i=0;$i<$anzLayer;$i++){
 	}
 	
 	echo $this->qlayerset[$i]['paging'];
+	
+	if($gesamt > 0){
+		echo '<hr class="gle_hr">';
+	}
 }
-?>
+
+if(!empty($this->noMatchLayers)){
+	foreach($this->noMatchLayers as $noMatchLayerID => $noMatchLayerName){
+	?>
+	<table border="0" cellspacing="10" cellpadding="2">
+		<tr>
+			<td width="99%" align="center"><h2 id="layername"><? echo $noMatchLayerName; ?></h2></td>
+		</tr>
+		<tr>
+			<td>
+					<span style="color:#FF0000;"><? echo $strNoMatch; ?></span>
+			</td>
+		</tr>
+	<? 	$layer_new_dataset = $this->Stelle->getqueryablePostgisLayers(1, NULL, true, $noMatchLayerID);		// Abfrage ob Datensatzerzeugung möglich
+			if($layer_new_dataset != NULL){ ?>
+		<tr align="center">
+			<td><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=<? echo $noMatchLayerID; ?>"><? echo $strNewDataset; ?></a></td>
+		</tr>
+		<? } ?>
+	</table>
+	<hr class="gle_hr">
+<? }
+} ?>
+
 <table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
 	<tr>
 		<td align="right">

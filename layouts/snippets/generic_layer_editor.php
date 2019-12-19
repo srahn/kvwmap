@@ -27,6 +27,8 @@
 		$k = -1;
   	$doit = true;
   }
+	
+	if($doit == true){
 ?>
 <SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 
@@ -65,9 +67,7 @@
 </table>
 <?
 	}
-
-  if($doit == true){
-		echo $layer['paging'];
+	echo $layer['paging'];
 ?>
 <table border="0" cellspacing="1" cellpadding="2" width="100%">
 	<tr>
@@ -87,7 +87,7 @@
 									if($collapsed)echo '1';
 									else echo $colspan;
 									echo '" data-colspan="'.$colspan.'">';
-									echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\''.$groupname.'\')"><img id="img_'.$groupname.'" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;<span>'.$groupname.'</span></td><td style="border:none;background: url(graphics/bg.gif);"></td>';
+									echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\''.$groupname.'\')"><img id="img_'.$groupname.'" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;<span>'.$groupname.'</span></td><td style="border:none;background: url('.BG_IMAGE.');"></td>';
 									$colspan = 0;
 								}
 								elseif($layer['attributes']['SubFormFK_hidden'][$j] != 1){
@@ -112,7 +112,7 @@
 						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 						$groupname = $explosion[0];
 						if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url(graphics/bg.gif);"></td>';
+							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 						}
 						if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
@@ -194,7 +194,7 @@
 			if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 			$groupname = $explosion[0];
 			if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-				echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url(graphics/bg.gif);"></td>';
+				echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 			}
 			if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 				$layer['attributes']['form_element_type'][$j] .= '_not_saveable';
@@ -278,7 +278,7 @@
 						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 						$groupname = $explosion[0];
 						if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url(graphics/bg.gif);"></td>';
+							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 						}
 						if($layer['attributes']['type'][$j] != 'geometry' AND $layer['attributes']['visible'][$j] AND $layer['attributes']['SubFormFK_hidden'][$j] != 1){ ?>
 							<td valign="top" class="group_<? echo $groupname; ?>" <? if($collapsed)echo 'style="display: none"'; ?> >
@@ -328,7 +328,7 @@
 						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 						$groupname = $explosion[0];
 						if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url(graphics/bg.gif);"></td>';
+							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 						}
 						if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
@@ -376,7 +376,7 @@
 							if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 							$groupname = $explosion[0];
 							if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-								echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url(graphics/bg.gif);"></td>';
+								echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 							}
 							if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 								$layer['attributes']['form_element_type'][$j] .= '_not_saveable';
@@ -550,22 +550,12 @@
 	
 ?>
 	
-<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
-<input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
-
+	<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
+	<input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
+</div>
 <?
   }
   elseif($layer['requires'] == ''){
-?>
-<table border="0" cellspacing="10" cellpadding="2">
-  <tr>
-	<td>
-      <span style="font-size:12px; color:#FF0000;"><? echo $strNoMatch; ?></span>
-	</td>
-  </tr>
-</table>
-
-<?
+		$this->noMatchLayers[$layer['Layer_ID']] = $layer['Name'];
   }
 ?>
-</div>

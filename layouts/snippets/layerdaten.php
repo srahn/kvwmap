@@ -1,4 +1,4 @@
-<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" width="1000px">
   <tr align="center"> 
     <td><h2><?php echo $this->titel; ?></h2></td>
   </tr>
@@ -94,7 +94,7 @@ for ($i=0;$i<count($this->layerdaten['ID']);$i++) {
       
       if ($this->formvars['order']!="Alias" or ($this->formvars['order']=="Alias" and $this->layerdaten['alias'][$i]!='')) {
       ?>
-        <tr onMouseover="this.bgColor='<?php echo BG_TR; ?>'" onMouseout="this.bgColor=''">
+        <tr onMouseover="this.bgColor='#DAE4EC'" onMouseout="this.bgColor=''">
           <td>&nbsp;</td>
           <td><?php echo $this->layerdaten['ID'][$i]; ?>&nbsp;&nbsp;</td>
           <td>
@@ -109,8 +109,8 @@ for ($i=0;$i<count($this->layerdaten['ID']);$i++) {
           } ?>
           </td>
           <td><?php echo $this->layerdaten['Gruppe'][$i]; ?></td>
-          <td>&nbsp;<a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>"><?php echo $this->strChange; ?></a></td>
-          <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Layer_Löschen&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie Layer <?php echo $this->layerdaten['Bezeichnung'][$i]; ?> wirklich löschen?')"><?php echo $this->strDelete; ?></a></td>        
+          <td style="padding-left: 10px"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>" title="<?php echo $this->strChange; ?>"><i class="fa fa-pencil" style="padding: 3px"></a></td>
+          <td style="padding-left: 5px"><a href="javascript:Bestaetigung('index.php?go=Layer_Löschen&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie Layer <?php echo $this->layerdaten['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete; ?>"><i class="fa fa-trash" style="padding: 3px"></i></a></td>        
         </tr>
       <? 
      }

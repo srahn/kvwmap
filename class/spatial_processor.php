@@ -662,7 +662,7 @@ class spatial_processor {
 	      $searchbox_maxy=strval($rect->maxy+$rand);
 	      $request = $layerset[0]['connection'].'&service=wfs&version=1.0.0&request=getfeature&typename='.$layerset[0]['wms_name'].'&bbox='.$searchbox_minx.','.$searchbox_miny.','.$searchbox_maxx.','.$searchbox_maxy;
         $this->debug->write("<br>WFS-Request: ".$request,4);
-	      $gml = url_get_contents($request);
+	      $gml = url_get_contents($request, $layerset[0]['wms_auth_username'], $layerset[0]['wms_auth_password']);
         #$this->debug->write("<br>WFS-Response: ".$gml,4);
 	      $wkt = $this->composeMultipolygonWKTStringFromGML($gml, $layerset[0]['wfs_geom']);
 	      #$this->debug->write("<br>WKT von GML-Geometrie: ".$wkt,4);

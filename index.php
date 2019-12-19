@@ -71,27 +71,6 @@ $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '
 
 ob_start ();    // Ausgabepufferung starten
 
-function replace_tags($text, $tags) {
-	$first_right = strpos($text, '>');
-	if ($first_right !== false) {
-		$text = preg_replace("#<\s*\/?(" . $tags . ")\s*[^>]*?>#im", '', $text);
-/*		$first_left = strpos($text, '<');
-		if ($first_left !== false and $first_right < $first_left) {
-			# >...<
-			$last_right = strrpos($text, '>');
-			if ($last_right !== false and $last_right > $first_left) {
-				# >...<...>
-				# entferne $first_right, $last_right und alles dazwischen
-				$text = substr_replace($text, '', $first_right, $last_right - $first_right + 1);
-			}
-		}*/
-	}
-	return $text;
-}
-foreach($_REQUEST as $key => $value) {
-	if (is_string($value)) $_REQUEST[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
-}
-reset($_REQUEST);
 $formvars = $_REQUEST;
 
 $go = $formvars['go'];
@@ -109,7 +88,7 @@ define(CASE_COMPRESS, false);																																						  #
 #											- man muss in einer Fachschale zoomen (wegen reduce_mapwidth)												#
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
-#   getLayerOptions:  - getRollenLayer(), writeCustomType(), getDatatypeId() 															#
+#   getLayerOptions:  - getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
 #												und writeDatatypeAttributes() reinkopieren																				#
 #		get_group_legend:	- compare_legendorder() reinkopieren																								#
 #		get_select_list:  - read_datatype_attributes() reinkopieren																						#
@@ -435,6 +414,11 @@ function go_switch($go, $exit = false) {
 			# Kartenbild anzeigen
 			case 'showMapImage' : {
 				$GUI->showMapImage();
+			} break;
+
+			case 'showRefMapImage' : {
+				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->getRefMapImage($GUI->formvars['ID']);
 			} break;
 
 			# Klassen abfragen
@@ -1158,7 +1142,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Layer_Datensaetze_Loeschen' : {
-				$GUI->layer_Datensaetze_loeschen();
+				$GUI->layer_Datensaetze_loeschen(($GUI->formvars['output'] == 'false' ? false : true));
 			} break;
 
 			case 'Dokument_Loeschen' : {
@@ -1260,24 +1244,7 @@ function go_switch($go, $exit = false) {
 			case 'Layereditor' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Layereditor();
-			} break;
-
-			case 'Layereditor_Klasse_Löschen' : {
-				$GUI->checkCaseAllowed('Layereditor');
-				$GUI->Layereditor_KlasseLoeschen();
-			} break;
-
-			case 'Layereditor_Klasse_Hinzufügen' : {
-				$GUI->checkCaseAllowed('Layereditor');
-				$GUI->Layereditor_KlasseHinzufuegen();
-				$GUI->Layereditor();
-			} break;
-
-			case 'Layereditor_Autoklassen_Hinzufügen' : {
-				$GUI->checkCaseAllowed('Layereditor');
-				$GUI->Layereditor_AutoklassenHinzufuegen();
-				$GUI->Layereditor();
-			} break;
+			} break;			
 
 			case 'Layereditor_Als neuen Layer eintragen' : {
 				$GUI->checkCaseAllowed('Layereditor');
@@ -1285,14 +1252,34 @@ function go_switch($go, $exit = false) {
 				$GUI->Layereditor();
 			} break;
 
-			case 'Layereditor_Ändern' : {
+			case 'Layereditor_Speichern' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->LayerAendern();
 			} break;
 
-			case 'Layereditor_erweiterte Einstellungen' : {
-				$GUI->checkCaseAllowed('Attributeditor');
-				$GUI->Attributeditor();
+			case 'Klasseneditor' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->Klasseneditor();
+			} break;
+			
+			case 'Klasseneditor_Speichern' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->Klasseneditor_speichern();
+			} break;			
+
+			case 'Klasseneditor_Klasse_Löschen' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->Klasseneditor_KlasseLoeschen();
+			} break;
+
+			case 'Klasseneditor_Klasse_Hinzufügen' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->Klasseneditor_KlasseHinzufuegen();
+			} break;
+
+			case 'Klasseneditor_Autoklassen_Hinzufügen' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->Klasseneditor_AutoklassenHinzufuegen();
 			} break;
 
 			case 'Attributeditor' : {
@@ -1510,6 +1497,26 @@ function go_switch($go, $exit = false) {
 				$GUI->als_nutzer_anmelden_allowed($GUI->formvars['selected_user_id'], $GUI->user->id);
 				$_SESSION['login_name'] = $GUI->formvars['loginname'];
 				header('location: index.php');
+			} break;
+
+			case 'connections_anzeigen' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->connections_anzeigen();
+			} break;
+
+			case 'connection_create' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->connection_create();
+			} break;
+
+			case 'connection_update' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->connection_update();
+			} break;
+
+			case 'connection_delete' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->connection_delete();
 			} break;
 
 			case 'cronjobs_anzeigen' : {

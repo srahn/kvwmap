@@ -27,6 +27,8 @@
 		$k = -1;
   	$doit = true;
   }
+	
+	if($doit == true){
 ?>
 <div id="layer" onclick="remove_calendar();">
 <input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
@@ -52,8 +54,6 @@
 	</tr>
 </table>
 <? }
-
-  if($doit == true){
 		$table_id = rand(0, 100000);
 		echo $layer['paging'];
 ?>
@@ -66,8 +66,8 @@
 	<tr>
 		<td>
 			<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
-			<div
-				id="datensatz"<?
+			<div id="datensatz_<? echo $layer['Layer_ID'].'_'.$k; ?>" class="datensatz"
+				<?
 				if ($this->new_entry != true AND $this->user->rolle->querymode == 1) { ?>
 					onmouseenter="highlight_object(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['the_geom']].'_oid']; ?>');"<?
 				} ?>
@@ -79,7 +79,7 @@
 				}
 			}
 			?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">
-			<table id="dstable" class="tgle" style="border-bottom: 1px solid grey" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
+			<table class="tgle dstable" style="border-bottom: 1px solid grey" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
 				<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
         <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle"'; ?>>
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
@@ -491,28 +491,12 @@
 	[].forEach.call(vchangers, function(vchanger){vchanger.oninput();});
 </script>
 
-<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
-<input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
-
+	<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
+	<input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
+</div>
 <?
   }
   elseif($layer['requires'] == '' AND $layer['required'] == ''){
+		$this->noMatchLayers[$layer['Layer_ID']] = $layer['Name'];
+	}
 ?>
-<table border="0" cellspacing="10" cellpadding="2">
-  <tr>
-		<td>
-				<span style="color:#FF0000;"><? echo $strNoMatch; ?></span>
-		</td>
-  </tr>
-<? 	$layer_new_dataset = $this->Stelle->getqueryablePostgisLayers(1, NULL, true, $layer['Layer_ID']);		// Abfrage ob Datensatzerzeugung möglich
-		if($layer_new_dataset != NULL){ ?>
-	<tr align="center">
-		<td><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=<? echo $layer['Layer_ID']; ?>"><? echo $strNewDataset; ?></a></td>
-	</tr>
-	<? } ?>
-</table>
-
-<?
-  }
-?>
-</div>

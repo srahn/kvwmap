@@ -86,7 +86,7 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, connection, printconnection,
+				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
 				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
@@ -110,9 +110,10 @@ class rolle {
 				r2ul.rollenfilter,
 				r2ul.geom_from_layer
 			FROM
-				layer AS l,
 				used_layer AS ul,
-				u_rolle2used_layer as r2ul
+				u_rolle2used_layer as r2ul,
+				layer AS l
+				LEFT JOIN connections as c ON l.connection_id = c.id
 			WHERE
 				l.Layer_ID=ul.Layer_ID AND
 				r2ul.Stelle_ID=ul.Stelle_ID AND
@@ -370,6 +371,8 @@ class rolle {
 			$this->highlighting=$rs['highlighting'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
+			$this->result_hatching=$rs['result_hatching'];
+			$this->result_transparency=$rs['result_transparency'];
 			$this->always_draw=$rs['always_draw'];
 			$this->runningcoords=$rs['runningcoords'];
 			$this->showmapfunctions=$rs['showmapfunctions'];
@@ -1246,6 +1249,8 @@ class rolle {
 					`buttons`,
 					`scrollposition`,
 					`result_color`,
+					`result_hatching`,
+					`result_transparency`,
 					`always_draw`,
 					`runningcoords`,
 					`showmapfunctions`,
@@ -1283,6 +1288,8 @@ class rolle {
 					`buttons`,
 					`scrollposition`,
 					`result_color`,
+					`result_hatching`,
+					`result_transparency`,					
 					`always_draw`,
 					`runningcoords`,
 					`showmapfunctions`,
@@ -1738,7 +1745,7 @@ class rolle {
 		return 1;
 	}
 
-	function getMapComments($consumetime, $public = false) {
+	function getMapComments($consumetime, $public = false, $order) {
 		$sql ='SELECT c.user_id, c.time_id, c.comment, c.public, u.Name, u.Vorname FROM u_consume2comments as c, user as u WHERE c.user_id = u.ID AND (';
 		if($public)$sql.=' c.public OR';
 		$sql.=' c.user_id='.$this->user_id;
@@ -1746,7 +1753,7 @@ class rolle {
 		if ($consumetime!='') {
 			$sql.=' AND time_id="'.$consumetime.'"';
 		}
-		$sql.=' ORDER BY c.time_id DESC';
+		$sql.=' ORDER BY '.replace_semicolon($order);
 		#echo '<br>'.$sql;
 		$queryret=$this->database->execSQL($sql,4, 0);
 		if ($queryret[0]) {

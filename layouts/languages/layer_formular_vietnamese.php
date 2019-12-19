@@ -1,4 +1,5 @@
 ﻿<?php
+	$strLayer="Layer";
 	$strAsteriskRequired="Cần điền đủ thông tin cho những trường có dấu *";  
 	$strMaintable="Main Table";
 	$strDataBankID="Số ID cơ sở dữ liệu*";
@@ -40,7 +41,7 @@
 	$strSignOrder="Thứ tự ký hiệu";
 	$strDelete="Xóa";
 	$strAddClass="Thêm lớp";
-	$strOtherExtentions="Các lựa chọn khác";
+	$strAttributes="Attributes";
 	$strButtonBack="Quay lại";  
 	$strButtonSave="Lưu sửa đổi";
 	$strButtonSaveAsNewLayer="Lưu lại lớp với tên mới";
@@ -51,7 +52,9 @@
 	$strmaxscale="maxscale";
 	$stroffsite="offsite";
 	$strOWSParameter="OWS-Parameters";
-	$strDefaultValues="Default-Values for Task-Asignment";
+	$strStellenAsignment="Usergroup-Asignment";
+	$strDefaultValues="Default-Values for Usergroup-Asignment";
+	$strPrivileges="Privileges";
 	$strWFS_geom="WFS-Geometry-Attribute";
 	$strQueryMap="QueryMap";
 	$strProcessing="Processing";
@@ -65,5 +68,7 @@
 	$strTriggerFunction="Trigger function";
 	$strSync="Sync - Mode";
 	$strSyncHelp="In Sync - Mode all changes on the layer will be stored in a table named (Main Table)_deltas with a serialised version number. The mode must be switched on, to enable the layer in the mobile App kvmobile."
-	$strIdAttribute="ID-attribute";
+	$strStylesLabels="Styles and Labels";
+	$strDdlAttribute="DDL Default Attribute";
+	$strIdAttribute="ID-Column";
 ?>

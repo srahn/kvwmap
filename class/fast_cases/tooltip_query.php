@@ -1316,7 +1316,7 @@ class db_mapObj {
 			$sql ='SELECT `connection`, "'.CUSTOM_SHAPE_SCHEMA.'" as `schema` FROM rollenlayer WHERE -id = '.$layer_id.' AND connectiontype = 6';
 		}
 		else{
-			$sql ='SELECT `connection`, `schema` FROM layer WHERE Layer_ID = '.$layer_id.' AND connectiontype = 6';
+			$sql ="SELECT concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as `connection`, `schema` FROM layer as l, connections as c WHERE l.Layer_ID = ".$layer_id." AND l.connection_id = c.id AND l.connectiontype = 6";
 		}
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Lesen des connection-Strings des Layers:<br>".$sql,4);
 		$query=mysql_query($sql);
@@ -1540,6 +1540,7 @@ class db_mapObj {
                 }
                 elseif($attributes['options'][$i] != ''){
                   $sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
+									$sql = str_replace('$userid', $this->User_ID, $sql);
                   $ret=$database->execSQL($sql,4,0);
                   if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
                   while($rs = pg_fetch_array($ret[1])){

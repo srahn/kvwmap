@@ -121,9 +121,29 @@ else {
           </td>
         </tr>
         <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strReferenceMapID; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="Referenzkarte_ID" type="text" value="<?php echo $this->formvars['Referenzkarte_ID']; ?>" size="25" maxlength="100">
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strReferenceMap; ?></th>
+					<td colspan=2 style="border-bottom:1px solid #C3C7C3"><?
+						include_once(CLASSPATH . 'Referenzkarte.php');
+						include_once(CLASSPATH . 'FormObject.php');
+						$referenzkarten = array_map(
+							function($referenzkarte) {
+								return array(
+									'value' => $referenzkarte->get('ID'),
+									'output' => $referenzkarte->get('Name')
+								);
+							},
+							Referenzkarte::find($this, '', 'Name')
+						);
+						echo FormObject::createSelectField(
+							'Referenzkarte_ID',
+							$referenzkarten,
+							$this->formvars['Referenzkarte_ID'],
+							1,
+							'',
+							'$(\'#ref_map_img_prev\').attr(\'src\', \'index.php?go=showRefMapImage&ID=\' + this.value)'
+						);
+						$referenzkarte = Referenzkarte::find_by_id($this, $this->formvars['Referenzkarte_ID']); ?>
+						<img id="ref_map_img_prev" src="index.php?go=showRefMapImage&ID=<? echo $referenzkarte->get('ID'); ?>" style="vertical-align: middle" onchange="this.src=">
           </td>
         </tr>
         <tr>

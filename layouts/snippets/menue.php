@@ -51,7 +51,7 @@ function showMenue() {
 
 <div id="menue_options">
 <?	
-  if (!$this->user->rolle->hideMenue){
+  if (!$this->user->rolle->hideMenue) {
 		include(LAYOUTPATH.'languages/menue_body_'.$this->user->rolle->language.'.php');
 		$wappen_html = '<img src="' . WAPPENPATH . $this->Stelle->getWappen() . '" alt="Wappen" align="middle" border="0">';
 		$wappen_link = $this->Stelle->getWappenLink();
@@ -70,13 +70,15 @@ function showMenue() {
 				hspace="0"
 			>';
 
-		if(MENU_WAPPEN=="oben") { ?>
+		if (MENU_WAPPEN=="oben") { ?>
 		<div style="position: relative; visibility: visible; left: 0px; top: 0px"><?
 			echo $wappen_html; ?>
-		</div>		<? }
-		
-		if($this->img['referenzkarte'] != '' AND MENU_REFMAP == "oben")echo $refmap_html; ?>
-		
+		</div><? }
+
+		if ($this->img['referenzkarte'] != '' AND MENU_REFMAP == "oben") {
+			echo $refmap_html;
+		} ?>
+
 		<div id="menueTable"><?
 			if ($this->user->rolle->menue_buttons) {
 				$button_menues = Menue::loadMenue($this, 'button');		# erst nur die Button-Menüpunkte

@@ -58,7 +58,8 @@
 	$GUI->ukos_new_doppikobjekt = function($schema_name, $table_name, $geometry_type) use ($GUI) {
 		$sql = "
 			SELECT
-				`Layer_ID`
+				`Layer_ID`,
+				`Name`
 			FROM
 				`layer`
 			WHERE
@@ -66,15 +67,29 @@
 				`maintable` = '" . $table_name . "' AND
 				`Datentyp` = " . $geometry_type . "
 		";
-		#echo '<br>Sql: ' . $sql;
+		# echo '<br>Sql: ' . $sql;
 		$ret = $GUI->database->execSQL($sql, 1, 4);
 
+		$nix_gefunden = true;
 		if ($ret['success'] AND mysql_num_rows($ret[1]) == 1) {
+			$nix_gefunden = false;
 			$rs = mysql_fetch_assoc($ret[1]);
 			$GUI->formvars['selected_layer_id'] = $rs['Layer_ID'];
 			$GUI->neuer_Layer_Datensatz();
 		}
 		else {
+			if ($schema_name == 'ukos_doppik' AND $table_name == 'strasse' AND $geometry_type == 2) {
+				while ($rs = mysql_fetch_assoc($ret[1])) {
+					if ($rs['Name'] == 'Straßen') {
+						$nix_gefunden = false;
+						$GUI->formvars['selected_layer_id'] = $rs['Layer_ID'];
+						$GUI->neuer_Layer_Datensatz();
+					}
+				}
+			}
+		}
+
+		if ($nix_gefunden) {
 			$GUI->add_message('error', 'Zu dieser Doppikklasse wurde kein passender Layer gefunden. Legen Sie einen Layer an mit Schema ukos_doppik, dem richtigen Tabellennamen und Geometrietyp!');
 			$GUI->ukos_show_doppikklassen();
 		}

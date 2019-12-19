@@ -79,13 +79,17 @@ class FormObject {
 		$this->outputHTML();
 	} # ende constructor
 
-static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '') {
+static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $first_option = '-- bitte Wählen --') {
 	$id = ($id == '' ? $name : $id);
 	if ($multiple != '') $multiple = ' multiple';
 	if ($style != '') $style = 'style="' . $style . '"';
 	if ($onchange != '') $onchange = 'onchange="' . $onchange . '"';
+	if ($class != '') $class = 'class="' . $class . '"';
 
 	$options_html = array();
+	if ($first_option != '') {
+		$options_html[] = "<option value=\"\">" . $first_option . "</option>";
+	}
 	foreach($options AS $option) {
 		if (is_string($option)) {
 			$option = array('value' => $option, 'output' => $option);		// falls die Optionen kein value und output haben
@@ -101,7 +105,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 	}
 
 	$html  = "
-<select id=\"{$id}\" name=\"{$name}\" size=\"{$size}\" {$style} {$onchange} {$multiple}>
+<select id=\"{$id}\" name=\"{$name}\" size=\"{$size}\" {$style} {$onchange} {$multiple} {$class}>
 	" . implode('<br>', $options_html) . "
 </select>
 ";

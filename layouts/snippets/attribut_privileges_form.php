@@ -1,5 +1,6 @@
 <? 
 	include(LAYOUTPATH.'languages/attribut_privileges_form_'.$this->user->rolle->language.'.php');
+	include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php');
 ?>
 <SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
@@ -57,38 +58,77 @@ function save(stelle){
 //-->
 </script>
 
-<table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
-  <tr align="center"> 
-    <td colspan="4"><h2><?php echo $strTitle; ?></h2></td>
+<style>
+	.navigation{
+		border-collapse: collapse; 
+		width: 100%;
+		min-width: 940px;
+		background:rgb(248, 248, 249);
+	}
+
+	.navigation th{
+		border: 1px solid #bbb;
+		border-collapse: collapse;
+		width: 17%;
+	}
+	
+	.navigation th div{
+		padding: 3px;
+		padding: 9px 0 9px 0;
+	}	
+	
+	.navigation th a{
+		color: #888;
+	}	
+	
+	.navigation th:hover{
+		background-color: rgb(238, 238, 239);
+		color: #666;
+	}
+</style>
+
+<table style="width: 700px; margin: 0px 40px 0 40px">
+	<tr>
+    <td align="center">
+			<span class="px17 fetter"><? echo $strLayer;?>:</span>
+      <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+      <option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option>
+        <?
+    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
+    			echo '<option';
+    			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
+    				echo ' selected';
+    			}
+    			echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
+    		}
+    	?>
+      </select>
+		</td>
   </tr>
-  <tr>
-  	<td>&nbsp;</td>
-  </tr>
-  <tr>
-    <td colspan="2" align="center">
-    	<table cellpadding="5" cellspacing="2">
-    		<tr> 
-			    <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="2">Layer</td>
-			  </tr>
+</table>
+
+<? if($this->formvars['selected_layer_id'] != ''){ ?>
+
+<table border="0" cellpadding="0" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" style="margin: 10px">
+	<tr align="center"> 
+		<td style="width: 100%;">
+			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3"> 
-			      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.scrollposition.value=0;document.GUI.submit();">
-			      	<option value="">----------- <? echo $this->strPleaseSelect; ?> -----------</option>
-			        <?
-			    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
-			    			echo '<option';
-			    			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
-			    				echo ' selected';
-			    			}
-			    			echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
-			    		}
-			    		?>
-			      </select> 
-			    </td>
-			  </tr>
+					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
+					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
+					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
+					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
+					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
+					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="background-color: #c7d9e6; color: #111; width: 100%"><? echo $strPrivileges; ?></div></a></th>
+				</tr>
 			</table>
-  	</td>
-  </tr>
+		</td>
+	</tr>	
+</table>
+
+<? } ?>
+
+<table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <? if($this->layer[0]['Name'] != ''){ ?>
 	<tr>
   	<td>
@@ -119,7 +159,7 @@ function save(stelle){
 				</tr>
   			<tr>
 			  	<td valign="top">
-			  		<div style="border:1px solid black;">
+			  		<div style="background-color: #f8f8f9; border:1px solid black;">
 							<table border="1" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
 								<tr>  	
 			  					<? include(LAYOUTPATH.'snippets/attribute_privileges_template.php'); ?>
@@ -128,7 +168,7 @@ function save(stelle){
 						</div>
 					<td>	
 					<td valign="top">
-						<div id="stellendiv" style="border:1px solid black; width:<? echo $width; ?>px; float:right; overflow:auto; overflow-y:hidden" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
+						<div id="stellendiv" style="background-color: #f8f8f9; border:1px solid black; width:<? echo $width; ?>px; float:right; overflow:auto; overflow-y:hidden" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
 							<table border="1" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
 								<tr>
 							<?
@@ -147,14 +187,6 @@ function save(stelle){
 				</tr>
 			</table>
 		</td>
-  </tr>
-  <tr> 
-    <td colspan="4">&nbsp;</td>
-  </tr>
-	<tr>
-  	<td align="center">
-  		<input type="button" name="dummy" onclick="location.href='index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>#stellenzuweisung'" value="<? echo $strToTaskAssignment; ?>">
-  	</td>
   </tr>
   <tr> 
     <td colspan="4" >&nbsp;</td>

@@ -18,6 +18,8 @@
   $strHighlight="Tooltip-Highlighting";
   $strPlatt="Lower German";
   $strSearchColor="Result-Color";
+	$strSearchHatching="Result/Import-Hatching";
+	$strSearchTransparency="Result/Import-Transparency";
   $strPolish="Polish";
 	$strMenuAutoClose="Đóng menu tự động";
 	$strVisuallyImpaired="Đơn giản hóa trong chế độ đọc";

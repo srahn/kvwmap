@@ -3,8 +3,10 @@ $ahah = '
 <script language="javascript" type="text/javascript">
 	function ahah(url, data, target, action, progress){
 		for(k = 0; k < target.length; ++k){
-			if(target[k] != null && target[k].tagName == "DIV" && target[k].innerHTML == ""){
-				target[k].innerHTML = \'<img src="graphics/ajax-loader.gif">\';
+			if(target[k] != null && target[k].tagName == "DIV"){
+				waiting_img = document.createElement("img");
+				waiting_img.src = "graphics/ajax-loader.gif";
+				target[k].appendChild(waiting_img);
 			}
 		}
 		var req = new XMLHttpRequest();
@@ -61,9 +63,6 @@ $ahah = '
 							case "sethtml":
 								if (targets[i] != undefined && req.getResponseHeader(\'error\') != \'true\') {
 									targets[i].innerHTML = responsevalues[i];
-									if (targets[i].tagName == "SELECT" && targets[i].outerHTML != undefined) {
-										targets[i].outerHTML = targets[i].outerHTML; // Bug-Workaround fuer den IE 8 beim setzen eines select-Objekts
-									}
 									scripts = targets[i].getElementsByTagName("script"); // Alle script-Bloecke evaln damit diese Funktionen bekannt sind
 									for (s = 0; s < scripts.length; s++) {
 										if (scripts[s].hasAttribute("src")) {
@@ -76,6 +75,14 @@ $ahah = '
 										}
 									}
 								}
+							break;
+							
+							case "prependhtml":
+								targets[i].insertAdjacentHTML(\'beforebegin\', responsevalues[i]);
+							break;
+							
+							case "appendhtml":
+								targets[i].insertAdjacentHTML(\'beforeend\', responsevalues[i]);
 							break;
 
 							case "setvalue":

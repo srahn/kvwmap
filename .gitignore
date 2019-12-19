@@ -1,5 +1,6 @@
 credentials.php
 config.php
+custom/*
 fonts/custom/*
 layouts/custom/*
 layouts/snippets/custom/*
@@ -10,6 +11,7 @@ plugins/*/config/config.php
 plugins/*/config/config.sh
 plugins/*/img/*
 plugins/*/results/
+tools/copy_kvwmap_config.json
 .settings
 .project
 .buildpath

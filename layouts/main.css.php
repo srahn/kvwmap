@@ -357,6 +357,34 @@ a.invisiblelayerlink:hover{
 	margin-top: 10px;
 }
 
+#datendrucklayouteditor{
+	display: flex;
+	margin: 10px;
+}
+
+#datendrucklayouteditor_formular{
+	margin-left: 5px;
+}
+
+#datendrucklayouteditor_formular_scroll{
+	background-color: white;
+	border: 1px solid #aaa;
+	overflow-y: auto;
+	max-height: 800px;
+	width: 100%;
+	min-width: 600px;
+	margin-right: 15px;
+}
+
+#datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table{
+	width: 100%;
+	background: url('../<? echo BG_IMAGE; ?>');
+}
+
+#datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table>tbody:first-of-type>tr:first-of-type{
+	background-color: #c5d4e7;
+}
+
 #geo_name_search_result_div{
 	position: absolute;
 	z-index: 1000000;
@@ -520,7 +548,7 @@ a.invisiblelayerlink:hover{
 
 #menuebar{
 	width: <? echo ($size['menue']['width'] - 2); ?>px;
-	background: url('../graphics/bg.gif');
+	background: url('../<? echo BG_IMAGE; ?>');
 	border: 1px solid;
 	border-color: #CCC; 
 	border-top: none;
@@ -924,7 +952,7 @@ a.menuered:hover {
 	box-shadow: 0px 1px 0px #bbb;
 	display: flex; 
 	flex-direction: column;
-	background-image: url(../graphics/bg.gif);
+	background-image: url(../<? echo BG_IMAGE; ?>);
 }
 
 #legend_layer{
@@ -1111,13 +1139,15 @@ a.menuered:hover {
 
 
 select.imagebacked { 
-	padding: 2px 0 3px 155px; 
+	#padding: 2px 0 3px 155px; 
+	color: rgba(255, 255, 255, 0);
 	background-repeat: no-repeat; 
 	background-position: 0px 0px; 
 	vertical-align: middle; 
 }
 
 option.imagebacked {
+	color: black;
 	padding: 2px 0 3px 1px; 
 	background-repeat: no-repeat; 
 	background-position: 0px 0px; 
@@ -1155,9 +1185,20 @@ span.black {
 	clear: both;
 }
 
-a .preview_image{border:1px solid black;width: 125px;transition: all 0.25s ease;}	/* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf 250px vergrößert */
+/* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf PREVIEW_IMAGE_WIDTH vergrößert */
+a .preview_image{
+	border:1px solid black;
+	max-width: 125px;
+	max-height: 125px;
+	transition: all 0.25s ease;
+}
 
-a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 0.25s ease;}
+a:hover .preview_image{
+	max-width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;
+	max-height: <? echo PREVIEW_IMAGE_WIDTH; ?>px;
+	transition: all 0.25s ease;
+	transition-delay: 0.5s;
+}
 
 .preview_doc{}
 
@@ -1223,7 +1264,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	padding-left: 35px;
 }
 
-#datensatz {
+.datensatz {
 	border:0px solid gray;
 	border-collapse:collapse;
 	padding:0px 0px 0px 0px;
@@ -1285,7 +1326,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	text-align: left;
 }
 
-#dstable{
+.dstable{
 	max-width: 900px;
 }
 
@@ -1547,21 +1588,19 @@ tbody.gle>tr {
 	border-right: 1px solid #CCCCCC;
 }
 
-.rollenwahl-gruppe {
+#rollenwahl_optionen_div {
+	background:rgb(248, 248, 249);
 	margin: 10px;
-	border: 1px solid #cccccc;
-	background: url('../graphics/bg.gif'); 
-	z-index: 2;
+	border: 1px solid #bbb;
+}
+
+.rollenwahl-gruppe {
+	margin:0;
+	border:0;
 }
 
 .rollenwahl-table {
-	width: 700px;
-}
-
-.rollenwahl-gruppen-header {
-	background-color: #c7d9e6; 
-	padding: 2px;
-	padding-left: 8px
+	width: 100%;
 }
 
 .rollenwahl-gruppen-options{
@@ -1569,7 +1608,7 @@ tbody.gle>tr {
 }
 
 .rollenwahl-option-header {
-	width: 221px;
+	width: 266px;
 	padding : 4px;
 }
 
@@ -1599,6 +1638,10 @@ tbody.gle>tr {
 
 .fa {
 	color: gray;
+}
+
+.fa:hover {
+	color: #555;
 }
 
 .fa-7x {
@@ -1928,9 +1971,13 @@ tbody.gle>tr {
 }
 
 .scrolltable tbody {
-	max-height: 590px;
 	overflow-y: auto;
 	overflow-x: hidden;
+}
+
+.scrolltable_header{
+	position: absolute;
+	margin-top: -25px;
 }
 
 .toggle_fa_off i{

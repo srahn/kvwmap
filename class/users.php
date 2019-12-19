@@ -871,10 +871,10 @@ class user {
 
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
-				JOIN rolle rall ON u.ID = rall.user_id
-				JOIN rolle radm ON radm.stelle_id = rall.stelle_id
+				LEFT JOIN rolle rall ON u.ID = rall.user_id
+				LEFT JOIN rolle radm ON radm.stelle_id = rall.stelle_id
 			";
-			$where[] = "radm.user_id = " . $admin_id;
+			$where[] = "(radm.user_id = ".$admin_id." OR rall.user_id IS NULL)";
 		}
 
 		if ($id > 0) {
@@ -891,9 +891,9 @@ class user {
 
 		$sql = "
 			SELECT DISTINCT
-				u.*
+				u.*, (select max(c.time_id) from u_consume c where u.ID = c.user_id ) as last_timestamp
 			FROM
-				user u" .
+				user u " .
 				$more_from .
 			(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") .
 			$order . "
@@ -1023,12 +1023,13 @@ class user {
 			if($formvars['highlighting'] != '')	$sql.=',highlighting="1"';
 			else $sql.=',highlighting="0"';
 			$sql.=',result_color="'.$formvars['result_color'].'"';
-
-			$sql .= ', runningcoords = "' . ($formvars['runningcoords'] == '' ? '0' : '1') . '"';
-			$sql .= ', showmapfunctions = "' . ($formvars['showmapfunctions'] == '' ? '0' : '1') . '"';
-			$sql .= ', showlayeroptions = "' . ($formvars['showlayeroptions'] == '' ? '0' : '1') . '"';
-			$sql .= ', showrollenfilter = "' . ($formvars['showrollenfilter'] == '' ? '0' : '1') . '"';
-			$sql .= ', menue_buttons = "' . ($formvars['menue_buttons'] == '' ? '0' : '1') . '"';
+			$sql.=',result_hatching = "' . ($formvars['result_hatching'] == '' ? '0' : '1') . '"';
+			$sql.=',result_transparency="'.$formvars['result_transparency'].'"';
+			$sql.=',runningcoords = "' . ($formvars['runningcoords'] == '' ? '0' : '1') . '"';
+			$sql.=',showmapfunctions = "' . ($formvars['showmapfunctions'] == '' ? '0' : '1') . '"';
+			$sql.=',showlayeroptions = "' . ($formvars['showlayeroptions'] == '' ? '0' : '1') . '"';
+			$sql.=',showrollenfilter = "' . ($formvars['showrollenfilter'] == '' ? '0' : '1') . '"';
+			$sql.=',menue_buttons = "' . ($formvars['menue_buttons'] == '' ? '0' : '1') . '"';
 
 			if($formvars['singlequery'] != '') $sql.=',singlequery="1"';
 			else $sql.=',singlequery="0"';
@@ -1179,7 +1180,7 @@ class user {
 	}
 
 	function NeuAnlegen($userdaten) {
-		$stellen = explode(', ',$userdaten['selstellen']);
+		$stellen = array_filter(explode(', ',$userdaten['selstellen']));
 		# Neuen Nutzer anlegen
 		$sql ='INSERT INTO user SET';
 		if($userdaten['id'] != ''){

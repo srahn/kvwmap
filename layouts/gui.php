@@ -18,15 +18,15 @@
 						<table cellpadding=0 cellspacing=0>
 							<tr> 
 								<td colspan="2" id="header"><?php
-									$this->debug->write("<br>Include <b>".LAYOUTPATH."snippets/".HEADER."</b> in gui.php",4);
-									include(LAYOUTPATH."snippets/".HEADER); ?>
+									$this->debug->write("<br>Include <b>".HEADER."</b> in gui.php",4);
+									include(HEADER); ?>
 								</td>
 							</tr>
 							<tr>
 								<td id="menuebar" valign="top" align="center"><?php
 									include(SNIPPETS . "menue.php"); ?>
 								</td>
-								<td align="center" width="100%" height="100%" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif" style="border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
+								<td align="center" width="100%" height="100%" valign="top" style="background: url('<?php echo BG_IMAGE; ?>'); border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
 									<div id="container_paint" style="height:100%; position: relative; overflow: hidden;">		<!-- overflow wird für rausfliegende Legende benötigt und height:100% für den Box-Shadow unter der MapFunctionsBar und Legende -->
 										<script type="text/javascript">
 											currentform = document.GUI;
@@ -54,8 +54,8 @@
 							</tr>
 							<tr> 
 								<td colspan="2" id="footer"><?php
-									$this->debug->write("<br>Include <b>".LAYOUTPATH."snippets/".FOOTER."</b> in gui.php",4);
-									include(LAYOUTPATH."snippets/".FOOTER); ?>
+									$this->debug->write("<br>Include <b>".FOOTER."</b> in gui.php",4);
+									include(FOOTER); ?>
 								</td>
 							</tr>
 						</table>

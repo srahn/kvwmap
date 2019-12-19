@@ -93,7 +93,7 @@ class LogFile {
 			if ($title=="") { $title=="Logdatei"; }
 			fwrite($this->fp,"<html>\n<head>\n<title>".$title."</title>\n</head>\n<body>");
 			if ($headline!="") {
-				$ret=@fwrite($this->fp,"<h1>".$headline."</h2>");
+				$ret=@fwrite($this->fp,"<h1>".$headline."</h1>");
 			}
 		}
 		if ($format=="text") {

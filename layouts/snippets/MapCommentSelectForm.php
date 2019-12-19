@@ -6,9 +6,9 @@
 <br>
 <table border="1" style="border-collapse:collapse; border: 1px solid grey" cellspacing="0" cellpadding="4">
 <tr bgcolor="<?php echo BG_DEFAULT ?>">
-  <th><?php echo $strTime; ?></th>
-	<th><?php echo $strUser; ?></th>
-  <th><?php echo $strComment; ?></th>
+  <th><a href="index.php?go=Kartenkommentar_Waehlen&order=time_id DESC"><?php echo $strTime; ?></a></th>
+	<th><a href="index.php?go=Kartenkommentar_Waehlen&order=Name, Vorname"><?php echo $strUser; ?></a></th>
+  <th><a href="index.php?go=Kartenkommentar_Waehlen&order=comment"><?php echo $strComment; ?></a></th>
   <th>&nbsp;</th>
 </tr>
 <?php

@@ -526,7 +526,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           </td>
 					<td style="width: 24">
 					<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten') AND $this->Stelle->isFunctionAllowed('Nachweise_Geometrie_uebernehmen')){ ?>
-								<input type="radio" title="Geometrie für Geometrieübernahme verwenden" onmousedown="set_ref_geom();" value="<? echo $this->nachweis->Dokumente[$i]['id'];?>" name="ref_geom" <? if($this->formvars['ref_geom'] == $this->nachweis->Dokumente[$i]['id'])echo 'checked'; ?>>
+								<input type="checkbox" title="Geometrie für Geometrieübernahme verwenden" onmousedown="set_ref_geom();" value="<? echo $this->nachweis->Dokumente[$i]['id'];?>" name="ref_geom[]" <? if($this->formvars['ref_geom'] == $this->nachweis->Dokumente[$i]['id'])echo 'checked'; ?>>
 					<? } ?>
 					</td>
         </tr>

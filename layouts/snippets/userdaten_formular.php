@@ -210,15 +210,15 @@ else {
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEmail;?></th>
 					<td style="border-bottom:1px solid #C3C7C3"><input name="email" type="text" value="<?php echo $this->formvars['email']; ?>" size="50" maxlength="100"></td>
 				</tr>
-				<tr class="mehr-toggle" style="display: none;">
+				<tr class="mehr-toggle">
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOrganisation;?></th>
 					<td style="border-bottom:1px solid #C3C7C3"><input name="organisation" type="text" value="<?php echo $this->formvars['organisation']; ?>" size="50" maxlength="255" style="width: 100%"></td>
 				</tr>
-				<tr class="mehr-toggle" style="display: none;">
+				<tr class="mehr-toggle">
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPosition;?></th>
 					<td style="border-bottom:1px solid #C3C7C3"><input name="position" type="text" value="<?php echo $this->formvars['position']; ?>" size="50" maxlength="255" style="width: 100%"></td>
 				</tr>
-				<tr>
+				<!--tr>
 					<td>&nbsp;</td><td>
 						<a class="small-gray" href="#" onclick="$('.mehr-toggle').toggle();$('#mehr_button').toggleClass('fa-angle-down, fa-angle-up');">
 							<span class="mehr-toggle"><?php echo $this->strShowMore; ?></span>
@@ -226,7 +226,7 @@ else {
 							<i id="mehr_button" class="fa fa-angle-down" aria-hidden="true"></i>
 						</a>
 					</td>
-				</tr>
+				</tr-->
 			</table>
 		</td>
 	</tr><?

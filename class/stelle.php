@@ -145,6 +145,7 @@ class stelle {
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
 		$this->hist_timestamp = $rs['hist_timestamp'];
 		$this->default_user_id = $rs['default_user_id'];
+		$this->style = $rs['style'];
 	}
 
   function checkClientIpIsOn() {
@@ -434,8 +435,8 @@ class stelle {
 
 		if ($user_id > 0 AND !in_array($this->id, $admin_stellen)) {
 			$where = "
-				JOIN `rolle` AS r ON s.ID = r.stelle_id
-				WHERE r.user_id = " . $user_id . "
+				LEFT JOIN `rolle` AS r ON s.ID = r.stelle_id
+				WHERE r.user_id = ".$user_id." OR r.stelle_id IS NULL
 			";
 		}
 
@@ -960,20 +961,34 @@ class stelle {
 			WHERE
 				stelle.ID = " . $this->id . "
 		";
-		#echo '<br>SQL: ' . $sql;
+		#echo '<br>SQL zur Aktualisierung der LayerParams: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+	#	$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 
-		$sql = "UPDATE rolle SET layer_params = ";
-		$sql.= "COALESCE((SELECT GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"')) ";
-		$sql.= "FROM layer_parameter p, stelle ";
-		$sql.= "WHERE FIND_IN_SET(p.id, stelle.selectable_layer_params) ";
-		$sql.= "AND stelle.ID = rolle.stelle_id), '') ";
-		$sql.= "WHERE rolle.stelle_id = ".$this->id;
+		$sql = "
+			UPDATE
+				rolle
+			SET
+				layer_params = COALESCE(
+					(
+						SELECT
+							GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"'))
+						FROM
+							layer_parameter p, stelle
+						WHERE
+							FIND_IN_SET(p.id, stelle.selectable_layer_params) AND
+							stelle.ID = rolle.stelle_id
+					),
+					''
+				)
+			WHERE
+				rolle.stelle_id = " . $this->id . "
+		";
+		#echo '<br>SQL zum Aktualisieren der Layerparameter in den Rollen: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+	#	$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 	}
 
 	function updateLayer($formvars){
@@ -1368,6 +1383,7 @@ class stelle {
 	}
 
 	function parse_path($database, $path, $privileges, $attributes = NULL){
+		$path = str_replace(array("\r\n", "\n"), ' ', $path);
 		$distinctpos = strpos(strtolower($path), 'distinct');
 		if($distinctpos !== false && $distinctpos < 10){
 			$offset = $distinctpos+8;
@@ -1550,20 +1566,33 @@ class stelle {
 	}
 
 	function getWappen() {
-		$sql ='SELECT wappen FROM stelle WHERE ID='.$this->id;
-		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		$rs=mysql_fetch_array($query);
+		$sql = "
+			SELECT
+				wappen
+			FROM
+				stelle
+			WHERE
+				ID = " . $this->id . "
+		";
+		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>" . $sql, 4);
+		$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
+		$rs = mysql_fetch_array($query);
 		return $rs['wappen'];
 	}
-	
+
 	function getWappenLink() {
-		$sql ='SELECT wappen_link FROM stelle WHERE ID='.$this->id;
-		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		$rs=mysql_fetch_array($query);
+		$sql = "
+			SELECT
+				wappen_link
+			FROM
+				stelle
+			WHERE ID = " . $this->id . "
+		";
+		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>" . $sql, 4);
+		$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
+		$rs = mysql_fetch_array($query);
 		return $rs['wappen_link'];
 	}
 }
