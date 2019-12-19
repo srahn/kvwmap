@@ -10988,7 +10988,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->output();
 	}
 
-	function Attributeditor_speichern(){
+	function Attributeditor_speichern() {
 		switch (true) {
 			case (!empty($this->formvars['selected_layer_id']) && empty($this->formvars['selected_datatype_id'])) :
 				$this->Layerattribute_speichern();
@@ -11014,6 +11014,21 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->attributes = $mapdb->read_datatype_attributes($this->formvars['selected_datatype_id'], NULL, NULL, true);
 		$mapdb->save_datatype_attributes($this->attributes, $this->database, $this->formvars);
 		$this->Attributeditor();
+	}
+
+	/*
+	* Funktion speichert die Einstellungen der Attribute aus dem Attributeditor Form für
+	* die Attribute von for_attributes_selected_layer_id. Die Einstellungen können von einem anderen Layer stammen.
+	* Vor Layerattribute_speichern wird als selected_layer_id for_attributes_selected_layer_id genommen.
+	* Damit werden die Attribute von dem Layer abgefragt, für die die Formularwerte übernommen werden sollen.
+	* Nach dem Speichern wird der Attributeditor für den layer mit for_attributes_selected_layer_id geöffnet.
+	*/
+	function Attributeditor_takeover_attributes() {
+		$from_layer_id = $this->formvars['selected_layer_id'];
+		$to_layer_id = $this->formvars['for_attributes_selected_layer_id'];
+		$this->formvars['selected_layer_id'] = $to_layer_id;
+		$this->add_message('info', 'Einstellungen der Attribute von Layer ID: ' . $from_layer_id . ' für die Attribute des Layers ID: ' . $to_layer_id . ' übernommen.<br>Ordne Attribute ohne Einstellungen neu ein!');
+		$this->Layerattribute_speichern();
 	}
 
   function layer_attributes_privileges(){
@@ -18247,56 +18262,62 @@ class db_mapObj{
 		}
 	}
 
+	/*
+	* Speichert die Einstellungen, die in formvars enthalten sind für die Attribute, die in $attributes angegeben sind.
+	* Formvars, die nicht zu Attributen in $attributes passen werden ignoriert.
+	*/
 	function save_layer_attributes($attributes, $database, $formvars){
 		global $supportedLanguages;
 
-		for($i = 0; $i < count($attributes['name']); $i++){
-			$alias_rows = "`alias` = '" . $formvars['alias_' . $attributes['name'][$i]] . "',";
-			foreach($supportedLanguages as $language) {
-				if ($language != 'german') {
-					$alias_rows .= "`alias_" . $language . "` = '" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "',";
+		for ($i = 0; $i < count($attributes['name']); $i++) {
+			if ($formvars['attribute_' . $attributes['name'][$i]] != '') {
+				$alias_rows = "`alias` = '" . $formvars['alias_' . $attributes['name'][$i]] . "',";
+				foreach ($supportedLanguages as $language) {
+					if ($language != 'german') {
+						$alias_rows .= "`alias_" . $language . "` = '" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "',";
+					}
 				}
+				if ($formvars['visible_' . $attributes['name'][$i]] != 2){
+					$formvars['vcheck_attribute_'.$attributes['name'][$i]] = '';
+					$formvars['vcheck_operator_'.$attributes['name'][$i]] = '';
+					$formvars['vcheck_value_'.$attributes['name'][$i]] = '';
+				}
+				if ($formvars['group_' . $attributes['name'][$i]] == '' AND $last_group != ''){
+					$formvars['group_' . $attributes['name'][$i]] = $last_group;
+				}
+				$last_group = $formvars['group_' . $attributes['name'][$i]];
+				$rows = "
+					`order` = " . ($formvars['order_' . $attributes['name'][$i]] == '' ? 0 : $formvars['order_' . $attributes['name'][$i]]) . ",
+					`name` = '" . $attributes['name'][$i] . "', " .
+					$alias_rows . "
+					`form_element_type` = '" . $formvars['form_element_' . $attributes['name'][$i]] . "',
+					`options` = '" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "',
+					`tooltip` = '" . $formvars['tooltip_' . $attributes['name'][$i]] . "',
+					`group` = '" . $formvars['group_' . $attributes['name'][$i]] . "',
+					`arrangement` = " . ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? 0 : $formvars['arrangement_' . $attributes['name'][$i]]) . ",
+					`labeling` = " . ($formvars['labeling_' . $attributes['name'][$i]] == '' ? 0 : $formvars['labeling_' . $attributes['name'][$i]]) . ",
+					`raster_visibility` = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
+					`dont_use_for_new`= " . ($formvars['dont_use_for_new_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attributes['name'][$i]]) . ",
+					`mandatory` = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
+					`quicksearch`= " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
+					`visible`= ".($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]).",
+					`vcheck_attribute`= '" . $formvars['vcheck_attribute_'.$attributes['name'][$i]]."',
+					`vcheck_operator`= '" . $formvars['vcheck_operator_'.$attributes['name'][$i]]."',
+					`vcheck_value`= '" . $formvars['vcheck_value_'.$attributes['name'][$i]]."'
+				";
+				$sql = "
+					INSERT INTO
+						`layer_attributes`
+					SET
+						`layer_id` = " . $formvars['selected_layer_id'] . ", " .
+						$rows . "
+					ON DUPLICATE KEY UPDATE " .
+						$rows . "
+				";
+				#echo '<br>Sql: ' . $sql;
+				$this->debug->write("<p>file:kvwmap class:Document->save_layer_attributes :",4);
+				$database->execSQL($sql, 4, 1);
 			}
-			if($formvars['visible_' . $attributes['name'][$i]] != 2){
-				$formvars['vcheck_attribute_'.$attributes['name'][$i]] = '';
-				$formvars['vcheck_operator_'.$attributes['name'][$i]] = '';
-				$formvars['vcheck_value_'.$attributes['name'][$i]] = '';
-			}
-			if($formvars['group_' . $attributes['name'][$i]] == '' AND $last_group != ''){
-				$formvars['group_' . $attributes['name'][$i]] = $last_group;
-			}
-			$last_group = $formvars['group_' . $attributes['name'][$i]];
-			$rows = "
-				`order` = " . $formvars['order_' . $attributes['name'][$i]] . ",
-				`name` = '" . $attributes['name'][$i] . "', " .
-				$alias_rows . "
-				`form_element_type` = '" . $formvars['form_element_' . $attributes['name'][$i]] . "',
-				`options` = '" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "',
-				`tooltip` = '" . $formvars['tooltip_' . $attributes['name'][$i]] . "',
-				`group` = '" . $formvars['group_' . $attributes['name'][$i]] . "',
-				`arrangement` = " . $formvars['arrangement_' . $attributes['name'][$i]] . ",
-				`labeling` = " . $formvars['labeling_' . $attributes['name'][$i]] . ",
-				`raster_visibility` = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
-				`dont_use_for_new`= " . ($formvars['dont_use_for_new_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attributes['name'][$i]]) . ",
-				`mandatory` = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
-				`quicksearch`= " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
-				`visible`= ".($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]).",
-				`vcheck_attribute`= '" . $formvars['vcheck_attribute_'.$attributes['name'][$i]]."',
-				`vcheck_operator`= '" . $formvars['vcheck_operator_'.$attributes['name'][$i]]."',
-				`vcheck_value`= '" . $formvars['vcheck_value_'.$attributes['name'][$i]]."'
-			";
-			$sql = "
-				INSERT INTO
-					`layer_attributes`
-				SET
-					`layer_id` = " . $formvars['selected_layer_id'] . ", " .
-					$rows . "
-				ON DUPLICATE KEY UPDATE " .
-					$rows . "
-			";
-			#echo '<br>Sql: ' . $sql;
-			$this->debug->write("<p>file:kvwmap class:Document->save_layer_attributes :",4);
-			$database->execSQL($sql, 4, 1);
 		}
 	}
 

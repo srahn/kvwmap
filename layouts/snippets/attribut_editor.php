@@ -217,10 +217,11 @@ function alias_replace(name){
 	<tr>
     <td align="center">
 			<span class="px17 fetter"><? echo $strLayer;?>:</span>
-      <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="submitLayerSelector();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
-      <option value=""><?php echo $strPleaseSelect; ?></option>
-        <?
-    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
+      <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="submitLayerSelector();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>><?
+			$layer_options = array(); ?>
+      <option value=""><?php echo $strPleaseSelect; ?></option><?
+				for ($i = 0; $i < count($this->layerdaten['ID']); $i++) {
+					$layer_options[] = array('value' => $this->layerdaten['ID'][$i], 'output' => $this->layerdaten['Bezeichnung'][$i]);
     			echo '<option';
     			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
     				echo ' selected';
@@ -504,7 +505,35 @@ function alias_replace(name){
 		if(count($this->attributes) > 0 AND ($this->layer['editable'] OR $this->formvars['selected_datatype_id'])){ ?>
 			<tr>
 				<td align="center" style="height: 50px">
-					<input type="submit" name="go_plus" value="speichern">
+					<input id="attribut_editor_save" type="submit" name="go_plus" value="speichern"><?
+					echo FormObject::createSelectField(
+						'for_attributes_selected_layer_id',
+						$layer_options,
+						'',
+						1,
+						'display: none;',
+						'',
+						'',
+						'',
+						'',
+						$strPleaseSelect
+					); ?>
+					<input id="attributes_for_other_layer_button" style="display: none; margin-left: 10px" type="submit" name="go_plus" value="Attributeinstellungen für ausgewählten Layer übernehmen">
+					<span style="margin-left: 10px;">
+					<i
+						id="show_attributes_for_other_layer_button"
+						title="Magische Funktion um die Attributeinstellungen auf gleich benannte Attribute eines anderen Layers zu übertragen. Vorgenommene Änderungen müssen vorher gespeichert werden!"
+						class="fa fa-magic"
+						aria-hidden="true"
+						onclick="$('#attributes_for_other_layer_button, #for_attributes_selected_layer_id, #attribut_editor_save, #show_attributes_for_other_layer_button, #close_attributes_for_other_layer_button').toggle();"
+					></i>
+					<i
+						id="close_attributes_for_other_layer_button"
+						title="Den Spuk wieder schließen."
+						style="display: none;" class="fa fa-times"
+						aria-hidden="true"
+						onclick="$('#attributes_for_other_layer_button, #for_attributes_selected_layer_id, #attribut_editor_save, #show_attributes_for_other_layer_button, #close_attributes_for_other_layer_button').toggle();"
+					></i>
 				</td>
 			</tr><?php
 		}	

@@ -1292,6 +1292,11 @@ function go_switch($go, $exit = false) {
 				$GUI->Attributeditor_speichern();
 			} break;
 
+			case 'Attributeditor_Attributeinstellungen für ausgewählten Layer übernehmen' : {
+				$GUI->checkCaseAllowed('Attributeditor');
+				$GUI->Attributeditor_takeover_attributes();
+			} break;
+
 			case 'Datentypen_Anzeigen' : {
 				$GUI->checkCaseAllowed($go);
 				$GUI->DatentypenAnzeigen();
