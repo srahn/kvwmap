@@ -249,7 +249,7 @@ class GUI {
 
 		if (empty($error_msg)) {
 			if (strtolower($this->formvars['format']) == 'json' OR $this->formvars['only_main']) {
-				include_once(WWWROOT . CUSTOM_PATH . 'layouts/' . $snippet_file);
+				include_once(WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/snippets/' . $snippet_file);
 			}
 		}
 		else {
