@@ -1,6 +1,7 @@
 <?php
 	global $supportedLanguages;
-	include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php'); ?>
+	include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php'); 
+	include_once(CLASSPATH . 'FormObject.php');		?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script src="funktionen/tooltip.js" language="JavaScript"	type="text/javascript"></script>
 <script type="text/javascript">
@@ -263,7 +264,6 @@
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDdlAttribute; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3"><?php
 							include_once(CLASSPATH . 'LayerAttribute.php');
-							include_once(CLASSPATH . 'FormObject.php');
 							$attributes = LayerAttribute::find($this, 'layer_id = ' . $this->formvars['Layer_ID']);
 							echo FormObject::createSelectField(
 								'ddl_attribute',
