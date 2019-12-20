@@ -7295,7 +7295,7 @@ echo '			</ul>
 			$this->formvars['connectiontype'] = MS_WMS;
 			$this->formvars['transparency'] = 100;
 			$wms_epsg_codes = array_flip(explode(' ', str_replace('epsg:', '', strtolower($this->formvars['srs'][0]))));
-			if($wms_epsg_codes[$this->user->rolle->epsg_code] !== '')$this->formvars['epsg_code'] = $this->user->rolle->epsg_code;
+			if($wms_epsg_codes[$this->user->rolle->epsg_code] !== NULL)$this->formvars['epsg_code'] = $this->user->rolle->epsg_code;
 			else $this->formvars['epsg_code'] = 4326;
 			if(strpos($this->formvars['wms_url'], '?') !== false)$this->formvars['wms_url'] .= '&';
 			else $this->formvars['wms_url'] .= '?';
@@ -14278,12 +14278,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             $request=$layerset[$i]['connection'];
 
             # GetMap durch GetFeatureInfo ersetzen
-            $request = str_replace('getmap','GetFeatureInfo',strtolower($request));
+            $request = str_ireplace('getmap','GetFeatureInfo',$request);
             $request = $request.'&REQUEST=GetFeatureInfo&SERVICE=WMS';
 
             # Anzufragenden Layernamen
 						if(strpos(strtolower($request), 'query_layers') === false){
-							$reqStr=explode('&',strstr(strtolower($request),'layers='));
+							$reqStr=explode('&',stristr($request,'layers='));
 							$layerStr=explode('=',$reqStr[0]);
 							$request .='&QUERY_LAYERS='.$layerStr[1];
 						}
