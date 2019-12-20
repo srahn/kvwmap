@@ -14278,7 +14278,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             $request=$layerset[$i]['connection'];
 
             # GetMap durch GetFeatureInfo ersetzen
-            $request = str_replace('getmap','GetFeatureInfo',strtolower($request));
+            $request = str_ireplace('getmap','GetFeatureInfo',$request);
             $request = $request.'&REQUEST=GetFeatureInfo&SERVICE=WMS';
 
             # Anzufragenden Layernamen
