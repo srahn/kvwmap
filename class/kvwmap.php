@@ -14265,7 +14265,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
             # Anzufragenden Layernamen
 						if(strpos(strtolower($request), 'query_layers') === false){
-							$reqStr=explode('&',strstr(strtolower($request),'layers='));
+							$reqStr=explode('&',stristr($request,'layers='));
 							$layerStr=explode('=',$reqStr[0]);
 							$request .='&QUERY_LAYERS='.$layerStr[1];
 						}
