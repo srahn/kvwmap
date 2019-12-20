@@ -354,9 +354,7 @@
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnection; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<div id="connection_div" <? if($this->formvars['connectiontype'] == MS_POSTGIS){echo 'style="display: none"';} ?>>
-								<textarea id="connection" name="connection" cols="33" rows="2"><?
-									echo $this->formvars['connection']; ?>
-								</textarea>
+								<textarea id="connection" name="connection" cols="33" rows="2"><?	echo $this->formvars['connection']; ?></textarea>
 								<input
 									type="button"
 									onclick="testConnection();"
