@@ -13,6 +13,12 @@ class Layer extends MyObject {
 		return $layer->find_where($where);
 	}
 
+	public static	function find_by_name($gui, $name) {
+		$layer = new Layer($gui);
+		$layers = $layer->find_where("Name LIKE '" . $name . "'");
+		return $layers[0];
+	}
+
 	public static function find_by_obergruppe_und_name($gui, $obergruppe_id, $layer_name) {
 		$layer = new Layer($gui);
 		$result = $layer->find_by_sql(
