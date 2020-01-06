@@ -963,7 +963,7 @@ class stelle {
 		";
 		#echo '<br>SQL zur Aktualisierung der LayerParams: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
-	#	$query = mysql_query($sql,$this->database->dbConn);
+		$query = mysql_query($sql,$this->database->dbConn);
 		if ($query == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 
 		$sql = "
