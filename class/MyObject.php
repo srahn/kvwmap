@@ -86,13 +86,15 @@ class MyObject {
 		$this->debug->write('#mysql find_by_sql sql:<br> ' . $sql.';<br>',4);
 		$this->database->execSQL($sql);
 		$results = array();
-		while($this->data = $this->database->result->fetch_assoc()) {
-			if($hierarchy_key == NULL){
+		while ($this->data = $this->database->result->fetch_assoc()) {
+			if ($hierarchy_key == NULL) {
 				$results[] = clone $this;
 			}
-			else{
+			else {
 				$results[$this->data[$this->identifier]] = clone $this;		// create result-array as associative array
-				if($this->data[$hierarchy_key] > 0 AND $results[$this->data[$hierarchy_key]] != NULL)$results[$this->data[$hierarchy_key]]->children_ids[] = $this->data[$this->identifier];		// add this id to parents children array
+				if ($this->data[$hierarchy_key] > 0 AND value_of($results, $this->data[$hierarchy_key]) != NULL) {
+					$results[$this->data[$hierarchy_key]]->children_ids[] = $this->data[$this->identifier];		// add this id to parents children array
+				}
 			}
 		}
 		return $results;

@@ -12,6 +12,7 @@ class rolle {
 	static $layer_params;
 	var $minx;
 	var $language;
+	var $newtime;
 
 	function rolle($user_id, $stelle_id, $database) {
 		global $debug;
@@ -446,7 +447,7 @@ class rolle {
 				echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
 			}
 			else {
-				while ($param = $this->database->result->fetch_row()) {
+				while ($param = $this->database->result->fetch_assoc()) {
 					$sql = $param['options_sql'];
 					$sql = str_replace('$user_id', $this->user_id, $sql);
 					$sql = str_replace('$stelle_id', $this->stelle_id, $sql);

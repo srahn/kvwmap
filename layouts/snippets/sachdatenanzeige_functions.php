@@ -1,5 +1,7 @@
 <?
-if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
+if (value_of($this->formvars, 'anzahl') == '') {
+	$this->formvars['anzahl'] = 0;
+}
 
 include('funktionen/input_check_functions.php');
 ?>

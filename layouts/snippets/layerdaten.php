@@ -1,9 +1,10 @@
-<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" width="1000px">
+<?php
+	$first = $nextfirst = '';
+?><table border="0" cellpadding="5" cellspacing="0" width="1000px">
   <tr align="center"> 
     <td><h2><?php echo $this->titel; ?></h2></td>
-  </tr>
-
-<? if($this->formvars['order']=="Name" or $this->formvars['order']=="Alias") { ?>
+  </tr><?
+	if ($this->formvars['order']=="Name" or $this->formvars['order']=="Alias") { ?>
   <tr height="50px" valign="bottom">
     <td>
     <? $umlaute=array("Ä","Ö","Ü");

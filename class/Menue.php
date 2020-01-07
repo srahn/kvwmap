@@ -2,7 +2,7 @@
 include_once(CLASSPATH . 'MyObject.php');
 include_once(CLASSPATH . 'MyAttribute.php');
 class Menue extends MyObject {
-
+	var $obermenue;
 	static $write_debug = false;
 
 	function Menue($gui) {
@@ -198,13 +198,13 @@ class Menue extends MyObject {
 				$this->gui->user->rolle->language
 			)
 		);
-		if ($link['query'] == '') {
+		if (value_of($link, 'query') == '') {
 			$is_selected = false;
 		}
 		else {
 			parse_str($link['query'], $link_params);
 			foreach($link_params AS $key => $value) {
-				if ($formvars[$key] != $value) {
+				if (value_of($formvars, $key) != $value) {
 					$is_selected = false;
 				}
 			}
@@ -247,6 +247,7 @@ class Menue extends MyObject {
 
 
 	function get_href($class, $target) {
+		$href = '';
 		$link = replace_params(
 			$this->get('links'),
 			rolle::$layer_params,
@@ -256,7 +257,7 @@ class Menue extends MyObject {
 			$this->gui->user->rolle->language
 		);
 		# define click events
-		if($this->obermenue){
+		if ($this->obermenue){
 			$href .= "javascript:changemenue(".$this->get('id').", ".$this->gui->user->rolle->menu_auto_close.");";
 		}
 		else {
@@ -284,6 +285,7 @@ class Menue extends MyObject {
 	}
 
 	function html() {
+		$html = '';
 		$class  = $this->get_class();
 		$target = $this->get_target();
 		$href = $this->get_href($class, $target);

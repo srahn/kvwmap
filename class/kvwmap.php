@@ -71,6 +71,10 @@ class GUI {
 	var $class_load_level;
 	var $layer_id_string;
 	var $noMinMaxScaling;
+	var $stelle_id;
+	var $angle_attribute;
+	var $titel;
+	var $PasswordError;
 
 	# Konstruktor
 	function GUI($main, $style, $mime_type) {
@@ -8263,7 +8267,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	function LayerAnzeigen() {
 		# Abfragen aller Layer
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-		if($this->formvars['order'] == ''){
+		if (value_of($this->formvars, 'order') == '') {
 			$this->formvars['order'] = 'Name';
 		}
 		$this->layerdaten = $mapDB->getall_Layer($this->formvars['order'], false, $this->user->id, $this->Stelle->id);
