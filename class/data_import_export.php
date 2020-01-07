@@ -1147,7 +1147,7 @@ class data_import_export {
     }
     $sql.= $orderby;
 		$data_sql = $sql;
-		#echo $sql;
+		#echo '<br>Frage Daten ab mit SQL: '. $sql;
 		
     $temp_table = 'shp_export_'.rand(1, 10000);
     $sql = 'CREATE TABLE public.'.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, falls Argumentliste durch das SQL zu lang
