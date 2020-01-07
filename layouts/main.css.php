@@ -1588,6 +1588,11 @@ tbody.gle>tr {
 	border-right: 1px solid #CCCCCC;
 }
 
+#rollenwahl_main_div {
+	width: 830px; 
+	height: 430px
+}
+
 #rollenwahl_optionen_div {
 	background:rgb(248, 248, 249);
 	margin: 10px;
