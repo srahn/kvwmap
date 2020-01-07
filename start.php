@@ -12,17 +12,17 @@ $GUI->echo = false;
 #################################################################################
 # Setzen der Konstante, ob in die Datenbank geschrieben werden soll oder nicht.
 # Kann z.B. zu Testzwecken ausgeschaltet werden.
-if ($GUI->formvars['disableDbWrite']=='1') {
+if (array_key_exists('disableDbWrite', $GUI->formvars) and $GUI->formvars['disableDbWrite'] == '1') {
 	define('DBWRITE',false);
 }
 else {
-	define('DBWRITE',DEFAULTDBWRITE);
+	define('DBWRITE', DEFAULTDBWRITE);
 }
 if (!DBWRITE) { echo '<br>Das Schreiben in die Datenbank wird unterdrückt!'; }
 
 # Öffnen der Datenbankverbindung zur Kartenverwaltung (MySQL)
 # Erzeugen des MYSQL-DB-Objekts, falls es noch nicht durch den Login erzeugt wurde
-if ($userDb == NULL){
+if (!isset($userDb)) {
 	$userDb = new database();
 	$userDb->host = MYSQL_HOST;
 	$userDb->user = MYSQL_USER;
@@ -30,15 +30,13 @@ if ($userDb == NULL){
 	$userDb->dbName = MYSQL_DBNAME;
 }
 $GUI->database = $userDb;
-if (!$GUI->database->open()) {
+if ($GUI->database->open() != 0) {
   # Prüfen ob eine neue Datenbank angelegt werden soll
-  if ($GUI->formvars['go']=='install-mysql-db') {
+  if ($GUI->formvars['go'] == 'install-mysql-db') {
     # Anlegen der neuen Datenbank
     # Herstellen der Verbindung mit defaultwerten
-    $GUI->dbConn=mysql_connect(MYSQL_HOST,'kvwmap','kvwmap');
-    $GUI->debug->write("MySQL Datenbank mit ID: ".$GUI->dbConn." und Name: mysql auswählen.",4);
-    # Auswählen der Datenbank mysql
-    mysql_select_db('mysql',$GUI->dbConn);
+		$GUI->mysqli = new mysqli(MYSQL_HOST, 'kvwmap', 'kvwmap', 'mysql');
+    $GUI->debug->write('MySQL Datenbankverbindung hergestellt mit (' . MYSQL_HOST . ', kvwmap, kvwmap, mysql) thread_id: ' . $GUI->mysqli->thread_id, 4);
     # Erzeugen der leeren Datenbank für kvwmap
     $sql = 'CREATE DATABASE '.$GUI->database->dbName.' CHARACTER SET latin1 COLLATE latin1_german2_ci';
     $GUI->database->execSQL($sql,4,0);
@@ -49,7 +47,7 @@ if (!$GUI->database->open()) {
       $GUI->database->execSQL($sql,4,0);
     }
     # Abfrage ob Zugang zur neuen Datenbank jetzt möglich
-    if (mysql_select_db($GUI->database->dbName,$GUI->dbConn)) {
+    if ($GUI->database->select_db($GUI->database->dbName)) {
       $GUI->debug->write("Verbindung zur MySQL Datenbank erfolgreich hergestellt.",4);
     }
     else {
@@ -90,9 +88,9 @@ else {
 # Angeben, dass die Texte in latin1 zurückgegeben werden sollen
 $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
 
-/**
-	Hier findet sich die gesamte Loging für Login und Reggistrierung, sowie Stellenwechsel
-**/
+/*
+*	Hier findet sich die gesamte Loging für Login und Reggistrierung, sowie Stellenwechsel
+*/
 #$GUI->debug->write('Formularvariablen: ' . print_r($GUI->formvars, true), 4, $GUI->echo);
 # logout
 if (is_logout($GUI->formvars)) {
@@ -266,7 +264,7 @@ else {
 
 # $show_login_form = true nach login cases 3, 6, 7, 8, 9, 10
 if (!$show_login_form) {
-	if (is_new_stelle($GUI->formvars['Stelle_ID'], $GUI->user)) {
+	if (is_new_stelle($GUI->formvars, $GUI->user)) {
 		$GUI->debug->write('Neue Stelle ' . $GUI->formvars['Stelle_ID'] . ' angefragt.', 4, $GUI->echo);
 		$GUI->Stelle = new stelle($GUI->formvars['Stelle_ID'], $GUI->database);
 	}
@@ -276,7 +274,7 @@ if (!$show_login_form) {
 	}
 
 	# check stelle wenn noch nicht angemeldet gewesen, wenn noch nicht in Stelle angemeldet auch wenn stelle gewechselt wird.
-	if (is_login($GUI->formvars) OR !is_logged_in_stelle() OR is_new_stelle($GUI->formvars['Stelle_ID'], $GUI->user)) {
+	if (is_login($GUI->formvars) OR !is_logged_in_stelle() OR is_new_stelle($GUI->formvars, $GUI->user)) {
 		$GUI->debug->write('Zugang zu Stelle ' . $GUI->Stelle->id . ' wird angefragt.', 4, $GUI->echo);
 
 		$GUI->user->Stellen = $GUI->user->getStellen(0);
@@ -353,7 +351,7 @@ if ($show_login_form) {
 else {
 	$GUI->debug->write('Lade Stelle und ordne Rolle dem User zu.', 4, $GUI->echo);
 
-	$GUI->debug->write('Ordne Nutzer: ' . $GUI->user->id . ' Stelle: ' . $GUI->Stelle->ID . ' zu.', 4, $GUI->echo);
+	$GUI->debug->write('Ordne Nutzer: ' . $GUI->user->id . ' Stelle: ' . $GUI->user->stelle_id . ' zu.', 4, $GUI->echo);
 	$GUI->user->setRolle($GUI->user->stelle_id);
 
 	# Alles was man immer machen muss bevor die go's aufgerufen werden
@@ -474,7 +472,9 @@ else {
 	    }
 		}
 		# Zurücksetzen des histtimestamps
-		if($GUI->user->rolle->hist_timestamp != '')$GUI->setHistTimestamp();
+		if ($GUI->user->rolle->hist_timestamp_de != '') {
+			$GUI->setHistTimestamp();
+		}
 		# Zurücksetzen der veränderten Klassen
 		#$GUI->user->rolle->resetClasses();
 		if (defined('LOGIN_ROUTINE') AND LOGIN_ROUTINE != '') {
@@ -487,11 +487,12 @@ else {
 	}
 
 	# Anpassen der Kartengröße an das Browserfenster
-	if ($GUI->user->rolle->auto_map_resize AND $GUI->formvars['browserwidth'] != '') {
+	if ($GUI->user->rolle->auto_map_resize AND value_of($GUI->formvars, 'browserwidth') != '') {
 		$GUI->resizeMap2Window();
 	}
 
-	if(isset($_FILES)) {
+	if (isset($_FILES)) {
+		$forbidden_files = array();
 		foreach ($_FILES AS $datei) {
 	    if (!is_array($datei['name'])) # $datei so umformen als wäre es ein multi file upload
 	      $datei = array_map(
@@ -522,11 +523,11 @@ else {
 }
 
 /**
- Functions
+* Functions
 **/
 
 function is_logout($formvars) {
-	return ($formvars['go'] == 'logout');
+	return (array_key_exists('go', $formvars) AND $formvars['go'] == 'logout');
 }
 
 function is_logged_in() {
@@ -549,7 +550,7 @@ function is_logged_out() {
 }
 
 function is_gast_login($formvars, $gast_stellen) {
-	return $formvars['gast'] != '' AND $formvars['login_name'] == '' AND in_array($formvars['gast'], $gast_stellen);
+	return array_key_exists('gast', $formvars) AND $formvars['gast'] != '' AND $formvars['login_name'] == '' AND in_array($formvars['gast'], $gast_stellen);
 }
 
 function has_width_and_height($var) {
@@ -557,15 +558,15 @@ function has_width_and_height($var) {
 }
 
 function is_login($formvars) {
-	return $formvars['login_name'] != '' AND $formvars['passwort'] != '';
+	return array_key_exists('login_name', $formvars) AND $formvars['login_name'] != '' AND array_key_exists('passwort', $formvars) AND $formvars['passwort'] != '';
 }
 
 function is_agreement_accepted($user) {
 	return $user->agreement_accepted == 1;
 }
 
-function is_new_stelle($new_stelle_id, $user) {
-	return ($new_stelle_id != '' AND $new_stelle_id != $user->stelle_id);
+function is_new_stelle($formvars, $user) {
+	return (array_key_exists('Stelle_ID', $formvars) AND $formvars['Stelle_ID'] != '' AND $formvars['Stelle_ID'] != $user->stelle_id);
 }
 
 function is_user_member_in_stelle($user_stelle_id, $allowed_stellen_ids) {
@@ -641,7 +642,7 @@ function is_password_expired($user, $stelle) {
 }
 
 function is_registration($formvars) {
-	return strpos($formvars['go'], 'invitation') === false AND $formvars['token'] != '' AND $formvars['email'] != '' AND $formvars['stelle_id'] != '';
+	return array_key_exists('go', $formvars) AND strpos($formvars['go'], 'invitation') === false AND $formvars['token'] != '' AND $formvars['email'] != '' AND $formvars['stelle_id'] != '';
 }
 
 function checkRegistration($gui) {
@@ -739,7 +740,7 @@ function is_ows_request($formvars) {
 }
 
 function new_options_sent($formvars) {
-	return $formvars['gui'] != '';
+	return (array_key_exists('gui', $formvars) AND $formvars['gui'] != '');
 }
 
 function logout() {

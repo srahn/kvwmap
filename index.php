@@ -73,10 +73,14 @@ ob_start ();    // Ausgabepufferung starten
 
 $formvars = $_REQUEST;
 
-$go = $formvars['go'];
-if($formvars['go_plus'] != '') $go = $go.'_'.$formvars['go_plus'];
+$go = (array_key_exists('go', $formvars) ? $formvars['go'] : '');
+
+if (array_key_exists('go_plus', $formvars) and $formvars['go_plus'] != '') {
+	$go = $go.'_'.$formvars['go_plus'];
+}
+
 ###########################################################################################################
-define(CASE_COMPRESS, false);																																						  #
+define('CASE_COMPRESS', false);																																						
 #																																																					#
 #		ALLE:						  - die Stelle muss die IP checken  																								  #
 #											- die Stelle muss das Passwortalter checken																					#
@@ -99,10 +103,13 @@ define(CASE_COMPRESS, false);																																						  #
 $non_spatial_cases = array('getLayerOptions', 'get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
 $spatial_cases = array('navMap_ajax', 'tooltip_query', 'get_group_legend');
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
+$fast_loading_case = array();
 
-if(in_array($go, $fast_loading_cases))define(FAST_CASE, true);else define(FAST_CASE, false);
+define('FAST_CASE', in_array($go, $fast_loading_cases));
 
-if(CASE_COMPRESS)	include(CLASSPATH.'case_compressor.php');
+if (CASE_COMPRESS) {
+	include(CLASSPATH . 'case_compressor.php');
+}
 
 function include_($filename){
 	if(CASE_COMPRESS AND FAST_CASE){		// ein fast-case und er soll komprimiert werden
@@ -115,13 +122,17 @@ function include_($filename){
 }
 
 # laden der Klassenbibliotheken
-if(!CASE_COMPRESS AND FAST_CASE){
+if (!CASE_COMPRESS AND FAST_CASE) {
 	include (CLASSPATH.'fast_cases/'.$go.'.php');
 }
-else{
-	include_(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');
-	if($userDb == NULL)include_(CLASSPATH.'mysql.php');
+else {
+	include_(WWWROOT . APPLVERSION . 'funktionen/allg_funktionen.php');
+	if (!isset($userDb)) {
+		include_(CLASSPATH . 'mysql.php');
+	}
 	include_(CLASSPATH . 'kvwmap.php');
+	include_(CLASSPATH . 'db_MapObj.php');
+	include_(CLASSPATH . 'Document.php');
 	include_(CLASSPATH . 'Menue.php');
 	include_(CLASSPATH . 'kataster.php');
 	include_(CLASSPATH . 'postgresql.php');
@@ -133,14 +144,12 @@ else{
 }
 
 include(WWWROOT . APPLVERSION . 'start.php');
-
 $GUI->go = $go;
-$GUI->requeststring = $QUERY_STRING;
 
 # Laden der Plugins index.phps
-if(!FAST_CASE){
-	for($i = 0; $i < count($kvwmap_plugins); $i++) {
-		include(PLUGINS.$kvwmap_plugins[$i].'/control/index.php');
+if (!FAST_CASE) {
+	for ($i = 0; $i < count($kvwmap_plugins); $i++) {
+		include(PLUGINS . $kvwmap_plugins[$i] . '/control/index.php');
 	}
 }
 
@@ -167,7 +176,6 @@ function go_switch($go, $exit = false) {
 			$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
 			$GUI->formvars['go'] = $go = $GUI->last_query['go'];
 		}
-
 		switch($go) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;

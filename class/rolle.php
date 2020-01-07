@@ -7,8 +7,11 @@ class rolle {
 	var $debug;
 	var $database;
 	var $loglevel;
+	var $hist_timestamp_de;
 	static $hist_timestamp;
 	static $layer_params;
+	var $minx;
+	var $language;
 
 	function rolle($user_id, $stelle_id, $database) {
 		global $debug;
@@ -126,10 +129,10 @@ class rolle {
 		";
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
-		while ($rs=mysql_fetch_assoc($query)) {
+		while ($rs = $this->database->result->fetch_row()) {
 			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
 				if($rs['Filter'] == ''){
 					$rs['Filter'] = '('.$rs['rollenfilter'].')';
@@ -189,18 +192,18 @@ class rolle {
     }
     #echo $sql;
     $this->debug->write("<p>file:rolle.php class:rolle->getAktivLayer - Abfragen der aktiven Layer zur Rolle:<br>".$sql,4);
-    $queryret=$this->database->execSQL($sql,4, 0);
-    if ($queryret[0]) {
+    $this->database->execSQL($sql,4, 0);
+    if (!$this->database->success) {
       # Fehler bei Datenbankanfrage
-      $ret[0]=1;
-      $ret[1]='<br>Die aktiven Layer konnten nicht abgefragt werden.<br>'.$ret[1];
+      $ret[0] = 1;
+      $ret[1] = '<br>Die aktiven Layer konnten nicht abgefragt werden.<br>'.$ret[1];
     }
     else {
-      while ($rs=mysql_fetch_array($queryret[1])) {
-        $layer[]=$rs['layer_id'];
+      while ($rs = $this->database->result->fetch_row()) {
+        $layer[] = $rs['layer_id'];
       }
-      $ret[0]=0;
-      $ret[1]=$layer;
+      $ret[0] = 0;
+      $ret[1] = $layer;
     }
     return $ret;
   }
@@ -219,9 +222,9 @@ class rolle {
       $sql.=' AND Gruppenname LIKE "'.$GroupName.'"';
     }
     $this->debug->write("<p>file:rolle.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-    while ($rs=mysql_fetch_array($query)) {
+    $this->database->execSQL($sql);
+    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    while ($rs = $this->database->result->fetch_row()) {
       $groups[]=$rs;
     }
     return $groups;
@@ -318,8 +321,8 @@ class rolle {
 		$sql.=' WHERE stelle_id='.$this->stelle_id.' AND user_id='.$this->user_id;		
 		#echo $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle->setHistTimestamp - Setzen der Einstellungen für die Rolle<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$this->debug->write('Neue Werte für Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
 		if($go_next != ''){
 			go_switch($go_next);
@@ -339,15 +342,15 @@ class rolle {
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
 		";
-    #echo $sql;
+		#echo 'Read rolle settings mit sql: ' . $sql;
     $this->debug->write("<p>file:rolle.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) {
+    $this->database->execSQL($sql);
+    if (!$this->database->success) {
       $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
       return 0;
     }
-		if(mysql_num_rows($query) > 0){
-			$rs = mysql_fetch_assoc($query);
+		if ($this->database->result->num_rows > 0){
+			$rs = $this->database->result->fetch_assoc();
 			$this->oGeorefExt=ms_newRectObj();
 			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
@@ -391,12 +394,14 @@ class rolle {
 			$this->legendtype = $rs['legendtype'];
 			$this->print_legend_separate = $rs['print_legend_separate'];
 			$this->print_scale = $rs['print_scale'];
-			if($rs['hist_timestamp'] != ''){
-				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
+			if ($rs['hist_timestamp'] != '') {
+				$this->hist_timestamp_de = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
 			}
-			else
-				rolle::$hist_timestamp = $this->hist_timestamp = '';
+			else {
+				rolle::$hist_timestamp = $this->hist_timestamp_de = '';
+				#rolle::$hist_timestamp = '';
+			}
 			$this->selectedButton=$rs['selectedButton'];
 			$buttons = explode(',', $rs['buttons']);
 			$this->back = in_array('back', $buttons);
@@ -436,12 +441,12 @@ class rolle {
 					id IN (" . $selectable_layer_params . ")
 			";
 			#echo '<br>Sql: ' . $sql;
-			$params_result = $this->database->execSQL($sql, 4, 0);
-			if ($params_result[0]) {
+			$this->database->execSQL($sql, 4, 0);
+			if (!$this->database->success) {
 				echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
 			}
 			else {
-				while ($param = mysql_fetch_assoc($params_result[1])) {
+				while ($param = $this->database->result->fetch_row()) {
 					$sql = $param['options_sql'];
 					$sql = str_replace('$user_id', $this->user_id, $sql);
 					$sql = str_replace('$stelle_id', $this->stelle_id, $sql);
@@ -501,7 +506,7 @@ class rolle {
       $ret[1]='<br>Fehler bei der Abfrage der letzten Zugriffszeit.<br>'.$ret[1];
     }
     else {
-      $rs=mysql_fetch_array($queryret[1]);
+      $rs = $this->database->result->fetch_row();
       $ret[0]=0;
       $ret[1]=$rs;
     }
@@ -521,7 +526,7 @@ class rolle {
       $ret[1]='<br>Fehler bei der Abfrage der letzten Zugriffszeit.<br>'.$ret[1];
     }
     else {
-      $rs=mysql_fetch_array($queryret[1]);
+      $rs = $this->database->result->fetch_row();
       $ret[0]=0;
       $ret[1]=$rs;
     }
@@ -707,9 +712,9 @@ class rolle {
 		$sql = "SELECT * FROM rolle_last_query WHERE user_id = ".$this->user_id." AND stelle_id = ".$this->stelle_id;
 		if($layer_id != NULL)$sql .= " AND layer_id = ".$layer_id;
 		$this->debug->write("<p>file:rolle.php class:rolle->get_last_query - Abfragen der letzten Abfrage:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		while ($rs=mysql_fetch_assoc($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		while ($rs = $this->database->result->fetch_row()) {
 			$last_query['go'] = $rs['go'];
 			$last_query['layer_ids'][] = $rs['layer_id'];
 			$last_query[$rs['layer_id']] = $rs;
@@ -720,18 +725,18 @@ class rolle {
 	function get_last_search_layer_id(){
 		$sql = "SELECT layer_id FROM search_attributes2rolle WHERE name = '<last_search>' AND user_id = ".$this->user_id." AND stelle_id = ".$this->stelle_id;
 		$this->debug->write("<p>file:rolle.php class:rolle->get_last_search_layer_id - Abfragen der letzten Suche:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		$rs=mysql_fetch_assoc($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$rs = $this->database->result->fetch_row();
 		return $rs['layer_id'];
 	}
 	
 	function get_csv_attribute_selections(){
 		$sql = 'SELECT name FROM rolle_csv_attributes WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' ORDER BY name';
 		$this->debug->write("<p>file:rolle.php class:rolle->get_csv_attribute_selections - Abfragen der gespeicherten CSV-Attributlisten der Rolle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		while ($rs=mysql_fetch_assoc($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		while ($rs = $this->database->result->fetch_row()) {
 			$attribute_selections[]=$rs;
 		}
 		return $attribute_selections;
@@ -740,9 +745,9 @@ class rolle {
 	function get_csv_attribute_selection($name){
 		$sql = 'SELECT name, attributes FROM rolle_csv_attributes WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND name = "'.$name.'"';
 		$this->debug->write("<p>file:rolle.php class:rolle->get_csv_attribute_selection - Abfragen einer CSV-Attributliste der Rolle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		$rs=mysql_fetch_assoc($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$rs = $this->database->result->fetch_row();
 		return $rs;
 	}
 
@@ -806,9 +811,9 @@ class rolle {
 		if($layer_id != '') $sql.= ' AND a.layer_id='.$layer_id;
 		$sql .= ' ORDER BY b.Name, a.name';
 		$this->debug->write("<p>file:rolle.php class:rolle->getsearches - Abfragen der gespeicherten Suchabfragen der Rolle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		while ($rs=mysql_fetch_assoc($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		while ($rs = $this->database->result->fetch_row()) {
 			$searches[]=$rs;
 		}
 		return $searches;
@@ -817,9 +822,9 @@ class rolle {
 	function getsearch($layer_id, $name){
 		$sql = 'SELECT * FROM search_attributes2rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND layer_id='.$layer_id.' AND name = "'.$name.'" ORDER BY searchmask_number DESC';
 		$this->debug->write("<p>file:rolle.php class:rolle->getsearch - Abfragen der gespeicherten Suchabfrage:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		while ($rs=mysql_fetch_assoc($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		while ($rs = $this->database->result->fetch_row()) {
 			$json_test = json_decode($rs['value1']);
 			if(is_array($json_test))$rs['value1'] = $json_test;
 			$search[]=$rs;
@@ -831,9 +836,9 @@ class rolle {
 		$sql ='SELECT g2r.*, g.Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r';
 		$sql.=' WHERE g2r.stelle_ID='.$this->stelle_id.' AND g2r.user_id='.$this->user_id.' AND g2r.id = g.id AND g.id='.$id;
 		$this->debug->write("<p>file:kvwmap class:rolle->read_Group - Lesen einer Gruppe der Rolle:<br>".$sql,4);
-		$query=mysql_query($sql);
-		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-		$rs=mysql_fetch_array($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		$rs = $this->database->result->fetch_row();
 		return $rs;
 	}
 
@@ -880,10 +885,10 @@ class rolle {
 		}
     #echo $sql.'<br>';
     $this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    $this->database->execSQL($sql);
+    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
-    while ($rs=mysql_fetch_assoc($query)) {
+    while ($rs = $this->database->result->fetch_row()) {
       $layer[]=$rs;
     }
     return $layer;
@@ -990,8 +995,8 @@ class rolle {
 				#neu eintragen der deaktiven Klassen
 				if($aktiv_status != 0){
 					$sql = 'SELECT Class_ID FROM classes WHERE Layer_ID='.$this->layerset[$i]['Layer_ID'].';';
-					$query = mysql_query($sql);
-					while($row = @mysql_fetch_array($query)){
+					$this->database->execSQL($sql);
+					while ($rs = @$this->database->result->fetch_row()) {
 						if($formvars['class'.$row['Class_ID']] == '0' OR $formvars['class'.$row['Class_ID']] == '2'){
 							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id, status) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$row['Class_ID'].', '.$formvars['class'.$row['Class_ID']].');';
 							$this->database->execSQL($sql2,4, $this->loglevel);
@@ -1177,14 +1182,22 @@ class rolle {
 
 	function setSize($mapsize) {
 		# setzen der Werte, die aktuell für die Nutzung der Stelle durch den Nutzer gelten sollen.
-		$teil=explode('x',$mapsize);
-		$nImageWidth=$teil[0];
-		$nImageHeight=$teil[1];
-		$sql ='UPDATE rolle SET nImageWidth='.$nImageWidth;
-		$sql.=',nImageHeight='.$nImageHeight.' WHERE stelle_id='.$this->stelle_id.' AND user_id='.$this->user_id;
+		$teil = explode('x',$mapsize);
+		$nImageWidth = $teil[0];
+		$nImageHeight = $teil[1];
+		$sql = "
+			UPDATE
+				rolle
+			SET
+				nImageWidth = " . $nImageWidth . ",
+				nImageHeight = " . $nImageHeight . "
+			WHERE
+				stelle_id = " . $this->stelle_id . "
+				AND user_id = " . $this->user_id . "
+		";
 		$this->debug->write("<p>file:rolle.php class:rolle->setSize - Setzen der Einstellungen für die Bildgröße", 4);
 		$this->database->execSQL($sql,4, $this->loglevel);
-		$this->debug->write('Neue Werte für Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
+		$this->debug->write('Neue Werte für Rolle eingestellt: ' . $nImageWidth . ', ' . $nImageHeight, 4);
 		return 1;
 	}
 
@@ -1417,8 +1430,8 @@ class rolle {
 		";
 		#echo '<br>sql: ' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle function:setMenue - Setzen der Menuepunkte der Rolle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		return 1;
 	}
 
@@ -1436,8 +1449,8 @@ class rolle {
 				";
 				#echo '<br>'.$sql;
 				$this->debug->write("<p>file:rolle.php class:stelle function:deleteMenue - Löschen der Menuepunkte der Stelle:<br>".$sql,4);
-				$query=mysql_query($sql,$this->database->dbConn);
-				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+				$this->database->execSQL($sql);
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 			}
 		}
 		else {
@@ -1453,8 +1466,8 @@ class rolle {
 					";
 					#echo '<br>'.$sql;
 					$this->debug->write("<p>file:rolle.php class:rolle function:deleteMenue - Löschen der Menuepunkte der Rollen:<br>".$sql,4);
-					$query=mysql_query($sql,$this->database->dbConn);
-					if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+					$this->database->execSQL($sql);
+					if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 					/*
 					$sql = "
 						SELECT
@@ -1466,12 +1479,12 @@ class rolle {
 					";
 					echo '<br>'.$sql;
 					$this->debug->write("<p>file:rolle.php class:rolle->deleteMenue - Lesen der Untermenuepunkte zu den Obermenuepunken zur Stelle:<br>".$sql,4);
-					$query=mysql_query($sql,$this->database->dbConn);
-					if ($query==0) {
+					$this->database->execSQL($sql);
+					if (!$this->database->success) {
 						$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 					}
 					else {
-						while($rs=mysql_fetch_array($query)) {
+						while($rs=$this->database->result->fetch_row()) {
 							$sql = "
 								DELETE FROM
 									`u_menue2rolle`
@@ -1497,8 +1510,8 @@ class rolle {
 	function set_one_Group($user_id, $stelle_id, $group_id, $open) {
 		$sql ='REPLACE INTO u_groups2rolle VALUES('.$user_id.', '.$stelle_id.', '.$group_id.', '.$open.')';
 		$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		return 1;
 	}
 
@@ -1520,8 +1533,8 @@ class rolle {
 					user_id = ".$default_user_id;
 			#echo '<br>Gruppen: '.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rolle:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
 		else {
 			for($j = 0; $j < count($layerids); $j++){
@@ -1544,8 +1557,8 @@ class rolle {
 					JOIN u_groups ON dat.id = u_groups.id";
 				#echo '<br>Gruppen: '.$sql;
 				$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
-				$query=mysql_query($sql,$this->database->dbConn);
-				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+				$this->database->execSQL($sql);
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 			}
 		}
 		return 1;
@@ -1557,8 +1570,8 @@ class rolle {
 			$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i];
 			#echo '<br>'.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
 		return 1;
 	}
@@ -1575,9 +1588,9 @@ class rolle {
 		$sql.='	JOIN u_groups ON dat.id = u_groups.id';
 		#echo '<br>'.$sql;
 		$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		while($rs = mysql_fetch_array($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		while ($rs = $this->database->result->fetch_row()) {
 			$gruppen_ids[] = $rs[0];
 		}
 		
@@ -1588,9 +1601,9 @@ class rolle {
 		$sql.='r2ul.stelle_id = '.$stelle_id;
 		#echo '<br>'.$sql;
 		$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		while($rs = mysql_fetch_array($query)){
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		while ($rs = $this->database->result->fetch_row()) {
 			$rs_layer[$rs['Gruppe']] = $rs['Gruppe'];		# ein Array mit den GruppenIDs, die noch Layer haben
 		}
 		
@@ -1601,21 +1614,21 @@ class rolle {
 		$sql.='r2g.stelle_id = '.$stelle_id;
 		#echo '<br>'.$sql;
 		$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		$rs_subgroups = mysql_fetch_array($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$rs_subgroups = $this->database->result->fetch_row();
 		
 		if($rs_layer[$gruppen_ids[0]] == ''){					# wenn die erste Gruppe, also die Gruppe des Layers keine Layer hat, diese löschen
 			$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` = '.$gruppen_ids[0].';';
 			if($rs_layer == '' AND !$rs_subgroups[0]){				# wenn darüberhinaus keine Layer oder Untergruppen in den Gruppen darüber vorhanden sind, diese auch löschen
 				$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` IN ('.implode(',', $gruppen_ids).');';
 				$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
-				$query=mysql_query($sql,$this->database->dbConn);
-				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+				$this->database->execSQL($sql);
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 			}
 			$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
 		return 1;
 	}
@@ -1623,8 +1636,8 @@ class rolle {
 	function set_one_Layer($user_id, $stelle_id, $layer_id,  $active) {
 		$sql ='INSERT IGNORE INTO u_rolle2used_layer VALUES ('.$user_id.', '.$stelle_id.', '.$layer_id.', "'.$active.'", "0", "1", "0")';
 		$this->debug->write("<p>file:rolle.php class:rolle function:set_one_Layer - Setzen eines Layers der Rolle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		return 1;
 	}
 
@@ -1682,8 +1695,8 @@ class rolle {
 			$rolle2used_layer_select_sql . "
 		";
 		$this->debug->write("<p>file:rolle.php class:rolle function:setLayer - Setzen der Layer der Rolle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		return 1;
 	}
 
@@ -1700,8 +1713,8 @@ class rolle {
 				}
 				#echo '<br>'.$sql;
 				$this->debug->write("<p>file:rolle.php class:rolle function:deleteLayer - Löschen der Layer der Rollen:<br>".$sql,4);
-				$query=mysql_query($sql,$this->database->dbConn);
-				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+				$this->database->execSQL($sql);
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 			}
 		}
 		return 1;
@@ -1762,7 +1775,7 @@ class rolle {
 			$ret[1]='<br>Fehler beim Laden des Kommentares zum Kartenausschnitt.<br>'.$ret[1];
 		}
 		else {
-			while ($rs=mysql_fetch_array($queryret[1])) {
+			while ($rs = $this->database->result->fetch_row()) {
 				$mapComments[]=$rs;
 			}
 			$ret[0]=0;
@@ -1790,14 +1803,14 @@ class rolle {
 		";
 		#echo '<br>Sql: ' . $sql;
 
-		$queryret = $this->database->execSQL($sql, 4, 0);
-		if ($queryret[0]) {
+		$this->database->execSQL($sql, 4, 0);
+		if (!$this->database->success) {
 			# Fehler bei Datenbankanfrage
 			$ret[0] = 1;
 			$ret[1] = '<br>Fehler beim Laden der Themenauswahl.<br>' . $ret[1];
 		}
 		else {
-			while ($rs = mysql_fetch_array($queryret[1])) {
+			while ($rs = $this->database->result->fetch_row()) {
 				$layerComments[] = $rs;
 			}
 			$ret[0] = 0;

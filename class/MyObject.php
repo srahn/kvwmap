@@ -31,9 +31,11 @@ class MyObject {
 				`" . $attribute . "` = '" . $value . "'
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
-		$query = mysql_query($sql, $this->database->dbConn);
-		$result = mysql_fetch_assoc($query);
-		if ($result !== false) $this->data = $result;
+		$this->database->execSQL($sql);
+		$rs = $this->database->result->fetch_assoc();
+		if ($rs !== false) {
+			$this->data = $rs;
+		}
 		return $this;
 	}
 
@@ -59,9 +61,9 @@ class MyObject {
 			($order != '' ? " ORDER BY `" . implode('`, `', $orders) . "`" . ($sort_direction == 'DESC' ? ' DESC' : ' ASC') : "") . "
 		";
 		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
-		$query = mysql_query($sql, $this->database->dbConn);
+		$this->database->execSQL($sql);
 		$result = array();
-		while ($this->data = mysql_fetch_assoc($query)) {
+		while ($this->data = $this->database->result->fetch_assoc()) {
 			$result[] = clone $this;
 		}
 		return $result;
@@ -82,9 +84,9 @@ class MyObject {
 		";
 		$this->debug->show('mysql find_by_sql sql: ' . $sql, MyObject::$write_debug);
 		$this->debug->write('#mysql find_by_sql sql:<br> ' . $sql.';<br>',4);
-		$query = mysql_query($sql, $this->database->dbConn);
+		$this->database->execSQL($sql);
 		$results = array();
-		while($this->data = mysql_fetch_assoc($query)) {
+		while($this->data = $this->database->result->fetch_assoc()) {
 			if($hierarchy_key == NULL){
 				$results[] = clone $this;
 			}
@@ -109,8 +111,8 @@ class MyObject {
 				`" . $key . "` = {$quote}" . $this->get($key) . "{$quote}
 		";
 		$this->debug->show('mysql exists sql: ' . $sql, MyObject::$write_debug);
-		$query = mysql_query($sql, $this->database->dbConn);
-		return mysql_num_rows($query) > 0;
+		$this->database->execSQL($sql);
+		return $this->database->result->num_rows() > 0;
 	}
 
 	function getAttributes() {
@@ -159,8 +161,8 @@ class MyObject {
 				`" . $this->tableName . "`
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
-		$result = mysql_query($sql, $this->database->dbConn);
-		while ($column = mysql_fetch_assoc($result)) {
+		$this->database->execSQL($sql);
+		while ($column = $this->database->result->fetch_assoc()) {
 			$columns[] = $column;
 		};
 		return $columns;
@@ -238,8 +240,9 @@ class MyObject {
 			)
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
-		if (mysql_query($sql)) {
-			$new_id = mysql_insert_id();
+		$this->database->execSQL($sql);
+		if ($this->database->success) {
+			$new_id = $this->database->mysqli->insert_id();
 			$new_id = ($new_id == 0 ? $this->get($this->identifier) : $new_id);
 			$this->debug->show('<p>new id: ' . $new_id, MyObject::$write_debug);
 			$this->set($this->identifier, $new_id);
@@ -252,7 +255,7 @@ class MyObject {
 		else {
 			$results[] = array(
 				'success' => false,
-				'msg' => mysql_error($this->database->dbConn)
+				'msg' => $this->database->errormessage
 			);
 		}
 
@@ -287,8 +290,8 @@ class MyObject {
 				" . implode(' AND ', $where) . "
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
-		$query = mysql_query($sql);
-		$err_msg = mysql_error($this->database->dbConn);
+		$this->database->execSQL($sql);
+		$err_msg = $this->database->errormessage;
 		$results[] = array(
 			'success' => ($err_msg == ''),
 			'err_msg' => $err_msg . ' Aufgetreten bei SQL: ' . $sql
@@ -306,7 +309,7 @@ class MyObject {
 				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
 		";
 		$this->debug->show('MyObject delete sql: ' . $sql, MyObject::$write_debug);
-		$result = mysql_query($sql);
+		$result = $this->database->execSQL($sql);
 		return $result;
 	}
 

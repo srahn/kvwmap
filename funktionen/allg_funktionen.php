@@ -42,7 +42,7 @@ function human_filesize($file){
 
 function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	global $errors;
-	if(!(error_reporting() & $errno)){
+	if (!(error_reporting() & $errno)) {
 		// This error code is not included in error_reporting
 		return;
 	}
@@ -1711,6 +1711,7 @@ function geometrytype_to_datatype($geometrytype) {
 * außer von denen, dessen keys im except array stehen.
 */
 function hidden_formvars_fields($formvars, $except = array()) {
+	$html = '';
 	$params = array();
 	foreach ($formvars AS $key => $value) {
 		if (!in_array($key, $except)) {
@@ -1854,6 +1855,10 @@ function send_image_not_found($img) {
 	imagecolordeallocate($text_color);
 	imagecolordeallocate($background);
 	imagedestroy($empty_img);
+}
+
+function value_of($array, $key) {
+	return (array_key_exists($key, $array) ? $array[$key] :	'');
 }
 
 ?>

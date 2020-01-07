@@ -16,7 +16,7 @@ if (true) { ?>
 if (defined('CUSTOM_STYLE') AND CUSTOM_STYLE != '') { ?>
 	<link rel="stylesheet" href="<?php echo CUSTOM_STYLE; ?>"><?
 }
-if ($this->Stelle->style != '') { ?>
+if (isset($this->Stelle) AND isset($this->Stelle->style) AND $this->Stelle->style != '') { ?>
 	<link rel="stylesheet" href="<? echo $this->Stelle->style; ?>"><?
 }
 ?>

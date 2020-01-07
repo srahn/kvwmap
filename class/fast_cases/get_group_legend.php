@@ -1688,12 +1688,12 @@ class database {
     $this->blocktransaction=0;
   }
 
-  function open() {
-    $this->debug->write("<br>MySQL Verbindung öffnen mit Host: ".$this->host." User: ".$this->user,4);
-    $this->dbConn=mysql_connect($this->host,$this->user,$this->passwd);
-    $this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswählen.",4);
-    return mysql_select_db($this->dbName,$this->dbConn);
-  }
+	function open() {
+		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
+		$this->dbConn = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+		$this->debug->write("<br>MySQL VerbindungsID: " . $this->dbConn->thread_id, 4);
+		return $this->dbConn->connect_errno;
+	}
 
 	function execSQL($sql, $debuglevel, $loglevel, $suppress_error_msg = false) {
 		switch ($this->loglevel) {
@@ -1712,7 +1712,7 @@ class database {
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
 		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
 			#echo '<br>sql in execSQL: ' . $sql;
-			$query = mysql_query($sql, $this->dbConn);
+			$query = mysqli_query($this->dbConn, $sql);
 			if ($query == 0) {
 				$ret[0]=1;
 				$div_id = rand(1, 99999);
@@ -1800,7 +1800,7 @@ class user {
 		#echo '<br>Sql: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>" . $sql, 3);
-		$query = mysql_query($sql,$this->database->dbConn);
+		$query = mysqli_query($this->database->dbConn, $sql);
 		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
 		$rs = mysql_fetch_array($query);
 		$this->id = $rs['ID'];
@@ -1863,7 +1863,7 @@ class stelle {
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo $sql;
     $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
+		$query = mysqli_query($this->database->dbConn, $sql);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs=mysql_fetch_array($query);
     $this->Bezeichnung=$rs['Bezeichnung'];
@@ -1880,7 +1880,7 @@ class stelle {
 				ID = " . $this->id . "
 		";
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
-		$query = mysql_query($sql,$this->database->dbConn);
+		$query = mysqli_query($this->database->dbConn, $sql);
 		if ($query == 0) { $this->debug->write('<br>Abbruch Zeile: ' . __LINE__, 4); return 0; }
 		$rs = mysql_fetch_array($query);    
 		$this->MaxGeorefExt = ms_newRectObj();
@@ -1948,7 +1948,7 @@ class rolle {
 		";
     #echo $sql;
     $this->debug->write("<p>file:rolle.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
+  		$query = mysqli_query($this->database->dbConn, $sql);
     if ($query==0) {
       $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
       return 0;
@@ -2066,7 +2066,7 @@ class rolle {
       $sql.=' AND Gruppenname LIKE "'.$GroupName.'"';
     }
     $this->debug->write("<p>file:rolle.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
+  		$query = mysqli_query($this->database->dbConn, $sql);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
     while ($rs=mysql_fetch_array($query)) {
       $groups[]=$rs;
@@ -2322,7 +2322,7 @@ class db_mapObj {
     $sql ='SELECT r.* FROM referenzkarten AS r, stelle AS s WHERE r.ID=s.Referenzkarte_ID';
     $sql.=' AND s.ID='.$this->Stelle_ID;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_ReferenceMap - Lesen der Referenzkartendaten:<br>" . $sql,4);
-    $query=mysql_query($sql);
+		$query = mysqli_query($this->database->dbConn, $sql);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs=mysql_fetch_array($query);
     $this->referenceMap=$rs;
@@ -2347,7 +2347,7 @@ class db_mapObj {
 		#echo $sql;
 
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Groups - Lesen der Gruppen der Rolle:<br>" . $sql,4);
-    $query=mysql_query($sql);
+		$query = mysqli_query($this->database->dbConn, $sql);
 		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
     while ($rs=mysql_fetch_array($query)) {
 			$groups[$rs['id']]['status'] = $rs['status'];
@@ -2425,7 +2425,7 @@ class db_mapObj {
     $sql.=' ORDER BY drawingorder';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>" . $sql,4);
-    $query=mysql_query($sql);
+		$query = mysqli_query($this->database->dbConn, $sql);
 		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
     $layer = array();
 		$layer['list'] = array();
@@ -2465,7 +2465,7 @@ class db_mapObj {
   function read_disabled_classes(){
   	#Anne
     $sql_classes = 'SELECT class_id, status FROM u_rolle2used_class WHERE user_id='.$this->User_ID.' AND stelle_id='.$this->Stelle_ID.';';
-    $query_classes=mysql_query($sql_classes);
+		$query_classes = mysqli_query($this->database->dbConn, $sql_classes);
     while($row = mysql_fetch_assoc($query_classes)){
   		$classarray['class_id'][] = $row['class_id'];
 			$classarray['status'][$row['class_id']] = $row['status'];
@@ -2517,7 +2517,7 @@ class db_mapObj {
 		";
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
-		$query = mysql_query($sql);
+		$query = mysqli_query($this->database->dbConn, $sql);
 		if ($query == 0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__; return 0; }
 		$index = 0;
 		while ($rs = mysql_fetch_assoc($query)) {
@@ -2557,7 +2557,7 @@ class db_mapObj {
     $sql.=' WHERE s.Style_ID=s2c.style_id AND s2c.class_id='.$Class_ID;
     $sql.=' ORDER BY drawingorder';
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Styles - Lesen der Styledaten:<br>" . $sql,4);
-    $query=mysql_query($sql);
+		$query = mysqli_query($this->database->dbConn, $sql);
     if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
     while($rs=mysql_fetch_assoc($query)) {
       $Styles[]=$rs;
@@ -2569,7 +2569,7 @@ class db_mapObj {
     $sql ='SELECT * FROM labels AS l,u_labels2classes AS l2c';
     $sql.=' WHERE l.Label_ID=l2c.label_id AND l2c.class_id='.$Class_ID;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Label - Lesen der Labels zur Classe eines Layers:<br>" . $sql,4);
-    $query=mysql_query($sql);
+		$query = mysqli_query($this->database->dbConn, $sql);
     if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
     while ($rs=mysql_fetch_assoc($query)) {
       $Labels[]=$rs;
@@ -2587,7 +2587,7 @@ class db_mapObj {
     	$sql .= ' AND l.Typ = \''.$typ.'\'';
     }
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>" . $sql,4);
-    $query=mysql_query($sql);
+		$query = mysqli_query($this->database->dbConn, $sql);
 		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
     $Layer = array();
     while ($rs=mysql_fetch_array($query)) {

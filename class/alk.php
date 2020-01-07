@@ -6,13 +6,14 @@
 class ALK {
   var $FlstLayerName;
   var $alk_protokoll_einlesen;
-  var $database;
 
-
-  function ALK() {
+  function ALK($app_db, $gis_db) {
     global $debug;
     $this->debug=$debug;
     $this->LayerName=LAYERNAME_FLURSTUECKE;
+		$this->mydatabase = $mydatabase;
+		$this->app_db = $app_db;
+		$this->gis_db = $gis_db;
   }
   
   function getRectByFlurstListe($FlurstKennz,$layer) {
@@ -51,7 +52,7 @@ class ALK {
   }
   
   function getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode) {
-    $ret=$this->database->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode);
+    $ret=$this->gis_db->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode);
     if ($ret[0]==0) {
       $rect=ms_newRectObj();
       $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
@@ -63,7 +64,7 @@ class ALK {
   
   function getMERfromGemeinde($Gemeinde, $epsgcode) {
     # 2006-01-31 pk
-    $ret=$this->database->getMERfromGemeinde($Gemeinde, $epsgcode);
+    $ret=$this->gis_db->getMERfromGemeinde($Gemeinde, $epsgcode);
     if ($ret[0]==0) {
       $rect=ms_newRectObj();
       $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
@@ -75,7 +76,7 @@ class ALK {
   
   function getMERfromGemarkung($Gemkgschl, $epsgcode) {
     # 2006-02-01 pk
-    $ret=$this->database->getMERfromGemarkung($Gemkgschl, $epsgcode);
+    $ret=$this->gis_db->getMERfromGemarkung($Gemkgschl, $epsgcode);
     if ($ret[0]==0) {
       $rect=ms_newRectObj();
       $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
@@ -87,7 +88,7 @@ class ALK {
 
   function getMERfromFlur($Gemarkung,$Flur, $epsgcode) {
     # 2006-02-01 pk
-    $ret=$this->database->getMERfromFlur($Gemarkung,$Flur,$epsgcode);
+    $ret=$this->gis_db->getMERfromFlur($Gemarkung,$Flur,$epsgcode);
     if ($ret[0]==0) {
       $rect=ms_newRectObj();
       $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
@@ -98,7 +99,7 @@ class ALK {
   }
     
   function getMERfromFlurstuecke($flstliste, $epsgcode) {
-    $ret=$this->database->getMERfromFlurstuecke($flstliste, $epsgcode);
+    $ret=$this->gis_db->getMERfromFlurstuecke($flstliste, $epsgcode);
     if ($ret[0]==0) {
       $rect=ms_newRectObj();
       $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
@@ -112,9 +113,9 @@ class ALK {
     # Abfragen des Namens der Shapedatei für Flurstücke
     $sql ='SELECT Data FROM layer WHERE Name="'.$this->LayerName.'"';
     $this->debug->write("<p>kataster.php ALK->getDataSourceName Abfragen des Shapefilenamen für die Flurstücke:<br>".$sql,4);    
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
+    $app_db->execSQL($sql);
+    if (!$app_db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $app_db->mysqli->error, 4); return 0; }
+    $rs = $app_db->result->fetch_array();
     return $rs['Data'];
   } 
 } # end of class ALK

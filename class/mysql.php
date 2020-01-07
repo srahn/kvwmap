@@ -33,6 +33,8 @@ class database {
   var $logfile;
   var $commentsign;
   var $blocktransaction;
+	var $success;
+	var $errormessage;
 
   function database() {
     global $debug;
@@ -90,12 +92,12 @@ class database {
 		"; # Zeiteinschränkung wird nicht berücksichtigt.
 		#echo $sql;
 		$this->execSQL("SET NAMES '" . MYSQL_CHARSET . "'", 0, 0);
-		$ret=$this->execSQL($sql, 4, 0);
-		if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$ret = mysql_fetch_array($ret[1]);
-		if ($ret[0] != '') {
+		$this->execSQL($sql, 4, 0);
+		if (!$this->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
+		$rs = $this->result->fetch_array();
+		if ($this->result->num_rows != '') {
 			# wenn Nutzer bisher noch nicht akzeptiert hatte
-			if (defined('AGREEMENT_MESSAGE') AND AGREEMENT_MESSAGE != '' AND $ret['agreement_accepted'] == 0) {
+			if (defined('AGREEMENT_MESSAGE') AND AGREEMENT_MESSAGE != '' AND $rs['agreement_accepted'] == 0) {
 				if ($agreement != '') { # es wurde jetzt akzeptiert
 					$sql = "
 						UPDATE
@@ -103,9 +105,9 @@ class database {
 						SET
 							agreement_accepted = TRUE
 						WHERE
-							ID = " . $ret['ID'] . "
+							ID = " . $rs['ID'] . "
 					";
-					$ret2 = $this->execSQL($sql, 4, 0);
+					$this->execSQL($sql, 4, 0);
 					return true;
 				}
 				else { # jetzt wurde auch nicht akzeptiert
@@ -125,12 +127,10 @@ class database {
   function read_colors(){	
   	$sql = "SELECT * FROM colors";
   	#echo $sql;
-  	$ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    if($ret[0]==0){
-      while($row = mysql_fetch_array($ret[1])){
-        $colors[] = $row;
-      }
+  	$this->execSQL($sql, 4, 0);
+    if (!$this->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    while ($rs = $this->result->fetch_array()) {
+      $colors[] = $rs;
     }
     return $colors;
   }
@@ -595,20 +595,20 @@ INSERT INTO u_styles2classes (
 ####################################################
 # database Funktionen
 ###########################################################
-  function open() {
-    $this->debug->write("<br>MySQL Verbindung öffnen mit Host: ".$this->host." User: ".$this->user,4);
-    $this->dbConn=mysql_connect($this->host,$this->user,$this->passwd);
-    $this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswählen.",4);
-    return mysql_select_db($this->dbName,$this->dbConn);
-  }
+	function open() {
+		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
+		$this->mysqli = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
+		return $this->mysqli->connect_errno;
+	}
 
-  function close() {
-    $this->debug->write("<br>MySQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
-    if (LOG_LEVEL>0){
-    	$this->logfile->close();
-    }
-    return mysql_close($this->dbConn);
-  }
+	function close() {
+		$this->debug->write("<br>MySQL Verbindung ID: " . $this->mysqli->thread_id . " schließen.", 4);
+		if (LOG_LEVEL > 0) {
+			$this->logfile->close();
+		}
+		return $this->mysqli->close();
+	}
 
 	function exec_commands($commands_string, $search, $replace, $replace_constants = false, $suppress_err_msg = false) {
 		if ($commands_string != '') {
@@ -702,7 +702,7 @@ INSERT INTO u_styles2classes (
   	}
   }
 
-	function execSQL($sql, $debuglevel, $loglevel, $suppress_error_msg = false) {
+	function execSQL($sql, $debuglevel = 4, $loglevel = 0, $suppress_error_msg = false) {
 		switch ($this->loglevel) {
 			case 0 : {
 				$logsql=0;
@@ -719,32 +719,33 @@ INSERT INTO u_styles2classes (
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
 		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
 			#echo '<br>sql in execSQL: ' . $sql;
-			$query = mysql_query($sql, $this->dbConn);
-			if ($query == 0) {
-				$ret[0]=1;
+			if ($result = $this->mysqli->query($sql)) {
+				$ret[0] = 0;
+				$ret['success'] = $this->success = true;
+				$ret[1] = $ret['query'] = $ret['result'] = $this->result = $result;
+				$this->errormessage = '';
+				if ($logsql) {
+					$this->logfile->write($sql . ';');
+				}
+				$this->debug->write(date('H:i:s')."<br>" . $sql, $debuglevel);
+			}
+			else {
+				$ret[0] = 1;
+				$ret['success'] = $this->success = false;
 				$div_id = rand(1, 99999);
-				$errormessage = mysql_error($this->dbConn);
-				$ret[1] = sql_err_msg('MySQL', $sql, $errormessage, $div_id);
+				$errormessage = $this->mysqli->error;
+				$ret[1] = $this->errormessage = sql_err_msg('MySQL', $sql, $errormessage, $div_id);
 				if ($logsql) {
 					$this->logfile->write("#" . $errormessage);
 				}
 				if (!$suppress_error_msg) {
 					if (gettype($this->gui) == 'object') {
-						$this->gui->add_message('error', $ret[1]);
+						$this->gui->add_message('error', $this->errormessage);
 					}
 					else {
-						echo '<br>error: ' . $ret[1];
+						echo '<br>error: ' . $this->errormessage;
 					}
 				}
-			}
-			else {
-				$ret[0] = 0;
-				$ret['success'] = true;
-				$ret[1] = $ret['query'] = $query;
-				if ($logsql) {
-					$this->logfile->write($sql . ';');
-				}
-				$this->debug->write(date('H:i:s')."<br>" . $sql, $debuglevel);
 			}
 			$ret[2] = $sql;
 		}

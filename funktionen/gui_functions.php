@@ -229,17 +229,17 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 	}
 }
 
-function onload_functions(){
-	<? if($this->scrolldown){ ?>
-	window.scrollTo(0,document.body.scrollHeight);	
-	<? } ?>
+function onload_functions() {<?php
+	if ($this->scrolldown) { ?>
+		window.scrollTo(0,document.body.scrollHeight);<?php
+	} ?>
 	document.onmousemove = drag;
   document.onmouseup = dragstop;
 	document.onmousedown = stop;
-	getBrowserSize();
-	<? if($this->user->rolle->auto_map_resize){ ?>
-	window.onresize = function(){clearTimeout(doit);doit = setTimeout(resizemap2window, 200);};
-	<? } ?>
+	getBrowserSize();<?php
+	if ($this->user->rolle->auto_map_resize) { ?>
+		window.onresize = function(){ clearTimeout(doit); doit = setTimeout(resizemap2window, 200);};<?php
+	} ?>
 	document.fullyLoaded = true;
 }
 

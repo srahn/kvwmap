@@ -173,12 +173,12 @@ class database {
     $this->blocktransaction=0;
   }
 
-  function open() {
-    $this->debug->write("<br>MySQL Verbindung öffnen mit Host: ".$this->host." User: ".$this->user,4);
-    $this->dbConn=mysql_connect($this->host,$this->user,$this->passwd);
-    $this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswählen.",4);
-    return mysql_select_db($this->dbName,$this->dbConn);
-  }
+	function open() {
+		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
+		$this->dbConn = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+		$this->debug->write("<br>MySQL VerbindungsID: " . $this->dbConn->thread_id, 4);
+		return $this->dbConn->connect_errno;
+	}
 
   function execSQL($sql,$debuglevel, $loglevel) {
   	switch ($this->loglevel) {

@@ -35,6 +35,8 @@ class pgdatabase {
 	var $defaultlogfile;
 	var $commentsign;
 	var $blocktransaction;
+	var $port;
+	var $schema;
 
 	function pgdatabase() {
 		global $debug;

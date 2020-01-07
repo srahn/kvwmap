@@ -626,12 +626,12 @@ class database {
     $this->blocktransaction=0;
   }
 
-  function open() {
-    $this->debug->write("<br>MySQL Verbindung öffnen mit Host: ".$this->host." User: ".$this->user,4);
-    $this->dbConn=mysql_connect($this->host,$this->user,$this->passwd);
-    $this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswählen.",4);
-    return mysql_select_db($this->dbName,$this->dbConn);
-  }
+	function open() {
+		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
+		$this->dbConn = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+		$this->debug->write("<br>MySQL VerbindungsID: " . $this->dbConn->thread_id, 4);
+		return $this->dbConn->connect_errno;
+	}
 
   function execSQL($sql,$debuglevel, $loglevel) {
   	switch ($this->loglevel) {
@@ -649,7 +649,7 @@ class database {
     # wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
     # (lesend immer, aber schreibend nur mit DBWRITE=1)
     if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
-      $query=mysql_query($sql,$this->dbConn);
+			$query = mysqli_query($this->dbConn, $sql);
       #echo $sql;
       if ($query==0) {
         $ret[0]=1;
@@ -726,7 +726,7 @@ class user {
       $sql.=' AND login_name LIKE "'.$login_name.'"';
     }
     $this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
+		$query = mysqli_query($this->database->dbConn, $sql);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs=mysql_fetch_array($query);
     $this->id=$rs['ID'];
@@ -746,7 +746,7 @@ class user {
   function getLastStelle() {
     $sql = 'SELECT stelle_id FROM user WHERE ID='.$this->id;
     $this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
+		$query = mysqli_query($this->database->dbConn, $sql);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs=mysql_fetch_array($query);
     return $rs['stelle_id'];
@@ -777,7 +777,7 @@ class user {
 		$sql.=' ORDER BY Bezeichnung';
 		#echo $sql;
 		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
+		$query = mysqli_query($this->database->dbConn, $sql);
 		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		while($rs=mysql_fetch_array($query)) {
 			$stellen['ID'][]=$rs['ID'];
@@ -843,7 +843,7 @@ class stelle {
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo $sql;
     $this->debug->write("<p>file:users.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
+		$query = mysqli_query($this->database->dbConn, $sql);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs=mysql_fetch_array($query);
     $this->Bezeichnung=$rs['Bezeichnung'];
@@ -853,7 +853,7 @@ class stelle {
   function readDefaultValues() {
     $sql ='SELECT * FROM stelle WHERE ID='.$this->id;
     $this->debug->write("<p>file:users.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
+		$query = mysqli_query($this->database->dbConn, $sql);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs=mysql_fetch_array($query);    
     $this->MaxGeorefExt=ms_newRectObj();
@@ -886,7 +886,7 @@ class stelle {
     $sql ='SELECT check_client_ip FROM stelle WHERE ID = '.$this->id;
     $this->debug->write("<p>file:users.php class:stelle->checkClientIpIsOn- Abfragen ob IP's der Nutzer in der Stelle getestet werden sollen<br>".$sql,4);
     #echo '<br>'.$sql;
-    $query=mysql_query($sql,$this->database->dbConn);
+		$query = mysqli_query($this->database->dbConn, $sql);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs=mysql_fetch_array($query);
     if ($rs['check_client_ip']=='1') {
@@ -898,7 +898,7 @@ class stelle {
 	function get_attributes_privileges($layer_id){
 		$sql = 'SELECT attributename, privileg, tooltip FROM layer_attributes2stelle WHERE stelle_id = '.$this->id.' AND layer_id = '.$layer_id;
 		$this->debug->write("<p>file:users.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
+		$query = mysqli_query($this->database->dbConn, $sql);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		while ($rs=mysql_fetch_array($query)) {
 			$privileges[$rs['attributename']] = $rs['privileg'];
@@ -944,7 +944,7 @@ class rolle {
 		";
     #echo $sql;
     $this->debug->write("<p>file:users.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
+		$query = mysqli_query($this->database->dbConn, $sql);
     if ($query==0) {
       $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
       return 0;
@@ -1076,7 +1076,7 @@ class rolle {
 		";
 #		echo $sql.'<br>';
     $this->debug->write("<p>file:users.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
+		$query = mysqli_query($this->database->dbConn, $sql);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
 		while ($rs=mysql_fetch_assoc($query)) {
@@ -1116,7 +1116,7 @@ class rolle {
 		}
     #echo $sql.'<br>';
     $this->debug->write("<p>file:users.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
+		$query = mysqli_query($this->database->dbConn, $sql);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
     while ($rs=mysql_fetch_array($query)) {
@@ -1319,7 +1319,7 @@ class db_mapObj {
 			$sql ="SELECT concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as `connection`, `schema` FROM layer as l, connections as c WHERE l.Layer_ID = ".$layer_id." AND l.connection_id = c.id AND l.connectiontype = 6";
 		}
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Lesen des connection-Strings des Layers:<br>".$sql,4);
-		$query=mysql_query($sql);
+		$query = mysqli_query($this->database->dbConn, $sql);
 		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$rs = mysql_fetch_array($query);
 		$connectionstring = $rs[0];
@@ -1381,7 +1381,7 @@ class db_mapObj {
 		$sql.='LEFT JOIN datatypes as d ON d.id = REPLACE(type, \'_\', \'\') ';
 		$sql.='WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>".$sql,4);
-		$query=mysql_query($sql);
+		$query = mysqli_query($this->database->dbConn, $sql);
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 		$i = 0;
 		while($rs=mysql_fetch_array($query)){
@@ -1708,7 +1708,7 @@ class db_mapObj {
   function get_used_Layer($id) {
     $sql ='SELECT * FROM used_layer WHERE Layer_ID = '.$id.' AND Stelle_ID = '.$this->Stelle_ID;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_used_Layer - Lesen eines Layers:<br>".$sql,4);
-    $query=mysql_query($sql);
+		$query = mysqli_query($this->database->dbConn, $sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     $layer = mysql_fetch_array($query);
     return $layer;
