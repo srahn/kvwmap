@@ -976,9 +976,8 @@ class stelle {
 		";
 		#echo '<br>SQL zur Aktualisierung der LayerParams: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
-	#	$this->database->execSQL($sql);
+		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-
 		$sql = "
 			UPDATE
 				rolle
