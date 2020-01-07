@@ -291,7 +291,7 @@
 						echo'
 							</td>
 						</tr>';						
-						if($this->user->rolle->geom_edit_first)echo '</table><table class="tgle" border="0" cellspacing="0" cellpadding="2" style="width:100%"><tbody class="gle">'.$datapart;
+						if($this->user->rolle->geom_edit_first)echo '</table><table class="tgle" border="0" cellspacing="0" cellpadding="2"><tbody class="gle">'.$datapart;
 					}
 					else echo $datapart;
 				}
