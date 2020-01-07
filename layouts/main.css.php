@@ -1608,12 +1608,12 @@ tbody.gle>tr {
 }
 
 .rollenwahl-option-header {
-	width: 266px;
+	width: 270px;
 	padding : 4px;
 }
 
 .rollenwahl-option-data {
-	width: 460px;
+	width: 560px;
 	padding : 4px;
 }
 
