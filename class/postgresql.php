@@ -1950,7 +1950,8 @@ FROM
 			$Eigentuemer->n_gml_id=$rs['n_gml_id'];
 			$Eigentuemer->bestehtausrechtsverhaeltnissenzu=$rs['bestehtausrechtsverhaeltnissenzu'];
       $Eigentuemerliste[$rs['n_gml_id']]=$Eigentuemer;
-			if($this->listendarstellung OR $rs['namensnr'] != '')$this->writeRechtsverhaeltnisChildren($rs['n_gml_id'], $Eigentuemerliste);
+			#if($this->listendarstellung OR $rs['namensnr'] != '')	Bugfix 2.12.9
+			$this->writeRechtsverhaeltnisChildren($rs['n_gml_id'], $Eigentuemerliste);
     }
     $retListe[0]=0;
     $retListe[1]=$Eigentuemerliste;
