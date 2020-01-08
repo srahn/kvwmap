@@ -1590,7 +1590,7 @@ tbody.gle>tr {
 
 #rollenwahl_main_div {
 	width: 830px; 
-	height: 430px
+	min-height: 430px
 }
 
 #rollenwahl_optionen_div {
