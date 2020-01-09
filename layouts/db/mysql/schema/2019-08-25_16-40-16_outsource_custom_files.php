@@ -143,7 +143,7 @@
 				'prefix' => 'WWWROOT.APPLVERSION.CUSTOM_PATH',
 				'value' => str_replace('symbols/custom/', 'symbols/', $this->config_params['SYMBOLSET']['value'])
 			);
-			$cmd = 'sed -i -e "s|../|../../symbols/|g" ' . WWWROOT. APPLVERSION . CUSTOM_PATH . 'symbols/*.sym';
+			$cmd = 'sed -i -e "s|../|../../symbols/|g" ' . CUSTOM_PATH . 'symbols/*.sym';
 			exec($cmd);
 		}
 
@@ -209,7 +209,7 @@
 				'value' => LOGIN_AGREEMENT
 			);
 		}
-		$cmd = 'sed -i -e "s|SNIPPETS.AGREEMENT_MESSAGE|AGREEMENT_MESSAGE|g" ' . WWWROOT. APPLVERSION . CUSTOM_PATH . 'layouts/snippets/*';
+		$cmd = 'sed -i -e "s|SNIPPETS.AGREEMENT_MESSAGE|AGREEMENT_MESSAGE|g" ' . CUSTOM_PATH . 'layouts/snippets/*';
 		# echo '<br>Replace cmd: ' . $cmd;
 		exec($cmd);
 
@@ -284,8 +284,8 @@
 				'prefix' => 'SNIPPETS'
 			);
 		}
-		$cmd = 'sed -i -e "s|LAYOUTPATH.\"snippets/\".FOOTER|FOOTER|g" ' . WWWROOT. APPLVERSION . CUSTOM_PATH . 'layouts/*';
-		$cmd = 'sed -i -e "s|LAYOUTPATH.\"snippets/\".FOOTER|FOOTER|g" ' . WWWROOT. APPLVERSION . CUSTOM_PATH . 'layouts/snippets/*';
+		$cmd = 'sed -i -e "s|LAYOUTPATH.\"snippets/\".FOOTER|FOOTER|g" ' . CUSTOM_PATH . 'layouts/*';
+		$cmd = 'sed -i -e "s|LAYOUTPATH.\"snippets/\".FOOTER|FOOTER|g" ' . CUSTOM_PATH . 'layouts/snippets/*';
 		# echo '<br>Replace cmd: ' . $cmd;
 		exec($cmd);
 
