@@ -143,7 +143,7 @@
 				'prefix' => 'WWWROOT.APPLVERSION.CUSTOM_PATH',
 				'value' => str_replace('symbols/custom/', 'symbols/', $this->config_params['SYMBOLSET']['value'])
 			);
-			$cmd = 'sed -i -e "s|../|../../symbols/|g" ' . CUSTOM_PATH . 'symbols/*.sym';
+			$cmd = 'sed -i -e "s|\.\./|\.\./\.\./symbols/|g" ' . CUSTOM_PATH . 'symbols/*.sym';
 			exec($cmd);
 		}
 
