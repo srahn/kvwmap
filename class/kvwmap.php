@@ -10939,7 +10939,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$anzahl++;
 				}
 			}
-			$where .= "0)";
+			$where = substr($where, 0, -1).')';
 			if($anzahl > 0){
 				$this->formvars['sql_'.$this->formvars['selected_layer_id']] = $where.$orderby;
 				$this->formvars['anzahl'] = $anzahl;
