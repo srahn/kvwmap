@@ -5510,7 +5510,7 @@ echo '			</ul>
 			include_(CLASSPATH . 'datendrucklayout.php');
 			$ddl = new ddl($this->database);
 			$this->Document->fonts = $ddl->get_fonts();
-			$this->Document->din_formats = $ddl->get_din_formats();
+			$this->Document->din_formats = get_din_formats();
 
 			if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
         $this->Document->headsize = GetImageSize(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']));
@@ -5554,7 +5554,7 @@ echo '			</ul>
 			include_(CLASSPATH . 'datendrucklayout.php');
 			$ddl = new ddl($this->database);
 			$this->Document->fonts = $ddl->get_fonts();
-			$this->Document->din_formats = $ddl->get_din_formats();
+			$this->Document->din_formats = get_din_formats();
 
       if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
         $this->Document->headsize = GetImageSize(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']));
