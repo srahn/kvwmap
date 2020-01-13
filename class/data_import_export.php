@@ -59,6 +59,10 @@ class data_import_export {
 				$epsg = 4326;
 				$custom_tables = $this->import_custom_ovl($filename, $pgdatabase, $epsg);
 			} break;
+			case 'uko' : {
+				$custom_tables = $this->import_custom_uko($filename, $pgdatabase, $epsg);
+				$epsg = $custom_tables[0]['epsg'];
+			} break;
 			case 'dxf' : {
 				$custom_tables = $this->import_custom_dxf($filename, $pgdatabase, $epsg);
 			} break;
@@ -805,47 +809,35 @@ class data_import_export {
     }
   }
 
-	function get_ukotable_srid($database){
-		$sql = "select srid from geometry_columns where f_table_name = 'uko_polygon'";
-		$ret = $database->execSQL($sql,4, 1);
-		if(!$ret[0]){
-			$rs=pg_fetch_array($ret[1]);
-			$this->uko_srid = $rs[0];
-		}
-  }
-
-	function uko_importieren($formvars, $username, $userid, $database){
-		$_files = $_FILES;
-		if($_files['ukofile']['name']){
-		  $formvars['ukofile'] = $_files['ukofile']['name'];
-		  $nachDatei = UPLOADPATH.$_files['ukofile']['name'];
-		  if(move_uploaded_file($_files['ukofile']['tmp_name'],$nachDatei)){
-				$dateinamensteil = explode('.', $nachDatei);
-				if(strtolower($dateinamensteil[1]) == 'zip'){
-					$files = unzip($nachDatei, false, false, true);
-				}
-				else $files = array($_files['ukofile']['name']);
-				for($i = 0; $i < count($files); $i++){
-					$wkt = file_get_contents(UPLOADPATH.$files[$i]);
-					$wkt = substr($wkt, strpos($wkt, 'KOO ')+4);
-					$wkt = str_replace(chr(13), '', $wkt);
-					$wkt = 'MULTIPOLYGON((('.$wkt;
-					$wkt = str_replace(chr(13).'FL+'.chr(13).'KOO ', ')),((', $wkt);
-					$wkt = str_replace(chr(10).'FL+'.chr(10).'KOO ', ')),((', $wkt);
-					$wkt = str_replace(chr(10).'FL-'.chr(10).'KOO ', '),(', $wkt);
-					$wkt = str_replace(chr(10).'KOO ', ',', $wkt);
-					$wkt.= ')))';
-					$sql = "INSERT INTO uko_polygon (username, userid, dateiname, the_geom) VALUES('".$username."', ".$userid.", '".$_files['ukofile']['name']."', st_transform(st_geomfromtext('".$wkt."', ".$formvars['epsg']."), ".$this->uko_srid.")) RETURNING oid";
-					$ret = $database->execSQL($sql,4, 1);
-					if ($ret[0])$this->success = false;
-					else{
-						$this->success = true;
-						$rs=pg_fetch_array($ret[1]);
-						$oids[] = $rs[0];
-					}
-				}
-				return $oids;
-		  }
+	function import_custom_uko($filename, $pgdatabase, $epsg){
+		if(file_exists($filename)){
+			if($epsg == NULL){
+				$this->ask_epsg = true;		# EPSG-Code nachfragen
+				return;
+			}
+			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
+			$wkt = file_get_contents($filename);
+			$wkt = substr($wkt, strpos($wkt, 'KOO ')+4);
+			$wkt = str_replace(chr(13), '', $wkt);
+			$wkt = 'MULTIPOLYGON((('.$wkt;
+			$wkt = str_replace(chr(13).'FL+'.chr(13).'KOO ', ')),((', $wkt);
+			$wkt = str_replace(chr(10).'FL+'.chr(10).'KOO ', ')),((', $wkt);
+			$wkt = str_replace(chr(10).'FL-'.chr(10).'KOO ', '),(', $wkt);
+			$wkt = str_replace(chr(10).'KOO ', ',', $wkt);
+			$wkt.= ')))';
+			$sql = "CREATE TABLE ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (";
+			$sql.= "id serial";
+			$sql.= ")WITH (OIDS=TRUE);";
+			$sql.= "SELECT AddGeometryColumn('".CUSTOM_SHAPE_SCHEMA."', '".$tablename."', 'the_geom', ".$epsg.", 'MULTIPOLYGON', 2);";
+			
+			$sql.= "INSERT INTO ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (the_geom) VALUES(st_geomfromtext('".$wkt."', ".$epsg."))";
+			$ret = $pgdatabase->execSQL($sql,4, 1);
+			if(!$ret[0]){
+				$custom_table['tablename'] = $tablename;
+				$custom_table['epsg'] = $epsg;
+				$custom_table['datatype'] = 2;
+				return array($custom_table);
+			}
 		}
 	}
 
