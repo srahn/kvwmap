@@ -485,7 +485,7 @@ function alias_replace(name){
 							} ?>							
 							
 							<td align="center" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header"><i class="fa fa-windows" style="font-size:20px" title="Im Rastertemplate als Vorschau-Attribut verwenden"></i></div>'; ?>
+								<? if($i == 0)echo '<div class="fett scrolltable_header"><i class="fa fa-th" style="font-size:23px" title="Im Rastertemplate als Vorschau-Attribut verwenden"></i></div>'; ?>
 						  	<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>
 						  </td>
 							<td>
