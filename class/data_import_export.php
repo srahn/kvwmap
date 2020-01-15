@@ -157,64 +157,19 @@ class data_import_export {
 				($pgdatabase->host != 'localhost' ? ' host=' . $pgdatabase->host : '') .
 				($pgdatabase->passwd != ''        ? ' password=' . $pgdatabase->passwd : '');
 			$this->formvars['connectiontype'] = 6;
-			$this->formvars['transparency'] = 65;
+			if($custom_table['datatype'] == MS_LAYER_POLYGON)$this->formvars['transparency'] = $user->rolle->result_transparency;
+			else $this->formvars['transparency'] = 100;
 			if($custom_table['labelitem'] != '')$this->formvars['labelitem'] = $custom_table['labelitem'];
 		}
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
 		
-		if($custom_table['datatype'] != 3){	# kein Raster
+		if($custom_table['datatype'] != 3){	# kein Raster		
 			$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
 			$layerdb->setClientEncoding();
 			$path = $this->formvars['query'];
 			$attributes = $dbmap->load_attributes($layerdb, $path);
 			$dbmap->save_postgis_attributes(-$layer_id, $attributes, '', '');
-			$attrib['name'] = ' ';
-			$attrib['layer_id'] = -$layer_id;
-			$attrib['expression'] = '';
-			$attrib['order'] = 0;
-			$class_id = $dbmap->new_Class($attrib);
-			$this->formvars['class'] = $class_id;
-			$color = $user->rolle->readcolor();
-			$style['colorred'] = $color['red'];
-			$style['colorgreen'] = $color['green'];
-			$style['colorblue'] = $color['blue'];
-			$style['outlinecolorred'] = 0;
-			$style['outlinecolorgreen'] = 0;
-			$style['outlinecolorblue'] = 0;
-			switch ($custom_table['datatype']) {
-				case 0 : {
-					$style['size'] = 8;
-					$style['maxsize'] = 8;
-					$style['symbolname'] = 'circle';
-				} break;
-				case 1 : {
-					$style['width'] = 2;
-					$style['minwidth'] = 1;
-					$style['maxwidth'] = 3;
-					$style['symbolname'] = NULL;
-				} break;
-				case 2 :{
-					$style['size'] = 1;
-					$style['maxsize'] = 2;
-					$style['symbolname'] = NULL;
-				}
-			}
-			$style['backgroundcolor'] = NULL;
-			$style['minsize'] = NULL;
-			$style['angle'] = 360;
-			$style_id = $dbmap->new_Style($style);
-			$dbmap->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
-			if($custom_table['labelitem'] != '') {
-				$label['font'] = 'arial';
-				$label['color'] = '0 0 0';
-				$label['outlinecolor'] = '255 255 255';
-				$label['size'] = 8;
-				$label['minsize'] = 6;
-				$label['maxsize'] = 10;
-				$label['position'] = 9;
-				$new_label_id = $dbmap->new_Label($label);
-				$dbmap->addLabel2Class($class_id, $new_label_id, 0);
-			}
+			$dbmap->addRollenLayerStyling($layer_id, $custom_table['datatype'], $custom_table['labelitem'], $user);
 		}
     return $layer_id;
 	}
