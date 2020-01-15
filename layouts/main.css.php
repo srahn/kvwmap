@@ -244,6 +244,10 @@ select {
 	padding: 0 0;
 }
 
+select option{
+	font-family: SourceSansPro1,arial;
+}
+
 textarea {
 	font-size: 14px;
 	font-family: SourceSansPro1;
