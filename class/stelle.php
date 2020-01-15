@@ -970,16 +970,21 @@ class stelle {
 			UPDATE
 				rolle
 			SET
-				layer_params = concat(coalesce(concat(NULLIF(layer_params, ''), ','), ''), 
-					(
-						SELECT
-							GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"'))
-						FROM
-							layer_parameter p, stelle
-						WHERE
-							FIND_IN_SET(p.id, stelle.selectable_layer_params) AND
-							locate(concat('\"', p.key, '\"'), coalesce(layer_params, '')) = 0 AND
-							stelle.ID = rolle.stelle_id
+				layer_params = concat(coalesce(layer_params, ''), 
+					coalesce(
+						concat(
+							CASE WHEN coalesce(layer_params, '') = '' THEN '' ELSE ',' END,
+							(SELECT
+								GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"'))
+							FROM
+								layer_parameter p, stelle
+							WHERE
+								FIND_IN_SET(p.id, stelle.selectable_layer_params) AND
+								locate(concat('\"', p.key, '\"'), coalesce(layer_params, '')) = 0 AND
+								stelle.ID = rolle.stelle_id
+							)
+						),
+						''
 					)
 				)
 			WHERE
