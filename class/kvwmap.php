@@ -4995,7 +4995,7 @@ echo '			</ul>
       $this->formvars['Datentyp'] = $layerset[0]['Datentyp'];;
       $this->formvars['Data'] = $datastring;
       $this->formvars['connectiontype'] = 6;
-      $this->formvars['labelitem'] = $layerset[0]['labelitem'];
+			if($layerset[0]['labelitem'] != 'Cluster:FeatureCount')$this->formvars['labelitem'] = $layerset[0]['labelitem'];
       $connectionstring ='user='.$layerdb->user;
       if($layerdb->passwd != ''){
         $connectionstring.=' password='.$layerdb->passwd;
@@ -5013,7 +5013,7 @@ echo '			</ul>
 
       $layer_id = $dbmap->newRollenLayer($this->formvars);
 
-      if($this->formvars['selektieren'] != '1'){      # highlighten (gelb)
+      if($this->formvars['selektieren'] != '1'){      # highlighten
       	# ------------ automatische Klassifizierung -------------------
       	if($attribute != ''){
 					for($i = 0; $i < count($result); $i++){		# Auswahlfelder behandeln
@@ -5045,60 +5045,9 @@ echo '			</ul>
 					}
       		$dbmap->createAutoClasses(array_unique($classes), $attribute, $layer_id, $this->formvars['Datentyp'], $this->database);
       	}
-      	# ------------ automatische Klassifizierung -------------------
+      	# ------------ automatische Klassifizierung Ende -------------------
       	else{
-      		$color = $this->user->rolle->readcolor();
-	        $classdata['layer_id'] = -$layer_id;
-					$classdata['name'] = ' ';
-	        $class_id = $dbmap->new_Class($classdata);
-	        if($this->formvars['Datentyp'] == 0){			# Punkt
-						if(defined('ZOOM2POINT_STYLE_ID') AND ZOOM2POINT_STYLE_ID != ''){
-							$style_id = $dbmap->copyStyle(ZOOM2POINT_STYLE_ID);
-						}
-						else{
-							# highlighten (mit der ausgewählten Farbe)
-							$color = $this->user->rolle->readcolor();
-							$style['colorred'] = $color['red'];
-							$style['colorgreen'] = $color['green'];
-							$style['colorblue'] = $color['blue'];
-							$style['outlinecolorred'] = 0;
-							$style['outlinecolorgreen'] = 0;
-							$style['outlinecolorblue'] = 0;
-							$style['size'] = 10;
-							$style['symbolname'] = 'circle';
-							$style['backgroundcolor'] = NULL;
-							$style['minsize'] = NULL;
-							$style['maxsize'] = 100000;
-							if (MAPSERVERVERSION > '500') {
-								$style['angle'] = 360;
-							}
-							$style_id = $dbmap->new_Style($style);
-						}
-	        }
-	        else{
-	        	$style['colorred'] = $color['red'];
-		        $style['colorgreen'] = $color['green'];
-		        $style['colorblue'] = $color['blue'];
-		        $style['outlinecolorred'] = 0;
-		        $style['outlinecolorgreen'] = 0;
-		        $style['outlinecolorblue'] = 0;
-		       	$style['size'] = 3;
-		       	if($this->formvars['Datentyp'] == 1){		# Linie
-		       		$style['symbol'] = 9;
-		       	}
-		       	else{
-		       		$style['symbol'] = NULL;
-		       	}
-		        $style['symbolname'] = NULL;
-		        $style['backgroundcolor'] = NULL;
-		        $style['minsize'] = 3;
-		        $style['maxsize'] = 3;
-		        if (MAPSERVERVERSION > '500') {
-		        	$style['angle'] = 360;
-		        }
-		        $style_id = $dbmap->new_Style($style);
-	        }
-					$dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
+      		$dbmap->addRollenLayerStyling($layer_id, $this->formvars['Datentyp'], $this->formvars['labelitem'], $this->user);
       	}
       }
       else{         # selektieren (eigenen Style verwenden)
@@ -5205,71 +5154,8 @@ echo '			</ul>
 
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
 
-		$color = $this->user->rolle->readcolor();
-		$style['colorred'] = $color['red'];
-		$style['colorgreen'] = $color['green'];
-		$style['colorblue'] = $color['blue'];
-
 		if($this->formvars['selektieren'] == 'false'){      # highlighten (mit der ausgewählten Farbe)
-			$classdata['layer_id'] = -$layer_id;
-			$class_id = $dbmap->new_Class($classdata);
-			$this->formvars['class'] = $class_id;
-			switch ($layerset[0]['Datentyp']){
-				case MS_LAYER_POINT : {
-					if(defined('ZOOM2POINT_STYLE_ID') AND ZOOM2POINT_STYLE_ID != ''){
-						$style_id = $dbmap->copyStyle(ZOOM2POINT_STYLE_ID);
-					}
-					else{
-						# highlighten (mit der ausgewählten Farbe)
-						$style['outlinecolorred'] = 0;
-						$style['outlinecolorgreen'] = 0;
-						$style['outlinecolorblue'] = 0;
-						$style['size'] = 10;
-						$style['symbolname'] = 'circle';
-						$style['backgroundcolor'] = NULL;
-						$style['minsize'] = NULL;
-						$style['maxsize'] = 100000;
-						$style['angle'] = 360;
-						$style_id = $dbmap->new_Style($style);
-					}
-				}break;
-
-				case MS_LAYER_LINE : {
-					$style['outlinecolorred'] = -1;
-					$style['outlinecolorgreen'] = -1;
-					$style['outlinecolorblue'] = -1;
-					$style['size'] = NULL;
-					$style['symbol'] = NULL;
-					$style['symbolname'] = NULL;
-					$style['backgroundcolor'] = NULL;
-					$style['minsize'] = NULL;
-					$style['maxsize'] = NULL;
-					$style['width'] = 3;
-					$style['minwidth'] = 3;
-					$style['maxwidth'] = 3;
-					$style_id = $dbmap->new_Style($style);
-				}break;
-
-				case MS_LAYER_POLYGON : {
-					$style['outlinecolorred'] = 0;
-					$style['outlinecolorgreen'] = 0;
-					$style['outlinecolorblue'] = 0;
-					$style['size'] = 1;
-					$style['symbol'] = NULL;
-					if($this->user->rolle->result_hatching){
-						$style['symbolname'] = 'hatch';
-						$style['size'] = 11;
-						$style['width'] = 5;
-						$style['angle'] = 45;
-					}
-					else{
-						$style['symbolname'] = NULL;
-					}
-					$style['backgroundcolor'] = NULL;
-					$style_id = $dbmap->new_Style($style);
-				}break;
-			}
-			$dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
+			$dbmap->addRollenLayerStyling($layer_id, $this->formvars['Datentyp'], $this->formvars['labelitem'], $this->user);
 		}
 		else{         # selektieren (eigenen Style verwenden)
 			$class_id = $dbmap->getClassFromObject($select, $this->formvars['layer_id'], $layerset[0]['classitem']);
@@ -15380,30 +15266,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->formvars['transparency'] = 60;
 
     $layer_id = $dbmap->newRollenLayer($this->formvars);
-
-    $classdata['layer_id'] = -$layer_id;
-		$classdata['name'] = ' ';
-    $class_id = $dbmap->new_Class($classdata);
-
-		$color = $this->user->rolle->readcolor();
-    $style['colorred'] = $color['red'];
-		$style['colorgreen'] = $color['green'];
-		$style['colorblue'] = $color['blue'];
-    $style['outlinecolorred'] = 0;
-    $style['outlinecolorgreen'] = 0;
-    $style['outlinecolorblue'] = 0;
-    $style['size'] = 1;
-    $style['symbol'] = NULL;
-    $style['symbolname'] = NULL;
-    $style['backgroundcolor'] = NULL;
-    $style['minsize'] = NULL;
-    $style['maxsize'] = 100000;
-    if (MAPSERVERVERSION > '500') {
-    	$style['angle'] = 360;
-    }
-    $style_id = $dbmap->new_Style($style);
-
-    $dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
+		
+		$dbmap->addRollenLayerStyling($layer_id, $this->formvars['Datentyp'], $this->formvars['labelitem'], $this->user);
+		
     $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 
     $this->loadMap('DataBase');
@@ -15505,28 +15370,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 	    $layer_id = $dbmap->newRollenLayer($this->formvars);
 
-	    $classdata['layer_id'] = -$layer_id;
-	    $class_id = $dbmap->new_Class($classdata);
-
-			$color = $this->user->rolle->readcolor();
-	    $style['colorred'] = $color['red'];
-			$style['colorgreen'] = $color['green'];
-			$style['colorblue'] = $color['blue'];
-	    $style['outlinecolorred'] = 0;
-	    $style['outlinecolorgreen'] = 0;
-	    $style['outlinecolorblue'] = 0;
-	    $style['size'] = 1;
-	    $style['symbol'] = NULL;
-	    $style['symbolname'] = NULL;
-	    $style['backgroundcolor'] = NULL;
-	    $style['minsize'] = NULL;
-	    $style['maxsize'] = 100000;
-	    if (MAPSERVERVERSION > '500') {
-	    	$style['angle'] = 360;
-	    }
-	    $style_id = $dbmap->new_Style($style);
-
-	    $dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
+	    $dbmap->addRollenLayerStyling($layer_id, $this->formvars['Datentyp'], $this->formvars['labelitem'], $this->user);
+			
 	    $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 
 	    $this->loadMap('DataBase');
@@ -17790,6 +17635,76 @@ class db_mapObj{
 			}
 		}
   }
+
+	function addRollenLayerStyling($layer_id, $datatype, $labelitem, $user){
+		$attrib['name'] = ' ';
+		$attrib['layer_id'] = -$layer_id;
+		$attrib['expression'] = '';
+		$attrib['order'] = 0;
+		$class_id = $this->new_Class($attrib);
+		$this->formvars['class'] = $class_id;
+		$color = $user->rolle->readcolor();
+		$style['colorred'] = $color['red'];
+		$style['colorgreen'] = $color['green'];
+		$style['colorblue'] = $color['blue'];
+		$style['outlinecolorred'] = 0;
+		$style['outlinecolorgreen'] = 0;
+		$style['outlinecolorblue'] = 0;
+		switch ($datatype) {
+			case 0 : {
+				if(defined('ZOOM2POINT_STYLE_ID') AND ZOOM2POINT_STYLE_ID != ''){
+					$style_id = $this->copyStyle(ZOOM2POINT_STYLE_ID);
+				}
+				else{
+					$style['size'] = 8;
+					$style['maxsize'] = 8;
+					$style['symbolname'] = 'circle';
+				}
+			} break;
+			case 1 : {
+				$style['width'] = 2;
+				$style['minwidth'] = 1;
+				$style['maxwidth'] = 3;
+				$style['symbolname'] = NULL;
+			} break;
+			case 2 :{
+				$style['size'] = 1;
+				if($user->rolle->result_hatching){
+					$style['symbolname'] = 'hatch';
+					$style['size'] = 11;
+					$style['width'] = 5;
+					$style['angle'] = 45;
+				}
+				else{
+					$style['symbolname'] = NULL;
+				}
+			}
+		}
+		$style['backgroundcolor'] = NULL;
+		$style['minsize'] = NULL;
+		$style_id = $this->new_Style($style);
+		$this->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
+		if($user->rolle->result_hatching){
+			$style['symbolname'] = NULL;
+			$style['width'] = 1;
+			$style['colorred'] = -1;
+			$style['colorgreen'] = -1;
+			$style['colorblue'] = -1;
+			$style_id = $this->new_Style($style);
+			$this->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
+		}
+		if($labelitem != '') {
+			$label['font'] = 'arial';
+			$label['color'] = '0 0 0';
+			$label['outlinecolor'] = '255 255 255';
+			$label['size'] = 8;
+			$label['minsize'] = 6;
+			$label['maxsize'] = 10;
+			$label['position'] = 9;
+			$new_label_id = $this->new_Label($label);
+			$this->addLabel2Class($class_id, $new_label_id, 0);
+		}
+	}
 
 	function newRollenLayer($formvars){
 		$formvars['Data'] = str_replace ( "'", "''", $formvars['Data']);
