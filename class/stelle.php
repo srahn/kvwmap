@@ -970,7 +970,7 @@ class stelle {
 			UPDATE
 				rolle
 			SET
-				layer_params = COALESCE(
+				layer_params = concat(coalesce(concat(NULLIF(layer_params, ''), ','), ''), 
 					(
 						SELECT
 							GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"'))
@@ -978,16 +978,16 @@ class stelle {
 							layer_parameter p, stelle
 						WHERE
 							FIND_IN_SET(p.id, stelle.selectable_layer_params) AND
+							locate(concat('\"', p.key, '\"'), coalesce(layer_params, '')) = 0 AND
 							stelle.ID = rolle.stelle_id
-					),
-					''
+					)
 				)
 			WHERE
 				rolle.stelle_id = " . $this->id . "
 		";
 		#echo '<br>SQL zum Aktualisieren der Layerparameter in den Rollen: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
-	#	$query = mysql_query($sql,$this->database->dbConn);
+		$query = mysql_query($sql,$this->database->dbConn);
 		if ($query == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 	}
 
