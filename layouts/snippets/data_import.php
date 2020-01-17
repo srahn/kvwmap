@@ -93,7 +93,7 @@
     <td align="center" valign="top" style="height: 40px"><h2><?php echo $strTitle; ?></h2></td>
   </tr>
 	<tr> 
-    <td align="center" valign="top"><? echo $strSupportedFileTypes; ?>Shape, GeoJSON, KML, DXF, GPX, OVL, GeoTiff</td>
+    <td align="center" valign="top"><? echo $strSupportedFileTypes; ?>Shape, GeoJSON, KML, DXF, GPX, UKO, OVL, GeoTiff</td>
   </tr>
 	<tr>
 		<td>

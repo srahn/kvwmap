@@ -1016,16 +1016,6 @@ function go_switch($go, $exit = false) {
 				$GUI->wmsImportFormular();
 			} break;
 
-			case 'UKO_Import' : {
-				$GUI->checkCaseAllowed('UKO_Import');
-				$GUI->uko_import();
-			} break;
-
-			case 'UKO_Import_Importieren' : {
-				$GUI->checkCaseAllowed('UKO_Import');
-				$GUI->uko_import_importieren();
-			} break;
-
 			case 'Punktliste_Anzeigen' : {
 				$GUI->create_point_rollenlayer();
 			} break;

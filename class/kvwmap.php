@@ -5396,7 +5396,7 @@ echo '			</ul>
 			include_(CLASSPATH . 'datendrucklayout.php');
 			$ddl = new ddl($this->database);
 			$this->Document->fonts = $ddl->get_fonts();
-			$this->Document->din_formats = $ddl->get_din_formats();
+			$this->Document->din_formats = get_din_formats();
 
 			if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
         $this->Document->headsize = GetImageSize(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']));
@@ -5440,7 +5440,7 @@ echo '			</ul>
 			include_(CLASSPATH . 'datendrucklayout.php');
 			$ddl = new ddl($this->database);
 			$this->Document->fonts = $ddl->get_fonts();
-			$this->Document->din_formats = $ddl->get_din_formats();
+			$this->Document->din_formats = get_din_formats();
 
       if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
         $this->Document->headsize = GetImageSize(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']));
@@ -10049,7 +10049,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$pdf_file = $output;
 			# in jpg umwandeln
 			$currenttime = date('Y-m-d_H_i_s',time());
-			exec(IMAGEMAGICKPATH.'convert "'.$pdf_file.'[' . ($this->formvars['page'] ? $this->formvars['page'] : 0) . ']" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"');
+			exec(IMAGEMAGICKPATH.'convert "'.$pdf_file.'[' . ($this->formvars['page'] ? $this->formvars['page'] : 0) . ']" -resize '.$selectedlayout['width'].'x'.$selectedlayout['height'].' "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"');
 			#echo IMAGEMAGICKPATH.'convert "'.$pdf_file.'[0]" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"';
 			if(!file_exists(IMAGEPATH.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg')){
 				return TEMPPATH_REL.basename($pdf_file, ".pdf").'-'.$currenttime.'-0.jpg';
@@ -10588,41 +10588,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     //return TEMPPATH_REL.$imagename;
     //$this->output();
 	}
-
-  function uko_import(){
-		$this->titel='UKO-Import';
-    $this->main='uko_import.php';
-		include_(CLASSPATH.'data_import_export.php');
-    $this->data_import_export = new data_import_export();
-		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
-    $this->output();
-  }
-
-  function uko_import_importieren(){
-    $this->titel='UKO-Import';
-    $this->main='uko_import.php';
-		include_(CLASSPATH.'data_import_export.php');
-    $this->data_import_export = new data_import_export();
-		$this->data_import_export->get_ukotable_srid($this->pgdatabase);
-    $oids = $this->data_import_export->uko_importieren($this->formvars, $this->user->Name, $this->user->id, $this->pgdatabase);
-		if($this->data_import_export->success == true){
-			$this->main='map.php';
-			$this->loadMap('DataBase');
-			$rect = $this->mapDB->zoomToDatasets($oids, 'uko_polygon', 'the_geom', 20, $this->pgdatabase, $this->data_import_export->uko_srid, $this->user->rolle->epsg_code);
-			$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
-	    if (MAPSERVERVERSION > 600) {
-				$this->map_scaledenom = $this->map->scaledenom;
-			}
-			else {
-				$this->map_scaledenom = $this->map->scale;
-			}
-			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-			$this->drawMap();
-			$this->saveMap('');
-		}
-    $this->output();
-  }
-
 
   function TIFExport(){
     $this->loadMap('DataBase');
