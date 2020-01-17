@@ -5405,6 +5405,7 @@ echo '			</ul>
 
 
   function druckrahmen_init() {
+		include_(CLASSPATH . 'Document.php');
     $Document=new Document($this->database);
     $this->Document=$Document;
   }
@@ -5654,6 +5655,7 @@ echo '			</ul>
   }
 
   function druckausschnittswahl($loadmapsource){
+		include_(CLASSPATH . 'Document.php');
 		global $selectable_scales;
 		$this->selectable_scales = array_reverse($selectable_scales);
 		$saved_scale = $this->reduce_mapwidth(10);
@@ -5757,6 +5759,7 @@ echo '			</ul>
   }
 	
   function druckausschnitt_löschen($loadmapsource){
+		include_(CLASSPATH . 'Document.php');
     $this->Document = new Document($this->database);
     $this->Document->delete_ausschnitt($this->Stelle->id, $this->user->id, $this->formvars['druckausschnitt']);
     $this->formvars['druckausschnitt'] = '';
@@ -5764,6 +5767,7 @@ echo '			</ul>
   }
 
   function druckausschnitt_speichern($loadmapsource){
+		include_(CLASSPATH . 'Document.php');
     $this->loadMap($loadmapsource);
     $this->Document = new Document($this->database);
     $this->Document->save_ausschnitt($this->Stelle->id, $this->user->id, $this->formvars['name'], $this->formvars['center_x'], $this->formvars['center_y'], $this->formvars['printscale'], $this->formvars['angle'], $this->formvars['aktiverRahmen']);
@@ -6527,6 +6531,7 @@ echo '			</ul>
     # Einbinden der PDF Klassenbibliotheken
     include (CLASSPATH.'class.ezpdf.php');
     # Erzeugen neue Dokument-Klasse
+		include_(CLASSPATH . 'Document.php');
     $Document=new Document($this->database);
     $this->Docu=$Document;
 
@@ -6624,6 +6629,7 @@ echo '			</ul>
 
 
   function createMapPDF($frame_id, $preview, $fast = false) {
+		include_(CLASSPATH . 'Document.php');
     $Document=new Document($this->database);
     $this->Docu=$Document;
     $this->Docu->activeframe = $this->Docu->load_frames(NULL, $frame_id);
@@ -11016,6 +11022,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       if($functions[0] != NULL){
         $new_stelle->addFunctions($functions, 0); # Hinzufügen der Funktionen zur Stelle
       }
+			include_(CLASSPATH . 'Document.php');
       $document = new Document($this->database);
       $document->removeFrames($new_stelleid);   // Entfernen aller Kartendruck-Layouts der Stelle
       if($frames[0] != NULL){
@@ -11150,6 +11157,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         if($layer[0] != NULL){
           $Stelle->addLayer($layer, 0);
         }
+				include_(CLASSPATH . 'Document.php');
         $document = new Document($this->database);
         if($frames[0] != NULL){
           for($i = 0; $i < count($frames); $i++){
@@ -11194,6 +11202,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		include_(CLASSPATH.'datendrucklayout.php');
 		include_(CLASSPATH.'funktion.php');
 		include_(CLASSPATH.'FormObject.php');
+		include_(CLASSPATH . 'Document.php');
 		$document = new Document($this->database);
 		$ddl = new ddl($this->database, $this);
 		$where = '';

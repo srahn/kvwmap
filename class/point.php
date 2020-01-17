@@ -20,4 +20,3 @@ class point {
     $this->y=round(($this->y-$minY)/$pixSize);
   }
 }
-?>
