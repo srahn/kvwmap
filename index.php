@@ -133,6 +133,7 @@ else {
 	include_(CLASSPATH . 'kvwmap.php');
 	include_(CLASSPATH . 'db_MapObj.php');
 	include_(CLASSPATH . 'Document.php');
+	include_(CLASSPATH . 'point.php');
 	include_(CLASSPATH . 'Menue.php');
 	include_(CLASSPATH . 'kataster.php');
 	include_(CLASSPATH . 'postgresql.php');
@@ -1022,16 +1023,6 @@ function go_switch($go, $exit = false) {
 			case 'WMS_Import' : {
 				$GUI->checkCaseAllowed('WMS_Import');
 				$GUI->wmsImportFormular();
-			} break;
-
-			case 'UKO_Import' : {
-				$GUI->checkCaseAllowed('UKO_Import');
-				$GUI->uko_import();
-			} break;
-
-			case 'UKO_Import_Importieren' : {
-				$GUI->checkCaseAllowed('UKO_Import');
-				$GUI->uko_import_importieren();
 			} break;
 
 			case 'Punktliste_Anzeigen' : {

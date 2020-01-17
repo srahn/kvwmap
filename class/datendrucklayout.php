@@ -36,6 +36,12 @@ class ddl {
     $this->debug=$debug;
     $this->database = $database;
     $this->gui = $gui;
+		$this->din_formats = array(
+			'A4 hoch' => array('width' => 595, 'height' => 842, 'size' => 'A4', 'orientation' => 'portrait'),
+			'A4 quer' => array('width' => 842, 'height' => 595, 'size' => 'A4', 'orientation' => 'landscape'),
+			'A3 hoch' => array('width' => 842, 'height' => 1191, 'size' => 'A3', 'orientation' => 'portrait'),
+			'A3 quer' => array('width' => 1191, 'height' => 842, 'size' => 'A3', 'orientation' => 'landscape')
+		);
   }
   
   function add_static_elements($offsetx){
@@ -236,7 +242,7 @@ class ddl {
 								$pagecount = count($this->pdf->objects['3']['info']['pages']);								
 								if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$ypos = $ypos + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 								
-								$offy = 842 - $ypos;
+								$offy = $this->layout['height'] - $ypos;
 								
 								if($offset_attribute == ''){
 									$offy = $offy + $this->offsety;
@@ -248,7 +254,7 @@ class ddl {
 								
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
 								if($this->i_on_page == 0){
-									if($this->maxy < 842-$offy)$this->maxy = 842-$offy;		# beim ersten Datensatz das maxy ermitteln
+									if($this->maxy < $this->layout['height']-$offy)$this->maxy = $this->layout['height']-$offy;		# beim ersten Datensatz das maxy ermitteln
 								}
 								if($preview){
 									$sublayoutobject = $this->load_layouts(NULL, $sublayout, NULL, NULL);
@@ -447,14 +453,14 @@ class ddl {
 			$backto_oldpage = true;															# das Offset-Attribut wurde auf einer anderen Seite beendet -> zu dieser Seite zurückkehren
 		}
 		if($offset_value - $ypos < 40){	# Seitenüberlauf
-			$offset_value = 842 + $offset_value - 40 - 30;	# Offsetwert so anpassen, dass er für die neue Seite passt
+			$offset_value = $this->layout['height'] + $offset_value - 40 - 30;	# Offsetwert so anpassen, dass er für die neue Seite passt
 			$next_page = $this->getNextPage($this->layout['page_id'][$offset_attribute]);
 			if($next_page != NULL){
 				$this->pdf->reopenObject($next_page);		# die nächste Seite der Seite des Offset-Attributes nehmen
 			}
 			else{																			# wenns noch keine gibt, neue Seite erstellen
 				$this->pdf->ezNewPage();			# eine neue Seite beginnen
-				$this->miny[$this->pdf->currentContents] = 842;
+				$this->miny[$this->pdf->currentContents] = $this->layout['height'];
 				$this->maxy = 800;
 				if($this->layout['type'] == 2)$this->offsety = 50;
 				$this->page_overflow = true;
@@ -479,13 +485,13 @@ class ddl {
 	
 	function putText($text, $fontsize, $width, $x, $y, $offsetx){	
 		if($x < 0){		# rechtsbündig
-			$x = 595 + $x;
+			$x = $this->layout['width'] + $x;
 			$x = $x + $offsetx;
 			$options = array('aright'=>$x, 'justification'=>'right');
 		}
 		else{							# linksbündig
 			$x = $x + $offsetx;
-			if($width != '')$right = 595 - $width - $x + 20;
+			if($width != '')$right = $this->layout['width'] - $width - $x + 20;
 			else $right = NULL;
 			$options = array('aleft'=>$x, 'right'=>$right, 'justification'=>'full');
 		}
@@ -602,7 +608,7 @@ class ddl {
 		$this->page_overflow = false;
 		if($pdfobject == NULL){
 			include (CLASSPATH . 'class.ezpdf.php');
-			$this->pdf=new Cezpdf();
+			$this->pdf=new Cezpdf($this->layout['size'], $this->layout['orientation']);
 			$this->pdf->ezSetMargins($this->layout['margin_top'], $this->layout['margin_bottom'], $this->layout['margin_left'], $this->layout['margin_right']);
 		}
 		else{
@@ -610,7 +616,7 @@ class ddl {
 		}
 		$this->miny[$this->pdf->currentContents] = 1000000;
 		$this->max_dataset_height = 0;
-		if($this->offsety)$this->miny[$this->pdf->currentContents] = 842 - $this->offsety;
+		if($this->offsety)$this->miny[$this->pdf->currentContents] = $this->layout['height'] - $this->offsety;
     if($this->layout['elements'][$attributes['the_geom']]['xpos'] > 0){		# wenn ein Geometriebild angezeigt werden soll -> loadmap()
     	$this->gui->map_factor = MAPFACTOR;
     	$this->gui->loadmap('DataBase');
@@ -822,6 +828,7 @@ class ddl {
       $sql = "INSERT INTO `datendrucklayouts`";
       $sql .= " SET `name` = '".$formvars['name']."'";
       $sql .= ", `layer_id` = ".(int)$formvars['selected_layer_id'];
+			$sql .= ", `format` = '".$formvars['format']."'";
   		if($formvars['bgposx'])$sql .= ", `bgposx` = ".(int)$formvars['bgposx'];
   		else $sql .= ", `bgposx` = NULL";
       if($formvars['bgposy'])$sql .= ", `bgposy` = ".(int)$formvars['bgposy'];
@@ -892,7 +899,7 @@ class ddl {
         $this->database->execSQL($sql,4, 1);
 			}
 			
-			$sql = "DELETE FROM ddl_elemente WHERE ((xpos IS NULL AND ypos IS NULL) OR (xpos = 0 AND ypos = 0) OR (xpos > 595 AND ypos > 842)) AND ddl_id = ".$lastddl_id;
+			$sql = "DELETE FROM ddl_elemente WHERE ((xpos IS NULL AND ypos IS NULL) OR (xpos = 0 AND ypos = 0)) AND ddl_id = ".$lastddl_id;
 			#echo $sql;
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
@@ -961,6 +968,7 @@ class ddl {
       $sql = "UPDATE `datendrucklayouts`";
       $sql .= " SET `name` = '".$formvars['name']."'";
       $sql .= ", `layer_id` = ".(int)$formvars['selected_layer_id'];
+			$sql .= ", `format` = '".$formvars['format']."'";
   		if($formvars['bgposx'])$sql .= ", `bgposx` = ".(int)$formvars['bgposx'];
   		else $sql .= ", `bgposx` = NULL";
       if($formvars['bgposy'])$sql .= ", `bgposy` = ".(int)$formvars['bgposy'];
@@ -1026,7 +1034,7 @@ class ddl {
         $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
         $this->database->execSQL($sql,4, 1);
 			}
-			$sql = "DELETE FROM ddl_elemente WHERE ((xpos IS NULL AND ypos IS NULL) OR (xpos = 0 AND ypos = 0) OR (xpos > 595 AND ypos > 842)) AND ddl_id = ".(int)$formvars['aktivesLayout'];
+			$sql = "DELETE FROM ddl_elemente WHERE ((xpos IS NULL AND ypos IS NULL) OR (xpos = 0 AND ypos = 0)) AND ddl_id = ".(int)$formvars['aktivesLayout'];
 			#echo $sql;
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
@@ -1122,7 +1130,11 @@ class ddl {
 			if ($return == 'only_ids') {
 				$layouts[] = $rs['id'];
 			}
-			else {
+			else { 
+				$rs['width'] = $this->din_formats[$rs['format']]['width'];
+				$rs['height'] = $this->din_formats[$rs['format']]['height'];
+				$rs['size'] = $this->din_formats[$rs['format']]['size'];
+				$rs['orientation'] = $this->din_formats[$rs['format']]['orientation'];
 				$layouts[] = $rs;
 				#$layouts[0]['bilder'] = $this->load_bilder($rs['id']);
 				$layouts[0]['elements'] = $this->load_elements($rs['id']);
@@ -1343,22 +1355,5 @@ class ddl {
 		return $fonts;
 	}
 
-	function get_din_formats() {
-		$din_formats = array(
-			'A5hoch' => array('value' => 'A5hoch', 'output' => 'A5 hoch', 'size' => '(420 x 595)'),
-			'A5quer' => array('value' => 'A5quer', 'output' => 'A5 quer', 'size' => '(595 x 420)'),
-			'A4hoch' => array('value' => 'A4hoch', 'output' => 'A4 hoch', 'size' => '(595 x 842)'),
-			'A4quer' => array('value' => 'A4quer', 'output' => 'A4 quer', 'size' => '(842 x 595)'),
-			'A3hoch' => array('value' => 'A3hoch', 'output' => 'A3 hoch', 'size' => '(842 x 1191)'),
-			'A3quer' => array('value' => 'A3quer', 'output' => 'A3 quer', 'size' => '(1191 x 842)'),
-			'A2hoch' => array('value' => 'A2hoch', 'output' => 'A2 hoch', 'size' => '(1191 x 1684)'),
-			'A2quer' => array('value' => 'A2quer', 'output' => 'A2 quer', 'size' => '(1684 x 1191)'),
-			'A1hoch' => array('value' => 'A1hoch', 'output' => 'A1 hoch', 'size' => '(1684 x 2384)'),
-			'A1quer' => array('value' => 'A1quer', 'output' => 'A1 quer', 'size' => '(2384 x 1684)'),
-			'A0hoch' => array('value' => 'A0hoch', 'output' => 'A0 hoch', 'size' => '(2384 x 3370)'),
-			'A0quer' => array('value' => 'A0quer', 'output' => 'A0 quer', 'size' => '(3370 x 2384)'),
-		);
-		return $din_formats;
-	}
 }
 ?>
