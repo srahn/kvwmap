@@ -586,7 +586,7 @@
 					if($attribute_privileg != '0' OR $lock[$k]){
 						$datapart .= '<input class="'.$field_class.'" tabindex="1" onchange="'.$onchange.'" id="'.$layer_id.'_'.$name.'_'.$k.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					}else{
-						$datapart .= '<input class="'.$field_class.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+						$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					}
 				} break;
 

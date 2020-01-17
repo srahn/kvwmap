@@ -244,6 +244,10 @@ select {
 	padding: 0 0;
 }
 
+select option{
+	font-family: SourceSansPro1,arial;
+}
+
 textarea {
 	font-size: 14px;
 	font-family: SourceSansPro1;
@@ -1588,6 +1592,11 @@ tbody.gle>tr {
 	border-right: 1px solid #CCCCCC;
 }
 
+#rollenwahl_main_div {
+	width: 830px; 
+	min-height: 430px
+}
+
 #rollenwahl_optionen_div {
 	background:rgb(248, 248, 249);
 	margin: 10px;
@@ -1608,12 +1617,12 @@ tbody.gle>tr {
 }
 
 .rollenwahl-option-header {
-	width: 266px;
+	width: 270px;
 	padding : 4px;
 }
 
 .rollenwahl-option-data {
-	width: 460px;
+	width: 560px;
 	padding : 4px;
 }
 
