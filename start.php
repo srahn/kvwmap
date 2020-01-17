@@ -291,7 +291,7 @@ if (!$show_login_form) {
 			# login case 15
 		}
 		else {
-			$GUI->debug->write('Zugang zur Stelle ' . $GUI->Stelle->id . ' für Nutzer nicht erlaubt weil: ' . $permission['reason'], 4, $GUI->echo);
+			$GUI->debug->write('Zugang zur Stelle ' . $GUI->Stelle->id . ' für Nutzer fehlgeschlagen weil: ' . $permission['reason'].'<br>', 4, true);
 
 			if (is_ows_request($GUI->formvars)) {
 				$GUI->debug->write('OWS Request führt zu Exception.', 4);
@@ -569,6 +569,7 @@ function is_new_stelle($new_stelle_id, $user) {
 }
 
 function is_user_member_in_stelle($user_stelle_id, $allowed_stellen_ids) {
+	if($allowed_stellen_ids == NULL)return false;
 	return in_array($user_stelle_id, $allowed_stellen_ids);
 }
 
@@ -611,7 +612,12 @@ function get_permission_in_stelle($GUI) {
 	}
 	else {
 		$GUI->debug->write('Nutzer gehört nicht zur Stelle ' . $GUI->Stelle->id, 4, $GUI->echo);
-		$reason = 'Der Nutzer ist nicht der Stelle mit der ID: ' . $GUI->Stelle->id . ' zugeordnet oder es gibt diese Stelle in der Anwendung nicht.';
+		if($GUI->user->Stellen['ID'] == NULL){
+			$reason = 'Der Nutzer ist keiner Stelle zugeordnet.';
+		}
+		else{
+			$reason = 'Der Nutzer ist nicht der Stelle mit der ID: ' . $GUI->Stelle->id . ' zugeordnet oder es gibt diese Stelle in der Anwendung nicht.';
+		}
 		$errmsg = 'Anmeldung in der Stelle fehlgeschlagen.';
 		$allowed = false;
 	}
