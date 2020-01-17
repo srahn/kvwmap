@@ -1,9 +1,4 @@
-<?php
-##############################################################
-# Klasse MapObject zum laden der Map-Daten aus der Datenbank #
-##############################################################
-# Klasse db_mapObj #
-####################
+<?
 class db_mapObj{
   var $debug;
   var $referenceMap;

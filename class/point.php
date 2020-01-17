@@ -1,7 +1,4 @@
-###########################################
-# Dokumentenklasse                        #
-###########################################
-# Klasse point
+<?
 class point {
   var $x;
   var $y;
@@ -23,3 +20,4 @@ class point {
     $this->y=round(($this->y-$minY)/$pixSize);
   }
 }
+?>
