@@ -1,4 +1,8 @@
 <?
+<<<<<<< HEAD
+=======
+
+>>>>>>> develop
 class db_mapObj{
   var $debug;
   var $referenceMap;
@@ -7,6 +11,7 @@ class db_mapObj{
   var $nurAufgeklappteLayer;
   var $Stelle_ID;
   var $User_ID;
+<<<<<<< HEAD
 	var $db;
 	var $OhneRequires;
 
@@ -38,6 +43,29 @@ class db_mapObj{
 		if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
 		$rs = $this->db->result->fetch_array();
     $this->referenceMap = $rs;
+=======
+	var $database;
+
+	function db_mapObj($Stelle_ID, $User_ID, $database = NULL) {
+		global $debug;
+		global $GUI;
+		$this->debug = $debug;
+		$this->GUI = $GUI;
+		$this->Stelle_ID = $Stelle_ID;
+		$this->User_ID = $User_ID;
+		$this->rolle = new rolle($User_ID, $Stelle_ID, $database);
+		$this->database = $database;
+	}
+
+	function read_ReferenceMap() {
+    $sql ='SELECT r.* FROM referenzkarten AS r, stelle AS s WHERE r.ID=s.Referenzkarte_ID';
+    $sql.=' AND s.ID='.$this->Stelle_ID;
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_ReferenceMap - Lesen der Referenzkartendaten:<br>" . $sql,4);
+    $query=mysql_query($sql);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $rs=mysql_fetch_array($query);
+    $this->referenceMap=$rs;
+>>>>>>> develop
 #		echo '<br>sql: ' . print_r($sql, true);
 #		echo '<br>ref: ' . print_r($this->referenceMap, true);
     return $rs;
@@ -53,12 +81,21 @@ class db_mapObj{
     	$sql .= ' AND l.Typ = \''.$typ.'\'';
     }
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>" . $sql,4);
+<<<<<<< HEAD
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
     $Layer = array();
     while ($rs = $ret['result']->fetch_array()) {
       $rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
       $Layer[] = $rs;
+=======
+    $query=mysql_query($sql);
+		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+    $Layer = array();
+    while ($rs=mysql_fetch_array($query)) {
+      $rs['Class']=$this->read_Classes(-$rs['id'], $this->disabled_classes);
+      $Layer[]=$rs;
+>>>>>>> develop
     }
     return $Layer;
   }
@@ -127,17 +164,30 @@ class db_mapObj{
     	$sql.=' AND (l.connection like "%host=%" AND l.connection NOT like "%host=localhost%" OR l.connectiontype != 6 AND rl.aktivStatus != "0")';
     }
     $sql.=' ORDER BY drawingorder';
+<<<<<<< HEAD
     #echo '<br>SQL zur Abfrage der Layer: ' . $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+    #echo $sql;
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>" . $sql,4);
+    $query=mysql_query($sql);
+		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
     $layer = array();
 		$layer['list'] = array();
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
+<<<<<<< HEAD
     while ($rs = $ret['result']->fetch_assoc()) {
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
 				if ($rs['Filter'] == ''){
+=======
+    while ($rs=mysql_fetch_assoc($query)){
+			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
+				if($rs['Filter'] == ''){
+>>>>>>> develop
 					$rs['Filter'] = '('.$rs['rollenfilter'].')';
 				}
 				else {
@@ -192,9 +242,15 @@ class db_mapObj{
 		#echo $sql;
 
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Groups - Lesen der Gruppen der Rolle:<br>" . $sql,4);
+<<<<<<< HEAD
     $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
     while ($rs = $this->db->result->fetch_array()) {
+=======
+    $query=mysql_query($sql);
+		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+    while ($rs=mysql_fetch_array($query)) {
+>>>>>>> develop
 			$groups[$rs['id']]['status'] = $rs['status'];
       $groups[$rs['id']]['Gruppenname'] = $rs['Gruppenname'];
 			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
@@ -209,9 +265,15 @@ class db_mapObj{
     // $sql ='SELECT g2r.*, g.Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r';
     // $sql.=' WHERE g2r.stelle_ID='.$this->Stelle_ID.' AND g2r.user_id='.$this->User_ID.' AND g2r.id = g.id AND g.id='.$id;
     // $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Group - Lesen einer Gruppe der Rolle:<br>" . $sql,4);
+<<<<<<< HEAD
     // $ret = $this->db->execSQL($sql);
     //if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql, $this->connection); return 0; }
     // $rs = $this->db->result->fetch_array();
+=======
+    // $query=mysql_query($sql);
+    //if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql, $this->connection); return 0; }
+    // $rs=mysql_fetch_array($query);
+>>>>>>> develop
     // return $rs;
   // }
 
@@ -247,9 +309,15 @@ class db_mapObj{
 
 		#echo $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
+<<<<<<< HEAD
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		while ($rs = $ret['result']->fetch_array()) {
+=======
+		$query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+		while ($rs = mysql_fetch_array($query)) {
+>>>>>>> develop
 			$rs['Style'] = $this->read_Styles($rs['Class_ID']);
 			$rs['Label'] = $this->read_Label($rs['Class_ID']);
 			$Classes[] = $rs;
@@ -259,7 +327,10 @@ class db_mapObj{
 
 	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $classification = '') {
 		global $language;
+<<<<<<< HEAD
 		$Classes = array();
+=======
+>>>>>>> develop
 
 		$sql = "
 			SELECT " .
@@ -303,10 +374,17 @@ class db_mapObj{
 		";
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
+<<<<<<< HEAD
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name . " Zeile: " . __LINE__ .'<br>'.$sql; return 0; }
 		$index = 0;
 		while ($rs = $ret['result']->fetch_assoc()) {
+=======
+		$query = mysql_query($sql);
+		if ($query == 0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ .'<br>'.$sql; return 0; }
+		$index = 0;
+		while ($rs = mysql_fetch_assoc($query)) {
+>>>>>>> develop
 			$rs['Style'] = $this->read_Styles($rs['Class_ID']);
 			$rs['Label'] = $this->read_Label($rs['Class_ID']);
 			$rs['index'] = $index;
@@ -338,6 +416,7 @@ class db_mapObj{
 		return $Classes;
 	}
 
+<<<<<<< HEAD
   function read_disabled_classes() {
 		$classarray = array();
 		$sql = "
@@ -353,6 +432,13 @@ class db_mapObj{
 		#echo '<p>SQL zur Abfrage von diabled classes: ' . $sql;
 		$this->db->execSQL($sql);
     while ($row = $this->db->result->fetch_assoc()) {
+=======
+  function read_disabled_classes(){
+  	#Anne
+    $sql_classes = 'SELECT class_id, status FROM u_rolle2used_class WHERE user_id='.$this->User_ID.' AND stelle_id='.$this->Stelle_ID.';';
+    $query_classes=mysql_query($sql_classes);
+    while($row = mysql_fetch_assoc($query_classes)){
+>>>>>>> develop
   		$classarray['class_id'][] = $row['class_id'];
 			$classarray['status'][$row['class_id']] = $row['status'];
 		}
@@ -364,14 +450,21 @@ class db_mapObj{
     $sql.=' WHERE s.Style_ID=s2c.style_id AND s2c.class_id='.$Class_ID;
     $sql.=' ORDER BY drawingorder';
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Styles - Lesen der Styledaten:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
     while($rs = $this->db->result->fetch_assoc()) {
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+    while($rs=mysql_fetch_assoc($query)) {
+>>>>>>> develop
       $Styles[]=$rs;
     }
     return $Styles;
   }
 
+<<<<<<< HEAD
 	# Einer Klasse können mehrere Labels zugeordnet werden
 	# Abfrage der Labels nicht aus Tabelle classes sondern aus u_labels2classes
 	function read_Label($Class_ID) {
@@ -394,6 +487,23 @@ class db_mapObj{
 		}
 		return $Labels;
 	}
+=======
+
+  # Änderung am 12.07.2005 von 1.4.4 nach 1.4.5, Korduan
+  # Einer Klasse können nun mehrere Labels zugeordnet werden
+  # Abfrage der Labels nicht mehr aus Tabelle classes sondern aus u_labels2classes
+  function read_Label($Class_ID) {
+    $sql ='SELECT * FROM labels AS l,u_labels2classes AS l2c';
+    $sql.=' WHERE l.Label_ID=l2c.label_id AND l2c.class_id='.$Class_ID;
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Label - Lesen der Labels zur Classe eines Layers:<br>" . $sql,4);
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+    while ($rs=mysql_fetch_assoc($query)) {
+      $Labels[]=$rs;
+    }
+    return $Labels;
+  }
+>>>>>>> develop
 
 	function zoomToDatasets($oids, $tablename, $columnname, $border, $layerdb, $layer_epsg, $client_epsg) {
   	$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
@@ -437,8 +547,13 @@ class db_mapObj{
     $sql = 'DELETE FROM u_attributfilter2used_layer WHERE Stelle_ID = '.$stelle_id.' AND Layer_ID = '.$layer_id.' AND attributname = "'.$attributname.'"';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->deleteFilter - Löschen eines Attribut-Filters eines used_layers:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+>>>>>>> develop
   }
 
   function writeFilter($database, $filter, $layer, $stelle){
@@ -472,16 +587,27 @@ class db_mapObj{
     $sql = 'UPDATE used_layer SET Filter = "'.$filterstring.'" WHERE Stelle_ID = '.$stelle.' AND Layer_ID = '.$layer;
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->writeFilter - Speichern des Filterstrings:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+>>>>>>> develop
   }
 
   function checkPolygon($poly_id){
     $sql = 'SELECT * FROM u_attributfilter2used_layer WHERE attributvalue = "'.$poly_id.'" AND type = "geometry"';
     $this->debug->write("<p>file:kvwmap class:db_mapObj->checkPolygon - Testen ob Polygon_id noch in einem Filter benutzt wird:<br>" . $sql,4);
+<<<<<<< HEAD
     $this->db->execSQL($sql);
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
     $rs = $this->db->result->fetch_array();
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $rs = mysql_fetch_array($query);
+>>>>>>> develop
     if($rs == NULL){
       return false;
     }
@@ -494,8 +620,13 @@ class db_mapObj{
     $sql = 'SELECT attributvalue AS id FROM u_attributfilter2used_layer';
     $sql.= ' WHERE stelle_id = "'.$stelle_id.'" AND layer_id = "'.$layer_id.'" AND type = "geometry"';
     #echo $sql;
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+>>>>>>> develop
     $ret=mysql_fetch_row($query);
     $poly_id = $ret[0];
     return $poly_id;
@@ -523,8 +654,13 @@ class db_mapObj{
     }
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->saveAttributeFilter - Speichern der Attribute-Filter-Parameter:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+>>>>>>> develop
   }
 
 	function readAttributeFilter($Stelle_ID, $Layer_ID) {
@@ -539,9 +675,15 @@ class db_mapObj{
 		";
 		# echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->readAttributeFilter - Lesen der Attribute-Filter-Parameter:<br>" . $sql, 4);
+<<<<<<< HEAD
 		$this->db->execSQL($sql);
 		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__,4); return 0; }
 		while($rs = $this->db->result->fetch_array()) {
+=======
+		$query = mysql_query($sql);
+		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__,4); return 0; }
+		while($rs = mysql_fetch_array($query)) {
+>>>>>>> develop
 			$filter[] = $rs;
 		}
 		return $filter;
@@ -550,9 +692,15 @@ class db_mapObj{
 	function getFilter($layer_id, $stelle_id){
     $sql ='SELECT Filter FROM used_layer WHERE Layer_ID = '.$layer_id.' AND Stelle_ID = '.$stelle_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getFilter - Lesen des Filter-Statements des Layers:<br>" . $sql,4);
+<<<<<<< HEAD
     $this->db->execSQL($sql);
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
     $rs = $this->db->result->fetch_array();
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $rs = mysql_fetch_array($query);
+>>>>>>> develop
     $filter = $rs[0];
     return $filter;
   }
@@ -580,9 +728,15 @@ class db_mapObj{
   	}
   	#echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getData - Lesen des Data-Statements des Layers:<br>" . $sql,4);
+<<<<<<< HEAD
     $this->db->execSQL($sql);
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
     $rs = $this->db->result->fetch_assoc();
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $rs = mysql_fetch_assoc($query);
+>>>>>>> develop
     $data = replace_params(
 			$rs['Data'],
 			rolle::$layer_params,
@@ -597,9 +751,15 @@ class db_mapObj{
   function getPath($layer_id){
     $sql ='SELECT Pfad FROM layer WHERE Layer_ID = '.$layer_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getPath - Lesen des Path-Statements des Layers:<br>" . $sql,4);
+<<<<<<< HEAD
     $this->db->execSQL($sql);
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
     $rs = $this->db->result->fetch_array();
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $rs = mysql_fetch_array($query);
+>>>>>>> develop
     $pfad = $rs[0];
     return $pfad;
   }
@@ -645,6 +805,7 @@ class db_mapObj{
 			$sql ="SELECT concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as `connection`, `schema` FROM layer as l, connections as c WHERE l.Layer_ID = ".$layer_id." AND l.connection_id = c.id AND l.connectiontype = 6";
 		}
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Lesen des connection-Strings des Layers:<br>" . $sql,4);
+<<<<<<< HEAD
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
 		$rs = $this->db->result->fetch_array();
@@ -653,6 +814,16 @@ class db_mapObj{
 		if ($connectionstring != ''){
 			$layerdb = new pgdatabase();
 			if($rs[1] == '') {
+=======
+		$query=mysql_query($sql);
+		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		$rs = mysql_fetch_array($query);
+		$connectionstring = $rs[0];
+#		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Gefundener Connection String des Layers:<br>" . $connectionstring, 4);
+		if($connectionstring != ''){
+			$layerdb = new pgdatabase();
+			if($rs[1] == ''){
+>>>>>>> develop
 				$rs[1] = 'public';
 			}
 			$layerdb->schema = $rs[1];
@@ -865,7 +1036,11 @@ class db_mapObj{
 										if ($sql != '') {
 											$ret = $database->execSQL($sql, 4, 0);
 											if ($ret[0]) {
+<<<<<<< HEAD
 												$this->GUI->add_message('error', 'Fehler bei der Abfrage der Optionen für das Attribut "' . $attributes['name'][$i] . '"<br>' . err_msg($this->script_name, __LINE__, $ret[1]));
+=======
+												$this->GUI->add_message('error', 'Fehler bei der Abfrage der Optionen für das Attribut "' . $attributes['name'][$i] . '"<br>' . err_msg($PHP_SELF, __LINE__, $ret[1]));
+>>>>>>> develop
 												return 0;
 											}
 											while($rs = pg_fetch_array($ret[1])) {
@@ -880,7 +1055,11 @@ class db_mapObj{
 									$sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
 									$sql = str_replace('$userid', $this->User_ID, $sql);
 									$ret = $database->execSQL($sql, 4, 0);
+<<<<<<< HEAD
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+									if ($ret[0]) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
 									while($rs = pg_fetch_array($ret[1])) {
 										$attributes['enum_value'][$i][] = $rs['value'];
 										$attributes['enum_output'][$i][] = $rs['output'];
@@ -903,7 +1082,11 @@ class db_mapObj{
 										if ($value != '' AND !in_array($attributes['operator'][$i], array('LIKE', 'NOT LIKE', 'IN'))) {			# falls eine LIKE-Suche oder eine IN-Suche durchgeführt wurde
 											$sql = 'SELECT * FROM ('.$sql.') as foo WHERE value = \''.pg_escape_string($value).'\'';
 											$ret = $database->execSQL($sql, 4, 0);
+<<<<<<< HEAD
 											if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+											if ($ret[0]) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
 											$rs = pg_fetch_array($ret[1]);
 											$attributes['enum_output'][$i][$k] = $rs['output'];
 										}
@@ -942,7 +1125,11 @@ class db_mapObj{
 								if ($attributes['options'][$i] != '') {
 									$sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
 									$ret = $database->execSQL($sql, 4, 0);
+<<<<<<< HEAD
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+									if ($ret[0]) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
 									while($rs = pg_fetch_array($ret[1])) {
 										$attributes['enum_value'][$i][] = $rs['value'];
 										$attributes['enum_output'][$i][] = $rs['output'];
@@ -1084,9 +1271,15 @@ class db_mapObj{
 			";
 			#echo '<br>Sql: ' . $sql;
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>" . $sql,4);
+<<<<<<< HEAD
 			$ret = $this->db->execSQL($sql);
 			if(mysql_affected_rows() == 1)$insert_count++;		# ein neues Attribut wurde per Insert eingefügt
 			if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+			$query=mysql_query($sql);
+			if(mysql_affected_rows() == 1)$insert_count++;		# ein neues Attribut wurde per Insert eingefügt
+			if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
 		}
 	}		
 
@@ -1097,8 +1290,13 @@ class db_mapObj{
 			$maintable = $attributes[0]['table_name'];
 			$sql = "UPDATE layer SET maintable = '" . $maintable."' WHERE (maintable IS NULL OR maintable = '') AND Layer_ID = " . $layer_id;
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>" . $sql,4);
+<<<<<<< HEAD
 			$ret = $this->db->execSQL($sql);
 			if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+			$query=mysql_query($sql);
+			if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
 		}
 
 		$sql = "select 1 from information_schema.views WHERE table_name = '" . $maintable."' AND table_schema = '" . $schema."'";
@@ -1106,8 +1304,13 @@ class db_mapObj{
 		$is_view = pg_num_rows($query);
 		$sql = "UPDATE layer SET maintable_is_view = " . $is_view." WHERE Layer_ID = " . $layer_id;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>" . $sql,4);
+<<<<<<< HEAD
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+		$query=mysql_query($sql);
+		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
 
 		# den PRIMARY KEY constraint rausnehmen, falls der tablename nicht der maintable entspricht
 		$sql = "
@@ -1125,8 +1328,13 @@ class db_mapObj{
 		";
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>" . $sql,4);
+<<<<<<< HEAD
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+		$query=mysql_query($sql);
+		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
 	}
 
   function delete_old_attributes($layer_id, $attributes){
@@ -1141,8 +1349,13 @@ class db_mapObj{
   	}
   	#echo $sql.'<br><br>';
   	$this->debug->write("<p>file:kvwmap class:db_mapObj->delete_old_attributes - Löschen von alten Layerattributen:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+    $query=mysql_query($sql);
+		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
   }
 
 	function create_layer_dumpfile($database, $layer_ids, $with_privileges = false, $with_datatypes = false) {
@@ -1379,15 +1592,25 @@ class db_mapObj{
     $sql = 'DELETE FROM layer WHERE Layer_ID = '.$id;
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->deleteLayer - Löschen eines Layers:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+    $query=mysql_query($sql);
+		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
     if(MYSQLVERSION > 412){
       # Den Autowert für die Layer_id zurücksetzen
       $sql ="ALTER TABLE layer AUTO_INCREMENT = 1";
       $this->debug->write("<p>file:kvwmap class:db_mapObj->deleteLayer - Zurücksetzen des Auto_Incrementwertes:<br>" . $sql,4);
       #echo $sql;
+<<<<<<< HEAD
       $ret = $this->db->execSQL($sql);
 			if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+      $query=mysql_query($sql);
+			if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
     }
   }
 
@@ -1395,15 +1618,24 @@ class db_mapObj{
 		$sql = 'UPDATE u_rolle2used_layer SET rollenfilter = NULL WHERE user_id = '.$this->User_ID;
 		#echo $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenFilter:<br>" . $sql,4);
+<<<<<<< HEAD
 		$ret = $this->db->execSQL($sql);
 		$sql = 'UPDATE rollenlayer SET rollenfilter = NULL WHERE user_id = '.$this->User_ID;
 		#echo $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenFilter:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
+=======
+		$query=mysql_query($sql);
+		$sql = 'UPDATE rollenlayer SET rollenfilter = NULL WHERE user_id = '.$this->User_ID;
+		#echo $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenFilter:<br>" . $sql,4);
+		$query=mysql_query($sql);
+>>>>>>> develop
 	}
 
   function deleteRollenLayer($id = NULL, $type = NULL){
   	$rollenlayerset = $this->read_RollenLayer($id, $type);
+<<<<<<< HEAD
 		for ($i = 0; $i < count($rollenlayerset); $i++){
 			if ($rollenlayerset[$i]['Datentyp'] != 3 AND $rollenlayerset[$i]['Typ'] == 'import'){		# beim Import-Layern die Tabelle löschen
 				$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $rollenlayerset[$i]['Data']);
@@ -1450,6 +1682,42 @@ class db_mapObj{
 					$this->delete_Class($class['Class_ID']);
 					if ($class['Style'] != ''){
 						foreach ($class['Style'] as $style){
+=======
+		for($i = 0; $i < count($rollenlayerset); $i++){
+			if($rollenlayerset[$i]['Datentyp'] != 3 AND $rollenlayerset[$i]['Typ'] == 'import'){		# beim Import-Layern die Tabelle löschen
+				$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $rollenlayerset[$i]['Data']);
+				$explosion = explode(' ', $explosion[1]);
+				$sql = "SELECT count(id) FROM rollenlayer WHERE Data like '%" . $explosion[0]."%'";
+				$query=mysql_query($sql);
+				if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+				$rs=mysql_fetch_array($query);
+				if($rs[0] == 1){		# Tabelle nur löschen, wenn das der einzige Layer ist, der sie benutzt
+					$sql = 'DROP TABLE IF EXISTS '.CUSTOM_SHAPE_SCHEMA.'.'.$explosion[0].';';
+					$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>" . $sql,4);
+					$query=pg_query($sql);
+				}
+			}
+			$sql = 'DELETE FROM rollenlayer WHERE id = '.$rollenlayerset[$i]['id'];
+			#echo $sql;
+			$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>" . $sql,4);
+			$query=mysql_query($sql);
+			if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+			if(MYSQLVERSION > 412){
+				# Den Autowert für die Layer_id zurücksetzen
+				$sql ="ALTER TABLE rollenlayer AUTO_INCREMENT = 1";
+				$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Zurücksetzen des Auto_Incrementwertes:<br>" . $sql,4);
+				#echo $sql;
+				$query=mysql_query($sql);
+				if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+			}
+			$this->delete_layer_attributes(-$rollenlayerset[$i]['id']);
+			# auch die Klassen und styles löschen
+			if($rollenlayerset[$i]['Class'] != ''){
+				foreach($rollenlayerset[$i]['Class'] as $class){
+					$this->delete_Class($class['Class_ID']);
+					if($class['Style'] != ''){
+						foreach($class['Style'] as $style){
+>>>>>>> develop
 							$this->delete_Style($style['Style_ID']);
 						}
 					}
@@ -1458,6 +1726,79 @@ class db_mapObj{
 		}
   }
 
+<<<<<<< HEAD
+=======
+	function addRollenLayerStyling($layer_id, $datatype, $labelitem, $user){
+		$attrib['name'] = ' ';
+		$attrib['layer_id'] = -$layer_id;
+		$attrib['expression'] = '';
+		$attrib['order'] = 0;
+		$class_id = $this->new_Class($attrib);
+		$this->formvars['class'] = $class_id;
+		$color = $user->rolle->readcolor();
+		$style['colorred'] = $color['red'];
+		$style['colorgreen'] = $color['green'];
+		$style['colorblue'] = $color['blue'];
+		$style['outlinecolorred'] = 0;
+		$style['outlinecolorgreen'] = 0;
+		$style['outlinecolorblue'] = 0;
+		switch ($datatype) {
+			case 0 : {
+				if(defined('ZOOM2POINT_STYLE_ID') AND ZOOM2POINT_STYLE_ID != ''){
+					$style_id = $this->copyStyle(ZOOM2POINT_STYLE_ID);
+				}
+				else{
+					$style['size'] = 8;
+					$style['maxsize'] = 8;
+					$style['symbolname'] = 'circle';
+				}
+			} break;
+			case 1 : {
+				$style['width'] = 2;
+				$style['minwidth'] = 1;
+				$style['maxwidth'] = 3;
+				$style['symbolname'] = NULL;
+			} break;
+			case 2 :{
+				$style['size'] = 1;
+				if($user->rolle->result_hatching){
+					$style['symbolname'] = 'hatch';
+					$style['size'] = 11;
+					$style['width'] = 5;
+					$style['angle'] = 45;
+				}
+				else{
+					$style['symbolname'] = NULL;
+				}
+			}
+		}
+		$style['backgroundcolor'] = NULL;
+		$style['minsize'] = NULL;
+		$style_id = $this->new_Style($style);
+		$this->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
+		if($user->rolle->result_hatching){
+			$style['symbolname'] = NULL;
+			$style['width'] = 1;
+			$style['colorred'] = -1;
+			$style['colorgreen'] = -1;
+			$style['colorblue'] = -1;
+			$style_id = $this->new_Style($style);
+			$this->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
+		}
+		if($labelitem != '') {
+			$label['font'] = 'arial';
+			$label['color'] = '0 0 0';
+			$label['outlinecolor'] = '255 255 255';
+			$label['size'] = 8;
+			$label['minsize'] = 6;
+			$label['maxsize'] = 10;
+			$label['position'] = 9;
+			$new_label_id = $this->new_Label($label);
+			$this->addLabel2Class($class_id, $new_label_id, 0);
+		}
+	}
+
+>>>>>>> develop
 	function newRollenLayer($formvars){
 		$formvars['Data'] = str_replace ( "'", "''", $formvars['Data']);
 		$formvars['query'] = str_replace ( "'", "''", $formvars['query']);
@@ -1500,8 +1841,13 @@ class db_mapObj{
 		";
     #echo 'SQL: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->newRollenLayer - Erzeugen eines RollenLayers" . str_replace($formvars['connection'], 'Connection', $sql), 4);
+<<<<<<< HEAD
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql, $formvars['connection']); return 0; }
+=======
+		$query=mysql_query($sql);
+		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql, $formvars['connection']); return 0; }
+>>>>>>> develop
 		return mysql_insert_id();
 	}
 
@@ -1669,7 +2015,11 @@ class db_mapObj{
 		";
 		#echo '<br>Update Layer mit SQL: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>" . $sql, 4);
+<<<<<<< HEAD
 		$ret = $this->db->execSQL($sql, 4, 1, true);
+=======
+		$ret = $this->GUI->database->execSQL($sql, 4, 1, true);
+>>>>>>> develop
 		if (!$ret['success']) {
 			$this->GUI->add_message('error', $ret[1]);
 			return 0;
@@ -1838,8 +2188,13 @@ class db_mapObj{
 
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->newLayer - Erzeugen eines Layers:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql, $this->connection); return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql, $this->connection); return 0; }
+>>>>>>> develop
     return mysql_insert_id();
   }
 
@@ -1973,22 +2328,37 @@ class db_mapObj{
 	function delete_layer_filterattributes($layer_id){
     $sql = 'DELETE FROM u_attributfilter2used_layer WHERE layer_id = '.$layer_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->delete_layer_filterattributes:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
   }
 
   function delete_layer_attributes($layer_id){
     $sql = 'DELETE FROM layer_attributes WHERE layer_id = '.$layer_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->delete_layer_attributes:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
   }
 
   function delete_layer_attributes2stelle($layer_id, $stelle_id){
     $sql = 'DELETE FROM layer_attributes2stelle WHERE layer_id = '.$layer_id.' AND stelle_id = '.$stelle_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->delete_layer_attributes2stelle:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
   }
 
   function read_datatype_attributes($datatype_id, $datatypedb, $attributenames, $all_languages = false, $recursive = false){
@@ -2057,10 +2427,17 @@ class db_mapObj{
 		*/
 		#echo '<br>Sql read_datatype_attributes: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_datatype_attributes:<br>" . $sql,4);
+<<<<<<< HEAD
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
 		while($rs = $ret['result']->fetch_array()){
+=======
+		$query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+		$i = 0;
+		while($rs = mysql_fetch_array($query)){
+>>>>>>> develop
 			$attributes['datatype_id'][$i] = $rs['datatype_id'];
 			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
@@ -2203,10 +2580,17 @@ class db_mapObj{
 		";
 		#echo '<br>Sql read_layer_attributes: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>" . $sql,4);
+<<<<<<< HEAD
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
 		while ($rs = $ret['result']->fetch_array()){
+=======
+		$query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+		$i = 0;
+		while ($rs = mysql_fetch_array($query)){
+>>>>>>> develop
 			$attributes['order'][$i] = $rs['order'];
 			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
@@ -2315,12 +2699,21 @@ class db_mapObj{
 		";
 
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_datatypes - Lesen der Datentypen der Layer mit id (" . implode(', ', $layer_ids) . "):<br>" . $sql , 4);
+<<<<<<< HEAD
 		$this->db->execSQL($sql);
 		if ($query == 0) {
 			$this->GUI->add_message('error', err_msg($this->script_name, __LINE__, $sql));
 			return 0;
 		}
 		while ($rs = $this->db->result->fetch_assoc()) {
+=======
+		$query = mysql_query($sql);
+		if ($query == 0) {
+			$this->GUI->add_message('error', err_msg($PHP_SELF, __LINE__, $sql));
+			return 0;
+		}
+		while ($rs = mysql_fetch_assoc($query)) {
+>>>>>>> develop
 			$datatypes[] = $rs;
 		}
 		return $datatypes;
@@ -2337,9 +2730,15 @@ class db_mapObj{
 			" . $order_sql;
 
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Datatypes - Lesen aller Datentypen:<br>" . $sql , 4);
+<<<<<<< HEAD
 		$this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		while($rs = $this->db->result->fetch_assoc()) {
+=======
+		$query = mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+		while($rs = mysql_fetch_assoc($query)) {
+>>>>>>> develop
 			/*
 			foreach($rs AS $key => $value) {
 				$datatypes[$key][] = $value;
@@ -2429,10 +2828,17 @@ class db_mapObj{
 */
 
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>" . $sql,4);
+<<<<<<< HEAD
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
 		while($rs = $ret['result']->fetch_array()){
+=======
+		$query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+		$i = 0;
+		while($rs=mysql_fetch_array($query)){
+>>>>>>> develop
 			$layer['ID'][]=$rs['Layer_ID'];
 			$layer['Bezeichnung'][]=$rs['Name'];
 			$layer['Gruppe'][]=$rs['Gruppenname'];
@@ -2456,6 +2862,7 @@ class db_mapObj{
 
 	function get_all_layer_params() {
 		$layer_params = array();
+<<<<<<< HEAD
 		$sql = "
 			SELECT
 				*
@@ -2468,6 +2875,15 @@ class db_mapObj{
 		}
 		else {
 			while ($rs = $this->db->result->fetch_assoc()) {
+=======
+		$sql = "SELECT * FROM layer_parameter";
+		$params_result = mysql_query($sql);
+		if($params_result==0) {
+			echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
+		}
+		else{
+			while($rs = mysql_fetch_assoc($params_result)){
+>>>>>>> develop
 				$params[] = $rs;
 			}
 		}
@@ -2476,7 +2892,11 @@ class db_mapObj{
 
 	function save_all_layer_params($formvars) {
 		$sql = "TRUNCATE layer_parameter";
+<<<<<<< HEAD
 		$this->db->execSQL($sql);
+=======
+		$result = mysql_query($sql);
+>>>>>>> develop
 		$sql = "INSERT INTO layer_parameter VALUES ";
 		for ($i = 0; $i < count($formvars['key']); $i++) {
 			if ($formvars['key'][$i] != '') {
@@ -2496,10 +2916,15 @@ class db_mapObj{
 				$komma = true;
 			}
 		}
+<<<<<<< HEAD
 		$this->db->execSQL($sql);
 		if (!$this->db->success) {
 			echo '<br>Fehler beim Speichern der Layerparameter mit SQL: ' . $sql;
 		}
+=======
+		$result = mysql_query($sql);
+		if ($result==0) echo '<br>Fehler beim Speichern der Layerparameter mit SQL: ' . $sql;
+>>>>>>> develop
 	}
 
 	function get_all_layer_params_default_values() {
@@ -2510,12 +2935,21 @@ class db_mapObj{
 			FROM
 				layer_parameter p
 		";
+<<<<<<< HEAD
 		$this->db->execSQL($sql);
 		if (!$this->db->success) {
 			echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
 		}
 		else {
 			$rs = $this->db->result->fetch_assoc();
+=======
+		$params_result = mysql_query($sql);
+		if ($params_result == 0) {
+			echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
+		}
+		else {
+			$rs = mysql_fetch_assoc($params_result);
+>>>>>>> develop
 		}
 		$params = $rs['params'];
 		$params = str_replace('$user_id', $this->User_ID, $params);
@@ -2539,9 +2973,15 @@ class db_mapObj{
 		";
 		#echo '<br>Sql: ' . $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_stellen_from_layer - Lesen der Stellen eines Layers:<br>" . $sql, 4);
+<<<<<<< HEAD
     $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
     while ($rs = $this->db->result->fetch_array()) {
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+    while ($rs = mysql_fetch_array($query)) {
+>>>>>>> develop
       $stellen['ID'][] = $rs['ID'];
       $stellen['Bezeichnung'][] = $rs['Bezeichnung'];
     }
@@ -2564,6 +3004,7 @@ class db_mapObj{
     $sql.=' WHERE connectiontype IN ('.$types.')';
     if($order != ''){$sql .= ' ORDER BY ' . replace_semicolon($order);}
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>" . $sql,4);
+<<<<<<< HEAD
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		while ($rs = $this->db->result->fetch_array()) {
@@ -2571,6 +3012,15 @@ class db_mapObj{
 			$layer['Bezeichnung'][]=$rs['Name'];
 		}
     if ($order == 'Bezeichnung'){
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+    while($rs=mysql_fetch_array($query)) {
+          $layer['ID'][]=$rs['Layer_ID'];
+          $layer['Bezeichnung'][]=$rs['Name'];
+      }
+    if($order == 'Bezeichnung'){
+>>>>>>> develop
       // Sortieren der Layer unter Berücksichtigung von Umlauten
       $sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
       $layer['Bezeichnung'] = $sorted_arrays['array'];
@@ -2589,10 +3039,17 @@ class db_mapObj{
 				`Layer_ID` = " . $id ."
 		";
 		#echo '<br>Sql: ' . $sql;
+<<<<<<< HEAD
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_Layer - Lesen eines Layers:<br>" . $sql, 4);
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$layer = $this->db->result->fetch_array();
+=======
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Layer - Lesen eines Layers:<br>" . $sql, 4);
+    $query = mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+    $layer = mysql_fetch_array($query);
+>>>>>>> develop
 		if ($replace_class_item) {
 			foreach (array('classitem', 'classification') AS $key) {
 				$layer[$key] = replace_params(
@@ -2623,8 +3080,13 @@ class db_mapObj{
 			";
 			#echo '<br>Sql: ' . $sql;
 			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern des Layerrechte zur Stelle:<br>" . $sql, 4);
+<<<<<<< HEAD
 			$ret = $this->db->execSQL($sql);
 			if ($query == 0) { $this->debug->write("<br>Abbruch in " . $this->script_name . " Zeile: " . __LINE__, 4); return 0; }
+=======
+			$query = mysql_query($sql);
+			if ($query == 0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
+>>>>>>> develop
 
 			$sql = "
 				UPDATE
@@ -2637,8 +3099,13 @@ class db_mapObj{
 			";
 			#echo '<br>Sql: ' . $sql;
 			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern der Layerrechte zur Stelle:<br>" . $sql,4);
+<<<<<<< HEAD
 			$ret = $this->db->execSQL($sql);
 			if (!$this->db->success) { $this->debug->write("<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__,4); return 0; }
+=======
+			$query=mysql_query($sql);
+			if ($query==0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+>>>>>>> develop
 		}
 	}
 
@@ -2646,12 +3113,21 @@ class db_mapObj{
     $sql ='SELECT * FROM layer';
 		if($group_id != '')$sql.=' WHERE Gruppe = '.$group_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Layerfromgroup - Lesen der Layer einer Gruppe:<br>" . $sql,4);
+<<<<<<< HEAD
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		while ($rs = $this->db->result->fetch_array()) {
 			$layer['ID'][]=$rs['Layer_ID'];
 			$layer['Bezeichnung'][]=$rs['Name'];
 		}
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+		while($rs=mysql_fetch_array($query)) {
+    	$layer['ID'][]=$rs['Layer_ID'];
+      $layer['Bezeichnung'][]=$rs['Name'];
+    }
+>>>>>>> develop
     // Sortieren der Layer unter Berücksichtigung von Umlauten
     $sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
     $layer['Bezeichnung'] = $sorted_arrays['array'];
@@ -2672,27 +3148,46 @@ class db_mapObj{
 	function get_table_information($dbname, $tablename) {
 		$sql = "SELECT * FROM information_schema.tables WHERE table_schema = '" . $dbname."' AND table_name = '" . $tablename."'";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_table_information - Lesen der Metadaten der Tabelle " . $tablename." in db " . $dbname.":<br>" . $sql,4);
+<<<<<<< HEAD
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$metadata = $this->db->result->fetch_array();
 		return $metadata;
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+    $metadata = mysql_fetch_array($query);
+    return $metadata;
+>>>>>>> develop
 	}
 
   function get_used_Layer($id) {
     $sql ='SELECT * FROM used_layer WHERE Layer_ID = '.$id.' AND Stelle_ID = '.$this->Stelle_ID;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_used_Layer - Lesen eines Layers:<br>" . $sql,4);
+<<<<<<< HEAD
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$layer = $this->db->result->fetch_array();
 		return $layer;
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+    $layer = mysql_fetch_array($query);
+    return $layer;
+>>>>>>> develop
   }
 
   function newGroup($groupname, $order){
     $sql = 'INSERT INTO u_groups (Gruppenname, `order`) VALUES ("'.$groupname.'", '.$order.')';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->newGroup - Erstellen einer Gruppe:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
     return mysql_insert_id();
   }
 
@@ -2724,6 +3219,7 @@ class db_mapObj{
 		}
 	}
 
+<<<<<<< HEAD
 	function getGroupbyName($groupname){
 		$sql = "
 			SELECT
@@ -2739,6 +3235,16 @@ class db_mapObj{
 		$rs = $this->db->result->fetch_array();
 		return $rs;
 	}
+=======
+  function getGroupbyName($groupname){
+    $sql ="SELECT * FROM u_groups WHERE Gruppenname = '" . $groupname."'";
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->getGroupbyName - Lesen einer Gruppe:<br>" . $sql,4);
+    $query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+    $rs=mysql_fetch_array($query);
+    return $rs;
+  }
+>>>>>>> develop
 
   function getClassFromObject($select, $layer_id, $classitem){
     # diese Funktion bestimmt für ein über die oid gegebenes Objekt welche Klasse dieses Objekt hat
@@ -2774,7 +3280,11 @@ class db_mapObj{
 				$sql = 'SELECT * FROM ('.$select.") as foo WHERE (" . $exp.")";
         $this->debug->write("<p>file:kvwmap class:db_mapObj->getClassFromObject - Lesen einer Klasse eines Objektes:<br>" . $sql,4);
         $query=pg_query($sql);
+<<<<<<< HEAD
     		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+    		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
         $count=pg_num_rows($query);
         if($count > 0){
           return $classes[$i]['Class_ID'];
@@ -2786,16 +3296,26 @@ class db_mapObj{
 	function copyStyle($style_id){
 		$sql = "INSERT INTO styles (symbol,symbolname,size,color,backgroundcolor,outlinecolor,minsize,maxsize,angle,angleitem,antialias,width,minwidth,maxwidth,geomtransform) SELECT symbol,symbolname,size,color,backgroundcolor,outlinecolor,minsize,maxsize,angle,angleitem,antialias,width,minwidth,maxwidth,geomtransform FROM styles WHERE Style_ID = " . $style_id;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->copyStyle - Kopieren eines Styles:<br>" . $sql,4);
+<<<<<<< HEAD
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+		$query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
 		return mysql_insert_id();
 	}
 
 	function copyLabel($label_id){
 		$sql = "INSERT INTO labels (font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,autoangle,buffer,antialias,minfeaturesize,maxfeaturesize,partials,wrap,the_force) SELECT font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,autoangle,buffer,antialias,minfeaturesize,maxfeaturesize,partials,wrap,the_force FROM labels WHERE Label_ID = " . $label_id;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->copyLabel - Kopieren eines Labels:<br>" . $sql,4);
+<<<<<<< HEAD
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+		$query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
 		return mysql_insert_id();
 	}
 
@@ -2804,8 +3324,13 @@ class db_mapObj{
     $class = $this->read_ClassesbyClassid($class_id);
     $sql = "INSERT INTO classes (Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, Layer_ID,Expression,classification,drawingorder,text) SELECT Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, " . $layer_id.",Expression,classification,drawingorder,text FROM classes WHERE Class_ID = " . $class_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->copyClass - Kopieren einer Klasse:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
     $new_class_id = mysql_insert_id();
     for($i = 0; $i < count($class[0]['Style']); $i++){
       $new_style_id = $this->copyStyle($class[0]['Style'][$i]['Style_ID']);
@@ -2866,9 +3391,15 @@ class db_mapObj{
 		}
 		#echo $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->new_Class - Erstellen einer Klasse zu einem Layer:<br>" . $sql, 4);
+<<<<<<< HEAD
 		$ret = $this->db->execSQL($sql);
 		if ($this->db->logfile != NULL) $this->db->logfile->write($sql . ';');
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+=======
+		$query=mysql_query($sql);
+		if ($this->database->logfile != NULL) $this->database->logfile->write($sql . ';');
+    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+>>>>>>> develop
 		return mysql_insert_id();
 	}
 
@@ -2876,8 +3407,13 @@ class db_mapObj{
     $sql = 'DELETE FROM classes WHERE Class_ID = '.$class_id;
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->delete_Class - Löschen einer Klasse:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+>>>>>>> develop
 
     # Einträge in u_styles2classes und evtl. die Styles mitlöschen
     $styles = $this->read_Styles($class_id);
@@ -2937,8 +3473,13 @@ class db_mapObj{
 
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->update_Class - Aktualisieren einer Klasse:<br>" . $sql,4);
+<<<<<<< HEAD
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+=======
+		$query=mysql_query($sql);
+		if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+>>>>>>> develop
 	}
 
   function new_Style($style){
@@ -2989,15 +3530,22 @@ class db_mapObj{
     }
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->new_Style - Erzeugen eines Styles:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
 		if($this->db->logfile != NULL)$this->db->logfile->write($sql.';');
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+=======
+    $query=mysql_query($sql);
+		if($this->database->logfile != NULL)$this->database->logfile->write($sql.';');
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+>>>>>>> develop
     return mysql_insert_id();
   }
 
 	function get_classes2style($style_id){
 		$sql = 'SELECT class_id FROM u_styles2classes WHERE Style_ID = '.$style_id;
 		#echo $sql;
+<<<<<<< HEAD
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_classes2style - Abfragen der Klassen, die einen Style benutzen:<br>" . $sql,4);
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
@@ -3005,12 +3553,22 @@ class db_mapObj{
 			$classes[] = $rs[0];
 		}
 		return $classes;
+=======
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->get_classes2style - Abfragen der Klassen, die einen Style benutzen:<br>" . $sql,4);
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+    while($rs=mysql_fetch_array($query)) {
+      $classes[]=$rs[0];
+    }
+    return $classes;
+>>>>>>> develop
 	}
 
   function delete_Style($style_id){
     $sql = 'DELETE FROM styles WHERE Style_ID = '.$style_id;
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->delete_Style - Löschen eines Styles:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
   }
@@ -3033,10 +3591,26 @@ class db_mapObj{
     while ($rs = $this->db->result->fetch_array()) {
       $styles[$i] = $rs;
       if ($rs['style_id'] == $style_id){
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+  }
+
+  function moveup_Style($style_id, $class_id){
+    $sql = 'SELECT * FROM u_styles2classes WHERE class_id = '.$class_id.' ORDER BY drawingorder';
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->moveup_Style :<br>" . $sql,4);
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+    $i = 0;
+    while($rs=mysql_fetch_array($query)) {
+      $styles[$i]=$rs;
+      if($rs['style_id'] == $style_id){
+>>>>>>> develop
         $index = $i;
       }
       $i++;
     }
+<<<<<<< HEAD
     $sql = "
 			UPDATE
 				u_styles2classes
@@ -3081,10 +3655,32 @@ class db_mapObj{
     while ($rs = $this->db->result->fetch_array()) {
       $styles[$i] = $rs;
       if ($rs['style_id'] == $style_id){
+=======
+    $sql = 'UPDATE u_styles2classes SET drawingorder = '.$styles[$index]['drawingorder'].' WHERE class_id = '.$class_id.' AND style_id = '.$styles[$index+1]['style_id'];
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->moveup_Style :<br>" . $sql,4);
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+    $sql = 'UPDATE u_styles2classes SET drawingorder = '.$styles[$index+1]['drawingorder'].' WHERE class_id = '.$class_id.' AND style_id = '.$styles[$index]['style_id'];
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->moveup_Style :<br>" . $sql,4);
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+  }
+
+  function movedown_Style($style_id, $class_id){
+    $sql = 'SELECT * FROM u_styles2classes WHERE class_id = '.$class_id.' ORDER BY drawingorder';
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->moveup_Style :<br>" . $sql,4);
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+    $i = 0;
+    while($rs=mysql_fetch_array($query)) {
+      $styles[$i]=$rs;
+      if($rs['style_id'] == $style_id){
+>>>>>>> develop
         $index = $i;
       }
       $i++;
     }
+<<<<<<< HEAD
     $sql = "
 			UPDATE
 				u_styles2classes
@@ -3109,12 +3705,23 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->moveup_Style :<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+=======
+    $sql = 'UPDATE u_styles2classes SET drawingorder = '.$styles[$index]['drawingorder'].' WHERE class_id = '.$class_id.' AND style_id = '.$styles[$index-1]['style_id'];
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->moveup_Style :<br>" . $sql,4);
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+    $sql = 'UPDATE u_styles2classes SET drawingorder = '.$styles[$index-1]['drawingorder'].' WHERE class_id = '.$class_id.' AND style_id = '.$styles[$index]['style_id'];
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->moveup_Style :<br>" . $sql,4);
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+>>>>>>> develop
   }
 
   function delete_Label($label_id){
     $sql = 'DELETE FROM labels WHERE Label_ID = '.$label_id;
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->delete_Label - Löschen eines Labels:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
   }
@@ -3126,24 +3733,48 @@ class db_mapObj{
       $this->db->execSQL($sql);
       if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
       $rs = $this->db->result->fetch_array();
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+  }
+
+  function addStyle2Class($class_id, $style_id, $drawingorder){
+    if($drawingorder == NULL){
+      $sql = 'SELECT MAX(drawingorder) FROM u_styles2classes WHERE class_id = '.$class_id;
+      $this->debug->write("<p>file:kvwmap class:db_mapObj->addStyle2Class :<br>" . $sql,4);
+      $query=mysql_query($sql);
+      if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+      $rs = mysql_fetch_array($query);
+>>>>>>> develop
       $drawingorder = $rs[0]+1;
     }
     $sql = 'INSERT INTO u_styles2classes VALUES ('.$class_id.', '.$style_id.', "'.$drawingorder.'")';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->addStyle2Class - Hinzufügen eines Styles zu einer Klasse:<br>" . $sql,4);
+<<<<<<< HEAD
     $this->db->execSQL($sql);
 		if ($this->db->logfile != NULL) {
 			$this->db->logfile->write($sql.';');
 		}
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+=======
+    $query=mysql_query($sql);
+		if($this->database->logfile != NULL)$this->database->logfile->write($sql.';');
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+>>>>>>> develop
   }
 
   function removeStyle2Class($class_id, $style_id){
     $sql = 'DELETE FROM u_styles2classes WHERE class_id = '.$class_id.' AND style_id = '.$style_id;
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->removeStyle2Class - Löschen eines Styles:<br>" . $sql,4);
+<<<<<<< HEAD
     $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+>>>>>>> develop
   }
 
   function save_Style($formvars){
@@ -3185,8 +3816,13 @@ class db_mapObj{
     $sql.=" WHERE Style_ID = " . $formvars["style_id"];
 		#echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->save_Style - Speichern der Styledaten:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+>>>>>>> develop
   }
 
   function get_Style($style_id){
@@ -3194,9 +3830,15 @@ class db_mapObj{
 	    $sql ='SELECT * FROM styles AS s';
 	    $sql.=' WHERE s.Style_ID = '.$style_id;
 	    $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Style - Lesen der Styledaten:<br>" . $sql,4);
+<<<<<<< HEAD
 	    $this->db->execSQL($sql);
 	    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
 	    $rs = $this->db->result->fetch_assoc();
+=======
+	    $query=mysql_query($sql);
+	    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+	    $rs=mysql_fetch_assoc($query);
+>>>>>>> develop
 	    return $rs;
   	}
   }
@@ -3234,17 +3876,28 @@ class db_mapObj{
     $sql.="Label_ID = " . $formvars["label_Label_ID"];
     $sql.=" WHERE Label_ID = " . $formvars["label_id"];
     $this->debug->write("<p>file:kvwmap class:db_mapObj->save_Label - Speichern der Labeldaten:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+>>>>>>> develop
   }
 
   function get_Label($label_id) {
     $sql ='SELECT * FROM labels AS l';
     $sql.=' WHERE l.Label_ID = '.$label_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Label - Lesen der Labeldaten:<br>" . $sql,4);
+<<<<<<< HEAD
     $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
     $rs = $this->db->result->fetch_assoc();
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+    $rs=mysql_fetch_assoc($query);
+>>>>>>> develop
     return $rs;
   }
 
@@ -3310,8 +3963,13 @@ class db_mapObj{
   	}
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->new_Style - Erzeugen eines Styles:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+>>>>>>> develop
     return mysql_insert_id();
   }
 
@@ -3319,9 +3977,15 @@ class db_mapObj{
 		$sql = 'SELECT class_id FROM u_labels2classes WHERE Label_ID = '.$label_id;
 		#echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_classes2label - Abfragen der Klassen, die ein Label benutzen:<br>" . $sql,4);
+<<<<<<< HEAD
     $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
     while ($rs = $this->db->result->fetch_array()) {
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+    while($rs=mysql_fetch_array($query)) {
+>>>>>>> develop
       $classes[]=$rs[0];
     }
     return $classes;
@@ -3331,16 +3995,26 @@ class db_mapObj{
     $sql = 'INSERT INTO u_labels2classes VALUES ('.$class_id.', '.$label_id.')';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->addLabel2Class - Hinzufügen eines Labels zu einer Klasse:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+>>>>>>> develop
   }
 
   function removeLabel2Class($class_id, $label_id){
     $sql = 'DELETE FROM u_labels2classes WHERE class_id = '.$class_id.' AND label_id = '.$label_id;
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->removeLabels2Class - Löschen eines Labels:<br>" . $sql,4);
+<<<<<<< HEAD
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+>>>>>>> develop
   }
 
   function getShapeByAttribute($layer,$attribut,$value) {
@@ -3366,10 +4040,20 @@ class db_mapObj{
     $sql ='SELECT MIN(minxmax) AS minxmax, MIN(minymax) AS minymax';
     $sql.=', MAX(maxxmax) AS maxxmax, MAX(maxymax) AS maxymax FROM stelle';
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getMaxMapExtent - Lesen der Maximalen Kartenausdehnung:<br>" . $sql,4);
+<<<<<<< HEAD
     $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
     $rs = $this->db->result->fetch_array();
     return $rs;
   }
 }
+=======
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__; return 0; }
+    $rs=mysql_fetch_array($query);
+    return $rs;
+  }
+}
+
+>>>>>>> develop
 ?>

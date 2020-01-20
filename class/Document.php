@@ -1,4 +1,8 @@
 <?
+<<<<<<< HEAD
+=======
+
+>>>>>>> develop
 class Document {
   var $html;
   var $debug;
@@ -510,4 +514,8 @@ class Document {
     return $rs[0];
   }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> develop
 ?>

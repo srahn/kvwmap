@@ -1,4 +1,8 @@
 <?
+<<<<<<< HEAD
+=======
+
+>>>>>>> develop
 class point {
   var $x;
   var $y;
@@ -19,4 +23,10 @@ class point {
     $this->x=round(($this->x-$minX)/$pixSize);
     $this->y=round(($this->y-$minY)/$pixSize);
   }
+<<<<<<< HEAD
 }
+=======
+}
+
+?>
+>>>>>>> develop
