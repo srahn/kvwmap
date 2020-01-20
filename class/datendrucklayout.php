@@ -503,7 +503,7 @@ class ddl {
 		$page_id_after_puttext = $this->pdf->currentContents;		
 		#echo $page_id_before_puttext.' '.$page_id_after_puttext.' - '.$y.' - '.$text.'<br>';
 		if($page_id_before_puttext != $page_id_after_puttext){
-			$this->page_overflow = true;
+			#$this->page_overflow = true;				# rausgenommen, da sonst bei der WIRO bein Druck des Baums 41108 Fehler
 			if($this->getNextPage($page_id_before_puttext) != $page_id_after_puttext)$this->pdf->overflow_error = true;		# eine oder mehr Seiten übersprungen -> Fehler
 		}
 		return $ret;
