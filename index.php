@@ -131,7 +131,6 @@ else {
 		include_(CLASSPATH . 'mysql.php');
 	}
 	include_(CLASSPATH . 'kvwmap.php');
-	include_(CLASSPATH . 'db_mapObj.php');
 	include_(CLASSPATH . 'Menue.php');
 	include_(CLASSPATH . 'kataster.php');
 	include_(CLASSPATH . 'postgresql.php');
