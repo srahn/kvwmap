@@ -14,7 +14,7 @@ class rolle {
 	var $language;
 	var $newtime;
 
-	function rolle($user_id, $stelle_id, $database) {
+	function __construct($user_id, $stelle_id, $database) {
 		global $debug;
 		global $GUI;
 		$this->gui_object = $GUI;
@@ -133,7 +133,7 @@ class rolle {
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
-		while ($rs = $this->database->result->fetch_row()) {
+		while ($rs = $this->database->result->fetch_assoc()) {
 			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
 				if($rs['Filter'] == ''){
 					$rs['Filter'] = '('.$rs['rollenfilter'].')';
@@ -161,6 +161,7 @@ class rolle {
 	}
 
   function getAktivLayer($aktivStatus,$queryStatus,$logconsume) {
+		$layer = array();
     # Abfragen der zu loggenden Layer der Rolle
     $sql ='SELECT r2ul.layer_id FROM u_rolle2used_layer AS r2ul';
     if ($logconsume) {
@@ -225,7 +226,7 @@ class rolle {
     $this->debug->write("<p>file:rolle.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
     $this->database->execSQL($sql);
     if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-    while ($rs = $this->database->result->fetch_row()) {
+    while ($rs = $this->database->result->fetch_assoc()) {
       $groups[]=$rs;
     }
     return $groups;

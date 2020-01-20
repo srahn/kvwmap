@@ -77,7 +77,7 @@ class GUI {
 	var $PasswordError;
 
 	# Konstruktor
-	function GUI($main, $style, $mime_type) {
+	function __construct($main, $style, $mime_type) {
 		# Debugdatei setzen
 		global $debug;
 		$this->debug = $debug;
@@ -13712,6 +13712,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
  # 2006-07-26 pk
 	function SachdatenAnzeige($rect){
+		$this->qlayerset = array();
 		$last_query_deleted = false;
 		if($this->last_query != ''){
 			foreach($this->last_query['layer_ids'] as $layer_id){
@@ -16240,7 +16241,7 @@ class db_mapObj{
 	var $db;
 	var $OhneRequires;
 
-	function db_mapObj($Stelle_ID, $User_ID) {
+	function __construct($Stelle_ID, $User_ID) {
 		global $debug;
 		global $GUI;
 		$this->script_name = 'db_MapObj.php';
@@ -19694,7 +19695,7 @@ class Document {
   #
   ################################################################################
 
-  function Document ($database){
+  function __construct($database){
     global $debug;
     $this->debug=$debug;
     $this->database = $database;
@@ -20191,7 +20192,7 @@ class point {
   var $x;
   var $y;
 
-  function point($x,$y) {
+  function __construct($x,$y) {
     $this->x=$x;
     $this->y=$y;
   }
