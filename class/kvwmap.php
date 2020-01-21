@@ -17663,7 +17663,7 @@ class db_mapObj{
 		}
 		$style['backgroundcolor'] = NULL;
 		$style['minsize'] = NULL;
-		$style_id = $this->new_Style($style);
+		if(!$style_id)$style_id = $this->new_Style($style);
 		$this->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
 		if($user->rolle->result_hatching){
 			$style['symbolname'] = NULL;
