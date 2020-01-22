@@ -2750,18 +2750,12 @@ echo '			</ul>
 			case 'pdf' : {
 				$this->formvars['file']=1;
 				if ($this->formvars['file']) {
-					echo '
-						<html>
-							<head>
-								<title>PDF-Ausgabe</title>
-								<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-								<META HTTP-EQUIV=REFRESH CONTENT="0; URL=' . TEMPPATH_REL.$this->outputfile . '">
-							</head>
-							<body>
-								<BR>Folgende Datei wird automatisch aufgerufen: <a href="' . TEMPPATH_REL.$this->outputfile . '">' . $this->outputfile . '</a>
-							</body>
-						</html>
-					';
+					header("Content-type: application/pdf");
+					header("Content-Disposition: attachment; filename=\"" . $this->outputfile."\"");
+					header("Expires: 0");
+					header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+					header("Pragma: public");
+					readfile(IMAGEPATH.$this->outputfile);
 				}
 				else {
 					$this->pdf->ezStream();
