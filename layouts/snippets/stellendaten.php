@@ -1,7 +1,7 @@
 <?php
   include(LAYOUTPATH.'languages/stellendaten_'.$this->user->rolle->language.'.php');
 ?>
-<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table border="0" cellpadding="5" cellspacing="0">
   <tr align="center">
     <td><h2><?php echo $strTitel; ?></h2></td>
   </tr>

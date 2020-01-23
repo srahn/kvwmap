@@ -1123,10 +1123,11 @@ class ddl {
     $sql .= ' ORDER BY layer_id, name';
     #echo $sql.'<br>';
     $this->debug->write("<p>file:kvwmap class:ddl->load_layouts :<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $i = 0;
-    while($rs=mysql_fetch_array($query)){
+		
+		$ret1 = $this->database->execSQL($sql, 4, 1);
+    if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		$i = 0;
+    while($rs = $this->database->result->fetch_assoc()){
 			if ($return == 'only_ids') {
 				$layouts[] = $rs['id'];
 			}
@@ -1169,9 +1170,9 @@ class ddl {
     $sql.= ' WHERE ddl_elemente.ddl_id = '.$ddl_id;
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:ddl->load_elements :<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs=mysql_fetch_array($query)){
+    $ret1 = $this->database->execSQL($sql, 4, 1);
+    if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    while($rs = $this->database->result->fetch_assoc()){
       $elements[$rs['name']] = $rs;
     }
     return $elements;
@@ -1184,9 +1185,9 @@ class ddl {
 		if($freetext_id != NULL)$sql.= ' AND druckfreitexte.id = '.$freetext_id;
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:ddl->load_texts :<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs=mysql_fetch_array($query)){
+    $ret1 = $this->database->execSQL($sql, 4, 1);
+    if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    while($rs = $this->database->result->fetch_assoc()){
       $texts[] = $rs;
     }
     return $texts;
@@ -1253,14 +1254,15 @@ class ddl {
 	}
 	
   function load_lines($ddl_id){
+		$lines = array();
     $sql = 'SELECT druckfreilinien.* FROM druckfreilinien, ddl2freilinien';
     $sql.= ' WHERE ddl2freilinien.ddl_id = '.$ddl_id;
     $sql.= ' AND ddl2freilinien.line_id = druckfreilinien.id';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:ddl->load_lines :<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs=mysql_fetch_array($query)){
+    $ret1 = $this->database->execSQL($sql, 4, 1);
+    if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    while($rs = $this->database->result->fetch_assoc()){
       $lines[] = $rs;
     }
     return $lines;

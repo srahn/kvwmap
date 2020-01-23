@@ -89,7 +89,7 @@ function addMenues(){
 //-->
 </script>
 <br>
-<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table border="0" cellpadding="5" cellspacing="0">
   <tr align="center">
     <td><h2><?php echo $strTitle; ?></h2></td>
   </tr>

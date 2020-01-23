@@ -389,7 +389,7 @@ class stelle {
 	# Stelle ändern
 	function Aendern($stellendaten) {
 		$stelle = ($stellendaten['id'] != '' ? "`ID` = " . $stellendaten['id'] . ", " : "");
-		$wappen = ($stellendaten['wappen'] != '' ? "`wappen` = '" . $stellendaten['wappen'] . "', " : "");
+		$wappen = (value_of($stellendaten, 'wappen') != '' ? "`wappen` = '" . $stellendaten['wappen'] . "', " : "");
 		$sql = "
 			UPDATE
 				stelle
@@ -421,8 +421,8 @@ class stelle {
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
 				`check_client_ip` =				'" . ($stellendaten['checkClientIP'] 			== '1'	? "1" : "0") . "',
 				`check_password_age` =		'" . ($stellendaten['checkPasswordAge'] 	== '1'	? "1" : "0") . "',
-				`use_layer_aliases` = 		'" . ($stellendaten['use_layer_aliases'] 	== '1'	? "1" : "0") . "',
-				`hist_timestamp` = 				'" . ($stellendaten['hist_timestamp'] 		== '1'	? "1" : "0") . "',
+				`use_layer_aliases` = 		'" . (value_of($stellendaten, 'use_layer_aliases') 	== '1'	? "1" : "0") . "',
+				`hist_timestamp` = 				'" . (value_of($stellendaten, 'hist_timestamp') 		== '1'	? "1" : "0") . "',
 				`allowed_password_age` = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "',
 				`default_user_id` = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . "
 			WHERE
@@ -441,7 +441,7 @@ class stelle {
 
 	function getStellen($order, $user_id = 0) {
 		global $admin_stellen;
-
+		$where = '';
 		if ($order != '') {
 			$order = " ORDER BY `" . $order . "`";
 		}
@@ -940,7 +940,7 @@ class stelle {
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 
-			if(!$assign_default_values AND $this->database->mysqli->affected_rows() > 0){
+			if(!$assign_default_values AND $this->database->mysqli->affected_rows > 0){
 				$sql = "INSERT IGNORE INTO layer_attributes2stelle (layer_id, attributename, stelle_id, privileg, tooltip) ";
 				$sql.= "SELECT ".$layer_ids[$i].", name, ".$this->id.", privileg, query_tooltip FROM layer_attributes WHERE layer_id = ".$layer_ids[$i]." AND privileg IS NOT NULL";
 				#echo $sql.'<br>';

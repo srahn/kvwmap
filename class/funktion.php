@@ -51,6 +51,7 @@ class funktion {
 	function getFunktionen($id, $order, $stelle_id = 0, $admin_id = 0) {
 		global $admin_stellen;
 		$where = array();
+		$more_from = '';
 
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
@@ -89,9 +90,9 @@ class funktion {
 		}
 		*/
 		$this->debug->write("<p>file:users.php class:funktion->getFunktionen - Abfragen einer oder aller Funktionen:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		while ($rs=mysql_fetch_array($query)) {
+    $ret1 = $this->database->execSQL($sql, 4, 1);
+    if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    while($rs = $this->database->result->fetch_assoc()){
 			$funktionen[]=$rs;
 		}
 		return $funktionen;

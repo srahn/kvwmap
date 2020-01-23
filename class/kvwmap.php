@@ -75,6 +75,7 @@ class GUI {
 	var $angle_attribute;
 	var $titel;
 	var $PasswordError;
+	var $Meldung;
 
 	# Konstruktor
 	function __construct($main, $style, $mime_type) {
@@ -2993,7 +2994,7 @@ echo '			</ul>
 
 		$ret = $this->database->execSQL($sql, 0, 0);
 		if ($ret['success']) {
-			if (mysql_num_rows($ret['query']) == 1) {
+			if ($this->database->result->num_rows == 1) {
 				$ret = true;
 			}
 		}
@@ -10952,9 +10953,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
   function StelleAendern() {
-		#echo '<p><b>StelleAendern</b>';
   	$_files = $_FILES;
 		$results = array();
+		$deleteuser = array();
 
     if (!$this->formvars['bezeichnung'] or !$this->formvars['Referenzkarte_ID']) {
       # Fehler bei der Formulareingabe
@@ -11093,10 +11094,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       }
 			# /Löschen der in der Selectbox entfernten User
 
-			if ($ret[0]) {
-				$this->add_message('error', $ret[1]);
-			}
-
 			if (
 				count(
 					array_map(
@@ -11180,7 +11177,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 	function StellenAnzeigen() {
 		# Abfragen aller Stellen
-		if($this->formvars['order'] == ''){
+		if(value_of($this->formvars, 'order') == ''){
 			$this->formvars['order'] = 'Bezeichnung';
 		}
 		$this->stellendaten=$this->Stelle->getStellen($this->formvars['order'], $this->user->id);
@@ -11219,7 +11216,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->formvars['pgdbpasswd'] = $this->stellendaten['pgdbpasswd'];
       $this->formvars['ows_title'] = $this->stellendaten['ows_title'];
       $this->formvars['ows_abstract'] = $this->stellendaten['ows_abstract'];
-      $this->formvars['wms_accessconstraints'] = $this->stellendaten['wms_accesscontraints'];
+      $this->formvars['wms_accessconstraints'] = $this->stellendaten['wms_accessconstraints'];
       $this->formvars['ows_contactperson'] = $this->stellendaten['ows_contactperson'];
       $this->formvars['ows_contactorganization'] = $this->stellendaten['ows_contactorganization'];
       $this->formvars['ows_contactemailaddress'] = $this->stellendaten['ows_contactemailaddress'];
@@ -11227,6 +11224,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->formvars['ows_fees'] = $this->stellendaten['ows_fees'];
       $this->formvars['ows_srs'] = $this->stellendaten['ows_srs'];
       $this->formvars['wappen'] = $this->stellendaten['wappen'];
+			$this->formvars['wappen_link'] = $this->stellendaten['wappen_link'];
 			$this->formvars['checkClientIP'] = $this->stellendaten['check_client_ip'];
       $this->formvars['checkPasswordAge'] = $this->stellendaten['check_password_age'];
       $this->formvars['allowedPasswordAge'] = $this->stellendaten['allowed_password_age'];
@@ -16426,7 +16424,7 @@ class db_mapObj{
     $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
     while ($rs = $this->db->result->fetch_array()) {
-			$groups[$rs['id']]['status'] = $rs['status'];
+			$groups[$rs['id']]['status'] = value_of($rs, 'status');
       $groups[$rs['id']]['Gruppenname'] = $rs['Gruppenname'];
 			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
 			$groups[$rs['id']]['id'] = $rs['id'];
@@ -19780,7 +19778,7 @@ class Document {
 		$ret1 = $this->database->execSQL($sql, 4, 1);
   	if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $i = 0;
-    while($rs=mysql_fetch_array($ret1[1])){
+    while($rs = $this->database->result->fetch_assoc()){
 			if ($return == 'only_ids') {
 				$frames[] = $rs['id'];
 			}
@@ -19795,30 +19793,32 @@ class Document {
   }
 
   function load_texts($frame_id){
+		$texts = array();
     $sql = 'SELECT druckfreitexte.* FROM druckrahmen, druckfreitexte, druckrahmen2freitexte';
     $sql.= ' WHERE druckrahmen2freitexte.druckrahmen_id = '.$frame_id;
     $sql.= ' AND druckrahmen2freitexte.druckrahmen_id = druckrahmen.id';
     $sql.= ' AND druckrahmen2freitexte.freitext_id = druckfreitexte.id';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:Document->load_texts :<br>" . $sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs=mysql_fetch_array($query)){
+    $ret1 = $this->database->execSQL($sql, 4, 1);
+    if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    while($rs = $this->database->result->fetch_assoc()){
       $texts[] = $rs;
     }
     return $texts;
   }
 
   function load_bilder($frame_id){
+		$bilder = array();
     $sql = 'SELECT b.src,r2b.posx,r2b.posy,r2b.width,r2b.height,r2b.angle';
     $sql.= ' FROM druckrahmen AS r, druckfreibilder AS b, druckrahmen2freibilder AS r2b';
     $sql.= ' WHERE r.id = r2b.druckrahmen_id';
     $sql.= ' AND b.id = r2b.freibild_id';
     $sql.= ' AND r.id = '.$frame_id;
     $this->debug->write("<p>file:kvwmap class:Document->load_bilder :<br>" . $sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs=mysql_fetch_array($query)){
+		$ret1 = $this->database->execSQL($sql, 4, 1);
+    if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    while($rs = $this->database->result->fetch_assoc()){
       $bilder[] = $rs;
     }
     return $bilder;

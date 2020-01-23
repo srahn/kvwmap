@@ -778,6 +778,7 @@ class user {
 	function getall_Users($order, $stelle_id = 0, $admin_id = 0) {
 		global $admin_stellen;
 		$more_from = '';
+		$where = '';
 
 		#echo '<br>getall_Users für Stelle: ' . $stelle_id . ' und User: ' . $admin_id;
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
