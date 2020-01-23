@@ -981,7 +981,7 @@ class rolle {
 			$aktiv_status = value_of($formvars, 'thema'.$this->layerset[$i]['Layer_ID']);
 			$requires_status = value_of($formvars, 'thema'.$this->layerset[$i]['requires']);
 			if($aktiv_status != '' OR $requires_status != ''){										// entweder ist der Layer selber an oder sein requires-Layer
-				$aktiv_status = $aktiv_status + $requires_status;
+				$aktiv_status = $aktiv_status + (int)$requires_status;
 				if($this->layerset[$i]['Layer_ID'] > 0){
 					$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;

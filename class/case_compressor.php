@@ -1,5 +1,11 @@
 <?
 
+# value_of muss hier nochmal unter anderem Namen definiert werden, damit man sie in der case_compressor Klasse verwenden kann
+# die Verwendung von value_of würde sonst eine unendliche Rekursion erzeugen
+function value_of2($array, $key) {
+	return (array_key_exists($key, $array) ? $array[$key] :	'');
+}
+
 class case_compressor {
 
 	public static $filearray = array();
@@ -13,30 +19,35 @@ class case_compressor {
 			# den Klassennamen ermitteln
 			$class = $func->getDeclaringClass();
 			$classname = $class->getName();
-			if($parent = $class->getParentClass())$extends = ' extends '.$parent->getName();
+			if($parent = $class->getParentClass()){
+				$extends = ' extends '.$parent->getName();
+			}
+			else{
+				$extends = '';
+			}
 			$properties = $class->getProperties();
 			
 			# wenn er noch nicht da ist, den leeren Klassenkörper ermitteln
-			if(self::$classarray[$classname] == ''){
+			if(value_of2(self::$classarray, $classname) == ''){
 				self::$classarray[$classname]['code'] = chr(10).'class '.$classname.$extends.' {'.chr(10);		
 				foreach($properties as $prop) {
 					if($prop->isStatic())$var = 'static'; else $var = 'var';
 					#if($prop->isPublic())$public = 'public '; else $public = '';
-					self::$classarray[$classname]['code'] .= chr(10).'  '.$public.$var.' $'.$prop->getName();
+					self::$classarray[$classname]['code'] .= chr(10).'  '.$var.' $'.$prop->getName();
 					if(@$prop->getValue() != '')self::$classarray[$classname]['code'] .= ' = '.@$prop->getValue().';';
 					else self::$classarray[$classname]['code'] .= ';';
 				}
 				self::$classarray[$classname]['code'] .= chr(10);
 			}
 			# wenn er noch nicht da ist, den Funktionscode ermitteln und zum Klassen-Array hinzufügen
-			if(self::$classarray[$classname][$functionname] != true){
+			if(value_of2(self::$classarray[$classname], $functionname) != true){
 				self::$classarray[$classname]['code'] .= chr(10).self::get_function_body($func);
 				self::$classarray[$classname][$functionname] = true;	// merken, dass Funktion schon extrahiert wurde
 			}
 		}
 		catch(Exception $e){		// es ist eine Funktion ohne Klasse
 			# wenn er noch nicht da ist, den Funktionscode ermitteln und zum nonclassfunction-String hinzufügen
-			if(self::$nonclassfunctionarray[$functionname] != true){
+			if(value_of2(self::$nonclassfunctionarray, $functionname) != true){
 				$func = new ReflectionFunction($functionname);				
 				self::$nonclassfunctionstring .= chr(10).self::get_function_body($func);
 				self::$nonclassfunctionarray[$functionname] = true;		// merken, dass Funktion schon extrahiert wurde

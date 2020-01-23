@@ -333,7 +333,7 @@ class administration{
 					}
 				}
 				if ($param['type'] == 'array') {
-					$config .= "$" . $param['name'] . " = " . preg_replace('/stdClass::__set_state/', '', var_export(json_decode($param['value']), true)) . ";\n\n";
+					$config .= "$" . $param['name'] . " = " . str_replace('(object) ', '', var_export(json_decode($param['value']), true)) . ";\n\n";
 				}
 				else {
 					if ($param['type'] == 'string' OR $param['type'] == 'password') {
