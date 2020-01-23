@@ -35,8 +35,8 @@ class rolle {
 		$this->groupset = $this->getGroups('');
 		# Eintragen des group_status=1 für Gruppen, die angezeigt werden sollen
 		for ($i = 0; $i < count($this->groupset); $i++) {
-			if ($formvars['group_' . $this->groupset[$i]['id']] !== NULL) {
-				$group_status = ($formvars['group_' . $this->groupset[$i]['id']] == 1 ? 1 : 0);
+			if(value_of($formvars, 'group_'.$this->groupset[$i]['id']) !== NULL) {
+				$group_status = (value_of($formvars, 'group_'.$this->groupset[$i]['id']) == 1 ? 1 : 0);
 				$sql = "
 					UPDATE
 						`u_groups2rolle`
@@ -67,7 +67,8 @@ class rolle {
 
 	function getLayer($LayerName) {
 		global $language;
-
+		$layer_name_filter = '';
+		
 		# Abfragen der Layer in der Rolle
 		if($language != 'german') {
 			$name_column = "
@@ -146,10 +147,10 @@ class rolle {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,
-					$this->user->id,
+					$this->user_id,
 					$this->stelle_id,
 					rolle::$hist_timestamp,
-					$this->user->rolle->language
+					$language
 				);
 			}
 			$layer[$i]=$rs;
@@ -597,6 +598,7 @@ class rolle {
 
 # 2006-03-20 pk
   function setConsumeActivity($time,$activity,$prevtime) {
+		$errmsg = '';
     if (LOG_CONSUME_ACTIVITY==1) {
       # function setzt eine Verbraucheraktivität (den Zugriff auf Layer oder Daten)
       # Starten der Transaktion
@@ -976,9 +978,9 @@ class rolle {
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		for ($i=0;$i<count($this->layerset)-1;$i++) {
 			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>';
-			$aktiv_status = $formvars['thema'.$this->layerset[$i]['Layer_ID']];
-			$requires_status = $formvars['thema'.$this->layerset[$i]['requires']];
-			if(isset($aktiv_status) OR isset($requires_status)){										// entweder ist der Layer selber an oder sein requires-Layer
+			$aktiv_status = value_of($formvars, 'thema'.$this->layerset[$i]['Layer_ID']);
+			$requires_status = value_of($formvars, 'thema'.$this->layerset[$i]['requires']);
+			if($aktiv_status != '' OR $requires_status != ''){										// entweder ist der Layer selber an oder sein requires-Layer
 				$aktiv_status = $aktiv_status + $requires_status;
 				if($this->layerset[$i]['Layer_ID'] > 0){
 					$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
@@ -1016,9 +1018,9 @@ class rolle {
 	
 	function setQueryStatus($formvars) {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
-		for ($i=0;$i<count($this->layerset);$i++){
-			$query_status = $formvars['qLayer'.$this->layerset[$i]['Layer_ID']];
-			if(isset($query_status)){	
+		for ($i=0; $i<count($this->layerset)-1; $i++){
+			$query_status = value_of($formvars, 'qLayer'.$this->layerset[$i]['Layer_ID']);
+			if($query_status != ''){	
 				if($this->layerset[$i]['Layer_ID'] > 0){
 					$sql ='UPDATE u_rolle2used_layer set queryStatus="'.$query_status.'"';
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
@@ -1037,7 +1039,7 @@ class rolle {
 	}
 
 	function setClassStatus($formvars) {
-		if($formvars['layer_id'] != ''){
+		if(value_of($formvars, 'layer_id') != ''){
 			# Eintragen des showclasses=1 für Klassen, die angezeigt werden sollen
 			$sql ='UPDATE u_rolle2used_layer set showclasses = "'.$formvars['show_classes'].'"';
 			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;

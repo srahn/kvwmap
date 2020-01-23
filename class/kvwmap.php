@@ -12312,7 +12312,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 	function saveLegendRoleParameters(){
 		# Scrollposition der Legende wird gespeichert
-  	$this->user->rolle->setScrollPosition($this->formvars['scrollposition']);
+  	$this->user->rolle->setScrollPosition(value_of($this->formvars, 'scrollposition'));
     # Änderungen in den Gruppen werden gesetzt
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
     # Ein- oder Ausblenden der Klassen
@@ -12325,8 +12325,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   function neuLaden() {
 		$this->saveLegendRoleParameters();
-		if(in_array($this->formvars['last_button'], array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->setSelectedButton($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
-		if($this->formvars['delete_rollenlayer'] != ''){
+		if(in_array(value_of($this->formvars, 'last_button'), array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->setSelectedButton($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
+		if(value_of($this->formvars, 'delete_rollenlayer') != ''){
 			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			$mapDB->deleteRollenlayer(NULL, $this->formvars['delete_rollenlayer_type']);
 		}
@@ -12335,8 +12335,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     # zwischenspeichern des vorherigen Maßstabs
     $oldscale=round($this->map_scaledenom);
 		# zoomToMaxLayerExtent
-		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
-		if ($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
+		if(value_of($this->formvars, 'zoom_layer_id') != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+		if (value_of($this->formvars, 'nScale') != '' AND $this->formvars['nScale'] != $oldscale) {
       # Zoom auf den in der Maßstabsauswahl ausgewählten Maßstab
       # wenn er sich von der vorherigen Maßstabszahl unterscheidet
       # (das heißt wenn eine andere Zahl eingegeben wurde)
@@ -12345,13 +12345,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->user->rolle->readSettings();
     }
     # Zoom auf den in der Referenzkarte ausgewählten Ausschnitt
-    if ($this->formvars['refmap_x'] > 0) {
+    if (value_of($this->formvars, 'refmap_x') > 0) {
       $this->zoomToRefExt();
     }
     else {
       # Wenn ein Navigationskommando ausgewählt/übergeben wurde
       # Zoom/Pan auf den in der Karte ausgewählten Ausschnitt
-      if ($this->formvars['CMD']!='') {
+      if (value_of($this->formvars, 'CMD') != '') {
         $this->navMap($this->formvars['CMD']);
       }
     }
