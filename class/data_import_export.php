@@ -1025,7 +1025,7 @@ class data_import_export {
 		$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
 
 		# Where-Klausel aus Sachdatenabfrage-SQL
-		$where = substr($this->formvars['sql_'.$this->formvars['selected_layer_id']], strrpos(strtolower(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where'));
+		$where = substr($this->formvars['sql_'.$this->formvars['selected_layer_id']], strrpos(strtolower($this->formvars['sql_'.$this->formvars['selected_layer_id']]), 'where'));
 
 		# order by rausnehmen
 		$orderbyposition = strrpos(strtolower($sql), 'order by');
