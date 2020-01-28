@@ -7903,48 +7903,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 
 			# Klassen übernehmen (aber als neue Klassen anlegen)
-			$name = @array_values($this->formvars['name']);
-			foreach($supportedLanguages as $language){
-				if($language != 'german'){
-					$name_[$language] = @array_values($this->formvars['name_'.$language]);
-				}
-			}
-			$expression = @array_values($this->formvars['expression']);
-			$classification = @array_values($this->formvars['classification']);
-			$legendgraphic = @array_values($this->formvars['legendgraphic']);
-			$legendimagewidth = @array_values($this->formvars['legendimagewidth']);
-			$legendimageheight = @array_values($this->formvars['legendimageheight']);
-			$order = @array_values($this->formvars['order']);
-			$legendorder = @array_values($this->formvars['classlegendorder']);
-			$ID = @array_values($this->formvars['ID']);
-			for($i = 0; $i < count($name); $i++){
-				$attrib['name'] = $name[$i];
-				foreach($supportedLanguages as $language){
-					if($language != 'german'){
-						$attrib['name_'.$language] = $name_[$language][$i];
-					}
-				}
-				$attrib['layer_id'] = $this->formvars['selected_layer_id'];
-				$attrib['expression'] = $expression[$i];
-				$attrib['classification'] = $classification[$i];
-				$attrib['legendgraphic'] = $legendgraphic[$i];
-				$attrib['legendimagewidth'] = $legendimagewidth[$i];
-				$attrib['legendimageheight'] = $legendimageheight[$i];
-				$attrib['order'] = $order[$i];
-				$attrib['legendorder'] = $legendorder[$i];
-				$class_id = $mapDB->new_Class($attrib);
-				# Styles übernehmen (in u_styles2classes eintragen)
-				$styles = $mapDB->read_Styles($ID[$i]);
-				for($j = 0; $j < count($styles); $j++){
-					$style_id = $mapDB->new_Style($styles[$j]);
-					$mapDB->addStyle2Class($class_id, $style_id, $styles[$j]['drawingorder']);
-				}
-				# Labels übernehmen (in u_labels2classes eintragen)
-				$labels = $mapDB->read_Label($ID[$i]);
-				for($j = 0; $j < count($labels); $j++){
-					$label_id = $mapDB->new_Label($labels[$j]);
-					$mapDB->addLabel2Class($class_id, $label_id);
-				}
+			$classes = $mapDB->read_Classes($this->formvars['old_id']);
+			for($i = 0; $i < count($classes); $i++){
+				$mapDB->copyClass($classes[$i]['Class_ID'], $this->formvars['selected_layer_id']);
 			}
 		}
   }
