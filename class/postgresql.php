@@ -1348,7 +1348,7 @@ FROM
 
   function getLage($FlurstKennz) {
     # liefert die Lage des Flurstückes
-    $sql = "SELECT l.unverschluesselt, s.bezeichnung ";
+    $sql = "SELECT distinct l.unverschluesselt, s.bezeichnung, ' ('||s.lage||')' as lage ";
 		$sql.= "FROM alkis.ax_flurstueck as f ";
 		$sql.= "JOIN alkis.ax_lagebezeichnungohnehausnummer l ON l.gml_id = ANY(f.zeigtauf)  ";
 		$sql.= "LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage=s.lage ";
@@ -1364,7 +1364,7 @@ FROM
       $ret[0]=0;
       if (pg_num_rows($queryret[1])>0) {
         while($rs=pg_fetch_assoc($queryret[1])) {
-          $Lage[]= $rs['unverschluesselt'].$rs['bezeichnung'];
+          $Lage[]= $rs['unverschluesselt'].$rs['bezeichnung'].$rs['lage'];
         }
       }
       $ret[1]=$Lage;
