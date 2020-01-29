@@ -514,7 +514,12 @@
 							if ($layer['document_url'] != '') {
 								$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
 								$target = 'target="_blank"';
-								$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+								if(dirname($thumbname).'/' == IMAGEPATH){
+									$thumbname = IMAGEURL.basename($thumbname);
+								}
+								else{
+									$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+								}
 							}
 							else {
 								$original_name = $pfadteil[1];
@@ -526,9 +531,15 @@
 							if ($hover_preview) {
 								$onmouseover = 'onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
 							}
+							# Bilder mit Vorschaubild
 							if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
 								$datapart .= '<a href="' . $url . $dokumentpfad . '" ' . $target . '><img class="preview_image" src="' . $url . $thumbname . '" ' . $onmouseover . '></a>';
 							}
+							# Videostream
+							elseif ($layer['document_url'] != '' AND in_array($type, array('mp4'))) {
+								$datapart .= '<video width="'.PREVIEW_IMAGE_WIDTH.'" src="'.$dokumentpfad.'" controls>';
+							}
+							# Rest
 							else {
 								$datapart .= '<a href="' . $url . $dokumentpfad . '" ' . $target . '><img class="preview_doc" src="' . $url . $thumbname . '"></a>';
 							}
