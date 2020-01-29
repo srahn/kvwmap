@@ -715,6 +715,9 @@ class GUI {
                }
                $layer->setFilter($expr);
               }
+							if ($layerset[$i]['styleitem']!='') {
+								$layer->set('styleitem',$layerset[$i]['styleitem']);
+							}
               # Layerweite Labelangaben
               if (MAPSERVERVERSION < 500 AND $layerset[$i]['labelangleitem']!='') {
                 $layer->set('labelangleitem',$layerset[$i]['labelangleitem']);
@@ -2499,7 +2502,7 @@ class db_mapObj {
 				$name_column . ",
 				l.alias,
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem,
-				l.labelmaxscale, l.labelminscale, l.labelrequires, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.styleitem, l.classification, l.filteritem,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status,
 				g.*
