@@ -400,6 +400,12 @@
 						</td>
 					</tr>
 					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStyleItem; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="styleitem" type="text" value="<?php echo $this->formvars['styleitem']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClassification; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="layer_classification" type="text" value="<?php echo $this->formvars['classification']; ?>" size="50" maxlength="50">

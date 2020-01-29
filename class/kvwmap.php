@@ -249,7 +249,7 @@ class GUI {
 
 		if (empty($error_msg)) {
 			if (strtolower($this->formvars['format']) == 'json' OR $this->formvars['only_main']) {
-				include_once(WWWROOT . CUSTOM_PATH . 'layouts/' . $snippet_file);
+				include_once(WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/snippets/' . $snippet_file);
 			}
 		}
 		else {
@@ -657,7 +657,7 @@ echo '			</ul>
 				$legend .= '</td></tr></table></td></tr>';
 			}
 			if($layercount > 0){		# Layer vorhanden
-				if($this->layerset['list'][$this->layerset['layers_of_group'][$group_id][0]]['legendorder'] != ''){		# erster Layer hat eine Legendenreihenfolge -> sortieren
+				if($this->layerset['layer_group_has_legendorder'][$group_id]){			# Gruppe hat Legendenreihenfolge -> sortieren
 					usort($this->layerset['layers_of_group'][$group_id], function($a, $b) use ($layerlist) {
 						return $layerlist[$a]['legendorder'] - $layerlist[$b]['legendorder'];
 					});
@@ -1480,6 +1480,9 @@ echo '			</ul>
         unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
         for($i=0; $i < $layerset['anzLayer']; $i++){
 					$layerset['layers_of_group'][$layerset['list'][$i]['Gruppe']][] = $i;
+					if($layerset['list'][$i]['legendorder'] != ''){
+						$layerset['layer_group_has_legendorder'][$layerset['list'][$i]['Gruppe']] = true;
+					}
 					if($layerset['list'][$i]['requires'] == ''){
 						$this->layer_ids_of_group[$layerset['list'][$i]['Gruppe']][] = $layerset['list'][$i]['Layer_ID'];				# die Layer-IDs in einer Gruppe
 					}
@@ -1733,6 +1736,9 @@ echo '			</ul>
 				 $expr=buildExpressionString($layerset['Filter']);
 			 }
 			 $layer->setFilter($expr);
+			}
+			if ($layerset['styleitem']!='') {
+				$layer->set('styleitem',$layerset['styleitem']);
 			}
 			# Layerweite Labelangaben
 			if ($layerset['labelitem']!='') {
@@ -2747,18 +2753,12 @@ echo '			</ul>
 			case 'pdf' : {
 				$this->formvars['file']=1;
 				if ($this->formvars['file']) {
-					echo '
-						<html>
-							<head>
-								<title>PDF-Ausgabe</title>
-								<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-								<META HTTP-EQUIV=REFRESH CONTENT="0; URL=' . TEMPPATH_REL.$this->outputfile . '">
-							</head>
-							<body>
-								<BR>Folgende Datei wird automatisch aufgerufen: <a href="' . TEMPPATH_REL.$this->outputfile . '">' . $this->outputfile . '</a>
-							</body>
-						</html>
-					';
+					header("Content-type: application/pdf");
+					header("Content-Disposition: attachment; filename=\"" . $this->outputfile."\"");
+					header("Expires: 0");
+					header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+					header("Pragma: public");
+					readfile(IMAGEPATH.$this->outputfile);
 				}
 				else {
 					$this->pdf->ezStream();
@@ -4952,7 +4952,7 @@ echo '			</ul>
       if($attribute != '' AND strpos($select, '*') === false AND strpos($select, $attribute) === false){			# Attribut für automatische Klassifizierung mit ins data packen
       	$select = str_replace(' from ', ', '.$attribute.' from ', strtolower($select));
       }
-      if(strpos(strtolower($select), ' where ') === false){
+      if(stripos(str_replace([chr(10), chr(13)], ' ', $select), ' where ') === false){
         $select .= " WHERE ";
       }
       else{
@@ -5394,7 +5394,7 @@ echo '			</ul>
 			include_(CLASSPATH . 'datendrucklayout.php');
 			$ddl = new ddl($this->database);
 			$this->Document->fonts = $ddl->get_fonts();
-			$this->Document->din_formats = $ddl->get_din_formats();
+			$this->Document->din_formats = get_din_formats();
 
 			if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
         $this->Document->headsize = GetImageSize(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']));
@@ -5438,7 +5438,7 @@ echo '			</ul>
 			include_(CLASSPATH . 'datendrucklayout.php');
 			$ddl = new ddl($this->database);
 			$this->Document->fonts = $ddl->get_fonts();
-			$this->Document->din_formats = $ddl->get_din_formats();
+			$this->Document->din_formats = get_din_formats();
 
       if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
         $this->Document->headsize = GetImageSize(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']));
@@ -10008,7 +10008,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$pdf_file = $output;
 			# in jpg umwandeln
 			$currenttime = date('Y-m-d_H_i_s',time());
-			exec(IMAGEMAGICKPATH.'convert "'.$pdf_file.'[' . ($this->formvars['page'] ? $this->formvars['page'] : 0) . ']" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"');
+			exec(IMAGEMAGICKPATH.'convert "'.$pdf_file.'[' . ($this->formvars['page'] ? $this->formvars['page'] : 0) . ']" -resize '.$selectedlayout['width'].'x'.$selectedlayout['height'].' "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"');
 			#echo IMAGEMAGICKPATH.'convert "'.$pdf_file.'[0]" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"';
 			if(!file_exists(IMAGEPATH.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg')){
 				return TEMPPATH_REL.basename($pdf_file, ".pdf").'-'.$currenttime.'-0.jpg';
@@ -10548,41 +10548,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     //$this->output();
 	}
 
-  function uko_import(){
-		$this->titel='UKO-Import';
-    $this->main='uko_import.php';
-		include_(CLASSPATH.'data_import_export.php');
-    $this->data_import_export = new data_import_export();
-		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
-    $this->output();
-  }
-
-  function uko_import_importieren(){
-    $this->titel='UKO-Import';
-    $this->main='uko_import.php';
-		include_(CLASSPATH.'data_import_export.php');
-    $this->data_import_export = new data_import_export();
-		$this->data_import_export->get_ukotable_srid($this->pgdatabase);
-    $oids = $this->data_import_export->uko_importieren($this->formvars, $this->user->Name, $this->user->id, $this->pgdatabase);
-		if($this->data_import_export->success == true){
-			$this->main='map.php';
-			$this->loadMap('DataBase');
-			$rect = $this->mapDB->zoomToDatasets($oids, 'uko_polygon', 'the_geom', 20, $this->pgdatabase, $this->data_import_export->uko_srid, $this->user->rolle->epsg_code);
-			$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
-	    if (MAPSERVERVERSION > 600) {
-				$this->map_scaledenom = $this->map->scaledenom;
-			}
-			else {
-				$this->map_scaledenom = $this->map->scale;
-			}
-			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-			$this->drawMap();
-			$this->saveMap('');
-		}
-    $this->output();
-  }
-
-
   function TIFExport(){
     $this->loadMap('DataBase');
     $breite = $this->map->extent->maxx - $this->map->extent->minx;
@@ -10833,7 +10798,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->output();
 	}
 
-	function Attributeditor_speichern(){
+	function Attributeditor_speichern() {
 		switch (true) {
 			case (!empty($this->formvars['selected_layer_id']) && empty($this->formvars['selected_datatype_id'])) :
 				$this->Layerattribute_speichern();
@@ -10859,6 +10824,21 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->attributes = $mapdb->read_datatype_attributes($this->formvars['selected_datatype_id'], NULL, NULL, true);
 		$mapdb->save_datatype_attributes($this->attributes, $this->database, $this->formvars);
 		$this->Attributeditor();
+	}
+
+	/*
+	* Funktion speichert die Einstellungen der Attribute aus dem Attributeditor Form für
+	* die Attribute von for_attributes_selected_layer_id. Die Einstellungen können von einem anderen Layer stammen.
+	* Vor Layerattribute_speichern wird als selected_layer_id for_attributes_selected_layer_id genommen.
+	* Damit werden die Attribute von dem Layer abgefragt, für die die Formularwerte übernommen werden sollen.
+	* Nach dem Speichern wird der Attributeditor für den layer mit for_attributes_selected_layer_id geöffnet.
+	*/
+	function Attributeditor_takeover_attributes() {
+		$from_layer_id = $this->formvars['selected_layer_id'];
+		$to_layer_id = $this->formvars['for_attributes_selected_layer_id'];
+		$this->formvars['selected_layer_id'] = $to_layer_id;
+		$this->add_message('info', 'Einstellungen der Attribute von Layer ID: ' . $from_layer_id . ' für die Attribute des Layers ID: ' . $to_layer_id . ' übernommen.<br>Ordne Attribute ohne Einstellungen neu ein!');
+		$this->Layerattribute_speichern();
 	}
 
   function layer_attributes_privileges(){
@@ -13835,17 +13815,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								else{
 									$pfad = substr(trim($newpath), 7);
 								}
-								if($layerset[$i]['Layer_ID'] > 0 AND empty($privileges))$pfad = 'NULL::geometry as '.$layerset[$i]['attributes']['the_geom'].' '.$pfad;
+								if ($layerset[$i]['Layer_ID'] > 0 AND empty($privileges)) {
+									$pfad = 'NULL::geometry as ' . $layerset[$i]['attributes']['the_geom'] . ' ' . $pfad;
+								}
 								$geometrie_tabelle = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 								$j = 0;
-								foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-									if(($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oder Geometrietabelle oids?
-										$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
+								foreach($layerset[$i]['attributes']['all_table_names'] as $tablename) {
+									if (($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['attributes']['oids'][$j]) {
+										# hat Haupttabelle oder Geometrietabelle oids?
+										$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename] . '.oid AS ' . $tablename . '_oid, ' . $pfad;
 									}
 									$j++;
 								}
-								if($distinct == true){
-									$pfad = 'DISTINCT '.$pfad;
+								if ($distinct == true) {
+									$pfad = 'DISTINCT ' . $pfad;
 								}
 							#}
 							#else{
@@ -13858,7 +13841,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							}
 							else{
 							*/
-								if($layerset[$i]['attributes']['the_geom'] == ''){					# Geometriespalte ist nicht geladen, da auf "nicht sichtbar" gesetzt --> aus Data holen
+								if ($layerset[$i]['attributes']['the_geom'] == '') {					# Geometriespalte ist nicht geladen, da auf "nicht sichtbar" gesetzt --> aus Data holen
 									$data_attributes = $this->mapDB->getDataAttributes($layerdb, $layerset[$i]['Layer_ID']);
 									$layerset[$i]['attributes']['the_geom'] = $data_attributes['the_geom'];
 								}
@@ -16174,11 +16157,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 } # end of class GUI
 
-##############################################################
-# Klasse MapObject zum laden der Map-Daten aus der Datenbank #
-##############################################################
-# Klasse db_mapObj #
-####################
 class db_mapObj{
   var $debug;
   var $referenceMap;
@@ -16261,7 +16239,7 @@ class db_mapObj{
 				$name_column . ",
 				l.alias,
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem,
-				l.labelmaxscale, l.labelminscale, l.labelrequires, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.styleitem, l.classification, l.filteritem,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				g.id, ".$group_column.", g.obergruppe, g.order
@@ -17841,6 +17819,7 @@ class db_mapObj{
 				'printconnection',
 				'connectiontype',
 				'classitem',
+				'styleitem',
 				'filteritem',
 				'tolerance',
 				'toleranceunits',
@@ -17902,7 +17881,7 @@ class db_mapObj{
 					$sql .= "`Name_" . $language."`, ";
 				}
 			}
-			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`) VALUES(";
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'" . $formvars['id']."', ";
       }
@@ -17960,6 +17939,7 @@ class db_mapObj{
       $sql .= "'" . $formvars['printconnection']."', ";
       $sql .= ($formvars['connectiontype'] =='' ? "6" : $formvars['connectiontype']) .", "; # Set default to postgis layer
       $sql .= "'" . $formvars['classitem']."', ";
+			$sql .= "'" . $formvars['styleitem']."', ";
 			$sql .= "'" . $formvars['layer_classification']."', ";
       $sql .= "'" . $formvars['filteritem']."', ";
 			if($formvars['cluster_maxdistance'] == '')$formvars['cluster_maxdistance'] = 'NULL';
@@ -18121,56 +18101,62 @@ class db_mapObj{
 		}
 	}
 
+	/*
+	* Speichert die Einstellungen, die in formvars enthalten sind für die Attribute, die in $attributes angegeben sind.
+	* Formvars, die nicht zu Attributen in $attributes passen werden ignoriert.
+	*/
 	function save_layer_attributes($attributes, $database, $formvars){
 		global $supportedLanguages;
 
-		for($i = 0; $i < count($attributes['name']); $i++){
-			$alias_rows = "`alias` = '" . $formvars['alias_' . $attributes['name'][$i]] . "',";
-			foreach($supportedLanguages as $language) {
-				if ($language != 'german') {
-					$alias_rows .= "`alias_" . $language . "` = '" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "',";
+		for ($i = 0; $i < count($attributes['name']); $i++) {
+			if ($formvars['attribute_' . $attributes['name'][$i]] != '') {
+				$alias_rows = "`alias` = '" . $formvars['alias_' . $attributes['name'][$i]] . "',";
+				foreach ($supportedLanguages as $language) {
+					if ($language != 'german') {
+						$alias_rows .= "`alias_" . $language . "` = '" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "',";
+					}
 				}
+				if ($formvars['visible_' . $attributes['name'][$i]] != 2){
+					$formvars['vcheck_attribute_'.$attributes['name'][$i]] = '';
+					$formvars['vcheck_operator_'.$attributes['name'][$i]] = '';
+					$formvars['vcheck_value_'.$attributes['name'][$i]] = '';
+				}
+				if ($formvars['group_' . $attributes['name'][$i]] == '' AND $last_group != ''){
+					$formvars['group_' . $attributes['name'][$i]] = $last_group;
+				}
+				$last_group = $formvars['group_' . $attributes['name'][$i]];
+				$rows = "
+					`order` = " . ($formvars['order_' . $attributes['name'][$i]] == '' ? 0 : $formvars['order_' . $attributes['name'][$i]]) . ",
+					`name` = '" . $attributes['name'][$i] . "', " .
+					$alias_rows . "
+					`form_element_type` = '" . $formvars['form_element_' . $attributes['name'][$i]] . "',
+					`options` = '" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "',
+					`tooltip` = '" . $formvars['tooltip_' . $attributes['name'][$i]] . "',
+					`group` = '" . $formvars['group_' . $attributes['name'][$i]] . "',
+					`arrangement` = " . ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? 0 : $formvars['arrangement_' . $attributes['name'][$i]]) . ",
+					`labeling` = " . ($formvars['labeling_' . $attributes['name'][$i]] == '' ? 0 : $formvars['labeling_' . $attributes['name'][$i]]) . ",
+					`raster_visibility` = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
+					`dont_use_for_new`= " . ($formvars['dont_use_for_new_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attributes['name'][$i]]) . ",
+					`mandatory` = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
+					`quicksearch`= " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
+					`visible`= ".($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]).",
+					`vcheck_attribute`= '" . $formvars['vcheck_attribute_'.$attributes['name'][$i]]."',
+					`vcheck_operator`= '" . $formvars['vcheck_operator_'.$attributes['name'][$i]]."',
+					`vcheck_value`= '" . $formvars['vcheck_value_'.$attributes['name'][$i]]."'
+				";
+				$sql = "
+					INSERT INTO
+						`layer_attributes`
+					SET
+						`layer_id` = " . $formvars['selected_layer_id'] . ", " .
+						$rows . "
+					ON DUPLICATE KEY UPDATE " .
+						$rows . "
+				";
+				#echo '<br>Sql: ' . $sql;
+				$this->debug->write("<p>file:kvwmap class:Document->save_layer_attributes :",4);
+				$database->execSQL($sql, 4, 1);
 			}
-			if($formvars['visible_' . $attributes['name'][$i]] != 2){
-				$formvars['vcheck_attribute_'.$attributes['name'][$i]] = '';
-				$formvars['vcheck_operator_'.$attributes['name'][$i]] = '';
-				$formvars['vcheck_value_'.$attributes['name'][$i]] = '';
-			}
-			if($formvars['group_' . $attributes['name'][$i]] == '' AND $last_group != ''){
-				$formvars['group_' . $attributes['name'][$i]] = $last_group;
-			}
-			$last_group = $formvars['group_' . $attributes['name'][$i]];
-			$rows = "
-				`order` = " . $formvars['order_' . $attributes['name'][$i]] . ",
-				`name` = '" . $attributes['name'][$i] . "', " .
-				$alias_rows . "
-				`form_element_type` = '" . $formvars['form_element_' . $attributes['name'][$i]] . "',
-				`options` = '" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "',
-				`tooltip` = '" . $formvars['tooltip_' . $attributes['name'][$i]] . "',
-				`group` = '" . $formvars['group_' . $attributes['name'][$i]] . "',
-				`arrangement` = " . $formvars['arrangement_' . $attributes['name'][$i]] . ",
-				`labeling` = " . $formvars['labeling_' . $attributes['name'][$i]] . ",
-				`raster_visibility` = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
-				`dont_use_for_new`= " . ($formvars['dont_use_for_new_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attributes['name'][$i]]) . ",
-				`mandatory` = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
-				`quicksearch`= " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
-				`visible`= ".($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]).",
-				`vcheck_attribute`= '" . $formvars['vcheck_attribute_'.$attributes['name'][$i]]."',
-				`vcheck_operator`= '" . $formvars['vcheck_operator_'.$attributes['name'][$i]]."',
-				`vcheck_value`= '" . $formvars['vcheck_value_'.$attributes['name'][$i]]."'
-			";
-			$sql = "
-				INSERT INTO
-					`layer_attributes`
-				SET
-					`layer_id` = " . $formvars['selected_layer_id'] . ", " .
-					$rows . "
-				ON DUPLICATE KEY UPDATE " .
-					$rows . "
-			";
-			#echo '<br>Sql: ' . $sql;
-			$this->debug->write("<p>file:kvwmap class:Document->save_layer_attributes :",4);
-			$database->execSQL($sql, 4, 1);
 		}
 	}
 
@@ -19511,14 +19497,6 @@ class db_mapObj{
   }
 }
 
-###########################################
-# Dokumentenklasse                        #
-###########################################
-# Klasse Document #
-################
-
-# functions of class Document
-
 class Document {
   var $html;
   var $debug;
@@ -20052,4 +20030,5 @@ class point {
     $this->y=round(($this->y-$minY)/$pixSize);
   }
 }
+
 ?>
