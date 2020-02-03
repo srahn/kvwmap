@@ -153,6 +153,7 @@
 						<th class="fetter" width="300px" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLayerID; ?></th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="id" type="text" value="<?php echo $this->formvars['selected_layer_id']; ?>" size="50" maxlength="11">
+							<input name="old_id" type="hidden" value="<?php echo $this->formvars['selected_layer_id']; ?>">
 						</td>
 					</tr>
 					<tr>
@@ -396,6 +397,12 @@
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClassItem; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="classitem" type="text" value="<?php echo $this->formvars['classitem']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStyleItem; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="styleitem" type="text" value="<?php echo $this->formvars['styleitem']; ?>" size="50" maxlength="100">
 						</td>
 					</tr>
 					<tr>

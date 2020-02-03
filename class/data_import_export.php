@@ -485,7 +485,7 @@ class data_import_export {
 	function geojson_import($filename, $pgdatabase, $schema, $tablename){
 		if(file_exists($filename)){
 			$json = json_decode(file_get_contents($filename));
-			if(strpos($json->crs->properties->name, 'EPSG::') !== false)$epsg = array_pop(explode('EPSG::', $json->crs->properties->name));
+			if(strpos($json->crs->properties->name, 'EPSG:') !== false)$epsg = array_pop(explode('EPSG:', $json->crs->properties->name));
 			else $epsg = 4326;
 			if($tablename == NULL)$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
 			$ret = $this->ogr2ogr_import($schema, $tablename, $epsg, $filename, $pgdatabase, NULL, NULL, NULL, 'UTF8');
@@ -1017,7 +1017,7 @@ class data_import_export {
 		$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
 
 		# Where-Klausel aus Sachdatenabfrage-SQL
-		$where = substr($this->formvars['sql_'.$this->formvars['selected_layer_id']], strrpos(strtolower(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where'));
+		$where = substr($this->formvars['sql_'.$this->formvars['selected_layer_id']], strrpos(strtolower($this->formvars['sql_'.$this->formvars['selected_layer_id']]), 'where'));
 
 		# order by rausnehmen
 		$orderbyposition = strrpos(strtolower($sql), 'order by');
