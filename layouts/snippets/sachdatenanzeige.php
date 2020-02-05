@@ -33,7 +33,7 @@ for($i=0;$i<$anzLayer;$i++){
 	$gesamt = $this->qlayerset[$i]['count'];
   if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $gesamt > 1){
 	   # Blätterfunktion
-	   if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] == ''){
+	   if(value_of($this->formvars, 'offset_'.$this->qlayerset[$i]['Layer_ID']) == ''){
 		   $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] = 0;
 		 }
 		 $von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + 1;
@@ -56,7 +56,7 @@ for($i=0;$i<$anzLayer;$i++){
 					<span class="fett">'.$von.' - '.$bis.' '.$strFromDatasets.' '.$gesamt.'</span>
 				</td>
 	      <td width="38%">';
-	      if($bis < $gesamt AND $this->formvars['printversion'] == ''){
+	      if($bis < $gesamt AND value_of($this->formvars, 'printversion') == ''){
 	      	$this->qlayerset[$i]['paging'].= '&nbsp;<a href="javascript:nextdatasets('.$this->qlayerset[$i]['Layer_ID'].');"><img src="'.GRAPHICSPATH.'go-next.png" class="hover-border" style="vertical-align:middle" title="'.$strForwardDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
 					$this->qlayerset[$i]['paging'].= '<a href="javascript:lastdatasets('.$this->qlayerset[$i]['Layer_ID'].', '.$gesamt.');"><img src="'.GRAPHICSPATH.'go-last.png" class="hover-border" style="vertical-align:middle" title="'.$strLastDatasets.'"></a>';
 	      }
@@ -107,7 +107,7 @@ for($i=0;$i<$anzLayer;$i++){
 		}
 	}
 	
-	echo $this->qlayerset[$i]['paging'];
+	echo value_of($this->qlayerset[$i], 'paging');
 	
 	if($gesamt > 0){
 		echo '<hr class="gle_hr">';
@@ -147,7 +147,7 @@ if(!empty($this->noMatchLayers)){
 				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
 				<? } ?>
 		<? }
-if($this->formvars['printversion'] == ''){ ?>
+if(value_of($this->formvars, 'printversion') == ''){ ?>
 			<a style="margin-right: 8px" href="javascript:scrolltop();"	title="<? echo $strToTop; ?>">
 				<i class="fa fa-arrow-up hover-border" aria-hidden="true"></i>
 			</a>
@@ -156,7 +156,7 @@ if($this->formvars['printversion'] == ''){ ?>
 	</tr>
 </table>
 <?
-	if($this->found != 'false' AND $this->formvars['printversion'] == ''){	?>		
+	if($this->found != 'false' AND value_of($this->formvars, 'printversion') == ''){	?>		
 		<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
     <tr>
     	<td width="49%" class="px13">
@@ -170,13 +170,15 @@ if($this->formvars['printversion'] == ''){ ?>
 				<? }else{
 							echo '&nbsp;'.$strLimit; ?>&nbsp;
 							<select name="anzahl" id="anzahl" onchange="javascript:currentform.go.value = 'get_last_query';overlay_submit(currentform, false);">
-								<? foreach($selectable_limits as $limit){
-								if($this->formvars['anzahl'] != '' AND $custom_limit != true AND !in_array($this->formvars['anzahl'], $selectable_limits) AND $this->formvars['anzahl'] < $limit){
-									$custom_limit = true;	?>
-									<option value="<? echo $this->formvars['anzahl'];?>" selected><? echo $this->formvars['anzahl']; ?></option>
-								<? } ?>
-								<option value="<? echo $limit; ?>" <? if($this->formvars['anzahl'] == $limit)echo 'selected'?>><? echo $limit; ?></option>
-								<? } ?>
+								<?
+								$custom_limit = false;
+								foreach($selectable_limits as $limit){
+									if($this->formvars['anzahl'] != '' AND $custom_limit != true AND !in_array($this->formvars['anzahl'], $selectable_limits) AND $this->formvars['anzahl'] < $limit){
+										$custom_limit = true;	?>
+										<option value="<? echo $this->formvars['anzahl'];?>" selected><? echo $this->formvars['anzahl']; ?></option>
+									<? } ?>
+									<option value="<? echo $limit; ?>" <? if($this->formvars['anzahl'] == $limit)echo 'selected'?>><? echo $limit; ?></option><? 
+								} ?>
 							</select>
 					<? } ?>
 			</td>
@@ -218,11 +220,12 @@ if($this->formvars['printversion'] == ''){ ?>
 
   		if(is_array($this->qlayerset[0]['attributes']['all_table_names'])){
   			foreach($this->qlayerset[0]['attributes']['all_table_names'] as $tablename){
-		    	if($this->formvars['value_'.$tablename.'_oid']){
+		    	if(value_of($this->formvars, 'value_'.$tablename.'_oid')){
 		      	echo '<input name="value_'.$tablename.'_oid" type="hidden" value="'.$this->formvars['value_'.$tablename.'_oid'].'">';
 		      }
 		    }
   		}
+			$prefix = '';
 			for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
 				if($m > 0){
 					$prefix = $m.'_';
@@ -236,7 +239,7 @@ if($this->formvars['printversion'] == ''){ ?>
 					';
 				}
 			}
-	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
+	  	if(value_of($this->formvars, 'printversion') == '' AND value_of($this->formvars, 'keinzurueck') == '' AND value_of($this->formvars, 'subform_link') == ''){
 	  		echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" id="sachdatenanzeige_footer">'.$strbackToSearch.'</a><br><br>';
 	  	}
   	}
@@ -244,7 +247,7 @@ if($this->formvars['printversion'] == ''){ ?>
 			for($i = 0; $i < $anzLayer; $i++){
 				if($this->formvars['qLayer'.$this->qlayerset[$i]['Layer_ID']] == 1){
 					echo '<input name="qLayer'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="1">';
-					echo '<input id="offset_'.$this->qlayerset[$i]['Layer_ID'].'" name="offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']].'">';
+					echo '<input id="offset_'.$this->qlayerset[$i]['Layer_ID'].'" name="offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.value_of($this->formvars, 'offset_'.$this->qlayerset[$i]['Layer_ID']).'">';
 					echo '<input name="sql_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->qlayerset[$i]['sql'].'">';
 				}
 			}
@@ -255,37 +258,37 @@ if($this->formvars['printversion'] == ''){ ?>
   <input type="hidden" name="printversion" value="">
   <input type="hidden" name="go_backup" value="">
   <input name="querypolygon" type="hidden" value="<?php echo $this->querypolygon; ?>">
-  <input name="rectminx" type="hidden" value="<?php echo $this->formvars['rectminx'] ? $this->formvars['rectminx'] : $this->queryrect->minx; ?>">
-  <input name="rectminy" type="hidden" value="<?php echo $this->formvars['rectminy'] ? $this->formvars['rectminy'] : $this->queryrect->miny; ?>">
-  <input name="rectmaxx" type="hidden" value="<?php echo $this->formvars['rectmaxx'] ? $this->formvars['rectmaxx'] : $this->queryrect->maxx; ?>">
-  <input name="rectmaxy" type="hidden" value="<?php echo $this->formvars['rectmaxy'] ? $this->formvars['rectmaxy'] : $this->queryrect->maxy; ?>">
+  <input name="rectminx" type="hidden" value="<?php echo value_of($this->formvars, 'rectminx') ? $this->formvars['rectminx'] : $this->queryrect->minx; ?>">
+  <input name="rectminy" type="hidden" value="<?php echo value_of($this->formvars, 'rectminy') ? $this->formvars['rectminy'] : $this->queryrect->miny; ?>">
+  <input name="rectmaxx" type="hidden" value="<?php echo value_of($this->formvars, 'rectmaxx') ? $this->formvars['rectmaxx'] : $this->queryrect->maxx; ?>">
+  <input name="rectmaxy" type="hidden" value="<?php echo value_of($this->formvars, 'rectmaxy') ? $this->formvars['rectmaxy'] : $this->queryrect->maxy; ?>">
   <input name="form_field_names" type="hidden" value="<?php echo $this->form_field_names; ?>">
   <input type="hidden" name="chosen_layer_id" value="">
   <input type="hidden" name="layer_tablename" value="">
   <input type="hidden" name="layer_columnname" value="">
   <input type="hidden" name="all" value="">
-	<input name="INPUT_COORD" type="hidden" value="<?php echo $this->formvars['INPUT_COORD']; ?>">
-  <INPUT TYPE="HIDDEN" NAME="searchradius" VALUE="<?php echo $this->formvars['searchradius']; ?>">
-  <input name="CMD" type="hidden" value="<?php echo $this->formvars['CMD']; ?>">
-	<? if($this->formvars['printversion'] == '' AND $this->currentform != 'document.GUI2'){ ?>
+	<input name="INPUT_COORD" type="hidden" value="<?php echo value_of($this->formvars, 'INPUT_COORD'); ?>">
+  <INPUT TYPE="HIDDEN" NAME="searchradius" VALUE="<?php echo value_of($this->formvars, 'searchradius'); ?>">
+  <input name="CMD" type="hidden" value="<?php echo value_of($this->formvars, 'CMD'); ?>">
+	<? if(value_of($this->formvars, 'printversion') == '' AND $this->currentform != 'document.GUI2'){ ?>
   <table width="100%" border="0" cellpadding="2" cellspacing="0" id="sachdatenanzeige_footer">
     <tr bgcolor="<?php echo BG_DEFAULT ?>" align="center">
-      <td><a href="index.php?searchradius=<?php echo $this->formvars['searchradius']; ?>" onclick="checkForUnsavedChanges(event);"><? echo $strbacktomap;?></a></td>
+      <td><a href="index.php?searchradius=<?php echo value_of($this->formvars, 'searchradius'); ?>" onclick="checkForUnsavedChanges(event);"><? echo $strbacktomap;?></a></td>
     </tr>
   </table>
 	<? } ?>
 </div>
-<input type="hidden" name="titel" value="<? echo $this->formvars['titel'] ?>">
+<input type="hidden" name="titel" value="<? echo value_of($this->formvars, 'titel'); ?>">
 <input type="hidden" name="width" value="">
 <input type="hidden" name="delete_documents" value="">
 <input type="hidden" name="map_flag" value="<? echo $this->formvars['map_flag']; ?>">
-<input name="newpath" type="hidden" value="<?php echo $this->formvars['newpath']; ?>">
-<input name="pathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
-<input name="newpathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
+<input name="newpath" type="hidden" value="<?php echo value_of($this->formvars, 'newpath'); ?>">
+<input name="pathwkt" type="hidden" value="<?php echo value_of($this->formvars, 'newpathwkt'); ?>">
+<input name="newpathwkt" type="hidden" value="<?php echo value_of($this->formvars, 'newpathwkt'); ?>">
 <input name="result" type="hidden" value="">
-<input name="firstpoly" type="hidden" value="<?php echo $this->formvars['firstpoly']; ?>">
+<input name="firstpoly" type="hidden" value="<?php echo value_of($this->formvars, 'firstpoly'); ?>">
 <input type="hidden" name="searchmask_count" value="<? echo $this->formvars['searchmask_count']; ?>">
-<input type="hidden" name="within" value="<? echo $this->formvars['within']; ?>">
+<input type="hidden" name="within" value="<? echo value_of($this->formvars, 'within'); ?>">
 
 <div id="vorschau" style="pointer-events:none; box-shadow: 12px 10px 14px #777;z-index: 1000000; position: fixed; right:10px; top:5px; ">
 	<img id="preview_img" style="max-height: 940px" src="<? echo GRAPHICSPATH.'leer.gif'; ?>">

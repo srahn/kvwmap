@@ -1119,7 +1119,6 @@ class GUI {
         } # ende mapserver < 600
         else {
           $label = new labelObj();
-          $label->type = $dbLabel['type'];
           $label->font = $dbLabel['font'];
           $RGB=explode(" ",$dbLabel['color']);
           if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }

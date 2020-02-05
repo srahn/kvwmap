@@ -718,7 +718,7 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->get_last_query - Abfragen der letzten Abfrage:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		while ($rs = $this->database->result->fetch_row()) {
+		while ($rs = $this->database->result->fetch_assoc()) {
 			$last_query['go'] = $rs['go'];
 			$last_query['layer_ids'][] = $rs['layer_id'];
 			$last_query[$rs['layer_id']] = $rs;
@@ -731,7 +731,7 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->get_last_search_layer_id - Abfragen der letzten Suche:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		$rs = $this->database->result->fetch_row();
+		$rs = $this->database->result->fetch_assoc();
 		return $rs['layer_id'];
 	}
 	
@@ -783,12 +783,12 @@ class rolle {
 				$prefix = '';
 			}
 			for($i = 0; $i < count($attributes['name']); $i++){
-				if($formvars[$prefix.'value_'.$attributes['name'][$i]] != '' OR $formvars[$prefix.'operator_'.$attributes['name'][$i]] == 'IS NULL' OR $formvars[$prefix.'operator_'.$attributes['name'][$i]] == 'IS NOT NULL'){
+				if(value_of($formvars, $prefix.'value_'.$attributes['name'][$i]) != '' OR value_of($formvars, $prefix.'operator_'.$attributes['name'][$i]) == 'IS NULL' OR value_of($formvars, $prefix.'operator_'.$attributes['name'][$i]) == 'IS NOT NULL'){
 					if(is_array($formvars[$prefix.'value_'.$attributes['name'][$i]])){
 						$formvars[$prefix.'value_'.$attributes['name'][$i]] = json_encode($formvars[$prefix.'value_'.$attributes['name'][$i]], JSON_UNESCAPED_UNICODE);
 					}
 					$search_params_set = true;
-					$sql = "INSERT INTO search_attributes2rolle VALUES ('".$formvars['search_name']."', ".$this->user_id.", ".$this->stelle_id.", ".$formvars['selected_layer_id'].", '".$attributes['name'][$i]."', '".$formvars[$prefix.'operator_'.$attributes['name'][$i]]."', '".$formvars[$prefix.'value_'.$attributes['name'][$i]]."', '".$formvars[$prefix.'value2_'.$attributes['name'][$i]]."', ".$m.", '".$formvars['boolean_operator_'.$m]."');";
+					$sql = "INSERT INTO search_attributes2rolle VALUES ('".$formvars['search_name']."', ".$this->user_id.", ".$this->stelle_id.", ".$formvars['selected_layer_id'].", '".$attributes['name'][$i]."', '".value_of($formvars, $prefix.'operator_'.$attributes['name'][$i])."', '".$formvars[$prefix.'value_'.$attributes['name'][$i]]."', '".$formvars[$prefix.'value2_'.$attributes['name'][$i]]."', ".$m.", '".value_of($formvars, 'boolean_operator_'.$m)."');";
 					$this->debug->write("<p>file:rolle.php class:rolle->save_search - Speichern einer Suchabfrage:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
 				}
@@ -811,6 +811,7 @@ class rolle {
 	}
 
 	function getsearches($layer_id){
+		$searches = array();
 		$sql = 'SELECT distinct a.name, a.layer_id, b.Name as layername FROM search_attributes2rolle as a, layer as b WHERE a.name != \'<last_search>\' AND a.layer_id = b.Layer_ID AND user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		if($layer_id != '') $sql.= ' AND a.layer_id='.$layer_id;
 		$sql .= ' ORDER BY b.Name, a.name';
@@ -828,7 +829,7 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->getsearch - Abfragen der gespeicherten Suchabfrage:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		while ($rs = $this->database->result->fetch_row()) {
+		while ($rs = $this->database->result->fetch_assoc()) {
 			$json_test = json_decode($rs['value1']);
 			if(is_array($json_test))$rs['value1'] = $json_test;
 			$search[]=$rs;
@@ -978,8 +979,8 @@ class rolle {
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		for ($i=0;$i<count($this->layerset)-1;$i++) {
 			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>';
-			$aktiv_status = value_of($formvars, 'thema'.$this->layerset[$i]['Layer_ID']);
-			$requires_status = value_of($formvars, 'thema'.$this->layerset[$i]['requires']);
+			$aktiv_status = value_of($formvars, 'thema'.value_of($this->layerset[$i], 'Layer_ID'));
+			$requires_status = value_of($formvars, 'thema'.value_of($this->layerset[$i], 'requires'));
 			if($aktiv_status != '' OR $requires_status != ''){										// entweder ist der Layer selber an oder sein requires-Layer
 				$aktiv_status = $aktiv_status + (int)$requires_status;
 				if($this->layerset[$i]['Layer_ID'] > 0){
@@ -1000,13 +1001,14 @@ class rolle {
 				if($aktiv_status != 0){
 					$sql = 'SELECT Class_ID FROM classes WHERE Layer_ID='.$this->layerset[$i]['Layer_ID'].';';
 					$this->database->execSQL($sql);
-					while ($rs = @$this->database->result->fetch_row()) {
-						if($formvars['class'.$row['Class_ID']] == '0' OR $formvars['class'.$row['Class_ID']] == '2'){
-							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id, status) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$row['Class_ID'].', '.$formvars['class'.$row['Class_ID']].');';
+					$result = $this->database->result;
+					while ($rs = mysqli_fetch_assoc($result)) {
+						if(value_of($formvars, 'class'.$rs['Class_ID']) == '0' OR value_of($formvars, 'class'.$rs['Class_ID']) == '2'){
+							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id, status) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$rs['Class_ID'].', '.$formvars['class'.$rs['Class_ID']].');';
 							$this->database->execSQL($sql2,4, $this->loglevel);
 						}
-						elseif($formvars['class'.$row['Class_ID']] == '1'){
-							$sql1 = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND class_id='.$row['Class_ID'].';';
+						elseif(value_of($formvars, 'class'.$rs['Class_ID']) == '1'){
+							$sql1 = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND class_id='.$rs['Class_ID'].';';
 							$this->database->execSQL($sql1,4, $this->loglevel);
 						}
 					}
@@ -1019,7 +1021,7 @@ class rolle {
 	function setQueryStatus($formvars) {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
 		for ($i=0; $i<count($this->layerset)-1; $i++){
-			$query_status = value_of($formvars, 'qLayer'.$this->layerset[$i]['Layer_ID']);
+			$query_status = value_of($formvars, 'qLayer'.value_of($this->layerset[$i], 'Layer_ID'));
 			if($query_status != ''){	
 				if($this->layerset[$i]['Layer_ID'] > 0){
 					$sql ='UPDATE u_rolle2used_layer set queryStatus="'.$query_status.'"';

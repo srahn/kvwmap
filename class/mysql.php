@@ -141,7 +141,7 @@ class database {
   	$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     if($ret[0]==0){
-      $color = mysql_fetch_array($ret[1]);
+      $color = $this->result->fetch_assoc();
     }
     return $color;
   }

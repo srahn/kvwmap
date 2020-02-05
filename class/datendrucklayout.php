@@ -1091,6 +1091,7 @@ class ddl {
   }
  	
 	function load_layouts($stelle_id, $ddl_id, $layer_id, $types, $return = '') {
+		$layouts = array();
 		$sql = "
 			SELECT DISTINCT
 				datendrucklayouts.*

@@ -93,16 +93,16 @@
 							  <td align="center" style="height:21px">';
 								$privilege_options = array(
 									array(
-										value => '',
-										output => $strNoAccess,
+										'value' => '',
+										'output' => $strNoAccess,
 									),
 									array(
-										value => '0',
-										output => $strRead,
+										'value' => '0',
+										'output' => $strRead,
 									),
 									array(
-										value => '1',
-										output => $strEdit,
+										'value' => '1',
+										'output' => $strEdit,
 									)
 								);
 
@@ -127,7 +127,7 @@
 								<td>&nbsp;</td>
 							</tr>
 							<tr>';
-			    			if($this->formvars['stelle'] != 'a'){
+			    			if(value_of($this->formvars, 'stelle') != 'a'){
 			    				echo '
 							  <td align="center">
 							  	<input style="width:100px" type="text" name="" value="alle" readonly>

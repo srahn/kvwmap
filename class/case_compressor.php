@@ -47,6 +47,7 @@ class case_compressor {
 		}
 		catch(Exception $e){		// es ist eine Funktion ohne Klasse
 			# wenn er noch nicht da ist, den Funktionscode ermitteln und zum nonclassfunction-String hinzufügen
+			if($functionname != '{closure}')
 			if(value_of2(self::$nonclassfunctionarray, $functionname) != true){
 				$func = new ReflectionFunction($functionname);				
 				self::$nonclassfunctionstring .= chr(10).self::get_function_body($func);

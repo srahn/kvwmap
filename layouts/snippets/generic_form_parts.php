@@ -6,10 +6,11 @@
 	global $strNewEmbeddedPK;
 	global $hover_preview;
 	function output_table($table) {
+		$output = '';
 		if (is_array($table)) {
 			foreach($table['rows'] as $row) {
 				$output .= '<tr id="' . $row['id'] . '" class="' . $row['class'] . '">';
-				if ($row['sidebyside'] AND !$row['contains_attribute_names']) {
+				if (value_of($row, 'sidebyside') AND !$row['contains_attribute_names']) {
 					$width = 'width="'.(100 / $table['max_cell_count']).'%"';
 				}
 				$cell_count = count($row['cells']);
@@ -39,14 +40,11 @@
 				$output .= '</tr>';
 			}
 		}
-		else {
-			$output = '';
-		}
 		return $output;
 	}
 
 	function attribute_name($layer_id, $attributes, $j, $k, $fontsize, $sort_links = true) {
-		$datapart .= '<table ';
+		$datapart = '<table ';
 		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j] != 1 AND $attributes['labeling'][$j] != 1)$datapart .= 'width="200px"';
 		else $datapart .= 'width="100%"';
 		$datapart .= '><tr style="border: none"><td' . (($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0') ? ' class="gle-attribute-mandatory"' : '') . '>';
@@ -93,6 +91,8 @@
 	}
 
 	function attribute_value(&$gui, $layer, $attributes, $j, $k, $dataset, $size, $select_width, $fontsize, $change_all = false, $onchange = NULL, $field_name = NULL, $field_id = NULL, $field_class = NULL){
+		$datapart = '';
+		$after_attribute = '';
 		global $strShowPK;
 		global $strNewPK;
 		global $strShowFK;
@@ -545,7 +545,7 @@
 							$datapart .= '<div>';
 							$datapart .= 'Oooops!<p>';
 							$datapart .= 'Die Datei ' . $dateiname . ' wurde nicht auf dem Server gefunden.';
-							if ($layer['document_url'] == '') {
+							if (value_of($pfadteil, 1) AND $layer['document_url'] == '') {
 								$datapart .= '<br>Der originale Name der Datei war ' . $pfadteil[1];
 							}
 							$datapart .= '<br>Laden Sie die Datei neu auf den Server hoch oder fragen Sie Ihren Administrator warum die Datei auf dem Server fehlt und lassen Sie sie wiederherstellen.';
@@ -553,7 +553,7 @@
 						}
 						$datapart .= '<input type="hidden" name="'.$fieldname.'_alt" class="' . $field_class . '" value="' . htmlspecialchars($value) . '">';
 					}
-					if ($attribute_privileg != '0' AND !$lock[$k]) {
+					if ($attribute_privileg != '0') {
 						$datapart .= '<input
 							tabindex="1"
 							onchange="' . $onchange . '"
@@ -709,7 +709,7 @@
 				
 				default : {
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
-					if($attribute_privileg == '0' OR $lock[$k]){
+					if($attribute_privileg == '0'){
 						$datapart .= ' readonly style="display:none;"';
 					}
 					else{
@@ -723,7 +723,7 @@
 					}
 					if($size)$datapart .= ' size="'.$size.'"';
 					$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
-					if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
+					if($attribute_privileg == '0'){ // nur lesbares Attribut
 						$angezeigter_value = (($attributes['type'][$j] == 'bool' OR $attributes['form_element_type'][$j] == 'Editiersperre') ? ($value == 't' ? $gui->strYes : $gui->strNo) : $value);
 						if($size == 12){		// spaltenweise
 							$datapart .= htmlspecialchars($angezeigter_value);

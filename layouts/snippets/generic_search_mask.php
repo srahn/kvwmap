@@ -22,6 +22,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 				<?
 			}
 			else{
+				$prefix = '';
 ?>
 				<tr>
 					<td width="150px"><span class="fett"><? echo $strAttribute; ?></span></td>
@@ -39,10 +40,10 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 			$z_index = 500;
 			for($i = 0; $i < count($this->attributes['name']); $i++) {
 				if ($this->attributes['mandatory'][$i] == '' or $this->attributes['mandatory'][$i] > -1) {
-					$operator = $this->formvars[$prefix . 'operator_' . $this->attributes['name'][$i]];
+					$operator = value_of($this->formvars, $prefix . 'operator_' . $this->attributes['name'][$i]);
 					
 	        if($this->attributes['form_element_type'][$i] != 'dynamicLink' AND !($this->attributes['form_element_type'][$i] == 'SubFormFK' AND $this->attributes['type'][$i] == 'not_saveable')){					
-						if($this->attributes['group'][$i] != $this->attributes['group'][$last_attribute_index]){		# wenn die vorige Gruppe anders ist: ...
+						if($this->attributes['group'][$i] != value_of($this->attributes['group'], $last_attribute_index)){		# wenn die vorige Gruppe anders ist: ...
 							$explosion = explode(';', $this->attributes['group'][$i]);
 							if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 							$groupname = $explosion[0];
@@ -99,7 +100,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 							<?php
 							if (!$this->user->rolle->visually_impaired) { ?>
 	            <td width="100px">
-	              <select  style="width:75px" <? if(count($this->attributes['enum_value'][$i]) == 0) { ?>onchange="operatorchange(<? echo $this->formvars['selected_layer_id']; ?>, '<? echo $this->attributes['name'][$i]; ?>', <? echo $searchmask_number; ?>);" id="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>" <? } ?> name="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>">
+	              <select  style="width:75px" <? if(value_of($this->attributes, 'enum_value') AND count($this->attributes['enum_value'][$i]) == 0) { ?>onchange="operatorchange(<? echo $this->formvars['selected_layer_id']; ?>, '<? echo $this->attributes['name'][$i]; ?>', <? echo $searchmask_number; ?>);" id="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>" <? } ?> name="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>">
 	                <option title="<? echo $strEqualHint; ?>" value="=" <? if($operator == '='){ echo 'selected';} ?> >=</option>
 								<? if($this->attributes['type'][$i] != 'geometry'){ ?>
 	                <option title="<? echo $strNotEqualHint; ?>" value="!=" <? if($operator == '!='){ echo 'selected';} ?> >!=</option>
@@ -192,8 +193,8 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
                 
 			default : { 
 	                  ?>
-	                  <input style="width:<? if($this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]] != ''){echo '120';}else{echo '293';} ?>px" id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="<? echo $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]; ?>" onkeyup="checknumbers(this, '<? echo $this->attributes['type'][$i]; ?>', '<? echo $this->attributes['length'][$i]; ?>', '<? echo $this->attributes['decimal_length'][$i]; ?>');">
-	                  <input style="width:145px" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="<? if($this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]] != ''){echo 'text';}else{echo 'hidden';} ?>" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">
+	                  <input style="width:<? if(value_of($this->formvars, $prefix.'value2_'.$this->attributes['name'][$i]) != ''){echo '120';}else{echo '293';} ?>px" id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="<? echo value_of($this->formvars, $prefix.'value_'.$this->attributes['name'][$i]); ?>" onkeyup="checknumbers(this, '<? echo $this->attributes['type'][$i]; ?>', '<? echo $this->attributes['length'][$i]; ?>', '<? echo $this->attributes['decimal_length'][$i]; ?>');">
+	                  <input style="width:145px" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="<? if(value_of($this->formvars, $prefix.'value2_'.$this->attributes['name'][$i]) != ''){echo 'text';}else{echo 'hidden';} ?>" value="<? echo value_of($this->formvars, $prefix.'value2_'.$this->attributes['name'][$i]); ?>">
 	                  <?
 	               }
 	      				}

@@ -235,7 +235,7 @@ function scrollToSelected(select){
 		include(SNIPPETS.'/generic_search_layer_selector.php');
 	}
 
-?><table border="0" cellpadding="5" cellspacing="2" bgcolor="<? echo $bgcolor; ?>"><?php
+?><table border="0" cellpadding="5" cellspacing="2"><?php
 	if(!in_array($this->selected_search[0]['name'], array('', '<last_search>'))){echo '<script type="text/javascript">showsearches();</script>';} ?>
   <tr> 
     <td id="searchmasks">
@@ -298,8 +298,8 @@ function scrollToSelected(select){
  ?>
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="go" value="Layer-Suche">
-<input type="hidden" name="titel" value="<? echo $this->formvars['titel'] ?>">
-<input type="hidden" name="map_flag" value="<? echo $this->formvars['map_flag']; ?>">
+<input type="hidden" name="titel" value="<? echo value_of($this->formvars, 'titel'); ?>">
+<input type="hidden" name="map_flag" value="<? echo value_of($this->formvars, 'map_flag'); ?>">
 <input type="hidden" name="area" value="">
 <INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<? echo $this->formvars['columnname']; ?>">
 <INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">

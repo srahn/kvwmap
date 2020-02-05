@@ -28,7 +28,7 @@
         <?
         for($i = 0; $i < count($this->layerdaten['ID']); $i++){         
           echo '<option';
-          if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
+          if($this->layerdaten['ID'][$i] == value_of($this->formvars, 'selected_layer_id')){
             echo ' selected';
           }
           echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
@@ -39,7 +39,7 @@
   </tr>
 
   <tr>
-    <td id="searches1"><? if($this->formvars['selected_layer_id'] != ''){ ?><a href="javascript:showsearches();"><? echo $strSearches; ?></a><? if(count($this->searchset) > 0)echo ' ('.count($this->searchset).')';} ?>&nbsp;</td>
+    <td id="searches1"><? if(value_of($this->formvars, 'selected_layer_id') != ''){ ?><a href="javascript:showsearches();"><? echo $strSearches; ?></a><? if(count($this->searchset) > 0)echo ' ('.count($this->searchset).')';} ?>&nbsp;</td>
   </tr>
   <tr id="searches2" style="display:none">
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
@@ -70,11 +70,11 @@
     </td>
   </tr>
 
-  <? if($this->formvars['columnname'] != ''){ ?>
+  <? if(value_of($this->formvars, 'columnname') != ''){ ?>
   <tr>
-    <td id="map1" <? if($this->formvars['map_flag'] != ''){echo 'style="border-top: 1px solid #C3C7C3;border-left: 1px solid #C3C7C3;border-right: 1px solid #C3C7C3"';} ?>><a href="javascript:showmap();"><? echo $strSpatialFiltering; ?></a>&nbsp;</td>
+    <td id="map1" <? if(value_of($this->formvars, 'map_flag') != ''){echo 'style="border-top: 1px solid #C3C7C3;border-left: 1px solid #C3C7C3;border-right: 1px solid #C3C7C3"';} ?>><a href="javascript:showmap();"><? echo $strSpatialFiltering; ?></a>&nbsp;</td>
   </tr>
-  <? if($this->formvars['map_flag'] != ''){ ?>
+  <? if(value_of($this->formvars, 'map_flag') != ''){ ?>
   <tr id="map2"> 
     <td align="right" style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
 			<input type="checkbox" name="within" value="1" <? if($this->formvars['within'] == 1)echo 'checked'; ?>>

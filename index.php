@@ -178,7 +178,7 @@ function go_switch($go, $exit = false) {
 		switch($go) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
-				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction'], $GUI->formvars['height_reduction']);
+				if(value_of($GUI->formvars, 'width_reduction') != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction'], $GUI->formvars['height_reduction']);
 				$GUI->loadMap('DataBase');
 				$GUI->navMap($GUI->formvars['CMD']);
 				$GUI->saveMap('');
@@ -322,7 +322,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'reset_layers' : {
-				$GUI->reset_layers($GUI->formvars['layer_id']);
+				$GUI->reset_layers(value_of($GUI->formvars, 'layer_id'));
 				$GUI->loadMap('DataBase');
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
 				$GUI->drawMap();
@@ -563,7 +563,7 @@ function go_switch($go, $exit = false) {
 
 			# zoomToPoint
 			case 'zoomtoPoint' : {
-				if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
+				if(value_of($GUI->formvars, 'mime_type') != '')$GUI->mime_type = $GUI->formvars['mime_type'];
 				$GUI->zoom_toPoint();
 			}break;
 

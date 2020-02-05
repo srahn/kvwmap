@@ -88,37 +88,58 @@ function umlaute_umwandeln($name){
 
 class GUI {
 
-  var $layout;
-  var $style;
-  var $mime_type;
-  var $menue;
-  var $pdf;
-  var $addressliste;
-  var $debug;
-  var $dbConn;
-  var $flst;
-  var $formvars;
-  var $legende;
-  var $map;
-  var $mapDB;
-  var $img;
-  var $FormObject;
-  var $StellenForm;
-  var $Fehlermeldung;
-  var $messages;
-  var $Hinweis;
-  var $Stelle;
-  var $ALB;
-  var $activeLayer;
-  var $nImageWidth;
-  var $nImageHeight;
-  var $user;
-  var $qlayerset;
-  var $scaleUnitSwitchScale;
-  var $map_scaledenom;
-  var $map_factor;
-  var $formatter;
-  var $success;
+	var $alert;
+	var $gui;
+	var $layout;
+	var $style;
+	var $mime_type;
+	var $menue;
+	var $pdf;
+	var $addressliste;
+	var $debug;
+	var $mysqli;
+	var $flst;
+	var $formvars;
+	var $legende;
+	var $map;
+	var $mapDB;
+	var $img;
+	var $FormObject;
+	var $StellenForm;
+	var $Fehlermeldung;
+	var $messages = array();
+	var $Hinweis;
+	var $Stelle;
+	var $ALB;
+	var $activeLayer;
+	var $nImageWidth;
+	var $nImageHeight;
+	var $user;
+	var $qlayerset;
+	var $scaleUnitSwitchScale;
+	var $map_scaledenom;
+	var $map_factor='';
+	var $formatter;
+	var $success = true;
+	var $login_failed;
+	var $only_main = false;
+	var $class_load_level;
+	var $layer_id_string;
+	var $noMinMaxScaling;
+	var $stelle_id;
+	var $angle_attribute;
+	var $titel;
+	var $PasswordError;
+	var $Meldung;
+	var $radiolayers;
+	var $show_query_tooltip;
+	var $last_query;
+	var $querypolygon;
+	var $new_entry;
+	var $search;
+	var $form_field_names;
+	var $editable;
+	var $groupset;
 
   function __construct($main, $style, $mime_type) {
     # Debugdatei setzen
@@ -1166,7 +1187,6 @@ class GUI {
         } # ende mapserver < 600
         else {
           $label = new labelObj();
-          $label->type = $dbLabel['type'];
           $label->font = $dbLabel['font'];
           $RGB=explode(" ",$dbLabel['color']);
           if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
@@ -1926,16 +1946,16 @@ class user {
 }
 
 class stelle {
-
-  var $id;
-  var $Bezeichnung;
-  var $debug;
-  var $nImageWidth;
-  var $nImageHeight;
-  var $oGeorefExt;
-  var $pixsize;
-  var $selectedButton;
-  var $database;
+	var $id;
+	var $Bezeichnung;
+	var $debug;
+	var $nImageWidth;
+	var $nImageHeight;
+	var $oGeorefExt;
+	var $pixsize;
+	var $selectedButton;
+	var $database;
+	var $language;
 
 	function __construct($id, $database) {
 		global $debug;
@@ -2328,15 +2348,16 @@ class rolle {
 }
 
 class pgdatabase {
-
-  var $ist_Fortfuehrung;
-  var $debug;
-  var $loglevel;
-  var $defaultloglevel;
-  var $logfile;
-  var $defaultlogfile;
-  var $commentsign;
-  var $blocktransaction;
+	var $ist_Fortfuehrung;
+	var $debug;
+	var $loglevel;
+	var $defaultloglevel;
+	var $logfile;
+	var $defaultlogfile;
+	var $commentsign;
+	var $blocktransaction;
+	var $port;
+	var $schema;
 
 	function __construct() {
 	  global $debug;
@@ -2666,7 +2687,7 @@ function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL){
 					$this->User_ID,
 					$this->Stelle_ID,
 					rolle::$hist_timestamp,
-					$this->rolle->language
+					$language
 				);
 			}
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {

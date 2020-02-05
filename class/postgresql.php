@@ -839,7 +839,7 @@ FROM
     $column = get_select_parts($select);
     for($i = 0; $i < count($column); $i++){
       if(strpos(trim($column[$i]), '*') === 0 OR strpos($column[$i], '.*') !== false){
-        $sql .= "SELECT ".$column[$i]." ".$from." LIMIT 0";
+        $sql = "SELECT ".$column[$i]." ".$from." LIMIT 0";
         $ret = $this->execSQL($sql, 4, 0);
         if($ret[0]==0){
         	$tablename = str_replace('*', '', trim($column[$i]));

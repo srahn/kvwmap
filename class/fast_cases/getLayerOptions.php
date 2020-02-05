@@ -13,23 +13,6 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	return $str;
 }
 
-function get_select_parts($select){
-	$column = explode(',', $select);		# an den Kommas splitten
-  for($i = 0; $i < count($column); $i++){
-  	$klammerauf = substr_count($column[$i], '(');
-  	$klammerzu = substr_count($column[$i], ')');
-		$hochkommas = substr_count($column[$i], "'");
-		# Wenn ein Select-Teil eine ungerade Anzahl von Hochkommas oder mehr Klammern auf als zu hat,
-		# wurde hier entweder ein Komma im einem String verwendet (z.B. x||','||y) oder eine Funktion (z.B. round(x, 2)) bzw. eine Unterabfrage mit Kommas verwendet
-  	if($hochkommas % 2 != 0 OR $klammerauf > $klammerzu){
-  		$column[$i] = $column[$i].','.$column[$i+1];
-  		array_splice($column, $i+1, 1);
-			$i--;							# und nochmal prüfen, falls mehrere Kommas drin sind
-  	}
-  }
-  return $column;
-}
-
 function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
 	if($last)$word_pos = strripos($str, $word);
 	else $word_pos = stripos($str, $word);
@@ -43,6 +26,8 @@ function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last =
 
 class GUI {
 
+  var $alert;
+  var $gui;
   var $layout;
   var $style;
   var $mime_type;
@@ -50,7 +35,7 @@ class GUI {
   var $pdf;
   var $addressliste;
   var $debug;
-  var $dbConn;
+  var $mysqli;
   var $flst;
   var $formvars;
   var $legende;
@@ -74,8 +59,26 @@ class GUI {
   var $map_factor;
   var $formatter;
   var $success;
+  var $login_failed;
+  var $only_main;
+  var $class_load_level;
+  var $layer_id_string;
+  var $noMinMaxScaling;
+  var $stelle_id;
+  var $angle_attribute;
+  var $titel;
+  var $PasswordError;
+  var $Meldung;
+  var $radiolayers;
+  var $show_query_tooltip;
+  var $last_query;
+  var $querypolygon;
+  var $new_entry;
+  var $search;
+  var $form_field_names;
+  var $editable;
 
-	function GUI($main, $style, $mime_type) {
+	function __construct($main, $style, $mime_type) {
 		# Debugdatei setzen
 		global $debug;
 		$this->debug = $debug;
@@ -270,9 +273,13 @@ class database {
   var $logfile;
   var $commentsign;
   var $blocktransaction;
+  var $success;
+  var $errormessage;
 
   function database() {
     global $debug;
+		global $GUI;
+		$this->gui = $GUI;
     $this->debug=$debug;
     $this->loglevel=LOG_LEVEL;
  		$this->defaultloglevel=LOG_LEVEL;
@@ -294,65 +301,74 @@ class database {
 
 	function open() {
 		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
-		$this->dbConn = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
-		$this->debug->write("<br>MySQL VerbindungsID: " . $this->dbConn->thread_id, 4);
-		return $this->dbConn->connect_errno;
+		$this->mysqli = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
+		return $this->mysqli->connect_errno;
 	}
 
-  function execSQL($sql, $debuglevel, $loglevel) {
-  	switch ($this->loglevel) {
-  		case 0 : {
-  			$logsql=0;
-  		} break;
-  		case 1 : {
-  			$logsql=1;
-  		} break;
-  		case 2 : {
-  			$logsql=$loglevel;
-  		} break;
-  	}
-    # SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
-    # wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
-    # (lesend immer, aber schreibend nur mit DBWRITE=1)
-    if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
+	function execSQL($sql, $debuglevel = 4, $loglevel = 0, $suppress_error_msg = false) {
+		switch ($this->loglevel) {
+			case 0 : {
+				$logsql=0;
+			} break;
+			case 1 : {
+				$logsql=1;
+			} break;
+			case 2 : {
+				$logsql=$loglevel;
+			} break;
+		}
+		# SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
+		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
+		# (lesend immer, aber schreibend nur mit DBWRITE=1)
+		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
 			#echo '<br>sql in execSQL: ' . $sql;
-      $query=mysql_query($sql,$this->dbConn);
-      #echo $sql;
-      if ($query==0) {
-        $ret[0]=1;
-        $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>".mysql_error($this->dbConn);
-        $this->debug->write($ret[1], $debuglevel);
-        if ($logsql) {
-          $this->logfile->write("#".$ret[1]);
-        }
-      }
-      else {
-        $ret[0] = 0;
-				$ret['success'] = true;
-        $ret[1] = $ret['query'] = $query;
-        if ($logsql) {
-          $this->logfile->write($sql.';');
-        }
-        $this->debug->write(date('H:i:s')."<br>".$sql,$debuglevel);
-      }
-      $ret[2] = $sql;
-    }
-    else {
-    	if ($logsql) {
-    		$this->logfile->write($sql.';');
-    	}
-    	$this->debug->write("<br>".$sql,$debuglevel);
-    }
-    return $ret;
-  }
+			if ($result = $this->mysqli->query($sql)) {
+				$ret[0] = 0;
+				$ret['success'] = $this->success = true;
+				$ret[1] = $ret['query'] = $ret['result'] = $this->result = $result;
+				$this->errormessage = '';
+				if ($logsql) {
+					$this->logfile->write($sql . ';');
+				}
+				$this->debug->write(date('H:i:s')."<br>" . $sql, $debuglevel);
+			}
+			else {
+				$ret[0] = 1;
+				$ret['success'] = $this->success = false;
+				$div_id = rand(1, 99999);
+				$errormessage = $this->mysqli->error;
+				$ret[1] = $this->errormessage = sql_err_msg('MySQL', $sql, $errormessage, $div_id);
+				if ($logsql) {
+					$this->logfile->write("#" . $errormessage);
+				}
+				if (!$suppress_error_msg) {
+					if (gettype($this->gui) == 'object') {
+						$this->gui->add_message('error', $this->errormessage);
+					}
+					else {
+						echo '<br>error: ' . $this->errormessage;
+					}
+				}
+			}
+			$ret[2] = $sql;
+		}
+		else {
+			if ($logsql) {
+				$this->logfile->write($sql . ';');
+			}
+			$this->debug->write("<br>" . $sql, $debuglevel);
+		}
+		return $ret;
+	}
 
-  function close() {
-    $this->debug->write("<br>MySQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
-    if (LOG_LEVEL>0){
-    	$this->logfile->close();
-    }
-    return mysql_close($this->dbConn);
-  }
+	function close() {
+		$this->debug->write("<br>MySQL Verbindung ID: " . $this->mysqli->thread_id . " schließen.", 4);
+		if (LOG_LEVEL > 0) {
+			$this->logfile->close();
+		}
+		return $this->mysqli->close();
+	}
 }
 
 class user {
@@ -401,9 +417,9 @@ class user {
 		#echo '<br>Sql: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>" . $sql, 3);
-		$query = mysql_query($sql,$this->database->dbConn);
-		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$rs = mysql_fetch_array($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		$rs = $this->database->result->fetch_array();
 		$this->id = $rs['ID'];
 		$this->login_name = $rs['login_name'];
 		$this->Namenszusatz = $rs['Namenszusatz'];
@@ -418,6 +434,8 @@ class user {
 		$this->funktion = $rs['Funktion'];
 		$this->password_setting_time = $rs['password_setting_time'];
 		$this->agreement_accepted = $rs['agreement_accepted'];
+		$this->start = $rs['start'];
+		$this->stop = $rs['stop'];
 	}
 
 	function setRolle($stelle_id) {
@@ -442,6 +460,7 @@ class stelle {
   var $pixsize;
   var $selectedButton;
   var $database;
+  var $language;
 
 	function stelle($id, $database) {
 		global $debug;
@@ -453,51 +472,7 @@ class stelle {
 		$this->Bezeichnung = $this->getName();
 		$this->readDefaultValues();
 	}
-	
-	function isMenueAllowed($menuename){
-		$sql = "SELECT distinct a.* from u_menues as a, u_menue2stelle as b ";
-		$sql.= "WHERE links LIKE 'index.php?go=".$menuename."%' AND b.menue_id = a.id AND b.stelle_id = ".$this->id;
-		#echo $sql;
-		$this->debug->write("<p>file:stelle.php class:stelle->isMenueAllowed - Guckt ob der Menuepunkt der Stelle zugeordnet ist:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
-			$errmsg='Fehler bei der Ueberpruefung des Menuepunkts für die Stelle';
-		}
-		else{
-			$rs=mysql_fetch_array($query);
-		}
-		if($rs[0] != '') {
-			return 1;
-		}
-		else {
-			return 0;
-		}
-	}	
 
-	function get_attributes_privileges($layer_id) {
-		$sql = "
-			SELECT
-				`attributename`,
-				`privileg`,
-				`tooltip`
-			FROM
-				`layer_attributes2stelle`
-			WHERE
-				`stelle_id` = " . $this->id . " AND
-				`layer_id` = " . $layer_id;
-		#echo '<br>Sql: ' . $sql;
-		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
-		$query = mysql_query($sql, $this->database->dbConn);
-		if ($query == 0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
-		while ($rs = mysql_fetch_array($query)) {
-			$privileges[$rs['attributename']] = $rs['privileg'];
-			$privileges['tooltip_' . $rs['attributename']] = $rs['tooltip'];
-			$privileges['attributenames'][] = $rs['attributename'];
-		}
-		return $privileges;
-	}	
-	
   function getName() {
     $sql ='SELECT ';
     if ($this->language != 'german' AND $this->language != ''){
@@ -506,9 +481,11 @@ class stelle {
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo $sql;
     $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+		}
+		$rs = $this->database->result->fetch_array();
     $this->Bezeichnung=$rs['Bezeichnung'];
     return $rs['Bezeichnung'];
   }
@@ -523,9 +500,11 @@ class stelle {
 				ID = " . $this->id . "
 		";
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
-		$query = mysql_query($sql,$this->database->dbConn);
-		if ($query == 0) { $this->debug->write('<br>Abbruch Zeile: ' . __LINE__, 4); return 0; }
-		$rs = mysql_fetch_array($query);    
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+		}
+		$rs = $this->database->result->fetch_array();
 		$this->MaxGeorefExt = ms_newRectObj();
 		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
@@ -551,6 +530,51 @@ class stelle {
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
 		$this->hist_timestamp = $rs['hist_timestamp'];
 		$this->default_user_id = $rs['default_user_id'];
+		$this->style = $rs['style'];
+	}
+
+	function get_attributes_privileges($layer_id) {
+		$sql = "
+			SELECT
+				`attributename`,
+				`privileg`,
+				`tooltip`
+			FROM
+				`layer_attributes2stelle`
+			WHERE
+				`stelle_id` = " . $this->id . " AND
+				`layer_id` = " . $layer_id;
+		#echo '<br>Sql: ' . $sql;
+		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
+		while ($rs = $this->database->result->fetch_array()) {
+			$privileges[$rs['attributename']] = $rs['privileg'];
+			$privileges['tooltip_' . $rs['attributename']] = $rs['tooltip'];
+			$privileges['attributenames'][] = $rs['attributename'];
+		}
+		return $privileges;
+	}
+
+	function isMenueAllowed($menuename){
+		$sql = "SELECT distinct a.* from u_menues as a, u_menue2stelle as b ";
+		$sql.= "WHERE links LIKE 'index.php?go=".$menuename."%' AND b.menue_id = a.id AND b.stelle_id = ".$this->id;
+		#echo $sql;
+		$this->debug->write("<p>file:stelle.php class:stelle->isMenueAllowed - Guckt ob der Menuepunkt der Stelle zugeordnet ist:<br>".$sql,4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
+			$errmsg='Fehler bei der Ueberpruefung des Menuepunkts für die Stelle';
+		}
+		else{
+			$rs=$this->database->result->fetch_array();
+		}
+		if($rs[0] != '') {
+			return 1;
+		}
+		else {
+			return 0;
+		}
 	}
 }
 
@@ -561,11 +585,17 @@ class rolle {
   var $debug;
   var $database;
   var $loglevel;
+  var $hist_timestamp_de;
   static $hist_timestamp;
   static $layer_params;
+  var $minx;
+  var $language;
+  var $newtime;
 
-	function rolle($user_id,$stelle_id,$database) {
+	function __construct($user_id, $stelle_id, $database) {
 		global $debug;
+		global $GUI;
+		$this->gui_object = $GUI;
 		$this->debug=$debug;
 		$this->user_id=$user_id;
 		$this->stelle_id=$stelle_id;
@@ -574,6 +604,32 @@ class rolle {
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
 	}
+	
+	function getRollenLayer($LayerName, $typ = NULL) {
+    $sql ="SELECT l.*, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable FROM rollenlayer AS l";
+    $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
+    if ($LayerName!='') {
+      $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
+      if(is_numeric($LayerName)){
+        $sql.='OR l.id = "'.$LayerName.'")';
+      }
+      else{
+        $sql.=')';
+      }
+    }
+		if($typ != NULL){
+			$sql .= " AND Typ = '".$typ."'";
+		}
+    #echo $sql.'<br>';
+    $this->debug->write("<p>file:users.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$layer = array();
+    while ($rs=mysql_fetch_array($query)) {
+      $layer[]=$rs;
+    }
+    return $layer;
+  }		
 
   function readSettings() {
 		global $language;
@@ -587,15 +643,15 @@ class rolle {
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
 		";
-    #echo $sql;
+		#echo 'Read rolle settings mit sql: ' . $sql;
     $this->debug->write("<p>file:rolle.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) {
+    $this->database->execSQL($sql);
+    if (!$this->database->success) {
       $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
       return 0;
     }
-		if(mysql_num_rows($query) > 0){
-			$rs = mysql_fetch_assoc($query);
+		if ($this->database->result->num_rows > 0){
+			$rs = $this->database->result->fetch_assoc();
 			$this->oGeorefExt=ms_newRectObj();
 			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
@@ -619,6 +675,8 @@ class rolle {
 			$this->highlighting=$rs['highlighting'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
+			$this->result_hatching=$rs['result_hatching'];
+			$this->result_transparency=$rs['result_transparency'];
 			$this->always_draw=$rs['always_draw'];
 			$this->runningcoords=$rs['runningcoords'];
 			$this->showmapfunctions=$rs['showmapfunctions'];
@@ -636,12 +694,15 @@ class rolle {
 			$this->visually_impaired = $rs['visually_impaired'];
 			$this->legendtype = $rs['legendtype'];
 			$this->print_legend_separate = $rs['print_legend_separate'];
-			if($rs['hist_timestamp'] != ''){
-				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
+			$this->print_scale = $rs['print_scale'];
+			if ($rs['hist_timestamp'] != '') {
+				$this->hist_timestamp_de = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
 			}
-			else
-				rolle::$hist_timestamp = $this->hist_timestamp = '';
+			else {
+				rolle::$hist_timestamp = $this->hist_timestamp_de = '';
+				#rolle::$hist_timestamp = '';
+			}
 			$this->selectedButton=$rs['selectedButton'];
 			$buttons = explode(',', $rs['buttons']);
 			$this->back = in_array('back', $buttons);
@@ -651,7 +712,7 @@ class rolle {
 			$this->zoomall = in_array('zoomall', $buttons);
 			$this->recentre = in_array('recentre', $buttons);
 			$this->jumpto = in_array('jumpto', $buttons);
-			$this->coord_query = in_array('coord_query', $buttons);			
+			$this->coord_query = in_array('coord_query', $buttons);
 			$this->query = in_array('query', $buttons);
 			$this->queryradius = in_array('queryradius', $buttons);
 			$this->polyquery = in_array('polyquery', $buttons);
@@ -661,14 +722,19 @@ class rolle {
 			$this->freetext = in_array('freetext', $buttons);
 			$this->freearrow = in_array('freearrow', $buttons);
 			$this->gps = in_array('gps', $buttons);
+			$this->geom_buttons = explode(',', str_replace(' ', '', $rs['geom_buttons']));
 			return 1;
-		}else return 0;
-  }
+		}
+		else {
+			return 0;
+		}
+	}
 
-  function getLayer($LayerName) {
+	function getLayer($LayerName) {
 		global $language;
-
-    # Abfragen der Layer in der Rolle
+		$layer_name_filter = '';
+		
+		# Abfragen der Layer in der Rolle
 		if($language != 'german') {
 			$name_column = "
 			CASE
@@ -680,7 +746,7 @@ class rolle {
 			$name_column = "l.Name";
 
 		if ($LayerName != '') {
-			$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "'";
+			$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "'";
 			if(is_numeric($LayerName))
 				$layer_name_filter .= " OR l.Layer_ID = " . $LayerName;
 			$layer_name_filter .= ")";
@@ -690,7 +756,7 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
+				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
 				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
@@ -700,10 +766,8 @@ class rolle {
 				l.labelitem as original_labelitem,
 				ul.`postlabelcache`,
 				`Filter`,
-				CASE r2ul.gle_view
-					WHEN '0' THEN 'generic_layer_editor.php'
-					ELSE ul.`template`
-				END as template,
+				r2ul.gle_view,
+				ul.`template`,
 				`header`,
 				`footer`,
 				ul.`symbolscale`,
@@ -730,56 +794,37 @@ class rolle {
 			ORDER BY
 				ul.drawingorder desc
 		";
-#		echo $sql.'<br>';
-    $this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		#echo $sql.'<br>';
+		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
-		while ($rs=mysql_fetch_assoc($query)) {
-			foreach (array('Name', 'alias', 'connection', 'classification') AS $key) {
+		while ($rs = $this->database->result->fetch_assoc()) {
+			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
+				if($rs['Filter'] == ''){
+					$rs['Filter'] = '('.$rs['rollenfilter'].')';
+				}
+				else {
+					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
+				}
+			}
+			foreach(array('Name', 'alias', 'connection') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
+					$this->user_id,
+					$this->stelle_id,
 					rolle::$hist_timestamp,
-					$this->rolle->language
+					$language
 				);
-			}		
+			}
 			$layer[$i]=$rs;
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
-    }
-    return $layer;
-  }
-	
-	function getRollenLayer($LayerName, $typ = NULL) {
-    $sql ="SELECT l.*, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable FROM rollenlayer AS l";
-    $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
-    if ($LayerName!='') {
-      $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
-      if(is_numeric($LayerName)){
-        $sql.='OR l.id = "'.$LayerName.'")';
-      }
-      else{
-        $sql.=')';
-      }
-    }
-		if($typ != NULL){
-			$sql .= " AND Typ = '".$typ."'";
 		}
-    #echo $sql.'<br>';
-    $this->debug->write("<p>file:users.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		$layer = array();
-    while ($rs=mysql_fetch_array($query)) {
-      $layer[]=$rs;
-    }
-    return $layer;
-  }	
-	
+		return $layer;
+	}
 }
 
 class db_mapObj {
@@ -791,17 +836,19 @@ class db_mapObj {
   var $nurAufgeklappteLayer;
   var $Stelle_ID;
   var $User_ID;
-  var $database;
+  var $db;
+  var $OhneRequires;
 
-	function db_mapObj($Stelle_ID, $User_ID, $database = NULL) {
+	function __construct($Stelle_ID, $User_ID) {
 		global $debug;
 		global $GUI;
+		$this->script_name = 'db_MapObj.php';
 		$this->debug = $debug;
 		$this->GUI = $GUI;
+		$this->db = $GUI->database;
 		$this->Stelle_ID = $Stelle_ID;
 		$this->User_ID = $User_ID;
-		$this->rolle = new rolle($User_ID, $Stelle_ID, $database);
-		$this->database = $database;
+		$this->rolle = new rolle($User_ID, $Stelle_ID, $this->db);
 	}
 
 	function getlayerdatabase($layer_id, $host){
@@ -811,15 +858,15 @@ class db_mapObj {
 		else{
 			$sql ="SELECT concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as `connection`, `schema` FROM layer as l, connections as c WHERE l.Layer_ID = ".$layer_id." AND l.connection_id = c.id AND l.connectiontype = 6";
 		}
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Lesen des connection-Strings des Layers:<br>".$sql,4);
-		$query=mysql_query($sql);
-		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		$rs = mysql_fetch_array($query);
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Lesen des connection-Strings des Layers:<br>" . $sql,4);
+		$this->db->execSQL($sql);
+		if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
+		$rs = $this->db->result->fetch_array();
 		$connectionstring = $rs[0];
 #		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Gefundener Connection String des Layers:<br>" . $connectionstring, 4);
-		if($connectionstring != ''){
+		if ($connectionstring != ''){
 			$layerdb = new pgdatabase();
-			if($rs[1] == ''){
+			if($rs[1] == '') {
 				$rs[1] = 'public';
 			}
 			$layerdb->schema = $rs[1];
@@ -858,37 +905,39 @@ class db_mapObj {
 		return $layerdb;
 	}
 
-  function getDataAttributes($database, $layer_id, $ifEmptyUseQuery = false){
-    $data = $this->getData($layer_id);
-    if($data != ''){
-      $select = $this->getSelectFromData($data);
-      if($database->schema != ''){
-      	$select = str_replace($database->schema.'.', '', $select);
-      }
-      $ret = $database->getFieldsfromSelect($select);
+	function getDataAttributes($database, $layer_id, $ifEmptyUseQuery = false) {
+		global $language;
+		$data = $this->getData($layer_id);
+		if ($data != '') {
+			$select = $this->getSelectFromData($data);
+			if ($database->schema != '') {
+				$select = str_replace($database->schema.'.', '', $select);
+			}
+			$ret = $database->getFieldsfromSelect($select);
 			if ($ret[0]) {
 				$this->GUI->add_message('error', $ret[1]);
 			}
-      return $ret[1];
-    }
-    elseif($ifEmptyUseQuery){
+			return $ret[1];
+		}
+		elseif ($ifEmptyUseQuery){
 			$path = replace_params(
 				$this->getPath($layer_id),
-				$all_layer_params,
+				rolle::$layer_params,
 				$this->User_ID,
 				$this->Stelle_ID,
 				rolle::$hist_timestamp,
-				$this->user->rolle->language
+				$language
 			);
 			return $this->getPathAttributes($database, $path);
 		}
-		else{
-      echo 'Das Data-Feld des Layers mit der Layer-ID '.$layer_id.' ist leer.';
-      return NULL;
-    }
-  }
+		else {
+			echo 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.';
+			return NULL;
+		}
+	}
 
   function getData($layer_id){
+		global $language;
   	if($layer_id < 0){	# Rollenlayer
   		$sql = "
 				SELECT
@@ -910,22 +959,23 @@ class db_mapObj {
 			";
   	}
   	#echo $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->getData - Lesen des Data-Statements des Layers:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs = mysql_fetch_assoc($query);
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->getData - Lesen des Data-Statements des Layers:<br>" . $sql,4);
+    $this->db->execSQL($sql);
+    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
+    $rs = $this->db->result->fetch_assoc();
     $data = replace_params(
 			$rs['Data'],
 			rolle::$layer_params,
 			$this->User_ID,
 			$this->Stelle_ID,
 			rolle::$hist_timestamp,
-			$this->rolle->language
+			$language
 		);
     return $data;
   }
 
   function getSelectFromData($data){
+		global $language;
     if(strpos($data, '(') === false){
       $from = stristr($data, ' from ');
       $usingposition = strpos($from, 'using');
@@ -942,22 +992,39 @@ class db_mapObj {
         $select = stristr($select, 'select');
       }
     }
-    return $select;
+		return replace_params(
+						$select,
+						rolle::$layer_params,
+						$this->User_ID,
+						$this->Stelle_ID,
+						rolle::$hist_timestamp,
+						$language
+					);
   }
 
-  function read_disabled_classes(){
-  	#Anne
-    $sql_classes = 'SELECT class_id, status FROM u_rolle2used_class WHERE user_id='.$this->User_ID.' AND stelle_id='.$this->Stelle_ID.';';
-    $query_classes=mysql_query($sql_classes);
-    while($row = mysql_fetch_assoc($query_classes)){
+  function read_disabled_classes() {
+		$sql = "
+			SELECT
+				class_id,
+				status
+			FROM
+				u_rolle2used_class
+			WHERE
+				user_id = " . $this->User_ID . "
+				AND stelle_id = " . $this->Stelle_ID . "
+		";
+		#echo '<p>SQL zur Abfrage von diabled classes: ' . $sql;
+		$this->db->execSQL($sql);
+    while ($row = $this->db->result->fetch_assoc()) {
   		$classarray['class_id'][] = $row['class_id'];
 			$classarray['status'][$row['class_id']] = $row['status'];
 		}
-		return $classarray;
+		return $classarray ?? NULL;
   }
 
 	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $classification = '') {
 		global $language;
+		$Classes = array();
 
 		$sql = "
 			SELECT " .
@@ -994,16 +1061,17 @@ class db_mapObj {
 					" : ""
 				) . "
 			ORDER BY
+				NULLIF(classification, '') IS NULL,
 				classification,
 				drawingorder,
 				Class_ID
 		";
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
-		$query = mysql_query($sql);
-		if ($query == 0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__; return 0; }
+		$ret = $this->db->execSQL($sql);
+		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name . " Zeile: " . __LINE__ .'<br>'.$sql; return 0; }
 		$index = 0;
-		while ($rs = mysql_fetch_assoc($query)) {
+		while ($rs = $ret['result']->fetch_assoc()) {
 			$rs['Style'] = $this->read_Styles($rs['Class_ID']);
 			$rs['Label'] = $this->read_Label($rs['Class_ID']);
 			$rs['index'] = $index;
@@ -1039,26 +1107,35 @@ class db_mapObj {
     $sql ='SELECT * FROM styles AS s,u_styles2classes AS s2c';
     $sql.=' WHERE s.Style_ID=s2c.style_id AND s2c.class_id='.$Class_ID;
     $sql.=' ORDER BY drawingorder';
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Styles - Lesen der Styledaten:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while($rs=mysql_fetch_assoc($query)) {
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Styles - Lesen der Styledaten:<br>" . $sql,4);
+    $ret = $this->db->execSQL($sql);
+    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+    while($rs = $this->db->result->fetch_assoc()) {
       $Styles[]=$rs;
     }
     return $Styles;
   }
 
-  function read_Label($Class_ID) {
-    $sql ='SELECT * FROM labels AS l,u_labels2classes AS l2c';
-    $sql.=' WHERE l.Label_ID=l2c.label_id AND l2c.class_id='.$Class_ID;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Label - Lesen der Labels zur Classe eines Layers:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while ($rs=mysql_fetch_assoc($query)) {
-      $Labels[]=$rs;
-    }
-    return $Labels;
-  }
+	function read_Label($Class_ID) {
+		$Labels = array();
+		$sql = "
+			SELECT
+				*
+			FROM
+				labels AS l,
+				u_labels2classes AS l2c
+			WHERE
+				l.Label_ID = l2c.label_id
+				AND l2c.class_id = " . $Class_ID . "
+		";
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Label - Lesen der Labels zur Classe eines Layers:<br>" . $sql,4);
+		$this->db->execSQL($sql);
+		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+		while ($rs = $this->db->result->fetch_assoc()) {
+			$Labels[]=$rs;
+		}
+		return $Labels;
+	}
 }
 
 class pgdatabase {
@@ -1071,28 +1148,32 @@ class pgdatabase {
   var $defaultlogfile;
   var $commentsign;
   var $blocktransaction;
+  var $port;
+  var $schema;
 
 	function pgdatabase() {
-	  global $debug;
-    $this->debug=$debug;
-    $this->loglevel=LOG_LEVEL;
- 		$this->defaultloglevel=LOG_LEVEL;
- 		global $log_postgres;
-    $this->logfile=$log_postgres;
- 		$this->defaultlogfile=$log_postgres;
-    $this->ist_Fortfuehrung=1;
-    $this->type='postgresql';
-    $this->commentsign='--';
-    # Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
-    # START TRANSACTION, ROLLBACK und COMMIT unterdrï¿½ckt, so daï¿½ alle anderen SQL
-    # Anweisungen nicht in Transactionsblï¿½cken ablaufen.
-    # Kann zur Steigerung der Geschwindigkeit von groï¿½en Datenbestï¿½nden verwendet werden
-    # Vorsicht: Wenn Fehler beim Einlesen passieren, ist der Datenbestand inkonsistent
-    # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
-    # Dazu Fehlerausschriften bearchten.
-    $this->blocktransaction=0;
+		global $debug;
+		global $GUI;
+		$this->gui = $GUI;
+		$this->debug=$debug;
+		$this->loglevel=LOG_LEVEL;
+		$this->defaultloglevel=LOG_LEVEL;
+		global $log_postgres;
+		$this->logfile=$log_postgres;
+		$this->defaultlogfile=$log_postgres;
+		$this->ist_Fortfuehrung=1;
+		$this->type='postgresql';
+		$this->commentsign='--';
+		# Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
+		# START TRANSACTION, ROLLBACK und COMMIT unterdrückt, so daß alle anderen SQL
+		# Anweisungen nicht in Transactionsblöcken ablaufen.
+		# Kann zur Steigerung der Geschwindigkeit von großen Datenbeständen verwendet werden
+		# Vorsicht: Wenn Fehler beim Einlesen passieren, ist der Datenbestand inkonsistent
+		# und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
+		# Dazu Fehlerausschriften bearchten.
+		$this->blocktransaction=0;
 		$this->spatial_ref_code = EPSGCODE_ALKIS . ", " . EARTH_RADIUS;
-  }
+	}
 
   function open() {
   	if($this->port == '') $this->port = 5432;
@@ -1196,31 +1277,7 @@ class pgdatabase {
 			$query=mysql_query($sql);
 			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 		}
-	}	
-
-	function pg_field_schema($table_oid){
-		if($table_oid != ''){
-			$sql = "select nspname as schema from pg_class c, pg_namespace ns
-						where c.relnamespace = ns.oid 
-						and c.oid = ".$table_oid;
-			$ret = $this->execSQL($sql, 4, 0);
-			if($ret[0]==0)$ret = pg_fetch_assoc($ret[1]);
-			return $ret['schema'];
-		}
-	}
-	
-	function getTableAliasNames($plans){
-		$table_aliases = array();
-		foreach($plans as $plan){
-			if($plan['Parent Relationship'] != 'SubPlan'){
-				if($plan['Relation Name'] != ''){
-					$table_aliases[$plan['Relation Name']] = $plan['Alias'];
-				}
-				if($plan['Plans'] != NULL)$table_aliases = $table_aliases + $this->getTableAliasNames($plan['Plans']);
-			}
-		}
-		return $table_aliases;
-	}	
+	}		
 
 	function getFieldsfromSelect($select, $assoc = false) {
 		$err_msgs = array();
@@ -1353,9 +1410,171 @@ class pgdatabase {
 		return $ret;
 	}
 
+	function execSQL($sql, $debuglevel, $loglevel, $suppress_err_msg = false) {
+		$ret = array(); // Array with results to return
+		$strip_context = true;
+
+		switch ($this->loglevel) {
+			case 0 : {
+				$logsql = 0;
+			} break;
+			case 1 : {
+				$logsql = 1;
+			} break;
+			case 2 : {
+				$logsql = $loglevel;
+			} break;
+		}
+		# SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
+		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
+		# (lesend immer, aber schreibend nur mit DBWRITE=1)
+		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
+			#echo "<br>SQL in execSQL: " . $sql;
+			//if (stristr($sql, 'SELECT')) {
+				$sql = "SET datestyle TO 'German';" . $sql;
+			//};
+			if ($this->schema != '') {
+				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
+			}
+			#echo "<br>SQL in execSQL: " . $sql;
+			$query = pg_query($this->dbConn, $sql);
+			//$query=0;
+			if ($query == 0) {
+				$ret['success'] = false;
+				# erzeuge eine Fehlermeldung;
+				$last_error = pg_last_error($this->dbConn);
+				if ($strip_context AND strpos($last_error, 'CONTEXT: ') !== false) {
+					$ret['msg'] = substr($last_error, 0, strpos($last_error, 'CONTEXT: '));
+				}
+				else {
+					$ret['msg'] = $last_error;
+				}
+
+				if (strpos($last_error, '{') !== false AND strpos($last_error, '}') !== false) {
+					# Parse als JSON String;
+					$error_obj = json_decode(substr($last_error, strpos($last_error, '{'), strpos($last_error, '}') - strpos($last_error, '{') + 1), true);
+					if (array_key_exists('msg_type', $error_obj)) {
+						$ret['type'] = $error_obj['msg_type'];
+					}
+					if (array_key_exists('msg', $error_obj) AND $error_obj['msg'] != '') {
+						$ret['msg'] = $error_obj['msg'];
+					}
+				}
+				else {
+					$ret['type'] = 'error';
+				}
+				$this->debug->write("<br><b>" . $last_error . "</b>", $debuglevel);
+				if ($logsql) {
+					$this->logfile->write($this->commentsign . ' ' . $sql . ' ' . $last_error);
+				}
+			}
+			else {
+				# Abfrage wurde zunächst erfolgreich ausgeführt
+				$ret[0] = 0;
+				$ret['success'] = true;
+				$ret[1] = $ret['query'] = $query;
+
+				# Prüfe ob eine Fehlermeldung in der Notice steckt
+				$last_notice = pg_last_notice($this->dbConn);
+				if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
+					$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
+				}
+				# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
+				if ($last_notice != '' AND ($this->gui->notices == NULL OR !in_array($last_notice, $this->gui->notices))) {
+					$this->gui->notices[] = $last_notice;
+					if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
+						# Parse als JSON String
+						$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
+						if (array_key_exists('success', $notice_obj)) {
+							if (!$notice_obj['success']) {
+								$ret['success'] = false;
+							}
+							if (array_key_exists('msg_type', $notice_obj)) {
+								$ret['type'] = $notice_obj['msg_type'];
+							}
+							if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
+								$ret['msg'] = $notice_obj['msg'];
+							}
+						}
+					}
+					else {
+						# Gebe Noticetext wie er ist zurück
+						$ret['msg'] = $last_notice;
+					}
+				}
+
+				# Schreibe Meldungen in Log und Debugfile
+				$this->debug->write("<br>" . $sql, $debuglevel);
+				if ($logsql) {
+					$this->logfile->write($sql . ';');
+				}
+			}
+			$ret[2] = $sql;
+		}
+		else {
+			# Es werden keine SQL-Kommandos ausgeführt
+			# Die Funktion liefert ret[0]=0, und zeigt damit an, daß kein Datenbankfehler aufgetreten ist,
+			$ret[0] = 0;
+			$ret['success'] = true;
+			# jedoch hat $ret[1] keine query_ID sondern auch den Wert 0
+			$ret[1] = 0;
+			# Wenn $this->loglevel != 0 wird die sql-Anweisung in die logdatei geschrieben
+			# zusätzlich immer in die debugdatei
+			# 2006-07-04 pk $logfile ersetzt durch $this->logfile
+			if ($logsql) {
+				$this->logfile->write($sql . ';');
+			}
+			$this->debug->write("<br>" . $sql, $debuglevel);
+		}
+
+		if ($ret['success']) {
+			# alles ok mach nichts weiter
+		}
+		else {
+			# Fehler setze entsprechende Fags und Fehlermeldung
+			$ret[0] = 1;
+			$ret[1] = $ret['msg'];
+			if ($suppress_err_msg) {
+				# mache nichts, den die Fehlermeldung wird unterdrückt
+			}
+			else {
+				# gebe Fehlermeldung aus.
+				$ret[1] = $ret['msg'] = sql_err_msg('Fehler bei der Abfrage der PostgreSQL-Datenbank:', $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
+				$this->gui->add_message($ret['type'], $ret['msg']);
+				header('error: true');	// damit ajax-Requests das auch mitkriegen
+			}
+		}
+		return $ret;
+	}
+
+	function get_table_alias_names($query_plan){
+		$table_info = explode(":eref \n         {ALIAS \n         ", $query_plan);
+		for($i = 1; $i < count($table_info); $i++){
+			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
+			$table_oid = get_first_word_after($table_info[$i], ':relid');
+			$table_alias_names[$table_oid] = $table_alias;
+		}
+		return $table_alias_names;
+	}
+
+	function pg_field_schema($table_oid){
+		if($table_oid != ''){
+			$sql = "select nspname as schema from pg_class c, pg_namespace ns
+						where c.relnamespace = ns.oid 
+						and c.oid = ".$table_oid;
+			$ret = $this->execSQL($sql, 4, 0);
+			if($ret[0]==0)$ret = pg_fetch_assoc($ret[1]);
+			return $ret['schema'];
+		}
+	}
+
 	function get_attribute_information($schema, $table, $col_num = NULL) {
-		if($col_num != NULL)$and_column = " a.attnum = ".$col_num." ";
-		else $and_column = " a.attnum > 0 ";
+		if ($col_num != NULL) {
+			$and_column = " a.attnum = " . $col_num . " ";
+		}
+		else {
+			$and_column = " a.attnum > 0 ";
+		}
 		$attributes = array();
 		$sql = "
 			SELECT
@@ -1410,8 +1629,8 @@ class pgdatabase {
 				pg_catalog.pg_views v ON v.viewname = c.relname AND v.schemaname = ns.nspname
 			WHERE
 				ns.nspname IN ('" .  implode("','", array_map(function($schema) { return trim($schema); }, explode(',', $schema)))  .  "') AND
-				c.relname = '".$table."' AND
-				".$and_column."
+				c.relname = '" . $table . "' AND
+				" . $and_column . "
 			ORDER BY a.attnum, indisunique desc, indisprimary desc
 		";
 		#echo '<br><br>' . $sql;
@@ -1429,201 +1648,6 @@ class pgdatabase {
 		}
 		return $attributes;
 	}
-	
-	function get_table_alias_names($query_plan){
-		$table_info = explode(":eref \n         {ALIAS \n         ", $query_plan);
-		for($i = 1; $i < count($table_info); $i++){
-			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
-			$table_oid = get_first_word_after($table_info[$i], ':relid');
-			$table_alias_names[$table_oid] = $table_alias;
-		}
-		return $table_alias_names;
-	}	
-
-  function eliminate_star($query, $offset){
-  	if(substr_count(strtolower($query), ' from ') > 1){
-  		$whereposition = strpos($query, ' WHERE ');
-  		$withoutwhere = substr($query, 0, $whereposition);
-  		$fromposition = strpos($withoutwhere, ' FROM ');
-  	}
-  	else{
-  		$whereposition = strpos(strtolower($query), ' where ');
-  		if($whereposition){
-  			$withoutwhere = substr($query, 0, $whereposition);
-  		}
-  		else{
-  			$withoutwhere = $query;
-  		}
-  		$fromposition = strpos(strtolower($withoutwhere), ' from ');
-  	}
-    $select = substr($query, $offset, $fromposition-$offset);
-    $from = substr($query, $fromposition);
-    $column = explode(',', $select);
-    $column = get_select_parts($select);
-    for($i = 0; $i < count($column); $i++){
-      if(strpos(trim($column[$i]), '*') === 0 OR strpos($column[$i], '.*') !== false){
-        $sql .= "SELECT ".$column[$i]." ".$from." LIMIT 0";
-        $ret = $this->execSQL($sql, 4, 0);
-        if($ret[0]==0){
-        	$tablename = str_replace('*', '', trim($column[$i]));
-          $columns = $tablename.pg_field_name($ret[1], 0);
-          for($j = 1; $j < pg_num_fields($ret[1]); $j++){
-            $columns .= ', '.$tablename.pg_field_name($ret[1], $j);
-          }
-          $query = str_replace(trim($column[$i]), $columns, $query);
-        }
-      }
-    }
-    return $query;
-  }
-
-	function execSQL($sql, $debuglevel, $loglevel, $suppress_error_msg = false) {
-		$ret = array(); // Array with results to return
-
-		switch ($this->loglevel) {
-			case 0 : {
-				$logsql = 0;
-			} break;
-			case 1 : {
-				$logsql = 1;
-			} break;
-			case 2 : {
-				$logsql = $loglevel;
-			} break;
-		}
-		# SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
-		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
-		# (lesend immer, aber schreibend nur mit DBWRITE=1)
-		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
-			#echo "<br>SQL in execSQL: " . $sql;
-			if (stristr($sql, 'SELECT')) {
-				$sql = "SET datestyle TO 'German';" . $sql;
-			};
-			if ($this->schema != ''){
-				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
-			}
-			$query = @pg_query($this->dbConn, $sql);
-			//$query=0;
-			if ($query == 0) {
-				$ret[0] = 1;
-				$ret['success'] = false;
-				$errormessage = pg_last_error($this->dbConn);
-				#header('error: true');		// damit ajax-Requests das auch mitkriegen
-				$ret[1] = "Fehler bei SQL Anweisung:<br><br>\n\n" . $sql . "\n\n<br><br>" . $errormessage;
-				$ret['msg'] = $ret[1];
-				$ret['type'] = 'error';
-				if (!$suppress_error_msg) {
-					echo "<br><b>" . $ret[1] . "</b>";
-				}
-				$this->debug->write("<br><b>" . $ret[1] . "</b>", $debuglevel);
-				if ($logsql) {
-					$this->logfile->write($this->commentsign . " " . $ret[1]);
-				}
-			}
-			else {
-				# Abfrage wurde erfolgreich ausgeführt
-				$ret[0] = 0;
-				$ret['success'] = true;
-				$ret[1] = $query;
-				$ret['query'] = $ret[1]; 
-				$this->debug->write("<br>" . $sql, $debuglevel);
-				# 2006-07-04 pk $logfile ersetzt durch $this->logfile
-				if ($logsql) {
-					$this->logfile->write($sql . ';');
-				}
-			}
-			$ret[2] = $sql;
-		}
-		else {
-			# Es werden keine SQL-Kommandos ausgeführt
-			# Die Funktion liefert ret[0]=0, und zeigt damit an, daß kein Datenbankfehler aufgetreten ist,
-			$ret[0] = 0;
-			$ret['success'] = true;
-			# jedoch hat $ret[1] keine query_ID sondern auch den Wert 0
-			$ret[1] = 0;
-			# Wenn $this->loglevel != 0 wird die sql-Anweisung in die logdatei geschrieben
-			# zusätzlich immer in die debugdatei
-			# 2006-07-04 pk $logfile ersetzt durch $this->logfile
-			if ($logsql) {
-				$this->logfile->write($sql . ';');
-			}
-			$this->debug->write("<br>" . $sql, $debuglevel);
-		}
-		return $ret;
-	}
-
-  function check_real_attribute_name($fieldstring, $fieldname){
-	    # testen ob Attributname durch 'as' umbenannt wurde
-	    if(strpos(strtolower($fieldstring), ' as '.$fieldname)){
-	      $fieldstring = trim($fieldstring);
-	      $explosion = explode(' ', $fieldstring);
-	      $klammerstartpos = strrpos($fieldstring, '(');
-	      if($klammerstartpos !== false){										# eine Funktion wurde auf das Attribut angewendet
-	        $klammerendpos = strpos($fieldstring, ')');
-	        if($klammerendpos){
-						$klammer_inhalt = substr($explosion[0], $klammerstartpos+1, $klammerendpos-$klammerstartpos-1);
-						if(strpos($klammer_inhalt, "'") === false)$name_pair['real_name'] = $klammer_inhalt;
-	        	$name_pair['name'] = $explosion[count($explosion)-1];
-	        	$name_pair['no_real_attribute'] = true;
-	        }
-	      }
-	      elseif(strpos(strtolower($fieldstring), '||') OR strpos(strtolower($fieldstring), '+')){		# irgendwas zusammengesetztes mit || oder +
-	      	$explosion2 = explode('||', $fieldstring);
-	      	for($i = 0; $i < count($explosion2); $i++){
-	      		if(strpos($explosion2[$i], "'") === false){
-	      			$realname = explode('.', $explosion2[$i]);
-	      			$name_pair['real_name'] = $realname[count($realname)-1];
-	          	$name_pair['name'] = $explosion[count($explosion)-1];
-	          	$name_pair['no_real_attribute'] = true;
-	          	break;
-	      		}
-	      	}
-	      }
-	      else{ # 'irgendein String' as ...
-	        $fieldname = explode('.', $explosion[0]);
-					if(strtolower($explosion[0]) == 'case' OR strpos($fieldname[count($fieldname)-1], "'") !== false){
-	          $name_pair['no_real_attribute'] = true;
-	        }
-	        else{		# tabellenname.attributname
-	          $name_pair['real_name'] = $fieldname[count($fieldname)-1];
-	          $name_pair['name'] = $explosion[count($explosion)-1];
-	        }
-	      }
-	      return $name_pair;
-	    }
-	    else{
-	      return NULL;
-	    }
-  }
-
-  function get_table_alias($tablename, $fromposition, $withoutwhere){
-    $tablealias = $tablename;
-    $from = substr($withoutwhere, $fromposition);
-    $tablestring = substr($from, 5);
-    $tables = explode(',', trim($tablestring));
-    $i = 0;
-    $found = false;
-    while($found == false AND $i < count($tables)){
-      $tableexplosion = explode(' ', trim($tables[$i]));
-      if(count($tableexplosion) > 1){
-	      for($j = 0; $j < count($tableexplosion); $j++){
-					if($found)return $tablealias;
-	      	if($tablename == $tableexplosion[$j]){
-	      		if(strtolower($tableexplosion[$j+1]) == 'as'){			# Umbenennung mit AS
-	      			$found = true;
-	        		$tablealias = $tableexplosion[$j+2];
-	      		}
-	      		elseif(strtolower($tableexplosion[$j+1]) != 'on' AND strtolower($tableexplosion[$j+1]) != 'left'){	# Umbenennung ohne AS, wie z.B. beim LEFT JOIN
-	      			$found = true;
-	        		$tablealias = $tableexplosion[$j+1];
-	      		}
-	      	}
-	      }
-      }
-      $i++;
-    }
-    return $tablealias;
-  }
 
   function pg_table_constraints($table){
   	if($table != ''){

@@ -648,7 +648,7 @@ function is_password_expired($user, $stelle) {
 }
 
 function is_registration($formvars) {
-	return array_key_exists('go', $formvars) AND strpos($formvars['go'], 'invitation') === false AND $formvars['token'] != '' AND $formvars['email'] != '' AND $formvars['stelle_id'] != '';
+	return array_key_exists('go', $formvars) AND strpos($formvars['go'], 'invitation') === false AND array_key_exists('token', $formvars) AND $formvars['token'] != '' AND $formvars['email'] != '' AND $formvars['stelle_id'] != '';
 }
 
 function checkRegistration($gui) {

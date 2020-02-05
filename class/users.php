@@ -1049,13 +1049,13 @@ class user {
 			$sql.=',showmapfunctions = "' . ($formvars['showmapfunctions'] == '' ? '0' : '1') . '"';
 			$sql.=',showlayeroptions = "' . ($formvars['showlayeroptions'] == '' ? '0' : '1') . '"';
 			$sql.=',showrollenfilter = "' . (value_of($formvars, 'showrollenfilter') == '' ? '0' : '1') . '"';
-			$sql.=',menue_buttons = "' . ($formvars['menue_buttons'] == '' ? '0' : '1') . '"';
+			$sql.=',menue_buttons = "' . (value_of($formvars, 'menue_buttons') == '' ? '0' : '1') . '"';
 
-			if($formvars['singlequery'] != '') $sql.=',singlequery="1"';
+			if(value_of($formvars, 'singlequery') != '') $sql.=',singlequery="1"';
 			else $sql.=',singlequery="0"';
-			if($formvars['instant_reload'] != '') $sql.=',instant_reload="1"';
+			if(value_of($formvars, 'instant_reload') != '') $sql.=',instant_reload="1"';
 			else $sql.=',instant_reload="0"';
-			if($formvars['menu_auto_close'] != '') $sql.=',menu_auto_close="1"';
+			if(value_of($formvars, 'menu_auto_close') != '') $sql.=',menu_auto_close="1"';
 			else $sql.=',menu_auto_close="0"';
 			$sql .= ', visually_impaired=' . ((value_of($formvars, 'visually_impaired') != '') ? '"1"' : '"0"');
 			if (value_of($formvars, 'querymode') != '') {
