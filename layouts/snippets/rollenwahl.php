@@ -126,7 +126,7 @@ if ($this->Fehlermeldung!='') {
 	include(LAYOUTPATH."snippets/Fehlermeldung.php");
 } ?>
 
-<div style="height: 430px">
+<div id="rollenwahl_main_div">
 	<div id="rollenwahl_optionen_div" class="tabbed">
 		<? if ($this->formvars['show_layer_parameter']){ ?>
 		<input id="tab1" type="radio" name="tabs" />

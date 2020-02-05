@@ -457,7 +457,9 @@ FROM
 		for($i = 1; $i < count($table_info); $i++){
 			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
 			$table_oid = get_first_word_after($table_info[$i], ':relid');
-			$table_alias_names[$table_oid] = $table_alias;
+			if($table_oid AND $table_alias != 'unnamed_join'){
+				$table_alias_names[$table_oid] = $table_alias;
+			}
 		}
 		return $table_alias_names;
 	}
@@ -1346,7 +1348,7 @@ FROM
 
   function getLage($FlurstKennz) {
     # liefert die Lage des Flurstückes
-    $sql = "SELECT l.unverschluesselt, s.bezeichnung ";
+    $sql = "SELECT distinct l.unverschluesselt, s.bezeichnung, ' ('||s.lage||')' as lage ";
 		$sql.= "FROM alkis.ax_flurstueck as f ";
 		$sql.= "JOIN alkis.ax_lagebezeichnungohnehausnummer l ON l.gml_id = ANY(f.zeigtauf)  ";
 		$sql.= "LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage=s.lage ";
@@ -1362,7 +1364,7 @@ FROM
       $ret[0]=0;
       if (pg_num_rows($queryret[1])>0) {
         while($rs=pg_fetch_assoc($queryret[1])) {
-          $Lage[]= $rs['unverschluesselt'].$rs['bezeichnung'];
+          $Lage[]= $rs['unverschluesselt'].$rs['bezeichnung'].$rs['lage'];
         }
       }
       $ret[1]=$Lage;
@@ -1950,7 +1952,8 @@ FROM
 			$Eigentuemer->n_gml_id=$rs['n_gml_id'];
 			$Eigentuemer->bestehtausrechtsverhaeltnissenzu=$rs['bestehtausrechtsverhaeltnissenzu'];
       $Eigentuemerliste[$rs['n_gml_id']]=$Eigentuemer;
-			if($this->listendarstellung OR $rs['namensnr'] != '')$this->writeRechtsverhaeltnisChildren($rs['n_gml_id'], $Eigentuemerliste);
+			#if($this->listendarstellung OR $rs['namensnr'] != '')	Bugfix 2.12.9
+			$this->writeRechtsverhaeltnisChildren($rs['n_gml_id'], $Eigentuemerliste);
     }
     $retListe[0]=0;
     $retListe[1]=$Eigentuemerliste;

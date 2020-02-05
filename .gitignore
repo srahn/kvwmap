@@ -1,5 +1,6 @@
 credentials.php
 config.php
+custom/
 custom/*
 custom/*/*
 custom/*/*/*

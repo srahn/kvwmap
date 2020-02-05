@@ -35,7 +35,7 @@
 					</tr><?
 				} ?>
 			</table>
-			<a href="void(0);" onclick="addParam();">
+			<a href="javascript:void(0);" onclick="addParam();">
 				<i class="fa fa-plus buttonlink" style="margin: 5px; padding: 6px" aria-hidden="true" title="Parameter hinzufügen"></i>
 			</a>
 		</td>

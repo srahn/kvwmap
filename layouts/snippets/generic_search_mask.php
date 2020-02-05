@@ -109,6 +109,8 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 									<? if(!in_array($this->attributes['type'][$i], array('text'))){ ?>
 	                <option title="<? echo $strLowerHint; ?>" value="<" <? if($operator == '<'){ echo 'selected';} ?> ><</option>
 	                <option title="<? echo $strGreaterHint; ?>" value=">" <? if($operator == '>'){ echo 'selected';} ?> >></option>
+									<option title="<? echo $strLowerEqualHint; ?>" value="<" <? if($operator == '<='){ echo 'selected';} ?> ><=</option>
+	                <option title="<? echo $strGreaterEqualHint; ?>" value=">" <? if($operator == '>='){ echo 'selected';} ?> >>=</option>
 									<? }
 									if($this->attributes['form_element_type'][$i] == 'Autovervollständigungsfeld' OR !in_array($this->attributes['type'][$i], array('int2', 'int4', 'int8', 'numeric', 'float4', 'float8', 'date', 'timestampt', 'timestamptz'))){ ?>
 	                <option title="<? echo $strLikeHint; ?>" value="LIKE" <? if($operator == 'LIKE'){ echo 'selected';} ?> ><? echo $strLike; ?></option>
@@ -142,7 +144,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 											}
 											else{
 												$array = '[]';
-												echo ' multiple="true" size="1" style="height: 20px;z-index:'.($z_index-=1).';position: absolute;top: 3px; width: 293px" onmousedown="if(this.style.height==\'20px\'){this.style.height=300;preventDefault(event);}" onmouseleave="this.style.height=20;scrollToSelected(this);"';
+												echo ' multiple="true" size="1" style="height: 20px;z-index:'.($z_index-=1).';position: absolute;top: 3px; width: 293px" onmousedown="if(this.style.height==\'20px\'){this.style.height=\'300px\';preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height=\'20px\';scrollToSelected(this);}"';
 											}
 										?> 
 	                  	id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i].$array; ?>"><?echo "\n"; ?>

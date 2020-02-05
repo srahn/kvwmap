@@ -187,11 +187,14 @@ class MyObject {
 		return array_values($this->data);
 	}
 
-	function getKVP() {
+	function getKVP($options = array('escaped' => false)) {
 		$types = $this->getTypesFromColumns();
 		$kvp = array();
 		if (is_array($this->data)) {
 			foreach ($this->data AS $key => $value) {
+				if ($options['escaped']) {
+					$value = str_replace("'", "''", $value);
+				}
 				$kvp[] = "`" . $key . "` = " . ((stripos($types[$key], 'int') !== false AND $value == '') ? 'NULL' : "'" . $value . "'");
 			}
 		}
@@ -282,7 +285,7 @@ class MyObject {
 			UPDATE
 				`" . $this->tableName . "`
 			SET
-				" . implode(', ', $this->getKVP()) . "
+				" . implode(', ', $this->getKVP(array('escaped' => true))) . "
 			WHERE
 				" . implode(' AND ', $where) . "
 		";

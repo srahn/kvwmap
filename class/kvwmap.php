@@ -417,8 +417,9 @@ echo '			</ul>
 		legend_top = document.getElementById(\'legenddiv\').getBoundingClientRect().top;
 		legend_bottom = document.getElementById(\'legenddiv\').getBoundingClientRect().bottom;
 		posy = document.getElementById(\'options_'.$this->formvars['layer_id'].'\').getBoundingClientRect().top;
-		if(posy > legend_bottom - 150)posy = legend_bottom - 150;
-		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = document.getElementById(\'map\').offsetTop + posy - (13+legend_top);
+		options_height = document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').getBoundingClientRect().height;
+		if(posy > legend_bottom - options_height)posy = legend_bottom - options_height;
+		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = document.getElementById(\'map\').offsetTop + posy - legend_top;
 		';
 	}
 
@@ -1736,6 +1737,9 @@ echo '			</ul>
 			 }
 			 $layer->setFilter($expr);
 			}
+			if ($layerset['styleitem']!='') {
+				$layer->set('styleitem',$layerset['styleitem']);
+			}
 			# Layerweite Labelangaben
 			if ($layerset['labelitem']!='') {
 				$layer->set('labelitem',$layerset['labelitem']);
@@ -2749,18 +2753,12 @@ echo '			</ul>
 			case 'pdf' : {
 				$this->formvars['file']=1;
 				if ($this->formvars['file']) {
-					echo '
-						<html>
-							<head>
-								<title>PDF-Ausgabe</title>
-								<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-								<META HTTP-EQUIV=REFRESH CONTENT="0; URL=' . TEMPPATH_REL.$this->outputfile . '">
-							</head>
-							<body>
-								<BR>Folgende Datei wird automatisch aufgerufen: <a href="' . TEMPPATH_REL.$this->outputfile . '">' . $this->outputfile . '</a>
-							</body>
-						</html>
-					';
+					header("Content-type: application/pdf");
+					header("Content-Disposition: attachment; filename=\"" . $this->outputfile."\"");
+					header("Expires: 0");
+					header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+					header("Pragma: public");
+					readfile(IMAGEPATH.$this->outputfile);
 				}
 				else {
 					$this->pdf->ezStream();
@@ -4962,7 +4960,7 @@ echo '			</ul>
       if($attribute != '' AND strpos($select, '*') === false AND strpos($select, $attribute) === false){			# Attribut für automatische Klassifizierung mit ins data packen
       	$select = str_replace(' from ', ', '.$attribute.' from ', strtolower($select));
       }
-      if(strpos(strtolower($select), ' where ') === false){
+      if(stripos(str_replace([chr(10), chr(13)], ' ', $select), ' where ') === false){
         $select .= " WHERE ";
       }
       else{
@@ -5006,7 +5004,7 @@ echo '			</ul>
       $this->formvars['Datentyp'] = $layerset[0]['Datentyp'];;
       $this->formvars['Data'] = $datastring;
       $this->formvars['connectiontype'] = 6;
-      $this->formvars['labelitem'] = $layerset[0]['labelitem'];
+			if($layerset[0]['labelitem'] != 'Cluster:FeatureCount')$this->formvars['labelitem'] = $layerset[0]['labelitem'];
       $connectionstring ='user='.$layerdb->user;
       if($layerdb->passwd != ''){
         $connectionstring.=' password='.$layerdb->passwd;
@@ -5024,7 +5022,7 @@ echo '			</ul>
 
       $layer_id = $dbmap->newRollenLayer($this->formvars);
 
-      if($this->formvars['selektieren'] != '1'){      # highlighten (gelb)
+      if($this->formvars['selektieren'] != '1'){      # highlighten
       	# ------------ automatische Klassifizierung -------------------
       	if($attribute != ''){
 					for($i = 0; $i < count($result); $i++){		# Auswahlfelder behandeln
@@ -5056,60 +5054,9 @@ echo '			</ul>
 					}
       		$dbmap->createAutoClasses(array_unique($classes), $attribute, $layer_id, $this->formvars['Datentyp'], $this->database);
       	}
-      	# ------------ automatische Klassifizierung -------------------
+      	# ------------ automatische Klassifizierung Ende -------------------
       	else{
-      		$color = $this->user->rolle->readcolor();
-	        $classdata['layer_id'] = -$layer_id;
-					$classdata['name'] = ' ';
-	        $class_id = $dbmap->new_Class($classdata);
-	        if($this->formvars['Datentyp'] == 0){			# Punkt
-						if(defined('ZOOM2POINT_STYLE_ID') AND ZOOM2POINT_STYLE_ID != ''){
-							$style_id = $dbmap->copyStyle(ZOOM2POINT_STYLE_ID);
-						}
-						else{
-							# highlighten (mit der ausgewählten Farbe)
-							$color = $this->user->rolle->readcolor();
-							$style['colorred'] = $color['red'];
-							$style['colorgreen'] = $color['green'];
-							$style['colorblue'] = $color['blue'];
-							$style['outlinecolorred'] = 0;
-							$style['outlinecolorgreen'] = 0;
-							$style['outlinecolorblue'] = 0;
-							$style['size'] = 10;
-							$style['symbolname'] = 'circle';
-							$style['backgroundcolor'] = NULL;
-							$style['minsize'] = NULL;
-							$style['maxsize'] = 100000;
-							if (MAPSERVERVERSION > '500') {
-								$style['angle'] = 360;
-							}
-							$style_id = $dbmap->new_Style($style);
-						}
-	        }
-	        else{
-	        	$style['colorred'] = $color['red'];
-		        $style['colorgreen'] = $color['green'];
-		        $style['colorblue'] = $color['blue'];
-		        $style['outlinecolorred'] = 0;
-		        $style['outlinecolorgreen'] = 0;
-		        $style['outlinecolorblue'] = 0;
-		       	$style['size'] = 3;
-		       	if($this->formvars['Datentyp'] == 1){		# Linie
-		       		$style['symbol'] = 9;
-		       	}
-		       	else{
-		       		$style['symbol'] = NULL;
-		       	}
-		        $style['symbolname'] = NULL;
-		        $style['backgroundcolor'] = NULL;
-		        $style['minsize'] = 3;
-		        $style['maxsize'] = 3;
-		        if (MAPSERVERVERSION > '500') {
-		        	$style['angle'] = 360;
-		        }
-		        $style_id = $dbmap->new_Style($style);
-	        }
-					$dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
+      		$dbmap->addRollenLayerStyling($layer_id, $this->formvars['Datentyp'], $this->formvars['labelitem'], $this->user);
       	}
       }
       else{         # selektieren (eigenen Style verwenden)
@@ -5216,71 +5163,8 @@ echo '			</ul>
 
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
 
-		$color = $this->user->rolle->readcolor();
-		$style['colorred'] = $color['red'];
-		$style['colorgreen'] = $color['green'];
-		$style['colorblue'] = $color['blue'];
-
 		if($this->formvars['selektieren'] == 'false'){      # highlighten (mit der ausgewählten Farbe)
-			$classdata['layer_id'] = -$layer_id;
-			$class_id = $dbmap->new_Class($classdata);
-			$this->formvars['class'] = $class_id;
-			switch ($layerset[0]['Datentyp']){
-				case MS_LAYER_POINT : {
-					if(defined('ZOOM2POINT_STYLE_ID') AND ZOOM2POINT_STYLE_ID != ''){
-						$style_id = $dbmap->copyStyle(ZOOM2POINT_STYLE_ID);
-					}
-					else{
-						# highlighten (mit der ausgewählten Farbe)
-						$style['outlinecolorred'] = 0;
-						$style['outlinecolorgreen'] = 0;
-						$style['outlinecolorblue'] = 0;
-						$style['size'] = 10;
-						$style['symbolname'] = 'circle';
-						$style['backgroundcolor'] = NULL;
-						$style['minsize'] = NULL;
-						$style['maxsize'] = 100000;
-						$style['angle'] = 360;
-						$style_id = $dbmap->new_Style($style);
-					}
-				}break;
-
-				case MS_LAYER_LINE : {
-					$style['outlinecolorred'] = -1;
-					$style['outlinecolorgreen'] = -1;
-					$style['outlinecolorblue'] = -1;
-					$style['size'] = NULL;
-					$style['symbol'] = NULL;
-					$style['symbolname'] = NULL;
-					$style['backgroundcolor'] = NULL;
-					$style['minsize'] = NULL;
-					$style['maxsize'] = NULL;
-					$style['width'] = 3;
-					$style['minwidth'] = 3;
-					$style['maxwidth'] = 3;
-					$style_id = $dbmap->new_Style($style);
-				}break;
-
-				case MS_LAYER_POLYGON : {
-					$style['outlinecolorred'] = 0;
-					$style['outlinecolorgreen'] = 0;
-					$style['outlinecolorblue'] = 0;
-					$style['size'] = 1;
-					$style['symbol'] = NULL;
-					if($this->user->rolle->result_hatching){
-						$style['symbolname'] = 'hatch';
-						$style['size'] = 11;
-						$style['width'] = 5;
-						$style['angle'] = 45;
-					}
-					else{
-						$style['symbolname'] = NULL;
-					}
-					$style['backgroundcolor'] = NULL;
-					$style_id = $dbmap->new_Style($style);
-				}break;
-			}
-			$dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
+			$dbmap->addRollenLayerStyling($layer_id, $this->formvars['Datentyp'], $this->formvars['labelitem'], $this->user);
 		}
 		else{         # selektieren (eigenen Style verwenden)
 			$class_id = $dbmap->getClassFromObject($select, $this->formvars['layer_id'], $layerset[0]['classitem']);
@@ -5518,7 +5402,7 @@ echo '			</ul>
 			include_(CLASSPATH . 'datendrucklayout.php');
 			$ddl = new ddl($this->database);
 			$this->Document->fonts = $ddl->get_fonts();
-			$this->Document->din_formats = $ddl->get_din_formats();
+			$this->Document->din_formats = get_din_formats();
 
 			if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
         $this->Document->headsize = GetImageSize(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']));
@@ -5562,7 +5446,7 @@ echo '			</ul>
 			include_(CLASSPATH . 'datendrucklayout.php');
 			$ddl = new ddl($this->database);
 			$this->Document->fonts = $ddl->get_fonts();
-			$this->Document->din_formats = $ddl->get_din_formats();
+			$this->Document->din_formats = get_din_formats();
 
       if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
         $this->Document->headsize = GetImageSize(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']));
@@ -8027,48 +7911,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 
 			# Klassen übernehmen (aber als neue Klassen anlegen)
-			$name = @array_values($this->formvars['name']);
-			foreach($supportedLanguages as $language){
-				if($language != 'german'){
-					$name_[$language] = @array_values($this->formvars['name_'.$language]);
-				}
-			}
-			$expression = @array_values($this->formvars['expression']);
-			$classification = @array_values($this->formvars['classification']);
-			$legendgraphic = @array_values($this->formvars['legendgraphic']);
-			$legendimagewidth = @array_values($this->formvars['legendimagewidth']);
-			$legendimageheight = @array_values($this->formvars['legendimageheight']);
-			$order = @array_values($this->formvars['order']);
-			$legendorder = @array_values($this->formvars['classlegendorder']);
-			$ID = @array_values($this->formvars['ID']);
-			for($i = 0; $i < count($name); $i++){
-				$attrib['name'] = $name[$i];
-				foreach($supportedLanguages as $language){
-					if($language != 'german'){
-						$attrib['name_'.$language] = $name_[$language][$i];
-					}
-				}
-				$attrib['layer_id'] = $this->formvars['selected_layer_id'];
-				$attrib['expression'] = $expression[$i];
-				$attrib['classification'] = $classification[$i];
-				$attrib['legendgraphic'] = $legendgraphic[$i];
-				$attrib['legendimagewidth'] = $legendimagewidth[$i];
-				$attrib['legendimageheight'] = $legendimageheight[$i];
-				$attrib['order'] = $order[$i];
-				$attrib['legendorder'] = $legendorder[$i];
-				$class_id = $mapDB->new_Class($attrib);
-				# Styles übernehmen (in u_styles2classes eintragen)
-				$styles = $mapDB->read_Styles($ID[$i]);
-				for($j = 0; $j < count($styles); $j++){
-					$style_id = $mapDB->new_Style($styles[$j]);
-					$mapDB->addStyle2Class($class_id, $style_id, $styles[$j]['drawingorder']);
-				}
-				# Labels übernehmen (in u_labels2classes eintragen)
-				$labels = $mapDB->read_Label($ID[$i]);
-				for($j = 0; $j < count($labels); $j++){
-					$label_id = $mapDB->new_Label($labels[$j]);
-					$mapDB->addLabel2Class($class_id, $label_id);
-				}
+			$classes = $mapDB->read_Classes($this->formvars['old_id']);
+			for($i = 0; $i < count($classes); $i++){
+				$mapDB->copyClass($classes[$i]['Class_ID'], $this->formvars['selected_layer_id']);
 			}
 		}
   }
@@ -8126,7 +7971,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				showAlert('Keine connection angegeben.');
 			}
 		}
-		if($this->formvars['connectiontype'] == MS_WFS){
+		if ($this->formvars['connectiontype'] == MS_WFS){
 			include_(CLASSPATH.'wfs.php');
 			$url = $this->formvars['connection'];
 			$version = $this->formvars['wms_server_version'];
@@ -8923,9 +8768,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($this->formvars['layer_id']){
 			$this->formvars['anzahl'] = MAXQUERYROWS;
 			$this->layerset=$this->user->rolle->getLayer($this->formvars['layer_id']);
+			$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 			switch ($this->layerset[0]['connectiontype']){
-        case MS_POSTGIS : {
-          $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+        case MS_POSTGIS : {          
 					$layerdb = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
 					$layerdb->setClientEncoding();
 					$path = $mapdb->getPath($this->formvars['layer_id']);
@@ -10171,7 +10016,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$pdf_file = $output;
 			# in jpg umwandeln
 			$currenttime = date('Y-m-d_H_i_s',time());
-			exec(IMAGEMAGICKPATH.'convert "'.$pdf_file.'[' . ($this->formvars['page'] ? $this->formvars['page'] : 0) . ']" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"');
+			exec(IMAGEMAGICKPATH.'convert "'.$pdf_file.'[' . ($this->formvars['page'] ? $this->formvars['page'] : 0) . ']" -resize '.$selectedlayout['width'].'x'.$selectedlayout['height'].' "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"');
 			#echo IMAGEMAGICKPATH.'convert "'.$pdf_file.'[0]" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"';
 			if(!file_exists(IMAGEPATH.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg')){
 				return TEMPPATH_REL.basename($pdf_file, ".pdf").'-'.$currenttime.'-0.jpg';
@@ -10711,41 +10556,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     //$this->output();
 	}
 
-  function uko_import(){
-		$this->titel='UKO-Import';
-    $this->main='uko_import.php';
-		include_(CLASSPATH.'data_import_export.php');
-    $this->data_import_export = new data_import_export();
-		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
-    $this->output();
-  }
-
-  function uko_import_importieren(){
-    $this->titel='UKO-Import';
-    $this->main='uko_import.php';
-		include_(CLASSPATH.'data_import_export.php');
-    $this->data_import_export = new data_import_export();
-		$this->data_import_export->get_ukotable_srid($this->pgdatabase);
-    $oids = $this->data_import_export->uko_importieren($this->formvars, $this->user->Name, $this->user->id, $this->pgdatabase);
-		if($this->data_import_export->success == true){
-			$this->main='map.php';
-			$this->loadMap('DataBase');
-			$rect = $this->mapDB->zoomToDatasets($oids, 'uko_polygon', 'the_geom', 20, $this->pgdatabase, $this->data_import_export->uko_srid, $this->user->rolle->epsg_code);
-			$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
-	    if (MAPSERVERVERSION > 600) {
-				$this->map_scaledenom = $this->map->scaledenom;
-			}
-			else {
-				$this->map_scaledenom = $this->map->scale;
-			}
-			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-			$this->drawMap();
-			$this->saveMap('');
-		}
-    $this->output();
-  }
-
-
   function TIFExport(){
     $this->loadMap('DataBase');
     $breite = $this->map->extent->maxx - $this->map->extent->minx;
@@ -10950,7 +10760,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$anzahl++;
 				}
 			}
-			$where .= "0)";
+			$where = substr($where, 0, -1).')';
 			if($anzahl > 0){
 				$this->formvars['sql_'.$this->formvars['selected_layer_id']] = $where.$orderby;
 				$this->formvars['anzahl'] = $anzahl;
@@ -14013,17 +13823,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								else{
 									$pfad = substr(trim($newpath), 7);
 								}
-								if($layerset[$i]['Layer_ID'] > 0 AND empty($privileges))$pfad = 'NULL::geometry as '.$layerset[$i]['attributes']['the_geom'].' '.$pfad;
+								if ($layerset[$i]['Layer_ID'] > 0 AND empty($privileges)) {
+									$pfad = 'NULL::geometry as ' . $layerset[$i]['attributes']['the_geom'] . ' ' . $pfad;
+								}
 								$geometrie_tabelle = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 								$j = 0;
-								foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-									if(($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oder Geometrietabelle oids?
-										$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
+								foreach($layerset[$i]['attributes']['all_table_names'] as $tablename) {
+									if (($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['attributes']['oids'][$j]) {
+										# hat Haupttabelle oder Geometrietabelle oids?
+										$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename] . '.oid AS ' . $tablename . '_oid, ' . $pfad;
 									}
 									$j++;
 								}
-								if($distinct == true){
-									$pfad = 'DISTINCT '.$pfad;
+								if ($distinct == true) {
+									$pfad = 'DISTINCT ' . $pfad;
 								}
 							#}
 							#else{
@@ -14036,7 +13849,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							}
 							else{
 							*/
-								if($layerset[$i]['attributes']['the_geom'] == ''){					# Geometriespalte ist nicht geladen, da auf "nicht sichtbar" gesetzt --> aus Data holen
+								if ($layerset[$i]['attributes']['the_geom'] == '') {					# Geometriespalte ist nicht geladen, da auf "nicht sichtbar" gesetzt --> aus Data holen
 									$data_attributes = $this->mapDB->getDataAttributes($layerdb, $layerset[$i]['Layer_ID']);
 									$layerset[$i]['attributes']['the_geom'] = $data_attributes['the_geom'];
 								}
@@ -15406,30 +15219,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->formvars['transparency'] = 60;
 
     $layer_id = $dbmap->newRollenLayer($this->formvars);
-
-    $classdata['layer_id'] = -$layer_id;
-		$classdata['name'] = ' ';
-    $class_id = $dbmap->new_Class($classdata);
-
-		$color = $this->user->rolle->readcolor();
-    $style['colorred'] = $color['red'];
-		$style['colorgreen'] = $color['green'];
-		$style['colorblue'] = $color['blue'];
-    $style['outlinecolorred'] = 0;
-    $style['outlinecolorgreen'] = 0;
-    $style['outlinecolorblue'] = 0;
-    $style['size'] = 1;
-    $style['symbol'] = NULL;
-    $style['symbolname'] = NULL;
-    $style['backgroundcolor'] = NULL;
-    $style['minsize'] = NULL;
-    $style['maxsize'] = 100000;
-    if (MAPSERVERVERSION > '500') {
-    	$style['angle'] = 360;
-    }
-    $style_id = $dbmap->new_Style($style);
-
-    $dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
+		
+		$dbmap->addRollenLayerStyling($layer_id, $this->formvars['Datentyp'], $this->formvars['labelitem'], $this->user);
+		
     $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 
     $this->loadMap('DataBase');
@@ -15531,28 +15323,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 	    $layer_id = $dbmap->newRollenLayer($this->formvars);
 
-	    $classdata['layer_id'] = -$layer_id;
-	    $class_id = $dbmap->new_Class($classdata);
-
-			$color = $this->user->rolle->readcolor();
-	    $style['colorred'] = $color['red'];
-			$style['colorgreen'] = $color['green'];
-			$style['colorblue'] = $color['blue'];
-	    $style['outlinecolorred'] = 0;
-	    $style['outlinecolorgreen'] = 0;
-	    $style['outlinecolorblue'] = 0;
-	    $style['size'] = 1;
-	    $style['symbol'] = NULL;
-	    $style['symbolname'] = NULL;
-	    $style['backgroundcolor'] = NULL;
-	    $style['minsize'] = NULL;
-	    $style['maxsize'] = 100000;
-	    if (MAPSERVERVERSION > '500') {
-	    	$style['angle'] = 360;
-	    }
-	    $style_id = $dbmap->new_Style($style);
-
-	    $dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
+	    $dbmap->addRollenLayerStyling($layer_id, $this->formvars['Datentyp'], $this->formvars['labelitem'], $this->user);
+			
 	    $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 
 	    $this->loadMap('DataBase');
@@ -16393,11 +16165,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 } # end of class GUI
 
-##############################################################
-# Klasse MapObject zum laden der Map-Daten aus der Datenbank #
-##############################################################
-# Klasse db_mapObj #
-####################
 class db_mapObj{
   var $debug;
   var $referenceMap;
@@ -16480,7 +16247,7 @@ class db_mapObj{
 				$name_column . ",
 				l.alias,
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem,
-				l.labelmaxscale, l.labelminscale, l.labelrequires, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.styleitem, l.classification, l.filteritem,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				g.id, ".$group_column.", g.obergruppe, g.order
@@ -17817,6 +17584,76 @@ class db_mapObj{
 		}
   }
 
+	function addRollenLayerStyling($layer_id, $datatype, $labelitem, $user){
+		$attrib['name'] = ' ';
+		$attrib['layer_id'] = -$layer_id;
+		$attrib['expression'] = '';
+		$attrib['order'] = 0;
+		$class_id = $this->new_Class($attrib);
+		$this->formvars['class'] = $class_id;
+		$color = $user->rolle->readcolor();
+		$style['colorred'] = $color['red'];
+		$style['colorgreen'] = $color['green'];
+		$style['colorblue'] = $color['blue'];
+		$style['outlinecolorred'] = 0;
+		$style['outlinecolorgreen'] = 0;
+		$style['outlinecolorblue'] = 0;
+		switch ($datatype) {
+			case 0 : {
+				if(defined('ZOOM2POINT_STYLE_ID') AND ZOOM2POINT_STYLE_ID != ''){
+					$style_id = $this->copyStyle(ZOOM2POINT_STYLE_ID);
+				}
+				else{
+					$style['size'] = 8;
+					$style['maxsize'] = 8;
+					$style['symbolname'] = 'circle';
+				}
+			} break;
+			case 1 : {
+				$style['width'] = 2;
+				$style['minwidth'] = 1;
+				$style['maxwidth'] = 3;
+				$style['symbolname'] = NULL;
+			} break;
+			case 2 :{
+				$style['size'] = 1;
+				if($user->rolle->result_hatching){
+					$style['symbolname'] = 'hatch';
+					$style['size'] = 11;
+					$style['width'] = 5;
+					$style['angle'] = 45;
+				}
+				else{
+					$style['symbolname'] = NULL;
+				}
+			}
+		}
+		$style['backgroundcolor'] = NULL;
+		$style['minsize'] = NULL;
+		if(!$style_id)$style_id = $this->new_Style($style);
+		$this->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
+		if($user->rolle->result_hatching){
+			$style['symbolname'] = NULL;
+			$style['width'] = 1;
+			$style['colorred'] = -1;
+			$style['colorgreen'] = -1;
+			$style['colorblue'] = -1;
+			$style_id = $this->new_Style($style);
+			$this->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
+		}
+		if($labelitem != '') {
+			$label['font'] = 'arial';
+			$label['color'] = '0 0 0';
+			$label['outlinecolor'] = '255 255 255';
+			$label['size'] = 8;
+			$label['minsize'] = 6;
+			$label['maxsize'] = 10;
+			$label['position'] = 9;
+			$new_label_id = $this->new_Label($label);
+			$this->addLabel2Class($class_id, $new_label_id, 0);
+		}
+	}
+
 	function newRollenLayer($formvars){
 		$formvars['Data'] = str_replace ( "'", "''", $formvars['Data']);
 		$formvars['query'] = str_replace ( "'", "''", $formvars['query']);
@@ -17960,6 +17797,17 @@ class db_mapObj{
 			$attribute_sets[] = $key . " = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
 		}
 
+		# Schreibt alle Attribute, die getrimmt werden sollen
+		foreach(
+			array(
+				'connection'
+			) AS $key
+		) {
+			if ($formvars[$key]	!= '') {
+				$attribute_sets[] = "`" . $key . "` = '" . trim($formvars[$key]) . "'";
+			}
+		}
+
 		# Schreibt alle Attribute, die immer geschrieben werden sollen, egal wie der Wert ist
 		# Besonderheit beim Attribut classification, kommt aus Field layer_classification,
 		# weil classification schon belegt ist von den Classes
@@ -17986,10 +17834,10 @@ class db_mapObj{
 				'offsite',
 				'labelrequires',
 				'postlabelcache',
-				'connection',
 				'printconnection',
 				'connectiontype',
 				'classitem',
+				'styleitem',
 				'filteritem',
 				'tolerance',
 				'toleranceunits',
@@ -18051,7 +17899,7 @@ class db_mapObj{
 					$sql .= "`Name_" . $language."`, ";
 				}
 			}
-			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`) VALUES(";
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'" . $formvars['id']."', ";
       }
@@ -18103,12 +17951,13 @@ class db_mapObj{
       $sql .= $formvars['labelminscale'].", ";
       $sql .= "'" . $formvars['labelrequires']."', ";
 			$sql .= "'" . $formvars['postlabelcache']."', ";
-      $sql .= "'" . $formvars['connection']."', ";
+      $sql .= "'" . trim($formvars['connection']) ."', ";
 			if($formvars['connection_id'] == '')$sql .= "NULL, ";
       else $sql .= "'" . $formvars['connection_id']."', ";
       $sql .= "'" . $formvars['printconnection']."', ";
       $sql .= ($formvars['connectiontype'] =='' ? "6" : $formvars['connectiontype']) .", "; # Set default to postgis layer
       $sql .= "'" . $formvars['classitem']."', ";
+			$sql .= "'" . $formvars['styleitem']."', ";
 			$sql .= "'" . $formvars['layer_classification']."', ";
       $sql .= "'" . $formvars['filteritem']."', ";
 			if($formvars['cluster_maxdistance'] == '')$formvars['cluster_maxdistance'] = 'NULL';
@@ -19666,14 +19515,6 @@ class db_mapObj{
   }
 }
 
-###########################################
-# Dokumentenklasse                        #
-###########################################
-# Klasse Document #
-################
-
-# functions of class Document
-
 class Document {
   var $html;
   var $debug;
@@ -20207,4 +20048,5 @@ class point {
     $this->y=round(($this->y-$minY)/$pixSize);
   }
 }
+
 ?>

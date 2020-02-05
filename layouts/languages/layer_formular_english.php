@@ -90,4 +90,5 @@
 	$strStylesLabels="Styles and Labels";
 	$strDdlAttribute="DDL Default Attribute";
 	$strIdAttribute="ID-Column";
+	$strStyleItem="Styleitem";
 ?>  

@@ -133,10 +133,7 @@
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 <!--
-
-<? if ((count($this->attributes))!=0) { ?>
-var attributes = new Array('<? echo implode("', '", $this->attributes['name']); ?>');
-<? } ?>
+var attributes = new Array(<? echo (count($this->attributes['name']) == 0 ? "" : "'" . implode("', '", $this->attributes['name']) . "'"); ?>);
 
 function update_visibility_form(visibility, attributename){
 	if(visibility == 2)document.getElementById('visibility_form_'+attributename).style.display = '';
@@ -486,7 +483,7 @@ function alias_replace(name){
 							} ?>							
 							
 							<td align="center" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header"><i class="fa fa-windows" style="font-size:20px" title="Im Rastertemplate als Vorschau-Attribut verwenden"></i></div>'; ?>
+								<? if($i == 0)echo '<div class="fett scrolltable_header"><i class="fa fa-th" style="font-size:23px" title="Im Rastertemplate als Vorschau-Attribut verwenden"></i></div>'; ?>
 						  	<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>
 						  </td>
 							<td>
