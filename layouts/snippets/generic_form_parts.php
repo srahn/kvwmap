@@ -505,12 +505,14 @@
 						$pfadteil = explode('&original_name=', $dokumentpfad);
 						$dateiname = $pfadteil[0];
 						if ($layer['document_url'] != '') {
+							$remote_url = false;
+							if($_SERVER['HTTP_HOST'] != parse_url($layer['document_url'], PHP_URL_HOST))$remote_url = true;		# die URL verweist auf einen anderen Server
 							$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
 						}
-						if (file_exists($dateiname)) {
+						if (file_exists($dateiname) OR $remote_url) {
 							$dateinamensteil = explode('.', $dateiname);
 							$type = strtolower($dateinamensteil[1]);
-							$thumbname = $gui->get_dokument_vorschau($dateinamensteil);
+							$thumbname = $gui->get_dokument_vorschau($dateinamensteil, $remote_url);
 							if ($layer['document_url'] != '') {
 								$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
 								$target = 'target="_blank"';
