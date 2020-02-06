@@ -540,7 +540,11 @@
 							}
 							# Videostream
 							elseif ($layer['document_url'] != '' AND in_array($type, array('mp4'))) {
-								$datapart .= '<video width="'.PREVIEW_IMAGE_WIDTH.'" src="'.$dokumentpfad.'" controls>';
+								$datapart .= '
+									<video width="'.PREVIEW_IMAGE_WIDTH.'" controls>
+										<source src="'.$dokumentpfad.'" type="video/mp4">
+									</video>
+									';
 							}
 							# Rest
 							else {
