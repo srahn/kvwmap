@@ -18,6 +18,7 @@
 if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc_raster.php'){		# in beiden Fällen erscheint ein SubFormular mit mehreren editierbaren Datensätzen
 	$this->subform_classname = 'subform_'.$layer['Layer_ID'];
 	if ($layer['template']=='generic_layer_editor_doc_raster.php') { # die Raster-Darstellung kann auch anstatt der SubFormEmbedded-Liste verwendet werden
+		$save_button_display = 'display: none';
 		include(SNIPPETS.$layer['template']);
 	}
 	else {
@@ -91,7 +92,7 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 	} ?>
 	<div style="width: 100%;text-align: center;margin-top: 4px">
 <? if ($anzObj > 0){ ?>
-		<input id="subform_save_button_<? echo $layer['Layer_ID']; ?>" type="button" tabindex="1" value="Speichern" onclick="subsave_data(<? echo $layer['Layer_ID']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', false);">
+		<input id="subform_save_button_<? echo $layer['Layer_ID']; ?>" style="<? echo $save_button_display; ?>" type="button" tabindex="1" value="Speichern" onclick="subsave_data(<? echo $layer['Layer_ID']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', false);">
 <?	}
 		if ($layer['privileg'] > 0 AND $this->formvars['attribute_privileg'] > 0){
 			echo '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';

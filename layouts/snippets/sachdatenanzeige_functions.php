@@ -911,5 +911,12 @@ include('funktionen/input_check_functions.php');
 			if(flag.onchange)flag.onchange();
 		}
 	}
+	
+	activate_save_button = function(layer_id){
+		var button = document.getElementById('subform_save_button_'+layer_id);
+		if(button && button.style.display == 'none'){
+			button.style.display = '';
+		}		
+	}
 
 </script>
