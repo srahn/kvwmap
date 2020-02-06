@@ -433,7 +433,7 @@ include('funktionen/input_check_functions.php');
 			}
   	}
 		formData.append('go', 'Sachdaten_speichern');
-		formData.append('reload', reload);
+		if(reload)formData.append('reload', reload);
 		formData.append('selected_layer_id', layer_id);
 		formData.append('targetobject', targetobject);
 		formData.append('form_field_names', form_fieldstring);
@@ -468,7 +468,7 @@ include('funktionen/input_check_functions.php');
 			}
   	}
 		formData.append('go', 'neuer_Layer_Datensatz_speichern');
-		formData.append('reload', reload);
+		if(reload)formData.append('reload', reload);
 		formData.append('selected_layer_id', layer_id);
 		formData.append('targetobject', targetobject);
 		formData.append('targetlayer_id', targetlayer_id);

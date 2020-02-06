@@ -480,7 +480,7 @@
 					$reloadParams .= '&fromobject='.$layer_id.'_'.$name.'_'.$k;
 					$reloadParams .= '&targetlayer_id='.$layer_id;
 					$reloadParams .= '&targetattribute='.$name;
-					$reloadParams .= '&reload=1';
+					$reloadParams .= '&reload='.$attributes['reload'][$j];
 					$reloadParams .= '&oid='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
 					$reloadParams .= '&tablename='.$attributes['table_name'][$attributes['the_geom']];											# dito
 					$reloadParams .= '&columnname='.$attributes['the_geom'];																								# dito

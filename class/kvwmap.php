@@ -13514,9 +13514,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if ($this->formvars['embedded'] != '') {
 			# es wurde ein Datensatz aus einem embedded-Formular gespeichert 
 			if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
-				echo '█';
-				echo "currentform.go.value='get_last_query';
-							overlay_submit(currentform, false);";
+				echo '█currentform.go.value=\'get_last_query\';	overlay_submit(currentform, false);';
 			}
 			else{				# ansonsten wird das embedded-Formular entfernt und das Listen-DIV neu geladen (getrennt durch █)
 				echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
@@ -17163,6 +17161,9 @@ class db_mapObj{
 										case 'list_edit': {														# nur Listen-Editier-Modus
 											$attributes['list_edit'][$i] = true;
 										} break;
+										case 'reload': {														# die komplette Sachdatenanzeige soll neu geladen werden
+											$attributes['reload'][$i] = true;
+										} break;										
 									}
 								}
 							}
