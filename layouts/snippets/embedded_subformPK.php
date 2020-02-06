@@ -202,7 +202,7 @@ else{ ?>
 					}
 					if ($this->formvars['embedded'] == 'true') {
 						echo '<tr style="border: none">
-										<td'. get_td_class_or_style(array($dataset[$attributes['style']], 'subFormListItem')) . '><a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:if (document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$layer['Layer_ID'].');">'.implode(' ', $output).'</a><div id="subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
+										<td'. get_td_class_or_style(array($dataset[$attributes['style']], 'subFormListItem')) . '><a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:if (document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&reload='.$this->formvars['reload'].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$layer['Layer_ID'].');">'.implode(' ', $output).'</a><div id="subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
 									</tr>
 			';
 					}
@@ -250,7 +250,8 @@ else{ ?>
 										 '&targetobject='.$this->formvars['targetobject'].
 										 '&targetlayer_id='.$this->formvars['targetlayer_id'].
 										 '&targetattribute='.$this->formvars['targetattribute'].
-										 '&mime_type='.$this->formvars['mime_type'].'\', 
+										 '&mime_type='.$this->formvars['mime_type'].
+										 '&reload='.$this->formvars['reload'].'\', 
 										 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
 										 new Array(\'sethtml\', \'execute_function\'));
 										 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';

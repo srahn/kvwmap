@@ -9564,16 +9564,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
         case 'SubFormEmbeddedPK' : {
           if(!$this->success)echo $ret['msg'];
-          else echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+          else{
+						if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+							echo '██currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
+						}
+						else{			# ansonsten nur das SubForm-Listen-Div
+							echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+						}
+					}
         } break;
       }
-
-			if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
-				echo '██';
-				echo "currentform.go.value='get_last_query';
-							overlay_submit(currentform, false);";
-			}
-
     }
     else {
       if ($this->success == false) {
@@ -13512,10 +13512,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->add_message('warning', 'Keine Änderung.');
 		}
 		if ($this->formvars['embedded'] != '') {
-			# wenn es ein Datensatz aus einem embedded-Formular ist, 
-			# muss das embedded-Formular entfernt werden und 
-			# das Listen-DIV neu geladen werden (getrennt durch █)
-			echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
+			# es wurde ein Datensatz aus einem embedded-Formular gespeichert 
+			if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+				echo '█';
+				echo "currentform.go.value='get_last_query';
+							overlay_submit(currentform, false);";
+			}
+			else{				# ansonsten wird das embedded-Formular entfernt und das Listen-DIV neu geladen (getrennt durch █)
+				echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
+			}
 		}
 		else {
 			$this->last_query = $this->user->rolle->get_last_query();
