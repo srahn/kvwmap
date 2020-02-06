@@ -91,8 +91,11 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 		}
 	} ?>
 	<div style="width: 100%;text-align: center;margin-top: 4px">
-<? if ($anzObj > 0){ ?>
-		<input id="subform_save_button_<? echo $layer['Layer_ID']; ?>" style="<? echo $save_button_display; ?>" type="button" tabindex="1" value="Speichern" onclick="subsave_data(<? echo $layer['Layer_ID']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', false);">
+<? if ($anzObj > 0){
+		if ($this->formvars['list_edit']) { ?>
+			<a tabindex="1" class="buttonlink" href="javascript:reload_subform_list('<? echo $this->formvars['targetobject']; ?>', 0)"><span><? echo $this->strCancel; ?></span></a>
+		<? } ?>
+		<a id="subform_save_button_<? echo $layer['Layer_ID']; ?>" class="buttonlink" style="<? echo $save_button_display; ?>" tabindex="1" href="javascript:subsave_data(<? echo $layer['Layer_ID']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', false);"><span>Speichern</span></a>
 <?	}
 		if ($layer['privileg'] > 0 AND $this->formvars['attribute_privileg'] > 0){
 			echo '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
