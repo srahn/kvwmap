@@ -4252,6 +4252,14 @@ echo '			</ul>
 				$this->administration->update_backups_in_crontab();
 				$this->showAdminFunctions();
 			} break;
+			case "create_inserts_from_dataset" : {
+				$inserts_file = LOGPATH . 'inserts_from_dataset.sql';
+				file_put_contents($inserts_file, $this->administration->create_inserts_from_dataset($this->formvars['schema'], $this->formvars['table'], $this->formvars['where']));
+				header("Content-type:application/pdf");
+				header("Content-Disposition:attachment; filename=" . $this->formvars['schema'] . "-" . $this->formvars['table'] . "-" . $this->formvars['where'] . ".sql");
+				readfile($inserts_file);
+				exit;
+			} break;
 			default : {
 				$this->showAdminFunctions();
 			}
@@ -7963,7 +7971,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				showAlert('Keine connection angegeben.');
 			}
 		}
-		if($this->formvars['connectiontype'] == MS_WFS){
+		if ($this->formvars['connectiontype'] == MS_WFS){
 			include_(CLASSPATH.'wfs.php');
 			$url = $this->formvars['connection'];
 			$version = $this->formvars['wms_server_version'];
@@ -17795,6 +17803,17 @@ class db_mapObj{
 			$attribute_sets[] = $key . " = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
 		}
 
+		# Schreibt alle Attribute, die getrimmt werden sollen
+		foreach(
+			array(
+				'connection'
+			) AS $key
+		) {
+			if ($formvars[$key]	!= '') {
+				$attribute_sets[] = "`" . $key . "` = '" . trim($formvars[$key]) . "'";
+			}
+		}
+
 		# Schreibt alle Attribute, die immer geschrieben werden sollen, egal wie der Wert ist
 		# Besonderheit beim Attribut classification, kommt aus Field layer_classification,
 		# weil classification schon belegt ist von den Classes
@@ -17821,7 +17840,6 @@ class db_mapObj{
 				'offsite',
 				'labelrequires',
 				'postlabelcache',
-				'connection',
 				'printconnection',
 				'connectiontype',
 				'classitem',
@@ -17939,7 +17957,7 @@ class db_mapObj{
       $sql .= $formvars['labelminscale'].", ";
       $sql .= "'" . $formvars['labelrequires']."', ";
 			$sql .= "'" . $formvars['postlabelcache']."', ";
-      $sql .= "'" . $formvars['connection']."', ";
+      $sql .= "'" . trim($formvars['connection']) ."', ";
 			if($formvars['connection_id'] == '')$sql .= "NULL, ";
       else $sql .= "'" . $formvars['connection_id']."', ";
       $sql .= "'" . $formvars['printconnection']."', ";
