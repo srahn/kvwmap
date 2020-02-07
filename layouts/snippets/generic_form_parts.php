@@ -480,6 +480,7 @@
 					$reloadParams .= '&fromobject='.$layer_id.'_'.$name.'_'.$k;
 					$reloadParams .= '&targetlayer_id='.$layer_id;
 					$reloadParams .= '&targetattribute='.$name;
+					$reloadParams .= '&reload='.$attributes['reload'][$j];
 					$reloadParams .= '&oid='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
 					$reloadParams .= '&tablename='.$attributes['table_name'][$attributes['the_geom']];											# dito
 					$reloadParams .= '&columnname='.$attributes['the_geom'];																								# dito
@@ -505,12 +506,14 @@
 						$pfadteil = explode('&original_name=', $dokumentpfad);
 						$dateiname = $pfadteil[0];
 						if ($layer['document_url'] != '') {
+							$remote_url = false;
+							if($_SERVER['HTTP_HOST'] != parse_url($layer['document_url'], PHP_URL_HOST))$remote_url = true;		# die URL verweist auf einen anderen Server
 							$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
 						}
-						if (file_exists($dateiname)) {
+						if (file_exists($dateiname) OR $remote_url) {
 							$dateinamensteil = explode('.', $dateiname);
 							$type = strtolower($dateinamensteil[1]);
-							$thumbname = $gui->get_dokument_vorschau($dateinamensteil);
+							$thumbname = $gui->get_dokument_vorschau($dateinamensteil, $remote_url);
 							if ($layer['document_url'] != '') {
 								$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
 								$target = 'target="_blank"';
@@ -537,7 +540,11 @@
 							}
 							# Videostream
 							elseif ($layer['document_url'] != '' AND in_array($type, array('mp4'))) {
-								$datapart .= '<video width="'.PREVIEW_IMAGE_WIDTH.'" src="'.$dokumentpfad.'" controls>';
+								$datapart .= '
+									<video width="'.PREVIEW_IMAGE_WIDTH.'" controls>
+										<source src="'.$dokumentpfad.'" type="video/mp4">
+									</video>
+									';
 							}
 							# Rest
 							else {
