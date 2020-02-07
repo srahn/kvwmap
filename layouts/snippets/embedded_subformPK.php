@@ -67,17 +67,7 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 						} 
 						if ($layer['privileg'] == 2 and $layer['shape'][$k][$layer['attributes']['Editiersperre']] != 't'){	?>
 						<td style="text-align: center">
-							<i
-								class="fa fa-times buttonlink"
-								aria-hidden="true"
-								style=""
-								onclick="subdelete_data(
-									<? echo $layer['Layer_ID']; ?>,
-									'<? echo $element_id; ?>',
-									<? echo $layer['shape'][$k][$layer['maintable'] . '_oid']; ?>,
-									''
-								);"
-							></i>
+							<a href="javascript:void(0)" onclick="subdelete_data(<? echo $layer['Layer_ID']; ?>, '<? echo $element_id; ?>', <? echo $layer['shape'][$k][$layer['maintable'] . '_oid']; ?>, '');"><img style="width: 18px" src="graphics/datensatz_loeschen.png"></a>
 						</td>
 						<? } ?>
 					</tr><?
