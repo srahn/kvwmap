@@ -67,9 +67,10 @@
 </table>
 <?
 	}
+	$table_id = rand(0, 100000);
 	echo $layer['paging'];
 ?>
-<table border="0" cellspacing="1" cellpadding="2" width="100%">
+<table id="<? echo $table_id; ?>" border="0" cellspacing="1" cellpadding="2" width="100%">
 	<tr>
 		<td width="100%">   
 			<table class="gle1_table" cellspacing="0" cellpadding="2" width="100%">
@@ -202,7 +203,7 @@
 			if($layer['attributes']['visible'][$j]){
 				if($layer['attributes']['type'][$j] != 'geometry') {
 					if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-						echo '<td' . get_td_class_or_style(array('group_'.$groupname, $layer['shape'][$k][$layer['attributes']['style']], 'position: relative; text-align: right'.($collapsed ? ';display: none' : ''))) . '>';
+						echo '<td id="value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" '.get_td_class_or_style(array('group_'.$groupname, $layer['shape'][$k][$layer['attributes']['style']], 'position: relative; text-align: right'.($collapsed ? ';display: none' : ''))) . '>';
 						if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
 							echo calendar($layer['attributes']['type'][$j], $layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
 						}
@@ -225,7 +226,7 @@
 				}
 			}
 			else{
-				$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
+				$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" readonly="true" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
 				$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'|';
 			}
 		}
@@ -549,6 +550,11 @@
 	}
 	
 ?>
+	
+<script type="text/javascript">
+	var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
+	[].forEach.call(vchangers, function(vchanger){if(vchanger.oninput)vchanger.oninput();});
+</script>
 	
 	<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
 	<input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">

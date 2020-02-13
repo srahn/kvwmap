@@ -417,8 +417,9 @@ echo '			</ul>
 		legend_top = document.getElementById(\'legenddiv\').getBoundingClientRect().top;
 		legend_bottom = document.getElementById(\'legenddiv\').getBoundingClientRect().bottom;
 		posy = document.getElementById(\'options_'.$this->formvars['layer_id'].'\').getBoundingClientRect().top;
-		if(posy > legend_bottom - 150)posy = legend_bottom - 150;
-		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = document.getElementById(\'map\').offsetTop + posy - (13+legend_top);
+		options_height = document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').getBoundingClientRect().height;
+		if(posy > legend_bottom - options_height)posy = legend_bottom - options_height;
+		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = document.getElementById(\'map\').offsetTop + posy - legend_top;
 		';
 	}
 
@@ -1736,6 +1737,9 @@ echo '			</ul>
 			 }
 			 $layer->setFilter($expr);
 			}
+			if ($layerset['styleitem']!='') {
+				$layer->set('styleitem',$layerset['styleitem']);
+			}
 			# Layerweite Labelangaben
 			if ($layerset['labelitem']!='') {
 				$layer->set('labelitem',$layerset['labelitem']);
@@ -2749,18 +2753,12 @@ echo '			</ul>
 			case 'pdf' : {
 				$this->formvars['file']=1;
 				if ($this->formvars['file']) {
-					echo '
-						<html>
-							<head>
-								<title>PDF-Ausgabe</title>
-								<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-								<META HTTP-EQUIV=REFRESH CONTENT="0; URL=' . TEMPPATH_REL.$this->outputfile . '">
-							</head>
-							<body>
-								<BR>Folgende Datei wird automatisch aufgerufen: <a href="' . TEMPPATH_REL.$this->outputfile . '">' . $this->outputfile . '</a>
-							</body>
-						</html>
-					';
+					header("Content-type: application/pdf");
+					header("Content-Disposition: attachment; filename=\"" . $this->outputfile."\"");
+					header("Expires: 0");
+					header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+					header("Pragma: public");
+					readfile(IMAGEPATH.$this->outputfile);
 				}
 				else {
 					$this->pdf->ezStream();
@@ -4254,6 +4252,14 @@ echo '			</ul>
 				$this->administration->update_backups_in_crontab();
 				$this->showAdminFunctions();
 			} break;
+			case "create_inserts_from_dataset" : {
+				$inserts_file = LOGPATH . 'inserts_from_dataset.sql';
+				file_put_contents($inserts_file, $this->administration->create_inserts_from_dataset($this->formvars['schema'], $this->formvars['table'], $this->formvars['where']));
+				header("Content-type:application/pdf");
+				header("Content-Disposition:attachment; filename=" . $this->formvars['schema'] . "-" . $this->formvars['table'] . "-" . $this->formvars['where'] . ".sql");
+				readfile($inserts_file);
+				exit;
+			} break;
 			default : {
 				$this->showAdminFunctions();
 			}
@@ -4954,7 +4960,7 @@ echo '			</ul>
       if($attribute != '' AND strpos($select, '*') === false AND strpos($select, $attribute) === false){			# Attribut für automatische Klassifizierung mit ins data packen
       	$select = str_replace(' from ', ', '.$attribute.' from ', strtolower($select));
       }
-      if(strpos(strtolower($select), ' where ') === false){
+      if(stripos(str_replace([chr(10), chr(13)], ' ', $select), ' where ') === false){
         $select .= " WHERE ";
       }
       else{
@@ -6436,16 +6442,16 @@ echo '			</ul>
 		if(file_exists($dateinamensteil[0].'_thumb.jpg'))unlink($dateinamensteil[0].'_thumb.jpg');
 	}
 
-  function get_dokument_vorschau($dateinamensteil){
+  function get_dokument_vorschau($dateinamensteil, $remote_url = false){
 		$type = strtolower($dateinamensteil[1]);
   	$dokument = $dateinamensteil[0].'.'.$dateinamensteil[1];
-		if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){			// für Bilder und PDFs werden automatisch Thumbnails erzeugt
+		if(!$remote_url AND in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){			// für Bilder und PDFs werden automatisch Thumbnails erzeugt
 			$thumbname = $dateinamensteil[0].'_thumb.jpg';
 			if(!file_exists($thumbname)){
 				exec(IMAGEMAGICKPATH.'convert -filter Hanning "'.$dokument.'"[0] -quality 75 -background white -flatten -resize '.PREVIEW_IMAGE_WIDTH.'x1000\> "'.$thumbname.'"');
 			}
 		}
-		else{																// alle anderen Dokumenttypen bekommen entsprechende Dokumentensymbole als Vorschaubild
+		else{																// alle anderen Dokumenttypen oder Dateien auf fremden Servern bekommen entsprechende Dokumentensymbole als Vorschaubild
 			$dateinamensteil[1] = 'gif';
   		switch ($type) {
   			default : {
@@ -7905,48 +7911,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 
 			# Klassen übernehmen (aber als neue Klassen anlegen)
-			$name = @array_values($this->formvars['name']);
-			foreach($supportedLanguages as $language){
-				if($language != 'german'){
-					$name_[$language] = @array_values($this->formvars['name_'.$language]);
-				}
-			}
-			$expression = @array_values($this->formvars['expression']);
-			$classification = @array_values($this->formvars['classification']);
-			$legendgraphic = @array_values($this->formvars['legendgraphic']);
-			$legendimagewidth = @array_values($this->formvars['legendimagewidth']);
-			$legendimageheight = @array_values($this->formvars['legendimageheight']);
-			$order = @array_values($this->formvars['order']);
-			$legendorder = @array_values($this->formvars['classlegendorder']);
-			$ID = @array_values($this->formvars['ID']);
-			for($i = 0; $i < count($name); $i++){
-				$attrib['name'] = $name[$i];
-				foreach($supportedLanguages as $language){
-					if($language != 'german'){
-						$attrib['name_'.$language] = $name_[$language][$i];
-					}
-				}
-				$attrib['layer_id'] = $this->formvars['selected_layer_id'];
-				$attrib['expression'] = $expression[$i];
-				$attrib['classification'] = $classification[$i];
-				$attrib['legendgraphic'] = $legendgraphic[$i];
-				$attrib['legendimagewidth'] = $legendimagewidth[$i];
-				$attrib['legendimageheight'] = $legendimageheight[$i];
-				$attrib['order'] = $order[$i];
-				$attrib['legendorder'] = $legendorder[$i];
-				$class_id = $mapDB->new_Class($attrib);
-				# Styles übernehmen (in u_styles2classes eintragen)
-				$styles = $mapDB->read_Styles($ID[$i]);
-				for($j = 0; $j < count($styles); $j++){
-					$style_id = $mapDB->new_Style($styles[$j]);
-					$mapDB->addStyle2Class($class_id, $style_id, $styles[$j]['drawingorder']);
-				}
-				# Labels übernehmen (in u_labels2classes eintragen)
-				$labels = $mapDB->read_Label($ID[$i]);
-				for($j = 0; $j < count($labels); $j++){
-					$label_id = $mapDB->new_Label($labels[$j]);
-					$mapDB->addLabel2Class($class_id, $label_id);
-				}
+			$classes = $mapDB->read_Classes($this->formvars['old_id']);
+			for($i = 0; $i < count($classes); $i++){
+				$mapDB->copyClass($classes[$i]['Class_ID'], $this->formvars['selected_layer_id']);
 			}
 		}
   }
@@ -8004,7 +7971,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				showAlert('Keine connection angegeben.');
 			}
 		}
-		if($this->formvars['connectiontype'] == MS_WFS){
+		if ($this->formvars['connectiontype'] == MS_WFS){
 			include_(CLASSPATH.'wfs.php');
 			$url = $this->formvars['connection'];
 			$version = $this->formvars['wms_server_version'];
@@ -8801,9 +8768,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($this->formvars['layer_id']){
 			$this->formvars['anzahl'] = MAXQUERYROWS;
 			$this->layerset=$this->user->rolle->getLayer($this->formvars['layer_id']);
+			$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 			switch ($this->layerset[0]['connectiontype']){
-        case MS_POSTGIS : {
-          $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+        case MS_POSTGIS : {          
 					$layerdb = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
 					$layerdb->setClientEncoding();
 					$path = $mapdb->getPath($this->formvars['layer_id']);
@@ -9605,16 +9572,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
         case 'SubFormEmbeddedPK' : {
           if(!$this->success)echo $ret['msg'];
-          else echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+          else{
+						if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+							echo '██currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
+						}
+						else{			# ansonsten nur das SubForm-Listen-Div
+							echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+						}
+					}
         } break;
       }
-
-			if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
-				echo '██';
-				echo "currentform.go.value='get_last_query';
-							overlay_submit(currentform, false);";
-			}
-
     }
     else {
       if ($this->success == false) {
@@ -13646,10 +13613,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->add_message('warning', 'Keine Änderung.');
 		}
 		if ($this->formvars['embedded'] != '') {
-			# wenn es ein Datensatz aus einem embedded-Formular ist, 
-			# muss das embedded-Formular entfernt werden und 
-			# das Listen-DIV neu geladen werden (getrennt durch █)
-			echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
+			# es wurde ein Datensatz aus einem embedded-Formular gespeichert 
+			if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+				echo '█currentform.go.value=\'get_last_query\';	overlay_submit(currentform, false);';
+			}
+			else{				# ansonsten wird das embedded-Formular entfernt und das Listen-DIV neu geladen (getrennt durch █)
+				echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
+			}
 		}
 		else {
 			$this->last_query = $this->user->rolle->get_last_query();
@@ -16291,11 +16261,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 } # end of class GUI
 
-##############################################################
-# Klasse MapObject zum laden der Map-Daten aus der Datenbank #
-##############################################################
-# Klasse db_mapObj #
-####################
 class db_mapObj{
   var $debug;
   var $referenceMap;
@@ -16378,7 +16343,7 @@ class db_mapObj{
 				$name_column . ",
 				l.alias,
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem,
-				l.labelmaxscale, l.labelminscale, l.labelrequires, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.styleitem, l.classification, l.filteritem,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				g.id, ".$group_column.", g.obergruppe, g.order
@@ -17297,6 +17262,9 @@ class db_mapObj{
 										case 'list_edit': {														# nur Listen-Editier-Modus
 											$attributes['list_edit'][$i] = true;
 										} break;
+										case 'reload': {														# die komplette Sachdatenanzeige soll neu geladen werden
+											$attributes['reload'][$i] = true;
+										} break;										
 									}
 								}
 							}
@@ -17761,7 +17729,7 @@ class db_mapObj{
 		}
 		$style['backgroundcolor'] = NULL;
 		$style['minsize'] = NULL;
-		$style_id = $this->new_Style($style);
+		if(!$style_id)$style_id = $this->new_Style($style);
 		$this->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
 		if($user->rolle->result_hatching){
 			$style['symbolname'] = NULL;
@@ -17928,6 +17896,17 @@ class db_mapObj{
 			$attribute_sets[] = $key . " = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
 		}
 
+		# Schreibt alle Attribute, die getrimmt werden sollen
+		foreach(
+			array(
+				'connection'
+			) AS $key
+		) {
+			if ($formvars[$key]	!= '') {
+				$attribute_sets[] = "`" . $key . "` = '" . trim($formvars[$key]) . "'";
+			}
+		}
+
 		# Schreibt alle Attribute, die immer geschrieben werden sollen, egal wie der Wert ist
 		# Besonderheit beim Attribut classification, kommt aus Field layer_classification,
 		# weil classification schon belegt ist von den Classes
@@ -17954,10 +17933,10 @@ class db_mapObj{
 				'offsite',
 				'labelrequires',
 				'postlabelcache',
-				'connection',
 				'printconnection',
 				'connectiontype',
 				'classitem',
+				'styleitem',
 				'filteritem',
 				'tolerance',
 				'toleranceunits',
@@ -18019,7 +17998,7 @@ class db_mapObj{
 					$sql .= "`Name_" . $language."`, ";
 				}
 			}
-			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`) VALUES(";
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'" . $formvars['id']."', ";
       }
@@ -18071,12 +18050,13 @@ class db_mapObj{
       $sql .= $formvars['labelminscale'].", ";
       $sql .= "'" . $formvars['labelrequires']."', ";
 			$sql .= "'" . $formvars['postlabelcache']."', ";
-      $sql .= "'" . $formvars['connection']."', ";
+      $sql .= "'" . trim($formvars['connection']) ."', ";
 			if($formvars['connection_id'] == '')$sql .= "NULL, ";
       else $sql .= "'" . $formvars['connection_id']."', ";
       $sql .= "'" . $formvars['printconnection']."', ";
       $sql .= ($formvars['connectiontype'] =='' ? "6" : $formvars['connectiontype']) .", "; # Set default to postgis layer
       $sql .= "'" . $formvars['classitem']."', ";
+			$sql .= "'" . $formvars['styleitem']."', ";
 			$sql .= "'" . $formvars['layer_classification']."', ";
       $sql .= "'" . $formvars['filteritem']."', ";
 			if($formvars['cluster_maxdistance'] == '')$formvars['cluster_maxdistance'] = 'NULL';
@@ -19634,14 +19614,6 @@ class db_mapObj{
   }
 }
 
-###########################################
-# Dokumentenklasse                        #
-###########################################
-# Klasse Document #
-################
-
-# functions of class Document
-
 class Document {
   var $html;
   var $debug;
@@ -20175,4 +20147,5 @@ class point {
     $this->y=round(($this->y-$minY)/$pixSize);
   }
 }
+
 ?>

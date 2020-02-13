@@ -480,6 +480,7 @@
 					$reloadParams .= '&fromobject='.$layer_id.'_'.$name.'_'.$k;
 					$reloadParams .= '&targetlayer_id='.$layer_id;
 					$reloadParams .= '&targetattribute='.$name;
+					$reloadParams .= '&reload='.$attributes['reload'][$j];
 					$reloadParams .= '&oid='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
 					$reloadParams .= '&tablename='.$attributes['table_name'][$attributes['the_geom']];											# dito
 					$reloadParams .= '&columnname='.$attributes['the_geom'];																								# dito
@@ -505,16 +506,23 @@
 						$pfadteil = explode('&original_name=', $dokumentpfad);
 						$dateiname = $pfadteil[0];
 						if ($layer['document_url'] != '') {
+							$remote_url = false;
+							if($_SERVER['HTTP_HOST'] != parse_url($layer['document_url'], PHP_URL_HOST))$remote_url = true;		# die URL verweist auf einen anderen Server
 							$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
 						}
-						if (file_exists($dateiname)) {
+						if (file_exists($dateiname) OR $remote_url) {
 							$dateinamensteil = explode('.', $dateiname);
 							$type = strtolower($dateinamensteil[1]);
-							$thumbname = $gui->get_dokument_vorschau($dateinamensteil);
+							$thumbname = $gui->get_dokument_vorschau($dateinamensteil, $remote_url);
 							if ($layer['document_url'] != '') {
 								$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
 								$target = 'target="_blank"';
-								$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+								if(dirname($thumbname).'/' == IMAGEPATH){
+									$thumbname = IMAGEURL.basename($thumbname);
+								}
+								else{
+									$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+								}
 							}
 							else {
 								$original_name = $pfadteil[1];
@@ -526,9 +534,19 @@
 							if ($hover_preview) {
 								$onmouseover = 'onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
 							}
+							# Bilder mit Vorschaubild
 							if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
 								$datapart .= '<a href="' . $url . $dokumentpfad . '" ' . $target . '><img class="preview_image" src="' . $url . $thumbname . '" ' . $onmouseover . '></a>';
 							}
+							# Videostream
+							elseif ($layer['document_url'] != '' AND in_array($type, array('mp4'))) {
+								$datapart .= '
+									<video width="'.PREVIEW_IMAGE_WIDTH.'" controls>
+										<source src="'.$dokumentpfad.'" type="video/mp4">
+									</video>
+									';
+							}
+							# Rest
 							else {
 								$datapart .= '<a href="' . $url . $dokumentpfad . '" ' . $target . '><img class="preview_doc" src="' . $url . $thumbname . '"></a>';
 							}
