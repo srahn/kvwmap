@@ -510,9 +510,11 @@ class administration{
 		$datasets = $pgo->find_where($where);
 		if (count($datasets) > 0) {
 			$fkeys = $datasets[0]->get_fkey_constraints();
+			$attribute_types = $datasets[0]->get_attribute_types();
+			#echo '<p>attribute_types from table ' . $datasets[0]->tableName . ': ' . print_r($attribute_types, 1);
 			foreach ($datasets AS $dataset) {
 				#echo '<p>return inserts for '. $table . ': ' . $dataset->get('id');
-				return $dataset->as_inserts_with_childs($fkeys);
+				return $dataset->as_inserts_with_childs($fkeys, $attribute_types);
 			}
 		}
 	}

@@ -50,6 +50,7 @@ class PgObject {
 		$this->identifier = 'id';
 		$this->identifier_type = 'integer';
 		$this->show = false;
+		$this->attribute_types = array();
 	}
 
 	public static	function postgis_version($gui) {
@@ -123,6 +124,29 @@ class PgObject {
 
 	function getValues() {
 		return array_values($this->data);
+	}
+
+	function get_values_for_insert($attribute_types = array()) {
+		if (count($attribute_types) == 0) {
+			$this->get_attribute_types();
+		}
+		$values = array();
+		foreach ($this->data AS $key => $value) {
+			if (is_array($value)) {
+				$value = "{" . implode(
+					", ",
+					(in_array($attribute_types[$key], $this->database->pg_text_attribute_types) ? "'" . $value . "'" : $value)
+				) . "}";
+			}
+			if ('' . $value == '') {
+				$values[] = "NULL";
+			}
+			else {
+				#echo '<br>is type: ' . $attribute_types[$key] . ' of key: ' . $key . ' in pg_text_attribute_types';
+				$values[] = (in_array($attribute_types[$key], $this->database->pg_text_attribute_types) ? "'" . $value . "'" : $value);
+			}
+		}
+		return $values;
 	}
 
 	function getKVP($escaped = false, $without_identifier = false) {
@@ -297,6 +321,26 @@ class PgObject {
 		return $this->fkeys;
 	}
 
+	function get_attribute_types() {
+		$sql = "
+			SELECT
+				column_name,
+				data_type
+			FROM
+				information_schema.columns
+			WHERE
+				table_schema = '" . $this->schema . "' AND
+				table_name = '" . $this->tableName . "'
+		";
+		#echo '<p>sql zur Abfrage von attribut typen: ' . $sql;
+		$query = pg_query($this->database->dbConn, $sql);
+		$this->attribute_types = array();
+		while ($rs = pg_fetch_assoc($query)) {
+			$this->attribute_types[$rs['column_name']] = $rs['data_type'];
+		}
+		return $this->attribute_types;
+	}
+
 	/*
 	* Query all child elementes of a table related over given fk_id
 	* @params $child_schema string - Name of the schema of child table
@@ -334,7 +378,7 @@ class PgObject {
 	*        rufe diese Funktion auf
 	* Gebe das Insert-Statement dieses Datensatzes heraus.
 	*/
-	function as_inserts_with_childs($fkeys) {
+	function as_inserts_with_childs($fkeys, $attribute_types) {
 		$sql = "";
 		#echo '<p>anzahl fkeys: ' . count($fkeys);
 		foreach ($fkeys AS $fk) {
@@ -344,15 +388,18 @@ class PgObject {
 				#echo '<p>child 0: ' . $this->childs[$fk['child_table']][0]->tableName;
 				# fragt die child fkeys nur vom ersten child ab und übergibt diese in der Schleife an alle Aufrufe
 				$child_keys = $this->childs[$fk['child_table']][0]->get_fkey_constraints();
+				# fragt die attribut typen nur vom ersten child ab und übergibt diese in der Schleife an alle Aufrufe
 				#echo '<p>Anzahl child_keys: ' . count($child_keys);
 				#echo '<p>keys: ' . print_r($child_keys, true);
+
+				$child_attribute_types = $this->childs[$fk['child_table']][0]->get_attribute_types();
 				foreach ($this->childs[$fk['child_table']] AS $child) {
-					$sql .= $child->as_inserts_with_childs($child_keys);
+					$sql .= $child->as_inserts_with_childs($child_keys, $child_attribute_types);
 				}
 			}
 		}
-		#$sql .= '<br>inserts für ' . $this->tableName . ': ' . $this->get($this->identifier);
-		$sql .= $this->as_insert();
+		
+		$sql .= $this->as_insert($attribute_types);
 		return $sql;
 	}
 
@@ -360,9 +407,13 @@ class PgObject {
 	* Liefert dieses Objekt als SQL INSERT-Statement zurück
 	* @return text - Das INSERT Statement des Objektes
 	*/
-	function as_insert() {
+	function as_insert($attribute_types) {
+		#echo '<br>as_insert attribute_types: ' . print_r($attribute_types, true);
 		$sql = "INSERT INTO " . $this->schema . "." . $this->tableName . " (" . implode(', ', $this->getKeys()) . ")
-VALUES ('" . implode("', '", $this->getValues()) . "');
+VALUES (" . implode(
+			", ",
+			$this->get_values_for_insert($attribute_types)
+		) . ");
 ";
 		return $sql;
 	}
