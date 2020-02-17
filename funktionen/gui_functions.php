@@ -51,6 +51,15 @@ function roundNumber(num, scale){
   }
 }
 
+function scrollToSelected(select){
+	var height = select.scrollHeight / select.childElementCount;
+  for(var i = 0; i < select.options.length; i++){
+		if(select.options[i].selected){			
+			select.scrollTop = i * height;
+		}
+	}
+}
+
 function toggle(obj){
 	if(obj.style.display == 'none')obj.style.display = '';
 	else obj.style.display = 'none';

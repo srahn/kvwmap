@@ -256,7 +256,7 @@ $j=0;
 					for($s = 0; $s < 4; $s++){ ?>
 						<div style="float: left; padding: 4px;"><?
 							for($i = 0; $i < $floor+$r; $i++) {
-								if(!in_array($this->data_import_export->attributes['form_element_type'][$j], ['dynamicLink', 'SubFormEmbeddedPK'])){
+								if(!in_array($this->data_import_export->attributes['form_element_type'][$j], ['dynamicLink'])){
 									if($this->data_import_export->attributes['group'][$j] != '') $groupnames = true;
 									if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument'){$document_attributes = true; $document_ids[] = $j;} ?>
 									<div style="padding: 4px;
