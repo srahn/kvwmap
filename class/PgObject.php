@@ -379,7 +379,7 @@ class PgObject {
 	* Gebe das Insert-Statement dieses Datensatzes heraus.
 	*/
 	function as_inserts_with_childs($fkeys, $attribute_types) {
-		$sql = "";
+		$sql = $this->as_insert($attribute_types);
 		#echo '<p>anzahl fkeys: ' . count($fkeys);
 		foreach ($fkeys AS $fk) {
 			$this->find_childs($fk['child_schema'], $fk['child_table'], $fk['fkey_column'], $this->get($this->identifier));
@@ -398,8 +398,6 @@ class PgObject {
 				}
 			}
 		}
-		
-		$sql .= $this->as_insert($attribute_types);
 		return $sql;
 	}
 
