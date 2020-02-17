@@ -56,7 +56,7 @@ class GUI {
 	var $formvars;
 	var $legende;
 	var $map;
-	var $mapDB;
+	var $mapdb;
 	var $img;
 	var $FormObject;
 	var $StellenForm;
@@ -10863,23 +10863,116 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->output();
   }
 
-  function layer_attributes_privileges_save(){
-  	$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-    $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-    if ($this->formvars['stelle'] != '' AND $this->formvars['selected_layer_id'] != '') {
+	function layer_attributes_privileges_save() {
+		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
+		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+		$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+		if ($this->formvars['stelle'] != '' AND $this->formvars['selected_layer_id'] != '') {
 			$stellen = explode('|', $this->formvars['stelle']);
 			foreach ($stellen as $stelleid) {
 				$stelle = new stelle($stelleid, $this->database);
 				$stelle->set_attributes_privileges($this->formvars, $this->attributes);
-				$stelle->set_layer_privileges($this->formvars['selected_layer_id'], $this->formvars['privileg'.$stelleid], $this->formvars['export_privileg'.$stelleid]);
+				$stelle->set_layer_privileges($this->formvars['selected_layer_id'], $this->formvars['privileg' . $stelleid], $this->formvars['export_privileg' . $stelleid]);
 			}
-    }
-    elseif ($this->formvars['selected_layer_id'] != '') {
-      $mapdb->set_default_layer_privileges($this->formvars, $this->attributes);
-    }
-    $this->layer_attributes_privileges();
-  }
+		}
+		elseif ($this->formvars['selected_layer_id'] != '') {
+			$mapdb->set_default_layer_privileges($this->formvars, $this->attributes);
+		}
+		$this->layer_attributes_privileges();
+	}
+
+	/*
+	* Funktion übernimmt alle Attributprivilegien von layer $this->formvars['from_layer_id']
+	* auf Layer $this->formvars['to_layer_id'] wo die stelle_id und der attributname übereinstimmt
+	*/
+	function Attributeditor_takeover_layer_attributes_privileges() {
+		# take over layer attributes privileges
+		$sql = "
+			UPDATE
+				layer_attributes2stelle AS t2 INNER JOIN
+				layer_attributes2stelle AS t1 ON t1.attributename = t2.attributename AND t1.stelle_id = t2.stelle_id
+			SET
+				t2.privileg = t1.privileg, 
+				t2.tooltip = t1.tooltip
+			WHERE
+				t1.layer_id = " . $this->formvars['from_layer_id'] . " AND
+				t2.layer_id = " . $this->formvars['to_layer_id'] . "
+		";
+		#echo '<br>Sql zur Übernahme der Attributrechte: ' . $sql;
+		$this->debug->write("<p>file:stelle.php class:gui->Attributeditor_takeover_layer_attributes_privileges - Übernehmen der Stellen-Layerrechte von einem Layer zu einem anderen:<br>" . $sql, 4);
+		$query = mysql_query($sql, $this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
+	}
+
+	/*
+	* Funktion übernimmt alle Layerprivilegien von layer $this->formvars['from_layer_id']
+	* auf Layer $this->formvars['to_layer_id'] wo die stelle_id übereinstimmt
+	*/
+	function Attributeditor_takeover_layer_privileges() {
+		# take over layer privileges
+		$sql = "
+			UPDATE
+				used_layer AS t2 INNER JOIN
+				used_layer AS t1 ON t1.stelle_id = t2.stelle_id
+			SET
+				t2.privileg = t1.privileg,
+				t2.export_privileg = t1.export_privileg
+			WHERE
+				t1.layer_id = " . $this->formvars['from_layer_id'] . " AND
+				t2.layer_id = " . $this->formvars['to_layer_id'] . "
+		";
+		# echo '<br>Sql zur Übernahme der layer privileges von einem Layer zum anderen
+		$this->debug->write("<p>file:stelle.php class:gui->Attributeditor_takeover_attributes_privileges - übernehmen der Layerrechte von einem Layer zu einem anderen:<br>".$sql,4);
+		$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+	}
+
+	/*
+	* Funktion übernimmt alle Default-Layerattribute von layer $this->formvars['from_layer_id']
+	* auf Layer $this->formvars['to_layer_id'] wo der Attributname (name) übereinstimmt.
+	*/
+	function Attributeditor_takeover_default_layer_attributes_privileges() {
+		# take over default layer attributes
+		$sql = "
+			UPDATE
+				layer_attributes AS t2 INNER JOIN
+				layer_attributes AS t1 ON t1.name = t2.name
+			SET
+				t2.privileg = t1.privileg, 
+				t2.query_tooltip = t1.query_tooltip
+			WHERE
+				t1.layer_id = " . $this->formvars['from_layer_id'] . " AND
+				t2.layer_id = " . $this->formvars['to_layer_id'] . "
+		";
+		#echo '<br>Sql zur Übernahme der default layer privileges von einem Layer auf einen anderen: ' . $sql;
+		$this->debug->write("<p>file:users.php class:gui->Attributeditor_takeover_default_layer_attributes_privileges - Speichern der Default-Layerrechte der Attribute:<br>" . $sql,4);
+		$query = mysql_query($sql);
+		if ($query==0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+	}
+
+	/*
+	* Funktion übernimmt alle Default-Layer Privilegien von layer $this->formvars['from_layer_id']
+	* auf Layer $this->formvars['to_layer_id'] wo der Attributname (name) übereinstimmt.
+	*/
+	function Attributeditor_takeover_default_layer_privileges() {
+		# take over default layer privileges
+		$sql = "
+			UPDATE
+				layer AS t2,
+				layer AS t1
+			SET
+				t2.privileg = t1.privileg, 
+				t2.export_privileg = t1.export_privileg
+			WHERE
+				t1.Layer_ID = " . $this->formvars['from_layer_id'] . " AND
+				t2.Layer_ID = " . $this->formvars['to_layer_id'] . "
+		";
+		#echo '<br>Sql zur Übernahme der default layer attribute privileges von einem Layer auf einen anderen: ' . $sql;
+		$this->debug->write("<p>file:users.php class:gui->Attributeditor_takeover_default_layer_privileges - Speichern der Default-Layerrechte:<br>" . $sql,4);
+		$query = mysql_query($sql);
+		if ($query==0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+
+	}
 
   function StelleAendern() {
 		#echo '<p><b>StelleAendern</b>';
@@ -18828,8 +18921,8 @@ class db_mapObj{
 					`layer_id` = " . $formvars['selected_layer_id'] . " AND
 					`name` = '" . $attributes['name'][$i] . "'
 			";
-			#echo '<br>Sql: ' . $sql;
-			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern des Layerrechte zur Stelle:<br>" . $sql, 4);
+			#echo '<br>Sql zum Speichern der Default-Layerrechte der Attribute: ' . $sql;
+			$this->debug->write("<p>file:users.php class:db_MapObj->set_default_layer_privileges - Speichern der Default-Layerrechte der Attribute<br>" . $sql, 4);
 			$query = mysql_query($sql);
 			if ($query == 0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
 
@@ -18842,8 +18935,8 @@ class db_mapObj{
 				WHERE
 					`Layer_ID` = " . $formvars['selected_layer_id'] . "
 			";
-			#echo '<br>Sql: ' . $sql;
-			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern der Layerrechte zur Stelle:<br>" . $sql,4);
+			#echo '<br>Sql zur Speicherung der Default-Layerrechte: ' . $sql;
+			$this->debug->write("<p>file:users.php class:db_MapObj->set_default_layer_privileges - Speichern der Default-Layerrechte:<br>" . $sql,4);
 			$query=mysql_query($sql);
 			if ($query==0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
