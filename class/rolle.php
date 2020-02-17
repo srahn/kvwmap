@@ -1053,7 +1053,7 @@ class rolle {
 			for($i = $active_layer_count-2; $i >= 0; $i--){		# von hinten beginnen
 				$layer_oben = &$layerset['layer_ids'][$active_layers[$i]];
 				$layer_unten = $layerset['layer_ids'][$active_layers[$i+1]];
-				if($layer_oben['drawingorder'] < $layer_unten['drawingorder']){		// drawingorder muss erhöht werden
+				if($layer_oben['drawingorder'] <= $layer_unten['drawingorder']){		// drawingorder muss erhöht werden
 					$newdrawingorder = $layer_unten['drawingorder'] + 1;
 					$layer_oben['drawingorder'] = $newdrawingorder;
 					$layers_changed[$layer_oben['id']] = true;
