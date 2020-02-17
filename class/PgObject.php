@@ -126,24 +126,31 @@ class PgObject {
 		return array_values($this->data);
 	}
 
-	function get_values_for_insert($attribute_types = array()) {
+	function get_values_for_insert($escaped = false, $attribute_types = array()) {
+		#echo '<br>attr_types in get_values_for_insert: ' . print_r($attribute_types, true);
 		if (count($attribute_types) == 0) {
 			$this->get_attribute_types();
 		}
 		$values = array();
 		foreach ($this->data AS $key => $value) {
+			$bracket = (in_array($attribute_types[$key], $this->database->pg_text_attribute_types) ? "'" : "");
+			#echo '<br>is type: ' . $attribute_types[$key] . ' of key: ' . $key . ' in pg_text_attribute_types';
+
 			if (is_array($value)) {
-				$value = "{" . implode(
-					", ",
-					(in_array($attribute_types[$key], $this->database->pg_text_attribute_types) ? "'" . $value . "'" : $value)
-				) . "}";
+				$value = array_map(
+					function($v) {
+						return ($escaped ? pg_escape_string($v) : $v);
+					},
+					$value
+				);
+				$value = "{" . $bracket . implode($bracket . ", " . $bracket, $value) . $bracket . "}";
 			}
+
 			if ('' . $value == '') {
 				$values[] = "NULL";
 			}
 			else {
-				#echo '<br>is type: ' . $attribute_types[$key] . ' of key: ' . $key . ' in pg_text_attribute_types';
-				$values[] = (in_array($attribute_types[$key], $this->database->pg_text_attribute_types) ? "'" . $value . "'" : $value);
+				$values[] = $bracket . ($escaped ? pg_escape_string($value) : $value) . $bracket;
 			}
 		}
 		return $values;
@@ -410,7 +417,7 @@ class PgObject {
 		$sql = "INSERT INTO " . $this->schema . "." . $this->tableName . " (" . implode(', ', $this->getKeys()) . ")
 VALUES (" . implode(
 			", ",
-			$this->get_values_for_insert($attribute_types)
+			$this->get_values_for_insert(true, $attribute_types)
 		) . ");
 ";
 		return $sql;
