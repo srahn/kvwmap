@@ -14230,7 +14230,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$attributes = $this->qlayerset[0]['attributes'];
 			$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
 			$this->loadMap('DataBase');
-			if(count($this->qlayerset[0]['shape']) > 0 AND ($this->qlayerset[0]['shape'][0][$attributes['the_geom']] != '')){			# wenn was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
+			if($this->last_query['go'] != 'Sachdaten' AND count($this->qlayerset[0]['shape']) > 0 AND ($this->qlayerset[0]['shape'][0][$attributes['the_geom']] != '')){			# wenn es eine Suche war und was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
 				$this->zoomed = true;
 				switch ($this->qlayerset[0]['connectiontype']) {
 					case MS_POSTGIS : {
