@@ -150,7 +150,12 @@ class PgObject {
 				$values[] = "NULL";
 			}
 			else {
-				$values[] = $bracket . ($escaped ? pg_escape_string($value) : $value) . $bracket;
+				if ($attribute_types[$key] == 'boolean') {
+					$values[] = ($value == 't' ? "true" : "false");
+				}
+				else {
+					$values[] = $bracket . ($escaped ? pg_escape_string($value) : $value) . $bracket;
+				}
 			}
 		}
 		return $values;
