@@ -287,7 +287,7 @@ function alias_replace(name){
 						  	<input type="text"
 								  name="order_<?php echo $this->attributes['name'][$i]; ?>"
 									value="<?php echo $this->attributes['order'][$i]; ?>"
-									size="1"
+									style="width: 27px"
 								>
 						  </td>
 						  <td align="left" valign="top">
