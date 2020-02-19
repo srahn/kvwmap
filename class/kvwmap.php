@@ -47,7 +47,7 @@ class GUI {
 	var $formvars;
 	var $legende;
 	var $map;
-	var $mapDB;
+	var $mapdb;
 	var $img;
 	var $FormObject;
 	var $StellenForm;
@@ -437,8 +437,9 @@ echo '			</ul>
 		legend_top = document.getElementById(\'legenddiv\').getBoundingClientRect().top;
 		legend_bottom = document.getElementById(\'legenddiv\').getBoundingClientRect().bottom;
 		posy = document.getElementById(\'options_'.$this->formvars['layer_id'].'\').getBoundingClientRect().top;
-		if(posy > legend_bottom - 150)posy = legend_bottom - 150;
-		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = document.getElementById(\'map\').offsetTop + posy - (13+legend_top);
+		options_height = document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').getBoundingClientRect().height;
+		if(posy > legend_bottom - options_height)posy = legend_bottom - options_height;
+		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = document.getElementById(\'map\').offsetTop + posy - legend_top;
 		';
 	}
 
@@ -1794,6 +1795,9 @@ echo '			</ul>
 			 }
 			 $layer->setFilter($expr);
 			}
+			if ($layerset['styleitem']!='') {
+				$layer->set('styleitem',$layerset['styleitem']);
+			}
 			# Layerweite Labelangaben
 			if ($layerset['labelitem']!='') {
 				$layer->set('labelitem',$layerset['labelitem']);
@@ -2711,18 +2715,12 @@ echo '			</ul>
 			case 'pdf' : {
 				$this->formvars['file']=1;
 				if ($this->formvars['file']) {
-					echo '
-						<html>
-							<head>
-								<title>PDF-Ausgabe</title>
-								<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-								<META HTTP-EQUIV=REFRESH CONTENT="0; URL=' . TEMPPATH_REL.$this->outputfile . '">
-							</head>
-							<body>
-								<BR>Folgende Datei wird automatisch aufgerufen: <a href="' . TEMPPATH_REL.$this->outputfile . '">' . $this->outputfile . '</a>
-							</body>
-						</html>
-					';
+					header("Content-type: application/pdf");
+					header("Content-Disposition: attachment; filename=\"" . $this->outputfile."\"");
+					header("Expires: 0");
+					header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+					header("Pragma: public");
+					readfile(IMAGEPATH.$this->outputfile);
 				}
 				else {
 					$this->pdf->ezStream();
@@ -4219,6 +4217,17 @@ echo '			</ul>
 				$this->administration->write_backup_scripts();
 				$this->administration->update_backups_in_crontab();
 				$this->showAdminFunctions();
+			} break;
+			case "create_inserts_from_dataset" : {
+				$inserts_file = LOGPATH . 'inserts_from_dataset.sql';
+#				echo $this->administration->create_inserts_from_dataset($this->formvars['schema'], $this->formvars['table'], $this->formvars['where']);
+
+				file_put_contents($inserts_file, $this->administration->create_inserts_from_dataset($this->formvars['schema'], $this->formvars['table'], $this->formvars['where']));
+				header("Content-type:application/pdf");
+				header("Content-Disposition:attachment; filename=" . $this->formvars['schema'] . "-" . $this->formvars['table'] . "-" . $this->formvars['where'] . ".sql");
+				readfile($inserts_file);
+
+				exit;
 			} break;
 			default : {
 				$this->showAdminFunctions();
@@ -6402,16 +6411,16 @@ echo '			</ul>
 		if(file_exists($dateinamensteil[0].'_thumb.jpg'))unlink($dateinamensteil[0].'_thumb.jpg');
 	}
 
-  function get_dokument_vorschau($dateinamensteil){
+  function get_dokument_vorschau($dateinamensteil, $remote_url = false){
 		$type = strtolower($dateinamensteil[1]);
   	$dokument = $dateinamensteil[0].'.'.$dateinamensteil[1];
-		if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){			// für Bilder und PDFs werden automatisch Thumbnails erzeugt
+		if(!$remote_url AND in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){			// für Bilder und PDFs werden automatisch Thumbnails erzeugt
 			$thumbname = $dateinamensteil[0].'_thumb.jpg';
 			if(!file_exists($thumbname)){
 				exec(IMAGEMAGICKPATH.'convert -filter Hanning "'.$dokument.'"[0] -quality 75 -background white -flatten -resize '.PREVIEW_IMAGE_WIDTH.'x1000\> "'.$thumbname.'"');
 			}
 		}
-		else{																// alle anderen Dokumenttypen bekommen entsprechende Dokumentensymbole als Vorschaubild
+		else{																// alle anderen Dokumenttypen oder Dateien auf fremden Servern bekommen entsprechende Dokumentensymbole als Vorschaubild
 			$dateinamensteil[1] = 'gif';
   		switch ($type) {
   			default : {
@@ -7871,48 +7880,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 
 			# Klassen übernehmen (aber als neue Klassen anlegen)
-			$name = @array_values($this->formvars['name']);
-			foreach($supportedLanguages as $language){
-				if($language != 'german'){
-					$name_[$language] = @array_values($this->formvars['name_'.$language]);
-				}
-			}
-			$expression = @array_values($this->formvars['expression']);
-			$classification = @array_values($this->formvars['classification']);
-			$legendgraphic = @array_values($this->formvars['legendgraphic']);
-			$legendimagewidth = @array_values($this->formvars['legendimagewidth']);
-			$legendimageheight = @array_values($this->formvars['legendimageheight']);
-			$order = @array_values($this->formvars['order']);
-			$legendorder = @array_values($this->formvars['classlegendorder']);
-			$ID = @array_values($this->formvars['ID']);
-			for($i = 0; $i < count($name); $i++){
-				$attrib['name'] = $name[$i];
-				foreach($supportedLanguages as $language){
-					if($language != 'german'){
-						$attrib['name_'.$language] = $name_[$language][$i];
-					}
-				}
-				$attrib['layer_id'] = $this->formvars['selected_layer_id'];
-				$attrib['expression'] = $expression[$i];
-				$attrib['classification'] = $classification[$i];
-				$attrib['legendgraphic'] = $legendgraphic[$i];
-				$attrib['legendimagewidth'] = $legendimagewidth[$i];
-				$attrib['legendimageheight'] = $legendimageheight[$i];
-				$attrib['order'] = $order[$i];
-				$attrib['legendorder'] = $legendorder[$i];
-				$class_id = $mapDB->new_Class($attrib);
-				# Styles übernehmen (in u_styles2classes eintragen)
-				$styles = $mapDB->read_Styles($ID[$i]);
-				for($j = 0; $j < count($styles); $j++){
-					$style_id = $mapDB->new_Style($styles[$j]);
-					$mapDB->addStyle2Class($class_id, $style_id, $styles[$j]['drawingorder']);
-				}
-				# Labels übernehmen (in u_labels2classes eintragen)
-				$labels = $mapDB->read_Label($ID[$i]);
-				for($j = 0; $j < count($labels); $j++){
-					$label_id = $mapDB->new_Label($labels[$j]);
-					$mapDB->addLabel2Class($class_id, $label_id);
-				}
+			$classes = $mapDB->read_Classes($this->formvars['old_id']);
+			for($i = 0; $i < count($classes); $i++){
+				$mapDB->copyClass($classes[$i]['Class_ID'], $this->formvars['selected_layer_id']);
 			}
 		}
   }
@@ -7970,7 +7940,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				showAlert('Keine connection angegeben.');
 			}
 		}
-		if($this->formvars['connectiontype'] == MS_WFS){
+		if ($this->formvars['connectiontype'] == MS_WFS){
 			include_(CLASSPATH.'wfs.php');
 			$url = $this->formvars['connection'];
 			$version = $this->formvars['wms_server_version'];
@@ -8770,9 +8740,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($this->formvars['layer_id']){
 			$this->formvars['anzahl'] = MAXQUERYROWS;
 			$this->layerset=$this->user->rolle->getLayer($this->formvars['layer_id']);
+			$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 			switch ($this->layerset[0]['connectiontype']){
-        case MS_POSTGIS : {
-          $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+        case MS_POSTGIS : {          
 					$layerdb = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
 					$layerdb->setClientEncoding();
 					$path = $mapdb->getPath($this->formvars['layer_id']);
@@ -9496,7 +9466,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 					$ret = $layerdb->execSQL($sql, 4, 1, false);
 					#echo '<br>Datensatz Speichern SQL: ' . $sql;
-					/*
+					
 					if ($last_notice = pg_last_notice($layerdb->dbConn)) {
 						if (strpos($last_notice, 'CONTEXT: ') !== false) {
 							$last_notice = $msg = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
@@ -9505,7 +9475,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$last_notice = $notice_result['msg'];
 						}
 						$this->add_message('info', $last_notice);
-					}*/
+					}
 
 					if ($ret['success']) {
 						$result = pg_fetch_row($ret['query']);
@@ -9574,16 +9544,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
         case 'SubFormEmbeddedPK' : {
           if(!$this->success)echo $ret['msg'];
-          else echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+          else{
+						if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+							echo '██currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
+						}
+						else{			# ansonsten nur das SubForm-Listen-Div
+							echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+						}
+					}
         } break;
       }
-
-			if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
-				echo '██';
-				echo "currentform.go.value='get_last_query';
-							overlay_submit(currentform, false);";
-			}
-
     }
     else {
       if ($this->success == false) {
@@ -10851,37 +10821,131 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->Layerattribute_speichern();
 	}
 
-  function layer_attributes_privileges(){
-    $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->titel='Layer-Rechteverwaltung';
-    $this->main='attribut_privileges_form.php';
-		$this->layerdaten = $mapdb->get_layers_of_type(MS_POSTGIS.','.MS_WFS, 'Name');
-    if($this->formvars['selected_layer_id'] != ''){
-    	$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-    	$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-    	$this->stellen = $mapdb->get_stellen_from_layer($this->formvars['selected_layer_id']);
-    	$this->layer[0] = $mapdb->get_Layer($this->formvars['selected_layer_id']);
-    }
-    $this->output();
-  }
+	function layer_attributes_privileges(){
+		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
+		$this->titel='Layer-Rechteverwaltung';
+		$this->main='attribut_privileges_form.php';
+		include_once(CLASSPATH . 'FormObject.php');
+		$this->layerdaten = $mapdb->get_layers_of_type(MS_POSTGIS . ',' . MS_WFS, 'Name');
+		if ($this->formvars['selected_layer_id'] != '') {
+			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+			$this->stellen = $mapdb->get_stellen_from_layer($this->formvars['selected_layer_id']);
+			$this->layer[0] = $mapdb->get_Layer($this->formvars['selected_layer_id']);
+		}
+		$this->output();
+	}
 
-  function layer_attributes_privileges_save(){
-  	$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-    $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-    if ($this->formvars['stelle'] != '' AND $this->formvars['selected_layer_id'] != '') {
+	function layer_attributes_privileges_save() {
+		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
+		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+		$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+		if ($this->formvars['stelle'] != '' AND $this->formvars['selected_layer_id'] != '') {
 			$stellen = explode('|', $this->formvars['stelle']);
 			foreach ($stellen as $stelleid) {
 				$stelle = new stelle($stelleid, $this->database);
 				$stelle->set_attributes_privileges($this->formvars, $this->attributes);
-				$stelle->set_layer_privileges($this->formvars['selected_layer_id'], $this->formvars['privileg'.$stelleid], $this->formvars['export_privileg'.$stelleid]);
+				$stelle->set_layer_privileges($this->formvars['selected_layer_id'], $this->formvars['privileg' . $stelleid], $this->formvars['export_privileg' . $stelleid]);
 			}
-    }
-    elseif ($this->formvars['selected_layer_id'] != '') {
-      $mapdb->set_default_layer_privileges($this->formvars, $this->attributes);
-    }
-    $this->layer_attributes_privileges();
-  }
+		}
+		elseif ($this->formvars['selected_layer_id'] != '') {
+			$mapdb->set_default_layer_privileges($this->formvars, $this->attributes);
+		}
+		$this->layer_attributes_privileges();
+	}
+
+	/*
+	* Funktion übernimmt alle Attributprivilegien von layer $this->formvars['from_layer_id']
+	* auf Layer $this->formvars['to_layer_id'] wo die stelle_id und der attributname übereinstimmt
+	*/
+	function Attributeditor_takeover_layer_attributes_privileges() {
+		# take over layer attributes privileges
+		$sql = "
+			UPDATE
+				layer_attributes2stelle AS t2 INNER JOIN
+				layer_attributes2stelle AS t1 ON t1.attributename = t2.attributename AND t1.stelle_id = t2.stelle_id
+			SET
+				t2.privileg = t1.privileg, 
+				t2.tooltip = t1.tooltip
+			WHERE
+				t1.layer_id = " . $this->formvars['from_layer_id'] . " AND
+				t2.layer_id = " . $this->formvars['to_layer_id'] . "
+		";
+		#echo '<br>Sql zur Übernahme der Attributrechte: ' . $sql;
+		$this->debug->write("<p>file:stelle.php class:gui->Attributeditor_takeover_layer_attributes_privileges - Übernehmen der Stellen-Layerrechte von einem Layer zu einem anderen:<br>" . $sql, 4);
+		$query = mysql_query($sql, $this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
+	}
+
+	/*
+	* Funktion übernimmt alle Layerprivilegien von layer $this->formvars['from_layer_id']
+	* auf Layer $this->formvars['to_layer_id'] wo die stelle_id übereinstimmt
+	*/
+	function Attributeditor_takeover_layer_privileges() {
+		# take over layer privileges
+		$sql = "
+			UPDATE
+				used_layer AS t2 INNER JOIN
+				used_layer AS t1 ON t1.stelle_id = t2.stelle_id
+			SET
+				t2.privileg = t1.privileg,
+				t2.export_privileg = t1.export_privileg
+			WHERE
+				t1.layer_id = " . $this->formvars['from_layer_id'] . " AND
+				t2.layer_id = " . $this->formvars['to_layer_id'] . "
+		";
+		# echo '<br>Sql zur Übernahme der layer privileges von einem Layer zum anderen
+		$this->debug->write("<p>file:stelle.php class:gui->Attributeditor_takeover_attributes_privileges - übernehmen der Layerrechte von einem Layer zu einem anderen:<br>".$sql,4);
+		$query = mysql_query($sql,$this->database->dbConn);
+		if ($query == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+	}
+
+	/*
+	* Funktion übernimmt alle Default-Layerattribute von layer $this->formvars['from_layer_id']
+	* auf Layer $this->formvars['to_layer_id'] wo der Attributname (name) übereinstimmt.
+	*/
+	function Attributeditor_takeover_default_layer_attributes_privileges() {
+		# take over default layer attributes
+		$sql = "
+			UPDATE
+				layer_attributes AS t2 INNER JOIN
+				layer_attributes AS t1 ON t1.name = t2.name
+			SET
+				t2.privileg = t1.privileg, 
+				t2.query_tooltip = t1.query_tooltip
+			WHERE
+				t1.layer_id = " . $this->formvars['from_layer_id'] . " AND
+				t2.layer_id = " . $this->formvars['to_layer_id'] . "
+		";
+		#echo '<br>Sql zur Übernahme der default layer privileges von einem Layer auf einen anderen: ' . $sql;
+		$this->debug->write("<p>file:users.php class:gui->Attributeditor_takeover_default_layer_attributes_privileges - Speichern der Default-Layerrechte der Attribute:<br>" . $sql,4);
+		$query = mysql_query($sql);
+		if ($query==0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+	}
+
+	/*
+	* Funktion übernimmt alle Default-Layer Privilegien von layer $this->formvars['from_layer_id']
+	* auf Layer $this->formvars['to_layer_id'] wo der Attributname (name) übereinstimmt.
+	*/
+	function Attributeditor_takeover_default_layer_privileges() {
+		# take over default layer privileges
+		$sql = "
+			UPDATE
+				layer AS t2,
+				layer AS t1
+			SET
+				t2.privileg = t1.privileg, 
+				t2.export_privileg = t1.export_privileg
+			WHERE
+				t1.Layer_ID = " . $this->formvars['from_layer_id'] . " AND
+				t2.Layer_ID = " . $this->formvars['to_layer_id'] . "
+		";
+		#echo '<br>Sql zur Übernahme der default layer attribute privileges von einem Layer auf einen anderen: ' . $sql;
+		$this->debug->write("<p>file:users.php class:gui->Attributeditor_takeover_default_layer_privileges - Speichern der Default-Layerrechte:<br>" . $sql,4);
+		$query = mysql_query($sql);
+		if ($query==0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+
+	}
 
   function StelleAendern() {
   	$_files = $_FILES;
@@ -13520,10 +13584,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->add_message('warning', 'Keine Änderung.');
 		}
 		if ($this->formvars['embedded'] != '') {
-			# wenn es ein Datensatz aus einem embedded-Formular ist, 
-			# muss das embedded-Formular entfernt werden und 
-			# das Listen-DIV neu geladen werden (getrennt durch █)
-			echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
+			# es wurde ein Datensatz aus einem embedded-Formular gespeichert 
+			if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+				echo '█currentform.go.value=\'get_last_query\';	overlay_submit(currentform, false);';
+			}
+			else{				# ansonsten wird das embedded-Formular entfernt und das Listen-DIV neu geladen (getrennt durch █)
+				echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
+			}
 		}
 		else {
 			$this->last_query = $this->user->rolle->get_last_query();
@@ -14203,7 +14270,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$attributes = $this->qlayerset[0]['attributes'];
 			$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
 			$this->loadMap('DataBase');
-			if(count($this->qlayerset[0]['shape']) > 0 AND ($this->qlayerset[0]['shape'][0][$attributes['the_geom']] != '')){			# wenn was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
+			if($this->last_query['go'] != 'Sachdaten' AND count($this->qlayerset[0]['shape']) > 0 AND ($this->qlayerset[0]['shape'][0][$attributes['the_geom']] != '')){			# wenn es eine Suche war und was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
 				$this->zoomed = true;
 				switch ($this->qlayerset[0]['connectiontype']) {
 					case MS_POSTGIS : {
@@ -16237,7 +16304,7 @@ class db_mapObj{
 				$name_column . ",
 				l.alias,
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem,
-				l.labelmaxscale, l.labelminscale, l.labelrequires, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.styleitem, l.classification, l.filteritem,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				g.id, ".$group_column.", g.obergruppe, g.order
@@ -17178,6 +17245,9 @@ class db_mapObj{
 										case 'list_edit': {														# nur Listen-Editier-Modus
 											$attributes['list_edit'][$i] = true;
 										} break;
+										case 'reload': {														# die komplette Sachdatenanzeige soll neu geladen werden
+											$attributes['reload'][$i] = true;
+										} break;										
 									}
 								}
 							}
@@ -17301,7 +17371,7 @@ class db_mapObj{
 		$dump_text .= "\n-- Achtung: Die Datenbank in die der Dump eingespielt wird, sollte die gleiche Migrationsversion haben,";
 		$dump_text .= "\n-- wie die Datenbank aus der exportiert wurde! Anderenfalls kann es zu Fehlern bei der Ausführung des SQL kommen.";
 		$dump_text .= "\n\nSET @group_id = 1;";
-		$dump_text .= "\nSET @connection = 'user=xxxx password=xxxx dbname=kvwmapsp';";
+		$dump_text .= "\nSET @connection = 'host=pgsql user=kvwmap password=xxxxxx dbname=kvwmapsp';";
 
 		if ($with_privileges) {
 			# Frage Stellen der Layer ab
@@ -17353,7 +17423,11 @@ class db_mapObj{
 		}
 
 		for($i = 0; $i < count($layer_ids); $i++) {
-			$layer = $database->create_insert_dump('layer', '', 'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `privileg`, `trigger_function`, `sync` FROM layer WHERE Layer_ID='.$layer_ids[$i]);
+			$layer = $database->create_insert_dump(
+				'layer',
+				'',
+				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `privileg`, `trigger_function`, `sync` FROM layer WHERE Layer_ID=' . $layer_ids[$i]
+			);
 			$dump_text .= "\n\n-- Layer " . $layer_ids[$i] . "\n" . $layer['insert'][0];
 			$last_layer_id = '@last_layer_id'.$layer_ids[$i];
 			$dump_text .= "\nSET " . $last_layer_id . "=LAST_INSERT_ID();";
@@ -17654,7 +17728,7 @@ class db_mapObj{
 		}
 		$style['backgroundcolor'] = NULL;
 		$style['minsize'] = NULL;
-		$style_id = $this->new_Style($style);
+		if(!$style_id)$style_id = $this->new_Style($style);
 		$this->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
 		if($user->rolle->result_hatching){
 			$style['symbolname'] = NULL;
@@ -17821,6 +17895,17 @@ class db_mapObj{
 			$attribute_sets[] = $key . " = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
 		}
 
+		# Schreibt alle Attribute, die getrimmt werden sollen
+		foreach(
+			array(
+				'connection'
+			) AS $key
+		) {
+			if ($formvars[$key]	!= '') {
+				$attribute_sets[] = "`" . $key . "` = '" . trim($formvars[$key]) . "'";
+			}
+		}
+
 		# Schreibt alle Attribute, die immer geschrieben werden sollen, egal wie der Wert ist
 		# Besonderheit beim Attribut classification, kommt aus Field layer_classification,
 		# weil classification schon belegt ist von den Classes
@@ -17847,10 +17932,10 @@ class db_mapObj{
 				'offsite',
 				'labelrequires',
 				'postlabelcache',
-				'connection',
 				'printconnection',
 				'connectiontype',
 				'classitem',
+				'styleitem',
 				'filteritem',
 				'tolerance',
 				'toleranceunits',
@@ -17912,7 +17997,7 @@ class db_mapObj{
 					$sql .= "`Name_" . $language."`, ";
 				}
 			}
-			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`) VALUES(";
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'" . $formvars['id']."', ";
       }
@@ -17964,12 +18049,13 @@ class db_mapObj{
       $sql .= $formvars['labelminscale'].", ";
       $sql .= "'" . $formvars['labelrequires']."', ";
 			$sql .= "'" . $formvars['postlabelcache']."', ";
-      $sql .= "'" . $formvars['connection']."', ";
+      $sql .= "'" . trim($formvars['connection']) ."', ";
 			if($formvars['connection_id'] == '')$sql .= "NULL, ";
       else $sql .= "'" . $formvars['connection_id']."', ";
       $sql .= "'" . $formvars['printconnection']."', ";
       $sql .= ($formvars['connectiontype'] =='' ? "6" : $formvars['connectiontype']) .", "; # Set default to postgis layer
       $sql .= "'" . $formvars['classitem']."', ";
+			$sql .= "'" . $formvars['styleitem']."', ";
 			$sql .= "'" . $formvars['layer_classification']."', ";
       $sql .= "'" . $formvars['filteritem']."', ";
 			if($formvars['cluster_maxdistance'] == '')$formvars['cluster_maxdistance'] = 'NULL';
@@ -18843,7 +18929,7 @@ class db_mapObj{
 					`layer_id` = " . $formvars['selected_layer_id'] . " AND
 					`name` = '" . $attributes['name'][$i] . "'
 			";
-			#echo '<br>Sql: ' . $sql;
+			#echo '<br>Sql zum Speichern der Default-Layerrechte der Attribute: ' . $sql;
 			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern des Layerrechte zur Stelle:<br>" . $sql, 4);
 			$ret = $this->db->execSQL($sql);
 			if ($query == 0) { $this->debug->write("<br>Abbruch in " . $this->script_name . " Zeile: " . __LINE__, 4); return 0; }
@@ -18857,7 +18943,7 @@ class db_mapObj{
 				WHERE
 					`Layer_ID` = " . $formvars['selected_layer_id'] . "
 			";
-			#echo '<br>Sql: ' . $sql;
+			#echo '<br>Sql zur Speicherung der Default-Layerrechte: ' . $sql;
 			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern der Layerrechte zur Stelle:<br>" . $sql,4);
 			$ret = $this->db->execSQL($sql);
 			if (!$this->db->success) { $this->debug->write("<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__,4); return 0; }

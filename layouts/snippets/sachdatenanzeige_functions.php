@@ -435,7 +435,7 @@ include('funktionen/input_check_functions.php');
 			}
   	}
 		formData.append('go', 'Sachdaten_speichern');
-		formData.append('reload', reload);
+		if(reload)formData.append('reload', reload);
 		formData.append('selected_layer_id', layer_id);
 		formData.append('targetobject', targetobject);
 		formData.append('form_field_names', form_fieldstring);
@@ -470,7 +470,7 @@ include('funktionen/input_check_functions.php');
 			}
   	}
 		formData.append('go', 'neuer_Layer_Datensatz_speichern');
-		formData.append('reload', reload);
+		if(reload)formData.append('reload', reload);
 		formData.append('selected_layer_id', layer_id);
 		formData.append('targetobject', targetobject);
 		formData.append('targetlayer_id', targetlayer_id);
@@ -912,6 +912,13 @@ include('funktionen/input_check_functions.php');
 			flag.value=1;
 			if(flag.onchange)flag.onchange();
 		}
+	}
+	
+	activate_save_button = function(layer_id){
+		var button = document.getElementById('subform_save_button_'+layer_id);
+		if(button && button.style.display == 'none'){
+			button.style.display = '';
+		}		
 	}
 
 </script>

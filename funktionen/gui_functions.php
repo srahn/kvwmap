@@ -51,6 +51,15 @@ function roundNumber(num, scale){
   }
 }
 
+function scrollToSelected(select){
+	var height = select.scrollHeight / select.childElementCount;
+  for(var i = 0; i < select.options.length; i++){
+		if(select.options[i].selected){			
+			select.scrollTop = i * height;
+		}
+	}
+}
+
 function toggle(obj){
 	if(obj.style.display == 'none')obj.style.display = '';
 	else obj.style.display = 'none';
@@ -913,7 +922,8 @@ function scrollLayerOptions(){
 		legend_top = document.getElementById('legenddiv').getBoundingClientRect().top;
 		legend_bottom = document.getElementById('legenddiv').getBoundingClientRect().bottom;
 		posy = document.getElementById('options_'+layer_id).getBoundingClientRect().top;
-		if(posy < legend_bottom - 180 && posy > legend_top + 10)document.getElementById('options_content_'+layer_id).style.top = posy - (13+legend_top);		
+		options_height = document.getElementById('options_content_'+layer_id).getBoundingClientRect().height;
+		if(posy < legend_bottom - options_height && posy > legend_top)document.getElementById('options_content_'+layer_id).style.top = posy - (legend_top);		
 	}
 }
 

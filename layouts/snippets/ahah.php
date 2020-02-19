@@ -33,8 +33,8 @@ $ahah = '
 					message(req.responseText);
 				}
 				var found = false;
-				response = "" + req.responseText;
-				responsevalues = response.split("█");
+				var response = "" + req.responseText;
+				var responsevalues = response.split("█");
 				if (actions == undefined || actions == "") {
 					actions = new Array();
 				}

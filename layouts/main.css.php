@@ -520,12 +520,13 @@ a.invisiblelayerlink:hover{
 	border: 1px solid #cccccc;
 	border-color: #bbbbbb;
 	background: linear-gradient(#eff3f6, lightsteelblue);
-	padding: 4px;
-	padding-top: 0px;
-	padding-bottom: 4px;
 	text-align: center;
 	color: black;
 	border-radius: 5px;
+}
+
+a.buttonlink{
+	padding: 1px 7px 5px 7px;
 }
 
 .buttonlink:hover, .buttonlink:focus{

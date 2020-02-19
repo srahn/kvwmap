@@ -601,31 +601,33 @@ class GUI {
 		$this->debug->write('<br>Lade Layer: ' . $layerset['Name'], 4);
 		$layer = ms_newLayerObj($map);
 		$layer->setMetaData('wfs_request_method', 'GET');
-		$layer->setMetaData('wms_name', $layerset['wms_name']);
-		if($layerset['wms_keywordlist'])$layer->setMetaData('ows_keywordlist', $layerset['wms_keywordlist']);
-		$layer->setMetaData('wfs_typename', $layerset['wms_name']);
-		$layer->setMetaData('ows_title', $layerset['Name']); # required
-		$layer->setMetaData('wms_group_title',$layerset['Gruppenname']);
-		$layer->setMetaData('wms_queryable',$layerset['queryable']);
-		$layer->setMetaData('wms_format',$layerset['wms_format']);
-		$layer->setMetaData('ows_server_version',$layerset['wms_server_version']);
-		$layer->setMetaData('ows_version',$layerset['wms_server_version']);
-		if($layerset['metalink']){
-			$layer->setMetaData('ows_metadataurl_href',$layerset['metalink']);
-			$layer->setMetaData('ows_metadataurl_type', 'ISO 19115');
-			$layer->setMetaData('ows_metadataurl_format', 'text/plain');
+		if(value_of($layerset, 'wms_name')){
+			$layer->setMetaData('wms_name', $layerset['wms_name']);
+			if($layerset['wms_keywordlist'])$layer->setMetaData('ows_keywordlist', $layerset['wms_keywordlist']);
+			$layer->setMetaData('wfs_typename', $layerset['wms_name']);
+			$layer->setMetaData('ows_title', $layerset['Name']); # required
+			$layer->setMetaData('wms_group_title',$layerset['Gruppenname']);
+			$layer->setMetaData('wms_queryable',$layerset['queryable']);
+			$layer->setMetaData('wms_format',$layerset['wms_format']);
+			$layer->setMetaData('ows_server_version',$layerset['wms_server_version']);
+			$layer->setMetaData('ows_version',$layerset['wms_server_version']);
+			if($layerset['metalink']){
+				$layer->setMetaData('ows_metadataurl_href',$layerset['metalink']);
+				$layer->setMetaData('ows_metadataurl_type', 'ISO 19115');
+				$layer->setMetaData('ows_metadataurl_format', 'text/plain');
+			}
+			if($layerset['ows_srs'] == '') $layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
+			$layer->setMetaData('ows_srs', $layerset['ows_srs']);
+			$layer->setMetaData('wms_connectiontimeout',$layerset['wms_connectiontimeout']);
+			$layer->setMetaData('ows_auth_username', $layerset['wms_auth_username']);
+			$layer->setMetaData('ows_auth_password', $layerset['wms_auth_password']);
+			$layer->setMetaData('ows_auth_type', 'basic');
+			$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
+			# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
+			#$layer->setMetaData("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
+			$layer->setMetaData("gml_featureid", "ogc_fid");
+			$layer->setMetaData("gml_include_items", "all");
 		}
-		if($layerset['ows_srs'] == '') $layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
-		$layer->setMetaData('ows_srs', $layerset['ows_srs']);
-		$layer->setMetaData('wms_connectiontimeout',$layerset['wms_connectiontimeout']);
-		$layer->setMetaData('ows_auth_username', $layerset['wms_auth_username']);
-		$layer->setMetaData('ows_auth_password', $layerset['wms_auth_password']);
-		$layer->setMetaData('ows_auth_type', 'basic');
-		$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
-		# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
-		#$layer->setMetaData("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
-		$layer->setMetaData("gml_featureid", "ogc_fid");
-		$layer->setMetaData("gml_include_items", "all");
 
 		$layer->set('dump', 0);
 		$layer->set('type',$layerset['Datentyp']);
@@ -633,7 +635,7 @@ class GUI {
 
 		$layer->set('name', $layerset['alias']);
 
-		if($layerset['status'] != ''){
+		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
 		}
 
@@ -679,21 +681,22 @@ class GUI {
 
 		if($layerset['aktivStatus'] != 0){
 			$collapsed = false;
-			$group = $this->groupset[$layerset['Gruppe']];				# die Gruppe des Layers
-			if($group['status'] == 0){
-				$this->group_has_active_layers[$layerset['Gruppe']] = 1;  	# die zugeklappte Gruppe hat aktive Layer
-				$collapsed = true;
-			}
-			while($group['obergruppe'] != ''){
-				$group = $this->groupset[$group['obergruppe']];
-				if($collapsed OR $group['status'] == 0){
-					$this->group_has_active_layers[$group['id']] = 1;  	# auch alle Obergruppen durchlaufen
+			if($group = value_of($this->groupset, $layerset['Gruppe'])){				# die Gruppe des Layers
+				if($group['status'] == 0){
+					$this->group_has_active_layers[$layerset['Gruppe']] = 1;  	# die zugeklappte Gruppe hat aktive Layer
 					$collapsed = true;
+				}
+				while($group['obergruppe'] != ''){
+					$group = $this->groupset[$group['obergruppe']];
+					if($collapsed OR $group['status'] == 0){
+						$this->group_has_active_layers[$group['id']] = 1;  	# auch alle Obergruppen durchlaufen
+						$collapsed = true;
+					}
 				}
 			}
 		}
 
-		if(!$this->noMinMaxScaling AND $layerset['minscale']>=0) {
+		if(!$this->noMinMaxScaling AND value_of($layerset, 'minscale') >= '0') {
 			if($this->map_factor != ''){
 				$layer->set('minscaledenom', $layerset['minscale']/$this->map_factor*1.414);
 			}
@@ -701,7 +704,7 @@ class GUI {
 				$layer->set('minscaledenom', $layerset['minscale']);
 			}
 		}
-		if(!$this->noMinMaxScaling AND $layerset['maxscale']>0) {
+		if(!$this->noMinMaxScaling AND value_of($layerset, 'maxscale') > 0) {
 			if($this->map_factor != ''){
 				$layer->set('maxscaledenom', $layerset['maxscale']/$this->map_factor*1.414);
 			}
@@ -731,7 +734,7 @@ class GUI {
 		}
 
 		if ($layerset['connectiontype'] == 6) {
-			$layerset['processing'] = 'CLOSE_CONNECTION=DEFER;' . $layerset['processing'];		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
+			$layerset['processing'] = 'CLOSE_CONNECTION=DEFER;' . value_of($layerset, 'processing');		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
 		}
 
 		if ($layerset['processing'] != "") {
@@ -741,11 +744,11 @@ class GUI {
 			}
 		}
 
-		if ($layerset['postlabelcache'] != 0) {
+		if (value_of($layerset, 'postlabelcache') != 0) {
 			$layer->set('postlabelcache',$layerset['postlabelcache']);
 		}
 
-		if($layerset['Datentyp'] == MS_LAYER_POINT AND $layerset['cluster_maxdistance'] != ''){
+		if($layerset['Datentyp'] == MS_LAYER_POINT AND value_of($layerset, 'cluster_maxdistance') != ''){
 			$layer->cluster->maxdistance = $layerset['cluster_maxdistance'];
 			$layer->cluster->region = 'ellipse';
 		}
@@ -787,11 +790,11 @@ class GUI {
 				$layer->set('template', 'dummy');
 			}
 			# Header (Kopfdatei)
-			if ($layerset['header']!='') {
+			if (value_of($layerset, 'header') != '') {
 				$layer->set('header',$layerset['header']);
 			}
 			# Footer (Fusszeile)
-			if ($layerset['footer']!='') {
+			if (value_of($layerset, 'footer') != '') {
 				$layer->set('footer',$layerset['footer']);
 			}
 			# Setzen der Spalte nach der der Layer klassifiziert werden soll
@@ -822,23 +825,26 @@ class GUI {
 			 }
 			 $layer->setFilter($expr);
 			}
+			if ($layerset['styleitem']!='') {
+				$layer->set('styleitem',$layerset['styleitem']);
+			}
 			# Layerweite Labelangaben
 			if ($layerset['labelitem']!='') {
 				$layer->set('labelitem',$layerset['labelitem']);
 			}
-			if ($layerset['labelmaxscale']!='') {
+			if (value_of($layerset, 'labelmaxscale') != '') {
 				$layer->set('labelmaxscaledenom',$layerset['labelmaxscale']);
 			}
-			if ($layerset['labelminscale']!='') {
+			if (value_of($layerset, 'labelminscale') != '') {
 				$layer->set('labelminscaledenom',$layerset['labelminscale']);
 			}
-			if ($layerset['labelrequires']!='') {
+			if (value_of($layerset, 'labelrequires') != '') {
 				$layer->set('labelrequires',$layerset['labelrequires']);
 			}
-			if ($layerset['tolerance']!='3') {
+			if (value_of($layerset, 'tolerance') != '') {
 				$layer->set('tolerance',$layerset['tolerance']);
 			}
-			if ($layerset['toleranceunits']!='pixels') {
+			if (value_of($layerset, 'toleranceunits') != '') {
 				$layer->set('toleranceunits',$layerset['toleranceunits']);
 			}
 			if ($layerset['transparency']!=''){
@@ -849,7 +855,7 @@ class GUI {
 						$layer->set('opacity',$layerset['transparency']);
 				}
 			}
-			if ($layerset['symbolscale']!='') {
+			if (value_of($layerset, 'symbolscale') != '') {
 				if($this->map_factor != ''){
 					$layer->set('symbolscaledenom',$layerset['symbolscale']/$this->map_factor*1.414);
 				}
@@ -2623,7 +2629,7 @@ function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL){
 				$name_column . ",
 				l.alias,
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem,
-				l.labelmaxscale, l.labelminscale, l.labelrequires, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.styleitem, l.classification, l.filteritem,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				g.id, ".$group_column.", g.obergruppe, g.order

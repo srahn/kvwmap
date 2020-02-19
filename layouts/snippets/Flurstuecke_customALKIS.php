@@ -315,10 +315,10 @@ hide_versions = function(flst){
 												$anzLage=count($flst->Lage);
 												$Lage='';
 												for ($j=0;$j<$anzLage;$j++) {
-													$Lage.=' '.$flst->Lage[$j];
+													$Lage.= $flst->Lage[$j].'<br>';
 												}
 												if ($Lage!='') {
-													?><br><?php echo TRIM($Lage);
+													?><?php echo TRIM($Lage);
 												}
 											?>
 												</td>

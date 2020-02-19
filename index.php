@@ -69,6 +69,8 @@ $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '
 // $starttime = $executiontimes['time'][] = microtime_float1();
 // $executiontimes['action'][] = 'Start';
 
+error_reporting(E_ALL & ~E_NOTICE);
+
 ob_start ();    // Ausgabepufferung starten
 
 $formvars = $_REQUEST;
@@ -154,7 +156,6 @@ if (!FAST_CASE) {
 
 # Übergeben des Anwendungsfalles
 $debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
-
 function go_switch($go, $exit = false) {
 	global $GUI;
 	global $Stelle_ID;
@@ -1367,6 +1368,16 @@ function go_switch($go, $exit = false) {
 			case 'Layerattribut-Rechteverwaltung_speichern' : {
 				$GUI->checkCaseAllowed('Layerattribut-Rechteverwaltung');
 				$GUI->layer_attributes_privileges_save();
+			} break;
+
+			case 'Layerattribut-Rechteverwaltung_Attributrechte für ausgewählten Layer übernehmen' : {
+				$GUI->checkCaseAllowed('Attributeditor');
+				$GUI->Attributeditor_takeover_layer_privileges();
+				$GUI->Attributeditor_takeover_layer_attributes_privileges();
+				$GUI->Attributeditor_takeover_default_layer_privileges();
+				$GUI->Attributeditor_takeover_default_layer_attributes_privileges();
+				$GUI->formvars['selected_layer_id'] = $GUI->formvars['to_layer_id'];
+				$GUI->layer_attributes_privileges();
 			} break;
 
 			case 'Layer_Parameter' : {

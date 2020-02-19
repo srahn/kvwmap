@@ -218,15 +218,6 @@ function add_searchmask(layer_id){
 	document.getElementById('searchmasks').appendChild(newdiv);
 	ahah("index.php", "go=Layer-Suche_Suchmaske_generieren&selected_layer_id="+layer_id+"&searchmask_number="+document.GUI.searchmask_count.value, new Array(newdiv), new Array('sethtml'));
 }
-
-function scrollToSelected(select){
-	var height = select.scrollHeight / select.childElementCount;
-  for(var i = 0; i < select.options.length; i++){
-		if(select.options[i].selected){			
-			select.scrollTop = i * height;
-		}
-	}
-}
   
 //-->
 </script>

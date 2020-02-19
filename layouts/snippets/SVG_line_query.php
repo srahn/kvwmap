@@ -4,8 +4,8 @@
 ?>
 <div id="map">
 	<input name="newpath" type="hidden" value="<? echo $this->formvars['newpath']; ?>">
-	<input name="pathwkt" type="hidden" value="<?php echo $this->formvars['pathwkt']; ?>">
-	<input name="newpathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
+	<input name="pathwkt" type="text" value="<?php echo $this->formvars['pathwkt']; ?>">
+	<input name="newpathwkt" type="text" value="<?php echo $this->formvars['newpathwkt']; ?>">
 	<input name="result" type="hidden" value="">
 	<input name="firstline" type="hidden" value="<?php echo $this->formvars['firstline']; ?>">
 	<input name="secondline" type="hidden" value="<?php echo $this->formvars['secondline']; ?>">

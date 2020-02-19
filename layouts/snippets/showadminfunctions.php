@@ -191,7 +191,45 @@ function toggleGroup(group, show){
 				</tr>
 				<tr style="border:1px solid #C3C7C3;">
 					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=save_all_layer_attributes"><? echo $strSaveAllLayerAttributes; ?></a></span></td>
-				</tr>  
+				</tr>
+				<tr style="border:1px solid #C3C7C3;">
+					<td align="center">
+						<span class="fett create_inserts_from_dataset" onclick="$('.create_inserts_from_dataset').toggle();"><a href="#"><? echo  $strCreateInsertsFromDataset; ?></a></span>
+						<style>
+							label {
+								float: left;
+								width: 100px;
+							}
+							label:after {
+								content: ": "
+							}
+						</style>
+						<div class="create_inserts_from_dataset" style="margin-left: 25%; text-align: center; display: none;">
+							<label>Schema</label><input style="float: left" type="text" name="schema" value="mvbio"/>
+							<div style="clear: both"></div>
+							<label>Tabelle</label><input style="float: left" type="text" name="table" value="kampagnen"/><br>
+							<div style="clear: both"></div>
+							<label>WHERE</label><input style="float: left" type="text" name="where" value="id = 11"/><br>
+							<div style="clear: both"></div>
+							<input
+								style="float: left; margin-left: 50px; margin-top: 5px"
+								type="button"
+								onclick="$('.create_inserts_from_dataset').toggle()"
+								value="Abbrechen"
+							>
+							<input
+								style="float: left; margin-left: 5px; margin-top: 5px"
+								style="margin-left: 10px"
+								type="button"
+								onclick="
+									document.GUI.func.value = 'create_inserts_from_dataset';
+									document.GUI.submit();
+								"
+								value="Erzeugen"
+							>
+						</div>
+					</td>
+				</tr>
 			</table>
 		</td>
 	</tr>

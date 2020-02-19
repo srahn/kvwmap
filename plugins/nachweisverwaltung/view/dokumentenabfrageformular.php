@@ -161,14 +161,6 @@ function delete_dokauswahl(){
 		alert('Es wurde keine Dokumentauswahl ausgewählt.');
 	}
 }
-
-function scrollToSelected(select){
-  for(var i = 0; i < select.options.length; i++){
-		if(select.options[i].selected){
-			select.scrollTop = i * 18;
-		}
-	}
-}
   
 //-->
 </script>
@@ -216,7 +208,7 @@ else {
 								</div>
 								<div style="width: 215px;">
 				<?				if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
-									&nbsp;<select name="suchunterart[]" multiple="true" size="1" style="z-index:<? echo $z_index-=1; ?>;position: absolute;width: 219px" onmouseenter="this.size=this.length" onmouseleave="this.size=1;scrollToSelected(this);">
+									&nbsp;<select name="suchunterart[]" multiple="true" style="height: 20px;z-index:<? echo $z_index-=1; ?>;position: absolute;width: 219px" onmousedown="if(this.style.height=='20px'){this.style.height = this.length * 20;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='20px';scrollToSelected(this);}"">
 										<option value="">alle</option>
 										<? for($i = 0; $i < count($this->dokumentarten[$hauptdokumentart['id']]); $i++){?>
 											<option <? if(in_array($this->dokumentarten[$hauptdokumentart['id']][$i]['id'], $this->formvars['suchunterart'])){echo 'selected';} ?> value="<? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['id']; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	

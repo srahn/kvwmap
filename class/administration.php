@@ -502,6 +502,23 @@ class administration{
 	function update_backups_in_crontab() {
 		
 	}
+
+	function create_inserts_from_dataset($schema, $table, $where) {
+		global $GUI;
+		include_once(CLASSPATH . 'PgObject.php');
+		$pgo = new PgObject($GUI, $schema, $table);
+		$datasets = $pgo->find_where($where);
+		if (count($datasets) > 0) {
+			$fkeys = $datasets[0]->get_fkey_constraints();
+			$attribute_types = $datasets[0]->get_attribute_types();
+			#echo '<p>attribute_types from table ' . $datasets[0]->tableName . ': ' . print_r($attribute_types, 1);
+			foreach ($datasets AS $dataset) {
+				#echo '<p>return inserts for '. $table . ': ' . $dataset->get('id');
+				return $dataset->as_inserts_with_childs($fkeys, $attribute_types);
+			}
+		}
+	}
+
 }
 
 ?>
