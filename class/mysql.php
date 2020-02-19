@@ -211,7 +211,7 @@ class database {
     $sql.= " WHERE ".$where;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $ret[1]=mysql_fetch_assoc($ret[1]);
+    $ret[1] = $this->result->fetch_assoc();
     return $ret;
   }
 
@@ -501,9 +501,6 @@ INSERT INTO u_styles2classes (
 		#echo '<br>extra: ' . $extra;
 		$this->debug->write("<p>file:kvwmap class:database->create_insert_dump :<br>".$sql,4);
 		$this->execSQL($sql, 4, 0);
-		if ($query==0) {
-			$this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0;
-		}
 
 		$feld_anzahl = $this->result->field_count;
 		#echo '<br>Anzahl Felder: ' . $feld_anzahl;
@@ -562,12 +559,11 @@ INSERT INTO u_styles2classes (
 		# Funktion erstellt zu einer Tabelle einen Update-Dump und liefert ihn als String zurück
 		$sql = 'SELECT * FROM '.$table;
 		$this->debug->write("<p>file:kvwmap class:database->create_update_dump :<br>".$sql,4);
-	  $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		$ret = $this->execSQL($sql, 4, 0);
 
-    $feld_anzahl = mysql_num_fields($query);
+    $feld_anzahl = $this->result->field_count;
     for($i = 0; $i < $feld_anzahl; $i++){
-    	$meta = mysql_fetch_field($query,$i);
+    	$meta = $this->result->fetch_field_direct($i);
     	# array mit feldnamen
     	$felder[$i] = $meta->name;
     	# array mit indizes der primary-keys
@@ -575,7 +571,7 @@ INSERT INTO u_styles2classes (
     		$keys[] = $i;
     	}
     }
-    while($rs = mysql_fetch_array($query)){
+    while ($rs = $this->result->fetch_array()) {
     	$update = 'UPDATE '.$table.' SET ';
     	$update .= $felder[0].' = '.$rs[0];
     	for($i = 1; $i < $feld_anzahl; $i++){

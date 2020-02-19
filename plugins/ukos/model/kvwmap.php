@@ -73,13 +73,13 @@
 		$nix_gefunden = true;
 		if ($ret['success'] AND mysql_num_rows($ret[1]) == 1) {
 			$nix_gefunden = false;
-			$rs = mysql_fetch_assoc($ret[1]);
+			$rs = $GUI->database->result->fetch_assoc();
 			$GUI->formvars['selected_layer_id'] = $rs['Layer_ID'];
 			$GUI->neuer_Layer_Datensatz();
 		}
 		else {
 			if ($schema_name == 'ukos_doppik' AND $table_name == 'strasse' AND $geometry_type == 2) {
-				while ($rs = mysql_fetch_assoc($ret[1])) {
+				while ($rs = $GUI->database->result->fetch_assoc()) {
 					if ($rs['Name'] == 'Straßen') {
 						$nix_gefunden = false;
 						$GUI->formvars['selected_layer_id'] = $rs['Layer_ID'];

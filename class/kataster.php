@@ -391,9 +391,6 @@ class gemarkung {
       return $ret[1];
     }
     return $ret[1];
-    #$query=mysql_query($sql);  if ($query==0) { return 0; }
-    #$rs=mysql_fetch_array($query);
-    #return $rs['GemkgName'];
   }
 
 

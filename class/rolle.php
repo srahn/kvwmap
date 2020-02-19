@@ -1474,38 +1474,6 @@ class rolle {
 					$this->debug->write("<p>file:rolle.php class:rolle function:deleteMenue - Löschen der Menuepunkte der Rollen:<br>".$sql,4);
 					$this->database->execSQL($sql);
 					if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-					/*
-					$sql = "
-						SELECT
-							id
-						FROM
-							u_menues
-						WHERE
-							obermenue = " . $menues[$i] . "
-					";
-					echo '<br>'.$sql;
-					$this->debug->write("<p>file:rolle.php class:rolle->deleteMenue - Lesen der Untermenuepunkte zu den Obermenuepunken zur Stelle:<br>".$sql,4);
-					$this->database->execSQL($sql);
-					if (!$this->database->success) {
-						$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
-					}
-					else {
-						while($rs=$this->database->result->fetch_row()) {
-							$sql = "
-								DELETE FROM
-									`u_menue2rolle`
-								WHERE
-									`user_id` = " . $user_id . " AND
-									`stelle_id` = " . $stellen[$i] . " AND
-									`menue_id` = " . $rs[0] . "
-							";
-							echo '<br>'.$sql;
-							$this->debug->write("<p>file:rolle.php class:rolle->deleteMenue - Löschen von Menuepunkten zur Rolle:<br>".$sql,4);
-							$query1=mysql_query($sql,$this->database->dbConn);
-							if ($query1==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-						}
-					}
-					*/
 				}
 			}
 		}

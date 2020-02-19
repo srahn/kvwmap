@@ -105,7 +105,7 @@ class funktion {
 		}
 		$sql.= "bezeichnung = '".$formvars['bezeichnung']."'";
 		$ret=$this->database->execSQL($sql,4, 1);
-		$ret[1] = mysql_insert_id();
+		$ret[1] = $this->database->mysqli->insert_id;
 		return $ret;
 	}
   

@@ -771,23 +771,6 @@ class stelle {
 			$this->debug->write("<p>file:stelle.php class:stelle->addMenue - Hinzufügen von Menuepunkten zur Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-
-			/* $sql ='SELECT id FROM u_menues WHERE obermenue = '.$menue_ids[$i];
-			 $this->debug->write("<p>file:stelle.php class:stelle->addMenue - Lesen der Untermenuepunkte zu den Obermenuepunken zur Stelle:<br>".$sql,4);
-			 $this->database->execSQL($sql);
-			 if (!$this->database->success) {
-			 $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
-			 }
-			 else{
-			 while($rs=$this->database->result->fetch_array()) {
-			 $sql ="INSERT IGNORE INTO u_menue2stelle ( `stelle_id` , `menue_id` , `menue_order` ) VALUES ('".$this->id."', '".$rs[0]."', '".$count."')";
-			 $count++;
-			 $this->debug->write("<p>file:stelle.php class:stelle->addMenue - Hinzufügen von Menuepunkten zur Stelle:<br>".$sql,4);
-			 $query1=mysql_query($sql,$this->database->dbConn);
-			 if ($query1==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-			 }
-			 }
-			 */
 		}
 		return 1;
 	}

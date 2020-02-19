@@ -876,7 +876,7 @@ class ddl {
       }
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
-      $lastddl_id = mysql_insert_id();
+      $lastddl_id = $this->database->mysqli->insert_id;
 
       $sql = 'INSERT INTO ddl2stelle (stelle_id, ddl_id) VALUES('.$stelle_id.', '.$lastddl_id.')';
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
@@ -928,7 +928,7 @@ class ddl {
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
         $this->database->execSQL($sql,4, 1);
-        $lastfreitext_id = mysql_insert_id();
+        $lastfreitext_id = $this->database->mysqli->insert_id;
 
         $sql = 'INSERT INTO ddl2freitexte (ddl_id, freitext_id) VALUES('.$lastddl_id.', '.$lastfreitext_id.')';
         $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
@@ -954,7 +954,7 @@ class ddl {
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
         $this->database->execSQL($sql,4, 1);
-        $lastline_id = mysql_insert_id();
+        $lastline_id = $this->database->mysqli->insert_id;
 				
 				$sql = 'INSERT INTO ddl2freilinien (ddl_id, line_id) VALUES('.$lastddl_id.', '.$lastline_id.')';
         $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
@@ -1017,7 +1017,7 @@ class ddl {
       $sql .= " WHERE id = ".(int)$formvars['aktivesLayout'];
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
-      $lastddl_id = mysql_insert_id();
+      $lastddl_id = $this->database->mysqli->insert_id;
 
 			for($i = 0; $i < count($attributes['name']); $i++){
 				$sql = "REPLACE INTO ddl_elemente SET ddl_id = ".(int)$formvars['aktivesLayout'];
@@ -1065,7 +1065,7 @@ class ddl {
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->update_layout :",4);
         $this->database->execSQL($sql,4, 1);
-        $lastfreitext_id = mysql_insert_id();
+        $lastfreitext_id = $this->database->mysqli->insert_id;
       }
 			
       for($i = 0; $i < $formvars['linecount']; $i++){
@@ -1088,7 +1088,7 @@ class ddl {
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->update_layout :",4);
         $this->database->execSQL($sql,4, 1);
-        $lastline_id = mysql_insert_id();
+        $lastline_id = $this->database->mysqli->insert_id;
       }
     }
   }
@@ -1287,7 +1287,7 @@ class ddl {
     $sql .= ' angle = 0';
     $this->debug->write("<p>file:kvwmap class:ddl->addfreetext :",4);
     $this->database->execSQL($sql,4, 1);
-    $lastinsert_id = mysql_insert_id();
+    $lastinsert_id = $this->database->mysqli->insert_id;
     $sql = 'INSERT INTO ddl2freitexte (ddl_id, freitext_id) VALUES ('.$formvars['aktivesLayout'].', '.$lastinsert_id.')';
     $this->debug->write("<p>file:kvwmap class:ddl->addfreetext :",4);
     $this->database->execSQL($sql,4, 1);
@@ -1318,7 +1318,7 @@ class ddl {
     $sql .= ' breite = '.$breite;
     $this->debug->write("<p>file:kvwmap class:ddl->addline :",4);
     $this->database->execSQL($sql,4, 1);
-    $lastinsert_id = mysql_insert_id();
+    $lastinsert_id = $this->database->mysqli->insert_id;
     $sql = 'INSERT INTO ddl2freilinien (ddl_id, line_id) VALUES ('.$formvars['aktivesLayout'].', '.$lastinsert_id.')';
     $this->debug->write("<p>file:kvwmap class:ddl->addline :",4);
     $this->database->execSQL($sql,4, 1);
