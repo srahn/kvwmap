@@ -2948,7 +2948,7 @@ echo '			</ul>
 
 		$result = $this->database->execSQL($sql, 0, 0);
 		if ($result['success']) {
-			if (mysql_num_rows($result['query']) > 0) {
+			if ($this->database->result->num_rows > 0) {
 				$ret = true;
 				$this->add_message('error', 'Nutzer mit der ID: ' . $user_id . ' gehört noch zu anderen Stellen und kann daher nur in Adminstellen bearbeitet werden!');
 			}
@@ -9077,8 +9077,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$sql = "SELECT count(z.layer_id) as count, z.layer_id, " . $name_column." FROM zwischenablage as z, layer as l WHERE z.layer_id = l.Layer_ID AND user_id = " . $this->user->id." AND stelle_id = " . $this->Stelle->id." GROUP BY z.layer_id, l.Name";
 		#echo $sql.'<br>';
 		$ret = $this->database->execSQL($sql,4, 1);
-    $this->num_rows=mysql_num_rows($ret[1]);
-		while($rs=mysql_fetch_array($ret[1])){
+    $this->num_rows = $this->database->result->num_rows;
+		while($rs = $this->database->result->fetch_assoc()){
 			$this->layer[] = $rs;
 		}
 		// if($this->num_rows == 1){
@@ -9095,7 +9095,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$sql = "SELECT oid FROM zwischenablage WHERE user_id = " . $this->user->id." AND stelle_id = " . $this->Stelle->id." AND layer_id = " . $layer_id;
 		#echo $sql.'<br>';
 		$ret = $this->database->execSQL($sql,4, 1);
-		while($rs=mysql_fetch_array($ret[1])){
+		while($rs = $this->database->result->fetch_assoc()){
 			$oids[] = $rs['oid'];
 		}
 		$layerset = $this->user->rolle->getLayer($layer_id);
@@ -16182,7 +16182,7 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_ReferenceMap - Lesen der Referenzkartendaten:<br>" . $sql,4);
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-		$rs = $this->db->result->fetch_array();
+		$rs = $this->db->result->fetch_assoc();
     $this->referenceMap = $rs;
 #		echo '<br>sql: ' . print_r($sql, true);
 #		echo '<br>ref: ' . print_r($this->referenceMap, true);
@@ -16340,7 +16340,7 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Groups - Lesen der Gruppen der Rolle:<br>" . $sql,4);
     $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-    while ($rs = $this->db->result->fetch_array()) {
+    while ($rs = $this->db->result->fetch_assoc()) {
 			$groups[$rs['id']]['status'] = value_of($rs, 'status');
       $groups[$rs['id']]['Gruppenname'] = $rs['Gruppenname'];
 			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
@@ -16395,7 +16395,7 @@ class db_mapObj{
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-		while ($rs = $ret['result']->fetch_array()) {
+		while ($rs = $ret['result']->fetch_assoc()) {
 			$rs['Style'] = $this->read_Styles($rs['Class_ID']);
 			$rs['Label'] = $this->read_Label($rs['Class_ID']);
 			$Classes[] = $rs;
@@ -16620,7 +16620,6 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->writeFilter - Speichern des Filterstrings:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-    $query=mysql_query($sql);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
   }
 
@@ -16629,7 +16628,7 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->checkPolygon - Testen ob Polygon_id noch in einem Filter benutzt wird:<br>" . $sql,4);
     $this->db->execSQL($sql);
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-    $rs = $this->db->result->fetch_array();
+    $rs = $this->db->result->fetch_assoc();
     if($rs == NULL){
       return false;
     }
@@ -16644,7 +16643,7 @@ class db_mapObj{
     #echo $sql;
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-    $ret=mysql_fetch_row($query);
+    $ret = $this->db->result->fetch_row();
     $poly_id = $ret[0];
     return $poly_id;
   }
@@ -16688,8 +16687,8 @@ class db_mapObj{
 		# echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->readAttributeFilter - Lesen der Attribute-Filter-Parameter:<br>" . $sql, 4);
 		$this->db->execSQL($sql);
-		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__,4); return 0; }
-		while($rs = $this->db->result->fetch_array()) {
+		if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__,4); return 0; }
+		while($rs = $this->db->result->fetch_assoc()) {
 			$filter[] = $rs;
 		}
 		return $filter;
@@ -16700,7 +16699,7 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getFilter - Lesen des Filter-Statements des Layers:<br>" . $sql,4);
     $this->db->execSQL($sql);
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-    $rs = $this->db->result->fetch_array();
+    $rs = $this->db->result->fetch_row();
     $filter = $rs[0];
     return $filter;
   }
@@ -16748,7 +16747,7 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getPath - Lesen des Path-Statements des Layers:<br>" . $sql,4);
     $this->db->execSQL($sql);
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-    $rs = $this->db->result->fetch_array();
+    $rs = $this->db->result->fetch_row();
     $pfad = $rs[0];
     return $pfad;
   }
@@ -16796,7 +16795,7 @@ class db_mapObj{
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Lesen des connection-Strings des Layers:<br>" . $sql,4);
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-		$rs = $this->db->result->fetch_array();
+		$rs = $this->db->result->fetch_row();
 		$connectionstring = $rs[0];
 #		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Gefundener Connection String des Layers:<br>" . $connectionstring, 4);
 		if ($connectionstring != ''){
@@ -17323,7 +17322,7 @@ class db_mapObj{
 				$err_msg = $ret[1];
 			}
 			else {
-				while($rs = mysql_fetch_assoc($ret[1])) {
+				while($rs = $database->result->fetch_assoc()) {
 					$stelle_id_var = '@stelle_id_' . $rs['ID'];
 					$stellen[] = array(
 						'id' => $rs['ID'],
@@ -18061,7 +18060,7 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->newLayer - Erzeugen eines Layers:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql, $this->connection); return 0; }
-    return mysql_insert_id();
+    return $this->db->mysqli->insert_id;
   }
 
 	function save_datatype_attributes($attributes, $database, $formvars){
@@ -18916,7 +18915,7 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->newGroup - Erstellen einer Gruppe:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-    return mysql_insert_id();
+    return $this->db->mysqli->insert_id;
   }
 
   function get_Groups($layergruppen = NULL) {
@@ -19019,7 +19018,7 @@ class db_mapObj{
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->copyLabel - Kopieren eines Labels:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-		return mysql_insert_id();
+		return $this->db->mysqli->insert_id;
 	}
 
   function copyClass($class_id, $layer_id){
@@ -19029,7 +19028,7 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->copyClass - Kopieren einer Klasse:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-    $new_class_id = mysql_insert_id();
+    $new_class_id = $this->db->mysqli->insert_id;
     for($i = 0; $i < count($class[0]['Style']); $i++){
       $new_style_id = $this->copyStyle($class[0]['Style'][$i]['Style_ID']);
       $this->addStyle2Class($new_class_id, $new_style_id, $class[0]['Style'][$i]['drawingorder']);
@@ -19677,9 +19676,9 @@ class Document {
       $sql.= ' AND id = '.$id;
     }
     $this->debug->write("<p>file:kvwmap class:Document->load_ausschnitte :<br>" . $sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs=mysql_fetch_array($query)){
+		$ret1 = $this->database->execSQL($sql, 4, 1);
+		if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		while($rs = $this->database->result->fetch_assoc()){
       $ausschnitte[] = $rs;
     }
     return $ausschnitte;
@@ -19758,7 +19757,7 @@ class Document {
     $sql .= ' angle = 0';
     $this->debug->write("<p>file:kvwmap class:Document->addfreetext :",4);
     $this->database->execSQL($sql,4, 1);
-    $lastinsert_id = mysql_insert_id();
+    $lastinsert_id = $this->database->mysqli->insert_id;
     $sql = 'INSERT INTO druckrahmen2freitexte (druckrahmen_id, freitext_id) VALUES('.$formvars['aktiverRahmen'].', '.$lastinsert_id.')';
     $this->debug->write("<p>file:kvwmap class:Document->addfreetext :",4);
     $this->database->execSQL($sql,4, 1);
@@ -19777,10 +19776,8 @@ class Document {
     $sql ='SELECT preis FROM druckrahmen WHERE `format` = \''.$format.'\'';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:Document->get_price :<br>" . $sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-
+    $this->database->execSQL($sql,4, 1);
+    $rs = $this->database->result->fetch_row();
     return $rs[0];
   }
 
@@ -19922,7 +19919,7 @@ class Document {
       }
       $this->debug->write("<p>file:kvwmap class:Document->save_frame :",4);
       $this->database->execSQL($sql,4, 1);
-      $lastdruckrahmen_id = mysql_insert_id();
+      $lastdruckrahmen_id = $this->database->mysqli->insert_id;
 
       $sql = 'INSERT INTO druckrahmen2stelle (stelle_id, druckrahmen_id) VALUES('.$stelle_id.', '.$lastdruckrahmen_id.')';
       $this->debug->write("<p>file:kvwmap class:Document->save_frame :",4);
@@ -19940,7 +19937,7 @@ class Document {
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:Document->update_frame :",4);
         $this->database->execSQL($sql,4, 1);
-        $lastfreitext_id = mysql_insert_id();
+        $lastfreitext_id = $this->database->mysqli->insert_id;
 
         $sql = 'INSERT INTO druckrahmen2freitexte (druckrahmen_id, freitext_id) VALUES('.$lastdruckrahmen_id.', '.$lastfreitext_id.')';
         $this->debug->write("<p>file:kvwmap class:Document->save_frame :",4);
@@ -20105,9 +20102,8 @@ class Document {
   function get_active_frameid($userid, $stelleid){
     $sql ='SELECT active_frame from rolle WHERE `user_id` ='.$userid.' AND `stelle_id` ='.$stelleid;
     $this->debug->write("<p>file:kvwmap class:GUI->get_active_frameid :<br>" . $sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
+    $this->database->execSQL($sql,4, 1);
+		$rs = $this->database->result->fetch_row();
     return $rs[0];
   }
 }

@@ -606,7 +606,10 @@ class rolle {
 	}
 	
 	function getRollenLayer($LayerName, $typ = NULL) {
-    $sql ="SELECT l.*, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable FROM rollenlayer AS l";
+		$sql ="
+			SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, gle_view,
+				concat('(', rollenfilter, ')') as Filter
+			FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
     if ($LayerName!='') {
       $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
@@ -621,11 +624,11 @@ class rolle {
 			$sql .= " AND Typ = '".$typ."'";
 		}
     #echo $sql.'<br>';
-    $this->debug->write("<p>file:users.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    $this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
+    $this->database->execSQL($sql);
+    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
-    while ($rs=mysql_fetch_array($query)) {
+    while ($rs = $this->database->result->fetch_row()) {
       $layer[]=$rs;
     }
     return $layer;
@@ -1215,13 +1218,13 @@ class pgdatabase {
 	function getDatatypeId($typname, $schema, $dbname, $host, $port){
 		$sql = "SELECT id FROM datatypes WHERE ";
 		$sql.= "name = '".$typname."' AND `schema` = '".$schema."' AND dbname = '".$dbname."' AND host = '".$host."' AND port = ".$port;
-		$query=mysql_query($sql);
-		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-		$rs=mysql_fetch_assoc($query);
+		$ret1 = $this->gui->database->execSQL($sql, 4, 1);
+		if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		$rs = $this->gui->database->result->fetch_assoc();
 		if($rs == NULL){
 			$sql = "INSERT INTO datatypes (name, `schema`, dbname, host, port) VALUES ('".$typname."', '".$schema."', '".$dbname."', '".$host."', ".$port.")";
-			$query=mysql_query($sql);
-			$datatype_id = mysql_insert_id();
+			$ret2 = $this->gui->database->execSQL($sql, 4, 1);
+			$datatype_id = $this->gui->database->mysqli->insert_id;
 		}
 		else{	
 			$datatype_id = $rs['id'];
@@ -1274,8 +1277,8 @@ class pgdatabase {
 								decimal_length = ".$fields[$i]['decimal_length'].", 
 								`default` = '".addslashes($fields[$i]['default'])."', 
 								`order` = ".$i;
-			$query=mysql_query($sql);
-			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			$ret1 = $this->gui->database->execSQL($sql, 4, 1);
+			if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		}
 	}		
 

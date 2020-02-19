@@ -482,6 +482,7 @@ FROM
 		$sql = 'SET client_min_messages=\'log\';SET debug_print_parse=true;'.$select." LIMIT 0;";		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
 		$ret = $this->execSQL($sql, 4, 0);
 		error_reporting($error_reporting);		
+		ini_set("display_errors", '1');
 		if ($ret['success']) {
 			$query_plan = $error_list[0];
 			$table_alias_names = $this->get_table_alias_names($query_plan);
@@ -685,13 +686,13 @@ FROM
 	function getDatatypeId($typname, $schema, $dbname, $host, $port){
 		$sql = "SELECT id FROM datatypes WHERE ";
 		$sql.= "name = '".$typname."' AND `schema` = '".$schema."' AND dbname = '".$dbname."' AND host = '".$host."' AND port = ".$port;
-		$query=mysql_query($sql);
-		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-		$rs=mysql_fetch_assoc($query);
+		$ret1 = $this->gui->database->execSQL($sql, 4, 1);
+		if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		$rs = $this->gui->database->result->fetch_assoc();
 		if($rs == NULL){
 			$sql = "INSERT INTO datatypes (name, `schema`, dbname, host, port) VALUES ('".$typname."', '".$schema."', '".$dbname."', '".$host."', ".$port.")";
-			$query=mysql_query($sql);
-			$datatype_id = mysql_insert_id();
+			$ret2 = $this->gui->database->execSQL($sql, 4, 1);
+			$datatype_id = $this->gui->database->mysqli->insert_id;
 		}
 		else{	
 			$datatype_id = $rs['id'];
@@ -758,8 +759,8 @@ FROM
 								decimal_length = ".$fields[$i]['decimal_length'].", 
 								`default` = '".addslashes($fields[$i]['default'])."', 
 								`order` = ".$i;
-			$query=mysql_query($sql);
-			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			$ret1 = $this->gui->database->execSQL($sql, 4, 1);
+			if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		}
 	}
 

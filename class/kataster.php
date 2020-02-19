@@ -106,9 +106,9 @@ class Flur {
     # Abfragen des Namens der Shapedatei für Fluren
     $sql ='SELECT Data FROM layer WHERE Name="'.$this->LayerName.'"';
     $this->debug->write("<p>kataster.php Flur->getDataSourceName Abfragen des Shapefilenamen für die Fluren:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->database->mysqli->error, 4); return 0; }
+		$rs = $this->database->result->fetch_assoc();
     return $rs['Data'];
   }
 
@@ -163,11 +163,6 @@ class adresse {
     $this->dbConn=$dbConn;
   }
 	
-  function getGebaeude() {
-    $Gebaeude=new gebaeude($this);
-    return $Gebaeude->getGebaeude();
-  }
-
   function getFlurstKennzListe() {
     # liefert FlurstKennz zur Adressangaben aus dem ALB Bestand
     $ret=$this->database->getFlurstKennzListeByGemSchlByStrSchl($this->GemeindeSchl,$this->StrassenSchl,$this->HausNr);
@@ -205,9 +200,9 @@ class adresse {
       $sql.=' ORDER BY ' . replace_semicolon($order);
     }
     $this->debug->write("<p>kvwmap->getAdressenListeByFlst->Abfragen der Adressdaten für Flurstuecke:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while ($rs=mysql_fetch_array($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->database->mysqli->error, 4); return 0; }
+		while ($rs = $this->database->result->fetch_assoc()){
       $Liste['GemID'][]=$rs['Gemeinde'];
       $Liste['StrID'][]=$rs['Strasse'];
       $Liste['HausNr'][]=$rs['HausNr'];
@@ -219,9 +214,6 @@ class adresse {
     # 2006-01-09
     # Abfragen der Strassen, die im aktuellen Ausschnitt zu sehen sind.
     # 1. Abfragen der Adressen von Gebäuden im Ausschnitt
-    $Gebaeude=new gebaeude('');
-    $GebaeudeAdressenListe=$Gebaeude->getGebaeudeListeByExtent($extent);
-    #var_dump($GebaeudeAdressenListe);
 
     # 2. Abfragen der Flurstuecke, die im extent liegen
     $Flurstueck=new flurstueck('',$this->database);
@@ -270,520 +262,6 @@ class adresse {
   }
 }
 
-#-----------------------------------------------------------------------------------------------------------------
-#####################
-#-> Klasse Gebaeude #
-#####################
-
-class gebaeude {
-  var $Adresse;
-  var $debug;
-
-  ###################### Liste der Funktionen ####################################
-  #
-  # function gebaeude($Adresse) - Construktor
-  # function getTableDef()
-  # function getColNames()
-  # function getGebaeude()
-  # function getRectByGebaeudeListe($IDlist,$layer)
-  # function getGebaeudeListeByExtent($extent)
-  # function getDataSourceName()
-  #
-  ################################################################################
-
-
-  function gebaeude($Adresse) {
-    global $debug; $this->debug=$debug;
-    $this->Adresse=$Adresse;
-    $this->LayerName=LAYERNAME_GEBAEUDE;
-  }
-
-  function getTableDef() {
-    $def = array(
-      array("OBJGR","N",6,0),
-      array("OBJID","C",8),
-      array("FOLIE","N",6,0),
-      array("OBJART","N",6,0),
-      array("TEXTART","C",255),
-      array("INFOART","N",6,0),
-      array("INFOTEXT","C",21),
-      array("AKTUAL","N",6,0),
-      array("QUELLE","N",6,0),
-      array("ID","N",11,0),
-      array("GEMEINDE","N",8,0),
-      array("STRKEY","C",5),
-      array("HAUSNR","C",8)
-    );
-    $this->tabdef=$def;
-    return $def;
-  }
-
-  function getColNames() {
-    for ($i=0;$i<count($this->tabdef);$i++) {
-      $names[$i]=$this->tabdef[$i][0];
-    }
-    $this->colnames=$names;
-    return $names;
-  }
-
-  function getALKGebaeude() {
-    $gebaeude=$this->database->getGebaeude();
-  }
-
-  # ermittelt die ID für das Gebäude welche sowohl im Shapefile Gebaeude.dbf als auch
-  # in der Tabelle ALK_Gebaeude steht. Die Abfrage erfolgt in der Datenbank
-  function getGebaeude() {
-    if ($this->Adresse->GemeindeSchl=='' OR $this->Adresse->StrassenSchl=='') { return 0; }
-    $sql ='SELECT ID,Gemeinde AS GemeindeSchl,STRKEY AS StrassenSchl,HAUSNR AS HausNr';
-    $sql.=' FROM ALK_Gebaeude WHERE Gemeinde = '.$this->Adresse->GemeindeSchl;
-    $sql.=' AND STRKEY = "'.$this->Adresse->StrassenSchl.'" AND HAUSNR = "'.$this->Adresse->HausNr.'"';
-    $query=mysql_query($sql);
-    if ($this->debug) {
-      $this->debug->write('<br>kataster.php gebaeude getGebaeude<br>Abfrage der Gebaeudedaten<br>'.$sql,4);
-    }
-    if ($query==0) {
-      $this->debug->write('<br>Abbruch in Zeile:'.__LINE__.': '.$sql,4);
-      echo '<br>Abbruch in Zeile:'.__LINE__.'<br>kataster.php gebaeude getGebaeude<br>Abfrage der Gebaeudedaten<br>'.$sql;
-      return 0;
-    }
-    if (mysql_num_rows($query)==0) {
-      $Gebaeude['ID'][0]=0;
-    }
-    else {
-      while($rs=mysql_fetch_array($query)) {
-        $Gebaeude['ID'][]=$rs['ID'];
-        $Gebaeude['GemeindeSchl'][]=$rs['GemeindeSchl'];
-        $Gebaeude['StrassenSchl'][]=$rs['StrassenSchl'];
-        $Gebaeude['HausNr'][]=$rs['HausNr'];
-      }
-    }
-    return $Gebaeude;
-  }
-
-  function getRectByGebaeudeListe($IDlist,$layer) {
-    $anzGeb=count($IDlist);
-    $minx=9999999;
-    $miny=9999999;
-    $maxx=0;
-    $maxy=0;
-    for ($i=0;$i<$anzGeb;$i++) {
-      @$layer->queryByAttributes('ID',$IDlist[$i],0);
-      $result=$layer->getResult(0);
-      if ($layer->getNumResults()>0) {
-        $numResults+=$layer->getNumResults();
-        $layer->open();
-        if(MAPSERVERVERSION > 500){
-        	$shape=$layer->getFeature($result->shapeindex,-1);
-        }
-        else{
-        	$shape=$layer->getShape(-1,$result->shapeindex);
-        }
-        $bounds=$shape->bounds;
-        if ($minx>$bounds->minx) { $minx=$bounds->minx; }
-        if ($miny>$bounds->miny) { $miny=$bounds->miny; }
-        if ($maxx<$bounds->maxx) { $maxx=$bounds->maxx; }
-        if ($maxy<$bounds->maxy) { $maxy=$bounds->maxy; }
-      }
-    }
-    if ($numResults==0) {
-      return 0;
-    }
-    else {
-      $bounds->setextent($minx,$miny,$maxx,$maxy);
-      return $bounds;
-    }
-  }
-
-  function getGebaeudeListeByExtent($extent) {
-    # Abfragen der Gebäude, die im aktuellen Ausschnitt zu sehen sind.
-    # Hier könnte später eine Unterteilung in die Abfrage der Gebäude im Kartenausschnitt aus
-    # Shape-Datei oder
-    # postgis-Datenbank erfolgen. Je nachdem, wo die Gebäude befinden.
-    $map=ms_newMapObj('');
-    $layer=ms_newLayerObj($map);
-    $layer->set('data',SHAPEPATH.$this->getDataSourceName());
-    $layer->set('status',MS_ON);
-    $layer->set('template', ' ');
-    $layer->queryByRect($extent);
-    $layer->open();
-    $anzResult=$layer->getNumResults();
-    for ($i=0;$i<$anzResult;$i++) {
-      $result=$layer->getResult($i);
-      $shapeindex=$result->shapeindex;
-      if(MAPSERVERVERSION > 500){
-      	$shape=$layer->getFeature($shapeindex,-1);
-      }
-      else{
-      	$shape=$layer->getShape(-1,$shapeindex);
-      }
-      $Liste[$i]['GemID']=$shape->values['GEMEINDE'];
-      $Liste[$i]['StrID']=$shape->values['STRKEY'];
-      $Liste[$i]['HausNr']=$shape->values['HAUSNR'];
-    }
-    return $Liste;
-  }
-
-  function getDataSourceName() {
-    # Abfragen des Namens der Shapedatei für Gebaeude
-    $sql ='SELECT Data FROM layer WHERE Name="Gebaeude"';
-    $this->debug->write("<p>kataster.php Gebaeude getDataSourceName Abfragen des Shapefilenamen für Gebaeude:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    $this->datasourcename=$rs['Data'];
-    return $rs['Data'];
-  }
-}
-
-#-----------------------------------------------------------------------------------------------------------------
-
-####################
-#-> Klasse Nutzung #
-####################
-
-class nutzung {
-  var $debug;
-
-  ###################### Liste der Funktionen ####################################
-  #
-  # function nutzung()  - Construktor
-  # function getTableDef()
-  # function getColNames()
-  # function getDataSourceName()
-  #
-  ################################################################################
-
-
-  function nutzung() {
-    global $debug; $this->debug=$debug;
-    $this->LayerName=LAYERNAME_NUTZUNGEN; # geändert 2005-12-15 pk
-  }
-
-  function getTableDef() {
-    $def = array(
-      array("OBJGR","N",6,0),
-      array("OBJID","C",8),
-      array("FOLIE","N",6,0),
-      array("OBJART","N",6,0),
-      array("TEXTART","C",255),
-      array("INFOART","N",6,0),
-      array("INFOTEXT","C",21),
-      array("AKTUAL","N",6,0),
-      array("QUELLE","N",6,0),
-      array("ID","N",11,0)
-    );
-    $this->tabdef=$def;
-    return $def;
-  }
-
-  function getColNames() {
-    for ($i=0;$i<count($this->tabdef);$i++) {
-      $names[$i]=$this->tabdef[$i][0];
-    }
-    $this->colnames=$names;
-    return $names;
-  }
-
-  function getDataSourceName() {
-    # Abfragen des Namens der Shapedatei für Gebaeude
-    $sql ='SELECT Data FROM layer WHERE Name="'.$this->LayerName.'"';
-    $this->debug->write("<p>kataster.php Nutzung getDataSourceName Abfragen des Shapefilenamen für Nutzungsarten:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    $this->datasourcename=$rs['Data'];
-    return $rs['Data'];
-  }
-}
-
-#-----------------------------------------------------------------------------------------------------------------
-
-##########################
-#-> Klasse Ausgestaltung #
-##########################
-
-class ausgestaltung {
-  var $debug;
-
-  ###################### Liste der Funktionen ####################################
-  #
-  # function ausgestaltung()  - Construktor
-  # function getTableDef()
-  # function getColNames()
-  # function getDataSourceName()
-  #
-  ################################################################################
-
-  function ausgestaltung() {
-    global $debug; $this->debug=$debug;
-    $this->LayerName=LAYERNAME_AUSGESTALTUNGEN;
-  }
-
-  function getTableDef() {
-    $def = array(
-      array("OBJGR","N",6,0),
-      array("OBJID","C",8),
-      array("FOLIE","N",6,0),
-      array("OBJART","N",6,0),
-      array("INFOART","N",6,0),
-      array("INFOTEXT","C",21),
-      array("KURZTEXT","C",255),
-      array("ARTGEO","N",6,0),
-      array("DARST","N",6,0),
-      array("AKTUAL","N",6,0),
-      array("QUELLE","N",6,0),
-      array("ID","N",11,0)
-    );
-    $this->tabdef=$def;
-    return $def;
-  }
-
-  function getColNames() {
-    for ($i=0;$i<count($this->tabdef);$i++) {
-      $names[$i]=$this->tabdef[$i][0];
-    }
-    $this->colnames=$names;
-    return $names;
-  }
-
-  function getDataSourceName() {
-    # Abfragen des Namens der Shapedatei für Gebaeude
-    $sql ='SELECT Data FROM layer WHERE Name="'.$this->LayerName.'"';
-    $this->debug->write("<p>kataster.php Ausgestaltung getDataSourceName Abfragen des Shapefilenamen für die Ausgestaltung:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    $this->datasourcename=$rs['Data'];
-    return $rs['Data'];
-  }
-}
-
-#-----------------------------------------------------------------------------------------------------------------
-
-######################
-#-> Klasse Finanzamt #
-######################
-
-class finanzamt {
-  var $FinanzamtSchl;
-  var $FinanzamtName;
-
-  ###################### Liste der Funktionen ####################################
-  #
-  # function finanzamt($FinanzamtSchl)  - Construktor
-  # function getFinanzamtName()
-  #
-  ################################################################################
-
-  function finanzamt($FinanzamtSchl) {
-    $this->FinanzamtSchl=$FinanzamtSchl;
-    $this->FinanzamtName=$this->getFinanzamtName();
-  }
-
-  function getFinanzamtName() {
-    $sql = 'SELECT Name AS FinanzamtName FROM v_Finanzaemter WHERE Finanzamt ='.$this->FinanzamtSchl;
-    $query=mysql_query($sql);
-    $rs=mysql_fetch_array($query);
-    return $rs['FinanzamtName'];
-  }
-}
-
-#-----------------------------------------------------------------------------------------------------------------
-#####################
-#-> Klasse Forstamt #
-#####################
-
-class forstamt {
-  var $Schluessel;
-  var $Name;
-
-  ###################### Liste der Funktionen ####################################
-  #
-  # function forstamt($Schluessel)  - Construktor
-  # function getName()
-  #
-  ################################################################################
-
-  function forstamt($Schluessel) {
-    global $debug;
-    $this->debug=$debug;
-    $this->Schluessel=$Schluessel;
-    $this->Name=$this->getName();
-  }
-
-  function getName() {
-    if ($Schluessel>0) {
-      $sql = 'SELECT Name FROM v_Forstaemter WHERE Forstamt ='.$this->ForstamtSchl;
-      $this->debug->write("<p>kataster.php Forstamt->getName:<br>".$sql,4);
-      $query=mysql_query($sql);
-      if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-      $rs=mysql_fetch_array($query);
-      return $rs['Name'];
-    }
-    else {
-      return 'keine Angabe';
-    }
-  }
-}
-
-#-----------------------------------------------------------------------------------------------------------------
-################
-# Klasse Kreis #
-################
-
-class kreis {
-  var $KreisSchl;
-  var $KreisName;
-  var $database;
-
-  ###################### Liste der Funktionen ####################################
-  #
-  # function kreis($KreisSchl)  - Construktor
-  # function getKreisName()
-  # function getDataSourceName()
-  # function getTableDef()
-  # function getColNames()
-  # function updateKreise()
-  #
-  ################################################################################
-
-  function kreis($KreisSchl,$database) {
-    global $debug;
-    $this->debug=$debug;
-    $this->database=$database;
-    $this->KreisSchl=$KreisSchl;
-  }
-
-  function getKreisName() {
-    $this->debug->write("<p>kataster.php kreis getKreisName Abfragen des Namens des Kreises:",4);
-    $ret=$this->database->getKreisName($this->KreisSchl);
-    return $ret[1];
-  }
-
-  function getDataSourceName() {
-    # Abfragen des Namens der Shapedatei für Kreise
-    $sql ='SELECT Data FROM layer WHERE Name="Landkreis"';
-    $this->debug->write("<p>kataster.php kreis getDataSourceName Abfragen des Shapefilenamen für Kreise:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    $this->datasourcename=$rs['Data'];
-    return $rs['Data'];
-  }
-
-  function getTableDef() {
-    $def = array(
-      array("AREA","N",16,0),
-      array("PERIMETER","N",16,0),
-      array("KREIS_","N",11,0),
-      array("KREIS_ID","N",11,0),
-      array("KREIS","C",50),
-      array("ID","N",11,0)
-    );
-
-    $this->tabdef=$def;
-    return $def;
-  }
-
-  function getColNames() {
-    for ($i=0;$i<count($this->tabdef);$i++) {
-      $names[$i]=$this->tabdef[$i][0];
-    }
-    $this->colnames=$names;
-    return $names;
-  }
-
-  function updateKreise() {
-    $filename=SHAPEPATH.'temp/'.$this->getDataSourceName();
-    # Für die Kreisdaten testen ob es eine shp, dbf, und shx gibt
-    $msg = '<b>Aktualisieren der Kreisgrenzen:</b>';
-    if (!is_file($filename.'.shp')) {
-      $errmsg='<br>'.$filename.'.shp';
-    }
-    if (!is_file($filename.'.shx')) {
-      $errmsg.='<br>'.$filename.'.shx';
-    }
-    if (!is_file($filename.'.dbf')) {
-      $errmsg.='<br>'.$filename.'.dbf';
-    }
-    if ($errmsg!='') {
-      $msg.='<br>Zur Fortführung der Kreisgrenzen fehlen folgende Dateien:';
-      $msg.=$errmsg;
-    }
-    else {
-      $msg.='<br>Temporäre Dateien zum aktualisieren gefunden.';
-      # lesen der soll-Tabellendefinition
-      $tabdef=$this->getTableDef();
-      $colnames=$this->getColNames();
-      $dbfin=dbase_open($filename.'.dbf',0);
-      $dbfout=dbase_create($filename.'_neu.dbf',$tabdef);
-      if ($dbfin==0 OR $dbfout==0) {
-        $msg.='<b><br>Fehler beim Öffnen der dbf-Tabelle für die Landkreise!</b>';
-      }
-      else {
-        $numfieldsin=dbase_numfields($dbfin);
-        $msg.='<br>Schreiben der dbf-Tabelle...';
-        echo "Lese Landkreise...";
-        # Leeren des bisherigen Bestandes an Landkreisen in der Datenbank
-        $ret=$this->database->truncateAdmKreise();
-        if ($ret[0] AND DBWRITE) {
-          $errmsg ='<br>Fehler beim Löschen der Kreisgrenzen in der Datenbank.';
-          $errmsg.='<br>'.$ret[1];
-        }
-        else {
-          for ($i=1;$i<=dbase_numrecords($dbfin);$i++) {
-            $rsin=dbase_get_record_with_names($dbfin,$i);
-            echo "in".$rsin['KREIS'];
-            if ($i-1==$i10) {
-              if ($i>1) { echo "<br>".($i-1)." Zeilen eingelesen."; }
-              $i10+=10;
-            }
-            echo "<br>";
-            for ($numfieldsout=0;$numfieldsout<$numfieldsin;$numfieldsout++) {
-              $rsout[$numfieldsout]=trim(ANSII2DOS($rsin[$numfieldsout]));
-            }
-            # Auffüllen des records mit den zusätzlichen Spalten
-            $rsout[$numfieldsout++]=$i; # ID
-            if (!dbase_add_record($dbfout,$rsout)) {
-              $msg.='<br><b>Fehler beim Umschreiben der dbf-Tabelle in Zeile '.$i.'!</b>';
-            }
-            # Eintragen der Datenzeile in die Datenbanktabelle
-            $ret=$this->database->insertAdmKreis($colnames,$rsout);
-            if ($ret[0] AND DBWRITE) {
-              $msg.='<br>Fehler beim Einfügen eines Landkreises in die Datenbank.';
-              $msg.='<br>'.$ret[1];
-            }
-          }
-        } # end of lesen und überschreiben der Landkreisdaten
-      }
-      $msg.='<br>...fertig<br>'.($i-1).' Zeilen in neue dbf-Tabelle geschrieben.';
-      dbase_close ($dbfin);
-      dbase_close($dbfout);
-      # kopieren der temporären Tabellen ins Datenverzeichnis
-      $source=$filename;
-      $target=SHAPEPATH.$flst->datasourcename;
-      if (!copy($source.'.shp',$target.'.shp')) {
-         $errmsg='<br>'.$filename.'.shp\n';
-      }
-      if (!copy($source.'.shx',$target.'.shx')) {
-         $errmsg.='<br>'.$filename.'.shx\n';
-      }
-      if (!copy($source.'_neu.dbf',$target.'.dbf')) {
-         $errmsg.='<br>'.$filename.'.dbf\n';
-      }
-      if ($errmsg!='') {
-        $msg.='<br>Fehler beim Überschreiben der vorherigen Landkreisgrenzen, bei folgenden Dateien:';
-        $msg.=$errmsg;
-        $msg.='<br>Achtung!!! Die Fortführung war nicht erfolgreich!';
-      }
-      else {
-        $msg.='<br>Alter Datensatz überschrieben.';
-      }
-    }
-    $this->anzKreise=($i-1);
-    return $msg;
-  }
-}
 
 #-----------------------------------------------------------------------------------------------------------------
 #####################
@@ -865,231 +343,8 @@ class gemeinde {
     return $GemeindeListe;
   }
   
-  function getGemeindeListeByExtent($extent) {
-    # Hier könnte später eine Unterteilung in die Abfrage der Gemeinden im Kartenausschnitt aus
-    # Shape-Datei oder
-    # postgis-Datenbank erfolgen. Je nachdem, wo die Gemeindegrenzen befinden.
-
-    # Abfragen der Gemeinen, die im aktuellen Ausschnitt zu sehen sind.
-    $map=ms_newMapObj('');
-    $layer=ms_newLayerObj($map);
-    $layer->set('data',SHAPEPATH.$this->getDataSourceName());
-    $layer->set('status',MS_ON);
-    $layer->set('template', ' ');
-    $layer->queryByRect($extent);
-    $layer->open();
-    $anzResult=$layer->getNumResults();
-    for ($i=0;$i<$anzResult;$i++) {
-      $result=$layer->getResult($i);
-      $shapeindex=$result->shapeindex;
-      if(MAPSERVERVERSION > 500){
-      	$shape=$layer->getFeature($shapeindex,-1);
-      }
-      else{
-      	$shape=$layer->getShape(-1,$shapeindex);
-      }
-      $GemeindeListe['ID'][]=$shape->values['GEMEINDE_L'];
-      $GemeindeListe['Name'][]=$shape->values['GEMEINDE'];
-    }
-    return $GemeindeListe;
-  }
-
-  function getGemeindeListeByPermission($GemListe) {
-    # Abfragen des Filters für den Layer Gemeinde, Welche Gemeinden sind erlaubt
-    $sql ='SELECT Filter FROM used_layer AS ul,layer AS l WHERE ul.Layer_ID=l.Layer_ID';
-    $sql.=' AND l.Name="Gemeinde" AND ul.Stelle_ID='.$Stelle->id;
-    $this->debug->write("<p>kataster.php Gemeinde->getGemeindeListeByExtent Abfragen des Filters zum GemeindeLayer:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    if ($rs['Filter']!='') { # Filter wird nur ausgewertet, wenn er gesetzt ist
-      $IDallow=decompressListe($rs['Filter']);
-    }
-    else { # ansonsten wird $IDallow[0] auf 'all' gesetzt
-      $IDallow[0]='all';
-    }
-
-    # Abfragen der sortierten und zusammengefassten Gemeinden
-    $sql ='SELECT DISTINCT adr.Gemeinde AS GemID,adr.GemeindeName AS Name';
-    $sql.=' FROM tmp_Adressen AS adr,'.$GemeindeShapeFileName.' AS Gem';
-    $sql.=' WHERE adr.Gemeinde=Gem.GEMEINDE_L AND Gem.ID IN ('.$IDinRect['ID'][0];
-    for ($i=1;$i<count($IDinRect['ID']);$i++) {
-      $sql.=','.$IDinRect['ID'][$i];
-    }
-    $sql.=')';
-    if ($IDallow[0]!='all') {
-      $sql.=' AND Gem.ID IN ('.$IDallow[0];
-      for ($i=1;$i<count($IDallow);$i++) {
-        $sql.=','.$IDallow[$i];
-      }
-      $sql.=')';
-    }
-    if ($order!='') {
-      $sql.=' ORDER BY ' . replace_semicolon($order);
-    }
-    $this->debug->write("<p>kataster.php Gemeinde->getGemeindeListeByExtent Abfragen der Geimeinden aus dem Kartenausschnitt:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while ($rs=mysql_fetch_array($query)) {
-      $GemeindeListe['GemID'][]=$rs['GemID'];
-      $GemeindeListe['Name'][]=$rs['Name'];
-    }
-    return $GemeindeListe;
-  }
-
-  function getDataSourceName() {
-    # Abfragen des Namens der Shapedatei für Gemeinden
-    $sql ='SELECT Data FROM layer WHERE Name="Gemeinde"';
-    $this->debug->write("<p>kataster.php Gemeinde getDataSourceName Abfragen des Shapefilenamen für Geimeinden:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    return $rs['Data'];
-  }
-
-  function getMER($layer) {
-    @$layer->queryByAttributes('GEMEINDE_L',$this->GemeindeSchl,0);
-    $result=$layer->getResult(0);
-    if ($layer->getNumResults()==0) {
-      return 0;
-    }
-    else {
-      $layer->open();
-      if(MAPSERVERVERSION > 500){
-      	$shape=$layer->getFeature($result->shapeindex,-1);
-      }
-      else{
-      	$shape=$layer->getShape(-1,$result->shapeindex);
-      }
-      return $shape->bounds;
-    }
-  }
-
-  function updateGemeinden() {
-    $filename=SHAPEPATH.'temp/'.$this->getDataSourceName();
-    # Für die Gemeinde testen ob es eine shp, dbf, und shx gibt
-    $msg = '<b>Aktualisieren der Gemeindegrenzen:</b>';
-    if (!is_file($filename.'.shp')) {
-      $errmsg='<br>'.$filename.'.shp';
-    }
-    if (!is_file($filename.'.shx')) {
-      $errmsg.='<br>'.$filename.'.shx';
-    }
-    if (!is_file($filename.'.dbf')) {
-      $errmsg.='<br>'.$filename.'.dbf';
-    }
-    if ($errmsg!='') {
-      $msg.='<br>Zur Fortführung der Gemeindegrenzen fehlen folgende Dateien:';
-      $msg.=$errmsg;
-    }
-    else {
-      $msg.='<br>Temporäre Dateien zum aktualisieren gefunden.';
-      # lesen der soll-Tabellendefinition
-      $tabdef=$this->getTableDef();
-      $colnames=$this->getColNames();
-
-      $dbfin=dbase_open($filename.'.dbf',0);
-      $dbfout=dbase_create($filename.'_neu.dbf',$tabdef);
-      if ($dbfin==0 OR $dbfout==0) {
-        $msg.='<b><br>Fehler beim Öffnen der dbf-Tabelle für die Gemeinden!</b>';
-      }
-      else {
-        $numfieldsin=dbase_numfields($dbfin);
-        $msg.='<br>Schreiben der dbf-Tabelle...';
-        echo "Lese Landkreise...";
-        # Leeren des bisherigen Bestandes an Gemeinden in der Datenbank
-        $ret=$this->database->truncateAdmKreise();
-        if ($ret[0] AND DBWRITE) {
-          $errmsg ='<br>Fehler beim Löschen der Gemeindegrenzen in der Datenbank.';
-          $errmsg.='<br>'.$ret[1];
-        }
-        else {
-          for ($i=1;$i<=dbase_numrecords($dbfin);$i++) {
-            $rsin=dbase_get_record($dbfin,$i);
-            if ($i-1==$i10) {
-              if ($i>1) { echo "<br>".($i-1)." Zeilen eingelesen."; }
-              $i10+=10;
-            }
-            for ($numfieldsout=0;$numfieldsout<$numfieldsin;$numfieldsout++) {
-              $rsout[$numfieldsout]=trim(ANSII2DOS($rsin[$numfieldsout]));
-            }
-            # Auffüllen des records mit den zusätzlichen Spalten
-            $rsout[$numfieldsout++]=$i; # ID
-            if (!dbase_add_record($dbfout,$rsout)) {
-              $msg.='<br><b>Fehler beim Umschreiben der dbf-Tabelle in Zeile '.$i.'!</b>';
-            }
-            # Eintragen der Datenzeile in die Datenbanktabelle
-            $ret=$this->database->insertAdmKreis($colnames,$rsout);
-            if ($ret[0] AND DBWRITE) {
-              $msg.='<br>Fehler beim Einfügen einer Gemeinde in die Datenbank.';
-              $msg.='<br>'.$ret[1];
-            }
-          }
-        } # end of lesen und überschreiben der Landkreisdaten
-      }
-      $msg.='<br>...fertig<br>'.($i-1).' Zeilen in neue dbf-Tabelle geschrieben.';
-      dbase_close ($dbfin);
-      dbase_close($dbfout);
-      # kopieren der temporären Tabellen ins Datenverzeichnis
-      $source=$filename;
-      $target=SHAPEPATH.$flst->datasourcename;
-      if (!copy($source.'.shp',$target.'.shp')) {
-         $errmsg='<br>'.$filename.'.shp\n';
-      }
-      if (!copy($source.'.shx',$target.'.shx')) {
-         $errmsg.='<br>'.$filename.'.shx\n';
-      }
-      if (!copy($source.'_neu.dbf',$target.'.dbf')) {
-         $errmsg.='<br>'.$filename.'.dbf\n';
-      }
-      if ($errmsg!='') {
-        $msg.='<br>Fehler beim Überschreiben der vorherigen Gemeindegrenzen, bei folgenden Dateien:';
-        $msg.=$errmsg;
-        $msg.='<br>Achtung!!! Die Fortführung war nicht erfolgreich!';
-      }
-      else {
-        $msg.='<br>Alter Datensatz überschrieben.';
-      }
-    }
-    $this->anzGemeinden=($i-1);
-    return $msg;
-  }
 } # ende der klasse gemeinde
 
-#-----------------------------------------------------------------------------------------------------------------
-######################
-# Klasse Amtsgericht #
-######################
-class amtsgericht {
-  var $id;
-  var $debug;
-
-  ###################### Liste der Funktionen ####################################
-  #
-  # function function amtsgericht($id)  - Construktor
-  # function getName()
-  #
-  ################################################################################
-
-
-  function amtsgericht($id) {
-    global $debug;
-    $this->debug=$debug;
-    $this->id=$id;
-    $this->debug=$debug;
-    $this->Name=$this->getName();
-  }
-
-  function getName() {
-    if ($this->id=="") { return 0; }
-    $sql = 'SELECT Name AS AmtsgerichtName FROM v_Amtsgerichte WHERE Amtsgericht ="'.$this->id.'"';
-    $this->debug->write("<p>kataster.php->amtsgericht->getName Abfragen des Amtsgerichtes:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in kataster.php Zeile: ".__LINE__."<br>".$sql; return 0; }
-    if (mysql_num_rows($query)==0) { return 0; }
-    else { $rs=mysql_fetch_array($query); return $rs['AmtsgerichtName']; }
-  }
-}
 
 #-----------------------------------------------------------------------------------------------------------------
 ####################
@@ -1127,7 +382,6 @@ class gemarkung {
 
   function getAmtsgericht() {
     if ($this->GemkgSchl=="") { return 0; }
-    $ret=$this->database->getAmtsgericht($this->GemkgSchl);
     return $ret[1];
   }
   
@@ -1142,12 +396,6 @@ class gemarkung {
     #return $rs['GemkgName'];
   }
 
-  function getGemeindeSchl() {
-    $sql = 'SELECT Gemeinde AS GemeindeSchl FROM v_Gemarkungen WHERE GemkgSchl ='.$this->GemkgSchl;
-    $query=mysql_query($sql);  if ($query==0) { return 0; }
-    $rs=mysql_fetch_array($query);
-    return $rs['GemeindeSchl'];
-  }
 
   function getGemarkungListe($ganzeGemID, $GemkgID) {
     # Abfragen der Gemarkungen mit seinen GemeindeNamen
@@ -1155,64 +403,6 @@ class gemarkung {
     return $Liste;
   }
   
-  function getGemarkungListeByExtent($extent) {
-    # Abfragen der Gemarkungen, die im aktuellen Ausschnitt zu sehen sind.
-    $map=ms_newMapObj('');
-    $layer=ms_newLayerObj($map);
-    $layer->set('data',SHAPEPATH.$this->getDataSourceName());
-    $layer->set('status',MS_ON);
-    $layer->set('template', ' ');
-    $layer->queryByRect($extent);
-    $layer->open();
-    $anzResult=$layer->getNumResults();
-    for ($i=0;$i<$anzResult;$i++) {
-      $result=$layer->getResult($i);
-      $shapeindex=$result->shapeindex;
-      if(MAPSERVERVERSION > 500){
-      	$shape=$layer->getFeature($shapeindex,-1);
-      }
-      else{
-      	$shape=$layer->getShape(-1,$shapeindex);
-      }
-      $GemkgListe['GemkgID'][]=$shape->values['GEMARKUNG_'];
-      $GemeindeListe['Name'][]=$shape->values['GEMARKUNG'];
-    }
-    return $GemkgListe;
-  }
-
-  function getDataSourceName() {
-    # Abfragen des Namens der Shapedatei für Gemeinden
-    $sql ='SELECT Data FROM layer WHERE Name="'.$this->LayerName.'"';
-    $this->debug->write("<p>kataster.php Gemarkung getDataSourceName Abfragen des Shapefilenamen für die Gemarkung:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    return $rs['Data'];
-  }
-
-  function getMER($layer) {
-    # diese Funktion liefert die Koordinaten des kleinsten einschließenden Rechtecks
-    # Minimum Enclosing Rectangle der Gemarkung aus dem übergebenen layer
-    @$layer->queryByAttributes('GEMARKUNG_',$this->GemkgSchl,0);
-    $result=$layer->getResult(0);
-    if ($layer->getNumResults()==0) {
-      return 0;
-    }
-    else {
-      $layer->open();
-      if(MAPSERVERVERSION > 500){
-      	$shape=$layer->getFeature($result->shapeindex,-1);
-      }
-      else{
-      	$shape=$layer->getShape(-1,$result->shapeindex);
-      }
-      return $shape->bounds;
-    }
-  }
-
-  function updateGemarkungen() {
-    return 'updateGemarkungen';
-  }
 } # end of class Gemarkung
 
 #-----------------------------------------------------------------------------------------------------------------
@@ -1244,30 +434,6 @@ class eigentuemer {
     }
     */
     $this->Nr = $NamensNr;
-  }
-
-  function getEigentuemerName() {
-    if ($this->NamensNr=="" OR $this->Grundbuch->Bezirk=="" OR $this->Grundbuch->Blatt=="") {
-      $Name[0]="";
-      return $Name;
-    }
-    $sql ='SELECT Name1,Name2,Name3,Name4 FROM g_Eigentümer AS eig,g_Namen AS nam';
-    $sql.=' WHERE eig.lfd_Nr_Name=nam.lfd_Nr_Name AND eig.Bezirk = '.$this->Grundbuch->Bezirk.'"';
-    $sql.=' AND eig.Blatt= "'.$this->Grundbuch->Blatt.'" AND eig.NamensNr = "'.$this->NamensNr.'"';
-    if ($this->debug) { echo "<br>".$sql; }
-    $query=mysql_query($sql);  if ($query==0) { return 0; }
-    if (mysql_num_rows($query)==0) {
-      $Name[0] = "";
-      return $Name;
-    }
-    else {
-      $rs=mysql_fetch_array($query);
-      $Name[] = $rs['Name1'];
-      if ($rs['Name2']!="") { $Name[] = $rs['Name2']; }
-      if ($rs['Name3']!="") { $Name[] = $rs['Name3']; }
-      if ($rs['Name4']!="") { $Name[] = $rs['Name4']; }
-      return $Name;
-    }
   }
 
   function getAdressaenderungen($gml_id) {
@@ -1306,26 +472,6 @@ class grundstueck {
     $this->Grundbuch=$Grundbuch;
     $this->BVNR=$BVNR;
     $this->debug=$debug;
-  }
-  function getEigentuemer() {
-    if ($this->BVNR=="" OR $this->Grundbuch->Bezirk=="" OR $this->Grundbuch->Blatt=="") {
-      $Eigentuemer[0] = new eigentuemer($this->$Grundbuch,"");
-      return $Eigentuemer;
-    }
-    $sql ='SELECT NamensNr FROM g_Eigentümer WHERE Bezirk = "'.$this->Grundbuch->Bezirk.'"';
-    $sql.=' AND Blatt= "'.$this->Grundbuch->Blatt.'" ORDER BY NamensNr';
-    if ($this->debug) { echo "<br>".$sql; }
-    $query=mysql_query($sql); if ($query==0) { return 0; }
-    if (mysql_num_rows($query)==0) {
-      $Eigentuemer[0] = new eigentuemer($this->Grundbuch,"");
-      return $Eigentuemer;
-    }
-    else {
-      while($rs=mysql_fetch_array($query)) {
-        $Eigentuemer[] = new eigentuemer($this->Grundbuch,$rs['NamensNr']);
-      }
-      return $Eigentuemer;
-    }
   }
 }
 
@@ -1751,53 +897,12 @@ class flurstueck {
     return $ret[1];
   }
 
-  function getGrundstuecke() {
-    if ($this->FlurstKennz=="") {
-      $Grundstuecke[0] = new grundstueck("","");
-      return $Grundstuecke;
-    }
-    $sql = 'SELECT Bezirk,Blatt,BVNR FROM g_Buchungen WHERE FlurstKennz = "'.$this->FlurstKennz.'"';
-    $this->debug->write("<br>".$sql,4);
-    $query=mysql_query($sql);
-    if (mysql_num_rows($query)==0) {
-      $Grundstuecke[0] = new grundstueck("","");
-      return $Grundstuecke;
-    }
-    else {
-      while ($rs=mysql_fetch_array($query)) {
-        $Grundbuch = new grundbuch($rs['Bezirk'],$rs['Blatt'],$this->database);
-        $Grundstuecke[]=new grundstueck($Grundbuch,$rs['BVNR']);
-      }
-      return $Grundstuecke;
-    }
-    return $ret;
-  }
-
   function getGrundbuchbezirk() {
     if ($this->FlurstKennz=="") { return 0; }
     $ret=$this->database->getGrundbuchbezirke($this->FlurstKennz, $this->hist_alb);
     return $ret;
   }
 
-  function getFortfuehrung() {
-    # Abfrage des Datums der letzten Fortführung des Flurstuecks
-    if ($this->FlurstKennz=="") { return 0; }
-
-    $sql = 'SELECT LetzFF AS Fortfuehrung FROM Flurstuecke WHERE FlurstKennz = "'.$this->FlurstKennz.'"';
-    $this->debug->write("<br>".$sql,4);
-    $query=mysql_query($sql); $rs=mysql_fetch_array($query);
-
-    if ($rs['Fortfuehrung']=="") { return "keine Angabe"; } else { return $rs['Fortfuehrung']; }
-  }
-
-  function getEntstehung() {
-    if ($this->FlurstKennz=="") { return 0; }
-    $sql = 'SELECT Entsteh AS Entstehung FROM Flurstuecke WHERE FlurstKennz = "'.$this->FlurstKennz.'"';
-    $this->debug->write("<br>".$sql,4);
-    $query=mysql_query($sql); if ($query==0) { return 0; }
-    $rs=mysql_fetch_array($query);
-    if ($rs['Entstehung']=="") { return "keine Angabe"; } else { return $rs['Entstehung']; }
-  }
 
   function getAktualitaetsNr() {
     if ($this->FlurstKennz=="") { return 0; }
@@ -1806,14 +911,6 @@ class flurstueck {
     return $ret[1];
   }
 
-  function getPruefzeichen() {
-    if ($this->FlurstKennz=="") { return 0; }
-    $sql = 'SELECT Pruefzeichen FROM Flurstuecke WHERE FlurstKennz = "'.$this->FlurstKennz.'"';
-      $this->debug->write("<br>".$sql,4);
-      $query=mysql_query($sql); if ($query==0) { return 0; }
-      $rs=mysql_fetch_array($query);
-      if ($rs['Pruefzeichen']=="") { return "keine Angabe"; } else { return $rs['Pruefzeichen']; }
-  }
 
   function getForstamt() {
     if ($this->FlurstKennz=="") { return 0; }
@@ -1886,18 +983,6 @@ class flurstueck {
     if ($this->FlurstKennz=="") { return 0; }
     $ret=$this->database->getFlurkarte($this->FlurstKennz);
     return $ret[1];
-  }
-
-  function getKreis() {
-    if ($this->FlurstKennz=="") { return 0; }
-    $sql ='SELECT k.Kreis AS ID,k.KreisName AS Name FROM v_Kreise AS k,v_Gemarkungen AS gk,Flurstuecke AS f';
-    $sql.=' WHERE f.GemkgSchl=gk.GemkgSchl AND SUBSTRING(gk.Gemeinde,1,5)=k.Kreis';
-    $sql.=' AND f.FlurstKennz="'.$this->FlurstKennz.'"';
-    $this->debug->write("<br>".$sql,4);
-    $query=mysql_query($sql); $rs=mysql_fetch_array($query);
-    $this->KreisID=$rs['ID'];
-    $this->KreisName=$rs['Name'];
-    return $rs;
   }
 
   function getLage() {
@@ -2205,17 +1290,6 @@ class flurstueck {
       }
     }
     return $ret;
-  }
-
-  function getDataSourceName() {
-    # Abfragen des Namens der Shapedatei für Flurstücke
-    $sql ='SELECT Data FROM layer WHERE Name="'.$this->LayerName.'"';
-    $this->debug->write("<p>kataster.php Flurstueck->getDataSourceName Abfragen des Shapefilenamen für die Flurstücke:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    $this->datasourcename=$rs['Data'];
-    return $rs['Data'];
   }
 
   function getFlurstByNutzungen($gemkgschl, $nutzung, $anzahl){

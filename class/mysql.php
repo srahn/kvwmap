@@ -179,14 +179,14 @@ class database {
 			);
 		";
 		#echo '<br>sql: ' . $sql;
-		$query = mysql_query($sql);
+		$query =  ($sql);
 
 		# ID des Gastnutzers abfragen
 		$sql = "
 			SELECT LAST_INSERT_ID();
 		";
-		$query = mysql_query($sql);
-		$row = mysql_fetch_row($query);
+		$this->execSQL($sql, 4, 0);
+		$row = $this->result->fetch_row();
 		$new_user_id = $row[0];
 
 		include_once(CLASSPATH . 'stelle.php');
@@ -500,15 +500,15 @@ INSERT INTO u_styles2classes (
 		#echo '<br>sql: ' . $sql;
 		#echo '<br>extra: ' . $extra;
 		$this->debug->write("<p>file:kvwmap class:database->create_insert_dump :<br>".$sql,4);
-		$query = mysql_query($sql);
+		$this->execSQL($sql, 4, 0);
 		if ($query==0) {
 			$this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0;
 		}
 
-		$feld_anzahl = mysql_num_fields($query);
+		$feld_anzahl = $this->result->field_count;
 		#echo '<br>Anzahl Felder: ' . $feld_anzahl;
 		for ($i = 0; $i < $feld_anzahl; $i++) {
-			$meta = mysql_fetch_field($query, $i);
+			$meta = $this->result->fetch_field_direct($i);
 			#echo '<br>Meta name: ' . $meta->name;
 			# array mit feldnamen
 			$felder[$i] = $meta->name;
@@ -520,7 +520,7 @@ INSERT INTO u_styles2classes (
 			}
 		}
 
-		while ($rs = mysql_fetch_array($query)) {
+		while ($rs = $this->result->fetch_array()) {
 			$insert = '';
 			if ($rs[$connectiontype] == 6) {
 				$rs[$connection] = '@connection';
