@@ -14607,9 +14607,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					}
 					$j++;
 				}
-				if($distinct == true){
-					$pfad = 'DISTINCT '.$pfad;
-				}
 
 				/*if(strpos(strtolower($pfad), 'as the_geom') !== false){
 					$the_geom = 'query.the_geom';
@@ -14714,6 +14711,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$j++;
 					}
 				}
+				
+				if($distinct == true){
+					$pfad = 'DISTINCT '.$pfad;
+				}				
 				
 				#if($the_geom == 'query.the_geom'){
 					$sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
