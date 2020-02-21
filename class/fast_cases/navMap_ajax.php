@@ -925,11 +925,12 @@ class GUI {
 					}
 					else {
 						if($this->map_factor != '') {
-							$style->set('size', $dbStyle['size']*$this->map_factor/1.414);
+							if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']*$this->map_factor/1.414);
+							else $style->updateFromString("STYLE SIZE [" . $dbStyle['size']."] END");
 						}
 						else{
 							if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
-							else $style->updateFromString("STYLE SIZE [".$dbStyle['size']."] END");
+							else $style->updateFromString("STYLE SIZE [" . $dbStyle['size']."] END");
 						}
 					}
 				}
@@ -967,12 +968,14 @@ class GUI {
           if ($dbStyle['antialias']!='') {
             $style -> set('antialias',$dbStyle['antialias']);
           }
-          if($this->map_factor != ''){
-            $style -> set('width',$dbStyle['width']*$this->map_factor/1.414);
-          }
-          else{
-            $style->set('width',$dbStyle['width']);
-          }
+					if($this->map_factor != '') {
+						if(is_numeric($dbStyle['width']))$style->set('width', $dbStyle['width']*$this->map_factor/1.414);
+						else $style->updateFromString("STYLE WIDTH [" . $dbStyle['width']."] END");
+					}
+					else{
+						if(is_numeric($dbStyle['width']))$style->set('width', $dbStyle['width']);
+						else $style->updateFromString("STYLE WIDTH [" . $dbStyle['width']."] END");
+					}
         }
 
         if ($dbStyle['minwidth']!='') {
