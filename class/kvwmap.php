@@ -19785,8 +19785,8 @@ class Document {
     #echo $sql.'<br>';
 		$ret1 = $this->database->execSQL($sql, 4, 1);
   	if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $i = 0;
-    while($rs = $this->database->result->fetch_assoc()){
+    $result = $this->database->result;
+    while($rs = $result->fetch_assoc()){
 			if ($return == 'only_ids') {
 				$frames[] = $rs['id'];
 			}
@@ -19794,7 +19794,6 @@ class Document {
 	      $frames[] = $rs;
 	      $frames[0]['bilder'] = $this->load_bilder($rs['id']);
 	      $frames[0]['texts'] = $this->load_texts($rs['id']);
-	      $i++;
 			}
     }
     return $frames;
