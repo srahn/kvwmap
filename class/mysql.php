@@ -682,10 +682,6 @@ INSERT INTO u_styles2classes (
     return $ret;
   }
 
-  function getAffectedRows($query) {
-    return mysql_affected_rows();
-  }
-
   function setLogLevel($loglevel,$logfile) {
   	if ($loglevel==-1) {
   		# setzen der Defaulteinstellungen

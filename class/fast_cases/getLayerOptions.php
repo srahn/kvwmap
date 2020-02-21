@@ -1023,7 +1023,7 @@ class db_mapObj {
   		$classarray['class_id'][] = $row['class_id'];
 			$classarray['status'][$row['class_id']] = $row['status'];
 		}
-		return $classarray ?? NULL;
+		return $classarray;
   }
 
 	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $classification = '') {

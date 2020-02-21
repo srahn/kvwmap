@@ -1512,6 +1512,9 @@ echo '			</ul>
         $map->scalebar->imagecolor->setRGB(hexdec($r), hexdec($g), hexdec($b));
         $map->scalebar->outlinecolor->setRGB(0,0,0);
 				$map->scalebar->label->font = 'SourceSansPro';
+				if (MAPSERVERVERSION < 700 ) {
+					$map->scalebar->label->type = 'truetype';
+				}
 				$map->scalebar->label->size = 10.5;
 
         # Groups
@@ -12158,7 +12161,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					);
 				}
 				else {
-					$num_affected_rows = mysql_affected_rows();
+					$num_affected_rows = $this->database->mysqli->affected_rows;
 					switch ($num_affected_rows) {
 						case (-1) : {
 							$result = array(
@@ -17301,7 +17304,7 @@ class db_mapObj{
 			#echo '<br>Sql: ' . $sql;
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>" . $sql,4);
 			$ret = $this->db->execSQL($sql);
-			if(mysql_affected_rows() == 1)$insert_count++;		# ein neues Attribut wurde per Insert eingefügt
+			if($this->db->mysqli->affected_rows == 1)$insert_count++;		# ein neues Attribut wurde per Insert eingefügt
 			if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		}
 	}		
