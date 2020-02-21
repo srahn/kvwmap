@@ -2060,6 +2060,9 @@ echo '			</ul>
       for ($k=0;$k<count($classset[$j]['Label']);$k++) {
         $dbLabel=$classset[$j]['Label'][$k];
 				$label = new labelObj();
+				if (MAPSERVERVERSION < 700 ) {
+					$label->type = 'truetype';
+				}
 				$label->font = $dbLabel['font'];
 				$RGB=explode(" ",$dbLabel['color']);
 				if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
