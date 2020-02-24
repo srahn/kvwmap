@@ -69,7 +69,7 @@ $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '
 // $starttime = $executiontimes['time'][] = microtime_float1();
 // $executiontimes['action'][] = 'Start';
 
-error_reporting(E_ALL & ~E_NOTICE);
+error_reporting(E_ALL & ~(E_STRICT|E_NOTICE));
 
 ob_start ();    // Ausgabepufferung starten
 
