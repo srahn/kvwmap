@@ -923,7 +923,7 @@ class user {
 		$this->debug->write("<p>file:users.php class:user->getFunktion - Abfragen des Namens des Benutzers:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
-		if ($this->database->result->num_rows() == 0) {
+		if ($this->database->result->num_rows == 0) {
 			$err_nr = 1;
 			$view = 'anmelden';
 		}
@@ -1145,7 +1145,7 @@ class user {
 			$ret[1] .= '<br>Die Abfrage konnte nicht ausgeführt werden.' . $ret[1];
 		}
 		else {
-			if ($this->database->result->num_rows() > 0) {
+			if ($this->database->result->num_rows > 0) {
 				$ret[1] = 1;
 			}
 			else {
@@ -1171,7 +1171,7 @@ class user {
 			$ret[1].='<br>Die Abfrage konnte nicht ausgeführt werden.'.$ret[1];
 		}
 		else {
-			if ($this->database->result->num_rows() > 0) {
+			if ($this->database->result->num_rows > 0) {
 				$ret[1] = 1;
 			}
 			else {

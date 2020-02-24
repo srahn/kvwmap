@@ -1534,7 +1534,7 @@ class stelle {
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
-		if($this->database->result->num_rows() > 0){
+		if($this->database->result->num_rows > 0){
 			$liste['ganze_gemeinde'] = Array();
 			$liste['eingeschr_gemeinde'] = Array();
 			$liste['ganze_gemarkung'] = Array();
@@ -1558,7 +1558,7 @@ class stelle {
 		if($database->type == 'mysql'){
 			$ret=$this->database->getGemeindebyID_Name($this->id);
 			if ($ret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-			if ($this->database->result->num_rows() == 0) {
+			if ($this->database->result->num_rows == 0) {
 				$GemeindeListe['ID'][0]=0;
 			}
 			else{

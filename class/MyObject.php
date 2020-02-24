@@ -114,7 +114,7 @@ class MyObject {
 		";
 		$this->debug->show('mysql exists sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
-		return $this->database->result->num_rows() > 0;
+		return $this->database->result->num_rows > 0;
 	}
 
 	function getAttributes() {
