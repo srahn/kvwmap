@@ -136,6 +136,53 @@ class GUI {
 		$this->trigger_functions = array();
   }
 	
+function saveLegendRoleParameters(){
+		# Scrollposition der Legende wird gespeichert
+  	$this->user->rolle->setScrollPosition($this->formvars['scrollposition']);
+    # Änderungen in den Gruppen werden gesetzt
+    $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
+    # Ein- oder Ausblenden der Klassen
+    #$this->user->rolle->setClassStatus($this->formvars);			# kann wahrscheinlich weg
+    # Wenn ein Button im Kartenfenster gewählt wurde,
+    # werden auch die Einstellungen aus der Legende übernommen
+    $this->user->rolle->setAktivLayer($this->formvars,$this->Stelle->id,$this->user->id);
+    $this->user->rolle->setQueryStatus($this->formvars);
+	}
+
+  function neuLaden() {
+		$this->saveLegendRoleParameters();
+		if(in_array($this->formvars['last_button'], array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->setSelectedButton($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
+		if($this->formvars['delete_rollenlayer'] != ''){
+			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+			$mapDB->deleteRollenlayer(NULL, $this->formvars['delete_rollenlayer_type']);
+		}
+    # Karteninformationen lesen
+    $this->loadMap('DataBase');
+    # zwischenspeichern des vorherigen Maßstabs
+    $oldscale=round($this->map_scaledenom);
+		# zoomToMaxLayerExtent
+		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+		if ($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
+      # Zoom auf den in der Maßstabsauswahl ausgewählten Maßstab
+      # wenn er sich von der vorherigen Maßstabszahl unterscheidet
+      # (das heißt wenn eine andere Zahl eingegeben wurde)
+      $this->scaleMap($this->formvars['nScale']);
+			$this->user->rolle->saveSettings($this->map->extent);
+			$this->user->rolle->readSettings();
+    }
+    # Zoom auf den in der Referenzkarte ausgewählten Ausschnitt
+    if ($this->formvars['refmap_x'] > 0) {
+      $this->zoomToRefExt();
+    }
+    else {
+      # Wenn ein Navigationskommando ausgewählt/übergeben wurde
+      # Zoom/Pan auf den in der Karte ausgewählten Ausschnitt
+      if ($this->formvars['CMD']!='') {
+        $this->navMap($this->formvars['CMD']);
+      }
+    }
+  }	
+	
 	function reduce_mapwidth($width_reduction, $height_reduction = NULL){
 		# Diese Funktion reduziert die aktuelle Kartenbildbreite um $width_reduction Pixel (und optional die Kartenbildhöhe um $height_reduction Pixel), damit das Kartenbild in Fachschalen nicht zu groß erscheint.
 		# Diese reduzierte Breite wird aber nicht in der Datenbank gespeichert, sondern gilt nur solange man in der Fachschale bleibt.
@@ -1984,6 +2031,254 @@ class rolle {
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
 	}
+
+	function setScrollPosition($scrollposition){
+		if($scrollposition != ''){
+			$sql = 'UPDATE rolle SET scrollposition = '.$scrollposition;
+			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+			$this->debug->write("<p>file:rolle.php class:rolle->setOneLayer - Setzen eines Layers:",4);
+			$this->database->execSQL($sql,4, $this->loglevel);
+		}
+	}
+	
+	function setGroupStatus($formvars) {
+		$this->groupset = $this->getGroups('');
+		# Eintragen des group_status=1 für Gruppen, die angezeigt werden sollen
+		for ($i = 0; $i < count($this->groupset); $i++) {
+			if ($formvars['group_' . $this->groupset[$i]['id']] !== NULL) {
+				$group_status = ($formvars['group_' . $this->groupset[$i]['id']] == 1 ? 1 : 0);
+				$sql = "
+					UPDATE
+						`u_groups2rolle`
+					SET
+						`status` = '" . $group_status . "'
+					WHERE
+						`user_id` = " . $this->user_id . " AND
+						`stelle_id` = " . $this->stelle_id . " AND
+						`id` = " . $this->groupset[$i]['id'] . "
+				";
+				#echo '<br>Sql: ' . $sql;
+				$this->debug->write("<p>file:rolle.php class:rolle->setGroupStatus - Speichern des Status der Gruppen zur Rolle:", 4);
+				$this->database->execSQL($sql, 4, $this->loglevel);
+			}
+		}
+		return $formvars;
+	}
+
+  function getGroups($GroupName) {
+		global $language;
+    # Abfragen der Gruppen in der Rolle
+    $sql ='SELECT g2r.*, ';
+		if($language != 'german') {
+			$sql.='CASE WHEN `Gruppenname_'.$language.'` != "" THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
+		}
+		$sql.='Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r ';
+    $sql.=' WHERE g2r.stelle_ID='.$this->stelle_id.' AND g2r.user_id='.$this->user_id;
+    $sql.=' AND g2r.id = g.id';
+    if ($GroupName!='') {
+      $sql.=' AND Gruppenname LIKE "'.$GroupName.'"';
+    }
+    $this->debug->write("<p>file:rolle.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    while ($rs=mysql_fetch_array($query)) {
+      $groups[]=$rs;
+    }
+    return $groups;
+  }
+
+	function setAktivLayer($formvars, $stelle_id, $user_id, $ignore_rollenlayer = false) {
+		$this->layerset=$this->getLayer('');
+		if(!$ignore_rollenlayer){
+			$rollenlayer=$this->getRollenLayer('', NULL);
+			$this->layerset = array_merge($this->layerset, $rollenlayer);
+		}
+		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
+		for ($i=0;$i<count($this->layerset)-1;$i++) {
+			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>';
+			$aktiv_status = $formvars['thema'.$this->layerset[$i]['Layer_ID']];
+			$requires_status = $formvars['thema'.$this->layerset[$i]['requires']];
+			if(isset($aktiv_status) OR isset($requires_status)){										// entweder ist der Layer selber an oder sein requires-Layer
+				$aktiv_status = $aktiv_status + $requires_status;
+				if($this->layerset[$i]['Layer_ID'] > 0){
+					$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
+					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+					$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
+					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
+					$this->database->execSQL($sql,4, $this->loglevel);
+				}
+				else{						# Rollenlayer
+					$sql ='UPDATE rollenlayer SET aktivStatus="'.$aktiv_status.'"';
+					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+					$sql.=' AND id = '.abs($this->layerset[$i]['Layer_ID']);
+					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
+					$this->database->execSQL($sql,4, $this->loglevel);
+				}
+				#neu eintragen der deaktiven Klassen
+				if($aktiv_status != 0){
+					$sql = 'SELECT Class_ID FROM classes WHERE Layer_ID='.$this->layerset[$i]['Layer_ID'].';';
+					$query = mysql_query($sql);
+					while($row = @mysql_fetch_array($query)){
+						if($formvars['class'.$row['Class_ID']] == '0' OR $formvars['class'.$row['Class_ID']] == '2'){
+							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id, status) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$row['Class_ID'].', '.$formvars['class'.$row['Class_ID']].');';
+							$this->database->execSQL($sql2,4, $this->loglevel);
+						}
+						elseif($formvars['class'.$row['Class_ID']] == '1'){
+							$sql1 = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND class_id='.$row['Class_ID'].';';
+							$this->database->execSQL($sql1,4, $this->loglevel);
+						}
+					}
+				}
+			}
+		}
+		return 1;
+	}
+
+	function getLayer($LayerName) {
+		global $language;
+
+		# Abfragen der Layer in der Rolle
+		if($language != 'german') {
+			$name_column = "
+			CASE
+				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
+				ELSE l.`Name`
+			END AS Name";
+		}
+		else
+			$name_column = "l.Name";
+
+		if ($LayerName != '') {
+			$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "'";
+			if(is_numeric($LayerName))
+				$layer_name_filter .= " OR l.Layer_ID = " . $LayerName;
+			$layer_name_filter .= ")";
+		}
+
+		$sql = "
+			SELECT " .
+				$name_column . ",
+				l.Layer_ID,
+				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
+				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
+				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
+				ul.`minscale`, ul.`maxscale`,
+				ul.`offsite`,
+				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
+				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
+				l.labelitem as original_labelitem,
+				ul.`postlabelcache`,
+				`Filter`,
+				r2ul.gle_view,
+				ul.`template`,
+				`header`,
+				`footer`,
+				ul.`symbolscale`,
+				ul.`logconsume`,
+				ul.`requires`,
+				ul.`privileg`,
+				ul.`export_privileg`,
+				`start_aktiv`,
+				r2ul.showclasses,
+				r2ul.rollenfilter,
+				r2ul.geom_from_layer
+			FROM
+				used_layer AS ul,
+				u_rolle2used_layer as r2ul,
+				layer AS l
+				LEFT JOIN connections as c ON l.connection_id = c.id
+			WHERE
+				l.Layer_ID=ul.Layer_ID AND
+				r2ul.Stelle_ID=ul.Stelle_ID AND
+				r2ul.Layer_ID=ul.Layer_ID AND
+				ul.Stelle_ID= " . $this->stelle_id . " AND
+				r2ul.User_ID= " . $this->user_id .
+				$layer_name_filter . "
+			ORDER BY
+				ul.drawingorder desc
+		";
+		#echo $sql.'<br>';
+		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$i = 0;
+		while ($rs=mysql_fetch_assoc($query)) {
+			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
+				if($rs['Filter'] == ''){
+					$rs['Filter'] = '('.$rs['rollenfilter'].')';
+				}
+				else {
+					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
+				}
+			}
+			foreach(array('Name', 'alias', 'connection') AS $key) {
+				$rs[$key] = replace_params(
+					$rs[$key],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->stelle_id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				);
+			}
+			$layer[$i]=$rs;
+			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
+			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
+			$i++;
+		}
+		return $layer;
+	}
+
+	function getRollenLayer($LayerName, $typ = NULL) {
+		$sql ="
+			SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, gle_view,
+				concat('(', rollenfilter, ')') as Filter
+			FROM rollenlayer AS l";
+    $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
+    if ($LayerName!='') {
+      $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
+      if(is_numeric($LayerName)){
+        $sql.='OR l.id = "'.$LayerName.'")';
+      }
+      else{
+        $sql.=')';
+      }
+    }
+		if($typ != NULL){
+			$sql .= " AND Typ = '".$typ."'";
+		}
+    #echo $sql.'<br>';
+    $this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$layer = array();
+    while ($rs=mysql_fetch_assoc($query)) {
+      $layer[]=$rs;
+    }
+    return $layer;
+  }
+
+	function setQueryStatus($formvars) {
+		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
+		for ($i=0;$i<count($this->layerset);$i++){
+			$query_status = $formvars['qLayer'.$this->layerset[$i]['Layer_ID']];
+			if(isset($query_status)){	
+				if($this->layerset[$i]['Layer_ID'] > 0){
+					$sql ='UPDATE u_rolle2used_layer set queryStatus="'.$query_status.'"';
+					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+					$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
+				}
+				else{		# Rollenlayer
+					$sql ='UPDATE rollenlayer set queryStatus="'.$query_status.'"';
+					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+					$sql.=' AND id='.-$this->layerset[$i]['Layer_ID'];
+				}
+				$this->debug->write("<p>file:rolle.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:",4);
+				$this->database->execSQL($sql,4, $this->loglevel);
+			}
+		}
+		return 1;
+	}	
 
   function readSettings() {
 		global $language;
