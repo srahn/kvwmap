@@ -912,8 +912,8 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
-	activate_save_button = function(layer_id){
-		var button = document.getElementById('subform_save_button_'+layer_id);
+	activate_save_button = function(layerdiv, layer_id){
+		var button = layerdiv.querySelector('#subform_save_button_'+layer_id);
 		if(button && button.style.display == 'none'){
 			button.style.display = '';
 		}		
