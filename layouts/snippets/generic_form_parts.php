@@ -747,7 +747,7 @@
 							$datapart .= htmlspecialchars($angezeigter_value);
 						}
 						else{								// zeilenweise
-							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; font-size: '.$fontsize.'px;">' . htmlspecialchars($angezeigter_value) . '</div>';
+							$datapart .= '<div class="readonly_text" style="font-size: '.$fontsize.'px;">' . htmlspecialchars($angezeigter_value) . '</div>';
 						}
 					}
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){

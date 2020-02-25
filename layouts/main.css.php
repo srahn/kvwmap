@@ -1370,6 +1370,7 @@ thead.gle th {
 
 .readonly_text{
 	word-wrap: break-word;
+	padding: 0 0 0 3;
 }
 
 tbody.gle>tr { 
