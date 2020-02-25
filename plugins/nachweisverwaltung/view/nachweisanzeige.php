@@ -425,7 +425,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 				<th align="center" style="width: 120"><a href="javascript:add_to_order('vermst');" title="nach Vermessungsstelle sortieren"><span class="fett">VermStelle</span></a></th>
 			<? }else{echo '<th align="center" style="width: 120"><span class="fett">VermStelle</span></th>';} ?>
 			<? if(strpos($this->formvars['order'], 'gueltigkeit') === false){ ?>
-				<th align="center" style="width: 80"><a href="javascript:add_to_order('gueltigkeit');" title="nach Gültigkeit sortieren"><span class="fett">Gültigkeit</span></a></th>
+				<th align="center" style="width: 80"><a href="javascript:add_to_order('gueltigkeit');" title="nach Gültigkeit sortieren"><span class="fett">gültig</span></a></th>
 			<? }else{echo '<th align="center" style="width: 80"><span class="fett">Gültigkeit</span></th>';} ?>
 			<? if(strpos($this->formvars['order'], 'geprueft') === false){ ?>
 				<th align="center" style="width: 80"><a href="javascript:add_to_order('geprueft');" title="nach geprüft sortieren"><span class="fett">geprüft</span></a></th>
@@ -436,7 +436,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <th colspan="3" style="width: 150"><div align="center"><?    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></th>
         </tr>
 			</thead>
-			<tbody style="outline: 1px solid gray;">
+			<tbody style="outline: 1px solid gray; max-height: 590px;">
         <?
 		$bgcolor = '#FFFFFF';
      for ($i=0;$i<$this->nachweis->erg_dokumente;$i++) {
@@ -495,8 +495,8 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td style="width: 80"><div align="center"><? echo $this->nachweis->Dokumente[$i]['datum']; ?></div></td>
           <td style="width: 120"><div align="center"><? echo $this->formvars['fortf']=$this->nachweis->Dokumente[$i]['fortfuehrung']; ?></div></td>
           <td style="width: 120"><div align="center"><? echo $this->formvars['vermstelle']=$this->nachweis->Dokumente[$i]['vermst']; ?></div></td>
-          <td style="width: 80"><div align="center"><? echo $this->formvars['gueltigkeit']=$this->nachweis->Dokumente[$i]['gueltigkeit']; ?></div></td>
-					<td style="width: 80"><div align="center"><? echo $this->formvars['geprueft']=$this->nachweis->Dokumente[$i]['geprueft']; ?></div></td>
+					<td style="width: 80"><div align="center"><? if($this->nachweis->Dokumente[$i]['gueltigkeit']){echo 'ja';} else {echo 'nein';} ?></div></td>
+					<td style="width: 80"><div align="center"><? if($this->nachweis->Dokumente[$i]['geprueft']){echo 'ja';} else {echo 'nein';} ?></div></td>
           <td style="width: 80"><div align="center"><? echo $this->formvars['format']=$this->nachweis->Dokumente[$i]['format']; ?> 
             </div></td>
 					<td style="width: 30">

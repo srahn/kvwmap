@@ -71,31 +71,12 @@ $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '
 
 ob_start ();    // Ausgabepufferung starten
 
-function replace_tags($text, $tags) {
-	$first_right = strpos($text, '>');
-	if ($first_right !== false) {
-		$text = preg_replace("#<\s*\/?(" . $tags . ")\s*[^>]*?>#im", '', $text);
-/*		$first_left = strpos($text, '<');
-		if ($first_left !== false and $first_right < $first_left) {
-			# >...<
-			$last_right = strrpos($text, '>');
-			if ($last_right !== false and $last_right > $first_left) {
-				# >...<...>
-				# entferne $first_right, $last_right und alles dazwischen
-				$text = substr_replace($text, '', $first_right, $last_right - $first_right + 1);
-			}
-		}*/
-	}
-	return $text;
-}
-foreach($_REQUEST as $key => $value) {
-	if (is_string($value)) $_REQUEST[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
-}
-reset($_REQUEST);
 $formvars = $_REQUEST;
 
 $go = $formvars['go'];
-if($formvars['go_plus'] != '') $go = $go.'_'.$formvars['go_plus'];
+if ($formvars['go_plus'] != '') {
+	$go = $go . '_' . $formvars['go_plus'];
+}
 ###########################################################################################################
 define(CASE_COMPRESS, false);																																						  #
 #																																																					#
@@ -107,6 +88,8 @@ define(CASE_COMPRESS, false);																																						  #
 #										  - ein räumlich gefilterter Layer muss an sein																				#
 #										  - man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
 #											- man muss in einer Fachschale zoomen (wegen reduce_mapwidth)												#
+#											- man muss einen Layer in der Legende ein oder ausschalten													#
+#											- InchesPerUnit() reinkopieren																											#
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
 #   getLayerOptions:  - getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
@@ -167,7 +150,6 @@ if(!FAST_CASE){
 
 # Übergeben des Anwendungsfalles
 $debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
-
 function go_switch($go, $exit = false) {
 	global $GUI;
 	global $Stelle_ID;
@@ -193,8 +175,13 @@ function go_switch($go, $exit = false) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction'], $GUI->formvars['height_reduction']);
-				$GUI->loadMap('DataBase');
-				$GUI->navMap($GUI->formvars['CMD']);
+				if($GUI->formvars['legendtouched']){
+					$GUI->neuLaden();
+				}
+				else{
+					$GUI->loadMap('DataBase');
+					$GUI->navMap($GUI->formvars['CMD']);
+				}
 				$GUI->saveMap('');
 				$currenttime=date('Y-m-d H:i:s',time());
 				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
@@ -1037,16 +1024,6 @@ function go_switch($go, $exit = false) {
 				$GUI->wmsImportFormular();
 			} break;
 
-			case 'UKO_Import' : {
-				$GUI->checkCaseAllowed('UKO_Import');
-				$GUI->uko_import();
-			} break;
-
-			case 'UKO_Import_Importieren' : {
-				$GUI->checkCaseAllowed('UKO_Import');
-				$GUI->uko_import_importieren();
-			} break;
-
 			case 'Punktliste_Anzeigen' : {
 				$GUI->create_point_rollenlayer();
 			} break;
@@ -1313,6 +1290,11 @@ function go_switch($go, $exit = false) {
 				$GUI->Attributeditor_speichern();
 			} break;
 
+			case 'Attributeditor_Attributeinstellungen für ausgewählten Layer übernehmen' : {
+				$GUI->checkCaseAllowed('Attributeditor');
+				$GUI->Attributeditor_takeover_attributes();
+			} break;
+
 			case 'Datentypen_Anzeigen' : {
 				$GUI->checkCaseAllowed($go);
 				$GUI->DatentypenAnzeigen();
@@ -1386,6 +1368,16 @@ function go_switch($go, $exit = false) {
 			case 'Layerattribut-Rechteverwaltung_speichern' : {
 				$GUI->checkCaseAllowed('Layerattribut-Rechteverwaltung');
 				$GUI->layer_attributes_privileges_save();
+			} break;
+
+			case 'Layerattribut-Rechteverwaltung_Attributrechte für ausgewählten Layer übernehmen' : {
+				$GUI->checkCaseAllowed('Attributeditor');
+				$GUI->Attributeditor_takeover_layer_privileges();
+				$GUI->Attributeditor_takeover_layer_attributes_privileges();
+				$GUI->Attributeditor_takeover_default_layer_privileges();
+				$GUI->Attributeditor_takeover_default_layer_attributes_privileges();
+				$GUI->formvars['selected_layer_id'] = $GUI->formvars['to_layer_id'];
+				$GUI->layer_attributes_privileges();
 			} break;
 
 			case 'Layer_Parameter' : {

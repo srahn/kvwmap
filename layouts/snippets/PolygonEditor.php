@@ -121,7 +121,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 			<table cellspacing="0" cellpadding="0">
 				<tr>
 					<td>
-						<div id="legenddiv" style="height: <? echo $this->map->height-205; ?>px;"	class="normallegend">
+						<div id="legenddiv" style="height: <? echo $this->map->height-215; ?>px;"	class="normallegend">
 							<?
 							$this->simple_legend = true;
 							include(SNIPPETS . 'legenddiv.php'); 
@@ -131,10 +131,10 @@ function buildwktpolygonfromsvgpath(svgpath){
 				</tr>
 				<tr><?
 					if ($this->new_entry != true) { ?>
-						<td align="center"><input type="button" style="visibility:hidden" name="split" value="Geometrie in neue Objekte aufteilen" onclick="split_geometries();"></td><?
+						<td style="height: 34px" align="center"><input type="button" <? if($this->polygon['numgeometries'] < 2){ echo 'style="visibility:hidden"';} ?> name="split" value="Geometrie in neue Objekte aufteilen" onclick="split_geometries();"></td><?
 					}
 					else { ?>
-						<td style="height: 24px">&nbsp;</td><?
+						<td style="height: 34px">&nbsp;</td><?
 					} ?>
 				</tr>
 				<tr>

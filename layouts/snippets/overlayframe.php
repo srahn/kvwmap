@@ -23,10 +23,10 @@
 								<a href="javascript:deactivate_overlay();" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH."exit.png"; ?>"></img></a>
 							</div>
 						</div>						
-						<div id="contentdiv" style="background: url(<? echo GRAPHICSPATH; ?>bg.gif);border: 1px solid #cccccc;max-width:<? echo $width; ?>px;height:100%;max-height:<? echo $this->user->rolle->nImageHeight+30; ?>px;position:relative;overflow-y: scroll;overflow-x: auto;">
+						<div id="contentdiv" style="background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;max-width:<? echo $width; ?>px;height:100%;max-height:<? echo $this->user->rolle->nImageHeight+30; ?>px;position:relative;overflow-y: scroll;overflow-x: auto;">
 						<? if($this->overlaymain != '')include(LAYOUTPATH.'snippets/overlay.php'); ?>
 						</div>
-						<div id="overlayfooter" style="<? if($this->found == 'false' OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo GRAPHICSPATH; ?>bg.gif);border: 1px solid #cccccc;max-width:<? echo $width; ?>px;position:relative;">
+						<div id="overlayfooter" style="<? if($this->found == 'false' OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;max-width:<? echo $width; ?>px;position:relative;">
 							<table style="width:100%">
 								<tr>
 									<td style="width:40%" class="px13">&nbsp;<? echo $this->strLimit; ?>&nbsp;										

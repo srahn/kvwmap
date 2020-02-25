@@ -59,6 +59,10 @@ class data_import_export {
 				$epsg = 4326;
 				$custom_tables = $this->import_custom_ovl($filename, $pgdatabase, $epsg);
 			} break;
+			case 'uko' : {
+				$custom_tables = $this->import_custom_uko($filename, $pgdatabase, $epsg);
+				$epsg = $custom_tables[0]['epsg'];
+			} break;
 			case 'dxf' : {
 				$custom_tables = $this->import_custom_dxf($filename, $pgdatabase, $epsg);
 			} break;
@@ -153,64 +157,19 @@ class data_import_export {
 				($pgdatabase->host != 'localhost' ? ' host=' . $pgdatabase->host : '') .
 				($pgdatabase->passwd != ''        ? ' password=' . $pgdatabase->passwd : '');
 			$this->formvars['connectiontype'] = 6;
-			$this->formvars['transparency'] = 65;
+			if($custom_table['datatype'] == MS_LAYER_POLYGON)$this->formvars['transparency'] = $user->rolle->result_transparency;
+			else $this->formvars['transparency'] = 100;
 			if($custom_table['labelitem'] != '')$this->formvars['labelitem'] = $custom_table['labelitem'];
 		}
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
 		
-		if($custom_table['datatype'] != 3){	# kein Raster
+		if($custom_table['datatype'] != 3){	# kein Raster		
 			$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
 			$layerdb->setClientEncoding();
 			$path = $this->formvars['query'];
 			$attributes = $dbmap->load_attributes($layerdb, $path);
 			$dbmap->save_postgis_attributes(-$layer_id, $attributes, '', '');
-			$attrib['name'] = ' ';
-			$attrib['layer_id'] = -$layer_id;
-			$attrib['expression'] = '';
-			$attrib['order'] = 0;
-			$class_id = $dbmap->new_Class($attrib);
-			$this->formvars['class'] = $class_id;
-			$color = $user->rolle->readcolor();
-			$style['colorred'] = $color['red'];
-			$style['colorgreen'] = $color['green'];
-			$style['colorblue'] = $color['blue'];
-			$style['outlinecolorred'] = 0;
-			$style['outlinecolorgreen'] = 0;
-			$style['outlinecolorblue'] = 0;
-			switch ($custom_table['datatype']) {
-				case 0 : {
-					$style['size'] = 8;
-					$style['maxsize'] = 8;
-					$style['symbolname'] = 'circle';
-				} break;
-				case 1 : {
-					$style['width'] = 2;
-					$style['minwidth'] = 1;
-					$style['maxwidth'] = 3;
-					$style['symbolname'] = NULL;
-				} break;
-				case 2 :{
-					$style['size'] = 1;
-					$style['maxsize'] = 2;
-					$style['symbolname'] = NULL;
-				}
-			}
-			$style['backgroundcolor'] = NULL;
-			$style['minsize'] = NULL;
-			$style['angle'] = 360;
-			$style_id = $dbmap->new_Style($style);
-			$dbmap->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
-			if($custom_table['labelitem'] != '') {
-				$label['font'] = 'arial';
-				$label['color'] = '0 0 0';
-				$label['outlinecolor'] = '255 255 255';
-				$label['size'] = 8;
-				$label['minsize'] = 6;
-				$label['maxsize'] = 10;
-				$label['position'] = 9;
-				$new_label_id = $dbmap->new_Label($label);
-				$dbmap->addLabel2Class($class_id, $new_label_id, 0);
-			}
+			$dbmap->addRollenLayerStyling($layer_id, $custom_table['datatype'], $custom_table['labelitem'], $user);
 		}
     return $layer_id;
 	}
@@ -526,7 +485,7 @@ class data_import_export {
 	function geojson_import($filename, $pgdatabase, $schema, $tablename){
 		if(file_exists($filename)){
 			$json = json_decode(file_get_contents($filename));
-			if(strpos($json->crs->properties->name, 'EPSG::') !== false)$epsg = array_pop(explode('EPSG::', $json->crs->properties->name));
+			if(strpos($json->crs->properties->name, 'EPSG:') !== false)$epsg = array_pop(explode('EPSG:', $json->crs->properties->name));
 			else $epsg = 4326;
 			if($tablename == NULL)$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
 			$ret = $this->ogr2ogr_import($schema, $tablename, $epsg, $filename, $pgdatabase, NULL, NULL, NULL, 'UTF8');
@@ -805,47 +764,35 @@ class data_import_export {
     }
   }
 
-	function get_ukotable_srid($database){
-		$sql = "select srid from geometry_columns where f_table_name = 'uko_polygon'";
-		$ret = $database->execSQL($sql,4, 1);
-		if(!$ret[0]){
-			$rs=pg_fetch_array($ret[1]);
-			$this->uko_srid = $rs[0];
-		}
-  }
-
-	function uko_importieren($formvars, $username, $userid, $database){
-		$_files = $_FILES;
-		if($_files['ukofile']['name']){
-		  $formvars['ukofile'] = $_files['ukofile']['name'];
-		  $nachDatei = UPLOADPATH.$_files['ukofile']['name'];
-		  if(move_uploaded_file($_files['ukofile']['tmp_name'],$nachDatei)){
-				$dateinamensteil = explode('.', $nachDatei);
-				if(strtolower($dateinamensteil[1]) == 'zip'){
-					$files = unzip($nachDatei, false, false, true);
-				}
-				else $files = array($_files['ukofile']['name']);
-				for($i = 0; $i < count($files); $i++){
-					$wkt = file_get_contents(UPLOADPATH.$files[$i]);
-					$wkt = substr($wkt, strpos($wkt, 'KOO ')+4);
-					$wkt = str_replace(chr(13), '', $wkt);
-					$wkt = 'MULTIPOLYGON((('.$wkt;
-					$wkt = str_replace(chr(13).'FL+'.chr(13).'KOO ', ')),((', $wkt);
-					$wkt = str_replace(chr(10).'FL+'.chr(10).'KOO ', ')),((', $wkt);
-					$wkt = str_replace(chr(10).'FL-'.chr(10).'KOO ', '),(', $wkt);
-					$wkt = str_replace(chr(10).'KOO ', ',', $wkt);
-					$wkt.= ')))';
-					$sql = "INSERT INTO uko_polygon (username, userid, dateiname, the_geom) VALUES('".$username."', ".$userid.", '".$_files['ukofile']['name']."', st_transform(st_geomfromtext('".$wkt."', ".$formvars['epsg']."), ".$this->uko_srid.")) RETURNING oid";
-					$ret = $database->execSQL($sql,4, 1);
-					if ($ret[0])$this->success = false;
-					else{
-						$this->success = true;
-						$rs=pg_fetch_array($ret[1]);
-						$oids[] = $rs[0];
-					}
-				}
-				return $oids;
-		  }
+	function import_custom_uko($filename, $pgdatabase, $epsg){
+		if(file_exists($filename)){
+			if($epsg == NULL){
+				$this->ask_epsg = true;		# EPSG-Code nachfragen
+				return;
+			}
+			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
+			$wkt = file_get_contents($filename);
+			$wkt = substr($wkt, strpos($wkt, 'KOO ')+4);
+			$wkt = str_replace(chr(13), '', $wkt);
+			$wkt = 'MULTIPOLYGON((('.$wkt;
+			$wkt = str_replace(chr(13).'FL+'.chr(13).'KOO ', ')),((', $wkt);
+			$wkt = str_replace(chr(10).'FL+'.chr(10).'KOO ', ')),((', $wkt);
+			$wkt = str_replace(chr(10).'FL-'.chr(10).'KOO ', '),(', $wkt);
+			$wkt = str_replace(chr(10).'KOO ', ',', $wkt);
+			$wkt.= ')))';
+			$sql = "CREATE TABLE ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (";
+			$sql.= "id serial";
+			$sql.= ")WITH (OIDS=TRUE);";
+			$sql.= "SELECT AddGeometryColumn('".CUSTOM_SHAPE_SCHEMA."', '".$tablename."', 'the_geom', ".$epsg.", 'MULTIPOLYGON', 2);";
+			
+			$sql.= "INSERT INTO ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (the_geom) VALUES(st_geomfromtext('".$wkt."', ".$epsg."))";
+			$ret = $pgdatabase->execSQL($sql,4, 1);
+			if(!$ret[0]){
+				$custom_table['tablename'] = $tablename;
+				$custom_table['epsg'] = $epsg;
+				$custom_table['datatype'] = 2;
+				return array($custom_table);
+			}
 		}
 	}
 
@@ -1070,7 +1017,7 @@ class data_import_export {
 		$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
 
 		# Where-Klausel aus Sachdatenabfrage-SQL
-		$where = substr(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']]), strrpos(strtolower(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where'));
+		$where = substr($this->formvars['sql_'.$this->formvars['selected_layer_id']], strrpos(strtolower($this->formvars['sql_'.$this->formvars['selected_layer_id']]), 'where'));
 
 		# order by rausnehmen
 		$orderbyposition = strrpos(strtolower($sql), 'order by');
@@ -1147,7 +1094,7 @@ class data_import_export {
     }
     $sql.= $orderby;
 		$data_sql = $sql;
-		#echo $sql;
+		#echo '<br>Frage Daten ab mit SQL: '. $sql;
 		
     $temp_table = 'shp_export_'.rand(1, 10000);
     $sql = 'CREATE TABLE public.'.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, falls Argumentliste durch das SQL zu lang

@@ -433,7 +433,7 @@ include('funktionen/input_check_functions.php');
 			}
   	}
 		formData.append('go', 'Sachdaten_speichern');
-		formData.append('reload', reload);
+		if(reload)formData.append('reload', reload);
 		formData.append('selected_layer_id', layer_id);
 		formData.append('targetobject', targetobject);
 		formData.append('form_field_names', form_fieldstring);
@@ -453,7 +453,7 @@ include('funktionen/input_check_functions.php');
   	for(i = 0; i < form_fields.length; i++){
 			if(form_fields[i].name.slice(-4) != '_alt')form_fieldstring += form_fields[i].name+'|';
   		field = form_fields[i].name.split(';');
-  		if(field[4] != 'Dokument' && form_fields[i].readOnly != true && field[5] == '0' && form_fields[i].value == ''){
+			if(field[4] != 'Dokument' && form_fields[i].readOnly != true && form_fields[i].type != 'hidden' && field[5] == '0' && form_fields[i].value == ''){
   			message('Das Feld '+form_fields[i].title+' erfordert eine Eingabe.');
   			return;
   		}
@@ -468,7 +468,7 @@ include('funktionen/input_check_functions.php');
 			}
   	}
 		formData.append('go', 'neuer_Layer_Datensatz_speichern');
-		formData.append('reload', reload);
+		if(reload)formData.append('reload', reload);
 		formData.append('selected_layer_id', layer_id);
 		formData.append('targetobject', targetobject);
 		formData.append('targetlayer_id', targetlayer_id);
@@ -910,6 +910,13 @@ include('funktionen/input_check_functions.php');
 			flag.value=1;
 			if(flag.onchange)flag.onchange();
 		}
+	}
+	
+	activate_save_button = function(layer_id){
+		var button = document.getElementById('subform_save_button_'+layer_id);
+		if(button && button.style.display == 'none'){
+			button.style.display = '';
+		}		
 	}
 
 </script>

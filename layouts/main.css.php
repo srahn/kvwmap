@@ -244,6 +244,10 @@ select {
 	padding: 0 0;
 }
 
+select option{
+	font-family: SourceSansPro1,arial;
+}
+
 textarea {
 	font-size: 14px;
 	font-family: SourceSansPro1;
@@ -378,7 +382,7 @@ a.invisiblelayerlink:hover{
 
 #datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table{
 	width: 100%;
-	background: url('../graphics/bg.gif');
+	background: url('../<? echo BG_IMAGE; ?>');
 }
 
 #datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table>tbody:first-of-type>tr:first-of-type{
@@ -516,12 +520,13 @@ a.invisiblelayerlink:hover{
 	border: 1px solid #cccccc;
 	border-color: #bbbbbb;
 	background: linear-gradient(#eff3f6, lightsteelblue);
-	padding: 4px;
-	padding-top: 0px;
-	padding-bottom: 4px;
 	text-align: center;
 	color: black;
 	border-radius: 5px;
+}
+
+a.buttonlink{
+	padding: 1px 7px 5px 7px;
 }
 
 .buttonlink:hover, .buttonlink:focus{
@@ -548,7 +553,7 @@ a.invisiblelayerlink:hover{
 
 #menuebar{
 	width: <? echo ($size['menue']['width'] - 2); ?>px;
-	background: url('../graphics/bg.gif');
+	background: url('../<? echo BG_IMAGE; ?>');
 	border: 1px solid;
 	border-color: #CCC; 
 	border-top: none;
@@ -952,7 +957,7 @@ a.menuered:hover {
 	box-shadow: 0px 1px 0px #bbb;
 	display: flex; 
 	flex-direction: column;
-	background-image: url(../graphics/bg.gif);
+	background-image: url(../<? echo BG_IMAGE; ?>);
 }
 
 #legend_layer{
@@ -1185,9 +1190,20 @@ span.black {
 	clear: both;
 }
 
-a .preview_image{border:1px solid black;width: 125px;transition: all 0.25s ease;}	/* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf 250px vergrößert */
+/* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf PREVIEW_IMAGE_WIDTH vergrößert */
+a .preview_image{
+	border:1px solid black;
+	max-width: 125px;
+	max-height: 125px;
+	transition: all 0.25s ease;
+}
 
-a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 0.25s ease;}
+a:hover .preview_image{
+	max-width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;
+	max-height: <? echo PREVIEW_IMAGE_WIDTH; ?>px;
+	transition: all 0.25s ease;
+	transition-delay: 0.5s;
+}
 
 .preview_doc{}
 
@@ -1577,21 +1593,24 @@ tbody.gle>tr {
 	border-right: 1px solid #CCCCCC;
 }
 
-.rollenwahl-gruppe {
+#rollenwahl_main_div {
+	width: 830px; 
+	min-height: 430px
+}
+
+#rollenwahl_optionen_div {
+	background:rgb(248, 248, 249);
 	margin: 10px;
-	border: 1px solid #cccccc;
-	background: url('../graphics/bg.gif'); 
-	z-index: 2;
+	border: 1px solid #bbb;
+}
+
+.rollenwahl-gruppe {
+	margin:0;
+	border:0;
 }
 
 .rollenwahl-table {
-	width: 700px;
-}
-
-.rollenwahl-gruppen-header {
-	background-color: #c7d9e6; 
-	padding: 2px;
-	padding-left: 8px
+	width: 100%;
 }
 
 .rollenwahl-gruppen-options{
@@ -1599,12 +1618,12 @@ tbody.gle>tr {
 }
 
 .rollenwahl-option-header {
-	width: 221px;
+	width: 270px;
 	padding : 4px;
 }
 
 .rollenwahl-option-data {
-	width: 460px;
+	width: 560px;
 	padding : 4px;
 }
 

@@ -371,6 +371,8 @@ class rolle {
 			$this->highlighting=$rs['highlighting'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
+			$this->result_hatching=$rs['result_hatching'];
+			$this->result_transparency=$rs['result_transparency'];
 			$this->always_draw=$rs['always_draw'];
 			$this->runningcoords=$rs['runningcoords'];
 			$this->showmapfunctions=$rs['showmapfunctions'];
@@ -915,7 +917,7 @@ class rolle {
 				WHERE
 					user_id = " . $this->user_id . " AND
 					stelle_id = " . $this->stelle_id .
-					($layer_id != '' ? " AND layer_id = " . abs($layer_id) : "") . "
+					($layer_id != '' ? " AND id = " . abs($layer_id) : "") . "
 			";
 			#echo '<br>Sql: ' . $sql;
 			$this->debug->write("<p>file:rolle.php class:rolle->update_layer_status - schalte ein oder alle Layer Stati der Rolle um:", 4);
@@ -946,7 +948,7 @@ class rolle {
 				WHERE 
 					user_id=".$this->user_id." AND 
 					stelle_id=".$this->stelle_id.
-					($layer_id != '' ? " AND layer_id = ".abs($layer_id) : "");
+					($layer_id != '' ? " AND id = ".abs($layer_id) : "");
 			$this->debug->write("<p>file:rolle.php class:rolle->resetQuerys - resetten aller aktiven Layer zur Rolle:",4);
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
@@ -1051,7 +1053,7 @@ class rolle {
 			for($i = $active_layer_count-2; $i >= 0; $i--){		# von hinten beginnen
 				$layer_oben = &$layerset['layer_ids'][$active_layers[$i]];
 				$layer_unten = $layerset['layer_ids'][$active_layers[$i+1]];
-				if($layer_oben['drawingorder'] < $layer_unten['drawingorder']){		// drawingorder muss erhöht werden
+				if($layer_oben['drawingorder'] <= $layer_unten['drawingorder']){		// drawingorder muss erhöht werden
 					$newdrawingorder = $layer_unten['drawingorder'] + 1;
 					$layer_oben['drawingorder'] = $newdrawingorder;
 					$layers_changed[$layer_oben['id']] = true;
@@ -1247,6 +1249,8 @@ class rolle {
 					`buttons`,
 					`scrollposition`,
 					`result_color`,
+					`result_hatching`,
+					`result_transparency`,
 					`always_draw`,
 					`runningcoords`,
 					`showmapfunctions`,
@@ -1284,6 +1288,8 @@ class rolle {
 					`buttons`,
 					`scrollposition`,
 					`result_color`,
+					`result_hatching`,
+					`result_transparency`,					
 					`always_draw`,
 					`runningcoords`,
 					`showmapfunctions`,

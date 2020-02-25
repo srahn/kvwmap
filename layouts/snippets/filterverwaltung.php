@@ -114,7 +114,7 @@ function showmap(){
   </tr>
   <tr> 
     <td valign="top" style="border-bottom:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3"> 
-      <select  name="stelle" onchange="document.GUI.newpath.value = '';document.GUI.newpathwkt.value = '';document.GUI.pathwkt.value = '';document.GUI.result.value = '';document.GUI.layer.disabled = true;document.GUI.submit()">
+      <select style="width: 400px" name="stelle" onchange="document.GUI.newpath.value = '';document.GUI.newpathwkt.value = '';document.GUI.pathwkt.value = '';document.GUI.result.value = '';document.GUI.layer.disabled = true;document.GUI.submit()">
         <option value=""><?php echo $this->strPleaseSelect; ?></option>
         <?
     		for($i = 0; $i < count($this->stellendaten['ID']); $i++){
@@ -128,7 +128,7 @@ function showmap(){
       </select>
 		</td>
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="4"> 
-      <select style="width:250px" multiple size="5"  name="layer" onchange="document.GUI.newpath.value = '';document.GUI.newpathwkt.value = '';document.GUI.pathwkt.value = '';document.GUI.result.value = '';" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+      <select style="width:400px" multiple size="5"  name="layer" onchange="document.GUI.newpath.value = '';document.GUI.newpathwkt.value = '';document.GUI.pathwkt.value = '';document.GUI.result.value = '';" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
         <?
     		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
     			echo '<option value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';

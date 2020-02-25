@@ -35,6 +35,7 @@ class pgdatabase {
 	var $defaultlogfile;
 	var $commentsign;
 	var $blocktransaction;
+	var $pg_text_attribute_types = array('character', 'character varying', 'text', 'timestamp without time zone', 'timestamp with time zone', 'date', 'USER-DEFINED');
 
 	function pgdatabase() {
 		global $debug;
@@ -297,11 +298,11 @@ FROM
 				# Prüfe ob eine Fehlermeldung in der Notice steckt
 				$last_notice = pg_last_notice($this->dbConn);
 				if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
-					$ret['msg'] = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
+					$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
 				}
-				$this->notices[] = $last_notice;
 				# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
-				if ($last_notice != '' AND !in_array($last_notice, $this->notices)) {
+				if ($last_notice != '' AND ($this->gui->notices == NULL OR !in_array($last_notice, $this->gui->notices))) {
+					$this->gui->notices[] = $last_notice;
 					if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
 						# Parse als JSON String
 						$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
@@ -319,7 +320,7 @@ FROM
 					}
 					else {
 						# Gebe Noticetext wie er ist zurück
-						$ret['msg'] = $notice_txt;
+						$ret['msg'] = $last_notice;
 					}
 				}
 
@@ -457,7 +458,9 @@ FROM
 		for($i = 1; $i < count($table_info); $i++){
 			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
 			$table_oid = get_first_word_after($table_info[$i], ':relid');
-			$table_alias_names[$table_oid] = $table_alias;
+			if($table_oid AND $table_alias != 'unnamed_join'){
+				$table_alias_names[$table_oid] = $table_alias;
+			}
 		}
 		return $table_alias_names;
 	}
@@ -1346,7 +1349,7 @@ FROM
 
   function getLage($FlurstKennz) {
     # liefert die Lage des Flurstückes
-    $sql = "SELECT l.unverschluesselt, s.bezeichnung ";
+    $sql = "SELECT distinct l.unverschluesselt, s.bezeichnung, ' ('||s.lage||')' as lage ";
 		$sql.= "FROM alkis.ax_flurstueck as f ";
 		$sql.= "JOIN alkis.ax_lagebezeichnungohnehausnummer l ON l.gml_id = ANY(f.zeigtauf)  ";
 		$sql.= "LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage=s.lage ";
@@ -1362,7 +1365,7 @@ FROM
       $ret[0]=0;
       if (pg_num_rows($queryret[1])>0) {
         while($rs=pg_fetch_assoc($queryret[1])) {
-          $Lage[]= $rs['unverschluesselt'].$rs['bezeichnung'];
+          $Lage[]= $rs['unverschluesselt'].$rs['bezeichnung'].$rs['lage'];
         }
       }
       $ret[1]=$Lage;
@@ -1950,7 +1953,8 @@ FROM
 			$Eigentuemer->n_gml_id=$rs['n_gml_id'];
 			$Eigentuemer->bestehtausrechtsverhaeltnissenzu=$rs['bestehtausrechtsverhaeltnissenzu'];
       $Eigentuemerliste[$rs['n_gml_id']]=$Eigentuemer;
-			if($this->listendarstellung OR $rs['namensnr'] != '')$this->writeRechtsverhaeltnisChildren($rs['n_gml_id'], $Eigentuemerliste);
+			#if($this->listendarstellung OR $rs['namensnr'] != '')	Bugfix 2.12.9
+			$this->writeRechtsverhaeltnisChildren($rs['n_gml_id'], $Eigentuemerliste);
     }
     $retListe[0]=0;
     $retListe[1]=$Eigentuemerliste;

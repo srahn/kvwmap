@@ -1,3 +1,4 @@
+
 <?php
 	/*
 	* Cases:
@@ -67,7 +68,6 @@
 		$mobile_layers = array();
 
 		foreach($layers['ID'] AS $layer_id) {
-
 			if ($layer_id != '') {
 				# Abfragen der Layerdefinition
 				$layerset = $GUI->user->rolle->getLayer($layer_id);
@@ -95,7 +95,7 @@
 						$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
 						#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
 					}
-					$layer = $GUI->mobile_reformat_layer($layerset[0]);
+					$layer = $GUI->mobile_reformat_layer($layerset[0], $attributes);
 					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID);
 					$layer['attributes'] = $GUI->mobile_reformat_attributes($attributes);
 
@@ -231,17 +231,18 @@
 		return $result;
 	};
 
-	$GUI->mobile_reformat_layer = function($layerset) use ($GUI) {
+	$GUI->mobile_reformat_layer = function($layerset, $attributes) use ($GUI) {
 		$geometry_types = array(
 			"Point", "Line", "Polygon"
 		);
+
 		$layer = array(
 			"id" => $layerset['Layer_ID'],
 			"title" => $layerset['Name'],
 			"alias" => $layerset['alias'],
-			"id_attribute" => "id",
+			"id_attribute" => $layerset['oid'],
 			"name_attribute" => $layerset['labelitem'],
-			"title_attribute" => "title",
+			"geometry_attribute" => $attributes['the_geom'],
 			"geometry_type" => $geometry_types[$layerset['Datentyp']],
 			"table_name" => $layerset['maintable'],
 			"schema_name" => $layerset['schema'],
@@ -289,7 +290,17 @@
 				return array(
 					'id' => $class['Class_ID'],
 					'name' => $class['Name'],
-					'expression' => $class['Expression']
+					'expression' => $class['Expression'],
+					'style' => array(
+						'id' => $class['Style'][0]['Style_ID'],
+						'symbol' => $class['Style'][0]['symbol'],
+						'stroke' => ($class['Style'][0]['outlinecolor'] == '-1 -1 -1' ? false : true),
+						'fillColor' => $class['Style'][0]['color'],
+						'opacity' => $class['Style'][0]['opacity'],
+						'color' => $class['Style'][0]['outlinecolor'],
+						'weight' => $class['Style'][0]['width'],
+						'size' => $class['Style'][0]['size']
+					)
 				);
 			},
 			$classes

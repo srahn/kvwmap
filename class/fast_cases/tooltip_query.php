@@ -302,9 +302,6 @@ class GUI {
 					}
 					$j++;
 				}
-				if($distinct == true){
-					$pfad = 'DISTINCT '.$pfad;
-				}
 
 				/*if(strpos(strtolower($pfad), 'as the_geom') !== false){
 					$the_geom = 'query.the_geom';
@@ -408,6 +405,10 @@ class GUI {
 						}
 						$j++;
 					}
+				}
+				
+				if($distinct == true){
+					$pfad = 'DISTINCT '.$pfad;
 				}
 				
 				#if($the_geom == 'query.the_geom'){
@@ -1470,7 +1471,7 @@ class db_mapObj {
 				$attributes['type_attributes'][$i] = $this->add_attribute_values($attributes['type_attributes'][$i], $database, $query_result, $withvalues, $stelle_id, $only_current_enums);
 			}
 			if($attributes['options'][$i] == '' AND $attributes['constraints'][$i] != '' AND !in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
-      	$attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['constraints'][$i]));
+				$attributes['enum_value'][$i] = explode("','", trim($attributes['constraints'][$i], "'"));
       	$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
       }
       if($withvalues == true){
@@ -1479,7 +1480,7 @@ class db_mapObj {
           case 'Auswahlfeld' : {
             if($attributes['options'][$i] != ''){     # das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
               if(strpos($attributes['options'][$i], "'") === 0){      # Aufzählung wie 'wert1','wert2','wert3'
-                $attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['options'][$i]));
+								$attributes['enum_value'][$i] = explode("','", trim($attributes['options'][$i], "'"));
                 $attributes['enum_output'][$i] = $attributes['enum_value'][$i];
               }
               elseif(strpos(strtolower($attributes['options'][$i]), "select") === 0){     # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
@@ -1540,6 +1541,7 @@ class db_mapObj {
                 }
                 elseif($attributes['options'][$i] != ''){
                   $sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
+									$sql = str_replace('$userid', $this->User_ID, $sql);
                   $ret=$database->execSQL($sql,4,0);
                   if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
                   while($rs = pg_fetch_array($ret[1])){

@@ -49,12 +49,19 @@ function get_from_default(attribute_names, stellen){
 }
 
 
-function save(stelle){
+function save(stelle, other_selected_layer_id = '') {
 	document.GUI.stelle.value = stelle;
-	document.GUI.go_plus.value = 'speichern';
+	if (other_selected_layer_id != '') {
+		document.GUI.from_layer_id.value = $('#selected_layer_id').val();
+		document.GUI.to_layer_id.value = other_selected_layer_id;
+		document.GUI.go_plus.value = 'Attributrechte für ausgewählten Layer übernehmen';
+	}
+	else {
+		document.GUI.go_plus.value = 'speichern';
+	}
 	document.GUI.submit();
 }
-  
+
 //-->
 </script>
 
@@ -63,49 +70,51 @@ function save(stelle){
 		border-collapse: collapse; 
 		width: 100%;
 		min-width: 940px;
+		background:rgb(248, 248, 249);
 	}
 
 	.navigation th{
-		border: 1px solid <?php echo BG_DEFAULT ?>;
+		border: 1px solid #bbb;
 		border-collapse: collapse;
 		width: 17%;
 	}
 	
 	.navigation th div{
 		padding: 3px;
+		padding: 9px 0 9px 0;
+	}	
+	
+	.navigation th a{
+		color: #888;
 	}	
 	
 	.navigation th:hover{
-		background-color: <?php echo BG_DEFAULT ?>;
-	}
-	
-	#layerform input[type="text"], #layerform select, #layerform textarea{
-		width: 340px;
-	}
-		
-	#stellenzuweisung{
-		display: none;
+		background-color: rgb(238, 238, 239);
+		color: #666;
 	}
 </style>
 
 <table style="width: 700px; margin: 0px 40px 0 40px">
 	<tr>
-    <td align="center">
+		<td align="center">
 			<span class="px17 fetter"><? echo $strLayer;?>:</span>
-      <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
-      <option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option>
-        <?
-    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
-    			echo '<option';
-    			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
-    				echo ' selected';
-    			}
-    			echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
-    		}
-    	?>
-      </select>
+			<select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>><?
+			$layer_options = array(); ?>
+			<option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option><?
+			for ($i = 0; $i < count($this->layerdaten['ID']); $i++) {
+				$layer_options[] = array(
+					'value' => $this->layerdaten['ID'][$i],
+					'output' => $this->layerdaten['Bezeichnung'][$i]
+				);
+				echo '<option';
+				if ($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']) {
+					echo ' selected';
+				}
+				echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
+			} ?>
+			</select>
 		</td>
-  </tr>
+	</tr>
 </table>
 
 <? if($this->formvars['selected_layer_id'] != ''){ ?>
@@ -115,12 +124,12 @@ function save(stelle){
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
-					<th class="fetter"><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
-					<th class="fetter"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
-					<th class="fetter"><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
-					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
-					<th bgcolor="<?php echo BG_DEFAULT ?>" class="fetter"><? echo $strPrivileges; ?></th>
+					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
+					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
+					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
+					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
+					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
+					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="background-color: #c7d9e6; color: #111; width: 100%"><? echo $strPrivileges; ?></div></a></th>
 				</tr>
 			</table>
 		</td>
@@ -134,7 +143,45 @@ function save(stelle){
 	<tr>
   	<td>
 			<div style="position:relative;">
-				<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()">
+				<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()"><?
+				echo FormObject::createSelectField(
+					'for_attribute_privileges_selected_layer_id',
+					$layer_options,
+					'',
+					1,
+					'display: none;',
+					'',
+					'',
+					'',
+					'',
+					$strPleaseSelect
+				); ?>
+				<input
+					id="attribute_previleges_for_other_layer_button"
+					style="display: none; margin-left: 10px"
+					type="button"
+					onclick="save(
+						'<? echo implode('|', $this->stellen['ID']); ?>',
+						$('#for_attribute_privileges_selected_layer_id').val()
+					)"
+					value="Attributrechte für ausgewählten Layer übernehmen"
+				>
+				<span style="margin-left: 10px;">
+				<i
+					id="show_attribute_previleges_for_other_layer_button"
+					title="Magische Funktion um die Attributrechte auf gleich benannte Attribute eines anderen Layers zu übertragen. Vorgenommene Änderungen müssen vorher gespeichert werden!"
+					class="fa fa-magic"
+					aria-hidden="true"
+					onclick="$('#attribute_previleges_for_other_layer_button, #for_attribute_privileges_selected_layer_id, #show_attribute_previleges_for_other_layer_button, #close_attribute_previleges_for_other_layer_button').toggle();"
+				></i>
+				<i
+					id="close_attribute_previleges_for_other_layer_button"
+					title="Den Spuk wieder schließen."
+					style="display: none;" class="fa fa-times"
+					aria-hidden="true"
+					onclick="$('#attribute_previleges_for_other_layer_button, #for_attribute_privileges_selected_layer_id, #show_attribute_previleges_for_other_layer_button, #close_attribute_previleges_for_other_layer_button').toggle();"
+				></i>
+
 				<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;"></DIV>
 			</div>
   	</td>
@@ -160,7 +207,7 @@ function save(stelle){
 				</tr>
   			<tr>
 			  	<td valign="top">
-			  		<div style="border:1px solid black;">
+			  		<div style="background-color: #f8f8f9; border:1px solid black;">
 							<table border="1" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
 								<tr>  	
 			  					<? include(LAYOUTPATH.'snippets/attribute_privileges_template.php'); ?>
@@ -169,7 +216,7 @@ function save(stelle){
 						</div>
 					<td>	
 					<td valign="top">
-						<div id="stellendiv" style="border:1px solid black; width:<? echo $width; ?>px; float:right; overflow:auto; overflow-y:hidden" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
+						<div id="stellendiv" style="background-color: #f8f8f9; border:1px solid black; width:<? echo $width; ?>px; float:right; overflow:auto; overflow-y:hidden" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
 							<table border="1" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
 								<tr>
 							<?
@@ -199,7 +246,8 @@ function save(stelle){
 <input type="hidden" name="go" value="Layerattribut-Rechteverwaltung">
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="stelle" value="">
-
+<input type="hidden" name="from_layer_id" value="">
+<input type="hidden" name="to_layer_id" value="">
 <script type="text/javascript">
 
 	if(document.getElementById("stellendiv"))document.getElementById("stellendiv").scrollLeft="<? echo $this->formvars['scrollposition']; ?>"

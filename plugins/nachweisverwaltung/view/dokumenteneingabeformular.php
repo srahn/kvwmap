@@ -528,7 +528,7 @@ $legendheight = $this->map->height + 20;
 											</div>
 											<div id="scrolldiv" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 												<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
-												<div id="legend">
+												<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
 													<? echo $this->legende; ?>
 												</div>
 											</div>

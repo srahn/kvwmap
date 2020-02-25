@@ -205,6 +205,7 @@
 					$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Einmessungsskizzen');		# und, wenn vorhanden, die Einmessungsskizzen
 					$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/KVZ');		# und, wenn vorhanden, die KVZ packen
 				}
+				chdir(WWWROOT.APPLVERSION);
       }
     }
     $filename = RECHERCHEERGEBNIS_PATH.$antragsnr.'.zip';
@@ -305,7 +306,7 @@
 					$fromwhere = substr($select, 0, $orderbyposition);
 					$GUI->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 				}
-				$GUI->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+				$GUI->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
 		    if(strpos(strtolower($GUI->formvars['fromwhere']), ' where ') === false){
 		      $GUI->formvars['fromwhere'] .= ' where (1=1)';
 		    }
@@ -1199,6 +1200,7 @@
 					$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
           if ($ret[0]) {
             $GUI->nachweis->database->rollbacktransaction();
+						$GUI->nachweis->dokumentenDateiLoeschen($zieldatei);
             $errmsg=$ret[1];
           }
           else {
@@ -1308,7 +1310,7 @@
 				$fromwhere = substr($select, 0, $orderbyposition);
 				$GUI->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 			}
-			$GUI->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+			$GUI->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
 	    if(strpos(strtolower($GUI->formvars['fromwhere']), ' where ') === false){
 	      $GUI->formvars['fromwhere'] .= ' where (1=1)';
 	    }
@@ -1637,7 +1639,7 @@
 				$fromwhere = substr($select, 0, $orderbyposition);
 				$GUI->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 			}
-			$GUI->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+			$GUI->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
 	    if(strpos(strtolower($GUI->formvars['fromwhere']), ' where ') === false){
 	      $GUI->formvars['fromwhere'] .= ' where (1=1)';
 	    }

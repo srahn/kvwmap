@@ -40,7 +40,7 @@
 		<? if (!$this->user->rolle->visually_impaired AND $anzObj > 0) { ?>
 		<td align="right" valign="top" style="padding: 0 10 0 0">
 		<?	if($this->search == true AND $this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
-				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" title="'.$strbackToSearch.'"><img class="hover-border" src="'.GRAPHICSPATH.'pfeil_links.gif"></a>';
+				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
 			} ?>
 		</td>
 		<td align="right" valign="top" style="padding: 0 10 0 0">
@@ -67,9 +67,10 @@
 </table>
 <?
 	}
+	$table_id = rand(0, 100000);
 	echo $layer['paging'];
 ?>
-<table border="0" cellspacing="1" cellpadding="2" width="100%">
+<table id="<? echo $table_id; ?>" border="0" cellspacing="1" cellpadding="2" width="100%">
 	<tr>
 		<td width="100%">   
 			<table class="gle1_table" cellspacing="0" cellpadding="2" width="100%">
@@ -87,7 +88,7 @@
 									if($collapsed)echo '1';
 									else echo $colspan;
 									echo '" data-colspan="'.$colspan.'">';
-									echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\''.$groupname.'\')"><img id="img_'.$groupname.'" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;<span>'.$groupname.'</span></td><td style="border:none;background: url(graphics/bg.gif);"></td>';
+									echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\''.$groupname.'\')"><img id="img_'.$groupname.'" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;<span>'.$groupname.'</span></td><td style="border:none;background: url('.BG_IMAGE.');"></td>';
 									$colspan = 0;
 								}
 								elseif($layer['attributes']['SubFormFK_hidden'][$j] != 1){
@@ -112,7 +113,7 @@
 						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 						$groupname = $explosion[0];
 						if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url(graphics/bg.gif);"></td>';
+							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 						}
 						if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
@@ -194,7 +195,7 @@
 			if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 			$groupname = $explosion[0];
 			if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-				echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url(graphics/bg.gif);"></td>';
+				echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 			}
 			if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 				$layer['attributes']['form_element_type'][$j] .= '_not_saveable';
@@ -202,7 +203,7 @@
 			if($layer['attributes']['visible'][$j]){
 				if($layer['attributes']['type'][$j] != 'geometry') {
 					if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-						echo '<td' . get_td_class_or_style(array('group_'.$groupname, $layer['shape'][$k][$layer['attributes']['style']], 'position: relative; text-align: right'.($collapsed ? ';display: none' : ''))) . '>';
+						echo '<td id="value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" '.get_td_class_or_style(array('group_'.$groupname, $layer['shape'][$k][$layer['attributes']['style']], 'position: relative; text-align: right'.($collapsed ? ';display: none' : ''))) . '>';
 						if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
 							echo calendar($layer['attributes']['type'][$j], $layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
 						}
@@ -225,7 +226,7 @@
 				}
 			}
 			else{
-				$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
+				$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" readonly="true" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
 				$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].'|';
 			}
 		}
@@ -278,7 +279,7 @@
 						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 						$groupname = $explosion[0];
 						if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url(graphics/bg.gif);"></td>';
+							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 						}
 						if($layer['attributes']['type'][$j] != 'geometry' AND $layer['attributes']['visible'][$j] AND $layer['attributes']['SubFormFK_hidden'][$j] != 1){ ?>
 							<td valign="top" class="group_<? echo $groupname; ?>" <? if($collapsed)echo 'style="display: none"'; ?> >
@@ -328,7 +329,7 @@
 						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 						$groupname = $explosion[0];
 						if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url(graphics/bg.gif);"></td>';
+							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 						}
 						if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
@@ -376,7 +377,7 @@
 							if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 							$groupname = $explosion[0];
 							if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
-								echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url(graphics/bg.gif);"></td>';
+								echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 							}
 							if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 								$layer['attributes']['form_element_type'][$j] .= '_not_saveable';
@@ -549,6 +550,11 @@
 	}
 	
 ?>
+	
+<script type="text/javascript">
+	var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
+	[].forEach.call(vchangers, function(vchanger){if(vchanger.oninput)vchanger.oninput();});
+</script>
 	
 	<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
 	<input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">

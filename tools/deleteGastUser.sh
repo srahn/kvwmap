@@ -4,7 +4,7 @@
 CONFIG_FILE="$(dirname $0)/../credentials.php"
 #echo "CONFIG_FILE: ${CONFIG_FILE}"
 
-MYSQL_HOST=$(grep "MYSQL_HOST" $CONFIG_FILE | cut -d "'" -f 2)
+MYSQL_HOST=$(grep "MYSQL_HOST," $CONFIG_FILE | cut -d "'" -f 2)
 #echo "MYSQL_HOST: ${MYSQL_HOST}"
 
 MYSQL_DATABASE=$(grep "MYSQL_DBNAME" $CONFIG_FILE | cut -d "'" -f 2)

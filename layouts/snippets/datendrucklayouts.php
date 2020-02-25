@@ -168,7 +168,7 @@ function scrolltop(){
 			<tr>
 				<td colspan="8" align="center">
 					<? if($this->previewfile){ ?>
-						<div id="preview_div" align="left" onmouseenter="document.getElementById('preview_page').style.visibility='';" onmouseleave="document.getElementById('preview_page').style.visibility='hidden';document.getElementById('coords').style.visibility='hidden';" onmousemove="image_coords(event)" style="position: relative; border:1px solid black;width:595px;height:842px;background-image:url('<? echo $this->previewfile; ?>');">
+						<div id="preview_div" align="left" onmouseenter="document.getElementById('preview_page').style.visibility='';" onmouseleave="document.getElementById('preview_page').style.visibility='hidden';document.getElementById('coords').style.visibility='hidden';" onmousemove="image_coords(event)" style="position: relative; border:1px solid black;width:<? echo $this->ddl->selectedlayout[0]['width']; ?>px;height:<? echo $this->ddl->selectedlayout[0]['height']; ?>px;background-repeat: no-repeat;background-image:url('<? echo $this->previewfile; ?>');">
 							<div id="preview_page" style="background-color: white; visibility: hidden; margin: auto; width: 150px; padding: 10px; position: relative; z-index: 2">
 									<span class="fett">Vorschau:</span>
 								<?
@@ -202,10 +202,12 @@ function scrolltop(){
 									]]></style>
 									<g transform="translate(0, 842) scale(1, -1)">
 								<?
-									$this->lines = array_values($this->lines);
-									$lines = $this->lines[$this->formvars['page']];
-									for($l = 0; $l < count($lines); $l++){
-										echo '<line id="line_'.$lines[$l]['id'].'" x1="'.$lines[$l]['x1'].'" y1="'.$lines[$l]['y1'].'" x2="'.$lines[$l]['x2'].'" y2="'.$lines[$l]['y2'].'" class="line" onmouseenter="highlight_line('.$lines[$l]['id'].')" onmouseleave="de_highlight_line('.$lines[$l]['id'].')" onclick="jump_to_line('.$lines[$l]['id'].')"/>';
+									if($this->lines){
+										$this->lines = array_values($this->lines);
+										$lines = $this->lines[$this->formvars['page']];
+										for($l = 0; $l < count($lines); $l++){
+											echo '<line id="line_'.$lines[$l]['id'].'" x1="'.$lines[$l]['x1'].'" y1="'.$lines[$l]['y1'].'" x2="'.$lines[$l]['x2'].'" y2="'.$lines[$l]['y2'].'" class="line" onmouseenter="highlight_line('.$lines[$l]['id'].')" onmouseleave="de_highlight_line('.$lines[$l]['id'].')" onclick="jump_to_line('.$lines[$l]['id'].')"/>';
+										}
 									}
 								?>
 									</g>
@@ -265,7 +267,7 @@ function scrolltop(){
 										<option value="">--- bitte wählen ---</option>
 										<?	
 										for($i = 0; $i < count($this->ddl->layouts); $i++){
-											echo ($this->formvars['aktivesLayout']<>$this->ddl->layouts[$i]['id']) ? '<option value="'.$this->ddl->layouts[$i]['id'].'">'.$this->ddl->layouts[$i]['name'].'</option>' : '<option value="'.$this->ddl->layouts[$i]['id'].'" selected>'.$this->ddl->layouts[$i]['name'].'</option>';
+											echo ($this->formvars['aktivesLayout']<>$this->ddl->layouts[$i]['id']) ? '<option value="'.$this->ddl->layouts[$i]['id'].'">'.$this->ddl->layouts[$i]['name'].' ('.$this->ddl->layouts[$i]['id'].')</option>' : '<option value="'.$this->ddl->layouts[$i]['id'].'" selected>'.$this->ddl->layouts[$i]['name'].' ('.$this->ddl->layouts[$i]['id'].')</option>';
 										}
 										?>
 									</select> 
@@ -322,11 +324,22 @@ function scrolltop(){
 									<td style="border-bottom:1px solid #C3C7C3">
 										<span class="fett">Dateiname:</span> <img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1], Style[0], document.getElementById('Tip2'))" onmouseout="htm()">
 									</td>
-									<td colspan="3" style="border-bottom:1px solid #C3C7C3">
+									<td style="border-bottom:1px solid #C3C7C3">
 										<input type="text" name="filename" value="<? echo $this->ddl->selectedlayout[0]['filename'] ?>" size="35">
 										<div style="position:relative">
 											<div id="Tip2" style="visibility:hidden;position:absolute;bottom:20px;z-index:1000;"></div>
 										</div>
+									</td>
+									<td style="border-bottom:1px solid #C3C7C3">
+										<span class="fett">Format:</span>
+									</td>
+									<td style="border-bottom:1px solid #C3C7C3">
+										<select name="format">
+											<option value="A4 hoch" <? if($this->ddl->selectedlayout[0]['format'] == 'A4 hoch')echo 'selected' ?>>A4 hoch</option>
+											<option value="A4 quer" <? if($this->ddl->selectedlayout[0]['format'] == 'A4 quer')echo 'selected' ?>>A4 quer</option>
+											<option value="A3 hoch" <? if($this->ddl->selectedlayout[0]['format'] == 'A3 hoch')echo 'selected' ?>>A3 hoch</option>
+											<option value="A3 quer" <? if($this->ddl->selectedlayout[0]['format'] == 'A3 quer')echo 'selected' ?>>A3 quer</option>
+										</select>
 									</td>
 								</tr>
 								<tr id="list_type_options" style="display:<? if($this->ddl->selectedlayout[0]['type'] == 0)echo 'none' ?>">

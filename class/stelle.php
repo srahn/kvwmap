@@ -435,8 +435,8 @@ class stelle {
 
 		if ($user_id > 0 AND !in_array($this->id, $admin_stellen)) {
 			$where = "
-				JOIN `rolle` AS r ON s.ID = r.stelle_id
-				WHERE r.user_id = " . $user_id . "
+				LEFT JOIN `rolle` AS r ON s.ID = r.stelle_id
+				WHERE r.user_id = ".$user_id." OR r.stelle_id IS NULL
 			";
 		}
 
@@ -940,6 +940,7 @@ class stelle {
 	}
 	
 	function updateLayerParams() {
+		/*
 		$sql = "
 			UPDATE
 				stelle
@@ -961,33 +962,85 @@ class stelle {
 			WHERE
 				stelle.ID = " . $this->id . "
 		";
-		#echo '<br>SQL zur Aktualisierung der LayerParams: ' . $sql;
+		*/
+		$sql = "
+			UPDATE stelle
+			SET
+				selectable_layer_params = COALESCE((
+					SELECT GROUP_CONCAT(id)
+					FROM
+						(
+							SELECT DISTINCT
+								id
+							FROM
+								(
+									SELECT
+										id
+									FROM
+										`layer_parameter` as p,
+										used_layer as ul,
+										layer as l
+									WHERE
+										ul.Stelle_ID = " . $this->id . " AND
+										ul.Layer_ID = l.Layer_ID AND
+										locate(
+											concat('$', p.key),
+											concat(l.Name, l.alias, l.connection, l.Data, l.pfad, l.classitem, l.classification)
+										) > 0
+									UNION
+									SELECT
+										p.id
+									FROM
+										u_menues AS m JOIN
+										u_menue2stelle AS m2s ON (m.id = m2s.menue_id) JOIN
+										layer_parameter AS p ON (
+											locate(
+												concat('$', p.key),
+												m.links
+											) > 0
+										)
+									WHERE
+										m2s.stelle_id = " . $this->id . "
+								) AS params
+						) AS foo
+					),
+					''
+				)
+			WHERE stelle.ID = " . $this->id . "
+		";
+
+		#echo '<br>SQL zur Aktualisierung der selectable_layer_params: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
-	#	$query = mysql_query($sql,$this->database->dbConn);
+		$query = mysql_query($sql, $this->database->dbConn);
 		if ($query == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 
 		$sql = "
 			UPDATE
 				rolle
 			SET
-				layer_params = COALESCE(
-					(
-						SELECT
-							GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"'))
-						FROM
-							layer_parameter p, stelle
-						WHERE
-							FIND_IN_SET(p.id, stelle.selectable_layer_params) AND
-							stelle.ID = rolle.stelle_id
-					),
-					''
+				layer_params = concat(coalesce(layer_params, ''), 
+					coalesce(
+						concat(
+							CASE WHEN coalesce(layer_params, '') = '' THEN '' ELSE ',' END,
+							(SELECT
+								GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"'))
+							FROM
+								layer_parameter p, stelle
+							WHERE
+								FIND_IN_SET(p.id, stelle.selectable_layer_params) AND
+								locate(concat('\"', p.key, '\"'), coalesce(layer_params, '')) = 0 AND
+								stelle.ID = rolle.stelle_id
+							)
+						),
+						''
+					)
 				)
 			WHERE
 				rolle.stelle_id = " . $this->id . "
 		";
 		#echo '<br>SQL zum Aktualisieren der Layerparameter in den Rollen: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
-	#	$query = mysql_query($sql,$this->database->dbConn);
+		$query = mysql_query($sql,$this->database->dbConn);
 		if ($query == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 	}
 

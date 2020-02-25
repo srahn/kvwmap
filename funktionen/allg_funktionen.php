@@ -6,8 +6,53 @@
 
 $errors = array();
 
+function get_din_formats() {
+	$din_formats = array(
+		'A5hoch' => array('value' => 'A5hoch', 'output' => 'A5 hoch', 'size' => '(420 x 595)'),
+		'A5quer' => array('value' => 'A5quer', 'output' => 'A5 quer', 'size' => '(595 x 420)'),
+		'A4hoch' => array('value' => 'A4hoch', 'output' => 'A4 hoch', 'size' => '(595 x 842)'),
+		'A4quer' => array('value' => 'A4quer', 'output' => 'A4 quer', 'size' => '(842 x 595)'),
+		'A3hoch' => array('value' => 'A3hoch', 'output' => 'A3 hoch', 'size' => '(842 x 1191)'),
+		'A3quer' => array('value' => 'A3quer', 'output' => 'A3 quer', 'size' => '(1191 x 842)'),
+		'A2hoch' => array('value' => 'A2hoch', 'output' => 'A2 hoch', 'size' => '(1191 x 1684)'),
+		'A2quer' => array('value' => 'A2quer', 'output' => 'A2 quer', 'size' => '(1684 x 1191)'),
+		'A1hoch' => array('value' => 'A1hoch', 'output' => 'A1 hoch', 'size' => '(1684 x 2384)'),
+		'A1quer' => array('value' => 'A1quer', 'output' => 'A1 quer', 'size' => '(2384 x 1684)'),
+		'A0hoch' => array('value' => 'A0hoch', 'output' => 'A0 hoch', 'size' => '(2384 x 3370)'),
+		'A0quer' => array('value' => 'A0quer', 'output' => 'A0 quer', 'size' => '(3370 x 2384)'),
+	);
+	return $din_formats;
+}
+
+function str_replace_first($search, $replace, $subject){
+	$newstring = $subject;
+	$pos = strpos($subject, $search);
+	if($pos !== false){
+		$newstring = substr_replace($subject, $replace, $pos, strlen($search));
+	}
+	return $newstring;
+}
+
+function replace_tags($text, $tags) {
+	$first_right = strpos($text, '>');
+	if ($first_right !== false) {
+		$text = preg_replace("#<\s*\/?(" . $tags . ")\s*[^>]*?>#im", '', $text);
+/*		$first_left = strpos($text, '<');
+		if ($first_left !== false and $first_right < $first_left) {
+			# >...<
+			$last_right = strrpos($text, '>');
+			if ($last_right !== false and $last_right > $first_left) {
+				# >...<...>
+				# entferne $first_right, $last_right und alles dazwischen
+				$text = substr_replace($text, '', $first_right, $last_right - $first_right + 1);
+			}
+		}*/
+	}
+	return $text;
+}
+
 function human_filesize($file){
-	$bytes = filesize($file);
+	$bytes = @filesize($file);
   $sz = 'BKMGTP';
   $factor = floor((strlen($bytes) - 1) / 3);
   return sprintf("%.2f", $bytes / pow(1024, $factor)).' '.@$sz[$factor].'B';

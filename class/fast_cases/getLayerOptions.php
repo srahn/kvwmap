@@ -189,8 +189,8 @@ class GUI {
 							echo 	 '</select>
 										</li>';
 						}
-						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>';
-						if($this->user->rolle->showrollenfilter){
+						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="height: 6px; width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>';
+						if(ROLLENFILTER AND $this->user->rolle->showrollenfilter){
 							echo '	
 									<li>
 									<a href="javascript:void(0);" onclick="$(\'#rollenfilter, #rollenfilterquestionicon\').toggle()">Filter</a>
@@ -256,8 +256,9 @@ echo '			</ul>
 		legend_top = document.getElementById(\'legenddiv\').getBoundingClientRect().top;
 		legend_bottom = document.getElementById(\'legenddiv\').getBoundingClientRect().bottom;
 		posy = document.getElementById(\'options_'.$this->formvars['layer_id'].'\').getBoundingClientRect().top;
-		if(posy > legend_bottom - 150)posy = legend_bottom - 150;
-		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = document.getElementById(\'map\').offsetTop + posy - (13+legend_top);
+		options_height = document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').getBoundingClientRect().height;
+		if(posy > legend_bottom - options_height)posy = legend_bottom - options_height;
+		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = document.getElementById(\'map\').offsetTop + posy - legend_top;
 		';
 	}
 }

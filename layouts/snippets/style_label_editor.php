@@ -165,20 +165,27 @@ function navigate(params){
 		border-collapse: collapse; 
 		width: 100%;
 		min-width: 940px;
+		background:rgb(248, 248, 249);
 	}
 
 	.navigation th{
-		border: 1px solid <?php echo BG_DEFAULT ?>;
+		border: 1px solid #bbb;
 		border-collapse: collapse;
 		width: 17%;
 	}
 	
 	.navigation th div{
 		padding: 3px;
-	}
+		padding: 9px 0 9px 0;
+	}	
+	
+	.navigation th a{
+		color: #888;
+	}	
 	
 	.navigation th:hover{
-		background-color: <?php echo BG_DEFAULT ?>;
+		background-color: rgb(238, 238, 239);
+		color: #666;
 	}
 </style>
 
@@ -208,15 +215,15 @@ function navigate(params){
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th class="fetter"><a href="javascript:navigate('go=Layereditor');"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
-					<th class="fetter"><a href="javascript:navigate('go=Klasseneditor');"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
-					<th bgcolor="<?php echo BG_DEFAULT ?>" class="fetter"><? echo $strStylesLabels; ?></th>
+					<th><a href="javascript:navigate('go=Layereditor');"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
+					<th><a href="javascript:navigate('go=Klasseneditor');"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
+					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="background-color: #c7d9e6; color: #111; width: 100%"><? echo $strStylesLabels; ?></div></a></th>
 					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th class="fetter"><a href="javascript:navigate('go=Attributeditor');"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
+					<th><a href="javascript:navigate('go=Attributeditor');"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
 					<? } ?>
-					<th class="fetter"><a href="javascript:navigate('go=Layereditor&stellenzuweisung=1');"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
+					<th><a href="javascript:navigate('go=Layereditor&stellenzuweisung=1');"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
 					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th class="fetter"><a href="javascript:navigate('go=Layerattribut-Rechteverwaltung');"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>
+					<th><a href="javascript:navigate('go=Layerattribut-Rechteverwaltung');"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>
 					<? } ?>
 				</tr>
 			</table>
@@ -224,7 +231,7 @@ function navigate(params){
 	</tr>	
 </table>
 
-<table border="0" cellpadding="2" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
+<table border="0" cellpadding="2" cellspacing="2" bgcolor="#f8f8f9">
   <tr>
   	<td valign="top">
 		  <table cellpadding="3" cellspacing="0" style="border:1px solid #C3C7C3;">

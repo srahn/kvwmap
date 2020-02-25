@@ -34,7 +34,7 @@
 </script>
 
 <div id="layer" align="left" onclick="remove_calendar();">
-<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
+<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" onchange="activate_save_button('<? echo $layer['Layer_ID']; ?>');" name="changed_<? echo $layer['Layer_ID']; ?>">
 <? if($this->formvars['embedded_subformPK'] == '' AND $this->new_entry != true){ ?>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
@@ -105,7 +105,7 @@
 			<? if($this->new_entry != true){ ?>
 			<div style="position: absolute;top: 1px;right: 1px"><a href="javascript:close_record('record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH."exit2.png"; ?>"></img></a></div>
 			<? } ?>
-			<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
+			<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value; changed_<? echo $layer['Layer_ID']; ?>.onchange();" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 			<table class="tgle" border="0">
 				<? if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
 				<tr class="tr_hide">
