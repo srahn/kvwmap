@@ -89,6 +89,7 @@ define(CASE_COMPRESS, false);																																						  #
 #										  - man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
 #											- man muss in einer Fachschale zoomen (wegen reduce_mapwidth)												#
 #											- man muss einen Layer in der Legende ein oder ausschalten													#
+#											- InchesPerUnit() reinkopieren																											#
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
 #   getLayerOptions:  - getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
