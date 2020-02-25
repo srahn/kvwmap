@@ -40,7 +40,7 @@
 		<? if (!$this->user->rolle->visually_impaired AND $anzObj > 0) { ?>
 		<td align="right" valign="top" style="padding: 0 10 0 0">
 		<?	if($this->search == true AND $this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
-				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" title="'.$strbackToSearch.'"><img class="hover-border" src="'.GRAPHICSPATH.'pfeil_links.gif"></a>';
+				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
 			} ?>
 		</td>
 		<td align="right" valign="top" style="padding: 0 10 0 0">
