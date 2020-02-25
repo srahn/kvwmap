@@ -1,7 +1,8 @@
 <script type="text/javascript">
 <!--
-	function addParam(){
+	function addParam() {
 		document.getElementById('param-1').style.display = '';
+
 		param = document.getElementById('param-1').cloneNode(true);
 		document.getElementById('param-1').style.display = 'none';
 		document.getElementById('params_table').getElementsByTagName('tbody')[0].appendChild(param);
@@ -35,13 +36,13 @@
 					</tr><?
 				} ?>
 			</table>
-			<a href="void(0);" onclick="addParam();">
+			<a href="javascript:void(0)" onclick="addParam();">
 				<i class="fa fa-plus buttonlink" style="margin: 5px; padding: 6px" aria-hidden="true" title="Parameter hinzufügen"></i>
 			</a>
 		</td>
 	</tr>
 	<tr>
-		<td align="center">			
+		<td align="center">	
 			<input type="submit" value="Speichern">
 		</td>
 	</tr>

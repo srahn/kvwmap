@@ -1829,4 +1829,18 @@ function send_image_not_found($img) {
 	imagedestroy($empty_img);
 }
 
+function is_true($val) {
+	if (
+		$val === true OR
+		$val === 1 OR
+		$val === 't' OR
+		strtolower($val) == 'true'
+	) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 ?>

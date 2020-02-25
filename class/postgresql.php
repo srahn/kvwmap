@@ -355,7 +355,7 @@ FROM
 			$ret[0] = 1;
 			$ret[1] = $ret['msg'];
 			if ($suppress_err_msg) {
-				# mache nichts, den die Fehlermeldung wird unterdrückt
+				# mache nichts, denn die Fehlermeldung wird unterdrückt
 			}
 			else {
 				# gebe Fehlermeldung aus.
