@@ -1395,7 +1395,6 @@ tbody.gle>tr {
 }
 
 .gle_hr{
-	width: 100%; 
 	height: 3px; 
 	margin: 15 0; 
 	color: <? echo BG_GLEHEADER; ?>; 
