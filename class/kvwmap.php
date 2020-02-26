@@ -249,7 +249,7 @@ class GUI {
 
 		if (empty($error_msg)) {
 			if (strtolower($this->formvars['format']) == 'json' OR $this->formvars['only_main']) {
-				include_once(WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/snippets/' . $snippet_file);
+				include_once($snippet_path . $snippet_file);
 			}
 		}
 		else {
@@ -1932,12 +1932,14 @@ echo '			</ul>
           if ($dbStyle['antialias']!='') {
             $style -> set('antialias',$dbStyle['antialias']);
           }
-          if($this->map_factor != ''){
-            $style -> set('width',$dbStyle['width']*$this->map_factor/1.414);
-          }
-          else{
-            $style->set('width',$dbStyle['width']);
-          }
+					if($this->map_factor != '') {
+						if(is_numeric($dbStyle['width']))$style->set('width', $dbStyle['width']*$this->map_factor/1.414);
+						else $style->updateFromString("STYLE WIDTH [" . $dbStyle['width']."] END");
+					}
+					else{
+						if(is_numeric($dbStyle['width']))$style->set('width', $dbStyle['width']);
+						else $style->updateFromString("STYLE WIDTH [" . $dbStyle['width']."] END");
+					}
         }
 
         if ($dbStyle['minwidth']!='') {
@@ -2674,7 +2676,7 @@ echo '			</ul>
 		if ($this->gui != '') {
 			return $this->gui;
 		}
-		if(strpos($this->user->rolle->gui, 'layouts') === false){		# Berücksichtigung des alten gui-Pfads
+		if (strpos($this->user->rolle->gui, 'layouts') === false) {		# Berücksichtigung des alten gui-Pfads
 			return WWWROOT . APPLVERSION . 'layouts/' . $this->user->rolle->gui;
 		}
 		else {
@@ -14693,9 +14695,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					}
 					$j++;
 				}
-				if($distinct == true){
-					$pfad = 'DISTINCT '.$pfad;
-				}
 
 				/*if(strpos(strtolower($pfad), 'as the_geom') !== false){
 					$the_geom = 'query.the_geom';
@@ -14800,6 +14799,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$j++;
 					}
 				}
+				
+				if($distinct == true){
+					$pfad = 'DISTINCT '.$pfad;
+				}				
 				
 				#if($the_geom == 'query.the_geom'){
 					$sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
