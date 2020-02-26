@@ -37,8 +37,8 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
 		<td>
-			<? if($this->search == true AND !$this->user->rolle->visually_impaired AND $anzObj > 0 AND value_of($this->formvars, 'printversion') == '' AND value_of($this->formvars, 'keinzurueck') == '' AND value_of($this->formvars, 'subform_link') == ''){
-				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" title="'.$strbackToSearch.'"><img class="hover-border" src="'.GRAPHICSPATH.'pfeil_links.gif"></a>';
+			<? if($this->search == true AND !$this->user->rolle->visually_impaired AND $anzObj > 0 AND $this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
+				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
 			} ?>
 		</td>
 		<td width="99%" align="center"><h2 id="layername"><? echo $layer['Name']; ?></h2></td>
@@ -164,7 +164,11 @@
 							######### Attributwert #########
 							$cell['content'] = attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2, $this->user->rolle->fontsize_gle);
 							$cell['id'] = 'value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
+<<<<<<< HEAD
 							$cell['properties'] = get_td_class_or_style(@array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value'));
+=======
+							$cell['properties'] = get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j]));
+>>>>>>> develop
 							if($nl){
 								$next_row['cells'][] = $cell;
 							}

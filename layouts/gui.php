@@ -31,7 +31,7 @@
 										<script type="text/javascript">
 											currentform = document.GUI;
 											<? $this->currentform = 'document.GUI'; ?>
-											function set_hist_timestamp(){
+											function set_hist_timestamp() {
 												$('#hist_timestamp_form').show();
 											}
 										</script>
@@ -43,11 +43,11 @@
 										</div>
 										<?php
 										$this->debug->write("<br>Include <b>".$this->main."</b> in gui.php",4);
-										if(file_exists($this->main)){
-											include($this->main);			# Pluginviews
+										if (file_exists($this->main)) {
+											include($this->main); # Pluginviews
 										}
 										else {
-											include(LAYOUTPATH."snippets/".$this->main);		# normale snippets
+											include(LAYOUTPATH . "snippets/" . $this->main);		# normale snippets
 										} ?>
 									</div>
 								</td>

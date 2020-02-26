@@ -208,7 +208,7 @@ if(value_of($this->formvars, 'printversion') == ''){ ?>
 		</tr>
   </table>
 <? } ?>
-  <br><div align="center">
+  <br><div align="left">
 
   <?
   	if($this->search == true){			# wenn man von der Suche kam -> Hidden Felder zum Speichern der Suchparameter (die können evtl. weg, da jetzt immer get_last_query verwendet wird)
@@ -239,8 +239,8 @@ if(value_of($this->formvars, 'printversion') == ''){ ?>
 					';
 				}
 			}
-	  	if(value_of($this->formvars, 'printversion') == '' AND value_of($this->formvars, 'keinzurueck') == '' AND value_of($this->formvars, 'subform_link') == ''){
-	  		echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" id="sachdatenanzeige_footer">'.$strbackToSearch.'</a><br><br>';
+	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
+				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" style="margin: 5px" aria-hidden="true"></i></a>';
 	  	}
   	}
   	else{

@@ -845,12 +845,14 @@ function umlaute_html($string){
 	return $string;
 }
 
-function umlaute_sortieren($array, $second_array){
-	// Diese Funktion sortiert das Array $array unter Berücksichtigung von Umlauten.
-	// Zusätzlich läßt sich ein zweites Array $second_array übergeben, welches genauso viele
-	// Elemente haben muß wie das erste und dessen Elemente entsprechend der Sortierung des
-	// ersten Arrays angeordnet werden, dadurch bleiben die Index-Beziehungen beider Arrays erhalten.
-	// Außerdem werden alle Array-Elemente unabhängig von Groß/Kleinschreibung sortiert.
+/**
+* Diese Funktion sortiert das Array $array unter Berücksichtigung von Umlauten.
+* Zusätzlich läßt sich ein zweites Array $second_array übergeben, welches genauso viele
+* Elemente haben muß wie das erste und dessen Elemente entsprechend der Sortierung des
+* ersten Arrays angeordnet werden, dadurch bleiben die Index-Beziehungen beider Arrays erhalten.
+* Außerdem werden alle Array-Elemente unabhängig von Groß/Kleinschreibung sortiert.
+*/
+function umlaute_sortieren($array, $second_array) {
 	if(is_array($array)){
 		$oldarray = $array;
 		for($i = 0; $i < count($array); $i++){
@@ -1878,6 +1880,20 @@ function send_image_not_found($img) {
 function value_of($array, $key) {
 	if(!is_array($array))$array = array();
 	return (array_key_exists($key, $array) ? $array[$key] :	'');
+}
+
+function is_true($val) {
+	if (
+		$val === true OR
+		$val === 1 OR
+		$val === 't' OR
+		strtolower($val) == 'true'
+	) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 ?>

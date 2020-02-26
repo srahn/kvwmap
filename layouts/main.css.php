@@ -1370,6 +1370,7 @@ thead.gle th {
 
 .readonly_text{
 	word-wrap: break-word;
+	padding: 0 0 0 3;
 }
 
 tbody.gle>tr { 
@@ -1396,7 +1397,6 @@ tbody.gle>tr {
 }
 
 .gle_hr{
-	width: 100%; 
 	height: 3px; 
 	margin: 15 0; 
 	color: <? echo BG_GLEHEADER; ?>; 
