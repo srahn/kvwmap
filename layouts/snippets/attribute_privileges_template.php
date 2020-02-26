@@ -77,73 +77,75 @@
 							else{
 								$noentry = false;
 							}
-							$attributenames = implode('|', $this->attributes['name']);
-							for ($i = 0; $i < count($this->attributes['type']); $i++){
-				    		if ($this->stelle->id == ''){
-				    			$this->attributes_privileges[$this->attributes['name'][$i]] = $this->attributes['privileg'][$i]; 	# die default-Rechte kommen aus layer_attributes
-				    			$this->attributes_privileges['tooltip_'.$this->attributes['name'][$i]] = $this->attributes['query_tooltip'][$i]; 	# die default-Rechte kommen aus layer_attributes
-				    		}
-								echo '
-								<tr>
-								  <td align="center">
-								  	<input style="width:100px" type="text" name="attribute_'.$this->attributes['name'][$i].'" value="'.$this->attributes['name'][$i].'" readonly>
-								  </td>
-								  <td>&nbsp;</td>
-								  <td align="center" style="height:21px">';
-									$privilege_options = array(
-										array(
-											'value' => '',
-											'output' => $strNoAccess,
-										),
-										array(
-											'value' => '0',
-											'output' => $strRead,
-										),
-										array(
-											'value' => '1',
-											'output' => $strEdit,
-										)
-									);
+							if (array_key_exists('name', $this->attributes)) {
+								$attributenames = implode('|', $this->attributes['name']);
+								for ($i = 0; $i < count($this->attributes['type']); $i++){
+					    		if ($this->stelle->id == ''){
+					    			$this->attributes_privileges[$this->attributes['name'][$i]] = $this->attributes['privileg'][$i]; 	# die default-Rechte kommen aus layer_attributes
+					    			$this->attributes_privileges['tooltip_'.$this->attributes['name'][$i]] = $this->attributes['query_tooltip'][$i]; 	# die default-Rechte kommen aus layer_attributes
+					    		}
+									echo '
+									<tr>
+									  <td align="center">
+									  	<input style="width:100px" type="text" name="attribute_'.$this->attributes['name'][$i].'" value="'.$this->attributes['name'][$i].'" readonly>
+									  </td>
+									  <td>&nbsp;</td>
+									  <td align="center" style="height:21px">';
+										$privilege_options = array(
+											array(
+												'value' => '',
+												'output' => $strNoAccess,
+											),
+											array(
+												'value' => '0',
+												'output' => $strRead,
+											),
+											array(
+												'value' => '1',
+												'output' => $strEdit,
+											)
+										);
 
-								  echo '<select style="width:100px" name="privileg_'.$this->attributes['name'][$i].'_'.$this->stelle->id.'">';
-									foreach($privilege_options AS $option) {
-										$selected = ($this->attributes_privileges[$this->attributes['name'][$i]] == $option['value'] ? ' selected' : '');
-										echo '<option value="' . $option['value'] . '"' . $selected . '>' . $option['output'] . '</option>';
-									}
-									echo '</select>
-								  </td>
-								  <td>&nbsp;</td>
-								  <td align="center"><input type="checkbox" name="tooltip_'.$this->attributes['name'][$i].'_'.$this->stelle->id.'" ';
-								  if($this->attributes_privileges['tooltip_'.$this->attributes['name'][$i]] == 1){
-								  	echo 'checked';
-								  }
-									echo ' ></td>
-				        </tr>
-				        ';
-				    	}
-							echo '
-								<tr>
-									<td>&nbsp;</td>
-								</tr>
-								<tr>';
-				    			if($this->formvars['stelle'] != 'a'){
-				    				echo '
-								  <td align="center">
-								  	<input style="width:100px" type="text" name="" value="alle" readonly>
-								  </td>';} echo '
-								  <td>&nbsp;</td>
-								  <td align="center">
-								  	<select  style="width:100px" name="" onchange="set_all(\''.$attributenames.'\', \''.$this->stelle->id.'\', this.value);"">
-											<option value=""> - '.$this->strChoose.' - </option>
-								  		<option value="">'.$strNoAccess.'</option>
-								  		<option value="0">'.$strRead.'</option>
-								  		<option value="1">'.$strEdit.'</option>
-								  	</select>
-								  </td>
-								  <td>&nbsp;</td>
-								  <td>&nbsp;</td>
-				        </tr>
+									  echo '<select style="width:100px" name="privileg_'.$this->attributes['name'][$i].'_'.$this->stelle->id.'">';
+										foreach($privilege_options AS $option) {
+											$selected = ($this->attributes_privileges[$this->attributes['name'][$i]] == $option['value'] ? ' selected' : '');
+											echo '<option value="' . $option['value'] . '"' . $selected . '>' . $option['output'] . '</option>';
+										}
+										echo '</select>
+									  </td>
+									  <td>&nbsp;</td>
+									  <td align="center"><input type="checkbox" name="tooltip_'.$this->attributes['name'][$i].'_'.$this->stelle->id.'" ';
+									  if($this->attributes_privileges['tooltip_'.$this->attributes['name'][$i]] == 1){
+									  	echo 'checked';
+									  }
+										echo ' ></td>
+					        </tr>
+					        ';
+					    	}
+								echo '
+									<tr>
+										<td>&nbsp;</td>
+									</tr>
+									<tr>';
+					    			if($this->formvars['stelle'] != 'a'){
+					    				echo '
+									  <td align="center">
+									  	<input style="width:100px" type="text" name="" value="alle" readonly>
+									  </td>';} echo '
+									  <td>&nbsp;</td>
+									  <td align="center">
+									  	<select  style="width:100px" name="" onchange="set_all(\''.$attributenames.'\', \''.$this->stelle->id.'\', this.value);"">
+												<option value=""> - '.$this->strChoose.' - </option>
+									  		<option value="">'.$strNoAccess.'</option>
+									  		<option value="0">'.$strRead.'</option>
+									  		<option value="1">'.$strEdit.'</option>
+									  	</select>
+									  </td>
+									  <td>&nbsp;</td>
+									  <td>&nbsp;</td>
+					        </tr>
 								';
+							}
 							if (count($this->attributes) > 0) {
 								$stelle_and_layer_selected = $this->stelle->id != '' AND $this->layer[0]['Name'] != '';
 								if ($stelle_and_layer_selected ) {

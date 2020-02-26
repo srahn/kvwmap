@@ -16858,11 +16858,33 @@ class db_mapObj{
   }
 
 	function getlayerdatabase($layer_id, $host){
-		if($layer_id < 0){	# Rollenlayer
-			$sql ='SELECT `connection`, "'.CUSTOM_SHAPE_SCHEMA.'" as `schema` FROM rollenlayer WHERE -id = '.$layer_id.' AND connectiontype = 6';
+		if ($layer_id < 0) {	# Rollenlayer
+			$sql = "
+				SELECT
+					`connection`,
+					'" . CUSTOM_SHAPE_SCHEMA . "' as `schema`,
+					0 AS connection_id
+				FROM
+					rollenlayer
+				WHERE
+					-id = " . $layer_id . " AND
+					connectiontype = 6
+			";
 		}
-		else{
-			$sql ="SELECT concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as `connection`, `schema` FROM layer as l, connections as c WHERE l.Layer_ID = ".$layer_id." AND l.connection_id = c.id AND l.connectiontype = 6";
+		else {
+			$sql = "
+				SELECT
+					concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as `connection`,
+					`schema`,
+					l.connection_id
+				FROM
+					layer as l,
+					connections as c
+				WHERE
+					l.Layer_ID = " . $layer_id . " AND
+					l.connection_id = c.id AND
+					l.connectiontype = 6
+			";
 		}
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Lesen des connection-Strings des Layers:<br>" . $sql,4);
 		$this->db->execSQL($sql);
@@ -16870,29 +16892,29 @@ class db_mapObj{
 		$rs = $this->db->result->fetch_row();
 		$connectionstring = $rs[0];
 #		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Gefundener Connection String des Layers:<br>" . $connectionstring, 4);
-		if ($connectionstring != ''){
+		if ($connectionstring != '') {
 			$layerdb = new pgdatabase();
-			if($rs[1] == '') {
+			if ($rs[1] == '') {
 				$rs[1] = 'public';
 			}
 			$layerdb->schema = $rs[1];
 			$connection = explode(' ', trim($connectionstring));
-			for($j = 0; $j < count($connection); $j++){
-				if($connection[$j] != ''){
+			for ($j = 0; $j < count($connection); $j++){
+				if ($connection[$j] != '') {
 					$value = explode('=', $connection[$j]);
-					if(strtolower($value[0]) == 'user'){
+					if (strtolower($value[0]) == 'user'){
 						$layerdb->user = $value[1];
 					}
-					if(strtolower($value[0]) == 'dbname'){
+					if (strtolower($value[0]) == 'dbname'){
 						$layerdb->dbName = $value[1];
 					}
-					if(strtolower($value[0]) == 'password'){
+					if (strtolower($value[0]) == 'password'){
 						$layerdb->passwd = $value[1];
 					}
-					if(strtolower($value[0]) == 'host'){
+					if (strtolower($value[0]) == 'host'){
 						$layerdb->host = $value[1];
 					}
-					if(strtolower($value[0]) == 'port'){
+					if (strtolower($value[0]) == 'port'){
 						$layerdb->port = $value[1];
 					}
 				}
@@ -16902,6 +16924,7 @@ class db_mapObj{
 			}
 			if (!$layerdb->open()) {
 				echo 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
+				echo '<br>Connection ID: ' . $rs[2];
 				echo '<br>Host: '.$layerdb->host;
 				echo '<br>User: '.$layerdb->user;
 				echo '<br>Datenbankname: '.$layerdb->dbName;

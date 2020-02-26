@@ -192,9 +192,8 @@ function save(stelle, other_selected_layer_id = '') {
 				<tr>
 					<td></td>
 					<td></td>
-					<td>
-						<? 
-						$stellenanzahl = count($this->stellen['ID']);
+					<td><?
+						$stellenanzahl = ($this->stellen ? count($this->stellen['ID']) : 0);
 						if($stellenanzahl > 0){
 						$width1 = $width = 280*$stellenanzahl;
 						if($width > 840)$width = 840;

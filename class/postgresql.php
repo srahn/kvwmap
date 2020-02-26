@@ -39,7 +39,7 @@ class pgdatabase {
 	var $schema;
 	var $pg_text_attribute_types = array('character', 'character varying', 'text', 'timestamp without time zone', 'timestamp with time zone', 'date', 'USER-DEFINED');
 
-	function pgdatabase() {
+	function __construct() {
 		global $debug;
 		global $GUI;
 		$this->gui = $GUI;

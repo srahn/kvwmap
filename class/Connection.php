@@ -20,7 +20,7 @@ class Connection extends MyObject {
 		);
 	}
 
-	public function validate() {
+	public function validate($on = '') {
 		$results = array();
 		$results[] = $this->validates('name', 'not_null', 'Es muss ein Name für die Auswahl angegeben werden.');
 		$results[] = $this->validates('name', 'unique', 'Falscher Name.');
