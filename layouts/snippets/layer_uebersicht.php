@@ -8,9 +8,9 @@
 			$output = '
 				<tr>
 					<td bgcolor="' . BG_GLEATTRIBUTE . '" class="px17 fett id-column" style="height: 30px; border:1px solid #C3C7C3;" class="id-column">
-						<div style="margin-left: ' . $indent . 'px;">' . $group['id'] . '</div>
+						<div style="margin-left: ' . $indent . 'px;"><a href="index.php?go=Layergruppe_Editor&selected_group_id=' . $group['id'] . '">' . $group['id'] . '</a></div>
 					</td>
-					<td colspan="3" bgcolor="' . BG_GLEATTRIBUTE . '" class="px17 fett" style="height: 30px; border:1px solid #C3C7C3;">
+					<td colspan="4" bgcolor="' . BG_GLEATTRIBUTE . '" class="px17 fett" style="height: 30px; border:1px solid #C3C7C3;">
 						<div style="margin-left: ' . $indent . 'px;" class="layer-column">
 							' . ($indent > 0 ? '<img src="graphics/pfeil_unten-rechts.gif">' : '') . ' ' . $group['Gruppenname'] . '
 						</div>
@@ -35,10 +35,13 @@
 		$output = '
 				<tr>
 					<td style="padding-left: ' . $indent . 'px;border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" valign="top" class="id-column">
-						' . $GUI->layers['ID'][$i] . '
+						<a href="index.php?go=Layereditor&selected_layer_id=' . $GUI->layers['ID'][$i] . '">' . $GUI->layers['ID'][$i] . '</a>
 					</td>
 					<td style="padding-left: ' . $indent . 'px;border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" valign="top" class="layer-column">
 						' . ($GUI->layers['alias'][$i] != '' ? $GUI->layers['alias'][$i] : $GUI->layers['Bezeichnung'][$i]) . '
+					</td>
+					<td style="padding-left: ' . $indent . 'px;border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" valign="top" class="default_drawingorder-column">
+						' . $GUI->layers['default_drawingorder'][$i] . '
 					</td>
 					<td style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" valign="top" class="kurzbeschreibung-column">
 						<div style="width: 400px">
@@ -64,7 +67,7 @@
 	}
 </script>
 <style>
-	.id-column {
+	.id-column, .default_drawingorder-column {
 		display: none;
 	}
 
@@ -96,6 +99,7 @@
 			<div id="column_options_div">
 				<input type="checkbox" onclick="$('.id-column').toggle(); $('#column_options_div').toggle();"> ID<br>
 				<input type="checkbox" onclick="$('.layer-column').toggle(); $('#column_options_div').toggle();" checked> Layer<br>
+				<input type="checkbox" onclick="$('.default_drawingorder-column').toggle(); $('#column_options_div').toggle();"> Zeichenreihenfolge<br>
 				<input type="checkbox" onclick="$('.kurzbeschreibung-column').toggle(); $('#column_options_div').toggle();" checked> Kurzbeschreibung<br>
 				<input type="checkbox" onclick="$('.datenherr-column').toggle(); $('#column_options_div').toggle();" checked> Datenherr
 			</div>
@@ -107,6 +111,7 @@
 				<tr>
 					<th style="border-right:1px solid #C3C7C3" class="id-column">ID</th>
 					<th style="border-right:1px solid #C3C7C3" class="layer-column">Layer</th>
+					<th style="border-right:1px solid #C3C7C3" class="default_drawingorder-column">Default<br>Zeichen-<br>reihenfolge</th>
 					<th style="border-right:1px solid #C3C7C3" class="kurzbeschreibung-column">Kurzbeschreibung</th>
 					<th class="datenherr-column">Datenherr</th>
 				</tr><?

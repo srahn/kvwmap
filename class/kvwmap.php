@@ -18721,6 +18721,7 @@ class db_mapObj{
 				l.Gruppe,
 				l.kurzbeschreibung,
 				l.datenherr,
+				l.drawingorder,
 				l.alias
 			FROM
 				layer l JOIN
@@ -18748,9 +18749,9 @@ class db_mapObj{
 
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>" . $sql,4);
 		$query=mysql_query($sql);
-    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
 		$i = 0;
-		while($rs=mysql_fetch_array($query)){
+		while ($rs = mysql_fetch_array($query)) {
 			$layer['ID'][]=$rs['Layer_ID'];
 			$layer['Bezeichnung'][]=$rs['Name'];
 			$layer['Gruppe'][]=$rs['Gruppenname'];
@@ -18758,16 +18759,19 @@ class db_mapObj{
 			$layer['Kurzbeschreibung'][]=$rs['kurzbeschreibung'];
 			$layer['Datenherr'][]=$rs['datenherr'];
 			$layer['alias'][]=$rs['alias'];
+			$layer['default_drawingorder'][] = $rs['drawingorder'];
 			$layer['layers_of_group'][$rs['Gruppe']][] = $i;
 			$i++;
 		}
-		if($order == 'Bezeichnung'){
-			// Sortieren der Layer unter Berücksichtigung von Umlauten
+		if ($order == 'Bezeichnung') {
+			# Sortieren der Layer unter Berücksichtigung von Umlauten
 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
 			$layer['ID'] = $sorted_arrays['second_array'];
 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['GruppeID']);
 			$layer['Bezeichnung'] = $sorted_arrays['array'];
 			$layer['GruppeID'] = $sorted_arrays['second_array'];
+			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['drawingorder']);
+			$layer['default_drawingorder'] = $sorted_arrays['second_array'];
 		}
 		return $layer;
 	}
