@@ -41,7 +41,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 				if ($this->attributes['mandatory'][$i] == '' or $this->attributes['mandatory'][$i] > -1) {
 					$operator = $this->formvars[$prefix . 'operator_' . $this->attributes['name'][$i]];
 					
-	        if($this->attributes['form_element_type'][$i] != 'dynamicLink' AND !($this->attributes['form_element_type'][$i] == 'SubFormFK' AND $this->attributes['type'][$i] == 'not_saveable')){					
+	        if($this->attributes['form_element_type'][$i] != 'dynamicLink' AND !($this->attributes['form_element_type'][$i] == 'SubFormFK' AND $this->attributes['saveable'][$i] == 0)){					
 						if($this->attributes['group'][$i] != $this->attributes['group'][$last_attribute_index]){		# wenn die vorige Gruppe anders ist: ...
 							$explosion = explode(';', $this->attributes['group'][$i]);
 							if($explosion[1] != '')$collapsed = true;else $collapsed = false;
