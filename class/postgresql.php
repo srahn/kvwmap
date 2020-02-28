@@ -565,9 +565,11 @@ FROM
 						}
 					}
 					$fields[$i]['constraints'] = $constraintstring;
+					$fields[$i]['saveable'] = 1;
 				}
 				else { # Attribut ist keine Tabellenspalte -> nicht speicherbar
-					$fieldtype = 'not_saveable';
+					$fieldtype = pg_field_type($ret[1], $i);			# Typ aus Query ermitteln
+					$fields[$i]['saveable'] = 0;
 				}
 				$fields[$i]['type'] = $fieldtype;
 
