@@ -17,7 +17,7 @@
 		$layer['Name'] = $layer['alias'];
 	}
 	$doit = false;
-  $anzObj = count($layer['shape']);
+  $anzObj = count_or_0($layer['shape']);
   if ($anzObj > 0) {
   	$this->found = 'true';
 		$k = 0;
@@ -174,10 +174,13 @@
 							unset($cell);
 							######### /Attributwert #########
 							
-							if($layer['attributes']['arrangement'][$j+1] != 1){		# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
-								$table['rows'][] = $row;
-								if(count($row['cells']) > value_of($table, 'max_cell_count'))$table['max_cell_count'] = count($row['cells']);
-								unset($row);
+							if ($layer['attributes']['arrangement'][$j+1] != 1){		# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
+								# ToDo web2.0.0 Behandlung wenn $table leer sein.
+								if (is_array($table)) {
+									$table['rows'][] = $row;
+									if(count($row['cells']) > value_of($table, 'max_cell_count'))$table['max_cell_count'] = count($row['cells']);
+									unset($row);
+								}
 							}
 							if($layer['attributes']['arrangement'][$j+1] != 1 AND $nl){			# die aufgesammelten Zellen in neuer Zeile ausgeben
 								$table['rows'][] = $next_row;

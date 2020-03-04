@@ -71,7 +71,7 @@
 		$ret = $GUI->database->execSQL($sql, 1, 4);
 
 		$nix_gefunden = true;
-		if ($ret['success'] AND mysql_num_rows($ret[1]) == 1) {
+		if ($ret['success'] AND $GUI->database->result->num_rows() == 1) {
 			$nix_gefunden = false;
 			$rs = $GUI->database->result->fetch_assoc();
 			$GUI->formvars['selected_layer_id'] = $rs['Layer_ID'];

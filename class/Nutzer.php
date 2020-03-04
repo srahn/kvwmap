@@ -68,7 +68,7 @@ class Nutzer extends MyObject {
 				}
 			}
 			if ($result['success'] == 0) {
-				$succsess['msg'] = mysql_error($gui->database->dbConn);
+				$succsess['msg'] = $gui->database->error;
 			}
 		}
 		return $result;

@@ -2094,9 +2094,9 @@ class rolle {
       $sql.=' AND Gruppenname LIKE "'.$GroupName.'"';
     }
     $this->debug->write("<p>file:rolle.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
+    $query=$this->database->mysqli->query($sql);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-    while ($rs=mysql_fetch_array($query)) {
+    while ($this->database->result->fetch_array()) {
       $groups[]=$rs;
     }
     return $groups;
@@ -2132,8 +2132,8 @@ class rolle {
 				#neu eintragen der deaktiven Klassen
 				if($aktiv_status != 0){
 					$sql = 'SELECT Class_ID FROM classes WHERE Layer_ID='.$this->layerset[$i]['Layer_ID'].';';
-					$query = mysql_query($sql);
-					while($row = @mysql_fetch_array($query)){
+					$query = $this->database->mysqli->query($sql);
+					while($row = @$this->database->result->fetch_array()){
 						if($formvars['class'.$row['Class_ID']] == '0' OR $formvars['class'.$row['Class_ID']] == '2'){
 							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id, status) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$row['Class_ID'].', '.$formvars['class'.$row['Class_ID']].');';
 							$this->database->execSQL($sql2,4, $this->loglevel);
@@ -2214,10 +2214,10 @@ class rolle {
 		";
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
+		$query = $this->database->mysqli->query($sql);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
-		while ($rs=mysql_fetch_assoc($query)) {
+		while ($rs=$this->database->result->fetch_assoc()) {
 			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
 				if($rs['Filter'] == ''){
 					$rs['Filter'] = '('.$rs['rollenfilter'].')';
@@ -2264,10 +2264,10 @@ class rolle {
 		}
     #echo $sql.'<br>';
     $this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
+    $query = $this->database->mysqli->query($sql);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
-    while ($rs=mysql_fetch_assoc($query)) {
+    while ($rs=$this->database->result->fetch_assoc()) {
       $layer[]=$rs;
     }
     return $layer;

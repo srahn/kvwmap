@@ -654,7 +654,7 @@ class database {
       #echo $sql;
       if ($query==0) {
         $ret[0]=1;
-        $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>".mysql_error($this->dbConn);
+        $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>" . $this->dbConn->error;
         $this->debug->write($ret[1],$debuglevel);
         if ($logsql) {
           $this->logfile->write("#".$ret[1]);

@@ -2019,7 +2019,7 @@ else{
 			$credentials.= 'define('.$constant['name'].', '.$constant['value'].");\n";
 		}
 	}
-	if(mysql_num_rows($result[1]) == 0){
+	if($this->database->result->num_rows() == 0){
 		# config Tabelle befüllen
 		$result = $this->database->exec_commands($sql, NULL, NULL);
 	}

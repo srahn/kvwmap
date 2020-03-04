@@ -73,7 +73,7 @@ class database {
 		$ret = $this->execSQL($sql, 4, 0);
 		if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
 
-		$colunn_aggreement_accepted = (mysql_num_rows($ret[1]) == 1 ? ', agreement_accepted' : ', 1');
+		$colunn_aggreement_accepted = ($this->result->num_rows() == 1 ? ', agreement_accepted' : ', 1');
 
 		$sql = "
 			SELECT
@@ -536,7 +536,8 @@ INSERT INTO u_styles2classes (
 						$insert .= addslashes($rs[$i]);
 					}
 					else {
-						if (mysql_field_type($query, $i) != 'string' AND mysql_field_type($query, $i) != 'blob' AND $rs[$i] == '') {
+						$field = $this->result->fetch_field_direct($i);
+						if ($field->type != 'string' AND $field->type != 'blob' AND $rs[$i] == '') {
 							$insert .= "NULL";
 						} else{
 							$insert .= "'".addslashes($rs[$i])."'";
