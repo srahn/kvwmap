@@ -249,7 +249,7 @@ class GUI {
 
 		if (empty($error_msg)) {
 			if (strtolower($this->formvars['format']) == 'json' OR $this->formvars['only_main']) {
-				include_once(WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/snippets/' . $snippet_file);
+				include_once($snippet_path . $snippet_file);
 			}
 		}
 		else {
@@ -1932,12 +1932,14 @@ echo '			</ul>
           if ($dbStyle['antialias']!='') {
             $style -> set('antialias',$dbStyle['antialias']);
           }
-          if($this->map_factor != ''){
-            $style -> set('width',$dbStyle['width']*$this->map_factor/1.414);
-          }
-          else{
-            $style->set('width',$dbStyle['width']);
-          }
+					if($this->map_factor != '') {
+						if(is_numeric($dbStyle['width']))$style->set('width', $dbStyle['width']*$this->map_factor/1.414);
+						else $style->updateFromString("STYLE WIDTH [" . $dbStyle['width']."] END");
+					}
+					else{
+						if(is_numeric($dbStyle['width']))$style->set('width', $dbStyle['width']);
+						else $style->updateFromString("STYLE WIDTH [" . $dbStyle['width']."] END");
+					}
         }
 
         if ($dbStyle['minwidth']!='') {
@@ -2674,7 +2676,7 @@ echo '			</ul>
 		if ($this->gui != '') {
 			return $this->gui;
 		}
-		if(strpos($this->user->rolle->gui, 'layouts') === false){		# Berücksichtigung des alten gui-Pfads
+		if (strpos($this->user->rolle->gui, 'layouts') === false) {		# Berücksichtigung des alten gui-Pfads
 			return WWWROOT . APPLVERSION . 'layouts/' . $this->user->rolle->gui;
 		}
 		else {
@@ -4254,10 +4256,13 @@ echo '			</ul>
 			} break;
 			case "create_inserts_from_dataset" : {
 				$inserts_file = LOGPATH . 'inserts_from_dataset.sql';
+#				echo $this->administration->create_inserts_from_dataset($this->formvars['schema'], $this->formvars['table'], $this->formvars['where']);
+
 				file_put_contents($inserts_file, $this->administration->create_inserts_from_dataset($this->formvars['schema'], $this->formvars['table'], $this->formvars['where']));
 				header("Content-type:application/pdf");
 				header("Content-Disposition:attachment; filename=" . $this->formvars['schema'] . "-" . $this->formvars['table'] . "-" . $this->formvars['where'] . ".sql");
 				readfile($inserts_file);
+
 				exit;
 			} break;
 			default : {
@@ -8428,7 +8433,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								}
 							}
 							if($operator == 'IS NULL' OR $operator == 'IS NOT NULL'){
-								if(in_array($attributes['type'][$i], array('bpchar', 'varchar', 'text', 'not_saveable'))){
+								if(in_array($attributes['type'][$i], array('bpchar', 'varchar', 'text'))){
 									if($operator == 'IS NULL'){
 										$sql_where .= ' AND ('.$attr.' '.$operator.' OR '.$attr.' = \'\') ';
 									}
@@ -9494,7 +9499,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 					$ret = $layerdb->execSQL($sql, 4, 1, false);
 					#echo '<br>Datensatz Speichern SQL: ' . $sql;
-					/*
+					
 					if ($last_notice = pg_last_notice($layerdb->dbConn)) {
 						if (strpos($last_notice, 'CONTEXT: ') !== false) {
 							$last_notice = $msg = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
@@ -9503,7 +9508,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							$last_notice = $notice_result['msg'];
 						}
 						$this->add_message('info', $last_notice);
-					}*/
+					}
 
 					if ($ret['success']) {
 						$result = pg_fetch_row($ret['query']);
@@ -9670,7 +9675,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				for ($j = 0; $j < count($layerset[0]['attributes']['name']); $j++) {
 					$layerset[0]['attributes']['privileg'][$j] = $privileges[$layerset[0]['attributes']['name'][$j]];
 					$layerset[0]['attributes']['privileg'][$layerset[0]['attributes']['name'][$j]] = $privileges[$layerset[0]['attributes']['name'][$j]];
-					$layerset[0]['shape'][-1][$layerset[0]['attributes']['name'][$j]] = $this->formvars[$layerset[0]['Layer_ID'].';'.$layerset[0]['attributes']['real_name'][$layerset[0]['attributes']['name'][$j]].';'.$layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['name'][$j]].';;'.$layerset[0]['attributes']['form_element_type'][$j].';'.$layerset[0]['attributes']['nullable'][$j].';'.$layerset[0]['attributes']['type'][$j]];
+					$layerset[0]['shape'][-1][$layerset[0]['attributes']['name'][$j]] = $this->formvars[$layerset[0]['Layer_ID'].';'.$layerset[0]['attributes']['real_name'][$layerset[0]['attributes']['name'][$j]].';'.$layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['name'][$j]].';;'.$layerset[0]['attributes']['form_element_type'][$j].';'.$layerset[0]['attributes']['nullable'][$j].';'.$layerset[0]['attributes']['type'][$j].';'.$layerset[0]['attributes']['saveable'][$j]];
 					if (
 						$layerset[0]['shape'][-1][$layerset[0]['attributes']['name'][$j]] == '' AND
 						$layerset[0]['attributes']['default'][$j] != ''
@@ -10849,19 +10854,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->Layerattribute_speichern();
 	}
 
-  function layer_attributes_privileges(){
-    $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->titel='Layer-Rechteverwaltung';
-    $this->main='attribut_privileges_form.php';
-		$this->layerdaten = $mapdb->get_layers_of_type(MS_POSTGIS.','.MS_WFS, 'Name');
-    if($this->formvars['selected_layer_id'] != ''){
-    	$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-    	$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-    	$this->stellen = $mapdb->get_stellen_from_layer($this->formvars['selected_layer_id']);
-    	$this->layer[0] = $mapdb->get_Layer($this->formvars['selected_layer_id']);
-    }
-    $this->output();
-  }
+	function layer_attributes_privileges(){
+		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
+		$this->titel='Layer-Rechteverwaltung';
+		$this->main='attribut_privileges_form.php';
+		include_once(CLASSPATH . 'FormObject.php');
+		$this->layerdaten = $mapdb->get_layers_of_type(MS_POSTGIS . ',' . MS_WFS, 'Name');
+		if ($this->formvars['selected_layer_id'] != '') {
+			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+			$this->stellen = $mapdb->get_stellen_from_layer($this->formvars['selected_layer_id']);
+			$this->layer[0] = $mapdb->get_Layer($this->formvars['selected_layer_id']);
+		}
+		$this->output();
+	}
 
 	function layer_attributes_privileges_save() {
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
@@ -13393,6 +13399,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$attributevalues[$oid][] = $this->formvars[$form_fields[$i]];
 				$formtype = $element[4];
 				$datatype = $element[6];
+				$saveable = $element[7];
 				if ($layerset[$layer_id] == NULL) {
 					$layerset[$layer_id] = $this->user->rolle->getLayer ($layer_id);
 				}
@@ -13411,7 +13418,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					) AND
 					$attributname != 'oid' AND
 					$tablename != '' AND
-					$datatype != 'not_saveable' AND
+					$saveable AND
 					$tablename == $layerset[$layer_id][0]['maintable']
 				) {
 					# nur Attribute aus der Haupttabelle werden gespeichert
@@ -14314,7 +14321,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$attributes = $this->qlayerset[0]['attributes'];
 			$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
 			$this->loadMap('DataBase');
-			if(count($this->qlayerset[0]['shape']) > 0 AND ($this->qlayerset[0]['shape'][0][$attributes['the_geom']] != '')){			# wenn was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
+			if($this->last_query['go'] != 'Sachdaten' AND count($this->qlayerset[0]['shape']) > 0 AND ($this->qlayerset[0]['shape'][0][$attributes['the_geom']] != '')){			# wenn es eine Suche war und was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
 				$this->zoomed = true;
 				switch ($this->qlayerset[0]['connectiontype']) {
 					case MS_POSTGIS : {
@@ -14689,9 +14696,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					}
 					$j++;
 				}
-				if($distinct == true){
-					$pfad = 'DISTINCT '.$pfad;
-				}
 
 				/*if(strpos(strtolower($pfad), 'as the_geom') !== false){
 					$the_geom = 'query.the_geom';
@@ -14796,6 +14800,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$j++;
 					}
 				}
+				
+				if($distinct == true){
+					$pfad = 'DISTINCT '.$pfad;
+				}				
 				
 				#if($the_geom == 'query.the_geom'){
 					$sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
@@ -17301,6 +17309,7 @@ class db_mapObj{
 					type = '" . $attributes[$i]['type'] . "',
 					geometrytype = '" . $attributes[$i]['geomtype'] . "',
 					constraints = '".addslashes($attributes[$i]['constraints']) . "',
+					saveable = " . $attributes[$i]['saveable'] . ",
 					nullable = " . $attributes[$i]['nullable'] . ",
 					length = " . $attributes[$i]['length'] . ",
 					decimal_length = " . $attributes[$i]['decimal_length'] . ",
@@ -17313,6 +17322,7 @@ class db_mapObj{
 					type = '" . $attributes[$i]['type'] . "',
 					geometrytype = '" . $attributes[$i]['geomtype'] . "',
 					constraints = '".addslashes($attributes[$i]['constraints']) . "',
+					saveable = " . $attributes[$i]['saveable'] . ",
 					nullable = " . $attributes[$i]['nullable'] . ",
 					length = " . $attributes[$i]['length'] . ",
 					decimal_length = " . $attributes[$i]['decimal_length'] . ",
@@ -17388,7 +17398,7 @@ class db_mapObj{
 		$dump_text .= "\n-- Achtung: Die Datenbank in die der Dump eingespielt wird, sollte die gleiche Migrationsversion haben,";
 		$dump_text .= "\n-- wie die Datenbank aus der exportiert wurde! Anderenfalls kann es zu Fehlern bei der Ausführung des SQL kommen.";
 		$dump_text .= "\n\nSET @group_id = 1;";
-		$dump_text .= "\nSET @connection = 'user=xxxx password=xxxx dbname=kvwmapsp';";
+		$dump_text .= "\nSET @connection = 'host=pgsql user=kvwmap password=xxxxxx dbname=kvwmapsp';";
 
 		if ($with_privileges) {
 			# Frage Stellen der Layer ab
@@ -17440,7 +17450,11 @@ class db_mapObj{
 		}
 
 		for($i = 0; $i < count($layer_ids); $i++) {
-			$layer = $database->create_insert_dump('layer', '', 'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `privileg`, `trigger_function`, `sync` FROM layer WHERE Layer_ID='.$layer_ids[$i]);
+			$layer = $database->create_insert_dump(
+				'layer',
+				'',
+				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `privileg`, `trigger_function`, `sync` FROM layer WHERE Layer_ID=' . $layer_ids[$i]
+			);
 			$dump_text .= "\n\n-- Layer " . $layer_ids[$i] . "\n" . $layer['insert'][0];
 			$last_layer_id = '@last_layer_id'.$layer_ids[$i];
 			$dump_text .= "\nSET " . $last_layer_id . "=LAST_INSERT_ID();";
@@ -17497,7 +17511,7 @@ class db_mapObj{
 				}
 			}
 
-			$layer_attributes = $database->create_insert_dump('layer_attributes', 'layer_attribut_id', 'SELECT `name` AS layer_attribut_id, \''.$last_layer_id.'\' AS `layer_id`, `name`, `real_name`, `tablename`, `table_alias_name`, `type`, `geometrytype`, `constraints`, `nullable`, `length`, `decimal_length`, `default`, `form_element_type`, `options`, `alias`, `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`, `tooltip`, `group`, `arrangement`, `labeling`, `raster_visibility`, `dont_use_for_new`, `mandatory`, `quicksearch`, `visible`, `vcheck_attribute`, `vcheck_operator`, `vcheck_value`, `order`, `privileg`, `query_tooltip` FROM layer_attributes WHERE layer_id = ' . $layer_ids[$i]);
+			$layer_attributes = $database->create_insert_dump('layer_attributes', 'layer_attribut_id', 'SELECT `name` AS layer_attribut_id, \''.$last_layer_id.'\' AS `layer_id`, `name`, `real_name`, `tablename`, `table_alias_name`, `type`, `geometrytype`, `constraints`, `saveable`, `nullable`, `length`, `decimal_length`, `default`, `form_element_type`, `options`, `alias`, `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`, `tooltip`, `group`, `arrangement`, `labeling`, `raster_visibility`, `dont_use_for_new`, `mandatory`, `quicksearch`, `visible`, `vcheck_attribute`, `vcheck_operator`, `vcheck_value`, `order`, `privileg`, `query_tooltip` FROM layer_attributes WHERE layer_id = ' . $layer_ids[$i]);
 			for($j = 0; $j < count($layer_attributes['insert']); $j++){
 				# Attribut des Layers
 				$dump_text .= "\n\n-- Attribut " . $layer_attributes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $layer_attributes['insert'][$j];
@@ -18478,6 +18492,7 @@ class db_mapObj{
 				d.`name` as typename,
 				`geometrytype`,
 				`constraints`,
+				`saveable`,
 				`nullable`,
 				`length`,
 				`decimal_length`,
@@ -18543,6 +18558,7 @@ class db_mapObj{
 			$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
 			$attributes['constraints'][$i]= $rs['constraints'];
 			$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
+			$attributes['saveable'][$i]= $rs['saveable'];
 			$attributes['nullable'][$i]= $rs['nullable'];
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
@@ -18710,6 +18726,7 @@ class db_mapObj{
 				l.Gruppe,
 				l.kurzbeschreibung,
 				l.datenherr,
+				l.drawingorder,
 				l.alias
 			FROM
 				layer l JOIN
@@ -18737,9 +18754,9 @@ class db_mapObj{
 
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>" . $sql,4);
 		$query=mysql_query($sql);
-    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
 		$i = 0;
-		while($rs=mysql_fetch_array($query)){
+		while ($rs = mysql_fetch_array($query)) {
 			$layer['ID'][]=$rs['Layer_ID'];
 			$layer['Bezeichnung'][]=$rs['Name'];
 			$layer['Gruppe'][]=$rs['Gruppenname'];
@@ -18747,16 +18764,19 @@ class db_mapObj{
 			$layer['Kurzbeschreibung'][]=$rs['kurzbeschreibung'];
 			$layer['Datenherr'][]=$rs['datenherr'];
 			$layer['alias'][]=$rs['alias'];
+			$layer['default_drawingorder'][] = $rs['drawingorder'];
 			$layer['layers_of_group'][$rs['Gruppe']][] = $i;
 			$i++;
 		}
-		if($order == 'Bezeichnung'){
-			// Sortieren der Layer unter Berücksichtigung von Umlauten
+		if ($order == 'Bezeichnung') {
+			# Sortieren der Layer unter Berücksichtigung von Umlauten
 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
 			$layer['ID'] = $sorted_arrays['second_array'];
 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['GruppeID']);
 			$layer['Bezeichnung'] = $sorted_arrays['array'];
 			$layer['GruppeID'] = $sorted_arrays['second_array'];
+			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['drawingorder']);
+			$layer['default_drawingorder'] = $sorted_arrays['second_array'];
 		}
 		return $layer;
 	}

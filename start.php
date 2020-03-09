@@ -291,7 +291,7 @@ if (!$show_login_form) {
 			# login case 15
 		}
 		else {
-			$GUI->debug->write('Zugang zur Stelle ' . $GUI->Stelle->id . ' für Nutzer fehlgeschlagen weil: ' . $permission['reason'].'<br>', 4, true);
+			$GUI->debug->write('Zugang zur Stelle ' . $GUI->Stelle->id . ' für Nutzer fehlgeschlagen weil: ' . $permission['reason'].'<br>', 4, ($permission['reason'] == 'Der Nutzer ist keiner Stelle zugeordnet.' ? true : $GUI->echo));
 
 			if (is_ows_request($GUI->formvars)) {
 				$GUI->debug->write('OWS Request führt zu Exception.', 4);
@@ -487,7 +487,7 @@ else {
 	}
 
 	# Anpassen der Kartengröße an das Browserfenster
-	if ($GUI->user->rolle->auto_map_resize AND $GUI->formvars['browserwidth'] != '') {
+	if ($go != 'navMap_ajax' AND $GUI->user->rolle->auto_map_resize AND $GUI->formvars['browserwidth'] != '') {
 		$GUI->resizeMap2Window();
 	}
 

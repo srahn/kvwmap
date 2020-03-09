@@ -516,14 +516,14 @@ INSERT INTO u_styles2classes (
 				$connectiontype = $i;
 			}
 			if($meta->name == 'connection'){
-				$connection = $i;
+				$connection_field_index = $i;
 			}
 		}
 
 		while ($rs = mysql_fetch_array($query)) {
 			$insert = '';
 			if ($rs[$connectiontype] == 6) {
-				$rs[$connection] = '@connection';
+				$rs[$connection_field_index] = '@connection';
 			}
 			$insert .= 'INSERT INTO '.$table.' (';
 			for ($i = 0; $i < $feld_anzahl; $i++) {

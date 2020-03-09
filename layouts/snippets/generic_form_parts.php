@@ -111,7 +111,7 @@
 		$oid = $dataset[$tablename.'_oid'];															# die oid des Datensatzes
 		$attribute_privileg = $attributes['privileg'][$j];							# das Recht des Attributs
 
-		if($field_name == NULL)$fieldname = $layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j];
+		if($field_name == NULL)$fieldname = $layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].';'.$attributes['saveable'][$j];
 		else $fieldname = $field_name;
 				
 		if(!$change_all){
@@ -743,12 +743,7 @@
 					$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
 					if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
 						$angezeigter_value = (($attributes['type'][$j] == 'bool' OR $attributes['form_element_type'][$j] == 'Editiersperre') ? ($value == 't' ? $gui->strYes : $gui->strNo) : $value);
-						if($size == 12){		// spaltenweise
-							$datapart .= htmlspecialchars($angezeigter_value);
-						}
-						else{								// zeilenweise
-							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; font-size: '.$fontsize.'px;">' . htmlspecialchars($angezeigter_value) . '</div>';
-						}
+						$datapart .= '<div class="readonly_text" style="font-size: '.$fontsize.'px;">' . htmlspecialchars($angezeigter_value) . '</div>';
 					}
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
 						if(strtolower(substr($attributes['options'][$j], 0, 6)) == 'select'){

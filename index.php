@@ -88,6 +88,8 @@ define(CASE_COMPRESS, false);																																						  #
 #										  - ein räumlich gefilterter Layer muss an sein																				#
 #										  - man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
 #											- man muss in einer Fachschale zoomen (wegen reduce_mapwidth)												#
+#											- man muss einen Layer in der Legende ein oder ausschalten													#
+#											- InchesPerUnit() reinkopieren																											#
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
 #   getLayerOptions:  - getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
@@ -173,8 +175,13 @@ function go_switch($go, $exit = false) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction'], $GUI->formvars['height_reduction']);
-				$GUI->loadMap('DataBase');
-				$GUI->navMap($GUI->formvars['CMD']);
+				if($GUI->formvars['legendtouched']){
+					$GUI->neuLaden();
+				}
+				else{
+					$GUI->loadMap('DataBase');
+					$GUI->navMap($GUI->formvars['CMD']);
+				}
 				$GUI->saveMap('');
 				$currenttime=date('Y-m-d H:i:s',time());
 				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
