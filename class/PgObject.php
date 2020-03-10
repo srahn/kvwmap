@@ -50,6 +50,7 @@ class PgObject {
 		$this->identifier = 'id';
 		$this->identifier_type = 'integer';
 		$this->show = false;
+		$this->attribute_types = array();
 	}
 
 	public static	function postgis_version($gui) {
@@ -123,6 +124,41 @@ class PgObject {
 
 	function getValues() {
 		return array_values($this->data);
+	}
+
+	function get_values_for_insert($escaped = false, $attribute_types = array()) {
+		#echo '<br>attr_types in get_values_for_insert: ' . print_r($attribute_types, true);
+		if (count($attribute_types) == 0) {
+			$this->get_attribute_types();
+		}
+		$values = array();
+		foreach ($this->data AS $key => $value) {
+			$bracket = (in_array($attribute_types[$key], $this->database->pg_text_attribute_types) ? "'" : "");
+			#echo '<br>is type: ' . $attribute_types[$key] . ' of key: ' . $key . ' in pg_text_attribute_types';
+
+			if (is_array($value)) {
+				$value = array_map(
+					function($v) {
+						return ($escaped ? pg_escape_string($v) : $v);
+					},
+					$value
+				);
+				$value = "{" . $bracket . implode($bracket . ", " . $bracket, $value) . $bracket . "}";
+			}
+
+			if ('' . $value == '') {
+				$values[] = "NULL";
+			}
+			else {
+				if ($attribute_types[$key] == 'boolean') {
+					$values[] = ($value == 't' ? "true" : "false");
+				}
+				else {
+					$values[] = $bracket . ($escaped ? pg_escape_string($value) : $value) . $bracket;
+				}
+			}
+		}
+		return $values;
 	}
 
 	function getKVP($escaped = false, $without_identifier = false) {
@@ -266,5 +302,130 @@ class PgObject {
 		return $results;
 	}
 
+	/*
+	* Fragt die foreign constraints der Tabelle ab und
+	* speichert sie im Array $this->fkeys
+	* Ein fkey enthält die Schlüssel constraint_name, child_schema, child_name und fkey_column
+	*/
+	function get_fkey_constraints() {
+		$sql = "
+			SELECT DISTINCT
+			  ccu.column_name AS parent_id,
+			  ccu.constraint_name AS constraint_name,
+			  kcu.table_schema AS child_schema,
+			  kcu.table_name AS child_table,
+			  kcu.column_name AS fkey_column
+			FROM
+			  information_schema.constraint_column_usage ccu JOIN
+			  information_schema.key_column_usage kcu ON ccu.constraint_name = kcu.constraint_name JOIN
+				information_schema.table_constraints tc ON kcu.constraint_name = tc.constraint_name AND kcu.table_name = tc.table_name
+			WHERE
+				ccu.table_schema = '" . $this->schema . "' AND
+				ccu.table_name = '" . $this->tableName . "' AND
+				tc.constraint_type = 'FOREIGN KEY'
+		";
+		#echo '<p>sql zur Abfrage von fkey_constrains: ' . $sql;
+		$query = pg_query($this->database->dbConn, $sql);
+		$this->fkeys = array();
+		while ($rs = pg_fetch_assoc($query)) {
+			$this->fkeys[] = $rs;
+		}
+		return $this->fkeys;
+	}
+
+	function get_attribute_types() {
+		$sql = "
+			SELECT
+				column_name,
+				data_type
+			FROM
+				information_schema.columns
+			WHERE
+				table_schema = '" . $this->schema . "' AND
+				table_name = '" . $this->tableName . "'
+		";
+		#echo '<p>sql zur Abfrage von attribut typen: ' . $sql;
+		$query = pg_query($this->database->dbConn, $sql);
+		$this->attribute_types = array();
+		while ($rs = pg_fetch_assoc($query)) {
+			$this->attribute_types[$rs['column_name']] = $rs['data_type'];
+		}
+		return $this->attribute_types;
+	}
+
+	/*
+	* Query all child elementes of a table related over given fk_id
+	* @params $child_schema string - Name of the schema of child table
+	* @params $child_table string - Name of the table of child table
+	* @params $fkey_column string - Name of the column where the fkeys resists in child table
+	* @params $fk_id string - ID of the parent to filter the childs that belongs to the parent
+	* @return array(PgObject) - The childs that belongs to the parent over this fkey constraint
+	*/
+	function find_childs($child_schema, $child_table, $fkey_column, $fk_id) {
+		$table = new PgObject($this->gui, $child_schema, $child_table);
+		$this->childs[$child_table] = $table->find_where($fkey_column . " = '" . $fk_id. "'");
+		return $this->childs[$child_table];
+	}
+
+	/*
+	* Fragt die fkey constraints der Tabelle ab
+	* Fragt die dazugehörigen childs ab uns setzt sie in der Variable $this->childs mit den child_table_name als keys im array
+	*/
+	function set_all_childs() {
+		$fkeys = $this->get_fkey_constraints();
+		foreach ($fkeys AS $fk) {
+			$this->find_childs($fk['child_schema'], $fk['child_table'], $fk['fkey_column'], $this->get($this->identifier));
+		}
+	}
+
+	/*
+	* Erzeugt SQL Insert-Statements des Datensatzes und aller seiner verknüpften Unterdatensätze in der richtigen Reihenfolge
+	* damit die Foreign Key Constaints berücksichtigt bleiben
+	* Sucht nach fkeys der Tabelle des aktuellen Objektes
+	* Wenn welche gefunden wurden
+	*  führe für jeden fkey aus:
+	*    Suche nach Childobjekten
+	*    Wenn welche gefunden wurden
+	*      führe für jedes child aus:
+	*        rufe diese Funktion auf
+	* Gebe das Insert-Statement dieses Datensatzes heraus.
+	*/
+	function as_inserts_with_childs($fkeys, $attribute_types) {
+		$sql = $this->as_insert($attribute_types);
+		#echo '<p>anzahl fkeys: ' . count($fkeys);
+		foreach ($fkeys AS $fk) {
+			$this->find_childs($fk['child_schema'], $fk['child_table'], $fk['fkey_column'], $this->get($this->identifier));
+			#echo '<p>anzahl childs: ' . count($this->childs[$fk['child_table']]);
+			if (count($this->childs[$fk['child_table']]) > 0) {
+				#echo '<p>child 0: ' . $this->childs[$fk['child_table']][0]->tableName;
+				# fragt die child fkeys nur vom ersten child ab und übergibt diese in der Schleife an alle Aufrufe
+				$child_keys = $this->childs[$fk['child_table']][0]->get_fkey_constraints();
+				# fragt die attribut typen nur vom ersten child ab und übergibt diese in der Schleife an alle Aufrufe
+				#echo '<p>Anzahl child_keys: ' . count($child_keys);
+				#echo '<p>keys: ' . print_r($child_keys, true);
+
+				$child_attribute_types = $this->childs[$fk['child_table']][0]->get_attribute_types();
+				foreach ($this->childs[$fk['child_table']] AS $child) {
+					$sql .= $child->as_inserts_with_childs($child_keys, $child_attribute_types);
+				}
+			}
+		}
+		return $sql;
+	}
+
+	/*
+	* Liefert dieses Objekt als SQL INSERT-Statement zurück
+	* @return text - Das INSERT Statement des Objektes
+	*/
+	function as_insert($attribute_types) {
+		#echo '<br>as_insert attribute_types: ' . print_r($attribute_types, true);
+		$sql = "INSERT INTO " . $this->schema . "." . $this->tableName . " (" . implode(', ', $this->getKeys()) . ")
+VALUES (" . implode(
+			", ",
+			$this->get_values_for_insert(true, $attribute_types)
+		) . ");
+";
+		return $sql;
+	}
 }
 ?>

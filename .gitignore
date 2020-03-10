@@ -1,6 +1,10 @@
 credentials.php
 config.php
 custom/
+custom/*
+custom/*/*
+custom/*/*/*
+custom/*/*/*/*
 plugins/*/config/config.php
 plugins/*/config/config.sh
 plugins/*/img/*

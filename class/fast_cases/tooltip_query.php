@@ -302,9 +302,6 @@ class GUI {
 					}
 					$j++;
 				}
-				if($distinct == true){
-					$pfad = 'DISTINCT '.$pfad;
-				}
 
 				/*if(strpos(strtolower($pfad), 'as the_geom') !== false){
 					$the_geom = 'query.the_geom';
@@ -408,6 +405,10 @@ class GUI {
 						}
 						$j++;
 					}
+				}
+				
+				if($distinct == true){
+					$pfad = 'DISTINCT '.$pfad;
 				}
 				
 				#if($the_geom == 'query.the_geom'){

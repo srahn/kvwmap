@@ -695,7 +695,7 @@
 				</tr>
 				<tr valign="top"> 
 					<td align="right">Zugeordnete<br>
-						<select name="selectedstellen" size="10" multiple">
+						<select name="selectedstellen" size="10" multiple>
 						<? 
 						for($i=0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++){
 								echo '<option value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';

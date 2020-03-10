@@ -20,6 +20,9 @@ $pixelsize    = ($dx/$res_x+$dy/$res_y)/2;		# ist $scale in SVG_map.php
 #			var polygon = svgdoc.getElementById("polygon");
 #			// nix
 
+if($this->formvars['legendtouched']){
+	$this->layerhiddenstring = 'reload reload';		// wenn Legende benutzt wurde, Legende immer neu laden
+}
 
 $response = $this->formvars['code2execute_before'].
 '█'.$this->img['hauptkarte'].'█

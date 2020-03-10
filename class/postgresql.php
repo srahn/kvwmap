@@ -35,6 +35,7 @@ class pgdatabase {
 	var $defaultlogfile;
 	var $commentsign;
 	var $blocktransaction;
+	var $pg_text_attribute_types = array('character', 'character varying', 'text', 'timestamp without time zone', 'timestamp with time zone', 'date', 'USER-DEFINED');
 
 	function pgdatabase() {
 		global $debug;
@@ -355,7 +356,7 @@ FROM
 			$ret[0] = 1;
 			$ret[1] = $ret['msg'];
 			if ($suppress_err_msg) {
-				# mache nichts, den die Fehlermeldung wird unterdrückt
+				# mache nichts, denn die Fehlermeldung wird unterdrückt
 			}
 			else {
 				# gebe Fehlermeldung aus.
@@ -564,9 +565,11 @@ FROM
 						}
 					}
 					$fields[$i]['constraints'] = $constraintstring;
+					$fields[$i]['saveable'] = 1;
 				}
 				else { # Attribut ist keine Tabellenspalte -> nicht speicherbar
-					$fieldtype = 'not_saveable';
+					$fieldtype = pg_field_type($ret[1], $i);			# Typ aus Query ermitteln
+					$fields[$i]['saveable'] = 0;
 				}
 				$fields[$i]['type'] = $fieldtype;
 

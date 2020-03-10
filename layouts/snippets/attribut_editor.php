@@ -133,10 +133,7 @@
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 <!--
-
-<? if ((count($this->attributes))!=0) { ?>
-var attributes = new Array('<? echo implode("', '", $this->attributes['name']); ?>');
-<? } ?>
+var attributes = new Array(<? echo (count($this->attributes['name']) == 0 ? "" : "'" . implode("', '", $this->attributes['name']) . "'"); ?>);
 
 function update_visibility_form(visibility, attributename){
 	if(visibility == 2)document.getElementById('visibility_form_'+attributename).style.display = '';
@@ -290,7 +287,7 @@ function alias_replace(name){
 						  	<input type="text"
 								  name="order_<?php echo $this->attributes['name'][$i]; ?>"
 									value="<?php echo $this->attributes['order'][$i]; ?>"
-									size="1"
+									style="width: 27px"
 								>
 						  </td>
 						  <td align="left" valign="top">

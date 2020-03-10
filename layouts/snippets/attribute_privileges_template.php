@@ -49,136 +49,148 @@
 						</table>
 					</td>
 				</tr>
-			  <tr>
-			  	<td>&nbsp;</td>
-			  </tr>
-			  <tr> 
-			    <td colspan="4">
-			    	<table align="center" border="0" cellspacing="0" cellpadding="0">
-			        <?
-					if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) {
-						echo '
-								<tr>
-									<td align="center">
-										<span class="fett">Attribut</span>
-									</td>
-									<td>&nbsp;</td>
-									<td align="center">
-										<span class="fett">Privileg</span>
-									</td>
-									<td>&nbsp;</td>
-									<td align="center">
-										<span class="fett">Tooltip</span>
-									</td>
-								</tr>
-						';
-						if($this->stelle->id != '' AND $this->attributes_privileges == NULL){				# zu diesem Layer und Stelle gibt es keinen Eintrag -> alle Attribute sind lesbar
-							$noentry = true;
-						}
-						else{
-							$noentry = false;
-						}
-						$attributenames = implode('|', $this->attributes['name']);
-			    	for ($i = 0; $i < count($this->attributes['type']); $i++){
-			    		if ($this->stelle->id == ''){
-			    			$this->attributes_privileges[$this->attributes['name'][$i]] = $this->attributes['privileg'][$i]; 	# die default-Rechte kommen aus layer_attributes
-			    			$this->attributes_privileges['tooltip_'.$this->attributes['name'][$i]] = $this->attributes['query_tooltip'][$i]; 	# die default-Rechte kommen aus layer_attributes
-			    		}
+				<tr>
+					<td>&nbsp;</td>
+				</tr>
+				<tr> 
+					<td colspan="4">
+						<table align="center" border="0" cellspacing="0" cellpadding="0"><?
+						if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) {
 							echo '
-							<tr>
-							  <td align="center">
-							  	<input style="width:100px" type="text" name="attribute_'.$this->attributes['name'][$i].'" value="'.$this->attributes['name'][$i].'" readonly>
-							  </td>
-							  <td>&nbsp;</td>
-							  <td align="center" style="height:21px">';
-								$privilege_options = array(
-									array(
-										value => '',
-										output => $strNoAccess,
-									),
-									array(
-										value => '0',
-										output => $strRead,
-									),
-									array(
-										value => '1',
-										output => $strEdit,
-									)
-								);
+									<tr>
+										<td align="center">
+											<span class="fett">Attribut</span>
+										</td>
+										<td>&nbsp;</td>
+										<td align="center">
+											<span class="fett">Privileg</span>
+										</td>
+										<td>&nbsp;</td>
+										<td align="center">
+											<span class="fett">Tooltip</span>
+										</td>
+									</tr>
+							';
+							if($this->stelle->id != '' AND $this->attributes_privileges == NULL){				# zu diesem Layer und Stelle gibt es keinen Eintrag -> alle Attribute sind lesbar
+								$noentry = true;
+							}
+							else{
+								$noentry = false;
+							}
+							$attributenames = implode('|', $this->attributes['name']);
+							for ($i = 0; $i < count($this->attributes['type']); $i++){
+				    		if ($this->stelle->id == ''){
+				    			$this->attributes_privileges[$this->attributes['name'][$i]] = $this->attributes['privileg'][$i]; 	# die default-Rechte kommen aus layer_attributes
+				    			$this->attributes_privileges['tooltip_'.$this->attributes['name'][$i]] = $this->attributes['query_tooltip'][$i]; 	# die default-Rechte kommen aus layer_attributes
+				    		}
+								echo '
+								<tr>
+								  <td align="center">
+								  	<input style="width:100px" type="text" name="attribute_'.$this->attributes['name'][$i].'" value="'.$this->attributes['name'][$i].'" readonly>
+								  </td>
+								  <td>&nbsp;</td>
+								  <td align="center" style="height:21px">';
+									$privilege_options = array(
+										array(
+											value => '',
+											output => $strNoAccess,
+										),
+										array(
+											value => '0',
+											output => $strRead,
+										),
+										array(
+											value => '1',
+											output => $strEdit,
+										)
+									);
 
-							  echo '<select style="width:100px" name="privileg_'.$this->attributes['name'][$i].'_'.$this->stelle->id.'">';
-								foreach($privilege_options AS $option) {
-									$selected = ($this->attributes_privileges[$this->attributes['name'][$i]] == $option['value'] ? ' selected' : '');
-									echo '<option value="' . $option['value'] . '"' . $selected . '>' . $option['output'] . '</option>';
+								  echo '<select style="width:100px" name="privileg_'.$this->attributes['name'][$i].'_'.$this->stelle->id.'">';
+									foreach($privilege_options AS $option) {
+										$selected = ($this->attributes_privileges[$this->attributes['name'][$i]] == $option['value'] ? ' selected' : '');
+										echo '<option value="' . $option['value'] . '"' . $selected . '>' . $option['output'] . '</option>';
+									}
+									echo '</select>
+								  </td>
+								  <td>&nbsp;</td>
+								  <td align="center"><input type="checkbox" name="tooltip_'.$this->attributes['name'][$i].'_'.$this->stelle->id.'" ';
+								  if($this->attributes_privileges['tooltip_'.$this->attributes['name'][$i]] == 1){
+								  	echo 'checked';
+								  }
+									echo ' ></td>
+				        </tr>
+				        ';
+				    	}
+							echo '
+								<tr>
+									<td>&nbsp;</td>
+								</tr>
+								<tr>';
+				    			if($this->formvars['stelle'] != 'a'){
+				    				echo '
+								  <td align="center">
+								  	<input style="width:100px" type="text" name="" value="alle" readonly>
+								  </td>';} echo '
+								  <td>&nbsp;</td>
+								  <td align="center">
+								  	<select  style="width:100px" name="" onchange="set_all(\''.$attributenames.'\', \''.$this->stelle->id.'\', this.value);"">
+											<option value=""> - '.$this->strChoose.' - </option>
+								  		<option value="">'.$strNoAccess.'</option>
+								  		<option value="0">'.$strRead.'</option>
+								  		<option value="1">'.$strEdit.'</option>
+								  	</select>
+								  </td>
+								  <td>&nbsp;</td>
+								  <td>&nbsp;</td>
+				        </tr>
+								';
+							if (count($this->attributes) > 0) {
+								$stelle_and_layer_selected = $this->stelle->id != '' AND $this->layer[0]['Name'] != '';
+								if ($stelle_and_layer_selected ) {
+									$default_stellen_ids = $this->stelle->id;
+									$default_privileges_link_text = $strUseDefaultPrivileges;
+									$save_stellen_ids = implode('|', $this->stellen['ID']);
 								}
-								echo '</select>
-							  </td>
-							  <td>&nbsp;</td>
-							  <td align="center"><input type="checkbox" name="tooltip_'.$this->attributes['name'][$i].'_'.$this->stelle->id.'" ';
-							  if($this->attributes_privileges['tooltip_'.$this->attributes['name'][$i]] == 1){
-							  	echo 'checked';
-							  }
-								echo ' ></td>
-			        </tr>
-			        ';
-			    	}
-			    	echo '
-							<tr>
-								<td>&nbsp;</td>
-							</tr>
-							<tr>';
-			    			if($this->formvars['stelle'] != 'a'){
-			    				echo '
-							  <td align="center">
-							  	<input style="width:100px" type="text" name="" value="alle" readonly>
-							  </td>';} echo '
-							  <td>&nbsp;</td>
-							  <td align="center">
-							  	<select  style="width:100px" name="" onchange="set_all(\''.$attributenames.'\', \''.$this->stelle->id.'\', this.value);"">
-										<option value=""> - '.$this->strChoose.' - </option>
-							  		<option value="">'.$strNoAccess.'</option>
-							  		<option value="0">'.$strRead.'</option>
-							  		<option value="1">'.$strEdit.'</option>
-							  	</select>
-							  </td>
-							  <td>&nbsp;</td>
-							  <td>&nbsp;</td>
-			        </tr>
-			        ';
-						if(count($this->attributes) > 0){
-							echo '
-							<tr>
-								<td colspan="5" height="40px" align="center" valign="middle">';
-							if($this->stelle->id != '' AND $this->layer[0]['Name'] != ''){
-								echo '<a href="javascript:get_from_default(\''.$attributenames.'\', \''.$this->stelle->id.'\');">'.$strUseDefaultPrivileges.'</a>
-									</td>
+								else {
+									$default_stellen_ids = implode('|', $this->stellen['ID']);
+									$default_privileges_link_text = $strAssignDefaultPrivileges;
+									$save_stellen_ids = '';
+								}
+
+								if ($stelle_and_layer_selected OR count($this->stellen['ID']) > 0) { ?>
+									<tr>
+										<td colspan="5" height="40px" align="center" valign="middle">
+											<a href="javascript:get_from_default(
+												'<? echo $attributenames; ?>',
+													'<? echo $default_stellen_ids; ?>'
+												);"><? echo $default_privileges_link_text; ?></a>
+										</td>
+									</tr>
+									<tr>
+										<td align="center" colspan="5">
+											<input
+												type="button"
+												onclick="save('<? echo $save_stellen_ids; ?>');"
+												name="speichern"
+												value="<? echo $this->strSave; ?>"
+											>
+										</td>
+									</tr><?
+								} ?>
+								<tr>
+									<td>&nbsp;</td>
 								</tr>
 								<tr>
-									<td align="center" colspan="5"><input type="button" onclick="save(\''.implode('|', $this->stellen['ID']).'\');" name="speichern" value="'.$this->strSave.'">
+									<td height="40px" align="center" colspan="5">
+										<span class="fett">
+											<span style="font-size:15px"><? echo $this->stelle->Bezeichnung; ?></span>
+										</span>
 									</td>
-								</tr>';
+								</tr><?
 							}
-							elseif(count($this->stellen['ID']) > 0){
-								echo '<a href="javascript:get_from_default(\''.$attributenames.'\', \''.implode('|', $this->stellen['ID']).'\');">'.$strAssignDefaultPrivileges.'</a>
-									</td>
-								</tr>
-								<tr>
-									<td align="center" colspan="5"><input type="button" onclick="save(\'\');" name="speichern" value="'.$this->strSave.'">
-									</td>
-								</tr>';
-							}
-							echo '
-			 				<tr>
-			 					<td>&nbsp;</td>
-			 				</tr>
-			 				<tr>
-			 					<td height="40px" align="center" colspan="5"><span class="fett"><span style="font-size:15px">'.$this->stelle->Bezeichnung.'</span></span></td>
-			 				</tr>';
-						}
-					} 
-						?>
-			      </table>
-			     </td>
-			    </tr>
-			   </table>
-			  </td>
+						} ?>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>

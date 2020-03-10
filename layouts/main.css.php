@@ -520,12 +520,13 @@ a.invisiblelayerlink:hover{
 	border: 1px solid #cccccc;
 	border-color: #bbbbbb;
 	background: linear-gradient(#eff3f6, lightsteelblue);
-	padding: 4px;
-	padding-top: 0px;
-	padding-bottom: 4px;
 	text-align: center;
 	color: black;
 	border-radius: 5px;
+}
+
+a.buttonlink{
+	padding: 1px 7px 5px 7px;
 }
 
 .buttonlink:hover, .buttonlink:focus{
@@ -1369,6 +1370,7 @@ thead.gle th {
 
 .readonly_text{
 	word-wrap: break-word;
+	padding: 0 0 0 3;
 }
 
 tbody.gle>tr { 
@@ -1395,7 +1397,6 @@ tbody.gle>tr {
 }
 
 .gle_hr{
-	width: 100%; 
 	height: 3px; 
 	margin: 15 0; 
 	color: <? echo BG_GLEHEADER; ?>; 
