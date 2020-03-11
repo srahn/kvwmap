@@ -1,4 +1,9 @@
-<? include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php'); ?>
+<? include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php');
+
+	global $selectable_scales;
+	$selectable_scales = array_reverse($selectable_scales);
+
+?>
 
 <script type="text/javascript">
 <!--
@@ -154,6 +159,14 @@ function browser_check(){
 
 function navigate(params){	
 	location.href='index.php?'+params+'&selected_layer_id='+document.GUI.selected_layer_id.value;
+}
+
+function setScale(select){
+	if(select.value != ''){
+		document.GUI.nScale.value=select.value;
+		document.getElementById('scales').style.display='none';
+		neuLaden();
+	}
 }
 
 
@@ -434,6 +447,22 @@ function navigate(params){
 					<td>
 						<div id="map_div" style="border:1px solid #C3C7C3;">
 						 <?php include(LAYOUTPATH.'snippets/SVG_style_preview.php');  ?>
+						</div>
+						<div id="scale_selector_div" style="margin-top: 4px;">
+							<div style="width:145px;" onmouseenter="document.getElementById('scales').style.display='inline-block';" onmouseleave="document.getElementById('scales').style.display='none';">
+								<div valign="top" style="height:0px; position:relative;">
+									<div id="scales" style="display:none; position:absolute; left:66px; bottom:-1px; width: 70px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
+										<select size="<? echo count($selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onmousedown="setScale(this);" onclick="setScale(this);">
+											<? 
+												foreach($selectable_scales as $scale){
+													echo '<option onmouseover="this.selected = true;" value="'.$scale.'">1:&nbsp;&nbsp;'.$scale.'</option>';
+												}
+											?>
+										</select>
+									</div>
+								</div>
+								&nbsp;&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
+							</div>
 						</div>
 					</td>
 					<td valign="top">
