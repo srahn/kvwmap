@@ -1348,7 +1348,7 @@ class Festpunkte {
   ################################################################################
 
 # 2016-11-03 H.Riedel - fp_punkte_temp durch fp_punkte_alkis ersetzt
-  function Festpunkte($dateiname,$database) {
+  function __construct($dateiname,$database) {
     global $debug;
     $this->debug=$debug;
     $this->database=$database;
@@ -1744,7 +1744,7 @@ class Vermessungsstelle {
   #
   ################################################################################
 
-  function Vermessungsstelle($db){
+  function __construct($db){
     $this->database=$db;
   }
 
@@ -1782,7 +1782,7 @@ class Vermessungsart {
   #
   ################################################################################
 
-  function Vermessungsart($db){
+  function __construct($db){
     $this->database=$db;
   }
 
