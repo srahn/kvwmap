@@ -676,7 +676,8 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
 function deleteRollenlayer(type){
 	document.GUI.delete_rollenlayer.value = 'true';
 	document.GUI.delete_rollenlayer_type.value = type;
-	neuLaden();
+	document.GUI.go.value='neu Laden';
+	document.GUI.submit();
 }
 
 function neuLaden(){
