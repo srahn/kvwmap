@@ -739,22 +739,33 @@ hide_versions = function(flst){
 								<tr>
 								<td colspan="2">
 										<table border="0" cellspacing="0" cellpadding="2">
-											<tr>
-												<td colspan="3"><span class="fett">Eigentümer</span></td>
-											</tr>
 										<? 
 										for ($b=0;$b<count($flst->Buchungen);$b++) {
 											if($privileg_['bestandsnr']){
-												$BestandStr ='<a href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
+												$BestandStr = $flst->Buchungen[$b]['bezeichnung'].' ';
+												$BestandStr.='<a href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
 												$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-													$BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-													$BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-													$BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung']; ?>
+												$BestandStr.=', Laufende Nummer '.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+												if($flst->Buchungen[$b]['sondereigentum'] != ''){
+													$BestandStr.='<br><br>verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.';
+												} ?>
 												<tr>
-													<td>Bestand</td>
-													<td colspan="2"><? echo $BestandStr; ?></td>
+													<td class="fett">Buchung:</td>
 												</tr>
-											<? if($flst->Buchungen[$b]['blattart'] == 3000){ ?>
+												<tr>
+													<td colspan="2" style="padding-left: 20px"><? echo $BestandStr; ?></td>
+												</tr>
+												<? if($flst->Buchungen[$b]['buchungstext'] != ''){ ?>
+												<tr>
+													<td class="fett">Buchungstext:</td>
+												</tr>
+												<tr>
+													<td colspan="2" style="padding-left: 20px">
+														<? echo nl2br($flst->Buchungen[$b]['buchungstext']); ?>
+													</td>
+												</tr>
+											<?	} 
+												if($flst->Buchungen[$b]['blattart'] == 3000){ ?>
 												<tr>
 													<td></td>
 													<td colspan="2">Im Grundbuch noch nicht gebucht.</td>
@@ -764,6 +775,9 @@ hide_versions = function(flst){
 											if($Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr'])){
 												reset($Eigentuemerliste);
 												?>
+												<tr>
+													<td class="fett">Eigentümer:</td>
+												</tr>
 												<tr>
 													<td colspan="3">
 														<table>				<?
