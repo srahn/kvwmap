@@ -422,8 +422,12 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	var polygon = svgdoc.getElementById("polygon");			
 	// nix
 	
-	input_coord = document.GUI.INPUT_COORD.value;
-	cmd = document.GUI.CMD.value;
+	var input_coord = document.GUI.INPUT_COORD.value;
+	var cmd = document.GUI.CMD.value;
+	var width_reduction;
+	var height_reduction;
+	if(document.GUI.width_reduction)width_reduction = document.GUI.width_reduction.value;
+	if(document.GUI.height_reduction)height_reduction = document.GUI.height_reduction.value;
 	
 	if(browser != 'firefox'){
 		code2execute_before += 'moveback()';
@@ -432,10 +436,10 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	
 	if(document.GUI.punktfang != undefined && document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
 
-	postdata = postdata+"&mime_type=map_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
+	postdata = postdata+"&mime_type=map_ajax&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
 	
 	if(document.GUI.legendtouched.value == 1){		// Legende benutzt -> gesamtes Formular mitschicken
-		var formdata = new FormData(form);
+		var formdata = new FormData(document.GUI);
 	}
 	else{																				// nur navigiert -> Formular muss nicht mitgeschickt werden
 		var formdata = new FormData();

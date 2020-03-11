@@ -165,6 +165,7 @@ function setScale(select){
 	if(select.value != ''){
 		document.GUI.nScale.value=select.value;
 		document.getElementById('scales').style.display='none';
+		document.GUI.legendtouched.value = 1;
 		neuLaden();
 	}
 }
@@ -479,7 +480,9 @@ function setScale(select){
 				          <img src="graphics/tool_info_2.png" alt="Informationsabfrage" title="Informationsabfrage" width="17">&nbsp;
 				          <img src="graphics/layer.png" alt="Themensteuerung" title="Themensteuerung" width="20" height="20"><br>
 									<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
-				          <div id="legend_div"><? echo $this->legende; ?></div>
+				          <div id="legend_div" onclick="document.GUI.legendtouched.value = 1;">
+										<? echo $this->legende; ?>
+									</div>
 				        </div>
 			          </td>
 			        </tr>
