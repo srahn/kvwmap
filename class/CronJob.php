@@ -4,7 +4,7 @@ class CronJob extends MyObject {
 
 	static $write_debug = false;
 
-	function CronJob($gui) {
+	function __construct($gui) {
 		$this->MyObject($gui, 'cron_jobs');
 		$this->identifier = 'id';
 		$this->setKeys(

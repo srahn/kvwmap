@@ -7,7 +7,7 @@ class ALK {
   var $FlstLayerName;
   var $alk_protokoll_einlesen;
 
-  function ALK($app_db, $gis_db) {
+  function __construct($app_db, $gis_db) {
     global $debug;
     $this->debug=$debug;
     $this->LayerName=LAYERNAME_FLURSTUECKE;

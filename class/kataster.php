@@ -56,7 +56,7 @@ class Flur {
   var $FlurID;
   var $database;
 
-	function Flur($GemID,$GemkgID,$FlurID,$database) {
+	function __construct($GemID,$GemkgID,$FlurID,$database) {
     # constructor
     global $debug;
     $this->debug=$debug;
@@ -150,7 +150,7 @@ class adresse {
   var $debug;
   var $database;
 
-  function adresse($GemeindeSchl,$StrassenSchl,$HausNr,$database) {
+  function __construct($GemeindeSchl,$StrassenSchl,$HausNr,$database) {
     global $debug;
     $this->debug=$debug;
     $this->GemeindeSchl=$GemeindeSchl;
@@ -292,7 +292,7 @@ class gemeinde {
   ################################################################################
 
 
-  function gemeinde($GemeindeSchl,$database) {
+  function __construct($GemeindeSchl,$database) {
     global $debug; $this->debug=$debug;
     $this->GemeindeSchl=$GemeindeSchl;
     $this->KreisSchl=$this->getKreisSchl();
@@ -359,7 +359,7 @@ class gemarkung {
   var $database;
 
 
-  function gemarkung($GemkgSchl,$database) {
+  function __construct($GemkgSchl,$database) {
     global $debug;
     $this->debug=$debug;
     $this->GemkgSchl=$GemkgSchl;
@@ -418,7 +418,7 @@ class eigentuemer {
  #
  ################################################################################
 
-  function eigentuemer($Grundbuch,$NamensNr, $database = NULL) {
+  function __construct($Grundbuch,$NamensNr, $database = NULL) {
     global $debug;
     $this->debug=$debug;
     $this->Grundbuch=$Grundbuch;
@@ -464,7 +464,7 @@ class grundstueck {
  #
  ################################################################################
 
-  function grundstueck($Grundbuch,$BVNR) {
+  function __construct($Grundbuch,$BVNR) {
     global $debug;
     $this->Grundbuch=$Grundbuch;
     $this->BVNR=$BVNR;
@@ -480,7 +480,7 @@ class grundbuch {
   var $Bezirk;
   var $Blatt;
 
-  function grundbuch($Bezirk,$Blatt,$database) {
+  function __construct($Bezirk,$Blatt,$database) {
     global $debug;
     $this->debug=$debug;
     $this->Bezirk=$Bezirk;
@@ -571,7 +571,7 @@ class flurstueck {
   var $datadourcename;
   var $database;
 
-  function flurstueck($FlurstKennz,$database) {
+  function __construct($FlurstKennz,$database) {
     global $debug;
     $this->debug=$debug;
     $this->database=$database;

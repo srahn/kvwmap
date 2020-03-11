@@ -6,7 +6,7 @@ class LayerGroup extends MyObject {
 	static $write_debug = false;
 	static $identifier = 'id';
 
-	function LayerGroup($gui) {
+	function __construct($gui) {
 		$this->MyObject($gui, 'u_groups');
 		$this->validations = array(
 			array(

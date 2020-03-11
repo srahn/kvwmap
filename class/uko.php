@@ -32,7 +32,7 @@
 class uko{
     
 
-  function uko($database) {
+  function __construct($database) {
     global $debug;
     $this->debug=$debug;
 	$this->srid = $this->getsrid($database);

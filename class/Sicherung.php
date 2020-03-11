@@ -4,7 +4,7 @@ class Sicherung extends MyObject {
 
 	static $write_debug = false;
 
-	function Sicherung($gui) {
+	function __construct($gui) {
 		$this->MyObject($gui, 'sicherungen');
 		$this->identifier = 'id';
 		$this->setKeys(

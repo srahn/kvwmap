@@ -31,7 +31,7 @@
 
 class ddl {
     
-  function ddl($database, $gui = NULL) {
+  function __construct($database, $gui = NULL) {
     global $debug;
     $this->debug=$debug;
     $this->database = $database;

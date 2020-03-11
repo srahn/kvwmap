@@ -5,7 +5,7 @@ class Menue extends MyObject {
 	var $obermenue;
 	static $write_debug = false;
 
-	function Menue($gui) {
+	function __construct($gui) {
 		$this->MyObject($gui, 'u_menues');
 		$this->identifier = 'id';
 		$this->validations = array(

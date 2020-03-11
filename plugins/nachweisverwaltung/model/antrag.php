@@ -49,7 +49,7 @@ class antrag {
   # pruefe_antrag_eintragen($antr_nr_a,$antr_nr_b,$VermStelle,$verm_art,$datum)
   ################################################################
 
-  function antrag($nr,$stelle_id,$db) {
+  function __construct($nr,$stelle_id,$db) {
     global $debug;
     $this->debug=$debug;
     if($nr!='') {

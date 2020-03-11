@@ -3,7 +3,7 @@ class MyObject {
 
 	static $write_debug = false;
 
-	function MyObject($gui, $tableName, $identifier = 'id', $identifier_type = 'integer') {
+	function __construct($gui, $tableName, $identifier = 'id', $identifier_type = 'integer') {
 		$this->gui = $gui;
 		$this->debug = $gui->debug;
 		$this->database = $gui->database;

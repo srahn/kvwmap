@@ -42,7 +42,7 @@
 # class_user #
 class funktion {
 
-	function funktion($database) {
+	function __construct($database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->database=$database;

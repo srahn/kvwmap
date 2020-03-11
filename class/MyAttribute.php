@@ -3,7 +3,7 @@ class MyAttribute {
 
 	static $write_debug = false;
 
-	function MyAttribute($debug, $name, $type, $value, $validations = array(), $identifier = '') {
+	function __construct($debug, $name, $type, $value, $validations = array(), $identifier = '') {
 		$this->debug = $debug;
 		$this->name = $name;
 		$this->type = $type;

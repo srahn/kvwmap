@@ -36,7 +36,7 @@ class database {
 	var $success;
 	var $errormessage;
 
-  function database() {
+  function __construct() {
     global $debug;
 		global $GUI;
 		$this->gui = $GUI;

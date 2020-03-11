@@ -8,7 +8,7 @@ class metadata extends PgObject {
 	static $schema = 'public';
 	static $tableName = 'md_metadata';
 
-	function metadata($gui, $select = '*') {
+	function __construct($gui, $select = '*') {
 		$this->PgObject($gui, metadata::$schema, metadata::$tableName);
 		$this->select = $select;
 		$this->identifier = 'id';

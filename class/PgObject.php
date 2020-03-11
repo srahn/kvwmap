@@ -37,7 +37,7 @@ class PgObject {
 	* $this->gui->database MySQL Datenbank
 	*
 	*/
-	function PgObject($gui, $schema, $tableName) {
+	function __construct($gui, $schema, $tableName) {
 		$gui->debug->show('Create new Object PgObject with schema ' . $schema . ' table ' . $tableName, false);
 		$this->debug = $gui->debug;
 		$this->gui = $gui;

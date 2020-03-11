@@ -26,7 +26,7 @@ class Konvertierung extends PgObject {
 	);
 	static $write_debug = false;
 
-	function Konvertierung($gui) {
+	function __construct($gui) {
 		$this->PgObject($gui, Konvertierung::$schema, Konvertierung::$tableName);
 	}
 

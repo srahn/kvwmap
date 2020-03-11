@@ -41,7 +41,7 @@ class administration{
 	var $migration_files;
 	var $migrations_to_execute;
 	
-	function administration($database, $pgdatabase) {
+	function __construct($database, $pgdatabase) {
 		$this->database = $database;
 		$this->pgdatabase = $pgdatabase;
 	}

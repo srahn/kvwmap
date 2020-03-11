@@ -16,7 +16,7 @@ class Debugger {
 	#
 	################################################################################
 
-	function Debugger($filename, $mime_type = 'text/html') {
+	function __construct($filename, $mime_type = 'text/html') {
 		$this->filename = LOGPATH . (dirname($filename) != '.' ? dirname($filename) . '/' : '') . (array_key_exists('login_name', $_SESSION) ? $_SESSION['login_name'] : '') . basename($filename);
 		$this->fp=fopen($this->filename,'w');
 		$this->mime_type = $mime_type;
@@ -85,7 +85,7 @@ class LogFile {
 	################################################################################
 
 	# öffnet die Logdatei
-	function LogFile($filename,$format,$title,$headline) {
+	function __construct($filename,$format,$title,$headline) {
 		$this->name=$filename;
 		$this->fp=fopen($filename,"a");
 		$this->format=$format;

@@ -36,7 +36,7 @@ class Validierung extends PgObject {
 	static $tableName = 'validierungen';
 	static $write_debug = false;
 
-	function Validierung($gui) {
+	function __construct($gui) {
 		#echo '<br>Create new Object Validierung';
 		$this->PgObject($gui, Validierung::$schema, Validierung::$tableName);
 		$this->konvertierung_id = 0;

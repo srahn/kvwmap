@@ -40,7 +40,7 @@ class Nachweis {
   var $database;
   var $client_epsg;
     
-  function Nachweis($database, $client_epsg) {
+  function __construct($database, $client_epsg) {
     global $debug;
     $this->debug=$debug;
     $this->database=$database;

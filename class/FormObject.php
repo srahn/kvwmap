@@ -35,7 +35,7 @@ class FormObject {
 	#
 	################################################################################
 
-	function FormObject($name, $type, $value, $selectedValue, $label, $size, $maxlenght, $multiple, $width, $disabled = NULL, $style = "") {
+	function __construct($name, $type, $value, $selectedValue, $label, $size, $maxlenght, $multiple, $width, $disabled = NULL, $style = "") {
 		if (!is_array($selectedValue)) { $selectedValue=array($selectedValue); }
 		$this->type = $type;
 		$this->width = $width;

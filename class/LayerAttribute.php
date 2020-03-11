@@ -3,7 +3,7 @@ class LayerAttribute extends MyObject {
 
 	static $write_debug = false;
 
-	function LayerAttribute($gui) {
+	function __construct($gui) {
 		$this->MyObject($gui, 'layer_attributes');
 	}
 

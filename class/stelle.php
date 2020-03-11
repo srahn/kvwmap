@@ -30,7 +30,7 @@ class stelle {
 	var $database;
 	var $language;
 
-	function stelle($id, $database) {
+	function __construct($id, $database) {
 		global $debug;
 		global $log_mysql;
 		$this->debug = $debug;

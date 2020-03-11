@@ -49,7 +49,7 @@ class account {
 
 	var $database;
 
-	function account ($database) {
+	function __construct($database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->database=$database;
@@ -670,7 +670,7 @@ class user {
 	var $database;
 	var $remote_addr;
 
-	function user($login_name, $id, $database, $passwort = '') {
+	function __construct($login_name, $id, $database, $passwort = '') {
 		global $debug;
 		$this->debug = $debug;
 		$this->database = $database;
