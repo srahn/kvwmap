@@ -511,9 +511,15 @@
 							$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
 						}
 						if (file_exists($dateiname) OR $remote_url) {
-							$dateinamensteil = explode('.', $dateiname);
-							$type = strtolower($dateinamensteil[1]);
-							$thumbname = $gui->get_dokument_vorschau($dateinamensteil, $remote_url);
+							$pathinfo = pathinfo($dateiname);
+							$type = strtolower($pathinfo['extension']);
+							$thumbname = $gui->get_dokument_vorschau(
+								array(
+									$pathinfo['dirname'] . '/' . $pathinfo['filename'],
+									$pathinfo['extension']
+								),
+								$remote_url
+							);
 							if ($layer['document_url'] != '') {
 								$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
 								$target = 'target="_blank"';

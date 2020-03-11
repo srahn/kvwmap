@@ -147,9 +147,14 @@ else{ ?>
 											$pfadteil = explode('&original_name=', $dokumentpfad);
 											$dateiname = $pfadteil[0];
 											if ($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
-											$dateinamensteil = explode('.', $dateiname);
-											$type = strtolower($dateinamensteil[1]);
-											$thumbname = $this->get_dokument_vorschau($dateinamensteil);
+											$pathinfo = pathinfo($dateiname);
+											$type = strtolower($pathinfo['extension']);
+											$thumbname = $this->get_dokument_vorschau(
+												array(
+													$pathinfo['dirname'] . '/' . $pathinfo['filename'],
+													$pathinfo['extension']
+												)
+											);
 											if ($layer['document_url'] != '') {
 												$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
 												$target = 'target="_blank"';

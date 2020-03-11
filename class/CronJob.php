@@ -65,7 +65,7 @@ class CronJob extends MyObject {
 
 		if (!empty($this->get('time'))) {
 			if (!empty($this->get('query'))) {
-				$line = $this->get('time') . ' PGPASSWORD=' . $this->gui->pgdatabase->passwd . ' psql -h pgsql -U ' . $this->gui->pgdatabase->user . ' -c "' . preg_replace('/\s+/', ' ', $this->get('query')) . '" ' . $dbname . ' >> ' . $this->log_file_name;
+				$line = $this->get('time') . ' psql -h pgsql -U ' . $this->gui->pgdatabase->user . ' -c "' . preg_replace('/\s+/', ' ', $this->get('query')) . '" ' . $dbname . ' >> ' . $this->log_file_name;
 			}
 			else {
 				if (!empty($this->get('function'))) {
