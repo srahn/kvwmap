@@ -6440,11 +6440,19 @@ echo '			</ul>
   }
 
 	function deleteDokument($path, $doc_path, $doc_url, $only_thumb = false){
-		if($doc_url != '')$path = url2filepath($path, $doc_path, $doc_url);			# Dokument mit URL
-		else $path = array_shift(explode('&original_name', $path));
-		$dateinamensteil = explode('.', $path);
-		if(!$only_thumb AND file_exists($path))unlink($path);
-		if(file_exists($dateinamensteil[0].'_thumb.jpg'))unlink($dateinamensteil[0].'_thumb.jpg');
+		if ($doc_url != '') {
+			$path = url2filepath($path, $doc_path, $doc_url);			# Dokument mit URL
+		}
+		else {
+			$path = array_shift(explode('&original_name', $path));
+		}
+		if (!$only_thumb AND file_exists($path)) {
+			unlink($path);
+		}
+		$pathinfo = pathinfo($path);
+		if (file_exists($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg')) {
+			unlink($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg');
+		}
 	}
 
   function get_dokument_vorschau($dateinamensteil, $remote_url = false){
@@ -10136,7 +10144,16 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->output();
 	}
 
-	function generischer_sachdaten_druck_drucken($pdfobject = NULL, $offsetx = NULL, $offsety = NULL){
+	/*
+	* Übergebene Parameter:
+	* go=generischer_sachdaten_druck_Drucken
+	* aktivesLayout=31
+	* chosen_layer_id=743
+	* checkbox_names_743=check;rechnungen;rechnungen;222792641| Nur ein Feld wenn archivieren
+	* check;rechnungen;rechnungen;222792641=on 
+	* archiveren => 1 Wenn PDF in Dokumentpfad gespeichert und in Dokument Attribut hinterlegt werden soll statt download
+	*/
+	function generischer_sachdaten_druck_drucken($pdfobject = NULL, $offsetx = NULL, $offsety = NULL) {
 		include_(CLASSPATH.'datendrucklayout.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$ddl = new ddl($this->database, $this);
@@ -10164,7 +10181,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$geometrie_tabelle = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']];
 		$j = 0;
 		foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
-			if(($tablename == $layerset[0]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[0]['attributes']['oids'][$j]){		# hat Haupttabelle oder Geometrietabelle oids?
+			if (
+				(
+					$tablename == $layerset[0]['maintable'] OR
+					$tablename == $geometrie_tabelle
+				) AND
+				$layerset[0]['attributes']['oids'][$j]
+			) { # hat Haupttabelle oder Geometrietabelle oids?
 				$newpath = $layerset[0]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$newpath;
 			}
 			$j++;
@@ -10172,8 +10195,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($distinct == true){
 			$newpath = 'DISTINCT '.$newpath;
 		}
-		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
-    # Daten abfragen
+
+		if ($this->formvars['archivieren']) {
+			# Erzeuge die Checkboxvariablen an Hand der maintable des Layers und der mitgegebenen oid
+			# Für den Case archivieren = 1 werden nicht die checkbox_names mit ihrer Semikolon getrennten Struktur
+			# verwendet damit man die URL in dynamicLink verwenden kann mit Semikolon für Linkname und no_new_window.
+			$checkbox_names = array('check;' . $layerset[0]['maintable'] . ';' . $layerset[0]['maintable'] . ';' . $this->formvars['oid']);
+			$this->formvars[$checkbox_names[0]] = 'on';
+		}
+		else {
+			# Entnehme die Checkboxwerte aus formvars
+			$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
+		}
+
+		# Daten abfragen
 		if($this->qlayerset[0]['shape'] != null){
 			$result = $this->qlayerset[0]['shape'];
 		}
@@ -10181,10 +10216,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			for($i = 0; $i < count($checkbox_names); $i++){
 				if($this->formvars[$checkbox_names[$i]] == 'on'){
 					$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
-					$sql = 'SELECT '.$newpath." AND " . $element[1].".oid = " . $element[3];
+					$sql = "
+						SELECT
+							" . $newpath . " AND
+							" . $element[1] . ".oid = " . $element[3] . "
+					";
 					$oids[] = $element[3];
-					#echo $sql.'<br><br>';
-					$this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
+					#echo '<p>SQL zur Abfrage der Datensätze die gedruckt werden sollen:<br>' . $sql;
+					$this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :", 4);
 					$sql = replace_params(
 						$sql,
 						rolle::$layer_params,
@@ -10213,13 +10252,60 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    # PDF erzeugen
 	    $output = $ddl->createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $ddl->selectedlayout[0], $result, $this->Stelle, $this->user, NULL, $this->formvars['record_paging']);
     }
-		if($pdfobject == NULL){			# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF anzeigen
+		if ($pdfobject == NULL) {
+			# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF anzeigen
 			$this->outputfile = basename($output);
-			$this->mime_type='pdf';
-			$this->output();
+			if ($this->formvars['archivieren']) {
+
+				# Dokumentpfad ermitteln
+				$document_path = $layerset[0]['document_path'];
+
+				# Dateiname für Speicherung im Dokumentpfad ermitteln
+				$document_file = $this->outputfile;
+
+				# Wert für den Eintrag in Dokument-Attribut ermitteln
+				$attribute_value = $document_path . $document_file . '&original_name=' . $document_file;
+
+				# Attributname ermitteln in dem der Attributwert eingetragen werden soll
+				$dokument_attribute = array_keys(array_filter(
+					$layerset[0]['attributes']['form_element_type'],
+					function($value, $key) {
+						return (!is_int($key) AND $value == 'Dokument');
+					},
+					ARRAY_FILTER_USE_BOTH
+				))[0];
+
+				# Datei von tmp in das Ziel verschieben
+				#echo '<p>Verschiebe : ' . $output . ' nach: ' . $document_path . $document_file;
+				rename($output, $document_path . $document_file);
+
+				# Wert in Attribut eintragen
+				$sql = "
+					UPDATE
+						" .  $layerset[0]['schema'] . '.' . $layerset[0]['maintable'] . "
+					SET
+						" . $dokument_attribute . " = '" . $attribute_value . "'
+					WHERE
+						oid = " . $oids[0] . "
+				";
+				#echo '<p>Sql zum Update des Dokumentattributes:<br>' . $sql;
+				$ret = $layerdb->execSQL($sql, 4, 1);
+				if ($ret['success']) {
+					# Datensatz in Sachdatenanzeige anzeigen.
+					$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
+					$this->formvars['value_' . $dokument_attribute] = $attribute_value;
+					$this->formvars['operator_' . $dokument_attribute] = '=';
+					#echo '<p>Zeige Datensatz an mit: index.php?go=Layer-Suche_Suchen&selected_layer_id=' . $this->formvars['selected_layer_id'] . '&value_' . $dokument_attribute . '=' . $this->formvars['value_' . $dokument_attribute] . '&operator_' . $dokument_attribute . $this->formvars['operator_' . $dokument_attribute];
+					$this->GenerischeSuche_Suchen();
+				}
+			}
+			else {
+				$this->mime_type='pdf';
+				$this->output();
+			}
 		}
-		else{
-			return $output;			# das ist der letzte y-Wert, um nachfolgende Elemente darunter zu setzen
+		else {
+			return $output; # das ist der letzte y-Wert, um nachfolgende Elemente darunter zu setzen
 		}
 	}
 
@@ -14855,17 +14941,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 									$dokumentpfad = $layer['shape'][$k][$attributes['name'][$j]];
 									$pfadteil = explode('&original_name=', $dokumentpfad);
 									$dateiname = $pfadteil[0];
-									if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
-									$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+									if ($layer['document_url'] != '') {
+										$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
+									}
 									$original_name = $pfadteil[1];
-									$dateinamensteil=explode('.', $dateiname);
-									$type = $dateinamensteil[1];
-									$thumbname = $this->get_dokument_vorschau($dateinamensteil);
-									if($layer['document_url'] != ''){
-										$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+									$pathinfo = pathinfo($dateiname);
+									$thumbname = $this->get_dokument_vorschau(array(
+										$pathinfo['dirname'] . '/' . $pathinfo['filename'],
+										$pathinfo['extension']
+									));
+									if ($layer['document_url'] != '') {
+										$thumbname = dirname($dokumentpfad) . '/' . basename($thumbname);
 										$url = '';
 									}
-									else{
+									else {
 										$this->allowed_documents[] = addslashes($dateiname);
 										$this->allowed_documents[] = addslashes($thumbname);
 										$url = IMAGEURL.$this->document_loader_name.'?dokument=';
