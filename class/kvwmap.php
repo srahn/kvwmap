@@ -3048,7 +3048,7 @@ echo '			</ul>
 	}
 
 	function getSVG_foreign_vertices(){
-		# Diese Funktion liefert die Eckpunkte der Geometrien des übergebenen Postgis-Layers, die im aktuellen Kartenausschnitt liegen
+		# Diese Funktion liefert die Eckpunkte der Geometrien des übergebenen Vektor-Layers, die im aktuellen Kartenausschnitt liegen
 		#$this->user->rolle->readSettings();
 		if($this->formvars['geom_from_layer'] == 0){		# wenn kein Layer ausgewählt ==> alle aktiven abfragen
 			$this->getSVG_vertices();
@@ -3063,16 +3063,17 @@ echo '			</ul>
 			$rollenlayer = $mapDB->read_RollenLayer(-$this->formvars['geom_from_layer'], NULL);
 			$layer = $rollenlayer[0];
 		}
+		$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer['epsg_code'].')';
 		if($layer['connectiontype'] == MS_POSTGIS){
 			$layerdb = $mapDB->getlayerdatabase($layer['Layer_ID'], $this->Stelle->pgdbhost);
     	$data_attributes = $mapDB->getDataAttributes($layerdb, $layer['Layer_ID']);
+			$geom = $data_attributes['the_geom'];
     	$select = $mapDB->getSelectFromData($layer['Data']);
 			$select = str_replace(' FROM ', ' from ', $select);
 
 			if($this->formvars['geom_from_layer'] > 0)$select = str_replace(' from ', ', '.$data_attributes[$data_attributes['the_geom_id']]['table_alias_name'].'.oid as exclude_oid'.' from ', $select);		# bei Rollenlayern nicht machen
-			$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer['epsg_code'].')';
 
-			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.') ';
+			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$geom.', '.$extent.') ';
 			if($layer['Datentyp'] !== '1' AND $this->formvars['geom_from_layer'] > 0 AND $this->formvars['oid']){		# bei Linienlayern werden auch die eigenen Punkte geholt, bei Polygonen nicht
 				$fromwhere .= 'AND exclude_oid != '.$this->formvars['oid'];
 			}
@@ -3080,25 +3081,51 @@ echo '			</ul>
 			if($layer['Filter'] != ''){
 				$layer['Filter'] = str_replace('$userid', $this->user->id, $layer['Filter']);
 				$fromwhere .= " AND " . $layer['Filter'];
+			}			
+		}
+		elseif($layer['connectiontype'] == MS_WFS){
+			include_(CLASSPATH.'spatial_processor.php');
+			$projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+			$projTO = ms_newprojectionobj("init=epsg:".$layer['epsg_code']);
+			$rect = $this->user->rolle->oGeorefExt;
+			$rect->project($projFROM, $projTO);
+			$request = $layer['connection'].'&service=wfs&version=1.1.0&request=getfeature&srsName=EPSG:'.$layer['epsg_code'].'&typename='.$layer['wms_name'].'&bbox='.$rect->minx.','.$rect->miny.','.$rect->maxx.','.$rect->maxy;
+			$this->debug->write("<br>WFS-Request: ".$request,4);
+			$gml = url_get_contents($request, $layer['wms_auth_username'], $layer['wms_auth_password']);
+			#$this->debug->write("<br>WFS-Response: ".$gml,4);
+			$spatial_processor = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
+			switch($layer['Datentyp']){
+				case MS_LAYER_POLYGON : {
+					$wkt = $spatial_processor->composeMultipolygonWKTStringFromGML($gml, $layer['wfs_geom']);
+				}break;
+				
+				case MS_LAYER_POINT : {
+					$wkt = $spatial_processor->composeMultipointWKTStringFromGML($gml, $layer['wfs_geom']);
+				}break;
 			}
-			$sql = '
-				SELECT st_x((dump).geom), st_y((dump).geom) 
+			#$this->debug->write("<br>WKT von GML-Geometrie: ".$wkt,4);
+			if($layer['epsg_code'] != $this->user->rolle->epsg_code)$wkt = $this->pgdatabase->transformPoly($wkt, $layer['epsg_code'], $this->user->rolle->epsg_code);
+			$fromwhere = "from (select st_geomfromtext('".$wkt."', ".$this->user->rolle->epsg_code.") as geom) as foo";
+			$geom = 'geom';
+			$layerdb = $this->pgdatabase;
+		}
+		$sql = '
+			SELECT st_x((dump).geom), st_y((dump).geom) 
+			FROM (
+				SELECT st_dumppoints(intersection) AS dump
 				FROM (
-					SELECT st_dumppoints(intersection) AS dump
-					FROM (
-						select 	st_transform(st_intersection('.$data_attributes['the_geom'].', '.$extent.'), '.$this->user->rolle->epsg_code.') as intersection
-							'.$fromwhere.'
-					) foo1
-				) foo2 
-				LIMIT 10000';
-			#echo $sql;
-			$ret=$layerdb->execSQL($sql,4, 0);
-      if(!$ret[0]){
-      	while ($rs=pg_fetch_array($ret[1])){
-        	echo $rs[0].' '.$rs[1].'|';
-        }
-				echo '█show_vertices();';
-      }
+					select 	st_transform(st_intersection('.$geom.', '.$extent.'), '.$this->user->rolle->epsg_code.') as intersection
+						'.$fromwhere.'
+				) foo1
+			) foo2 
+			LIMIT 10000';
+		#echo $sql;
+		$ret=$layerdb->execSQL($sql,4, 0);
+		if(!$ret[0]){
+			while ($rs=pg_fetch_array($ret[1])){
+				echo $rs[0].' '.$rs[1].'|';
+			}
+			echo '█show_vertices();';
 		}
 	}
 
@@ -7924,9 +7951,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 
 			# Klassen übernehmen (aber als neue Klassen anlegen)
-			$classes = $mapDB->read_Classes($this->formvars['old_id']);
-			for($i = 0; $i < count($classes); $i++){
-				$mapDB->copyClass($classes[$i]['Class_ID'], $this->formvars['selected_layer_id']);
+			if($this->formvars['old_id'] != ''){
+				$classes = $mapDB->read_Classes($this->formvars['old_id']);
+				for($i = 0; $i < count($classes); $i++){
+					$mapDB->copyClass($classes[$i]['Class_ID'], $this->formvars['selected_layer_id']);
+				}
 			}
 		}
   }
@@ -17384,6 +17413,7 @@ class db_mapObj{
 		for ($i = 0; $i < count($attributes); $i++) {
 			if($attributes[$i] == NULL)continue;
 			if($attributes[$i]['nullable'] == '')$attributes[$i]['nullable'] = 'NULL';
+			if($attributes[$i]['saveable'] == '')$attributes[$i]['saveable'] = 0;
 			if($attributes[$i]['length'] == '')$attributes[$i]['length'] = 'NULL';
 			if($attributes[$i]['decimal_length'] == '')$attributes[$i]['decimal_length'] = 'NULL';
 			$sql = "
