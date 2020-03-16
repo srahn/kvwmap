@@ -261,7 +261,7 @@ class ddl {
 									$y = $this->gui->sachdaten_druck_editor_preview($sublayoutobject[0], $this->pdf, $offx, $offy);
 								}
 								else{
-									$this->gui->formvars['embedded_dataPDF'] = true;
+									$this->gui->formvars['no_output'] = true;
 									for($p = 0; $p < count($attributes['name']); $p++){			# erstmal alle Suchparameter des übergeordneten Layers für die Layersuche leeren
 										$this->gui->formvars['value_'.$attributes['name'][$p]] = '';
 										$this->gui->formvars['operator_'.$attributes['name'][$p]] = '';

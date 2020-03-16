@@ -4957,7 +4957,7 @@ echo '			</ul>
 		if($this->formvars['no_query'] != true){
 			$this->last_query = $this->user->rolle->get_last_query($this->formvars['chosen_layer_id']);
 			#if($this->formvars['search']){        # man kam von der Suche   -> nochmal suchen
-				$this->formvars['embedded_dataPDF'] = true;		# damit der Aufruf von output() verhindert wird
+				$this->formvars['no_output'] = true;		# damit der Aufruf von output() verhindert wird
 				$this->GenerischeSuche_Suchen();
 			#}
 			#else{                                 # man kam aus einer Sachdatenabfrage    -> nochmal abfragen			# den Fall kann man wohl ignorieren, weil die Suche bei lastquery auch für die Kartenabfrage funktioniert...
@@ -8576,7 +8576,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					if($this->formvars['offset_'.$layerset[0]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[0]['Layer_ID']] = $this->last_query[$layerset[0]['Layer_ID']]['offset'];
 				}
 
-        if($this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == ''){
+        if($this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['no_output'] == ''){
         	if($this->formvars['anzahl'] == ''){
 	          $this->formvars['anzahl'] = MAXQUERYROWS;
 	        }
@@ -8640,7 +8640,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$this->user->rolle->save_search($attributes, $this->formvars);
 				}
 
-				if ($layerset[0]['count'] != 0 AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == ''){
+				if ($layerset[0]['count'] != 0 AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['no_output'] == ''){
 					# last_query speichern
 					$this->user->rolle->delete_last_query();
 					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
@@ -8731,8 +8731,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 		$i = 0;
 		$this->search = true;
-		if ($this->formvars['embedded_dataPDF']) {
-			# wenn diese Suche für ein eingebettetes Drucklayout ist und Treffer da sind -> nichts weiter machen
+		if ($this->formvars['no_output']) {
+			# nichts weiter machen
 		}
 		elseif ($this->formvars['embedded_subformPK'] != '') {
 			header('Content-type: text/html; charset=UTF-8');
@@ -9151,8 +9151,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$layer = $layers[0];
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
-		$results = $this->Datensatz_Loeschen($layerdb, $layer, $oid);
-		# ToDo Dokumente werden noch nicht mit gelöscht.
+		$attributes = $mapdb->read_layer_attributes($layer_id, $layerdb, NULL);
+		$results = $this->Datensatz_Loeschen($layerdb, $layer, $attributes, $oid);
 		echo '█';
 		if($reload_object != '')echo 'reload_subform_list(\''.$reload_object.'\', 0);';
 	}
@@ -9204,23 +9204,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$this->success = $ret['success'];
 				}
 				else {
-					$results = $results + $this->Datensatz_Loeschen($layerdb, $layer, $element[3]);
+					$results = $results + $this->Datensatz_Loeschen($layerdb, $layer, $attributes, $element[3]);
 				}
 			}
 		}
-		# Dokumente auch löschen
-		if (empty($instead_updates)) {
-			$form_fields = explode('|', $this->formvars['form_field_names']);
-			for ($i = 0; $i < count($form_fields); $i++) {
-				if ($form_fields[$i] != ''){
-					$element = explode(';', $form_fields[$i]);
-					if ($element[4] == 'Dokument' AND in_array($element[3], $oids)) {
-						$this->deleteDokument($this->formvars[$form_fields[$i].'_alt'], $layer['document_path'], $layer['document_url']);
-					}
-				}
-			}
-		}
-
 		if ($output) {
 			if ($this->formvars['embedded'] == '') {
 				if ($this->success == false) {
@@ -9251,7 +9238,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		return $this->success;
 	}
 
-	function Datensatz_Loeschen($layerdb, $layer, $oid) {
+	function Datensatz_Loeschen($layerdb, $layer, $attributes, $oid) {
 		$results = array();
 		if (!empty($layer['trigger_function'])) {
 			$sql_old = "
@@ -9297,6 +9284,22 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			#echo '<br>Delete Trigger Funktion wurde nicht ausgeführt.';
 			# Instead Triggerfuktion wurde nicht ausgeführt
 			# Delete the object regularly in database
+
+			# überprüfen ob Dokument-Attribute vorhanden sind, wenn ja deren Datei-Pfade ermitteln und nach erfolgreichem Löschen auch die Dokumente löschen
+			$document_attributes = array();
+			for ($i = 0; $i < count($attributes['name']); $i++) {
+				if($attributes['form_element_type'][$i] == 'Dokument'){
+					$document_attributes[] = $attributes['name'][$i];
+				}
+			}
+			if(!empty($document_attributes)){
+				$this->formvars['selected_layer_id'] = $layer['Layer_ID'];
+				$this->formvars['value_'.$layer['maintable'].'_oid'] = $oid;
+				$this->formvars['operator_'.$layer['maintable'].'_oid'] = '=';
+				$this->formvars['no_output'] = true;
+				$this->GenerischeSuche_Suchen();
+			}
+			
 			$sql = "
 				DELETE FROM
 					" . $layer['maintable'] . "
@@ -9335,6 +9338,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 
 		if ($this->success) {
+			# Dokumente löschen
+			foreach($document_attributes as $document_attribute){
+				$this->deleteDokument($this->qlayerset[0]['shape'][0][$document_attribute], $layer['document_path'], $layer['document_url']);
+			}
 			# After delete trigger
 			if (!empty($layer['trigger_function'])) {
 				$this->exec_trigger_function('AFTER', 'DELETE', $layer, '', $old_dataset);
@@ -13178,7 +13185,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->formvars['chosen_layer_id'] = $this->formvars['selected_layer_id'];
 		$this->formvars['value_flurstueckskennzeichen'] = implode('|', $flurst_array);
 		$this->formvars['operator_flurstueckskennzeichen'] = 'IN';
-		$this->formvars['embedded_dataPDF'] = true;
+		$this->formvars['no_output'] = true;
 		$this->GenerischeSuche_Suchen();
 		$this->formvars['aktivesLayout'] = $this->formvars['formnummer'];
 		$this->generischer_sachdaten_druck_drucken();
