@@ -660,7 +660,7 @@ class spatial_processor {
 	      $searchbox_miny=strval($rect->miny-$rand);
 	      $searchbox_maxx=strval($rect->maxx+$rand);
 	      $searchbox_maxy=strval($rect->maxy+$rand);
-	      $request = $layerset[0]['connection'].'&service=wfs&version=1.0.0&request=getfeature&typename='.$layerset[0]['wms_name'].'&bbox='.$searchbox_minx.','.$searchbox_miny.','.$searchbox_maxx.','.$searchbox_maxy;
+				$request = $layerset[0]['connection'].'&service=wfs&version=1.1.0&request=getfeature&srsName=EPSG:'.$layerset[0]['epsg_code'].'&typename='.$layerset[0]['wms_name'].'&bbox='.$searchbox_minx.','.$searchbox_miny.','.$searchbox_maxx.','.$searchbox_maxy;
         $this->debug->write("<br>WFS-Request: ".$request,4);
 	      $gml = url_get_contents($request, $layerset[0]['wms_auth_username'], $layerset[0]['wms_auth_password']);
         #$this->debug->write("<br>WFS-Response: ".$gml,4);
@@ -925,33 +925,43 @@ class spatial_processor {
   }
   
   function composeMultipolygonWKTStringFromGML($gml, $geom_attribute){
-  	if($geom_attribute != ''){			# Attribut welches die Geometrie repr�sentiert (erforderlich, wenn es mehrere Geometrien pro Feature gibt)
-	  	$start = strpos($gml, '<'.$geom_attribute.'>');
-	  	$end = strpos($gml, '</'.$geom_attribute.'>');
-	  	$geom = substr($gml, $start, $end-$start);
-  	}
-  	else{
-  		$geom = $gml;
-  	}
-    $polygons = explode('<gml:Polygon', $geom);
+    $polygons = explode('<gml:Polygon', $gml);
     for($i = 1; $i < count($polygons); $i++){
     	$wkt_polygon[$i-1] = 'st_geomfromtext(\'POLYGON(';
-    	$rings = explode('<gml:coordinates', $polygons[$i]);
+    	$rings = explode('<gml:posList', $polygons[$i]);
       for($j = 1; $j < count($rings); $j++){
       	if($j > 1){$wkt_polygon[$i-1] .= ',';}
       	$wkt_polygon[$i-1] .= '(';
       	$start = strpos($rings[$j], '>')+1;
-      	$end = strpos($rings[$j], '</gml:coordinates>');
+      	$end = strpos($rings[$j], '</gml:posList>');
       	$coords = substr($rings[$j], $start, $end-$start);
-      	$coords = str_replace(' ', '_', trim($coords));
-      	$coords = str_replace(',', ' ', $coords);
-      	$coords = str_replace('_', ',', $coords);
-      	$wkt_polygon[$i-1] .= $coords;
+				$coord_array = explode(' ', $coords);
+				$wkt_coords = $coord_array[0].' '.$coord_array[1];
+      	for($k = 2; $k < count($coord_array)-1; $k=$k+2){
+					$wkt_coords .= ','.$coord_array[$k].' '.$coord_array[$k+1];
+				}
+      	$wkt_polygon[$i-1] .= $wkt_coords;
       	$wkt_polygon[$i-1] .= ')';
       }
       $wkt_polygon[$i-1] .= ')\')';
     }
     $sql = "SELECT st_astext(st_union(ARRAY[".implode(',', $wkt_polygon)."]))";
+  	$ret=$this->pgdatabase->execSQL($sql,4, 0);
+  	if(!$ret[0]){
+  		$rs=pg_fetch_array($ret[1]);
+  		return $rs[0];	
+    }
+  }
+	
+	function composeMultipointWKTStringFromGML($gml, $geom_attribute){
+    $points = explode('<gml:Point', $gml);
+    for($i = 1; $i < count($points); $i++){
+			$start = strpos($points[$i], '<gml:pos>')+9;
+			$end = strpos($points[$i], '</gml:pos>');
+      $coords = substr($points[$i], $start, $end-$start);
+      $wkt_point[$i-1] = 'st_geomfromtext(\'POINT('.$coords.')\')';
+    }
+    $sql = "SELECT st_astext(st_union(ARRAY[".implode(',', $wkt_point)."]))";
   	$ret=$this->pgdatabase->execSQL($sql,4, 0);
   	if(!$ret[0]){
   		$rs=pg_fetch_array($ret[1]);

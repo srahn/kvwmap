@@ -1487,7 +1487,7 @@ class flurstueck {
 	}
 	
 	function outputEigentuemerLong($eigentuemer, $adressAenderungen, $indent = NULL, $database){
-		//if($eigentuemer->Nr != ''){
+		if($eigentuemer->nachnameoderfirma != ''){
 			$Eigentuemer .= '<tr>
 												<td colspan="2">
 													<table>
@@ -1542,7 +1542,7 @@ class flurstueck {
 													</td>
 												</tr>';
 			$Eigentuemer .= '</table></td></tr>';
-		//}
+		}
 		if($eigentuemer->zusatz_eigentuemer != ''){
 			$Eigentuemer .=	 '<tr>
 													<td>&nbsp;</td><td>'.$eigentuemer->zusatz_eigentuemer; if($eigentuemer->Anteil != '')$Eigentuemer .= ' zu '.$eigentuemer->Anteil;

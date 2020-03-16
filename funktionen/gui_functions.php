@@ -406,57 +406,73 @@ function urlstring2formdata(formdata, string){
 	 
 function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	top.startwaiting();
-	if(document.GUI.legendtouched.value == 0){
-		svgdoc = document.SVG.getSVGDocument();	
-		// nix
-		if(browser == 'firefox')var mapimg = svgdoc.getElementById("mapimg2");			
-		else var mapimg = svgdoc.getElementById("mapimg");
-		var scalebar = document.getElementById("scalebar");
-		var refmap = document.getElementById("refmap");
-		var scale = document.getElementById("scale");
-		var lagebezeichnung = document.getElementById("lagebezeichnung");
-		var minx = document.GUI.minx;
-		var miny = document.GUI.miny;
-		var maxx = document.GUI.maxx;
-		var maxy = document.GUI.maxy;			
-		var pixelsize = document.GUI.pixelsize;
-		var polygon = svgdoc.getElementById("polygon");			
-		// nix
-		
-		input_coord = document.GUI.INPUT_COORD.value;
-		cmd = document.GUI.CMD.value;
-		
-		if(browser != 'firefox'){
-			code2execute_before += 'moveback()';
-			code2execute_after += 'startup();';
-		}
-		
-		if(document.GUI.punktfang != undefined && document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
-		
-		ahah("index.php", postdata+"&mime_type=map_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after, 
-		new Array(
-			'',
-			mapimg, 
-			scalebar,
-			refmap, 
-			scale,
-			lagebezeichnung,
-			minx,
-			miny,
-			maxx,
-			maxy,
-			pixelsize,			
-			polygon,
-			''
-		), 			 
-		new Array("execute_function", "xlink:href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "points", "execute_function"));
-					
-		document.GUI.INPUT_COORD.value = '';
-		document.GUI.CMD.value = '';
+	svgdoc = document.SVG.getSVGDocument();	
+	// nix
+	if(browser == 'firefox')var mapimg = svgdoc.getElementById("mapimg2");			
+	else var mapimg = svgdoc.getElementById("mapimg");
+	var scalebar = document.getElementById("scalebar");
+	var refmap = document.getElementById("refmap");
+	var scale = document.getElementById("scale");
+	var lagebezeichnung = document.getElementById("lagebezeichnung");
+	var minx = document.GUI.minx;
+	var miny = document.GUI.miny;
+	var maxx = document.GUI.maxx;
+	var maxy = document.GUI.maxy;			
+	var pixelsize = document.GUI.pixelsize;
+	var polygon = svgdoc.getElementById("polygon");			
+	// nix
+	
+	var input_coord = document.GUI.INPUT_COORD.value;
+	var cmd = document.GUI.CMD.value;
+	var width_reduction;
+	var height_reduction;
+	if(document.GUI.width_reduction)width_reduction = document.GUI.width_reduction.value;
+	if(document.GUI.height_reduction)height_reduction = document.GUI.height_reduction.value;
+	
+	if(browser != 'firefox'){
+		code2execute_before += 'moveback()';
+		code2execute_after += 'startup();';
 	}
-	else{
-		document.GUI.submit();
+	
+	if(document.GUI.punktfang != undefined && document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
+
+	postdata = postdata+"&mime_type=map_ajax&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
+	
+	if(document.GUI.legendtouched.value == 1){		// Legende benutzt -> gesamtes Formular mitschicken
+		var formdata = new FormData(document.GUI);
 	}
+	else{																				// nur navigiert -> Formular muss nicht mitgeschickt werden
+		var formdata = new FormData();
+	}
+		
+	postdata.split("&")
+		.forEach(function (item) {
+			pos = item.indexOf('=');
+			key = item.substring(0, pos);
+			value = item.substring(pos+1);
+			formdata.set(key, value);	
+		});
+	
+	ahah("index.php", formdata, 
+	new Array(
+		'',
+		mapimg, 
+		scalebar,
+		refmap, 
+		scale,
+		lagebezeichnung,
+		minx,
+		miny,
+		maxx,
+		maxy,
+		pixelsize,			
+		polygon,
+		''
+	), 			 
+	new Array("execute_function", "xlink:href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "points", "execute_function"));
+				
+	document.GUI.INPUT_COORD.value = '';
+	document.GUI.CMD.value = '';
 }
 
 function overlay_submit(gui, start){
@@ -660,15 +676,16 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
 function deleteRollenlayer(type){
 	document.GUI.delete_rollenlayer.value = 'true';
 	document.GUI.delete_rollenlayer_type.value = type;
-	neuLaden();
+	document.GUI.go.value='neu Laden';
+	document.GUI.submit();
 }
 
 function neuLaden(){
 	if(checkForUnsavedChanges()){
 		startwaiting(true);
-		if(currentform.neuladen != undefined){		// neu Laden in Fachschale
-			currentform.neuladen.value='true';
-			overlay_submit(currentform);
+		if(true || currentform.neuladen != undefined){		// neu Laden in Fachschale
+			if(currentform.neuladen)currentform.neuladen.value='true';
+			get_map_ajax('go=navMap_ajax', '', 'if(document.GUI.oldscale != undefined){document.GUI.oldscale.value=document.GUI.nScale.value;}');
 		}
 		else{
 			document.GUI.go.value='neu Laden';		// neu Laden in Hauptkarte

@@ -1,5 +1,5 @@
 BEGIN;
 
-DROP TABLE uko_polygon;
+  DROP TABLE IF EXISTS uko_polygon;
 
 COMMIT;

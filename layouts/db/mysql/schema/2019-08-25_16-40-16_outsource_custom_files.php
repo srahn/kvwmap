@@ -177,6 +177,7 @@
 			# echo '<br>move: ' . WWWROOT . APPLVERSION . 'layouts/snippets/custom to: ' . CUSTOM_PATH . 'layouts/snippets';
 			rename(WWWROOT . APPLVERSION . 'layouts/snippets/custom', CUSTOM_PATH . 'layouts/snippets');
 		}
+		$cmd = 'sed -i -e "s|SNIPPETS . \'custom/|\'|g" ' . WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/*';
 
 		# echo '<p>LOGIN ' . $this->config_params['LOGIN']['value'];
 		if (strpos(LOGIN, 'custom/') !== false) {

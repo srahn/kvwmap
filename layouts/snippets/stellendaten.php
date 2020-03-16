@@ -16,12 +16,12 @@
       </tr>
       <?php
       for ($i=0;$i<count($this->stellendaten['ID']);$i++) { ?>
-      <tr>
+      <tr onmouseover="this.bgColor='#DAE4EC'" onmouseout="this.bgColor=''">
         <td><?php echo $this->stellendaten['ID'][$i]; ?></td>
         <td><?php echo $this->stellendaten['Bezeichnung'][$i]; ?></td>
-        <td>&nbsp;<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>"><?php echo $this->strChange; ?></a></td>
-        <td>&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>">Layer</a></td>
-        <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Stelle_Löschen&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie diese Stelle wirklich löschen?')"><?php echo $this->strDelete; ?></a></td>
+        <td>&nbsp;<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>" title="<?php echo $this->strChange; ?>"><i class="fa fa-pencil" style="padding: 3px"></a></td>
+        <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Stelle_Löschen&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie die Stelle \'<? echo $this->stellendaten['Bezeichnung'][$i]; ?>\' wirklich löschen?')" title="<?php echo $this->strDelete; ?>"><i class="fa fa-trash" style="padding: 3px"></i></a></td>
+				<td>&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>">Layer</a></td>
       </tr>
       <?php
       }

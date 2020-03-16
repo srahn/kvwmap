@@ -928,6 +928,10 @@ class data_import_export {
 								$value = str_replace('f', "nein", $value);
 							}
 						}
+						if(substr($attributes['type'][$j], 0, 1) == '_'){		# Arrays ohne geschweifte Klammern und mit Zeilenumbrüchen
+							$value = trim($value, '{}');
+							$value = str_replace(',', chr(13), $value);
+						}
 						$value = str_replace(';', ",", $value);
 						if(strpos($value, chr(10)) !== false OR strpos($value, chr(13)) !== false){		# Zeilenumbruch => Wert in Anführungszeichen setzen
 							$value = str_replace('"', "'", $value);
