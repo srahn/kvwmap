@@ -4,7 +4,7 @@ BEGIN;
   SELECT * FROM xplankonverter.gebietseinheiten;
   ALTER TABLE xplankonverter.planaufstellende_gebietseinheiten
   ADD CONSTRAINT planaufstellende_gebietseinheiten_pkey PRIMARY KEY (id_ot);
-  CREATE INDEX stelle_id_idx ON xplankonverter.planaufstellende_gebietseinheiten
+  CREATE INDEX planaufstellende_gebietseinheiten_stelle_id_idx ON xplankonverter.planaufstellende_gebietseinheiten
   USING btree (stelle_id ASC NULLS LAST);
 
   -- Umstellung auf extra Datentyp für planaufstellende Gemeinden
