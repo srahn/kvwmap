@@ -105,8 +105,10 @@ class ddl {
 							$x = $x + $this->xoffset_onpage;
 						}
 					}
-					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);					
-					$y = $this->putText($text, $this->layout['texts'][$j]['size'], NULL, $x, $y, $offsetx);
+					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);
+					$width = $this->layout['texts'][$j]['width'];
+					$border = $this->layout['texts'][$j]['border'];
+					$y = $this->putText($text, $this->layout['texts'][$j]['size'], $width, $x, $y, $offsetx, $border);
 					if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 					
 					if($type != 'everypage' AND $this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();			# falls in eine alte Seite geschrieben wurde, zurückkehren
 				}
@@ -336,6 +338,7 @@ class ddl {
 								}
 								
 								$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
+								$border = $this->layout['elements'][$attributes['name'][$j]]['border'];
 								
 								if($attributes['form_element_type'][$j] == 'Dokument'){
 									if($width == '')$width = 50;
@@ -363,7 +366,7 @@ class ddl {
 								}
 								else{
 									$text = $this->get_result_value_output($i, $j, $preview);
-									$y = $this->putText($text, $zeilenhoehe, $width, $x, $y, $offsetx);
+									$y = $this->putText($text, $zeilenhoehe, $width, $x, $y, $offsetx, $border);
 								}								
 								if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y){
 									if(($this->miny[$this->pdf->currentContents] - $y) > $this->max_dataset_height)$this->max_dataset_height = $this->miny[$this->pdf->currentContents] - $y;
@@ -486,7 +489,7 @@ class ddl {
 		return NULL;
 	}
 	
-	function putText($text, $fontsize, $width, $x, $y, $offsetx){	
+	function putText($text, $fontsize, $width, $x, $y, $offsetx, $border = false){	
 		if($x < 0){		# rechtsbündig
 			$x = $this->layout['width'] + $x;
 			$x = $x + $offsetx;
@@ -494,14 +497,23 @@ class ddl {
 		}
 		else{							# linksbündig
 			$x = $x + $offsetx;
-			if($width != '')$right = $this->layout['width'] - $width - $x + 20;
-			else $right = NULL;
-			$options = array('aleft'=>$x, 'right'=>$right, 'justification'=>'full');
+			if($width != ''){
+				$right = $this->layout['width'] - $width - $x + 20;
+				$just = 'full';
+			}
+			else{
+				$right = NULL;
+				$just = 'left';
+			}
+			$options = array('aleft'=>$x, 'right'=>$right, 'justification'=>$just);
 		}
 		$fh = $this->pdf->getFontHeight($fontsize);
 		$y = $y + $fh;
 		$page_id_before_puttext = $this->pdf->currentContents;
-		$this->pdf->ezSetY($y);		
+		$this->pdf->ezSetY($y);
+		if($border){
+			$text = '<box>'.$text.'</box>';
+		}
 		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252//TRANSLIT", $text), $fontsize, $options);
 		$page_id_after_puttext = $this->pdf->currentContents;		
 		#echo $page_id_before_puttext.' '.$page_id_after_puttext.' - '.$y.' - '.$text.'<br>';
@@ -921,6 +933,10 @@ class ddl {
         else $sql .= ", `offset_attribute` = NULL";
         if($formvars['textsize'][$i] !== NULL)$sql .= ", `size` = ".(int)$formvars['textsize'][$i];
         else $sql .= ", `size` = 0";
+				if($formvars['textwidth'][$i] != NULL)$sql.= " ,width = ".(int)$formvars['textwidth'][$i];
+				else $sql.= " ,width = NULL";
+				if($formvars['textborder'][$i] != NULL)$sql.= " ,border = ".(int)$formvars['textborder'][$i];
+				else $sql.= " ,border = NULL";
         if($formvars['textangle'][$i])$sql .= ", `angle` = ".(int)$formvars['textangle'][$i];
         else $sql .= ", `angle` = NULL";
         $sql .= ", `font` = '".$formvars['textfont'][$i]."'";
@@ -1056,13 +1072,17 @@ class ddl {
         else $sql .= ", `offset_attribute` = NULL";
         if($formvars['textsize'][$i])$sql .= ", `size` = ".(int)$formvars['textsize'][$i];
         else $sql .= ", `size` = NULL";
+				if($formvars['textwidth'][$i] != NULL)$sql.= " ,width = ".(int)$formvars['textwidth'][$i];
+				else $sql.= " ,width = NULL";
+				if($formvars['textborder'][$i] != NULL)$sql.= " ,border = ".(int)$formvars['textborder'][$i];
+				else $sql.= " ,border = NULL";
         if($formvars['textangle'][$i])$sql .= ", `angle` = ".(int)$formvars['textangle'][$i];
         else $sql .= ", `angle` = NULL";
         $sql .= ", `font` = '".$formvars['textfont'][$i]."'";
         if($formvars['texttype'][$i] == '')$formvars['texttype'][$i] = 0;
         $sql .= ", `type` = '".$formvars['texttype'][$i]."'";
         $sql .= " WHERE id = ".(int)$formvars['text_id'][$i];
-        #echo $sql;
+        #echo $sql.'<br>';
         $this->debug->write("<p>file:kvwmap class:ddl->update_layout :",4);
         $this->database->execSQL($sql,4, 1);
         $lastfreitext_id = mysql_insert_id();
@@ -1205,6 +1225,9 @@ class ddl {
 				<td rowspan="4" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan=3>
 					<textarea name="text[]" cols="37" rows="6">'.$texts[$i]['text'].'</textarea>
 				</td>
+				<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">
+					Breite:&nbsp;<input type="text" name="textwidth[]" value="'.$texts[$i]['width'].'" size="2">
+				</td>
 				<td style="border-top:2px solid #C3C7C3;" colspan=2 align="left">
 					'.output_select(
 						'textfont[]',
@@ -1219,10 +1242,15 @@ class ddl {
 			<tr>
 				<td>&nbsp;y:</td>
 				<td style="border-right:1px solid #C3C7C3"><input type="text" name="textposy[]" value="'.$texts[$i]['posy'].'" size="5"><input type="hidden" name="text_id[]" value="'.$texts[$i]['id'].'"></td>
+				<td style="border-right:1px solid #C3C7C3">
+					Rahmen:
+					<input type="hidden" name="textborder[]" value="'.$texts[$i]['border'].'"><input type="checkbox" onclick="if(this.checked){this.previousSibling.value=1;}else{this.previousSibling.value=0;}" '.(($texts[$i]['border'] == '1') ? 'checked="true"' : '').'>
+				</td>
 				<td colspan="2"><input type="text" title="Schriftgröße" name="textsize[]" value="'.$texts[$i]['size'].'" size="5">&nbsp;pt</td>
 			</tr>
 			<tr>
 				<td colspan="2" valign="bottom" style="border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
+				<td style="border-right:1px solid #C3C7C3"></td>
 				<td colspan="2" valign="bottom">&nbsp;Platzierung:</td>
 			</tr>
 			<tr>
@@ -1239,6 +1267,7 @@ class ddl {
 				echo '
 					</select>
 				</td>
+				<td style="border-right:1px solid #C3C7C3"></td>
 				<td align="left" valign="top">
 					<select style="width: 110px" name="texttype[]">
 						<option value="0">normal</option>';
