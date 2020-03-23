@@ -17,6 +17,22 @@ include('funktionen/input_check_functions.php');
 		document.getElementById("svghelp").SVGshow_foreign_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
 
+	completeDate = function(datefield){
+		var d = new Date();
+		var year = d.getFullYear();
+		var split = datefield.value.split(".");
+		if(split.length == 2){
+			if(split[1] != ''){
+				datefield.value += '.'+year;
+			}
+		}
+		else if(split.length == 3){
+			if(split[2] == ''){
+				datefield.value += year;
+			}
+		}
+	}
+
 	scrolltop = function(){
 		if(enclosingForm.name == 'GUI2'){
 			document.getElementById('contentdiv').scrollTop = 0;
@@ -358,8 +374,11 @@ include('funktionen/input_check_functions.php');
 				return;
 			}
 			if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-				message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
-				return;
+				completeDate(document.getElementsByName(fieldstring)[0]);
+				if(!checkDate(document.getElementsByName(fieldstring)[0].value)){
+					message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+					return;
+				}
 			}
 		}
 		enclosingForm.go.value = 'Sachdaten_speichern';
@@ -384,8 +403,11 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
   		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-  			message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
-  			return;
+				completeDate(document.getElementsByName(fieldstring)[0]);
+				if(!checkDate(document.getElementsByName(fieldstring)[0].value)){
+					message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+					return;
+				}
   		}
   	}
   	this.go.value = 'neuer_Layer_Datensatz_speichern';
@@ -423,8 +445,11 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
   		if(field[6] == 'date' && field[4] != 'Time' && form_fields[i].value != '' && !checkDate(form_fields[i].value)){
-  			message('Das Datumsfeld '+form_fields[i].title+' hat nicht das Format TT.MM.JJJJ.');
-  			return;
+				completeDate(form_fields[i]);
+				if(!checkDate(form_fields[i].value)){
+					message('Das Datumsfeld '+form_fields[i].title+' hat nicht das Format TT.MM.JJJJ.');
+					return;
+				}
   		}
 			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
 				if(form_fields[i].type == 'file' && form_fields[i].files[0] != undefined)value = form_fields[i].files[0];
@@ -458,8 +483,11 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
   		if(field[6] == 'date' && field[4] != 'Time' && form_fields[i].value != '' && !checkDate(form_fields[i].value)){
-  			message('Das Datumsfeld '+form_fields[i].title+' hat nicht das Format TT.MM.JJJJ.');
-  			return;
+  			completeDate(form_fields[i]);
+				if(!checkDate(form_fields[i].value)){
+					message('Das Datumsfeld '+form_fields[i].title+' hat nicht das Format TT.MM.JJJJ.');
+					return;
+				}
   		}
 			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
 				if(form_fields[i].type == 'file' && form_fields[i].files[0] != undefined)value = form_fields[i].files[0];
