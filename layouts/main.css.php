@@ -43,6 +43,12 @@ body {
 	margin: auto;	
 }
 
+input[type="button"][value='«'], input[type="button"][value='»'] {
+	margin: 0.2em;
+	padding: 0px 0.5em 3px 0.5em;
+	font-size: 1.5em;
+}
+
 form {
 	margin: 0;
 	padding: 0;

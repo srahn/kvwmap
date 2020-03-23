@@ -187,8 +187,8 @@ else {
 									</select>
 								</td>
 								<td align="center" valign="middle" width="1"> 
-									<input type="button" name="addPlaces" value="&lt;&lt;" onClick=addOptions(document.GUI.allstellen,document.GUI.selectedstellen,document.GUI.selstellen,'value')>
-									<input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedstellen,document.GUI.selstellen,'value')>
+									<input type="button" name="addPlaces" value="&laquo;" onClick=addOptions(document.GUI.allstellen,document.GUI.selectedstellen,document.GUI.selstellen,'value')>
+									<input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedstellen,document.GUI.selstellen,'value')>
 								</td>
 								<td> 
 									<select name="allstellen" size="4" multiple style="width:300px">

@@ -91,8 +91,8 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     	</select>
    	</td>
     <td align="center" valign="middle" width="1">
-      <input type="button" name="addPlaces" value="&lt;&lt;" onClick="addOptions(document.GUI.Blatt,document.GUI.selectedBlatt,document.GUI.selBlatt,'value');">
-    	<input type="button" name="substractPlaces" value="&gt;&gt;" onClick="substractOptions(document.GUI.selectedBlatt,document.GUI.selBlatt,'value');">
+      <input type="button" name="addPlaces" value="&laquo;" onClick="addOptions(document.GUI.Blatt,document.GUI.selectedBlatt,document.GUI.selBlatt,'value');">
+    	<input type="button" name="substractPlaces" value="&raquo;" onClick="substractOptions(document.GUI.selectedBlatt,document.GUI.selBlatt,'value');">
     </td>
     <td>
     	<br>vorhandene:<br>
