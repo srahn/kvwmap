@@ -1099,7 +1099,7 @@ function str_space($string, $split_length = 1) {
 function showAlert($text) {
   ?>
   <script type="text/javascript">
-    alert("<?php echo $text; ?>");
+    alert("<?php echo str_replace('"', '\"', $text); ?>");
   </script><?php
 }
 
