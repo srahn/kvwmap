@@ -16014,7 +16014,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 		}
 		restore_error_handler();
-		include(LAYER_ERROR_PAGE);
+		if($this->formvars['go'] != 'navMap_ajax'){
+			include(LAYER_ERROR_PAGE);
+		}
+		else{
+			header('error: true');	// damit ajax-Requests das auch mitkriegen
+		}
 	}
 
   # Flurstücksauswahl

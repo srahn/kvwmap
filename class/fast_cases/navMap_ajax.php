@@ -1433,6 +1433,29 @@ function saveLegendRoleParameters(){
     # 2006-02-16 pk
     $this->user->rolle->readSettings();
   }
+	
+	function layer_error_handling(){
+		global $errors;
+		for($i = 0; $i < 2; $i++){		// es wird nach den ersten beiden Fehlern abgebrochen, da die Fehlermeldungen bei mehrmaligem Aufruf immer mehr werden...
+			$error_details .= $errors[$i].chr(10);
+			if(strpos($errors[$i], 'named') !== false){
+				$start = strpos($errors[$i], '\'')+1;
+				$end = strpos($errors[$i], '\'', $start);
+				$length = $end - $start;
+				$error_layername = substr($errors[$i], $start, $length);
+				$layer = $this->user->rolle->getLayer($error_layername);
+				if($layer == NULL)$layer = $this->user->rolle->getRollenLayer($error_layername);
+				$error_layer_id = $layer[0]['Layer_ID'];
+			}
+		}
+		restore_error_handler();
+		if($this->formvars['go'] != 'navMap_ajax'){
+			include(LAYER_ERROR_PAGE);
+		}
+		else{
+			header('error: true');	// damit ajax-Requests das auch mitkriegen
+		}
+	}
 
   function drawMap() {
 		if($this->formvars['go'] != 'navMap_ajax')set_error_handler("MapserverErrorHandler");		// ist in allg_funktionen.php definiert
