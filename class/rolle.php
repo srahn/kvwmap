@@ -1138,7 +1138,7 @@ class rolle {
 				UPDATE
 					" . $table_name . "
 				SET
-					rollenfilter = '" . $formvars['layer_options_rollenfilter'] . "'
+					rollenfilter = '" . pg_escape_string($formvars['layer_options_rollenfilter']) . "'
 				WHERE
 					user_id = " . $this->user_id . " AND
 					stelle_id = " . $this->stelle_id . " AND
