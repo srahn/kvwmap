@@ -739,8 +739,9 @@ class ddl {
 				# Datensatzes zurückgerollt und die Seite vorher umgebrochen, so dass sauber zwischen 2 Datensätzen 
 				# und nicht innerhalb eines Datensatzes getrennt wird.
 				if($this->page_overflow != false){
-					if($this->pdf->overflow_error != true AND ($this->getNextPage($this->transaction_start_pageid) != $this->pdf->currentContents		# wenn die Transaktion aber mehr als 2 Seiten umfasst
-					OR $this->transaction_start_y > $this->miny[$this->pdf->currentContents] - 50)){							# oder insgesamt länger als 1 Seite ist, bringt es nichts auf einer neuen Seite zu beginnen, dann committen
+					$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
+					if($this->pdf->overflow_error != true AND ($this->getNextPage($this->transaction_start_pageid) != $lastpage		# wenn die Transaktion aber mehr als 2 Seiten umfasst
+					OR $this->transaction_start_y > $this->miny[$lastpage] - 50)){							# oder insgesamt länger als 1 Seite ist, bringt es nichts auf einer neuen Seite zu beginnen, dann committen
 						$this->pdf->transaction('commit');
 						$this->page_overflow = false;
 					}
@@ -749,7 +750,7 @@ class ddl {
 						$this->pdf->transaction('abort');
 						$i--;
 						$this->i_on_page = -1;
-						$this->maxy = 0;
+						#$this->maxy = 0;
 						if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
 						if($this->layout['type'] == 2)$this->offsety = $this->pdf->ez['topMargin']; else $this->offsety = 0;
 						$this->pdf->newPage();
