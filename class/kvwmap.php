@@ -10332,8 +10332,14 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$this->formvars['value_' . $dokument_attribute] = $attribute_value;
 					$this->formvars['operator_' . $dokument_attribute] = '=';
 					#echo '<p>Zeige Datensatz an mit: index.php?go=Layer-Suche_Suchen&selected_layer_id=' . $this->formvars['selected_layer_id'] . '&value_' . $dokument_attribute . '=' . $this->formvars['value_' . $dokument_attribute] . '&operator_' . $dokument_attribute . $this->formvars['operator_' . $dokument_attribute];
-					$this->GenerischeSuche_Suchen();
 				}
+				else {
+					$this->add_message('error', $ret[2]);
+					$this->last_query = $this->user->rolle->get_last_query();
+					$this->last_query_requested = true; # get_last_query wurde direkt aufgerufen
+					$this->formvars['go'] = $this->last_query['go'];
+				}
+				$this->GenerischeSuche_Suchen();
 			}
 			else {
 				$this->mime_type='pdf';
