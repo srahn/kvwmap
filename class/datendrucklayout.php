@@ -380,8 +380,8 @@ class ddl {
 					}
 				}
 				elseif($attributes['name'][$j] == $attributes['the_geom'] AND $this->layout['elements'][$attributes['name'][$j]]['xpos'] > 0){		# Geometrie
-					if($this->layout['type'] == 0 AND 7 != end($this->pdf->objects['3']['info']['pages'])+1){
-						$this->pdf->reopenObject(7);		# zurück zur ersten Seite bei seitenweisem Typ und allen absolut positionierten Attributen, wenn erforderlich
+					if($this->layout['type'] == 0 AND $this->record_startpage != end($this->pdf->objects['3']['info']['pages'])+1){
+						$this->pdf->reopenObject($this->record_startpage);		# zurück zur Startseite des Datensatzes
 					}
 					#if($this->page_overflow)$this->pdf->reopenObject(7);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 					#$this->pdf->reopenObject($this->pdf->objects['3']['info']['pages'][0]+1);			# Kartenbild immer auf die erste Seite
@@ -656,9 +656,12 @@ class ddl {
 				$this->transaction_start_pageid = $this->pdf->currentContents;
 				$this->transaction_start_y = $this->miny[$this->pdf->currentContents];
 			}
-			if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
-    		$this->pdf->newPage();
-				$this->add_static_elements($offsetx);
+			if($this->layout['type'] == 0){
+				if($i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
+					$this->pdf->newPage();
+					$this->add_static_elements($offsetx);
+				}
+				$this->record_startpage = $this->pdf->currentContents;
     	}
 			# spaltenweiser Typ von oben nach unten
 			// if($this->layout['columns'] AND $this->i_on_page > 0 AND $this->i_on_page % $rowcount == 0){
