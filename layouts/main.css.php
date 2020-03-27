@@ -83,6 +83,9 @@ form {
 	font-size: 20px;
 }
 
+.hidden{
+	display: none;
+}
 
 h1 {
 	font-family: SourceSansPro3;
