@@ -185,6 +185,10 @@ class PgObject {
 		return $this->data[$attribute];
 	}
 
+	function get_id() {
+		return $this->get($this->identifier);
+	}
+
 	function set($attribute, $value) {
 		$this->data[$attribute] = $value;
 		return $value;
