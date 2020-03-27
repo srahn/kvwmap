@@ -510,13 +510,20 @@ FROM
 					$fields[$i]['table_alias_name'] = $table_alias_names[$table_oid];
 
 					# Schemaname der Tabelle des Attributs
-					$schemaname = $this->pg_field_schema($table_oid);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?	
+					if($schema_names[$table_oid] == NULL){
+						$schema_names[$table_oid] = $this->pg_field_schema($table_oid);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?	
+					}
+					$schemaname = $schema_names[$table_oid];
 					
 					$constraintstring = '';
-					$attr_info = $this->get_attribute_information($schemaname, $tablename, $col_num);
-					if($attr_info[0]['relkind'] == 'v'){		# wenn View, dann Attributinformationen aus View-Definition holen
+					
+					if(!is_array($attribute_infos[$schemaname][$tablename])){
+						$attribute_infos[$schemaname][$tablename] = $this->get_attribute_information($schemaname, $tablename);
+					}
+					$attr_info = $attribute_infos[$schemaname][$tablename][$col_num];
+					if($attr_info['relkind'] == 'v'){		# wenn View, dann Attributinformationen aus View-Definition holen
 						if($view_defintion_attributes[$tablename] == NULL) {
-							$ret2 = $this->getFieldsfromSelect(substr($attr_info[0]['view_definition'], 0, -1), true);
+							$ret2 = $this->getFieldsfromSelect(substr($attr_info['view_definition'], 0, -1), true);
 							if ($ret2['success']) {
 								$view_defintion_attributes[$tablename] = $ret2[1];
 							}
@@ -526,33 +533,35 @@ FROM
 								$view_defintion_attributes[$tablename] = array();
 							}
 						}
-						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info[0]['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
-						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info[0]['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
+						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
+						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
 					}
 					# realer Name der Spalte in der Tabelle
-					$fields[$i]['real_name'] = $attr_info[0]['name'];
-					$fieldtype = $attr_info[0]['type_name'];
-					$fields[$i]['nullable'] = $attr_info[0]['nullable']; 
-					$fields[$i]['length'] = $attr_info[0]['length'];
-					$fields[$i]['decimal_length'] = $attr_info[0]['decimal_length'];
-					$fields[$i]['default'] = $attr_info[0]['default'];
-					if($attr_info[0]['is_array'] == 't')$prefix = '_'; else $prefix = '';
-					if($attr_info[0]['type_type'] == 'c'){		# custom datatype
-						$datatype_id = $this->writeCustomType($attr_info[0]['type'], $attr_info[0]['type_schema']);
+					$fields[$i]['real_name'] = $attr_info['name'];
+					$fieldtype = $attr_info['type_name'];
+					$fields[$i]['nullable'] = $attr_info['nullable']; 
+					$fields[$i]['length'] = $attr_info['length'];
+					$fields[$i]['decimal_length'] = $attr_info['decimal_length'];
+					$fields[$i]['default'] = $attr_info['default'];
+					if($attr_info['is_array'] == 't')$prefix = '_'; else $prefix = '';
+					if($attr_info['type_type'] == 'c'){		# custom datatype
+						$datatype_id = $this->writeCustomType($attr_info['type'], $attr_info['type_schema']);
 						$fieldtype = $prefix.$datatype_id; 
 					}
-					if($attr_info[0]['type_type'] == 'e'){		# enum
+					if($attr_info['type_type'] == 'e'){		# enum
 						$fieldtype = $prefix.'text';
-						$constraintstring = $this->getEnumElements($attr_info[0]['type'], $attr_info[0]['type_schema']);
+						$constraintstring = $this->getEnumElements($attr_info['type'], $attr_info['type_schema']);
 					}
-					if($attr_info[0]['indisunique'] == 't')$constraintstring = 'UNIQUE';
-					if($attr_info[0]['indisprimary'] == 't')$constraintstring = 'PRIMARY KEY';
-					$constraints = $this->pg_table_constraints($tablename);		# todo
+					if($attr_info['indisunique'] == 't')$constraintstring = 'UNIQUE';
+					if($attr_info['indisprimary'] == 't')$constraintstring = 'PRIMARY KEY';
+					if(!is_array($constraints[$table_oid])){
+						$constraints[$table_oid] = $this->pg_table_constraints($table_oid);
+					}
 					if($fieldtype != 'geometry'){
 						# testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
-						for($j = 0; $j < count($constraints); $j++){
-							if(strpos($constraints[$j], '('.$fieldname.')')){
-								$options = explode("'", $constraints[$j]);
+						for($j = 0; $j < count($constraints[$table_oid]); $j++){
+							if(strpos($constraints[$table_oid][$j], '('.$fieldname.')')){
+								$options = explode("'", $constraints[$table_oid][$j]);
 								for($k = 0; $k < count($options); $k++){
 									if($k%2 == 1){
 										if($k > 1){
@@ -673,7 +682,7 @@ FROM
 	      if($attr_info['decimal_length'] == ''){$attr_info['decimal_length'] = 'NULL';}	      
 	      if($attr_info['default'] != '' AND substr($attr_info['default'], 0, 7) != 'nextval')$attr_info['default'] = 'SELECT '.$attr_info['default'];
 	  		else $attr_info['default'] = '';
-				$attributes[] = $attr_info;
+				$attributes[$attr_info['ordinal_position']] = $attr_info;
 			}
 		}
 		return $attributes;
@@ -718,7 +727,7 @@ FROM
 	
 	function writeDatatypeAttributes($datatype_id, $typname, $schema){
 		$attr_info = $this->get_attribute_information($schema, $typname);
-		for($i = 0; $i < count($attr_info); $i++){
+		for($i = 1; $i < count($attr_info); $i++){
 			$fields[$i]['real_name'] = $attr_info[$i]['name'];
 			$fields[$i]['name'] = $attr_info[$i]['name'];
 			$fieldtype = $attr_info[$i]['type_name'];
@@ -857,10 +866,11 @@ FROM
     return $query;
   }
 	
-  function pg_table_constraints($table){
-  	if($table != ''){
+  function pg_table_constraints($table_oid){
+  	if(table_oid != ''){
+			$constraints = array();
 	    $sql = "SELECT consrc FROM pg_constraint, pg_class WHERE contype = 'check'";
-	    $sql.= " AND pg_class.oid = pg_constraint.conrelid AND pg_class.relname = '".$table."'";
+	    $sql.= " AND pg_class.oid = pg_constraint.conrelid AND pg_class.oid = '".$table_oid."'";
 	    $ret = $this->execSQL($sql, 4, 0);
 	    if($ret[0]==0){
 	      while($row = pg_fetch_assoc($ret[1])){
