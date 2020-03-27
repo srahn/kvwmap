@@ -69,7 +69,7 @@ class ddl {
 				OR ($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['texts'][$j]['type'] == 0)
 				OR ($type == 'everypage' AND $this->layout['texts'][$j]['type'] == 2)){
 					if($type != 'everypage' AND $this->page_overflow){
-						$this->pdf->reopenObject(7);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+						$this->pdf->reopenObject($this->record_startpage);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 						#$this->i_on_page = 0;		# evtl. nicht 0 setzen, sondern ein eigenes i_on_page für jede Seite machen
 						#$this->page_overflow = false;		# muss auskommentiert bleiben, da sonst Fehler in EN-Liste1
 					}
@@ -116,7 +116,7 @@ class ddl {
 		if(count($this->remaining_lines) == 0)return;
     for($j = 0; $j < count($this->layout['lines']); $j++){
 			if($type != 'everypage' AND $this->page_overflow){
-				$this->pdf->reopenObject(7);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+				$this->pdf->reopenObject($this->record_startpage);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 				#if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???		muss auskommentiert bleiben, sonst ist die Karte im MVBIO-Drucklayout auf der zweiten Seite
 			}
 			# die Linie wurde noch nicht geschrieben und ist entweder eine feste Linie oder eine fortlaufende oder eine, der auf jeder Seite erscheinen soll
@@ -294,7 +294,7 @@ class ddl {
 						}break;
 						
 						default : {
-							if($this->page_overflow)$this->pdf->reopenObject(7);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+							if($this->page_overflow)$this->pdf->reopenObject($this->record_startpage);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 							$this->pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/' . $this->layout['elements'][$attributes['name'][$j]]['font']);
 							if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0 OR $attributes['form_element_type'][$j] == 'Dokument'){
 								$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
@@ -374,8 +374,6 @@ class ddl {
 					if($this->layout['type'] == 0 AND $this->record_startpage != end($this->pdf->objects['3']['info']['pages'])+1){
 						$this->pdf->reopenObject($this->record_startpage);		# zurück zur Startseite des Datensatzes
 					}
-					#if($this->page_overflow)$this->pdf->reopenObject(7);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
-					#$this->pdf->reopenObject($this->pdf->objects['3']['info']['pages'][0]+1);			# Kartenbild immer auf die erste Seite
 					$this->gui->map->set('width', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
 					$this->gui->map->set('height', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
 					$oid = $this->result[$i][$this->layerset['maintable'].'_oid'];
@@ -638,12 +636,9 @@ class ddl {
 				$this->transaction_start_pageid = $this->pdf->currentContents;
 				$this->transaction_start_y = $this->miny[$this->pdf->currentContents];
 			}
-			if($this->layout['type'] == 0){
-				if($i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
-					$this->pdf->newPage();
-					$this->add_static_elements($offsetx);
-				}
-				$this->record_startpage = $this->pdf->currentContents;
+			if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
+				$this->pdf->newPage();
+				$this->add_static_elements($offsetx);
     	}
 			# spaltenweiser Typ von oben nach unten
 			// if($this->layout['columns'] AND $this->i_on_page > 0 AND $this->i_on_page % $rowcount == 0){
@@ -673,7 +668,8 @@ class ddl {
 				$this->pdf->newPage();
 				$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
 				$this->miny[$lastpage] = 1000000;
-			}			
+			}
+			$this->record_startpage = $this->pdf->currentContents;		# die Seiten-ID auf der der Datensatz beginnt
 			$this->layout['offset_attributes'] = array();
 			
 			for($j = 0; $j < count($this->layout['texts']); $j++){
