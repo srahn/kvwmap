@@ -17216,6 +17216,7 @@ class db_mapObj{
 		for ($i = 0; $i < count($attributes); $i++) {
 			if($attributes[$i] == NULL)continue;
 			if($attributes[$i]['nullable'] == '')$attributes[$i]['nullable'] = 'NULL';
+			if($attributes[$i]['saveable'] == '')$attributes[$i]['saveable'] = 0;
 			if($attributes[$i]['length'] == '')$attributes[$i]['length'] = 'NULL';
 			if($attributes[$i]['decimal_length'] == '')$attributes[$i]['decimal_length'] = 'NULL';
 			$sql = "
