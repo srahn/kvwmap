@@ -1,6 +1,8 @@
 #!/bin/bash
 usage() {
   echo "Usage: copy_kvwmap.sh [OPTIONS] SOURCE TARGET"
+  echo ""
+  echo "Das Script muss auf dem Hostrechner ausgeführt werden."
   echo "SOURCE kann folgende Werte haben:"
   echo "  dev   Kopiert von Entwicklungsversion nach TARGET"
   echo "  demo  Kopiert von Demoversion nach TARGET"
