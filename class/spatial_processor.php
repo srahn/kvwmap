@@ -76,19 +76,40 @@ class spatial_processor {
     }
     return $rs;
   }
-  
-  function difference($geom_1, $geom_2){
-  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_difference(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."')) as geom) as foo";
-  	$ret = $this->pgdatabase->execSQL($sql,4, 0, true);
-    if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
-    }
-    else {
-    	$rs = pg_fetch_assoc($ret[1]);
-    }
-    return $rs;
-  }
-  
+
+	/*
+	* Funktion liefert den Teil von geom1, der nicht von geom2 überlappt wird
+	* und normalisiert das Ergebnis mit der Funktion gdi_normalize_geometry
+	* von Gaspare Sganga https://gasparesganga.com/labs/postgis-normalize-geometry/
+	* mit den in den Datenbanken-Konstanten NORMALIZE* angegebenen Werten
+	*/
+	function difference($geom_1, $geom_2){
+		$sql = "
+			SELECT
+				st_astext(geom) as wkt,
+				st_assvg(geom, 0, 8) as svg
+			FROM
+				(
+					SELECT
+						gdi_normalize_geometry(
+							st_difference(
+								st_geomfromtext('" . $geom_1 . "'),
+								st_geomfromtext('" . $geom_2 . "')
+							),
+							NORMALIZE_AREA_THRESHOLD, NORMALIZE_ANGLE_THRESHOLD, NORMALIZE_POINT_DISTANCE_THRESHOLD, NORMALIZE_NULL_AREA
+						) as geom
+				) as foo
+		";
+		$ret = $this->pgdatabase->execSQL($sql,4, 0, true);
+		if ($ret[0]) {
+			$rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+		}
+		else {
+			$rs = pg_fetch_assoc($ret[1]);
+		}
+		return $rs;
+	}
+
   function area($geom, $unit){
   	$sql = "SELECT round(st_area_utm(st_geomfromtext('".$geom."'), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")::numeric, 2)";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0, true);
