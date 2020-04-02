@@ -96,7 +96,10 @@ class spatial_processor {
 								st_geomfromtext('" . $geom_1 . "'),
 								st_geomfromtext('" . $geom_2 . "')
 							),
-							NORMALIZE_AREA_THRESHOLD, NORMALIZE_ANGLE_THRESHOLD, NORMALIZE_POINT_DISTANCE_THRESHOLD, NORMALIZE_NULL_AREA
+							" . NORMALIZE_AREA_THRESHOLD . ",
+							" . NORMALIZE_ANGLE_THRESHOLD . ",
+							" . NORMALIZE_POINT_DISTANCE_THRESHOLD . ",
+							" . NORMALIZE_NULL_AREA . "
 						) as geom
 				) as foo
 		";
