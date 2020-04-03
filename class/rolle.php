@@ -614,7 +614,7 @@ class rolle {
 				$sql.=", epsg_code='".$this->epsg_code."'";
         $sql.=', minx='.$this->oGeorefExt->minx.', miny='.$this->oGeorefExt->miny;
         $sql.=', maxx='.$this->oGeorefExt->maxx.', maxy='.$this->oGeorefExt->maxy;
-        #echo $sql;
+				#echo '<p>SQL zum Eintragen von consume-Aktivitäten in der Karte: ' . $sql;
         $ret=$this->database->execSQL($sql,4, 1);
         
         if ($ret[0]) {
@@ -650,6 +650,7 @@ class rolle {
             $sql.=', stelle_id='.$this->stelle_id;
             $sql.=', time_id="'.$time.'"';
             $sql.=', layer_id='.$layer[$i];
+						#echo '<p>SQL zum Eintragen des consumierten Layers: ' . $sql;
             $ret=$this->database->execSQL($sql,4, 1);
             if ($ret[0]) {
               # Fehler bei Datenbankanfrage
