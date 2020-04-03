@@ -3382,10 +3382,6 @@ echo '			</ul>
 				}
 			}
 
-			for ($n = 0; $n < count($id_names); $n++) {
-				$where[] = $id_names[$n] . " = '" . $id_values[$n] . "'";
-			}
-
 			# Original löschen
 			if ($delete_original) {
 				$sql = "
