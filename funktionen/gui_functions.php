@@ -444,13 +444,13 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	else{																				// nur navigiert -> Formular muss nicht mitgeschickt werden
 		var formdata = new FormData();
 	}
-		
+			
 	postdata.split("&")
 		.forEach(function (item) {
 			pos = item.indexOf('=');
 			key = item.substring(0, pos);
 			value = item.substring(pos+1);
-			formdata.set(key, value);	
+			formdata.append(key, value);			// hier muesste eigentlich set verwendet werden, kann der IE 11 aber nicht
 		});
 	
 	ahah("index.php", formdata, 
