@@ -18668,6 +18668,7 @@ class db_mapObj{
 			$attributes['order'][$i] = $rs['order'];
 			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
+			if($rs['real_name'] == '')$rs['real_name'] = $rs['name'];
 			$attributes['real_name'][$rs['name']] = $rs['real_name'];
 			if ($rs['tablename']){
 				if (strpos($rs['tablename'], '.') !== false){
