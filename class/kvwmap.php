@@ -13549,6 +13549,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			# muss das embedded-Formular entfernt werden und 
 			# das Listen-DIV neu geladen werden (getrennt durch █)
 			echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
+			if(!empty($this->messages)){
+				echo 'message('.json_encode($this->messages).');';
+			}
 		}
 		else {
 			$this->last_query = $this->user->rolle->get_last_query();
