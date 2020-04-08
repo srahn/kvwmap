@@ -171,29 +171,6 @@ else {
 				set_session_vars($GUI->formvars);
 				$GUI->debug->write('Anmeldung war erfolgreich, Benutzer wurde mit angegebenem Passwort gefunden.', 4, $GUI->echo);
 				Nutzer::reset_num_login_failed($GUI, $GUI->formvars['login_name']);
-
-				if (
-					!defined('AGREEMENT_MESSAGE') OR
-					AGREEMENT_MESSAGE == '' OR
-					is_agreement_accepted($GUI->user)
-				) {
-					$GUI->debug->write('Agreement ist akzeptiert.', 4, $GUI->echo);
-					# login case 4
-				}
-				else {
-					if ($GUI->formvars['agreement_accepted'] == '1') {
-						$GUI->debug->write('Nutzer bestätigt Agreement. Trage das ein.', 4, $GUI->echo);
-						$GUI->user->update_agreement_accepted($GUI->formvars['agreement_accepted']);
-						# login case 18
-					}
-					else {
-						$GUI->debug->write('Agreement ist nicht akzeptiert.', 4, $GUI->echo);
-						logout();
-						$show_login_form = true;
-						$go = 'login_agreement';
-						# login case 16
-					}
-				}
 			}
 			else { # Anmeldung ist fehlgeschlagen
 				$GUI->debug->write('Anmeldung ist fehlgeschlagen.', 4, $GUI->echo);
@@ -262,6 +239,30 @@ else {
 			} # ende keine Registrierung
 		} # ende keine Anmeldung
 	} # ende keine gastanmeldung
+	if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'])){
+		if (
+			!defined('AGREEMENT_MESSAGE') OR
+			AGREEMENT_MESSAGE == '' OR
+			is_agreement_accepted($GUI->user)
+		) {
+			$GUI->debug->write('Agreement ist akzeptiert.', 4, $GUI->echo);
+			# login case 4
+		}
+		else {
+			if ($GUI->formvars['agreement_accepted'] == '1') {
+				$GUI->debug->write('Nutzer bestätigt Agreement. Trage das ein.', 4, $GUI->echo);
+				$GUI->user->update_agreement_accepted($GUI->formvars['agreement_accepted']);
+				# login case 18
+			}
+			else {
+				$GUI->debug->write('Agreement ist nicht akzeptiert.', 4, $GUI->echo);
+				logout();
+				$show_login_form = true;
+				$go = 'login_agreement';
+				# login case 16
+			}
+		}
+	}
 } # ende nicht angemeldet
 
 # $show_login_form = true nach login cases 3, 6, 7, 8, 9, 10
