@@ -120,7 +120,6 @@
 					if($layer['attributes']['type'][$j] != 'geometry'){
 						if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
 							if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
-							if($layer['attributes']['alias'][$j] == '')$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
 						
 							####### wenn Attribut nicht daneben -> neue Zeile beginnen ########
 							if($layer['attributes']['arrangement'][$j] != 1){
