@@ -13750,6 +13750,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 			else{				# ansonsten wird das embedded-Formular entfernt und das Listen-DIV neu geladen (getrennt durch █)
 				echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
+				if(!empty($this->messages)){
+					echo 'message('.json_encode($this->messages).');';
+				}
 			}
 		}
 		else {
