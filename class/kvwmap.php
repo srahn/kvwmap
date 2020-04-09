@@ -9710,12 +9710,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						}
 					}
 				}
+
 				######### von einer Sachdatenanzeige übergebene Formvars #######
 				for ($j = 0; $j < count($layerset[0]['attributes']['name']); $j++) {
 					# Hier auch nur Werte übergeben, die in neues Formular übernommen werden sollen
 					$attributes = $layerset[0]['attributes'];
-					$attribut_name = $attributes['name'][$j];
-					$index = $attributes['indizes'][$attribut_name];
+					$attribute_name = $attributes['name'][$j];
+					$index = $attributes['indizes'][$attribute_name];
 
 					$layerset[0]['attributes']['privileg'][$j] = $layerset[0]['attributes']['privileg'][$attribute_name] = $privileges[$attribute_name];
 
@@ -9739,7 +9740,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$this->angle_attribute = $attribute_name;
 					}
 				}
-
 				$this->formvars['layer_columnname'] = $layerset[0]['attributes']['the_geom'];
 				$this->formvars['layer_tablename'] = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']];
 				$this->qlayerset[0]=$layerset[0];
