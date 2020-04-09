@@ -285,7 +285,7 @@ class GUI {
 			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['layer_id']);
 		}
 		$disabled_classes = $mapDB->read_disabled_classes();
-		$layer[0]['Class'] = $mapDB->read_Classes($this->formvars['layer_id'], $disabled_classes);
+		$layer[0]['Class'] = $mapDB->read_Classes($this->formvars['layer_id'], $disabled_classes, false, $layer[0]['classification']);
 		echo '
 		<div class="layerOptions" id="options_content_'.$this->formvars['layer_id'].'">
 			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:closeLayerOptions('.$this->formvars['layer_id'].');" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>
@@ -3380,10 +3380,6 @@ echo '			</ul>
 						$this->copy_dataset($mapdb, $subform_layerid, $subform_pks_realnames2, $pkvalues, count($next_update_values), $subform_pks_realnames2, $next_update_values, $delete_original);
 					}
 				}
-			}
-
-			for ($n = 0; $n < count($id_names); $n++) {
-				$where[] = $id_names[$n] . " = '" . $id_values[$n] . "'";
 			}
 
 			# Original löschen
@@ -13766,6 +13762,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 			else{				# ansonsten wird das embedded-Formular entfernt und das Listen-DIV neu geladen (getrennt durch █)
 				echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
+				if(!empty($this->messages)){
+					echo 'message('.json_encode($this->messages).');';
+				}
 			}
 		}
 		else {
@@ -18681,6 +18680,7 @@ class db_mapObj{
 			$attributes['order'][$i] = $rs['order'];
 			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
+			if($rs['real_name'] == '')$rs['real_name'] = $rs['name'];
 			$attributes['real_name'][$rs['name']] = $rs['real_name'];
 			if ($rs['tablename']){
 				if (strpos($rs['tablename'], '.') !== false){

@@ -19,7 +19,12 @@ MYSQL_PASSWORD=$(grep "MYSQL_PASSWORD" $CONFIG_FILE | cut -d "'" -f 2)
 CURRENT_TIME=$(date -d yesterday '+%Y-%m-%d %H:%M:%S')
 #echo "CURRENT_TIME: ${CURRENT_TIME}"
 
-SQL="DELETE FROM user WHERE Name LIKE 'gast' AND Vorname LIKE 'gast' AND password_setting_time < '${CURRENT_TIME}'"
+SQL="DELETE FROM user WHERE Name LIKE 'gast' AND Vorname LIKE 'gast' AND password_setting_time < '${CURRENT_TIME}';
+SET @m = (SELECT MAX(id) + 1 FROM user); 
+SET @s = CONCAT('ALTER TABLE user AUTO_INCREMENT=', @m);
+PREPARE stmt1 FROM @s;
+EXECUTE stmt1;
+DEALLOCATE PREPARE stmt1;"
 #echo "SQL: ${SQL}"
 
 mysql --host=${MYSQL_HOST} --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} -e "${SQL}" ${MYSQL_DATABASE} > /dev/null 2>&1

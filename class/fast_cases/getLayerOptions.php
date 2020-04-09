@@ -124,7 +124,7 @@ class GUI {
 			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['layer_id']);
 		}
 		$disabled_classes = $mapDB->read_disabled_classes();
-		$layer[0]['Class'] = $mapDB->read_Classes($this->formvars['layer_id'], $disabled_classes);
+		$layer[0]['Class'] = $mapDB->read_Classes($this->formvars['layer_id'], $disabled_classes, false, $layer[0]['classification']);
 		echo '
 		<div class="layerOptions" id="options_content_'.$this->formvars['layer_id'].'">
 			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:closeLayerOptions('.$this->formvars['layer_id'].');" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>
@@ -691,7 +691,7 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
+				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, classification, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
 				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,

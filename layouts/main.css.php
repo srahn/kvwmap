@@ -1417,10 +1417,11 @@ tbody.gle>tr {
 	vertical-align: top;
 }
 
-.calendar { /* Fuer IE <= 6 */
+.calendar {
 	text-align: center;
 	position: absolute;
 	z-index: 1000000;
+	right: 0px;
 }
 
 .timepicker{
