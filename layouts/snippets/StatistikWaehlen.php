@@ -101,7 +101,7 @@ function display(id) {
               <? 
               for($i = 2005; $i <= date('Y'); $i++){
               	echo '<option value="'.$i.'"';
-              	if ($this->formvars['year_m'] == $i){
+              	if ($this->formvars['year_w'] == $i){
               		echo ' selected';
               	}
               	echo '>'.$i.'</option>';
@@ -143,7 +143,7 @@ function display(id) {
               <? 
               for($i = 2005; $i <= date('Y'); $i++){
               	echo '<option value="'.$i.'"';
-              	if ($this->formvars['year_m'] == $i){
+              	if ($this->formvars['year_d'] == $i){
               		echo ' selected';
               	}
               	echo '>'.$i.'</option>';
@@ -187,7 +187,7 @@ function display(id) {
               <? 
               for($i = 2005; $i <= date('Y'); $i++){
               	echo '<option value="'.$i.'"';
-              	if ($this->formvars['year_m'] == $i){
+              	if ($this->formvars['year_e1'] == $i){
               		echo ' selected';
               	}
               	echo '>'.$i.'</option>';
@@ -229,7 +229,7 @@ function display(id) {
               <? 
               for($i = 2005; $i <= date('Y'); $i++){
               	echo '<option value="'.$i.'"';
-              	if ($this->formvars['year_m'] == $i){
+              	if ($this->formvars['year_e2'] == $i){
               		echo ' selected';
               	}
               	echo '>'.$i.'</option>';
