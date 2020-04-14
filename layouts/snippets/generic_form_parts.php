@@ -480,9 +480,9 @@
 					$reloadParams .= '&fromobject='.$layer_id.'_'.$name.'_'.$k;
 					$reloadParams .= '&targetlayer_id='.$layer_id;
 					$reloadParams .= '&targetattribute='.$name;
-					$reloadParams .= '&oid='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
-					$reloadParams .= '&tablename='.$attributes['table_name'][$attributes['the_geom']];											# dito
-					$reloadParams .= '&columnname='.$attributes['the_geom'];																								# dito
+					$reloadParams .= '&oid_mother='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
+					$reloadParams .= '&tablename_mother='.$attributes['table_name'][$attributes['the_geom']];											# dito
+					$reloadParams .= '&columnname_mother='.$attributes['the_geom'];																								# dito
 					$reloadParams .= '&attribute_privileg='.$attribute_privileg;
 					
 					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'" style="margin-top: 3px"><img src="'.GRAPHICSPATH.'leer.gif" ';
