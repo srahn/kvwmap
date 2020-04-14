@@ -5690,8 +5690,11 @@ echo '			</ul>
       $rect->miny = $this->Document->ausschnitt[0]['center_y'] - $height/2;
       $rect->maxx = $this->Document->ausschnitt[0]['center_x'] + $width/2;
       $rect->maxy = $this->Document->ausschnitt[0]['center_y'] + $height/2;
-			$this->formvars['refpoint_x'] = $this->Document->ausschnitt[0]['center_x'];
-			$this->formvars['refpoint_y'] = $this->Document->ausschnitt[0]['center_y'];
+			if($this->Document->ausschnitt[0]['epsg_code'] != '' AND $this->Document->ausschnitt[0]['epsg_code'] != $this->user->rolle->epsg_code){
+				$projFROM = ms_newprojectionobj("init=epsg:" . $this->Document->ausschnitt[0]['epsg_code']);
+				$projTO = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
+				$rect->project($projFROM, $projTO);
+			}
       if($this->user->rolle->epsg_code == 4326)$rand = 10/10000;
 			else $rand = 10;
       $this->map->setextent($rect->minx-$rand,$rect->miny-$rand,$rect->maxx+$rand,$rect->maxy+$rand);
@@ -5702,8 +5705,8 @@ echo '			</ul>
 				$this->map_scaledenom = $this->map->scale;
 			}
       # Position setzen
-      $this->formvars['center_x'] = $this->Document->ausschnitt[0]['center_x'];
-      $this->formvars['center_y'] = $this->Document->ausschnitt[0]['center_y'];
+			$this->formvars['refpoint_x'] = $this->formvars['center_x'] = $rect->minx + $width/2;
+			$this->formvars['refpoint_y'] = $this->formvars['center_y'] = $rect->miny + $height/2;
       # Druckmaßstab setzen
       $this->formvars['printscale'] = $this->Document->ausschnitt[0]['print_scale'];
       # Drehwinkel setzen
@@ -5732,7 +5735,7 @@ echo '			</ul>
   function druckausschnitt_speichern($loadmapsource){
     $this->loadMap($loadmapsource);
     $this->Document = new Document($this->database);
-    $this->Document->save_ausschnitt($this->Stelle->id, $this->user->id, $this->formvars['name'], $this->formvars['center_x'], $this->formvars['center_y'], $this->formvars['printscale'], $this->formvars['angle'], $this->formvars['aktiverRahmen']);
+    $this->Document->save_ausschnitt($this->Stelle->id, $this->user->id, $this->formvars['name'], $this->user->rolle->epsg_code, $this->formvars['center_x'], $this->formvars['center_y'], $this->formvars['printscale'], $this->formvars['angle'], $this->formvars['aktiverRahmen']);
     $this->druckausschnittswahl($loadmapsource);
   }
 
@@ -12324,8 +12327,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$rect = ms_newRectObj();
 			$rect->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
 			if($ret[1]['epsg_code'] != '' AND $ret[1]['epsg_code'] != $this->user->rolle->epsg_code){
-				$rect = ms_newRectObj();
-				$rect->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
 				$projFROM = ms_newprojectionobj("init=epsg:" . $ret[1]['epsg_code']);
 				$projTO = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
 				$rect->project($projFROM, $projTO);
@@ -19580,7 +19581,7 @@ class Document {
     $this->database->execSQL($sql,4, 1);
   }
 
-  function save_ausschnitt($stelle_id, $user_id, $name, $center_x, $center_y, $print_scale, $angle, $frame_id){
+  function save_ausschnitt($stelle_id, $user_id, $name, $epsg_code, $center_x, $center_y, $print_scale, $angle, $frame_id){
     $sql = "
 			INSERT INTO
 				druckausschnitte
@@ -19596,20 +19597,21 @@ class Document {
 							FROM
 								druckausschnitte
 							WHERE
-								stelle_id = " . $stelle_id . " AND
-								user_id = " . $user_id . "
+								stelle_id = ".$stelle_id." AND
+								user_id = ".$user_id."
 						) as foo
 					),
 					1
 				),
-				stelle_id = " . $stelle_id . ",
-				user_id = " . $user_id . ",
-				name = '" . $name . "',
-				center_x = " . $center_x . ",
-				center_y = " . $center_y . ",
-				print_scale = " . $print_scale . ",
-				angle = " . $angle . ",
-				frame_id = " . $frame_id . "
+				stelle_id = ".$stelle_id.",
+				user_id = ".$user_id.",
+				name = '".$name."',
+				epsg_code = '".$epsg_code."',
+				center_x = ".$center_x.",
+				center_y = ".$center_y.",
+				print_scale = ".$print_scale.",
+				angle = ".$angle.",
+				frame_id = ".$frame_id."
 		";
     $this->debug->write("<p>file:kvwmap class:Document->save_ausschnitt :",4);
     $this->database->execSQL($sql,4, 1);
