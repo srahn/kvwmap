@@ -260,10 +260,10 @@ else{ ?>
 									$data[] = 'values[' . $p . ']=' . $this->formvars['values'][$p];
 								}
 								$data[] = 'selected_layer_id=' . $this->formvars['selected_layer_id'];
-								$data[] = 'layer_id=' . $this->formvars['targetlayer_id'];
-								$data[] = 'oid=' . $this->formvars['oid'];
-								$data[] = 'tablename=' . $this->formvars['tablename'];
-								$data[] = 'columnname=' . $this->formvars['columnname']; ?>
+								$data[] = 'layer_id_mother=' . $this->formvars['targetlayer_id'];
+								$data[] = 'oid_mother=' . $this->formvars['oid_mother'];
+								$data[] = 'tablename_mother=' . $this->formvars['tablename_mother'];
+								$data[] = 'columnname_mother=' . $this->formvars['columnname_mother']; ?>
 								<a class="buttonlink"<?
 									if ($this->formvars['no_new_window'] != true) {
 										echo ' target="_blank"';
