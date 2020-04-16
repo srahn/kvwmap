@@ -66,8 +66,8 @@ include(LAYOUTPATH.'languages/cronjobs_'.$this->user->rolle->language.'.php');
 		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_user; ?></th>
 		<td style="border-bottom: 1px solid #C3C7C3;">
 			<select name="user">
-				<option value="gisadmin" selected>gisadmin</option>
-				<option value="root">root</option>
+				<option value="gisadmin"<? echo ($this->cronjob->get('user') == 'root' ? '' : ' selected'); ?>>gisadmin</option>
+				<option value="root"<? echo ($this->cronjob->get('user') == 'root' ? ' selected' : ''); ?>>root</option>
 			</select> <span style="font-size: 0.9em; color: gray"><? echo $strTip_user; ?></span>
 		</td>
 	</tr>
