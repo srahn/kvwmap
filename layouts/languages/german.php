@@ -17,6 +17,7 @@
 	$this->TaskChangeWarning = "Sie sind nicht berechtigt zur Ausführung der Funktion in dieser Stelle.";
 	$this->strButtonBack = "Zurück";	
 	$this->strCancel = "Abbrechen";
+  $this->strCreate = "Anlegen";
 	$this->strSend = "Senden";
 	$this->strSearch = "Suchen";
 	$this->strEnter = "Übernehmen";

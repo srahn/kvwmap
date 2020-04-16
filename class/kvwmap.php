@@ -12438,20 +12438,23 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->cronjobs = CronJob::find($this);
 
 		# erzeugt die Zeilen für den crontab
-		$crontab_lines = array();
+		$crontab_lines = array('gisadmin' => array(), 'root' => array());
 		foreach($this->cronjobs AS $cronjob) {
 			if ($cronjob->get('aktiv')) {
-				$crontab_lines[] = $cronjob->get_crontab_line();
+				$crontab_lines[$cronjob->get('user')][] = $cronjob->get_crontab_line();
 			}
 		}
-
-		# schreibt die Zeilen in eine Datei
-		$crontab_file = '/var/www/cron/crontab_gisadmin';
-		$fp = fopen($crontab_file, 'w');
-		foreach($crontab_lines AS $line) {
-			fwrite($fp, $line . PHP_EOL);
+		# schreibt die Zeilen in die crontab Dateien von root und gisadmin falls vorhanden
+		foreach($crontab_lines AS $user => $lines) {
+			if (count($lines) > 0) {
+				$crontab_file = '/var/www/cron/crontab_' . $user;
+				$fp = fopen($crontab_file, 'w');
+				foreach($lines AS $line) {
+					fwrite($fp, $line . PHP_EOL);
+				}
+				fclose($fp);
+			}
 		}
-		fclose($fp);
 
 		# crontab starten
 #		exec('crontab -u www-data ' . $crontab_file);

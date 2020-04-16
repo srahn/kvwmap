@@ -336,6 +336,10 @@ class MyObject {
 				$result = $this->validate_presence($key, $msg);
 				break;
 
+			case 'pending_value' :
+				$result = $this->validate_pending_value($key, $option, $msg);
+				break;
+
 			case 'not_null' :
 				$result = $this->validate_not_null($key, $msg);
 				break;
@@ -368,6 +372,23 @@ class MyObject {
 		return (array_key_exists($key, $this->data) ? '' : $msg);
 	}
 
+  /*
+  * Validates the presence of a value in $key that is dependent on an $pending_key
+  * Returns an error msg if keys not exists or its value is empty even though pending_key exists and its value is not empty
+  */
+  function validate_pending_value($key, $pending_key, $msg = '') {
+    if (
+      array_key_exists($pending_key, $this->data) AND
+      !empty($this->data->get($pending_key)) AND (
+        !array_key_exists($key, $this->data) OR
+        empty($this->data->get($key))
+      )
+    ) {
+      $msg = "Wenn im Attribut ${pending_key} ein Wert angegeben ist, muss im Attribut ${key} auch einer angegeben sein!";
+    }
+    return $msg;
+	}
+
 	function validate_not_null($key, $msg = '') {
 		if ($msg == '') $msg = "Der Parameter <i>{$key}</i> darf nicht leer sein.";
 
@@ -387,7 +408,7 @@ class MyObject {
 	}
 
 	function validate_value_is_one_off($key, $allowed_values, $msg = '') {
-		if ($msg == '') $msg = 'Der angegebene Wert ' . $this->get($key) . ' muss einer von diesen sein: <i>(' . implode(', ', $allowed_values) . '</i>)';
+		if ($msg == '') $msg = 'Der im Attribut <i>' . $key . '</i> angegebene Wert <i>' . $this->get($key) . '</i> muss einer von diesen sein: <i>(' . implode(', ', $allowed_values) . '</i>)';
 		return (in_array($this->get($key), $allowed_values) ? '' : $msg);
 	}
 
