@@ -12,17 +12,18 @@
     <td align="center" colspan="4"><h2><?php echo $strTitle; ?></h2></td>
 	</tr>
 	<tr>
-		<td align="right" colspan="4"><a class="btn btn-new" href="index.php?go=cronjob_editieren"><i titel="Lege einen neuen Job an." class="fa fa-plus" style="color: white;"></i>&nbsp;Neuer&nbsp;Job</a></td>
+		<td align="right" colspan="4"><a class="btn btn-new" href="index.php?go=cronjob_editieren"><i titel="<? echo $strTitle_create_new_cronjob; ?>" class="fa fa-plus" style="color: white;"></i>&nbsp;Neuer&nbsp;Job</a></td>
   </tr>
 	<tr>
-		<th><i title="Aktiviere oder Deaktiviere die Cron Jobs über die Checkboxen." class="fa fa-check-square-o" aria-hidden="true"></i></th>
-		<th>Bezeichnung</th>
-		<td>Zeit</td>
-		<th>Beschreibung</th>
+		<th><i title="<? echo $strTitle_checkbox; ?>" class="fa fa-check-square-o" aria-hidden="true"></i></th>
+		<th><? echo $strLabel_bezeichnung; ?></th>
+		<td><? echo $strLabel_zeit; ?></td>
+		<th><? echo $strLabel_beschreibung; ?></th>
+		<th><? echo $strTitle_user; ?></th>
 		<!--th>Query/Command</th>
 		<th>User Id</th>
 		<th>Stelle Id</th//-->
-		<th></th>
+		<th width="70px"></th>
 	<tr><?php
 	foreach($this->cronjobs AS $cronjob) { ?>
 		<tr>
@@ -39,10 +40,11 @@
 			<td><?php echo $cronjob->get('bezeichnung'); ?></td>
 			<td><?php echo $cronjob->get('time'); ?></td>
 			<td><?php echo $cronjob->get('beschreibung'); ?></td>
+			<td><?php echo $cronjob->get('user'); ?></td>
 			<!--td><textarea cols="33" rows="1" readonly><?php echo (empty($cronjob->get('query')) ? $cronjob->get('function') : $cronjob->get('query')); ?></textarea></td>
 			<td><?php echo $cronjob->get('user_id'); ?></td>
 			<td><?php echo $cronjob->get('stelle_id'); ?></td//-->
-			<td>
+			<td width="70px">
 				<a href="index.php?go=cronjob_editieren&selected_cronjob_id=<?php echo $cronjob->get('id'); ?>"><i class="fa fa-pencil fa_lg" style="color: #a82e2e;"></i></a>
 				<a href="index.php?go=cronjob_löschen&selected_cronjob_id=<?php echo $cronjob->get('id'); ?>" style="margin-left: 10px;"><i class="fa fa-trash-o fa_lg" style="color: #a82e2e;"></i></a>
 			</td>
