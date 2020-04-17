@@ -437,7 +437,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	if(document.GUI.punktfang != undefined && document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
 
 	postdata = postdata+"&mime_type=map_ajax&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
-	
+
 	if(document.GUI.legendtouched.value == 1){		// Legende benutzt -> gesamtes Formular mitschicken
 		var formdata = new FormData(document.GUI);
 	}
@@ -683,14 +683,8 @@ function deleteRollenlayer(type){
 function neuLaden(){
 	if(checkForUnsavedChanges()){
 		startwaiting(true);
-		if(true || currentform.neuladen != undefined){		// neu Laden in Fachschale
-			if(currentform.neuladen)currentform.neuladen.value='true';
-			get_map_ajax('go=navMap_ajax', '', 'if(document.GUI.oldscale != undefined){document.GUI.oldscale.value=document.GUI.nScale.value;}');
-		}
-		else{
-			document.GUI.go.value='neu Laden';		// neu Laden in Hauptkarte
-			document.GUI.submit();
-		}
+		if(currentform.neuladen)currentform.neuladen.value='true';
+		get_map_ajax('go=navMap_ajax', '', 'if(document.GUI.oldscale != undefined){document.GUI.oldscale.value=document.GUI.nScale.value;}');
 	}
 }
 
