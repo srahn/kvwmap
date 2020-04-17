@@ -458,3 +458,8 @@ INSERT INTO `druckrahmen` (`Name`, `headsrc`, `headposx`, `headposy`, `headwidth
 ('A4-hoch-leer', 'A4-hoch.jpg', 0, 0, 595, 842, 44, 50, 511, 714, '', NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 503, 784, 11, 422, 74, 0, 422, 87, 0, 238, 54, 0, 238, 64, 0, 58, 50, 0, 540, 770, 0, 140, 800, 0, 155, 155, '', 120, 45, 77, 'A4hoch', 0, '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', NULL, '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm');
 SET @last_druckrahmen_id=LAST_INSERT_ID();
 INSERT INTO `druckrahmen2stelle` (`stelle_id`, `druckrahmen_id`) VALUES (@last_druckrahmen_id, @stelle_id);
+
+# Insert default cron_jobs
+INSERT INTO `cron_jobs` (`id`, `bezeichnung`, `beschreibung`, `time`, `query`, `function`, `url`, `user_id`, `stelle_id`, `aktiv`, `dbname`, `user`) VALUES
+(1, 'Leere tmp Verzeichnis', 'Löscht /var/www/tmp jeden Tag', '1 1 * * *', '', 'find /var/www/tmp -mtime +1 ! -path /var/www/tmp -exec rm -rf {} +', NULL, 0, 0, 1, '', 'gisadmin'),
+(2, 'Update Let\'s Encrypt Certificate', 'Führt regelmäßig certbot-auto renew zur Aktualisierung des https Zertifikates aus.', '0 0,12 * * *', '', 'python -c \'import random; import time; time.sleep(random.random() * 3600)\' && rm -rf /etc/apt/sources.list.d/* || true && /usr/local/certbot-auto renew -q', NULL, 0, 0, 1, '', 'root');
