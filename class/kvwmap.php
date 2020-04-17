@@ -9154,6 +9154,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$results = $this->Datensatz_Loeschen($layerdb, $layer, $attributes, $oid);
 		echo '█';
 		if($reload_object != '')echo 'reload_subform_list(\''.$reload_object.'\', 0);';
+		if(!empty($results[0])){
+			echo 'message('.json_encode($results).');';
+		}
 	}
 
 	function layer_Datensaetze_loeschen($output = true) {
