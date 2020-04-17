@@ -4,13 +4,9 @@
 $layerset = $this->layerset['list'];
 
 $SVGvars_querytooltipscript = '
-
-		var layerset = new Array();
 		var layernumber = new Array();';
 for($i = 0; $i < count($layerset); $i++){
 	if($layerset[$i]['Layer_ID'] != ''){
-		$SVGvars_querytooltipscript.= 'layerset['.$i.'] = top.document.getElementById("qLayer'.$layerset[$i]['Layer_ID'].'");
-		';
 		$SVGvars_querytooltipscript.= 'layernumber['.$i.'] = '.$layerset[$i]['Layer_ID'].';
 		';
 	}
@@ -239,8 +235,9 @@ $SVGvars_querytooltipscript .= '
 			if(doing == "ppquery" && mouse_down == false && tooltipstate == "ready_for_request" && prevent != 1){ 		// wenn bereit fuer Request
 				if(Math.abs(oldmousex-mousex) < 1 && Math.abs(oldmousey-mousey) < 1){		// Maus stillhalten
 					tooltipstate = "request_sent";
-					for(i = 0; i < layerset.length; i++){
-						if(layerset[i] != undefined && layerset[i].checked){
+					for(i = 0; i < layernumber.length; i++){
+						query_layer_field = top.document.getElementById("qLayer"+layernumber[i]);
+						if(query_layer_field != undefined && query_layer_field.checked){
 							querylayer += "&qLayer"+layernumber[i]+"=1";
 						}
 					}
