@@ -86,9 +86,7 @@
 									}
 								} ?>
 							</th>
-							<td colspan="5" align="right" style="border-top:1px solid #808080; margin:0px;">
-								<a href="#oben"><img src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a>
-							</td>
+							<td colspan="5" align="right" style="border-top:1px solid #808080;"></td>
 						</tr>
 						<? }
 						}      
