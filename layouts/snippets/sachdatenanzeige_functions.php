@@ -334,7 +334,10 @@ include('funktionen/input_check_functions.php');
 	druck = function(){
 		enclosingForm.target = '_blank';
 		enclosingForm.printversion.value = 'true';
+		enclosingForm.go.value = 'get_last_query';
 		enclosingForm.submit();
+		enclosingForm.target = '';
+		enclosingForm.printversion.value = '';
 	}
 	
 	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen, weiter_erfassen_params){
