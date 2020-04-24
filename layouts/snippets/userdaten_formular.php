@@ -45,8 +45,7 @@
 </script>
 <div id="userdaten_formular" class="">
 	<input type="hidden" name="go" value="Benutzerdaten">
-	<input type="hidden" name="selstellen" value="<? echo implode(', ', $this->formvars['selstellen']["ID"]); ?>"><?
-	$active_stelle = array_search($this->userdaten[0]['stelle_id'], $this->formvars['selstellen']["ID"]); ?>
+	<input type="hidden" name="selstellen" value="<? echo implode(', ', $this->formvars['selstellen']["ID"]); ?>">
 
 	<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
@@ -233,7 +232,8 @@ else {
 			</table>
 		</td>
 	</tr><?
-	if ($this->formvars['selected_user_id'] > 0) { ?>
+	if ($this->formvars['selected_user_id'] > 0) {
+		$active_stelle = array_search($this->userdaten[0]['stelle_id'], $this->formvars['selstellen']["ID"]);		?>
 		<tr>
 			<td>
 				<table border="0" cellspacing="0" cellpadding="5" style="width: 100%;border:1px solid #C3C7C3">
