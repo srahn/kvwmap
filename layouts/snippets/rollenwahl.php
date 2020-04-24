@@ -189,7 +189,8 @@ if ($this->Fehlermeldung!='') {
 										</td>
 									</tr><?
 								}
-								if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) { ?>
+								if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) {
+									if($this->user->Name != 'gast'){ ?>
 									<tr>
 										<td valign="top" class="rollenwahl-option-header">
 											<? echo $strPassword; ?>:
@@ -240,6 +241,7 @@ if ($this->Fehlermeldung!='') {
 											</div>
 										</td>
 									</tr>
+									<? } ?>
 									<tr>
 										<td class="rollenwahl-option-header">
 											<? echo $strLanguage; ?>:
