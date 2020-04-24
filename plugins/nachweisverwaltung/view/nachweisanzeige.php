@@ -464,7 +464,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 				
         ?>>	
 				<? if($this->nachweis->Dokumente[$i]['bemerkungen'] != ''){ ?>
-					<i class="fa fa-exclamation-circle" style="font-size: 19px; color: orange"  title="Bemerkungen: <? echo $this->nachweis->Dokumente[$i]['bemerkungen']; ?>"></i>
+					<i class="fa fa-exclamation-circle" style="font-size: 19px; color: orange"  title="Bemerkungen: <? echo htmlentities($this->nachweis->Dokumente[$i]['bemerkungen']); ?>"></i>
 				<? } ?>
 					<i class="fa fa-exclamation-circle bearbeitungshinweise" style="<? if($this->nachweis->Dokumente[$i]['bemerkungen_intern'] != '')echo 'color: red'; ?>" onclick="open_bearbeitungshinweise_form(<? echo $this->nachweis->Dokumente[$i]['id']; ?>);" title="Bearbeitungshinweise:&#13;<? echo $this->nachweis->Dokumente[$i]['bemerkungen_intern']; ?>"></i>
 					<div style="position:relative">
