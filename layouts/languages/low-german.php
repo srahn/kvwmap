@@ -1,5 +1,6 @@
 <?php
 	$this->strAnd = "un";
+	$this->strHelp = 'Help';
 	$this->strID="ID";
 	$this->strChoose="Beed utsöken";
 	$this->strChange="Ännern";

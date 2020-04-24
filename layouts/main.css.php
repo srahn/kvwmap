@@ -5,7 +5,29 @@
 	global $sizes;
 	$size = $sizes[$_REQUEST['gui']];
 ?>
-	
+
+.clear {
+	clear: both;
+}
+
+.form-field {
+	font-family: SourceSansPro1;
+}
+
+.form-label {
+	float: left;
+	font-size: 17px;
+	width: 32%;
+	text-align: right;
+}
+
+.form-value {
+	float: left;
+	margin-left: 10px;
+	font-size: 15px;
+	line-height: 16px;
+}
+
 @font-face {
 	font-family: 'SourceSansPro';
 	font-style: normal;

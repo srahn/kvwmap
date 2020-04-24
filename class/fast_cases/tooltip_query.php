@@ -56,16 +56,17 @@ function InchesPerUnit($unit, $center_y){
 	}
 }
 
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL) {
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
 		}
 	}
-	if (!is_null($user_id))				 $str = str_replace('$user_id', $user_id, $str);
-	if (!is_null($stelle_id))			 $str = str_replace('$stelle_id', $stelle_id, $str);
-	if (!is_null($hist_timestamp)) $str = str_replace('$hist_timestamp', $hist_timestamp, $str);
-	if (!is_null($language))			 $str = str_replace('$language', $language, $str);
+	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
+	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
+	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
+	if (!is_null($language))						$str = str_replace('$language', $language, $str);
+	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	return $str;
 }
 
@@ -1014,22 +1015,22 @@ class rolle {
 		}else return 0;
   }
 
-  function getLayer($LayerName) {
+	function getLayer($LayerName) {
 		global $language;
 
-    # Abfragen der Layer in der Rolle
+		# Abfragen der Layer in der Rolle
 		if($language != 'german') {
 			$name_column = "
 			CASE
-				WHEN `l.Name_" . $language . "` != \"\" THEN `l.Name_" . $language . "`
-				ELSE `l.Name`
-			END AS l.Name";
+				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
+				ELSE l.`Name`
+			END AS Name";
 		}
 		else
 			$name_column = "l.Name";
 
 		if ($LayerName != '') {
-			$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "'";
+			$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "'";
 			if(is_numeric($LayerName))
 				$layer_name_filter .= " OR l.Layer_ID = " . $LayerName;
 			$layer_name_filter .= ")";
@@ -1039,19 +1040,20 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, `schema`, document_path, connection, printconnection,
-				connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
+				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, classification, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
+				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
+				l.labelitem as original_labelitem,
+				l.duplicate_from_layer_id,
+				l.duplicate_criterion,
 				ul.`postlabelcache`,
 				`Filter`,
-				CASE r2ul.gle_view
-					WHEN '0' THEN 'generic_layer_editor.php'
-					ELSE ul.`template`
-				END as template,
+				r2ul.gle_view,
+				ul.`template`,
 				`header`,
 				`footer`,
 				ul.`symbolscale`,
@@ -1060,11 +1062,14 @@ class rolle {
 				ul.`privileg`,
 				ul.`export_privileg`,
 				`start_aktiv`,
-				r2ul.showclasses
+				r2ul.showclasses,
+				r2ul.rollenfilter,
+				r2ul.geom_from_layer
 			FROM
-				layer AS l,
 				used_layer AS ul,
-				u_rolle2used_layer as r2ul
+				u_rolle2used_layer as r2ul,
+				layer AS l
+				LEFT JOIN connections as c ON l.connection_id = c.id
 			WHERE
 				l.Layer_ID=ul.Layer_ID AND
 				r2ul.Stelle_ID=ul.Stelle_ID AND
@@ -1075,33 +1080,44 @@ class rolle {
 			ORDER BY
 				ul.drawingorder desc
 		";
-#		echo $sql.'<br>';
-    $this->debug->write("<p>file:users.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		#echo $sql.'<br>';
+		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
 		while ($rs=mysql_fetch_assoc($query)) {
-			foreach(array('Name', 'alias', 'connection') AS $key) {
+			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
+				if($rs['Filter'] == ''){
+					$rs['Filter'] = '('.$rs['rollenfilter'].')';
+				}
+				else {
+					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
+				}
+			}
+			foreach(array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,
 					$this->user->id,
 					$this->stelle_id,
 					rolle::$hist_timestamp,
-					$this->user->rolle->language
+					$this->user->rolle->language,
+					$rs['duplicate_criterion']
 				);
 			}
 			$layer[$i]=$rs;
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
-    }
-    return $layer;
-  }
-}
+		}
+		return $layer;
+	}
 
 	function getRollenLayer($LayerName, $typ = NULL) {
-    $sql ="SELECT l.*, -l.id as Layer_ID, l.query as pfad, 1 as queryable FROM rollenlayer AS l";
+		$sql ="
+			SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, gle_view,
+				concat('(', rollenfilter, ')') as Filter
+			FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
     if ($LayerName!='') {
       $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
@@ -1116,15 +1132,16 @@ class rolle {
 			$sql .= " AND Typ = '".$typ."'";
 		}
     #echo $sql.'<br>';
-    $this->debug->write("<p>file:users.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
+    $this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
-    while ($rs=mysql_fetch_array($query)) {
+    while ($rs=mysql_fetch_assoc($query)) {
       $layer[]=$rs;
     }
     return $layer;
   }
+}
 
 class pgdatabase {
 

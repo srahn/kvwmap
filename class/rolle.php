@@ -94,6 +94,8 @@ class rolle {
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
 				l.labelitem as original_labelitem,
+				l.duplicate_from_layer_id,
+				l.duplicate_criterion,
 				ul.`postlabelcache`,
 				`Filter`,
 				r2ul.gle_view,
@@ -138,14 +140,15 @@ class rolle {
 					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
 				}
 			}
-			foreach(array('Name', 'alias', 'connection', 'classification') AS $key) {
+			foreach(array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,
-					$this->user->id,
+					$this->user_id,
 					$this->stelle_id,
 					rolle::$hist_timestamp,
-					$this->user->rolle->language
+					$this->language,
+					$rs['duplicate_criterion']
 				);
 			}
 			$layer[$i]=$rs;

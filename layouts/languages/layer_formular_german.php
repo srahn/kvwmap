@@ -2,6 +2,12 @@
 	$strLayer="Layer";
 	$strAsteriskRequired="Werte mit * mussen eingetragen werden";
 	$strLayerID="Layer ID*";
+	$strDuplicateTableFieldsOpenTitle = 'Zeige Felder zum duplizieren von Layereinstellungen.';
+	$strDuplicateTableFieldsCloseTitle = 'Schließe Felder zum duplizieren von Layereinstellungen.';
+	$strDuplicateFromLayerId = 'Von Layer duplizieren';
+	$strDuplicateFromLayerIdHelp = 'ID des Originallayers von dem dieser Layer dupliziert wurde. Wird der Originallayer im Editor geändert, werden dessen Einstellungen (außer Layer ID, von Layer duplizieren, Unterscheidungskriterium, Name, Alias und Gruppe) auf diesen Layer übertragen. Geben Sie ein Unterscheidungskriterium ein und platzieren Sie es in Pfad und Data um die Unterschiede zwischen den Duplikaten zu definieren, z.B. ein unterschiedlicher Ausdruck in der WHERE Klausel. Diese Funktion kann verwendet werden, wenn man den gleichen Layer mehrmals haben möchte nur mit unterschiedlichen Namen, Gruppe und Filter';
+	$strDuplicateCriterion = 'Unterscheidungskriterium';
+	$strDuplicateCriterionHelp = 'Dieser Ausdruck ersetzt den Parameter $duplicate_criterion in Pfad und Data, falls dort vorhanden, zur Unterscheidung dieses Layers vom Original und anderen Layern, die vom gleichen Original dupliziert wurden.';
 	$strName="Name";
 	$strDataType="Datentyp*";
 	$strGroup="Gruppe*";
