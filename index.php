@@ -1253,7 +1253,9 @@ function go_switch($go, $exit = false) {
 
 			case 'Layereditor_Speichern' : {
 				$GUI->checkCaseAllowed('Layereditor');
-				$GUI->LayerAendern();
+				include(CLASSPATH . 'Layer.php');
+				$GUI->LayerAendern($GUI->formvars);
+				$GUI->Layereditor();
 			} break;
 
 			case 'Klasseneditor' : {
@@ -1288,7 +1290,14 @@ function go_switch($go, $exit = false) {
 
 			case 'Attributeditor_speichern' : {
 				$GUI->checkCaseAllowed('Attributeditor');
-				$GUI->Attributeditor_speichern();
+				if (!empty($GUI->formvars['selected_layer_id']) AND empty($GUI->formvars['selected_datatype_id'])) {
+					include(CLASSPATH . 'Layer.php');
+					$GUI->save_layers_attributes($GUI->formvars);
+				}
+				if (empty($GUI->formvars['selected_layer_id']) AND !empty($this->formvars['selected_datatype_id'])) {
+					$GUI->Datentypattribute_speichern();
+				}
+				$GUI->Attributeditor();
 			} break;
 
 			case 'Attributeditor_Attributeinstellungen für ausgewählten Layer übernehmen' : {
@@ -1368,7 +1377,9 @@ function go_switch($go, $exit = false) {
 
 			case 'Layerattribut-Rechteverwaltung_speichern' : {
 				$GUI->checkCaseAllowed('Layerattribut-Rechteverwaltung');
-				$GUI->layer_attributes_privileges_save();
+				include(CLASSPATH . 'Layer.php');
+				$GUI->save_layers_attribute_privileges($GUI->formvars);
+				$GUI->layer_attributes_privileges();
 			} break;
 
 			case 'Layerattribut-Rechteverwaltung_Attributrechte für ausgewählten Layer übernehmen' : {

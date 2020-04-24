@@ -11,6 +11,8 @@
 	Text[3] = ["Hilfe:","Das Data-Feld wird vom Mapserver für die Kartendarstellung verwendet (siehe Mapserver-Doku). Etwaige Schemanamen müssen hier angegeben werden."];
 	Text[4] = ["Hilfe:","Bei Punktlayern kann durch Angabe dieses Wertes die Clusterbildung aktiviert werden. Der Wert ist der Radius in Pixeln, in dem Punktobjekte zu einem Cluster zusammengefasst werden. <br>Damit die Cluster dargestellt werden können, muss es eine Klasse mit der Expression \"('[Cluster:FeatureCount]' != '1')\" geben. Cluster:FeatureCount kann auch als Labelitem verwendet werden, um die Anzahl der Punkte pro Cluster anzuzeigen."];	
 	Text[5] = ["Hilfe:","Hier muss die Spalte aus der Haupttabelle angegeben werden, mit dem die Datensätze identifiziert werden können (z.B. der Primärschlüssel oder die oid)."];
+	Text['duplicate_from_layer_id'] = ['<? echo $this->strHelp; ?>', '<? echo $strDuplicateFromLayerIdHelp; ?>'];
+	Text['duplicate_criterion'] = ['<? echo $this->strHelp; ?>', '<? echo $strDuplicateCriterionHelp; ?>'];
 
 	function updateConnection(){
 		if(document.getElementById('connectiontype').value == 6){
@@ -92,7 +94,11 @@
 	#form input[type="text"], #form select, #form textarea{
 		width: 340px;
 	}
-		
+
+	#form input[type="numeric"] {
+		width: 34px;
+	}
+
 	#stellenzuweisung{
 		display: none;
 		width: 100%;
@@ -152,8 +158,58 @@
 					<tr>
 						<th class="fetter" width="300px" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLayerID; ?></th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="id" type="text" value="<?php echo $this->formvars['selected_layer_id']; ?>" size="50" maxlength="11">
+							<input name="id" type="text" value="<?php echo $this->formvars['selected_layer_id']; ?>" size="5" maxlength="11">
 							<input name="old_id" type="hidden" value="<?php echo $this->formvars['selected_layer_id']; ?>">
+							<i id="show_duplicate_table_field_button" class="fa fa-clone" aria-hidden="true" onclick="$('.duplicate-table-fields').show(); $(this).hide();" style="float: right; <? echo ($this->formvars['duplicate_criterion'] != '' ? 'display: none' : ''); ?>" title="<? echo $strDuplicateTableFieldsOpenTitle; ?>"></i>
+						</td>
+					</tr>
+					<tr class="duplicate-table-fields" style="<? echo ($this->formvars['duplicate_criterion'] == '' ? 'display: none' : ''); ?>">
+						<td colspan="3" style="border-bottom:1px solid #C3C7C3">
+							<div class="form-field">
+								<div class="form-label fetter">
+									<label><? echo $strDuplicateFromLayerId; ?></label>
+								</div>
+								<div class="form-value"><?
+									$duplicate_from_layer_options = array();
+									foreach ($this->layerdaten['ID'] AS $index => $layer_id) {
+										if ($layer['ID'] != $this->formvars['selected_layer_id']) {
+											$duplicate_from_layer_options[] = array(
+												'value' => $layer_id,
+												'output' => $this->layerdaten['Bezeichnung'][$index] . ($this->layerdaten['alias'][$index] ? ' (' . $this->layerdaten['alias'][$index] . ')' : '')
+											);
+										}
+									}
+									echo FormObject::createSelectField(
+										'duplicate_from_layer_id',
+										$duplicate_from_layer_options,
+										$this->formvars['duplicate_from_layer_id'],
+										1,
+										'',
+										'',
+										'',
+										'',
+										'',
+										'nicht duplizieren'
+									); ?>&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text['duplicate_from_layer_id'], Style[0], document.getElementById('TipDuplicateLayerId'))" onmouseout="htm()">
+									<div id="TipDuplicateLayerId" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+								</div>
+							</div>
+							<i class="fa fa-close" aria-hidden="true" onclick="$('.duplicate-table-fields').hide(); $('#show_duplicate_table_field_button').show();" style="float: right" title="<? echo $strDuplicateTableFieldsCloseTitle; ?>"></i>
+							<div class="clear"></div>
+						</td>
+					</tr>
+					<tr class="duplicate-table-fields" style="<? echo ($this->formvars['duplicate_criterion'] == '' ? 'display: none' : ''); ?>">
+						<td colspan="3" style="border-bottom:1px solid #C3C7C3">
+							<div class="form-field">
+								<div class="form-label fetter">
+									<label><?php echo $strDuplicateCriterion; ?></label>
+								</div>
+								<div class="form-value">
+									<input name="duplicate_criterion" type="text" value="<?php echo $this->formvars['duplicate_criterion']; ?>" size="50" maxlength="255">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text['duplicate_criterion'], Style[0], document.getElementById('TipDuplicateCriterion'))" onmouseout="htm()">
+									<div id="TipDuplicateCriterion" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+								</div>
+							</div>
+							<div class="clear"></div>
 						</td>
 					</tr>
 					<tr>

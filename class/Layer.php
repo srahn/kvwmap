@@ -35,6 +35,39 @@ class Layer extends MyObject {
 		return $result[0];
 	}
 
+	/**
+	* This function return the layer id's of the duplicates of a layer
+	* @param mysql_connection object
+	* @param integer $duplicate_from_layer_id The layer id from witch the others are duplicates
+	* @param array(integer) The layer_ids of the duplicates
+	*/
+	public static function find_by_duplicate_from_layer_id($database, $duplicate_from_layer_id) {
+		$duplicate_layer_ids = array();
+		$sql =  "
+			SELECT
+				`Layer_ID`
+			FROM
+				`layer`
+			WHERE
+				`duplicate_from_layer_id` = " . $duplicate_from_layer_id . "
+				AND `Layer_ID` != `duplicate_from_layer_id`
+		";
+		# letzte Where Bedinung, damit keine Entlosschleifen entstehen beim Aufruf von update_layer falls
+		# Layer_ID fälschlicherweise identisch sein sollte mit duplicate_layer_id was nicht passieren sollte
+		# wenn das Layerformular genutzt wurde.
+		#echo  MyObject::$write_debug ? 'Layer find_by_duplicate_from_layer_id sql:<br> ' . $sql : '';
+		$ret = $database->execSQL($sql, 4, 1, true);
+		if (!$ret['success']) {
+			$database->gui->add_message('error', $ret[1]);
+		}
+		else {
+			while ($rs = mysql_fetch_assoc($ret[1])) {
+				$duplicate_layer_ids[] = $rs['Layer_ID'];
+			}
+		}
+		return $duplicate_layer_ids;
+	}
+
 	/*
 	* Diese Funktion legt vom aktuellen layer Objekt einen neuen Layer an
 	* mit der übergebenen Layergruppe sowie alle seine zugehörigen Klassen und layer_attributes.
