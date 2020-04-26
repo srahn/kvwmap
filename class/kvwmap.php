@@ -10908,7 +10908,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	/**
 	* Funktion speichert die Einstellungen der Attribute aus dem Attributeditor Form für
 	* die Attribute von for_attributes_selected_layer_id. Die Einstellungen können von einem anderen Layer stammen.
-	* Vor Layerattribute_speichern wird als selected_layer_id for_attributes_selected_layer_id genommen.
+	* Vor save_layer_attributes wird als selected_layer_id for_attributes_selected_layer_id genommen.
 	* Damit werden die Attribute von dem Layer abgefragt, für die die Formularwerte übernommen werden sollen.
 	* Nach dem Speichern wird der Attributeditor für den layer mit for_attributes_selected_layer_id geöffnet.
 	*/
@@ -10917,7 +10917,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$to_layer_id = $this->formvars['for_attributes_selected_layer_id'];
 		$this->formvars['selected_layer_id'] = $to_layer_id;
 		$this->add_message('info', 'Einstellungen der Attribute von Layer ID: ' . $from_layer_id . ' für die Attribute des Layers ID: ' . $to_layer_id . ' übernommen.<br>Ordne Attribute ohne Einstellungen neu ein!');
-		$this->Layerattribute_speichern();
+		$this->save_layer_attributes($this->formvars);
 		$this->Attributeditor();
 	}
 
