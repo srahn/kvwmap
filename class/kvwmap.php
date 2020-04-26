@@ -7924,7 +7924,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$attributes = $mapDB->load_attributes(
 						$layerdb,
 						replace_params(
-							$formvars['path'],
+							$formvars['pfad'],
 							$all_layer_params,
 							$this->user->id,
 							$this->Stelle->id,
