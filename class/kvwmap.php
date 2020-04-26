@@ -18213,7 +18213,7 @@ class db_mapObj{
 					'" . $formvars['trigger_function'] . "',
 					" . ($formvars['sync'] == '' ? 0 : "'" . $formvars['sync'] . "'") . ",
 			 		" . ($formvars['listed'] == '' ? 0 : "'" . $formvars['listed'] . "'") . ",
-					" . ($formvars['duplicate_from_layer_id'] == '' ? NULL : $formvars['duplicate_from_layer_id']) . ",
+					" . ($formvars['duplicate_from_layer_id'] == '' ? "NULL" : $formvars['duplicate_from_layer_id']) . ",
 					'" . $formvars['duplicate_criterion'] . "'
 				)
 			";
