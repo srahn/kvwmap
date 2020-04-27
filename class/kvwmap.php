@@ -17031,6 +17031,7 @@ class db_mapObj{
         $select = stristr($select, 'select');
       }
     }
+		return $select;
   }
 
 	function getDataAttributes($database, $layer_id, $ifEmptyUseQuery = false) {
