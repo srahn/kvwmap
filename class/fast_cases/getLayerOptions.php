@@ -859,60 +859,40 @@ class db_mapObj {
 		return $layerdb;
 	}
 
-  function getDataAttributes($database, $layer_id, $ifEmptyUseQuery = false){
-    $data = $this->getData($layer_id);
-    if($data != ''){
-      $select = $this->getSelectFromData($data);
-      if($database->schema != ''){
-      	$select = str_replace($database->schema.'.', '', $select);
-      }
-      $ret = $database->getFieldsfromSelect($select);
+	function getDataAttributes($database, $layer_id, $ifEmptyUseQuery = false) {
+		$data = $this->getData($layer_id);
+		if ($data != '') {
+			$select = $this->getSelectFromData($data);
+			if ($database->schema != '') {
+				$select = str_replace($database->schema.'.', '', $select);
+			}
+			$ret = $database->getFieldsfromSelect($select);
 			if ($ret[0]) {
 				$this->GUI->add_message('error', $ret[1]);
 			}
-      return $ret[1];
-    }
-    elseif($ifEmptyUseQuery){
-			$path = replace_params(
-				$this->getPath($layer_id),
-				$all_layer_params,
-				$this->User_ID,
-				$this->Stelle_ID,
-				rolle::$hist_timestamp,
-				$this->user->rolle->language,
-        $rs['duplicate_criterion']
-			);
-			return $this->getPathAttributes($database, $path);
+			return $ret[1];
 		}
-		else{
-      echo 'Das Data-Feld des Layers mit der Layer-ID '.$layer_id.' ist leer.';
-      return NULL;
-    }
-  }
+		elseif ($ifEmptyUseQuery){
+			return $this->getPathAttributes($database, $this->getPath($layer_id));
+		}
+		else {
+			echo 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.';
+			return NULL;
+		}
+	}
 
   function getData($layer_id){
-  	if($layer_id < 0){	# Rollenlayer
-  		$sql = "
-				SELECT
-					Data
-				FROM
-					rollenlayer
-				WHERE
-					-id = " . $layer_id . "
-			";
-  	}
-  	else{
-    	$sql = "
-				SELECT
-					Data
-				FROM
-					layer
-				WHERE
-					Layer_ID = " . $layer_id . "
-			";
-  	}
-  	#echo $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->getData - Lesen des Data-Statements des Layers:<br>".$sql,4);
+		$sql = "
+			SELECT
+				`Data`,
+				`duplicate_criterion`
+			FROM
+				`" . ($layer_id < 0 ? "rollenlayer" : "layer") . "`
+			WHERE
+				" . ($layer_id < 0 ? "-id" : "`Layer_ID`") . " = " . $layer_id . "
+		";
+		#echo $sql;
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->getData - Lesen des Data-Statements des Layers:<br>" . $sql,4);
     $query=mysql_query($sql);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs = mysql_fetch_assoc($query);
@@ -922,7 +902,8 @@ class db_mapObj {
 			$this->User_ID,
 			$this->Stelle_ID,
 			rolle::$hist_timestamp,
-			$this->rolle->language
+			$this->rolle->language,
+			$rs['duplicate_criterion']
 		);
     return $data;
   }
