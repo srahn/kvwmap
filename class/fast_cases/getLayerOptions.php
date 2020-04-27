@@ -879,7 +879,8 @@ class db_mapObj {
 				$this->User_ID,
 				$this->Stelle_ID,
 				rolle::$hist_timestamp,
-				$this->user->rolle->language
+				$this->user->rolle->language,
+        $rs['duplicate_criterion']
 			);
 			return $this->getPathAttributes($database, $path);
 		}
