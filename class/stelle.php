@@ -922,7 +922,7 @@ class stelle {
 					layer
 				WHERE
 					Layer_ID = " . $layer_ids[$i];
-			#echo '<br>' . $sql;
+			#echo '<br>SQL zur Zuordnung eines Layers zur Stelle: ' . $sql;
 			$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
