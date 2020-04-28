@@ -3050,9 +3050,10 @@ echo '			</ul>
     	$data_attributes = $mapDB->getDataAttributes($layerdb, $layer['Layer_ID']);
 			$geom = $data_attributes['the_geom'];
     	$select = $mapDB->getSelectFromData($layer['Data']);
-			$select = str_replace(' FROM ', ' from ', $select);
-
-			if($this->formvars['geom_from_layer'] > 0)$select = str_replace(' from ', ', '.$data_attributes[$data_attributes['the_geom_id']]['table_alias_name'].'.oid as exclude_oid'.' from ', $select);		# bei Rollenlayern nicht machen
+			$select = preg_replace ("/ FROM /", ' from ', $select);
+			if ($this->formvars['geom_from_layer'] > 0) {
+				$select = str_replace_last(' from ', ', ' . $data_attributes[$data_attributes['the_geom_id']]['table_alias_name'] . '.oid as exclude_oid' . ' from ', $select); # bei Rollenlayern nicht machen
+			}
 
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$geom.', '.$extent.') ';
 			if($layer['Datentyp'] !== '1' AND $this->formvars['geom_from_layer'] > 0 AND $this->formvars['oid']){		# bei Linienlayern werden auch die eigenen Punkte geholt, bei Polygonen nicht
@@ -3100,7 +3101,7 @@ echo '			</ul>
 				) foo1
 			) foo2 
 			LIMIT 10000';
-		#echo $sql;
+		#echo '<p>SQL zur Abfrage von Vertexes: '. $sql;
 		$ret=$layerdb->execSQL($sql,4, 0);
 		if(!$ret[0]){
 			while ($rs=pg_fetch_array($ret[1])){
@@ -11673,7 +11674,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	function MenueSpeichern() {
 		$this->menue = new Menue($this);
 		$this->menue->data = formvars_strip($this->formvars, $this->menue->setKeysFromTable(), 'keep');
-
 		$this->menue->set('title', $this->formvars['title']);
 		$results = $this->menue->validate();
 		if (empty($results)) {
