@@ -1893,4 +1893,21 @@ function is_true($val) {
 	}
 }
 
+/**
+* Replacing part of a string with another string is straight forward, but what if you have to replace last occurrence of a character or string with another string.
+* https://pageconfig.com/post/replace-last-occurrence-of-a-string-php
+* In case the $search is not found inside the $str, the function returns the original untouched string $str.
+* This behavior is compatible with the default behavior of str_replace PHP’s builtin function that replaces all
+* occurrances of a string inside another string.
+* @param string $search keeps the string to be searched for
+* @param string $replace Is the replacement string
+* @param string $str Is the subject string, commonly known as haystack
+*/
+function str_replace_last($search , $replace, $str) {
+  if (($pos = strrpos($str, $search)) !== false) {
+    $search_length  = strlen( $search );
+    $str    = substr_replace( $str , $replace , $pos , $search_length );
+  }
+  return $str;
+}
 ?>

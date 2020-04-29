@@ -3050,9 +3050,10 @@ echo '			</ul>
     	$data_attributes = $mapDB->getDataAttributes($layerdb, $layer['Layer_ID']);
 			$geom = $data_attributes['the_geom'];
     	$select = $mapDB->getSelectFromData($layer['Data']);
-			$select = str_replace(' FROM ', ' from ', $select);
-
-			if($this->formvars['geom_from_layer'] > 0)$select = str_replace(' from ', ', '.$data_attributes[$data_attributes['the_geom_id']]['table_alias_name'].'.oid as exclude_oid'.' from ', $select);		# bei Rollenlayern nicht machen
+			$select = preg_replace ("/ FROM /", ' from ', $select);
+			if ($this->formvars['geom_from_layer'] > 0) {
+				$select = str_replace_last(' from ', ', ' . $data_attributes[$data_attributes['the_geom_id']]['table_alias_name'] . '.oid as exclude_oid' . ' from ', $select); # bei Rollenlayern nicht machen
+			}
 
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$geom.', '.$extent.') ';
 			if($layer['Datentyp'] !== '1' AND $this->formvars['geom_from_layer'] > 0 AND $this->formvars['oid']){		# bei Linienlayern werden auch die eigenen Punkte geholt, bei Polygonen nicht
@@ -3100,7 +3101,7 @@ echo '			</ul>
 				) foo1
 			) foo2 
 			LIMIT 10000';
-		#echo $sql;
+		#echo '<p>SQL zur Abfrage von Vertexes: '. $sql;
 		$ret=$layerdb->execSQL($sql,4, 0);
 		if(!$ret[0]){
 			while ($rs=pg_fetch_array($ret[1])){
@@ -7908,6 +7909,13 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
   }
 
+  /**
+  * This function update layers settings of $formvars['selected_layer_id'] and
+  * duplicate all layer that have it in duplicate_from_layer_id
+  * if $duplicate is false it updates also assignments to stelle for selected_layer
+  * @param array $formvars Formular variables used to change the layer
+  * @param boolean $duplicate True if the layer is a duplicate from another
+  */
 	function LayerAendern($formvars, $duplicate = false) {
 		global $supportedLanguages;
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
@@ -7968,41 +7976,44 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$mapDB->delete_old_attributes($formvars['selected_layer_id'], $attributes);
 			}
 		}
-    # Stellenzuweisung
-		$stellen = $this->Stellenzuweisung(
-      array($formvars['selected_layer_id']),
-      explode(', ', $formvars['selstellen']),
-			NULL,
-			$formvars['assign_default_values']
-    );
-		if ($formvars['assign_default_values']) {
-			$this->add_message('notice', 'Die Defaultwerte wurden an die zugeordneten Stellen übertragen.');
-		}
-    # Löschen der in der Selectbox entfernten Stellen
-    $layerstellen = $mapDB->get_stellen_from_layer($formvars['selected_layer_id']);
-    for ($i = 0; $i < count($layerstellen['ID']); $i++){
-      $found = false;
-      for($j = 0; $j < count($stellen); $j++){
-        if($stellen[$j] == $layerstellen['ID'][$i]){
-          $found = true;
+
+		if (!$duplicate) {
+      # Stellenzuweisung
+  		$stellen = $this->Stellenzuweisung(
+        array($formvars['selected_layer_id']),
+        explode(', ', $formvars['selstellen']),
+  			NULL,
+  			$formvars['assign_default_values']
+      );
+  		if ($formvars['assign_default_values']) {
+  			$this->add_message('notice', 'Die Defaultwerte wurden an die zugeordneten Stellen übertragen.');
+  		}
+      # Löschen der in der Selectbox entfernten Stellen
+      $layerstellen = $mapDB->get_stellen_from_layer($formvars['selected_layer_id']);
+      for ($i = 0; $i < count($layerstellen['ID']); $i++){
+        $found = false;
+        for($j = 0; $j < count($stellen); $j++){
+          if($stellen[$j] == $layerstellen['ID'][$i]){
+            $found = true;
+          }
+        }
+        if($found == false){
+          $deletestellen[] = $layerstellen['ID'][$i];
         }
       }
-      if($found == false){
-        $deletestellen[] = $layerstellen['ID'][$i];
-      }
-    }
-    if ($deletestellen != 0){
-      for($i = 0; $i < count($deletestellen); $i++){
-        $stelle = new stelle($deletestellen[$i], $this->database);
-        $stelle->deleteLayer(array($formvars['selected_layer_id']), $this->pgdatabase);
-        $users = $stelle->getUser();
-        for($j = 0; $j < count($users['ID']); $j++){
-          $this->user->rolle->deleteLayer($users['ID'][$j], array($deletestellen[$i]), array($formvars['selected_layer_id']));
-          $this->user->rolle->updateGroups($users['ID'][$j],$deletestellen[$i], $formvars['selected_layer_id']);
+      if ($deletestellen != 0){
+        for($i = 0; $i < count($deletestellen); $i++){
+          $stelle = new stelle($deletestellen[$i], $this->database);
+          $stelle->deleteLayer(array($formvars['selected_layer_id']), $this->pgdatabase);
+          $users = $stelle->getUser();
+          for($j = 0; $j < count($users['ID']); $j++){
+            $this->user->rolle->deleteLayer($users['ID'][$j], array($deletestellen[$i]), array($formvars['selected_layer_id']));
+            $this->user->rolle->updateGroups($users['ID'][$j],$deletestellen[$i], $formvars['selected_layer_id']);
+          }
         }
       }
+      # /Löschen der in der Selectbox entfernten Stellen
     }
-    # /Löschen der in der Selectbox entfernten Stellen
 
 		$this->update_duplicate_layers($formvars);
 	}
@@ -11663,7 +11674,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	function MenueSpeichern() {
 		$this->menue = new Menue($this);
 		$this->menue->data = formvars_strip($this->formvars, $this->menue->setKeysFromTable(), 'keep');
-
 		$this->menue->set('title', $this->formvars['title']);
 		$results = $this->menue->validate();
 		if (empty($results)) {
@@ -17355,7 +17365,7 @@ class db_mapObj{
 		$attributes = $this->getPathAttributes($database, $path);
 		return $attributes;
 	}
-	
+
 	function save_attributes($layer_id, $attributes){
 		$insert_count = 0;
 		for ($i = 0; $i < count($attributes); $i++) {
@@ -17402,7 +17412,7 @@ class db_mapObj{
 			if(mysql_affected_rows() == 1)$insert_count++;		# ein neues Attribut wurde per Insert eingefügt
 			if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
 		}
-	}		
+	}
 
 	function save_postgis_attributes($layer_id, $attributes, $maintable, $schema){
 		$this->save_attributes($layer_id, $attributes);
@@ -17927,9 +17937,11 @@ class db_mapObj{
 	/**
 	* Function updateLayer($formvars array, $duplicate boolean)
 	* @param array @formvars Das Array mit Attributen des Layers die für den Update verwendet werden sollen
-	* @param boolean @duplicate Wenn true werden folgende Attribute nicht gespeichert weil es sich um ein
+	* @param boolean @duplicate Wenn true werden folgende Attribute nicht!! gespeichert weil es sich um ein
 	*		Duplikat von einem anderen Layer handelt:
 	*		alias, Gruppe, duplicate_from_layer_id, duplicate_criterion, Name und alle Namen in anderen Sprachen
+	*		und die Attribute für Default-Werte für Stellen-Zuweisung
+	*		template, queryable, transparency, drawingorder, legendorder, minscale, maxscale, symbolscale, offsite, requires, postlabelcache
 	*/
 	function updateLayer($formvars, $duplicate = false) {
 		global $supportedLanguages;
@@ -17955,6 +17967,17 @@ class db_mapObj{
 					'duplicate_from_layer_id',
 					'duplicate_criterion',
 					'Name',
+					'template',
+					'queryable',
+					'transparency',
+					'drawingorder',
+					'legendorder',
+					'minscale',
+					'maxscale',
+					'symbolscale',
+					'offsite',
+					'requires',
+					'postlabelcache'
 				) AS $key
 			) {
 				$attribute_sets[] = $key . " = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
@@ -17983,15 +18006,8 @@ class db_mapObj{
 		foreach(
 			array(
 				'cluster_maxdistance',
-				'transparency',
-				'drawingorder',
-				'legendorder',
 				'labelmaxscale',
 				'labelminscale',
-				'minscale',
-				'maxscale',
-				'symbolscale',
-				'requires',
 				'connection_id'
 			) AS $key
 		) {
@@ -18039,9 +18055,7 @@ class db_mapObj{
 				'tileitem',
 				'labelangleitem',
 				'labelitem',
-				'offsite',
 				'labelrequires',
-				'postlabelcache',
 				'printconnection',
 				'connectiontype',
 				'classitem',
@@ -18050,8 +18064,6 @@ class db_mapObj{
 				'tolerance',
 				'toleranceunits',
 				'epsg_code',
-				'template',
-				'queryable',
 				'ows_srs',
 				'wms_name',
 				'wms_keywordlist',
@@ -18082,7 +18094,7 @@ class db_mapObj{
 			WHERE
 				Layer_ID = " . $formvars['selected_layer_id'] . "
 		";
-		#echo '<br>Update Layer mit SQL: ' . $sql;
+		#echo '<br>SQL zum update eines Layers: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>" . $sql, 4);
 		$ret = $this->GUI->database->execSQL($sql, 4, 1, true);
 		if (!$ret['success']) {
@@ -18252,7 +18264,7 @@ class db_mapObj{
       $sql .= ")";
     }
 
-    #echo $sql;
+    #echo '<p>SQL zum Eintragen eines Layers: '. $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->newLayer - Erzeugen eines Layers:<br>" . $sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql, $this->connection); return 0; }

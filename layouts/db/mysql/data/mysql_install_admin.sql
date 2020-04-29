@@ -52,7 +52,7 @@ VALUES (
 # Referenzkarte eintragen
 INSERT INTO `referenzkarten` (`ID`,`Name` , `Dateiname` , `xmin` , `ymin` , `xmax` , `ymax` , `width` , `height`, `epsg_code`)
 VALUES (
- '1','Uebersichtskarte', 'uebersicht_mv.png', 201165, 5867815, 477900, 6081468, '205', '146', 25833
+ '1','Uebersichtskarte', 'uebersicht_mv.png', 204240, 5889964, 462705, 6063324, '205', '139', 25833
 );
 
 ############################################################################

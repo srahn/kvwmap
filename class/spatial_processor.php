@@ -54,7 +54,7 @@ class spatial_processor {
   }
 		
 	function split($geom_1, $geom_2){
-  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_collect(geom) as geom from (select (st_dump(st_split(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."')))).geom as geom) as foo) as fooo";
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT st_collect(geom) as geom from (select (st_dump(st_split(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."')))).geom as geom) as foo) as fooo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
@@ -66,7 +66,8 @@ class spatial_processor {
   }
   
   function union($geom_1, $geom_2){
-  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."')) as geom) as foo";
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."')) as geom) as foo";
+		#echo '<p>SQL zur Verschmelzung von Geometrien: ' . $sql;
   	$ret = $this->pgdatabase->execSQL($sql,4, 0, true);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
@@ -83,27 +84,33 @@ class spatial_processor {
 	* von Gaspare Sganga https://gasparesganga.com/labs/postgis-normalize-geometry/
 	* mit den in den Datenbanken-Konstanten NORMALIZE* angegebenen Werten
 	*/
-	function difference($geom_1, $geom_2){
+	function difference($geom_1, $geom_2, $normalize = true) {
+		$diff = "
+			st_difference(
+				st_geomfromtext('" . $geom_1 . "'),
+				st_geomfromtext('" . $geom_2 . "')
+			)
+		";
+
+		if ($normalize) {
+			$diff = "st_makevalid(
+					gdi_normalize_geometry(
+						" . $diff . ",
+						" . NORMALIZE_AREA_THRESHOLD . ",
+						" . NORMALIZE_ANGLE_THRESHOLD . ",
+						" . NORMALIZE_POINT_DISTANCE_THRESHOLD . ",
+						" . NORMALIZE_NULL_AREA . "
+					)
+				)
+			";
+		}
+
 		$sql = "
 			SELECT
 				st_astext(geom) as wkt,
-				st_assvg(geom, 0, 8) as svg
+				st_assvg(geom, 0, 15) as svg
 			FROM
-				(
-					SELECT
-						st_makevalid(
-							gdi_normalize_geometry(
-								st_difference(
-									st_geomfromtext('" . $geom_1 . "'),
-									st_geomfromtext('" . $geom_2 . "')
-								),
-								" . NORMALIZE_AREA_THRESHOLD . ",
-								" . NORMALIZE_ANGLE_THRESHOLD . ",
-								" . NORMALIZE_POINT_DISTANCE_THRESHOLD . ",
-								" . NORMALIZE_NULL_AREA . "
-							)
-						) as geom
-				) as foo
+				( SELECT " . $diff . " as geom ) as foo
 		";
 		$ret = $this->pgdatabase->execSQL($sql,4, 0, true);
 		if ($ret[0]) {
@@ -144,7 +151,7 @@ class spatial_processor {
   }
 	
 	function translate($geom, $x, $y){
-  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_translate(st_geomfromtext('".$geom."'), ".$x.", ".$y.") as geom) as foo";
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT st_translate(st_geomfromtext('".$geom."'), ".$x.", ".$y.") as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
@@ -156,7 +163,7 @@ class spatial_processor {
   }
 	
 	function reverse($geom){
-  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_reverse(st_geomfromtext('".$geom."')) as geom) as foo";
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT st_reverse(st_geomfromtext('".$geom."')) as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
@@ -409,7 +416,7 @@ class spatial_processor {
   	if(substr_count($geom_1, ',') == 1){			# wenn Polygon nur aus einem Eckpunkt besteht -> in POINT umwandeln -> Kreis entsteht
   		$geom_1 = $this->pointfrompolygon($geom_1);
   	}
-  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (select st_buffer(st_geomfromtext('".$geom_1."'), ".$width.") as geom) as foo";
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0, 15) as svg FROM (select st_buffer(st_geomfromtext('".$geom_1."'), ".$width.") as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
@@ -421,7 +428,7 @@ class spatial_processor {
   }
   
   function buffer_ring($geom_1, $width){
-  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (select st_difference(st_buffer(st_geomfromtext('".$geom_1."'), ".$width.", 16), st_geomfromtext('".$geom_1."')) as geom) as foo";
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0, 15) as svg FROM (select st_difference(st_buffer(st_geomfromtext('".$geom_1."'), ".$width.", 16), st_geomfromtext('".$geom_1."')) as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
@@ -440,7 +447,7 @@ class spatial_processor {
 		if($geom_1 == ''){
 			$geom_1 = 'GEOMETRYCOLLECTION EMPTY';
 		}
-  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT (st_union(st_geomfromtext('".$geom_1."'), st_intersection(st_geomfromtext('".$querygeometryWKT."'),  st_buffer(st_geomfromtext('".$formvars['path3']."'), (select st_distance(st_geomfromtext('".$formvars['path3']."'), st_geomfromtext('".$geom_2."'))), 16)))) as geom) as foo";
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT (st_union(st_geomfromtext('".$geom_1."'), st_intersection(st_geomfromtext('".$querygeometryWKT."'),  st_buffer(st_geomfromtext('".$formvars['path3']."'), (select st_distance(st_geomfromtext('".$formvars['path3']."'), st_geomfromtext('".$geom_2."'))), 16)))) as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
@@ -460,10 +467,10 @@ class spatial_processor {
 		}
 		if($width < 0){		# eine negative Breite bewirkt das Abziehen der Puffergeometrie von der aktuellen Geometrie
 			$width = $width * -1;
-			$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_difference(st_geomfromtext('".$geom_1."'), st_buffer(st_geomfromtext('".$geom_2."'), ".$width.")) as geom) as foo";
+			$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT st_difference(st_geomfromtext('".$geom_1."'), st_buffer(st_geomfromtext('".$geom_2."'), ".$width.")) as geom) as foo";
 		}
 		else{
-			$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_union(st_geomfromtext('".$geom_1."'), st_buffer(st_geomfromtext('".$geom_2."'), ".$width.")) as geom) as foo";
+			$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT st_union(st_geomfromtext('".$geom_1."'), st_buffer(st_geomfromtext('".$geom_2."'), ".$width.")) as geom) as foo";
 		}
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
@@ -484,7 +491,7 @@ class spatial_processor {
 			$width = -1 * $width;
 			$reverse = 'ST_Reverse';			// bei rechts die Richtung des Linienzugs umdrehen, damit das Polygon mit ST_Polygonize korrekt gebildet werden kann
 		}
-		$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg 
+		$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg 
 						FROM (
 							SELECT ".$operation."(
 								st_geomfromtext('".$geom_1."'),  
@@ -525,7 +532,7 @@ class spatial_processor {
   		$sql = "SELECT '".$point."'";
   	}																				# wkt liefert nur den Punkt, svg die Linie
   	else{
-  		$sql = "select st_assvg(snapline(linefrompoly(the_geom),st_geomfromtext('".$point."',2398)),0,5) AS Segment ";
+  		$sql = "select st_assvg(snapline(linefrompoly(the_geom),st_geomfromtext('".$point."',2398)), 0, 15) AS Segment ";
   	}
  		$sql .= $fromwhere;
   	$sql .= " AND st_within(st_geomfromtext('".$point."',2398), the_geom)"; 	

@@ -158,7 +158,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 				</tr>			
 				<tr>
 					<td align="center" height="30">
-						<input type="button" onclick="document.getElementById('data_import').style.display='';" value="Daten-Import">
+						<input type="button" onclick="document.getElementById('data_import').style.display='';" value="<? echo $strDataImport; ?>" title="<? echo $strDataImportTitle; ?>">
 						<div id="data_import" style="position: fixed; top: 50%; left: 50%; margin-top: -220px; margin-left: -300px;display: none;box-shadow: 6px 5px 7px #777;">
 							<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="document.getElementById('data_import').style.display='none';" title="Schlie&szlig;en"><img style="border:none" src="graphics/exit2.png"></img></a></div>
 							<? 
@@ -180,7 +180,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 				<? if($this->new_entry != true){ ?>
 				<tr> 
 					<td align="center" style="height: 40px">
-						<input type="button" name="senden2" value="<? echo $strSaveWithoutZoom; ?>" onclick="send('false');">&nbsp;<input type="button" name="senden" value="<? echo $strSave; ?>" onclick="send('true');"><br>
+						<input title="<? echo $strSaveWithoutZoom; ?>" type="button" name="senden2" value="<? echo $strSaveWithoutZoom; ?>" onclick="send('false');">&nbsp;<input title="<? echo $strSaveTitle; ?>" type="button" name="senden" value="<? echo $strSave; ?>" onclick="send('true');"><br>
 					</td>
 				</tr>
 				<? }else{ ?>
