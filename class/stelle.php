@@ -1416,10 +1416,9 @@ class stelle {
 		$fieldstring = get_select_parts($attributesstring);
 		$count = count($fieldstring);
 		for($i = 0; $i < $count; $i++){
-			if(strpos(strtolower($fieldstring[$i]), ' as ')){   # Ausdruck AS attributname
-				$explosion = explode(' as ', strtolower($fieldstring[$i]));
-				$attributename = trim(array_pop($explosion));
-				$real_attributename = implode(' as ', $explosion);
+			if($as_pos = strripos($fieldstring[$i], ' as ')){   # Ausdruck AS attributname
+				$attributename = trim(substr($fieldstring[$i], $as_pos+4));
+				$real_attributename = substr($fieldstring[$i], 0, $as_pos);
 			}
 			else{   # tabellenname.attributname oder attributname
 				$explosion = explode('.', strtolower($fieldstring[$i]));
