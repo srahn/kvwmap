@@ -6435,11 +6435,13 @@ echo '			</ul>
   }
 
 	function deleteDokument($path, $doc_path, $doc_url, $only_thumb = false){
-		if($doc_url != '')$path = url2filepath($path, $doc_path, $doc_url);			# Dokument mit URL
-		else $path = array_shift(explode('&original_name', $path));
-		$dateinamensteil = explode('.', $path);
-		if(!$only_thumb AND file_exists($path))unlink($path);
-		if(file_exists($dateinamensteil[0].'_thumb.jpg'))unlink($dateinamensteil[0].'_thumb.jpg');
+		if($path != ''){
+			if($doc_url != '')$path = url2filepath($path, $doc_path, $doc_url);			# Dokument mit URL
+			else $path = array_shift(explode('&original_name', $path));
+			$dateinamensteil = explode('.', $path);
+			if(!$only_thumb AND file_exists($path))unlink($path);
+			if(file_exists($dateinamensteil[0].'_thumb.jpg'))unlink($dateinamensteil[0].'_thumb.jpg');
+		}
 	}
 
   function get_dokument_vorschau($dateinamensteil, $remote_url = false){
@@ -9259,6 +9261,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$this->formvars['operator_'.$layer['maintable'].'_oid'] = '=';
 				$this->formvars['no_output'] = true;
 				$this->GenerischeSuche_Suchen();
+				$this->formvars['no_output'] = false;
 			}
 			
 			$sql = "
@@ -9303,6 +9306,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			foreach($document_attributes as $document_attribute){
 				$this->deleteDokument($this->qlayerset[0]['shape'][0][$document_attribute], $layer['document_path'], $layer['document_url']);
 			}
+			$this->qlayerset[0]['shape'] = array();
 			# After delete trigger
 			if (!empty($layer['trigger_function'])) {
 				$this->exec_trigger_function('AFTER', 'DELETE', $layer, '', $old_dataset);
