@@ -1419,7 +1419,7 @@ class stelle {
 			if(strpos(strtolower($fieldstring[$i]), ' as ')){   # Ausdruck AS attributname
 				$explosion = explode(' as ', strtolower($fieldstring[$i]));
 				$attributename = trim(array_pop($explosion));
-				$real_attributename = $explosion[0];
+				$real_attributename = implode(' as ', $explosion);
 			}
 			else{   # tabellenname.attributname oder attributname
 				$explosion = explode('.', strtolower($fieldstring[$i]));
