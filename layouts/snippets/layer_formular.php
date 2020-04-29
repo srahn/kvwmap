@@ -50,6 +50,7 @@
 			document.getElementById('saveAsNewLayerButton').style.display = 'none';
 		}
 		else{
+			document.GUI.stellenzuweisung.value = 0;
 			document.getElementById('stellenzuweisung').style.display = 'none';
 			document.getElementById('stellenzuweisung_link').style.backgroundColor = '';
 			document.getElementById('stellenzuweisung_link').style.color = '#888';
