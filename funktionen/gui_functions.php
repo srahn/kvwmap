@@ -424,8 +424,8 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	
 	var input_coord = document.GUI.INPUT_COORD.value;
 	var cmd = document.GUI.CMD.value;
-	var width_reduction;
-	var height_reduction;
+	var width_reduction = '';
+	var height_reduction = '';
 	if(document.GUI.width_reduction)width_reduction = document.GUI.width_reduction.value;
 	if(document.GUI.height_reduction)height_reduction = document.GUI.height_reduction.value;
 	
