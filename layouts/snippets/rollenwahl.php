@@ -128,10 +128,10 @@ if ($this->Fehlermeldung!='') {
 
 <div id="rollenwahl_main_div">
 	<div id="rollenwahl_optionen_div" class="tabbed">
-		<? if ($this->formvars['show_layer_parameter']){ ?>
-		<input id="tab1" type="radio" name="tabs" />
+		<? if ($this->formvars['show_layer_parameter']) { ?>
+		<input id="tab1"<? echo ($this->formvars['show_layer_parameter'] ? ' checked="checked"' : '') ?> type="radio" name="tabs" />
 		<? } ?>
-		<input checked="checked" id="tab2" type="radio" name="tabs" />
+		<input id="tab2"<? echo ($this->formvars['show_layer_parameter'] ? '' : ' checked="checked"') ?> type="radio" name="tabs" />
 		<input id="tab3" type="radio" name="tabs" />
 		<input id="tab4" type="radio" name="tabs" />
 		<input id="tab5" type="radio" name="tabs" />
