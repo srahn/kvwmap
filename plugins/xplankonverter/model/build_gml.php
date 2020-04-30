@@ -278,7 +278,8 @@ class Gml_builder {
 				# TODO Make this more generic to reflect possible changes in index and support all associations
 				# Might need a change in xplan_uml generation to contain association sequenceorder/index
 			if($sequence_attr == 10) {
-					$aggregated_bereich_gml_ids = explode(',', substr($gml_object['bereiche_gml_ids'], 1, -1));
+					# $aggregated_bereich_gml_ids = explode(',', substr($gml_object['bereiche_gml_ids'], 1, -1));
+					$aggregated_bereich_gml_ids = explode(',', $gml_object['bereiche_gml_ids']);
 					// entnimmt mögliche doppelte Werte
 					$aggregated_bereich_gml_ids = array_unique($aggregated_bereich_gml_ids);
 					foreach ($aggregated_bereich_gml_ids as $bereich_gml_id) {
