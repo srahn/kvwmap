@@ -313,7 +313,6 @@ pre {
 	background: inherit;
 	font: inherit;
 	margin: 0;
-	overflow: auto;
 	padding: 0;
 }
 
