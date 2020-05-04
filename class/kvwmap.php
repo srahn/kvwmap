@@ -3015,7 +3015,7 @@ echo '			</ul>
 							) foo1
 						) foo2 
 						LIMIT 10000';
-					#echo $sql;
+					echo $sql;
 					$ret=$layerdb->execSQL($sql,4, 0);
 					if(!$ret[0]){
 						while ($rs=pg_fetch_array($ret[1])){
@@ -3051,14 +3051,16 @@ echo '			</ul>
 			$geom = $data_attributes['the_geom'];
     	$select = $mapDB->getSelectFromData($layer['Data']);
 			$select = preg_replace ("/ FROM /", ' from ', $select);
-			if ($this->formvars['geom_from_layer'] > 0) {
-				$select = str_replace_last(' from ', ', ' . $data_attributes[$data_attributes['the_geom_id']]['table_alias_name'] . '.oid as exclude_oid' . ' from ', $select); # bei Rollenlayern nicht machen
-			}
+#			if ($this->formvars['geom_from_layer'] > 0) {
+#				$select = str_replace_last(' from ', ', ' . $data_attributes[$data_attributes['the_geom_id']]['table_alias_name'] . '.oid as exclude_oid' . ' from ', $select); # bei Rollenlayern nicht machen
+#			}
 
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$geom.', '.$extent.') ';
-			if($layer['Datentyp'] !== '1' AND $this->formvars['geom_from_layer'] > 0 AND $this->formvars['oid']){		# bei Linienlayern werden auch die eigenen Punkte geholt, bei Polygonen nicht
-				$fromwhere .= 'AND exclude_oid != '.$this->formvars['oid'];
-			}
+
+#			if($layer['Datentyp'] !== '1' AND $this->formvars['geom_from_layer'] > 0 AND $this->formvars['oid']){		# bei Linienlayern werden auch die eigenen Punkte geholt, bei Polygonen nicht
+#				$fromwhere .= 'AND exclude_oid != '.$this->formvars['oid'];
+#			}
+
 			# Filter hinzufügen
 			if($layer['Filter'] != ''){
 				$layer['Filter'] = str_replace('$userid', $this->user->id, $layer['Filter']);
@@ -3101,7 +3103,7 @@ echo '			</ul>
 				) foo1
 			) foo2 
 			LIMIT 10000';
-		#echo '<p>SQL zur Abfrage von Vertexes: '. $sql;
+		echo '<p>SQL zur Abfrage von Vertexes: '. $sql;
 		$ret=$layerdb->execSQL($sql,4, 0);
 		if(!$ret[0]){
 			while ($rs=pg_fetch_array($ret[1])){
@@ -3152,7 +3154,8 @@ echo '			</ul>
 	}
 
 	function split_multi_geometries(){
-		include_(CLASSPATH.'spatial_processor.php');
+		include_(CLASSPATH . 'spatial_processor.php');
+		include_(CLASSPATH . 'PgObject.php');
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -3168,6 +3171,7 @@ echo '			</ul>
 	}
 
 	function dublicate_dataset() {
+		include_(CLASSPATH . 'PgObject.php');
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_' . $this->formvars['chosen_layer_id']]);
@@ -3190,7 +3194,7 @@ echo '			</ul>
 		}
 	}
 
-	function copy_dataset($mapdb, $layer_id, $id_names, $id_values, $count, $update_columns = NULL, $update_values = NULL, $delete_original = false){
+	function copy_dataset($mapdb, $layer_id, $id_names, $id_values, $count, $update_columns = array(), $update_values = NULL, $delete_original = false){
 		# Diese Funktion kopiert einen über die Arrays $id_names und $id_values bestimmten Datensatz in einem Layer $count-mal.
 		# $id_names sind die Namen und $id_values die Werte der Attribute, die den Datensatz identifizieren, also in der WHERE-Bedingung verwendet werden.
 		# Jeder neu entstandene Datensatz kann sich in den Attributen, die über das Array $update_columns definiert werden von den anderen unterscheiden.
@@ -3202,6 +3206,10 @@ echo '			</ul>
 		$layerset = $this->user->rolle->getLayer($layer_id);
 		$layerdb = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 		$layerattributes = $mapdb->read_layer_attributes($layer_id, $layerdb, NULL);
+
+		# Query table constraints
+		$table = new PgObject($this, $layerdb->schema, $layerset[0]['maintable']);
+		$table->get_constraints();
 
 		# Attribute, die kopiert werden sollen ermitteln
 		$sql = "
@@ -3218,9 +3226,26 @@ echo '			</ul>
 		if (!$ret['success']) {
 			return array();
 		}
-		while ($rs = pg_fetch_row($ret[1])) {
-			if(!in_array($layerattributes['constraints'][$rs[0]], array('PRIMARY KEY', 'UNIQUE'))) $attributes[] = $rs[0];		# PRIMARY KEY und UNIQUE Attribute auslassen
-			if($layerattributes['form_element_type'][$rs[0]] == 'Dokument')$document_attributes[] = $rs[0];				# Dokument-Attribute sammeln
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			# ignoriert das Attribut wenn
+			# es in $update_colums ist oder wenn
+			# es zu pkey gehärt und $update_columns nicht Bestandteil des pkeys ist
+			if (
+				!(
+						in_array($rs['column_name'], $update_columns) OR
+						(
+							$table->is_part_of_primary_keys($rs['column_name']) AND
+							!$table->has_other_constraint_column($rs['column_name'], $update_columns)
+						)
+					)
+			) {
+				$attributes[] = $rs['column_name'];
+			}
+
+			# Dokument-Attribute sammeln
+			if ($layerattributes['form_element_type'][$rs['column_name']] == 'Dokument') {
+				$document_attributes[] = $rs['column_name'];
+			}
 		}
 
 		for ($n = 0; $n < count($id_names); $n++) {
@@ -3263,11 +3288,30 @@ echo '			</ul>
 			$rs = pg_fetch_assoc($ret[1]);
 			$max_oid = $rs['oid'];
 
+			if (count($update_columns) > 0) {
+				$insert_columns = array_merge($attributes, $update_columns);
+				$select_columns = array_merge(
+					$attributes,
+					array_map(
+						function($values) {
+							return "'" . $values . "'";
+						},
+						$update_values[$i]
+					)
+				);
+			}
+			else {
+				$insert_columns = $select_columns = $attributes;
+			}
 			$sql = "
-				INSERT INTO " . $layerset[0]['maintable'] . " (" . implode(',', $attributes) . ")
-				SELECT " . implode(',', $attributes) . "
-				FROM " . $layerset[0]['maintable'] . "
-				WHERE " . implode(' AND ', $where) . "
+				INSERT INTO
+					" . $layerset[0]['maintable'] . " (" . implode(', ', $insert_columns) . ")
+				SELECT
+					" . implode(', ', $select_columns) . "
+				FROM
+					" . $layerset[0]['maintable'] . "
+				WHERE
+					" . implode(' AND ', $where) . "
 			";
 			#echo '<p>SQL zum kopieren eines Datensatzes: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 0);
