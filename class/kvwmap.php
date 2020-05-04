@@ -3205,12 +3205,15 @@ echo '			</ul>
 
 		# Attribute, die kopiert werden sollen ermitteln
 		$sql = "
-			SELECT column_name
-			FROM information_schema.columns
+			SELECT
+				column_name
+			FROM
+				information_schema.columns
 			WHERE
 				table_name = '" . $layerset[0]['maintable'] . "' AND
 				table_schema = '" . $layerdb->schema . "'
-			";
+		";
+		#echo '<p>SQL zur Abfrage der Attribute, die kopiert werden sollen: ' . $sql;
 		$ret = $layerdb->execSQL($sql,4, 0);
 		if (!$ret['success']) {
 			return array();
@@ -3227,11 +3230,14 @@ echo '			</ul>
 		# Dokument-Pfade abfragen
 		if (count($document_attributes) > 0) {
 			$sql = "
-				SELECT " . implode(',', $document_attributes) . "
-				FROM " . $layerset[0]['maintable'] . "
-				WHERE " . implode(' AND ', $where) . "
+				SELECT
+					" . implode(',', $document_attributes) . "
+				FROM
+					" . $layerset[0]['maintable'] . "
+				WHERE
+					" . implode(' AND ', $where) . "
 			";
-			#echo 'SQL zur Abfrage der Dokument-Pfade: ' . $sql;
+			#echo '<p>SQL zur Abfrage der Dokument-Pfade: ' . $sql;
 			$ret = $layerdb->execSQL($sql,4, 0);
 			$dokument_paths = array();
 			if (!$ret['success']) {
@@ -3249,7 +3255,7 @@ echo '			</ul>
 			$sql = "
 				SELECT Coalesce(max(".$layerset[0]['oid']."), 0) AS oid FROM " . $layerset[0]['maintable'] . "
 			";
-			#echo '<br>SQL zur Abfrage der letzen oid: ' . $sql;
+			#echo '<p>SQL zur Abfrage der letzen oid: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 0);
 			if (!$ret['success']) {
 				return array();
@@ -3263,7 +3269,7 @@ echo '			</ul>
 				FROM " . $layerset[0]['maintable'] . "
 				WHERE " . implode(' AND ', $where) . "
 			";
-			#echo '<br>SQL zum kopieren eines Datensatzes: ' . $sql;
+			#echo '<p>SQL zum kopieren eines Datensatzes: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 0);
 			if (!$ret['success']) {
 				return array();
@@ -3274,7 +3280,7 @@ echo '			</ul>
 				WHERE
 					".$layerset[0]['oid']." > " . $max_oid . "
 			";
-			#echo '<br>SQL zum Abfragen der neuen oids: ' . $sql;
+			#echo '<p>SQL zum Abfragen der neuen oids: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 0);
 			if (!$ret['success']) {
 				return array();
@@ -3300,7 +3306,7 @@ echo '			</ul>
 							SET " . $document_attributes[$p] . " = '" . $complete_new_path . "'
 							WHERE ".$layerset[0]['oid']." = " . $rs[0] . "
 						";
-						#echo '<br>SQL zum Update der Dokumentattribute: ' . $sql;
+						#echo '<p>SQL zum Update der Dokumentattribute: ' . $sql;
 						$ret1 = $layerdb->execSQL($sql,4, 0);
 					}
 				}
@@ -3314,7 +3320,7 @@ echo '			</ul>
 						SET " . $update_columns[$u] . " = '" . $update_values[$i][$u] . "'
 						WHERE ".$layerset[0]['oid']." IN (" . implode(',', $new_oids) . ")
 					";
-					#echo '<br>SQL zum Update der Attribute, die sich unterscheiden sollen: ' . $sql;
+					#echo '<p>SQL zum Update der Attribute, die sich unterscheiden sollen: ' . $sql;
 					$ret = $layerdb->execSQL($sql,4, 0);
 				}
 			}
@@ -3340,20 +3346,34 @@ echo '			</ul>
 							$subform_pks_realnames[] = $layerattributes['real_name'][$subform[$k]];											# das sind die richtigen Namen der SubformPK-Schlüssel in der übergeordneten Tabelle
 							$subform_pks_realnames2[] = $subformlayerattributes['real_name'][$subform[$k]];							# das sind die richtigen Namen der SubformPK-Schlüssel in der untergeordneten Tabelle
 						}
-						$sql = "SELECT ".implode(',', $subform_pks_realnames)." FROM " . $layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus dem alten Datensatz abfragen
-						for($n = 0; $n < count($id_names); $n++){
-							$sql.= $id_names[$n]." = '" . $id_values[$n]."' AND ";
+
+						$subformpk_where = array();
+						for ($n = 0; $n < count($id_names); $n++) {
+							$subformpk_where[] = $id_names[$n] . " = '" . $id_values[$n] . "'";
 						}
-						$sql.= "1=1";
-						#echo $sql.'<br>';
-						$ret=$layerdb->execSQL($sql,4, 0);
+						$sql = "
+							SELECT
+								" . implode(',', $subform_pks_realnames) . "
+							FROM
+								" . $layerset[0]['maintable'] . "
+							" . (count($subformpk_where) > 0 ? ' WHERE ' . implode(' AND ', $subformpk_where) : '') . "
+						";
+						#echo '<p>SQL zur Abfrage der Werte der SubformPK-Schlüssel aus dem alten Datensatz: ' . $sql;
+						$ret = $layerdb->execSQL($sql,4, 0);
 						if(!$ret[0]){
 							$pkvalues=pg_fetch_row($ret[1]);
 						}
-						$sql = "SELECT ".implode(',', $subform_pks_realnames)." FROM " . $layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus den neuen Datensätzen abfragen
-						$sql.= "".$layerset[0]['oid']." IN (".implode(',', $all_new_oids).")";
-						#echo '<br>'.$sql.'<br>';
-						$ret=$layerdb->execSQL($sql,4, 0);
+
+						$sql = "
+							SELECT
+								" . implode(',', $subform_pks_realnames) . "
+							FROM
+								" . $layerset[0]['maintable'] . "
+							WHERE
+								" . $layerset[0]['oid'] . " IN (" . implode(',', $all_new_oids) . ")
+						";
+						#echo '<p>SQL zur Abfrage der SubformPK-Schlüssel aus den neuen Datensätzen: ' . $sql;
+						$ret = $layerdb->execSQL($sql,4, 0);
 						if(!$ret[0]){
 							while($rs=pg_fetch_row($ret[1])){
 								$next_update_values[] = $rs;
