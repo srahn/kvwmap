@@ -314,11 +314,12 @@
 				<tr>
 					<td colspan="2">
 						<i><? echo $layer['Name'] ?></i>:&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:selectall(<? echo $layer['Layer_ID']; ?>);">
-						<? if ($layer['count'] > MAXQUERYROWS) {
-						    echo $strSelectAllShown;
-						   } else {
-						    echo $strSelectAll;
-						   } ?>
+						<? 
+							if ($layer['count'] > $this->formvars['anzahl']) {
+								echo $strSelectAllShown;
+							} else {
+								echo $strSelectAll;
+							} ?>
 						</a>
 					</td>
 				</tr>
@@ -327,7 +328,7 @@
 					<td style="padding: 5 0 0 0;">
 						<select id="all_<? echo $layer['Layer_ID']; ?>" name="all_<? echo $layer['Layer_ID']; ?>" onchange="update_buttons(this.value, <? echo $layer['Layer_ID']; ?>);">
 							<option value=""><? echo $strSelectedDatasets.':'; ?></option>
-							<option value="true"><? echo $strAllDatasets.':'; ?><? if ($layer['count'] > MAXQUERYROWS){	echo "&nbsp;(".$layer['count'].")"; } ?></option>
+							<option value="true"><? echo $strAllDatasets.':&nbsp;('.$layer['count'].')'; ?></option>
 						</select>
 					</td>					
 					<? }else{ ?>
