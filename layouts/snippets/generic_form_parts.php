@@ -285,9 +285,7 @@
 							$datapart .= htmlspecialchars($value);
 						}
 						else{								// zeilenweise
-							$maxwidth = $size * 11;
-							$minwidth = $size * 7.1;
-							$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;"><pre>' . $value . '</pre></div>';
+							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; font-size: '.$fontsize.'px;"><pre>' . $value . '</pre></div>';
 						}
 					}
 				}break;
