@@ -94,7 +94,7 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 <?	}
 	 }
 		if ($layer['privileg'] > 0 AND $this->formvars['attribute_privileg'] > 0){
-			echo '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
+			echo '<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
 			for($p = 0; $p < count($this->formvars['attributenames']); $p++){
 				echo '&attributenames['.$p.']='.$this->formvars['attributenames'][$p];
 				echo '&values['.$p.']='.$this->formvars['values'][$p];
@@ -116,7 +116,7 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 				echo '&value_'.$this->formvars['attributenames'][$p].'='.$this->formvars['values'][$p];
 				echo '&operator_'.$this->formvars['attributenames'][$p].'==';
 			}				
-			echo '&subform_link=true\')"><span>'.$strShowAll.'</span></a>';
+			echo '&subform_link=true\')"><span>'.$strShowAllSeparat.'</span></a>';
 		}
 		?>
 	</div>

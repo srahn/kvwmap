@@ -557,6 +557,7 @@ a.invisiblelayerlink:hover{
 
 a.buttonlink{
 	padding: 1px 7px 5px 7px;
+	margin: 0px 2px 0px 2px;
 }
 
 .buttonlink:hover, .buttonlink:focus{
