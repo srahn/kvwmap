@@ -3015,7 +3015,7 @@ echo '			</ul>
 							) foo1
 						) foo2 
 						LIMIT 10000';
-					echo $sql;
+					#echo $sql;
 					$ret=$layerdb->execSQL($sql,4, 0);
 					if(!$ret[0]){
 						while ($rs=pg_fetch_array($ret[1])){
@@ -3103,7 +3103,7 @@ echo '			</ul>
 				) foo1
 			) foo2 
 			LIMIT 10000';
-		echo '<p>SQL zur Abfrage von Vertexes: '. $sql;
+		#echo '<p>SQL zur Abfrage von Vertexes: '. $sql;
 		$ret=$layerdb->execSQL($sql,4, 0);
 		if(!$ret[0]){
 			while ($rs=pg_fetch_array($ret[1])){
