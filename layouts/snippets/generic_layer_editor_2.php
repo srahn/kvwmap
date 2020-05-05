@@ -40,7 +40,7 @@
 				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
 			} ?>
 		</td>
-		<td width="99%" align="center"><h2 id="layername"><? echo $layer['Name']; ?></h2></td>
+		<td width="100%" align="center"><h2 id="layername"><? echo $layer['Name']; ?></h2></td>
     <? if (!$this->user->rolle->visually_impaired AND $anzObj > 0 AND $this->formvars['printversion'] == '') { ?>
 			<td valign="top" style="padding: 0 10 0 0" class="layer_header">
 				<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
