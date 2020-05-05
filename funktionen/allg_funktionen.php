@@ -1540,10 +1540,11 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 		if (!$strip) {
 			#echo "<br>Keep {$key} in formvars.";
 			$pos = strpos($value, '[');
-			if ($pos === false) {
-				$stripped_formvars[$key] = stripslashes($value);
-			} else {
+			if ($pos !== false AND $pos == 0) {
 				$stripped_formvars[$key] = arrStrToArr(stripslashes($value), ',');
+			}
+			else {
+				$stripped_formvars[$key] = stripslashes($value);
 			}
 		}
 		else {

@@ -337,6 +337,63 @@ class PgObject {
 		return $this->fkeys;
 	}
 
+	function get_constraints() {
+		$sql = "
+			SELECT DISTINCT
+			  cu.constraint_name,
+			  tc.constraint_type,
+			  string_agg(cu.column_name, ',') AS constraint_columns
+			FROM
+			  information_schema.table_constraints tc
+			  JOIN information_schema.constraint_column_usage cu ON (
+			    tc.table_schema = cu.table_schema AND
+			    tc.table_name = cu.table_name AND
+			    tc.constraint_name = cu.constraint_name
+			  )
+			WHERE
+			  tc.table_schema = '" . $this->schema . "' AND
+			  tc.table_name = '" . $this->tableName . "' AND
+			  tc.constraint_type IN ('PRIMARY KEY', 'UNIQUE')
+			GROUP BY
+				tc.constraint_type, cu.constraint_name
+		";
+		$query = pg_query($this->database->dbConn, $sql);
+		$this->constraints = array();
+		while ($rs = pg_fetch_assoc($query)) {
+			$this->constraints[] = array(
+				'name' => $rs['constraint_name'],
+				'type' => $rs['constraint_type'],
+				'columns' => explode(',', $rs['constraint_columns'])
+			);
+		}
+		return $this->constraints;
+	}
+
+	/**
+	* Return true if $colum occure together with $other_columns at least in one same constraint colums list
+	* requires call of get_constraints before
+  * @param array(string) $columns
+	* @return boolean true if all elements of $columns are in at least one constraint columns list
+	*/
+	function has_other_constraint_column($column, $other_columns) {
+		$columns = array_unique(array_merge(array($column), $other_columns));
+		return count(array_filter($this->constraints, function($constraint) use ($columns) {
+			return $columns == array_intersect($constraint['columns'], $columns);
+		})) > 0;
+	}
+
+	/**
+	* Return true if $column is part of a primary key in any constraint column list
+	* requires call of get_constraints before
+	* @param string $column The name of the column
+	* @return boolean true if $column is part of a primary key
+	*/
+	function is_part_of_primary_keys($column) {
+		return count(array_filter($this->constraints, function($constraint) use ($column) {
+			return $constraint['type'] == 'PRIMARY KEY' AND in_array($column, $constraint['columns']);
+		})) > 0;
+	}
+
 	function get_attribute_types() {
 		$sql = "
 			SELECT
