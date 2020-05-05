@@ -1394,11 +1394,12 @@ function getArrayOfChars() {
 	return $characters;
 }
 
-function url_get_contents($url, $username = NULL, $password = NULL) {
+function url_get_contents($url, $username = NULL, $password = NULL, $useragent = NULL) {
 	$hostname = parse_url($url, PHP_URL_HOST);
 	try {
 		$ctx['http']['timeout'] = 20;
 		#$ctx['http']['header'] = 'Referer: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];		// erstmal wieder rausgenommen, da sonst Authorization nicht funktioniert
+		if($useragent)$ctx['http']['header'] = 'User-Agent: '.$useragent;
 		if($username)$ctx['http']['header'].= "Authorization: Basic ".base64_encode($username.':'.$password);
 		$proxy = getenv('HTTP_PROXY');
 		if($proxy != '' AND $hostname != 'localhost'){
@@ -1408,7 +1409,7 @@ function url_get_contents($url, $username = NULL, $password = NULL) {
 			$ctx['ssl']['SNI_enabled'] = true;
 		}
 		$context = stream_context_create($ctx);
-		$response = @ file_get_contents($url, false, $context);
+		$response =  file_get_contents($url, false, $context);
 		if ($response === false) {
 			throw new Exception("Fehler beim Abfragen der URL mit file_get_contents(".$url.")");
 		}
