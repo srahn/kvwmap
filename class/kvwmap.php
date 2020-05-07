@@ -3315,8 +3315,6 @@ echo '			</ul>
 			";
 			#echo '<p>SQL zum kopieren eines Datensatzes: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 0);
-			print_r($ret);
-			exit;
 			if (!$ret['success']) {
 				return array();
 			}
@@ -3421,7 +3419,7 @@ echo '			</ul>
 						#echo '<p>SQL zur Abfrage der SubformPK-Schlüssel aus den neuen Datensätzen: ' . $sql;
 						$ret = $layerdb->execSQL($sql,4, 0);
 						if(!$ret[0]){
-							while($rs=pg_fetch_row($ret[1])){
+							while ($rs=pg_fetch_row($ret[1])){
 								$next_update_values[] = $rs;
 							}
 						}
@@ -13906,13 +13904,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->SachdatenAnzeige($rect);
 			if (
 				$this->go == 'Layer_Datensaetze_Loeschen' AND
-				count(
-					array_filter(
-						$this->qlayerset,
-						function($layerset) {
-							return count($layerset['shape']) > 0;
-						}
-					)
+				array_reduce(
+					$this->qlayerset,
+					function($sum, $layerset) {
+						return $sum + count($layerset['shape']);
+					},
+					0
 				) == 0
 			) {
 				$this->add_message('waring', 'Keine Datensätze mehr in der Sachdatenanzeige. Deshalb zeige ich die Karte an.');
@@ -13944,8 +13941,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
     $this->queryrect = $rect;
     # Abfragen der Layer, die zur Stelle gehören
-    $layer=$this->user->rolle->getLayer('');
-		$rollenlayer=$this->user->rolle->getRollenLayer('', 'import');
+    $layer = $this->user->rolle->getLayer('');
+		$rollenlayer = $this->user->rolle->getRollenLayer('', 'import');
 		$layerset = array_merge($layer, $rollenlayer);
     $anzLayer=count($layerset);
     $map=ms_newMapObj('');
@@ -13953,7 +13950,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($this->formvars['anzahl'] == ''){
 			$this->formvars['anzahl'] = MAXQUERYROWS;
 		}
-    for ($i=0;$i<$anzLayer;$i++) {
+    for ($i = 0; $i < $anzLayer; $i++) {
     	$sql_order = '';
       if($layerset[$i]['queryable'] AND
 				($this->formvars['qLayer'.$layerset[$i]['Layer_ID']]=='1' OR $this->formvars['qLayer'.$layerset[$i]['requires']]=='1') 	AND
