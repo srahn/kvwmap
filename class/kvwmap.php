@@ -3188,7 +3188,7 @@ echo '			</ul>
 			$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
 			$this->GenerischeSuche_Suchen();
 		}
-		else{
+		else {
 			$this->add_message('error', 'Kopiervorgang fehlgeschlagen.');
 			$this->GenerischeSuche_Suchen();
 		}
@@ -3315,9 +3315,12 @@ echo '			</ul>
 			";
 			#echo '<p>SQL zum kopieren eines Datensatzes: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 0);
+			print_r($ret);
+			exit;
 			if (!$ret['success']) {
 				return array();
 			}
+
 			$sql = "
 				SELECT ".$layerset[0]['oid']."
 				FROM " . $layerset[0]['maintable'] . "
@@ -3329,7 +3332,6 @@ echo '			</ul>
 			if (!$ret['success']) {
 				return array();
 			}
-
 			$new_oids = array();
 			$d = 0; # Zähler der kopierten Datensätze pro Kopiervorgang
 			while ($rs = pg_fetch_row($ret[1])) { # das ist die Schleife der kopierten Datensätze pro Kopiervorgang
@@ -9243,15 +9245,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$this->add_message('notice', 'Löschen erfolgreich');
 				}
 				$this->last_query = $this->user->rolle->get_last_query();
-				if($this->formvars['search']){ # man kam von der Suche -> nochmal suchen
+				if ($this->formvars['search']) {
+					# man kam von der Suche -> nochmal suchen
 					$this->GenerischeSuche_Suchen();
 				}
-				else{ # man kam aus einer Sachdatenabfrage -> nochmal abfragen
+				else {
+					# man kam aus einer Sachdatenabfrage -> nochmal abfragen
 					$this->last_query_requested = true;
 					$this->queryMap();
 				}
 			}
-			else{
+			else {
 				# wenn es ein Datensatz aus einem embedded-Formular ist, 
 				# muss das embedded-Formular entfernt werden und 
 				# das Listen-DIV neu geladen werden (getrennt durch █)
@@ -13895,13 +13899,33 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		else{
 			$rect = $this->create_query_rect($this->formvars['INPUT_COORD']);
 		}
-    if($this->show_query_tooltip == true){
+    if ($this->show_query_tooltip == true){
       $this->tooltip_query($rect);
     }
-    else{
+    else {
       $this->SachdatenAnzeige($rect);
-			if($this->formvars['printversion'] != ''){
-				$this->mime_type = 'printversion';
+			if (
+				$this->go == 'Layer_Datensaetze_Loeschen' AND
+				count(
+					array_filter(
+						$this->qlayerset,
+						function($layerset) {
+							return count($layerset['shape']) > 0;
+						}
+					)
+				) == 0
+			) {
+				$this->add_message('waring', 'Keine Datensätze mehr in der Sachdatenanzeige. Deshalb zeige ich die Karte an.');
+				$this->loadMap('DataBase');
+				$this->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+				$this->saveMap('');
+				$this->drawMap();
+				$this->main = 'map.php';
+			}
+			else {
+				if ($this->formvars['printversion'] != ''){
+					$this->mime_type = 'printversion';
+				}
 			}
 			$this->output();
     }
@@ -14464,7 +14488,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       } # ende der Behandlung der zur Abfrage ausgewählten Layer
     } # ende der Schleife zur Abfrage der Layer der Stelle
 
-		if($this->formvars['mime_type'] != 'overlay_html' AND $this->last_query != '' AND $this->user->rolle->querymode == 1){		# bei get_last_query (nicht aus Overlay) und aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer
+		if ($this->formvars['mime_type'] != 'overlay_html' AND $this->last_query != '' AND $this->user->rolle->querymode == 1) {
+			# bei get_last_query (nicht aus Overlay) und aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer
 			$attributes = $this->qlayerset[0]['attributes'];
 			$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
 			$this->loadMap('DataBase');
@@ -14497,7 +14522,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->main = 'map.php';
 			$this->overlaymain = 'sachdatenanzeige.php';
 		}
-		else $this->main='sachdatenanzeige.php';
+		else {
+			$this->main = 'sachdatenanzeige.php';
+		}
   }
 
   function WLDGE_Auswaehlen() {
