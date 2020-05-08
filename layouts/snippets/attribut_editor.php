@@ -327,8 +327,8 @@ function alias_replace(name){
 
 						  <td align="left" valign="top">
 								<? if($i == 0)echo '<div class="fett scrolltable_header">Optionen</div>';
-						  if($this->attributes['options'][$i] == '' AND $this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))) { ?>
-						  	<input style="width:180px" name="options_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo $this->attributes['constraints'][$i]; ?>"><?php
+							if($this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){ ?>
+						  	<input disabled style="width:180px" name="options_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo $this->attributes['constraints'][$i]; ?>"><?php
 						  }
 						  else { ?>
 								<textarea name="options_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:180px"><?php echo $this->attributes['options'][$i]; ?></textarea><?php
