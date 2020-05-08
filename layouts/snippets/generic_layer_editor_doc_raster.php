@@ -53,10 +53,7 @@
 			<a href="javascript:switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
 			<? } ?>
 		</td>
-		<td align="right" valign="top">			
-			<a href="javascript:scrollbottom();"	title="<? echo $strToBottom; ?>">
-				<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
-			</a>
+		<td align="right" valign="top">
 		</td>
 	</tr>
 	<tr><td><img height="7" src="<? echo GRAPHICSPATH ?>leer.gif"></td></tr>

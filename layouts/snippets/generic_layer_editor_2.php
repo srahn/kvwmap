@@ -46,9 +46,6 @@
 				<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer switch-gle-view-columns" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
 			</td>
 			<td>
-				<a href="javascript:scrollbottom();"	title="<? echo $strToBottom; ?>">
-					<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
-				</a>
 			</td>
 		<? } ?>
 	</tr>
