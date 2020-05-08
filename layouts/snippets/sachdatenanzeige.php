@@ -33,7 +33,8 @@ if ($anzLayer==0) {
 }
 	
 if($this->formvars['printversion'] == '' AND $this->user->rolle->querymode == 0) { ?>
-<div id="contentdiv" style="width: 100%;height:100%;max-height:<? echo $this->user->rolle->nImageHeight; ?>px;position:relative;overflow-y: auto;">
+<div id="contentdiv" style="width: 100%;height:100%;max-height:<? echo $this->user->rolle->nImageHeight; ?>px;position:relative;overflow-y: auto;overflow-x: hidden">
+	<div style="margin-right: 10px">
 <? }
 
 for($i=0;$i<$anzLayer;$i++){
@@ -145,7 +146,7 @@ if(!empty($this->noMatchLayers)){
 }
 
 if($this->formvars['printversion'] == '' AND $this->user->rolle->querymode == 0) { ?>
-</div>
+</div></div>
 <? } ?>
 
 <table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
