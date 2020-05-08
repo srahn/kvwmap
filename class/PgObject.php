@@ -357,6 +357,7 @@ class PgObject {
 			GROUP BY
 				tc.constraint_type, cu.constraint_name
 		";
+		#echo '<p>SQL zur Abfrage der Constraints der Tabelle: ' . $sql;
 		$query = pg_query($this->database->dbConn, $sql);
 		$this->constraints = array();
 		while ($rs = pg_fetch_assoc($query)) {
@@ -376,6 +377,9 @@ class PgObject {
 	* @return boolean true if all elements of $columns are in at least one constraint columns list
 	*/
 	function has_other_constraint_column($column, $other_columns) {
+		if (count($other_columns) == 0) {
+			return false;
+		}
 		$columns = array_unique(array_merge(array($column), $other_columns));
 		return count(array_filter($this->constraints, function($constraint) use ($columns) {
 			return $columns == array_intersect($constraint['columns'], $columns);
@@ -389,9 +393,10 @@ class PgObject {
 	* @return boolean true if $column is part of a primary key
 	*/
 	function is_part_of_primary_keys($column) {
-		return count(array_filter($this->constraints, function($constraint) use ($column) {
+		$result = count(array_filter($this->constraints, function($constraint) use ($column) {
 			return $constraint['type'] == 'PRIMARY KEY' AND in_array($column, $constraint['columns']);
 		})) > 0;
+		return $result;
 	}
 
 	function get_attribute_types() {
