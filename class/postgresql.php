@@ -727,7 +727,7 @@ FROM
 	
 	function writeDatatypeAttributes($datatype_id, $typname, $schema){
 		$attr_info = $this->get_attribute_information($schema, $typname);
-		for($i = 1; $i < count($attr_info); $i++){
+		for($i = 1; $i < count($attr_info)+1; $i++){
 			$fields[$i]['real_name'] = $attr_info[$i]['name'];
 			$fields[$i]['name'] = $attr_info[$i]['name'];
 			$fieldtype = $attr_info[$i]['type_name'];
