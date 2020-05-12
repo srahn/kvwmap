@@ -14592,7 +14592,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     if($refmap->selectOutputFormat('jpeg_print') == 1){
       $refmap->selectOutputFormat('jpeg');
     }
-    $image_map = $refmap->draw();
+		set_error_handler("MapserverErrorHandler");		// ist in allg_funktionen.php definiert
+    $image_map = $refmap->draw() OR die($this->layer_error_handling());
     $filename = $this->map_saveWebImage($image_map,'jpeg');
 
 
@@ -17194,7 +17195,7 @@ class db_mapObj{
 			return $this->getPathAttributes($database, $this->getPath($layer_id));
 		}
 		else {
-			echo 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.';
+			$this->GUI->add_message('waring', 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.');
 			return NULL;
 		}
 	}

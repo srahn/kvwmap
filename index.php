@@ -153,7 +153,6 @@ if(!FAST_CASE){
 $debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
 function go_switch($go, $exit = false) {
 	global $GUI;
-	global $Stelle_ID;
 	global $newPassword;
 	global $passwort;
 	global $username;
@@ -1747,7 +1746,7 @@ function go_switch($go, $exit = false) {
 			 # Auswählen einer neuen Stelle
 			case 'Stelle_waehlen' : case 'Stelle_waehlen_Passwort_aendern' : {
 				$GUI->checkCaseAllowed('Stelle_waehlen');
-				$GUI->rollenwahl($Stelle_ID);
+				$GUI->rollenwahl($GUI->Stelle->id);
 				$GUI->output();
 			} break;
 

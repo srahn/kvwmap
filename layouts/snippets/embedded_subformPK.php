@@ -89,7 +89,7 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 		if ($this->formvars['list_edit']) { ?>
 			<a tabindex="1" class="buttonlink" href="javascript:reload_subform_list('<? echo $this->formvars['targetobject']; ?>', 0)"><span><? echo $this->strCancel; ?></span></a>
 		<? }
-		if($editable){ ?>
+		if($editable OR $layer['template'] == 'generic_layer_editor_doc_raster.php'){ ?>
 			<a id="subform_save_button_<? echo $layer['Layer_ID']; ?>" class="buttonlink" style="<? echo $save_button_display; ?>" tabindex="1" href="javascript:subsave_data(<? echo $layer['Layer_ID']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', <? echo $this->formvars['reload']; ?>);"><span>Speichern</span></a>
 <?	}
 	 }
