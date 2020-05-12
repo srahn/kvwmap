@@ -17155,7 +17155,7 @@ class db_mapObj{
 			return $this->getPathAttributes($database, $this->getPath($layer_id));
 		}
 		else {
-			echo 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.';
+			$this->GUI->add_message('waring', 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.');
 			return NULL;
 		}
 	}
