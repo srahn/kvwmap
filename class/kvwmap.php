@@ -9403,6 +9403,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $formtype = $element[4];
 				$tablename[$table_name]['tablename'] = $table_name;
 				$tablename[$table_name]['attributname'][] = $attributenames[] = $attributname;
+				$form_field_indizes[$attributname] = $i;
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
 				if($this->formvars['embedded'] != ''){
 					$formfieldstring .= '&'.$form_fields[$i].'='.$this->formvars[$form_fields[$i]];
@@ -9423,10 +9424,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 
 		# Dokumente speichern
-		if(count($document_attributes)> 0){
-			foreach($document_attributes as $i => $document_attribute){
+		if (count($document_attributes) > 0) {
+			foreach ($document_attributes as $i => $document_attribute) {
 				$options = $attributes['options'][$document_attribute['attributename']];
-				if(substr($document_attribute['datatype'], 0, 1) == '_'){
+				if (substr($document_attribute['datatype'], 0, 1) == '_') {
 					// ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen,
 					// nicht geänderten Datei-Pfaden und File-input-Feldnamen, die noch verarbeitet werden müssen
 					$insert = $this->processJSON($this->formvars[$form_fields[$i]], $doc_path, $doc_url, $options, $attributenames, $attributevalues, $layerdb);
@@ -9434,7 +9435,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				else {
 					$insert = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attributenames, $attributevalues, $layerdb);	// normales Dokument-Attribut
 				}
-				$this->formvars[$form_fields[$i]] = $insert;
+				$this->formvars[$form_fields[$i]] = $document_attributes[$i]['insert'] = $insert;
 			}
 		}
 
@@ -9482,24 +9483,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->success = true;
 		foreach($tablename as $table){
 			$insert = array();
-			$exif_values = array();
+			$exif_data = array();
 			if ($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']) {		# nur Attribute aus der Haupttabelle werden gespeichert
-				if (count(array_intersect(array('ExifLatLng', 'ExifRichtung', 'ExifErstErstellungsdatum'), $table['type'])) > 0) {
-					$exif = exif_read_data($foto, 'EXIF, GPS');
-					if ($exif === false) {
-						$this->add_message('warning', 'Keine Exif-Daten im Header der Bilddatei ' . $foto . ' gefunden!');
-					}
-					else {
-						$exif_values['LatLng'] =
-							(floatval(substr($exif['GPSLatitude' ][0], 0, strlen($exif['GPSLatitude' ][0]) - 2)) + floatval(substr($exif['GPSLatitude' ][1], 0, strlen($exif['GPSLatitude' ][1]) - 2) / 60) + floatval(substr($exif['GPSLatitude' ][2], 0 , strlen($exif['GPSLatitude' ][2]) - 2) / 6000))
-							. ' '
-							. (floatval(substr($exif['GPSLongitude'][0], 0, strlen($exif['GPSLongitude'][0]) - 2)) + floatval(substr($exif['GPSLongitude'][1], 0, strlen($exif['GPSLongitude'][1]) - 2) / 60) + floatval(substr($exif['GPSLongitude'][2], 0 , strlen($exif['GPSLongitude'][2]) - 2) / 6000));
-						$exif_values['Richtung'] = $exif['GPSImgDirection'];
-						$exif_values['Erstellungszeit'] = substr($exif['DateTimeOriginal'], 0 , 4) . '-' . substr($exif['DateTimeOriginal'], 5, 2) . '-' . substr($exif['DateTimeOriginal'], 8, 2) . ' ' . substr($exif['DateTimeOriginal'], 11);
-					}
-				}
-
-
 				for ($i = 0; $i < count($table['attributname']); $i++) {
 
 					switch (true) {
@@ -9533,10 +9518,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							}
 						} break;
 
-						case (
-							$table['type'][$i] == 'Dokument' AND
-							$this->formvars[$table['formfield'][$i]] != ''
-						) : {
+						case ($table['type'][$i] == 'Dokument' AND $this->formvars[$table['formfield'][$i]] != '') : {
 							$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]]."'";
 							$this->formvars[$table['formfield'][$i]] = ''; # leeren, for the case weiter_erfassen angehakt
 						} break;
@@ -9565,15 +9547,34 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						} break;
 
 						case ($table['type'][$i] == 'ExifLatLng') : {
-							$insert[$table['attributname'][$i]] = "'" . $exif_values['LatLng'] . "'";
+							$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
+
+							if (!$exif_data[$document_attribute_name]) {
+								$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+							}
+							if ($exif_data[$document_attribute_name]['success']) {
+								$insert[$table['attributname'][$i]] = "'" . $exif_data[$document_attribute_name]['LatLng'] . "'";
+							}
 						} break;
 
 						case ($table['type'][$i] == 'ExifRichtung') : {
-							$insert[$table['attributname'][$i]] = $exif_values['Richtung'];
+							$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
+							if (!$exif_data[$document_attribute_name]) {
+								$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+							}
+							if ($exif_data[$document_attribute_name]['success']) {
+								$insert[$table['attributname'][$i]] = $exif_data[$document_attribute_name]['Richtung'];
+							}
 						} break;
 
 						case ($table['type'][$i] == 'ExifErstellungszeit') : {
-							$insert[$table['attributname'][$i]] = "'" . $exif_values['Erstellungszeit'] . "'";
+							$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
+							if (!$exif_data[$document_attribute_name]) {
+								$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+							}
+							if ($exif_data[$document_attribute_name]['success']) {
+								$insert[$table['attributname'][$i]] = "'" . $exif_data[$document_attribute_name]['Erstellungszeit'] . "'";
+							}
 						} break;
 
 						case ($table['type'][$i] == 'Geometrie') : {
@@ -15061,12 +15062,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             	switch ($attributes['form_element_type'][$j]){
 				        case 'Dokument' : {
 									$dokumentpfad = $layer['shape'][$k][$attributes['name'][$j]];
-									$pfadteil = explode('&original_name=', $dokumentpfad);
-									$dateiname = $pfadteil[0];
-									if ($layer['document_url'] != '') {
-										$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
-									}
-									$original_name = $pfadteil[1];
+									$dateiname = get_document_file_path($dokumentpfad, $layer['document_path'], $layer['document_url']);
 									$pathinfo = pathinfo($dateiname);
 									$thumbname = $this->get_dokument_vorschau(array(
 										$pathinfo['dirname'] . '/' . $pathinfo['filename'],
