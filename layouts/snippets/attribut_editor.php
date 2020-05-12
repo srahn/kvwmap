@@ -126,6 +126,21 @@
 			'value' => 'Editiersperre',
 			'output' => 'Editiersperre',
 			'title' => 'Sperrt die Möglichkeit zum Editieren, wenn das Attribut den Wert 1 hat.'
+		),
+		array(
+			'value' => 'ExifLatLng',
+			'output' => 'Exif-Koordinate',
+			'title' => 'Übernimmt die LatLng-Koordinaten beim Upload des Fotos aus dem Exif-Header falls vorhanden. (Format: Latitude Longitude Dezimal)'
+		),
+		array(
+			'value' => 'ExifRichtung',
+			'output' => 'Exif-Richtung',
+			'title' => 'Übernimmt die Richtung beim Upload des Fotos aus dem Exif-Header falls vorhanden. (Format: Float Dezimal)'
+		),
+		array(
+			'value' => 'ExifErstellungszeit',
+			'output' => 'Exif-Erstellungszeit',
+			'title' => 'Übernimmt den Zeitstempel beim Upload des Fotos aus dem Exif-Header falls vorhanden. (Format: "YYYY-MM-DD hh:mm:ss")'
 		)
 	);
 
