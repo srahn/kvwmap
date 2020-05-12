@@ -356,8 +356,7 @@ if ($this->Fehlermeldung!='') {
 										<div id="Tip22" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 									</td>
 								</tr>
-								<? if(ROLLENFILTER){ ?>
-								<tr>
+								<tr <? if(ROLLENFILTER){echo 'style="display: none"'; ?>>
 									<td class="rollenwahl-option-header">
 										<? echo $strShowRollenFilter; ?>:
 									</td>
