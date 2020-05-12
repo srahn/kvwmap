@@ -212,9 +212,10 @@ if($this->formvars['printversion'] == ''){ ?>
   	if($this->search == true){			# wenn man von der Suche kam
 			echo '<input name="go" type="hidden" value="Layer-Suche_Suchen">
 						<input name="sql_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->qlayerset[0]['sql'].'">
-						<input id="offset_'.$this->formvars['selected_layer_id'].'" name="offset_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['selected_layer_id']].'">';
+						<input id="offset_'.$this->formvars['selected_layer_id'].'" name="offset_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['selected_layer_id']].'">
+						<input name="search" type="hidden" value="true">';
 /*		Hidden Felder zum Speichern der Suchparameter (die können evtl. weg, da jetzt immer get_last_query verwendet wird)
-			echo '		<input name="search" type="hidden" value="true">
+			echo '		
   					<input name="selected_layer_id" type="hidden" value="'.$this->formvars['selected_layer_id'].'">
   					<input id="offset_'.$this->formvars['selected_layer_id'].'" name="offset_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['selected_layer_id']].'">
 					<input name="sql_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->qlayerset[0]['sql'].'">';
