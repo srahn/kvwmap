@@ -93,7 +93,8 @@ define(CASE_COMPRESS, false);																																						  #
 #											- layer_error_handling() reinkopieren																								#
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
-#   getLayerOptions:  - getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
+#   getLayerOptions:  - ein Rollenlayer muss verwendet werden																							#
+#											- getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
 #												und writeDatatypeAttributes() reinkopieren																				#
 #		get_group_legend:	- compare_legendorder() reinkopieren																								#
 #		get_select_list:  - read_datatype_attributes() reinkopieren																						#

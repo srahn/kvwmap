@@ -350,6 +350,39 @@ class GUI {
 							echo 	 '</select>
 										</li>';
 						}
+						if($this->formvars['layer_id'] < 0){
+							$this->result_colors = $this->database->read_colors();
+							for($i = 0; $i < count($this->result_colors); $i++){
+								$color_rgb = $this->result_colors[$i]['red'].' '.$this->result_colors[$i]['green'].' '.$this->result_colors[$i]['blue'];
+								if($layer[0]['Class'][0]['Style'][0]['color'] == $color_rgb){
+									$bgcolor = $this->result_colors[$i]['red'].', '.$this->result_colors[$i]['green'].', '.$this->result_colors[$i]['blue'];
+								}
+							}
+							echo '
+								<li>
+									<span>'.$this->strColor.': </span>
+									<select name="layer_options_color" style="background-color: rgb('.$bgcolor.')" onchange="this.setAttribute(\'style\', this.options[this.selectedIndex].getAttribute(\'style\'));">';
+										for($i = 0; $i < count($this->result_colors); $i++){
+											$color_rgb = $this->result_colors[$i]['red'].' '.$this->result_colors[$i]['green'].' '.$this->result_colors[$i]['blue'];
+											echo '<option ';
+											if($layer[0]['Class'][0]['Style'][0]['color'] == $color_rgb){
+												echo ' selected';
+											}
+											echo ' style="background-color: rgb('.$this->result_colors[$i]['red'].', '.$this->result_colors[$i]['green'].', '.$this->result_colors[$i]['blue'].')"';
+											echo ' value="'.$color_rgb.'">';
+											echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+											echo "</option>\n";
+										}
+										echo '
+									</select>
+								</li>';
+								
+							echo '
+								<li>
+									<span>'.$this->strHatching.': </span>
+									<input type="checkbox" value="hatch" name="layer_options_hatching" '.($layer[0]['Class'][0]['Style'][0]['symbolname'] == 'hatch' ? 'checked' : '').'>
+								</li>';
+						}
 						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="height: 6px; width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>';
 						if(ROLLENFILTER AND $this->user->rolle->showrollenfilter){
 							echo '	
@@ -496,6 +529,7 @@ echo '			</ul>
 			# bei Bedarf Label anlegen
 			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			$classes = $mapDB->read_Classes($this->formvars['layer_options_open']);
+			$this->user->rolle->setStyle($classes[0]['Style'][0]['Style_ID'], $this->formvars);
 			if($classes[0]['Label'] == NULL){
 				$empty_label = new stdClass();
 				$empty_label->font = 'arial';
