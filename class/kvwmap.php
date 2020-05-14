@@ -7575,7 +7575,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->Klasseneditor();
   }
 
-  function Klasseneditor_KlasseHinzufuegen(){
+  function Klasseneditor_KlasseHinzufuegen($output = true){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $attrib['name'] = $this->formvars['class_name'];
     $attrib['layer_id'] = $this->formvars['selected_layer_id'];
@@ -7583,7 +7583,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $attrib['order'] = ($this->formvars['class_order'] != '') ? $this->formvars['class_order'] : 1;
     $attrib['expression'] = ($this->formvars['class_expression'] != '') ? $this->formvars['class_expression'] : '';
     $new_class = $mapDB->new_Class($attrib);
-		$this->Klasseneditor();
+		if($output)$this->Klasseneditor();
 		return $new_class;
   }
 
@@ -7621,7 +7621,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->formvars['class_order'] = $auto_classes[$i]['order'];
       $this->formvars['class_expression'] = $auto_classes[$i]['expression'];
 
-      $this->formvars['class_id'] = $this->Klasseneditor_KlasseHinzufuegen();
+      $this->formvars['class_id'] = $this->Klasseneditor_KlasseHinzufuegen(false);
       $this->formvars['style_color'] = $auto_classes[$i]['style_color'];
       $this->formvars['style_outlinecolor'] = $auto_classes[$i]['style_outlinecolor'];
       $this->add_style();
