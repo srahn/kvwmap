@@ -553,9 +553,6 @@ a.invisiblelayerlink:hover{
 	text-align: center;
 	color: black;
 	border-radius: 5px;
-}
-
-a.buttonlink{
 	padding: 1px 7px 5px 7px;
 	margin: 0px 2px 0px 2px;
 }

@@ -87,6 +87,7 @@ function versionFormatter($version) {
 }
 
 function url2filepath($url, $doc_path, $doc_url){
+	if(in_array($url, ['', 'NULL']))return '';
 	if($doc_path == '')$doc_path = CUSTOM_IMAGE_PATH;
 	$url_parts = explode($doc_url, $url);
 	return $doc_path.$url_parts[1];
