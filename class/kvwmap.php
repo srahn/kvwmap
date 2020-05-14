@@ -9437,6 +9437,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $formtype = $element[4];
 				$tablename[$table_name]['tablename'] = $table_name;
 				$tablename[$table_name]['attributname'][] = $attributenames[] = $attributname;
+				$form_field_indizes[$attributname] = $i;
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
 				if($this->formvars['embedded'] != ''){
 					$formfieldstring .= '&'.$form_fields[$i].'='.$this->formvars[$form_fields[$i]];
@@ -9457,16 +9458,18 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 
 		# Dokumente speichern
-		if(count($document_attributes)> 0){
-			foreach($document_attributes as $i => $document_attribute){
+		if (count($document_attributes) > 0) {
+			foreach ($document_attributes as $i => $document_attribute) {
 				$options = $attributes['options'][$document_attribute['attributename']];
-				if(substr($document_attribute['datatype'], 0, 1) == '_'){
+				if (substr($document_attribute['datatype'], 0, 1) == '_') {
 					// ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen,
 					// nicht geänderten Datei-Pfaden und File-input-Feldnamen, die noch verarbeitet werden müssen
 					$insert = $this->processJSON($this->formvars[$form_fields[$i]], $doc_path, $doc_url, $options, $attributenames, $attributevalues, $layerdb);
 				}
-				else $insert = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attributenames, $attributevalues, $layerdb);	// normales Dokument-Attribut
-				$this->formvars[$form_fields[$i]] = $insert;
+				else {
+					$insert = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attributenames, $attributevalues, $layerdb);	// normales Dokument-Attribut
+				}
+				$this->formvars[$form_fields[$i]] = $document_attributes[$i]['insert'] = $insert;
 			}
 		}
 
@@ -9514,78 +9517,120 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->success = true;
 		foreach($tablename as $table){
 			$insert = array();
-			if($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']){		# nur Attribute aus der Haupttabelle werden gespeichert
-				for($i = 0; $i < count($table['attributname']); $i++){
-					if($table['type'][$i] == 'Time'){                       # Typ "Time"
-						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$insert[$table['attributname'][$i]] = "'".date("Y-m-d H:i:s")."'";
-						}
-					}
-					elseif($table['type'][$i] == 'User'){                       # Typ "User"
-						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$insert[$table['attributname'][$i]] = "'" . $this->user->Vorname." " . $this->user->Name."'";
-						}
-					}
-					elseif($table['type'][$i] == 'UserID'){                       # Typ "UserID"
-						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$insert[$table['attributname'][$i]] = "'" . $this->user->id."'";
-						}
-					}
-					elseif($table['type'][$i] == 'Stelle'){                       # Typ "Stelle"
-						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$insert[$table['attributname'][$i]] = "'" . $this->Stelle->Bezeichnung."'";
-						}
-					}
-					elseif($table['type'][$i] == 'StelleID'){                       # Typ "StelleID"
-						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$insert[$table['attributname'][$i]] = "'" . $this->Stelle->id."'";
-						}
-					}
-					elseif($table['type'][$i] == 'Dokument' AND $this->formvars[$table['formfield'][$i]] != '') {
-						$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]]."'";
-						$this->formvars[$table['formfield'][$i]] = ''; # leeren, falls weiter_erfassen angehakt
-					}					
-					elseif(
-						$table['type'][$i] != 'Text_not_saveable' AND
-						$table['type'][$i] != 'Auswahlfeld_not_saveable' AND
-						$table['type'][$i] != 'SubFormPK' AND
-						$table['type'][$i] != 'SubFormFK' AND
-						($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')
-					){
-						if($table['type'][$i] != 'Dokument' AND (substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i]))){		// bei Dokumenten wurde das JSON schon weiter oben verarbeitet
-							# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
-							$insert[$table['attributname'][$i]] = "'" . $this->processJSON($this->formvars[$table['formfield'][$i]], $doc_path, $doc_url)."'";
-						}
-						else{
-							if($table['type'][$i] == 'Zahl'){
-								# bei Zahlen den Punkt (Tausendertrenner) entfernen
-								$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
+			$exif_data = array();
+			if ($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']) {		# nur Attribute aus der Haupttabelle werden gespeichert
+				for ($i = 0; $i < count($table['attributname']); $i++) {
+
+					switch (true) {
+						case ($table['type'][$i] == 'Time') : {                       # Typ "Time"
+							if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+								$insert[$table['attributname'][$i]] = "'".date("Y-m-d H:i:s")."'";
 							}
-							if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
-								$this->formvars[$table['formfield'][$i]] = 'f';
+						} break;
+
+						case ($table['type'][$i] == 'User') : {                       # Typ "User"
+							if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+								$insert[$table['attributname'][$i]] = "'" . $this->user->Vorname." " . $this->user->Name."'";
 							}
-							$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]]."'"; # Typ "normal"
-						}
-					}
-					elseif($table['type'][$i] == 'Geometrie') {
-						if($this->formvars['geomtype'] == 'POINT'){
-							if($this->formvars['loc_x'] != '') {
-								if($this->formvars['dimension'] == 3) {
-									$insert[$table['attributname'][$i]] = "st_transform(st_geomfromtext('POINT(" . $this->formvars['loc_x']." " . $this->formvars['loc_y']." 0)', " . $client_epsg."), " . $layer_epsg.")";
+						} break;
+
+						case ($table['type'][$i] == 'UserID') : {                       # Typ "UserID"
+							if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+								$insert[$table['attributname'][$i]] = "'" . $this->user->id."'";
+							}
+						} break;
+
+						case ($table['type'][$i] == 'Stelle') : {                       # Typ "Stelle"
+							if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+								$insert[$table['attributname'][$i]] = "'" . $this->Stelle->Bezeichnung."'";
+							}
+						} break;
+
+						case ($table['type'][$i] == 'StelleID') : {                       # Typ "StelleID"
+							if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+								$insert[$table['attributname'][$i]] = "'" . $this->Stelle->id."'";
+							}
+						} break;
+
+						case ($table['type'][$i] == 'Dokument' AND $this->formvars[$table['formfield'][$i]] != '') : {
+							$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]]."'";
+							$this->formvars[$table['formfield'][$i]] = ''; # leeren, for the case weiter_erfassen angehakt
+						} break;
+
+						case (
+							$table['type'][$i] != 'Text_not_saveable' AND
+							$table['type'][$i] != 'Auswahlfeld_not_saveable' AND
+							$table['type'][$i] != 'SubFormPK' AND
+							$table['type'][$i] != 'SubFormFK' AND
+							($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')
+						) : {
+							if ($table['type'][$i] != 'Dokument' AND (substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i]))){		// bei Dokumenten wurde das JSON schon weiter oben verarbeitet
+								# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
+								$insert[$table['attributname'][$i]] = "'" . $this->processJSON($this->formvars[$table['formfield'][$i]], $doc_path, $doc_url)."'";
+							}
+							else {
+								if($table['type'][$i] == 'Zahl') {
+									# bei Zahlen den Punkt (Tausendertrenner) entfernen
+									$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
 								}
-								else{
-									$insert[$table['attributname'][$i]] = "st_transform(st_geomfromtext('POINT(" . $this->formvars['loc_x']." " . $this->formvars['loc_y'].")', " . $client_epsg."), " . $layer_epsg.")";
+								if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
+									$this->formvars[$table['formfield'][$i]] = 'f';
+								}
+								$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]]."'"; # Typ "normal"
+							}
+						} break;
+
+						case ($table['type'][$i] == 'ExifLatLng') : {
+							$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
+
+							if (!$exif_data[$document_attribute_name]) {
+								$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+							}
+							if ($exif_data[$document_attribute_name]['success']) {
+								$insert[$table['attributname'][$i]] = "'" . $exif_data[$document_attribute_name]['LatLng'] . "'";
+							}
+						} break;
+
+						case ($table['type'][$i] == 'ExifRichtung') : {
+							$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
+							if (!$exif_data[$document_attribute_name]) {
+								$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+							}
+							if ($exif_data[$document_attribute_name]['success']) {
+								$insert[$table['attributname'][$i]] = $exif_data[$document_attribute_name]['Richtung'];
+							}
+						} break;
+
+						case ($table['type'][$i] == 'ExifErstellungszeit') : {
+							$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
+							if (!$exif_data[$document_attribute_name]) {
+								$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+							}
+							if ($exif_data[$document_attribute_name]['success']) {
+								$insert[$table['attributname'][$i]] = "'" . $exif_data[$document_attribute_name]['Erstellungszeit'] . "'";
+							}
+						} break;
+
+						case ($table['type'][$i] == 'Geometrie') : {
+							if ($this->formvars['geomtype'] == 'POINT'){
+								if ($this->formvars['loc_x'] != '') {
+									if ($this->formvars['dimension'] == 3) {
+										$insert[$table['attributname'][$i]] = "st_transform(st_geomfromtext('POINT(" . $this->formvars['loc_x']." " . $this->formvars['loc_y']." 0)', " . $client_epsg."), " . $layer_epsg.")";
+									}
+									else {
+										$insert[$table['attributname'][$i]] = "st_transform(st_geomfromtext('POINT(" . $this->formvars['loc_x']." " . $this->formvars['loc_y'].")', " . $client_epsg."), " . $layer_epsg.")";
+									}
 								}
 							}
-						}
-						elseif ($this->formvars['newpathwkt'] != '') {
-							$geom = "ST_GeomFromText('" . $this->formvars['newpathwkt'] . "', " . $client_epsg . ")";
-							if (substr($this->formvars['geomtype'], 0, 5) == 'MULTI') {					# Erzeuge immer Multigeometrie
-								$geom = "ST_Multi(" . $geom . ")";
+							elseif ($this->formvars['newpathwkt'] != '') {
+								$geom = "ST_GeomFromText('" . $this->formvars['newpathwkt'] . "', " . $client_epsg . ")";
+								if (substr($this->formvars['geomtype'], 0, 5) == 'MULTI') {					# Erzeuge immer Multigeometrie
+									$geom = "ST_Multi(" . $geom . ")";
+								}
+								$insert[$table['attributname'][$i]] = "ST_Transform(" . $geom . ", " . $layer_epsg . ")";
 							}
-							$insert[$table['attributname'][$i]] = "ST_Transform(" . $geom . ", " . $layer_epsg . ")";
-						}
-					}
+						} break;
+					} # end of switch
 				}
 				
 				if(!empty($insert)){
@@ -9605,7 +9650,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 					$ret = $layerdb->execSQL($sql, 4, 1, false);
 					#echo '<br>Datensatz Speichern SQL: ' . $sql;
-					
+
 					if ($last_notice = pg_last_notice($layerdb->dbConn)) {
 						if (strpos($last_notice, 'CONTEXT: ') !== false) {
 							$last_notice = $msg = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
@@ -14974,11 +15019,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand)."))";
-						$pfad = "st_assvg(st_transform(st_simplify(st_intersection(" . $layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('" . $box_wkt."'," . $client_epsg."), " . $layer_epsg.")), " . $tolerance."), " . $client_epsg."), 0, 8) AS highlight_geom, " . $pfad;
+						$pfad = "st_assvg(st_transform(st_simplify(st_intersection(" . $layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('" . $box_wkt."'," . $client_epsg."), " . $layer_epsg.")), " . $tolerance."), " . $client_epsg."), 0, 15) AS highlight_geom, " . $pfad;
 					}
 					else{
 						$buffer = $this->map_scaledenom/260;
-						$pfad = "st_assvg(st_buffer(st_transform(" . $layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", " . $client_epsg."), " . $buffer."), 0, 8) AS highlight_geom, " . $pfad;
+						$pfad = "st_assvg(st_buffer(st_transform(" . $layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", " . $client_epsg."), " . $buffer."), 0, 15) AS highlight_geom, " . $pfad;
 					}
 				}
 
@@ -15052,12 +15097,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
             	switch ($attributes['form_element_type'][$j]){
 				        case 'Dokument' : {
 									$dokumentpfad = $layer['shape'][$k][$attributes['name'][$j]];
-									$pfadteil = explode('&original_name=', $dokumentpfad);
-									$dateiname = $pfadteil[0];
-									if ($layer['document_url'] != '') {
-										$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
-									}
-									$original_name = $pfadteil[1];
+									$dateiname = get_document_file_path($dokumentpfad, $layer['document_path'], $layer['document_url']);
 									$pathinfo = pathinfo($dateiname);
 									$thumbname = $this->get_dokument_vorschau(array(
 										$pathinfo['dirname'] . '/' . $pathinfo['filename'],

@@ -737,7 +737,51 @@
 					}
 					$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
 				}break;
-				
+
+				case 'ExifLatLng': {
+					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" id="custom_latlng" ';
+					if ($attribute_privileg == '0' OR $lock[$k]) {
+						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: ' . $fontsize . 'px;"';
+					}
+					else {
+						$datapart .= ' style="font-size: ' . $fontsize . 'px;"';
+					}
+					$datapart .= ' size="' . $size . '" type="text" name="' . $fieldname . '" value="'.htmlspecialchars($value) . '">';
+				}break;
+
+				case 'ExifRichtung': {
+					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" id="custom_richtung" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
+					if ($attribute_privileg == '0' OR $lock[$k]) {
+						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
+					}
+					else{
+						$datapart .= ' style="font-size: '.$fontsize.'px;"';
+					}
+					$datapart .= ' size="' . $size . '" type="text" name="' . $fieldname . '" value="' . htmlspecialchars($value) . '">';
+				}break;
+
+				case 'ExifErstellungszeit': {
+					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
+					if($attribute_privileg == '0' OR $lock[$k]){
+						$datapart .= ' readonly style="display:none;"';
+					}
+					else{
+						$datapart .= ' tabindex="1" style="width: 100%; font-size: '.$fontsize.'px;"';
+					}
+					if($name == 'lock'){
+						$datapart .= ' type="hidden"';
+					}
+					if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
+						$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
+					}
+					if($size)$datapart .= ' size="'.$size.'"';
+					$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
+					if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
+						$angezeigter_value = (($attributes['type'][$j] == 'bool' OR $attributes['form_element_type'][$j] == 'Editiersperre') ? ($value == 't' ? $gui->strYes : $gui->strNo) : $value);
+						$datapart .= '<div class="readonly_text" style="font-size: '.$fontsize.'px;">' . htmlspecialchars($angezeigter_value) . '</div>';
+					}
+				} break;
+
 				default : {
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 					if($attribute_privileg == '0' OR $lock[$k]){
