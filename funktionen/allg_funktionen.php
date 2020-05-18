@@ -104,12 +104,16 @@ function get_document_file_path($document_attribute_value, $layer_document_path,
 }
 
 function url2filepath($url, $doc_path, $doc_url){
-	if(in_array($url, ['', 'NULL']))return '';
 	if($doc_path == '')$doc_path = CUSTOM_IMAGE_PATH;
 	$url_parts = explode($doc_url, $url);
 	return $doc_path.$url_parts[1];
 }
 
+/*
+* function read exif and gps data from file given in $img_path and return GPS-Position, Direction and creation Time
+* @param string $img_path Absolute Path of file with Exif Data to read
+* @return array Array with success true if read was successful, LatLng the GPS-Position where the foto was taken Richtung and Erstellungszeit.
+*/
 function get_exif_data($img_path) {
 	$exif = exif_read_data($img_path, 'EXIF, GPS');
 	if ($exif === false) {
@@ -120,13 +124,14 @@ function get_exif_data($img_path) {
 	}
 	else {
 		$direction_parts = explode('/',  $exif['GPSImgDirection']);
+		$direction = (count($direction_parts) > 1 AND $direction_parts[1] != 0 ? $direction_parts / $direction_parts[1] : 0);
 		return array(
 			'success' => true,
 			'LatLng' =>
 				(floatval(substr($exif['GPSLatitude' ][0], 0, strlen($exif['GPSLatitude' ][0]) - 2)) + floatval(substr($exif['GPSLatitude' ][1], 0, strlen($exif['GPSLatitude' ][1]) - 2) / 60) + floatval(substr($exif['GPSLatitude' ][2], 0 , strlen($exif['GPSLatitude' ][2]) - 2) / 6000))
 				. ' '
 				. (floatval(substr($exif['GPSLongitude'][0], 0, strlen($exif['GPSLongitude'][0]) - 2)) + floatval(substr($exif['GPSLongitude'][1], 0, strlen($exif['GPSLongitude'][1]) - 2) / 60) + floatval(substr($exif['GPSLongitude'][2], 0 , strlen($exif['GPSLongitude'][2]) - 2) / 6000)),
-			'Richtung' => $direction_parts[0] / $direction_parts[1],
+			'Richtung' => $direction,
 			'Erstellungszeit' => substr($exif['DateTimeOriginal'], 0 , 4) . '-' . substr($exif['DateTimeOriginal'], 5, 2) . '-' . substr($exif['DateTimeOriginal'], 8, 2) . ' ' . substr($exif['DateTimeOriginal'], 11)
 		);
 	}
