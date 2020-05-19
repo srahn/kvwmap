@@ -311,6 +311,7 @@ function save_bearbeitungshinweis(id){
 <input type="hidden" name="suchgeprueft" value="<? echo $this->formvars['suchgeprueft']; ?>">
 <input type="hidden" name="bearbeitungshinweis_id" value="">
 <input type="hidden" name="bearbeitungshinweis_text" value="">
+<input type="hidden" name="geom_from_layer" value="<? echo $this->formvars['geom_from_layer']; ?>">
 
 	
 <table width="0%" border="0" cellpadding="8" cellspacing="0">
@@ -330,7 +331,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		  ?>
 	  </td>
 				<tr>
-					<td><a href="index.php?go=Nachweisrechercheformular&zurueck=1&VermStelle=<? echo $this->formvars['VermStelle']; ?>"><span style="font-size: 140%">&laquo;</span> Nachweisrecherche</a></td>
+					<td><a href="index.php?go=Nachweisrechercheformular&zurueck=1&VermStelle=<? echo $this->formvars['VermStelle']; ?>&geom_from_layer=<? echo $this->formvars['geom_from_layer']; ?>"><span style="font-size: 140%">&laquo;</span> Nachweisrecherche</a></td>
 				</tr>
         </tr>
         <tr> 
