@@ -340,34 +340,44 @@ class ddl {
 								$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
 								$border = $this->layout['elements'][$attributes['name'][$j]]['border'];
 								
-								if($attributes['form_element_type'][$j] == 'Dokument'){
-									if($width == '')$width = 50;
-									$dokumentpfad = $this->result[$i][$this->attributes['name'][$j]];
-									if(substr($dokumentpfad, 0, 4) == 'http'){
-										$file = file_get_contents($dokumentpfad);
-										$dokumentpfad = IMAGEPATH.rand(0,100000).'.jpg';
-										file_put_contents($dokumentpfad, $file);
-									}
-									$pfadteil = explode('&original_name=', $dokumentpfad);
-									$dateiname = $pfadteil[0];
-									if($dateiname == $this->attributes['alias'][$j] AND $preview)$dateiname = WWWROOT.APPLVERSION.GRAPHICSPATH.'nogeom.png';		// als Platzhalter im Editor
-									if($dateiname != '' AND file_exists($dateiname)){
-										$dateinamensteil=explode('.', $dateiname);
-										if(in_array(strtolower($dateinamensteil[1]), array('jpg', 'png', 'gif', 'tif', 'pdf'))){
-											$new_filename = IMAGEPATH.basename($dateinamensteil[0]).'.jpg';
-											exec(IMAGEMAGICKPATH.'convert '.$dateiname.' -background white -flatten '.$new_filename);
-											$size = getimagesize($new_filename);
-											$ratio = $size[1]/$size[0];
-											$height = $ratio*$width;
-											$y = $y-$height;
-											$this->pdf->addJpegFromFile($new_filename, $x, $y, $width);
+								if(substr($attributes['type'][$j], 0, 1) == '_'){		# Array									
+									$values = json_decode($this->result[$i][$attributes['name'][$j]]);
+									$x2 = $x;
+									$y2 = $miny_array = $y;
+									for($v = 0; $v < count($values); $v++){
+										if($attributes['form_element_type'][$j] == 'Dokument'){		# Dokument-Attribute werden im Raster ausgegeben
+											if($v > 0){
+												if(($x2 + 2*$width + 20) < ($this->layout['width'] - $this->layout['margin_right'])){		# neue Spalte
+													$x2 += $width + 20;
+												}
+												else{					# neue Zeile
+													$x2 = $x;
+													$y2 = $miny_array - 20;
+												}
+											}
+											$y = $this->putImage($values[$v], $j, $x2, $y2, $width, $preview);
+											if($y < $miny_array)$miny_array = $y;
+										}
+										else{
+											if($v > 0){
+												$y2 = $miny_array - 20;		# neue Zeile
+											}
+											$text = $this->get_result_value_output($values[$v], $i, $j, $preview);
+											$miny_array = $this->putText($text, $zeilenhoehe, $width, $x, $y2, $offsetx, $border);
 										}
 									}
+									$y = $miny_array;
 								}
-								else{
-									$text = $this->get_result_value_output($i, $j, $preview);
-									$y = $this->putText($text, $zeilenhoehe, $width, $x, $y, $offsetx, $border);
-								}								
+								else{			# normal
+									$value = $this->result[$i][$attributes['name'][$j]];
+									if($attributes['form_element_type'][$j] == 'Dokument'){
+										$y = $this->putImage($value, $j, $x, $y, $width, $preview);
+									}
+									else{
+										$text = $this->get_result_value_output($value, $i, $j, $preview);
+										$y = $this->putText($text, $zeilenhoehe, $width, $x, $y, $offsetx, $border);
+									}
+								}
 								if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y){
 									if(($this->miny[$this->pdf->currentContents] - $y) > $this->max_dataset_height)$this->max_dataset_height = $this->miny[$this->pdf->currentContents] - $y;
 									$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes									
@@ -487,6 +497,31 @@ class ddl {
 		return NULL;
 	}
 	
+	function putImage($dokumentpfad, $j, $x, $y, $width, $preview){
+		if($width == '')$width = 50;
+		if(substr($dokumentpfad, 0, 4) == 'http'){
+			$file = file_get_contents($dokumentpfad);
+			$dokumentpfad = IMAGEPATH.rand(0,100000).'.jpg';
+			file_put_contents($dokumentpfad, $file);
+		}
+		$pfadteil = explode('&original_name=', $dokumentpfad);
+		$dateiname = $pfadteil[0];
+		if($dateiname == $this->attributes['alias'][$j] AND $preview)$dateiname = WWWROOT.APPLVERSION.GRAPHICSPATH.'nogeom.png';		// als Platzhalter im Editor
+		if($dateiname != '' AND file_exists($dateiname)){
+			$dateinamensteil=explode('.', $dateiname);
+			if(in_array(strtolower($dateinamensteil[1]), array('jpg', 'png', 'gif', 'tif', 'pdf'))){
+				$new_filename = IMAGEPATH.basename($dateinamensteil[0]).'.jpg';
+				exec(IMAGEMAGICKPATH.'convert '.$dateiname.' -background white -flatten '.$new_filename);
+				$size = getimagesize($new_filename);
+				$ratio = $size[1]/$size[0];
+				$height = $ratio*$width;
+				$y = $y-$height;
+				$this->pdf->addJpegFromFile($new_filename, $x, $y, $width);
+			}
+		}
+		return $y;
+	}
+	
 	function putText($text, $fontsize, $width, $x, $y, $offsetx, $border = false){	
 		if($x < 0){		# rechtsbündig
 			$x = $this->layout['width'] + $x;
@@ -530,53 +565,55 @@ class ddl {
 		$text = str_replace(';', chr(10), $text);
 		if(strpos($text, '${') !== false){
 			for($j = 0; $j < count($this->attributes['name']); $j++){
-				$text = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output($i, $j, true), $text);
+				$value = $this->result[$i][$this->attributes['name'][$j]];
+				$text = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output($value, $i, $j, true), $text);
 			}
 		}
 		if(strpos($text, '$') !== false){
 			for($j = 0; $j < count($this->attributes['name']); $j++){
-				$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($i, $j, true), $text);
+				$value = $this->result[$i][$this->attributes['name'][$j]];
+				$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($value, $i, $j, true), $text);
 			}
 		}
   	return $text;
   }
   
-  function get_result_value_output($i, $j, $preview){
+  function get_result_value_output($value, $i, $j, $preview){
 				# $i ist der result-counter, $j ist der attribute-counter
-		if($this->result[$i][$this->attributes['name'][$j]] == '')$this->result[$i][$this->attributes['name'][$j]] = ' ';		# wenns der result-value leer ist, ein Leerzeichen setzen, wegen der relativen Positionierung
+		if($value == '')$value = ' ';		# wenns der result-value leer ist, ein Leerzeichen setzen, wegen der relativen Positionierung
 		switch ($this->attributes['form_element_type'][$j]){
 			case 'Auswahlfeld' : {
 				if(is_array($this->attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 					for($e = 0; $e < count($this->attributes['enum_value'][$j][$i]); $e++){
-						if($this->attributes['enum_value'][$j][$i][$e] == $this->result[$i][$this->attributes['name'][$j]]){
+						if($this->attributes['enum_value'][$j][$i][$e] == $value){
 							$output = $this->attributes['enum_output'][$j][$i][$e];
 							break;
 						}
-						else $output = $this->result[$i][$this->attributes['name'][$j]];
+						else $output = $value;
 					}
 				}
 				else{
 					for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
-						if($this->attributes['enum_value'][$j][$e] == $this->result[$i][$this->attributes['name'][$j]]){
+						if($this->attributes['enum_value'][$j][$e] == $value){
 							$output = $this->attributes['enum_output'][$j][$e];
 							break;
 						}
-						else $output = $this->result[$i][$this->attributes['name'][$j]];
+						else $output = $value;
 					}
 				}
 				if(count($this->attributes['enum_value'][$j]) == 0){	
-					$output = $this->result[$i][$this->attributes['name'][$j]];
+					$output = $value;
 				}			
 			}break;
 			case 'Autovervollständigungsfeld' : {
 				if(count($this->attributes['enum_output'][$j]) == 0){	
-					$output = $this->result[$i][$this->attributes['name'][$j]];		# preview
+					$output = $value;		# preview
 				}	
 				else $output = $this->attributes['enum_output'][$j][$i];
 			}break;
 			case 'Radiobutton' : {
 				for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
-					if($this->attributes['enum_value'][$j][$e] == $this->result[$i][$this->attributes['name'][$j]]){
+					if($this->attributes['enum_value'][$j][$e] == $value){
 						$output .= '<box><b> X </b></box>  ';
 					}
 					else $output .= ' <box>    </box>  ';
@@ -584,19 +621,19 @@ class ddl {
 					if(!$this->attributes['horizontal'][$j])$output .= chr(10);
 				}
 				if(count($this->attributes['enum_value'][$j]) == 0){	
-					$output = $this->result[$i][$this->attributes['name'][$j]];
+					$output = $value;
 				}			
 			}break;			
 			case 'Checkbox' : {
 				$option = (json_decode($this->attributes['options'][$j]));
-				$output = ($this->result[$i][$this->attributes['name'][$j]] == 't' ? ($option->print->true != '' ? $option->print->true : 'ja') : ($option->print->false != '' ? $option->print->false : 'nein'));
+				$output = ($value == 't' ? ($option->print->true != '' ? $option->print->true : 'ja') : ($option->print->false != '' ? $option->print->false : 'nein'));
 			} break;			
 			default: {
 				if(!$preview AND $this->attributes['type'][$j] == 'bool'){
-					$this->result[$i][$this->attributes['name'][$j]] = str_replace('t', "ja", $this->result[$i][$this->attributes['name'][$j]]);	
-					$this->result[$i][$this->attributes['name'][$j]] = str_replace('f', "nein", $this->result[$i][$this->attributes['name'][$j]]);
+					$value = str_replace('t', "ja", $value);	
+					$value = str_replace('f', "nein", $value);
 				}
-				$output = $this->result[$i][$this->attributes['name'][$j]];
+				$output = $value;
 			}break;
 		}
 		return $output;
@@ -785,10 +822,12 @@ class ddl {
 				$dateiname = $this->layout['filename'];
 				# Attribute
 				for($j = 0; $j < count($this->attributes['name']); $j++){
-					$dateiname = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output(0, $j, true), $dateiname);
+					$value = $this->result[$i][$this->attributes['name'][$j]];
+					$dateiname = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output($value, 0, $j, true), $dateiname);
 				}
 				for($j = 0; $j < count($this->attributes['name']); $j++){
-					$dateiname = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output(0, $j, true), $dateiname);
+					$value = $this->result[$i][$this->attributes['name'][$j]];
+					$dateiname = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($value, 0, $j, true), $dateiname);
 				}
 				# Nutzer
 				$dateiname = str_replace('$user', $this->user->Vorname.'_'.$this->user->Name, $dateiname);
