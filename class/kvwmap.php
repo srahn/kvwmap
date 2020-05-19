@@ -14247,7 +14247,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       } # ende der Behandlung der zur Abfrage ausgewählten Layer
     } # ende der Schleife zur Abfrage der Layer der Stelle
 
-		if($this->formvars['mime_type'] != 'overlay_html' AND $this->last_query != '' AND $this->user->rolle->querymode == 1){		# bei get_last_query (nicht aus Overlay) und aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer
+		if($this->formvars['printversion'] == '' AND $this->formvars['mime_type'] != 'overlay_html' AND $this->last_query != '' AND $this->user->rolle->querymode == 1){		# bei get_last_query (nicht aus Overlay) und aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer
 			$attributes = $this->qlayerset[0]['attributes'];
 			$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
 			$this->loadMap('DataBase');
