@@ -89,6 +89,14 @@ $SVGvars_querytooltipscript .= '
 						}
 						var anzahl_bilder = elements.length-1;
 						for(j = 1; j < elements.length; j++){
+							if(j%2 == 0){
+								xpos = 165;
+								maxwidth = 305;
+								ypos = ypos - 110;
+							}
+							else{
+								xpos = 5;
+							}
 							pics[i] = new Array();
 							pics[i][j] = document.createElementNS("http://www.w3.org/2000/svg", "image");
 							pics[i][j].setAttributeNS(null, "id", "pic_"+i+j);
@@ -106,6 +114,7 @@ $SVGvars_querytooltipscript .= '
 							}
 						}
 						ypos = ypos + 12;
+						xpos = 5;
 					}
 				}
 				tooltipframe.setAttribute("x", xpos-8);

@@ -14895,11 +14895,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 				$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
 				#$path = $layerset[$i]['pfad'];
-				$path = $layerset[$i]['pfad'];
-
+				$path = replace_params(
+					$layerset[$i]['pfad'],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->Stelle->id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				);
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
-				#$path = $this->Stelle->parse_path($layerdb, $path, $privileges);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
+				$path = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
 
 				# order by rausnehmen
 				$orderbyposition = strrpos(strtolower($path), 'order by');
@@ -14987,26 +14993,26 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					# Wenn das Koordinatenssystem des Views anders ist als vom Layer wird die Suchbox und die Suchgeometrie
 					# in epsg des layers transformiert
 					if ($client_epsg!=$layer_epsg) {
-						$sql_where =" AND " . $the_geom." && st_transform(st_geomfromtext('" . $loosesearchbox_wkt."'," . $client_epsg.")," . $layer_epsg.")";
+						$sql_where =" AND ".$the_geom." && st_transform(st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
 					}
 					else {
-						$sql_where =" AND " . $the_geom." && st_geomfromtext('" . $loosesearchbox_wkt."'," . $client_epsg.")";
+						$sql_where =" AND ".$the_geom." && st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg.")";
 					}
 
 					# Wenn es sich bei der Suche um eine punktuelle Suche handelt, wird die where Klausel um eine
 					if($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy AND $this->querypolygon == ''){
 						if ($client_epsg!=$layer_epsg) {
-							$sql_where.=" AND st_distance(" . $the_geom.",st_transform(st_geomfromtext('POINT(" . $rect->minx." " . $rect->miny.")'," . $client_epsg.")," . $layer_epsg."))";
+							$sql_where.=" AND st_distance(".$the_geom.",st_transform(st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
 						}
 						else {
-							$sql_where.=" AND st_distance(" . $the_geom.",st_geomfromtext('POINT(" . $rect->minx." " . $rect->miny.")'," . $client_epsg."))";
+							$sql_where.=" AND st_distance(".$the_geom.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
 						}
-						$sql_where.=" <= " . $rand;
+						$sql_where.=" <= ".$rand;
 					}
 				}
 				else{		################ mouseover auf Datensatz in Sachdatenanzeige ################
 					$showdata = 'false';
-					$sql_where = " AND " . $geometrie_tabelle."_oid = " . $this->formvars['oid'];
+					$sql_where = " AND ".$geometrie_tabelle."_oid = ".$this->formvars['oid'];
 				}
 
 				# SVG-Geometrie abfragen für highlighting
@@ -15024,20 +15030,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand)."))";
-						$pfad = "st_assvg(st_transform(st_simplify(st_intersection(" . $layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('" . $box_wkt."'," . $client_epsg."), " . $layer_epsg.")), " . $tolerance."), " . $client_epsg."), 0, 15) AS highlight_geom, " . $pfad;
+						$pfad = "st_assvg(st_transform(st_simplify(st_intersection(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('".$box_wkt."',".$client_epsg."), ".$layer_epsg.")), ".$tolerance."), ".$client_epsg."), 0, 15) AS highlight_geom, ".$pfad;
 					}
 					else{
 						$buffer = $this->map_scaledenom/260;
-						$pfad = "st_assvg(st_buffer(st_transform(" . $layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", " . $client_epsg."), " . $buffer."), 0, 15) AS highlight_geom, " . $pfad;
+						$pfad = "st_assvg(st_buffer(st_transform(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom, ".$pfad;
 					}
 				}
 
 				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
 				if($layerset[$i]['Filter'] != ''){
 					$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
-					$sql_where .= " AND " . $layerset[$i]['Filter'];
+					$sql_where .= " AND ".$layerset[$i]['Filter'];
 				}
-
+				
 				# group by wieder einbauen
 				if($layerset[$i]['attributes']['groupby'] != ''){
 					$pfad .= $layerset[$i]['attributes']['groupby'];
@@ -15052,7 +15058,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				
 				if($distinct == true){
 					$pfad = 'DISTINCT '.$pfad;
-				}				
+				}
 				
 				#if($the_geom == 'query.the_geom'){
 					$sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
@@ -15099,84 +15105,94 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           for($j = 0; $j < count($attributes['name']); $j++){
             if($attributes['tooltip'][$j]){
 							if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
-            	switch ($attributes['form_element_type'][$j]){
-				        case 'Dokument' : {
-									$dokumentpfad = $layer['shape'][$k][$attributes['name'][$j]];
-									$dateiname = get_document_file_path($dokumentpfad, $layer['document_path'], $layer['document_url']);
-									$pathinfo = pathinfo($dateiname);
-									$thumbname = $this->get_dokument_vorschau(array(
-										$pathinfo['dirname'] . '/' . $pathinfo['filename'],
-										$pathinfo['extension']
-									));
-									if ($layer['document_url'] != '') {
-										$thumbname = dirname($dokumentpfad) . '/' . basename($thumbname);
-										$url = '';
-									}
-									else {
-										$this->allowed_documents[] = addslashes($dateiname);
-										$this->allowed_documents[] = addslashes($thumbname);
-										$url = IMAGEURL.$this->document_loader_name.'?dokument=';
-									}
-									$pictures .= '| '.$url.$thumbname;
-				        }break;
-				        case 'Link': {
-		              $attribcount++;
-									if($layer['shape'][$k][$attributes['name'][$j]]!='') {
-										$link = 'xlink:'.$layer['shape'][$k][$attributes['name'][$j]];
-										$links .= $link.'##';
-									}
-								} break;
-								case 'Auswahlfeld': {
-									$auswahlfeld_output = '';
-									if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-										for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
-											if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-												$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
-												break;
+							if(substr($attributes['type'][$j], 0, 1) == '_'){
+								$values = json_decode($layer['shape'][$k][$attributes['name'][$j]]);
+							}
+							else{
+								$values = array($layer['shape'][$k][$attributes['name'][$j]]);
+							}
+							foreach($values as $value){
+								switch ($attributes['form_element_type'][$j]){
+									case 'Dokument' : {
+										$dokumentpfad = $value;
+										$pfadteil = explode('&original_name=', $dokumentpfad);
+										$dateiname = $pfadteil[0];
+										if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
+										$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+										$original_name = $pfadteil[1];
+										$dateinamensteil=explode('.', $dateiname);
+										$type = $dateinamensteil[1];
+										$thumbname = $this->get_dokument_vorschau($dateinamensteil);
+										if($layer['document_url'] != ''){
+											$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+											$url = '';
+										}
+										else{
+											$this->allowed_documents[] = addslashes($dateiname);
+											$this->allowed_documents[] = addslashes($thumbname);
+											$url = IMAGEURL.$this->document_loader_name.'?dokument=';
+										}
+										$pictures .= '| '.$url.$thumbname;
+									}break;
+									case 'Link': {
+										$attribcount++;
+										if($value!='') {
+											$link = 'xlink:'.$value;
+											$links .= $link.'##';
+										}
+									} break;
+									case 'Auswahlfeld': {
+										$auswahlfeld_output = '';
+										if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+											for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
+												if($attributes['enum_value'][$j][$k][$e] == $value){
+													$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
+													break;
+												}
 											}
 										}
-									}
-									else{
+										else{
+											for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
+												if($attributes['enum_value'][$j][$e] == $value){
+													$auswahlfeld_output = $attributes['enum_output'][$j][$e];
+													break;
+												}
+											}
+										}
+										$output .=  $attributes['alias'][$j].': ';
+										$output .= $auswahlfeld_output;
+										$output .= '##';
+										$attribcount++;
+									} break;
+									case 'Radiobutton': {
+										$radiobutton_output = '';
 										for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-											if($attributes['enum_value'][$j][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-												$auswahlfeld_output = $attributes['enum_output'][$j][$e];
+											if($attributes['enum_value'][$j][$e] == $value){
+												$radiobutton_output = $attributes['enum_output'][$j][$e];
 												break;
 											}
 										}
+										$output .=  $attributes['alias'][$j].': ';
+										$output .= $radiobutton_output;
+										$output .= '##';
+										$attribcount++;
+									} break;
+									case 'Checkbox': {
+										$output .=  $attributes['alias'][$j].': ';
+										$value = str_replace('f', 'nein',  $value);
+										$value = str_replace('t', 'ja',  $value);
+										$output .= $value.'  ';
+										$output .= '##';
+									} break;
+									default : {
+										$output .=  $attributes['alias'][$j].': ';
+										$attribcount++;
+										$value = str_replace(chr(10), '##',  $value);
+										$output .= $value.'  ';
+										$output .= '##';
 									}
-									$output .=  $attributes['alias'][$j].': ';
-									$output .= $auswahlfeld_output;
-									$output .= '##';
-									$attribcount++;
-								} break;
-								case 'Radiobutton': {
-									$radiobutton_output = '';
-									for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-										if($attributes['enum_value'][$j][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-											$radiobutton_output = $attributes['enum_output'][$j][$e];
-											break;
-										}
-									}
-									$output .=  $attributes['alias'][$j].': ';
-									$output .= $radiobutton_output;
-									$output .= '##';
-									$attribcount++;
-								} break;
-								case 'Checkbox': {
-									$output .=  $attributes['alias'][$j].': ';
-		              $layer['shape'][$k][$attributes['name'][$j]] = str_replace('f', 'nein',  $layer['shape'][$k][$attributes['name'][$j]]);
-									$layer['shape'][$k][$attributes['name'][$j]] = str_replace('t', 'ja',  $layer['shape'][$k][$attributes['name'][$j]]);
-									$output .= $layer['shape'][$k][$attributes['name'][$j]].'  ';
-		              $output .= '##';
-								} break;
-				        default : {
-		              $output .=  $attributes['alias'][$j].': ';
-		              $attribcount++;
-									$layer['shape'][$k][$attributes['name'][$j]] = str_replace(chr(10), '##',  $layer['shape'][$k][$attributes['name'][$j]]);
-		              $output .= $layer['shape'][$k][$attributes['name'][$j]].'  ';
-		              $output .= '##';
-				        }
-            	}
+								}
+							}
             }
           }
           # Links und Bild-URLs anfügen
