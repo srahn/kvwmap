@@ -12829,6 +12829,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
 	function layerCommentLoad() {
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$groups = $mapDB->read_Groups();
 		$ret = $this->user->rolle->getLayerComments(
 			$this->formvars['id'],
 			($this->formvars['from_default_user'] != '' ? $this->Stelle->default_user_id : $this->user->id)
@@ -12845,6 +12847,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $layer_ids = explode(',', $ret[1][0]['layers']);
 			foreach($layer_ids as $layer_id){
 				$formvars['thema' . $layer_id] = 1;
+				$groupid = $layerset['layer_ids'][$layer_id]['Gruppe'];
+				do{
+					$formvars['group_'.$groupid] = 1;
+					$groupid = $groups[$groupid]['obergruppe'];
+				} while ($groupid != '');				
 			}
 			$query_ids = explode(',', $ret[1][0]['query']);
 			foreach($query_ids as $layer_id){
@@ -12852,6 +12859,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 			$this->user->rolle->setAktivLayer($formvars, $this->Stelle->id, $this->user->id, true);
 			$this->user->rolle->setQueryStatus($formvars);
+			$this->user->rolle->setGroupStatus($formvars);
 		}
 		$this->loadMap('DataBase');
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
