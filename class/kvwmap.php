@@ -9587,7 +9587,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
 							}
 							if ($exif_data[$document_attribute_name]['success']) {
-								$insert[$table['attributname'][$i]] = "'" . $exif_data[$document_attribute_name]['LatLng'] . "'";
+								$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['LatLng'] ? "'" . $exif_data[$document_attribute_name]['LatLng'] . "'" : "NULL");
 							}
 						} break;
 
@@ -9597,7 +9597,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
 							}
 							if ($exif_data[$document_attribute_name]['success']) {
-								$insert[$table['attributname'][$i]] = $exif_data[$document_attribute_name]['Richtung'];
+								$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['Richtung'] ? $exif_data[$document_attribute_name]['Richtung'] : "NULL");
 							}
 						} break;
 
@@ -9607,7 +9607,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 								$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
 							}
 							if ($exif_data[$document_attribute_name]['success']) {
-								$insert[$table['attributname'][$i]] = "'" . $exif_data[$document_attribute_name]['Erstellungszeit'] . "'";
+								$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['Erstellungszeit']  ? "'" . $exif_data[$document_attribute_name]['Erstellungszeit'] . "'" : "NULL");
 							}
 						} break;
 

@@ -124,15 +124,30 @@ function get_exif_data($img_path) {
 	}
 	else {
 		$direction_parts = explode('/',  $exif['GPSImgDirection']);
-		$direction = (count($direction_parts) > 1 AND $direction_parts[1] != 0 ? $direction_parts / $direction_parts[1] : 0);
 		return array(
 			'success' => true,
-			'LatLng' =>
-				(floatval(substr($exif['GPSLatitude' ][0], 0, strlen($exif['GPSLatitude' ][0]) - 2)) + floatval(substr($exif['GPSLatitude' ][1], 0, strlen($exif['GPSLatitude' ][1]) - 2) / 60) + floatval(substr($exif['GPSLatitude' ][2], 0 , strlen($exif['GPSLatitude' ][2]) - 2) / 6000))
-				. ' '
-				. (floatval(substr($exif['GPSLongitude'][0], 0, strlen($exif['GPSLongitude'][0]) - 2)) + floatval(substr($exif['GPSLongitude'][1], 0, strlen($exif['GPSLongitude'][1]) - 2) / 60) + floatval(substr($exif['GPSLongitude'][2], 0 , strlen($exif['GPSLongitude'][2]) - 2) / 6000)),
-			'Richtung' => $direction,
-			'Erstellungszeit' => substr($exif['DateTimeOriginal'], 0 , 4) . '-' . substr($exif['DateTimeOriginal'], 5, 2) . '-' . substr($exif['DateTimeOriginal'], 8, 2) . ' ' . substr($exif['DateTimeOriginal'], 11)
+			'LatLng' => ((array_key_exists('GPSLatitude', $exif) AND array_key_exists('GPSLongitude', $exif)) ? (
+				floatval(substr($exif['GPSLatitude' ][0], 0, strlen($exif['GPSLatitude' ][0]) - 2))
+				+ floatval(substr($exif['GPSLatitude' ][1], 0, strlen($exif['GPSLatitude' ][1]) - 2) / 60)
+				+ floatval(substr($exif['GPSLatitude' ][2], 0 , strlen($exif['GPSLatitude' ][2]) - 2) / 6000)
+			) . ' ' . (
+				floatval(substr($exif['GPSLongitude'][0], 0, strlen($exif['GPSLongitude'][0]) - 2))
+				+ floatval(substr($exif['GPSLongitude'][1], 0, strlen($exif['GPSLongitude'][1]) - 2) / 60)
+				+ floatval(substr($exif['GPSLongitude'][2], 0 , strlen($exif['GPSLongitude'][2]) - 2) / 6000)
+			) : NULL),
+			'Richtung' => ((
+				count($direction_parts) > 1 AND
+				intval($direction_parts[0]) != 0 AND
+				intval($direction_parts[1]) > 0
+			) ? (
+				$direction_parts[0] / $direction_parts[1]
+			) : NULL),
+			'Erstellungszeit' => (array_key_exists('DateTimeOriginal', $exif) ? (
+					substr($exif['DateTimeOriginal'], 0 , 4) . '-'
+				. substr($exif['DateTimeOriginal'], 5, 2) . '-'
+				. substr($exif['DateTimeOriginal'], 8, 2) . ' '
+				. substr($exif['DateTimeOriginal'], 11)
+			) : NULL)
 		);
 	}
 }
