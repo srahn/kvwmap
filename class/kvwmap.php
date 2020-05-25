@@ -12844,6 +12844,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$formvars['thema'.$layerset[$i]['Layer_ID']] = 0;		# erstmal alle ausschalten
 				$formvars['qLayer'.$layerset[$i]['Layer_ID']] = 0;		# erstmal alle ausschalten
 			}
+			foreach($groups as $group){
+				if($group['obergruppe'] == ''){
+					$formvars['group_'.$group['id']] = 0;		# und alle Obergruppen zuklappen
+				}
+			}
       $layer_ids = explode(',', $ret[1][0]['layers']);
 			foreach($layer_ids as $layer_id){
 				$formvars['thema' . $layer_id] = 1;
