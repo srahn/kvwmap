@@ -34,6 +34,29 @@ function jump_to_line(id){
 	form.scrollIntoView({behavior: 'smooth'});
 }
 
+function highlight_rect(id){
+	var form = document.getElementById('rect_form_'+id);
+	form.classList.add('legend_layer_highlight');
+	svg_rect = document.getElementById('rect_'+id)
+	if(svg_rect){	
+		svg_rect.classList.add('line_highlight');
+	}
+}
+
+function de_highlight_rect(id){
+	var form = document.getElementById('rect_form_'+id);
+	form.classList.remove('legend_layer_highlight');
+	svg_rect = document.getElementById('rect_'+id)
+	if(svg_rect){	
+		svg_rect.classList.remove('line_highlight');
+	}
+}
+
+function jump_to_rect(id){
+	var form = document.getElementById('rect_form_'+id);
+	form.scrollIntoView({behavior: 'smooth'});
+}
+
 function image_coords(event){
 	document.getElementById('coords').style.visibility='';
 	var pointer_div = document.getElementById("preview_div");
@@ -80,6 +103,11 @@ function addfreetext(layer_id, ddl_id){
 
 function addline(){
 	document.GUI.go.value = 'sachdaten_druck_editor_Liniehinzufuegen';
+	document.GUI.submit();
+}
+
+function addrect(){
+	document.GUI.go.value = 'sachdaten_druck_editor_Rechteckhinzufuegen';
 	document.GUI.submit();
 }
 
@@ -679,6 +707,88 @@ function scrolltop(){
 									<td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;<a href="javascript:addline();">Linie hinzufügen</a></td>
 								</tr>
 							</table>
+							<br>
+							<table width="597" border=0 cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
+								<tr>
+									<td class="fett" style="border-top:2px solid #C3C7C3" colspan=8 align="center">
+										<span id="rechtecke">Rechtecke</span>
+									</td>
+								</tr>
+								<? for($i = 0; $i < count($this->ddl->selectedlayout[0]['rectangles']); $i++){
+									 ?>
+									<tbody id="rect_form_<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>" onmouseenter="highlight_rect(<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>)" onmouseleave="de_highlight_rect(<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>)">
+									<tr>
+										<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Start<input type="hidden" name="rect_id<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id'] ?>"></td>
+										<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Ende</td>
+										<td colspan="2" style="border-top:2px solid #C3C7C3"></td>
+									</tr>
+									<tr>
+										<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
+										<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="rectposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['posx'] ?>" size="5"></td>
+										<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
+										<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="rectendposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['endposx'] ?>" size="5"></td>
+										<td colspan="2">Linienbreite:&nbsp;<input type="text" name="rectbreite<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['breite'] ?>" size="5"></td>
+									</tr>
+									<tr>
+										<td>&nbsp;y:</td>
+										<td style="border-right:1px solid #C3C7C3"><input type="text" name="rectposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['posy'] ?>" size="5"></td>
+										<td>&nbsp;y:</td>
+										<td style="border-right:1px solid #C3C7C3"><input type="text" name="rectendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['endposy'] ?>" size="5"></td>
+										<td colspan="2"></td>
+									</tr>
+									<tr>
+										<td colspan="2" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
+										<td colspan="2" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
+										<td colspan="2" valign="bottom">&nbsp;Platzierung:</td>
+									</tr>
+									<tr>
+										<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
+											<select name="rectoffset_attribute_start<? echo $i ?>" style="width: 200px">
+												<option value="">- Auswahl -</option>
+												<?
+												for($j = 0; $j < count($this->ddl->attributes['name']); $j++){
+													echo '<option ';
+													if($this->ddl->selectedlayout[0]['rectangles'][$i]['offset_attribute_start'] == $this->ddl->attributes['name'][$j]){
+														echo 'selected ';
+													}
+													echo 'value="'.$this->ddl->attributes['name'][$j].'">'.$this->ddl->attributes['name'][$j].'</option>';
+												}
+												?>
+											</select>
+										</td>
+										<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
+											<select name="rectoffset_attribute_end<? echo $i ?>" style="width: 200px">
+												<option value="">- Auswahl -</option>
+												<?
+												for($j = 0; $j < count($this->ddl->attributes['name']); $j++){
+													echo '<option ';
+													if($this->ddl->selectedlayout[0]['rectangles'][$i]['offset_attribute_end'] == $this->ddl->attributes['name'][$j]){
+														echo 'selected ';
+													}
+													echo 'value="'.$this->ddl->attributes['name'][$j].'">'.$this->ddl->attributes['name'][$j].'</option>';
+												}
+												?>
+											</select>
+										</td>
+										<td align="left" valign="top">
+											<select style="width: 110px" name="recttype<? echo $i ?>">
+												<option value="0">normal</option>
+												<? if($this->ddl->selectedlayout[0]['type'] != 0){ ?>
+												<option value="1" <? if($this->ddl->selectedlayout[0]['rectangles'][$i]['type'] == 1)echo ' selected '; ?>>fixiert</option>
+												<? } ?>
+												<option value="2" <? if($this->ddl->selectedlayout[0]['rectangles'][$i]['type'] == 2)echo ' selected '; ?>>auf jeder Seite</option>
+											</select>
+										</td>
+										<td align="right">
+											<a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Rechteckloeschen&rect_id=<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie das Rechteck wirklich löschen?');">löschen&nbsp;</a>
+										</td>
+									</tr>
+									</tbody>
+								<? } ?>
+								<tr>
+									<td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;<a href="javascript:addrect();">Rechteck hinzufügen</a></td>
+								</tr>
+							</table>
 						</td>
 					</tr>
 	<?		} ?>
@@ -697,5 +807,6 @@ function scrolltop(){
 </div>
 <input type="hidden" name="textcount" value="<? echo count($this->ddl->selectedlayout[0]['texts']); ?>">
 <input type="hidden" name="linecount" value="<? echo count($this->ddl->selectedlayout[0]['lines']); ?>">
+<input type="hidden" name="rectcount" value="<? echo count($this->ddl->selectedlayout[0]['rectangles']); ?>">
 <input type="hidden" name="bgsrc_save" value="<? echo $this->ddl->selectedlayout[0]['bgsrc'] ?>">
 

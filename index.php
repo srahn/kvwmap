@@ -1213,6 +1213,16 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('sachdaten_druck_editor');
 				$GUI->sachdaten_druck_editor_Linieloeschen();
 			} break;
+			
+			case 'sachdaten_druck_editor_Rechteckhinzufuegen' :
+				$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
+				$GUI->sachdaten_druck_editor_Rechteckhinzufuegen();
+			} break;
+			
+			case 'sachdaten_druck_editor_Rechteckloeschen' : {
+				$GUI->checkCaseAllowed('sachdaten_druck_editor');
+				$GUI->sachdaten_druck_editor_Rechteckloeschen();
+			} break;			
 
 			case 'Layer_Export' : {
 				$GUI->checkCaseAllowed($go);
