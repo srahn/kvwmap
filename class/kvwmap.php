@@ -10158,6 +10158,19 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->ddl->removeline($this->formvars);
 		$this->sachdaten_druck_editor();
 	}
+	
+	function sachdaten_druck_editor_Rechteckhinzufuegen(){
+		$this->sachdaten_druck_editor_aendern();
+    $this->ddl->addrectangle($this->formvars);
+		$this->scrolldown = true;
+		$this->sachdaten_druck_editor();
+	}
+
+	function sachdaten_druck_editor_Rechteckloeschen(){
+		$this->sachdaten_druck_editor_aendern();
+    $this->ddl->removerectangle($this->formvars);
+		$this->sachdaten_druck_editor();
+	}
 
 	function sachdaten_druck_editor_preview($selectedlayout, $pdfobject = NULL, $offsetx = NULL, $offsety = NULL){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
