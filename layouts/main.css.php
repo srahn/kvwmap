@@ -1413,7 +1413,9 @@ tbody.gle>tr {
 	position: absolute;
 	z-index: 1000000;
 	right: 0px;
+	left: 0px;
 	bottom: 30px;
+	width: 180px;
 }
 
 .timepicker{
