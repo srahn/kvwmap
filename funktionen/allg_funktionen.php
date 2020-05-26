@@ -123,25 +123,21 @@ function get_exif_data($img_path) {
 		);
 	}
 	else {
-		$direction_parts = explode('/',  $exif['GPSImgDirection']);
+		echo '<br>' . print_r($exif['GPSLatitude'], true);
+		echo '<br>' . print_r($exif['GPSLongitude'], true);
+		echo '<br>' . print_r($exif['GPSImgDirection'], true);
 		return array(
 			'success' => true,
 			'LatLng' => ((array_key_exists('GPSLatitude', $exif) AND array_key_exists('GPSLongitude', $exif)) ? (
 				floatval(substr($exif['GPSLatitude' ][0], 0, strlen($exif['GPSLatitude' ][0]) - 2))
-				+ floatval(substr($exif['GPSLatitude' ][1], 0, strlen($exif['GPSLatitude' ][1]) - 2) / 60)
-				+ floatval(substr($exif['GPSLatitude' ][2], 0 , strlen($exif['GPSLatitude' ][2]) - 2) / 6000)
+				+ float_from_slash_text($exif['GPSLatitude' ][1]) / 60
+				+ float_from_slash_text($exif['GPSLatitude' ][2]) / 6000
 			) . ' ' . (
 				floatval(substr($exif['GPSLongitude'][0], 0, strlen($exif['GPSLongitude'][0]) - 2))
-				+ floatval(substr($exif['GPSLongitude'][1], 0, strlen($exif['GPSLongitude'][1]) - 2) / 60)
-				+ floatval(substr($exif['GPSLongitude'][2], 0 , strlen($exif['GPSLongitude'][2]) - 2) / 6000)
+				+ float_from_slash_text($exif['GPSLongitude'][1]) / 60
+				+ float_from_slash_text($exif['GPSLongitude'][2]) / 6000
 			) : NULL),
-			'Richtung' => ((
-				count($direction_parts) > 1 AND
-				intval($direction_parts[0]) != 0 AND
-				intval($direction_parts[1]) > 0
-			) ? (
-				$direction_parts[0] / $direction_parts[1]
-			) : NULL),
+			'Richtung' => (array_key_exists('GPSImgDirection', $exif) ? float_from_slash_text($exif['GPSImgDirection']) : NULL),
 			'Erstellungszeit' => (array_key_exists('DateTimeOriginal', $exif) ? (
 					substr($exif['DateTimeOriginal'], 0 , 4) . '-'
 				. substr($exif['DateTimeOriginal'], 5, 2) . '-'
@@ -150,6 +146,37 @@ function get_exif_data($img_path) {
 			) : NULL)
 		);
 	}
+}
+
+/**
+* Function create a float value from a text
+* where numerator and denominator are delimited by a slash e.g. 23/100
+* @params string $slash_text First part of the string is numerator, second part is denominator.
+* @return float The float value calculated from numerator divided by denominator.
+* Return Null if string is empty or NULL.
+* Return numerator if only one part exists after explode by slash
+*/
+function float_from_slash_text($slash_text) {
+	$parts = explode('/', $slash_text);
+	if ($parts[0] == '0') {
+		return floatval(0);
+	}
+
+	$numerator = floatval($parts[0]);
+	if ($numerator == 0) {
+		return NULL;
+	}
+
+	if (count($parts) == 1) {
+		return $numerator;
+	}
+
+	$denominator = floatval($parts[1]);
+	if ($denominator == 0) {
+		return $numerator;
+	}
+
+	return $parts[0] / $parts[1];
 }
 
 function compare_layers($a, $b){
