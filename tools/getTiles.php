@@ -117,11 +117,9 @@ function getTileNumbers($polygon, $zoom){
 	# Kachelnummern durch Verschneidung des Polygons mit Grid-Tabelle bestimmen
 	$sql = "
 		SELECT 
-			x, y
+			x, y, st_intersects(geom, st_transform(st_geomfromtext('".$polygon."', 4326), 900913)) as intersects
 		FROM
 			tile_grid_table
-		WHERE
-			st_intersects(geom, st_transform(st_geomfromtext('".$polygon."', 4326), 900913))
 	";
 	$ret = pg_query($database->dbConn, $sql);
 	while($rs=pg_fetch_assoc($ret)){
@@ -150,22 +148,30 @@ function downloadTiles($tiles, $zoom){
 			mkdir($dirname, 0755, true);
 		}		
 		$out = fopen($dirname.$tile['x'].'.png',"wb");
-		$request_url = str_replace(['{x}', '{y}', '{z}'], [$tile['x'], $tile['y'], $zoom], $url);
-		curl_setopt($ch, CURLOPT_URL, $request_url);		// !! das bringt einen Performance-Boost, anstatt jedesmal ein curl_init mit der URL zu machen !!
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-		curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-		curl_setopt($ch, CURLOPT_FILE, $out);
-		if($result = curl_exec($ch) === false){
-			echo curl_error($ch);
-			prev($tiles);
+		
+		if($tile['intersects'] == 't'){			# Kacheln, die das Polygon schneiden downloaden
+			$request_url = str_replace(['{x}', '{y}', '{z}'], [$tile['x'], $tile['y'], $zoom], $url);
+			curl_setopt($ch, CURLOPT_URL, $request_url);		// !! das bringt einen Performance-Boost, anstatt jedesmal ein curl_init mit der URL zu machen !!
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+			curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+			curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+			curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+			curl_setopt($ch, CURLOPT_FILE, $out);
+			if($result = curl_exec($ch) === false){
+				echo curl_error($ch);
+				prev($tiles);
+			}
+			else{
+				$count++;
+				echo $count.'/'.$tile_count." fertig\n";
+			}
 		}
-		else{
+		else{		# für alle anderen Dummy-Kachel speichern
+			copy('../graphics/dummy_tile.png', $dirname.$tile['x'].'.png');
 			$count++;
-			echo $count.'/'.$tile_count." fertig\n";		
+			echo $count.'/'.$tile_count." fertig\n";
 		}
 	}
  }
