@@ -1154,6 +1154,19 @@ class rolle {
 		}
 	}
 
+	function setStyle($style_id, $formvars) {
+		$sql ='
+			UPDATE 
+				styles 
+			SET 
+				color = "'.$formvars['layer_options_color'].'",
+				symbolname = "'.$formvars['layer_options_hatching'].'"
+			WHERE 
+				Style_ID = '.$style_id;
+		$this->debug->write("<p>file:rolle.php class:rolle->setColor:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}
+
 	function setTransparency($formvars) {
 		if($formvars['layer_options_open'] > 0){		# normaler Layer
 			$sql ='UPDATE u_rolle2used_layer set transparency = '.$formvars['layer_options_transparency'];

@@ -878,8 +878,7 @@ class stelle {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
 		for ($i=0;$i<count($layer_ids);$i++){
-			$sql = ($assign_default_values ? "REPLACE" : "INSERT IGNORE").
-			" INTO used_layer (
+			$sql = "INSERT ".(!$assign_default_values ? "IGNORE" : "")." INTO used_layer (
 					`Stelle_ID`,
 					`Layer_ID`,
 					`queryable`,
@@ -914,14 +913,30 @@ class stelle {
 					template, 
 					NULL,
 					NULL,
-					privileg, 
-					export_privileg, 
+					`privileg`,
+					`export_privileg`,
 					postlabelcache,
 					requires
 				FROM
-					layer
+					layer as l
 				WHERE
-					Layer_ID = " . $layer_ids[$i];
+					l.Layer_ID = ".$layer_ids[$i];
+				if($assign_default_values){
+					$sql .= "
+					ON DUPLICATE KEY UPDATE 
+						queryable = l.queryable, 
+						drawingorder = l.drawingorder, 
+						legendorder = l.legendorder, 
+						minscale = l.minscale, 
+						maxscale = l.maxscale, 
+						symbolscale = l.symbolscale, 
+						offsite = l.offsite, 
+						transparency = l.transparency, 
+						template = l.template, 
+						postlabelcache = l.postlabelcache,
+						requires = l.requires
+					";
+				}
 			#echo '<br>SQL zur Zuordnung eines Layers zur Stelle: ' . $sql;
 			$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);

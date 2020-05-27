@@ -57,4 +57,5 @@
 	$this->strShowMore="Show more";
 	$this->strShowLess="Show less";
 	$this->strLayerParameters="Layer Parameter";
+	$this->strHatching="Hatching";
 ?>

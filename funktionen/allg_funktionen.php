@@ -86,10 +86,97 @@ function versionFormatter($version) {
   );
 }
 
+/*
+* This function return the absolute path to a document in the file system of the server
+* @param string $document_attribute_value The value of the document attribute stored in the dataset. Can be a path and original name or an url.
+* @param string $layer_document_path The document path of the layer the attribute belongs to.
+* @param string $layer_document_url optional, default '' The document url of the layer the attribute belongs to. If empty the $document_attribute_value containing an url
+* @return string The absolute path to the document
+*/
+function get_document_file_path($document_attribute_value, $layer_document_path, $layer_document_url = '') {
+	$value_part = explode('&original_name=', $document_attribute_value);
+	if ($layer_document_url != '') {
+		return url2filepath($value_part[0], $layer_document_path, $layer_document_url);
+	}
+	else {
+		return $value_part[0];
+	}
+}
+
 function url2filepath($url, $doc_path, $doc_url){
 	if($doc_path == '')$doc_path = CUSTOM_IMAGE_PATH;
 	$url_parts = explode($doc_url, $url);
 	return $doc_path.$url_parts[1];
+}
+
+/*
+* function read exif and gps data from file given in $img_path and return GPS-Position, Direction and creation Time
+* @param string $img_path Absolute Path of file with Exif Data to read
+* @return array Array with success true if read was successful, LatLng the GPS-Position where the foto was taken Richtung and Erstellungszeit.
+*/
+function get_exif_data($img_path) {
+	$exif = exif_read_data($img_path, 'EXIF, GPS');
+	if ($exif === false) {
+		return array(
+			'success' => false,
+			'err_msg' => 'Keine Exif-Daten im Header der Bilddatei ' . $img_path . ' gefunden!'
+		);
+	}
+	else {
+		echo '<br>' . print_r($exif['GPSLatitude'], true);
+		echo '<br>' . print_r($exif['GPSLongitude'], true);
+		echo '<br>' . print_r($exif['GPSImgDirection'], true);
+		return array(
+			'success' => true,
+			'LatLng' => ((array_key_exists('GPSLatitude', $exif) AND array_key_exists('GPSLongitude', $exif)) ? (
+				floatval(substr($exif['GPSLatitude' ][0], 0, strlen($exif['GPSLatitude' ][0]) - 2))
+				+ float_from_slash_text($exif['GPSLatitude' ][1]) / 60
+				+ float_from_slash_text($exif['GPSLatitude' ][2]) / 6000
+			) . ' ' . (
+				floatval(substr($exif['GPSLongitude'][0], 0, strlen($exif['GPSLongitude'][0]) - 2))
+				+ float_from_slash_text($exif['GPSLongitude'][1]) / 60
+				+ float_from_slash_text($exif['GPSLongitude'][2]) / 6000
+			) : NULL),
+			'Richtung' => (array_key_exists('GPSImgDirection', $exif) ? float_from_slash_text($exif['GPSImgDirection']) : NULL),
+			'Erstellungszeit' => (array_key_exists('DateTimeOriginal', $exif) ? (
+					substr($exif['DateTimeOriginal'], 0 , 4) . '-'
+				. substr($exif['DateTimeOriginal'], 5, 2) . '-'
+				. substr($exif['DateTimeOriginal'], 8, 2) . ' '
+				. substr($exif['DateTimeOriginal'], 11)
+			) : NULL)
+		);
+	}
+}
+
+/**
+* Function create a float value from a text
+* where numerator and denominator are delimited by a slash e.g. 23/100
+* @params string $slash_text First part of the string is numerator, second part is denominator.
+* @return float The float value calculated from numerator divided by denominator.
+* Return Null if string is empty or NULL.
+* Return numerator if only one part exists after explode by slash
+*/
+function float_from_slash_text($slash_text) {
+	$parts = explode('/', $slash_text);
+	if ($parts[0] == '0') {
+		return floatval(0);
+	}
+
+	$numerator = floatval($parts[0]);
+	if ($numerator == 0) {
+		return NULL;
+	}
+
+	if (count($parts) == 1) {
+		return $numerator;
+	}
+
+	$denominator = floatval($parts[1]);
+	if ($denominator == 0) {
+		return $numerator;
+	}
+
+	return $parts[0] / $parts[1];
 }
 
 function compare_layers($a, $b){

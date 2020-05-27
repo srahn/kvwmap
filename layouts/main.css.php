@@ -553,10 +553,8 @@ a.invisiblelayerlink:hover{
 	text-align: center;
 	color: black;
 	border-radius: 5px;
-}
-
-a.buttonlink{
 	padding: 1px 7px 5px 7px;
+	margin: 0px 2px 0px 2px;
 }
 
 .buttonlink:hover, .buttonlink:focus{
@@ -1443,7 +1441,9 @@ tbody.gle>tr {
 	position: absolute;
 	z-index: 1000000;
 	right: 0px;
+	left: 0px;
 	bottom: 30px;
+	width: 180px;
 }
 
 .timepicker{

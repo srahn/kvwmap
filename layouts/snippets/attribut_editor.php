@@ -126,6 +126,21 @@
 			'value' => 'Editiersperre',
 			'output' => 'Editiersperre',
 			'title' => 'Sperrt die Möglichkeit zum Editieren, wenn das Attribut den Wert 1 hat.'
+		),
+		array(
+			'value' => 'ExifLatLng',
+			'output' => 'Exif-Koordinate',
+			'title' => 'Übernimmt die LatLng-Koordinaten beim Upload des Fotos aus dem Exif-Header falls vorhanden. (Format: Latitude Longitude Dezimal)'
+		),
+		array(
+			'value' => 'ExifRichtung',
+			'output' => 'Exif-Richtung',
+			'title' => 'Übernimmt die Richtung beim Upload des Fotos aus dem Exif-Header falls vorhanden. (Format: Float Dezimal)'
+		),
+		array(
+			'value' => 'ExifErstellungszeit',
+			'output' => 'Exif-Erstellungszeit',
+			'title' => 'Übernimmt den Zeitstempel beim Upload des Fotos aus dem Exif-Header falls vorhanden. (Format: "YYYY-MM-DD hh:mm:ss")'
 		)
 	);
 
@@ -325,8 +340,8 @@ function alias_replace(name){
 
 						  <td align="left" valign="top">
 								<? if($i == 0)echo '<div class="fett scrolltable_header">Optionen</div>';
-						  if($this->attributes['options'][$i] == '' AND $this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))) { ?>
-						  	<input style="width:180px" name="options_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo $this->attributes['constraints'][$i]; ?>"><?php
+							if($this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){ ?>
+						  	<input disabled style="width:180px" name="options_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo $this->attributes['constraints'][$i]; ?>"><?php
 						  }
 						  else { ?>
 								<textarea name="options_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:180px"><?php echo $this->attributes['options'][$i]; ?></textarea><?php

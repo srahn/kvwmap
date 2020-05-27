@@ -350,6 +350,39 @@ class GUI {
 							echo 	 '</select>
 										</li>';
 						}
+						if($this->formvars['layer_id'] < 0){
+							$this->result_colors = $this->database->read_colors();
+							for($i = 0; $i < count($this->result_colors); $i++){
+								$color_rgb = $this->result_colors[$i]['red'].' '.$this->result_colors[$i]['green'].' '.$this->result_colors[$i]['blue'];
+								if($layer[0]['Class'][0]['Style'][0]['color'] == $color_rgb){
+									$bgcolor = $this->result_colors[$i]['red'].', '.$this->result_colors[$i]['green'].', '.$this->result_colors[$i]['blue'];
+								}
+							}
+							echo '
+								<li>
+									<span>'.$this->strColor.': </span>
+									<select name="layer_options_color" style="background-color: rgb('.$bgcolor.')" onchange="this.setAttribute(\'style\', this.options[this.selectedIndex].getAttribute(\'style\'));">';
+										for($i = 0; $i < count($this->result_colors); $i++){
+											$color_rgb = $this->result_colors[$i]['red'].' '.$this->result_colors[$i]['green'].' '.$this->result_colors[$i]['blue'];
+											echo '<option ';
+											if($layer[0]['Class'][0]['Style'][0]['color'] == $color_rgb){
+												echo ' selected';
+											}
+											echo ' style="background-color: rgb('.$this->result_colors[$i]['red'].', '.$this->result_colors[$i]['green'].', '.$this->result_colors[$i]['blue'].')"';
+											echo ' value="'.$color_rgb.'">';
+											echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+											echo "</option>\n";
+										}
+										echo '
+									</select>
+								</li>';
+								
+							echo '
+								<li>
+									<span>'.$this->strHatching.': </span>
+									<input type="checkbox" value="hatch" name="layer_options_hatching" '.($layer[0]['Class'][0]['Style'][0]['symbolname'] == 'hatch' ? 'checked' : '').'>
+								</li>';
+						}
 						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="height: 6px; width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>';
 						if(ROLLENFILTER AND $this->user->rolle->showrollenfilter){
 							echo '	
@@ -496,6 +529,7 @@ echo '			</ul>
 			# bei Bedarf Label anlegen
 			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			$classes = $mapDB->read_Classes($this->formvars['layer_options_open']);
+			$this->user->rolle->setStyle($classes[0]['Style'][0]['Style_ID'], $this->formvars);
 			if($classes[0]['Label'] == NULL){
 				$empty_label = new stdClass();
 				$empty_label->font = 'arial';
@@ -3188,7 +3222,7 @@ echo '			</ul>
 			$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
 			$this->GenerischeSuche_Suchen();
 		}
-		else{
+		else {
 			$this->add_message('error', 'Kopiervorgang fehlgeschlagen.');
 			$this->GenerischeSuche_Suchen();
 		}
@@ -3318,6 +3352,7 @@ echo '			</ul>
 			if (!$ret['success']) {
 				return array();
 			}
+
 			$sql = "
 				SELECT ".$layerset[0]['oid']."
 				FROM " . $layerset[0]['maintable'] . "
@@ -3329,7 +3364,6 @@ echo '			</ul>
 			if (!$ret['success']) {
 				return array();
 			}
-
 			$new_oids = array();
 			$d = 0; # Zähler der kopierten Datensätze pro Kopiervorgang
 			while ($rs = pg_fetch_row($ret[1])) { # das ist die Schleife der kopierten Datensätze pro Kopiervorgang
@@ -3419,7 +3453,7 @@ echo '			</ul>
 						#echo '<p>SQL zur Abfrage der SubformPK-Schlüssel aus den neuen Datensätzen: ' . $sql;
 						$ret = $layerdb->execSQL($sql,4, 0);
 						if(!$ret[0]){
-							while($rs=pg_fetch_row($ret[1])){
+							while ($rs=pg_fetch_row($ret[1])){
 								$next_update_values[] = $rs;
 							}
 						}
@@ -7641,7 +7675,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->Klasseneditor();
   }
 
-  function Klasseneditor_KlasseHinzufuegen(){
+  function Klasseneditor_KlasseHinzufuegen($output = true){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $attrib['name'] = $this->formvars['class_name'];
     $attrib['layer_id'] = $this->formvars['selected_layer_id'];
@@ -7649,7 +7683,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $attrib['order'] = ($this->formvars['class_order'] != '') ? $this->formvars['class_order'] : 1;
     $attrib['expression'] = ($this->formvars['class_expression'] != '') ? $this->formvars['class_expression'] : '';
     $new_class = $mapDB->new_Class($attrib);
-		$this->Klasseneditor();
+		if($output)$this->Klasseneditor();
 		return $new_class;
   }
 
@@ -7671,7 +7705,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       $this->formvars['class_order'] = $auto_classes[$i]['order'];
       $this->formvars['class_expression'] = $auto_classes[$i]['expression'];
 
-      $this->formvars['class_id'] = $this->Klasseneditor_KlasseHinzufuegen();
+      $this->formvars['class_id'] = $this->Klasseneditor_KlasseHinzufuegen(false);
       $this->formvars['style_color'] = $auto_classes[$i]['style_color'];
       $this->formvars['style_outlinecolor'] = $auto_classes[$i]['style_outlinecolor'];
       $this->add_style();
@@ -9243,15 +9277,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					$this->add_message('notice', 'Löschen erfolgreich');
 				}
 				$this->last_query = $this->user->rolle->get_last_query();
-				if($this->formvars['search']){ # man kam von der Suche -> nochmal suchen
+				if ($this->formvars['search']) {
+					# man kam von der Suche -> nochmal suchen
 					$this->GenerischeSuche_Suchen();
 				}
-				else{ # man kam aus einer Sachdatenabfrage -> nochmal abfragen
+				else {
+					# man kam aus einer Sachdatenabfrage -> nochmal abfragen
 					$this->last_query_requested = true;
 					$this->queryMap();
 				}
 			}
-			else{
+			else {
 				# wenn es ein Datensatz aus einem embedded-Formular ist, 
 				# muss das embedded-Formular entfernt werden und 
 				# das Listen-DIV neu geladen werden (getrennt durch █)
@@ -9401,6 +9437,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $formtype = $element[4];
 				$tablename[$table_name]['tablename'] = $table_name;
 				$tablename[$table_name]['attributname'][] = $attributenames[] = $attributname;
+				$form_field_indizes[$attributname] = $i;
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
 				if($this->formvars['embedded'] != ''){
 					$formfieldstring .= '&'.$form_fields[$i].'='.$this->formvars[$form_fields[$i]];
@@ -9421,16 +9458,18 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		}
 
 		# Dokumente speichern
-		if(count($document_attributes)> 0){
-			foreach($document_attributes as $i => $document_attribute){
+		if (count($document_attributes) > 0) {
+			foreach ($document_attributes as $i => $document_attribute) {
 				$options = $attributes['options'][$document_attribute['attributename']];
-				if(substr($document_attribute['datatype'], 0, 1) == '_'){
+				if (substr($document_attribute['datatype'], 0, 1) == '_') {
 					// ein Array aus Dokumenten, hier enthält der JSON-String eine Mischung aus bereits vorhandenen,
 					// nicht geänderten Datei-Pfaden und File-input-Feldnamen, die noch verarbeitet werden müssen
 					$insert = $this->processJSON($this->formvars[$form_fields[$i]], $doc_path, $doc_url, $options, $attributenames, $attributevalues, $layerdb);
 				}
-				else $insert = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attributenames, $attributevalues, $layerdb);	// normales Dokument-Attribut
-				$this->formvars[$form_fields[$i]] = $insert;
+				else {
+					$insert = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attributenames, $attributevalues, $layerdb);	// normales Dokument-Attribut
+				}
+				$this->formvars[$form_fields[$i]] = $document_attributes[$i]['insert'] = $insert;
 			}
 		}
 
@@ -9478,78 +9517,120 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->success = true;
 		foreach($tablename as $table){
 			$insert = array();
-			if($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']){		# nur Attribute aus der Haupttabelle werden gespeichert
-				for($i = 0; $i < count($table['attributname']); $i++){
-					if($table['type'][$i] == 'Time'){                       # Typ "Time"
-						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$insert[$table['attributname'][$i]] = "'".date("Y-m-d H:i:s")."'";
-						}
-					}
-					elseif($table['type'][$i] == 'User'){                       # Typ "User"
-						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$insert[$table['attributname'][$i]] = "'" . $this->user->Vorname." " . $this->user->Name."'";
-						}
-					}
-					elseif($table['type'][$i] == 'UserID'){                       # Typ "UserID"
-						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$insert[$table['attributname'][$i]] = "'" . $this->user->id."'";
-						}
-					}
-					elseif($table['type'][$i] == 'Stelle'){                       # Typ "Stelle"
-						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$insert[$table['attributname'][$i]] = "'" . $this->Stelle->Bezeichnung."'";
-						}
-					}
-					elseif($table['type'][$i] == 'StelleID'){                       # Typ "StelleID"
-						if(in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-							$insert[$table['attributname'][$i]] = "'" . $this->Stelle->id."'";
-						}
-					}
-					elseif($table['type'][$i] == 'Dokument' AND $this->formvars[$table['formfield'][$i]] != '') {
-						$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]]."'";
-						$this->formvars[$table['formfield'][$i]] = ''; # leeren, falls weiter_erfassen angehakt
-					}					
-					elseif(
-						$table['type'][$i] != 'Text_not_saveable' AND
-						$table['type'][$i] != 'Auswahlfeld_not_saveable' AND
-						$table['type'][$i] != 'SubFormPK' AND
-						$table['type'][$i] != 'SubFormFK' AND
-						($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')
-					){
-						if($table['type'][$i] != 'Dokument' AND (substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i]))){		// bei Dokumenten wurde das JSON schon weiter oben verarbeitet
-							# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
-							$insert[$table['attributname'][$i]] = "'" . $this->processJSON($this->formvars[$table['formfield'][$i]], $doc_path, $doc_url)."'";
-						}
-						else{
-							if($table['type'][$i] == 'Zahl'){
-								# bei Zahlen den Punkt (Tausendertrenner) entfernen
-								$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
+			$exif_data = array();
+			if ($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']) {		# nur Attribute aus der Haupttabelle werden gespeichert
+				for ($i = 0; $i < count($table['attributname']); $i++) {
+
+					switch (true) {
+						case ($table['type'][$i] == 'Time') : {                       # Typ "Time"
+							if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+								$insert[$table['attributname'][$i]] = "'".date("Y-m-d H:i:s")."'";
 							}
-							if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
-								$this->formvars[$table['formfield'][$i]] = 'f';
+						} break;
+
+						case ($table['type'][$i] == 'User') : {                       # Typ "User"
+							if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+								$insert[$table['attributname'][$i]] = "'" . $this->user->Vorname." " . $this->user->Name."'";
 							}
-							$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]]."'"; # Typ "normal"
-						}
-					}
-					elseif($table['type'][$i] == 'Geometrie') {
-						if($this->formvars['geomtype'] == 'POINT'){
-							if($this->formvars['loc_x'] != '') {
-								if($this->formvars['dimension'] == 3) {
-									$insert[$table['attributname'][$i]] = "st_transform(st_geomfromtext('POINT(" . $this->formvars['loc_x']." " . $this->formvars['loc_y']." 0)', " . $client_epsg."), " . $layer_epsg.")";
+						} break;
+
+						case ($table['type'][$i] == 'UserID') : {                       # Typ "UserID"
+							if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+								$insert[$table['attributname'][$i]] = "'" . $this->user->id."'";
+							}
+						} break;
+
+						case ($table['type'][$i] == 'Stelle') : {                       # Typ "Stelle"
+							if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+								$insert[$table['attributname'][$i]] = "'" . $this->Stelle->Bezeichnung."'";
+							}
+						} break;
+
+						case ($table['type'][$i] == 'StelleID') : {                       # Typ "StelleID"
+							if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+								$insert[$table['attributname'][$i]] = "'" . $this->Stelle->id."'";
+							}
+						} break;
+
+						case ($table['type'][$i] == 'Dokument' AND $this->formvars[$table['formfield'][$i]] != '') : {
+							$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]]."'";
+							$this->formvars[$table['formfield'][$i]] = ''; # leeren, for the case weiter_erfassen angehakt
+						} break;
+
+						case (
+							$table['type'][$i] != 'Text_not_saveable' AND
+							$table['type'][$i] != 'Auswahlfeld_not_saveable' AND
+							$table['type'][$i] != 'SubFormPK' AND
+							$table['type'][$i] != 'SubFormFK' AND
+							($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')
+						) : {
+							if ($table['type'][$i] != 'Dokument' AND (substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i]))){		// bei Dokumenten wurde das JSON schon weiter oben verarbeitet
+								# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
+								$insert[$table['attributname'][$i]] = "'" . $this->processJSON($this->formvars[$table['formfield'][$i]], $doc_path, $doc_url)."'";
+							}
+							else {
+								if($table['type'][$i] == 'Zahl') {
+									# bei Zahlen den Punkt (Tausendertrenner) entfernen
+									$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
 								}
-								else{
-									$insert[$table['attributname'][$i]] = "st_transform(st_geomfromtext('POINT(" . $this->formvars['loc_x']." " . $this->formvars['loc_y'].")', " . $client_epsg."), " . $layer_epsg.")";
+								if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
+									$this->formvars[$table['formfield'][$i]] = 'f';
+								}
+								$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]]."'"; # Typ "normal"
+							}
+						} break;
+
+						case ($table['type'][$i] == 'ExifLatLng') : {
+							$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
+
+							if (!$exif_data[$document_attribute_name]) {
+								$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+							}
+							if ($exif_data[$document_attribute_name]['success']) {
+								$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['LatLng'] ? "'" . $exif_data[$document_attribute_name]['LatLng'] . "'" : "NULL");
+							}
+						} break;
+
+						case ($table['type'][$i] == 'ExifRichtung') : {
+							$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
+							if (!$exif_data[$document_attribute_name]) {
+								$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+							}
+							if ($exif_data[$document_attribute_name]['success']) {
+								$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['Richtung'] ? $exif_data[$document_attribute_name]['Richtung'] : "NULL");
+							}
+						} break;
+
+						case ($table['type'][$i] == 'ExifErstellungszeit') : {
+							$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
+							if (!$exif_data[$document_attribute_name]) {
+								$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+							}
+							if ($exif_data[$document_attribute_name]['success']) {
+								$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['Erstellungszeit']  ? "'" . $exif_data[$document_attribute_name]['Erstellungszeit'] . "'" : "NULL");
+							}
+						} break;
+
+						case ($table['type'][$i] == 'Geometrie') : {
+							if ($this->formvars['geomtype'] == 'POINT'){
+								if ($this->formvars['loc_x'] != '') {
+									if ($this->formvars['dimension'] == 3) {
+										$insert[$table['attributname'][$i]] = "st_transform(st_geomfromtext('POINT(" . $this->formvars['loc_x']." " . $this->formvars['loc_y']." 0)', " . $client_epsg."), " . $layer_epsg.")";
+									}
+									else {
+										$insert[$table['attributname'][$i]] = "st_transform(st_geomfromtext('POINT(" . $this->formvars['loc_x']." " . $this->formvars['loc_y'].")', " . $client_epsg."), " . $layer_epsg.")";
+									}
 								}
 							}
-						}
-						elseif ($this->formvars['newpathwkt'] != '') {
-							$geom = "ST_GeomFromText('" . $this->formvars['newpathwkt'] . "', " . $client_epsg . ")";
-							if (substr($this->formvars['geomtype'], 0, 5) == 'MULTI') {					# Erzeuge immer Multigeometrie
-								$geom = "ST_Multi(" . $geom . ")";
+							elseif ($this->formvars['newpathwkt'] != '') {
+								$geom = "ST_GeomFromText('" . $this->formvars['newpathwkt'] . "', " . $client_epsg . ")";
+								if (substr($this->formvars['geomtype'], 0, 5) == 'MULTI') {					# Erzeuge immer Multigeometrie
+									$geom = "ST_Multi(" . $geom . ")";
+								}
+								$insert[$table['attributname'][$i]] = "ST_Transform(" . $geom . ", " . $layer_epsg . ")";
 							}
-							$insert[$table['attributname'][$i]] = "ST_Transform(" . $geom . ", " . $layer_epsg . ")";
-						}
-					}
+						} break;
+					} # end of switch
 				}
 				
 				if(!empty($insert)){
@@ -9569,7 +9650,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 					$ret = $layerdb->execSQL($sql, 4, 1, false);
 					#echo '<br>Datensatz Speichern SQL: ' . $sql;
-					
+
 					if ($last_notice = pg_last_notice($layerdb->dbConn)) {
 						if (strpos($last_notice, 'CONTEXT: ') !== false) {
 							$last_notice = $msg = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
@@ -10077,6 +10158,19 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->ddl->removeline($this->formvars);
 		$this->sachdaten_druck_editor();
 	}
+	
+	function sachdaten_druck_editor_Rechteckhinzufuegen(){
+		$this->sachdaten_druck_editor_aendern();
+    $this->ddl->addrectangle($this->formvars);
+		$this->scrolldown = true;
+		$this->sachdaten_druck_editor();
+	}
+
+	function sachdaten_druck_editor_Rechteckloeschen(){
+		$this->sachdaten_druck_editor_aendern();
+    $this->ddl->removerectangle($this->formvars);
+		$this->sachdaten_druck_editor();
+	}
 
 	function sachdaten_druck_editor_preview($selectedlayout, $pdfobject = NULL, $offsetx = NULL, $offsety = NULL){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -10094,7 +10188,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 	    for($j = 0; $j < count($attributes['name']); $j++){
 	    	if($attributes['type'][$j] != 'geometry' ){
 	    		if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
-	    		$result[$i][$attributes['name'][$j]] = $attributes['alias'][$j];
+					if(substr($attributes['type'][$j], 0, 1) == '_'){		# Array
+						$result[$i][$attributes['name'][$j]] = '["'.$attributes['alias'][$j].'","'.$attributes['alias'][$j].'","'.$attributes['alias'][$j].'"]';
+					}
+					else{
+						$result[$i][$attributes['name'][$j]] = $attributes['alias'][$j];
+					}
 	    	}
 	    }
     }
@@ -10127,7 +10226,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $layerdb->setClientEncoding();
     $path = $mapDB->getPath($this->formvars['chosen_layer_id']);
     $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
-    $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
+		# Attribute laden
+		$attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
+    $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
     # order by rausnehmen
 
 		$orderbyposition = strrpos(strtolower($newpath), 'order by');
@@ -10174,8 +10275,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         }
       }
     }
-		# Attribute laden
-		$attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
     # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $result, true, $this->Stelle->id);
 		$this->attributes = $attributes;
@@ -10232,7 +10331,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $layerdb->setClientEncoding();
     $path = $mapDB->getPath($this->formvars['chosen_layer_id']);
     $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
-    $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
+		# Attribute laden
+		$attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
+    $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
     # order by rausnehmen
   	$orderbyposition = strrpos(strtolower($newpath), 'order by');
 		$lastfromposition = strrpos(strtolower($newpath), 'from');
@@ -10302,8 +10403,6 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 			}
 		}
-		# Attribute laden
-		$attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
     # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $result, true, $this->Stelle->id);
 		$this->attributes = $attributes;
@@ -12743,6 +12842,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
   }
 
 	function layerCommentLoad() {
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$groups = $mapDB->read_Groups();
 		$ret = $this->user->rolle->getLayerComments(
 			$this->formvars['id'],
 			($this->formvars['from_default_user'] != '' ? $this->Stelle->default_user_id : $this->user->id)
@@ -12756,9 +12857,19 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				$formvars['thema'.$layerset[$i]['Layer_ID']] = 0;		# erstmal alle ausschalten
 				$formvars['qLayer'.$layerset[$i]['Layer_ID']] = 0;		# erstmal alle ausschalten
 			}
+			foreach($groups as $group){
+				if($group['obergruppe'] == ''){
+					$formvars['group_'.$group['id']] = 0;		# und alle Obergruppen zuklappen
+				}
+			}
       $layer_ids = explode(',', $ret[1][0]['layers']);
 			foreach($layer_ids as $layer_id){
 				$formvars['thema' . $layer_id] = 1;
+				$groupid = $layerset['layer_ids'][$layer_id]['Gruppe'];
+				do{
+					$formvars['group_'.$groupid] = 1;
+					$groupid = $groups[$groupid]['obergruppe'];
+				} while ($groupid != '');				
 			}
 			$query_ids = explode(',', $ret[1][0]['query']);
 			foreach($query_ids as $layer_id){
@@ -12766,6 +12877,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 			$this->user->rolle->setAktivLayer($formvars, $this->Stelle->id, $this->user->id, true);
 			$this->user->rolle->setQueryStatus($formvars);
+			$this->user->rolle->setGroupStatus($formvars);
 		}
 		$this->loadMap('DataBase');
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
@@ -13895,13 +14007,32 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		else{
 			$rect = $this->create_query_rect($this->formvars['INPUT_COORD']);
 		}
-    if($this->show_query_tooltip == true){
+    if ($this->show_query_tooltip == true){
       $this->tooltip_query($rect);
     }
-    else{
+    else {
       $this->SachdatenAnzeige($rect);
-			if($this->formvars['printversion'] != ''){
-				$this->mime_type = 'printversion';
+			if (
+				$this->go == 'Layer_Datensaetze_Loeschen' AND
+				array_reduce(
+					$this->qlayerset,
+					function($sum, $layerset) {
+						return $sum + count($layerset['shape']);
+					},
+					0
+				) == 0
+			) {
+				$this->add_message('waring', 'Keine Datensätze mehr in der Sachdatenanzeige. Deshalb zeige ich die Karte an.');
+				$this->loadMap('DataBase');
+				$this->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+				$this->saveMap('');
+				$this->drawMap();
+				$this->main = 'map.php';
+			}
+			else {
+				if ($this->formvars['printversion'] != ''){
+					$this->mime_type = 'printversion';
+				}
 			}
 			$this->output();
     }
@@ -13920,8 +14051,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     }
     $this->queryrect = $rect;
     # Abfragen der Layer, die zur Stelle gehören
-    $layer=$this->user->rolle->getLayer('');
-		$rollenlayer=$this->user->rolle->getRollenLayer('', 'import');
+    $layer = $this->user->rolle->getLayer('');
+		$rollenlayer = $this->user->rolle->getRollenLayer('', 'import');
 		$layerset = array_merge($layer, $rollenlayer);
     $anzLayer=count($layerset);
     $map=ms_newMapObj('');
@@ -13929,7 +14060,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		if($this->formvars['anzahl'] == ''){
 			$this->formvars['anzahl'] = MAXQUERYROWS;
 		}
-    for ($i=0;$i<$anzLayer;$i++) {
+    for ($i = 0; $i < $anzLayer; $i++) {
     	$sql_order = '';
       if($layerset[$i]['queryable'] AND
 				($this->formvars['qLayer'.$layerset[$i]['Layer_ID']]=='1' OR $this->formvars['qLayer'.$layerset[$i]['requires']]=='1') 	AND
@@ -14464,7 +14595,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       } # ende der Behandlung der zur Abfrage ausgewählten Layer
     } # ende der Schleife zur Abfrage der Layer der Stelle
 
-		if($this->formvars['mime_type'] != 'overlay_html' AND $this->last_query != '' AND $this->user->rolle->querymode == 1){		# bei get_last_query (nicht aus Overlay) und aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer
+		if ($this->formvars['printversion'] == '' AND $this->formvars['mime_type'] != 'overlay_html' AND $this->last_query != '' AND $this->user->rolle->querymode == 1) {
+			# bei get_last_query (nicht aus Overlay) und aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer
 			$attributes = $this->qlayerset[0]['attributes'];
 			$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
 			$this->loadMap('DataBase');
@@ -14497,7 +14629,9 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			$this->main = 'map.php';
 			$this->overlaymain = 'sachdatenanzeige.php';
 		}
-		else $this->main='sachdatenanzeige.php';
+		else {
+			$this->main = 'sachdatenanzeige.php';
+		}
   }
 
   function WLDGE_Auswaehlen() {
@@ -14523,7 +14657,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     if($refmap->selectOutputFormat('jpeg_print') == 1){
       $refmap->selectOutputFormat('jpeg');
     }
-    $image_map = $refmap->draw();
+		set_error_handler("MapserverErrorHandler");		// ist in allg_funktionen.php definiert
+    $image_map = $refmap->draw() OR die($this->layer_error_handling());
     $filename = $this->map_saveWebImage($image_map,'jpeg');
 
 
@@ -14786,11 +14921,17 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				}
 				$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
 				#$path = $layerset[$i]['pfad'];
-				$path = $layerset[$i]['pfad'];
-
+				$path = replace_params(
+					$layerset[$i]['pfad'],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->Stelle->id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				);
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
-				#$path = $this->Stelle->parse_path($layerdb, $path, $privileges);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
+				$path = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
 
 				# order by rausnehmen
 				$orderbyposition = strrpos(strtolower($path), 'order by');
@@ -14878,26 +15019,26 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 					# Wenn das Koordinatenssystem des Views anders ist als vom Layer wird die Suchbox und die Suchgeometrie
 					# in epsg des layers transformiert
 					if ($client_epsg!=$layer_epsg) {
-						$sql_where =" AND " . $the_geom." && st_transform(st_geomfromtext('" . $loosesearchbox_wkt."'," . $client_epsg.")," . $layer_epsg.")";
+						$sql_where =" AND ".$the_geom." && st_transform(st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
 					}
 					else {
-						$sql_where =" AND " . $the_geom." && st_geomfromtext('" . $loosesearchbox_wkt."'," . $client_epsg.")";
+						$sql_where =" AND ".$the_geom." && st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg.")";
 					}
 
 					# Wenn es sich bei der Suche um eine punktuelle Suche handelt, wird die where Klausel um eine
 					if($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy AND $this->querypolygon == ''){
 						if ($client_epsg!=$layer_epsg) {
-							$sql_where.=" AND st_distance(" . $the_geom.",st_transform(st_geomfromtext('POINT(" . $rect->minx." " . $rect->miny.")'," . $client_epsg.")," . $layer_epsg."))";
+							$sql_where.=" AND st_distance(".$the_geom.",st_transform(st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
 						}
 						else {
-							$sql_where.=" AND st_distance(" . $the_geom.",st_geomfromtext('POINT(" . $rect->minx." " . $rect->miny.")'," . $client_epsg."))";
+							$sql_where.=" AND st_distance(".$the_geom.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
 						}
-						$sql_where.=" <= " . $rand;
+						$sql_where.=" <= ".$rand;
 					}
 				}
 				else{		################ mouseover auf Datensatz in Sachdatenanzeige ################
 					$showdata = 'false';
-					$sql_where = " AND " . $geometrie_tabelle."_oid = " . $this->formvars['oid'];
+					$sql_where = " AND ".$geometrie_tabelle."_oid = ".$this->formvars['oid'];
 				}
 
 				# SVG-Geometrie abfragen für highlighting
@@ -14915,20 +15056,20 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand)."))";
-						$pfad = "st_assvg(st_transform(st_simplify(st_intersection(" . $layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('" . $box_wkt."'," . $client_epsg."), " . $layer_epsg.")), " . $tolerance."), " . $client_epsg."), 0, 8) AS highlight_geom, " . $pfad;
+						$pfad = "st_assvg(st_transform(st_simplify(st_intersection(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('".$box_wkt."',".$client_epsg."), ".$layer_epsg.")), ".$tolerance."), ".$client_epsg."), 0, 15) AS highlight_geom, ".$pfad;
 					}
 					else{
 						$buffer = $this->map_scaledenom/260;
-						$pfad = "st_assvg(st_buffer(st_transform(" . $layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", " . $client_epsg."), " . $buffer."), 0, 8) AS highlight_geom, " . $pfad;
+						$pfad = "st_assvg(st_buffer(st_transform(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom, ".$pfad;
 					}
 				}
 
 				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
 				if($layerset[$i]['Filter'] != ''){
 					$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
-					$sql_where .= " AND " . $layerset[$i]['Filter'];
+					$sql_where .= " AND ".$layerset[$i]['Filter'];
 				}
-
+				
 				# group by wieder einbauen
 				if($layerset[$i]['attributes']['groupby'] != ''){
 					$pfad .= $layerset[$i]['attributes']['groupby'];
@@ -14943,7 +15084,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 				
 				if($distinct == true){
 					$pfad = 'DISTINCT '.$pfad;
-				}				
+				}
 				
 				#if($the_geom == 'query.the_geom'){
 					$sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
@@ -14990,89 +15131,94 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
           for($j = 0; $j < count($attributes['name']); $j++){
             if($attributes['tooltip'][$j]){
 							if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
-            	switch ($attributes['form_element_type'][$j]){
-				        case 'Dokument' : {
-									$dokumentpfad = $layer['shape'][$k][$attributes['name'][$j]];
-									$pfadteil = explode('&original_name=', $dokumentpfad);
-									$dateiname = $pfadteil[0];
-									if ($layer['document_url'] != '') {
-										$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
-									}
-									$original_name = $pfadteil[1];
-									$pathinfo = pathinfo($dateiname);
-									$thumbname = $this->get_dokument_vorschau(array(
-										$pathinfo['dirname'] . '/' . $pathinfo['filename'],
-										$pathinfo['extension']
-									));
-									if ($layer['document_url'] != '') {
-										$thumbname = dirname($dokumentpfad) . '/' . basename($thumbname);
-										$url = '';
-									}
-									else {
-										$this->allowed_documents[] = addslashes($dateiname);
-										$this->allowed_documents[] = addslashes($thumbname);
-										$url = IMAGEURL.$this->document_loader_name.'?dokument=';
-									}
-									$pictures .= '| '.$url.$thumbname;
-				        }break;
-				        case 'Link': {
-		              $attribcount++;
-									if($layer['shape'][$k][$attributes['name'][$j]]!='') {
-										$link = 'xlink:'.$layer['shape'][$k][$attributes['name'][$j]];
-										$links .= $link.'##';
-									}
-								} break;
-								case 'Auswahlfeld': {
-									$auswahlfeld_output = '';
-									if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-										for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
-											if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-												$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
-												break;
+							if(substr($attributes['type'][$j], 0, 1) == '_'){
+								$values = json_decode($layer['shape'][$k][$attributes['name'][$j]]);
+							}
+							else{
+								$values = array($layer['shape'][$k][$attributes['name'][$j]]);
+							}
+							foreach($values as $value){
+								switch ($attributes['form_element_type'][$j]){
+									case 'Dokument' : {
+										$dokumentpfad = $value;
+										$pfadteil = explode('&original_name=', $dokumentpfad);
+										$dateiname = $pfadteil[0];
+										if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
+										$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+										$original_name = $pfadteil[1];
+										$dateinamensteil=explode('.', $dateiname);
+										$type = $dateinamensteil[1];
+										$thumbname = $this->get_dokument_vorschau($dateinamensteil);
+										if($layer['document_url'] != ''){
+											$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+											$url = '';
+										}
+										else{
+											$this->allowed_documents[] = addslashes($dateiname);
+											$this->allowed_documents[] = addslashes($thumbname);
+											$url = IMAGEURL.$this->document_loader_name.'?dokument=';
+										}
+										$pictures .= '| '.$url.$thumbname;
+									}break;
+									case 'Link': {
+										$attribcount++;
+										if($value!='') {
+											$link = 'xlink:'.$value;
+											$links .= $link.'##';
+										}
+									} break;
+									case 'Auswahlfeld': {
+										$auswahlfeld_output = '';
+										if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+											for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
+												if($attributes['enum_value'][$j][$k][$e] == $value){
+													$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
+													break;
+												}
 											}
 										}
-									}
-									else{
+										else{
+											for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
+												if($attributes['enum_value'][$j][$e] == $value){
+													$auswahlfeld_output = $attributes['enum_output'][$j][$e];
+													break;
+												}
+											}
+										}
+										$output .=  $attributes['alias'][$j].': ';
+										$output .= $auswahlfeld_output;
+										$output .= '##';
+										$attribcount++;
+									} break;
+									case 'Radiobutton': {
+										$radiobutton_output = '';
 										for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-											if($attributes['enum_value'][$j][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-												$auswahlfeld_output = $attributes['enum_output'][$j][$e];
+											if($attributes['enum_value'][$j][$e] == $value){
+												$radiobutton_output = $attributes['enum_output'][$j][$e];
 												break;
 											}
 										}
+										$output .=  $attributes['alias'][$j].': ';
+										$output .= $radiobutton_output;
+										$output .= '##';
+										$attribcount++;
+									} break;
+									case 'Checkbox': {
+										$output .=  $attributes['alias'][$j].': ';
+										$value = str_replace('f', 'nein',  $value);
+										$value = str_replace('t', 'ja',  $value);
+										$output .= $value.'  ';
+										$output .= '##';
+									} break;
+									default : {
+										$output .=  $attributes['alias'][$j].': ';
+										$attribcount++;
+										$value = str_replace(chr(10), '##',  $value);
+										$output .= $value.'  ';
+										$output .= '##';
 									}
-									$output .=  $attributes['alias'][$j].': ';
-									$output .= $auswahlfeld_output;
-									$output .= '##';
-									$attribcount++;
-								} break;
-								case 'Radiobutton': {
-									$radiobutton_output = '';
-									for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-										if($attributes['enum_value'][$j][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-											$radiobutton_output = $attributes['enum_output'][$j][$e];
-											break;
-										}
-									}
-									$output .=  $attributes['alias'][$j].': ';
-									$output .= $radiobutton_output;
-									$output .= '##';
-									$attribcount++;
-								} break;
-								case 'Checkbox': {
-									$output .=  $attributes['alias'][$j].': ';
-		              $layer['shape'][$k][$attributes['name'][$j]] = str_replace('f', 'nein',  $layer['shape'][$k][$attributes['name'][$j]]);
-									$layer['shape'][$k][$attributes['name'][$j]] = str_replace('t', 'ja',  $layer['shape'][$k][$attributes['name'][$j]]);
-									$output .= $layer['shape'][$k][$attributes['name'][$j]].'  ';
-		              $output .= '##';
-								} break;
-				        default : {
-		              $output .=  $attributes['alias'][$j].': ';
-		              $attribcount++;
-									$layer['shape'][$k][$attributes['name'][$j]] = str_replace(chr(10), '##',  $layer['shape'][$k][$attributes['name'][$j]]);
-		              $output .= $layer['shape'][$k][$attributes['name'][$j]].'  ';
-		              $output .= '##';
-				        }
-            	}
+								}
+							}
             }
           }
           # Links und Bild-URLs anfügen
@@ -17130,7 +17276,7 @@ class db_mapObj{
 			return $this->getPathAttributes($database, $this->getPath($layer_id));
 		}
 		else {
-			echo 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.';
+			$this->GUI->add_message('waring', 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.');
 			return NULL;
 		}
 	}

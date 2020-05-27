@@ -93,7 +93,8 @@ define(CASE_COMPRESS, false);																																						  #
 #											- layer_error_handling() reinkopieren																								#
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
-#   getLayerOptions:  - getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
+#   getLayerOptions:  - ein Rollenlayer muss verwendet werden																							#
+#											- getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
 #												und writeDatatypeAttributes() reinkopieren																				#
 #		get_group_legend:	- compare_legendorder() reinkopieren																								#
 #		get_select_list:  - read_datatype_attributes() reinkopieren																						#
@@ -153,7 +154,6 @@ if(!FAST_CASE){
 $debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
 function go_switch($go, $exit = false) {
 	global $GUI;
-	global $Stelle_ID;
 	global $newPassword;
 	global $passwort;
 	global $username;
@@ -1213,6 +1213,16 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('sachdaten_druck_editor');
 				$GUI->sachdaten_druck_editor_Linieloeschen();
 			} break;
+			
+			case 'sachdaten_druck_editor_Rechteckhinzufuegen' :
+				$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
+				$GUI->sachdaten_druck_editor_Rechteckhinzufuegen();
+			} break;
+			
+			case 'sachdaten_druck_editor_Rechteckloeschen' : {
+				$GUI->checkCaseAllowed('sachdaten_druck_editor');
+				$GUI->sachdaten_druck_editor_Rechteckloeschen();
+			} break;			
 
 			case 'Layer_Export' : {
 				$GUI->checkCaseAllowed($go);
@@ -1747,7 +1757,7 @@ function go_switch($go, $exit = false) {
 			 # Auswählen einer neuen Stelle
 			case 'Stelle_waehlen' : case 'Stelle_waehlen_Passwort_aendern' : {
 				$GUI->checkCaseAllowed('Stelle_waehlen');
-				$GUI->rollenwahl($Stelle_ID);
+				$GUI->rollenwahl($GUI->Stelle->id);
 				$GUI->output();
 			} break;
 

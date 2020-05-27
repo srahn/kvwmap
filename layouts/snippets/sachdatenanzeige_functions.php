@@ -34,19 +34,11 @@ include('funktionen/input_check_functions.php');
 	}
 
 	scrolltop = function(){
-		if(enclosingForm.name == 'GUI2'){
-			document.getElementById('contentdiv').scrollTop = 0;
-		}else{
-			window.scrollTo(0,0);
-		}
+		document.getElementById('contentdiv').scrollTop = 0;
 	}
 	
 	scrollbottom = function(){
-		if(enclosingForm.name == 'GUI2'){
-			document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
-		}else{
-			window.scrollTo(0, document.body.scrollHeight);
-		}
+		document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
 	}
 	
 	toggle_group = function(id){

@@ -14,7 +14,9 @@
 	<script>
 		keypress_bound_ctrl_s_button_id = 'sachdatenanzeige_save_button';
 	</script>
-	<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
+	<a href="javascript:scrollbottom();" style="float: right;" title="<? echo $strToBottom; ?>">
+		<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
+	</a>
 	<a name="oben"></a><?
 	if ($this->user->rolle->querymode == 1) { ?>
 		<script type="text/javascript">
@@ -29,6 +31,12 @@ if ($anzLayer==0) {
 <span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoLayer; ?></span><br/>
 	<?php	
 }
+	
+if($this->formvars['printversion'] == '' AND $this->user->rolle->querymode == 0) { ?>
+<div id="contentdiv" style="width: 100%;height:100%;max-height:<? echo $this->user->rolle->nImageHeight; ?>px;position:relative;overflow-y: auto;overflow-x: hidden">
+	<div style="margin-right: 10px">
+<? }
+
 for($i=0;$i<$anzLayer;$i++){
 	$gesamt = $this->qlayerset[$i]['count'];
   if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $gesamt > 1){
@@ -135,7 +143,11 @@ if(!empty($this->noMatchLayers)){
 	</table>
 	<hr class="gle_hr">
 <? }
-} ?>
+}
+
+if($this->formvars['printversion'] == '' AND $this->user->rolle->querymode == 0) { ?>
+</div></div>
+<? } ?>
 
 <table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
 	<tr>
@@ -146,15 +158,18 @@ if(!empty($this->noMatchLayers)){
 				<? }else{ ?>
 				<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
 				<? } ?>
-		<? }
-if($this->formvars['printversion'] == ''){ ?>
-			<a style="margin-right: 8px" href="javascript:scrolltop();"	title="<? echo $strToTop; ?>">
-				<i class="fa fa-arrow-up hover-border" aria-hidden="true"></i>
-			</a>
-<? } ?>
+		<? } ?>
 		</td>
 	</tr>
 </table>
+
+<?
+if($this->formvars['printversion'] == ''){ ?>
+	<a style="float: right" href="javascript:scrolltop();"	title="<? echo $strToTop; ?>">
+		<i class="fa fa-arrow-up hover-border" aria-hidden="true"></i>
+	</a>
+<? } ?>
+
 <?
 	if($this->found != 'false' AND $this->formvars['printversion'] == ''){	?>		
 		<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
@@ -211,9 +226,11 @@ if($this->formvars['printversion'] == ''){ ?>
   <?
   	if($this->search == true){			# wenn man von der Suche kam
 			echo '<input name="go" type="hidden" value="Layer-Suche_Suchen">
-						<input name="sql_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->qlayerset[0]['sql'].'">';
+						<input name="sql_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->qlayerset[0]['sql'].'">
+						<input id="offset_'.$this->formvars['selected_layer_id'].'" name="offset_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['selected_layer_id']].'">
+						<input name="search" type="hidden" value="true">';
 /*		Hidden Felder zum Speichern der Suchparameter (die können evtl. weg, da jetzt immer get_last_query verwendet wird)
-			echo '		<input name="search" type="hidden" value="true">
+			echo '		
   					<input name="selected_layer_id" type="hidden" value="'.$this->formvars['selected_layer_id'].'">
   					<input id="offset_'.$this->formvars['selected_layer_id'].'" name="offset_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['selected_layer_id']].'">
 					<input name="sql_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->qlayerset[0]['sql'].'">';
