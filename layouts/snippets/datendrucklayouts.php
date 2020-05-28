@@ -734,7 +734,28 @@ function scrolltop(){
 										<td style="border-right:1px solid #C3C7C3"><input type="text" name="rectposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['posy'] ?>" size="5"></td>
 										<td>&nbsp;y:</td>
 										<td style="border-right:1px solid #C3C7C3"><input type="text" name="rectendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['endposy'] ?>" size="5"></td>
-										<td colspan="2"></td>
+										<td colspan="2">
+											Füllfarbe:
+											<?											
+												$selected_color = $this->ddl->colors[$this->ddl->selectedlayout[0]['rectangles'][$i]['color']];
+												$bgcolor = $selected_color['red'].', '.$selected_color['green'].', '.$selected_color['blue'];
+											?>
+											<select name="rectcolor<? echo $i ?>" style="background-color: rgb(<? echo $bgcolor; ?>)" onchange="this.setAttribute('style', this.options[this.selectedIndex].getAttribute('style'));">
+												<option value=""> - keine - </option>
+												<?
+												foreach($this->ddl->colors as $color){
+													echo '<option ';
+													if($selected_color['id'] == $color['id']){
+														echo ' selected';
+													}
+													echo ' style="background-color: rgb('.$color['red'].', '.$color['green'].', '.$color['blue'].')"';
+													echo ' value="'.$color['id'].'">';
+													echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+													echo "</option>\n";
+												}
+												?>
+											</select>
+										</td>
 									</tr>
 									<tr>
 										<td colspan="2" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
@@ -774,6 +795,7 @@ function scrolltop(){
 											<select style="width: 110px" name="recttype<? echo $i ?>">
 												<option value="0">normal</option>
 												<? if($this->ddl->selectedlayout[0]['type'] != 0){ ?>
+												<option value="3" <? if($this->ddl->selectedlayout[0]['rectangles'][$i]['type'] == 3)echo ' selected '; ?>>alternierend</option>
 												<option value="1" <? if($this->ddl->selectedlayout[0]['rectangles'][$i]['type'] == 1)echo ' selected '; ?>>fixiert</option>
 												<? } ?>
 												<option value="2" <? if($this->ddl->selectedlayout[0]['rectangles'][$i]['type'] == 2)echo ' selected '; ?>>auf jeder Seite</option>

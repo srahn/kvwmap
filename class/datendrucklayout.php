@@ -42,7 +42,22 @@ class ddl {
 			'A3 hoch' => array('width' => 842, 'height' => 1191, 'size' => 'A3', 'orientation' => 'portrait'),
 			'A3 quer' => array('width' => 1191, 'height' => 842, 'size' => 'A3', 'orientation' => 'landscape')
 		);
+		$this->colors = $this->read_colors();
   }
+	
+	function read_colors(){
+		$sql = "SELECT * FROM ddl_colors";
+  	#echo $sql;
+  	$ret=$this->database->execSQL($sql, 4, 0);
+    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    if($ret[0]==0){
+      while($row = mysql_fetch_assoc($ret[1])){
+        $colors[$row['id']] = $row;
+      }
+    }
+    return $colors;
+  }
+	
   
   function add_static_elements($offsetx){
 		$offsety = $this->offsety;
@@ -213,7 +228,7 @@ class ddl {
 			# das Rechteck wurde noch nicht geschrieben und ist entweder ein festes Rechteck oder ein fortlaufendes oder eins, welches auf jeder Seite erscheinen soll
     	if(in_array($this->layout['rectangles'][$j]['id'], $this->remaining_rectangles) AND $this->layout['rectangles'][$j]['posy'] != ''){	# nur Linien mit einem y-Wert werden geschrieben
 				if(($type == 'fixed' AND $this->layout['rectangles'][$j]['type'] != 2 AND ($this->layout['type'] == 0 OR $this->layout['rectangles'][$j]['type'] == 1)) 
-				OR ($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['rectangles'][$j]['type'] == 0)
+				OR ($type == 'running' AND $this->layout['type'] != 0 AND in_array($this->layout['rectangles'][$j]['type'], [0,3]))
 				OR ($type == 'everypage' AND $this->layout['rectangles'][$j]['type'] == 2)){			
 					$x = $this->layout['rectangles'][$j]['posx'] + $offsetx;
 					$y_orig = $y = $this->layout['rectangles'][$j]['posy'];
@@ -263,8 +278,16 @@ class ddl {
 							$x = $x + $this->xoffset_onpage;
 						}
 					}
-					$this->pdf->setColor(0.5,0.9,0.2);
-					$this->pdf->filledRectangle($x,$y,$endx-$x,$endy-$y);	
+					$color_id = $this->layout['rectangles'][$j]['color'];
+					if($color_id != ''){
+						if($this->layout['rectangles'][$j]['type'] != 3 OR !$this->layout['rectangles'][$j]['printed']){		# bei type = 3 (alternierend) gibt 'printed' an ob das letzte Rechteck gefüllt war oder nicht
+							$this->layout['rectangles'][$j]['printed'] = true;
+							$this->pdf->filledRectangle($x,$y,$endx-$x,$endy-$y, $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
+						}
+						else{
+							$this->layout['rectangles'][$j]['printed'] = false;
+						}
+					}
 					if($this->layout['rectangles'][$j]['breite'] > 0){
 						$this->pdf->setLineStyle($this->layout['rectangles'][$j]['breite'], 'square');
 						$this->pdf->rectangle($x,$y,$endx-$x,$endy-$y);	
@@ -1128,13 +1151,14 @@ class ddl {
 				if($formvars['rectoffset_attribute_end'.$i] !== NULL)$sql .= ", `offset_attribute_end` = '".$formvars['rectoffset_attribute_end'.$i]."'";
         else $sql .= ", `offset_attribute_end` = NULL";
         if($formvars['recttype'.$i] == '')$formvars['recttype'.$i] = 0;
-        $sql .= ", `type` = '".$formvars['recttype'.$i]."'";
+        $sql .= ", `color` = '".$formvars['rectcolor'.$i]."'";
+				$sql .= ", `type` = '".$formvars['recttype'.$i]."'";
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
         $this->database->execSQL($sql,4, 1);
         $lastrect_id = mysql_insert_id();
 				
-				$sql = 'INSERT INTO ddl2freilinien (ddl_id, rect_id) VALUES('.$lastddl_id.', '.$lastrect_id.')';
+				$sql = 'INSERT INTO ddl2freirechtecke (ddl_id, rect_id) VALUES('.$lastddl_id.', '.$lastrect_id.')';
         $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
         $this->database->execSQL($sql,4, 1);
       }			
@@ -1288,6 +1312,8 @@ class ddl {
 				if($formvars['rectoffset_attribute_end'.$i])$sql .= ", `offset_attribute_end` = '".$formvars['rectoffset_attribute_end'.$i]."'";
         else $sql .= ", `offset_attribute_end` = NULL";
         if($formvars['recttype'.$i] == '')$formvars['recttype'.$i] = 0;
+				if($formvars['rectcolor'.$i])$sql .= ", `color` = '".$formvars['rectcolor'.$i]."'";
+				else $sql .= ", `color` = NULL";
         $sql .= ", `type` = '".$formvars['recttype'.$i]."'";
         $sql .= " WHERE id = ".(int)$formvars['rect_id'.$i];
         #echo $sql;
@@ -1563,15 +1589,16 @@ class ddl {
 		$i = $formvars['rectcount'] - 1;
 		if($formvars['rectbreite'.$i] != '')$breite = $formvars['rectbreite'.$i];	else $breite = 1;
 		if($formvars['rectposx'.$i] != '')$posx = $formvars['rectposx'.$i]; else $posx = 70;
-		if($formvars['rectposy'.$i] != '')$posy = $formvars['rectposy'.$i]-20; else $posy = 0;
+		if($formvars['rectposy'.$i] != '')$posy = $formvars['rectposy'.$i]-20; else $posy = 50;
 		if($formvars['rectendposx'.$i] != '')$endposx = $formvars['rectendposx'.$i]; else $endposx = 520;
-		if($formvars['rectendposy'.$i] != '')$endposy = $formvars['rectendposy'.$i]-20; else $endposy = 50;
+		if($formvars['rectendposy'.$i] != '')$endposy = $formvars['rectendposy'.$i]-20; else $endposy = 150;
     $sql = 'INSERT INTO druckfreirechtecke SET';
     $sql .= ' posx = '.$posx.',';
     $sql .= ' posy = '.$posy.',';
 		$sql .= ' endposx = '.$endposx.',';
     $sql .= ' endposy = '.$endposy.',';
     $sql .= ' breite = '.$breite;
+		#echo $sql.'<br>';
     $this->debug->write("<p>file:kvwmap class:ddl->addrectangle :",4);
     $this->database->execSQL($sql,4, 1);
     $lastinsert_id = mysql_insert_id();

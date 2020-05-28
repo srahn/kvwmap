@@ -13,6 +13,10 @@ CREATE TABLE `druckfreirechtecke` (
   `type` tinyint(1) DEFAULT NULL
 ) ENGINE=INNODB;
 
+ALTER TABLE `druckfreirechtecke` ADD PRIMARY KEY(`id`);
+
+ALTER TABLE `druckfreirechtecke` CHANGE `id` `id` INT(11) NOT NULL AUTO_INCREMENT;
+
 CREATE TABLE `ddl2freirechtecke` (
 	`ddl_id` int(11) NOT NULL,
 	`rect_id` int(11) NOT NULL
