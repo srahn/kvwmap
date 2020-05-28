@@ -244,8 +244,8 @@ class Nachweis {
   	$sql="SELECT * FROM nachweisverwaltung.n_dokumentarten order by sortierung, art"; 
     $ret=$this->database->execSQL($sql,4, 0);    
     if (!$ret[0]) {
-      while($rs=pg_fetch_array($ret[1])){
-				$art[$rs['hauptart']][] = $rs;
+      while($rs=pg_fetch_assoc($ret[1])){
+				$art[$rs['hauptart']][$rs['id']] = $rs;
       }
     }
     return $art;

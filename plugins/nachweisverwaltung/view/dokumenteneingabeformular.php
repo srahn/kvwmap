@@ -341,8 +341,8 @@ $legendheight = $this->map->height + 20;
 							<div class="dokein-dokart-sub">
 								<select name="unterart_<? echo $hauptdokumentart['id']; ?>" class="dokein-dokart-select" style="<? if($this->formvars['hauptart'] != $hauptdokumentart['id'])echo 'display:none'; ?>">
 									<option value="">-- Auswahl --</option>
-									<? for($i = 0; $i < count($this->dokumentarten[$hauptdokumentart['id']]); $i++){?>
-									<option <? if($this->formvars['unterart'] == $this->dokumentarten[$hauptdokumentart['id']][$i]['id']){echo 'selected';} ?> value="<? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['id']; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	
+									<? foreach($this->dokumentarten[$hauptdokumentart['id']] as $dokumentart){ ?>
+									<option <? if($this->formvars['unterart'] == $dokumentart['id']){echo 'selected';} ?> value="<? echo $dokumentart['id']; ?>"><? echo $dokumentart['art']; ?></option>	
 									<? } ?>
 								</select>
 							</div>

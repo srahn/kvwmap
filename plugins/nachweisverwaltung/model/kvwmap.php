@@ -1169,7 +1169,9 @@
     #2005-11-24_pk
     $GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
     $hauptarten = $GUI->nachweis->getHauptDokumentarten();
-    $GUI->formvars['artname'] = strtolower($hauptarten[$GUI->formvars['hauptart']]['abkuerzung']);
+		$dokumentarten = $GUI->nachweis->getDokumentarten();
+		$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
+    $GUI->formvars['artname'] = strtolower($dokumentarten[$GUI->formvars['hauptart']][$GUI->formvars['unterart']]['abkuerzung'] ?: $hauptarten[$GUI->formvars['hauptart']]['abkuerzung']);
 		# Zusammensetzen der flurid
     $GUI->formvars['flurid']=$GUI->formvars['Gemarkung'].str_pad(intval(trim($GUI->formvars['Flur'])),3,'0',STR_PAD_LEFT);
     # Zusammensetzen der übergebenen Parameter für das Polygon
@@ -1196,8 +1198,7 @@
         else {
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank
           $GUI->nachweis->database->begintransaction();
-          $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['unterart_'.$GUI->formvars['hauptart']], $GUI->formvars['gueltigkeit'], $GUI->formvars['geprueft'], $GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['bemerkungen_intern'],$zieldatei,$GUI->formvars['umring'], $GUI->user);
-					$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
+          $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['unterart'], $GUI->formvars['gueltigkeit'], $GUI->formvars['geprueft'], $GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['bemerkungen_intern'],$zieldatei,$GUI->formvars['umring'], $GUI->user);
           if ($ret[0]) {
             $GUI->nachweis->database->rollbacktransaction();
 						$GUI->nachweis->dokumentenDateiLoeschen($zieldatei);
