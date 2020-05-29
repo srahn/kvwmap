@@ -1989,7 +1989,7 @@ function is_true($val) {
 }
 
 function count_or_0($val) {
-	if (is_null($var) OR !is_array($var)) {
+	if (is_null($val) OR !is_array($val)) {
 		return 0;
 	}
 	else {

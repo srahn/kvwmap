@@ -7,7 +7,7 @@
 	global $hover_preview;
 	function output_table($table) {
 		$output = '';
-		if (is_array($table)) {
+		if (is_array($table['rows'])) {
 			foreach($table['rows'] as $row) {
 				$output .= '<tr id="' . $row['id'] . '" class="' . $row['class'] . '">';
 				if (value_of($row, 'sidebyside') AND !$row['contains_attribute_names']) {
@@ -148,7 +148,7 @@
 			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);			
 			$dataset2[$tablename.'_oid'] = $oid;
 			$onchange2 = 'buildJSONString(\''.$id.'\', true);';
-			for($e = -1; $e < count($elements); $e++){
+			for($e = -1; $e < count_or_0($elements); $e++){
 				if(is_array($elements[$e]) OR is_object($elements[$e]))$elements[$e] = json_encode($elements[$e]);		# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
 				$dataset2[$attributes2['name'][$j]] = $elements[$e];
 				$datapart .= '<div id="div_'.$id.'_'.$e.'" style="margin: 5px; display: '.($e==-1 ? 'none' : 'block').'"><table cellpadding="0" cellspacing="0"><tr><td style="height: 22px">';

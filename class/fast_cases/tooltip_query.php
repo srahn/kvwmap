@@ -1384,7 +1384,7 @@ class pgdatabase {
     return $ret[1];    	
   }  
 
-  function execSQL($sql,$debuglevel, $loglevel) {
+	function execSQL($sql, $debuglevel = 4, $loglevel = 0, $suppress_error_msg = false) {
   	switch ($this->loglevel) {
   		case 0 : {
   			$logsql=0;

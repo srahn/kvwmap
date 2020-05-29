@@ -1643,7 +1643,7 @@ class database {
   var $success;
   var $errormessage;
 
-  function database() {
+  function __construct() {
     global $debug;
 		global $GUI;
 		$this->gui = $GUI;
@@ -1753,7 +1753,7 @@ class user {
   var $database;
   var $remote_addr;
 
-	function user($login_name, $id, $database, $passwort = '') {
+	function __construct($login_name, $id, $database, $passwort = '') {
 		global $debug;
 		$this->debug = $debug;
 		$this->database = $database;
@@ -1829,7 +1829,7 @@ class stelle {
   var $database;
   var $language;
 
-	function stelle($id, $database) {
+	function __construct($id, $database) {
 		global $debug;
 		global $log_mysql;
 		$this->debug = $debug;
@@ -2098,7 +2098,7 @@ class pgdatabase {
   var $port;
   var $schema;
 
-	function pgdatabase() {
+	function __construct() {
 		global $debug;
 		global $GUI;
 		$this->gui = $GUI;

@@ -110,7 +110,7 @@ class metadatensatz {
 	#
 	################################################################
 
-	function metadatensatz($MD_id, $db) {
+	function __construct($MD_id, $db) {
 		global $debug;
 		$this->debug=$debug;
 		if ($MD_id!='') {

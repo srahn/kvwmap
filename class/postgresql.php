@@ -870,7 +870,7 @@ FROM
   }
 	
   function pg_table_constraints($table_oid){
-  	if(table_oid != ''){
+  	if($table_oid != ''){
 			$constraints = array();
 	    $sql = "SELECT consrc FROM pg_constraint, pg_class WHERE contype = 'check'";
 	    $sql.= " AND pg_class.oid = pg_constraint.conrelid AND pg_class.oid = '".$table_oid."'";

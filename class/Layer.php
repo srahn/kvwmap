@@ -61,7 +61,7 @@ class Layer extends MyObject {
 			$database->gui->add_message('error', $ret[1]);
 		}
 		else {
-			while ($rs = mysql_fetch_assoc($ret[1])) {
+			while ($rs = $database->result->fetch_assoc()) {				
 				$duplicate_layer_ids[] = $rs['Layer_ID'];
 			}
 		}

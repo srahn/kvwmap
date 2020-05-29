@@ -173,11 +173,11 @@
 							
 							if ($layer['attributes']['arrangement'][$j+1] != 1){		# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
 								# ToDo web2.0.0 Behandlung wenn $table leer sein.
-								if (is_array($table)) {
+								#if (is_array($table)) {
 									$table['rows'][] = $row;
 									if(count($row['cells']) > value_of($table, 'max_cell_count'))$table['max_cell_count'] = count($row['cells']);
 									unset($row);
-								}
+								#}
 							}
 							if($layer['attributes']['arrangement'][$j+1] != 1 AND $nl){			# die aufgesammelten Zellen in neuer Zeile ausgeben
 								$table['rows'][] = $next_row;
@@ -213,7 +213,7 @@
 				if($layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j+1)){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
 					$datapart .= output_table($table);
 					unset($table);
-					$table = '';
+					$table = array();
 					$datapart .= '</table></div></td></tr>';
 				}
 			}

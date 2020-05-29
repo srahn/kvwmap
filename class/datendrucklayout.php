@@ -51,7 +51,7 @@ class ddl {
   	$ret=$this->database->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     if($ret[0]==0){
-      while($row = mysql_fetch_assoc($ret[1])){
+			while($row = $this->database->result->fetch_assoc()){
         $colors[$row['id']] = $row;
       }
     }
