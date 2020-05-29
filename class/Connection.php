@@ -5,7 +5,7 @@ class Connection extends MyObject {
 	static $write_debug = false;
 
 	function __construct($gui) {
-		$this->MyObject($gui, 'connections');
+		parent::__construct($gui, 'connections');
 		$this->identifier = 'id';
 		$this->setKeys(
 			array(

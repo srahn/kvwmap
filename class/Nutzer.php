@@ -4,7 +4,7 @@ class Nutzer extends MyObject {
 	static $write_debug = false;
 
 	function __construct($gui) {
-		$this->MyObject($gui, 'user');
+		parent::__construct($gui, 'user');
 		$this->identifier = 'ID';
 	}
 
