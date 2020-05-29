@@ -76,8 +76,8 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     	<?php echo $this->FormObject["selectedHausNr"]->html; ?>
     </td>
     <td align="center" valign="middle" width="1">
-    	<input type="button" name="addPlaces" value="&lt;&lt;" onClick="addOptions(document.GUI.HausID,document.GUI.selectedHausID,document.GUI.selHausID,'value'); blur();">
-    	<input type="button" name="substractPlaces" value="&gt;&gt;" onClick="substractOptions(document.GUI.selectedHausID,document.GUI.selHausID,'value'); blur();">
+    	<input type="button" name="addPlaces" value="&laquo;" onClick="addOptions(document.GUI.HausID,document.GUI.selectedHausID,document.GUI.selHausID,'value'); blur();">
+    	<input type="button" name="substractPlaces" value="&raquo;" onClick="substractOptions(document.GUI.selectedHausID,document.GUI.selHausID,'value'); blur();">
     </td>
     <td>
     	<?php echo $strExist; ?>:<br>

@@ -94,9 +94,11 @@ define('CASE_COMPRESS', false);
 #											- man muss in einer Fachschale zoomen (wegen reduce_mapwidth)												#
 #											- man muss einen Layer in der Legende ein oder ausschalten													#
 #											- InchesPerUnit() reinkopieren																											#
+#											- layer_error_handling() reinkopieren																								#
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
-#   getLayerOptions:  - getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
+#   getLayerOptions:  - ein Rollenlayer muss verwendet werden																							#
+#											- getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
 #												und writeDatatypeAttributes() reinkopieren																				#
 #		get_group_legend:	- compare_legendorder() reinkopieren																								#
 #											- ein Layer muss in der Gruppe an sein																							#
@@ -160,7 +162,6 @@ if (!FAST_CASE) {
 $debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
 function go_switch($go, $exit = false) {
 	global $GUI;
-	global $Stelle_ID;
 	global $newPassword;
 	global $passwort;
 	global $username;
@@ -1219,6 +1220,16 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('sachdaten_druck_editor');
 				$GUI->sachdaten_druck_editor_Linieloeschen();
 			} break;
+			
+			case 'sachdaten_druck_editor_Rechteckhinzufuegen' :
+				$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
+				$GUI->sachdaten_druck_editor_Rechteckhinzufuegen();
+			} break;
+			
+			case 'sachdaten_druck_editor_Rechteckloeschen' : {
+				$GUI->checkCaseAllowed('sachdaten_druck_editor');
+				$GUI->sachdaten_druck_editor_Rechteckloeschen();
+			} break;			
 
 			case 'Layer_Export' : {
 				$GUI->checkCaseAllowed($go);
@@ -1259,7 +1270,9 @@ function go_switch($go, $exit = false) {
 
 			case 'Layereditor_Speichern' : {
 				$GUI->checkCaseAllowed('Layereditor');
-				$GUI->LayerAendern();
+				include(CLASSPATH . 'Layer.php');
+				$GUI->LayerAendern($GUI->formvars);
+				$GUI->Layereditor();
 			} break;
 
 			case 'Klasseneditor' : {
@@ -1294,7 +1307,14 @@ function go_switch($go, $exit = false) {
 
 			case 'Attributeditor_speichern' : {
 				$GUI->checkCaseAllowed('Attributeditor');
-				$GUI->Attributeditor_speichern();
+				if (!empty($GUI->formvars['selected_layer_id']) AND empty($GUI->formvars['selected_datatype_id'])) {
+					include(CLASSPATH . 'Layer.php');
+					$GUI->save_layers_attributes($GUI->formvars);
+				}
+				if (empty($GUI->formvars['selected_layer_id']) AND !empty($this->formvars['selected_datatype_id'])) {
+					$GUI->Datentypattribute_speichern();
+				}
+				$GUI->Attributeditor();
 			} break;
 
 			case 'Attributeditor_Attributeinstellungen für ausgewählten Layer übernehmen' : {
@@ -1374,7 +1394,9 @@ function go_switch($go, $exit = false) {
 
 			case 'Layerattribut-Rechteverwaltung_speichern' : {
 				$GUI->checkCaseAllowed('Layerattribut-Rechteverwaltung');
-				$GUI->layer_attributes_privileges_save();
+				include(CLASSPATH . 'Layer.php');
+				$GUI->save_layers_attribute_privileges($GUI->formvars);
+				$GUI->layer_attributes_privileges();
 			} break;
 
 			case 'Layerattribut-Rechteverwaltung_Attributrechte für ausgewählten Layer übernehmen' : {
@@ -1742,7 +1764,7 @@ function go_switch($go, $exit = false) {
 			 # Auswählen einer neuen Stelle
 			case 'Stelle_waehlen' : case 'Stelle_waehlen_Passwort_aendern' : {
 				$GUI->checkCaseAllowed('Stelle_waehlen');
-				$GUI->rollenwahl($Stelle_ID);
+				$GUI->rollenwahl($GUI->Stelle->id);
 				$GUI->output();
 			} break;
 

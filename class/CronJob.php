@@ -17,7 +17,8 @@ class CronJob extends MyObject {
 				"dbname",
 				"function",
 				"user_id",
-				"stelle_id"
+				"stelle_id",
+				"user"
 			)
 		);
 		$this->log_file_name = '/var/www/logs/cron/cron.log';
@@ -31,6 +32,9 @@ class CronJob extends MyObject {
 		$results[] = $this->validates('time', 'not_null', 'Zeit muss angegeben werden.');
 		$results[] = $this->validates('time', 'format', 'Zeit muss im Format Minute (*|0-59), Stunde(*|0-23), Tag(*|1-31), Monat(*|1-12), Tag der Woche (*|0-6, 0 = Sonntag) mit Leerzeichen getrennt angegeben werden, z.B. "0 10 1 * *" für jeden 1. des Monats um 10:00 Uhr morgens.', '* * * * *');
 		$results[] = $this->validates(array('query', 'function'), 'presence_one_of', 'Es muss entweder <i>SQL-Anfrage</i> oder <i>Shell Komando</i> angegeben werden.');
+		$results[] = $this->validates('user', 'presence');
+		$results[] = $this->validates('user', 'not_null', '"ausführen als" muss angegeben sein.');
+		$results[] = $this->validates('user', 'validate_value_is_one_off', '', array('gisadmin', 'root'));
 
 		$messages = array();
 		foreach($results AS $result) {

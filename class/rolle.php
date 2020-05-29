@@ -91,7 +91,7 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
+				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, classification, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
 				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
@@ -99,6 +99,8 @@ class rolle {
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
 				l.labelitem as original_labelitem,
+				l.duplicate_from_layer_id,
+				l.duplicate_criterion,
 				ul.`postlabelcache`,
 				`Filter`,
 				r2ul.gle_view,
@@ -143,14 +145,15 @@ class rolle {
 					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
 				}
 			}
-			foreach(array('Name', 'alias', 'connection') AS $key) {
+			foreach(array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,
 					$this->user_id,
 					$this->stelle_id,
 					rolle::$hist_timestamp,
-					$language
+					$language,
+					$rs['duplicate_criterion']
 				);
 			}
 			$layer[$i]=$rs;
@@ -623,7 +626,7 @@ class rolle {
 				$sql.=", epsg_code='".$this->epsg_code."'";
         $sql.=', minx='.$this->oGeorefExt->minx.', miny='.$this->oGeorefExt->miny;
         $sql.=', maxx='.$this->oGeorefExt->maxx.', maxy='.$this->oGeorefExt->maxy;
-        #echo $sql;
+				#echo '<p>SQL zum Eintragen von consume-Aktivitäten in der Karte: ' . $sql;
         $ret=$this->database->execSQL($sql,4, 1);
         
         if ($ret[0]) {
@@ -659,6 +662,7 @@ class rolle {
             $sql.=', stelle_id='.$this->stelle_id;
             $sql.=', time_id="'.$time.'"';
             $sql.=', layer_id='.$layer[$i];
+						#echo '<p>SQL zum Eintragen des consumierten Layers: ' . $sql;
             $ret=$this->database->execSQL($sql,4, 1);
             if ($ret[0]) {
               # Fehler bei Datenbankanfrage
@@ -1149,7 +1153,7 @@ class rolle {
 				UPDATE
 					" . $table_name . "
 				SET
-					rollenfilter = '" . $formvars['layer_options_rollenfilter'] . "'
+					rollenfilter = '" . pg_escape_string($formvars['layer_options_rollenfilter']) . "'
 				WHERE
 					user_id = " . $this->user_id . " AND
 					stelle_id = " . $this->stelle_id . " AND
@@ -1159,6 +1163,19 @@ class rolle {
 			$this->debug->write("<p>file:rolle.php class:rolle->setLabelitem:", 4);
 			$this->database->execSQL($sql, 4, $this->loglevel);
 		}
+	}
+
+	function setStyle($style_id, $formvars) {
+		$sql ='
+			UPDATE 
+				styles 
+			SET 
+				color = "'.$formvars['layer_options_color'].'",
+				symbolname = "'.$formvars['layer_options_hatching'].'"
+			WHERE 
+				Style_ID = '.$style_id;
+		$this->debug->write("<p>file:rolle.php class:rolle->setColor:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 
 	function setTransparency($formvars) {

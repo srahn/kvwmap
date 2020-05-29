@@ -33,7 +33,7 @@
 ?>
 <div id="layer" onclick="remove_calendar();">
 <input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
-<? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
+<? if($this->new_entry != true){ ?>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
 		<td>
@@ -44,12 +44,9 @@
 		<td width="99%" align="center"><h2 id="layername"><? echo $layer['Name']; ?></h2></td>
     <? if (!$this->user->rolle->visually_impaired AND $anzObj > 0 AND value_of($this->formvars, 'printversion') == '') { ?>
 			<td valign="top" style="padding: 0 10 0 0" class="layer_header">
-				<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
+				<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border pointer switch-gle-view-columns" src="<? echo GRAPHICSPATH.'columns.png'; ?>">
 			</td>
 			<td>
-				<a href="javascript:scrollbottom();"	title="<? echo $strToBottom; ?>">
-					<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
-				</a>
 			</td>
 		<? } ?>
 	</tr>
@@ -88,13 +85,13 @@
         <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle"'; ?>>
 <?							
 			for($j = 0; $j < count($layer['attributes']['name']); $j++) {
-				if($this->success === false){			# nach einem fehlgeschlagenen UPDATE oder INSERT die Formularfelder mit den übergebenen Werten befüllen
-					$layer['shape'][$k][$layer['attributes']['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j]];
-				}
 				$attribute_class = (($this->new_entry == true AND $layer['attributes']['dont_use_for_new'][$j] == -1) ? 'hidden' : 'visible');
 				if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['saveable'][$j] == '0')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 					$layer['attributes']['form_element_type'][$j] .= '_not_saveable';
 				}
+				if($this->success === false){			# nach einem fehlgeschlagenen UPDATE oder INSERT die Formularfelder mit den übergebenen Werten befüllen
+					$layer['shape'][$k][$layer['attributes']['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j]];
+				}				
 				
 				if($layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j-1)){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
 					$explosion = explode(';', $layer['attributes']['group'][$j]);
@@ -319,11 +316,12 @@
 				<tr>
 					<td colspan="2">
 						<i><? echo $layer['Name'] ?></i>:&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:selectall(<? echo $layer['Layer_ID']; ?>);">
-						<? if ($layer['count'] > MAXQUERYROWS) {
-						    echo $strSelectAllShown;
-						   } else {
-						    echo $strSelectAll;
-						   } ?>
+						<? 
+							if ($layer['count'] > $this->formvars['anzahl']) {
+								echo $strSelectAllShown;
+							} else {
+								echo $strSelectAll;
+							} ?>
 						</a>
 					</td>
 				</tr>
@@ -332,7 +330,7 @@
 					<td style="padding: 5 0 0 0;">
 						<select id="all_<? echo $layer['Layer_ID']; ?>" name="all_<? echo $layer['Layer_ID']; ?>" onchange="update_buttons(this.value, <? echo $layer['Layer_ID']; ?>);">
 							<option value=""><? echo $strSelectedDatasets.':'; ?></option>
-							<option value="true"><? echo $strAllDatasets.':'; ?><? if ($layer['count'] > MAXQUERYROWS){	echo "&nbsp;(".$layer['count'].")"; } ?></option>
+							<option value="true"><? echo $strAllDatasets.':&nbsp;('.$layer['count'].')'; ?></option>
 						</select>
 					</td>					
 					<? }else{ ?>

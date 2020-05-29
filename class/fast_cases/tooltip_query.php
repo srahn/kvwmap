@@ -56,16 +56,17 @@ function InchesPerUnit($unit, $center_y){
 	}
 }
 
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL) {
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
 		}
 	}
-	if (!is_null($user_id))				 $str = str_replace('$user_id', $user_id, $str);
-	if (!is_null($stelle_id))			 $str = str_replace('$stelle_id', $stelle_id, $str);
-	if (!is_null($hist_timestamp)) $str = str_replace('$hist_timestamp', $hist_timestamp, $str);
-	if (!is_null($language))			 $str = str_replace('$language', $language, $str);
+	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
+	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
+	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
+	if (!is_null($language))						$str = str_replace('$language', $language, $str);
+	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	return $str;
 }
 
@@ -97,6 +98,22 @@ function umlaute_javascript($text){
 	return $text;
 }
 
+function get_select_parts($select){
+	$column = explode(',', $select);		# an den Kommas splitten
+  for($i = 0; $i < count($column); $i++){
+  	$klammerauf = substr_count($column[$i], '(');
+  	$klammerzu = substr_count($column[$i], ')');
+		$hochkommas = substr_count($column[$i], "'");
+		# Wenn ein Select-Teil eine ungerade Anzahl von Hochkommas oder mehr Klammern auf als zu hat,
+		# wurde hier entweder ein Komma im einem String verwendet (z.B. x||','||y) oder eine Funktion (z.B. round(x, 2)) bzw. eine Unterabfrage mit Kommas verwendet
+  	if($hochkommas % 2 != 0 OR $klammerauf > $klammerzu){
+  		$column[$i] = $column[$i].','.$column[$i+1];
+  		array_splice($column, $i+1, 1);
+			$i--;							# und nochmal prüfen, falls mehrere Kommas drin sind
+  	}
+  }
+  return $column;
+}
 
 class GUI {
 
@@ -255,8 +272,8 @@ class GUI {
 					$this->user->rolle->language
 				);
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
-				#$path = $this->Stelle->parse_path($layerdb, $path, $privileges);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
+				$path = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
 
 				# order by rausnehmen
 				$orderbyposition = strrpos(strtolower($path), 'order by');
@@ -381,11 +398,11 @@ class GUI {
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand)."))";
-						$pfad = "st_assvg(st_transform(st_simplify(st_intersection(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('".$box_wkt."',".$client_epsg."), ".$layer_epsg.")), ".$tolerance."), ".$client_epsg."), 0, 8) AS highlight_geom, ".$pfad;
+						$pfad = "st_assvg(st_transform(st_simplify(st_intersection(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('".$box_wkt."',".$client_epsg."), ".$layer_epsg.")), ".$tolerance."), ".$client_epsg."), 0, 15) AS highlight_geom, ".$pfad;
 					}
 					else{
 						$buffer = $this->map_scaledenom/260;
-						$pfad = "st_assvg(st_buffer(st_transform(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", ".$client_epsg."), ".$buffer."), 0, 8) AS highlight_geom, ".$pfad;
+						$pfad = "st_assvg(st_buffer(st_transform(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom, ".$pfad;
 					}
 				}
 
@@ -456,86 +473,94 @@ class GUI {
           for($j = 0; $j < count($attributes['name']); $j++){
             if($attributes['tooltip'][$j]){
 							if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
-            	switch ($attributes['form_element_type'][$j]){
-				        case 'Dokument' : {
-									$dokumentpfad = $layer['shape'][$k][$attributes['name'][$j]];
-									$pfadteil = explode('&original_name=', $dokumentpfad);
-									$dateiname = $pfadteil[0];
-									if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
-									$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
-									$original_name = $pfadteil[1];
-									$dateinamensteil=explode('.', $dateiname);
-									$type = $dateinamensteil[1];
-									$thumbname = $this->get_dokument_vorschau($dateinamensteil);
-									if($layer['document_url'] != ''){
+							if(substr($attributes['type'][$j], 0, 1) == '_'){
+								$values = json_decode($layer['shape'][$k][$attributes['name'][$j]]);
+							}
+							else{
+								$values = array($layer['shape'][$k][$attributes['name'][$j]]);
+							}
+							foreach($values as $value){
+								switch ($attributes['form_element_type'][$j]){
+									case 'Dokument' : {
+										$dokumentpfad = $value;
+										$pfadteil = explode('&original_name=', $dokumentpfad);
+										$dateiname = $pfadteil[0];
+										if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
 										$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
-										$url = '';
-									}
-									else{
-										$this->allowed_documents[] = addslashes($dateiname);
-										$this->allowed_documents[] = addslashes($thumbname);
-										$url = IMAGEURL.$this->document_loader_name.'?dokument=';
-									}
-									$pictures .= '| '.$url.$thumbname;
-				        }break;
-				        case 'Link': {
-		              $attribcount++;
-									if($layer['shape'][$k][$attributes['name'][$j]]!='') {
-										$link = 'xlink:'.$layer['shape'][$k][$attributes['name'][$j]];
-										$links .= $link.'##';
-									}
-								} break;
-								case 'Auswahlfeld': {
-									$auswahlfeld_output = '';
-									if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-										for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
-											if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-												$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
-												break;
+										$original_name = $pfadteil[1];
+										$dateinamensteil=explode('.', $dateiname);
+										$type = $dateinamensteil[1];
+										$thumbname = $this->get_dokument_vorschau($dateinamensteil);
+										if($layer['document_url'] != ''){
+											$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+											$url = '';
+										}
+										else{
+											$this->allowed_documents[] = addslashes($dateiname);
+											$this->allowed_documents[] = addslashes($thumbname);
+											$url = IMAGEURL.$this->document_loader_name.'?dokument=';
+										}
+										$pictures .= '| '.$url.$thumbname;
+									}break;
+									case 'Link': {
+										$attribcount++;
+										if($value!='') {
+											$link = 'xlink:'.$value;
+											$links .= $link.'##';
+										}
+									} break;
+									case 'Auswahlfeld': {
+										$auswahlfeld_output = '';
+										if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+											for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
+												if($attributes['enum_value'][$j][$k][$e] == $value){
+													$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
+													break;
+												}
 											}
 										}
-									}
-									else{
+										else{
+											for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
+												if($attributes['enum_value'][$j][$e] == $value){
+													$auswahlfeld_output = $attributes['enum_output'][$j][$e];
+													break;
+												}
+											}
+										}
+										$output .=  $attributes['alias'][$j].': ';
+										$output .= $auswahlfeld_output;
+										$output .= '##';
+										$attribcount++;
+									} break;
+									case 'Radiobutton': {
+										$radiobutton_output = '';
 										for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-											if($attributes['enum_value'][$j][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-												$auswahlfeld_output = $attributes['enum_output'][$j][$e];
+											if($attributes['enum_value'][$j][$e] == $value){
+												$radiobutton_output = $attributes['enum_output'][$j][$e];
 												break;
 											}
 										}
+										$output .=  $attributes['alias'][$j].': ';
+										$output .= $radiobutton_output;
+										$output .= '##';
+										$attribcount++;
+									} break;
+									case 'Checkbox': {
+										$output .=  $attributes['alias'][$j].': ';
+										$value = str_replace('f', 'nein',  $value);
+										$value = str_replace('t', 'ja',  $value);
+										$output .= $value.'  ';
+										$output .= '##';
+									} break;
+									default : {
+										$output .=  $attributes['alias'][$j].': ';
+										$attribcount++;
+										$value = str_replace(chr(10), '##',  $value);
+										$output .= $value.'  ';
+										$output .= '##';
 									}
-									$output .=  $attributes['alias'][$j].': ';
-									$output .= $auswahlfeld_output;
-									$output .= '##';
-									$attribcount++;
-								} break;
-								case 'Radiobutton': {
-									$radiobutton_output = '';
-									for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-										if($attributes['enum_value'][$j][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-											$radiobutton_output = $attributes['enum_output'][$j][$e];
-											break;
-										}
-									}
-									$output .=  $attributes['alias'][$j].': ';
-									$output .= $radiobutton_output;
-									$output .= '##';
-									$attribcount++;
-								} break;
-								case 'Checkbox': {
-									$output .=  $attributes['alias'][$j].': ';
-		              $layer['shape'][$k][$attributes['name'][$j]] = str_replace('f', 'nein',  $layer['shape'][$k][$attributes['name'][$j]]);
-									$layer['shape'][$k][$attributes['name'][$j]] = str_replace('t', 'ja',  $layer['shape'][$k][$attributes['name'][$j]]);
-									$output .= $layer['shape'][$k][$attributes['name'][$j]].'  ';
-		              $output .= '##';
-								} break;
-				        default : {
-		              $output .=  $attributes['alias'][$j].': ';
-		              $attribcount++;
-									$layer['shape'][$k][$attributes['name'][$j]] = str_replace(chr(10), '##',  $layer['shape'][$k][$attributes['name'][$j]]);
-		              $output .= $layer['shape'][$k][$attributes['name'][$j]].'  ';
-		              $output .= '##';
-				        }
-            	}
+								}
+							}
             }
           }
           # Links und Bild-URLs anfügen
@@ -859,6 +884,58 @@ class stelle {
 		$this->Bezeichnung=$this->getName();
 		$this->readDefaultValues();
 	}
+	
+	function parse_path($database, $path, $privileges, $attributes = NULL){
+		$path = str_replace(array("\r\n", "\n"), ' ', $path);
+		$distinctpos = strpos(strtolower($path), 'distinct');
+		if($distinctpos !== false && $distinctpos < 10){
+			$offset = $distinctpos+8;
+		}
+		else{
+			$offset = 7;
+		}
+		$offstring = substr($path, 0, $offset);
+		$path = $database->eliminate_star($path, $offset);
+		if(substr_count(strtolower($path), ' from ') > 1){
+			$whereposition = strpos($path, ' WHERE ');
+			$withoutwhere = substr($path, 0, $whereposition);
+			$fromposition = strpos($withoutwhere, ' FROM ');
+		}
+		else{
+			$whereposition = strpos(strtolower($path), ' where ');
+			$withoutwhere = substr($path, 0, $whereposition);
+			$fromposition = strpos(strtolower($withoutwhere), ' from ');
+		}
+		$where = substr($path, $whereposition);
+		$from = substr($withoutwhere, $fromposition);
+
+		$attributesstring = substr($path, $offset, $fromposition-$offset);
+		//$fieldstring = explode(',', $attributesstring);
+		$fieldstring = get_select_parts($attributesstring);
+		$count = count($fieldstring);
+		for($i = 0; $i < $count; $i++){
+			if($as_pos = strripos($fieldstring[$i], ' as ')){   # Ausdruck AS attributname
+				$attributename = trim(substr($fieldstring[$i], $as_pos+4));
+				$real_attributename = substr($fieldstring[$i], 0, $as_pos);
+			}
+			else{   # tabellenname.attributname oder attributname
+				$explosion = explode('.', strtolower($fieldstring[$i]));
+				$attributename = trim($explosion[count($explosion)-1]);
+				$real_attributename = $fieldstring[$i];
+			}
+			if($privileges[$attributename] != ''){
+				$type = $attributes['type'][$attributes['indizes'][$attributename]];
+				if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$real_attributename.') as '.$attributename.', ';		# Array oder Datentyp
+				else $newattributesstring .= $fieldstring[$i].', ';																																			# normal
+			}
+			if(substr_count($fieldstring[$i], '(') - substr_count($fieldstring[$i], ')') > 0){
+				$fieldstring[$i+1] = $fieldstring[$i].','.$fieldstring[$i+1];
+			}
+		}
+		$newattributesstring = substr($newattributesstring, 0, strlen($newattributesstring)-2);
+		$newpath = $offstring.' '.$newattributesstring.' '.$from.$where;
+		return $newpath;
+	}	
 
   function getName() {
     $sql ='SELECT ';
@@ -1111,7 +1188,7 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
+				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, classification, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
 				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
@@ -1119,6 +1196,8 @@ class rolle {
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
 				l.labelitem as original_labelitem,
+				l.duplicate_from_layer_id,
+				l.duplicate_criterion,
 				ul.`postlabelcache`,
 				`Filter`,
 				r2ul.gle_view,
@@ -1163,14 +1242,15 @@ class rolle {
 					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
 				}
 			}
-			foreach(array('Name', 'alias', 'connection') AS $key) {
+			foreach(array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,
 					$this->user_id,
 					$this->stelle_id,
 					rolle::$hist_timestamp,
-					$language
+					$language,
+					$rs['duplicate_criterion']
 				);
 			}
 			$layer[$i]=$rs;
@@ -1180,7 +1260,6 @@ class rolle {
 		}
 		return $layer;
 	}
-}
 
 	function getRollenLayer($LayerName, $typ = NULL) {
 		$sql ="
@@ -1205,11 +1284,12 @@ class rolle {
     $this->database->execSQL($sql);
     if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
-    while ($rs = $this->database->result->fetch_row()) {
+    while ($rs = $this->database->result->fetch_assoc()) {
       $layer[]=$rs;
     }
     return $layer;
   }
+}
 
 class pgdatabase {
 
@@ -1258,6 +1338,43 @@ class pgdatabase {
     # $this->version = pg_version($this->dbConn); geht erst mit PHP 5
     $this->version = POSTGRESVERSION;
     return $this->dbConn;
+  }
+
+  function eliminate_star($query, $offset){
+  	if(substr_count(strtolower($query), ' from ') > 1){
+  		$whereposition = strrpos($query, ' WHERE ');
+  		$withoutwhere = substr($query, 0, $whereposition);
+  		$fromposition = strrpos($withoutwhere, ' FROM ');
+  	}
+  	else{
+  		$whereposition = strpos(strtolower($query), ' where ');
+  		if($whereposition){
+  			$withoutwhere = substr($query, 0, $whereposition);
+  		}
+  		else{
+  			$withoutwhere = $query;
+  		}
+  		$fromposition = strpos(strtolower($withoutwhere), ' from ');
+  	}
+    $select = substr($query, $offset, $fromposition-$offset);
+    $from = substr($query, $fromposition);
+    $column = explode(',', $select);
+    $column = get_select_parts($select);
+    for($i = 0; $i < count($column); $i++){
+      if(strpos(trim($column[$i]), '*') === 0 OR strpos($column[$i], '.*') !== false){
+        $sql .= "SELECT ".$column[$i]." ".$from." LIMIT 0";
+        $ret = $this->execSQL($sql, 4, 0);
+        if($ret[0]==0){
+        	$tablename = str_replace('*', '', trim($column[$i]));
+          $columns = $tablename.pg_field_name($ret[1], 0);
+          for($j = 1; $j < pg_num_fields($ret[1]); $j++){
+            $columns .= ', '.$tablename.pg_field_name($ret[1], $j);
+          }
+          $query = str_replace(trim($column[$i]), $columns, $query);
+        }
+      }
+    }
+    return $query;
   }
 
   function setClientEncoding() {

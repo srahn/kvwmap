@@ -44,9 +44,6 @@
 			} ?>
 		</td>
 		<td align="right" valign="top" style="padding: 0 10 0 0">
-			<a href="javascript:scrollbottom();"	title="<? echo $strToBottom; ?>">
-				<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
-			</a>
 		</td>
 		<td valign="top" style="padding: 0 0 0 0">
 			<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
@@ -58,9 +55,6 @@
 			<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
 		</td>
 		<td align="right" valign="top">
-			<a href="javascript:scrollbottom();"	title="<? echo $strToBottom; ?>">
-				<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
-			</a>
 		</td>
 		<? } ?>
 	</tr>

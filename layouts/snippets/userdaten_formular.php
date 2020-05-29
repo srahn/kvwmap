@@ -43,16 +43,11 @@
 	}
 -->
 </script>
+<div id="userdaten_formular" class="">
+	<input type="hidden" name="go" value="Benutzerdaten">
+	<input type="hidden" name="selstellen" value="<? echo implode(', ', $this->formvars['selstellen']["ID"]); ?>">
 
-<input type="hidden" name="go" value="Benutzerdaten">
-<input type="hidden" name="selstellen" value="<?
-	for($i=0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++){
-		if($this->userdaten[0]['stelle_id'] == $this->formvars['selstellen']["ID"][$i])$active_stelle = $i;
-		if($i > 0)echo ', ';
-		echo $this->formvars['selstellen']["ID"][$i];
-	}
-?>">
-<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+	<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
     <td><h2><?php echo $strTitle; ?></h2></td>
   </tr>
@@ -208,7 +203,14 @@ else {
 				</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEmail;?></th>
-					<td style="border-bottom:1px solid #C3C7C3"><input name="email" type="text" value="<?php echo $this->formvars['email']; ?>" size="50" maxlength="100"></td>
+					<td style="border-bottom:1px solid #C3C7C3">
+						<input name="email" type="text" value="<?php echo $this->formvars['email']; ?>" size="50" maxlength="100" style="margin-right: 5px">
+						<a
+							href="mailto:<?php echo $this->formvars['email']; ?>"
+							title="Neue E-Mail schreiben"
+							onMouseOver="message([{'type' : 'notice', 'msg': 'Bei Klick öffnet sich der E-Mail-Client'}], 2000)"
+							onMouseOut="$('#message_box').html('').hide()">Neue E-Mail scheiben</a>
+					</td>
 				</tr>
 				<tr class="mehr-toggle">
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOrganisation;?></th>
@@ -230,7 +232,8 @@ else {
 			</table>
 		</td>
 	</tr><?
-	if ($this->formvars['selected_user_id'] > 0) { ?>
+	if ($this->formvars['selected_user_id'] > 0) {
+		$active_stelle = array_search($this->userdaten[0]['stelle_id'], $this->formvars['selstellen']["ID"]);		?>
 		<tr>
 			<td>
 				<table border="0" cellspacing="0" cellpadding="5" style="width: 100%;border:1px solid #C3C7C3">
@@ -279,3 +282,4 @@ else {
 		</td>
 	</tr>
 </table>
+</div>

@@ -874,8 +874,7 @@ class stelle {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
 		for ($i=0;$i<count($layer_ids);$i++){
-			$sql = ($assign_default_values ? "REPLACE" : "INSERT IGNORE").
-			" INTO used_layer (
+			$sql = "INSERT ".(!$assign_default_values ? "IGNORE" : "")." INTO used_layer (
 					`Stelle_ID`,
 					`Layer_ID`,
 					`queryable`,
@@ -910,15 +909,31 @@ class stelle {
 					template, 
 					NULL,
 					NULL,
-					privileg, 
-					export_privileg, 
+					`privileg`,
+					`export_privileg`,
 					postlabelcache,
 					requires
 				FROM
-					layer
+					layer as l
 				WHERE
-					Layer_ID = " . $layer_ids[$i];
-			#echo '<br>' . $sql;
+					l.Layer_ID = ".$layer_ids[$i];
+				if($assign_default_values){
+					$sql .= "
+					ON DUPLICATE KEY UPDATE 
+						queryable = l.queryable, 
+						drawingorder = l.drawingorder, 
+						legendorder = l.legendorder, 
+						minscale = l.minscale, 
+						maxscale = l.maxscale, 
+						symbolscale = l.symbolscale, 
+						offsite = l.offsite, 
+						transparency = l.transparency, 
+						template = l.template, 
+						postlabelcache = l.postlabelcache,
+						requires = l.requires
+					";
+				}
+			#echo '<br>SQL zur Zuordnung eines Layers zur Stelle: ' . $sql;
 			$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
@@ -1463,10 +1478,9 @@ class stelle {
 		$fieldstring = get_select_parts($attributesstring);
 		$count = count($fieldstring);
 		for($i = 0; $i < $count; $i++){
-			if(strpos(strtolower($fieldstring[$i]), ' as ')){   # Ausdruck AS attributname
-				$explosion = explode(' as ', strtolower($fieldstring[$i]));
-				$attributename = trim(array_pop($explosion));
-				$real_attributename = $explosion[0];
+			if($as_pos = strripos($fieldstring[$i], ' as ')){   # Ausdruck AS attributname
+				$attributename = trim(substr($fieldstring[$i], $as_pos+4));
+				$real_attributename = substr($fieldstring[$i], 0, $as_pos);
 			}
 			else{   # tabellenname.attributname oder attributname
 				$explosion = explode('.', strtolower($fieldstring[$i]));

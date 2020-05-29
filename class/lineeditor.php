@@ -124,7 +124,7 @@ class lineeditor {
 	}
 
 	function getlines($oid, $tablename, $columnname) {
-		$sql = "SELECT st_assvg(st_transform(" . $columnname.", " . $this->clientepsg."), 0, 8) AS svggeom, st_astext(st_transform(" . $columnname.", " . $this->clientepsg.")) AS wktgeom, st_numGeometries(".$columnname.") as numgeometries FROM " . $tablename." WHERE oid = " . $oid;
+		$sql = "SELECT st_assvg(st_transform(" . $columnname.", " . $this->clientepsg."), 0, 15) AS svggeom, st_astext(st_transform(" . $columnname.", " . $this->clientepsg.")) AS wktgeom, st_numGeometries(".$columnname.") as numgeometries FROM " . $tablename." WHERE oid = " . $oid;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$lines = pg_fetch_array($ret[1]);
 		return $lines;

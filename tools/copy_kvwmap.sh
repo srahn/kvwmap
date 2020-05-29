@@ -1,6 +1,8 @@
 #!/bin/bash
 usage() {
   echo "Usage: copy_kvwmap.sh [OPTIONS] SOURCE TARGET"
+  echo ""
+  echo "Das Script muss auf dem Hostrechner ausgeführt werden."
   echo "SOURCE kann folgende Werte haben:"
   echo "  dev   Kopiert von Entwicklungsversion nach TARGET"
   echo "  demo  Kopiert von Demoversion nach TARGET"
@@ -237,9 +239,9 @@ exec_mysql
 sql="CREATE DATABASE ${TARGET_MYSQL_DBNAME}"
 exec_mysql
 
-echo "exec: mysqldump -h ${MYSQL_SERVER} -u $MYSQL_USER --password=${MYSQL_PASSWORD} ${SOURCE_MYSQL_DBNAME} > /home/gisadmin/${DUMP_DIR}/${TARGET_MYSQL_DBNAME}.dump"
+echo "exec: mysqldump -h ${MYSQL_SERVER} -u $MYSQL_USER --password=xxxx ${SOURCE_MYSQL_DBNAME} > /home/gisadmin/${DUMP_DIR}/${TARGET_MYSQL_DBNAME}.dump"
 docker exec web mysqldump -h ${MYSQL_SERVER} -u $MYSQL_USER --password=${MYSQL_PASSWORD} ${SOURCE_MYSQL_DBNAME} > /home/gisadmin/${DUMP_DIR}/${TARGET_MYSQL_DBNAME}.dump
-echo "exec: mysql -h ${MYSQL_SERVER} -u $MYSQL_USER --password=${MYSQL_PASSWORD} ${TARGET_MYSQL_DBNAME} < /home/gisadmin/${DUMP_DIR}/${TARGET_MYSQL_DBNAME}.dump"
+echo "exec: mysql -h ${MYSQL_SERVER} -u $MYSQL_USER --password=xxxx ${TARGET_MYSQL_DBNAME} < /home/gisadmin/${DUMP_DIR}/${TARGET_MYSQL_DBNAME}.dump"
 docker exec -i web mysql -h ${MYSQL_SERVER} -u $MYSQL_USER --password=${MYSQL_PASSWORD} ${TARGET_MYSQL_DBNAME} < /home/gisadmin/${DUMP_DIR}/${TARGET_MYSQL_DBNAME}.dump
 
 MYSQL_DBNAME=$TARGET_MYSQL_DBNAME

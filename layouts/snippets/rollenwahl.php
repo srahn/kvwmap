@@ -129,10 +129,10 @@ if ($this->Fehlermeldung!='') {
 
 <div id="rollenwahl_main_div">
 	<div id="rollenwahl_optionen_div" class="tabbed">
-		<? if ($show_layer_parameter) { ?>
-		<input id="tab1" type="radio" name="tabs" />
+		<? if ($this->formvars['show_layer_parameter']) { ?>
+		<input id="tab1"<? echo ($show_layer_parameter ? ' checked="checked"' : '') ?> type="radio" name="tabs" />
 		<? } ?>
-		<input checked="checked" id="tab2" type="radio" name="tabs" />
+		<input id="tab2"<? echo ($show_layer_parameter ? '' : ' checked="checked"') ?> type="radio" name="tabs" />
 		<input id="tab3" type="radio" name="tabs" />
 		<input id="tab4" type="radio" name="tabs" />
 		<input id="tab5" type="radio" name="tabs" />
@@ -190,7 +190,8 @@ if ($this->Fehlermeldung!='') {
 										</td>
 									</tr><?
 								}
-								if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) { ?>
+								if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) {
+									if($this->user->Name != 'gast'){ ?>
 									<tr>
 										<td valign="top" class="rollenwahl-option-header">
 											<? echo $strPassword; ?>:
@@ -241,6 +242,7 @@ if ($this->Fehlermeldung!='') {
 											</div>
 										</td>
 									</tr>
+									<? } ?>
 									<tr>
 										<td class="rollenwahl-option-header">
 											<? echo $strLanguage; ?>:
@@ -355,8 +357,7 @@ if ($this->Fehlermeldung!='') {
 										<div id="Tip22" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 									</td>
 								</tr>
-								<? if(ROLLENFILTER){ ?>
-								<tr>
+								<tr <? if(!ROLLENFILTER){echo 'style="display: none"'; ?>>
 									<td class="rollenwahl-option-header">
 										<? echo $strShowRollenFilter; ?>:
 									</td>

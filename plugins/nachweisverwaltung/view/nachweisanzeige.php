@@ -311,6 +311,7 @@ function save_bearbeitungshinweis(id){
 <input type="hidden" name="suchgeprueft" value="<? echo $this->formvars['suchgeprueft']; ?>">
 <input type="hidden" name="bearbeitungshinweis_id" value="">
 <input type="hidden" name="bearbeitungshinweis_text" value="">
+<input type="hidden" name="geom_from_layer" value="<? echo $this->formvars['geom_from_layer']; ?>">
 
 	
 <table width="0%" border="0" cellpadding="8" cellspacing="0">
@@ -330,7 +331,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		  ?>
 	  </td>
 				<tr>
-					<td><a href="index.php?go=Nachweisrechercheformular&zurueck=1&VermStelle=<? echo $this->formvars['VermStelle']; ?>">&lt;&lt; zur&uuml;ck zur Suche</a></td>
+					<td><a href="index.php?go=Nachweisrechercheformular&zurueck=1&VermStelle=<? echo $this->formvars['VermStelle']; ?>&geom_from_layer=<? echo $this->formvars['geom_from_layer']; ?>"><span style="font-size: 140%">&laquo;</span> Nachweisrecherche</a></td>
 				</tr>
         </tr>
         <tr> 
@@ -464,7 +465,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 				
         ?>>	
 				<? if($this->nachweis->Dokumente[$i]['bemerkungen'] != ''){ ?>
-					<i class="fa fa-exclamation-circle" style="font-size: 19px; color: orange"  title="Bemerkungen: <? echo $this->nachweis->Dokumente[$i]['bemerkungen']; ?>"></i>
+					<i class="fa fa-exclamation-circle" style="font-size: 19px; color: orange"  title="Bemerkungen: <? echo htmlentities($this->nachweis->Dokumente[$i]['bemerkungen']); ?>"></i>
 				<? } ?>
 					<i class="fa fa-exclamation-circle bearbeitungshinweise" style="<? if($this->nachweis->Dokumente[$i]['bemerkungen_intern'] != '')echo 'color: red'; ?>" onclick="open_bearbeitungshinweise_form(<? echo $this->nachweis->Dokumente[$i]['id']; ?>);" title="Bearbeitungshinweise:&#13;<? echo $this->nachweis->Dokumente[$i]['bemerkungen_intern']; ?>"></i>
 					<div style="position:relative">
@@ -515,7 +516,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td style="width: 30">
           	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){
 									if($this->nachweis->Dokumente[$i]['geprueft'] == 0 OR $this->Stelle->isFunctionAllowed('gepruefte_Nachweise_bearbeiten')){	?>
-										<a href="index.php?go=Nachweisformular&id=<? echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a>
+										<a href="index.php?go=Nachweisformular&id=<? echo $this->nachweis->Dokumente[$i]['id'];?>&suchgueltigkeit=<? echo $this->formvars['suchgueltigkeit'] ?>&suchgeprueft=<? echo $this->formvars['suchgeprueft'] ?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a>
 							<? 	} 
 							 } ?>
 					</td>

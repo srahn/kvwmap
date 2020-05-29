@@ -695,6 +695,15 @@ INSERT INTO u_styles2classes (
   	}
   }
 
+	/**
+	* Führt die in $sql übergebene SQL-Anweisung aus
+	* @param varchar $sql Das SQL-Statement
+	* @return array(
+	*		0 => integer 0 Erfolgreiche Abfrage, 1 Fehler bei der Abfrage)
+	*   1 => varchar query mysql_result object wenn 0 = 0 und die Fehlermeldung als varchar wenn 0 = 1
+	*   'query' => mysql_result object
+	*   'success' => boolean true bei Erfolg, false bei Fehler 
+	*/
 	function execSQL($sql, $debuglevel = 4, $loglevel = 0, $suppress_error_msg = false) {
 		switch ($this->loglevel) {
 			case 0 : {

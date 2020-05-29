@@ -86,10 +86,97 @@ function versionFormatter($version) {
   );
 }
 
+/*
+* This function return the absolute path to a document in the file system of the server
+* @param string $document_attribute_value The value of the document attribute stored in the dataset. Can be a path and original name or an url.
+* @param string $layer_document_path The document path of the layer the attribute belongs to.
+* @param string $layer_document_url optional, default '' The document url of the layer the attribute belongs to. If empty the $document_attribute_value containing an url
+* @return string The absolute path to the document
+*/
+function get_document_file_path($document_attribute_value, $layer_document_path, $layer_document_url = '') {
+	$value_part = explode('&original_name=', $document_attribute_value);
+	if ($layer_document_url != '') {
+		return url2filepath($value_part[0], $layer_document_path, $layer_document_url);
+	}
+	else {
+		return $value_part[0];
+	}
+}
+
 function url2filepath($url, $doc_path, $doc_url){
 	if($doc_path == '')$doc_path = CUSTOM_IMAGE_PATH;
 	$url_parts = explode($doc_url, $url);
 	return $doc_path.$url_parts[1];
+}
+
+/*
+* function read exif and gps data from file given in $img_path and return GPS-Position, Direction and creation Time
+* @param string $img_path Absolute Path of file with Exif Data to read
+* @return array Array with success true if read was successful, LatLng the GPS-Position where the foto was taken Richtung and Erstellungszeit.
+*/
+function get_exif_data($img_path) {
+	$exif = exif_read_data($img_path, 'EXIF, GPS');
+	if ($exif === false) {
+		return array(
+			'success' => false,
+			'err_msg' => 'Keine Exif-Daten im Header der Bilddatei ' . $img_path . ' gefunden!'
+		);
+	}
+	else {
+		echo '<br>' . print_r($exif['GPSLatitude'], true);
+		echo '<br>' . print_r($exif['GPSLongitude'], true);
+		echo '<br>' . print_r($exif['GPSImgDirection'], true);
+		return array(
+			'success' => true,
+			'LatLng' => ((array_key_exists('GPSLatitude', $exif) AND array_key_exists('GPSLongitude', $exif)) ? (
+				floatval(substr($exif['GPSLatitude' ][0], 0, strlen($exif['GPSLatitude' ][0]) - 2))
+				+ float_from_slash_text($exif['GPSLatitude' ][1]) / 60
+				+ float_from_slash_text($exif['GPSLatitude' ][2]) / 6000
+			) . ' ' . (
+				floatval(substr($exif['GPSLongitude'][0], 0, strlen($exif['GPSLongitude'][0]) - 2))
+				+ float_from_slash_text($exif['GPSLongitude'][1]) / 60
+				+ float_from_slash_text($exif['GPSLongitude'][2]) / 6000
+			) : NULL),
+			'Richtung' => (array_key_exists('GPSImgDirection', $exif) ? float_from_slash_text($exif['GPSImgDirection']) : NULL),
+			'Erstellungszeit' => (array_key_exists('DateTimeOriginal', $exif) ? (
+					substr($exif['DateTimeOriginal'], 0 , 4) . '-'
+				. substr($exif['DateTimeOriginal'], 5, 2) . '-'
+				. substr($exif['DateTimeOriginal'], 8, 2) . ' '
+				. substr($exif['DateTimeOriginal'], 11)
+			) : NULL)
+		);
+	}
+}
+
+/**
+* Function create a float value from a text
+* where numerator and denominator are delimited by a slash e.g. 23/100
+* @params string $slash_text First part of the string is numerator, second part is denominator.
+* @return float The float value calculated from numerator divided by denominator.
+* Return Null if string is empty or NULL.
+* Return numerator if only one part exists after explode by slash
+*/
+function float_from_slash_text($slash_text) {
+	$parts = explode('/', $slash_text);
+	if ($parts[0] == '0') {
+		return floatval(0);
+	}
+
+	$numerator = floatval($parts[0]);
+	if ($numerator == 0) {
+		return NULL;
+	}
+
+	if (count($parts) == 1) {
+		return $numerator;
+	}
+
+	$denominator = floatval($parts[1]);
+	if ($denominator == 0) {
+		return $numerator;
+	}
+
+	return $parts[0] / $parts[1];
 }
 
 function compare_layers($a, $b){
@@ -1099,7 +1186,7 @@ function str_space($string, $split_length = 1) {
 function showAlert($text) {
   ?>
   <script type="text/javascript">
-    alert("<?php echo $text; ?>");
+    alert("<?php echo str_replace('"', '\"', $text); ?>");
   </script><?php
 }
 
@@ -1317,7 +1404,7 @@ function emailcheck($email) {
   }
 
   $postfix=strlen(strrchr($email,"."))-1;
-  if (!($postfix >1 AND $postfix < 4)) {
+  if (!($postfix > 1 AND $postfix < 5)) {
     #echo " postfix ist zu kurz oder zu lang";
     $Meldung.='<br>E-Mail ist zu kurz oder zu lang.';
   }
@@ -1414,11 +1501,12 @@ function getArrayOfChars() {
 	return $characters;
 }
 
-function url_get_contents($url, $username = NULL, $password = NULL) {
+function url_get_contents($url, $username = NULL, $password = NULL, $useragent = NULL) {
 	$hostname = parse_url($url, PHP_URL_HOST);
 	try {
 		$ctx['http']['timeout'] = 20;
 		#$ctx['http']['header'] = 'Referer: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];		// erstmal wieder rausgenommen, da sonst Authorization nicht funktioniert
+		if($useragent)$ctx['http']['header'] = 'User-Agent: '.$useragent;
 		if($username)$ctx['http']['header'].= "Authorization: Basic ".base64_encode($username.':'.$password);
 		$proxy = getenv('HTTP_PROXY');
 		if($proxy != '' AND $hostname != 'localhost'){
@@ -1428,7 +1516,7 @@ function url_get_contents($url, $username = NULL, $password = NULL) {
 			$ctx['ssl']['SNI_enabled'] = true;
 		}
 		$context = stream_context_create($ctx);
-		$response = @ file_get_contents($url, false, $context);
+		$response =  file_get_contents($url, false, $context);
 		if ($response === false) {
 			throw new Exception("Fehler beim Abfragen der URL mit file_get_contents(".$url.")");
 		}
@@ -1539,10 +1627,11 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 		if (!$strip) {
 			#echo "<br>Keep {$key} in formvars.";
 			$pos = strpos($value, '[');
-			if ($pos === false) {
-				$stripped_formvars[$key] = stripslashes($value);
-			} else {
+			if ($pos !== false AND $pos == 0) {
 				$stripped_formvars[$key] = arrStrToArr(stripslashes($value), ',');
+			}
+			else {
+				$stripped_formvars[$key] = stripslashes($value);
 			}
 		}
 		else {
@@ -1559,16 +1648,17 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 * als key übergeben werden durch die values von $params und zusätzlich die Werte der
 * Variablen aus den Parametern 3 bis n wenn welche übergeben wurden
 */
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL) {
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
 		}
 	}
-	if (!is_null($user_id))				 $str = str_replace('$user_id', $user_id, $str);
-	if (!is_null($stelle_id))			 $str = str_replace('$stelle_id', $stelle_id, $str);
-	if (!is_null($hist_timestamp)) $str = str_replace('$hist_timestamp', $hist_timestamp, $str);
-	if (!is_null($language))			 $str = str_replace('$language', $language, $str);
+	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
+	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
+	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
+	if (!is_null($language))						$str = str_replace('$language', $language, $str);
+	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	return $str;
 }
 
@@ -1841,7 +1931,9 @@ function sql_err_msg($title, $sql, $msg, $div_id) {
 		<div style=\"text-align: left;\">" .
 		$title . "<br>" .
 		$msg . "
-		<a href=\"#\" onclick=\"$('#error_details_" . $div_id . "').toggle()\" style=\"float: right;\">Details</a>
+		<div style=\"text-align: center\">
+			<a href=\"#\" onclick=\"debug_t = this; $('#error_details_" . $div_id . "').toggle(); $(this).children().toggleClass('fa-caret-down fa-caret-up')\"><i class=\"fa fa-caret-down\" aria-hidden=\"true\"></i></a>
+		</div>
 		<div id=\"error_details_" . $div_id . "\" style=\"display: none\">
 			Aufgetreten bei SQL-Anweisung:<br>
 			<textarea id=\"sql_statement_" . $div_id . "\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px; max-height: 600px\">
@@ -1903,6 +1995,24 @@ function count_or_0($val) {
 	else {
 		return count($val);
 	}
+}
+
+/**
+* Replacing part of a string with another string is straight forward, but what if you have to replace last occurrence of a character or string with another string.
+* https://pageconfig.com/post/replace-last-occurrence-of-a-string-php
+* In case the $search is not found inside the $str, the function returns the original untouched string $str.
+* This behavior is compatible with the default behavior of str_replace PHP’s builtin function that replaces all
+* occurrances of a string inside another string.
+* @param string $search keeps the string to be searched for
+* @param string $replace Is the replacement string
+* @param string $str Is the subject string, commonly known as haystack
+*/
+function str_replace_last($search , $replace, $str) {
+  if (($pos = strrpos($str, $search)) !== false) {
+    $search_length  = strlen( $search );
+    $str    = substr_replace( $str , $replace , $pos , $search_length );
+  }
+  return $str;
 }
 
 ?>

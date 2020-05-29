@@ -1,5 +1,6 @@
 <?php
 	$this->strAnd = "i";
+	$this->strHelp = 'Pomoc';
 	$this->strID = "ID"; 
 	$this->strChoose = "proszę wybrać"; 
 	$this->strChange = "zmień"; 

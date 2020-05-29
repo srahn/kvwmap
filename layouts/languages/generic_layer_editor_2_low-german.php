@@ -20,4 +20,5 @@
  $strShowFK="ankieken";
  $strNewFK="nie";
  $strNewEmbeddedPK="nie";
+ $strShowAllSeparat="alle separaty ankieken";
 ?>

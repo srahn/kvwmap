@@ -51,6 +51,7 @@ class pointeditor {
 	}
 
 	function eintragenPunkt($pointx, $pointy, $oid, $tablename, $columnname, $dimension) {
+		$success = true;
 		if ($pointx == '') {
 			$sql = "
 				UPDATE " . $tablename . "
@@ -59,26 +60,44 @@ class pointeditor {
 			";
 		}
 		else {
+			# Zielgeometrie bestimmen
 			$sql = "
-				UPDATE " . $tablename . "
-				SET " . $columnname . " = st_transform(
-					St_GeomFromText('POINT(" . $pointx . " " . $pointy . ($dimension == 3 ? " 0" : "") . ")', " . $this->clientepsg . "),
-					" . $this->layerepsg . "
-				)
-				WHERE oid = " . $oid . "
+				SELECT
+					ST_Transform(
+						St_GeomFromText('POINT(" . $pointx . " " . $pointy . ($dimension == 3 ? " 0" : "") . ")', " . $this->clientepsg . "),
+						" . $this->layerepsg . "
+					) wkb_geometry
 			";
+			#echo '<p>SQL zum Berechnen der WKB-Geometrie des Punktes: ' . $sql;
+			$ret = $this->database->execSQL($sql, 4, 1, true);
+			if ($ret[0]) {
+				# Fehler beim Berechnen der WKB-Geometrie in der Datenbank
+				$ret[1] = 'Auf Grund eines Fehlers bei der Anfrage an die Datenbank konnte die Geometrie des Punktes nicht berechnet werden!<br>' . $ret[1];
+				$success = false;
+			}
+			else {
+				$rs = pg_fetch_assoc($ret['query']);
+				$sql = "
+					UPDATE " . $tablename . "
+					SET " . $columnname . " = '" . $rs['wkb_geometry'] . "'
+					WHERE oid = " . $oid . "
+				";
+			}
 		}
-		$ret = $this->database->execSQL($sql, 4, 1, true);
-		if ($ret[0]) {
-			# Fehler beim Eintragen in Datenbank
-			$ret[1] = 'Auf Grund eines Datenbankfehlers konnte der Punkt nicht eingetragen werden!<br>' . $ret[1];
-		}
-		else{
-			if($last_notice = $msg = pg_last_notice($this->database->dbConn)){
-				if($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true)){
-					$msg = $notice_result['msg'];
+		if ($success) {
+			#echo '<p>SQL zum Updaten von Punktgeometrie: ' . $sql;
+			$ret = $this->database->execSQL($sql, 4, 1, true);
+			if ($ret[0]) {
+				# Fehler beim Eintragen in Datenbank
+				$ret[1] = 'Auf Grund eines Datenbankfehlers konnte der Punkt nicht eingetragen werden!<br>' . $ret[1];
+			}
+			else {
+				if ($last_notice = $msg = pg_last_notice($this->database->dbConn)){
+					if($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true)){
+						$msg = $notice_result['msg'];
+					}
+					$ret[3] = $msg;
 				}
-				$ret[3] = $msg;
 			}
 		}
 		return $ret;

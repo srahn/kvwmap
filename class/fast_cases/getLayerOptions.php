@@ -1,15 +1,15 @@
 <?
-
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL) {
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
 		}
 	}
-	if (!is_null($user_id))				 $str = str_replace('$user_id', $user_id, $str);
-	if (!is_null($stelle_id))			 $str = str_replace('$stelle_id', $stelle_id, $str);
-	if (!is_null($hist_timestamp)) $str = str_replace('$hist_timestamp', $hist_timestamp, $str);
-	if (!is_null($language))			 $str = str_replace('$language', $language, $str);
+	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
+	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
+	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
+	if (!is_null($language))						$str = str_replace('$language', $language, $str);
+	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	return $str;
 }
 
@@ -127,7 +127,7 @@ class GUI {
 			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['layer_id']);
 		}
 		$disabled_classes = $mapDB->read_disabled_classes();
-		$layer[0]['Class'] = $mapDB->read_Classes($this->formvars['layer_id'], $disabled_classes);
+		$layer[0]['Class'] = $mapDB->read_Classes($this->formvars['layer_id'], $disabled_classes, false, $layer[0]['classification']);
 		echo '
 		<div class="layerOptions" id="options_content_'.$this->formvars['layer_id'].'">
 			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:closeLayerOptions('.$this->formvars['layer_id'].');" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>
@@ -191,6 +191,39 @@ class GUI {
 												}
 							echo 	 '</select>
 										</li>';
+						}
+						if($this->formvars['layer_id'] < 0){
+							$this->result_colors = $this->database->read_colors();
+							for($i = 0; $i < count($this->result_colors); $i++){
+								$color_rgb = $this->result_colors[$i]['red'].' '.$this->result_colors[$i]['green'].' '.$this->result_colors[$i]['blue'];
+								if($layer[0]['Class'][0]['Style'][0]['color'] == $color_rgb){
+									$bgcolor = $this->result_colors[$i]['red'].', '.$this->result_colors[$i]['green'].', '.$this->result_colors[$i]['blue'];
+								}
+							}
+							echo '
+								<li>
+									<span>'.$this->strColor.': </span>
+									<select name="layer_options_color" style="background-color: rgb('.$bgcolor.')" onchange="this.setAttribute(\'style\', this.options[this.selectedIndex].getAttribute(\'style\'));">';
+										for($i = 0; $i < count($this->result_colors); $i++){
+											$color_rgb = $this->result_colors[$i]['red'].' '.$this->result_colors[$i]['green'].' '.$this->result_colors[$i]['blue'];
+											echo '<option ';
+											if($layer[0]['Class'][0]['Style'][0]['color'] == $color_rgb){
+												echo ' selected';
+											}
+											echo ' style="background-color: rgb('.$this->result_colors[$i]['red'].', '.$this->result_colors[$i]['green'].', '.$this->result_colors[$i]['blue'].')"';
+											echo ' value="'.$color_rgb.'">';
+											echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+											echo "</option>\n";
+										}
+										echo '
+									</select>
+								</li>';
+								
+							echo '
+								<li>
+									<span>'.$this->strHatching.': </span>
+									<input type="checkbox" value="hatch" name="layer_options_hatching" '.($layer[0]['Class'][0]['Style'][0]['symbolname'] == 'hatch' ? 'checked' : '').'>
+								</li>';
 						}
 						echo '<li><span>'.$this->transparency.':</span> <input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="height: 6px; width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()"></li>';
 						if(ROLLENFILTER AND $this->user->rolle->showrollenfilter){
@@ -306,6 +339,19 @@ class database {
 	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
 		return $this->mysqli->connect_errno;
 	}
+	
+	function read_colors(){	
+  	$sql = "SELECT * FROM colors";
+  	#echo $sql;
+  	$ret=$this->execSQL($sql, 4, 0);
+    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    if($ret[0]==0){
+      while($row = mysql_fetch_array($ret[1])){
+        $colors[] = $row;
+      }
+    }
+    return $colors;
+  }
 
 	function execSQL($sql, $debuglevel = 4, $loglevel = 0, $suppress_error_msg = false) {
 		switch ($this->loglevel) {
@@ -760,7 +806,7 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
+				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, ddl_attribute, classification, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
 				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
@@ -942,27 +988,16 @@ class db_mapObj {
 
   function getData($layer_id){
 		global $language;
-  	if($layer_id < 0){	# Rollenlayer
-  		$sql = "
-				SELECT
-					Data
-				FROM
-					rollenlayer
-				WHERE
-					-id = " . $layer_id . "
-			";
-  	}
-  	else{
-    	$sql = "
-				SELECT
-					Data
-				FROM
-					layer
-				WHERE
-					Layer_ID = " . $layer_id . "
-			";
-  	}
-  	#echo $sql;
+  	$sql = "
+			SELECT
+				`Data`,
+				`duplicate_criterion`
+			FROM
+				`" . ($layer_id < 0 ? "rollenlayer" : "layer") . "`
+			WHERE
+				" . ($layer_id < 0 ? "-id" : "`Layer_ID`") . " = " . $layer_id . "
+		";
+		#echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getData - Lesen des Data-Statements des Layers:<br>" . $sql,4);
     $this->db->execSQL($sql);
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
@@ -973,7 +1008,8 @@ class db_mapObj {
 			$this->User_ID,
 			$this->Stelle_ID,
 			rolle::$hist_timestamp,
-			$language
+			$language,
+			$rs['duplicate_criterion']
 		);
     return $data;
   }

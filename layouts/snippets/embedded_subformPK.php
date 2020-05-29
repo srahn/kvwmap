@@ -50,8 +50,12 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 					}
 					$element_id = 'subform_dataset_tr_' . $layer['Layer_ID'] . '_' . $layer['shape'][$k][$layer['maintable'] . '_oid']; ?>
 					<tr id="<? echo $element_id; ?>"><?
+						$editable = false;
 						for ($j = 0; $j < count($attributes['name']); $j++) {
 							if ($layer['attributes']['privileg'][$j] >= '0') {
+								if ($layer['attributes']['privileg'][$j] == 1) {
+									$editable = true;
+								}								
 								if ($layer['attributes']['visible'][$j]) {
 									$explosion = explode(';', $layer['attributes']['group'][$j]);
 									if ($explosion[1] != 'collapsed') { ?>
@@ -84,11 +88,13 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 <? if ($anzObj > 0){
 		if ($this->formvars['list_edit']) { ?>
 			<a tabindex="1" class="buttonlink" href="javascript:reload_subform_list('<? echo $this->formvars['targetobject']; ?>', 0)"><span><? echo $this->strCancel; ?></span></a>
-		<? } ?>
-		<a id="subform_save_button_<? echo $layer['Layer_ID']; ?>" class="buttonlink" style="<? echo $save_button_display; ?>" tabindex="1" href="javascript:subsave_data(<? echo $layer['Layer_ID']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', <? echo $this->formvars['reload']; ?>);"><span>Speichern</span></a>
+		<? }
+		if($editable OR $layer['template'] == 'generic_layer_editor_doc_raster.php'){ ?>
+			<a id="subform_save_button_<? echo $layer['Layer_ID']; ?>" class="buttonlink" style="<? echo $save_button_display; ?>" tabindex="1" href="javascript:subsave_data(<? echo $layer['Layer_ID']; ?>, '<? echo $this->formvars['targetobject']; ?>', '<? echo $this->formvars['targetobject']; ?>', <? echo $this->formvars['reload']; ?>);"><span>Speichern</span></a>
 <?	}
+	 }
 		if ($layer['privileg'] > 0 AND $this->formvars['attribute_privileg'] > 0){
-			echo '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
+			echo '<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
 			for($p = 0; $p < count($this->formvars['attributenames']); $p++){
 				echo '&attributenames['.$p.']='.$this->formvars['attributenames'][$p];
 				echo '&values['.$p.']='.$this->formvars['values'][$p];
@@ -103,7 +109,16 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 					 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
 					 new Array(\'sethtml\', \'execute_function\'));
 					 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
-		} ?>
+		}
+		if ($this->formvars['list_edit']) {
+			echo '&nbsp;<a tabindex="1" style="font-size: '.$linksize.'px;" class="show_all_button buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
+			for($p = 0; $p < count($this->formvars['attributenames']); $p++){
+				echo '&value_'.$this->formvars['attributenames'][$p].'='.$this->formvars['values'][$p];
+				echo '&operator_'.$this->formvars['attributenames'][$p].'==';
+			}				
+			echo '&subform_link=true\')"><span>'.$strShowAllSeparat.'</span></a>';
+		}
+		?>
 	</div>
 <?
 }
@@ -219,17 +234,18 @@ else{ ?>
 					<td align="right"><?
 						# alle anzeigen
 						if ($anzObj > 1) {
-							# Liste bearbeiten 
+							# alle in Liste anzeigen
 							if ($this->formvars['embedded'] == 'true') {
-								echo '<a tabindex="1" id="edit_list_'.$this->formvars['targetobject'].'" class="list_edit_button buttonlink" href="javascript:reload_subform_list(\''.$this->formvars['targetobject'].'\', 1)"><span>'.$strEditList.'</span></a>';
+								echo '<a tabindex="1" id="edit_list_'.$this->formvars['targetobject'].'" class="list_edit_button buttonlink" href="javascript:reload_subform_list(\''.$this->formvars['targetobject'].'\', 1)"><span>'.$strShowAll.'</span></a>';
 							}
-							echo '&nbsp;<a tabindex="1" style="font-size: '.$linksize.'px;" class="show_all_button buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
-							for($p = 0; $p < count($this->formvars['attributenames']); $p++){
-								echo '&value_'.$this->formvars['attributenames'][$p].'='.$this->formvars['values'][$p];
-								echo '&operator_'.$this->formvars['attributenames'][$p].'==';
-							}				
-							echo '&subform_link=true\')"><span>'.$strShowAll.'</span></a>'; ?>
-							<?
+							else{		# alle separat anzeigen
+								echo '&nbsp;<a tabindex="1" style="font-size: '.$linksize.'px;" class="show_all_button buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
+								for($p = 0; $p < count($this->formvars['attributenames']); $p++){
+									echo '&value_'.$this->formvars['attributenames'][$p].'='.$this->formvars['values'][$p];
+									echo '&operator_'.$this->formvars['attributenames'][$p].'==';
+								}				
+								echo '&subform_link=true\')"><span>'.$strShowAll.'</span></a>';
+							}
 						}
 						# neu
 						if ($layer['privileg'] > 0 AND $this->formvars['attribute_privileg'] > 0){
@@ -260,10 +276,10 @@ else{ ?>
 									$data[] = 'values[' . $p . ']=' . $this->formvars['values'][$p];
 								}
 								$data[] = 'selected_layer_id=' . $this->formvars['selected_layer_id'];
-								$data[] = 'layer_id=' . $this->formvars['targetlayer_id'];
-								$data[] = 'oid=' . $this->formvars['oid'];
-								$data[] = 'tablename=' . $this->formvars['tablename'];
-								$data[] = 'columnname=' . $this->formvars['columnname']; ?>
+								$data[] = 'layer_id_mother=' . $this->formvars['targetlayer_id'];
+								$data[] = 'oid_mother=' . $this->formvars['oid_mother'];
+								$data[] = 'tablename_mother=' . $this->formvars['tablename_mother'];
+								$data[] = 'columnname_mother=' . $this->formvars['columnname_mother']; ?>
 								<a class="buttonlink"<?
 									if ($this->formvars['no_new_window'] != true) {
 										echo ' target="_blank"';

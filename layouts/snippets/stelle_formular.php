@@ -311,8 +311,8 @@ else {
                       </select>
                     </td>
                     <td align="center" valign="middle" width="1">
-                      <input type="button" name="addPlaces" value="&lt;&lt;" onClick="addMenues()">
-                      <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedmenues,document.GUI.selmenues,'value')>
+                      <input type="button" name="addPlaces" value="&laquo;" onClick="addMenues()">
+                      <input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedmenues,document.GUI.selmenues,'value')>
                     </td>
                     <td>
                       <?php echo $strAvailable; ?><br>

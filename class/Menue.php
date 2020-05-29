@@ -252,7 +252,7 @@ class Menue extends MyObject {
 			$this->get('links'),
 			rolle::$layer_params,
 			$this->gui->user->id,
-			$this->gui->stelle_id,
+			$this->gui->Stelle->id,
 			rolle::$hist_timestamp,
 			$this->gui->user->rolle->language
 		);

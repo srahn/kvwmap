@@ -148,7 +148,7 @@
 					<textarea name="expression[<?php echo $this->classes[$i]['Class_ID']; ?>]" cols="28" rows="3"><?php echo $this->classes[$i]['Expression']; ?></textarea>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
-					<textarea name="text[<?php echo $this->classes[$i]['text']; ?>]" cols="18" rows="3"><?php echo $this->classes[$i]['text']; ?></textarea>
+					<textarea name="text[<?php echo $this->classes[$i]['Class_ID']; ?>]" cols="18" rows="3"><?php echo $this->classes[$i]['text']; ?></textarea>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
 					<input type="text" name="classification[<?php echo $this->classes[$i]['Class_ID']; ?>]" size="18" value="<?php echo $this->classes[$i]['classification']; ?>">

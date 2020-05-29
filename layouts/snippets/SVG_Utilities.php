@@ -482,22 +482,22 @@
      case "zoomin_point":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
       enclosingForm.CMD.value          = "zoomin";
-      get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value+\'&height_reduction=\'+enclosingForm.height_reduction.value);
+      get_map_ajax(\'go=navMap_ajax\');
      break;
      case "zoomout":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
       enclosingForm.CMD.value          = cmd;
-      get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value+\'&height_reduction=\'+enclosingForm.height_reduction.value);
+      get_map_ajax(\'go=navMap_ajax\');
      break;
      case "zoomin_box":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
       enclosingForm.CMD.value          = "zoomin";
-      get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value+\'&height_reduction=\'+enclosingForm.height_reduction.value);
+      get_map_ajax(\'go=navMap_ajax\');
      break;
      case "recentre":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
       enclosingForm.CMD.value = cmd;
-			get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value+\'&height_reduction=\'+enclosingForm.height_reduction.value);
+			get_map_ajax(\'go=navMap_ajax\');
      break;
      case "ppquery_point":
 			if(!checkQueryFields())break;

@@ -5,7 +5,29 @@
 	global $sizes;
 	$size = $sizes[$_REQUEST['gui']];
 ?>
-	
+
+.clear {
+	clear: both;
+}
+
+.form-field {
+	font-family: SourceSansPro1;
+}
+
+.form-label {
+	float: left;
+	font-size: 17px;
+	width: 32%;
+	text-align: right;
+}
+
+.form-value {
+	float: left;
+	margin-left: 10px;
+	font-size: 15px;
+	line-height: 16px;
+}
+
 @font-face {
 	font-family: 'SourceSansPro';
 	font-style: normal;
@@ -41,6 +63,12 @@ body {
 #gui-table {
 	width: 900px;
 	margin: auto;	
+}
+
+input[type="button"][value='«'], input[type="button"][value='»'] {
+	margin: 0.2em;
+	padding: 0px 0.5em 3px 0.5em;
+	font-size: 1.5em;
 }
 
 form {
@@ -83,6 +111,9 @@ form {
 	font-size: 20px;
 }
 
+.hidden{
+	display: none;
+}
 
 h1 {
 	font-family: SourceSansPro3;
@@ -282,7 +313,6 @@ pre {
 	background: inherit;
 	font: inherit;
 	margin: 0;
-	overflow: auto;
 	padding: 0;
 }
 
@@ -523,10 +553,8 @@ a.invisiblelayerlink:hover{
 	text-align: center;
 	color: black;
 	border-radius: 5px;
-}
-
-a.buttonlink{
 	padding: 1px 7px 5px 7px;
+	margin: 0px 2px 0px 2px;
 }
 
 .buttonlink:hover, .buttonlink:focus{
@@ -1408,10 +1436,14 @@ tbody.gle>tr {
 	vertical-align: top;
 }
 
-.calendar { /* Fuer IE <= 6 */
+.calendar {
 	text-align: center;
 	position: absolute;
 	z-index: 1000000;
+	right: 0px;
+	left: 0px;
+	bottom: 30px;
+	width: 180px;
 }
 
 .timepicker{
