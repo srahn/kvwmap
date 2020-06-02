@@ -4,6 +4,11 @@ function value_of($array, $key) {
 	return (array_key_exists($key, $array ?? array()) ? $array[$key] :	'');
 }
 
+function compare_legendorder($a, $b){
+	if($a['legendorder'] > $b['legendorder'])return 1;
+	else return 0;
+}
+
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){

@@ -340,15 +340,13 @@ class database {
 		return $this->mysqli->connect_errno;
 	}
 	
-	function read_colors(){	
+  function read_colors(){	
   	$sql = "SELECT * FROM colors";
   	#echo $sql;
-  	$ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    if($ret[0]==0){
-      while($row = mysql_fetch_array($ret[1])){
-        $colors[] = $row;
-      }
+  	$this->execSQL($sql, 4, 0);
+    if (!$this->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    while ($rs = $this->result->fetch_assoc()) {
+      $colors[] = $rs;
     }
     return $colors;
   }

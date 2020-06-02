@@ -129,7 +129,7 @@ class database {
   	#echo $sql;
   	$this->execSQL($sql, 4, 0);
     if (!$this->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while ($rs = $this->result->fetch_array()) {
+    while ($rs = $this->result->fetch_assoc()) {
       $colors[] = $rs;
     }
     return $colors;

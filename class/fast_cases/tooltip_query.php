@@ -704,13 +704,13 @@ class database {
     return $ret;
   }
 
-  function close() {
-    $this->debug->write("<br>MySQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
-    if (LOG_LEVEL>0){
-    	$this->logfile->close();
-    }
-    return mysql_close($this->dbConn);
-  }
+	function close() {
+		$this->debug->write("<br>MySQL Verbindung ID: " . $this->mysqli->thread_id . " schließen.", 4);
+		if (LOG_LEVEL > 0) {
+			$this->logfile->close();
+		}
+		return $this->mysqli->close();
+	}
 }
 
 class user {
