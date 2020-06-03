@@ -407,7 +407,8 @@ class GUI {
 						$layer->set('opacity',MS_GD_ALPHA);
 				}
 				else {
-						$layer->set('opacity',$layerset['transparency']);
+					$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
+					#$layer->set('opacity',$layerset['transparency']);  # MS-Bug
 				}
 			}
 			if ($layerset['symbolscale']!='') {
