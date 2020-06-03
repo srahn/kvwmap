@@ -1840,8 +1840,12 @@ echo '			</ul>
 						$layer->set('opacity',MS_GD_ALPHA);
 				}
 				else {
-					$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
-					#$layer->set('opacity',$layerset['transparency']);  MS-Bug
+					if (MAPSERVERVERSION > 700) {
+						$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
+					}
+					else{
+						$layer->set('opacity',$layerset['transparency']);
+					}
 				}
 			}
 			if (value_of($layerset, 'symbolscale') != '') {
