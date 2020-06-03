@@ -38,7 +38,7 @@
 */
 class synchro {
 
-	function synchro($stelle, $user, $database) {
+	function __construct($stelle, $user, $database) {
 		$this->Stelle = $stelle;
 		$this->user = $user;
 		$this->database = $database;

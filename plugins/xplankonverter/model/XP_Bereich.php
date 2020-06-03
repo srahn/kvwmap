@@ -7,7 +7,7 @@ class XP_Bereich extends PgObject {
 
 	static $schema = 'xplan_gml';
 
-	function XP_Bereich($gui, $planart) {
+	function __construct($gui, $planart) {
 		$this->planart = $planart;
 		$this->planartAbk = strtolower(substr($planart, 0, 2));
 		$this->tableName = $this->planartAbk . '_bereich';

@@ -28,7 +28,7 @@
 
 class adressaenderungen {
 
-  function adressaenderungen($database) {
+  function __construct($database) {
     global $debug;
     $this->debug=$debug;
     $this->database = $database;

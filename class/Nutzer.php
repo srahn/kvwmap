@@ -3,8 +3,8 @@ class Nutzer extends MyObject {
 
 	static $write_debug = false;
 
-	function Nutzer($gui) {
-		$this->MyObject($gui, 'user');
+	function __construct($gui) {
+		parent::__construct($gui, 'user');
 		$this->identifier = 'ID';
 	}
 
@@ -68,7 +68,7 @@ class Nutzer extends MyObject {
 				}
 			}
 			if ($result['success'] == 0) {
-				$succsess['msg'] = mysql_error($gui->database->dbConn);
+				$succsess['msg'] = $gui->database->error;
 			}
 		}
 		return $result;

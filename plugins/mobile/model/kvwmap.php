@@ -45,7 +45,7 @@
 		}
 		else {
 			$stellen = array();
-			while ($rs = mysql_fetch_assoc($ret[1])) {
+			while ($rs = $GUI->database->result->fetch_assoc()) {
 				$stellen[] = $rs;
 			}
 

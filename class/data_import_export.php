@@ -30,7 +30,7 @@
 
 class data_import_export {
 
-  function data_import_export() {
+  function __construct() {
     global $debug;
     $this->debug=$debug;
 		$this->delimiters = array("\t", ';', ' ', ',');		# erlaubte Trennzeichen

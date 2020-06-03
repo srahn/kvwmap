@@ -9,7 +9,7 @@ class Fortfuehrungsfall extends PgObject {
 	static $tableName = 'ff_faelle';
 	static $write_debug = false;
 
-	function Fortfuehrungsfall($gui) {
+	function __construct($gui) {
 		$gui->debug->show('Create new Object Fortfuhrungsfall', Fortfuehrungsfall::$write_debug);
 		$this->PgObject($gui, Fortfuehrungsfall::$schema, Fortfuehrungsfall::$tableName);
 	}

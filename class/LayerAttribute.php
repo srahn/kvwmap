@@ -3,8 +3,8 @@ class LayerAttribute extends MyObject {
 
 	static $write_debug = false;
 
-	function LayerAttribute($gui) {
-		$this->MyObject($gui, 'layer_attributes');
+	function __construct($gui) {
+		parent::__construct($gui, 'layer_attributes');
 	}
 
 	public static	function find($gui, $where) {

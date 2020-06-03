@@ -60,7 +60,7 @@ function human_filesize($file){
 
 function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	global $errors;
-	if(!(error_reporting() & $errno)){
+	if (!(error_reporting() & $errno)) {
 		// This error code is not included in error_reporting
 		return;
 	}
@@ -1821,6 +1821,7 @@ function geometrytype_to_datatype($geometrytype) {
 * außer von denen, dessen keys im except array stehen.
 */
 function hidden_formvars_fields($formvars, $except = array()) {
+	$html = '';
 	$params = array();
 	foreach ($formvars AS $key => $value) {
 		if (!in_array($key, $except)) {
@@ -1968,6 +1969,11 @@ function send_image_not_found($img) {
 	imagedestroy($empty_img);
 }
 
+function value_of($array, $key) {
+	if(!is_array($array))$array = array();
+	return (array_key_exists($key, $array) ? $array[$key] :	'');
+}
+
 function is_true($val) {
 	if (
 		$val === true OR
@@ -1979,6 +1985,15 @@ function is_true($val) {
 	}
 	else {
 		return false;
+	}
+}
+
+function count_or_0($val) {
+	if (is_null($val) OR !is_array($val)) {
+		return 0;
+	}
+	else {
+		return count($val);
 	}
 }
 
@@ -1999,4 +2014,5 @@ function str_replace_last($search , $replace, $str) {
   }
   return $str;
 }
+
 ?>

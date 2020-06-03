@@ -23,6 +23,7 @@ class FormObject {
 	var $hidden;
 	var $text;
 	var $anzValues;
+	var $JavaScript;
 
 	###################### Liste der Funktionen ####################################
 	#
@@ -34,7 +35,7 @@ class FormObject {
 	#
 	################################################################################
 
-	function FormObject($name, $type, $value, $selectedValue, $label, $size, $maxlenght, $multiple, $width, $disabled = NULL, $style = "") {
+	function __construct($name, $type, $value, $selectedValue, $label, $size, $maxlenght, $multiple, $width, $disabled = NULL, $style = "") {
 		if (!is_array($selectedValue)) { $selectedValue=array($selectedValue); }
 		$this->type = $type;
 		$this->width = $width;
@@ -179,14 +180,14 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 					$this->html .= ' style="' . $this->style . '"';
 				}
 				$this->html.=">\n";
-				for ($i=0;$i<count($this->select[option]);$i++) {
-					$this->html.="<option value='".$this->select["option"][$i]["value"]."'";
-					if ($this->select["option"][$i]["selected"]) {
-						$this->html.=" selected";
+				for ($i = 0; $i < count($this->select['option']); $i++) {
+					$this->html .= "<option value='" . $this->select["option"][$i]["value"] . "'";
+					if (value_of($this->select["option"][$i], 'selected')) {
+						$this->html .= " selected";
 					}
-					$this->html.=">".$this->select["option"][$i]["label"]."</option>\n";
+					$this->html .= ">" . $this->select["option"][$i]["label"] . "</option>\n";
 				}
-				$this->html.="</select>";
+				$this->html .= "</select>";
 			} break;
 			case "text" : {
 				$this->html ="<input type='text' name='".$this->text["name"]."' value='".$this->text["value"]."'";

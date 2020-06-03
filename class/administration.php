@@ -41,7 +41,7 @@ class administration{
 	var $migration_files;
 	var $migrations_to_execute;
 	
-	function administration($database, $pgdatabase) {
+	function __construct($database, $pgdatabase) {
 		$this->database = $database;
 		$this->pgdatabase = $pgdatabase;
 	}
@@ -55,11 +55,11 @@ class administration{
 		";
 		#echo '<br>SQL zur Abfrage der registrierten Migrationen: ' . $sql;
 		$result = $this->database->execSQL($sql,0, 0);
-		if ($result[0]) {
+		if (!$this->database->success) {
 			echo '<br>Fehler bei der Abfrage der Tabelle migrations.<br>'; 	// bei Neuinstallation gibt es diese Tabelle noch nicht
 		}
 		else {
-			while($rs=mysql_fetch_array($result[1])) {
+			while ($rs = $this->database->result->fetch_array()) {
 				$migrations[$rs['component']][$rs['type']][$rs['filename']] = 1;
 			}
 		}
@@ -256,12 +256,12 @@ class administration{
 			ORDER BY `group`, name
 		";
 		#echo 'SQL: ' . $sql;
-		$result = $this->database->execSQL($sql, 0, 0);
-		if ($result[0]) {
+		$this->database->execSQL($sql, 0, 0);
+		if (!$this->database->success) {
 			#echo '<br>Fehler bei der Abfrage der Tabelle config.<br>';
 		}
 		else {
-			while ($rs = mysql_fetch_assoc($result[1])) {
+			while ($rs = $this->database->result->fetch_assoc()) {
 				$this->config_params[$rs['name']] = $rs;
 			}
 			foreach ($this->config_params as &$param) {
@@ -333,7 +333,7 @@ class administration{
 					}
 				}
 				if ($param['type'] == 'array') {
-					$config .= "$" . $param['name'] . " = " . preg_replace('/stdClass::__set_state/', '', var_export(json_decode($param['value']), true)) . ";\n\n";
+					$config .= "$" . $param['name'] . " = " . str_replace('(object) ', '', var_export(json_decode($param['value']), true)) . ";\n\n";
 				}
 				else {
 					if ($param['type'] == 'string' OR $param['type'] == 'password') {

@@ -37,7 +37,7 @@ class Gml_builder {
       "updated_at"
   );
 
-  function Gml_builder($database) {
+  function __construct($database) {
     global $debug;
     $this->debug = $debug;
     $this->database = $database;

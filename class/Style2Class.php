@@ -3,7 +3,7 @@ class Style2Class extends MyObject {
 
 	static $write_debug = false;
 
-	function Style2Class($gui) {
+	function __construct($gui) {
 		$this->MyObject($gui, 'u_styles2classes');
 	}
 

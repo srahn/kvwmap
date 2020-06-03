@@ -173,65 +173,76 @@ class database {
     $this->blocktransaction=0;
   }
 
-  function open() {
-    $this->debug->write("<br>MySQL Verbindung öffnen mit Host: ".$this->host." User: ".$this->user,4);
-    $this->dbConn=mysql_connect($this->host,$this->user,$this->passwd);
-    $this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswählen.",4);
-    return mysql_select_db($this->dbName,$this->dbConn);
-  }
+	function open() {
+		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
+		$this->dbConn = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+		$this->debug->write("<br>MySQL VerbindungsID: " . $this->dbConn->thread_id, 4);
+		return $this->dbConn->connect_errno;
+	}
 
-  function execSQL($sql,$debuglevel, $loglevel) {
-  	switch ($this->loglevel) {
-  		case 0 : {
-  			$logsql=0;
-  		} break;
-  		case 1 : {
-  			$logsql=1;
-  		} break;
-  		case 2 : {
-  			$logsql=$loglevel;
-  		} break;
-  	}
-    # SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
-    # wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
-    # (lesend immer, aber schreibend nur mit DBWRITE=1)
-    if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
-      $query=mysql_query($sql,$this->dbConn);
-      #echo $sql;
-      if ($query==0) {
-        $ret[0]=1;
-        $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>".mysql_error($this->dbConn);
-        $this->debug->write($ret[1],$debuglevel);
-        if ($logsql) {
-          $this->logfile->write("#".$ret[1]);
-        }
-      }
-      else {
-        $ret[0]=0;
-        $ret[1]=$query;
-        if ($logsql) {
-          $this->logfile->write($sql.';');
-        }
-        $this->debug->write(date('H:i:s')."<br>".$sql,$debuglevel);
-      }
-      $ret[2]=$sql;
-    }
-    else {
-    	if ($logsql) {
-    		$this->logfile->write($sql.';');
-    	}
-    	$this->debug->write("<br>".$sql,$debuglevel);
-    }
-    return $ret;
-  }
+	function execSQL($sql, $debuglevel = 4, $loglevel = 0, $suppress_error_msg = false) {
+		switch ($this->loglevel) {
+			case 0 : {
+				$logsql=0;
+			} break;
+			case 1 : {
+				$logsql=1;
+			} break;
+			case 2 : {
+				$logsql=$loglevel;
+			} break;
+		}
+		# SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
+		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
+		# (lesend immer, aber schreibend nur mit DBWRITE=1)
+		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
+			#echo '<br>sql in execSQL: ' . $sql;
+			if ($result = $this->mysqli->query($sql)) {
+				$ret[0] = 0;
+				$ret['success'] = $this->success = true;
+				$ret[1] = $ret['query'] = $ret['result'] = $this->result = $result;
+				$this->errormessage = '';
+				if ($logsql) {
+					$this->logfile->write($sql . ';');
+				}
+				$this->debug->write(date('H:i:s')."<br>" . $sql, $debuglevel);
+			}
+			else {
+				$ret[0] = 1;
+				$ret['success'] = $this->success = false;
+				$div_id = rand(1, 99999);
+				$errormessage = $this->mysqli->error;
+				$ret[1] = $this->errormessage = sql_err_msg('MySQL', $sql, $errormessage, $div_id);
+				if ($logsql) {
+					$this->logfile->write("#" . $errormessage);
+				}
+				if (!$suppress_error_msg) {
+					if (gettype($this->gui) == 'object') {
+						$this->gui->add_message('error', $this->errormessage);
+					}
+					else {
+						echo '<br>error: ' . $this->errormessage;
+					}
+				}
+			}
+			$ret[2] = $sql;
+		}
+		else {
+			if ($logsql) {
+				$this->logfile->write($sql . ';');
+			}
+			$this->debug->write("<br>" . $sql, $debuglevel);
+		}
+		return $ret;
+	}
 
-  function close() {
-    $this->debug->write("<br>MySQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
-    if (LOG_LEVEL>0){
-    	$this->logfile->close();
-    }
-    return mysql_close($this->dbConn);
-  }
+	function close() {
+		$this->debug->write("<br>MySQL Verbindung ID: " . $this->mysqli->thread_id . " schließen.", 4);
+		if (LOG_LEVEL > 0) {
+			$this->logfile->close();
+		}
+		return $this->mysqli->close();
+	}
 }
 
 class user {
@@ -264,40 +275,58 @@ class user {
 		}
 	}
 
-  function readUserDaten($id,$login_name) {
-    $sql ='SELECT * FROM user WHERE 1=1';
-    if ($id>0) {
-      $sql.=' AND ID='.$id;
-    }
-    if ($login_name!='') {
-      $sql.=' AND login_name LIKE "'.$login_name.'"';
-    }
-    $this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    $this->id=$rs['ID'];
-    $this->login_name=$rs['login_name'];
-    $this->Namenszusatz=$rs['Namenszusatz'];
-    $this->Name=$rs['Name'];
-    $this->Vorname=$rs['Vorname'];
-    $this->stelle_id=$rs['stelle_id'];
-    $this->phon=$rs['phon'];
-    $this->email=$rs['email'];
-    if (CHECK_CLIENT_IP) {
-      $this->ips=$rs['ips'];
-    }
-    $this->password_setting_time=$rs['password_setting_time'];
-  }
+	function readUserDaten($id, $login_name, $passwort = '') {
+		$where = array();
+		if ($id > 0) array_push($where, "ID = " . $id);
+		if ($login_name != '') array_push($where, "login_name LIKE '" . $login_name . "'");
+		if ($passwort != '') array_push($where, "passwort = md5('" . $passwort . "')");
+		$sql = "
+			SELECT
+				*
+			FROM
+				user
+			WHERE
+				" . implode(" AND ", $where) . "
+		";
+		#echo '<br>Sql: ' . $sql;
 
-  function getLastStelle() {
-    $sql = 'SELECT stelle_id FROM user WHERE ID='.$this->id;
-    $this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    return $rs['stelle_id'];
-  }
+		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>" . $sql, 3);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		$rs = $this->database->result->fetch_array();
+		$this->id = $rs['ID'];
+		$this->login_name = $rs['login_name'];
+		$this->Namenszusatz = $rs['Namenszusatz'];
+		$this->Name = $rs['Name'];
+		$this->Vorname = $rs['Vorname'];
+		$this->stelle_id = $rs['stelle_id'];
+		$this->phon = $rs['phon'];
+		$this->email = $rs['email'];
+		if (CHECK_CLIENT_IP) {
+			$this->ips = $rs['ips'];
+		}
+		$this->funktion = $rs['Funktion'];
+		$this->password_setting_time = $rs['password_setting_time'];
+		$this->agreement_accepted = $rs['agreement_accepted'];
+		$this->start = $rs['start'];
+		$this->stop = $rs['stop'];
+	}
+
+	function getLastStelle() {
+		$sql = "
+			SELECT
+				stelle_id
+			FROM
+				user
+			WHERE
+				ID= " . $this->id ."
+		";
+		$this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>" . $sql, 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		$rs = $this->database->result->fetch_array();
+		return $rs['stelle_id'];
+	}
 
 	function StellenZugriff($stelle_id) {
 		$this->Stellen=$this->getStellen($stelle_id);
@@ -308,25 +337,31 @@ class user {
 	}
 
 	function getStellen($stelle_ID) {
-		$sql ='SELECT s.ID,s.Bezeichnung FROM stelle AS s,rolle AS r';
-		$sql.=' WHERE s.ID=r.stelle_id AND r.user_id='.$this->id;
-		if ($stelle_ID>0) {
-			$sql.=' AND s.ID='.$stelle_ID;
-		}
-		# Zeiteinschränkung
-		$sql.=' AND (';
-		# Zeiteinschränkung wird berücksichtigt
-		$sql.='("'.date('Y-m-d h:i:s').'" >= s.start AND "'.date('Y-m-d h:i:s').'" <= s.stop)';
-		$sql.=' OR ';
-		# Zeiteinschränkung wird nicht berücksichtigt.
-		$sql.='(s.start="0000-00-00 00:00:00" AND s.stop="0000-00-00 00:00:00")';
-		$sql.=')';
-		$sql.=' ORDER BY Bezeichnung';
-		#echo $sql;
+		$sql = "
+			SELECT
+				s.ID,
+				s.Bezeichnung
+			FROM
+				stelle AS s,
+				rolle AS r
+			WHERE
+				s.ID = r.stelle_id AND
+				r.user_id = " . $this->id .
+				($stelle_ID > 0 ? " AND s.ID = " . $stelle_ID : "") . "
+				AND (
+					('" . date('Y-m-d h:i:s') . "' >= s.start AND '" . date('Y-m-d h:i:s') . "' <= s.stop)
+					OR
+					(s.start = '0000-00-00 00:00:00' AND s.stop = '0000-00-00 00:00:00')
+				)
+			ORDER BY
+				Bezeichnung;
+		";
+
+		#echo '<br>sql: ' . $sql;
 		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		while($rs=mysql_fetch_array($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		while ($rs = $this->database->result->fetch_array()) {
 			$stellen['ID'][]=$rs['ID'];
 			$stellen['Bezeichnung'][]=$rs['Bezeichnung'];
 		}
@@ -389,52 +424,74 @@ class stelle {
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo $sql;
-    $this->debug->write("<p>file:users.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
+    $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+		}
+		$rs = $this->database->result->fetch_array();
     $this->Bezeichnung=$rs['Bezeichnung'];
     return $rs['Bezeichnung'];
   }
 
-  function readDefaultValues() {
-    $sql ='SELECT * FROM stelle WHERE ID='.$this->id;
-    $this->debug->write("<p>file:users.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);    
-    $this->MaxGeorefExt=ms_newRectObj();
-    $this->MaxGeorefExt->setextent($rs['minxmax'],$rs['minymax'],$rs['maxxmax'],$rs['maxymax']);
-    $this->epsg_code=$rs["epsg_code"];
-    $this->wasserzeichen=$rs["wasserzeichen"];
-    $this->pgdbhost = ($rs["pgdbhost"] == 'PGSQL_PORT_5432_TCP_ADDR') ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs["pgdbhost"];
-    $this->pgdbname=$rs["pgdbname"];
-    $this->pgdbuser=$rs["pgdbuser"];
-    $this->pgdbpasswd=$rs["pgdbpasswd"];
-    $this->protected=$rs["protected"];
-    //---------- OWS Metadaten ----------//
-    $this->ows_title=$rs["ows_title"];
-    $this->ows_abstract=$rs["ows_abstract"];
-    $this->wms_accessconstraints=$rs["wms_accessconstraints"];
-    $this->ows_contactperson=$rs["ows_contactperson"];
-    $this->ows_contactorganization=$rs["ows_contactorganization"];
-    $this->ows_contactelectronicmailaddress=$rs["ows_contactemailaddress"];
-    $this->ows_contactposition=$rs["ows_contactposition"];
-    $this->ows_fees=$rs["ows_fees"];
-    $this->ows_srs=$rs["ows_srs"];
-    $this->check_client_ip=$rs["check_client_ip"];
-    $this->checkPasswordAge=$rs["check_password_age"];
-    $this->allowedPasswordAge=$rs["allowed_password_age"];
-    $this->useLayerAliases=$rs["use_layer_aliases"];
-  }
+	function readDefaultValues() {
+		$sql = "
+			SELECT
+				*
+			FROM
+				stelle
+			WHERE
+				ID = " . $this->id . "
+		";
+		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+		}
+		$rs = $this->database->result->fetch_array();
+		$this->MaxGeorefExt = ms_newRectObj();
+		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
+		$this->epsg_code = $rs['epsg_code'];
+		$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
+		$this->pgdbname = $rs['pgdbname'];
+		$this->pgdbuser = $rs['pgdbuser'];
+		$this->pgdbpasswd = $rs['pgdbpasswd'];
+		$this->protected = $rs['protected'];
+		//---------- OWS Metadaten ----------//
+		$this->ows_title = $rs['ows_title'];
+		$this->ows_abstract = $rs['ows_abstract'];
+		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
+		$this->ows_contactperson = $rs['ows_contactperson'];
+		$this->ows_contactorganization = $rs['ows_contactorganization'];
+		$this->ows_contactelectronicmailaddress = $rs['ows_contactemailaddress'];
+		$this->ows_contactposition = $rs['ows_contactposition'];
+		$this->ows_fees = $rs['ows_fees'];
+		$this->ows_srs = $rs['ows_srs'];
+		$this->check_client_ip = $rs['check_client_ip'];
+		$this->checkPasswordAge = $rs['check_password_age'];
+		$this->allowedPasswordAge = $rs['allowed_password_age'];
+		$this->useLayerAliases = $rs['use_layer_aliases'];
+		$this->selectable_layer_params = $rs['selectable_layer_params'];
+		$this->hist_timestamp = $rs['hist_timestamp'];
+		$this->default_user_id = $rs['default_user_id'];
+		$this->style = $rs['style'];
+	}
 
   function checkClientIpIsOn() {
-    $sql ='SELECT check_client_ip FROM stelle WHERE ID = '.$this->id;
-    $this->debug->write("<p>file:users.php class:stelle->checkClientIpIsOn- Abfragen ob IP's der Nutzer in der Stelle getestet werden sollen<br>".$sql,4);
+    $sql = "
+			SELECT
+				check_client_ip
+			FROM
+				stelle
+			WHERE ID = " . $this->id . "
+		";
+    $this->debug->write("<p>file:stelle.php class:stelle->checkClientIpIsOn- Abfragen ob IP's der Nutzer in der Stelle getestet werden sollen<br>".$sql,4);
     #echo '<br>'.$sql;
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+		}
+		$rs = $this->database->result->fetch_array();
     if ($rs['check_client_ip']=='1') {
       return 1;
     }
@@ -465,16 +522,24 @@ class rolle {
   function readSettings() {
 		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
-    $sql ='SELECT * FROM rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-    #echo $sql;
-    $this->debug->write("<p>file:users.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) {
+    $sql = "
+			SELECT
+				*
+			FROM
+				rolle
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . "
+		";
+		#echo 'Read rolle settings mit sql: ' . $sql;
+    $this->debug->write("<p>file:rolle.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
+    $this->database->execSQL($sql);
+    if (!$this->database->success) {
       $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
       return 0;
     }
-		if(mysql_num_rows($query) > 0){
-			$rs=mysql_fetch_assoc($query);
+		if ($this->database->result->num_rows > 0){
+			$rs = $this->database->result->fetch_assoc();
 			$this->oGeorefExt=ms_newRectObj();
 			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
@@ -498,22 +563,34 @@ class rolle {
 			$this->highlighting=$rs['highlighting'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
+			$this->result_hatching=$rs['result_hatching'];
+			$this->result_transparency=$rs['result_transparency'];
 			$this->always_draw=$rs['always_draw'];
 			$this->runningcoords=$rs['runningcoords'];
 			$this->showmapfunctions=$rs['showmapfunctions'];
 			$this->showlayeroptions=$rs['showlayeroptions'];
+			$this->showrollenfilter=$rs['showrollenfilter'];
+			$this->menue_buttons=$rs['menue_buttons'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
-			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->geom_edit_first=$rs['geom_edit_first'];		
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
-			if($rs['hist_timestamp'] != ''){
-				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
+			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
+			$this->visually_impaired = $rs['visually_impaired'];
+			$this->legendtype = $rs['legendtype'];
+			$this->print_legend_separate = $rs['print_legend_separate'];
+			$this->print_scale = $rs['print_scale'];
+			if ($rs['hist_timestamp'] != '') {
+				$this->hist_timestamp_de = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
 			}
-			else rolle::$hist_timestamp = $this->hist_timestamp = '';
+			else {
+				rolle::$hist_timestamp = $this->hist_timestamp_de = '';
+				#rolle::$hist_timestamp = '';
+			}
 			$this->selectedButton=$rs['selectedButton'];
 			$buttons = explode(',', $rs['buttons']);
 			$this->back = in_array('back', $buttons);
@@ -523,7 +600,7 @@ class rolle {
 			$this->zoomall = in_array('zoomall', $buttons);
 			$this->recentre = in_array('recentre', $buttons);
 			$this->jumpto = in_array('jumpto', $buttons);
-			$this->coord_query = in_array('coord_query', $buttons);			
+			$this->coord_query = in_array('coord_query', $buttons);
 			$this->query = in_array('query', $buttons);
 			$this->queryradius = in_array('queryradius', $buttons);
 			$this->polyquery = in_array('polyquery', $buttons);
@@ -532,9 +609,14 @@ class rolle {
 			$this->freepolygon = in_array('freepolygon', $buttons);
 			$this->freetext = in_array('freetext', $buttons);
 			$this->freearrow = in_array('freearrow', $buttons);
+			$this->gps = in_array('gps', $buttons);
+			$this->geom_buttons = explode(',', str_replace(' ', '', $rs['geom_buttons']));
 			return 1;
-		}else return 0;
-  }
+		}
+		else {
+			return 0;
+		}
+	}
 }
 
 class db_mapObj {
@@ -554,59 +636,59 @@ class db_mapObj {
     $this->User_ID=$User_ID;
   }
 
-  function getlayerdatabase($layer_id, $host){
-  	if($layer_id < 0){	# Rollenlayer
-  		$sql ='SELECT `connection`, "'.CUSTOM_SHAPE_SCHEMA.'" as `schema` FROM rollenlayer WHERE -id = '.$layer_id.' AND connectiontype = 6';
-  	}
-  	else{
-    	$sql ="SELECT concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as `connection`, `schema` FROM layer as l, connections as c WHERE l.Layer_ID = ".$layer_id." AND l.connection_id = c.id AND l.connectiontype = 6";
-  	}
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Lesen des connection-Strings des Layers:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs = mysql_fetch_array($query);
-    $connectionstring = $rs[0];
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Gefundener Connection String des Layers:<br>".$connectionstring, 4);
-    if($connectionstring != ''){
-      $layerdb = new pgdatabase();
-      if($rs[1] == ''){
-      	$rs[1] = 'public';
-      }
-      $layerdb->schema = $rs[1];
-      $connection = explode(' ', trim($connectionstring));
-      for($j = 0; $j < count($connection); $j++){
-        if($connection[$j] != ''){
-          $value = explode('=', $connection[$j]);
-          if(strtolower($value[0]) == 'user'){
-            $layerdb->user = $value[1];
-          }
-          if(strtolower($value[0]) == 'dbname'){
-            $layerdb->dbName = $value[1];
-          }
-          if(strtolower($value[0]) == 'password'){
-            $layerdb->passwd = $value[1];
-          }
-          if(strtolower($value[0]) == 'host'){
-            $layerdb->host = $value[1];
-          }
-          if(strtolower($value[0]) == 'port'){
-            $layerdb->port = $value[1];
-          }
-        }
-      }
-      if (!isset($layerdb->host)) {
-        $layerdb->host = $host;
-      }
-      if (!$layerdb->open()) {
-        echo 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
-        echo '<br>Host: '.$layerdb->host;
-        echo '<br>User: '.$layerdb->user;
-        echo '<br>Datenbankname: '.$layerdb->dbName;
-        exit;
-      }
-    }
-    return $layerdb;
-  }
+	function getlayerdatabase($layer_id, $host){
+		if($layer_id < 0){	# Rollenlayer
+			$sql ='SELECT `connection`, "'.CUSTOM_SHAPE_SCHEMA.'" as `schema` FROM rollenlayer WHERE -id = '.$layer_id.' AND connectiontype = 6';
+		}
+		else{
+			$sql ="SELECT concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as `connection`, `schema` FROM layer as l, connections as c WHERE l.Layer_ID = ".$layer_id." AND l.connection_id = c.id AND l.connectiontype = 6";
+		}
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Lesen des connection-Strings des Layers:<br>" . $sql,4);
+		$this->db->execSQL($sql);
+		if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
+		$rs = $this->db->result->fetch_array();
+		$connectionstring = $rs[0];
+#		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Gefundener Connection String des Layers:<br>" . $connectionstring, 4);
+		if ($connectionstring != ''){
+			$layerdb = new pgdatabase();
+			if($rs[1] == '') {
+				$rs[1] = 'public';
+			}
+			$layerdb->schema = $rs[1];
+			$connection = explode(' ', trim($connectionstring));
+			for($j = 0; $j < count($connection); $j++){
+				if($connection[$j] != ''){
+					$value = explode('=', $connection[$j]);
+					if(strtolower($value[0]) == 'user'){
+						$layerdb->user = $value[1];
+					}
+					if(strtolower($value[0]) == 'dbname'){
+						$layerdb->dbName = $value[1];
+					}
+					if(strtolower($value[0]) == 'password'){
+						$layerdb->passwd = $value[1];
+					}
+					if(strtolower($value[0]) == 'host'){
+						$layerdb->host = $value[1];
+					}
+					if(strtolower($value[0]) == 'port'){
+						$layerdb->port = $value[1];
+					}
+				}
+			}
+			if (!isset($layerdb->host)) {
+				$layerdb->host = $host;
+			}
+			if (!$layerdb->open()) {
+				echo 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
+				echo '<br>Host: '.$layerdb->host;
+				echo '<br>User: '.$layerdb->user;
+				echo '<br>Datenbankname: '.$layerdb->dbName;
+				exit;
+			}
+		}
+		return $layerdb;
+	}
 	
   function read_datatype_attributes($datatype_id, $datatypedb, $attributenames, $all_languages = false, $recursive = false){
 		global $language;
@@ -657,7 +739,7 @@ class db_mapObj {
 				`visible`,
 				`vcheck_attribute`,
 				`vcheck_operator`,
-				`vcheck_value`,				
+				`vcheck_value`,
 				`arrangement`,
 				`labeling`
 			FROM
@@ -674,10 +756,10 @@ class db_mapObj {
 		*/
 		#echo '<br>Sql read_datatype_attributes: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_datatype_attributes:<br>" . $sql,4);
-		$query=mysql_query($sql);
-    if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+		$ret = $this->db->execSQL($sql);
+    if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
-		while($rs = mysql_fetch_array($query)){
+		while($rs = $ret['result']->fetch_array()){
 			$attributes['datatype_id'][$i] = $rs['datatype_id'];
 			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
@@ -755,40 +837,100 @@ class db_mapObj {
 		return $attributes;
   }	
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false){
 		global $language;
-		if($attributenames != NULL){
-			$einschr = ' AND name IN (\'';
-			$einschr.= implode('\', \'', $attributenames);
-			$einschr.= '\')';
+		$attributes = array();
+		$einschr = '';
+
+		$alias_column = (
+			(!$all_languages AND $language != 'german') ?
+			"
+				CASE
+					WHEN `alias_" . $language. "` != '' THEN `alias_" . $language . "`
+					ELSE `alias`
+				END AS alias
+			" :
+			"
+				`alias`
+			"
+		);
+
+		if ($attributenames != NULL) {
+			$einschr = " AND a.name IN ('" . implode("', '", $attributenames) . "')";
 		}
-		$sql = 'SELECT ';
-		if(!$all_languages AND $language != 'german') {
-			$sql.='CASE WHEN `alias_'.$language.'` != "" THEN `alias_'.$language.'` ELSE `alias` END AS ';
-		}
-		$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>".$sql,4);
-		$query=mysql_query($sql);
-		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+
+		$sql = "
+			SELECT 
+				`order`, " .
+				$alias_column . ", `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`,
+				`layer_id`,
+				a.`name`,
+				`real_name`,
+				`tablename`,
+				`table_alias_name`,
+				`type`,
+				d.`name` as typename,
+				`geometrytype`,
+				`constraints`,
+				`nullable`,
+				`length`,
+				`decimal_length`,
+				`default`,
+				`form_element_type`,
+				`options`,
+				`tooltip`,
+				`group`,
+				`arrangement`,
+				`labeling`,
+				`raster_visibility`,
+				`dont_use_for_new`,
+				`mandatory`,
+				`quicksearch`,
+				`visible`,
+				`vcheck_attribute`,
+				`vcheck_operator`,
+				`vcheck_value`,
+				`order`,
+				`privileg`,
+				`query_tooltip`
+			FROM
+				`layer_attributes` as a LEFT JOIN
+				`datatypes` as d ON d.`id` = REPLACE(`type`, '_', '')
+			WHERE
+				`layer_id` = " . $layer_id .
+				$einschr . "
+			ORDER BY
+				`order`
+		";
+		#echo '<br>Sql read_layer_attributes: ' . $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>" . $sql,4);
+		$ret = $this->db->execSQL($sql);
+    if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
-		while($rs=mysql_fetch_array($query)){
-			$attributes['name'][$i]= $rs['name'];
+		while ($rs = $ret['result']->fetch_array()){
+			$attributes['order'][$i] = $rs['order'];
+			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
-			$attributes['real_name'][$rs['name']]= $rs['real_name'];
-			if($rs['tablename']){
-				if(strpos($rs['tablename'], '.') !== false){
+			$attributes['real_name'][$rs['name']] = $rs['real_name'];
+			if ($rs['tablename']){
+				if (strpos($rs['tablename'], '.') !== false){
 					$explosion = explode('.', $rs['tablename']);
 					$rs['tablename'] = $explosion[1];		# Tabellenname ohne Schema
 					$attributes['schema_name'][$rs['tablename']] = $explosion[0];
 				}
 				$attributes['table_name'][$i]= $rs['tablename'];
-				$attributes['table_name'][$rs['name']] = $rs['tablename']; 
+				$attributes['table_name'][$rs['name']] = $rs['tablename'];
 			}
-			if($rs['table_alias_name'])$attributes['table_alias_name'][$i]= $rs['table_alias_name'];
-			if($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']]= $rs['table_alias_name'];
-			$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
-			$attributes['type'][$i]= $rs['type'];
-			if($rs['type'] == 'geometry'){
+			if ($rs['table_alias_name'])$attributes['table_alias_name'][$i] = $rs['table_alias_name'];
+			if ($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']] = $rs['table_alias_name'];
+			$attributes['table_alias_name'][$rs['tablename']] = $rs['table_alias_name'];
+			$attributes['type'][$i] = $rs['type'];
+			$attributes['typename'][$i] = $rs['typename'];
+			$type = ltrim($rs['type'], '_');
+			if ($recursive AND is_numeric($type)){
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
+			}
+			if ($rs['type'] == 'geometry'){
 				$attributes['the_geom'] = $rs['name'];
 			}
 			$attributes['geomtype'][$i]= $rs['geometrytype'];
@@ -798,45 +940,61 @@ class db_mapObj {
 			$attributes['nullable'][$i]= $rs['nullable'];
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
-		
-			if(substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$ret1 = $layerdb->execSQL($rs['default'], 4, 0);					
-				if($ret1[0]==0){
-					$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
+
+			if (substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+				$ret1 = $layerdb->execSQL($rs['default'], 4, 0);
+				if ($ret1[0] == 0) {
+					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}
 			}
-			else{															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
-				$attributes['default'][$i]= $rs['default'];
+			else {															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
+				$attributes['default'][$i] = $rs['default'];
 			}
-			$attributes['form_element_type'][$i]= $rs['form_element_type'];
-			$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
+			$attributes['form_element_type'][$i] = $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
-			$rs['options'] = str_replace('$language', $this->user->rolle->language, $rs['options']);
-			$attributes['options'][$i]= $rs['options'];
-			$attributes['options'][$rs['name']]= $rs['options'];
-			$attributes['alias'][$i]= $rs['alias'];
-			$attributes['alias'][$attributes['name'][$i]]= $rs['alias'];
-			$attributes['alias_low-german'][$i]= $rs['alias_low-german'];
-			$attributes['alias_english'][$i]= $rs['alias_english'];
-			$attributes['alias_polish'][$i]= $rs['alias_polish'];
-			$attributes['alias_vietnamese'][$i]= $rs['alias_vietnamese'];
-			$attributes['tooltip'][$i]= $rs['tooltip'];
-			$attributes['group'][$i]= $rs['group'];
-			$attributes['raster_visibility'][$i]= $rs['raster_visibility'];
-			$attributes['mandatory'][$i]= $rs['mandatory'];
-			$attributes['quicksearch'][$i]= $rs['quicksearch'];
-			$attributes['privileg'][$i]= $rs['privileg'];
-			$attributes['query_tooltip'][$i]= $rs['query_tooltip'];
+			$rs['options'] = str_replace('$language', $language, $rs['options']);
+			$attributes['options'][$i] = $rs['options'];
+			$attributes['options'][$rs['name']] = $rs['options'];
+			$attributes['alias'][$i] = $rs['alias'];
+			$attributes['alias'][$attributes['name'][$i]] = $rs['alias'];
+			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
+			$attributes['alias_english'][$i] = $rs['alias_english'];
+			$attributes['alias_polish'][$i] = $rs['alias_polish'];
+			$attributes['alias_vietnamese'][$i] = $rs['alias_vietnamese'];
+			$attributes['tooltip'][$i] = $rs['tooltip'];
+			$attributes['group'][$i] = $rs['group'];
+			$attributes['arrangement'][$i] = $rs['arrangement'];
+			$attributes['labeling'][$i] = $rs['labeling'];
+			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
+			$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
+			$attributes['mandatory'][$i] = $rs['mandatory'];
+			$attributes['quicksearch'][$i] = $rs['quicksearch'];
+			$attributes['visible'][$i] = $rs['visible'];
+			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
+			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
+			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
+			$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			$dependents[$rs['vcheck_attribute']][] = $rs['name'];
+			$attributes['privileg'][$i] = $rs['privileg'];
+			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
+			if ($rs['form_element_type'] == 'Style') {
+				$attributes['style'] = $rs['name'];
+				$attributes['visible'][$i] = 0;
+			}
+			if ($rs['form_element_type'] == 'Editiersperre') {
+				$attributes['Editiersperre'] = $rs['name'];
+			}
 			$i++;
 		}
-		if($attributes['table_name'] != NULL){   
+		if (value_of($attributes, 'table_name') != NULL) {
 			$attributes['all_table_names'] = array_unique($attributes['table_name']);
 			//$attributes['all_alias_table_names'] = array_values(array_unique($attributes['table_alias_name']));
-			foreach($attributes['all_table_names'] as $tablename){
+			foreach ($attributes['all_table_names'] as $tablename) {
 				$attributes['oids'][] = $layerdb->check_oid($tablename);   # testen ob Tabelle oid hat
 			}
 		}
-		else{
+		else {
 			$attributes['all_table_names'] = array();
 		}
 		return $attributes;

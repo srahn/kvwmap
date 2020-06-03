@@ -9,7 +9,7 @@ class Regel extends PgObject {
 	static $tableName = 'regeln';
 	static $write_debug = false;
 
-	function Regel($gui) {
+	function __construct($gui) {
 		$gui->debug->show('Create new Object Regel', Regel::$write_debug);
 		$this->PgObject($gui, Regel::$schema, Regel::$tableName);
 		$this->layertypen = array(

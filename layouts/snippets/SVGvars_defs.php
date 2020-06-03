@@ -487,8 +487,9 @@ $SVGvars_defs = '
 	}
 
 	function gps_follow($strGPS, $gps_follow){
-		global $last_x;global $events;
-		$mobile .= '
+		global $last_x;
+		global $events;
+		$mobile = '
 		<g id="gps" transform="translate('.$last_x.' 0)">
 			<rect id="gps0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strGPS.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();switch_gps_follow();highlightbyid(this.id);noMeasuring();"' : '').' x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 			<g class="navbutton" transform="translate(5 5) scale(0.8)">

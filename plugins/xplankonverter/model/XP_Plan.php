@@ -7,7 +7,7 @@ class XP_Plan extends PgObject {
 
 	static $schema = 'xplan_gml';
 
-	function XP_Plan($gui, $planart, $select = '*') {
+	function __construct($gui, $planart, $select = '*') {
 		$this->planart = $planart;
 		$this->planartAbk = strtolower(substr($planart, 0, 2));
 		$this->tableName = $this->planartAbk . '_plan';

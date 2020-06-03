@@ -69,16 +69,20 @@ $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '
 // $starttime = $executiontimes['time'][] = microtime_float1();
 // $executiontimes['action'][] = 'Start';
 
+error_reporting(E_ALL & ~(E_STRICT|E_NOTICE));
+
 ob_start ();    // Ausgabepufferung starten
 
 $formvars = $_REQUEST;
 
-$go = $formvars['go'];
-if ($formvars['go_plus'] != '') {
-	$go = $go . '_' . $formvars['go_plus'];
+$go = (array_key_exists('go', $formvars) ? $formvars['go'] : '');
+
+if (array_key_exists('go_plus', $formvars) and $formvars['go_plus'] != '') {
+	$go = $go.'_'.$formvars['go_plus'];
 }
+
 ###########################################################################################################
-define(CASE_COMPRESS, false);																																						  #
+define('CASE_COMPRESS', false);																																						
 #																																																					#
 #		ALLE:						  - die Stelle muss die IP checken  																								  #
 #											- die Stelle muss das Passwortalter checken																					#
@@ -97,6 +101,7 @@ define(CASE_COMPRESS, false);																																						  #
 #											- getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
 #												und writeDatatypeAttributes() reinkopieren																				#
 #		get_group_legend:	- compare_legendorder() reinkopieren																								#
+#											- ein Layer muss in der Gruppe an sein																							#
 #		get_select_list:  - read_datatype_attributes() reinkopieren																						#
 #																																																				  #
 #																																																				  #
@@ -105,10 +110,13 @@ define(CASE_COMPRESS, false);																																						  #
 $non_spatial_cases = array('getLayerOptions', 'get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
 $spatial_cases = array('navMap_ajax', 'tooltip_query', 'get_group_legend');
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
+$fast_loading_case = array();
 
-if(in_array($go, $fast_loading_cases))define(FAST_CASE, true);else define(FAST_CASE, false);
+define('FAST_CASE', in_array($go, $fast_loading_cases));
 
-if(CASE_COMPRESS)	include(CLASSPATH.'case_compressor.php');
+if (CASE_COMPRESS) {
+	include(CLASSPATH . 'case_compressor.php');
+}
 
 function include_($filename){
 	if(CASE_COMPRESS AND FAST_CASE){		// ein fast-case und er soll komprimiert werden
@@ -121,12 +129,14 @@ function include_($filename){
 }
 
 # laden der Klassenbibliotheken
-if(!CASE_COMPRESS AND FAST_CASE){
+if (!CASE_COMPRESS AND FAST_CASE) {
 	include (CLASSPATH.'fast_cases/'.$go.'.php');
 }
-else{
-	include_(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');
-	if($userDb == NULL)include_(CLASSPATH.'mysql.php');
+else {
+	include_(WWWROOT . APPLVERSION . 'funktionen/allg_funktionen.php');
+	if (!isset($userDb)) {
+		include_(CLASSPATH . 'mysql.php');
+	}
 	include_(CLASSPATH . 'kvwmap.php');
 	include_(CLASSPATH . 'Menue.php');
 	include_(CLASSPATH . 'kataster.php');
@@ -139,14 +149,12 @@ else{
 }
 
 include(WWWROOT . APPLVERSION . 'start.php');
-
 $GUI->go = $go;
-$GUI->requeststring = $QUERY_STRING;
 
 # Laden der Plugins index.phps
-if(!FAST_CASE){
-	for($i = 0; $i < count($kvwmap_plugins); $i++) {
-		include(PLUGINS.$kvwmap_plugins[$i].'/control/index.php');
+if (!FAST_CASE) {
+	for ($i = 0; $i < count($kvwmap_plugins); $i++) {
+		include(PLUGINS . $kvwmap_plugins[$i] . '/control/index.php');
 	}
 }
 
@@ -171,7 +179,6 @@ function go_switch($go, $exit = false) {
 			$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
 			$GUI->formvars['go'] = $go = $GUI->last_query['go'];
 		}
-
 		switch($go) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
@@ -324,7 +331,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'reset_layers' : {
-				$GUI->reset_layers($GUI->formvars['layer_id']);
+				$GUI->reset_layers(value_of($GUI->formvars, 'layer_id'));
 				$GUI->loadMap('DataBase');
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
 				$GUI->drawMap();
@@ -565,7 +572,7 @@ function go_switch($go, $exit = false) {
 
 			# zoomToPoint
 			case 'zoomtoPoint' : {
-				if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
+				if(value_of($GUI->formvars, 'mime_type') != '')$GUI->mime_type = $GUI->formvars['mime_type'];
 				$GUI->zoom_toPoint();
 			}break;
 

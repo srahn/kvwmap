@@ -41,7 +41,7 @@ class Bauauskunft {
   # 
   ################################################################################
 
-  function Bauauskunft($baudatabase) {
+  function __construct($baudatabase) {
     global $debug;
     $this->debug=$debug;
     $this->database = $baudatabase;

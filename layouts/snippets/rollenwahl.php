@@ -6,6 +6,7 @@
 	include(SNIPPETS . 'sachdatenanzeige_functions.php');
 	global $supportedLanguages;
 	global $last_x;
+	$show_layer_parameter = value_of($this->formvars, 'show_layer_parameter');
 ?>
 
 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15">
@@ -129,9 +130,9 @@ if ($this->Fehlermeldung!='') {
 <div id="rollenwahl_main_div">
 	<div id="rollenwahl_optionen_div" class="tabbed">
 		<? if ($this->formvars['show_layer_parameter']) { ?>
-		<input id="tab1"<? echo ($this->formvars['show_layer_parameter'] ? ' checked="checked"' : '') ?> type="radio" name="tabs" />
+		<input id="tab1"<? echo ($show_layer_parameter ? ' checked="checked"' : '') ?> type="radio" name="tabs" />
 		<? } ?>
-		<input id="tab2"<? echo ($this->formvars['show_layer_parameter'] ? '' : ' checked="checked"') ?> type="radio" name="tabs" />
+		<input id="tab2"<? echo ($show_layer_parameter ? '' : ' checked="checked"') ?> type="radio" name="tabs" />
 		<input id="tab3" type="radio" name="tabs" />
 		<input id="tab4" type="radio" name="tabs" />
 		<input id="tab5" type="radio" name="tabs" />
@@ -139,7 +140,7 @@ if ($this->Fehlermeldung!='') {
 		<nav>
 			<table width="100%" cellpadding="0" cellspacing="0">
 				<tr>
-					<? if ($this->formvars['show_layer_parameter']){ ?>
+					<? if ($show_layer_parameter) { ?>
 					<th width="20%" align="center"><label for="tab1">&nbsp;<? echo $this->strLayerParameters; ?>&nbsp;</label></th>
 					<? } ?>
 					<th width="20%" align="center"><label for="tab2"><? echo $strGeneralOptions; ?></label></th>
@@ -151,7 +152,7 @@ if ($this->Fehlermeldung!='') {
 		</nav>
 
 		<figure>
-			<? if ($this->formvars['show_layer_parameter']){ ?>
+			<? if ($show_layer_parameter) { ?>
 			<div id="layer_parameters_div" class="tab1">
 					<? $this->get_layer_params_form(); ?>
 			</div>
@@ -161,7 +162,7 @@ if ($this->Fehlermeldung!='') {
 					<tr>
 						<td class="rollenwahl-gruppen-options">
 							<table border="0" cellpadding="0" cellspacing="0"><?
-								if ($this->formvars['hide_stellenwahl']) { ?>
+								if (value_of($this->formvars, 'hide_stellenwahl')) { ?>
 									<tr>
 										<td>
 											<input type="hidden" name="Stelle_ID" value="<? echo $this->user->stelle_id; ?>">
@@ -197,7 +198,7 @@ if ($this->Fehlermeldung!='') {
 										</td>
 										<td class="rollenwahl-option-data">
 											<i class="fa fa-key options-button" aria-hidden="true"></i><a href="javascript:openPasswordForm();"><? echo $strChangePassword; ?></a>
-											<div id="password_form" style="border: 1px solid #cbcbcb;width: 290px;<? if($this->PasswordError == '')echo 'display: none'; ?>">
+											<div id="password_form" style="border: 1px solid #cbcbcb;width: 290px;<? if ($this->PasswordError == '') echo 'display: none'; ?>">
 												<table cellspacing="3" style="width: 100%">
 													<tr>
 														<td><span class="px16"><? echo $strCurrentPassword; ?>: </span></td>
@@ -647,7 +648,7 @@ if ($this->Fehlermeldung!='') {
 									<td class="rollenwahl-option-header">
 										<? echo $this->histTimestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp', 'timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_hist_timestamp" class="calendar" style="bottom:40px"></div></td>
 									<td class="rollenwahl-option-data">
-										<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp" name="hist_timestamp" type="text" value="<? echo $this->user->rolle->hist_timestamp; ?>" size="16">
+										<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp" name="hist_timestamp" type="text" value="<? echo $this->user->rolle->hist_timestamp_de; ?>" size="16">
 										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_histtimestamp, Style[0], document.getElementById('Tip20'))" onmouseout="htm()">
 										<div id="Tip20" style="visibility:hidden;position:absolute;bottom:80px;z-index:1000;"></div>
 									</td>			

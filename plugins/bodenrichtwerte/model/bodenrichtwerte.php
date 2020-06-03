@@ -39,7 +39,7 @@ class bodenrichtwertzone {
   # pruefeBWEingabedaten
   ##################################################################################################################################################
 
-  function bodenrichtwertzone($database, $layer_epsg, $client_epsg) {
+  function __construct($database, $layer_epsg, $client_epsg) {
     global $debug;
     $this->debug=$debug;
     $this->database=$database;

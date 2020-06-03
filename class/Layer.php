@@ -3,8 +3,8 @@ class Layer extends MyObject {
 
 	static $write_debug = false;
 
-	function Layer($gui) {
-		$this->MyObject($gui, 'layer');
+	function __construct($gui) {
+		parent::__construct($gui, 'layer');
 		$this->identifier = 'Layer_ID';
 	}
 
@@ -61,7 +61,7 @@ class Layer extends MyObject {
 			$database->gui->add_message('error', $ret[1]);
 		}
 		else {
-			while ($rs = mysql_fetch_assoc($ret[1])) {
+			while ($rs = $database->result->fetch_assoc()) {				
 				$duplicate_layer_ids[] = $rs['Layer_ID'];
 			}
 		}

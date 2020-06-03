@@ -7,7 +7,7 @@ class XP_Object extends PgObject {
 
 	static $schema = 'xplan_gml';
 
-	function XP_Object($konvertierung, $class_name) {
+	function __construct($konvertierung, $class_name) {
 		$this->PgObject($konvertierung->gui, XP_Object::$schema, strtolower($class_name));
 		$this->class_name = $class_name;
 		$this->konvertierung = $konvertierung;

@@ -1,8 +1,10 @@
 <?
 	global $selectable_limits;
-	$width = $this->map->width +
-		($this->user->rolle->hideMenue  == 1 ? $size['menue']['hide_width'] : $size['menue']['width']) +
-		($this->user->rolle->hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width']);
+	if($this->map){
+		$width = $this->map->width +
+			($this->user->rolle->hideMenue  == 1 ? $size['menue']['hide_width'] : $size['menue']['width']) +
+			($this->user->rolle->hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width']);
+	}
 ?>
 				<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
 					<div id="overlaydiv" style="display:none;padding:3px;left:150px;top:150px;width:auto;max-width:<? echo $width; ?>px;position:absolute;z-index: 1000;-moz-box-shadow: 12px 10px 14px #777;-webkit-box-shadow: 12px 10px 14px #777;box-shadow: 12px 10px 14px #777;">

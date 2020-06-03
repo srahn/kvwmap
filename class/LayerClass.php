@@ -3,7 +3,7 @@ class LayerClass extends MyObject {
 
 	static $write_debug = false;
 
-	function LayerClass($gui) {
+	function __construct($gui) {
 		$this->MyObject($gui, 'classes');
 		$this->identifier = 'Class_ID';
 	}

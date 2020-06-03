@@ -35,7 +35,7 @@ class Validierungsergebnis extends PgObject {
 	static $schema = 'xplankonverter';
 	static $tableName = 'validierungsergebnisse';
 
-	function Validierungsergebnis($gui) {
+	function __construct($gui) {
 		#echo '<br>Create new Object Validierungsergebnis';
 		$this->PgObject($gui, Validierungsergebnis::$schema, Validierungsergebnis::$tableName);
 		$this->konvertierung_id = 0;

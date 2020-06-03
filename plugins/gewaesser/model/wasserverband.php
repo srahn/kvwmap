@@ -5,7 +5,7 @@ class gewaesser {
   var $dbDirNeu;
   var $pgdatabase;
   
-  function gewaesser($pgdatabase) {
+  function __construct($pgdatabase) {
     $this->pgdatabase = $pgdatabase;
     $this->shapeFile = '/home/fgs/wasserverband-kroepelin/gew-kroepelin_utm_ost';
     $this->dbDir = '/home/fgs/wasserverband-kroepelin/db/';

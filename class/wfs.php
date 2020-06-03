@@ -2,7 +2,7 @@
 
 class wfs{
 	
-	function wfs($url, $version, $typename, $namespace, $epsg, $username = NULL, $password = NULL){
+	function __construct($url, $version, $typename, $namespace, $epsg, $username = NULL, $password = NULL){
 		$this->url = $url;
 		$this->version = $version;
 		$this->typename = $typename;

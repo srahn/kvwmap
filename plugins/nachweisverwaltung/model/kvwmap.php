@@ -536,19 +536,18 @@
 		$sql ='SELECT user_id FROM rolle_nachweise';
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
-		$query=mysql_query($sql,$GUI->database->dbConn);
-		if ($query==0) { $GUI->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		if (mysql_num_rows($query)==0) {
+		$GUI->database->execSQL($sql,4, 1);
+		if ($GUI->database->result->num_rows == 0) {
 			$sql ='INSERT INTO rolle_nachweise ';
 			$sql.='SET user_id='.$user_id.', stelle_id='.$stelle_id;
 			$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
-			$query=mysql_query($sql,$GUI->database->dbConn);
+			$GUI->database->execSQL($sql,4, 1);
 		}
 		$sql ='SELECT * FROM rolle_nachweise';
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
-		$query=mysql_query($sql,$GUI->database->dbConn);
-		$rs=mysql_fetch_assoc($query);
+		$GUI->database->execSQL($sql,4, 1);
+		$rs = $GUI->database->result->fetch_assoc();
 		$rs['suchhauptart'] = array_filter(explode(',', $rs['suchhauptart']));
 		$rs['suchunterart'] = array_filter(explode(',', $rs['suchunterart']));
 		$rs['showhauptart'] = array_filter(explode(',', $rs['showhauptart']));
@@ -562,7 +561,7 @@
 		#echo $sql;
 		$GUI->debug->write("<p>file:users.php class:rolle->save_Dokumentauswahl ",4);
 		$GUI->database->execSQL($sql,4, 1);
-		return mysql_insert_id();
+		return $GUI->database->mysqli->insert_id;
 	};
 	
 	$GUI->delete_Dokumentauswahl = function($id) use ($GUI){
@@ -579,9 +578,8 @@
 		if($dokauswahl_id != '')$sql.=' AND id = '.$dokauswahl_id;
 		#echo $sql;
 		$GUI->debug->write("<p>file:users.php class:rolle->get_Dokumentauswahl ",4);
-		$query=mysql_query($sql,$GUI->database->dbConn);
-		if ($query==0) { $GUI->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		while($rs=mysql_fetch_assoc($query)){
+		$GUI->database->execSQL($sql,4, 1);
+		while($rs = $GUI->database->result->fetch_assoc()){
 			$dokauswahlen[] = $rs;
 		}
 		return $dokauswahlen;
@@ -629,9 +627,8 @@
 		$sql = "SELECT * FROM u_consumeNachweise ";
 		$sql.= "WHERE antrag_nr='".$antrag_nr."' AND stelle_id=".$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->Suchparameter_anhaengen_PDF <br>".$sql,4);
-		$query=mysql_query($sql,$GUI->database->dbConn);
-		if ($query==0) { $GUI->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		while($rs = mysql_fetch_assoc($query)){
+		$GUI->database->execSQL($sql,4, 1);
+		while($rs = $GUI->database->result->fetch_assoc()){
 			$searches[] = $rs;
 		}
 		return $searches;

@@ -31,7 +31,7 @@
 
 class pointeditor {
 
-	function pointeditor($database, $layerepsg, $clientepsg) {
+	function __construct($database, $layerepsg, $clientepsg) {
 		global $debug;
 		$this->debug=$debug;
 		$this->database=$database;

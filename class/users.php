@@ -49,7 +49,7 @@ class account {
 
 	var $database;
 
-	function account ($database) {
+	function __construct($database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->database=$database;
@@ -238,9 +238,9 @@ class account {
 			$sql.=' GROUP BY (CONCAT(c2l.layer_id,c.stelle_id,c.user_id)) ORDER BY Bezeichnung,lName,Name';
 		}
 		$this->debug->write("<p>file:kvwmap class:account->getNumber_of_Access_to_Layer:<br>".$sql,4);
-		$query=mysql_query($sql);
-		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-		while($rs=mysql_fetch_array($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		while ($rs = $this->database->result->fetch_array()) {
 			$NumbOfAccessUser[]=$rs;
 		}
 		return $NumbOfAccessUser;
@@ -295,9 +295,9 @@ class account {
 			$sql.=' GROUP BY (CONCAT(u_consumeCSV.art,u_consumeCSV.stelle_id,u_consumeCSV.user_id)) ORDER BY art';
 		}
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
-		$query=mysql_query($sql);
-		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-		while($rs=mysql_fetch_array($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		while ($rs = $this->database->result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeCSV.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM user AS u, stelle AS s, u_consumeCSV';
@@ -322,11 +322,11 @@ class account {
 			}
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
-			$query_array[]=mysql_query($sql);
-			if ($query_array[count($query_array)-1]==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			$query_array[] = $this->database->execSQL($sql);
+			if (!$query_array[count($query_array)-1]->success) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 			$NumbOfAccessTimeIDs = array();
-			while($rs=mysql_fetch_array($query_array[count($query_array)-1])) {
-				$NumbOfAccessTimeIDs[]=$rs;
+			while ($rs = $query_array[count($query_array) - 1]['result']->fetch_array()) {
+				$NumbOfAccessTimeIDs[] = $rs;
 			}
 			$NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
 		}
@@ -382,9 +382,9 @@ class account {
 			$sql.=' GROUP BY (CONCAT(u_consumeShape.layer_id,u_consumeShape.stelle_id,u_consumeShape.user_id)) ORDER BY layer_id';
 		}
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToShape:<br>".$sql,4);
-		$query=mysql_query($sql);
-		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-		while($rs=mysql_fetch_array($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		while ($rs = $this->database->result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeShape.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM user AS u, stelle AS s, u_consumeShape';
@@ -409,10 +409,10 @@ class account {
 			}
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToShape:<br>".$sql,4);
-			$query_array[]=mysql_query($sql);
-			if ($query_array[count($query_array)-1]==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			$query_array[] = $this->database->execSQL($sql);
+			if (!$query_array[count($query_array)-1]->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
 			$NumbOfAccessTimeIDs = array();
-			while($rs=mysql_fetch_array($query_array[count($query_array)-1])) {
+			while ($rs = $query_array[count($query_array) - 1]->result->fetch_array()) {
 				$NumbOfAccessTimeIDs[]=$rs;
 			}
 			$NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
@@ -470,9 +470,9 @@ class account {
 		}
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToALB:<br>".$sql,4);
 		#echo $sql.'<br><br>';
-		$query=mysql_query($sql);
-		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-		while($rs=mysql_fetch_array($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		while ($rs = $this->database->result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeALB.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM user AS u, stelle AS s, u_consumeALB';
@@ -499,11 +499,13 @@ class account {
 			if($rs['layer_id'] != '') $sql.= ' AND c2l.layer_id='.$rs['layer_id'];
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToALB:<br>".$sql,4);
-			$query_array[]=mysql_query($sql);
-			if ($query_array[count($query_array)-1]==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+
+			$this->debug->write("<p>file:kvwmap class:account->getAccessToALB:<br>".$sql,4);
+			$query_array[] = $this->database->execSQL($sql);
+			if (!$query_array[count($query_array)-1]->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
 			$NumbOfAccessTimeIDs = array();
-			while($rs=mysql_fetch_array($query_array[count($query_array)-1])) {
-				$NumbOfAccessTimeIDs[]=$rs;
+			while ($rs = $query_array[count($query_array) - 1]->result->fetch_array()) {
+				$NumbOfAccessTimeIDs[] = $rs;
 			}
 			$NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
 		}
@@ -565,9 +567,9 @@ class account {
 		}
 		#echo $sql.'<br><br>';
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToALK:<br>".$sql,4);
-		$query=mysql_query($sql);
-		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-		while($rs=mysql_fetch_array($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		while ($rs = $this->database->result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeALK.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM druckrahmen, user AS u, stelle AS s, u_consumeALK';
@@ -594,11 +596,11 @@ class account {
 			if($rs['layer_id'] != '') $sql.= ' AND c2l.layer_id='.$rs['layer_id'];
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToALK:<br>".$sql,4);
-			$query_array[]=mysql_query($sql);
-			if ($query_array[count($query_array)-1]==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			$query_array[] = $this->database->execSQL($sql);
+			if (!$query_array[count($query_array) - 1]->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
 			$NumbOfAccessTimeIDs = array();
-			while($rs=mysql_fetch_array($query_array[count($query_array)-1])) {
-				$NumbOfAccessTimeIDs[]=$rs;
+			while ($rs = $query_array[count($query_array)-1]->result->fetch_array()) {
+				$NumbOfAccessTimeIDs[] = $rs;
 			}
 			$NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
 		}
@@ -612,18 +614,19 @@ class account {
 			$sql.=' WHERE logconsume="1"';
 		}
 		$this->debug->write("<p>file:kvwmap class:account->getNumber_of_Access_to_Layer:<br>".$sql,4);
-		$query=mysql_query($sql);
-		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-		$rs=mysql_fetch_array($query);
-		$this->AnzLayer=$rs;
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		$rs = $this->database->result->fetch_array();
+		$this->AnzLayer = $rs;
 		return $this->AnzLayer;
 	} # END of function getLayer
 
 	function getAllAccess($case){
 		# Abfragen aller Zugriffe der Layer
 		$sql ='SELECT count(time_id) AS allAccess FROM u_consume'.$case;
-		$query=mysql_query($sql);
-		$rs=mysql_fetch_array($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		$rs = $this->database->result->fetch_array();
 		$this->allAccess=$rs;
 		return $this->allAccess;
 	} # END of function getAllAccess
@@ -634,9 +637,9 @@ class account {
 		$sql.=' , day(MAX(time_id)) AS max_d, month(MAX(time_id)) AS max_m, year(MAX(time_id)) AS max_y';
 		$sql.=' FROM `u_consume2layer`';
 		$this->debug->write("<p>file:kvwmap class:account->getNumber_of_Access_to_Layer:<br>".$sql,4);
-		$query=mysql_query($sql);
-		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-		while($rs=mysql_fetch_array($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		while ($rs = $this->database->result->fetch_array()) {
 			$epoch['min_d']=$rs['min_d'];
 			$epoch['min_m']=$rs['min_m'];
 			$epoch['min_y']=$rs['min_y'];
@@ -667,7 +670,7 @@ class user {
 	var $database;
 	var $remote_addr;
 
-	function user($login_name, $id, $database, $passwort = '') {
+	function __construct($login_name, $id, $database, $passwort = '') {
 		global $debug;
 		$this->debug = $debug;
 		$this->database = $database;
@@ -715,9 +718,9 @@ class user {
 		#echo '<br>Sql: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>" . $sql, 3);
-		$query = mysql_query($sql,$this->database->dbConn);
-		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$rs = mysql_fetch_array($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		$rs = $this->database->result->fetch_array();
 		$this->id = $rs['ID'];
 		$this->login_name = $rs['login_name'];
 		$this->Namenszusatz = $rs['Namenszusatz'];
@@ -751,12 +754,9 @@ class user {
 				ID= " . $this->id ."
 		";
 		$this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>" . $sql, 4);
-		$query = mysql_query($sql, $this->database->dbConn);
-		if ($query == 0) {
-			$this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4);
-			return 0;
-		}
-		$rs = mysql_fetch_array($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		$rs = $this->database->result->fetch_array();
 		return $rs['stelle_id'];
 	}
 
@@ -778,6 +778,7 @@ class user {
 	function getall_Users($order, $stelle_id = 0, $admin_id = 0) {
 		global $admin_stellen;
 		$more_from = '';
+		$where = '';
 
 		#echo '<br>getall_Users für Stelle: ' . $stelle_id . ' und User: ' . $admin_id;
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
@@ -804,9 +805,9 @@ class user {
 		#echo '<br>getall_Users sql: ' . $sql;
 
 		$this->debug->write("<p>file:kvwmap class:user->getall_Users - Lesen aller User:<br>" . $sql, 4);
-		$query = mysql_query($sql);
-		if ($query==0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>" . INFO1; return 0; }
-		while ($rs = mysql_fetch_array($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . $sql . '<p>' . INFO1 . '<p>' . $this->database->mysqli->error, 4); return 0; }
+		while ($rs = $this->database->result->fetch_array()) {
 			$user['ID'][] = $rs['ID'];
 			$user['Bezeichnung'][] = $rs['Name'] . ', ' . $rs['Vorname'];
 		}
@@ -821,12 +822,13 @@ class user {
 		# Lesen der User, die keiner Stelle zugeordnet sind
 		$sql ='SELECT * FROM user WHERE ID NOT IN (SELECT DISTINCT user.ID FROM user, rolle WHERE rolle.user_id = user.ID) ORDER BY Name';
 		$this->debug->write("<p>file:users.php class:user->get_Unassigned_Users - Lesen der User zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4);
+			return 0;
 		}
-		else{
-			while($rs=mysql_fetch_array($query)) {
+		else {
+			while ($rs = $this->database->result->fetch_array()) {
 				$user['ID'][]=$rs['ID'];
 				$user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
 				$user['email'][]=$rs['email'];
@@ -845,12 +847,13 @@ class user {
 		# Lesen der User, die abgelaufen sind
 		$sql ='SELECT * FROM user WHERE stop != "0000-00-00 00:00:00" AND "'.date('Y-m-d h:i:s').'" > stop ORDER BY Name';
 		$this->debug->write("<p>file:users.php class:user->get_Expired_Users - Lesen der User zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4);
+			return 0;
 		}
-		else{
-			while($rs=mysql_fetch_array($query)) {
+		else {
+			while ($rs = $this->database->result->fetch_array()) {
 				$user['ID'][]=$rs['ID'];
 				$user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
 				$user['email'][]=$rs['email'];
@@ -901,9 +904,12 @@ class user {
 		#echo '<br>sql: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		while ($rs=mysql_fetch_array($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4);
+			return 0;
+		}
+		while ($rs = $this->database->result->fetch_array()) {
 			$userdaten[]=$rs;
 		}
 		return $userdaten;
@@ -915,11 +921,11 @@ class user {
 		$sql.=" WHERE user.ID=rolle.user_id";
 		$sql.=" AND user.ID LIKE '".$id."' AND passwort LIKE '".$passwort."'";
 		$this->debug->write("<p>file:users.php class:user->getFunktion - Abfragen des Namens des Benutzers:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		if (mysql_num_rows($query_id)==0) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		if ($this->database->result->num_rows == 0) {
 			$err_nr = 1;
-			$view='anmelden';
+			$view = 'anmelden';
 		}
 	}
 
@@ -946,9 +952,9 @@ class user {
 
 		#echo '<br>sql: ' . $sql;
 		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		while($rs=mysql_fetch_array($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		while ($rs = $this->database->result->fetch_array()) {
 			$stellen['ID'][]=$rs['ID'];
 			$stellen['Bezeichnung'][]=$rs['Bezeichnung'];
 		}
@@ -957,11 +963,18 @@ class user {
 
 	function updateStelleID($stelle_id) {
 		# sezten der aktuell für den Nutzer eingestellten Stelle
-		$sql ='UPDATE user SET stelle_id='.$stelle_id.' WHERE ID='.$this->id;
+		$sql = "
+			UPDATE
+				user
+			SET
+				stelle_id = " . $stelle_id . "
+			WHERE
+				ID = " . $this->id . "
+		";
 		$this->debug->write("<p>file:users.php class:user->updateStelleID - Setzen der aktuellen Stellen-ID für den User<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		$this->debug->write('Stelle gewechselt, neue Stellen_ID: '.$neueStelle,4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		$this->debug->write('Stelle gewechselt, neue Stellen_ID: ' . $stelle_id, 4);
 	}
 
 	function update_agreement_accepted($accepted) {
@@ -974,21 +987,24 @@ class user {
 				ID = " . $this->id . "
 		";
 		$this->debug->write("<p>file:users.php class:user->agreement_accepted - Setzen ob Agreement akzeptiert.<br>" . $sql, 4);
-		$query = mysql_query($sql, $this->database->dbConn);
-		if ($query == 0) {
-			$this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4);
-			return 0;
-		}
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
 	}
 
 	function setOptions($stelle_id, $formvars) {
+		$nImageWidth = '';
+		$nImageHeight = '';
+		$buttons = '';
+
 		# Setzen der Werte, die aktuell für die Nutzung der Stelle durch den Nutzer gelten sollen.
-		if($formvars['mapsize'] == 'auto')$auto_map_resize = '1';
-		else{
+		if ($formvars['mapsize'] == 'auto') {
+			$auto_map_resize = '1';
+		}
+		else {
 			$auto_map_resize = '0';
-			$teil=explode('x',$formvars['mapsize']);
-			$nImageWidth=$teil[0];
-			$nImageHeight=$teil[1];
+			$teil = explode('x', $formvars['mapsize']);
+			$nImageWidth = $teil[0];
+			$nImageHeight = $teil[1];
 		}
 		# Zoomfaktor (Wenn 1 erfolgt kein Zoom durch einfaches klicken in die Karte)
 		if ($formvars['nZoomFactor']=='' OR $formvars['nZoomFactor']==0) {
@@ -1005,46 +1021,52 @@ class user {
 		$formvars['language']=$formvars['language'];
 
 		# Eintragen der neuen Einstellungen für die Rolle
-		if($formvars['gui'] != '' AND $formvars['mapsize'] != ''){
-			$sql ='UPDATE rolle SET nZoomFactor='.$formvars['nZoomFactor'];
-			if($nImageWidth != ''){
-				$sql.=',nImageWidth='.$nImageWidth;
-				$sql.=',nImageHeight='.$nImageHeight;
-			}
-			$sql.=',gui="'.$formvars['gui'].'"';
-			$sql.=',auto_map_resize='.$auto_map_resize;
-			$sql.=',epsg_code="'.$formvars['epsg_code'].'"';
-			$sql.=',epsg_code2="'.$formvars['epsg_code2'].'"';
-			$sql.=',coordtype="'.$formvars['coordtype'].'"';
-			$sql.=',minx='.$newExtent['minx'].',miny='.$newExtent['miny'];
-			$sql.=',maxx='.$newExtent['maxx'].',maxy='.$newExtent['maxy'];
-			$sql.=',language="'.$formvars['language'].'"';
-			if($formvars['fontsize_gle'])$sql.=',fontsize_gle="'.$formvars['fontsize_gle'].'"';
-			if($formvars['highlighting'] != '')	$sql.=',highlighting="1"';
-			else $sql.=',highlighting="0"';
+		if ($formvars['gui'] != '' AND $formvars['mapsize'] != '') {
+			$sql = "
+				UPDATE
+					rolle
+				SET
+					nZoomFactor = " . $formvars['nZoomFactor'] . "
+					" . ($nImageWidth != '' ? ", nImageWidth = " . $nImageWidth : "") . "
+					" . ($nImageHeight != '' ? ", nImageHeight = " . $nImageHeight : "") . "
+					, gui = '" . $formvars['gui'] . "'
+					, auto_map_resize = " . $auto_map_resize . "
+					, epsg_code = '" . $formvars['epsg_code'] . "'
+					, epsg_code2 = '" . $formvars['epsg_code2'] . "'
+					, coordtype = '" . $formvars['coordtype'] . "'
+					, minx = " . $newExtent['minx'] . "
+					, miny = " . $newExtent['miny'] . "
+					, maxx = " . $newExtent['maxx'] . "
+					, maxy = " . $newExtent['maxy'] . "
+					, language = '" . $formvars['language'] . "'
+					" . ($formvars['fontsize_gle'] ? ", fontsize_gle = '" . $formvars['fontsize_gle'] . "'" : "") . "
+					, highlighting = '" . ($formvars['highlighting'] != '' ? "1" : "0") . "'
+			";
 			$sql.=',result_color="'.$formvars['result_color'].'"';
-			$sql.=',result_hatching = "' . ($formvars['result_hatching'] == '' ? '0' : '1') . '"';
+			$sql.=',result_hatching = "' . (value_of($formvars, 'result_hatching') == '' ? '0' : '1') . '"';
 			$sql.=',result_transparency="'.$formvars['result_transparency'].'"';
-			$sql.=',runningcoords = "' . ($formvars['runningcoords'] == '' ? '0' : '1') . '"';
+			$sql.=',runningcoords = "' . (value_of($formvars, 'runningcoords') == '' ? '0' : '1') . '"';
 			$sql.=',showmapfunctions = "' . ($formvars['showmapfunctions'] == '' ? '0' : '1') . '"';
 			$sql.=',showlayeroptions = "' . ($formvars['showlayeroptions'] == '' ? '0' : '1') . '"';
-			$sql.=',showrollenfilter = "' . ($formvars['showrollenfilter'] == '' ? '0' : '1') . '"';
-			$sql.=',menue_buttons = "' . ($formvars['menue_buttons'] == '' ? '0' : '1') . '"';
+			$sql.=',showrollenfilter = "' . (value_of($formvars, 'showrollenfilter') == '' ? '0' : '1') . '"';
+			$sql.=',menue_buttons = "' . (value_of($formvars, 'menue_buttons') == '' ? '0' : '1') . '"';
 
-			if($formvars['singlequery'] != '') $sql.=',singlequery="1"';
+			if(value_of($formvars, 'singlequery') != '') $sql.=',singlequery="1"';
 			else $sql.=',singlequery="0"';
-			if($formvars['instant_reload'] != '') $sql.=',instant_reload="1"';
+			if(value_of($formvars, 'instant_reload') != '') $sql.=',instant_reload="1"';
 			else $sql.=',instant_reload="0"';
-			if($formvars['menu_auto_close'] != '') $sql.=',menu_auto_close="1"';
+			if(value_of($formvars, 'menu_auto_close') != '') $sql.=',menu_auto_close="1"';
 			else $sql.=',menu_auto_close="0"';
-			$sql .= ', visually_impaired=' . (($formvars['visually_impaired'] != '') ? '"1"' : '"0"');
-			if($formvars['querymode'] != '') $sql.=',querymode="1"';
+			$sql .= ', visually_impaired=' . ((value_of($formvars, 'visually_impaired') != '') ? '"1"' : '"0"');
+			if (value_of($formvars, 'querymode') != '') {
+				$sql .= ', querymode="1"';
+			}
 			else $sql.=',querymode="0", overlayx=400, overlayy=150';
 			$sql.=',geom_edit_first="'.$formvars['geom_edit_first'].'"';
 			$sql.=',print_scale = CASE WHEN print_scale = "auto" OR "'.$formvars['print_scale'].'" = "auto" THEN "'.$formvars['print_scale'].'" ELSE print_scale END';
 			if($formvars['hist_timestamp'] != '') $sql.=',hist_timestamp="'.DateTime::createFromFormat('d.m.Y H:i:s', $formvars['hist_timestamp'])->format('Y-m-d H:i:s').'"';
 			else $sql.=',hist_timestamp = NULL';
-			if($formvars['back']){$buttons .= 'back,';}
+			if($formvars['back']) { $buttons .= 'back,';}
 			if($formvars['forward']){$buttons .= 'forward,';}
 			if($formvars['zoomin']){$buttons .= 'zoomin,';}
 			if($formvars['zoomout']){$buttons .= 'zoomout,';}
@@ -1057,17 +1079,17 @@ class user {
 			if($formvars['queryradius']){$buttons .= 'queryradius,';}
 			if($formvars['polyquery']){$buttons .= 'polyquery,';}
 			if($formvars['measure']){$buttons .= 'measure,';}
-			if($formvars['freepolygon']){$buttons .= 'freepolygon,';}
-			if($formvars['freearrow']){$buttons .= 'freearrow,';}
-			if($formvars['freetext']){$buttons .= 'freetext,';}
-			if($formvars['gps']){$buttons .= 'gps';}
+			if (value_of($formvars, 'freepolygon')) { $buttons .= 'freepolygon,';}
+			if (value_of($formvars, 'freearrow')) { $buttons .= 'freearrow,';}
+			if (value_of($formvars, 'freetext')) { $buttons .= 'freetext,';}
+			if (value_of($formvars, 'gps')) { $buttons .= 'gps';}
 			if($buttons != '')$sql.=",buttons = '".$buttons."'";
 			$sql.=",selectedButton='zoomin'";
 			$sql.=' WHERE stelle_id='.$stelle_id.' AND user_id='.$this->id;
 			#echo $sql;
 			$this->debug->write("<p>file:users.php class:user->setOptions - Setzen der Einstellungen für die Rolle des Users<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
 			$this->debug->write('Neue Werte für Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
 		}
 		return 1;
@@ -1110,17 +1132,24 @@ class user {
 	function exist($id) {
 		$Meldung='';
 		# testen ob es einen user unter dieser id in der Datenbanktabelle gibt
-		$sql ='SELECT * FROM user WHERE ID='.$id;
-		$ret=$this->database->execSQL($sql,4, 0);
-		if ($ret[0]) {
-			$ret[1].='<br>Die Abfrage konnte nicht ausgeführt werden.'.$ret[1];
+		$sql = "
+			SELECT
+				*
+			FROM
+				user
+			WHERE
+				ID = " . $id . "
+		";
+		$this->database->execSQL($sql,4, 0);
+		if (!$this->database->success) {
+			$ret[1] .= '<br>Die Abfrage konnte nicht ausgeführt werden.' . $ret[1];
 		}
 		else {
-			if (mysql_num_rows($ret[1])>0) {
-				$ret[1]=1;
+			if ($this->database->result->num_rows > 0) {
+				$ret[1] = 1;
 			}
 			else {
-				$ret[1]=0;
+				$ret[1] = 0;
 			}
 		}
 		return $ret;
@@ -1129,17 +1158,24 @@ class user {
 	function loginname_exists($login) {
 		$Meldung='';
 		# testen ob es einen user mit diesem login_namen in der Datenbanktabelle gibt
-		$sql ="SELECT * FROM user WHERE login_name='".$login."'";
-		$ret=$this->database->execSQL($sql,4, 0);
-		if ($ret[0]) {
+		$sql ="
+			SELECT
+				*
+			FROM
+				user
+			WHERE
+				login_name = '" . $login . "'
+		";
+		$this->database->execSQL($sql,4, 0);
+		if (!$this->database->success) {
 			$ret[1].='<br>Die Abfrage konnte nicht ausgeführt werden.'.$ret[1];
 		}
 		else {
-			if (mysql_num_rows($ret[1])>0) {
-				$ret[1]=1;
+			if ($this->database->result->num_rows > 0) {
+				$ret[1] = 1;
 			}
 			else {
-				$ret[1]=0;
+				$ret[1] = 0;
 			}
 		}
 		return $ret;
@@ -1238,16 +1274,16 @@ class user {
 				$sql.=' AND position="'.$userdaten['position'].'"';
 			}
 			# Starten der Anfrage
-			$ret=$this->database->execSQL($sql,4, 0);
+			$this->database->execSQL($sql,4, 0);
 			#echo $sql;
-			if ($ret[0]) {
+			if (!$this->database->success) {
 				# Fehler bei der Datenbankanfrage
-				$ret[1].='<br>Die Benutzerdaten konnten nicht eingetragen werden.<br>'.$ret[1];
+				$ret[1] .= '<br>Die Benutzerdaten konnten nicht eingetragen werden.<br>'.$ret[1];
 			}
 			else {
 				# Abfrage erfolgreich durchgeführt, übergeben der user_id zur Rückgabe der Funktion
-				$rs=mysql_fetch_array($ret[1]);
-				$ret[1]=$rs['ID'];
+				$rs = $this->database->result->fetch_array();
+				$ret[1] = $rs['ID'];
 			}
 		}
 		return $ret;

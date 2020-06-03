@@ -363,7 +363,7 @@ function kvwmapdb_exists($mysqlRootDb, $mysqlKvwmapDb) { ?>
       SCHEMA_NAME = '" . $mysqlKvwmapDb->dbName . "'
   ";
   $ret = $mysqlRootDb->execSQL($sql, 0, 1);
-  return (mysql_num_rows($ret[1]) > 0);
+  return ($mysqlRootDb->result->num_rows() > 0);
 }
 
 /*
@@ -385,7 +385,7 @@ function install_kvwmapdb($mysqlRootDb, $mysqlKvwmapDb) {
     Fehler beim Abfragen ob User <?php echo $mysqlKvwmapDb->user; ?> mit Host <?php echo MYSQL_HOSTS_ALLOWED; ?> schon in MySQL existiert.<br><?php
     return false;
   }
-  if (mysql_num_rows($ret[1]) > 0 ) { ?>
+  if ($mysqlRootDb->result->num_rows() > 0 ) { ?>
     User <?php echo $mysqlKvwmapDb->user; ?> mit Host <?php echo MYSQL_HOSTS_ALLOWED; ?> existiert schon in Datenbank. <?php
   }
   else  { ?>
@@ -524,7 +524,7 @@ function admin_stelle_exists($mysqlKvwmapDb) {
       `Bezeichnung` = 'Administration'
   ";
   $ret = $mysqlKvwmapDb->execSQL($sql, 0, 1);
-  return (mysql_num_rows($ret[1]) > 0) ? true : false;
+  return ($mysqlKvwmapDb->result->num_rows() > 0) ? true : false;
 }
 
 /*

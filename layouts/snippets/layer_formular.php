@@ -737,8 +737,8 @@
 								?>
 							</select>
 					</td>
-				</tr>
-				<? if(count($this->formvars['selstellen']["Bezeichnung"]) > 0){ ?>
+				</tr><?
+				if (is_array('Bezeichnung', $this->formvars['selstellen']) AND count($this->formvars['selstellen']["Bezeichnung"]) > 0) { ?>
 				<tr>
 					<td align="center" colspan=3 style="height: 30px;border-bottom:1px solid #C3C7C3">
 						<a href="javascript:document.GUI.assign_default_values.value=1;submitWithValue('GUI','go_plus','Speichern')"><? echo $strAssignDefaultValues; ?></a>
@@ -806,7 +806,7 @@
 			</tr>
 			<?
 			$last_classification = $this->classes[0]['classification'];
-			for($i = 0; $i < count($this->classes); $i++){
+			for($i = 0; $i < count((is_null($this->classes) ? array() : $this->classes)); $i++){
 				if($this->classes[$i]['classification'] != $last_classification){
 					$last_classification = $this->classes[$i]['classification'];
 					if($tr_color == 'gainsboro')$tr_color = '';
