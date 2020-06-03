@@ -111,7 +111,7 @@ function __construct($paper='a4',$orientation='portrait'){
 			$size[3] = ( $paper[1] / 2.54 ) * 72;
 		}
 	}
-	$this->Cpdf($size);
+	parent::__construct($size);
 	$this->ez['pageWidth']=$size[2];
 	$this->ez['pageHeight']=$size[3];
 	
