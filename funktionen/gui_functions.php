@@ -681,11 +681,9 @@ function deleteRollenlayer(type){
 }
 
 function neuLaden(){
-	if(checkForUnsavedChanges()){
-		startwaiting(true);
-		if(currentform.neuladen)currentform.neuladen.value='true';
-		get_map_ajax('go=navMap_ajax', '', 'if(document.GUI.oldscale != undefined){document.GUI.oldscale.value=document.GUI.nScale.value;}');
-	}
+	startwaiting(true);
+	if(currentform.neuladen)currentform.neuladen.value='true';
+	get_map_ajax('go=navMap_ajax', '', 'if(document.GUI.oldscale != undefined){document.GUI.oldscale.value=document.GUI.nScale.value;}');
 }
 
 function preventDefault(e){
