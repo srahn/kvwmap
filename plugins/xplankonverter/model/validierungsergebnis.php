@@ -37,7 +37,7 @@ class Validierungsergebnis extends PgObject {
 
 	function __construct($gui) {
 		#echo '<br>Create new Object Validierungsergebnis';
-		$this->PgObject($gui, Validierungsergebnis::$schema, Validierungsergebnis::$tableName);
+		parent::__construct($gui, Validierungsergebnis::$schema, Validierungsergebnis::$tableName);
 		$this->konvertierung_id = 0;
 	}
 

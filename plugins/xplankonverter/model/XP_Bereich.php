@@ -12,7 +12,7 @@ class XP_Bereich extends PgObject {
 		$this->planartAbk = strtolower(substr($planart, 0, 2));
 		$this->tableName = $this->planartAbk . '_bereich';
 		$this->umlName = strtoupper($this->planartAbk) . '_Bereich';
-		$this->PgObject($gui, XP_Bereich::$schema, $this->tableName);
+		parent::__construct($gui, XP_Bereich::$schema, $this->tableName);
 		$this->xp_objekte = array();
 		$this->identifier = 'gml_id';
 		$this->identifier_type = 'text';

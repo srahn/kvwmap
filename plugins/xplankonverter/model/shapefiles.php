@@ -10,7 +10,7 @@ class ShapeFile extends PgObject {
 	static $write_debug = false;
 
 	function __construct($gui) {
-		$this->PgObject($gui, ShapeFile::$schema, ShapeFile::$tableName);
+		parent::__construct($gui, ShapeFile::$schema, ShapeFile::$tableName);
 		$this->importer = new data_import_export();
 	}
 
