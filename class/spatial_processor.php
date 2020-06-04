@@ -91,6 +91,15 @@ class spatial_processor {
 				st_geomfromtext('" . $geom_2 . "')
 			)
 		";
+		
+		if(
+			NORMALIZE_AREA_THRESHOLD == 0 AND 
+			NORMALIZE_ANGLE_THRESHOLD == 0 AND 
+			NORMALIZE_POINT_DISTANCE_THRESHOLD == 0 AND 
+			NORMALIZE_NULL_AREA == 0
+		){
+			$normalize = false;
+		}
 
 		if ($normalize) {
 			$diff = "st_makevalid(
@@ -112,6 +121,7 @@ class spatial_processor {
 			FROM
 				( SELECT " . $diff . " as geom ) as foo
 		";
+		#echo $sql;
 		$ret = $this->pgdatabase->execSQL($sql,4, 0, true);
 		if ($ret[0]) {
 			$rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
