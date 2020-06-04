@@ -6,7 +6,7 @@ class Referenzkarte extends MyObject {
 	static $identifier = 'ID';
 
 	function __construct($gui) {
-		$this->MyObject($gui, 'referenzkarten');
+		parent::__construct($gui, 'referenzkarten');
 		$this->validations = array();
 	}
 
