@@ -673,7 +673,7 @@ class rolle {
     $this->database->execSQL($sql);
     if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
-    while ($rs = $this->database->result->fetch_row()) {
+    while ($rs = $this->database->result->fetch_assoc()) {
       $layer[]=$rs;
     }
     return $layer;

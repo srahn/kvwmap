@@ -259,6 +259,7 @@ if ($this->Fehlermeldung!='') {
 											<div id="Tip2" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 										</td>
 									</tr>
+									<? if(count($this->guifiles) > 1){ ?>
 									<tr>
 										<td class="rollenwahl-option-header">
 											<? echo $strGUI; ?>:
@@ -284,6 +285,7 @@ if ($this->Fehlermeldung!='') {
 											<div id="Tip3" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 										</td>
 									</tr>
+									<? } ?>
 									<tr>
 										<td class="rollenwahl-option-header">
 											<? echo $strVisuallyImpaired; ?>:
@@ -650,7 +652,7 @@ if ($this->Fehlermeldung!='') {
 									<td class="rollenwahl-option-data">
 										<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp" name="hist_timestamp" type="text" value="<? echo $this->user->rolle->hist_timestamp_de; ?>" size="16">
 										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_histtimestamp, Style[0], document.getElementById('Tip20'))" onmouseout="htm()">
-										<div id="Tip20" style="visibility:hidden;position:absolute;bottom:80px;z-index:1000;"></div>
+										<div id="Tip20" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 									</td>			
 								</tr>
 							</table>
