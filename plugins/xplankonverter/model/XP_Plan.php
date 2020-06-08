@@ -14,7 +14,7 @@ class XP_Plan extends PgObject {
 		$this->umlName = strtoupper($this->planartAbk) . '_Plan';
 		$this->bereichTableName = $this->planartAbk . '_bereich';
 		$this->bereichUmlName = strtoupper($this->planartAbk) . '_Bereich';
-		$this->PgObject($gui, XP_Plan::$schema, $this->tableName);
+		parent::__construct($gui, XP_Plan::$schema, $this->tableName);
 		$this->bereiche = array();
 		$this->select = $select;
 		$this->identifier = 'gml_id';

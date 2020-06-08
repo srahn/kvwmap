@@ -11,7 +11,7 @@ class Regel extends PgObject {
 
 	function __construct($gui) {
 		$gui->debug->show('Create new Object Regel', Regel::$write_debug);
-		$this->PgObject($gui, Regel::$schema, Regel::$tableName);
+		parent::__construct($gui, Regel::$schema, Regel::$tableName);
 		$this->layertypen = array(
 			'Punkte',
 			'Linien',

@@ -27,7 +27,7 @@ class Konvertierung extends PgObject {
 	static $write_debug = false;
 
 	function __construct($gui) {
-		$this->PgObject($gui, Konvertierung::$schema, Konvertierung::$tableName);
+		parent::__construct($gui, Konvertierung::$schema, Konvertierung::$tableName);
 	}
 
 	public static	function find_by_id($gui, $by, $id, $select = '*') {
