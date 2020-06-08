@@ -293,9 +293,9 @@ class ddl {
 						$this->pdf->rectangle($x,$y,$endx-$x,$endy-$y);	
 					}
 					$rectangle['x1'] = $x;
-					$rectangle['y1'] = $y;
-					$rectangle['x2'] = $endx;
-					$rectangle['y2'] = $endy;
+					$rectangle['y1'] = $y + ($endy-$y);
+					$rectangle['x2'] = $endx-$x;
+					$rectangle['y2'] = -($endy-$y);
 					$rectangle['id'] = $this->layout['rectangles'][$j]['id'];
 					$this->gui->rectangles[$this->pdf->currentContents][] = $rectangle;
 					#echo 'zeichne Rechteck: '.$x.' '.$y.' '.$endx.' '.$endy.'<br>';
@@ -564,6 +564,7 @@ class ddl {
 					}
 					$this->pdf->addJpegFromFile(IMAGEPATH.$newname, $x, $y, $this->layout['elements'][$attributes['name'][$j]]['width']);
 					# Rechteck um die Karte
+					$this->pdf->setLineStyle(1, 'square');
 					$this->pdf->rectangle($x, $y, $this->layout['elements'][$attributes['name'][$j]]['width'], $this->layout['elements'][$attributes['name'][$j]]['width']);
 					if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;
 					if($this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
@@ -1362,7 +1363,8 @@ class ddl {
 		$ret1 = $this->database->execSQL($sql, 4, 1);
     if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
-    while($rs = $this->database->result->fetch_assoc()){
+		$result = $this->database->result;
+    while($rs = $result->fetch_assoc()){
 			if ($return == 'only_ids') {
 				$layouts[] = $rs['id'];
 			}

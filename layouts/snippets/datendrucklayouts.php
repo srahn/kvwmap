@@ -219,6 +219,7 @@ function scrolltop(){
 									<style type="text/css"><![CDATA[
 										.line{
 											stroke: steelblue;
+											fill: steelblue;
 											stroke-width: 6;
 											opacity: 0.01;
 										}
@@ -235,6 +236,14 @@ function scrolltop(){
 										$lines = $this->lines[$this->formvars['page']];
 										for($l = 0; $l < count($lines); $l++){
 											echo '<line id="line_'.$lines[$l]['id'].'" x1="'.$lines[$l]['x1'].'" y1="'.$lines[$l]['y1'].'" x2="'.$lines[$l]['x2'].'" y2="'.$lines[$l]['y2'].'" class="line" onmouseenter="highlight_line('.$lines[$l]['id'].')" onmouseleave="de_highlight_line('.$lines[$l]['id'].')" onclick="jump_to_line('.$lines[$l]['id'].')"/>';
+										}
+									}
+									
+									if($this->rectangles){
+										$this->rectangles = array_values($this->rectangles);
+										$rectangles = $this->rectangles[$this->formvars['page']];
+										for($l = 0; $l < count($rectangles); $l++){
+											echo '<rect id="rect_'.$rectangles[$l]['id'].'" x="'.$rectangles[$l]['x1'].'" y="'.$rectangles[$l]['y1'].'" width="'.$rectangles[$l]['x2'].'" height="'.$rectangles[$l]['y2'].'" class="line" onmouseenter="highlight_rect('.$rectangles[$l]['id'].')" onmouseleave="de_highlight_rect('.$rectangles[$l]['id'].')" onclick="jump_to_rect('.$rectangles[$l]['id'].')"/>';
 										}
 									}
 								?>
