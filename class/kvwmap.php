@@ -15095,85 +15095,87 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 							else{
 								$values = array($layer['shape'][$k][$attributes['name'][$j]]);
 							}
-							foreach($values as $value){
-								switch ($attributes['form_element_type'][$j]){
-									case 'Dokument' : {
-										$dokumentpfad = $value;
-										$pfadteil = explode('&original_name=', $dokumentpfad);
-										$dateiname = $pfadteil[0];
-										if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
-										$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
-										$original_name = $pfadteil[1];
-										$dateinamensteil=explode('.', $dateiname);
-										$type = $dateinamensteil[1];
-										$thumbname = $this->get_dokument_vorschau($dateinamensteil);
-										if($layer['document_url'] != ''){
+							if(is_array($values)){
+								foreach($values as $value){
+									switch ($attributes['form_element_type'][$j]){
+										case 'Dokument' : {
+											$dokumentpfad = $value;
+											$pfadteil = explode('&original_name=', $dokumentpfad);
+											$dateiname = $pfadteil[0];
+											if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
 											$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
-											$url = '';
-										}
-										else{
-											$this->allowed_documents[] = addslashes($dateiname);
-											$this->allowed_documents[] = addslashes($thumbname);
-											$url = IMAGEURL.$this->document_loader_name.'?dokument=';
-										}
-										$pictures .= '| '.$url.$thumbname;
-									}break;
-									case 'Link': {
-										$attribcount++;
-										if($value!='') {
-											$link = 'xlink:'.$value;
-											$links .= $link.'##';
-										}
-									} break;
-									case 'Auswahlfeld': {
-										$auswahlfeld_output = '';
-										if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-											for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
-												if($attributes['enum_value'][$j][$k][$e] == $value){
-													$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
-													break;
+											$original_name = $pfadteil[1];
+											$dateinamensteil=explode('.', $dateiname);
+											$type = $dateinamensteil[1];
+											$thumbname = $this->get_dokument_vorschau($dateinamensteil);
+											if($layer['document_url'] != ''){
+												$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+												$url = '';
+											}
+											else{
+												$this->allowed_documents[] = addslashes($dateiname);
+												$this->allowed_documents[] = addslashes($thumbname);
+												$url = IMAGEURL.$this->document_loader_name.'?dokument=';
+											}
+											$pictures .= '| '.$url.$thumbname;
+										}break;
+										case 'Link': {
+											$attribcount++;
+											if($value!='') {
+												$link = 'xlink:'.$value;
+												$links .= $link.'##';
+											}
+										} break;
+										case 'Auswahlfeld': {
+											$auswahlfeld_output = '';
+											if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+												for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
+													if($attributes['enum_value'][$j][$k][$e] == $value){
+														$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
+														break;
+													}
 												}
 											}
-										}
-										else{
+											else{
+												for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
+													if($attributes['enum_value'][$j][$e] == $value){
+														$auswahlfeld_output = $attributes['enum_output'][$j][$e];
+														break;
+													}
+												}
+											}
+											$output .=  $attributes['alias'][$j].': ';
+											$output .= $auswahlfeld_output;
+											$output .= '##';
+											$attribcount++;
+										} break;
+										case 'Radiobutton': {
+											$radiobutton_output = '';
 											for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
 												if($attributes['enum_value'][$j][$e] == $value){
-													$auswahlfeld_output = $attributes['enum_output'][$j][$e];
+													$radiobutton_output = $attributes['enum_output'][$j][$e];
 													break;
 												}
 											}
+											$output .=  $attributes['alias'][$j].': ';
+											$output .= $radiobutton_output;
+											$output .= '##';
+											$attribcount++;
+										} break;
+										case 'Checkbox': {
+											$output .=  $attributes['alias'][$j].': ';
+											$value = str_replace('f', 'nein',  $value);
+											$value = str_replace('t', 'ja',  $value);
+											$output .= $value.'  ';
+											$output .= '##';
+										} break;
+										default : {
+											$output .=  $attributes['alias'][$j].': ';
+											$attribcount++;
+											$value = str_replace(chr(10), '##',  $value);
+											$output .= $value.'  ';
+											$output .= '##';
 										}
-										$output .=  $attributes['alias'][$j].': ';
-										$output .= $auswahlfeld_output;
-										$output .= '##';
-										$attribcount++;
-									} break;
-									case 'Radiobutton': {
-										$radiobutton_output = '';
-										for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-											if($attributes['enum_value'][$j][$e] == $value){
-												$radiobutton_output = $attributes['enum_output'][$j][$e];
-												break;
-											}
-										}
-										$output .=  $attributes['alias'][$j].': ';
-										$output .= $radiobutton_output;
-										$output .= '##';
-										$attribcount++;
-									} break;
-									case 'Checkbox': {
-										$output .=  $attributes['alias'][$j].': ';
-										$value = str_replace('f', 'nein',  $value);
-										$value = str_replace('t', 'ja',  $value);
-										$output .= $value.'  ';
-										$output .= '##';
-									} break;
-									default : {
-										$output .=  $attributes['alias'][$j].': ';
-										$attribcount++;
-										$value = str_replace(chr(10), '##',  $value);
-										$output .= $value.'  ';
-										$output .= '##';
 									}
 								}
 							}

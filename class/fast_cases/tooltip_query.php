@@ -1,5 +1,10 @@
 <?
 
+function value_of($array, $key) {
+	if(!is_array($array))$array = array();
+	return (array_key_exists($key, $array) ? $array[$key] :	'');
+}
+
 function in_subnet($ip,$net) {
 	$ipparts=explode('.',$ip);
 	$netparts=explode('.',$net);
@@ -479,85 +484,87 @@ class GUI {
 							else{
 								$values = array($layer['shape'][$k][$attributes['name'][$j]]);
 							}
-							foreach($values as $value){
-								switch ($attributes['form_element_type'][$j]){
-									case 'Dokument' : {
-										$dokumentpfad = $value;
-										$pfadteil = explode('&original_name=', $dokumentpfad);
-										$dateiname = $pfadteil[0];
-										if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
-										$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
-										$original_name = $pfadteil[1];
-										$dateinamensteil=explode('.', $dateiname);
-										$type = $dateinamensteil[1];
-										$thumbname = $this->get_dokument_vorschau($dateinamensteil);
-										if($layer['document_url'] != ''){
+							if(is_array($values)){
+								foreach($values as $value){
+									switch ($attributes['form_element_type'][$j]){
+										case 'Dokument' : {
+											$dokumentpfad = $value;
+											$pfadteil = explode('&original_name=', $dokumentpfad);
+											$dateiname = $pfadteil[0];
+											if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
 											$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
-											$url = '';
-										}
-										else{
-											$this->allowed_documents[] = addslashes($dateiname);
-											$this->allowed_documents[] = addslashes($thumbname);
-											$url = IMAGEURL.$this->document_loader_name.'?dokument=';
-										}
-										$pictures .= '| '.$url.$thumbname;
-									}break;
-									case 'Link': {
-										$attribcount++;
-										if($value!='') {
-											$link = 'xlink:'.$value;
-											$links .= $link.'##';
-										}
-									} break;
-									case 'Auswahlfeld': {
-										$auswahlfeld_output = '';
-										if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-											for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
-												if($attributes['enum_value'][$j][$k][$e] == $value){
-													$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
-													break;
+											$original_name = $pfadteil[1];
+											$dateinamensteil=explode('.', $dateiname);
+											$type = $dateinamensteil[1];
+											$thumbname = $this->get_dokument_vorschau($dateinamensteil);
+											if($layer['document_url'] != ''){
+												$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+												$url = '';
+											}
+											else{
+												$this->allowed_documents[] = addslashes($dateiname);
+												$this->allowed_documents[] = addslashes($thumbname);
+												$url = IMAGEURL.$this->document_loader_name.'?dokument=';
+											}
+											$pictures .= '| '.$url.$thumbname;
+										}break;
+										case 'Link': {
+											$attribcount++;
+											if($value!='') {
+												$link = 'xlink:'.$value;
+												$links .= $link.'##';
+											}
+										} break;
+										case 'Auswahlfeld': {
+											$auswahlfeld_output = '';
+											if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+												for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
+													if($attributes['enum_value'][$j][$k][$e] == $value){
+														$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
+														break;
+													}
 												}
 											}
-										}
-										else{
+											else{
+												for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
+													if($attributes['enum_value'][$j][$e] == $value){
+														$auswahlfeld_output = $attributes['enum_output'][$j][$e];
+														break;
+													}
+												}
+											}
+											$output .=  $attributes['alias'][$j].': ';
+											$output .= $auswahlfeld_output;
+											$output .= '##';
+											$attribcount++;
+										} break;
+										case 'Radiobutton': {
+											$radiobutton_output = '';
 											for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
 												if($attributes['enum_value'][$j][$e] == $value){
-													$auswahlfeld_output = $attributes['enum_output'][$j][$e];
+													$radiobutton_output = $attributes['enum_output'][$j][$e];
 													break;
 												}
 											}
+											$output .=  $attributes['alias'][$j].': ';
+											$output .= $radiobutton_output;
+											$output .= '##';
+											$attribcount++;
+										} break;
+										case 'Checkbox': {
+											$output .=  $attributes['alias'][$j].': ';
+											$value = str_replace('f', 'nein',  $value);
+											$value = str_replace('t', 'ja',  $value);
+											$output .= $value.'  ';
+											$output .= '##';
+										} break;
+										default : {
+											$output .=  $attributes['alias'][$j].': ';
+											$attribcount++;
+											$value = str_replace(chr(10), '##',  $value);
+											$output .= $value.'  ';
+											$output .= '##';
 										}
-										$output .=  $attributes['alias'][$j].': ';
-										$output .= $auswahlfeld_output;
-										$output .= '##';
-										$attribcount++;
-									} break;
-									case 'Radiobutton': {
-										$radiobutton_output = '';
-										for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-											if($attributes['enum_value'][$j][$e] == $value){
-												$radiobutton_output = $attributes['enum_output'][$j][$e];
-												break;
-											}
-										}
-										$output .=  $attributes['alias'][$j].': ';
-										$output .= $radiobutton_output;
-										$output .= '##';
-										$attribcount++;
-									} break;
-									case 'Checkbox': {
-										$output .=  $attributes['alias'][$j].': ';
-										$value = str_replace('f', 'nein',  $value);
-										$value = str_replace('t', 'ja',  $value);
-										$output .= $value.'  ';
-										$output .= '##';
-									} break;
-									default : {
-										$output .=  $attributes['alias'][$j].': ';
-										$attribcount++;
-										$value = str_replace(chr(10), '##',  $value);
-										$output .= $value.'  ';
-										$output .= '##';
 									}
 								}
 							}
@@ -623,16 +630,19 @@ class GUI {
 }
 
 class database {
-
   var $ist_Fortfuehrung;
   var $debug;
   var $loglevel;
   var $logfile;
   var $commentsign;
   var $blocktransaction;
+	var $success;
+	var $errormessage;
 
-  function database() {
+  function __construct() {
     global $debug;
+		global $GUI;
+		$this->gui = $GUI;
     $this->debug=$debug;
     $this->loglevel=LOG_LEVEL;
  		$this->defaultloglevel=LOG_LEVEL;
@@ -654,55 +664,10 @@ class database {
 
 	function open() {
 		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
-		$this->dbConn = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
-		$this->debug->write("<br>MySQL VerbindungsID: " . $this->dbConn->thread_id, 4);
-		return $this->dbConn->connect_errno;
+		$this->mysqli = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
+		return $this->mysqli->connect_errno;
 	}
-
-  function execSQL($sql,$debuglevel, $loglevel) {
-  	switch ($this->loglevel) {
-  		case 0 : {
-  			$logsql=0;
-  		} break;
-  		case 1 : {
-  			$logsql=1;
-  		} break;
-  		case 2 : {
-  			$logsql=$loglevel;
-  		} break;
-  	}
-    # SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
-    # wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
-    # (lesend immer, aber schreibend nur mit DBWRITE=1)
-    if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
-			$query = mysqli_query($this->dbConn, $sql);
-      #echo $sql;
-      if ($query==0) {
-        $ret[0]=1;
-        $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>" . $this->dbConn->error;
-        $this->debug->write($ret[1],$debuglevel);
-        if ($logsql) {
-          $this->logfile->write("#".$ret[1]);
-        }
-      }
-      else {
-        $ret[0]=0;
-        $ret[1]=$query;
-        if ($logsql) {
-          $this->logfile->write($sql.';');
-        }
-        $this->debug->write(date('H:i:s')."<br>".$sql,$debuglevel);
-      }
-      $ret[2]=$sql;
-    }
-    else {
-    	if ($logsql) {
-    		$this->logfile->write($sql.';');
-    	}
-    	$this->debug->write("<br>".$sql,$debuglevel);
-    }
-    return $ret;
-  }
 
 	function close() {
 		$this->debug->write("<br>MySQL Verbindung ID: " . $this->mysqli->thread_id . " schließen.", 4);
@@ -710,6 +675,62 @@ class database {
 			$this->logfile->close();
 		}
 		return $this->mysqli->close();
+	}
+
+	function execSQL($sql, $debuglevel = 4, $loglevel = 0, $suppress_error_msg = false) {
+		switch ($this->loglevel) {
+			case 0 : {
+				$logsql=0;
+			} break;
+			case 1 : {
+				$logsql=1;
+			} break;
+			case 2 : {
+				$logsql=$loglevel;
+			} break;
+		}
+		# SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
+		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
+		# (lesend immer, aber schreibend nur mit DBWRITE=1)
+		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
+			#echo '<br>sql in execSQL: ' . $sql;
+			if ($result = $this->mysqli->query($sql)) {
+				$ret[0] = 0;
+				$ret['success'] = $this->success = true;
+				$ret[1] = $ret['query'] = $ret['result'] = $this->result = $result;
+				$this->errormessage = '';
+				if ($logsql) {
+					$this->logfile->write($sql . ';');
+				}
+				$this->debug->write(date('H:i:s')."<br>" . $sql, $debuglevel);
+			}
+			else {
+				$ret[0] = 1;
+				$ret['success'] = $this->success = false;
+				$div_id = rand(1, 99999);
+				$errormessage = $this->mysqli->error;
+				$ret[1] = $this->errormessage = sql_err_msg('MySQL', $sql, $errormessage, $div_id);
+				if ($logsql) {
+					$this->logfile->write("#" . $errormessage);
+				}
+				if (!$suppress_error_msg) {
+					if (gettype($this->gui) == 'object') {
+						$this->gui->add_message('error', $this->errormessage);
+					}
+					else {
+						echo '<br>error: ' . $this->errormessage;
+					}
+				}
+			}
+			$ret[2] = $sql;
+		}
+		else {
+			if ($logsql) {
+				$this->logfile->write($sql . ';');
+			}
+			$this->debug->write("<br>" . $sql, $debuglevel);
+		}
+		return $ret;
 	}
 }
 
@@ -1494,8 +1515,7 @@ class pgdatabase {
   }
 }
 
-class db_mapObj {
-
+class db_mapObj{
   var $debug;
   var $referenceMap;
   var $Layer;
@@ -1503,16 +1523,21 @@ class db_mapObj {
   var $nurAufgeklappteLayer;
   var $Stelle_ID;
   var $User_ID;
-  var $database;
+	var $db;
+	var $OhneRequires;
+	var $disabled_classes;
 
-  function db_mapObj($Stelle_ID, $User_ID, $database = NULL) {
-    global $debug;
-    $this->debug=$debug;
-    $this->Stelle_ID=$Stelle_ID;
-    $this->User_ID=$User_ID;
-		$this->rolle = new rolle($User_ID, $Stelle_ID, $database);
-		$this->database=$database;
-  }
+	function __construct($Stelle_ID, $User_ID) {
+		global $debug;
+		global $GUI;
+		$this->script_name = 'db_MapObj.php';
+		$this->debug = $debug;
+		$this->GUI = $GUI;
+		$this->db = $GUI->database;
+		$this->Stelle_ID = $Stelle_ID;
+		$this->User_ID = $User_ID;
+		$this->rolle = new rolle($User_ID, $Stelle_ID, $this->db);
+	}
 
 	function getlayerdatabase($layer_id, $host){
 		if($layer_id < 0){	# Rollenlayer
