@@ -259,8 +259,7 @@ if ($this->Fehlermeldung!='') {
 											<div id="Tip2" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 										</td>
 									</tr>
-									<? if(count($this->guifiles) > 1){ ?>
-									<tr>
+									<tr <? if(count($this->guifiles) < 2){echo 'style="display: none"';} ?>>
 										<td class="rollenwahl-option-header">
 											<? echo $strGUI; ?>:
 										</td>
@@ -285,7 +284,6 @@ if ($this->Fehlermeldung!='') {
 											<div id="Tip3" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 										</td>
 									</tr>
-									<? } ?>
 									<tr>
 										<td class="rollenwahl-option-header">
 											<? echo $strVisuallyImpaired; ?>:
