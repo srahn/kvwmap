@@ -35,7 +35,7 @@ class rolle {
 		$this->groupset = $this->getGroups('');
 		# Eintragen des group_status=1 für Gruppen, die angezeigt werden sollen
 		for ($i = 0; $i < count($this->groupset); $i++) {
-			if(value_of($formvars, 'group_'.$this->groupset[$i]['id']) !== NULL) {
+			if(value_of($formvars, 'group_'.$this->groupset[$i]['id']) !== '') {
 				$group_status = (value_of($formvars, 'group_'.$this->groupset[$i]['id']) == 1 ? 1 : 0);
 				$sql = "
 					UPDATE
