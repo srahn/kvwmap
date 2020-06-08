@@ -601,7 +601,7 @@ class rolle {
       }
       else {
         # Eintragen der Consume Activity
-        $sql ='INSERT INTO u_consume SET';
+        $sql ='INSERT IGNORE INTO u_consume SET';
         $sql.=' user_id='.$this->user_id;
         $sql.=', stelle_id='.$this->stelle_id;
         $sql.=', time_id="'.$time.'"';
@@ -645,7 +645,7 @@ class rolle {
             # Wichtig wird das besonders für externe Datenquellen wie fremde WMS oder WFS Layer
             # Die dürfen nicht mit abgerechnet werden, wenn sie beim Client nicht erscheinen.
             # bzw. nicht geliefert werden
-            $sql ='INSERT INTO u_consume2layer SET';
+            $sql ='INSERT IGNORE INTO u_consume2layer SET';
             $sql.=' user_id='.$this->user_id;
             $sql.=', stelle_id='.$this->stelle_id;
             $sql.=', time_id="'.$time.'"';
