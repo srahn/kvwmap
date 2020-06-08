@@ -985,7 +985,7 @@ class rolle {
 			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>';
 			$aktiv_status = value_of($formvars, 'thema'.value_of($this->layerset[$i], 'Layer_ID'));
 			$requires_status = value_of($formvars, 'thema'.value_of($this->layerset[$i], 'requires'));
-			if($aktiv_status != '' OR $requires_status != ''){										// entweder ist der Layer selber an oder sein requires-Layer
+			if($aktiv_status !== '' OR $requires_status !== ''){										// entweder ist der Layer selber an oder sein requires-Layer
 				$aktiv_status = $aktiv_status + (int)$requires_status;
 				if($this->layerset[$i]['Layer_ID'] > 0){
 					$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
@@ -1801,7 +1801,7 @@ class rolle {
 			$ret[1] = '<br>Fehler beim Laden der Themenauswahl.<br>' . $ret[1];
 		}
 		else {
-			while ($rs = $this->database->result->fetch_row()) {
+			while ($rs = $this->database->result->fetch_assoc()) {
 				$layerComments[] = $rs;
 			}
 			$ret[0] = 0;
