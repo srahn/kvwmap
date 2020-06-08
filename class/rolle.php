@@ -1026,7 +1026,7 @@ class rolle {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
 		for ($i=0; $i<count($this->layerset)-1; $i++){
 			$query_status = value_of($formvars, 'qLayer'.value_of($this->layerset[$i], 'Layer_ID'));
-			if($query_status != ''){	
+			if($query_status !== ''){	
 				if($this->layerset[$i]['Layer_ID'] > 0){
 					$sql ='UPDATE u_rolle2used_layer set queryStatus="'.$query_status.'"';
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
