@@ -1730,7 +1730,7 @@ class database {
 		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
 		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
-			#echo '<br>sql in execSQL: ' . $sql;
+			echo '<br>sql in execSQL: ' . $sql;
 			if ($result = $this->mysqli->query($sql)) {
 				$ret[0] = 0;
 				$ret['success'] = $this->success = true;
@@ -2570,7 +2570,7 @@ class rolle {
       $ret[1] = '<br>Die aktiven Layer konnten nicht abgefragt werden.<br>'.$ret[1];
     }
     else {
-      while ($rs = $this->database->result->fetch_row()) {
+      while ($rs = $this->database->result->fetch_assoc()) {
         $layer[] = $rs['layer_id'];
       }
       $ret[0] = 0;
