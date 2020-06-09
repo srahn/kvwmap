@@ -205,7 +205,7 @@ class rolle {
       $ret[1] = '<br>Die aktiven Layer konnten nicht abgefragt werden.<br>'.$ret[1];
     }
     else {
-      while ($rs = $this->database->result->fetch_row()) {
+      while ($rs = $this->database->result->fetch_assoc()) {
         $layer[] = $rs['layer_id'];
       }
       $ret[0] = 0;
@@ -512,7 +512,7 @@ class rolle {
       $ret[1]='<br>Fehler bei der Abfrage der letzten Zugriffszeit.<br>'.$ret[1];
     }
     else {
-      $rs = $this->database->result->fetch_row();
+      $rs = $this->database->result->fetch_assoc();
       $ret[0]=0;
       $ret[1]=$rs;
     }
@@ -532,7 +532,7 @@ class rolle {
       $ret[1]='<br>Fehler bei der Abfrage der letzten Zugriffszeit.<br>'.$ret[1];
     }
     else {
-      $rs = $this->database->result->fetch_row();
+      $rs = $this->database->result->fetch_assoc();
       $ret[0]=0;
       $ret[1]=$rs;
     }
@@ -744,7 +744,7 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->get_csv_attribute_selections - Abfragen der gespeicherten CSV-Attributlisten der Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		while ($rs = $this->database->result->fetch_row()) {
+		while ($rs = $this->database->result->fetch_assoc()) {
 			$attribute_selections[]=$rs;
 		}
 		return $attribute_selections;
@@ -755,7 +755,7 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->get_csv_attribute_selection - Abfragen einer CSV-Attributliste der Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		$rs = $this->database->result->fetch_row();
+		$rs = $this->database->result->fetch_assoc();
 		return $rs;
 	}
 
@@ -822,7 +822,7 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->getsearches - Abfragen der gespeicherten Suchabfragen der Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		while ($rs = $this->database->result->fetch_row()) {
+		while ($rs = $this->database->result->fetch_assoc()) {
 			$searches[]=$rs;
 		}
 		return $searches;
@@ -847,7 +847,7 @@ class rolle {
 		$this->debug->write("<p>file:kvwmap class:rolle->read_Group - Lesen einer Gruppe der Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-		$rs = $this->database->result->fetch_row();
+		$rs = $this->database->result->fetch_assoc();
 		return $rs;
 	}
 
@@ -1594,7 +1594,7 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		while ($rs = $this->database->result->fetch_row()) {
+		while ($rs = $this->database->result->fetch_assoc()) {
 			$rs_layer[$rs['Gruppe']] = $rs['Gruppe'];		# ein Array mit den GruppenIDs, die noch Layer haben
 		}
 		
@@ -1607,7 +1607,7 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		$rs_subgroups = $this->database->result->fetch_row();
+		$rs_subgroups = $this->database->result->fetch_assoc();
 		
 		if($rs_layer[$gruppen_ids[0]] == ''){					# wenn die erste Gruppe, also die Gruppe des Layers keine Layer hat, diese löschen
 			$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` = '.$gruppen_ids[0].';';
@@ -1766,7 +1766,7 @@ class rolle {
 			$ret[1]='<br>Fehler beim Laden des Kommentares zum Kartenausschnitt.<br>'.$ret[1];
 		}
 		else {
-			while ($rs = $this->database->result->fetch_row()) {
+			while ($rs = $this->database->result->fetch_assoc()) {
 				$mapComments[]=$rs;
 			}
 			$ret[0]=0;
