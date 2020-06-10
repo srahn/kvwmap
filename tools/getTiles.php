@@ -143,12 +143,12 @@ function downloadTiles($tiles, $zoom){
 	$count = 0;
 	$ch =  curl_init();
 	foreach($tiles as $tile){
-		$dirname = $folder.$zoom.'/'.$tile['y'].'/';
+		$dirname = $folder.$zoom.'/'.$tile['x'].'/';
 		if(!is_dir($dirname)){
 			mkdir($dirname, 0755, true);
 		}		
 		if($tile['intersects'] == 't'){			# Kacheln, die das Polygon schneiden downloaden
-			$out = fopen($dirname.$tile['x'].'.png',"wb");
+			$out = fopen($dirname.$tile['y'].'.png',"wb");
 			$request_url = str_replace(['{x}', '{y}', '{z}'], [$tile['x'], $tile['y'], $zoom], $url);
 			curl_setopt($ch, CURLOPT_URL, $request_url);		// !! das bringt einen Performance-Boost, anstatt jedesmal ein curl_init mit der URL zu machen !!
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -168,7 +168,7 @@ function downloadTiles($tiles, $zoom){
 			}
 		}
 		else{		# für alle anderen Dummy-Kachel speichern
-			copy('../graphics/dummy_tile.png', $dirname.$tile['x'].'.png');
+			copy('../graphics/dummy_tile.png', $dirname.$tile['y'].'.png');
 			$count++;
 			echo $count.'/'.$tile_count." fertig\n";
 		}
