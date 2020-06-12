@@ -140,8 +140,8 @@
 			$map->setProjection('+init=epsg:'.$GUI->user->rolle->epsg_code,MS_TRUE);
 			$map->web->set('imagepath', IMAGEPATH);
 			$map->web->set('imageurl', IMAGEURL);
-			$map->set('width', 150);
-			$map->set('height', 150);
+			$map->set('width', 300);
+			$map->set('height', 300);
 			$image_map = $map->draw();
 			$filename = $GUI->map_saveWebImage($image_map,'jpeg');
 			$newname = $GUI->user->id.basename($filename);

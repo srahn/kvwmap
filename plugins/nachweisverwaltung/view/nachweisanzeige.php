@@ -635,7 +635,7 @@ Wählen Sie neue Suchparameter.</span><br>
 
 
 <!--[IF !IE]> -->
-<div id="vorschau"  onmouseleave="clearVorschau();" style="z-index: 1000; position: fixed; left:50%; margin-left:-100px;  top:20px; box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.3);"></div>
+<div id="vorschau"  onmouseleave="clearVorschau();" style="z-index: 1000; position: fixed; left:50%; margin-left:-100px;  top:0px; box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.3);"></div>
 <!-- <![ENDIF]-->
  <!--[IF IE]>
 <div id="vorschau" style="position: absolute; left:50%; margin-left:-150px; top: expression((190 + (ignoreMe = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop)) + 'px');"></div>
