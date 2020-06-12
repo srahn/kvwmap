@@ -315,6 +315,7 @@ function go_switch($go, $exit = false) {
 			# Legende erzeugen
 			case 'get_legend' : {
 				$GUI->loadMap('DataBase');
+				$GUI->map->draw();			# sonst werden manche Klassenbilder nicht generiert
 				echo $GUI->create_dynamic_legend();
 			} break;
 
