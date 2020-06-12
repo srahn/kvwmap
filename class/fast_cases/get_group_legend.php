@@ -1491,7 +1491,7 @@ class GUI {
 								}
 							}
 							$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
-							if($s > 0){
+							if($s > 0 OR $class->status == MS_OFF){
 								$width = $height = '';
 								if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
 								if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
