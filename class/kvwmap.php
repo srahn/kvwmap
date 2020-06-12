@@ -581,6 +581,7 @@ echo '			</ul>
     # Ein- oder Ausblenden der Klassen
     $this->user->rolle->setClassStatus($this->formvars);
     $this->loadMap('DataBase');
+		$this->map->draw();			# sonst werden manche Klassenbilder nicht generiert
     echo $this->create_group_legend($this->formvars['group']);
   }
 
@@ -1736,7 +1737,7 @@ echo '			</ul>
 			}
 			if ($layerset['styleitem']!='') {
 				$layer->set('styleitem',$layerset['styleitem']);
-			}			
+			}
 			# Layerweite Labelangaben
 			if ($layerset['labelitem']!='') {
 				$layer->set('labelitem',$layerset['labelitem']);
