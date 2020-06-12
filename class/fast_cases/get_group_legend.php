@@ -111,6 +111,7 @@ class GUI {
     # Ein- oder Ausblenden der Klassen
     $this->user->rolle->setClassStatus($this->formvars);
     $this->loadMap('DataBase');
+		$this->map->draw();			# sonst werden manche Klassenbilder nicht generiert
     echo $this->create_group_legend($this->formvars['group']);
   }
 
@@ -731,6 +732,9 @@ class GUI {
               if (MAPSERVERVERSION < 500 AND $layerset['list'][$i]['labelangleitem']!='') {
                 $layer->set('labelangleitem',$layerset['list'][$i]['labelangleitem']);
               }
+							if ($layerset['list'][$i]['styleitem']!='') {
+								$layer->set('styleitem',$layerset['list'][$i]['styleitem']);
+							}
               if ($layerset['list'][$i]['labelitem']!='') {
                 $layer->set('labelitem',$layerset['list'][$i]['labelitem']);
               }
@@ -1504,7 +1508,7 @@ class GUI {
 								}
 							}
 							$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
-							if($s > 0 OR $class->status == MS_OFF){
+							if($s > 0){
 								$width = $height = '';
 								if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
 								if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
@@ -2385,7 +2389,7 @@ class db_mapObj {
 				$name_column . ",
 				l.alias,
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem,
-				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.classification, l.filteritem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.styleitem, l.classification, l.filteritem,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				g.id, ".$group_column.", g.obergruppe, g.order
