@@ -1085,10 +1085,9 @@ class flurstueck {
 		for($b=0; $b < count($Buchungen); $b++){
 			$buchungsstelle_gml_ids[] = $Buchungen[$b]['gml_id'];
 			$Eigentuemerliste = $this->getEigentuemerliste($Buchungen[$b]['bezirk'],$Buchungen[$b]['blatt'],$Buchungen[$b]['bvnr'], true);		# die Eigentümer ohne zeitlichen Filter abfragen
-      $anzEigentuemer=count($Eigentuemerliste);
-      for($e=0;$e<$anzEigentuemer;$e++){
-				$namensnummer_gml_ids[] = $Eigentuemerliste[$e]->n_gml_id;
-				$person_gml_ids[] = $Eigentuemerliste[$e]->gml_id;
+			foreach($Eigentuemerliste as $eigentuemer){
+				$namensnummer_gml_ids[] = $eigentuemer->n_gml_id;
+				$person_gml_ids[] = $eigentuemer->gml_id;
 			}
 		}
 		$versionen= $this->database->getVersionen('ax_flurstueck', array($this->gml_id), NULL);

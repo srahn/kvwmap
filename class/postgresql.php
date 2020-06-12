@@ -1878,6 +1878,7 @@ FROM
 			$sql.= "WHERE gml_id IN ('".implode("','", $gml_ids)."') ";
 			if($start)$sql.= "AND beginnt::timestamp > '".$start."' ";
 			$sql.= "ORDER BY beginnt";
+			#echo $sql.'<br>';
 			$queryret=$this->execSQL($sql, 4, 0);
 			while($rs=pg_fetch_assoc($queryret[1])) {
 				$versionen[]=$rs;

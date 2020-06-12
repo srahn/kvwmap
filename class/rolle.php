@@ -331,6 +331,7 @@ class rolle {
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$this->debug->write('Neue Werte für Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
 		if($go_next != ''){
+			$this->readSettings();
 			go_switch($go_next);
 			exit();
 		}
