@@ -308,7 +308,7 @@ FROM
 					if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
 						# Parse als JSON String
 						$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
-						if (array_key_exists('success', $notice_obj)) {
+						if ($notice_obj AND array_key_exists('success', $notice_obj)) {
 							if (!$notice_obj['success']) {
 								$ret['success'] = false;
 							}
