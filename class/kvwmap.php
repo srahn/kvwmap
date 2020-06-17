@@ -4589,54 +4589,43 @@ echo '			</ul>
 			return;
 		}
 		else {
-			$ret = $pointeditor->eintragenPunkt($this->formvars['loc_x'], $this->formvars['loc_y'], $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->formvars['dimension']);
-			if ($ret[0]) { # fehler beim eintrag
-				$this->add_message('error', $ret[1]);
-			}
-			else { # eintrag erfolgreich
-				# wenn Time-Attribute vorhanden, aktuelle Zeit speichern
-				$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-				for ($i = 0; $i < count($this->attributes['type']); $i++) {
-					$value = '';
-					if ($this->attributes['name'][$i] != 'oid') {
-						switch (true) {
-							case (
-								$this->attributes['form_element_type'][$i] == 'Time' AND
-								in_array($this->attributes['options'][$i], array('', 'update'))
-							) : $value = "'" . date('Y-m-d G:i:s') . "'";
-							break;
-							case (
-								$this->attributes['form_element_type'][$i] == 'User' AND
-								in_array($this->attributes['options'][$i], array('', 'update'))
-							) : $value = "'" . $this->user->Vorname . " " . $this->user->Name . "'";
-							break;
-							case (
-								$this->attributes['form_element_type'][$i] == 'UserID' AND
-								in_array($this->attributes['options'][$i], array('', 'update'))
-							) : $value = $this->user->id;
-							break;
-							case (
-								$this->attributes['form_element_type'][$i] == 'Winkel'
-							) : $value = $this->formvars['angle'];
-							break;
-							default : $value = "";
-						}
-						if ($value != "") {
-							$sql = "
-								UPDATE
-									" . $this->formvars['layer_tablename'] . "
-								SET
-									" . $this->attributes['name'][$i] . " = " . $value ."
-								WHERE
-									oid = '" . $this->formvars['oid'] . "'
-							";
-							$this->debug->write("<p>file:kvwmap :PointEditor_Senden :", 4);
-							$ret2 = $layerdb->execSQL($sql, 4, 1);
-						}
+			$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+			# collect key value pairs for update statement
+			$kvps = array();
+			for ($i = 0; $i < count($this->attributes['type']); $i++) {
+				if ($this->attributes['name'][$i] != 'oid') {
+					switch (true) {
+						case (
+							$this->attributes['form_element_type'][$i] == 'Time' AND
+							in_array($this->attributes['options'][$i], array('', 'update'))
+						) : $kvps[] = $this->attributes['name'][$i] . " = '" . date('Y-m-d G:i:s') . "'";
+						break;
+						case (
+							$this->attributes['form_element_type'][$i] == 'User' AND
+							in_array($this->attributes['options'][$i], array('', 'update'))
+						) : $kvps[] = $this->attributes['name'][$i] . " = '" . $this->user->Vorname . " " . $this->user->Name . "'";
+						break;
+						case (
+							$this->attributes['form_element_type'][$i] == 'UserID' AND
+							in_array($this->attributes['options'][$i], array('', 'update'))
+						) : $kvps[] = $this->attributes['name'][$i] . " = " . $this->user->id;
+						break;
+						case (
+							$this->attributes['form_element_type'][$i] == 'Winkel'
+						) : $kvps[] = $this->attributes['name'][$i] . " = " . $this->formvars['angle'];
+						break;
 					}
 				}
+			}
+			$ret = $pointeditor->eintragenPunkt($this->formvars['loc_x'], $this->formvars['loc_y'], $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->formvars['dimension'], $kvps);
+			if ($ret['success']) {
 				$this->add_message('notice', 'Eintrag erfolgreich!');
-				if($ret[3])$this->add_message('info', $ret[3]);
+				if ($ret['info_msg']) {
+					$this->add_message('info', $ret['info_msg']);
+				}
+			}
+			else {
+				$this->add_message('error', $ret['err_msg']);
 			}
 			$this->PointEditor();
 		}
@@ -9595,15 +9584,26 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						case ($table['type'][$i] == 'Geometrie') : {
 							if ($this->formvars['geomtype'] == 'POINT'){
 								if ($this->formvars['loc_x'] != '') {
-									if ($this->formvars['dimension'] == 3) {
-										$insert[$table['attributname'][$i]] = "st_transform(st_geomfromtext('POINT(" . $this->formvars['loc_x']." " . $this->formvars['loc_y']." 0)', " . $client_epsg."), " . $layer_epsg.")";
+									# ToDo: Test if a new Point can be stored and if the statement contain the wkb_geometrie in stead of the ST_GeomFromGeo Gedöns.
+									include_once (CLASSPATH.'pointeditor.php');
+									$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+									$result = $pointeditor->get_wkb_geometry(array(
+										'loc_x' => $this->formvars['loc_x'],
+										'loc_y' => $this->formvars['loc_y'],
+										'dimension' => $this->formvars['dimension']
+									));
+									if ($result['success']) {
+										$insert[$table['attributname'][$i]] = "'" . $result['wkb_geometry'] . "'";
 									}
 									else {
-										$insert[$table['attributname'][$i]] = "st_transform(st_geomfromtext('POINT(" . $this->formvars['loc_x']." " . $this->formvars['loc_y'].")', " . $client_epsg."), " . $layer_epsg.")";
+										$this->add_message('error', 'Umwandeln der Punktgeometrie in WKB-Geometry gescheitert! ' . $result['err_msg']);
+										$this->success = false;
 									}
 								}
 							}
 							elseif ($this->formvars['newpathwkt'] != '') {
+								# ToDo: Replace this also with a get_wkb_geometry function from polygoneditor and replace wkb_geometry generation in
+								# PointEditor_Senden also by a function and also for Line and Polygon editing cases
 								$geom = "ST_GeomFromText('" . $this->formvars['newpathwkt'] . "', " . $client_epsg . ")";
 								if (substr($this->formvars['geomtype'], 0, 5) == 'MULTI') {					# Erzeuge immer Multigeometrie
 									$geom = "ST_Multi(" . $geom . ")";
