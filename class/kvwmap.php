@@ -9370,8 +9370,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 		if ($this->success) {
 			# Dokumente löschen
-			foreach($document_attributes as $document_attribute){
-				$this->deleteDokument($this->qlayerset[0]['shape'][0][$document_attribute], $layer['document_path'], $layer['document_url']);
+			if ($document_attributes AND is_array($document_attributes)) {
+				foreach($document_attributes as $document_attribute){
+					$this->deleteDokument($this->qlayerset[0]['shape'][0][$document_attribute], $layer['document_path'], $layer['document_url']);
+				}
 			}
 			$this->qlayerset[0]['shape'] = array();
 			# After delete trigger
