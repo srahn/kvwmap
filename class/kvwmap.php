@@ -6527,12 +6527,13 @@ echo '			</ul>
   }
 
 	function deleteDokument($path, $doc_path, $doc_url, $only_thumb = false){
-		if($path != ''){
+		if ($path != '') {
 			if ($doc_url != '') {
 				$path = url2filepath($path, $doc_path, $doc_url);			# Dokument mit URL
 			}
 			else {
-				$path = array_shift(explode('&original_name', $path));
+				$parts = explode('&original_name', $path);
+				$path = array_shift($parts);
 			}
 			if (!$only_thumb AND file_exists($path)) {
 				unlink($path);
@@ -9744,19 +9745,24 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         $this->neuer_Layer_Datensatz();
       }
       else {
-        if($this->formvars['weiter_erfassen'] == 1){
-        	$this->formvars['firstpoly'] = '';
-        	$this->formvars['firstline'] = '';
-        	$this->formvars['secondpoly'] = '';
-        	$this->formvars['pathwkt'] = '';
-        	$this->formvars['newpathwkt'] = '';
-        	$this->formvars['newpath'] = '';
-        	$this->formvars['last_doing'] = '';
-        	$this->neuer_Layer_Datensatz();
-        }
-        else {
-        	$this->GenerischeSuche_Suchen();
-        }
+				if ($this->formvars['only_create']) {
+					# Hier wird keine weitere Funktion zum Laden von views aufgerufen
+				}
+				else {
+	        if($this->formvars['weiter_erfassen'] == 1){
+	        	$this->formvars['firstpoly'] = '';
+	        	$this->formvars['firstline'] = '';
+	        	$this->formvars['secondpoly'] = '';
+	        	$this->formvars['pathwkt'] = '';
+	        	$this->formvars['newpathwkt'] = '';
+	        	$this->formvars['newpath'] = '';
+	        	$this->formvars['last_doing'] = '';
+	        	$this->neuer_Layer_Datensatz();
+	        }
+	        else {
+	        	$this->GenerischeSuche_Suchen();
+	        }
+				}
       }
     }
   }
@@ -13968,11 +13974,15 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 			if($this->formvars[$input_name] == 'delete')$db_input = 'NULL';
 			# Bild in das Datenverzeichnis kopieren
-			if(move_uploaded_file($_files[$input_name]['tmp_name'],$nachDatei) OR $this->formvars[$input_name] == 'delete'){
+			#echo '<p>move uploaded file: ' . $_files[$input_name]['tmp_name'] . ' to file: ' . $nachDatei;
+			if (move_uploaded_file($_files[$input_name]['tmp_name'],$nachDatei) OR $this->formvars[$input_name] == 'delete'){
 				# bei dynamischem Dateipfad das Vorschaubild löschen
-				if(strtolower(substr($options, 0, 6)) == 'select')$this->deleteDokument($nachDatei, $doc_path, $doc_url, true);
+				if (strtolower(substr($options, 0, 6)) == 'select') {
+					$this->deleteDokument($nachDatei, $doc_path, $doc_url, true);
+				}
 				# Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
-				$old = array_shift(explode('&original_name', $this->formvars[$input_name.'_alt']));
+				$parts = explode('&original_name', $this->formvars[$input_name.'_alt']);
+				$old = array_shift($parts);
 				if ($old != '' AND $old != $nachDatei) {
 					$this->deleteDokument($old, $doc_path, $doc_url);
 				}
@@ -17160,13 +17170,18 @@ class db_mapObj{
 		}
 		if(strtolower(substr($dynamic_path_sql, 0, 6)) == 'select'){		// ist im Optionenfeld eine SQL-Abfrage definiert, diese ausführen und mit dem Ergebnis den Dokumentenpfad erweitern
 			$sql = $dynamic_path_sql;
-			for($a = 0; $a < count($attributenames); $a++){
-				if($attributenames[$a] != '')$sql = str_replace('$'.$attributenames[$a], $attributevalues[$a], $sql);
+			for ($a = 0; $a < count($attributenames); $a++){
+				if($attributenames[$a] != '') {
+					$sql = str_replace('$'.$attributenames[$a], $attributevalues[$a], $sql);
+				}
 			}
-			$ret = $layerdb->execSQL($sql,4, 1);
+			# echo '<p>SQL zur Abfrage des Dokumentenpfades: ' . $sql;
+			$ret = $layerdb->execSQL($sql, 4, 1);
 			$dynamic_path = pg_fetch_row($ret[1]);
 			$doc_path .= $dynamic_path[0];		// der ganze Pfad mit Dateiname ohne Endung
-			if($doc_url)$doc_url = $doc_url.$dynamic_path[0];
+			if ($doc_url) {
+				$doc_url = $doc_url . $dynamic_path[0];
+			}
 			$path_parts = explode('/', $doc_path);
 			array_pop($path_parts);
 			$new_path = implode('/', $path_parts);		// der evtl. neu anzulegende Pfad ohne Datei
