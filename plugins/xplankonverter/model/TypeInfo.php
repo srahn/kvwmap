@@ -7,7 +7,7 @@ class TypeInfo {
 
   static $schema = 'xplan_gml';//CONTENT_SCHEME;
 
-  function TypeInfo($database) {
+  function __construct($database) {
     $this->_database=$database;
     $this->_typeInfoLUT = array();
   }

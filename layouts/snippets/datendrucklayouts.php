@@ -219,6 +219,7 @@ function scrolltop(){
 									<style type="text/css"><![CDATA[
 										.line{
 											stroke: steelblue;
+											fill: steelblue;
 											stroke-width: 6;
 											opacity: 0.01;
 										}
@@ -235,6 +236,14 @@ function scrolltop(){
 										$lines = $this->lines[$this->formvars['page']];
 										for($l = 0; $l < count($lines); $l++){
 											echo '<line id="line_'.$lines[$l]['id'].'" x1="'.$lines[$l]['x1'].'" y1="'.$lines[$l]['y1'].'" x2="'.$lines[$l]['x2'].'" y2="'.$lines[$l]['y2'].'" class="line" onmouseenter="highlight_line('.$lines[$l]['id'].')" onmouseleave="de_highlight_line('.$lines[$l]['id'].')" onclick="jump_to_line('.$lines[$l]['id'].')"/>';
+										}
+									}
+									
+									if($this->rectangles){
+										$this->rectangles = array_values($this->rectangles);
+										$rectangles = $this->rectangles[$this->formvars['page']];
+										for($l = 0; $l < count($rectangles); $l++){
+											echo '<rect id="rect_'.$rectangles[$l]['id'].'" x="'.$rectangles[$l]['x1'].'" y="'.$rectangles[$l]['y1'].'" width="'.$rectangles[$l]['x2'].'" height="'.$rectangles[$l]['y2'].'" class="line" onmouseenter="highlight_rect('.$rectangles[$l]['id'].')" onmouseleave="de_highlight_rect('.$rectangles[$l]['id'].')" onclick="jump_to_rect('.$rectangles[$l]['id'].')"/>';
 										}
 									}
 								?>
@@ -734,7 +743,28 @@ function scrolltop(){
 										<td style="border-right:1px solid #C3C7C3"><input type="text" name="rectposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['posy'] ?>" size="5"></td>
 										<td>&nbsp;y:</td>
 										<td style="border-right:1px solid #C3C7C3"><input type="text" name="rectendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['endposy'] ?>" size="5"></td>
-										<td colspan="2"></td>
+										<td colspan="2">
+											Füllfarbe:
+											<?											
+												$selected_color = $this->ddl->colors[$this->ddl->selectedlayout[0]['rectangles'][$i]['color']];
+												$bgcolor = $selected_color['red'].', '.$selected_color['green'].', '.$selected_color['blue'];
+											?>
+											<select name="rectcolor<? echo $i ?>" style="background-color: rgb(<? echo $bgcolor; ?>)" onchange="this.setAttribute('style', this.options[this.selectedIndex].getAttribute('style'));">
+												<option value=""> - keine - </option>
+												<?
+												foreach($this->ddl->colors as $color){
+													echo '<option ';
+													if($selected_color['id'] == $color['id']){
+														echo ' selected';
+													}
+													echo ' style="background-color: rgb('.$color['red'].', '.$color['green'].', '.$color['blue'].')"';
+													echo ' value="'.$color['id'].'">';
+													echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+													echo "</option>\n";
+												}
+												?>
+											</select>
+										</td>
 									</tr>
 									<tr>
 										<td colspan="2" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
@@ -774,6 +804,7 @@ function scrolltop(){
 											<select style="width: 110px" name="recttype<? echo $i ?>">
 												<option value="0">normal</option>
 												<? if($this->ddl->selectedlayout[0]['type'] != 0){ ?>
+												<option value="3" <? if($this->ddl->selectedlayout[0]['rectangles'][$i]['type'] == 3)echo ' selected '; ?>>alternierend</option>
 												<option value="1" <? if($this->ddl->selectedlayout[0]['rectangles'][$i]['type'] == 1)echo ' selected '; ?>>fixiert</option>
 												<? } ?>
 												<option value="2" <? if($this->ddl->selectedlayout[0]['rectangles'][$i]['type'] == 2)echo ' selected '; ?>>auf jeder Seite</option>

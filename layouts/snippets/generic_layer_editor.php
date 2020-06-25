@@ -71,22 +71,23 @@
 				<? # Gruppennamen
 					if($layer['attributes']['group'][0] != ''){
 						echo '<tr><td style="border:none"></td><td style="border:none"></td>';
+						$explosion = explode(';', $layer['attributes']['group'][0]);
+						$groupname = $explosion[0];
+						echo '<td id="'.$groupname.'" style="background: '.BG_GLEATTRIBUTE.'" colspan="';								
 						$colspan = 0;
 						for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 							if($layer['attributes']['visible'][$j] AND $layer['attributes']['SubFormFK_hidden'][$j] != 1)$colspan++;
-							if($j == 0 OR $layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){
+							if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 								$groupname = str_replace(' ', '_', $explosion[0]);
-								if($j > 0){
-									if($collapsed)echo '1';
-									else echo $colspan;
-									echo '" data-colspan="'.$colspan.'">';
-									echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\''.$groupname.'\')"><img id="img_'.$groupname.'" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;<span>'.$explosion[0].'</span></td><td style="border:none;background: url('.BG_IMAGE.');"></td>';
-									$colspan = 0;
-								}
-								elseif($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-									$colspan = 1;
+								if($collapsed)echo '1';
+								else echo $colspan;
+								echo '" data-colspan="'.$colspan.'">';
+								echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\''.$groupname.'\')"><img id="img_'.$groupname.'" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;<span>'.$explosion[0].'</span></td><td style="border:none;background: url('.BG_IMAGE.');"></td>';
+								$colspan = 0;
+								if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
+									#$colspan = 1;
 								}
 								if($j < count($this->qlayerset[$i]['attributes']['name'])-1){
 									$explosion = explode(';', $layer['attributes']['group'][$j+1]);

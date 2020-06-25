@@ -30,7 +30,7 @@ INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_a
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`decimal_length`,`default`,`form_element_type`,`options`,`alias`,`alias_low-german`,`alias_english`,`alias_polish`,`alias_vietnamese`,`tooltip`,`group`,`raster_visibility`,`mandatory`,`order`,`privileg`,`query_tooltip`) VALUES(@last_layer_id8,'zurueck','','','','not_saveable','','',NULL,NULL,NULL,'','dynamicLink','index.php?go=xplankonverter_konvertierungen_index&konvertierung_id=$konvertierung_id;Konvertierungsliste','zurück zur Liste','','','','','Rücksprunglink zur Anzeige der Konvertierung','',NULL,'0','1','0','0');
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('alle',@last_layer_id8,'(1 = 1)','1','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'','1','0 189 231','','22 97 113',NULL,'1','360','',NULL,NULL,NULL,NULL,'');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'','1','0 189 231','','22 97 113',NULL,'1','360','',NULL,NULL,NULL,NULL);
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
 
@@ -58,7 +58,7 @@ INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_a
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`decimal_length`,`default`,`form_element_type`,`options`,`alias`,`alias_low-german`,`alias_english`,`alias_polish`,`alias_vietnamese`,`tooltip`,`group`,`raster_visibility`,`mandatory`,`order`,`privileg`,`query_tooltip`) VALUES(@last_layer_id3,'vorschau','b.name,','','','not_saveable','','',NULL,NULL,NULL,'','Text','','Anzeigename','','','','','Name unter der der Bereich in der Auflistung zum Plan erscheint','XP_Bereich',NULL,NULL,'3','0','0');
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('alle',@last_layer_id3,'','1','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'','6','238 255 211','','35 203 0',NULL,'8','360','',NULL,NULL,NULL,NULL,'');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'','6','238 255 211','','35 203 0',NULL,'8','360','',NULL,NULL,NULL,NULL);
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
 
@@ -118,7 +118,7 @@ INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_a
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`decimal_length`,`default`,`form_element_type`,`options`,`alias`,`alias_low-german`,`alias_english`,`alias_polish`,`alias_vietnamese`,`tooltip`,`group`,`raster_visibility`,`mandatory`,`order`,`privileg`,`query_tooltip`) VALUES(@last_layer_id2,'wurdegeaendertvon','wurdegeaendertvon','rp_plan','p','_1','','','1',NULL,NULL,'','','','Wurde geändert von','','','','','Bezeichnung eines anderen Plans, durch den der vorliegende Plan geändert wurde.','XP_Plan',NULL,NULL,'16','1','0');
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('alle',@last_layer_id2,'(1 = 1)','1','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'','1','0 189 231','','22 97 113',NULL,'1','360','',NULL,NULL,NULL,NULL,'');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'','1','0 189 231','','22 97 113',NULL,'1','360','',NULL,NULL,NULL,NULL);
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
 
@@ -156,7 +156,7 @@ INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_a
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`decimal_length`,`default`,`form_element_type`,`options`,`alias`,`alias_low-german`,`alias_english`,`alias_polish`,`alias_vietnamese`,`tooltip`,`group`,`raster_visibility`,`mandatory`,`order`,`privileg`,`query_tooltip`) VALUES(@last_layer_id10,'zurueck','zurueck','','','','','',NULL,NULL,NULL,'','dynamicLink','http://xplan-raumordnung.de/konverter/index.php?go=xplankonverter_shapefiles_index&konvertierung_id=$konvertierung_id;anzeigen','Liste der Shapefiles','','','','','Link zurück zur Anzeige der Konvertierung','Konvertierung',NULL,NULL,'8','0','0');
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('alle',@last_layer_id10,'(1 = 1)','1','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'','1','0 189 231','','22 97 113',NULL,'1','360','',NULL,NULL,NULL,NULL,'');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'','1','0 189 231','','22 97 113',NULL,'1','360','',NULL,NULL,NULL,NULL);
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
 
@@ -193,7 +193,7 @@ INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_a
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`decimal_length`,`default`,`form_element_type`,`options`,`alias`,`alias_low-german`,`alias_english`,`alias_polish`,`alias_vietnamese`,`tooltip`,`group`,`raster_visibility`,`mandatory`,`order`,`privileg`,`query_tooltip`) VALUES(@last_layer_id455,'zurueck','zurueck','','konvertierungen','','','',NULL,NULL,NULL,'','Text','','','','','','','','Konvertierung',NULL,NULL,'17','0','0');
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('alle',@last_layer_id455,'(1 = 1)','1','');
 SET @last_class_id=LAST_INSERT_ID();
-INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'','1','0 189 231','','22 97 113',NULL,'1','360','',NULL,NULL,NULL,NULL,'');
+INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`) VALUES(NULL,'','1','0 189 231','','22 97 113',NULL,'1','360','',NULL,NULL,NULL,NULL);
  SET @last_style_id=LAST_INSERT_ID();
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
 

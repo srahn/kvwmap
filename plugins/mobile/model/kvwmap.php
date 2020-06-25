@@ -45,7 +45,7 @@
 		}
 		else {
 			$stellen = array();
-			while ($rs = mysql_fetch_assoc($ret[1])) {
+			while ($rs = $GUI->database->result->fetch_assoc()) {
 				$stellen[] = $rs;
 			}
 
@@ -387,17 +387,17 @@
 					--raise notice '_query: %', _query;
 					foreach part in array string_to_array(_query, ';')
 					loop
-					-- replace horizontal tabs, new lines and carriage returns
-					part = trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
+						-- replace horizontal tabs, new lines and carriage returns
+						part = trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
 
-					IF strpos(lower(part), 'set search_path') = 1 THEN
-					search_path_schema = trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
-					--RAISE notice 'schema in search_path %', search_path_schema;
-					END IF;
+						IF strpos(lower(part), 'set search_path') = 1 THEN
+						search_path_schema = trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
+						--RAISE notice 'schema in search_path %', search_path_schema;
+						END IF;
 
-					IF strpos(lower(part), 'insert into ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'insert into ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
-					_sql := part;
-					END IF;
+						IF strpos(lower(part), 'insert into ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'insert into ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
+						_sql := part;
+						END IF;
 					end loop;
 					--raise notice 'sql nach split by ; und select by update: %', _sql;
 
@@ -446,20 +446,20 @@
 					--raise notice '_query: %', _query;
 					foreach part in array string_to_array(_query, ';')
 					loop
-					--raise notice 'part in loop vor trim und replace: %', part;
-					-- replace horizontal tabs, new lines and carriage returns
-					part = trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
-					--raise notice 'part in loop nach trim und replace: %', part;
-					--raise notice 'suche nach %', 'update ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME;
+						--raise notice 'part in loop vor trim und replace: %', part;
+						-- replace horizontal tabs, new lines and carriage returns
+						part = trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
+						--raise notice 'part in loop nach trim und replace: %', part;
+						--raise notice 'suche nach %', 'update ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME;
 
-					IF strpos(lower(part), 'set search_path') = 1 THEN
-					search_path_schema = trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
-					--RAISE notice 'schema in search_path %', search_path_schema;
-					END IF;
+						IF strpos(lower(part), 'set search_path') = 1 THEN
+						search_path_schema = trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
+						--RAISE notice 'schema in search_path %', search_path_schema;
+						END IF;
 
-					IF strpos(lower(part), 'update ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'update ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
-					_sql := part;
-					END IF;
+						IF strpos(lower(part), 'update ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'update ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
+						_sql := part;
+						END IF;
 					end loop;
 					--raise notice 'sql nach split by ; und select by update: %', _sql;
 

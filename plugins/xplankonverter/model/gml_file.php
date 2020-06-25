@@ -30,7 +30,7 @@
 #############################
 class gml_file {
     
-  function gml_file($filename) {
+  function __construct($filename) {
     global $debug;
     $this->debug = $debug;
     $this->filename = $filename;

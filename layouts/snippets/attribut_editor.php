@@ -140,7 +140,7 @@
 		array(
 			'value' => 'ExifErstellungszeit',
 			'output' => 'Exif-Erstellungszeit',
-			'title' => 'Übernimmt den Zeitstempel beim Upload des Fotos aus dem Exif-Header falls vorhanden. (Format: "YYYY-MM-DD hh:mm:ss")'
+			'title' => 'Übernimmt den Zeitstempel beim Upload des Fotos aus dem Exif-Header falls vorhanden. (Format: YYYY-MM-DD hh:mm:ss)'
 		)
 	);
 

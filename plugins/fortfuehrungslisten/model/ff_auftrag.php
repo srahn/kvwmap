@@ -10,7 +10,7 @@ class Fortfuehrungsauftrag extends PgObject {
 	static $write_debug = false;
 	public $messages = array();
 
-	function Fortfuehrungsauftrag($gui) {
+	function __construct($gui) {
 		$gui->debug->show('Create new Object Fortfuehrungsauftrag', Fortfuehrungsauftrag::$write_debug);
 		$this->PgObject($gui, Fortfuehrungsauftrag::$schema, Fortfuehrungsauftrag::$tableName);
 	}

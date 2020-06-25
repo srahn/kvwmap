@@ -40,7 +40,7 @@ class Nachweis {
   var $database;
   var $client_epsg;
     
-  function Nachweis($database, $client_epsg) {
+  function __construct($database, $client_epsg) {
     global $debug;
     $this->debug=$debug;
     $this->database=$database;
@@ -244,8 +244,8 @@ class Nachweis {
   	$sql="SELECT * FROM nachweisverwaltung.n_dokumentarten order by sortierung, art"; 
     $ret=$this->database->execSQL($sql,4, 0);    
     if (!$ret[0]) {
-      while($rs=pg_fetch_array($ret[1])){
-				$art[$rs['hauptart']][] = $rs;
+      while($rs=pg_fetch_assoc($ret[1])){
+				$art[$rs['hauptart']][$rs['id']] = $rs;
       }
     }
     return $art;
@@ -1348,7 +1348,7 @@ class Festpunkte {
   ################################################################################
 
 # 2016-11-03 H.Riedel - fp_punkte_temp durch fp_punkte_alkis ersetzt
-  function Festpunkte($dateiname,$database) {
+  function __construct($dateiname,$database) {
     global $debug;
     $this->debug=$debug;
     $this->database=$database;
@@ -1744,7 +1744,7 @@ class Vermessungsstelle {
   #
   ################################################################################
 
-  function Vermessungsstelle($db){
+  function __construct($db){
     $this->database=$db;
   }
 
@@ -1782,7 +1782,7 @@ class Vermessungsart {
   #
   ################################################################################
 
-  function Vermessungsart($db){
+  function __construct($db){
     $this->database=$db;
   }
 

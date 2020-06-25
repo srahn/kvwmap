@@ -31,7 +31,7 @@
 
 class pointeditor {
 
-	function pointeditor($database, $layerepsg, $clientepsg) {
+	function __construct($database, $layerepsg, $clientepsg) {
 		global $debug;
 		$this->debug=$debug;
 		$this->database=$database;
@@ -50,36 +50,73 @@ class pointeditor {
 		return $ret; 
 	}
 
-	function eintragenPunkt($pointx, $pointy, $oid, $tablename, $columnname, $dimension) {
-		if ($pointx == '') {
-			$sql = "
-				UPDATE " . $tablename . "
-				SET " . $columnname . " = NULL
-				WHERE oid = " . $oid . "
-			";
-		}
-		else {
-			$sql = "
-				UPDATE " . $tablename . "
-				SET " . $columnname . " = st_transform(
-					St_GeomFromText('POINT(" . $pointx . " " . $pointy . ($dimension == 3 ? " 0" : "") . ")', " . $this->clientepsg . "),
+	/**
+	* Funktion returns wkb_geometry from loc_x, loc_y and dimension given in options
+	* transformed from client to layerepsg of this pointeditor object.
+	* @params array options with loc_x = East, loc_y = North and dimension = 3 if 3D Point
+	* @return array success = false and err_msg if error in database request and true and
+	* wkb_geometry with the requested WKB Geometry of that point
+	*/
+	function get_wkb_geometry($options) {
+		$sql = "
+			SELECT
+				ST_Transform(
+					St_GeomFromText('POINT(" . $options['loc_x'] . " " . $options['loc_y'] . ($options['dimension'] == 3 ? " 0" : "") . ")', " . $this->clientepsg . "),
 					" . $this->layerepsg . "
-				)
-				WHERE oid = " . $oid . "
-			";
-		}
+				) AS wkb_geometry
+		";
+		#echo '<p>SQL zum Berechnen der WKB-Geometrie des Punktes: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 1, true);
 		if ($ret[0]) {
-			# Fehler beim Eintragen in Datenbank
-			$ret[1] = 'Auf Grund eines Datenbankfehlers konnte der Punkt nicht eingetragen werden!<br>' . $ret[1];
+			# Fehler beim Berechnen der WKB-Geometrie in der Datenbank
+			return array(
+				'success' => false,
+				'err_msg' => 'Auf Grund eines Fehlers bei der Anfrage an die Datenbank konnte die Geometrie des Punktes nicht berechnet werden!<br>' . $ret[1]
+			);
 		}
-		else{
-			if($last_notice = $msg = pg_last_notice($this->database->dbConn)){
-				if($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true)){
-					$msg = $notice_result['msg'];
-				}
-				$ret[3] = $msg;
+		else {
+			$rs = pg_fetch_assoc($ret['query']);
+			return array(
+				'success' => true,
+				'wkb_geometry' => $rs['wkb_geometry']
+			);
+		}
+	}
+
+	function eintragenPunkt($pointx, $pointy, $oid, $tablename, $columnname, $dimension, $kvps) {
+		if ($pointx == '') {
+			$wkb_geometry = 'NULL';
+		}
+		else {
+			$ret = $this->get_wkb_geometry(array(
+				'loc_x' => $pointx,
+				'loc_y' => $pointy,
+				'dimension' => $dimension
+			));
+			if (!$ret['success']) {
+				return $ret;
 			}
+			$wkb_geometry = "'" . $ret['wkb_geometry'] . "'";
+		}
+		$kvps[] = $columnname . ' = ' . $wkb_geometry;
+		$sql = "
+			UPDATE " . $tablename . "
+			SET " . implode(', ', $kvps) . "
+			WHERE oid = " . $oid . "
+		";
+		#echo '<p>SQL zum Updaten von Punktgeometrie: ' . $sql;
+		$ret = $this->database->execSQL($sql, 4, 1, true);
+		if (!$ret['success']) {
+			return array(
+				'success' => false,
+				'err_msg' => 'Auf Grund eines Datenbankfehlers konnte der Punkt nicht eingetragen werden!<br>' . $ret[1]
+			);
+		}
+		if ($last_notice = $msg = pg_last_notice($this->database->dbConn)) {
+			if ($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true)) {
+				$msg = $notice_result['msg'];
+			}
+			$ret['info_msg'] = $msg;
 		}
 		return $ret;
 	}

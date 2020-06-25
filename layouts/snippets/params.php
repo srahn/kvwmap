@@ -1,6 +1,6 @@
 <?php
 	$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
-	if ($params['error_message'] != '') {
+	if (value_of($params, 'error_message') != '') {
 		$this->add_message('error', $params['error_message']);
 	}
 	else { ?>

@@ -6,10 +6,11 @@
 	global $strNewEmbeddedPK;
 	global $hover_preview;
 	function output_table($table) {
-		if (is_array($table)) {
+		$output = '';
+		if (is_array($table['rows'])) {
 			foreach($table['rows'] as $row) {
 				$output .= '<tr id="' . $row['id'] . '" class="' . $row['class'] . '">';
-				if ($row['sidebyside'] AND !$row['contains_attribute_names']) {
+				if (value_of($row, 'sidebyside') AND !$row['contains_attribute_names']) {
 					$width = 'width="'.(100 / $table['max_cell_count']).'%"';
 				}
 				$cell_count = count($row['cells']);
@@ -39,14 +40,11 @@
 				$output .= '</tr>';
 			}
 		}
-		else {
-			$output = '';
-		}
 		return $output;
 	}
 
 	function attribute_name($layer_id, $attributes, $j, $k, $fontsize, $sort_links = true) {
-		$datapart .= '<table ';
+		$datapart = '<table ';
 		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j] != 1 AND $attributes['labeling'][$j] != 1)$datapart .= 'width="200px"';
 		else $datapart .= 'width="100%"';
 		$datapart .= '><tr style="border: none"><td' . (($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0') ? ' class="gle-attribute-mandatory"' : '') . '>';
@@ -94,6 +92,8 @@
 	}
 
 	function attribute_value(&$gui, $layer, $attributes, $j, $k, $dataset, $size, $select_width, $fontsize, $change_all = false, $onchange = NULL, $field_name = NULL, $field_id = NULL, $field_class = NULL){
+		$datapart = '';
+		$after_attribute = '';
 		global $strShowPK;
 		global $strNewPK;
 		global $strShowFK;
@@ -148,7 +148,7 @@
 			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);			
 			$dataset2[$tablename.'_oid'] = $oid;
 			$onchange2 = 'buildJSONString(\''.$id.'\', true);';
-			for($e = -1; $e < count($elements); $e++){
+			for($e = -1; $e < count_or_0($elements); $e++){
 				if(is_array($elements[$e]) OR is_object($elements[$e]))$elements[$e] = json_encode($elements[$e]);		# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
 				$dataset2[$attributes2['name'][$j]] = $elements[$e];
 				$datapart .= '<div id="div_'.$id.'_'.$e.'" style="margin: 5px; display: '.($e==-1 ? 'none' : 'block').'"><table cellpadding="0" cellspacing="0"><tr><td style="height: 22px">';
@@ -581,7 +581,7 @@
 						}
 						$datapart .= '<input type="hidden" name="'.$fieldname.'_alt" class="' . $field_class . '" value="' . htmlspecialchars($value) . '">';
 					}
-					if ($attribute_privileg != '0' AND !$lock[$k]) {
+					if ($attribute_privileg != '0') {
 						$datapart .= '
 							<label id="label_'.$id.'" for="'.$id.'" class="buttonlink">
 								Durchsuchen...
@@ -784,7 +784,7 @@
 
 				default : {
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
-					if($attribute_privileg == '0' OR $lock[$k]){
+					if($attribute_privileg == '0'){
 						$datapart .= ' readonly style="display:none;"';
 					}
 					else{
@@ -798,7 +798,7 @@
 					}
 					if($size)$datapart .= ' size="'.$size.'"';
 					$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
-					if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
+					if($attribute_privileg == '0'){ // nur lesbares Attribut
 						$angezeigter_value = (($attributes['type'][$j] == 'bool' OR $attributes['form_element_type'][$j] == 'Editiersperre') ? ($value == 't' ? $gui->strYes : $gui->strNo) : $value);
 						$datapart .= '<div class="readonly_text" style="font-size: '.$fontsize.'px;">' . htmlspecialchars($angezeigter_value) . '</div>';
 					}

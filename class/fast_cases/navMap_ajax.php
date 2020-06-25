@@ -1,4 +1,9 @@
 <?
+
+function value_of($array, $key) {
+	return (array_key_exists($key, $array) ? $array[$key] :	'');
+}
+
 function InchesPerUnit($unit, $center_y){
 	if($unit == MS_METERS){
 		return 39.3701;
@@ -97,39 +102,60 @@ function umlaute_umwandeln($name){
 
 class GUI {
 
-  var $layout;
-  var $style;
-  var $mime_type;
-  var $menue;
-  var $pdf;
-  var $addressliste;
-  var $debug;
-  var $dbConn;
-  var $flst;
-  var $formvars;
-  var $legende;
-  var $map;
-  var $mapDB;
-  var $img;
-  var $FormObject;
-  var $StellenForm;
-  var $Fehlermeldung;
-  var $messages;
-  var $Hinweis;
-  var $Stelle;
-  var $ALB;
-  var $activeLayer;
-  var $nImageWidth;
-  var $nImageHeight;
-  var $user;
-  var $qlayerset;
-  var $scaleUnitSwitchScale;
-  var $map_scaledenom;
-  var $map_factor;
-  var $formatter;
-  var $success;
+	var $alert;
+	var $gui;
+	var $layout;
+	var $style;
+	var $mime_type;
+	var $menue;
+	var $pdf;
+	var $addressliste;
+	var $debug;
+	var $mysqli;
+	var $flst;
+	var $formvars;
+	var $legende;
+	var $map;
+	var $mapDB;
+	var $img;
+	var $FormObject;
+	var $StellenForm;
+	var $Fehlermeldung;
+	var $messages = array();
+	var $Hinweis;
+	var $Stelle;
+	var $ALB;
+	var $activeLayer;
+	var $nImageWidth;
+	var $nImageHeight;
+	var $user;
+	var $qlayerset;
+	var $scaleUnitSwitchScale;
+	var $map_scaledenom;
+	var $map_factor='';
+	var $formatter;
+	var $success = true;
+	var $login_failed;
+	var $only_main = false;
+	var $class_load_level;
+	var $layer_id_string;
+	var $noMinMaxScaling;
+	var $stelle_id;
+	var $angle_attribute;
+	var $titel;
+	var $PasswordError;
+	var $Meldung;
+	var $radiolayers;
+	var $show_query_tooltip;
+	var $last_query;
+	var $querypolygon;
+	var $new_entry;
+	var $search;
+	var $form_field_names;
+	var $editable;
+	var $groupset;
 
-  function GUI($main, $style, $mime_type) {
+  function __construct($main, $style, $mime_type) {
     # Debugdatei setzen
     global $debug;
     $this->debug=$debug;
@@ -381,7 +407,12 @@ class GUI {
 						$layer->set('opacity',MS_GD_ALPHA);
 				}
 				else {
+					if (MAPSERVERVERSION > 700) {
+						$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
+					}
+					else{
 						$layer->set('opacity',$layerset['transparency']);
+					}
 				}
 			}
 			if ($layerset['symbolscale']!='') {
@@ -484,7 +515,7 @@ class GUI {
   }
 
   function loadMap($loadMapSource) {
-    $this->debug->write("<p>Funktion: loadMap('" . $loadMapSource."','" . $connStr."')",4);
+    $this->debug->write("<p>Funktion: loadMap('" . $loadMapSource . ")",4);
     switch ($loadMapSource) {
       # lade Karte aus Post-Parametern
       case 'Post' : {
@@ -635,7 +666,7 @@ class GUI {
 
       # lade Karte von einer Map-Datei
       case 'File' : {
-        $debug->write("MapDatei $connStr laden",4);
+        $this->debug->write("MapDatei $connStr laden",4);
 				if (MAPSERVERVERSION < 600) {
           $this->map = ms_newMapObj(DEFAULTMAPFILE);
         }
@@ -646,13 +677,14 @@ class GUI {
 
       # lade Karte von Datenbank
       case 'DataBase' : {
+				$this->debug->write('<br>Lade Defaultmapfile: ' . DEFAULTMAPFILE, 4);
 				if (MAPSERVERVERSION < 600) {
-							$map = ms_newMapObj(DEFAULTMAPFILE);
-						}
+					$map = ms_newMapObj(DEFAULTMAPFILE);
+				}
 				else {
 					$map = new mapObj(DEFAULTMAPFILE, SHAPEPATH);
 				}
-        $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+        $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 
         # Allgemeine Parameter
         $map->set('width',$this->user->rolle->nImageWidth);
@@ -683,7 +715,7 @@ class GUI {
 					if ($this->user->rolle->oGeorefExt->maxy > $this->Stelle->MaxGeorefExt->maxy)			$this->user->rolle->oGeorefExt->maxy = $this->Stelle->MaxGeorefExt->maxy;
 					if ($this->user->rolle->oGeorefExt->maxx <= $this->user->rolle->oGeorefExt->minx) $this->user->rolle->oGeorefExt->maxx = $this->user->rolle->oGeorefExt->minx + 1;
 					if ($this->user->rolle->oGeorefExt->maxy <= $this->user->rolle->oGeorefExt->miny) $this->user->rolle->oGeorefExt->maxy = $this->user->rolle->oGeorefExt->miny + 1;
-					if($this->formvars['go'] != 'OWS'){
+					if (value_of($this->formvars, 'go') != 'OWS') {
 						$map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
 					}
 					else{
@@ -753,8 +785,12 @@ class GUI {
         else{
           $map->setMetaData("ows_srs",OWS_SRS);
         }
-        if($_REQUEST['onlineresource'] != '')$ows_onlineresource = $_REQUEST['onlineresource'];
-        else $ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&Stelle_ID=' . $this->Stelle->id .'&login_name=' . $_REQUEST['login_name'] . '&passwort=' .  $_REQUEST['passwort'];
+				if (value_of($_REQUEST, 'onlineresource') != '') {
+					$ows_onlineresource = $_REQUEST['onlineresource'];
+				}
+				else {
+					$ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&Stelle_ID=' . $this->Stelle->id .'&login_name=' . value_of($_REQUEST, 'login_name') . '&passwort=' .  value_of($_REQUEST, 'passwort');
+				}
         $map->setMetaData("ows_onlineresource", $ows_onlineresource);
 				$map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
 
@@ -820,23 +856,25 @@ class GUI {
         $b = substr(BG_MENUETOP, 5, 2);
         $map->scalebar->imagecolor->setRGB(hexdec($r), hexdec($g), hexdec($b));
         $map->scalebar->outlinecolor->setRGB(0,0,0);
-				$map->scalebar->label->type = 'truetype';
 				$map->scalebar->label->font = 'SourceSansPro';
+				if (MAPSERVERVERSION < 700 ) {
+					$map->scalebar->label->type = 'truetype';
+				}
 				$map->scalebar->label->size = 10.5;
 
         # Groups
-        if($this->formvars['nurAufgeklappteLayer'] == ''){
+        if(value_of($this->formvars, 'nurAufgeklappteLayer') == ''){
 	        $this->groupset=$mapDB->read_Groups();
         }
 
         # Layer
-				$mapDB->nurAktiveLayer = $this->formvars['nurAktiveLayer'];
-        $mapDB->nurAufgeklappteLayer=$this->formvars['nurAufgeklappteLayer'];
-        $mapDB->nurFremdeLayer=$this->formvars['nurFremdeLayer'];
-        if($this->class_load_level == ''){
+				$mapDB->nurAktiveLayer = value_of($this->formvars, 'nurAktiveLayer');
+        $mapDB->nurAufgeklappteLayer = value_of($this->formvars, 'nurAufgeklappteLayer');
+        $mapDB->nurFremdeLayer = value_of($this->formvars, 'nurFremdeLayer');
+        if ($this->class_load_level == '') {
           $this->class_load_level = 1;
         }
-        $layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups($this->formvars['group']));     # class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
+        $layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')));     # class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
         $rollenlayer = $mapDB->read_RollenLayer();
         $layerset['list'] = array_merge($layerset['list'], $rollenlayer);
         $layerset['anzLayer'] = count($layerset['list']);
@@ -875,7 +913,7 @@ class GUI {
     } # end of switch loadMapSource
     return 1;
   }
-
+	
 	function list_subgroups($groupid){
 		if($groupid != ''){
 			$group = $this->groupset[$groupid];
@@ -1107,212 +1145,117 @@ class GUI {
       # Änderung am 12.07.2005 Korduan
       for ($k=0;$k<count($classset[$j]['Label']);$k++) {
         $dbLabel=$classset[$j]['Label'][$k];
-        if (MAPSERVERVERSION < 600) {
-          $klasse->label->set('type',$dbLabel['type']);
-          $klasse->label->set('font',$dbLabel['font']);
-          $RGB=explode(" ",$dbLabel['color']);
-          if ($RGB[0]=='') { $RGB[0]=0; }
-          if ($RGB[1]=='') { $RGB[1]=0; }
-          if ($RGB[2]=='') { $RGB[2]=0; }
-          $klasse->label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
-          $RGB=explode(" ",$dbLabel['outlinecolor']);
-          $klasse->label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-          if ($dbLabel['shadowcolor']!='') {
-            $RGB=explode(" ",$dbLabel['shadowcolor']);
-            $klasse->label->shadowcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-            $klasse->label->set('shadowsizex',$dbLabel['shadowsizex']);
-            $klasse->label->set('shadowsizey',$dbLabel['shadowsizey']);
-          }
-          if ($dbLabel['backgroundcolor']!='') {
-            $RGB=explode(" ",$dbLabel['backgroundcolor']);
-            $klasse->label->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-          }
-          if ($dbLabel['backgroundshadowcolor']!='') {
-            $RGB=explode(" ",$dbLabel['backgroundshadowcolor']);
-            $klasse->label->backgroundshadowcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-            $klasse->label->set('backgroundshadowsizex',$dbLabel['backgroundshadowsizex']);
-            $klasse->label->set('backgroundshadowsizey',$dbLabel['backgroundshadowsizey']);
-          }
-          $klasse->label->set('angle',$dbLabel['angle']);
-          if(MAPSERVERVERSION > 500 AND $layerset['labelangleitem']!=''){
-            $klasse->label->setbinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
-          }
-        	if($dbLabel['autoangle']==1) {
-            if(MAPSERVERVERSION >= 600){
-	          	$klasse->label->set('anglemode', MS_AUTO);
-	          }
-	          else{
-	          	$klasse->label->set('autoangle',$dbLabel['autoangle']);
-            }
-          }
-          if ($dbLabel['buffer']!='') {
-            $klasse->label->set('buffer',$dbLabel['buffer']);
-          }
-					$klasse->label->set('maxlength',$dbLabel['maxlength']);
-          $klasse->label->set('wrap',$dbLabel['wrap']);
-          $klasse->label->set('force',$dbLabel['the_force']);
-          $klasse->label->set('partials',$dbLabel['partials']);
-          $klasse->label->set('size',$dbLabel['size']);
-          $klasse->label->set('minsize',$dbLabel['minsize']);
-          $klasse->label->set('maxsize',$dbLabel['maxsize']);
-          # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
-          if($this->map_factor != ''){
-            $klasse->label->set('minsize',$dbLabel['minsize']*$this->map_factor/1.414);
-            $klasse->label->set('maxsize',$dbLabel['size']*$this->map_factor/1.414);
-            $klasse->label->set('size',$dbLabel['size']*$this->map_factor/1.414);
-          }
-          if ($dbLabel['position']!='') {
-            switch ($dbLabel['position']){
-              case '0' :{
-                $klasse->label->set('position', MS_UL);
-              }break;
-              case '1' :{
-                $klasse->label->set('position', MS_LR);
-              }break;
-              case '2' :{
-                $klasse->label->set('position', MS_UR);
-              }break;
-              case '3' :{
-                $klasse->label->set('position', MS_LL);
-              }break;
-              case '4' :{
-                $klasse->label->set('position', MS_CR);
-              }break;
-              case '5' :{
-                $klasse->label->set('position', MS_CL);
-              }break;
-              case '6' :{
-                $klasse->label->set('position', MS_UC);
-              }break;
-              case '7' :{
-                $klasse->label->set('position', MS_LC);
-              }break;
-              case '8' :{
-                $klasse->label->set('position', MS_CC);
-              }break;
-              case '9' :{
-                $klasse->label->set('position', MS_AUTO);
-              }break;
-            }
-          }
-          if ($dbLabel['offsetx']!='') {
-            $klasse->label->set('offsetx',$dbLabel['offsetx']);
-          }
-          if ($dbLabel['offsety']!='') {
-            $klasse->label->set('offsety',$dbLabel['offsety']);
-          }
-        } # ende mapserver < 600
-        else {
-          $label = new labelObj();
-          $label->type = $dbLabel['type'];
-          $label->font = $dbLabel['font'];
-          $RGB=explode(" ",$dbLabel['color']);
-          if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-          $label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
-          if($dbLabel['outlinecolor'] != ''){
-						$RGB=explode(" ",$dbLabel['outlinecolor']);
-						$label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+				$label = new labelObj();
+				if (MAPSERVERVERSION < 700 ) {
+					$label->type = 'truetype';
+				}
+				$label->font = $dbLabel['font'];
+				$RGB=explode(" ",$dbLabel['color']);
+				if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
+				$label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+				if($dbLabel['outlinecolor'] != ''){
+					$RGB=explode(" ",$dbLabel['outlinecolor']);
+					$label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+				}
+				if ($dbLabel['shadowcolor']!='') {
+					$RGB=explode(" ",$dbLabel['shadowcolor']);
+					$label->shadowcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					$label->shadowsizex = $dbLabel['shadowsizex'];
+					$label->shadowsizey = $dbLabel['shadowsizey'];
+				}
+
+				if($dbLabel['backgroundshadowcolor']!='') {
+					$RGB=explode(" ",$dbLabel['backgroundshadowcolor']);
+					$style = new styleObj($label);
+					$style->setGeomTransform('labelpoly');
+					$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					$style->set('offsetx', $dbLabel['backgroundshadowsizex']);
+					$style->set('offsety', $dbLabel['backgroundshadowsizey']);
+					if ($dbLabel['buffer']!='') {
+						$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+						$style->set('width', $dbLabel['buffer']);
 					}
-          if ($dbLabel['shadowcolor']!='') {
-            $RGB=explode(" ",$dbLabel['shadowcolor']);
-            $label->shadowcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-            $label->shadowsizex = $dbLabel['shadowsizex'];
-            $label->shadowsizey = $dbLabel['shadowsizey'];
-          }
+				}
+				if ($dbLabel['backgroundcolor']!='') {
+					$RGB=explode(" ",$dbLabel['backgroundcolor']);
+					$style = new styleObj($label);
+					$style->setGeomTransform('labelpoly');
+					$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					if ($dbLabel['buffer']!='') {
+						$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+						$style->set('width', $dbLabel['buffer']);
+					}
+				}
 
-          if($dbLabel['backgroundshadowcolor']!='') {
-            $RGB=explode(" ",$dbLabel['backgroundshadowcolor']);
-            $style = new styleObj($label);
-						$style->setGeomTransform('labelpoly');
-            $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
-            $style->set('offsetx', $dbLabel['backgroundshadowsizex']);
-						$style->set('offsety', $dbLabel['backgroundshadowsizey']);
-						if ($dbLabel['buffer']!='') {
-							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-							$style->set('width', $dbLabel['buffer']);
-						}
-          }
-					if ($dbLabel['backgroundcolor']!='') {
-            $RGB=explode(" ",$dbLabel['backgroundcolor']);
-						$style = new styleObj($label);
-						$style->setGeomTransform('labelpoly');
-            $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
-						if ($dbLabel['buffer']!='') {
-							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-							$style->set('width', $dbLabel['buffer']);
-						}
-          }
-
-          $label->angle = $dbLabel['angle'];
-          if($layerset['labelangleitem']!=''){
-            $label->setBinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
-          }
-        	if($dbLabel['autoangle']==1) {
-            if(MAPSERVERVERSION >= 600){
-            	$label->set('anglemode', MS_AUTO);
-            }
-            else{
-            	$label->autoangle = $dbLabel['autoangle'];
-            }
-          }
-          if ($dbLabel['buffer']!='') {
-            $label->buffer = $dbLabel['buffer'];
-          }
-					$label->set('maxlength',$dbLabel['maxlength']);
-          $label->wrap = $dbLabel['wrap'];
-          $label->force = $dbLabel['the_force'];
-          $label->partials = $dbLabel['partials'];
-          $label->size = $dbLabel['size'];
-          $label->minsize = $dbLabel['minsize'];
-          $label->maxsize = $dbLabel['maxsize'];
-          # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
-          if($this->map_factor != ''){
-            $label->minsize = $dbLabel['minsize']*$this->map_factor/1.414;
-            $label->maxsize = $dbLabel['size']*$this->map_factor/1.414;
-            $label->size = $dbLabel['size']*$this->map_factor/1.414;
-          }
-          if ($dbLabel['position']!='') {
-            switch ($dbLabel['position']){
-              case '0' :{
-                $label->set('position', MS_UL);
-              }break;
-              case '1' :{
-                $label->set('position', MS_LR);
-              }break;
-              case '2' :{
-                $label->set('position', MS_UR);
-              }break;
-              case '3' :{
-                $label->set('position', MS_LL);
-              }break;
-              case '4' :{
-                $label->set('position', MS_CR);
-              }break;
-              case '5' :{
-                $label->set('position', MS_CL);
-              }break;
-              case '6' :{
-                $label->set('position', MS_UC);
-              }break;
-              case '7' :{
-                $label->set('position', MS_LC);
-              }break;
-              case '8' :{
-                $label->set('position', MS_CC);
-              }break;
-              case '9' :{
-                $label->set('position', MS_AUTO);
-              }break;
-            }
-          }
-          if ($dbLabel['offsetx']!='') {
-            $label->offsetx = $dbLabel['offsetx'];
-          }
-          if ($dbLabel['offsety']!='') {
-            $label->offsety = $dbLabel['offsety'];
-          }
-          $klasse->addLabel($label);
-        } # ende mapserver >=600
+				$label->angle = $dbLabel['angle'];
+				if($layerset['labelangleitem']!=''){
+					$label->setBinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
+				}
+				if($dbLabel['autoangle']==1) {
+					if(MAPSERVERVERSION >= 600){
+						$label->set('anglemode', MS_AUTO);
+					}
+					else{
+						$label->autoangle = $dbLabel['autoangle'];
+					}
+				}
+				if ($dbLabel['buffer']!='') {
+					$label->buffer = $dbLabel['buffer'];
+				}
+				$label->set('maxlength',$dbLabel['maxlength']);
+				$label->wrap = $dbLabel['wrap'];
+				$label->force = $dbLabel['the_force'];
+				$label->partials = $dbLabel['partials'];
+				$label->size = $dbLabel['size'];
+				$label->minsize = $dbLabel['minsize'];
+				$label->maxsize = $dbLabel['maxsize'];
+				# Skalierung der Labelschriftgröße, wenn map_factor gesetzt
+				if($this->map_factor != ''){
+					$label->minsize = $dbLabel['minsize']*$this->map_factor/1.414;
+					$label->maxsize = $dbLabel['size']*$this->map_factor/1.414;
+					$label->size = $dbLabel['size']*$this->map_factor/1.414;
+				}
+				if ($dbLabel['position']!='') {
+					switch ($dbLabel['position']){
+						case '0' :{
+							$label->set('position', MS_UL);
+						}break;
+						case '1' :{
+							$label->set('position', MS_LR);
+						}break;
+						case '2' :{
+							$label->set('position', MS_UR);
+						}break;
+						case '3' :{
+							$label->set('position', MS_LL);
+						}break;
+						case '4' :{
+							$label->set('position', MS_CR);
+						}break;
+						case '5' :{
+							$label->set('position', MS_CL);
+						}break;
+						case '6' :{
+							$label->set('position', MS_UC);
+						}break;
+						case '7' :{
+							$label->set('position', MS_LC);
+						}break;
+						case '8' :{
+							$label->set('position', MS_CC);
+						}break;
+						case '9' :{
+							$label->set('position', MS_AUTO);
+						}break;
+					}
+				}
+				if ($dbLabel['offsetx']!='') {
+					$label->offsetx = $dbLabel['offsetx'];
+				}
+				if ($dbLabel['offsety']!='') {
+					$label->offsety = $dbLabel['offsety'];
+				}
+				$klasse->addLabel($label);
       } # ende Schleife für mehrere Label
     } # end of Schleife Class
   }
@@ -1743,7 +1686,7 @@ class database {
   var $commentsign;
   var $blocktransaction;
 
-  function database() {
+  function __construct() {
     global $debug;
     $this->debug=$debug;
     $this->loglevel=LOG_LEVEL;
@@ -1764,65 +1707,76 @@ class database {
     $this->blocktransaction=0;
   }
 
-  function open() {
-    $this->debug->write("<br>MySQL Verbindung öffnen mit Host: ".$this->host." User: ".$this->user,4);
-    $this->dbConn=mysql_connect($this->host,$this->user,$this->passwd);
-    $this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswählen.",4);
-    return mysql_select_db($this->dbName,$this->dbConn);
-  }
+	function open() {
+		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
+		$this->mysqli = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
+		return $this->mysqli->connect_errno;
+	}
 
-  function execSQL($sql,$debuglevel, $loglevel) {
-  	switch ($this->loglevel) {
-  		case 0 : {
-  			$logsql=0;
-  		} break;
-  		case 1 : {
-  			$logsql=1;
-  		} break;
-  		case 2 : {
-  			$logsql=$loglevel;
-  		} break;
-  	}
-    # SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
-    # wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
-    # (lesend immer, aber schreibend nur mit DBWRITE=1)
-    if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
-      $query=mysql_query($sql,$this->dbConn);
-      #echo $sql;
-      if ($query==0) {
-        $ret[0]=1;
-        $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>".mysql_error($this->dbConn);
-        $this->debug->write($ret[1],$debuglevel);
-        if ($logsql) {
-          $this->logfile->write("#".$ret[1]);
-        }
-      }
-      else {
-        $ret[0]=0;
-        $ret[1]=$query;
-        if ($logsql) {
-          $this->logfile->write($sql.';');
-        }
-        $this->debug->write(date('H:i:s')."<br>".$sql,$debuglevel);
-      }
-      $ret[2]=$sql;
-    }
-    else {
-    	if ($logsql) {
-    		$this->logfile->write($sql.';');
-    	}
-    	$this->debug->write("<br>".$sql,$debuglevel);
-    }
-    return $ret;
-  }
+	function execSQL($sql, $debuglevel = 4, $loglevel = 0, $suppress_error_msg = false) {
+		switch ($this->loglevel) {
+			case 0 : {
+				$logsql=0;
+			} break;
+			case 1 : {
+				$logsql=1;
+			} break;
+			case 2 : {
+				$logsql=$loglevel;
+			} break;
+		}
+		# SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
+		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
+		# (lesend immer, aber schreibend nur mit DBWRITE=1)
+		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
+			echo '<br>sql in execSQL: ' . $sql;
+			if ($result = $this->mysqli->query($sql)) {
+				$ret[0] = 0;
+				$ret['success'] = $this->success = true;
+				$ret[1] = $ret['query'] = $ret['result'] = $this->result = $result;
+				$this->errormessage = '';
+				if ($logsql) {
+					$this->logfile->write($sql . ';');
+				}
+				$this->debug->write(date('H:i:s')."<br>" . $sql, $debuglevel);
+			}
+			else {
+				$ret[0] = 1;
+				$ret['success'] = $this->success = false;
+				$div_id = rand(1, 99999);
+				$errormessage = $this->mysqli->error;
+				$ret[1] = $this->errormessage = sql_err_msg('MySQL', $sql, $errormessage, $div_id);
+				if ($logsql) {
+					$this->logfile->write("#" . $errormessage);
+				}
+				if (!$suppress_error_msg) {
+					if (gettype($this->gui) == 'object') {
+						$this->gui->add_message('error', $this->errormessage);
+					}
+					else {
+						echo '<br>error: ' . $this->errormessage;
+					}
+				}
+			}
+			$ret[2] = $sql;
+		}
+		else {
+			if ($logsql) {
+				$this->logfile->write($sql . ';');
+			}
+			$this->debug->write("<br>" . $sql, $debuglevel);
+		}
+		return $ret;
+	}
 
-  function close() {
-    $this->debug->write("<br>MySQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
-    if (LOG_LEVEL>0){
-    	$this->logfile->close();
-    }
-    return mysql_close($this->dbConn);
-  }
+	function close() {
+		$this->debug->write("<br>MySQL Verbindung ID: " . $this->mysqli->thread_id . " schließen.", 4);
+		if (LOG_LEVEL > 0) {
+			$this->logfile->close();
+		}
+		return $this->mysqli->close();
+	}
 }
 
 class user {
@@ -1840,7 +1794,7 @@ class user {
   var $database;
   var $remote_addr;
 
-	function user($login_name,$id,$database) {
+	function __construct($login_name,$id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->database=$database;
@@ -1869,10 +1823,10 @@ class user {
 		";
 		#echo '<br>Sql: ' . $sql;
 
-		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>" . $sql, 4);
-		$query = mysql_query($sql,$this->database->dbConn);
-		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$rs = mysql_fetch_array($query);
+		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>" . $sql, 3);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		$rs = $this->database->result->fetch_array();
 		$this->id = $rs['ID'];
 		$this->login_name = $rs['login_name'];
 		$this->Namenszusatz = $rs['Namenszusatz'];
@@ -1888,14 +1842,21 @@ class user {
 		$this->password_setting_time = $rs['password_setting_time'];
   }
 
-  function getLastStelle() {
-    $sql = 'SELECT stelle_id FROM user WHERE ID='.$this->id;
-    $this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    return $rs['stelle_id'];
-  }
+	function getLastStelle() {
+		$sql = "
+			SELECT
+				stelle_id
+			FROM
+				user
+			WHERE
+				ID= " . $this->id ."
+		";
+		$this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>" . $sql, 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+		$rs = $this->database->result->fetch_array();
+		return $rs['stelle_id'];
+	}
 
 	function StellenZugriff($stelle_id) {
 		$this->Stellen=$this->getStellen($stelle_id);
@@ -1905,32 +1866,35 @@ class user {
 		return 0;
 	}
 
-	function getStellen($stelle_ID) {
+	function getStellen($order, $user_id = 0) {
+		global $admin_stellen;
+
+		if ($order != '') {
+			$order = " ORDER BY `" . $order . "`";
+		}
+
+		if ($user_id > 0 AND !in_array($this->id, $admin_stellen)) {
+			$where = "
+				LEFT JOIN `rolle` AS r ON s.ID = r.stelle_id
+				WHERE r.user_id = ".$user_id." OR r.stelle_id IS NULL
+			";
+		}
+
 		$sql = "
 			SELECT
 				s.ID,
 				s.Bezeichnung
 			FROM
-				stelle AS s,
-				rolle AS r
-			WHERE
-				s.ID = r.stelle_id AND
-				r.user_id = " . $this->id .
-				($stelle_ID > 0 ? " AND s.ID = " . $stelle_ID : "") . "
-				AND (
-					('" . date('Y-m-d h:i:s') . "' >= s.start AND '" . date('Y-m-d h:i:s') . "' <= s.stop)
-					OR
-					(s.start = '0000-00-00 00:00:00' AND s.stop = '0000-00-00 00:00:00')
-				)
-			ORDER BY
-				Bezeichnung;
+				`stelle` AS s" .
+				$where .
+				$order . "
 		";
-
 		#echo '<br>sql: ' . $sql;
-		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		while($rs=mysql_fetch_array($query)) {
+
+		$this->debug->write("<p>file:stelle.php class:stelle->getStellen - Abfragen aller Stellen<br>" . $sql, 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		while($rs = $this->database->result->fetch_array()) {
 			$stellen['ID'][]=$rs['ID'];
 			$stellen['Bezeichnung'][]=$rs['Bezeichnung'];
 		}
@@ -1966,18 +1930,18 @@ class user {
 }
 
 class stelle {
+	var $id;
+	var $Bezeichnung;
+	var $debug;
+	var $nImageWidth;
+	var $nImageHeight;
+	var $oGeorefExt;
+	var $pixsize;
+	var $selectedButton;
+	var $database;
+	var $language;
 
-  var $id;
-  var $Bezeichnung;
-  var $debug;
-  var $nImageWidth;
-  var $nImageHeight;
-  var $oGeorefExt;
-  var $pixsize;
-  var $selectedButton;
-  var $database;
-
-	function stelle($id, $database) {
+	function __construct($id, $database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->id=$id;
@@ -1994,15 +1958,17 @@ class stelle {
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo $sql;
     $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+		}
+		$rs = $this->database->result->fetch_array();
     $this->Bezeichnung=$rs['Bezeichnung'];
     return $rs['Bezeichnung'];
   }
 
-  function readDefaultValues() {
-    $sql = "
+	function readDefaultValues() {
+		$sql = "
 			SELECT
 				*
 			FROM
@@ -2010,44 +1976,55 @@ class stelle {
 			WHERE
 				ID = " . $this->id . "
 		";
-    $this->debug->write("<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);    
-    $this->MaxGeorefExt=ms_newRectObj();
-    $this->MaxGeorefExt->setextent($rs['minxmax'],$rs['minymax'],$rs['maxxmax'],$rs['maxymax']);
-    $this->epsg_code=$rs["epsg_code"];
-    $this->pgdbhost = ($rs["pgdbhost"] == 'PGSQL_PORT_5432_TCP_ADDR') ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs["pgdbhost"];
-    $this->pgdbname=$rs["pgdbname"];
-    $this->pgdbuser=$rs["pgdbuser"];
-    $this->pgdbpasswd=$rs["pgdbpasswd"];
-    $this->protected=$rs["protected"];
-    //---------- OWS Metadaten ----------//
-    $this->ows_title=$rs["ows_title"];
-    $this->ows_abstract=$rs["ows_abstract"];
-    $this->wms_accessconstraints=$rs["wms_accessconstraints"];
-    $this->ows_contactperson=$rs["ows_contactperson"];
-    $this->ows_contactorganization=$rs["ows_contactorganization"];
-    $this->ows_contactelectronicmailaddress=$rs["ows_contactemailaddress"];
-    $this->ows_contactposition=$rs["ows_contactposition"];
-    $this->ows_fees=$rs["ows_fees"];
-    $this->ows_srs=$rs["ows_srs"];
-    $this->check_client_ip=$rs["check_client_ip"];
-    $this->checkPasswordAge=$rs["check_password_age"];
-    $this->allowedPasswordAge=$rs["allowed_password_age"];
-    $this->useLayerAliases=$rs["use_layer_aliases"];
+		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+		}
+		$rs = $this->database->result->fetch_array();
+		$this->MaxGeorefExt = ms_newRectObj();
+		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
+		$this->epsg_code = $rs['epsg_code'];
+		$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
+		$this->pgdbname = $rs['pgdbname'];
+		$this->pgdbuser = $rs['pgdbuser'];
+		$this->pgdbpasswd = $rs['pgdbpasswd'];
+		$this->protected = $rs['protected'];
+		//---------- OWS Metadaten ----------//
+		$this->ows_title = $rs['ows_title'];
+		$this->ows_abstract = $rs['ows_abstract'];
+		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
+		$this->ows_contactperson = $rs['ows_contactperson'];
+		$this->ows_contactorganization = $rs['ows_contactorganization'];
+		$this->ows_contactelectronicmailaddress = $rs['ows_contactemailaddress'];
+		$this->ows_contactposition = $rs['ows_contactposition'];
+		$this->ows_fees = $rs['ows_fees'];
+		$this->ows_srs = $rs['ows_srs'];
+		$this->check_client_ip = $rs['check_client_ip'];
+		$this->checkPasswordAge = $rs['check_password_age'];
+		$this->allowedPasswordAge = $rs['allowed_password_age'];
+		$this->useLayerAliases = $rs['use_layer_aliases'];
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
-		$this->hist_timestamp=$rs["hist_timestamp"];
+		$this->hist_timestamp = $rs['hist_timestamp'];
 		$this->default_user_id = $rs['default_user_id'];
-  }
+		$this->style = $rs['style'];
+	}
 
   function checkClientIpIsOn() {
-    $sql ='SELECT check_client_ip FROM stelle WHERE ID = '.$this->id;
+    $sql = "
+			SELECT
+				check_client_ip
+			FROM
+				stelle
+			WHERE ID = " . $this->id . "
+		";
     $this->debug->write("<p>file:stelle.php class:stelle->checkClientIpIsOn- Abfragen ob IP's der Nutzer in der Stelle getestet werden sollen<br>".$sql,4);
     #echo '<br>'.$sql;
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+		}
+		$rs = $this->database->result->fetch_array();
     if ($rs['check_client_ip']=='1') {
       return 1;
     }
@@ -2065,7 +2042,7 @@ class rolle {
   static $hist_timestamp;
   static $layer_params;
 
-	function rolle($user_id,$stelle_id,$database) {
+	function __construct($user_id,$stelle_id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->user_id=$user_id;
@@ -2123,9 +2100,9 @@ class rolle {
       $sql.=' AND Gruppenname LIKE "'.$GroupName.'"';
     }
     $this->debug->write("<p>file:rolle.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-    while ($rs=mysql_fetch_array($query)) {
+    $this->database->execSQL($sql);
+    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    while ($rs = $this->database->result->fetch_assoc()) {
       $groups[]=$rs;
     }
     return $groups;
@@ -2140,10 +2117,10 @@ class rolle {
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		for ($i=0;$i<count($this->layerset)-1;$i++) {
 			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>';
-			$aktiv_status = $formvars['thema'.$this->layerset[$i]['Layer_ID']];
-			$requires_status = $formvars['thema'.$this->layerset[$i]['requires']];
-			if(isset($aktiv_status) OR isset($requires_status)){										// entweder ist der Layer selber an oder sein requires-Layer
-				$aktiv_status = $aktiv_status + $requires_status;
+			$aktiv_status = value_of($formvars, 'thema'.value_of($this->layerset[$i], 'Layer_ID'));
+			$requires_status = value_of($formvars, 'thema'.value_of($this->layerset[$i], 'requires'));
+			if($aktiv_status != '' OR $requires_status != ''){										// entweder ist der Layer selber an oder sein requires-Layer
+				$aktiv_status = $aktiv_status + (int)$requires_status;
 				if($this->layerset[$i]['Layer_ID'] > 0){
 					$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
@@ -2161,14 +2138,15 @@ class rolle {
 				#neu eintragen der deaktiven Klassen
 				if($aktiv_status != 0){
 					$sql = 'SELECT Class_ID FROM classes WHERE Layer_ID='.$this->layerset[$i]['Layer_ID'].';';
-					$query = mysql_query($sql);
-					while($row = @mysql_fetch_array($query)){
-						if($formvars['class'.$row['Class_ID']] == '0' OR $formvars['class'.$row['Class_ID']] == '2'){
-							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id, status) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$row['Class_ID'].', '.$formvars['class'.$row['Class_ID']].');';
+					$this->database->execSQL($sql);
+					$result = $this->database->result;
+					while ($rs = mysqli_fetch_assoc($result)) {
+						if(value_of($formvars, 'class'.$rs['Class_ID']) == '0' OR value_of($formvars, 'class'.$rs['Class_ID']) == '2'){
+							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id, status) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$rs['Class_ID'].', '.$formvars['class'.$rs['Class_ID']].');';
 							$this->database->execSQL($sql2,4, $this->loglevel);
 						}
-						elseif($formvars['class'.$row['Class_ID']] == '1'){
-							$sql1 = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND class_id='.$row['Class_ID'].';';
+						elseif(value_of($formvars, 'class'.$rs['Class_ID']) == '1'){
+							$sql1 = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND class_id='.$rs['Class_ID'].';';
 							$this->database->execSQL($sql1,4, $this->loglevel);
 						}
 					}
@@ -2243,10 +2221,10 @@ class rolle {
 		";
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
-		while ($rs=mysql_fetch_assoc($query)) {
+		while ($rs = $this->database->result->fetch_assoc()) {
 			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
 				if($rs['Filter'] == ''){
 					$rs['Filter'] = '('.$rs['rollenfilter'].')';
@@ -2293,10 +2271,10 @@ class rolle {
 		}
     #echo $sql.'<br>';
     $this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
+    $query = $this->database->mysqli->query($sql);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
-    while ($rs=mysql_fetch_assoc($query)) {
+    while ($rs=$this->database->result->fetch_assoc()) {
       $layer[]=$rs;
     }
     return $layer;
@@ -2336,15 +2314,15 @@ class rolle {
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
 		";
-    #echo $sql;
+		#echo 'Read rolle settings mit sql: ' . $sql;
     $this->debug->write("<p>file:rolle.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) {
+    $this->database->execSQL($sql);
+    if (!$this->database->success) {
       $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
       return 0;
     }
-		if(mysql_num_rows($query) > 0){
-			$rs = mysql_fetch_assoc($query);
+		if ($this->database->result->num_rows > 0){
+			$rs = $this->database->result->fetch_assoc();
 			$this->oGeorefExt=ms_newRectObj();
 			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
@@ -2368,10 +2346,13 @@ class rolle {
 			$this->highlighting=$rs['highlighting'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
+			$this->result_hatching=$rs['result_hatching'];
+			$this->result_transparency=$rs['result_transparency'];
 			$this->always_draw=$rs['always_draw'];
 			$this->runningcoords=$rs['runningcoords'];
 			$this->showmapfunctions=$rs['showmapfunctions'];
 			$this->showlayeroptions=$rs['showlayeroptions'];
+			$this->showrollenfilter=$rs['showrollenfilter'];
 			$this->menue_buttons=$rs['menue_buttons'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
@@ -2383,12 +2364,16 @@ class rolle {
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
 			$this->visually_impaired = $rs['visually_impaired'];
 			$this->legendtype = $rs['legendtype'];
-			if($rs['hist_timestamp'] != ''){
-				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
+			$this->print_legend_separate = $rs['print_legend_separate'];
+			$this->print_scale = $rs['print_scale'];
+			if ($rs['hist_timestamp'] != '') {
+				$this->hist_timestamp_de = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
 			}
-			else
-				rolle::$hist_timestamp = $this->hist_timestamp = '';
+			else {
+				rolle::$hist_timestamp = $this->hist_timestamp_de = '';
+				#rolle::$hist_timestamp = '';
+			}
 			$this->selectedButton=$rs['selectedButton'];
 			$buttons = explode(',', $rs['buttons']);
 			$this->back = in_array('back', $buttons);
@@ -2398,7 +2383,7 @@ class rolle {
 			$this->zoomall = in_array('zoomall', $buttons);
 			$this->recentre = in_array('recentre', $buttons);
 			$this->jumpto = in_array('jumpto', $buttons);
-			$this->coord_query = in_array('coord_query', $buttons);			
+			$this->coord_query = in_array('coord_query', $buttons);
 			$this->query = in_array('query', $buttons);
 			$this->queryradius = in_array('queryradius', $buttons);
 			$this->polyquery = in_array('polyquery', $buttons);
@@ -2407,9 +2392,14 @@ class rolle {
 			$this->freepolygon = in_array('freepolygon', $buttons);
 			$this->freetext = in_array('freetext', $buttons);
 			$this->freearrow = in_array('freearrow', $buttons);
+			$this->gps = in_array('gps', $buttons);
+			$this->geom_buttons = explode(',', str_replace(' ', '', $rs['geom_buttons']));
 			return 1;
-		}else return 0;
-  }
+		}
+		else {
+			return 0;
+		}
+	}
 
   function setSelectedButton($selectedButton) {
     $this->selectedButton=$selectedButton;
@@ -2540,6 +2530,7 @@ class rolle {
   }
 
   function getAktivLayer($aktivStatus,$queryStatus,$logconsume) {
+		$layer = array();
     # Abfragen der zu loggenden Layer der Rolle
     $sql ='SELECT r2ul.layer_id FROM u_rolle2used_layer AS r2ul';
     if ($logconsume) {
@@ -2572,35 +2563,36 @@ class rolle {
     }
     #echo $sql;
     $this->debug->write("<p>file:rolle.php class:rolle->getAktivLayer - Abfragen der aktiven Layer zur Rolle:<br>".$sql,4);
-    $queryret=$this->database->execSQL($sql,4, 0);
-    if ($queryret[0]) {
+    $this->database->execSQL($sql,4, 0);
+    if (!$this->database->success) {
       # Fehler bei Datenbankanfrage
-      $ret[0]=1;
-      $ret[1]='<br>Die aktiven Layer konnten nicht abgefragt werden.<br>'.$ret[1];
+      $ret[0] = 1;
+      $ret[1] = '<br>Die aktiven Layer konnten nicht abgefragt werden.<br>'.$ret[1];
     }
     else {
-      while ($rs=mysql_fetch_array($queryret[1])) {
-        $layer[]=$rs['layer_id'];
+      while ($rs = $this->database->result->fetch_assoc()) {
+        $layer[] = $rs['layer_id'];
       }
-      $ret[0]=0;
-      $ret[1]=$layer;
+      $ret[0] = 0;
+      $ret[1] = $layer;
     }
     return $ret;
   }
 }
 
 class pgdatabase {
+	var $ist_Fortfuehrung;
+	var $debug;
+	var $loglevel;
+	var $defaultloglevel;
+	var $logfile;
+	var $defaultlogfile;
+	var $commentsign;
+	var $blocktransaction;
+	var $port;
+	var $schema;
 
-  var $ist_Fortfuehrung;
-  var $debug;
-  var $loglevel;
-  var $defaultloglevel;
-  var $logfile;
-  var $defaultlogfile;
-  var $commentsign;
-  var $blocktransaction;
-
-	function pgdatabase() {
+	function __construct() {
 	  global $debug;
     $this->debug=$debug;
     $this->loglevel=LOG_LEVEL;
@@ -2792,8 +2784,7 @@ class pgdatabase {
   }
 }
 
-class db_mapObj {
-
+class db_mapObj{
   var $debug;
   var $referenceMap;
   var $Layer;
@@ -2801,29 +2792,43 @@ class db_mapObj {
   var $nurAufgeklappteLayer;
   var $Stelle_ID;
   var $User_ID;
-  var $database;
+	var $db;
+	var $OhneRequires;
 
-  function db_mapObj($Stelle_ID, $User_ID, $database = NULL) {
-    global $debug;
-    $this->debug=$debug;
-    $this->Stelle_ID=$Stelle_ID;
-    $this->User_ID=$User_ID;
-		$this->rolle = new rolle($User_ID, $Stelle_ID, $database);
-		$this->database=$database;
-  }
+	function __construct($Stelle_ID, $User_ID) {
+		global $debug;
+		global $GUI;
+		$this->script_name = 'db_MapObj.php';
+		$this->debug = $debug;
+		$this->GUI = $GUI;
+		$this->db = $GUI->database;
+		$this->Stelle_ID = $Stelle_ID;
+		$this->User_ID = $User_ID;
+		$this->rolle = new rolle($User_ID, $Stelle_ID, $this->db);
+	}
 
 	function read_ReferenceMap() {
-    $sql ='SELECT r.* FROM referenzkarten AS r, stelle AS s WHERE r.ID=s.Referenzkarte_ID';
-    $sql.=' AND s.ID='.$this->Stelle_ID;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_ReferenceMap - Lesen der Referenzkartendaten:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    $this->referenceMap=$rs;
+    $sql = "
+			SELECT
+				r.*
+			FROM
+				referenzkarten AS r,
+				stelle AS s
+			WHERE
+				r.ID = s.Referenzkarte_ID
+    		AND s.ID = " . $this->Stelle_ID . "
+		";
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_ReferenceMap - Lesen der Referenzkartendaten:<br>" . $sql,4);
+		$this->db->execSQL($sql);
+		if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
+		$rs = $this->db->result->fetch_array();
+    $this->referenceMap = $rs;
+#		echo '<br>sql: ' . print_r($sql, true);
+#		echo '<br>ref: ' . print_r($this->referenceMap, true);
     return $rs;
   }
 
-  function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL){
+function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL){
 		global $language;
 
 		if($language != 'german') {
@@ -2889,17 +2894,17 @@ class db_mapObj {
     	$sql.=' AND (l.connection like "%host=%" AND l.connection NOT like "%host=localhost%" OR l.connectiontype != 6 AND rl.aktivStatus != "0")';
     }
     $sql.=' ORDER BY drawingorder';
-    #echo $sql;
+    #echo '<br>SQL zur Abfrage der Layer: ' . $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>" . $sql,4);
-    $query=mysql_query($sql);
-		if ($query==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+    $ret = $this->db->execSQL($sql);
+		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
     $layer = array();
 		$layer['list'] = array();
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
-    while ($rs=mysql_fetch_assoc($query)){
-			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
-				if($rs['Filter'] == ''){
+    while ($rs = $ret['result']->fetch_assoc()) {
+			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
+				if ($rs['Filter'] == ''){
 					$rs['Filter'] = '('.$rs['rollenfilter'].')';
 				}
 				else {
@@ -2917,7 +2922,7 @@ class db_mapObj {
 					$this->User_ID,
 					$this->Stelle_ID,
 					rolle::$hist_timestamp,
-					$this->rolle->language,
+					$language,
 					$rs['duplicate_criterion']
 				);
 			}
@@ -2937,11 +2942,21 @@ class db_mapObj {
     return $layer;
   }
 
-  function read_disabled_classes(){
-  	#Anne
-    $sql_classes = 'SELECT class_id, status FROM u_rolle2used_class WHERE user_id='.$this->User_ID.' AND stelle_id='.$this->Stelle_ID.';';
-    $query_classes=mysql_query($sql_classes);
-    while($row = mysql_fetch_assoc($query_classes)){
+  function read_disabled_classes() {
+		$classarray = array();
+		$sql = "
+			SELECT
+				class_id,
+				status
+			FROM
+				u_rolle2used_class
+			WHERE
+				user_id = " . $this->User_ID . "
+				AND stelle_id = " . $this->Stelle_ID . "
+		";
+		#echo '<p>SQL zur Abfrage von diabled classes: ' . $sql;
+		$this->db->execSQL($sql);
+    while ($row = $this->db->result->fetch_assoc()) {
   		$classarray['class_id'][] = $row['class_id'];
 			$classarray['status'][$row['class_id']] = $row['status'];
 		}
@@ -2950,6 +2965,7 @@ class db_mapObj {
 
 	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $classification = '') {
 		global $language;
+		$Classes = array();
 
 		$sql = "
 			SELECT " .
@@ -2993,10 +3009,10 @@ class db_mapObj {
 		";
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
-		$query = mysql_query($sql);
-		if ($query == 0) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__; return 0; }
+		$ret = $this->db->execSQL($sql);
+		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name . " Zeile: " . __LINE__ .'<br>'.$sql; return 0; }
 		$index = 0;
-		while ($rs = mysql_fetch_assoc($query)) {
+		while ($rs = $ret['result']->fetch_assoc()) {
 			$rs['Style'] = $this->read_Styles($rs['Class_ID']);
 			$rs['Label'] = $this->read_Label($rs['Class_ID']);
 			$rs['index'] = $index;
@@ -3032,29 +3048,40 @@ class db_mapObj {
     $sql ='SELECT * FROM styles AS s,u_styles2classes AS s2c';
     $sql.=' WHERE s.Style_ID=s2c.style_id AND s2c.class_id='.$Class_ID;
     $sql.=' ORDER BY drawingorder';
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Styles - Lesen der Styledaten:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while($rs=mysql_fetch_assoc($query)) {
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Styles - Lesen der Styledaten:<br>" . $sql,4);
+    $ret = $this->db->execSQL($sql);
+    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+    while($rs = $this->db->result->fetch_assoc()) {
       $Styles[]=$rs;
     }
     return $Styles;
   }
 
-  function read_Label($Class_ID) {
-    $sql ='SELECT * FROM labels AS l,u_labels2classes AS l2c';
-    $sql.=' WHERE l.Label_ID=l2c.label_id AND l2c.class_id='.$Class_ID;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Label - Lesen der Labels zur Classe eines Layers:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while ($rs=mysql_fetch_assoc($query)) {
-      $Labels[]=$rs;
-    }
-    return $Labels;
-  }
+	# Einer Klasse können mehrere Labels zugeordnet werden
+	# Abfrage der Labels nicht aus Tabelle classes sondern aus u_labels2classes
+	function read_Label($Class_ID) {
+		$Labels = array();
+		$sql = "
+			SELECT
+				*
+			FROM
+				labels AS l,
+				u_labels2classes AS l2c
+			WHERE
+				l.Label_ID = l2c.label_id
+				AND l2c.class_id = " . $Class_ID . "
+		";
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Label - Lesen der Labels zur Classe eines Layers:<br>" . $sql,4);
+		$this->db->execSQL($sql);
+		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+		while ($rs = $this->db->result->fetch_assoc()) {
+			$Labels[]=$rs;
+		}
+		return $Labels;
+	}
 
   function read_RollenLayer($id = NULL, $typ = NULL){
-		$sql = "SELECT DISTINCT l.*, l.Name as alias, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, concat('(', rollenfilter, ')') as Filter from rollenlayer AS l, u_groups AS g";		
+		$sql = "SELECT DISTINCT l.*, l.Name as alias, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, CASE WHEN rollenfilter != '' THEN concat('(', rollenfilter, ')') END as Filter from rollenlayer AS l, u_groups AS g";
     $sql.= ' WHERE l.Gruppe = g.id AND l.stelle_id='.$this->Stelle_ID.' AND l.user_id='.$this->User_ID;
     if($id != NULL){
     	$sql .= ' AND l.id = '.$id;
@@ -3062,13 +3089,13 @@ class db_mapObj {
   	if($typ != NULL){
     	$sql .= ' AND l.Typ = \''.$typ.'\'';
     }
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>" . $sql,4);
+		$ret = $this->db->execSQL($sql);
+		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
     $Layer = array();
-    while ($rs=mysql_fetch_array($query)) {
-      $rs['Class']=$this->read_Classes(-$rs['id'], $this->disabled_classes);
-      $Layer[]=$rs;
+    while ($rs = $ret['result']->fetch_array()) {
+      $rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
+      $Layer[] = $rs;
     }
     return $Layer;
   }
@@ -3079,7 +3106,7 @@ class Flur {
   var $FlurID;
   var $database;
 
-	function Flur($GemID,$GemkgID,$FlurID,$database) {
+	function __construct($GemID,$GemkgID,$FlurID,$database) {
     # constructor
     global $debug;
     $this->debug=$debug;

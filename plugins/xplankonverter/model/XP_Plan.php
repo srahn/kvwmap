@@ -7,14 +7,14 @@ class XP_Plan extends PgObject {
 
 	static $schema = 'xplan_gml';
 
-	function XP_Plan($gui, $planart, $select = '*') {
+	function __construct($gui, $planart, $select = '*') {
 		$this->planart = $planart;
 		$this->planartAbk = strtolower(substr($planart, 0, 2));
 		$this->tableName = $this->planartAbk . '_plan';
 		$this->umlName = strtoupper($this->planartAbk) . '_Plan';
 		$this->bereichTableName = $this->planartAbk . '_bereich';
 		$this->bereichUmlName = strtoupper($this->planartAbk) . '_Bereich';
-		$this->PgObject($gui, XP_Plan::$schema, $this->tableName);
+		parent::__construct($gui, XP_Plan::$schema, $this->tableName);
 		$this->bereiche = array();
 		$this->select = $select;
 		$this->identifier = 'gml_id';

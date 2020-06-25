@@ -33,7 +33,7 @@
 
 class spatial_processor {
   
-  function spatial_processor($rolle, $database, $pgdatabase) {
+  function __construct($rolle, $database, $pgdatabase) {
     global $debug;
     $this->debug = $debug;
     $this->database = $database;
@@ -65,18 +65,55 @@ class spatial_processor {
     return $rs;
   }
   
-  function union($geom_1, $geom_2){
-  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."')) as geom) as foo";
-		#echo '<p>SQL zur Verschmelzung von Geometrien: ' . $sql;
-  	$ret = $this->pgdatabase->execSQL($sql,4, 0, true);
-    if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
-    }
-    else {
-    	$rs = pg_fetch_assoc($ret[1]);
-    }
-    return $rs;
-  }
+
+	
+	function union($geom_1, $geom_2, $normalize = true) {
+		$union = "
+			st_union(
+				st_geomfromtext('" . $geom_1 . "'),
+				st_geomfromtext('" . $geom_2 . "')
+			)
+		";
+		
+		if(
+			NORMALIZE_AREA_THRESHOLD == 0 AND 
+			NORMALIZE_ANGLE_THRESHOLD == 0 AND 
+			NORMALIZE_POINT_DISTANCE_THRESHOLD == 0 AND 
+			NORMALIZE_NULL_AREA == 0
+		){
+			$normalize = false;
+		}
+
+		if ($normalize) {
+			$union = "st_makevalid(
+					gdi_normalize_geometry(
+						" . $union . ",
+						" . NORMALIZE_AREA_THRESHOLD . ",
+						" . NORMALIZE_ANGLE_THRESHOLD . ",
+						" . NORMALIZE_POINT_DISTANCE_THRESHOLD . ",
+						" . NORMALIZE_NULL_AREA . "
+					)
+				)
+			";
+		}
+
+		$sql = "
+			SELECT
+				st_astext(geom) as wkt,
+				st_assvg(geom, 0, 15) as svg
+			FROM
+				( SELECT " . $union . " as geom ) as foo
+		";
+		#echo $sql;
+		$ret = $this->pgdatabase->execSQL($sql,4, 0, true);
+		if ($ret[0]) {
+			$rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+		}
+		else {
+			$rs = pg_fetch_assoc($ret[1]);
+		}
+		return $rs;
+	}
 
 	/*
 	* Funktion liefert den Teil von geom1, der nicht von geom2 überlappt wird
@@ -91,6 +128,15 @@ class spatial_processor {
 				st_geomfromtext('" . $geom_2 . "')
 			)
 		";
+		
+		if(
+			NORMALIZE_AREA_THRESHOLD == 0 AND 
+			NORMALIZE_ANGLE_THRESHOLD == 0 AND 
+			NORMALIZE_POINT_DISTANCE_THRESHOLD == 0 AND 
+			NORMALIZE_NULL_AREA == 0
+		){
+			$normalize = false;
+		}
 
 		if ($normalize) {
 			$diff = "st_makevalid(
@@ -112,6 +158,7 @@ class spatial_processor {
 			FROM
 				( SELECT " . $diff . " as geom ) as foo
 		";
+		#echo $sql;
 		$ret = $this->pgdatabase->execSQL($sql,4, 0, true);
 		if ($ret[0]) {
 			$rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];

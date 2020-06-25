@@ -238,17 +238,17 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 	}
 }
 
-function onload_functions(){
-	<? if($this->scrolldown){ ?>
-	window.scrollTo(0,document.body.scrollHeight);	
-	<? } ?>
+function onload_functions() {<?php
+	if ($this->scrolldown) { ?>
+		window.scrollTo(0,document.body.scrollHeight);<?php
+	} ?>
 	document.onmousemove = drag;
   document.onmouseup = dragstop;
 	document.onmousedown = stop;
-	getBrowserSize();
-	<? if($this->user->rolle->auto_map_resize){ ?>
-	window.onresize = function(){clearTimeout(doit);doit = setTimeout(resizemap2window, 200);};
-	<? } ?>
+	getBrowserSize();<?php
+	if ($this->user->rolle->auto_map_resize) { ?>
+		window.onresize = function(){ clearTimeout(doit); doit = setTimeout(resizemap2window, 200);};<?php
+	} ?>
 	document.fullyLoaded = true;
 }
 
@@ -681,11 +681,9 @@ function deleteRollenlayer(type){
 }
 
 function neuLaden(){
-	if(checkForUnsavedChanges()){
-		startwaiting(true);
-		if(currentform.neuladen)currentform.neuladen.value='true';
-		get_map_ajax('go=navMap_ajax', '', 'if(document.GUI.oldscale != undefined){document.GUI.oldscale.value=document.GUI.nScale.value;}');
-	}
+	startwaiting(true);
+	if(currentform.neuladen)currentform.neuladen.value='true';
+	get_map_ajax('go=navMap_ajax', '', 'if(document.GUI.oldscale != undefined){document.GUI.oldscale.value=document.GUI.nScale.value;}');
 }
 
 function preventDefault(e){
