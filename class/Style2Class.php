@@ -4,8 +4,7 @@ class Style2Class extends MyObject {
 	static $write_debug = false;
 
 	function __construct($gui) {
-		$this->MyObject($gui, 'u_styles2classes');
-	}
+		parent::__construct($gui, 'u_styles2classes');	}
 
 	public static	function find($gui, $where) {
 		$style2class = new Style2Class($gui);
