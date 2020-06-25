@@ -99,7 +99,7 @@ class stelle {
       $sql.='`Bezeichnung_'.$this->language.'` AS ';
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
-    #echo $sql;
+    #echo '<p>SQL zur Abfrage des Stellennamens: ' . $sql;
     $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {

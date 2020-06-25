@@ -8049,7 +8049,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
       # Stellenzuweisung
   		$stellen = $this->Stellenzuweisung(
         array($formvars['selected_layer_id']),
-        explode(', ', $formvars['selstellen']),
+        ($formvars['selstellen'] != '' ? explode(', ', $formvars['selstellen']) : array()),
   			NULL,
   			$formvars['assign_default_values']
       );
@@ -9616,7 +9616,7 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 						} break;
 					} # end of switch
 				}
-				
+
 				if(!empty($insert)){
 					if(!$layerset[0]['maintable_is_view'])$sql = "LOCK TABLE " . $table['tablename']." IN SHARE ROW EXCLUSIVE MODE;";
 					$sql.= "INSERT INTO " . $table['tablename']." (";
@@ -9632,8 +9632,8 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
 					$this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
 
+					#echo '<p>SQL zum Anlegen des Datensatzes: ' . $sql;
 					$ret = $layerdb->execSQL($sql, 4, 1, false);
-					#echo '<br>Datensatz Speichern SQL: ' . $sql;
 
 					if ($last_notice = pg_last_notice($layerdb->dbConn)) {
 						if (strpos($last_notice, 'CONTEXT: ') !== false) {

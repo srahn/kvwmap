@@ -738,7 +738,7 @@
 							</select>
 					</td>
 				</tr><?
-				if (is_array('Bezeichnung', $this->formvars['selstellen']) AND count($this->formvars['selstellen']["Bezeichnung"]) > 0) { ?>
+				if (is_array($this->formvars['selstellen']) AND array_key_exists('Bezeichnung', $this->formvars['selstellen']) AND count($this->formvars['selstellen']["Bezeichnung"]) > 0) { ?>
 				<tr>
 					<td align="center" colspan=3 style="height: 30px;border-bottom:1px solid #C3C7C3">
 						<a href="javascript:document.GUI.assign_default_values.value=1;submitWithValue('GUI','go_plus','Speichern')"><? echo $strAssignDefaultValues; ?></a>
