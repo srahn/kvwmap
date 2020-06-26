@@ -1215,8 +1215,8 @@ echo '			</ul>
 				else {
 				  $map = new mapObj(SHAPEPATH.'MapFiles/tk_niedersachsen.map');
 				}
-				echo '<br>MapServer Version: '.ms_GetVersionInt();
-				echo '<br>Details: '.ms_GetVersion();
+				#echo '<br>MapServer Version: '.ms_GetVersionInt();
+				#echo '<br>Details: '.ms_GetVersion();
 
         # Allgemeine Parameter
         #var_dump($this->formvars);
@@ -16577,6 +16577,7 @@ class db_mapObj{
 				. ($typ != NULL ? " AND l.Typ = '" . $typ . "'" : "") . "
 		";
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>" . $sql,4);
+		# echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
     $Layer = array();
@@ -18059,6 +18060,7 @@ class db_mapObj{
 		$style['outlinecolorred'] = 0;
 		$style['outlinecolorgreen'] = 0;
 		$style['outlinecolorblue'] = 0;
+		$style['outlinecolor'] = $style['outlinecolorred'] . ' ' . $style['outlinecolorgreen'] . ' ' . $style['outlinecolorblue'];
 		switch ($datatype) {
 			case 0 : {
 				if(defined('ZOOM2POINT_STYLE_ID') AND ZOOM2POINT_STYLE_ID != ''){
@@ -18091,6 +18093,7 @@ class db_mapObj{
 		}
 		$style['backgroundcolor'] = NULL;
 		$style['minsize'] = NULL;
+		# echo '<p>neuer Style style_id: ' . $style_id;
 		if(!$style_id)$style_id = $this->new_Style($style);
 		$this->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
 		if($user->rolle->result_hatching){
@@ -19658,6 +19661,7 @@ class db_mapObj{
 	}
 
   function new_Style($style){
+		#echo '<p>style: ' . print_r($style, true);
     if(is_array($style)){
       $sql = "INSERT INTO styles SET ";
 			if($style['colorred'] != ''){$sql.= "color = '" . $style['colorred']." " . $style['colorgreen']." " . $style['colorblue']."'";}
@@ -19667,7 +19671,9 @@ class db_mapObj{
       if(value_of($style, 'size')){$sql.= ", size = '" . $style['size']."'";}
       if(value_of($style, 'backgroundcolor')){$sql.= ", backgroundcolor = '" . $style['backgroundcolor']."'";}
       if(value_of($style, 'backgroundcolorred')){$sql.= ", backgroundcolor = '" . $style['backgroundcolorred']." " . $style['backgroundcolorgreen']." " . $style['backgroundcolorblue']."'";}
-      if(value_of($style, 'outlinecolor')){$sql.= ", outlinecolor = '" . $style['outlinecolor']."'";}
+      if (value_of($style, 'outlinecolor')) {
+				$sql.= ", outlinecolor = '" . $style['outlinecolor']."'";
+			}
       if(value_of($style, 'outlinecolorred')){$sql.= ", outlinecolor = '" . $style['outlinecolorred']." " . $style['outlinecolorgreen']." " . $style['outlinecolorblue']."'";}
 			if(value_of($style, 'colorrange')){$sql.= ", colorrange = '" . $style['colorrange']."'";}
 			if(value_of($style, 'datarange')){$sql.= ", datarange = '" . $style['datarange']."'";}
@@ -19703,7 +19709,7 @@ class db_mapObj{
       $sql.= "minsize = '" . $style->minsize."', ";
       $sql.= "maxsize = '" . $style->maxsize."'";
     }
-    #echo $sql;
+    #echo '<p>SQL zum Anlegen eines Styles: '. $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->new_Style - Erzeugen eines Styles:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
 		if($this->db->logfile != NULL)$this->db->logfile->write($sql.';');
