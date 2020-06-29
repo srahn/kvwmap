@@ -108,7 +108,7 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 					 '&list_edit=1\', 
 					 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
 					 new Array(\'sethtml\', \'execute_function\'));
-					 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
+					 clearsubforms('.$this->formvars['selected_layer_id'].');"><span>'.$strNewEmbeddedPK.'</span></a>';
 		}
 		if ($this->formvars['list_edit']) {
 			echo '&nbsp;<a tabindex="1" style="font-size: '.$linksize.'px;" class="show_all_button buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
@@ -265,7 +265,7 @@ else{ ?>
 										 '&reload='.$this->formvars['reload'].'\', 
 										 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
 										 new Array(\'sethtml\', \'execute_function\'));
-										 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
+										 clearsubforms('.$this->formvars['selected_layer_id'].');"><span>'.$strNewEmbeddedPK.'</span></a>';
 							}
 							else {
 								$data = array();
