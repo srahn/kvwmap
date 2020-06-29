@@ -1,4 +1,8 @@
 <?
+function value_of($array, $key) {
+	if(!is_array($array))$array = array();
+	return (array_key_exists($key, $array) ? $array[$key] :	'');
+}
 
 function in_subnet($ip,$net) {
 	$ipparts=explode('.',$ip);
