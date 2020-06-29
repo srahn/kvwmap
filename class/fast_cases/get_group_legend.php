@@ -671,7 +671,7 @@ class GUI {
 									$layerset['list'][$i]['Data'],
 									rolle::$layer_params,
 									$this->user->id,
-									$this->stelle_id,
+									$this->Stelle->id,
 									rolle::$hist_timestamp,
 									$this->user->rolle->language
 								);
@@ -2389,16 +2389,17 @@ class db_mapObj {
 				$name_column . ",
 				l.alias,
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem,
-				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.styleitem, l.classification, l.filteritem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.styleitem, l.classification, l.filteritem,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				g.id, ".$group_column.", g.obergruppe, g.order
 			FROM
 				u_rolle2used_layer AS rl,
 				used_layer AS ul,
-				layer AS l,
 				u_groups AS g,
-				u_groups2rolle as gr
+				u_groups2rolle as gr,
+				layer AS l
+				LEFT JOIN connections as c ON l.connection_id = c.id
 			WHERE
 				rl.stelle_id = ul.Stelle_ID AND
 				rl.layer_id = ul.Layer_ID AND
@@ -2433,6 +2434,14 @@ class db_mapObj {
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
     while ($rs=mysql_fetch_assoc($query)){
+			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
+				if($rs['Filter'] == ''){
+					$rs['Filter'] = '('.$rs['rollenfilter'].')';
+				}
+				else {
+					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
+				}
+			}
 			if($rs['alias'] == '' OR !$useLayerAliases){
 				$rs['alias'] = $rs['Name'];
 			}
