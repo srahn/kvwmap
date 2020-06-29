@@ -144,16 +144,19 @@ class GUI {
 }
 
 class database {
-
   var $ist_Fortfuehrung;
   var $debug;
   var $loglevel;
   var $logfile;
   var $commentsign;
   var $blocktransaction;
+	var $success;
+	var $errormessage;
 
-  function database() {
+  function __construct() {
     global $debug;
+		global $GUI;
+		$this->gui = $GUI;
     $this->debug=$debug;
     $this->loglevel=LOG_LEVEL;
  		$this->defaultloglevel=LOG_LEVEL;
@@ -175,9 +178,9 @@ class database {
 
 	function open() {
 		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
-		$this->dbConn = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
-		$this->debug->write("<br>MySQL VerbindungsID: " . $this->dbConn->thread_id, 4);
-		return $this->dbConn->connect_errno;
+		$this->mysqli = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
+		return $this->mysqli->connect_errno;
 	}
 
 	function execSQL($sql, $debuglevel = 4, $loglevel = 0, $suppress_error_msg = false) {
@@ -235,7 +238,7 @@ class database {
 		}
 		return $ret;
 	}
-
+	
 	function close() {
 		$this->debug->write("<br>MySQL Verbindung ID: " . $this->mysqli->thread_id . " schließen.", 4);
 		if (LOG_LEVEL > 0) {
@@ -500,16 +503,22 @@ class stelle {
 }
 
 class rolle {
+	var $user_id;
+	var $stelle_id;
+	var $debug;
+	var $database;
+	var $loglevel;
+	var $hist_timestamp_de;
+	static $hist_timestamp;
+	static $layer_params;
+	var $minx;
+	var $language;
+	var $newtime;
 
-  var $user_id;
-  var $stelle_id;
-  var $debug;
-  var $database;
-  var $loglevel;
-  static $hist_timestamp;
-
-	function rolle($user_id,$stelle_id,$database) {
+	function __construct($user_id, $stelle_id, $database) {
 		global $debug;
+		global $GUI;
+		$this->gui_object = $GUI;
 		$this->debug=$debug;
 		$this->user_id=$user_id;
 		$this->stelle_id=$stelle_id;
@@ -619,8 +628,7 @@ class rolle {
 	}
 }
 
-class db_mapObj {
-
+class db_mapObj{
   var $debug;
   var $referenceMap;
   var $Layer;
@@ -628,50 +636,80 @@ class db_mapObj {
   var $nurAufgeklappteLayer;
   var $Stelle_ID;
   var $User_ID;
+	var $db;
+	var $OhneRequires;
+	var $disabled_classes;
 
-  function db_mapObj($Stelle_ID,$User_ID) {
-    global $debug;
-    $this->debug=$debug;
-    $this->Stelle_ID=$Stelle_ID;
-    $this->User_ID=$User_ID;
-  }
+	function __construct($Stelle_ID, $User_ID) {
+		global $debug;
+		global $GUI;
+		$this->script_name = 'db_MapObj.php';
+		$this->debug = $debug;
+		$this->GUI = $GUI;
+		$this->db = $GUI->database;
+		$this->Stelle_ID = $Stelle_ID;
+		$this->User_ID = $User_ID;
+		$this->rolle = new rolle($User_ID, $Stelle_ID, $this->db);
+	}
 
 	function getlayerdatabase($layer_id, $host){
-		if($layer_id < 0){	# Rollenlayer
-			$sql ='SELECT `connection`, "'.CUSTOM_SHAPE_SCHEMA.'" as `schema` FROM rollenlayer WHERE -id = '.$layer_id.' AND connectiontype = 6';
+		if ($layer_id < 0) {	# Rollenlayer
+			$sql = "
+				SELECT
+					`connection`,
+					'" . CUSTOM_SHAPE_SCHEMA . "' as `schema`,
+					0 AS connection_id
+				FROM
+					rollenlayer
+				WHERE
+					-id = " . $layer_id . " AND
+					connectiontype = 6
+			";
 		}
-		else{
-			$sql ="SELECT concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as `connection`, `schema` FROM layer as l, connections as c WHERE l.Layer_ID = ".$layer_id." AND l.connection_id = c.id AND l.connectiontype = 6";
+		else {
+			$sql = "
+				SELECT
+					concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as `connection`,
+					`schema`,
+					l.connection_id
+				FROM
+					layer as l,
+					connections as c
+				WHERE
+					l.Layer_ID = " . $layer_id . " AND
+					l.connection_id = c.id AND
+					l.connectiontype = 6
+			";
 		}
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Lesen des connection-Strings des Layers:<br>" . $sql,4);
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-		$rs = $this->db->result->fetch_array();
+		$rs = $this->db->result->fetch_row();
 		$connectionstring = $rs[0];
 #		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Gefundener Connection String des Layers:<br>" . $connectionstring, 4);
-		if ($connectionstring != ''){
+		if ($connectionstring != '') {
 			$layerdb = new pgdatabase();
-			if($rs[1] == '') {
+			if ($rs[1] == '') {
 				$rs[1] = 'public';
 			}
 			$layerdb->schema = $rs[1];
 			$connection = explode(' ', trim($connectionstring));
-			for($j = 0; $j < count($connection); $j++){
-				if($connection[$j] != ''){
+			for ($j = 0; $j < count($connection); $j++){
+				if ($connection[$j] != '') {
 					$value = explode('=', $connection[$j]);
-					if(strtolower($value[0]) == 'user'){
+					if (strtolower($value[0]) == 'user'){
 						$layerdb->user = $value[1];
 					}
-					if(strtolower($value[0]) == 'dbname'){
+					if (strtolower($value[0]) == 'dbname'){
 						$layerdb->dbName = $value[1];
 					}
-					if(strtolower($value[0]) == 'password'){
+					if (strtolower($value[0]) == 'password'){
 						$layerdb->passwd = $value[1];
 					}
-					if(strtolower($value[0]) == 'host'){
+					if (strtolower($value[0]) == 'host'){
 						$layerdb->host = $value[1];
 					}
-					if(strtolower($value[0]) == 'port'){
+					if (strtolower($value[0]) == 'port'){
 						$layerdb->port = $value[1];
 					}
 				}
@@ -681,6 +719,7 @@ class db_mapObj {
 			}
 			if (!$layerdb->open()) {
 				echo 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
+				echo '<br>Connection ID: ' . $rs[2];
 				echo '<br>Host: '.$layerdb->host;
 				echo '<br>User: '.$layerdb->user;
 				echo '<br>Datenbankname: '.$layerdb->dbName;
@@ -689,7 +728,7 @@ class db_mapObj {
 		}
 		return $layerdb;
 	}
-	
+
   function read_datatype_attributes($datatype_id, $datatypedb, $attributenames, $all_languages = false, $recursive = false){
 		global $language;
 
@@ -835,7 +874,7 @@ class db_mapObj {
 			$i++;
 		}
 		return $attributes;
-  }	
+  }
 
   function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false){
 		global $language;
@@ -872,6 +911,7 @@ class db_mapObj {
 				d.`name` as typename,
 				`geometrytype`,
 				`constraints`,
+				`saveable`,
 				`nullable`,
 				`length`,
 				`decimal_length`,
@@ -911,6 +951,7 @@ class db_mapObj {
 			$attributes['order'][$i] = $rs['order'];
 			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
+			if($rs['real_name'] == '')$rs['real_name'] = $rs['name'];
 			$attributes['real_name'][$rs['name']] = $rs['real_name'];
 			if ($rs['tablename']){
 				if (strpos($rs['tablename'], '.') !== false){
@@ -937,6 +978,7 @@ class db_mapObj {
 			$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
 			$attributes['constraints'][$i]= $rs['constraints'];
 			$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
+			$attributes['saveable'][$i]= $rs['saveable'];
 			$attributes['nullable'][$i]= $rs['nullable'];
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
@@ -999,46 +1041,107 @@ class db_mapObj {
 		}
 		return $attributes;
   }
+
+	/*
+	* Returns a list of datatypes used by layer, given in layer_ids array
+	*/
+	function get_datatypes($layer_ids) {
+		$datatypes = array();
+		$sql = "
+			SELECT DISTINCT
+				dt.*
+			FROM
+				`layer_attributes` la JOIN
+				`datatypes` dt ON replace(la.type,'_', '') = dt.id
+			WHERE
+				la.layer_id IN (" . implode(', ', $layer_ids) . ")
+		";
+
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_datatypes - Lesen der Datentypen der Layer mit id (" . implode(', ', $layer_ids) . "):<br>" . $sql , 4);
+		$this->db->execSQL($sql);
+		if ($query == 0) {
+			$this->GUI->add_message('error', err_msg($this->script_name, __LINE__, $sql));
+			return 0;
+		}
+		while ($rs = $this->db->result->fetch_assoc()) {
+			$datatypes[] = $rs;
+		}
+		return $datatypes;
+	}
+
+	function getall_Datatypes($order) {
+		$datatypes = array();
+		$order_sql = ($order != '') ? "ORDER BY " . replace_semicolon($order) : '';
+		$sql = "
+			SELECT
+				*
+			FROM
+				datatypes
+			" . $order_sql;
+
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Datatypes - Lesen aller Datentypen:<br>" . $sql , 4);
+		$this->db->execSQL($sql);
+    if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+		while($rs = $this->db->result->fetch_assoc()) {
+			/*
+			foreach($rs AS $key => $value) {
+				$datatypes[$key][] = $value;
+			}
+			*/
+			$datatypes[] = $rs;
+		}
+		return $datatypes;
+	}
 }
 
 class pgdatabase {
+	var $ist_Fortfuehrung;
+	var $debug;
+	var $loglevel;
+	var $defaultloglevel;
+	var $logfile;
+	var $defaultlogfile;
+	var $commentsign;
+	var $blocktransaction;
+	var $port;
+	var $schema;
+	var $pg_text_attribute_types = array('character', 'character varying', 'text', 'timestamp without time zone', 'timestamp with time zone', 'date', 'USER-DEFINED');
 
-  var $ist_Fortfuehrung;
-  var $debug;
-  var $loglevel;
-  var $defaultloglevel;
-  var $logfile;
-  var $defaultlogfile;
-  var $commentsign;
-  var $blocktransaction;
-
-	function pgdatabase() {
-	  global $debug;
-    $this->debug=$debug;
-    $this->loglevel=LOG_LEVEL;
- 		$this->defaultloglevel=LOG_LEVEL;
- 		global $log_postgres;
-    $this->logfile=$log_postgres;
- 		$this->defaultlogfile=$log_postgres;
-    $this->ist_Fortfuehrung=1;
-    $this->type='postgresql';
-    $this->commentsign='--';
-    # Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
-    # START TRANSACTION, ROLLBACK und COMMIT unterdrï¿½ckt, so daï¿½ alle anderen SQL
-    # Anweisungen nicht in Transactionsblï¿½cken ablaufen.
-    # Kann zur Steigerung der Geschwindigkeit von groï¿½en Datenbestï¿½nden verwendet werden
-    # Vorsicht: Wenn Fehler beim Einlesen passieren, ist der Datenbestand inkonsistent
-    # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
-    # Dazu Fehlerausschriften bearchten.
-    $this->blocktransaction=0;
-  }
+	function __construct() {
+		global $debug;
+		global $GUI;
+		$this->gui = $GUI;
+		$this->debug=$debug;
+		$this->loglevel=LOG_LEVEL;
+		$this->defaultloglevel=LOG_LEVEL;
+		global $log_postgres;
+		$this->logfile=$log_postgres;
+		$this->defaultlogfile=$log_postgres;
+		$this->ist_Fortfuehrung=1;
+		$this->type='postgresql';
+		$this->commentsign='--';
+		# Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
+		# START TRANSACTION, ROLLBACK und COMMIT unterdrückt, so daß alle anderen SQL
+		# Anweisungen nicht in Transactionsblöcken ablaufen.
+		# Kann zur Steigerung der Geschwindigkeit von großen Datenbeständen verwendet werden
+		# Vorsicht: Wenn Fehler beim Einlesen passieren, ist der Datenbestand inkonsistent
+		# und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
+		# Dazu Fehlerausschriften bearchten.
+		$this->blocktransaction=0;
+		$this->spatial_ref_code = EPSGCODE_ALKIS . ", " . EARTH_RADIUS;
+	}
 
   function open() {
   	if($this->port == '') $this->port = 5432;
     #$this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
-		$connect_string = 'dbname='.$this->dbName.' port='.$this->port.' user='.$this->user.' password='.$this->passwd;
-		if($this->host != 'localhost' AND $this->host != '127.0.0.1')$connect_string .= ' host='.$this->host;		// das beschleunigt den Connect extrem
-    $this->dbConn=pg_connect($connect_string);
+		$this->connect_string = '' .
+      'dbname='. $this->dbName .
+      ' port=' . $this->port .
+      ' user=' . $this->user .
+      ' password=' . $this->passwd;
+		if($this->host != 'localhost' AND $this->host != '127.0.0.1')
+      $this->connect_string .= ' host=' . $this->host; // das beschleunigt den Connect extrem
+    $this->dbConn = pg_connect($this->connect_string);
     $this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);
     # $this->version = pg_version($this->dbConn); geht erst mit PHP 5
     $this->version = POSTGRESVERSION;
@@ -1049,71 +1152,145 @@ class pgdatabase {
     $sql ="SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    return $ret[1];    	
-  }  
-
-  function execSQL($sql,$debuglevel, $loglevel) {
-  	switch ($this->loglevel) {
-  		case 0 : {
-  			$logsql=0;
-  		} break;
-  		case 1 : {
-  			$logsql=1;
-  		} break;
-  		case 2 : {
-  			$logsql=$loglevel;
-  		} break;
-  	}
-    # SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
-    # wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
-    # (lesend immer, aber schreibend nur mit DBWRITE=1)
-    if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
-      #echo "<br>".$sql;
-      $sql = "SET datestyle TO 'German';".$sql;
-      if($this->schema != ''){
-      	$sql = "SET search_path = ".$this->schema.", public;".$sql;
-      }
-      $query=pg_query($this->dbConn,$sql);
-      //$query=0;
-      if ($query==0) {
-				$errormessage = pg_last_error($this->dbConn);
-        $ret[0]=1;
-        $ret[1]="Fehler bei SQL Anweisung:<br><br>\n\n".$sql."\n\n<br><br>".$errormessage;
-        echo "<br><b>".$ret[1]."</b>";
-        $this->debug->write("<br><b>".$ret[1]."</b>",$debuglevel);
-        if ($logsql) {
-          $this->logfile->write($this->commentsign." ".$ret[1]);
-        }
-      }
-      else {
-      	# Abfrage wurde erfolgreich ausgeführt
-        $ret[0]=0;
-        $ret[1]=$query;
-        $this->debug->write("<br>".$sql,$debuglevel);
-        # 2006-07-04 pk $logfile ersetzt durch $this->logfile
-        if ($logsql) {
-          $this->logfile->write($sql.';');
-        }
-      }
-      $ret[2]=$sql;
-    }
-    else {
-      # Es werden keine SQL-Kommandos ausgeführt
-      # Die Funktion liefert ret[0]=0, und zeigt damit an, daß kein Datenbankfehler aufgetreten ist,
-      $ret[0]=0;
-      # jedoch hat $ret[1] keine query_ID sondern auch den Wert 0
-      $ret[1]=0;
-      # Wenn $this->loglevel != 0 wird die sql-Anweisung in die logdatei geschrieben
-      # zusätzlich immer in die debugdatei
-      # 2006-07-04 pk $logfile ersetzt durch $this->logfile
-      if ($logsql) {
-        $this->logfile->write($sql.';');
-      }
-      $this->debug->write("<br>".$sql,$debuglevel);
-    }
-
-    return $ret;
+    return $ret[1];
   }
+
+	function execSQL($sql, $debuglevel, $loglevel, $suppress_err_msg = false) {
+		$ret = array(); // Array with results to return
+		$strip_context = true;
+
+		switch ($this->loglevel) {
+			case 0 : {
+				$logsql = 0;
+			} break;
+			case 1 : {
+				$logsql = 1;
+			} break;
+			case 2 : {
+				$logsql = $loglevel;
+			} break;
+		}
+		# SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
+		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
+		# (lesend immer, aber schreibend nur mit DBWRITE=1)
+		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
+			#echo "<br>SQL in execSQL: " . $sql;
+			//if (stristr($sql, 'SELECT')) {
+				$sql = "SET datestyle TO 'German';" . $sql;
+			//};
+			if ($this->schema != '') {
+				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
+			}
+			#echo "<br>SQL in execSQL: " . $sql;
+			$query = @pg_query($this->dbConn, $sql);
+			//$query=0;
+			if ($query == 0) {
+				$ret['success'] = false;
+				# erzeuge eine Fehlermeldung;
+				$last_error = pg_last_error($this->dbConn);
+				if ($strip_context AND strpos($last_error, 'CONTEXT: ') !== false) {
+					$ret['msg'] = substr($last_error, 0, strpos($last_error, 'CONTEXT: '));
+				}
+				else {
+					$ret['msg'] = $last_error;
+				}
+
+				if (strpos($last_error, '{') !== false AND strpos($last_error, '}') !== false) {
+					# Parse als JSON String;
+					$error_obj = json_decode(substr($last_error, strpos($last_error, '{'), strpos($last_error, '}') - strpos($last_error, '{') + 1), true);
+					if (array_key_exists('msg_type', $error_obj)) {
+						$ret['type'] = $error_obj['msg_type'];
+					}
+					if (array_key_exists('msg', $error_obj) AND $error_obj['msg'] != '') {
+						$ret['msg'] = $error_obj['msg'];
+					}
+				}
+				else {
+					$ret['type'] = 'error';
+				}
+				$this->debug->write("<br><b>" . $last_error . "</b>", $debuglevel);
+				if ($logsql) {
+					$this->logfile->write($this->commentsign . ' ' . $sql . ' ' . $last_error);
+				}
+			}
+			else {
+				# Abfrage wurde zunächst erfolgreich ausgeführt
+				$ret[0] = 0;
+				$ret['success'] = true;
+				$ret[1] = $ret['query'] = $query;
+
+				# Prüfe ob eine Fehlermeldung in der Notice steckt
+				$last_notice = pg_last_notice($this->dbConn);
+				if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
+					$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
+				}
+				# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
+				if ($last_notice != '' AND ($this->gui->notices == NULL OR !in_array($last_notice, $this->gui->notices))) {
+					$this->gui->notices[] = $last_notice;
+					if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
+						# Parse als JSON String
+						$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
+						if ($notice_obj AND array_key_exists('success', $notice_obj)) {
+							if (!$notice_obj['success']) {
+								$ret['success'] = false;
+							}
+							if (array_key_exists('msg_type', $notice_obj)) {
+								$ret['type'] = $notice_obj['msg_type'];
+							}
+							if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
+								$ret['msg'] = $notice_obj['msg'];
+							}
+						}
+					}
+					else {
+						# Gebe Noticetext wie er ist zurück
+						$ret['msg'] = $last_notice;
+					}
+				}
+
+				# Schreibe Meldungen in Log und Debugfile
+				$this->debug->write("<br>" . $sql, $debuglevel);
+				if ($logsql) {
+					$this->logfile->write($sql . ';');
+				}
+			}
+			$ret[2] = $sql;
+		}
+		else {
+			# Es werden keine SQL-Kommandos ausgeführt
+			# Die Funktion liefert ret[0]=0, und zeigt damit an, daß kein Datenbankfehler aufgetreten ist,
+			$ret[0] = 0;
+			$ret['success'] = true;
+			# jedoch hat $ret[1] keine query_ID sondern auch den Wert 0
+			$ret[1] = 0;
+			# Wenn $this->loglevel != 0 wird die sql-Anweisung in die logdatei geschrieben
+			# zusätzlich immer in die debugdatei
+			# 2006-07-04 pk $logfile ersetzt durch $this->logfile
+			if ($logsql) {
+				$this->logfile->write($sql . ';');
+			}
+			$this->debug->write("<br>" . $sql, $debuglevel);
+		}
+
+		if ($ret['success']) {
+			# alles ok mach nichts weiter
+		}
+		else {
+			# Fehler setze entsprechende Fags und Fehlermeldung
+			$ret[0] = 1;
+			$ret[1] = $ret['msg'];
+			if ($suppress_err_msg) {
+				# mache nichts, denn die Fehlermeldung wird unterdrückt
+			}
+			else {
+				# gebe Fehlermeldung aus.
+				$ret[1] = $ret['msg'] = sql_err_msg('Fehler bei der Abfrage der PostgreSQL-Datenbank:', $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
+				$this->gui->add_message($ret['type'], $ret['msg']);
+				header('error: true');	// damit ajax-Requests das auch mitkriegen
+			}
+		}
+		return $ret;
+	}
 
   function check_oid($tablename){
     $sql = 'SELECT oid from '.$tablename.' limit 0';
@@ -1123,7 +1300,7 @@ class pgdatabase {
     $this->debug->write("<p>file:kvwmap class:postgresql->check_oid:<br>".$sql,4);
     @$query=pg_query($sql);
     if ($query==0) {
-      return false;
+			return false;
     }
     else{
       return true;

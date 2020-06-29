@@ -1216,7 +1216,8 @@ class user {
 	}
 
 	function NeuAnlegen($userdaten) {
-		$stellen = array_filter(explode(', ',$userdaten['selstellen']));
+#		$stellen = array_filter(explode(', ',$userdaten['selstellen']));
+		$stellen[0] = '';
 		# Neuen Nutzer anlegen
 		$sql ='INSERT INTO user SET';
 		if($userdaten['id'] != ''){
@@ -1248,6 +1249,7 @@ class user {
 		if($stellen[0] != ''){
 			$sql.=',stelle_id='.$stellen[0];
 		}
+		#echo '<p>SQL zum Eintragen eines neuen Nutzers: ' . $sql;
 		# Abfrage starten
 		$ret=$this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {

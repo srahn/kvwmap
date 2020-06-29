@@ -123,9 +123,9 @@ function get_exif_data($img_path) {
 		);
 	}
 	else {
-		echo '<br>' . print_r($exif['GPSLatitude'], true);
-		echo '<br>' . print_r($exif['GPSLongitude'], true);
-		echo '<br>' . print_r($exif['GPSImgDirection'], true);
+#		echo '<br>' . print_r($exif['GPSLatitude'], true);
+#		echo '<br>' . print_r($exif['GPSLongitude'], true);
+#		echo '<br>' . print_r($exif['GPSImgDirection'], true);
 		return array(
 			'success' => true,
 			'LatLng' => ((array_key_exists('GPSLatitude', $exif) AND array_key_exists('GPSLongitude', $exif)) ? (

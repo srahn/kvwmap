@@ -179,7 +179,7 @@ class database {
 			);
 		";
 		#echo '<br>sql: ' . $sql;
-		$query =  ($sql);
+		$this->execSQL($sql, 4, 0);
 
 		# ID des Gastnutzers abfragen
 		$sql = "

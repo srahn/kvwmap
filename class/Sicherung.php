@@ -5,7 +5,7 @@ class Sicherung extends MyObject {
 	static $write_debug = false;
 
 	function __construct($gui) {
-		$this->MyObject($gui, 'sicherungen');
+		parent::__construct($gui, 'sicherungen');
 		$this->identifier = 'id';
 		$this->setKeys(
 			array(

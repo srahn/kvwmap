@@ -1167,10 +1167,24 @@ class data_import_export {
 
 				case 'GeoJSONPlus': {
 					$exportfile = $exportfile.'.json';
-					if (in_array('mobile', $kvwmap_plugins)) {
-						$sql = str_replace('version FROM ', '(SELECT coalesce(max(version), 1) FROM ' . $layerset[0]['schema'] . '.' . $layerset[0]['maintable'] . '_deltas) AS version FROM ', $sql);
-					}
+
 					$err = $this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
+
+					if (in_array('mobile', $kvwmap_plugins)) {
+						$sql = "
+							SELECT
+								coalesce(max(version), 1) AS version
+							FROM
+								" . $layerset[0]['schema'] . "." . $layerset[0]['maintable'] . "_deltas
+						";
+						#echo '<p>SQL zur Abfrage der letzten Version in Delta Tabelle: ' . $sql;
+						$ret = $layerdb->execSQL($sql,4, 0);
+						if (!$ret[0]) {
+							$rs = pg_fetch_assoc($ret[1]);
+							$cmd = "sed -i 's/\"type\": \"FeatureCollection\"/\"type\": \"FeatureCollection\",\\n\"lastDeltaVersion\": " . $rs['version'] . "/g' " . $exportfile;
+							exec($cmd, $output, $return);
+						}
+					}
 				} break;
 
 				case 'CSV' : {

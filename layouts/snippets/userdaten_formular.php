@@ -44,9 +44,14 @@
 -->
 </script>
 <div id="userdaten_formular" class="">
-	<input type="hidden" name="go" value="Benutzerdaten">
-	<input type="hidden" name="selstellen" value="<? echo implode(', ', $this->formvars['selstellen']["ID"]); ?>">
-
+	<input type="hidden" name="go" value="Benutzerdaten"><?
+		if (is_array($this->formvars['selstellen']) AND array_key_exists('ID', $this->formvars['selstellen'])) {
+			$selstellen = implode(', ', $this->formvars['selstellen']["ID"]);
+		}
+		else {
+			$selstellen = '';
+		} ?>
+		<input type="hidden" name="selstellen" value="<? echo $selstellen; ?>">
 	<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
     <td><h2><?php echo $strTitle; ?></h2></td>
@@ -233,14 +238,17 @@ else {
 		</td>
 	</tr><?
 	if ($this->formvars['selected_user_id'] > 0) {
-		$active_stelle = array_search($this->userdaten[0]['stelle_id'], $this->formvars['selstellen']["ID"]);		?>
+		if (is_array($this->formvars['selstellen'])) {
+			$active_stelle = array_search($this->userdaten[0]['stelle_id'], $this->formvars['selstellen']["ID"]);
+			$active_stelle_bezeichnung = $this->formvars['selstellen']['Bezeichnung'][$active_stelle];
+		} ?>
 		<tr>
 			<td>
 				<table border="0" cellspacing="0" cellpadding="5" style="width: 100%;border:1px solid #C3C7C3">
 					<tr>
 						<th class="fetter" align="right" valign="top" style="width: 175px;border-bottom:1px solid #C3C7C3"><?php echo $strActiveStelle;?></th>
 						<td style="border-bottom:1px solid #C3C7C3">
-							<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->userdaten[0]['stelle_id']; ?>"><? echo $this->formvars['selstellen']['Bezeichnung'][$active_stelle]; ?></a>
+							<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->userdaten[0]['stelle_id']; ?>"><? echo $active_stelle_bezeichnung; ?></a>
 						</td>
 					</tr>
 					<tr>
