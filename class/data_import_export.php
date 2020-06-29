@@ -1047,7 +1047,7 @@ class data_import_export {
 			if (strpos($where, 'query.'.$this->attributes['name'][$i])) {			# oder es kommt in der Where-Bedingung des Sachdatenabfrage-SQLs vor
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
-			if (strpos($orderby, 'query.' . $this->attributes['name'][$i])) {						# oder es kommt im ORDER BY des Layer-Query vor
+			if (strpos($orderby, $this->attributes['name'][$i])) {						# oder es kommt im ORDER BY des Layer-Query vor
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
 			if (strpos($filter, $this->attributes['name'][$i])) {						# oder es kommt im Filter des Layers vor
