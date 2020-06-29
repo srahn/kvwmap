@@ -1549,7 +1549,9 @@ class GUI {
 					}
 				}
 			}
-			$legend .= '</td></tr>';
+			if($j+1 < $count AND $current_groupgetMetaData_off_requires != 1){		// todo
+				$legend .= '</td></tr>';
+			}
 		}
 
 		# unsichtbare Layer
