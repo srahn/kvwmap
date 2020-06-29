@@ -117,7 +117,7 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 					 '&list_edit=1\', 
 					 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
 					 new Array(\'sethtml\', \'execute_function\'));
-					 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
+					 clearsubforms('.$this->formvars['selected_layer_id'].');"><span>'.$strNewEmbeddedPK.'</span></a>';
 		} ?>
 	</div>
 <?
@@ -258,7 +258,7 @@ else{ ?>
 										 '&mime_type='.$this->formvars['mime_type'].'\', 
 										 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
 										 new Array(\'sethtml\', \'execute_function\'));
-										 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
+										 clearsubforms('.$this->formvars['selected_layer_id'].');"><span>'.$strNewEmbeddedPK.'</span></a>';
 							}
 							else {
 								$data = array();
