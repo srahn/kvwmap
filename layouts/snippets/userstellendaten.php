@@ -9,67 +9,83 @@ function Bestaetigung(link,text) {
   window.location.href = link;
 }
 </script>
-<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
-  <tr align="center"> 
-    <td><h2><?php echo $this->titel; ?></h2></td>
-  </tr>
-  <tr>
-    <td>
-    	<table width="100%" border="0" style="border:2px solid <?php echo BG_DEFAULT ?>"cellspacing="0" cellpadding="3">
-	      <tr>
-	      	<th style="border-right:1px solid <?php echo BG_DEFAULT ?>">Stelle</th>
-	        <th style="border-right:1px solid <?php echo BG_DEFAULT ?>"><?php echo $this->strName;?></th>
-	      </tr>
-	      <?php 
-	      for($s = 0; $s < count($this->stellen['ID']); $s++){ ?>
-	      	<tr>
-	      		<td colspan="3" bgcolor="<?php echo BG_DEFAULT ?>" style="border:1px solid <?php echo BG_DEFAULT ?>"><span class="fett"><? echo $this->stellen['Bezeichnung'][$s]; ?></span></td>
-	      	</tr>
-		   <? for($i=0;$i<count($this->stellen['user'][$s]['ID']);$i++) { ?>
-		      <tr>
-		      	<? if($i == 0){ ?><td align="center" rowspan="<? echo count($this->stellen['user'][$s]['ID']); ?>" style="border-right:1px solid <?php echo BG_DEFAULT ?>" width="200"><? echo count($this->stellen['user'][$s]['ID']).' Nutzer'; ?></td><? } ?>
-						<td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>"><a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<? echo $this->stellen['user'][$s]['ID'][$i]; ?>"><? echo $this->stellen['user'][$s]['Bezeichnung'][$i]; ?></a></td>
-		      </tr>
-		   <? } ?>
-		      <tr>
-		      	<td></td>
-		      </tr>
-		      <?
-	      }
-	      ?>
-	      <? if($this->unassigned_users['ID']){ ?>
-	      <tr>
-	    		<td colspan="3" bgcolor="<?php echo BG_DEFAULT ?>" style="border:1px solid <?php echo BG_DEFAULT ?>"><span class="fett">Nicht zugeordnete Nutzer</span></td>
-	    	</tr>
-	   <? }
-	   		for($i = 0; $i < count($this->unassigned_users['ID']); $i++){ ?>
-	      <tr>
-	      	<? if($i == 0){ ?><td align="center" rowspan="<? echo count($this->unassigned_users['ID']); ?>" style="border-right:1px solid <?php echo BG_DEFAULT ?>" width="200"><? echo count($this->unassigned_users['ID']).' Nutzer'; ?></td><? } ?>
-					<td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>"><a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<? echo $this->unassigned_users['ID'][$i]; ?>"><? echo $this->unassigned_users['Bezeichnung'][$i]; ?></a></td>
-	      </tr>
-	   <? } if($this->expired_users['ID']){ ?>
-				<tr>
-					<td colspan="3" bgcolor="<?php echo BG_DEFAULT ?>" style="border:1px solid <?php echo BG_DEFAULT ?>"><span class="fett">Abgelaufene Nutzer</span></td>
-				</tr>
-		 <? }
-				for($i = 0; $i < count($this->expired_users['ID']); $i++){ ?>
-				<tr>
-					<? if($i == 0){ ?><td align="center" rowspan="<? echo count($this->expired_users['ID']); ?>" style="border-right:1px solid <?php echo BG_DEFAULT ?>" width="200"><? echo count($this->expired_users['ID']).' Nutzer'; ?></td><? } ?>
-					<td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>"><a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<? echo $this->expired_users['ID'][$i]; ?>"><? echo $this->expired_users['Bezeichnung'][$i]; ?></a></td>
-				</tr>
-		 <? } if($this->user_count){ ?>
-	   		<tr>
-	    		<td colspan="3" bgcolor="<?php echo BG_DEFAULT ?>" style="border:1px solid <?php echo BG_DEFAULT ?>"><span class="fett">Nutzer insgesamt</span></td>
-	    	</tr>
-	      <tr>
-	      	<td align="center" style="border-right:1px solid <?php echo BG_DEFAULT ?>" width="200"><? echo $this->user_count.' Nutzer'; ?></td>
-	      	<td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>">&nbsp;</td>
-	      </tr>
-	      <? } ?>
-	    </table>
-    </td>
-  </tr>
-  <tr> 
-    <td align="right">&nbsp;</td>
-  </tr>
-</table>
+<style>
+.usd-titel {
+	margin: 20px 0px 50px 0px;
+}
+.usd-stellen {
+	width: 50%;
+	margin: 0px 0px 15px 0px;
+}
+.usd-stelle {
+	border: 1px solid #ccc;
+	border-radius: 2px;
+	background: linear-gradient(#ECF1F5 0%, #dee9f0 100%);
+	text-align: left;
+	padding: 10px;
+}
+.usd-stelle span:first-child {
+	font-weight: bold;
+}
+.usd-nutzer {
+	border: 1px solid #ccc;
+	border-radius: 2px;
+	background-color: white;
+	text-align: left;
+	margin-top: 1px;
+	padding: 5px 10px;
+}
+</style>
+
+<div class="usd-titel">
+<h2><? echo $this->titel; ?></h2>
+<h4><? echo $this->user_count.' Nutzer'; ?></h4>
+</div>
+<? for($s = 0; $s < count($this->stellen['ID']); $s++){ ?>
+   <div class="usd-stellen">
+     <div class="usd-stelle">
+	   <span><? echo $this->stellen['Bezeichnung'][$s]; ?></span><br>
+	   <span><? echo count($this->stellen['user'][$s]['ID']).' Nutzer'; ?></span>
+	 </div>
+  <? for($i=0;$i<count($this->stellen['user'][$s]['ID']);$i++) { ?>
+	 <a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<? echo $this->stellen['user'][$s]['ID'][$i]; ?>">
+	   <div class="usd-nutzer">
+	     <? echo $this->stellen['user'][$s]['Bezeichnung'][$i]; ?>
+	   </div>
+	 </a>
+  <? } ?>
+  </div>
+<? } ?>
+
+<? if($this->unassigned_users['ID']){ ?>
+  <div class="usd-stellen">
+    <div class="usd-stelle">
+      <span>Nicht zugeordnete Nutzer</span><br>
+	  <span><? echo count($this->unassigned_users['ID']).' Nutzer'; ?></span>
+    </div>
+<? }
+   for($i = 0; $i < count($this->unassigned_users['ID']); $i++){ ?>
+    <a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<? echo $this->unassigned_users['ID'][$i]; ?>">
+      <div class="usd-nutzer">
+	     <? echo $this->unassigned_users['Bezeichnung'][$i]; ?>
+      </div>
+    </a>
+<? } ?>
+  </div>
+
+<? if($this->expired_users['ID']){ ?>
+  <div class="usd-stellen">
+    <div class="usd-stelle">
+      <span>Gestoppte Nutzer</span><br>
+	  <span><? echo count($this->expired_users['ID']).' Nutzer'; ?></span>
+    </div>
+<? }
+   for($i = 0; $i < count($this->expired_users['ID']); $i++){ ?>
+    <a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<? echo $this->expired_users['ID'][$i]; ?>">
+      <div class="usd-nutzer">
+	     <? echo $this->expired_users['Bezeichnung'][$i]; ?>
+      </div>
+    </a>
+<? } ?>
+  </div>
+
