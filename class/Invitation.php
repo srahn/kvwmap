@@ -6,7 +6,8 @@ class Invitation extends MyObject {
 	static $identifier = 'token';
 
 	function __construct($gui) {
-		$this->MyObject($gui, 'invitations');
+		parent::__construct($gui, 'invitations');
+		//$this->MyObject($gui, 'invitations');
 		$this->identifier = Invitation::$identifier;
 		$this->identifier_type = 'text';
 		$this->validations = array(
