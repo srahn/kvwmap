@@ -342,7 +342,7 @@ $j=0;
   			?>
   		</select>
       <?php
- 				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
+ 				include(LAYOUTPATH.'snippets/SVG_polygon.php')
 			?>
     </td>
   </tr>
