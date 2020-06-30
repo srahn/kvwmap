@@ -4739,7 +4739,7 @@ echo '			</ul>
 			$ret = $lineeditor->eintragenLinie($umring, $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->attributes['geomtype'][$this->attributes['the_geom']]);
 			if ($ret[0]) { # fehler beim eintrag
 				$this->add_message('error', $ret[1]);
-#				$this->Meldung=$ret[1];
+				$this->formvars['no_load'] = 'true';
 			}
 			else { # eintrag erfolgreich
 				# wenn Time-Attribute vorhanden, aktuelle Zeit speichern
@@ -4935,6 +4935,7 @@ echo '			</ul>
 			);
 			if (!$ret['success']) { # fehler beim eintrag
 				$this->Meldung = $ret[1];
+				$this->formvars['no_load'] = 'true';
 			}
 			else { # eintrag erfolgreich
 				# wenn auto-Attribute vorhanden, auto-Werte eintragen
