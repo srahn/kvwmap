@@ -674,12 +674,13 @@ a.menuered:hover {
 	margin-right: 23px;
 }
 
-.untermenue:before {
-	padding-left: 3px;
-	content:url('../graphics/submenue.png');
-	position:relative;
-	z-index:100000;
-	float: left;
+.untermenue::before {
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	content: '';
+	margin: 8px 7px 0px 10px;
+	background-color: #236dbf;
 }
 
 .untermenue {
