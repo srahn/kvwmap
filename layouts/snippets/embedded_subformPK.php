@@ -59,7 +59,7 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 								if ($layer['attributes']['visible'][$j]) {
 									$explosion = explode(';', $layer['attributes']['group'][$j]);
 									if ($explosion[1] != 'collapsed') { ?>
-										<td><?
+										<td <? echo get_td_class_or_style(array($layer['shape'][$k][$attributes['style']])); ?>><?
 											echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, false, NULL, NULL, NULL, $this->subform_classname); ?>
 										</td><?
 									}
