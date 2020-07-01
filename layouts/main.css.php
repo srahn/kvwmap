@@ -555,6 +555,10 @@ a.invisiblelayerlink:hover{
 	border-radius: 5px;
 	padding: 1px 7px 5px 7px;
 	margin: 0px 2px 0px 2px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	max-width: 300px;
 }
 
 .buttonlink:hover, .buttonlink:focus{
