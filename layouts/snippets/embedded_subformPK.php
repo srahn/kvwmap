@@ -30,8 +30,10 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 							if ($layer['attributes']['visible'][$j]) {
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								if ($explosion[1] != 'collapsed') { ?>
-									<td class="gle-attribute-name"><?
-										echo attribute_name($layer['Layer_ID'], $layer['attributes'], $j, 0, $this->user->rolle->fontsize_gle, false); ?>
+									<td class="gle-attribute-name">
+										<a href="javascript:reload_subform_list('<? echo $this->formvars['targetobject']; ?>', 1, '', '', '&orderby<? echo $layer['Layer_ID']; ?>=<? echo $layer['attributes']['name'][$j]; ?>')" title="Sortieren nach <? echo $layer['attributes']['name'][$j]; ?>"><?
+											echo attribute_name($layer['Layer_ID'], $layer['attributes'], $j, 0, $this->user->rolle->fontsize_gle, false); ?>
+										</a>
 									</td><?
 								}
 							}

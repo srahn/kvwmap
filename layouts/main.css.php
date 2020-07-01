@@ -316,7 +316,7 @@ pre {
 	padding: 0;
 }
 
-a, img {	
+a, img, a table span {	
 	color: firebrick; 
 	TEXT-DECORATION: none;
 	font-size: 15px;
