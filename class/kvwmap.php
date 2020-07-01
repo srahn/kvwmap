@@ -2837,7 +2837,7 @@ echo '			</ul>
 					echo '<option onmouseover="this.selected = true;"  value="'.$rs['value'].'">'.$rs['output'].'</option>';
 				}
 				echo '</select>
-				█document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'block\';';
+				█document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'block\'; document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').scrollIntoViewIfNeeded({block: "end", behavior: "smooth"});';
 			}
 		}
 		else {

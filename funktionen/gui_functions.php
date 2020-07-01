@@ -51,6 +51,13 @@ function roundNumber(num, scale){
   }
 }
 
+Element.prototype.scrollIntoViewIfNeeded = function (options) {
+	var rect = this.getBoundingClientRect();
+	if(rect.y + rect.height > window.innerHeight){
+		this.scrollIntoView(options);
+	}
+}
+
 function scrollToSelected(select){
 	var height = select.scrollHeight / select.childElementCount;
   for(var i = 0; i < select.options.length; i++){
