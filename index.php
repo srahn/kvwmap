@@ -1496,11 +1496,8 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'BenutzerStellen_Anzeigen' : {
+				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
 				$GUI->BenutzerNachStellenAnzeigen();
-			} break;
-
-			case 'BenutzerderStelleAnzeigen' : {
-				$GUI->BenutzerderStelleAnzeigen();
 			} break;
 
 			case 'Benutzerdaten_Anzeigen' : {
