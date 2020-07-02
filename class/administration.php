@@ -56,7 +56,7 @@ class administration{
 		#echo '<br>SQL zur Abfrage der registrierten Migrationen: ' . $sql;
 		$result = $this->database->execSQL($sql,0, 0);
 		if (!$this->database->success) {
-			echo '<br>Fehler bei der Abfrage der Tabelle migrations.<br>'; 	// bei Neuinstallation gibt es diese Tabelle noch nicht
+			echo '<br>Migrationstabelle existiert noch nicht. Bei Neuinstallation wird sie angelegt.<br>'; 	// bei Neuinstallation gibt es diese Tabelle noch nicht
 		}
 		else {
 			while ($rs = $this->database->result->fetch_array()) {
@@ -68,6 +68,7 @@ class administration{
 	}
 	
 	function get_schema_migration_files() {
+		#echo '<br>Get Schema Migration Files';
 		global $kvwmap_plugins;
 		$migrations['kvwmap']['mysql'] = array_diff (scandir(LAYOUTPATH.'db/mysql/schema'), array('.', '..'));
 		sort($migrations['kvwmap']['mysql']);
@@ -148,7 +149,10 @@ class administration{
 			foreach ($component_seed as $file) {
 				$filepath = $prepath.'db/mysql/data/'.$file;
 				$connection = 'user='.$this->pgdatabase->user.' password='.$this->pgdatabase->passwd.' dbname='.$this->pgdatabase->dbName;
-				if ($this->pgdatabase->host != '')$connection .= ' host='.$this->pgdatabase->host;
+				if ($this->pgdatabase->host != '') {
+					$connection .= ' host='.$this->pgdatabase->host;
+				}
+				#echo '<br>Execute SQL from seed file: ' . $filepath;
 				$result = $this->database->exec_commands(file_get_contents($filepath), 'user=xxxx password=xxxx dbname=kvwmapsp', $connection, true); # replace known constants
 				if ($result[0]) {
 					echo $result[1] . getTimestamp('H:i:s', 4). ' Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
@@ -174,6 +178,7 @@ class administration{
 			foreach ($migrations as $migration) {
 				$component = $migration['component'];
 				$file = $migration['file'];
+				#echo '<br>Execute sql from migration for component: ' . $component . ' from file: ' . $file;
 				if ($component == 'kvwmap') {
 					$prepath = LAYOUTPATH;
 				}
@@ -182,6 +187,7 @@ class administration{
 				}
 				$filepath = $prepath . 'db/' . $database_type . '/schema/';
 				$filetype = pathinfo($filepath . $file)['extension'];
+				#echo ' filetype: ' . $filetype;
 				switch ($filetype) {
 					case 'sql' : {
 						$sql = file_get_contents($filepath . $file);
@@ -189,6 +195,7 @@ class administration{
 							$sql = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $sql);
 							$sql = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $sql);
 							if ($database_type == 'mysql') {
+								#echo ' Exec SQL';
 								$result = $this->database->exec_commands($sql, NULL, NULL, false, true);	# mysql
 							}
 							else {
@@ -204,6 +211,7 @@ class administration{
 								foreach ($sql_parts AS $sql) {
 									$sql = trim($sql);
 									if ($sql != '') {
+										#echo ' Query SQL';
 										$result = $this->pgdatabase->execSQL($sql, 4, 0, true);	# postgresql
 									}
 								}
@@ -212,7 +220,8 @@ class administration{
 					}break;
 					
 					case 'php' : {
-						include $filepath . $file;
+						#echo ' include PHP: ' . WWWROOT . APPLVERSION . $filepath . $file ;
+						include WWWROOT . APPLVERSION . $filepath . $file;
 					}break;
 				}
 				if ($result[0]) {

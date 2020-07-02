@@ -73,7 +73,7 @@ class database {
 		$ret = $this->execSQL($sql, 4, 0);
 		if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
 
-		$colunn_aggreement_accepted = ($this->result->num_rows() == 1 ? ', agreement_accepted' : ', 1');
+		$colunn_aggreement_accepted = (mysqli_num_rows($this->result) == 1 ? ', agreement_accepted' : ', 1');
 
 		$sql = "
 			SELECT
@@ -95,7 +95,7 @@ class database {
 		$this->execSQL($sql, 4, 0);
 		if (!$this->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
 		$rs = $this->result->fetch_array();
-		if ($this->result->num_rows != '') {
+		if (mysqli_num_rows($this->result) != '') {
 			# wenn Nutzer bisher noch nicht akzeptiert hatte
 			if (defined('AGREEMENT_MESSAGE') AND AGREEMENT_MESSAGE != '' AND $rs['agreement_accepted'] == 0) {
 				if ($agreement != '') { # es wurde jetzt akzeptiert
@@ -594,9 +594,11 @@ INSERT INTO u_styles2classes (
 ###########################################################
 	function open() {
 		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
-		$this->mysqli = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+		$this->mysqli = mysqli_connect($this->host, $this->user, $this->passwd, $this->dbName);
 	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
-		return $this->mysqli->connect_errno;
+		$this->debug->write("<br>MySQL Fehlernummer: " . mysqli_connect_errno(), 4);
+		$this->debug->write("<br>MySQL Fehler: " . mysqli_connect_error(), 4);
+		return mysqli_connect_error();
 	}
 
 	function close() {

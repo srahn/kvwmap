@@ -14,7 +14,7 @@ if ($result[0]) {
 	echo '<br>Fehler bei der Abfrage ob die Spalte aktiv schon in der Tabelle cron_jobs existiert.<br>';
 }
 else {
-	if ($this->database->result->num_rows() == 0) {
+	if (mysqli_num_rows($this->database->result) == 0) {
 		$sql = "ALTER TABLE `cron_jobs` ADD `aktiv` BOOLEAN NOT NULL DEFAULT false AFTER `stelle_id`;";
 		$result = $this->database->execSQL($sql, 0, 0);
 	}
