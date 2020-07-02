@@ -220,8 +220,7 @@ class administration{
 					}break;
 					
 					case 'php' : {
-						#echo ' include PHP: ' . WWWROOT . APPLVERSION . $filepath . $file ;
-						include WWWROOT . APPLVERSION . $filepath . $file;
+						include $filepath . $file;
 					}break;
 				}
 				if ($result[0]) {
