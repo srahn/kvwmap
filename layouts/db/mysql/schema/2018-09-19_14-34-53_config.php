@@ -61,7 +61,7 @@ $constants = array (
   array (
     'name' => 'LOGIN',
     'value' => 'login.php',
-    'prefix' => '',
+    'prefix' => 'SNIPPETS',
     'type' => 'string',
     'description' => 'login.php
 ',

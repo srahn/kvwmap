@@ -68,6 +68,7 @@ class administration{
 	}
 	
 	function get_schema_migration_files() {
+		#echo '<br>Get Schema Migration Files';
 		global $kvwmap_plugins;
 		$migrations['kvwmap']['mysql'] = array_diff (scandir(LAYOUTPATH.'db/mysql/schema'), array('.', '..'));
 		sort($migrations['kvwmap']['mysql']);
