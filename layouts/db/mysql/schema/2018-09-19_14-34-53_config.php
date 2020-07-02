@@ -2002,6 +2002,9 @@ if(file_exists($config_file)){
 		}
 	}
 }
+foreach ($constants as &$const) {
+	$const['saved'] = 1;
+}
 
 $sql = "SELECT * FROM config WHERE plugin = ''";
 $result=$this->database->execSQL($sql,0, 0);
@@ -2021,6 +2024,7 @@ else{
 	}
 	if(mysqli_num_rows($this->database->result) == 0){
 		# config Tabelle befüllen
+		#echo '<br>Befülle constant table mit sql: ' . $sql;
 		$result = $this->database->exec_commands($sql, NULL, NULL);
 	}
 }

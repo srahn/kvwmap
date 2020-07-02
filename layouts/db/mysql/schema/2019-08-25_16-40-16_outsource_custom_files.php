@@ -33,7 +33,7 @@
 	define(CUSTOM_PATH, WWWROOT . APPLVERSION . $constants['CUSTOM_PATH']['value']);
 
 	# create a new custom_folder
-	if (mkdir(CUSTOM_PATH, 0775) === false){
+	if (!file_exists(CUSTOM_PATH) AND mkdir(CUSTOM_PATH, 0775) === false) {
 		$result[0]=1;
 		$result[1]='<br>Fehler beim Anlegen des custom-Ordners im kvwmap-Ordner. Keine Schreibrechte vorhanden.<br>Setzen Sie rekursiv für alle Dateien Schreibrechte für die Gruppe:<br>chmod -R g+w '.APPLVERSION;
 	}
@@ -208,7 +208,7 @@
 				'value' => str_replace('custom/', 'layouts/snippets/', LOGIN)
 			);
 		}
-		else {
+		elseif (defined('LOGIN')) {
 			# echo '<br>set: ' . LOGIN . ' prefix to: LAYOUTPATH and value to: ' . LOGIN;
 			$constants['LOGIN'] = array(
 				'prefix' => 'SNIPPETS',
@@ -224,11 +224,17 @@
 				'value' => str_replace('custom/', 'layouts/snippets/', LOGIN_AGREEMENT)
 			);
 		}
-		else {
+		elseif (defined('LOGIN_AGREEMENT')) {
 			# echo '<br>set: ' . LOGIN_AGREEMENT . ' prefix to: LAYOUTPATH and value to: ' . LOGIN_AGREEMENT;
 			$constants['LOGIN_AGREEMENT'] = array(
 				'prefix' => 'SNIPPETS',
 				'value' => LOGIN_AGREEMENT
+			);
+		}
+		else {
+			$constants['LOGIN_AGREEMENT'] = array(
+				'prefix' => 'SNIPPETS',
+				'value' => 'login_agreement.php'
 			);
 		}
 		$cmd = 'sed -i -e "s|SNIPPETS.AGREEMENT_MESSAGE|AGREEMENT_MESSAGE|g" ' . CUSTOM_PATH . 'layouts/snippets/*';
@@ -243,11 +249,17 @@
 				'value' => str_replace('custom/', 'layouts/snippets/', LOGIN_NEW_PASSWORD)
 			);
 		}
-		else {
+		elseif (defined('LOGIN_NEW_PASSWORD')) {
 			# echo '<br>set: ' . LOGIN_NEW_PASSWORD . ' prefix to: LAYOUTPATH and value to: ' . LOGIN_NEW_PASSWORD;
 			$constants['LOGIN_NEW_PASSWORD'] = array(
 				'prefix' => 'SNIPPETS',
 				'value' => LOGIN_NEW_PASSWORD
+			);
+		}
+		else {
+			$constants['LOGIN_NEW_PASSWORD'] = array(
+				'prefix' => 'SNIPPETS',
+				'value' => 'login_new_password.php'
 			);
 		}
 
@@ -259,31 +271,61 @@
 				'value' => str_replace('custom/', 'layouts/snippets/', LOGIN_REGISTRATION)
 			);
 		}
-		else {
+		elseif (defined('LOGIN_REGISTRATION')) {
 			# echo '<br>set: ' . LOGIN_REGISTRATION . ' prefix to: LAYOUTPATH and value to: ' . LOGIN_REGISTRATION;
 			$constants['LOGIN_REGISTRATION'] = array(
 				'prefix' => 'SNIPPETS',
 				'value' => LOGIN_REGISTRATION
 			);
 		}
+		else {
+			$constants['LOGIN_REGISTRATION'] = array(
+				'prefix' => 'SNIPPETS',
+				'value' => 'login_registration.php'
+			);
+		}
 
 		# echo '<p>LOGIN_ROUTINE ' . $this->config_params['LOGIN_ROUTINE']['value'];
-		$constants['LOGIN_ROUTINE'] = array(
-			'prefix' => 'CUSTOM_PATH',
-			'value' => str_replace('custom/', 'layouts/snippets/', $this->config_params['LOGIN_ROUTINE']['value'])
-		);
+		if (defined('LOGIN_ROUTINE')) {
+			$constants['LOGIN_ROUTINE'] = array(
+				'prefix' => 'CUSTOM_PATH',
+				'value' => str_replace('custom/', 'layouts/snippets/', $this->config_params['LOGIN_ROUTINE']['value'])
+			);
+		}
+		else {
+			$constants['LOGIN_ROUTINE'] = array(
+				'prefix' => 'CUSTOM_PATH',
+				'value' => ''
+			);
+		}
 
 		# echo '<p>LOGOUT_ROUTINE ' . $this->config_params['LOGOUT_ROUTINE']['value'];
-		$constants['LOGOUT_ROUTINE'] = array(
-			'prefix' => 'CUSTOM_PATH',
-			'value' => str_replace('custom/', 'layouts/snippets/', $this->config_params['LOGOUT_ROUTINE']['value'])
-		);
+		if (defined('LOGOUT_ROUTINE')) {
+			$constants['LOGOUT_ROUTINE'] = array(
+				'prefix' => 'CUSTOM_PATH',
+				'value' => str_replace('custom/', 'layouts/snippets/', $this->config_params['LOGOUT_ROUTINE']['value'])
+			);
+		}
+		else {
+			$constants['LOGOUT_ROUTINE'] = array(
+				'prefix' => 'CUSTOM_PATH',
+				'value' => ''
+			);
+		}
 
 		# echo '<br>set AGREEMENT_MESSAGE prefix to: CUSTOM_PATH and value to: ' . str_replace('custom/', 'layouts/snippets/', AGREEMENT_MESSAGE);
-		$constants['AGREEMENT_MESSAGE'] = array(
-			'prefix' => 'CUSTOM_PATH',
-			'value' => str_replace('custom/', 'layouts/snippets/', AGREEMENT_MESSAGE)
-		);
+		if (defined('AGREEMENT_MESSAGE')) {
+			$constants['AGREEMENT_MESSAGE'] = array(
+				'prefix' => 'CUSTOM_PATH',
+				'value' => str_replace('custom/', 'layouts/snippets/', AGREEMENT_MESSAGE)
+			);
+		}
+		else {
+			$constants['AGREEMENT_MESSAGE'] = array(
+				'prefix' => '',
+				'value' => ''
+			);
+		}
 
 		# echo '<p>CUSTOM_STYLE';
 		$constants['CUSTOM_STYLE'] = array(
@@ -300,7 +342,7 @@
 				'value' => str_replace('custom/', 'layouts/snippets/', $this->config_params['FOOTER']['value'])
 			);
 		}
-		else {
+		elseif(defined('FOOTER')) {
 			# echo '<br>prefix: ' . $this->config_params['FOOTER']['prefix'] . ' => LAYOUTPATH';
 			$constants['FOOTER'] = array(
 				'prefix' => 'SNIPPETS'
@@ -320,7 +362,7 @@
 				'value' => str_replace('custom/', 'layouts/snippets/', $this->config_params['HEADER']['value'])
 			);
 		}
-		else {
+		elseif(defined('HEADER')) {
 			# echo '<br>prefix: ' . $this->config_params['HEADER']['prefix'] . ' => LAYOUTPATH';
 			$constants['HEADER'] = array(
 				'prefix' => 'SNIPPETS'
@@ -340,7 +382,7 @@
 				'value' => str_replace('custom/', 'layouts/snippets/', $this->config_params['LAYER_ERROR_PAGE']['value'])
 			);
 		}
-		else {
+		elseif (defined('LAYER_ERROR_PAGE')) {
 			# echo '<br>prefix: ' . $this->config_params['LAYER_ERROR_PAGE']['prefix'] . ' => LAYOUTPATH';
 			$constants['LAYER_ERROR_PAGE'] = array(
 				'prefix' => 'SNIPPETS'

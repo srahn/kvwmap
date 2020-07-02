@@ -498,8 +498,9 @@ function migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb) {
 	echo '<br>Frage Datenbankstati ab.';
   $administration->get_database_status();
 	echo '<br>Aktualisiere Datenbanken.';
-  $administration->update_databases();
-  $administration->get_database_status();
+  $err_msgs = $administration->update_databases();
+  echo '<br>Datenbanken aktualisiert:<br>' . implode('<br>', $err_msgs);
+	$administration->get_database_status();
   if (count($administration->migrations_to_execute['mysql']) == 0 AND count($administration->migrations_to_execute['postgresql']) == 0) { ?>
     Anlegen der Datenbank-Schemata erfolgreich.<br><?php
   }
