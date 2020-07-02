@@ -89,11 +89,13 @@ function install() {
   Password: <?php #echo $mysqlRootDb->passwd; ?><br>
   Datenbankname: <?php echo $mysqlRootDb->dbName; ?><br><?php
   
-  if (mysql_exists($mysqlRootDb)) { ?>
+	$mysql_error = mysql_exists($mysqlRootDb);
+  if ($mysql_error == null) { ?>
     MySQL-Server läuft, Verbindung hergestellt zu Host: <?php echo $mysqlRootDb->host; ?> Datenbank: <?php echo $mysqlRootDb->dbName; ?> mit Nutzer: <?php echo $mysqlRootDb->user; ?>!<br><?php
   }
   else { ?>
     Es kann keine Verbindung zu Host: <?php echo $mysqlRootDb->host; ?> MySQL Datenbank: <?php echo $mysqlRootDb->dbName; ?> mit Nutzer: <?php echo $mysqlRootDb->user; ?> hergestellt werden!<br>
+		Fehlermeldung: <?php echo $mysql_error; ?><br>
     Das kann folgende Gründe haben:
     <ul>
       <li><b>MySQL ist noch nicht installiert:</b> => Installieren sie MySQL</li>
@@ -363,7 +365,7 @@ function kvwmapdb_exists($mysqlRootDb, $mysqlKvwmapDb) { ?>
       SCHEMA_NAME = '" . $mysqlKvwmapDb->dbName . "'
   ";
   $ret = $mysqlRootDb->execSQL($sql, 0, 1);
-  return ($mysqlRootDb->result->num_rows() > 0);
+  return (mysqli_num_rows($mysqlRootDb->result) > 0);
 }
 
 /*
@@ -385,7 +387,7 @@ function install_kvwmapdb($mysqlRootDb, $mysqlKvwmapDb) {
     Fehler beim Abfragen ob User <?php echo $mysqlKvwmapDb->user; ?> mit Host <?php echo MYSQL_HOSTS_ALLOWED; ?> schon in MySQL existiert.<br><?php
     return false;
   }
-  if ($mysqlRootDb->result->num_rows() > 0 ) { ?>
+  if (mysqli_num_rows($mysqlRootDb->result) > 0 ) { ?>
     User <?php echo $mysqlKvwmapDb->user; ?> mit Host <?php echo MYSQL_HOSTS_ALLOWED; ?> existiert schon in Datenbank. <?php
   }
   else  { ?>
@@ -524,7 +526,7 @@ function admin_stelle_exists($mysqlKvwmapDb) {
       `Bezeichnung` = 'Administration'
   ";
   $ret = $mysqlKvwmapDb->execSQL($sql, 0, 1);
-  return ($mysqlKvwmapDb->result->num_rows() > 0) ? true : false;
+  return (mysqli_num_rows($mysqlKvwmapDb->result) > 0) ? true : false;
 }
 
 /*
