@@ -39,7 +39,7 @@ $constants = array (
   array (
     'name' => 'HEADER',
     'value' => 'header.php',
-    'prefix' => '',
+    'prefix' => 'SNIPPETS',
     'type' => 'string',
     'description' => '',
     'group' => 'Layout',
@@ -50,7 +50,7 @@ $constants = array (
   array (
     'name' => 'FOOTER',
     'value' => 'footer.php',
-    'prefix' => '',
+    'prefix' => 'SNIPPETS',
     'type' => 'string',
     'description' => '',
     'group' => 'Layout',
@@ -73,7 +73,7 @@ $constants = array (
   array (
     'name' => 'LAYER_ERROR_PAGE',
     'value' => 'layer_error_page.php',
-    'prefix' => '',
+    'prefix' => 'SNIPPETS',
     'type' => 'string',
     'description' => 'Seite zur Fehlerbehandlung, die durch fehlerhafte Layer verursacht werden; unterhalb von /snippets
 ',
@@ -96,8 +96,8 @@ z.B. custom/ds_gvo.htm',
   'CUSTOM_STYLE' => 
   array (
     'name' => 'CUSTOM_STYLE',
-    'value' => 'custom.css',
-    'prefix' => '',
+    'value' => 'layouts/custom.css',
+    'prefix' => 'CUSTOM_PATH',
     'type' => 'string',
     'description' => 'hier kann eine eigene css-Datei angegeben werden
 ',
@@ -144,7 +144,7 @@ z.B. custom/ds_gvo.htm',
   array (
     'name' => 'sizes',
     'value' => '{
-    "gui.php": {
+    "layouts/gui.php": {
         "margin": {
             "width": 0,
             "height": 0

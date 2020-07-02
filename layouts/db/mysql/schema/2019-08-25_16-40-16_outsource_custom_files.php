@@ -33,16 +33,12 @@
 	define(CUSTOM_PATH, WWWROOT . APPLVERSION . $constants['CUSTOM_PATH']['value']);
 
 	# create a new custom_folder
-	# echo "<p>create custom_path: " . CUSTOM_PATH;
-	
-	if(mkdir(CUSTOM_PATH) === false){
+	if (mkdir(CUSTOM_PATH, 0775) === false){
 		$result[0]=1;
 		$result[1]='<br>Fehler beim Anlegen des custom-Ordners im kvwmap-Ordner. Keine Schreibrechte vorhanden.<br>Setzen Sie rekursiv für alle Dateien Schreibrechte für die Gruppe:<br>chmod -R g+w '.APPLVERSION;
 	}
-	else{
-		chgrp(CUSTOM_PATH, 'gisadmin');
-		chmod(CUSTOM_PATH, 0775);
-
+	else {
+		chgrp(CUSTOM_PATH, gisadmin);
 		$constants = array ();
 
 		$sql = "
@@ -72,6 +68,8 @@
 		$sql = "
 			ALTER TABLE `config` ADD `editable` INTEGER DEFAULT 2
 		";
+		#echo 'Add column editable to config table: ' . $sql;
+
 		$this->database->execSQL($sql, 4, 1);
 
 		# Set nothing editable => 0
@@ -122,6 +120,10 @@
 			# echo '<br>move: ' . WWWROOT . APPLVERSION . 'fonts/custom to: ' . CUSTOM_PATH . 'fonts';
 			rename(WWWROOT . APPLVERSION . 'fonts/custom', CUSTOM_PATH . 'fonts');
 		}
+		else {
+			mkdir(CUSTOM_PATH . 'fonts', 0775);
+			chgrp(CUSTOM_PATH . 'fonts', 'gisadmin');
+		}
 		if (strpos($this->config_params['FONTSET']['value'], 'fonts/custom/') !== false) {
 			# echo '<br>prefix: ' . $this->config_params['FONTSET']['prefix'] . ' => CUSTOM_PATH';
 			# echo '<br>value: ' . $this->config_params['FONTSET']['value'] . ' => ' . str_replace('fonts/custom/', 'fonts/', $this->config_params['FONTSET']['value']);
@@ -135,6 +137,10 @@
 		if (file_exists(WWWROOT . APPLVERSION . 'symbols/custom')) {
 			# echo '<br>move: ' . WWWROOT . APPLVERSION . 'symbols/custom to: ' . CUSTOM_PATH . 'symbols';
 			rename(WWWROOT . APPLVERSION . 'symbols/custom', CUSTOM_PATH . 'symbols');
+		}
+		else {
+			mkdir(CUSTOM_PATH . 'symbols', 0775);
+			chgrp(CUSTOM_PATH . 'symbols', 'gisadmin');
 		}
 		if (strpos($this->config_params['SYMBOLSET']['value'], 'symbols/custom/') !== false) {
 			# echo '<br>prefix: ' . $this->config_params['SYMBOLSET']['prefix'] . ' => CUSTOM_PATH';
@@ -152,11 +158,18 @@
 			# echo '<br>move: ' . WWWROOT . APPLVERSION . 'graphics/custom to: ' . CUSTOM_PATH . 'graphics';
 			rename(WWWROOT . APPLVERSION . 'graphics/custom', CUSTOM_PATH . 'graphics');
 		}
-
+		else {
+			mkdir(CUSTOM_PATH . 'graphics', 0775);
+			chgrp(CUSTOM_PATH . 'graphics', 'gisadmin');
+		}
 		# echo '<p>WAPPENPATH';
 		if (file_exists(WWWROOT . APPLVERSION . WAPPENPATH)) {
 			# echo '<br>move: ' . WWWROOT . APPLVERSION . WAPPENPATH . ' to: ' . CUSTOM_PATH . 'wappen';
 			rename(WWWROOT . APPLVERSION . WAPPENPATH, CUSTOM_PATH . 'wappen');
+		}
+		else {
+			mkdir(CUSTOM_PATH . 'wappen', 0775);
+			chgrp(CUSTOM_PATH . 'wappen', 'gisadmin');
 		}
 		# echo '<br>value: ' . $this->config_params['WAPPENPATH']['value'] . ' => ' . $this->config_params['WAPPENPATH']['value'];
 		$constants['WAPPENPATH'] = array(
@@ -171,11 +184,19 @@
 			# echo '<br>move: ' . WWWROOT . APPLVERSION . 'layouts/custom to: ' . CUSTOM_PATH . 'layouts';
 			rename(WWWROOT . APPLVERSION . 'layouts/custom', CUSTOM_PATH . 'layouts');
 		}
+		else {
+			mkdir(CUSTOM_PATH . 'layouts', 0775);
+			chgrp(CUSTOM_PATH . 'layouts', 'gisadmin');
+		}
 
 		# echo '<p>SNIPPETS ' . $this->config_params['SNIPPETS']['value'];
 		if (file_exists(WWWROOT . APPLVERSION . 'layouts/snippets/custom')) {
 			# echo '<br>move: ' . WWWROOT . APPLVERSION . 'layouts/snippets/custom to: ' . CUSTOM_PATH . 'layouts/snippets';
 			rename(WWWROOT . APPLVERSION . 'layouts/snippets/custom', CUSTOM_PATH . 'layouts/snippets');
+		}
+		else {
+			mkdir(CUSTOM_PATH . 'layouts/snippets', 0775);
+			chgrp(CUSTOM_PATH . 'layouts/snippets', 'gisadmin');
 		}
 		$cmd = 'sed -i -e "s|SNIPPETS . \'custom/|\'|g" ' . WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/*';
 
@@ -379,5 +400,7 @@
 
 		$this->get_config_params();
 		$result = $this->write_config_file('');
+		chgrp(WWWROOT . APPLVERSION . 'config.php', 'gisadmin');
+		chmod(WWWROOT . APPLVERSION . 'config.php', 0660);
 	}
 ?>
