@@ -170,6 +170,24 @@ input[type="text"].transparent_input{
 	border:	1px solid #C3C7C3;
 }
 
+.layerdaten-topdiv, .userdaten-topdiv, .stellendaten-topdiv {
+	height: calc(100vh - 210px);
+	overflow-y: scroll;
+	padding: 0px 6px;
+}
+
+.listen-tr:hover {
+	background-color: #DAE4EC;
+}
+
+.listen-tr td:last-child .fa {
+	margin-right: 10px;
+}
+
+.listen-tr .fa {
+	padding: 3px;
+}
+
 .search-form h2 {
 	color: black;
 	margin-bottom: 10px
