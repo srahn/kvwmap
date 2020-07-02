@@ -42,17 +42,20 @@ function Bestaetigung(link,text) {
 <h4><? echo $this->user_count.' Nutzer'; ?></h4>
 </div>
 <? for($s = 0; $s < count($this->stellen['ID']); $s++){ ?>
-   <div class="usd-stellen">
-     <div class="usd-stelle">
-	   <span><? echo $this->stellen['Bezeichnung'][$s]; ?></span><br>
-	   <span><? echo count($this->stellen['user'][$s]['ID']).' Nutzer'; ?></span>
-	 </div>
+  <div class="usd-stellen">
+    <div class="usd-stelle">
+	  <span><? echo $this->stellen['Bezeichnung'][$s]; ?></span><br>
+	  <span><? echo count($this->stellen['user'][$s]['ID']).' Nutzer'; ?></span>
+	</div>
   <? for($i=0;$i<count($this->stellen['user'][$s]['ID']);$i++) { ?>
-	 <a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<? echo $this->stellen['user'][$s]['ID'][$i]; ?>">
-	   <div class="usd-nutzer">
-	     <? echo $this->stellen['user'][$s]['Bezeichnung'][$i]; ?>
-	   </div>
-	 </a>
+	<div id="stelle<? echo $this->stellen['ID'][$s]; ?>user<? echo $this->stellen['user'][$s]['ID'][$i]; ?>" class="usd-nutzer">
+		<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=stelle<? echo $this->stellen['ID'][$s]; ?>&selected_user_id=<? echo $this->stellen['user'][$s]['ID'][$i]; ?>">
+			<? echo $this->stellen['user'][$s]['Bezeichnung'][$i]; ?>
+		</a>
+		<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->stellen['user'][$s]['ID'][$i]; ?>','Wollen Sie den Benutzer <?php echo $this->stellen['user'][$s]['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete?>">
+			<i class="fa fa-trash" style="padding: 3px"></i>
+		</a>
+	</div>
   <? } ?>
   </div>
 <? } ?>
@@ -65,11 +68,14 @@ function Bestaetigung(link,text) {
     </div>
 <? }
    for($i = 0; $i < count($this->unassigned_users['ID']); $i++){ ?>
-    <a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<? echo $this->unassigned_users['ID'][$i]; ?>">
-      <div class="usd-nutzer">
-	     <? echo $this->unassigned_users['Bezeichnung'][$i]; ?>
-      </div>
-    </a>
+		<div id="unassigneduser<? echo $this->unassigned_users['ID'][$i]; ?>" class="usd-nutzer">
+			<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=unassigned&selected_user_id=<? echo $this->unassigned_users['ID'][$i]; ?>">
+				 <? echo $this->unassigned_users['Bezeichnung'][$i]; ?>      
+			</a>
+			<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->unassigned_users['ID'][$i]; ?>','Wollen Sie den Benutzer <?php echo $this->unassigned_users['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete?>">
+				<i class="fa fa-trash" style="padding: 3px"></i>
+			</a>
+		</div>
 <? } ?>
   </div>
 
@@ -81,11 +87,14 @@ function Bestaetigung(link,text) {
     </div>
 <? }
    for($i = 0; $i < count($this->expired_users['ID']); $i++){ ?>
-    <a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<? echo $this->expired_users['ID'][$i]; ?>">
-      <div class="usd-nutzer">
+    <div id="expireduser<? echo $this->expired_users['ID'][$i]; ?>" class="usd-nutzer">
+			<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=expired&selected_user_id=<? echo $this->expired_users['ID'][$i]; ?>">
 	     <? echo $this->expired_users['Bezeichnung'][$i]; ?>
-      </div>
-    </a>
+			</a>
+			<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->expired_users['ID'][$i]; ?>','Wollen Sie den Benutzer <?php echo $this->expired_users['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete?>">
+				<i class="fa fa-trash" style="padding: 3px"></i>
+			</a>
+		</div>
 <? } ?>
   </div>
 

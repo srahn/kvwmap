@@ -289,5 +289,13 @@ else {
 			?><input type="button" name="dummy" value="<?php echo $strButtonSaveAs; ?>" onclick="submitWithValue('GUI','go_plus','Als neuen Nutzer eintragen')">
 		</td>
 	</tr>
+<? if($this->formvars['nutzerstellen']){?>
+	<tr>
+		<td align="center">
+			<a href="index.php?go=BenutzerStellen_Anzeigen#<? echo $this->formvars['nutzerstellen'].'user'.$this->formvars['selected_user_id']; ?>"><? echo $this->strButtonBack; ?></a>
+			<br><br>
+		</td>
+	</tr>
+<? } ?>
 </table>
 </div>

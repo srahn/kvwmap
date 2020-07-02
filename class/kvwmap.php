@@ -12193,11 +12193,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
     $this->user->rolle->deleteMenue($this->formvars['selected_user_id'], $stellen['ID'], 0);
     $this->user->rolle->deleteGroups($this->formvars['selected_user_id'], $stellen['ID']);
     $this->user->rolle->deleteLayer($this->formvars['selected_user_id'], $stellen['ID'], 0);
-    $this->titel='Benutzerdaten';
-    $this->main='userdaten.php';
-    # Abfragen aller Benutzer
-    $this->userdaten=$this->user->getUserDaten(0,'',$this->formvars['order'], $this->Stelle->id, $this->user->id);
-    $this->output();
+		if($this->formvars['nutzerstellen']){
+			$this->BenutzerNachStellenAnzeigen();
+		}
+		else{
+			$this->BenutzerdatenAnzeigen();
+		}
   }
 
 	function BenutzerdatenAnzeigen() {
