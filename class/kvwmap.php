@@ -15806,8 +15806,12 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 
   function zoomToMaxLayerExtent($layer_id) {
     # Abfragen der maximalen Ausdehnung aller Daten eines Layers
-		$layer = $this->user->rolle->getLayer($layer_id);
-		if($layer == NULL)$layer = $this->user->rolle->getRollenLayer(-$layer_id);
+		if($layer_id > 0){
+			$layer = $this->user->rolle->getLayer($layer_id);
+		}
+		else{
+			$layer = $this->user->rolle->getRollenLayer(-$layer_id);
+		}
 		switch ($layer[0]['Datentyp']) {
 			case MS_LAYER_POLYGON : case MS_LAYER_LINE : case MS_LAYER_POINT : {
 				# Abfragen der Datenbankverbindung des Layers

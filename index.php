@@ -95,6 +95,11 @@ define('CASE_COMPRESS', false);
 #											- man muss einen Layer in der Legende ein oder ausschalten													#
 #											- InchesPerUnit() reinkopieren																											#
 #											- layer_error_handling() reinkopieren																								#
+#											- zoomToMaxLayerExtent() reinkopieren																								#
+#											- getlayerdatabase() reinkopieren																										#
+#											- read_layer_attributes() reinkopieren																							#
+#											- check_oid() reinkopieren																													#
+#											- getFilter() reinkopieren																													#
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
 #   getLayerOptions:  - ein Rollenlayer muss verwendet werden																							#

@@ -245,6 +245,16 @@ class Menue extends MyObject {
 		return $target;
 	}
 
+	function get_onclick(){
+		return replace_params(
+			$this->get('onclick'),
+			rolle::$layer_params,
+			$this->gui->user->id,
+			$this->gui->Stelle->id,
+			rolle::$hist_timestamp,
+			$this->gui->user->rolle->language
+		);
+	}
 
 	function get_href($class, $target) {
 		$href = '';
@@ -289,7 +299,7 @@ class Menue extends MyObject {
 		$class  = $this->get_class();
 		$target = $this->get_target();
 		$href = $this->get_href($class, $target);
-		$onclick = $this->get('onclick');
+		$onclick = $this->get_onclick();
 		if(!$this->obermenue)$onclick = 'checkForUnsavedChanges(event);'.$onclick;
 		$style = $this->get_style();
 

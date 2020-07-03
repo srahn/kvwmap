@@ -174,6 +174,121 @@ class GUI {
 		$this->scaleUnitSwitchScale = 239210;
 		$this->trigger_functions = array();
   }
+	
+	function zoomToMaxLayerExtent($layer_id) {
+    # Abfragen der maximalen Ausdehnung aller Daten eines Layers
+		if($layer_id > 0){
+			$layer = $this->user->rolle->getLayer($layer_id);
+		}
+		else{
+			$layer = $this->user->rolle->getRollenLayer(-$layer_id);
+		}
+		switch ($layer[0]['Datentyp']) {
+			case MS_LAYER_POLYGON : case MS_LAYER_LINE : case MS_LAYER_POINT : {
+				# Abfragen der Datenbankverbindung des Layers
+				$layerdb=$this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+				$data = $layer[0]['Data'];
+				if ($data != ''){
+					# suchen nach dem ersten Vorkommen von using
+					$pos = strpos(strtolower($data),'using ');
+					# Abschneiden der uing Wörter im Datastatement wenn unique verwendet wurde
+					if ($pos !== false) {
+						$subquery=substr($data,0,$pos);
+					}
+					else {
+						# using kommt nicht vor, es handelt sich um ein einfaches Data Statement in der Form
+						# the_geom from tabelle, übernehmen wie es ist.
+						$subquery = $data;
+					}
+					$explosion = explode(' ', $data);
+					$this->attributes['the_geom'] = $explosion[0];
+				}
+				else{
+					$subquery = substr($layer[0]['pfad'], 7);
+					$this->attributes = $this->mapDB->read_layer_attributes($layer_id, $layerdb, NULL);
+				}
+
+				# Filter berücksichtigen
+				$filter = $this->mapDB->getFilter($layer_id, $this->Stelle->id);
+				if($filter != ''){
+					$filter = str_replace('$userid', $this->user->id, $filter);
+					$subquery .= ' WHERE '.$filter;
+				}
+
+				# Erzeugen des Abfragestatements für den maximalen Extent aus dem Data String
+				$sql ='SELECT st_xmin(extent) AS minx,st_ymin(extent) AS miny,st_xmax(extent) AS maxx,st_ymax(extent) AS maxy FROM (SELECT st_transform(st_setsrid(st_extent('.$this->attributes['the_geom'].'), '.$layer[0]['epsg_code'].'), '.$this->user->rolle->epsg_code.') AS extent FROM (SELECT ';
+				$sql.=$subquery;
+				$sql.=') AS fooForMaxLayerExtent) as foo';
+				#echo $sql;
+
+				# Abfragen der Layerausdehnung
+				$ret=$layerdb->execSQL($sql,4,0);
+				if ($ret[0]) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+				$rs = pg_fetch_array($ret[1]);
+			}break;
+			
+			case MS_LAYER_RASTER : {
+				if($layer[0]['Data'] != ''){				# eine einzelne Rasterdatei
+					$raster_file = SHAPEPATH.$layer[0]['Data'];
+					if(file_exists($raster_file)){
+						$output = rand(0, 100000);
+						$command = OGR_BINPATH.'gdalinfo '.$raster_file.' > '.IMAGEPATH.$output.'.info';
+						exec($command);
+						$infotext = file_get_contents(IMAGEPATH.$output.'.info');
+						$ll = explode(', ', trim(get_first_word_after($infotext, 'Lower Left', '', ')'), ' ('));
+						$ur = explode(', ', trim(get_first_word_after($infotext, 'Upper Right', '', ')'), ' ('));
+					}
+				}
+				elseif($layer[0]['tileindex'] != ''){		# ein Tile-Index
+					$shape_file = SHAPEPATH.$layer[0]['tileindex'];
+					if(file_exists($shape_file)){
+						$output = rand(0, 100000);
+						$command = OGR_BINPATH.'ogrinfo -al -so '.$shape_file.' > '.IMAGEPATH.$output.'.info';
+						exec($command);
+						$infotext = file_get_contents(IMAGEPATH.$output.'.info');
+						$extent = get_first_word_after($infotext, 'Extent:', ' ', chr(10));
+						$corners = explode('-', $extent);
+						$ll = explode(', ', trim($corners[0], '() '));
+						$ur = explode(', ', trim($corners[1], '() '));
+					}
+				}
+				$extent = new rectObj();
+				$extent->setextent($ll[0],$ll[1],$ur[0],$ur[1]);
+				$rasterProjection = ms_newprojectionobj("init=epsg:".$layer[0]['epsg_code']);
+				$userProjection = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+				$extent->project($rasterProjection, $userProjection);
+				$rs['minx'] = $extent->minx;
+				$rs['maxx'] = $extent->maxx;
+				$rs['miny'] = $extent->miny;
+				$rs['maxy'] = $extent->maxy;
+			}break;
+		}
+		if($rs['minx'] != ''){
+			if($this->user->rolle->epsg_code == 4326)$rand = 10/10000;
+			else $rand = 10;
+			$minx=$rs['minx']-$rand;
+			$maxx=$rs['maxx']+$rand;
+			$miny=$rs['miny']-$rand;
+			$maxy=$rs['maxy']+$rand;
+			#echo 'box:'.$minx.' '.$miny.','.$maxx.' '.$maxy;
+			$this->map->setextent($minx,$miny,$maxx,$maxy);
+			# damit nicht außerhalb des Stellen-Extents oder des maximalen Layer-Maßstabs gezoomt wird
+			$oPixelPos=ms_newPointObj();
+			$oPixelPos->setXY($this->map->width/2,$this->map->height/2);
+			if (MAPSERVERVERSION > 600) {
+				if($layer[0]['maxscale'] > 0 AND $layer[0]['maxscale'] < $this->map->scaledenom)$nScale = $layer[0]['maxscale']-1;
+				else $nScale = $this->map->scaledenom;
+				$this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				if($layer[0]['maxscale'] > 0 AND $layer[0]['maxscale'] < $this->map->scale)$nScale = $layer[0]['maxscale']-1;
+				else $nScale = $this->map->scale;
+				$this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+				$this->map_scaledenom = $this->map->scale;
+			}
+		}
+  }
 
 	function loadlayer($map, $layerset){
 		$layer = ms_newLayerObj($map);
@@ -1730,7 +1845,7 @@ class database {
 		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
 		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
-			echo '<br>sql in execSQL: ' . $sql;
+			#echo '<br>sql in execSQL: ' . $sql;
 			if ($result = $this->mysqli->query($sql)) {
 				$ret[0] = 0;
 				$ret['success'] = $this->success = true;
@@ -2271,10 +2386,10 @@ class rolle {
 		}
     #echo $sql.'<br>';
     $this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
-    $query = $this->database->mysqli->query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    $this->database->execSQL($sql);
+    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
-    while ($rs=$this->database->result->fetch_assoc()) {
+    while ($rs = $this->database->result->fetch_assoc()) {
       $layer[]=$rs;
     }
     return $layer;
@@ -2630,6 +2745,21 @@ class pgdatabase {
     $this->version = POSTGRESVERSION;
     return $this->dbConn;
   }
+	
+	function check_oid($tablename){
+    $sql = 'SELECT oid from '.$tablename.' limit 0';
+    if($this->schema != ''){
+    	$sql = "SET search_path = ".$this->schema.", public;".$sql;
+    }
+    $this->debug->write("<p>file:kvwmap class:postgresql->check_oid:<br>".$sql,4);
+    @$query=pg_query($sql);
+    if ($query==0) {
+			return false;
+    }
+    else{
+      return true;
+    }
+  }
 
   function setClientEncoding() {
     $sql ="SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';";
@@ -2805,6 +2935,259 @@ class db_mapObj{
 		$this->Stelle_ID = $Stelle_ID;
 		$this->User_ID = $User_ID;
 		$this->rolle = new rolle($User_ID, $Stelle_ID, $this->db);
+	}
+	
+	function getFilter($layer_id, $stelle_id){
+    $sql ='SELECT Filter FROM used_layer WHERE Layer_ID = '.$layer_id.' AND Stelle_ID = '.$stelle_id;
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->getFilter - Lesen des Filter-Statements des Layers:<br>" . $sql,4);
+    $this->db->execSQL($sql);
+    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
+    $rs = $this->db->result->fetch_row();
+    $filter = $rs[0];
+    return $filter;
+  }		
+	
+	function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false){
+		global $language;
+		$attributes = array();
+		$einschr = '';
+
+		$alias_column = (
+			(!$all_languages AND $language != 'german') ?
+			"
+				CASE
+					WHEN `alias_" . $language. "` != '' THEN `alias_" . $language . "`
+					ELSE `alias`
+				END AS alias
+			" :
+			"
+				`alias`
+			"
+		);
+
+		if ($attributenames != NULL) {
+			$einschr = " AND a.name IN ('" . implode("', '", $attributenames) . "')";
+		}
+
+		$sql = "
+			SELECT 
+				`order`, " .
+				$alias_column . ", `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`,
+				`layer_id`,
+				a.`name`,
+				`real_name`,
+				`tablename`,
+				`table_alias_name`,
+				`type`,
+				d.`name` as typename,
+				`geometrytype`,
+				`constraints`,
+				`saveable`,
+				`nullable`,
+				`length`,
+				`decimal_length`,
+				`default`,
+				`form_element_type`,
+				`options`,
+				`tooltip`,
+				`group`,
+				`arrangement`,
+				`labeling`,
+				`raster_visibility`,
+				`dont_use_for_new`,
+				`mandatory`,
+				`quicksearch`,
+				`visible`,
+				`vcheck_attribute`,
+				`vcheck_operator`,
+				`vcheck_value`,
+				`order`,
+				`privileg`,
+				`query_tooltip`
+			FROM
+				`layer_attributes` as a LEFT JOIN
+				`datatypes` as d ON d.`id` = REPLACE(`type`, '_', '')
+			WHERE
+				`layer_id` = " . $layer_id .
+				$einschr . "
+			ORDER BY
+				`order`
+		";
+		#echo '<br>Sql read_layer_attributes: ' . $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>" . $sql,4);
+		$ret = $this->db->execSQL($sql);
+    if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+		$i = 0;
+		while ($rs = $ret['result']->fetch_array()){
+			$attributes['order'][$i] = $rs['order'];
+			$attributes['name'][$i] = $rs['name'];
+			$attributes['indizes'][$rs['name']] = $i;
+			if($rs['real_name'] == '')$rs['real_name'] = $rs['name'];
+			$attributes['real_name'][$rs['name']] = $rs['real_name'];
+			if ($rs['tablename']){
+				if (strpos($rs['tablename'], '.') !== false){
+					$explosion = explode('.', $rs['tablename']);
+					$rs['tablename'] = $explosion[1];		# Tabellenname ohne Schema
+					$attributes['schema_name'][$rs['tablename']] = $explosion[0];
+				}
+				$attributes['table_name'][$i]= $rs['tablename'];
+				$attributes['table_name'][$rs['name']] = $rs['tablename'];
+			}
+			if ($rs['table_alias_name'])$attributes['table_alias_name'][$i] = $rs['table_alias_name'];
+			if ($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']] = $rs['table_alias_name'];
+			$attributes['table_alias_name'][$rs['tablename']] = $rs['table_alias_name'];
+			$attributes['type'][$i] = $rs['type'];
+			$attributes['typename'][$i] = $rs['typename'];
+			$type = ltrim($rs['type'], '_');
+			if ($recursive AND is_numeric($type)){
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
+			}
+			if ($rs['type'] == 'geometry'){
+				$attributes['the_geom'] = $rs['name'];
+			}
+			$attributes['geomtype'][$i]= $rs['geometrytype'];
+			$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
+			$attributes['constraints'][$i]= $rs['constraints'];
+			$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
+			$attributes['saveable'][$i]= $rs['saveable'];
+			$attributes['nullable'][$i]= $rs['nullable'];
+			$attributes['length'][$i]= $rs['length'];
+			$attributes['decimal_length'][$i]= $rs['decimal_length'];
+
+			if (substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+				$ret1 = $layerdb->execSQL($rs['default'], 4, 0);
+				if ($ret1[0] == 0) {
+					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
+				}
+			}
+			else {															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
+				$attributes['default'][$i] = $rs['default'];
+			}
+			$attributes['form_element_type'][$i] = $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
+			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
+			$rs['options'] = str_replace('$language', $language, $rs['options']);
+			$attributes['options'][$i] = $rs['options'];
+			$attributes['options'][$rs['name']] = $rs['options'];
+			$attributes['alias'][$i] = $rs['alias'];
+			$attributes['alias'][$attributes['name'][$i]] = $rs['alias'];
+			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
+			$attributes['alias_english'][$i] = $rs['alias_english'];
+			$attributes['alias_polish'][$i] = $rs['alias_polish'];
+			$attributes['alias_vietnamese'][$i] = $rs['alias_vietnamese'];
+			$attributes['tooltip'][$i] = $rs['tooltip'];
+			$attributes['group'][$i] = $rs['group'];
+			$attributes['arrangement'][$i] = $rs['arrangement'];
+			$attributes['labeling'][$i] = $rs['labeling'];
+			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
+			$attributes['dont_use_for_new'][$i] = $rs['dont_use_for_new'];
+			$attributes['mandatory'][$i] = $rs['mandatory'];
+			$attributes['quicksearch'][$i] = $rs['quicksearch'];
+			$attributes['visible'][$i] = $rs['visible'];
+			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
+			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
+			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
+			$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			$dependents[$rs['vcheck_attribute']][] = $rs['name'];
+			$attributes['privileg'][$i] = $rs['privileg'];
+			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
+			if ($rs['form_element_type'] == 'Style') {
+				$attributes['style'] = $rs['name'];
+				$attributes['visible'][$i] = 0;
+			}
+			if ($rs['form_element_type'] == 'Editiersperre') {
+				$attributes['Editiersperre'] = $rs['name'];
+			}
+			$i++;
+		}
+		if (value_of($attributes, 'table_name') != NULL) {
+			$attributes['all_table_names'] = array_unique($attributes['table_name']);
+			//$attributes['all_alias_table_names'] = array_values(array_unique($attributes['table_alias_name']));
+			foreach ($attributes['all_table_names'] as $tablename) {
+				$attributes['oids'][] = $layerdb->check_oid($tablename);   # testen ob Tabelle oid hat
+			}
+		}
+		else {
+			$attributes['all_table_names'] = array();
+		}
+		return $attributes;
+  }
+	
+	function getlayerdatabase($layer_id, $host){
+		if ($layer_id < 0) {	# Rollenlayer
+			$sql = "
+				SELECT
+					`connection`,
+					'" . CUSTOM_SHAPE_SCHEMA . "' as `schema`,
+					0 AS connection_id
+				FROM
+					rollenlayer
+				WHERE
+					-id = " . $layer_id . " AND
+					connectiontype = 6
+			";
+		}
+		else {
+			$sql = "
+				SELECT
+					concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as `connection`,
+					`schema`,
+					l.connection_id
+				FROM
+					layer as l,
+					connections as c
+				WHERE
+					l.Layer_ID = " . $layer_id . " AND
+					l.connection_id = c.id AND
+					l.connectiontype = 6
+			";
+		}
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Lesen des connection-Strings des Layers:<br>" . $sql,4);
+		$this->db->execSQL($sql);
+		if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
+		$rs = $this->db->result->fetch_row();
+		$connectionstring = $rs[0];
+#		$this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Gefundener Connection String des Layers:<br>" . $connectionstring, 4);
+		if ($connectionstring != '') {
+			$layerdb = new pgdatabase();
+			if ($rs[1] == '') {
+				$rs[1] = 'public';
+			}
+			$layerdb->schema = $rs[1];
+			$connection = explode(' ', trim($connectionstring));
+			for ($j = 0; $j < count($connection); $j++){
+				if ($connection[$j] != '') {
+					$value = explode('=', $connection[$j]);
+					if (strtolower($value[0]) == 'user'){
+						$layerdb->user = $value[1];
+					}
+					if (strtolower($value[0]) == 'dbname'){
+						$layerdb->dbName = $value[1];
+					}
+					if (strtolower($value[0]) == 'password'){
+						$layerdb->passwd = $value[1];
+					}
+					if (strtolower($value[0]) == 'host'){
+						$layerdb->host = $value[1];
+					}
+					if (strtolower($value[0]) == 'port'){
+						$layerdb->port = $value[1];
+					}
+				}
+			}
+			if (!isset($layerdb->host)) {
+				$layerdb->host = $host;
+			}
+			if (!$layerdb->open()) {
+				echo 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
+				echo '<br>Connection ID: ' . $rs[2];
+				echo '<br>Host: '.$layerdb->host;
+				echo '<br>User: '.$layerdb->user;
+				echo '<br>Datenbankname: '.$layerdb->dbName;
+				exit;
+			}
+		}
+		return $layerdb;
 	}
 
 	function read_ReferenceMap() {
