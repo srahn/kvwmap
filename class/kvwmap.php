@@ -2801,6 +2801,15 @@ echo '			</ul>
 			$where = "lower(output::text) LIKE lower('" . $wildcard . $this->formvars['inputvalue'] . "%')";
 		}
 
+		$sql = replace_params(
+			$sql,
+			rolle::$layer_params,
+			$this->user->id,
+			$this->Stelle->id,
+			rolle::$hist_timestamp,
+			$this->user->rolle->language
+		);
+
 		$sql = "
 			SELECT *
 			FROM (" . $sql . ") as foo
@@ -17360,6 +17369,15 @@ class db_mapObj{
 				$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
 			}
 			if ($withvalues == true) {
+				$attributes['options'][$i] = replace_params(
+					$attributes['options'][$i],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->Stelle->id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				);
+
 				switch ($attributes['form_element_type'][$i]) {
 					# Auswahlfelder
 					case 'Auswahlfeld' : {
@@ -19200,7 +19218,7 @@ class db_mapObj{
 					'" . $formvars['key'][$i] . "',
 					'" . $formvars['alias'][$i] . "',
 					'" . $formvars['default_value'][$i] . "',
-					'" . mysql_real_escape_string($formvars['options_sql'][$i]) . "'
+					'" . $this->db->mysqli->real_escape_string($formvars['options_sql'][$i]) . "'
 				)";
 				$komma = true;
 			}

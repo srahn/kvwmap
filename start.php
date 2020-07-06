@@ -383,44 +383,13 @@ else {
 
 	if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, den PGConnect und Trafos weglassen
 		##############################################################################
-		# Übergeben der Datenbank für die raumbezogenen Daten (PostgreSQL mit PostGIS)
-		if(POSTGRES_DBNAME != '') {
-			$PostGISdb=new pgdatabase();
-			$PostGISdb->host = POSTGRES_HOST;
-			$PostGISdb->user = POSTGRES_USER;
-			$PostGISdb->passwd = POSTGRES_PASSWORD;
-			$PostGISdb->dbName = POSTGRES_DBNAME;
+		# Übergeben der GIS-Datenbank für GIS-Daten an die GUI
+		$GUI->pgdatabase = $GUI->baudatabase = new pgdatabase();
+		if (!$GUI->pgdatabase->open()) {
+			echo $GUI->pgdatabase->err_msg;
+			exit;
 		}
-		else {
-			# pgdbname ist leer, die Informationen zur Verbindung mit der PostGIS Datenbank
-			# mit Geometriedaten werden aus der Tabelle stelle
-			# der kvwmap-Datenbank $GUI->database gelesen
-			$PostGISdb=new pgdatabase();
-			$PostGISdb->host = $GUI->Stelle->pgdbhost;
-			$PostGISdb->dbName = $GUI->Stelle->pgdbname;
-			$PostGISdb->user = $GUI->Stelle->pgdbuser;
-			$PostGISdb->passwd = $GUI->Stelle->pgdbpasswd;
-			$PostGISdb->port = $GUI->Stelle->port;
-		}
-		if ($PostGISdb->dbName != '') {
-			# Übergeben der GIS-Datenbank für GIS-Daten an die GUI
-			$GUI->pgdatabase = $PostGISdb;
-			# Übergeben der GIS-Datenbank für die Bauaktendaten an die GUI
-			$GUI->baudatabase = $PostGISdb;
 
-			if (!$GUI->pgdatabase->open()) {
-				echo 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
-				echo '<br>Host: '.$GUI->pgdatabase->host;
-				echo '<br>User: '.$GUI->pgdatabase->user;
-			 # echo '<br>Passwd: '.$GUI->database->passwd;
-				echo '<br>Datenbankname: '.$GUI->pgdatabase->dbName;
-				exit;
-			}
-			else {
-				$GUI->debug->write("Verbindung zur PostGIS Datenbank erfolgreich hergestellt.", 4);
-				$GUI->pgdatabase->setClientEncoding();
-			}
-		}
 		$GUI->epsg_codes = $GUI->pgdatabase->read_epsg_codes(false);
 		# Umrechnen der für die Stelle eingetragenen Koordinaten in das aktuelle System der Rolle
 		# wenn die EPSG-Codes voneinander abweichen

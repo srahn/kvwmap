@@ -553,10 +553,13 @@ class stelle {
 		$this->MaxGeorefExt = ms_newRectObj();
 		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
-		$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
-		$this->pgdbname = $rs['pgdbname'];
-		$this->pgdbuser = $rs['pgdbuser'];
-		$this->pgdbpasswd = $rs['pgdbpasswd'];
+		$this->postgres_connection_id = $rs['postgres_connection_id'];
+		# ---> deprecated
+			$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
+			$this->pgdbname = $rs['pgdbname'];
+			$this->pgdbuser = $rs['pgdbuser'];
+			$this->pgdbpasswd = $rs['pgdbpasswd'];
+		# <---
 		$this->protected = $rs['protected'];
 		//---------- OWS Metadaten ----------//
 		$this->ows_title = $rs['ows_title'];
@@ -1177,17 +1180,17 @@ class db_mapObj {
 }
 
 class pgdatabase {
-
-  var $ist_Fortfuehrung;
-  var $debug;
-  var $loglevel;
-  var $defaultloglevel;
-  var $logfile;
-  var $defaultlogfile;
-  var $commentsign;
-  var $blocktransaction;
-  var $port;
-  var $schema;
+	var $ist_Fortfuehrung;
+	var $debug;
+	var $loglevel;
+	var $defaultloglevel;
+	var $logfile;
+	var $defaultlogfile;
+	var $commentsign;
+	var $blocktransaction;
+	var $port;
+	var $schema;
+	var $pg_text_attribute_types = array('character', 'character varying', 'text', 'timestamp without time zone', 'timestamp with time zone', 'date', 'USER-DEFINED');
 
 	function __construct() {
 		global $debug;
@@ -1202,6 +1205,7 @@ class pgdatabase {
 		$this->ist_Fortfuehrung=1;
 		$this->type='postgresql';
 		$this->commentsign='--';
+		$this->err_msg = '';
 		# Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
 		# START TRANSACTION, ROLLBACK und COMMIT unterdrückt, so daß alle anderen SQL
 		# Anweisungen nicht in Transactionsblöcken ablaufen.
@@ -1213,23 +1217,147 @@ class pgdatabase {
 		$this->spatial_ref_code = EPSGCODE_ALKIS . ", " . EARTH_RADIUS;
 	}
 
+	/**
+	* Decide how to get the credentials, get it and open the postgres database
+	* @return boolean, True if success or set an error message in $this->err_msg and return false when fail to find the credentials or open the connection
+	*/
   function open() {
-  	if($this->port == '') $this->port = 5432;
-    #$this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
-		$this->connect_string = '' .
-      'dbname='. $this->dbName .
-      ' port=' . $this->port .
-      ' user=' . $this->user .
-      ' password=' . $this->passwd;
-		if($this->host != 'localhost' AND $this->host != '127.0.0.1')
-      $this->connect_string .= ' host=' . $this->host; // das beschleunigt den Connect extrem
-    $this->dbConn = pg_connect($this->connect_string);
-    $this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);
-    # $this->version = pg_version($this->dbConn); geht erst mit PHP 5
-    $this->version = POSTGRESVERSION;
-    return $this->dbConn;
-  }
+		$credentials = $this->get_credentials();
+		if ($credentials == false) {
+			$this->err_msg = 'Es konnten keine Einstellungen zur Herstellung der Postgres-Datenbankverbindung gefunden werden.<br>Bitte bei Konstanten POSTGRESQL_* oder in Stelle (postgres_connection_id) und in der Tabelle connections eintragen.';
+			return false;
+		}
+		else {
+			$connection_string = $this->get_connection_string($credentials);
+			$this->dbConn = pg_connect($connection_string);
+			if (!$this->dbConn) {
+				$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden: ' . str_replace($credentials['password'], '********', $connection_string);
+				return false;
+			}
+			else {
+				$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
+				$this->setClientEncoding();
+				# $this->version = pg_version($this->dbConn); geht erst mit PHP 5
+				$this->version = POSTGRESVERSION;
+				if ($credentials['connection_id'] == '') {
+					# deprecated if all scripts using only connection_id
+					$this->set_object_credentials();
+				}
+				return true;
+			}
+		}
+	}
+
+	/**
+	* return the credential details as array from constants, connection table or stelle
+	* @return array $credentials array with connection details
+	*/
+	function get_credentials() {
+		$debug = false;
+		switch (true) {
+			case (defined('POSTGRES_CONNECTION_ID') AND POSTGRES_CONNECTION_ID != '') :
+				if ($debug) echo '<p>get_credentials_from_connections_table with POSTGRES_CONNECTION_ID: ' . POSTGRES_CONNECTION_ID;
+				$credentials = $this->get_credentials_from_connections_table(POSTGRES_CONNECTION_ID);
+				break;
+			case (defined('POSTGRES_DBNAME') AND POSTGRES_DBNAME != '') :
+				if ($debug) echo '<p>get_credentials_from_constants';
+				$credentials = $this->get_credentials_from_constants();
+				break;
+			case ($this->gui->Stelle->postgres_connection_id != '') :
+				if ($debug) echo '<p>get_credentials_from_connections_table with Stelle postgres_connection_id: ' . $this->gui->Stelle->postgres_connection_id;
+				$credentials = $this->get_credentials_from_connections_table($this->gui->Stelle->postgres_connection_id);
+				break;
+			case ($this->gui->Stelle->pgdbname != '') :
+				if ($debug) echo '<p>get_credentials_from_stelle with id: ' . $this->gui->Stelle->id;
+				$credentials = $this->get_credentials_from_stelle($this->gui->Stelle);
+				break;
+			default :
+				$credentials = null;
+		}
+		return $credentials;
+	}
 	
+	/**
+	* return the credential details as array from connections_table
+	* @param integer $connection_id The id of connection information in connection mysql table
+	* @return array $credentials array with connection details
+	*/
+	function get_credentials_from_connections_table($connection_id) {
+		include_once(CLASSPATH . 'Connection.php');
+		$conn = Connection::find_by_id($this->gui, $this->gui->Stelle->postgres_connection_id);
+		return array(
+			'host' => 		$conn->get('host'),
+			'port' => 		($conn->get('port') != '' ? $conn->get('port') : '5432'),
+			'dbname' => 	$conn->get('dbname'),
+			'user' => 		$conn->get('user'),
+			'password' => $conn->get('password')
+		);
+	}
+
+	/**
+	* return the credential details as array from constants
+	* @return array $credentials array with connection details
+	*/
+	function get_credentials_from_constants() {
+		return array(
+			'host' => 		POSTGRES_HOST,
+			'port' => 		((defined('POSTGRES_PORT') AND POSTGRES_PORT != '') ? POSTGRES_PORT : '5432'),
+			'dbname' => 	POSTGRES_DBNAME,
+			'user' => 		POSTGRES_USER,
+			'password' => POSTGRES_PASSWORD
+		);
+	}
+
+	/**
+	* return the credential details as array from stelle object
+	* @param Object $stelle A stelle object with credentials in object variables
+	* @return array $credentials array with connection details
+	*/
+	function get_credentials_from_stelle($stelle) {
+		echo '<p>get_credentials_from_stelle id: ' . $stelle->id;
+		return array(
+			'host' => 		$stelle->pgdbhost,
+			'port' => 		5432,
+			'dbname' => 	$stelle->pgdbname,
+			'user' => 		$stelle->pgdbuser,
+			'password' => $stelle->pgdbpasswd
+		);
+	}
+
+	/**
+	* returns a connection string used to connect to postgres with pg_connect
+	* @param array $credentials array with connection details
+	* @return string the postgres connection string
+	*/
+	function get_connection_string($credentials) {
+		$connection_string = '' .
+			'host=' . 			$credentials['host'] 		. ' ' .
+			'port=' . 			$credentials['port'] 		. ' ' .
+			'dbname=' . 		$credentials['dbname'] 	. ' ' .
+			'user=' . 			$credentials['user'] 		. ' ' .
+			'password=' .	$credentials['password'];
+		return $connection_string;
+	}
+
+	/**
+	* Set credentials to postgres object variables
+	* deprecated if all scripts using only connection_id
+	*/
+	function set_object_credentials() {
+		$this->host = 	$credentials['host'];
+		$this->port = 	$credentials['port'];
+		$this->dbName = $credentials['dbname'];
+		$this->user = 	$credentials['user'];
+		$this->passwd = $credentials['password'];
+	}
+
+  function setClientEncoding() {
+    $sql ="SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';";
+		$ret=$this->execSQL($sql, 4, 0);
+    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    return $ret[1];
+  }
+
 	function getEnumElements($name, $schema){
 		$sql = "SELECT array_to_string(array_agg(''''||e.enumlabel||''''), ',') as enum_string ";
 		$sql.= "FROM pg_enum e ";
