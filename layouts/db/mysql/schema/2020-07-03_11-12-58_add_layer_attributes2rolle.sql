@@ -13,7 +13,7 @@ BEGIN;
     `sortable` tinyint(1) NOT NULL DEFAULT 1,
     `sort_order` int(11) NOT NULL DEFAULT 1,
     `sort_direction` enum('asc', 'desc') NOT NULL DEFAULT 'asc'
-  ) ENGINE=INNODB DEFAULT CHARSET=utf8;
+  ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE utf8_general_ci;
 
   ALTER TABLE `layer_attributes2rolle` ADD PRIMARY KEY (`layer_id`, `attributename`, `stelle_id`, `user_id`);
   ALTER TABLE `layer_attributes2rolle` ADD FOREIGN KEY (`layer_id`, `attributename`, `stelle_id`) REFERENCES `layer_attributes2stelle` (`layer_id`, `attributename`, `stelle_id`) ON DELETE CASCADE;
