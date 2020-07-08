@@ -39,6 +39,7 @@ class LayerAttributeRolleSetting extends MyObject {
 	}
 
 	function read_layer_attributes2rolle($layer_id, $stelle_id, $user_id) {
+		$rolle_attribute_settings = array();
 		$sql = "
 			SELECT
 				*

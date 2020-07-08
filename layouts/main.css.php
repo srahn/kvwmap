@@ -1380,6 +1380,7 @@ a:hover .preview_image{
 	padding: 0px;
 	max-width: 480px;
 	text-align: left;
+	word-break: break-all;
 }
 
 .dstable{

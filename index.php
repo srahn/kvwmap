@@ -1415,6 +1415,10 @@ function go_switch($go, $exit = false) {
 				$GUI->layer_attributes_privileges();
 			} break;
 
+			case 'write_layer_attributes2rolle' : {
+				$GUI->write_layer_attributes2rolle();
+			} break;
+
 			case 'Layer_Parameter' : {
 				$GUI->checkCaseAllowed('Layer_Parameter');
 				$GUI->layer_parameter();
