@@ -2205,7 +2205,7 @@ class pgdatabase {
 	*/
 	function get_credentials_from_connections_table($connection_id) {
 		include_once(CLASSPATH . 'Connection.php');
-		$conn = Connection::find_by_id($this->gui, $this->gui->Stelle->postgres_connection_id);
+		$conn = Connection::find_by_id($this->gui, $connection_id);
 		return array(
 			'host' => 		$conn->get('host'),
 			'port' => 		($conn->get('port') != '' ? $conn->get('port') : '5432'),
