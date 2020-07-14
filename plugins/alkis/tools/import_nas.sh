@@ -10,10 +10,10 @@ extract_zip_files() {
 			find ${DATA_PATH} -iname '*.zip' | sort | while read ZIP_FILE ; do			
 				if [ ! "${UNZIP_PASSWORD}" = "" ] ; then
 					log "unzip -P ${UNZIP_PASSWORD} ${ZIP_FILE} -d ${IMPORT_PATH}"
-					unzip -o -P $UNZIP_PASSWORD $ZIP_FILE -d $IMPORT_PATH >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
+					unzip -o -P $UNZIP_PASSWORD $ZIP_FILE -d $IMPORT_PATH/$(basename "${ZIP_FILE}") >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 				else
 				  log "unzip ${ZIP_FILE} -d ${IMPORT_PATH}"
-					unzip -o $ZIP_FILE -d $IMPORT_PATH >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
+					unzip -o $ZIP_FILE -d $IMPORT_PATH/$(basename "${ZIP_FILE}") >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 				fi
 				find $IMPORT_PATH -iname '*.xml.gz' | sort | while read GZ_FILE ; do
 					GZ_FILE_=${GZ_FILE// /_} # ersetzt Leerzeichen durch _ in Dateiname
