@@ -148,6 +148,7 @@ class MyObject {
 	}
 
 	function setKeysFromTable() {
+		#$this->debug->show('setKeysFromTable', MyObject::$write_debug);
 		$columns = $this->getColumnsFromTable();
 		foreach($columns AS $column) {
 			$this->set($column['Field'], NULL);
@@ -155,14 +156,20 @@ class MyObject {
 		return $this->getKeys();
 	}
 
+	function setKeysFromFormvars($formvars) {
+		$this->debug->show('setKeysFromFormvars', MyObject::$write_debug);
+		$this->data = array_flip(array_intersect(array_keys($formvars), array_map(function($attribute) { return $attribute['Field']; }, $this->getColumnsFromTable())));
+	}
+
 	function getColumnsFromTable() {
+		#$this->debug->show('getColumnsFromTable', MyObject::$write_debug);
 		$columns = array();
 		$sql = "
 			SHOW COLUMNS
 			FROM
 				`" . $this->tableName . "`
 		";
-		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
+		$this->debug->show('sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
 		while ($column = $this->database->result->fetch_assoc()) {
 			$columns[] = $column;
@@ -171,12 +178,34 @@ class MyObject {
 	}
 
 	function getTypesFromColumns() {
+		#$this->debug->show('getTypesFromColumns', MyObject::$write_debug);
 		$types = array();
 		$columns = $this->getColumnsFromTable();
 		foreach ($columns AS $column) {
 			$types[$column['Field']] = $column['Type'];
 		}
 		return $types;
+	}
+
+	/*
+	* This function returns an expression with identifiers and its values
+	* to identify a unique dataset regularly used in WHERE clausel of SQL-Statements
+	*/
+	function getIdentifierCondition() {
+		if ($this->identifier_type == 'array' AND getType($this->identifier) == 'array') {
+			$where = array_map(
+				function($id) {
+					$quote = ($id['type'] == 'text' ? "'" : "");
+					return $id['key'] . " = " . $quote . $this->get($id['key']) . $quote;
+				},
+				$this->identifier
+			);
+		}
+		else {
+			$quote = ($this->identifier_type == 'text' ? "'" : "");
+			$where = array($this->identifier . " = " . $quote . $this->get($this->identifier) . $quote);
+		}
+		return implode(' AND ', $where); 
 	}
 
 	function setData($formvars) {
@@ -188,10 +217,12 @@ class MyObject {
 	}
 
 	function getValues() {
+		$this->debug->show('getValues', MyObject::$write_debug);
 		return array_values($this->data);
 	}
 
 	function getKVP($options = array('escaped' => false)) {
+		#$this->debug->show('getKVP', MyObject::$write_debug);
 		$types = $this->getTypesFromColumns();
 		$kvp = array();
 		if (is_array($this->data)) {
@@ -269,21 +300,56 @@ class MyObject {
 		return $results;
 	}
 
+	/*
+	* Function insert new dataset if not exists else update it with data values
+	* corresonding to identifier attributes
+	* INSERT INTO `layer_attributes2rolle` (
+	*   `layer_id`, `attributename`, `stelle_id`, `user_id`, `switchable`, `switched_on`, `sortable`, `sort_order`, `sort_direction`
+	* ) VALUES (
+	*   146, 'user_id', 1, 1, 1, 1, 1, 1, 'desc'
+	* ) ON DUPLICATE KEY UPDATE
+	* layer_id = 146, `attributename` = 'user_id', stelle_id = 1, user_id = 1, switched_on = 1, sort_order = 2, sort_direction = 'desc'
+	*/
+	function insert_or_update() {
+		$sql = "
+			INSERT INTO `" . $this->tableName . "` (
+				`" . implode('`, `', $this->getKeys()) . "`
+			)
+			VALUES (
+				" . implode(
+					", ",
+					array_map(
+						function ($value) {
+							if ($value === NULL OR $value == '') {
+								$v = 'NULL';
+							}
+							else if (is_numeric($value)) {
+								$v = "'" . $value . "'";
+							}
+							else {
+								$v = "'" . addslashes($value) . "'";
+							}
+							return $v;
+						},
+						$this->getValues()
+					)
+				) . "
+			)
+			ON DUPLICATE KEY UPDATE"
+				. implode(', ', $this->getKVP()) . "
+		";
+		$this->debug->show('<p>insert_or_update: ' . $sql, MyObject::$write_debug);
+		$this->database->execSQL($sql);
+		$err_msg = $this->database->errormessage;
+		$result = array(
+			'success' => ($err_msg == ''),
+			'err_msg' => $err_msg . ' Aufgetreten bei SQL: ' . $sql
+		);
+		return $result;
+	}
+
 	function update($data = array()) {
 		$results = array();
-		if ($this->identifier_type == 'array' AND getType($this->identifier) == 'array') {
-			$where = array_map(
-				function($id) {
-					$quote = ($id['type'] == 'text' ? "'" : "");
-					return $id['key'] . " = " . $quote . $this->get($id['key']) . $quote;
-				},
-				$this->identifier
-			);
-		}
-		else {
-			$quote = ($this->identifier_type == 'text' ? "'" : "");
-			$where = array($this->identifier . " = " . $quote . $this->get($this->identifier) . $quote);
-		}
 		if (!empty($data)) {
 			$this->data = $data;
 		}
@@ -294,7 +360,7 @@ class MyObject {
 			SET
 				" . implode(', ', $this->getKVP(array('escaped' => true))) . "
 			WHERE
-				" . implode(' AND ', $where) . "
+				" . $this->getIdentifierCondition() . "
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);

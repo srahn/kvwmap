@@ -11116,6 +11116,26 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 		$this->output();
 	}
 
+	function write_layer_attributes2rolle() {
+		$result = array();
+		include_once(CLASSPATH . 'LayerAttributeRolleSetting.php');
+		$larsObj = new LayerAttributeRolleSetting($this);
+		$this->formvars['stelle_id'] = $this->Stelle->id;
+		$this->formvars['user_id'] = $this->user->id;
+		if (
+			array_key_exists('sort_order', $this->formvars) AND
+			array_key_exists('sort_other', $this->formvars) AND
+			$this->formvars['sort_other'] == 'false'
+		) {
+			$larsObj->resetSortOrder($this->formvars['layer_id'], $this->formvars['stelle_id'], $this->formvars['user_id']);
+		}
+		$larsObj->setKeysFromFormvars($this->formvars);
+		$larsObj->setData($this->formvars);
+		$result = $larsObj->insert_or_update();
+		header('Content-Type: application/json; charset=utf-8');
+		echo utf8_decode(json_encode($result));
+	}
+
 	/**
 	* Function saves attribute privileges of the selected and its duplicated layers
 	* @param array $formvars The attribute privileges including the selected_layer_id
