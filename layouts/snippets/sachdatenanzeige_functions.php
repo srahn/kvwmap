@@ -449,7 +449,7 @@ include('funktionen/input_check_functions.php');
 					return;
 				}
   		}
-			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
+			if(['checkbox', 'radio'].indexOf(form_fields[i].type) == -1 || form_fields[i].checked){
 				if(form_fields[i].type == 'file' && form_fields[i].files[0] != undefined)value = form_fields[i].files[0];
 				else value = form_fields[i].value;
 				formData.append(form_fields[i].name, value);

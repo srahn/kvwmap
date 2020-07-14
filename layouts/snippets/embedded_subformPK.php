@@ -135,7 +135,7 @@ else{ ?>
 							if ($preview_attributes[$p] == $attributes['name'][$j]) {
 								$output[$p] = '';
 								switch ($attributes['form_element_type'][$j]) {
-									case 'Auswahlfeld' : {
+									case 'Auswahlfeld' : case 'Radiobutton' : {
 										if (is_array($attributes['dependent_options'][$j])) {		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 											for ($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++) {
 												if ($attributes['enum_value'][$j][$k][$e] == $dataset[$attributes['name'][$j]]) {
