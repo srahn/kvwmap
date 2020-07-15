@@ -1241,7 +1241,7 @@ class pgdatabase {
 				$this->version = POSTGRESVERSION;
 				if ($credentials['connection_id'] == '') {
 					# deprecated if all scripts using only connection_id
-					$this->set_object_credentials();
+					$this->set_object_credentials($credentials);
 				}
 				return true;
 			}
@@ -1343,7 +1343,7 @@ class pgdatabase {
 	* Set credentials to postgres object variables
 	* deprecated if all scripts using only connection_id
 	*/
-	function set_object_credentials() {
+	function set_object_credentials($credentials) {
 		$this->host = 	$credentials['host'];
 		$this->port = 	$credentials['port'];
 		$this->dbName = $credentials['dbname'];
