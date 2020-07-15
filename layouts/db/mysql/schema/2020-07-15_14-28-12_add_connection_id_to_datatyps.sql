@@ -9,14 +9,18 @@ BEGIN;
     `datatypes` dt,
     (
       SELECT
-        min(id) AS id,
-        host,
-        port,
-        dbname
-      FROM
-        `connections`
-      GROUP BY
-        host, port, dbname
+				id,
+				host,
+				port,
+				dbname
+			FROM
+				`connections`, `layer`
+			WHERE 
+				`layer`.connection_id = `connections`.id
+			GROUP BY
+				host, port, dbname, password
+			HAVING 
+				count(layer.Layer_ID) > 5
     ) AS cn
   SET
     dt.connection_id = cn.id

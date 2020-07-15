@@ -1318,20 +1318,39 @@ class pgdatabase {
 		return $result['enum_string'];
 	}
 	
-	function writeCustomType($typname, $schema){		
-		$datatype_id = $this->getDatatypeId($typname, $schema, $this->dbName, $this->host, $this->port);
+	function writeCustomType($typname, $schema) {
+		$datatype_id = $this->getDatatypeId($typname, $schema, $this->connection_id);
 		$this->writeDatatypeAttributes($datatype_id, $typname, $schema);
 		return $datatype_id;
 	}
-
-	function getDatatypeId($typname, $schema, $dbname, $host, $port){
-		$sql = "SELECT id FROM datatypes WHERE ";
-		$sql.= "name = '".$typname."' AND `schema` = '".$schema."' AND dbname = '".$dbname."' AND host = '".$host."' AND port = ".$port;
+	
+	function getDatatypeId($typname, $schema, $connection_id){
+		$sql = "
+			SELECT
+				id
+			FROM
+				datatypes
+			WHERE
+				`name` = '" . $typname . "' AND
+				`schema` = '" . $schema . "' AND
+				`connection_id` = '" . $connection_id . "'
+		";
 		$ret1 = $this->gui->database->execSQL($sql, 4, 1);
 		if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$rs = $this->gui->database->result->fetch_assoc();
-		if($rs == NULL){
-			$sql = "INSERT INTO datatypes (name, `schema`, dbname, host, port) VALUES ('".$typname."', '".$schema."', '".$dbname."', '".$host."', ".$port.")";
+		if ($rs == NULL) {
+			$sql = "
+				INSERT INTO datatypes (
+					`name`,
+					`schema`,
+					`connectino_id`
+				)
+				VALUES (
+					'" . $typname . "',
+					'" . $schema . "',
+					'" . $connection_id . "'
+				)
+			";
 			$ret2 = $this->gui->database->execSQL($sql, 4, 1);
 			$datatype_id = $this->gui->database->mysqli->insert_id;
 		}
