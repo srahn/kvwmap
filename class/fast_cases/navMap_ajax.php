@@ -1341,6 +1341,7 @@ class GUI {
 					$label->buffer = $dbLabel['buffer'];
 				}
 				$label->set('maxlength',$dbLabel['maxlength']);
+				$label->set('repeatdistance',$dbLabel['repeatdistance']);
 				$label->wrap = $dbLabel['wrap'];
 				$label->force = $dbLabel['the_force'];
 				$label->partials = $dbLabel['partials'];

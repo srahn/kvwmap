@@ -2142,6 +2142,7 @@ echo '			</ul>
 					$label->buffer = $dbLabel['buffer'];
 				}
 				$label->set('maxlength',$dbLabel['maxlength']);
+				$label->set('repeatdistance',$dbLabel['repeatdistance']);
 				$label->wrap = $dbLabel['wrap'];
 				$label->force = $dbLabel['the_force'];
 				$label->partials = $dbLabel['partials'];
@@ -19988,6 +19989,7 @@ class db_mapObj{
     if($formvars["label_maxfeaturesize"]){$sql.="maxfeaturesize = '" . $formvars["label_maxfeaturesize"]."',";}
     if($formvars["label_partials"] != ''){$sql.="partials = '" . $formvars["label_partials"]."',";}else{$sql.="partials = NULL,";}
 		if($formvars["label_maxlength"] != ''){$sql.="maxlength = '" . $formvars["label_maxlength"]."',";}
+		if($formvars["label_repeatdistance"] != ''){$sql.="repeatdistance = '" . $formvars["label_repeatdistance"]."',";}
     if($formvars["label_wrap"] != ''){$sql.="wrap = '" . $formvars["label_wrap"]."',";}
     if($formvars["label_the_force"] != ''){$sql.="the_force = '" . $formvars["label_the_force"]."',";}else{$sql.="the_force = NULL,";}
     $sql.="Label_ID = " . $formvars["label_Label_ID"];
