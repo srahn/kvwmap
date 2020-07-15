@@ -576,8 +576,10 @@ class stelle {
 	}
 
 	function isFunctionAllowed($functionname) {
-		if($this->funktionen == NULL)$this->getFunktionen();
-		if($this->funktionen[$functionname]['erlaubt']) {
+		if ($this->funktionen == NULL) {
+			$this->getFunktionen();
+		}
+		if ($this->funktionen[$functionname]['erlaubt']) {
 			return 1;
 		}
 		else {

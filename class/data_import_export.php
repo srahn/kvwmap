@@ -151,11 +151,7 @@ class data_import_export {
 			$select = 'oid, *';
 			$this->formvars['Data'] = 'the_geom from (SELECT ' . $select . ' FROM ' . CUSTOM_SHAPE_SCHEMA . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ')as foo using unique oid using srid=' . $epsg;
 			$this->formvars['query'] = 'SELECT * FROM ' . $custom_table['tablename'] . ' WHERE 1=1' . $custom_table['where'];
-			$this->formvars['connection'] =
-				'dbname=' . $pgdatabase->dbName .
-				' user=' . $pgdatabase->user .
-				($pgdatabase->host != 'localhost' ? ' host=' . $pgdatabase->host : '') .
-				($pgdatabase->passwd != ''        ? ' password=' . $pgdatabase->passwd : '');
+			$this->formvars['connection_id'] = $pgdatabase->connection_id;
 			$this->formvars['connectiontype'] = 6;
 			if($custom_table['datatype'] == MS_LAYER_POLYGON)$this->formvars['transparency'] = $user->rolle->result_transparency;
 			else $this->formvars['transparency'] = 100;
@@ -812,15 +808,14 @@ class data_import_export {
 		}
 	}
 
-	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb){
-		$command = 'export PGDATESTYLE="ISO, MDY";export PGCLIENTENCODING=UTF-8;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -lco ENCODING=UTF-8 -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
-		if($layerdb->passwd != '')$command.= ' password='.$layerdb->passwd;
-		if($layerdb->port != '')$command.=' port='.$layerdb->port;
-		if($layerdb->host != '')$command .= ' host=' . $layerdb->host;
-		if($layerdb->schema != '')$command .= ' active_schema='.$layerdb->schema;
+	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb) {
+		$command = 'export PGDATESTYLE="ISO, MDY";export PGCLIENTENCODING=UTF-8;'
+			. OGR_BINPATH . 'ogr2ogr -f ' . $exportformat . ' -lco ENCODING=UTF-8 -sql "' . $sql . '" ' . $exportfile
+			. ' PG:"' . $layerdb->get_connection_string() . ' active_schema=' . $layerdb->schema . '"';
 		$errorfile = rand(0, 1000000);
-		$command .= '" 2> '.IMAGEPATH.$errorfile.'.err';
+		$command .= ' 2> '.IMAGEPATH.$errorfile.'.err';
 		$output = array();
+		#echo '<br>' . $command;
 		exec($command, $output, $ret);
 		if($ret != 0)$ret = 'Fehler beim Exportieren !<br><br>Befehl:<div class="code">'.$command.'</div><a href="' . IMAGEURL . $errorfile . '.err" target="_blank">Fehlerprotokoll</a>';
 		return $ret;
@@ -831,11 +826,8 @@ class data_import_export {
 		if ($options != NULL) $command.= $options;
 		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco precision=NO -nlt PROMOTE_TO_MULTI -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
 		if ($sql != NULL) $command.= ' -sql \''.$sql.'\'';
-		$command .= ' -append PG:"dbname=' . $database->dbName . ' user=' . $database->user . ' active_schema=' . $schema;
-		if ($database->passwd != '') $command .= ' password=' . $database->passwd;
-		if ($database->port != '') $command .= ' port=' . $database->port;
-		if ($database->host != '') $command .= ' host=' . $database->host;
-		$command .= '" "' . $importfile . '" ' . $layer;
+		$command .= ' -append PG:"' . $layerdb->get_connection_string() . ' active_schema=' . $schema . '"';
+		$command .= ' "' . $importfile . '" ' . $layer;
 		$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
 		$output = array();
 		exec($command, $output, $ret);
@@ -1007,7 +999,7 @@ class data_import_export {
 		$this->formvars = $formvars;
 		$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
 		$mapdb = new db_mapObj($stelle->id,$user->id);
-		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);		
+		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
 		$sql = replace_params(
 			$layerset[0]['pfad'],
 			rolle::$layer_params,
@@ -1251,19 +1243,21 @@ class data_import_export {
 					rename($item, $pathinfo['dirname'].'/'.umlaute_umwandeln($pathinfo['filename']).'.'.$pathinfo['extension']);
 				});
 				exec(ZIP_PATH.' -j '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*'); # Ordner zippen
-				#echo ZIP_PATH.' -j '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*';
+				#echo '<p>' . ZIP_PATH.' -j '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*';
 				$exportfile = IMAGEPATH.$folder.'.zip';
 				$contenttype = 'application/octet-stream';
 			}
 			# temp. Tabelle wieder löschen
 			$sql = 'DROP TABLE '.$temp_table;
 			$ret = $layerdb->execSQL($sql,4, 0);
-			if($this->formvars['export_format'] != 'CSV')$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
+			if ($this->formvars['export_format'] != 'CSV') {
+				$user->rolle->setConsumeShape($currenttime, $this->formvars['selected_layer_id'], $count);
+			}
 
-			if($err != ''){
+			if ($err != ''){
 				$GUI->add_message('error', $err);
 			}
-			else{
+			else {
 				ob_end_clean();
 				header('Content-type: '.$contenttype);
 				header("Content-disposition:	attachment; filename=".basename($exportfile));

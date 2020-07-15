@@ -383,9 +383,10 @@ else {
 
 	if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, den PGConnect und Trafos weglassen
 		##############################################################################
-		# Übergeben der GIS-Datenbank für GIS-Daten an die GUI
+		# kvwmap uses the database defined in postgres_connection_id of stelle object or if not exists from POSTGRES_CONNECTION_ID
 		$GUI->pgdatabase = $GUI->baudatabase = new pgdatabase();
-		if (!$GUI->pgdatabase->open()) {
+		$connection_id = ($GUI->Stelle->postgres_connection_id != '' ? $GUI->Stelle->postgres_connection_id : POSTGRES_CONNECTION_ID);
+		if (!$GUI->pgdatabase->open($connection_id)) {
 			echo $GUI->pgdatabase->err_msg;
 			exit;
 		}

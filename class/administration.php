@@ -148,12 +148,13 @@ class administration{
 			$prepath = PLUGINS.$component.'/';
 			foreach ($component_seed as $file) {
 				$filepath = $prepath.'db/mysql/data/'.$file;
-				$connection = 'user='.$this->pgdatabase->user.' password='.$this->pgdatabase->passwd.' dbname='.$this->pgdatabase->dbName;
-				if ($this->pgdatabase->host != '') {
-					$connection .= ' host='.$this->pgdatabase->host;
-				}
 				#echo '<br>Execute SQL from seed file: ' . $filepath;
-				$result = $this->database->exec_commands(file_get_contents($filepath), 'user=xxxx password=xxxx dbname=kvwmapsp', $connection, true); # replace known constants
+				$result = $this->database->exec_commands(
+					file_get_contents($filepath),
+					$this->pgdatabase->get_connection_string(),
+					$this->pgdatabase->connection_id,
+					true
+				); # replace known constants
 				if ($result[0]) {
 					echo $result[1] . getTimestamp('H:i:s', 4). ' Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
 				}
