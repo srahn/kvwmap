@@ -1465,7 +1465,6 @@ class pgdatabase {
 					if($attr_info[0]['is_array'] == 't')$prefix = '_'; else $prefix = '';
 					if($attr_info[0]['type_type'] == 'c'){		# custom datatype
 						$datatype_id = $this->writeCustomType($attr_info[0]['type'], $attr_info[0]['type_schema']);
-						echo 'joo';exit;
 						$fieldtype = $prefix.$datatype_id; 
 					}
 					if($attr_info[0]['type_type'] == 'e'){		# enum
