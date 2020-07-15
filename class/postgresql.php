@@ -35,9 +35,12 @@ class pgdatabase {
 	var $defaultlogfile;
 	var $commentsign;
 	var $blocktransaction;
+	var $host;
 	var $port;
 	var $schema;
 	var $pg_text_attribute_types = array('character', 'character varying', 'text', 'timestamp without time zone', 'timestamp with time zone', 'date', 'USER-DEFINED');
+	var $version = POSTGRESVERSION;
+	var $connection_id;
 
 	function __construct() {
 		global $debug;
@@ -62,139 +65,78 @@ class pgdatabase {
 		# Dazu Fehlerausschriften bearchten.
 		$this->blocktransaction=0;
 		$this->spatial_ref_code = EPSGCODE_ALKIS . ", " . EARTH_RADIUS;
-		$this->connection_id = '';
 	}
 
 	/**
-	* Decide how to get the credentials, get it and open the postgres database
+	* Open the database connection based on the given connection_id
+	* @param integer, $connection_id The id of the connection defined in mysql connections table, if 0 default connection will be used
 	* @return boolean, True if success or set an error message in $this->err_msg and return false when fail to find the credentials or open the connection
 	*/
-  function open() {
-		$credentials = $this->get_credentials();
-		if ($credentials == false) {
-			$this->err_msg = 'Es konnten keine Einstellungen zur Herstellung der Postgres-Datenbankverbindung gefunden werden.<br>Bitte bei Konstanten POSTGRESQL_* oder in Stelle (postgres_connection_id) und in der Tabelle connections eintragen.';
+  function open($connection_id = 0) {
+		if ($connection_id == 0) {
+			# get credentials from object variables
+			$connection_string = $this->format_pg_connection_string($this->get_object_credentials());
+		}
+		else {
+			$this->debug->write("Open Database connection with connection_id: " . $connection_id, 4);
+			$this->connection_id = $connection_id;
+			$connection_string = $this->get_connection_string();
+		}
+		$this->dbConn = pg_connect($connection_string);
+		if (!$this->dbConn) {
+			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden: ' . str_replace($credentials['password'], '********', $connection_string);
 			return false;
 		}
 		else {
-			$connection_string = $this->get_connection_string($credentials);
-			$this->dbConn = pg_connect($connection_string);
-			if (!$this->dbConn) {
-				$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden: ' . str_replace($credentials['password'], '********', $connection_string);
-				return false;
-			}
-			else {
-				$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
-				$this->setClientEncoding();
-				# $this->version = pg_version($this->dbConn); geht erst mit PHP 5
-				$this->version = POSTGRESVERSION;
-				if ($credentials['connection_id'] == '') {
-					# deprecated if all scripts using only connection_id
-					$this->set_object_credentials();
-				}
-				else {
-					$this->connection_id = $credentials['connection_id'];
-				}
-				return true;
-			}
+			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
+			$this->setClientEncoding();
+			$this->connection_id = $connection_id;
+			return true;
 		}
 	}
 
 	/**
-	* return the credential details as array from constants, connection table or stelle
-	* @return array $credentials array with connection details
-	*/
-	function get_credentials() {
-		$debug = false;
-		switch (true) {
-			case (defined('POSTGRES_CONNECTION_ID') AND POSTGRES_CONNECTION_ID != '') :
-				if ($debug) echo '<p>get_credentials_from_connections_table with POSTGRES_CONNECTION_ID: ' . POSTGRES_CONNECTION_ID;
-				$credentials = $this->get_credentials_from_connections_table(POSTGRES_CONNECTION_ID);
-				break;
-			case (defined('POSTGRES_DBNAME') AND POSTGRES_DBNAME != '') :
-				if ($debug) echo '<p>get_credentials_from_constants';
-				$credentials = $this->get_credentials_from_constants();
-				break;
-			case ($this->gui->Stelle->postgres_connection_id != '') :
-				if ($debug) echo '<p>get_credentials_from_connections_table with Stelle postgres_connection_id: ' . $this->gui->Stelle->postgres_connection_id;
-				$credentials = $this->get_credentials_from_connections_table($this->gui->Stelle->postgres_connection_id);
-				break;
-			case ($this->gui->Stelle->pgdbname != '') :
-				if ($debug) echo '<p>get_credentials_from_stelle with id: ' . $this->gui->Stelle->id;
-				$credentials = $this->get_credentials_from_stelle($this->gui->Stelle);
-				break;
-			default :
-				$credentials = null;
-		}
-		return $credentials;
-	}
-	
-	/**
 	* return the credential details as array from connections_table
+	* or default values if no exists for connection_id
 	* @param integer $connection_id The id of connection information in connection mysql table
 	* @return array $credentials array with connection details
 	*/
-	function get_credentials_from_connections_table($connection_id) {
+	function get_credentials($connection_id) {
+		#echo '<p>get_credentials with connection_id: ' . $connection_id;
 		include_once(CLASSPATH . 'Connection.php');
 		$conn = Connection::find_by_id($this->gui, $connection_id);
 		return array(
-			'host' => 		$conn->get('host'),
-			'port' => 		($conn->get('port') != '' ? $conn->get('port') : '5432'),
-			'dbname' => 	$conn->get('dbname'),
-			'user' => 		$conn->get('user'),
-			'password' => $conn->get('password')
+			'host' => 		($conn->get('host')     != '' ? $conn->get('host')     : 'pgsql'),
+			'port' => 		($conn->get('port')     != '' ? $conn->get('port')     : '5432'),
+			'dbname' => 	($conn->get('dbname')   != '' ? $conn->get('dbname')   : 'kvwmapsp'),
+			'user' => 		($conn->get('user')     != '' ? $conn->get('user')     : 'kvwmap'),
+			'password' => ($conn->get('password') != '' ? $conn->get('password') : KVWMAP_INIT_PASSWORD)
 		);
 	}
 
 	/**
-	* return the credential details as array from constants
-	* @return array $credentials array with connection details
-	*/
-	function get_credentials_from_constants() {
-		return array(
-			'host' => 		POSTGRES_HOST,
-			'port' => 		((defined('POSTGRES_PORT') AND POSTGRES_PORT != '') ? POSTGRES_PORT : '5432'),
-			'dbname' => 	POSTGRES_DBNAME,
-			'user' => 		POSTGRES_USER,
-			'password' => POSTGRES_PASSWORD
-		);
-	}
-
-	/**
-	* return the credential details as array from stelle object
-	* @param Object $stelle A stelle object with credentials in object variables
-	* @return array $credentials array with connection details
-	*/
-	function get_credentials_from_stelle($stelle) {
-		echo '<p>get_credentials_from_stelle id: ' . $stelle->id;
-		return array(
-			'host' => 		$stelle->pgdbhost,
-			'port' => 		5432,
-			'dbname' => 	$stelle->pgdbname,
-			'user' => 		$stelle->pgdbuser,
-			'password' => $stelle->pgdbpasswd
-		);
-	}
-
-	/**
-	* returns a connection string used to connect to postgres with pg_connect
+	* returns a postgres connection string used to connect to postgres with pg_connect
 	* @param array $credentials array with connection details
 	* @return string the postgres connection string
 	*/
-	function get_connection_string($credentials) {
+	function format_pg_connection_string($credentials) {
 		$connection_string = '' .
-			'host=' . 			$credentials['host'] 		. ' ' .
-			'port=' . 			$credentials['port'] 		. ' ' .
-			'dbname=' . 		$credentials['dbname'] 	. ' ' .
-			'user=' . 			$credentials['user'] 		. ' ' .
+			'host=' . 		$credentials['host'] 		. ' ' .
+			'port=' . 		$credentials['port'] 		. ' ' .
+			'dbname=' . 	$credentials['dbname'] 	. ' ' .
+			'user=' . 		$credentials['user'] 		. ' ' .
 			'password=' .	$credentials['password'];
 		return $connection_string;
 	}
 
+	function get_connection_string() {
+		return $this->format_pg_connection_string($this->get_credentials($this->connection_id));
+	}
+
 	/**
 	* Set credentials to postgres object variables
-	* deprecated if all scripts using only connection_id
 	*/
-	function set_object_credentials() {
+	function set_object_credentials($credentials) {
 		$this->host = 	$credentials['host'];
 		$this->port = 	$credentials['port'];
 		$this->dbName = $credentials['dbname'];
@@ -202,12 +144,25 @@ class pgdatabase {
 		$this->passwd = $credentials['password'];
 	}
 
+	/**
+	* Get credentials from postgres object variables
+	*/
+	function get_object_credentials() {
+		return array(
+			'host'     => $this->host,
+			'port'     => $this->port,
+			'dbname'   => $this->dbName,
+			'user'     => $this->user,
+			'password' => $this->passwd
+		);
+	}
+
   function setClientEncoding() {
     $sql ="SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    return $ret[1];    	
-  }  
+    return $ret[1];
+  }
 
   function close() {
     $this->debug->write("<br>PostgreSQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
@@ -235,6 +190,30 @@ class pgdatabase {
 			}
 		}
 		return $tables;
+	}
+
+	/*
+	* connect to the database to test if exists
+	* @return boolean true if exists else false
+	*/
+	function database_exists() {
+		$this->debug->write("Open Database " . $credentials['dbname'] . " to test if exists", 4);
+
+		$this->dbConn = pg_connect(
+		$this->get_connection_string()
+	);
+		if (!$this->dbConn) {
+			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden: ' . str_replace($credentials['password'], '********', $connection_string);
+			return false;
+		}
+		else {
+			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
+			$this->setClientEncoding();
+			$this->connection_id = $connection_id;
+			return true;
+		}
+
+
 	}
 
 	function table_exists($schema, $table) {

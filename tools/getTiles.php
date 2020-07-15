@@ -11,11 +11,7 @@ include(CLASSPATH.'log.php');
 include(CLASSPATH.'postgresql.php');
 $debug=new Debugger(DEBUGFILE);
 $database = new pgdatabase();
-$database->host = POSTGRES_HOST;
-$database->user = POSTGRES_USER;																			
-$database->passwd = POSTGRES_PASSWORD;															
-$database->dbName = POSTGRES_DBNAME;
-$database->open();
+$database->open(POSTGRES_CONNECTION_ID);
 
 function deg2num($lat_deg, $lon_deg, $zoom){
 	$lat_rad = deg2rad($lat_deg);

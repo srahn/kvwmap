@@ -150,7 +150,7 @@ class Gml_extractor {
 	*/
 	function ogr2ogr_gmlas() {
 		# For Logging add: . ' >> /var/www/logs/ogr_' . $gml_id . '.log 2>> /var/www/logs/ogr_' . $gml_id . '.err'
-		$cmd = $this->docker_gdal_cmd . ' ' . OGR_BINPATH_GDAL . 'ogr2ogr -f "PostgreSQL" PG:"host=' . $this->pgdatabase->host . ' dbname=' . $this->pgdatabase->dbName . ' user=' . $this->pgdatabase->user . ' password=' . $this->pgdatabase->passwd . ' SCHEMAS=' . $this->gmlas_schema .'" GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location;
+		$cmd = $this->docker_gdal_cmd . ' ' . OGR_BINPATH_GDAL . 'ogr2ogr -f "PostgreSQL" PG:"' . $this->pgdatabase->get_connection_string() . ' SCHEMAS=' . $this->gmlas_schema .'" GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location;
 		# echo $cmd;
 		exec($cmd, $output, $error_code);
 		# echo '<pre>'; print_r($output); echo '</pre>';

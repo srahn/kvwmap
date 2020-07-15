@@ -140,10 +140,13 @@ function install() {
   #
   include(CLASSPATH . 'postgresql.php');
   $pgsqlPostgresDb = new pgdatabase();
-  $pgsqlPostgresDb->host = POSTGRES_HOST;
-  $pgsqlPostgresDb->user = 'postgres';
-  $pgsqlPostgresDb->passwd = POSTGRES_ROOT_PASSWORD;
-  $pgsqlPostgresDb->dbName = 'postgres'; ?>
+  $pgsqlPostgresDb->set_object_credentials(array(
+		'host' => 		POSTGRES_HOST,
+		'port' => 		'5432',
+		'dbname' => 	'postgres',
+		'user' => 		'postgres',
+		'password' => POSTGRES_ROOT_PASSWORD
+	)); ?>
   Verbindungsdaten für Zugang zu PostgreSQL postgres Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $pgsqlPostgresDb->host; ?><br>
   User: <?php echo $pgsqlPostgresDb->user; ?><br>
@@ -172,10 +175,13 @@ function install() {
   # und richte ggf. Nutzer und eine neue leere kvwmap Datenbank ein. 
   #
   $pgsqlKvwmapDb = new pgdatabase();
-  $pgsqlKvwmapDb->host = POSTGRES_HOST;
-  $pgsqlKvwmapDb->user = POSTGRES_USER;
-  $pgsqlKvwmapDb->passwd = POSTGRES_PASSWORD;
-  $pgsqlKvwmapDb->dbName = POSTGRES_DBNAME; ?>
+	$pgsqlKvwmapDb->set_object_credentials(array(
+		'host' => 		POSTGRES_HOST,
+		'port' => 		'5432',
+		'dbname' => 	POSTGRES_DBNAME,
+		'user' => 		POSTGRES_USER,
+		'password' => POSTGRES_PASSWORD
+	)); ?>
   Verbindungsdaten für Zugang zu PostgreSQL kvwmap Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $pgsqlKvwmapDb->host; ?><br>
   User: <?php echo $pgsqlKvwmapDb->user; ?><br>
