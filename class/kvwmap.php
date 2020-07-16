@@ -16623,16 +16623,16 @@ class db_mapObj{
 			FROM
 				u_rolle2used_layer AS rl,
 				used_layer AS ul,
-				u_groups AS g,
-				u_groups2rolle as gr,
-				layer AS l
-				LEFT JOIN connections as c ON l.connection_id = c.id
+				layer AS l LEFT JOIN
+				u_groups AS g ON l.Gruppe = g.id LEFT JOIN
+				u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
+				connections as c ON l.connection_id = c.id
 			WHERE
 				rl.stelle_id = ul.Stelle_ID AND
 				rl.layer_id = ul.Layer_ID AND
 				l.Layer_ID = ul.Layer_ID AND
-				(ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID = " . $this->Stelle_ID . " AND rl.user_id = " . $this->User_ID . " AND
-				gr.id = g.id AND
+				(ul.minscale != -1 OR ul.minscale IS NULL) AND
+				rl.stelle_ID = " . $this->Stelle_ID . " AND rl.user_id = " . $this->User_ID . " AND
 				gr.stelle_id = " . $this->Stelle_ID . " AND
 				gr.user_id = " . $this->User_ID .
 				($groups != NULL ? " AND g.id IN (" . $groups . ")" : '') .
@@ -19068,7 +19068,7 @@ class db_mapObj{
 				l.drawingorder,
 				l.alias
 			FROM
-				layer l JOIN
+				layer l LEFT JOIN
 				u_groups g ON l.Gruppe = g.id" .
 				$more_from .
 			(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") .
