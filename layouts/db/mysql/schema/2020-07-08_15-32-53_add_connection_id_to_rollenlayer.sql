@@ -3,7 +3,7 @@ BEGIN;
   ALTER TABLE `layer` ENGINE=INNODB;
   ALTER TABLE `layer` ADD CONSTRAINT fk_layer_connection_id FOREIGN KEY (connection_id) REFERENCES connections(id);
 
-
+  SET @row_nr := 0;
   INSERT INTO `connections` (`name`, `host`, `port`, `dbname`, `user`, `password`)
   SELECT
     concat(
