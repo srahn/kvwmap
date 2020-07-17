@@ -67,29 +67,30 @@
 <style>
 	.navigation{
 		border-collapse: collapse; 
-		width: 100%;
-		min-width: 940px;
+		width: 940px;
 		background:rgb(248, 248, 249);
 	}
-
 	.navigation th{
 		border: 1px solid #bbb;
 		border-collapse: collapse;
 		width: 17%;
 	}
-	
 	.navigation th div{
 		padding: 3px;
 		padding: 9px 0 9px 0;
+		width: 100%;
 	}	
-	
-	.navigation th a{
+	.navigation th:not(.navigation-selected) a{
 		color: #888;
 	}	
-	
-	.navigation th:hover{
+	.navigation th:not(.navigation-selected):hover{
 		background-color: rgb(238, 238, 239);
-		color: #666;
+	}
+	.navigation-selected{
+		background-color: #c7d9e6;
+	}
+	.navigation-selected div{
+		color: #111;
 	}
 	
 	#form input[type="text"], #form select, #form textarea{
@@ -135,15 +136,15 @@
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th><a href="javascript:toggleForm('layerform');" style="color: #111;"><div style="background-color: #c7d9e6; width: 100%" id="layerform_link"><? echo $strCommonData; ?></div></a></th>
-					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
-					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
+					<th><a href="javascript:toggleForm('layerform');"><div id="layerform_link"><? echo $strCommonData; ?></div></a></th>
+					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strClasses; ?></div></a></th>
+					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strStylesLabels; ?></div></a></th>
 					<? if(in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
+					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strAttributes; ?></div></a></th>
 					<? } ?>
-					<th><a href="javascript:toggleForm('stellenzuweisung');"><div style="width: 100%" id="stellenzuweisung_link"><? echo $strStellenAsignment; ?></div></a></th>
+					<th><a href="javascript:toggleForm('stellenzuweisung');"><div id="stellenzuweisung_link"><? echo $strStellenAsignment; ?></div></a></th>
 					<? if(in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>
+					<th><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strPrivileges; ?></div></a></th>
 					<? } ?>
 				</tr>
 			</table>
@@ -923,8 +924,7 @@
 	}
 ?>">
 
-<? if($this->formvars['stellenzuweisung'] == 1){ ?>
-	<script type="text/javascript">
-		toggleForm('stellenzuweisung');
-	</script>
-<? }?>
+
+<script type="text/javascript">
+	<? if($this->formvars['stellenzuweisung'] == 1){ ?>toggleForm('stellenzuweisung');<? } else { ?>toggleForm('layerform');<? } ?>
+</script>
