@@ -78,12 +78,12 @@ class data_import_export {
 				$custom_tables = $this->import_custom_pointlist($formvars, $pgdatabase);
 			} break;
 		}
-		if($custom_tables != NULL){
-			if($custom_tables[0]['error'] != ''){
+		if ($custom_tables != NULL){
+			if ($custom_tables[0]['error'] != ''){
 				echo $custom_tables[0]['error'];
 			}
-			else{
-				foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
+			else {
+				foreach ($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
 					$layer_id = $this->create_rollenlayer(
 						$pgdatabase,
 						$stelle,
@@ -285,8 +285,8 @@ class data_import_export {
 			}
 			$encoding = $this->getEncoding($filenameparts[0] . '.dbf');
 			$custom_table = $this->load_shp_into_pgsql($pgdatabase, '', $formvars['shapefile'], $epsg, CUSTOM_SHAPE_SCHEMA, 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['shapefile']), 0, 15))).rand(1,1000000), $encoding);
-			if($custom_table != NULL){
-				exec('rm '.UPLOADPATH.$user->id.'/'.basename($formvars['shapefile']).'.*');	# aus Sicherheitsgründen rm mit Uploadpfad davor
+			if ($custom_table != NULL) {
+				exec('rm ' . UPLOADPATH . $user->id . '/' . basename($formvars['shapefile']) . '.*');	# aus Sicherheitsgründen rm mit Uploadpfad davor
 			}
 			$custom_table[0]['epsg'] = $epsg;
 			return $custom_table;
@@ -795,7 +795,8 @@ class data_import_export {
 
 ################### Export ########################
 
-	function export($formvars, $stelle, $user, $mapdb){
+	function export($formvars, $stelle, $user, $mapdb) {
+		#echo '<br>export formvars: ' . print_r($formvars, true);
 		$this->formvars = $formvars;
 		$this->layerdaten = $stelle->getqueryablePostgisLayers(NULL, 1);
 		if ($this->formvars['selected_layer_id']) {
@@ -826,7 +827,7 @@ class data_import_export {
 		if ($options != NULL) $command.= $options;
 		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco precision=NO -nlt PROMOTE_TO_MULTI -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
 		if ($sql != NULL) $command.= ' -sql \''.$sql.'\'';
-		$command .= ' -append PG:"' . $layerdb->get_connection_string() . ' active_schema=' . $schema . '"';
+		$command .= ' -append PG:"' . $database->get_connection_string() . ' active_schema=' . $schema . '"';
 		$command .= ' "' . $importfile . '" ' . $layer;
 		$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
 		$output = array();
@@ -1063,40 +1064,68 @@ class data_import_export {
 		}
 		$j = 0;
 		foreach ($this->attributes['all_table_names'] as $tablename) {
-			if(($tablename == $layerset[0]['maintable']) AND $this->attributes['oids'][$j]){		# hat Haupttabelle oids?
-				$pfad = $this->attributes['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
-				if($groupby != '')$groupby .= ','.$this->attributes['table_alias_name'][$tablename].'.oid';
+			if (($tablename == $layerset[0]['maintable']) AND $this->attributes['oids'][$j]) {
+				# hat Haupttabelle oids?
+				$pfad = $this->attributes['table_alias_name'][$tablename] . '.oid AS ' . $tablename . '_oid, ' . $pfad;
+				if ($groupby != '') {
+					$groupby .= ',' . $this->attributes['table_alias_name'][$tablename] . '.oid';
+				}
 			}
 			$j++;
 		}
-		if ($distinct == true){
-			$pfad = 'DISTINCT '.$pfad;
+		if ($distinct == true) {
+			$pfad = "
+				DISTINCT "
+				. $pfad . "
+			";
 		}
-		$sql = "SELECT " . $pfad;
+		$sql = "
+			SELECT "
+				. $pfad . "
+			";
 
 		# Bedingungen
 		if($where != ''){		# Where-Klausel aus Sachdatenabfrage-SQL (abgefragter Extent, Suchparameter oder oids)
 			$orderbyposition = strpos(strtolower($where), 'order by');
 			if($orderbyposition)$where = substr($where, 0, $orderbyposition);
-			$sql = "SELECT * FROM (".$sql.$groupby.") as query ".$where;
+			$sql = "
+				SELECT *
+				FROM ("
+					. $sql
+					.$groupby . "
+				) as query "
+				. $where;
 		}
-		elseif($filter != ''){		# Filter muss nur dazu, wenn kein $where vorhanden, also keine Abfrage gemacht wurde, sondern der gesamte Layer exportiert werden soll (Filter ist ja schon im $where enthalten)
+		elseif ($filter != '') {		# Filter muss nur dazu, wenn kein $where vorhanden, also keine Abfrage gemacht wurde, sondern der gesamte Layer exportiert werden soll (Filter ist ja schon im $where enthalten)
 			$filter = str_replace('$userid', $user->id, $filter);
-    	$sql = "SELECT * FROM (".$sql.$groupby.") as query WHERE ".$filter;
-    }
-    if($this->formvars['newpathwkt']){	# über Polygon einschränken
-			if($this->formvars['within'] == 1)$sp_op = 'st_within'; else $sp_op = 'st_intersects';
-    	$sql.= " AND ".$sp_op."(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
-    }
+    	$sql = "
+				SELECT *
+				FROM ("
+					. $sql
+					. $groupby . "
+				) as query
+				WHERE " . $filter;
+			}
+		if ($this->formvars['newpathwkt']){	# über Polygon einschränken
+			if ($this->formvars['within'] == 1)$sp_op = 'st_within'; else $sp_op = 'st_intersects';
+			$sql.= " AND ".$sp_op."(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
+		}
     $sql.= $orderby;
 		$data_sql = $sql;
 		#echo '<br>Frage Daten ab mit SQL: '. $sql;
 		
     $temp_table = 'shp_export_'.rand(1, 10000);
-    $sql = 'CREATE TABLE public.'.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, falls Argumentliste durch das SQL zu lang
-    $ret = $layerdb->execSQL($sql,4, 0);		
 
-		for($s = 0; $s < count($selected_attributes); $s++){
+		# temporäre Tabelle erzeugen, falls Argumentliste durch das SQL zu lang
+    $sql = "
+			CREATE TABLE public." . $temp_table . " AS "
+			. $sql . "
+		";
+		#echo '<p>SQL zum Anlegen der temporären Tabelle: ' . $sql;
+		$ret = $layerdb->execSQL($sql,4, 0);
+		#echo 'ret: ' . print_r($ret, true);
+
+		for ($s = 0; $s < count($selected_attributes); $s++){
 			# Transformieren der Geometrie
 			if ($this->attributes['the_geom'] == $selected_attributes[$s])$selected_attributes[$s] = 'st_transform('.$selected_attributes[$s].', '.$this->formvars['epsg'].') as '.$selected_attributes[$s];
 			# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
@@ -1104,7 +1133,15 @@ class data_import_export {
 				if (in_array($selected_attr_types[$s], array('text', 'varchar'))) $selected_attributes[$s] = $selected_attributes[$s].'::varchar(254)';
 			}
 		}
-		$sql = "SELECT " . implode(', ', $selected_attributes) . " FROM public." . $temp_table; # auf die ausgewählten Attribute einschränken
+
+		# auf die ausgewählten Attribute einschränken
+		$sql = "
+			SELECT
+				" . implode(', ', $selected_attributes) . "
+			FROM
+				public." . $temp_table . "
+		";
+		#echo '<p>SQL zur Abfrage der zu exportierenden Attribute; ' . $sql;
 		$ret = $layerdb->execSQL($sql,4, 0);
 		if (!$ret[0]) {
 			$count = pg_num_rows($ret[1]);
