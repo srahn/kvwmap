@@ -414,6 +414,9 @@ function go_switch_xplankonverter($go){
 										$GUI->formvars['maintable'] = $shapeFile->dataTableName();
 										$GUI->formvars['schema'] = $shapeFile->dataSchemaName();
 										$GUI->formvars['connection'] = $GUI->pgdatabase->connect_string;
+										if ($GUI->pgdatabase->connection_id != '') {
+											$GUI->formvars['connection_id'] = $GUI->pgdatabase->connection_id;
+										}
 										$GUI->formvars['connectiontype'] = '6';
 										$GUI->formvars['filteritem'] = 'oid';
 										$GUI->formvars['tolerance'] = '5';

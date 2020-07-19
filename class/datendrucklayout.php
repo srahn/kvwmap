@@ -942,11 +942,11 @@ class ddl {
 				$dateiname = $this->layout['filename'];
 				# Attribute
 				for($j = 0; $j < count($this->attributes['name']); $j++){
-					$value = $this->result[$i][$this->attributes['name'][$j]];
+					$value = $this->result[0][$this->attributes['name'][$j]];
 					$dateiname = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output($value, 0, $j, true), $dateiname);
 				}
 				for($j = 0; $j < count($this->attributes['name']); $j++){
-					$value = $this->result[$i][$this->attributes['name'][$j]];
+					$value = $this->result[0][$this->attributes['name'][$j]];
 					$dateiname = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($value, 0, $j, true), $dateiname);
 				}
 				# Nutzer

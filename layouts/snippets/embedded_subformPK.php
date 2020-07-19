@@ -30,8 +30,10 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 							if ($layer['attributes']['visible'][$j]) {
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								if ($explosion[1] != 'collapsed') { ?>
-									<td class="gle-attribute-name"><?
-										echo attribute_name($layer['Layer_ID'], $layer['attributes'], $j, 0, $this->user->rolle->fontsize_gle, false); ?>
+									<td class="gle-attribute-name">
+										<a href="javascript:reload_subform_list('<? echo $this->formvars['targetobject']; ?>', 1, '', '', '&orderby<? echo $layer['Layer_ID']; ?>=<? echo $layer['attributes']['name'][$j]; ?>')" title="Sortieren nach <? echo $layer['attributes']['name'][$j]; ?>"><?
+											echo attribute_name($layer['Layer_ID'], $layer['attributes'], $j, 0, $this->user->rolle->fontsize_gle, false); ?>
+										</a>
 									</td><?
 								}
 							}
@@ -59,7 +61,7 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 								if ($layer['attributes']['visible'][$j]) {
 									$explosion = explode(';', $layer['attributes']['group'][$j]);
 									if ($explosion[1] != 'collapsed') { ?>
-										<td><?
+										<td <? echo get_td_class_or_style(array($layer['shape'][$k][$attributes['style']])); ?>><?
 											echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, false, NULL, NULL, NULL, $this->subform_classname); ?>
 										</td><?
 									}
@@ -108,7 +110,7 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 					 '&list_edit=1\', 
 					 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
 					 new Array(\'sethtml\', \'execute_function\'));
-					 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
+					 clearsubforms('.$this->formvars['selected_layer_id'].');"><span>'.$strNewEmbeddedPK.'</span></a>';
 		}
 		if ($this->formvars['list_edit']) {
 			echo '&nbsp;<a tabindex="1" style="font-size: '.$linksize.'px;" class="show_all_button buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
@@ -133,7 +135,7 @@ else{ ?>
 							if ($preview_attributes[$p] == $attributes['name'][$j]) {
 								$output[$p] = '';
 								switch ($attributes['form_element_type'][$j]) {
-									case 'Auswahlfeld' : {
+									case 'Auswahlfeld' : case 'Radiobutton' : {
 										if (is_array($attributes['dependent_options'][$j])) {		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 											for ($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++) {
 												if ($attributes['enum_value'][$j][$k][$e] == $dataset[$attributes['name'][$j]]) {
@@ -265,7 +267,7 @@ else{ ?>
 										 '&reload='.$this->formvars['reload'].'\', 
 										 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
 										 new Array(\'sethtml\', \'execute_function\'));
-										 clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
+										 clearsubforms('.$this->formvars['selected_layer_id'].');"><span>'.$strNewEmbeddedPK.'</span></a>';
 							}
 							else {
 								$data = array();

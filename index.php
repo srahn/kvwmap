@@ -95,6 +95,11 @@ define('CASE_COMPRESS', false);
 #											- man muss einen Layer in der Legende ein oder ausschalten													#
 #											- InchesPerUnit() reinkopieren																											#
 #											- layer_error_handling() reinkopieren																								#
+#											- zoomToMaxLayerExtent() reinkopieren																								#
+#											- getlayerdatabase() reinkopieren																										#
+#											- read_layer_attributes() reinkopieren																							#
+#											- check_oid() reinkopieren																													#
+#											- getFilter() reinkopieren																													#
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
 #   getLayerOptions:  - ein Rollenlayer muss verwendet werden																							#
@@ -1410,6 +1415,10 @@ function go_switch($go, $exit = false) {
 				$GUI->layer_attributes_privileges();
 			} break;
 
+			case 'write_layer_attributes2rolle' : {
+				$GUI->write_layer_attributes2rolle();
+			} break;
+
 			case 'Layer_Parameter' : {
 				$GUI->checkCaseAllowed('Layer_Parameter');
 				$GUI->layer_parameter();
@@ -1496,11 +1505,8 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'BenutzerStellen_Anzeigen' : {
+				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
 				$GUI->BenutzerNachStellenAnzeigen();
-			} break;
-
-			case 'BenutzerderStelleAnzeigen' : {
-				$GUI->BenutzerderStelleAnzeigen();
 			} break;
 
 			case 'Benutzerdaten_Anzeigen' : {

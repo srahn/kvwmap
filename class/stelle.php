@@ -99,7 +99,7 @@ class stelle {
       $sql.='`Bezeichnung_'.$this->language.'` AS ';
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
-    #echo $sql;
+    #echo '<p>SQL zur Abfrage des Stellennamens: ' . $sql;
     $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
@@ -128,10 +128,13 @@ class stelle {
 		$this->MaxGeorefExt = ms_newRectObj();
 		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
-		$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
-		$this->pgdbname = $rs['pgdbname'];
-		$this->pgdbuser = $rs['pgdbuser'];
-		$this->pgdbpasswd = $rs['pgdbpasswd'];
+		$this->postgres_connection_id = $rs['postgres_connection_id'];
+		# ---> deprecated
+			$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
+			$this->pgdbname = $rs['pgdbname'];
+			$this->pgdbuser = $rs['pgdbuser'];
+			$this->pgdbpasswd = $rs['pgdbpasswd'];
+		# <---
 		$this->protected = $rs['protected'];
 		//---------- OWS Metadaten ----------//
 		$this->ows_title = $rs['ows_title'];
@@ -332,6 +335,9 @@ class stelle {
 		$sql.=', epsg_code= "'.$stellendaten['epsg_code'].'"';
 		$sql.=', start= "'.$stellendaten['start'].'"';
 		$sql.=', stop= "'.$stellendaten['stop'].'"';
+		if ($stellendaten['postgres_connection_id'] != '') {
+			$sql .= ', postgres_connection_id = ' . $stellendaten['postgres_connection_id'];
+		}
 		if ($stellendaten['pgdbhost']!='') {
 			$sql.=', pgdbhost= "'.$stellendaten['pgdbhost'].'"';
 		}
@@ -405,6 +411,7 @@ class stelle {
 				`epsg_code` = '" . $stellendaten['epsg_code'] . "',
 				`start` = '" . $stellendaten['start'] . "',
 				`stop` = '" . $stellendaten['stop'] . "',
+				`postgres_connection_id` = " . ($stellendaten['postgres_connection_id'] != '' ? $stellendaten['postgres_connection_id'] : 'NULL') . ",
 				`pgdbhost` = '" . $stellendaten['pgdbhost'] . "',
 				`pgdbname` = '" . $stellendaten['pgdbname'] . "',
 				`pgdbuser` = '" . $stellendaten['pgdbuser'] . "',
@@ -569,8 +576,10 @@ class stelle {
 	}
 
 	function isFunctionAllowed($functionname) {
-		if($this->funktionen == NULL)$this->getFunktionen();
-		if($this->funktionen[$functionname]['erlaubt']) {
+		if ($this->funktionen == NULL) {
+			$this->getFunktionen();
+		}
+		if ($this->funktionen[$functionname]['erlaubt']) {
 			return 1;
 		}
 		else {
