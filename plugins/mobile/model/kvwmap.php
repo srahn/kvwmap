@@ -52,7 +52,7 @@
 			$result = array(
 				"success" => true,
 				"user_id" => $GUI->user->id,
-				"user_name" => $GUI->user->Name . ' ' . $GUI->user->Vorname,
+				"user_name" => $GUI->user->Vorname . ' ' . $GUI->user->Name,
 				"stellen" => $stellen
 			);
 		}
