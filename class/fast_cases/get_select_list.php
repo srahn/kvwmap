@@ -660,13 +660,13 @@ class db_mapObj{
 	}
 
 	function getlayerdatabase($layer_id, $host) {
+		#echo '<br>GUI->getlayerdatabase layer_id: ' . $layer_id;
 		$layerdb = new pgdatabase();
 		$rs = $this->get_layer_connection($layer_id);
-		$layerdb->connection_id = $rs['connection_id'];
 		$layerdb->schema = ($rs['schema'] == '' ? 'public' : $rs['schema']);
 		$layerdb->host = $host; # depricated since host is allways in connection table
-		if (!$layerdb->open($connection_id)) {
-			echo 'Die Verbindung zur PostGIS-Datenbank konnte mit connection_id: ' . $connection_id . ' nicht hergestellt werden:';
+		if (!$layerdb->open($rs['connection_id'])) {
+			echo 'Die Verbindung zur PostGIS-Datenbank konnte mit connection_id: ' . $rs['connection_id'] . ' nicht hergestellt werden:';
 			exit;
 		}
 		return $layerdb;
