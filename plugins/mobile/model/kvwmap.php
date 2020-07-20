@@ -275,6 +275,7 @@
 				"tooltip" => $attr['tooltip'][$key],
 				"type" => $attr['type'][$key],
 				"nullable" => $attr['nullable'][$key],
+				"saveable" => $attr['saveable'][$key],
 				"form_element_type" => $attr['form_element_type'][$key],
 				"options" => $attr['options'][$key],
 				"privilege" => $attr['privileg'][$key],

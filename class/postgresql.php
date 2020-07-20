@@ -75,9 +75,11 @@ class pgdatabase {
   function open($connection_id = 0) {
 		if ($connection_id == 0) {
 			# get credentials from object variables
+			#echo '<br>connection_id ist 0, hole von object credentials';
 			$connection_string = $this->format_pg_connection_string($this->get_object_credentials());
 		}
 		else {
+			#echo '<br>Öffne Datenbank mit connection_id: ' . $connection_id;
 			$this->debug->write("Open Database connection with connection_id: " . $connection_id, 4);
 			$this->connection_id = $connection_id;
 			$connection_string = $this->get_connection_string();
@@ -591,8 +593,8 @@ FROM
 			$query_plan = $error_list[0];
 			$table_alias_names = $this->get_table_alias_names($query_plan);
 			$field_plan_info = explode("\n      :resno", $query_plan);
-			
-			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {				
+			$select_attr = attributes_from_select($select);
+			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
 				# Attributname
 				$fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
 				
@@ -683,6 +685,7 @@ FROM
 				else { # Attribut ist keine Tabellenspalte -> nicht speicherbar
 					$fieldtype = pg_field_type($ret[1], $i);			# Typ aus Query ermitteln
 					$fields[$i]['saveable'] = 0;
+					$fields[$i]['real_name'] = addslashes($select_attr[$fields[$i]['name']]['base_expr']);
 				}
 				$fields[$i]['type'] = $fieldtype;
 

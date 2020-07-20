@@ -240,6 +240,7 @@ class administration{
 							'" . $file . "'
 						);
 					";
+					#echo 'register migration with sql: ' . $sql;
 					$result=$this->database->execSQL($sql, 4, 0);
 				}
 			}

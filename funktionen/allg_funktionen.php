@@ -2015,4 +2015,28 @@ function str_replace_last($search , $replace, $str) {
   return $str;
 }
 
+function attributes_from_select($sql) {
+	include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
+	$parser = new PHPSQLParser($sql, true);
+	$attributes = array();
+	foreach ($parser->parsed['SELECT'] AS $key => $value) {
+		$name = $alias = '';
+		if (
+			is_array($value['alias']) AND
+			array_key_exists('no_quotes', $value['alias']) AND
+			$value['alias']['no_quotes'] != ''
+		) {
+			$name = $value['alias']['no_quotes'];
+			$alias = $value['alias']['no_quotes'];
+		}
+		else {
+			$name = $alias = $value['base_expr'];
+		}
+		$attributes[$name] = array(
+			'base_expr' => $value['base_expr'],
+			'alias' => $alias
+		);
+	}
+	return $attributes;
+}
 ?>
