@@ -14645,21 +14645,21 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     return $uebersichtskarte;
   }
 
-  function spatial_processing(){
-		include_(CLASSPATH.'spatial_processor.php');
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		if(in_array($this->formvars['operation'], array('area', 'length'))){
-			$layerdb = $this->pgdatabase;				# wegen st_area_utm und st_length_utm die eigene Datenbank nehmen
+	function spatial_processing() {
+		include_(CLASSPATH . 'spatial_processor.php');
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		if (in_array($this->formvars['operation'], array('area', 'length'))) {
+			$layerdb = $this->pgdatabase; # wegen st_area_utm und st_length_utm die eigene Datenbank nehmen
 		}
-		else{
+		else {
 			$layerdb = $mapDB->getlayerdatabase($this->formvars['geom_from_layer'], $this->Stelle->pgdbhost);
-			if($layerdb == NULL){
+			if ($layerdb == NULL) {
 				$layerdb = $this->pgdatabase;
 			}
 		}
-    $this->processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
-    $this->processor->process_query($this->formvars);
-  }
+		$this->processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
+		$this->processor->process_query($this->formvars);
+	}
 
   function getRow() {
 		$this->formvars['select'] = str_replace("''", "'", $this->formvars['select']);
@@ -17172,6 +17172,9 @@ class db_mapObj{
 		#echo '<br>GUI->getlayerdatabase layer_id: ' . $layer_id;
 		$layerdb = new pgdatabase();
 		$rs = $this->get_layer_connection($layer_id);
+		if (count($rs) == 0) {
+			return null;
+		}
 		$layerdb->schema = ($rs['schema'] == '' ? 'public' : $rs['schema']);
 		$layerdb->host = $host; # depricated since host is allways in connection table
 		if (!$layerdb->open($rs['connection_id'])) {
