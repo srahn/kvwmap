@@ -281,7 +281,7 @@
 						}
 					}
 					if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
-						if($size == 12){		// spaltenweise
+						if($size == 16){		// spaltenweise
 							$datapart .= htmlspecialchars($value);
 						}
 						else{								// zeilenweise
@@ -345,7 +345,7 @@
 
 				case 'SubFormPK' : {
 					$datapart .= '<table width="98%" cellspacing="0" cellpadding="0"><tr><td>';
-					if($size == 12){		// spaltenweise
+					if($size == 16){		// spaltenweise
 						$datapart .= htmlspecialchars($value);
 					}
 					else{								// zeilenweise
@@ -433,7 +433,7 @@
 						}
 						$gui->form_field_names .= $fieldname_[$f].'|';
 					}
-					if($size == 12){		// spaltenweise
+					if($size == 16){		// spaltenweise
 						$datapart .= htmlspecialchars($value);
 					}
 					else{								// zeilenweise
@@ -740,7 +740,7 @@
 					$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
 					if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
 						$angezeigter_value = (($attributes['type'][$j] == 'bool' OR $attributes['form_element_type'][$j] == 'Editiersperre') ? ($value == 't' ? $gui->strYes : $gui->strNo) : $value);
-						if($size == 12){		// spaltenweise
+						if($size == 16){		// spaltenweise
 							$datapart .= htmlspecialchars($angezeigter_value);
 						}
 						else{								// zeilenweise
