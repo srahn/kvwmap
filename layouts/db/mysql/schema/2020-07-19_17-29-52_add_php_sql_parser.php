@@ -55,4 +55,7 @@ else {
 	$install_msg .= 'PHPSQLParser.php allready exists';
 }
 $GUI->add_message(($success ? 'Notice' : 'Fehler'), $install_msg);
+
+$result[0] = $success;
+
 ?>
