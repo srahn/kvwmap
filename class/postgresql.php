@@ -86,7 +86,8 @@ class pgdatabase {
 		}
 		$this->dbConn = pg_connect($connection_string);
 		if (!$this->dbConn) {
-			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden: ' . str_replace($credentials['password'], '********', $connection_string);
+			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
+				. implode(' ' , array_filter(explode(' ', $connection_string), function($part) { return strpos($part, 'password') === false; }));
 			return false;
 		}
 		else {
@@ -289,27 +290,32 @@ FROM
 	}
 
 	function read_epsg_codes($order = true){
-    global $supportedSRIDs;
-    $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9, 35)) as srtext, proj4text, minx, miny, maxx, maxy FROM spatial_ref_sys ";
-    $sql.="LEFT JOIN spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid";
-    # Wenn zu unterstützende SRIDs angegeben sind, ist die Abfrage diesbezüglich eingeschränkt
-    $anzSupportedSRIDs = count($supportedSRIDs);
-    if ($anzSupportedSRIDs > 0) {
-      $sql.=" WHERE spatial_ref_sys.srid IN (".implode(',', $supportedSRIDs).")";
-    }
-    if($order)$sql.=" ORDER BY srtext";
-    #echo $sql;		
-    $ret = $this->execSQL($sql, 4, 0);		
-    if($ret[0]==0){
+		global $supportedSRIDs;
+		# Wenn zu unterstützende SRIDs angegeben sind, ist die Abfrage diesbezüglich eingeschränkt
+		$anzSupportedSRIDs = count($supportedSRIDs);
+		$sql = "
+			SELECT
+				spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9, 35)) as srtext,
+				proj4text,
+				minx, miny, maxx, maxy
+			FROM
+				spatial_ref_sys LEFT JOIN
+				spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid" . ($anzSupportedSRIDs > 0 ? "
+			WHERE spatial_ref_sys.srid IN (" . implode(', ', $supportedSRIDs) . ")" : 'true') . ($order ? "
+			ORDER BY srtext" : '') . "
+		";
+		#echo 'SQL zum Abfragen der EPSG-Codes: ' . $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		if ($ret[0] == 0) {
 			$i = 0;
-      while($row = pg_fetch_assoc($ret[1])){
+			while ($row = pg_fetch_assoc($ret[1])){
 				$epsg_codes[$row['srid']] = $row;
 				$i++;
-      }
-    }
-    return $epsg_codes;
-  }
-  
+			}
+		}
+		return $epsg_codes;
+	}
+
   function transformRect($curExtent,$curSRID,$newSRID) {
     $sql ="SELECT round(CAST (st_x(min) AS numeric),5) AS minx, round(CAST (st_y(min) AS numeric),5) AS miny";
     $sql.=", round(CAST (st_x(max) AS numeric),5) AS maxx, round(CAST (st_y(max) AS numeric),5) AS maxy";

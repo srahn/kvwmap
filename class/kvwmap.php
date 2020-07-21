@@ -11477,6 +11477,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       $this->formvars['Referenzkarte_ID'] = $this->stellendaten['Referenzkarte_ID'];
       $this->formvars['start'] = $this->stellendaten['start'];
       $this->formvars['stop'] = $this->stellendaten['stop'];
+			$this->formvars['postgres_connection_id'] = $this->stellendaten['postgres_connection_id'];
       $this->formvars['pgdbhost'] = $this->stellendaten['pgdbhost'];
       $this->formvars['pgdbname'] = $this->stellendaten['pgdbname'];
       $this->formvars['pgdbuser'] = $this->stellendaten['pgdbuser'];
@@ -18403,8 +18404,12 @@ class db_mapObj{
       $sql .= "'" . $formvars['labelrequires']."', ";
 			$sql .= "'" . $formvars['postlabelcache']."', ";
       $sql .= "'" . trim($formvars['connection']) ."', ";
-			if($formvars['connection_id'] == '')$sql .= "NULL, ";
-      else $sql .= "'" . $formvars['connection_id']."', ";
+			if ($formvars['connection_id'] == '') {
+				$sql .= "NULL, ";
+			}
+			else {
+				$sql .= "'" . $formvars['connection_id']."', ";
+			}
       $sql .= "'" . $formvars['printconnection']."', ";
       $sql .= ($formvars['connectiontype'] =='' ? "6" : $formvars['connectiontype']) .", "; # Set default to postgis layer
       $sql .= "'" . $formvars['classitem']."', ";

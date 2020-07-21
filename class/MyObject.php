@@ -1,4 +1,5 @@
 <?php
+# mvbio_dev
 class MyObject {
 
 	static $write_debug = false;
@@ -39,9 +40,55 @@ class MyObject {
 		return $this;
 	}
 
+	/**
+	* Search for a unique record in the database by identifier of the table
+	* if $id is empty use the values from data array
+	* else set the identifier from given value or array
+	* @param $id string, text or associative array with id keys and values
+	* @return an object with this record
+	*/
+	function find_by_ids($id) {
+		if ($id) {
+			if (getType($id) == 'array') {
+				$this->data = $id;
+			}
+			else {
+				$this->set($this->identifier, $id);
+			}
+		}
+		$sql = "
+			SELECT
+				*
+			FROM
+				`" . $this->tableName . "`
+			WHERE
+				" . $this->get_identifier_expression() . "
+		";
+		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
+		$this->database->execSQL($sql);
+		$rs = $this->database->result->fetch_assoc();
+		if ($rs !== false) {
+			$this->data = $rs;
+		}
+		return $this;
+	}
+
+	function setDataOnlyFormvars($formvars) {
+		$columns = array_map(
+			function($column) {
+				return $column['Field'];
+			},
+			$this->getColumnsFromTable()
+		);
+		foreach ($formvars AS $key => $value) {
+			if (in_array($key, $columns)) {
+				$this->set($key, $formvars[$key]);
+			}
+		}
+	}
+
 	/*
-	* Search for records in the database
-	* by the given where clause
+	* Search for records in the database by the given where clause
 	* @ return all objects
 	*/
 	function find_where($where, $order = '', $sort_direction = '') {
@@ -187,11 +234,12 @@ class MyObject {
 		return $types;
 	}
 
-	/*
-	* This function returns an expression with identifiers and its values
-	* to identify a unique dataset regularly used in WHERE clausel of SQL-Statements
+	/**
+	* Function return the expression to identify the unique dataset in a
+	* where or update statement
+	* @return string The expression representing true or false in a sql statement
 	*/
-	function getIdentifierCondition() {
+	function get_identifier_expression() {
 		if ($this->identifier_type == 'array' AND getType($this->identifier) == 'array') {
 			$where = array_map(
 				function($id) {
@@ -205,7 +253,7 @@ class MyObject {
 			$quote = ($this->identifier_type == 'text' ? "'" : "");
 			$where = array($this->identifier . " = " . $quote . $this->get($this->identifier) . $quote);
 		}
-		return implode(' AND ', $where); 
+		return implode(' AND ', $where);
 	}
 
 	function setData($formvars) {
@@ -360,7 +408,7 @@ class MyObject {
 			SET
 				" . implode(', ', $this->getKVP(array('escaped' => true))) . "
 			WHERE
-				" . $this->getIdentifierCondition() . "
+				" . $this->get_identifier_expression() . "
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
@@ -373,13 +421,12 @@ class MyObject {
 	}
 
 	function delete() {
-		$quote = ($this->identifier_type == 'text') ? "'" : "";
 		$sql = "
 			DELETE
 			FROM
 				`" . $this->tableName . "`
 			WHERE
-				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
+				" . $this->get_identifier_expression() . "
 		";
 		$this->debug->show('MyObject delete sql: ' . $sql, MyObject::$write_debug);
 		$result = $this->database->execSQL($sql);
