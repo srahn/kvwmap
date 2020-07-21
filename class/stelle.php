@@ -37,7 +37,6 @@ class stelle {
 		$this->log = $log_mysql;
 		$this->id = $id;
 		$this->database = $database;
-		$this->Bezeichnung = $this->getName();
 		$this->readDefaultValues();
 	}
 
@@ -100,7 +99,7 @@ class stelle {
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo '<p>SQL zur Abfrage des Stellennamens: ' . $sql;
-    $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
+    $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>",4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
@@ -113,18 +112,24 @@ class stelle {
 	function readDefaultValues() {
 		$sql = "
 			SELECT
-				*
+				*,";
+		if ($this->language != 'german' AND $this->language != ''){
+      $sql.='`Bezeichnung_'.$this->language.'` AS ';
+    }
+    $sql.="
+				Bezeichnung
 			FROM
 				stelle
 			WHERE
 				ID = " . $this->id . "
 		";
-		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
+		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
+		$this->Bezeichnung=$rs['Bezeichnung'];
 		$this->MaxGeorefExt = ms_newRectObj();
 		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
