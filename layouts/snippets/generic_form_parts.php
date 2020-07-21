@@ -284,7 +284,7 @@
 						}
 					}
 					if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
-						if($size == 12){		// spaltenweise
+						if($size == 16){		// spaltenweise
 							$datapart .= htmlspecialchars($value);
 						}
 						else{								// zeilenweise
@@ -348,7 +348,7 @@
 
 				case 'SubFormPK' : {
 					$datapart .= '<table width="98%" cellspacing="0" cellpadding="0"><tr><td>';
-					if($size == 12){		// spaltenweise
+					if($size == 16){		// spaltenweise
 						$datapart .= htmlspecialchars($value);
 					}
 					else{								// zeilenweise
@@ -436,7 +436,7 @@
 						}
 						$gui->form_field_names .= $fieldname_[$f].'|';
 					}
-					if($size == 12){		// spaltenweise
+					if($size == 16){		// spaltenweise
 						$datapart .= htmlspecialchars($value);
 					}
 					else{								// zeilenweise
