@@ -570,7 +570,7 @@ FROM
 		return $table_alias_names;
 	}
 
-	function getFieldsfromSelect($select, $assoc = false) {
+	function getFieldsfromSelect($select, $assoc = false, $pseudo_realnames = false) {
 		$err_msgs = array();
 		$error_reporting = error_reporting();
 		error_reporting(E_NOTICE);
@@ -593,7 +593,9 @@ FROM
 			$query_plan = $error_list[0];
 			$table_alias_names = $this->get_table_alias_names($query_plan);
 			$field_plan_info = explode("\n      :resno", $query_plan);
-			$select_attr = attributes_from_select($select);
+			if($pseudo_realnames){
+				$select_attr = attributes_from_select($select);
+			}
 			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
 				# Attributname
 				$fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);

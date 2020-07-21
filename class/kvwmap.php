@@ -7910,7 +7910,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						rolle::$hist_timestamp,
 						$this->user->rolle->language,
 						$duplicate_criterion
-					)
+					),
+					$this->formvars['sync']
 				);
 				$mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
 				$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
@@ -7971,7 +7972,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							rolle::$hist_timestamp,
 							$this->user->rolle->language,
 							$formvars['duplicate_criterion']
-						)
+						),
+						$this->formvars['sync']
 					);
 					$mapDB->save_postgis_attributes($formvars['selected_layer_id'], $attributes, $formvars['maintable'], $formvars['schema']);
 					#---------- Speichern der Layerattribute -------------------
@@ -16554,7 +16556,7 @@ class db_mapObj{
 				($id != NULL ? " AND l.id = " . $id : '') .
 				($typ != NULL ? " AND l.Typ = '" . $typ . "'" : '') . "
 		";
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>" . $sql,4);
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>",4);
 		# echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
@@ -16818,7 +16820,7 @@ class db_mapObj{
 				Class_ID
 		";
 		#echo $sql.'<br>';
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>" . $sql, 4);
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>", 4);
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name . " Zeile: " . __LINE__ .'<br>'.$sql; return 0; }
 		$index = 0;
@@ -16880,7 +16882,7 @@ class db_mapObj{
     $sql ='SELECT * FROM styles AS s,u_styles2classes AS s2c';
     $sql.=' WHERE s.Style_ID=s2c.style_id AND s2c.class_id='.$Class_ID;
     $sql.=' ORDER BY drawingorder';
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Styles - Lesen der Styledaten:<br>" . $sql,4);
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Styles - Lesen der Styledaten:<br>",4);
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
     while($rs = $this->db->result->fetch_assoc()) {
@@ -16903,7 +16905,7 @@ class db_mapObj{
 				l.Label_ID = l2c.label_id
 				AND l2c.class_id = " . $Class_ID . "
 		";
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Label - Lesen der Labels zur Classe eines Layers:<br>" . $sql,4);
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Label - Lesen der Labels zur Classe eines Layers:<br>",4);
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
 		while ($rs = $this->db->result->fetch_assoc()) {
@@ -17270,10 +17272,10 @@ class db_mapObj{
 		}
 	}
 
-	function getPathAttributes($database, $path) {
+	function getPathAttributes($database, $path, $pseudo_realnames) {
 		$pathAttributes = array();
 		if ($path != '') {
-			$ret = $database->getFieldsfromSelect($path);
+			$ret = $database->getFieldsfromSelect($path, false, $pseudo_realnames);
 			if ($ret['success']) {
 				$pathAttributes = $ret[1]; # Gebe die Attribute zurück
 			}
@@ -17573,9 +17575,9 @@ class db_mapObj{
 		return $attributes;
 	}
 
-	function load_attributes($database, $path) {
+	function load_attributes($database, $path, $pseudo_realnames) {
 		# Attributname und Typ aus Pfad-Statement auslesen:
-		$attributes = $this->getPathAttributes($database, $path);
+		$attributes = $this->getPathAttributes($database, $path, $pseudo_realnames);
 		return $attributes;
 	}
 
