@@ -261,7 +261,7 @@ class administration{
 		else {
 			exec('cd '.$folder.' && sudo -u '.GIT_USER.' git stash && sudo -u '.GIT_USER.' git pull origin', $ausgabe, $ret);
 			if ($ret != 0) {
-				showAlert('Fehler bei der Ausführung von "git pull origin".');
+				$this->database->gui->add_message('Fehler', 'Fehler bei der Ausführung von "git pull origin"!');
 			}
 			return $ausgabe;
 		}
