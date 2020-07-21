@@ -255,7 +255,7 @@ class administration{
 		}
 		exec("git status -s --porcelain 2>&1", $output, $return_var);
 		if (count($output) > 0) {
-			$this->database->gui->add_message('Fehler', 'Update kann nicht erfolgen!<p>Es gibt folgende noch nicht committete Änderungen:<br>' . implode('<br>', $output));
+			$this->database->gui->add_message('Fehler', 'Update kann nicht erfolgen!<p>Es gibt folgende noch nicht committete Änderungen:<br>' . implode('<br>', $output) . '<br>Erst Änderungen committen oder auschecken!');
 			return false;
 		}
 		else {
