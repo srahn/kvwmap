@@ -263,12 +263,6 @@ class administration{
 			if ($ret != 0) {
 				$this->database->gui->add_message('Fehler', 'Fehler bei der Ausführung von "git pull origin"!');
 			}
-			else {
-				exec("git status -sb --porcelain 2>&1", $output, $return_var);
-				if (strpos($output[0], 'behind') !== false) {
-					$this->database->gui->add_message('Fehler', 'Der Update war zwar erfolgreich, aber es müssen noch Commits gepusht werden.!');
-				}
-			}
 			return $ausgabe;
 		}
 	}
