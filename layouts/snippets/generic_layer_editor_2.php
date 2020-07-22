@@ -55,7 +55,7 @@
 		$table_id = rand(0, 100000);
 		echo value_of($layer, 'paging');
 ?>
-<table id="<? echo $table_id; ?>" border="0" cellspacing="0" cellpadding="2">
+<table id="<? echo $table_id; ?>" style="width: 100%" border="0" cellspacing="0" cellpadding="2">
 <?
 	for ($k; $k<$anzObj; $k++) {
 		$table = array();
