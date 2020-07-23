@@ -142,8 +142,10 @@ else {
 							'',
 							'$(\'#ref_map_img_prev\').attr(\'src\', \'index.php?go=showRefMapImage&ID=\' + this.value)'
 						);
-						$referenzkarte = Referenzkarte::find_by_id($this, $this->formvars['Referenzkarte_ID']); ?>
-						<img id="ref_map_img_prev" src="index.php?go=showRefMapImage&ID=<? echo $referenzkarte->get('ID'); ?>" style="vertical-align: middle" onchange="this.src=">
+						if($this->formvars['Referenzkarte_ID']){
+							$referenzkarte = Referenzkarte::find_by_id($this, $this->formvars['Referenzkarte_ID']); ?>
+							<img id="ref_map_img_prev" src="index.php?go=showRefMapImage&ID=<? echo $referenzkarte->get('ID'); ?>" style="vertical-align: middle" onchange="this.src=">
+						<? } ?>
           </td>
         </tr>
         <tr>
@@ -554,7 +556,7 @@ else {
 				</tr>
 				
 				<?php
-				if (false) { # deaktiviert, da noch in Entwicklung ?>
+				if (true) { # deaktiviert, da noch in Entwicklung ?>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 							<table border="0" cellspacing="0" cellpadding="0">
@@ -612,8 +614,66 @@ else {
 								</tr>
 							</table>
 						</td>
-					</tr><?php
-				} ?>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+							<table border="0" cellspacing="0" cellpadding="0">
+								<tr>
+									<th class="fetter" align="right">Untergeordnete Stellen</th>
+								</tr>
+								<tr>
+									<td align="right">&nbsp;</td>
+								</tr>
+							</table>
+						</th>
+						<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
+							<table border="0" cellspacing="0" cellpadding="0">
+								<tr valign="top">
+									<td><?php
+										$options = array_map(
+											function($child) {
+												return array(
+													'value' => $child['ID'],
+													'title' => str_replace(' ', '&nbsp;', $child["Bezeichnung"]),
+													'output' => $child['Bezeichnung']
+												);
+											},
+											$this->formvars['selchildren']
+										);
+										echo FormObject::createSelectField('selectedchildren', $options, '', 6, 'width: 300px', '', '', 'multiple');?>
+									</td>
+									<td align="center" valign="middle" width="1">
+										<input
+											type="button"
+											name="addPlaces"
+											value="&lt;&lt;"
+											onClick="addOptions(document.GUI.allchildren, document.GUI.selectedchildren, document.GUI.selchildren, 'value')"
+										>
+										<input
+											type="button"
+											name="substractPlaces"
+											value="&gt;&gt;"
+											onClick="substractOptions(document.GUI.selectedchildren, document.GUI.selchildren, 'value')"
+										>
+									</td>
+									<td><?php
+										$options = array_map(
+											function($child) {
+												return array(
+													'value' => $child->get('ID'),
+													'title' => str_replace(' ', '&nbsp;', $child->get("Bezeichnung")),
+													'output' => $child->get('Bezeichnung')
+												);
+											},
+											$this->formvars['children']
+										);
+										echo FormObject::createSelectField('allchildren', $options, '', 6, 'width: 300px', '', '', 'multiple');?>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+		<?	} ?>
 
 				<tr>
 					<td class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
@@ -712,5 +772,11 @@ else {
 <input
 	name="selparents"
 	value="<?php echo implode(', ', array_map(function($parent) { return $parent['ID']; }, $this->formvars['selparents'])); ?>"
+	type="hidden"
+>
+
+<input
+	name="selchildren"
+	value="<?php echo implode(', ', array_map(function($child) { return $child['ID']; }, $this->formvars['selchildren'])); ?>"
 	type="hidden"
 >

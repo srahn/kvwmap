@@ -506,7 +506,7 @@ public static	function find_by_id($gui, $by, $id) {
 
 				$formvars_before = $this->gui->formvars;
 
-				$stellen = $this->gui->Stellenzuweisung(
+				$stellen = $this->gui->addLayersToStellen(
 					array($gml_layer->get($gml_layer->identifier)),
 					array($this->gui->Stelle->id),
 					'(konvertierung_id = ' . $this->konvertierung->get('id') .')'

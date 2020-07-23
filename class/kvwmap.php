@@ -8013,7 +8013,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 		if (!$duplicate) {
       # Stellenzuweisung
-  		$stellen = $this->Stellenzuweisung(
+  		$stellen = $this->addLayersToStellen(
         array($formvars['selected_layer_id']),
         ($formvars['selstellen'] != '' ? explode(', ', $formvars['selstellen']) : array()),
   			NULL,
@@ -8071,7 +8071,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	* @param boolean (optional) Flag, ob die Defaultwerte auch an die bereits zugeordneten Stellen übertragen werden sollen
   * @return void
   */
-  function Stellenzuweisung($layer_ids, $stellen_ids, $filter = '', $assign_default_values = false) {
+  function addLayersToStellen($layer_ids, $stellen_ids, $filter = '', $assign_default_values = false) {
     for($i = 0; $i < count($stellen_ids); $i++){
       $stelle = new stelle($stellen_ids[$i], $this->database);
       $stelle->addLayer($layer_ids,	0, $filter, $assign_default_values);
@@ -11219,9 +11219,114 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->debug->write("<p>file:users.php class:gui->Attributeditor_takeover_default_layer_privileges - Speichern der Default-Layerrechte:<br>" . $sql,4);
 		$this->database->execSQL($sql,4, 1);
 	}
+	
+	function Stellenzuweisung($Stelle, $new_stelle, $menues, $functions, $frames,	$layouts,	$layer,	$selectedusers){
+		# $Stelle ist das "alte" Stellenobjekt und $new_stelle das "neue" Stellenobjekt, 
+		# denn falls die Stellen-ID geändert wurde, müssen alle Zuordnungen mit der alten ID gelöscht werden und mit der neuen ID zugewiesen werden
+		
+		# Menüs
+		$Stelle->deleteMenue(0); // erst alle Menüs rausnehmen
+		$new_stelle->addMenue($menues); // und dann hinzufügen, damit die Reihenfolge stimmt
+		
+		# Layer
+		if($layer[0] != NULL) {
+			$new_stelle->addLayer($layer, 0); # Hinzufügen der Layer zur Stelle
+		}
+		
+		# Funktionen
+		$Stelle->removeFunctions();   // Entfernen aller Funktionen
+		if($functions[0] != NULL){
+			$new_stelle->addFunctions($functions, 0); # Hinzufügen der Funktionen zur Stelle
+		}
+		
+		# Kartendruck-Layouts
+		$this->document->removeFrames($Stelle->id);   // Entfernen aller Kartendruck-Layouts der Stelle
+		if($frames[0] != NULL){
+			for($i = 0; $i < count($frames); $i++){
+				$this->document->add_frame2stelle($frames[$i], $new_stelle->id); # Hinzufügen der Kartendruck-Layouts zur Stelle
+			}
+		}
+		
+		# Datendruck-Layouts
+		$this->ddl->removelayouts($Stelle->id);   // Entfernen aller Datendruck-Layouts der Stelle
+		if ($layouts[0] != NULL){
+			for ($i = 0; $i < count($layouts); $i++){
+				$this->ddl->add_layout2stelle($layouts[$i], $new_stelle->id); # Hinzufügen der Datendruck-Layouts zur Stelle
+			}
+		}
+		
+		# Rolleneinstellungen
+		for ($i = 0; $i < count($selectedusers); $i++) {
+			$this->user->rolle->setRolle($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+			$this->user->rolle->setMenue($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
+			$this->user->rolle->setLayer($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
+			$this->user->rolle->setGroups($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id, $layer); 											# Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+			$this->user->rolle->setSavedLayersFromDefaultUser($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);
+			$this->selected_user = new user(0,$selectedusers[$i],$this->user->database);
+			$this->selected_user->checkstelle();
+		}
+		// ToDo: Löschen der Einträge in u_menue2rolle, bei denen der Menüpunkt nicht mehr der Stelle zugeordnet ist
+		
+		# nicht mehr zugewiesene Layer entfernen
+		$users= $Stelle->getUser();
+		$stellenlayer = $Stelle->getLayers(NULL);
+		$deletelayer = array();
+		for($i = 0; $i < count($stellenlayer['ID']); $i++){
+			$found = false;
+			for($j = 0; $j < count($layer); $j++){
+				if($layer[$j] == $stellenlayer['ID'][$i]){
+					$found = true;
+				}
+			}
+			if($found == false){
+				$deletelayer[] = $stellenlayer['ID'][$i];
+			}
+		}
+		if(count($deletelayer) > 0) {
+			$Stelle->deleteLayer($deletelayer, $this->pgdatabase);
+			for($i = 0; $i < count($deletelayer); $i++){
+				$layerid = $deletelayer[$i];
+				$layer_id = explode(',',$layerid);
+				for($j = 0; $j < count($users['ID']); $j++){
+					$this->user->rolle->deleteLayer($users['ID'][$j], array($Stelle->id), $layer_id);
+					$this->user->rolle->updateGroups($users['ID'][$j],$Stelle->id, $layerid);
+				}
+			}
+		}
+		
+		# Layerparameter aktualisieren
+		$new_stelle->updateLayerParams();
+		
+		# nicht mehr zugewiesene Nutzer entfernen
+		for($i = 0; $i < count($users['ID']); $i++){
+			$found = false;
+			for($j = 0; $j < count($selectedusers); $j++){
+				if($selectedusers[$j] == $users['ID'][$i]){
+					$found = true;
+				}
+			}
+			if($found == false){
+				$deleteuser[] = $users['ID'][$i];
+			}
+		}
+		$anzdeleteuser = count($deleteuser);
+		if ($anzdeleteuser > 0) {
+			for($i=0; $i<$anzdeleteuser; $i++){
+				$this->user->rolle->deleteRollen($deleteuser[$i], array($Stelle->id));
+				$this->user->rolle->deleteMenue($deleteuser[$i], array($Stelle->id), 0);
+				$this->user->rolle->deleteGroups($deleteuser[$i], array($Stelle->id));
+				$this->user->rolle->deleteLayer($deleteuser[$i], array($Stelle->id), 0);
+				$this->selected_user = new user(0,$deleteuser[$i],$this->user->database);
+				$this->selected_user->checkstelle();
+			}
+		}
+	}
 
   function StelleAendern() {
   	$_files = $_FILES;
+		include_(CLASSPATH.'datendrucklayout.php');
+		$this->ddl = new ddl($this->database, $this);
+		$this->document = new Document($this->database);
 		$results = array();
 		$deleteuser = array();
 
@@ -11237,18 +11342,15 @@ SET @connection_id = {$this->pgdatabase->connection_id};
             #echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
         }
       }
-      $stelleid = $this->formvars['selected_stelle_id'];
-      $Stelle = new stelle($stelleid,$this->user->database);
+      $Stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);		# das "alte" Stellenobjekt
       $Stelle->language = $this->Stelle->language;
       $Stelle->Aendern($this->formvars);
       if ($this->formvars['id'] != '') {
-        $new_stelle = new stelle($this->formvars['id'], $this->user->database);
-        $new_stelleid = $this->formvars['id'];
-        $this->formvars['selected_stelle_id'] = $new_stelleid;
+        $new_stelle = new stelle($this->formvars['id'], $this->user->database);		# das "neue" Stellenobjekt, falls die Stellen-ID geändert wird
+        $this->formvars['selected_stelle_id'] = $this->formvars['id'];
       }
       else {
         $new_stelle = $Stelle;
-        $new_stelleid = $stelleid;
       }
       $menues = ($this->formvars['selmenues'] == '' ? array() : explode(', ',$this->formvars['selmenues']));
       $functions = (trim($this->formvars['selfunctions']) == '' ? array() : explode(', ', $this->formvars['selfunctions']));
@@ -11256,13 +11358,28 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$layouts = (trim($this->formvars['sellayouts']) == '' ? array() : explode(', ', $this->formvars['sellayouts']));
       $layer = (trim($this->formvars['sellayer']) == '' ? array() : explode(', ', $this->formvars['sellayer']));
       $selectedusers = array_filter(explode(', ',$this->formvars['selusers']));
-      $users= $Stelle->getUser();
 			$selectedparents = ($this->formvars['selparents'] == '' ? array() : explode(', ', $this->formvars['selparents']));
+			$selectedchildren = ($this->formvars['selchildren'] == '' ? array() : explode(', ', $this->formvars['selchildren']));
 
-			# menues, functions, frames, layouts, layers und users zusätzlich zuordnen oder entfernen
-			# je nach gesetzten parent Einstellungen, Parameterübergabe erfolgt per Referenz
+			# die menues, functions, frames, layouts, layers und users der Oberstellen zusätzlich zuordnen oder entfernen
+			# Parameterübergabe erfolgt per Referenz
 			$results = $new_stelle->apply_parent_selection(
 				$selectedparents,
+				$menues,
+				$functions,
+				$frames,
+				$layouts,
+				$layer
+			);
+
+			foreach($results AS $result) {
+				$this->add_message($result['type'], $result['message']);
+			}
+			
+			# Zuweisung in der geänderten Stelle
+      $this->Stellenzuweisung(
+				$Stelle, 
+				$new_stelle, 
 				$menues,
 				$functions,
 				$frames,
@@ -11270,97 +11387,59 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$layer,
 				$selectedusers
 			);
-
-			foreach($results AS $result) {
-				$this->add_message($result['type'], $result['message']);
+			
+			# Zuweisung in den Kindstellen
+			$old_children = $Stelle->getChildren($this->formvars['selected_stelle_id'], " ORDER BY Bezeichnung", 'only_ids');
+			foreach($selectedchildren as $child){
+				if(!in_array($child, $old_children)){
+					$new_stelle->addChild($child);
+				}
+				$child_stelle = new stelle($child, $this->user->database);
+				$this->Stellenzuweisung(
+					$child_stelle, 
+					$child_stelle, 
+					$child_stelle->merge_menues(Menue::find($this, ' id IN ('.implode(',', $menues).')', 'order'), $child_stelle->getMenue(0)),
+					array_values(array_unique(array_merge($functions, $child_stelle->getFunktionen('only_ids')))),
+					array_values(array_unique(array_merge($frames, $this->document->load_frames($child, false, 'only_ids')))),
+					array_values(array_unique(array_merge($layouts, $this->ddl->load_layouts($child, '', '', '', 'only_ids')))),
+					array_values(array_unique(array_merge($layer, $child_stelle->getLayer('', 'only_ids')))),
+					$child_stelle->getUser('only_ids')
+				);
 			}
-
-      $stelle_id = explode(',',$stelleid);
-      $new_stelle->deleteMenue(0); // erst alle Menüs rausnehmen
-      $new_stelle->addMenue($menues); // und dann hinzufügen, damit die Reihenfolge stimmt
-      if($layer[0] != NULL) {
-        $new_stelle->addLayer($layer, 0); # Hinzufügen der Layer zur Stelle
-      }
-      $new_stelle->removeFunctions();   // Entfernen aller Funktionen
-      if($functions[0] != NULL){
-        $new_stelle->addFunctions($functions, 0); # Hinzufügen der Funktionen zur Stelle
-      }
-      $document = new Document($this->database);
-      $document->removeFrames($new_stelleid);   // Entfernen aller Kartendruck-Layouts der Stelle
-      if($frames[0] != NULL){
-        for($i = 0; $i < count($frames); $i++){
-          $document->add_frame2stelle($frames[$i], $new_stelleid); # Hinzufügen der Kartendruck-Layouts zur Stelle
-        }
-      }
-			include_(CLASSPATH.'datendrucklayout.php');
-			$ddl = new ddl($this->database, $this);
-      $ddl->removelayouts($new_stelleid);   // Entfernen aller Datendruck-Layouts der Stelle
-      if ($layouts[0] != NULL){
-        for ($i = 0; $i < count($layouts); $i++){
-          $ddl->add_layout2stelle($layouts[$i], $new_stelleid); # Hinzufügen der Datendruck-Layouts zur Stelle
-        }
-      }
-      for ($i = 0; $i < count($selectedusers); $i++) {
-				$this->user->rolle->setRolle($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
-        $this->user->rolle->setMenue($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
-        $this->user->rolle->setLayer($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
-				$this->user->rolle->setGroups($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id, $layer); 											# Hinzufügen der Layergruppen der selektierten Layer zur Rolle
-				$this->user->rolle->setSavedLayersFromDefaultUser($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);
-        $this->selected_user = new user(0,$selectedusers[$i],$this->user->database);
-        $this->selected_user->checkstelle();
-      }
-			// ToDo: Löschen der Einträge in u_menue2rolle, bei denen der Menüpunkt nicht mehr der Stelle zugeordnet ist
-      $stellenlayer = $Stelle->getLayers(NULL);
-			$deletelayer = array();
-      for($i = 0; $i < count($stellenlayer['ID']); $i++){
-        $found = false;
-        for($j = 0; $j < count($layer); $j++){
-          if($layer[$j] == $stellenlayer['ID'][$i]){
-            $found = true;
-          }
-        }
-        if($found == false){
-          $deletelayer[] = $stellenlayer['ID'][$i];
-        }
-      }
-      if(count($deletelayer) > 0) {
-        $Stelle->deleteLayer($deletelayer, $this->pgdatabase);
-        for($i = 0; $i < count($deletelayer); $i++){
-          $layerid = $deletelayer[$i];
-          $layer_id = explode(',',$layerid);
-          for($j = 0; $j < count($users['ID']); $j++){
-            $this->user->rolle->deleteLayer($users['ID'][$j], $stelle_id, $layer_id);
-            $this->user->rolle->updateGroups($users['ID'][$j],$stelleid, $layerid);
-          }
-        }
-      }
-    	# /Löschen der in der Selectbox entfernten Layer
-			$new_stelle->updateLayerParams();
-    	# Löschen  der User, die nicht mehr zur Stelle gehören sollen
-    	# Löschen der in der Selectbox entfernten User
-      for($i = 0; $i < count($users['ID']); $i++){
-        $found = false;
-        for($j = 0; $j < count($selectedusers); $j++){
-          if($selectedusers[$j] == $users['ID'][$i]){
-            $found = true;
-          }
-        }
-        if($found == false){
-          $deleteuser[] = $users['ID'][$i];
-        }
-      }
-      $anzdeleteuser = count($deleteuser);
-      if ($anzdeleteuser > 0) {
-        for($i=0; $i<$anzdeleteuser; $i++){
-          $this->user->rolle->deleteRollen($deleteuser[$i], $stelle_id);
-          $this->user->rolle->deleteMenue($deleteuser[$i], $stelle_id, 0);
-          $this->user->rolle->deleteGroups($deleteuser[$i], $stelle_id);
-          $this->user->rolle->deleteLayer($deleteuser[$i], $stelle_id, 0);
-          $this->selected_user = new user(0,$deleteuser[$i],$this->user->database);
-          $this->selected_user->checkstelle();
-        }
-      }
-			# /Löschen der in der Selectbox entfernten User
+			
+			# Zuweisung in den entfernten Kindstellen
+			foreach(array_diff($old_children, $selectedchildren) AS $drop_child_id){
+				$drop_child_stelle = new stelle($drop_child_id, $this->user->database);
+				# zunächst alle Zuweisungen der Kindstelle selber holen
+				$menues = $drop_child_stelle->getMenue(0, 'only_ids');
+				$functions = $drop_child_stelle->getFunktionen('only_ids');
+				$layouts = $this->ddl->load_layouts($drop_child_id, '', '', '', 'only_ids');
+				$frames = $this->document->load_frames($drop_child_id, false, 'only_ids');
+				$layer = $drop_child_stelle->getLayer('', 'only_ids');
+				$selectedusers = $drop_child_stelle->getUser('only_ids');
+				# dann entsprechend der Elternstellen erweitern bzw. reduzieren
+				$drop_child_stelle->apply_parent_selection(
+					array_diff($drop_child_stelle->getParents('ORDER BY `ID`', 'only_ids'), array($Stelle->id)),	# alle Oberstellen außer der gerade geänderten
+					$menues,
+					$functions,
+					$frames,
+					$layouts,
+					$layer
+				);
+				# zuweisen
+				$this->Stellenzuweisung(
+					$drop_child_stelle, 
+					$drop_child_stelle, 
+					$menues,
+					$functions,
+					$frames,
+					$layouts,
+					$layer,
+					$selectedusers
+				);
+				# und Kindstelle entfernen
+				$Stelle->dropChild($drop_child_id);
+			}
 
 			if (
 				count(
@@ -11376,6 +11455,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     }
     $this->Stelleneditor();
   }
+
 
   function StelleAnlegen() {
   	$_files = $_FILES;
@@ -11461,8 +11541,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		include_(CLASSPATH.'FormObject.php');
 		$document = new Document($this->database);
 		$ddl = new ddl($this->database, $this);
+		$stelle = new MyObject($this, 'stelle');
 		$where = '';
 		$this->formvars['selparents'] = array();
+		$this->formvars['selchildren'] = array();
+		$children_ids = array();
+		$parent_ids = array();
 
 		# Abfragen der Stellendaten wenn eine stelle_id zur Änderung selektiert ist
 		if ($this->formvars['selected_stelle_id'] > 0) {
@@ -11506,9 +11590,27 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       $this->formvars['sellayer'] = $Stelle->getLayers(NULL, 'Name');
       $this->formvars['selusers'] = $Stelle->getUser();
 			$this->formvars['selparents'] = $Stelle->getParents("ORDER BY `Bezeichnung`"); // formatted mysql resultset, ordered by Bezeichnung
+			$this->formvars['selchildren'] = $Stelle->getChildren($this->formvars['selected_stelle_id'], "ORDER BY Bezeichnung"); // formatted mysql resultset, ordered by Bezeichnung
 			$this->formvars['default_user_id'] = $this->stellendaten['default_user_id'];
-			$where = 'ID != ' . $this->formvars['selected_stelle_id'];
+			$where = 'ID != '.$this->formvars['selected_stelle_id'];
+			
+			$children_ids = array_map(function($child) {return $child['ID'];}, $this->formvars['selchildren']);
+			$parent_ids = array_map(function($parent) {return $parent['ID'];}, $this->formvars['selparents']);
     }
+		
+		$alle_anderen_stellen = $stelle->find_where($where, 'Bezeichnung');
+		
+		# Abfragen aller möglichen Oberstellen. Kindstellen der ausgewählten Stelle werden ausgenommen;
+		$this->formvars['parents'] = array();
+		foreach ($alle_anderen_stellen AS $parent) {
+			if (!in_array($parent->get('ID'), $children_ids)) $this->formvars['parents'][] = $parent;
+		}
+		
+		# Abfragen aller möglichen Kindstellen. Oberstellen der ausgewählten Stelle werden ausgenommen;
+		$this->formvars['children'] = array();
+		foreach ($alle_anderen_stellen AS $child) {
+			if (!in_array($parent->get('ID'), $parent_ids)) $this->formvars['children'][] = $child;
+		}
 
     # Abfragen aller möglichen Menuepunkte
     $this->formvars['menues'] = Menue::get_all_ober_menues($this);
@@ -11527,19 +11629,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
     # Abfragen aller verfügbaren User der Stelle ab
 		$this->formvars['users'] = $this->user->getall_Users('Name', $this->Stelle->id, $this->user->id);
-
-		# Abfragen aller möglichen Oberstellen Kindstellen der ausgewählten Stelle werden ausgenommen;
-		$stelle = new MyObject($this, 'stelle');
-		$children_ids = array_map(
-			function($child) {
-				return $child['ID'];
-			},
-			$this->Stelle->getChildren($this->formvars['selected_stelle_id'])
-		);
-		$this->formvars['parents'] = array();
-		foreach ($stelle->find_where($where, 'Bezeichnung') AS $parent) {
-			if (!in_array($parent->get('ID'), $children_ids)) $this->formvars['parents'][] = $parent;
-		}
 
     # Abfragen aller möglichen EPSG-Codes
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
@@ -20148,6 +20237,7 @@ class Document {
   }
 
   function load_frames($stelle_id, $frameid, $return = '') {
+		$frames = array();
     $sql = 'SELECT DISTINCT druckrahmen.* FROM druckrahmen';
     if($frameid AND !$stelle_id){$sql .= ' WHERE druckrahmen.id ='.$frameid;}
     if($stelle_id AND !$frameid){

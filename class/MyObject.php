@@ -46,6 +46,9 @@ class MyObject {
 	*/
 	function find_where($where, $order = '', $sort_direction = '') {
 		$where = ($where == '' ? '' : 'WHERE ' . $where);
+		if(strpos($order, '(') === false){
+			$q = '`';		# wenn kein Funktion im order steht, quote-Zeichen verwenden
+		}
 		$orders = array_map(
 			function ($order) {
 				return trim($order);
@@ -58,7 +61,7 @@ class MyObject {
 			FROM
 				`" . $this->tableName . "`
 			" . $where .
-			($order != '' ? " ORDER BY `" . implode('`, `', $orders) . "`" . ($sort_direction == 'DESC' ? ' DESC' : ' ASC') : "") . "
+			($order != '' ? " ORDER BY " .$q.implode($q.', '.$q, $orders).$q.($sort_direction == 'DESC' ? ' DESC' : ' ASC') : "") . "
 		";
 		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);

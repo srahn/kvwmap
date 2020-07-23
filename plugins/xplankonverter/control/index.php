@@ -312,7 +312,7 @@ function go_switch_xplankonverter($go){
 
 
 					# Ordne layer zur Stelle
-					$GUI->Stellenzuweisung(
+					$GUI->addLayersToStellen(
 						array($shapeFile->get('layer_id')),
 						array($GUI->konvertierung->get('stelle_id'))
 					);
@@ -439,7 +439,7 @@ function go_switch_xplankonverter($go){
 										$shapeFile->update();
 
 										# Ordne layer zur Stelle
-										$GUI->Stellenzuweisung(
+										$GUI->addLayersToStellen(
 											array($shapeFile->get('layer_id')),
 											array($GUI->konvertierung->get('stelle_id'))
 										);
