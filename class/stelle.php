@@ -650,7 +650,7 @@ class stelle {
 		# Füge Einstellungen der Elternstellen zur Stelle hinzu
 		foreach($selected_parents AS $new_parent_id) {
 			$parent_stelle = new stelle($new_parent_id, $this->database);
-			$menues = $this->merge_menues(Menue::find($this, ' id IN ('.implode(',', $menues).')', 'FIELD(id, '.implode(',', $menues).')'), $parent_stelle->getMenue(0));
+			$menues = $this->merge_menues($menues, $parent_stelle->getMenue(0));
 			$functions = array_values(array_unique(array_merge($functions, $parent_stelle->getFunktionen('only_ids'))));
 			$layouts = array_values(array_unique(array_merge($layouts, $ddl->load_layouts($new_parent_id, '', '', '', 'only_ids'))));
 			$frames = array_values(array_unique(array_merge($frames, $document->load_frames($new_parent_id, false, 'only_ids'))));
@@ -661,17 +661,18 @@ class stelle {
 	}
 
 	function merge_menues($menues, $new_menues){
+		$menue_objects = empty($menues) ? array() : Menue::find($this, ' id IN ('.implode(',', $menues).')', 'FIELD(id, '.implode(',', $menues).')');
 		$insert_index = 0;
 		for($i = 0; $i < count($new_menues['ID']); $i++){
 			if($new_menues['menueebene'][$i] == 1){
-				while($menues[$insert_index]->data['menueebene'] == 1 AND $menues[$insert_index]->data['order'] < $new_menues['ORDER'][$i]){
+				while($menue_objects[$insert_index]->data['menueebene'] == 1 AND $menue_objects[$insert_index]->data['order'] < $new_menues['ORDER'][$i]){
 					$insert_index++;
 				}
 			}
-			array_splice($menues, $insert_index, 0, [(object)['data' => ['id' => $new_menues['ID'][$i], 'order' => $new_menues['ORDER'][$i], 'name' => $new_menues['Bezeichnung'][$i]]]]);
+			array_splice($menue_objects, $insert_index, 0, [(object)['data' => ['id' => $new_menues['ID'][$i], 'order' => $new_menues['ORDER'][$i], 'name' => $new_menues['Bezeichnung'][$i]]]]);
 			$insert_index++;
 		}
-		foreach($menues as $menue){
+		foreach($menue_objects as $menue){
 			$result[] = $menue->data['id'];
 		}
 		return $result;
