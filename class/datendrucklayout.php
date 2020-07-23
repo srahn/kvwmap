@@ -173,7 +173,15 @@ class ddl {
 						}
 					}
 					$this->pdf->setLineStyle($this->layout['lines'][$j]['breite'], 'square');
-					$this->pdf->line($x,$y,$endx,$endy);
+					if($endy > $y){		# Seitenumbruch dazwischen
+						$this->pdf->reopenObject($this->record_startpage);
+						$this->pdf->line($x, $y, $endx, $this->layout['margin_bottom']);
+						$this->pdf->closeObject();
+						$this->pdf->line($x, 842 - $this->layout['margin_top'] + 10, $endx, $endy);
+					}
+					else{
+						$this->pdf->line($x, $y, $endx, $endy);
+					}
 					$line['x1'] = $x;
 					$line['y1'] = $y;
 					$line['x2'] = $endx;
