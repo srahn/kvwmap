@@ -659,20 +659,20 @@ class stelle {
 		return $results;
 	}
 
-	/*
-	* Merge $new_menues in correct order with $menue
-	* ToDo: replace array_merge by correct logig to merge with order not only append
-	*/
-	function merge_menues($menues, $new_menues) {
-		print_r($menues[0]->data);
-		print_r($menues[1]->data);
-		print_r($menues[2]->data);
-		print_r($menues[3]->data);
-		print_r($menues[4]->data);
-		print_r($menues[5]->data);
-		echo '<br><br>';
-		print_r($new_menues);
-		$result = array_values(array_unique(array_merge($menues, $new_menues)));
+	function merge_menues($menues, $new_menues){
+		$insert_index = 0;
+		for($i = 0; $i < count($new_menues['ID']); $i++){
+			if($new_menues['menueebene'][$i] == 1){
+				while($menues[$insert_index]->data['menueebene'] == 1 AND $menues[$insert_index]->data['order'] < $new_menues['ORDER'][$i]){
+					$insert_index++;
+				}
+			}
+			array_splice($menues, $insert_index, 0, [(object)['data' => ['id' => $new_menues['ID'][$i], 'order' => $new_menues['ORDER'][$i], 'name' => $new_menues['Bezeichnung'][$i]]]]);
+			$insert_index++;
+		}
+		foreach($menues as $menue){
+			$result[] = $menue->data['id'];
+		}
 		return $result;
 	}
 

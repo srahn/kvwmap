@@ -11352,6 +11352,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       else {
         $new_stelle = $Stelle;
       }
+			# die alten Zuweisungen der Stelle
+			$old_menues = $Stelle->getMenue(0, 'only_ids');
+			$old_functions = $Stelle->getFunktionen('only_ids');
+			$old_layouts = $this->ddl->load_layouts($Stelle->id, '', '', '', 'only_ids');
+			$old_frames = $this->document->load_frames($Stelle->id, false, 'only_ids');
+			$old_layer = $Stelle->getLayer('', 'only_ids');
+			
+			# die neuen Zuweisungen aus dem Formular
       $menues = ($this->formvars['selmenues'] == '' ? array() : explode(', ',$this->formvars['selmenues']));
       $functions = (trim($this->formvars['selfunctions']) == '' ? array() : explode(', ', $this->formvars['selfunctions']));
       $frames = explode(', ', $this->formvars['selframes']);
@@ -11387,49 +11395,36 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$layer,
 				$selectedusers
 			);
-			
+						
 			# Zuweisung in den Kindstellen
 			$old_children = $Stelle->getChildren($this->formvars['selected_stelle_id'], " ORDER BY Bezeichnung", 'only_ids');
-			foreach($selectedchildren as $child){
-				if(!in_array($child, $old_children)){
-					$new_stelle->addChild($child);
+			foreach(array_unique(array_merge($old_children, $selectedchildren)) AS $child_id){
+				$drop_child = !in_array($child_id, $selectedchildren) ? true : false;
+				if(!in_array($child_id, $old_children)){
+					$new_stelle->addChild($child_id);
 				}
-				$child_stelle = new stelle($child, $this->user->database);
-				$this->Stellenzuweisung(
-					$child_stelle, 
-					$child_stelle, 
-					$child_stelle->merge_menues(Menue::find($this, ' id IN ('.implode(',', $menues).')', 'order'), $child_stelle->getMenue(0)),
-					array_values(array_unique(array_merge($functions, $child_stelle->getFunktionen('only_ids')))),
-					array_values(array_unique(array_merge($frames, $this->document->load_frames($child, false, 'only_ids')))),
-					array_values(array_unique(array_merge($layouts, $this->ddl->load_layouts($child, '', '', '', 'only_ids')))),
-					array_values(array_unique(array_merge($layer, $child_stelle->getLayer('', 'only_ids')))),
-					$child_stelle->getUser('only_ids')
-				);
-			}
-			
-			# Zuweisung in den entfernten Kindstellen
-			foreach(array_diff($old_children, $selectedchildren) AS $drop_child_id){
-				$drop_child_stelle = new stelle($drop_child_id, $this->user->database);
-				# zunächst alle Zuweisungen der Kindstelle selber holen
-				$menues = $drop_child_stelle->getMenue(0, 'only_ids');
-				$functions = $drop_child_stelle->getFunktionen('only_ids');
-				$layouts = $this->ddl->load_layouts($drop_child_id, '', '', '', 'only_ids');
-				$frames = $this->document->load_frames($drop_child_id, false, 'only_ids');
-				$layer = $drop_child_stelle->getLayer('', 'only_ids');
-				$selectedusers = $drop_child_stelle->getUser('only_ids');
+				$child_stelle = new stelle($child_id, $this->user->database);
+				# zunächst alle Zuweisungen der Kindstelle selber holen, abzüglich der alten Zuweisungen der geänderten Stelle
+				$menues = array_diff($child_stelle->getMenue(0, 'only_ids'), $old_menues);
+				$functions = array_diff($child_stelle->getFunktionen('only_ids'), $old_functions);
+				$layouts = array_diff($this->ddl->load_layouts($child_id, '', '', '', 'only_ids'), $old_layouts);
+				$frames = array_diff($this->document->load_frames($child_id, false, 'only_ids'), $old_frames);
+				$layer = array_diff($child_stelle->getLayer('', 'only_ids'), $old_layer);
+				$selectedusers = $child_stelle->getUser('only_ids');
+				$parents = $child_stelle->getParents('ORDER BY `ID`', 'only_ids');
 				# dann entsprechend der Elternstellen erweitern bzw. reduzieren
-				$drop_child_stelle->apply_parent_selection(
-					array_diff($drop_child_stelle->getParents('ORDER BY `ID`', 'only_ids'), array($Stelle->id)),	# alle Oberstellen außer der gerade geänderten
+				$child_stelle->apply_parent_selection(
+					($drop_child ? array_diff($parents, array($Stelle->id)) : $parents),
 					$menues,
 					$functions,
 					$frames,
 					$layouts,
 					$layer
 				);
-				# zuweisen
+				# und zuweisen
 				$this->Stellenzuweisung(
-					$drop_child_stelle, 
-					$drop_child_stelle, 
+					$child_stelle, 
+					$child_stelle, 
 					$menues,
 					$functions,
 					$frames,
@@ -11437,8 +11432,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$layer,
 					$selectedusers
 				);
-				# und Kindstelle entfernen
-				$Stelle->dropChild($drop_child_id);
+				# Kindstelle entfernen
+				if($drop_child){
+					$Stelle->dropChild($child_id);
+				}
 			}
 
 			if (
