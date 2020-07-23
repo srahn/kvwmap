@@ -402,8 +402,8 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
                       </select>
                     </td>
                     <td align="center" valign="middle" width="1">
-                      <input type="button" name="addPlaces" value="&lt;&lt;" onClick=addOptions(document.GUI.allfunctions,document.GUI.selectedfunctions,document.GUI.selfunctions,'value')>
-                      <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedfunctions,document.GUI.selfunctions,'value')>
+                      <input type="button" name="addPlaces" value="&laquo;" onClick=addOptions(document.GUI.allfunctions,document.GUI.selectedfunctions,document.GUI.selfunctions,'value')>
+                      <input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedfunctions,document.GUI.selfunctions,'value')>
                     </td>
                     <td>
                       <select name="allfunctions" size="6" multiple style="width:300px">
@@ -442,8 +442,8 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
                       </select>
                     </td>
                     <td align="center" valign="middle" width="1">
-                      <input type="button" name="addPlaces" value="&lt;&lt;" onClick=addOptions(document.GUI.allframes,document.GUI.selectedframes,document.GUI.selframes,'value')>
-                      <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedframes,document.GUI.selframes,'value')>
+                      <input type="button" name="addPlaces" value="&laquo;" onClick=addOptions(document.GUI.allframes,document.GUI.selectedframes,document.GUI.selframes,'value')>
+                      <input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedframes,document.GUI.selframes,'value')>
                     </td>
                     <td>
                       <select name="allframes" size="6" multiple style="width:300px">
@@ -482,8 +482,8 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
                       </select>
                     </td>
                     <td align="center" valign="middle" width="1">
-                      <input type="button" name="addPlaces" value="&lt;&lt;" onClick=addOptions(document.GUI.alllayouts,document.GUI.selectedlayouts,document.GUI.sellayouts,'value')>
-                      <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedlayouts,document.GUI.sellayouts,'value')>
+                      <input type="button" name="addPlaces" value="&laquo;" onClick=addOptions(document.GUI.alllayouts,document.GUI.selectedlayouts,document.GUI.sellayouts,'value')>
+                      <input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedlayouts,document.GUI.sellayouts,'value')>
                     </td>
                     <td>
                       <select name="alllayouts" size="6" multiple style="width:300px">
@@ -526,8 +526,8 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
                       </select>
                     </td>
                     <td align="center" valign="middle" width="1">
-                      <input type="button" name="addPlaces" value="&lt;&lt;" onClick=addOptions(document.GUI.alllayer,document.GUI.selectedlayer,document.GUI.sellayer,'value')>
-                      <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedlayer,document.GUI.sellayer,'value')>
+                      <input type="button" name="addPlaces" value="&laquo;" onClick=addOptions(document.GUI.alllayer,document.GUI.selectedlayer,document.GUI.sellayer,'value')>
+                      <input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedlayer,document.GUI.sellayer,'value')>
                     </td>
                     <td>
 											<select name="allgroups" size="6" onchange="getlayer();select_layer();" style="width:300px">
@@ -581,8 +581,8 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 									</select>
 								</td>
 								<td align="center" valign="middle" width="1">
-									<input type="button" name="addPlaces" value="&lt;&lt;" onClick=addOptions(document.GUI.allusers,document.GUI.selectedusers,document.GUI.selusers,'value')>
-									<input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedusers,document.GUI.selusers,'value')>
+									<input type="button" name="addPlaces" value="&laquo;" onClick=addOptions(document.GUI.allusers,document.GUI.selectedusers,document.GUI.selusers,'value')>
+									<input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedusers,document.GUI.selusers,'value')>
 								</td>
 								<td>
 									<select name="allusers" size="6" multiple style="width:300px"><?
@@ -632,13 +632,13 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										<input
 											type="button"
 											name="addPlaces"
-											value="&lt;&lt;"
+											value="&laquo;"
 											onClick="addOptions(document.GUI.allparents, document.GUI.selectedparents, document.GUI.selparents, 'value')"
 										>
 										<input
 											type="button"
 											name="substractPlaces"
-											value="&gt;&gt;"
+											value="&raquo;"
 											onClick="substractOptions(document.GUI.selectedparents, document.GUI.selparents, 'value')"
 										>
 									</td>
@@ -690,13 +690,13 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										<input
 											type="button"
 											name="addPlaces"
-											value="&lt;&lt;"
+											value="&laquo;"
 											onClick="addOptions(document.GUI.allchildren, document.GUI.selectedchildren, document.GUI.selchildren, 'value')"
 										>
 										<input
 											type="button"
 											name="substractPlaces"
-											value="&gt;&gt;"
+											value="&raquo;"
 											onClick="substractOptions(document.GUI.selectedchildren, document.GUI.selchildren, 'value')"
 										>
 									</td>
