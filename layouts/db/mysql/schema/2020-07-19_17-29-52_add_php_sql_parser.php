@@ -27,7 +27,6 @@ if (!file_exists('../../../../../3rdparty/PHP-SQL-Parser/src/PHPSQLParser.php'))
 				  $zip->close();
 					$install_msg .= '<br>ZIP-File extrahiert nach: ' . $extract_path;
 					unlink($zipfile);
-					chgrp($extract_path . 'PHP-SQL-Parser', 'gisadmin');
 					chmod($extract_path . 'PHP-SQL-Parser', 07550);
 				} else {
 				  $install_msg .= '<br>Kann File nicht extrahieren!';
