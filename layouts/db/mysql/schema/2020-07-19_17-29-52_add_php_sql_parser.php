@@ -27,6 +27,7 @@ if (!file_exists('../../../../../3rdparty/PHP-SQL-Parser/src/PHPSQLParser.php'))
 				  $zip->close();
 					$install_msg .= '<br>ZIP-File extrahiert nach: ' . $extract_path;
 					unlink($zipfile);
+					chmod($extract_path . 'PHP-SQL-Parser', 07550);
 				} else {
 				  $install_msg .= '<br>Kann File nicht extrahieren!';
 					$success = false;
@@ -54,6 +55,6 @@ else {
 }
 $GUI->add_message(($success ? 'Notice' : 'Fehler'), $install_msg);
 
-$result[0] = $success;
+$result[0] = !$success;
 
 ?>
