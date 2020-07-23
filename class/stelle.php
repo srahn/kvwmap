@@ -317,6 +317,7 @@ class stelle {
 			WHERE
 				ID = " . $this->id . "
 		";
+		#echo '<p>SQL zum Abfragen der Stellendaten: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getstellendaten - Abfragen der Stellendaten<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -471,8 +472,8 @@ class stelle {
 				s.Bezeichnung
 			FROM
 				`stelle` AS s" .
-				$where .
-				$order . "
+			$where .
+			$order . "
 		";
 		#echo '<br>sql: ' . $sql;
 

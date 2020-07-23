@@ -477,7 +477,7 @@ class Validierung extends PgObject {
 		$sql = str_ireplace(
 			'select',
 			"select
-				" . ($sourcetype == 'gmlas' ? '' : 'gid') . ",
+				" . ($sourcetype == 'gmlas' ? '' : 'gid,') . "
 				NOT st_within(" . $geometry_col . ", " . $bereichtype . ".geltungsbereich) AS ausserhalb,
 				st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), ST_Transform(" . $bereichtype . ".geltungsbereich, " . $konvertierung->get('input_epsg') . "))/1000 AS distance,
 			",

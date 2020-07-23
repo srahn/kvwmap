@@ -250,12 +250,21 @@ class administration{
 	
 	function update_code() {
 		$folder = WWWROOT.APPLVERSION;
-		if (defined('HTTP_PROXY'))putenv('https_proxy='.HTTP_PROXY);
-		exec('cd '.$folder.' && sudo -u '.GIT_USER.' git stash && sudo -u '.GIT_USER.' git pull origin', $ausgabe, $ret);
-		if ($ret != 0) {
-			showAlert('Fehler bei der Ausführung von "git pull origin".');
+		if (defined('HTTP_PROXY')) {
+			putenv('https_proxy='.HTTP_PROXY);
 		}
-		return $ausgabe;
+		exec("git status -s --porcelain 2>&1", $output, $return_var);
+		if (count($output) > 0) {
+			$this->database->gui->add_message('Fehler', 'Update kann nicht erfolgen!<p>Es gibt folgende noch nicht committete Änderungen:<br>' . implode('<br>', $output) . '<br>Erst Änderungen committen oder auschecken!');
+			return false;
+		}
+		else {
+			exec('cd '.$folder.' && sudo -u '.GIT_USER.' git stash && sudo -u '.GIT_USER.' git pull origin', $ausgabe, $ret);
+			if ($ret != 0) {
+				$this->database->gui->add_message('Fehler', 'Fehler bei der Ausführung von "git pull origin"!');
+			}
+			return $ausgabe;
+		}
 	}
 	
 	function get_config_params() {

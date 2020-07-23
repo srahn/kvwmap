@@ -190,33 +190,72 @@ else {
           </td>
         </tr>
 
-        <tr>
+        <!--tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostgisHost; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="pgdbhost" type="text" value="<?php echo $this->formvars['pgdbhost']; ?>" size="25" maxlength="100">
           </td>
-        </tr>
+        </tr//-->
 
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISDataBankName; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="pgdbname" readonly onfocus="this.removeAttribute('readonly');" type="text" value="<?php echo $this->formvars['pgdbname']; ?>" size="25" maxlength="100">
-          </td>
-        </tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostgisConnection; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<div id="connection_id_div"><?
+								include_once(CLASSPATH . 'Connection.php');
+								$connections = Connection::find($this);
+								echo FormObject::createSelectField(
+									'postgres_connection_id',
+									array_map(
+									  function($connection) {
+											return array(
+												'value' => $connection->get('id'),
+												'output' => $connection->get('name')
+											);
+										},
+										$connections
+									),
+									$this->formvars['postgres_connection_id']
+								); ?>
+								<a href="index.php?go=connections_anzeigen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>"><i class="fa fa-pencil fa_lg" style="margin-left: 5px;"></i></a>
+							</div>
+						</td>
+					</tr><?
 
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISUserName; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="pgdbuser" readonly onfocus="this.removeAttribute('readonly');" type="text" value="<?php echo $this->formvars['pgdbuser']; ?>" size="25" maxlength="100">
-          </td>
-        </tr>
+					if ($this->formvars['postgres_connection_id'] == '') { ?>
+						<tr>
+							<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostgisHost; ?></th>
+							<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="pgdbhost" type="text" value="<?php echo $this->formvars['pgdbhost']; ?>" size="25" maxlength="100">
+							</td>
+						</tr>
 
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISPassword; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="pgdbpasswd" type="password" value="<?php echo $this->formvars['pgdbpasswd']; ?>" size="25" maxlength="100">
-          </td>
-        </tr>
+						<tr>
+							<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISDataBankName; ?></th>
+							<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="pgdbname" readonly onfocus="this.removeAttribute('readonly');" type="text" value="<?php echo $this->formvars['pgdbname']; ?>" size="25" maxlength="100">
+							</td>
+						</tr>
+
+						<tr>
+							<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISUserName; ?></th>
+							<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="pgdbuser" readonly onfocus="this.removeAttribute('readonly');" type="text" value="<?php echo $this->formvars['pgdbuser']; ?>" size="25" maxlength="100">
+							</td>
+						</tr>
+
+						<tr>
+							<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISPassword; ?></th>
+							<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="pgdbpasswd" type="password" value="<?php echo $this->formvars['pgdbpasswd']; ?>" size="25" maxlength="100">
+							</td>
+						</tr><?
+					}
+					else { ?>
+						<input name="pgdbhost" type="hidden" value="<?php echo $this->formvars['pgdbhost']; ?>">
+						<input name="pgdbname" type="hidden" value="<?php echo $this->formvars['pgdbname']; ?>">
+						<input name="pgdbuser" type="hidden" value="<?php echo $this->formvars['pgdbuser']; ?>">
+						<input name="pgdbpasswd" type="hidden" value="<?php echo $this->formvars['pgdbpasswd']; ?>"><?
+					} ?>
 
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsTitle; ?></th>
@@ -277,11 +316,16 @@ else {
             &nbsp;<input type="file" name="wappen" size="15"><br>
             &nbsp;<? echo $this->formvars['wappen'] ?>
           </td>
-          <td style="border-bottom:1px solid #C3C7C3">
-            &nbsp;<img src="<? echo WAPPENPATH.basename($this->formvars['wappen']); ?>" width="100" alt="<?php echo $strNoLogoSelected; ?>">
-            <input type="hidden" name="wappen_save" value="<? echo $this->formvars['wappen']; ?>">
-          </td>
-        </tr>
+
+					<td style="border-bottom:1px solid #C3C7C3"><?
+						if ($this->formvars['wappen'] != '') { ?>
+							&nbsp;<img src="<? echo WAPPENPATH.basename($this->formvars['wappen']); ?>" width="100" 
+alt="<?php echo $strNoLogoSelected; ?>"><?
+						} ?>
+						<input type="hidden" name="wappen_save" value="<? echo $this->formvars['wappen']; ?>">
+					</td>
+				</tr>
+
 				<tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWappenLink; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
