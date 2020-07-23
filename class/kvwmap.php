@@ -5112,7 +5112,7 @@ echo '			</ul>
 		$explosion = explode(',', $select);							# wenn im Data sowas wie tabelle.oid vorkommt, soll das anstatt oid verwendet werden
 		for($i = 0; $i < count($explosion); $i++){
 			if(strpos(strtolower($explosion[$i]), '.oid') !== false){
-				$oid = str_replace('select ', '', strtolower($explosion[$i]));
+				$oid = str_replace('select ', '', strtolower(str_replace([chr(10), chr(13)], '', $explosion[$i])));
 				break;
 			}
 		}
