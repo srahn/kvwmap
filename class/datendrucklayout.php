@@ -100,7 +100,7 @@ class ddl {
 						}
 					}
 					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);					
-					$y = $this->putText($text, $this->layout['texts'][$j]['size'], NULL, $x, $y, $offsetx);
+					$y = $this->putText($text, $this->layout['texts'][$j]['size'], NULL, $x, $y, $offsetx, $type);
 					if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 					
 					if($type != 'everypage' AND $this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();			# falls in eine alte Seite geschrieben wurde, zurückkehren
 				}
@@ -486,7 +486,21 @@ class ddl {
 		return NULL;
 	}
 	
-	function putText($text, $fontsize, $width, $x, $y, $offsetx){	
+	function putText($text, $fontsize, $width, $x, $y, $offsetx, $type = 'running'){	
+		if($type == 'running' AND $y < $this->layout['margin_bottom']){
+			$nextpage = $this->getNextPage($this->pdf->currentContents);
+			if($nextpage != NULL){
+				$this->pdf->reopenObject($nextpage);
+			}
+			else{
+				$this->pdf->ezNewPage();
+				$this->miny[$this->pdf->currentContents] = 842;
+				$this->maxy = 800;
+				if($this->layout['type'] == 2)$this->offsety = 50;
+				$this->page_overflow = true;
+			}
+			$y = 842 - $this->layout['margin_top'];
+		}
 		if($x < 0){		# rechtsbündig
 			$x = 595 + $x;
 			$x = $x + $offsetx;
@@ -503,7 +517,7 @@ class ddl {
 		$page_id_before_puttext = $this->pdf->currentContents;
 		$this->pdf->ezSetY($y);		
 		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252//TRANSLIT", $text), $fontsize, $options);
-		$page_id_after_puttext = $this->pdf->currentContents;		
+		$page_id_after_puttext = $this->pdf->currentContents;
 		#echo $page_id_before_puttext.' '.$page_id_after_puttext.' - '.$y.' - '.$text.'<br>';
 		if($page_id_before_puttext != $page_id_after_puttext){
 			$this->page_overflow = true; 
