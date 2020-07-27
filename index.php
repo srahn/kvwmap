@@ -1317,7 +1317,7 @@ function go_switch($go, $exit = false) {
 					include_once(CLASSPATH . 'Layer.php');
 					$GUI->save_layers_attributes($GUI->formvars);
 				}
-				if (empty($GUI->formvars['selected_layer_id']) AND !empty($this->formvars['selected_datatype_id'])) {
+				if (empty($GUI->formvars['selected_layer_id']) AND !empty($GUI->formvars['selected_datatype_id'])) {
 					$GUI->Datentypattribute_speichern();
 				}
 				$GUI->Attributeditor();
