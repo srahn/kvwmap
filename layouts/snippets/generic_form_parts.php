@@ -747,7 +747,7 @@
 							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; font-size: '.$fontsize.'px;">' . htmlspecialchars($angezeigter_value) . '</div>';
 						}
 					}
-					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
+					if($attribute_privileg > '0' AND $attributes['options'][$j] != '' AND strpos($attributes['options'][$j], 'require') === false){		# bei <requires> oder <required by> nicht
 						if(strtolower(substr($attributes['options'][$j], 0, 6)) == 'select'){
 							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
