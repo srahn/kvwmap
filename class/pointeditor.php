@@ -31,12 +31,13 @@
 
 class pointeditor {
 
-	function __construct($database, $layerepsg, $clientepsg) {
+	function __construct($database, $layerepsg, $clientepsg, $oid_attribute) {
 		global $debug;
 		$this->debug=$debug;
 		$this->database=$database;
 		$this->clientepsg = $clientepsg;
 		$this->layerepsg = $layerepsg;
+		$this->oid_attribute = $oid_attribute;
 	}
 
 	function pruefeEingabedaten($locx, $locy) {
@@ -102,7 +103,7 @@ class pointeditor {
 		$sql = "
 			UPDATE " . $tablename . "
 			SET " . implode(', ', $kvps) . "
-			WHERE oid = " . $oid . "
+			WHERE ".$this->oid_attribute." = " . $oid . "
 		";
 		#echo '<p>SQL zum Updaten von Punktgeometrie: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 1, true);
@@ -130,7 +131,7 @@ class pointeditor {
 			FROM
 				" . $tablename . "
 			WHERE
-				oid = " . $oid . "
+				".$this->oid_attribute." = " . $oid . "
 		";
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$point = pg_fetch_array($ret[1]);

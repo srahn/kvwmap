@@ -31,24 +31,20 @@
 
 class lineeditor {
 
-	function __construct($database, $layerepsg, $clientepsg) {
+	function __construct($database, $layerepsg, $clientepsg, $oid_attribute) {
 		global $debug;
 		$this->debug=$debug;
 		$this->database=$database;
 		$this->clientepsg = $clientepsg;
-		#echo '<br>EPSG-Code im Client:'.$this->clientepsg;
 		$this->layerepsg = $layerepsg;
-		#echo '<br>EPSG-Code vom Layer:'.$this->layerepsg;
+		$this->oid_attribute = $oid_attribute;
 	}
 
 	function zoomToLine($oid, $tablename, $columnname, $border) {
 		# Eine Variante mit der nur einmal transformiert wird
 		$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
 		$sql.=" FROM (SELECT box2D(st_transform(" . $columnname.", " . $this->clientepsg.")) as bbox";
-		$sql.=" FROM " . $tablename." WHERE oid = '" . $oid."') AS foo";
-#		$sql = 'SELECT MIN(st_xmin(st_envelope(st_transform(the_geom, '.$this->clientepsg.')))) AS minx, MAX(st_xmax(st_envelope(st_transform(the_geom, '.$this->clientepsg.')))) AS maxx';
-#		$sql.= ', MIN(st_ymin(st_envelope(st_transform(the_geom, '.$this->clientepsg.')))) AS miny, MAX(st_ymax(st_envelope(st_transform(the_geom, '.$this->clientepsg.')))) AS maxy';
-#		$sql.= " FROM " . $tablename." WHERE oid = '" . $oid."';";
+		$sql.=" FROM " . $tablename." WHERE ".$this->oid_attribute." = '" . $oid."') AS foo";
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
 		$rect = ms_newRectObj();
@@ -107,7 +103,7 @@ class lineeditor {
 			SET
 				" . $columnname . " = " . $geom . "
 			WHERE
-				oid = " . $oid . "
+				".$this->oid_attribute." = " . $oid . "
 		";
 		$ret = $this->database->execSQL($sql, 4, 1, true);
 		if (!$ret[0]) {
@@ -124,7 +120,7 @@ class lineeditor {
 	}
 
 	function getlines($oid, $tablename, $columnname) {
-		$sql = "SELECT st_assvg(st_transform(" . $columnname.", " . $this->clientepsg."), 0, 15) AS svggeom, st_astext(st_transform(" . $columnname.", " . $this->clientepsg.")) AS wktgeom, st_numGeometries(".$columnname.") as numgeometries FROM " . $tablename." WHERE oid = " . $oid;
+		$sql = "SELECT st_assvg(st_transform(" . $columnname.", " . $this->clientepsg."), 0, 15) AS svggeom, st_astext(st_transform(" . $columnname.", " . $this->clientepsg.")) AS wktgeom, st_numGeometries(".$columnname.") as numgeometries FROM " . $tablename." WHERE ".$this->oid_attribute." = " . $oid;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$lines = pg_fetch_array($ret[1]);
 		return $lines;
