@@ -530,7 +530,7 @@ class stelle {
 
 		while($rs = $this->database->result->fetch_assoc()) {
 			$children[] = ($return == 'only_ids' ? $rs['ID'] : $rs);
-			$children = array_merge($children, $this->getChildren($rs['ID'], $order, $return));
+			#$children = array_merge($children, $this->getChildren($rs['ID'], $order, $return));
 		};
 		return $children;
 	}

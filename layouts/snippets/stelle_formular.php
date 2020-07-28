@@ -7,6 +7,12 @@
 <script language="JavaScript">
 <!--
 
+function handleClick(event, option_obj){
+	if(event.layerX > 260){
+		location.href = 'index.php?go=Stelleneditor&selected_stelle_id='+option_obj.value;
+	}
+}
+
 function getsubmenues(){
 	menue_id = document.GUI.allmenues.options[document.GUI.allmenues.selectedIndex].value;
 	ahah('index.php', 'go=getsubmenues&menue_id='+menue_id, new Array(document.getElementById('submenue_div')), "");
@@ -599,125 +605,123 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 					</td>
 				</tr>
 				
-				<?php
-				if (true) { # deaktiviert, da noch in Entwicklung ?>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
-							<table border="0" cellspacing="0" cellpadding="0">
-								<tr>
-									<th class="fetter" align="right">Übergeordnete Stellen</th>
-								</tr>
-								<tr>
-									<td align="right">&nbsp;</td>
-								</tr>
-							</table>
-						</th>
-						<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
-							<table border="0" cellspacing="0" cellpadding="0">
-								<tr valign="top">
-									<td><?php
-										$options = array_map(
-											function($parent) {
-												return array(
-													'value' => $parent['ID'],
-													'title' => str_replace(' ', '&nbsp;', $parent["Bezeichnung"]),
-													'output' => $parent['Bezeichnung']
-												);
-											},
-											$this->formvars['selparents']
-										);
-										echo FormObject::createSelectField('selectedparents', $options, '', 6, 'width: 300px', '', '', 'multiple');?>
-									</td>
-									<td align="center" valign="middle" width="1">
-										<input
-											type="button"
-											name="addPlaces"
-											value="&laquo;"
-											onClick="addOptions(document.GUI.allparents, document.GUI.selectedparents, document.GUI.selparents, 'value')"
-										>
-										<input
-											type="button"
-											name="substractPlaces"
-											value="&raquo;"
-											onClick="substractOptions(document.GUI.selectedparents, document.GUI.selparents, 'value')"
-										>
-									</td>
-									<td><?php
-										$options = array_map(
-											function($parent) {
-												return array(
-													'value' => $parent->get('ID'),
-													'title' => str_replace(' ', '&nbsp;', $parent->get("Bezeichnung")),
-													'output' => $parent->get('Bezeichnung')
-												);
-											},
-											$this->formvars['parents']
-										);
-										echo FormObject::createSelectField('allparents', $options, '', 6, 'width: 300px', '', '', 'multiple');?>
-									</td>
-								</tr>
-							</table>
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
-							<table border="0" cellspacing="0" cellpadding="0">
-								<tr>
-									<th class="fetter" align="right">Untergeordnete Stellen</th>
-								</tr>
-								<tr>
-									<td align="right">&nbsp;</td>
-								</tr>
-							</table>
-						</th>
-						<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
-							<table border="0" cellspacing="0" cellpadding="0">
-								<tr valign="top">
-									<td><?php
-										$options = array_map(
-											function($child) {
-												return array(
-													'value' => $child['ID'],
-													'title' => str_replace(' ', '&nbsp;', $child["Bezeichnung"]),
-													'output' => $child['Bezeichnung']
-												);
-											},
-											$this->formvars['selchildren']
-										);
-										echo FormObject::createSelectField('selectedchildren', $options, '', 6, 'width: 300px', '', '', 'multiple');?>
-									</td>
-									<td align="center" valign="middle" width="1">
-										<input
-											type="button"
-											name="addPlaces"
-											value="&laquo;"
-											onClick="addOptions(document.GUI.allchildren, document.GUI.selectedchildren, document.GUI.selchildren, 'value')"
-										>
-										<input
-											type="button"
-											name="substractPlaces"
-											value="&raquo;"
-											onClick="substractOptions(document.GUI.selectedchildren, document.GUI.selchildren, 'value')"
-										>
-									</td>
-									<td><?php
-										$options = array_map(
-											function($child) {
-												return array(
-													'value' => $child->get('ID'),
-													'title' => str_replace(' ', '&nbsp;', $child->get("Bezeichnung")),
-													'output' => $child->get('Bezeichnung')
-												);
-											},
-											$this->formvars['children']
-										);
-										echo FormObject::createSelectField('allchildren', $options, '', 6, 'width: 300px', '', '', 'multiple');?>
-									</td>
-								</tr>
-							</table>
-						</td>
-					</tr>
-		<?	} ?>
+				<tr>
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<table border="0" cellspacing="0" cellpadding="0">
+							<tr>
+								<th class="fetter" align="right">Übergeordnete Stellen</th>
+							</tr>
+							<tr>
+								<td align="right">&nbsp;</td>
+							</tr>
+						</table>
+					</th>
+					<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
+						<table border="0" cellspacing="0" cellpadding="0">
+							<tr valign="top">
+								<td><?php
+									$options = array_map(
+										function($parent) {
+											return array(
+												'value' => $parent['ID'],
+												'title' => str_replace(' ', '&nbsp;', $parent["Bezeichnung"]),
+												'output' => $parent['Bezeichnung']
+											);
+										},
+										$this->formvars['selparents']
+									);
+									$option_style = 'background-image: url(graphics/pfeil_rechts.gif);  background-repeat: no-repeat;  background-position: 267px;';
+									echo FormObject::createSelectField('selectedparents', $options, '', 6, 'position: relative; width: 300px', '', '', 'multiple', '', '', $option_style, 'handleClick(event, this);');?>
+								</td>
+								<td align="center" valign="middle" width="1">
+									<input
+										type="button"
+										name="addPlaces"
+										value="&laquo;"
+										onClick="addOptions(document.GUI.allparents, document.GUI.selectedparents, document.GUI.selparents, 'value')"
+									>
+									<input
+										type="button"
+										name="substractPlaces"
+										value="&raquo;"
+										onClick="substractOptions(document.GUI.selectedparents, document.GUI.selparents, 'value')"
+									>
+								</td>
+								<td><?php
+									$options = array_map(
+										function($parent) {
+											return array(
+												'value' => $parent->get('ID'),
+												'title' => str_replace(' ', '&nbsp;', $parent->get("Bezeichnung")),
+												'output' => $parent->get('Bezeichnung')
+											);
+										},
+										$this->formvars['parents']
+									);
+									echo FormObject::createSelectField('allparents', $options, '', 6, 'position: relative; width: 300px', '', '', 'multiple', '', '', $option_style, 'handleClick(event, this);');?>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<table border="0" cellspacing="0" cellpadding="0">
+							<tr>
+								<th class="fetter" align="right">Untergeordnete Stellen</th>
+							</tr>
+							<tr>
+								<td align="right">&nbsp;</td>
+							</tr>
+						</table>
+					</th>
+					<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
+						<table border="0" cellspacing="0" cellpadding="0">
+							<tr valign="top">
+								<td><?php
+									$options = array_map(
+										function($child) {
+											return array(
+												'value' => $child['ID'],
+												'title' => str_replace(' ', '&nbsp;', $child["Bezeichnung"]),
+												'output' => $child['Bezeichnung']
+											);
+										},
+										$this->formvars['selchildren']
+									);
+									echo FormObject::createSelectField('selectedchildren', $options, '', 6, 'position: relative; width: 300px', '', '', 'multiple', '', '', $option_style, 'handleClick(event, this);');?>
+								</td>
+								<td align="center" valign="middle" width="1">
+									<input
+										type="button"
+										name="addPlaces"
+										value="&laquo;"
+										onClick="addOptions(document.GUI.allchildren, document.GUI.selectedchildren, document.GUI.selchildren, 'value')"
+									>
+									<input
+										type="button"
+										name="substractPlaces"
+										value="&raquo;"
+										onClick="substractOptions(document.GUI.selectedchildren, document.GUI.selchildren, 'value')"
+									>
+								</td>
+								<td><?php
+									$options = array_map(
+										function($child) {
+											return array(
+												'value' => $child->get('ID'),
+												'title' => str_replace(' ', '&nbsp;', $child->get("Bezeichnung")),
+												'output' => $child->get('Bezeichnung')
+											);
+										},
+										$this->formvars['children']
+									);
+									echo FormObject::createSelectField('allchildren', $options, '', 6, 'position: relative; width: 300px', '', '', 'multiple', '', '', $option_style, 'handleClick(event, this);');?>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
 
 				<tr>
 					<td class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
