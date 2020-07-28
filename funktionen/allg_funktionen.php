@@ -6,6 +6,10 @@
 
 $errors = array();
 
+function quote($var){
+	return is_numeric($var) ? $var : "'".$var."'";
+}
+
 function get_din_formats() {
 	$din_formats = array(
 		'A5hoch' => array('value' => 'A5hoch', 'output' => 'A5 hoch', 'size' => '(420 x 595)'),

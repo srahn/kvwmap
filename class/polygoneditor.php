@@ -101,7 +101,7 @@ class polygoneditor {
 		$sql = "
 			UPDATE " . $tablename . "
 			SET " . $columnname . " = " . (substr($geomtype, 0, 5) == 'MULTI' ? "ST_Multi(" . $geometry . ")" : $geometry) . "
-			WHERE ".$this->oid_attribute." = " . $oid . "
+			WHERE ".$this->oid_attribute." = " . quote($oid) . "
 		";
 		$ret = $this->database->execSQL($sql, 4, 1, true);
 		if (!$ret['success']) {
@@ -126,7 +126,7 @@ class polygoneditor {
 
 	function getpolygon($oid, $tablename, $columnname, $extent, $schemaname = ''){
 		$sql = "SELECT st_assvg(st_transform(st_union(".$columnname."),".$this->clientepsg."), 0, 15) AS svggeom, st_astext(st_transform(st_union(".$columnname."),".$this->clientepsg.")) AS wktgeom, st_numGeometries(st_union(".$columnname.")) as numgeometries FROM " . ($schemaname != '' ? $schemaname . '.' : '') . $tablename;
-		if($oid != NULL)$sql .= " WHERE ".$this->oid_attribute." = ".$oid;
+		if($oid != NULL)$sql .= " WHERE ".$this->oid_attribute." = ".quote($oid);
 		#echo '<br>sql: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$polygon = pg_fetch_array($ret[1]);

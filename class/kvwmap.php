@@ -9247,7 +9247,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				FROM
 					" . $layer['schema'] . '.' . $layer['maintable'] . "
 				WHERE
-					".$layer['oid']." = " . $oid;
+					".$layer['oid']." = " . quote($oid);
 			#echo '<br>Sql before delete: ' . $sql_old; #pk
 			$ret = $layerdb->execSQL($sql_old, 4, 1, true);
 			if ($ret['success']) {
@@ -9305,7 +9305,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				DELETE FROM
 					" . $layer['maintable'] . "
 				WHERE
-					".$layer['oid']." = " . $oid . "
+					".$layer['oid']." = " . quote($oid) . "
 			";
 			$oids[] = $element[3];
 			$ret = $layerdb->execSQL($sql, 4, 1, true);
@@ -13745,7 +13745,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if (
 					(
 						$this->formvars['go'] == 'Dokument_Loeschen' OR
-						$this->formvars['changed_' . $layer_id . '_' . $oid] == 1 OR
+						$this->formvars['changed_' . $layer_id . '_' . str_replace('-', '', $oid)] == 1 OR
 						$this->formvars['embedded']
 					) AND
 					$attributname != $layerset[$layer_id][0]['oid'] AND
@@ -13867,7 +13867,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								}
 							}
 
-							$where_condition = $layerset[$layer_id][0]['oid'].' = '.$oid;
+							$where_condition = $layerset[$layer_id][0]['oid'].' = '.quote($oid);
 
 							$sql = $sql_lock . "
 								UPDATE
