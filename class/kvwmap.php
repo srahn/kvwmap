@@ -9428,7 +9428,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 			if($this->formvars['newpathwkt'] != ''){
 				include_(CLASSPATH.'polygoneditor.php');
-				$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+				$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 				$ret = $polygoneditor->pruefeEingabedaten($this->formvars['newpathwkt']);
 				if ($ret[0]) { # fehlerhafte eingabedaten
 					$this->error_position = explode(' ', trim(substr($ret[1], strpos($ret[1], '[')), '[]'));
@@ -9446,7 +9446,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 			if($this->formvars['newpathwkt'] != ''){
 				include_(CLASSPATH.'lineeditor.php');
-				$lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+				$lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 				# eingeabewerte pruefen:
 				$ret = $lineeditor->pruefeEingabedaten($this->formvars['newpathwkt']);
 				if ($ret[0]) { # fehlerhafte eingabedaten
@@ -9558,7 +9558,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								if ($this->formvars['loc_x'] != '') {
 									# ToDo: Test if a new Point can be stored and if the statement contain the wkb_geometrie in stead of the ST_GeomFromGeo Gedöns.
 									include_once (CLASSPATH.'pointeditor.php');
-									$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+									$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 									$result = $pointeditor->get_wkb_geometry(array(
 										'loc_x' => $this->formvars['loc_x'],
 										'loc_y' => $this->formvars['loc_y'],
@@ -9593,6 +9593,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$sql.= ") VALUES (";
 					$sql.= implode(', ', $insert);
 					$sql.= ")";
+					if($layerset[0]['oid'] != 'oid'){
+						$sql.= " RETURNING ".$layerset[0]['oid'];
+					}
 
 					# Before Insert trigger
 					if (!empty($layerset[0]['trigger_function'])) {
@@ -9618,14 +9621,19 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$result = pg_fetch_row($ret['query']);
 						if (pg_affected_rows($ret['query']) > 0) {
 							# dataset was created
-							if (is_array($result) and (!array_key_exists(1, $result) OR $result[1] != 'error')) {
+							if (is_array($result) and (!array_key_exists(1, $result) OR $result[1] != 'error') AND $layerset[0]['oid'] == 'oid') {
 								$this->add_message('warning', 'Eintrag erfolgreich.<br>' . $result[0]);
 							}
 							else {
 								$this->add_message('notice', 'Eintrag erfolgreich!');
 							}
 
-							$last_oid = pg_last_oid($ret['query']);
+							if($layerset[0]['oid'] != 'oid'){
+								$last_oid = $result[0];
+							}
+							else{
+								$last_oid = pg_last_oid($ret['query']);
+							}
 							if($last_oid == '')$last_oid = $notice_result['oid'];
 							if($this->formvars['embedded'] == '') $this->formvars['value_' . $table['tablename'] . '_oid'] = $last_oid;
 
@@ -9648,6 +9656,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 			}
 		}
+
 
 		if ($this->formvars['embedded'] != '') {    
 			# wenn es ein neuer Datensatz aus einem embedded-Formular ist, 
