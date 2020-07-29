@@ -30,8 +30,6 @@
 #############################
 
 class Validierung extends PgObject {
-
-
 	static $schema = 'xplankonverter';
 	static $tableName = 'validierungen';
 	static $write_debug = false;
@@ -40,12 +38,27 @@ class Validierung extends PgObject {
 		#echo '<br>Create new Object Validierung';
 		parent::__construct($gui, Validierung::$schema, Validierung::$tableName);
 		$this->konvertierung_id = 0;
+		$this->identifiers = array(
+			array(
+				'column' => 'konformitaet_nummer',
+				'type' => 'character varying'
+			),
+			array(
+				'column' => 'konformitaet_version_von',
+				'type' => 'character varying'
+			)
+		);
 	}
 
 	public static	function find_by_id($gui, $by, $id) {
 		$validierung = new Validierung($gui);
 		$validierung->find_by($by, $id);
 		return $validierung;
+	}
+
+	public static function find_by_class_name($gui, $class_name) {
+		$konformitaets_validierung = new PgObject($gui, 'xplankonverter', 'konformitaets_validierung');
+		$konformitaets_validierung->find_where('class_name LIKE ' . $class_name);
 	}
 
 	public static function delete_by_id($gui, $by, $id) {
@@ -611,6 +624,102 @@ class Validierung extends PgObject {
 			)
 		);
 		return $success;
+	}
+
+	/**
+	* Zerteilt alle Multipolygone von bp_, fp_ und so_flaechenschlussobjekten und ließt diese in die Tabelle xplankonverter.flaechenschlussobjekte ein.
+	* Erzeugt ein umschließendes Pufferpolygon vom Geltungsbereich des Planes und fügt diese auch in die flaechenschlussobjekt Tabelle
+	* Erzeugt eine Topologie von all diesen Flächen
+	* Ermittelt die faces, die zu mehr als einem Polygon zugeordnet sind (Überlappungen)
+	* Ermittelt die faces, die zu keinem Polygon zugeordnet sind (Lücken)
+	* @return array mit success boolean True wenn keine Überlappungen und Lücken gefunden wurden. 
+	* wenn welche gefunden wurden, succes = false und eine err_msg, die angibt welche Objekte sich überlappen oder wo Lücken sind.
+	*/
+	function flaechenschluss_ueberlappungen() {
+		$success = true;
+
+		# prüft ob es faces gibt, die mehreren Geometrien zugeordnet sind
+		$sql = "
+			SELECT
+			  string_agg(fo.gml_id::text, ', ') neighbours
+			FROM
+			  flaechenschluss_topology.relation r JOIN
+			  xplankonverter.flaechenschlussobjekte fo ON r.topogeo_id = (fo.topo).id
+			WHERE
+				fo.konvertierung_id = " . $this->konvertierung_id . "
+			GROUP BY r.element_id
+			HAVING count(r.element_id) > 1
+		";
+		#echo '<p>SQL zur Abfrage von Überlappungen in der Topologie: ' . $sql;
+		$overlaps = $this->getSQLResults($sql);
+		if (count($overlaps) > 0) {
+			$success = false;
+			$msg = 'Die Validierung schlägt fehl, weil es zwischen folgenden Flächenschlussobjekten Überlappungen gibt, sie außerhalb des räumlichen Geltungsbereiches liegen oder Stützpunkte in der Nachbargeometrie fehlen:<br>' .
+				implode('<br>', array_map(
+					function($overlap) {
+						return $overlap['neighbours'];
+					},
+					$overlaps
+				));
+			$validierungsergebnis = new Validierungsergebnis($this->gui);
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $this->konvertierung_id,
+					'validierung_id' => $this->get('id'),
+					'status' => ($success ? 'Erfolg' : 'Fehler'),
+					'msg' => $msg
+				)
+			);
+		}
+		return $success;
+	}
+
+	function flaechenschluss_luecken() {
+		$success = true;
+
+		# prüft ob es faces gibt, die keiner Geometrie zugeordnet sind
+		$sql = "
+			SELECT DISTINCT
+				string_agg(fo.gml_id::text, ', ') neighbours
+			FROM
+				flaechenschluss_topology.face f LEFT JOIN
+				flaechenschluss_topology.relation r ON f.face_id = r.element_id LEFT JOIN
+				flaechenschluss_topology.edge_data el ON f.face_id = el.left_face JOIN
+				flaechenschluss_topology.relation rr ON el.right_face = rr.element_id JOIN
+				xplankonverter.flaechenschlussobjekte fo ON rr.topogeo_id = (fo.topo).id
+			WHERE
+				f.face_id != 0 AND
+				r.element_id IS NULL AND
+				fo.konvertierung_id = " . $this->konvertierung_id . "
+			GROUP BY face_id
+		";
+		#echo '<p>SQL zur Abfrage von Lücken in der Topologie: ' . $sql;
+		$gaps = $this->getSQLResults($sql);
+		if (count($gaps) > 0) {
+			$success = false;
+			$msg = 'Die Validierung schlägt fehl, weil zwischen folgenden Flächenschlussobjekten oder Flächenschlussobjekten und dem räumlichen Geltungsbereich Lücken sind oder Stützpunkte in der Nachbargeometrie fehlen:<br>' .
+				implode('<br>', array_map(
+					function($gap) {
+						return $gap['neighbours'];
+					},
+					$gaps
+				));
+			$validierungsergebnis = new Validierungsergebnis($this->gui);
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $this->konvertierung_id,
+					'validierung_id' => $this->get('id'),
+					'status' => ($success ? 'Erfolg' : 'Fehler'),
+					'msg' => $msg
+				)
+			);
+		}
+		return $success;
+	}
+
+	function validiere_konformitaet() {
+		echo 'Validiere die Konformität mit Funktion: ' . $this->get('functionsname') . ' und den Argumenten: ' . $this->get('functionsargumente');
+		return false;
 	}
 
   function doValidate($konvertierung) {

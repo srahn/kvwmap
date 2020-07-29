@@ -13,6 +13,7 @@ class XP_Object extends PgObject {
 		$this->konvertierung = $konvertierung;
 		$this->identifier = 'gml_id';
 		$this->identifier_type = 'text';
+		$this->konformitaetsbedingungen = array();
 	}
 
 	public function get_sub_classes() {
@@ -108,6 +109,26 @@ class XP_Object extends PgObject {
 		$query = pg_query($this->database->dbConn, $sql);
 
 		return pg_fetch_all($query);
+	}
+
+	public function get_konformitaetsbedingungen() {
+		$sql = "
+			SELECT
+				c2k.name AS class_name,
+				k.*
+			FROM
+				xplankonverter.uml_class2konformitaeten c2k JOIN
+				xplankonverter.konformitaetsbedingungen k ON c2k.konformitaet_nummer = k.nummer AND c2k.konformitaet_version_von = k.version_von
+			WHERE
+				c2k.name LIKE '" . $this->class_name . "'
+		";
+		$this->debug->show('sql to find konformitaetsbedingungen for class: ' . $this->class_name . '<br>' . $sql, false);
+		$query = pg_query($this->database->dbConn, $sql);
+		while ($rs = pg_fetch_assoc($query)) {
+			echo '<p>validierung: ' . print_r($rs, true);
+			$this->konformitaetsbedingungen[] = Konformitaetsbedingung::find_by_id($this->konvertierung->gui, $rs['nummer'], $rs['version_von']);
+		}
+		return $this->konformitaetsbedingungen;
 	}
 
 }
