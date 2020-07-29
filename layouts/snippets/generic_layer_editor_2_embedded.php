@@ -195,6 +195,14 @@
 <script type="text/javascript">
 	var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
 	[].forEach.call(vchangers, function(vchanger){vchanger.oninput();});
+	
+	var input_fields = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.subform_<? echo $layer['Layer_ID']; ?>, input');
+	for(var input_field of input_fields){
+		if(input_field.type != 'hidden' && !input_field.readonly && input_field.style.display != 'none'){
+			input_field.focus();
+			break;
+		}
+	}
 </script>
 
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_name; ?>">

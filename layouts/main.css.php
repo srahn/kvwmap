@@ -1385,6 +1385,7 @@ a:hover .preview_image{
 
 .dstable{
 	max-width: 900px;
+	width: 100%;
 }
 
 table.tgle {
