@@ -16133,7 +16133,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$tablename = $layerset['attributes']['schema_name'][$tablename].'.'.$tablename;
 				}
 		    elseif($layerset['schema'] != ''){
-		    	$tablename = $layerset['schema'].'.'.$tablename;
+		    	$tablename = $layerdb->schema.'.'.$tablename;
 		    }
 		    $datastring = $real_geom_name." from (select oid as id, " . $real_geom_name." from " . $tablename;
 		    $datastring.=" WHERE oid = '" . $oid."'";
