@@ -629,6 +629,96 @@ echo '			</ul>
 		}
 	}
 
+	/**
+	* function returns the svg and wkb geometry of an uploaded shape file
+	* in json format and an error message and success false when fail
+	*/
+	function get_geom_from_shape_file() {
+		$success = false;
+		$upload_file = $_FILES['file'];
+		$geom = '';
+		$msg = 'filename: ' . $upload_file['name'] . ' tmp_name: ' . $upload_file['tmp_name'];
+		if (strtolower(pathinfo($upload_file['name'], PATHINFO_EXTENSION)) == 'zip') {
+			$zip_file = IMAGEPATH . pathinfo($upload_file['tmp_name'], PATHINFO_FILENAME) . '_' . $upload_file['name'];
+			$msg .= 'zipfile: ' . $zip_file;
+
+			$importer = new data_import_export();
+
+			if (move_uploaded_file($upload_file['tmp_name'], $zip_file)) {
+				# ToDo: Shape in einem untergeordneten Ordner auspacken um Problemm mit gleichen Namen von hochgeladenen Dateien unterschiedlicher Anwender zu vermeiden.
+				$shape_files = unzip($zip_file, false, false, true);
+
+				$msg .= 'file unziped';
+				# get shape file name
+				$first_file = explode('.', $shape_files[0]);
+				$shape_file_name = $first_file[0];
+
+				# get EPSG-Code aus prj-Datei
+				$file_epsg = $importer->get_shp_epsg(IMAGEPATH . $shape_file_name, $this->pgdatabase);
+				if ($file_epsg == '') {
+					$file_epsg = '25833';
+					# ToDo EPSG-Code konnte nicht aus prj-Datei ermittelt werden, Dateiname merken und EPSG-Code nachfragen
+				}
+				$msg .= 'EPSG: ' . $file_epsg;
+
+				# get encoding of dbf file
+				$encoding = $importer->getEncoding(IMAGEPATH . $shape_file_name . '.dbf');
+
+				# load shapes to custom schema
+				$import_result = $importer->load_shp_into_pgsql($this->pgdatabase, IMAGEPATH, $shape_file_name, $file_epsg, CUSTOM_SHAPE_SCHEMA, 'b' . strtolower(umlaute_umwandeln(substr($shape_file_name, 0, 15))) . rand(1, 1000000), $encoding);
+
+				# return name of import table
+				$table_name = $import_result[0]['tablename'];
+
+				include_once (CLASSPATH.'polygoneditor.php');
+
+				$polygoneditor = new polygoneditor($this->pgdatabase, $file_epsg, $this->user->rolle->epsg_code);
+				$geom = $polygoneditor->getpolygon(NULL, $table_name, 'the_geom', NULL, CUSTOM_SHAPE_SCHEMA);
+				if ($geom['wktgeom'] != '') {
+					# use geom on client side to set
+					# $this->formvars['newpathwkt'] = $geom['wktgeom'];
+					# $this->formvars['pathwkt'] = $geom['wktgeom'];
+					# $this->formvars['newpath'] = $geom['svggeom'];
+					# $this->formvars['firstpoly'] = 'true';
+					# $this->formvars['zoom'] == 'true')
+
+					# drop custom shape table
+					$sql = "
+						 DROP TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $table_name . "
+					";
+					$this->pgdatabase->execSQL($sql, 4, 0, true);
+
+					# delete uploaded shape files
+					foreach($shape_files AS $shape_file) {
+						 unlink(IMAGEPATH . $shape_file);
+					}
+					unlink(IMAGEPATH . pathinfo($shape_file, PATHINFO_FILENAME) . '.sql');
+					unlink($zip_file);
+
+					$msg = 'Geometrie erfolgreich geladen.';
+					$success = true;
+				}
+				else {
+					$msg = 'Fehler beim Lesen der Geometrie!';
+				}
+			}
+			else {
+				$msg = 'Fehler beim kopieren der Datei auf den Server!';
+			}
+		}
+		else {
+			$msg .= 'Datei ist keine Zip-Datei!';
+		}
+
+		$response = array(
+			"success" => $success,
+			"result" => $msg,
+			"svggeom" => $geom['svggeom'],
+			"wktgeom" => $geom['wktgeom']
+		);
+		return utf8_decode(json_encode($response));
+	}
+
 	function get_group_legend() {
     # Änderungen in den Gruppen werden gesetzt
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);

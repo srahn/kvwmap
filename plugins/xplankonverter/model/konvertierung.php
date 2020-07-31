@@ -501,7 +501,122 @@ class Konvertierung extends PgObject {
 				$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'alle_sql_ausfuehrbar');
 				$validierung->konvertierung_id = $this->get('id');
 				$validierung->alle_sql_ausfuehrbar($success);
+
+				if (in_array($this->get('planart'), array('BP-Plan', 'FP-Plan', 'SO-Plan'))) {
+					# Flächenschlussprüfung
+					$this->clearTopology();
+					# Create topology of plan objects
+					$this->createTopology();
+					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'flaechenschluss_ueberlappungen');
+					$validierung->konvertierung_id = $this->get('id');
+					$validierung->flaechenschluss_ueberlappungen();
+					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'flaechenschluss_luecken');
+					$validierung->konvertierung_id = $this->get('id');
+					$validierung->flaechenschluss_luecken();
+				}
 			}
+		}
+	}
+
+	/**
+	* Clear the topology from all flaechenschlussobjekten of the plan
+	*/
+	function clearTopology() {
+		# Lösche die Topologie der flaechenschlussobjekte des Planes
+		$sql ="
+			UPDATE xplankonverter.flaechenschlussobjekte
+			SET topo = topology.clearTopoGeom(topo)
+			WHERE
+				konvertierung_id = " . $this->get('id') . "
+		";
+		#echo '<p>SQL zum Löschen der Topology: ' . $sql;
+		$result = $this->database->execSQL($sql, 0, 3);
+		if (!$result['success']) {
+			$this->gui->add_message('Fehler', 'Fehler beim Löschen der Toplogie!');
+			return false;
+		}
+
+		# Lösche die flaechenschlussobjekte des Plans in temporärer Tabelle flaechenschlussobjekte
+		$sql ="
+			DELETE FROM xplankonverter.flaechenschlussobjekte
+			WHERE
+				konvertierung_id = " . $this->get('id') . "
+		";
+		#echo '<p>SQL zum Löschne die flaechenschlussobjekte: ' . $sql;
+		$result = $this->database->execSQL($sql, 0, 3);
+		if (!$result['success']) {
+			$this->gui->add_message('Fehler', 'Fehler beim Löschen die flaechenschlussobjekte!');
+			return false;
+		}
+	}
+
+	/**
+	* Creates a topology from all flaechenschlussobjekten of the plan
+	*/
+	function createTopology() {
+		# Füge vorhandene Flächenschlussobjekte neu in Tabelle flächenschlussobjekte ein
+		$sql = "
+			INSERT INTO xplankonverter.flaechenschlussobjekte (gml_id, konvertierung_id, teilpolygon, teilpolygon_nr)
+			SELECT
+				gml_id,
+				konvertierung_id,
+				(st_dump(position)).geom AS teilpolygon,
+				(st_dump(position)).path[1] AS teilpolygon_nr
+			FROM
+				xplan_gml.bp_flaechenschlussobjekt
+			WHERE
+				flaechenschluss AND
+				ebene = 0 OR ebene IS NULL AND
+				konvertierung_id = " . $this->get('id') . "
+		";
+		#echo '<p>SQL zur Erzeugung von Topology: ' . $sql;
+		$result = $this->database->execSQL($sql, 0, 3);
+		if (!$result['success']) {
+			$this->gui->add_message('Fehler', 'Fehler beim Anlegen der Toplogie!');
+			return false;
+		}
+
+		# Füge ein umschließendes Polygon des raeumlichen Geltungsbereiches zur Tabelle flaechenschlussobjekte hinzu
+		$sql = "
+			INSERT INTO xplankonverter.flaechenschlussobjekte (gml_id, konvertierung_id, teilpolygon, teilpolygon_nr)
+	 		SELECT
+				gml_id,
+				konvertierung_id,
+				(st_dump(position)).geom AS teilpolygon,
+				(st_dump(position)).path[1] AS teilpolygon_nr
+			FROM
+			(
+				SELECT
+					gml_id,
+					konvertierung_id,
+					ST_Multi(ST_Difference(ST_SetSrid(ST_Buffer(Box2d(raeumlichergeltungsbereich)::geometry, 1), 25833), raeumlichergeltungsbereich)) AS position
+				FROM
+					xplan_gml.bp_plan
+				WHERE
+					konvertierung_id = " . $this->get('id') . "
+			) plan
+		";
+		#echo '<p>SQL Füge ein umschließendes Polygon des raeumlichen Geltungsbereiches zur Tabelle flaechenschlussobjekte hinzu: ' . $sql;
+		$result = $this->database->execSQL($sql, 0, 3);
+		if (!$result['success']) {
+			$this->gui->add_message('Fehler', 'Fehler beim hinzufügen eines umschließenden Polygon des raeumlichen Geltungsbereiches zur Tabelle flaechenschlussobjekte!');
+			return false;
+		}
+
+		# Berechne die topologie der flaechenschlussobjekte
+		$sql = "
+			UPDATE
+				xplankonverter.flaechenschlussobjekte
+			SET
+				topo = topology.toTopoGeom(teilpolygon, 'flaechenschluss_topology', 1, 0.002)
+			WHERE
+				konvertierung_id = " . $this->get('id') . "
+		";
+		#echo '<p>SQL zur Berechnung der topologie der flaechenschlussobjekte: ' . $sql;
+		$result = $this->database->execSQL($sql, 0, 3);
+		if (!$result['success']) {
+			$this->gui->add_message('Fehler', 'Fehler bei der Berechnung der Topologie der flaechenschlussobjekte!');
+			return false;
 		}
 	}
 
