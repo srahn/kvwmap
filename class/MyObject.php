@@ -401,9 +401,8 @@ class MyObject {
 	function update($data = array()) {
 		$results = array();
 		if (!empty($data)) {
-			$this->data = $data;
+			array_merge($this->data, $data);
 		}
-
 		$sql = "
 			UPDATE
 				`" . $this->tableName . "`
