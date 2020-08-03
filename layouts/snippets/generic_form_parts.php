@@ -625,10 +625,10 @@
 					$show_link = false;
 					$one_param_is_null = false;
 					$options = $attributes['options'][$j];
-					for($a = 0; $a < count($attributes['name']); $a++){
+					for ($a = 0; $a < count($attributes['name']); $a++) {
 						if(strpos($options, '$'.$attributes['name'][$a]) !== false){
 							$options = str_replace('$'.$attributes['name'][$a], $dataset[$attributes['name'][$a]], $options);
-							if($dataset[$attributes['name'][$a]] == ''){								
+							if ($dataset[$attributes['name'][$a]] == '') {
 								$one_param_is_null = true;
 							}
 							else {
@@ -652,16 +652,18 @@
 					}
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					if ($show_link) {
-						if($explosion[2] == 'embedded'){
+						if ($explosion[2] == 'embedded'){
 							$datapart .= '<a class="dynamicLink" href="javascript:void(0);" onclick="if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
 							$datapart .= '<div style="display:inline" id="dynamicLink'.$layer_id.'_'.$k.'_'.$j.'"></div>';
 						}
-						else{
+						else {
 							$datapart .= '<a tabindex="1"';
-							if($explosion[2] != 'no_new_window'){$datapart .= 'target="_blank"';}
-							$datapart .= ' class="dynamicLink" style="font-size: '.$fontsize.'px" '.(($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') ? 'onclick="checkForUnsavedChanges(event);"' : '').' href="'.$href.'">';
+							if ($explosion[2] != 'no_new_window') {
+								$datapart .= 'target="_blank"';
+							}
+							$datapart .= ' class="dynamicLink" style="font-size: ' . $fontsize . 'px" ' . (($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') ? 'onclick="checkForUnsavedChanges(event);"' : '').' href="' . $href . '">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
 						}
