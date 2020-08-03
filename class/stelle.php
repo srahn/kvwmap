@@ -37,7 +37,6 @@ class stelle {
 		$this->log = $log_mysql;
 		$this->id = $id;
 		$this->database = $database;
-		$this->Bezeichnung = $this->getName();
 		$this->readDefaultValues();
 	}
 
@@ -99,8 +98,8 @@ class stelle {
       $sql.='`Bezeichnung_'.$this->language.'` AS ';
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
-    #echo $sql;
-    $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
+    #echo '<p>SQL zur Abfrage des Stellennamens: ' . $sql;
+    $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>",4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
@@ -113,25 +112,34 @@ class stelle {
 	function readDefaultValues() {
 		$sql = "
 			SELECT
-				*
+				*,";
+		if ($this->language != 'german' AND $this->language != ''){
+      $sql.='`Bezeichnung_'.$this->language.'` AS ';
+    }
+    $sql.="
+				Bezeichnung
 			FROM
 				stelle
 			WHERE
 				ID = " . $this->id . "
 		";
-		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
+		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
+		$this->Bezeichnung=$rs['Bezeichnung'];
 		$this->MaxGeorefExt = ms_newRectObj();
 		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
-		$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
-		$this->pgdbname = $rs['pgdbname'];
-		$this->pgdbuser = $rs['pgdbuser'];
-		$this->pgdbpasswd = $rs['pgdbpasswd'];
+		$this->postgres_connection_id = $rs['postgres_connection_id'];
+		# ---> deprecated
+			$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
+			$this->pgdbname = $rs['pgdbname'];
+			$this->pgdbuser = $rs['pgdbuser'];
+			$this->pgdbpasswd = $rs['pgdbpasswd'];
+		# <---
 		$this->protected = $rs['protected'];
 		//---------- OWS Metadaten ----------//
 		$this->ows_title = $rs['ows_title'];
@@ -309,6 +317,7 @@ class stelle {
 			WHERE
 				ID = " . $this->id . "
 		";
+		#echo '<p>SQL zum Abfragen der Stellendaten: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getstellendaten - Abfragen der Stellendaten<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -332,6 +341,9 @@ class stelle {
 		$sql.=', epsg_code= "'.$stellendaten['epsg_code'].'"';
 		$sql.=', start= "'.$stellendaten['start'].'"';
 		$sql.=', stop= "'.$stellendaten['stop'].'"';
+		if ($stellendaten['postgres_connection_id'] != '') {
+			$sql .= ', postgres_connection_id = ' . $stellendaten['postgres_connection_id'];
+		}
 		if ($stellendaten['pgdbhost']!='') {
 			$sql.=', pgdbhost= "'.$stellendaten['pgdbhost'].'"';
 		}
@@ -405,6 +417,7 @@ class stelle {
 				`epsg_code` = '" . $stellendaten['epsg_code'] . "',
 				`start` = '" . $stellendaten['start'] . "',
 				`stop` = '" . $stellendaten['stop'] . "',
+				`postgres_connection_id` = " . ($stellendaten['postgres_connection_id'] != '' ? $stellendaten['postgres_connection_id'] : 'NULL') . ",
 				`pgdbhost` = '" . $stellendaten['pgdbhost'] . "',
 				`pgdbname` = '" . $stellendaten['pgdbname'] . "',
 				`pgdbuser` = '" . $stellendaten['pgdbuser'] . "',
@@ -459,8 +472,8 @@ class stelle {
 				s.Bezeichnung
 			FROM
 				`stelle` AS s" .
-				$where .
-				$order . "
+			$where .
+			$order . "
 		";
 		#echo '<br>sql: ' . $sql;
 
@@ -484,9 +497,8 @@ class stelle {
 				`stelle` AS s JOIN
 				`stellen_hierarchie` AS h ON (s.`ID` = h.`parent_id`)
 			WHERE
-				h.`child_id`= " . $this->id . "
-				" . $order . "
-		";
+				h.`child_id`= ".$this->id." "
+			.$order;
 		#echo '<br>stelle.php getParents sql:<br>' . $sql;
 
 		$this->debug->write("<p>file:stelle.php class:stelle->getParents - Abfragen aller Elternstellen<br>" . $sql, 4);
@@ -498,9 +510,8 @@ class stelle {
 		return $parents;
 	}
 
-	function getChildren($parent_id, $order = '') {
+	function getChildren($parent_id, $order = '', $return = '') {
 		$children = array();
-		if ($order != '') $order = " ORDER BY `" . $order . "`";
 		$sql = "
 			SELECT
 				s.`ID`,
@@ -509,9 +520,8 @@ class stelle {
 				`stelle` AS s JOIN
 				`stellen_hierarchie` AS h ON (s.`ID` = h.`child_id`)
 			WHERE
-				h.`parent_id`= " . $parent_id .
-			$order . "
-		";
+				h.`parent_id`= ".$parent_id." "
+			.$order;
 		#echo '<br>sql: ' . $sql;
 
 		$this->debug->write("<p>file:stelle.php class:getChildren - Abfragen aller Kindstellen<br>" . $sql, 4);
@@ -519,30 +529,14 @@ class stelle {
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
 
 		while($rs = $this->database->result->fetch_assoc()) {
-			$children[] = $rs;
-			$children = array_merge($children, $this->getChildren($rs['ID']));
+			$children[] = ($return == 'only_ids' ? $rs['ID'] : $rs);
+			#$children = array_merge($children, $this->getChildren($rs['ID'], $order, $return));
 		};
 		return $children;
 	}
 
-	/*
-	* function collect all distinct menue_ids from parents of this stelle  
-	*/
-	function get_parent_menues() {
-		#echo '<p>stelle.php get_parent_menues';
-		$parent_menue_ids = array();
-		foreach($this->getParents() AS $parent) {
-			$parent_stelle = new stelle($parent['ID'], $this->database);
-			$parent_menues = $parent_stelle->getMenue(0);
-			foreach($parent_menues['ID'] AS $parent_menue_id) {
-				if (!in_array($parent_menue_id, $parent_menue_ids)) $parent_menue_ids[] = $parent_menue_id;
-			}
-		}
-		#echo '<br>Returned parent_menue_ids: ' . implode(', ', $parent_menue_ids);
-		return $parent_menue_ids;
-	}
-
 	function getFunktionen($return = '') {
+		$funktionen = array();
 		# Abfragen der Funktionen, die in der Stelle ausgeführt werden dürfen
 		$sql ='SELECT f.id,f.bezeichnung, 1 as erlaubt FROM u_funktionen AS f,u_funktion2stelle AS f2s';
 		$sql.=' WHERE f.id=f2s.funktion_id AND f2s.stelle_id='.$this->id.' ORDER BY bezeichnung';
@@ -569,8 +563,10 @@ class stelle {
 	}
 
 	function isFunctionAllowed($functionname) {
-		if($this->funktionen == NULL)$this->getFunktionen();
-		if($this->funktionen[$functionname]['erlaubt']) {
+		if ($this->funktionen == NULL) {
+			$this->getFunktionen();
+		}
+		if ($this->funktionen[$functionname]['erlaubt']) {
 			return 1;
 		}
 		else {
@@ -631,18 +627,16 @@ class stelle {
 		&$functions,
 		&$frames,
 		&$layouts,
-		&$layer,
-		&$selectedusers
+		&$layer
 	) {
 		include_once(CLASSPATH . 'datendrucklayout.php');
 		$results = array();
 		$old_parents = $this->getParents('ORDER BY `ID`', 'only_ids');
 		$document = new Document($this->database);
 		$ddl = new ddl($this->database);
-		
-		# Entferne Einstellungen der Elternstellen von Stelle
-		foreach(array_diff($old_parents, $selected_parents) AS $drop_parent_id) {
-			# echo '<br>Entferne Elternstelle ' . $drop_parent_id;
+				
+		# immer alle Elternstellen und deren Zuordnungen entfernen und wieder neu hinzufügen
+		foreach($old_parents AS $drop_parent_id) {
 			$parent_stelle = new stelle($drop_parent_id, $this->database);
 			$menues = array_values(array_diff($menues, $parent_stelle->getMenue(0, 'only_ids')));
 			$functions = array_values(array_diff($functions, $parent_stelle->getFunktionen('only_ids')));
@@ -650,31 +644,37 @@ class stelle {
 			$frames = array_values(array_diff($frames, $document->load_frames($drop_parent_id, false, 'only_ids')));
 			$parent_layer = $parent_stelle->getLayer('', 'only_ids');
 			$layer = array_values(array_diff($layer, $parent_layer));
-			$selectedusers = array_values(array_diff($selectedusers, $parent_stelle->getUser('only_ids')));
-			$results[] = $this->dropParent($drop_parent_id);
+			$this->dropParent($drop_parent_id);
 		}
-
+		
 		# Füge Einstellungen der Elternstellen zur Stelle hinzu
-		foreach(array_diff($selected_parents, $old_parents) AS $new_parent_id) {
+		foreach($selected_parents AS $new_parent_id) {
 			$parent_stelle = new stelle($new_parent_id, $this->database);
-
-			$menues = $this->merge_menues($menues, $parent_stelle->getMenue(0, 'only_ids'));
+			$menues = $this->merge_menues($menues, $parent_stelle->getMenue(0));
 			$functions = array_values(array_unique(array_merge($functions, $parent_stelle->getFunktionen('only_ids'))));
 			$layouts = array_values(array_unique(array_merge($layouts, $ddl->load_layouts($new_parent_id, '', '', '', 'only_ids'))));
 			$frames = array_values(array_unique(array_merge($frames, $document->load_frames($new_parent_id, false, 'only_ids'))));
 			$layer = array_values(array_unique(array_merge($layer, $parent_stelle->getLayer('', 'only_ids'))));
-			$selectedusers = array_values(array_unique(array_merge($selectedusers, $parent_stelle->getUser('only_ids'))));
 			$results[] = $this->addParent($new_parent_id);
 		}
 		return $results;
 	}
 
-	/*
-	* Merge $new_menues in correct order with $menue
-	* ToDo: replace array_merge by correct logig to merge with order not only append
-	*/
-	function merge_menues($menues, $new_menues) {
-		$result = array_values(array_unique(array_merge($menues, $new_menues)));
+	function merge_menues($menues, $new_menues){
+		$menue_objects = empty($menues) ? array() : Menue::find($this, ' id IN ('.implode(',', $menues).')', 'FIELD(id, '.implode(',', $menues).')');
+		$insert_index = 0;
+		for($i = 0; $i < count($new_menues['ID']); $i++){
+			if($new_menues['menueebene'][$i] == 1){
+				while($menue_objects[$insert_index]->data['menueebene'] == 1 AND $menue_objects[$insert_index]->data['order'] < $new_menues['ORDER'][$i]){
+					$insert_index++;
+				}
+			}
+			array_splice($menue_objects, $insert_index, 0, [(object)['data' => ['id' => $new_menues['ID'][$i], 'order' => $new_menues['ORDER'][$i], 'name' => $new_menues['Bezeichnung'][$i]]]]);
+			$insert_index++;
+		}
+		foreach($menue_objects as $menue){
+			$result[] = $menue->data['id'];
+		}
 		return $result;
 	}
 
@@ -714,7 +714,7 @@ class stelle {
 				`child_id` = " . $this->id . "
 		";
 		#echo '<p>stelle.php dropParent(' . $drop_parent_id . ') Sql: ' . $sql;
-		$this->debug->write("<p>file:stelle.php class:stelle->dropParent - Delete Parent Id: " . $drop_parent_id . " von Stelle Id: " . $this->id . "<br>" . $sql, 4);
+		$this->debug->write("<p>file:stelle.php class:stelle->dropParent - Delete Parent Id: " . $drop_parent_id . " von Stelle Id: " . $this->id . "<br>", 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
@@ -723,12 +723,61 @@ class stelle {
 				'message' => 'Fehler beim Löschen der Elternstelle: ' . $this->databse->errormessage
 			);
 		}
+		return array(
+			'type' => 'notice',
+			'message' => 'Elternstelle ID: ' . $drop_parent_id . ' erfolgreich entfernt.'
+		);
+	}
+	
+	function addChild($child_id) {
+		$sql = "
+			INSERT INTO `stellen_hierarchie` (
+				`parent_id`,
+				`child_id`
+			)
+			VALUES (
+				" . $this->id . ",
+				" . $child_id . "
+			)
+		";
+		#echo 'Sql: ' . $sql;
+		$this->debug->write("<p>file:stelle.php class:stelle->addChild - Add Child Id: " . $child_id . " zu Stelle Id: " . $this->id . "<br>", 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
+			return array(
+				'type' => 'error',
+				'message' => 'Fehler beim Eintragen der Kindstelle: ' . $this->databse->errormessage
+			);
+		}
 
 		return array(
 			'type' => 'notice',
-			'message' => 'Elternstelle Id: ' . $drop_parent_id . ' erfolgreich gelöscht.'
+			'message' => 'Kindstelle ID: ' . $child_id . ' erfolgreich zugewiesen.'
 		);
-	}
+	}	
+	
+	function dropChild($drop_child_id) {
+		$sql = "
+			DELETE FROM `stellen_hierarchie`
+			WHERE
+				`parent_id` = " . $this->id . " AND
+				`child_id` = " . $drop_child_id . "
+		";
+		$this->debug->write("<p>file:stelle.php class:stelle->dropChild - Delete Child Id: " . $drop_child_id . " von Stelle Id: " . $this->id . "<br>", 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
+			return array(
+				'type' => 'error',
+				'message' => 'Fehler beim Löschen der Kindstelle: ' . $this->databse->errormessage
+			);
+		}
+		return array(
+			'type' => 'notice',
+			'message' => 'Kindstelle ID: ' . $drop_child_id . ' erfolgreich entfernt.'
+		);
+	}	
 
 	/*
 	* Hinzufügen von Menuepunkten zur Stelle
@@ -777,7 +826,7 @@ class stelle {
 
 	function getMenue($ebene, $return = '') {
 		global $language;
-
+		$menue['ID'] = array();
 		# Lesen der Menuepunkte zur Stelle
 		if ($language != 'german') {
 			$name_column = "
@@ -1289,7 +1338,7 @@ class stelle {
 		}
 		if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(substring( `Name` FROM 1 FOR locate( ")", `Name` )), CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection` FROM rollenlayer';
+			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection` FROM rollenlayer';
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';			
 			if($rollenlayer_type != NULL){
 				$sql .=' AND Typ = "'.$rollenlayer_type.'"';
@@ -1595,6 +1644,7 @@ class stelle {
 */
 
 	function getUser($result = '') {
+		$user['ID'] = array();
 		# Lesen der User zur Stelle
 		$sql = "
 			SELECT
@@ -1618,12 +1668,14 @@ class stelle {
 				$user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
 				$user['email'][]=$rs['email'];
 			}
-			// Sortieren der User unter Berücksichtigung von Umlauten
-			$sorted_arrays = umlaute_sortieren($user['Bezeichnung'], $user['ID']);
-			$sorted_arrays2 = umlaute_sortieren($user['Bezeichnung'], $user['email']);
-			$user['Bezeichnung'] = $sorted_arrays['array'];
-			$user['ID'] = $sorted_arrays['second_array'];
-			$user['email'] = $sorted_arrays2['second_array'];
+			if(!empty($user['ID'])){
+				// Sortieren der User unter Berücksichtigung von Umlauten
+				$sorted_arrays = umlaute_sortieren($user['Bezeichnung'], $user['ID']);
+				$sorted_arrays2 = umlaute_sortieren($user['Bezeichnung'], $user['email']);
+				$user['Bezeichnung'] = $sorted_arrays['array'];
+				$user['ID'] = $sorted_arrays['second_array'];
+				$user['email'] = $sorted_arrays2['second_array'];
+			}
 		}
 		if ($result == 'only_ids') {
 			return $user['ID'];

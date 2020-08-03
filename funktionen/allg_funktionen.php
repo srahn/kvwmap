@@ -6,6 +6,10 @@
 
 $errors = array();
 
+function quote($var){
+	return is_numeric($var) ? $var : "'".$var."'";
+}
+
 function get_din_formats() {
 	$din_formats = array(
 		'A5hoch' => array('value' => 'A5hoch', 'output' => 'A5 hoch', 'size' => '(420 x 595)'),
@@ -123,9 +127,9 @@ function get_exif_data($img_path) {
 		);
 	}
 	else {
-		echo '<br>' . print_r($exif['GPSLatitude'], true);
-		echo '<br>' . print_r($exif['GPSLongitude'], true);
-		echo '<br>' . print_r($exif['GPSImgDirection'], true);
+#		echo '<br>' . print_r($exif['GPSLatitude'], true);
+#		echo '<br>' . print_r($exif['GPSLongitude'], true);
+#		echo '<br>' . print_r($exif['GPSImgDirection'], true);
 		return array(
 			'success' => true,
 			'LatLng' => ((array_key_exists('GPSLatitude', $exif) AND array_key_exists('GPSLongitude', $exif)) ? (
@@ -2015,4 +2019,28 @@ function str_replace_last($search , $replace, $str) {
   return $str;
 }
 
+function attributes_from_select($sql) {
+	include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
+	$parser = new PHPSQLParser($sql, true);
+	$attributes = array();
+	foreach ($parser->parsed['SELECT'] AS $key => $value) {
+		$name = $alias = '';
+		if (
+			is_array($value['alias']) AND
+			array_key_exists('no_quotes', $value['alias']) AND
+			$value['alias']['no_quotes'] != ''
+		) {
+			$name = $value['alias']['no_quotes'];
+			$alias = $value['alias']['no_quotes'];
+		}
+		else {
+			$name = $alias = $value['base_expr'];
+		}
+		$attributes[$name] = array(
+			'base_expr' => $value['base_expr'],
+			'alias' => $alias
+		);
+	}
+	return $attributes;
+}
 ?>

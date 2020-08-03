@@ -123,7 +123,7 @@ class ddl {
 					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);
 					$width = $this->layout['texts'][$j]['width'];
 					$border = $this->layout['texts'][$j]['border'];
-					$y = $this->putText($text, $this->layout['texts'][$j]['size'], $width, $x, $y, $offsetx, $border);
+					$y = $this->putText($text, $this->layout['texts'][$j]['size'], $width, $x, $y, $offsetx, $border, $type);
 					if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 					
 					if($type != 'everypage' AND $this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();			# falls in eine alte Seite geschrieben wurde, zurückkehren
 				}
@@ -196,7 +196,15 @@ class ddl {
 						}
 					}
 					$this->pdf->setLineStyle($this->layout['lines'][$j]['breite'], 'square');
-					$this->pdf->line($x,$y,$endx,$endy);
+					if($endy > $y){		# Seitenumbruch dazwischen
+						$this->pdf->reopenObject($this->record_startpage);
+						$this->pdf->line($x, $y, $endx, $this->layout['margin_bottom']);
+						$this->pdf->closeObject();
+						$this->pdf->line($x, $this->layout['height'] - $this->layout['margin_top'] + 10, $endx, $endy);
+					}
+					else{
+						$this->pdf->line($x, $y, $endx, $endy);
+					}
 					$line['x1'] = $x;
 					$line['y1'] = $y;
 					$line['x2'] = $endx;
@@ -609,6 +617,7 @@ class ddl {
 		return NULL;
 	}
 	
+
 	function putImage($dokumentpfad, $j, $x, $y, $width, $preview){
 		if($width == '')$width = 50;
 		if(substr($dokumentpfad, 0, 4) == 'http'){
@@ -634,7 +643,21 @@ class ddl {
 		return $y;
 	}
 	
-	function putText($text, $fontsize, $width, $x, $y, $offsetx, $border = false){	
+	function putText($text, $fontsize, $width, $x, $y, $offsetx, $border = false, $type = 'running'){	
+		if($type == 'running' AND $y < $this->layout['margin_bottom']){
+			$nextpage = $this->getNextPage($this->pdf->currentContents);
+			if($nextpage != NULL){
+				$this->pdf->reopenObject($nextpage);
+			}
+			else{
+				$this->pdf->ezNewPage();
+				$this->miny[$this->pdf->currentContents] = $this->layout['height'];
+				$this->maxy = 800;
+				if($this->layout['type'] == 2)$this->offsety = 50;
+				$this->page_overflow = true;
+			}
+			$y = $this->layout['height'] - $this->layout['margin_top'];
+		}
 		if($x < 0){		# rechtsbündig
 			$x = $this->layout['width'] + $x;
 			$x = $x + $offsetx;
@@ -660,7 +683,7 @@ class ddl {
 			$text = '<box>'.$text.'</box>';
 		}
 		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252//TRANSLIT", $text), $fontsize, $options);
-		$page_id_after_puttext = $this->pdf->currentContents;		
+		$page_id_after_puttext = $this->pdf->currentContents;
 		#echo $page_id_before_puttext.' '.$page_id_after_puttext.' - '.$y.' - '.$text.'<br>';
 		if($page_id_before_puttext != $page_id_after_puttext){
 			$this->page_overflow = true; 
@@ -942,11 +965,11 @@ class ddl {
 				$dateiname = $this->layout['filename'];
 				# Attribute
 				for($j = 0; $j < count($this->attributes['name']); $j++){
-					$value = $this->result[$i][$this->attributes['name'][$j]];
+					$value = $this->result[0][$this->attributes['name'][$j]];
 					$dateiname = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output($value, 0, $j, true), $dateiname);
 				}
 				for($j = 0; $j < count($this->attributes['name']); $j++){
-					$value = $this->result[$i][$this->attributes['name'][$j]];
+					$value = $this->result[0][$this->attributes['name'][$j]];
 					$dateiname = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($value, 0, $j, true), $dateiname);
 				}
 				# Nutzer

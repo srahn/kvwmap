@@ -18,6 +18,7 @@ include(PLUGINS . 'xplankonverter/model/konvertierung.php');
 include(PLUGINS . 'xplankonverter/model/regel.php');
 include(PLUGINS . 'xplankonverter/model/shapefiles.php');
 include(PLUGINS . 'xplankonverter/model/validierung.php');
+include(PLUGINS . 'xplankonverter/model/konformitaetsbedingungen.php');
 include(PLUGINS . 'xplankonverter/model/validierungsergebnis.php');
 include(PLUGINS . 'xplankonverter/model/xplan.php');
 include(PLUGINS . 'xplankonverter/model/extract_gml.php');
@@ -312,7 +313,7 @@ function go_switch_xplankonverter($go){
 
 
 					# Ordne layer zur Stelle
-					$GUI->Stellenzuweisung(
+					$GUI->addLayersToStellen(
 						array($shapeFile->get('layer_id')),
 						array($GUI->konvertierung->get('stelle_id'))
 					);
@@ -414,6 +415,9 @@ function go_switch_xplankonverter($go){
 										$GUI->formvars['maintable'] = $shapeFile->dataTableName();
 										$GUI->formvars['schema'] = $shapeFile->dataSchemaName();
 										$GUI->formvars['connection'] = $GUI->pgdatabase->connect_string;
+										if ($GUI->pgdatabase->connection_id != '') {
+											$GUI->formvars['connection_id'] = $GUI->pgdatabase->connection_id;
+										}
 										$GUI->formvars['connectiontype'] = '6';
 										$GUI->formvars['filteritem'] = 'oid';
 										$GUI->formvars['tolerance'] = '5';
@@ -436,7 +440,7 @@ function go_switch_xplankonverter($go){
 										$shapeFile->update();
 
 										# Ordne layer zur Stelle
-										$GUI->Stellenzuweisung(
+										$GUI->addLayersToStellen(
 											array($shapeFile->get('layer_id')),
 											array($GUI->konvertierung->get('stelle_id'))
 										);

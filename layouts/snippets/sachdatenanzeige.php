@@ -33,7 +33,7 @@ if ($anzLayer==0) {
 }
 	
 if($this->formvars['printversion'] == '' AND $this->user->rolle->querymode == 0) { ?>
-<div id="contentdiv" style="width: 100%;height:100%;max-height:<? echo $this->user->rolle->nImageHeight; ?>px;position:relative;overflow-y: auto;overflow-x: hidden">
+<div id="contentdiv" style="width: 100%;max-height:<? echo $this->user->rolle->nImageHeight; ?>px;position:relative;overflow-y: auto;overflow-x: hidden">
 	<div style="margin-right: 10px">
 <? }
 

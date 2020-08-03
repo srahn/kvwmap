@@ -1,6 +1,4 @@
 <?php include('header.php'); ?>
-<h2>Hochgeladene Dateien</h2>
-<br>
 <script language="javascript" type="text/javascript">
   function shapeFileFunctionsFormatter(value, row) {
 		output  = '\
@@ -61,8 +59,9 @@
 		$('#GUI').submit();
 	}
 </script>
-
-<h4><?php echo  htmlspecialchars($this->konvertierung->plan->get_anzeige_name()); ?></h4>
+<h2>Hochgeladene Dateien</h2>
+<br>
+<h4><?php echo $this->konvertierung->plan->planart . ': ' . htmlspecialchars($this->konvertierung->plan->get_anzeige_name()); ?></h4>
 <table
   id="shapefiles_table"
   data-toggle="table"

@@ -26,7 +26,7 @@
 
   <tr>
     <td>
-			<div style="height: calc(100vh - 210px); overflow-y: scroll;">
+			<div class="layerdaten-topdiv">
 				<table width="100%" border="0" cellspacing="0" cellpadding="2">
 					<tr>
 						<td>&nbsp;</td>
@@ -95,7 +95,7 @@
 					
 					if ($this->formvars['order']!="Alias" or ($this->formvars['order']=="Alias" and $this->layerdaten['alias'][$i]!='')) {
 					?>
-						<tr onMouseover="this.bgColor='#DAE4EC'" onMouseout="this.bgColor=''">
+						<tr class="listen-tr">
 							<td>&nbsp;</td>
 							<td><?php echo $this->layerdaten['ID'][$i]; ?>&nbsp;&nbsp;</td>
 							<td>
@@ -110,8 +110,8 @@
 							} ?>
 							</td>
 							<td><?php echo $this->layerdaten['Gruppe'][$i]; ?></td>
-							<td style="padding-left: 10px"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>" title="<?php echo $this->strChange; ?>"><i class="fa fa-pencil" style="padding: 3px"></a></td>
-							<td style="padding-left: 5px"><a href="javascript:Bestaetigung('index.php?go=Layer_Löschen&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie den Layer <?php echo $this->layerdaten['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete; ?>"><i class="fa fa-trash" style="padding: 3px"></i></a></td>        
+							<td><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>" title="<?php echo $this->strChange; ?>"><i class="fa fa-pencil"></a></td>
+							<td><a href="javascript:Bestaetigung('index.php?go=Layer_Löschen&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie den Layer <?php echo $this->layerdaten['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete; ?>"><i class="fa fa-trash-o"></i></a></td>
 						</tr>
 					<? 
 				 }

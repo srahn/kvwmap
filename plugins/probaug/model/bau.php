@@ -45,7 +45,6 @@ class Bauauskunft {
     global $debug;
     $this->debug=$debug;
     $this->database = $baudatabase;
-		$this->database->open();
   }
   
   function getbaudaten2($searchvars){

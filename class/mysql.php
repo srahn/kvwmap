@@ -73,7 +73,7 @@ class database {
 		$ret = $this->execSQL($sql, 4, 0);
 		if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
 
-		$colunn_aggreement_accepted = ($this->result->num_rows() == 1 ? ', agreement_accepted' : ', 1');
+		$colunn_aggreement_accepted = (mysqli_num_rows($this->result) == 1 ? ', agreement_accepted' : ', 1');
 
 		$sql = "
 			SELECT
@@ -95,7 +95,7 @@ class database {
 		$this->execSQL($sql, 4, 0);
 		if (!$this->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
 		$rs = $this->result->fetch_array();
-		if ($this->result->num_rows != '') {
+		if (mysqli_num_rows($this->result) != '') {
 			# wenn Nutzer bisher noch nicht akzeptiert hatte
 			if (defined('AGREEMENT_MESSAGE') AND AGREEMENT_MESSAGE != '' AND $rs['agreement_accepted'] == 0) {
 				if ($agreement != '') { # es wurde jetzt akzeptiert
@@ -223,11 +223,11 @@ class database {
 	* @params $layertyp Integer, 0 point, 1 line, 2 polygon, 5 query
 	*
 	*/
-	function generate_layer($schema, $table, $group_id = 0, $connection, $epsg = 25832, $geometrie_column = 'the_geom', $geometrietyp = '', $layertyp = '2') {
+	function generate_layer($schema, $table, $group_id = 0, $connection_id, $epsg = 25832, $geometrie_column = 'the_geom', $geometrietyp = '', $layertyp = '2') {
 		#echo '<br>Create Layer: ' . $table['name'];
 		if ($geometrietyp != '') $geometrie_column = "({$geometrie_column}).{$geometrietyp}";
 		if ($group_id == 0) $group_id = '@group_id';
-		if ($connection == '') $connection = '@connection';
+		if ($connection_id == '') $connection_id = '@connection_id';
 		$sql = "
 -- Create layer {$table['name']}
 INSERT INTO layer (
@@ -238,7 +238,7 @@ INSERT INTO layer (
 	`maintable`,
 	`Data`,
 	`schema`,
-	`connection`,
+	`connection_id`,
 	`connectiontype`,
 	`tolerance`,
 	`toleranceunits`,
@@ -262,7 +262,7 @@ VALUES (
 	'{$table['name']}',
 	'geom from (select oid, {$geometrie_column} AS geom FROM {$schema}.{$table['name']}) as foo using unique oid using srid={$epsg}',
 	'{$schema}',
-	'{$connection}',
+	'{$connection_id}'
 	'6',
 	'3',
 	'pixels',
@@ -594,9 +594,11 @@ INSERT INTO u_styles2classes (
 ###########################################################
 	function open() {
 		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
-		$this->mysqli = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+		$this->mysqli = mysqli_connect($this->host, $this->user, $this->passwd, $this->dbName);
 	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
-		return $this->mysqli->connect_errno;
+		$this->debug->write("<br>MySQL Fehlernummer: " . mysqli_connect_errno(), 4);
+		$this->debug->write("<br>MySQL Fehler: " . mysqli_connect_error(), 4);
+		return mysqli_connect_error();
 	}
 
 	function close() {
@@ -607,13 +609,18 @@ INSERT INTO u_styles2classes (
 		return $this->mysqli->close();
 	}
 
-	function exec_commands($commands_string, $search, $replace, $replace_constants = false, $suppress_err_msg = false) {
+	function exec_commands($commands_string, $replace_connection, $replace_connection_id, $replace_constants = false, $suppress_err_msg = false) {
 		if ($commands_string != '') {
 			foreach (explode(';' . chr(10), $commands_string) as $query2) { // verschiedene Varianten des Zeilenumbruchs berücksichtigen
 				foreach (explode(';' . chr(13), $query2) as $query) {
 					$query_to_execute = '';
 					$query = trim($query);
-					if ($search != NULL) $query = str_replace($search, $replace, $query);
+					if ($replace_connection != NULL) {
+						$query = str_replace('user=xxxx password=xxxx dbname=kvwmapsp', $replace_connection, $query);
+					}
+					if ($replace_connection_id != NULL) {
+						$query = str_replace('xxxx_connection_id_xxxx', $replace_connection_id, $query);
+					}
 					// foreach (explode(chr(10), $query) as $line) {
 						// if ($line != '' AND strpos($line, "--") !== 0 && strpos($line, "#") !== 0) { // Zeilen mit Kommentarzeichen ignorieren
 							// $query_to_execute .= ' '.$line;

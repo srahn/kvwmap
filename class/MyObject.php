@@ -1,4 +1,5 @@
 <?php
+# mvbio_dev
 class MyObject {
 
 	static $write_debug = false;
@@ -39,13 +40,62 @@ class MyObject {
 		return $this;
 	}
 
+	/**
+	* Search for a unique record in the database by identifier of the table
+	* if $id is empty use the values from data array
+	* else set the identifier from given value or array
+	* @param $id string, text or associative array with id keys and values
+	* @return an object with this record
+	*/
+	function find_by_ids($id) {
+		if ($id) {
+			if (getType($id) == 'array') {
+				$this->data = $id;
+			}
+			else {
+				$this->set($this->identifier, $id);
+			}
+		}
+		$sql = "
+			SELECT
+				*
+			FROM
+				`" . $this->tableName . "`
+			WHERE
+				" . $this->get_identifier_expression() . "
+		";
+		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
+		$this->database->execSQL($sql);
+		$rs = $this->database->result->fetch_assoc();
+		if ($rs !== false) {
+			$this->data = $rs;
+		}
+		return $this;
+	}
+
+	function setDataOnlyFormvars($formvars) {
+		$columns = array_map(
+			function($column) {
+				return $column['Field'];
+			},
+			$this->getColumnsFromTable()
+		);
+		foreach ($formvars AS $key => $value) {
+			if (in_array($key, $columns)) {
+				$this->set($key, $formvars[$key]);
+			}
+		}
+	}
+
 	/*
-	* Search for records in the database
-	* by the given where clause
+	* Search for records in the database by the given where clause
 	* @ return all objects
 	*/
 	function find_where($where, $order = '', $sort_direction = '') {
 		$where = ($where == '' ? '' : 'WHERE ' . $where);
+		if(strpos($order, '(') === false){
+			$q = '`';		# wenn kein Funktion im order steht, quote-Zeichen verwenden
+		}
 		$orders = array_map(
 			function ($order) {
 				return trim($order);
@@ -58,7 +108,7 @@ class MyObject {
 			FROM
 				`" . $this->tableName . "`
 			" . $where .
-			($order != '' ? " ORDER BY `" . implode('`, `', $orders) . "`" . ($sort_direction == 'DESC' ? ' DESC' : ' ASC') : "") . "
+			($order != '' ? " ORDER BY " .$q.implode($q.', '.$q, $orders).$q.($sort_direction == 'DESC' ? ' DESC' : ' ASC') : "") . "
 		";
 		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
@@ -148,6 +198,7 @@ class MyObject {
 	}
 
 	function setKeysFromTable() {
+		#$this->debug->show('setKeysFromTable', MyObject::$write_debug);
 		$columns = $this->getColumnsFromTable();
 		foreach($columns AS $column) {
 			$this->set($column['Field'], NULL);
@@ -155,14 +206,20 @@ class MyObject {
 		return $this->getKeys();
 	}
 
+	function setKeysFromFormvars($formvars) {
+		$this->debug->show('setKeysFromFormvars', MyObject::$write_debug);
+		$this->data = array_flip(array_intersect(array_keys($formvars), array_map(function($attribute) { return $attribute['Field']; }, $this->getColumnsFromTable())));
+	}
+
 	function getColumnsFromTable() {
+		#$this->debug->show('getColumnsFromTable', MyObject::$write_debug);
 		$columns = array();
 		$sql = "
 			SHOW COLUMNS
 			FROM
 				`" . $this->tableName . "`
 		";
-		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
+		$this->debug->show('sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
 		while ($column = $this->database->result->fetch_assoc()) {
 			$columns[] = $column;
@@ -171,12 +228,35 @@ class MyObject {
 	}
 
 	function getTypesFromColumns() {
+		#$this->debug->show('getTypesFromColumns', MyObject::$write_debug);
 		$types = array();
 		$columns = $this->getColumnsFromTable();
 		foreach ($columns AS $column) {
 			$types[$column['Field']] = $column['Type'];
 		}
 		return $types;
+	}
+
+	/**
+	* Function return the expression to identify the unique dataset in a
+	* where or update statement
+	* @return string The expression representing true or false in a sql statement
+	*/
+	function get_identifier_expression() {
+		if ($this->identifier_type == 'array' AND getType($this->identifier) == 'array') {
+			$where = array_map(
+				function($id) {
+					$quote = ($id['type'] == 'text' ? "'" : "");
+					return $id['key'] . " = " . $quote . $this->get($id['key']) . $quote;
+				},
+				$this->identifier
+			);
+		}
+		else {
+			$quote = ($this->identifier_type == 'text' ? "'" : "");
+			$where = array($this->identifier . " = " . $quote . $this->get($this->identifier) . $quote);
+		}
+		return implode(' AND ', $where);
 	}
 
 	function setData($formvars) {
@@ -188,10 +268,12 @@ class MyObject {
 	}
 
 	function getValues() {
+		$this->debug->show('getValues', MyObject::$write_debug);
 		return array_values($this->data);
 	}
 
 	function getKVP($options = array('escaped' => false)) {
+		#$this->debug->show('getKVP', MyObject::$write_debug);
 		$types = $this->getTypesFromColumns();
 		$kvp = array();
 		if (is_array($this->data)) {
@@ -215,8 +297,7 @@ class MyObject {
 
 	function create($data = array()) {
 		$this->debug->show('<p>MyObject create ' . $this->tablename, MyObject::$write_debug);
-		#echo '<p>' . print_r($this->getValues(), true);
-		#echo '<p>' . print_r($this->data, true);
+
 		$results = array();
 		if (!empty($data))
 			$this->data = $data;
@@ -249,7 +330,7 @@ class MyObject {
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
 		if ($this->database->success) {
-			$new_id = $this->database->mysqli->insert_id();
+			$new_id = $this->database->mysqli->insert_id;
 			$new_id = ($new_id == 0 ? $this->get($this->identifier) : $new_id);
 			$this->debug->show('<p>new id: ' . $new_id, MyObject::$write_debug);
 			$this->set($this->identifier, $new_id);
@@ -269,32 +350,66 @@ class MyObject {
 		return $results;
 	}
 
+	/*
+	* Function insert new dataset if not exists else update it with data values
+	* corresonding to identifier attributes
+	* INSERT INTO `layer_attributes2rolle` (
+	*   `layer_id`, `attributename`, `stelle_id`, `user_id`, `switchable`, `switched_on`, `sortable`, `sort_order`, `sort_direction`
+	* ) VALUES (
+	*   146, 'user_id', 1, 1, 1, 1, 1, 1, 'desc'
+	* ) ON DUPLICATE KEY UPDATE
+	* layer_id = 146, `attributename` = 'user_id', stelle_id = 1, user_id = 1, switched_on = 1, sort_order = 2, sort_direction = 'desc'
+	*/
+	function insert_or_update() {
+		$sql = "
+			INSERT INTO `" . $this->tableName . "` (
+				`" . implode('`, `', $this->getKeys()) . "`
+			)
+			VALUES (
+				" . implode(
+					", ",
+					array_map(
+						function ($value) {
+							if ($value === NULL OR $value == '') {
+								$v = 'NULL';
+							}
+							else if (is_numeric($value)) {
+								$v = "'" . $value . "'";
+							}
+							else {
+								$v = "'" . addslashes($value) . "'";
+							}
+							return $v;
+						},
+						$this->getValues()
+					)
+				) . "
+			)
+			ON DUPLICATE KEY UPDATE"
+				. implode(', ', $this->getKVP()) . "
+		";
+		$this->debug->show('<p>insert_or_update: ' . $sql, MyObject::$write_debug);
+		$this->database->execSQL($sql);
+		$err_msg = $this->database->errormessage;
+		$result = array(
+			'success' => ($err_msg == ''),
+			'err_msg' => $err_msg . ' Aufgetreten bei SQL: ' . $sql
+		);
+		return $result;
+	}
+
 	function update($data = array()) {
 		$results = array();
-		if ($this->identifier_type == 'array' AND getType($this->identifier) == 'array') {
-			$where = array_map(
-				function($id) {
-					$quote = ($id['type'] == 'text' ? "'" : "");
-					return $id['key'] . " = " . $quote . $this->get($id['key']) . $quote;
-				},
-				$this->identifier
-			);
-		}
-		else {
-			$quote = ($this->identifier_type == 'text' ? "'" : "");
-			$where = array($this->identifier . " = " . $quote . $this->get($this->identifier) . $quote);
-		}
 		if (!empty($data)) {
-			$this->data = $data;
+			array_merge($this->data, $data);
 		}
-
 		$sql = "
 			UPDATE
 				`" . $this->tableName . "`
 			SET
 				" . implode(', ', $this->getKVP(array('escaped' => true))) . "
 			WHERE
-				" . implode(' AND ', $where) . "
+				" . $this->get_identifier_expression() . "
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
@@ -307,13 +422,12 @@ class MyObject {
 	}
 
 	function delete() {
-		$quote = ($this->identifier_type == 'text') ? "'" : "";
 		$sql = "
 			DELETE
 			FROM
 				`" . $this->tableName . "`
 			WHERE
-				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
+				" . $this->get_identifier_expression() . "
 		";
 		$this->debug->show('MyObject delete sql: ' . $sql, MyObject::$write_debug);
 		$result = $this->database->execSQL($sql);

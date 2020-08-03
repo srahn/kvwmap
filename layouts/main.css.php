@@ -170,6 +170,24 @@ input[type="text"].transparent_input{
 	border:	1px solid #C3C7C3;
 }
 
+.layerdaten-topdiv, .userdaten-topdiv, .stellendaten-topdiv {
+	height: calc(100vh - 210px);
+	overflow-y: scroll;
+	padding: 0px 6px;
+}
+
+.listen-tr:hover {
+	background-color: #DAE4EC;
+}
+
+.listen-tr td:last-child .fa {
+	margin-right: 10px;
+}
+
+.listen-tr .fa {
+	padding: 3px;
+}
+
 .search-form h2 {
 	color: black;
 	margin-bottom: 10px
@@ -316,7 +334,7 @@ pre {
 	padding: 0;
 }
 
-a, img {	
+a, img, a table span {	
 	color: firebrick; 
 	TEXT-DECORATION: none;
 	font-size: 15px;
@@ -555,6 +573,10 @@ a.invisiblelayerlink:hover{
 	border-radius: 5px;
 	padding: 1px 7px 5px 7px;
 	margin: 0px 2px 0px 2px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	max-width: 300px;
 }
 
 .buttonlink:hover, .buttonlink:focus{
@@ -674,12 +696,13 @@ a.menuered:hover {
 	margin-right: 23px;
 }
 
-.untermenue:before {
-	padding-left: 3px;
-	content:url('../graphics/submenue.png');
-	position:relative;
-	z-index:100000;
-	float: left;
+.untermenue::before {
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	content: '';
+	margin: 8px 7px 0px 10px;
+	background-color: #236dbf;
 }
 
 .untermenue {
@@ -1357,10 +1380,12 @@ a:hover .preview_image{
 	padding: 0px;
 	max-width: 480px;
 	text-align: left;
+	word-break: break-all;
 }
 
 .dstable{
 	max-width: 900px;
+	width: 100%;
 }
 
 table.tgle {

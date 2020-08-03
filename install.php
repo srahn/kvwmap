@@ -89,11 +89,13 @@ function install() {
   Password: <?php #echo $mysqlRootDb->passwd; ?><br>
   Datenbankname: <?php echo $mysqlRootDb->dbName; ?><br><?php
   
-  if (mysql_exists($mysqlRootDb)) { ?>
+	$mysql_error = mysql_exists($mysqlRootDb);
+  if ($mysql_error == null) { ?>
     MySQL-Server läuft, Verbindung hergestellt zu Host: <?php echo $mysqlRootDb->host; ?> Datenbank: <?php echo $mysqlRootDb->dbName; ?> mit Nutzer: <?php echo $mysqlRootDb->user; ?>!<br><?php
   }
   else { ?>
     Es kann keine Verbindung zu Host: <?php echo $mysqlRootDb->host; ?> MySQL Datenbank: <?php echo $mysqlRootDb->dbName; ?> mit Nutzer: <?php echo $mysqlRootDb->user; ?> hergestellt werden!<br>
+		Fehlermeldung: <?php echo $mysql_error; ?><br>
     Das kann folgende Gründe haben:
     <ul>
       <li><b>MySQL ist noch nicht installiert:</b> => Installieren sie MySQL</li>
@@ -138,10 +140,13 @@ function install() {
   #
   include(CLASSPATH . 'postgresql.php');
   $pgsqlPostgresDb = new pgdatabase();
-  $pgsqlPostgresDb->host = POSTGRES_HOST;
-  $pgsqlPostgresDb->user = 'postgres';
-  $pgsqlPostgresDb->passwd = POSTGRES_ROOT_PASSWORD;
-  $pgsqlPostgresDb->dbName = 'postgres'; ?>
+  $pgsqlPostgresDb->set_object_credentials(array(
+		'host' => 		POSTGRES_HOST,
+		'port' => 		'5432',
+		'dbname' => 	'postgres',
+		'user' => 		'postgres',
+		'password' => POSTGRES_ROOT_PASSWORD
+	)); ?>
   Verbindungsdaten für Zugang zu PostgreSQL postgres Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $pgsqlPostgresDb->host; ?><br>
   User: <?php echo $pgsqlPostgresDb->user; ?><br>
@@ -170,10 +175,13 @@ function install() {
   # und richte ggf. Nutzer und eine neue leere kvwmap Datenbank ein. 
   #
   $pgsqlKvwmapDb = new pgdatabase();
-  $pgsqlKvwmapDb->host = POSTGRES_HOST;
-  $pgsqlKvwmapDb->user = POSTGRES_USER;
-  $pgsqlKvwmapDb->passwd = POSTGRES_PASSWORD;
-  $pgsqlKvwmapDb->dbName = POSTGRES_DBNAME; ?>
+	$pgsqlKvwmapDb->set_object_credentials(array(
+		'host' => 		POSTGRES_HOST,
+		'port' => 		'5432',
+		'dbname' => 	POSTGRES_DBNAME,
+		'user' => 		POSTGRES_USER,
+		'password' => POSTGRES_PASSWORD
+	)); ?>
   Verbindungsdaten für Zugang zu PostgreSQL kvwmap Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $pgsqlKvwmapDb->host; ?><br>
   User: <?php echo $pgsqlKvwmapDb->user; ?><br>
@@ -363,7 +371,7 @@ function kvwmapdb_exists($mysqlRootDb, $mysqlKvwmapDb) { ?>
       SCHEMA_NAME = '" . $mysqlKvwmapDb->dbName . "'
   ";
   $ret = $mysqlRootDb->execSQL($sql, 0, 1);
-  return ($mysqlRootDb->result->num_rows() > 0);
+  return (mysqli_num_rows($mysqlRootDb->result) > 0);
 }
 
 /*
@@ -385,7 +393,7 @@ function install_kvwmapdb($mysqlRootDb, $mysqlKvwmapDb) {
     Fehler beim Abfragen ob User <?php echo $mysqlKvwmapDb->user; ?> mit Host <?php echo MYSQL_HOSTS_ALLOWED; ?> schon in MySQL existiert.<br><?php
     return false;
   }
-  if ($mysqlRootDb->result->num_rows() > 0 ) { ?>
+  if (mysqli_num_rows($mysqlRootDb->result) > 0 ) { ?>
     User <?php echo $mysqlKvwmapDb->user; ?> mit Host <?php echo MYSQL_HOSTS_ALLOWED; ?> existiert schon in Datenbank. <?php
   }
   else  { ?>
@@ -496,17 +504,20 @@ function migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb) {
 	echo '<br>Frage Datenbankstati ab.';
   $administration->get_database_status();
 	echo '<br>Aktualisiere Datenbanken.';
-  $administration->update_databases();
-  $administration->get_database_status();
+  $err_msgs = $administration->update_databases();
+  echo '<br>Datenbanken aktualisiert:<br>' . implode('<br>', $err_msgs);
+	$administration->get_database_status();
   if (count($administration->migrations_to_execute['mysql']) == 0 AND count($administration->migrations_to_execute['postgresql']) == 0) { ?>
     Anlegen der Datenbank-Schemata erfolgreich.<br><?php
   }
   else{
     if (count($administration->migrations_to_execute['mysql']) > 0) { ?>
-      Anlegen des MySQL-Schemas fehlgeschlagen.<br><?php
+      <br>Anlegen des MySQL-Schemas fehlgeschlagen.<br><?php
+			echo '<br>Folgende wurden noch nicht ausgeführt: <ul><li>' . implode('</li><li>', $administration->migrations_to_execute['mysql']['kvwmap']) . '</li></ul>';
     }
     if (count($administration->migrations_to_execute['postgresql']) > 0) { ?>
-      Anlegen des PostgreSQL-Schemas fehlgeschlagen.<br><?php
+      <br>Anlegen des PostgreSQL-Schemas fehlgeschlagen.<br><?php
+			echo '<br>Folgende wurden noch nicht ausgeführt: <ul><li>' . implode('</li><li>', $administration->migrations_to_execute['postgresql']['kvwmap']) . '</li></ul>';
     }
   }
 }
@@ -524,7 +535,7 @@ function admin_stelle_exists($mysqlKvwmapDb) {
       `Bezeichnung` = 'Administration'
   ";
   $ret = $mysqlKvwmapDb->execSQL($sql, 0, 1);
-  return ($mysqlKvwmapDb->result->num_rows() > 0) ? true : false;
+  return (mysqli_num_rows($mysqlKvwmapDb->result) > 0) ? true : false;
 }
 
 /*

@@ -55,14 +55,14 @@
 		$table_id = rand(0, 100000);
 		echo value_of($layer, 'paging');
 ?>
-<table id="<? echo $table_id; ?>" border="0" cellspacing="0" cellpadding="2">
+<table id="<? echo $table_id; ?>" style="width: 100%" border="0" cellspacing="0" cellpadding="2">
 <?
 	for ($k; $k<$anzObj; $k++) {
 		$table = array();
 		$nl = false;
 		$datapart = '';
 		$next_row = array();
-		$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
+		$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID'].'|';
 ?>
 	<tr>
 		<td>
@@ -79,7 +79,7 @@
 					$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
 				}
 			}
-			?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">
+			?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
 			<table class="tgle dstable" style="border-bottom: 1px solid grey" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
 				<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
         <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle"'; ?>>
@@ -162,7 +162,7 @@
 							$cell['content'] = attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2, $this->user->rolle->fontsize_gle);
 							$cell['id'] = 'value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
 							$cell['properties'] = get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j]));
-							if($nl){
+							if ($nl){
 								$next_row['cells'][] = $cell;
 							}
 							else{
@@ -173,10 +173,12 @@
 							
 							if ($layer['attributes']['arrangement'][$j+1] != 1){		# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
 								$table['rows'][] = $row;
-								if(count($row['cells']) > value_of($table, 'max_cell_count'))$table['max_cell_count'] = count($row['cells']);
+								if (count($row['cells']) > value_of($table, 'max_cell_count')) {
+									$table['max_cell_count'] = count($row['cells']);
+								}
 								unset($row);
 							}
-							if($layer['attributes']['arrangement'][$j+1] != 1 AND $nl){			# die aufgesammelten Zellen in neuer Zeile ausgeben
+							if ($layer['attributes']['arrangement'][$j+1] != 1 AND $nl){			# die aufgesammelten Zellen in neuer Zeile ausgeben
 								$table['rows'][] = $next_row;
 								unset($next_row);
 								$nl = false;

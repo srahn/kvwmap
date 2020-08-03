@@ -49,6 +49,12 @@ class PgObject {
 		$this->select = '*';
 		$this->identifier = 'id';
 		$this->identifier_type = 'integer';
+		$this->identifiers = array(
+			array(
+				'column' => 'id',
+				'type' => 'integer'
+			)
+		);
 		$this->show = false;
 		$this->attribute_types = array();
 	}
@@ -77,6 +83,36 @@ class PgObject {
 		$query = pg_query($this->database->dbConn, $sql);
 		$this->data = pg_fetch_assoc($query);
 		return $this;
+	}
+
+	function get_id_condition($ids) {
+		$parts = array();
+		foreach ($this->identifiers AS $key => $identifier) {
+			$parts[] = "\"{$identifier['column']}\" = '{$ids[$key]}'"; 
+		}
+		return implode(' AND ', $parts);
+	}
+
+	function find_by_ids(...$ids) {
+		$where_condition = $this->get_id_condition($ids);
+		$this->debug->show('find by ids: ' . $where_condition, false);
+		$sql = "
+			SELECT
+				{$this->select}
+			FROM
+				\"{$this->schema}\".\"{$this->tableName}\"
+			WHERE
+				" . $where_condition . "
+		";
+		$this->debug->show('find_by_id sql: ' . $sql, true);
+		$query = pg_query($this->database->dbConn, $sql);
+		$this->data = pg_fetch_assoc($query);
+		return $this;
+	}
+
+	function execSQL($sql) {
+		$query = @pg_query($this->database->dbConn, $sql);
+		return $query;
 	}
 
 	/*

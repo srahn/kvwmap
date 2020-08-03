@@ -88,6 +88,10 @@ include('funktionen/input_check_functions.php');
 				}
 			})
 			row.style.display = row_display;
+			if(name_dependent != null){
+				var name_row = name_dependent.parentNode;	// in case name row is above value row
+				name_row.style.display = row_display;
+			}
 			// visibility of group
 			if(row.closest('table').firstChild.children != null){
 				all_trs = [].slice.call(row.closest('table').firstChild.children);		// alle trs in der Gruppe
@@ -350,13 +354,14 @@ include('funktionen/input_check_functions.php');
 		enclosingForm.printversion.value = '';
 	}
 	
-	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen, weiter_erfassen_params){
+	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen, weiter_erfassen_params, further_params){
 		list_div = document.getElementById(list_div_id);
 		var params = list_div.dataset.reload_params;
 		if(enclosingForm.name == 'GUI2')params += '&mime_type=overlay_html';
 		if(list_edit)params += '&list_edit='+list_edit;
 		if(weiter_erfassen)params += '&weiter_erfassen='+weiter_erfassen;
 		if(weiter_erfassen_params)params += '&weiter_erfassen_params='+weiter_erfassen_params;
+		if(further_params)params += further_params;
 		ahah('index.php?go=Layer-Suche_Suchen', params, new Array(list_div), new Array('sethtml'));
 	}
 
@@ -448,7 +453,7 @@ include('funktionen/input_check_functions.php');
 					return;
 				}
   		}
-			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
+			if(['checkbox', 'radio'].indexOf(form_fields[i].type) == -1 || form_fields[i].checked){
 				if(form_fields[i].type == 'file' && form_fields[i].files[0] != undefined)value = form_fields[i].files[0];
 				else value = form_fields[i].value;
 				formData.append(form_fields[i].name, value);

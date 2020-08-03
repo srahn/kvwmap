@@ -60,6 +60,11 @@
 				$shapefile->deleteUploadFiles();
 			} break;
 
+			case ($fired == 'AFTER' AND $event == 'DELETE') : {
+				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_shapes Funktion aus.', true);
+				$GUI->add_message('warning', 'Lösche Gruppe wenn keine Layer mehr enthalten sind.');
+			}
+
 			default : {
 				$executed = false;
 			}
@@ -166,7 +171,7 @@
 			} break;
 
 			case ($fired == 'AFTER' AND $event == 'UPDATE') : {
-				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, true);
+				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, false);
 				$regel = Regel::find_by_id($GUI, 'oid', $oid);
 				#$regel->delete_gml_layer();
 				$regel->create_gml_layer();
