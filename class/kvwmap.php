@@ -629,6 +629,96 @@ echo '			</ul>
 		}
 	}
 
+	/**
+	* function returns the svg and wkb geometry of an uploaded shape file
+	* in json format and an error message and success false when fail
+	*/
+	function get_geom_from_shape_file() {
+		$success = false;
+		$upload_file = $_FILES['file'];
+		$geom = '';
+		$msg = 'filename: ' . $upload_file['name'] . ' tmp_name: ' . $upload_file['tmp_name'];
+		if (strtolower(pathinfo($upload_file['name'], PATHINFO_EXTENSION)) == 'zip') {
+			$zip_file = IMAGEPATH . pathinfo($upload_file['tmp_name'], PATHINFO_FILENAME) . '_' . $upload_file['name'];
+			$msg .= 'zipfile: ' . $zip_file;
+
+			$importer = new data_import_export();
+
+			if (move_uploaded_file($upload_file['tmp_name'], $zip_file)) {
+				# ToDo: Shape in einem untergeordneten Ordner auspacken um Problemm mit gleichen Namen von hochgeladenen Dateien unterschiedlicher Anwender zu vermeiden.
+				$shape_files = unzip($zip_file, false, false, true);
+
+				$msg .= 'file unziped';
+				# get shape file name
+				$first_file = explode('.', $shape_files[0]);
+				$shape_file_name = $first_file[0];
+
+				# get EPSG-Code aus prj-Datei
+				$file_epsg = $importer->get_shp_epsg(IMAGEPATH . $shape_file_name, $this->pgdatabase);
+				if ($file_epsg == '') {
+					$file_epsg = '25833';
+					# ToDo EPSG-Code konnte nicht aus prj-Datei ermittelt werden, Dateiname merken und EPSG-Code nachfragen
+				}
+				$msg .= 'EPSG: ' . $file_epsg;
+
+				# get encoding of dbf file
+				$encoding = $importer->getEncoding(IMAGEPATH . $shape_file_name . '.dbf');
+
+				# load shapes to custom schema
+				$import_result = $importer->load_shp_into_pgsql($this->pgdatabase, IMAGEPATH, $shape_file_name, $file_epsg, CUSTOM_SHAPE_SCHEMA, 'b' . strtolower(umlaute_umwandeln(substr($shape_file_name, 0, 15))) . rand(1, 1000000), $encoding);
+
+				# return name of import table
+				$table_name = $import_result[0]['tablename'];
+
+				include_once (CLASSPATH.'polygoneditor.php');
+
+				$polygoneditor = new polygoneditor($this->pgdatabase, $file_epsg, $this->user->rolle->epsg_code);
+				$geom = $polygoneditor->getpolygon(NULL, $table_name, 'the_geom', NULL, CUSTOM_SHAPE_SCHEMA);
+				if ($geom['wktgeom'] != '') {
+					# use geom on client side to set
+					# $this->formvars['newpathwkt'] = $geom['wktgeom'];
+					# $this->formvars['pathwkt'] = $geom['wktgeom'];
+					# $this->formvars['newpath'] = $geom['svggeom'];
+					# $this->formvars['firstpoly'] = 'true';
+					# $this->formvars['zoom'] == 'true')
+
+					# drop custom shape table
+					$sql = "
+						 DROP TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $table_name . "
+					";
+					$this->pgdatabase->execSQL($sql, 4, 0, true);
+
+					# delete uploaded shape files
+					foreach($shape_files AS $shape_file) {
+						 unlink(IMAGEPATH . $shape_file);
+					}
+					unlink(IMAGEPATH . pathinfo($shape_file, PATHINFO_FILENAME) . '.sql');
+					unlink($zip_file);
+
+					$msg = 'Geometrie erfolgreich geladen.';
+					$success = true;
+				}
+				else {
+					$msg = 'Fehler beim Lesen der Geometrie!';
+				}
+			}
+			else {
+				$msg = 'Fehler beim kopieren der Datei auf den Server!';
+			}
+		}
+		else {
+			$msg .= 'Datei ist keine Zip-Datei!';
+		}
+
+		$response = array(
+			"success" => $success,
+			"result" => $msg,
+			"svggeom" => $geom['svggeom'],
+			"wktgeom" => $geom['wktgeom']
+		);
+		return utf8_decode(json_encode($response));
+	}
+
 	function get_group_legend() {
     # Änderungen in den Gruppen werden gesetzt
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
@@ -4520,7 +4610,7 @@ echo '			</ul>
 		$this->formvars['layer_columnname'] = $attributes['the_geom'];
 		$this->formvars['layer_tablename'] = $attributes['table_name'][$attributes['the_geom']];
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
-		$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+		$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 		if (!$this->formvars['edit_other_object'] AND ($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')) {
 			$this->neuLaden();
 		}
@@ -4565,7 +4655,7 @@ echo '			</ul>
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-		$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+		$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 		# eingeabewerte pruefen:
 		$ret = $pointeditor->pruefeEingabedaten($this->formvars['loc_x'], $this->formvars['loc_y']);
 		if ($ret[0]) { # fehlerhafte eingabedaten
@@ -4630,7 +4720,7 @@ echo '			</ul>
 		$this->formvars['layer_tablename'] = $attributes['table_name'][$attributes['the_geom']];
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
-    $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+    $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 		if(!$this->formvars['edit_other_object'] AND ($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')){
 			$this->neuLaden();
 			$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
@@ -4707,7 +4797,7 @@ echo '			</ul>
 		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-		$lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+		$lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 		# eingeabewerte pruefen:
 		$ret = $lineeditor->pruefeEingabedaten($this->formvars['newpathwkt']);
 		if ($ret[0]) { # fehlerhafte eingabedaten
@@ -4796,7 +4886,7 @@ echo '			</ul>
 		$this->formvars['layer_tablename'] = $attributes['table_name'][$attributes['the_geom']];
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
 		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
-		$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+		$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 
 		if (
 			!$this->formvars['edit_other_object'] AND
@@ -4870,7 +4960,7 @@ echo '			</ul>
 			if($rollenlayer[0]['Typ'] == 'search'){
 				$layerdb1 = $this->mapDB->getlayerdatabase($this->formvars['geom_from_layer'], $this->Stelle->pgdbhost);
 				include_once (CLASSPATH.'polygoneditor.php');
-				$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+				$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 				$tablename = '('.$fromwhere.') as foo';
 				$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
 				if($this->polygon['wktgeom'] != '') {
@@ -4896,7 +4986,7 @@ echo '			</ul>
 		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-		$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+		$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 		# eingeabewerte pruefen:
 		$ret = $polygoneditor->pruefeEingabedaten($this->formvars['newpathwkt']);
 		if ($ret[0]) { # fehlerhafte eingabedaten
@@ -8510,11 +8600,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
         $j = 0;
         foreach($attributes['all_table_names'] as $tablename){
-					if(($tablename == $layerset[0]['maintable'] OR $tablename == $geometrie_tabelle) AND $attributes['oids'][$j]){		# hat Haupttabelle oder Geometrietabelle oids?
-            $pfad = $attributes['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
+					if(($tablename == $layerset[0]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[0]['oid'] != ''){
+            $pfad = $attributes['table_alias_name'][$tablename].'.'.$layerset[0]['oid'].' AS '.$tablename.'_oid, '.$pfad;
 						if(value_of($this->formvars, 'operator_'.$tablename.'_oid') == '')$this->formvars['operator_'.$tablename.'_oid'] = '=';
             if(value_of($this->formvars, 'value_'.$tablename.'_oid')){
-              $sql_where .= ' AND '.$tablename.'_oid '.$this->formvars['operator_'.$tablename.'_oid'].' '.$this->formvars['value_'.$tablename.'_oid'];
+              $sql_where .= ' AND '.$tablename.'_oid '.$this->formvars['operator_'.$tablename.'_oid'].' '.quote($this->formvars['value_'.$tablename.'_oid']);
             }
           }
           $j++;
@@ -8535,7 +8625,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$pfad .= $attributes['groupby'];
 					$j = 0;
 					foreach($attributes['all_table_names'] as $tablename){
-						if($tablename == $layerset[0]['maintable'] AND $attributes['oids'][$j]){		# hat Haupttabelle oids?
+						if($tablename == $layerset[0]['maintable'] AND $layerset[0]['oid'] != ''){		# hat Haupttabelle oids?
 							$pfad .= ','.$tablename.'_oid ';
 						}
 						$j++;
@@ -8554,7 +8644,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				# standardmäßig wird nach der oid sortiert
 				$j = 0;
 				foreach($attributes['all_table_names'] as $tablename){
-					if($tablename == $layerset[0]['maintable'] AND $attributes['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
+					if($tablename == $layerset[0]['maintable'] AND $layerset[0]['oid'] != ''){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
 						if($sql_order == '')$sql_order = ' ORDER BY ' . replace_semicolon($layerset[0]['maintable']) . '_oid ';
 						else $sql_order .= ', '.$layerset[0]['maintable'].'_oid ';
 					}
@@ -9238,13 +9328,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	function Datensatz_Loeschen($layerdb, $layer, $attributes, $oid) {
 		$results = array();
 		if (!empty($layer['trigger_function'])) {
+			if($layer['oid'] == 'oid'){
+				$oid_sql = 'oid,';
+			}
 			$sql_old = "
-				SELECT
-					oid, *
+				SELECT ".
+					$oid_sql." *
 				FROM
 					" . $layer['schema'] . '.' . $layer['maintable'] . "
 				WHERE
-					oid = " . $oid;
+					".$layer['oid']." = " . quote($oid);
 			#echo '<br>Sql before delete: ' . $sql_old; #pk
 			$ret = $layerdb->execSQL($sql_old, 4, 1, true);
 			if ($ret['success']) {
@@ -9302,7 +9395,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				DELETE FROM
 					" . $layer['maintable'] . "
 				WHERE
-					oid = " . $oid . "
+					".$layer['oid']." = " . quote($oid) . "
 			";
 			$oids[] = $element[3];
 			$ret = $layerdb->execSQL($sql, 4, 1, true);
@@ -9425,7 +9518,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 			if($this->formvars['newpathwkt'] != ''){
 				include_(CLASSPATH.'polygoneditor.php');
-				$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+				$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 				$ret = $polygoneditor->pruefeEingabedaten($this->formvars['newpathwkt']);
 				if ($ret[0]) { # fehlerhafte eingabedaten
 					$this->error_position = explode(' ', trim(substr($ret[1], strpos($ret[1], '[')), '[]'));
@@ -9443,7 +9536,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 			if($this->formvars['newpathwkt'] != ''){
 				include_(CLASSPATH.'lineeditor.php');
-				$lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+				$lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 				# eingeabewerte pruefen:
 				$ret = $lineeditor->pruefeEingabedaten($this->formvars['newpathwkt']);
 				if ($ret[0]) { # fehlerhafte eingabedaten
@@ -9555,7 +9648,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								if ($this->formvars['loc_x'] != '') {
 									# ToDo: Test if a new Point can be stored and if the statement contain the wkb_geometrie in stead of the ST_GeomFromGeo Gedöns.
 									include_once (CLASSPATH.'pointeditor.php');
-									$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+									$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 									$result = $pointeditor->get_wkb_geometry(array(
 										'loc_x' => $this->formvars['loc_x'],
 										'loc_y' => $this->formvars['loc_y'],
@@ -9590,6 +9683,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$sql.= ") VALUES (";
 					$sql.= implode(', ', $insert);
 					$sql.= ")";
+					if($layerset[0]['oid'] != 'oid'){
+						$sql.= " RETURNING ".$layerset[0]['oid'];
+					}
 
 					# Before Insert trigger
 					if (!empty($layerset[0]['trigger_function'])) {
@@ -9615,14 +9711,19 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$result = pg_fetch_row($ret['query']);
 						if (pg_affected_rows($ret['query']) > 0) {
 							# dataset was created
-							if (is_array($result) and (!array_key_exists(1, $result) OR $result[1] != 'error')) {
+							if (is_array($result) and (!array_key_exists(1, $result) OR $result[1] != 'error') AND $layerset[0]['oid'] == 'oid') {
 								$this->add_message('warning', 'Eintrag erfolgreich.<br>' . $result[0]);
 							}
 							else {
 								$this->add_message('notice', 'Eintrag erfolgreich!');
 							}
 
-							$last_oid = pg_last_oid($ret['query']);
+							if($layerset[0]['oid'] != 'oid'){
+								$last_oid = $result[0];
+							}
+							else{
+								$last_oid = pg_last_oid($ret['query']);
+							}
 							if($last_oid == '')$last_oid = $notice_result['oid'];
 							if($this->formvars['embedded'] == '') $this->formvars['value_' . $table['tablename'] . '_oid'] = $last_oid;
 
@@ -9645,6 +9746,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 			}
 		}
+
 
 		if ($this->formvars['embedded'] != '') {    
 			# wenn es ein neuer Datensatz aus einem embedded-Formular ist, 
@@ -9896,7 +9998,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							if ($rollenlayer[0]['Typ'] == 'search') {
 								$layerdb1 = $mapdb->getlayerdatabase($this->formvars['geom_from_layer'], $this->Stelle->pgdbhost);
 								include_once (CLASSPATH.'polygoneditor.php');
-								$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+								$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 								$tablename = '('.$fromwhere.') as foo';
 								$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
 								if ($this->polygon['wktgeom'] != '') {
@@ -9911,7 +10013,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						if ($this->formvars['chosen_layer_id']) {			# für neuen Datensatz verwenden -> Geometrie abfragen
 							if ($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY') {		# Polygonlayer
 								include_once (CLASSPATH.'polygoneditor.php');
-								$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+								$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 								$this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
 								$this->polygon = $polygoneditor->getpolygon($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->map->extent, $this->formvars['layer_schemaname']);
 								if ($this->polygon['wktgeom'] != '') {
@@ -9933,7 +10035,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							}
 							else {			# Linienlayer
 								include_once (CLASSPATH.'lineeditor.php');
-								$lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+								$lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 								$this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
 								$this->lines = $lineeditor->getlines($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
 								if ($this->lines['wktgeom'] != '') {
@@ -9961,7 +10063,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						#-----Pointeditor-----#
 						if ($this->formvars['chosen_layer_id']) {			# für neuen Datensatz verwenden -> Geometrie abfragen
 							include_once (CLASSPATH.'pointeditor.php');
-							$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+							$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 							$this->point = $pointeditor->getpoint($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->angle_attribute);
 							if ($this->point['pointx'] != '') {
 								$this->formvars['loc_x']=$this->point['pointx'];
@@ -13742,10 +13844,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if (
 					(
 						$this->formvars['go'] == 'Dokument_Loeschen' OR
-						$this->formvars['changed_' . $layer_id . '_' . $oid] == 1 OR
+						$this->formvars['changed_' . $layer_id . '_' . str_replace('-', '', $oid)] == 1 OR
 						$this->formvars['embedded']
 					) AND
-					$attributname != 'oid' AND
+					$attributname != $layerset[$layer_id][0]['oid'] AND
 					$tablename != '' AND
 					$saveable AND
 					$tablename == $layerset[$layer_id][0]['maintable']
@@ -13864,11 +13966,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								}
 							}
 
-							$where_condition = (
-								($this->plugin_loaded('mobile') AND array_key_exists('uuid', $attributes))
-								? " uuid = '" . $attributes['uuid']['value'] . "'"
-								: "oid = " . $oid
-							);
+							$where_condition = $layerset[$layer_id][0]['oid'].' = '.quote($oid);
 
 							$sql = $sql_lock . "
 								UPDATE
@@ -14082,7 +14180,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					0
 				) == 0
 			) {
-				$this->add_message('waring', 'Keine Datensätze mehr in der Sachdatenanzeige. Deshalb zeige ich die Karte an.');
+				$this->add_message('warning', 'Keine Datensätze mehr in der Sachdatenanzeige.');
 				$this->loadMap('DataBase');
 				$this->user->rolle->newtime = $GUI->user->rolle->last_time_id;
 				$this->saveMap('');
@@ -14270,9 +14368,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							$geometrie_tabelle = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 							$j = 0;
 							foreach($layerset[$i]['attributes']['all_table_names'] as $tablename) {
-								if (($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['attributes']['oids'][$j]) {
-									# hat Haupttabelle oder Geometrietabelle oids?
-									$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename] . '.oid AS ' . $tablename . '_oid, ' . $pfad;
+								if (($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['oid'] != '') {
+									$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.'.$layerset[$i]['oid'].' AS ' . $tablename . '_oid, ' . $pfad;
 								}
 								$j++;
 							}
@@ -15984,7 +16081,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	    # Auf den Datensatz zoomen
 	    $sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
 	    $sql.=" FROM (SELECT box2D(st_transform(" . $real_geom_name.", " . $this->user->rolle->epsg_code.")) as bbox";
-	    $sql.=" FROM " . $tablename." WHERE oid = '" . $oid."') AS foo";
+	    $sql.=" FROM " . $tablename." WHERE ".$layerset['oid']." = '" . $oid."') AS foo";
 	    $ret = $layerdb->execSQL($sql, 4, 0);
 	    $rs = pg_fetch_array($ret[1]);
 	    $rect = ms_newRectObj();
@@ -16036,7 +16133,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$tablename = $layerset['attributes']['schema_name'][$tablename].'.'.$tablename;
 				}
 		    elseif($layerset['schema'] != ''){
-		    	$tablename = $layerset['schema'].'.'.$tablename;
+		    	$tablename = $layerdb->schema.'.'.$tablename;
 		    }
 		    $datastring = $real_geom_name." from (select oid as id, " . $real_geom_name." from " . $tablename;
 		    $datastring.=" WHERE oid = '" . $oid."'";
@@ -17266,6 +17363,14 @@ class db_mapObj{
 		if (count($rs) == 0) {
 			return null;
 		}
+		$rs['schema'] = replace_params(
+			$rs['schema'],
+			rolle::$layer_params,
+			$this->User_ID,
+			$this->Stelle_ID,
+			rolle::$hist_timestamp,
+			$this->rolle->language
+		);
 		$layerdb->schema = ($rs['schema'] == '' ? 'public' : $rs['schema']);
 		$layerdb->host = $host; # depricated since host is allways in connection table
 		if (!$layerdb->open($rs['connection_id'])) {
@@ -19047,10 +19152,6 @@ class db_mapObj{
 		}
 		if (value_of($attributes, 'table_name') != NULL) {
 			$attributes['all_table_names'] = array_unique($attributes['table_name']);
-			//$attributes['all_alias_table_names'] = array_values(array_unique($attributes['table_alias_name']));
-			foreach ($attributes['all_table_names'] as $tablename) {
-				$attributes['oids'][] = $layerdb->check_oid($tablename);   # testen ob Tabelle oid hat
-			}
 		}
 		else {
 			$attributes['all_table_names'] = array();

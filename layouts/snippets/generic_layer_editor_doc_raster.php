@@ -102,7 +102,7 @@
 			<? if($this->new_entry != true){ ?>
 			<div style="position: absolute;top: 1px;right: 1px"><a href="javascript:close_record('record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH."exit2.png"; ?>"></img></a></div>
 			<? } ?>
-			<input type="hidden" value="" onchange="this.closest('#layer').querySelector('#changed_<? echo $layer['Layer_ID']; ?>').value=this.value; this.closest('#layer').querySelector('#changed_<? echo $layer['Layer_ID']; ?>').onchange();" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
+			<input type="hidden" value="" onchange="this.closest('#layer').querySelector('#changed_<? echo $layer['Layer_ID']; ?>').value=this.value; this.closest('#layer').querySelector('#changed_<? echo $layer['Layer_ID']; ?>').onchange();" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>"> 
 			<table class="tgle" border="0">
 				<? if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
 				<tr class="tr_hide">

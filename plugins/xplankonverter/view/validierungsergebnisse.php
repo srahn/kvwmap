@@ -1,13 +1,9 @@
-<?php include('header.php'); ?>
-
-<h2>Validierungsergebnisse</h2>
 <?php
-if ($this->Fehlermeldung!='') {
-       include(LAYOUTPATH."snippets/Fehlermeldung.php");
-}
-?>
-<br>
-<script language="javascript" type="text/javascript">
+  include('header.php');
+  if ($this->Fehlermeldung!='') {
+    include(LAYOUTPATH."snippets/Fehlermeldung.php");
+  }
+?><script language="javascript" type="text/javascript">
 // formatter functions
 function validierung_msg_formatter(value, row) {
 	if (row.ergebnis_status == 'Fehler')
@@ -57,14 +53,16 @@ function validierungsergebnisseRowAttribs(row, index){
   };
 }
 </script>
-<h4><?php echo  htmlspecialchars($this->konvertierung->plan->get_anzeige_name()); ?></h4>
+<h2>Validierungsergebnisse</h2>
+<br>
+<h4><?php echo $this->konvertierung->plan->planart . ': ' . htmlspecialchars($this->konvertierung->plan->get_anzeige_name()); ?></h4>
 <table
   id="validierungsergebnis_table"
   data-toggle="table"
   data-url="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_VALIDIERUNGSERGEBNISSE_LAYER_ID; ?>&anzahl=1000&operator_konvertierung_id==&value_konvertierung_id=<?php echo $this->formvars['konvertierung_id']; ?>&mime_type=formatter&format=json"
   data-height="100%"
   data-click-to-select="false"
-  data-sort-name="validierungsergebnis_id"
+  data-sort-name="ergebnis_order"
   data-sort-order="asc"
   data-search="false"
   data-show-refresh="false"
@@ -116,8 +114,15 @@ function validierungsergebnisseRowAttribs(row, index){
         class="text-left"
       >Status</th>
       <th
+        data-field="ergebnis_order"
+        data-visible="false"
+        data-switchable="false"
+        data-sortable="false"
+        class="text-left"
+      >Reihenfolge</th>
+      <th
         data-field="ergebnis_msg"
-				data-formatter="validierung_msg_formatter"
+        data-formatter="validierung_msg_formatter"
         data-visible="true"
         data-switchable="true"
         data-sortable="true"

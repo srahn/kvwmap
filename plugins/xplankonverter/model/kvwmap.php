@@ -60,6 +60,11 @@
 				$shapefile->deleteUploadFiles();
 			} break;
 
+			case ($fired == 'AFTER' AND $event == 'DELETE') : {
+				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_shapes Funktion aus.', true);
+				$GUI->add_message('warning', 'Lösche Gruppe wenn keine Layer mehr enthalten sind.');
+			}
+
 			default : {
 				$executed = false;
 			}

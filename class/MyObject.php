@@ -297,8 +297,7 @@ class MyObject {
 
 	function create($data = array()) {
 		$this->debug->show('<p>MyObject create ' . $this->tablename, MyObject::$write_debug);
-		#echo '<p>' . print_r($this->getValues(), true);
-		#echo '<p>' . print_r($this->data, true);
+
 		$results = array();
 		if (!empty($data))
 			$this->data = $data;
@@ -402,9 +401,8 @@ class MyObject {
 	function update($data = array()) {
 		$results = array();
 		if (!empty($data)) {
-			$this->data = $data;
+			array_merge($this->data, $data);
 		}
-
 		$sql = "
 			UPDATE
 				`" . $this->tableName . "`
