@@ -17489,7 +17489,7 @@ class db_mapObj{
 		}
 	}
 
-	function getPathAttributes($database, $path, $pseudo_realnames) {
+	function getPathAttributes($database, $path, $pseudo_realnames = array()) {
 		$pathAttributes = array();
 		if ($path != '') {
 			$ret = $database->getFieldsfromSelect($path, false, $pseudo_realnames);
@@ -17792,7 +17792,7 @@ class db_mapObj{
 		return $attributes;
 	}
 
-	function load_attributes($database, $path, $pseudo_realnames) {
+	function load_attributes($database, $path, $pseudo_realnames = array()) {
 		# Attributname und Typ aus Pfad-Statement auslesen:
 		$attributes = $this->getPathAttributes($database, $path, $pseudo_realnames);
 		return $attributes;
