@@ -1339,8 +1339,8 @@
     $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
     $GUI->drawMap();
 	
-		if($GUI->formvars['Gemarkung'] == '')$GUI->formvars['Gemarkung'] = $GUI->Lagebezeichung['gemkgschl'];
-		if($GUI->formvars['Flur'] == '')$GUI->formvars['Flur'] = $GUI->Lagebezeichung['flur'];
+		if($GUI->formvars['Gemarkung'] == '')$GUI->formvars['Gemarkung'] = $GUI->formvars['gemschl'] ?: $GUI->Lagebezeichung['gemkgschl'];
+		if($GUI->formvars['Flur'] == '')$GUI->formvars['Flur'] = (int)$GUI->formvars['FlurID'] ?: $GUI->Lagebezeichung['flur'];
     
     # Abfragen der Gemarkungen
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
