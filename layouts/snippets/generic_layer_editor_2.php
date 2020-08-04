@@ -162,7 +162,7 @@
 							$cell['content'] = attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2, $this->user->rolle->fontsize_gle);
 							$cell['id'] = 'value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
 							$cell['properties'] = get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j]));
-							if($nl){
+							if ($nl){
 								$next_row['cells'][] = $cell;
 							}
 							else{
@@ -173,10 +173,12 @@
 							
 							if ($layer['attributes']['arrangement'][$j+1] != 1){		# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
 								$table['rows'][] = $row;
-								if(count($row['cells']) > value_of($table, 'max_cell_count'))$table['max_cell_count'] = count($row['cells']);
+								if (count($row['cells']) > value_of($table, 'max_cell_count')) {
+									$table['max_cell_count'] = count($row['cells']);
+								}
 								unset($row);
 							}
-							if($layer['attributes']['arrangement'][$j+1] != 1 AND $nl){			# die aufgesammelten Zellen in neuer Zeile ausgeben
+							if ($layer['attributes']['arrangement'][$j+1] != 1 AND $nl){			# die aufgesammelten Zellen in neuer Zeile ausgeben
 								$table['rows'][] = $next_row;
 								unset($next_row);
 								$nl = false;

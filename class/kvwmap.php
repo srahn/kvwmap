@@ -5330,7 +5330,7 @@ echo '			</ul>
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
     $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
-    $polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+    $polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
     if($this->formvars['oid'] != ''){
     	if($this->formvars['selektieren'] != 'zoomonly'){
 	      $this->createZoomRollenlayer($dbmap, $layerdb, $layerset);
@@ -16062,121 +16062,143 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
   }
 
-  function createQueryMap($layerset, $k){
+	/**
+	* Function erzeugt eine MapServer Query Map vom $k-ten Feature im layerset
+	* und liefert den Pfad der Datei zurück
+	* @param array $layerset Der Satz des Layers von dem die Karte ausgegeben werden soll
+	* @param integer $k Der Indexwert von dem Feature innerhalb des layerset
+	* @return string Der Pfad auf die Bilddatei der Querymap. Wenn das Feature keine Geometrie hat,
+	* wird der Pfad zur Datei nogeom.png in GRAPHICSPATH zurückgegeben.
+	*/
+	function createQueryMap($layerset, $k) {
 		global $language;
-  	if($layerset['attributes']['the_geom'] != ''){
-	    $layer_id = $layerset['Layer_ID'];
-	    $tablename = $layerset['attributes']['table_name'][$layerset['attributes']['the_geom']];
-	    $oid = $layerset['shape'][$k][$tablename.'_oid'];
+		if ($layerset['attributes']['the_geom'] != '') {
+			$layer_id = $layerset['Layer_ID'];
+			$tablename = $layerset['attributes']['table_name'][$layerset['attributes']['the_geom']];
+			$oid = $layerset['shape'][$k][$tablename . '_oid'];
 			$real_geom_name = $layerset['attributes']['real_name'][$layerset['attributes']['the_geom']];
-	    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-			if(MAPSERVERVERSION < 600){
+			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+			if (MAPSERVERVERSION < 600) {
 				$map = ms_newMapObj(NULL);
 			}
 			else {
 				$map = new mapObj(NULL);
 			}
 			$map->set('debug', 5);
-	    $layerdb = $mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
-	    # Auf den Datensatz zoomen
-	    $sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
-	    $sql.=" FROM (SELECT box2D(st_transform(" . $real_geom_name.", " . $this->user->rolle->epsg_code.")) as bbox";
-	    $sql.=" FROM " . $tablename." WHERE ".$layerset['oid']." = '" . $oid."') AS foo";
-	    $ret = $layerdb->execSQL($sql, 4, 0);
-	    $rs = pg_fetch_array($ret[1]);
-	    $rect = ms_newRectObj();
-	    $rect->minx=$rs['minx'];
-	    $rect->maxx=$rs['maxx'];
-	    $rect->miny=$rs['miny'];
-	    $rect->maxy=$rs['maxy'];
-	    $randx=($rect->maxx-$rect->minx)*50/100 + 0.01;
-	    $randy=($rect->maxy-$rect->miny)*50/100 + 0.01;
-	    if($rect->minx != ''){
-	    	$map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-		    # Haupt-Layer erzeugen
-		    $layer=ms_newLayerObj($map);
-		    $layer->set('data',$layerset['Data']);
-				if($layerset['Filter'] != ''){
+			$layerdb = $mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+			# Auf den Datensatz zoomen
+			$sql = "
+				SELECT
+					st_xmin(bbox) AS minx,
+					st_ymin(bbox) AS miny,
+					st_xmax(bbox) AS maxx,
+					st_ymax(bbox) AS maxy
+				FROM
+					(
+						SELECT
+							box2D(st_transform(" . $real_geom_name . ", " . $this->user->rolle->epsg_code . ")) as bbox
+						FROM
+							" . $tablename . "
+						WHERE
+							" . $layerset['oid'] . " = '" . $oid . "'
+					) AS foo
+			";
+			$ret = $layerdb->execSQL($sql, 4, 0);
+			$rs = pg_fetch_array($ret[1]);
+			$rect = ms_newRectObj();
+			$rect->minx = $rs['minx'];
+			$rect->maxx = $rs['maxx'];
+			$rect->miny = $rs['miny'];
+			$rect->maxy = $rs['maxy'];
+			$randx = ($rect->maxx-$rect->minx) * 50 / 100 + 0.01;
+			$randy = ($rect->maxy-$rect->miny) * 50 / 100 + 0.01;
+			if ($rect->minx != '') {
+				$map->setextent($rect->minx - $randx, $rect->miny - $randy, $rect->maxx + $randx, $rect->maxy + $randy);
+				# Haupt-Layer erzeugen
+				$layer = ms_newLayerObj($map);
+				$layer->set('data', $layerset['Data']);
+				if ($layerset['Filter'] != '') {
 					$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
-					if (substr($layerset['Filter'],0,1)=='(') {
-						$expr=$layerset['Filter'];
+					if (substr($layerset['Filter'], 0, 1) == '(') {
+						$expr = $layerset['Filter'];
 					}
-					else{
-						$expr=buildExpressionString($layerset['Filter']);
+					else {
+						$expr = buildExpressionString($layerset['Filter']);
 					}
 					$layer->setFilter($expr);
 				}
-		    $layer->set('status',MS_ON);
-		    $layer->set('template', ' ');
-		    $layer->set('name','querymap'.$k);
-		    $layer->set('type',$layerset['Datentyp']);
-		    if (MAPSERVERVERSION < '540') {
-		      $layer->set('connectiontype', 6);
-		    }
-		    else {
-		      $layer->setConnectionType(6);
-		    }
-		    $layer->set('connection',$layerset['connection']);
-		    $layer->setProjection('+init=epsg:'.$layerset['epsg_code']);
-		    $layer->setMetaData('wms_queryable','0');
-		    $klasse=ms_newClassObj($layer);
-		    $klasse->set('status', MS_ON);
-		    $style=ms_newStyleObj($klasse);
-		    $style->color->setRGB(12,255,12);
-		    if (MAPSERVERVERSION > '500') {
-		    	$style->set('width', 1);
-		    }
-		    $style->outlinecolor->setRGB(110,110,110);
-		    # Datensatz-Layer erzeugen
-		    $layer=ms_newLayerObj($map);
-				if($layerset['attributes']['schema_name'][$tablename] != ''){
+				$layer->set('status',MS_ON);
+				$layer->set('template', ' ');
+				$layer->set('name','querymap'.$k);
+				$layer->set('type',$layerset['Datentyp']);
+				if (MAPSERVERVERSION < '540') {
+					$layer->set('connectiontype', 6);
+				}
+				else {
+					$layer->setConnectionType(6);
+				}
+				$layer->set('connection', $layerset['connection']);
+				$layer->setProjection('+init=epsg:' . $layerset['epsg_code']);
+				$layer->setMetaData('wms_queryable', '0');
+				$klasse=ms_newClassObj($layer);
+				$klasse->set('status', MS_ON);
+				$style=ms_newStyleObj($klasse);
+				$style->color->setRGB(12, 255, 12);
+				if (MAPSERVERVERSION > '500') {
+					$style->set('width', 1);
+				}
+				$style->outlinecolor->setRGB(110, 110, 110);
+				# Datensatz-Layer erzeugen
+				$layer = ms_newLayerObj($map);
+				if ($layerset['attributes']['schema_name'][$tablename] != '') {
 					$tablename = $layerset['attributes']['schema_name'][$tablename].'.'.$tablename;
 				}
-		    elseif($layerset['schema'] != ''){
-		    	$tablename = $layerdb->schema.'.'.$tablename;
-		    }
-		    $datastring = $real_geom_name." from (select oid as id, " . $real_geom_name." from " . $tablename;
-		    $datastring.=" WHERE oid = '" . $oid."'";
-		    $datastring.=") as foo using unique id using srid=" . $layerset['epsg_code'];
-		    $layer->set('data',$datastring);
-		    $layer->set('status',MS_ON);
-		    $layer->set('template', ' ');
-		    $layer->set('name','querymap'.$k);
-		    $layer->set('type',$layerset['Datentyp']);
-		    if (MAPSERVERVERSION < '540') {
-		      $layer->set('connectiontype', 6);
-		    }
-		    else {
-		      $layer->setConnectionType(6);
-		    }
-		    $layer->set('connection',$layerset['connection']);
-		    $layer->setProjection('+init=epsg:'.$layerset['epsg_code']);
-		    $layer->setMetaData('wms_queryable','0');
-		    $klasse=ms_newClassObj($layer);
-		    $klasse->set('status', MS_ON);
-		    $style=ms_newStyleObj($klasse);
-		    $style->color->setRGB(255,5,12);
-		    if (MAPSERVERVERSION > '500') {
-		    	$style->set('width', 2);
-		    }
-		    $style->outlinecolor->setRGB(0,0,0);
-		    # Karte rendern
-		    $map->setProjection('+init=epsg:'.$this->user->rolle->epsg_code,MS_TRUE);
-		    $map->web->set('imagepath', IMAGEPATH);
-		    $map->web->set('imageurl', IMAGEURL);
-		    $map->set('width', 50);
-		    $map->set('height', 50);
-		    $image_map = $map->draw();
-		    $filename = $this->map_saveWebImage($image_map,'jpeg');
-		    $newname = $this->user->id.basename($filename);
-		    rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-		    return IMAGEURL.$newname;
-	    }
-	    else{
-	    	return GRAPHICSPATH.'nogeom.png';
-	    }
-  	}
-  }
+				elseif ($layerset['schema'] != '') {
+					$tablename = $layerdb->schema.'.'.$tablename;
+				}
+				$datastring  = $real_geom_name
+					. " from (select " . $layerset['oid'] . ", " . $real_geom_name . " from " . $tablename
+					. " WHERE " . $layerset['oid'] . " = '" . $oid
+					. "') as foo using unique " . $layerset['oid'] . " using srid=" . $layerset['epsg_code'];
+				$layer->set('data', $datastring);
+				$layer->set('status', MS_ON);
+				$layer->set('template', ' ');
+				$layer->set('name', 'querymap' . $k);
+				$layer->set('type', $layerset['Datentyp']);
+				if (MAPSERVERVERSION < '540') {
+					$layer->set('connectiontype', 6);
+				}
+				else {
+					$layer->setConnectionType(6);
+				}
+				$layer->set('connection', $layerset['connection']);
+				$layer->setProjection('+init=epsg:' . $layerset['epsg_code']);
+				$layer->setMetaData('wms_queryable', '0');
+				$klasse=ms_newClassObj($layer);
+				$klasse->set('status', MS_ON);
+				$style=ms_newStyleObj($klasse);
+				$style->color->setRGB(255, 5, 12);
+				if (MAPSERVERVERSION > '500') {
+					$style->set('width', 2);
+				}
+				$style->outlinecolor->setRGB(0,0,0);
+				# Karte rendern
+				$map->setProjection('+init=epsg:' . $this->user->rolle->epsg_code, MS_TRUE);
+				$map->web->set('imagepath', IMAGEPATH);
+				$map->web->set('imageurl', IMAGEURL);
+				$map->set('width', 50);
+				$map->set('height', 50);
+				$image_map = $map->draw();
+				$filename = $this->map_saveWebImage($image_map, 'jpeg');
+				$newname = $this->user->id . basename($filename);
+				rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+				return IMAGEURL . $newname;
+			}
+			else {
+				return GRAPHICSPATH . 'nogeom.png';
+			}
+		}
+	}
 
 	function create_query_rect($input_coords){
 		if($input_coords != ''){
