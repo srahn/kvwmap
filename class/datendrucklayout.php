@@ -958,7 +958,7 @@ class ddl {
     }
 		if($pdfobject == NULL){		# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF erzeugen
 			# Freitexte hinzufügen, die auf jeder Seite erscheinen sollen (Seitennummerierung etc.)
-			$this->add_everypage_elements();
+			$this->add_everypage_elements($preview);
 			$dateipfad=IMAGEPATH;
 			$currenttime = date('Y-m-d_H_i_s',time());
 			if($this->layout['filename'] != ''){
@@ -994,7 +994,7 @@ class ddl {
 		}
 	}
 	
-	function add_everypage_elements(){
+	function add_everypage_elements($preview){
 		$this->pdf->ezSetMargins(0,0,0,0);
 		$pages = $this->pdf->objects['3']['info']['pages'];
 		$pagecount = count($pages);
@@ -1016,6 +1016,13 @@ class ddl {
 			}
 			$this->add_lines(0, 'everypage');
 			$this->add_rectangles(0, 'everypage');			# feste Rechtecke hinzufügen
+			if($preview){
+				$this->pdf->setLineStyle(0.1,'','',array(9,10));
+				$this->pdf->line(0, $this->layout['margin_bottom'], $this->layout['width'], $this->layout['margin_bottom']);
+				$this->pdf->line(0, $this->layout['height'] - $this->layout['margin_top'], $this->layout['width'], $this->layout['height'] - $this->layout['margin_top']);
+				$this->pdf->line($this->layout['margin_left'], $this->layout['height'], $this->layout['margin_left'], 0);
+				$this->pdf->line($this->layout['width'] - $this->layout['margin_right'], $this->layout['height'], $this->layout['width'] - $this->layout['margin_right'], 0);
+			}
 			$this->pdf->closeObject();
 		}
 	}
