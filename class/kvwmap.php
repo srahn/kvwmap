@@ -10304,8 +10304,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$geometrie_tabelle = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']];
 		$j = 0;
 		foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
-			if(($tablename == $layerset[0]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[0]['attributes']['oids'][$j]){		# hat Haupttabelle oder Geometrietabelle oids?
-				$newpath = $layerset[0]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$newpath;
+			if(($tablename == $layerset[0]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[0]['oid'] != ''){		# hat Haupttabelle oder Geometrietabelle oids?
+				$newpath = $layerset[0]['attributes']['table_alias_name'][$tablename].'.'.$layerset[0]['oid'].' AS '.$tablename.'_oid, '.$newpath;
 			}
 			$j++;
 		}
@@ -10319,7 +10319,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
 				$sql = "
 					SELECT " . $newpath . "
-						AND " . $element[1] . ".oid = " . $element[3] . "
+						AND " . $element[1] . ".".$layerset[0]['oid']." = " . $element[3] . "
 				";
         $oids[] = $element[3];
        # echo $sql.'<br><br>';
