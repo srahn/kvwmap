@@ -5094,9 +5094,9 @@ echo '			</ul>
       	$orderby = substr($select, $orderbyposition);
         $select = substr($select, 0, $orderbyposition);
       }
-      if(strpos(strtolower($select), 'oid') === false){
-      	$select = str_replace($this->formvars['layer_columnname'], 'oid, '.$this->formvars['layer_columnname'], $select);
-      	$select = str_replace('*', '*, oid', $select);
+      if(strpos(strtolower($select), $layerset[0]['oid']) === false){
+      	$select = str_replace($this->formvars['layer_columnname'], $layerset[0]['oid'].', '.$this->formvars['layer_columnname'], $select);
+      	$select = str_replace('*', '*, '.$layerset[0]['oid'], $select);
       }
       if($attribute != '' AND strpos($select, '*') === false AND strpos($select, $attribute) === false){			# Attribut für automatische Klassifizierung mit ins data packen
       	$select = str_replace(' from ', ', '.$attribute.' from ', strtolower($select));
@@ -5107,10 +5107,10 @@ echo '			</ul>
       else{
         $select .= " AND ";
       }
-      $oid = 'oid';
+      $oid = $layerset[0]['oid'];
       $explosion = explode(',', $select);							# wenn im Data sowas wie tabelle.oid vorkommt, soll das anstatt oid verwendet werden
       for($i = 0; $i < count($explosion); $i++){
-      	if(strpos(strtolower($explosion[$i]), '.oid') !== false){
+      	if(strpos(strtolower($explosion[$i]), '.'.$layerset[0]['oid']) !== false){
       		$oid = str_replace('select ', '', strtolower($explosion[$i]));
       		break;
       	}
@@ -5122,7 +5122,7 @@ echo '			</ul>
       $select = substr($select, 0, -1);
       $select .= ")";
       $datastring = $this->formvars['layer_columnname']." from (" . $select.' '.$orderby;
-      $datastring.=") as foo using unique oid using srid=" . $layerset[0]['epsg_code'];
+      $datastring.=") as foo using unique ".$layerset[0]['oid']." using srid=" . $layerset[0]['epsg_code'];
 			if($layerset[0]['alias'] != '' AND $this->Stelle->useLayerAliases){
 				$layerset[0]['Name'] = $layerset[0]['alias'];
 			}
@@ -5229,9 +5229,9 @@ echo '			</ul>
 		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 			$select = substr($select, 0, $orderbyposition);
 		}
-		if(strpos(strtolower($select), 'oid') === false){
-			$select = str_replace('*', '*, oid', $select);
-			$select = str_replace_first($datageom, $datageom.', oid', $select);
+		if(strpos(strtolower($select), $layerset[0]['oid']) === false){
+			$select = str_replace('*', '*, '.$layerset[0]['oid'], $select);
+			$select = str_replace_first($datageom, $datageom.', '.$layerset[0]['oid'], $select);
 		}
 
 		if(strpos(strtolower($select), 'where') === false){
@@ -5240,10 +5240,10 @@ echo '			</ul>
 		else{
 			$select .= " AND ";
 		}
-		$oid = 'oid';
+		$oid = $layerset[0]['oid'];
 		$explosion = explode(',', $select);							# wenn im Data sowas wie tabelle.oid vorkommt, soll das anstatt oid verwendet werden
 		for($i = 0; $i < count($explosion); $i++){
-			if(strpos(strtolower($explosion[$i]), '.oid') !== false){
+			if(strpos(strtolower($explosion[$i]), '.'.$layerset[0]['oid']) !== false){
 				$oid = str_replace('select ', '', strtolower(str_replace([chr(10), chr(13)], '', $explosion[$i])));
 				break;
 			}
@@ -5251,7 +5251,7 @@ echo '			</ul>
 		$select .= $oid." = '" . $this->formvars['oid']."'";
 
 		$datastring = $datageom." from (" . $select;
-		$datastring.=") as foo using unique oid using srid=" . $layerset[0]['epsg_code'];
+		$datastring.=") as foo using unique ".$layerset[0]['oid']." using srid=" . $layerset[0]['epsg_code'];
 		if($layerset[0]['alias'] != '' AND $this->Stelle->useLayerAliases){
 			$layerset[0]['Name'] = $layerset[0]['alias'];
 		}
