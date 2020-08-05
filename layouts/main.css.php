@@ -115,6 +115,21 @@ form {
 	display: none;
 }
 
+ul{
+	color: lightsteelblue;
+	margin: 5px;
+	padding: 0 0 0 15px;
+	list-style: square outside none;
+}
+
+.ul_table td:first-of-type{
+	display: inline list-item;
+	color: lightsteelblue;
+	margin: 4px;
+	padding: 0;
+	list-style: square outside none;
+}
+
 h1 {
 	font-family: SourceSansPro3;
 	font-size: 24px; 
@@ -409,6 +424,10 @@ a.invisiblelayerlink:hover{
 	margin-top: 10px;
 }
 
+#params_table{
+	width: 1000px
+}
+
 #datendrucklayouteditor{
 	display: flex;
 	margin: 10px;
@@ -446,10 +465,7 @@ a.invisiblelayerlink:hover{
 }
 
 #geo_name_search_result_div ul{
-	color: lightsteelblue;
-	margin: 5px;
 	padding: 10px 0 6px 15px;
-	list-style: square outside none;
 }
 
 #geo_name_search_result_div ul li{
@@ -1845,14 +1861,6 @@ tbody.gle>tr {
 	padding-left: 9px;
 }
 
-.layerOptions ul, #legendOptions ul{
-	color: lightsteelblue;
-	margin: 5px;
-	padding: 0px;
-	padding-left: 15px;
-	list-style: square outside none;
-}
-
 .layerOptions li, #legendOptions li{
 	margin-bottom: 5px;
 }
@@ -1884,14 +1892,6 @@ tbody.gle>tr {
 .groupOptionsHeader{
 	background-color: #c7d9e6;
 	padding: 2px 2px 2px 8px;
-}
-
-.groupOptions ul{
-	color: lightsteelblue;
-	margin: 5px;
-	padding: 0px;
-	padding-left: 15px;
-	list-style: square outside none;
 }
 
 .groupOptions span{

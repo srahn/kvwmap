@@ -105,6 +105,7 @@ define('CASE_COMPRESS', false);
 #   getLayerOptions:  - ein Rollenlayer muss verwendet werden																							#
 #											- getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
 #												und writeDatatypeAttributes() reinkopieren																				#
+#											- get_layer_params_form, get_layer_params_layer und get_layer_params reinkopieren		#
 #		get_group_legend:	- compare_legendorder() reinkopieren																								#
 #											- ein Layer muss in der Gruppe an sein																							#
 #		get_select_list:  - read_datatype_attributes() reinkopieren																						#
