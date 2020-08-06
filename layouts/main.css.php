@@ -965,7 +965,7 @@ a.menuered:hover {
 	position: relative;
 }
 
-#showcoords{
+#showcoords, #showmeasurement{
 	position: absolute; 
 	bottom: 0px;
 	text-align: left;

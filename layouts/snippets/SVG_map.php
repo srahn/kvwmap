@@ -1223,6 +1223,8 @@ function polygonarea(){
 		label.setAttribute("x", Math.floor(bbox.x + bbox.width/2.0) - 50);
 		label.setAttribute("y", -1 * (Math.floor(bbox.y + bbox.height/2.0)));		
 		label.textContent = "Fl"+unescape("%E4")+"cheninhalt: "+area+" m"+unescape("%B2")+" "+unescape("%A0");
+		top.document.getElementById("showmeasurement").style.display = "";
+		top.document.getElementById("measurement").value = area;
 		return;
 	}
 }
@@ -1520,7 +1522,9 @@ function showSectionMeasurement(j){
 	section_text = section_box.childNodes[3];		// 3, weil zwischen den eigentlichen Nodes noch Text steht (wahrscheinlich die Zeilenumbrueche)
 	section_rect.setAttribute("id", "");
 	section_text.setAttribute("id", "");
-	document.getElementById("moveGroup").appendChild(section_box);
+	document.getElementById("moveGroup").appendChild(section_box);	
+	top.document.getElementById("showmeasurement").style.display = "";
+	top.document.getElementById("measurement").value = top.format_number(new_distance, false, freehand_measuring, true);
 }
 
 function showMeasurement(evt){

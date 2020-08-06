@@ -3,6 +3,7 @@
   $strLoadNew="Reload";
   $strCoordinates="Coordinates";
   $strShowCoordinates="Coordinates";
+	$strMeasurement="Measurement";
   $strMapImageURL="Show map image";
   $strMapSettingsFrom="Map settings from";
   $strPreviousView="Previous view";
