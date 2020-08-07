@@ -1839,7 +1839,16 @@ echo '			</table>
 				# z.B. für Klassen mit Umlauten
 				$layerset['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";
 			}
-			$layer->set('connection', $layerset['connection']);
+			$layer->set('connection', 
+				replace_params(
+					$layerset[connection],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->Stelle->id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				)
+			);
 		}
 
 		if ($layerset['connectiontype'] > 0) {
@@ -1851,7 +1860,16 @@ echo '			</table>
 		}
 
 		if ($layerset['processing'] != "") {
-			$processings = explode(";",$layerset['processing']);
+			$processings = explode(";",
+				replace_params(
+					$layerset['processing'],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->Stelle->id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				)
+			);
 			foreach ($processings as $processing) {
 				$layer->setProcessing($processing);
 			}
@@ -19414,7 +19432,7 @@ class db_mapObj{
 			WHERE
 				locate(
 					concat('$', p.key),
-					concat(l.Name, COALESCE(l.alias, ''), l.connection, l.Data, l.pfad, l.classitem, l.classification)
+					concat(l.Name, COALESCE(l.alias, ''), l.connection, l.Data, l.pfad, l.classitem, l.classification, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 				) > 0
 		";
 		if($param_id != NULL){
