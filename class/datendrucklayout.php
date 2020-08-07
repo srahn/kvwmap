@@ -549,9 +549,9 @@ class ddl {
 					$this->gui->switchScaleUnitIfNecessary();
 					$this->gui->map->scalebar->set('status', MS_EMBED);
 					$this->gui->map->scalebar->position = MS_LR;
-					$this->gui->map->scalebar->label->size = 16;
-					$this->gui->map->scalebar->width = 300;
-					$this->gui->map->scalebar->height = 4;
+					$this->gui->map->scalebar->label->size = 12;
+					$this->gui->map->scalebar->width = 180;
+					$this->gui->map->scalebar->height = 3;
 					$image_map = $this->gui->map->draw();
 					# Rollenlayer wieder entfernen
 					if($oid != ''){

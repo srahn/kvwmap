@@ -10461,9 +10461,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$tablename == $layerset[0]['maintable'] OR
 					$tablename == $geometrie_tabelle
 				) AND
-				$layerset[0]['attributes']['oids'][$j]
-			) { # hat Haupttabelle oder Geometrietabelle oids?
-				$newpath = $layerset[0]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$newpath;
+				$layerset[0]['oid'] != ''
+			) {
+				$newpath = $layerset[0]['attributes']['table_alias_name'][$tablename].'.'.$layerset[0]['oid'].' AS '.$tablename.'_oid, '.$newpath;
 			}
 			$j++;
 		}
@@ -10494,7 +10494,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$sql = "
 						SELECT
 							" . $newpath . " AND
-							" . $element[1] . ".oid = " . $element[3] . "
+							" . $element[1] . ".".$layerset[0]['oid']." = " . $element[3] . "
 					";
 					$oids[] = $element[3];
 					#echo '<p>SQL zur Abfrage der Datensätze die gedruckt werden sollen:<br>' . $sql;
