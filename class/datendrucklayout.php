@@ -179,7 +179,7 @@ class ddl {
 					}
 					$this->pdf->setLineStyle($this->layout['lines'][$j]['breite'], 'square');
 					if($overflow){		# Seitenumbruch dazwischen
-						$this->pdf->reopenObject($before);
+						$this->pdf->reopenObject($page_id_start);
 						$this->pdf->line($x, $y, $endx, $this->layout['margin_bottom']);
 						$this->pdf->closeObject();
 						$this->pdf->line($x, 842 - $this->layout['margin_top'] + 10, $endx, $endy);
