@@ -37,7 +37,7 @@
 		
 		$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
 		if (is_array($layer['attributes']['privileg'])) {
-			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
+			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't' OR $this->formvars['attribute_privileg'] == '0') {
 				$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
 			}
 		}
