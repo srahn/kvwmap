@@ -138,6 +138,7 @@ class ddl {
 	function add_lines($offsetx, $type){
 		if(count($this->remaining_lines) == 0)return;
     for($j = 0; $j < count($this->layout['lines']); $j++){
+			$overflow = false;
 			if($type != 'everypage' AND $this->page_overflow){
 				$this->pdf->reopenObject($this->record_startpage);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 				#if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???		muss auskommentiert bleiben, sonst ist die Karte im MVBIO-Drucklayout auf der zweiten Seite
@@ -156,7 +157,11 @@ class ddl {
 					if($offset_attribute_start != ''){			# ist ein offset_attribute gesetzt
 						$offset_value = $this->layout['offset_attributes'][$offset_attribute_start];
 						if($offset_value != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
+							$before = $this->pdf->currentContents;
 							$y = $this->handlePageOverflow($offset_attribute_start, $offset_value, $y);		# Seitenüberläufe berücksichtigen
+							if($before != $this->pdf->currentContents){
+								$overflow = true;
+							}
 						}
 						else{
 							$remaining_lines[] = $this->layout['lines'][$j]['id'];
@@ -166,7 +171,11 @@ class ddl {
 					if($offset_attribute_end != ''){			# ist ein offset_attribute gesetzt
 						$offset_value = $this->layout['offset_attributes'][$offset_attribute_end];
 						if($offset_value != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
+							$before = $this->pdf->currentContents;
 							$endy = $this->handlePageOverflow($offset_attribute_end, $offset_value, $endy);		# Seitenüberläufe berücksichtigen
+							if($before != $this->pdf->currentContents){
+								$overflow = true;
+							}
 						}
 						else{
 							$remaining_lines[] = $this->layout['lines'][$j]['id'];
@@ -196,8 +205,8 @@ class ddl {
 						}
 					}
 					$this->pdf->setLineStyle($this->layout['lines'][$j]['breite'], 'square');
-					if($this->pdf->currentContents != $this->record_startpage){		# Seitenumbruch dazwischen
-						$this->pdf->reopenObject($this->record_startpage);
+					if($overflow){		# Seitenumbruch dazwischen
+						$this->pdf->reopenObject($before);
 						$this->pdf->line($x, $y, $endx, $this->layout['margin_bottom']);
 						$this->pdf->closeObject();
 						$this->pdf->line($x, $this->layout['height'] - $this->layout['margin_top'] + 10, $endx, $endy);
