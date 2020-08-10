@@ -196,7 +196,7 @@ class ddl {
 						}
 					}
 					$this->pdf->setLineStyle($this->layout['lines'][$j]['breite'], 'square');
-					if($endy > $y){		# Seitenumbruch dazwischen
+					if($this->pdf->currentContents != $this->record_startpage){		# Seitenumbruch dazwischen
 						$this->pdf->reopenObject($this->record_startpage);
 						$this->pdf->line($x, $y, $endx, $this->layout['margin_bottom']);
 						$this->pdf->closeObject();
