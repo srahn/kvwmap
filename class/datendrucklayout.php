@@ -158,25 +158,25 @@ class ddl {
 						$offset_value = $this->layout['offset_attributes'][$offset_attribute_start];
 						if($offset_value != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
 							$y = $this->handlePageOverflow($offset_attribute_start, $offset_value, $y);		# Seitenüberläufe berücksichtigen
-							$page_id_start = $this->pdf->currentContents;
 						}
 						else{
 							$remaining_lines[] = $this->layout['lines'][$j]['id'];
 							continue;			# die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
 						}
 					}
+					$page_id_start = $this->pdf->currentContents;
 					if($offset_attribute_end != ''){			# ist ein offset_attribute gesetzt
 						$offset_value = $this->layout['offset_attributes'][$offset_attribute_end];
 						if($offset_value != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
 							$endy = $this->handlePageOverflow($offset_attribute_end, $offset_value, $endy);		# Seitenüberläufe berücksichtigen
-							if($page_id_start != $this->pdf->currentContents){
-								$overflow = true;
-							}
 						}
 						else{
 							$remaining_lines[] = $this->layout['lines'][$j]['id'];
 							continue;			# die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
 						}
+					}
+					if($page_id_start != $this->pdf->currentContents){
+						$overflow = true;
 					}
 					if($offset_attribute_start == ''){
 						$y = $y - $this->offsety;
