@@ -247,7 +247,7 @@ function save(stelle, other_selected_layer_id = '') {
 					<td><?
 						$stellenanzahl = ($this->stellen ? count($this->stellen['ID']) : 0);
 						if($stellenanzahl > 0){
-						$width1 = $width = 289*$stellenanzahl;
+						$width1 = $width = 297*$stellenanzahl;
 						if($width > 1187)$width = 1187;
 						if($width1 > 1187){ ?>
 						<div id="upperscrollbar" style="overflow:auto; overflow-y:hidden;width:1187px" onscroll="document.getElementById('stellendiv').scrollLeft=this.scrollLeft">
