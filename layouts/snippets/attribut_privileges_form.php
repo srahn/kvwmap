@@ -130,30 +130,18 @@ function save(stelle, other_selected_layer_id = '') {
 		margin-top: 50px;
 	}
 	.apt-attributname {
-		position: relative;
-		display: inline-block;
-	}
-	.apt-attributname .apt-attributname-tooltip {
-		visibility: hidden;
-		top: 0px;
-		left: 50%;
-		background-color: rgb(255,255,255);
-		color: #000;
-		text-align: center;
-		border-radius: 2px;
-		border: 1px solid #ccc;
+		margin-top: 2px;
 		padding: 3px;
 		position: absolute;
-		z-index: 1;
-		margin-left: -53px;
-		margin-top: -1px;
-		font-size:14px;
+		width: 100px;
+		background-color: #f8f8f9;		
+		overflow: hidden;
+		outline: 1px solid #f8f8f9;
 		cursor: default;
-		transition-property: visibility;
-		transition-delay: 250ms;
 	}
-	.apt-attributname:hover .apt-attributname-tooltip  {
-		visibility: visible;
+	.apt-attributname:hover {
+		width: auto;
+		outline: 1px solid #ccc;
 	}
 	</style>
 
