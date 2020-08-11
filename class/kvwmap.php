@@ -9841,14 +9841,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         } break;
 
         case 'SubFormEmbeddedPK' : {
-          if(!$this->success)echo $ret['msg'];
-          else{
-						if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
-							echo '██currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
-						}
-						else{			# ansonsten nur das SubForm-Listen-Div
-							echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
-						}
+					if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+						echo '██currentform.go.value=\'get_last_query\';overlay_submit(currentform, false);';
+					}
+					else{
+						echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+					}
+					if(!empty($this->messages)){
+						echo 'message('.json_encode($this->messages).');';
 					}
         } break;
       }
