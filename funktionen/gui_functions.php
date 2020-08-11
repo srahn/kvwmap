@@ -4,12 +4,19 @@
 ?>
 <script language="javascript" type="text/javascript">
 
-if(navigator.userAgent.toLowerCase().indexOf('firefox') >= 0){
+var browser_string = navigator.userAgent.toLowerCase();
+
+if(browser_string.indexOf('firefox') >= 0){
 	var browser = 'firefox';
+}	
+else if(browser_string.indexOf('chrome') >= 0){	
+	var browser = 'chrome';
+}
+else if (browser_string.indexOf('edg') >= 0){
+	var browser = 'edge';
 }
 else{
-	if(navigator.userAgent.toLowerCase().indexOf('chrome') >= 0) var browser = 'chrome';
-	else var browser = 'other';
+	var browser = 'ie';
 }
 
 function Bestaetigung(link,text) {
@@ -415,7 +422,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	top.startwaiting();
 	svgdoc = document.SVG.getSVGDocument();	
 	// nix
-	if(browser == 'firefox')var mapimg = svgdoc.getElementById("mapimg2");			
+	if(browser != 'ie')var mapimg = svgdoc.getElementById("mapimg2");			
 	else var mapimg = svgdoc.getElementById("mapimg");
 	var scalebar = document.getElementById("scalebar");
 	var refmap = document.getElementById("refmap");
@@ -436,7 +443,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	if(document.GUI.width_reduction)width_reduction = document.GUI.width_reduction.value;
 	if(document.GUI.height_reduction)height_reduction = document.GUI.height_reduction.value;
 	
-	if(browser != 'firefox'){
+	if(browser == 'ie'){
 		code2execute_before += 'moveback()';
 		code2execute_after += 'startup();';
 	}

@@ -538,7 +538,7 @@ function getEventPoint(evt) {
 
 function init(){
 	startup();
-	if(top.browser != "other"){
+	if(top.browser != "ie"){
 		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback_ff(evt); }, true);
 	}
 	if (window.addEventListener) {
