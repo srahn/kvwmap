@@ -9586,8 +9586,10 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
         } break;
 
         case 'SubFormEmbeddedPK' : {
-          if(!$this->success)echo $ret['msg'];
-          else echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+					echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
+					if(!empty($this->messages)){
+						echo 'message('.json_encode($this->messages).');';
+					}
         } break;
       }
 
