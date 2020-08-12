@@ -504,11 +504,13 @@ function overlay_submit(gui, start){
 
 function overlay_link(data){
 	// diese Funktion macht bei Aufruf aus dem Overlay-Fenster einen ajax-Request mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
-	if(currentform.name == 'GUI2'){
-		ahah("index.php", data+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv')), new Array("sethtml"));	
-		if(document.GUI.CMD != undefined)document.GUI.CMD.value = "";
-	}else{
-		window.location.href = 'index.php?'+data;
+	if(checkForUnsavedChanges()){
+		if(currentform.name == 'GUI2'){
+			ahah("index.php", data+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv')), new Array("sethtml"));	
+			if(document.GUI.CMD != undefined)document.GUI.CMD.value = "";
+		}else{
+			window.location.href = 'index.php?'+data;
+		}
 	}
 }
 
