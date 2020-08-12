@@ -3330,7 +3330,7 @@ echo '			</table>
 				break;
 			}
 		}
-		if ($new_oids = $this->copy_dataset($mapdb, $this->formvars['chosen_layer_id'], array('oid'), array($oid), 1)) {
+		if ($new_oids = $this->copy_dataset($mapdb, $this->formvars['chosen_layer_id'], array($layerset[0]['oid']), array($oid), 1)) {
 			$this->add_message('notice', 'Der Datensatz wurde kopiert.');
 			$this->formvars['value_'.$layerset[0]['maintable'].'_oid'] = $new_oids[0];
 			$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
@@ -5261,7 +5261,7 @@ echo '			</table>
       $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
       $this->loadMap('DataBase');
       # Polygon abfragen und Extent setzen
-      $rect = $dbmap->zoomToDatasets($geom_oids, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10, $layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+      $rect = $dbmap->zoomToDatasets($geom_oids, $layerset[0]['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10, $layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 	    if (MAPSERVERVERSION > 600) {
 				$this->map_scaledenom = $this->map->scaledenom;
@@ -8921,7 +8921,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							for ($k = 0; $k < count($this->qlayerset[$i]['shape']); $k++){
 								$oids[] = $this->qlayerset[$i]['shape'][$k][$geometrie_tabelle.'_oid'];
 							}
-							$rect = $mapDB->zoomToDatasets($oids, $geometrie_tabelle, $attributes['real_name'][$attributes['the_geom']], 10, $layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+							$rect = $mapDB->zoomToDatasets($oids, $layerset[0]['oid'], $geometrie_tabelle, $attributes['real_name'][$attributes['the_geom']], 10, $layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
 							$this->map->setextent($rect->minx, $rect->miny, $rect->maxx, $rect->maxy);
 							if (MAPSERVERVERSION > 600) {
 								$this->map_scaledenom = $this->map->scaledenom;
@@ -10017,7 +10017,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						# das sind die Sachen vom "Mutter"-Layer
 						$parentlayerset = $this->user->rolle->getLayer($this->formvars['layer_id_mother']);
 						$layerdb2 = $this->mapDB->getlayerdatabase($this->formvars['layer_id_mother'], $this->Stelle->pgdbhost);
-						$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid_mother']), $this->formvars['tablename_mother'], $this->formvars['columnname_mother'], 10, $layerdb2, $parentlayerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+						$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid_mother']), $parentlayerset[0]['oid'], $this->formvars['tablename_mother'], $this->formvars['columnname_mother'], 10, $layerdb2, $parentlayerset[0]['epsg_code'], $this->user->rolle->epsg_code);
 						if ($rect->minx != '') {
 							$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy); # Zoom auf den "Mutter"-Datensatz
 							if (MAPSERVERVERSION > 600) {
@@ -14811,7 +14811,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						for($k = 0; $k < count($this->qlayerset[0]['shape']); $k++){
 							$oids[] = $this->qlayerset[0]['shape'][$k][$geometrie_tabelle.'_oid'];
 						}
-						$rect = $this->mapDB->zoomToDatasets($oids, $geometrie_tabelle, $attributes['real_name'][$attributes['the_geom']], 10, $layerdb, $this->qlayerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+						$rect = $this->mapDB->zoomToDatasets($oids, $this->qlayerset[0]['oid'], $geometrie_tabelle, $attributes['real_name'][$attributes['the_geom']], 10, $layerdb, $this->qlayerset[0]['epsg_code'], $this->user->rolle->epsg_code);
 						$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 						if (MAPSERVERVERSION > 600) {
 							$this->map_scaledenom = $this->map->scaledenom;
@@ -17199,10 +17199,10 @@ class db_mapObj{
 		return $Labels;
 	}
 
-	function zoomToDatasets($oids, $tablename, $columnname, $border, $layerdb, $layer_epsg, $client_epsg) {
+	function zoomToDatasets($oids, $oid_name, $tablename, $columnname, $border, $layerdb, $layer_epsg, $client_epsg) {
   	$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
   	$sql.=" FROM (SELECT st_transform(ST_SetSRID(ST_Extent(" . $columnname."), " . $layer_epsg."), " . $client_epsg.") as bbox";
-  	$sql.=" FROM " . $tablename." WHERE oid IN (";
+  	$sql.=" FROM " . $tablename." WHERE ".$oid_name." IN (";
   	for($i = 0; $i < count($oids); $i++){
     	$sql .= "'" . $oids[$i]."',";
     }
