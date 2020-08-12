@@ -13588,17 +13588,17 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->main = 'rollenwahl.php';
     # Suchen nach verfügbaren Layouts
     # aus dem Stammordner layouts (vom System angebotene)
-    $this->layoutfiles = searchdir(LAYOUTPATH, false);
+    $this->layoutfiles = searchdir('layouts/', false);
 		for ($i = 0; $i < count($this->layoutfiles); $i++) {
 			if (strpos($this->layoutfiles[$i], '.php') > 0 AND strpos($this->layoutfiles[$i], 'main.css.php') === false) {
-				$this->guifiles[] = 'layouts/'.basename($this->layoutfiles[$i]);
+				$this->guifiles[] = $this->layoutfiles[$i];
 			}
 		}
 		# aus dem Customordner (vom Nutzer hinzugefügte Layouts)
 		$this->customlayoutfiles = searchdir(CUSTOM_PATH . 'layouts/', false);
 		for ($i = 0; $i < count($this->customlayoutfiles); $i++) {
 			if (strpos($this->customlayoutfiles[$i], '.php') > 0) {
-				$this->customguifiles[] = CUSTOM_PATH . '/' . basename($this->customlayoutfiles[$i]);
+				$this->guifiles[] = $this->customlayoutfiles[$i];
 			}
 		}
     # Abfrage der verfügbaren Kartenprojektionen in PostGIS (Tabelle spatial_ref_sys)
