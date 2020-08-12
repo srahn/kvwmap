@@ -1,6 +1,6 @@
 <?php
 # Objekt für graphische Benutzeroberfläche erzeugen mit default-Werten
-$GUI = new GUI("map.php", "main.css.php", "html");
+$GUI = new GUI("map.php", "layouts/main.css.php", "html");
 $GUI->user = new stdClass();
 $GUI->user->rolle = new stdClass();
 $GUI->user->rolle->querymode = 0;
