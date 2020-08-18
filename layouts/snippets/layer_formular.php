@@ -14,6 +14,12 @@
 	Text['duplicate_from_layer_id'] = ['<? echo $this->strHelp; ?>', '<? echo $strDuplicateFromLayerIdHelp; ?>'];
 	Text['duplicate_criterion'] = ['<? echo $this->strHelp; ?>', '<? echo $strDuplicateCriterionHelp; ?>'];
 
+	function gotoStelle(event, option_obj){
+		if(event.layerX > 300){
+			location.href = 'index.php?go=Stelleneditor&selected_stelle_id='+option_obj.value;
+		}
+	}
+
 	function updateConnection(){
 		if(document.getElementById('connectiontype').value == 6){
 			document.getElementById('connection_div').style.display = 'none';
@@ -765,7 +771,7 @@
 						<select name="selectedstellen" size="10" multiple>
 						<? 
 						for($i=0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++){
-								echo '<option value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
+								echo '<option class="select_option_link" onclick="gotoStelle(event, this)" value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'" onclick="handleClick(event, this)">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
 							 }
 						?>
 						</select>
@@ -777,7 +783,7 @@
 					<td>verfügbare<br>
 						<select name="allstellen" size="10" multiple>
 						<? for($i=0; $i < count($this->stellen["Bezeichnung"]); $i++){
-								echo '<option value="'.$this->stellen["ID"][$i].'" title="'.$this->stellen["Bezeichnung"][$i].'">'.$this->stellen["Bezeichnung"][$i].'</option>';
+								echo '<option class="select_option_link" onclick="gotoStelle(event, this)" value="'.$this->stellen["ID"][$i].'" title="'.$this->stellen["Bezeichnung"][$i].'">'.$this->stellen["Bezeichnung"][$i].'</option>';
 							 }
 						?>
 						</select>

@@ -173,6 +173,12 @@ input[type="text"].transparent_input{
 	background-color:	transparent;
 }
 
+.select_option_link{
+	background-image: url(../graphics/pfeil_rechts.gif);
+	background-repeat: no-repeat;
+	background-position: 307px;
+}
+
 .search-form {
 	display: inline-block;
 }
