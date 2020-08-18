@@ -97,4 +97,5 @@
 	$strDdlAttribute="DDL Default Attribut";
 	$strIdAttribute="ID-Spalte";
 	$strStyleItem="Styleitem";
+	$strGeomUsable="Geometrie übernehmbar";
 ?>

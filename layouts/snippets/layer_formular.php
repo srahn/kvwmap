@@ -674,6 +674,15 @@
 					</td>
 				</tr>
 				<tr>
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strGeomUsable; ?></th>
+					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<select name="use_geom">
+								<option <? if($this->formvars['use_geom'] == '0'){echo 'selected ';} ?>value="0"><?php echo $this->strNo; ?></option>
+								<option <? if($this->formvars['use_geom'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>								
+							</select>
+					</td>
+				</tr>
+				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strtransparency; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="transparency" type="text" value="<?php echo $this->formvars['transparency']; ?>" size="50" maxlength="3">

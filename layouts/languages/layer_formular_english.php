@@ -91,4 +91,5 @@
 	$strDdlAttribute="DDL Default Attribute";
 	$strIdAttribute="ID-Column";
 	$strStyleItem="Styleitem";
+	$strGeomUsable="Geometry usable";
 ?>  
