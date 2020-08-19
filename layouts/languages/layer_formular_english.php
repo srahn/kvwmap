@@ -92,4 +92,5 @@
 	$strIdAttribute="ID-Column";
 	$strStyleItem="Styleitem";
 	$strGeomUsable="Geometry usable";
+	$strMaxQueryRows="Records per Page";
 ?>  

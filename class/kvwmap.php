@@ -8722,7 +8722,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$sql_limit = '';
         if(value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'no_output') == ''){
         	if($this->formvars['anzahl'] == ''){
-	          $this->formvars['anzahl'] = MAXQUERYROWS;
+	          $this->formvars['anzahl'] = $layerset[0]['max_query_rows'] ?: MAXQUERYROWS;
 	        }
         	$sql_limit.=' LIMIT ' . intval($this->formvars['anzahl']);
         	if(value_of($this->formvars, 'offset_'.$layerset[0]['Layer_ID']) != ''){
@@ -8839,7 +8839,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         $filter = $wfs->create_filter($attributenames, $operators, $values);
         # Abfrage mit Filter absetzen
         if($this->formvars['anzahl'] == ''){
-          $this->formvars['anzahl'] = MAXQUERYROWS;
+          $this->formvars['anzahl'] = $layerset[$i]['max_query_rows'] ?: MAXQUERYROWS;
         }
 				if ($this->last_query != ''){
 					$request = $this->last_query[$layerset[0]['Layer_ID']]['sql'];
@@ -8952,8 +8952,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function get_quicksearch_attributes(){
 		if($this->formvars['layer_id']){
-			$this->formvars['anzahl'] = MAXQUERYROWS;
 			$this->layerset=$this->user->rolle->getLayer($this->formvars['layer_id']);
+			$this->formvars['anzahl'] = $this->layerset[0]['max_query_rows'] ?: MAXQUERYROWS;
 			$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 			switch ($this->layerset[0]['connectiontype']){
         case MS_POSTGIS : {          
@@ -9117,14 +9117,15 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
 	    	########################################################################
     	}
-			if (empty($this->formvars['anzahl'])) {
-				$this->formvars['anzahl'] = MAXQUERYROWS;
-			}
 
 			if($this->formvars['selected_layer_id'] > 0)
 				$this->layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 			else
 				$this->layerset=$this->user->rolle->getRollenlayer(-$this->formvars['selected_layer_id']);
+			
+			if (empty($this->formvars['anzahl'])) {
+				$this->formvars['anzahl'] = $this->layerset[0]['max_query_rows'] ?: MAXQUERYROWS;
+			}			
 
 			$this->formvars['selected_group_id'] = $this->layerset[0]['Gruppe'];
 
@@ -14278,9 +14279,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $anzLayer=count($layerset)-1;
     $map=ms_newMapObj('');
     $map->set('shapepath', SHAPEPATH);
-		if(value_of($this->formvars, 'anzahl') == ''){
-			$this->formvars['anzahl'] = MAXQUERYROWS;
-		}
     for ($i = 0; $i < $anzLayer; $i++) {
     	$sql_order = '';
       if($layerset[$i]['queryable'] AND
@@ -14288,6 +14286,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				(($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom)
 				OR $this->last_query != '')) {
         # Dieser Layer soll abgefragt werden
+				if(value_of($this->formvars, 'anzahl') == ''){
+					$this->formvars['anzahl'] = $layerset[$i]['max_query_rows'] ?: MAXQUERYROWS;
+				}
         switch ($layerset[$i]['connectiontype']) {
           case MS_SHAPEFILE : { # Shape File Layer (1)
             if ($this->formvars['searchradius'] > 0 OR $this->querypolygon != '') {
@@ -15307,7 +15308,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 
 				# Anhängen des Begrenzers zur Einschränkung der Anzahl der Ergebniszeilen
-				$sql_limit =' LIMIT '.MAXQUERYROWS;
+				$sql_limit =' LIMIT '.($layerset[$i]['max_query_rows'] ?: MAXQUERYROWS);
 
 				#echo '<br>sql:<br>'.$sql;
 				$ret=$layerdb->execSQL($sql.$sql_limit,4, 0);
@@ -18534,7 +18535,8 @@ class db_mapObj{
 				'cluster_maxdistance',
 				'labelmaxscale',
 				'labelminscale',
-				'connection_id'
+				'connection_id',
+				'max_query_rows'
 			) AS $key
 		) {
 			$attribute_sets[] = $key . " = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");

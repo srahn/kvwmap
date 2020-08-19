@@ -98,4 +98,5 @@
 	$strIdAttribute="ID-Spalte";
 	$strStyleItem="Styleitem";
 	$strGeomUsable="Geometrie übernehmbar";
+	$strMaxQueryRows="Datensätze pro Seite";
 ?>
