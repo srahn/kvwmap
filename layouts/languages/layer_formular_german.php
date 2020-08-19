@@ -1,6 +1,10 @@
 ﻿<?php
 	$strLayer="Layer";
 	$strAsteriskRequired="Werte mit * mussen eingetragen werden";
+	$strBaseParameters="Basis-Parameter";
+	$strMapParameters="Kartendarstellung";
+	$strQueryParameters="Sachdaten";
+	$strMetaParameters="Metadaten";
 	$strLayerID="Layer ID*";
 	$strDuplicateTableFieldsOpenTitle = 'Zeige Felder zum duplizieren von Layereinstellungen.';
 	$strDuplicateTableFieldsCloseTitle = 'Schließe Felder zum duplizieren von Layereinstellungen.';

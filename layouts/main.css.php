@@ -173,7 +173,7 @@ input[type="text"].transparent_input{
 	background-color:	transparent;
 }
 
-.select_option_link{
+.select_option_link:hover{
 	background-image: url(../graphics/pfeil_rechts.gif);
 	background-repeat: no-repeat;
 	background-position: 307px;

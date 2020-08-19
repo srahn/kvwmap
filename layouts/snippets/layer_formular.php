@@ -111,6 +111,10 @@
 		display: none;
 		width: 100%;
 	}
+	
+	.layerform_header{
+		background: rgb(199, 217, 230);
+	}
 </style>
 
 <table>
@@ -163,6 +167,9 @@
 		<td align="center" style="padding: 10px;">
 			<div id="layerform" style="width: 100%; background-color: #f8f8f9">
 				<table border="0" cellspacing="0" cellpadding="3" style="width: 100%;border:1px solid #bbb">
+					<tr align="center">
+						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strBaseParameters; ?></th>
+					</tr>
 					<tr>
 						<th class="fetter" width="300px" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLayerID; ?></th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -243,23 +250,6 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataType; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<select name="Datentyp">
-									<option value=""><?php echo $this->strPleaseSelect; ?></option>
-									<option <? if($this->formvars['Datentyp'] == '0'){echo 'selected ';} ?>value="0">MS_LAYER_POINT</option>
-									<option <? if($this->formvars['Datentyp'] == 1){echo 'selected ';} ?>value="1">MS_LAYER_LINE</option>
-									<option <? if($this->formvars['Datentyp'] == 2){echo 'selected ';} ?>value="2">MS_LAYER_POLYGON</option>
-									<option <? if($this->formvars['Datentyp'] == 3){echo 'selected ';} ?>value="3">MS_LAYER_RASTER</option>
-									<option <? if($this->formvars['Datentyp'] == 4){echo 'selected ';} ?>value="4">MS_LAYER_ANNOTATION</option>
-									<option <? if($this->formvars['Datentyp'] == 5){echo 'selected ';} ?>value="5">MS_LAYER_QUERY</option>
-									<option <? if($this->formvars['Datentyp'] == 6){echo 'selected ';} ?>value="6">MS_LAYER_CIRCLE</option>
-									<option <? if($this->formvars['Datentyp'] == 7){echo 'selected ';} ?>value="7">MS_LAYER_TILEINDEX</option>
-									<option <? if($this->formvars['Datentyp'] == 8){echo 'selected ';} ?>value="8">MS_LAYER_CHART</option>
-								</select>
-						</td>
-					</tr>
-					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strGroup; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<select name="Gruppe">
@@ -277,128 +267,22 @@
 									?>
 								</select>
 								</td>
-						</tr>
-						<tr>
-							<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPath; ?></th>
-							<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
-								<textarea name="pfad" cols="33" rows="4"><? echo $this->formvars['pfad'] ?></textarea>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[2], Style[0], document.getElementById('TipLayer3'))" onmouseout="htm()">
-								<div id="TipLayer3" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-						</td>
-					</tr>
+						</tr>					
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strData; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataType; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<textarea name="Data" cols="33" rows="4"><? echo $this->formvars['Data'] ?></textarea>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[3], Style[0], document.getElementById('TipLayer4'))" onmouseout="htm()">
-							<div id="TipLayer4" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaintable; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="maintable" type="text" value="<?php echo $this->formvars['maintable']; ?>" size="50" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1], Style[0], document.getElementById('TipLayer1'))" onmouseout="htm()">
-							<div id="TipLayer1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strIdAttribute; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="oid" type="text" value="<?php echo $this->formvars['oid']; ?>" size="36" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[5], Style[0], document.getElementById('TipLayer5'))" onmouseout="htm()">
-							<div id="TipLayer5" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-						</td>
-					</tr>					
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSchema; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="schema" type="text" value="<?php echo $this->formvars['schema']; ?>" size="50" maxlength="100">
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaxQueryRows; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="max_query_rows" type="text" value="<?php echo $this->formvars['max_query_rows']; ?>" size="50" maxlength="5">
-						</td>
-					</tr>					
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDocument_path; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="document_path" type="text" value="<?php echo $this->formvars['document_path']; ?>" size="50" maxlength="100">
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDocument_url; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="document_url" type="text" value="<?php echo $this->formvars['document_url']; ?>" size="50" maxlength="100">
-						</td>
-					</tr>
-					<? if($this->formvars['selected_layer_id']){ ?>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDdlAttribute; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3"><?php
-							include_once(CLASSPATH . 'LayerAttribute.php');
-							$attributes = LayerAttribute::find($this, 'layer_id = ' . $this->formvars['Layer_ID']);
-							echo FormObject::createSelectField(
-								'ddl_attribute',
-								array_map(
-									function($attribute) {
-										return array(
-											'value' => $attribute->get('name'),
-											'output' => $attribute->get('name')
-										);
-									},
-									$attributes
-								),
-								$this->formvars['ddl_attribute'],
-								1,
-								'',
-								'',
-								'ddl_attribute',
-								'',
-								'',
-								'-- Auswahl --'
-							); ?>
-						</td>
-					</tr>
-					<? } ?>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTileIndex; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="tileindex" type="text" value="<?php echo $this->formvars['tileindex']; ?>" size="50" maxlength="100">
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTileItem; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="tileitem" type="text" value="<?php echo $this->formvars['tileitem']; ?>" size="50" maxlength="100">
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelAngleItem; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="labelangleitem" type="text" value="<?php echo $this->formvars['labelangleitem']; ?>" size="50" maxlength="100">
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelItem; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="labelitem" type="text" value="<?php echo $this->formvars['labelitem']; ?>" size="50" maxlength="100">
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelMaxScale; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="labelmaxscale" type="text" value="<?php echo $this->formvars['labelmaxscale']; ?>" size="50" maxlength="100">
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelMinScale; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="labelminscale" type="text" value="<?php echo $this->formvars['labelminscale']; ?>" size="50" maxlength="100">
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelRequires; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="labelrequires" type="text" value="<?php echo $this->formvars['labelrequires']; ?>" size="50" maxlength="100">
+								<select name="Datentyp">
+									<option value=""><?php echo $this->strPleaseSelect; ?></option>
+									<option <? if($this->formvars['Datentyp'] == '0'){echo 'selected ';} ?>value="0">MS_LAYER_POINT</option>
+									<option <? if($this->formvars['Datentyp'] == 1){echo 'selected ';} ?>value="1">MS_LAYER_LINE</option>
+									<option <? if($this->formvars['Datentyp'] == 2){echo 'selected ';} ?>value="2">MS_LAYER_POLYGON</option>
+									<option <? if($this->formvars['Datentyp'] == 3){echo 'selected ';} ?>value="3">MS_LAYER_RASTER</option>
+									<option <? if($this->formvars['Datentyp'] == 4){echo 'selected ';} ?>value="4">MS_LAYER_ANNOTATION</option>
+									<option <? if($this->formvars['Datentyp'] == 5){echo 'selected ';} ?>value="5">MS_LAYER_QUERY</option>
+									<option <? if($this->formvars['Datentyp'] == 6){echo 'selected ';} ?>value="6">MS_LAYER_CIRCLE</option>
+									<option <? if($this->formvars['Datentyp'] == 7){echo 'selected ';} ?>value="7">MS_LAYER_TILEINDEX</option>
+									<option <? if($this->formvars['Datentyp'] == 8){echo 'selected ';} ?>value="8">MS_LAYER_CHART</option>
+								</select>
 						</td>
 					</tr>
 					<tr>
@@ -464,6 +348,109 @@
 					</tr>
 		<?  } ?>
 					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEpsgCode; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<select name="epsg_code">
+									<option value=""><?php echo $this->strPleaseSelect; ?></option>
+									<? 
+									foreach($this->epsg_codes as $epsg_code){
+										echo '<option ';
+										if($this->formvars['epsg_code'] == $epsg_code['srid'])echo 'selected ';
+										echo ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
+									}
+									?>							
+								</select>
+						</td>
+					</tr>		
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPath; ?></th>
+						<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
+							<textarea name="pfad" cols="33" rows="4"><? echo $this->formvars['pfad'] ?></textarea>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[2], Style[0], document.getElementById('TipLayer2'))" onmouseout="htm()">
+							<div id="TipLayer2" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strData; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<textarea name="Data" cols="33" rows="4"><? echo $this->formvars['Data'] ?></textarea>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[3], Style[0], document.getElementById('TipLayer3'))" onmouseout="htm()">
+							<div id="TipLayer3" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaintable; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="maintable" type="text" value="<?php echo $this->formvars['maintable']; ?>" size="50" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1], Style[0], document.getElementById('TipLayer1'))" onmouseout="htm()">
+							<div id="TipLayer1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strIdAttribute; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="oid" type="text" value="<?php echo $this->formvars['oid']; ?>" size="36" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[5], Style[0], document.getElementById('TipLayer5'))" onmouseout="htm()">
+							<div id="TipLayer5" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+						</td>
+					</tr>					
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSchema; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="schema" type="text" value="<?php echo $this->formvars['schema']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+				</table>
+				<br>
+				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
+					<tr align="center">
+						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strMapParameters; ?></th>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strSelectionType; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="selectiontype" type="text" value="<?php echo $this->formvars['selectiontype']; ?>" size="50" maxlength="20">
+						</td>
+					</tr>					
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTileIndex; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="tileindex" type="text" value="<?php echo $this->formvars['tileindex']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTileItem; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="tileitem" type="text" value="<?php echo $this->formvars['tileitem']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelAngleItem; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="labelangleitem" type="text" value="<?php echo $this->formvars['labelangleitem']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelItem; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="labelitem" type="text" value="<?php echo $this->formvars['labelitem']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelMaxScale; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="labelmaxscale" type="text" value="<?php echo $this->formvars['labelmaxscale']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelMinScale; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="labelminscale" type="text" value="<?php echo $this->formvars['labelminscale']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelRequires; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="labelrequires" type="text" value="<?php echo $this->formvars['labelrequires']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClassItem; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="classitem" type="text" value="<?php echo $this->formvars['classitem']; ?>" size="50" maxlength="100">
@@ -490,10 +477,71 @@
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClusterMaxdistance; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="cluster_maxdistance" type="text" value="<?php echo $this->formvars['cluster_maxdistance']; ?>" size="50" maxlength="11">&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[4], Style[0], document.getElementById('TipLayer5'))" onmouseout="htm()">
-							<div id="TipLayer5" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+								<input name="cluster_maxdistance" type="text" value="<?php echo $this->formvars['cluster_maxdistance']; ?>" size="50" maxlength="11">&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[4], Style[0], document.getElementById('TipLayer4'))" onmouseout="htm()">
+							<div id="TipLayer4" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 						</td>
 					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strProcessing; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="processing" type="text" value="<?php echo $this->formvars['processing']; ?>" size="50" maxlength="255">
+							<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[0], Style[0], document.getElementById('TipLayer0'))" onmouseout="htm()">
+							<div id="TipLayer0" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+						</td>
+					</tr>					
+				</table>
+				<br>
+				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
+					<tr align="center">
+						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strQueryParameters; ?></th>
+					</tr>			
+					<tr>
+						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strMaxQueryRows; ?></th>
+						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="max_query_rows" type="text" value="<?php echo $this->formvars['max_query_rows']; ?>" size="50" maxlength="5">
+						</td>
+					</tr>					
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDocument_path; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="document_path" type="text" value="<?php echo $this->formvars['document_path']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDocument_url; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="document_url" type="text" value="<?php echo $this->formvars['document_url']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+					<? if($this->formvars['selected_layer_id']){ ?>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDdlAttribute; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3"><?php
+							include_once(CLASSPATH . 'LayerAttribute.php');
+							$attributes = LayerAttribute::find($this, 'layer_id = ' . $this->formvars['Layer_ID']);
+							echo FormObject::createSelectField(
+								'ddl_attribute',
+								array_map(
+									function($attribute) {
+										return array(
+											'value' => $attribute->get('name'),
+											'output' => $attribute->get('name')
+										);
+									},
+									$attributes
+								),
+								$this->formvars['ddl_attribute'],
+								1,
+								'',
+								'',
+								'ddl_attribute',
+								'',
+								'',
+								'-- Auswahl --'
+							); ?>
+						</td>
+					</tr>
+					<? } ?>					
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTolerance; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -511,27 +559,6 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEpsgCode; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<select name="epsg_code">
-									<option value=""><?php echo $this->strPleaseSelect; ?></option>
-									<? 
-									foreach($this->epsg_codes as $epsg_code){
-										echo '<option ';
-										if($this->formvars['epsg_code'] == $epsg_code['srid'])echo 'selected ';
-										echo ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
-									}
-									?>							
-								</select>
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSelectionType; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="selectiontype" type="text" value="<?php echo $this->formvars['selectiontype']; ?>" size="50" maxlength="20">
-						</td>
-					</tr>
-					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strQueryMap; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<select name="querymap">
@@ -540,16 +567,14 @@
 								</select>
 						</td>
 					</tr>
+				</table>
+				<br>
+				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
+					<tr align="center">
+						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strMetaParameters; ?></th>
+					</tr>					
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strProcessing; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="processing" type="text" value="<?php echo $this->formvars['processing']; ?>" size="50" maxlength="255">
-							<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[0], Style[0], document.getElementById('TipLayer2'))" onmouseout="htm()">
-							<div id="TipLayer2" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDescribtion; ?></th>
+						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strDescribtion; ?></th>
 						<td style="border-bottom:1px solid #C3C7C3">
 							<textarea name="kurzbeschreibung" cols="33" rows="2"><? echo $this->formvars['kurzbeschreibung'] ?></textarea>
 						</td>
@@ -593,10 +618,10 @@
 						</td>
 					</tr>				
 				</table>
-				
+				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
 					<tr align="center">
-						<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strOWSParameter; ?></th>
+						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strOWSParameter; ?></th>
 					</tr>	
 					<tr>
 						<th class="fetter" width="300" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
@@ -668,7 +693,7 @@
 		<div id="stellenzuweisung" style="background-color: #f8f8f9;">
 			<table border="0" cellspacing="0" cellpadding="3" style="width: 100%; border:1px solid #bbb">
 				<tr align="center">
-					<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strDefaultValues; ?></th>
+					<th class="fetter layerform_header" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strDefaultValues; ?></th>
 				</tr>
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTemplate; ?></th>
@@ -768,13 +793,14 @@
 				</tr>
 				<? } ?>
 			</table>
+			<br>
 			<table border="0" cellspacing="0" cellpadding="3" style="width: 100%; border:1px solid #bbb">
 				<tr align="center">
-					<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" width="670" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strTasks; ?></th>
+					<th class="fetter layerform_header" width="670" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strTasks; ?></th>
 				</tr>
 				<tr valign="top"> 
 					<td align="right">Zugeordnete<br>
-						<select name="selectedstellen" size="10" multiple>
+						<select name="selectedstellen" size="10" multiple style="position: relative; width: 340px">
 						<? 
 						for($i=0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++){
 								echo '<option class="select_option_link" onclick="gotoStelle(event, this)" value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'" onclick="handleClick(event, this)">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
@@ -787,7 +813,7 @@
 						<input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedstellen,document.GUI.selstellen,'value')>
 					</td>
 					<td>verfügbare<br>
-						<select name="allstellen" size="10" multiple>
+						<select name="allstellen" size="10" multiple style="position: relative; width: 340px">
 						<? for($i=0; $i < count($this->stellen["Bezeichnung"]); $i++){
 								echo '<option class="select_option_link" onclick="gotoStelle(event, this)" value="'.$this->stellen["ID"][$i].'" title="'.$this->stellen["Bezeichnung"][$i].'">'.$this->stellen["Bezeichnung"][$i].'</option>';
 							 }
@@ -814,8 +840,8 @@
 				} ?>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strExpression; ?></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strText; ?></td>
-				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strClassification; ?>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[5], Style[0], document.getElementById('TipLayer6'))" onmouseout="htm()">
-						<div id="TipLayer6" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strClassification; ?>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[5], Style[0], document.getElementById('TipLayer5'))" onmouseout="htm()">
+						<div id="TipLayer5" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strLegendGraphic; ?>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[6], Style[0], document.getElementById('TipLayer7'))" onmouseout="htm()">
 						<div id="TipLayer7" style="visibility:hidden;position:absolute;z-index:1000;"></div>

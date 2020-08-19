@@ -1,6 +1,10 @@
 ﻿<?php
 	$strLayer="Layer";
   $strAsteriskRequired="Fields marked with an asterisk * are required";
+	$strBaseParameters="Base-Parameter";
+	$strMapParameters="Map Display";
+	$strQueryParameters="Query";
+	$strMetaParameters="Metadata";
   $strLayerID="Layer ID*";
   $strName="Name";
   $strDataType="Datatype*";
