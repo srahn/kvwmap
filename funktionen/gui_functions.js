@@ -1,9 +1,3 @@
-<?php
-  include(LAYOUTPATH.'snippets/ahah.php');
-  echo $ahah;
-?>
-<script language="javascript" type="text/javascript">
-
 var browser_string = navigator.userAgent.toLowerCase();
 
 if(browser_string.indexOf('firefox') >= 0){
@@ -17,6 +11,145 @@ else if (browser_string.indexOf('edg') >= 0){
 }
 else{
 	var browser = 'ie';
+}
+
+function ahah(url, data, target, action, progress){
+	for(k = 0; k < target.length; ++k){
+		if(target[k] != null && target[k].tagName == "DIV"){
+			waiting_img = document.createElement("img");
+			waiting_img.src = "graphics/ajax-loader.gif";
+			target[k].appendChild(waiting_img);
+		}
+	}
+	var req = new XMLHttpRequest();
+	if(req != undefined){
+		req.onreadystatechange = function(){ahahDone(url, target, req, action);};
+		if(typeof progress !== 'undefined')req.upload.addEventListener("progress", progress);
+		req.open("POST", url, true);
+		if(typeof data == "string") {
+			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=iso-8859-15"); // data kann entweder ein String oder ein FormData-Objekt sein
+		}
+		req.send(data);
+	}
+	return req;
+}
+
+function ahahDone(url, targets, req, actions) {
+	if (req.readyState == 4) { // only if req is "loaded"
+		if (req.status == 200) { // only if "OK"
+			if (req.getResponseHeader('logout') == 'true') { // falls man zwischenzeitlich ausgeloggt wurde
+				window.location = url;
+				return;
+			}
+			if(req.getResponseHeader('error') == 'true'){
+				message(req.responseText);
+			}
+			var found = false;
+			var response = "" + req.responseText;
+			var responsevalues = response.split("█");
+			if (actions == undefined || actions == "") {
+				actions = new Array();
+			}
+			for (i = 0; i < targets.length; ++i) {
+				if (targets[i] != undefined) {
+					if (actions[i] == undefined) {
+						actions[i] = "";
+					}
+					switch (actions[i]) {
+						case "execute_function":
+							eval(responsevalues[i]);
+						break;
+
+						case "src":
+							targets[i].src = responsevalues[i];
+						break;
+
+						case "xlink:href":
+							targets[i].setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", responsevalues[i]);
+						break;
+
+						case "points":
+							targets[i].setAttribute("points", responsevalues[i]);	
+						break;
+
+						case "sethtml":
+							if (targets[i] != undefined && req.getResponseHeader('error') != 'true') {
+								targets[i].innerHTML = responsevalues[i];
+								$(targets[i]).change();
+								scripts = targets[i].getElementsByTagName("script"); // Alle script-Bloecke evaln damit diese Funktionen bekannt sind
+								for (s = 0; s < scripts.length; s++) {
+									if (scripts[s].hasAttribute("src")) {
+										var script = document.createElement("script");
+										script.setAttribute("src", scripts[s].src);
+										document.head.appendChild(script);
+									}
+									else {
+										eval(scripts[s].innerHTML);
+									}
+								}
+							}
+						break;
+						
+						case "prependhtml":
+							targets[i].insertAdjacentHTML('beforebegin', responsevalues[i]);
+						break;
+						
+						case "appendhtml":
+							targets[i].insertAdjacentHTML('beforeend', responsevalues[i]);
+						break;
+
+						case "setvalue":
+							targets[i].value = responsevalues[i];
+						break;
+
+						default : {
+							if (targets[i] != null) {
+								if (targets[i].value == undefined) {
+									targets[i].innerHTML = responsevalues[i];
+								}
+								else {
+									if (targets[i].type == "checkbox") {
+										if (responsevalues[i] == "1") {
+											targets[i].checked = "true";
+										}
+										else{
+											targets[i].checked = "";
+										}
+									}
+									if (targets[i].type == "select-one") {
+										found = false;
+										for (j = 0; j < targets[i].length; ++j) {
+											if (targets[i].options[j].value == responsevalues[i]) {
+												targets[i].options[j].selected = true;
+												found = true;
+											}
+										}
+										if (found == false) {
+											// wenns nicht dabei ist, wirds hinten rangehangen
+											targets[i].options[targets[i].length] = new Option(responsevalues[i], responsevalues[i]);
+											targets[i].options[targets[i].length-1].selected = true;
+										}
+									}
+									else {
+										if (targets[i].type == "select-multiple") {
+											targets[i].innerHTML = responsevalues[i];
+										}
+										else {
+											targets[i].value = responsevalues[i];
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} 
+		else{
+			//target.value =" AHAH Error:"+ req.status + " " +req.statusText;
+			//alert(target.value);
+		}
+	}
 }
 
 function Bestaetigung(link,text) {
@@ -161,12 +294,13 @@ function getBrowserSize(){
 function resizemap2window(){
 	getBrowserSize();
 	params = 'go=ResizeMap2Window&browserwidth='+document.GUI.browserwidth.value+'&browserheight='+document.GUI.browserheight.value;
-<? if($this->main == 'map.php'){ ?>
-	startwaiting();
-	document.location.href='index.php?'+params+'&nScale='+document.GUI.nScale.value+'&reloadmap=true';			// in der Hauptkarte neuladen
-<? }else{ ?>
-	ahah('index.php', params, new Array(''), new Array(''));																								// ansonsten nur die neue Mapsize setzen
-<? } ?>
+	if(document.getElementById('map_frame') != undefined){
+		startwaiting();
+		document.location.href='index.php?'+params+'&nScale='+document.GUI.nScale.value+'&reloadmap=true';			// in der Hauptkarte neuladen
+	}
+	else{
+		ahah('index.php', params, new Array(''), new Array(''));																								// ansonsten nur die neue Mapsize setzen
+	}
 }
 
 /*
@@ -252,17 +386,17 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 	}
 }
 
-function onload_functions() {<?php
-	if ($this->scrolldown) { ?>
-		window.scrollTo(0,document.body.scrollHeight);<?php
-	} ?>
+function onload_functions() {
+	if(scrolldown){
+		window.scrollTo(0,document.body.scrollHeight);
+	}
 	document.onmousemove = drag;
   document.onmouseup = dragstop;
 	document.onmousedown = stop;
-	getBrowserSize();<?php
-	if ($this->user->rolle->auto_map_resize) { ?>
-		window.onresize = function(){ clearTimeout(doit); doit = setTimeout(resizemap2window, 200);};<?php
-	} ?>
+	getBrowserSize();
+	if(auto_map_resize){
+		window.onresize = function(){ clearTimeout(doit); doit = setTimeout(resizemap2window, 200);};
+	}
 	document.fullyLoaded = true;
 }
 
@@ -492,7 +626,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 function overlay_submit(gui, start){
 	// diese Funktion macht beim Fenstermodus und einer Kartenabfrage oder einem Aufruf aus dem Overlay-Fenster einen ajax-Request mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
 	startwaiting();
-	if(typeof FormData !== 'undefined' && (1 == <? echo $this->user->rolle->querymode; ?> && start || gui.id == 'GUI2')){	
+	if(typeof FormData !== 'undefined' && (querymode == 1 && start || gui.id == 'GUI2')){	
 		formdata = new FormData(gui);
 		formdata.append("mime_type", "overlay_html");	
 		ahah("index.php", formdata, new Array(document.getElementById('contentdiv')), new Array("sethtml"));	
@@ -597,13 +731,13 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
   if(status == true){
     if(thema.checked == false){
 			thema.checked = true;
-			thema.title="<? echo $this->deactivatelayer; ?>";	
+			thema.title = deactivatelayer;	
 			if(instantreload)reload = true;
 		}
-		query.title="<? echo $this->deactivatequery; ?>";		
+		query.title = deactivatequery;
   }
 	else{
-		query.title="<? echo $this->activatequery; ?>";
+		query.title = activatequery;
 	}
   if(groupradiolayers != '' && groupradiolayers.value != ''){
     preventDefault(event);
@@ -623,7 +757,7 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 					if(query.checked == true){
 						if(thema.checked == false){
 							thema.checked = true;
-							thema.title="<? echo $this->deactivatelayer; ?>";	
+							thema.title = deactivatelayer;
 							if(instantreload)reload = true;
 						}
 					}
@@ -646,7 +780,7 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 					if(query.checked == true){
 						if(thema.checked == false){
 							thema.checked = true;
-							thema.title="<? echo $this->deactivatelayer; ?>";	
+							thema.title = deactivatelayer;
 							if(instantreload)reload = true;
 						}
 					}
@@ -661,11 +795,11 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
   if(query){
     if(thema.checked == false){
       query.checked = false;
-			thema.title="<? echo $this->activatelayer; ?>";
-			query.title="<? echo $this->activatequery; ?>";
+			thema.title = activatelayer;
+			query.title = activatequery;
     }
 		else{
-			thema.title="<? echo $this->deactivatelayer; ?>";			
+			thema.title = deactivatelayer;
 		}
   }
   if(radiolayers != '' && radiolayers.value != ''){  
@@ -879,37 +1013,25 @@ function handleDragEnd(e){
 
 // --- html5 Drag and Drop der Layer im drawingOrderForm --- //
  
-
-<?
-	if($this->user->rolle->legendtype == 1){ # alphabetisch sortierte Legende
-		echo "layernames = new Array();\n";
-		$layercount = count($this->sorted_layerset);
-		for($j = 0; $j < $layercount; $j++){
-			echo 'layernames['.$j.'] = \''.str_replace('"', '', str_replace("'", '', $this->sorted_layerset[$j]['alias']))."';\n";
-		}
-?>
-		function jumpToLayer(searchtext){
-			if(searchtext.length > 1){
-				found = false;
-				legend_top = document.getElementById('scrolldiv').getBoundingClientRect().top;
-				for(var i = 0; i < layernames.length; i++){
-					if(layernames[i].toLowerCase().search(searchtext.toLowerCase()) != -1){
-						layer = document.getElementById(layernames[i].replace('-', '_'));
-						layer.classList.remove('legend_layer_highlight');
-						void layer.offsetWidth;
-						layer.classList.add('legend_layer_highlight');
-						if(!found){
-							document.getElementById('scrolldiv').style.scrollBehavior = 'smooth';		// erst hier und nicht im css, damit das Scrollen beim Laden nicht animiert wird
-							document.getElementById('scrolldiv').scrollTop = document.getElementById('scrolldiv').scrollTop + (layer.getBoundingClientRect().top - legend_top);
-						}
-						found = true;
-					}
+function jumpToLayer(searchtext){
+	if(searchtext.length > 1){
+		found = false;
+		legend_top = document.getElementById('scrolldiv').getBoundingClientRect().top;
+		for(var i = 0; i < layernames.length; i++){
+			if(layernames[i].toLowerCase().search(searchtext.toLowerCase()) != -1){
+				layer = document.getElementById(layernames[i].replace('-', '_'));
+				layer.classList.remove('legend_layer_highlight');
+				void layer.offsetWidth;
+				layer.classList.add('legend_layer_highlight');
+				if(!found){
+					document.getElementById('scrolldiv').style.scrollBehavior = 'smooth';		// erst hier und nicht im css, damit das Scrollen beim Laden nicht animiert wird
+					document.getElementById('scrolldiv').scrollTop = document.getElementById('scrolldiv').scrollTop + (layer.getBoundingClientRect().top - legend_top);
 				}
+				found = true;
 			}
 		}
-<?
 	}
-?>
+}
 
 function slide_legend_in(evt) {
 	document.getElementById('legenddiv').className = 'slidinglegend_slidein';
@@ -925,13 +1047,13 @@ function switchlegend(){
 	if (document.getElementById('legenddiv').className == 'normallegend') {
 		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
 		ahah('index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize_legend.png';
+		document.getElementById('LegendMinMax').src = 'graphics/maximize_legend.png';
 		document.getElementById('LegendMinMax').title="Legende zeigen";
 	}
 	else {
 		document.getElementById('legenddiv').className = 'normallegend';
 		ahah('index.php', 'go=changeLegendDisplay&hide=0', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize_legend.png';
+		document.getElementById('LegendMinMax').src = 'graphics/minimize_legend.png';
 		document.getElementById('LegendMinMax').title="Legende verstecken";
 	}
 }
@@ -1043,7 +1165,7 @@ function showExtentURL(epsg_code) {
 			msg = " \
 				<div style=\"text-align: left\"> \
 					<h2>URL des aktuellen Kartenausschnitts</h2><br> \
-					<input id=\"extenturl\" style=\"width: 350px\" type=\"text\" value=\"<? echo URL.APPLVERSION; ?>index.php?go=zoom2coord&INPUT_COORD="+toFixed(gui.minx.value, 3)+","+toFixed(gui.miny.value, 3)+";"+toFixed(gui.maxx.value, 3)+","+toFixed(gui.maxy.value, 3)+"&epsg_code="+epsg_code+"\"><br> \
+					<input id=\"extenturl\" style=\"width: 350px\" type=\"text\" value=\""+document.baseURI+"go=zoom2coord&INPUT_COORD="+toFixed(gui.minx.value, 3)+","+toFixed(gui.miny.value, 3)+";"+toFixed(gui.maxx.value, 3)+","+toFixed(gui.maxy.value, 3)+"&epsg_code="+epsg_code+"\"><br> \
 				</div> \
 			";
 	message([{
@@ -1079,4 +1201,3 @@ function htmlspecialchars(value) {
 	};
 	return value.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
-</script>
