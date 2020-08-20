@@ -5,6 +5,7 @@
 	$strMapParameters="Map Display";
 	$strQueryParameters="Query";
 	$strMetaParameters="Metadata";
+	$strAdministrative="Administration";
   $strLayerID="Layer ID*";
   $strName="Name";
   $strDataType="Datatype*";

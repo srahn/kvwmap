@@ -111,8 +111,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 	$html  = '
 <select id="'.$id.'" name="'.$name.'" size="'.$size.'" '.$style.' '.$onchange.' '.$multiple.' '.$class.'>
 	'.implode('<br>', $options_html).'
-</select>
-';
+</select>';
   return $html;
 }
 

@@ -173,6 +173,29 @@ input[type="text"].transparent_input{
 	background-color:	transparent;
 }
 
+span[data-tooltip] {
+  position: relative;
+  cursor: help;
+}
+
+span[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: -300px;
+  top: 24px;
+  width: 500px;
+	font-size: 11px;
+	font-family: verdana, arial;
+	box-shadow: 12px 10px 14px #777;
+  border: 1px #236dbf solid;
+	border-top: 15px #236dbf solid;
+  background-color: #DAE4EC;
+  padding: 4px;
+  z-index: 10000;
+	white-space: pre-wrap;
+  display: block;
+}
+
 .select_option_link:hover{
 	background-image: url(../graphics/pfeil_rechts.gif);
 	background-repeat: no-repeat;

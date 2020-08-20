@@ -3,17 +3,7 @@
 	include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php'); 
 	include_once(CLASSPATH . 'FormObject.php');		?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
-<script src="funktionen/tooltip.js" language="JavaScript"	type="text/javascript"></script>
 <script type="text/javascript">
-	Text[0] = ["Hilfe:","Wendet eine Prozessierungsanweisung für den Layer an. Die unterstützten Anweisungen hängen vom Layertyp und dem verwendeten Treiber ab. Es gibt Anweisungen für Attribute, Connection Pooling, OGR Styles und Raster. siehe Beschreibung zum Layerattribut PROCESSING unter: http://www.mapserver.org/mapfile/layer.html. Mehrere Prozessinganweisungen werden hier eingegeben getrennt durch Semikolon. z.B. CHART_SIZE=60;CHART_TYPE=pie für die Darstellung eines Tortendiagramms des Typs MS_LAYER_CHART"];
-	Text[1] = ["Hilfe:","Die Haupttabelle ist diejenige der im Query-SQL-Statement abgefragten Tabellen, die die oid liefern soll.<br><br>Die Haupttabelle muss oids besitzen, diese müssen allerdings nicht im SQL angegeben werden.<br><br>Ist das Feld Haupttabelle leer, wird der Name der Haupttabelle automatisch eingetragen. Bei einer Layerdefinition über mehrere Tabellen hinweg kann es sein, dass kvwmap die falsche Tabelle als Haupttabelle auswählt. In diesem Fall kann hier händisch die gewünschte Tabelle eingetragen werden. Achtung: Wenn die Tabellennamen im Query-SQL geändert werden, muss auch der Eintrag im Feld Haupttabelle angepasst werden!"];
-	Text[2] = ["Hilfe:","Das Query-SQL ist das SQL-Statement, welches für die Sachdatenabfrage verwendet wird. Es kann eine beliebige Abfrage auf Tabellen oder Sichten sein, eine WHERE-Bedingung ist aber erforderlich. Der Schemaname wird hier nicht angegeben, sondern im Feld 'Schema'"];
-	Text[3] = ["Hilfe:","Das Data-Feld wird vom Mapserver für die Kartendarstellung verwendet (siehe Mapserver-Doku). Etwaige Schemanamen müssen hier angegeben werden."];
-	Text[4] = ["Hilfe:","Bei Punktlayern kann durch Angabe dieses Wertes die Clusterbildung aktiviert werden. Der Wert ist der Radius in Pixeln, in dem Punktobjekte zu einem Cluster zusammengefasst werden. <br>Damit die Cluster dargestellt werden können, muss es eine Klasse mit der Expression \"('[Cluster:FeatureCount]' != '1')\" geben. Cluster:FeatureCount kann auch als Labelitem verwendet werden, um die Anzahl der Punkte pro Cluster anzuzeigen."];	
-	Text[5] = ["Hilfe:","Hier muss die Spalte aus der Haupttabelle angegeben werden, mit dem die Datensätze identifiziert werden können (z.B. der Primärschlüssel oder die oid)."];
-	Text['duplicate_from_layer_id'] = ['<? echo $this->strHelp; ?>', '<? echo $strDuplicateFromLayerIdHelp; ?>'];
-	Text['duplicate_criterion'] = ['<? echo $this->strHelp; ?>', '<? echo $strDuplicateCriterionHelp; ?>'];
-
 	function gotoStelle(event, option_obj){
 		if(event.layerX > 300){
 			location.href = 'index.php?go=Stelleneditor&selected_stelle_id='+option_obj.value;
@@ -205,8 +195,10 @@
 										'',
 										'',
 										'nicht duplizieren'
-									); ?>&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text['duplicate_from_layer_id'], Style[0], document.getElementById('TipDuplicateLayerId'))" onmouseout="htm()">
-									<div id="TipDuplicateLayerId" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+									); ?>&nbsp;
+									<span data-tooltip="<? echo $strDuplicateFromLayerIdHelp; ?>">
+										<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
+									</span>
 								</div>
 							</div>
 							<i class="fa fa-close" aria-hidden="true" onclick="$('.duplicate-table-fields').hide(); $('#show_duplicate_table_field_button').show();" style="float: right" title="<? echo $strDuplicateTableFieldsCloseTitle; ?>"></i>
@@ -220,8 +212,10 @@
 									<label><?php echo $strDuplicateCriterion; ?></label>
 								</div>
 								<div class="form-value">
-									<input name="duplicate_criterion" type="text" value="<?php echo $this->formvars['duplicate_criterion']; ?>" size="50" maxlength="255">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text['duplicate_criterion'], Style[0], document.getElementById('TipDuplicateCriterion'))" onmouseout="htm()">
-									<div id="TipDuplicateCriterion" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+									<input name="duplicate_criterion" type="text" value="<?php echo $this->formvars['duplicate_criterion']; ?>" size="50" maxlength="255">&nbsp;
+									<span data-tooltip="<? echo $strDuplicateCriterionHelp; ?>">
+										<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
+									</span>
 								</div>
 							</div>
 							<div class="clear"></div>
@@ -365,29 +359,37 @@
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPath; ?></th>
 						<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
-							<textarea name="pfad" cols="33" rows="4"><? echo $this->formvars['pfad'] ?></textarea>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[2], Style[0], document.getElementById('TipLayer2'))" onmouseout="htm()">
-							<div id="TipLayer2" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+							<textarea name="pfad" cols="33" rows="4"><? echo $this->formvars['pfad'] ?></textarea>&nbsp;
+							<span data-tooltip="Das Query-SQL ist das SQL-Statement, welches für die Sachdatenabfrage verwendet wird. Es kann eine beliebige Abfrage auf Tabellen oder Sichten sein, eine WHERE-Bedingung ist aber erforderlich.&#xa;Der Schemaname wird hier nicht angegeben, sondern im Feld 'Schema'.&#xa;Wenn Unterabfragen verwendet werden, müssen 'select', 'from' und 'where' in der Unterabfrage klein geschrieben werden und in der Hauptabfrage groß!">
+								<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
+							</span>
 						</td>
 					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strData; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<textarea name="Data" cols="33" rows="4"><? echo $this->formvars['Data'] ?></textarea>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[3], Style[0], document.getElementById('TipLayer3'))" onmouseout="htm()">
-							<div id="TipLayer3" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+							<textarea name="Data" cols="33" rows="4"><? echo $this->formvars['Data'] ?></textarea>&nbsp;
+							<span data-tooltip="Das Data-Feld wird vom Mapserver für die Kartendarstellung verwendet (siehe Mapserver-Doku). Etwaige Schemanamen müssen hier angegeben werden.">
+								<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
+							</span>
 						</td>
 					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaintable; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="maintable" type="text" value="<?php echo $this->formvars['maintable']; ?>" size="50" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1], Style[0], document.getElementById('TipLayer1'))" onmouseout="htm()">
-							<div id="TipLayer1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+							<input name="maintable" type="text" value="<?php echo $this->formvars['maintable']; ?>" size="50" maxlength="100">&nbsp;
+							<span data-tooltip="Die Haupttabelle ist diejenige der im Query-SQL-Statement abgefragten Tabellen, die die ID-Spalte liefern soll. Nur auf dieser Tabelle finden Schreiboperationen statt.&#xa;&#xa;Die Haupttabelle muss eine eindeutige ID-Spalte besitzen, welche allerdings nicht im SQL angegeben werden muss.&#xa;&#xa;Ist das Feld Haupttabelle leer, wird der Name der Haupttabelle automatisch eingetragen. Bei einer Layerdefinition über mehrere Tabellen hinweg kann es sein, dass kvwmap die falsche Tabelle als Haupttabelle auswählt. In diesem Fall kann hier händisch die gewünschte Tabelle eingetragen werden. Achtung: Wenn die Tabellennamen im Query-SQL geändert werden, muss auch der Eintrag im Feld Haupttabelle angepasst werden!">
+								<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
+							</span>
 						</td>
 					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strIdAttribute; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="oid" type="text" value="<?php echo $this->formvars['oid']; ?>" size="36" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[5], Style[0], document.getElementById('TipLayer5'))" onmouseout="htm()">
-							<div id="TipLayer5" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+							<input name="oid" type="text" value="<?php echo $this->formvars['oid']; ?>" size="36" maxlength="100">&nbsp;
+							<span data-tooltip="Hier muss die Spalte aus der Haupttabelle angegeben werden, mit der die Datensätze identifiziert werden können (z.B. der Primärschlüssel oder die oid).">
+								<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
+							</span>
 						</td>
 					</tr>					
 					<tr>
@@ -477,16 +479,19 @@
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClusterMaxdistance; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="cluster_maxdistance" type="text" value="<?php echo $this->formvars['cluster_maxdistance']; ?>" size="50" maxlength="11">&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[4], Style[0], document.getElementById('TipLayer4'))" onmouseout="htm()">
-							<div id="TipLayer4" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+							<input name="cluster_maxdistance" type="text" value="<?php echo $this->formvars['cluster_maxdistance']; ?>" size="50" maxlength="11">&nbsp;
+							<span data-tooltip="Bei Punktlayern kann durch Angabe dieses Wertes die Clusterbildung aktiviert werden.&#xa;Der Wert ist der Radius in Pixeln, in dem Punktobjekte zu einem Cluster zusammengefasst werden.&#xa;Damit die Cluster dargestellt werden können, muss es eine Klasse mit der Expression&#xa;('[Cluster:FeatureCount]' != '1')&#xa;geben. Cluster:FeatureCount kann auch als Labelitem verwendet werden, um die Anzahl der Punkte pro Cluster anzuzeigen.">	
+								<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
+							</span>
 						</td>
 					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strProcessing; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="processing" type="text" value="<?php echo $this->formvars['processing']; ?>" size="50" maxlength="255">
-							<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[0], Style[0], document.getElementById('TipLayer0'))" onmouseout="htm()">
-							<div id="TipLayer0" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+							<input name="processing" type="text" value="<?php echo $this->formvars['processing']; ?>" size="50" maxlength="255">&nbsp;
+							<span data-tooltip="Wendet eine Prozessierungsanweisung für den Layer an.&#xa;Die unterstützten Anweisungen hängen vom Layertyp und dem verwendeten Treiber ab. Es gibt Anweisungen für Attribute, Connection Pooling, OGR Styles und Raster. siehe Beschreibung zum Layerattribut PROCESSING unter: http://www.mapserver.org/mapfile/layer.html. Mehrere Prozessinganweisungen werden hier eingegeben getrennt durch Semikolon. z.B. CHART_SIZE=60;CHART_TYPE=pie für die Darstellung eines Tortendiagramms des Typs MS_LAYER_CHART">
+								<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
+							</span>
 						</td>
 					</tr>					
 				</table>
@@ -571,56 +576,6 @@
 				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
 					<tr align="center">
-						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strMetaParameters; ?></th>
-					</tr>					
-					<tr>
-						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strDescribtion; ?></th>
-						<td style="border-bottom:1px solid #C3C7C3">
-							<textarea name="kurzbeschreibung" cols="33" rows="2"><? echo $this->formvars['kurzbeschreibung'] ?></textarea>
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataOwner; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="datenherr" type="text" value="<?php echo $this->formvars['datenherr']; ?>" size="50" maxlength="100">
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMetaLink; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="metalink" type="text" value="<?php echo $this->formvars['metalink']; ?>" size="50" maxlength="255">
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStatus; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="status" type="text" value="<?php echo $this->formvars['status']; ?>" size="50" maxlength="255">
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTriggerFunction; ?></th>
-						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="trigger_function" type="text" value="<?php echo $this->formvars['trigger_function']; ?>" size="50" maxlength="100">
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSync; ?></th>
-						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="sync" type="checkbox" value="1"<?php if ($this->formvars['sync']) echo ' checked'; ?>>
-							<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(['<?php echo $strHelp; ?>:',	'<?php echo $strSyncHelp; ?>'],	Style[0],	$('#TipSync')[0]);"	onmouseout="htm()">
-							<div id="TipSync" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-						</td>
-					</tr>
-					<tr>
-						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strListed; ?></th>
-						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="listed" type="checkbox" value="1"<?php if ($this->formvars['listed']) echo ' checked'; ?>>
-						</td>
-					</tr>				
-				</table>
-				<br>
-				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
-					<tr align="center">
 						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strOWSParameter; ?></th>
 					</tr>	
 					<tr>
@@ -687,7 +642,64 @@
 								<input name="wfs_geom" type="text" value="<?php echo $this->formvars['wfs_geom']; ?>" size="50" maxlength="100">
 						</td>
 					</tr>
-			</table>
+				</table>				
+				<br>
+				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
+					<tr align="center">
+						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strMetaParameters; ?></th>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strDescribtion; ?></th>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<textarea name="kurzbeschreibung" cols="33" rows="2"><? echo $this->formvars['kurzbeschreibung'] ?></textarea>
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataOwner; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="datenherr" type="text" value="<?php echo $this->formvars['datenherr']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMetaLink; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="metalink" type="text" value="<?php echo $this->formvars['metalink']; ?>" size="50" maxlength="255">
+						</td>
+					</tr>
+				</table>
+				<br>
+				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
+					<tr align="center">
+						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strAdministrative; ?></th>
+					</tr>					
+					<tr>
+						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strStatus; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="status" type="text" value="<?php echo $this->formvars['status']; ?>" size="50" maxlength="255">
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTriggerFunction; ?></th>
+						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="trigger_function" type="text" value="<?php echo $this->formvars['trigger_function']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSync; ?></th>
+						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="sync" type="checkbox" value="1"<?php if ($this->formvars['sync']) echo ' checked'; ?>>&nbsp;
+							<span data-tooltip="<?php echo $strSyncHelp; ?>">
+								<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
+							</span>
+						</td>
+					</tr>
+					<tr>
+						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strListed; ?></th>
+						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="listed" type="checkbox" value="1"<?php if ($this->formvars['listed']) echo ' checked'; ?>>
+						</td>
+					</tr>				
+				</table>
 		</div>
 		
 		<div id="stellenzuweisung" style="background-color: #f8f8f9;">
@@ -840,14 +852,11 @@
 				} ?>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strExpression; ?></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strText; ?></td>
-				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strClassification; ?>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[5], Style[0], document.getElementById('TipLayer5'))" onmouseout="htm()">
-						<div id="TipLayer5" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strClassification; ?>
 				</td>
-				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strLegendGraphic; ?>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[6], Style[0], document.getElementById('TipLayer7'))" onmouseout="htm()">
-						<div id="TipLayer7" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strLegendGraphic; ?>
 				</td>
-				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strOrder; ?>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[7], Style[0], document.getElementById('TipLayer8'))" onmouseout="htm()">
-						<div id="TipLayer8" style="visibility:hidden;right: 20px;position:absolute;z-index:1000;"></div>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strOrder; ?>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strDelete; ?></td>
 	<!--			<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">ändern</td>	-->
