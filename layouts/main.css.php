@@ -176,14 +176,22 @@ input[type="text"].transparent_input{
 span[data-tooltip] {
   position: relative;
   cursor: help;
+	--left: -250px;
+	--width: 500px;
+}
+
+span[data-tooltip]::before {
+	content: url(../graphics/icon_i.png);
 }
 
 span[data-tooltip]:hover::after {
   content: attr(data-tooltip);
+	text-align: left;
   position: absolute;
-  left: -300px;
+	right: 0px;
+	left: var(--left);
   top: 24px;
-  width: 500px;
+  max-width: var(--width);
 	font-size: 11px;
 	font-family: verdana, arial;
 	box-shadow: 12px 10px 14px #777;
@@ -192,6 +200,7 @@ span[data-tooltip]:hover::after {
   background-color: #DAE4EC;
   padding: 4px;
   z-index: 10000;
+	width: max-content;
 	white-space: pre-wrap;
   display: block;
 }

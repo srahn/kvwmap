@@ -196,9 +196,7 @@
 										'',
 										'nicht duplizieren'
 									); ?>&nbsp;
-									<span data-tooltip="<? echo $strDuplicateFromLayerIdHelp; ?>">
-										<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
-									</span>
+									<span data-tooltip="<? echo $strDuplicateFromLayerIdHelp; ?>"></span>
 								</div>
 							</div>
 							<i class="fa fa-close" aria-hidden="true" onclick="$('.duplicate-table-fields').hide(); $('#show_duplicate_table_field_button').show();" style="float: right" title="<? echo $strDuplicateTableFieldsCloseTitle; ?>"></i>
@@ -213,9 +211,7 @@
 								</div>
 								<div class="form-value">
 									<input name="duplicate_criterion" type="text" value="<?php echo $this->formvars['duplicate_criterion']; ?>" size="50" maxlength="255">&nbsp;
-									<span data-tooltip="<? echo $strDuplicateCriterionHelp; ?>">
-										<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
-									</span>
+									<span data-tooltip="<? echo $strDuplicateCriterionHelp; ?>"></span>
 								</div>
 							</div>
 							<div class="clear"></div>
@@ -360,36 +356,28 @@
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPath; ?></th>
 						<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
 							<textarea name="pfad" cols="33" rows="4"><? echo $this->formvars['pfad'] ?></textarea>&nbsp;
-							<span data-tooltip="Das Query-SQL ist das SQL-Statement, welches für die Sachdatenabfrage verwendet wird. Es kann eine beliebige Abfrage auf Tabellen oder Sichten sein, eine WHERE-Bedingung ist aber erforderlich.&#xa;Der Schemaname wird hier nicht angegeben, sondern im Feld 'Schema'.&#xa;Wenn Unterabfragen verwendet werden, müssen 'select', 'from' und 'where' in der Unterabfrage klein geschrieben werden und in der Hauptabfrage groß!">
-								<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
-							</span>
+							<span data-tooltip="Das Query-SQL ist das SQL-Statement, welches für die Sachdatenabfrage verwendet wird. Es kann eine beliebige Abfrage auf Tabellen oder Sichten sein, eine WHERE-Bedingung ist aber erforderlich.&#xa;Der Schemaname wird hier nicht angegeben, sondern im Feld 'Schema'.&#xa;Wenn Unterabfragen verwendet werden, müssen 'select', 'from' und 'where' in der Unterabfrage klein geschrieben werden und in der Hauptabfrage groß!"></span>
 						</td>
 					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strData; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<textarea name="Data" cols="33" rows="4"><? echo $this->formvars['Data'] ?></textarea>&nbsp;
-							<span data-tooltip="Das Data-Feld wird vom Mapserver für die Kartendarstellung verwendet (siehe Mapserver-Doku). Etwaige Schemanamen müssen hier angegeben werden.">
-								<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
-							</span>
+							<span data-tooltip="Das Data-Feld wird vom Mapserver für die Kartendarstellung verwendet (siehe Mapserver-Doku). Etwaige Schemanamen müssen hier angegeben werden."></span>
 						</td>
 					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaintable; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="maintable" type="text" value="<?php echo $this->formvars['maintable']; ?>" size="50" maxlength="100">&nbsp;
-							<span data-tooltip="Die Haupttabelle ist diejenige der im Query-SQL-Statement abgefragten Tabellen, die die ID-Spalte liefern soll. Nur auf dieser Tabelle finden Schreiboperationen statt.&#xa;&#xa;Die Haupttabelle muss eine eindeutige ID-Spalte besitzen, welche allerdings nicht im SQL angegeben werden muss.&#xa;&#xa;Ist das Feld Haupttabelle leer, wird der Name der Haupttabelle automatisch eingetragen. Bei einer Layerdefinition über mehrere Tabellen hinweg kann es sein, dass kvwmap die falsche Tabelle als Haupttabelle auswählt. In diesem Fall kann hier händisch die gewünschte Tabelle eingetragen werden. Achtung: Wenn die Tabellennamen im Query-SQL geändert werden, muss auch der Eintrag im Feld Haupttabelle angepasst werden!">
-								<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
-							</span>
+							<span data-tooltip="Die Haupttabelle ist diejenige der im Query-SQL-Statement abgefragten Tabellen, die die ID-Spalte liefern soll. Nur auf dieser Tabelle finden Schreiboperationen statt.&#xa;&#xa;Die Haupttabelle muss eine eindeutige ID-Spalte besitzen, welche allerdings nicht im SQL angegeben werden muss.&#xa;&#xa;Ist das Feld Haupttabelle leer, wird der Name der Haupttabelle automatisch eingetragen. Bei einer Layerdefinition über mehrere Tabellen hinweg kann es sein, dass kvwmap die falsche Tabelle als Haupttabelle auswählt. In diesem Fall kann hier händisch die gewünschte Tabelle eingetragen werden. Achtung: Wenn die Tabellennamen im Query-SQL geändert werden, muss auch der Eintrag im Feld Haupttabelle angepasst werden!"></span>
 						</td>
 					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strIdAttribute; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="oid" type="text" value="<?php echo $this->formvars['oid']; ?>" size="36" maxlength="100">&nbsp;
-							<span data-tooltip="Hier muss die Spalte aus der Haupttabelle angegeben werden, mit der die Datensätze identifiziert werden können (z.B. der Primärschlüssel oder die oid).">
-								<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
-							</span>
+							<span data-tooltip="Hier muss die Spalte aus der Haupttabelle angegeben werden, mit der die Datensätze identifiziert werden können (z.B. der Primärschlüssel oder die oid)."></span>
 						</td>
 					</tr>					
 					<tr>
@@ -480,18 +468,14 @@
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClusterMaxdistance; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="cluster_maxdistance" type="text" value="<?php echo $this->formvars['cluster_maxdistance']; ?>" size="50" maxlength="11">&nbsp;
-							<span data-tooltip="Bei Punktlayern kann durch Angabe dieses Wertes die Clusterbildung aktiviert werden.&#xa;Der Wert ist der Radius in Pixeln, in dem Punktobjekte zu einem Cluster zusammengefasst werden.&#xa;Damit die Cluster dargestellt werden können, muss es eine Klasse mit der Expression&#xa;('[Cluster:FeatureCount]' != '1')&#xa;geben. Cluster:FeatureCount kann auch als Labelitem verwendet werden, um die Anzahl der Punkte pro Cluster anzuzeigen.">	
-								<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
-							</span>
+							<span data-tooltip="Bei Punktlayern kann durch Angabe dieses Wertes die Clusterbildung aktiviert werden.&#xa;Der Wert ist der Radius in Pixeln, in dem Punktobjekte zu einem Cluster zusammengefasst werden.&#xa;Damit die Cluster dargestellt werden können, muss es eine Klasse mit der Expression&#xa;('[Cluster:FeatureCount]' != '1')&#xa;geben. Cluster:FeatureCount kann auch als Labelitem verwendet werden, um die Anzahl der Punkte pro Cluster anzuzeigen."></span>
 						</td>
 					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strProcessing; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="processing" type="text" value="<?php echo $this->formvars['processing']; ?>" size="50" maxlength="255">&nbsp;
-							<span data-tooltip="Wendet eine Prozessierungsanweisung für den Layer an.&#xa;Die unterstützten Anweisungen hängen vom Layertyp und dem verwendeten Treiber ab. Es gibt Anweisungen für Attribute, Connection Pooling, OGR Styles und Raster. siehe Beschreibung zum Layerattribut PROCESSING unter: http://www.mapserver.org/mapfile/layer.html. Mehrere Prozessinganweisungen werden hier eingegeben getrennt durch Semikolon. z.B. CHART_SIZE=60;CHART_TYPE=pie für die Darstellung eines Tortendiagramms des Typs MS_LAYER_CHART">
-								<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
-							</span>
+							<span data-tooltip="Wendet eine Prozessierungsanweisung für den Layer an.&#xa;Die unterstützten Anweisungen hängen vom Layertyp und dem verwendeten Treiber ab. Es gibt Anweisungen für Attribute, Connection Pooling, OGR Styles und Raster. siehe Beschreibung zum Layerattribut PROCESSING unter: http://www.mapserver.org/mapfile/layer.html. Mehrere Prozessinganweisungen werden hier eingegeben getrennt durch Semikolon. z.B. CHART_SIZE=60;CHART_TYPE=pie für die Darstellung eines Tortendiagramms des Typs MS_LAYER_CHART"></span>
 						</td>
 					</tr>					
 				</table>
@@ -688,9 +672,7 @@
 						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSync; ?></th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="sync" type="checkbox" value="1"<?php if ($this->formvars['sync']) echo ' checked'; ?>>&nbsp;
-							<span data-tooltip="<?php echo $strSyncHelp; ?>">
-								<img src="<?php echo GRAPHICSPATH;?>icon_i.png">
-							</span>
+							<span data-tooltip="<?php echo $strSyncHelp; ?>"></span>
 						</td>
 					</tr>
 					<tr>

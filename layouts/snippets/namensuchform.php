@@ -3,10 +3,6 @@
 	include('funktionen/input_check_functions.php');
  ?>
 
-<script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
-<script type="text/javascript">
-Text[0]=["Hilfe:","Zeigt auch die zum Grundbuchblatt geh&ouml;renden Flurst&uuml;cke an"]
-</script>
 <script type="text/javascript">
 <!--
 
@@ -259,8 +255,8 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   <tr>
     <td height="28" align="right" width="220px"><span class="fett"><?php echo $strShowWithFst; ?>:&nbsp;</span></td>
     <td>
-      <input name="withflurst" type="checkbox" <? if($this->formvars['withflurst'] == 'on'){echo 'checked';} ?>>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[0], Style[0], document.getElementById('TipLayer1'))" onmouseout="htm()">
-	  <div id="TipLayer1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+      <input name="withflurst" type="checkbox" <? if($this->formvars['withflurst'] == 'on'){echo 'checked';} ?>>&nbsp;
+			<span data-tooltip="Zeigt auch die zum Grundbuchblatt gehörenden Flurstücke an."></span>
     </td>
   </tr>
   <tr>

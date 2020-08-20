@@ -12121,12 +12121,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
   function StatistikAuswahl() {
     # Abfragen aller Stellen für die Statistik oder Abrechnung
     $this->account = new account($this->database);
-    $this->user2 = new user(0,'',$this->database);
     $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
     if($this->formvars['go'] == 'StatistikAuswahl_Stelle'){
     	$this->stellendaten=$this->user->getStellen('Bezeichnung');
     }
-    $this->UserDaten=$this->user2->getUserDaten('','','Name', $this->Stelle->id, $this->user->id);
+    $this->UserDaten = $this->user->getall_Users('Name');
     $this->titel='Auswahl zur Statistik';
     $this->main='StatistikWaehlen.php';
     $this->output();

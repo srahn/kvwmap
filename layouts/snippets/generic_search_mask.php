@@ -14,8 +14,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 							<option value="AND" <? if($this->formvars['searchmask_operator'][$searchmask_number] == 'AND')echo 'selected'; ?>><? echo $strAnd; ?></option>
 						</select>
 						&nbsp;
-						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text1, Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
-						<div id="Tip1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+						<span data-tooltip="<? echo $strAndOrHint; ?>"></span>
 						<!--a href="javascript:close_record('record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH."symbol_delete.gif"; ?>"></img></a-->
 					</td>
 				</tr>
