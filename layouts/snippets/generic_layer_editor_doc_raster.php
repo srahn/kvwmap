@@ -88,10 +88,15 @@
 	$privileg = '';
 	if($this->formvars['embedded_subformPK'] == '')$records_per_row = 5;
 	else $records_per_row = 3;
+	
+	if($this->formvars['attribute_privileg'] == '0'){
+		$layer['privileg'] = $this->formvars['attribute_privileg'];
+	}
+	
 	for ($k;$k<$anzObj;$k++) {
 		$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
 		if (is_array($layer['attributes']['privileg'])) {
-			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
+			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't' OR $this->formvars['attribute_privileg'] == '0') {
 				$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
 			}
 		}

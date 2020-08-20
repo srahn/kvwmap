@@ -1,13 +1,18 @@
 ﻿<?php
 	$strLayer="Layer";
 	$strAsteriskRequired="Werte mit * mussen eingetragen werden";
+	$strBaseParameters="Basis-Parameter";
+	$strMapParameters="Kartendarstellung";
+	$strQueryParameters="Sachdaten";
+	$strMetaParameters="Metadaten";
+	$strAdministrative="Administration";
 	$strLayerID="Layer ID*";
 	$strDuplicateTableFieldsOpenTitle = 'Zeige Felder zum duplizieren von Layereinstellungen.';
 	$strDuplicateTableFieldsCloseTitle = 'Schließe Felder zum duplizieren von Layereinstellungen.';
 	$strDuplicateFromLayerId = 'Von Layer duplizieren';
-	$strDuplicateFromLayerIdHelp = 'ID des Originallayers von dem dieser Layer dupliziert wurde. Wird der Originallayer im Editor geändert, werden dessen Einstellungen (außer Layer ID, von Layer duplizieren, Unterscheidungskriterium, Gruppe, Alias, Name, Namen in anderen Sprachen und alle Defaulteinstellungen für die Stellenzuweisung) auf diesen Layer übertragen. Geben Sie ein Unterscheidungskriterium ein und platzieren Sie es in Pfad und Data um die Unterschiede zwischen den Duplikaten zu definieren, z.B. ein unterschiedlicher Ausdruck in der WHERE Klausel. Diese Funktion kann verwendet werden, wenn man den gleichen Layer mehrmals haben möchte nur mit unterschiedlichen Namen, Gruppe und Filter';
+	$strDuplicateFromLayerIdHelp = 'ID des Originallayers von dem dieser Layer dupliziert wurde. Wird der Originallayer im Editor geändert, werden dessen Einstellungen (außer Layer ID, von Layer duplizieren, Unterscheidungskriterium, Gruppe, Alias, Name, Namen in anderen Sprachen und alle Defaulteinstellungen für die Stellenzuweisung) auf diesen Layer übertragen. Geben Sie ein Unterscheidungskriterium ein und platzieren Sie es in Query und Data um die Unterschiede zwischen den Duplikaten zu definieren, z.B. ein unterschiedlicher Ausdruck in der WHERE Klausel. Diese Funktion kann verwendet werden, wenn man den gleichen Layer mehrmals haben möchte nur mit unterschiedlichen Namen, Gruppe und Filter';
 	$strDuplicateCriterion = 'Unterscheidungskriterium';
-	$strDuplicateCriterionHelp = 'Dieser Ausdruck ersetzt den Parameter $duplicate_criterion in Pfad und Data, falls dort vorhanden, zur Unterscheidung dieses Layers vom Original und anderen Layern, die vom gleichen Original dupliziert wurden.';
+	$strDuplicateCriterionHelp = 'Dieser Ausdruck ersetzt den Parameter $duplicate_criterion in Query und Data, falls dort vorhanden, zur Unterscheidung dieses Layers vom Original und anderen Layern, die vom gleichen Original dupliziert wurden.';
 	$strName="Name";
 	$strDataType="Datentyp*";
 	$strGroup="Gruppe*";
@@ -97,4 +102,6 @@
 	$strDdlAttribute="DDL Default Attribut";
 	$strIdAttribute="ID-Spalte";
 	$strStyleItem="Styleitem";
+	$strGeomUsable="Geometrie übernehmbar";
+	$strMaxQueryRows="Datensätze pro Seite";
 ?>

@@ -49,9 +49,10 @@ if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) { ?>
 ?>
 			<tr>
 				<td>
-					<div class="apt-attributname">
-						<input style="outline: none; width: 100px; border:none; background-color:rgba(255,255,255,0); cursor:default;" type="text" name="attribute_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->attributes['name'][$i]; ?>" readonly>
-						<span class="apt-attributname-tooltip" <? if($template_div == 'default') { echo 'style="margin-left: -78px;"'; } ?>><? echo $this->attributes['name'][$i]; ?></span>
+					<div style="height: 26px; width: 100px; position: relative">
+						<div class="apt-attributname">
+							<span><? echo $this->attributes['name'][$i]; ?></span>
+						</div>
 					</div>
 				</td>
 				<td>

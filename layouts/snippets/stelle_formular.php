@@ -7,9 +7,21 @@
 <script language="JavaScript">
 <!--
 
-function handleClick(event, option_obj){
-	if(event.layerX > 260){
+function gotoStelle(event, option_obj){
+	if(event.layerX > 300){
 		location.href = 'index.php?go=Stelleneditor&selected_stelle_id='+option_obj.value;
+	}
+}
+
+function gotoLayer(event, option_obj){
+	if(event.layerX > 300){
+		location.href = 'index.php?go=Layereditor&selected_layer_id='+option_obj.value;
+	}
+}
+
+function gotoUser(event, option_obj){
+	if(event.layerX > 300){
+		location.href = 'index.php?go=Benutzerdaten_Formular&selected_user_id='+option_obj.value;
 	}
 }
 
@@ -354,7 +366,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
                 <tr valign="top">
                     <td><?php echo $strAssigned; ?><br>
 
-                      <select name="selectedmenues" size="12" onchange="select_submenues();" multiple style="width:300px">
+                      <select name="selectedmenues" size="12" onchange="select_submenues();" multiple style="width: 340px">
                       <?
                       for($i=0; $i < count($this->formvars['selmenues']["Bezeichnung"]); $i++){
                         echo '<option id="'.$this->formvars['selmenues']["ORDER"][$i].'_sel_'.$this->formvars['selmenues']["menueebene"][$i].'_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['selmenues']["Bezeichnung"][$i]).'" value="'.$this->formvars['selmenues']["ID"][$i].'">'.$this->formvars['selmenues']["Bezeichnung"][$i].'</option>';
@@ -368,14 +380,14 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
                     </td>
                     <td>
                       <?php echo $strAvailable; ?><br>
-                      <select name="allmenues" size="6" onchange="getsubmenues();" style="width:300px">
+                      <select name="allmenues" size="6" onchange="getsubmenues();" style="width: 340px">
                       <? for($i=0; $i < count($this->formvars['menues']); $i++){
                           echo '<option id="'.$this->formvars['menues'][$i]->data['order'].'_all_'.$this->formvars['menues'][$i]->data['menueebene'].'_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['menues'][$i]->data['name']).'" value="'.$this->formvars['menues'][$i]->data['id'].'">'.$this->formvars['menues'][$i]->data['name'].'</option>';
                            }
                       ?>
                       </select>
                       <div id="submenue_div">
-                      	<select name="submenues" size="6" multiple style="width:300px">
+                      	<select name="submenues" size="6" multiple style="width: 340px">
                       	</select>
                       </div>
                     </td>
@@ -399,7 +411,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
               <table border="0" cellspacing="0" cellpadding="0">
                 <tr valign="top">
                     <td>
-                      <select name="selectedfunctions" size="6" multiple style="width:300px">
+                      <select name="selectedfunctions" size="6" multiple style="width: 340px">
                       <?
                       for($i=0; $i < count($this->formvars['selfunctions']); $i++){
                           echo '<option title="'.str_replace(' ', '&nbsp;', $this->formvars['selfunctions'][$i]["bezeichnung"]).'" value="'.$this->formvars['selfunctions'][$i]["id"].'">'.$this->formvars['selfunctions'][$i]["bezeichnung"].'</option>';
@@ -412,7 +424,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
                       <input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedfunctions,document.GUI.selfunctions,'value')>
                     </td>
                     <td>
-                      <select name="allfunctions" size="6" multiple style="width:300px">
+                      <select name="allfunctions" size="6" multiple style="width: 340px">
                       <? for($i=0; $i < count($this->formvars['functions']); $i++){
                           echo '<option title="'.str_replace(' ', '&nbsp;', $this->formvars['functions'][$i]["bezeichnung"]).'" value="'.$this->formvars['functions'][$i]["id"].'">'.$this->formvars['functions'][$i]["bezeichnung"].'</option>';
                            }
@@ -439,7 +451,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
               <table border="0" cellspacing="0" cellpadding="0">
                 <tr valign="top">
                     <td>
-                      <select name="selectedframes" size="6" multiple style="width:300px">
+                      <select name="selectedframes" size="6" multiple style="width: 340px">
                       <?
                       for($i=0; $i < count($this->formvars['selframes']); $i++){
                           echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['selframes'][$i]["Name"]).' value="'.$this->formvars['selframes'][$i]["id"].'">'.$this->formvars['selframes'][$i]["Name"].'</option>';
@@ -452,7 +464,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
                       <input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedframes,document.GUI.selframes,'value')>
                     </td>
                     <td>
-                      <select name="allframes" size="6" multiple style="width:300px">
+                      <select name="allframes" size="6" multiple style="width: 340px">
                       <? for($i=0; $i < count($this->formvars['frames']); $i++){
                           echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['frames'][$i]["Name"]).'  value="'.$this->formvars['frames'][$i]["id"].'">'.$this->formvars['frames'][$i]["Name"].'</option>';
                            }
@@ -479,7 +491,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
               <table border="0" cellspacing="0" cellpadding="0">
                 <tr valign="top">
                     <td>
-                      <select name="selectedlayouts" size="6" multiple style="width:300px">
+                      <select name="selectedlayouts" size="6" multiple style="width: 340px">
                       <?
                       for($i=0; $i < count($this->formvars['sellayouts']); $i++){
                           echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['sellayouts'][$i]["name"]).' value="'.$this->formvars['sellayouts'][$i]["id"].'">['.$this->formvars['sellayouts'][$i]["layer_id"].'] '.$this->formvars['sellayouts'][$i]["name"].'</option>';
@@ -492,7 +504,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
                       <input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedlayouts,document.GUI.sellayouts,'value')>
                     </td>
                     <td>
-                      <select name="alllayouts" size="6" multiple style="width:300px">
+                      <select name="alllayouts" size="6" multiple style="width: 340px">
                       <? for($i=0; $i < count($this->formvars['layouts']); $i++){
                           echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['layouts'][$i]["name"]).'  value="'.$this->formvars['layouts'][$i]["id"].'">['.$this->formvars['layouts'][$i]["layer_id"].'] '.$this->formvars['layouts'][$i]["name"].'</option>';
                            }
@@ -523,10 +535,10 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
               <table border="0" cellspacing="0" cellpadding="0">
                 <tr valign="top">
                     <td>
-                      <select name="selectedlayer" size="12" multiple style="width:300px">
+                      <select name="selectedlayer" size="12" multiple style="position: relative; width: 340px">
                       <?
                       for($i=0; $i < count($this->formvars['sellayer']["Bezeichnung"]); $i++){
-                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' id="'.$this->formvars['sellayer']["ID"][$i].'_'.$this->formvars['sellayer']["Gruppe"][$i].'" value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
+                          echo '<option class="select_option_link" onclick="gotoLayer(event, this)" title='.str_replace(' ', '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' id="'.$this->formvars['sellayer']["ID"][$i].'_'.$this->formvars['sellayer']["Gruppe"][$i].'" value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
                          }
                       ?>
                       </select>
@@ -536,7 +548,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
                       <input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedlayer,document.GUI.sellayer,'value')>
                     </td>
                     <td>
-											<select name="allgroups" size="6" onchange="getlayer();select_layer();" style="width:300px">
+											<select name="allgroups" size="6" onchange="getlayer();select_layer();" style="width: 340px">
 												<option value=""> - alle - </option>
                       <? for($i = 0; $i < count($this->layergruppen['ID']); $i++){
                           echo '<option title="'.str_replace(' ', '&nbsp;', $this->layergruppen['Bezeichnung'][$i]).'" value="'.$this->layergruppen['ID'][$i].'">'.$this->layergruppen['Bezeichnung'][$i].'</option>';
@@ -544,9 +556,9 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
                       ?>
                       </select>                    
                     	<div id="alllayer_div">
-                      <select name="alllayer" size="6" multiple style="width:300px">
+                      <select name="alllayer" size="6" multiple style="position: relative; width: 340px">
                       <? for($i=0; $i < count($this->formvars['layer']["Bezeichnung"]); $i++){
-                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['layer']["Bezeichnung"][$i]).' id="'.$this->formvars['layer']["ID"][$i].'_'.$this->formvars['layer']["GruppeID"][$i].'" value="'.$this->formvars['layer']["ID"][$i].'">'.$this->formvars['layer']["Bezeichnung"][$i].'</option>';
+                          echo '<option class="select_option_link" onclick="gotoLayer(event, this)" title='.str_replace(' ', '&nbsp;', $this->formvars['layer']["Bezeichnung"][$i]).' id="'.$this->formvars['layer']["ID"][$i].'_'.$this->formvars['layer']["GruppeID"][$i].'" value="'.$this->formvars['layer']["ID"][$i].'">'.$this->formvars['layer']["Bezeichnung"][$i].'</option>';
                            }
                       ?>
                       </select>
@@ -572,7 +584,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<table border="0" cellspacing="0" cellpadding="0">
 							<tr valign="top">
 								<td>
-									<select name="selectedusers" size="6" multiple style="width:300px"><?
+									<select name="selectedusers" size="6" multiple style="position: relative; width: 340px"><?
 										$seluseroptions[] = array('value' => '', 'output' => '-- Auswahl --');
 										for ($i = 0; $i < count($this->formvars['selusers']["Bezeichnung"]); $i++) {
 											$seluseroptions[] = array(
@@ -580,6 +592,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 												'output' => $this->formvars['selusers']["Bezeichnung"][$i]
 											); ?>
 											<option
+												class="select_option_link" onclick="gotoUser(event, this)" 
 												title="<?php echo str_replace(' ', '&nbsp;', $this->formvars['selusers']["Bezeichnung"][$i]); ?>"
 												value="<?php echo $this->formvars['selusers']["ID"][$i]; ?>"
 											><?php echo $this->formvars['selusers']["Bezeichnung"][$i]; ?></option><?php
@@ -591,9 +604,10 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 									<input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedusers,document.GUI.selusers,'value')>
 								</td>
 								<td>
-									<select name="allusers" size="6" multiple style="width:300px"><?
+									<select name="allusers" size="6" multiple style="position: relative; width: 340px"><?
 										for ($i = 0; $i < count($this->formvars['users']["Bezeichnung"]); $i++) { ?>
 											<option
+												class="select_option_link" onclick="gotoUser(event, this)" 
 												title="<?php echo str_replace(' ', '&nbsp;', $this->formvars['users']["Bezeichnung"][$i]); ?>"
 												value="<?php echo $this->formvars['users']["ID"][$i]; ?>"
 											><?php echo $this->formvars['users']["Bezeichnung"][$i]; ?></option><?php
@@ -630,8 +644,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										},
 										$this->formvars['selparents']
 									);
-									$option_style = 'background-image: url(graphics/pfeil_rechts.gif);  background-repeat: no-repeat;  background-position: 267px;';
-									echo FormObject::createSelectField('selectedparents', $options, '', 6, 'position: relative; width: 300px', '', '', 'multiple', '', '', $option_style, 'handleClick(event, this);');?>
+									echo FormObject::createSelectField('selectedparents', $options, '', 6, 'position: relative; width: 340px', '', '', 'multiple', '', '', '', 'select_option_link', 'gotoStelle(event, this);');?>
 								</td>
 								<td align="center" valign="middle" width="1">
 									<input
@@ -658,7 +671,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										},
 										$this->formvars['parents']
 									);
-									echo FormObject::createSelectField('allparents', $options, '', 6, 'position: relative; width: 300px', '', '', 'multiple', '', '', $option_style, 'handleClick(event, this);');?>
+									echo FormObject::createSelectField('allparents', $options, '', 6, 'position: relative; width: 340px', '', '', 'multiple', '', '', '', 'select_option_link', 'gotoStelle(event, this);');?>
 								</td>
 							</tr>
 						</table>
@@ -689,7 +702,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										},
 										$this->formvars['selchildren']
 									);
-									echo FormObject::createSelectField('selectedchildren', $options, '', 6, 'position: relative; width: 300px', '', '', 'multiple', '', '', $option_style, 'handleClick(event, this);');?>
+									echo FormObject::createSelectField('selectedchildren', $options, '', 6, 'position: relative; width: 340px', '', '', 'multiple', '', '', '', 'select_option_link', 'gotoStelle(event, this);');?>
 								</td>
 								<td align="center" valign="middle" width="1">
 									<input
@@ -716,7 +729,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										},
 										$this->formvars['children']
 									);
-									echo FormObject::createSelectField('allchildren', $options, '', 6, 'position: relative; width: 300px', '', '', 'multiple', '', '', $option_style, 'handleClick(event, this);');?>
+									echo FormObject::createSelectField('allchildren', $options, '', 6, 'position: relative; width: 340px', '', '', 'multiple', '', '', '', 'select_option_link', 'gotoStelle(event, this);');?>
 								</td>
 							</tr>
 						</table>

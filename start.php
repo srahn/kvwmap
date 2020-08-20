@@ -1,6 +1,6 @@
 <?php
 # Objekt für graphische Benutzeroberfläche erzeugen mit default-Werten
-$GUI = new GUI("map.php", "main.css.php", "html");
+$GUI = new GUI("map.php", "layouts/main.css.php", "html");
 $GUI->user = new stdClass();
 $GUI->user->rolle = new stdClass();
 $GUI->user->rolle->querymode = 0;
@@ -381,19 +381,19 @@ else {
 		define('BEARBEITER_NAME', 'Bearbeiter: ' . $GUI->user->Name);
 	}
 
-	if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, den PGConnect und Trafos weglassen
-		##############################################################################
-		# kvwmap uses the database defined in postgres_connection_id of stelle object or if not exists from POSTGRES_CONNECTION_ID
-		$GUI->pgdatabase = $GUI->baudatabase = new pgdatabase();
-		#echo '<br>GUI->Stelle-->postgres_connection_id: ' . $GUI->Stelle->postgres_connection_id;
-		#echo '<br>POSTGRES_CONNECTION_ID: ' . POSTGRES_CONNECTION_ID;
-		$connection_id = ($GUI->Stelle->postgres_connection_id != '' ? $GUI->Stelle->postgres_connection_id : POSTGRES_CONNECTION_ID);
-		#echo '<br>connection_id: ' . $connection_id;
-		if (!$GUI->pgdatabase->open($connection_id)) {
-			echo $GUI->pgdatabase->err_msg;
-			exit;
-		}
-
+	##############################################################################
+	# kvwmap uses the database defined in postgres_connection_id of stelle object or if not exists from POSTGRES_CONNECTION_ID
+	$GUI->pgdatabase = $GUI->baudatabase = new pgdatabase();
+	#echo '<br>GUI->Stelle-->postgres_connection_id: ' . $GUI->Stelle->postgres_connection_id;
+	#echo '<br>POSTGRES_CONNECTION_ID: ' . POSTGRES_CONNECTION_ID;
+	$connection_id = ($GUI->Stelle->postgres_connection_id != '' ? $GUI->Stelle->postgres_connection_id : POSTGRES_CONNECTION_ID);
+	#echo '<br>connection_id: ' . $connection_id;
+	if (!$GUI->pgdatabase->open($connection_id)) {
+		echo $GUI->pgdatabase->err_msg;
+		exit;
+	}
+	
+	if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, die Trafos weglassen
 		$GUI->epsg_codes = $GUI->pgdatabase->read_epsg_codes(false);
 		# Umrechnen der für die Stelle eingetragenen Koordinaten in das aktuelle System der Rolle
 		# wenn die EPSG-Codes voneinander abweichen

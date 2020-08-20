@@ -438,7 +438,16 @@ class GUI {
 				# z.B. für Klassen mit Umlauten
 				$layerset['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";
 			}
-			$layer->set('connection', $layerset['connection']);
+			$layer->set('connection', 
+				replace_params(
+					$layerset[connection],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->Stelle->id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				)
+			);
 		}
 
 		if ($layerset['connectiontype'] > 0) {
@@ -450,7 +459,16 @@ class GUI {
 		}
 
 		if ($layerset['processing'] != "") {
-			$processings = explode(";",$layerset['processing']);
+			$processings = explode(";",
+				replace_params(
+					$layerset['processing'],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->Stelle->id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				)
+			);
 			foreach ($processings as $processing) {
 				$layer->setProcessing($processing);
 			}

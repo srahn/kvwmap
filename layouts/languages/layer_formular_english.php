@@ -1,6 +1,11 @@
 ﻿<?php
 	$strLayer="Layer";
   $strAsteriskRequired="Fields marked with an asterisk * are required";
+	$strBaseParameters="Base-Parameter";
+	$strMapParameters="Map Display";
+	$strQueryParameters="Query";
+	$strMetaParameters="Metadata";
+	$strAdministrative="Administration";
   $strLayerID="Layer ID*";
   $strName="Name";
   $strDataType="Datatype*";
@@ -91,4 +96,6 @@
 	$strDdlAttribute="DDL Default Attribute";
 	$strIdAttribute="ID-Column";
 	$strStyleItem="Styleitem";
+	$strGeomUsable="Geometry usable";
+	$strMaxQueryRows="Records per Page";
 ?>  

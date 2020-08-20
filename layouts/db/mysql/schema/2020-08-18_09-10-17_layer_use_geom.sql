@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE `layer` ADD `use_geom` BOOLEAN NOT NULL DEFAULT TRUE AFTER `queryable`;
+
+COMMIT;

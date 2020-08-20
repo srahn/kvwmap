@@ -4,12 +4,7 @@ include(SNIPPETS.'/sachdatenanzeige_functions.php');
 ?>
 
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
-<script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
-<!--
-
-
-Text1=['<? echo $strHelp; ?>:','<? echo $strAndOrHint; ?>'];
 
 <!-- wird fuer das Absenden bei Enter benoetigt -->
 document.onkeydown = function(ev){

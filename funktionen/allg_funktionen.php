@@ -1093,24 +1093,22 @@ function searchdir($path, $recursive){
     return ($dirlist);
 }
 
-
-function get_select_parts($select){
-	$column = explode(',', $select);		# an den Kommas splitten
-  for($i = 0; $i < count($column); $i++){
-  	$klammerauf = substr_count($column[$i], '(');
-  	$klammerzu = substr_count($column[$i], ')');
+function get_select_parts($select) {
+	$column = explode(',', $select); # an den Kommas splitten
+	for($i = 0; $i < count($column); $i++) {
+		$klammerauf = substr_count($column[$i], '(');
+		$klammerzu = substr_count($column[$i], ')');
 		$hochkommas = substr_count($column[$i], "'");
 		# Wenn ein Select-Teil eine ungerade Anzahl von Hochkommas oder mehr Klammern auf als zu hat,
 		# wurde hier entweder ein Komma im einem String verwendet (z.B. x||','||y) oder eine Funktion (z.B. round(x, 2)) bzw. eine Unterabfrage mit Kommas verwendet
-  	if($hochkommas % 2 != 0 OR $klammerauf > $klammerzu){
-  		$column[$i] = $column[$i].','.$column[$i+1];
-  		array_splice($column, $i+1, 1);
-			$i--;							# und nochmal prüfen, falls mehrere Kommas drin sind
-  	}
-  }
-  return $column;
+		if ($hochkommas % 2 != 0 OR $klammerauf > $klammerzu) {
+			$column[$i] = $column[$i] . ',' . $column[$i + 1];
+			array_splice($column, $i + 1, 1);
+			$i--; # und nochmal prüfen, falls mehrere Kommas drin sind
+		}
+	}
+	return $column;
 }
-
 
 function microtime_float(){
    list($usec, $sec) = explode(" ", microtime());

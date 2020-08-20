@@ -927,6 +927,7 @@ class stelle {
 					`Stelle_ID`,
 					`Layer_ID`,
 					`queryable`,
+					`use_geom`,
 					`drawingorder`,
 					`legendorder`,
 					`minscale`,
@@ -946,7 +947,8 @@ class stelle {
 				SELECT
 					'" . $this->id . "',
 					'" . $layer_ids[$i] . "',
-					queryable, 
+					queryable,
+					use_geom,
 					drawingorder, 
 					legendorder, 
 					minscale, 
@@ -970,6 +972,7 @@ class stelle {
 					$sql .= "
 					ON DUPLICATE KEY UPDATE 
 						queryable = l.queryable, 
+						queryable = l.use_geom, 
 						drawingorder = l.drawingorder, 
 						legendorder = l.legendorder, 
 						minscale = l.minscale, 
@@ -1045,7 +1048,7 @@ class stelle {
 										ul.Layer_ID = l.Layer_ID AND
 										locate(
 											concat('$', p.key),
-											concat(l.Name, l.alias, l.connection, l.Data, l.pfad, l.classitem, l.classification)
+											concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 										) > 0
 									UNION
 									SELECT

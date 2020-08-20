@@ -2,12 +2,8 @@
 	include(LAYOUTPATH.'languages/attribut_privileges_form_'.$this->user->rolle->language.'.php');
 	include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php');
 ?>
-<script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
-
-Text[1]=["Hilfe:","Globale sowie attributive Rechte der Stelle beim Zugriff den ausgewählten Layer. Die eingestellten Default-Rechte werden beim erstmaligen Zuordnen eines Layers zu einer Stelle verwendet.<br><br>Layerzugriffsrechte<br>Globale Privilegien auf Layerebene (globale editierende Rechte am Layer müssen durch die entsprechenden attributbezogenen Rechte aktiviert werden):<br>- 'lesen und bearbeiten': Mindestzugriffsrecht. Vorhandene Datensätze können gelesen und bearbeitet werden.<br>- 'neue Datensätze erzeugen': Datensätze können gelesen, bearbeitet und neu angelegt werden.<br>- 'Datensätze erzeugen und löschen': Datensätze können gelesen, bearbeitet, erzeugt und gelöscht werden.<br><br>Layerexportrechte<br>- 'Export nicht erlaubt': Datensätze sind in der Sachdatenabfrage grundsätzlich sichtbar, können jedoch nicht exportiert werden.<br>- 'nur Sachdaten': Der Export eines Datensatzes ist nur in Nicht-Geometrie-Formate möglich.<br>- 'Sach- und Geometriedaten': Default. Der Export eines Datensatzes ist in alle Datenformate möglich.<br><br>Attributbezogene Rechte:<br>- 'kein Zugriff': Das Attribut erscheint in der Sachdatenabfrage nicht.<br>- 'lesen': Das Attribut erscheint in der Sachdatenabfrage, ist aber nicht editierbar.<br>- 'editieren': Das Attribut erscheint in der Sachdatenabfrage und ist editierbar.<br>Ist für das Geometrie-Attribut ('the_geom') das Privileg 'kein Zugriff' eingetragen, kann man nicht von der Sachdatenanzeige in die Karte auf das Objekt zoomen. Dafür muß es mindestens lesbar sein.<br>Damit ein Attribut in der Layer-Suche als Suchoption zur Verfügung steht, muss es mindestens lesbar sein.<br><br>Tooltip: Inhalt des angehakten Attributs erscheint in der Karte beim Hovern über ein Objekt. Funktioniert auch mit Fotos.<br><br>Hinweis 'Default-Rechte allen Stellen zuweisen': Je nach nach Anzahl der Stellen und Attribute kann eine sehr große Anzahl an Formularvariablen übermittelt werden. Möglicherweise muss dafür in der php.ini der Wert für max_input_vars hoch gesetzt werden."]
-
 
 function set_all(attribute_names, stelle, value){
 	names = attribute_names.split('|');
@@ -130,30 +126,18 @@ function save(stelle, other_selected_layer_id = '') {
 		margin-top: 50px;
 	}
 	.apt-attributname {
-		position: relative;
-		display: inline-block;
-	}
-	.apt-attributname .apt-attributname-tooltip {
-		visibility: hidden;
-		top: 0px;
-		left: 50%;
-		background-color: rgb(255,255,255);
-		color: #000;
-		text-align: center;
-		border-radius: 2px;
-		border: 1px solid #ccc;
+		margin-top: 2px;
 		padding: 3px;
 		position: absolute;
-		z-index: 1;
-		margin-left: -53px;
-		margin-top: -1px;
-		font-size:14px;
+		width: 100px;
+		background-color: #f8f8f9;		
+		overflow: hidden;
+		outline: 1px solid #f8f8f9;
 		cursor: default;
-		transition-property: visibility;
-		transition-delay: 250ms;
 	}
-	.apt-attributname:hover .apt-attributname-tooltip  {
-		visibility: visible;
+	.apt-attributname:hover {
+		width: auto;
+		outline: 1px solid #ccc;
 	}
 	</style>
 
@@ -207,7 +191,7 @@ function save(stelle, other_selected_layer_id = '') {
   	<td>
 			<div class="apf-tip-magic">
 				<div class="apf-tip">
-					<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer'));" onmouseout="htm();">
+					<span style="--left: -50px; --width: 750px" data-tooltip="Globale sowie attributive Rechte der Stelle beim Zugriff den ausgewählten Layer.&#xa;&#xa;Die eingestellten Default-Rechte werden beim erstmaligen Zuordnen eines Layers zu einer Stelle verwendet.&#xa;&#xa;Layerzugriffsrechte&#xa;Globale Privilegien auf Layerebene (globale editierende Rechte am Layer müssen durch die entsprechenden attributbezogenen Rechte aktiviert werden):&#xa;- 'lesen und bearbeiten': Mindestzugriffsrecht. Vorhandene Datensätze können gelesen und bearbeitet werden.&#xa;- 'neue Datensätze erzeugen': Datensätze können gelesen, bearbeitet und neu angelegt werden.&#xa;- 'Datensätze erzeugen und löschen': Datensätze können gelesen, bearbeitet, erzeugt und gelöscht werden.&#xa;&#xa;Layerexportrechte&#xa;- 'Export nicht erlaubt': Datensätze sind in der Sachdatenabfrage grundsätzlich sichtbar, können jedoch nicht exportiert werden.&#xa;- 'nur Sachdaten': Der Export eines Datensatzes ist nur in Nicht-Geometrie-Formate möglich.&#xa;- 'Sach- und Geometriedaten': Default. Der Export eines Datensatzes ist in alle Datenformate möglich.&#xa;&#xa;Attributbezogene Rechte:&#xa;- 'kein Zugriff': Das Attribut erscheint in der Sachdatenabfrage nicht.&#xa;- 'lesen': Das Attribut erscheint in der Sachdatenabfrage, ist aber nicht editierbar.&#xa;- 'editieren': Das Attribut erscheint in der Sachdatenabfrage und ist editierbar.&#xa;&#xa;Ist für das Geometrie-Attribut ('the_geom') das Privileg 'kein Zugriff' eingetragen, kann man nicht von der Sachdatenanzeige in die Karte auf das Objekt zoomen. Dafür muß es mindestens lesbar sein.&#xa;Damit ein Attribut in der Layer-Suche als Suchoption zur Verfügung steht, muss es mindestens lesbar sein.&#xa;&#xa;Tooltip: Inhalt des angehakten Attributs erscheint in der Karte beim Hovern über ein Objekt. Funktioniert auch mit Fotos.&#xa;&#xa;Hinweis 'Default-Rechte allen Stellen zuweisen': Je nach nach Anzahl der Stellen und Attribute kann eine sehr große Anzahl an Formularvariablen übermittelt werden. Möglicherweise muss dafür in der php.ini der Wert für max_input_vars hoch gesetzt werden."></span>
 <?					echo FormObject::createSelectField(
 						'for_attribute_privileges_selected_layer_id',
 						$layer_options,
@@ -246,7 +230,6 @@ function save(stelle, other_selected_layer_id = '') {
 						onclick="$('#attribute_privileges_for_other_layer_button, #for_attribute_privileges_selected_layer_id, #show_attribute_privileges_for_other_layer_button, #close_attribute_privileges_for_other_layer_button').toggle();"
 					></i>
 				</div>
-				<DIV id="TipLayer" style="visibility:hidden;position: absolute;z-index:1000;"></DIV>
 			</div>
   	</td>
   </tr>
@@ -259,7 +242,7 @@ function save(stelle, other_selected_layer_id = '') {
 					<td><?
 						$stellenanzahl = ($this->stellen ? count($this->stellen['ID']) : 0);
 						if($stellenanzahl > 0){
-						$width1 = $width = 289*$stellenanzahl;
+						$width1 = $width = 297*$stellenanzahl;
 						if($width > 1187)$width = 1187;
 						if($width1 > 1187){ ?>
 						<div id="upperscrollbar" style="overflow:auto; overflow-y:hidden;width:1187px" onscroll="document.getElementById('stellendiv').scrollLeft=this.scrollLeft">
