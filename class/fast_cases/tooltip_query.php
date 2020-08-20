@@ -491,7 +491,7 @@ class GUI {
 				}
 
 				# Anhängen des Begrenzers zur Einschränkung der Anzahl der Ergebniszeilen
-				$sql_limit =' LIMIT '.$layerset[$i]['max_query_rows'] ?: MAXQUERYROWS;
+				$sql_limit =' LIMIT '.($layerset[$i]['max_query_rows'] ?: MAXQUERYROWS);
 
 				#echo '<br>sql:<br>'.$sql;
 				$ret=$layerdb->execSQL($sql.$sql_limit,4, 0);
