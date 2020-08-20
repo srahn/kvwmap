@@ -104,7 +104,7 @@ class PgObject {
 			WHERE
 				" . $where_condition . "
 		";
-		$this->debug->show('find_by_id sql: ' . $sql, true);
+		$this->debug->show('find_by_id sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		$this->data = pg_fetch_assoc($query);
 		return $this;
@@ -132,7 +132,7 @@ class PgObject {
 				" . $where . "
 			" . $order . "
 		";
-		$this->debug->show('find_where sql: ' . $sql, $this->show);
+		$this->debug->show('find_where sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		$result = array();
 		while($this->data = pg_fetch_assoc($query)) {

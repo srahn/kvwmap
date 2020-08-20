@@ -64,8 +64,9 @@ class Konformitaetsbedingung extends PgObject {
 	*/
 	function getValidierungen() {
 		$validierung = new Validierung($this->gui);
-		$validieringen = $validierung->find_where($validierung->get_id_condition(array($this->get('nummer'), $this->get('version_von'))));
-		return $validierungen;
+		$where =  $validierung->get_id_condition(array($this->get('nummer'), $this->get('version_von')));
+		$this->validierungen = $validierung->find_where($where);
+		return $this->validierungen;
 	}
 
 }

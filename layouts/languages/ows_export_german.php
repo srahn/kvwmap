@@ -1,22 +1,21 @@
 ﻿<?php
-$strTitle="MapService Map-Datei Export";
-$strWMSExportWarning="Diese Funktion speichert die aktuellen Kartendarstellungen mit zusätzlichen Metadaten zum Projekt in einer Map-Datei ab, sodass die Inhalte in einem OGC konformen Web Map Service (WMS) anderen unabhängig von kvwmap zur Verfügung gestellt werden können. Der Speicherort ist in der Konstante WMS_MAPFILE_PATH festzulegen.";
-$strAllOrActiveLayer="Sollen alle Layer der Stelle ausgegeben werden oder nur die aktiven?";
-$strAll="alle";
-$strActiveLayer="nur aktive";
-$strNameOfMapFile="Wählen Sie einen Namen für die Map-Datei:";
-$strOwsTitle="Wie soll der Service bezeichnet werden (ows_title):";
-$strOwsAbstract="Geben Sie eine kurze Beschreibung zum Web Map Service (ows_abstract):";
-$strContactInfo="Kontaktinformationen:";
-$strContactPerson="Person (ows_contactperson):";
-$strOrganisation="Organisation (ows_contactorganization)";
-$strEMail="E-Mail (ows_contactelectronicmailaddress):";
-$strFee="Kosten für die Nutzung des Dienstes (ows_fees):";
-$strButtonCancel="Abbrechen";
-$strButtonSend="Senden";
-$strExported1="Die aktuellen Karteneinstellungen wurden in die Mapdatei ".WMS_MAPFILE_PATH.$this->formvars['mapfile_name']." exportiert. Die exportierte Datei kann nun f&uuml;r OWS verwendet werden.";
-$strExported2="Ein getCapabilities-Request zu diesem WMS sieht folgendermaßen aus";
-$strExported3="Die Karte l&auml;&szlig;t sich abfragen mit einem getMap-Request, z.B.";
-
-  
-?>  
+	$strTitle = "Export OGC-Dienst Map-Datei";
+	$strWMSExportWarning = "Diese Funktion speichert die aktuellen Kartendarstellungen mit zusätzlichen Metadaten zum Projekt in einer MapServer Map-Datei ab, sodass die Inhalte in einem OGC konformen Web Map (WMS) und Web Feature Service (WFS) anderen unabhängig von kvwmap zur Verfügung gestellt werden können. Der Speicherort ist:";
+	$strAllOrActiveLayer = "Sollen alle Layer der Stelle ausgegeben werden oder nur die aktiven?";
+	$strAll = "alle";
+	$strActiveLayer = "nur aktive";
+	$strNameOfMapFile = "Wählen Sie einen Namen für die Map-Datei:";
+	$strOwsTitle = "Wie soll der Service bezeichnet werden (ows_title):";
+	$strOwsAbstract = "Geben Sie eine kurze Beschreibung zum Web Map Service (ows_abstract):";
+	$strContactInfo = "Kontaktinformationen:";
+	$strContactPerson = "Person (ows_contactperson):";
+	$strContactPosition = "Position (ows_contactposition):";
+	$strOrganisation = "Organisation (ows_contactorganization):";
+	$strEMail = "E-Mail (ows_contactelectronicmailaddress):";
+	$strFee = "Kosten für die Nutzung des Dienstes (ows_fees):";
+	$strButtonCancel = "Abbrechen";
+	$strButtonSend = "Senden";
+	$strExported1 = "Die aktuellen Karteneinstellungen wurden in die Mapdatei " . $this->mapfile ." exportiert. Die exportierte Datei kann nun f&uuml;r OWS verwendet werden.";
+	$strExported2 = "Ein getCapabilities-Request zu diesem WMS sieht folgendermaßen aus";
+	$strExported3 = "Die Karte l&auml;&szlig;t sich abfragen mit einem getMap-Request, z.B.";
+?>

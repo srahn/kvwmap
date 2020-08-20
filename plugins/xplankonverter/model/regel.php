@@ -123,16 +123,6 @@ public static	function find_by_id($gui, $by, $id) {
 					$validierung->konvertierung_id = $konvertierung_id;
 					$validierung->geom_within_bereich($this, $konvertierung);
 				}
-
-				# Prüft die Konformitäten der Klasse
-				$xp_object = new XP_Object($this->konvertierung, $this->get('class_name'));
-				$konformitaetsbedingungen = $xp_object->get_konformitaetsbedingungen();
-				echo '<p>konformitätsbedingungen: ' . print_r($konformitaetsbedingungen->data, true);
-				foreach ($konformitaetsbedingungen AS $bedingung) {
-					foreach ($bedingung->validierungen AS $validierung) {
-						$validierung->validiere_konformitaet();
-					}
-				}
 			}
 			else {
 				$this->debug->show('<br>Regel->validate(): SQL der Regel: ' . $this->get('name') . ' nicht ausfuehrbar', true);
