@@ -1718,5 +1718,18 @@ class stelle {
 		$rs = $this->database->result->fetch_array();
 		return $rs['wappen_link'];
 	}
+
+	/**
+	* Function reads all mapfiles in directory WMS_MAPFILE_PATH . $this->Stelle->id
+	* @return array An array of mapfiles in the mapfiles directory of the stelle
+	*/
+	function get_mapfiles() {
+		$mapfiles = array();
+		if (is_dir(WMS_MAPFILE_PATH . $this->id)) {
+			$mapfiles = array_diff(scandir(WMS_MAPFILE_PATH . $this->id), array('.', '..'));
+		}
+		#echo '<p>Stelle->get_mapfile returns mapfiles: ' . print_r($mapfiles, true);
+		return $mapfiles;
+	}
 }
 ?>

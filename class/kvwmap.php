@@ -7299,51 +7299,86 @@ echo '			</table>
   	return $text;
   }
 
-  function wmsExportSenden() {
-    $this->titel='WMS Map-Datei erfolgreich exportiert';
-    $this->main="ows_exportiert.php";
-    # laden der aktuellen Karteneinstellungen
-    if($this->formvars['nurAktiveLayer'] == 1)$this->class_load_level = 1;    # die Klassen von aktiven Layern laden
-		else $this->class_load_level = 2;    # die Klassen von allen Layern laden
-    $this->loadMap('DataBase');
-		# grid-Layer rausnehmen
-		@$gridlayer = $this->map->getLayerByName('grid');
-		if($gridlayer)$this->map->removeLayer($gridlayer->index);
-		# Layernamen anpassen
-		for($i = 0; $i < $this->map->numlayers; $i++){
-      $layer = $this->map->getlayer($i);
-      $layer->set('name', umlaute_umwandeln($layer->name));
-    }
-    # setzen der WMS-Metadaten
-    $this->map->setMetaData("ows_title",$this->formvars['ows_title']);
-    $this->map->setMetaData("ows_abstract",$this->formvars['ows_abstract']);
-    $bb=$this->map->extent;
-    $this->map->setMetaData("wms_extent",$bb->minx.' '.$bb->miny.' '.$bb->maxx.'  '.$bb->maxy);
-    $this->map->setMetaData("wms_accessconstraints","none");
-    $this->map->setMetaData("ows_contactperson",$this->formvars['ows_contactperson']);
-    $this->map->setMetaData("ows_contactorganization",$this->formvars['ows_contactorganization']);
-    $this->map->setMetaData("ows_contactelectronicmailaddress",$this->formvars['ows_contactelectronicmailaddress']);
-    $this->map->setMetaData("ows_contactposition",OWS_CONTACTPOSITION);
-    $this->map->setMetaData("ows_fees",$this->formvars['ows_fees']);
-    $this->wms_onlineresource=MAPSERV_CGI_BIN."?map=".WMS_MAPFILE_PATH.$this->formvars['mapfile_name']."&";
-    $this->map->setMetaData("wms_onlineresource",$this->wms_onlineresource);
-    $this->map->setMetaData("ows_srs",OWS_SRS);
-		$this->map->setMetaData("wms_enable_request",'*');
-    $this->saveMap(WMS_MAPFILE_PATH.$this->formvars['mapfile_name']);
-    $getMapRequestExample=$this->wms_onlineresource.'request=getMap&VERSION='.SUPORTED_WMS_VERSION;
-    $getMapRequestExample.='&layers='.$layer->name;
-    $getMapRequestExample.='&srs=EPSG:'.$this->user->rolle->epsg_code;
-    $getMapRequestExample.='&bbox='.$this->map->extent->minx.','.$this->map->extent->miny.','.$this->map->extent->maxx.','.$this->map->extent->maxy;
-    $getMapRequestExample.='&width='.$this->map->width.'&height='.$this->map->height;
-		$getMapRequestExample.='&format=image/jpeg';
-    $this->getMapRequestExample=$getMapRequestExample;
-    $this->output();
-  }
+	function wmsExportSenden() {
+		$this->titel = 'MapServer Map-Datei für OGC-Dienste erfolgreich exportiert';
+		$this->main = "ows_exportiert.php";
+		# laden der aktuellen Karteneinstellungen 1 nur aktive, 2 alle
+		$this->class_load_level = ($this->formvars['nurAktiveLayer'] == 1 ? 1 : 2);
 
-  function wmsExport() {
-    $this->titel='MapService Map-Datei Export';
-    $this->main="ows_export.php";
-    $this->output();
+		$this->loadMap('DataBase');
+		@$gridlayer = $this->map->getLayerByName('grid');
+		if ($gridlayer) {
+			$this->map->removeLayer($gridlayer->index);
+		}
+		# Layernamen anpassen
+		for ($i = 0; $i < $this->map->numlayers; $i++) {
+			$layer = $this->map->getlayer($i);
+			$layer->set('name', umlaute_umwandeln($layer->name));
+		}
+		$bb = array($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+		if (!is_dir(WMS_MAPFILE_PATH . $this->Stelle->id)) {
+			mkdir(WMS_MAPFILE_PATH . $this->Stelle->id);
+		}
+		$this->mapfile = WMS_MAPFILE_PATH . $this->Stelle->id . '/' . $this->formvars['mapfile_name'];
+		# setzen der WMS-Metadaten
+		$this->map->setMetaData("ows_title", $this->formvars['ows_title']);
+		$this->map->setMetaData("ows_abstract", $this->formvars['ows_abstract']);
+		$this->map->setMetaData("wms_extent", implode(' ', $bb));
+		$this->map->setMetaData("wms_accessconstraints", "none");
+		$this->map->setMetaData("ows_contactperson", $this->formvars['ows_contactperson']);
+		$this->map->setMetaData("ows_contactorganization", $this->formvars['ows_contactorganization']);
+		$this->map->setMetaData("ows_contactelectronicmailaddress", $this->formvars['ows_contactelectronicmailaddress']);
+		$this->map->setMetaData("ows_contactposition", $this->formvars['ows_contactposition']);
+		$this->map->setMetaData("ows_fees", $this->formvars['ows_fees']);
+		$this->wms_onlineresource = MAPSERV_CGI_BIN . "?map=" . $this->mapfile . "&";
+		$this->map->setMetaData("wms_onlineresource", $this->wms_onlineresource);
+		$this->map->setMetaData("ows_srs", OWS_SRS);
+		$this->map->setMetaData("wms_enable_request", '*');
+		$this->saveMap($this->mapfile);
+		$this->getMapRequestExample = $this->wms_onlineresource . 'REQUEST=GetMap&'
+			. 'VERSION=' . SUPORTED_WMS_VERSION . '&'
+			. 'LAYERS=Pläne&'
+			. 'CRS=EPSG:' . $this->user->rolle->epsg_code . '&'
+			. 'BBOX=' . implode(',', $bb) .'&'
+			. 'WIDTH=' . $this->map->width . '&'
+			. 'HEIGHT=' . $this->map->height . '&'
+			. 'FORMAT=image/jpeg';
+
+		$this->mapfiles_der_stelle = $this->Stelle->get_mapfiles();
+
+		$this->output();
+	}
+
+	function wmsExport() {
+		$this->titel='MapService Map-Datei Export';
+		$this->main="ows_export.php";
+		if (
+			$this->formvars['mapfile_name'] != '' AND
+			in_array($this->formvars['mapfile_name'], $this->Stelle->get_mapfiles())
+		) {
+			$this->mapfile = WMS_MAPFILE_PATH . $this->Stelle->id . '/' . $this->formvars['mapfile_name'];
+			if (MAPSERVERVERSION < 600) {
+				$map = ms_newMapObj($this->mapfile);
+			}
+			else {
+				$map = new mapObj($this->mapfile, SHAPEPATH);
+			}
+			$this->formvars['ows_title'] = $map->getMetaData('ows_title');
+			$this->formvars['ows_abstract'] = $map->getMetaData('ows_abstract');
+			$this->formvars['wms_extent'] = $map->getMetaData('wms_extent');
+			$this->formvars['wms_accessconstraints'] = $map->getMetaData('wms_accessconstraints');
+			$this->formvars['ows_contactperson'] = $map->getMetaData('ows_contactperson');
+			$this->formvars['ows_contactorganization'] = $map->getMetaData('ows_contactorganization');
+			$this->formvars['ows_contactelectronicmailaddress'] = $map->getMetaData('ows_contactelectronicmailaddress');
+			$this->formvars['ows_contactelectronicmailaddress'] = $map->getMetaData('ows_contactelectronicmailaddress');
+			$this->formvars['ows_contactposition'] = $map->getMetaData('ows_contactposition');
+			$this->formvars['ows_fees'] = $map->getMetaData('ows_fees');
+			$this->formvars['wms_onlineresource'] = $map->getMetaData('wms_onlineresource');
+			$this->formvars['ows_srs'] = $map->getMetaData('ows_srs');
+			$this->formvars['wms_enable_request'] = $map->getMetaData('wms_enable_request');
+		}
+
+		$this->output();
   }
 
 	function wmsImportFormular(){

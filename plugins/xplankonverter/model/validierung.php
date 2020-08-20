@@ -80,11 +80,11 @@ class Validierung extends PgObject {
 		return $regeln_existieren;
 	}
 
-	function sql_ausfuehrbar($regel, $konvertierung_id) {
+	function sql_ausfuehrbar($regel) {
 		$this->debug->show('<br>Validiere ob sql_ausfuehrbar: ', Validierung::$write_debug);
 		$ausfuehrbar = true;
 
-		$sql = $regel->get_convert_sql($konvertierung_id);
+		$sql = $regel->get_convert_sql($this->konvertierung_id);
 
 		# Objekte anlegen
 		$result = @pg_query(
@@ -717,9 +717,58 @@ class Validierung extends PgObject {
 		return $success;
 	}
 
-	function validiere_konformitaet() {
-		echo 'Validiere die Konformität mit Funktion: ' . $this->get('functionsname') . ' und den Argumenten: ' . $this->get('functionsargumente');
-		return false;
+	function validiere_konformitaet($konvertierung_id, $bedingung) {
+		$conformity = false;
+		$konformitaetsbedingung = $bedingung['konformitaet'];
+		#echo '<p>Validierung der Klasse: ' . $bedingung['class_name'] . ', Konformität Nr: ' . $konformitaetsbedingung->get('nummer') . ' ' . $konformitaetsbedingung->get('bezeichnung') . ', Validierung: ' . $this->get('name');
+		switch ($this->get('functionsname')) {
+			default :
+				$sql = "
+					SELECT
+						*
+					FROM
+						xplan_gml." . $bedingung['class_name'] . "
+					WHERE
+						NOT (" . substr($this->get('functionsargumente'), 2, -2) . ")
+				";
+		}
+		$this->debug->show('sql to find failed konformities: ' . $sql, false);
+		$query = pg_query($this->database->dbConn, $sql);
+		$validierungsergebnis = new Validierungsergebnis($this->gui);
+		if (pg_num_rows($query) > 0) {
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $konvertierung_id,
+					'validierung_id' => $this->get('id'),
+					'status' => 'Fehler',
+					'msg' => 'Folgende Objekte der Klasse: ' . $bedingung['class_name']
+						. ' widersprechen der Validierung ' . $this->get('name')
+						. ' der Konformitätsbedinung Nr: ' . $konformitaetsbedingung->get('nummer') . ' ' . $konformitaetsbedingung->get('bezeichnung') . '<br>'
+						. implode(
+							'<br>',
+							array_map(
+								function($rs) {
+									return $rs['gml_id'];
+								},
+								pg_fetch_all($query)
+							)
+						)
+				)
+			);
+		}
+		else {
+			$conformity = true;
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $konvertierung_id,
+					'validierung_id' => $this->get('id'),
+					'status' => 'Erfolg',
+					'msg' => 'Alle Objekte der Klasse ' . $bedingung['class_name'] . ' entsprechen der Validierung ' . $this->get('name')
+						. ' der Konformitätsbedinung Nr: ' . $konformitaetsbedingung->get('nummer') . ' ' . $konformitaetsbedingung->get('bezeichnung')
+				)
+			);
+		}
+		return $conformity;
 	}
 
   function doValidate($konvertierung) {

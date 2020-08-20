@@ -498,25 +498,72 @@ class Konvertierung extends PgObject {
 						}*/
 					}
 				}
+				$alle_sql_ausfuehrbar = true;
 				$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'alle_sql_ausfuehrbar');
 				$validierung->konvertierung_id = $this->get('id');
-				$validierung->alle_sql_ausfuehrbar($success);
+				foreach ($regeln AS $regel) {
+					if (!$validierung->sql_ausfuehrbar($regel)) {
+						$alle_sql_ausfuehrbar = false;
+					}
+				}
+				$validierung->alle_sql_ausfuehrbar($alle_sql_ausfuehrbar);
 
-				if (in_array($this->get('planart'), array('BP-Plan', 'FP-Plan', 'SO-Plan'))) {
-					# Flächenschlussprüfung
-					$this->clearTopology();
-					# Create topology of plan objects
-					$this->createTopology();
-					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'flaechenschluss_ueberlappungen');
-					$validierung->konvertierung_id = $this->get('id');
-					$validierung->flaechenschluss_ueberlappungen();
-					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'flaechenschluss_luecken');
-					$validierung->konvertierung_id = $this->get('id');
-					$validierung->flaechenschluss_luecken();
+				if ($alle_sql_ausfuehrbar) {
+					# Prüft die Konformitäten der Klassen der Konvertierung für die aktuelle Version
+					foreach ($this->get_konformitaetsbedingungen($this->get_version_from_ns_uri(XPLAN_NS_URI)) AS $bedingung) {
+						foreach ($bedingung['konformitaet']->validierungen AS $validierung) {
+							$validierung->validiere_konformitaet($this->get('id'), $bedingung);
+						}
+					}
+
+					if (in_array($this->get('planart'), array('BP-Plan', 'FP-Plan', 'SO-Plan'))) {
+						# Flächenschlussprüfung
+						$this->clearTopology();
+						# Create topology of plan objects
+						$this->createTopology();
+						$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'flaechenschluss_ueberlappungen');
+						$validierung->konvertierung_id = $this->get('id');
+						$validierung->flaechenschluss_ueberlappungen();
+						$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'flaechenschluss_luecken');
+						$validierung->konvertierung_id = $this->get('id');
+						$validierung->flaechenschluss_luecken();
+					}
 				}
 			}
 		}
 	}
+
+	/**
+	* Return the xplan version number from the xplan_ns_uri constants as float
+	*/
+	function get_version_from_ns_uri($uri) {
+		return floatval(implode('.', array_slice(explode('/', $uri), -2)));
+	}
+
+	/**
+	* Return konformitaetsbedingungen der Klassen der Konvertierung in der angegebenen XPlanung-Version
+	*/
+	function get_konformitaetsbedingungen($version) {
+		$sql = "
+			SELECT
+				name, konvertierung_id, nummer, version_von, version_bis, inhalt, bezeichnung
+			FROM
+				xplankonverter.konformitaeten_der_konvertierungen
+			WHERE
+				" . $version . " BETWEEN version_von::float AND coalesce(version_bis::float, 99999) AND
+				konvertierung_id = " . $this->get('id') . "
+		";
+		$this->debug->show('sql to find konformitaetsbedingungen for konvertierung_id: ' . $this->get('id') . ' für XPlanung Version: ' . $version, false);
+		$query = pg_query($this->database->dbConn, $sql);
+		while ($rs = pg_fetch_assoc($query)) {
+			$bedingungen[] = array(
+				'class_name' => $rs['name'],
+				'konformitaet' => Konformitaetsbedingung::find_by_id($this->gui, $rs['nummer'], $rs['version_von'])
+			);
+		}
+		return $bedingungen;
+	}
+
 
 	/**
 	* Clear the topology from all flaechenschlussobjekten of the plan
