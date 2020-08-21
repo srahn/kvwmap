@@ -539,7 +539,7 @@ function getEventPoint(evt) {
 function init(){
 	startup();
 	if(top.browser != "ie"){
-		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback_ff(evt); }, true);
+		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(evt); }, true);
 	}
 	if (window.addEventListener) {
 			window.addEventListener(\'mousewheel\', mousewheelchange, {passive: false}); // Chrome/Safari//IE9
@@ -558,8 +558,8 @@ top.document.getElementById("map").SVGstartup = startup;		// das ist ein Trick, 
 
 top.document.getElementById("svghelp").SVGmoveback = moveback;
 
-function moveback_ff(evt){
-	// beim Firefox wird diese Funktion beim onload des Kartenbildes ausgefuehrt
+function moveback(evt){
+	// diese Funktion dient dazu die verschobene moveGroup wieder zurueck zu schieben
 	document.getElementById("mapimg2").setAttribute("style", "display:block");	
 	window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("href", document.getElementById("mapimg2").getAttribute("href"));startup();\', 200);
 	// Redlining-Sachen loeschen
@@ -584,23 +584,6 @@ function sleep(milliseconds) {
       break;
     }
   }
-}
-
-
-
-function moveback(evt){
-	// bei allen anderen Browsern gibt es kein onload für das Kartenbild, deswegen wird diese Funktion als erstes ausgefuehrt
-	document.getElementById("mapimg").setAttribute("xlink:href", "'.rtrim(dirname($_SERVER['SCRIPT_NAME']), '/').'/'.GRAPHICSPATH.'leer.gif");
-	document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
-	// Redlining-Sachen loeschen
-	while(child = document.getElementById("redlining").firstChild){
-  	document.getElementById("redlining").removeChild(child);
-	}
-	// Tooltip refreshen
-	oldmousex = undefined;
-	hidetooltip(evt);
-	// Navigation wieder erlauben
-	top.stopwaiting();
 }
 
 function go_previous(){

@@ -556,8 +556,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	top.startwaiting();
 	svgdoc = document.SVG.getSVGDocument();	
 	// nix
-	if(browser != 'ie')var mapimg = svgdoc.getElementById("mapimg2");			
-	else var mapimg = svgdoc.getElementById("mapimg");
+	var mapimg = svgdoc.getElementById("mapimg2");
 	var scalebar = document.getElementById("scalebar");
 	var refmap = document.getElementById("refmap");
 	var scale = document.getElementById("scale");
@@ -578,8 +577,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	if(document.GUI.height_reduction)height_reduction = document.GUI.height_reduction.value;
 	
 	if(browser == 'ie'){
-		code2execute_before += 'moveback()';
-		code2execute_after += 'startup();';
+		code2execute_after += 'moveback()';
 	}
 	
 	if(document.GUI.punktfang != undefined && document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
