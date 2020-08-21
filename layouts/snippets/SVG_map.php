@@ -561,7 +561,7 @@ top.document.getElementById("svghelp").SVGmoveback = moveback;
 function moveback_ff(evt){
 	// beim Firefox wird diese Funktion beim onload des Kartenbildes ausgefuehrt
 	document.getElementById("mapimg2").setAttribute("style", "display:block");	
-	window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));startup();\', 200);
+	window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("href", document.getElementById("mapimg2").getAttribute("href"));startup();\', 200);
 	// Redlining-Sachen loeschen
 	while(child = document.getElementById("redlining").firstChild){
   	document.getElementById("redlining").removeChild(child);
@@ -1754,7 +1754,7 @@ function highlightbyid(id){
   </defs> 
   <rect id="background" style="fill:white" width="100%" height="100%"/>
   <g id="moveGroup" transform="translate(0 0)">
-    <image id="mapimg" xlink:href="'.$bg_pic.'" height="100%" width="100%" y="0" x="0"/>
+    <image id="mapimg" href="'.$bg_pic.'" height="100%" width="100%" y="0" x="0"/>
     <g id="cartesian" transform="translate(0,'.$res_y.') scale(1,-1)">
       <polygon points="" id="polygon" style="opacity:0.25;fill:yellow;stroke:black;stroke-width:2"/>
 			<text x="-1000" y="-1000" id="polygon_label" transform="scale(1, -1)" style="text-anchor:start;fill:rgb(0,0,0);stroke:none;font-size:12px;font-family:Arial;font-weight:bold"></text>
@@ -1770,7 +1770,7 @@ $svg.='
     </g>
   </g>
 	<g id="mapimg2_group">
-  	<image id="mapimg2" xlink:href="" height="100%" width="100%" y="0" x="0" style="display:none"/>
+  	<image id="mapimg2" href="" height="100%" width="100%" y="0" x="0" style="display:none"/>
   </g>
 	
   <rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt)" onmousemove="mousemove(evt);" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0"/>

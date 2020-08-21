@@ -2641,7 +2641,7 @@ echo '			</table>
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
     $filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
     $this->image_map->saveImage(IMAGEPATH.$filename);
-    $this->img['hauptkarte'] = IMAGEURL.$filename;
+    $this->img['hauptkarte'] = 'data:image/jpg;base64,'.base64_encode(file_get_contents(IMAGEPATH.$filename));
     $this->debug->write("Name der Hauptkarte: " . $this->img['hauptkarte'],4);
 
 		if($this->formvars['go'] != 'navMap_ajax'){
@@ -2667,7 +2667,7 @@ echo '			</table>
     $filename = $this->map_saveWebImage($img_scalebar,'png');
     $newname = $this->user->id.basename($filename);
     rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-    $this->img['scalebar'] = IMAGEURL.$newname;
+    $this->img['scalebar'] = 'data:image/jpg;base64,'.base64_encode(file_get_contents(IMAGEPATH.$newname));
     $this->debug->write("Name des Scalebars: " . $this->img['scalebar'],4);
 		$this->calculatePixelSize();
 		$this->drawReferenceMap();
@@ -2716,7 +2716,7 @@ echo '			</table>
       $filename = $this->map_saveWebImage($img_refmap,'png');
       $newname = $this->user->id.basename($filename);
       rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-      $this->img['referenzkarte'] = IMAGEURL.$newname;
+      $this->img['referenzkarte'] = 'data:image/jpg;base64,'.base64_encode(file_get_contents(IMAGEPATH.$newname));
       $this->debug->write("Name der Referenzkarte: " . $this->img['referenzkarte'],4);
       $this->Lagebezeichung=$this->getLagebezeichnung($this->user->rolle->epsg_code);
     }

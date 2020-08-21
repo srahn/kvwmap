@@ -64,8 +64,8 @@ function ahahDone(url, targets, req, actions) {
 							targets[i].src = responsevalues[i];
 						break;
 
-						case "xlink:href":
-							targets[i].setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", responsevalues[i]);
+						case "href":
+							targets[i].setAttribute("href", responsevalues[i]);
 						break;
 
 						case "points":
@@ -617,7 +617,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 		polygon,
 		''
 	), 			 
-	new Array("execute_function", "xlink:href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "points", "execute_function"));
+	new Array("execute_function", "href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "points", "execute_function"));
 				
 	document.GUI.INPUT_COORD.value = '';
 	document.GUI.CMD.value = '';
