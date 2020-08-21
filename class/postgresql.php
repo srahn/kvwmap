@@ -148,15 +148,15 @@ class pgdatabase {
 	}
 
 	/**
-	* Get credentials from postgres object variables
+	* Get credentials from postgres object variables, with Fallback to old constants
 	*/
 	function get_object_credentials() {
 		return array(
-			'host'     => $this->host,
-			'port'     => $this->port,
-			'dbname'   => $this->dbName,
-			'user'     => $this->user,
-			'password' => $this->passwd
+			'host'     => $this->host ?: POSTGRES_HOST,
+			'port'     => $this->port ?: 5432,
+			'dbname'   => $this->dbName ?: POSTGRES_DBNAME,
+			'user'     => $this->user ?: POSTGRES_USER,
+			'password' => $this->passwd ?: POSTGRES_PASSWORD
 		);
 	}
 
