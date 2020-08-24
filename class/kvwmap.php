@@ -9433,7 +9433,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				SELECT ".
 					$oid_sql." *
 				FROM
-					" . $layer['schema'] . '.' . $layer['maintable'] . "
+					" . $layer['schema'] . '.' . pg_quote($layer['maintable']) . "
 				WHERE
 					".$layer['oid']." = " . quote($oid);
 			#echo '<br>Sql before delete: ' . $sql_old; #pk
@@ -9491,7 +9491,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			
 			$sql = "
 				DELETE FROM
-					" . $layer['maintable'] . "
+					" . pg_quote($layer['maintable']) . "
 				WHERE
 					".$layer['oid']." = " . quote($oid) . "
 			";
@@ -14642,7 +14642,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							$layerset[$i]['sql'] = $sql;
 
 							$this->suppress_err_msg = 1;
-							#echo '<p>Sacahdatenanzeige:<br>' . $sql . $sql_order . $sql_limit;
+							#echo '<p>Sachdatenanzeige:<br>' . $sql . $sql_order . $sql_limit;
 							$ret = $layerdb->execSQL($sql . $sql_order . $sql_limit, 4, 0);
 							if ($ret[0]) {
 								$this->add_message('error', $ret[1]);
