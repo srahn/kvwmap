@@ -8698,10 +8698,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         $j = 0;
         foreach($attributes['all_table_names'] as $tablename){
 					if(($tablename == $layerset[0]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[0]['oid'] != ''){
-            $pfad = $attributes['table_alias_name'][$tablename].'.'.$layerset[0]['oid'].' AS '.$tablename.'_oid, '.$pfad;
+            $pfad = pg_quote($attributes['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'].' AS '.pg_quote($tablename.'_oid').', '.$pfad;
 						if(value_of($this->formvars, 'operator_'.$tablename.'_oid') == '')$this->formvars['operator_'.$tablename.'_oid'] = '=';
             if(value_of($this->formvars, 'value_'.$tablename.'_oid')){
-              $sql_where .= ' AND '.$tablename.'_oid '.$this->formvars['operator_'.$tablename.'_oid'].' '.quote($this->formvars['value_'.$tablename.'_oid']);
+              $sql_where .= ' AND '.pg_quote($tablename.'_oid').' '.$this->formvars['operator_'.$tablename.'_oid'].' '.quote($this->formvars['value_'.$tablename.'_oid']);
             }
           }
           $j++;
@@ -8723,7 +8723,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$j = 0;
 					foreach($attributes['all_table_names'] as $tablename){
 						if($tablename == $layerset[0]['maintable'] AND $layerset[0]['oid'] != ''){		# hat Haupttabelle oids?
-							$pfad .= ','.$tablename.'_oid ';
+							$pfad .= ','.pg_quote($tablename.'_oid').' ';
 						}
 						$j++;
 					}
@@ -8743,7 +8743,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				foreach($attributes['all_table_names'] as $tablename){
 					if($tablename == $layerset[0]['maintable'] AND $layerset[0]['oid'] != ''){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
 						if($sql_order == '')$sql_order = ' ORDER BY ' . replace_semicolon($layerset[0]['maintable']) . '_oid ';
-						else $sql_order .= ', '.$layerset[0]['maintable'].'_oid ';
+						else $sql_order .= ', '.pg_quote($layerset[0]['maintable'].'_oid').' ';
 					}
 					$j++;
 				}
@@ -9776,7 +9776,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 				if(!empty($insert)){
 					if(!$layerset[0]['maintable_is_view'])$sql = "LOCK TABLE " . $table['tablename']." IN SHARE ROW EXCLUSIVE MODE;";
-					$sql.= "INSERT INTO " . $table['tablename']." (";
+					$sql.= "INSERT INTO " . pg_quote($table['tablename']) . " (";
 					$sql.= implode(', ', array_keys($insert));
 					$sql.= ") VALUES (";
 					$sql.= implode(', ', $insert);
@@ -10403,7 +10403,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$j = 0;
 		foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
 			if(($tablename == $layerset[0]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[0]['oid'] != ''){		# hat Haupttabelle oder Geometrietabelle oids?
-				$newpath = $layerset[0]['attributes']['table_alias_name'][$tablename].'.'.$layerset[0]['oid'].' AS '.$tablename.'_oid, '.$newpath;
+				$newpath = pg_quote($layerset[0]['attributes']['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'].' AS '.pg_quote($tablename.'_oid').', '.$newpath;
 			}
 			$j++;
 		}
@@ -10513,7 +10513,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				) AND
 				$layerset[0]['oid'] != ''
 			) {
-				$newpath = $layerset[0]['attributes']['table_alias_name'][$tablename].'.'.$layerset[0]['oid'].' AS '.$tablename.'_oid, '.$newpath;
+				$newpath = pg_quote($layerset[0]['attributes']['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'].' AS '.pg_quote($tablename.'_oid').', '.$newpath;
 			}
 			$j++;
 		}
@@ -11157,7 +11157,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
 			# Daten abfragen
 			$element = explode(';', $checkbox_names[0]);   #  check;table_alias;table;oid
-			$where = " WHERE " . $element[2]."_oid IN (";
+			$where = " WHERE " . pg_quote($element[2]."_oid")." IN (";
 			for($i = 0; $i < count($checkbox_names); $i++){
 				if($this->formvars[$checkbox_names[$i]] == 'on'){
 					$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
@@ -14044,7 +14044,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					foreach ($table as $oid => $attributes) {
 						if (count($attributes) > 0) {
 							if (!$layerset[$layer_id][0]['maintable_is_view']) {
-								$sql_lock = "LOCK TABLE " . $tablename." IN SHARE ROW EXCLUSIVE MODE;";
+								$sql_lock = "LOCK TABLE " . pg_quote($tablename)." IN SHARE ROW EXCLUSIVE MODE;";
 							}
 
 							$attributes_set = array();
@@ -14067,7 +14067,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 							$sql = $sql_lock . "
 								UPDATE
-									" . $tablename . "
+									" . pg_quote($tablename) . "
 								SET
 									" . implode(', ', $attributes_set) . "
 								WHERE
@@ -14085,7 +14085,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									SELECT
 										oid, *
 									FROM
-										" . $tablename."
+										" . pg_quote($tablename)."
 									WHERE
 										oid = " . $oid;
 								#echo '<br>sql before update: ' . $sql_old; #pk
@@ -14466,7 +14466,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							$j = 0;
 							foreach($layerset[$i]['attributes']['all_table_names'] as $tablename) {
 								if (($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['oid'] != '') {
-									$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.'.$layerset[$i]['oid'].' AS ' . $tablename . '_oid, ' . $pfad;
+									$pfad = pg_quote($layerset[$i]['attributes']['table_alias_name'][$tablename]).'.'.$layerset[$i]['oid'].' AS ' . pg_quote($tablename . '_oid').', ' . $pfad;
 								}
 								$j++;
 							}
@@ -14585,8 +14585,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 										$pfad .= $layerset[$i]['attributes']['groupby'];
 										$j = 0;
 										foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-													if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
-														$pfad .= ','.$tablename.'_oid ';
+													if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != ''){		# hat Haupttabelle oids?
+														$pfad .= ','.pg_quoet($tablename.'_oid').' ';
 													}
 													$j++;
 										}
@@ -14618,9 +14618,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								if($layerset[$i]['template'] == ''){																				# standardmäßig wird nach der oid sortiert
 									$j = 0;
 									foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-										if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
-											if($sql_order == '')$sql_order = ' ORDER BY ' . replace_semicolon($layerset[$i]['maintable']) . '_oid ';
-											else $sql_order .= ', '.$layerset[$i]['maintable'].'_oid ';
+										if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != ''){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
+											if($sql_order == '')$sql_order = ' ORDER BY ' . pg_quote(replace_semicolon($layerset[$i]['maintable']).'_oid').' ';
+											else $sql_order .= ', '.pg_quote($layerset[$i]['maintable'].'_oid').' ';
 										}
 										$j++;
 									}
@@ -16195,7 +16195,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						SELECT
 							box2D(st_transform(" . $real_geom_name . ", " . $this->user->rolle->epsg_code . ")) as bbox
 						FROM
-							" . $tablename . "
+							" . pg_quote($tablename) . "
 						WHERE
 							" . $layerset['oid'] . " = '" . $oid . "'
 					) AS foo
@@ -16254,7 +16254,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$tablename = $layerdb->schema.'.'.$tablename;
 				}
 				$datastring  = $real_geom_name
-					. " from (select " . $layerset['oid'] . ", " . $real_geom_name . " from " . $tablename
+					. " from (select " . $layerset['oid'] . ", " . $real_geom_name . " from " . pg_quote($tablename)
 					. " WHERE " . $layerset['oid'] . " = '" . $oid
 					. "') as foo using unique " . $layerset['oid'] . " using srid=" . $layerset['epsg_code'];
 				$layer->set('data', $datastring);
