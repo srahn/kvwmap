@@ -10,6 +10,10 @@ function quote($var){
 	return is_numeric($var) ? $var : "'".$var."'";
 }
 
+function pg_quote($column){
+	return ctype_lower($column) ? $column : '"'.$column.'"';
+}
+
 function get_din_formats() {
 	$din_formats = array(
 		'A5hoch' => array('value' => 'A5hoch', 'output' => 'A5 hoch', 'size' => '(420 x 595)'),

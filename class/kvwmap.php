@@ -9566,7 +9566,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         $table_name = $element[2];
         $formtype = $element[4];
 				$tablename[$table_name]['tablename'] = $table_name;
-				$tablename[$table_name]['attributname'][] = $attributenames[] = $attributname;
+				$tablename[$table_name]['attributname'][] = $attributenames[] = pg_quote($attributname);
 				$form_field_indizes[$attributname] = $i;
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
 				if($this->formvars['embedded'] != ''){
@@ -14059,7 +14059,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									}
 								}
 								else {
-									$attributes_set[] = $attribute . " = " . ($properties['value'] == 'NULL' ? "NULL" : "'" . $properties['value'] . "'");
+									$attributes_set[] = pg_quote($attribute) . " = " . ($properties['value'] == 'NULL' ? "NULL" : "'" . $properties['value'] . "'");
 								}
 							}
 
