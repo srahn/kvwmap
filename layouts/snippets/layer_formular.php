@@ -461,12 +461,6 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strFilterItem; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="filteritem" type="text" value="<?php echo $this->formvars['filteritem']; ?>" size="50" maxlength="100">
-						</td>
-					</tr>
-					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClusterMaxdistance; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="cluster_maxdistance" type="text" value="<?php echo $this->formvars['cluster_maxdistance']; ?>" size="50" maxlength="11">&nbsp;
