@@ -98,4 +98,8 @@
 	$strStyleItem="Styleitem";
 	$strGeomUsable="Geometry usable";
 	$strMaxQueryRows="Records per Page";
+	$strSelectionTypeHelp="'radio' can be entered here. All layers of a group with this entry get a radio button in the legend. You can only switch on one of the layers at a time. Makes sense for background maps for example.";
+	$strClassificationHelp="The name of the classification to be used can be entered here. A classification is a collection of related classes.&#xa;The classification name entered here can also contain a layer-parameter and thus be dynamic.";
+	$strStatusHelp="This field can be filled with an error status. This deactivates the layer and has a hint symbol in the legend.&#xa;The 'wms_checker.php' tool fills this field automatically.";
+	$strTriggerFunctionHelp="The name of a PHP-trigger function can be entered here, which is to be executed in this layer during insert, update or delete. The trigger function must be defined within a plugin.";
 ?>  

@@ -395,7 +395,8 @@
 					<tr>
 						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strSelectionType; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="selectiontype" type="text" value="<?php echo $this->formvars['selectiontype']; ?>" size="50" maxlength="20">
+								<input name="selectiontype" type="text" value="<?php echo $this->formvars['selectiontype']; ?>" size="50" maxlength="20">&nbsp;
+								<span data-tooltip="<? echo $strSelectionTypeHelp; ?>"></span>
 						</td>
 					</tr>					
 					<tr>
@@ -455,7 +456,8 @@
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClassification; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="layer_classification" type="text" value="<?php echo $this->formvars['classification']; ?>" size="50" maxlength="50">
+							<input name="layer_classification" type="text" value="<?php echo $this->formvars['classification']; ?>" size="50" maxlength="50">&nbsp;
+							<span data-tooltip="<? echo $strClassificationHelp; ?>"></span>	
 						</td>
 					</tr>
 					<tr>
@@ -659,13 +661,15 @@
 					<tr>
 						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strStatus; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="status" type="text" value="<?php echo $this->formvars['status']; ?>" size="50" maxlength="255">
+							<input name="status" type="text" value="<?php echo $this->formvars['status']; ?>" size="50" maxlength="255">&nbsp;
+							<span data-tooltip="<? echo $strStatusHelp; ?>"></span>
 						</td>
 					</tr>
 					<tr>
 						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTriggerFunction; ?></th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="trigger_function" type="text" value="<?php echo $this->formvars['trigger_function']; ?>" size="50" maxlength="100">
+							<input name="trigger_function" type="text" value="<?php echo $this->formvars['trigger_function']; ?>" size="50" maxlength="100">&nbsp;
+							<span data-tooltip="<? echo $strTriggerFunctionHelp; ?>">
 						</td>
 					</tr>
 					<tr>
