@@ -571,7 +571,7 @@ function moveback(evt){
 	hidetooltip(evt);
 	// Navigation wieder erlauben
 	top.stopwaiting();
-	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 400);
+	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("href", "")\', 400);
 	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 400);	
 }
 
