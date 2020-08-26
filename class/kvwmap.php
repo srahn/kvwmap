@@ -2641,7 +2641,7 @@ echo '			</table>
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
     $filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
     $this->image_map->saveImage(IMAGEPATH.$filename);
-    $this->img['hauptkarte'] = IMAGEURL.$filename;
+    $this->img['hauptkarte'] = 'data:image/jpg;base64,'.base64_encode(file_get_contents(IMAGEPATH.$filename));
     $this->debug->write("Name der Hauptkarte: " . $this->img['hauptkarte'],4);
 
 		if($this->formvars['go'] != 'navMap_ajax'){
@@ -2667,7 +2667,7 @@ echo '			</table>
     $filename = $this->map_saveWebImage($img_scalebar,'png');
     $newname = $this->user->id.basename($filename);
     rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-    $this->img['scalebar'] = IMAGEURL.$newname;
+    $this->img['scalebar'] = 'data:image/jpg;base64,'.base64_encode(file_get_contents(IMAGEPATH.$newname));
     $this->debug->write("Name des Scalebars: " . $this->img['scalebar'],4);
 		$this->calculatePixelSize();
 		$this->drawReferenceMap();
@@ -2716,7 +2716,7 @@ echo '			</table>
       $filename = $this->map_saveWebImage($img_refmap,'png');
       $newname = $this->user->id.basename($filename);
       rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-      $this->img['referenzkarte'] = IMAGEURL.$newname;
+      $this->img['referenzkarte'] = 'data:image/jpg;base64,'.base64_encode(file_get_contents(IMAGEPATH.$newname));
       $this->debug->write("Name der Referenzkarte: " . $this->img['referenzkarte'],4);
       $this->Lagebezeichung=$this->getLagebezeichnung($this->user->rolle->epsg_code);
     }
@@ -8726,10 +8726,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         $j = 0;
         foreach($attributes['all_table_names'] as $tablename){
 					if(($tablename == $layerset[0]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[0]['oid'] != ''){
-            $pfad = $attributes['table_alias_name'][$tablename].'.'.$layerset[0]['oid'].' AS '.$tablename.'_oid, '.$pfad;
+            $pfad = pg_quote($attributes['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'].' AS '.pg_quote($tablename.'_oid').', '.$pfad;
 						if(value_of($this->formvars, 'operator_'.$tablename.'_oid') == '')$this->formvars['operator_'.$tablename.'_oid'] = '=';
             if(value_of($this->formvars, 'value_'.$tablename.'_oid')){
-              $sql_where .= ' AND '.$tablename.'_oid '.$this->formvars['operator_'.$tablename.'_oid'].' '.quote($this->formvars['value_'.$tablename.'_oid']);
+              $sql_where .= ' AND '.pg_quote($tablename.'_oid').' '.$this->formvars['operator_'.$tablename.'_oid'].' '.quote($this->formvars['value_'.$tablename.'_oid']);
             }
           }
           $j++;
@@ -8751,7 +8751,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$j = 0;
 					foreach($attributes['all_table_names'] as $tablename){
 						if($tablename == $layerset[0]['maintable'] AND $layerset[0]['oid'] != ''){		# hat Haupttabelle oids?
-							$pfad .= ','.$tablename.'_oid ';
+							$pfad .= ','.pg_quote($tablename.'_oid').' ';
 						}
 						$j++;
 					}
@@ -8771,7 +8771,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				foreach($attributes['all_table_names'] as $tablename){
 					if($tablename == $layerset[0]['maintable'] AND $layerset[0]['oid'] != ''){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
 						if($sql_order == '')$sql_order = ' ORDER BY ' . replace_semicolon($layerset[0]['maintable']) . '_oid ';
-						else $sql_order .= ', '.$layerset[0]['maintable'].'_oid ';
+						else $sql_order .= ', '.pg_quote($layerset[0]['maintable'].'_oid').' ';
 					}
 					$j++;
 				}
@@ -9461,7 +9461,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				SELECT ".
 					$oid_sql." *
 				FROM
-					" . $layer['schema'] . '.' . $layer['maintable'] . "
+					" . $layer['schema'] . '.' . pg_quote($layer['maintable']) . "
 				WHERE
 					".$layer['oid']." = " . quote($oid);
 			#echo '<br>Sql before delete: ' . $sql_old; #pk
@@ -9519,7 +9519,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			
 			$sql = "
 				DELETE FROM
-					" . $layer['maintable'] . "
+					" . pg_quote($layer['maintable']) . "
 				WHERE
 					".$layer['oid']." = " . quote($oid) . "
 			";
@@ -9594,7 +9594,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         $table_name = $element[2];
         $formtype = $element[4];
 				$tablename[$table_name]['tablename'] = $table_name;
-				$tablename[$table_name]['attributname'][] = $attributenames[] = $attributname;
+				$tablename[$table_name]['attributname'][] = $attributenames[] = pg_quote($attributname);
 				$form_field_indizes[$attributname] = $i;
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
 				if($this->formvars['embedded'] != ''){
@@ -9804,7 +9804,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 				if(!empty($insert)){
 					if(!$layerset[0]['maintable_is_view'])$sql = "LOCK TABLE " . $table['tablename']." IN SHARE ROW EXCLUSIVE MODE;";
-					$sql.= "INSERT INTO " . $table['tablename']." (";
+					$sql.= "INSERT INTO " . pg_quote($table['tablename']) . " (";
 					$sql.= implode(', ', array_keys($insert));
 					$sql.= ") VALUES (";
 					$sql.= implode(', ', $insert);
@@ -10431,7 +10431,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$j = 0;
 		foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
 			if(($tablename == $layerset[0]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[0]['oid'] != ''){		# hat Haupttabelle oder Geometrietabelle oids?
-				$newpath = $layerset[0]['attributes']['table_alias_name'][$tablename].'.'.$layerset[0]['oid'].' AS '.$tablename.'_oid, '.$newpath;
+				$newpath = pg_quote($layerset[0]['attributes']['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'].' AS '.pg_quote($tablename.'_oid').', '.$newpath;
 			}
 			$j++;
 		}
@@ -10541,7 +10541,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				) AND
 				$layerset[0]['oid'] != ''
 			) {
-				$newpath = $layerset[0]['attributes']['table_alias_name'][$tablename].'.'.$layerset[0]['oid'].' AS '.$tablename.'_oid, '.$newpath;
+				$newpath = pg_quote($layerset[0]['attributes']['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'].' AS '.pg_quote($tablename.'_oid').', '.$newpath;
 			}
 			$j++;
 		}
@@ -11185,7 +11185,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
 			# Daten abfragen
 			$element = explode(';', $checkbox_names[0]);   #  check;table_alias;table;oid
-			$where = " WHERE " . $element[2]."_oid IN (";
+			$where = " WHERE " . pg_quote($element[2]."_oid")." IN (";
 			for($i = 0; $i < count($checkbox_names); $i++){
 				if($this->formvars[$checkbox_names[$i]] == 'on'){
 					$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
@@ -14072,7 +14072,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					foreach ($table as $oid => $attributes) {
 						if (count($attributes) > 0) {
 							if (!$layerset[$layer_id][0]['maintable_is_view']) {
-								$sql_lock = "LOCK TABLE " . $tablename." IN SHARE ROW EXCLUSIVE MODE;";
+								$sql_lock = "LOCK TABLE " . pg_quote($tablename)." IN SHARE ROW EXCLUSIVE MODE;";
 							}
 
 							$attributes_set = array();
@@ -14087,7 +14087,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									}
 								}
 								else {
-									$attributes_set[] = $attribute . " = " . ($properties['value'] == 'NULL' ? "NULL" : "'" . $properties['value'] . "'");
+									$attributes_set[] = pg_quote($attribute) . " = " . ($properties['value'] == 'NULL' ? "NULL" : "'" . $properties['value'] . "'");
 								}
 							}
 
@@ -14095,7 +14095,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 							$sql = $sql_lock . "
 								UPDATE
-									" . $tablename . "
+									" . pg_quote($tablename) . "
 								SET
 									" . implode(', ', $attributes_set) . "
 								WHERE
@@ -14113,7 +14113,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									SELECT
 										oid, *
 									FROM
-										" . $tablename."
+										" . pg_quote($tablename)."
 									WHERE
 										oid = " . $oid;
 								#echo '<br>sql before update: ' . $sql_old; #pk
@@ -14494,7 +14494,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							$j = 0;
 							foreach($layerset[$i]['attributes']['all_table_names'] as $tablename) {
 								if (($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['oid'] != '') {
-									$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.'.$layerset[$i]['oid'].' AS ' . $tablename . '_oid, ' . $pfad;
+									$pfad = pg_quote($layerset[$i]['attributes']['table_alias_name'][$tablename]).'.'.$layerset[$i]['oid'].' AS ' . pg_quote($tablename . '_oid').', ' . $pfad;
 								}
 								$j++;
 							}
@@ -14613,8 +14613,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 										$pfad .= $layerset[$i]['attributes']['groupby'];
 										$j = 0;
 										foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-													if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
-														$pfad .= ','.$tablename.'_oid ';
+													if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != ''){		# hat Haupttabelle oids?
+														$pfad .= ','.pg_quoet($tablename.'_oid').' ';
 													}
 													$j++;
 										}
@@ -14646,9 +14646,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								if($layerset[$i]['template'] == ''){																				# standardmäßig wird nach der oid sortiert
 									$j = 0;
 									foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-										if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
-											if($sql_order == '')$sql_order = ' ORDER BY ' . replace_semicolon($layerset[$i]['maintable']) . '_oid ';
-											else $sql_order .= ', '.$layerset[$i]['maintable'].'_oid ';
+										if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != ''){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
+											if($sql_order == '')$sql_order = ' ORDER BY ' . pg_quote(replace_semicolon($layerset[$i]['maintable']).'_oid').' ';
+											else $sql_order .= ', '.pg_quote($layerset[$i]['maintable'].'_oid').' ';
 										}
 										$j++;
 									}
@@ -14670,7 +14670,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							$layerset[$i]['sql'] = $sql;
 
 							$this->suppress_err_msg = 1;
-							#echo '<p>Sacahdatenanzeige:<br>' . $sql . $sql_order . $sql_limit;
+							#echo '<p>Sachdatenanzeige:<br>' . $sql . $sql_order . $sql_limit;
 							$ret = $layerdb->execSQL($sql . $sql_order . $sql_limit, 4, 0);
 							if ($ret[0]) {
 								$this->add_message('error', $ret[1]);
@@ -16223,7 +16223,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						SELECT
 							box2D(st_transform(" . $real_geom_name . ", " . $this->user->rolle->epsg_code . ")) as bbox
 						FROM
-							" . $tablename . "
+							" . pg_quote($tablename) . "
 						WHERE
 							" . $layerset['oid'] . " = '" . $oid . "'
 					) AS foo
@@ -16282,7 +16282,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$tablename = $layerdb->schema.'.'.$tablename;
 				}
 				$datastring  = $real_geom_name
-					. " from (select " . $layerset['oid'] . ", " . $real_geom_name . " from " . $tablename
+					. " from (select " . $layerset['oid'] . ", " . $real_geom_name . " from " . pg_quote($tablename)
 					. " WHERE " . $layerset['oid'] . " = '" . $oid
 					. "') as foo using unique " . $layerset['oid'] . " using srid=" . $layerset['epsg_code'];
 				$layer->set('data', $datastring);
@@ -16963,7 +16963,7 @@ class db_mapObj{
 				END as connection,
 				l.printconnection,
 				l.connectiontype,
-				l.classitem, l.styleitem, l.classification, l.filteritem,
+				l.classitem, l.styleitem, l.classification,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				l.duplicate_from_layer_id,
@@ -18102,7 +18102,7 @@ class db_mapObj{
 			$layer = $database->create_insert_dump(
 				'layer',
 				'',
-				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `privileg`, `trigger_function`, `sync` FROM layer WHERE Layer_ID=' . $layer_ids[$i]
+				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `privileg`, `trigger_function`, `sync` FROM layer WHERE Layer_ID=' . $layer_ids[$i]
 			);
 			$dump_text .= "\n\n-- Layer " . $layer_ids[$i] . "\n" . $layer['insert'][0];
 			$last_layer_id = '@last_layer_id'.$layer_ids[$i];
@@ -18650,7 +18650,6 @@ class db_mapObj{
 				'connectiontype',
 				'classitem',
 				'styleitem',
-				'filteritem',
 				'tolerance',
 				'toleranceunits',
 				'epsg_code',
@@ -18709,7 +18708,7 @@ class db_mapObj{
 					$sql .= "`Name_" . $language."`, ";
 				}
 			}
-			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `use_geom`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`, `duplicate_from_layer_id`, `duplicate_criterion`) VALUES(";
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `use_geom`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`, `duplicate_from_layer_id`, `duplicate_criterion`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'" . $formvars['id']."', ";
       }
@@ -18773,7 +18772,6 @@ class db_mapObj{
       $sql .= "'" . $formvars['classitem']."', ";
 			$sql .= "'" . $formvars['styleitem']."', ";
 			$sql .= "'" . $formvars['layer_classification']."', ";
-      $sql .= "'" . $formvars['filteritem']."', ";
 			if($formvars['cluster_maxdistance'] == '')$formvars['cluster_maxdistance'] = 'NULL';
 			$sql .= $formvars['cluster_maxdistance'].", ";
       if($formvars['tolerance']==''){$formvars['tolerance']='3';}
@@ -18829,7 +18827,7 @@ class db_mapObj{
     else{
       $layer = $layerdata;      # ein Layerobject wurde übergeben
       $projection = explode('epsg:', $layer->getProjection());
-      $sql = "INSERT INTO layer (`Name`, `Datentyp`, `Gruppe`, `pfad`, `Data`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connectiontype`, `classitem`,  `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `trigger_function`, `sync`) VALUES(";
+      $sql = "INSERT INTO layer (`Name`, `Datentyp`, `Gruppe`, `pfad`, `Data`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `epsg_code`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `trigger_function`, `sync`) VALUES(";
       $sql .= "'" . $layer->name."', ";
       $sql .= "'" . $layer->type."', ";
       $sql .= "'" . $layer->group."', ";
@@ -18845,7 +18843,6 @@ class db_mapObj{
       $sql .= "'" . $layer->connection."', ";
       $sql .= $layer->connectiontype.", ";
       $sql .= "'" . $layer->classitem."', ";
-      $sql .= "'" . $layer->filteritem."', ";
       $sql .= $layer->tolerance.", ";
       $sql .= "'" . $layer->toleranceunits."', ";
       $sql .= "'" . $projection[1]."', ";               # epsg_code
