@@ -4421,6 +4421,34 @@ echo '			</table>
 		}
 	}
 
+	function createAtomResponse() {
+		// Test URL Service: https://bauleitplaene-mv.de/kvwmap_dev/?go=Atom&type=service
+		// Test URL Dataset: https://bauleitplaene-mv.de/kvwmap_dev/?go=Atom&ype=dataset&dataset_id=dataset_feed_b46d87dc-6465-11ea-bebd-f784309c10da
+		include(CLASSPATH . 'atom.php');
+		$atom = new Atom($this);
+		$feed_type = $_GET['type'];
+		if ($feed_type == 'service') {
+			header('Content-Type: application/xml');
+			echo $atom->build_service_feed();
+		} else if($feed_type == 'dataset') {
+			//$dataset_id = $_GET['dataset_id'];
+			//TODO filter by id, if no filter is used, show all datasets
+			$dataset_id = $_GET['dataset_id'];
+			if (!empty($dataset_id)) {
+				header('Content-Type: application/xml');
+				$gml_id = str_replace("dataset_feed_","",$dataset_id);
+				echo $atom->build_dataset_feed($gml_id);
+			}
+			else {
+				echo 'No dataset_id parameter specified, e.g. ?dataset_id=dataset_feed_578268ba-433f-11e8-88d4-976b915d04de';
+			}
+			//TODO consider showing all datasets if no ID is entered
+		}
+		else {
+			echo 'No Service type parameter specified, e.g. ?type=service, ?type=dataset';
+		}
+	}
+
 	function adminFunctions() {
 		include_once(CLASSPATH . 'administration.php');
 		$this->administration = new administration($this->database, $this->pgdatabase);
