@@ -710,6 +710,10 @@ function go_switch($go, $exit = false) {
 				$GUI->createOWSException();
 			}break;
 
+			case 'Atom' : {
+				$GUI->createAtomResponse();
+			} break;
+
 			# 2006-03-24 CG
 			case 'StatistikAuswahl' : {
 				$GUI->checkCaseAllowed($go);
