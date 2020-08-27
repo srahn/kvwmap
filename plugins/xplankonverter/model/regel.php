@@ -24,11 +24,18 @@ class Regel extends PgObject {
 		);
 	}
 
-public static	function find_by_id($gui, $by, $id) {
+	public static	function find_by_id($gui, $by, $id) {
 		$regel = new Regel($gui);
 		$regel->find_by($by, $id);
 		$regel->konvertierung = $regel->get_konvertierung();
 		return $regel;
+	}
+
+	public static	function find_by_konvertierung_and_class_name($gui, $konvertierung_id, $class_name) {
+		#echo '<br>Finde Regel mit konvertierung_id = ' . $konvertierung_id . " AND class_name LIKE '" . $class_name . "'";
+		$regel = new Regel($gui);
+		$regeln = $regel->find_where("konvertierung_id = " . $konvertierung_id . " AND class_name LIKE '" . $class_name . "'", $id);
+		return $regeln;
 	}
 
 	/*

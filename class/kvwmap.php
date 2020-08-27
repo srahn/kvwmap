@@ -16282,9 +16282,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$tablename = $layerdb->schema.'.'.$tablename;
 				}
 				$datastring  = $real_geom_name
-					. " from (select " . $layerset['oid'] . ", " . $real_geom_name . " from " . pg_quote($tablename)
-					. " WHERE " . $layerset['oid'] . " = '" . $oid
-					. "') as foo using unique " . $layerset['oid'] . " using srid=" . $layerset['epsg_code'];
+					. " from (
+						select
+							" . $layerset['oid'] . ", " . $real_geom_name . "
+						from
+							" . $tablename . "
+						WHERE
+					  	" . $layerset['oid'] . " = " . $oid ."
+					) as foo using unique " . $layerset['oid'] . " using srid=" . $layerset['epsg_code'];
 				$layer->set('data', $datastring);
 				$layer->set('status', MS_ON);
 				$layer->set('template', ' ');

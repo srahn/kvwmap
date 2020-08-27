@@ -729,30 +729,42 @@ class Validierung extends PgObject {
 					FROM
 						xplan_gml." . $bedingung['class_name'] . "
 					WHERE
-						NOT (" . substr($this->get('functionsargumente'), 2, -2) . ")
+						NOT (" . substr($this->get('functionsargumente'), 2, -2) . ") AND
+						konvertierung_id = " . $konvertierung_id . "
 				";
 		}
 		$this->debug->show('sql to find failed konformities: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		$validierungsergebnis = new Validierungsergebnis($this->gui);
 		if (pg_num_rows($query) > 0) {
+			# Ermittle die Regel, in der $bedingung['class_name'] konvertiert wurde
+			$regeln = Regel::find_by_konvertierung_and_class_name($this->gui, $konvertierung_id, $bedingung['class_name']);
+			$fehler = pg_fetch_all($query);
 			$validierungsergebnis->create(
 				array(
 					'konvertierung_id' => $konvertierung_id,
 					'validierung_id' => $this->get('id'),
 					'status' => 'Fehler',
-					'msg' => 'Folgende Objekte der Klasse: ' . $bedingung['class_name']
-						. ' widersprechen der Validierung ' . $this->get('name')
-						. ' der Konformitätsbedinung Nr: ' . $konformitaetsbedingung->get('nummer') . ' ' . $konformitaetsbedingung->get('bezeichnung') . '<br>'
+					'msg' => 'Folgende Objekte der Klasse ' . $bedingung['class_name']
+						. ' widersprechen der Validierung:<br>'
 						. implode(
-							'<br>',
+							', ',
 							array_map(
 								function($rs) {
-									return $rs['gml_id'];
+									return ($rs['uuid'] != '' ? $rs['uuid'] : $rs['gml_id']);
 								},
-								pg_fetch_all($query)
+								$fehler
 							)
 						)
+						. ((count(array_filter(
+								$fehler,
+								function($rs) {
+									return ($rs['uuid'] == '');
+								}
+								)) > 0 AND count($regeln) > 0) ? '<br>Bei der Regel ' . implode(', ', array_map(function($regel) {
+									return '<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=15&operator_id==&value_id=' . $regel->get('id') . '">' . $regel->get('id') . '</a>';
+								}, $regeln)) . ' fehlt die Übernahme der Spalte gid in das Attribut uuid des XPlanungobjektes. Bitte Regel korrigieren.' : ''),
+					'regel_id' => $regeln[0]->get('id')
 				)
 			);
 		}
