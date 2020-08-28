@@ -11,7 +11,7 @@ document.onkeydown = function(ev){
 	var key;
 	ev = ev || event;
 	key = ev.keyCode;
-	if (key == 13) {
+	if (ev.target.className != 'quicksearch_field' && key == 13) {
 		document.GUI.suchen.click();
 	}
 }

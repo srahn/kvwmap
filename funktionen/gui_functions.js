@@ -551,6 +551,13 @@ function urlstring2formdata(formdata, string){
 	}
 	return formdata;
 }
+
+function formdata2urlstring(formdata){
+	for(var pair of formdata.entries()){
+		url = '&' + encodeURIComponent(pair[0]) + '=' + encodeURIComponent(pair[1]);
+	}
+	return url;
+}
 	 
 function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	top.startwaiting();
