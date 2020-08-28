@@ -5474,7 +5474,7 @@ echo '			</table>
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
     $layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    $pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+    $pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
     if($this->formvars['oid'] != '') {
       $this->point = $pointeditor->getpoint($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], NULL);
 
