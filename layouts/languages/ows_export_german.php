@@ -4,6 +4,9 @@
 	$strAllOrActiveLayer = "Sollen alle Layer der Stelle ausgegeben werden oder nur die aktiven?";
 	$strAll = "alle";
 	$strActiveLayer = "nur aktive";
+	$strTotalOrCurrentExtent = "Welche räumliche Kartenausdehnung soll der Dienst abdecken?";
+	$strTotalExtent = "die gesamte Stelle";
+	$strCurrentExtent = "nur die aktuell eingestellte Ausdehnung";
 	$strNameOfMapFile = "Wählen Sie einen Namen für die Map-Datei:";
 	$strOwsTitle = "Wie soll der Service bezeichnet werden (ows_title):";
 	$strOwsAbstract = "Geben Sie eine kurze Beschreibung zum Web Map Service (ows_abstract):";
@@ -15,7 +18,9 @@
 	$strFee = "Kosten für die Nutzung des Dienstes (ows_fees):";
 	$strButtonCancel = "Abbrechen";
 	$strButtonSend = "Senden";
-	$strExported1 = "Die aktuellen Karteneinstellungen wurden in die Mapdatei " . $this->mapfile ." exportiert. Die exportierte Datei kann nun f&uuml;r OWS verwendet werden.";
-	$strExported2 = "Ein getCapabilities-Request zu diesem WMS sieht folgendermaßen aus";
+	$strExported1 = "Die Karteneinstellungen wurden in die Mapdatei " . $this->mapfile ." exportiert. Die exportierte Datei kann nun f&uuml;r OWS verwendet werden.";
+	$strExported2 = "GetCapabilities-Request:";
 	$strExported3 = "Die Karte l&auml;&szlig;t sich abfragen mit einem getMap-Request, z.B.";
+	$strExportedWFSExample = "Die Daten lassen sich abfragen mit einem getFeature-Request, z.B.";
+	$strExportList = "Folgende Map-Files wurden bereits in dieser Stelle exportiert";
 ?>
