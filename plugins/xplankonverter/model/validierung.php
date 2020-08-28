@@ -200,7 +200,7 @@ class Validierung extends PgObject {
 					'status' => 'Warnung',
 					'regel_id' => $regel_id,
 					'shape_gid' => $row['gid'],
-					'msg' => 'Objekt mit gid=' . $row['gid'] . ' hat keine Geometrie.'
+					'msg' => 'Objekt mit gid: ' . $row['gid']. ' in Shape: ' . $regel->get_shape_table_name() . ' hat keine Geometrie.'
 				)
 			);
 			$geometrie_vorhanden = false;
@@ -299,7 +299,7 @@ class Validierung extends PgObject {
 						'status' => 'Fehler',
 						'regel_id' => $regel->get('id'),
 						'shape_gid' => $row['gid'],
-						'msg' => 'Regel: ' . $regel->get('name') . '. Objekt mit gid=' . $row['gid'] . ' ist nicht valide. Grund: ' . $row['validreason']
+						'msg' => 'Regel: ' . $regel->get('name') . '. Objekt mit gid: ' . $row['gid'] . ' in Shape: ' . $regel->get_shape_table_name() . ' ist nicht valide. Grund: ' . $row['validreason']
 					)
 				);
 				$all_geom_isvalid = false;
@@ -434,7 +434,7 @@ class Validierung extends PgObject {
 							'status' => ($row['distance'] > 100 ? 'Fehler' : 'Warnung'),
 							'regel_id' => $regel->get('id'),
 							'shape_gid' => $row['gid'],
-							'msg' => 'Objekt mit' . ($sourcetype == 'gmlas' ? '' : ' gid=' . $row['gid']) . ' ist außerhalb des räumlichen Geltungsbereiches des Planes.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
+							'msg' => 'Objekt mit' . ($sourcetype == 'gmlas' ? '' : ' gid: ' . $row['gid']). ' in Shape: ' . $regel->get_shape_table_name() . ' ist außerhalb des räumlichen Geltungsbereiches des Planes.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
 						)
 					);
 					$all_within_plan = false;
@@ -576,7 +576,7 @@ class Validierung extends PgObject {
 							'status' => ($row['distance'] > 100 ? 'Fehler' : 'Warnung'),
 							'regel_id' => $regel->get('id'),
 							'shape_gid' => $row['gid'],
-							'msg' => 'Objekt mit gid=' . $row['gid'] . ' ist außerhalb des räumlichen Geltungsbereiches seines Planbereiches.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
+							'msg' => 'Objekt mit gid: ' . $row['gid']. ' in Shape: ' . $regel->get_shape_table_name() . ' ist außerhalb des räumlichen Geltungsbereiches seines Planbereiches.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
 						)
 					);
 					$all_within_bereich = false;
