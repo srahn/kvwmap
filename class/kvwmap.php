@@ -5474,7 +5474,7 @@ echo '			</table>
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
     $layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    $pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+    $pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
     if($this->formvars['oid'] != '') {
       $this->point = $pointeditor->getpoint($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], NULL);
 
@@ -8606,7 +8606,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								$attr = 'a';
 							}
 							else{
-								$attr = 'query.'.$attributes['name'][$i];		# normaler Datentyp
+								$attr = 'query.'.pg_quote($attributes['name'][$i]);		# normaler Datentyp
 							}
 							if ($value != '') {
 								# Entferne Leerzeichen, wenn der Wert danach noch Zeichen enthalten würde
@@ -9050,7 +9050,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						<td align="left" width="40%"><?
 							switch ($this->attributes['form_element_type'][$i]) {
 								case 'Auswahlfeld' : {	?>
-									<select class="select"
+									<select class="select quicksearch_field"
 									<?
 										if($this->attributes['req_by'][$i] != ''){
 											echo 'onchange="update_require_attribute_(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['layer_id'].', new Array(\''.implode($this->attributes['name'], "','").'\'));" ';
@@ -9068,17 +9068,17 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 											<option <? if($this->formvars['value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
 										} ?>
 										</select>
-										<input type="hidden" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="=">
+										<input type="hidden" class="quicksearch_field" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="=">
 										<?
 								}break;
 
 								default : { ?>
-                  <input size="24" onkeydown="keydown(event)" id="attribute_<? echo $i; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="">
+                  <input size="24" class="quicksearch_field" onkeydown="keydown(event)" id="attribute_<? echo $i; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="">
 									<? if($this->layerset[0]['connectiontype'] == MS_WFS OR
 												!in_array($this->attributes['type'][$i],	array('varchar', 'text'))){ ?>
-										<input type="hidden" id="operator_attribute_<? echo $i; ?>" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="=">
+										<input type="hidden" class="quicksearch_field" id="operator_attribute_<? echo $i; ?>" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="=">
 									<? }else{ ?>
-										<input type="hidden" id="operator_attribute_<? echo $i; ?>" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="LIKE">
+										<input type="hidden" class="quicksearch_field" id="operator_attribute_<? echo $i; ?>" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="LIKE">
 									<? }
                }
 							}
@@ -16275,6 +16275,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$style->outlinecolor->setRGB(110, 110, 110);
 				# Datensatz-Layer erzeugen
 				$layer = ms_newLayerObj($map);
+				$tablename = pg_quote($tablename);
 				if ($layerset['attributes']['schema_name'][$tablename] != '') {
 					$tablename = $layerset['attributes']['schema_name'][$tablename].'.'.$tablename;
 				}
@@ -16286,7 +16287,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						select
 							" . $layerset['oid'] . ", " . $real_geom_name . "
 						from
-							" . $tablename . "
+							" . $tablename. "
 						WHERE
 					  	" . $layerset['oid'] . " = " . $oid ."
 					) as foo using unique " . $layerset['oid'] . " using srid=" . $layerset['epsg_code'];

@@ -123,6 +123,10 @@ class ddl {
 					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);
 					$width = $this->layout['texts'][$j]['width'];
 					$border = $this->layout['texts'][$j]['border'];
+					if ($text == 'WIRO-Kartenserver') {
+						$this->debug->write('Druck pk: write freetext: ' . $text . ' offsety: ' . $offsety . ' x: ' . $offsetx);
+						$this->pdf->addJpegFromFile(DRUCKRAHMEN_PATH . 'wiro-bg-druck02.jpg', 1 + $offsetx, 785, 590);
+					}
 					$y = $this->putText($text, $this->layout['texts'][$j]['size'], $width, $x, $y, $offsetx, $border, $type);
 					if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 					
 					if($type != 'everypage' AND $this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();			# falls in eine alte Seite geschrieben wurde, zurückkehren
