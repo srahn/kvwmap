@@ -8606,7 +8606,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								$attr = 'a';
 							}
 							else{
-								$attr = 'query.'.$attributes['name'][$i];		# normaler Datentyp
+								$attr = 'query.'.pq_quote($attributes['name'][$i]);		# normaler Datentyp
 							}
 							if ($value != '') {
 								# Entferne Leerzeichen, wenn der Wert danach noch Zeichen enthalten würde
@@ -16275,11 +16275,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$style->outlinecolor->setRGB(110, 110, 110);
 				# Datensatz-Layer erzeugen
 				$layer = ms_newLayerObj($map);
+				$tablename = pg_quote($tablename);
 				if ($layerset['attributes']['schema_name'][$tablename] != '') {
 					$tablename = $layerset['attributes']['schema_name'][$tablename].'.'.$tablename;
 				}
 				elseif ($layerset['schema'] != '') {
-					$tablename = $layerdb->schema.'.'.pg_quote($tablename);
+					$tablename = $layerdb->schema.'.'.$tablename;
 				}
 				$datastring  = $real_geom_name
 					. " from (
