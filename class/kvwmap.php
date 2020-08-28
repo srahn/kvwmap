@@ -20733,4 +20733,258 @@ class Document {
 			if($formvars['font_flurst']){$sql .= ", `font_flurst` = '" . $formvars['font_flurst']."'";}
       if($formvars['font_legend']){$sql .= ", `font_legend` = '" . $formvars['font_legend']."'";}
       if($formvars['font_user']){$sql .= ", `font_user` = '" . $formvars['font_user']."'";}
-      if($formvars['font_watermark']){$sql .= ", `font_watermark` = '" . $formvars['font_wa
+      if($formvars['font_watermark']){$sql .= ", `font_watermark` = '" . $formvars['font_watermark']."'";}
+
+      if($_files['headsrc']['name']){
+        $nachDatei = DRUCKRAHMEN_PATH.$_files['headsrc']['name'];
+        if (move_uploaded_file($_files['headsrc']['tmp_name'],$nachDatei)) {
+            //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
+          $sql .= ", `headsrc` = '" . $_files['headsrc']['name']."'";
+        }
+        else {
+            //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+        }
+      }
+      else{
+        $sql .= ", `headsrc` = '" . $formvars['headsrc_save']."'";
+      }
+      if($_files['refmapsrc']['name']){
+        $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapsrc']['name'];
+        if (move_uploaded_file($_files['refmapsrc']['tmp_name'],$nachDatei)) {
+            //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
+          $sql .= ", `refmapsrc` = '" . $_files['refmapsrc']['name']."'";
+        }
+        else {
+            //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+        }
+      }
+      else{
+        $sql .= ", `refmapsrc` = '" . $formvars['refmapsrc_save']."'";
+      }
+      if($_files['refmapfile']['name']){
+        $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapfile']['name'];
+        if (move_uploaded_file($_files['refmapfile']['tmp_name'],$nachDatei)) {
+            //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
+          $sql .= ", `refmapfile` = '" . $_files['refmapfile']['name']."'";
+        }
+        else {
+            //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+        }
+      }
+      else{
+        $sql .= ", `refmapfile` = '" . $formvars['refmapfile_save']."'";
+      }
+      $this->debug->write("<p>file:kvwmap class:Document->save_frame :",4);
+      $this->database->execSQL($sql,4, 1);
+      $lastdruckrahmen_id = $this->database->mysqli->insert_id;
+
+      $sql = 'INSERT INTO druckrahmen2stelle (stelle_id, druckrahmen_id) VALUES('.$stelle_id.', '.$lastdruckrahmen_id.')';
+      $this->debug->write("<p>file:kvwmap class:Document->save_frame :",4);
+      $this->database->execSQL($sql,4, 1);
+
+      for($i = 0; $i < $formvars['textcount']; $i++){
+        $formvars['text'.$i] = str_replace(chr(10), ';', $formvars['text'.$i]);
+        $formvars['text'.$i] = str_replace(chr(13), '', $formvars['text'.$i]);
+        $sql = "INSERT INTO druckfreitexte SET `text` = '" . $formvars['text'.$i]."'";
+        $sql .= ", `posx` = " . $formvars['textposx'.$i];
+        $sql .= ", `posy` = " . $formvars['textposy'.$i];
+        $sql .= ", `size` = " . $formvars['textsize'.$i];
+        $sql .= ", `angle` = " . $formvars['textangle'.$i];
+        $sql .= ", `font` = '" . $formvars['textfont'.$i]."'";
+        #echo $sql;
+        $this->debug->write("<p>file:kvwmap class:Document->update_frame :",4);
+        $this->database->execSQL($sql,4, 1);
+        $lastfreitext_id = $this->database->mysqli->insert_id;
+
+        $sql = 'INSERT INTO druckrahmen2freitexte (druckrahmen_id, freitext_id) VALUES('.$lastdruckrahmen_id.', '.$lastfreitext_id.')';
+        $this->debug->write("<p>file:kvwmap class:Document->save_frame :",4);
+        $this->database->execSQL($sql,4, 1);
+      }
+    }
+    return $lastdruckrahmen_id;
+  }
+
+  function update_frame($formvars, $_files){
+    if($formvars['Name']){
+      $formvars['cent'] = str_pad ($formvars['cent'], 2, "0", STR_PAD_RIGHT);
+      $preis = $formvars['euro'] * 100 + $formvars['cent'];
+
+      $sql ="UPDATE `druckrahmen`";
+      $sql .= " SET `Name` = '" . $formvars['Name']."'";
+			$sql .= ", `dhk_call` = '" . $formvars['dhk_call']."'";
+      $sql .= ", `headposx` = '" . $formvars['headposx']."'";
+      $sql .= ", `headposy` = '" . $formvars['headposy']."'";
+      $sql .= ", `headwidth` = '" . $formvars['headwidth']."'";
+      $sql .= ", `headheight` = '" . $formvars['headheight']."'";
+      $sql .= ", `mapposx` = '" . $formvars['mapposx']."'";
+      $sql .= ", `mapposy` = '" . $formvars['mapposy']."'";
+      $sql .= ", `mapwidth` = '" . $formvars['mapwidth']."'";
+      $sql .= ", `mapheight` = '" . $formvars['mapheight']."'";
+      $sql .= ", `refmapposx` = '" . $formvars['refmapposx']."'";
+      $sql .= ", `refmapposy` = '" . $formvars['refmapposy']."'";
+      $sql .= ", `refmapwidth` = '" . $formvars['refmapwidth']."'";
+      $sql .= ", `refmapheight` = '" . $formvars['refmapheight']."'";
+      $sql .= ", `refposx` = '" . $formvars['refposx']."'";
+      $sql .= ", `refposy` = '" . $formvars['refposy']."'";
+      $sql .= ", `refwidth` = '" . $formvars['refwidth']."'";
+      $sql .= ", `refheight` = '" . $formvars['refheight']."'";
+      $sql .= ", `refzoom` = '" . $formvars['refzoom']."'";
+      $sql .= ", `dateposx` = '" . $formvars['dateposx']."'";
+      $sql .= ", `dateposy` = '" . $formvars['dateposy']."'";
+      $sql .= ", `datesize` = '" . $formvars['datesize']."'";
+      $sql .= ", `scaleposx` = '" . $formvars['scaleposx']."'";
+      $sql .= ", `scaleposy` = '" . $formvars['scaleposy']."'";
+      $sql .= ", `scalesize` = '" . $formvars['scalesize']."'";
+			$sql .= ", `scalebarposx` = '" . $formvars['scalebarposx']."'";
+      $sql .= ", `scalebarposy` = '" . $formvars['scalebarposy']."'";
+      $sql .= ", `oscaleposx` = '" . $formvars['oscaleposx']."'";
+      $sql .= ", `oscaleposy` = '" . $formvars['oscaleposy']."'";
+      $sql .= ", `oscalesize` = '" . $formvars['oscalesize']."'";
+			$sql .= ", `lageposx` = '" . $formvars['lageposx']."'";
+      $sql .= ", `lageposy` = '" . $formvars['lageposy']."'";
+      $sql .= ", `lagesize` = '" . $formvars['lagesize']."'";
+			$sql .= ", `gemeindeposx` = '" . $formvars['gemeindeposx']."'";
+      $sql .= ", `gemeindeposy` = '" . $formvars['gemeindeposy']."'";
+      $sql .= ", `gemeindesize` = '" . $formvars['gemeindesize']."'";
+      $sql .= ", `gemarkungposx` = '" . $formvars['gemarkungposx']."'";
+      $sql .= ", `gemarkungposy` = '" . $formvars['gemarkungposy']."'";
+      $sql .= ", `gemarkungsize` = '" . $formvars['gemarkungsize']."'";
+      $sql .= ", `flurposx` = '" . $formvars['flurposx']."'";
+      $sql .= ", `flurposy` = '" . $formvars['flurposy']."'";
+      $sql .= ", `flursize` = '" . $formvars['flursize']."'";
+			$sql .= ", `flurstposx` = '" . $formvars['flurstposx']."'";
+      $sql .= ", `flurstposy` = '" . $formvars['flurstposy']."'";
+      $sql .= ", `flurstsize` = '" . $formvars['flurstsize']."'";
+      $sql .= ", `legendposx` = '" . $formvars['legendposx']."'";
+      $sql .= ", `legendposy` = '" . $formvars['legendposy']."'";
+      $sql .= ", `legendsize` = '" . $formvars['legendsize']."'";
+      $sql .= ", `arrowposx` = '" . $formvars['arrowposx']."'";
+      $sql .= ", `arrowposy` = '" . $formvars['arrowposy']."'";
+      $sql .= ", `arrowlength` = '" . $formvars['arrowlength']."'";
+      $sql .= ", `userposx` = '" . $formvars['userposx']."'";
+      $sql .= ", `userposy` = '" . $formvars['userposy']."'";
+      $sql .= ", `usersize` = '" . $formvars['usersize']."'";
+      $sql .= ", `watermark` = '" . $formvars['watermark']."'";
+      $sql .= ", `watermarkposx` = '" . $formvars['watermarkposx']."'";
+      $sql .= ", `watermarkposy` = '" . $formvars['watermarkposy']."'";
+      $sql .= ", `watermarksize` = '" . $formvars['watermarksize']."'";
+      $sql .= ", `watermarkangle` = '" . $formvars['watermarkangle']."'";
+      $sql .= ", `watermarktransparency` = '" . $formvars['watermarktransparency']."'";
+      if($formvars['variable_freetexts'] != 1)$formvars['variable_freetexts'] = 0;
+      $sql .= ", `variable_freetexts` = " . $formvars['variable_freetexts'];
+      $sql .= ", `format` = '" . $formvars['format']."'";
+      $sql .= ", `preis` = '" . $preis."'";
+      $sql .= ", `font_date` = '" . $formvars['font_date']."'";
+      $sql .= ", `font_scale` = '" . $formvars['font_scale']."'";
+			$sql .= ", `font_lage` = '" . $formvars['font_lage']."'";
+			$sql .= ", `font_gemeinde` = '" . $formvars['font_gemeinde']."'";
+      $sql .= ", `font_gemarkung` = '" . $formvars['font_gemarkung']."'";
+      $sql .= ", `font_flur` = '" . $formvars['font_flur']."'";
+			$sql .= ", `font_flurst` = '" . $formvars['font_flurst']."'";
+      $sql .= ", `font_legend` = '" . $formvars['font_legend']."'";
+      $sql .= ", `font_user` = '" . $formvars['font_user']."'";
+      $sql .= ", `font_watermark` = '" . $formvars['font_watermark']."'";
+
+      if($_files['headsrc']['name']){
+        $nachDatei = DRUCKRAHMEN_PATH.$_files['headsrc']['name'];
+        if (move_uploaded_file($_files['headsrc']['tmp_name'],$nachDatei)) {
+            //echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
+          $sql .= ", `headsrc` = '" . $_files['headsrc']['name']."'";
+          #echo $sql;
+        }
+        else {
+            //echo '<br>Datei: '.$_files['Wappen']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+          }
+      }
+      if($_files['refmapsrc']['name']){
+        $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapsrc']['name'];
+        if (move_uploaded_file($_files['refmapsrc']['tmp_name'],$nachDatei)) {
+            //echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
+          $sql .= ", `refmapsrc` = '" . $_files['refmapsrc']['name']."'";
+          #echo $sql;
+        }
+        else {
+            //echo '<br>Datei: '.$_files['Wappen']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+          }
+      }
+      if($_files['refmapfile']['name']){
+        $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapfile']['name'];
+        if (move_uploaded_file($_files['refmapfile']['tmp_name'],$nachDatei)) {
+            //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
+          $sql .= ", `refmapfile` = '" . $_files['refmapfile']['name']."'";
+        }
+        else {
+            //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+        }
+      }
+      $sql .= " WHERE `id` =".(int)$formvars['aktiverRahmen'];
+      $this->debug->write("<p>file:kvwmap class:Document->update_frame :",4);
+      $this->database->execSQL($sql,4, 1);
+
+      for($i = 0; $i < $formvars['textcount']; $i++){
+        $formvars['text'.$i] = str_replace(chr(10), ';', $formvars['text'.$i]);
+        $formvars['text'.$i] = str_replace(chr(13), '', $formvars['text'.$i]);
+        $sql = "UPDATE druckfreitexte SET `text` = '" . $formvars['text'.$i]."'";
+        $sql .= ", `posx` = " . $formvars['textposx'.$i];
+        $sql .= ", `posy` = " . $formvars['textposy'.$i];
+        $sql .= ", `size` = " . $formvars['textsize'.$i];
+        $sql .= ", `angle` = " . $formvars['textangle'.$i];
+        $sql .= ", `font` = '" . $formvars['textfont'.$i]."'";
+        $sql .= " WHERE id = " . $formvars['text_id'.$i];
+        #echo $sql;
+        $this->debug->write("<p>file:kvwmap class:Document->update_frame :",4);
+        $this->database->execSQL($sql,4, 1);
+      }
+    }
+  }
+
+  function add_frame2stelle($id, $stelleid){
+    $sql ="INSERT IGNORE INTO druckrahmen2stelle VALUES (" . $stelleid.", " . $id.")";
+    $this->debug->write("<p>file:kvwmap class:Document->add_frame2stelle :",4);
+    $this->database->execSQL($sql,4, 1);
+  }
+
+  function removeFrames($stelleid){
+    $sql ="DELETE FROM druckrahmen2stelle WHERE stelle_id = " . $stelleid;
+    $this->debug->write("<p>file:kvwmap class:Document->removeFrames :",4);
+    $this->database->execSQL($sql,4, 1);
+  }
+
+  function save_active_frame($id, $userid, $stelleid){
+    $sql ="UPDATE `rolle` SET `active_frame` = '" . $id."' WHERE `user_id` =" . $userid." AND `stelle_id` =" . $stelleid;
+    $this->debug->write("<p>file:kvwmap class:Document->save_active_frame :",4);
+    $this->database->execSQL($sql,4, 1);
+  }
+
+  function get_active_frameid($userid, $stelleid){
+    $sql ='SELECT active_frame from rolle WHERE `user_id` ='.$userid.' AND `stelle_id` ='.$stelleid;
+    $this->debug->write("<p>file:kvwmap class:GUI->get_active_frameid :<br>" . $sql,4);
+    $this->database->execSQL($sql,4, 1);
+		$rs = $this->database->result->fetch_row();
+    return $rs[0];
+  }
+}
+
+class point {
+  var $x;
+  var $y;
+
+  function __construct($x,$y) {
+    $this->x=$x;
+    $this->y=$y;
+  }
+
+  function pixel2welt($minX,$minY,$pixSize) {
+    # Rechnet Pixel- in Weltkoordinaten um mit minx, miny und pixsize
+    $this->x=($this->x*$pixSize)+$minX;
+    $this->y=($this->y*$pixSize)+$minY;
+  }
+
+  function welt2pixel($minX,$minY,$pixSize) {
+    # Rechnet Welt- in Pixelkoordinaten um mit minx, miny und pixsize
+    $this->x=round(($this->x-$minX)/$pixSize);
+    $this->y=round(($this->y-$minY)/$pixSize);
+  }
+}
+
+?>
