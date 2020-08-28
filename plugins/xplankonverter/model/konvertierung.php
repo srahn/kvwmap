@@ -603,9 +603,10 @@ class Konvertierung extends PgObject {
 	function createTopology() {
 		# Füge vorhandene Flächenschlussobjekte neu in Tabelle flächenschlussobjekte ein
 		$sql = "
-			INSERT INTO xplankonverter.flaechenschlussobjekte (gml_id, konvertierung_id, teilpolygon, teilpolygon_nr)
+			INSERT INTO xplankonverter.flaechenschlussobjekte (gml_id, uuid, konvertierung_id, teilpolygon, teilpolygon_nr)
 			SELECT
 				gml_id,
+				uuid,
 				konvertierung_id,
 				(st_dump(position)).geom AS teilpolygon,
 				(st_dump(position)).path[1] AS teilpolygon_nr
@@ -625,9 +626,10 @@ class Konvertierung extends PgObject {
 
 		# Füge ein umschließendes Polygon des raeumlichen Geltungsbereiches zur Tabelle flaechenschlussobjekte hinzu
 		$sql = "
-			INSERT INTO xplankonverter.flaechenschlussobjekte (gml_id, konvertierung_id, teilpolygon, teilpolygon_nr)
+			INSERT INTO xplankonverter.flaechenschlussobjekte (gml_id, uuid, konvertierung_id, teilpolygon, teilpolygon_nr)
 	 		SELECT
 				gml_id,
+				'räumlicher Geltungsbereich Plan' AS uuid,
 				konvertierung_id,
 				(st_dump(position)).geom AS teilpolygon,
 				(st_dump(position)).path[1] AS teilpolygon_nr

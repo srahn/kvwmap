@@ -641,14 +641,22 @@ class Validierung extends PgObject {
 		# prüft ob es faces gibt, die mehreren Geometrien zugeordnet sind
 		$sql = "
 			SELECT
-			  string_agg(fo.gml_id::text, ', ') neighbours
+				string_agg(foo.uuid, ' - ') neighbours
 			FROM
-			  flaechenschluss_topology.relation r JOIN
-			  xplankonverter.flaechenschlussobjekte fo ON r.topogeo_id = (fo.topo).id
-			WHERE
-				fo.konvertierung_id = " . $this->konvertierung_id . "
-			GROUP BY r.element_id
-			HAVING count(r.element_id) > 1
+				(
+					SELECT DISTINCT
+						fo.uuid,
+						r.element_id
+					FROM
+					  flaechenschluss_topology.relation r JOIN
+					  xplankonverter.flaechenschlussobjekte fo ON r.topogeo_id = (fo.topo).id
+					WHERE
+						fo.konvertierung_id = " . $this->konvertierung_id . "
+				) foo
+			GROUP BY foo.element_id
+			HAVING
+				count(foo.element_id) > 1 AND
+				string_agg(foo.uuid, ' - ') != 'räumlicher Geltungsbereich Plan'
 		";
 		#echo '<p>SQL zur Abfrage von Überlappungen in der Topologie: ' . $sql;
 		$overlaps = $this->getSQLResults($sql);
@@ -666,7 +674,7 @@ class Validierung extends PgObject {
 				array(
 					'konvertierung_id' => $this->konvertierung_id,
 					'validierung_id' => $this->get('id'),
-					'status' => ($success ? 'Erfolg' : 'Fehler'),
+					'status' => ($success ? 'Erfolg' : 'Warnung'),
 					'msg' => $msg
 				)
 			);
@@ -679,19 +687,26 @@ class Validierung extends PgObject {
 
 		# prüft ob es faces gibt, die keiner Geometrie zugeordnet sind
 		$sql = "
-			SELECT DISTINCT
-				string_agg(fo.gml_id::text, ', ') neighbours
+			SELECT
+				string_agg(foo.uuid, ' - ') neighbours
 			FROM
-				flaechenschluss_topology.face f LEFT JOIN
-				flaechenschluss_topology.relation r ON f.face_id = r.element_id LEFT JOIN
-				flaechenschluss_topology.edge_data el ON f.face_id = el.left_face JOIN
-				flaechenschluss_topology.relation rr ON el.right_face = rr.element_id JOIN
-				xplankonverter.flaechenschlussobjekte fo ON rr.topogeo_id = (fo.topo).id
-			WHERE
-				f.face_id != 0 AND
-				r.element_id IS NULL AND
-				fo.konvertierung_id = " . $this->konvertierung_id . "
-			GROUP BY face_id
+				(
+					SELECT DISTINCT
+						fo.uuid,
+						f.face_id
+					FROM
+						flaechenschluss_topology.face f LEFT JOIN
+						flaechenschluss_topology.relation r ON f.face_id = r.element_id LEFT JOIN
+						flaechenschluss_topology.edge_data el ON f.face_id = el.left_face JOIN
+						flaechenschluss_topology.relation rr ON el.right_face = rr.element_id JOIN
+						xplankonverter.flaechenschlussobjekte fo ON rr.topogeo_id = (fo.topo).id
+					WHERE
+						f.face_id != 0 AND
+						r.element_id IS NULL AND
+						fo.konvertierung_id = " . $this->konvertierung_id . "
+				)	foo
+			GROUP BY foo.face_id
+			HAVING string_agg(foo.uuid, ' - ') != 'räumlicher Geltungsbereich Plan'
 		";
 		#echo '<p>SQL zur Abfrage von Lücken in der Topologie: ' . $sql;
 		$gaps = $this->getSQLResults($sql);
@@ -709,7 +724,7 @@ class Validierung extends PgObject {
 				array(
 					'konvertierung_id' => $this->konvertierung_id,
 					'validierung_id' => $this->get('id'),
-					'status' => ($success ? 'Erfolg' : 'Fehler'),
+					'status' => ($success ? 'Erfolg' : 'Warnung'),
 					'msg' => $msg
 				)
 			);

@@ -5,16 +5,16 @@
 class Atom{
 	function __construct($gui) {
 		$this->gui = $gui;
-		$service_location_root = 'https://bauleitplaene-mv.de/kvwmap_dev/atom.php';
+		$this->used_standard = 'XPlanung'; // e.g. also possible for INSPIRE
+		$this->service_location_root = URL . 'kvwmap_dev/index.php?go=Atom';
 		//Namespaces e.g. relevant when creating an INSPIRE service and inspire_dls is needed
 		$this->service_feed_namespaces = array('xmlns="http://www.w3.org/2005/Atom"','xmlns:georss="http://www.georss.org/georss"');
 		$this->service_feed_title = 'Service-Feed des Bauleitplanservers Mecklenburg-Vorpommern';
 		$this->service_feed_metadata_location = 'https://testurl.de/servicefeed_metadata.xml';
-		$this->service_feed_location = $service_location_root . '?type=service'; //if go case, swap ? with &
-		// service-feed-url currently url = id, as always local
+		$this->service_feed_location = $this->service_location_root . '&amp;type=service';
+		// service-feed-url currently  = id, as always local
 		$this->service_feed_id = $this->service_feed_location;
 		$this->service_feed_rights = 'none';
-		$this->service_feed_updated_at = '2019-01-28T11:29:11+01:00'; // TODO // TODO get this automatically FROM xplankonverter.konvertierungen -> column updated_at (the newest that conforms to publishable datasets or e.g. newest from dataset_entry
 		$this->service_feed_author_name = 'Landkreis Nordwestmecklenburg';
 		$this->service_feed_author_email = 'j.debold@nordwestmecklenburg.de';
 
@@ -22,50 +22,23 @@ class Atom{
 		$this->dataset_feed_author_name = 'Landkreis Nordwestmecklenburg';
 		$this->dataset_feed_author_email = 'j.debold@nordwestmecklenburg.de';
 		// XML escape & 
-		$this->dataset_feed_location = $service_location_root . '?type=dataset&amp;dataset_id='; //if go case, swap ? with &
+		$this->dataset_feed_location = $this->service_location_root . '&amp;type=dataset&amp;dataset_id=';
 		$this->dataset_feed_metadata_location = 'https://testurl.de/datasetfeed_metadata.xml';
 
 		$this->dataset_feed_rights = 'none';
-		$this->dataset_feed_summary = 'dataset_feed_summary';
-		$this->dataset_feed_subtitle = 'Example Dataset-Feed-Subtitle';
 		$this->dataset_entry_rights = 'none';
-		$this->dataset_entry_summary = 'test_summary_dataset_entry';
 		//internal location of gml's is currently /var/www/data/$konvertierung_id/xplan_gml/xplan_gml_ + $konvertierung_id
 		$this->dataset_entry_file_location = 'https://gdi-service.de/public/services/lbforstbb/fuek_rp/fuek_rp_25833.gml';
 		$this->dataset_entry_file_length = 2032682; // TODO use filesize($this->dataset_entry_file_location); to get filesize
 	}
 
 	/*
-	* Function liefert service feet
+	* Function liefert service feed
 	* hier im Beispiel hart programmiert für Bauleitpläne
 	* ToDo dynamisch machen für beliebige Feature
 	*
 	*/
 	function build_service_feed() {
-		$xml  = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>';
-		$xml .= '<!-- Atom-Feed automatically created by GDI-Service Rostock-->';
-		$xml .= '<feed ';
-		foreach($this->service_feed_namespaces as $ns) {
-			$xml .= $ns . ' ';
-		}
-		$xml .= '>';
-		$xml .= '<title>' . $this->service_feed_title . '</title>';
-		$xml .= '<link title="Link on this service-metdata-document" rel="describedBy" href="' . $this->service_feed_metadata_location . '" hreflang="de" type="application.xml" />';
-		$xml .= '<link title="Link on this service atom feed" rel="self" href="' . $this->service_feed_location . '" hreflang="de" type="application/atom+xml" />';
-		/*
-		* If INSPIRE pre-defined download service, add a link to an open search description, e.g.
-		* <link title="Open Search Beschreibung des INSPIRE pre-defined Download Dienstes" rel="search" href="" hreflang="de" type="application/opensearchdescription+xml" />
-		*/ 
-		$xml .= '<id>' . $this->service_feed_id . '</id>';
-		$xml .= '<rights>' . $this->service_feed_rights . '</rights>';
-		$xml .= '<updated>' . $this->service_feed_updated_at . '</updated>';
-		$xml .= '<author>';
-		$xml .= '<name>' . $this->service_feed_author_name . '</name>';
-		$xml .= '<email>' . $this->service_feed_author_email . '</email>';
-		$xml .= '</author>';
-
-		// TODO currently only BP-Pläne, find out first if it should be one service for bp, fp and so together or 3 feeds (then fix anzeigename accordingly)
-		// TODO also add Stelle_name in front of anzeigename
 		$conn = $this->gui->pgdatabase->dbConn;
 		$sql = "
 			SELECT
@@ -142,6 +115,33 @@ class Atom{
 		#echo '<p>SQL zur Abfrage der Plandaten für Datafeets: ' . $sql; exit;
 		$result = pg_query($conn, $sql);
 		$konvertierungen = pg_fetch_all($result);
+
+		
+		$xml  = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>';
+		$xml .= '<!-- Atom-Feed automatically created by GDI-Service Rostock-->';
+		$xml .= '<feed ';
+		foreach($this->service_feed_namespaces as $ns) {
+			$xml .= $ns . ' ';
+		}
+		$xml .= '>';
+		$xml .= '<title>' . $this->service_feed_title . '</title>';
+		$xml .= '<link title="Link on this service-metdata-document" rel="describedBy" href="' . $this->service_feed_metadata_location . '" hreflang="de" type="application.xml" />';
+		$xml .= '<link title="Link on this service atom feed" rel="self" href="' . $this->service_feed_location . '" hreflang="de" type="application/atom+xml" />';
+		/*
+		* If INSPIRE pre-defined download service, add a link to an open search description, e.g.
+		* <link title="Open Search Beschreibung des INSPIRE pre-defined Download Dienstes" rel="search" href="" hreflang="de" type="application/opensearchdescription+xml" />
+		*/ 
+		$xml .= '<id>' . $this->service_feed_id . '</id>';
+		$xml .= '<rights>' . $this->service_feed_rights . '</rights>';
+		date("Y-m-d H:i:s") . PHP_EOL;
+		$updated_at = reset($konvertierungen)['dataset_updated_at'] ? date("c", reset($konvertierungen)['dataset_updated_at']) : '2018-01-01T09:00:00+01:00';
+		$xml .= '<updated>' . $updated_at . '</updated>';
+		$xml .= '<author>';
+		$xml .= '<name>' . $this->service_feed_author_name . '</name>';
+		$xml .= '<email>' . $this->service_feed_author_email . '</email>';
+		$xml .= '</author>';
+
+		// TODO also add Stelle_name in front of anzeigename
 		foreach ($konvertierungen as $konvertierung) {
 			$xml .= $this->build_service_entry(
 				$konvertierung['dataset_epsg'],
@@ -151,7 +151,7 @@ class Atom{
 				$this->dataset_feed_metadata_location,
 				$this->dataset_feed_location . 'dataset_feed_' . $konvertierung['gml_id'],
 				$this->dataset_feed_rights,
-				$this->dataset_feed_summary,
+				'This feed-entry contains a link to a standardized ' . $this->used_standard . ' GML-file. The overarching service feed and relevant metadata can be found in the feed links.',
 				'Dataset Feed Bauleitplanserver Plan ' . $konvertierung['anzeigename'],
 				$konvertierung['dataset_updated_at'],
 				$konvertierung['dataset_polygon']
@@ -180,7 +180,7 @@ class Atom{
 		$xml .= '<rights>' . $dataset_feed_rights . '</rights>';
 		$xml .= '<summary>' . $dataset_feed_summary . '</summary>';
 		$xml .= '<title>' . $dataset_feed_title . '</title>';
-		$xml .= '<updated>' . $dataset_feed_updated_at . '</updated>';
+		$xml .= '<updated>' . date("c", $dataset_feed_updated_at) . '</updated>';
 		$dataset_feed_georss_polygon = str_replace(",","",$dataset_feed_georss_polygon);
 		$dataset_feed_georss_polygon = str_replace("POLYGON","",$dataset_feed_georss_polygon);
 		$dataset_feed_georss_polygon = str_replace("(","",$dataset_feed_georss_polygon);
@@ -297,8 +297,14 @@ class Atom{
 			$xml .= $ns . ' ';
 		}
 		$xml .= '>';
-		$xml .= '<title>' . $this->dataset_feed_title . '</title>';
-		$xml .= '<subtitle>' . $this->dataset_feed_subtitle . '</subtitle>';
+		$xml .= '<title>Dataset Feed ';
+		$dataset_feed_title = '';
+		foreach($datasets as $dataset) {
+			$dataset_feed_title .=  'Plan ' . $dataset['anzeigename'] . ',';
+		}
+		$xml .= rtrim($dataset_feed_title, ',');
+		$xml .= '</title>';
+		$xml .= '<subtitle>Dataset of the Bauleitplanserver Mecklenburg-Vorpommern service feed.</subtitle>';
 		$xml .= '<link title="Link on the dataset metadata document" rel="describedby" href="' . $this->dataset_feed_metadata_link . '" hreflang="de" type="application.xml" />';
 		$xml .= '<link title="Link on this dataset atom feed" rel="self" href="' . $this->dataset_feed_location . '" hreflang="de" type="application.xml" />';
 		$xml .= '<link title="Link on the service atom feed" rel="describedby" href="' . $this->service_feed_location . '" hreflang="de" type="application/atom+xml" />';
@@ -308,23 +314,24 @@ class Atom{
 		*/
 		$xml .= '<id>' . 'dataset_feed_' . $gml_id . '</id>';
 		$xml .= '<rights>' . $this->dataset_feed_rights . '</rights>';
-		$xml .= '<updated>' . $dataset['dataset_updated_at'] . '</updated>';
+		$xml .= '<updated>' . date("c", $dataset['dataset_updated_at']) . '</updated>';
 		$xml .= '<author>';
 		$xml .= '<name>' . $this->dataset_feed_author_name . '</name>';
 		$xml .= '<email>' . $this->dataset_feed_author_email . '</email>';
 		$xml .= '</author>';
 		foreach($datasets as $dataset) {
-			$xml .= $this->build_dataset_entry($dataset['dataset_epsg'],
-												'dataset_feed_' . $dataset['gml_id'],
-												'GML Dataset Bauleitplanserver Plan ' . $dataset['gml_id'] . ' ' . $dataset['anzeigename'],
-												'GML Dataset Bauleitplanserver Plan ' . $dataset['gml_id'], /* is shortened to prevent special characters in xml attribute that are allowed in Anzeigename, e.g. " " */
-												$this->dataset_entry_file_location, /* TODO Figure out how to expose xplan-GML path (folder-structure with konvertierung_id */
-												$this->dataset_entry_file_length,
-												$dataset['dataset_bbox'],
-												$this->dataset_entry_rights,
-												$this->dataset_entry_summary,
-												$dataset['dataset_updated_at'],
-												$dataset['dataset_polygon']
+			$xml .= $this->build_dataset_entry(
+				$dataset['dataset_epsg'],
+				'dataset_feed_' . $dataset['gml_id'],
+				'GML Dataset Bauleitplanserver Plan ' . $dataset['gml_id'] . ' ' . $dataset['anzeigename'],
+				'GML Dataset Bauleitplanserver Plan ' . $dataset['gml_id'], /* is shortened to prevent special characters in xml attribute that are allowed in Anzeigename, e.g. " " */
+				$this->dataset_entry_file_location, /* TODO Figure out how to expose xplan-GML path (folder-structure with konvertierung_id, currently in upload/xplankonverter/$konvertierung_id/... TODO perhaps also check if GML exists here */
+				$this->dataset_entry_file_length,
+				$dataset['dataset_bbox'],
+				$this->dataset_entry_rights,
+				'This feed-entry contains a link to a standardized ' . $this->used_standard . ' GML-file. The overarching service feed and relevant metadata can be found in the feed links.',
+				$dataset['dataset_updated_at'],
+				$dataset['dataset_polygon']
 			);
 		}
 		$xml .= '</feed>';
@@ -346,7 +353,7 @@ class Atom{
 		$xml .= '<rights>' . $dataset_entry_rights . '</rights>';
 		$xml .= '<summary>' . $dataset_entry_summary . '</summary>';
 		$xml .= '<title>' . $dataset_entry_title . '</title>';
-		$xml .= '<updated>' . $dataset_entry_updated_at . '</updated>';
+		$xml .= '<updated>' . date("c", $dataset_entry_updated_at) . '</updated>';
 		$dataset_feed_georss_polygon = str_replace(",","",$dataset_feed_georss_polygon);
 		$dataset_feed_georss_polygon = str_replace("POLYGON","",$dataset_feed_georss_polygon);
 		$dataset_feed_georss_polygon = str_replace("(","",$dataset_feed_georss_polygon);
