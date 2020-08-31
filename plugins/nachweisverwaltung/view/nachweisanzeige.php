@@ -94,8 +94,18 @@ function aus_Auftrag_entfernen(){
 }
 
 function vorlage(){
-	document.GUI.go.value='Nachweisformular_Vorlage';
-	document.GUI.submit();
+	var ids = document.getElementsByName('id[]');
+	var count = 0;
+	for(i = 0; i < ids.length; i++){
+		if(ids[i].checked){
+			count++;
+		}
+	}
+	if(count == 0)message([{ 'type': 'warning', 'msg': 'Bitte wählen Sie den Nachweis aus, der als Vorlage verwendet werden soll.' }]);
+	else{
+		document.GUI.go.value='Nachweisformular_Vorlage';
+		document.GUI.submit();
+	}
 }
 
 function set_ref_geom(){
