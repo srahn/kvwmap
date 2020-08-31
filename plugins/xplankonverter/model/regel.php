@@ -191,7 +191,10 @@ class Regel extends PgObject {
 
 	function get_shape_table_name() {
 		$this->debug->show('<br>Extrahiere Tabellenname der Shape-Datei aus sql: ' . $this->get($sql), Validierung::$write_debug);
-		$shape_table_name = get_first_word_after($this->get('sql'), 'FROM');
+		$parts1 = explode('FROM', $this->get('sql'));
+		$parts2 = explode('WHERE', $parts1[1]);
+		$shape_table_name = trim($parts2[0]);
+#		$shape_table_name = get_first_word_after($this->get('sql'), 'FROM');
 		$this->debug->show('<br>Shape table name: ' . $shape_table_name, Validierung::$write_debug);
 		return $shape_table_name;
 	}

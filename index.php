@@ -1023,6 +1023,11 @@ function go_switch($go, $exit = false) {
 				$GUI->TIFExport_erzeugen();
 			} break;
 
+			case 'ows_export_loeschen' : {
+				$GUI->checkCaseAllowed('WMS_Export');
+				$GUI->ows_export_loeschen();
+			} break;
+
 			case 'WMS_Export_Senden' : {
 				$GUI->checkCaseAllowed('WMS_Export');
 				$GUI->wmsExportSenden();

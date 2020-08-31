@@ -7325,6 +7325,14 @@ echo '			</table>
   	return $text;
   }
 
+	function ows_export_loeschen() {
+		if (unlink(WMS_MAPFILE_PATH . $this->Stelle->id . '/' . $this->formvars['mapfile_name'])) {
+			$this->add_message('notice', 'MapDatei ' . WMS_MAPFILE_PATH . $this->Stelle->id . '/' . $this->formvars['mapfile_name'] . ' erfolgreich gelöscht.');
+		}
+		$this->formvars['mapfile_name'] = '';
+		$this->wmsExport();
+	}
+
 	function wmsExportSenden() {
 		$this->titel = 'MapServer Map-Datei für OGC-Dienste erfolgreich exportiert';
 		$this->main = "ows_exportiert.php";
@@ -7341,7 +7349,12 @@ echo '			</table>
 			$layer = $this->map->getlayer($i);
 			$layer->set('name', umlaute_umwandeln($layer->name));
 		}
-		$bb = array($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+		if ($this->formvars['totalExtent']) {
+			$bb = array($this->Stelle->MaxGeorefExt->minx, $this->Stelle->MaxGeorefExt->miny, $this->Stelle->MaxGeorefExt->maxx, $this->Stelle->MaxGeorefExt->maxy);
+		}
+		else {
+			$bb = array($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+		}
 		if (!is_dir(WMS_MAPFILE_PATH . $this->Stelle->id)) {
 			mkdir(WMS_MAPFILE_PATH . $this->Stelle->id);
 		}
@@ -7361,7 +7374,9 @@ echo '			</table>
 		$this->map->setMetaData("ows_srs", OWS_SRS);
 		$this->map->setMetaData("wms_enable_request", '*');
 		$this->saveMap($this->mapfile);
-		$this->getMapRequestExample = $this->wms_onlineresource . 'REQUEST=GetMap&'
+		$this->getMapRequestExample = $this->wms_onlineresource
+			. 'SERVICE=WMS&'
+			. 'REQUEST=GetMap&'
 			. 'VERSION=' . SUPORTED_WMS_VERSION . '&'
 			. 'LAYERS=Pläne&'
 			. 'CRS=EPSG:' . $this->user->rolle->epsg_code . '&'
@@ -7369,6 +7384,13 @@ echo '			</table>
 			. 'WIDTH=' . $this->map->width . '&'
 			. 'HEIGHT=' . $this->map->height . '&'
 			. 'FORMAT=image/jpeg';
+		define('SUPORTED_WFS_VERSION', '1.3.0');
+		$this->getFeatureRequestExample = $this->wms_onlineresource
+			. 'SERVICE=WFS&'
+			. 'REQUEST=GetFeature&'
+			. 'VERSION=' . SUPORTED_WFS_VERSION . '&'
+			. 'TYPENAME=B_Plaene&'
+			. 'CRS=EPSG:' . $this->user->rolle->epsg_code;
 
 		$this->mapfiles_der_stelle = $this->Stelle->get_mapfiles();
 
@@ -7403,6 +7425,8 @@ echo '			</table>
 			$this->formvars['ows_srs'] = $map->getMetaData('ows_srs');
 			$this->formvars['wms_enable_request'] = $map->getMetaData('wms_enable_request');
 		}
+
+		$this->mapfiles_der_stelle = $this->Stelle->get_mapfiles();
 
 		$this->output();
   }

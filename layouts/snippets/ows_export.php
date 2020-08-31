@@ -18,6 +18,14 @@
   </tr>
   <tr>
     <td align="left">&nbsp;</td>
+    <td align="left"><?php echo $strTotalOrCurrentExtent; ?><br>
+    <input type="radio" name="totalExtent" value="0"<?php echo ($this->formvars['totalExtent'] != 2 ? ' checked' : ''); ?>>
+    <?php echo $strTotalExtent; ?>
+    <input type="radio" name="totalExtent" value="1"<?php echo ($this->formvars['totalExtent'] == 2 ? ' checked' : ''); ?>>
+    <?php echo $strCurrentExtent; ?></td>
+  </tr>
+  <tr>
+    <td align="left">&nbsp;</td>
     <td align="left"> <p><?php echo $strNameOfMapFile; ?><br>
       <input name="mapfile_name" type="text" id="mapfile_name" value="<?php echo ($this->formvars['mapfile_name'] != '' ? $this->formvars['mapfile_name'] : 'wms_test.map'); ?>" size="50" maxlength="50">
     </p>
@@ -72,6 +80,23 @@
 			<input type="hidden" name="go_plus" value="">
 			<input type="button" onclick="document.GUI.go_plus.value='Abbrechen';document.GUI.submit();" value="<?php echo $this->strCancel; ?>">&nbsp;
       <input type="button" onclick="document.GUI.go_plus.value='Senden';document.GUI.submit();" value="<?php echo $this->strSend; ?>">
+		</td>
+	</tr>
+  <tr>
+    <td align="right">&nbsp;</td>
+    <td align="left">
+			<b><?php echo $strExportList; ?>:</b>
+			<ul><?
+				echo implode('', array_map(
+					function($mapfile) {
+						return '<li>' . $mapfile . '
+							<a title="Map-Datei ' . $mapfile . ' ändern" href="index.php?go=WMS_Export&mapfile_name=' . $mapfile . '"><i class="fa fa-pencil" aria-hidden="true" style="margin-left: 10px; color: firebrick"></i></a>
+							<a title="Map-Datei ' . $mapfile . ' löschen" href="index.php?go=ows_export_loeschen&mapfile_name=' . $mapfile . '"><i class="fa fa-trash" aria-hidden="true" style="margin-left: 10px; color: firebrick"></i></a>
+						</li>';
+					},
+					$this->mapfiles_der_stelle
+				)); ?>
+			</ul>
 		</td>
 	</tr>
 </table>

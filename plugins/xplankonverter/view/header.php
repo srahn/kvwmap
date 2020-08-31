@@ -12,6 +12,10 @@
 <script src="<?php echo BOOTSTRAP_PATH; ?>js/bootstrap.min.js"></script>
 <script src="<?php echo BOOTSTRAP_PATH; ?>js/bootstrap-table-flatJSON.js"></script>
 <script src="<?php echo BOOTSTRAPTABLE_PATH; ?>bootstrap-table.min.js"></script>
-<script src="<?php echo BOOTSTRAPTABLE_PATH; ?>extension/bootstrap-table-export.min.js"></script>
+
+<script src="<?php echo BOOTSTRAPTABLE_PATH; ?>libs/FileSaver/FileSaver.min.js"></script>
+<script src="<?php echo BOOTSTRAPTABLE_PATH; ?>libs/js-xlsx/xlsx.core.min.js"></script>
+<script src="<?php echo BOOTSTRAPTABLE_PATH; ?>tableExport.min.js"></script>
+
 <script src="<?php echo BOOTSTRAPTABLE_PATH; ?>locale/bootstrap-table-de-DE.min.js"></script>
 
