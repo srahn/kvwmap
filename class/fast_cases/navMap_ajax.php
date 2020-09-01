@@ -1587,7 +1587,7 @@ class GUI {
 		else{
 			# Zusammensetzen eines Layerhiddenstrings, in dem die aktuelle Sichtbarkeit aller aufgeklappten Layer gespeichert ist um damit bei Bedarf die Legende neu zu laden
 			for($i = 0; $i < $this->layerset['anzLayer']; $i++) {
-				$layer=&$this->layerset[$i];
+				$layer=&$this->layerset['list'][$i];
 				if($layer['requires'] == ''){
 					if($this->check_layer_visibility($layer))$layerhiddenflag = '0';
 					else $layerhiddenflag = '1';
@@ -2792,7 +2792,6 @@ class pgdatabase {
 	* @return boolean, True if success or set an error message in $this->err_msg and return false when fail to find the credentials or open the connection
 	*/
   function open($connection_id = 0) {
-		echo '<p>open Database with connection_id: ' . $connection_id;
 		if ($connection_id == 0) {
 			# get credentials from object variables
 			$connection_string = $this->format_pg_connection_string($this->get_object_credentials());
