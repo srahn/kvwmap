@@ -2630,7 +2630,7 @@ echo '			</table>
 
 	# Zeichnet die Kartenelemente Hauptkarte, Legende, Maßstab und Referenzkarte
   # drawMap #
-  function drawMap() {
+  function drawMap($img_urls = false) {
 		if (value_of($this->formvars, 'go') != 'navMap_ajax') {
 			set_error_handler("MapserverErrorHandler"); # ist in allg_funktionen.php definiert
 		}
@@ -2639,10 +2639,17 @@ echo '			</table>
 			$this->saveMap('');
     }
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
-		ob_start();
-		$this->image_map->saveImage();
-		$image = ob_get_clean();
-    $this->img['hauptkarte'] = 'data:image/jpg;base64,'.base64_encode($image);
+		if(!$img_urls){
+			ob_start();
+			$this->image_map->saveImage();
+			$image = ob_get_clean();
+			$this->img['hauptkarte'] = 'data:image/jpg;base64,'.base64_encode($image);
+		}
+		else{
+			$filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
+			$this->image_map->saveImage(IMAGEPATH.$filename);
+			$this->img['hauptkarte'] = IMAGEURL.$filename;			
+		}
 
 		if($this->formvars['go'] != 'navMap_ajax'){
 			$this->legende = $this->create_dynamic_legend();
@@ -2664,10 +2671,17 @@ echo '			</table>
 		$this->map_scaledenom = $this->map->scaledenom;
     $this->switchScaleUnitIfNecessary();
     $img_scalebar = $this->map->drawScaleBar();
-		ob_start();
-		$img_scalebar->saveImage();
-		$image = ob_get_clean();
-    $this->img['scalebar'] = 'data:image/jpg;base64,'.base64_encode($image);
+		if(!$img_urls){
+			ob_start();
+			$img_scalebar->saveImage();
+			$image = ob_get_clean();
+			$this->img['scalebar'] = 'data:image/jpg;base64,'.base64_encode($image);
+		}
+		else{
+			$filename = $this->user->id.'_'.rand(0, 1000000).'.png';
+			$img_scalebar->saveImage(IMAGEPATH.$filename);
+			$this->img['scalebar'] = IMAGEURL.$filename;
+		}
 		$this->calculatePixelSize();
 		$this->drawReferenceMap();
   }
@@ -3746,7 +3760,7 @@ echo '			</table>
 
   function showMapImage(){
   	$this->loadMap('DataBase');
-  	$this->drawMap();
+  	$this->drawMap(true);
   	$randomnumber = rand(0, 1000000);
   	$svgfile  = $randomnumber.'.svg';
   	$jpgfile = $randomnumber.'.jpg';
@@ -3758,12 +3772,13 @@ echo '			</table>
   xmlns="http://www.w3.org/2000/svg" version="1.1"
   xmlns:xlink="http://www.w3.org/1999/xlink">
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>';
+		$this->formvars['svg_string'] = preg_replace('/<image id="mapimg" href=".*"/', '<image id="mapimg" href="'.$this->img['hauptkarte'].'" height="100%" width="100%" y="0" x="0"', $this->formvars['svg_string']);
 		$this->formvars['svg_string'] = str_replace(IMAGEURL, IMAGEPATH, $this->formvars['svg_string']).'</svg>';
 		$svg.= str_replace('points=""', 'points="-1000,-1000 -2000,-2000 -3000,-3000 -1000,-1000"', $this->formvars['svg_string']);
 		fputs($fpsvg, $svg);
   	fclose($fpsvg);
   	exec(IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile);
-  	#echo IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile;
+  	#echo IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile;exit;
 
     if(function_exists('imagecreatefromjpeg')){
     	$mainimage = imagecreatefromjpeg(IMAGEPATH.$jpgfile);
