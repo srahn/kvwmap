@@ -32,10 +32,21 @@ function toggleGroup(group, show){
 					<td colspan="3" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17"><? echo $strUpdateCode; ?></span></td>
 				</tr>
 				<tr style="border:1px solid #C3C7C3">
-					<td><? include(SNIPPETS.'git_remote_update.php');include(SNIPPETS.'git_status.php'); ?></td>
+					<td><?
+						include(SNIPPETS . 'git_remote_update.php');
+						include(SNIPPETS . 'git_status.php');?>
+					</td>
 				</tr>
-				<tr >
-					<td colspan="2" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=update_code'" <? if(!$num_commits_behind)echo 'disabled'; ?> value="<? echo $strUpdate; ?>"></td>
+				<tr>
+					<td colspan="2" align="center">
+						<input
+							type="button"
+							onclick="location.href='index.php?go=Administratorfunktionen&func=update_code'"<?
+							if ($num_commits_behind == '' AND !$diverged) { ?>
+								disabled<?
+							} ?>
+							value="<? echo $strUpdate; ?>"
+						></td>
 				</tr>
 			</table> 
 		</td>
