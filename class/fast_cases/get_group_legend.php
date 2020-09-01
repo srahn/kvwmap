@@ -274,12 +274,12 @@ class GUI {
 						$layer->setConnectionType(7);
 					}
           if($layerset[$i]['transparency'] != ''){
-            if(MAPSERVERVERSION > 500){
-              $layer->set('opacity',$layerset[$i]['transparency']);
-            }
-            else{
-              $layer->set('transparency',$layerset[$i]['transparency']);
-            }
+						if (MAPSERVERVERSION > 700) {
+							$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
+						}
+						else{
+							$layer->set('opacity',$layerset['transparency']);
+						}	
           }
         } # end of Schleife layer
         $this->map=$map;
@@ -702,7 +702,12 @@ class GUI {
 
 		if ($layerset['Datentyp']=='3') {
 			if($layerset['transparency'] != ''){
-				$layer->set('opacity',$layerset['transparency']);
+				if (MAPSERVERVERSION > 700) {
+					$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
+				}
+				else{
+					$layer->set('opacity',$layerset['transparency']);
+				}	
 			}
 			if ($layerset['tileindex']!='') {
 				$layer->set('tileindex',SHAPEPATH.$layerset['tileindex']);
@@ -799,7 +804,12 @@ class GUI {
 						$layer->set('opacity',MS_GD_ALPHA);
 				}
 				else {
+					if (MAPSERVERVERSION > 700) {
+						$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
+					}
+					else{
 						$layer->set('opacity',$layerset['transparency']);
+					}
 				}
 			}
 			if ($layerset['symbolscale']!='') {
@@ -2507,7 +2517,7 @@ class db_mapObj {
 				$name_column . ",
 				l.alias,
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem,
-				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection_id, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.styleitem, l.classification, l.filteritem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection_id, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.styleitem, l.classification, 
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				l.duplicate_from_layer_id,

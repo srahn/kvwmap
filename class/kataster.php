@@ -655,6 +655,9 @@ class flurstueck {
 															<td>';
 					$Eigentuemer .= $anschrift['strasse'].' '.$anschrift['hausnummer'].'<br>';
 					$Eigentuemer .= $anschrift['postleitzahlpostzustellung'].' '.$anschrift['ort_post'].' '.$anschrift['ortsteil'];
+					if($anschrift['bestimmungsland'] != ''){
+						$Eigentuemer .= '<br>'.$anschrift['bestimmungsland'];
+					}	
 					$Eigentuemer .= '</td>';
 					# Adressänderungen
 					if($adressAenderungen){

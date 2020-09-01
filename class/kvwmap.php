@@ -1900,7 +1900,12 @@ echo '			</table>
 
 		if ($layerset['Datentyp']=='3') {
 			if($layerset['transparency'] != ''){
-				$layer->set('opacity',$layerset['transparency']);
+				if (MAPSERVERVERSION > 700) {
+					$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
+				}
+				else{
+					$layer->set('opacity',$layerset['transparency']);
+				}				
 			}
 			if ($layerset['tileindex']!='') {
 				$layer->set('tileindex',SHAPEPATH.$layerset['tileindex']);
@@ -2630,7 +2635,7 @@ echo '			</table>
 
 	# Zeichnet die Kartenelemente Hauptkarte, Legende, Maßstab und Referenzkarte
   # drawMap #
-  function drawMap() {
+  function drawMap($img_urls = false) {
 		if (value_of($this->formvars, 'go') != 'navMap_ajax') {
 			set_error_handler("MapserverErrorHandler"); # ist in allg_funktionen.php definiert
 		}
@@ -2639,10 +2644,17 @@ echo '			</table>
 			$this->saveMap('');
     }
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
-    $filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
-    $this->image_map->saveImage(IMAGEPATH.$filename);
-    $this->img['hauptkarte'] = 'data:image/jpg;base64,'.base64_encode(file_get_contents(IMAGEPATH.$filename));
-    $this->debug->write("Name der Hauptkarte: " . $this->img['hauptkarte'],4);
+		if(!$img_urls){
+			ob_start();
+			$this->image_map->saveImage();
+			$image = ob_get_clean();
+			$this->img['hauptkarte'] = 'data:image/jpg;base64,'.base64_encode($image);
+		}
+		else{
+			$filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
+			$this->image_map->saveImage(IMAGEPATH.$filename);
+			$this->img['hauptkarte'] = IMAGEURL.$filename;			
+		}
 
 		if($this->formvars['go'] != 'navMap_ajax'){
 			$this->legende = $this->create_dynamic_legend();
@@ -2651,7 +2663,7 @@ echo '			</table>
 		else{
 			# Zusammensetzen eines Layerhiddenstrings, in dem die aktuelle Sichtbarkeit aller aufgeklappten Layer gespeichert ist um damit bei Bedarf die Legende neu zu laden
 			for($i = 0; $i < $this->layerset['anzLayer']; $i++) {
-				$layer=&$this->layerset[$i];
+				$layer=&$this->layerset['list'][$i];
 				if($layer['requires'] == ''){
 					if($this->check_layer_visibility($layer))$layerhiddenflag = '0';
 					else $layerhiddenflag = '1';
@@ -2660,15 +2672,21 @@ echo '			</table>
 			}
 		}
 
-    # Erstellen des Maßstabes
+		# Erstellen des Maßstabes
 		$this->map_scaledenom = $this->map->scaledenom;
     $this->switchScaleUnitIfNecessary();
     $img_scalebar = $this->map->drawScaleBar();
-    $filename = $this->map_saveWebImage($img_scalebar,'png');
-    $newname = $this->user->id.basename($filename);
-    rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-    $this->img['scalebar'] = 'data:image/jpg;base64,'.base64_encode(file_get_contents(IMAGEPATH.$newname));
-    $this->debug->write("Name des Scalebars: " . $this->img['scalebar'],4);
+		if(!$img_urls){
+			ob_start();
+			$img_scalebar->saveImage();
+			$image = ob_get_clean();
+			$this->img['scalebar'] = 'data:image/jpg;base64,'.base64_encode($image);
+		}
+		else{
+			$filename = $this->user->id.'_'.rand(0, 1000000).'.png';
+			$img_scalebar->saveImage(IMAGEPATH.$filename);
+			$this->img['scalebar'] = IMAGEURL.$filename;
+		}
 		$this->calculatePixelSize();
 		$this->drawReferenceMap();
   }
@@ -2713,11 +2731,10 @@ echo '			</table>
 				$this->reference_map->extent->project($projFROM, $projTO);
 			}
       $img_refmap = $this->reference_map->drawReferenceMap();
-      $filename = $this->map_saveWebImage($img_refmap,'png');
-      $newname = $this->user->id.basename($filename);
-      rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-      $this->img['referenzkarte'] = 'data:image/jpg;base64,'.base64_encode(file_get_contents(IMAGEPATH.$newname));
-      $this->debug->write("Name der Referenzkarte: " . $this->img['referenzkarte'],4);
+      ob_start();
+			$img_refmap->saveImage();
+			$image = ob_get_clean();
+      $this->img['referenzkarte'] = 'data:image/jpg;base64,'.base64_encode($image);
       $this->Lagebezeichung=$this->getLagebezeichnung($this->user->rolle->epsg_code);
     }
 	}
@@ -3748,7 +3765,7 @@ echo '			</table>
 
   function showMapImage(){
   	$this->loadMap('DataBase');
-  	$this->drawMap();
+  	$this->drawMap(true);
   	$randomnumber = rand(0, 1000000);
   	$svgfile  = $randomnumber.'.svg';
   	$jpgfile = $randomnumber.'.jpg';
@@ -3760,12 +3777,13 @@ echo '			</table>
   xmlns="http://www.w3.org/2000/svg" version="1.1"
   xmlns:xlink="http://www.w3.org/1999/xlink">
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>';
+		$this->formvars['svg_string'] = preg_replace('/<image id="mapimg" href=".*"/', '<image id="mapimg" href="'.$this->img['hauptkarte'].'" height="100%" width="100%" y="0" x="0"', $this->formvars['svg_string']);
 		$this->formvars['svg_string'] = str_replace(IMAGEURL, IMAGEPATH, $this->formvars['svg_string']).'</svg>';
 		$svg.= str_replace('points=""', 'points="-1000,-1000 -2000,-2000 -3000,-3000 -1000,-1000"', $this->formvars['svg_string']);
 		fputs($fpsvg, $svg);
   	fclose($fpsvg);
   	exec(IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile);
-  	#echo IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile;
+  	#echo IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile;exit;
 
     if(function_exists('imagecreatefromjpeg')){
     	$mainimage = imagecreatefromjpeg(IMAGEPATH.$jpgfile);
