@@ -1900,7 +1900,12 @@ echo '			</table>
 
 		if ($layerset['Datentyp']=='3') {
 			if($layerset['transparency'] != ''){
-				$layer->set('opacity',$layerset['transparency']);
+				if (MAPSERVERVERSION > 700) {
+					$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
+				}
+				else{
+					$layer->set('opacity',$layerset['transparency']);
+				}				
 			}
 			if ($layerset['tileindex']!='') {
 				$layer->set('tileindex',SHAPEPATH.$layerset['tileindex']);

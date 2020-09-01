@@ -274,12 +274,12 @@ class GUI {
 						$layer->setConnectionType(7);
 					}
           if($layerset[$i]['transparency'] != ''){
-            if(MAPSERVERVERSION > 500){
-              $layer->set('opacity',$layerset[$i]['transparency']);
-            }
-            else{
-              $layer->set('transparency',$layerset[$i]['transparency']);
-            }
+						if (MAPSERVERVERSION > 700) {
+							$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
+						}
+						else{
+							$layer->set('opacity',$layerset['transparency']);
+						}	
           }
         } # end of Schleife layer
         $this->map=$map;
@@ -702,7 +702,12 @@ class GUI {
 
 		if ($layerset['Datentyp']=='3') {
 			if($layerset['transparency'] != ''){
-				$layer->set('opacity',$layerset['transparency']);
+				if (MAPSERVERVERSION > 700) {
+					$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
+				}
+				else{
+					$layer->set('opacity',$layerset['transparency']);
+				}	
 			}
 			if ($layerset['tileindex']!='') {
 				$layer->set('tileindex',SHAPEPATH.$layerset['tileindex']);
@@ -799,7 +804,12 @@ class GUI {
 						$layer->set('opacity',MS_GD_ALPHA);
 				}
 				else {
+					if (MAPSERVERVERSION > 700) {
+						$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
+					}
+					else{
 						$layer->set('opacity',$layerset['transparency']);
+					}
 				}
 			}
 			if ($layerset['symbolscale']!='') {
