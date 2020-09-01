@@ -631,12 +631,13 @@ class Validierung extends PgObject {
 	* Erzeugt ein umschließendes Pufferpolygon vom Geltungsbereich des Planes und fügt diese auch in die flaechenschlussobjekt Tabelle
 	* Erzeugt eine Topologie von all diesen Flächen
 	* Ermittelt die faces, die zu mehr als einem Polygon zugeordnet sind (Überlappungen)
-	* Ermittelt die faces, die zu keinem Polygon zugeordnet sind (Lücken)
+	* @param object $plan, Der Plan der validiert wird
 	* @return array mit success boolean True wenn keine Überlappungen und Lücken gefunden wurden. 
 	* wenn welche gefunden wurden, succes = false und eine err_msg, die angibt welche Objekte sich überlappen oder wo Lücken sind.
 	*/
-	function flaechenschluss_ueberlappungen() {
+	function flaechenschluss_ueberlappungen($plan) {
 		$success = true;
+		$kommentar_zusatz = 'Die Flächenschlussbedingung des Planes ist nicht gegeben wegen Überlappungen der Geometrien von Inhalten.';
 
 		# prüft ob es faces gibt, die mehreren Geometrien zugeordnet sind
 		$sql = "
@@ -679,11 +680,29 @@ class Validierung extends PgObject {
 				)
 			);
 		}
+
+		if ($success) {
+			$plan->remove_kommentar_if_exists($kommentar_zusatz);
+		}
+		else {
+			$plan->add_kommentar_if_not_exists($kommentar_zusatz);
+		}
+
 		return $success;
 	}
 
-	function flaechenschluss_luecken() {
+	/**
+	* Zerteilt alle Multipolygone von bp_, fp_ und so_flaechenschlussobjekten und ließt diese in die Tabelle xplankonverter.flaechenschlussobjekte ein.
+	* Erzeugt ein umschließendes Pufferpolygon vom Geltungsbereich des Planes und fügt diese auch in die flaechenschlussobjekt Tabelle
+	* Erzeugt eine Topologie von all diesen Flächen
+	* Ermittelt die faces, die zu keinem Polygon zugeordnet sind (Lücken)
+	* @param object $plan, Der Plan der validiert wird
+	* @return array mit success boolean True wenn keine Überlappungen und Lücken gefunden wurden. 
+	* wenn welche gefunden wurden, succes = false und eine err_msg, die angibt welche Objekte sich überlappen oder wo Lücken sind.
+	*/
+	function flaechenschluss_luecken($plan) {
 		$success = true;
+		$kommentar_zusatz = 'Die Flächenschlussbedingung des Planes ist nicht gegeben wegen Lücken zwischen den Geometrien von Inhalten.';
 
 		# prüft ob es faces gibt, die keiner Geometrie zugeordnet sind
 		$sql = "
@@ -728,6 +747,13 @@ class Validierung extends PgObject {
 					'msg' => $msg
 				)
 			);
+		}
+
+		if ($success) {
+			$plan->remove_kommentar_if_exists($kommentar_zusatz);
+		}
+		else {
+			$plan->add_kommentar_if_not_exists($kommentar_zusatz);
 		}
 		return $success;
 	}

@@ -1,6 +1,21 @@
 <?php
   include(LAYOUTPATH.'languages/ows_export_'.$this->user->rolle->language.'.php');
 ?>
+<script>
+	function copyToClipBoard(element) {
+		var textarea = element.previousSibling;
+		textarea.select();
+		textarea.setSelectionRange(0, 99999); /*For mobile devices*/
+		document.execCommand("copy");
+		message([{msg: 'Text in Zwischenablage übernommen.', type: 'notice'}]);
+	}
+</script>
+<style>
+	.fa-clipboard {
+		margin-left: 5px;
+  	vertical-align: top;
+	}
+</style>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center">
     <td colspan="2"><h2><?php echo $this->titel; ?></h2></td>
@@ -41,6 +56,48 @@
 			<td align="right">&nbsp;</td>
 			<td align="left" style="line-break: auto"><? echo $strExportedWFSExample; ?><br>
 				<span class="fett"><a href="<?php echo $this->getFeatureRequestExample; ?>" target="_blank"><?php echo $this->getFeatureRequestExample; ?></a></span></td>
+		</tr>
+		<tr>
+			<td align="right">&nbsp;</td>
+			<td align="left"><b>WMS in HTML-Seite einbinden</b></td>
+		</tr>
+		<tr>
+			<td align="right">&nbsp;</td>
+			<td align="left" style="line-break: auto">
+				Im Header einbinden:<br>
+				<textarea id="headText" style="width: 860px" rows="13">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+<script>
+  function init() {
+    var map = L.map('map').setView([54.367, 13.02355], 13);
+    var wmsLayer = L.tileLayer.wms("<?php echo $this->wms_onlineresource; ?>", {
+        layers: 'B_Plaene',
+        format: 'image/png',
+        transparent: true,
+        attribution: "bauleitplaene-mv.de"
+    }).addTo(map);
+  }
+</script>
+				</textarea><i class="fa fa-clipboard" aria-hidden="true" onclick="copyToClipBoard(this);"></i><br>
+				Rufen Sie die Methode init() im Body-Tag auf:<br>
+			  <textarea id="bodyText" style="width: 150px" rows="1"><body onload="init()"></textarea><i class="fa fa-clipboard" aria-hidden="true" onclick="copyToClipBoard(this);"></i><br>
+				Fügen Sie dann ein div mit der id="map" an der Stelle im body ein wo die Karte erscheinen soll.<br>
+			  <textarea id="divText" style="width: 360px" rows="1"><div id="map" style="width: 100%; height: 100%"></div></textarea><i class="fa fa-clipboard" aria-hidden="true" onclick="copyToClipBoard(this);"></i><br>
+				Die Darstellung sieht dann so aus:<br>
+				<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"/>
+				<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+				<div id="map" style="width: 860px; height: 300px"></div>
+				<script>
+			    var map = L.map('map').setView([54.367, 13.02355], 13);
+			    var wmsLayer = L.tileLayer.wms("<?php echo $this->wms_onlineresource; ?>", {
+			        layers: 'B_Plaene',
+			        format: 'image/png',
+			        transparent: true,
+			        attribution: "bauleitplaene-mv.de"
+			    }).addTo(map);
+			</script>
+			</td>
 		</tr><?
 	} ?>
 	<tr>
