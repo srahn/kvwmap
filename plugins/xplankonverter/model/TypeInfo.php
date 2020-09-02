@@ -52,27 +52,56 @@ class TypeInfo {
     $structure_schema = 'xplan_uml';
     $sql = "
         WITH " . ($include_inherited ? "RECURSIVE " : "") . "inheritance AS (
-          SELECT xmi_id::text AS xmi_id FROM $structure_schema.uml_classes WHERE name ILIKE '$typename'".
+          SELECT
+						xmi_id::text AS xmi_id,
+						-1 AS inheritance_order
+					FROM
+						$structure_schema.uml_classes
+					WHERE
+						name ILIKE '$typename'".
         ($include_inherited
         ? "
           UNION
-          SELECT inner_inh.parent_id AS xmi_id
-          FROM $structure_schema.class_generalizations inner_inh
-          INNER JOIN inheritance ON inheritance.xmi_id = inner_inh.child_id"
+          SELECT
+						inner_inh.parent_id AS xmi_id,
+						inner_inh.inheritance_order
+          FROM
+						$structure_schema.class_generalizations inner_inh INNER JOIN
+						inheritance ON inheritance.xmi_id = inner_inh.child_id"
         : "") . "
         )
-        SELECT uc.name AS origin, ua.name AS name, ua.datatype AS stype, ua.multiplicity_range_upper = '*' as is_array, uc2.name AS ctype, dt.name AS dtype, tv.datavalue AS sequence, inheritance.order
-        FROM (SELECT *, row_number() OVER () AS order FROM inheritance) AS inheritance
-        INNER JOIN $structure_schema.uml_classes uc ON uc.xmi_id = inheritance.xmi_id
-        INNER JOIN $structure_schema.uml_attributes ua ON ua.uml_class_id = uc.id
-        INNER JOIN $structure_schema.taggedvalues tv ON ua.id = tv.attribute_id
-        INNER JOIN $structure_schema.tagdefinitions td ON td.xmi_id = tv.type
-        LEFT JOIN $structure_schema.uml_classes uc2 ON ua.classifier = uc2.xmi_id
-        LEFT JOIN $structure_schema.datatypes dt ON ua.classifier = dt.xmi_id
-        WHERE td.name = 'sequenceNumber'
-        ORDER BY inheritance.order DESC, tv.datavalue ASC
+        SELECT
+					uc.name AS origin,
+					ua.name AS name, ua.datatype AS stype,
+					ua.multiplicity_range_upper = '*' as is_array,
+					uc2.name AS ctype, dt.name AS dtype,
+					tv.datavalue AS sequence,
+					inheritance.order
+        FROM
+					(
+						SELECT
+							*,
+				      case
+				        when inheritance_order IS NULL then row_number() OVER () + 100
+				      ELSE
+				        inheritance_order
+				      END AS order
+						FROM
+							inheritance
+					) AS inheritance INNER JOIN
+					$structure_schema.uml_classes uc ON uc.xmi_id = inheritance.xmi_id
+        	INNER JOIN $structure_schema.uml_attributes ua ON ua.uml_class_id = uc.id
+        	INNER JOIN $structure_schema.taggedvalues tv ON ua.id = tv.attribute_id
+        	INNER JOIN $structure_schema.tagdefinitions td ON td.xmi_id = tv.type
+        	LEFT JOIN $structure_schema.uml_classes uc2 ON ua.classifier = uc2.xmi_id
+        	LEFT JOIN $structure_schema.datatypes dt ON ua.classifier = dt.xmi_id
+        WHERE
+					td.name = 'sequenceNumber'
+        ORDER BY
+					inheritance.order DESC,
+					tv.datavalue::int ASC
       ";
-    #echo $sql . "\n";
+    echo '<p>' . $sql . ";";
     $uml_attributes = pg_query($this->_database->dbConn, $sql);
     return pg_fetch_all($uml_attributes);
   }
