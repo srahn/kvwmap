@@ -507,6 +507,9 @@ class GUI {
 		else {
 			# Vektorlayer
 			if ($layerset['Data'] != '') {
+				if(strpos($layerset['Data'], '$scale') !== false){
+					$this->layers_replace_scale[] =& $layer;
+				}				
 				$layer->set('data', $layerset['Data']);
 			}
 
@@ -1579,6 +1582,10 @@ class GUI {
       $this->scaleMap(MINSCALE);
 			$this->saveMap('');
     }
+		# Parameter $scale in Data ersetzen
+		for($i = 0; $i < count($this->layers_replace_scale); $i++){
+			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
+		}		
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
 		ob_start();
 		$this->image_map->saveImage();

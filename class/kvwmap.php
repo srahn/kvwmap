@@ -1922,6 +1922,9 @@ echo '			</table>
 		else {
 			# Vektorlayer
 			if ($layerset['Data'] != '') {
+				if(strpos($layerset['Data'], '$scale') !== false){
+					$this->layers_replace_scale[] =& $layer;
+				}
 				$layer->set('data', $layerset['Data']);
 			}
 
@@ -2643,6 +2646,10 @@ echo '			</table>
       $this->scaleMap(MINSCALE);
 			$this->saveMap('');
     }
+		# Parameter $scale in Data ersetzen
+		for($i = 0; $i < count($this->layers_replace_scale); $i++){
+			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
+		}
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
 		if(!$img_urls){
 			ob_start();
@@ -17649,6 +17656,16 @@ class db_mapObj{
 		global $language;
 		$data = $this->getData($layer_id);
 		if ($data != '') {
+			$data = replace_params(
+				$data,
+				rolle::$layer_params,
+				$this->User_ID,
+				$this->Stelle_ID,
+				rolle::$hist_timestamp,
+				$language,
+				NULL,
+				1000
+			);			
 			$select = $this->getSelectFromData($data);
 			if ($database->schema != '') {
 				$select = str_replace($database->schema.'.', '', $select);
