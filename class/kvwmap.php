@@ -7398,7 +7398,7 @@ echo '			</table>
 		$this->map->setMetaData("ows_fees", $this->formvars['ows_fees']);
 		$this->wms_onlineresource = MAPSERV_CGI_BIN . "?map=" . $this->mapfile . "&";
 		$this->map->setMetaData("wms_onlineresource", $this->wms_onlineresource);
-		$this->map->setMetaData("ows_srs", OWS_SRS . ' EPSG:3857');
+		$this->map->setMetaData("ows_srs", OWS_SRS);
 		$this->map->setMetaData("wms_enable_request", '*');
 		$this->saveMap($this->mapfile);
 		$this->getMapRequestExample = $this->wms_onlineresource
@@ -18955,7 +18955,7 @@ class db_mapObj{
 					`name` = '" . $attributes['name'][$i] . "',
 					`form_element_type` = '" . $formvars['form_element_' . $attributes['name'][$i]] . "',
 					`options` = '" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "',
-					`tooltip` = '" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "',					
+					`tooltip` = '" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "',
 					`alias` = '" . $formvars['alias_'.$attributes['name'][$i]] . "',
 					`group` = '" . $formvars['group_' . $attributes['name'][$i]] . "',
 					`raster_visibility` = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
@@ -18971,8 +18971,8 @@ class db_mapObj{
 					" . $language_columns . "
 					`name` = '" . $attributes['name'][$i] . "',
 					`form_element_type` = '" . $formvars['form_element_' . $attributes['name'][$i]] . "',
-					`options` = '" . $formvars['options_' . $attributes['name'][$i]] . "',
-					`tooltip` = '" . $formvars['tooltip_' . $attributes['name'][$i]] . "',
+					`options` = '" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "',
+					`tooltip` = '" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "',
 					`alias` = '" . $formvars['alias_'.$attributes['name'][$i]] . "',
 					`group` = '" . $formvars['group_' . $attributes['name'][$i]] . "',
 					`raster_visibility` = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
