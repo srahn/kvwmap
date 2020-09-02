@@ -1855,7 +1855,7 @@ echo '			</table>
 			}
 			$layer->set('connection', 
 				replace_params(
-					$layerset[connection],
+					$layerset['connection'],
 					rolle::$layer_params,
 					$this->user->id,
 					$this->Stelle->id,
@@ -3312,7 +3312,7 @@ echo '			</table>
 			$size['margin']['height'] -
 			$size['header']['height'] -
 			$size['scale_bar']['height'] -
-			(LAGEBEZEICHNUNGSART != '' ? $size['lagebezeichnung_bar']['height'] : 0) -
+			((defined('LAGEBEZEICHNUNGSART') AND LAGEBEZEICHNUNGSART != '') ? $size['lagebezeichnung_bar']['height'] : 0) -
 			($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0) -
 			$size['footer']['height'];
 

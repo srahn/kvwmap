@@ -377,7 +377,7 @@ else {
 	$GUI->debug->write('Stellenbezeichnung: ' . $GUI->Stelle->Bezeichnung, 4);
 	$GUI->debug->write('Host_ID: ' . getenv("REMOTE_ADDR"), 4);
 
-	if(BEARBEITER == 'true') {
+	if (defined('BEARBEITER') AND BEARBEITER == 'true') {
 		define('BEARBEITER_NAME', 'Bearbeiter: ' . $GUI->user->Name);
 	}
 
