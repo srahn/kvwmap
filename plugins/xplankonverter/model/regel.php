@@ -24,11 +24,18 @@ class Regel extends PgObject {
 		);
 	}
 
-public static	function find_by_id($gui, $by, $id) {
+	public static	function find_by_id($gui, $by, $id) {
 		$regel = new Regel($gui);
 		$regel->find_by($by, $id);
 		$regel->konvertierung = $regel->get_konvertierung();
 		return $regel;
+	}
+
+	public static	function find_by_konvertierung_and_class_name($gui, $konvertierung_id, $class_name) {
+		#echo '<br>Finde Regel mit konvertierung_id = ' . $konvertierung_id . " AND class_name LIKE '" . $class_name . "'";
+		$regel = new Regel($gui);
+		$regeln = $regel->find_where("konvertierung_id = " . $konvertierung_id . " AND class_name LIKE '" . $class_name . "'", $id);
+		return $regeln;
 	}
 
 	/*
@@ -123,16 +130,6 @@ public static	function find_by_id($gui, $by, $id) {
 					$validierung->konvertierung_id = $konvertierung_id;
 					$validierung->geom_within_bereich($this, $konvertierung);
 				}
-
-				# Prüft die Konformitäten der Klasse
-				$xp_object = new XP_Object($this->konvertierung, $this->get('class_name'));
-				$konformitaetsbedingungen = $xp_object->get_konformitaetsbedingungen();
-				echo '<p>konformitätsbedingungen: ' . print_r($konformitaetsbedingungen->data, true);
-				foreach ($konformitaetsbedingungen AS $bedingung) {
-					foreach ($bedingung->validierungen AS $validierung) {
-						$validierung->validiere_konformitaet();
-					}
-				}
 			}
 			else {
 				$this->debug->show('<br>Regel->validate(): SQL der Regel: ' . $this->get('name') . ' nicht ausfuehrbar', true);
@@ -194,7 +191,10 @@ public static	function find_by_id($gui, $by, $id) {
 
 	function get_shape_table_name() {
 		$this->debug->show('<br>Extrahiere Tabellenname der Shape-Datei aus sql: ' . $this->get($sql), Validierung::$write_debug);
-		$shape_table_name = get_first_word_after($this->get('sql'), 'FROM');
+		$parts1 = explode('FROM', $this->get('sql'));
+		$parts2 = explode('WHERE', $parts1[1]);
+		$shape_table_name = trim($parts2[0]);
+#		$shape_table_name = get_first_word_after($this->get('sql'), 'FROM');
 		$this->debug->show('<br>Shape table name: ' . $shape_table_name, Validierung::$write_debug);
 		return $shape_table_name;
 	}

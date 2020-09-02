@@ -8,9 +8,6 @@
 
 var counter = 0;
 
-Text[0]=["Hilfe:","In Freitexten können folgende Schlüsselwörter verwendet werden, die dann durch andere Texte ersetzt werden:<ul><li>$stelle: die aktuelle Stellenbezeichung</li><li>$user: der Name des Nutzers</li><li>$pagenumber: die aktuelle Seitennummer<br>(Platzierung \"auf jeder Seite\" erforderlich)</li><li>$pagecount: die Gesamtseitenzahl<br>(Platzierung \"auf jeder Seite\" erforderlich)</li><li>${<i>&lt;attributname&gt;</i>}: der Wert des Attributs</li></ul>"]
-Text[1]=["Hilfe:","Hier kann der Name der erzeugten PDF-Datei angegeben werden. Im Dateinamen können auch Attribute in der Form ${<i>&lt;attributname&gt;</i>} und die Schlüsselwörter $user, $stelle und $date verwendet werden, wodurch der Dateiname dynamisch wird. Wird kein Dateiname angegeben, erhält die PDF-Datei einen automatisch generierten Namen."]
-
 function highlight_line(id){
 	var form = document.getElementById('line_form_'+id);
 	form.classList.add('legend_layer_highlight');
@@ -363,7 +360,8 @@ function scrolltop(){
 								</tr>
 								<tr>
 									<td style="border-bottom:1px solid #C3C7C3">
-										<span class="fett">Dateiname:</span> <img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1], Style[0], document.getElementById('Tip2'))" onmouseout="htm()">
+										<span class="fett">Dateiname:</span>&nbsp;
+										<span style="--left: 0px" data-tooltip="Hier kann der Name der erzeugten PDF-Datei angegeben werden.&#xa;Im Dateinamen können auch Attribute in der Form ${&lt;attributname&gt;} und die Schlüsselwörter $user, $stelle und $date verwendet werden, wodurch der Dateiname dynamisch wird. Wird kein Dateiname angegeben, erhält die PDF-Datei einen automatisch generierten Namen."></span>
 									</td>
 									<td style="border-bottom:1px solid #C3C7C3">
 										<input type="text" name="filename" value="<? echo $this->ddl->selectedlayout[0]['filename'] ?>" size="35">
@@ -626,11 +624,8 @@ function scrolltop(){
 							<table width="597" border=0 cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
 								<tr>
 									<td class="fett" style="border-top:2px solid #C3C7C3" colspan=8 align="center">
-										<span id="freitexte">Freitexte</span>
-										<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[0], Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
-										<div style="position:relative">
-											<div id="Tip1" style="visibility:hidden;position:absolute;top:15px;z-index:1000;"></div>
-										</div>
+										<span id="freitexte">Freitexte</span>&nbsp;
+										<span data-tooltip="In Freitexten können folgende Schlüsselwörter verwendet werden, die dann durch andere Texte ersetzt werden:&#xa;- $stelle: die aktuelle Stellenbezeichung&#xa;- $user: der Name des Nutzers&#xa;- $pagenumber: die aktuelle Seitennummer  (Platzierung 'auf jeder Seite' erforderlich)&#xa;- $pagecount: die Gesamtseitenzahl  (Platzierung 'auf jeder Seite' erforderlich)&#xa;- ${&lt;attributname&gt;}: der Wert des Attributs"></span>
 									</td>
 								</tr>
 						<?  echo $this->ddl->output_freetext_form($this->ddl->selectedlayout[0]['texts'], $this->formvars['selected_layer_id'], $this->formvars['aktivesLayout']); ?>

@@ -105,6 +105,7 @@ define('CASE_COMPRESS', false);
 #   getLayerOptions:  - ein Rollenlayer muss verwendet werden																							#
 #											- getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
 #												und writeDatatypeAttributes() reinkopieren																				#
+#											- get_layer_params_form, get_layer_params_layer und get_layer_params reinkopieren		#
 #		get_group_legend:	- compare_legendorder() reinkopieren																								#
 #											- ein Layer muss in der Gruppe an sein																							#
 #		get_select_list:  - read_datatype_attributes() reinkopieren																						#
@@ -709,6 +710,10 @@ function go_switch($go, $exit = false) {
 				$GUI->createOWSException();
 			}break;
 
+			case 'Atom' : {
+				$GUI->createAtomResponse();
+			} break;
+
 			# 2006-03-24 CG
 			case 'StatistikAuswahl' : {
 				$GUI->checkCaseAllowed($go);
@@ -1016,6 +1021,11 @@ function go_switch($go, $exit = false) {
 
 			case 'TIF_Export_TIF-Datei erzeugen' : {
 				$GUI->TIFExport_erzeugen();
+			} break;
+
+			case 'ows_export_loeschen' : {
+				$GUI->checkCaseAllowed('WMS_Export');
+				$GUI->ows_export_loeschen();
 			} break;
 
 			case 'WMS_Export_Senden' : {

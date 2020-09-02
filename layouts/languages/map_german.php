@@ -1,6 +1,7 @@
 <?php
   $strAvailableLayer="Verfügbare&nbsp;Themen";
   $strShowCoordinates="Koordinatenabfrage";
+	$strMeasurement="Messung";
   $strLoadNew="Neu Laden";
   $strMapImageURL="Bild speichern";
   $strChoose="Ausschnitt laden";

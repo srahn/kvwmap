@@ -1178,7 +1178,7 @@
     if ($GUI->formvars['id']=='') {
       # Prüfen der Eingabewerte
       #echo '<br>Prüfen der Eingabewerte.';
-      $ret=$GUI->nachweis->pruefeEingabedaten($GUI->formvars['id'], $GUI->formvars['datum'],$GUI->formvars['VermStelle'],$GUI->formvars['hauptart'],$GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['rissnummer'], $GUI->formvars['fortfuehrung'], $GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],true,$GUI->formvars['Bilddatei_name'],$GUI->formvars['pathlength'],$GUI->formvars['umring'], $GUI->formvars['flurid'], $GUI->formvars['Blattnr']);
+      $ret=$GUI->nachweis->pruefeEingabedaten($GUI->formvars['id'], $GUI->formvars['datum'],$GUI->formvars['VermStelle'],$GUI->formvars['hauptart'],$GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['rissnummer'], $GUI->formvars['fortfuehrung'], $GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],true,$GUI->formvars['Bilddatei_name'],$GUI->formvars['pathlength'],$GUI->formvars['umring'], $GUI->formvars['flurid'], $GUI->formvars['Blattnr'], $dokumentarten[$GUI->formvars['hauptart']][$GUI->formvars['unterart']]['pok_pflicht']);
       if ($ret[0]) {
         #echo '<br>Ergebnis der Prüfung: '.$ret;
         $errmsg=$ret[1];
@@ -1339,8 +1339,8 @@
     $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
     $GUI->drawMap();
 	
-		if($GUI->formvars['Gemarkung'] == '')$GUI->formvars['Gemarkung'] = $GUI->Lagebezeichung['gemkgschl'];
-		if($GUI->formvars['Flur'] == '')$GUI->formvars['Flur'] = $GUI->Lagebezeichung['flur'];
+		if($GUI->formvars['Gemarkung'] == '')$GUI->formvars['Gemarkung'] = $GUI->formvars['gemschl'] ?: $GUI->Lagebezeichung['gemkgschl'];
+		if($GUI->formvars['Flur'] == '')$GUI->formvars['Flur'] = (int)$GUI->formvars['FlurID'] ?: $GUI->Lagebezeichung['flur'];
     
     # Abfragen der Gemarkungen
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();

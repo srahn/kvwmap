@@ -927,6 +927,7 @@ class stelle {
 					`Stelle_ID`,
 					`Layer_ID`,
 					`queryable`,
+					`use_geom`,
 					`drawingorder`,
 					`legendorder`,
 					`minscale`,
@@ -946,7 +947,8 @@ class stelle {
 				SELECT
 					'" . $this->id . "',
 					'" . $layer_ids[$i] . "',
-					queryable, 
+					queryable,
+					use_geom,
 					drawingorder, 
 					legendorder, 
 					minscale, 
@@ -970,6 +972,7 @@ class stelle {
 					$sql .= "
 					ON DUPLICATE KEY UPDATE 
 						queryable = l.queryable, 
+						queryable = l.use_geom, 
 						drawingorder = l.drawingorder, 
 						legendorder = l.legendorder, 
 						minscale = l.minscale, 
@@ -1045,7 +1048,7 @@ class stelle {
 										ul.Layer_ID = l.Layer_ID AND
 										locate(
 											concat('$', p.key),
-											concat(l.Name, l.alias, l.connection, l.Data, l.pfad, l.classitem, l.classification)
+											concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 										) > 0
 									UNION
 									SELECT
@@ -1532,11 +1535,11 @@ class stelle {
 				$real_attributename = substr($fieldstring[$i], 0, $as_pos);
 			}
 			else{   # tabellenname.attributname oder attributname
-				$explosion = explode('.', strtolower($fieldstring[$i]));
+				$explosion = explode('.', $fieldstring[$i]);
 				$attributename = trim($explosion[count($explosion)-1]);
 				$real_attributename = $fieldstring[$i];
 			}
-			if(value_of($privileges, $attributename) != ''){
+			if(value_of($privileges, trim($attributename, '"')) != ''){
 				$type = $attributes['type'][$attributes['indizes'][$attributename]];
 				if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$real_attributename.') as '.$attributename.', ';		# Array oder Datentyp
 				else $newattributesstring .= $fieldstring[$i].', ';																																			# normal
@@ -1714,6 +1717,19 @@ class stelle {
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
 		$rs = $this->database->result->fetch_array();
 		return $rs['wappen_link'];
+	}
+
+	/**
+	* Function reads all mapfiles in directory WMS_MAPFILE_PATH . $this->Stelle->id
+	* @return array An array of mapfiles in the mapfiles directory of the stelle
+	*/
+	function get_mapfiles() {
+		$mapfiles = array();
+		if (is_dir(WMS_MAPFILE_PATH . $this->id)) {
+			$mapfiles = array_diff(scandir(WMS_MAPFILE_PATH . $this->id), array('.', '..'));
+		}
+		#echo '<p>Stelle->get_mapfile returns mapfiles: ' . print_r($mapfiles, true);
+		return $mapfiles;
 	}
 }
 ?>

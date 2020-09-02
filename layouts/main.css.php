@@ -115,6 +115,21 @@ form {
 	display: none;
 }
 
+ul{
+	color: lightsteelblue;
+	margin: 5px;
+	padding: 0 0 0 15px;
+	list-style: square outside none;
+}
+
+.ul_table td:first-of-type{
+	display: inline list-item;
+	color: lightsteelblue;
+	margin: 4px;
+	padding: 0;
+	list-style: square outside none;
+}
+
 h1 {
 	font-family: SourceSansPro3;
 	font-size: 24px; 
@@ -156,6 +171,44 @@ input[type="text"].transparent_input{
 	font-family: SourceSansPro1;
 	border:0px;
 	background-color:	transparent;
+}
+
+span[data-tooltip] {
+  position: relative;
+  cursor: help;
+	--left: -250px;
+	--width: 500px;
+}
+
+span[data-tooltip]::before {
+	content: url(../graphics/icon_i.png);
+}
+
+span[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+	text-align: left;
+  position: absolute;
+	right: 0px;
+	left: var(--left);
+  top: 24px;
+  max-width: var(--width);
+	font-size: 11px;
+	font-family: verdana, arial;
+	box-shadow: 12px 10px 14px #777;
+  border: 1px #236dbf solid;
+	border-top: 15px #236dbf solid;
+  background-color: #DAE4EC;
+  padding: 4px;
+  z-index: 10000;
+	width: max-content;
+	white-space: pre-wrap;
+  display: block;
+}
+
+.select_option_link:hover{
+	background-image: url(../graphics/pfeil_rechts.gif);
+	background-repeat: no-repeat;
+	background-position: 307px;
 }
 
 .search-form {
@@ -409,6 +462,10 @@ a.invisiblelayerlink:hover{
 	margin-top: 10px;
 }
 
+#params_table{
+	width: 1000px
+}
+
 #datendrucklayouteditor{
 	display: flex;
 	margin: 10px;
@@ -446,10 +503,7 @@ a.invisiblelayerlink:hover{
 }
 
 #geo_name_search_result_div ul{
-	color: lightsteelblue;
-	margin: 5px;
 	padding: 10px 0 6px 15px;
-	list-style: square outside none;
 }
 
 #geo_name_search_result_div ul li{
@@ -949,7 +1003,7 @@ a.menuered:hover {
 	position: relative;
 }
 
-#showcoords{
+#showcoords, #showmeasurement{
 	position: absolute; 
 	bottom: 0px;
 	text-align: left;
@@ -1845,14 +1899,6 @@ tbody.gle>tr {
 	padding-left: 9px;
 }
 
-.layerOptions ul, #legendOptions ul{
-	color: lightsteelblue;
-	margin: 5px;
-	padding: 0px;
-	padding-left: 15px;
-	list-style: square outside none;
-}
-
 .layerOptions li, #legendOptions li{
 	margin-bottom: 5px;
 }
@@ -1884,14 +1930,6 @@ tbody.gle>tr {
 .groupOptionsHeader{
 	background-color: #c7d9e6;
 	padding: 2px 2px 2px 8px;
-}
-
-.groupOptions ul{
-	color: lightsteelblue;
-	margin: 5px;
-	padding: 0px;
-	padding-left: 15px;
-	list-style: square outside none;
 }
 
 .groupOptions span{

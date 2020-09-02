@@ -72,7 +72,7 @@
 			else {
 				$title_link = 'href="javascript:void(0);"';
 			}
-			$datapart .= '<td align="right"><a ' . $title_link . ' title="' . htmlentities($attributes['tooltip'][$j]) . '"><img src="' . GRAPHICSPATH . 'emblem-important.png" border="0" onclick="message([{\'type\': \'info\', \'msg\': \'' . htmlentities($attributes['tooltip'][$j]) . '\'}])"></a></td>';
+			$datapart .= '<td align="right"><a ' . $title_link . ' title="' . htmlentities($attributes['tooltip'][$j]) . '"><img src="' . GRAPHICSPATH . 'emblem-important.png" border="0" onclick="message([{\'type\': \'info\', \'msg\': \'' . str_replace(array("\r\n", "\r", "\n"), "<br>", htmlentities($attributes['tooltip'][$j], ENT_QUOTES)) . '\'}])"></a></td>';
 		}
 		if(in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
 			$datapart .= '<td align="right">'.calendar($attributes['type'][$j], $layer_id.'_'.$attributes['name'][$j].'_'.$k, $attributes['privileg'][$j]).'</td>';
@@ -327,7 +327,7 @@
 						if ($enum_value[$e] == $value) {
 							$datapart .= 'checked ';
 						}
-						if($attributes['nullable'][$j] != '0')$datapart .= ' onclick="'.($attribute_privileg == '0'? 'return false;' : '').'if(this.checked2 == undefined){this.checked2 = true;}this.checked = this.checked2; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';
+						$datapart .= ' onclick="'.($attribute_privileg == '0'? 'return false;' : '').'if(this.checked2 == undefined){this.checked2 = true;}this.checked = this.checked2; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';
 						$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="margin-right: 15px">'.$enum_output[$e].'</label>';
 						if(!$attributes['horizontal'][$j])$datapart .= '<br>';
 					}

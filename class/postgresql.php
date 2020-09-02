@@ -148,15 +148,15 @@ class pgdatabase {
 	}
 
 	/**
-	* Get credentials from postgres object variables
+	* Get credentials from postgres object variables, with Fallback to old constants
 	*/
 	function get_object_credentials() {
 		return array(
-			'host'     => $this->host,
-			'port'     => $this->port,
-			'dbname'   => $this->dbName,
-			'user'     => $this->user,
-			'password' => $this->passwd
+			'host'     => $this->host ?: POSTGRES_HOST,
+			'port'     => $this->port ?: 5432,
+			'dbname'   => $this->dbName ?: POSTGRES_DBNAME,
+			'user'     => $this->user ?: POSTGRES_USER,
+			'password' => $this->passwd ?: POSTGRES_PASSWORD
 		);
 	}
 
@@ -925,7 +925,7 @@ FROM
 			#-- search_path ist zwar gesetzt, aber nur auf custom_shapes, daher ist das Schema der Tabelle erforderlich
 			$sql = "
 				SELECT coalesce(
-					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . $tablename . " limit 1)
+					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . pg_quote($tablename) . " limit 1)
 					,  
 					(select type from geometry_columns WHERE 
 					 f_table_schema IN ('" . $schema . "') and 
