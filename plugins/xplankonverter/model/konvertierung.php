@@ -523,10 +523,10 @@ class Konvertierung extends PgObject {
 						$this->createTopology();
 						$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'flaechenschluss_ueberlappungen');
 						$validierung->konvertierung_id = $this->get('id');
-						$validierung->flaechenschluss_ueberlappungen();
+						$validierung->flaechenschluss_ueberlappungen($this->plan);
 						$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'flaechenschluss_luecken');
 						$validierung->konvertierung_id = $this->get('id');
-						$validierung->flaechenschluss_luecken();
+						$validierung->flaechenschluss_luecken($this->plan);
 					}
 				}
 			}

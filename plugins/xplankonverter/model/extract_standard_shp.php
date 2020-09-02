@@ -57,6 +57,10 @@ class Standard_shp_extractor {
 				case "ST_MultiPolygon":
 					$regel_name .= $uml_class . "_standard_shp_" . "Flaechen";
 					break;
+				default:
+					//unknown geometry, e.g. when shape is empty
+					$regel_name .= $uml_class . "_standard_shp";
+					break;
 			}
 
 			// Delete existing rule with same name, konvertierung_id and bereich if already exists
@@ -84,19 +88,24 @@ class Standard_shp_extractor {
 			# beschreibung
 			$sql .= "'regel created automatically from standard shape', ";
 			# geometrietyp
-			// fallthrough, use as is so these values wont be filled with emtpy shapes (no default case)
+			// fallthrough
 			switch($geom_type) {
 				case "ST_Point":
 				case "ST_MultiPoint":
-					$sql .= " 'Punkte'::xplankonverter.enum_geometrie_typ, ";
+					$sql .= "'Punkte'::xplankonverter.enum_geometrie_typ, ";
 					break;
 				case "ST_LineString":
 				case "ST_MultiLineString":
-					$sql .= " 'Linien'::xplankonverter.enum_geometrie_typ, ";
+					$sql .= "'Linien'::xplankonverter.enum_geometrie_typ, ";
 					break;
 				case "ST_Polygon":
 				case "ST_MultiPolygon":
-					$sql .= " 'Flächen'::xplankonverter.enum_geometrie_typ, ";
+					$sql .= "'Flächen'::xplankonverter.enum_geometrie_typ, ";
+					break;
+				default:
+					//unknown geometry, e.g. when shape is empty to create base ruleset
+					$sql .= "'Flächen'::xplankonverter.enum_geometrie_typ, ";
+					$regel_name .= $uml_class . "_standard_shp";
 					break;
 			}
 			# name

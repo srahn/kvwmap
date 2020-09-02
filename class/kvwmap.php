@@ -7398,7 +7398,7 @@ echo '			</table>
 		$this->map->setMetaData("ows_fees", $this->formvars['ows_fees']);
 		$this->wms_onlineresource = MAPSERV_CGI_BIN . "?map=" . $this->mapfile . "&";
 		$this->map->setMetaData("wms_onlineresource", $this->wms_onlineresource);
-		$this->map->setMetaData("ows_srs", OWS_SRS);
+		$this->map->setMetaData("ows_srs", OWS_SRS . ' EPSG:3857');
 		$this->map->setMetaData("wms_enable_request", '*');
 		$this->saveMap($this->mapfile);
 		$this->getMapRequestExample = $this->wms_onlineresource

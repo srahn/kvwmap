@@ -319,6 +319,20 @@ class PgObject {
 		$query = pg_query($this->database->dbConn, $sql);
 	}
 
+	function update_attr($attributes) {
+		$quote = ($this->identifier_type == 'text') ? "'" : "";
+		$sql = "
+			UPDATE
+				\"" . $this->schema . "\".\"" . $this->tableName . "\"
+			SET
+				" . implode(', ', $attributes) . "
+			WHERE
+				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
+		";
+		$this->debug->show('update sql: ' . $sql, false);
+		$query = pg_query($this->database->dbConn, $sql);
+	}
+
 	function delete() {
 		$quote = ($this->identifier_type == 'text') ? "'" : "";
 		$sql = "
