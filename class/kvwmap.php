@@ -13702,7 +13702,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     # aus dem Stammordner layouts (vom System angebotene)
     $this->layoutfiles = searchdir('layouts/', false);
 		for ($i = 0; $i < count($this->layoutfiles); $i++) {
-			if (strpos($this->layoutfiles[$i], '.php') > 0 AND strpos($this->layoutfiles[$i], 'main.css.php') === false) {
+			if (strpos($this->layoutfiles[$i], '.php') > 0 ) {
 				$this->guifiles[] = $this->layoutfiles[$i];
 			}
 		}
