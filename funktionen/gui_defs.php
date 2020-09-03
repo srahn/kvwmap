@@ -6,6 +6,7 @@
 	var deactivatelayer = '<? echo $this->deactivatelayer; ?>';
 	var deactivatequery = '<? echo $this->deactivatequery; ?>';
 	var activatequery = '<? echo $this->activatequery; ?>';
+	var activatelayer = '<? echo $this->activatelayer; ?>';
  
 <?
  	if($this->user->rolle->legendtype == 1){ # alphabetisch sortierte Legende

@@ -1527,14 +1527,16 @@ class GUI {
 										$padding = 0;
 										$newname = rand(0, 1000000).'.jpg';
 										$this->colorramp(IMAGEPATH.$newname, $width, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
+										$imagename = TEMPPATH_REL.$newname;
 									}
 									else{																												# vom Mapserver generiertes Klassenbild
 										$image = $class->createLegendIcon($width, $height);
-										$filename = $this->map_saveWebImage($image,'jpeg');
-										$newname = $this->user->id.basename($filename);
-										rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+										ob_start();
+										$image->saveImage();
+										$image = ob_get_clean();
+										$imagename = 'data:image/jpg;base64,'.base64_encode($image);
 									}
-									$imagename = $original_class_image = TEMPPATH_REL.$newname;
+									$original_class_image = $imagename;
 								}
 								####################################
 								$classid = $layer['Class'][$k]['Class_ID'];

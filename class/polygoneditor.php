@@ -44,7 +44,7 @@ class polygoneditor {
   	# Eine Variante mit der nur einmal transformiert wird
   	$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
   	$sql.=" FROM (SELECT box2D(st_transform(".$columnname.", ".$this->clientepsg.")) as bbox";
-  	$sql.=" FROM " . ($schemaname != '' ? $schemaname . '.' : '') .$tablename." WHERE ".$this->oid_attribute." = '".$oid."') AS foo";
+  	$sql.=" FROM " . ($schemaname != '' ? $schemaname . '.' : '') .pg_quote($tablename)." WHERE ".$this->oid_attribute." = '".$oid."') AS foo";
     $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
 		$rect = ms_newRectObj();
@@ -125,7 +125,7 @@ class polygoneditor {
 	}
 
 	function getpolygon($oid, $tablename, $columnname, $extent, $schemaname = ''){
-		$sql = "SELECT st_assvg(st_transform(st_union(".$columnname."),".$this->clientepsg."), 0, 15) AS svggeom, st_astext(st_transform(st_union(".$columnname."),".$this->clientepsg.")) AS wktgeom, st_numGeometries(st_union(".$columnname.")) as numgeometries FROM " . ($schemaname != '' ? $schemaname . '.' : '') . $tablename;
+		$sql = "SELECT st_assvg(st_transform(st_union(".$columnname."),".$this->clientepsg."), 0, 15) AS svggeom, st_astext(st_transform(st_union(".$columnname."),".$this->clientepsg.")) AS wktgeom, st_numGeometries(st_union(".$columnname.")) as numgeometries FROM " . ($schemaname != '' ? $schemaname . '.' : '') . pg_quote($tablename);
 		if($oid != NULL)$sql .= " WHERE ".$this->oid_attribute." = ".quote($oid);
 		#echo '<br>sql: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
