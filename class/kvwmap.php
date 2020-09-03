@@ -13981,6 +13981,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
   }
 
 	function sachdaten_speichern() {
+		$document_attributes = array();
 		foreach($this->formvars as $key => $value) {
 			if (is_string($value)) $this->formvars[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
 		}

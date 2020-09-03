@@ -1,7 +1,6 @@
 <?
-
 	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
-  
+ 
 	$checkbox_names = '';
 	$columnname = '';
 	$geom_tablename = '';
@@ -10,6 +9,12 @@
 	$privileg = '';
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
+
+	if (!$invisible_attributes) {
+		$invisible_attributes = array();
+		$invisible_attributes[$layer['Layer_ID']] = array();
+	};
+
 	$size = 16;
 	$select_width = 'width: 100%;'; 
 	if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
