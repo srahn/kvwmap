@@ -212,6 +212,8 @@ class GUI {
 				$layerdb=$this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 				$data = $layer[0]['Data'];
 				if ($data != ''){
+					# ersetzen von $scale
+					$data = str_replace('$scale', 1000, $data);
 					# suchen nach dem ersten Vorkommen von using
 					$pos = strpos(strtolower($data),'using ');
 					# Abschneiden der uing Wörter im Datastatement wenn unique verwendet wurde
@@ -440,7 +442,7 @@ class GUI {
 			}
 			$layer->set('connection', 
 				replace_params(
-					$layerset[connection],
+					$layerset['connection'],
 					rolle::$layer_params,
 					$this->user->id,
 					$this->Stelle->id,

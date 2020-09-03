@@ -838,7 +838,7 @@ echo '			</table>
 				<tr>
 					<td>
 						<div id="layergroupdiv_'.$group_id.'" style="width:100%;'.(($groupstatus != 1 AND value_of($this->group_has_active_layers, $group_id) != '') ? 'display: none' : '').'"><table cellspacing="0" cellpadding="0">';
-		$layercount = count($this->layerset['layers_of_group'][$group_id]);
+		$layercount = @count($this->layerset['layers_of_group'][$group_id]);
 		if($groupstatus == 1 OR value_of($this->group_has_active_layers, $group_id) != ''){		# Gruppe aufgeklappt oder hat aktive Layer
 			if(value_of($this->groupset[$group_id], 'untergruppen') != ''){
 				for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
@@ -16291,6 +16291,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$map->setextent($rect->minx - $randx, $rect->miny - $randy, $rect->maxx + $randx, $rect->maxy + $randy);
 				# Haupt-Layer erzeugen
 				$layer = ms_newLayerObj($map);
+				# Parameter $scale in Data ersetzen
+				$layerset['Data'] = str_replace('$scale', $this->map_scaledenom, $layerset['Data']);
 				$layer->set('data', $layerset['Data']);
 				if ($layerset['Filter'] != '') {
 					$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);

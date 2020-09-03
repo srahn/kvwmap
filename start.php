@@ -562,9 +562,6 @@ function get_permission_in_stelle($GUI) {
 
 		if (is_password_expired($GUI->user, $GUI->Stelle)) {
 			$GUI->debug->write('Passwort ist abgelaufen.', 4, $GUI->echo);
-			if (new_password)
-
-
 			$allowed = false;
 			$reason = 'password expired';
 			$errmsg = 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist in der Stelle ' . $GUI->stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gütligkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten. Geben Sie ein neues Passwort ein und notieren Sie es sich.';
