@@ -5,11 +5,9 @@ BEGIN;
   CREATE TABLE xplankonverter.flaechenschlussobjekte (
       gml_id uuid NOT NULL,
       konvertierung_id integer NOT NULL,
-      topo topogeometry,
       teilpolygon_nr integer,
       teilpolygon geometry(Polygon,25833),
-      CONSTRAINT flaechenschlussobjekte_pkey PRIMARY KEY (gml_id, konvertierung_id),
-      CONSTRAINT check_topogeom_topo CHECK ((topo).topology_id = 1 AND (topo).layer_id = 1 AND (topo).type = 3)
+      CONSTRAINT flaechenschlussobjekte_pkey PRIMARY KEY (gml_id, konvertierung_id)
   )
   WITH ( OIDS = TRUE );
 
