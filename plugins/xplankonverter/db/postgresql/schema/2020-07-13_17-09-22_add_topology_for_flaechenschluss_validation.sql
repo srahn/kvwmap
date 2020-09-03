@@ -1,5 +1,7 @@
 BEGIN;
 
+  CREATE EXTENSION postgis_topology;
+
   CREATE TABLE xplankonverter.flaechenschlussobjekte (
       gml_id uuid NOT NULL,
       konvertierung_id integer NOT NULL,
@@ -10,8 +12,6 @@ BEGIN;
       CONSTRAINT check_topogeom_topo CHECK ((topo).topology_id = 1 AND (topo).layer_id = 1 AND (topo).type = 3)
   )
   WITH ( OIDS = TRUE );
-
-  CREATE EXTENSION postgis_topology;
 
   SELECT CreateTopology('flaechenschluss_topology', 25833, 0.002);
 
