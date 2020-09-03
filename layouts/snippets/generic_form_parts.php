@@ -1049,7 +1049,7 @@
 			if($datatype_id != '')$datapart .= ' data-datatype_id="'.$datatype_id.'" ';
 			$datapart .= 'id="'.$layer_id.'_'.$name.'_'.$k.'" name="'.$fieldname.'">';
 			if($strPleaseSelect)$datapart .= '<option value="">'.$strPleaseSelect.'</option>';
-			for($e = 0; $e < count($enum_value); $e++){
+			for($e = 0; $e < @count($enum_value); $e++){
 				$datapart .= '<option ';
 				if($enum_value[$e] == $value){
 					$datapart .= 'selected ';
