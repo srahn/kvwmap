@@ -24,11 +24,18 @@ class Regel extends PgObject {
 		);
 	}
 
-public static	function find_by_id($gui, $by, $id) {
+	public static	function find_by_id($gui, $by, $id) {
 		$regel = new Regel($gui);
 		$regel->find_by($by, $id);
 		$regel->konvertierung = $regel->get_konvertierung();
 		return $regel;
+	}
+
+	public static	function find_by_konvertierung_and_class_name($gui, $konvertierung_id, $class_name) {
+		#echo '<br>Finde Regel mit konvertierung_id = ' . $konvertierung_id . " AND class_name LIKE '" . $class_name . "'";
+		$regel = new Regel($gui);
+		$regeln = $regel->find_where("konvertierung_id = " . $konvertierung_id . " AND class_name LIKE '" . $class_name . "'", $id);
+		return $regeln;
 	}
 
 	/*
@@ -40,8 +47,8 @@ public static	function find_by_id($gui, $by, $id) {
 		$full_table_name_arr = explode('.', $full_table_name);
 		$table_name = $full_table_name_arr[1];
 		
-		$sql = 
-		"SELECT
+		$sql = "
+			SELECT
 			EXISTS(
 				SELECT
 					column_name
@@ -105,30 +112,29 @@ public static	function find_by_id($gui, $by, $id) {
 
 			$this->debug->show('<br>bereich_gml_id: ' . $this->get('bereich_gml_id'), Regel::$write_debug);
 			if ($sql_ausfuehrbar) {
+				$this->debug->show('<br>SQL der Regel: ' . $this->get('name') . ' ausfuehrbar', Regel::$write_debug);
 
-					$this->debug->show('<br>SQL der Regel: ' . $this->get('name') . ' ausfuehrbar', Regel::$write_debug);
-					# Prüft ob die erzeugten Geometrien valide sind.
-					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geometrie_isvalid');
+				# Prüft ob die erzeugten Geometrien valide sind.
+				$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geometrie_isvalid');
+				$validierung->konvertierung_id = $konvertierung_id;
+				$all_geom_isvalid = $validierung->geometrie_isvalid($this, $konvertierung);
+
+				if ($all_geom_isvalid) {
+					# Prüft ob die erzeugten Geometrien im räumlichen Geltungsbereich des Planes liegen.
+					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geom_within_plan');
 					$validierung->konvertierung_id = $konvertierung_id;
-					$all_geom_isvalid = $validierung->geometrie_isvalid($this, $konvertierung);
-					
-					if ($all_geom_isvalid) {
-						# Prüft ob die erzeugten Geometrien im räumlichen Geltungsbereich des Planes liegen.
-						$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geom_within_plan');
-						$validierung->konvertierung_id = $konvertierung_id;
-						$validierung->geom_within_plan($this, $konvertierung);
+					$validierung->geom_within_plan($this, $konvertierung);
 
-						# Prüft ob die erzeugten Geometrien im Geltungsbereich der Bereiche liegen.
-						$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geom_within_bereich');
-						$validierung->konvertierung_id = $konvertierung_id;
-						$validierung->geom_within_bereich($this, $konvertierung);
+					# Prüft ob die erzeugten Geometrien im Geltungsbereich der Bereiche liegen.
+					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geom_within_bereich');
+					$validierung->konvertierung_id = $konvertierung_id;
+					$validierung->geom_within_bereich($this, $konvertierung);
 				}
 			}
 			else {
 				$this->debug->show('<br>Regel->validate(): SQL der Regel: ' . $this->get('name') . ' nicht ausfuehrbar', true);
 				$success = false;
 			}
-
 		}
 		else {
 			$success = false;
@@ -185,7 +191,10 @@ public static	function find_by_id($gui, $by, $id) {
 
 	function get_shape_table_name() {
 		$this->debug->show('<br>Extrahiere Tabellenname der Shape-Datei aus sql: ' . $this->get($sql), Validierung::$write_debug);
-		$shape_table_name = get_first_word_after($this->get('sql'), 'FROM');
+		$parts1 = explode('FROM', $this->get('sql'));
+		$parts2 = explode('WHERE', $parts1[1]);
+		$shape_table_name = trim($parts2[0]);
+#		$shape_table_name = get_first_word_after($this->get('sql'), 'FROM');
 		$this->debug->show('<br>Shape table name: ' . $shape_table_name, Validierung::$write_debug);
 		return $shape_table_name;
 	}
@@ -506,7 +515,7 @@ public static	function find_by_id($gui, $by, $id) {
 
 				$formvars_before = $this->gui->formvars;
 
-				$stellen = $this->gui->Stellenzuweisung(
+				$stellen = $this->gui->addLayersToStellen(
 					array($gml_layer->get($gml_layer->identifier)),
 					array($this->gui->Stelle->id),
 					'(konvertierung_id = ' . $this->konvertierung->get('id') .')'

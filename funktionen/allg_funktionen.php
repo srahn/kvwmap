@@ -6,6 +6,14 @@
 
 $errors = array();
 
+function quote($var){
+	return is_numeric($var) ? $var : "'".$var."'";
+}
+
+function pg_quote($column){
+	return ctype_lower($column) ? $column : '"'.$column.'"';
+}
+
 function get_din_formats() {
 	$din_formats = array(
 		'A5hoch' => array('value' => 'A5hoch', 'output' => 'A5 hoch', 'size' => '(420 x 595)'),
@@ -1089,24 +1097,22 @@ function searchdir($path, $recursive){
     return ($dirlist);
 }
 
-
-function get_select_parts($select){
-	$column = explode(',', $select);		# an den Kommas splitten
-  for($i = 0; $i < count($column); $i++){
-  	$klammerauf = substr_count($column[$i], '(');
-  	$klammerzu = substr_count($column[$i], ')');
+function get_select_parts($select) {
+	$column = explode(',', $select); # an den Kommas splitten
+	for($i = 0; $i < count($column); $i++) {
+		$klammerauf = substr_count($column[$i], '(');
+		$klammerzu = substr_count($column[$i], ')');
 		$hochkommas = substr_count($column[$i], "'");
 		# Wenn ein Select-Teil eine ungerade Anzahl von Hochkommas oder mehr Klammern auf als zu hat,
 		# wurde hier entweder ein Komma im einem String verwendet (z.B. x||','||y) oder eine Funktion (z.B. round(x, 2)) bzw. eine Unterabfrage mit Kommas verwendet
-  	if($hochkommas % 2 != 0 OR $klammerauf > $klammerzu){
-  		$column[$i] = $column[$i].','.$column[$i+1];
-  		array_splice($column, $i+1, 1);
-			$i--;							# und nochmal prüfen, falls mehrere Kommas drin sind
-  	}
-  }
-  return $column;
+		if ($hochkommas % 2 != 0 OR $klammerauf > $klammerzu) {
+			$column[$i] = $column[$i] . ',' . $column[$i + 1];
+			array_splice($column, $i + 1, 1);
+			$i--; # und nochmal prüfen, falls mehrere Kommas drin sind
+		}
+	}
+	return $column;
 }
-
 
 function microtime_float(){
    list($usec, $sec) = explode(" ", microtime());
@@ -1648,7 +1654,7 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 * als key übergeben werden durch die values von $params und zusätzlich die Werte der
 * Variablen aus den Parametern 3 bis n wenn welche übergeben wurden
 */
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL) {
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
@@ -1659,6 +1665,7 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
 	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
+	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
 	return $str;
 }
 
@@ -1794,10 +1801,14 @@ function output_select($form_field_name, $data, $selected_value = null, $onchang
 * Wenn der optionale Parameter $last true ist, wird das letzte Vorkommen des Wortes verwendet.
 */
 function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
-	if($last)$word_pos = strripos($str, $word);
-	else $word_pos = stripos($str, $word);
-	if($word_pos !== false){
-		$str_from_word_pos = substr($str, $word_pos+strlen($word));
+	if ($last) {
+		$word_pos = strripos($str, $word);
+	}
+	else {
+		$word_pos = stripos($str, $word);
+	}
+	if ($word_pos !== false) {
+		$str_from_word_pos = substr($str, $word_pos + strlen($word));
 		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
 		return $parts[0];
 	}
@@ -2015,4 +2026,28 @@ function str_replace_last($search , $replace, $str) {
   return $str;
 }
 
+function attributes_from_select($sql) {
+	include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
+	$parser = new PHPSQLParser($sql, true);
+	$attributes = array();
+	foreach ($parser->parsed['SELECT'] AS $key => $value) {
+		$name = $alias = '';
+		if (
+			is_array($value['alias']) AND
+			array_key_exists('no_quotes', $value['alias']) AND
+			$value['alias']['no_quotes'] != ''
+		) {
+			$name = $value['alias']['no_quotes'];
+			$alias = $value['alias']['no_quotes'];
+		}
+		else {
+			$name = $alias = $value['base_expr'];
+		}
+		$attributes[$name] = array(
+			'base_expr' => $value['base_expr'],
+			'alias' => $alias
+		);
+	}
+	return $attributes;
+}
 ?>

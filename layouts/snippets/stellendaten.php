@@ -23,7 +23,7 @@
 						<td><?php echo $this->stellendaten['Bezeichnung'][$i]; ?></td>
 						<td><a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>" title="<?php echo $this->strChange; ?>"><i class="fa fa-pencil"></a></td>
 						<td><a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>" title="Layer"><i class="fa fa-list"></i></a></td>
-						<td><a href="javascript:Bestaetigung('index.php?go=Stelle_Löschen&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie die Stelle \'<? echo $this->stellendaten['Bezeichnung'][$i]; ?>\' wirklich löschen?')" title="<?php echo $this->strDelete; ?>"><i class="fa fa-trash"></i></a></td>
+						<td><a href="javascript:Bestaetigung('index.php?go=Stelle_Löschen&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie die Stelle \'<? echo $this->stellendaten['Bezeichnung'][$i]; ?>\' wirklich löschen?')" title="<?php echo $this->strDelete; ?>"><i class="fa fa-trash-o"></i></a></td>
 					</tr>
 					<?php
 					}

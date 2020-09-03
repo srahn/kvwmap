@@ -655,6 +655,9 @@ class flurstueck {
 															<td>';
 					$Eigentuemer .= $anschrift['strasse'].' '.$anschrift['hausnummer'].'<br>';
 					$Eigentuemer .= $anschrift['postleitzahlpostzustellung'].' '.$anschrift['ort_post'].' '.$anschrift['ortsteil'];
+					if($anschrift['bestimmungsland'] != ''){
+						$Eigentuemer .= '<br>'.$anschrift['bestimmungsland'];
+					}	
 					$Eigentuemer .= '</td>';
 					# Adressänderungen
 					if($adressAenderungen){
@@ -1266,7 +1269,7 @@ class flurstueck {
   	for($i = 0; $i < count($gbarray); $i++){
   		$gb = explode('-', $gbarray[$i]);
   		$Flurst = $this->database->getFlurstueckeByGrundbuchblatt($gb[0], $gb[1]);
-  		if($Flurst != NULL)$Flurstuecke = array_merge($Flurstuecke, $Flurst);
+  		if($Flurst != NULL)$Flurstuecke = array_unique(array_merge($Flurstuecke, $Flurst));
   	}
     return $Flurstuecke;
   }

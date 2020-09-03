@@ -450,6 +450,7 @@ else { ?>
 	data-show-columns="true"
 	data-query-params="go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&anzahl=10000&mime_type=formatter&format=json"
 	data-pagination="true"
+	data-page-list=[10,25,50,100,250,500,1000,all]
 	data-page-size="25"
 	data-show-export="false"
 	data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']

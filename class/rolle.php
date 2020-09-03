@@ -91,7 +91,7 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, classification, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
+				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
 				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
@@ -350,7 +350,7 @@ class rolle {
 				stelle_id = " . $this->stelle_id . "
 		";
 		#echo 'Read rolle settings mit sql: ' . $sql;
-    $this->debug->write("<p>file:rolle.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
+    $this->debug->write("<p>file:rolle.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>",4);
     $this->database->execSQL($sql);
     if (!$this->database->success) {
       $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
@@ -1585,42 +1585,43 @@ class rolle {
 		while ($rs = $this->database->result->fetch_row()) {
 			$gruppen_ids[] = $rs[0];
 		}
-		
-		# Test ob Layer in den Gruppen vorhanden sind
-		$sql ='SELECT DISTINCT Gruppe FROM layer, u_rolle2used_layer AS r2ul WHERE Gruppe IN ('.implode(',', $gruppen_ids).') AND ';
-		$sql.='r2ul.layer_id = layer.Layer_ID AND ';
-		$sql.='r2ul.user_id = '.$user_id.' AND ';
-		$sql.='r2ul.stelle_id = '.$stelle_id;
-		#echo '<br>'.$sql;
-		$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		while ($rs = $this->database->result->fetch_assoc()) {
-			$rs_layer[$rs['Gruppe']] = $rs['Gruppe'];		# ein Array mit den GruppenIDs, die noch Layer haben
-		}
-		
-		# Test ob Untergruppen in den Gruppen vorhanden sind
-		$sql ='SELECT u_groups.id FROM u_groups, u_groups2rolle as r2g WHERE u_groups.id NOT IN ('.implode(',', $gruppen_ids).') AND u_groups.obergruppe IN ('.implode(',', $gruppen_ids).') AND ';
-		$sql.='r2g.id = u_groups.id AND ';
-		$sql.='r2g.user_id = '.$user_id.' AND ';
-		$sql.='r2g.stelle_id = '.$stelle_id;
-		#echo '<br>'.$sql;
-		$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		$rs_subgroups = $this->database->result->fetch_assoc();
-		
-		if($rs_layer[$gruppen_ids[0]] == ''){					# wenn die erste Gruppe, also die Gruppe des Layers keine Layer hat, diese löschen
-			$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` = '.$gruppen_ids[0].';';
-			if($rs_layer == '' AND !$rs_subgroups[0]){				# wenn darüberhinaus keine Layer oder Untergruppen in den Gruppen darüber vorhanden sind, diese auch löschen
-				$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` IN ('.implode(',', $gruppen_ids).');';
+		if($gruppen_ids != NULL){
+			# Test ob Layer in den Gruppen vorhanden sind
+			$sql ='SELECT DISTINCT Gruppe FROM layer, u_rolle2used_layer AS r2ul WHERE Gruppe IN ('.implode(',', $gruppen_ids).') AND ';
+			$sql.='r2ul.layer_id = layer.Layer_ID AND ';
+			$sql.='r2ul.user_id = '.$user_id.' AND ';
+			$sql.='r2ul.stelle_id = '.$stelle_id;
+			#echo '<br>'.$sql;
+			$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			while ($rs = $this->database->result->fetch_assoc()) {
+				$rs_layer[$rs['Gruppe']] = $rs['Gruppe'];		# ein Array mit den GruppenIDs, die noch Layer haben
+			}
+			
+			# Test ob Untergruppen in den Gruppen vorhanden sind
+			$sql ='SELECT u_groups.id FROM u_groups, u_groups2rolle as r2g WHERE u_groups.id NOT IN ('.implode(',', $gruppen_ids).') AND u_groups.obergruppe IN ('.implode(',', $gruppen_ids).') AND ';
+			$sql.='r2g.id = u_groups.id AND ';
+			$sql.='r2g.user_id = '.$user_id.' AND ';
+			$sql.='r2g.stelle_id = '.$stelle_id;
+			#echo '<br>'.$sql;
+			$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$rs_subgroups = $this->database->result->fetch_assoc();
+			
+			if($rs_layer[$gruppen_ids[0]] == ''){					# wenn die erste Gruppe, also die Gruppe des Layers keine Layer hat, diese löschen
+				$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` = '.$gruppen_ids[0].';';
+				if($rs_layer == '' AND !$rs_subgroups[0]){				# wenn darüberhinaus keine Layer oder Untergruppen in den Gruppen darüber vorhanden sind, diese auch löschen
+					$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` IN ('.implode(',', $gruppen_ids).');';
+					$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
+					$this->database->execSQL($sql);
+					if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+				}
 				$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
 				$this->database->execSQL($sql);
 				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 			}
-			$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
-			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
 		return 1;
 	}

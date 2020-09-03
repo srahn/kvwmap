@@ -150,7 +150,7 @@ class Gml_extractor {
 	*/
 	function ogr2ogr_gmlas() {
 		# For Logging add: . ' >> /var/www/logs/ogr_' . $gml_id . '.log 2>> /var/www/logs/ogr_' . $gml_id . '.err'
-		$cmd = $this->docker_gdal_cmd . ' ' . OGR_BINPATH_GDAL . 'ogr2ogr -f "PostgreSQL" PG:"host=' . $this->pgdatabase->host . ' dbname=' . $this->pgdatabase->dbName . ' user=' . $this->pgdatabase->user . ' password=' . $this->pgdatabase->passwd . ' SCHEMAS=' . $this->gmlas_schema .'" GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location;
+		$cmd = $this->docker_gdal_cmd . ' ' . OGR_BINPATH_GDAL . 'ogr2ogr -f "PostgreSQL" PG:"' . $this->pgdatabase->get_connection_string() . ' SCHEMAS=' . $this->gmlas_schema .'" GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location;
 		# echo $cmd;
 		exec($cmd, $output, $error_code);
 		# echo '<pre>'; print_r($output); echo '</pre>';
@@ -445,6 +445,88 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid
 			WHERE
 				gmlas.id ='" . $gml_id . "'
+			;";
+		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+		$result = pg_fetch_assoc($ret[1]);
+		return $result;
+	}
+
+	/*
+	* Returns an associative array to fill the bp_plan form
+	*/
+	function fill_form_rp_plan($gml_id) {
+		$sql = "
+			SELECT
+				gmlas.oid," . 
+				"'" . $this->trim_gml_prefix_if_exists($gml_id) . "'::text::uuid AS plan_gml_id,
+				gmlas.xplan_name AS name,
+				gmlas.nummer AS nummer,
+				gmlas.internalid AS internalid,
+				gmlas.beschreibung AS beschreibung,
+				gmlas.kommentar AS kommentar,
+				to_char(gmlas.technherstelldatum, 'DD.MM.YYYY') AS technherstelldatum,
+				to_char(gmlas.genehmigungsdatum, 'DD.MM.YYYY') AS genehmigungsdatum,
+				to_char(gmlas.untergangsdatum, 'DD.MM.YYYY') AS untergangsdatum,
+				CASE WHEN vpa.planname IS NOT NULL OR vpa.rechtscharakter IS NOT NULL OR vpa.nummer IS NOT NULL OR vpa.verbundenerplan_href IS NOT NULL THEN
+					array_to_json(ARRAY[(vpa.planname, vpa.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpa.nummer, vpa.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[])
+					ELSE NULL
+				END AS aendert,
+				CASE WHEN vpwgv.planname IS NOT NULL OR vpwgv.rechtscharakter IS NOT NULL OR vpwgv.nummer IS NOT NULL OR vpwgv.verbundenerplan_href IS NOT NULL THEN
+					array_to_json(ARRAY[(vpwgv.planname, vpwgv.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpwgv.nummer, vpwgv.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[])
+					ELSE NULL
+				END AS wurdegeaendertvon,
+				gmlas.erstellungsmassstab AS erstellungsmassstab,
+				gmlas.bezugshoehe AS bezugshoehe,
+				st_assvg(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg ."), 0, 8) AS newpath,
+				st_astext(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg .")) AS newpathwkt,
+				CASE WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
+					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
+					ELSE NULL
+				END AS verfahrensmerkmale,
+				CASE WHEN e.georefurl IS NOT NULL OR e.georefmimetype_codespace IS NOT NULL OR e.georefmimetype IS NOT NULL OR e.art IS NOT NULL OR e.informationssystemurl IS NOT NULL OR e.referenzname IS NOT NULL OR e.referenzmimetype_codespace IS NOT NULL OR e.referenzmimetype IS NOT NULL OR e.beschreibung IS NOT NULL OR e.datum IS NOT NULL OR e.typ IS NOT NULL THEN 
+					array_to_json(ARRAY[(e.georefurl, 
+						(e.georefmimetype_codespace, e.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+						e.art::xplan_gml.xp_externereferenzart,
+						e.informationssystemurl,
+						e.referenzname, e.referenzurl,
+						(e.referenzmimetype_codespace, e.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+						e.beschreibung,
+						to_char(e.datum, 'DD.MM.YYYY'),
+						e.typ::xplan_gml.xp_externereferenztyp
+					)]::xplan_gml.xp_spezexternereferenz[])
+					ELSE NULL
+				END AS externereferenz,
+				gmlas.planungsregion AS planungsregion,
+				gmlas.teilabschnitt AS teilabschnitt,
+				gmlas.amtlicherschluessel AS amtlicherschluessel,
+				gmlas.verfahren::xplan_gml.rp_verfahren AS verfahren,
+				gmlas.rechtsstand::xplan_gml.rp_rechtsstand AS rechtsstand,
+				to_char(gmlas.datumdesinkrafttretens, 'DD.MM.YYYY') AS datumdesinkrafttretens,
+				to_char(gmlas.planbeschlussdatum, 'DD.MM.YYYY') AS planbeschlussdatum,
+				to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY') AS aufstellungsbeschlussdatum,
+				to_char(gmlas.entwurfsbeschlussdatum, 'DD.MM.YYYY') AS entwurfsbeschlussdatum,
+				/*to_char(gmlas.auslegungenddatum, 'DD.MM.YYYY') AS auslegungenddatum,*/
+				to_json((gmlas.sonstplanart_codespace, gmlas.sonstplanart)::xplan_gml.rp_sonstplanart) AS sonstplanart,
+				/*to_char(gmlas.auslegungstartdatum AS auslegungstartdatum, 'DD.MM.YYYY'),*/
+				/*to_char(gmlas.traegerbeteiligungsstartdatum, 'DD.MM.YYYY') AS traegerbeteiligungsstartdatum,*/
+				to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY') AS aenderungenbisdatum,
+				to_json((gmlas.status_codespace, gmlas.status)::xplan_gml.rp_status) AS status,
+				/*to_char(gmlas.traegerbeteiligungsenddatum, 'DD.MM.YYYY') AS traegerbeteiligungsenddatum,*/
+				gmlas.planart::xplan_gml.rp_art AS planart
+			FROM
+				" . $this->gmlas_schema . ".rp_plan gmlas LEFT JOIN
+				" . $this->gmlas_schema . ".rp_plan_externereferenz externereferenzlink ON gmlas.id = externereferenzlink.parent_id LEFT JOIN
+				" . $this->gmlas_schema . ".xp_spezexternereferenz e ON externereferenzlink.xp_spezexternereferenz_pkid = e.ogr_pkid LEFT JOIN
+				" . $this->gmlas_schema . ".rp_plan_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
+				" . $this->gmlas_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
+				" . $this->gmlas_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid LEFT JOIN
+				" . $this->gmlas_schema . ".rp_plan_wurdegeaendertvon_wurdegeaendertvon wurdegeaendertvonlink ON gmlas.id = wurdegeaendertvonlink.parent_pkid LEFT JOIN
+				" . $this->gmlas_schema . ".wurdegeaendertvon wurdegeaendertvonlinktwo ON wurdegeaendertvonlink.child_pkid = wurdegeaendertvonlinktwo.ogr_pkid LEFT JOIN
+				" . $this->gmlas_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid LEFT JOIN
+				" . $this->gmlas_schema . ".rp_plan_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
+				" . $this->gmlas_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid
+			WHERE
+				gmlas.id = '" . $gml_id . "'
 			;";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$result = pg_fetch_assoc($ret[1]);

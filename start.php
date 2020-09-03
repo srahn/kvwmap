@@ -1,6 +1,6 @@
 <?php
 # Objekt für graphische Benutzeroberfläche erzeugen mit default-Werten
-$GUI = new GUI("map.php", "main.css.php", "html");
+$GUI = new GUI("map.php", "layouts/css/main.css.php", "html");
 $GUI->user = new stdClass();
 $GUI->user->rolle = new stdClass();
 $GUI->user->rolle->querymode = 0;
@@ -377,50 +377,23 @@ else {
 	$GUI->debug->write('Stellenbezeichnung: ' . $GUI->Stelle->Bezeichnung, 4);
 	$GUI->debug->write('Host_ID: ' . getenv("REMOTE_ADDR"), 4);
 
-	if(BEARBEITER == 'true') {
+	if (defined('BEARBEITER') AND BEARBEITER == 'true') {
 		define('BEARBEITER_NAME', 'Bearbeiter: ' . $GUI->user->Name);
 	}
 
-	if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, den PGConnect und Trafos weglassen
-		##############################################################################
-		# Übergeben der Datenbank für die raumbezogenen Daten (PostgreSQL mit PostGIS)
-		if(POSTGRES_DBNAME != '') {
-			$PostGISdb=new pgdatabase();
-			$PostGISdb->host = POSTGRES_HOST;
-			$PostGISdb->user = POSTGRES_USER;
-			$PostGISdb->passwd = POSTGRES_PASSWORD;
-			$PostGISdb->dbName = POSTGRES_DBNAME;
-		}
-		else {
-			# pgdbname ist leer, die Informationen zur Verbindung mit der PostGIS Datenbank
-			# mit Geometriedaten werden aus der Tabelle stelle
-			# der kvwmap-Datenbank $GUI->database gelesen
-			$PostGISdb=new pgdatabase();
-			$PostGISdb->host = $GUI->Stelle->pgdbhost;
-			$PostGISdb->dbName = $GUI->Stelle->pgdbname;
-			$PostGISdb->user = $GUI->Stelle->pgdbuser;
-			$PostGISdb->passwd = $GUI->Stelle->pgdbpasswd;
-			$PostGISdb->port = $GUI->Stelle->port;
-		}
-		if ($PostGISdb->dbName != '') {
-			# Übergeben der GIS-Datenbank für GIS-Daten an die GUI
-			$GUI->pgdatabase = $PostGISdb;
-			# Übergeben der GIS-Datenbank für die Bauaktendaten an die GUI
-			$GUI->baudatabase = $PostGISdb;
-
-			if (!$GUI->pgdatabase->open()) {
-				echo 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
-				echo '<br>Host: '.$GUI->pgdatabase->host;
-				echo '<br>User: '.$GUI->pgdatabase->user;
-			 # echo '<br>Passwd: '.$GUI->database->passwd;
-				echo '<br>Datenbankname: '.$GUI->pgdatabase->dbName;
-				exit;
-			}
-			else {
-				$GUI->debug->write("Verbindung zur PostGIS Datenbank erfolgreich hergestellt.", 4);
-				$GUI->pgdatabase->setClientEncoding();
-			}
-		}
+	##############################################################################
+	# kvwmap uses the database defined in postgres_connection_id of stelle object or if not exists from POSTGRES_CONNECTION_ID
+	$GUI->pgdatabase = $GUI->baudatabase = new pgdatabase();
+	#echo '<br>GUI->Stelle-->postgres_connection_id: ' . $GUI->Stelle->postgres_connection_id;
+	#echo '<br>POSTGRES_CONNECTION_ID: ' . POSTGRES_CONNECTION_ID;
+	$connection_id = ($GUI->Stelle->postgres_connection_id != '' ? $GUI->Stelle->postgres_connection_id : POSTGRES_CONNECTION_ID);
+	#echo '<br>connection_id: ' . $connection_id;
+	if (!$GUI->pgdatabase->open($connection_id)) {
+		echo $GUI->pgdatabase->err_msg;
+		exit;
+	}
+	
+	if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, die Trafos weglassen
 		$GUI->epsg_codes = $GUI->pgdatabase->read_epsg_codes(false);
 		# Umrechnen der für die Stelle eingetragenen Koordinaten in das aktuelle System der Rolle
 		# wenn die EPSG-Codes voneinander abweichen

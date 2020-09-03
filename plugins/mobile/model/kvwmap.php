@@ -52,6 +52,7 @@
 			$result = array(
 				"success" => true,
 				"user_id" => $GUI->user->id,
+				"user_name" => $GUI->user->Vorname . ' ' . $GUI->user->Name,
 				"stellen" => $stellen
 			);
 		}
@@ -274,6 +275,7 @@
 				"tooltip" => $attr['tooltip'][$key],
 				"type" => $attr['type'][$key],
 				"nullable" => $attr['nullable'][$key],
+				"saveable" => $attr['saveable'][$key],
 				"form_element_type" => $attr['form_element_type'][$key],
 				"options" => $attr['options'][$key],
 				"privilege" => $attr['privileg'][$key],
@@ -405,7 +407,7 @@
 					--RAISE notice 'sql nach remove line feeds %', _sql;
 
 					_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
-					--RAISE notice 'sql nach remove %', TG_TABLE_SCHEMA || '.';
+					--RAISE notice 'sql nach add schema %', TG_TABLE_SCHEMA || '.';
 
 					_sql := kvw_insert_str_before(_sql, ', version', ')');
 					--RAISE notice 'sql nach add column version %', _sql;
@@ -415,6 +417,9 @@
 
 					_sql := substr(_sql, 1, strpos(_sql, 'VALUES') - 1) || regexp_replace(substr(_sql, strpos(_sql, 'VALUES')), '\)+', ', ' || new_version || ')', 'g');
 					--RAISE notice 'sql nach add values for version %', _sql;
+
+					_sql := replace(_sql, 'RETURNING uuid', '');
+					--RAISE notice 'sql nach entfernen von RETURNING uuid';
 
 					--RAISE notice 'Eintragen des INSERT-Statements mit Version: %', new_version; 
 					INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);

@@ -13,6 +13,7 @@ class XP_Object extends PgObject {
 		$this->konvertierung = $konvertierung;
 		$this->identifier = 'gml_id';
 		$this->identifier_type = 'text';
+		$this->konformitaetsbedingungen = array();
 	}
 
 	public function get_sub_classes() {

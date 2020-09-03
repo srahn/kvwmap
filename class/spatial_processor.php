@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver f�r Kreisverwaltungen                     #
+# kvwmap - Kartenserver für Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 # 
@@ -129,12 +129,12 @@ class spatial_processor {
 			)
 		";
 		
-		if(
+		if (
 			NORMALIZE_AREA_THRESHOLD == 0 AND 
 			NORMALIZE_ANGLE_THRESHOLD == 0 AND 
 			NORMALIZE_POINT_DISTANCE_THRESHOLD == 0 AND 
 			NORMALIZE_NULL_AREA == 0
-		){
+		) {
 			$normalize = false;
 		}
 
@@ -158,7 +158,7 @@ class spatial_processor {
 			FROM
 				( SELECT " . $diff . " as geom ) as foo
 		";
-		#echo $sql;
+		#echo 'SQL zur Berechnung der geometrischen Differenz: ' . $sql;
 		$ret = $this->pgdatabase->execSQL($sql,4, 0, true);
 		if ($ret[0]) {
 			$rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
@@ -239,10 +239,9 @@ class spatial_processor {
     
     $this->debug->write("Starte operation: ".$formvars['operation']."\n",4);
 		switch($formvars['operation']){
-			
 			case 'isvalid':{
 				$result = $this->isvalid($polywkt1);
-			}break;
+			} break;
 			
 			case 'transformPoint':{
 		    # Transformation eines Punktes in ein anderes Koordinatensystem  
@@ -413,7 +412,8 @@ class spatial_processor {
 			
 			case 'subtract_geometry':{
 				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], $formvars['fromwhere'], $formvars['columnname'], $formvars['singlegeom'], $formvars['orderby']);
-				if($querygeometryWKT == ''){
+				if ($querygeometryWKT == '') {
+					echo 'Keine Geometrie zur Übernahme an der Stelle gefunden.';
 					break;
 				}
 				if($polywkt1 == ''){
@@ -474,8 +474,24 @@ class spatial_processor {
     return $rs;
   }
   
-  function buffer_ring($geom_1, $width){
-  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0, 15) as svg FROM (select st_difference(st_buffer(st_geomfromtext('".$geom_1."'), ".$width.", 16), st_geomfromtext('".$geom_1."')) as geom) as foo";
+	function buffer_ring($geom_1, $width){
+		$sql = "
+			SELECT
+				st_astext(geom) as wkt,
+				st_assvg(geom,0, 15) as svg
+			FROM
+				(
+					SELECT
+						st_difference(
+							st_buffer(
+								st_geomfromtext('" . $geom_1 . "'),
+								" . $width . ",
+								16
+							),
+							st_geomfromtext('" . $geom_1 . "')
+						) as geom
+				) as foo
+		";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];

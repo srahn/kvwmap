@@ -12,7 +12,7 @@ if ($this->new_entry != true AND value_of($this->formvars, 'printversion') == ''
 							id="<? echo $layer['Layer_ID'] . '_' . $k; ?>"
 							type="checkbox"
 							class="<? if (value_of($layer['attributes'], 'Editiersperre') AND $layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
-							name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"
+							name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID']; ?>"
 						>&nbsp;<span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span><?
 						if (value_of($layer['shape'][$k], value_of($layer['attributes'], 'Editiersperre')) == 't') { ?>
 							<span class="editier_sperre fa-stack" title="Dieser Datensatz ist zur Bearbeitung gesperrt">

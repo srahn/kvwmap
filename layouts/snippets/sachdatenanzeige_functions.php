@@ -88,6 +88,10 @@ include('funktionen/input_check_functions.php');
 				}
 			})
 			row.style.display = row_display;
+			if(name_dependent != null){
+				var name_row = name_dependent.parentNode;	// in case name row is above value row
+				name_row.style.display = row_display;
+			}
 			// visibility of group
 			if(row.closest('table').firstChild.children != null){
 				all_trs = [].slice.call(row.closest('table').firstChild.children);		// alle trs in der Gruppe
@@ -449,7 +453,7 @@ include('funktionen/input_check_functions.php');
 					return;
 				}
   		}
-			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
+			if(['checkbox', 'radio'].indexOf(form_fields[i].type) == -1 || form_fields[i].checked){
 				if(form_fields[i].type == 'file' && form_fields[i].files[0] != undefined)value = form_fields[i].files[0];
 				else value = form_fields[i].value;
 				formData.append(form_fields[i].name, value);

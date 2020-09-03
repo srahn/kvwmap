@@ -123,7 +123,11 @@ class ddl {
 					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);
 					$width = $this->layout['texts'][$j]['width'];
 					$border = $this->layout['texts'][$j]['border'];
-					$y = $this->putText($text, $this->layout['texts'][$j]['size'], $width, $x, $y, $offsetx, $border);
+					if ($text == 'WIRO-Kartenserver') {
+						$this->debug->write('Druck pk: write freetext: ' . $text . ' offsety: ' . $offsety . ' x: ' . $offsetx);
+						$this->pdf->addJpegFromFile(DRUCKRAHMEN_PATH . 'wiro-bg-druck02.jpg', 1 + $offsetx, 785, 590);
+					}
+					$y = $this->putText($text, $this->layout['texts'][$j]['size'], $width, $x, $y, $offsetx, $border, $type);
 					if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 					
 					if($type != 'everypage' AND $this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();			# falls in eine alte Seite geschrieben wurde, zurückkehren
 				}
@@ -138,6 +142,7 @@ class ddl {
 	function add_lines($offsetx, $type){
 		if(count($this->remaining_lines) == 0)return;
     for($j = 0; $j < count($this->layout['lines']); $j++){
+			$overflow = false;
 			if($type != 'everypage' AND $this->page_overflow){
 				$this->pdf->reopenObject($this->record_startpage);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 				#if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???		muss auskommentiert bleiben, sonst ist die Karte im MVBIO-Drucklayout auf der zweiten Seite
@@ -163,6 +168,7 @@ class ddl {
 							continue;			# die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
 						}
 					}
+					$page_id_start = $this->pdf->currentContents;
 					if($offset_attribute_end != ''){			# ist ein offset_attribute gesetzt
 						$offset_value = $this->layout['offset_attributes'][$offset_attribute_end];
 						if($offset_value != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
@@ -172,6 +178,9 @@ class ddl {
 							$remaining_lines[] = $this->layout['lines'][$j]['id'];
 							continue;			# die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
 						}
+					}
+					if($page_id_start != $this->pdf->currentContents){
+						$overflow = true;
 					}
 					if($offset_attribute_start == ''){
 						$y = $y - $this->offsety;
@@ -196,7 +205,15 @@ class ddl {
 						}
 					}
 					$this->pdf->setLineStyle($this->layout['lines'][$j]['breite'], 'square');
-					$this->pdf->line($x,$y,$endx,$endy);
+					if($overflow){		# Seitenumbruch dazwischen
+						$this->pdf->reopenObject($page_id_start);
+						$this->pdf->line($x, $y, $endx, $this->layout['margin_bottom']);
+						$this->pdf->closeObject();
+						$this->pdf->line($x, $this->layout['height'] - $this->layout['margin_top'] + 10, $endx, $endy);
+					}
+					else{
+						$this->pdf->line($x, $y, $endx, $endy);
+					}
 					$line['x1'] = $x;
 					$line['y1'] = $y;
 					$line['x2'] = $endx;
@@ -524,7 +541,7 @@ class ddl {
 						}
 						else{
 							include_(CLASSPATH.'polygoneditor.php');
-							$polygoneditor = new polygoneditor($layerdb, $this->layerset['epsg_code'], $this->gui->user->rolle->epsg_code);
+							$polygoneditor = new polygoneditor($layerdb, $this->layerset['epsg_code'], $this->gui->user->rolle->epsg_code, $this->layerset['oid']);
 							$rect = $polygoneditor->zoomTopolygon($oid, $attributes['table_name'][$attributes['the_geom']], $attributes['real_name'][$attributes['the_geom']], $rand);
 						}
 						$this->gui->formvars['layer_id'] = $selected_layer_id;
@@ -541,9 +558,9 @@ class ddl {
 					$this->gui->switchScaleUnitIfNecessary();
 					$this->gui->map->scalebar->set('status', MS_EMBED);
 					$this->gui->map->scalebar->position = MS_LR;
-					$this->gui->map->scalebar->label->size = 16;
-					$this->gui->map->scalebar->width = 300;
-					$this->gui->map->scalebar->height = 4;
+					$this->gui->map->scalebar->label->size = 12;
+					$this->gui->map->scalebar->width = 180;
+					$this->gui->map->scalebar->height = 3;
 					$image_map = $this->gui->map->draw();
 					# Rollenlayer wieder entfernen
 					if($oid != ''){
@@ -609,6 +626,7 @@ class ddl {
 		return NULL;
 	}
 	
+
 	function putImage($dokumentpfad, $j, $x, $y, $width, $preview){
 		if($width == '')$width = 50;
 		if(substr($dokumentpfad, 0, 4) == 'http'){
@@ -634,7 +652,21 @@ class ddl {
 		return $y;
 	}
 	
-	function putText($text, $fontsize, $width, $x, $y, $offsetx, $border = false){	
+	function putText($text, $fontsize, $width, $x, $y, $offsetx, $border = false, $type = 'running'){	
+		if($type == 'running' AND $y < $this->layout['margin_bottom']){
+			$nextpage = $this->getNextPage($this->pdf->currentContents);
+			if($nextpage != NULL){
+				$this->pdf->reopenObject($nextpage);
+			}
+			else{
+				$this->pdf->ezNewPage();
+				$this->miny[$this->pdf->currentContents] = $this->layout['height'];
+				$this->maxy = 800;
+				if($this->layout['type'] == 2)$this->offsety = 50;
+				$this->page_overflow = true;
+			}
+			$y = $this->layout['height'] - $this->layout['margin_top'];
+		}
 		if($x < 0){		# rechtsbündig
 			$x = $this->layout['width'] + $x;
 			$x = $x + $offsetx;
@@ -660,7 +692,7 @@ class ddl {
 			$text = '<box>'.$text.'</box>';
 		}
 		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252//TRANSLIT", $text), $fontsize, $options);
-		$page_id_after_puttext = $this->pdf->currentContents;		
+		$page_id_after_puttext = $this->pdf->currentContents;
 		#echo $page_id_before_puttext.' '.$page_id_after_puttext.' - '.$y.' - '.$text.'<br>';
 		if($page_id_before_puttext != $page_id_after_puttext){
 			$this->page_overflow = true; 
@@ -935,7 +967,7 @@ class ddl {
     }
 		if($pdfobject == NULL){		# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF erzeugen
 			# Freitexte hinzufügen, die auf jeder Seite erscheinen sollen (Seitennummerierung etc.)
-			$this->add_everypage_elements();
+			$this->add_everypage_elements($preview);
 			$dateipfad=IMAGEPATH;
 			$currenttime = date('Y-m-d_H_i_s',time());
 			if($this->layout['filename'] != ''){
@@ -971,7 +1003,7 @@ class ddl {
 		}
 	}
 	
-	function add_everypage_elements(){
+	function add_everypage_elements($preview){
 		$this->pdf->ezSetMargins(0,0,0,0);
 		$pages = $this->pdf->objects['3']['info']['pages'];
 		$pagecount = count($pages);
@@ -993,6 +1025,13 @@ class ddl {
 			}
 			$this->add_lines(0, 'everypage');
 			$this->add_rectangles(0, 'everypage');			# feste Rechtecke hinzufügen
+			if($preview){
+				$this->pdf->setLineStyle(0.1,'','',array(9,10));
+				$this->pdf->line(0, $this->layout['margin_bottom'], $this->layout['width'], $this->layout['margin_bottom']);
+				$this->pdf->line(0, $this->layout['height'] - $this->layout['margin_top'], $this->layout['width'], $this->layout['height'] - $this->layout['margin_top']);
+				$this->pdf->line($this->layout['margin_left'], $this->layout['height'], $this->layout['margin_left'], 0);
+				$this->pdf->line($this->layout['width'] - $this->layout['margin_right'], $this->layout['height'], $this->layout['width'] - $this->layout['margin_right'], 0);
+			}
 			$this->pdf->closeObject();
 		}
 	}

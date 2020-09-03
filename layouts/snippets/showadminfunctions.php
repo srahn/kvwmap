@@ -1,7 +1,6 @@
 <?
 	include(LAYOUTPATH.'languages/showadminfunctions_'.$this->user->rolle->language.'.php');
 ?>
-<script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 
 <script type="text/javascript">
 
@@ -33,10 +32,21 @@ function toggleGroup(group, show){
 					<td colspan="3" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17"><? echo $strUpdateCode; ?></span></td>
 				</tr>
 				<tr style="border:1px solid #C3C7C3">
-					<td><? include(SNIPPETS.'git_remote_update.php');include(SNIPPETS.'git_status.php'); ?></td>
+					<td><?
+						include(SNIPPETS . 'git_remote_update.php');
+						include(SNIPPETS . 'git_status.php');?>
+					</td>
 				</tr>
-				<tr >
-					<td colspan="2" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=update_code'" <? if(!$num_commits_behind)echo 'disabled'; ?> value="<? echo $strUpdate; ?>"></td>
+				<tr>
+					<td colspan="2" align="center">
+						<input
+							type="button"
+							onclick="location.href='index.php?go=Administratorfunktionen&func=update_code'"<?
+							if ($num_commits_behind == '' AND !$diverged) { ?>
+								disabled<?
+							} ?>
+							value="<? echo $strUpdate; ?>"
+						></td>
 				</tr>
 			</table> 
 		</td>
@@ -151,9 +161,8 @@ function toggleGroup(group, show){
 								</td>
 								<td align="center"><?
 									if ($param['description'] != '') { ?>
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(['Beschreibung:', '<? echo str_replace(array("\r\n", "\r", "\n"), '<br>', htmlentities($param['description'], ENT_QUOTES)); ?>'], Style[0], document.getElementById('Tip_<? echo $param['name']; ?>'))" onmouseout="htm()">
-										<div id="Tip_<? echo $param['name']; ?>" style="right: 10px;visibility:hidden;position:absolute;z-index:1000;"></div><?
-									} ?>
+										<span style="--left: none" data-tooltip="<? echo str_replace(array("\r\n", "\r", "\n"), '&#xa;', htmlentities($param['description'], ENT_QUOTES)); ?>"></span>
+							<?	} ?>
 								</td>
 							</tr><?
 							if ($param['saved'] == 0) { ?>

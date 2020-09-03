@@ -28,8 +28,16 @@ function go_switch_mobile($go){
 		} break;
 
 		case 'mobile_upload_image' : {
-			$GUI->checkCaseAllowed($GUI->go);
-			$result = $GUI->mobile_upload_image($GUI->formvars['selected_layer_id'], $_FILES);
+			# Prüfen was hier kommt wenn go nicht erlaubt ist und ob checkCaseAllowed false liefert.
+			if (($GUI->Stelle->isMenueAllowed($go) OR $GUI->Stelle->isFunctionAllowed($go))) {
+				$result = $GUI->mobile_upload_image($GUI->formvars['selected_layer_id'], $_FILES);
+			}
+			else {
+				$result = array(
+					'success' => false,
+					'msg' => 'Anwendungsfall mobile_upload_image auf diesem Server für diese Stelle nicht erlaubt. Lassen Sie die Funktion oder einen entsprechenden Menüpunkt vom Administrator der Anwendung freigeben!'
+				);
+			}
 			echo json_encode($result);
 		} break;
 

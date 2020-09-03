@@ -223,11 +223,11 @@ class database {
 	* @params $layertyp Integer, 0 point, 1 line, 2 polygon, 5 query
 	*
 	*/
-	function generate_layer($schema, $table, $group_id = 0, $connection, $epsg = 25832, $geometrie_column = 'the_geom', $geometrietyp = '', $layertyp = '2') {
+	function generate_layer($schema, $table, $group_id = 0, $connection_id, $epsg = 25832, $geometrie_column = 'the_geom', $geometrietyp = '', $layertyp = '2') {
 		#echo '<br>Create Layer: ' . $table['name'];
 		if ($geometrietyp != '') $geometrie_column = "({$geometrie_column}).{$geometrietyp}";
 		if ($group_id == 0) $group_id = '@group_id';
-		if ($connection == '') $connection = '@connection';
+		if ($connection_id == '') $connection_id = '@connection_id';
 		$sql = "
 -- Create layer {$table['name']}
 INSERT INTO layer (
@@ -238,7 +238,7 @@ INSERT INTO layer (
 	`maintable`,
 	`Data`,
 	`schema`,
-	`connection`,
+	`connection_id`,
 	`connectiontype`,
 	`tolerance`,
 	`toleranceunits`,
@@ -262,7 +262,7 @@ VALUES (
 	'{$table['name']}',
 	'geom from (select oid, {$geometrie_column} AS geom FROM {$schema}.{$table['name']}) as foo using unique oid using srid={$epsg}',
 	'{$schema}',
-	'{$connection}',
+	'{$connection_id}'
 	'6',
 	'3',
 	'pixels',
@@ -609,13 +609,18 @@ INSERT INTO u_styles2classes (
 		return $this->mysqli->close();
 	}
 
-	function exec_commands($commands_string, $search, $replace, $replace_constants = false, $suppress_err_msg = false) {
+	function exec_commands($commands_string, $replace_connection, $replace_connection_id, $replace_constants = false, $suppress_err_msg = false) {
 		if ($commands_string != '') {
 			foreach (explode(';' . chr(10), $commands_string) as $query2) { // verschiedene Varianten des Zeilenumbruchs berücksichtigen
 				foreach (explode(';' . chr(13), $query2) as $query) {
 					$query_to_execute = '';
 					$query = trim($query);
-					if ($search != NULL) $query = str_replace($search, $replace, $query);
+					if ($replace_connection != NULL) {
+						$query = str_replace('user=xxxx password=xxxx dbname=kvwmapsp', $replace_connection, $query);
+					}
+					if ($replace_connection_id != NULL) {
+						$query = str_replace('xxxx_connection_id_xxxx', $replace_connection_id, $query);
+					}
 					// foreach (explode(chr(10), $query) as $line) {
 						// if ($line != '' AND strpos($line, "--") !== 0 && strpos($line, "#") !== 0) { // Zeilen mit Kommentarzeichen ignorieren
 							// $query_to_execute .= ' '.$line;

@@ -105,6 +105,7 @@ define('CASE_COMPRESS', false);
 #   getLayerOptions:  - ein Rollenlayer muss verwendet werden																							#
 #											- getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
 #												und writeDatatypeAttributes() reinkopieren																				#
+#											- get_layer_params_form, get_layer_params_layer und get_layer_params reinkopieren		#
 #		get_group_legend:	- compare_legendorder() reinkopieren																								#
 #											- ein Layer muss in der Gruppe an sein																							#
 #		get_select_list:  - read_datatype_attributes() reinkopieren																						#
@@ -709,6 +710,10 @@ function go_switch($go, $exit = false) {
 				$GUI->createOWSException();
 			}break;
 
+			case 'Atom' : {
+				$GUI->createAtomResponse();
+			} break;
+
 			# 2006-03-24 CG
 			case 'StatistikAuswahl' : {
 				$GUI->checkCaseAllowed($go);
@@ -1018,6 +1023,11 @@ function go_switch($go, $exit = false) {
 				$GUI->TIFExport_erzeugen();
 			} break;
 
+			case 'ows_export_loeschen' : {
+				$GUI->checkCaseAllowed('WMS_Export');
+				$GUI->ows_export_loeschen();
+			} break;
+
 			case 'WMS_Export_Senden' : {
 				$GUI->checkCaseAllowed('WMS_Export');
 				$GUI->wmsExportSenden();
@@ -1317,7 +1327,7 @@ function go_switch($go, $exit = false) {
 					include_once(CLASSPATH . 'Layer.php');
 					$GUI->save_layers_attributes($GUI->formvars);
 				}
-				if (empty($GUI->formvars['selected_layer_id']) AND !empty($this->formvars['selected_datatype_id'])) {
+				if (empty($GUI->formvars['selected_layer_id']) AND !empty($GUI->formvars['selected_datatype_id'])) {
 					$GUI->Datentypattribute_speichern();
 				}
 				$GUI->Attributeditor();
@@ -1413,6 +1423,10 @@ function go_switch($go, $exit = false) {
 				$GUI->Attributeditor_takeover_default_layer_attributes_privileges();
 				$GUI->formvars['selected_layer_id'] = $GUI->formvars['to_layer_id'];
 				$GUI->layer_attributes_privileges();
+			} break;
+
+			case 'write_layer_attributes2rolle' : {
+				$GUI->write_layer_attributes2rolle();
 			} break;
 
 			case 'Layer_Parameter' : {

@@ -148,12 +148,13 @@ class administration{
 			$prepath = PLUGINS.$component.'/';
 			foreach ($component_seed as $file) {
 				$filepath = $prepath.'db/mysql/data/'.$file;
-				$connection = 'user='.$this->pgdatabase->user.' password='.$this->pgdatabase->passwd.' dbname='.$this->pgdatabase->dbName;
-				if ($this->pgdatabase->host != '') {
-					$connection .= ' host='.$this->pgdatabase->host;
-				}
 				#echo '<br>Execute SQL from seed file: ' . $filepath;
-				$result = $this->database->exec_commands(file_get_contents($filepath), 'user=xxxx password=xxxx dbname=kvwmapsp', $connection, true); # replace known constants
+				$result = $this->database->exec_commands(
+					file_get_contents($filepath),
+					$this->pgdatabase->get_connection_string(),
+					$this->pgdatabase->connection_id,
+					true
+				); # replace known constants
 				if ($result[0]) {
 					echo $result[1] . getTimestamp('H:i:s', 4). ' Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
 				}
@@ -239,6 +240,7 @@ class administration{
 							'" . $file . "'
 						);
 					";
+					#echo 'register migration with sql: ' . $sql;
 					$result=$this->database->execSQL($sql, 4, 0);
 				}
 			}
@@ -248,12 +250,21 @@ class administration{
 	
 	function update_code() {
 		$folder = WWWROOT.APPLVERSION;
-		if (defined('HTTP_PROXY'))putenv('https_proxy='.HTTP_PROXY);
-		exec('cd '.$folder.' && sudo -u '.GIT_USER.' git stash && sudo -u '.GIT_USER.' git pull origin', $ausgabe, $ret);
-		if ($ret != 0) {
-			showAlert('Fehler bei der Ausführung von "git pull origin".');
+		if (defined('HTTP_PROXY')) {
+			putenv('https_proxy='.HTTP_PROXY);
 		}
-		return $ausgabe;
+		exec("git status -s --porcelain 2>&1", $output, $return_var);
+		if (count($output) > 0) {
+			$this->database->gui->add_message('Fehler', 'Update kann nicht erfolgen!<p>Es gibt folgende noch nicht committete Änderungen:<br>' . implode('<br>', $output) . '<br>Erst Änderungen committen oder auschecken!');
+			return false;
+		}
+		else {
+			exec('cd '.$folder.' && sudo -u '.GIT_USER.' git stash && sudo -u '.GIT_USER.' git pull origin', $ausgabe, $ret);
+			if ($ret != 0) {
+				$this->database->gui->add_message('Fehler', 'Fehler bei der Ausführung von "git pull origin"!');
+			}
+			return $ausgabe;
+		}
 	}
 	
 	function get_config_params() {

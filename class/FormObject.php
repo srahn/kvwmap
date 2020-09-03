@@ -80,12 +80,15 @@ class FormObject {
 		$this->outputHTML();
 	} # ende constructor
 
-static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $first_option = '-- Bitte Wählen --') {
+static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $first_option = '-- Bitte Wählen --', $option_style = '', $option_class = '', $onclick = '') {
 	$id = ($id == '' ? $name : $id);
 	if ($multiple != '') $multiple = ' multiple';
 	if ($style != '') $style = 'style="' . $style . '"';
 	if ($onchange != '') $onchange = 'onchange="' . $onchange . '"';
+	if ($onclick != '') $onclick = 'onclick="' . $onclick . '"';
 	if ($class != '') $class = 'class="' . $class . '"';
+	if ($option_style != '') $option_style = 'style="' . $option_style . '"';
+	if ($option_class != '') $option_class = 'class="' . $option_class . '"';
 
 	$options_html = array();
 	if ($first_option != '') {
@@ -97,7 +100,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 		}
 		$selected = ($option['value'] == $value ? ' selected' : '');
 		$options_html[] = "
-			<option
+			<option ".$onclick." ".$option_style." ".$option_class." 
 				value=\"{$option['value']}\"{$selected}" .
 				(array_key_exists('attribute', $option) ? " {$option['attribute']}=\"{$option['attribute_value']}\"" : '') .
 				(array_key_exists('title', $option) ? " title=\"{$option['title']}\"" : '') .
@@ -105,11 +108,10 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 			>{$option['output']}</option>";
 	}
 
-	$html  = "
-<select id=\"{$id}\" name=\"{$name}\" size=\"{$size}\" {$style} {$onchange} {$multiple} {$class}>
-	" . implode('<br>', $options_html) . "
-</select>
-";
+	$html  = '
+<select id="'.$id.'" name="'.$name.'" size="'.$size.'" '.$style.' '.$onchange.' '.$multiple.' '.$class.'>
+	'.implode('<br>', $options_html).'
+</select>';
   return $html;
 }
 

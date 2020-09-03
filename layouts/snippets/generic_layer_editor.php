@@ -1,7 +1,6 @@
 <?
-
 	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
-  
+ 
 	$checkbox_names = '';
 	$columnname = '';
 	$geom_tablename = '';
@@ -10,7 +9,13 @@
 	$privileg = '';
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
-	$size = 12;
+
+	if (!$invisible_attributes) {
+		$invisible_attributes = array();
+		$invisible_attributes[$layer['Layer_ID']] = array();
+	};
+
+	$size = 16;
 	$select_width = 'width: 100%;'; 
 	if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
 		$layer['Name'] = $layer['alias'];
@@ -30,7 +35,6 @@
 	
 	if($doit == true){
 ?>
-<SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 
 <div id="layer" onclick="remove_calendar();">
 <input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
@@ -163,7 +167,7 @@
 				$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
 			}
 		}
-		$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
+		$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID'].'|';
 ?>
 	<tr 
 	<? if($this->user->rolle->querymode == 1){ ?>
@@ -175,8 +179,8 @@
 		  <table>
 				<tr>
 					<td style="line-height: 1px; ">
-						<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
-						<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't')echo 'no_edit'; ?>" name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
+						<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>"> 
+						<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't')echo 'no_edit'; ?>" name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID']; ?>">&nbsp;
 					</td>
 				</tr>
 		  </table>
@@ -363,8 +367,7 @@
 
 				<tr id="edit_all4_<? echo $layer['Layer_ID']; ?>" style="display: none">
 					<td style="text-align: center; background-color:<? echo BG_DEFAULT; ?>;">
-						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(new Array('Hilfe:','Sie können hier die Attribut-Werte von mehreren Datensätzen gleichzeitig bearbeiten. Die Werte werden nur für die ausgewählten Datensätze übernommen.'),Style[0], document.getElementById('TipLayer<? echo $layer['Layer_ID']; ?>'))" onmouseout="htm()">
-						<DIV id="TipLayer<? echo $layer['Layer_ID']; ?>" style="visibility:hidden;position:absolute;z-index:1000;"></DIV>
+						<span style="--left: 0px" data-tooltip="Sie können hier die Attribut-Werte von mehreren Datensätzen gleichzeitig bearbeiten. Die Werte werden nur für die ausgewählten Datensätze übernommen."></span>
 					</td>
 					<?					
 						for($j = 0; $j < count($layer['attributes']['name']); $j++){

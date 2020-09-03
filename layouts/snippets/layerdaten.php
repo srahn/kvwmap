@@ -111,7 +111,7 @@
 							</td>
 							<td><?php echo $this->layerdaten['Gruppe'][$i]; ?></td>
 							<td><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>" title="<?php echo $this->strChange; ?>"><i class="fa fa-pencil"></a></td>
-							<td><a href="javascript:Bestaetigung('index.php?go=Layer_Löschen&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie den Layer <?php echo $this->layerdaten['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete; ?>"><i class="fa fa-trash"></i></a></td>
+							<td><a href="javascript:Bestaetigung('index.php?go=Layer_Löschen&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie den Layer <?php echo $this->layerdaten['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete; ?>"><i class="fa fa-trash-o"></i></a></td>
 						</tr>
 					<? 
 				 }

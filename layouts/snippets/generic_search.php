@@ -4,19 +4,14 @@ include(SNIPPETS.'/sachdatenanzeige_functions.php');
 ?>
 
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
-<script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
-<!--
-
-
-Text1=['<? echo $strHelp; ?>:','<? echo $strAndOrHint; ?>'];
 
 <!-- wird fuer das Absenden bei Enter benoetigt -->
 document.onkeydown = function(ev){
 	var key;
 	ev = ev || event;
 	key = ev.keyCode;
-	if (key == 13) {
+	if (ev.target.className != 'quicksearch_field' && key == 13) {
 		document.GUI.suchen.click();
 	}
 }

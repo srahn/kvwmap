@@ -1,56 +1,32 @@
 <?php
-	header('Content-type: text/css');
-	include('../config.php');
-	
-	global $sizes;
-	$size = $sizes[$_REQUEST['gui']];
-?>
-
-.clear {
-	clear: both;
-}
-
-.form-field {
-	font-family: SourceSansPro1;
-}
-
-.form-label {
-	float: left;
-	font-size: 17px;
-	width: 32%;
-	text-align: right;
-}
-
-.form-value {
-	float: left;
-	margin-left: 10px;
-	font-size: 15px;
-	line-height: 16px;
-}
+#	header('Content-type: text/css');
+include('../../config.php');
+global $sizes;
+$size = $sizes[$_REQUEST['gui']]; ?>
 
 @font-face {
 	font-family: 'SourceSansPro';
 	font-style: normal;
 	font-weight: 200;
-	src: local('SourceSansPro'), url(../fonts/SourceSansPro-Light.ttf);
+	src: local('SourceSansPro'), url(../../fonts/SourceSansPro-Light.ttf);
 }
 @font-face {
 	font-family: 'SourceSansPro1';
 	font-style: normal;
 	font-weight: 400;
-	src: local('SourceSansPro1'), url(../fonts/SourceSansPro-Regular.ttf);
+	src: local('SourceSansPro1'), url(../../fonts/SourceSansPro-Regular.ttf);
 }
 @font-face {
 	font-family: 'SourceSansPro2';
 	font-style: normal;
 	font-weight: 600;
-	src: local('SourceSansPro2'), url(../fonts/SourceSansPro-Semibold.ttf);
+	src: local('SourceSansPro2'), url(../../fonts/SourceSansPro-Semibold.ttf);
 }
 @font-face {
 	font-family: 'SourceSansPro3';
 	font-style: normal;
 	font-weight: 700;
-	src: local('SourceSansPro3'), url(../fonts/SourceSansPro-Bold.ttf);
+	src: local('SourceSansPro3'), url(../../fonts/SourceSansPro-Bold.ttf);
 }
 
 body {	
@@ -61,7 +37,7 @@ body {
 }
 
 #gui-table {
-	width: 900px;
+	width: 100%;
 	margin: auto;	
 }
 
@@ -168,24 +144,6 @@ input[type="text"].transparent_input{
 
 .table_border_collapse>tbody>tr>td{
 	border:	1px solid #C3C7C3;
-}
-
-.layerdaten-topdiv, .userdaten-topdiv, .stellendaten-topdiv {
-	height: calc(100vh - 210px);
-	overflow-y: scroll;
-	padding: 0px 6px;
-}
-
-.listen-tr:hover {
-	background-color: #DAE4EC;
-}
-
-.listen-tr td:last-child .fa {
-	margin-right: 10px;
-}
-
-.listen-tr .fa {
-	padding: 3px;
 }
 
 .search-form h2 {
@@ -331,10 +289,11 @@ pre {
 	background: inherit;
 	font: inherit;
 	margin: 0;
+	overflow: auto;
 	padding: 0;
 }
 
-a, img, a table span {	
+a, img {	
 	color: firebrick; 
 	TEXT-DECORATION: none;
 	font-size: 15px;
@@ -430,7 +389,7 @@ a.invisiblelayerlink:hover{
 
 #datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table{
 	width: 100%;
-	background: url('../<? echo BG_IMAGE; ?>');
+	background: url('../../<? echo BG_IMAGE; ?>');
 }
 
 #datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table>tbody:first-of-type>tr:first-of-type{
@@ -520,9 +479,9 @@ a.invisiblelayerlink:hover{
 
 #data_import_upload_zone #text{
 	position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 	color: #333;
 }
 
@@ -530,7 +489,7 @@ a.invisiblelayerlink:hover{
 	display: table;
 	width: 600px;
 	border-collapse: separate;
-  border-spacing: 5px;
+	border-spacing: 5px;
 }
 
 #data_import_upload_progress .file_status{
@@ -571,12 +530,10 @@ a.invisiblelayerlink:hover{
 	text-align: center;
 	color: black;
 	border-radius: 5px;
+}
+
+a.buttonlink{
 	padding: 1px 7px 5px 7px;
-	margin: 0px 2px 0px 2px;
-	text-overflow: ellipsis;
-	overflow: hidden;
-	white-space: nowrap;
-	max-width: 300px;
 }
 
 .buttonlink:hover, .buttonlink:focus{
@@ -603,11 +560,18 @@ a.invisiblelayerlink:hover{
 
 #menuebar{
 	width: <? echo ($size['menue']['width'] - 2); ?>px;
-	background: url('../<? echo BG_IMAGE; ?>');
+	background: url('../../<? echo BG_IMAGE; ?>');
 	border: 1px solid;
 	border-color: #CCC; 
 	border-top: none;
 	border-bottom: none;
+	float: left;
+}
+
+#container_paint {
+	float: left;
+	padding: 5px;
+	width: calc(100% - <? echo $size['menue']['width']; ?>px - 10px);
 }
 
 #menue_switch{
@@ -668,12 +632,12 @@ a.menuered:hover {
 
 .menue-auf .menue_before {
 	display: inline-block;
-	background: url('../graphics/menue_top_open.gif');
+	background: url('../../graphics/menue_top_open.gif');
 }
 
 .menue-zu .menue_before {	
 	display: inline-block;
-	background: url('../graphics/menue_top.gif');
+	background: url('../../graphics/menue_top.gif');
 }
 
 .obermenue {
@@ -756,119 +720,119 @@ a.menuered:hover {
 }
 
 .use_for_dataset{
-	background-image: url(../graphics/use_for_dataset.png);
+	background-image: url(../../graphics/use_for_dataset.png);
 }
 
 .copy_dataset{
-	background-image: url(../graphics/copy_dataset.png);
+	background-image: url(../../graphics/copy_dataset.png);
 }
 
 .datensatz_exportieren{
-	background-image: url(../graphics/datensatz_exportieren.png);
+	background-image: url(../../graphics/datensatz_exportieren.png);
 }
 
 .drucken{
-	background-image: url(../graphics/drucken.png);
+	background-image: url(../../graphics/drucken.png);
 }
 
 .schnelldruck{
-	background-image: url(../graphics/schnelldruck.png);
+	background-image: url(../../graphics/schnelldruck.png);
 }
 
 .merken{
-	background-image: url(../graphics/merken.png);
+	background-image: url(../../graphics/merken.png);
 }
 
 .nicht_mehr_merken{
-	background-image: url(../graphics/nicht_mehr_merken.png);
+	background-image: url(../../graphics/nicht_mehr_merken.png);
 }
 
 .datensatz_loeschen{
-	background-image: url(../graphics/datensatz_loeschen.png);
+	background-image: url(../../graphics/datensatz_loeschen.png);
 }
 
 .edit_geom{
-	background-image: url(../graphics/edit_geom.png);
+	background-image: url(../../graphics/edit_geom.png);
 }
 
 .zoom_normal{
-	background-image: url(../graphics/zoom_normal.png);
+	background-image: url(../../graphics/zoom_normal.png);
 }
 
 .zoom_highlight{
-	background-image: url(../graphics/zoom_highlight.png);
+	background-image: url(../../graphics/zoom_highlight.png);
 }
 
 .zoom_select{
-	background-image: url(../graphics/zoom_select.png);
+	background-image: url(../../graphics/zoom_select.png);
 }
 
 .switch_gle{
-	background-image: url(../graphics/switch_gle.png);
+	background-image: url(../../graphics/switch_gle.png);
 }
 
 .url_extent{
-	background-image: url(../graphics/url_extent.png);
+	background-image: url(../../graphics/url_extent.png);
 }
 
 .save_extent{
-	background-image: url(../graphics/save_extent.png);
+	background-image: url(../../graphics/save_extent.png);
 }
 
 .load_extent{
-	background-image: url(../graphics/load_extent.png);
+	background-image: url(../../graphics/load_extent.png);
 }
 
 .save_image{
-	background-image: url(../graphics/save_image.png);
+	background-image: url(../../graphics/save_image.png);
 }
 
 .resize_map{
-	background-image: url(../graphics/resize_map.png);
+	background-image: url(../../graphics/resize_map.png);
 }
 
 .optionen{
-	background-image: url(../graphics/optionen.png);
+	background-image: url(../../graphics/optionen.png);
 }
 
 .karte{
-	background-image: url(../graphics/karte.png);
+	background-image: url(../../graphics/karte.png);
 }
 
 .logout{
-	background-image: url(../graphics/logout.png);
+	background-image: url(../../graphics/logout.png);
 }
 
 .gesamtansicht {
-	background-image: url(../graphics/gesamtansicht.png);
+	background-image: url(../../graphics/gesamtansicht.png);
 }
 
 .notiz{
-	background-image: url(../graphics/notiz.png);
+	background-image: url(../../graphics/notiz.png);
 }
 
 .hilfe{
-	background-image: url(../graphics/hilfe.png);
+	background-image: url(../../graphics/hilfe.png);
 }
 
 .timetravel{
-	background-image: url(../graphics/timetravel.png);
+	background-image: url(../../graphics/timetravel.png);
 }
 
 .save_layers{
-	background-image: url(../graphics/save_layers.png);
+	background-image: url(../../graphics/save_layers.png);
 }
 
 .load_layers{
-	background-image: url(../graphics/load_layers.png);
+	background-image: url(../../graphics/load_layers.png);
 }
 
 .tool_info{
-	background-image: url(../graphics/tool_info.png);
+	background-image: url(../../graphics/tool_info.png);
 }
 
 .layer{
-	background-image: url(../graphics/layer.png);
+	background-image: url(../../graphics/layer.png);
 }
 
 .button_background{
@@ -905,9 +869,13 @@ a.menuered:hover {
 }
 
 #header{
-	height: <? echo ($size['header']['height'] - 2); ?>px;
+	height: 50px;
 	border: 1px solid; 
 	border-color: #ffffff #cccccc #bbbbbb;
+}
+
+.clear {
+	clear: both;
 }
 
 #footer{
@@ -1008,7 +976,7 @@ a.menuered:hover {
 	box-shadow: 0px 1px 0px #bbb;
 	display: flex; 
 	flex-direction: column;
-	background-image: url(../<? echo BG_IMAGE; ?>);
+	background-image: url(../../<? echo BG_IMAGE; ?>);
 }
 
 #legend_layer{
@@ -1455,18 +1423,14 @@ tbody.gle>tr {
 }
 
 .subFormListItem > a:before{
-	content:url('../graphics/submenue.png');
+	content:url('../../graphics/submenue.png');
 	vertical-align: top;
 }
 
-.calendar {
+.calendar { /* Fuer IE <= 6 */
 	text-align: center;
 	position: absolute;
 	z-index: 1000000;
-	right: 0px;
-	left: 0px;
-	bottom: 30px;
-	width: 180px;
 }
 
 .timepicker{
@@ -2058,13 +2022,13 @@ tbody.gle>tr {
 }
 
 .sql-statement {
-  text-align: left;
-  font-size: 12px;
-  line-height: 1.3;
-  min-height: 50px;
-  width: 100%;
-  box-sizing:border-box;
-  -moz-box-sizing:border-box;
+	text-align: left;
+	font-size: 12px;
+	line-height: 1.3;
+	min-height: 50px;
+	width: 100%;
+	box-sizing:border-box;
+	-moz-box-sizing:border-box;
 }
 
 .small-gray {

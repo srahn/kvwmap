@@ -49,6 +49,12 @@ class PgObject {
 		$this->select = '*';
 		$this->identifier = 'id';
 		$this->identifier_type = 'integer';
+		$this->identifiers = array(
+			array(
+				'column' => 'id',
+				'type' => 'integer'
+			)
+		);
 		$this->show = false;
 		$this->attribute_types = array();
 	}
@@ -79,6 +85,36 @@ class PgObject {
 		return $this;
 	}
 
+	function get_id_condition($ids) {
+		$parts = array();
+		foreach ($this->identifiers AS $key => $identifier) {
+			$parts[] = "\"{$identifier['column']}\" = '{$ids[$key]}'"; 
+		}
+		return implode(' AND ', $parts);
+	}
+
+	function find_by_ids(...$ids) {
+		$where_condition = $this->get_id_condition($ids);
+		$this->debug->show('find by ids: ' . $where_condition, false);
+		$sql = "
+			SELECT
+				{$this->select}
+			FROM
+				\"{$this->schema}\".\"{$this->tableName}\"
+			WHERE
+				" . $where_condition . "
+		";
+		$this->debug->show('find_by_id sql: ' . $sql, false);
+		$query = pg_query($this->database->dbConn, $sql);
+		$this->data = pg_fetch_assoc($query);
+		return $this;
+	}
+
+	function execSQL($sql) {
+		$query = @pg_query($this->database->dbConn, $sql);
+		return $query;
+	}
+
 	/*
 	* Search for an record in the database by the given where clause
 	* @ return an array with all found object
@@ -96,7 +132,7 @@ class PgObject {
 				" . $where . "
 			" . $order . "
 		";
-		$this->debug->show('find_where sql: ' . $sql, $this->show);
+		$this->debug->show('find_where sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		$result = array();
 		while($this->data = pg_fetch_assoc($query)) {
@@ -276,6 +312,20 @@ class PgObject {
 				\"" . $this->schema . "\".\"" . $this->tableName . "\"
 			SET
 				" . implode(', ', $this->getKVP(true, true)) . "
+			WHERE
+				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
+		";
+		$this->debug->show('update sql: ' . $sql, false);
+		$query = pg_query($this->database->dbConn, $sql);
+	}
+
+	function update_attr($attributes) {
+		$quote = ($this->identifier_type == 'text') ? "'" : "";
+		$sql = "
+			UPDATE
+				\"" . $this->schema . "\".\"" . $this->tableName . "\"
+			SET
+				" . implode(', ', $attributes) . "
 			WHERE
 				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
 		";
