@@ -2,7 +2,7 @@
 	<head>
 		<title><? echo TITLE; ?></title><?
 		$rs = true;
-		$this->style = 'main_rd.css.php';
+		$this->style = 'layouts/css/main_rd.css.php';
 		include(SNIPPETS . 'gui_head.php'); ?>
 	</head>
 	<body onload="onload_functions();">
