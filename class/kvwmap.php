@@ -6710,9 +6710,10 @@ echo '			</table>
 	function write_document_loader(){
 		$handle = fopen(IMAGEPATH.$this->document_loader_name, 'w');
 		$code = '<?
+			error_reporting(E_ALL & ~(E_STRICT|E_NOTICE));
 			$allowed_documents = array(\''.implode('\',\'', $this->allowed_documents).'\');
 			if(in_array($_REQUEST[\'dokument\'], $allowed_documents)){
-				if($_REQUEST[\'original_name\'] == "")$_REQUEST[\'original_name\'] = basename($_REQUEST[\'dokument\']);
+				if(!array_key_exists(\'original_name\', $_REQUEST))$_REQUEST[\'original_name\'] = basename($_REQUEST[\'dokument\']);
 				$type = strtolower(array_pop(explode(\'.\', $_REQUEST[\'dokument\'])));
 				if(in_array($type, array(\'jpg\', \'gif\', \'png\')))header("Content-type: image/" . $type);
 				else header("Content-type: application/" . $type);
