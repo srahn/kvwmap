@@ -321,6 +321,10 @@ function go_switch($go, $exit = false) {
 			# Legende erzeugen
 			case 'get_legend' : {
 				$GUI->loadMap('DataBase');
+				# Parameter $scale in Data ersetzen
+				for($i = 0; $i < count($GUI->layers_replace_scale); $i++){
+					$GUI->layers_replace_scale[$i]->set('data', str_replace('$scale', $GUI->map_scaledenom, $GUI->layers_replace_scale[$i]->data));
+				}
 				$GUI->map->draw();			# sonst werden manche Klassenbilder nicht generiert
 				echo $GUI->create_dynamic_legend();
 			} break;
@@ -1757,6 +1761,10 @@ function go_switch($go, $exit = false) {
 			case "ALK-Flurstueck_Auswaehlen_Suchen" : {
 				$GUI->flurstSuchen();
 				$GUI->output();
+			} break;
+			
+			case 'ALKIS_WSDL' : {
+				$GUI->ALKIS_WSDL();
 			} break;
 
 			case 'ALKIS_Auszug' : {

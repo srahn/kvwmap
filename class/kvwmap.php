@@ -13488,6 +13488,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->Stelle->getFunktionen();
   }
 
+	function ALKIS_WSDL(){
+		include_(CLASSPATH.'alb.php');    
+		$ALB=new ALB($this->pgdatabase);
+		echo $ALB->dhk_wsdl_login();
+	}
+
 	function ALKIS_Auszug($FlurstKennz,$Grundbuchbezirk,$Grundbuchblatt,$Buchnungstelle,$formnummer){
 		include_(CLASSPATH.'alb.php');
     if($FlurstKennz[0] == '' AND ($Grundbuchbezirk != NULL OR $Buchnungstelle != NULL)){
