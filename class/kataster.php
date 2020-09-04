@@ -1024,28 +1024,6 @@ class flurstueck {
     return $ret[1];
   }
 
-  function getKoordinaten() {
-  	$queryret=$this->database->getFlstKoordinaten($this->FlurstKennz);
-    if ($queryret[0]) {
-      $errmsg='Fehler bei der Abfrage der Koordinaten in getKoordinaten: '.$queryret[1];
-    }
-    else {
-      $rs=pg_fetch_array($queryret[1]);
-      $start=strrpos($rs['koordinaten'],'(')+1;
-      $end=strpos($rs['koordinaten'],')');
-      $vertex=explode(',',substr($rs['koordinaten'],$start,$end-$start));
-      for ($i=1;$i<count($vertex);$i++) {
-      	$koord=explode(' ',trim($vertex[$i]));
-      	$points[$i-1]['lfdnr']=$i;
-      	$points[$i-1]['x']=$this->vermessungsrunden(trim($koord[0]), 1);
-      	$points[$i-1]['y']=$this->vermessungsrunden(trim($koord[1]), 1);
-      }
-    }
-    $ret[0]=$errmsg;
-    $ret[1]=$points;
-    return $ret;
-  }
-
   function vermessungsrunden($zahl, $stellen){
   	// Die Funktion rundet eine Gleitkommazahl auf $stellen Stellen nach dem Komma,
   	// wobei bei einer 5 nicht immer aufgerundet, sondern immer zur geraden Zahl gerundet wird.

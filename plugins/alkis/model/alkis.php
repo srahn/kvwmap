@@ -1,12 +1,11 @@
 <?php
 #--------------------------------------------------------------------------------------------------------------
-##############
-# Klasse ALB #
-##############
+################
+# Klasse ALKIS #
+################
 
-class ALB {
+class ALKIS {
   var $debug;
-  # Datenbankobjekt in der die ALB Daten vorgehalten werden
   var $database;
 
   function __construct($database) {
@@ -2290,5 +2289,63 @@ xmlns:web="http://webservice.sgjonlinecmd.supportgis.de/">
     $pdf->pagecount[] = $pdf->numPages;
     return $pdf;
   }
+	
+  function getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode) {
+    $ret=$this->database->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode);
+    if ($ret[0]==0) {
+      $rect=ms_newRectObj();
+      $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
+      $rect->miny=$ret[1]['miny']; $rect->maxy=$ret[1]['maxy'];
+      $ret[1]=$rect;
+    }
+    return $ret;
+  }
+  
+  function getMERfromGemeinde($Gemeinde, $epsgcode) {
+    # 2006-01-31 pk
+    $ret=$this->database->getMERfromGemeinde($Gemeinde, $epsgcode);
+    if ($ret[0]==0) {
+      $rect=ms_newRectObj();
+      $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
+      $rect->miny=$ret[1]['miny']; $rect->maxy=$ret[1]['maxy'];
+      $ret[1]=$rect;
+    }
+    return $ret;
+  }
+  
+  function getMERfromGemarkung($Gemkgschl, $epsgcode) {
+    # 2006-02-01 pk
+    $ret=$this->database->getMERfromGemarkung($Gemkgschl, $epsgcode);
+    if ($ret[0]==0) {
+      $rect=ms_newRectObj();
+      $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
+      $rect->miny=$ret[1]['miny']; $rect->maxy=$ret[1]['maxy'];
+      $ret[1]=$rect;
+    }
+    return $ret;
+  }
+
+  function getMERfromFlur($Gemarkung,$Flur, $epsgcode) {
+    # 2006-02-01 pk
+    $ret=$this->database->getMERfromFlur($Gemarkung,$Flur,$epsgcode);
+    if ($ret[0]==0) {
+      $rect=ms_newRectObj();
+      $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
+      $rect->miny=$ret[1]['miny']; $rect->maxy=$ret[1]['maxy'];
+      $ret[1]=$rect;
+    }
+    return $ret;
+  }
+    
+  function getMERfromFlurstuecke($flstliste, $epsgcode) {
+    $ret=$this->database->getMERfromFlurstuecke($flstliste, $epsgcode);
+    if ($ret[0]==0) {
+      $rect=ms_newRectObj();
+      $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
+      $rect->miny=$ret[1]['miny']; $rect->maxy=$ret[1]['maxy'];
+      $ret[1]=$rect;
+    }
+    return $ret;
+  }	
 
 }
