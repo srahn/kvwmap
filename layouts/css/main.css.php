@@ -1511,8 +1511,14 @@ tbody.gle>tr {
 }
 
 .subFormListItem > a:before{
-	content:url('../../graphics/submenue.png');
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	content: '';
+	margin: 8px 7px 0px 10px;
+	background-color: #236dbf;
 	vertical-align: top;
+	display: inline-block;
 }
 
 .calendar {
