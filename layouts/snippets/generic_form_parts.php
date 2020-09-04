@@ -805,8 +805,8 @@
 						$datapart .= '<div class="readonly_text" style="font-size: '.$fontsize.'px;">' . htmlspecialchars($angezeigter_value) . '</div>';
 					}
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != '' AND strpos($attributes['options'][$j], 'require') === false){		# bei <requires> oder <required by> nicht
-						if(strtolower(substr($attributes['options'][$j], 0, 6)) == 'select'){
-							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.')"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+						if(strtolower(substr($attributes['options'][$j], 0, 6)) == 'select') {
+							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.'"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 						else{
 							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode($attributes['name'], "','").'\'), \''.$layer_id.'_'.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
