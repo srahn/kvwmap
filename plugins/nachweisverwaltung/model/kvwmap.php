@@ -1270,6 +1270,7 @@
 	};
 
 	$GUI->nachweisFormAnzeige = function($nachweis = NULL) use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
 		include_once(CLASSPATH.'FormObject.php');
 		if($GUI->formvars['reset_layers'])$GUI->reset_layers(NULL);
 
