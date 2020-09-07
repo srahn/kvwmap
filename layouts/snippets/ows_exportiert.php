@@ -24,7 +24,13 @@
 		<tr>
 			<td align="right">&nbsp;</td>
 			<td align="left"><? echo $strExported1; ?></td>
-		</tr>
+		</tr><?php
+			if ($this->formvars['nurVeroeffentlichte'] == 1) { ?>
+				<tr>
+					<td align="right">&nbsp;</td>
+					<td align="left"><?php echo $strGefilterteLayerList; ?>:<br><? echo implode(', ', $this->gefilterte_layer); ?></td>
+				</tr><?php
+			} ?>
 		<tr>
 			<td align="right">&nbsp;</td>
 			<td align="left"><b>Web Map Service (WMS)</b></td>
@@ -70,7 +76,7 @@
 <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
 <script>
   function init() {
-    var map = L.map('map').setView([54.367, 13.02355], 13);
+    var map = L.map('map').setView([<?php echo $this->center->y; ?>, <?php echo $this->center->x; ?>], 13);
     var wmsLayer = L.tileLayer.wms("<?php echo $this->wms_onlineresource; ?>", {
         layers: 'B_Plaene',
         format: 'image/png',
@@ -87,15 +93,15 @@
 				Die Darstellung sieht dann so aus:<br>
 				<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"/>
 				<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
-				<div id="map" style="width: 860px; height: 300px"></div>
+				<div id="wms_export_sample_map" style="width: 860px; height: 300px"></div>
 				<script>
-			    var map = L.map('map').setView([54.367, 13.02355], 13);
+			    var wms_export_sample_map = L.map('wms_export_sample_map').setView([<?php echo $this->center->y; ?>, <?php echo $this->center->x; ?>], 10);
 			    var wmsLayer = L.tileLayer.wms("<?php echo $this->wms_onlineresource; ?>", {
 			        layers: 'B_Plaene',
 			        format: 'image/png',
 			        transparent: true,
 			        attribution: "bauleitplaene-mv.de"
-			    }).addTo(map);
+			    }).addTo(wms_export_sample_map);
 			</script>
 			</td>
 		</tr><?

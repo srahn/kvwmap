@@ -2076,6 +2076,9 @@ echo '			</table>
 					if($dbStyle['linecap'] != '') {
 	          $style->set('linecap', constant(MS_CJC_.strtoupper($dbStyle['linecap'])));
 	        }
+					else {
+						$style->set('linecap', constant('MS_CJC_ROUND'));
+					}
 					if($dbStyle['linejoin'] != '') {
 	          $style->set('linejoin', constant(MS_CJC_.strtoupper($dbStyle['linejoin'])));
 	        }
@@ -2653,23 +2656,22 @@ echo '			</table>
 			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
-		if(!$img_urls){
+		if (!$img_urls) {
 			ob_start();
 			$this->image_map->saveImage();
 			$image = ob_get_clean();
 			$this->img['hauptkarte'] = 'data:image/jpg;base64,'.base64_encode($image);
 		}
-		else{
+		else {
 			$filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
-			$this->image_map->saveImage(IMAGEPATH.$filename);
-			$this->img['hauptkarte'] = IMAGEURL.$filename;			
+			$this->image_map->saveImage(IMAGEPATH . $filename);
+			$this->img['hauptkarte'] = IMAGEURL . $filename;
 		}
-
-		if($this->formvars['go'] != 'navMap_ajax'){
+		if ($this->formvars['go'] != 'navMap_ajax'){
 			$this->legende = $this->create_dynamic_legend();
-			$this->debug->write("Legende erzeugt",4);
+			$this->debug->write("Legende erzeugt", 4);
 		}
-		else{
+		else {
 			# Zusammensetzen eines Layerhiddenstrings, in dem die aktuelle Sichtbarkeit aller aufgeklappten Layer gespeichert ist um damit bei Bedarf die Legende neu zu laden
 			for($i = 0; $i < $this->layerset['anzLayer']; $i++) {
 				$layer=&$this->layerset['list'][$i];
@@ -6420,8 +6422,9 @@ echo '			</table>
 			else{
 				$this->map_factor = MAPFACTOR;
 			}
+
 			# Wenn in der Anfrage für loadmapsource POST übergeben wurde, werden alle Kartenparameter aus formvars entnommen
-			if($this->formvars['loadmapsource']){
+			if ($this->formvars['loadmapsource']){
 				$this->loadMap($this->formvars['loadmapsource']);
 			}
 			else{
@@ -6506,11 +6509,11 @@ echo '			</table>
 			$this->maxy = round($maxy, 1);
 
 			if(MAPSERVERVERSION >= 600 ) {
-					$this->map_scaledenom = $this->map->scaledenom;
-				}
-				else {
-					$this->map_scaledenom = $this->map->scale;
-		}
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
 
 			$currenttime=date('Y-m-d H:i:s',time());
 			# loggen der Druckausgabe
@@ -6565,7 +6568,7 @@ echo '			</table>
 	*/
 			#$this->saveMap('');
 			#$this->debug->write("<p>Maßstab des Drucks:" . $this->map_scaledenom,4);
-			$this->drawMap();
+			$this->drawMap('true');
 
 			if($this->formvars['angle'] != 0){
 				$angle = -1 * $this->formvars['angle'];
@@ -6686,7 +6689,13 @@ echo '			</table>
 			$pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->Docu->activeframe[0]['headsrc']),$this->Docu->activeframe[0]['headposx'],$this->Docu->activeframe[0]['headposy'],$this->Docu->activeframe[0]['headwidth']);
 
 			# Hinzufügen der vom MapServer produzierten Karte
-			$pdf->addJpegFromFile(IMAGEPATH.basename($this->img['hauptkarte']),$this->Docu->activeframe[0]['mapposx'],$this->Docu->activeframe[0]['mapposy'],$this->Docu->activeframe[0]['mapwidth'], $this->Docu->activeframe[0]['mapheight']);
+			$pdf->addJpegFromFile(
+				IMAGEPATH . basename($this->img['hauptkarte']),
+				$this->Docu->activeframe[0]['mapposx'],
+				$this->Docu->activeframe[0]['mapposy'],
+				$this->Docu->activeframe[0]['mapwidth'],
+				$this->Docu->activeframe[0]['mapheight']
+			);
 
 			# Rechteck um die Karte
 			$posx1 = $this->Docu->activeframe[0]['mapposx'];
@@ -6894,10 +6903,10 @@ echo '			</table>
 		fwrite($fp, $output);
 		fclose($fp);
 
-		if($preview == true){
+		if ($preview == true){
 			exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
 			#echo IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
-			if(!file_exists(IMAGEPATH.$name.'-'.$currenttime.'.jpg')){
+			if (!file_exists(IMAGEPATH.$name.'-'.$currenttime.'.jpg')){
 				return TEMPPATH_REL.$name.'-'.$currenttime.'-0.jpg';
 			}
 			else{
@@ -6947,12 +6956,17 @@ echo '			</table>
 			$layer = $this->map->getlayer($i);
 			$layer->set('name', umlaute_umwandeln($layer->name));
 		}
-		if ($this->formvars['totalExtent']) {
+		if ($this->formvars['totalExtent'] == 1) {
 			$bb = array($this->Stelle->MaxGeorefExt->minx, $this->Stelle->MaxGeorefExt->miny, $this->Stelle->MaxGeorefExt->maxx, $this->Stelle->MaxGeorefExt->maxy);
 		}
 		else {
 			$bb = array($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
 		}
+		$this->center = ms_newPointObj();
+		$this->center->setXY($bb[0] + ($bb[2] - $bb[0]) / 2, $bb[1] + ($bb[3] - $bb[1]) / 2);
+		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
+		$projTO = ms_newprojectionobj("init=epsg:4326");
+		$this->center->project($projFROM, $projTO);
 		if (!is_dir(WMS_MAPFILE_PATH . $this->Stelle->id)) {
 			mkdir(WMS_MAPFILE_PATH . $this->Stelle->id);
 		}
@@ -6969,19 +6983,58 @@ echo '			</table>
 		$this->map->setMetaData("ows_fees", $this->formvars['ows_fees']);
 		$this->wms_onlineresource = MAPSERV_CGI_BIN . "?map=" . $this->mapfile . "&";
 		$this->map->setMetaData("wms_onlineresource", $this->wms_onlineresource);
-		$this->map->setMetaData("ows_srs", OWS_SRS);
+		$this->map->setMetaData("ows_srs", OWS_SRS . ' EPSG:3857');
 		$this->map->setMetaData("wms_enable_request", '*');
+
+		for ($i = 0; $i < $this->map->numlayers; $i++) {
+			$layer = $this->map->getLayer($i);
+			$layer->setMetaData("ows_title", $layer->name);
+			$layer->setMetaData("ows_extent", implode(', ', $bb));
+			$layer->setMetaData("ows_srs", OWS_SRS . ' EPSG:3857');
+		}
+
+		/*
+		* if formvars['nurVeroeffentlichte'] == 1 and connection_type add a filter to the layer definition
+		* but only if connectiontype of the layer is postgis and
+		* $filter_attribute is part of the base_expresion or the alias of an attribute in layers data sql
+		*/
+		if ($this->formvars['nurVeroeffentlichte'] AND $this->formvars['nurVeroeffentlichte'] == 1) {
+			$mapDb = new db_mapObj($this->Stelle->id,$this->user->id);
+			$this->gefilterte_layer = array();
+			$filter_attribute = 'veroeffentlicht';
+			for ($i = 0; $i < $this->map->numlayers; $i++) {
+				$layer = $this->map->getLayer($i);
+				if ($layer->connectiontype == 6) {
+					$sql = $mapDb->getSelectFromData($layer->data);
+					$filter = '';
+					foreach (attributes_from_select($sql) AS $attribute) {
+						if ($attribute['alias'] == $filter_attribute) {
+							$filter = $attribute['alias'];
+						}
+						elseif (strpos($attribute['base_expr'], '.' . $filter_attribute) !== false) {
+							$filter = $attribute['base_expr'];
+						}
+						if ($filter != '') {
+							$this->gefilterte_layer[] = $layer->name;
+							$layer->setFilter($filter);
+							break;
+						}
+					}
+				}
+			}
+		}
+
 		$this->saveMap($this->mapfile);
 		$this->getMapRequestExample = $this->wms_onlineresource
 			. 'SERVICE=WMS&'
 			. 'REQUEST=GetMap&'
 			. 'VERSION=' . SUPORTED_WMS_VERSION . '&'
-			. 'LAYERS=Pläne&'
+			. 'LAYERS=B_Plaene&'
 			. 'CRS=EPSG:' . $this->user->rolle->epsg_code . '&'
 			. 'BBOX=' . implode(',', $bb) .'&'
 			. 'WIDTH=' . $this->map->width . '&'
 			. 'HEIGHT=' . $this->map->height . '&'
-			. 'FORMAT=image/jpeg';
+			. 'FORMAT=image/png';
 		define('SUPORTED_WFS_VERSION', '1.3.0');
 		$this->getFeatureRequestExample = $this->wms_onlineresource
 			. 'SERVICE=WFS&'
@@ -6996,8 +7049,8 @@ echo '			</table>
 	}
 
 	function wmsExport() {
-		$this->titel='MapService Map-Datei Export';
-		$this->main="ows_export.php";
+		$this->titel = 'MapService Map-Datei Export';
+		$this->main = "ows_export.php";
 		if (
 			$this->formvars['mapfile_name'] != '' AND
 			in_array($this->formvars['mapfile_name'], $this->Stelle->get_mapfiles())
