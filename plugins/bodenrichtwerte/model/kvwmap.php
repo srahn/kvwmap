@@ -3,6 +3,7 @@
 	
 	$GUI->bodenRichtWertErfassung = function() use ($GUI){
 		include_once(CLASSPATH.'FormObject.php');
+		include_once(PLUGINS.'alkis/model/kataster.php');
     if ($GUI->formvars['oid']=='') {
       $GUI->titel='Bodenrichtwerterfassung';
     }
