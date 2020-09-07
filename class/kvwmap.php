@@ -10586,8 +10586,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$pdf_file = $this->ddl->createDataPDF(NULL, NULL, NULL, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $this->ddl->selectedlayout[0], $result, $this->Stelle, $this->user, $this->formvars['record_paging']);
 	    # in jpg umwandeln
 	    $currenttime = date('Y-m-d_H_i_s',time());
-	    exec(IMAGEMAGICKPATH.'convert "'.$pdf_file.'[0]" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"');
-	    #echo IMAGEMAGICKPATH.'convert "'.$pdf_file.'[0]" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"';
+	    exec(IMAGEMAGICKPATH . 'convert "' . $pdf_file . '[0]" -resize 595x1000 "' . dirname($pdf_file) . '/' . basename($pdf_file, ".pdf") . '-' . $currenttime . '.jpg"');
+	    #echo IMAGEMAGICKPATH . 'convert "' . $pdf_file . '[0]" -resize 595x1000 "' . dirname($pdf_file) . '/' . basename($pdf_file, ".pdf") . '-' . $currenttime . '.jpg"';
 	    if(!file_exists(IMAGEPATH.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg')){
 	    	$this->previewfile = TEMPPATH_REL.basename($pdf_file, ".pdf").'-'.$currenttime.'-0.jpg';
 	    }
@@ -11243,10 +11243,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
 		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
     $this->data_import_export = new data_import_export();
-  	if(!$this->formvars['geom_from_layer']){
-      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
-    }
+		if (
+			defined('LAYERNAME_FLURSTUECKE') AND
+			!$this->formvars['geom_from_layer']
+		) {
+			$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+			$this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
+		}
     if ($this->formvars['geom_from_layer']) {
 	    # Geometrie-Übernahme-Layer:
 	    # Spaltenname und from-where abfragen
@@ -11998,11 +12001,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
     $showpolygon = true;
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
-  	if(!$this->formvars['geom_from_layer']){
-      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
-    }
-    if($this->formvars['geom_from_layer']){
+
+		if (
+			defined('LAYERNAME_FLURSTUECKE') AND
+			!$this->formvars['geom_from_layer']
+		) {
+			$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+			$this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
+		}
+
+    if ($this->formvars['geom_from_layer']){
 	    # Geometrie-Übernahme-Layer:
 	    # Spaltenname und from-where abfragen
 	    $data = $this->mapDB->getData($this->formvars['geom_from_layer']);
@@ -14001,40 +14009,40 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     }
 	}
 
-  function flurstAnzeige($FlurstKennzListe) {
-    # 2006-01-26 pk
-    # Abfrage der Berechtigung zum Anzeigen der FlurstKennzListe
-    $ret=$this->Stelle->getFlurstueckeAllowed($FlurstKennzListe, $this->pgdatabase);
-    if ($ret[0]) {
-      $this->Fehlermeldung=$ret[1];
-      $anzFlurst=0;
-    }
-    else {
-      $FlurstKennzListe=$ret[1];
-      $anzFlurst=count($FlurstKennzListe);
-    }
+	function flurstAnzeige($FlurstKennzListe) {
+		# 2006-01-26 pk
+		# Abfrage der Berechtigung zum Anzeigen der FlurstKennzListe
+		$ret=$this->Stelle->getFlurstueckeAllowed($FlurstKennzListe, $this->pgdatabase);
+		if ($ret[0]) {
+			$this->Fehlermeldung = $ret[1];
+			$anzFlurst = 0;
+		}
+		else {
+			$FlurstKennzListe = $ret[1];
+			$anzFlurst = count($FlurstKennzListe);
+		}
 
-    $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layer = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+		$this->mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$layer = $this->user->rolle->getLayer((defined('LAYERNAME_FLURSTUECKE') ? LAYERNAME_FLURSTUECKE : ''));
 		$layerdb = $this->mapDB->getlayerdatabase($layer[0]['Layer_ID'], $this->Stelle->pgdbhost);
-    $privileges = $this->Stelle->get_attributes_privileges($layer[0]['Layer_ID']);
-    $layer[0]['attributes'] = $this->mapDB->read_layer_attributes($layer[0]['Layer_ID'], $layerdb, $privileges['attributenames']);
+		$privileges = $this->Stelle->get_attributes_privileges($layer[0]['Layer_ID']);
+		$layer[0]['attributes'] = $this->mapDB->read_layer_attributes($layer[0]['Layer_ID'], $layerdb, $privileges['attributenames']);
 
 		for($j = 0; $j < count($layer[0]['attributes']['name']); $j++){
 			$layer[0]['attributes']['privileg'][$j] = $privileges[$layer[0]['attributes']['name'][$j]];
 			$layer[0]['attributes']['privileg'][$layer[0]['attributes']['name'][$j]] = $privileges[$layer[0]['attributes']['name'][$j]];
 		}
-    $this->qlayerset[] = $layer[0];
-    $this->main = $layer[0]['template'];
+		$this->qlayerset[] = $layer[0];
+		$this->main = $layer[0]['template'];
 
 		$this->user->rolle->delete_last_query();
 		$this->user->rolle->save_last_query('Flurstueck_Anzeigen', $layer[0]['Layer_ID'], implode(';', $FlurstKennzListe), NULL, NULL, NULL);
 
-    for ($i=0;$i<$anzFlurst;$i++) {
-      $this->qlayerset[0]['shape'][$i]['flurstkennz'] = $FlurstKennzListe[$i];
-    }
-    $i = 0;
-  }
+		for ($i=0;$i<$anzFlurst;$i++) {
+			$this->qlayerset[0]['shape'][$i]['flurstkennz'] = $FlurstKennzListe[$i];
+		}
+		$i = 0;
+	}
 
 	function sachdaten_speichern() {
 		$document_attributes = array();
@@ -15904,7 +15912,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       $randy=($rect->maxy-$rect->miny)*$border/100;
     }
 		$epsg = EPSGCODE_ALKIS;
-		$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+		$layerset = $this->user->rolle->getLayer((defined('LAYERNAME_FLURSTUECKE') ? LAYERNAME_FLURSTUECKE : ''));
 		$data = $layerset[0]['Data'];
 		if($data == '')$data ="the_geom from (select f.gml_id as oid, wkb_geometry as the_geom from alkis.ax_flurstueck as f where 1=1) as foo using unique oid using srid=" . $epsg;
 		$explosion = explode(' ', $data);
@@ -17881,6 +17889,7 @@ class db_mapObj{
 												$this->GUI->add_message('error', 'Fehler bei der Abfrage der Optionen für das Attribut "' . $attributes['name'][$i] . '"<br>' . err_msg($this->script_name, __LINE__, $ret[1]));
 												return 0;
 											}
+											$attributes['enum_value'][$i][$k] = array();
 											while($rs = pg_fetch_array($ret[1])) {
 												$attributes['enum_value'][$i][$k][] = $rs['value'];
 												$attributes['enum_output'][$i][$k][] = $rs['output'];
@@ -19354,6 +19363,8 @@ class db_mapObj{
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
 		while ($rs = $ret['result']->fetch_array()){
+			$attributes['enum_value'][$i] = array();
+
 			$attributes['order'][$i] = $rs['order'];
 			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;

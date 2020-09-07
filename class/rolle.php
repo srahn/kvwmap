@@ -70,7 +70,7 @@ class rolle {
 		$layer_name_filter = '';
 		
 		# Abfragen der Layer in der Rolle
-		if($language != 'german') {
+		if ($language != 'german') {
 			$name_column = "
 			CASE
 				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`

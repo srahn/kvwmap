@@ -994,9 +994,8 @@ class data_import_export {
 	function export_exportieren($formvars, $stelle, $user){
 		global $language;
 		global $GUI;
-    global $kvwmap_plugins;
-
-		$currenttime=date('Y-m-d H:i:s',time());
+		global $kvwmap_plugins;
+		$currenttime = date('Y-m-d H:i:s',time());
 		$this->formvars = $formvars;
 		$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
 		$mapdb = new db_mapObj($stelle->id,$user->id);
@@ -1085,9 +1084,10 @@ class data_import_export {
 			";
 
 		# Bedingungen
-		if($where != ''){		# Where-Klausel aus Sachdatenabfrage-SQL (abgefragter Extent, Suchparameter oder oids)
+		if ($where != '') {
+			# Where-Klausel aus Sachdatenabfrage-SQL (abgefragter Extent, Suchparameter oder oids)
 			$orderbyposition = strpos(strtolower($where), 'order by');
-			if($orderbyposition)$where = substr($where, 0, $orderbyposition);
+			if ($orderbyposition)$where = substr($where, 0, $orderbyposition);
 			$sql = "
 				SELECT *
 				FROM ("
@@ -1105,7 +1105,8 @@ class data_import_export {
 					. $groupby . "
 				) as query
 				WHERE " . $filter;
-			}
+		}
+		#echo '<br>sql: ' . $sql;
 		if ($this->formvars['newpathwkt']){	# über Polygon einschränken
 			if ($this->formvars['within'] == 1)$sp_op = 'st_within'; else $sp_op = 'st_intersects';
 			$sql.= " AND ".$sp_op."(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
@@ -1121,9 +1122,8 @@ class data_import_export {
 			CREATE TABLE public." . $temp_table . " AS "
 			. $sql . "
 		";
-		#echo '<p>SQL zum Anlegen der temporären Tabelle: ' . $sql;
+		#echo '<p>SQL zum Anlegen der temporären Tabelle: ' . $sql . '-';
 		$ret = $layerdb->execSQL($sql,4, 0);
-		#echo 'ret: ' . print_r($ret, true);
 
 		for ($s = 0; $s < count($selected_attributes); $s++){
 			# Transformieren der Geometrie
@@ -1217,7 +1217,7 @@ class data_import_export {
 				} break;
 
 				case 'CSV' : {
-					while($rs=pg_fetch_assoc($ret[1])){
+					while ($rs=pg_fetch_assoc($ret[1])){
 						$result[] = $rs;
 					}
 					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, true);
