@@ -145,7 +145,6 @@ else {
 	}
 	include_(CLASSPATH . 'kvwmap.php');
 	include_(CLASSPATH . 'Menue.php');
-	include_(CLASSPATH . 'kataster.php');
 	include_(CLASSPATH . 'postgresql.php');
 	include_(CLASSPATH . 'users.php');
 	include_(CLASSPATH . 'Nutzer.php');
@@ -321,6 +320,10 @@ function go_switch($go, $exit = false) {
 			# Legende erzeugen
 			case 'get_legend' : {
 				$GUI->loadMap('DataBase');
+				# Parameter $scale in Data ersetzen
+				for($i = 0; $i < count($GUI->layers_replace_scale); $i++){
+					$GUI->layers_replace_scale[$i]->set('data', str_replace('$scale', $GUI->map_scaledenom, $GUI->layers_replace_scale[$i]->data));
+				}
 				$GUI->map->draw();			# sonst werden manche Klassenbilder nicht generiert
 				echo $GUI->create_dynamic_legend();
 			} break;
@@ -515,18 +518,6 @@ function go_switch($go, $exit = false) {
 				$GUI->getlayerfromgroup();
 			} break;
 
-			# Eigentuemerfortführung
-			case 'Adressaenderungen_Export' : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->export_Adressaenderungen();
-			} break;
-
-			# Eigentuemerfortführung
-			case 'Adressaenderungen_Export_Exportieren' : {
-				$GUI->checkCaseAllowed('Adressaenderungen_Export');
-				$GUI->export_Adressaenderungen_exportieren();
-			} break;
-
 			case 'exportWMC' :{
 				$GUI->exportWMC();
 			} break;
@@ -541,26 +532,6 @@ function go_switch($go, $exit = false) {
 				$GUI->createMapPDF($GUI->formvars['aktiverRahmen'], false);
 				$GUI->mime_type='pdf';
 				$GUI->output();
-			} break;
-
-			case 'Flurstuecks-CSV-Export' : {
-				$GUI->export_flurst_csv();
-			} break;
-
-			case 'Flurstuecks-CSV-Export_Auswahl_speichern' : {
-				$GUI->export_flurst_csv_auswahl_speichern();
-			} break;
-
-			case 'Flurstuecks-CSV-Export_Auswahl_laden' : {
-				$GUI->export_flurst_csv_auswahl_laden();
-			} break;
-
-			case 'Flurstuecks-CSV-Export_Auswahl_loeschen' : {
-				$GUI->export_flurst_csv_auswahl_loeschen();
-			} break;
-
-			case 'Flurstuecks-CSV-Export_Exportieren' : {
-				$GUI->export_flurst_csv_exportieren();
 			} break;
 
 			# PointEditor
@@ -626,11 +597,6 @@ function go_switch($go, $exit = false) {
 				if($GUI->formvars['legendtouched'])$GUI->saveLegendRoleParameters();
 				$GUI->queryMap();
 			}break;
-
-			# gibt die Koordinaten des in der Variable FlurstKennz übergebenen Flurstückes aus
-			case 'showFlurstuckKoordinaten' : {
-				$GUI->showFlurstueckKoordinaten();
-			} break;
 
 			# Export der geloggten Zugriffe in eine Georg-Datei
 			case 'georg_export' : {
@@ -773,32 +739,6 @@ function go_switch($go, $exit = false) {
 			case 'Layerauswahl_loeschen' : {
 				$GUI->DeleteStoredLayers();
 			}break;
-
-			#2006-01-03 pk
-			case 'Grundbuchblatt_Auswaehlen' : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->grundbuchblattWahl();
-			} break;
-
-			#2006-01-03 pk
-			case 'Grundbuchblatt_Auswaehlen_Suchen' : {
-				$GUI->checkCaseAllowed('Grundbuchblatt_Auswaehlen');
-				if($GUI->last_query != ''){
-					$GUI->formvars['selBlatt'] = $GUI->last_query[0]['sql'];
-				}
-				$GUI->grundbuchblattSuchen();
-			} break;
-
-			# 2006-01-26 pk
-			case 'Flurstueck_Anzeigen' : {
-				$GUI->checkCaseAllowed($go);
-				if($GUI->last_query != ''){
-					$GUI->formvars['FlurstKennz'] = $GUI->last_query[$GUI->last_query['layer_ids'][0]]['sql'];
-				}
-				$explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
-				$GUI->flurstAnzeige($explodedFlurstKennz);
-				$GUI->output();
-			} break;
 
 			case 'changeLegendDisplay' : {
 				$GUI->changeLegendDisplay();
@@ -970,45 +910,6 @@ function go_switch($go, $exit = false) {
 
 			case 'Metadateneingabe_Senden' : {
 				$GUI->metadatensatzspeichern();
-			} break;
-
-			case 'Nutzung_auswaehlen' : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->nutzungWahl();
-			} break;
-
-			case 'Nutzung_auswaehlen_Suchen' : {
-				$GUI->nutzungsuchen();
-			} break;
-
-			case 'Namen_Auswaehlen' : {
-				$GUI->namenWahl();
-			} break;
-
-			case 'Namen_Auswaehlen_Suchen' : {
-				$GUI->checkCaseAllowed('Namensuche');
-				$GUI->nameSuchen();
-			} break;
-
-			case 'Suche_Flurstuecke_zu_Grundbuechern' : {
-				$GUI->flurstuecksSucheByGrundbuecher();
-			} break;
-
-			case 'Zeige_Flurstuecke_zu_Grundbuechern' : {
-				$GUI->flurstuecksAnzeigeByGrundbuecher();
-			} break;
-
-			case 'Suche_Flurstuecke_zu_Namen' : {
-				$GUI->flurstuecksSucheByNamen();
-			} break;
-
-			case 'Zeige_Flurstuecke_zu_Namen' : {
-				$GUI->flurstuecksAnzeigeByNamen();
-			} break;
-
-			case "Suche_Flurstueck_zu_LatLng" : {
-				$GUI->flurstSuchenByLatLng();
-				$GUI->output();
 			} break;
 
 			case 'ExportMapToPDF' : {
@@ -1678,20 +1579,6 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
-			case "ZoomToFlst" : {
-				$GUI->loadMap('DataBase');
-				if (strpos($GUI->formvars['FlurstKennz'], '/') !== false)$GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS($GUI->formvars['FlurstKennz']);
-				if (substr($GUI->formvars['FlurstKennz'], -1) == '0') $GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS_0To_($GUI->formvars['FlurstKennz']);
-
-				$explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
-				$GUI->zoomToALKFlurst($explodedFlurstKennz,10);
-				$currenttime=date('Y-m-d H:i:s',time());
-				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-				$GUI->drawMap();
-				$GUI->saveMap('');
-				$GUI->output();
-			} break;
-
 			case "Full_Extent" : {
 				$GUI->loadMap('DataBase');
 				$GUI->navMap('Full_Extent');
@@ -1701,83 +1588,7 @@ function go_switch($go, $exit = false) {
 				$GUI->saveMap('');
 				$GUI->output();
 			} break;
-
-			case "Adresse_Auswaehlen" : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->adresswahl();
-				$GUI->output();
-			} break;
-
-			case "ALK-Adresse_Auswaehlen" : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->formvars['ALK_Suche'] = 1;
-				$GUI->adresswahl();
-				$GUI->output();
-			} break;
-
-			case "Adresse_Auswaehlen_Suchen" : {
-				$GUI->adresseSuchen();
-				$GUI->output();
-			} break;
-
-			case "ALK-Adresse_Auswaehlen_Suchen" : {
-				$GUI->adresseSuchen();
-				$GUI->output();
-			} break;
-
-			case "Flurstueck_hist_Auswaehlen" : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->formvars['historical'] = 1;
-				$GUI->flurstwahl();
-				$GUI->output();
-			} break;
-
-			case "ALK-Flurstueck_Auswaehlen" : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->formvars['ALK_Suche'] = 1;
-				$GUI->flurstwahl();
-				$GUI->output();
-			} break;
-
-			case "Flurstueck_Auswaehlen" : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->flurstwahl();
-				$GUI->output();
-			} break;
-
-			 case "Flurstueck_GetVersionen" : {
-				$GUI->Flurstueck_GetVersionen();
-			} break;
-
-			case "Flurstueck_Auswaehlen_Suchen" : {
-				$GUI->flurstSuchen();
-				$GUI->output();
-			} break;
-
-			case "ALK-Flurstueck_Auswaehlen_Suchen" : {
-				$GUI->flurstSuchen();
-				$GUI->output();
-			} break;
-
-			case 'ALKIS_Auszug' : {
-				$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);
-				$GUI->ALKIS_Auszug($flurst_array, $GUI->formvars['Grundbuchbezirk'], $GUI->formvars['Grundbuchblatt'], $GUI->formvars['Buchungsstelle'], $GUI->formvars['formnummer']);
-			} break;
-
-			case  'ALB_Anzeige' : {
-				$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);
-				$GUI->ALB_Anzeigen($flurst_array,$GUI->formvars['formnummer'], NULL, NULL);
-			} break;
-
-			case  'ALB_Anzeige_Bestand' : {
-				$GUI->ALB_Anzeigen(NULL, $GUI->formvars['formnummer'], $GUI->formvars['Grundbuchbezirk'], $GUI->formvars['Grundbuchblatt']);
-			} break;
 			
-			case  'generischer_Flurstuecksauszug' : {
-				$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);
-				$GUI->generischer_Flurstuecksauszug($flurst_array);
-			} break;			
-
 			 # Auswählen einer neuen Stelle
 			case 'Stelle_waehlen' : case 'Stelle_waehlen_Passwort_aendern' : {
 				$GUI->checkCaseAllowed('Stelle_waehlen');

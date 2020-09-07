@@ -70,7 +70,7 @@ class rolle {
 		$layer_name_filter = '';
 		
 		# Abfragen der Layer in der Rolle
-		if($language != 'german') {
+		if ($language != 'german') {
 			$name_column = "
 			CASE
 				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
@@ -987,7 +987,7 @@ class rolle {
 			$aktiv_status = value_of($formvars, 'thema'.value_of($this->layerset[$i], 'Layer_ID'));
 			$requires_status = value_of($formvars, 'thema'.value_of($this->layerset[$i], 'requires'));
 			if($aktiv_status !== '' OR $requires_status !== ''){										// entweder ist der Layer selber an oder sein requires-Layer
-				$aktiv_status = $aktiv_status + (int)$requires_status;
+				$aktiv_status = (int)$aktiv_status + (int)$requires_status;
 				if($this->layerset[$i]['Layer_ID'] > 0){
 					$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
