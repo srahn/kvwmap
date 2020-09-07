@@ -596,11 +596,11 @@ class stelle {
 	}
 
 	function getFlurstueckeAllowed($FlurstKennz, $database) {
-		include_(CLASSPATH.'alb.php');
+		include_once(PLUGINS.'alkis/model/alkis.php');
 		$GemeindenStelle = $this->getGemeindeIDs();
 		if($GemeindenStelle != NULL){
-			$alb = new ALB($database);
-			$ret=$alb->getFlurstKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz);
+			$alkis = new alkis($database);
+			$ret=$alkis->getFlurstKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz);
 			if ($ret[0]==0) {
 				$anzFlurstKennz=count($ret[1]);
 				if ($anzFlurstKennz==0) {

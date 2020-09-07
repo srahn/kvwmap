@@ -58,7 +58,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	  	$alle_flst_pro_buchung[] = $this->buchungen[$i]['flurstkennz'];
 			$alle_flst[] = $this->buchungen[$i]['flurstkennz'];
 	  	$ret=$flst->readALB_Data($this->buchungen[$i]['flurstkennz']);
-	  	for($s=0;$s<count($flst->Adresse);$s++) {
+	  	for($s=0; $s < @count($flst->Adresse);$s++) {
 	      $Adressbezeichnung.=$flst->Adresse[$s]["strassenname"];
 	      $Adressbezeichnung.='&nbsp;'.$flst->Adresse[$s]["hausnr"];
 	    }

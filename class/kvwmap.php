@@ -2766,22 +2766,6 @@ echo '			</table>
     return $Lagebezeichnung;
   }
 
-  function getFlurbezeichnung($epsgcode) {
-    $Flurbezeichnung = '';
- 	  $flur = new Flur('','','',$this->pgdatabase);
-		$bildmitte['rw']=($this->map->extent->maxx+$this->map->extent->minx)/2;
-		$bildmitte['hw']=($this->map->extent->maxy+$this->map->extent->miny)/2;
-		$ret=$flur->getBezeichnungFromPosition($bildmitte, $epsgcode);
-		if ($ret[0]) {
-		}
-		else {
-			if ($ret[1]['flur'] != '') {
-				$Flurbezeichnung = $ret[1];
-			}
-		}
-		return $Flurbezeichnung;
-  }
-
 	# extrahiert die Daten aus qlayerset in ein Array
 	function qlayersetParamStrip() {
 		$result = array();

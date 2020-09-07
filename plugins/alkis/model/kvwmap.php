@@ -1,5 +1,22 @@
 <?
 
+	$GUI->getFlurbezeichnung = function($epsgcode) use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
+    $Flurbezeichnung = '';
+ 	  $flur = new Flur('','','',$GUI->pgdatabase);
+		$bildmitte['rw']=($GUI->map->extent->maxx+$GUI->map->extent->minx)/2;
+		$bildmitte['hw']=($GUI->map->extent->maxy+$GUI->map->extent->miny)/2;
+		$ret=$flur->getBezeichnungFromPosition($bildmitte, $epsgcode);
+		if ($ret[0]) {
+		}
+		else {
+			if ($ret[1]['flur'] != '') {
+				$Flurbezeichnung = $ret[1];
+			}
+		}
+		return $Flurbezeichnung;
+  };
+
   $GUI->zoomToALKGemarkung = function($Gemkgschl,$border) use ($GUI){
     # 2006-02-01 pk
     # 1. Funktion ermittelt das umschließende Rechteck der $Gemarkung aus der postgis Datenbank
@@ -7,6 +24,7 @@
     # 3. und stellt die Gemarkung in einem gesonderten Layer in Gelb dar
     # zu 1)
 		include_once(PLUGINS.'alkis/model/alkis.php');
+		include_once(PLUGINS.'alkis/model/kataster.php');
 		$alkis = new ALKIS($GUI->pgdatabase);
     $ret=$alkis->getMERfromGemarkung($Gemkgschl, $GUI->user->rolle->epsg_code);
     if ($ret[0]) {
@@ -70,6 +88,7 @@
     # 3. und stellt die Gemarkung in einem gesonderten Layer in Gelb dar
     # zu 1)
 		include_once(PLUGINS.'alkis/model/alkis.php');
+		include_once(PLUGINS.'alkis/model/kataster.php');
 		$alkis = new ALKIS($GUI->pgdatabase);
     $ret=$alkis->getMERfromFlur($GemkgID,$FlurID, $GUI->user->rolle->epsg_code);
     if ($ret[0]) {
@@ -307,6 +326,7 @@
   };
 	
 	$GUI->adresswahl = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
 		include_once(CLASSPATH.'FormObject.php');
     $Adresse=new adresse('','','',$GUI->pgdatabase);
     $GUI->main='adresssuche.php';
@@ -415,10 +435,7 @@
   };
 
 	$GUI->adresseSuchen = function() use ($GUI){
-    # 2006-01-31 pk
-    #echo 'GemeindeID'.$GUI->formvars['GemID'];
-    #echo '<br>StrasseID'.$GUI->formvars['StrID'];
-    #echo '<br>HausID'.$GUI->formvars['selHausID'];
+    include_once(PLUGINS.'alkis/model/kataster.php');
     $GemID=$GUI->formvars['GemID'];
     if($GemID == -1){
     	$Gemarkung=new gemarkung('',$GUI->pgdatabase);
@@ -495,6 +512,7 @@
   };
 	
 	$GUI->flurstwahl = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
 		include_once(CLASSPATH.'FormObject.php');
     if($GUI->formvars['historical'] == 1){
       $GUI->titel='historische Flurstückssuche';
@@ -612,6 +630,7 @@
   };
 	
 	$GUI->flurstSuchen = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
     $GemID=$GUI->formvars['GemID'];
     $GemkgID=$GUI->formvars['GemkgID'];
     if ($GUI->formvars['FlurID']!='-1') {
@@ -739,6 +758,7 @@
   };
 
 	$GUI->flurstSuchenByLatLng = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
     $flurstueck = new flurstueck('',$GUI->pgdatabase);
 		if (in_array($GUI->formvars['version'], array("1.0", "1.0.0"))) {
 			$result= $flurstueck->getFlurstByLatLng($GUI->formvars['latitude'], $GUI->formvars['longitude']);
@@ -762,6 +782,7 @@
 	};
 
 	$GUI->Flurstueck_GetVersionen = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
 		$ret=$GUI->Stelle->getFlurstueckeAllowed(array($GUI->formvars['flurstkennz']), $GUI->pgdatabase);
     if($ret[0]) {
       $GUI->Fehlermeldung=$ret[1];
@@ -815,6 +836,7 @@
 	};
 
 	$GUI->flurstAnzeige = function($FlurstKennzListe) use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
     # 2006-01-26 pk
     # Abfrage der Berechtigung zum Anzeigen der FlurstKennzListe
     $ret=$GUI->Stelle->getFlurstueckeAllowed($FlurstKennzListe, $GUI->pgdatabase);
@@ -857,6 +879,7 @@
 
 	$GUI->ALKIS_Auszug = function($FlurstKennz,$Grundbuchbezirk,$Grundbuchblatt,$Buchnungstelle,$formnummer) use ($GUI){
 		include_once(PLUGINS.'alkis/model/alkis.php');
+		include_once(PLUGINS.'alkis/model/kataster.php');
     if($FlurstKennz[0] == '' AND ($Grundbuchbezirk != NULL OR $Buchnungstelle != NULL)){
       $grundbuch=new grundbuch($Grundbuchbezirk,$Grundbuchblatt,$GUI->pgdatabase);
       # Abfrage aller Flurstücke, die auf dem angegebenen Grundbuchblatt liegen.
@@ -946,6 +969,7 @@
 
 	$GUI->ALB_Anzeigen = function($layout, $formvars) use ($GUI){
 		include_once(PLUGINS.'alkis/model/alkis.php');
+		include_once(PLUGINS.'alkis/model/kataster.php');
     if($FlurstKennz[0] == '' AND ($Grundbuchbezirk != NULL OR $Buchnungstelle != NULL)){
       $grundbuch=new grundbuch($Grundbuchbezirk,$Grundbuchblatt,$GUI->pgdatabase);
       # Abfrage aller Flurstücke, die auf dem angegebenen Grundbuchblatt liegen.
@@ -1122,6 +1146,7 @@
   };
 	
 	$GUI->grundbuchblattWahl = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
     $GUI->titel='Suche nach Grundbuchblättern';
     $GUI->main='grundbuchblattsuchform.php';
     $grundbuch = new grundbuch('', '', $GUI->pgdatabase);
@@ -1163,6 +1188,7 @@
   };
 
 	$GUI->grundbuchblattSuchen = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
   	$blaetter = explode(', ', $GUI->formvars['selBlatt']);
   	for($i = 0; $i < count($blaetter); $i++){
   		$blatt = explode('-', $blaetter[$i]);		# bezirk-blatt
@@ -1214,6 +1240,7 @@
   };
 	
 	$GUI->nutzungWahl = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
 		include_once(CLASSPATH.'FormObject.php');
     if ($GUI->formvars['anzahl'] == 0) {
       $GUI->formvars['anzahl'] = 10;
@@ -1243,7 +1270,7 @@
   };
 
 	$GUI->nutzungsuchen = function() use ($GUI){
-    # 2006-29-06 sr: auf Gemarkungen der Stelle einschränken
+    include_once(PLUGINS.'alkis/model/kataster.php');
     if($GUI->formvars['GemkgID'] > 0){
       $Liste['GemkgID'][] = $GUI->formvars['GemkgID'];
       $GUI->formvars['GemkgID'] = $Liste['GemkgID'];
@@ -1281,6 +1308,7 @@
   };
 
 	$GUI->namenWahl = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
 		include_once(CLASSPATH.'FormObject.php');
     if ($GUI->formvars['anzahl']==0) {
       $GUI->formvars['anzahl']=10;
@@ -1317,6 +1345,7 @@
   };
 
 	$GUI->nameSuchen = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
 		$GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
 		if(!empty($GemeindenStelle['ganze_gemeinde'])){
 			$Gemarkung=new gemarkung('',$GUI->pgdatabase);
@@ -1360,6 +1389,7 @@
   };
 
 	$GUI->flurstuecksAnzeigeByGrundbuecher = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
     $flurstueck=new flurstueck('',$GUI->database);
     $flurstueck->database=$GUI->pgdatabase;
     $gbarray = explode(', ', $GUI->formvars['selBlatt']);
@@ -1380,6 +1410,7 @@
   };
 
 	$GUI->flurstuecksSucheByGrundbuecher = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
     $flurstueck=new flurstueck('',$GUI->database);
     $flurstueck->database=$GUI->pgdatabase;
     $gbarray = explode(', ', $GUI->formvars['selBlatt']);
@@ -1392,54 +1423,6 @@
       $GUI->flurstAnzeige($Flurstuecke);
       $GUI->output();
     }
-  };
-
-	$GUI->flurstuecksSucheByNamen = function() use ($GUI){
-    $flurstueck=new flurstueck('',$GUI->database);
-    $flurstueck->database=$GUI->pgdatabase;
-    $ret=$flurstueck->getFlurstByLfdNrName($GUI->formvars['lfd_nr_name'],$GUI->formvars['anzahl']);
-    if ($ret[0]) {
-      $GUI->Fehlermeldung='<br>Es konnten keine Namen abgefragt werden'.$ret[1];
-      $GUI->namenWahl();
-    }
-    else {
-      $FlurstKennz=$ret[1];
-      if (count($FlurstKennz)==0) {
-        $GUI->Fehlermeldung='<br>Es konnten keine Namen gefunden werden, bitte ändern Sie die Anfrage!';
-        $GUI->namenWahl();
-      }
-      else {
-        # Anzeige der Namen
-        $GUI->flurstAnzeige($FlurstKennz);
-        $GUI->output();
-      } # ende Ergebnisanzahl größer 0
-    } # ende Abfrage war erfolgreich
-  };
-
-	$GUI->flurstuecksAnzeigeByNamen = function() use ($GUI){
-    $flurstueck=new flurstueck('',$GUI->database);
-    $flurstueck->database=$GUI->pgdatabase;
-    $ret=$flurstueck->getFlurstByLfdNrName($GUI->formvars['lfd_nr_name'],$GUI->formvars['anzahl']);
-    if ($ret[0]) {
-      $GUI->Fehlermeldung='<br>Es konnten keine Namen abgefragt werden'.$ret[1];
-      $GUI->namenWahl();
-    }
-    else {
-      $FlurstKennz=$ret[1];
-      if (count($FlurstKennz)==0) {
-        $GUI->Fehlermeldung='<br>Es konnten keine Namen gefunden werden, bitte ändern Sie die Anfrage!';
-        $GUI->namenWahl();
-      }
-      else {
-        # Anzeige der Flurstuecke
-        $GUI->zoomToALKFlurst($FlurstKennz,10);
-        $currenttime=date('Y-m-d H:i:s',time());
-        $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-        $GUI->drawMap();
-        $GUI->saveMap('');
-        $GUI->output();
-      } # ende Ergebnisanzahl größer 0
-    } # ende Abfrage war erfolgreich
   };
 
 ?>
