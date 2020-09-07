@@ -1,4 +1,5 @@
 <?
+	include_once(PLUGINS.'alkis/model/kataster.php');
 	include_once(SNIPPETS.'sachdatenanzeige_functions.php');
 	global $layer_ids_flst_auszuege;
 	if(!empty($layer_ids_flst_auszuege)){

@@ -329,7 +329,7 @@
 		include_once(PLUGINS.'alkis/model/kataster.php');
 		include_once(CLASSPATH.'FormObject.php');
     $Adresse=new adresse('','','',$GUI->pgdatabase);
-    $GUI->main='adresssuche.php';
+    $GUI->main = PLUGINS.'alkis/view/adresssuche.php';
     if($GUI->formvars['ALK_Suche'] == 1){
     	$GUI->titel='Adresssuche (zur Karte)';
     }
@@ -525,7 +525,7 @@
     	$GUI->titel='Flurstückssuche';
     }
 		if($GUI->formvars['titel'] != '')$GUI->titel = $GUI->formvars['titel'];
-    $GUI->main='flurstueckssuche.php';
+		$GUI->main = PLUGINS.'alkis/view/flurstueckssuche.php';
     ####### Import ###########
 		$_files = $_FILES;
     if($_files['importliste']['name']){
@@ -1070,7 +1070,7 @@
 	
 	$GUI->export_Adressaenderungen = function() use ($GUI){
     $GUI->titel='Adressänderungen der Eigentümer exportieren';
-    $GUI->main='Adressaenderungen_Export.php';
+		$GUI->main = PLUGINS.'alkis/view/Adressaenderungen_Export.php';
     $GUI->output();
   };
 
@@ -1087,7 +1087,7 @@
 	$GUI->export_flurst_csv = function() use ($GUI){
 		$GUI->attribute_selections = $GUI->user->rolle->get_csv_attribute_selections();
     $GUI->attribute = explode(';', $GUI->formvars['attributliste']);
-    $GUI->main = 'export_flurstuecke_csv.php';
+		$GUI->main = PLUGINS.'alkis/view/export_flurstuecke_csv.php';
    	$GUI->titel = $GUI->formvars['formnummer'].'-CSV-Export';
     $GUI->output();
   };
@@ -1148,7 +1148,7 @@
 	$GUI->grundbuchblattWahl = function() use ($GUI){
 		include_once(PLUGINS.'alkis/model/kataster.php');
     $GUI->titel='Suche nach Grundbuchblättern';
-    $GUI->main='grundbuchblattsuchform.php';
+		$GUI->main = PLUGINS.'alkis/view/grundbuchblattsuchform.php';
     $grundbuch = new grundbuch('', '', $GUI->pgdatabase);
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
     if($GemeindenStelle != ''){   // Stelle ist auf Gemeinden eingeschränkt
@@ -1233,7 +1233,7 @@
   };
 
 	$GUI->grundbuchblattanzeige = function($gbblaetter) use ($GUI){
-    $GUI->main='grundbuchblattanzeige.php';
+		$GUI->main = PLUGINS.'alkis/view/grundbuchblattanzeige.php';
     $GUI->titel='Buchungen zum Grundbuchblatt';
     $GUI->gbblaetter=$gbblaetter;
     $GUI->output();
@@ -1246,7 +1246,7 @@
       $GUI->formvars['anzahl'] = 10;
     }
     $GUI->titel='Flurstückssuche nach Nutzung';
-    $GUI->main='nutzungensuchform.php';
+		$GUI->main = PLUGINS.'alkis/view/nutzungensuchform.php';
 
     # 2006-29-06 sr: Gemarkungsformobjekt nur für Gemeinden der Stelle
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
@@ -1313,7 +1313,7 @@
     if ($GUI->formvars['anzahl']==0) {
       $GUI->formvars['anzahl']=10;
     }
-    $GUI->main='namensuchform.php';
+		$GUI->main = PLUGINS.'alkis/view/namensuchform.php';
 		$GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
 		$GemkgID=$GUI->formvars['GemkgID'];
 		$Gemarkung=new gemarkung('',$GUI->pgdatabase);
