@@ -190,6 +190,7 @@ class Validierung extends PgObject {
 		$this->debug->show('<br>Validiere ob geometrie_vorhanden mit sql:<br>' . $sql, Validierung::$write_debug);
 
 		$result = pg_query($this->database->dbConn, $sql);
+		$regel = Regel::find_by_id($this->gui, 'id', $this->konvertierung_id);
 
 		while ($row = pg_fetch_assoc($result)) {
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
