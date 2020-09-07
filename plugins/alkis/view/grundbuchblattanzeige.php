@@ -62,7 +62,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	      $Adressbezeichnung.=$flst->Adresse[$s]["strassenname"];
 	      $Adressbezeichnung.='&nbsp;'.$flst->Adresse[$s]["hausnr"];
 	    }
-	    for($s=0;$s<count($flst->Lage);$s++) {
+	    for($s=0; $s < @count($flst->Lage);$s++) {
       	$Adressbezeichnung .= $flst->Lage[$s];
     	}
 	    for($n=0;$n<count($flst->Nutzung);$n++) {
