@@ -2198,7 +2198,7 @@ FROM
     if ($flur>0) {
       $sql.=" AND f.flurnummer = ".$flur;
     }
-		if($ganze_gemkg_ids[0] != '' OR count($eingeschr_gemkg_ids) > 0){
+		if($ganze_gemkg_ids[0] != '' OR @count($eingeschr_gemkg_ids) > 0){
 			$sql.=" AND (FALSE ";
 			if($ganze_gemkg_ids[0] != ''){
 				$sql.="OR f.land||f.gemarkungsnummer IN ('".implode("','", $ganze_gemkg_ids)."')";

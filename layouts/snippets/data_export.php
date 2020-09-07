@@ -168,7 +168,7 @@ $j=0;
 			if ($this->formvars['sql_' . $this->formvars['selected_layer_id']] != '') { ?>
 				<div style="margin-top:30px; text-align:center;">
 					<span class="fett"><? echo $this->formvars['anzahl']; ?> <? if ($this->formvars['anzahl']==1) { echo $strRecordFromGLE; } else { echo $strRecordsFromGLE; } ?></span>
-					<input type="hidden" name="sql_<? echo $this->formvars['selected_layer_id']; ?>" value="<? echo stripslashes($this->formvars['sql_'.$this->formvars['selected_layer_id']]); ?>">
+					<input type="hidden" name="sql_<? echo $this->formvars['selected_layer_id']; ?>" value="<? echo htmlspecialchars($this->formvars['sql_'.$this->formvars['selected_layer_id']]); ?>">
 					<input type="hidden" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>">
 				</div><?
 			} ?>
