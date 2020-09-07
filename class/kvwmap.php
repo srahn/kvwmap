@@ -13860,10 +13860,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 										$pfad .= $layerset[$i]['attributes']['groupby'];
 										$j = 0;
 										foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-													if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != ''){		# hat Haupttabelle oids?
-														$pfad .= ','.pg_quoet($tablename.'_oid').' ';
-													}
-													$j++;
+											if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != ''){		# hat Haupttabelle oids?
+												$pfad .= ','.pg_quote($tablename.'_oid').' ';
+											}
+											$j++;
 										}
 									}
 									$sql = "SELECT * FROM (SELECT " . $pfad.") as query WHERE 1=1 " . $filter . $sql_where;
@@ -14489,8 +14489,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$geometrie_tabelle = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 				$j = 0;
 				foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-					if(($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oder Geometrietabelle oids?
-						$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
+					if (($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['oid'] != '') {
+						$pfad = pg_quote($layerset[$i]['attributes']['table_alias_name'][$tablename]).'.'.$layerset[$i]['oid'].' AS ' . pg_quote($tablename . '_oid').', ' . $pfad;
 					}
 					$j++;
 				}
@@ -14592,8 +14592,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$pfad .= $layerset[$i]['attributes']['groupby'];
 					$j = 0;
 					foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-						if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
-							$pfad .= ','.$tablename.'_oid ';
+						if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != ''){		# hat Haupttabelle oids?
+							$pfad .= ','.pg_quote($tablename.'_oid').' ';
 						}
 						$j++;
 					}
