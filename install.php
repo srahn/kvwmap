@@ -344,7 +344,9 @@ function init_config() {
 	define('LOGFILE_MYSQL', LOGPATH . 'install.log');
 	define('LOGFILE_POSTGRES', LOGPATH . 'install.log');
 	define('WWWROOT', $installpath.$wwwpath);
-	define('APPLVERSION', $applversion.'/');
+	define('APPLVERSION', $applversion . '/');
+	define('WAPPENPATH', 'graphics/wappen/');
+	$kvwmap_plugins = array();
 }
 
 function show_constants() { ?>
