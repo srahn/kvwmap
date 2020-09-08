@@ -3,7 +3,8 @@
 	include('../../config.php');
 	
 	global $sizes;
-	$size = $sizes[$_REQUEST['gui']];
+	$key = ((array_key_exists('gui', $_REQUEST) AND array_key_exists($_REQUEST['gui'], $sizes)) ? $_REQUEST['gui'] : 'layouts/gui.php');
+	$size =	$sizes[$key];
 ?>
 
 .clear {
