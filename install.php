@@ -329,7 +329,7 @@ function init_config() {
 	define('POSTGRES_HOST', ($formvars['POSTGRES_HOST'] != '' ? $formvars['POSTGRES_HOST'] : 'pgsql'));
 	define('POSTGRES_USER', ($formvars['POSTGRES_USER'] != '' ? $formvars['POSTGRES_USER'] : 'kvwmap'));
 	define('POSTGRES_PASSWORD', ($formvars['POSTGRES_PASSWORD'] != '' ? $formvars['POSTGRES_PASSWORD'] : (getenv('KVWMAP_INIT_PASSWORD') == '' ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'))));
-	define('POSTGRES_ROOT_PASSWORD', ($formvars['POSTGRES_ROOT_PASSWORD'] != '' ? $formvars['POSTGRES_ROOT_PASSWORD'] : getenv('POSTGRES_PASSWORD')));
+	define('POSTGRES_ROOT_PASSWORD', ($formvars['POSTGRES_ROOT_PASSWORD'] != '' ? $formvars['POSTGRES_ROOT_PASSWORD'] : getenv('POSTGRES_ROOT_PASSWORD')));
 	define('POSTGRES_DBNAME', ($formvars['POSTGRES_DBNAME'] != '' ? $formvars['POSTGRES_DBNAME'] : 'kvwmapsp'));
 	define('POSTGRESVERSION', getenv('PGSQL_ENV_POSTGRES_MAJOR'));
 	define('POSTGRES_CHARSET', 'UTF8');
