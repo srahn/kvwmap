@@ -179,9 +179,10 @@ class Validierung extends PgObject {
 		else {
 			$sql = str_ireplace(
 				'where',
-				"WHERE " . $geometry_col . " IS NULL AND ",
+				"WHERE " . $geometry_col . " IS NULL AND (",
 				$sql
 			);
+			$sql .= ')';
 		}
 		$this->debug->show('<br>sql mit where Klausel: ' . $sql, Validierung::$write_debug);
 
