@@ -38,7 +38,6 @@
 		$result[1]='<br>Fehler beim Anlegen des custom-Ordners im kvwmap-Ordner. Keine Schreibrechte vorhanden.<br>Setzen Sie rekursiv für alle Dateien Schreibrechte für die Gruppe:<br>chmod -R g+w '.APPLVERSION;
 	}
 	else {
-		chgrp(CUSTOM_PATH, gisadmin);
 		$constants = array ();
 
 		$sql = "
@@ -122,7 +121,6 @@
 		}
 		else {
 			mkdir(CUSTOM_PATH . 'fonts', 0775);
-			chgrp(CUSTOM_PATH . 'fonts', 'gisadmin');
 		}
 		if (strpos($this->config_params['FONTSET']['value'], 'fonts/custom/') !== false) {
 			# echo '<br>prefix: ' . $this->config_params['FONTSET']['prefix'] . ' => CUSTOM_PATH';
@@ -140,7 +138,6 @@
 		}
 		else {
 			mkdir(CUSTOM_PATH . 'symbols', 0775);
-			chgrp(CUSTOM_PATH . 'symbols', 'gisadmin');
 		}
 		if (strpos($this->config_params['SYMBOLSET']['value'], 'symbols/custom/') !== false) {
 			# echo '<br>prefix: ' . $this->config_params['SYMBOLSET']['prefix'] . ' => CUSTOM_PATH';
@@ -160,7 +157,6 @@
 		}
 		else {
 			mkdir(CUSTOM_PATH . 'graphics', 0775);
-			chgrp(CUSTOM_PATH . 'graphics', 'gisadmin');
 		}
 		# echo '<p>WAPPENPATH';
 		if (file_exists(WWWROOT . APPLVERSION . WAPPENPATH)) {
@@ -169,7 +165,6 @@
 		}
 		else {
 			mkdir(CUSTOM_PATH . 'wappen', 0775);
-			chgrp(CUSTOM_PATH . 'wappen', 'gisadmin');
 		}
 		# echo '<br>value: ' . $this->config_params['WAPPENPATH']['value'] . ' => ' . $this->config_params['WAPPENPATH']['value'];
 		$constants['WAPPENPATH'] = array(
@@ -186,7 +181,6 @@
 		}
 		else {
 			mkdir(CUSTOM_PATH . 'layouts', 0775);
-			chgrp(CUSTOM_PATH . 'layouts', 'gisadmin');
 		}
 
 		# echo '<p>SNIPPETS ' . $this->config_params['SNIPPETS']['value'];
@@ -196,7 +190,6 @@
 		}
 		else {
 			mkdir(CUSTOM_PATH . 'layouts/snippets', 0775);
-			chgrp(CUSTOM_PATH . 'layouts/snippets', 'gisadmin');
 		}
 		$cmd = 'sed -i -e "s|SNIPPETS . \'custom/|\'|g" ' . WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/*';
 
@@ -484,4 +477,8 @@
 		chgrp(WWWROOT . APPLVERSION . 'config.php', 'gisadmin');
 		chmod(WWWROOT . APPLVERSION . 'config.php', 0660);
 	}
+	if (fileowner(CUSTOM_PATH, 'gisadmin') == 'www-data' AND filegroup(CUSTOM_PATH, 'gisadmin') != 'gisadmin') {
+		chgrp(CUSTOM_PATH, 'gisadmin');
+	}
+	exec('chown -R www-data.gisadmin ' . CUSTOM_PATH . '/*');
 ?>
