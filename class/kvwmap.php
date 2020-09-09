@@ -14981,7 +14981,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				# Haupt-Layer erzeugen
 				$layer = ms_newLayerObj($map);
 				# Parameter $scale in Data ersetzen
-				$layerset['Data'] = str_replace('$scale', $this->map_scaledenom, $layerset['Data']);
+				$layerset['Data'] = str_replace('$scale', $this->map_scaledenom ?: 1000, $layerset['Data']);
 				$layer->set('data', $layerset['Data']);
 				if ($layerset['Filter'] != '') {
 					$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
