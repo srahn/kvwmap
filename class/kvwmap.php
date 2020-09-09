@@ -7914,9 +7914,11 @@ SET @connection = 'host={$this->pgdatabase->host} user={$this->pgdatabase->user}
 			}
 
 			# Klassen übernehmen (aber als neue Klassen anlegen)
-			$classes = $mapDB->read_Classes($this->formvars['old_id']);
-			for($i = 0; $i < count($classes); $i++){
-				$mapDB->copyClass($classes[$i]['Class_ID'], $this->formvars['selected_layer_id']);
+			if($this->formvars['old_id'] != ''){
+				$classes = $mapDB->read_Classes($this->formvars['old_id']);
+				for($i = 0; $i < count($classes); $i++){
+					$mapDB->copyClass($classes[$i]['Class_ID'], $this->formvars['selected_layer_id']);
+				}
 			}
 		}
   }
