@@ -179,9 +179,10 @@ class Validierung extends PgObject {
 		else {
 			$sql = str_ireplace(
 				'where',
-				"WHERE " . $geometry_col . " IS NULL AND ",
+				"WHERE " . $geometry_col . " IS NULL AND (",
 				$sql
 			);
+			$sql .= ')';
 		}
 		$this->debug->show('<br>sql mit where Klausel: ' . $sql, Validierung::$write_debug);
 
@@ -190,6 +191,7 @@ class Validierung extends PgObject {
 		$this->debug->show('<br>Validiere ob geometrie_vorhanden mit sql:<br>' . $sql, Validierung::$write_debug);
 
 		$result = pg_query($this->database->dbConn, $sql);
+		$regel = Regel::find_by_id($this->gui, 'id', $this->konvertierung_id);
 
 		while ($row = pg_fetch_assoc($result)) {
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
@@ -339,8 +341,8 @@ class Validierung extends PgObject {
 
 		$sql = $regel->get_convert_sql($konvertierung->get('id'));
 		$sourcetype = $regel->is_source_shape_or_gmlas($regel);
-		# Default Shape (the_geom), gmlas (position)
 		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
+		# Default Shape (the_geom), gmlas (position)
 
 		$plantype = $konvertierung->get_plan()->tableName;
 
@@ -353,12 +355,20 @@ class Validierung extends PgObject {
 		#if for gid (shape) or no gid (gmlas)
 		# changed to 25832 as otherwise thered be mixed geometry errors
 		# TODO Get the Epsg code from $konvertierung
+
+		# Buffer = 0.001mm, as 2mm euclidean distance is considered equivalent in XPlanung
+		# Buffer distance according SRID unit, for 25832 and 25833 distance is meters
+		# TODO In PostGIS 2.5 and higher, consider using one of the new variable precision functions instead
+		# e.g. ST_AsText with precision, ST_QuantizeCoordinates
+		# or build a custom ST_Within (and ST_Intersection?) variant, that utilizes the relevant equivalency distance
+		$tolerance_meters = '0.001';
+
 		if($sourcetype != 'gmlas') {
 			$sql = str_ireplace(
 				'select',
 				"select
 					gid,
-					NOT st_within(" . $geometry_col . ", " . $plantype . ".raeumlichergeltungsbereich) AS ausserhalb,
+					NOT st_within(" . $geometry_col . ", ST_Buffer(" . $plantype . ".raeumlichergeltungsbereich," . $tolerance_meters . ")) AS ausserhalb,
 					st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), ST_Transform(" . $plantype . ".raeumlichergeltungsbereich, " . $konvertierung->get('input_epsg') ."))/1000 AS distance,
 				",
 				$sql
@@ -368,7 +378,7 @@ class Validierung extends PgObject {
 			$sql = str_ireplace(
 				'select',
 				"select
-					NOT st_within(" . $geometry_col . ", " . $plantype . ".raeumlichergeltungsbereich) AS ausserhalb,
+					NOT st_within(" . $geometry_col . ", ST_Buffer(" . $plantype . ".raeumlichergeltungsbereich," . $tolerance_meters . ")) AS ausserhalb,
 					st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), ST_Transform(" . $plantype . ".raeumlichergeltungsbereich, " . $konvertierung->get('input_epsg') ."))/1000 AS distance,
 				",
 				$sql
@@ -391,7 +401,7 @@ class Validierung extends PgObject {
 			'where',
 			"where
 				" . $plantype . ".konvertierung_id = " . $konvertierung->get('id') . " AND 
-				NOT st_within(" . $geometry_col . ", raeumlichergeltungsbereich) AND (
+				NOT st_within(" . $geometry_col . ", ST_Buffer(raeumlichergeltungsbereich," . $tolerance_meters . ")) AND (
 			",
 			$sql
 		);
@@ -402,6 +412,10 @@ class Validierung extends PgObject {
 		$this->debug->show('<br>sql ohne returning: ' . $sql, Validierung::$write_debug);
 
 		$this->debug->show('Sql für Prüfung geom_within_plan:<br>' . $sql, false);
+
+
+		$search_path  = ($sourcetype == 'gmlas') ? "xplan_gmlas_{$this->gui->user->id}" : "xplan_shapes_{$this->konvertierung_id}";
+		$sql = "SET search_path=" . $search_path . ", public; " . $sql;
 
 		$result = @pg_query(
 			$this->database->dbConn,
@@ -425,7 +439,7 @@ class Validierung extends PgObject {
 		else {
 			while ($row = pg_fetch_assoc($result)) {
 				if ($row['ausserhalb'] == 't') {
-					$this->debug->show('geometrie mit gid: ' . $row['gid'] . ' ist außerhalb vom Geltungsbereich des Plans', Validierung::$write_debug);
+					$this->debug->show('geometrie mit gid: ' . $row['gid'] . ' ist außerhalb des Geltungsbereich des Plans', Validierung::$write_debug);
 					$validierungsergebnis = new Validierungsergebnis($this->gui);
 					$validierungsergebnis->create(
 						array(
@@ -486,12 +500,15 @@ class Validierung extends PgObject {
 		$sql = stristr($sql, 'select');
 		$this->debug->show('<br>sql von select an: ' . $sql, Validierung::$write_debug);		
 
+		# Tolerance and buffer, see comment in geom_within_plan
+		$tolerance_meters = '0.001';
 		# gid zur eindeutigen Identifizierung des Datensatzes (nicht bei gmlas) sowie within und distance zum select hinzufügen
+
 		$sql = str_ireplace(
 			'select',
 			"select
 				" . ($sourcetype == 'gmlas' ? '' : 'gid,') . "
-				NOT st_within(" . $geometry_col . ", " . $bereichtype . ".geltungsbereich) AS ausserhalb,
+				NOT st_within(" . $geometry_col . ", ST_Buffer(" . $bereichtype . ".geltungsbereich," . $tolerance_meters . ")) AS ausserhalb,
 				st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), ST_Transform(" . $bereichtype . ".geltungsbereich, " . $konvertierung->get('input_epsg') . "))/1000 AS distance,
 			",
 			$sql
@@ -514,7 +531,7 @@ class Validierung extends PgObject {
 			"where
 				" . $bereichtype . ".gml_id = '" . $regel->get('bereich_gml_id') . "' AND
 				" . $bereichtype . ".konvertierung_id = " . $konvertierung->get('id') . " AND 
-				NOT st_within(" . $geometry_col . ", " . $bereichtype . ".geltungsbereich) AND (
+				NOT st_within(" . $geometry_col . ", ST_Buffer(" . $bereichtype . ".geltungsbereich," . $tolerance_meters . ")) AND (
 			",
 			$sql
 		);

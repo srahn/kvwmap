@@ -10154,8 +10154,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$pdf_file = $this->ddl->createDataPDF(NULL, NULL, NULL, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $this->ddl->selectedlayout[0], $result, $this->Stelle, $this->user, $this->formvars['record_paging']);
 	    # in jpg umwandeln
 	    $currenttime = date('Y-m-d_H_i_s',time());
-	    exec(IMAGEMAGICKPATH.'convert "'.$pdf_file.'[0]" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"');
-	    #echo IMAGEMAGICKPATH.'convert "'.$pdf_file.'[0]" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"';
+	    exec(IMAGEMAGICKPATH . 'convert "' . $pdf_file . '[0]" -resize 595x1000 "' . dirname($pdf_file) . '/' . basename($pdf_file, ".pdf") . '-' . $currenttime . '.jpg"');
+	    #echo IMAGEMAGICKPATH . 'convert "' . $pdf_file . '[0]" -resize 595x1000 "' . dirname($pdf_file) . '/' . basename($pdf_file, ".pdf") . '-' . $currenttime . '.jpg"';
 	    if(!file_exists(IMAGEPATH.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg')){
 	    	$this->previewfile = TEMPPATH_REL.basename($pdf_file, ".pdf").'-'.$currenttime.'-0.jpg';
 	    }
@@ -10811,10 +10811,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
 		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
     $this->data_import_export = new data_import_export();
-  	if(!$this->formvars['geom_from_layer']){
-      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
-    }
+		if (
+			defined('LAYERNAME_FLURSTUECKE') AND
+			!$this->formvars['geom_from_layer']
+		) {
+			$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+			$this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
+		}
     if ($this->formvars['geom_from_layer']) {
 	    # Geometrie-Übernahme-Layer:
 	    # Spaltenname und from-where abfragen
@@ -11566,11 +11569,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
     $showpolygon = true;
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
-  	if(!$this->formvars['geom_from_layer']){
-      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
-    }
-    if($this->formvars['geom_from_layer']){
+
+		if (
+			defined('LAYERNAME_FLURSTUECKE') AND
+			!$this->formvars['geom_from_layer']
+		) {
+			$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+			$this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
+		}
+
+    if ($this->formvars['geom_from_layer']){
 	    # Geometrie-Übernahme-Layer:
 	    # Spaltenname und from-where abfragen
 	    $data = $this->mapDB->getData($this->formvars['geom_from_layer']);
@@ -16204,6 +16212,7 @@ class db_mapObj{
 												$this->GUI->add_message('error', 'Fehler bei der Abfrage der Optionen für das Attribut "' . $attributes['name'][$i] . '"<br>' . err_msg($this->script_name, __LINE__, $ret[1]));
 												return 0;
 											}
+											$attributes['enum_value'][$i][$k] = array();
 											while($rs = pg_fetch_array($ret[1])) {
 												$attributes['enum_value'][$i][$k][] = $rs['value'];
 												$attributes['enum_output'][$i][$k][] = $rs['output'];
@@ -17677,6 +17686,8 @@ class db_mapObj{
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
 		while ($rs = $ret['result']->fetch_array()){
+			$attributes['enum_value'][$i] = array();
+
 			$attributes['order'][$i] = $rs['order'];
 			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;

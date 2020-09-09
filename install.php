@@ -33,11 +33,23 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 $debug; $log_mysql; $log_postgres;
 define('KVWMAP_INIT_PASSWORD', (getenv('KVWMAP_INIT_PASSWORD') == '') ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'));
 
+class GUI {
+	function __construct() {
+	}
+
+	function add_message($type, $msg) {
+		echo '<p>Meldung: ' . $type;
+		echo '<br>' . $msg;
+	}
+}
+$GUI = new GUI();
+
 output_header();
 
 if (!file_exists('config.php')) {
 	# Lade default Konfigurationsparameter
 	init_config();
+	$kvwmap_plugins = array();
 	include(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');
 	if ($_REQUEST['go'] == 'Installation starten') {
 	  install();
@@ -313,11 +325,18 @@ function init_config() {
 	define('MYSQL_DBNAME', ($formvars['MYSQL_DBNAME'] != '' ? $formvars['MYSQL_DBNAME'] : 'kvwmapdb'));
 	define('MYSQL_ROOT_PASSWORD', ($formvars['MYSQL_ROOT_PASSWORD'] != '' ? $formvars['MYSQL_ROOT_PASSWORD'] : getenv('MYSQL_ENV_MYSQL_ROOT_PASSWORD')));
 	define('MYSQL_HOSTS_ALLOWED', '172.17.%');
+	define('MYSQL_CHARSET', 'UTF8');
+	define('DEFAULTDBWRITE', 1);
+	define('DBWRITE', 1);
 	define('POSTGRES_HOST', ($formvars['POSTGRES_HOST'] != '' ? $formvars['POSTGRES_HOST'] : 'pgsql'));
 	define('POSTGRES_USER', ($formvars['POSTGRES_USER'] != '' ? $formvars['POSTGRES_USER'] : 'kvwmap'));
 	define('POSTGRES_PASSWORD', ($formvars['POSTGRES_PASSWORD'] != '' ? $formvars['POSTGRES_PASSWORD'] : (getenv('KVWMAP_INIT_PASSWORD') == '' ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'))));
-	define('POSTGRES_ROOT_PASSWORD', ($formvars['POSTGRES_ROOT_PASSWORD'] != '' ? $formvars['POSTGRES_ROOT_PASSWORD'] : getenv('POSTGRES_PASSWORD')));
+	define('POSTGRES_ROOT_PASSWORD', ($formvars['POSTGRES_ROOT_PASSWORD'] != '' ? $formvars['POSTGRES_ROOT_PASSWORD'] : getenv('POSTGRES_ROOT_PASSWORD')));
 	define('POSTGRES_DBNAME', ($formvars['POSTGRES_DBNAME'] != '' ? $formvars['POSTGRES_DBNAME'] : 'kvwmapsp'));
+	define('POSTGRESVERSION', getenv('PGSQL_ENV_POSTGRES_MAJOR'));
+	define('POSTGRES_CHARSET', 'UTF8');
+	define('EPSGCODE_ALKIS', 25833);
+	define('EARTH_RADIUS', 6384000);
 	define('CLASSPATH', 'class/');
 	define('LAYOUTPATH', 'layouts/');
 	define('LOG_LEVEL', 4);
@@ -327,7 +346,8 @@ function init_config() {
 	define('LOGFILE_MYSQL', LOGPATH . 'install.log');
 	define('LOGFILE_POSTGRES', LOGPATH . 'install.log');
 	define('WWWROOT', $installpath.$wwwpath);
-	define('APPLVERSION', $applversion.'/');
+	define('APPLVERSION', $applversion . '/');
+	define('WAPPENPATH', 'graphics/wappen/');
 }
 
 function show_constants() { ?>
