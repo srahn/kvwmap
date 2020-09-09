@@ -34,7 +34,7 @@ $debug; $log_mysql; $log_postgres;
 define('KVWMAP_INIT_PASSWORD', (getenv('KVWMAP_INIT_PASSWORD') == '') ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'));
 
 class GUI {
-	function __construct($main, $style, $mime_type) {
+	function __construct() {
 	}
 
 	function add_message($type, $msg) {
@@ -42,12 +42,14 @@ class GUI {
 		echo '<br>' . $msg;
 	}
 }
+$GUI = new GUI();
 
 output_header();
 
 if (!file_exists('config.php')) {
 	# Lade default Konfigurationsparameter
 	init_config();
+	$kvwmap_plugins = array();
 	include(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');
 	if ($_REQUEST['go'] == 'Installation starten') {
 	  install();
@@ -344,7 +346,8 @@ function init_config() {
 	define('LOGFILE_MYSQL', LOGPATH . 'install.log');
 	define('LOGFILE_POSTGRES', LOGPATH . 'install.log');
 	define('WWWROOT', $installpath.$wwwpath);
-	define('APPLVERSION', $applversion.'/');
+	define('APPLVERSION', $applversion . '/');
+	define('WAPPENPATH', 'graphics/wappen/');
 }
 
 function show_constants() { ?>

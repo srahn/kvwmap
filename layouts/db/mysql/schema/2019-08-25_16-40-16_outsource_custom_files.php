@@ -30,7 +30,7 @@
 		'value' => 'custom/'
 	);
 
-	define(CUSTOM_PATH, WWWROOT . APPLVERSION . $constants['CUSTOM_PATH']['value']);
+	define('CUSTOM_PATH', WWWROOT . APPLVERSION . $constants['CUSTOM_PATH']['value']);
 
 	# create a new custom_folder
 	if (!file_exists(CUSTOM_PATH) AND mkdir(CUSTOM_PATH, 0775) === false) {
@@ -38,7 +38,6 @@
 		$result[1]='<br>Fehler beim Anlegen des custom-Ordners im kvwmap-Ordner. Keine Schreibrechte vorhanden.<br>Setzen Sie rekursiv für alle Dateien Schreibrechte für die Gruppe:<br>chmod -R g+w '.APPLVERSION;
 	}
 	else {
-		chgrp(CUSTOM_PATH, gisadmin);
 		$constants = array ();
 
 		$sql = "
@@ -122,7 +121,6 @@
 		}
 		else {
 			mkdir(CUSTOM_PATH . 'fonts', 0775);
-			chgrp(CUSTOM_PATH . 'fonts', 'gisadmin');
 		}
 		if (strpos($this->config_params['FONTSET']['value'], 'fonts/custom/') !== false) {
 			# echo '<br>prefix: ' . $this->config_params['FONTSET']['prefix'] . ' => CUSTOM_PATH';
@@ -140,7 +138,6 @@
 		}
 		else {
 			mkdir(CUSTOM_PATH . 'symbols', 0775);
-			chgrp(CUSTOM_PATH . 'symbols', 'gisadmin');
 		}
 		if (strpos($this->config_params['SYMBOLSET']['value'], 'symbols/custom/') !== false) {
 			# echo '<br>prefix: ' . $this->config_params['SYMBOLSET']['prefix'] . ' => CUSTOM_PATH';
@@ -160,7 +157,6 @@
 		}
 		else {
 			mkdir(CUSTOM_PATH . 'graphics', 0775);
-			chgrp(CUSTOM_PATH . 'graphics', 'gisadmin');
 		}
 		# echo '<p>WAPPENPATH';
 		if (file_exists(WWWROOT . APPLVERSION . WAPPENPATH)) {
@@ -169,7 +165,6 @@
 		}
 		else {
 			mkdir(CUSTOM_PATH . 'wappen', 0775);
-			chgrp(CUSTOM_PATH . 'wappen', 'gisadmin');
 		}
 		# echo '<br>value: ' . $this->config_params['WAPPENPATH']['value'] . ' => ' . $this->config_params['WAPPENPATH']['value'];
 		$constants['WAPPENPATH'] = array(
@@ -186,7 +181,6 @@
 		}
 		else {
 			mkdir(CUSTOM_PATH . 'layouts', 0775);
-			chgrp(CUSTOM_PATH . 'layouts', 'gisadmin');
 		}
 
 		# echo '<p>SNIPPETS ' . $this->config_params['SNIPPETS']['value'];
@@ -196,40 +190,48 @@
 		}
 		else {
 			mkdir(CUSTOM_PATH . 'layouts/snippets', 0775);
-			chgrp(CUSTOM_PATH . 'layouts/snippets', 'gisadmin');
 		}
 		$cmd = 'sed -i -e "s|SNIPPETS . \'custom/|\'|g" ' . WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/*';
 
 		# echo '<p>LOGIN ' . $this->config_params['LOGIN']['value'];
-		if (strpos(LOGIN, 'custom/') !== false) {
-			# echo '<br>set: ' . LOGIN . ' prefix to: CUSTOM_PATH and value to: ' . str_replace('custom/', 'layouts/snippets/', LOGIN);
-			$constants['LOGIN'] = array(
-				'prefix' => 'CUSTOM_PATH',
-				'value' => str_replace('custom/', 'layouts/snippets/', LOGIN)
-			);
+		if (defined('LOGIN')) {
+			if (strpos(LOGIN, 'custom/') !== false) {
+				# echo '<br>set: ' . LOGIN . ' prefix to: CUSTOM_PATH and value to: ' . str_replace('custom/', 'layouts/snippets/', LOGIN);
+				$constants['LOGIN'] = array(
+					'prefix' => 'CUSTOM_PATH',
+					'value' => str_replace('custom/', 'layouts/snippets/', LOGIN)
+				);
+			}
+			else {
+				# echo '<br>set: ' . LOGIN . ' prefix to: LAYOUTPATH and value to: ' . LOGIN;
+				$constants['LOGIN'] = array(
+					'prefix' => 'SNIPPETS',
+					'value' => LOGIN
+				);
+			}
 		}
-		elseif (defined('LOGIN')) {
-			# echo '<br>set: ' . LOGIN . ' prefix to: LAYOUTPATH and value to: ' . LOGIN;
+		else {
 			$constants['LOGIN'] = array(
 				'prefix' => 'SNIPPETS',
-				'value' => LOGIN
+				'value' => 'login.php'
 			);
 		}
 
-		# echo '<p>LOGIN_AGREEMENT ' . $this->config_params['LOGIN_AGREEMENT']['value'];
-		if (strpos(LOGIN_AGREEMENT, 'custom/') !== false) {
-			# echo '<br>set: ' . LOGIN_AGREEMENT . ' prefix to: CUSTOM_PATH and value to: ' . str_replace('custom/', 'layouts/snippets/', LOGIN_AGREEMENT);
-			$constants['LOGIN_AGREEMENT'] = array(
-				'prefix' => 'CUSTOM_PATH',
-				'value' => str_replace('custom/', 'layouts/snippets/', LOGIN_AGREEMENT)
-			);
-		}
-		elseif (defined('LOGIN_AGREEMENT')) {
-			# echo '<br>set: ' . LOGIN_AGREEMENT . ' prefix to: LAYOUTPATH and value to: ' . LOGIN_AGREEMENT;
-			$constants['LOGIN_AGREEMENT'] = array(
-				'prefix' => 'SNIPPETS',
-				'value' => LOGIN_AGREEMENT
-			);
+		if (defined('LOGIN_AGREEMENT')) {
+			if (strpos(LOGIN_AGREEMENT, 'custom/') !== false) {
+				# echo '<br>set: ' . LOGIN_AGREEMENT . ' prefix to: CUSTOM_PATH and value to: ' . str_replace('custom/', 'layouts/snippets/', LOGIN_AGREEMENT);
+				$constants['LOGIN_AGREEMENT'] = array(
+					'prefix' => 'CUSTOM_PATH',
+					'value' => str_replace('custom/', 'layouts/snippets/', LOGIN_AGREEMENT)
+				);
+			}
+			else {
+				# echo '<br>set: ' . LOGIN_AGREEMENT . ' prefix to: LAYOUTPATH and value to: ' . LOGIN_AGREEMENT;
+				$constants['LOGIN_AGREEMENT'] = array(
+					'prefix' => 'SNIPPETS',
+					'value' => LOGIN_AGREEMENT
+				);
+			}
 		}
 		else {
 			$constants['LOGIN_AGREEMENT'] = array(
@@ -242,19 +244,21 @@
 		exec($cmd);
 
 		# echo '<p>LOGIN_NEW_PASSWORD ' . $this->config_params['LOGIN_NEW_PASSWORD']['value'];
-		if (strpos(LOGIN_NEW_PASSWORD, 'custom/') !== false) {
-			# echo '<br>set: ' . LOGIN_NEW_PASSWORD . ' prefix to: CUSTOM_PATH and value to: ' . str_replace('custom/', 'layouts/snippets/', LOGIN_NEW_PASSWORD);
-			$constants['LOGIN_NEW_PASSWORD'] = array(
-				'prefix' => 'CUSTOM_PATH',
-				'value' => str_replace('custom/', 'layouts/snippets/', LOGIN_NEW_PASSWORD)
-			);
-		}
-		elseif (defined('LOGIN_NEW_PASSWORD')) {
-			# echo '<br>set: ' . LOGIN_NEW_PASSWORD . ' prefix to: LAYOUTPATH and value to: ' . LOGIN_NEW_PASSWORD;
-			$constants['LOGIN_NEW_PASSWORD'] = array(
-				'prefix' => 'SNIPPETS',
-				'value' => LOGIN_NEW_PASSWORD
-			);
+		if (defined('LOGIN_NEW_PASSWORD')) {
+			if (strpos(LOGIN_NEW_PASSWORD, 'custom/') !== false) {
+				# echo '<br>set: ' . LOGIN_NEW_PASSWORD . ' prefix to: CUSTOM_PATH and value to: ' . str_replace('custom/', 'layouts/snippets/', LOGIN_NEW_PASSWORD);
+				$constants['LOGIN_NEW_PASSWORD'] = array(
+					'prefix' => 'CUSTOM_PATH',
+					'value' => str_replace('custom/', 'layouts/snippets/', LOGIN_NEW_PASSWORD)
+				);
+			}
+			else {
+				# echo '<br>set: ' . LOGIN_NEW_PASSWORD . ' prefix to: LAYOUTPATH and value to: ' . LOGIN_NEW_PASSWORD;
+				$constants['LOGIN_NEW_PASSWORD'] = array(
+					'prefix' => 'SNIPPETS',
+					'value' => LOGIN_NEW_PASSWORD
+				);
+			}
 		}
 		else {
 			$constants['LOGIN_NEW_PASSWORD'] = array(
@@ -263,20 +267,21 @@
 			);
 		}
 
-		# echo '<p>LOGIN_REGISTRATION ' . $this->config_params['LOGIN_REGISTRATION']['value'];
-		if (strpos(LOGIN_REGISTRATION, 'custom/') !== false) {
-			# echo '<br>set: ' . LOGIN_REGISTRATION . ' prefix to: CUSTOM_PATH and value to: ' . str_replace('custom/', 'layouts/snippets/', LOGIN_REGISTRATION);
-			$constants['LOGIN_REGISTRATION'] = array(
-				'prefix' => 'CUSTOM_PATH',
-				'value' => str_replace('custom/', 'layouts/snippets/', LOGIN_REGISTRATION)
-			);
-		}
-		elseif (defined('LOGIN_REGISTRATION')) {
-			# echo '<br>set: ' . LOGIN_REGISTRATION . ' prefix to: LAYOUTPATH and value to: ' . LOGIN_REGISTRATION;
-			$constants['LOGIN_REGISTRATION'] = array(
-				'prefix' => 'SNIPPETS',
-				'value' => LOGIN_REGISTRATION
-			);
+		if (defined('LOGIN_REGISTRATION')) {
+			if (strpos(LOGIN_REGISTRATION, 'custom/') !== false) {
+				# echo '<br>set: ' . LOGIN_REGISTRATION . ' prefix to: CUSTOM_PATH and value to: ' . str_replace('custom/', 'layouts/snippets/', LOGIN_REGISTRATION);
+				$constants['LOGIN_REGISTRATION'] = array(
+					'prefix' => 'CUSTOM_PATH',
+					'value' => str_replace('custom/', 'layouts/snippets/', LOGIN_REGISTRATION)
+				);
+			}
+			else {
+				# echo '<br>set: ' . LOGIN_REGISTRATION . ' prefix to: LAYOUTPATH and value to: ' . LOGIN_REGISTRATION;
+				$constants['LOGIN_REGISTRATION'] = array(
+					'prefix' => 'SNIPPETS',
+					'value' => LOGIN_REGISTRATION
+				);
+			}
 		}
 		else {
 			$constants['LOGIN_REGISTRATION'] = array(
@@ -333,19 +338,28 @@
 			'value' => 'layouts/'.$this->config_params['CUSTOM_STYLE']['value']
 		);
 
-		# echo '<p>FOOTER: ' . $this->config_params['FOOTER']['value'];
-		if (strpos(FOOTER, 'custom/') !== false) {
-			# echo '<br>prefix: ' . $this->config_params['FOOTER']['prefix'] . ' => CUSTOM_PATH';
-			# echo '<br>value: ' . $this->config_params['FOOTER']['value'] . ' => ' . $this->config_params['FOOTER']['value'];
-			$constants['FOOTER'] = array(
-				'prefix' => 'CUSTOM_PATH',
-				'value' => str_replace('custom/', 'layouts/snippets/', $this->config_params['FOOTER']['value'])
-			);
+		if (defined('FOOTER')) {
+			# echo '<p>FOOTER: ' . $this->config_params['FOOTER']['value'];
+			if (strpos(FOOTER, 'custom/') !== false) {
+				# echo '<br>prefix: ' . $this->config_params['FOOTER']['prefix'] . ' => CUSTOM_PATH';
+				# echo '<br>value: ' . $this->config_params['FOOTER']['value'] . ' => ' . $this->config_params['FOOTER']['value'];
+				$constants['FOOTER'] = array(
+					'prefix' => 'CUSTOM_PATH',
+					'value' => str_replace('custom/', 'layouts/snippets/', $this->config_params['FOOTER']['value'])
+				);
+			}
+			else {
+				# echo '<br>prefix: ' . $this->config_params['FOOTER']['prefix'] . ' => LAYOUTPATH';
+				$constants['FOOTER'] = array(
+					'prefix' => 'SNIPPETS',
+					'value' => FOOTER
+				);
+			}
 		}
-		elseif(defined('FOOTER')) {
-			# echo '<br>prefix: ' . $this->config_params['FOOTER']['prefix'] . ' => LAYOUTPATH';
+		else {
 			$constants['FOOTER'] = array(
-				'prefix' => 'SNIPPETS'
+				'prefix' => 'SNIPPETS',
+				'value' => 'footer.php'
 			);
 		}
 		$cmd = 'sed -i -e "s|LAYOUTPATH.\"snippets/\".FOOTER|FOOTER|g" ' . CUSTOM_PATH . 'layouts/*';
@@ -353,19 +367,28 @@
 		# echo '<br>Replace cmd: ' . $cmd;
 		exec($cmd);
 
-		# echo '<p>HEADER: ' . $this->config_params['HEADER']['value'];
-		if (strpos(HEADER, 'custom/') !== false) {
-			# echo '<br>prefix: ' . $this->config_params['HEADER']['prefix'] . ' => CUSTOM_PATH';
-			# echo '<br>value: ' . $this->config_params['HEADER']['value'] . ' => ' . $this->config_params['HEADER']['value'];
-			$constants['HEADER'] = array(
-				'prefix' => 'CUSTOM_PATH',
-				'value' => str_replace('custom/', 'layouts/snippets/', $this->config_params['HEADER']['value'])
-			);
+		if (defined('HEADER')) {
+			# echo '<p>HEADER: ' . $this->config_params['HEADER']['value'];
+			if (strpos(HEADER, 'custom/') !== false) {
+				# echo '<br>prefix: ' . $this->config_params['HEADER']['prefix'] . ' => CUSTOM_PATH';
+				# echo '<br>value: ' . $this->config_params['HEADER']['value'] . ' => ' . $this->config_params['HEADER']['value'];
+				$constants['HEADER'] = array(
+					'prefix' => 'CUSTOM_PATH',
+					'value' => str_replace('custom/', 'layouts/snippets/', $this->config_params['HEADER']['value'])
+				);
+			}
+			else {
+				# echo '<br>prefix: ' . $this->config_params['HEADER']['prefix'] . ' => LAYOUTPATH';
+				$constants['HEADER'] = array(
+					'prefix' => 'SNIPPETS',
+					'value' => HEADER
+				);
+			}
 		}
-		elseif(defined('HEADER')) {
-			# echo '<br>prefix: ' . $this->config_params['HEADER']['prefix'] . ' => LAYOUTPATH';
+		else {
 			$constants['HEADER'] = array(
-				'prefix' => 'SNIPPETS'
+				'prefix' => 'SNIPPETS',
+				'value' => 'header.php'
 			);
 		}
 		$cmd = 'sed -i -e "s|LAYOUTPATH.\"snippets/\".HEADER|HEADER|g" ' . CUSTOM_PATH . 'layouts/*';
@@ -373,19 +396,28 @@
 		# echo '<br>Replace cmd: ' . $cmd;
 		exec($cmd);
 
-		# echo '<p>LAYER_ERROR_PAGE: ' . $this->config_params['LAYER_ERROR_PAGE']['value'];
-		if (strpos(LAYER_ERROR_PAGE, 'custom/') !== false) {
-			# echo '<br>prefix: ' . $this->config_params['LAYER_ERROR_PAGE']['prefix'] . ' => CUSTOM_PATH';
-			# echo '<br>value: ' . $this->config_params['LAYER_ERROR_PAGE']['value'] . ' => ' . $this->config_params['LAYER_ERROR_PAGE']['value'];
-			$constants['LAYER_ERROR_PAGE'] = array(
-				'prefix' => 'CUSTOM_PATH',
-				'value' => str_replace('custom/', 'layouts/snippets/', $this->config_params['LAYER_ERROR_PAGE']['value'])
-			);
+		if (defined('LAYER_ERROR_PAGE')) {
+			# echo '<p>LAYER_ERROR_PAGE: ' . $this->config_params['LAYER_ERROR_PAGE']['value'];
+			if (strpos(LAYER_ERROR_PAGE, 'custom/') !== false) {
+				# echo '<br>prefix: ' . $this->config_params['LAYER_ERROR_PAGE']['prefix'] . ' => CUSTOM_PATH';
+				# echo '<br>value: ' . $this->config_params['LAYER_ERROR_PAGE']['value'] . ' => ' . $this->config_params['LAYER_ERROR_PAGE']['value'];
+				$constants['LAYER_ERROR_PAGE'] = array(
+					'prefix' => 'CUSTOM_PATH',
+					'value' => str_replace('custom/', 'layouts/snippets/', $this->config_params['LAYER_ERROR_PAGE']['value'])
+				);
+			}
+			elseif (defined('LAYER_ERROR_PAGE')) {
+				# echo '<br>prefix: ' . $this->config_params['LAYER_ERROR_PAGE']['prefix'] . ' => LAYOUTPATH';
+				$constants['LAYER_ERROR_PAGE'] = array(
+					'prefix' => 'SNIPPETS',
+					'value' => LAYER_ERROR_PAGE
+				);
+			}
 		}
-		elseif (defined('LAYER_ERROR_PAGE')) {
-			# echo '<br>prefix: ' . $this->config_params['LAYER_ERROR_PAGE']['prefix'] . ' => LAYOUTPATH';
+		else {
 			$constants['LAYER_ERROR_PAGE'] = array(
-				'prefix' => 'SNIPPETS'
+				'prefix' => 'SNIPPETS',
+				'value' => 'layer_error_page.php'
 			);
 		}
 		$cmd = 'sed -i -e "s|LAYOUTPATH.\"snippets/\".LAYER_ERROR_PAGE|LAYER_ERROR_PAGE|g" ' . CUSTOM_PATH . 'layouts/*';
@@ -445,4 +477,8 @@
 		chgrp(WWWROOT . APPLVERSION . 'config.php', 'gisadmin');
 		chmod(WWWROOT . APPLVERSION . 'config.php', 0660);
 	}
+	if (fileowner(CUSTOM_PATH, 'gisadmin') == 'www-data' AND filegroup(CUSTOM_PATH, 'gisadmin') != 'gisadmin') {
+		chgrp(CUSTOM_PATH, 'gisadmin');
+	}
+	exec('chown -R www-data.gisadmin ' . CUSTOM_PATH . '/*');
 ?>
