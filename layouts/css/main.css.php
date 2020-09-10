@@ -1501,7 +1501,7 @@ tbody.gle>tr {
 
 .subFormListItem{
 	height: 20px;
-	padding: 0;
+	padding: 0 0 8px 0;
 }
 
 .gle_hr{
