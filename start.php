@@ -163,6 +163,7 @@ else {
 
 			# Frage den Nutzer mit dem login_namen ab
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
+			$GUI->debug->write('Nutzer ' . $GUI->user->id . ' mit login_name ' . $GUI->formvars['login_name'] . ' gefunden.', 4, $GUI->echo);
 
 			if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
 				$GUI->debug->write('Set Session', 4, $GUI->echo);

@@ -4,7 +4,7 @@ header('Content-Type: text/html; charset=utf-8');
 include('credentials.php');
 include('config.php');
 
-if (!USE_EXISTING_SESSION) {
+if (!USE_EXISTING_SESSION AND array_key_exists('CONTEXT_PREFIX', $_SERVER)) {
 	session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
 }
 
@@ -152,7 +152,6 @@ else {
 	include_(CLASSPATH . 'stelle.php');
 	include_(CLASSPATH . 'bauleitplanung.php');
 }
-
 include(WWWROOT . APPLVERSION . 'start.php');
 $GUI->go = $go;
 

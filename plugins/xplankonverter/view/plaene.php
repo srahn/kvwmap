@@ -6,7 +6,7 @@
 	$(function () {
 		result = $('#eventsResult');
 		result.success = function(text) {
-			message([{ type: 'notice', msg: text}], 1000, 500, '13%');
+			message([{ type: 'notice', msg: text}], 4000, 1000, '13%');
 /*			result.text(text);
 			result.removeClass('alert-danger');
 			result.addClass('alert-success');*/
@@ -27,9 +27,9 @@
 			$('.xpk-func-convert').click(
 				starteKonvertierung
 			);
-			$('.xpk-func-generate-gml').click(
+/*			$('.xpk-func-generate-gml').click(
 				starteXplanGmlGenerierung
-			);
+			);*/
 			$('.xpk-func-generate-inspire-gml').click(
 				starteInspireGmlGenerierung
 			);
@@ -104,8 +104,12 @@
 	};
 
 	starteXplanGmlGenerierung = function(e) {
-		e.preventDefault();
-		var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
+		debug_e = e;
+		var konvertierung_id = $(e).parent().attr('konvertierung_id'),
+				symbol = $(e).children();
+
+		symbol.removeClass('fa-code');
+		symbol.addClass('fa-spinner fa-pulse fa-fw');
 
 		// onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"
 		result.success('Starte GML-Ausgabe für Konvertierung-Id: ' + konvertierung_id);
@@ -124,7 +128,7 @@
 				return;
 			},
 			success: function(response) {
-				$('#konvertierungen_table').bootstrapTable('refresh');
+				//$('#konvertierungen_table').bootstrapTable('refresh');
 				// gml-Generierung starten
 				$.ajax({
 					url: 'index.php?go=xplankonverter_gml_generieren',
@@ -338,7 +342,7 @@
                   || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
 
 		funcIsInProgress = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>";
-		output += '<a title="XPlan-GML-Datei erzeugen" class="btn btn-link btn-xs xpk-func-btn xpk-func-generate-gml' + (funcIsAllowed ? '' : disableFrag) + '" href="#"><i class="' + (funcIsInProgress ? 'btn-link fa fa-spinner fa-pulse fa-fw' : 'btn-link fa fa-lg fa-code') + '"></i></a>';
+		output += '<a title="XPlan-GML-Datei erzeugen" class="btn btn-link btn-xs xpk-func-btn xpk-func-generate-gml' + (funcIsAllowed ? '" onclick="starteXplanGmlGenerierung(this)' : ' disabled" onclick="message([{type: \'info\', msg: \'Sie müssen den Plan erst konvertieren!\'}])') + '" href="#"><i class="' + (funcIsInProgress ? 'btn-link fa fa-spinner fa-pulse fa-fw' : 'btn-link fa fa-lg fa-code') + '"></i></a>';
 
 		if (<?php echo ((defined('XPLANKONVERTER_INSPIRE_KONVERTER') AND !XPLANKONVERTER_INSPIRE_KONVERTER) ? 'false' : 'true'); ?>) {
 			// INSPIRE-Erstellung
