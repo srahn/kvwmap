@@ -37,8 +37,12 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
 		<td>
-			<? if($this->search == true AND !$this->user->rolle->visually_impaired AND $anzObj > 0 AND $this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
-				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
+			<? 
+			if($this->search == true AND !$this->user->rolle->visually_impaired AND $anzObj > 0 AND $this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
+				if($this->formvars['backlink'] == ''){
+					$this->formvars['backlink'] = 'javascript:currentform.go.value=\'get_last_search\';currentform.submit();';
+				}
+				echo '<a href="'.$this->formvars['backlink'].'" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
 			} ?>
 		</td>
 		<td width="99%" align="center"><h2 id="layername"><? echo $layer['Name']; ?></h2></td>
