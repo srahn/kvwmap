@@ -408,7 +408,7 @@ else {
   				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
   					echo '<option';
   					if($this->formvars['geom_from_layer'] == $this->queryable_vector_layers['ID'][$i]){echo ' selected';}
-  					echo ' value="'.$this->queryable_vector_layers['ID'][$i].'">'.$this->queryable_vector_layers['Bezeichnung'][$i].'</option>';
+  					echo ' value="'.$this->queryable_vector_layers['ID'][$i].'">'.substr($this->queryable_vector_layers['Bezeichnung'][$i], 0, 50).'</option>';
   				}
   			?>
   		</select> 
