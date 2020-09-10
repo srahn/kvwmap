@@ -1540,6 +1540,7 @@
   };
 	
 	$GUI->rechercheFormAnzeigen = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
 		include_once(CLASSPATH.'FormObject.php');
 		# Speichern einer neuen Dokumentauswahl
 		if($GUI->formvars['go_plus'] == 'Dokumentauswahl_speichern'){

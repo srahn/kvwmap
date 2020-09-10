@@ -6,9 +6,6 @@
 <script type="text/javascript">
 <!--
 
-Text[1]=["Achtung:","Bei Auswahl von 'räumlich' erfolgt eine räumliche Suche über die aktuelle Flurgeometrie. Soll stattdessen über die in den Metainformationen gespeicherte Flur gesucht werden, muss 'thematisch' ausgewählt werden."]
-
-
 function save(){
 	var dokument_art_selected = false;
 	dokument_arten = document.getElementsByName('suchhauptart[]');
