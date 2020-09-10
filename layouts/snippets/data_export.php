@@ -104,8 +104,10 @@ function update_format(){
 	}
 }
 
-function data_export(){
-	if(document.GUI.selected_layer_id.value != ''){
+function data_export() {
+	message([{type: 'info', msg: 'Der Download wird automatisch gestartet. Die Zeitstempel falls vorhanden, werden automatisch gesetzt und die Datensätze damit als heruntergeladen gekennzeichnet.'}]);
+	message([{type: 'info', msg: 'Dokumente wurden ' + ($('input[name="download_documents"]').is(':checked') ? 'mit' : 'nicht mit') + ' heruntergeladen!'}]);
+	if (document.GUI.selected_layer_id.value != ''){
 		if(document.GUI.anzahl == undefined && document.GUI.newpathwkt.value == '' && document.GUI.newpath.value == ''){
 			var sure = confirm('<? echo $strSure; ?>');
 			if(sure == false)return;
@@ -118,7 +120,7 @@ function data_export(){
 		document.GUI.go_plus.value = '';
 	}
 	else{
-		alert('Bitte wählen Sie ein Thema aus.');
+		message([{type: 'info', msg: 'Wählen Sie erst ein Thema zum exportieren aus.'}]);
 	}
 }
 
@@ -313,8 +315,10 @@ $j=0;
 			} ?>
 
 			<div style="margin-top:30px; margin-bottom:10px; text-align: center;">
-				<input name="cancel" type="button" onclick="home();" value="<? echo $strButtonCancel; ?>">
-				<input name="create" type="button" onclick="data_export();" value="<? echo $strButtonGenerateShapeData; ?>">
+				<input name="cancel" type="button" onclick="home();" value="<? echo $strButtonCancel; ?>"><?php
+					if ($this->data_import_export->formvars['selected_layer_id'] != '') { ?>
+						<input name="create" type="button" onclick="data_export();" value="<? echo $strButtonGenerateShapeData; ?>"><?php
+					} ?>
 			</div>
 
 		</td>
