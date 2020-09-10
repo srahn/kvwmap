@@ -777,7 +777,15 @@ hide_versions = function(flst){
 												reset($Eigentuemerliste);
 												?>
 												<tr>
-													<td class="fett">Eigentümer:</td>
+													<td class="fett">
+													<? 	if($flst->Buchungen[$b]['buchungsart'] >= 2101){
+																echo 'Berechtigter';
+															}
+															else{
+																echo 'Eigentümer';
+															}
+													?>:
+													</td>
 												</tr>
 												<tr>
 													<td colspan="3">

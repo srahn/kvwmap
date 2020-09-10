@@ -102,7 +102,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 							<?php
 							if (!$this->user->rolle->visually_impaired) { ?>
 	            <td width="100px">
-	              <select  style="width:75px" <? if(value_of($this->attributes, 'enum_value') AND count($this->attributes['enum_value'][$i]) == 0) { ?>onchange="operatorchange(<? echo $this->formvars['selected_layer_id']; ?>, '<? echo $this->attributes['name'][$i]; ?>', <? echo $searchmask_number; ?>);" id="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>" <? } ?> name="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>">
+	              <select  style="width:75px" <? if(value_of($this->attributes, 'enum_value') AND @count($this->attributes['enum_value'][$i]) == 0) { ?>onchange="operatorchange(<? echo $this->formvars['selected_layer_id']; ?>, '<? echo $this->attributes['name'][$i]; ?>', <? echo $searchmask_number; ?>);" id="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>" <? } ?> name="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>">
 	                <option title="<? echo $strEqualHint; ?>" value="=" <? if($operator == '='){ echo 'selected';} ?> >=</option>
 								<? if($this->attributes['type'][$i] != 'geometry'){ ?>
 	                <option title="<? echo $strNotEqualHint; ?>" value="!=" <? if($operator == '!='){ echo 'selected';} ?> >!=</option>
@@ -123,9 +123,9 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 	                <option title="<? echo $strIsEmptyHint; ?>" value="IS NULL" <? if($operator == 'IS NULL'){ echo 'selected';} ?> ><? echo $strIsEmpty; ?></option>
 	                <option title="<? echo $strIsNotEmptyHint; ?>" value="IS NOT NULL" <? if($operator == 'IS NOT NULL'){ echo 'selected';} ?> ><? echo $strIsNotEmpty; ?></option>
 									<? if($this->attributes['type'][$i] != 'geometry'){ ?>
-	                <option title="<? echo $strInHint; ?>" value="IN" <? if (count($this->attributes['enum_value'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($operator == 'IN'){ echo 'selected';} ?> ><? echo $strIsIn; ?></option>
+	                <option title="<? echo $strInHint; ?>" value="IN" <? if (@count($this->attributes['enum_value'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($operator == 'IN'){ echo 'selected';} ?> ><? echo $strIsIn; ?></option>
 									<? if(!in_array($this->attributes['type'][$i], array('text'))){ ?>
-	                <option title="<? echo $strBetweenHint; ?>" value="between" <? if (count($this->attributes['enum_value'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($operator == 'between'){ echo 'selected';} ?> ><? echo $strBetween; ?></option>
+	                <option title="<? echo $strBetweenHint; ?>" value="between" <? if (@count($this->attributes['enum_value'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($operator == 'between'){ echo 'selected';} ?> ><? echo $strBetween; ?></option>
 									<? }
 										}
 									} ?>
@@ -156,7 +156,7 @@ $num_colspan = ($this->user->rolle->visually_impaired) ? 3 : 5;
 	                      	$this->attributes['enum_value'][$i] = $this->attributes['enum_value'][$i][0];
 	                      	$this->attributes['enum_output'][$i] = $this->attributes['enum_output'][$i][0];
 	                      }
-	                    for($o = 0; $o < count($this->attributes['enum_value'][$i]); $o++){
+	                    for($o = 0; $o < @count($this->attributes['enum_value'][$i]); $o++){
 	                      ?>
 	                      <option <? 
 													if(!is_array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]))$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]);

@@ -9267,7 +9267,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         $table_name = $element[2];
         $formtype = $element[4];
 				$tablename[$table_name]['tablename'] = $table_name;
-				$tablename[$table_name]['attributname'][] = $attributenames[] = pg_quote($attributname);
+				$tablename[$table_name]['attributname'][] = $attributenames[] = $attributname;
 				$form_field_indizes[$attributname] = $i;
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
 				if($this->formvars['embedded'] != ''){
@@ -9477,8 +9477,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 				if(!empty($insert)){
 					if(!$layerset[0]['maintable_is_view'])$sql = "LOCK TABLE " . $table['tablename']." IN SHARE ROW EXCLUSIVE MODE;";
+					$attr = array_keys($insert);
+					array_walk($attr, function(&$attributename, $key){$attributename = pg_quote($attributename);});
 					$sql.= "INSERT INTO " . pg_quote($table['tablename']) . " (";
-					$sql.= implode(', ', array_keys($insert));
+					$sql.= implode(', ', $attr);
 					$sql.= ") VALUES (";
 					$sql.= implode(', ', $insert);
 					$sql.= ")";
@@ -13868,10 +13870,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 										$pfad .= $layerset[$i]['attributes']['groupby'];
 										$j = 0;
 										foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-													if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != ''){		# hat Haupttabelle oids?
-														$pfad .= ','.pg_quoet($tablename.'_oid').' ';
-													}
-													$j++;
+											if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != ''){		# hat Haupttabelle oids?
+												$pfad .= ','.pg_quote($tablename.'_oid').' ';
+											}
+											$j++;
 										}
 									}
 									$sql = "SELECT * FROM (SELECT " . $pfad.") as query WHERE 1=1 " . $filter . $sql_where;
@@ -14497,8 +14499,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$geometrie_tabelle = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 				$j = 0;
 				foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-					if(($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oder Geometrietabelle oids?
-						$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
+					if (($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['oid'] != '') {
+						$pfad = pg_quote($layerset[$i]['attributes']['table_alias_name'][$tablename]).'.'.$layerset[$i]['oid'].' AS ' . pg_quote($tablename . '_oid').', ' . $pfad;
 					}
 					$j++;
 				}
@@ -14600,8 +14602,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$pfad .= $layerset[$i]['attributes']['groupby'];
 					$j = 0;
 					foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-						if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
-							$pfad .= ','.$tablename.'_oid ';
+						if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != ''){		# hat Haupttabelle oids?
+							$pfad .= ','.pg_quote($tablename.'_oid').' ';
 						}
 						$j++;
 					}
@@ -14989,7 +14991,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				# Haupt-Layer erzeugen
 				$layer = ms_newLayerObj($map);
 				# Parameter $scale in Data ersetzen
-				$layerset['Data'] = str_replace('$scale', $this->map_scaledenom, $layerset['Data']);
+				$layerset['Data'] = str_replace('$scale', $this->map_scaledenom ?: 1000, $layerset['Data']);
 				$layer->set('data', $layerset['Data']);
 				if ($layerset['Filter'] != '') {
 					$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
