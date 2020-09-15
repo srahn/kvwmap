@@ -140,7 +140,7 @@ class GUI {
 		if (array_key_exists('go', $this->formvars) AND $this->formvars['go'] == 'logout') {
 			$this->expect[] = 'go';
 		}
-		$this->gui = WWWROOT . APPLVERSION . LOGIN;
+		$this->gui = LOGIN;
 		$this->output();
 	}
 
