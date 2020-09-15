@@ -57,16 +57,15 @@
 		var day = parseInt(split[0], 10);
 		var month = parseInt(split[1], 10);
 		var year = parseInt(split[2], 10);
-		var check = new Date(year, month-1, day);
+		var check = new Date(year, month - 1, day);
 		var day2 = check.getDate();
 		var year2 = check.getFullYear();
-		var month2 = check.getMonth()+1;
-		if(year2 == year && month == month2 && day == day2){
+		var month2 = check.getMonth() + 1;
+		if (year2 == year && month == month2 && day == day2) {
 			return true;
 		}
-		else{
+		else {
 			return false;
 		}
 	}
-	
 </script>

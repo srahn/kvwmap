@@ -58,11 +58,11 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	  	$alle_flst_pro_buchung[] = $this->buchungen[$i]['flurstkennz'];
 			$alle_flst[] = $this->buchungen[$i]['flurstkennz'];
 	  	$ret=$flst->readALB_Data($this->buchungen[$i]['flurstkennz']);
-	  	for($s=0;$s<count($flst->Adresse);$s++) {
+	  	for($s=0; $s < @count($flst->Adresse);$s++) {
 	      $Adressbezeichnung.=$flst->Adresse[$s]["strassenname"];
 	      $Adressbezeichnung.='&nbsp;'.$flst->Adresse[$s]["hausnr"];
 	    }
-	    for($s=0;$s<count($flst->Lage);$s++) {
+	    for($s=0; $s < @count($flst->Lage);$s++) {
       	$Adressbezeichnung .= $flst->Lage[$s];
     	}
 	    for($n=0;$n<count($flst->Nutzung);$n++) {
@@ -85,9 +85,14 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 							</tr>
 							<tr>
 								<td>
-									<? if($this->buchungen[$i]['sondereigentum'] != ''){ ?>
+									<? if($this->buchungen[$i]['sondereigentum'] != ''){
+											if($this->buchungen[$i]['auftplannr'] != ''){?>
 									verbunden mit Sondereigentum "<? echo $this->buchungen[$i]['sondereigentum']; ?>" Nr. "<? echo $this->buchungen[$i]['auftplannr']; ?>" laut Aufteilungsplan.
-									<? } ?>
+									<? 	}
+											else{	?>
+									Sondereigentum "<? echo $this->buchungen[$i]['sondereigentum']; ?>"
+									<? 	}
+										}	?>
 									<? if($this->buchungen[$i]['buchungstext'] != '')echo nl2br($this->buchungen[$i]['buchungstext']); ?>
 								</td>
 							</tr>

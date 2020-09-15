@@ -48,9 +48,6 @@
 # Vermessungsstelle
 #########################
 #-----------------------------------------------------------------------------------------------------------------
-##########
-#-> Flur #
-##########
 
 class Flur {
   var $FlurID;
@@ -77,65 +74,6 @@ class Flur {
     return $Liste;
   }
   
-  function getFlurListeByExtent($extent) {
-    # Abfragen der Fluren, die im aktuellen Ausschnitt zu sehen sind.
-    $map=ms_newMapObj('');
-    $layer=ms_newLayerObj($map);
-    $layer->set('data',SHAPEPATH.$this->getDataSourceName());
-    $layer->set('status',MS_ON);
-    $layer->set('template', ' ');
-    $layer->queryByRect($extent);
-    $layer->open();
-    $anzResult=$layer->getNumResults();
-    for ($i=0;$i<$anzResult;$i++) {
-      $result=$layer->getResult($i);
-      $shapeindex=$result->shapeindex;
-      if(MAPSERVERVERSION > 500){
-      	$shape=$layer->getFeature($shapeindex,-1);
-      }
-      else{
-      	$shape=$layer->getShape(-1,$shapeindex);
-      }
-      $FlurListe['Flur'][]=$shape->values['FLUR'];
-      $FlurListe['FlurID'][]=$shape->values['FLUR_ID'];
-    }
-    return $FlurListe;
-  }
-
-  function getDataSourceName() {
-    # Abfragen des Namens der Shapedatei für Fluren
-    $sql ='SELECT Data FROM layer WHERE Name="'.$this->LayerName.'"';
-    $this->debug->write("<p>kataster.php Flur->getDataSourceName Abfragen des Shapefilenamen für die Fluren:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->database->mysqli->error, 4); return 0; }
-		$rs = $this->database->result->fetch_assoc();
-    return $rs['Data'];
-  }
-
-  function getMER($layer) {
-    # diese Funktion liefert die Koordinaten des kleinsten einschließenden Rechtecks
-    # Minimum Enclosing Rectangle der Flur aus dem übergebenen MapObjekt
-    @$layer->queryByAttributes('FLUR_ID',$this->GemkgID.$this->FlurID,0);
-    $result=$layer->getResult(0);
-    if ($layer->getNumResults()==0) {
-      return 0;
-    }
-    else {
-      $layer->open();
-      if(MAPSERVERVERSION > 500){
-      	$shape=$layer->getFeature($result->shapeindex,-1);
-      }
-      else{
-      	$shape=$layer->getShape(-1,$result->shapeindex);
-      }
-      return $shape->bounds;
-    }
-  }
-
-  function updateFluren() {
-    return 'updateFluren';
-  }
-
 } # ende der Klasse flur
 
 #-----------------------------------------------------------------------------------------------------------------
@@ -183,50 +121,6 @@ class adresse {
     return $StrassenListe;
   }
   
-  function getAdressenListeByFlst($FlstListe,$order) {
-    # liefert eine Liste von Adressen bei gegebenen Flurstuecken
-    # aus der Tabelle f_Adressen
-    $sql ='SELECT DISTINCT Gemeinde,Strasse,HausNr FROM f_Adressen WHERE 1=1';
-    # Einschränkung wenn Flurstücke in der Liste übergeben werden
-    if ($FlstListe!=0 AND $FlstListe!='') {
-      $sql.=' AND FlurstKennz IN ('.$FlstListe[0];
-      for($i=1;$i<count($FlstListe);$i++) {
-        $sql.=','.$FlstListe[$i];
-      }
-      $sql.=')';
-    }
-    # sortiert nach order wenn angegeben
-    if ($order!=0 AND $order!='') {
-      $sql.=' ORDER BY ' . replace_semicolon($order);
-    }
-    $this->debug->write("<p>kvwmap->getAdressenListeByFlst->Abfragen der Adressdaten für Flurstuecke:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_assoc()){
-      $Liste['GemID'][]=$rs['Gemeinde'];
-      $Liste['StrID'][]=$rs['Strasse'];
-      $Liste['HausNr'][]=$rs['HausNr'];
-    }
-    return $Liste;
-  }
-
-  function getAdressenListeByExtent($extent) {
-    # 2006-01-09
-    # Abfragen der Strassen, die im aktuellen Ausschnitt zu sehen sind.
-    # 1. Abfragen der Adressen von Gebäuden im Ausschnitt
-
-    # 2. Abfragen der Flurstuecke, die im extent liegen
-    $Flurstueck=new flurstueck('',$this->database);
-    $FlurstListe=$Flurstueck->getFlstListeByExtent($extent);
-
-    # 3. Abfragen der Adressen der Flurstücke im Ausschnitt
-    $FlurstueckAdressenListe=$this->getAdressenListeByFlst($FlurstListe['FKZ'],'Gemeinde,Strasse,HausNr');
-
-    # 4. Vereinen der GebaeudeAdressen mit den Flurstuecksadressen durch Abfrage auf tmp_adressen
-    # übernommen nach mysql.php und postgres.php 2005-12-27 pk
-    return $AdressenListeInExtent=$this->database->getAdressenListeByExtent($GebaeudeAdressenListe,$FlurstueckAdressenListe);
-  }
-
   function getHausNrListe($GemID,$StrID,$HausNr,$extent,$order) {
     # 2006-01-11 pk
     # Funktion liefert die Hausnummern zu einer GemID, StrID Kombination
@@ -236,23 +130,10 @@ class adresse {
     # liefert ein Array mit HausNr und Nr_Quelle jeweils mit einem Array für die Listen zurück
     return $HausNrListe;
   }
-
-  function getStrIDfromName($GemID,$StrName) {
-    # ermitteln ob es sich bei dem StrNamen um einen gültigen Strassennamen der Gemeinde GemID handelt
-    # Abfragen und die entsprechende StrID zurückliefern
-    $ret=$this->database->getStrIDByName($GemID,$StrName);
-    if ($ret[0]==0 AND count($ret[1])>0) {
-      # liefert die erste gefundene Strasse zurück
-      return $ret[1][0]['Strasse'];
-    }
-    else {
-      return 0;
-    }
-  }
   
 	function getStrNamefromID($GemID,$StrID) {
     $ret=$this->database->getStrNameByID($GemID,$StrID);
-    if ($ret[0]==0 AND count($ret[1])>0) {
+    if ($ret[0]==0 AND @count($ret[1])>0) {
       # liefert die erste gefundene Strasse zurück
       return $ret[1];
     }
@@ -300,29 +181,6 @@ class gemeinde {
     $this->database=$database;
   }
 
-  function getTableDef() {
-    $def = array(
-      array("GEMEINDE_L","N",8,0),
-      array("COUNT","N",3,0),
-      array("AMT_LANG_I","N",4,0),
-      array("AMT_ID","N",2,0),
-      array("GEMEINDE_I","N",3,0),
-      array("GEMEINDE","C",255),
-      array("POLYNAME","C",255),
-      array("ID","N",11,0)
-    );
-    $this->tabdef=$def;
-    return $def;
-  }
-
-  function getColNames() {
-    for ($i=0;$i<count($this->tabdef);$i++) {
-      $names[$i]=$this->tabdef[$i][0];
-    }
-    $this->colnames=$names;
-    return $names;
-  }
-
   function getKreisSchl() {
     return substr($this->GemeindeSchl,0,5);
   }
@@ -367,23 +225,6 @@ class gemarkung {
     $this->LayerName=LAYERNAME_GEMARKUNGEN;
   }
 
-  function getTableDef() {
-    $def = array(
-      array("GEMEINDE_L","N",8,0),
-      array("GEMEINDE_I","N",3,0),
-      array("GEMARKUNG_","N",6,0),
-      array("COUNT","N",3,0),
-      array("GEMARK_ID","N",4,0),
-      array("GEMARKUNG", "C",255),
-      array("ID","N",11,0)
-    );
-    return $def;
-  }
-
-  function getAmtsgericht() {
-    if ($this->GemkgSchl=="") { return 0; }
-    return $ret[1];
-  }
   
   function getGemkgName() {
     $ret=$this->database->getGemarkungName($this->GemkgSchl);
@@ -445,30 +286,6 @@ class eigentuemer {
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     $rs=pg_fetch_array($ret[1]);
     return $rs;
-  }
-}
-
-#-----------------------------------------------------------------------------------------------------------------
-######################
-# Klasse Grundstueck #
-######################
-class grundstueck {
-  var $Grundbuch;
-  var $BVNR;
-  var $Eigentuemer;
-  var $debug;
-  ###################### Liste der Funktionen ####################################
- #
- # function grundstueck($Grundbuch,$BVNR)  - Construktor
- # function getEigentuemer()
- #
- ################################################################################
-
-  function __construct($Grundbuch,$BVNR) {
-    global $debug;
-    $this->Grundbuch=$Grundbuch;
-    $this->BVNR=$BVNR;
-    $this->debug=$debug;
   }
 }
 
@@ -837,50 +654,6 @@ class flurstueck {
     return $ret[1];
   }
 
-  function getColNames() {
-    for ($i=0;$i<count($this->tabdef);$i++) {
-      $names[$i]=$this->tabdef[$i][0];
-    }
-    $this->colnames=$names;
-    return $names;
-  }
-
-  function is_FlurstKennz($Eingabe) {
-    if ($Eingabe=="") { return 0; }
-    $this->debug->write("<br>kataster.php->flurstueck->is_FlurstKennz Abfrage ob $Eingabe einer gültigen FlurstKennz entspricht<br>",4);
-    $ret=$this->database->is_FlurstKennz($Eingabe);
-    return $ret;
-  }
-
-  function is_FlurstNr($GemkgID,$FlurID,$Eingabe) {
-    # Zerlegen der Eingabe in die Teile vor und nach dem /
-    $NrTeil=explode('/',$Eingabe);
-    $Zaehler=str_pad($NrTeil[0],5,"0",STR_PAD_LEFT);
-    $Nenner=str_pad($NrTeil[1],3,"0",STR_PAD_LEFT);
-    # Zusammensetzen der Angaben zu einem FlurstKennz
-    $FlurKennz=str_pad($FlurID,3,"0",STR_PAD_LEFT);
-    $FlurstKennz=$GemkgID.'-'.$FlurKennz.'-'.$Zaehler.'/'.$Nenner.'.00';
-    # Abfrage ob gebildetes $FlutstKennz einem gültigen Flurstueckskennzeichen entspricht
-    if ($this->is_FlurstKennz($FlurstKennz)) {
-      return $FlurstKennz;
-    }
-    return 0;
-  }
-
-  function is_FlurstZaehler($GemkgID,$FlurID,$Eingabe) {
-    # liefert eine Liste mit FlurstKennz von Flurstuecken,
-    # die mit Gemkg, FlurID und im Zähler mit Eingabe übereinstimmen
-    # Zerlegen der Eingabe in die Teile vor und nach dem /
-    $NrTeil=explode('/',$Eingabe);
-    $Zaehler=str_pad($NrTeil[0],5,"0",STR_PAD_LEFT);
-    # Zusammensetzen des Teiles des FlurstKennz bis Zaehler
-    $FlurKennz=str_pad($FlurID,3,"0",STR_PAD_LEFT);
-    $KennzTeil=$GemkgID.'-'.$FlurKennz.'-'.$Zaehler.'/';
-    # Abfrage der FlurstKennz für die die GemkgID, FlurID und der Zaehler gültig ist
-    $FlstListe=$this->database->is_FlurstZaehler($KennzTeil);
-    return $FlstListe;
-  }
-
   function getEigentuemerliste($Bezirk,$Blatt,$BVNR,$without_temporal_filter = false) {
     if ($this->FlurstKennz=="") {
       $Grundbuch = new grundbuch("","",$this->debug);
@@ -901,14 +674,6 @@ class flurstueck {
     if ($this->FlurstKennz=="") { return 0; }
     $ret=$this->database->getGrundbuchbezirke($this->FlurstKennz, $this->hist_alb);
     return $ret;
-  }
-
-
-  function getAktualitaetsNr() {
-    if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("kataster.php flurstueck->getAktualitaetsNr:",4);
-    # ALKIS TODO
-    return $ret[1];
   }
 
 
@@ -950,40 +715,6 @@ class flurstueck {
   	return substr($this->FlurstKennz,6,3);
   }
 
-  function FKZ_Format($format) {
-    switch ($format) {
-      case 'ALB-Info': {
-        $str =substr($this->Infotext,2,6)."-".substr($this->Infotext,8,3);
-        $str.="-".substr($this->Infotext,11,5)."/".substr($this->Infotext,16,3).".".substr($this->Infotext,19,2);
-      } break;
-      case 'EDBS' : {
-        $FKZ_Format=$this->Infotext;
-      } break;
-      case 'ALB' : {
-        $str =substr($this->Infotext,2,6).ereg_replace('0',' ',substr($this->Infotext,8,3));
-        $str.=ereg_replace('0',' ',substr($this->Infotext,11,5));
-        $str.=str_pad (ereg_replace('0',' ',substr($this->Infotext,16,3)),5," ",STR_PAD_LEFT);
-        $str.=str_pad ($this->getPruefKZ(), 11, " ", STR_PAD_LEFT);
-      } break;
-      default : {
-        $str=$this->Infotext;
-      }
-    }
-    return $str;
-  }
-
-  function getPruefKZ() {
-    if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("kataster.php flurstueck getPruefKZ<br>line: ".__LINE__,4);
-    $ret=$this->database->getPruefKZ($this->FlurstKennz);
-    return $ret[1];
-  }
-
-  function getFlurkarte() {
-    if ($this->FlurstKennz=="") { return 0; }
-    $ret=$this->database->getFlurkarte($this->FlurstKennz);
-    return $ret[1];
-  }
 
   function getLage() {
     $ret=$this->database->getLage($this->FlurstKennz);
@@ -995,7 +726,7 @@ class flurstueck {
     $this->debug->write("<br>kataster.php flurstueck->getAdresse() Abfragen der Strassen zum Flurstück:",4);
 		$ret=$this->database->getStrassen($this->FlurstKennz);
     $Strassen=$ret[1];
-    for ($i=0;$i<count($Strassen);$i++) {
+    for ($i=0; $i < @count($Strassen);$i++) {
       $this->debug->write("<br>kataster.php flurstueck->getAdresse() Abfragen der Hausnummern zu den Strassen zum Flurstück:",4);
       $ret=$this->database->getHausNummern($this->FlurstKennz,$Strassen[$i]['strasse']);
       $HausNr=$ret[1];
@@ -1014,36 +745,6 @@ class flurstueck {
     $ret=$this->database->getNutzung($this->FlurstKennz);
     if ($ret[0] AND DBWRITE) { return 0; }
     return $ret[1];
-  }
-
-  function getFlaeche() {
-    if ($this->FlurstKennz=="") { return 0; }
-    $ret=$this->database->getFlstFlaeche($this->FlurstKennz);
-    # testen ob Abfrage erfolgreich, sonst Abbruch und 0 zurück
-    if ($ret[0] AND DBWRITE) { return 0; }
-    return $ret[1];
-  }
-
-  function getKoordinaten() {
-  	$queryret=$this->database->getFlstKoordinaten($this->FlurstKennz);
-    if ($queryret[0]) {
-      $errmsg='Fehler bei der Abfrage der Koordinaten in getKoordinaten: '.$queryret[1];
-    }
-    else {
-      $rs=pg_fetch_array($queryret[1]);
-      $start=strrpos($rs['koordinaten'],'(')+1;
-      $end=strpos($rs['koordinaten'],')');
-      $vertex=explode(',',substr($rs['koordinaten'],$start,$end-$start));
-      for ($i=1;$i<count($vertex);$i++) {
-      	$koord=explode(' ',trim($vertex[$i]));
-      	$points[$i-1]['lfdnr']=$i;
-      	$points[$i-1]['x']=$this->vermessungsrunden(trim($koord[0]), 1);
-      	$points[$i-1]['y']=$this->vermessungsrunden(trim($koord[1]), 1);
-      }
-    }
-    $ret[0]=$errmsg;
-    $ret[1]=$points;
-    return $ret;
   }
 
   function vermessungsrunden($zahl, $stellen){
@@ -1067,16 +768,6 @@ class flurstueck {
   		$newzahl .= '.'.str_repeat('0', $stellen);;
   	}
   	return $newzahl;
-  }
-
-  function ALB_Form_Auswaehlen($art) {
-    switch ($art) {
-      default : {
-        $kvwmap = new kvwmap();
-        $kvwmap->output("forms/ALB_Auswahl.php","form","html");
-      }
-      break;
-    }
   }
 	
 	function getVersionen() {
@@ -1167,7 +858,7 @@ class flurstueck {
 		$this->hist_alb=$rs['hist_alb'];
     $this->Pruefzeichen=$rs['pruefzeichen'];
     $this->Forstamt=$this->getForstamt();	
-    $this->AktualitaetsNr=$this->getAktualitaetsNr();			# ALKIS TODO
+    #$this->AktualitaetsNr=$this->getAktualitaetsNr();			# ALKIS TODO
     $this->Adresse=$this->getAdresse();
     $this->Lage=$this->getLage();
     $this->Grundbuchbezirk=$this->getGrundbuchbezirk();
@@ -1191,77 +882,9 @@ class flurstueck {
     $this->Nutzung=$this->getNutzung();
   }
 
-  function is_ALK_Flurstueck($FlurstKennz) {
-    $this->isALK=$this->database->is_ALK_Flurstueck($FlurstKennz);
-  }
-
-  function isALK($FlurstKennz) {
-    $this->isALK=0;
-    # Funktion fragt ab, ob das Flutstück in der ALK vorkommt
-    # Wenn ja wird dem Parameter isALK des Objektes Flurstück der Wert 1 zugewiesen.
-    $ALK=new ALK();
-    $ALKFlurst=$ALK->getALK_Flurst(0,0,0,array($FlurstKennz),'','FKZ');
-    $anzALKFlurst=count($ALKFlurst['FlurstKennz']);
-    if ($anzALKFlurst>0) {
-      $this->isALK=1;
-    }
-  }
-
   function getFlstListe($GemID,$GemkgID,$FlurID, $historical = false) {
     $Liste=$this->database->getFlurstuecksListe($GemID,$GemkgID,$FlurID, $historical);
     return $Liste;
-  }
-
-  function getFlstListeByExtent($rectObj) {
-    $map=ms_newMapObj('');
-    $layer=ms_newLayerObj($map);
-    $layer->set('data',SHAPEPATH.$this->getDataSourceName());
-    $layer->set('status',MS_ON);
-    $layer->set('template', ' ');
-    $layer->queryByRect($rectObj);
-    $layer->open();
-    $anzResult=$layer->getNumResults();
-    for ($i=0;$i<$anzResult;$i++) {
-      $result=$layer->getResult($i);
-      $shapeindex=$result->shapeindex;
-      if(MAPSERVERVERSION > 500){
-      	$shape=$layer->getFeature($shapeindex,-1);
-      }
-      else{
-      	$shape=$layer->getShape(-1,$shapeindex);
-      }
-      $Liste['FKZ'][$i]=$shape->values["FKZ"];
-    }
-    return $Liste;
-  }
-
-  function getFlurstByPoint($point) {
-    $map=ms_newMapObj('');
-    $layer=ms_newLayerObj($map);
-    $layer->set('data',SHAPEPATH.$this->getDataSourceName());
-    $layer->set('status',MS_ON);
-    $layer->set('template', ' ');
-    $layer->queryByPoint($point,MS_SINGLE,0);
-    $layer->open();
-    $result=$layer->getResult(0);
-    $shapeindex=$result->shapeindex;
-    if(MAPSERVERVERSION > 500){
-    	$shape=$layer->getFeature($shapeindex,-1);
-    }
-    else{
-    	$shape=$layer->getShape(-1,$shapeindex);
-    }
-    $Flurst['FKZ']=$shape->values["FKZ"];
-    $Flurst['bounds']=$shape->bounds;
-    return $Flurst;
-  }
-
-  function getFlurstByLfdNrName($lfd_nr_name,$limitAnzahl) {
-    $ret=$this->database->getFlurstueckeByLfdNrName($lfd_nr_name,$limitStart,$limitAnzahl);
-    if ($ret[0]) {
-      $ret[1]='<br>Fehler bei der Abfrage der Flurstückskennzeichen.'.$ret[1];
-    }
-    return $ret;
   }
   
   function getFlurstByGrundbuecher($gbarray) {
@@ -1289,11 +912,6 @@ class flurstueck {
       }
     }
     return $ret;
-  }
-
-  function getFlurstByNutzungen($gemkgschl, $nutzung, $anzahl){
-  	$rs = $this->database->getFlurstByNutzungen($gemkgschl, $nutzung, $anzahl);
-    return $rs;
   }
 	
 	function getFlurstByLatLng($latitude, $longitude) {

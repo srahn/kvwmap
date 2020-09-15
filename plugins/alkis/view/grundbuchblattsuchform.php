@@ -124,20 +124,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   </tr>
   <tr> 
     <td colspan="4" align="center"> 
-
-<input type="hidden" name="selBlatt" value="<? echo $this->formvars['selBlatt']; ?>">
-<input type="hidden" name="go" value="Grundbuchblatt_Auswaehlen">
-<input type="submit" name="go_plus" value="Suchen" tabindex="6">
-
-   </td>
-
-  </tr><?php 
-  $anzNamen=count($this->namen);
-  if ($anzNamen>0) {
-   ?><?php
-  }
-  ?>
-
+			<input type="hidden" name="selBlatt" value="<? echo $this->formvars['selBlatt']; ?>">
+			<input type="hidden" name="go" value="Grundbuchblatt_Auswaehlen">
+			<input type="submit" name="go_plus" value="Suchen" tabindex="6">
+		</td>
+  </tr>
 </table>
 <?
  if($this->formvars['namensuche'] == 'true'){

@@ -101,7 +101,7 @@ class TypeInfo {
 					inheritance.order DESC,
 					tv.datavalue::int ASC
       ";
-    echo '<p>' . $sql . ";";
+    #echo '<p>' . $sql . ";";
     $uml_attributes = pg_query($this->_database->dbConn, $sql);
     return pg_fetch_all($uml_attributes);
   }

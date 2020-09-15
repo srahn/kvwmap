@@ -271,25 +271,26 @@ class Gml_builder {
     if (($depth) < 0) return '';
     $xplan_ns_prefix = XPLAN_NS_PREFIX ? XPLAN_NS_PREFIX.':' : '';
     $gmlStr = '';
-		$sequence_attr = 0;
-		foreach ($uml_attribute_info as $uml_attribute) {
-				# Rueckverweise auf etwaige Bereiche hinzufügen
-				# index 10 is the current position (XPlanGML 5.0.1) for gehoertzubereich association to be implemented
-				# TODO Make this more generic to reflect possible changes in index and support all associations
-				# Might need a change in xplan_uml generation to contain association sequenceorder/index
-			if($sequence_attr == 10) {
-					$aggregated_bereich_gml_ids = explode(',', trim($gml_object['bereiche_gml_ids'], '{}'));
-					$str = str_replace("{", "", $gml_object['bereiche_gml_ids']);  
-					// entnimmt mögliche doppelte Werte
-					$aggregated_bereich_gml_ids = array_unique($aggregated_bereich_gml_ids);
-					foreach ($aggregated_bereich_gml_ids as $bereich_gml_id) {
-						if (!empty($bereich_gml_id)) {
-							$gmlStr .= "<{$xplan_ns_prefix}gehoertZuBereich xlink:href=\"#GML_{$bereich_gml_id}\"/>";
-						}
-					}
-				}
-				#$gmlStr .= "<note>attribut sequenznummer: " . $sequence_attr ."</note>";
-				$sequence_attr++;
+    $sequence_attr = 0;
+
+    foreach ($uml_attribute_info as $uml_attribute) {
+      # Rueckverweise auf etwaige Bereiche hinzufügen
+      # index 10 is the current position (XPlanGML 5.0.1) for gehoertzubereich association to be implemented
+      # TODO Make this more generic to reflect possible changes in index and support all associations
+      # Might need a change in xplan_uml generation to contain association sequenceorder/index
+      if($sequence_attr == 10) {
+        $aggregated_bereich_gml_ids = explode(',', trim($gml_object['bereiche_gml_ids'], '{}'));
+        $str = str_replace("{", "", $gml_object['bereiche_gml_ids']);  
+        // entnimmt mögliche doppelte Werte
+        $aggregated_bereich_gml_ids = array_unique($aggregated_bereich_gml_ids);
+        foreach ($aggregated_bereich_gml_ids as $bereich_gml_id) {
+          if (!empty($bereich_gml_id)) {
+            $gmlStr .= "<{$xplan_ns_prefix}gehoertZuBereich xlink:href=\"#GML_{$bereich_gml_id}\"/>";
+          }
+        }
+      }
+      #$gmlStr .= "<note>attribut sequenznummer: " . $sequence_attr ."</note>";
+      $sequence_attr++;
       // leere Felder auslassen
       if ($gml_object[$uml_attribute['col_name']] == '' OR $gml_object[$uml_attribute['col_name']] == '{}') continue;
       #$gmlStr .= '<note>attributname: ' . $uml_attribute['name'] . ' type_type: ' . $uml_attribute['type_type'] . ' stereotype: ' . $uml_attribute['stereotype'] . ' uml-attribute-type: '. $uml_attribute['type'] . ' uml-attribute-datatype: '. $uml_attribute['uml_dtype'] . '</note>';
@@ -348,10 +349,10 @@ class Gml_builder {
                 $gml_attrib_str .= $this->generateGmlForAttributes($single_value, $datatype_attribs,$depth-1);
                 // leere Datentypen auslassen
                 if (strlen($gml_attrib_str) == 0) break;
-
                 $typeElementName = end($datatype_attribs)['origin'];
                 $gmlStr .= $this->wrapWithElement(
                 "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+
                 // wrap all data-types with their data-type-element-tag
                 $this->wrapWithElement("{$xplan_ns_prefix}{$typeElementName}", $gml_attrib_str));
                 $gml_attrib_str = '';
@@ -476,7 +477,7 @@ class Gml_builder {
 							}
 						}
 					} break;
-					
+
         case 'e': // enum type
         default: {
           $gml_value = trim($gml_object[$uml_attribute['col_name']]);
@@ -494,6 +495,12 @@ class Gml_builder {
               htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"));
        }
       }
+    }
+
+    # Workaround for association verbundener Plan
+    # TODO Make this more generic to reflect possible changes in index and support all associations
+    if(array_key_exists('verbundenerplan', $gml_object)) {
+        $gmlStr .= "<{$xplan_ns_prefix}verbundenerPlan xlink:href=\"#GML_" . $gml_object['verbundenerplan'] . "\"/>";
     }
     return $gmlStr;
   }

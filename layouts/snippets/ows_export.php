@@ -19,11 +19,19 @@
   <tr>
     <td align="left">&nbsp;</td>
     <td align="left"><?php echo $strTotalOrCurrentExtent; ?><br>
-    <input type="radio" name="totalExtent" value="0"<?php echo ($this->formvars['totalExtent'] != 2 ? ' checked' : ''); ?>>
+    <input type="radio" name="totalExtent" value="1"<?php echo ($this->formvars['totalExtent'] != 2 ? ' checked' : ''); ?>>
     <?php echo $strTotalExtent; ?>
-    <input type="radio" name="totalExtent" value="1"<?php echo ($this->formvars['totalExtent'] == 2 ? ' checked' : ''); ?>>
+    <input type="radio" name="totalExtent" value="0"<?php echo ($this->formvars['totalExtent'] == 2 ? ' checked' : ''); ?>>
     <?php echo $strCurrentExtent; ?></td>
   </tr>
+
+	<tr>
+		<td align="left">&nbsp;</td>
+		<td align="left">
+			<input type="checkbox" name="nurVeroeffentlichte" value="1" checked> <?php echo $strNurVeroeffentlichteFilter; ?> <span id="debug_t" data-tooltip="<?php echo $strNurVeroeffentlichteHilfe; ?>" onclick="message([{'type': 'info', 'msg': this.getAttribute('data-tooltip')}])"></span>
+		</td>
+	</tr>
+
   <tr>
     <td align="left">&nbsp;</td>
     <td align="left"> <p><?php echo $strNameOfMapFile; ?><br>

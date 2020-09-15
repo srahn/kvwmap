@@ -33,7 +33,7 @@ class ddl {
     
   function __construct($database, $gui = NULL) {
     global $debug;
-    $this->debug=$debug;
+    $this->debug = $debug;
     $this->database = $database;
     $this->gui = $gui;
 		$this->din_formats = array(
@@ -42,6 +42,9 @@ class ddl {
 			'A3 hoch' => array('width' => 842, 'height' => 1191, 'size' => 'A3', 'orientation' => 'portrait'),
 			'A3 quer' => array('width' => 1191, 'height' => 842, 'size' => 'A3', 'orientation' => 'landscape')
 		);
+		$this->remaining_freetexts = array();
+		$this->remaining_rectangles = array();
+		$this->remaining_lines = array();
 		$this->colors = $this->read_colors();
   }
 	
@@ -81,15 +84,23 @@ class ddl {
     }
   }
 	
-	function add_freetexts($i, $offsetx, $type, $pagenumber = NULL, $pagecount = NULL){
-		if(count($this->remaining_freetexts) == 0)return;
-    for($j = 0; $j < count($this->layout['texts']); $j++){
+	function add_freetexts($i, $offsetx, $type, $pagenumber = NULL, $pagecount = NULL) {
+		if (count($this->remaining_freetexts) == 0) {
+			return array();
+		}
+		$remaining_freetexts = array();
+		for ($j = 0; $j < count($this->layout['texts']); $j++) {
 			# der Freitext wurde noch nicht geschrieben und ist entweder ein fester Freitext oder ein fortlaufender oder einer, der auf jeder Seite erscheinen soll
-    	if(in_array($this->layout['texts'][$j]['id'], $this->remaining_freetexts) AND $this->layout['texts'][$j]['posy'] != ''){	# nur Freitexte mit einem y-Wert werden geschrieben
-				if(($type == 'fixed' AND $this->layout['texts'][$j]['type'] != 2 AND ($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1)) 
-				OR ($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['texts'][$j]['type'] == 0)
-				OR ($type == 'everypage' AND $this->layout['texts'][$j]['type'] == 2)){
-					if($type != 'everypage' AND $this->page_overflow){
+    	if (
+				in_array($this->layout['texts'][$j]['id'], $this->remaining_freetexts) AND
+				$this->layout['texts'][$j]['posy'] != ''
+			) {	# nur Freitexte mit einem y-Wert werden geschrieben
+				if (
+					($type == 'fixed' AND $this->layout['texts'][$j]['type'] != 2 AND ($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1)) OR
+					($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['texts'][$j]['type'] == 0) OR
+					($type == 'everypage' AND $this->layout['texts'][$j]['type'] == 2)
+				) {
+					if ($type != 'everypage' AND $this->page_overflow){
 						$this->pdf->reopenObject($this->record_startpage);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 						#$this->i_on_page = 0;		# evtl. nicht 0 setzen, sondern ein eigenes i_on_page für jede Seite machen
 						#$this->page_overflow = false;		# muss auskommentiert bleiben, da sonst Fehler in EN-Liste1
@@ -98,12 +109,12 @@ class ddl {
 					$x = $this->layout['texts'][$j]['posx'];
 					$y = $this->layout['texts'][$j]['posy'];
 					$offset_attribute = $this->layout['texts'][$j]['offset_attribute'];
-					if($offset_attribute != ''){			# ist ein offset_attribute gesetzt
+					if ($offset_attribute != ''){			# ist ein offset_attribute gesetzt
 						$offset_value = $this->layout['offset_attributes'][$offset_attribute];
-						if($offset_value != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Freitext relativ dazu setzen 
+						if ($offset_value != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Freitext relativ dazu setzen 
 							$y = $this->handlePageOverflow($offset_attribute, $offset_value, $y);		# Seitenüberläufe berücksichtigen
 						}
-						else{
+						else {
 							$remaining_freetexts[] = $this->layout['texts'][$j]['id'];
 							continue;			# der Freitext ist abhängig aber das Attribut noch nicht geschrieben, Freitext merken und überspringen
 						}
@@ -139,8 +150,11 @@ class ddl {
 		return $remaining_freetexts;
 	}
 	
-	function add_lines($offsetx, $type){
-		if(count($this->remaining_lines) == 0)return;
+	function add_lines($offsetx, $type) {
+		if (count($this->remaining_lines) == 0) {
+			return array();
+		}
+		$remaining_lines = array();
     for($j = 0; $j < count($this->layout['lines']); $j++){
 			$overflow = false;
 			if($type != 'everypage' AND $this->page_overflow){
@@ -236,7 +250,10 @@ class ddl {
 	}
 	
 	function add_rectangles($offsetx, $type){
-		if(count($this->remaining_rectangles) == 0)return;
+		if (count($this->remaining_rectangles) == 0) {
+			return array();
+		}
+		$remaining_rectangles = array();
     for($j = 0; $j < count($this->layout['rectangles']); $j++){
 			if($type != 'everypage' AND $this->page_overflow){
 				$this->pdf->reopenObject($this->record_startpage);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
@@ -722,10 +739,12 @@ class ddl {
   	return $text;
   }
   
-  function get_result_value_output($value, $i, $j, $preview){
-				# $i ist der result-counter, $j ist der attribute-counter
-		if($value == '')$value = ' ';		# wenns der result-value leer ist, ein Leerzeichen setzen, wegen der relativen Positionierung
-		switch ($this->attributes['form_element_type'][$j]){
+  function get_result_value_output($value, $i, $j, $preview) {
+		# $i ist der result-counter, $j ist der attribute-counter
+		if ($value == '') {
+			$value = ' ';		# wenns der result-value leer ist, ein Leerzeichen setzen, wegen der relativen Positionierung
+		}
+		switch ($this->attributes['form_element_type'][$j]) {
 			case 'Auswahlfeld' : {
 				if(is_array($this->attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 					for($e = 0; $e < count($this->attributes['enum_value'][$j][$i]); $e++){
@@ -1443,6 +1462,7 @@ class ddl {
   }
   
   function load_elements($ddl_id){
+		$elements = array();
     $sql = 'SELECT * FROM ddl_elemente';
     $sql.= ' WHERE ddl_elemente.ddl_id = '.$ddl_id;
     #echo $sql;
@@ -1456,6 +1476,7 @@ class ddl {
   }
   
   function load_texts($ddl_id, $freetext_id = NULL){
+		$texts = array();
     $sql = 'SELECT druckfreitexte.* FROM druckfreitexte, ddl2freitexte';
     $sql.= ' WHERE ddl2freitexte.ddl_id = '.$ddl_id;
     $sql.= ' AND ddl2freitexte.freitext_id = druckfreitexte.id';
@@ -1555,6 +1576,7 @@ class ddl {
   }	
 	
   function load_rectangles($ddl_id){
+		$rects = array();
     $sql = 'SELECT druckfreirechtecke.* FROM druckfreirechtecke, ddl2freirechtecke';
     $sql.= ' WHERE ddl2freirechtecke.ddl_id = '.$ddl_id;
     $sql.= ' AND ddl2freirechtecke.rect_id = druckfreirechtecke.id';

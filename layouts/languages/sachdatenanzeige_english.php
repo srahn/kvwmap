@@ -10,7 +10,7 @@ $strFromDatasets="from";
 $strForwardDatasets="forward";
 $strLastDatasets="end";
 $strFirstDatasets="start";
-$strbackToSearch="back to search";
+$strbackToSearch="back";
 $strLimit="Limit Resultcount:";
 $strToTop="to top";
 ?>

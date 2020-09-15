@@ -2078,6 +2078,9 @@ echo '			</table>
 					if($dbStyle['linecap'] != '') {
 	          $style->set('linecap', constant(MS_CJC_.strtoupper($dbStyle['linecap'])));
 	        }
+					else {
+						$style->set('linecap', constant('MS_CJC_ROUND'));
+					}
 					if($dbStyle['linejoin'] != '') {
 	          $style->set('linejoin', constant(MS_CJC_.strtoupper($dbStyle['linejoin'])));
 	        }
@@ -2655,23 +2658,22 @@ echo '			</table>
 			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
-		if(!$img_urls){
+		if (!$img_urls) {
 			ob_start();
 			$this->image_map->saveImage();
 			$image = ob_get_clean();
 			$this->img['hauptkarte'] = 'data:image/jpg;base64,'.base64_encode($image);
 		}
-		else{
+		else {
 			$filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
-			$this->image_map->saveImage(IMAGEPATH.$filename);
-			$this->img['hauptkarte'] = IMAGEURL.$filename;			
+			$this->image_map->saveImage(IMAGEPATH . $filename);
+			$this->img['hauptkarte'] = IMAGEURL . $filename;
 		}
-
-		if($this->formvars['go'] != 'navMap_ajax'){
+		if ($this->formvars['go'] != 'navMap_ajax'){
 			$this->legende = $this->create_dynamic_legend();
-			$this->debug->write("Legende erzeugt",4);
+			$this->debug->write("Legende erzeugt", 4);
 		}
-		else{
+		else {
 			# Zusammensetzen eines Layerhiddenstrings, in dem die aktuelle Sichtbarkeit aller aufgeklappten Layer gespeichert ist um damit bei Bedarf die Legende neu zu laden
 			for($i = 0; $i < $this->layerset['anzLayer']; $i++) {
 				$layer=&$this->layerset['list'][$i];
@@ -2766,22 +2768,6 @@ echo '			</table>
 			}
 	  }
     return $Lagebezeichnung;
-  }
-
-  function getFlurbezeichnung($epsgcode) {
-    $Flurbezeichnung = '';
- 	  $flur = new Flur('','','',$this->pgdatabase);
-		$bildmitte['rw']=($this->map->extent->maxx+$this->map->extent->minx)/2;
-		$bildmitte['hw']=($this->map->extent->maxy+$this->map->extent->miny)/2;
-		$ret=$flur->getBezeichnungFromPosition($bildmitte, $epsgcode);
-		if ($ret[0]) {
-		}
-		else {
-			if ($ret[1]['flur'] != '') {
-				$Flurbezeichnung = $ret[1];
-			}
-		}
-		return $Flurbezeichnung;
   }
 
 	# extrahiert die Daten aus qlayerset in ein Array
@@ -4151,22 +4137,6 @@ echo '			</table>
     echo '</select>';
   }
 
-  function export_Adressaenderungen(){
-    $this->titel='Adressänderungen der Eigentümer exportieren';
-    $this->main='Adressaenderungen_Export.php';
-    $this->output();
-  }
-
-  function export_Adressaenderungen_exportieren(){
-		include_(CLASSPATH.'adressaenderungen.php');
-    $adressaenderungen = new adressaenderungen($this->pgdatabase);
-    $adressaenderungen->delete_old_entries();
-    $adressaenderungen->read_anschriften();
-		$adressaenderungen->read_personen();
-    $this->filename = $adressaenderungen->export_into_file();
-    $this->export_Adressaenderungen();
-  }
-
   function exportWMC(){
     $this->WMCFileName = 'wmc-'.$this->Stelle->id.'-'.$this->user->id.'.xml';
 
@@ -4199,23 +4169,6 @@ echo '			</table>
     ob_end_flush();
     $this->main='styledaten.php';
     $this->titel='Styles';
-  }
-
-  function showFlurstueckKoordinaten() {
-    $flurst=new flurstueck($this->formvars['FlurstKennz'],$this->pgdatabase);
-    $ret=$flurst->getKoordinaten();
-    if ($ret[0]) {
-      echo $ret[1];
-    }
-    else {
-      echo 'Lfdnr&nbsp;RW&nbsp;HW';
-      $Punkte=$ret[1];
-      for ($i=0;$i<count($Punkte);$i++) {
-        echo '<br>'.$this->formvars['FlurstKennz'].'-'.$Punkte[$i]['lfdnr'];
-        echo '&nbsp;'.$Punkte[$i]['x'];
-        echo '&nbsp;'.$Punkte[$i]['y'];
-      }
-    }
   }
 
   function https_proxy(){
@@ -4595,98 +4548,6 @@ echo '			</table>
   function showConstants() {
 		$this->main='showadminfunctions.php';
 		$this->administration->get_constants_from_all_configs();
-  }
-
-  function grundbuchblattWahl() {
-    $this->titel='Suche nach Grundbuchblättern';
-    $this->main='grundbuchblattsuchform.php';
-    $grundbuch = new grundbuch('', '', $this->pgdatabase);
-    $GemeindenStelle=$this->Stelle->getGemeindeIDs();
-    if($GemeindenStelle != ''){   // Stelle ist auf Gemeinden eingeschränkt
-      $Gemarkung=new gemarkung('',$this->pgdatabase);
-			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), NULL);
-			$ganze_gemarkungen = array_merge($GemkgListe['GemkgID'], array_keys($GemeindenStelle['ganze_gemarkung']));
-      $gbliste = $grundbuch->getGrundbuchbezirkslisteByGemkgIDs($ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung']);
-    }
-    else{
-      $gbliste = $grundbuch->getGrundbuchbezirksliste();
-    }
-    // Sortieren der Grundbuchbezirke unter Berücksichtigung von Umlauten
-    $sorted_arrays = umlaute_sortieren($gbliste['bezeichnung'], $gbliste['schluessel']);
-    $gbliste['schluessel'] = $sorted_arrays['second_array'];
-    $sorted_arrays = umlaute_sortieren($gbliste['bezeichnung'], $gbliste['beides']);
-    $gbliste['bezeichnung'] = $sorted_arrays['array'];
-    $gbliste['beides'] = $sorted_arrays['second_array'];
-    $this->gbliste = $gbliste;
-		####### Import ###########
-		$_files = $_FILES;
-    if($_files['importliste']['name']){
-			$importliste = file($_files['importliste']['tmp_name'], FILE_IGNORE_NEW_LINES);
-			$this->formvars['selBlatt'] = implode(', ', $importliste);
-			$this->formvars['Bezirk'] = substr($importliste[0], 0, 6);
-		}
-		##########################
-    if($this->formvars['Bezirk'] != ''){
-    	if($this->formvars['selBlatt'])$this->selblattliste = explode(', ',$this->formvars['selBlatt']);
-			if($GemeindenStelle != ''){   // Stelle ist auf Gemeinden eingeschränkt
-				$this->blattliste = $grundbuch->getGrundbuchblattlisteByGemkgIDs($this->formvars['Bezirk'], $ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung']);
-			}
-			else{
-				$this->blattliste = $grundbuch->getGrundbuchblattliste($this->formvars['Bezirk']);
-			}
-    }
-    $this->output();
-  }
-
-  function grundbuchblattSuchen() {
-  	$blaetter = explode(', ', $this->formvars['selBlatt']);
-  	for($i = 0; $i < count($blaetter); $i++){
-  		$blatt = explode('-', $blaetter[$i]);		# bezirk-blatt
-	    # Prüfen der eingegebenen Parameter
-	    $grundbuch=new grundbuch($blatt[0],$blatt[1],$this->pgdatabase);
-	    $ret=$grundbuch->grundbuchblattSuchParameterPruefen();
-	    if ($ret[0]) {
-	      $this->Fehlermeldung='Angaben fehlerhaft:'.$ret[1];
-	      $this->grundbuchblattWahl();
-				return;
-	    }
-	    else {
-	      # Suchparameter sind in Ordnung
-	      # Abfrage aller Flurstücke, die auf dem angegebenen Grundbuchblatt liegen.
-	      $ret=$grundbuch->getBuchungen('','','',1);
-	      if ($ret[0]) {
-	        # Fehler bei der Abfrage der Flurstücke des Grundbuchblattes
-	        $this->Fehlermeldung=$ret[1];
-	        $this->grundbuchblattWahl();
-					return;
-	      }
-	      else {
-	        $buchungen=$ret[1];
-	        # Test ob Flurstücke gefunden wurden
-	        $anzFlst=count($buchungen);
-	        if ($anzFlst==0) {
-	          # Wenn keine Flurstücke gefunden wurden
-	          $this->Fehlermeldung.='Es konnten keine Flurstücke zu dem Grundbuchblatt '.$blatt[0].'-'.$blatt[1].' gefunden werden.<br>';
-	          $this->grundbuchblattWahl();
-						return;
-	        }
-	        else {
-	          # Es wurden Flurstücke gefunden, ins Ergebnisarray aufnehmen
-	          $gbblaetter[] = $buchungen;
-	        } # Ende mit Flurstücksanzeige
-	      } # Ende mit Flurstücke erfolgreich abgefragt
-	    } # Ende mit Suchparameter sind in Ordnung
-  	}
-		$this->user->rolle->delete_last_query();
-		$this->user->rolle->save_last_query('Grundbuchblatt_Auswaehlen_Suchen', 0, $this->formvars['selBlatt'], NULL, NULL, NULL);
-  	$this->grundbuchblattanzeige($gbblaetter);
-  }
-
-  function grundbuchblattanzeige($gbblaetter) {
-    $this->main='grundbuchblattanzeige.php';
-    $this->titel='Buchungen zum Grundbuchblatt';
-    $this->gbblaetter=$gbblaetter;
-    $this->output();
   }
 
   function getMenueWithAjax() {
@@ -6436,235 +6297,6 @@ echo '			</table>
     $this->metadateneingabe();
   }
 
-	function nutzungWahl(){
-		include_once(CLASSPATH.'FormObject.php');
-    if ($this->formvars['anzahl'] == 0) {
-      $this->formvars['anzahl'] = 10;
-    }
-    $this->titel='Flurstückssuche nach Nutzung';
-    $this->main='nutzungensuchform.php';
-
-    # 2006-29-06 sr: Gemarkungsformobjekt nur für Gemeinden der Stelle
-    $GemeindenStelle=$this->Stelle->getGemeindeIDs();
-    $Gemeinde=new gemeinde('',$this->pgdatabase);
-    # Auswahl aller Gemeinden der Stelle
-    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'GemeindeName');
-
-    # Abfragen der Gemarkungen mit dazugehörigen Namen der Gemeinden
-    $GemkgID=$this->formvars['GemkgID'];
-    $Gemarkung=new gemarkung('',$this->pgdatabase);
-    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');
-    // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
-    $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
-    $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
-    $GemkgListe['GemkgID'] = $sorted_arrays['second_array'];
-    # Erzeugen des Formobjektes für die Gemarkungsauswahl
-    $this->GemkgFormObj=new FormObject("GemkgID","select",$GemkgListe['GemkgID'],$GemkgID,$GemkgListe['Bezeichnung'],"1","","",NULL);
-    $this->GemkgFormObj->insertOption(-1,0,'--Auswahl--',0);
-    $this->GemkgFormObj->outputHTML();
-    $this->output();
-  }
-
-  function nutzungsuchen(){
-    # 2006-29-06 sr: auf Gemarkungen der Stelle einschränken
-    if($this->formvars['GemkgID'] > 0){
-      $Liste['GemkgID'][] = $this->formvars['GemkgID'];
-      $this->formvars['GemkgID'] = $Liste['GemkgID'];
-    }
-    else{
-      $GemeindenStelle=$this->Stelle->getGemeindeIDs();
-      if($GemeindenStelle != NULL){
-        $Gemeinde=new gemeinde('',$this->pgdatabase);
-        # Auswahl aller Gemeinden der Stelle
-        $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'GemeindeName');
-        # Abfragen der Gemarkungen mit dazugehörigen Namen der Gemeinden
-        $Gemarkung=new gemarkung('',$this->pgdatabase);
-        $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');
-        $this->formvars['GemkgID'] = $GemkgListe['GemkgID'];
-      }
-    }
-    if($this->formvars['GemkgID'][0] != '-'){
-      $flurstueck=new flurstueck('',$this->pgdatabase);
-      $ret=$flurstueck->getFlurstByNutzungen($this->formvars['GemkgID'][0], $this->formvars['nutzung'], $this->formvars['anzahl']);
-      if ($ret[0] == 1) {
-        $this->Fehlermeldung='<br>Es konnten keine Flurstücke abgefragt werden'.$ret[1];
-      }
-      else {
-        $this->flurstuecke=$ret[1];
-        if (count($this->flurstuecke)==0) {
-          $this->Fehlermeldung='<br>Es konnten keine Flurstücke gefunden werden, bitte ändern Sie die Anfrage!';
-        }
-        else {
-          $ret=$flurstueck->getFlurstByNutzungen($this->formvars['GemkgID'][0], $this->formvars['nutzung'], NULL);
-          $this->anzNamenGesamt=count($ret[1]);
-        }
-      } # ende Abfrage war erfolgreich
-    }
-    $this->nutzungWahl();
-  }
-
-	 function namenWahl() {
-		include_once(CLASSPATH.'FormObject.php');
-    if ($this->formvars['anzahl']==0) {
-      $this->formvars['anzahl']=10;
-    }
-    $this->main='namensuchform.php';
-		$GemeindenStelle=$this->Stelle->getGemeindeIDs();
-		$GemkgID=$this->formvars['GemkgID'];
-		$Gemarkung=new gemarkung('',$this->pgdatabase);
-		if($GemeindenStelle == NULL){
-			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
-		}
-		else{
-			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
-		}
-    // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
-    $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
-    $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
-    $GemkgListe['GemkgID'] = $sorted_arrays['second_array'];
-    # Erzeugen des Formobjektes für die Gemarkungsauswahl
-    $this->GemkgFormObj=new selectFormObject("GemkgID","select",$GemkgListe['GemkgID'],array($GemkgID),$GemkgListe['Bezeichnung'],"1","","",NULL);
-    $this->GemkgFormObj->insertOption(-1,0,'--Auswahl--',0);
-    $this->GemkgFormObj->outputHTML();
-    # Abragen der Fluren zur Gemarkung
-    if($GemkgID > 0){
-    	$Flur=new Flur('','','',$this->pgdatabase);
-			$FlurListe=$Flur->getFlurListe($GemkgID, $GemeindenStelle['eingeschr_gemarkung'][$GemkgID], false);
-    	# Erzeugen des Formobjektes für die Flurauswahl
-    	if (count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
-    }
-    $this->FlurFormObj=new FormObject("FlurID","select",$FlurListe['FlurID'],$this->formvars['FlurID'],$FlurListe['Name'],"1","","",NULL);
-    $this->FlurFormObj->insertOption(-1,0,'--Auswahl--',0);
-    $this->FlurFormObj->outputHTML();
-    $this->output();
-  }
-
-	function nameSuchen() {
-		$GemeindenStelle=$this->Stelle->getGemeindeIDs();
-		if(!empty($GemeindenStelle['ganze_gemeinde'])){
-			$Gemarkung=new gemarkung('',$this->pgdatabase);
-			$GemkgListe = $Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_keys($GemeindenStelle['ganze_gemarkung']));
-			$GemeindenStelle['ganze_gemarkung'] = array_flip($GemkgListe['GemkgID']);
-		}
-    $formvars = $this->formvars;
-    $flurstueck=new flurstueck('',$this->pgdatabase);
-		$ret=$flurstueck->getNamen($formvars,@array_keys($GemeindenStelle['ganze_gemarkung']), $GemeindenStelle['eingeschr_gemarkung']);
-    if ($ret[0]) {
-      $this->Fehlermeldung='<br>Es konnten keine Namen abgefragt werden'.$ret[1];
-      $this->namenWahl();
-    }
-    else {
-      $this->namen=$ret[1];
-      if (count($this->namen)==0) {
-        $this->Fehlermeldung='<br>Es konnten keine Namen gefunden werden, bitte ändern Sie die Anfrage!';
-      }
-      else {
-				$formvars['anzahl'] = '';
-				$formvars['offset'] = '';
-				$ret=$flurstueck->getNamen($formvars, @array_keys($GemeindenStelle['ganze_gemarkung']), $GemeindenStelle['eingeschr_gemarkung']);
-        $this->anzNamenGesamt=count($ret[1]);
-
-				for($i = 0; $i < count($this->namen); $i++){
-					$currenttime=date('Y-m-d H:i:s',time());
-					$this->user->rolle->setConsumeALB($currenttime, 'Eigentümersuche', array($this->namen[$i]['gml_id']), 0, 'NULL');		# die gml_id aus ax_namensnummer wird geloggt
-					if($this->formvars['withflurst'] == 'on'){
-            $ret[1] = $flurstueck->getFlurstByGrundbuecher(array($this->namen[$i]['bezirk'].'-'.$this->namen[$i]['blatt']));
-            $this->namen[$i]['flurstuecke'] = $ret[1];
-            for($j = 0; $j < count($this->namen[$i]['flurstuecke']); $j++){
-              $ret = $this->pgdatabase->getALBData($this->namen[$i]['flurstuecke'][$j]);
-              $this->namen[$i]['alb_data'][$j] = $ret[1];
-            }
-          }
-        }
-
-      }
-      $this->namenWahl();
-    } # ende Abfrage war erfolgreich
-  }
-
-  function flurstuecksAnzeigeByGrundbuecher(){
-    $flurstueck=new flurstueck('',$this->database);
-    $flurstueck->database=$this->pgdatabase;
-    $gbarray = explode(', ', $this->formvars['selBlatt']);
-    $Flurstuecke = $flurstueck->getFlurstByGrundbuecher($gbarray);
-    if (count($Flurstuecke)==0) {
-      $this->Fehlermeldung='<br>Es konnten keine Flurstücke gefunden werden, bitte ändern Sie die Anfrage!';
-      $this->namenWahl();
-    }
-    else {
-      # Anzeige der Flurstuecke
-      $this->zoomToALKFlurst($Flurstuecke,10);
-      $currenttime=date('Y-m-d H:i:s',time());
-      $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-      $this->drawMap();
-      $this->saveMap('');
-      $this->output();
-    }
-  }
-
-  function flurstuecksSucheByGrundbuecher(){
-    $flurstueck=new flurstueck('',$this->database);
-    $flurstueck->database=$this->pgdatabase;
-    $gbarray = explode(', ', $this->formvars['selBlatt']);
-    $Flurstuecke = $flurstueck->getFlurstByGrundbuecher($gbarray);
-    if(count($Flurstuecke)==0) {
-        $this->Fehlermeldung='<br>Es konnten keine Flurstücke gefunden werden, bitte ändern Sie die Anfrage!';
-        $this->namenWahl();
-    }
-    else {
-      $this->flurstAnzeige($Flurstuecke);
-      $this->output();
-    }
-  }
-
-  function flurstuecksSucheByNamen() {
-    $flurstueck=new flurstueck('',$this->database);
-    $flurstueck->database=$this->pgdatabase;
-    $ret=$flurstueck->getFlurstByLfdNrName($this->formvars['lfd_nr_name'],$this->formvars['anzahl']);
-    if ($ret[0]) {
-      $this->Fehlermeldung='<br>Es konnten keine Namen abgefragt werden'.$ret[1];
-      $this->namenWahl();
-    }
-    else {
-      $FlurstKennz=$ret[1];
-      if (count($FlurstKennz)==0) {
-        $this->Fehlermeldung='<br>Es konnten keine Namen gefunden werden, bitte ändern Sie die Anfrage!';
-        $this->namenWahl();
-      }
-      else {
-        # Anzeige der Namen
-        $this->flurstAnzeige($FlurstKennz);
-        $this->output();
-      } # ende Ergebnisanzahl größer 0
-    } # ende Abfrage war erfolgreich
-  }
-
-  function flurstuecksAnzeigeByNamen() {
-    $flurstueck=new flurstueck('',$this->database);
-    $flurstueck->database=$this->pgdatabase;
-    $ret=$flurstueck->getFlurstByLfdNrName($this->formvars['lfd_nr_name'],$this->formvars['anzahl']);
-    if ($ret[0]) {
-      $this->Fehlermeldung='<br>Es konnten keine Namen abgefragt werden'.$ret[1];
-      $this->namenWahl();
-    }
-    else {
-      $FlurstKennz=$ret[1];
-      if (count($FlurstKennz)==0) {
-        $this->Fehlermeldung='<br>Es konnten keine Namen gefunden werden, bitte ändern Sie die Anfrage!';
-        $this->namenWahl();
-      }
-      else {
-        # Anzeige der Flurstuecke
-        $this->zoomToALKFlurst($FlurstKennz,10);
-        $currenttime=date('Y-m-d H:i:s',time());
-        $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-        $this->drawMap();
-        $this->saveMap('');
-        $this->output();
-      } # ende Ergebnisanzahl größer 0
-    } # ende Abfrage war erfolgreich
-  }
-
 	function deleteDokument($path, $doc_path, $doc_url, $only_thumb = false){
 		if ($path != '') {
 			if ($doc_url != '') {
@@ -6712,9 +6344,10 @@ echo '			</table>
 	function write_document_loader(){
 		$handle = fopen(IMAGEPATH.$this->document_loader_name, 'w');
 		$code = '<?
+			error_reporting(E_ALL & ~(E_STRICT|E_NOTICE));
 			$allowed_documents = array(\''.implode('\',\'', $this->allowed_documents).'\');
 			if(in_array($_REQUEST[\'dokument\'], $allowed_documents)){
-				if($_REQUEST[\'original_name\'] == "")$_REQUEST[\'original_name\'] = basename($_REQUEST[\'dokument\']);
+				if(!array_key_exists(\'original_name\', $_REQUEST))$_REQUEST[\'original_name\'] = basename($_REQUEST[\'dokument\']);
 				$type = strtolower(array_pop(explode(\'.\', $_REQUEST[\'dokument\'])));
 				if(in_array($type, array(\'jpg\', \'gif\', \'png\')))header("Content-type: image/" . $type);
 				else header("Content-type: application/" . $type);
@@ -6772,68 +6405,6 @@ echo '			</table>
     $this->output();
   }
 
-  function export_flurst_csv(){
-		$this->attribute_selections = $this->user->rolle->get_csv_attribute_selections();
-    $this->attribute = explode(';', $this->formvars['attributliste']);
-    $this->main = 'export_flurstuecke_csv.php';
-   	$this->titel = $this->formvars['formnummer'].'-CSV-Export';
-    $this->output();
-  }
-
-  function export_flurst_csv_auswahl_speichern(){
-  	$this->user->rolle->save_csv_attribute_selection($this->formvars['name'], $this->formvars['attributes']);
-  	$this->formvars['selection'] = $this->formvars['name'];
-  	$this->export_flurst_csv_auswahl_laden();
-  }
-
-  function export_flurst_csv_auswahl_laden(){
-  	$this->selection = $this->user->rolle->get_csv_attribute_selection($this->formvars['selection']);
-  	$attributes = explode('|', $this->selection['attributes']);
-  	for($i = 0; $i < count($attributes); $i++){
-  		$this->formvars[$attributes[$i]] = 'true';
-  	}
-  	$this->export_flurst_csv();
-  }
-
-  function export_flurst_csv_auswahl_loeschen(){
-  	$this->user->rolle->delete_csv_attribute_selection($this->formvars['selection']);
-  	$this->export_flurst_csv();
-  }
-
-  function export_flurst_csv_exportieren(){
-		include_(CLASSPATH.'alb.php');
-    $flurstuecke = explode(';', $this->formvars['FlurstKennz']);
-    $ret = $this->Stelle->getFlurstueckeAllowed($flurstuecke, $this->pgdatabase);
-    if ($ret[0]) {
-      $this->Fehlermeldung=$ret[1];
-      showAlert($ret[1]);
-    }
-    else {
-      $flurstuecke = $ret[1];
-      $ALB = new ALB($this->pgdatabase);
-      $currenttime=date('Y-m-d H:i:s',time());
-      switch ($this->formvars['formnummer']){
-      	case 'Flurstück' : {
-      		$ALB->export_flurst_csv($flurstuecke, $this->formvars);
-      		$this->user->rolle->setConsumeCSV($currenttime,'Flurstück',count($flurstuecke));
-      	}break;
-      	case 'Nutzungsarten' : {
-      		$ALB->export_nutzungsarten_csv($flurstuecke, $this->formvars);
-      		$this->user->rolle->setConsumeCSV($currenttime,'Nutzungsarten',count($flurstuecke));
-      	}break;
-      	case 'Eigentümer' : {
-      		$ALB->export_eigentuemer_csv($flurstuecke, $this->formvars);
-      		$this->user->rolle->setConsumeCSV($currenttime,'Eigentümer',count($flurstuecke));
-      	}break;
-      	case 'Klassifizierung' : {
-      		$ALB->export_klassifizierung_csv($flurstuecke, $this->formvars);
-      		$this->user->rolle->setConsumeCSV($currenttime,'Klassifizierung',count($flurstuecke));
-      	}break;
-      }
-    }
-  }
-
-
   function createMapPDF($frame_id, $preview, $fast = false) {
     $Document=new Document($this->database);
     $this->Docu=$Document;
@@ -6853,8 +6424,9 @@ echo '			</table>
 			else{
 				$this->map_factor = MAPFACTOR;
 			}
+
 			# Wenn in der Anfrage für loadmapsource POST übergeben wurde, werden alle Kartenparameter aus formvars entnommen
-			if($this->formvars['loadmapsource']){
+			if ($this->formvars['loadmapsource']){
 				$this->loadMap($this->formvars['loadmapsource']);
 			}
 			else{
@@ -6939,11 +6511,11 @@ echo '			</table>
 			$this->maxy = round($maxy, 1);
 
 			if(MAPSERVERVERSION >= 600 ) {
-					$this->map_scaledenom = $this->map->scaledenom;
-				}
-				else {
-					$this->map_scaledenom = $this->map->scale;
-		}
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
 
 			$currenttime=date('Y-m-d H:i:s',time());
 			# loggen der Druckausgabe
@@ -6998,7 +6570,7 @@ echo '			</table>
 	*/
 			#$this->saveMap('');
 			#$this->debug->write("<p>Maßstab des Drucks:" . $this->map_scaledenom,4);
-			$this->drawMap();
+			$this->drawMap('true');
 
 			if($this->formvars['angle'] != 0){
 				$angle = -1 * $this->formvars['angle'];
@@ -7119,7 +6691,13 @@ echo '			</table>
 			$pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->Docu->activeframe[0]['headsrc']),$this->Docu->activeframe[0]['headposx'],$this->Docu->activeframe[0]['headposy'],$this->Docu->activeframe[0]['headwidth']);
 
 			# Hinzufügen der vom MapServer produzierten Karte
-			$pdf->addJpegFromFile(IMAGEPATH.basename($this->img['hauptkarte']),$this->Docu->activeframe[0]['mapposx'],$this->Docu->activeframe[0]['mapposy'],$this->Docu->activeframe[0]['mapwidth'], $this->Docu->activeframe[0]['mapheight']);
+			$pdf->addJpegFromFile(
+				IMAGEPATH . basename($this->img['hauptkarte']),
+				$this->Docu->activeframe[0]['mapposx'],
+				$this->Docu->activeframe[0]['mapposy'],
+				$this->Docu->activeframe[0]['mapwidth'],
+				$this->Docu->activeframe[0]['mapheight']
+			);
 
 			# Rechteck um die Karte
 			$posx1 = $this->Docu->activeframe[0]['mapposx'];
@@ -7327,10 +6905,10 @@ echo '			</table>
 		fwrite($fp, $output);
 		fclose($fp);
 
-		if($preview == true){
+		if ($preview == true){
 			exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
 			#echo IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
-			if(!file_exists(IMAGEPATH.$name.'-'.$currenttime.'.jpg')){
+			if (!file_exists(IMAGEPATH.$name.'-'.$currenttime.'.jpg')){
 				return TEMPPATH_REL.$name.'-'.$currenttime.'-0.jpg';
 			}
 			else{
@@ -7380,12 +6958,17 @@ echo '			</table>
 			$layer = $this->map->getlayer($i);
 			$layer->set('name', umlaute_umwandeln($layer->name));
 		}
-		if ($this->formvars['totalExtent']) {
+		if ($this->formvars['totalExtent'] == 1) {
 			$bb = array($this->Stelle->MaxGeorefExt->minx, $this->Stelle->MaxGeorefExt->miny, $this->Stelle->MaxGeorefExt->maxx, $this->Stelle->MaxGeorefExt->maxy);
 		}
 		else {
 			$bb = array($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
 		}
+		$this->center = ms_newPointObj();
+		$this->center->setXY($bb[0] + ($bb[2] - $bb[0]) / 2, $bb[1] + ($bb[3] - $bb[1]) / 2);
+		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
+		$projTO = ms_newprojectionobj("init=epsg:4326");
+		$this->center->project($projFROM, $projTO);
 		if (!is_dir(WMS_MAPFILE_PATH . $this->Stelle->id)) {
 			mkdir(WMS_MAPFILE_PATH . $this->Stelle->id);
 		}
@@ -7402,19 +6985,58 @@ echo '			</table>
 		$this->map->setMetaData("ows_fees", $this->formvars['ows_fees']);
 		$this->wms_onlineresource = MAPSERV_CGI_BIN . "?map=" . $this->mapfile . "&";
 		$this->map->setMetaData("wms_onlineresource", $this->wms_onlineresource);
-		$this->map->setMetaData("ows_srs", OWS_SRS);
+		$this->map->setMetaData("ows_srs", OWS_SRS . ' EPSG:3857');
 		$this->map->setMetaData("wms_enable_request", '*');
+
+		for ($i = 0; $i < $this->map->numlayers; $i++) {
+			$layer = $this->map->getLayer($i);
+			$layer->setMetaData("ows_title", $layer->name);
+			$layer->setMetaData("ows_extent", implode(', ', $bb));
+			$layer->setMetaData("ows_srs", OWS_SRS . ' EPSG:3857');
+		}
+
+		/*
+		* if formvars['nurVeroeffentlichte'] == 1 and connection_type add a filter to the layer definition
+		* but only if connectiontype of the layer is postgis and
+		* $filter_attribute is part of the base_expresion or the alias of an attribute in layers data sql
+		*/
+		if ($this->formvars['nurVeroeffentlichte'] AND $this->formvars['nurVeroeffentlichte'] == 1) {
+			$mapDb = new db_mapObj($this->Stelle->id,$this->user->id);
+			$this->gefilterte_layer = array();
+			$filter_attribute = 'veroeffentlicht';
+			for ($i = 0; $i < $this->map->numlayers; $i++) {
+				$layer = $this->map->getLayer($i);
+				if ($layer->connectiontype == 6) {
+					$sql = $mapDb->getSelectFromData($layer->data);
+					$filter = '';
+					foreach (attributes_from_select($sql) AS $attribute) {
+						if ($attribute['alias'] == $filter_attribute) {
+							$filter = $attribute['alias'];
+						}
+						elseif (strpos($attribute['base_expr'], '.' . $filter_attribute) !== false) {
+							$filter = $attribute['base_expr'];
+						}
+						if ($filter != '') {
+							$this->gefilterte_layer[] = $layer->name;
+							$layer->setFilter($filter);
+							break;
+						}
+					}
+				}
+			}
+		}
+
 		$this->saveMap($this->mapfile);
 		$this->getMapRequestExample = $this->wms_onlineresource
 			. 'SERVICE=WMS&'
 			. 'REQUEST=GetMap&'
 			. 'VERSION=' . SUPORTED_WMS_VERSION . '&'
-			. 'LAYERS=Pläne&'
+			. 'LAYERS=B_Plaene&'
 			. 'CRS=EPSG:' . $this->user->rolle->epsg_code . '&'
 			. 'BBOX=' . implode(',', $bb) .'&'
 			. 'WIDTH=' . $this->map->width . '&'
 			. 'HEIGHT=' . $this->map->height . '&'
-			. 'FORMAT=image/jpeg';
+			. 'FORMAT=image/png';
 		define('SUPORTED_WFS_VERSION', '1.3.0');
 		$this->getFeatureRequestExample = $this->wms_onlineresource
 			. 'SERVICE=WFS&'
@@ -7429,8 +7051,8 @@ echo '			</table>
 	}
 
 	function wmsExport() {
-		$this->titel='MapService Map-Datei Export';
-		$this->main="ows_export.php";
+		$this->titel = 'MapService Map-Datei Export';
+		$this->main = "ows_export.php";
 		if (
 			$this->formvars['mapfile_name'] != '' AND
 			in_array($this->formvars['mapfile_name'], $this->Stelle->get_mapfiles())
@@ -9647,7 +9269,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         $table_name = $element[2];
         $formtype = $element[4];
 				$tablename[$table_name]['tablename'] = $table_name;
-				$tablename[$table_name]['attributname'][] = $attributenames[] = pg_quote($attributname);
+				$tablename[$table_name]['attributname'][] = $attributenames[] = $attributname;
 				$form_field_indizes[$attributname] = $i;
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
 				if($this->formvars['embedded'] != ''){
@@ -9857,8 +9479,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 				if(!empty($insert)){
 					if(!$layerset[0]['maintable_is_view'])$sql = "LOCK TABLE " . $table['tablename']." IN SHARE ROW EXCLUSIVE MODE;";
+					$attr = array_keys($insert);
+					array_walk($attr, function(&$attributename, $key){$attributename = pg_quote($attributename);});
 					$sql.= "INSERT INTO " . pg_quote($table['tablename']) . " (";
-					$sql.= implode(', ', array_keys($insert));
+					$sql.= implode(', ', $attr);
 					$sql.= ") VALUES (";
 					$sql.= implode(', ', $insert);
 					$sql.= ")";
@@ -10534,8 +10158,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$pdf_file = $this->ddl->createDataPDF(NULL, NULL, NULL, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $this->ddl->selectedlayout[0], $result, $this->Stelle, $this->user, $this->formvars['record_paging']);
 	    # in jpg umwandeln
 	    $currenttime = date('Y-m-d_H_i_s',time());
-	    exec(IMAGEMAGICKPATH.'convert "'.$pdf_file.'[0]" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"');
-	    #echo IMAGEMAGICKPATH.'convert "'.$pdf_file.'[0]" -resize 595x1000 "'.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg"';
+	    exec(IMAGEMAGICKPATH . 'convert "' . $pdf_file . '[0]" -resize 595x1000 "' . dirname($pdf_file) . '/' . basename($pdf_file, ".pdf") . '-' . $currenttime . '.jpg"');
+	    #echo IMAGEMAGICKPATH . 'convert "' . $pdf_file . '[0]" -resize 595x1000 "' . dirname($pdf_file) . '/' . basename($pdf_file, ".pdf") . '-' . $currenttime . '.jpg"';
 	    if(!file_exists(IMAGEPATH.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg')){
 	    	$this->previewfile = TEMPPATH_REL.basename($pdf_file, ".pdf").'-'.$currenttime.'-0.jpg';
 	    }
@@ -11191,10 +10815,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
 		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
     $this->data_import_export = new data_import_export();
-  	if(!$this->formvars['geom_from_layer']){
-      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
-    }
+		if (
+			defined('LAYERNAME_FLURSTUECKE') AND
+			!$this->formvars['geom_from_layer']
+		) {
+			$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+			$this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
+		}
     if ($this->formvars['geom_from_layer']) {
 	    # Geometrie-Übernahme-Layer:
 	    # Spaltenname und from-where abfragen
@@ -11946,11 +11573,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
     $showpolygon = true;
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
-  	if(!$this->formvars['geom_from_layer']){
-      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
-    }
-    if($this->formvars['geom_from_layer']){
+
+		if (
+			defined('LAYERNAME_FLURSTUECKE') AND
+			!$this->formvars['geom_from_layer']
+		) {
+			$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+			$this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
+		}
+
+    if ($this->formvars['geom_from_layer']){
 	    # Geometrie-Übernahme-Layer:
 	    # Spaltenname und from-where abfragen
 	    $data = $this->mapDB->getData($this->formvars['geom_from_layer']);
@@ -13489,195 +13121,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->Stelle->getFunktionen();
   }
 
-	function ALKIS_Auszug($FlurstKennz,$Grundbuchbezirk,$Grundbuchblatt,$Buchnungstelle,$formnummer){
-		include_(CLASSPATH.'alb.php');
-    if($FlurstKennz[0] == '' AND ($Grundbuchbezirk != NULL OR $Buchnungstelle != NULL)){
-      $grundbuch=new grundbuch($Grundbuchbezirk,$Grundbuchblatt,$this->pgdatabase);
-      # Abfrage aller Flurstücke, die auf dem angegebenen Grundbuchblatt liegen.
-      $ret=$grundbuch->getBuchungen('','','',1, $Buchnungstelle);
-      $buchungen=$ret[1];
-      for ($b=0;$b < count($buchungen);$b++) {
-        $FlurstKennz[] = $buchungen[$b]['flurstkennz'];
-      }
-    }
-    # Abfrage der Berechtigung zum Anzeigen der FlurstKennz
-    $ret=$this->Stelle->getFlurstueckeAllowed($FlurstKennz,$this->pgdatabase);
-    if ($ret[0]) {
-      $this->Fehlermeldung=$ret[1];
-      $this->loadMap('DataBase');
-			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-			$this->drawMap();
-			$this->output();
-    }
-    else{
-      $FlurstKennz=$ret[1];
-			$this->getFunktionen();
-			if(!$this->Stelle->funktionen[$formnummer]['erlaubt']){
-				showAlert('Die Anzeige dieses Nachweises ist für diese Stelle nicht erlaubt.');
-				exit();
-			}
-      # Ausgabe der Flurstücksdaten im PDF Format
-			$ALB=new ALB($this->pgdatabase);
-			$nasfile = $ALB->create_nas_request_xml_file($FlurstKennz, $Grundbuchbezirk, $Grundbuchblatt, $Buchnungstelle, NULL, $formnummer);
-			$sessionid = $ALB->dhk_call_login(DHK_CALL_URL, DHK_CALL_USER, DHK_CALL_PASSWORD);
-
-			$currenttime=date('Y-m-d_H-i-s',time());
-			switch($formnummer){
-				case 'MV0700' : {
-					$log_number = array($Grundbuchbezirk.'-'.$Grundbuchblatt);
-					$filename = 'Bestandsnachweis_'.$currenttime;
-				}break;
-
-				case 'MV0600' : {
-					$log_number = array($Buchnungstelle);
-					$filename = 'Grundstücksnachweis_'.$currenttime;
-				}break;
-
-				default : {
-					$log_number = $FlurstKennz;
-					$filename = 'Flurstücksnachweis_'.$currenttime;
-				}break;
-			}
-			$output = $ALB->dhk_call_getPDF(DHK_CALL_URL, $sessionid, $nasfile, $filename);
-			switch (substr($output, 0, 2)){
-				case 'PK' : $type = 'zip'; break;
-				case '<?' : $type = 'xml'; break;
-				case '%P' : $type = 'pdf'; break;
-			}
-			$currenttime=date('Y-m-d H:i:s',time());
-      $this->user->rolle->setConsumeALB($currenttime, substr($formnummer, 3, 3),$log_number, 0, 'NULL');
-			header("Pragma: public");
-			header("Expires: 0");
-			header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-			header("Content-Type: application/force-download");
-			header("Content-Type: application/octet-stream");
-			header("Content-Type: application/download");
-			header('Content-Disposition: attachment; filename='.$filename.'.'.$type);
-			header("Content-Transfer-Encoding: binary");
-			print $output;
-		}
-	}
-
-	function ALKIS_Kartenauszug($layout, $formvars){
-		include_(CLASSPATH.'alb.php');
-		$ALB=new ALB($this->pgdatabase);
-		$point=ms_newPointObj();
-		$point->setXY($formvars['center_x'], $formvars['center_y']);
-		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
-		$projTO = ms_newprojectionobj("init=epsg:".EPSGCODE_ALKIS);
-		$point->project($projFROM, $projTO);
-		$print_params['coord'] = $point->x.' '.$point->y;
-		$print_params['printscale'] = $formvars['printscale'];
-		$print_params['format'] = substr($layout['format'], 0, 3);
-		$formnummer = $layout['dhk_call'];
-		$nasfile = $ALB->create_nas_request_xml_file(NULL, NULL, NULL, NULL, $print_params, $formnummer);
-		$sessionid = $ALB->dhk_call_login(DHK_CALL_URL, DHK_CALL_USER, DHK_CALL_PASSWORD);
-		$currenttime=date('Y-m-d_H-i-s',time());
-		$filename = 'Kartenauszug_'.$currenttime;
-		$this->user->rolle->setConsumeALK($currenttime, $this->Docu->activeframe[0]['id']);
-		return $ALB->dhk_call_getPDF(DHK_CALL_URL, $sessionid, $nasfile, $filename);
-	}
-
-  function ALB_Anzeigen($FlurstKennz,$formnummer,$Grundbuchbezirk,$Grundbuchblatt) {
-		include_(CLASSPATH.'alb.php');
-    if($FlurstKennz[0] == '' AND ($Grundbuchbezirk != NULL OR $Buchnungstelle != NULL)){
-      $grundbuch=new grundbuch($Grundbuchbezirk,$Grundbuchblatt,$this->pgdatabase);
-      # Abfrage aller Flurstücke, die auf dem angegebenen Grundbuchblatt liegen.
-      $ret=$grundbuch->getBuchungen('','','',1, $Buchnungstelle);
-      $buchungen=$ret[1];
-      for ($b=0;$b < count($buchungen);$b++) {
-        $FlurstKennz[] = $buchungen[$b]['flurstkennz'];
-      }
-    }
-    # Abfrage der Berechtigung zum Anzeigen der FlurstKennz
-    $ret=$this->Stelle->getFlurstueckeAllowed($FlurstKennz,$this->pgdatabase);
-    if ($ret[0]) {
-      $this->Fehlermeldung=$ret[1];
-      $this->loadMap('DataBase');
-			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-			$this->drawMap();
-			$this->output();
-    }
-    else {
-      $FlurstKennz=$ret[1];
-      $this->getFunktionen();
-      # Prüfen ob stelle Formular 30 sehen darf
-      if ($formnummer==30) {
-        if(!$this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']) {
-          showAlert('Die Anzeige des Eigentümernachweises ist für diese Stelle nicht erlaubt.');
-          exit();
-        }
-      }
-      # Prüfen ob stelle Formular 35 sehen darf
-      if ($formnummer==35) {
-        if(!$this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']) {
-          showAlert('Die Anzeige des Eigentümernachweises ist für diese Stelle nicht erlaubt.');
-          exit();
-        }
-      }
-      # Prüfen ob stelle Formular 40 sehen darf
-      if ($formnummer==40) {
-        if(!$this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']) {
-          showAlert('Die Anzeige des Eigentümernachweises ist für diese Stelle nicht erlaubt.');
-          exit();
-        }
-      }
-      # Prüfen ob stelle Formular 20 sehen darf
-      if ($formnummer==20) {
-        if(!$this->Stelle->funktionen['ALB-Auszug 20']['erlaubt']) {
-          showAlert('Die Anzeige des Eigentümernachweises ist für diese Stelle nicht erlaubt.');
-          exit();
-        }
-      }
-      # Prüfen ob stelle Formular 25 sehen darf
-      if ($formnummer==25) {
-        if(!$this->Stelle->funktionen['ALB-Auszug 25']['erlaubt']) {
-          showAlert('Die Anzeige des Eigentümernachweises ist für diese Stelle nicht erlaubt.');
-          exit();
-        }
-      }
-      # Ausgabe der Flurstücksdaten im PDF Format
-      include (CLASSPATH.'class.ezpdf.php');
-      $pdf=new Cezpdf();
-      $ALB=new ALB($this->pgdatabase);
-
-      if($formnummer < 26){
-        $log_number = array($Grundbuchbezirk.'-'.$Grundbuchblatt);
-        $currenttime=date('Y-m-d H:i:s',time());
-        $pdf=$ALB->ALBAuszug_Bestand($Grundbuchbezirk,$Grundbuchblatt,$formnummer);
-        $this->user->rolle->setConsumeALB($currenttime,$formnummer,$log_number,$this->formvars['wz'],$pdf->pagecount);
-      }
-      else{
-        $currenttime=date('Y-m-d H:i:s',time());
-        $pdf=$ALB->ALBAuszug_Flurstueck($FlurstKennz,$formnummer);
-        $this->user->rolle->setConsumeALB($currenttime,$formnummer,$FlurstKennz,$this->formvars['wz'],$pdf->pagecount);
-      }
-      $this->pdf=$pdf;
-
-      $dateipfad=IMAGEPATH;
-      $currenttime = date('Y-m-d_H-i-s',time());
-      $name = umlaute_umwandeln($this->user->Name);
-      $dateiname = $name.'-'.$currenttime.'.pdf';
-      $this->outputfile = $dateiname;
-      $fp=fopen($dateipfad.$dateiname,'wb');
-      fwrite($fp,$this->pdf->ezOutput());
-      fclose($fp);
-
-      $this->mime_type='pdf';
-    }
-    $this->output();
-  }
-	
-	function generischer_Flurstuecksauszug($flurst_array){
-		$this->formvars['chosen_layer_id'] = $this->formvars['selected_layer_id'];
-		$this->formvars['value_flurstueckskennzeichen'] = implode('|', $flurst_array);
-		$this->formvars['operator_flurstueckskennzeichen'] = 'IN';
-		$this->formvars['no_output'] = true;
-		$this->GenerischeSuche_Suchen();
-		$this->formvars['aktivesLayout'] = $this->formvars['formnummer'];
-		$this->generischer_sachdaten_druck_drucken();
-	}
-
   function rollenwahl($Stelle_ID) {
 		include_once(CLASSPATH.'FormObject.php');
     $this->user->Stellen = $this->user->getStellen(0);
@@ -13744,244 +13187,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 			}
 		}
-  }
-
-  function flurstSuchen() {
-    $GemID=$this->formvars['GemID'];
-    $GemkgID=$this->formvars['GemkgID'];
-    if ($this->formvars['FlurID']!='-1') {
-      # dreistelliges auffüllen der Flurnummer mit Nullen
-      $FlurID=str_pad($this->formvars['FlurID'],3,"0",STR_PAD_LEFT);
-    }
-    else {
-      $FlurID=$this->formvars['FlurID'];
-    }
-    $FlstID=$this->formvars['selFlstID'];
-    $FlstNr=$this->formvars['FlstNr'];
-    $Gemarkung=new gemarkung('',$this->pgdatabase);
-    # abfragen, ob es sich um eine gültige GemarkungsID handelt
-    $GemkgListe=$Gemarkung->getGemarkungListe(array($GemID),array($GemkgID));
-    if(count($GemkgListe['GemkgID']) > 0){
-      # Die Gemarkung ist ausgewählt und gültig aber Flur leer, zoom auf Gemarkung
-      if($FlurID==0 OR $FlurID=='-1'){
-				if($this->formvars['ALK_Suche'] == 1){
-					$this->loadMap('DataBase');
-					$this->zoomToALKGemarkung($GemkgID,10);
-					$currenttime=date('Y-m-d H:i:s',time());
-					$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-					$this->drawMap();
-					$this->saveMap('');
-				}
-				else{			# Anzeige der Flurstuecke der Gemarkung
-					$FlstNr=new flurstueck('',$this->pgdatabase);
-					$FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,'',$this->formvars['historical']);
-					$FlstID = $FlstNrListe['FlstID'];
-					$FlurstKennz = array_values(array_unique($FlstID));
-					$this->flurstAnzeige($FlurstKennz);
-				}
-      }
-      else {
-        # ist Gemarkung und Flur ausgefüllt aber keine Angabe zum Flurstück, zoom auf Flur
-        if(($FlstID=='' AND $FlstNr=='') OR ($FlstID=='-1')){
-        	if($this->formvars['ALK_Suche'] == 1){
-	          $this->loadMap('DataBase');
-	          $this->zoomToALKFlur($GemID,$GemkgID,$FlurID,10);
-	          $currenttime=date('Y-m-d H:i:s',time());
-	          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-	          $this->drawMap();
-	          $this->saveMap('');
-        	}
-	        else{			# Anzeige der Flurstuecke der Flur
-	      		$FlstNr=new flurstueck('',$this->pgdatabase);
-	      		$FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,$FlurID,$this->formvars['historical']);
-		        $FlstID = $FlstNrListe['FlstID'];
-	          $FlurstKennz = array_values(array_unique($FlstID));
-	          $this->flurstAnzeige($FlurstKennz);
-	      	}
-        }
-        else {
-          # es existiert eine Angabe zum Flurstück
-          $Flurstueck=new flurstueck('',$this->pgdatabase);
-          # wenn keine FlstID angegeben wurde, wird versucht die FlstID aus der FlstNr abzuleiten
-          if ($FlstID=='') {
-            # ableiten der FlstID aus den Angaben in FlstNr
-            $FlurstKennz[0]=$Flurstueck->is_FlurstNr($GemkgID,$FlurID,$FlstNr);
-            if ($FlurstKennz[0]==0) {
-              # aus FlstNr konnte kein eindeutiges FlurstKennz abgeleitet werden
-              # Abfrage ob der Zähler eines Flurstücks mit FlstNr übereinstimmt
-              $FlurstKennz=$Flurstueck->is_FlurstZaehler($GemkgID,$FlurID,$FlstNr);
-              # wenn im Ergebnis die Anzahl der gefundenen FlurstKennz 0 ist wird weiter unten Suche abgebrochen
-            }
-          }
-          else {
-            # wenn FlstID nicht leer ist, wird diese zur Suche übernommen
-            $FlurstKennz = explode(', ', $FlstID);
-            $FlurstKennz = array_values(array_unique($FlurstKennz));
-          }
-          $anzFlurst=count($FlurstKennz);
-          if ($anzFlurst==0) {
-            # es konnten überhaupt keine gültigen Flurstuecke aus den Angaben FlstNr gefunden werden
-            # zurück zur Auswahl mit Hinweis, daß Flurstücksauswahl zu keinem Ergebnis führt
-            $this->Fehlermeldung='Zu diesem Flurstück wurden keine Angaben gefunden!';
-            $this->flurstwahl();
-          }
-          else {
-            # Es wurde mindestens ein eindeutiges FlurstKennz in FlstID ausgewählt, oder ein oder mehrere über FlstNr gefunden
-            # Zoom auf Flurstücke
-            if($this->formvars['ALK_Suche'] == 1){
-		          $this->zoomToALKFlurst($FlurstKennz,10);
-							if($this->formvars['go_next'] != ''){
-								$this->formvars['FlurstKennz'] = $FlurstKennz;
-								$this->saveMap('');
-								go_switch($this->formvars['go_next']);
-								exit();
-							}
-		          $currenttime=date('Y-m-d H:i:s',time());
-		          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-		          $this->drawMap();
-		          $this->saveMap('');
-            }
-            else{	  # Anzeige der ALB-daten in Flurstücksanzeige
-            	$this->flurstAnzeige($FlurstKennz);
-            }
-          }
-        } # ende Suche nach Flurstück
-      } # ende Suche nach Flur
-    }
-    else {
-			if($FlstNr != ''){
-				if($this->formvars['ALK_Suche'] == 1){
-					$this->zoomToALKFlurst(array($FlstNr),10);
-					if($this->formvars['go_next'] != ''){
-						$this->saveMap('');
-						go_switch($this->formvars['go_next']);
-						exit();
-					}
-					$currenttime=date('Y-m-d H:i:s',time());
-					$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-					$this->drawMap();
-					$this->saveMap('');
-				}
-				else{
-					$this->flurstAnzeige(array($FlstNr));			# ein Flurstückskennzeichen wurde in das EIngabefeld eingetragen
-				}
-			}
-			else{
-				$this->Fehlermeldung='Wählen Sie eine Gemarkung!';
-				$this->flurstwahl();
-			}
-    }
-  } # ende function flurstSuchen
-
-	function flurstSuchenByLatLng() {
-    $flurstueck = new flurstueck('',$this->pgdatabase);
-		if (in_array($this->formvars['version'], array("1.0", "1.0.0"))) {
-			$result= $flurstueck->getFlurstByLatLng($this->formvars['latitude'], $this->formvars['longitude']);
-			$layerset['landId'] = $result['land'];
-			$layerset['kreisId'] = $result['kreis'];
-			$layerset['gemeindId'] = $result['gemeinde'];
-			$layerset['gemarkungId'] = $result['gemarkungsnummer'];
-			$layerset['gemarkungName'] = $result['gemarkungname'];
-			$layerset['flurId'] = $result['flurnummer'];
-			$layerset['flurstueckId'] = $result['flurstkennz'];
-			$layerset['flurstueckNummer'] = $result['flurstuecksnummer'];
-			$this->qlayerset[0]['shape'][0] = $layerset;
-			$this->mime_type = 'formatter';
-		}
-		else {
-			$this->loadMap('DataBase');
-      $this->user->rolle->newtime = $this->user->rolle->last_time_id;
-      $this->drawMap();
-     	$this->saveMap('');
-		}
-	} # ende function flurstSuchenByLatLng
-
-	function Flurstueck_GetVersionen(){
-		$ret=$this->Stelle->getFlurstueckeAllowed(array($this->formvars['flurstkennz']), $this->pgdatabase);
-    if($ret[0]) {
-      $this->Fehlermeldung=$ret[1];
-    }
-    else{
-      $flst = new flurstueck($this->formvars['flurstkennz'], $this->pgdatabase);
-			$versionen = $flst->getVersionen();
-			$timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $this->user->rolle->hist_timestamp_de);
-			$output = '	<table cellspacing="0" cellpadding="3">
-										<tr style="background-color: #EDEFEF;">
-											<td style="border-bottom: 1px solid '.BG_DEFAULT.'">
-												<a href="javascript:hide_versions(\''.$this->formvars['flurstkennz'].'\');"><img src="'.GRAPHICSPATH.'minus.gif"></a>
-											</td>
-											<td style="border-bottom: 1px solid '.BG_DEFAULT.'">
-												<span class="px14">Versionen</span>
-											</td>
-										</tr>
-										<tr>
-											<td></td>
-											<td>';
-												if(count($versionen) > 0){
-			$output.= '					<select name="versions_'.$k.'" onchange="location.href=\'index.php?go=setHistTimestamp&timestamp=\'+this.value+\'&go_next=get_last_query\'" style="max-width: 500px">';
-													$selected = false;
-													$v = 1;
-													$count = count($versionen);
-													reset($versionen);
-													while($version = current($versionen)){
-														$version_beginnt = key($versionen);
-														$next_version = next($versionen);
-														$next_version_beginnt = key($versionen);
-														$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $version_beginnt);
-														$next_beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $next_version_beginnt);
-														$output.= '<option ';
-														if($selected == false AND
-															(($timestamp >= $beginnt AND $timestamp < $next_beginnt) OR				# timestamp liegt im Intervall
-															$v == $count)																											# letzte Version (aktuell)
-														){$selected = true; $output.= 'selected';}
-														if($v < $count)$output.= ' value="'.$version_beginnt.'"';
-														else $output.= ' value=""';
-														$output.= ' title="'.implode(', ', $version['table']).'">';
-														$output.= $version_beginnt.' '.implode(' ', $version['anlass']).'</option>';
-														$v++;
-													}
-			$output.= '					</select>';
-												}
-			$output.= '			</td>
-										</tr>
-									</table>';
-			echo $output;
-    }
-	}
-
-  function flurstAnzeige($FlurstKennzListe) {
-    # 2006-01-26 pk
-    # Abfrage der Berechtigung zum Anzeigen der FlurstKennzListe
-    $ret=$this->Stelle->getFlurstueckeAllowed($FlurstKennzListe, $this->pgdatabase);
-    if ($ret[0]) {
-      $this->Fehlermeldung=$ret[1];
-      $anzFlurst=0;
-    }
-    else {
-      $FlurstKennzListe=$ret[1];
-      $anzFlurst=count($FlurstKennzListe);
-    }
-
-    $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layer = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-		$layerdb = $this->mapDB->getlayerdatabase($layer[0]['Layer_ID'], $this->Stelle->pgdbhost);
-    $privileges = $this->Stelle->get_attributes_privileges($layer[0]['Layer_ID']);
-    $layer[0]['attributes'] = $this->mapDB->read_layer_attributes($layer[0]['Layer_ID'], $layerdb, $privileges['attributenames']);
-
-		for($j = 0; $j < count($layer[0]['attributes']['name']); $j++){
-			$layer[0]['attributes']['privileg'][$j] = $privileges[$layer[0]['attributes']['name'][$j]];
-			$layer[0]['attributes']['privileg'][$layer[0]['attributes']['name'][$j]] = $privileges[$layer[0]['attributes']['name'][$j]];
-		}
-    $this->qlayerset[] = $layer[0];
-    $this->main = $layer[0]['template'];
-
-		$this->user->rolle->delete_last_query();
-		$this->user->rolle->save_last_query('Flurstueck_Anzeigen', $layer[0]['Layer_ID'], implode(';', $FlurstKennzListe), NULL, NULL, NULL);
-
-    for ($i=0;$i<$anzFlurst;$i++) {
-      $this->qlayerset[0]['shape'][$i]['flurstkennz'] = $FlurstKennzListe[$i];
-    }
-    $i = 0;
   }
 
 	function sachdaten_speichern() {
@@ -14667,10 +13872,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 										$pfad .= $layerset[$i]['attributes']['groupby'];
 										$j = 0;
 										foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-													if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != ''){		# hat Haupttabelle oids?
-														$pfad .= ','.pg_quoet($tablename.'_oid').' ';
-													}
-													$j++;
+											if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != ''){		# hat Haupttabelle oids?
+												$pfad .= ','.pg_quote($tablename.'_oid').' ';
+											}
+											$j++;
 										}
 									}
 									$sql = "SELECT * FROM (SELECT " . $pfad.") as query WHERE 1=1 " . $filter . $sql_where;
@@ -15296,8 +14501,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$geometrie_tabelle = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 				$j = 0;
 				foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-					if(($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oder Geometrietabelle oids?
-						$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
+					if (($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['oid'] != '') {
+						$pfad = pg_quote($layerset[$i]['attributes']['table_alias_name'][$tablename]).'.'.$layerset[$i]['oid'].' AS ' . pg_quote($tablename . '_oid').', ' . $pfad;
 					}
 					$j++;
 				}
@@ -15399,8 +14604,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$pfad .= $layerset[$i]['attributes']['groupby'];
 					$j = 0;
 					foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-						if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
-							$pfad .= ','.$tablename.'_oid ';
+						if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != ''){		# hat Haupttabelle oids?
+							$pfad .= ','.pg_quote($tablename.'_oid').' ';
 						}
 						$j++;
 					}
@@ -15563,514 +14768,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	function setFullExtent() {
 		$this->map->setextent($this->Stelle->MaxGeorefExt->minx,$this->Stelle->MaxGeorefExt->miny,$this->Stelle->MaxGeorefExt->maxx,$this->Stelle->MaxGeorefExt->maxy);
 	}
-
-  function zoomToALKGemeinde($Gemeinde,$border) {
-    # 2006-01-31 pk
-    # 1. Funktion ermittelt das umschließende Rechteck der $Gemeinde aus der postgis Datenbank
-    # 2. zoom auf diese Rechteck
-    # 3. und stellt die Gemeinde in einem gesonderten Layer in Gelb dar
-    # zu 1)
-		include_(CLASSPATH.'alk.php');
-		$alk = new ALK($this->database, $this->pgdatabase);
-    $ret=$alk->getMERfromGemeinde($Gemeinde, $this->user->rolle->epsg_code);
-    if ($ret[0]) {
-      $this->Fehlermeldung='Es konnte keine Gemeinde gefunden werden.<br>'.$ret[1];
-      $rect=$this->user->rolle->oGeorefExt;
-      $this->adresswahl();
-    }
-    else {
-      $rect=$ret[1];
-      $randx=($rect->maxx-$rect->minx)*$border/100;
-      $randy=($rect->maxy-$rect->miny)*$border/100;
-    }
-    # zu 2)
-    $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-  	if(MAPSERVERVERSION >= 600 ) {
-			$this->map_scaledenom = $this->map->scaledenom;
-		}
-		else {
-			$this->map_scaledenom = $this->map->scale;
-		}
-    # zu 3)
-    $GemObj=new Gemeinde($Gemeinde,$this->pgdatabase);
-    $layer=ms_newLayerObj($this->map);
-    $datastring ="the_geom from (select o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknflur as fl";
-    $datastring.=",alb_v_gemarkungen AS g WHERE o.objnr=fl.objnr AND fl.gemkgschl::integer=g.gemkgschl";
-    $datastring.=" AND g.gemeinde=".(int)$Gemeinde;
-    $datastring.=") as foo using unique oid using srid=".EPSGCODE;
-    $legendentext ="Gemeinde: " . $GemObj->getGemeindeName($Gemeinde);
-    $layer->set('data',$datastring);
-    $layer->set('status',MS_ON);
-    $layer->set('template', ' ');
-    $layer->set('name',$legendentext);
-    $layer->set('type',2);
-    $layer->set('group','Suchergebnis');
-    $layer->setMetaData('off_requires',0);
-    $layer->setMetaData('layer_has_classes',0);
-    $this->map->setMetaData('group_status_Suchergebnis','0');
-    $this->map->setMetaData('group_Suchergebnis_has_active_layers','0');
-    if (MAPSERVERVERSION < '540') {
-      $layer->set('connectiontype', 6);
-    }
-    else {
-      $layer->setConnectionType(6);
-    }
-    $layer->set('connection', $this->pgdatabase->get_connection_string());
-    $layer->setMetaData('queryStatus','2');
-    $layer->setMetaData('wms_queryable','0');
-    $layer->setMetaData('layer_hidden','0'); #2005-11-30_pk
-    $klasse=ms_newClassObj($layer);
-    $klasse->set('status', MS_ON);
-    $klasse->setexpression($expression);
-    $style=ms_newStyleObj($klasse);
-    $style->color->setRGB(255,255,128);
-    $style->outlinecolor->setRGB(0,0,0);
-  }
-
-  function zoomToGemeinde($GemID,$border) {
-    $Gemeinde=new Gemeinde($GemID);
-    # 1. Anlegen eines neuen Layers für die Suche nach Gemeinde
-    $layer=ms_newLayerObj($this->map);
-    $layer->set('data',SHAPEPATH.$Gemeinde->getDataSourceName());
-    $layer->set('status',MS_ON);
-    $layer->set('template', ' ');
-    $layer->set('name','Gemeinde: '.$Gemeinde->getGemeindeName());
-    $layer->set('type',2);
-    $layer->set('group','Suchergebnis');
-    $layer->setMetaData('off_requires',0);
-    $layer->setMetaData('layer_has_classes',0);
-    $this->map->setMetaData('group_status_Suchergebnis','0');
-    $this->map->setMetaData('group_Suchergebnis_has_active_layers','0');
-    $layer->setMetaData('queryStatus','2');
-    $layer->setMetaData('wms_queryable','0');
-    $layer->setMetaData('layer_hidden','0');
-    $klasse=ms_newClassObj($layer);
-    $klasse->set('status', MS_ON);
-    $klasse->setexpression('([GEMEINDE_L]='.$GemID.')');
-    $style=ms_newStyleObj($klasse);
-    $style->color->setRGB(200,0,0);
-    # 2. zoom auf eine Gemeinde
-    $this->setFullExtent();
-    $rect=$Gemeinde->getMER($layer);
-    if ($rect==0) {
-      $this->Fehlermeldung='Diese Gemeinde konnte nicht gefunden werden.';
-      $rect=$this->Stelle->MaxGeorefExt;
-    }
-    else {
-      $randx=($rect->maxx-$rect->minx)*$border/100;
-      $randy=($rect->maxy-$rect->miny)*$border/100;
-    }
-    $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-  	if(MAPSERVERVERSION >= 600 ) {
-			$this->map_scaledenom = $this->map->scaledenom;
-		}
-		else {
-			$this->map_scaledenom = $this->map->scale;
-		}
-  }
-
-  function zoomToGemarkung($GemID,$GemkgID,$border) {
-    $Gemarkung=new Gemarkung($GemkgID,$this->database);
-    # 1. Anlegen eines neuen Layers für die Suche nach Gemarkung
-    $layer=ms_newLayerObj($this->map);
-    $layer->set('data',SHAPEPATH.$Gemarkung->getDataSourceName());
-    $layer->set('status',MS_ON);
-    $layer->set('template', ' ');
-    $layer->set('name','Gemarkung: '.$Gemarkung->getGemkgName());
-    $layer->set('type',2);
-    $layer->set('group','Suchergebnis');
-    $layer->setMetaData('off_requires',0);
-    $layer->setMetaData('layer_has_classes',0);
-    $this->map->setMetaData('group_status_Suchergebnis','0');
-    $this->map->setMetaData('group_Suchergebnis_has_active_layers','0');
-    $layer->setMetaData('queryStatus','2');
-    $layer->setMetaData('wms_queryable','0');
-    $layer->setMetaData('layer_hidden','0');
-    $klasse=ms_newClassObj($layer);
-    $klasse->set('status', MS_ON);
-    $klasse->setexpression('([GEMARKUNG_]='.$GemkgID.')');
-    $style=ms_newStyleObj($klasse);
-    $style->color->setRGB(200,0,0);
-    # 2. zoom auf eine Gemarkung
-    $this->setFullExtent();
-    $rect=$Gemarkung->getMER($layer);
-    if ($rect==0) {
-      $this->Fehlermeldung='Diese Gemarkung konnte nicht gefunden werden.';
-      $rect=$this->Stelle->MaxGeorefExt;
-    }
-    else {
-      $randx=($rect->maxx-$rect->minx)*$border/100;
-      $randy=($rect->maxy-$rect->miny)*$border/100;
-    }
-    $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-  	if(MAPSERVERVERSION >= 600 ) {
-			$this->map_scaledenom = $this->map->scaledenom;
-		}
-		else {
-			$this->map_scaledenom = $this->map->scale;
-		}
-  }
-
-  function zoomToALKGemarkung($Gemkgschl,$border) {
-    # 2006-02-01 pk
-    # 1. Funktion ermittelt das umschließende Rechteck der $Gemarkung aus der postgis Datenbank
-    # 2. zoom auf diese Rechteck
-    # 3. und stellt die Gemarkung in einem gesonderten Layer in Gelb dar
-    # zu 1)
-		include_(CLASSPATH.'alk.php');
-		$alk = new ALK($this->database, $this->pgdatabase);
-    $ret=$alk->getMERfromGemarkung($Gemkgschl, $this->user->rolle->epsg_code);
-    if ($ret[0]) {
-      $this->Fehlermeldung='Es konnte keine Gemarkung gefunden werden.<br>'.$ret[1];
-      $rect=$this->user->rolle->oGeorefExt;
-      $this->flurstwahl();
-    }
-    else {
-      $rect=$ret[1];
-      $randx=($rect->maxx-$rect->minx)*$border/100;
-      $randy=($rect->maxy-$rect->miny)*$border/100;
-    }
-    # zu 2)
-    $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-  	if(MAPSERVERVERSION >= 600 ) {
-			$this->map_scaledenom = $this->map->scaledenom;
-		}
-		else {
-			$this->map_scaledenom = $this->map->scale;
-		}
-    # zu 3)
-    $GemkgObj=new Gemarkung($Gemkgschl,$this->pgdatabase);
-    $layer=ms_newLayerObj($this->map);
-    $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
-    $datastring.="WHERE land||gemarkungsnummer = '" . $Gemkgschl."'";
-		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
-    $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
-    $legendentext ="Gemarkung: " . $GemkgObj->getGemkgName($Gemkgschl);
-    $layer->set('data',$datastring);
-    $layer->set('status',MS_ON);
-    $layer->set('template', ' ');
-    $layer->set('name',$legendentext);
-    $layer->set('type',2);
-    $layer->set('group','Suchergebnis');
-    $layer->setMetaData('off_requires',0);
-    $layer->setMetaData('layer_has_classes',0);
-    $this->map->setMetaData('group_status_Suchergebnis','0');
-    $this->map->setMetaData('group_Suchergebnis_has_active_layers','0');
-    if (MAPSERVERVERSION < '540') {
-      $layer->set('connectiontype', 6);
-    }
-    else {
-      $layer->setConnectionType(6);
-    }
-    $layer->set('connection', $this->pgdatabase->get_connection_string());
-    $layer->setMetaData('queryStatus','2');
-    $layer->setMetaData('wms_queryable','0');
-    $layer->setMetaData('layer_hidden','0'); #2005-11-30_pk
-    $klasse=ms_newClassObj($layer);
-    $klasse->set('status', MS_ON);
-    $klasse->setexpression($expression);
-    $style=ms_newStyleObj($klasse);
-    $style->color->setRGB(255,255,128);
-    $style->outlinecolor->setRGB(0,0,0);
-  }
-
-  function zoomToALKFlur($GemID,$GemkgID,$FlurID,$border) {
-    # 2006-02-01 pk
-    # 1. Funktion ermittelt das umschließende Rechteck der $Gemarkung aus der postgis Datenbank
-    # 2. zoom auf diese Rechteck
-    # 3. und stellt die Gemarkung in einem gesonderten Layer in Gelb dar
-    # zu 1)
-		include_(CLASSPATH.'alk.php');
-		$alk = new ALK($this->database, $this->pgdatabase);
-    $ret=$alk->getMERfromFlur($GemkgID,$FlurID, $this->user->rolle->epsg_code);
-    if ($ret[0]) {
-      $this->Fehlermeldung='Es konnte keine Flur gefunden werden.<br>'.$ret[1];
-      $rect=$this->user->rolle->oGeorefExt;
-    }
-    else {
-      $rect=$ret[1];
-      $randx=($rect->maxx-$rect->minx)*$border/100;
-      $randy=($rect->maxy-$rect->miny)*$border/100;
-    }
-    # zu 2)
-    $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-  	if(MAPSERVERVERSION >= 600 ) {
-			$this->map_scaledenom = $this->map->scaledenom;
-		}
-		else {
-			$this->map_scaledenom = $this->map->scale;
-		}
-    # zu 3)
-    $GemkgObj=new Gemarkung($GemkgID,$this->pgdatabase);
-    $layer=ms_newLayerObj($this->map);
-    $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
-    $datastring.="WHERE land||gemarkungsnummer = '" . $GemkgID."'";
-    $datastring.=" AND flurnummer = ".(int)$FlurID;
-		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
-    $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
-    $legendentext ="Gemarkung: " . $GemkgObj->getGemkgName($GemkgID);
-    $legendentext .="<br>Flur: " . $FlurID;
-    $layer->set('data',$datastring);
-    $layer->set('status',MS_ON);
-    $layer->set('template', ' ');
-    $layer->set('name',$legendentext);
-    $layer->set('type',2);
-    $layer->set('group','Suchergebnis');
-    $layer->setMetaData('off_requires',0);
-    $layer->setMetaData('layer_has_classes',0);
-    $this->map->setMetaData('group_status_Suchergebnis','0');
-    $this->map->setMetaData('group_Suchergebnis_has_active_layers','0');
-    if (MAPSERVERVERSION < '540') {
-      $layer->set('connectiontype', 6);
-    }
-    else {
-      $layer->setConnectionType(6);
-    }
-    $layer->set('connection', $this->pgdatabase->get_connection_string());
-    $layer->setMetaData('queryStatus','2');
-    $layer->setMetaData('wms_queryable','0');
-    $layer->setMetaData('layer_hidden','0');
-    $klasse=ms_newClassObj($layer);
-    $klasse->set('status', MS_ON);
-    $style=ms_newStyleObj($klasse);
-    $style->color->setRGB(255,255,128);
-    $style->outlinecolor->setRGB(0,0,0);
-  }
-
-  function zoomToALKFlurst($FlurstListe,$border){
-		include_(CLASSPATH.'alk.php');
-		$dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
-		$alk = new ALK($this->database, $this->pgdatabase);
-    $ret=$alk->getMERfromFlurstuecke($FlurstListe, $this->user->rolle->epsg_code);
-    if ($ret[0]) {
-      $this->Fehlermeldung='Es konnten keine Flurstücke gefunden werden.<br>'.$ret[1];
-      $rect=$this->user->rolle->oGeorefExt;
-    }
-    else {
-      $rect=$ret[1];
-      $randx=($rect->maxx-$rect->minx)*$border/100;
-      $randy=($rect->maxy-$rect->miny)*$border/100;
-    }
-		$epsg = EPSGCODE_ALKIS;
-		$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-		$data = $layerset[0]['Data'];
-		if($data == '')$data ="the_geom from (select f.gml_id as oid, wkb_geometry as the_geom from alkis.ax_flurstueck as f where 1=1) as foo using unique oid using srid=" . $epsg;
-		$explosion = explode(' ', $data);
-		$datageom = $explosion[0];
-		$explosion = explode('using unique ', strtolower($data));
-		$end = $explosion[1];
-		$select = $dbmap->getSelectFromData($data);
-		$whereposition = strpos(strtolower($select), ' where ');
-		$withoutwhere = substr($select, 0, $whereposition);
-		$fromposition = strpos(strtolower($withoutwhere), ' from ');
-		#$alias = $this->pgdatabase->get_table_alias('alkis.ax_flurstueck', $fromposition, $withoutwhere);
-		$orderbyposition = strpos(strtolower($select), ' order by ');
-		if($orderbyposition > 0)$select = substr($select, 0, $orderbyposition);
-		if(strpos(strtolower($select), ' where ') === false)$select .= " WHERE ";
-		else $select .= " AND ";
-		$datastring = $datageom." from (" . $select;
-		#$datastring.=" " . $alias.".flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
-		$datastring.=" flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
-    $legendentext="Flurstück";
-    if(count($FlurstListe) > 1)$legendentext .= "e";
-    $legendentext .= " (".date('d.m. H:i',time())."):<br>" . $FlurstListe[0];
-    for ($i=1;$i<count($FlurstListe);$i++) {
-      $datastring.=",'" . $FlurstListe[$i]."'";
-      $legendentext.=",<br>" . $FlurstListe[$i];
-    }
-   	$datastring.=") ";
-		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
-		# Filter
-		$filter = $dbmap->getFilter($layerset[0]['Layer_ID'], $this->Stelle->id);
-		if($filter != '')$datastring.= ' AND '.$filter;
-		$datastring.=") as foo using unique " . $end;
-    $group = $dbmap->getGroupbyName('Suchergebnis');
-    if($group != ''){
-      $groupid = $group['id'];
-    }
-    else{
-      $groupid = $dbmap->newGroup('Suchergebnis', 0);
-    }
-    $this->formvars['user_id'] = $this->user->id;
-    $this->formvars['stelle_id'] = $this->Stelle->id;
-    $this->formvars['aktivStatus'] = 1;
-    $this->formvars['Name'] = $legendentext;
-    $this->formvars['Gruppe'] = $groupid;
-    $this->formvars['Typ'] = 'search';
-    $this->formvars['Datentyp'] = 2;
-    $this->formvars['Data'] = $datastring;
-    $this->formvars['connectiontype'] = 6;
-    $this->formvars['connection_id'] = $this->pgdatabase->connection_id;
-    $this->formvars['epsg_code'] = $epsg;
-    $this->formvars['transparency'] = 60;
-
-    $layer_id = $dbmap->newRollenLayer($this->formvars);
-		
-		$dbmap->addRollenLayerStyling($layer_id, $this->formvars['Datentyp'], $this->formvars['labelitem'], $this->user);
-		
-    $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
-
-    $this->loadMap('DataBase');
-    # zu 2)
-    $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-  	if(MAPSERVERVERSION >= 600 ) {
-			$this->map_scaledenom = $this->map->scaledenom;
-		}
-		else {
-			$this->map_scaledenom = $this->map->scale;
-		}
-  }
-
-  function zoomToALKGebaeude($Gemeinde,$Strasse,$StrName,$Hausnr,$border) {
-    # 2006-01-31 pk
-    # 1. Funktion ermittelt das umschließende Rechteck der mit $Gemeinde,$Strasse und $Hausnr übergebenen
-    # Gebaeude aus der postgis Datenbank mit Rand entsprechend dem Faktor $border
-    # 2. zoom auf diese Rechteck
-    # 3. und stellt die Gebaeude in einem gesonderten Layer in Gelb dar
-    # zu 1)
-		include_(CLASSPATH.'alk.php');
-		$alk = new ALK($this->database, $this->pgdatabase);
-    $ret=$alk->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $this->user->rolle->epsg_code);
-    if ($ret[0]) {
-      #$this->Fehlermeldung='Es konnten keine Gebäude gefunden werden.<br>'.$ret[1];
-      $rect=$this->user->rolle->oGeorefExt;
-    }
-    else {
-      $rect=$ret[1];
-      $randx=($rect->maxx-$rect->minx)*$border/100;
-      $randy=($rect->maxy-$rect->miny)*$border/100;
-
-	    if(MAPSERVERVERSION >= 600 ) {
-				$this->map_scaledenom = $this->map->scaledenom;
-			}
-			else {
-				$this->map_scaledenom = $this->map->scale;
-			}
-	    # zu 3)
-			$epsg = EPSGCODE_ALKIS;
-			$datastring ="the_geom from (select g.gml_id as oid, wkb_geometry as the_geom FROM alkis.ax_gemeinde gem, alkis.ax_gebaeude g";
-			$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = any(g.zeigtauf)";
-			$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
-			$datastring.=" AND l.lage = lpad(s.lage,5,'0')";
-			$datastring.=" WHERE gem.gemeinde = l.gemeinde";
-			if ($Hausnr!='') {
-				$Hausnr = str_replace(", ", ",", $Hausnr);
-				$Hausnr = strtolower(str_replace(",", "','", $Hausnr));
-				$datastring.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('" . $Hausnr."')";
-			}
-			else{
-				$datastring.=" AND gem.schluesselgesamt = '" . $Gemeinde."'";
-				if ($Strasse!='') {
-					$datastring.=" AND l.lage='" . $Strasse."'";
-				}
-			}
-			$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN g.endet IS NULL ELSE g.beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= g.endet::text or g.endet IS NULL) END";
-			$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN gem.endet IS NULL ELSE gem.beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= gem.endet::text or gem.endet IS NULL) END";
-	    $datastring.=") as foo using unique oid using srid=" . $epsg;
-	    $legendentext ="Geb&auml;ude<br>";
-	    if ($Hausnr!='') {
-	      $legendentext.="HausNr: ".str_replace(',', '<br>', $Hausnr);
-	    }
-	    else{
-	    	$legendentext.=$StrName;
-	    }
-
-	    $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
-
-	    $group = $dbmap->getGroupbyName('Suchergebnis');
-	    if($group != ''){
-	      $groupid = $group['id'];
-	    }
-	    else{
-	      $groupid = $dbmap->newGroup('Suchergebnis', 0);
-	    }
-
-	    $this->formvars['user_id'] = $this->user->id;
-	    $this->formvars['stelle_id'] = $this->Stelle->id;
-	    $this->formvars['aktivStatus'] = 1;
-	    $this->formvars['Name'] = $legendentext;
-	    $this->formvars['Gruppe'] = $groupid;
-	    $this->formvars['Typ'] = 'search';
-	    $this->formvars['Datentyp'] = 2;
-	    $this->formvars['Data'] = $datastring;
-	    $this->formvars['connectiontype'] = 6;
-	    $this->formvars['connection_id'] = $this->pgdatabase->connection_id;
-	    $this->formvars['epsg_code'] = $epsg;
-	    $this->formvars['transparency'] = 60;
-
-	    $layer_id = $dbmap->newRollenLayer($this->formvars);
-
-	    $dbmap->addRollenLayerStyling($layer_id, $this->formvars['Datentyp'], $this->formvars['labelitem'], $this->user);
-			
-	    $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
-
-	    $this->loadMap('DataBase');
-	    # zu 2)
-	    $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-	    if(MAPSERVERVERSION >= 600 ) {
-				$this->map_scaledenom = $this->map->scaledenom;
-			}
-			else {
-				$this->map_scaledenom = $this->map->scale;
-			}
-    }
-    return $ret;
-  }
-
-  function zoomToGebaeude($GebaeudeListe,$border) {
-    $expression='("[ID]" eq "'.$GebaeudeListe['ID'][0].'"';
-    $LegendeText='Gemeinde: '.$GebaeudeListe['GemeindeSchl'][0].'<br>Strasse: '.$GebaeudeListe['StrassenSchl'][0].'<br>Gebäude Nr: '.$GebaeudeListe['HausNr'][0];
-    for ($i=1;$i<count($GebaeudeListe['ID']);$i++) {
-      $expression.=' OR "[ID]" eq "'.$GebaeudeListe['ID'][$i].'"';
-      $LegendeText.=', '.$GebaeudeListe['HausNr'][$i];
-    }
-    $expression.=')';
-    $Gebaeude=new Gebaeude('');
-    # 1. Anlegen eines neuen Layers für die Suche nach Flurstücken
-    $layer=ms_newLayerObj($this->map);
-    $layer->set('data',SHAPEPATH.$Gebaeude->getDataSourceName());
-    $layer->set('status',MS_ON);
-    $layer->set('template', ' ');
-    $layer->set('name',$LegendeText);
-    $layer->set('type',2);
-    $layer->set('group','Suchergebnis');
-    $layer->setMetaData('off_requires',0);
-    $layer->setMetaData('layer_has_classes',0);
-    $this->map->setMetaData('group_status_Suchergebnis','0');
-    $this->map->setMetaData('group_Suchergebnis_has_active_layers','0');
-    $layer->setMetaData('queryStatus','2');
-    $layer->setMetaData('wms_queryable','0');
-    $layer->setMetaData('layer_hidden','0');
-    $klasse=ms_newClassObj($layer);
-    $klasse->set('status', MS_ON);
-    $klasse->setexpression($expression);
-    $style=ms_newStyleObj($klasse);
-    $style->color->setRGB(255,255,128);
-    # 2. zoom auf ein oder mehrere Gebaeude
-    $this->setFullExtent();
-    $rect=$Gebaeude->getRectByGebaeudeListe($GebaeudeListe['ID'],$layer);
-    if ($rect==0) {
-      $this->Fehlermeldung='Es konnten keine Gebäude gefunden werden.';
-      $rect=$this->Stelle->MaxGeorefExt;
-    }
-    else {
-      $randx=($rect->maxx-$rect->minx)*$border/100;
-      $randy=($rect->maxy-$rect->miny)*$border/100;
-    }
-    $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-  	if(MAPSERVERVERSION >= 600 ) {
-			$this->map_scaledenom = $this->map->scaledenom;
-		}
-		else {
-			$this->map_scaledenom = $this->map->scale;
-		}
-    # Aktiviere Gebäude und Flurstückslayer
-    $geblayer=$this->map->getLayerByName('Gebaeude');
-    $geblayer->set('status',MS_ON);
-    $flstlayer=$this->map->getLayerByName('Flurstuecke');
-    $flstlayer->set('status',MS_ON);
-    $this->Stelle->addAktivLayer(array(2,3));
-  }
 
 	function zoomToGeom($geom,$border) {
     # Berechnen des Randes in Abhängigkeit vom Parameter border gegeben in Prozent
@@ -16296,7 +14993,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				# Haupt-Layer erzeugen
 				$layer = ms_newLayerObj($map);
 				# Parameter $scale in Data ersetzen
-				$layerset['Data'] = str_replace('$scale', $this->map_scaledenom, $layerset['Data']);
+				$layerset['Data'] = str_replace('$scale', $this->map_scaledenom ?: 1000, $layerset['Data']);
 				$layer->set('data', $layerset['Data']);
 				if ($layerset['Filter'] != '') {
 					$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
@@ -16486,316 +15183,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			header('error: true');	// damit ajax-Requests das auch mitkriegen
 		}
 	}
-
-  # Flurstücksauswahl
-  function flurstwahl() {
-		include_once(CLASSPATH.'FormObject.php');
-    if($this->formvars['historical'] == 1){
-      $this->titel='historische Flurstückssuche';
-			$this->formvars['without_temporal_filter'] = 1;
-    }
-    elseif($this->formvars['ALK_Suche'] == 1){
-      $this->titel='Flurstückssuche (zur Karte)';
-    }
-    else{
-    	$this->titel='Flurstückssuche';
-    }
-		if($this->formvars['titel'] != '')$this->titel = $this->formvars['titel'];
-    $this->main='flurstueckssuche.php';
-    ####### Import ###########
-		$_files = $_FILES;
-    if($_files['importliste']['name']){
-			$importliste = file($_files['importliste']['tmp_name'], FILE_IGNORE_NEW_LINES);
-			$bom = pack('H*','EFBBBF');
-			$importliste[0] = preg_replace("/^$bom/", '', $importliste[0]);
-			if(strpos($importliste[0], '/') !== false){
-				$importliste_string = implode('; ', $importliste);
-				$importliste_string = formatFlurstkennzALKIS($importliste_string);
-				$importliste = explode(';', $importliste_string);
-			}
-			$this->formvars['selFlstID'] = implode(', ', $importliste);
-			$this->formvars['GemkgID'] = substr($importliste[0], 0, 6);
-			$this->formvars['FlurID'] = substr($importliste[0], 6, 3);
-			$this->formvars['without_temporal_filter'] = 1;
-		}
-		##########################
-		# Übernahme der Formularwerte für die Einstellung der Auswahlmaske
-		$GemID=$this->formvars['GemID'];
-		$GemkgID=$this->formvars['GemkgID'];
-		$FlurID=$this->formvars['FlurID'];
-		$FlstID=$this->formvars['FlstID'];
-		$FlstNr=$this->formvars['FlstNr'];
-		$selFlstID = explode(', ',$this->formvars['selFlstID']);
-    $GemeindenStelle=$this->Stelle->getGemeindeIDs();
-		$Gemarkung=new gemarkung('',$this->pgdatabase);
-		if($GemeindenStelle == NULL){
-			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
-		}
-		else{
-			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
-		}
-		$this->land_schluessel = substr($GemkgListe['GemkgID'][0], 0, 2);
-    // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
-    $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
-    $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
-    $GemkgListe['GemkgID'] = $sorted_arrays['second_array'];
-    # Erzeugen des Formobjektes für die Gemarkungsauswahl
-    if (count($GemkgListe['GemkgID'])>0) {
-      if (count($GemkgListe['GemkgID'])==1) { $GemkgID=$GemkgListe['GemkgID'][0]; }
-      $GemkgFormObj=new selectFormObject("GemkgID","select",$GemkgListe['GemkgID'],array($GemkgID),$GemkgListe['Bezeichnung'],"1","","",NULL);
-    }
-    else {
-      $GemkgFormObj=new selectFormObject("GemkgID","text","","","","25","25","",NULL);
-    }
-    $GemkgFormObj->insertOption(-1,0,'--Auswahl--',0);
-    $GemkgFormObj->outputHTML();
-    # Wenn Gemarkung gewählt wurde, oder nur eine Gemarkung zur Wahl steht, Auswahlliste für Flur erzeugen
-    if ($GemkgFormObj->selected) {
-      # Abragen der Fluren zur Gemarkung
-      if ($GemkgID==0) { $GemkgID=$GemkgListe['GemkgID'][0]; }
-      $Flur=new Flur('','','',$this->pgdatabase);
-    	$FlurListe=$Flur->getFlurListe($GemkgID, $GemeindenStelle['eingeschr_gemarkung'][$GemkgID], $this->formvars['historical']);
-      # Erzeugen des Formobjektes für die Flurauswahl
-      if (count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
-      $FlurFormObj=new selectFormObject("FlurID","select",$FlurListe['FlurID'],array($FlurID),$FlurListe['Name'],"1","","",NULL);
-      $FlurFormObj->insertOption(-1,0,'--Auswahl--',0);
-      $FlurFormObj->outputHTML();
-      # Wenn Flur gewählt wurde, oder nur eine Flur zur Auswahl steht, Auswahllist für Flurstuecke erzeugen
-      if ($FlurFormObj->selected) {
-        # Abfragen der Flurstücke zur Flur
-        $FlstNr=new flurstueck('',$this->pgdatabase);
-        if ($FlurID==0) { $FlurID=$FlurListe['FlurID'][0]; }
-        $FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,$FlurID, $this->formvars['historical']);
-        # Erzeugen des Formobjektes für die Flurstücksauswahl
-        if (count($FlstNrListe['FlstID'])==1){
-          $FLstID=$FlstNrListe['FlstID'][0];
-          $FlstID = array($FLstID);
-        }
-        $FlstNrFormObj=new FormObject("FlstID","select",$FlstNrListe['FlstID'],array($FlstID),$FlstNrListe['FlstNr'],"12","","multiple",100);
-				$FlstNrFormObj->insertOption('alle',false,' -- alle -- ', 0);
-				$FlstNrFormObj->addJavaScript('onclick', 'if(this.value==\'alle\'){this.options[0].selected = false; for(var i=1; i<this.options.length; i++){this.options[i].selected = true;}}');
-        $FlstNrFormObj->outputHTML();
-        if($this->formvars['selFlstID'] != ''){
-          $SelectedFlstNrFormObj=new FormObject("selectedFlstID","select", $selFlstID, NULL, $selFlstID,"12","","multiple",170);
-        }
-        else{
-          $SelectedFlstNrFormObj=new FormObject("selectedFlstID","select",NULL,NULL,"","12","","multiple",170);
-        }
-        $SelectedFlstNrFormObj->outputHTML();
-      }
-      else {
-        if($this->formvars['selFlstID'] != ''){
-          $SelectedFlstNrFormObj=new FormObject("selectedFlstID","select", $selFlstID, NULL, $selFlstID,"12","","multiple",100);
-          $SelectedFlstNrFormObj->outputHTML();
-        }
-        else{
-          $FlstNrFormObj=new FormObject("FlstNr","text","","","","5","5","multiple",NULL);
-        }
-      }
-    }
-    else {
-      $FlurFormObj=new FormObject("FlurID","text","","","","5","5","multiple",NULL);
-      $FlstNrFormObj=new FormObject("FlstNr","text","","","","20","20","multiple",NULL);
-    }
-    $this->FormObject["Gemeinden"]=$GemFormObj;
-    $this->FormObject["Gemarkungen"]=$GemkgFormObj;
-    $this->FormObject["GemkgSchl"]=$GemkgSchlFormObj;
-    $this->FormObject["Fluren"]=$FlurFormObj;
-    $this->FormObject["FlstNr"]=$FlstNrFormObj;
-    $this->FormObject["selectedFlstNr"]=$SelectedFlstNrFormObj;
-  }
-
-  # adressenauswahl
-  function adresswahl() {
-		include_once(CLASSPATH.'FormObject.php');
-    $Adresse=new adresse('','','',$this->pgdatabase);
-    $this->main='adresssuche.php';
-    if($this->formvars['ALK_Suche'] == 1){
-    	$this->titel='Adresssuche (zur Karte)';
-    }
-    else{
-    	$this->titel='Adressensuche';
-    }
-		if($this->formvars['titel'] != '')$this->titel = $this->formvars['titel'];
-    if ($this->formvars['aktualisieren']=='Neu') {
-      $GemID=0; $StrID=0; $StrName=''; $HausID=0; $HausNr='';
-    }
-    else {
-      $GemID=$this->formvars['GemID'];
-      $GemkgID=$this->formvars['GemkgID'];
-      $StrID=$this->formvars['StrID'];
-      $StrName=$this->formvars['StrName'];
-      if ($StrName!='') {
-        $StrID=$Adresse->getStrIDfromName($GemID,$StrName);
-      }
-      $HausID=$this->formvars['HausID'];
-      $HausNr=$this->formvars['HausNr'];
-      $selHausID = explode(', ',$this->formvars['selHausID']);
-    }
-    $Gemeinde=new gemeinde('',$this->pgdatabase);
-		$Gemarkung=new gemarkung('',$this->pgdatabase);
-    $GemeindenStelle=$this->Stelle->getGemeindeIDs();
-
-		if($GemeindenStelle == NULL){
-			$GemListe=$Gemeinde->getGemeindeListe(NULL);
-			$GemkgListe=$Gemarkung->getGemarkungListe(NULL,'');
-		}
-		else{
-			$GemListe=$Gemeinde->getGemeindeListe(array_merge(array_keys($GemeindenStelle['ganze_gemeinde']), array_keys($GemeindenStelle['eingeschr_gemeinde'])));
-			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
-		}		
-		# Wenn nur eine Gemeinde zur Auswahl steht, wird diese gewählt; Verhalten so, als würde die Gemeinde vorher gewählt worden sein.
-		if(count($GemListe['ID'])==1)$GemID=$GemListe['ID'][0];
-    // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
-    $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
-    $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
-    $GemkgListe['GemkgID'] = $sorted_arrays['second_array'];
-    # Erzeugen des Formobjektes für die Gemarkungsauswahl
-    if (count($GemkgListe['GemkgID'])==1) { $GemkgID=$GemkgListe['GemkgID'][0]; }
-    $GemkgFormObj=new selectFormObject("GemkgID","select",$GemkgListe['GemkgID'],array($GemkgID),$GemkgListe['Bezeichnung'],"1","","",NULL);
-    $GemkgFormObj->addJavaScript('onclick', 'document.GUI.GemID.disabled = true');
-    $GemkgFormObj->insertOption(-1,0,'--Auswahl--',0);
-    $GemkgFormObj->outputHTML();
-
-    // Sortieren der Gemeinden unter Berücksichtigung von Umlauten
-    $sorted_arrays = umlaute_sortieren($GemListe['Name'], $GemListe['ID']);
-    $GemListe['Name'] = $sorted_arrays['array'];
-    $GemListe['ID'] = $sorted_arrays['second_array'];
-    # Erzeugen des Formobjektes für die Gemeindeauswahl
-    $GemFormObj=new selectFormObject("GemID","select",$GemListe['ID'],array($GemID),$GemListe['Name'],"1","","",NULL);
-    $GemFormObj->addJavaScript('onclick', 'document.GUI.GemkgID.disabled = true');
-    $GemFormObj->insertOption(-1,0,'--Auswahl--',0);
-    $GemFormObj->outputHTML();
-    # Wenn Gemeinde gewählt wurde, oder nur eine zur Auswahl stand, Auswahlliste für Strassen erzeugen
-    if ($GemFormObj->selected OR $GemkgFormObj->selected){
-    	if($GemFormObj->selected)$StrassenListe=$Adresse->getStrassenListe($GemID,'', '');
-    	elseif($GemkgFormObj->selected)$StrassenListe=$Adresse->getStrassenListe('', $GemkgID,'');
-      $StrSelected[0]=$StrID;
-      # Erzeugen des Formobjektes für die Strassenauswahl
-      $StrFormObj=new selectFormObject("StrID","select",$StrassenListe['StrID'],$StrSelected,$StrassenListe['Name'],"1","","",NULL);
-      # Unterscheidung ob Strasse ausgewählt wurde
-      if ($StrFormObj->selected){
-      	if($GemID == -1 OR $GemID == ''){
-					$Gemeinde = $Gemarkung->getGemarkungListe(NULL, array($this->formvars['GemkgID']), NULL);
-		    	$GemID = $Gemeinde['gemeinde'][0];
-		    }
-        $HausNrListe=$Adresse->getHausNrListe($GemID,$StrID,'','','hausnr*1,ASCII(REVERSE(hausnr)),quelle');
-        # Erzeugen des Formobjektes für die Flurstücksauswahl
-        if (count($HausNrListe['HausID'])==1){
-          $HausID=$HausNrListe['HausID'][0];
-          $HausID = array($HausID);
-        }
-        $HausNrFormObj=new FormObject("HausID","select",$HausNrListe['HausID'],array($HausID),$HausNrListe['HausNr'],"12","","multiple",100);
-        $HausNrFormObj->outputHTML();
-        if($this->formvars['selHausID'] != ''){
-          $SelectedHausNrFormObj=new FormObject("selectedHausID","select", $selHausID, NULL, $selHausID,"12","","multiple",170);
-        }
-        else{
-          $SelectedHausNrFormObj=new FormObject("selectedHausID","select",NULL,NULL,"","12","","multiple",170);
-        }
-        $SelectedHausNrFormObj->outputHTML();
-      }
-
-    	else {
-        if($this->formvars['selHausID'] != ''){
-          $SelectedHausNrFormObj=new FormObject("selectedHausID","select", $selHausID, NULL, $selHausID,"12","","multiple",100);
-          $SelectedHausNrFormObj->outputHTML();
-        }
-        else{
-          $HausNrFormObj=new FormObject("HausNr","text","","","","5","5","multiple",NULL);
-        }
-      }
-    }
-		$this->FormObject["Orte"]=$OrtsFormObj;
-    $this->FormObject["Gemeinden"]=$GemFormObj;
-    $this->FormObject["Gemarkungen"]=$GemkgFormObj;
-    $this->FormObject["Strassen"]=$StrFormObj;
-    $this->FormObject["HausNr"]=$HausNrFormObj;
-    $this->FormObject["selectedHausNr"]=$SelectedHausNrFormObj;
-  }
-
-  function adresseSuchen() {
-    # 2006-01-31 pk
-    #echo 'GemeindeID'.$this->formvars['GemID'];
-    #echo '<br>StrasseID'.$this->formvars['StrID'];
-    #echo '<br>HausID'.$this->formvars['selHausID'];
-    $GemID=$this->formvars['GemID'];
-    if($GemID == -1){
-    	$Gemarkung=new gemarkung('',$this->pgdatabase);
-    	$Gemeinde = $Gemarkung->getGemarkungListe(NULL, array($this->formvars['GemkgID']));
-    	$GemID = $Gemeinde['gemeinde'][0];
-    }
-    if ($GemID!='-1') {
-      $Adresse=new adresse($GemID,'','',$this->pgdatabase);
-      $StrID=$this->formvars['StrID'];
-      $StrName=$this->formvars['StrName'];
-      if($StrName!='') {
-        $StrID=$Adresse->getStrIDfromName($GemID,$StrName);
-      }
-    	else{
-        $StrName=$Adresse->getStrNamefromID($GemID,$StrID);
-      }
-      $Adresse->StrassenSchl=$StrID;
-      $HausID=$this->formvars['selHausID'];
-      $HausNr=$this->formvars['HausNr'];
-      if ($HausNr!='') {
-        $HausID=$HausNr;
-      }
-      if ($HausID=='-1') {
-        $HausID='';
-      }
-      $Adresse->HausNr=$HausID;
-      # $this->searchInExtent=$this->formvars['searchInExtent'];
-      # Wenn keine Strasse angegeben ist zoom auf die ganze Gemeinde
-      if ($StrID<'1') {
-        $this->loadMap('DataBase');
-        $this->zoomToALKGemeinde($GemID,10);
-        $currenttime=date('Y-m-d H:i:s',time());
-        $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-        $this->drawMap();
-        $this->saveMap('');
-      }
-      else {
-        # StrassenID ist angegeben
-        # Abfrage der Flurstücks aus dem ALB über die Adresse
-        $FlurstKennz=$Adresse->getFlurstKennzListe();
-        if($this->formvars['ALK_Suche'] == 1){
-	        $ret = $this->zoomToALKGebaeude($GemID,$StrID,$StrName,$HausID,100);
-	        if($ret[0]){
-	        	$this->zoomToALKFlurst($FlurstKennz,100);
-	        }
-					if($this->formvars['go_next'] != ''){
-						$this->saveMap('');
-						go_switch($this->formvars['go_next']);
-						exit();
-					}
-	        $currenttime=date('Y-m-d H:i:s',time());
-          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-          $this->drawMap();
-          $this->saveMap('');
-        }
-        else{
-	        if ($FlurstKennz > 0) {
-	          # Anzeige der ALB-daten in Flurstücksanzeige
-	          $this->flurstAnzeige($FlurstKennz);
-	        }
-	        else {
-	          # Anzeige der Gebaeude in der ALK
-	          # Karte laden, auf die Gebaeude zoomen, Karte Zeichnen und speichern für späteren gebrauch
-	          $this->zoomToALKGebaeude($GemID,$StrID,$StrName,$HausID,100);
-	          $currenttime=date('Y-m-d H:i:s',time());
-	          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-	          $this->drawMap();
-	          $this->saveMap('');
-	        }
-        }
-      }
-    }
-    else {
-      $this->Fehlermeldung='Wählen Sie eine Gemeinde aus!';
-      $this->adresswahl();
-    }
-  }
 	
 	function deleteRollenlayer(){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -17829,6 +16216,7 @@ class db_mapObj{
 												$this->GUI->add_message('error', 'Fehler bei der Abfrage der Optionen für das Attribut "' . $attributes['name'][$i] . '"<br>' . err_msg($this->script_name, __LINE__, $ret[1]));
 												return 0;
 											}
+											$attributes['enum_value'][$i][$k] = array();
 											while($rs = pg_fetch_array($ret[1])) {
 												$attributes['enum_value'][$i][$k][] = $rs['value'];
 												$attributes['enum_output'][$i][$k][] = $rs['output'];
@@ -19302,6 +17690,8 @@ class db_mapObj{
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
 		while ($rs = $ret['result']->fetch_array()){
+			$attributes['enum_value'][$i] = array();
+
 			$attributes['order'][$i] = $rs['order'];
 			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;

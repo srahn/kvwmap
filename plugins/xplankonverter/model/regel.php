@@ -441,6 +441,10 @@ class Regel extends PgObject {
 			$konvertierung = Konvertierung::find_by_id($this->gui, 'id', $this->get('konvertierung_id'));
 		}
 		else {
+			$regel_id = $this->get('id');
+			if(empty($regel_id)) {
+				$regel_id = 0; // can't exist, but necessary for int comparison in SQL
+			}
 			#echo '<br>Regel gehört über einen Bereich und Plan zur Konvertierung.';
 			$sql = "
 				SELECT
@@ -449,7 +453,7 @@ class Regel extends PgObject {
 					xplan_gml.xp_bereich b JOIN
 					xplankonverter.regeln r ON b.gml_id = r.bereich_gml_id
 				WHERE
-					r.id = " . $this->get('id') . "
+					r.id = " . $regel_id . "
 			";
 /*
 			SELECT

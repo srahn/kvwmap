@@ -23,14 +23,21 @@ include('funktionen/input_check_functions.php');
 		var d = new Date();
 		var year = d.getFullYear();
 		var split = datefield.value.split(".");
-		if(split.length == 2){
-			if(split[1] != ''){
-				datefield.value += '.'+year;
+		if (split.length == 2) {
+			if (split[1] != '') {
+				datefield.value += '.' + year;
 			}
 		}
-		else if(split.length == 3){
-			if(split[2] == ''){
+		else if (split.length == 3) {
+			if (split[2] == '') {
 				datefield.value += year;
+			}
+			else {
+				if (split[2].length == 2) {
+					// add century
+					split[2] = String(year).slice(0,2) + split[2];
+					datefield.value = split.join('.');
+				}
 			}
 		}
 	}

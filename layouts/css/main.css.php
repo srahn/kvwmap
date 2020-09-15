@@ -3,7 +3,8 @@
 	include('../../config.php');
 	
 	global $sizes;
-	$size = $sizes[$_REQUEST['gui']];
+	$key = ((array_key_exists('gui', $_REQUEST) AND array_key_exists($_REQUEST['gui'], $sizes)) ? $_REQUEST['gui'] : 'layouts/gui.php');
+	$size =	$sizes[$key];
 ?>
 
 .clear {
@@ -1500,7 +1501,7 @@ tbody.gle>tr {
 
 .subFormListItem{
 	height: 20px;
-	padding: 0;
+	padding: 0 0 8px 0;
 }
 
 .gle_hr{
@@ -1511,8 +1512,14 @@ tbody.gle>tr {
 }
 
 .subFormListItem > a:before{
-	content:url('../../graphics/submenue.png');
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	content: '';
+	margin: 8px 7px 0px 10px;
+	background-color: #236dbf;
 	vertical-align: top;
+	display: inline-block;
 }
 
 .calendar {

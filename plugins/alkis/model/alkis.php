@@ -1,12 +1,11 @@
 <?php
 #--------------------------------------------------------------------------------------------------------------
-##############
-# Klasse ALB #
-##############
+################
+# Klasse ALKIS #
+################
 
-class ALB {
+class ALKIS {
   var $debug;
-  # Datenbankobjekt in der die ALB Daten vorgehalten werden
   var $database;
 
   function __construct($database) {
@@ -15,6 +14,48 @@ class ALB {
     $this->database=$database;
     $database->setDebugLevel=1;
   }
+	
+	function dhk_wsdl_login($url = 'http://webdhk-vr.lk-vr.de:8090/?wsdl'){
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		$request_file = $this->create_wsdl_request_xml_file();
+		if (version_compare(phpversion(), '5.5.0', '<')) {
+			$curl_file = '@'.$request_file;
+		}
+		else {
+			curl_setopt($ch, CURLOPT_SAFE_UPLOAD, true);
+			$curl_file = new CURLFILE($request_file, 'text/xml', 'request_file');
+		}
+		#curl_setopt($ch, CURLOPT_POSTFIELDS, array('request_file' => $curl_file));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: text/xml'));
+		$result = curl_exec($ch);
+		echo $httpCode = curl_getinfo($ch , CURLINFO_HTTP_CODE);
+		echo $result;
+		curl_close($ch);
+		#$parser = xml_parser_create();
+		#xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE,1);
+		#xml_parse_into_struct($parser, $result, $values, $index);
+		#xml_parser_free($parser);
+		#return $values[$index['JSESSIONID'][0]]['value'];
+	}
+	
+	function create_wsdl_request_xml_file(){
+		$xml = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:web="http://webservice.sgjonlinecmd.supportgis.de/">
+<soapenv:Header/>
+<soapenv:Body>
+<web:getCapabilities/>
+</soapenv:Body>
+</soapenv:Envelope>';
+		$currenttime = date('Y-m-d_H_i_s',time());
+		$file = IMAGEPATH.'nas_call_'.$currenttime.'-'.rand(0, 1000000).'.xml';
+		file_put_contents($file, $xml);
+		return $file;
+	}	
 	
 	function dhk_call_login($url, $username, $password){
 		$data = 'cmd=login&j_username='.$username.'&j_password='.$password;
@@ -2248,5 +2289,63 @@ class ALB {
     $pdf->pagecount[] = $pdf->numPages;
     return $pdf;
   }
+	
+  function getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode) {
+    $ret=$this->database->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode);
+    if ($ret[0]==0) {
+      $rect=ms_newRectObj();
+      $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
+      $rect->miny=$ret[1]['miny']; $rect->maxy=$ret[1]['maxy'];
+      $ret[1]=$rect;
+    }
+    return $ret;
+  }
+  
+  function getMERfromGemeinde($Gemeinde, $epsgcode) {
+    # 2006-01-31 pk
+    $ret=$this->database->getMERfromGemeinde($Gemeinde, $epsgcode);
+    if ($ret[0]==0) {
+      $rect=ms_newRectObj();
+      $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
+      $rect->miny=$ret[1]['miny']; $rect->maxy=$ret[1]['maxy'];
+      $ret[1]=$rect;
+    }
+    return $ret;
+  }
+  
+  function getMERfromGemarkung($Gemkgschl, $epsgcode) {
+    # 2006-02-01 pk
+    $ret=$this->database->getMERfromGemarkung($Gemkgschl, $epsgcode);
+    if ($ret[0]==0) {
+      $rect=ms_newRectObj();
+      $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
+      $rect->miny=$ret[1]['miny']; $rect->maxy=$ret[1]['maxy'];
+      $ret[1]=$rect;
+    }
+    return $ret;
+  }
+
+  function getMERfromFlur($Gemarkung,$Flur, $epsgcode) {
+    # 2006-02-01 pk
+    $ret=$this->database->getMERfromFlur($Gemarkung,$Flur,$epsgcode);
+    if ($ret[0]==0) {
+      $rect=ms_newRectObj();
+      $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
+      $rect->miny=$ret[1]['miny']; $rect->maxy=$ret[1]['maxy'];
+      $ret[1]=$rect;
+    }
+    return $ret;
+  }
+    
+  function getMERfromFlurstuecke($flstliste, $epsgcode) {
+    $ret=$this->database->getMERfromFlurstuecke($flstliste, $epsgcode);
+    if ($ret[0]==0) {
+      $rect=ms_newRectObj();
+      $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
+      $rect->miny=$ret[1]['miny']; $rect->maxy=$ret[1]['maxy'];
+      $ret[1]=$rect;
+    }
+    return $ret;
+  }	
 
 }
