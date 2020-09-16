@@ -1,5 +1,7 @@
 BEGIN;
 
+  CREATE EXTENSION IF NOT EXISTS postgis_topology;
+
   CREATE TABLE xplankonverter.flaechenschlussobjekte (
       gml_id uuid NOT NULL,
       konvertierung_id integer NOT NULL,
@@ -11,9 +13,10 @@ BEGIN;
   )
   WITH ( OIDS = TRUE );
 
-  CREATE EXTENSION postgis_topology;
-
-  SELECT CreateTopology('flaechenschluss_topology', 25833, 0.002);
+  SELECT CreateTopology('flaechenschluss_topology', 25833, 0.002)
+  WHERE NOT EXISTS (
+      SELECT * FROM topology.topology WHERE name = 'flaechenschluss_topology'
+  );
 
   SELECT topology.AddTopoGeometryColumn('flaechenschluss_topology', 'xplankonverter', 'flaechenschlussobjekte', 'topo', 'POLYGON');
 

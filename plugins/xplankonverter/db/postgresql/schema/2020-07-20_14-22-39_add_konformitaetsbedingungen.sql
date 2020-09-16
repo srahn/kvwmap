@@ -50,6 +50,7 @@ BEGIN;
       xplankonverter.uml_class2konformitaeten c2k JOIN
       xplankonverter.konformitaetsbedingungen k ON c2k.konformitaet_nummer = k.nummer AND c2k.konformitaet_version_von = k.version_von JOIN
       xplankonverter.validierungen v ON k.nummer = v.konformitaet_nummer AND k.version_von = v.konformitaet_version_von
+  ;
 
 
 COMMIT;
