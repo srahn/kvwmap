@@ -247,12 +247,14 @@ class GUI {
 				$output .= '<li><a href="index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326&name='.$name.'\'">'.$name.'</a></li>';
 			}
 		}
-		if($show)echo '<div style="position: absolute;top: 0px;right: 0px">
-										<a href="javascript:void(0)" onclick="document.getElementById(\'geo_name_search_result_div\').innerHTML=\'\';" title="Schlie&szlig;en">
-											<img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img>
-										</a>
-									</div>
-									<ul>'.$output.'</ul>';;
+		if ($show) {
+			echo '<div style="position: absolute;top: 0px;right: 0px">
+							<a href="javascript:void(0)" onclick="document.getElementById(\'geo_name_search_result_div\').innerHTML=\'\';" title="Schlie&szlig;en">
+								<img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img>
+							</a>
+						</div>
+						<ul>'.$output.'</ul>';
+		}
 	}
 
 	function show_snippet() {
@@ -9267,7 +9269,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         $table_name = $element[2];
         $formtype = $element[4];
 				$tablename[$table_name]['tablename'] = $table_name;
-				$tablename[$table_name]['attributname'][] = $attributenames[] = pg_quote($attributname);
+				$tablename[$table_name]['attributname'][] = $attributenames[] = $attributname;
 				$form_field_indizes[$attributname] = $i;
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
 				if($this->formvars['embedded'] != ''){
@@ -9477,8 +9479,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 				if(!empty($insert)){
 					if(!$layerset[0]['maintable_is_view'])$sql = "LOCK TABLE " . $table['tablename']." IN SHARE ROW EXCLUSIVE MODE;";
+					$attr = array_keys($insert);
+					array_walk($attr, function(&$attributename, $key){$attributename = pg_quote($attributename);});
 					$sql.= "INSERT INTO " . pg_quote($table['tablename']) . " (";
-					$sql.= implode(', ', array_keys($insert));
+					$sql.= implode(', ', $attr);
 					$sql.= ") VALUES (";
 					$sql.= implode(', ', $insert);
 					$sql.= ")";

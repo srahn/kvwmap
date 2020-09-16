@@ -36,7 +36,7 @@ class database {
 	var $success;
 	var $errormessage;
 
-  function __construct() {
+  function __construct($open = false) {
     global $debug;
 		global $GUI;
 		$this->gui = $GUI;
@@ -57,6 +57,13 @@ class database {
     # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
     # Dazu Fehlerausschriften bearchten.
     $this->blocktransaction=0;
+		if ($open) {
+			$this->host = MYSQL_HOST;
+			$this->user = MYSQL_USER;
+			$this->passwd = MYSQL_PASSWORD;
+			$this->dbName = MYSQL_DBNAME;
+			$this->open();
+		}
   }
 
 	function login_user($username, $passwort, $agreement = ''){

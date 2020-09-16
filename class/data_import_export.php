@@ -1107,15 +1107,21 @@ class data_import_export {
 				WHERE " . $filter;
 		}
 		#echo '<br>sql: ' . $sql;
-		if ($this->formvars['newpathwkt']){	# über Polygon einschränken
-			if ($this->formvars['within'] == 1)$sp_op = 'st_within'; else $sp_op = 'st_intersects';
-			$sql.= " AND ".$sp_op."(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
+		if ($this->formvars['newpathwkt']){
+			# über Polygon einschränken
+			if ($this->formvars['within'] == 1) {
+				$sp_op = 'st_within';
+			}
+			else {
+				$sp_op = 'st_intersects';
+			}
+			$sql .= " AND ".$sp_op."(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
 		}
     $sql.= $orderby;
 		$data_sql = $sql;
 		#echo '<br>Frage Daten ab mit SQL: '. $sql;
-		
-    $temp_table = 'shp_export_'.rand(1, 10000);
+
+		$temp_table = 'shp_export_'.rand(1, 10000);
 
 		# temporäre Tabelle erzeugen, falls Argumentliste durch das SQL zu lang
     $sql = "
@@ -1291,21 +1297,10 @@ class data_import_export {
 				$user->rolle->setConsumeShape($currenttime, $this->formvars['selected_layer_id'], $count);
 			}
 
-			if ($err != ''){
-				$GUI->add_message('error', $err);
-			}
-			else {
-				ob_end_clean();
-				header('Content-type: '.$contenttype);
-				header("Content-disposition:	attachment; filename=".basename($exportfile));
-				#header("Content-Length: ".filesize($exportfile));			# hat bei großen Datenmengen dazu geführt, dass der Download abgeschnitten wird
-				header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-				header('Pragma: public');
-				readfile($exportfile);
-
+			if ($err == '') {
 				// Update timestamp formular_element_types having option export
 				$time_attributes = array();
-				foreach($this->attributes['name'] AS $key => $value) {
+				foreach ($this->attributes['name'] AS $key => $value) {
 					if (
 						$this->attributes['form_element_type'][$value] == 'Time' AND
 						trim(strtolower($this->attributes['options'][$value])) == 'export'
@@ -1324,18 +1319,30 @@ class data_import_export {
 						FROM
 							(" . $data_sql . ") AS data_table
 						WHERE
-							update_table.oid = data_table." . $layerset[0]['maintable'] . "_oid
+							update_table." . $layerset[0]['oid'] . " = data_table." . $layerset[0]['oid'] . "
 					";
 					#echo '<br>sql: ' . $sql;
 					$ret = $layerdb->execSQL($sql, 4, 0);
 					if ($ret[0]) {
-						$GUI->add_message('error', 'Speicherung der Zeitstempel ' . implode(", ", $time_attributes) . ' fehlgeschlagen.<br>' . $ret[1]);
+						$err_msg = 'Speicherung der Zeitstempel ' . implode(", ", $time_attributes) . ' fehlgeschlagen.<br>' . $ret[1];
 					}
 				}
 			}
 		}
-		else{
-			$GUI->add_message('error', 'Abfrage fehlgeschlagen!');
+		else {
+			$err = 'Abfrage fehlgeschlagen!';
+		}
+		if ($err == '') {
+			ob_end_clean();
+			header('Content-type: '.$contenttype);
+			header("Content-disposition:	attachment; filename=".basename($exportfile));
+			#header("Content-Length: ".filesize($exportfile));			# hat bei großen Datenmengen dazu geführt, dass der Download abgeschnitten wird
+			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+			header('Pragma: public');
+			readfile($exportfile);
+		}
+		else {
+			$GUI->add_message('error', $err);
 			$GUI->daten_export();
 		}
 	}

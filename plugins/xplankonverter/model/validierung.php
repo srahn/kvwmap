@@ -696,6 +696,18 @@ class Validierung extends PgObject {
 					'msg' => $msg
 				)
 			);
+		} else {
+			$success = true;
+			$msg = 'Erfolg der Flächenschlussprüfung. Der Plan beinhaltet keine Überlappungen im Flächenschluss.';
+			$validierungsergebnis = new Validierungsergebnis($this->gui);
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $this->konvertierung_id,
+					'validierung_id' => $this->get('id'),
+					'status' => ($success ? 'Erfolg' : 'Warnung'),
+					'msg' => $msg
+				)
+			);
 		}
 
 		if ($success) {
@@ -755,6 +767,18 @@ class Validierung extends PgObject {
 					},
 					$gaps
 				));
+			$validierungsergebnis = new Validierungsergebnis($this->gui);
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $this->konvertierung_id,
+					'validierung_id' => $this->get('id'),
+					'status' => ($success ? 'Erfolg' : 'Warnung'),
+					'msg' => $msg
+				)
+			);
+		} else {
+			$success = true;
+			$msg = 'Erfolg der Flächenschlussprüfung. Der Plan beinhaltet keine Lücken im Flächenschluss.';
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
 			$validierungsergebnis->create(
 				array(
@@ -834,7 +858,7 @@ class Validierung extends PgObject {
 					'validierung_id' => $this->get('id'),
 					'status' => 'Erfolg',
 					'msg' => 'Alle Objekte der Klasse ' . $bedingung['class_name'] . ' entsprechen der Validierung ' . $this->get('name')
-						. ' der Konformitätsbedinung Nr: ' . $konformitaetsbedingung->get('nummer') . ' ' . $konformitaetsbedingung->get('bezeichnung')
+						. ' der Konformitätsbedingung Nr: ' . $konformitaetsbedingung->get('nummer') . ' ' . $konformitaetsbedingung->get('bezeichnung')
 				)
 			);
 		}

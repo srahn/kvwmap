@@ -1,17 +1,19 @@
 <?php
 /*
 * Dynamic ATOM builder for service, dataset and link to metadata
+* https://bauleitplaene-mv.de/kvwmap_dev/index.php?go=Atom&type=dataset&dataset_id=dataset_feed_57839c3a-433f-11e8-88d4-c37bc2367e4d
 */
 class Atom{
 	function __construct($gui) {
 		$this->gui = $gui;
 		$this->used_standard = 'XPlanung'; // e.g. also possible for INSPIRE
-		$this->service_location_root = URL . 'kvwmap_dev/index.php?go=Atom';
+		$this->service_location_root = URL . APPLVERSION . 'index.php?go=Atom&amp;';
+
 		//Namespaces e.g. relevant when creating an INSPIRE service and inspire_dls is needed
 		$this->service_feed_namespaces = array('xmlns="http://www.w3.org/2005/Atom"','xmlns:georss="http://www.georss.org/georss"');
 		$this->service_feed_title = 'Service-Feed des Bauleitplanservers Mecklenburg-Vorpommern';
-		$this->service_feed_metadata_location = 'https://testurl.de/servicefeed_metadata.xml';
-		$this->service_feed_location = $this->service_location_root . '&amp;type=service';
+		$this->service_feed_metadata_location = 'http://www.geodaten-mv.de/geomis/id/5d36d8c3-45df-44aa-845b-baa3c2ce3951';
+		$this->service_feed_location = $this->service_location_root . 'type=service';
 		// service-feed-url currently  = id, as always local
 		$this->service_feed_id = $this->service_feed_location;
 		$this->service_feed_rights = 'none';
@@ -22,13 +24,16 @@ class Atom{
 		$this->dataset_feed_author_name = 'Landkreis Nordwestmecklenburg';
 		$this->dataset_feed_author_email = 'j.debold@nordwestmecklenburg.de';
 		// XML escape & 
-		$this->dataset_feed_location = $this->service_location_root . '&amp;type=dataset&amp;dataset_id=';
+		$this->dataset_feed_location = $this->service_location_root . 'type=dataset&amp;dataset_id=';
 		$this->dataset_feed_metadata_location = 'https://testurl.de/datasetfeed_metadata.xml';
+
+		$this->dataset_feed_metadata_link = 'http://www.geodaten-mv.de/geomis/id/e076fcf0-7ace-4e4a-89c0-7a0f8a48f9a1';
+		$this->dataset_feed_prefix = $this->service_location_root . 'type=dataset&amp;dataset_id=dataset_feed_';
 
 		$this->dataset_feed_rights = 'none';
 		$this->dataset_entry_rights = 'none';
-		//internal location of gml's is currently /var/www/data/$konvertierung_id/xplan_gml/xplan_gml_ + $konvertierung_id
-		$this->dataset_entry_file_location = 'https://gdi-service.de/public/services/lbforstbb/fuek_rp/fuek_rp_25833.gml';
+
+		$this->dataset_entry_location_prefix_gml = URL . APPLVERSION . 'index.php?go=xplankonverter_download_xplan_gml&amp;konvertierung_id=';
 		$this->dataset_entry_file_length = 2032682; // TODO use filesize($this->dataset_entry_file_location); to get filesize
 	}
 
@@ -39,7 +44,6 @@ class Atom{
 	*
 	*/
 	function build_service_feed() {
-		$conn = $this->gui->pgdatabase->dbConn;
 		$sql = "
 			SELECT
 				pa.abkuerzung || ' Nr. ' || p.nummer || ' ' || (p.gemeinde[1]).gemeindename || ' ' || p.name AS anzeigename,
@@ -110,13 +114,11 @@ class Atom{
 */
 			ORDER BY
 				dataset_updated_at
-			LIMIT 10 --for testing
 		";
 		#echo '<p>SQL zur Abfrage der Plandaten für Datafeets: ' . $sql; exit;
-		$result = pg_query($conn, $sql);
+		$result = pg_query($this->gui->pgdatabase->dbConn, $sql);
 		$konvertierungen = pg_fetch_all($result);
 
-		
 		$xml  = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>';
 		$xml .= '<!-- Atom-Feed automatically created by GDI-Service Rostock-->';
 		$xml .= '<feed ';
@@ -191,123 +193,118 @@ class Atom{
 	}
 
 	function build_dataset_feed($gml_id) {
-		$conn = pg_connect('host=85.214.52.246' . ' dbname=kvwmapsp' . ' user=kvwmap' . ' password=nSx5-F8C*53QEcz');
 		$sql = "
-		SELECT
-			pa.abkuerzung || ' Nr. ' || p.nummer || ' ' || (p.gemeinde[1]).gemeindename || ' ' || p.name AS anzeigename,
-			p.gml_id AS gml_id,
-			p.updated_at::timestamp with time zone AS dataset_updated_at,
-			k.output_epsg AS dataset_epsg,
-			k.id AS konvertierung_id,
-			k.planart AS planart,
-			Box2D(p.raeumlichergeltungsbereich)::text AS dataset_bbox,
-			ST_AsText(ST_Envelope(ST_Transform(p.raeumlichergeltungsbereich,4326))) AS dataset_polygon
-		FROM
-			xplan_gml.bp_plan p
-		INNER JOIN
-			xplankonverter.konvertierungen k
-		ON
-			p.konvertierung_id = k.id,
-			xplan_gml.enum_bp_planart pa
-		WHERE
-			k.veroeffentlicht = TRUE
-		AND
-			k.status IN(
-				'GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
-				'INSPIRE-GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
-				'INSPIRE-GML-Erstellung abgebrochen'::xplankonverter.enum_konvertierungsstatus,
-				'in INSPIRE-GML-Erstellung'::xplankonverter.enum_konvertierungsstatus
-			)
-		AND
-			p.planart[1] = pa.wert::text::xplan_gml.bp_planart
-		AND
-			p.gml_id::text = '" . $gml_id . "'
-		UNION
-		SELECT
-			pa.abkuerzung || ' Nr. ' || p.nummer || ' ' || (p.gemeinde[1]).gemeindename || ' ' || p.name AS anzeigename,
-			p.gml_id AS gml_id,
-			p.updated_at::timestamp with time zone AS dataset_updated_at,
-			k.output_epsg AS dataset_epsg,
-			k.id AS konvertierung_id,
-			k.planart AS planart,
-			Box2D(p.raeumlichergeltungsbereich)::text AS dataset_bbox,
-			ST_AsText(ST_Envelope(ST_Transform(p.raeumlichergeltungsbereich,4326))) AS dataset_polygon
-		FROM
-			xplan_gml.fp_plan p
-		INNER JOIN
-			xplankonverter.konvertierungen k
-		ON
-			p.konvertierung_id = k.id,
-			xplan_gml.enum_fp_planart pa
-		WHERE
-			k.veroeffentlicht = TRUE
-		AND
-			k.status IN(
-				'GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
-				'INSPIRE-GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
-				'INSPIRE-GML-Erstellung abgebrochen'::xplankonverter.enum_konvertierungsstatus,
-				'in INSPIRE-GML-Erstellung'::xplankonverter.enum_konvertierungsstatus
-			)
-		AND
-			p.planart = pa.wert::text::xplan_gml.fp_planart
-		AND
-			p.gml_id::text = '" . $gml_id . "'
-		UNION
-		SELECT
-			pa.value|| ' ' || (p.gemeinde[1]).gemeindename || ' ' || p.name || coalesce(' Nr. ' || p.nummer,  '') AS anzeigename,
-			p.gml_id AS gml_id,
-			p.updated_at::timestamp with time zone AS dataset_updated_at,
-			k.output_epsg AS dataset_epsg,
-			k.id AS konvertierung_id,
-			k.planart AS planart,
-			Box2D(p.raeumlichergeltungsbereich)::text AS dataset_bbox,
-			ST_AsText(ST_Envelope(ST_Transform(p.raeumlichergeltungsbereich,4326))) AS dataset_polygon
-		FROM
-			xplan_gml.so_plan p
-		INNER JOIN
-			xplankonverter.konvertierungen k
-		ON
-			p.konvertierung_id = k.id,
-			xplan_gml.so_planart  pa
-		WHERE
-			k.veroeffentlicht = TRUE
-		AND
-			k.status IN(
-				'GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
-				'INSPIRE-GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
-				'INSPIRE-GML-Erstellung abgebrochen'::xplankonverter.enum_konvertierungsstatus,
-				'in INSPIRE-GML-Erstellung'::xplankonverter.enum_konvertierungsstatus
-			)
-		AND
-			p.gml_id::text = '" . $gml_id . "'
-		ORDER BY
-			dataset_updated_at;";
+			SELECT
+				pa.abkuerzung || ' Nr. ' || p.nummer || ' ' || (p.gemeinde[1]).gemeindename || ' ' || p.name AS anzeigename,
+				p.gml_id AS gml_id,
+				to_char(p.updated_at, 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') as updated_at,
+				k.output_epsg AS dataset_epsg,
+				k.id AS konvertierung_id,
+				k.planart AS planart,
+				Box2D(p.raeumlichergeltungsbereich)::text AS dataset_bbox,
+				ST_AsText(ST_Envelope(ST_Transform(p.raeumlichergeltungsbereich,4326))) AS dataset_polygon,
+				(SELECT string_agg(referenzname, '|') FROM (SELECT gml_id, (unnest (externereferenz)).referenzname) AS foo GROUP BY gml_id) AS extref_referenznamen
+			FROM
+				xplan_gml.bp_plan p
+			INNER JOIN
+				xplankonverter.konvertierungen k
+			ON
+				p.konvertierung_id = k.id,
+				xplan_gml.enum_bp_planart pa
+			WHERE
+				k.veroeffentlicht = TRUE
+			AND
+				k.status IN(
+					'GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
+					'INSPIRE-GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
+					'INSPIRE-GML-Erstellung abgebrochen'::xplankonverter.enum_konvertierungsstatus,
+					'in INSPIRE-GML-Erstellung'::xplankonverter.enum_konvertierungsstatus
+				)
+			AND
+				p.planart[1] = pa.wert::text::xplan_gml.bp_planart
+			AND
+				p.gml_id::text = '" . $gml_id . "'
+			UNION
+			SELECT
+				pa.abkuerzung || ' Nr. ' || p.nummer || ' ' || (p.gemeinde[1]).gemeindename || ' ' || p.name AS anzeigename,
+				p.gml_id AS gml_id,
+				to_char(p.updated_at, 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') as updated_at,
+				k.output_epsg AS dataset_epsg,
+				k.id AS konvertierung_id,
+				k.planart AS planart,
+				Box2D(p.raeumlichergeltungsbereich)::text AS dataset_bbox,
+				ST_AsText(ST_Envelope(ST_Transform(p.raeumlichergeltungsbereich,4326))) AS dataset_polygon,
+				(SELECT string_agg(referenzname, '|') FROM (SELECT gml_id, (unnest (externereferenz)).referenzname) AS foo GROUP BY gml_id) AS extref_referenznamen
+			FROM
+				xplan_gml.fp_plan p
+			INNER JOIN
+				xplankonverter.konvertierungen k
+			ON
+				p.konvertierung_id = k.id,
+				xplan_gml.enum_fp_planart pa
+			WHERE
+				k.veroeffentlicht = TRUE
+			AND
+				k.status IN(
+					'GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
+					'INSPIRE-GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
+					'INSPIRE-GML-Erstellung abgebrochen'::xplankonverter.enum_konvertierungsstatus,
+					'in INSPIRE-GML-Erstellung'::xplankonverter.enum_konvertierungsstatus
+				)
+			AND
+				p.planart = pa.wert::text::xplan_gml.fp_planart
+			AND
+				p.gml_id::text = '" . $gml_id . "'
+			UNION
+			SELECT
+				pa.value|| ' ' || (p.gemeinde[1]).gemeindename || ' ' || p.name || coalesce(' Nr. ' || p.nummer,  '') AS anzeigename,
+				p.gml_id AS gml_id,
+				to_char(p.updated_at, 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') as updated_at,
+				k.output_epsg AS dataset_epsg,
+				k.id AS konvertierung_id,
+				k.planart AS planart,
+				Box2D(p.raeumlichergeltungsbereich)::text AS dataset_bbox,
+				ST_AsText(ST_Envelope(ST_Transform(p.raeumlichergeltungsbereich,4326))) AS dataset_polygon,
+				(SELECT string_agg(referenzname, '|') FROM (SELECT gml_id, (unnest (externereferenz)).referenzname) AS foo GROUP BY gml_id) AS extref_referenznamen
+			FROM
+				xplan_gml.so_plan p
+			INNER JOIN
+				xplankonverter.konvertierungen k
+			ON
+				p.konvertierung_id = k.id,
+				xplan_gml.so_planart  pa
+			WHERE
+				k.veroeffentlicht = TRUE
+			AND
+				k.status IN(
+					'GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
+					'INSPIRE-GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
+					'INSPIRE-GML-Erstellung abgebrochen'::xplankonverter.enum_konvertierungsstatus,
+					'in INSPIRE-GML-Erstellung'::xplankonverter.enum_konvertierungsstatus
+				)
+			AND
+				p.gml_id::text = '" . $gml_id . "'
+			ORDER BY
+				updated_at
+		";
 
-		$result = pg_query($conn, $sql);
-		$datasets = pg_fetch_all($result);
-		if(empty($datasets)) {
+		#echo '<br>SQL zur Abfrage der Datensätze: ' . $sql;
+		$result = pg_query($this->gui->pgdatabase->dbConn, $sql);
+		$dataset = pg_fetch_assoc($result);
+		if ($dataset == false) {
 			return '<warning>No feed found under id ' . $gml_id . '</warning>';
 		}
 
 		$xml  = '';
 		$xml  = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>';
 		$xml .= '<!-- Atom-Feed automatically created by GDI-Service Rostock-->';
-		$xml .= '<feed ';
-		foreach($this->dataset_feed_namespaces as $ns) {
-			$xml .= $ns . ' ';
-		}
-		$xml .= '>';
-		$xml .= '<title>Dataset Feed ';
-		$dataset_feed_title = '';
-		foreach($datasets as $dataset) {
-			$dataset_feed_title .=  'Plan ' . $dataset['anzeigename'] . ',';
-		}
-		$xml .= rtrim($dataset_feed_title, ',');
-		$xml .= '</title>';
+		$xml .= '<feed '. implode(' ', $this->dataset_feed_namespaces) . '>';
+		$xml .= '<title>Dataset Feed Plan ' . $dataset['anzeigename'] . '</title>';
 		$xml .= '<subtitle>Dataset of the Bauleitplanserver Mecklenburg-Vorpommern service feed.</subtitle>';
 		$xml .= '<link title="Link on the dataset metadata document" rel="describedby" href="' . $this->dataset_feed_metadata_link . '" hreflang="de" type="application.xml" />';
-		$xml .= '<link title="Link on this dataset atom feed" rel="self" href="' . $this->dataset_feed_location . '" hreflang="de" type="application.xml" />';
+		$xml .= '<link title="Link on this dataset atom feed" rel="self" href="' . $this->dataset_feed_prefix . $gml_id . '" hreflang="de" type="application.xml" />';
 		$xml .= '<link title="Link on the service atom feed" rel="describedby" href="' . $this->service_feed_location . '" hreflang="de" type="application/atom+xml" />';
+
 		/*
 		* If INSPIRE pre-defined download service, add a link to an open search description, e.g.
 		*$xml .= '<link title="Open Search Beschreibung des INSPIRE pre-defined Download Dienstes" rel="search" href="" hreflang="de" type="application/opensearchdescription+xml" />';
@@ -319,26 +316,27 @@ class Atom{
 		$xml .= '<name>' . $this->dataset_feed_author_name . '</name>';
 		$xml .= '<email>' . $this->dataset_feed_author_email . '</email>';
 		$xml .= '</author>';
-		foreach($datasets as $dataset) {
-			$xml .= $this->build_dataset_entry(
-				$dataset['dataset_epsg'],
-				'dataset_feed_' . $dataset['gml_id'],
-				'GML Dataset Bauleitplanserver Plan ' . $dataset['gml_id'] . ' ' . $dataset['anzeigename'],
-				'GML Dataset Bauleitplanserver Plan ' . $dataset['gml_id'], /* is shortened to prevent special characters in xml attribute that are allowed in Anzeigename, e.g. " " */
-				$this->dataset_entry_file_location, /* TODO Figure out how to expose xplan-GML path (folder-structure with konvertierung_id, currently in upload/xplankonverter/$konvertierung_id/... TODO perhaps also check if GML exists here */
-				$this->dataset_entry_file_length,
-				$dataset['dataset_bbox'],
-				$this->dataset_entry_rights,
-				'This feed-entry contains a link to a standardized ' . $this->used_standard . ' GML-file. The overarching service feed and relevant metadata can be found in the feed links.',
-				$dataset['dataset_updated_at'],
-				$dataset['dataset_polygon']
-			);
-		}
+
+		$xml .= $this->build_dataset_entry(
+			$dataset['dataset_epsg'],
+			'dataset_feed_' . $dataset['gml_id'],
+			'GML Dataset Bauleitplanserver Plan ' . $dataset['gml_id'] . ' ' . $dataset['anzeigename'],
+			'GML Dataset Bauleitplanserver Plan ' . $dataset['gml_id'], /* is shortened to prevent special characters in xml attribute that are allowed in Anzeigename, e.g. " " */
+			$dataset['konvertierung_id'],
+			$dataset['dataset_bbox'],
+			$this->dataset_entry_rights,
+			'This feed-entry contains a link to a standardized ' . $this->used_standard . ' GML-file. The overarching service feed and relevant metadata can be found in the feed links.',
+			$dataset['updated_at'],
+			$dataset['dataset_polygon'],
+			$dataset['extref_referenznamen']
+		);
 		$xml .= '</feed>';
 		return $xml;
 	}
 
-	function build_dataset_entry($dataset_feed_epsg, $dataset_entry_id, $dataset_entry_title, $dataset_entry_title_link, $dataset_entry_file_location, $dataset_entry_file_length, $dataset_bbox, $dataset_entry_rights, $dataset_entry_summary,$dataset_entry_updated_at, $dataset_feed_georss_polygon) {
+	function build_dataset_entry($dataset_feed_epsg, $dataset_entry_id, $dataset_entry_title, $dataset_entry_title_link, $konvertierung_id, $dataset_bbox, $dataset_entry_rights, $dataset_entry_summary, $updated_at, $dataset_feed_georss_polygon, $extref_referenznamen) {
+		$parts = explode('_', APPLVERSION);
+		$dev = (trim(end($parts),'/') == 'dev' ? '_dev' : '');
 		$xml  = '';
 		$xml .= '<entry>';
 		$xml .= '<category label="EPSG:' . $dataset_feed_epsg . '" term="http://www.opengis.net/def/crs/EPSG/0/' . $dataset_feed_epsg . '"/>';
@@ -349,17 +347,19 @@ class Atom{
 		$dataset_bbox = str_replace("(","",$dataset_bbox);
 		$dataset_bbox = str_replace(")","",$dataset_bbox);
 
-		$xml .= '<link title="' . $dataset_entry_title_link . '" rel="alternate" href="' . $dataset_entry_file_location . '" hreflang="de" length="' . $dataset_entry_file_length . '" bbox="' . $dataset_bbox . '" type="application/gml+xml"/>';
+		$xml .= '<link title="' . $dataset_entry_title_link . '" rel="alternate" href="' . URL . 'download' . $dev . '/xplan_' . $konvertierung_id . '.gml" hreflang="de" length="' . filesize(SHAPEPATH . 'upload/xplankonverter/' . $konvertierung_id . '/xplan_gml/xplan_' . $konvertierung_id . '.gml') . '" bbox="' . $dataset_bbox . '" type="application/gml+xml"/>';
+		foreach (explode('|', $extref_referenznamen) AS $extref_referenzname) {
+			$xml .= '<link title="Plandokument mit externer Referenz" rel="alternate" href="' . URL . 'download' . $dev . '/' . $extref_referenznamen . '" hreflang="de" length="' . (file_exists(SHAPEPATH . 'xplankonverter/plaene/' . $extref_referenzname) ? filesize(SHAPEPATH . 'xplankonverter/plaene/' . $extref_referenzname) : '0') . '" bbox="' . $dataset_bbox . '" type="application/pdf"/>';
+		}
 		$xml .= '<rights>' . $dataset_entry_rights . '</rights>';
 		$xml .= '<summary>' . $dataset_entry_summary . '</summary>';
 		$xml .= '<title>' . $dataset_entry_title . '</title>';
-		$xml .= '<updated>' . date("c", $dataset_entry_updated_at) . '</updated>';
+		$xml .= '<updated>' . $updated_at . '</updated>';
 		$dataset_feed_georss_polygon = str_replace(",","",$dataset_feed_georss_polygon);
 		$dataset_feed_georss_polygon = str_replace("POLYGON","",$dataset_feed_georss_polygon);
 		$dataset_feed_georss_polygon = str_replace("(","",$dataset_feed_georss_polygon);
 		$dataset_feed_georss_polygon = str_replace(")","",$dataset_feed_georss_polygon);
 		$xml .= '<georss:polygon>' . $dataset_feed_georss_polygon . '</georss:polygon>';
-
 		$xml .= '</entry>';
 		return $xml;
 	}
