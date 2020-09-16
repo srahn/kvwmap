@@ -320,7 +320,7 @@ function go_switch($go, $exit = false) {
 			case 'get_legend' : {
 				$GUI->loadMap('DataBase');
 				# Parameter $scale in Data ersetzen
-				for($i = 0; $i < count($GUI->layers_replace_scale); $i++){
+				for($i = 0; $i < @count($GUI->layers_replace_scale); $i++){
 					$GUI->layers_replace_scale[$i]->set('data', str_replace('$scale', $GUI->map_scaledenom, $GUI->layers_replace_scale[$i]->data));
 				}
 				$GUI->map->draw();			# sonst werden manche Klassenbilder nicht generiert
