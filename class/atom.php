@@ -44,8 +44,6 @@ class Atom{
 	*
 	*/
 	function build_service_feed() {
-		// limit for testing. Ist nicht standardkonform aber für tests ganz gut wenn man die Anzahl der Entries im Service Atom Feed begrenzen kann mit &LIMIT=Zahl in der URL
-		$limit = ($this->gui->formvars['limit'] != '' ? 'LIMIT ' . $this->gui->formvars['limit'] : '');
 		$sql = "
 			SELECT
 				pa.abkuerzung || ' Nr. ' || p.nummer || ' ' || (p.gemeinde[1]).gemeindename || ' ' || p.name AS anzeigename,
@@ -61,14 +59,13 @@ class Atom{
 				xplan_gml.enum_bp_planart pa ON p.planart[1] = pa.wert::text::xplan_gml.bp_planart
 			WHERE
 				k.veroeffentlicht = TRUE
-/*			AND
+			AND
 				k.status IN(
 					'GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
 					'INSPIRE-GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
 					'INSPIRE-GML-Erstellung abgebrochen'::xplankonverter.enum_konvertierungsstatus,
 					'in INSPIRE-GML-Erstellung'::xplankonverter.enum_konvertierungsstatus
 				)
-*/
 			UNION
 			SELECT
 				pa.abkuerzung || ' Nr. ' || p.nummer || ' ' || (p.gemeinde[1]).gemeindename || ' ' || p.name AS anzeigename,
@@ -84,14 +81,13 @@ class Atom{
 				xplan_gml.enum_fp_planart pa ON p.planart = pa.wert::text::xplan_gml.fp_planart
 			WHERE
 				k.veroeffentlicht = TRUE
-/*			AND
+				AND
 				k.status IN(
 					'GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
 					'INSPIRE-GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
 					'INSPIRE-GML-Erstellung abgebrochen'::xplankonverter.enum_konvertierungsstatus,
 					'in INSPIRE-GML-Erstellung'::xplankonverter.enum_konvertierungsstatus
 				)
-*/
 			UNION
 			SELECT
 				(p.planart).value|| ' ' || (p.gemeinde[1]).gemeindename || ' ' || p.name || coalesce(' Nr. ' || p.nummer,  '') AS anzeigename,
@@ -106,17 +102,15 @@ class Atom{
 				xplankonverter.konvertierungen k ON p.konvertierung_id = k.id
 			WHERE
 				k.veroeffentlicht = TRUE
-/*			AND
+				AND
 				k.status IN(
 					'GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
 					'INSPIRE-GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
 					'INSPIRE-GML-Erstellung abgebrochen'::xplankonverter.enum_konvertierungsstatus,
 					'in INSPIRE-GML-Erstellung'::xplankonverter.enum_konvertierungsstatus
 				)
-*/
 			ORDER BY
 				dataset_updated_at
-			" . $limit . "
 		";
 		#echo '<p>SQL zur Abfrage der Plandaten für Datafeets: ' . $sql; exit;
 		$result = pg_query($this->gui->pgdatabase->dbConn, $sql);
@@ -206,7 +200,7 @@ class Atom{
 				k.planart AS planart,
 				Box2D(p.raeumlichergeltungsbereich)::text AS dataset_bbox,
 				ST_AsText(ST_Envelope(ST_Transform(p.raeumlichergeltungsbereich,4326))) AS dataset_polygon,
-				(SELECT string_agg(referenzurl, '|') FROM (SELECT gml_id, (unnest (externereferenz)).referenzurl) AS foo GROUP BY gml_id) AS extref_referenzurls
+				(SELECT string_agg(referenzname, '|') FROM (SELECT gml_id, (unnest (externereferenz)).referenzname) AS foo GROUP BY gml_id) AS extref_referenznamen
 			FROM
 				xplan_gml.bp_plan p
 			INNER JOIN
@@ -216,8 +210,8 @@ class Atom{
 				xplan_gml.enum_bp_planart pa
 			WHERE
 				k.veroeffentlicht = TRUE
-			AND
-				k.status IN (
+				AND
+				k.status IN(
 					'GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
 					'INSPIRE-GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
 					'INSPIRE-GML-Erstellung abgebrochen'::xplankonverter.enum_konvertierungsstatus,
@@ -237,7 +231,7 @@ class Atom{
 				k.planart AS planart,
 				Box2D(p.raeumlichergeltungsbereich)::text AS dataset_bbox,
 				ST_AsText(ST_Envelope(ST_Transform(p.raeumlichergeltungsbereich,4326))) AS dataset_polygon,
-				(SELECT string_agg(referenzurl, '|') FROM (SELECT gml_id, (unnest (externereferenz)).referenzurl) AS foo GROUP BY gml_id) AS extref_referenzurls
+				(SELECT string_agg(referenzname, '|') FROM (SELECT gml_id, (unnest (externereferenz)).referenzname) AS foo GROUP BY gml_id) AS extref_referenznamen
 			FROM
 				xplan_gml.fp_plan p
 			INNER JOIN
@@ -268,7 +262,7 @@ class Atom{
 				k.planart AS planart,
 				Box2D(p.raeumlichergeltungsbereich)::text AS dataset_bbox,
 				ST_AsText(ST_Envelope(ST_Transform(p.raeumlichergeltungsbereich,4326))) AS dataset_polygon,
-				(SELECT string_agg(referenzurl, '|') FROM (SELECT gml_id, (unnest (externereferenz)).referenzurl) AS foo GROUP BY gml_id) AS extref_referenzurls
+				(SELECT string_agg(referenzname, '|') FROM (SELECT gml_id, (unnest (externereferenz)).referenzname) AS foo GROUP BY gml_id) AS extref_referenznamen
 			FROM
 				xplan_gml.so_plan p
 			INNER JOIN
@@ -331,13 +325,13 @@ class Atom{
 			'This feed-entry contains a link to a standardized ' . $this->used_standard . ' GML-file. The overarching service feed and relevant metadata can be found in the feed links.',
 			$dataset['updated_at'],
 			$dataset['dataset_polygon'],
-			$dataset['extref_referenzurls']
+			$dataset['extref_referenznamen']
 		);
 		$xml .= '</feed>';
 		return $xml;
 	}
 
-	function build_dataset_entry($dataset_feed_epsg, $dataset_entry_id, $dataset_entry_title, $dataset_entry_title_link, $konvertierung_id, $dataset_bbox, $dataset_entry_rights, $dataset_entry_summary, $updated_at, $dataset_feed_georss_polygon, $extref_referenzurls) {
+	function build_dataset_entry($dataset_feed_epsg, $dataset_entry_id, $dataset_entry_title, $dataset_entry_title_link, $konvertierung_id, $dataset_bbox, $dataset_entry_rights, $dataset_entry_summary, $updated_at, $dataset_feed_georss_polygon, $extref_referenznamen) {
 		$parts = explode('_', APPLVERSION);
 		$dev = (trim(end($parts),'/') == 'dev' ? '_dev' : '');
 		$xml  = '';
@@ -351,9 +345,8 @@ class Atom{
 		$dataset_bbox = str_replace(")","",$dataset_bbox);
 
 		$xml .= '<link title="' . $dataset_entry_title_link . '" rel="alternate" href="' . URL . 'download' . $dev . '/xplan_' . $konvertierung_id . '.gml" hreflang="de" length="' . filesize(SHAPEPATH . 'upload/xplankonverter/' . $konvertierung_id . '/xplan_gml/xplan_' . $konvertierung_id . '.gml') . '" bbox="' . $dataset_bbox . '" type="application/gml+xml"/>';
-		foreach (explode('|', $extref_referenzurls) AS $extref_referenzurl) {
-			$extref = pathinfo($extref_referenzurl);
-			$xml .= '<link title="Plandokument mit externer Referenz" rel="alternate" href="' . $extref_referenzurl . '" hreflang="de" length="' . (file_exists(SHAPEPATH . 'xplankonverter/plaene/' . $extref['basename']) ? filesize(SHAPEPATH . 'xplankonverter/plaene/' . $extref['basename']) : '0') . '" bbox="' . $dataset_bbox . '" type="application/pdf"/>';
+		foreach (explode('|', $extref_referenznamen) AS $extref_referenzname) {
+			$xml .= '<link title="Plandokument mit externer Referenz" rel="alternate" href="' . URL . 'download' . $dev . '/' . $extref_referenznamen . '" hreflang="de" length="' . (file_exists(SHAPEPATH . 'xplankonverter/plaene/' . $extref_referenzname) ? filesize(SHAPEPATH . 'xplankonverter/plaene/' . $extref_referenzname) : '0') . '" bbox="' . $dataset_bbox . '" type="application/pdf"/>';
 		}
 		$xml .= '<rights>' . $dataset_entry_rights . '</rights>';
 		$xml .= '<summary>' . $dataset_entry_summary . '</summary>';
