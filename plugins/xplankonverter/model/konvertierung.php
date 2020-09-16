@@ -58,7 +58,7 @@ class Konvertierung extends PgObject {
 	public static function find_by_document($gui, $document) {
 		$parts = explode('_', APPLVERSION);
 		$dev = (trim(end($parts),'/') == 'dev' ? '_dev' : '');
-		$path = pathinfo($_REQUEST['document']);
+		$path = pathinfo($document);
 		$konvertierung = new Konvertierung($gui);
 		switch (strToLower($path['extension'])) {
 			case 'gml' :
@@ -76,14 +76,14 @@ class Konvertierung extends PgObject {
 						(
 							SELECT
 								k.*,
-								(unnest(p.externereferenz)).referenzname
+								(unnest(p.externereferenz)).referenzurl
 							FROM
 								xplan_gml.bp_plan p JOIN
 								xplankonverter.konvertierungen k ON p.konvertierung_id = k.id
 						) sub
 					WHERE
-						sub.referenzname = '" . $path['basename'] . "' AND
-						sub.veroeffentlicht
+						sub.referenzurl LIKE '%" . $path['basename'] . "%' AND
+						" . ($_SESSION['angemeldet'] ? 'true' : "sub.veroeffentlicht") . "
 				";
 				#echo '<br>Sql zur Abfrage der Konvertierung: ' . $sql;
 				$rows = $konvertierung->getSQLResults($sql)[0];
@@ -91,6 +91,31 @@ class Konvertierung extends PgObject {
 				$konvertierung->data = $rows[0];
 				$konvertierung->exportfile = '/var/www/data' . $dev . '/xplankonverter/plaene' . $document;
 				$konvertierung->contenttype = 'application/pdf';
+				return $konvertierung;
+			case 'jpg' :
+				$filename = get_name_from_thump($path['basename']);
+				$sql = "
+					SELECT
+						*
+					FROM
+						(
+							SELECT
+								k.*,
+								(unnest(p.externereferenz)).referenzurl
+							FROM
+								xplan_gml.bp_plan p JOIN
+								xplankonverter.konvertierungen k ON p.konvertierung_id = k.id
+						) sub
+					WHERE
+						right(sub.referenzurl, position('/' in reverse(sub.referenzurl)) - 1) LIKE '" . $filename . "%' AND
+						" . ($_SESSION['angemeldet'] ? 'true' : "sub.veroeffentlicht") . "
+				";
+				#echo '<br>Sql zur Abfrage der Konvertierung: ' . $sql;
+				$rows = $konvertierung->getSQLResults($sql)[0];
+				if (count($rows) == 0) return false;
+				$konvertierung->data = $rows[0];
+				$konvertierung->exportfile = '/var/www/data' . $dev . '/xplankonverter/plaene' . $document;
+				$konvertierung->contenttype = 'image/jpg';
 				return $konvertierung;
 			default :
 				return false;
@@ -113,6 +138,7 @@ class Konvertierung extends PgObject {
 		$this->debug->show('Create new konvertierung with sql: ' . $sql, Konvertierung::$write_debug);
 		$query = pg_query($this->database->dbConn, $sql);
 		$oid = pg_last_oid($query);
+		echo '<br>oid: ' . $oid;
 		if (empty($oid)) {
 			$this->lastquery = $query;
 		}
@@ -131,6 +157,7 @@ class Konvertierung extends PgObject {
 			$this->set($this->identifier, $row[$this->identifier]);
 		}
 		$this->debug->show('Konvertierung created with ' . $this->identifier . ': '. $this->get($this->identifier), Konvertierung::$write_debug);
+		echo '<br>return identifier: ' . $this->identifier . ': ' . $this->get($this->identifier);
 		return $this->get($this->identifier);
 	}
 
@@ -530,11 +557,15 @@ class Konvertierung extends PgObject {
 		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'detaillierte_requires_bedeutung');
 		$validierung->konvertierung_id = $this->get('id');
 		$bereiche = $this->plan->get_bereiche();
-		foreach($bereiche AS $bereich) {
+		foreach ($bereiche AS $bereich) {
 			$validierung->detaillierte_requires_bedeutung($bereich);
 		}
 
-		if(!empty($regeln)){
+		if (count($bereiche) == 0) {
+			$this->gui->add_message('warning', 'Die Validierung liefert kein Ergebnis, weil zum Plan keine Bereiche hinzugefügt wurden!');
+		}
+
+		if (!empty($regeln)) {
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'regel_existiert');
 			$validierung->konvertierung_id = $this->get('id');
 			if ($validierung->regel_existiert($regeln)) {

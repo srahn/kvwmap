@@ -2026,6 +2026,32 @@ function str_replace_last($search , $replace, $str) {
   return $str;
 }
 
+/*
+* Liefert den Originalnamen vom Namen der Thumb-Datei
+*/
+function get_name_from_thump($thumb) {
+	return before_last($thumb, '_thumb.jpg');
+}
+
+/*
+* Funktion liefert Teilstring von $txt vor dem letzten vorkommen von $delimiter
+* Kann z.B. verwendet werden zum extrahieren der Originaldatei vom Namen eines Thumpnails
+* z.B. before_last('MeineDatei_abc_1.Ordnung-345863_thump.jpg', '_') => MeineDatei_abc_1.Ordnung-345863
+* @param string $txt Der Text von dem der Teilstring extrahiert werden soll.
+* @param string $delimiter Der Text, der den Text trennt in davor und danach.
+* @return string Der Teilstring vor dem letzten Vorkommen von $delimiter
+* oder ein Leerstring wenn $txt $delimiter nicht enthält oder $delimiter leer ist
+*/
+function before_last($txt, $delimiter) {
+	#echo '<br>Return the part of ' . $txt . ' before the last occurence of ' . $delimiter;
+	if (!$delimiter) {
+		return '';
+	}
+	$parts = explode($delimiter, $txt);
+	array_pop($parts);
+	return implode($delimiter , $parts);
+}
+
 function attributes_from_select($sql) {
 	include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
 	$parser = new PHPSQLParser($sql, true);
