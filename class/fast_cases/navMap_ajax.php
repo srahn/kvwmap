@@ -212,6 +212,8 @@ class GUI {
 				$layerdb=$this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 				$data = $layer[0]['Data'];
 				if ($data != ''){
+					# ersetzen von $scale
+					$data = str_replace('$scale', 1000, $data);
 					# suchen nach dem ersten Vorkommen von using
 					$pos = strpos(strtolower($data),'using ');
 					# Abschneiden der uing Wörter im Datastatement wenn unique verwendet wurde
@@ -440,7 +442,7 @@ class GUI {
 			}
 			$layer->set('connection', 
 				replace_params(
-					$layerset[connection],
+					$layerset['connection'],
 					rolle::$layer_params,
 					$this->user->id,
 					$this->Stelle->id,
@@ -485,7 +487,12 @@ class GUI {
 
 		if ($layerset['Datentyp']=='3') {
 			if($layerset['transparency'] != ''){
-				$layer->set('opacity',$layerset['transparency']);				
+				if (MAPSERVERVERSION > 700) {
+					$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
+				}
+				else{
+					$layer->set('opacity',$layerset['transparency']);
+				}		
 			}
 			if ($layerset['tileindex']!='') {
 				$layer->set('tileindex',SHAPEPATH.$layerset['tileindex']);
@@ -502,6 +509,9 @@ class GUI {
 		else {
 			# Vektorlayer
 			if ($layerset['Data'] != '') {
+				if(strpos($layerset['Data'], '$scale') !== false){
+					$this->layers_replace_scale[] =& $layer;
+				}				
 				$layer->set('data', $layerset['Data']);
 			}
 
@@ -1574,11 +1584,15 @@ class GUI {
       $this->scaleMap(MINSCALE);
 			$this->saveMap('');
     }
+		# Parameter $scale in Data ersetzen
+		for($i = 0; $i < count($this->layers_replace_scale); $i++){
+			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
+		}		
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
-    $filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
-    $this->image_map->saveImage(IMAGEPATH.$filename);
-    $this->img['hauptkarte'] = 'data:image/jpg;base64,'.base64_encode(file_get_contents(IMAGEPATH.$filename));
-    $this->debug->write("Name der Hauptkarte: ".$this->img['hauptkarte'],4);
+		ob_start();
+		$this->image_map->saveImage();
+		$image = ob_get_clean();
+    $this->img['hauptkarte'] = 'data:image/jpg;base64,'.base64_encode($image);
 
 		if($this->formvars['go'] != 'navMap_ajax'){
 			$this->legende = $this->create_dynamic_legend();
@@ -1587,7 +1601,7 @@ class GUI {
 		else{
 			# Zusammensetzen eines Layerhiddenstrings, in dem die aktuelle Sichtbarkeit aller aufgeklappten Layer gespeichert ist um damit bei Bedarf die Legende neu zu laden
 			for($i = 0; $i < $this->layerset['anzLayer']; $i++) {
-				$layer=&$this->layerset[$i];
+				$layer=&$this->layerset['list'][$i];
 				if($layer['requires'] == ''){
 					if($this->check_layer_visibility($layer))$layerhiddenflag = '0';
 					else $layerhiddenflag = '1';
@@ -1600,11 +1614,10 @@ class GUI {
 		$this->map_scaledenom = $this->map->scaledenom;
     $this->switchScaleUnitIfNecessary();
     $img_scalebar = $this->map->drawScaleBar();
-    $filename = $this->map_saveWebImage($img_scalebar,'png');
-    $newname = $this->user->id.basename($filename);
-    rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-    $this->img['scalebar'] = 'data:image/jpg;base64,'.base64_encode(file_get_contents(IMAGEPATH.$newname));
-    $this->debug->write("Name des Scalebars: ".$this->img['scalebar'],4);
+		ob_start();
+		$img_scalebar->saveImage();
+		$image = ob_get_clean();
+    $this->img['scalebar'] = 'data:image/jpg;base64,'.base64_encode($image);
 		$this->calculatePixelSize();
 		$this->drawReferenceMap();
   }
@@ -1668,11 +1681,10 @@ class GUI {
 				$this->reference_map->extent->project($projFROM, $projTO);
 			}
       $img_refmap = $this->reference_map->drawReferenceMap();
-      $filename = $this->map_saveWebImage($img_refmap,'png');
-      $newname = $this->user->id.basename($filename);
-      rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-      $this->img['referenzkarte'] = 'data:image/jpg;base64,'.base64_encode(file_get_contents(IMAGEPATH.$newname));
-      $this->debug->write("Name der Referenzkarte: ".$this->img['referenzkarte'],4);
+      ob_start();
+			$img_refmap->saveImage();
+			$image = ob_get_clean();
+      $this->img['referenzkarte'] = 'data:image/jpg;base64,'.base64_encode($image);
       $this->Lagebezeichung=$this->getLagebezeichnung($this->user->rolle->epsg_code);
     }
 	}
@@ -2794,7 +2806,6 @@ class pgdatabase {
 	* @return boolean, True if success or set an error message in $this->err_msg and return false when fail to find the credentials or open the connection
 	*/
   function open($connection_id = 0) {
-		echo '<p>open Database with connection_id: ' . $connection_id;
 		if ($connection_id == 0) {
 			# get credentials from object variables
 			$connection_string = $this->format_pg_connection_string($this->get_object_credentials());
@@ -3332,7 +3343,7 @@ class db_mapObj{
 				END as connection,
 				l.printconnection,
 				l.connectiontype,
-				l.classitem, l.styleitem, l.classification, l.filteritem,
+				l.classitem, l.styleitem, l.classification, 
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				l.duplicate_from_layer_id,

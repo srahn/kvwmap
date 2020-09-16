@@ -1,7 +1,6 @@
 <?
-
 	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
-  
+ 
 	$checkbox_names = '';
 	$columnname = '';
 	$geom_tablename = '';
@@ -10,6 +9,12 @@
 	$privileg = '';
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
+
+	if (!$invisible_attributes) {
+		$invisible_attributes = array();
+		$invisible_attributes[$layer['Layer_ID']] = array();
+	};
+
 	$size = 16;
 	$select_width = 'width: 100%;'; 
 	if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
@@ -38,8 +43,12 @@
 	<tr>
 		<? if (!$this->user->rolle->visually_impaired AND $anzObj > 0) { ?>
 		<td align="right" valign="top" style="padding: 0 10 0 0">
-		<?	if($this->search == true AND $this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
-				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
+		<?	
+			if($this->search == true AND $this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
+				if($this->formvars['backlink'] == ''){
+					$this->formvars['backlink'] = 'javascript:currentform.go.value=\'get_last_search\';currentform.submit();';
+				}
+				echo '<a href="'.$this->formvars['backlink'].'" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
 			} ?>
 		</td>
 		<td align="right" valign="top" style="padding: 0 10 0 0">
@@ -175,7 +184,7 @@
 				<tr>
 					<td style="line-height: 1px; ">
 						<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>"> 
-						<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't')echo 'no_edit'; ?>" name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
+						<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't')echo 'no_edit'; ?>" name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID']; ?>">&nbsp;
 					</td>
 				</tr>
 		  </table>

@@ -317,22 +317,30 @@ function resizemap2window(){
 *		]);
 */
 function message(messages, t_visible, t_fade, css_top, confirm_value) {
+	console.log('Show Message: %o: ', messages);
 	confirm_value = confirm_value || 'ok';
+	var messageTimeoutID;
 	var msgBoxDiv = $('#message_box');
 	if (msgBoxDiv.is(':visible')) {
+		console.log('msgBox is visible for message: %o', messages);
+		$('#message_box').stop().show();
 		msgBoxDiv.stop().css('opacity', '1').show();
 	}
 	else {
 		msgBoxDiv.html('');
 	}
-	if(document.getElementById('messages') == null)msgBoxDiv.append('<div id="messages"></div>');
+	if (document.getElementById('messages') == null) {
+    msgBoxDiv.append('<div id="messages"></div>');
+  }
 	var msgDiv = $('#messages');
 	var confirm = false;
 
 	t_visible   = (typeof t_visible   !== 'undefined') ? t_visible   : 1000;		// Zeit, die die Message-Box komplett zu sehen ist
 	t_fade   = (typeof t_fade   !== 'undefined') ? t_fade   : 2000;							// Dauer des Fadings
 	
-	if(typeof css_top  !== 'undefined')msgBoxDiv.css('top', css_top);
+	if(typeof css_top  !== 'undefined') {
+		msgBoxDiv.css('top', css_top);
+	}
 	
 	types = {
 		'notice': {
@@ -382,8 +390,13 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 	}
 
 	if (document.getElementById('message_ok_button') == null) {		// wenn kein OK-Button da ist, ausblenden
-		setTimeout(function() {msgBoxDiv.fadeOut(t_fade);}, t_visible);
+    messageTimeoutID = setTimeout(function() { console.log('start to fade out for message: %o', messages); msgBoxDiv.fadeOut(t_fade); }, t_visible);
 	}
+  else {
+		clearTimeout(messageTimeoutID);
+    $('#message_box').stop().fadeIn();
+  }
+
 }
 
 function onload_functions() {
@@ -550,6 +563,13 @@ function urlstring2formdata(formdata, string){
 		formdata.append(el[0], el[1]);	
 	}
 	return formdata;
+}
+
+function formdata2urlstring(formdata){
+	for(var pair of formdata.entries()){
+		url = '&' + encodeURIComponent(pair[0]) + '=' + encodeURIComponent(pair[1]);
+	}
+	return url;
 }
 	 
 function get_map_ajax(postdata, code2execute_before, code2execute_after){

@@ -104,8 +104,15 @@ function update_format(){
 	}
 }
 
-function data_export(){
-	if(document.GUI.selected_layer_id.value != ''){
+function data_export() {
+	message([{type: 'info', msg: 'Der Download wird automatisch gestartet. Bitte warten.'}]);
+	if(document.getElementById('exporttimestamp').value == 1){
+		message([{type: 'info', msg: 'Die Zeitstempel werden automatisch gesetzt und die Datensätze damit als heruntergeladen gekennzeichnet.'}]);
+	}
+	if(document.GUI.download_documents){
+		message([{type: 'info', msg: 'Dokumente wurden ' + (document.GUI.download_documents.checked ? 'mit' : 'nicht mit') + ' heruntergeladen!'}]);
+	}
+	if (document.GUI.selected_layer_id.value != ''){
 		if(document.GUI.anzahl == undefined && document.GUI.newpathwkt.value == '' && document.GUI.newpath.value == ''){
 			var sure = confirm('<? echo $strSure; ?>');
 			if(sure == false)return;
@@ -118,7 +125,7 @@ function data_export(){
 		document.GUI.go_plus.value = '';
 	}
 	else{
-		alert('Bitte wählen Sie ein Thema aus.');
+		message([{type: 'info', msg: 'Wählen Sie erst ein Thema zum exportieren aus.'}]);
 	}
 }
 
@@ -168,7 +175,7 @@ $j=0;
 			if ($this->formvars['sql_' . $this->formvars['selected_layer_id']] != '') { ?>
 				<div style="margin-top:30px; text-align:center;">
 					<span class="fett"><? echo $this->formvars['anzahl']; ?> <? if ($this->formvars['anzahl']==1) { echo $strRecordFromGLE; } else { echo $strRecordsFromGLE; } ?></span>
-					<input type="hidden" name="sql_<? echo $this->formvars['selected_layer_id']; ?>" value="<? echo stripslashes($this->formvars['sql_'.$this->formvars['selected_layer_id']]); ?>">
+					<input type="hidden" name="sql_<? echo $this->formvars['selected_layer_id']; ?>" value="<? echo htmlspecialchars($this->formvars['sql_'.$this->formvars['selected_layer_id']]); ?>">
 					<input type="hidden" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>">
 				</div><?
 			} ?>
@@ -258,6 +265,7 @@ $j=0;
 							for($i = 0; $i < $floor+$r; $i++) {
 								if(!in_array($this->data_import_export->attributes['form_element_type'][$j], ['dynamicLink']) AND $this->data_import_export->attributes['type'][$j] != 'unknown'){
 									if($this->data_import_export->attributes['group'][$j] != '') $groupnames = true;
+									if($this->data_import_export->attributes['form_element_type'][$j] == 'Time' AND $this->data_import_export->attributes['options'][$j] == 'export') $exporttimestamp = true;
 									if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument'){$document_attributes = true; $document_ids[] = $j;} ?>
 									<div style="padding: 4px;
 								<? 	if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom']){
@@ -311,10 +319,14 @@ $j=0;
 					</table>
 				</div><?
 			} ?>
+			
+			<input type="hidden" id="exporttimestamp" value="<? echo $exporttimestamp; ?>">
 
 			<div style="margin-top:30px; margin-bottom:10px; text-align: center;">
-				<input name="cancel" type="button" onclick="home();" value="<? echo $strButtonCancel; ?>">
-				<input name="create" type="button" onclick="data_export();" value="<? echo $strButtonGenerateShapeData; ?>">
+				<input name="cancel" type="button" onclick="home();" value="<? echo $strButtonCancel; ?>"><?php
+					if ($this->data_import_export->formvars['selected_layer_id'] != '') { ?>
+						<input name="create" type="button" onclick="data_export();" value="<? echo $strButtonGenerateShapeData; ?>"><?php
+					} ?>
 			</div>
 
 		</td>

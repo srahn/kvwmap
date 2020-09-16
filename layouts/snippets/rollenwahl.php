@@ -223,7 +223,7 @@ if ($this->Fehlermeldung!='') {
 											<span data-tooltip="<? echo $strHintLanguage; ?>"></span>
 										</td>
 									</tr>
-									<tr <? if(count($this->guifiles) + count($this->customguifiles) < 2){echo 'style="display: none"';} ?>>
+									<tr <? if(count($this->guifiles) < 2){echo 'style="display: none"';} ?>>
 										<td class="rollenwahl-option-header">
 											<? echo $strGUI; ?>:
 										</td>

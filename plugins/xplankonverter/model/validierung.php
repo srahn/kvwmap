@@ -179,9 +179,10 @@ class Validierung extends PgObject {
 		else {
 			$sql = str_ireplace(
 				'where',
-				"WHERE " . $geometry_col . " IS NULL AND ",
+				"WHERE " . $geometry_col . " IS NULL AND (",
 				$sql
 			);
+			$sql .= ')';
 		}
 		$this->debug->show('<br>sql mit where Klausel: ' . $sql, Validierung::$write_debug);
 
@@ -190,6 +191,7 @@ class Validierung extends PgObject {
 		$this->debug->show('<br>Validiere ob geometrie_vorhanden mit sql:<br>' . $sql, Validierung::$write_debug);
 
 		$result = pg_query($this->database->dbConn, $sql);
+		$regel = Regel::find_by_id($this->gui, 'id', $this->konvertierung_id);
 
 		while ($row = pg_fetch_assoc($result)) {
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
@@ -200,7 +202,7 @@ class Validierung extends PgObject {
 					'status' => 'Warnung',
 					'regel_id' => $regel_id,
 					'shape_gid' => $row['gid'],
-					'msg' => 'Objekt mit gid=' . $row['gid'] . ' hat keine Geometrie.'
+					'msg' => 'Objekt mit gid: ' . $row['gid']. ' in Shape: ' . $regel->get_shape_table_name() . ' hat keine Geometrie.'
 				)
 			);
 			$geometrie_vorhanden = false;
@@ -299,7 +301,7 @@ class Validierung extends PgObject {
 						'status' => 'Fehler',
 						'regel_id' => $regel->get('id'),
 						'shape_gid' => $row['gid'],
-						'msg' => 'Regel: ' . $regel->get('name') . '. Objekt mit gid=' . $row['gid'] . ' ist nicht valide. Grund: ' . $row['validreason']
+						'msg' => 'Regel: ' . $regel->get('name') . '. Objekt mit gid: ' . $row['gid'] . ' in Shape: ' . $regel->get_shape_table_name() . ' ist nicht valide. Grund: ' . $row['validreason']
 					)
 				);
 				$all_geom_isvalid = false;
@@ -339,8 +341,8 @@ class Validierung extends PgObject {
 
 		$sql = $regel->get_convert_sql($konvertierung->get('id'));
 		$sourcetype = $regel->is_source_shape_or_gmlas($regel);
-		# Default Shape (the_geom), gmlas (position)
 		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
+		# Default Shape (the_geom), gmlas (position)
 
 		$plantype = $konvertierung->get_plan()->tableName;
 
@@ -353,12 +355,20 @@ class Validierung extends PgObject {
 		#if for gid (shape) or no gid (gmlas)
 		# changed to 25832 as otherwise thered be mixed geometry errors
 		# TODO Get the Epsg code from $konvertierung
+
+		# Buffer = 0.001mm, as 2mm euclidean distance is considered equivalent in XPlanung
+		# Buffer distance according SRID unit, for 25832 and 25833 distance is meters
+		# TODO In PostGIS 2.5 and higher, consider using one of the new variable precision functions instead
+		# e.g. ST_AsText with precision, ST_QuantizeCoordinates
+		# or build a custom ST_Within (and ST_Intersection?) variant, that utilizes the relevant equivalency distance
+		$tolerance_meters = '0.001';
+
 		if($sourcetype != 'gmlas') {
 			$sql = str_ireplace(
 				'select',
 				"select
 					gid,
-					NOT st_within(" . $geometry_col . ", " . $plantype . ".raeumlichergeltungsbereich) AS ausserhalb,
+					NOT st_within(" . $geometry_col . ", ST_Buffer(" . $plantype . ".raeumlichergeltungsbereich," . $tolerance_meters . ")) AS ausserhalb,
 					st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), ST_Transform(" . $plantype . ".raeumlichergeltungsbereich, " . $konvertierung->get('input_epsg') ."))/1000 AS distance,
 				",
 				$sql
@@ -368,7 +378,7 @@ class Validierung extends PgObject {
 			$sql = str_ireplace(
 				'select',
 				"select
-					NOT st_within(" . $geometry_col . ", " . $plantype . ".raeumlichergeltungsbereich) AS ausserhalb,
+					NOT st_within(" . $geometry_col . ", ST_Buffer(" . $plantype . ".raeumlichergeltungsbereich," . $tolerance_meters . ")) AS ausserhalb,
 					st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), ST_Transform(" . $plantype . ".raeumlichergeltungsbereich, " . $konvertierung->get('input_epsg') ."))/1000 AS distance,
 				",
 				$sql
@@ -391,7 +401,7 @@ class Validierung extends PgObject {
 			'where',
 			"where
 				" . $plantype . ".konvertierung_id = " . $konvertierung->get('id') . " AND 
-				NOT st_within(" . $geometry_col . ", raeumlichergeltungsbereich) AND (
+				NOT st_within(" . $geometry_col . ", ST_Buffer(raeumlichergeltungsbereich," . $tolerance_meters . ")) AND (
 			",
 			$sql
 		);
@@ -402,6 +412,10 @@ class Validierung extends PgObject {
 		$this->debug->show('<br>sql ohne returning: ' . $sql, Validierung::$write_debug);
 
 		$this->debug->show('Sql für Prüfung geom_within_plan:<br>' . $sql, false);
+
+
+		$search_path  = ($sourcetype == 'gmlas') ? "xplan_gmlas_{$this->gui->user->id}" : "xplan_shapes_{$this->konvertierung_id}";
+		$sql = "SET search_path=" . $search_path . ", public; " . $sql;
 
 		$result = @pg_query(
 			$this->database->dbConn,
@@ -425,7 +439,7 @@ class Validierung extends PgObject {
 		else {
 			while ($row = pg_fetch_assoc($result)) {
 				if ($row['ausserhalb'] == 't') {
-					$this->debug->show('geometrie mit gid: ' . $row['gid'] . ' ist außerhalb vom Geltungsbereich des Plans', Validierung::$write_debug);
+					$this->debug->show('geometrie mit gid: ' . $row['gid'] . ' ist außerhalb des Geltungsbereich des Plans', Validierung::$write_debug);
 					$validierungsergebnis = new Validierungsergebnis($this->gui);
 					$validierungsergebnis->create(
 						array(
@@ -434,7 +448,7 @@ class Validierung extends PgObject {
 							'status' => ($row['distance'] > 100 ? 'Fehler' : 'Warnung'),
 							'regel_id' => $regel->get('id'),
 							'shape_gid' => $row['gid'],
-							'msg' => 'Objekt mit' . ($sourcetype == 'gmlas' ? '' : ' gid=' . $row['gid']) . ' ist außerhalb des räumlichen Geltungsbereiches des Planes.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
+							'msg' => 'Objekt mit' . ($sourcetype == 'gmlas' ? '' : ' gid: ' . $row['gid']). ' in Shape: ' . $regel->get_shape_table_name() . ' ist außerhalb des räumlichen Geltungsbereiches des Planes.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
 						)
 					);
 					$all_within_plan = false;
@@ -486,12 +500,15 @@ class Validierung extends PgObject {
 		$sql = stristr($sql, 'select');
 		$this->debug->show('<br>sql von select an: ' . $sql, Validierung::$write_debug);		
 
+		# Tolerance and buffer, see comment in geom_within_plan
+		$tolerance_meters = '0.001';
 		# gid zur eindeutigen Identifizierung des Datensatzes (nicht bei gmlas) sowie within und distance zum select hinzufügen
+
 		$sql = str_ireplace(
 			'select',
 			"select
 				" . ($sourcetype == 'gmlas' ? '' : 'gid,') . "
-				NOT st_within(" . $geometry_col . ", " . $bereichtype . ".geltungsbereich) AS ausserhalb,
+				NOT st_within(" . $geometry_col . ", ST_Buffer(" . $bereichtype . ".geltungsbereich," . $tolerance_meters . ")) AS ausserhalb,
 				st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), ST_Transform(" . $bereichtype . ".geltungsbereich, " . $konvertierung->get('input_epsg') . "))/1000 AS distance,
 			",
 			$sql
@@ -514,7 +531,7 @@ class Validierung extends PgObject {
 			"where
 				" . $bereichtype . ".gml_id = '" . $regel->get('bereich_gml_id') . "' AND
 				" . $bereichtype . ".konvertierung_id = " . $konvertierung->get('id') . " AND 
-				NOT st_within(" . $geometry_col . ", " . $bereichtype . ".geltungsbereich) AND (
+				NOT st_within(" . $geometry_col . ", ST_Buffer(" . $bereichtype . ".geltungsbereich," . $tolerance_meters . ")) AND (
 			",
 			$sql
 		);
@@ -576,7 +593,7 @@ class Validierung extends PgObject {
 							'status' => ($row['distance'] > 100 ? 'Fehler' : 'Warnung'),
 							'regel_id' => $regel->get('id'),
 							'shape_gid' => $row['gid'],
-							'msg' => 'Objekt mit gid=' . $row['gid'] . ' ist außerhalb des räumlichen Geltungsbereiches seines Planbereiches.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
+							'msg' => 'Objekt mit gid: ' . $row['gid']. ' in Shape: ' . $regel->get_shape_table_name() . ' ist außerhalb des räumlichen Geltungsbereiches seines Planbereiches.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
 						)
 					);
 					$all_within_bereich = false;
@@ -631,24 +648,33 @@ class Validierung extends PgObject {
 	* Erzeugt ein umschließendes Pufferpolygon vom Geltungsbereich des Planes und fügt diese auch in die flaechenschlussobjekt Tabelle
 	* Erzeugt eine Topologie von all diesen Flächen
 	* Ermittelt die faces, die zu mehr als einem Polygon zugeordnet sind (Überlappungen)
-	* Ermittelt die faces, die zu keinem Polygon zugeordnet sind (Lücken)
+	* @param object $plan, Der Plan der validiert wird
 	* @return array mit success boolean True wenn keine Überlappungen und Lücken gefunden wurden. 
 	* wenn welche gefunden wurden, succes = false und eine err_msg, die angibt welche Objekte sich überlappen oder wo Lücken sind.
 	*/
-	function flaechenschluss_ueberlappungen() {
+	function flaechenschluss_ueberlappungen($plan) {
 		$success = true;
+		$kommentar_zusatz = 'Die Flächenschlussbedingung des Planes ist nicht gegeben wegen Überlappungen der Geometrien von Inhalten.';
 
 		# prüft ob es faces gibt, die mehreren Geometrien zugeordnet sind
 		$sql = "
 			SELECT
-			  string_agg(fo.gml_id::text, ', ') neighbours
+				string_agg(foo.uuid, ' - ') neighbours
 			FROM
-			  flaechenschluss_topology.relation r JOIN
-			  xplankonverter.flaechenschlussobjekte fo ON r.topogeo_id = (fo.topo).id
-			WHERE
-				fo.konvertierung_id = " . $this->konvertierung_id . "
-			GROUP BY r.element_id
-			HAVING count(r.element_id) > 1
+				(
+					SELECT DISTINCT
+						fo.uuid,
+						r.element_id
+					FROM
+					  flaechenschluss_topology.relation r JOIN
+					  xplankonverter.flaechenschlussobjekte fo ON r.topogeo_id = (fo.topo).id
+					WHERE
+						fo.konvertierung_id = " . $this->konvertierung_id . "
+				) foo
+			GROUP BY foo.element_id
+			HAVING
+				count(foo.element_id) > 1 AND
+				string_agg(foo.uuid, ' - ') != 'räumlicher Geltungsbereich Plan'
 		";
 		#echo '<p>SQL zur Abfrage von Überlappungen in der Topologie: ' . $sql;
 		$overlaps = $this->getSQLResults($sql);
@@ -666,32 +692,69 @@ class Validierung extends PgObject {
 				array(
 					'konvertierung_id' => $this->konvertierung_id,
 					'validierung_id' => $this->get('id'),
-					'status' => ($success ? 'Erfolg' : 'Fehler'),
+					'status' => ($success ? 'Erfolg' : 'Warnung'),
+					'msg' => $msg
+				)
+			);
+		} else {
+			$success = true;
+			$msg = 'Erfolg der Flächenschlussprüfung. Der Plan beinhaltet keine Überlappungen im Flächenschluss.';
+			$validierungsergebnis = new Validierungsergebnis($this->gui);
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $this->konvertierung_id,
+					'validierung_id' => $this->get('id'),
+					'status' => ($success ? 'Erfolg' : 'Warnung'),
 					'msg' => $msg
 				)
 			);
 		}
+
+		if ($success) {
+			$plan->remove_kommentar_if_exists($kommentar_zusatz);
+		}
+		else {
+			$plan->add_kommentar_if_not_exists($kommentar_zusatz);
+		}
+
 		return $success;
 	}
 
-	function flaechenschluss_luecken() {
+	/**
+	* Zerteilt alle Multipolygone von bp_, fp_ und so_flaechenschlussobjekten und ließt diese in die Tabelle xplankonverter.flaechenschlussobjekte ein.
+	* Erzeugt ein umschließendes Pufferpolygon vom Geltungsbereich des Planes und fügt diese auch in die flaechenschlussobjekt Tabelle
+	* Erzeugt eine Topologie von all diesen Flächen
+	* Ermittelt die faces, die zu keinem Polygon zugeordnet sind (Lücken)
+	* @param object $plan, Der Plan der validiert wird
+	* @return array mit success boolean True wenn keine Überlappungen und Lücken gefunden wurden. 
+	* wenn welche gefunden wurden, succes = false und eine err_msg, die angibt welche Objekte sich überlappen oder wo Lücken sind.
+	*/
+	function flaechenschluss_luecken($plan) {
 		$success = true;
+		$kommentar_zusatz = 'Die Flächenschlussbedingung des Planes ist nicht gegeben wegen Lücken zwischen den Geometrien von Inhalten.';
 
 		# prüft ob es faces gibt, die keiner Geometrie zugeordnet sind
 		$sql = "
-			SELECT DISTINCT
-				string_agg(fo.gml_id::text, ', ') neighbours
+			SELECT
+				string_agg(foo.uuid, ' - ') neighbours
 			FROM
-				flaechenschluss_topology.face f LEFT JOIN
-				flaechenschluss_topology.relation r ON f.face_id = r.element_id LEFT JOIN
-				flaechenschluss_topology.edge_data el ON f.face_id = el.left_face JOIN
-				flaechenschluss_topology.relation rr ON el.right_face = rr.element_id JOIN
-				xplankonverter.flaechenschlussobjekte fo ON rr.topogeo_id = (fo.topo).id
-			WHERE
-				f.face_id != 0 AND
-				r.element_id IS NULL AND
-				fo.konvertierung_id = " . $this->konvertierung_id . "
-			GROUP BY face_id
+				(
+					SELECT DISTINCT
+						fo.uuid,
+						f.face_id
+					FROM
+						flaechenschluss_topology.face f LEFT JOIN
+						flaechenschluss_topology.relation r ON f.face_id = r.element_id LEFT JOIN
+						flaechenschluss_topology.edge_data el ON f.face_id = el.left_face JOIN
+						flaechenschluss_topology.relation rr ON el.right_face = rr.element_id JOIN
+						xplankonverter.flaechenschlussobjekte fo ON rr.topogeo_id = (fo.topo).id
+					WHERE
+						f.face_id != 0 AND
+						r.element_id IS NULL AND
+						fo.konvertierung_id = " . $this->konvertierung_id . "
+				)	foo
+			GROUP BY foo.face_id
+			HAVING string_agg(foo.uuid, ' - ') != 'räumlicher Geltungsbereich Plan'
 		";
 		#echo '<p>SQL zur Abfrage von Lücken in der Topologie: ' . $sql;
 		$gaps = $this->getSQLResults($sql);
@@ -709,10 +772,29 @@ class Validierung extends PgObject {
 				array(
 					'konvertierung_id' => $this->konvertierung_id,
 					'validierung_id' => $this->get('id'),
-					'status' => ($success ? 'Erfolg' : 'Fehler'),
+					'status' => ($success ? 'Erfolg' : 'Warnung'),
 					'msg' => $msg
 				)
 			);
+		} else {
+			$success = true;
+			$msg = 'Erfolg der Flächenschlussprüfung. Der Plan beinhaltet keine Lücken im Flächenschluss.';
+			$validierungsergebnis = new Validierungsergebnis($this->gui);
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $this->konvertierung_id,
+					'validierung_id' => $this->get('id'),
+					'status' => ($success ? 'Erfolg' : 'Warnung'),
+					'msg' => $msg
+				)
+			);
+		}
+
+		if ($success) {
+			$plan->remove_kommentar_if_exists($kommentar_zusatz);
+		}
+		else {
+			$plan->add_kommentar_if_not_exists($kommentar_zusatz);
 		}
 		return $success;
 	}
@@ -729,30 +811,42 @@ class Validierung extends PgObject {
 					FROM
 						xplan_gml." . $bedingung['class_name'] . "
 					WHERE
-						NOT (" . substr($this->get('functionsargumente'), 2, -2) . ")
+						NOT (" . substr($this->get('functionsargumente'), 2, -2) . ") AND
+						konvertierung_id = " . $konvertierung_id . "
 				";
 		}
 		$this->debug->show('sql to find failed konformities: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		$validierungsergebnis = new Validierungsergebnis($this->gui);
 		if (pg_num_rows($query) > 0) {
+			# Ermittle die Regel, in der $bedingung['class_name'] konvertiert wurde
+			$regeln = Regel::find_by_konvertierung_and_class_name($this->gui, $konvertierung_id, $bedingung['class_name']);
+			$fehler = pg_fetch_all($query);
 			$validierungsergebnis->create(
 				array(
 					'konvertierung_id' => $konvertierung_id,
 					'validierung_id' => $this->get('id'),
 					'status' => 'Fehler',
-					'msg' => 'Folgende Objekte der Klasse: ' . $bedingung['class_name']
-						. ' widersprechen der Validierung ' . $this->get('name')
-						. ' der Konformitätsbedinung Nr: ' . $konformitaetsbedingung->get('nummer') . ' ' . $konformitaetsbedingung->get('bezeichnung') . '<br>'
+					'msg' => 'Folgende Objekte der Klasse ' . $bedingung['class_name']
+						. ' widersprechen der Validierung:<br>'
 						. implode(
-							'<br>',
+							', ',
 							array_map(
 								function($rs) {
-									return $rs['gml_id'];
+									return ($rs['uuid'] != '' ? $rs['uuid'] : $rs['gml_id']);
 								},
-								pg_fetch_all($query)
+								$fehler
 							)
 						)
+						. ((count(array_filter(
+								$fehler,
+								function($rs) {
+									return ($rs['uuid'] == '');
+								}
+								)) > 0 AND count($regeln) > 0) ? '<br>Bei der Regel ' . implode(', ', array_map(function($regel) {
+									return '<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=15&operator_id==&value_id=' . $regel->get('id') . '">' . $regel->get('id') . '</a>';
+								}, $regeln)) . ' fehlt die Übernahme der Spalte gid in das Attribut uuid des XPlanungobjektes. Bitte Regel korrigieren.' : ''),
+					'regel_id' => $regeln[0]->get('id')
 				)
 			);
 		}
@@ -764,7 +858,7 @@ class Validierung extends PgObject {
 					'validierung_id' => $this->get('id'),
 					'status' => 'Erfolg',
 					'msg' => 'Alle Objekte der Klasse ' . $bedingung['class_name'] . ' entsprechen der Validierung ' . $this->get('name')
-						. ' der Konformitätsbedinung Nr: ' . $konformitaetsbedingung->get('nummer') . ' ' . $konformitaetsbedingung->get('bezeichnung')
+						. ' der Konformitätsbedingung Nr: ' . $konformitaetsbedingung->get('nummer') . ' ' . $konformitaetsbedingung->get('bezeichnung')
 				)
 			);
 		}

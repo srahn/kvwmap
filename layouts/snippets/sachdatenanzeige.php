@@ -228,7 +228,7 @@ if($this->formvars['printversion'] == ''){ ?>
   <?
   	if($this->search == true){			# wenn man von der Suche kam
 			echo '<input name="go" type="hidden" value="Layer-Suche_Suchen">
-						<input name="sql_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->qlayerset[0]['sql'].'">
+						<input name="sql_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.htmlspecialchars($this->qlayerset[0]['sql']).'">
 						<input id="offset_'.$this->formvars['selected_layer_id'].'" name="offset_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['selected_layer_id']].'">
 						<input name="search" type="hidden" value="true">';
 /*		Hidden Felder zum Speichern der Suchparameter (die können evtl. weg, da jetzt immer get_last_query verwendet wird)
@@ -268,7 +268,7 @@ if($this->formvars['printversion'] == ''){ ?>
 				if($this->formvars['qLayer'.$this->qlayerset[$i]['Layer_ID']] == 1){
 					echo '<input name="qLayer'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="1">';
 					echo '<input id="offset_'.$this->qlayerset[$i]['Layer_ID'].'" name="offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.value_of($this->formvars, 'offset_'.$this->qlayerset[$i]['Layer_ID']).'">';
-					echo '<input name="sql_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->qlayerset[$i]['sql'].'">';
+					echo '<input name="sql_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.htmlspecialchars($this->qlayerset[$i]['sql']).'">';
 				}
 			}
 			echo '<input name="go" type="hidden" value="Sachdaten">';
@@ -309,6 +309,7 @@ if($this->formvars['printversion'] == ''){ ?>
 <input name="firstpoly" type="hidden" value="<?php echo value_of($this->formvars, 'firstpoly'); ?>">
 <input type="hidden" name="searchmask_count" value="<? echo $this->formvars['searchmask_count']; ?>">
 <input type="hidden" name="within" value="<? echo value_of($this->formvars, 'within'); ?>">
+<input type="hidden" name="backlink" value="<? echo $this->formvars['backlink']; ?>">
 
 <div id="vorschau" style="pointer-events:none; box-shadow: 12px 10px 14px #777;z-index: 1000000; position: fixed; right:10px; top:5px; ">
 	<img id="preview_img" style="max-height: 940px" src="<? echo GRAPHICSPATH.'leer.gif'; ?>">

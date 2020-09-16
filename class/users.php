@@ -1216,8 +1216,7 @@ class user {
 	}
 
 	function NeuAnlegen($userdaten) {
-#		$stellen = array_filter(explode(', ',$userdaten['selstellen']));
-		$stellen[0] = '';
+		$stellen = array_filter(explode(', ',$userdaten['selstellen']));
 		# Neuen Nutzer anlegen
 		$sql ='INSERT INTO user SET';
 		if($userdaten['id'] != ''){

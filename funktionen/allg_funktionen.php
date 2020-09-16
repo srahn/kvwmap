@@ -1654,7 +1654,7 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 * als key übergeben werden durch die values von $params und zusätzlich die Werte der
 * Variablen aus den Parametern 3 bis n wenn welche übergeben wurden
 */
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL) {
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
@@ -1665,6 +1665,7 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
 	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
+	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
 	return $str;
 }
 
@@ -1800,10 +1801,14 @@ function output_select($form_field_name, $data, $selected_value = null, $onchang
 * Wenn der optionale Parameter $last true ist, wird das letzte Vorkommen des Wortes verwendet.
 */
 function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
-	if($last)$word_pos = strripos($str, $word);
-	else $word_pos = stripos($str, $word);
-	if($word_pos !== false){
-		$str_from_word_pos = substr($str, $word_pos+strlen($word));
+	if ($last) {
+		$word_pos = strripos($str, $word);
+	}
+	else {
+		$word_pos = stripos($str, $word);
+	}
+	if ($word_pos !== false) {
+		$str_from_word_pos = substr($str, $word_pos + strlen($word));
 		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
 		return $parts[0];
 	}

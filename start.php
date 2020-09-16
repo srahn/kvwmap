@@ -1,6 +1,6 @@
 <?php
 # Objekt für graphische Benutzeroberfläche erzeugen mit default-Werten
-$GUI = new GUI("map.php", "layouts/main.css.php", "html");
+$GUI = new GUI("map.php", "layouts/css/main.css.php", "html");
 $GUI->user = new stdClass();
 $GUI->user->rolle = new stdClass();
 $GUI->user->rolle->querymode = 0;
@@ -163,6 +163,7 @@ else {
 
 			# Frage den Nutzer mit dem login_namen ab
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
+			$GUI->debug->write('Nutzer ' . $GUI->user->id . ' mit login_name ' . $GUI->formvars['login_name'] . ' gefunden.', 4, $GUI->echo);
 
 			if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
 				$GUI->debug->write('Set Session', 4, $GUI->echo);
@@ -377,7 +378,7 @@ else {
 	$GUI->debug->write('Stellenbezeichnung: ' . $GUI->Stelle->Bezeichnung, 4);
 	$GUI->debug->write('Host_ID: ' . getenv("REMOTE_ADDR"), 4);
 
-	if(BEARBEITER == 'true') {
+	if (defined('BEARBEITER') AND BEARBEITER == 'true') {
 		define('BEARBEITER_NAME', 'Bearbeiter: ' . $GUI->user->Name);
 	}
 
@@ -562,9 +563,6 @@ function get_permission_in_stelle($GUI) {
 
 		if (is_password_expired($GUI->user, $GUI->Stelle)) {
 			$GUI->debug->write('Passwort ist abgelaufen.', 4, $GUI->echo);
-			if (new_password)
-
-
 			$allowed = false;
 			$reason = 'password expired';
 			$errmsg = 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist in der Stelle ' . $GUI->stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gütligkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten. Geben Sie ein neues Passwort ein und notieren Sie es sich.';

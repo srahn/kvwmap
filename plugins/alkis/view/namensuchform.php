@@ -267,7 +267,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
    </td>
   </tr>
 <? }
-  $anzNamen=count($this->namen);
+  $anzNamen = @count($this->namen);
   if ($anzNamen>0) {
    ?>
 	<tr>

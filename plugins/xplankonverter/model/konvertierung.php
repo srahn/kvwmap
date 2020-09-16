@@ -41,6 +41,62 @@ class Konvertierung extends PgObject {
 		return $konvertierung;
 	}
 
+	public static	function find_where_with_plan($gui, $where, $order = '') {
+		$konvertierung = new Konvertierung($gui);
+		$konvertierungen = $konvertierung->find_where($where, $order);
+		array_walk(
+			$konvertierungen,
+			function($k) {
+				if ($k->get('planart') != '') {
+					$k->get_plan();
+				}
+			}
+		);
+		return $konvertierungen;
+	}
+
+	public static function find_by_document($gui, $document) {
+		$parts = explode('_', APPLVERSION);
+		$dev = (trim(end($parts),'/') == 'dev' ? '_dev' : '');
+		$path = pathinfo($_REQUEST['document']);
+		$konvertierung = new Konvertierung($gui);
+		switch (strToLower($path['extension'])) {
+			case 'gml' :
+				$konvertierungen = $konvertierung->find_where('id = ' . explode('_', $path['filename'])[1] . ' AND veroeffentlicht');
+				if (count($konvertierungen) == 0) return false;
+				$konvertierung = $konvertierungen[0];
+				$konvertierung->exportfile = '/var/www/data' . $dev . '/upload/xplankonverter/' . $konvertierung->get('id') . '/xplan_gml' . $document;
+				$konvertierung->contenttype = 'text/xml';
+				return $konvertierung;
+			case 'pdf' :
+				$sql = "
+					SELECT
+						*
+					FROM
+						(
+							SELECT
+								k.*,
+								(unnest(p.externereferenz)).referenzname
+							FROM
+								xplan_gml.bp_plan p JOIN
+								xplankonverter.konvertierungen k ON p.konvertierung_id = k.id
+						) sub
+					WHERE
+						sub.referenzname = '" . $path['basename'] . "' AND
+						sub.veroeffentlicht
+				";
+				#echo '<br>Sql zur Abfrage der Konvertierung: ' . $sql;
+				$rows = $konvertierung->getSQLResults($sql)[0];
+				if (count($rows) == 0) return false;
+				$konvertierung->data = $rows[0];
+				$konvertierung->exportfile = '/var/www/data' . $dev . '/xplankonverter/plaene' . $document;
+				$konvertierung->contenttype = 'application/pdf';
+				return $konvertierung;
+			default :
+				return false;
+		}
+	}
+
 	function create($anzeige_name, $epsg_code, $input_epsg_code, $planart, $stelle_id, $user_id) {
 		$sql = "
 			INSERT INTO " . $this->schema . "." . $this->tableName . " (
@@ -206,7 +262,7 @@ class Konvertierung extends PgObject {
 
 	function send_export_file($exportfile, $contenttype) {
 		header('Content-type: ' . $contenttype);
-		header("Content-disposition:  attachment; filename=" . basename($exportfile));
+#		header("Content-disposition:  attachment; filename=" . basename($exportfile));
 		header("Content-Length: " . filesize($exportfile));
 		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header('Pragma: public');
@@ -307,7 +363,7 @@ class Konvertierung extends PgObject {
 				r.class_name
 			FROM
 				xplankonverter.regeln r LEFT JOIN
-				xplan_gml." . $this->plan->planartAbk . "_bereich b ON r.bereich_gml_id = b.gml_id left JOIN
+				xplan_gml." . $this->plan->planartAbk . "_bereich b ON r.bereich_gml_id = b.gml_id LEFT JOIN
 				xplan_gml." . $this->plan->planartAbk . "_plan bp ON b.gehoertzuplan = bp.gml_id::text LEFT JOIN
 				xplan_gml." . $this->plan->planartAbk . "_plan rp ON r.konvertierung_id = rp.konvertierung_id
 			WHERE
@@ -523,10 +579,10 @@ class Konvertierung extends PgObject {
 						$this->createTopology();
 						$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'flaechenschluss_ueberlappungen');
 						$validierung->konvertierung_id = $this->get('id');
-						$validierung->flaechenschluss_ueberlappungen();
+						$validierung->flaechenschluss_ueberlappungen($this->plan);
 						$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'flaechenschluss_luecken');
 						$validierung->konvertierung_id = $this->get('id');
-						$validierung->flaechenschluss_luecken();
+						$validierung->flaechenschluss_luecken($this->plan);
 					}
 				}
 			}
@@ -603,9 +659,10 @@ class Konvertierung extends PgObject {
 	function createTopology() {
 		# Füge vorhandene Flächenschlussobjekte neu in Tabelle flächenschlussobjekte ein
 		$sql = "
-			INSERT INTO xplankonverter.flaechenschlussobjekte (gml_id, konvertierung_id, teilpolygon, teilpolygon_nr)
+			INSERT INTO xplankonverter.flaechenschlussobjekte (gml_id, uuid, konvertierung_id, teilpolygon, teilpolygon_nr)
 			SELECT
 				gml_id,
+				uuid,
 				konvertierung_id,
 				(st_dump(position)).geom AS teilpolygon,
 				(st_dump(position)).path[1] AS teilpolygon_nr
@@ -625,9 +682,10 @@ class Konvertierung extends PgObject {
 
 		# Füge ein umschließendes Polygon des raeumlichen Geltungsbereiches zur Tabelle flaechenschlussobjekte hinzu
 		$sql = "
-			INSERT INTO xplankonverter.flaechenschlussobjekte (gml_id, konvertierung_id, teilpolygon, teilpolygon_nr)
+			INSERT INTO xplankonverter.flaechenschlussobjekte (gml_id, uuid, konvertierung_id, teilpolygon, teilpolygon_nr)
 	 		SELECT
 				gml_id,
+				'räumlicher Geltungsbereich Plan' AS uuid,
 				konvertierung_id,
 				(st_dump(position)).geom AS teilpolygon,
 				(st_dump(position)).path[1] AS teilpolygon_nr

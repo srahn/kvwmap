@@ -596,11 +596,11 @@ class stelle {
 	}
 
 	function getFlurstueckeAllowed($FlurstKennz, $database) {
-		include_(CLASSPATH.'alb.php');
+		include_once(PLUGINS.'alkis/model/alkis.php');
 		$GemeindenStelle = $this->getGemeindeIDs();
 		if($GemeindenStelle != NULL){
-			$alb = new ALB($database);
-			$ret=$alb->getFlurstKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz);
+			$alkis = new alkis($database);
+			$ret=$alkis->getFlurstKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz);
 			if ($ret[0]==0) {
 				$anzFlurstKennz=count($ret[1]);
 				if ($anzFlurstKennz==0) {
@@ -1535,11 +1535,11 @@ class stelle {
 				$real_attributename = substr($fieldstring[$i], 0, $as_pos);
 			}
 			else{   # tabellenname.attributname oder attributname
-				$explosion = explode('.', strtolower($fieldstring[$i]));
+				$explosion = explode('.', $fieldstring[$i]);
 				$attributename = trim($explosion[count($explosion)-1]);
 				$real_attributename = $fieldstring[$i];
 			}
-			if(value_of($privileges, $attributename) != ''){
+			if(value_of($privileges, trim($attributename, '"')) != ''){
 				$type = $attributes['type'][$attributes['indizes'][$attributename]];
 				if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$real_attributename.') as '.$attributename.', ';		# Array oder Datentyp
 				else $newattributesstring .= $fieldstring[$i].', ';																																			# normal

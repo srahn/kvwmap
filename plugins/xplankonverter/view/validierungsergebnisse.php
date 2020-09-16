@@ -7,7 +7,7 @@
 // formatter functions
 function validierung_msg_formatter(value, row) {
 	if (row.ergebnis_status == 'Fehler')
-		return row.validierung_msg_error + '<br>' + value;
+		return row.validierung_msg_error + '.<br>' + value;
 	else if (row.ergebnis_status == 'Warnung')
 		return row.validierung_msg_warning + '<br>' + value;
 	else
@@ -56,6 +56,7 @@ function validierungsergebnisseRowAttribs(row, index){
 <h2>Validierungsergebnisse</h2>
 <br>
 <h4><?php echo $this->konvertierung->plan->planart . ': ' . htmlspecialchars($this->konvertierung->plan->get_anzeige_name()); ?></h4>
+<button class="table-export-button-csv" onclick="event.stopPropagation(); $('#validierungsergebnis_table').tableExport({type:'csv'});">CSV-Export</button>
 <table
   id="validierungsergebnis_table"
   data-toggle="table"

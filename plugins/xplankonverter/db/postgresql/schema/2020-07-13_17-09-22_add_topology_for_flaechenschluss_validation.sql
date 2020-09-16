@@ -5,18 +5,20 @@ BEGIN;
   CREATE TABLE xplankonverter.flaechenschlussobjekte (
       gml_id uuid NOT NULL,
       konvertierung_id integer NOT NULL,
-      topo topogeometry,
       teilpolygon_nr integer,
       teilpolygon geometry(Polygon,25833),
-      CONSTRAINT flaechenschlussobjekte_pkey PRIMARY KEY (gml_id, konvertierung_id),
-      CONSTRAINT check_topogeom_topo CHECK ((topo).topology_id = 1 AND (topo).layer_id = 1 AND (topo).type = 3)
+      CONSTRAINT flaechenschlussobjekte_pkey PRIMARY KEY (gml_id, konvertierung_id)
   )
   WITH ( OIDS = TRUE );
 
+<<<<<<< HEAD
   SELECT CreateTopology('flaechenschluss_topology', 25833, 0.002)
   WHERE NOT EXISTS (
       SELECT * FROM topology.topology WHERE name = 'flaechenschluss_topology'
   );
+=======
+  SELECT CreateTopology('flaechenschluss_topology', 25833, 0.002);
+>>>>>>> b5bcbdf430e7dcdc6afe0a19076781f12bd50cb5
 
   SELECT topology.AddTopoGeometryColumn('flaechenschluss_topology', 'xplankonverter', 'flaechenschlussobjekte', 'topo', 'POLYGON');
 

@@ -130,6 +130,9 @@ class GUI {
     # Ein- oder Ausblenden der Klassen
     $this->user->rolle->setClassStatus($this->formvars);
     $this->loadMap('DataBase');
+		for($i = 0; $i < @count($this->layers_replace_scale); $i++){
+			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
+		}
 		$this->map->draw();			# sonst werden manche Klassenbilder nicht generiert
     echo $this->create_group_legend($this->formvars['group']);
   }
@@ -274,12 +277,12 @@ class GUI {
 						$layer->setConnectionType(7);
 					}
           if($layerset[$i]['transparency'] != ''){
-            if(MAPSERVERVERSION > 500){
-              $layer->set('opacity',$layerset[$i]['transparency']);
-            }
-            else{
-              $layer->set('transparency',$layerset[$i]['transparency']);
-            }
+						if (MAPSERVERVERSION > 700) {
+							$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
+						}
+						else{
+							$layer->set('opacity',$layerset['transparency']);
+						}	
           }
         } # end of Schleife layer
         $this->map=$map;
@@ -702,7 +705,12 @@ class GUI {
 
 		if ($layerset['Datentyp']=='3') {
 			if($layerset['transparency'] != ''){
-				$layer->set('opacity',$layerset['transparency']);
+				if (MAPSERVERVERSION > 700) {
+					$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
+				}
+				else{
+					$layer->set('opacity',$layerset['transparency']);
+				}	
 			}
 			if ($layerset['tileindex']!='') {
 				$layer->set('tileindex',SHAPEPATH.$layerset['tileindex']);
@@ -719,6 +727,9 @@ class GUI {
 		else {
 			# Vektorlayer
 			if($layerset['Data'] != '') {
+				if(strpos($layerset['Data'], '$scale') !== false){
+					$this->layers_replace_scale[] =& $layer;
+				}
 				$layerset['Data'] = replace_params(
 					$layerset['Data'],
 					rolle::$layer_params,
@@ -799,7 +810,12 @@ class GUI {
 						$layer->set('opacity',MS_GD_ALPHA);
 				}
 				else {
+					if (MAPSERVERVERSION > 700) {
+						$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
+					}
+					else{
 						$layer->set('opacity',$layerset['transparency']);
+					}
 				}
 			}
 			if ($layerset['symbolscale']!='') {
@@ -1274,7 +1290,7 @@ class GUI {
 				<tr>
 					<td>
 						<div id="layergroupdiv_'.$group_id.'" style="width:100%;'.(($groupstatus != 1 AND value_of($this->group_has_active_layers, $group_id) != '') ? 'display: none' : '').'"><table cellspacing="0" cellpadding="0">';
-		$layercount = count($this->layerset['layers_of_group'][$group_id]);
+		$layercount = @count($this->layerset['layers_of_group'][$group_id]);
 		if($groupstatus == 1 OR value_of($this->group_has_active_layers, $group_id) != ''){		# Gruppe aufgeklappt oder hat aktive Layer
 			if(value_of($this->groupset[$group_id], 'untergruppen') != ''){
 				for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
@@ -1517,14 +1533,16 @@ class GUI {
 										$padding = 0;
 										$newname = rand(0, 1000000).'.jpg';
 										$this->colorramp(IMAGEPATH.$newname, $width, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
+										$imagename = TEMPPATH_REL.$newname;
 									}
 									else{																												# vom Mapserver generiertes Klassenbild
 										$image = $class->createLegendIcon($width, $height);
-										$filename = $this->map_saveWebImage($image,'jpeg');
-										$newname = $this->user->id.basename($filename);
-										rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+										ob_start();
+										$image->saveImage();
+										$image = ob_get_clean();
+										$imagename = 'data:image/jpg;base64,'.base64_encode($image);
 									}
-									$imagename = $original_class_image = TEMPPATH_REL.$newname;
+									$original_class_image = $imagename;
 								}
 								####################################
 								$classid = $layer['Class'][$k]['Class_ID'];
@@ -2507,7 +2525,7 @@ class db_mapObj {
 				$name_column . ",
 				l.alias,
 				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem,
-				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection_id, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.styleitem, l.classification, l.filteritem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection_id, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.styleitem, l.classification, 
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				l.duplicate_from_layer_id,

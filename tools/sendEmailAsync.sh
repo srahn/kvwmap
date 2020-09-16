@@ -24,6 +24,7 @@ do
   if [[ -z $attachment ]]; then
     #echo Ohne Attachement sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=yes -u ${subject} -m ${message}
     sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=yes -o message-charset=utf8 -u "${subject}" -m "${message}" > /dev/null 2>&1
+    #sendEmail -v -t 'peter.korduan@gdi-service.de' -f 'info@gdi-service.de' -s smtp.ionos.de:587 -o tls=yes -xu 'peter.korduan@gdi-backup.de' -xp '*****' -o message-charset=utf8 -u "Testkvwmap" -m "TestMessage"
   else
     #echo Mit attachement sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=yes -u ${subject} -m ${message} -a $attachment
     sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=yes -o message-charset=utf8 -u "${subject}" -m "${message}" -a $attachment > /dev/null 2>&1

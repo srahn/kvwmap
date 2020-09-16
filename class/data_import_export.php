@@ -994,9 +994,8 @@ class data_import_export {
 	function export_exportieren($formvars, $stelle, $user){
 		global $language;
 		global $GUI;
-    global $kvwmap_plugins;
-
-		$currenttime=date('Y-m-d H:i:s',time());
+		global $kvwmap_plugins;
+		$currenttime = date('Y-m-d H:i:s',time());
 		$this->formvars = $formvars;
 		$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
 		$mapdb = new db_mapObj($stelle->id,$user->id);
@@ -1064,11 +1063,11 @@ class data_import_export {
 		}
 		$j = 0;
 		foreach ($this->attributes['all_table_names'] as $tablename) {
-			if (($tablename == $layerset[0]['maintable']) AND $this->attributes['oids'][$j]) {
+			if (($tablename == $layerset[0]['maintable']) AND $layerset[0]['oid'] != '') {
 				# hat Haupttabelle oids?
-				$pfad = $this->attributes['table_alias_name'][$tablename] . '.oid AS ' . $tablename . '_oid, ' . $pfad;
+				$pfad = pg_quote($this->attributes['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'].' AS '.pg_quote($tablename.'_oid').', '.$pfad;
 				if ($groupby != '') {
-					$groupby .= ',' . $this->attributes['table_alias_name'][$tablename] . '.oid';
+					$groupby .= ',' . pg_quote($this->attributes['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'];
 				}
 			}
 			$j++;
@@ -1085,9 +1084,10 @@ class data_import_export {
 			";
 
 		# Bedingungen
-		if($where != ''){		# Where-Klausel aus Sachdatenabfrage-SQL (abgefragter Extent, Suchparameter oder oids)
+		if ($where != '') {
+			# Where-Klausel aus Sachdatenabfrage-SQL (abgefragter Extent, Suchparameter oder oids)
 			$orderbyposition = strpos(strtolower($where), 'order by');
-			if($orderbyposition)$where = substr($where, 0, $orderbyposition);
+			if ($orderbyposition)$where = substr($where, 0, $orderbyposition);
 			$sql = "
 				SELECT *
 				FROM ("
@@ -1105,32 +1105,38 @@ class data_import_export {
 					. $groupby . "
 				) as query
 				WHERE " . $filter;
+		}
+		#echo '<br>sql: ' . $sql;
+		if ($this->formvars['newpathwkt']){
+			# über Polygon einschränken
+			if ($this->formvars['within'] == 1) {
+				$sp_op = 'st_within';
 			}
-		if ($this->formvars['newpathwkt']){	# über Polygon einschränken
-			if ($this->formvars['within'] == 1)$sp_op = 'st_within'; else $sp_op = 'st_intersects';
-			$sql.= " AND ".$sp_op."(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
+			else {
+				$sp_op = 'st_intersects';
+			}
+			$sql .= " AND ".$sp_op."(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
 		}
     $sql.= $orderby;
 		$data_sql = $sql;
 		#echo '<br>Frage Daten ab mit SQL: '. $sql;
-		
-    $temp_table = 'shp_export_'.rand(1, 10000);
+
+		$temp_table = 'shp_export_'.rand(1, 10000);
 
 		# temporäre Tabelle erzeugen, falls Argumentliste durch das SQL zu lang
     $sql = "
 			CREATE TABLE public." . $temp_table . " AS "
 			. $sql . "
 		";
-		#echo '<p>SQL zum Anlegen der temporären Tabelle: ' . $sql;
+		#echo '<p>SQL zum Anlegen der temporären Tabelle: ' . $sql . '-';
 		$ret = $layerdb->execSQL($sql,4, 0);
-		#echo 'ret: ' . print_r($ret, true);
 
 		for ($s = 0; $s < count($selected_attributes); $s++){
 			# Transformieren der Geometrie
 			if ($this->attributes['the_geom'] == $selected_attributes[$s])$selected_attributes[$s] = 'st_transform('.$selected_attributes[$s].', '.$this->formvars['epsg'].') as '.$selected_attributes[$s];
 			# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
 			if ($this->formvars['export_format'] == 'Shape') {
-				if (in_array($selected_attr_types[$s], array('text', 'varchar'))) $selected_attributes[$s] = $selected_attributes[$s].'::varchar(254)';
+				if (in_array($selected_attr_types[$s], array('text', 'varchar'))) $selected_attributes[$s] = pg_quote($selected_attributes[$s]).'::varchar(254)';
 			}
 		}
 
@@ -1164,7 +1170,7 @@ class data_import_export {
 			$exportfile = IMAGEPATH.$folder.'/'.$this->formvars['layer_name'];
 			switch($this->formvars['export_format']){
 				case 'Shape' : {
-					$err = $this->ogr2ogr_export($sql, '"ESRI Shapefile"', $exportfile.'.shp', $layerdb);
+					$err = $this->ogr2ogr_export(addslashes($sql), '"ESRI Shapefile"', $exportfile.'.shp', $layerdb);
 					if(!file_exists($exportfile.'.cpg')){		// ältere ogr-Versionen erzeugen die cpg-Datei nicht
 						$fp = fopen($exportfile.'.cpg', 'w');
 						fwrite($fp, 'UTF-8');
@@ -1217,7 +1223,7 @@ class data_import_export {
 				} break;
 
 				case 'CSV' : {
-					while($rs=pg_fetch_assoc($ret[1])){
+					while ($rs=pg_fetch_assoc($ret[1])){
 						$result[] = $rs;
 					}
 					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, true);
@@ -1291,21 +1297,10 @@ class data_import_export {
 				$user->rolle->setConsumeShape($currenttime, $this->formvars['selected_layer_id'], $count);
 			}
 
-			if ($err != ''){
-				$GUI->add_message('error', $err);
-			}
-			else {
-				ob_end_clean();
-				header('Content-type: '.$contenttype);
-				header("Content-disposition:	attachment; filename=".basename($exportfile));
-				#header("Content-Length: ".filesize($exportfile));			# hat bei großen Datenmengen dazu geführt, dass der Download abgeschnitten wird
-				header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-				header('Pragma: public');
-				readfile($exportfile);
-
+			if ($err == '') {
 				// Update timestamp formular_element_types having option export
 				$time_attributes = array();
-				foreach($this->attributes['name'] AS $key => $value) {
+				foreach ($this->attributes['name'] AS $key => $value) {
 					if (
 						$this->attributes['form_element_type'][$value] == 'Time' AND
 						trim(strtolower($this->attributes['options'][$value])) == 'export'
@@ -1324,18 +1319,30 @@ class data_import_export {
 						FROM
 							(" . $data_sql . ") AS data_table
 						WHERE
-							update_table.oid = data_table." . $layerset[0]['maintable'] . "_oid
+							update_table." . $layerset[0]['oid'] . " = data_table." . $layerset[0]['oid'] . "
 					";
 					#echo '<br>sql: ' . $sql;
 					$ret = $layerdb->execSQL($sql, 4, 0);
 					if ($ret[0]) {
-						$GUI->add_message('error', 'Speicherung der Zeitstempel ' . implode(", ", $time_attributes) . ' fehlgeschlagen.<br>' . $ret[1]);
+						$err_msg = 'Speicherung der Zeitstempel ' . implode(", ", $time_attributes) . ' fehlgeschlagen.<br>' . $ret[1];
 					}
 				}
 			}
 		}
-		else{
-			$GUI->add_message('error', 'Abfrage fehlgeschlagen!');
+		else {
+			$err = 'Abfrage fehlgeschlagen!';
+		}
+		if ($err == '') {
+			ob_end_clean();
+			header('Content-type: '.$contenttype);
+			header("Content-disposition:	attachment; filename=".basename($exportfile));
+			#header("Content-Length: ".filesize($exportfile));			# hat bei großen Datenmengen dazu geführt, dass der Download abgeschnitten wird
+			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+			header('Pragma: public');
+			readfile($exportfile);
+		}
+		else {
+			$GUI->add_message('error', $err);
 			$GUI->daten_export();
 		}
 	}

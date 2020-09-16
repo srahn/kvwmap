@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE layer DROP COLUMN filteritem;
+
+COMMIT;
