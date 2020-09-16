@@ -9519,14 +9519,19 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								$this->add_message('notice', 'Eintrag erfolgreich!');
 							}
 
-							if($layerset[0]['oid'] != 'oid'){
+							if ($layerset[0]['oid'] != 'oid') {
 								$last_oid = $result[0];
 							}
-							else{
+							else {
 								$last_oid = pg_last_oid($ret['query']);
 							}
-							if($last_oid == '')$last_oid = $notice_result['oid'];
-							if($this->formvars['embedded'] == '') $this->formvars['value_' . $table['tablename'] . '_oid'] = $last_oid;
+							if ($last_oid == '') {
+								$last_oid = $notice_result['oid'];
+							}
+
+							if ($this->formvars['embedded'] == '') {
+								$this->formvars['value_' . $table['tablename'] . '_oid'] = $last_oid;
+							}
 
 							# After Insert trigger
 							if (!empty($layerset[0]['trigger_function'])) {
@@ -13460,25 +13465,33 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		if(is_string($json) AND (strpos($json, '{') !== false OR strpos($json, '[') !== false)){			// bei Bedarf den JSON-String decodieren
 			$json = json_decode($json);
 		}
-		if(is_array($json)){		// Array-Datentyp
-			for($i = 0; $i < count($json); $i++){
+		if (is_array($json)) {		// Array-Datentyp
+			for ($i = 0; $i < count($json); $i++) {
 				$elems[] = $this->processJSON($json[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, '"');
 			}
 			$result = '{'.@implode(',', $elems).'}';
 		}
-		elseif(is_object($json)){		// Nutzer-Datentyp
-			if($quote == '')$new_quote = '"';
-			elseif($quote == '"')$new_quote = '\\'.$quote;		# Hinweis: das ist eigentlich nur ein! Backslash
-			else $new_quote = $quote; 
+		elseif (is_object($json)) { // Nutzer-Datentyp
+			if ($quote == '') {
+				$new_quote = '"';
+			}
+			elseif($quote == '"') {
+				$new_quote = '\\'.$quote;		# Hinweis: das ist eigentlich nur ein! Backslash
+			}
+			else {
+				$new_quote = $quote;
+			}
 			foreach($json as $elem){
 				$elems[] = $this->processJSON($elem, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $new_quote);
 			}
 			$result = $quote.'('.implode(',', $elems).')'.$quote;
 		}
-		else{		// normaler Datentyp
-			if(substr($json, 0, 5) == 'file:')$json = $this->save_uploaded_file(substr($json, 5), $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);		// Datei-Uploads verarbeiten
-			if($json != '') {
-				$result = $quote.$json.$quote;
+		else { // normaler Datentyp
+			if (substr($json, 0, 5) == 'file:') {
+				$json = $this->save_uploaded_file(substr($json, 5), $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);		// Datei-Uploads verarbeiten
+			}
+			if ($json != '') {
+				$result = ($json == 'NULL' ? '' : $quote . $json . $quote);
 			}
 			else {
 				$result = $json;
@@ -13490,22 +13503,24 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db){
 		$_files = $_FILES;
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-		if($_files[$input_name]['name'] != '' OR $this->formvars[$input_name] == 'delete'){
-			$name_array=explode('.',basename($_files[$input_name]['name']));
-			$datei_name=$name_array[0];
-			$datei_erweiterung=array_pop($name_array);
+		if ($_files[$input_name]['name'] != '' OR $this->formvars[$input_name] == 'delete') {
+			$name_array = explode('.', basename($_files[$input_name]['name']));
+			$datei_name = $name_array[0];
+			$datei_erweiterung = array_pop($name_array);
 			$doc_paths = $mapdb->getDocument_Path($doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $datei_name);
 			$nachDatei = $doc_paths['doc_path'].'.'.$datei_erweiterung;
-			if($doc_paths['doc_url'] != ''){
-				$db_input = $doc_paths['doc_url'].'.'.$datei_erweiterung;			# die URL zu der Datei wird gespeichert (Permalink)
+			if ($doc_paths['doc_url'] != ''){
+				$db_input = $doc_paths['doc_url'] . '.' . $datei_erweiterung;			# die URL zu der Datei wird gespeichert (Permalink)
 			}
-			else{
+			else {
 				$db_input = $nachDatei."&original_name=" . $_files[$input_name]['name'];			# absoluter Dateipfad wird gespeichert
 			}
-			if($this->formvars[$input_name] == 'delete')$db_input = 'NULL';
+			if ($this->formvars[$input_name] == 'delete') {
+				$db_input = 'NULL';
+			}
 			# Bild in das Datenverzeichnis kopieren
 			#echo '<p>move uploaded file: ' . $_files[$input_name]['tmp_name'] . ' to file: ' . $nachDatei;
-			if (move_uploaded_file($_files[$input_name]['tmp_name'],$nachDatei) OR $this->formvars[$input_name] == 'delete'){
+			if (move_uploaded_file($_files[$input_name]['tmp_name'], $nachDatei) OR $this->formvars[$input_name] == 'delete'){
 				# bei dynamischem Dateipfad das Vorschaubild löschen
 				if (strtolower(substr($options, 0, 6)) == 'select') {
 					$this->deleteDokument($nachDatei, $doc_path, $doc_url, true);

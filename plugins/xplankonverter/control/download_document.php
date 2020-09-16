@@ -10,7 +10,9 @@
 	include('../../../class/postgresql.php');
 	include('../../../class/PgObject.php');
 	include('../../../class/log.php');
+	include('../../../funktionen/allg_funktionen.php');
 	include('../model/konvertierung.php');
+
 	class GUI {
 		function __construct($debug, $database) {
 			$this->debug = $debug;
