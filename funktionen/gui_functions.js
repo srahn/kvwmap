@@ -319,6 +319,7 @@ function resizemap2window(){
 function message(messages, t_visible, t_fade, css_top, confirm_value) {
 	console.log('Show Message: %o: ', messages);
 	confirm_value = confirm_value || 'ok';
+	var messageTimeoutID;
 	var msgBoxDiv = $('#message_box');
 	if (msgBoxDiv.is(':visible')) {
 		console.log('msgBox is visible for message: %o', messages);

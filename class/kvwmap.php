@@ -140,7 +140,7 @@ class GUI {
 		if (array_key_exists('go', $this->formvars) AND $this->formvars['go'] == 'logout') {
 			$this->expect[] = 'go';
 		}
-		$this->gui = WWWROOT . APPLVERSION . LOGIN;
+		$this->gui = LOGIN;
 		$this->output();
 	}
 
@@ -247,12 +247,14 @@ class GUI {
 				$output .= '<li><a href="index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326&name='.$name.'\'">'.$name.'</a></li>';
 			}
 		}
-		if($show)echo '<div style="position: absolute;top: 0px;right: 0px">
-										<a href="javascript:void(0)" onclick="document.getElementById(\'geo_name_search_result_div\').innerHTML=\'\';" title="Schlie&szlig;en">
-											<img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img>
-										</a>
-									</div>
-									<ul>'.$output.'</ul>';;
+		if ($show) {
+			echo '<div style="position: absolute;top: 0px;right: 0px">
+							<a href="javascript:void(0)" onclick="document.getElementById(\'geo_name_search_result_div\').innerHTML=\'\';" title="Schlie&szlig;en">
+								<img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img>
+							</a>
+						</div>
+						<ul>'.$output.'</ul>';
+		}
 	}
 
 	function show_snippet() {
@@ -5277,7 +5279,7 @@ echo '			</table>
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
     $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
-    $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+    $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
     if($this->formvars['oid'] != ''){
 			if($this->formvars['selektieren'] != 'zoomonly'){
 				$this->createZoomRollenlayer($dbmap, $layerdb, $layerset);
