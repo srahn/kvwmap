@@ -11,14 +11,10 @@ BEGIN;
   )
   WITH ( OIDS = TRUE );
 
-<<<<<<< HEAD
   SELECT CreateTopology('flaechenschluss_topology', 25833, 0.002)
   WHERE NOT EXISTS (
       SELECT * FROM topology.topology WHERE name = 'flaechenschluss_topology'
   );
-=======
-  SELECT CreateTopology('flaechenschluss_topology', 25833, 0.002);
->>>>>>> b5bcbdf430e7dcdc6afe0a19076781f12bd50cb5
 
   SELECT topology.AddTopoGeometryColumn('flaechenschluss_topology', 'xplankonverter', 'flaechenschlussobjekte', 'topo', 'POLYGON');
 
