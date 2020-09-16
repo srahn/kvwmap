@@ -1063,11 +1063,11 @@ class data_import_export {
 		}
 		$j = 0;
 		foreach ($this->attributes['all_table_names'] as $tablename) {
-			if (($tablename == $layerset[0]['maintable']) AND $this->attributes['oids'][$j]) {
+			if (($tablename == $layerset[0]['maintable']) AND $layerset[0]['oid'] != '') {
 				# hat Haupttabelle oids?
-				$pfad = $this->attributes['table_alias_name'][$tablename] . '.oid AS ' . $tablename . '_oid, ' . $pfad;
+				$pfad = pg_quote($this->attributes['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'].' AS '.pg_quote($tablename.'_oid').', '.$pfad;
 				if ($groupby != '') {
-					$groupby .= ',' . $this->attributes['table_alias_name'][$tablename] . '.oid';
+					$groupby .= ',' . pg_quote($this->attributes['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'];
 				}
 			}
 			$j++;
@@ -1136,7 +1136,7 @@ class data_import_export {
 			if ($this->attributes['the_geom'] == $selected_attributes[$s])$selected_attributes[$s] = 'st_transform('.$selected_attributes[$s].', '.$this->formvars['epsg'].') as '.$selected_attributes[$s];
 			# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
 			if ($this->formvars['export_format'] == 'Shape') {
-				if (in_array($selected_attr_types[$s], array('text', 'varchar'))) $selected_attributes[$s] = $selected_attributes[$s].'::varchar(254)';
+				if (in_array($selected_attr_types[$s], array('text', 'varchar'))) $selected_attributes[$s] = pg_quote($selected_attributes[$s]).'::varchar(254)';
 			}
 		}
 
@@ -1170,7 +1170,7 @@ class data_import_export {
 			$exportfile = IMAGEPATH.$folder.'/'.$this->formvars['layer_name'];
 			switch($this->formvars['export_format']){
 				case 'Shape' : {
-					$err = $this->ogr2ogr_export($sql, '"ESRI Shapefile"', $exportfile.'.shp', $layerdb);
+					$err = $this->ogr2ogr_export(addslashes($sql), '"ESRI Shapefile"', $exportfile.'.shp', $layerdb);
 					if(!file_exists($exportfile.'.cpg')){		// ältere ogr-Versionen erzeugen die cpg-Datei nicht
 						$fp = fopen($exportfile.'.cpg', 'w');
 						fwrite($fp, 'UTF-8');

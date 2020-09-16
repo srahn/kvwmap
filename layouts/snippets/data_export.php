@@ -105,8 +105,13 @@ function update_format(){
 }
 
 function data_export() {
-	message([{type: 'info', msg: 'Der Download wird automatisch gestartet. Die Zeitstempel falls vorhanden, werden automatisch gesetzt und die Datensätze damit als heruntergeladen gekennzeichnet.'}]);
-	message([{type: 'info', msg: 'Dokumente wurden ' + ($('input[name="download_documents"]').is(':checked') ? 'mit' : 'nicht mit') + ' heruntergeladen!'}]);
+	message([{type: 'info', msg: 'Der Download wird automatisch gestartet. Bitte warten.'}]);
+	if(document.getElementById('exporttimestamp').value == 1){
+		message([{type: 'info', msg: 'Die Zeitstempel werden automatisch gesetzt und die Datensätze damit als heruntergeladen gekennzeichnet.'}]);
+	}
+	if(document.GUI.download_documents){
+		message([{type: 'info', msg: 'Dokumente wurden ' + (document.GUI.download_documents.checked ? 'mit' : 'nicht mit') + ' heruntergeladen!'}]);
+	}
 	if (document.GUI.selected_layer_id.value != ''){
 		if(document.GUI.anzahl == undefined && document.GUI.newpathwkt.value == '' && document.GUI.newpath.value == ''){
 			var sure = confirm('<? echo $strSure; ?>');
@@ -260,6 +265,7 @@ $j=0;
 							for($i = 0; $i < $floor+$r; $i++) {
 								if(!in_array($this->data_import_export->attributes['form_element_type'][$j], ['dynamicLink']) AND $this->data_import_export->attributes['type'][$j] != 'unknown'){
 									if($this->data_import_export->attributes['group'][$j] != '') $groupnames = true;
+									if($this->data_import_export->attributes['form_element_type'][$j] == 'Time' AND $this->data_import_export->attributes['options'][$j] == 'export') $exporttimestamp = true;
 									if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument'){$document_attributes = true; $document_ids[] = $j;} ?>
 									<div style="padding: 4px;
 								<? 	if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom']){
@@ -313,6 +319,8 @@ $j=0;
 					</table>
 				</div><?
 			} ?>
+			
+			<input type="hidden" id="exporttimestamp" value="<? echo $exporttimestamp; ?>">
 
 			<div style="margin-top:30px; margin-bottom:10px; text-align: center;">
 				<input name="cancel" type="button" onclick="home();" value="<? echo $strButtonCancel; ?>"><?php
