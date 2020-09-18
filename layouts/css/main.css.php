@@ -190,8 +190,10 @@ span[data-tooltip]:hover::after {
 	text-align: left;
   position: absolute;
 	right: 0px;
+	left: -300px;		/* IE Fallback */
 	left: var(--left);
   top: 24px;
+	max-width: 500px;		/* IE Fallback */
   max-width: var(--width);
 	font-size: 11px;
 	font-family: verdana, arial;
@@ -201,6 +203,7 @@ span[data-tooltip]:hover::after {
   background-color: #DAE4EC;
   padding: 4px;
   z-index: 10000;
+	width: 400px;		/* IE Fallback */
 	width: max-content;
 	white-space: pre-wrap;
   display: block;
