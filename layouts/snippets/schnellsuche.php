@@ -47,7 +47,7 @@
 	
 	if(count($quicksearch_layer_ids) > 0){
 		$quicksearch_layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL, NULL, $quicksearch_layer_ids);
-		if(count($quicksearch_layerdaten['ID']) > 0){
+		if(@count($quicksearch_layerdaten['ID']) > 0){
 ?>
 		<table>
 			<tr>
