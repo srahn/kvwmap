@@ -446,23 +446,27 @@ include('funktionen/input_check_functions.php');
 		form_fields = Array.prototype.slice.call(document.getElementById(fromobject).querySelectorAll('.subform_'+layer_id));
 		form_fieldstring = '';
 		var formData = new FormData();
-  	for(i = 0; i < form_fields.length; i++){
-			if(form_fields[i].name.slice(-4) != '_alt')form_fieldstring += form_fields[i].name+'|';
+  	for (i = 0; i < form_fields.length; i++){
+			if (form_fields[i].name.slice(-4) != '_alt')form_fieldstring += form_fields[i].name+'|';
   		field = form_fields[i].name.split(';');
-  		if(field[4] != 'Dokument' && form_fields[i].readOnly != true && field[5] == '0' && form_fields[i].value == ''){
+  		if (field[4] != 'Dokument' && form_fields[i].readOnly != true && field[5] == '0' && form_fields[i].value == ''){
   			message('Das Feld '+form_fields[i].title+' erfordert eine Eingabe.');
   			return;
   		}
-  		if(field[6] == 'date' && field[4] != 'Time' && form_fields[i].value != '' && !checkDate(form_fields[i].value)){
+  		if (field[6] == 'date' && field[4] != 'Time' && form_fields[i].value != '' && !checkDate(form_fields[i].value)){
 				completeDate(form_fields[i]);
 				if(!checkDate(form_fields[i].value)){
 					message('Das Datumsfeld '+form_fields[i].title+' hat nicht das Format TT.MM.JJJJ.');
 					return;
 				}
   		}
-			if(['checkbox', 'radio'].indexOf(form_fields[i].type) == -1 || form_fields[i].checked){
-				if(form_fields[i].type == 'file' && form_fields[i].files[0] != undefined)value = form_fields[i].files[0];
-				else value = form_fields[i].value;
+			if (['checkbox', 'radio'].indexOf(form_fields[i].type) == -1 || form_fields[i].checked) {
+				if (form_fields[i].type == 'file' && form_fields[i].files[0] != undefined) {
+					value = form_fields[i].files[0];
+				}
+				else {
+					value = form_fields[i].value;
+				}
 				formData.append(form_fields[i].name, value);
 			}
   	}
@@ -730,16 +734,16 @@ include('funktionen/input_check_functions.php');
 	}
 
 	delete_document = function(attributename, layer_id, fromobject, targetobject, reload){
-		if(confirm('Wollen Sie das ausgewählte Dokument wirklich löschen?')){
+		if (confirm('Wollen Sie das ausgewählte Dokument wirklich löschen?')){
 			field = document.getElementsByName(attributename);
 			field[0].type = 'hidden'; // bei einem Typ "file" kann man sonst den value nicht setzen
-			field[0].value = 'file:'+attributename;	// damit der JSON-String eines evtl. vorhandenen übergeordneten Attributs richtig gebildet wird
+			field[0].value = 'file:' + attributename;	// damit der JSON-String eines evtl. vorhandenen übergeordneten Attributs richtig gebildet wird
 			field[0].onchange(); // --||--
 			field[0].value = 'delete';
-			if(fromobject != ''){		// SubForm-Layer
+			if (fromobject != '') {		// SubForm-Layer
 				subsave_data(layer_id, fromobject, targetobject, reload);
 			}
-			else{												// normaler Layer
+			else {												// normaler Layer
 				enclosingForm.go.value = 'Sachdaten_speichern';
 				enclosingForm.submit();
 			}

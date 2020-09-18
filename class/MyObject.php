@@ -133,7 +133,6 @@ class MyObject {
 			" . (!empty($params['order']) ? "ORDER BY " . replace_semicolon($params['order']) : "") . "
 		";
 		$this->debug->show('mysql find_by_sql sql: ' . $sql, MyObject::$write_debug);
-		$this->debug->write('#mysql find_by_sql sql:<br> ' . $sql.';<br>',4);
 		$this->database->execSQL($sql);
 		$results = array();
 		while ($this->data = $this->database->result->fetch_assoc()) {

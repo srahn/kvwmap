@@ -1797,14 +1797,16 @@ BEGIN;
     ON UPDATE CASCADE
     ON DELETE CASCADE;
 
-  CREATE VIEW xplankonverter.konformitaets_validierungen AS 
-  SELECT
-    c2k.name AS class_name,
-    k.*,
-    v.*
-  FROM
-    xplankonverter.uml_class2konformitaeten c2k JOIN
-    xplankonverter.konformitaetsbedingungen k ON c2k.konformitaet_nummer = k.nummer AND c2k.konformitaet_version_von = k.version_von JOIN
-    xplankonverter.validierungen v ON k.nummer = v.konformitaet_nummer AND k.version_von = v.konformitaet_version_von;
+    CREATE VIEW xplankonverter.konformitaets_validierungen AS 
+    SELECT
+      c2k.name AS class_name,
+      k.*,
+      v.*
+    FROM
+      xplankonverter.uml_class2konformitaeten c2k JOIN
+      xplankonverter.konformitaetsbedingungen k ON c2k.konformitaet_nummer = k.nummer AND c2k.konformitaet_version_von = k.version_von JOIN
+      xplankonverter.validierungen v ON k.nummer = v.konformitaet_nummer AND k.version_von = v.konformitaet_version_von
+  ;
+
 
 COMMIT;

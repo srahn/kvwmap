@@ -59,14 +59,13 @@ class Atom{
 				xplan_gml.enum_bp_planart pa ON p.planart[1] = pa.wert::text::xplan_gml.bp_planart
 			WHERE
 				k.veroeffentlicht = TRUE
-/*			AND
+			AND
 				k.status IN(
 					'GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
 					'INSPIRE-GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
 					'INSPIRE-GML-Erstellung abgebrochen'::xplankonverter.enum_konvertierungsstatus,
 					'in INSPIRE-GML-Erstellung'::xplankonverter.enum_konvertierungsstatus
 				)
-*/
 			UNION
 			SELECT
 				pa.abkuerzung || ' Nr. ' || p.nummer || ' ' || (p.gemeinde[1]).gemeindename || ' ' || p.name AS anzeigename,
@@ -82,14 +81,13 @@ class Atom{
 				xplan_gml.enum_fp_planart pa ON p.planart = pa.wert::text::xplan_gml.fp_planart
 			WHERE
 				k.veroeffentlicht = TRUE
-/*			AND
+				AND
 				k.status IN(
 					'GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
 					'INSPIRE-GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
 					'INSPIRE-GML-Erstellung abgebrochen'::xplankonverter.enum_konvertierungsstatus,
 					'in INSPIRE-GML-Erstellung'::xplankonverter.enum_konvertierungsstatus
 				)
-*/
 			UNION
 			SELECT
 				(p.planart).value|| ' ' || (p.gemeinde[1]).gemeindename || ' ' || p.name || coalesce(' Nr. ' || p.nummer,  '') AS anzeigename,
@@ -104,14 +102,13 @@ class Atom{
 				xplankonverter.konvertierungen k ON p.konvertierung_id = k.id
 			WHERE
 				k.veroeffentlicht = TRUE
-/*			AND
+				AND
 				k.status IN(
 					'GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
 					'INSPIRE-GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
 					'INSPIRE-GML-Erstellung abgebrochen'::xplankonverter.enum_konvertierungsstatus,
 					'in INSPIRE-GML-Erstellung'::xplankonverter.enum_konvertierungsstatus
 				)
-*/
 			ORDER BY
 				dataset_updated_at
 		";
@@ -213,7 +210,7 @@ class Atom{
 				xplan_gml.enum_bp_planart pa
 			WHERE
 				k.veroeffentlicht = TRUE
-			AND
+				AND
 				k.status IN(
 					'GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
 					'INSPIRE-GML-Erstellung abgeschlossen'::xplankonverter.enum_konvertierungsstatus,
