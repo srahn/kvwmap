@@ -13,7 +13,7 @@
  $strGemkg="Gemarkung (Gemeinde)";
  $strHintCaseSens="Groß- und Kleinschreibung beachten";
  $strHintWildcard="Geben Sie den Platzhalter &quot;%&quot; ein (z.B. &quot;me%er&quot;), wenn an der Stelle beliebige und beliebig viele Zeichen stehen dürfen. Geben Sie den Platzhalter &quot;_&quot; ein (z.B. &quot;me_er&quot;), wenn an der Stelle ein beliebiges Zeichen stehen darf";
- $strShowHits="Anzahl Treffer anzeigen";
+ $strShowHits="Treffer anzeigen";
  $strShowWithFst="Flurstücke anzeigen";
  $strSearch="Suchen";
  $strTotalHits="Treffer gesamt";
@@ -28,7 +28,7 @@
  $strShowFst="Flurstücksdaten";
  $strToMap="Karte";
  $strHuntEdit="Jagdbezirk bearbeiten";
- $strParcelNo="Flurstkennz";
+ $strParcelNo="Flurstückskennzeichen";
  $strGemkgName="Gemarkungsname";
  $strAreaALB="amtliche Fläche";
  $strDoPrintoutsALB="Auszüge erzeugen";

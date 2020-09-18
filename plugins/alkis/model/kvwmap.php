@@ -1361,7 +1361,7 @@
     }
     else {
       $GUI->namen=$ret[1];
-      if (count($GUI->namen)==0) {
+      if (@count($GUI->namen)==0) {
         $GUI->Fehlermeldung='<br>Es konnten keine Namen gefunden werden, bitte ändern Sie die Anfrage!';
       }
       else {
