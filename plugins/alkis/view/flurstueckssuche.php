@@ -24,6 +24,12 @@ function showimport(){
 	}
 }
 
+document.onclick =  function(e){
+	if(e.target.id != 'importlink' && e.target.closest('div').id != 'import2'){
+		document.getElementById('import2').style.visibility = 'hidden';
+	}
+};
+
 -->
 </script>
 <style>
@@ -154,7 +160,7 @@ Eingabeformate:
 	</div>
 </div>
 <div id="import1">
-	<a href="javascript:showimport();">Import Flurstücksliste</a>
+	<a id="importlink" href="javascript:showimport();">Import Flurstücksliste</a>
 </div>
 <div id="import2">
 	<input name="importliste" type="file" value="" tabindex="2">
