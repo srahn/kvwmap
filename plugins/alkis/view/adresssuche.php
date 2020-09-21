@@ -115,7 +115,6 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 					</td>
 					<td><?php echo $this->FormObject["HausNr"]->html; ?></td>
 				</tr>
-				</tr>
 			</table>
 		</div>
 		<?	} else { ?>
