@@ -3,7 +3,7 @@
  $strGem="Gemeinde";
  $strGemkg="Gemarkung/Ortsteil";
  $strStreet="Straße";
- $strHnr="Hausnr.";
+ $strHnr="Hausnummer";
  $strSelected="ausgewählte";
  $strExist="vorhandene";
  $strClear="Neu";

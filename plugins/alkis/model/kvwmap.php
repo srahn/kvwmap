@@ -401,7 +401,7 @@
 		    }
         $HausNrListe=$Adresse->getHausNrListe($GemID,$StrID,'','','hausnr*1,ASCII(REVERSE(hausnr)),quelle');
         # Erzeugen des Formobjektes für die Flurstücksauswahl
-        if (count($HausNrListe['HausID'])==1){
+        if (@count($HausNrListe['HausID'])==1){
           $HausID=$HausNrListe['HausID'][0];
           $HausID = array($HausID);
         }
