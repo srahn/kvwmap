@@ -532,11 +532,9 @@
 			$importliste = file($_files['importliste']['tmp_name'], FILE_IGNORE_NEW_LINES);
 			$bom = pack('H*','EFBBBF');
 			$importliste[0] = preg_replace("/^$bom/", '', $importliste[0]);
-			if(strpos($importliste[0], '/') !== false){
-				$importliste_string = implode('; ', $importliste);
-				$importliste_string = formatFlurstkennzALKIS($importliste_string);
-				$importliste = explode(';', $importliste_string);
-			}
+			$importliste_string = implode('; ', $importliste);
+			$importliste_string = formatFlurstkennzALKIS($importliste_string);
+			$importliste = explode(';', $importliste_string);
 			$GUI->formvars['selFlstID'] = implode(', ', $importliste);
 			$GUI->formvars['GemkgID'] = substr($importliste[0], 0, 6);
 			$GUI->formvars['FlurID'] = substr($importliste[0], 6, 3);
@@ -619,7 +617,7 @@
     }
     else {
       $FlurFormObj=new FormObject("FlurID","text","","","","5","5","multiple",NULL);
-      $FlstNrFormObj=new FormObject("FlstNr","text","","","","20","20","multiple",NULL);
+      $FlstNrFormObj=new FormObject("FlstNr","text","","","","25","25","multiple",NULL);
     }
     $GUI->FormObject["Gemeinden"]=$GemFormObj;
     $GUI->FormObject["Gemarkungen"]=$GemkgFormObj;
@@ -631,21 +629,21 @@
 	
 	$GUI->flurstSuchen = function() use ($GUI){
 		include_once(PLUGINS.'alkis/model/kataster.php');
-    $GemID=$GUI->formvars['GemID'];
-    $GemkgID=$GUI->formvars['GemkgID'];
-    if ($GUI->formvars['FlurID']!='-1') {
+    $GemID = $GUI->formvars['GemID'];
+    $GemkgID = $GUI->formvars['GemkgID'];
+    if ($GUI->formvars['FlurID'] != '-1') {
       # dreistelliges auffüllen der Flurnummer mit Nullen
-      $FlurID=str_pad($GUI->formvars['FlurID'],3,"0",STR_PAD_LEFT);
+      $FlurID = str_pad($GUI->formvars['FlurID'],3,"0",STR_PAD_LEFT);
     }
     else {
-      $FlurID=$GUI->formvars['FlurID'];
+      $FlurID = $GUI->formvars['FlurID'];
     }
-    $FlstID=$GUI->formvars['selFlstID'];
-    $FlstNr=$GUI->formvars['FlstNr'];
+    $FlstID = $GUI->formvars['selFlstID'];
+    $FlstNr = formatFlurstkennzALKIS($GUI->formvars['FlstNr']);
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
     # abfragen, ob es sich um eine gültige GemarkungsID handelt
     $GemkgListe=$Gemarkung->getGemarkungListe(array($GemID),array($GemkgID));
-    if(count($GemkgListe['GemkgID']) > 0){
+    if(@count($GemkgListe['GemkgID']) > 0){
       # Die Gemarkung ist ausgewählt und gültig aber Flur leer, zoom auf Gemarkung
       if($FlurID==0 OR $FlurID=='-1'){
 				if($GUI->formvars['ALK_Suche'] == 1){

@@ -270,19 +270,29 @@ function formatFlurstkennzALKIS($FlurstKennzListe){
 	$Flurstuecke = explode(';', $FlurstKennzListe);
 	for($i = 0; $i < count($Flurstuecke); $i++){
 		$FlurstKennz = $Flurstuecke[$i];
-		$explosion = explode('-', $FlurstKennz);
-		$gem = trim($explosion[0]);
-		$flur = trim($explosion[1]);
-		$flurst = trim($explosion[2]);
-		$explosion = explode('/',$flurst);
-		$zaehler = $explosion[0];
-		$nenner = $explosion[1];
-		if($nenner != '000.00'){
-			$explosion = explode('.',$nenner);
-			$vorkomma = '0'.$explosion[0];
+		if(strpos($FlurstKennz, '/') !== false){		# ALB-Schreibweise 131234-001-00234/005.00
+			$explosion = explode('-', $FlurstKennz);
+			$gem = trim($explosion[0]);
+			$flur = trim($explosion[1]);
+			$flurst = trim($explosion[2]);
+			$explosion = explode('/',$flurst);
+			$zaehler = $explosion[0];
+			$nenner = $explosion[1];
+			if($nenner != '000.00'){
+				$explosion = explode('.',$nenner);
+				$vorkomma = '0'.$explosion[0];
+			}
+			else $vorkomma = '';
 		}
-		else $vorkomma = '';
-		$FlurstKennz = $gem.$flur.$zaehler.$vorkomma;
+		elseif(strpos($FlurstKennz, '-') !== false){		# Kurzschreibweise 13-1234-1-234-5
+			$explosion = explode('-', $FlurstKennz);
+			$land = $explosion[0];
+			$gem = $explosion[1];
+			$flur = str_pad($explosion[2], 3, '0', STR_PAD_LEFT);
+			$zaehler = str_pad($explosion[3], 5, '0', STR_PAD_LEFT);
+			$vorkomma = str_pad($explosion[4], 4, '0', STR_PAD_LEFT);
+		}
+		$FlurstKennz = $land.$gem.$flur.$zaehler.$vorkomma;
 		$Flurstuecke[$i] = str_pad($FlurstKennz, 20, '_', STR_PAD_RIGHT);
 	}
   return implode(';', $Flurstuecke);
