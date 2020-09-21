@@ -927,7 +927,6 @@ class stelle {
 					`Stelle_ID`,
 					`Layer_ID`,
 					`queryable`,
-					`use_geom`,
 					`drawingorder`,
 					`legendorder`,
 					`minscale`,
@@ -948,7 +947,6 @@ class stelle {
 					'" . $this->id . "',
 					'" . $layer_ids[$i] . "',
 					queryable,
-					use_geom,
 					drawingorder, 
 					legendorder, 
 					minscale, 
@@ -972,7 +970,6 @@ class stelle {
 					$sql .= "
 					ON DUPLICATE KEY UPDATE 
 						queryable = l.queryable, 
-						queryable = l.use_geom, 
 						drawingorder = l.drawingorder, 
 						legendorder = l.legendorder, 
 						minscale = l.minscale, 
