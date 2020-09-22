@@ -1,4 +1,4 @@
-<script src="funktionen/tooltip.js" language="JavaScript"	type="text/javascript"></script><?php
+<?php
 	include(SNIPPETS . 'sachdatenanzeige_functions.php');
 	include_once(CLASSPATH . 'FormObject.php');
 ?>
