@@ -35,6 +35,7 @@
 						<td style="border:1px solid #C3C7C3"><textarea name="options_sql[]" style="height: 22px"><? echo $this->params[$i]['options_sql']; ?></textarea></td>
 						<td style="border:1px solid #C3C7C3"><?
 							if (
+								$this->params_layer != NULL AND
 								array_key_exists($this->params[$i]['id'], $this->params_layer) AND
 								$layer_count = count($this->params_layer[$this->params[$i]['id']]) > 0
 							) {
