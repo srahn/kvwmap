@@ -865,31 +865,31 @@ class Validierung extends PgObject {
 		return $conformity;
 	}
 
-  function doValidate($konvertierung) {
-    // validate here
-    if (true)
-      return array('success' => 'OK');
-    else
-      return array('success' => 'ERROR', 'error' => 'Validierung fehlgeschlagen');
-  }
+	function doValidate($konvertierung) {
+		// validate here
+		if (true)
+			return array('success' => 'OK');
+		else
+			return array('success' => 'ERROR', 'error' => 'Validierung fehlgeschlagen');
+	}
 
-  function validateKonvertierung($konvertierung,$success,$failure) {
-    $result = $this->doValidate($konvertierung);
-    if ($result['success'] == 'OK') {
-      // status setzen
-      $konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_OK']);
-      $konvertierung->update();
-      // success callback ausführen
-     $success();
-    } else {
-      // status setzen
-      $konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_ERR']);
-      $konvertierung->update();
-      // error callback ausfuehren
-     $failure($result['error']);
-    }
-    return;
-  }
+	function validateKonvertierung($konvertierung,$success,$failure) {
+		$result = $this->doValidate($konvertierung);
+		if ($result['success'] == 'OK') {
+			// status setzen
+			$konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_OK']);
+			$konvertierung->update();
+			// success callback ausführen
+			$success();
+		} else {
+			// status setzen
+			$konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_ERR']);
+			$konvertierung->update();
+			// error callback ausfuehren
+			$failure($result['error']);
+		}
+		return;
+	}
 }
 
 ?>

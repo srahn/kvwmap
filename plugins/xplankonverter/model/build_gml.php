@@ -31,35 +31,35 @@
 
 class Gml_builder {
 
-  static $XPLANKONVERTER_NON_XPLAN_FIELDS = array(
-      "konvertierung_id",
-      "created_at",
-      "updated_at"
-  );
+	static $XPLANKONVERTER_NON_XPLAN_FIELDS = array(
+		"konvertierung_id",
+		"created_at",
+		"updated_at"
+	);
 
-  function __construct($database) {
-    global $debug;
-    $this->debug = $debug;
-    $this->database = $database;
-    $this->typeInfo = new TypeInfo($database);
+	function __construct($database) {
+		global $debug;
+		$this->debug = $debug;
+		$this->database = $database;
+		$this->typeInfo = new TypeInfo($database);
 
-    $this->tmpFile = tmpfile();
-  }
+		$this->tmpFile = tmpfile();
+	}
 
-  function __destruct() {
-    fclose($this->tmpFile);
-  }
+	function __destruct() {
+		fclose($this->tmpFile);
+	}
 
-  /*
-  * Diese Funktion erzeugt einen gml-Text aus den
-  * der Konvertierung und dem Plan zugeordneten Einträge
-  * des GML-Mappings. Aufgrund der Größe der entstehenden
-  * GML-Texte wird deren Inhalt in eine temporäre Datei
-  * geschrieben. Die temporäre Datei wird vom Gml_builder
-  * Objekt verwaltet.
-  * Mit der Funktion save($path) kann die temporäre Datei in
-  * eine Zieldatei gespeichert werden
-  */
+	/*
+	* Diese Funktion erzeugt einen gml-Text aus den
+	* der Konvertierung und dem Plan zugeordneten Einträge
+	* des GML-Mappings. Aufgrund der Größe der entstehenden
+	* GML-Texte wird deren Inhalt in eine temporäre Datei
+	* geschrieben. Die temporäre Datei wird vom Gml_builder
+	* Objekt verwaltet.
+	* Mit der Funktion save($path) kann die temporäre Datei in
+	* eine Zieldatei gespeichert werden
+	*/
 	function build_gml($konvertierung, $plan){
 		# set encoding to UTF-8
 		$old_encoding = mb_internal_encoding();
@@ -254,18 +254,18 @@ class Gml_builder {
 		return true;
 	}
 
-  function wrapWithElement($tag,$inner) {
-    return "<$tag>$inner</$tag>";
-  }
+	function wrapWithElement($tag,$inner) {
+		return "<$tag>$inner</$tag>";
+	}
 
 	function wrapWithElementAndAttribute($tag, $inner, $attributename, $attributevalue) {
 		$str = "<" . $tag . " " . $attributename . '="' . $attributevalue . '">' . $inner . "</" . $tag . ">";
 		return $str;
 	}
 
-  function wrapWithFeatureMember($inner) {
-    return $this->wrapWithElement("gml:featureMember",$inner);
-  }
+	function wrapWithFeatureMember($inner) {
+		return $this->wrapWithElement("gml:featureMember",$inner);
+	}
 
   function generateGmlForAttributes($gml_object, $uml_attribute_info, $depth) {
     if (($depth) < 0) return '';

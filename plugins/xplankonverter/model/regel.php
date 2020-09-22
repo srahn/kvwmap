@@ -448,7 +448,7 @@ class Regel extends PgObject {
 				$regel_id = 0; // can't exist, but necessary for int comparison in SQL
 			}
 			#echo '<br>Regel gehört über einen Bereich und Plan zur Konvertierung.';
-			$sql = "
+			/*$sql = "
 				SELECT
 					b.konvertierung_id
 				FROM
@@ -456,27 +456,29 @@ class Regel extends PgObject {
 					xplankonverter.regeln r ON b.gml_id = r.bereich_gml_id
 				WHERE
 					r.id = " . $regel_id . "
-			";
-/*
-			SELECT
-				coalesce(bp.konvertierung_id, rp.konvertierung_id) AS konvertierung_id
-			FROM
-				xplankonverter.regeln r LEFT JOIN
-				xplan_gml.bp_bereich bb ON r.bereich_gml_id = bb.gml_id LEFT JOIN
-				xplan_gml.fp_bereich fb ON r.bereich_gml_id = fb.gml_id LEFT JOIN
-				xplan_gml.rp_bereich rb ON r.bereich_gml_id = rb.gml_id LEFT JOIN
-				xplan_gml.so_bereich sb ON r.bereich_gml_id = sb.gml_id LEFT JOIN
-				xplan_gml.bp_plan bp ON bp.gml_id::text = bb.gehoertzuplan LEFT JOIN
-				xplan_gml.fp_plan fp ON fp.gml_id::text = fb.gehoertzuplan LEFT JOIN
-				xplan_gml.rp_plan rp ON rp.gml_id::text = rb.gehoertzuplan LEFT JOIN
-				xplan_gml.so_plan sp ON sp.gml_id::text = sb.gehoertzuplan LEFT JOIN
-				xplan_gml.rp_plan bpp ON bpp.konvertierung_id = r.konvertierung_id LEFT JOIN
-				xplan_gml.rp_plan fpp ON fpp.konvertierung_id = r.konvertierung_id LEFT JOIN
-				xplan_gml.rp_plan rpp ON rpp.konvertierung_id = r.konvertierung_id LEFT JOIN
-				xplan_gml.rp_plan spp ON spp.konvertierung_id = r.konvertierung_id
-			WHERE
-				r.id = " . $this->get('id')
-*/
+			";*/
+
+			// currently bereich does not (always) hold konvertierung_id and association is not on xp_schema
+			$sql = "
+				SELECT
+					coalesce(bp.konvertierung_id, rp.konvertierung_id) AS konvertierung_id
+				FROM
+					xplankonverter.regeln r LEFT JOIN
+					xplan_gml.bp_bereich bb ON r.bereich_gml_id = bb.gml_id LEFT JOIN
+					xplan_gml.fp_bereich fb ON r.bereich_gml_id = fb.gml_id LEFT JOIN
+					xplan_gml.rp_bereich rb ON r.bereich_gml_id = rb.gml_id LEFT JOIN
+					xplan_gml.so_bereich sb ON r.bereich_gml_id = sb.gml_id LEFT JOIN
+					xplan_gml.bp_plan bp ON bp.gml_id::text = bb.gehoertzuplan LEFT JOIN
+					xplan_gml.fp_plan fp ON fp.gml_id::text = fb.gehoertzuplan LEFT JOIN
+					xplan_gml.rp_plan rp ON rp.gml_id::text = rb.gehoertzuplan LEFT JOIN
+					xplan_gml.so_plan sp ON sp.gml_id::text = sb.gehoertzuplan LEFT JOIN
+					xplan_gml.rp_plan bpp ON bpp.konvertierung_id = r.konvertierung_id LEFT JOIN
+					xplan_gml.rp_plan fpp ON fpp.konvertierung_id = r.konvertierung_id LEFT JOIN
+					xplan_gml.rp_plan rpp ON rpp.konvertierung_id = r.konvertierung_id LEFT JOIN
+					xplan_gml.rp_plan spp ON spp.konvertierung_id = r.konvertierung_id
+				WHERE
+					r.id = " . $regel_id . "
+				";
 
 			#echo '<br>SQL zum Abfragen der konvertierung_id der Regel: ' . $sql;
 			$result = pg_query($this->database->dbConn, $sql);
