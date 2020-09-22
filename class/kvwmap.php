@@ -9914,6 +9914,19 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->output();
 		}
 	}
+	
+	function sachdaten_druck_editor_autogenerate(){
+		include_(CLASSPATH.'datendrucklayout.php');
+		$ddl=new ddl($this->database);
+		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+    $this->ddl=$ddl;
+    $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
+    $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+		$this->formvars = array_merge($this->formvars, $this->ddl->autogenerate_layout($this->attributes));
+		$this->formvars['aktivesLayout'] = $this->ddl->save_layout($this->formvars, $this->attributes, $_files, $this->Stelle->id);
+		$this->sachdaten_druck_editor();
+	}
 
 	function sachdaten_druck_editor(){
 		global $admin_stellen;

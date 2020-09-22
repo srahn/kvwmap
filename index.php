@@ -1096,6 +1096,11 @@ function go_switch($go, $exit = false) {
 				$GUI->sachdaten_druck_editor();
 			} break;
 
+			case 'sachdaten_druck_editor_Layout automatisch erzeugen' : {
+				$GUI->checkCaseAllowed('sachdaten_druck_editor');
+				$GUI->sachdaten_druck_editor_autogenerate();
+			} break;
+
 			case 'sachdaten_druck_editor_als neues Layout speichern' : {
 				$GUI->checkCaseAllowed('sachdaten_druck_editor');
 				$GUI->sachdaten_druck_editor_speichern();

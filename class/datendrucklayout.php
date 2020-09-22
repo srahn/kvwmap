@@ -372,7 +372,7 @@ class ddl {
 								#### relative Positionierung über Offset-Attribut ####
 								$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
 								if($offset_attribute != ''){			# es ist ein offset_attribute gesetzt
-									$offset_value = $this->layout[offset_attributes][$offset_attribute];
+									$offset_value = $this->layout['offset_attributes'][$offset_attribute];
 									if($offset_value != ''){		# Offset wurde auch schon bestimmt, relative y-Position berechnen
 										$ypos = $this->handlePageOverflow($offset_attribute, $offset_value, $ypos);		# Seitenüberläufe berücksichtigen
 									}
@@ -1054,6 +1054,33 @@ class ddl {
 			$this->pdf->closeObject();
 		}
 	}
+	
+	function autogenerate_layout($attributes){
+		$formvars['name'] = 'AutoLayout_'.date("Y-m-d_G-i-s");
+		$formvars['format'] = 'A4 hoch';
+		$formvars['type'] = '0';
+		$maxy = 842;
+		$maxx = 595;
+		$fontsize = 11;
+		$formvars['margin_top'] = 50;
+		$formvars['margin_bottom'] = 50;
+		$formvars['margin_left'] = 50;
+		$formvars['margin_right'] = 50;
+		$y = $maxy - $formvars['margin_top'] - $fontsize;
+		$x = $formvars['margin_left'];
+		for($i = 0; $i < count($attributes['name']); $i++){
+			if(!in_array($attributes['form_element_type'][$i], ['Geometrie', 'Dokument', 'SubFormEmbeddedPK', 'SubFormPK'])){
+				$formvars['posx_'.$attributes['name'][$i]] = $x;
+				$formvars['posy_'.$attributes['name'][$i]] = 20;
+				$formvars['offset_attribute_'.$attributes['name'][$i]] = $attributes['name'][$last_attribute_index];
+				$formvars['font_'.$attributes['name'][$i]] = 'Helvetica.afm';
+				$formvars['fontsize_'.$attributes['name'][$i]] = 11;
+				$last_attribute_index = $i;
+			}
+		}
+		$formvars['posy_'.$attributes['name'][0]] = $y;
+		return $formvars;
+	}
 
 	function save_layout($formvars, $attributes, $_files, $stelle_id){
     if($formvars['name']){
@@ -1137,7 +1164,7 @@ class ddl {
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
 
-      for($i = 0; $i < count($formvars['text']); $i++){
+      for($i = 0; $i < @count($formvars['text']); $i++){
         $formvars['text'][$i] = str_replace(chr(10), ';', $formvars['text'][$i]);
         $formvars['text'][$i] = str_replace(chr(13), '', $formvars['text'][$i]);
         if($formvars['text'][$i] == 'NULL')$formvars['text'][$i] = NULL;
@@ -1303,7 +1330,7 @@ class ddl {
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
 
-      for($i = 0; $i < count($formvars['text']); $i++){
+      for($i = 0; $i < @count($formvars['text']); $i++){
         $formvars['text'][$i] = str_replace(chr(10), ';', $formvars['text'][$i]);
         $formvars['text'][$i] = str_replace(chr(13), '', $formvars['text'][$i]);
         if($formvars['text'][$i] == 'NULL')$formvars['text'][$i] = NULL;
@@ -1492,7 +1519,7 @@ class ddl {
   }
 	
 	function output_freetext_form($texts, $layer_id, $ddl_id){
-		for($i = 0; $i < count($texts); $i++){
+		for($i = 0; $i < @count($texts); $i++){
 			$texts[$i]['text'] = str_replace(';', chr(10), $texts[$i]['text']);
 			echo '
 			<tr>
