@@ -972,7 +972,7 @@ class stelle {
 					$sql .= "
 					ON DUPLICATE KEY UPDATE 
 						queryable = l.queryable, 
-						queryable = l.use_geom, 
+						use_geom = l.use_geom, 
 						drawingorder = l.drawingorder, 
 						legendorder = l.legendorder, 
 						minscale = l.minscale, 

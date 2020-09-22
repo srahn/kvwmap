@@ -9291,7 +9291,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 
 		# Dokumente speichern
-		if (count($document_attributes) > 0) {
+		if (@count($document_attributes) > 0) {
 			foreach ($document_attributes as $i => $document_attribute) {
 				$options = $attributes['options'][$document_attribute['attributename']];
 				if (substr($document_attribute['datatype'], 0, 1) == '_') {
