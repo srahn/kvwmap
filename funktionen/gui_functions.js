@@ -566,7 +566,9 @@ function urlstring2formdata(formdata, string){
 }
 
 function formdata2urlstring(formdata){
-	for(var pair of formdata.entries()){
+	var entries = formdata.entries();
+	for(i = 0; i < entries.length; i++) {
+		var pair = entries[i];
 		url = '&' + encodeURIComponent(pair[0]) + '=' + encodeURIComponent(pair[1]);
 	}
 	return url;
