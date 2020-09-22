@@ -2746,21 +2746,68 @@ class db_mapObj {
 		return $Labels;
 	}
 
-  function read_RollenLayer($id = NULL, $typ = NULL){
-		$sql = "SELECT DISTINCT l.*, l.Name as alias, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, CASE WHEN rollenfilter != '' THEN concat('(', rollenfilter, ')') END as Filter from rollenlayer AS l, u_groups AS g";
-    $sql.= ' WHERE l.Gruppe = g.id AND l.stelle_id='.$this->Stelle_ID.' AND l.user_id='.$this->User_ID;
-    if($id != NULL){
-    	$sql .= ' AND l.id = '.$id;
-    }
-  	if($typ != NULL){
-    	$sql .= ' AND l.Typ = \''.$typ.'\'';
-    }
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>" . $sql,4);
+	function read_RollenLayer($id = NULL, $typ = NULL){
+		$sql = "
+			SELECT DISTINCT
+				l.`id`,
+				l.`user_id`,
+				l.`stelle_id`,
+				l.`aktivStatus`,
+				l.`queryStatus`,
+				l.`Name`,
+				l.`Name` as alias,
+				l.`Gruppe`,
+				l.`Typ`,
+				l.`Datentyp`,
+				l.`Data`,
+				l.`query`,
+				l.`connectiontype`,
+				l.connection_id,
+				CASE
+					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password)
+					ELSE l.connection
+				END as connection,
+				l.`epsg_code`,
+				l.`transparency`,
+				l.`labelitem`,
+				l.`classitem`,
+				l.`gle_view`,
+				l.`rollenfilter`,
+				l.`duplicate_from_layer_id`,
+				l.`duplicate_criterion`,
+				g.Gruppenname,
+				-l.id AS Layer_ID,
+				1 as showclasses,
+				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable,
+				CASE WHEN rollenfilter != '' THEN concat('(', rollenfilter, ')') END as Filter
+			FROM
+				rollenlayer AS l JOIN
+				u_groups AS g ON l.Gruppe = g.id LEFT JOIN
+				connections AS c ON l.connection_id = c.id
+			WHERE
+				l.stelle_id=" . $this->Stelle_ID . " AND
+				l.user_id = " . $this->User_ID .
+				($id != NULL ? " AND l.id = " . $id : '') .
+				($typ != NULL ? " AND l.Typ = '" . $typ . "'" : '') . "
+		";
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>",4);
+		# echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
     $Layer = array();
     while ($rs = $ret['result']->fetch_array()) {
       $rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
+			foreach (array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
+				$rs[$key] = replace_params(
+					$rs[$key],
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->rolle->language,
+					$rs['duplicate_criterion']
+				);
+			}
       $Layer[] = $rs;
     }
     return $Layer;

@@ -1,4 +1,4 @@
-<script src="funktionen/tooltip.js" language="JavaScript"	type="text/javascript"></script><?php
+<?php
 	include(SNIPPETS . 'sachdatenanzeige_functions.php');
 	include_once(CLASSPATH . 'FormObject.php');
 ?>
@@ -269,7 +269,7 @@ function scrolltop(){
 					<td>
 						<table width="597" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
 							<tr>
-								<td class="fett" align="center" style="border-top:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3">&nbsp;Themen-Auswahl</td>
+								<td colspan="2" class="fett" align="center" style="border-top:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3">&nbsp;Themen-Auswahl</td>
 							</tr>
 							<tr>
 								<td> 
@@ -283,6 +283,11 @@ function scrolltop(){
 											echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
 										} ?>
 									</select>
+								</td>
+								<td align="center">
+								<? if($this->formvars['selected_layer_id'] != ''){ ?>
+									<input type="submit" name="go_plus" value="Layout automatisch erzeugen">
+								<? } ?>
 								</td>
 							</tr>
 						</table>
@@ -301,7 +306,7 @@ function scrolltop(){
 								</tr>
 								<tr>
 									<td colspan=1>
-										&nbsp;<select	name="aktivesLayout" onchange="document.GUI.submit()">
+										<select	name="aktivesLayout" onchange="document.GUI.submit()">
 										<option value="">--- bitte wählen ---</option>
 										<?	
 										for($i = 0; $i < count($this->ddl->layouts); $i++){
@@ -314,7 +319,7 @@ function scrolltop(){
 										<input type="submit" name="go_plus" value="übernehmen >>">
 									</td>
 									<td style="border-left:1px solid #C3C7C3">
-										&nbsp;<select	name="stelle">
+										<select	name="stelle">
 										<option value="">--- bitte wählen ---</option>
 											<?
 											for($i = 0; $i < count($this->stellendaten['ID']); $i++){
@@ -640,7 +645,7 @@ function scrolltop(){
 										<span id="linien">Linien</span>
 									</td>
 								</tr>
-								<? for($i = 0; $i < count($this->ddl->selectedlayout[0]['lines']); $i++){
+								<? for($i = 0; $i < @count($this->ddl->selectedlayout[0]['lines']); $i++){
 									 ?>
 									<tbody id="line_form_<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>" onmouseenter="highlight_line(<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>)" onmouseleave="de_highlight_line(<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>)">
 									<tr>
@@ -722,7 +727,7 @@ function scrolltop(){
 										<span id="rechtecke">Rechtecke</span>
 									</td>
 								</tr>
-								<? for($i = 0; $i < count($this->ddl->selectedlayout[0]['rectangles']); $i++){
+								<? for($i = 0; $i < @count($this->ddl->selectedlayout[0]['rectangles']); $i++){
 									 ?>
 									<tbody id="rect_form_<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>" onmouseenter="highlight_rect(<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>)" onmouseleave="de_highlight_rect(<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>)">
 									<tr>

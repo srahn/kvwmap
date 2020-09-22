@@ -9291,7 +9291,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 
 		# Dokumente speichern
-		if (count($document_attributes) > 0) {
+		if (@count($document_attributes) > 0) {
 			foreach ($document_attributes as $i => $document_attribute) {
 				$options = $attributes['options'][$document_attribute['attributename']];
 				if (substr($document_attribute['datatype'], 0, 1) == '_') {
@@ -9913,6 +9913,19 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		else {
 			$this->output();
 		}
+	}
+	
+	function sachdaten_druck_editor_autogenerate(){
+		include_(CLASSPATH.'datendrucklayout.php');
+		$ddl=new ddl($this->database);
+		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+    $this->ddl=$ddl;
+    $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
+    $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+		$this->formvars = array_merge($this->formvars, $this->ddl->autogenerate_layout($this->attributes));
+		$this->formvars['aktivesLayout'] = $this->ddl->save_layout($this->formvars, $this->attributes, $_files, $this->Stelle->id);
+		$this->sachdaten_druck_editor();
 	}
 
 	function sachdaten_druck_editor(){
