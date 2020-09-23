@@ -99,7 +99,12 @@ function update_options(){
 }
 
 function addfreetext(layer_id, ddl_id){
-	ahah('index.php?go=sachdaten_druck_editor_Freitexthinzufuegen&selected_layer_id='+layer_id+'&aktivesLayout='+ddl_id, '', new Array(document.getElementById('add_freetext')), new Array('prependhtml'));
+	var posx = [].slice.call(document.getElementsByName('textposx[]')).pop().value;
+	var posy = [].slice.call(document.getElementsByName('textposy[]')).pop().value;
+	var font = [].slice.call(document.getElementsByName('textfont[]')).pop().value;
+	var size = [].slice.call(document.getElementsByName('textsize[]')).pop().value;
+	ahah('index.php?go=sachdaten_druck_editor_Freitexthinzufuegen&selected_layer_id='+layer_id+'&aktivesLayout='+ddl_id+'&posx='+posx+'&posy='+posy+'&size='+size+'&font='+font, '', new Array(document.getElementById('add_freetext')), new Array('prependhtml'));
+	document.GUI.textcount.value = document.GUI.textcount.value + 1;
 }
 
 function addline(){
