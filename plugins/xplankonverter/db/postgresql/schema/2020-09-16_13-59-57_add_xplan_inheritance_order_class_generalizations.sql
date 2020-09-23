@@ -1,5 +1,21 @@
 BEGIN;
-ALTER TABLE xplan_uml.class_generalizations ADD COLUMN IF NOT EXISTS inheritance_order INTEGER;
+-- Add column if not exists
+-- IF NOT EXISTS syntax for columns only supported for Postgres 9.6+, which is not running on all machines yet
+-- So Instead do information_schema check
+DO
+$$
+BEGIN
+IF NOT EXISTS (SELECT 1
+                FROM  information_schema.columns 
+               WHERE  table_schema = 'xplan_uml' 
+                 AND  table_name = 'class_generalizations' 
+                 AND  column_name = 'inheritance_order' ) THEN
+ALTER TABLE xplan_uml.class_generalizations ADD COLUMN inheritance_order INTEGER DEFAULT NULL;
+ELSE
+RAISE NOTICE 'Already exists';
+END IF;
+END
+$$
 
 UPDATE xplan_uml.class_generalizations
 SET inheritance_order = 1
