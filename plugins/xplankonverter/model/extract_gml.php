@@ -9,9 +9,9 @@ class Gml_extractor {
 		$this->gmlas_schema = $gmlas_schema;
 		$this->xsd_location = '/var/www/html/modell/xsd/5.1/XPlanung-Operationen.xsd';
 		$this->docker_gdal_cmd = 'docker exec gdal';
-        #TODO parse the input system from the file (e.g. with ogrinfo) or have an input field on upload 
-		$this->input_epsg = '25832';
-		$this->epsg = '25832';
+		#TODO consider other options of parsing epsgs from the file (e.g. with ogrinfo) or have an input field on upload 
+		$this->input_epsg = '25833';
+		$this->epsg = '25833';
 	}
 
 	/*
@@ -19,6 +19,9 @@ class Gml_extractor {
 	*/
 	function extract_gml_class($classname) {
 		global $GUI;
+		$this->input_epsg = $this->get_source_srid();
+		# TODO should the target EPSG be stelle or rolle specific?
+		$this->epsg = $GUI->Stelle->epsg_code;
 
 		$this->build_basic_tables();
 		$this->ogr2ogr_gmlas();
@@ -93,6 +96,55 @@ class Gml_extractor {
 		 #print_r($GUI->formvars);
 	}
 
+	function get_source_srid() {
+		# Parse the EPSG of the file
+		# According to Konformitaetsbedingung 2.1.3.1 there needs to be a standard gml:Envelope in each valid xplan-file.
+		# A fallback value will be provided as conformity currently cannot be validated at the moment of loading (schema could be validated with xsd-validator)
+		
+		# NOTE:
+		# Konformitaetsbedingung 2.13.1 currently also still allows a "kurzbezeichnung" akin to ALKIS, e.g "urn:adv:crs:DE_DHDN_3GK3", where DE_DHDN_3GK3 is Gauss-Krueger Streifen 3
+		# This method of CRS will likely become obsolete in XPlanung 6.0, and is also currently not supported with this parser (default value would be used)
+		$epsg = $this->input_epsg;
+		$lines = file($this->gml_location);
+		foreach ($lines as $lineNumber => $line) {
+			if(strpos($line, 'Envelope') === false) {
+				continue;
+			}
+			# needs to check for both single and double quotes as both are permitted by XML spec
+			if (preg_match('/srsName="([^"]+)"/', $line, $matched_epsg_str)) {
+				break; #found it
+			}
+			if (preg_match('/srsName=\'([^"]+)\'/', $line, $matched_epsg_str)) {
+				break; #found it
+			}
+			if (preg_match('/srsname=\'([^"]+)\'/', $line, $matched_epsg_str)) {
+				break; #found it
+			}
+			#echo 'could not find XPlan srsName within double quotes. checking single quotes:<br>';
+		}
+		echo $matched_epsg_str[1] . '<br>';
+		if(isset($matched_epsg_str[1])) {
+			// e.g. for EPSG:25832
+			$epsg_elements_array = explode(':',$matched_epsg_str[1]);
+			$matched_epsg = array_values(array_slice($epsg_elements_array, -1))[0];
+			if(is_numeric($matched_epsg)) {
+				# TODO should still be checked if it is a valid EPSG within the konverter or POSTGIS limit, e.g. through a check against the POSTGIS EPSG info
+				$epsg = $matched_epsg;
+			}
+		}
+		else {
+			$msg  = 'could not find Envelope srs within double quotes or single quotes<br>';
+			$msg .= 'Please make sure that an Envelope element is proviced according to XPlan-Konformitaetsbedingung 2.1.3.1, e.g. in the following style: ';
+			$msg .= '<pre>' . htmlentities('<gml:boundedBy><gml:Envelope srsName="EPSG:25833">...</gml:Envelope></gml:boundedBy>') . '</pre>...<br>';
+			$msg .= 'A fallback SRS of ' . $this->fallback_epsg . ' will be used.<br>';
+			$GUI->add_message('Warning', $msg);
+			$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
+			$GUI->output();
+		}
+		// fallback value
+		return $epsg;
+	}
+
 	/*
 	* Returns TRUE OR FALSE, depending on whether the schema exists
 	*/
@@ -165,8 +217,8 @@ class Gml_extractor {
 		#Removes prefix 'GML_', 'gml_' or 'Gml_ if it exists'
 		$mod_gml_id = $gml_id;
 		if(substr($gml_id, 0, strlen('GML_')) == 'GML_') $mod_gml_id = substr($gml_id, strlen('GML_'));
-		if (substr($gml_id, 0, strlen('gml_')) == 'gml_') $mod_gml_id = substr($gml_id, strlen('gml_'));
-		if (substr($gml_id, 0, strlen('Gml_')) == 'Gml_') $mod_gml_id = substr($gml_id, strlen('Gml_'));
+		if(substr($gml_id, 0, strlen('gml_')) == 'gml_') $mod_gml_id = substr($gml_id, strlen('gml_'));
+		if(substr($gml_id, 0, strlen('Gml_')) == 'Gml_') $mod_gml_id = substr($gml_id, strlen('Gml_'));
 		return $mod_gml_id;
 	}
 
