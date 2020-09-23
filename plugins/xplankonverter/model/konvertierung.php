@@ -597,6 +597,7 @@ class Konvertierung extends PgObject {
 
 				if ($alle_sql_ausfuehrbar) {
 					# Prüft die Konformitäten der Klassen der Konvertierung für die aktuelle Version
+					echo $this->get_version_from_ns_uri(XPLAN_NS_URI);
 					foreach ($this->get_konformitaetsbedingungen($this->get_version_from_ns_uri(XPLAN_NS_URI)) AS $bedingung) {
 						foreach ($bedingung['konformitaet']->validierungen AS $validierung) {
 							$validierung->validiere_konformitaet($this->get('id'), $bedingung);
