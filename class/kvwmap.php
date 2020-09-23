@@ -9923,8 +9923,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $layerdb->setClientEncoding();
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-		$this->formvars = array_merge($this->formvars, $this->ddl->autogenerate_layout($this->attributes));
-		$this->formvars['aktivesLayout'] = $this->ddl->save_layout($this->formvars, $this->attributes, $_files, $this->Stelle->id);
+		$this->formvars['aktivesLayout'] = $this->ddl->autogenerate_layout($this->formvars['selected_layer_id'], $this->attributes, $this->Stelle->id);
 		$this->sachdaten_druck_editor();
 	}
 
@@ -10013,7 +10012,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$layerdb->setClientEncoding();
 		$this->ddl->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-    $new_freetext_id = $this->ddl->addfreetext($this->formvars);
+		if($this->formvars['size'] != '')$size = $this->formvars['size'];	else $size = 11;
+		$font = $this->formvars['font'];
+		if($this->formvars['posx'] != '')$posx = $this->formvars['posx']; else $posx = 70;
+		if($this->formvars['posy'][$i] != '')$posy = $this->formvars['posy']-20; else $posy = 0;
+    $new_freetext_id = $this->ddl->addfreetext($this->formvars['aktivesLayout'], $this->formvars['texttext'.$i], $posx, $posy, $size, $font, $this->formvars['textoffset_attribute'.$i]);
 		$text = $this->ddl->load_texts($this->formvars['aktivesLayout'], $new_freetext_id);
 		$this->ddl->output_freetext_form($text, $this->formvars['selected_layer_id'], $this->formvars['aktivesLayout']);
 	}
@@ -10039,7 +10042,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	
 	function sachdaten_druck_editor_Rechteckhinzufuegen(){
 		$this->sachdaten_druck_editor_aendern();
-    $this->ddl->addrectangle($this->formvars);
+		$i = $this->formvars['rectcount'] - 1;
+		if($this->formvars['rectbreite'.$i] != '')$breite = $this->formvars['rectbreite'.$i];	else $breite = 1;
+		if($this->formvars['rectposx'.$i] != '')$posx = $this->formvars['rectposx'.$i]; else $posx = 70;
+		if($this->formvars['rectposy'.$i] != '')$posy = $this->formvars['rectposy'.$i]-20; else $posy = 50;
+		if($this->formvars['rectendposx'.$i] != '')$endposx = $this->formvars['rectendposx'.$i]; else $endposx = 520;
+		if($this->formvars['rectendposy'.$i] != '')$endposy = $this->formvars['rectendposy'.$i]-20; else $endposy = 150;
+    $this->ddl->addrectangle($this->formvars['aktivesLayout'], $posx, $posy, $endposx, $endposy, $breite, $this->formvars['rectoffset_attribute_start'.$i], $this->formvars['rectoffset_attribute_end'.$i]);
 		$this->scrolldown = true;
 		$this->sachdaten_druck_editor();
 	}

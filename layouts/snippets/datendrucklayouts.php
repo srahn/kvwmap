@@ -99,7 +99,12 @@ function update_options(){
 }
 
 function addfreetext(layer_id, ddl_id){
-	ahah('index.php?go=sachdaten_druck_editor_Freitexthinzufuegen&selected_layer_id='+layer_id+'&aktivesLayout='+ddl_id, '', new Array(document.getElementById('add_freetext')), new Array('prependhtml'));
+	var posx = [].slice.call(document.getElementsByName('textposx[]')).pop().value;
+	var posy = [].slice.call(document.getElementsByName('textposy[]')).pop().value;
+	var font = [].slice.call(document.getElementsByName('textfont[]')).pop().value;
+	var size = [].slice.call(document.getElementsByName('textsize[]')).pop().value;
+	ahah('index.php?go=sachdaten_druck_editor_Freitexthinzufuegen&selected_layer_id='+layer_id+'&aktivesLayout='+ddl_id+'&posx='+posx+'&posy='+posy+'&size='+size+'&font='+font, '', new Array(document.getElementById('add_freetext')), new Array('prependhtml'));
+	document.GUI.textcount.value = document.GUI.textcount.value + 1;
 }
 
 function addline(){
@@ -236,7 +241,7 @@ function scrolltop(){
 										$this->lines = array_values($this->lines);
 										$lines = $this->lines[$this->formvars['page']];
 										for($l = 0; $l < count($lines); $l++){
-											echo '<line id="line_'.$lines[$l]['id'].'" x1="'.$lines[$l]['x1'].'" y1="'.$lines[$l]['y1'].'" x2="'.$lines[$l]['x2'].'" y2="'.$lines[$l]['y2'].'" class="line" onmouseenter="highlight_line('.$lines[$l]['id'].')" onmouseleave="de_highlight_line('.$lines[$l]['id'].')" onclick="jump_to_line('.$lines[$l]['id'].')"/>';
+											#echo '<line id="line_'.$lines[$l]['id'].'" x1="'.$lines[$l]['x1'].'" y1="'.$lines[$l]['y1'].'" x2="'.$lines[$l]['x2'].'" y2="'.$lines[$l]['y2'].'" class="line" onmouseenter="highlight_line('.$lines[$l]['id'].')" onmouseleave="de_highlight_line('.$lines[$l]['id'].')" onclick="jump_to_line('.$lines[$l]['id'].')"/>';
 										}
 									}
 									
@@ -244,7 +249,7 @@ function scrolltop(){
 										$this->rectangles = array_values($this->rectangles);
 										$rectangles = $this->rectangles[$this->formvars['page']];
 										for($l = 0; $l < count($rectangles); $l++){
-											echo '<rect id="rect_'.$rectangles[$l]['id'].'" x="'.$rectangles[$l]['x1'].'" y="'.$rectangles[$l]['y1'].'" width="'.$rectangles[$l]['x2'].'" height="'.$rectangles[$l]['y2'].'" class="line" onmouseenter="highlight_rect('.$rectangles[$l]['id'].')" onmouseleave="de_highlight_rect('.$rectangles[$l]['id'].')" onclick="jump_to_rect('.$rectangles[$l]['id'].')"/>';
+											#echo '<rect id="rect_'.$rectangles[$l]['id'].'" x="'.$rectangles[$l]['x1'].'" y="'.$rectangles[$l]['y1'].'" width="'.$rectangles[$l]['x2'].'" height="'.$rectangles[$l]['y2'].'" class="line" onmouseenter="highlight_rect('.$rectangles[$l]['id'].')" onmouseleave="de_highlight_rect('.$rectangles[$l]['id'].')" onclick="jump_to_rect('.$rectangles[$l]['id'].')"/>';
 										}
 									}
 								?>
@@ -647,7 +652,7 @@ function scrolltop(){
 								</tr>
 								<? for($i = 0; $i < @count($this->ddl->selectedlayout[0]['lines']); $i++){
 									 ?>
-									<tbody id="line_form_<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>" onmouseenter="highlight_line(<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>)" onmouseleave="de_highlight_line(<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>)">
+									<tbody id="line_form_<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>" onmouseenter1="highlight_line(<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>)" onmouseleave1="de_highlight_line(<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>)">
 									<tr>
 										<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Start<input type="hidden" name="line_id<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>"></td>
 										<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Ende</td>
@@ -729,7 +734,7 @@ function scrolltop(){
 								</tr>
 								<? for($i = 0; $i < @count($this->ddl->selectedlayout[0]['rectangles']); $i++){
 									 ?>
-									<tbody id="rect_form_<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>" onmouseenter="highlight_rect(<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>)" onmouseleave="de_highlight_rect(<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>)">
+									<tbody id="rect_form_<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>" onmouseenter1="highlight_rect(<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>)" onmouseleave1="de_highlight_rect(<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>)">
 									<tr>
 										<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Start<input type="hidden" name="rect_id<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id'] ?>"></td>
 										<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Ende</td>

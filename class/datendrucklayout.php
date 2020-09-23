@@ -489,7 +489,7 @@ class ddl {
 									$values = json_decode($this->result[$i][$attributes['name'][$j]]);
 									$x2 = $x;
 									$y2 = $miny_array = $y;
-									for($v = 0; $v < count($values); $v++){
+									for($v = 0; $v < @count($values); $v++){
 										if($attributes['form_element_type'][$j] == 'Dokument'){		# Dokument-Attribute werden im Raster ausgegeben
 											if($v > 0){
 												if(($x2 + 2*$width + 20) < ($this->layout['width'] - $this->layout['margin_right'])){		# neue Spalte
@@ -1055,7 +1055,8 @@ class ddl {
 		}
 	}
 	
-	function autogenerate_layout($attributes){
+	function autogenerate_layout($layer_id, $attributes, $stelle_id){
+		$formvars['selected_layer_id'] = $layer_id;
 		$formvars['name'] = 'AutoLayout_'.date("Y-m-d_G-i-s");
 		$formvars['format'] = 'A4 hoch';
 		$formvars['type'] = '0';
@@ -1068,18 +1069,93 @@ class ddl {
 		$formvars['margin_right'] = 50;
 		$y = $maxy - $formvars['margin_top'] - $fontsize;
 		$x = $formvars['margin_left'];
+		if($attributes['group'][0] != ''){
+			$x = $x + 7;
+			$y = $y - 30;
+		}
+		$rc = 0;
 		for($i = 0; $i < count($attributes['name']); $i++){
 			if(!in_array($attributes['form_element_type'][$i], ['Geometrie', 'Dokument', 'SubFormEmbeddedPK', 'SubFormPK'])){
-				$formvars['posx_'.$attributes['name'][$i]] = $x;
-				$formvars['posy_'.$attributes['name'][$i]] = 20;
+				# Gruppe
+				if($attributes['group'][$i] != $attributes['group'][$i-1]){
+					# Rechteck um die Gruppe
+					$rects[$rc]['breite'] = 0.5;
+					$rects[$rc]['posx'] = $formvars['margin_left'];
+					$rects[$rc]['posy'] = 20;
+					$rects[$rc]['offset_attribute_start'] = $attributes['name'][$last_attribute_index];
+					if($rc > 0){
+						$rects[$rc-1]['endposx'] = $maxx - $formvars['margin_right'];
+						$rects[$rc-1]['endposy'] = 10;
+						$rects[$rc-1]['offset_attribute_end'] = $attributes['name'][$last_attribute_index];
+					}
+					$rc++;
+					# Rechteck um den Gruppennamen
+					$rect['breite'] = 0.5;
+					$rect['posx'] = $formvars['margin_left'];
+					$rect['posy'] = 20;
+					$rect['offset_attribute_start'] = $attributes['name'][$last_attribute_index];
+					$rect['endposx'] = $maxx - $formvars['margin_right'];
+					$rect['endposy'] = 39;
+					$rect['offset_attribute_end'] = $attributes['name'][$last_attribute_index];
+					$groupname_rects[] = $rect;
+					# Gruppenname als Freitext
+					$text['text'] = $attributes['group'][$i];
+					$text['posx'] = $x;
+					$text['posy'] = 33;
+					$text['offset_attribute'] = $attributes['name'][$last_attribute_index];
+					$text['font'] = 'Helvetica-Bold.afm';
+					$text['size'] = $fontsize;
+					$groupnames[] = $text;
+					#
+					$gap = 35;
+				}
+				else{
+					$gap = 0;
+				}
+				# Attribut
+				$formvars['posx_'.$attributes['name'][$i]] = $x + 130;
+				$formvars['posy_'.$attributes['name'][$i]] = 20 + $gap;
 				$formvars['offset_attribute_'.$attributes['name'][$i]] = $attributes['name'][$last_attribute_index];
 				$formvars['font_'.$attributes['name'][$i]] = 'Helvetica.afm';
 				$formvars['fontsize_'.$attributes['name'][$i]] = 11;
+				# Attributname als Freitext
+				$text['text'] = $attributes['alias'][$i] ?: $attributes['name'][$i];
+				$text['posx'] = $x;
+				$text['posy'] = 20 + $gap;
+				$text['offset_attribute'] = $attributes['name'][$last_attribute_index];
+				$text['font'] = 'Helvetica-Bold.afm';
+				$text['size'] = $fontsize;
+				$attributenames[] = $text;
 				$last_attribute_index = $i;
 			}
 		}
 		$formvars['posy_'.$attributes['name'][0]] = $y;
-		return $formvars;
+		$attributenames[0]['posy'] = $y;
+		$attributenames[0]['offset_attribute'] = '';
+		$groupnames[0]['posy'] = $maxy - $formvars['margin_top'] - $fontsize - 3;
+		$groupnames[0]['offset_attribute'] = '';
+		$rects[0]['posy'] = $maxy - $formvars['margin_top'];
+		$groupname_rects[0]['posy'] = $maxy - $formvars['margin_top'];
+		$groupname_rects[0]['endposy'] = $groupname_rects[0]['posy'] - 19;
+		$rects[$rc-1]['endposx'] = $maxx - $formvars['margin_right'];
+		$rects[$rc-1]['endposy'] = 10;
+		$rects[$rc-1]['offset_attribute_end'] = $attributes['name'][$last_attribute_index];
+		
+		$ddl_id = $this->save_layout($formvars, $attributes, NULL, $stelle_id);
+		
+		$texts = array_merge($attributenames, $groupnames);
+		
+		$rects = array_merge($rects, $groupname_rects);
+		
+		for($t = 0; $t < count($texts); $t++){
+			$this->addfreetext($ddl_id, $texts[$t]['text'], $texts[$t]['posx'], $texts[$t]['posy'], $texts[$t]['size'], $texts[$t]['font'], $texts[$t]['offset_attribute']);
+		}
+		
+		for($r = 0; $r < count($rects); $r++){
+			$this->addrectangle($ddl_id, $rects[$r]['posx'], $rects[$r]['posy'], $rects[$r]['endposx'], $rects[$r]['endposy'], $rects[$r]['breite'], $rects[$r]['offset_attribute_start'], $rects[$r]['offset_attribute_end']);
+		}
+
+		return $ddl_id;
 	}
 
 	function save_layout($formvars, $attributes, $_files, $stelle_id){
@@ -1617,23 +1693,24 @@ class ddl {
     return $rects;
   }		
   
-  function addfreetext($formvars){
-		$i = $formvars['textcount'] - 1;
-		if($formvars['textsize'.$i] != '')$size = $formvars['textsize'.$i];	else $size = 11;
-		if($formvars['textfont'.$i] != '')$font = $formvars['textfont'.$i];
-		if($formvars['textposx'.$i] != '')$posx = $formvars['textposx'.$i]; else $posx = 70;
-		if($formvars['textposy'.$i] != '')$posy = $formvars['textposy'.$i]-20; else $posy = 0;
+  function addfreetext($ddl_id, $text, $posx, $posy, $size, $font, $offset_attribute){		
     $sql = 'INSERT INTO druckfreitexte SET';
-    $sql .= ' text = "",';
+    $sql .= ' text = "'.$text.'",';
     $sql .= ' posx = '.$posx.',';
     $sql .= ' posy = '.$posy.',';
     $sql .= ' size = '.$size.',';
     $sql .= ' font = "'.$font.'",';
     $sql .= ' angle = 0';
+		if($offset_attribute){
+			$sql .= ", `offset_attribute` = '".$offset_attribute."'";
+		}
+    else{
+			$sql .= ", `offset_attribute` = NULL";
+		}
     $this->debug->write("<p>file:kvwmap class:ddl->addfreetext :",4);
     $this->database->execSQL($sql,4, 1);
     $lastinsert_id = $this->database->mysqli->insert_id;
-    $sql = 'INSERT INTO ddl2freitexte (ddl_id, freitext_id) VALUES ('.$formvars['aktivesLayout'].', '.$lastinsert_id.')';
+    $sql = 'INSERT INTO ddl2freitexte (ddl_id, freitext_id) VALUES ('.$ddl_id.', '.$lastinsert_id.')';
     $this->debug->write("<p>file:kvwmap class:ddl->addfreetext :",4);
     $this->database->execSQL($sql,4, 1);
 		return $lastinsert_id;
@@ -1678,24 +1755,30 @@ class ddl {
     $this->database->execSQL($sql,4, 1);
   }
 	
-  function addrectangle($formvars){
-		$i = $formvars['rectcount'] - 1;
-		if($formvars['rectbreite'.$i] != '')$breite = $formvars['rectbreite'.$i];	else $breite = 1;
-		if($formvars['rectposx'.$i] != '')$posx = $formvars['rectposx'.$i]; else $posx = 70;
-		if($formvars['rectposy'.$i] != '')$posy = $formvars['rectposy'.$i]-20; else $posy = 50;
-		if($formvars['rectendposx'.$i] != '')$endposx = $formvars['rectendposx'.$i]; else $endposx = 520;
-		if($formvars['rectendposy'.$i] != '')$endposy = $formvars['rectendposy'.$i]-20; else $endposy = 150;
+  function addrectangle($ddl_id, $posx, $posy, $endposx, $endposy, $breite, $offset_attribute_start, $offset_attribute_end){
     $sql = 'INSERT INTO druckfreirechtecke SET';
     $sql .= ' posx = '.$posx.',';
     $sql .= ' posy = '.$posy.',';
 		$sql .= ' endposx = '.$endposx.',';
     $sql .= ' endposy = '.$endposy.',';
     $sql .= ' breite = '.$breite;
+		if($offset_attribute_start){
+			$sql .= ", `offset_attribute_start` = '".$offset_attribute_start."'";
+		}
+    else{
+			$sql .= ", `offset_attribute_start` = NULL";
+		}
+		if($offset_attribute_end){
+			$sql .= ", `offset_attribute_end` = '".$offset_attribute_end."'";
+		}
+    else{
+			$sql .= ", `offset_attribute_end` = NULL";
+		}		
 		#echo $sql.'<br>';
     $this->debug->write("<p>file:kvwmap class:ddl->addrectangle :",4);
     $this->database->execSQL($sql,4, 1);
     $lastinsert_id = $this->database->mysqli->insert_id;
-    $sql = 'INSERT INTO ddl2freirechtecke (ddl_id, rect_id) VALUES ('.$formvars['aktivesLayout'].', '.$lastinsert_id.')';
+    $sql = 'INSERT INTO ddl2freirechtecke (ddl_id, rect_id) VALUES ('.$ddl_id.', '.$lastinsert_id.')';
     $this->debug->write("<p>file:kvwmap class:ddl->addline :",4);
     $this->database->execSQL($sql,4, 1);
   }
