@@ -14,8 +14,8 @@ ALTER TABLE xplan_uml.class_generalizations ADD COLUMN inheritance_order INTEGER
 ELSE
 RAISE NOTICE 'Already exists';
 END IF;
-END
-$$
+END;
+$$;
 
 UPDATE xplan_uml.class_generalizations
 SET inheritance_order = 1
