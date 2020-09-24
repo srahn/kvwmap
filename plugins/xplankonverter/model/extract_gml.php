@@ -25,7 +25,17 @@ class Gml_extractor {
 
 		$this->build_basic_tables();
 		$this->ogr2ogr_gmlas();
-		$tables = $this->get_all_tables_in_schema($this->gmlas_schema);
+		# $tables = $this->get_all_tables_in_schema($this->gmlas_schema);
+
+		# Revert the geom of GML to database specific winding order of vertices (CW/RHR IN DB and Shape, CCW/LHR in GML)
+		# NOTE:
+		# As lines have to be reverted as well, it cannot be confirmed automatically whether the order is correct.
+		# It must be assumed that source data conforms to the GML standard (left hand order) on all geometries
+		# For Polygons alone, this could be deduced through an inside/outside check (e.g. with ST_ForceRHR())
+		$fachobjekte_tables_and_geometries = $this->get_fachobjekte_geometry_tables_attributes($this->gmlas_schema);
+		foreach($fachobjekte_tables_and_geometries as $fachobjekt_table_and_geometry) {
+			$this->revert_vertex_order_for_table_with_geom_column_in_schema($fachobjekt_table_and_geometry['table_name'],$fachobjekt_table_and_geometry['column_name'],$this->gmlas_schema);
+		}
 
 		$layername = '';
 		$tablename = strtolower($classname); #for DB
@@ -238,6 +248,41 @@ class Gml_extractor {
 		$result = pg_fetch_all($ret[1]);
 		$result = (!empty($result)) ? array_column($result, 'table_name') : array();
 		return $result;
+	}
+
+	/*
+	* Get all existing tables outside of Plan and Bereich with geometry columns
+	*/
+	function get_fachobjekte_geometry_tables_attributes($schema) {
+		$sql = "
+			SELECT
+				table_name, column_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_schema = '" .$schema . "' 
+			AND
+				udt_name = 'geometry'
+			AND
+				column_name NOT IN ('raeumlichergeltungsbereich','geltungsbereich')
+			;";
+		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+		$result = pg_fetch_all($ret[1]);
+		//$result = (!empty($result)) ? array_column($result, 'table_name') : array();
+		return $result;
+	}
+
+	/*
+	* Reverse vertex order of specific geometry (GML CCW Lefthand, Shape and DB CW Righthand)
+	*/
+	function revert_vertex_order_for_table_with_geom_column_in_schema($table, $geom_column, $schema) {
+		$sql = "
+			UPDATE " . 
+				$schema . "." . $table . " 
+			SET " .
+				$geom_column . " = ST_Reverse(" . $geom_column . ") 
+		;";
+		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 	}
 
 	function get_bbox_from_wkt($wkt){
