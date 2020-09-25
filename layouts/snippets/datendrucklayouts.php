@@ -649,78 +649,81 @@ function scrolltop(){
 									<td class="fett" style="border-top:2px solid #C3C7C3" colspan=8 align="center">
 										<span id="linien">Linien</span>
 									</td>
-								</tr>
-								<? for($i = 0; $i < @count($this->ddl->selectedlayout[0]['lines']); $i++){
-									 ?>
-									<tbody id="line_form_<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>" onmouseenter1="highlight_line(<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>)" onmouseleave1="de_highlight_line(<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>)">
-									<tr>
-										<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Start<input type="hidden" name="line_id<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>"></td>
-										<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Ende</td>
-										<td colspan="2" style="border-top:2px solid #C3C7C3"></td>
-									</tr>
-									<tr>
-										<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
-										<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="lineposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posx'] ?>" size="5"></td>
-										<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
-										<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="lineendposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposx'] ?>" size="5"></td>
-										<td colspan="2">Breite:&nbsp;<input type="text" name="breite<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['breite'] ?>" size="5"></td>
-									</tr>
-									<tr>
-										<td>&nbsp;y:</td>
-										<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posy'] ?>" size="5"></td>
-										<td>&nbsp;y:</td>
-										<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposy'] ?>" size="5"></td>
-										<td colspan="2"></td>
-									</tr>
-									<tr>
-										<td colspan="2" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
-										<td colspan="2" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
-										<td colspan="2" valign="bottom">&nbsp;Platzierung:</td>
-									</tr>
-									<tr>
-										<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
-											<select name="lineoffset_attribute_start<? echo $i ?>" style="width: 200px">
-												<option value="">- Auswahl -</option>
-												<?
-												for($j = 0; $j < count($this->ddl->attributes['name']); $j++){
-													echo '<option ';
-													if($this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute_start'] == $this->ddl->attributes['name'][$j]){
-														echo 'selected ';
+								</tr><?
+								for ($i = 0; $i < ($this->formvars['nolines'] == '1' ? '0' : @count($this->ddl->selectedlayout[0]['lines'])); $i++) { ?>
+									<tbody
+										id="line_form_<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>"
+										onmouseenter1="highlight_line(<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>)"
+										onmouseleave1="de_highlight_line(<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>)"
+									>
+										<tr>
+											<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Start<input type="hidden" name="line_id<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>"></td>
+											<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Ende</td>
+											<td colspan="2" style="border-top:2px solid #C3C7C3"></td>
+										</tr>
+										<tr>
+											<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
+											<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="lineposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posx'] ?>" size="5"></td>
+											<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
+											<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="lineendposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposx'] ?>" size="5"></td>
+											<td colspan="2">Breite:&nbsp;<input type="text" name="breite<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['breite'] ?>" size="5"></td>
+										</tr>
+										<tr>
+											<td>&nbsp;y:</td>
+											<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posy'] ?>" size="5"></td>
+											<td>&nbsp;y:</td>
+											<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposy'] ?>" size="5"></td>
+											<td colspan="2"></td>
+										</tr>
+										<tr>
+											<td colspan="2" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
+											<td colspan="2" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
+											<td colspan="2" valign="bottom">&nbsp;Platzierung:</td>
+										</tr>
+										<tr>
+											<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
+												<select name="lineoffset_attribute_start<? echo $i ?>" style="width: 200px">
+													<option value="">- Auswahl -</option>
+													<?
+													for($j = 0; $j < count($this->ddl->attributes['name']); $j++){
+														echo '<option ';
+														if($this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute_start'] == $this->ddl->attributes['name'][$j]){
+															echo 'selected ';
+														}
+														echo 'value="'.$this->ddl->attributes['name'][$j].'">'.$this->ddl->attributes['name'][$j].'</option>';
 													}
-													echo 'value="'.$this->ddl->attributes['name'][$j].'">'.$this->ddl->attributes['name'][$j].'</option>';
-												}
-												?>
-											</select>
-										</td>
-										<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
-											<select name="lineoffset_attribute_end<? echo $i ?>" style="width: 200px">
-												<option value="">- Auswahl -</option>
-												<?
-												for($j = 0; $j < count($this->ddl->attributes['name']); $j++){
-													echo '<option ';
-													if($this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute_end'] == $this->ddl->attributes['name'][$j]){
-														echo 'selected ';
+													?>
+												</select>
+											</td>
+											<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
+												<select name="lineoffset_attribute_end<? echo $i ?>" style="width: 200px">
+													<option value="">- Auswahl -</option>
+													<?
+													for($j = 0; $j < count($this->ddl->attributes['name']); $j++){
+														echo '<option ';
+														if($this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute_end'] == $this->ddl->attributes['name'][$j]){
+															echo 'selected ';
+														}
+														echo 'value="'.$this->ddl->attributes['name'][$j].'">'.$this->ddl->attributes['name'][$j].'</option>';
 													}
-													echo 'value="'.$this->ddl->attributes['name'][$j].'">'.$this->ddl->attributes['name'][$j].'</option>';
-												}
-												?>
-											</select>
-										</td>
-										<td align="left" valign="top">
-											<select style="width: 110px" name="linetype<? echo $i ?>">
-												<option value="0">normal</option>
-												<? if($this->ddl->selectedlayout[0]['type'] != 0){ ?>
-												<option value="1" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 1)echo ' selected '; ?>>fixiert</option>
-												<? } ?>
-												<option value="2" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 2)echo ' selected '; ?>>auf jeder Seite</option>
-											</select>
-										</td>
-										<td align="right">
-											<a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Linieloeschen&line_id=<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie die Linie wirklich löschen?');">löschen&nbsp;</a>
-										</td>
-									</tr>
-									</tbody>
-								<? } ?>
+													?>
+												</select>
+											</td>
+											<td align="left" valign="top">
+												<select style="width: 110px" name="linetype<? echo $i ?>">
+													<option value="0">normal</option>
+													<? if($this->ddl->selectedlayout[0]['type'] != 0){ ?>
+													<option value="1" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 1)echo ' selected '; ?>>fixiert</option>
+													<? } ?>
+													<option value="2" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 2)echo ' selected '; ?>>auf jeder Seite</option>
+												</select>
+											</td>
+											<td align="right">
+												<a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Linieloeschen&line_id=<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie die Linie wirklich löschen?');">löschen&nbsp;</a>
+											</td>
+										</tr>
+									</tbody><?
+								} ?>
 								<tr>
 									<td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;<a href="javascript:addline();">Linie hinzufügen</a></td>
 								</tr>
