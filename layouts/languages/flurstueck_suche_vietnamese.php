@@ -8,4 +8,5 @@
  $strExist="existing";
  $strClear="Clear";
  $strSearch="Search";
+ $strImportList="Import Parcel List";
 ?>

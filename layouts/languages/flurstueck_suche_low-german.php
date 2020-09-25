@@ -8,4 +8,5 @@
  $strExist="vörhanden";
  $strClear="Nieg";
  $strSearch="Söken";
+ $strImportList="Liste vun en Flagstücks rinbringen";
 ?>

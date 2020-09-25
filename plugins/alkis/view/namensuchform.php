@@ -156,6 +156,12 @@ if($bis > $this->anzNamenGesamt){
 body {
   overflow-y:scroll;
 }
+#titel {
+	font-family: SourceSansPro3;
+	font-size: 20px;
+	margin-bottom: 0px;
+	margin-top: 10px;
+}
 #nsf_formular_oeffnen_wrap {
 	position: absolute;
 	top: 10px;
@@ -163,7 +169,6 @@ body {
 }
 #nsf_formular_oeffnen {
 	background: #345;
-	border: 2px solid white;
 	width: 40px;
 	height: 40px;
 	border-radius: 0 0 0 40px;
@@ -176,7 +181,7 @@ body {
 	border-radius: 0 0 0 40px;
 	display: inline-block;
 	padding-top: 8px;
-	padding-left: 4px;
+	padding-left: 6px;
 	font-size: 200%;
 }
 #nsf_formular_oeffnen_sign {
@@ -185,7 +190,7 @@ body {
 #nsf_formular_oeffnen_sign:checked + #nsf_formular_oeffnen_label:after {
 	content: "-";
 	position: absolute;
-	top: 8px;
+	top: 6px;
 	left: 9px;
 	right: 0px;
 	bottom: 0px;
@@ -235,31 +240,34 @@ body {
 	height: 28px;
 	margin: 0px 0px 10px 0px;
 	display: flex;
-	flex-flow: row nowrap;
 }
 .nsf_suche_child div:first-child, .nsf_name_child div:first-child {
 	width: 180px;
 	text-align: left;
-	margin: auto 0px;
+	align-self: center;
 }
 .nsf_name>div:last-child {
-	margin: auto;
-	margin-left: 30px;
-	margin-bottom: 36px;
-	display: flex;
+	margin-left: 20px;
 }
 .nsf_name>div:last-child div {
-	margin: 0px 0px 0px 4px;
+	position: relative;
+	top: 21px;
+	display: flex;
+}
+.nsf_name>div:last-child div span[data-tooltip], #nsf_parameter span[data-tooltip] {
+	margin-left: 10px;
+}
+.nsf_name>div:last-child div span[data-tooltip]:before, #nsf_parameter span[data-tooltip]:before {
+	top: 2px;
+	position: relative;
 }
 .nsf_name>div:last-child span {
-	margin: auto;
-	margin-left: 6px;
+	margin-left: 10px;
 }
 .nsf_suche_child_cal div:last-child {
 	position: relative;
-	bottom: 2px;
-	margin: auto;
 	margin-left: 5px;
+	display: flex;
 }
 #nsf_parameter {
 	margin: 30px 0px 0px 0px;
@@ -268,23 +276,19 @@ body {
 	justify-content: center;
 }
 #nsf_parameter div {
-	margin-top: auto;
-	margin-bottom: auto;
 	display: flex;
-	flex-flow: row nowrap;
+}
+#nsf_parameter span, #nsf_parameter div:last-child div:last-child, .nsf_suche_child_cal div:last-child img {
+	align-self: center;
+	margin: auto;
 }
 #nsf_parameter div:first-child div:last-child {
-	margin: auto;
 	margin-left: 10px;
 	margin-right: 15px;
 }
 #nsf_parameter div:last-child div:first-child {
 	margin-left: 15px;
 	margin-right: 10px;
-}
-#nsf_parameter div:first-child div:last-child span {
-	margin: auto;
-	margin-left: 6px;
 }
 #nsf_suchen {
 	margin: 20px 0px 10px 0px;
@@ -306,10 +310,13 @@ body {
 .nsf_treffer_anzeige_header td:first-child:hover, .nsf_treffer_anzeige_header td:last-child:hover {
 	background: linear-gradient(#ECF1F5 0%, #dee9f0 100%);
 }
-.nsf_treffer_anzeige_header div {
+.nsf_treffer_anzeige_header div, .nsf_treffer_anzeige_header span {
 	margin: 0px 5px;
 	padding: 0px;
 	cursor: pointer;
+}
+.nsf_treffer_anzeige_header span {
+	cursor: default;
 }
 .nsf_treffer_anzeige_daten {
 	height: 25px;
@@ -362,7 +369,7 @@ body {
 }
 </style>
 
-<br><h2><?php echo $strTitle; ?></h2>
+<div id="titel"><?php echo $strTitle; ?></div>
 <?php if ($this->Fehlermeldung!='') {
 include(LAYOUTPATH."snippets/Fehlermeldung.php");
 }
@@ -386,7 +393,7 @@ if ($anzNamen>0) {
 		<?php echo $strHintWildcard; ?>.
 	</div>
 	<div id="nsf_person">
-		<div class="nsf_titel menu">Person</div>
+		<div class="nsf_titel menu"><?php echo $strPerson; ?></div>
 		<div class="nsf_suche">
 			<div class="nsf_name">
 				<div>
@@ -395,54 +402,54 @@ if ($anzNamen>0) {
 						<div class="float_right"><input name="name1" type="text" value="<? echo htmlentities($this->formvars['name1'], NULL, 'UTF-8'); ?>" autofocus tabindex="1"></div>
 					</div>
 					<div class="nsf_name_child">
-						<div style="align-self: flex-start;"><?php echo $strName2; ?></div>
+						<div><?php echo $strName2; ?></div>
 						<div class="float_right"><input name="name2" type="text" value="<?php echo $this->formvars['name2']; ?>" tabindex="2"></div>
 					</div>
 				</div>
-				<div>
+				<div><div>
 					<input style="cursor: pointer;" type="checkbox" name="exakt" value="1" tabindex="3" <? if($this->formvars['exakt']) echo 'checked'; ?>>
-					<div>exakte Suche</div>
+					<span><?php echo $strExactSearch; ?></span>
 					<span data-tooltip="Name/Firma und Vorname:
 Suche genau nach der Eingabe"></span>
-				</div>
-			</div>
-			<div class="nsf_suche_child">
-				<div>Namensbestandteil</div>
-				<div><input name="name9" type="text" value="<?php echo $this->formvars['name9']; ?>" tabindex="4"></div>
-			</div>
-			<div class="nsf_suche_child">
-				<div>Akademischer Grad</div>
-				<div><input name="name10" type="text" value="<?php echo $this->formvars['name10']; ?>" tabindex="5"></div>
+				</div></div>
 			</div>
 			<div class="nsf_suche_child">
 				<div><?php echo $strName3; ?></div>
+				<div><input name="name9" type="text" value="<?php echo $this->formvars['name9']; ?>" tabindex="4"></div>
+			</div>
+			<div class="nsf_suche_child">
+				<div><?php echo $strName4; ?></div>
+				<div><input name="name10" type="text" value="<?php echo $this->formvars['name10']; ?>" tabindex="5"></div>
+			</div>
+			<div class="nsf_suche_child">
+				<div><?php echo $strName5; ?></div>
 				<div><input name="name3" type="text" value="<?php echo $this->formvars['name3']; ?>" tabindex="6"></div>
 			</div>
 			<div class="nsf_suche_child nsf_suche_child_cal">
-				<div><?php echo $strName4; ?></div>
+				<div><?php echo $strName6; ?></div>
 				<div><input name="name4" type="text" value="<?php echo $this->formvars['name4']; ?>" tabindex="7"></div>
 				<div><img title="TT.MM.JJJJ" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></div>
 			</div>
 			<div class="nsf_suche_child">
-				<div><?php echo $strName5; ?></div>
+				<div><?php echo $strName7; ?></div>
 				<div><input name="name5" type="text" value="<?php echo $this->formvars['name5']; ?>" tabindex="8"></div>
 			</div>
 			<div class="nsf_suche_child">
-				<div><?php echo $strName6; ?></div>
+				<div><?php echo $strName8; ?></div>
 				<div><input name="name6" type="text" value="<?php echo $this->formvars['name6']; ?>" tabindex="9"></div>
 			</div>
 			<div class="nsf_suche_child">
-				<div><?php echo $strName7; ?></div>
+				<div><?php echo $strName9; ?></div>
 				<div><input name="name7" type="text" value="<?php echo $this->formvars['name7']; ?>" tabindex="10"></div>
 			</div>
 			<div class="nsf_suche_child">
-				<div><?php echo $strName8; ?></div>
+				<div><?php echo $strName10; ?></div>
 				<div><input name="name8" type="text" value="<?php echo $this->formvars['name8']; ?>" tabindex="11"></div>
 			</div>			
 		</div>
 	</div>
 	<div id="nsf_gebiet">
-		<div class="nsf_titel menu">Gebiet</div>
+		<div class="nsf_titel menu"><?php echo $strGebiet; ?></div>
 		<div class="nsf_suche">
 			<div class="nsf_suche_child">
 				<div><?php echo $strGbbez; ?></div>
@@ -471,7 +478,7 @@ Suche genau nach der Eingabe"></span>
 			<input name="withflurst" type="checkbox" <? if($this->formvars['withflurst'] == 'on'){echo 'checked';} ?> tabindex="16">
 		</div>		
 		<div>
-			<?php echo $strShowWithFst; ?>
+			<span><?php echo $strShowWithFst; ?></span>
 			<span data-tooltip="Zeige auch die zum Grundbuchblatt gehörenden Flurstücke an"></span>
 		</div>
 	</div>
@@ -494,14 +501,14 @@ if ($anzNamen>0) {
 	<div id="nsf_treffer_anzeige">
 		<table>
 			<tr class="nsf_treffer_anzeige_header">
-				<td class="menu">&nbsp;</td>
+				<td class="menu"><span></span></td>
 				<td class="menu"><a href="javascript:changeorder('bezirk');" title="nach <?php echo $strGbbezShort; ?> sortieren"><div><?php echo $strGbbezShort; ?></div><? if($this->formvars['order'] == 'bezirk')echo '<div class="nsf_sort"></div>'; ?></a></td>
 				<td class="menu"><a href="javascript:changeorder('blatt');" title="nach <?php echo $strGbblShort; ?> sortieren"><div><?php echo $strGbblShort; ?></div><? if($this->formvars['order'] == 'blatt')echo '<div class="nsf_sort"></div>'; ?></a></td>
 				<td class="menu"><a href="javascript:changeorder('nachnameoderfirma, vorname');" title="nach <?php echo $strName1Short; ?> sortieren"><div><?php echo $strName1Short; ?></div><? if($this->formvars['order'] == 'nachnameoderfirma, vorname')echo '<div class="nsf_sort"></div>'; ?></a></td>
 				<td class="menu"><a href="javascript:changeorder('geburtsname');" title="nach <?php echo $strName2Short; ?> sortieren"><div><?php echo $strName2Short; ?></div><? if($this->formvars['order'] == 'geburtsname')echo '<div class="nsf_sort"></div>'; ?></a></td>
 				<td class="menu"><a href="javascript:changeorder('strasse,hausnummer');" title="nach <?php echo $strName3Short; ?> sortieren"><div><?php echo $strName3Short; ?></div><? if($this->formvars['order'] == 'strasse,hausnummer')echo '<div class="nsf_sort"></div>'; ?></a></td>
 				<td class="menu"><a href="javascript:changeorder('postleitzahlpostzustellung, ort_post');" title="nach <?php echo $strName4Short; ?> sortieren"><div><?php echo $strName4Short; ?></div><? if($this->formvars['order'] == 'postleitzahlpostzustellung, ort_post')echo '<div class="nsf_sort"></div>'; ?></a></td>
-				<td class="menu" colspan="2"><div><?php echo $strFst; ?></div></td>
+				<td class="menu" colspan="2"><span><?php echo $strFst; ?></span></td>
 			</tr>
 <?php
 	for ($i=0;$i<count($this->namen);$i++) {
@@ -613,7 +620,7 @@ if ($anzNamen>0) {
 <?
 if($this->formvars['offset'] > 0){
 ?>
-		<a href="javascript:prevquery(document.GUI.offset);"><? echo $strBack; ?>&nbsp;<img src="<? echo GRAPHICSPATH; ?>pfeil_links.gif" width="10" height="10" border="0"></a>
+		<a href="javascript:prevquery(document.GUI.offset);"><img src="graphics/go-previous.png" class="hover-border" style="vertical-align:middle" title="<? echo $strBack; ?>"></a>
 <?	} ?>
 	</div>
 	<div>
@@ -623,7 +630,7 @@ if($this->formvars['offset'] > 0){
 <?
 	if($bis < $this->anzNamenGesamt){
 ?>
-		<a href="javascript:nextquery(document.GUI.offset);"><img src="<? echo GRAPHICSPATH; ?>pfeil_rechts.gif" width="10" height="10" border="0">&nbsp;<? echo $strNext; ?></a>
+		<a href="javascript:nextquery(document.GUI.offset);"><img src="graphics/go-next.png" class="hover-border" style="vertical-align:middle" title="<? echo $strNext; ?>"></a>
 <?	} ?>
 	</div>
 </div>

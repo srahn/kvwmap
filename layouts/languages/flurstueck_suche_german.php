@@ -8,4 +8,5 @@
  $strExist="vorhandene";
  $strClear="Neu";
  $strSearch="Suchen";
+ $strImportList="Import Flurstücksliste";
 ?>

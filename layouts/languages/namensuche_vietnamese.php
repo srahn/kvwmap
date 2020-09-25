@@ -1,9 +1,18 @@
 ﻿<?php
  $strTitle="Search Owner";
+ $strPerson="Person";
+ $strGebiet="District";
  $strName1="Name, Prename Name of birth / Incorporation";
  $strName2="Date of birth / Annex";
- $strName3="Street House number";
- $strName4="Postcode Locality";
+ $strName3="Part of Name";
+ $strName4="Degree";
+ $strName5="Street House number";
+ $strName6="Postcode Locality";
+ $strName7="Street";
+ $strName8="House number";
+ $strName9="Postcode";
+ $strName10="Locality";
+ $strExactSearch="exact Search";
  $strGbbez="Land register borough";
  $strGbbl="Land register folio";
  $strGemkg="Local subdistrict (Commune)";

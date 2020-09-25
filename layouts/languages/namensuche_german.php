@@ -1,13 +1,18 @@
 ﻿<?php
  $strTitle="Eigentümersuche";
+ $strPerson="Person";
+ $strGebiet="Gebiet";
  $strName1="Name/Firma";
  $strName2="Vorname";
- $strName3="Geburtsname";
- $strName4="Geburtsdatum";
- $strName5="Straße";
- $strName6="Hausnummer";
- $strName7="PLZ";
- $strName8="Ort";
+ $strName3="Namensbestandteil";
+ $strName4="Akademischer Grad";
+ $strName5="Geburtsname";
+ $strName6="Geburtsdatum";
+ $strName7="Straße";
+ $strName8="Hausnummer";
+ $strName9="PLZ";
+ $strName10="Ort";
+ $strExactSearch="exakte Suche";
  $strGbbez="Grundbuchbezirk";
  $strGbbl="Grundbuchblatt";
  $strGemkg="Gemarkung (Gemeinde)";
