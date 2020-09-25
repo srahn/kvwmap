@@ -747,7 +747,7 @@ class ddl {
 		switch ($this->attributes['form_element_type'][$j]) {
 			case 'Auswahlfeld' : {
 				if(is_array($this->attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-					for($e = 0; $e < count($this->attributes['enum_value'][$j][$i]); $e++){
+					for($e = 0; $e < @count($this->attributes['enum_value'][$j][$i]); $e++){
 						if($this->attributes['enum_value'][$j][$i][$e] == $value){
 							$output = $this->attributes['enum_output'][$j][$i][$e];
 							break;
