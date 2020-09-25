@@ -44,6 +44,7 @@ class XP_Object extends PgObject {
 		return $sub_classes;
 	}
 
+	# Order by gml_id to always get same order if a plan is reloaded with GMLAS
 	public function get_object_rows() {
 		$sub_classes = $this->get_sub_classes();
 		$sql = "
@@ -102,6 +103,8 @@ class XP_Object extends PgObject {
 						$sub_classes
 					)
 				) . "
+			ORDER BY
+				gml_id
 		";
 
 		$this->debug->show('sql to find objects for class ' . $this->tableName . ': ' . $sql, false);

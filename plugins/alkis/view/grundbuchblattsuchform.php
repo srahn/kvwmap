@@ -1,3 +1,7 @@
+<?php
+  include(LAYOUTPATH.'languages/grundbuchblatt_suche_'.$this->user->rolle->language.'.php');
+ ?>
+
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 
 <script type="text/javascript">
@@ -21,115 +25,196 @@ function backto_namesearch(){
 }
 
 function showimport(){
-	if(document.getElementById('import2').style.display == 'none'){
-		document.getElementById('import1').style.borderTop="1px solid #C3C7C3";
-		document.getElementById('import1').style.borderLeft="1px solid #C3C7C3";
-		document.getElementById('import1').style.borderRight="1px solid #C3C7C3";
-		document.getElementById('import2').style.display = '';
+	if(document.getElementById('import2').style.visibility == 'visible'){
+		document.getElementById('import2').style.visibility = 'hidden';
 	}
 	else{
-		document.getElementById('import1').style.border="none";
-		document.getElementById('import2').style.display = 'none';
+		document.getElementById('import2').style.visibility = 'visible';
 	}
 }
-
+document.onclick =  function(e){
+	if(e.target.id != 'importlink' && e.target.closest('div').id != 'import2'){
+		document.getElementById('import2').style.visibility = 'hidden';
+	}
+};
 -->
 </script>
-<br>
-<h2><?php echo $this->titel; ?></h2>
+<style>
+#titel {
+	font-family: SourceSansPro3;
+	font-size: 20px;
+	margin-bottom: 0px;
+	margin-top: 25px;
+}
+#import1 {
+	text-align: left;
+	margin: 0 0 10px 0;
+	padding-left: 20px;
+}
+#import2 {
+	visibility: hidden;
+	position: relative;
+	margin: 0 0 10px 20px;
+	width: 500px;
+	height: 40px;
+	text-align: left;
+	border: 1px solid #aaaaaa;
+	padding: 5px;
+	background-color: #E6E6E6;
+	box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
+	z-index: 1;
+}
+#import2 input[type="submit"] {
+	float: right;
+	right: 5px;
+	transition: unset;
+}
+#import2 input {
+	margin: 0.5em;
+}
+#gsf_formular, #import1 {
+	margin: 40px 0px 20px 0px;
+	padding-left: 20px;
+}
+#gsf_formular select, #gsf_formular input[type="text"], .gsf_suche_gbbl select {
+	border-radius: 2px;
+	border: 1px solid #777;
+	padding-left: 5px;
+}
+#gsf_formular .gsf_suche select, #gsf_formular input[type="text"] {
+	height: 25px;
+}
+#gsf_formular select, #gsf_formular input[name="Blatt"] {
+	width: 260px;
+}
+.gsf_suche, .gsf_suche_gbbl {
+	width:100%;
+	height: 28px;
+	margin: 0px 0px 10px 0px;
+	display: flex;
+	flex-flow: row nowrap;
+}
+.gsf_suche_gbbl {
+	<? if($this->formvars['Bezirk'] != ''){ ?>margin: 0px 0px 250px 0px;<? } ?>
+}
+.gsf_suche div:first-child, .gsf_suche_gbbl>div:first-child {
+	width: 180px;
+	text-align: left;
+	align-self: center;
+}
+.gsf_suche input[name="bezirk"] {
+	width: 60px;
+}
+.gsf_suche_form span {
+	text-align: left;
+}
+.gsf_suche_gbbl>div span {
+	margin-left: 10px;
+	vertical-align: middle;
+}
+.gsf_suche_form_add {
+	width: 80px;
+	text-align: center;
+}
+</style>
+
+<div id="titel"><?php echo $strTitle; ?></div>
 
 <?php if ($this->Fehlermeldung!='') {
-
 include(LAYOUTPATH."snippets/Fehlermeldung.php");
-
 }
+?>
 
-?><p>
+<div id="gsf_formular">
+	<div class="gsf_suche">
+		<div><?php echo $strGbbzschl; ?></div>
+		<div><input name="bezirk" type="text" value="<?php echo $this->formvars['bezirk']; ?>" onkeyup="updateBezirksauswahl();" autofocus onfocus="var temp_value=this.value; this.value=''; this.value=temp_value;" tabindex="1"></div>
+	</div>
+	<div class="gsf_suche">
+		<div><?php echo $strGbbzname; ?></div>
+		<div>
+			<select name="Bezirk" onchange="updateBezirksschluessel();" tabindex="2">
+				<option value="">--- Auswahl ---</option>
+				<?for($i = 0; $i < count($this->gbliste['schluessel']); $i++){?>
+					<option 
+				<?if($this->formvars['Bezirk'] == $this->gbliste['schluessel'][$i]){?>
+				selected
+				<?}?>
+				value="<? echo $this->gbliste['schluessel'][$i]; ?>"><? echo $this->gbliste['beides'][$i]; ?></option>
+				<? } ?>
+			</select>
+		</div>
+	</div>
+	<div class="gsf_suche_gbbl">
+		<div>
+			<?php echo $strGbblatt; ?>
+		</div>
+		<? if($this->formvars['Bezirk'] == ''){ ?>
+		<div>
+			<input name="Blatt" type="text" value="<?php echo $this->formvars['Blatt']; ?>" tabindex="3">
+			<?php if($this->FormObject["selectedFlstNr"]->html == '') { ?>
+			<span data-tooltip="Eingabe eines Grundbuchblattes ohne Auswahl von Bezirk.
+Eingabeformate:
+132423-123
+132423-0000123"></span>
+			<?	} ?>
+		</div>
+		<? } else { ?>
+		<div>
+			<table class="gsf_suche_form">
+				<tr>
+					<td colspan="2"><span><?php echo $strSelected; ?></span></td>
+					<td><span><?php echo $strExist; ?></span></td>
+				</tr>
+				<tr>
+					<td>
+						<select size="12" style="width: 170px;" multiple="true" name="selectedBlatt">
+						<? for($i=0; $i < count($this->selblattliste); $i++){ ?>
+							<option value=" <? echo $this->selblattliste[$i]; ?>"><? echo $this->selblattliste[$i]; ?></option>';
+						<? } ?>
+						</select>
+					</td>
+					<td class="gsf_suche_form_add">
+						<div><input type="button" name="addPlaces" value="&laquo;" onClick="addOptions(document.GUI.Blatt,document.GUI.selectedBlatt,document.GUI.selBlatt,'value');" tabindex="4"></div>
+						<div><input type="button" name="substractPlaces" value="&raquo;" onClick="substractOptions(document.GUI.selectedBlatt,document.GUI.selBlatt,'value');"></div>
+					</td>
+					<td>
+						<select size="12" style="width: 100px;" multiple="true" name="Blatt" tabindex="3">
+						<? for($i = 0; $i < count($this->blattliste['blatt']); $i++){ ?>
+							<option <?if($this->formvars['Blatt'] == $this->blattliste['blatt'][$i]){ echo "selected"; } ?> 
+								value="<? echo $this->formvars['Bezirk'].'-'.$this->blattliste['blatt'][$i]; ?>"><? echo ltrim($this->blattliste['blatt'][$i], '0'); ?>
+							</option>
+						<? } ?>
+						</select>
+					</td>
+				</tr>		
+			</table>		
+		</div>
+		<? } ?>
+	</div>
+</div>
+<div id="import1">
+	<a href="javascript:showimport();"><? echo $strImportList; ?></a>
+</div>
+<div id="import2">
+	<input name="importliste" type="file" value="" tabindex="2">
+	<span data-tooltip="Eingabeformate:
+132423-123
+132423-0000123
+"></span>
+	<input type="submit" value="Laden">
+</div>
+<div>
+	<input type="hidden" name="selBlatt" value="<? echo $this->formvars['selBlatt']; ?>">
+	<input type="hidden" name="go" value="Grundbuchblatt_Auswaehlen">
+	<input type="submit" name="go_plus" value="<?php echo $strSearch; ?>" tabindex="5">
+</div>
 
-<table border="0" cellpadding="5" cellspacing="2">
-  <tr>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr> 
-    <td align="right"><span class="fett">Grundbuchbezirksschlüssel:</span></td>
-    <td colspan="3">
-    	<input name="bezirk" style="width:230px" type="text" value="<?php echo $this->formvars['bezirk']; ?>" onkeyup="updateBezirksauswahl();" size="25" tabindex="1">
-    </td>
-  </tr>
-  <tr> 
-    <td align="right"><span class="fett">Grundbuchbezirk:</span></td>
-    <td colspan="3">
-    	<select style="width:230px"  name="Bezirk" onchange="updateBezirksschluessel();">
-    		<option value="">--- Auswahl ---</option>
-    		<?for($i = 0; $i < count($this->gbliste['schluessel']); $i++){?>
-    			<option 
-    		<?if($this->formvars['Bezirk'] == $this->gbliste['schluessel'][$i]){?>
-    		 selected
-    		 <?}?>
-    		 value="<? echo $this->gbliste['schluessel'][$i]; ?>"><? echo $this->gbliste['beides'][$i]; ?></option>
-    		<? } ?>
-    	</select>
-    </td>
-  </tr>
-  <? if($this->formvars['Bezirk'] == ''){ ?>
-  <tr>
-    <td align="right"><span class="fett">Grundbuchblatt:</span></td>
-    <td colspan="3"><input name="Blatt" style="width:230px" type="text" value="<?php echo $this->formvars['Blatt']; ?>" size="25" tabindex="2"></td>
-  </tr>
-  <? }else{ ?>
-  <tr>
-    <td align="right"><span class="fett">Grundbuchblatt:</span></td>
-    <td>
-    	<br>ausgewählte:<br>
-    	<select size="10" style="width:130px" multiple="true"  name="selectedBlatt">
-    		 <?
-          for($i=0; $i < count($this->selblattliste); $i++){
-          	echo '<option value="'.$this->selblattliste[$i].'">'.$this->selblattliste[$i].'</option>';
-          }
-          ?>
-    	</select>
-   	</td>
-    <td align="center" valign="middle" width="1">
-      <input type="button" name="addPlaces" value="&laquo;" onClick="addOptions(document.GUI.Blatt,document.GUI.selectedBlatt,document.GUI.selBlatt,'value');">
-    	<input type="button" name="substractPlaces" value="&raquo;" onClick="substractOptions(document.GUI.selectedBlatt,document.GUI.selBlatt,'value');">
-    </td>
-    <td>
-    	<br>vorhandene:<br>
-    	<select size="10" style="width:100px" multiple="true"  name="Blatt">
-    		<?for($i = 0; $i < count($this->blattliste['blatt']); $i++){?>
-    			<option
-    			<?if($this->formvars['Blatt'] == $this->blattliste['blatt'][$i]){?>
-    		 selected
-    		 <?}?> 
-    			value="<? echo $this->formvars['Bezirk'].'-'.$this->blattliste['blatt'][$i]; ?>"><? echo ltrim($this->blattliste['blatt'][$i], '0'); ?></option>
-    		<? } ?>
-    	</select>
-  	</td>
-  </tr>
-  <? } ?>
-	<tr>
-		<td id="import1" colspan="4" align="center"><a href="javascript:showimport();">Import Grundbuchblattliste...</a></td>
-	</tr>
-	<tr id="import2" style="display:none">
-		<td colspan="4" style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
-			<table>
-				<td><input name="importliste" type="file" value="" style="width: 340px" tabindex="2"></td>
-				<td><input type="submit" value="Laden"></td>
-			</table>
-		</td>
-	</tr>
-  <tr>
-    <td colspan="3" align="center">&nbsp;</td>
-  </tr>
-  <tr> 
-    <td colspan="4" align="center"> 
-			<input type="hidden" name="selBlatt" value="<? echo $this->formvars['selBlatt']; ?>">
-			<input type="hidden" name="go" value="Grundbuchblatt_Auswaehlen">
-			<input type="submit" name="go_plus" value="Suchen" tabindex="6">
-		</td>
-  </tr>
-</table>
+
+
+
+
+
 <?
  if($this->formvars['namensuche'] == 'true'){
  ?>

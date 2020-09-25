@@ -94,6 +94,9 @@ function CalendarJS() {
         		
         this.show = function(){
 					if(this.contentdiv)this.destroy();
+					if(this.parEl.getBoundingClientRect().top < 300){
+						this.parEl.style.top = '20px';
+					}
 					this.contentdiv = document.createElement("div");
 					this.contentdiv.onclick = function(event){event.stopPropagation();};
 					if(this.type == 'date' || this.type == 'timestamp')this.showCalendar();
