@@ -306,7 +306,7 @@ class Gml_builder {
 							$codeSpaceUri = $gml_value_array[0];
 							$code_value = $gml_value_array[1];
 							if(!empty($codeSpaceUri) || !empty($code_value)) {
-								$gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']} codeSpace=\"$codeSpaceUri\">	$code_value</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
+								$gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']} codeSpace=\"$codeSpaceUri\">$code_value</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
 							}
 							break;
 						case "DataType":
@@ -480,32 +480,35 @@ class Gml_builder {
 						}
 					} break;
 
-        case 'e': // enum type
-        default: {
-          $gml_value = trim($gml_object[$uml_attribute['col_name']]);
-          // check for array values
-          if ($gml_value[0] == '{' && substr($gml_value,-1) == '}') {
-            $gml_value_array = explode(',',substr($gml_value, 1, -1));
-            for ($j = 0; $j < count($gml_value_array); $j++){
-              $gmlStr .= $this->wrapWithElement(
-                  "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
-                  htmlspecialchars($gml_value_array[$j],ENT_QUOTES|ENT_XML1,"UTF-8"));
-            }
-          } else
-          $gmlStr .= $this->wrapWithElement(
-              "{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
-              htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"));
-       }
-      }
-    }
+				case 'e': // enum type
+				default: {
+					$gml_value = trim($gml_object[$uml_attribute['col_name']]);
+					// check for array values
+					if ($gml_value[0] == '{' && substr($gml_value,-1) == '}') {
+						$gml_value_array = explode(',',substr($gml_value, 1, -1));
+						for ($j = 0; $j < count($gml_value_array); $j++){
+							$gmlStr .= $this->wrapWithElement(
+								"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+								htmlspecialchars($gml_value_array[$j],ENT_QUOTES|ENT_XML1,"UTF-8"));
+							}
+						} else
+							$gmlStr .= $this->wrapWithElement(
+								"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+								htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8")
+							);
+					}
+			}
+		}
 
-    # Workaround for association verbundener Plan
-    # TODO Make this more generic to reflect possible changes in index and support all associations
-    if(array_key_exists('verbundenerplan', $gml_object)) {
-        $gmlStr .= "<{$xplan_ns_prefix}verbundenerPlan xlink:href=\"#GML_" . $gml_object['verbundenerplan'] . "\"/>";
-    }
-    return $gmlStr;
-  }
+		# Workaround for association verbundener Plan
+		# TODO Make this more generic to reflect possible changes in index and support all associations
+		if(array_key_exists('verbundenerplan', $gml_object)) {
+				# Trim prefix in different variants if exists
+				$gml_object_verbundenerplan = str_replace(array('#','GML_','Gml_','gml_'), '', $gml_object['verbundenerplan']);
+				$gmlStr .= "<{$xplan_ns_prefix}verbundenerPlan xlink:href=\"#GML_" . $gml_object_verbundenerplan . "\"/>";
+		}
+		return $gmlStr;
+	}
 
   /*
   * Diese Funktion speichert den Inhalt der temporären Datei

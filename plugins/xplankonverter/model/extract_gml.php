@@ -25,7 +25,17 @@ class Gml_extractor {
 
 		$this->build_basic_tables();
 		$this->ogr2ogr_gmlas();
-		$tables = $this->get_all_tables_in_schema($this->gmlas_schema);
+		# $tables = $this->get_all_tables_in_schema($this->gmlas_schema);
+
+		# Revert the geom of GML to database specific winding order of vertices (CW/RHR IN DB and Shape, CCW/LHR in GML)
+		# NOTE:
+		# As lines have to be reverted as well, it cannot be confirmed automatically whether the order is correct.
+		# It must be assumed that source data conforms to the GML standard (left hand order) on all geometries
+		# For Polygons alone, this could be deduced through an inside/outside check (e.g. with ST_ForceRHR())
+		$fachobjekte_tables_and_geometries = $this->get_fachobjekte_geometry_tables_attributes($this->gmlas_schema);
+		foreach($fachobjekte_tables_and_geometries as $fachobjekt_table_and_geometry) {
+			$this->revert_vertex_order_for_table_with_geom_column_in_schema($fachobjekt_table_and_geometry['table_name'],$fachobjekt_table_and_geometry['column_name'],$this->gmlas_schema);
+		}
 
 		$layername = '';
 		$tablename = strtolower($classname); #for DB
@@ -240,6 +250,41 @@ class Gml_extractor {
 		return $result;
 	}
 
+	/*
+	* Get all existing tables outside of Plan and Bereich with geometry columns
+	*/
+	function get_fachobjekte_geometry_tables_attributes($schema) {
+		$sql = "
+			SELECT
+				table_name, column_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_schema = '" .$schema . "' 
+			AND
+				udt_name = 'geometry'
+			AND
+				column_name NOT IN ('raeumlichergeltungsbereich','geltungsbereich')
+			;";
+		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+		$result = pg_fetch_all($ret[1]);
+		//$result = (!empty($result)) ? array_column($result, 'table_name') : array();
+		return $result;
+	}
+
+	/*
+	* Reverse vertex order of specific geometry (GML CCW Lefthand, Shape and DB CW Righthand)
+	*/
+	function revert_vertex_order_for_table_with_geom_column_in_schema($table, $geom_column, $schema) {
+		$sql = "
+			UPDATE " . 
+				$schema . "." . $table . " 
+			SET " .
+				$geom_column . " = ST_Reverse(" . $geom_column . ") 
+		;";
+		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+	}
+
 	function get_bbox_from_wkt($wkt){
 		$sql ="
 			SELECT 
@@ -257,6 +302,7 @@ class Gml_extractor {
 
 	/*
 	* Returns an associative array to fill the bp_plan form
+	* Force RHR to get database-winding order, order will be reverted again on export.
 	*/
 	function fill_form_bp_plan($gml_id) {
 		$sql = "
@@ -281,8 +327,8 @@ class Gml_extractor {
 				END AS wurdegeaendertvon,
 				gmlas.erstellungsmassstab AS erstellungsmassstab,
 				gmlas.bezugshoehe AS bezugshoehe,
-				st_assvg(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg ."), 0, 8) AS newpath,
-				st_astext(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg .")) AS newpathwkt,
+				st_assvg(st_transform(ST_ForceRHR(gmlas.raeumlichergeltungsbereich),". $this->epsg ."), 0, 8) AS newpath,
+				st_astext(st_transform(ST_ForceRHR(gmlas.raeumlichergeltungsbereich),". $this->epsg .")) AS newpathwkt,
 				CASE WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
@@ -313,15 +359,15 @@ class Gml_extractor {
 				to_char(gmlas.ausfertigungsdatum, 'DD.MM.YYYY') AS ausfertigungsdatum,
 				to_char(gmlas.satzungsbeschlussdatum, 'DD.MM.YYYY') AS satzungsbeschlussdatum,
 				gmlas.veraenderungssperre AS veraenderungssperre,
-				/*-- to_char(gmlas.auslegungsenddatum, 'DD.MM.YYYY') AS auslegungsenddatum, -- NOT YET IN 5.0.1 */
+				array_to_json(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[]) AS auslegungsenddatum,
 				to_json((gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml.bp_sonstplanart) AS sonstplanart,
 				gmlas.gruenordnungsplan AS gruenordnungsplan,
 				to_json((pg.name, pg.kennziffer)::xplan_gml.xp_plangeber) AS plangeber,
-				/* to_char(gmlas.auslegungsstartdatum AS auslegungsstartdatum, 'DD.MM.YYYY'), -- NOT YET IN 5.0.1 */
-				/*-- to_char(gmlas.traegerbeteiligungsstartdatum, 'DD.MM.YYYY') AS traegerbeteiligungsstartdatum, -- NOT YET IN 5.0.1 */
+				array_to_json(ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[]) AS auslegungsstartdatum,
+				array_to_json(ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[]) AS traegerbeteiligungsstartdatum,
 				to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY') AS aenderungenbisdatum,
 				to_json((gmlas.status_codespace, gmlas.status, NULL)::xplan_gml.bp_status) AS status,
-				/*-- to_char(gmlas.traegerbeteiligungsenddatum, 'DD.MM.YYYY') AS traegerbeteiligungsenddatum, -- NOT YET IN 5.0.1 */
+				array_to_json(ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[]) AS traegerbeteiligungsenddatum,
 				array_to_json(gmlas.planart) AS planart,
 				gmlas.erschliessungsvertrag AS erschliessungsvertrag
 			FROM
@@ -338,7 +384,11 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".bp_plan_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid LEFT JOIN
-				" . $this->gmlas_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid
+				" . $this->gmlas_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
+				" . $this->gmlas_schema . ".bp_plan_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
+				" . $this->gmlas_schema . ".bp_plan_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
+				" . $this->gmlas_schema . ".bp_plan_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
+				" . $this->gmlas_schema . ".bp_plan_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id
 			WHERE
 				gmlas.id ='" . $gml_id . "'
 			;";
@@ -374,7 +424,7 @@ class Gml_extractor {
 				gmlas.erstellungsmassstab AS erstellungsmassstab,
 				gmlas.bezugshoehe AS bezugshoehe,
 				st_assvg(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg ."), 0, 8) AS newpath,
-				st_astext(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg .")) AS newpathwkt,
+				st_astext(st_transform(ST_ForceRHR(gmlas.raeumlichergeltungsbereich),". $this->epsg .")) AS newpathwkt,
 				CASE WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
@@ -392,18 +442,18 @@ class Gml_extractor {
 					)]::xplan_gml.xp_spezexternereferenz[])
 					ELSE NULL
 				END AS externereferenz,
-				/*to_char(gmlas.auslegungsenddatum, 'DD.MM.YYYY') AS auslegungsenddatum, -- NOT YET IN 5.0.1*/
+				array_to_json(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[]) AS auslegungsenddatum,
 				array_to_json(ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[]) AS gemeinde,
 				to_json((gmlas.status_codespace, gmlas.status, NULL)::xplan_gml.fp_status) AS status,
 				gmlas.sachgebiet AS sachgebiet,
 				to_json((pg.name, pg.kennziffer)::xplan_gml.xp_plangeber) AS plangeber,
 				gmlas.rechtsstand::xplan_gml.fp_rechtsstand AS rechtsstand,
 				to_char(gmlas.wirksamkeitsdatum, 'DD.MM.YYYY') AS wirksamkeitsdatum,
-				/*-- to_char(gmlas.auslegungsstartdatum AS auslegungsstartdatum, 'DD.MM.YYYY'), -- NOT YET IN 5.0.1*/ 
-				/*-- to_char(gmlas.traegerbeteiligungsstartdatum, 'DD.MM.YYYY') AS traegerbeteiligungsstartdatum, -- NOT YET IN 5.0.1*/
+				array_to_json(ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[]) AS auslegungsstartdatum,
+				array_to_json(ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[]) AS traegerbeteiligungsstartdatum,
 				to_char(gmlas.entwurfsbeschlussdatum, 'DD.MM.YYYY') AS entwurfsbeschlussdatum,
 				to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY') AS aenderungenbisdatum,
-				/*-- to_char(gmlas.traegerbeteiligungsenddatum, 'DD.MM.YYYY') AS traegerbeteiligungsenddatum, -- NOT YET IN 5.0.1*/
+				array_to_json(ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[]) AS traegerbeteiligungsenddatum,
 				gmlas.verfahren::xplan_gml.fp_verfahren AS verfahren,
 				to_json((gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml.fp_sonstplanart) AS sonstplanart,
 				gmlas.planart::xplan_gml.fp_planart AS planart,
@@ -423,7 +473,11 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".fp_plan_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid LEFT JOIN
-				" . $this->gmlas_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid
+				" . $this->gmlas_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
+				" . $this->gmlas_schema . ".fp_plan_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
+				" . $this->gmlas_schema . ".fp_plan_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
+				" . $this->gmlas_schema . ".fp_plan_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
+				" . $this->gmlas_schema . ".fp_plan_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id
 			WHERE
 				gmlas.id ='" . $gml_id . "'
 			;";
@@ -459,7 +513,7 @@ class Gml_extractor {
 				gmlas.erstellungsmassstab AS erstellungsmassstab,
 				gmlas.bezugshoehe AS bezugshoehe,
 				st_assvg(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg ."), 0, 8) AS newpath,
-				st_astext(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg .")) AS newpathwkt,
+				st_astext(st_transform(ST_ForceRHR(gmlas.raeumlichergeltungsbereich),". $this->epsg .")) AS newpathwkt,
 				CASE WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
@@ -530,7 +584,7 @@ class Gml_extractor {
 				gmlas.erstellungsmassstab AS erstellungsmassstab,
 				gmlas.bezugshoehe AS bezugshoehe,
 				st_assvg(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg ."), 0, 8) AS newpath,
-				st_astext(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg .")) AS newpathwkt,
+				st_astext(st_transform(ST_ForceRHR(gmlas.raeumlichergeltungsbereich),". $this->epsg .")) AS newpathwkt,
 				CASE WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
@@ -557,13 +611,13 @@ class Gml_extractor {
 				to_char(gmlas.planbeschlussdatum, 'DD.MM.YYYY') AS planbeschlussdatum,
 				to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY') AS aufstellungsbeschlussdatum,
 				to_char(gmlas.entwurfsbeschlussdatum, 'DD.MM.YYYY') AS entwurfsbeschlussdatum,
-				/*to_char(gmlas.auslegungenddatum, 'DD.MM.YYYY') AS auslegungenddatum,*/
+				array_to_json(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[]) AS auslegungsenddatum,
 				to_json((gmlas.sonstplanart_codespace, gmlas.sonstplanart)::xplan_gml.rp_sonstplanart) AS sonstplanart,
-				/*to_char(gmlas.auslegungstartdatum AS auslegungstartdatum, 'DD.MM.YYYY'),*/
-				/*to_char(gmlas.traegerbeteiligungsstartdatum, 'DD.MM.YYYY') AS traegerbeteiligungsstartdatum,*/
+				array_to_json(ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[]) AS auslegungsstartdatum,
+				array_to_json(ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[]) AS traegerbeteiligungsstartdatum,
 				to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY') AS aenderungenbisdatum,
 				to_json((gmlas.status_codespace, gmlas.status)::xplan_gml.rp_status) AS status,
-				/*to_char(gmlas.traegerbeteiligungsenddatum, 'DD.MM.YYYY') AS traegerbeteiligungsenddatum,*/
+				array_to_json(ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[]) AS traegerbeteiligungsenddatum,
 				gmlas.planart::xplan_gml.rp_art AS planart
 			FROM
 				" . $this->gmlas_schema . ".rp_plan gmlas LEFT JOIN
@@ -577,6 +631,10 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".rp_plan_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid
+				" . $this->gmlas_schema . ".rp_plan_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
+				" . $this->gmlas_schema . ".rp_plan_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
+				" . $this->gmlas_schema . ".rp_plan_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
+				" . $this->gmlas_schema . ".rp_plan_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id
 			WHERE
 				gmlas.id = '" . $gml_id . "'
 			;";
@@ -613,7 +671,7 @@ class Gml_extractor {
 				gmlas.bedeutung::xplan_gml.xp_bedeutungenbereich AS bedeutung,
 				gmlas.detailliertebedeutung AS detailliertebedeutung,
 				gmlas.erstellungsmassstab AS erstellungsmassstab,
-				st_transform(gmlas.geltungsbereich,". $this->epsg .") AS geltungsbereich,
+				ST_ForceRHR(st_transform(gmlas.geltungsbereich,". $this->epsg .")) AS geltungsbereich,
 				" . $user_id . " AS user_id,
 				" . $konvertierung_id . " AS konvertierung_id,
 				trim(leading '#gml_' FROM lower(gmlas.rasterbasis_href)) AS rasterbasis,";
@@ -1596,6 +1654,150 @@ class Gml_extractor {
 				parent_id character varying NOT NULL,
 				xp_gemeinde_pkid character varying,
 				CONSTRAINT fp_plan_gemeinde_pkey PRIMARY KEY (ogc_fid)
+			)
+			WITH (
+				OIDS=TRUE
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_auslegungsenddatum
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				parent_id character varying NOT NULL,
+				value date,
+				CONSTRAINT bp_plan_auslegungsenddatum_pkey PRIMARY KEY (ogc_fid)
+			)
+			WITH (
+				OIDS=TRUE
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_auslegungsstartdatum
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				parent_id character varying NOT NULL,
+				value date,
+				CONSTRAINT bp_plan_auslegungsstartdatum_pkey PRIMARY KEY (ogc_fid)
+			)
+			WITH (
+				OIDS=TRUE
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_traegerbeteiligungsenddatum
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				parent_id character varying NOT NULL,
+				value date,
+				CONSTRAINT bp_plan_traegerbeteiligungsenddatum_pkey PRIMARY KEY (ogc_fid)
+			)
+			WITH (
+				OIDS=TRUE
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_traegerbeteiligungsstartdatum
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				parent_id character varying NOT NULL,
+				value date,
+				CONSTRAINT bp_plan_traegerbeteiligungsstartdatum_pkey PRIMARY KEY (ogc_fid)
+			)
+			WITH (
+				OIDS=TRUE
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_auslegungsenddatum
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				parent_id character varying NOT NULL,
+				value date,
+				CONSTRAINT fp_plan_auslegungsenddatum_pkey PRIMARY KEY (ogc_fid)
+			)
+			WITH (
+				OIDS=TRUE
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_auslegungsstartdatum
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				parent_id character varying NOT NULL,
+				value date,
+				CONSTRAINT fp_plan_auslegungsstartdatum_pkey PRIMARY KEY (ogc_fid)
+			)
+			WITH (
+				OIDS=TRUE
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_traegerbeteiligungsenddatum
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				parent_id character varying NOT NULL,
+				value date,
+				CONSTRAINT fp_plan_traegerbeteiligungsenddatum_pkey PRIMARY KEY (ogc_fid)
+			)
+			WITH (
+				OIDS=TRUE
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_traegerbeteiligungsstartdatum
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				parent_id character varying NOT NULL,
+				value date,
+				CONSTRAINT fp_plan_traegerbeteiligungsstartdatum_pkey PRIMARY KEY (ogc_fid)
+			)
+			WITH (
+				OIDS=TRUE
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_auslegungsenddatum
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				parent_id character varying NOT NULL,
+				value date,
+				CONSTRAINT rp_plan_auslegungsenddatum_pkey PRIMARY KEY (ogc_fid)
+			)
+			WITH (
+				OIDS=TRUE
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_auslegungsstartdatum
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				parent_id character varying NOT NULL,
+				value date,
+				CONSTRAINT rp_plan_auslegungsstartdatum_pkey PRIMARY KEY (ogc_fid)
+			)
+			WITH (
+				OIDS=TRUE
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_traegerbeteiligungsenddatum
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				parent_id character varying NOT NULL,
+				value date,
+				CONSTRAINT rp_plan_traegerbeteiligungsenddatum_pkey PRIMARY KEY (ogc_fid)
+			)
+			WITH (
+				OIDS=TRUE
+			);
+
+			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_traegerbeteiligungsstartdatum
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				parent_id character varying NOT NULL,
+				value date,
+				CONSTRAINT rp_plan_traegerbeteiligungsstartdatum_pkey PRIMARY KEY (ogc_fid)
 			)
 			WITH (
 				OIDS=TRUE
