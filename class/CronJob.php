@@ -24,7 +24,7 @@ class CronJob extends MyObject {
 		$this->log_file_name = '/var/www/logs/cron/cron.log';
 	}
 
-	public function validate() {
+	public function validate($on = '') {
 		$results = array();
 		$results[] = $this->validates('bezeichnung', 'presence');
 		$results[] = $this->validates('bezeichnung', 'not_null', 'Bezeichnung muss angegeben werden.');
