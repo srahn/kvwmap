@@ -820,7 +820,7 @@ class ddl {
 		$this->xoffset_onpage = 0;
 		$this->page_overflow = false;
 		if($pdfobject == NULL){
-			include (CLASSPATH . 'class.ezpdf.php');
+			include_once (CLASSPATH . 'class.ezpdf.php');
 			$this->pdf=new Cezpdf($this->layout['size'], $this->layout['orientation']);
 			$this->pdf->ezSetMargins($this->layout['margin_top'], $this->layout['margin_bottom'], $this->layout['margin_left'], $this->layout['margin_right']);
 		}
@@ -1056,6 +1056,7 @@ class ddl {
 	}
 	
 	function autogenerate_layout($layer_id, $attributes, $stelle_id){
+		include (CLASSPATH . 'class.ezpdf.php');
 		$formvars['selected_layer_id'] = $layer_id;
 		$formvars['name'] = 'AutoLayout_'.date("Y-m-d_G-i-s");
 		$formvars['format'] = 'A4 hoch';
@@ -1067,6 +1068,7 @@ class ddl {
 		$formvars['margin_bottom'] = 50;
 		$formvars['margin_left'] = 50;
 		$formvars['margin_right'] = 50;
+		$this->pdf=new Cezpdf();
 		$y = $maxy - $formvars['margin_top'] - $fontsize;
 		$x = $formvars['margin_left'];
 		if($attributes['group'][0] != ''){
@@ -1076,8 +1078,11 @@ class ddl {
 		$rc = 0;
 		for($i = 0; $i < count($attributes['name']); $i++){
 			if(!in_array($attributes['form_element_type'][$i], ['Geometrie', 'Dokument', 'SubFormEmbeddedPK', 'SubFormPK'])){
+				$attribute_offset_x = 0;
+				$attribute_offset_y = 0;
 				# Gruppe
 				if($attributes['group'][$i] != $attributes['group'][$i-1]){
+					$gap = 35;
 					# Rechteck um die Gruppe
 					$rects[$rc]['breite'] = 0.5;
 					$rects[$rc]['posx'] = $formvars['margin_left'];
@@ -1089,15 +1094,6 @@ class ddl {
 						$rects[$rc-1]['offset_attribute_end'] = $attributes['name'][$last_attribute_index];
 					}
 					$rc++;
-					# Rechteck um den Gruppennamen
-					$rect['breite'] = 0.5;
-					$rect['posx'] = $formvars['margin_left'];
-					$rect['posy'] = 20;
-					$rect['offset_attribute_start'] = $attributes['name'][$last_attribute_index];
-					$rect['endposx'] = $maxx - $formvars['margin_right'];
-					$rect['endposy'] = 39;
-					$rect['offset_attribute_end'] = $attributes['name'][$last_attribute_index];
-					$groupname_rects[] = $rect;
 					# Gruppenname als Freitext
 					$text['text'] = $attributes['group'][$i];
 					$text['posx'] = $x;
@@ -1105,19 +1101,25 @@ class ddl {
 					$text['offset_attribute'] = $attributes['name'][$last_attribute_index];
 					$text['font'] = 'Helvetica-Bold.afm';
 					$text['size'] = $fontsize;
+					$this->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$text['font']);
+					$group_text_width = $this->pdf->getTextWidth($fontsize, $text['text']);
+					if($group_text_width > ($maxx - $formvars['margin_left'] - $formvars['margin_right'] - 7)){
+						$gap = $gap + 15;
+					}
 					$groupnames[] = $text;
-					#
-					$gap = 35;
+					# Rechteck um den Gruppennamen
+					$rect['breite'] = 0.5;
+					$rect['posx'] = $formvars['margin_left'];
+					$rect['posy'] = 20;
+					$rect['offset_attribute_start'] = $attributes['name'][$last_attribute_index];
+					$rect['endposx'] = $maxx - $formvars['margin_right'];
+					$rect['endposy'] = 4 + $gap;
+					$rect['offset_attribute_end'] = $attributes['name'][$last_attribute_index];
+					$groupname_rects[] = $rect;
 				}
 				else{
 					$gap = 0;
 				}
-				# Attribut
-				$formvars['posx_'.$attributes['name'][$i]] = $x + 130;
-				$formvars['posy_'.$attributes['name'][$i]] = 20 + $gap;
-				$formvars['offset_attribute_'.$attributes['name'][$i]] = $attributes['name'][$last_attribute_index];
-				$formvars['font_'.$attributes['name'][$i]] = 'Helvetica.afm';
-				$formvars['fontsize_'.$attributes['name'][$i]] = 11;
 				# Attributname als Freitext
 				$text['text'] = $attributes['alias'][$i] ?: $attributes['name'][$i];
 				$text['posx'] = $x;
@@ -1125,7 +1127,19 @@ class ddl {
 				$text['offset_attribute'] = $attributes['name'][$last_attribute_index];
 				$text['font'] = 'Helvetica-Bold.afm';
 				$text['size'] = $fontsize;
-				$attributenames[] = $text;
+				$this->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$text['font']);
+				$attributename_text_width = $this->pdf->getTextWidth($fontsize, $text['text']);
+				if($attributename_text_width > 130){
+					$attribute_offset_x = -130;
+					$attribute_offset_y = 20;
+				}
+				$attributenames[] = $text;				
+				# Attribut
+				$formvars['posx_'.$attributes['name'][$i]] = $x + 130 + $attribute_offset_x;
+				$formvars['posy_'.$attributes['name'][$i]] = 20 + $gap + $attribute_offset_y;
+				$formvars['offset_attribute_'.$attributes['name'][$i]] = $attributes['name'][$last_attribute_index];
+				$formvars['font_'.$attributes['name'][$i]] = 'Helvetica.afm';
+				$formvars['fontsize_'.$attributes['name'][$i]] = 11;
 				$last_attribute_index = $i;
 			}
 		}
