@@ -139,7 +139,8 @@ function buildwktpolygonfromsvgpath(svgpath){
 				</tr>
 				<tr>
 					<td><? echo $strGeomFrom; ?>:<br>
-						<select name="geom_from_layer" style="width: 250px" onchange="startwaiting(true);document.GUI.no_load.value='true';document.GUI.submit();">
+						<!--select name="geom_from_layer" style="width: 250px" onchange="startwaiting(true);document.GUI.no_load.value='true';document.GUI.submit();"-->
+						<select name="geom_from_layer" style="width: 250px">
 							<option value="0"> - alle - </option>
 							<?
 							for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){

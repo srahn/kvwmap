@@ -634,7 +634,29 @@ class spatial_processor {
 	      $client_epsg=$this->rolle->epsg_code;
 	      # EPSG-Code des Layers der Abgefragt werden soll
 	      $layer_epsg=$layerset[0]['epsg_code'];
-	      # Bildung der Where-Klausel f�r die r�umliche Abfrage mit der searchbox
+				
+				$data = replace_params(
+					$layerset[0]['Data'],
+					rolle::$layer_params,
+					$this->user->id,
+					$this->stelle_id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				);
+				$data = str_replace('$scale', 1000, $data);
+				$data_explosion = explode(' ', $data);
+				$columnname = $data_explosion[0];
+				$select = $fromwhere = $dbmap->getSelectFromData($data);
+				# order by rausnehmen
+				$orderby = '';
+				$orderbyposition = strrpos(strtolower($select), 'order by');
+				$lastfromposition = strrpos(strtolower($select), 'from');
+				if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+					$fromwhere = substr($select, 0, $orderbyposition);
+					$orderby = ' '.substr($select, $orderbyposition);
+				}
+
+	      # Bildung der Where-Klausel für die räumliche Abfrage mit der searchbox
 	      $searchbox_wkt ="POLYGON((";
 	      $searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny).",";
 	      $searchbox_wkt.=strval($rect->maxx)." ".strval($rect->miny).",";
@@ -657,7 +679,7 @@ class spatial_processor {
 					}
 					
 					# Wenn es sich bei der Suche um eine punktuelle Suche handelt, wird die where Klausel um eine
-					# Umkreissuche mit dem Suchradius weiter eingeschr�nkt.
+					# Umkreissuche mit dem Suchradius weiter eingeschränkt.
 					if ($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy) {
 						# Behandlung der Suchanfrage mit Punkt, exakte Suche im Kreis
 						if ($client_epsg!=$layer_epsg) {
@@ -685,26 +707,6 @@ class spatial_processor {
 	      	$layerset[0]['Filter'] = str_replace('$userid', $this->rolle->user_id, $layerset[0]['Filter']);
 	        $sql_where .= " AND ".$layerset[0]['Filter'];
 	      }
-
-				$data = replace_params(
-					$layerset[0]['Data'],
-					rolle::$layer_params,
-					$this->user->id,
-					$this->stelle_id,
-					rolle::$hist_timestamp,
-					$this->user->rolle->language
-				);
-				$data_explosion = explode(' ', $data);
-				$columnname = $data_explosion[0];
-				$select = $fromwhere = $dbmap->getSelectFromData($data);
-				# order by rausnehmen
-				$orderby = '';
-				$orderbyposition = strrpos(strtolower($select), 'order by');
-				$lastfromposition = strrpos(strtolower($select), 'from');
-				if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-					$fromwhere = substr($select, 0, $orderbyposition);
-					$orderby = ' '.substr($select, $orderbyposition);
-				}
 
 				#$fromwhere = pg_escape_string('from (' . $fromwhere . ') as foo where 1=1');
 				$fromwhere = 'from (' . $fromwhere . ') as foo where 1=1';
