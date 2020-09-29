@@ -12674,7 +12674,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->output();
   }
 
-  # 2006-03-20 pk
   function setPrevMapExtent($consumetime) {
     $currentextent = ms_newRectObj();
     $prevextent = ms_newRectObj();
@@ -12720,7 +12719,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
   }
 
-  # 2006-03-20 pk
   function setNextMapExtent($consumetime) {
     $currentextent = ms_newRectObj();
     $nextextent = ms_newRectObj();
@@ -13111,7 +13109,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     return $pathxyPixel;
   }
 
-	function reduce_mapwidth($width_reduction, $height_reduction = NULL){
+	function reduce_mapwidth($width_reduction, $height_reduction = 0){
 		# Diese Funktion reduziert die aktuelle Kartenbildbreite um $width_reduction Pixel (und optional die Kartenbildhöhe um $height_reduction Pixel), damit das Kartenbild in Fachschalen nicht zu groß erscheint.
 		# Diese reduzierte Breite wird aber nicht in der Datenbank gespeichert, sondern gilt nur solange man in der Fachschale bleibt.
 		# Außerdem wird bei Bedarf der aktuelle Maßstab berechnet und zurückgeliefert (er wird berechnet, weil ein loadmap() ja noch nicht aufgerufen wurde).

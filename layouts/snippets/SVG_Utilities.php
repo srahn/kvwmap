@@ -229,13 +229,13 @@
 	function go_previous(){
 	  document.getElementById("canvas").setAttribute("cursor", "wait");
 	  enclosingForm.CMD.value  = "previous";
-	  submit();
+    get_map_ajax(\'go=navMap_ajax\');
 	}
 	
 	function go_next(){
 	  document.getElementById("canvas").setAttribute("cursor", "wait");
 	  enclosingForm.CMD.value  = "next";
-	  submit();
+	  get_map_ajax(\'go=navMap_ajax\');
 	}	
 
 	function zoomin(){
@@ -443,9 +443,9 @@
       enclosingForm.pathy.value    = pathy;
   }
 
-  function Full_Extent()   {
-      enclosingForm.CMD.value  = "Full_Extent";
-      submit();
+  function Full_Extent(){
+    enclosingForm.CMD.value = "Full_Extent";
+    get_map_ajax(\'go=navMap_ajax\');
   }
 
 	function checkQueryFields(){
