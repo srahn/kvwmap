@@ -556,54 +556,81 @@ class Gml_builder {
     return $result;
   }
 
-  /*
-  * Diese Funktion parses den Inhalt des übergebenen
-  * Query-Results für Spalten vom Typ Composite Datatype
-  * und gibt die Werte in einem (ggf. verschachtelten)
-  * Array zurück.
-  */
-  function parseCompositeDataType($data_string) {
-    $value_array = array();
-    $stack = array();
-    $curr_value = '';
-    // prepare data string
-    $value_str = substr($data_string, 1, -1);
-    // Kommata innerhalb Text werden derzeit über die Konverteroberflaeche nicht zugelassen,
-    //d.h. \", oder ,\" innerhalb eines CompositeDataTypes ist derzeit nicht moeglich
-    $value_str = str_replace('\"(', '(', $value_str);
-    $value_str = str_replace(')\"', ')', $value_str);
-    $value_str = str_replace('(\"','(', $value_str);
-    $value_str = str_replace('\")',')', $value_str);
-    $value_str = str_replace(',\"',',', $value_str);
-    $value_str = str_replace('\",',',', $value_str);
-    $value_str = str_replace('\"', '&quot;', $value_str);
-    $value_str = str_replace('"', '', $value_str);
-    // return if no data
-    if (strlen($value_str) == 0) return;
-    // cast string to array
-    $value_str_array = str_split($value_str);
-    // parse character by character
-    foreach ($value_str_array as $char) {
-      switch ($char) {
-        case '(':
-          array_push($stack,$value_array);
-          $value_array = array();
-          break;
-        case ')':
-          $value_array[] = $curr_value;
-          $curr_value = $value_array;
-          $value_array = array_pop($stack);
-          break;
-        case ',':
-          $value_array[] = $curr_value;
-          $curr_value = '';
-          break;
-        default:
-          $curr_value .= $char;
-      }
-    }
-    $value_array[] = $curr_value;
-    return $value_array;
-  }
+	/*
+	* Diese Funktion parses den Inhalt des übergebenen
+	* Query-Results für Spalten vom Typ Composite Datatype
+	* und gibt die Werte in einem (ggf. verschachtelten)
+	* Array zurück.
+	*/
+	function parseCompositeDataType($data_string) {
+		// First replace commas within strings (delimited by \" with an uncommon delimiter
+		// Also make sure to not use codelist-types (also delimited by "/ but followed with a ( when opening or prefixed with a ) when opening
+		$char_array = str_split($data_string);
+		$component_is_maybe_string = false;
+		for($i = 0; $i < count($char_array); $i++) {
+			switch ($char_array[$i]) {
+				case '\\':
+					if ($char_array[$i + 1] == '"' and $char_array[$i + 2] != '(' and $char_array[$i - 1] != ')') {
+						$component_is_string = !$component_is_string;
+					}
+					break;
+				case ',':
+					if($component_is_string and $char_array[$i + 1] != '/') {
+						// Replaces the string pos with an alternate delimiter in the original string
+						$data_string[$i] = '|';
+					}
+					break;
+				default:
+					break;
+			}
+		}
+		$value_array = array();
+		$stack = array();
+		$curr_value = '';
+		// prepare data string
+		$value_str = substr($data_string, 1, -1);
+		// Kommata innerhalb Text werden derzeit über die Konverteroberflaeche nicht zugelassen,
+		//d.h. \", oder ,\" innerhalb eines CompositeDataTypes ist derzeit nicht moeglich
+		$value_str = str_replace('\"(', '(', $value_str);
+		$value_str = str_replace(')\"', ')', $value_str);
+		$value_str = str_replace('(\"','(', $value_str);
+		$value_str = str_replace('\")',')', $value_str);
+		$value_str = str_replace(',\"',',', $value_str);
+		$value_str = str_replace('\",',',', $value_str);
+		$value_str = str_replace('\"', '&quot;', $value_str);
+		$value_str = str_replace('"', '', $value_str);
+		// return if no data
+		if (strlen($value_str) == 0) return;
+		// cast string to array
+		$value_str_array = str_split($value_str);
+		// parse character by character
+		foreach ($value_str_array as $char) {
+			switch ($char) {
+				case '(':
+					array_push($stack,$value_array);
+					$value_array = array();
+					break;
+				case ')':
+					$value_array[] = $curr_value;
+					$curr_value = $value_array;
+					$value_array = array_pop($stack);
+					break;
+				case ',':
+					$value_array[] = $curr_value;
+					$curr_value = '';
+					break;
+				default:
+					$curr_value .= $char;
+			}
+		}
+		$value_array[] = $curr_value;
+
+		// Revert pipe escape for commas within strings
+		$value_array_2 = array();
+		foreach($value_array as $value) {
+			$value_array_2[] = str_replace('|',',', $value);
+		}
+		return $value_array_2;
+	}
 }
 ?>
