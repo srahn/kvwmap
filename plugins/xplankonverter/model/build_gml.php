@@ -570,14 +570,26 @@ class Gml_builder {
 		for($i = 0; $i < count($char_array); $i++) {
 			switch ($char_array[$i]) {
 				case '\\':
-					if ($char_array[$i + 1] == '"' and $char_array[$i + 2] != '(' and $char_array[$i - 1] != ')') {
+					if ($char_array[$i + 1] == '"' and ($char_array[$i + 2] != '(' or $char_array[$i - 1] != ')')) {
 						$component_is_string = !$component_is_string;
 					}
 					break;
 				case ',':
-					if($component_is_string and $char_array[$i + 1] != '/') {
+					if($component_is_string and $char_array[$i + 1] != '\\') {
 						// Replaces the string pos with an alternate delimiter in the original string
 						$data_string[$i] = '|';
+					}
+					break;
+				case '(':
+					if($component_is_string) {
+						// Replaces the string pos with an alternate delimiter in the original string
+						$data_string[$i] = '^';
+					}
+					break;
+				case ')':
+					if($component_is_string) {
+						// Replaces the string pos with an alternate delimiter in the original string
+						$data_string[$i] = '$';
 					}
 					break;
 				default:
@@ -627,8 +639,11 @@ class Gml_builder {
 
 		// Revert pipe escape for commas within strings
 		$value_array_2 = array();
-		foreach($value_array as $value) {
-			$value_array_2[] = str_replace('|',',', $value);
+		foreach($value_array as $value_new) {
+			$value_new = str_replace('|',',', $value_new);
+			$value_new = str_replace('^','(', $value_new);
+			$value_new = str_replace('$',')', $value_new);
+			$value_array_2[] = $value_new;
 		}
 		return $value_array_2;
 	}
