@@ -1657,14 +1657,7 @@ class ddl {
 					Breite:&nbsp;<input type="text" name="textwidth[]" value="'.$texts[$i]['width'].'" size="2">
 				</td>
 				<td style="border-top:2px solid #C3C7C3;" colspan=2 align="left">
-					'.output_select(
-						'textfont[]',
-						$this->fonts,
-						$texts[$i]['font'],
-						null,
-						'Schriftart',
-						'--- bitte wählen ---'
-					).'
+					<input type="text" onmouseenter="show_select(this, \'fonts\')" name="textfont[]" value="'.$texts[$i]['font'].'">
 				</td>
 			</tr>
 			<tr>
@@ -1683,17 +1676,7 @@ class ddl {
 			</tr>
 			<tr>
 				<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
-					<select name="textoffset_attribute[]" style="width: 100px">
-						<option value="">- Auswahl -</option>';
-						for($j = 0; $j < count($this->attributes['name']); $j++){
-							echo '<option ';
-							if($texts[$i]['offset_attribute'] == $this->attributes['name'][$j]){
-								echo 'selected ';
-							}
-							echo 'value="'.$this->attributes['name'][$j].'">'.$this->attributes['name'][$j].'</option>';
-						}
-				echo '
-					</select>
+					<input type="text" onmouseenter="show_select(this, \'attributes\')" name="textoffset_attribute[]" value="'.$texts[$i]['offset_attribute'].'">
 				</td>
 				<td style="border-right:1px solid #C3C7C3"></td>
 				<td align="left" valign="top">
