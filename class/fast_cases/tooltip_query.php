@@ -1,5 +1,9 @@
 <?
 
+function pg_quote($column){
+	return ctype_lower($column) ? $column : '"'.$column.'"';
+}
+
 function sql_err_msg($title, $sql, $msg, $div_id) {
 	$err_msg = "
 		<div style=\"text-align: left;\">" .
