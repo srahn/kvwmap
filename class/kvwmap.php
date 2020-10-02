@@ -93,6 +93,7 @@ class GUI {
 	var $attributes = array();
 	var $scrolldown;
 	var $queryrect;
+	var $notices;
 
 	# Konstruktor
 	function __construct($main, $style, $mime_type) {
