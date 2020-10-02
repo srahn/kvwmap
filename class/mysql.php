@@ -522,12 +522,16 @@ INSERT INTO u_styles2classes (
 			if($meta->name == 'connection'){
 				$connection_field_index = $i;
 			}
+			if($meta->name == 'connection_id'){
+				$connection_id_field_index = $i;
+			}
 		}
 
 		while ($rs = $this->result->fetch_array()) {
 			$insert = '';
 			if ($rs[$connectiontype] == 6) {
 				$rs[$connection_field_index] = '@connection';
+				$rs[$connection_id_field_index] = '@connection_id';
 			}
 			$insert .= 'INSERT INTO '.$table.' (';
 			for ($i = 0; $i < $feld_anzahl; $i++) {
