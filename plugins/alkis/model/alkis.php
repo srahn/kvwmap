@@ -15,32 +15,13 @@ class ALKIS {
     $database->setDebugLevel=1;
   }
 	
-	function dhk_wsdl_login($url = 'http://webdhk-vr.lk-vr.de:8090/?wsdl'){
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_POST, true);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		$request_file = $this->create_wsdl_request_xml_file();
-		if (version_compare(phpversion(), '5.5.0', '<')) {
-			$curl_file = '@'.$request_file;
-		}
-		else {
-			curl_setopt($ch, CURLOPT_SAFE_UPLOAD, true);
-			$curl_file = new CURLFILE($request_file, 'text/xml', 'request_file');
-		}
-		#curl_setopt($ch, CURLOPT_POSTFIELDS, array('request_file' => $curl_file));
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: text/xml'));
-		$result = curl_exec($ch);
-		echo $httpCode = curl_getinfo($ch , CURLINFO_HTTP_CODE);
-		echo $result;
-		curl_close($ch);
-		#$parser = xml_parser_create();
-		#xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE,1);
-		#xml_parse_into_struct($parser, $result, $values, $index);
-		#xml_parser_free($parser);
-		#return $values[$index['JSESSIONID'][0]]['value'];
+	function dhk_wsdl_login(){phpinfo();
+		$params = Array(
+			'soap_version' => 'SOAP_1_1'
+		);
+		$client = new SoapClient('http://webdhk-vr.lk-vr.de:8090/?wsdl', $params);
+		$functions = $client->__getFunctions();
+		print_r($functions);
 	}
 	
 	function create_wsdl_request_xml_file(){
