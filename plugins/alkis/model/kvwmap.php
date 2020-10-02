@@ -1061,6 +1061,7 @@
 		$GUI->formvars['value_flurstueckskennzeichen'] = implode('|', $flurst_array);
 		$GUI->formvars['operator_flurstueckskennzeichen'] = 'IN';
 		$GUI->formvars['no_output'] = true;
+		$GUI->formvars['no_last_search'] = true;
 		$GUI->GenerischeSuche_Suchen();
 		$GUI->formvars['aktivesLayout'] = $GUI->formvars['formnummer'];
 		$GUI->generischer_sachdaten_druck_drucken();
