@@ -18631,8 +18631,7 @@ class db_mapObj{
 		if ($user_id != NULL AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
 				LEFT JOIN used_layer ul ON l.Layer_ID = ul.Layer_id
-				LEFT JOIN rolle rall ON ul.Stelle_ID = rall.stelle_id
-				LEFT JOIN rolle radm ON rall.stelle_id = radm.stelle_id
+				LEFT JOIN rolle radm ON ul.Stelle_ID = radm.stelle_id
 			";
 			$where[] = "(radm.user_id = ".$this->User_ID." OR ul.Layer_id IS NULL)";
 		}
