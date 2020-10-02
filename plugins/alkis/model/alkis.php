@@ -1441,7 +1441,7 @@ xmlns:web="http://webservice.sgjonlinecmd.supportgis.de/">
 
           $pdf->addText($col0,$row-=24,$fontSize,'Lage');
           # Ausgabe der Adressangabe zur Lage
-          $anzStrassen=count($flst->Adresse);
+          $anzStrassen = @count($flst->Adresse);
           for ($s=0;$s<$anzStrassen;$s++) {
             $Adressbezeichnung =$flst->Adresse[$s]["strasse"];
             $Adressbezeichnung.=' '.$flst->Adresse[$s]["strassenname"];
@@ -1469,7 +1469,7 @@ xmlns:web="http://webservice.sgjonlinecmd.supportgis.de/">
 					if($flst->zweifelhafterflurstuecksnachweis == 'ja')$pdf->addText($col0,$row-=24,$fontSize,'Zweifelhafter Flurstücksnachweis');
 
           # Baulastenblattnummer
-          if (count($flst->Baulasten)>0) {
+          if (@count($flst->Baulasten)>0) {
             $pdf->addText($col0,$row-=24,$fontSize,'Baulastenblatt-Nummer');
             $row-=6;
             $BaulastenStr=$flst->Baulasten[0]['blattnr'];
@@ -1484,7 +1484,7 @@ xmlns:web="http://webservice.sgjonlinecmd.supportgis.de/">
           }
 
           # BauBodenrecht
-          if (count($flst->BauBodenrecht)>0) {
+          if (@count($flst->BauBodenrecht)>0) {
             $pdf->addText($col0,$row-=24,$fontSize,'Bau- und Bodenordnungsrecht');
             $row-=6;
             for ($i=0; $i < count($flst->BauBodenrecht); $i++){
@@ -1516,7 +1516,7 @@ xmlns:web="http://webservice.sgjonlinecmd.supportgis.de/">
           }
 
           # Freier Text zum Flurstück
-          if (count($flst->FreiText)>0) {
+          if (@count($flst->FreiText)>0) {
             $pdf->addText($col0,$row-=24,$fontSize,'Zusätzliche Angaben');
             $row-=6;
             for ($z=0;$z<count($flst->FreiText);$z++) {
@@ -1530,7 +1530,7 @@ xmlns:web="http://webservice.sgjonlinecmd.supportgis.de/">
           }
 
           # Vorgängerflurstücke
-          if (count($flst->Vorgaenger)>0) {
+          if (@count($flst->Vorgaenger)>0) {
             $pdf->addText($col0,$row-=24,$fontSize,'Vorgängerflurstück');
             $pdf->addText($col2_1,$row,$fontSize,mb_substr($flst->Vorgaenger[0]['vorgaenger'],0,20,'utf8'));
             for ($v=1;$v<count($flst->Vorgaenger);$v++) {
@@ -1538,7 +1538,7 @@ xmlns:web="http://webservice.sgjonlinecmd.supportgis.de/">
             }
           }
           # Nachfolgerflurstücke
-          if (count($flst->Nachfolger)>0) {
+          if (@count($flst->Nachfolger)>0) {
             $pdf->addText($col0,$row-=24,$fontSize,'Nachfolgerflurstück');
             $pdf->addText($col2_1,$row,$fontSize,mb_substr($flst->Nachfolger[0]['nachfolger'],0,20,'utf8'));
             for ($v=1;$v<count($flst->Nachfolger);$v++) {
