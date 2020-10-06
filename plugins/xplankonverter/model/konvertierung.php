@@ -138,7 +138,7 @@ class Konvertierung extends PgObject {
 		$this->debug->show('Create new konvertierung with sql: ' . $sql, Konvertierung::$write_debug);
 		$query = pg_query($this->database->dbConn, $sql);
 		$oid = pg_last_oid($query);
-		echo '<br>oid: ' . $oid;
+		#echo '<br>oid: ' . $oid;
 		if (empty($oid)) {
 			$this->lastquery = $query;
 		}
@@ -157,7 +157,7 @@ class Konvertierung extends PgObject {
 			$this->set($this->identifier, $row[$this->identifier]);
 		}
 		$this->debug->show('Konvertierung created with ' . $this->identifier . ': '. $this->get($this->identifier), Konvertierung::$write_debug);
-		echo '<br>return identifier: ' . $this->identifier . ': ' . $this->get($this->identifier);
+		#echo '<br>return identifier: ' . $this->identifier . ': ' . $this->get($this->identifier);
 		return $this->get($this->identifier);
 	}
 
@@ -189,6 +189,61 @@ class Konvertierung extends PgObject {
 	function get_file_name($name) {
 		$parts = explode('_', $name);
 		return $this->get_file_path($name) . '/' . $parts[0] . '_' . $this->get('id') . '.' . $parts[1];
+	}
+
+	function create_edited_shapes() {
+		$path = $this->get_file_path('edited_shapes');
+		$this->debug->show('Erzeuge Edited-Shape-Files in. ' . $path, Konvertierung::$write_debug);
+		$export_class = new data_import_export();
+
+		$this->debug->show('Frage Source-Tabellen ab: ', Konvertierung::$write_debug);
+		$sql = "
+			SELECT
+				table_name
+			FROM
+				information_schema.tables
+			WHERE
+				table_schema = 'xplan_shapes_" . $this->get('id') . "'
+		";
+
+		$this->debug->show('sql: ' . $sql, Konvertierung::$write_debug);
+		$result = pg_fetch_all(
+			pg_query($this->database->dbConn, $sql)
+		);
+
+		$class_names = [];
+		if ($result) {
+			$class_names = array_map(
+				function($row) {
+					return $row['table_name'];
+				},
+				$result
+			);
+		}
+		else {
+			$class_names = array();
+		}
+
+		$this->debug->show('Erzeuge Shape-Dateien für jede Klasse:', Konvertierung::$write_debug);
+		foreach ($class_names AS $class_name) {
+			$result = pg_query($this->database->dbConn, $sql);
+			//$result = pg_fetch_assoc($query);
+			if(pg_num_rows($result) == 0) {
+				continue;
+			} else {
+				while($row = pg_fetch_array($result)){
+					$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
+					$sql = "
+						SELECT
+							*
+						FROM
+							xplan_shapes_" . $this->get('id') . "." . $class_name . "
+					";
+					$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
+					$export_class->ogr2ogr_export($sql, '"ESRI Shapefile"', $path . '/' . ltrim($class_name, 'shp_') . '.shp', $this->database);
+				}
+			}
+		}
 	}
 
 	function create_xplan_shapes() {
@@ -289,7 +344,7 @@ class Konvertierung extends PgObject {
 
 	function send_export_file($exportfile, $contenttype) {
 		header('Content-type: ' . $contenttype);
-#		header("Content-disposition:  attachment; filename=" . basename($exportfile));
+		header("Content-disposition:  attachment; filename=" . basename($exportfile));
 		header("Content-Length: " . filesize($exportfile));
 		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header('Pragma: public');
@@ -597,7 +652,7 @@ class Konvertierung extends PgObject {
 
 				if ($alle_sql_ausfuehrbar) {
 					# Prüft die Konformitäten der Klassen der Konvertierung für die aktuelle Version
-					echo $this->get_version_from_ns_uri(XPLAN_NS_URI);
+					#echo $this->get_version_from_ns_uri(XPLAN_NS_URI);
 					foreach ($this->get_konformitaetsbedingungen($this->get_version_from_ns_uri(XPLAN_NS_URI)) AS $bedingung) {
 						foreach ($bedingung['konformitaet']->validierungen AS $validierung) {
 							$validierung->validiere_konformitaet($this->get('id'), $bedingung);
