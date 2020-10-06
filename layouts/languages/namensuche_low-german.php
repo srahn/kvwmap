@@ -1,13 +1,18 @@
 ﻿<?php
- $strTitle="Egendömer dörchschnöckern"; 
+ $strTitle="Egendömer dörchschnöckern";
+ $strPerson="Person";
+ $strGebiet="Gebiet";
  $strName1="Naam/Firma";
  $strName2="Vörnaam";
- $strName3="Geburtsnaam";
- $strName4="geburen am";
- $strName5="Stroat";
- $strName6="Husnummer";
- $strName7="PLZ";
- $strName8="Uurt";
+ $strName3="Deil vun en Naam";
+ $strName4="Akademischer Grad";
+ $strName5="Geburtsnaam";
+ $strName6="geburen am";
+ $strName7="Stroat";
+ $strName8="Husnummer";
+ $strName9="PLZ";
+ $strName10="Uurt";
+ $strExactSearch="nipp un nau Sök";
  $strGbbez="Grundbookbezirk";
  $strGbbl="Grundbookblatt";
  $strGemkg="Gemorkung (Gemeend)";

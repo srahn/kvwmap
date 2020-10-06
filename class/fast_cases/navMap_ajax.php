@@ -644,7 +644,7 @@ class GUI {
     }
   }
 	
-	function reduce_mapwidth($width_reduction, $height_reduction = NULL){
+	function reduce_mapwidth($width_reduction, $height_reduction = 0){
 		# Diese Funktion reduziert die aktuelle Kartenbildbreite um $width_reduction Pixel (und optional die Kartenbildhöhe um $height_reduction Pixel), damit das Kartenbild in Fachschalen nicht zu groß erscheint.
 		# Diese reduzierte Breite wird aber nicht in der Datenbank gespeichert, sondern gilt nur solange man in der Fachschale bleibt.
 		# Außerdem wird bei Bedarf der aktuelle Maßstab berechnet und zurückgeliefert (er wird berechnet, weil ein loadmap() ja noch nicht aufgerufen wurde).
@@ -1489,6 +1489,95 @@ class GUI {
 			$this->map_scaledenom = $this->map->scale;
 		}
   }
+	
+  function setPrevMapExtent($consumetime) {
+    $currentextent = ms_newRectObj();
+    $prevextent = ms_newRectObj();
+    $currentextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+    $prevextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+    $ret = $this->user->rolle->getConsume($consumetime);
+    $i = 0;
+    while($i < 100 AND 
+					round($currentextent->minx, 2) == round($prevextent->minx, 2) AND 
+					round($currentextent->miny, 2) == round($prevextent->miny, 2) AND 
+					round($currentextent->maxx, 2) == round($prevextent->maxx, 2) AND 
+					round($currentextent->maxy, 2) == round($prevextent->maxy, 2)){
+      # Setzen des next Wertes des vorherigen Kartenausschnittes
+      $prevtime=$ret[1]['prev'];
+      $this->user->rolle->newtime = $prevtime;
+      if (!($prevtime=='' OR $prevtime=='2006-09-29 12:55:50')) {
+        $ret=$this->user->rolle->updateNextConsumeTime($prevtime,$consumetime);
+        if ($ret[0]) {
+          $this->errmsg="Der Nachfolger für den letzten Kartenausschnitt konnte nicht eingetragen werden.<br>" . $ret[1];
+        }
+        else {
+          # Abfragen der vorherigen Kartenausdehnung
+          $ret=$this->user->rolle->getConsume($prevtime);
+          if ($ret[0]) {
+            $this->errmsg="Der letzte Kartenausschnitt konnte nicht abgefragt werden.<br>" . $ret[1];
+          }
+          else {
+						$consumetime = $prevtime;
+						$prevextent->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
+          }
+        }
+      }
+      $i++;
+    }
+    $this->user->rolle->set_last_time_id($prevtime);
+    $this->map->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
+  	if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
+  }
+
+  function setNextMapExtent($consumetime) {
+    $currentextent = ms_newRectObj();
+    $nextextent = ms_newRectObj();
+    $currentextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+    $nextextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+		$nexttime = $consumetime;
+    # Abfragen der nächsten Kartenausdehnung
+    $ret = $this->user->rolle->getConsume($consumetime);
+    $i = 0;
+    while($i < 100 AND 
+		(string)$currentextent->minx == (string)$nextextent->minx AND 
+		(string)$currentextent->miny == (string)$nextextent->miny AND 
+		(string)$currentextent->maxx == (string)$nextextent->maxx AND 
+		(string)$currentextent->maxy == (string)$nextextent->maxy){
+      $lasttime = $nexttime;
+      $nexttime=$ret[1]['next'];
+      if($nexttime == NULL){
+        $nexttime = $lasttime;
+        $i = 100;
+      }
+      $this->user->rolle->newtime = $nexttime;
+      $ret=$this->user->rolle->getConsume($nexttime);
+      if ($ret[0]) {
+        $this->errmsg="Der nächste Kartenausschnitt konnte nicht abgefragt werden.<br>" . $ret[1];
+      }
+      else {
+        $nextextent->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
+        #echo '<br>gewechselt auf Einstellung von:'.$this->consumetime;
+      }
+      $i++;
+    }
+    $this->user->rolle->set_last_time_id($ret[1]['time_id']);
+    $this->map->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
+  	if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
+  }	
+	
+	function setFullExtent() {
+		$this->map->setextent($this->Stelle->MaxGeorefExt->minx,$this->Stelle->MaxGeorefExt->miny,$this->Stelle->MaxGeorefExt->maxx,$this->Stelle->MaxGeorefExt->maxy);
+	}	
 
   function zoomMap($nZoomFactor){
 		# Funktion zum Zoomen über die Navigationswerkzeuge; Koordinaten sind Bildkoordinaten
@@ -2227,6 +2316,43 @@ class rolle {
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
 	}
+	
+  function getConsume($consumetime, $user_id = NULL) {
+		if($user_id == NULL)$user_id = $this->user_id;		# man kann auch eine user_id übergeben um den Kartenausschnitt eines anderen Users abzufragen
+    $sql ='SELECT * FROM u_consume';
+    $sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$this->stelle_id;
+    $sql.=' AND time_id="'.$consumetime.'"';
+    #echo '<br>'.$sql;
+    $queryret=$this->database->execSQL($sql,4, 0);
+    if ($queryret[0]) {
+      # Fehler bei Datenbankanfrage
+      $ret[0]=1;
+      $ret[1]='<br>Fehler bei der Abfrage der letzten Zugriffszeit.<br>'.$ret[1];
+    }
+    else {
+      $rs = $this->database->result->fetch_assoc();
+      $ret[0]=0;
+      $ret[1]=$rs;
+    }
+    return $ret;
+  }
+	
+  function updateNextConsumeTime($time_id,$nexttime) {
+    $sql ='UPDATE u_consume SET next="'.$nexttime.'"';
+    $sql.=' WHERE time_id="'.$time_id.'"';
+    #echo '<br>'.$sql;
+    $queryret=$this->database->execSQL($sql,4, 1);
+    if ($queryret[0]) {
+      # Fehler bei Datenbankanfrage
+      $ret[0]=1;
+      $ret[1]='<br>Fehler bei der Aktualisierung des Zeitstempels des Nachfolgers Next.<br>'.$ret[1];
+    }
+    else {
+      $ret[0]=0;
+      $ret[1]=1;
+    }
+    return $ret;
+  }	
 
 	function setScrollPosition($scrollposition){
 		if($scrollposition != ''){

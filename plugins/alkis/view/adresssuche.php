@@ -35,6 +35,12 @@
   }
 </script>
 <style>
+#titel {
+	font-family: SourceSansPro3;
+	font-size: 20px;
+	margin-bottom: 0px;
+	margin-top: 10px;
+}
 #ads_formular {
 	margin: 40px 0px 20px 0px;
 	padding-left: 20px;
@@ -63,11 +69,10 @@
 .ads_suche div:first-child, .ads_suche_hnr>div:first-child {
 	width: 180px;
 	text-align: left;
-	margin: auto 0px;
+	align-self: center;
 }
 .ads_suche_form span {
 	text-align: left;
-	margin: 5px auto;
 }
 .ads_suche_form_add {
 	width: 100px;
@@ -76,7 +81,7 @@
 </style>
 
 <input type="hidden" name="go" value="<? if($this->formvars['ALK_Suche']) echo 'ALK-'; ?>Adresse_Auswaehlen">
-<br><h2><?php echo $this->titel; ?></h2>
+<div id="titel"><?php echo $strTitle; ?></div>
 <?php if ($this->Fehlermeldung!='') {
 include(LAYOUTPATH."snippets/Fehlermeldung.php");
 }
@@ -99,8 +104,8 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 <?	}
 	if($this->FormObject["HausNr"] != ''){ ?>
 	<div class="ads_suche_hnr">
-		<div><?php echo $strHnr; ?></div>
 	<?	if($this->FormObject["selectedHausNr"]->html != ''){ ?>
+		<div><?php echo $strHnr; ?></div>
 		<div>
 			<table class="ads_suche_form">
 				<tr>
@@ -117,9 +122,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 				</tr>
 			</table>
 		</div>
-		<?	} else { ?>
-		<div><?php echo $this->FormObject["HausNr"]->html; ?></div>
-	<?	} ?>
+		<?	} ?>
 	</div>
 <?	} ?>
 		

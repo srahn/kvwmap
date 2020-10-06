@@ -4,10 +4,11 @@ header('Content-Type: text/html; charset=utf-8');
 include('credentials.php');
 include('config.php');
 
-if (!USE_EXISTING_SESSION AND array_key_exists('CONTEXT_PREFIX', $_SERVER)) {
-	session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
-}
-
+# Session
+$maxlifetime = 0;
+$path = (!USE_EXISTING_SESSION AND array_key_exists('CONTEXT_PREFIX', $_SERVER)) ? $_SERVER['CONTEXT_PREFIX'] : '/';
+$samesite = 'strict';
+session_set_cookie_params($maxlifetime, $path.'; samesite='.$samesite);
 session_start();
 
 # Laden der Plugins config.phps
@@ -100,6 +101,11 @@ define('CASE_COMPRESS', false);
 #											- read_layer_attributes() reinkopieren																							#
 #											- check_oid() reinkopieren																													#
 #											- getFilter() reinkopieren																													#
+#											- setFullExtent() reinkopieren																											#
+#											- setPrevMapExtent()																																#
+#											- setNextMapExtent()																																#
+#											- getConsume()																																			#
+#											-	updateNextConsumeTime()																														#
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
 #   getLayerOptions:  - ein Rollenlayer muss verwendet werden																							#

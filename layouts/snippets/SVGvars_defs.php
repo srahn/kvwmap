@@ -132,22 +132,25 @@ $SVGvars_defs = '
 	$nexttime=$ret[1]['next'];
 	$prevtime=$ret[1]['prev'];
 
-	if($nexttime!=''){
-		$mouseupfunction='go_next();';
-		$next_disabled='';
-	}
-	else{
-		$mouseupfunction='';
-		$next_disabled='disabled';
-	}
-	if($prevtime!='' AND $this->prevtime!='0000-00-00 00:00:00'){
-		$prevmouseupfunction='go_previous();';
-		$prev_disabled='';
-	}
-	else{
-		$prevmouseupfunction='';
-		$prev_disabled='disabled';
-	}
+	// if($nexttime!=''){
+		// $mouseupfunction='go_next();';
+		// $next_disabled='';
+	// }
+	// else{
+		// $mouseupfunction='';
+		// $next_disabled='disabled';
+	// }
+	// if($prevtime!='' AND $this->prevtime!='0000-00-00 00:00:00'){
+		// $prevmouseupfunction='go_previous();';
+		// $prev_disabled='';
+	// }
+	// else{
+		// $prevmouseupfunction='';
+		// $prev_disabled='disabled';
+	// }
+	
+	$mouseupfunction='go_next();';
+	$prevmouseupfunction='go_previous();';
 	
 	function previous($prev_disabled, $strPreviousView, $prevmouseupfunction){
 		global $last_x;global $events;

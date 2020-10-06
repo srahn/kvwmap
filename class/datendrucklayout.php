@@ -255,6 +255,7 @@ class ddl {
 		}
 		$remaining_rectangles = array();
     for($j = 0; $j < count($this->layout['rectangles']); $j++){
+			$overflow = false;
 			if($type != 'everypage' AND $this->page_overflow){
 				$this->pdf->reopenObject($this->record_startpage);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 				#if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???		muss auskommentiert bleiben, sonst ist die Karte im MVBIO-Drucklayout auf der zweiten Seite
@@ -280,6 +281,7 @@ class ddl {
 							continue;			# die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
 						}
 					}
+					$page_id_start = $this->pdf->currentContents;
 					if($offset_attribute_end != ''){			# ist ein offset_attribute gesetzt
 						$offset_value = $this->layout['offset_attributes'][$offset_attribute_end];
 						if($offset_value != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Linie relativ dazu setzen
@@ -289,6 +291,9 @@ class ddl {
 							$remaining_rectangles[] = $this->layout['rectangles'][$j]['id'];
 							continue;			# die Linie ist abhängig aber das Attribut noch nicht geschrieben, Linie merken und überspringen
 						}
+					}
+					if($page_id_start != $this->pdf->currentContents){
+						$overflow = true;
 					}
 					if($offset_attribute_start == ''){
 						$y = $y - $this->offsety;
@@ -316,7 +321,15 @@ class ddl {
 					if($color_id != ''){
 						if($this->layout['rectangles'][$j]['type'] != 3 OR !$this->layout['rectangles'][$j]['printed']){		# bei type = 3 (alternierend) gibt 'printed' an ob das letzte Rechteck gefüllt war oder nicht
 							$this->layout['rectangles'][$j]['printed'] = true;
-							$this->pdf->filledRectangle($x,$y,$endx-$x,$endy-$y, $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
+							if($overflow){		# Seitenumbruch dazwischen
+								$this->pdf->reopenObject($page_id_start);
+								$this->pdf->filledRectangle($x, $this->layout['margin_bottom'], $endx-$x, $y - $this->layout['margin_bottom'], $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
+								$this->pdf->closeObject();
+								$this->pdf->filledRectangle($x, $endy, $endx-$x, $this->layout['height'] - $this->layout['margin_top'] + 12 - $endy, $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
+							}
+							else{
+								$this->pdf->filledRectangle($x, $y, $endx-$x, $endy-$y, $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
+							}							
 						}
 						else{
 							$this->layout['rectangles'][$j]['printed'] = false;
@@ -324,7 +337,15 @@ class ddl {
 					}
 					if($this->layout['rectangles'][$j]['breite'] > 0){
 						$this->pdf->setLineStyle($this->layout['rectangles'][$j]['breite'], 'square');
-						$this->pdf->rectangle($x,$y,$endx-$x,$endy-$y);	
+						if($overflow){		# Seitenumbruch dazwischen
+							$this->pdf->reopenObject($page_id_start);
+							$this->pdf->rectangle($x, $this->layout['margin_bottom'], $endx-$x, $y - $this->layout['margin_bottom']);
+							$this->pdf->closeObject();
+							$this->pdf->rectangle($x, $endy, $endx-$x, $this->layout['height'] - $this->layout['margin_top'] + 12 - $endy);
+						}
+						else{
+							$this->pdf->rectangle($x, $y, $endx-$x, $endy-$y);
+						}
 					}
 					$rectangle['x1'] = $x;
 					$rectangle['y1'] = $y + ($endy-$y);
@@ -359,7 +380,7 @@ class ddl {
 				if($attributes['type'][$j] != 'geometry'){
 					switch ($attributes['form_element_type'][$j]){
 						case 'SubFormPK' : case 'SubFormEmbeddedPK' : {
-							if($this->layout['elements'][$attributes['name'][$j]]['font'] != ''){
+							if(true or $this->layout['elements'][$attributes['name'][$j]]['font'] != ''){
 								# Parameter saven ##
 								$layerid_save = $selected_layer_id;
 								$layoutid_save = $this->layout['id'];
@@ -403,31 +424,36 @@ class ddl {
 								if($this->i_on_page == 0){
 									if($this->maxy < $this->layout['height']-$offy)$this->maxy = $this->layout['height']-$offy;		# beim ersten Datensatz das maxy ermitteln
 								}
-								if($preview){
-									$sublayoutobject = $this->load_layouts(NULL, $sublayout, NULL, NULL);
-									$y = $this->gui->sachdaten_druck_editor_preview($sublayoutobject[0], $this->pdf, $offx, $offy);
+								if($sublayout == ''){
+									$y = $ypos - 20;
 								}
 								else{
-									$this->gui->formvars['no_output'] = true;
-									for($p = 0; $p < count($attributes['name']); $p++){			# erstmal alle Suchparameter des übergeordneten Layers für die Layersuche leeren
-										$this->gui->formvars['value_'.$attributes['name'][$p]] = '';
-										$this->gui->formvars['operator_'.$attributes['name'][$p]] = '';
+									if($preview){
+										$sublayoutobject = $this->load_layouts(NULL, $sublayout, NULL, NULL);
+										$y = $this->gui->sachdaten_druck_editor_preview($sublayoutobject[0], $this->pdf, $offx, $offy);
 									}
-									$this->gui->formvars['value_'.$this->layerset['maintable'].'_oid'] = '';
-									for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){			# die Suchparameter für die Layersuche
-										$this->gui->formvars['value_'.$this->attributes['subform_pkeys'][$j][$p]] = $this->result[$i][$attributes['subform_pkeys'][$j][$p]];
-										$this->gui->formvars['operator_'.$this->attributes['subform_pkeys'][$j][$p]] = '=';
-									}							
-									$this->gui->GenerischeSuche_Suchen();
-									for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){			# die Suchparameter für die Layersuche wieder leeren
-										$this->gui->formvars['value_'.$this->attributes['subform_pkeys'][$j][$p]] = '';
-									}	
-									$this->gui->formvars['aktivesLayout'] = $sublayout;
-									$page_id_before_sublayout = $this->pdf->currentContents;
-									$y = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy);
-									$page_id_after_sublayout = $this->pdf->currentContents;
-									if($page_id_before_sublayout != $page_id_after_sublayout){
-										$this->page_overflow = true;
+									else{
+										$this->gui->formvars['no_output'] = true;
+										for($p = 0; $p < count($attributes['name']); $p++){			# erstmal alle Suchparameter des übergeordneten Layers für die Layersuche leeren
+											$this->gui->formvars['value_'.$attributes['name'][$p]] = '';
+											$this->gui->formvars['operator_'.$attributes['name'][$p]] = '';
+										}
+										$this->gui->formvars['value_'.$this->layerset['maintable'].'_oid'] = '';
+										for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){			# die Suchparameter für die Layersuche
+											$this->gui->formvars['value_'.$this->attributes['subform_pkeys'][$j][$p]] = $this->result[$i][$attributes['subform_pkeys'][$j][$p]];
+											$this->gui->formvars['operator_'.$this->attributes['subform_pkeys'][$j][$p]] = '=';
+										}							
+										$this->gui->GenerischeSuche_Suchen();
+										for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){			# die Suchparameter für die Layersuche wieder leeren
+											$this->gui->formvars['value_'.$this->attributes['subform_pkeys'][$j][$p]] = '';
+										}	
+										$this->gui->formvars['aktivesLayout'] = $sublayout;
+										$page_id_before_sublayout = $this->pdf->currentContents;
+										$y = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy);
+										$page_id_after_sublayout = $this->pdf->currentContents;
+										if($page_id_before_sublayout != $page_id_after_sublayout){
+											$this->page_overflow = true;
+										}
 									}
 								}
 								# den letzten y-Wert dieses Elements in das Offset-Array schreiben
@@ -747,7 +773,7 @@ class ddl {
 		switch ($this->attributes['form_element_type'][$j]) {
 			case 'Auswahlfeld' : {
 				if(is_array($this->attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-					for($e = 0; $e < count($this->attributes['enum_value'][$j][$i]); $e++){
+					for($e = 0; $e < @count($this->attributes['enum_value'][$j][$i]); $e++){
 						if($this->attributes['enum_value'][$j][$i][$e] == $value){
 							$output = $this->attributes['enum_output'][$j][$i][$e];
 							break;
@@ -820,7 +846,7 @@ class ddl {
 		$this->xoffset_onpage = 0;
 		$this->page_overflow = false;
 		if($pdfobject == NULL){
-			include (CLASSPATH . 'class.ezpdf.php');
+			include_once (CLASSPATH . 'class.ezpdf.php');
 			$this->pdf=new Cezpdf($this->layout['size'], $this->layout['orientation']);
 			$this->pdf->ezSetMargins($this->layout['margin_top'], $this->layout['margin_bottom'], $this->layout['margin_left'], $this->layout['margin_right']);
 		}
@@ -1056,6 +1082,7 @@ class ddl {
 	}
 	
 	function autogenerate_layout($layer_id, $attributes, $stelle_id){
+		include (CLASSPATH . 'class.ezpdf.php');
 		$formvars['selected_layer_id'] = $layer_id;
 		$formvars['name'] = 'AutoLayout_'.date("Y-m-d_G-i-s");
 		$formvars['format'] = 'A4 hoch';
@@ -1067,6 +1094,7 @@ class ddl {
 		$formvars['margin_bottom'] = 50;
 		$formvars['margin_left'] = 50;
 		$formvars['margin_right'] = 50;
+		$this->pdf=new Cezpdf();
 		$y = $maxy - $formvars['margin_top'] - $fontsize;
 		$x = $formvars['margin_left'];
 		if($attributes['group'][0] != ''){
@@ -1075,9 +1103,12 @@ class ddl {
 		}
 		$rc = 0;
 		for($i = 0; $i < count($attributes['name']); $i++){
-			if(!in_array($attributes['form_element_type'][$i], ['Geometrie', 'Dokument', 'SubFormEmbeddedPK', 'SubFormPK'])){
+			if(!in_array($attributes['form_element_type'][$i], ['Geometrie', 'Dokument'])){
+				$attribute_offset_x = 0;
+				$attribute_offset_y = 0;
 				# Gruppe
 				if($attributes['group'][$i] != $attributes['group'][$i-1]){
+					$gap = 35;
 					# Rechteck um die Gruppe
 					$rects[$rc]['breite'] = 0.5;
 					$rects[$rc]['posx'] = $formvars['margin_left'];
@@ -1089,15 +1120,6 @@ class ddl {
 						$rects[$rc-1]['offset_attribute_end'] = $attributes['name'][$last_attribute_index];
 					}
 					$rc++;
-					# Rechteck um den Gruppennamen
-					$rect['breite'] = 0.5;
-					$rect['posx'] = $formvars['margin_left'];
-					$rect['posy'] = 20;
-					$rect['offset_attribute_start'] = $attributes['name'][$last_attribute_index];
-					$rect['endposx'] = $maxx - $formvars['margin_right'];
-					$rect['endposy'] = 39;
-					$rect['offset_attribute_end'] = $attributes['name'][$last_attribute_index];
-					$groupname_rects[] = $rect;
 					# Gruppenname als Freitext
 					$text['text'] = $attributes['group'][$i];
 					$text['posx'] = $x;
@@ -1105,19 +1127,25 @@ class ddl {
 					$text['offset_attribute'] = $attributes['name'][$last_attribute_index];
 					$text['font'] = 'Helvetica-Bold.afm';
 					$text['size'] = $fontsize;
+					$this->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$text['font']);
+					$group_text_width = $this->pdf->getTextWidth($fontsize, $text['text']);
+					if($group_text_width > ($maxx - $formvars['margin_left'] - $formvars['margin_right'] - 7)){
+						$gap = $gap + 15;
+					}
 					$groupnames[] = $text;
-					#
-					$gap = 35;
+					# Rechteck um den Gruppennamen
+					$rect['breite'] = 0.5;
+					$rect['posx'] = $formvars['margin_left'];
+					$rect['posy'] = 20;
+					$rect['offset_attribute_start'] = $attributes['name'][$last_attribute_index];
+					$rect['endposx'] = $maxx - $formvars['margin_right'];
+					$rect['endposy'] = 4 + $gap;
+					$rect['offset_attribute_end'] = $attributes['name'][$last_attribute_index];
+					$groupname_rects[] = $rect;
 				}
 				else{
 					$gap = 0;
 				}
-				# Attribut
-				$formvars['posx_'.$attributes['name'][$i]] = $x + 130;
-				$formvars['posy_'.$attributes['name'][$i]] = 20 + $gap;
-				$formvars['offset_attribute_'.$attributes['name'][$i]] = $attributes['name'][$last_attribute_index];
-				$formvars['font_'.$attributes['name'][$i]] = 'Helvetica.afm';
-				$formvars['fontsize_'.$attributes['name'][$i]] = 11;
 				# Attributname als Freitext
 				$text['text'] = $attributes['alias'][$i] ?: $attributes['name'][$i];
 				$text['posx'] = $x;
@@ -1125,7 +1153,28 @@ class ddl {
 				$text['offset_attribute'] = $attributes['name'][$last_attribute_index];
 				$text['font'] = 'Helvetica-Bold.afm';
 				$text['size'] = $fontsize;
-				$attributenames[] = $text;
+				$this->pdf->selectFont(WWWROOT.APPLVERSION.'fonts/PDFClass/'.$text['font']);
+				$attributename_text_width = $this->pdf->getTextWidth($fontsize, $text['text']);
+				if($attributename_text_width > 130){
+					$attribute_offset_x = $attributename_text_width - 120;		# Attributname zu lang -> Offset für das Attribut
+				}
+				if($attributename_text_width > ($maxx - $formvars['margin_left'] - $formvars['margin_right'] - 7)){		# Attributname länger als eine Zeile -> Offsets setzen
+					$attribute_offset_x = - 130;
+					$attribute_offset_y = 20;
+				}
+				$attributenames[] = $text;				
+				# Attribut
+				if($attributes['form_element_type'][$i] == 'Textfeld'){		# mehrzeilige Textfelder immer unter dem Attributnamen platzieren
+					$attribute_offset_x = - 130;
+					$attribute_offset_y = $attribute_offset_y + 20;
+				}
+				$formvars['posx_'.$attributes['name'][$i]] = $x + 130 + $attribute_offset_x;
+				$formvars['posy_'.$attributes['name'][$i]] = 20 + $gap + $attribute_offset_y;
+				$formvars['offset_attribute_'.$attributes['name'][$i]] = $attributes['name'][$last_attribute_index];
+				if(!in_array($attributes['form_element_type'][$i], ['SubFormEmbeddedPK', 'SubFormPK'])){
+					$formvars['font_'.$attributes['name'][$i]] = 'Helvetica.afm';
+				}
+				$formvars['fontsize_'.$attributes['name'][$i]] = $fontsize;
 				$last_attribute_index = $i;
 			}
 		}
@@ -1608,14 +1657,7 @@ class ddl {
 					Breite:&nbsp;<input type="text" name="textwidth[]" value="'.$texts[$i]['width'].'" size="2">
 				</td>
 				<td style="border-top:2px solid #C3C7C3;" colspan=2 align="left">
-					'.output_select(
-						'textfont[]',
-						$this->fonts,
-						$texts[$i]['font'],
-						null,
-						'Schriftart',
-						'--- bitte wählen ---'
-					).'
+					<input type="text" onmouseenter="show_select(this, \'fonts\')" name="textfont[]" value="'.$texts[$i]['font'].'">
 				</td>
 			</tr>
 			<tr>
@@ -1634,17 +1676,7 @@ class ddl {
 			</tr>
 			<tr>
 				<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
-					<select name="textoffset_attribute[]" style="width: 100px">
-						<option value="">- Auswahl -</option>';
-						for($j = 0; $j < count($this->attributes['name']); $j++){
-							echo '<option ';
-							if($texts[$i]['offset_attribute'] == $this->attributes['name'][$j]){
-								echo 'selected ';
-							}
-							echo 'value="'.$this->attributes['name'][$j].'">'.$this->attributes['name'][$j].'</option>';
-						}
-				echo '
-					</select>
+					<input type="text" onmouseenter="show_select(this, \'attributes\')" name="textoffset_attribute[]" value="'.$texts[$i]['offset_attribute'].'">
 				</td>
 				<td style="border-right:1px solid #C3C7C3"></td>
 				<td align="left" valign="top">

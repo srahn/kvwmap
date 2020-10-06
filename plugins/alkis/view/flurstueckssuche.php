@@ -33,6 +33,12 @@ document.onclick =  function(e){
 -->
 </script>
 <style>
+#titel {
+	font-family: SourceSansPro3;
+	font-size: 20px;
+	margin-bottom: 0px;
+	margin-top: 10px;
+}
 #import1 {
 	text-align: left;
 	margin: 0 0 10px 0;
@@ -55,6 +61,10 @@ document.onclick =  function(e){
 	float: right;
 	right: 5px;
 }
+#import2 input {
+	margin: 0.5em;
+	transition: unset;
+}
 #fsf_formular {
 	margin: 40px 0px 20px 0px;
 	padding-left: 20px;
@@ -70,8 +80,8 @@ document.onclick =  function(e){
 #fsf_formular select, #fsf_formular input[name="FlstNr"] {
 	width: 360px;
 }
-#fsf_formular input[name="FlurID"] {
-	width: 60px;
+#fsf_formular input[name="FlurID"], #fsf_formular select[name="FlurID"] {
+	width: 100px;
 }
 .fsf_suche, .fsf_suche_fst {
 	width:100%;
@@ -83,17 +93,26 @@ document.onclick =  function(e){
 .fsf_suche_fst {
 	<?	if($this->FormObject["selectedFlstNr"]->html != ''){ ?>margin: 0px 0px 250px 0px;<? } ?>
 }
+.fsf_suche_fst span[data-tooltip] {
+	margin-left: 10px;
+}
 .fsf_suche_fst span[data-tooltip]:before {
-	vertical-align: bottom;
+	top: 1px;
+	position: relative;
 }
 .fsf_suche div:first-child, .fsf_suche_fst>div:first-child {
 	width: 180px;
 	text-align: left;
-	margin: auto 0px;
+	align-self: center;
+}
+.fsf_suche input[name="gemschl1"] {
+	width:25px;
+}
+.fsf_suche input[name="gemschl2"] {
+	width:70px;
 }
 .fsf_suche_form span {
 	text-align: left;
-	margin: 5px auto;
 }
 .fsf_suche_form_add {
 	width: 80px;
@@ -102,7 +121,7 @@ document.onclick =  function(e){
 </style>
 
 <input type="hidden" name="go" value="<? if($this->formvars['ALK_Suche']) echo 'ALK-'; ?>Flurstueck_Auswaehlen">
-<br><h2><?php echo $this->titel; ?></h2>
+<div id="titel"><?php echo $strTitle; ?></div>
 <?php
 if ($this->Fehlermeldung!='') {
   include(LAYOUTPATH."snippets/Fehlermeldung.php");
@@ -112,8 +131,8 @@ if ($this->Fehlermeldung!='') {
 	<div class="fsf_suche">
 		<div><?php echo $strGemkgschl; ?></div>
 		<div>
-			<input name="gemschl1" type="text" value="<? echo $this->land_schluessel; ?>" style="width:25px;" onkeyup="updateGemarkungsauswahl();">
-			<input name="gemschl2" type="text" maxlength="4" value="<? echo substr($this->formvars['GemkgID'], 2, 4); ?>" style="width:46px" onkeyup="updateGemarkungsauswahl();">
+			<input name="gemschl1" type="text" value="<? echo $this->land_schluessel; ?>" onkeyup="updateGemarkungsauswahl();">
+			<input name="gemschl2" type="text" maxlength="4" value="<? echo substr($this->formvars['GemkgID'], 2, 4); ?>" onkeyup="updateGemarkungsauswahl();" autofocus onfocus="var temp_value=this.value; this.value=''; this.value=temp_value;" tabindex="1">
 			<input name="gemschl" type="hidden" value="<? echo $this->formvars['GemkgID']; ?>">
 		</div>
 	</div>
@@ -149,7 +168,7 @@ if ($this->Fehlermeldung!='') {
 		<?	} else { ?>	
 		<div>
 			<?php echo $this->FormObject["FlstNr"]->html; ?>
-			&nbsp;<span style="--left: -300px" data-tooltip="Eingabe eines Kennzeichens ohne Auswahl von Gemarkung/Flur.
+			<span style="--left: -300px;" data-tooltip="Eingabe eines Kennzeichens ohne Auswahl von Gemarkung/Flur.
 Eingabeformate:
 13-1234-1-234-5
 131234001002340005__
@@ -160,7 +179,7 @@ Eingabeformate:
 	</div>
 </div>
 <div id="import1">
-	<a id="importlink" href="javascript:showimport();">Import Flurstücksliste</a>
+	<a id="importlink" href="javascript:showimport();"><?php echo $strImportList; ?></a>
 </div>
 <div id="import2">
 	<input name="importliste" type="file" value="" tabindex="2">

@@ -70,6 +70,7 @@ input[type="button"][value='«'], input[type="button"][value='»'] {
 	margin: 0.2em;
 	padding: 0px 0.5em 3px 0.5em;
 	font-size: 1.5em;
+	height: 35px;
 }
 
 form {

@@ -93,6 +93,7 @@ class GUI {
 	var $attributes = array();
 	var $scrolldown;
 	var $queryrect;
+	var $notices;
 
 	# Konstruktor
 	function __construct($main, $style, $mime_type) {
@@ -12674,7 +12675,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->output();
   }
 
-  # 2006-03-20 pk
   function setPrevMapExtent($consumetime) {
     $currentextent = ms_newRectObj();
     $prevextent = ms_newRectObj();
@@ -12720,7 +12720,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
   }
 
-  # 2006-03-20 pk
   function setNextMapExtent($consumetime) {
     $currentextent = ms_newRectObj();
     $nextextent = ms_newRectObj();
@@ -13111,7 +13110,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     return $pathxyPixel;
   }
 
-	function reduce_mapwidth($width_reduction, $height_reduction = NULL){
+	function reduce_mapwidth($width_reduction, $height_reduction = 0){
 		# Diese Funktion reduziert die aktuelle Kartenbildbreite um $width_reduction Pixel (und optional die Kartenbildhöhe um $height_reduction Pixel), damit das Kartenbild in Fachschalen nicht zu groß erscheint.
 		# Diese reduzierte Breite wird aber nicht in der Datenbank gespeichert, sondern gilt nur solange man in der Fachschale bleibt.
 		# Außerdem wird bei Bedarf der aktuelle Maßstab berechnet und zurückgeliefert (er wird berechnet, weil ein loadmap() ja noch nicht aufgerufen wurde).
@@ -17905,8 +17904,7 @@ class db_mapObj{
 		if ($user_id != NULL AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
 				LEFT JOIN used_layer ul ON l.Layer_ID = ul.Layer_id
-				LEFT JOIN rolle rall ON ul.Stelle_ID = rall.stelle_id
-				LEFT JOIN rolle radm ON rall.stelle_id = radm.stelle_id
+				LEFT JOIN rolle radm ON ul.Stelle_ID = radm.stelle_id
 			";
 			$where[] = "(radm.user_id = ".$this->User_ID." OR ul.Layer_id IS NULL)";
 		}
