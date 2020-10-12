@@ -238,18 +238,18 @@ function CalendarJS() {
 					th.title = this.tooltip[1];
 					try { th.style.cursor = "pointer"; } catch(e){ th.style.cursor = "hand"; }
 					tr.appendChild( th );
-					th = this.getCell( "th", "\u02c4", "prev_year" );
+					th = this.getCell( "th", "\u02c4", "next_year" );
 					th.Instanz = this;
-					th.onclick = function() { this.Instanz.switchMonth("prev_year"); };
-					th.title = this.tooltip[3];
+					th.onclick = function() { this.Instanz.switchMonth("next_year"); };
+					th.title = this.tooltip[4];
 					try { th.style.cursor = "pointer"; } catch(e){ th.style.cursor = "hand"; }
 					tr.appendChild( th );
 					thead.appendChild( tr );
 					tr = document.createElement("tr");
-					th = this.getCell( "th", "\u02c5", "next_year" )
+					th = this.getCell( "th", "\u02c5", "prev_year" )
 					th.Instanz = this;
-					th.onclick = function() { this.Instanz.switchMonth("next_year"); };
-					th.title = this.tooltip[4];
+					th.onclick = function() { this.Instanz.switchMonth("prev_year"); };
+					th.title = this.tooltip[3];
 					try { th.style.cursor = "pointer"; } catch(e){ th.style.cursor = "hand"; }
 					tr.appendChild( th );
 					thead.appendChild( tr );
