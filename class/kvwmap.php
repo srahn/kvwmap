@@ -150,6 +150,10 @@ class GUI {
 			$this->login_failed_reason = 'authentication';
 			return false;
 		}
+		if ($user->start != '0000-00-00' AND date('Y-m-d') < $user->start) {
+			$this->login_failed_reason = 'not_yet_started';
+			return false;
+		}
 		if ($user->stop != '0000-00-00' AND date('Y-m-d') > $user->stop) {
 			$this->login_failed_reason = 'expired';
 			return false;
@@ -169,6 +173,9 @@ class GUI {
 			} break;
 			case 'expired' : {
 				$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers ist abgelaufen.');
+			} break;
+			case 'not_yet_started' : {
+				$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers hat noch nicht begonnen.');
 			} break;
 		}
 		$this->log_loginfail->write(
@@ -10049,6 +10056,24 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->ddl->addline($this->formvars);
 		$this->scrolldown = true;
 		$this->sachdaten_druck_editor();
+	}
+
+	/**
+	* Function edit settings of free thema print layout lines in table druckfreilinien
+	* @param integer $line_id It query for existing print layout with line_id
+	* @param string $line_attribute_name Name of the attribute that has to be changed with $line_attribute_value
+	* @param string $line_attribute_value Value of the attribute $line_attribute_name
+	* @return Json String with result from MyObject update function
+	*/
+	function sachdaten_druck_editor_linie_aendern($line_id, $line_attribute_name, $line_attribute_value) {
+		$myObj = new MyObject($this, 'druckfreilinien');
+		$druckfreilinie = $myObj->find_by_ids($line_id);
+		$druckfreilinie->set($line_attribute_name, $line_attribute_value);
+		$this->qlayerset[0]['shape'] = $druckfreilinie->update();
+		$this->mime_type = 'application/json';
+		$this->formvars['format'] = 'json';
+		$this->formvars['content_type'] = 'application/json';
+		$this->output();
 	}
 
 	function sachdaten_druck_editor_Linieloeschen(){

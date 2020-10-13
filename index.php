@@ -1128,8 +1128,8 @@ function go_switch($go, $exit = false) {
 				$GUI->sachdaten_druck_editor_add2stelle();
 			} break;
 
-			case 'sachdaten_druck_editor_Freitexthinzufuegen' :
-				$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
+			case 'sachdaten_druck_editor_Freitexthinzufuegen' : {
+				$GUI->checkCaseAllowed('sachdaten_druck_editor');
 				$GUI->sachdaten_druck_editor_Freitexthinzufuegen();
 			} break;
 
@@ -1138,9 +1138,18 @@ function go_switch($go, $exit = false) {
 				$GUI->sachdaten_druck_editor_Freitextloeschen();
 			} break;
 
-			case 'sachdaten_druck_editor_Liniehinzufuegen' :
-				$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
+			case 'sachdaten_druck_editor_Liniehinzufuegen' : {
+				$GUI->checkCaseAllowed('sachdaten_druck_editor');
 				$GUI->sachdaten_druck_editor_Liniehinzufuegen();
+			} break;
+
+			case 'sachdaten_druck_editor_linie_aendern' : {
+				$GUI->checkCaseAllowed('sachdaten_druck_editor');
+				$GUI->sachdaten_druck_editor_linie_aendern(
+					$GUI->formvars['line_id'],
+					$GUI->formvars['line_attribute_name'],
+					$GUI->formvars['line_attribute_value']
+				);
 			} break;
 
 			case 'sachdaten_druck_editor_Linieloeschen' : {
