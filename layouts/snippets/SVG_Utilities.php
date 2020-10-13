@@ -3128,7 +3128,7 @@ function mouseup(evt){
 				pathx_second.pop();
 				pathy_second.pop();
 			}
-			path_second = buildsvgpath(pathx_second, pathy_second);
+			path_second = "";
 			redrawsecondpolygon();
 			enclosingForm.secondpoly.value = false;
 			enclosingForm.pathx_second.value = "";
@@ -3141,7 +3141,7 @@ function mouseup(evt){
 		enclosingForm.last_doing.value = "subtract_polygon";
 	}
 
-	function add_polygon(){
+	function add_polygon(){		
 		var alles = pathx_second.length;
 		for(var i = 0; i < alles; ++i){
 			pathx_second.pop();
