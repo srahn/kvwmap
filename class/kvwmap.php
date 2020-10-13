@@ -10340,18 +10340,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				";
 				#echo '<p>Sql zum Update des Dokumentattributes:<br>' . $sql;
 				$ret = $layerdb->execSQL($sql, 4, 1);
-				if ($ret['success']) {
-					# Datensatz in Sachdatenanzeige anzeigen.
-					$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
-					$this->formvars['value_' . $dokument_attribute] = $attribute_value;
-					$this->formvars['operator_' . $dokument_attribute] = '=';
-					#echo '<p>Zeige Datensatz an mit: index.php?go=Layer-Suche_Suchen&selected_layer_id=' . $this->formvars['selected_layer_id'] . '&value_' . $dokument_attribute . '=' . $this->formvars['value_' . $dokument_attribute] . '&operator_' . $dokument_attribute . $this->formvars['operator_' . $dokument_attribute];
-				}
-				else {
+				$this->last_query = $this->user->rolle->get_last_query();
+				if (!$ret['success']) {
 					$this->add_message('error', $ret[2]);
-					$this->last_query = $this->user->rolle->get_last_query();
-					$this->last_query_requested = true; # get_last_query wurde direkt aufgerufen
-					$this->formvars['go'] = $this->last_query['go'];
 				}
 				$this->GenerischeSuche_Suchen();
 			}
