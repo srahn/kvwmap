@@ -16141,7 +16141,7 @@ class db_mapObj{
 
 	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $only_current_enums = false) {
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
-		for($i = 0; $i < count($attributes['name']); $i++) {
+		for($i = 0; $i < @count($attributes['name']); $i++) {
 			$type = ltrim($attributes['type'][$i], '_');
 			if (is_numeric($type) AND $query_result != NULL) {			# Attribut ist ein Datentyp
 				$query_result2 = array();

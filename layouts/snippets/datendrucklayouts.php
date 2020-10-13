@@ -777,7 +777,7 @@ function scrolltop(){
 											<input type="text" onmouseenter="show_select(this, 'attributes')" name="rectoffset_attribute_start<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['offset_attribute_start']; ?>">
 										</td>
 										<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
-											<input type="text" onmouseenter="show_select(this, 'attributes')" name="rectoffset_attribute_end<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['rectoffset_attribute_end']; ?>">
+											<input type="text" onmouseenter="show_select(this, 'attributes')" name="rectoffset_attribute_end<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['offset_attribute_end']; ?>">
 										</td>
 										<td align="left" valign="top">
 											<select style="width: 110px" name="recttype<? echo $i ?>">
