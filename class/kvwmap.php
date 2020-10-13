@@ -220,9 +220,23 @@ class GUI {
 	* @params $layer Array mit Angben des Layers aus der MySQL-Datenbank
 	*/
 	function exec_trigger_function($fired, $event, $layer, $oid = '', $old_dataset = array()) {
+		global $GUI;
+		$custom_kvwmap_php = WWWROOT.APPLVERSION.CUSTOM_PATH.'class/kvwmap.php';
+		if(file_exists($custom_kvwmap_php)){
+			include_once($custom_kvwmap_php);
+		}
 		$trigger_result = array('executed' => false);
 		if (array_key_exists($layer['trigger_function'], $this->trigger_functions)) {
 			$trigger_result = $this->trigger_functions[$layer['trigger_function']](
+				$fired,
+				$event,
+				$layer,
+				$oid,
+				$old_dataset
+			);
+		}
+		if (array_key_exists($layer['trigger_function'], $this->custom_trigger_functions)) {
+			$trigger_result = $this->custom_trigger_functions[$layer['trigger_function']](
 				$fired,
 				$event,
 				$layer,
