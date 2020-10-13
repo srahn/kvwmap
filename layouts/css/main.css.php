@@ -2130,3 +2130,22 @@ tbody.gle>tr {
 .red {
 	color: red;
 }
+
+.edit_button {
+  margin-left: 5px;
+}
+
+.edit_button.fa-pencil:hover {
+	cursor: pointer;
+	color: red;
+}
+
+.edit_button.fa-undo:hover {
+	cursor: pointer;
+	color: blue;
+}
+
+.edit_button.fa-check:hover {
+	cursor: pointer;
+	color: green;
+}
