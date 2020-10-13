@@ -342,7 +342,7 @@ function scrolltop(){
 								</tr>
 								<tr>
 									<td colspan=1>
-										<select	name="aktivesLayout" onchange="document.GUI.submit()">
+										<select	name="aktivesLayout" style="width:250px" onchange="document.GUI.submit()">
 										<option value="">--- bitte wählen ---</option>
 										<?	
 										for($i = 0; $i < count($this->ddl->layouts); $i++){
@@ -355,7 +355,7 @@ function scrolltop(){
 										<input type="submit" name="go_plus" value="übernehmen >>">
 									</td>
 									<td style="border-left:1px solid #C3C7C3">
-										<select	name="stelle">
+										<select	name="stelle" style="width:250px">
 										<option value="">--- bitte wählen ---</option>
 											<?
 											for($i = 0; $i < count($this->stellendaten['ID']); $i++){
