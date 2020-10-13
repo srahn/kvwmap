@@ -68,7 +68,6 @@
 			$label->set('minsize', 8);
 			$label->set('maxsize', 8);
 			$label->color->setRGB(40, 40, 40);
-			$label->set('type', 'TRUETYPE');
 			$label->set('font', 'arial');
 			$klasse->addLabel($label);
 			# Gebäude-Layer erzeugen
