@@ -41,8 +41,11 @@ function ahahDone(url, targets, req, actions) {
 				window.location = url;
 				return;
 			}
-			if(req.getResponseHeader('error') == 'true'){
+			if (req.getResponseHeader('error') == 'true'){
 				message(req.responseText);
+			}
+			if (req.getResponseHeader('warning') == 'true'){
+				message([{ type: 'warning', msg: req.responseText}]);
 			}
 			var found = false;
 			var response = "" + req.responseText;
