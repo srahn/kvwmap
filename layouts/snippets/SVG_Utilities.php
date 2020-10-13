@@ -1003,7 +1003,7 @@ function mouseup(evt){
 		endPoint(evt);
 		enclosingForm.secondpoly.value = "true";
 		if(enclosingForm.last_doing.value == "add_geom"){
-			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&operation=add_geometry&resulttype=svgwkt&fromwhere="+enclosingForm.fromwhere.value+"&singlegeom="+enclosingForm.singlegeom.checked+"&orderby="+enclosingForm.orderby.value+"&columnname="+enclosingForm.columnname.value+"&geom_from_layer="+enclosingForm.geom_from_layer.value,new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&operation=add_geometry&resulttype=svgwkt&singlegeom="+enclosingForm.singlegeom.checked+"&orderby="+enclosingForm.orderby.value+"&geom_from_layer="+enclosingForm.geom_from_layer.value,new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 			if(polygonfunctions == true){
 				enclosingForm.firstpoly.value = "true";
 			}
@@ -1013,7 +1013,7 @@ function mouseup(evt){
 		}
 		else{
 			if(enclosingForm.last_doing.value == "subtract_geom"){
-				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&operation=subtract_geometry&resulttype=svgwkt&fromwhere="+enclosingForm.fromwhere.value+"&singlegeom="+enclosingForm.singlegeom.checked+"&orderby="+enclosingForm.orderby.value+"&columnname="+enclosingForm.columnname.value+"&geom_from_layer="+enclosingForm.geom_from_layer.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&operation=subtract_geometry&resulttype=svgwkt&singlegeom="+enclosingForm.singlegeom.checked+"&orderby="+enclosingForm.orderby.value+"&geom_from_layer="+enclosingForm.geom_from_layer.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 			}
 		}
 	}
