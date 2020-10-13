@@ -15,47 +15,21 @@ class ALKIS {
     $database->setDebugLevel=1;
   }
 	
-	function dhk_wsdl_login($url = 'http://webdhk-vr.lk-vr.de:8090/?wsdl'){
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_POST, true);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		$request_file = $this->create_wsdl_request_xml_file();
-		if (version_compare(phpversion(), '5.5.0', '<')) {
-			$curl_file = '@'.$request_file;
-		}
-		else {
-			curl_setopt($ch, CURLOPT_SAFE_UPLOAD, true);
-			$curl_file = new CURLFILE($request_file, 'text/xml', 'request_file');
-		}
-		#curl_setopt($ch, CURLOPT_POSTFIELDS, array('request_file' => $curl_file));
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: text/xml'));
-		$result = curl_exec($ch);
-		echo $httpCode = curl_getinfo($ch , CURLINFO_HTTP_CODE);
-		echo $result;
-		curl_close($ch);
-		#$parser = xml_parser_create();
-		#xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE,1);
-		#xml_parse_into_struct($parser, $result, $values, $index);
-		#xml_parser_free($parser);
-		#return $values[$index['JSESSIONID'][0]]['value'];
+	function dhk_wsdl_login(){
+		$params = Array(
+			'soap_version' => 'SOAP_1_1'
+		);
+		$client = new SoapClient('http://webdhk-vr.lk-vr.de:8090/?wsdl', $params);
+		$soapParameters = array('userName' => $username, 'password' => $password);
+		$header = new SoapHeader($ns,'UserCredentials',$soapParameters,false);
+		$client->__setSoapHeaders($header);
+		$functions = $client->__getFunctions();
+		print_r($functions);
+		$response = $client->getCapabilities();
+		var_dump($response);
 	}
 	
-	function create_wsdl_request_xml_file(){
-		$xml = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-xmlns:web="http://webservice.sgjonlinecmd.supportgis.de/">
-<soapenv:Header/>
-<soapenv:Body>
-<web:getCapabilities/>
-</soapenv:Body>
-</soapenv:Envelope>';
-		$currenttime = date('Y-m-d_H_i_s',time());
-		$file = IMAGEPATH.'nas_call_'.$currenttime.'-'.rand(0, 1000000).'.xml';
-		file_put_contents($file, $xml);
-		return $file;
-	}	
+
 	
 	function dhk_call_login($url, $username, $password){
 		$data = 'cmd=login&j_username='.$username.'&j_password='.$password;
@@ -1460,7 +1434,7 @@ xmlns:web="http://webservice.sgjonlinecmd.supportgis.de/">
 
           $pdf->addText($col0,$row-=24,$fontSize,'Lage');
           # Ausgabe der Adressangabe zur Lage
-          $anzStrassen=count($flst->Adresse);
+          $anzStrassen = @count($flst->Adresse);
           for ($s=0;$s<$anzStrassen;$s++) {
             $Adressbezeichnung =$flst->Adresse[$s]["strasse"];
             $Adressbezeichnung.=' '.$flst->Adresse[$s]["strassenname"];
@@ -1488,7 +1462,7 @@ xmlns:web="http://webservice.sgjonlinecmd.supportgis.de/">
 					if($flst->zweifelhafterflurstuecksnachweis == 'ja')$pdf->addText($col0,$row-=24,$fontSize,'Zweifelhafter Flurstücksnachweis');
 
           # Baulastenblattnummer
-          if (count($flst->Baulasten)>0) {
+          if (@count($flst->Baulasten)>0) {
             $pdf->addText($col0,$row-=24,$fontSize,'Baulastenblatt-Nummer');
             $row-=6;
             $BaulastenStr=$flst->Baulasten[0]['blattnr'];
@@ -1503,7 +1477,7 @@ xmlns:web="http://webservice.sgjonlinecmd.supportgis.de/">
           }
 
           # BauBodenrecht
-          if (count($flst->BauBodenrecht)>0) {
+          if (@count($flst->BauBodenrecht)>0) {
             $pdf->addText($col0,$row-=24,$fontSize,'Bau- und Bodenordnungsrecht');
             $row-=6;
             for ($i=0; $i < count($flst->BauBodenrecht); $i++){
@@ -1535,7 +1509,7 @@ xmlns:web="http://webservice.sgjonlinecmd.supportgis.de/">
           }
 
           # Freier Text zum Flurstück
-          if (count($flst->FreiText)>0) {
+          if (@count($flst->FreiText)>0) {
             $pdf->addText($col0,$row-=24,$fontSize,'Zusätzliche Angaben');
             $row-=6;
             for ($z=0;$z<count($flst->FreiText);$z++) {
@@ -1549,7 +1523,7 @@ xmlns:web="http://webservice.sgjonlinecmd.supportgis.de/">
           }
 
           # Vorgängerflurstücke
-          if (count($flst->Vorgaenger)>0) {
+          if (@count($flst->Vorgaenger)>0) {
             $pdf->addText($col0,$row-=24,$fontSize,'Vorgängerflurstück');
             $pdf->addText($col2_1,$row,$fontSize,mb_substr($flst->Vorgaenger[0]['vorgaenger'],0,20,'utf8'));
             for ($v=1;$v<count($flst->Vorgaenger);$v++) {
@@ -1557,7 +1531,7 @@ xmlns:web="http://webservice.sgjonlinecmd.supportgis.de/">
             }
           }
           # Nachfolgerflurstücke
-          if (count($flst->Nachfolger)>0) {
+          if (@count($flst->Nachfolger)>0) {
             $pdf->addText($col0,$row-=24,$fontSize,'Nachfolgerflurstück');
             $pdf->addText($col2_1,$row,$fontSize,mb_substr($flst->Nachfolger[0]['nachfolger'],0,20,'utf8'));
             for ($v=1;$v<count($flst->Nachfolger);$v++) {

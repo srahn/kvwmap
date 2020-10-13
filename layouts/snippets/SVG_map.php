@@ -45,9 +45,10 @@
   <SCRIPT type="text/ecmascript"><!--
 
 	var nbh = new Array();
-  function go_cmd(cmd)   {
-      document.GUI.CMD.value  = cmd;
-      document.GUI.submit();
+	
+  function go_cmd(cmd){
+    document.GUI.CMD.value  = cmd;
+		get_map_ajax('go=navMap_ajax', '', '');
   }
 	
 	function moveback(){	

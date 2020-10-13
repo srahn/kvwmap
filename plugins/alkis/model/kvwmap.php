@@ -965,7 +965,7 @@
 		return $alkis->dhk_call_getPDF(DHK_CALL_URL, $sessionid, $nasfile, $filename);
 	};
 
-	$GUI->ALB_Anzeigen = function($layout, $formvars) use ($GUI){
+	$GUI->ALB_Anzeigen = function($FlurstKennz,$formnummer,$Grundbuchbezirk,$Grundbuchblatt) use ($GUI){
 		include_once(PLUGINS.'alkis/model/alkis.php');
 		include_once(PLUGINS.'alkis/model/kataster.php');
     if($FlurstKennz[0] == '' AND ($Grundbuchbezirk != NULL OR $Buchnungstelle != NULL)){
@@ -1061,6 +1061,7 @@
 		$GUI->formvars['value_flurstueckskennzeichen'] = implode('|', $flurst_array);
 		$GUI->formvars['operator_flurstueckskennzeichen'] = 'IN';
 		$GUI->formvars['no_output'] = true;
+		$GUI->formvars['no_last_search'] = true;
 		$GUI->GenerischeSuche_Suchen();
 		$GUI->formvars['aktivesLayout'] = $GUI->formvars['formnummer'];
 		$GUI->generischer_sachdaten_druck_drucken();

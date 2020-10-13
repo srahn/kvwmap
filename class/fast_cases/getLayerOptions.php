@@ -82,6 +82,7 @@ class GUI {
   var $search;
   var $form_field_names;
   var $editable;
+	var $notices;
 
 	function __construct($main, $style, $mime_type) {
 		# Debugdatei setzen

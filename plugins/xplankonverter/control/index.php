@@ -1110,6 +1110,8 @@ function go_switch_xplankonverter($go){
 		case 'xplankonverter_download_edited_shapes' : {
 			if ($GUI->xplankonverter_is_case_forbidden()) return;
 
+			$GUI->konvertierung->create_edited_shapes();
+
 			if (!$GUI->konvertierung->files_exists('edited_shapes')) {
 				$GUI->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
 				$GUI->main = '../../plugins/xplankonverter/view/konvertierungen.php';

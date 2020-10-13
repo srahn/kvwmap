@@ -510,7 +510,7 @@ class stelle {
 		return $parents;
 	}
 
-	function getChildren($parent_id, $order = '', $return = '') {
+	function getChildren($parent_id, $order = '', $return = '', $recursive = false) {
 		$children = array();
 		$sql = "
 			SELECT
@@ -530,7 +530,9 @@ class stelle {
 
 		while($rs = $this->database->result->fetch_assoc()) {
 			$children[] = ($return == 'only_ids' ? $rs['ID'] : $rs);
-			#$children = array_merge($children, $this->getChildren($rs['ID'], $order, $return));
+			if($recursive){
+				$children = array_merge($children, $this->getChildren($rs['ID'], $order, $return, true));
+			}
 		};
 		return $children;
 	}

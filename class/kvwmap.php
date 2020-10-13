@@ -93,6 +93,7 @@ class GUI {
 	var $attributes = array();
 	var $scrolldown;
 	var $queryrect;
+	var $notices;
 
 	# Konstruktor
 	function __construct($main, $style, $mime_type) {
@@ -2766,9 +2767,11 @@ echo '			</table>
   }
 
   function getLagebezeichnung($epsgcode) {
+		global $GUI;
     switch (LAGEBEZEICHNUNGSART) {
       case 'Flurbezeichnung' : {
-        $Lagebezeichnung = $this->getFlurbezeichnung($epsgcode);
+				include_once(PLUGINS.'alkis/model/kvwmap.php');
+        $Lagebezeichnung = $GUI->getFlurbezeichnung($epsgcode);
 			} break;
 			default : {
 			  $Lagebezeichnung = '';
@@ -5873,7 +5876,6 @@ echo '			</table>
     $this->map->legend->set("keyspacingx", $size*$this->map_factor);
     $this->map->legend->set("keyspacingy", $size*0.83*$this->map_factor);
     $this->map->legend->label->set("size", $size*$this->map_factor);
-		$this->map->legend->label->set("type", 'truetype');
 		$this->map->legend->label->set("font", 'arial');
     $this->map->legend->label->set("position", MS_C);
     #$this->map->legend->label->set("offsetx", $size*-5*$this->map_factor);
@@ -6688,6 +6690,7 @@ echo '			</table>
 
 			# Lagebezeichnung
 			if(LAGEBEZEICHNUNGSART == 'Flurbezeichnung'){
+				include_once(PLUGINS.'alkis/model/kataster.php');
 				$flur = new Flur('','','',$this->pgdatabase);
 				$bildmitte['rw']=$this->formvars['refpoint_x'];
 				$bildmitte['hw']=$this->formvars['refpoint_y'];
@@ -8523,7 +8526,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$layerset[0]['layouts'] = $ddl->load_layouts($this->Stelle->id, NULL, $layerset[0]['Layer_ID'], array(0,1));
 				
 				# last_search speichern
-				if($this->last_query == '' AND value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'subform_link') == ''){
+				if($this->formvars['no_last_search'] == '' AND $this->last_query == '' AND value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'subform_link') == ''){
 					$this->formvars['search_name'] = '<last_search>';
 					$this->user->rolle->delete_search($this->formvars['search_name']);		# das muss hier stehen bleiben, denn in save_search wird mit der Layer-ID gelöscht
 					$this->user->rolle->save_search($attributes, $this->formvars);
@@ -10362,18 +10365,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				";
 				#echo '<p>Sql zum Update des Dokumentattributes:<br>' . $sql;
 				$ret = $layerdb->execSQL($sql, 4, 1);
-				if ($ret['success']) {
-					# Datensatz in Sachdatenanzeige anzeigen.
-					$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
-					$this->formvars['value_' . $dokument_attribute] = $attribute_value;
-					$this->formvars['operator_' . $dokument_attribute] = '=';
-					#echo '<p>Zeige Datensatz an mit: index.php?go=Layer-Suche_Suchen&selected_layer_id=' . $this->formvars['selected_layer_id'] . '&value_' . $dokument_attribute . '=' . $this->formvars['value_' . $dokument_attribute] . '&operator_' . $dokument_attribute . $this->formvars['operator_' . $dokument_attribute];
-				}
-				else {
+				$this->last_query = $this->user->rolle->get_last_query();
+				if (!$ret['success']) {
 					$this->add_message('error', $ret[2]);
-					$this->last_query = $this->user->rolle->get_last_query();
-					$this->last_query_requested = true; # get_last_query wurde direkt aufgerufen
-					$this->formvars['go'] = $this->last_query['go'];
 				}
 				$this->GenerischeSuche_Suchen();
 			}
@@ -11269,7 +11263,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$deleteuser[] = $users['ID'][$i];
 			}
 		}
-		$anzdeleteuser = count($deleteuser);
+		$anzdeleteuser = @count($deleteuser);
 		if ($anzdeleteuser > 0) {
 			for($i=0; $i<$anzdeleteuser; $i++){
 				$this->user->rolle->deleteRollen($deleteuser[$i], array($Stelle->id));
@@ -11357,7 +11351,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			);
 						
 			# Zuweisung in den Kindstellen
-			$old_children = $Stelle->getChildren($this->formvars['selected_stelle_id'], " ORDER BY Bezeichnung", 'only_ids');
+			$old_children = $Stelle->getChildren($this->formvars['selected_stelle_id'], " ORDER BY Bezeichnung", 'only_ids', true);
 			foreach(array_unique(array_merge($old_children, $selectedchildren)) AS $child_id){
 				$drop_child = !in_array($child_id, $selectedchildren) ? true : false;
 				if(!in_array($child_id, $old_children)){
@@ -12315,14 +12309,15 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
       # Löschen der in der Selectbox entfernten Stellen
       $userstellen =  $this->selected_user->getStellen(0);
-      for($i = 0; $i < count($userstellen['ID']); $i++){
+      for ($i = 0; $i < count($userstellen['ID']); $i++) {
         $found = false;
-        for($j = 0; $j < count($stellen); $j++){
-          if($stellen[$j] == $userstellen['ID'][$i]){
+        for ($j = 0; $j < count($stellen); $j++) {
+          if ($stellen[$j] == $userstellen['ID'][$i]) {
             $found = true;
           }
         }
-        if($found == false){
+        $deletestellen = array();
+        if ($found == false) {
           $deletestellen[] = $userstellen['ID'][$i];
         }
       }
@@ -12699,7 +12694,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->output();
   }
 
-  # 2006-03-20 pk
   function setPrevMapExtent($consumetime) {
     $currentextent = ms_newRectObj();
     $prevextent = ms_newRectObj();
@@ -12745,7 +12739,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
   }
 
-  # 2006-03-20 pk
   function setNextMapExtent($consumetime) {
     $currentextent = ms_newRectObj();
     $nextextent = ms_newRectObj();
@@ -13136,7 +13129,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     return $pathxyPixel;
   }
 
-	function reduce_mapwidth($width_reduction, $height_reduction = NULL){
+	function reduce_mapwidth($width_reduction, $height_reduction = 0){
 		# Diese Funktion reduziert die aktuelle Kartenbildbreite um $width_reduction Pixel (und optional die Kartenbildhöhe um $height_reduction Pixel), damit das Kartenbild in Fachschalen nicht zu groß erscheint.
 		# Diese reduzierte Breite wird aber nicht in der Datenbank gespeichert, sondern gilt nur solange man in der Fachschale bleibt.
 		# Außerdem wird bei Bedarf der aktuelle Maßstab berechnet und zurückgeliefert (er wird berechnet, weil ein loadmap() ja noch nicht aufgerufen wurde).
@@ -14629,7 +14622,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				else{		################ mouseover auf Datensatz in Sachdatenanzeige ################
 					$showdata = 'false';
-					$sql_where = " AND ".$geometrie_tabelle."_oid = ".$this->formvars['oid'];
+					$sql_where = " AND ".pg_quote($geometrie_tabelle.'_oid')." = ".$this->formvars['oid'];					
 				}
 
 				# SVG-Geometrie abfragen für highlighting
@@ -15776,7 +15769,7 @@ class db_mapObj{
 	function zoomToDatasets($oids, $oid_name, $tablename, $columnname, $border, $layerdb, $layer_epsg, $client_epsg) {
   	$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
   	$sql.=" FROM (SELECT st_transform(ST_SetSRID(ST_Extent(" . $columnname."), " . $layer_epsg."), " . $client_epsg.") as bbox";
-  	$sql.=" FROM " . $tablename." WHERE ".$oid_name." IN (";
+  	$sql.=" FROM " . pg_quote($tablename)." WHERE ".$oid_name." IN (";
   	for($i = 0; $i < count($oids); $i++){
     	$sql .= "'" . $oids[$i]."',";
     }
@@ -16166,7 +16159,7 @@ class db_mapObj{
 
 	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $only_current_enums = false) {
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
-		for($i = 0; $i < count($attributes['name']); $i++) {
+		for($i = 0; $i < @count($attributes['name']); $i++) {
 			$type = ltrim($attributes['type'][$i], '_');
 			if (is_numeric($type) AND $query_result != NULL) {			# Attribut ist ein Datentyp
 				$query_result2 = array();
@@ -16715,12 +16708,12 @@ class db_mapObj{
 			}
 
 			$classes = $database->create_insert_dump('classes', 'Class_ID', 'SELECT `Class_ID`, `Name`, \''.$last_layer_id.'\' AS `Layer_ID`, `Expression`, `drawingorder`, `text` FROM classes WHERE Layer_ID=' . $layer_ids[$i]);
-			for ($j = 0; $j < count($classes['insert']); $j++) {
+			for ($j = 0; $j < @count($classes['insert']); $j++) {
 				$dump_text .= "\n\n-- Class " . $classes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $classes['insert'][$j];
 				$dump_text .= "\nSET @last_class_id=LAST_INSERT_ID();";
 
 				$styles = $database->create_insert_dump('styles', 'Style_ID', 'SELECT styles.Style_ID, `symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`, `colorrange`, `datarange`, `rangeitem`, `opacity`, `minsize`,`maxsize`, `minscale`, `maxscale`, `angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`, `offsetx`, `offsety`, `polaroffset`, `pattern`, `geomtransform`, `gap`, `initialgap`, `linecap`, `linejoin`, `linejoinmaxsize` FROM styles, u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND Class_ID='.$classes['extra'][$j].' ORDER BY drawingorder');				
-				for ($k = 0; $k < count($styles['insert']); $k++) {
+				for ($k = 0; $k < @count($styles['insert']); $k++) {
 					$dump_text .= "\n\n-- Style " . $styles['extra'][$k] . " der Class " . $classes['extra'][$j];
 					$dump_text .= "\n" . $styles['insert'][$k] . "\nSET @last_style_id=LAST_INSERT_ID();";
 					$dump_text .= "\n-- Zuordnung Style " . $styles['extra'][$k] . " zu Class " . $classes['extra'][$j];
@@ -16728,7 +16721,7 @@ class db_mapObj{
 				}
 
 				$labels = $database->create_insert_dump('labels', 'Label_ID', 'SELECT labels.Label_ID, `font`,`type`,`color`,`outlinecolor`,`shadowcolor`,`shadowsizex`,`shadowsizey`,`backgroundcolor`,`backgroundshadowcolor`,`backgroundshadowsizex`,`backgroundshadowsizey`,`size`,`minsize`,`maxsize`,`position`,`offsetx`,`offsety`,`angle`,`autoangle`,`buffer`,`antialias`,`minfeaturesize`,`maxfeaturesize`,`partials`,`wrap`,`the_force` FROM labels, u_labels2classes WHERE u_labels2classes.label_id = labels.Label_ID AND Class_ID='.$classes['extra'][$j]);
-				for ($k = 0; $k < count($labels['insert']); $k++) {
+				for ($k = 0; $k < @count($labels['insert']); $k++) {
 					$dump_text .= "\n\n-- Label " . $labels['extra'][$k] . " der Class " . $classes['extra'][$j];
 					$dump_text .= "\n" . $labels['insert'][$k] . "\nSET @last_label_id=LAST_INSERT_ID();";
 					$dump_text .= "\n-- Zuordnung Label " . $labels['extra'][$k] . " zu Class " . $classes['extra'][$j];
@@ -17930,8 +17923,7 @@ class db_mapObj{
 		if ($user_id != NULL AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
 				LEFT JOIN used_layer ul ON l.Layer_ID = ul.Layer_id
-				LEFT JOIN rolle rall ON ul.Stelle_ID = rall.stelle_id
-				LEFT JOIN rolle radm ON rall.stelle_id = radm.stelle_id
+				LEFT JOIN rolle radm ON ul.Stelle_ID = radm.stelle_id
 			";
 			$where[] = "(radm.user_id = ".$this->User_ID." OR ul.Layer_id IS NULL)";
 		}

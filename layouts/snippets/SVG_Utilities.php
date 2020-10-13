@@ -229,13 +229,13 @@
 	function go_previous(){
 	  document.getElementById("canvas").setAttribute("cursor", "wait");
 	  enclosingForm.CMD.value  = "previous";
-	  submit();
+    get_map_ajax(\'go=navMap_ajax\');
 	}
 	
 	function go_next(){
 	  document.getElementById("canvas").setAttribute("cursor", "wait");
 	  enclosingForm.CMD.value  = "next";
-	  submit();
+	  get_map_ajax(\'go=navMap_ajax\');
 	}	
 
 	function zoomin(){
@@ -443,9 +443,9 @@
       enclosingForm.pathy.value    = pathy;
   }
 
-  function Full_Extent()   {
-      enclosingForm.CMD.value  = "Full_Extent";
-      submit();
+  function Full_Extent(){
+    enclosingForm.CMD.value = "Full_Extent";
+    get_map_ajax(\'go=navMap_ajax\');
   }
 
 	function checkQueryFields(){
@@ -3128,7 +3128,7 @@ function mouseup(evt){
 				pathx_second.pop();
 				pathy_second.pop();
 			}
-			path_second = buildsvgpath(pathx_second, pathy_second);
+			path_second = "";
 			redrawsecondpolygon();
 			enclosingForm.secondpoly.value = false;
 			enclosingForm.pathx_second.value = "";
@@ -3141,7 +3141,7 @@ function mouseup(evt){
 		enclosingForm.last_doing.value = "subtract_polygon";
 	}
 
-	function add_polygon(){
+	function add_polygon(){		
 		var alles = pathx_second.length;
 		for(var i = 0; i < alles; ++i){
 			pathx_second.pop();

@@ -1533,51 +1533,17 @@ tbody.gle>tr {
 	right: 0px;
 	left: 0px;
 	bottom: 30px;
-	width: 180px;
+	width: 220px;
 }
 
-.timepicker{
-	min-width: 180px;
-	font-size: 18px;
-	line-height: 24px;
-	border: solid #112A5D 2px;
-	padding: 3 0 3 0;
-	margin-top: 7px;
+.calendar table{
+	width: 100%;
+	border-collapse: collapse;
+	outline: solid #112A5D 1px;
+	padding: 0px;
 	margin-left:auto;
 	margin-right:auto;
 	background-color: #F6F6F6;
-	display: flex;
-	justify-content: center;
-}
-
-.timepicker .time{
-	flex: 0 0 auto;
-	cursor: n-resize;
-	width: 33px;
-	padding: 0 5 0 5;
-	font-size: 18px;
-	border: 1px solid white;
-}
-
-.timepicker .time:focus{
-	border: 1px solid grey;
-}
-
-.timepicker .time:hover{ 
-	background-color: #CCD2D8;
-}
-
-.timepicker .submit{
-	cursor: pointer;
-	position: absolute;
-	right: 8px;
-	margin: 3 0 3 0;
-	font-size: 1.2em;
-	color: silver;
-}
-
-.timepicker .submit:hover{
-	color: gray;
 }
 
 .calendar tr { 
@@ -1586,30 +1552,33 @@ tbody.gle>tr {
 
 .calendar table thead th{ 
 	font-weight: bold; 
-	font-size: 15px;
+	font-size: 14px;
 	line-height: 1.2em;				
-	color: #BFBFC1; 
+	color: #F6F6F6; 
 	text-align: center;
 	background-color: #112A5D;
+	height: 1.5em;
 }
 
 .calendar table thead th.weekday{ 
-	font-weight: bold; 
+	font-weight: normal; 
 	font-size: 14px;
 	line-height: 1.2em;
-	color: #112A5D; 
+	height: 2em;
+	width: 1.3em;
+	padding-left: 0.4em; 
+	padding-right: 0.4em; 
+	color: #0E224B; 
 	text-align: center;
 	background-color: #CCD2D8;
-	border: solid #112A5D 1px;
 }
 
 .calendar table tbody td, .calendar table tfoot td{ 
 	font-weight: normal; 
 	font-size: 14px;
 	line-height: 1.2em;
-	width: 1.4em;
-	padding-left: 0.4em; 
-	padding-right: 0.4em; 
+	width: 31px;
+	padding-right: 4px; 
 	color: #0E224B; 
 	text-align: right;
 	border: 1px solid #CCD2D8;
@@ -1657,16 +1626,56 @@ tbody.gle>tr {
 
 .calendar table tbody td.last_month, .calendar table tbody td.next_month {
 	color:	 #a3afc4;
+	cursor: default;	
 }
 
-.calendar table{
-	border-collapse: collapse;
-	border: solid #112A5D 2px;
-	padding: 0;
-	margin-top: 7px;
+
+.timepicker{
+	min-width: 205px;
+	font-size: 18px;
+	line-height: 24px;
+	outline: solid #112A5D 1px;
+	padding: 3px 0px;
+	margin-top: 3px;
 	margin-left:auto;
 	margin-right:auto;
 	background-color: #F6F6F6;
+	display: flex;
+	justify-content: center;
+}
+
+.timepicker .time{
+	flex: 0 0 auto;
+	cursor: n-resize;
+	width: 33px;
+	padding: 0 5 0 5;
+	font-size: 18px;
+	border: 1px solid white;
+}
+
+.timepicker .time:focus{
+	border: 1px solid grey;
+}
+
+.timepicker .time:hover{ 
+	background-color: #CCD2D8;
+}
+
+.timepicker .submit{
+	cursor: pointer;
+	position: absolute;
+	right: 10px;
+	margin-top: 1px;
+	font-size: 1.2em;
+	color: silver;
+}
+
+.timepicker .submit:hover{
+	color: gray;
+}
+
+.calendar>div>table, .timepicker {
+	box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
 }
 
 .abc {

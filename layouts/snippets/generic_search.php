@@ -110,7 +110,7 @@ function suche(){
 		alert(nogo);
 	}
 	else{
-		document.getElementById('loader').style.display = '';
+		document.getElementById('gs_loader').style.display = '';
 		setTimeout('document.getElementById(\'loaderimg\').src=\'graphics/ajax-loader.gif\'', 50);
 		document.GUI.go_plus.value = 'Suchen';
 		document.GUI.submit();
@@ -164,16 +164,20 @@ function update_require_attribute(attributes, layer_id, attributenamesarray, sea
 }
 
 
-function showsearches(){
-	if(document.getElementById('searches2').style.display == 'none'){
-		document.getElementById('searches1').style.borderTop="1px solid #C3C7C3";
-		document.getElementById('searches1').style.borderLeft="1px solid #C3C7C3";
-		document.getElementById('searches1').style.borderRight="1px solid #C3C7C3";
-		document.getElementById('searches2').style.display = '';
+function showform(name){
+	if(document.getElementById(name).style.display == 'block'){
+		document.getElementById(name).style.display = 'none';
 	}
 	else{
-		document.getElementById('searches1').style.border="none";
-		document.getElementById('searches2').style.display = 'none';
+		if(document.GUI.map_flag.value == 1){
+			document.GUI.map_flag.value = '';
+			document.GUI.submit();
+		} else {
+			document.getElementById("gsl_abfrage_speichern_form").style.display = 'none';
+			document.getElementById("gsl_abfrage_laden_form").style.display = 'none';
+			document.getElementById(name).style.display = 'block';
+			$('.'+name+'_input').focus();
+		}
 	}
 }
 
@@ -210,78 +214,302 @@ function delete_search(){
 function add_searchmask(layer_id){
 	document.GUI.searchmask_count.value = parseInt(document.GUI.searchmask_count.value) + 1;
 	newdiv = document.createElement('div');
-	document.getElementById('searchmasks').appendChild(newdiv);
+	document.getElementById('gs_searchmasks').appendChild(newdiv);
 	ahah("index.php", "go=Layer-Suche_Suchmaske_generieren&selected_layer_id="+layer_id+"&searchmask_number="+document.GUI.searchmask_count.value, new Array(newdiv), new Array('sethtml'));
 }
+
+$(document).on('click', function(e){
+	if(e.target.id != 'gsl_abfrage_speichern_form_link' && e.target.closest('div').id != 'gsl_abfrage_speichern_form'){
+		$('#gsl_abfrage_speichern_form').css('display','none');
+		if(e.target.id != 'gsl_abfrage_laden_form_link' && e.target.closest('div').id != 'gsl_abfrage_laden_form'){
+			$('#gsl_abfrage_laden_form').css('display','none');
+		}
+	}
+});
   
-//-->
 </script>
-<br><h2><? if($this->titel != '')echo $this->titel;else echo $strLayerSearch; ?></h2><?php
+<style>
+/*
+--- generic_search -----------
+*/
+#gs_titel {
+	font-family: SourceSansPro3;
+	font-size: 20px;
+	margin-bottom: 0px;
+	margin-top: 20px;
+}
+#gs_loader {
+	display: none;
+}
+#gs_searchmasks {
+	margin: 0px 20px;
+}
+#gs_undoder {
+	max-width: 750px;
+	text-align: left;
+	margin: 20px;
+	display: flex;
+	align-items: center;
+}
+#gs_anzahl_treffer {
+	margin-bottom: 10px;
+	cursor: default;
+}
+#gs_suchen {
+	margin-bottom: 40px;
+}
+/*
+--- generic_search_layer_selector ---
+*/
+#gsl_formular {
+	margin: 40px 0px 20px 0px;
+	padding-left: 20px;
+}
+#gsl_formular select {
+	border-radius: 2px;
+	border: 1px solid #777;
+	padding-left: 5px;
+}
+#gsl_gruppe_waehlen, #gsl_layer_waehlen  {
+	display: flex;
+	justify-content: center;
+}
+#gsl_gruppe_waehlen>div, #gsl_layer_waehlen>div  {
+	margin: 0px 0px 10px 0px;
+	display: flex;
+}
+#gsl_gruppe_waehlen select {
+	height: 25px;
+	width: 260px;
+}
+#gsl_layer_waehlen select {
+	height: 35px;
+	width: 360px;
+}
+#gsl_gruppe_waehlen div div:first-child, #gsl_layer_waehlen div div:first-child {
+	margin-right: 10px;
+	align-self: center;
+}
+#gsl_suche_speichern>div {
+	margin-top: 10px;
+}
+#gsl_suche_speichern a {
+	cursor: pointer;	
+}
+#gsl_abfrage_speichern_form, #gsl_abfrage_laden_form {
+	display: none;
+}
+#gsl_abfrage_speichern_form, #gsl_abfrage_laden_form {
+	position: absolute;
+	margin-top: 5px;
+	left: calc(50% - 131px);
+	display: none;
+	border: 1px solid #aaaaaa;
+	padding: 5px;
+	background-color: #E6E6E6;
+	box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
+	z-index: 1;
+}
+#gsl_abfrage_speichern_form input[type="text"], #gsl_abfrage_laden_form select, #gsl_suche_raeumlich_params select {
+	border-radius: 2px;
+	border: 1px solid #777;
+	padding-left: 5px;
+	height: 25px;
+	}
+#gsl_abfrage_speichern_form input[type="text"] {
+	width: 250px;
+}
+#gsl_abfrage_laden_form select {
+	width: 260px;
+}
+#gsl_abfrage_laden_form input, #gsl_abfrage_laden_form a {
+	margin-left: 5px;
+}
+#gsl_suche_raeumlich_params {
+	display: flex;
+	margin: 10px 0px;
+}
+#gsl_suche_raeumlich_params div:not(:last-child) {
+	margin-right: 10px;
+}
+#gsl_suche_raeumlich_params div:last-child {
+	position: absolute;
+	right: 0px;
+}
+#map, #gsl_suche_raeumlich_params div:last-child {
+	margin-right: 20px;
+}
+#gsl_suchhinweise {
+	max-width: 750px;
+	margin: 0 20px 20px 20px;
+	font-style: italic;
+	font-size: 0.8em;
+	text-align: left;
+}
+/*
+--- generic_search_mask -------------
+*/
+.gsm_undoder {
+	margin: 20px 0px;
+	display: flex;
+	align-items: center;
+}
+span[data-tooltip] {
+	--left: -10px;
+	margin-left: 10px;
+}
+.gsm_tabelle {
+	border-collapse: collapse;
+	cursor: default;
+	min-width: calc(300px + <? if (!$this->user->rolle->visually_impaired) { ?>90px + <? } ?>295px);
+}
+.gsm_tabelle td {
+	padding: 3px 0 3px 0;
+}
+.gsm_tabelle_ueberschrift {
+	height: 30px;
+}
+.gsm_tabelle_ueberschrift td, .gsm_tabelle_gruppe tr:first-child td {
+	font-family: SourceSansPro2;
+}
+.gsm_tabelle_td_first {
+	min-width: 300px;
+}
+<? if (!$this->user->rolle->visually_impaired) { ?>
+.gsm_tabelle_td_second {
+	min-width: 90px;
+}
+.gsm_tabelle_td_second>div {
+	display: flex;
+	align-items: center;
+}
+.gsm_tabelle_td_second>div span[data-tooltip] {
+	--width: 300px;
+}
+.gsm_tabelle_td_second select {
+	width: 85px;
+}
+<? } ?>
+.gsm_tabelle_td_third {
+	min-width: 295px;
+}
+.gsm_tabelle_ueberschrift .gsm_tabelle_td_first>span {
+	margin-left: 6px;
+}
+.gsm_tabelle_gruppe {
+	width: 100%;
+	border-spacing: 0;
+}
+.gsm_tabelle_gruppe td {
+	padding: 0;
+}
+.gsm_tabelle_gruppe_auf, .gsm_tabelle_gruppe_zu {
+	height: 25px;
+	display: flex;
+	align-items: center;
+	background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);
+	border: 1px solid #ccc;
+}
+
+.gsm_tabelle_gruppe_auf span, .gsm_tabelle_gruppe_zu span {
+	margin-left: 5px;
+}
+.gsm_tabelle_attribute {
+	height: 29px;
+}
+.gsm_tabelle_attribute:hover {
+	background-color: #DAE4EC;
+}
+
+.gsm_tabelle_attribute .gsm_tabelle_td_first>span {
+	margin-left: 5px;
+}
+.gsm_tabelle_attribute .gsm_tabelle_td_third {
+	padding-right: 5px;
+}
+.gsm_tabelle_attribute .gsm_tabelle_td_second select, .gsm_tabelle_attribute .gsm_tabelle_td_third select, .gsm_tabelle_attribute .gsm_tabelle_td_third input {
+	border-radius: 2px;
+	border: 1px solid #777;
+	height: 25px;
+}
+.gsm_tabelle_attribute .gsm_tabelle_td_third select, .gsm_tabelle_attribute .gsm_tabelle_td_third input:not(.time) {
+		width: 293px;
+}
+.gsm_tabelle_attribute .gsm_tabelle_td_third>div {
+	position: relative;
+	display: inline-block;
+	height: 25px;
+}
+.gsm_tabelle_attribute .gsm_tabelle_td_third>div select option {
+	margin-top: 2px;
+	margin-left: 2px;
+}
+.gsm_tabelle_kalender {
+	position: absolute;
+	top: 1px;
+	left: 1px;
+	height: 19px;
+	padding: 2px;
+	background: #eee;
+}
+.gsm_tabelle_kalender img {
+	position: relative;
+	top: 3px;
+}
+
+</style>
+
+<div id="gs_titel"><? if($this->titel != '')echo $this->titel;else echo $strTitle; ?></div>
+<?php
 	if (!$this->user->rolle->visually_impaired) {
 		include(SNIPPETS.'/generic_search_layer_selector.php');
 	}
-
-?><table border="0" cellpadding="5" cellspacing="2"><?php
-	if(!in_array($this->selected_search[0]['name'], array('', '<last_search>'))){echo '<script type="text/javascript">showsearches();</script>';} ?>
-  <tr> 
-    <td id="searchmasks">
-
+?>
+<div id="gs_formular">
+<? if(!in_array($this->selected_search[0]['name'], array('', '<last_search>'))){echo '<script type="text/javascript">showsearches();</script>';} ?>
+	<div id="gs_searchmasks">
 <? if(count($this->attributes) > 0){
 		for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){ 
-			$searchmask_number = $m; 		?>
-			<div>
+			$searchmask_number = $m; ?>
+			<div id="gs_searchmask">
 			<? include(SNIPPETS.'generic_search_mask.php'); ?>
 			</div>
-<? 	}
-	} ?>
-		</td>
-  </tr>
-	<tr> 
-    <td colspan="5">
+<?		}
+    }
+?>
+	</div>
+</div>
 <? if(count($this->attributes) > 0){ ?>
-			<table width="100%" align="center" border="0" cellspacing="0" cellpadding="3">
-<?php if ($this->user->rolle->visually_impaired) { ?>
-					<tr>
-						<td align="center"><br>
-							<input type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
-						</td>
-					</tr>
-<?php } ?>
-			<? if($this->layerset[0]['connectiontype'] == MS_POSTGIS){ ?>
-					<tr>
-						<td><a href="javascript:add_searchmask(<? echo $this->formvars['selected_layer_id']; ?>);"><? echo $strAndOr; ?></a></td>
-					</tr>
-			<? } ?>
-					<tr>
-						<td><br><? echo $strLimit; ?>&nbsp;<input size="2" onkeyup="checknumbers(this, 'int2', '', '');" type="text" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>"></td>
-					</tr>
-					<tr>
-						<td><br><em><? echo $strLikeSearchHint; ?></em></td>
-					</tr>
-					<tr>
-						<td><br><em><? echo $strDateHint; ?></em></td>
-					</tr>
-<?php if (!$this->user->rolle->visually_impaired) { ?>
-					<tr>
-						<td align="center"><br>
-							<input type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
-						</td>
-					</tr>
-<?php } ?>
-					<tr>
-						<td height="30" valign="bottom" align="center" id="loader" style="display:none"><img id="loaderimg" src="graphics/ajax-loader.gif"></td>
-					</tr>
-				</table><?
-      }
-      ?>
-		</td>
-  </tr>
-</table>
-<?php
-	if ($this->user->rolle->visually_impaired) {
+
+<?	if ($this->user->rolle->visually_impaired) { ?>
+<div id="gs_suchen_vi">
+	<input type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
+</div>
+<?	} ?>
+<?	if($this->layerset[0]['connectiontype'] == MS_POSTGIS){ ?>
+<div id="gs_undoder">
+	<a href="javascript:add_searchmask(<? echo $this->formvars['selected_layer_id']; ?>);"><? echo $strAndOr; ?></a>
+	<span data-tooltip="<? echo $strAndOrHint1; ?>"></span>
+</div>
+<?	} ?>
+<div id="gs_anzahl_treffer">
+	<span><? echo $strLimit; ?><span>
+	<input size="2" onkeyup="checknumbers(this, 'int2', '', '');" type="text" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>">
+</div>
+<?	if (!$this->user->rolle->visually_impaired) { ?>
+<div id="gs_suchen">
+	<input type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
+</div>
+<?	} ?>
+<div id="gs_loader">
+	<img id="loaderimg" src="graphics/ajax-loader.gif">
+</div>
+<? } ?>
+<? if ($this->user->rolle->visually_impaired) {
 		include(SNIPPETS.'/generic_search_layer_selector.php');
-	}
+   }
  ?>
+
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="go" value="Layer-Suche">
 <input type="hidden" name="titel" value="<? echo value_of($this->formvars, 'titel'); ?>">
