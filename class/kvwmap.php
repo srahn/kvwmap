@@ -11245,7 +11245,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$deleteuser[] = $users['ID'][$i];
 			}
 		}
-		$anzdeleteuser = count($deleteuser);
+		$anzdeleteuser = @count($deleteuser);
 		if ($anzdeleteuser > 0) {
 			for($i=0; $i<$anzdeleteuser; $i++){
 				$this->user->rolle->deleteRollen($deleteuser[$i], array($Stelle->id));
@@ -15751,7 +15751,7 @@ class db_mapObj{
 	function zoomToDatasets($oids, $oid_name, $tablename, $columnname, $border, $layerdb, $layer_epsg, $client_epsg) {
   	$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
   	$sql.=" FROM (SELECT st_transform(ST_SetSRID(ST_Extent(" . $columnname."), " . $layer_epsg."), " . $client_epsg.") as bbox";
-  	$sql.=" FROM " . $tablename." WHERE ".$oid_name." IN (";
+  	$sql.=" FROM " . pg_quote($tablename)." WHERE ".$oid_name." IN (";
   	for($i = 0; $i < count($oids); $i++){
     	$sql .= "'" . $oids[$i]."',";
     }
