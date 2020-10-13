@@ -433,7 +433,7 @@ class GUI {
 				}
 				else{		################ mouseover auf Datensatz in Sachdatenanzeige ################
 					$showdata = 'false';
-					$sql_where = " AND ".$geometrie_tabelle."_oid = ".$this->formvars['oid'];
+					$sql_where = " AND ".pg_quote($geometrie_tabelle.'_oid')." = ".$this->formvars['oid'];
 				}
 
 				# SVG-Geometrie abfragen für highlighting
