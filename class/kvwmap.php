@@ -2760,9 +2760,11 @@ echo '			</table>
   }
 
   function getLagebezeichnung($epsgcode) {
+		global $GUI;
     switch (LAGEBEZEICHNUNGSART) {
       case 'Flurbezeichnung' : {
-        $Lagebezeichnung = $this->getFlurbezeichnung($epsgcode);
+				include_once(PLUGINS.'alkis/model/kvwmap.php');
+        $Lagebezeichnung = $GUI->getFlurbezeichnung($epsgcode);
 			} break;
 			default : {
 			  $Lagebezeichnung = '';
@@ -5867,7 +5869,6 @@ echo '			</table>
     $this->map->legend->set("keyspacingx", $size*$this->map_factor);
     $this->map->legend->set("keyspacingy", $size*0.83*$this->map_factor);
     $this->map->legend->label->set("size", $size*$this->map_factor);
-		$this->map->legend->label->set("type", 'truetype');
 		$this->map->legend->label->set("font", 'arial');
     $this->map->legend->label->set("position", MS_C);
     #$this->map->legend->label->set("offsetx", $size*-5*$this->map_factor);
@@ -6682,6 +6683,7 @@ echo '			</table>
 
 			# Lagebezeichnung
 			if(LAGEBEZEICHNUNGSART == 'Flurbezeichnung'){
+				include_once(PLUGINS.'alkis/model/kataster.php');
 				$flur = new Flur('','','',$this->pgdatabase);
 				$bildmitte['rw']=$this->formvars['refpoint_x'];
 				$bildmitte['hw']=$this->formvars['refpoint_y'];
