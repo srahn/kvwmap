@@ -155,6 +155,18 @@ function ahahDone(url, targets, req, actions) {
 	}
 }
 
+add_calendar = function(event, elementid, type, setnow){
+	event.stopPropagation();
+	remove_calendar();
+	calendar = new CalendarJS();
+	calendar.init(elementid, type, setnow);
+	document.getElementById('gui-table').calendar = calendar;
+}
+ 
+remove_calendar = function(){
+	if(document.getElementById('gui-table').calendar != undefined)document.getElementById('gui-table').calendar.destroy();
+}
+
 function Bestaetigung(link,text) {
 	Check = confirm(text);
 	if (Check == true) {

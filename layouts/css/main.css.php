@@ -1544,6 +1544,7 @@ tbody.gle>tr {
 	margin-left:auto;
 	margin-right:auto;
 	background-color: #F6F6F6;
+	height: 200px;
 }
 
 .calendar tr { 
