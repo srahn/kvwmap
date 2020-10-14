@@ -43,7 +43,7 @@
 		<div id="gsl_abfrage_speichern">
 			<div><a id="gsl_abfrage_speichern_form_link" onclick="showform('gsl_abfrage_speichern_form');"><?php echo $strAbfrageSpeichern; ?></a></div>
 			<div id="gsl_abfrage_speichern_form">
-				<span><input class="gsl_abfrage_speichern_form_input" type="text" name="search_name" value="<? echo $this->formvars['searches']; ?>" placeholder="<? echo $strAbfrageNamePlaceholder; ?>"></span><br>
+				<span><input class="gsl_abfrage_speichern_form_input" type="text" name="search_name" value="" placeholder="<? echo $strAbfrageNamePlaceholder; ?>"></span><br>
 				<span><input type="button" name="speichern" value="<? echo $this->strSave; ?>" onclick="save_search();"></span>
 			</div>		
 		</div>
