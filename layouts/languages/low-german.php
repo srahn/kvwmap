@@ -24,4 +24,7 @@
 	$this->strShowMore="Mehr anzeigen";
 	$this->strShowLess="Weniger anzeigen";
 	$this->strLayerParameters="Themenparameter";
+	$this->strLoad="Loden";
+	$this->strUseGeometryOf="Geometrie övernehmen von";
+	$this->strSearch="Nu sök";
 ?>
