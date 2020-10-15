@@ -504,8 +504,10 @@ class Gml_builder {
 		# TODO Make this more generic to reflect possible changes in index and support all associations
 		if(array_key_exists('verbundenerplan', $gml_object)) {
 				# Trim prefix in different variants if exists
-				$gml_object_verbundenerplan = str_replace(array('#','GML_','Gml_','gml_'), '', $gml_object['verbundenerplan']);
-				$gmlStr .= "<{$xplan_ns_prefix}verbundenerPlan xlink:href=\"#GML_" . $gml_object_verbundenerplan . "\"/>";
+				if(!empty($gml_object['verbundenerplan'])) {
+					$gml_object_verbundenerplan = str_replace(array('#','GML_','Gml_','gml_'), '', $gml_object['verbundenerplan']);
+					$gmlStr .= "<{$xplan_ns_prefix}verbundenerPlan xlink:href=\"#GML_" . $gml_object_verbundenerplan . "\"/>";
+				}
 		}
 		return $gmlStr;
 	}
