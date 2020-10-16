@@ -1460,7 +1460,7 @@ class stelle {
 	* Abfragen der Layer der Stelle
 	*/
 	function getLayer($Layer_id, $result = '') {
-		#echo '<br>stelle.php getLayer';
+		$layer = array();
 		$sql = "
 			SELECT
 				l.*,

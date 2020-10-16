@@ -17,15 +17,26 @@ class ALKIS {
 	
 	function dhk_wsdl_login(){
 		$params = Array(
-			'soap_version' => 'SOAP_1_1'
+			'soap_version' => 'SOAP_1_1',
+			'login' => "rahn", 
+			'password' => "d1dPv_r*",
+			'trace' => 1,
+			'exceptions' => 1
 		);
 		$client = new SoapClient('http://webdhk-vr.lk-vr.de:8090/?wsdl', $params);
-		$soapParameters = array('userName' => $username, 'password' => $password);
-		$header = new SoapHeader($ns,'UserCredentials',$soapParameters,false);
+		$auth = array(
+        'Username'=>'rahn',
+        'Password'=>'d1dPv_r*',
+    );
+		#$header = new SoapHeader('http://webdhk-vr.lk-vr.de:8090/?wsdl','UserIdentifierSoapHeaderIn',$auth,false);
+		#$header = new SoapHeader('http://webdhk-vr.lk-vr.de:8090/?wsdl','SOAPAction','getCapabilities',false);
 		$client->__setSoapHeaders($header);
-		$functions = $client->__getFunctions();
-		print_r($functions);
+		#$functions = $client->__getFunctions();
+		#print_r($functions);
 		$response = $client->getCapabilities();
+		echo "Request-Headers:\n".$client->__getLastRequestHeaders();
+		echo "Response-Headers:\n".$client->__getLastResponseHeaders();
+		echo $client->__getLastRequest();
 		var_dump($response);
 	}
 	

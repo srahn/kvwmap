@@ -1529,7 +1529,7 @@ class rolle {
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
 		else {
-			for($j = 0; $j < count($layerids); $j++){
+			for($j = 0; $j < @count($layerids); $j++){
 				$sql = "
 					INSERT IGNORE INTO u_groups2rolle 
 					SELECT DISTINCT 
