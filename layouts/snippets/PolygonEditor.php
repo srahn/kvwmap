@@ -121,7 +121,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 			<table cellspacing="0" cellpadding="0">
 				<tr>
 					<td>
-						<div id="legenddiv" style="height: <? echo $this->map->height-205; ?>px;"	class="normallegend">
+						<div id="legenddiv" style="height: <? echo $this->map->height-215; ?>px;"	class="normallegend">
 							<?
 							$this->simple_legend = true;
 							include(SNIPPETS . 'legenddiv.php'); 
@@ -131,15 +131,16 @@ function buildwktpolygonfromsvgpath(svgpath){
 				</tr>
 				<tr><?
 					if ($this->new_entry != true) { ?>
-						<td align="center"><input type="button" style="visibility:hidden" name="split" value="Geometrie in neue Objekte aufteilen" onclick="split_geometries();"></td><?
+						<td style="height: 34px" align="center"><input type="button" <? if($this->polygon['numgeometries'] < 2){ echo 'style="visibility:hidden"';} ?> name="split" value="Geometrie in neue Objekte aufteilen" onclick="split_geometries();"></td><?
 					}
 					else { ?>
-						<td style="height: 24px">&nbsp;</td><?
+						<td style="height: 34px">&nbsp;</td><?
 					} ?>
 				</tr>
 				<tr>
 					<td><? echo $strGeomFrom; ?>:<br>
-						<select name="geom_from_layer" style="width: 250px" onchange="startwaiting(true);document.GUI.no_load.value='true';document.GUI.submit();">
+						<!--select name="geom_from_layer" style="width: 250px" onchange="startwaiting(true);document.GUI.no_load.value='true';document.GUI.submit();"-->
+						<select name="geom_from_layer" style="width: 250px">
 							<option value="0"> - alle - </option>
 							<?
 							for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
@@ -158,7 +159,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 				</tr>			
 				<tr>
 					<td align="center" height="30">
-						<input type="button" onclick="document.getElementById('data_import').style.display='';" value="Daten-Import">
+						<input type="button" onclick="document.getElementById('data_import').style.display='';" value="<? echo $strDataImport; ?>" title="<? echo $strDataImportTitle; ?>">
 						<div id="data_import" style="position: fixed; top: 50%; left: 50%; margin-top: -220px; margin-left: -300px;display: none;box-shadow: 6px 5px 7px #777;">
 							<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="document.getElementById('data_import').style.display='none';" title="Schlie&szlig;en"><img style="border:none" src="graphics/exit2.png"></img></a></div>
 							<? 
@@ -180,7 +181,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 				<? if($this->new_entry != true){ ?>
 				<tr> 
 					<td align="center" style="height: 40px">
-						<input type="button" name="senden2" value="<? echo $strSaveWithoutZoom; ?>" onclick="send('false');">&nbsp;<input type="button" name="senden" value="<? echo $strSave; ?>" onclick="send('true');"><br>
+						<input title="<? echo $strSaveWithoutZoom; ?>" type="button" name="senden2" value="<? echo $strSaveWithoutZoom; ?>" onclick="send('false');">&nbsp;<input title="<? echo $strSaveTitle; ?>" type="button" name="senden" value="<? echo $strSave; ?>" onclick="send('true');"><br>
 					</td>
 				</tr>
 				<? }else{ ?>

@@ -35,7 +35,7 @@ class tif {
   # tif($map)
   ##################################################################################################################################################
 
-  function tif($map, $resolution) {
+  function __construct($map, $resolution) {
     $this->map=$map;
     $this->resolution=$resolution;
   }

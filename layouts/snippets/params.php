@@ -1,6 +1,6 @@
 <?php
 	$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
-	if ($params['error_message'] != '') {
+	if (value_of($params, 'error_message') != '') {
 		$this->add_message('error', $params['error_message']);
 	}
 	else { ?>
@@ -43,7 +43,7 @@
 								<i id="openLayerParamBarIcon" class="fa fa-bars button pointer" onclick="toggleLayerParamsBar();"></i>
 							</div>
 							<div id="layerParamsBar" class="layerOptions">
-								<div style="position: absolute; top: 2px; right: 2px;">
+								<div style="position: absolute; top: 2px; right: 2px; cursor: pointer">
 									<img style="border:none" src="graphics/exit2.png" onclick="toggleLayerParamsBar();">
 								</div>
 								<table>

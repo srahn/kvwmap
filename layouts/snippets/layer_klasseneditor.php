@@ -2,11 +2,7 @@
 	global $supportedLanguages;
 	include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php'); ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
-<script src="funktionen/tooltip.js" language="JavaScript"	type="text/javascript"></script>
 <script type="text/javascript">
-	Text[5] = ["Hilfe:","Für einen Layer lassen sich verschiedene Klassifizierungen erstellen. Klassen mit dem gleichen Eintrag im Klassen-Feld \"Klassifizierung\" gehören zu einer Klassifizierung. Welche Klassifizierung in einem Layer verwendet wird, wird über das Layer-Feld \"Klassifizierung\" festgelegt."];
-	Text[6] = ["Hilfe:","Wird hier der Name einer Grafikdatei aus dem Ordner <?php echo GRAPHICSPATH; ?>custom angegeben, wird diese Grafik an Stelle der vom MapServer erzeugten Grafik in der Legende angezeigt. Außerdem kann hier die Höhe und Breite der Legendengrafik angegeben werden."];
-	Text[7] = ["Hilfe:","Hier kann die Zeichenreihenfolge in der Karte und optional eine abweichende Reihenfolge für die Legende festgelegt werden."];
 
 	function toggleAutoClassForm(){
 		form = document.getElementById('autoClassForm');
@@ -31,20 +27,29 @@
 		border-collapse: collapse; 
 		width: 100%;
 		min-width: 940px;
+		background:rgb(248, 248, 249);
 	}
-
 	.navigation th{
-		border: 1px solid <?php echo BG_DEFAULT ?>;
+		border: 1px solid #bbb;
 		border-collapse: collapse;
 		width: 17%;
 	}
-	
 	.navigation th div{
 		padding: 3px;
+		padding: 9px 0 9px 0;
+		width: 100%;
+	}	
+	.navigation th:not(.navigation-selected) a{
+		color: #888;
+	}	
+	.navigation th:not(.navigation-selected):hover{
+		background-color: rgb(238, 238, 239);
 	}
-	
-	.navigation th:hover{
-		background-color: <?php echo BG_DEFAULT ?>;
+	.navigation-selected{
+		background-color: #c7d9e6;
+	}
+	.navigation-selected div{
+		color: #111;
 	}
 </style>
 
@@ -75,15 +80,15 @@
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
-					<th bgcolor="<?php echo BG_DEFAULT ?>" class="fetter"><? echo $strClasses; ?></th>
-					<th class="fetter"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
-					<? if($this->layerdata['connectiontype'] == 6){ ?>
-					<th class="fetter"><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
+					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strCommonData; ?></div></a></th>
+					<th class="navigation-selected"><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strClasses; ?></div></a></th>
+					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strStylesLabels; ?></div></a></th>
+					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
+					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strAttributes; ?></div></a></th>
 					<? } ?>
-					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
-					<? if($this->layerdata['connectiontype'] == 6){ ?>
-					<th class="fetter"><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>
+					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1"><div><? echo $strStellenAsignment; ?></div></a></th>
+					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
+					<th><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strPrivileges; ?></div></a></th>
 					<? } ?>
 				</tr>
 			</table>
@@ -91,7 +96,7 @@
 	</tr>
 	<tr>
 		<td align="center" style="padding-top: 10px;">
-		<table border="0" cellspacing="0" cellpadding="3" style="width: 100%; border:1px solid <?php echo BG_DEFAULT ?>">
+		<table border="0" cellspacing="0" cellpadding="3" style="background-color: #f8f8f9; width: 100%; border:1px solid <?php echo BG_DEFAULT ?>">
 			<tr>
 				<td style="border-bottom:1px solid #C3C7C3">&nbsp;<?php echo $strID; ?></td>
 				<td style="border-bottom:1px solid #C3C7C3">&nbsp;<?php echo $strClass; ?></td><?
@@ -102,14 +107,14 @@
 				} ?>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strExpression; ?></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strText; ?></td>
-				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strClassification; ?>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[5], Style[0], document.getElementById('TipLayer6'))" onmouseout="htm()">
-						<div id="TipLayer6" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strClassification; ?>&nbsp;
+				<span data-tooltip="Für einen Layer lassen sich verschiedene Klassifizierungen erstellen. Klassen mit dem gleichen Eintrag im Klassen-Feld 'Klassifizierung' gehören zu einer Klassifizierung. Welche Klassifizierung in einem Layer verwendet wird, wird über das Layer-Feld 'Klassifizierung' festgelegt."></span>
 				</td>
-				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strLegendGraphic; ?>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[6], Style[0], document.getElementById('TipLayer7'))" onmouseout="htm()">
-						<div id="TipLayer7" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strLegendGraphic; ?>&nbsp;
+				<span data-tooltip="Wird hier der Name einer Grafikdatei aus dem Ordner custom/graphics angegeben, wird diese Grafik an Stelle der vom MapServer erzeugten Grafik in der Legende angezeigt. Außerdem kann hier die Höhe und Breite der Legendengrafik angegeben werden."></span>
 				</td>
-				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strOrder; ?>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[7], Style[0], document.getElementById('TipLayer8'))" onmouseout="htm()">
-						<div id="TipLayer8" style="visibility:hidden;right: 20px;position:absolute;z-index:1000;"></div>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strOrder; ?>&nbsp;
+					<span style="--left: -400px" data-tooltip="Hier kann die Zeichenreihenfolge in der Karte und optional eine abweichende Reihenfolge für die Legende festgelegt werden."></span>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><i style="padding: 6px" class="fa fa-trash" aria-hidden="true"></i></td>
 	<!--			<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">ändern</td>	-->
@@ -141,7 +146,7 @@
 					<textarea name="expression[<?php echo $this->classes[$i]['Class_ID']; ?>]" cols="28" rows="3"><?php echo $this->classes[$i]['Expression']; ?></textarea>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
-					<textarea name="text[<?php echo $this->classes[$i]['text']; ?>]" cols="18" rows="3"><?php echo $this->classes[$i]['text']; ?></textarea>
+					<textarea name="text[<?php echo $this->classes[$i]['Class_ID']; ?>]" cols="18" rows="3"><?php echo $this->classes[$i]['text']; ?></textarea>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
 					<input type="text" name="classification[<?php echo $this->classes[$i]['Class_ID']; ?>]" size="18" value="<?php echo $this->classes[$i]['classification']; ?>">
@@ -202,10 +207,10 @@
 			?>
 			<tr>
 				<td style="border-bottom:1px solid #C3C7C3" colspan="10">					
-					<a href="javascript:void(0);" onclick="toggleAutoClassForm();" class="buttonlink" style="padding: 6px; line-height: 13px;" title="<? echo $strAddAutoClasses; ?>">AUTO</a>
-					<a style="float: right;" href="index.php?go=Klasseneditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>" title="<? echo $strAddClass; ?>">
+					<a style="float: left;" href="index.php?go=Klasseneditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>" title="<? echo $strAddClass; ?>">
 						<i style="padding: 6px" class="fa fa-plus buttonlink" aria-hidden="true"></i>
 					</a>
+					<a href="javascript:void(0);" onclick="toggleAutoClassForm();" class="buttonlink" style="margin-left: 10px; padding: 6px; line-height: 13px;" title="<? echo $strAddAutoClasses; ?>">AUTO</a>
 				</td>
 			</tr>
 			<tr id="autoClassForm" style="display:none">

@@ -6,8 +6,61 @@
 
 $errors = array();
 
+function quote($var){
+	return is_numeric($var) ? $var : "'".$var."'";
+}
+
+function pg_quote($column){
+	return ctype_lower($column) ? $column : '"'.$column.'"';
+}
+
+function get_din_formats() {
+	$din_formats = array(
+		'A5hoch' => array('value' => 'A5hoch', 'output' => 'A5 hoch', 'size' => '(420 x 595)'),
+		'A5quer' => array('value' => 'A5quer', 'output' => 'A5 quer', 'size' => '(595 x 420)'),
+		'A4hoch' => array('value' => 'A4hoch', 'output' => 'A4 hoch', 'size' => '(595 x 842)'),
+		'A4quer' => array('value' => 'A4quer', 'output' => 'A4 quer', 'size' => '(842 x 595)'),
+		'A3hoch' => array('value' => 'A3hoch', 'output' => 'A3 hoch', 'size' => '(842 x 1191)'),
+		'A3quer' => array('value' => 'A3quer', 'output' => 'A3 quer', 'size' => '(1191 x 842)'),
+		'A2hoch' => array('value' => 'A2hoch', 'output' => 'A2 hoch', 'size' => '(1191 x 1684)'),
+		'A2quer' => array('value' => 'A2quer', 'output' => 'A2 quer', 'size' => '(1684 x 1191)'),
+		'A1hoch' => array('value' => 'A1hoch', 'output' => 'A1 hoch', 'size' => '(1684 x 2384)'),
+		'A1quer' => array('value' => 'A1quer', 'output' => 'A1 quer', 'size' => '(2384 x 1684)'),
+		'A0hoch' => array('value' => 'A0hoch', 'output' => 'A0 hoch', 'size' => '(2384 x 3370)'),
+		'A0quer' => array('value' => 'A0quer', 'output' => 'A0 quer', 'size' => '(3370 x 2384)'),
+	);
+	return $din_formats;
+}
+
+function str_replace_first($search, $replace, $subject){
+	$newstring = $subject;
+	$pos = strpos($subject, $search);
+	if($pos !== false){
+		$newstring = substr_replace($subject, $replace, $pos, strlen($search));
+	}
+	return $newstring;
+}
+
+function replace_tags($text, $tags) {
+	$first_right = strpos($text, '>');
+	if ($first_right !== false) {
+		$text = preg_replace("#<\s*\/?(" . $tags . ")\s*[^>]*?>#im", '', $text);
+/*		$first_left = strpos($text, '<');
+		if ($first_left !== false and $first_right < $first_left) {
+			# >...<
+			$last_right = strrpos($text, '>');
+			if ($last_right !== false and $last_right > $first_left) {
+				# >...<...>
+				# entferne $first_right, $last_right und alles dazwischen
+				$text = substr_replace($text, '', $first_right, $last_right - $first_right + 1);
+			}
+		}*/
+	}
+	return $text;
+}
+
 function human_filesize($file){
-	$bytes = filesize($file);
+	$bytes = @filesize($file);
   $sz = 'BKMGTP';
   $factor = floor((strlen($bytes) - 1) / 3);
   return sprintf("%.2f", $bytes / pow(1024, $factor)).' '.@$sz[$factor].'B';
@@ -15,7 +68,7 @@ function human_filesize($file){
 
 function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	global $errors;
-	if(!(error_reporting() & $errno)){
+	if (!(error_reporting() & $errno)) {
 		// This error code is not included in error_reporting
 		return;
 	}
@@ -41,10 +94,97 @@ function versionFormatter($version) {
   );
 }
 
+/*
+* This function return the absolute path to a document in the file system of the server
+* @param string $document_attribute_value The value of the document attribute stored in the dataset. Can be a path and original name or an url.
+* @param string $layer_document_path The document path of the layer the attribute belongs to.
+* @param string $layer_document_url optional, default '' The document url of the layer the attribute belongs to. If empty the $document_attribute_value containing an url
+* @return string The absolute path to the document
+*/
+function get_document_file_path($document_attribute_value, $layer_document_path, $layer_document_url = '') {
+	$value_part = explode('&original_name=', $document_attribute_value);
+	if ($layer_document_url != '') {
+		return url2filepath($value_part[0], $layer_document_path, $layer_document_url);
+	}
+	else {
+		return $value_part[0];
+	}
+}
+
 function url2filepath($url, $doc_path, $doc_url){
 	if($doc_path == '')$doc_path = CUSTOM_IMAGE_PATH;
 	$url_parts = explode($doc_url, $url);
 	return $doc_path.$url_parts[1];
+}
+
+/*
+* function read exif and gps data from file given in $img_path and return GPS-Position, Direction and creation Time
+* @param string $img_path Absolute Path of file with Exif Data to read
+* @return array Array with success true if read was successful, LatLng the GPS-Position where the foto was taken Richtung and Erstellungszeit.
+*/
+function get_exif_data($img_path) {
+	$exif = exif_read_data($img_path, 'EXIF, GPS');
+	if ($exif === false) {
+		return array(
+			'success' => false,
+			'err_msg' => 'Keine Exif-Daten im Header der Bilddatei ' . $img_path . ' gefunden!'
+		);
+	}
+	else {
+#		echo '<br>' . print_r($exif['GPSLatitude'], true);
+#		echo '<br>' . print_r($exif['GPSLongitude'], true);
+#		echo '<br>' . print_r($exif['GPSImgDirection'], true);
+		return array(
+			'success' => true,
+			'LatLng' => ((array_key_exists('GPSLatitude', $exif) AND array_key_exists('GPSLongitude', $exif)) ? (
+				floatval(substr($exif['GPSLatitude' ][0], 0, strlen($exif['GPSLatitude' ][0]) - 2))
+				+ float_from_slash_text($exif['GPSLatitude' ][1]) / 60
+				+ float_from_slash_text($exif['GPSLatitude' ][2]) / 6000
+			) . ' ' . (
+				floatval(substr($exif['GPSLongitude'][0], 0, strlen($exif['GPSLongitude'][0]) - 2))
+				+ float_from_slash_text($exif['GPSLongitude'][1]) / 60
+				+ float_from_slash_text($exif['GPSLongitude'][2]) / 6000
+			) : NULL),
+			'Richtung' => (array_key_exists('GPSImgDirection', $exif) ? float_from_slash_text($exif['GPSImgDirection']) : NULL),
+			'Erstellungszeit' => (array_key_exists('DateTimeOriginal', $exif) ? (
+					substr($exif['DateTimeOriginal'], 0 , 4) . '-'
+				. substr($exif['DateTimeOriginal'], 5, 2) . '-'
+				. substr($exif['DateTimeOriginal'], 8, 2) . ' '
+				. substr($exif['DateTimeOriginal'], 11)
+			) : NULL)
+		);
+	}
+}
+
+/**
+* Function create a float value from a text
+* where numerator and denominator are delimited by a slash e.g. 23/100
+* @params string $slash_text First part of the string is numerator, second part is denominator.
+* @return float The float value calculated from numerator divided by denominator.
+* Return Null if string is empty or NULL.
+* Return numerator if only one part exists after explode by slash
+*/
+function float_from_slash_text($slash_text) {
+	$parts = explode('/', $slash_text);
+	if ($parts[0] == '0') {
+		return floatval(0);
+	}
+
+	$numerator = floatval($parts[0]);
+	if ($numerator == 0) {
+		return NULL;
+	}
+
+	if (count($parts) == 1) {
+		return $numerator;
+	}
+
+	$denominator = floatval($parts[1]);
+	if ($denominator == 0) {
+		return $numerator;
+	}
+
+	return $parts[0] / $parts[1];
 }
 
 function compare_layers($a, $b){
@@ -130,19 +270,29 @@ function formatFlurstkennzALKIS($FlurstKennzListe){
 	$Flurstuecke = explode(';', $FlurstKennzListe);
 	for($i = 0; $i < count($Flurstuecke); $i++){
 		$FlurstKennz = $Flurstuecke[$i];
-		$explosion = explode('-', $FlurstKennz);
-		$gem = trim($explosion[0]);
-		$flur = trim($explosion[1]);
-		$flurst = trim($explosion[2]);
-		$explosion = explode('/',$flurst);
-		$zaehler = $explosion[0];
-		$nenner = $explosion[1];
-		if($nenner != '000.00'){
-			$explosion = explode('.',$nenner);
-			$vorkomma = '0'.$explosion[0];
+		if(strpos($FlurstKennz, '/') !== false){		# ALB-Schreibweise 131234-001-00234/005.00
+			$explosion = explode('-', $FlurstKennz);
+			$gem = trim($explosion[0]);
+			$flur = trim($explosion[1]);
+			$flurst = trim($explosion[2]);
+			$explosion = explode('/',$flurst);
+			$zaehler = $explosion[0];
+			$nenner = $explosion[1];
+			if($nenner != '000.00'){
+				$explosion = explode('.',$nenner);
+				$vorkomma = '0'.$explosion[0];
+			}
+			else $vorkomma = '';
 		}
-		else $vorkomma = '';
-		$FlurstKennz = $gem.$flur.$zaehler.$vorkomma;
+		elseif(strpos($FlurstKennz, '-') !== false){		# Kurzschreibweise 13-1234-1-234-5
+			$explosion = explode('-', $FlurstKennz);
+			$land = $explosion[0];
+			$gem = $explosion[1];
+			$flur = str_pad($explosion[2], 3, '0', STR_PAD_LEFT);
+			$zaehler = str_pad($explosion[3], 5, '0', STR_PAD_LEFT);
+			$vorkomma = str_pad($explosion[4], 4, '0', STR_PAD_LEFT);
+		}
+		$FlurstKennz = $land.$gem.$flur.$zaehler.$vorkomma;
 		$Flurstuecke[$i] = str_pad($FlurstKennz, 20, '_', STR_PAD_RIGHT);
 	}
   return implode(';', $Flurstuecke);
@@ -800,12 +950,14 @@ function umlaute_html($string){
 	return $string;
 }
 
-function umlaute_sortieren($array, $second_array){
-	// Diese Funktion sortiert das Array $array unter Berücksichtigung von Umlauten.
-	// Zusätzlich läßt sich ein zweites Array $second_array übergeben, welches genauso viele
-	// Elemente haben muß wie das erste und dessen Elemente entsprechend der Sortierung des
-	// ersten Arrays angeordnet werden, dadurch bleiben die Index-Beziehungen beider Arrays erhalten.
-	// Außerdem werden alle Array-Elemente unabhängig von Groß/Kleinschreibung sortiert.
+/**
+* Diese Funktion sortiert das Array $array unter Berücksichtigung von Umlauten.
+* Zusätzlich läßt sich ein zweites Array $second_array übergeben, welches genauso viele
+* Elemente haben muß wie das erste und dessen Elemente entsprechend der Sortierung des
+* ersten Arrays angeordnet werden, dadurch bleiben die Index-Beziehungen beider Arrays erhalten.
+* Außerdem werden alle Array-Elemente unabhängig von Groß/Kleinschreibung sortiert.
+*/
+function umlaute_sortieren($array, $second_array) {
 	if(is_array($array)){
 		$oldarray = $array;
 		for($i = 0; $i < count($array); $i++){
@@ -955,24 +1107,22 @@ function searchdir($path, $recursive){
     return ($dirlist);
 }
 
-
-function get_select_parts($select){
-	$column = explode(',', $select);		# an den Kommas splitten
-  for($i = 0; $i < count($column); $i++){
-  	$klammerauf = substr_count($column[$i], '(');
-  	$klammerzu = substr_count($column[$i], ')');
+function get_select_parts($select) {
+	$column = explode(',', $select); # an den Kommas splitten
+	for($i = 0; $i < count($column); $i++) {
+		$klammerauf = substr_count($column[$i], '(');
+		$klammerzu = substr_count($column[$i], ')');
 		$hochkommas = substr_count($column[$i], "'");
 		# Wenn ein Select-Teil eine ungerade Anzahl von Hochkommas oder mehr Klammern auf als zu hat,
 		# wurde hier entweder ein Komma im einem String verwendet (z.B. x||','||y) oder eine Funktion (z.B. round(x, 2)) bzw. eine Unterabfrage mit Kommas verwendet
-  	if($hochkommas % 2 != 0 OR $klammerauf > $klammerzu){
-  		$column[$i] = $column[$i].','.$column[$i+1];
-  		array_splice($column, $i+1, 1);
-			$i--;							# und nochmal prüfen, falls mehrere Kommas drin sind
-  	}
-  }
-  return $column;
+		if ($hochkommas % 2 != 0 OR $klammerauf > $klammerzu) {
+			$column[$i] = $column[$i] . ',' . $column[$i + 1];
+			array_splice($column, $i + 1, 1);
+			$i--; # und nochmal prüfen, falls mehrere Kommas drin sind
+		}
+	}
+	return $column;
 }
-
 
 function microtime_float(){
    list($usec, $sec) = explode(" ", microtime());
@@ -1052,7 +1202,7 @@ function str_space($string, $split_length = 1) {
 function showAlert($text) {
   ?>
   <script type="text/javascript">
-    alert("<?php echo $text; ?>");
+    alert("<?php echo str_replace('"', '\"', $text); ?>");
   </script><?php
 }
 
@@ -1270,7 +1420,7 @@ function emailcheck($email) {
   }
 
   $postfix=strlen(strrchr($email,"."))-1;
-  if (!($postfix >1 AND $postfix < 4)) {
+  if (!($postfix > 1 AND $postfix < 5)) {
     #echo " postfix ist zu kurz oder zu lang";
     $Meldung.='<br>E-Mail ist zu kurz oder zu lang.';
   }
@@ -1367,11 +1517,12 @@ function getArrayOfChars() {
 	return $characters;
 }
 
-function url_get_contents($url, $username = NULL, $password = NULL) {
+function url_get_contents($url, $username = NULL, $password = NULL, $useragent = NULL) {
 	$hostname = parse_url($url, PHP_URL_HOST);
 	try {
 		$ctx['http']['timeout'] = 20;
 		#$ctx['http']['header'] = 'Referer: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];		// erstmal wieder rausgenommen, da sonst Authorization nicht funktioniert
+		if($useragent)$ctx['http']['header'] = 'User-Agent: '.$useragent;
 		if($username)$ctx['http']['header'].= "Authorization: Basic ".base64_encode($username.':'.$password);
 		$proxy = getenv('HTTP_PROXY');
 		if($proxy != '' AND $hostname != 'localhost'){
@@ -1381,7 +1532,7 @@ function url_get_contents($url, $username = NULL, $password = NULL) {
 			$ctx['ssl']['SNI_enabled'] = true;
 		}
 		$context = stream_context_create($ctx);
-		$response = @ file_get_contents($url, false, $context);
+		$response =  file_get_contents($url, false, $context);
 		if ($response === false) {
 			throw new Exception("Fehler beim Abfragen der URL mit file_get_contents(".$url.")");
 		}
@@ -1492,10 +1643,11 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 		if (!$strip) {
 			#echo "<br>Keep {$key} in formvars.";
 			$pos = strpos($value, '[');
-			if ($pos === false) {
-				$stripped_formvars[$key] = stripslashes($value);
-			} else {
+			if ($pos !== false AND $pos == 0) {
 				$stripped_formvars[$key] = arrStrToArr(stripslashes($value), ',');
+			}
+			else {
+				$stripped_formvars[$key] = stripslashes($value);
 			}
 		}
 		else {
@@ -1512,16 +1664,18 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 * als key übergeben werden durch die values von $params und zusätzlich die Werte der
 * Variablen aus den Parametern 3 bis n wenn welche übergeben wurden
 */
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL) {
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
 		}
 	}
-	if (!is_null($user_id))				 $str = str_replace('$user_id', $user_id, $str);
-	if (!is_null($stelle_id))			 $str = str_replace('$stelle_id', $stelle_id, $str);
-	if (!is_null($hist_timestamp)) $str = str_replace('$hist_timestamp', $hist_timestamp, $str);
-	if (!is_null($language))			 $str = str_replace('$language', $language, $str);
+	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
+	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
+	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
+	if (!is_null($language))						$str = str_replace('$language', $language, $str);
+	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
+	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
 	return $str;
 }
 
@@ -1657,10 +1811,14 @@ function output_select($form_field_name, $data, $selected_value = null, $onchang
 * Wenn der optionale Parameter $last true ist, wird das letzte Vorkommen des Wortes verwendet.
 */
 function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
-	if($last)$word_pos = strripos($str, $word);
-	else $word_pos = stripos($str, $word);
-	if($word_pos !== false){
-		$str_from_word_pos = substr($str, $word_pos+strlen($word));
+	if ($last) {
+		$word_pos = strripos($str, $word);
+	}
+	else {
+		$word_pos = stripos($str, $word);
+	}
+	if ($word_pos !== false) {
+		$str_from_word_pos = substr($str, $word_pos + strlen($word));
 		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
 		return $parts[0];
 	}
@@ -1684,6 +1842,7 @@ function geometrytype_to_datatype($geometrytype) {
 * außer von denen, dessen keys im except array stehen.
 */
 function hidden_formvars_fields($formvars, $except = array()) {
+	$html = '';
 	$params = array();
 	foreach ($formvars AS $key => $value) {
 		if (!in_array($key, $except)) {
@@ -1793,7 +1952,9 @@ function sql_err_msg($title, $sql, $msg, $div_id) {
 		<div style=\"text-align: left;\">" .
 		$title . "<br>" .
 		$msg . "
-		<a href=\"#\" onclick=\"$('#error_details_" . $div_id . "').toggle()\" style=\"float: right;\">Details</a>
+		<div style=\"text-align: center\">
+			<a href=\"#\" onclick=\"debug_t = this; $('#error_details_" . $div_id . "').toggle(); $(this).children().toggleClass('fa-caret-down fa-caret-up')\"><i class=\"fa fa-caret-down\" aria-hidden=\"true\"></i></a>
+		</div>
 		<div id=\"error_details_" . $div_id . "\" style=\"display: none\">
 			Aufgetreten bei SQL-Anweisung:<br>
 			<textarea id=\"sql_statement_" . $div_id . "\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px; max-height: 600px\">
@@ -1829,4 +1990,100 @@ function send_image_not_found($img) {
 	imagedestroy($empty_img);
 }
 
+function value_of($array, $key) {
+	if(!is_array($array))$array = array();
+	return (array_key_exists($key, $array) ? $array[$key] :	'');
+}
+
+function is_true($val) {
+	if (
+		$val === true OR
+		$val === 1 OR
+		$val === 't' OR
+		strtolower($val) == 'true'
+	) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+function count_or_0($val) {
+	if (is_null($val) OR !is_array($val)) {
+		return 0;
+	}
+	else {
+		return count($val);
+	}
+}
+
+/**
+* Replacing part of a string with another string is straight forward, but what if you have to replace last occurrence of a character or string with another string.
+* https://pageconfig.com/post/replace-last-occurrence-of-a-string-php
+* In case the $search is not found inside the $str, the function returns the original untouched string $str.
+* This behavior is compatible with the default behavior of str_replace PHP’s builtin function that replaces all
+* occurrances of a string inside another string.
+* @param string $search keeps the string to be searched for
+* @param string $replace Is the replacement string
+* @param string $str Is the subject string, commonly known as haystack
+*/
+function str_replace_last($search , $replace, $str) {
+  if (($pos = strrpos($str, $search)) !== false) {
+    $search_length  = strlen( $search );
+    $str    = substr_replace( $str , $replace , $pos , $search_length );
+  }
+  return $str;
+}
+
+/*
+* Liefert den Originalnamen vom Namen der Thumb-Datei
+*/
+function get_name_from_thump($thumb) {
+	return before_last($thumb, '_thumb.jpg');
+}
+
+/*
+* Funktion liefert Teilstring von $txt vor dem letzten vorkommen von $delimiter
+* Kann z.B. verwendet werden zum extrahieren der Originaldatei vom Namen eines Thumpnails
+* z.B. before_last('MeineDatei_abc_1.Ordnung-345863_thump.jpg', '_') => MeineDatei_abc_1.Ordnung-345863
+* @param string $txt Der Text von dem der Teilstring extrahiert werden soll.
+* @param string $delimiter Der Text, der den Text trennt in davor und danach.
+* @return string Der Teilstring vor dem letzten Vorkommen von $delimiter
+* oder ein Leerstring wenn $txt $delimiter nicht enthält oder $delimiter leer ist
+*/
+function before_last($txt, $delimiter) {
+	#echo '<br>Return the part of ' . $txt . ' before the last occurence of ' . $delimiter;
+	if (!$delimiter) {
+		return '';
+	}
+	$parts = explode($delimiter, $txt);
+	array_pop($parts);
+	return implode($delimiter , $parts);
+}
+
+function attributes_from_select($sql) {
+	include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
+	$parser = new PHPSQLParser($sql, true);
+	$attributes = array();
+	foreach ($parser->parsed['SELECT'] AS $key => $value) {
+		$name = $alias = '';
+		if (
+			is_array($value['alias']) AND
+			array_key_exists('no_quotes', $value['alias']) AND
+			$value['alias']['no_quotes'] != ''
+		) {
+			$name = $value['alias']['no_quotes'];
+			$alias = $value['alias']['no_quotes'];
+		}
+		else {
+			$name = $alias = $value['base_expr'];
+		}
+		$attributes[$name] = array(
+			'base_expr' => $value['base_expr'],
+			'alias' => $alias
+		);
+	}
+	return $attributes;
+}
 ?>

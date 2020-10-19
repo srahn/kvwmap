@@ -1,9 +1,18 @@
 ﻿<?php
  $strTitle="szukanie własciciela działki"; 
+ $strPerson="Person";
+ $strGebiet="District";
  $strName1="nazwisko, imię, nazwisko rodowe / firma"; 
  $strName2="urodzona/y dnia / dodatek do firmy"; 
- $strName3="ulica, numer domu"; 
- $strName4="kod, miejscowosć"; 
+ $strName3="Part of Name";
+ $strName4="Degree";
+ $strName5="ulica, numer domu"; 
+ $strName6="kod, miejscowosć";
+ $strName7="Street";
+ $strName8="House number";
+ $strName9="Postcode";
+ $strName10="Locality";
+ $strExactSearch="exact Search";
  $strGbbez="okręg księgi wieczystej"; 
  $strGbbl="karta księgi wieczystej"; 
  $strGemkg="okręg (gmina)"; 

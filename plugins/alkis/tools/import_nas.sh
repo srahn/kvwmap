@@ -10,10 +10,10 @@ extract_zip_files() {
 			find ${DATA_PATH} -iname '*.zip' | sort | while read ZIP_FILE ; do			
 				if [ ! "${UNZIP_PASSWORD}" = "" ] ; then
 					log "unzip -P ${UNZIP_PASSWORD} ${ZIP_FILE} -d ${IMPORT_PATH}"
-					unzip -o -P $UNZIP_PASSWORD $ZIP_FILE -d $IMPORT_PATH >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
+					unzip -o -P $UNZIP_PASSWORD $ZIP_FILE -d $IMPORT_PATH/$(basename "${ZIP_FILE}") >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 				else
 				  log "unzip ${ZIP_FILE} -d ${IMPORT_PATH}"
-					unzip -o $ZIP_FILE -d $IMPORT_PATH >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
+					unzip -o $ZIP_FILE -d $IMPORT_PATH/$(basename "${ZIP_FILE}") >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
 				fi
 				find $IMPORT_PATH -iname '*.xml.gz' | sort | while read GZ_FILE ; do
 					GZ_FILE_=${GZ_FILE// /_} # ersetzt Leerzeichen durch _ in Dateiname
@@ -62,7 +62,7 @@ convert_nas_files() {
 			SQL_FILE="${NAS_DIR}/${NAS_BASENAME}.sql"
 			GFS_FILE="${NAS_DIR}/${NAS_BASENAME}.gfs"
 			
-			check_dublicate=`PGPASSWORD=$POSTGRES_PASSWORD psql -q -t -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT count(*) FROM ${POSTGRES_SCHEMA}.import WHERE datei = '${NAS_FILENAME}' AND status='eingelesen';" $POSTGRES_DBNAME 2> ${LOG_PATH}/${ERROR_FILE}`
+			check_dublicate=`PGPASSWORD=$POSTGRES_PASSWORD psql -q -t -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT count(*) FROM ${POSTGRES_SCHEMA}.import WHERE datei = '${NAS_FILENAME}' AND status='eingelesen';" $POSTGRES_DBNAME 2>> ${LOG_PATH}/${ERROR_FILE}`
 			if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 				err "Fehler beim Abfragen der import-Tabelle."
 				head -n 30 ${LOG_PATH}/${ERROR_FILE}
@@ -76,7 +76,7 @@ convert_nas_files() {
 				fi
 			fi
 
-			${OGR_BINPATH}/ogr2ogr -f PGDump -append -a_srs EPSG:${EPSG_CODE} -nlt CONVERT_TO_LINEAR -lco DIM=2 -lco SCHEMA=${POSTGRES_SCHEMA} -lco CREATE_SCHEMA=OFF -lco CREATE_TABLE=OFF --config PG_USE_COPY YES --config NAS_GFS_TEMPLATE "$SCRIPT_PATH/$GFS_TEMPLATE" --config NAS_NO_RELATION_LAYER YES ${SQL_FILE} ${NAS_FILE} >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
+			${OGR_BINPATH}/ogr2ogr -f PGDump -append -a_srs EPSG:${EPSG_CODE} -nlt CONVERT_TO_LINEAR -lco DIM=2 -lco SCHEMA=${POSTGRES_SCHEMA} -lco CREATE_SCHEMA=OFF -lco CREATE_TABLE=OFF --config PG_USE_COPY YES --config NAS_GFS_TEMPLATE "$SCRIPT_PATH/$GFS_TEMPLATE" --config NAS_NO_RELATION_LAYER YES ${SQL_FILE} ${NAS_FILE} >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
 		
 			#/usr/local/gdal/bin/ogr2ogr -f PGDump -append -a_srs EPSG:25833 -nlt CONVERT_TO_LINEAR -lco SCHEMA=alkis -lco CREATE_SCHEMA=OFF -lco CREATE_TABLE=OFF --config PG_USE_COPY YES --config NAS_GFS_TEMPLATE "../config/alkis-schema.gfs" --config NAS_NO_RELATION_LAYER YES /var/www/data/alkis/ff/import/NAS/nba_landmv_lro_160112_1207von2024_288000_5986000.sql /var/www/data/alkis/ff/import/NAS/nba_landmv_lro_160112_1207von2024_288000_5986000.xml
 
@@ -116,7 +116,7 @@ execute_sql_transaction() {
 		if [ -f "${IMPORT_PATH}/import_transaction.sql" ] ; then
 			# execute transaction sql file
 			log "Lese Transaktionsdatei ein"
-			PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${IMPORT_PATH}/import_transaction.sql $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
+			PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${IMPORT_PATH}/import_transaction.sql $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
 			if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 				err "Fehler beim Einlesen der Transaktions-Datei: ${IMPORT_PATH}/import_transaction.sql."
 				head -n 30 ${LOG_PATH}/${ERROR_FILE}
@@ -131,7 +131,7 @@ execute_sql_transaction() {
 				else
 					find ${POSTPROCESSING_PATH} -iname '*.sql' | sort |  while read PP_FILE ; do
 						log "${PP_FILE} wird ausgeführt"
-						PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${PP_FILE} $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
+						PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${PP_FILE} $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
 						if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 							err "Fehler beim Ausführen der Post-Processing-Datei : ${PP_FILE}"
 						else
@@ -140,7 +140,7 @@ execute_sql_transaction() {
 					done
 					find ${POSTPROCESSING_PATH} -iname '*.sh' | sort |  while read PP_FILE ; do
 						log "${PP_FILE} wird ausgeführt"
-						"$PP_FILE" >> ${LOG_PATH}/${LOG_FILE} 2> ${LOG_PATH}/${ERROR_FILE}
+						"$PP_FILE" >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
 						if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 							err "Fehler beim Ausführen der Post-Processing-Datei : ${PP_FILE}"
 						else

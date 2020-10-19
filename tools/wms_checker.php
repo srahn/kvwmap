@@ -132,9 +132,9 @@ if ($without_layer_id != '') {
 }
 
 #echo '<br>get layer with sql: ' . $query;
-$result = mysql_query($query, $userDb->dbConn);
+$result = $userDb->execSQL($query);
 
-while($line = mysql_fetch_array($result)){
+while($line = $userDb->result->fetch_assoc()){
   try{
     $extent = ms_newRectObj();
   }
@@ -168,7 +168,7 @@ while($line = mysql_fetch_array($result)){
     echo 'ok<br>';
 		$query = "UPDATE `layer` SET status = '' WHERE Layer_ID = ".$line["Layer_ID"];
   }
-	$result2 = mysql_query($query, $userDb->dbConn);
+	$result2 = $userDb->execSQL($query);
 	echo '</div>';
 }
 

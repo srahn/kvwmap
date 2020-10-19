@@ -3,8 +3,10 @@ $ahah = '
 <script language="javascript" type="text/javascript">
 	function ahah(url, data, target, action, progress){
 		for(k = 0; k < target.length; ++k){
-			if(target[k] != null && target[k].tagName == "DIV" && target[k].innerHTML == ""){
-				target[k].innerHTML = \'<img src="graphics/ajax-loader.gif">\';
+			if(target[k] != null && target[k].tagName == "DIV"){
+				waiting_img = document.createElement("img");
+				waiting_img.src = "graphics/ajax-loader.gif";
+				target[k].appendChild(waiting_img);
 			}
 		}
 		var req = new XMLHttpRequest();
@@ -31,8 +33,8 @@ $ahah = '
 					message(req.responseText);
 				}
 				var found = false;
-				response = "" + req.responseText;
-				responsevalues = response.split("█");
+				var response = "" + req.responseText;
+				var responsevalues = response.split("█");
 				if (actions == undefined || actions == "") {
 					actions = new Array();
 				}
@@ -61,6 +63,7 @@ $ahah = '
 							case "sethtml":
 								if (targets[i] != undefined && req.getResponseHeader(\'error\') != \'true\') {
 									targets[i].innerHTML = responsevalues[i];
+									$(targets[i]).change();
 									scripts = targets[i].getElementsByTagName("script"); // Alle script-Bloecke evaln damit diese Funktionen bekannt sind
 									for (s = 0; s < scripts.length; s++) {
 										if (scripts[s].hasAttribute("src")) {

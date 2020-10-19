@@ -1,5 +1,5 @@
 <?
-if ($this->new_entry != true AND $this->formvars['printversion'] == '') {
+if ($this->new_entry != true AND value_of($this->formvars, 'printversion') == '') {
 	if (!$this->user->rolle->visually_impaired) { ?>
 		<thead class="gle"><?
 	} ?>
@@ -11,10 +11,10 @@ if ($this->new_entry != true AND $this->formvars['printversion'] == '') {
 							<input
 							id="<? echo $layer['Layer_ID'] . '_' . $k; ?>"
 							type="checkbox"
-							class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
-							name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"
+							class="<? if (value_of($layer['attributes'], 'Editiersperre') AND $layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
+							name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID']; ?>"
 						>&nbsp;<span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span><?
-						if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { ?>
+						if (value_of($layer['shape'][$k], value_of($layer['attributes'], 'Editiersperre')) == 't') { ?>
 							<span class="editier_sperre fa-stack" title="Dieser Datensatz ist zur Bearbeitung gesperrt">
 								<i class="fa fa-pencil fa-stack-1x" style="font-size:15px"></i>
 								<i class="fa fa-ban fa-stack-1x fa-flip-horizontal" style="color: tomato;font-size:29px"></i>
@@ -41,7 +41,7 @@ if ($this->new_entry != true AND $this->formvars['printversion'] == '') {
 							if ($layer['layouts']) { ?>
 								<td><a onclick="checkForUnsavedChanges(event);" title="<? echo $strPrintDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);print_data(<?php echo $layer['Layer_ID']; ?>);"><div class="button drucken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
 							}
-							if ($layer['privileg'] == '2' AND $layer['shape'][$k][$layer['attributes']['Editiersperre']] != 't') { ?>
+							if ($layer['privileg'] == '2' AND value_of($layer['shape'][$k], value_of($layer['attributes'], 'Editiersperre')) != 't') { ?>
 								<td>
 									<a
 										onclick="checkForUnsavedChanges(event);"

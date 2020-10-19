@@ -35,8 +35,14 @@ class pgdatabase {
 	var $defaultlogfile;
 	var $commentsign;
 	var $blocktransaction;
+	var $host;
+	var $port;
+	var $schema;
+	var $pg_text_attribute_types = array('character', 'character varying', 'text', 'timestamp without time zone', 'timestamp with time zone', 'date', 'USER-DEFINED');
+	var $version = POSTGRESVERSION;
+	var $connection_id;
 
-	function pgdatabase() {
+	function __construct() {
 		global $debug;
 		global $GUI;
 		$this->gui = $GUI;
@@ -49,6 +55,7 @@ class pgdatabase {
 		$this->ist_Fortfuehrung=1;
 		$this->type='postgresql';
 		$this->commentsign='--';
+		$this->err_msg = '';
 		# Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
 		# START TRANSACTION, ROLLBACK und COMMIT unterdrückt, so daß alle anderen SQL
 		# Anweisungen nicht in Transactionsblöcken ablaufen.
@@ -60,29 +67,105 @@ class pgdatabase {
 		$this->spatial_ref_code = EPSGCODE_ALKIS . ", " . EARTH_RADIUS;
 	}
 
-  function open() {
-  	if($this->port == '') $this->port = 5432;
-    #$this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
-		$this->connect_string = '' .
-      'dbname='. $this->dbName .
-      ' port=' . $this->port .
-      ' user=' . $this->user .
-      ' password=' . $this->passwd;
-		if($this->host != 'localhost' AND $this->host != '127.0.0.1')
-      $this->connect_string .= ' host=' . $this->host; // das beschleunigt den Connect extrem
-    $this->dbConn = pg_connect($this->connect_string);
-    $this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);
-    # $this->version = pg_version($this->dbConn); geht erst mit PHP 5
-    $this->version = POSTGRESVERSION;
-    return $this->dbConn;
-  }
+	/**
+	* Open the database connection based on the given connection_id
+	* @param integer, $connection_id The id of the connection defined in mysql connections table, if 0 default connection will be used
+	* @return boolean, True if success or set an error message in $this->err_msg and return false when fail to find the credentials or open the connection
+	*/
+  function open($connection_id = 0) {
+		if ($connection_id == 0) {
+			# get credentials from object variables
+			#echo '<br>connection_id ist 0, hole von object credentials';
+			$connection_string = $this->format_pg_connection_string($this->get_object_credentials());
+		}
+		else {
+			#echo '<br>Öffne Datenbank mit connection_id: ' . $connection_id;
+			$this->debug->write("Open Database connection with connection_id: " . $connection_id, 4);
+			$this->connection_id = $connection_id;
+			$connection_string = $this->get_connection_string();
+		}
+		$this->dbConn = pg_connect($connection_string);
+		if (!$this->dbConn) {
+			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
+				. implode(' ' , array_filter(explode(' ', $connection_string), function($part) { return strpos($part, 'password') === false; }));
+			return false;
+		}
+		else {
+			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
+			$this->setClientEncoding();
+			$this->connection_id = $connection_id;
+			return true;
+		}
+	}
+
+	/**
+	* return the credential details as array from connections_table
+	* or default values if no exists for connection_id
+	* @param integer $connection_id The id of connection information in connection mysql table
+	* @return array $credentials array with connection details
+	*/
+	function get_credentials($connection_id) {
+		#echo '<p>get_credentials with connection_id: ' . $connection_id;
+		include_once(CLASSPATH . 'Connection.php');
+		$conn = Connection::find_by_id($this->gui, $connection_id);
+		return array(
+			'host' => 		($conn->get('host')     != '' ? $conn->get('host')     : 'pgsql'),
+			'port' => 		($conn->get('port')     != '' ? $conn->get('port')     : '5432'),
+			'dbname' => 	($conn->get('dbname')   != '' ? $conn->get('dbname')   : 'kvwmapsp'),
+			'user' => 		($conn->get('user')     != '' ? $conn->get('user')     : 'kvwmap'),
+			'password' => ($conn->get('password') != '' ? $conn->get('password') : KVWMAP_INIT_PASSWORD)
+		);
+	}
+
+	/**
+	* returns a postgres connection string used to connect to postgres with pg_connect
+	* @param array $credentials array with connection details
+	* @return string the postgres connection string
+	*/
+	function format_pg_connection_string($credentials) {
+		$connection_string = '' .
+			'host=' . 		$credentials['host'] 		. ' ' .
+			'port=' . 		$credentials['port'] 		. ' ' .
+			'dbname=' . 	$credentials['dbname'] 	. ' ' .
+			'user=' . 		$credentials['user'] 		. ' ' .
+			'password=' .	$credentials['password'];
+		return $connection_string;
+	}
+
+	function get_connection_string() {
+		return $this->format_pg_connection_string($this->get_credentials($this->connection_id));
+	}
+
+	/**
+	* Set credentials to postgres object variables
+	*/
+	function set_object_credentials($credentials) {
+		$this->host = 	$credentials['host'];
+		$this->port = 	$credentials['port'];
+		$this->dbName = $credentials['dbname'];
+		$this->user = 	$credentials['user'];
+		$this->passwd = $credentials['password'];
+	}
+
+	/**
+	* Get credentials from postgres object variables, with Fallback to old constants
+	*/
+	function get_object_credentials() {
+		return array(
+			'host'     => $this->host ?: POSTGRES_HOST,
+			'port'     => $this->port ?: 5432,
+			'dbname'   => $this->dbName ?: POSTGRES_DBNAME,
+			'user'     => $this->user ?: POSTGRES_USER,
+			'password' => $this->passwd ?: POSTGRES_PASSWORD
+		);
+	}
 
   function setClientEncoding() {
     $sql ="SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    return $ret[1];    	
-  }  
+    return $ret[1];
+  }
 
   function close() {
     $this->debug->write("<br>PostgreSQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
@@ -110,6 +193,30 @@ class pgdatabase {
 			}
 		}
 		return $tables;
+	}
+
+	/*
+	* connect to the database to test if exists
+	* @return boolean true if exists else false
+	*/
+	function database_exists() {
+		$this->debug->write("Open Database " . $credentials['dbname'] . " to test if exists", 4);
+
+		$this->dbConn = pg_connect(
+		$this->get_connection_string()
+	);
+		if (!$this->dbConn) {
+			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden: ' . str_replace($credentials['password'], '********', $connection_string);
+			return false;
+		}
+		else {
+			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
+			$this->setClientEncoding();
+			$this->connection_id = $connection_id;
+			return true;
+		}
+
+
 	}
 
 	function table_exists($schema, $table) {
@@ -183,27 +290,32 @@ FROM
 	}
 
 	function read_epsg_codes($order = true){
-    global $supportedSRIDs;
-    $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9, 35)) as srtext, proj4text, minx, miny, maxx, maxy FROM spatial_ref_sys ";
-    $sql.="LEFT JOIN spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid";
-    # Wenn zu unterstützende SRIDs angegeben sind, ist die Abfrage diesbezüglich eingeschränkt
-    $anzSupportedSRIDs = count($supportedSRIDs);
-    if ($anzSupportedSRIDs > 0) {
-      $sql.=" WHERE spatial_ref_sys.srid IN (".implode(',', $supportedSRIDs).")";
-    }
-    if($order)$sql.=" ORDER BY srtext";
-    #echo $sql;		
-    $ret = $this->execSQL($sql, 4, 0);		
-    if($ret[0]==0){
+		global $supportedSRIDs;
+		# Wenn zu unterstützende SRIDs angegeben sind, ist die Abfrage diesbezüglich eingeschränkt
+		$anzSupportedSRIDs = count($supportedSRIDs);
+		$sql = "
+			SELECT
+				spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9, 35)) as srtext,
+				proj4text,
+				minx, miny, maxx, maxy
+			FROM
+				spatial_ref_sys LEFT JOIN
+				spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid" . ($anzSupportedSRIDs > 0 ? "
+			WHERE spatial_ref_sys.srid IN (" . implode(', ', $supportedSRIDs) . ")" : 'true') . ($order ? "
+			ORDER BY srtext" : '') . "
+		";
+		#echo 'SQL zum Abfragen der EPSG-Codes: ' . $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		if ($ret[0] == 0) {
 			$i = 0;
-      while($row = pg_fetch_assoc($ret[1])){
+			while ($row = pg_fetch_assoc($ret[1])){
 				$epsg_codes[$row['srid']] = $row;
 				$i++;
-      }
-    }
-    return $epsg_codes;
-  }
-  
+			}
+		}
+		return $epsg_codes;
+	}
+
   function transformRect($curExtent,$curSRID,$newSRID) {
     $sql ="SELECT round(CAST (st_x(min) AS numeric),5) AS minx, round(CAST (st_y(min) AS numeric),5) AS miny";
     $sql.=", round(CAST (st_x(max) AS numeric),5) AS maxx, round(CAST (st_y(max) AS numeric),5) AS maxy";
@@ -297,15 +409,15 @@ FROM
 				# Prüfe ob eine Fehlermeldung in der Notice steckt
 				$last_notice = pg_last_notice($this->dbConn);
 				if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
-					$ret['msg'] = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
+					$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
 				}
-				$this->notices[] = $last_notice;
 				# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
-				if ($last_notice != '' AND !in_array($last_notice, $this->notices)) {
+				if ($last_notice != '' AND ($this->gui->notices == NULL OR !in_array($last_notice, $this->gui->notices))) {
+					$this->gui->notices[] = $last_notice;
 					if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
 						# Parse als JSON String
 						$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
-						if (array_key_exists('success', $notice_obj)) {
+						if ($notice_obj AND array_key_exists('success', $notice_obj)) {
 							if (!$notice_obj['success']) {
 								$ret['success'] = false;
 							}
@@ -319,7 +431,7 @@ FROM
 					}
 					else {
 						# Gebe Noticetext wie er ist zurück
-						$ret['msg'] = $notice_txt;
+						$ret['msg'] = $last_notice;
 					}
 				}
 
@@ -355,7 +467,7 @@ FROM
 			$ret[0] = 1;
 			$ret[1] = $ret['msg'];
 			if ($suppress_err_msg) {
-				# mache nichts, den die Fehlermeldung wird unterdrückt
+				# mache nichts, denn die Fehlermeldung wird unterdrückt
 			}
 			else {
 				# gebe Fehlermeldung aus.
@@ -457,12 +569,14 @@ FROM
 		for($i = 1; $i < count($table_info); $i++){
 			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
 			$table_oid = get_first_word_after($table_info[$i], ':relid');
-			$table_alias_names[$table_oid] = $table_alias;
+			if($table_oid AND $table_alias != 'unnamed_join'){
+				$table_alias_names[$table_oid] = $table_alias;
+			}
 		}
 		return $table_alias_names;
 	}
 
-	function getFieldsfromSelect($select, $assoc = false) {
+	function getFieldsfromSelect($select, $assoc = false, $pseudo_realnames = false) {
 		$err_msgs = array();
 		$error_reporting = error_reporting();
 		error_reporting(E_NOTICE);
@@ -480,12 +594,15 @@ FROM
 		$sql = 'SET client_min_messages=\'log\';SET debug_print_parse=true;'.$select." LIMIT 0;";		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
 		$ret = $this->execSQL($sql, 4, 0);
 		error_reporting($error_reporting);		
+		ini_set("display_errors", '1');
 		if ($ret['success']) {
 			$query_plan = $error_list[0];
 			$table_alias_names = $this->get_table_alias_names($query_plan);
 			$field_plan_info = explode("\n      :resno", $query_plan);
-			
-			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {				
+			if($pseudo_realnames){
+				$select_attr = attributes_from_select($select);
+			}
+			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
 				# Attributname
 				$fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
 				
@@ -507,13 +624,20 @@ FROM
 					$fields[$i]['table_alias_name'] = $table_alias_names[$table_oid];
 
 					# Schemaname der Tabelle des Attributs
-					$schemaname = $this->pg_field_schema($table_oid);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?	
+					if($schema_names[$table_oid] == NULL){
+						$schema_names[$table_oid] = $this->pg_field_schema($table_oid);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?	
+					}
+					$schemaname = $schema_names[$table_oid];
 					
 					$constraintstring = '';
-					$attr_info = $this->get_attribute_information($schemaname, $tablename, $col_num);
-					if($attr_info[0]['relkind'] == 'v'){		# wenn View, dann Attributinformationen aus View-Definition holen
+					
+					if(!is_array($attribute_infos[$schemaname][$tablename])){
+						$attribute_infos[$schemaname][$tablename] = $this->get_attribute_information($schemaname, $tablename);
+					}
+					$attr_info = $attribute_infos[$schemaname][$tablename][$col_num];
+					if($attr_info['relkind'] == 'v'){		# wenn View, dann Attributinformationen aus View-Definition holen
 						if($view_defintion_attributes[$tablename] == NULL) {
-							$ret2 = $this->getFieldsfromSelect(substr($attr_info[0]['view_definition'], 0, -1), true);
+							$ret2 = $this->getFieldsfromSelect(substr($attr_info['view_definition'], 0, -1), true);
 							if ($ret2['success']) {
 								$view_defintion_attributes[$tablename] = $ret2[1];
 							}
@@ -523,33 +647,35 @@ FROM
 								$view_defintion_attributes[$tablename] = array();
 							}
 						}
-						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info[0]['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
-						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info[0]['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
+						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
+						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
 					}
 					# realer Name der Spalte in der Tabelle
-					$fields[$i]['real_name'] = $attr_info[0]['name'];
-					$fieldtype = $attr_info[0]['type_name'];
-					$fields[$i]['nullable'] = $attr_info[0]['nullable']; 
-					$fields[$i]['length'] = $attr_info[0]['length'];
-					$fields[$i]['decimal_length'] = $attr_info[0]['decimal_length'];
-					$fields[$i]['default'] = $attr_info[0]['default'];
-					if($attr_info[0]['is_array'] == 't')$prefix = '_'; else $prefix = '';
-					if($attr_info[0]['type_type'] == 'c'){		# custom datatype
-						$datatype_id = $this->writeCustomType($attr_info[0]['type'], $attr_info[0]['type_schema']);
+					$fields[$i]['real_name'] = $attr_info['name'];
+					$fieldtype = $attr_info['type_name'];
+					$fields[$i]['nullable'] = $attr_info['nullable']; 
+					$fields[$i]['length'] = $attr_info['length'];
+					$fields[$i]['decimal_length'] = $attr_info['decimal_length'];
+					$fields[$i]['default'] = $attr_info['default'];
+					if($attr_info['is_array'] == 't')$prefix = '_'; else $prefix = '';
+					if($attr_info['type_type'] == 'c'){		# custom datatype
+						$datatype_id = $this->writeCustomType($attr_info['type'], $attr_info['type_schema']);
 						$fieldtype = $prefix.$datatype_id; 
 					}
-					if($attr_info[0]['type_type'] == 'e'){		# enum
+					if($attr_info['type_type'] == 'e'){		# enum
 						$fieldtype = $prefix.'text';
-						$constraintstring = $this->getEnumElements($attr_info[0]['type'], $attr_info[0]['type_schema']);
+						$constraintstring = $this->getEnumElements($attr_info['type'], $attr_info['type_schema']);
 					}
-					if($attr_info[0]['indisunique'] == 't')$constraintstring = 'UNIQUE';
-					if($attr_info[0]['indisprimary'] == 't')$constraintstring = 'PRIMARY KEY';
-					$constraints = $this->pg_table_constraints($tablename);		# todo
+					if($attr_info['indisunique'] == 't')$constraintstring = 'UNIQUE';
+					if($attr_info['indisprimary'] == 't')$constraintstring = 'PRIMARY KEY';
+					if(!is_array($constraints[$table_oid])){
+						$constraints[$table_oid] = $this->pg_table_constraints($table_oid);
+					}
 					if($fieldtype != 'geometry'){
 						# testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
-						for($j = 0; $j < count($constraints); $j++){
-							if(strpos($constraints[$j], '('.$fieldname.')')){
-								$options = explode("'", $constraints[$j]);
+						for($j = 0; $j < count($constraints[$table_oid]); $j++){
+							if(strpos($constraints[$table_oid][$j], $fieldname)){
+								$options = explode("'", $constraints[$table_oid][$j]);
 								for($k = 0; $k < count($options); $k++){
 									if($k%2 == 1){
 										if($k > 1){
@@ -562,9 +688,12 @@ FROM
 						}
 					}
 					$fields[$i]['constraints'] = $constraintstring;
+					$fields[$i]['saveable'] = 1;
 				}
 				else { # Attribut ist keine Tabellenspalte -> nicht speicherbar
-					$fieldtype = 'not_saveable';
+					$fieldtype = pg_field_type($ret[1], $i);			# Typ aus Query ermitteln
+					$fields[$i]['saveable'] = 0;
+					$fields[$i]['real_name'] = addslashes($select_attr[$fields[$i]['name']]['base_expr']);
 				}
 				$fields[$i]['type'] = $fieldtype;
 
@@ -668,28 +797,47 @@ FROM
 	      if($attr_info['decimal_length'] == ''){$attr_info['decimal_length'] = 'NULL';}	      
 	      if($attr_info['default'] != '' AND substr($attr_info['default'], 0, 7) != 'nextval')$attr_info['default'] = 'SELECT '.$attr_info['default'];
 	  		else $attr_info['default'] = '';
-				$attributes[] = $attr_info;
+				$attributes[$attr_info['ordinal_position']] = $attr_info;
 			}
 		}
 		return $attributes;
 	}
      	
-	function writeCustomType($typname, $schema){		
-		$datatype_id = $this->getDatatypeId($typname, $schema, $this->dbName, $this->host, $this->port);
+	function writeCustomType($typname, $schema) {
+		$datatype_id = $this->getDatatypeId($typname, $schema, $this->connection_id);
 		$this->writeDatatypeAttributes($datatype_id, $typname, $schema);
 		return $datatype_id;
 	}
 	
-	function getDatatypeId($typname, $schema, $dbname, $host, $port){
-		$sql = "SELECT id FROM datatypes WHERE ";
-		$sql.= "name = '".$typname."' AND `schema` = '".$schema."' AND dbname = '".$dbname."' AND host = '".$host."' AND port = ".$port;
-		$query=mysql_query($sql);
-		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-		$rs=mysql_fetch_assoc($query);
-		if($rs == NULL){
-			$sql = "INSERT INTO datatypes (name, `schema`, dbname, host, port) VALUES ('".$typname."', '".$schema."', '".$dbname."', '".$host."', ".$port.")";
-			$query=mysql_query($sql);
-			$datatype_id = mysql_insert_id();
+	function getDatatypeId($typname, $schema, $connection_id){
+		$sql = "
+			SELECT
+				id
+			FROM
+				datatypes
+			WHERE
+				`name` = '" . $typname . "' AND
+				`schema` = '" . $schema . "' AND
+				`connection_id` = '" . $connection_id . "'
+		";
+		$ret1 = $this->gui->database->execSQL($sql, 4, 1);
+		if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		$rs = $this->gui->database->result->fetch_assoc();
+		if ($rs == NULL) {
+			$sql = "
+				INSERT INTO datatypes (
+					`name`,
+					`schema`,
+					`connectino_id`
+				)
+				VALUES (
+					'" . $typname . "',
+					'" . $schema . "',
+					'" . $connection_id . "'
+				)
+			";
+			$ret2 = $this->gui->database->execSQL($sql, 4, 1);
+			$datatype_id = $this->gui->database->mysqli->insert_id;
 		}
 		else{	
 			$datatype_id = $rs['id'];
@@ -713,7 +861,7 @@ FROM
 	
 	function writeDatatypeAttributes($datatype_id, $typname, $schema){
 		$attr_info = $this->get_attribute_information($schema, $typname);
-		for($i = 0; $i < count($attr_info); $i++){
+		for($i = 1; $i < count($attr_info)+1; $i++){
 			$fields[$i]['real_name'] = $attr_info[$i]['name'];
 			$fields[$i]['name'] = $attr_info[$i]['name'];
 			$fieldtype = $attr_info[$i]['type_name'];
@@ -756,8 +904,8 @@ FROM
 								decimal_length = ".$fields[$i]['decimal_length'].", 
 								`default` = '".addslashes($fields[$i]['default'])."', 
 								`order` = ".$i;
-			$query=mysql_query($sql);
-			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			$ret1 = $this->gui->database->execSQL($sql, 4, 1);
+			if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		}
 	}
 
@@ -777,7 +925,7 @@ FROM
 			#-- search_path ist zwar gesetzt, aber nur auf custom_shapes, daher ist das Schema der Tabelle erforderlich
 			$sql = "
 				SELECT coalesce(
-					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . $tablename . " limit 1)
+					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . pg_quote($tablename) . " limit 1)
 					,  
 					(select type from geometry_columns WHERE 
 					 f_table_schema IN ('" . $schema . "') and 
@@ -837,7 +985,7 @@ FROM
     $column = get_select_parts($select);
     for($i = 0; $i < count($column); $i++){
       if(strpos(trim($column[$i]), '*') === 0 OR strpos($column[$i], '.*') !== false){
-        $sql .= "SELECT ".$column[$i]." ".$from." LIMIT 0";
+        $sql = "SELECT ".$column[$i]." ".$from." LIMIT 0";
         $ret = $this->execSQL($sql, 4, 0);
         if($ret[0]==0){
         	$tablename = str_replace('*', '', trim($column[$i]));
@@ -852,10 +1000,11 @@ FROM
     return $query;
   }
 	
-  function pg_table_constraints($table){
-  	if($table != ''){
+  function pg_table_constraints($table_oid){
+  	if($table_oid != ''){
+			$constraints = array();
 	    $sql = "SELECT consrc FROM pg_constraint, pg_class WHERE contype = 'check'";
-	    $sql.= " AND pg_class.oid = pg_constraint.conrelid AND pg_class.relname = '".$table."'";
+	    $sql.= " AND pg_class.oid = pg_constraint.conrelid AND pg_class.oid = '".$table_oid."'";
 	    $ret = $this->execSQL($sql, 4, 0);
 	    if($ret[0]==0){
 	      while($row = pg_fetch_assoc($ret[1])){
@@ -1346,7 +1495,7 @@ FROM
 
   function getLage($FlurstKennz) {
     # liefert die Lage des Flurstückes
-    $sql = "SELECT l.unverschluesselt, s.bezeichnung ";
+    $sql = "SELECT distinct l.unverschluesselt, s.bezeichnung, ' ('||s.lage||')' as lage ";
 		$sql.= "FROM alkis.ax_flurstueck as f ";
 		$sql.= "JOIN alkis.ax_lagebezeichnungohnehausnummer l ON l.gml_id = ANY(f.zeigtauf)  ";
 		$sql.= "LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage=s.lage ";
@@ -1362,7 +1511,7 @@ FROM
       $ret[0]=0;
       if (pg_num_rows($queryret[1])>0) {
         while($rs=pg_fetch_assoc($queryret[1])) {
-          $Lage[]= $rs['unverschluesselt'].$rs['bezeichnung'];
+          $Lage[]= $rs['unverschluesselt'].$rs['bezeichnung'].$rs['lage'];
         }
       }
       $ret[1]=$Lage;
@@ -1860,6 +2009,7 @@ FROM
 			$sql.= "WHERE gml_id IN ('".implode("','", $gml_ids)."') ";
 			if($start)$sql.= "AND beginnt::timestamp > '".$start."' ";
 			$sql.= "ORDER BY beginnt";
+			#echo $sql.'<br>';
 			$queryret=$this->execSQL($sql, 4, 0);
 			while($rs=pg_fetch_assoc($queryret[1])) {
 				$versionen[]=$rs;
@@ -1950,7 +2100,8 @@ FROM
 			$Eigentuemer->n_gml_id=$rs['n_gml_id'];
 			$Eigentuemer->bestehtausrechtsverhaeltnissenzu=$rs['bestehtausrechtsverhaeltnissenzu'];
       $Eigentuemerliste[$rs['n_gml_id']]=$Eigentuemer;
-			if($this->listendarstellung OR $rs['namensnr'] != '')$this->writeRechtsverhaeltnisChildren($rs['n_gml_id'], $Eigentuemerliste);
+			#if($this->listendarstellung OR $rs['namensnr'] != '')	Bugfix 2.12.9
+			$this->writeRechtsverhaeltnisChildren($rs['n_gml_id'], $Eigentuemerliste);
     }
     $retListe[0]=0;
     $retListe[1]=$Eigentuemerliste;
@@ -2047,7 +2198,7 @@ FROM
     if ($flur>0) {
       $sql.=" AND f.flurnummer = ".$flur;
     }
-		if($ganze_gemkg_ids[0] != '' OR count($eingeschr_gemkg_ids) > 0){
+		if($ganze_gemkg_ids[0] != '' OR @count($eingeschr_gemkg_ids) > 0){
 			$sql.=" AND (FALSE ";
 			if($ganze_gemkg_ids[0] != ''){
 				$sql.="OR f.land||f.gemarkungsnummer IN ('".implode("','", $ganze_gemkg_ids)."')";

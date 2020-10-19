@@ -6,10 +6,11 @@
 	global $strNewEmbeddedPK;
 	global $hover_preview;
 	function output_table($table) {
-		if (is_array($table)) {
+		$output = '';
+		if (is_array($table['rows'])) {
 			foreach($table['rows'] as $row) {
 				$output .= '<tr id="' . $row['id'] . '" class="' . $row['class'] . '">';
-				if ($row['sidebyside'] AND !$row['contains_attribute_names']) {
+				if (value_of($row, 'sidebyside') AND !$row['contains_attribute_names']) {
 					$width = 'width="'.(100 / $table['max_cell_count']).'%"';
 				}
 				$cell_count = count($row['cells']);
@@ -39,17 +40,15 @@
 				$output .= '</tr>';
 			}
 		}
-		else {
-			$output = '';
-		}
 		return $output;
 	}
 
 	function attribute_name($layer_id, $attributes, $j, $k, $fontsize, $sort_links = true) {
-		$datapart .= '<table ';
+		$datapart = '<table ';
 		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j] != 1 AND $attributes['labeling'][$j] != 1)$datapart .= 'width="200px"';
 		else $datapart .= 'width="100%"';
 		$datapart .= '><tr style="border: none"><td' . (($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0') ? ' class="gle-attribute-mandatory"' : '') . '>';
+		if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
 		if (
 			$sort_links AND
 			!(
@@ -67,9 +66,13 @@
 			$datapart .= '<span title="Eingabe erforderlich">*</span>';
 		}
 		if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
-			if(substr($attributes['tooltip'][$j], 0, 4) == 'http')$title_link = 'href="'.$attributes['tooltip'][$j].'" target="_blank"';
-			else $title_link = 'href="javascript:void(0);"';
-			$datapart .= '<td align="right"><a '.$title_link.' title="'.htmlentities($attributes['tooltip'][$j]).'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
+			if (substr($attributes['tooltip'][$j], 0, 4) == 'http') {
+				$title_link = 'href="'.$attributes['tooltip'][$j].'" target="_blank"';
+			}
+			else {
+				$title_link = 'href="javascript:void(0);"';
+			}
+			$datapart .= '<td align="right"><a ' . $title_link . ' title="' . htmlentities($attributes['tooltip'][$j]) . '"><img src="' . GRAPHICSPATH . 'emblem-important.png" border="0" onclick="message([{\'type\': \'info\', \'msg\': \'' . str_replace(array("\r\n", "\r", "\n"), "<br>", htmlentities($attributes['tooltip'][$j], ENT_QUOTES)) . '\'}])"></a></td>';
 		}
 		if(in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
 			$datapart .= '<td align="right">'.calendar($attributes['type'][$j], $layer_id.'_'.$attributes['name'][$j].'_'.$k, $attributes['privileg'][$j]).'</td>';
@@ -89,6 +92,8 @@
 	}
 
 	function attribute_value(&$gui, $layer, $attributes, $j, $k, $dataset, $size, $select_width, $fontsize, $change_all = false, $onchange = NULL, $field_name = NULL, $field_id = NULL, $field_class = NULL){
+		$datapart = '';
+		$after_attribute = '';
 		global $strShowPK;
 		global $strNewPK;
 		global $strShowFK;
@@ -107,16 +112,17 @@
 		$oid = $dataset[$tablename.'_oid'];															# die oid des Datensatzes
 		$attribute_privileg = $attributes['privileg'][$j];							# das Recht des Attributs
 
-		if($field_name == NULL)$fieldname = $layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j];
+		if($field_name == NULL)$fieldname = $layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].';'.$attributes['saveable'][$j];
 		else $fieldname = $field_name;
 				
 		if(!$change_all){
-			$onchange .= 'set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.');';
+			$onchange .= 'set_changed_flag(currentform.changed_'.$layer_id.'_'.str_replace('-', '', $oid).');';
 		}
 		else{
 			$onchange .= 'change_all('.$layer_id.', '.$k.', \''.$layer_id.'_'.$name.'\');';
 		}
 		
+		$old_field_class = $field_class;
 		if ($attributes['dependents'][$j] != NULL) {
 			$field_class .= ' visibility_changer';
 			$onchange .= 'this.oninput();" oninput="check_visibility('.$layer_id.', this, [\''.implode('\',\'', $attributes['dependents'][$j]).'\'], '.$k.');';
@@ -133,7 +139,7 @@
 			if ($field_id != NULL) $id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
 			else $id = $layer_id.'_'.$name.'_'.$k;	# oberste Ebene
 			$datapart .= '<input type="hidden" class="'.$field_class.'" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
-			$datapart .= '<div id="'.$id.'_elements" style="">';
+			$datapart .= '<div id="'.$id.'_elements" '.($attributes['form_element_type'][$j] == 'Dokument' ? 'style="max-width: 735px; display: flex; flex-wrap: wrap; align-items: flex-start"' : '').'>';
 			$elements = json_decode($value);		# diese Funktion decodiert immer den kommpletten String
 			$attributes2 = $attributes;
 			#$attributes2['name'][$j] = '';		// rausgenommen weil sonst in dynamischen Links nicht richtig ersetzt wird, aber es hatte wahrscheinlich einen Grund
@@ -142,14 +148,14 @@
 			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);			
 			$dataset2[$tablename.'_oid'] = $oid;
 			$onchange2 = 'buildJSONString(\''.$id.'\', true);';
-			for($e = -1; $e < count($elements); $e++){
+			for($e = -1; $e < count_or_0($elements); $e++){
 				if(is_array($elements[$e]) OR is_object($elements[$e]))$elements[$e] = json_encode($elements[$e]);		# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
 				$dataset2[$attributes2['name'][$j]] = $elements[$e];
-				$datapart .= '<div id="div_'.$id.'_'.$e.'" style="display: '.($e==-1 ? 'none' : 'block').'"><table cellpadding="0" cellspacing="0"><tr><td style="height: 22px">';
-				$datapart .= attribute_value($gui, $layer, $attributes2, $j, $k, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id.' '.$field_class);
+				$datapart .= '<div id="div_'.$id.'_'.$e.'" style="margin: 5px; display: '.($e==-1 ? 'none' : 'block').'"><table cellpadding="0" cellspacing="0"><tr><td style="height: 22px">';
+				$datapart .= attribute_value($gui, $layer, $attributes2, $j, $k, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id.' '.$old_field_class);
 				$datapart .= '</td>';
 				if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
-					$datapart .= '<td valign="top"><a href="#" onclick="removeArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a></td>';
+					$datapart .= '<td valign="top"><a href="javascript:void(0)" title="'.$gui->strDelete.'" onclick="removeArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a></td>';
 				}
 				$datapart .= '</tr></table>';
 				$datapart .= '</div>';
@@ -235,6 +241,8 @@
 		}
 
 		###### normal #####
+		if ($field_id != NULL) $id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
+		else $id = $layer_id.'_'.$name.'_'.$k;	# oberste Ebene ($id kann eigentlich für alle Typen verwendet werden)
 		if($attributes['constraints'][$j] != '' AND !in_array($attributes['constraints'][$j], array('PRIMARY KEY', 'UNIQUE'))){
 			if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 				$size1 = 1.3*strlen($dataset[$attributes['name'][$j]]);
@@ -269,20 +277,18 @@
 					$datapart .= ' rows="3" name="'.$fieldname.'">' . htmlspecialchars($value) . '</textarea>';
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
 						if(strtolower(substr($attributes['options'][$j], 0, 6)) == 'select'){
-							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.')"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 						else{
 							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode($attributes['name'], "','").'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 					}
 					if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
-						if($size == 12){		// spaltenweise
+						if($size == 16){		// spaltenweise
 							$datapart .= htmlspecialchars($value);
 						}
 						else{								// zeilenweise
-							$maxwidth = $size * 11;
-							$minwidth = $size * 7.1;
-							$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;"><pre>' . $value . '</pre></div>';
+							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; font-size: '.$fontsize.'px;"><pre>' . $value . '</pre></div>';
 						}
 					}
 				}break;
@@ -321,7 +327,7 @@
 						if ($enum_value[$e] == $value) {
 							$datapart .= 'checked ';
 						}
-						if($attributes['nullable'][$j] != '0')$datapart .= ' onclick="'.($attribute_privileg == '0'? 'return false;' : '').'if(this.checked2 == undefined){this.checked2 = true;}this.checked = this.checked2; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';
+						$datapart .= ' onclick="'.($attribute_privileg == '0'? 'return false;' : '').'if(this.checked2 == undefined){this.checked2 = true;}this.checked = this.checked2; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';
 						$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="margin-right: 15px">'.$enum_output[$e].'</label>';
 						if(!$attributes['horizontal'][$j])$datapart .= '<br>';
 					}
@@ -342,7 +348,7 @@
 
 				case 'SubFormPK' : {
 					$datapart .= '<table width="98%" cellspacing="0" cellpadding="0"><tr><td>';
-					if($size == 12){		// spaltenweise
+					if($size == 16){		// spaltenweise
 						$datapart .= htmlspecialchars($value);
 					}
 					else{								// zeilenweise
@@ -367,7 +373,7 @@
 							}
 							$datapart .= 	' class="buttonlink"><span>'.$strShowPK.'</span></a>&nbsp;';
 						}
-						if($attributes['subform_layer_privileg'][$j] > 0){
+						if($attributes['subform_layer_privileg'][$j] > 0 AND $attribute_privileg > 0){
 							$datapart .= '<a href="" onclick="this.href=\'index.php?go=neuer_Layer_Datensatz&subform=true&selected_layer_id='.$attributes['subform_layer_id'][$j];
 							for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 								$datapart .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
@@ -392,7 +398,7 @@
 						$tablename_ = $attributes['table_name'][$name_];
 						$oid = $dataset[$tablename_.'_oid'];
 						$index = $attributes['indizes'][$attribute_foreign_keys[$f]];
-						$fieldname_[$f] = $layer_id.';'.$attributes['real_name'][$name_].';'.$tablename_.';'.$oid.';'.$attributes['form_element_type'][$index].';'.$attributes['nullable'][$index].';'.$attributes['type'][$index];
+						$fieldname_[$f] = $layer_id.';'.$attributes['real_name'][$name_].';'.$tablename_.';'.$oid.';'.$attributes['form_element_type'][$index].';'.$attributes['nullable'][$index].';'.$attributes['type'][$index].';'.$attributes['saveable'][$index];
 						if($dataset[$name_] == '')$dataset[$name_] = $gui->formvars[$fieldname_[$f]];
 						switch ($attributes['form_element_type'][$attribute_foreign_keys[$f]]){
 							case 'Autovervollständigungsfeld' : {
@@ -430,7 +436,7 @@
 						}
 						$gui->form_field_names .= $fieldname_[$f].'|';
 					}
-					if($size == 12){		// spaltenweise
+					if($size == 16){		// spaltenweise
 						$datapart .= htmlspecialchars($value);
 					}
 					else{								// zeilenweise
@@ -475,9 +481,11 @@
 					$reloadParams .= '&fromobject='.$layer_id.'_'.$name.'_'.$k;
 					$reloadParams .= '&targetlayer_id='.$layer_id;
 					$reloadParams .= '&targetattribute='.$name;
-					$reloadParams .= '&oid='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
-					$reloadParams .= '&tablename='.$attributes['table_name'][$attributes['the_geom']];											# dito
-					$reloadParams .= '&columnname='.$attributes['the_geom'];																								# dito
+					$reloadParams .= '&reload='.$attributes['reload'][$j];
+					$reloadParams .= '&oid_mother='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
+					$reloadParams .= '&tablename_mother='.$attributes['table_name'][$attributes['the_geom']];											# dito
+					$reloadParams .= '&columnname_mother='.$attributes['the_geom'];																								# dito
+					$reloadParams .= '&attribute_privileg='.$attribute_privileg;
 					
 					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'" style="margin-top: 3px"><img src="'.GRAPHICSPATH.'leer.gif" ';
 					if($gui->new_entry != true){
@@ -497,47 +505,99 @@
 					if ($value != '') {
 						$dokumentpfad = $value;
 						$pfadteil = explode('&original_name=', $dokumentpfad);
-						$dateiname = $pfadteil[0];
-						if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
-						$filesize = human_filesize($dateiname);
-						$dateinamensteil = explode('.', $dateiname);
-						$type = strtolower($dateinamensteil[1]);
-						$thumbname = $gui->get_dokument_vorschau($dateinamensteil);
-						if($layer['document_url'] != ''){
-							$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
-							$target = 'target="_blank"';
-							$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+						$dateipfad = $pfadteil[0];
+						if ($layer['document_url'] != '') {
+							$remote_url = false;
+							if($_SERVER['HTTP_HOST'] != parse_url($layer['document_url'], PHP_URL_HOST))$remote_url = true;		# die URL verweist auf einen anderen Server
+							$dateipfad = url2filepath($dateipfad, $layer['document_path'], $layer['document_url']);
 						}
-						else{
-							$original_name = $pfadteil[1];							
-							$gui->allowed_documents[] = addslashes($dateiname);
-							$gui->allowed_documents[] = addslashes($thumbname);
-							$url = IMAGEURL.$gui->document_loader_name.'?dokument=';			# absoluter Dateipfad
+						if ($dateipfad != ''){
+							if(file_exists($dateipfad) OR $remote_url) {
+								$pathinfo = pathinfo($dateipfad);
+								$type = strtolower($pathinfo['extension']);
+								$thumbname = $gui->get_dokument_vorschau(
+									array(
+										$pathinfo['dirname'] . '/' . $pathinfo['filename'],
+										$pathinfo['extension']
+									),
+									$remote_url
+								);
+								if ($layer['document_url'] != '') {
+									$original_name = basename($dateipfad);
+									$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
+									$target = 'target="_blank"';
+									if(dirname($thumbname).'/' == IMAGEPATH){
+										$thumbname = IMAGEURL.basename($thumbname);
+									}
+									else{
+										$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+									}
+								}
+								else {
+									$original_name = $pfadteil[1];
+									$gui->allowed_documents[] = addslashes($dateipfad);
+									$gui->allowed_documents[] = addslashes($thumbname);
+									$url = IMAGEURL.$gui->document_loader_name.'?dokument='; # absoluter Dateipfad
+								}
+								$datapart .= '<table border="0"><tr><td>';
+								if ($hover_preview) {
+									$onmouseover = 'onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
+								}
+								# Bilder mit Vorschaubild
+								if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
+									$datapart .= '<a href="' . $url . $dokumentpfad . '" ' . $target . '><img class="preview_image" src="' . $url . $thumbname . '" ' . $onmouseover . '></a>';
+								}
+								# Videostream
+								elseif ($layer['document_url'] != '' AND in_array($type, array('mp4'))) {
+									$datapart .= '
+										<video width="'.PREVIEW_IMAGE_WIDTH.'" controls>
+											<source src="'.$dokumentpfad.'" type="video/mp4">
+										</video>
+										';
+								}
+								# Rest
+								else {
+									$datapart .= '<a href="' . $url . $dokumentpfad . '" ' . $target . '><img class="preview_doc" src="' . $url . $thumbname . '"></a>';
+								}
+								$datapart .= '<br>';
+								if ($attribute_privileg != '0' AND !$lock[$k]) {
+									//$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\');"><span>Dokument <br>löschen</span></a>';
+									$datapart .= '<a href="javascript:delete_document(\'' . $fieldname . '\', ' . $layer_id . ', \'' . $gui->formvars['fromobject'] . '\', \'' . $gui->formvars['targetobject'] . '\',  \'' . $gui->formvars['reload'] . '\');"><span>Dokument löschen</span></a>';
+								}
+								$datapart .= '</td></tr>';
+								$datapart .= '<tr><td colspan="2"><span id="image_original_name">' . $original_name . ' (' . human_filesize($dateipfad) . ')</span></td></tr>';
+								$datapart .= '</table>';
+							}
+							else {
+								$datapart .= '<div>';
+								$datapart .= 'Oooops!<p>';
+								$datapart .= 'Die Datei ' . $dateipfad . ' wurde nicht auf dem Server gefunden.';
+								if ($layer['document_url'] == '') {
+									$datapart .= '<br>Der originale Name der Datei war ' . $pfadteil[1];
+								}
+								$datapart .= '<br>Laden Sie die Datei neu auf den Server hoch oder fragen Sie Ihren Administrator warum die Datei auf dem Server fehlt und lassen Sie sie wiederherstellen.';
+								$datapart .= '</div>';
+							}
 						}
-						$datapart .= '<table border="0"><tr><td>';
-						if($hover_preview){
-							$onmouseover='onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
-						}
-						if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){
-							$datapart .= '<a href="'.$url.$dokumentpfad.'" '.$target.'><img class="preview_image" src="'.$url.$thumbname.'" '.$onmouseover.'></a>';									
-						}
-						else{
-							$datapart .= '<a href="'.$url.$dokumentpfad.'" '.$target.'><img class="preview_doc" src="'.$url.$thumbname.'"></a>';									
-						}
-						$datapart .= '<br>';
-						if($attribute_privileg != '0' AND !$lock[$k]){
-							//$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\');"><span>Dokument <br>löschen</span></a>';
-							$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\', '.$layer_id.', \''.$gui->formvars['fromobject'].'\', \''.$gui->formvars['targetobject'].'\',  \''.$gui->formvars['reload'].'\');"><span>Dokument löschen</span></a>';
-						}
-						$datapart .= '</td></tr>';
-						$datapart .= '<tr><td colspan="2"><span id="image_original_name">'.$original_name.' ('.$filesize.')</span></td></tr>';
-						$datapart .= '</table>';
-						$datapart .= '<input type="hidden" name="'.$fieldname.'_alt" class="'.$field_class.'" value="' . htmlspecialchars($value) . '">';
+						$datapart .= '<input type="hidden" name="'.$fieldname.'_alt" class="' . $field_class . '" value="' . htmlspecialchars($value) . '">';
 					}
-					if($attribute_privileg != '0' AND !$lock[$k]){
-						$datapart .= '<input tabindex="1" onchange="'.$onchange.'" style="font-size: '.$fontsize.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$layer_id.'_'.$name.'_'.$k.'" title="'.$alias.'" class="'.$field_class.'" name="'.$fieldname.'">';
+					if ($attribute_privileg != '0') {
+						$datapart .= '
+							<label id="label_'.$id.'" for="'.$id.'" class="buttonlink">
+								Durchsuchen...
+							</label>
+							<input
+								tabindex="1"
+								onchange="'.$onchange.'; if(this.files){document.getElementById(\'label_'.$id.'\').innerHTML = this.files[0][\'name\']};"
+								style="display: none;"
+								size="43"
+								type="file"
+								id="'.$id.'"
+								class="' . $field_class . '" name="' . $fieldname . '"
+							>
+							';
 					}
-					else{
+					else {
 						$datapart .= '&nbsp;';
 					}
 				} break;
@@ -557,7 +617,7 @@
 					if($attribute_privileg != '0' OR $lock[$k]){
 						$datapart .= '<input class="'.$field_class.'" tabindex="1" onchange="'.$onchange.'" id="'.$layer_id.'_'.$name.'_'.$k.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					}else{
-						$datapart .= '<input class="'.$field_class.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+						$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					}
 				} break;
 
@@ -565,10 +625,10 @@
 					$show_link = false;
 					$one_param_is_null = false;
 					$options = $attributes['options'][$j];
-					for($a = 0; $a < count($attributes['name']); $a++){
+					for ($a = 0; $a < count($attributes['name']); $a++) {
 						if(strpos($options, '$'.$attributes['name'][$a]) !== false){
 							$options = str_replace('$'.$attributes['name'][$a], $dataset[$attributes['name'][$a]], $options);
-							if($dataset[$attributes['name'][$a]] == ''){								
+							if ($dataset[$attributes['name'][$a]] == '') {
 								$one_param_is_null = true;
 							}
 							else {
@@ -592,16 +652,18 @@
 					}
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					if ($show_link) {
-						if($explosion[2] == 'embedded'){
-							$datapart .= '<a class="dynamicLink" href="javascript:if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
+						if ($explosion[2] == 'embedded'){
+							$datapart .= '<a class="dynamicLink" href="javascript:void(0);" onclick="if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
 							$datapart .= '<div style="display:inline" id="dynamicLink'.$layer_id.'_'.$k.'_'.$j.'"></div>';
 						}
-						else{
+						else {
 							$datapart .= '<a tabindex="1"';
-							if($explosion[2] != 'no_new_window'){$datapart .= 'target="_blank"';}
-							$datapart .= ' class="dynamicLink" style="font-size: '.$fontsize.'px" '.(($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') ? 'onclick="checkForUnsavedChanges(event);"' : '').' href="'.$href.'">';
+							if ($explosion[2] != 'no_new_window') {
+								$datapart .= 'target="_blank"';
+							}
+							$datapart .= ' class="dynamicLink" style="font-size: ' . $fontsize . 'px" ' . (($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') ? 'onclick="checkForUnsavedChanges(event);"' : '').' href="' . $href . '">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
 						}
@@ -677,8 +739,30 @@
 					}
 					$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
 				}break;
-				
-				default : {
+
+				case 'ExifLatLng': {
+					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" id="custom_latlng" ';
+					if ($attribute_privileg == '0' OR $lock[$k]) {
+						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: ' . $fontsize . 'px;"';
+					}
+					else {
+						$datapart .= ' style="font-size: ' . $fontsize . 'px;"';
+					}
+					$datapart .= ' size="' . $size . '" type="text" name="' . $fieldname . '" value="'.htmlspecialchars($value) . '">';
+				}break;
+
+				case 'ExifRichtung': {
+					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" id="custom_richtung" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
+					if ($attribute_privileg == '0' OR $lock[$k]) {
+						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
+					}
+					else{
+						$datapart .= ' style="font-size: '.$fontsize.'px;"';
+					}
+					$datapart .= ' size="' . $size . '" type="text" name="' . $fieldname . '" value="' . htmlspecialchars($value) . '">';
+				}break;
+
+				case 'ExifErstellungszeit': {
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' readonly style="display:none;"';
@@ -696,16 +780,33 @@
 					$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
 					if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
 						$angezeigter_value = (($attributes['type'][$j] == 'bool' OR $attributes['form_element_type'][$j] == 'Editiersperre') ? ($value == 't' ? $gui->strYes : $gui->strNo) : $value);
-						if($size == 12){		// spaltenweise
-							$datapart .= htmlspecialchars($angezeigter_value);
-						}
-						else{								// zeilenweise
-							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; font-size: '.$fontsize.'px;">' . htmlspecialchars($angezeigter_value) . '</div>';
-						}
+						$datapart .= '<div class="readonly_text" style="font-size: '.$fontsize.'px;">' . htmlspecialchars($angezeigter_value) . '</div>';
 					}
-					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
-						if(strtolower(substr($attributes['options'][$j], 0, 6)) == 'select'){
-							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+				} break;
+
+				default : {
+					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
+					if($attribute_privileg == '0'){
+						$datapart .= ' readonly style="display:none;"';
+					}
+					else{
+						$datapart .= ' tabindex="1" style="width: 100%; font-size: '.$fontsize.'px;"';
+					}
+					if($name == 'lock'){
+						$datapart .= ' type="hidden"';
+					}
+					if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
+						$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
+					}
+					if($size)$datapart .= ' size="'.$size.'"';
+					$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
+					if($attribute_privileg == '0'){ // nur lesbares Attribut
+						$angezeigter_value = (($attributes['type'][$j] == 'bool' OR $attributes['form_element_type'][$j] == 'Editiersperre') ? ($value == 't' ? $gui->strYes : $gui->strNo) : $value);
+						$datapart .= '<div class="readonly_text" style="font-size: '.$fontsize.'px;">' . htmlspecialchars($angezeigter_value) . '</div>';
+					}
+					if($attribute_privileg > '0' AND $attributes['options'][$j] != '' AND strpos($attributes['options'][$j], 'require') === false){		# bei <requires> oder <required by> nicht
+						if(strtolower(substr($attributes['options'][$j], 0, 6)) == 'select') {
+							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.'"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 						else{
 							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode($attributes['name'], "','").'\'), \''.$layer_id.'_'.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
@@ -923,6 +1024,9 @@
 	}
 
 	function Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $req_by, $req, $attributenames, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class, $datatype_id = ''){
+		if (!is_array($req)) {
+			$req = array();
+		}
 		if($privileg == '0' OR $lock){
 			for($e = 0; $e < count($enum_value); $e++){
 				if($enum_value[$e] == $value){
@@ -931,8 +1035,8 @@
 					break;
 				}
 			}
-			$datapart .= '<input readonly id="'.$layer_id.'_'.$name.'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$fieldname.'" value="'.$auswahlfeld_output.'">';
-			$datapart .= '<input type="hidden" class="'.$field_class.'" onchange="'.$onchange.'" value="' . htmlspecialchars($value) . '">';		// falls das Attribut ein visibility-changer ist
+			$datapart .= '<input readonly id="'.$layer_id.'_'.$name.'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" value="'.$auswahlfeld_output.'">';
+			$datapart .= '<input type="hidden" name="'.$fieldname.'" class="'.$field_class.'" onchange="'.$onchange.'" value="' . htmlspecialchars($value) . '">';		// falls das Attribut ein visibility-changer ist
 			$auswahlfeld_output = '';
 			$auswahlfeld_output_laenge = '';
 		}
@@ -948,7 +1052,7 @@
 			if($datatype_id != '')$datapart .= ' data-datatype_id="'.$datatype_id.'" ';
 			$datapart .= 'id="'.$layer_id.'_'.$name.'_'.$k.'" name="'.$fieldname.'">';
 			if($strPleaseSelect)$datapart .= '<option value="">'.$strPleaseSelect.'</option>';
-			for($e = 0; $e < count($enum_value); $e++){
+			for($e = 0; $e < @count($enum_value); $e++){
 				$datapart .= '<option ';
 				if($enum_value[$e] == $value){
 					$datapart .= 'selected ';

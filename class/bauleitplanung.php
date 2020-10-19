@@ -37,7 +37,7 @@ class bauleitplanung {
   # pruefeEingabedaten
   ##################################################################################################################################################
 
-  function bauleitplanung($database) {
+  function __construct($database) {
     global $debug;
     $this->debug=$debug;
     $this->database=$database;

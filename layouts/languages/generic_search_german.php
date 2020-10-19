@@ -1,17 +1,21 @@
 <?
-$strLayerSearch="Layer-Suche";
-$strGroups="Gruppen";
-$strLayers="Themen";
-$strSearches="Suchabfragen...";
-$strSpatialFiltering="Suche räumlich eingrenzen...";
+$strTitle="Layer-Suche";
+$strGroups="Gruppe";
+$strLayers="Thema";
+$strAbfrageSpeichern="Suchabfrage speichern";
+$strAbfrageNamePlaceholder="Abfragename";
+$strSearches="Suchabfrage laden";
+$strSpatialFiltering="Suche räumlich eingrenzen";
 $strAndOr="und/oder...";
 $strAnd="und";
 $strOr="oder";
-$strLikeSearchHint="Zur nicht exakten Suche verwenden Sie den <br>Operator \"ähnlich\" und den Platzhalter %.";
-$strDateHint="Für Datumsangaben verwenden Sie bitte das <br>Format \"TT.MM.JJJJ\".";
+$strLikeSearchHint="Verwenden Sie für eine nicht exakte Suche den Operator 'ähnlich' bzw. 'nicht ähnlich'. Im 'Wert'-Feld können Sie dann bei der Eingabe Ihres Suchbegriffs zusätzlich Platzhalter setzen:
+Geben Sie den Platzhalter '%' an (z.B. 'me%er'), wenn an der Stelle beliebige und beliebig viele Zeichen stehen dürfen. Geben Sie den Platzhalter '_' an (z.B. 'me_er'), wenn an der Stelle ein beliebiges Zeichen stehen darf.";
+$strDateHint="Achten Sie auf das Kalendersymbol: Verwenden Sie für Datumsangaben das Format 'TT.MM.JJJJ'.";
 $strLimit="Anzahl Treffer anzeigen:";
 $strAttribute="Attribut";
 $strOperator="Operator";
+$strOperatorHint="Um Hinweise zu den verschiedenen Such-Operatoren zu erhalten, halten Sie die Maus über den jeweiligen Operator.";
 $strValue="Wert";
 $strLike="ähnlich";
 $strNotLike="nicht ähnlich";
@@ -23,12 +27,15 @@ $strEqualHint="Der Suchbegriff muss exakt so in der Datenbank stehen";
 $strNotEqualHint="Der Suchbegriff kommt so NICHT in der Datenbank vor";
 $strLowerHint="'kleiner als': nur bei Zahlen verwenden!";
 $strGreaterHint="'größer als': nur bei Zahlen verwenden!";
+$strLowerEqualHint="'kleiner gleich': nur bei Zahlen verwenden!";
+$strGreaterEqualHint="'größer gleich': nur bei Zahlen verwenden!";
 $strLikeHint="Fügen Sie das %-Zeichen vor und/oder nach dem Suchbegriff für beliebige Zeichen ein";
 $strIsEmptyHint="Sucht nach Datensätzen ohne Eintrag in diesem Attribut";
 $strIsNotEmptyHint="Sucht nach Datensätzen mit beliebigem Eintrag in diesem Attribut";
 $strInHint="Sucht nach mehreren exakten Suchbegriffen, zur Trennung '|' verwenden:  [Alt Gr] + [<]";
 $strBetweenHint="Sucht zwischen zwei Zahlwerten";
-$strAndOrHint="Bitte beachten Sie, dass Sie mit \"und\" bzw. \"oder\" die Suchkriterien verknüpfen und nicht die Ergebnismengen. Bedingungen, die mit \"und\" verknüpft sind, müssen <b>alle</b> zutreffen. Bei Bedingungen, die mit \"oder\" verknüpft sind, reicht es, wenn eine Bedingung erfüllt ist.";
+$strAndOrHint1="Fragen Sie ein Suchkriterium (oder auch mehrere gleichzeitig) mehrfach ab.\nMit 'oder' bzw. 'und' verknüpfen Sie die Kriterien Ihrer Suche.";
+$strAndOrHint2="Mit 'oder' bzw. 'und' verknüpfen Sie die Kriterien Ihrer Suche, nicht Ergebnismengen!\n\nBei Bedingungen, die mit 'oder' verknüpft werden, reicht es, wenn eine der beiden Bedingungen erfüllt ist ('Entweder Bedingung X aus der ersten Suche oder Bedingung X aus der zweiten Suche').\n\nBedingungen, die mit 'und' verknüpft werden, müssen alle zutreffen ('Sowohl Bedingung X aus der ersten Suche als auch Bedingung X aus der zweiten Suche').";
 $strWithin="nur innenliegend";
 $strSingleGeoms="Einzelgeometrien abfragen";
 ?>

@@ -2,11 +2,11 @@
 include_once(CLASSPATH . 'MyObject.php');
 include_once(CLASSPATH . 'MyAttribute.php');
 class Menue extends MyObject {
-
+	var $obermenue;
 	static $write_debug = false;
 
-	function Menue($gui) {
-		$this->MyObject($gui, 'u_menues');
+	function __construct($gui) {
+		parent::__construct($gui, 'u_menues');
 		$this->identifier = 'id';
 		$this->validations = array(
 			array(
@@ -198,13 +198,13 @@ class Menue extends MyObject {
 				$this->gui->user->rolle->language
 			)
 		);
-		if ($link['query'] == '') {
+		if (value_of($link, 'query') == '') {
 			$is_selected = false;
 		}
 		else {
 			parse_str($link['query'], $link_params);
 			foreach($link_params AS $key => $value) {
-				if ($formvars[$key] != $value) {
+				if (value_of($formvars, $key) != $value) {
 					$is_selected = false;
 				}
 			}
@@ -245,18 +245,29 @@ class Menue extends MyObject {
 		return $target;
 	}
 
+	function get_onclick(){
+		return replace_params(
+			$this->get('onclick'),
+			rolle::$layer_params,
+			$this->gui->user->id,
+			$this->gui->Stelle->id,
+			rolle::$hist_timestamp,
+			$this->gui->user->rolle->language
+		);
+	}
 
 	function get_href($class, $target) {
+		$href = '';
 		$link = replace_params(
 			$this->get('links'),
 			rolle::$layer_params,
 			$this->gui->user->id,
-			$this->gui->stelle_id,
+			$this->gui->Stelle->id,
 			rolle::$hist_timestamp,
 			$this->gui->user->rolle->language
 		);
 		# define click events
-		if($this->obermenue){
+		if ($this->obermenue){
 			$href .= "javascript:changemenue(".$this->get('id').", ".$this->gui->user->rolle->menu_auto_close.");";
 		}
 		else {
@@ -284,10 +295,11 @@ class Menue extends MyObject {
 	}
 
 	function html() {
+		$html = '';
 		$class  = $this->get_class();
 		$target = $this->get_target();
 		$href = $this->get_href($class, $target);
-		$onclick = $this->get('onclick');
+		$onclick = $this->get_onclick();
 		if(!$this->obermenue)$onclick = 'checkForUnsavedChanges(event);'.$onclick;
 		$style = $this->get_style();
 

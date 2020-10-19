@@ -3,7 +3,7 @@ class Label2Class extends MyObject {
 
 	static $write_debug = false;
 
-	function Label2Class($gui) {
+	function __construct($gui) {
 		$this->MyObject($gui, 'u_labels2classes');
 	}
 

@@ -10,7 +10,8 @@
   $strPostgisHost="PostGIS Host";
   $strPostGISDataBankName="PostGIS Datenbankname";
   $strPostGISUserName="PostGIS user name";
-  $strPostGISPassword="PostGIS password";
+	$strPostGISPassword="PostGIS password";
+	$strPostgisConnection='PostgreSQL Connection';
   $strOwsTitle="OWS title";
   $strOwsAbstract="OWS abstract";
   $strWmsAccessConstraints="WMS access constraints";

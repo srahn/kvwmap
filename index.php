@@ -4,10 +4,11 @@ header('Content-Type: text/html; charset=utf-8');
 include('credentials.php');
 include('config.php');
 
-if (!USE_EXISTING_SESSION) {
-	session_set_cookie_params(0, $_SERVER['CONTEXT_PREFIX']);
-}
-
+# Session
+$maxlifetime = 0;
+$path = (!USE_EXISTING_SESSION AND array_key_exists('CONTEXT_PREFIX', $_SERVER)) ? $_SERVER['CONTEXT_PREFIX'] : '/';
+$samesite = 'strict';
+session_set_cookie_params($maxlifetime, $path.'; samesite='.$samesite);
 session_start();
 
 # Laden der Plugins config.phps
@@ -69,35 +70,20 @@ $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '
 // $starttime = $executiontimes['time'][] = microtime_float1();
 // $executiontimes['action'][] = 'Start';
 
+error_reporting(E_ALL & ~(E_STRICT|E_NOTICE));
+
 ob_start ();    // Ausgabepufferung starten
 
-function replace_tags($text, $tags) {
-	$first_right = strpos($text, '>');
-	if ($first_right !== false) {
-		$text = preg_replace("#<\s*\/?(" . $tags . ")\s*[^>]*?>#im", '', $text);
-/*		$first_left = strpos($text, '<');
-		if ($first_left !== false and $first_right < $first_left) {
-			# >...<
-			$last_right = strrpos($text, '>');
-			if ($last_right !== false and $last_right > $first_left) {
-				# >...<...>
-				# entferne $first_right, $last_right und alles dazwischen
-				$text = substr_replace($text, '', $first_right, $last_right - $first_right + 1);
-			}
-		}*/
-	}
-	return $text;
-}
-foreach($_REQUEST as $key => $value) {
-	if (is_string($value)) $_REQUEST[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
-}
-reset($_REQUEST);
 $formvars = $_REQUEST;
 
-$go = $formvars['go'];
-if($formvars['go_plus'] != '') $go = $go.'_'.$formvars['go_plus'];
+$go = (array_key_exists('go', $formvars) ? $formvars['go'] : '');
+
+if (array_key_exists('go_plus', $formvars) and $formvars['go_plus'] != '') {
+	$go = $go.'_'.$formvars['go_plus'];
+}
+
 ###########################################################################################################
-define(CASE_COMPRESS, false);																																						  #
+define('CASE_COMPRESS', false);																																						
 #																																																					#
 #		ALLE:						  - die Stelle muss die IP checken  																								  #
 #											- die Stelle muss das Passwortalter checken																					#
@@ -107,11 +93,27 @@ define(CASE_COMPRESS, false);																																						  #
 #										  - ein räumlich gefilterter Layer muss an sein																				#
 #										  - man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
 #											- man muss in einer Fachschale zoomen (wegen reduce_mapwidth)												#
+#											- man muss einen Layer in der Legende ein oder ausschalten													#
+#											- InchesPerUnit() reinkopieren																											#
+#											- layer_error_handling() reinkopieren																								#
+#											- zoomToMaxLayerExtent() reinkopieren																								#
+#											- getlayerdatabase() reinkopieren																										#
+#											- read_layer_attributes() reinkopieren																							#
+#											- check_oid() reinkopieren																													#
+#											- getFilter() reinkopieren																													#
+#											- setFullExtent() reinkopieren																											#
+#											- setPrevMapExtent()																																#
+#											- setNextMapExtent()																																#
+#											- getConsume()																																			#
+#											-	updateNextConsumeTime()																														#
 # 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
 #										  - getRollenLayer() reinkopieren																										  #
-#   getLayerOptions:  - getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
+#   getLayerOptions:  - ein Rollenlayer muss verwendet werden																							#
+#											- getRollenLayer(), writeCustomType(), getDatatypeId(), getEnumElements()						#
 #												und writeDatatypeAttributes() reinkopieren																				#
+#											- get_layer_params_form, get_layer_params_layer und get_layer_params reinkopieren		#
 #		get_group_legend:	- compare_legendorder() reinkopieren																								#
+#											- ein Layer muss in der Gruppe an sein																							#
 #		get_select_list:  - read_datatype_attributes() reinkopieren																						#
 #																																																				  #
 #																																																				  #
@@ -120,10 +122,13 @@ define(CASE_COMPRESS, false);																																						  #
 $non_spatial_cases = array('getLayerOptions', 'get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
 $spatial_cases = array('navMap_ajax', 'tooltip_query', 'get_group_legend');
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
+$fast_loading_case = array();
 
-if(in_array($go, $fast_loading_cases))define(FAST_CASE, true);else define(FAST_CASE, false);
+define('FAST_CASE', in_array($go, $fast_loading_cases));
 
-if(CASE_COMPRESS)	include(CLASSPATH.'case_compressor.php');
+if (CASE_COMPRESS) {
+	include(CLASSPATH . 'case_compressor.php');
+}
 
 function include_($filename){
 	if(CASE_COMPRESS AND FAST_CASE){		// ein fast-case und er soll komprimiert werden
@@ -136,15 +141,16 @@ function include_($filename){
 }
 
 # laden der Klassenbibliotheken
-if(!CASE_COMPRESS AND FAST_CASE){
+if (!CASE_COMPRESS AND FAST_CASE) {
 	include (CLASSPATH.'fast_cases/'.$go.'.php');
 }
-else{
-	include_(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');
-	if($userDb == NULL)include_(CLASSPATH.'mysql.php');
+else {
+	include_(WWWROOT . APPLVERSION . 'funktionen/allg_funktionen.php');
+	if (!isset($userDb)) {
+		include_(CLASSPATH . 'mysql.php');
+	}
 	include_(CLASSPATH . 'kvwmap.php');
 	include_(CLASSPATH . 'Menue.php');
-	include_(CLASSPATH . 'kataster.php');
 	include_(CLASSPATH . 'postgresql.php');
 	include_(CLASSPATH . 'users.php');
 	include_(CLASSPATH . 'Nutzer.php');
@@ -152,25 +158,20 @@ else{
 	include_(CLASSPATH . 'stelle.php');
 	include_(CLASSPATH . 'bauleitplanung.php');
 }
-
 include(WWWROOT . APPLVERSION . 'start.php');
-
 $GUI->go = $go;
-$GUI->requeststring = $QUERY_STRING;
 
 # Laden der Plugins index.phps
-if(!FAST_CASE){
-	for($i = 0; $i < count($kvwmap_plugins); $i++) {
-		include(PLUGINS.$kvwmap_plugins[$i].'/control/index.php');
+if (!FAST_CASE) {
+	for ($i = 0; $i < count($kvwmap_plugins); $i++) {
+		include(PLUGINS . $kvwmap_plugins[$i] . '/control/index.php');
 	}
 }
 
 # Übergeben des Anwendungsfalles
 $debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
-
 function go_switch($go, $exit = false) {
 	global $GUI;
-	global $Stelle_ID;
 	global $newPassword;
 	global $passwort;
 	global $username;
@@ -188,13 +189,17 @@ function go_switch($go, $exit = false) {
 			$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
 			$GUI->formvars['go'] = $go = $GUI->last_query['go'];
 		}
-
 		switch($go) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction'], $GUI->formvars['height_reduction']);
-				$GUI->loadMap('DataBase');
-				$GUI->navMap($GUI->formvars['CMD']);
+				if($GUI->formvars['legendtouched']){
+					$GUI->neuLaden();
+				}
+				else{
+					$GUI->loadMap('DataBase');
+					$GUI->navMap($GUI->formvars['CMD']);
+				}
 				$GUI->saveMap('');
 				$currenttime=date('Y-m-d H:i:s',time());
 				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
@@ -320,6 +325,11 @@ function go_switch($go, $exit = false) {
 			# Legende erzeugen
 			case 'get_legend' : {
 				$GUI->loadMap('DataBase');
+				# Parameter $scale in Data ersetzen
+				for($i = 0; $i < @count($GUI->layers_replace_scale); $i++){
+					$GUI->layers_replace_scale[$i]->set('data', str_replace('$scale', $GUI->map_scaledenom, $GUI->layers_replace_scale[$i]->data));
+				}
+				$GUI->map->draw();			# sonst werden manche Klassenbilder nicht generiert
 				echo $GUI->create_dynamic_legend();
 			} break;
 
@@ -336,7 +346,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'reset_layers' : {
-				$GUI->reset_layers($GUI->formvars['layer_id']);
+				$GUI->reset_layers(value_of($GUI->formvars, 'layer_id'));
 				$GUI->loadMap('DataBase');
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
 				$GUI->drawMap();
@@ -513,18 +523,6 @@ function go_switch($go, $exit = false) {
 				$GUI->getlayerfromgroup();
 			} break;
 
-			# Eigentuemerfortführung
-			case 'Adressaenderungen_Export' : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->export_Adressaenderungen();
-			} break;
-
-			# Eigentuemerfortführung
-			case 'Adressaenderungen_Export_Exportieren' : {
-				$GUI->checkCaseAllowed('Adressaenderungen_Export');
-				$GUI->export_Adressaenderungen_exportieren();
-			} break;
-
 			case 'exportWMC' :{
 				$GUI->exportWMC();
 			} break;
@@ -539,26 +537,6 @@ function go_switch($go, $exit = false) {
 				$GUI->createMapPDF($GUI->formvars['aktiverRahmen'], false);
 				$GUI->mime_type='pdf';
 				$GUI->output();
-			} break;
-
-			case 'Flurstuecks-CSV-Export' : {
-				$GUI->export_flurst_csv();
-			} break;
-
-			case 'Flurstuecks-CSV-Export_Auswahl_speichern' : {
-				$GUI->export_flurst_csv_auswahl_speichern();
-			} break;
-
-			case 'Flurstuecks-CSV-Export_Auswahl_laden' : {
-				$GUI->export_flurst_csv_auswahl_laden();
-			} break;
-
-			case 'Flurstuecks-CSV-Export_Auswahl_loeschen' : {
-				$GUI->export_flurst_csv_auswahl_loeschen();
-			} break;
-
-			case 'Flurstuecks-CSV-Export_Exportieren' : {
-				$GUI->export_flurst_csv_exportieren();
 			} break;
 
 			# PointEditor
@@ -577,7 +555,7 @@ function go_switch($go, $exit = false) {
 
 			# zoomToPoint
 			case 'zoomtoPoint' : {
-				if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
+				if(value_of($GUI->formvars, 'mime_type') != '')$GUI->mime_type = $GUI->formvars['mime_type'];
 				$GUI->zoom_toPoint();
 			}break;
 
@@ -624,11 +602,6 @@ function go_switch($go, $exit = false) {
 				if($GUI->formvars['legendtouched'])$GUI->saveLegendRoleParameters();
 				$GUI->queryMap();
 			}break;
-
-			# gibt die Koordinaten des in der Variable FlurstKennz übergebenen Flurstückes aus
-			case 'showFlurstuckKoordinaten' : {
-				$GUI->showFlurstueckKoordinaten();
-			} break;
 
 			# Export der geloggten Zugriffe in eine Georg-Datei
 			case 'georg_export' : {
@@ -708,6 +681,10 @@ function go_switch($go, $exit = false) {
 				$GUI->createOWSException();
 			}break;
 
+			case 'Atom' : {
+				$GUI->createAtomResponse();
+			} break;
+
 			# 2006-03-24 CG
 			case 'StatistikAuswahl' : {
 				$GUI->checkCaseAllowed($go);
@@ -767,32 +744,6 @@ function go_switch($go, $exit = false) {
 			case 'Layerauswahl_loeschen' : {
 				$GUI->DeleteStoredLayers();
 			}break;
-
-			#2006-01-03 pk
-			case 'Grundbuchblatt_Auswaehlen' : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->grundbuchblattWahl();
-			} break;
-
-			#2006-01-03 pk
-			case 'Grundbuchblatt_Auswaehlen_Suchen' : {
-				$GUI->checkCaseAllowed('Grundbuchblatt_Auswaehlen');
-				if($GUI->last_query != ''){
-					$GUI->formvars['selBlatt'] = $GUI->last_query[0]['sql'];
-				}
-				$GUI->grundbuchblattSuchen();
-			} break;
-
-			# 2006-01-26 pk
-			case 'Flurstueck_Anzeigen' : {
-				$GUI->checkCaseAllowed($go);
-				if($GUI->last_query != ''){
-					$GUI->formvars['FlurstKennz'] = $GUI->last_query[$GUI->last_query['layer_ids'][0]]['sql'];
-				}
-				$explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
-				$GUI->flurstAnzeige($explodedFlurstKennz);
-				$GUI->output();
-			} break;
 
 			case 'changeLegendDisplay' : {
 				$GUI->changeLegendDisplay();
@@ -966,45 +917,6 @@ function go_switch($go, $exit = false) {
 				$GUI->metadatensatzspeichern();
 			} break;
 
-			case 'Nutzung_auswaehlen' : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->nutzungWahl();
-			} break;
-
-			case 'Nutzung_auswaehlen_Suchen' : {
-				$GUI->nutzungsuchen();
-			} break;
-
-			case 'Namen_Auswaehlen' : {
-				$GUI->namenWahl();
-			} break;
-
-			case 'Namen_Auswaehlen_Suchen' : {
-				$GUI->checkCaseAllowed('Namensuche');
-				$GUI->nameSuchen();
-			} break;
-
-			case 'Suche_Flurstuecke_zu_Grundbuechern' : {
-				$GUI->flurstuecksSucheByGrundbuecher();
-			} break;
-
-			case 'Zeige_Flurstuecke_zu_Grundbuechern' : {
-				$GUI->flurstuecksAnzeigeByGrundbuecher();
-			} break;
-
-			case 'Suche_Flurstuecke_zu_Namen' : {
-				$GUI->flurstuecksSucheByNamen();
-			} break;
-
-			case 'Zeige_Flurstuecke_zu_Namen' : {
-				$GUI->flurstuecksAnzeigeByNamen();
-			} break;
-
-			case "Suche_Flurstueck_zu_LatLng" : {
-				$GUI->flurstSuchenByLatLng();
-				$GUI->output();
-			} break;
-
 			case 'ExportMapToPDF' : {
 				$GUI->exportMapToPDF();
 			} break;
@@ -1015,6 +927,11 @@ function go_switch($go, $exit = false) {
 
 			case 'TIF_Export_TIF-Datei erzeugen' : {
 				$GUI->TIFExport_erzeugen();
+			} break;
+
+			case 'ows_export_loeschen' : {
+				$GUI->checkCaseAllowed('WMS_Export');
+				$GUI->ows_export_loeschen();
 			} break;
 
 			case 'WMS_Export_Senden' : {
@@ -1035,16 +952,6 @@ function go_switch($go, $exit = false) {
 			case 'WMS_Import' : {
 				$GUI->checkCaseAllowed('WMS_Import');
 				$GUI->wmsImportFormular();
-			} break;
-
-			case 'UKO_Import' : {
-				$GUI->checkCaseAllowed('UKO_Import');
-				$GUI->uko_import();
-			} break;
-
-			case 'UKO_Import_Importieren' : {
-				$GUI->checkCaseAllowed('UKO_Import');
-				$GUI->uko_import_importieren();
 			} break;
 
 			case 'Punktliste_Anzeigen' : {
@@ -1195,6 +1102,11 @@ function go_switch($go, $exit = false) {
 				$GUI->sachdaten_druck_editor();
 			} break;
 
+			case 'sachdaten_druck_editor_Layout automatisch erzeugen' : {
+				$GUI->checkCaseAllowed('sachdaten_druck_editor');
+				$GUI->sachdaten_druck_editor_autogenerate();
+			} break;
+
 			case 'sachdaten_druck_editor_als neues Layout speichern' : {
 				$GUI->checkCaseAllowed('sachdaten_druck_editor');
 				$GUI->sachdaten_druck_editor_speichern();
@@ -1216,8 +1128,8 @@ function go_switch($go, $exit = false) {
 				$GUI->sachdaten_druck_editor_add2stelle();
 			} break;
 
-			case 'sachdaten_druck_editor_Freitexthinzufuegen' :
-				$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
+			case 'sachdaten_druck_editor_Freitexthinzufuegen' : {
+				$GUI->checkCaseAllowed('sachdaten_druck_editor');
 				$GUI->sachdaten_druck_editor_Freitexthinzufuegen();
 			} break;
 
@@ -1226,15 +1138,34 @@ function go_switch($go, $exit = false) {
 				$GUI->sachdaten_druck_editor_Freitextloeschen();
 			} break;
 
-			case 'sachdaten_druck_editor_Liniehinzufuegen' :
-				$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
+			case 'sachdaten_druck_editor_Liniehinzufuegen' : {
+				$GUI->checkCaseAllowed('sachdaten_druck_editor');
 				$GUI->sachdaten_druck_editor_Liniehinzufuegen();
+			} break;
+
+			case 'sachdaten_druck_editor_linie_aendern' : {
+				$GUI->checkCaseAllowed('sachdaten_druck_editor');
+				$GUI->sachdaten_druck_editor_linie_aendern(
+					$GUI->formvars['line_id'],
+					$GUI->formvars['line_attribute_name'],
+					$GUI->formvars['line_attribute_value']
+				);
 			} break;
 
 			case 'sachdaten_druck_editor_Linieloeschen' : {
 				$GUI->checkCaseAllowed('sachdaten_druck_editor');
 				$GUI->sachdaten_druck_editor_Linieloeschen();
 			} break;
+			
+			case 'sachdaten_druck_editor_Rechteckhinzufuegen' :
+				$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
+				$GUI->sachdaten_druck_editor_Rechteckhinzufuegen();
+			} break;
+			
+			case 'sachdaten_druck_editor_Rechteckloeschen' : {
+				$GUI->checkCaseAllowed('sachdaten_druck_editor');
+				$GUI->sachdaten_druck_editor_Rechteckloeschen();
+			} break;			
 
 			case 'Layer_Export' : {
 				$GUI->checkCaseAllowed($go);
@@ -1275,7 +1206,9 @@ function go_switch($go, $exit = false) {
 
 			case 'Layereditor_Speichern' : {
 				$GUI->checkCaseAllowed('Layereditor');
-				$GUI->LayerAendern();
+				include_once(CLASSPATH . 'Layer.php');
+				$GUI->LayerAendern($GUI->formvars);
+				$GUI->Layereditor();
 			} break;
 
 			case 'Klasseneditor' : {
@@ -1310,7 +1243,19 @@ function go_switch($go, $exit = false) {
 
 			case 'Attributeditor_speichern' : {
 				$GUI->checkCaseAllowed('Attributeditor');
-				$GUI->Attributeditor_speichern();
+				if (!empty($GUI->formvars['selected_layer_id']) AND empty($GUI->formvars['selected_datatype_id'])) {
+					include_once(CLASSPATH . 'Layer.php');
+					$GUI->save_layers_attributes($GUI->formvars);
+				}
+				if (empty($GUI->formvars['selected_layer_id']) AND !empty($GUI->formvars['selected_datatype_id'])) {
+					$GUI->Datentypattribute_speichern();
+				}
+				$GUI->Attributeditor();
+			} break;
+
+			case 'Attributeditor_Attributeinstellungen für ausgewählten Layer übernehmen' : {
+				$GUI->checkCaseAllowed('Attributeditor');
+				$GUI->Attributeditor_takeover_attributes();
 			} break;
 
 			case 'Datentypen_Anzeigen' : {
@@ -1385,7 +1330,23 @@ function go_switch($go, $exit = false) {
 
 			case 'Layerattribut-Rechteverwaltung_speichern' : {
 				$GUI->checkCaseAllowed('Layerattribut-Rechteverwaltung');
-				$GUI->layer_attributes_privileges_save();
+				include_once(CLASSPATH . 'Layer.php');
+				$GUI->save_layers_attribute_privileges($GUI->formvars);
+				$GUI->layer_attributes_privileges();
+			} break;
+
+			case 'Layerattribut-Rechteverwaltung_Attributrechte für ausgewählten Layer übernehmen' : {
+				$GUI->checkCaseAllowed('Attributeditor');
+				$GUI->Attributeditor_takeover_layer_privileges();
+				$GUI->Attributeditor_takeover_layer_attributes_privileges();
+				$GUI->Attributeditor_takeover_default_layer_privileges();
+				$GUI->Attributeditor_takeover_default_layer_attributes_privileges();
+				$GUI->formvars['selected_layer_id'] = $GUI->formvars['to_layer_id'];
+				$GUI->layer_attributes_privileges();
+			} break;
+
+			case 'write_layer_attributes2rolle' : {
+				$GUI->write_layer_attributes2rolle();
 			} break;
 
 			case 'Layer_Parameter' : {
@@ -1474,11 +1435,8 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'BenutzerStellen_Anzeigen' : {
+				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
 				$GUI->BenutzerNachStellenAnzeigen();
-			} break;
-
-			case 'BenutzerderStelleAnzeigen' : {
-				$GUI->BenutzerderStelleAnzeigen();
 			} break;
 
 			case 'Benutzerdaten_Anzeigen' : {
@@ -1518,6 +1476,26 @@ function go_switch($go, $exit = false) {
 				$GUI->als_nutzer_anmelden_allowed($GUI->formvars['selected_user_id'], $GUI->user->id);
 				$_SESSION['login_name'] = $GUI->formvars['loginname'];
 				header('location: index.php');
+			} break;
+
+			case 'connections_anzeigen' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->connections_anzeigen();
+			} break;
+
+			case 'connection_create' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->connection_create();
+			} break;
+
+			case 'connection_update' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->connection_update();
+			} break;
+
+			case 'connection_delete' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->connection_delete();
 			} break;
 
 			case 'cronjobs_anzeigen' : {
@@ -1620,20 +1598,6 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
-			case "ZoomToFlst" : {
-				$GUI->loadMap('DataBase');
-				if (strpos($GUI->formvars['FlurstKennz'], '/') !== false)$GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS($GUI->formvars['FlurstKennz']);
-				if (substr($GUI->formvars['FlurstKennz'], -1) == '0') $GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS_0To_($GUI->formvars['FlurstKennz']);
-
-				$explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
-				$GUI->zoomToALKFlurst($explodedFlurstKennz,10);
-				$currenttime=date('Y-m-d H:i:s',time());
-				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-				$GUI->drawMap();
-				$GUI->saveMap('');
-				$GUI->output();
-			} break;
-
 			case "Full_Extent" : {
 				$GUI->loadMap('DataBase');
 				$GUI->navMap('Full_Extent');
@@ -1643,87 +1607,11 @@ function go_switch($go, $exit = false) {
 				$GUI->saveMap('');
 				$GUI->output();
 			} break;
-
-			case "Adresse_Auswaehlen" : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->adresswahl();
-				$GUI->output();
-			} break;
-
-			case "ALK-Adresse_Auswaehlen" : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->formvars['ALK_Suche'] = 1;
-				$GUI->adresswahl();
-				$GUI->output();
-			} break;
-
-			case "Adresse_Auswaehlen_Suchen" : {
-				$GUI->adresseSuchen();
-				$GUI->output();
-			} break;
-
-			case "ALK-Adresse_Auswaehlen_Suchen" : {
-				$GUI->adresseSuchen();
-				$GUI->output();
-			} break;
-
-			case "Flurstueck_hist_Auswaehlen" : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->formvars['historical'] = 1;
-				$GUI->flurstwahl();
-				$GUI->output();
-			} break;
-
-			case "ALK-Flurstueck_Auswaehlen" : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->formvars['ALK_Suche'] = 1;
-				$GUI->flurstwahl();
-				$GUI->output();
-			} break;
-
-			case "Flurstueck_Auswaehlen" : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->flurstwahl();
-				$GUI->output();
-			} break;
-
-			 case "Flurstueck_GetVersionen" : {
-				$GUI->Flurstueck_GetVersionen();
-			} break;
-
-			case "Flurstueck_Auswaehlen_Suchen" : {
-				$GUI->flurstSuchen();
-				$GUI->output();
-			} break;
-
-			case "ALK-Flurstueck_Auswaehlen_Suchen" : {
-				$GUI->flurstSuchen();
-				$GUI->output();
-			} break;
-
-			case 'ALKIS_Auszug' : {
-				$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);
-				$GUI->ALKIS_Auszug($flurst_array, $GUI->formvars['Grundbuchbezirk'], $GUI->formvars['Grundbuchblatt'], $GUI->formvars['Buchungsstelle'], $GUI->formvars['formnummer']);
-			} break;
-
-			case  'ALB_Anzeige' : {
-				$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);
-				$GUI->ALB_Anzeigen($flurst_array,$GUI->formvars['formnummer'], NULL, NULL);
-			} break;
-
-			case  'ALB_Anzeige_Bestand' : {
-				$GUI->ALB_Anzeigen(NULL, $GUI->formvars['formnummer'], $GUI->formvars['Grundbuchbezirk'], $GUI->formvars['Grundbuchblatt']);
-			} break;
 			
-			case  'generischer_Flurstuecksauszug' : {
-				$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);
-				$GUI->generischer_Flurstuecksauszug($flurst_array);
-			} break;			
-
 			 # Auswählen einer neuen Stelle
 			case 'Stelle_waehlen' : case 'Stelle_waehlen_Passwort_aendern' : {
 				$GUI->checkCaseAllowed('Stelle_waehlen');
-				$GUI->rollenwahl($Stelle_ID);
+				$GUI->rollenwahl($GUI->Stelle->id);
 				$GUI->output();
 			} break;
 

@@ -23,6 +23,7 @@ class FormObject {
 	var $hidden;
 	var $text;
 	var $anzValues;
+	var $JavaScript;
 
 	###################### Liste der Funktionen ####################################
 	#
@@ -34,7 +35,7 @@ class FormObject {
 	#
 	################################################################################
 
-	function FormObject($name, $type, $value, $selectedValue, $label, $size, $maxlenght, $multiple, $width, $disabled = NULL, $style = "") {
+	function __construct($name, $type, $value, $selectedValue, $label, $size, $maxlenght, $multiple, $width, $disabled = NULL, $style = "") {
 		if (!is_array($selectedValue)) { $selectedValue=array($selectedValue); }
 		$this->type = $type;
 		$this->width = $width;
@@ -79,16 +80,19 @@ class FormObject {
 		$this->outputHTML();
 	} # ende constructor
 
-static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $please_select = true) {
+static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $first_option = '-- Bitte Wählen --', $option_style = '', $option_class = '', $onclick = '') {
 	$id = ($id == '' ? $name : $id);
 	if ($multiple != '') $multiple = ' multiple';
 	if ($style != '') $style = 'style="' . $style . '"';
 	if ($onchange != '') $onchange = 'onchange="' . $onchange . '"';
+	if ($onclick != '') $onclick = 'onclick="' . $onclick . '"';
 	if ($class != '') $class = 'class="' . $class . '"';
+	if ($option_style != '') $option_style = 'style="' . $option_style . '"';
+	if ($option_class != '') $option_class = 'class="' . $option_class . '"';
 
 	$options_html = array();
-	if ($please_select) {
-		$options_html[] = "<option value=\"\">-- bitte wählen --</option>";
+	if ($first_option != '') {
+		$options_html[] = "<option value=\"\">" . $first_option . "</option>";
 	}
 	foreach($options AS $option) {
 		if (is_string($option)) {
@@ -96,7 +100,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 		}
 		$selected = ($option['value'] == $value ? ' selected' : '');
 		$options_html[] = "
-			<option
+			<option ".$onclick." ".$option_style." ".$option_class." 
 				value=\"{$option['value']}\"{$selected}" .
 				(array_key_exists('attribute', $option) ? " {$option['attribute']}=\"{$option['attribute_value']}\"" : '') .
 				(array_key_exists('title', $option) ? " title=\"{$option['title']}\"" : '') .
@@ -104,11 +108,10 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 			>{$option['output']}</option>";
 	}
 
-	$html  = "
-<select id=\"{$id}\" name=\"{$name}\" size=\"{$size}\" {$style} {$onchange} {$multiple} {$class}>
-	" . implode('<br>', $options_html) . "
-</select>
-";
+	$html  = '
+<select id="'.$id.'" name="'.$name.'" size="'.$size.'" '.$style.' '.$onchange.' '.$multiple.' '.$class.'>
+	'.implode('<br>', $options_html).'
+</select>';
   return $html;
 }
 
@@ -127,7 +130,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 		# insertafter ist die Nummer der Option, nach der die neue Option eingefügt werden soll
 		# die Zählung beginnt mit 1. Wenn z.B. eine Option an den Anfang gestellt werden soll
 		# muss insertafter = 0 sein.
-		$anzOption=count($this->select['option']);
+		$anzOption = @count($this->select['option']);
 		$oldvalue=$value;
 		$oldselected=$selected;
 		$oldlabel=$label;
@@ -179,14 +182,14 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 					$this->html .= ' style="' . $this->style . '"';
 				}
 				$this->html.=">\n";
-				for ($i=0;$i<count($this->select[option]);$i++) {
-					$this->html.="<option value='".$this->select["option"][$i]["value"]."'";
-					if ($this->select["option"][$i]["selected"]) {
-						$this->html.=" selected";
+				for ($i = 0; $i < @count($this->select['option']); $i++) {
+					$this->html .= "<option value='" . $this->select["option"][$i]["value"] . "'";
+					if (value_of($this->select["option"][$i], 'selected')) {
+						$this->html .= " selected";
 					}
-					$this->html.=">".$this->select["option"][$i]["label"]."</option>\n";
+					$this->html .= ">" . $this->select["option"][$i]["label"] . "</option>\n";
 				}
-				$this->html.="</select>";
+				$this->html .= "</select>";
 			} break;
 			case "text" : {
 				$this->html ="<input type='text' name='".$this->text["name"]."' value='".$this->text["value"]."'";
@@ -275,7 +278,7 @@ class selectFormObject extends FormObject{
 				if($this->nochange != true){
 					$this->html.=" onchange=\"document.GUI.submit()\">\n";
 				}
-				for ($i=0;$i<count($this->select[option]);$i++) {
+				for ($i=0;$i<count($this->select['option']);$i++) {
 					$this->html.="<option value=\"".$this->select['option'][$i]['value']."\"";
 					if ($this->select['option'][$i]['selected']) {
 						$this->html.=' selected';

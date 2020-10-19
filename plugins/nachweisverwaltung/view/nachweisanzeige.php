@@ -94,8 +94,18 @@ function aus_Auftrag_entfernen(){
 }
 
 function vorlage(){
-	document.GUI.go.value='Nachweisformular_Vorlage';
-	document.GUI.submit();
+	var ids = document.getElementsByName('id[]');
+	var count = 0;
+	for(i = 0; i < ids.length; i++){
+		if(ids[i].checked){
+			count++;
+		}
+	}
+	if(count == 0)message([{ 'type': 'warning', 'msg': 'Bitte wählen Sie den Nachweis aus, der als Vorlage verwendet werden soll.' }]);
+	else{
+		document.GUI.go.value='Nachweisformular_Vorlage';
+		document.GUI.submit();
+	}
 }
 
 function set_ref_geom(){
@@ -311,6 +321,7 @@ function save_bearbeitungshinweis(id){
 <input type="hidden" name="suchgeprueft" value="<? echo $this->formvars['suchgeprueft']; ?>">
 <input type="hidden" name="bearbeitungshinweis_id" value="">
 <input type="hidden" name="bearbeitungshinweis_text" value="">
+<input type="hidden" name="geom_from_layer" value="<? echo $this->formvars['geom_from_layer']; ?>">
 
 	
 <table width="0%" border="0" cellpadding="8" cellspacing="0">
@@ -330,7 +341,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		  ?>
 	  </td>
 				<tr>
-					<td><a href="index.php?go=Nachweisrechercheformular&zurueck=1&VermStelle=<? echo $this->formvars['VermStelle']; ?>">&lt;&lt; zur&uuml;ck zur Suche</a></td>
+					<td><a href="index.php?go=Nachweisrechercheformular&zurueck=1&VermStelle=<? echo $this->formvars['VermStelle']; ?>&geom_from_layer=<? echo $this->formvars['geom_from_layer']; ?>"><span style="font-size: 140%">&laquo;</span> Nachweisrecherche</a></td>
 				</tr>
         </tr>
         <tr> 
@@ -425,7 +436,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 				<th align="center" style="width: 120"><a href="javascript:add_to_order('vermst');" title="nach Vermessungsstelle sortieren"><span class="fett">VermStelle</span></a></th>
 			<? }else{echo '<th align="center" style="width: 120"><span class="fett">VermStelle</span></th>';} ?>
 			<? if(strpos($this->formvars['order'], 'gueltigkeit') === false){ ?>
-				<th align="center" style="width: 80"><a href="javascript:add_to_order('gueltigkeit');" title="nach Gültigkeit sortieren"><span class="fett">Gültigkeit</span></a></th>
+				<th align="center" style="width: 80"><a href="javascript:add_to_order('gueltigkeit');" title="nach Gültigkeit sortieren"><span class="fett">gültig</span></a></th>
 			<? }else{echo '<th align="center" style="width: 80"><span class="fett">Gültigkeit</span></th>';} ?>
 			<? if(strpos($this->formvars['order'], 'geprueft') === false){ ?>
 				<th align="center" style="width: 80"><a href="javascript:add_to_order('geprueft');" title="nach geprüft sortieren"><span class="fett">geprüft</span></a></th>
@@ -436,7 +447,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <th colspan="3" style="width: 150"><div align="center"><?    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></th>
         </tr>
 			</thead>
-			<tbody style="outline: 1px solid gray;">
+			<tbody style="outline: 1px solid gray; max-height: 590px;">
         <?
 		$bgcolor = '#FFFFFF';
      for ($i=0;$i<$this->nachweis->erg_dokumente;$i++) {
@@ -464,7 +475,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 				
         ?>>	
 				<? if($this->nachweis->Dokumente[$i]['bemerkungen'] != ''){ ?>
-					<i class="fa fa-exclamation-circle" style="font-size: 19px; color: orange"  title="Bemerkungen: <? echo $this->nachweis->Dokumente[$i]['bemerkungen']; ?>"></i>
+					<i class="fa fa-exclamation-circle" style="font-size: 19px; color: orange"  title="Bemerkungen: <? echo htmlentities($this->nachweis->Dokumente[$i]['bemerkungen']); ?>"></i>
 				<? } ?>
 					<i class="fa fa-exclamation-circle bearbeitungshinweise" style="<? if($this->nachweis->Dokumente[$i]['bemerkungen_intern'] != '')echo 'color: red'; ?>" onclick="open_bearbeitungshinweise_form(<? echo $this->nachweis->Dokumente[$i]['id']; ?>);" title="Bearbeitungshinweise:&#13;<? echo $this->nachweis->Dokumente[$i]['bemerkungen_intern']; ?>"></i>
 					<div style="position:relative">
@@ -495,8 +506,8 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td style="width: 80"><div align="center"><? echo $this->nachweis->Dokumente[$i]['datum']; ?></div></td>
           <td style="width: 120"><div align="center"><? echo $this->formvars['fortf']=$this->nachweis->Dokumente[$i]['fortfuehrung']; ?></div></td>
           <td style="width: 120"><div align="center"><? echo $this->formvars['vermstelle']=$this->nachweis->Dokumente[$i]['vermst']; ?></div></td>
-          <td style="width: 80"><div align="center"><? echo $this->formvars['gueltigkeit']=$this->nachweis->Dokumente[$i]['gueltigkeit']; ?></div></td>
-					<td style="width: 80"><div align="center"><? echo $this->formvars['geprueft']=$this->nachweis->Dokumente[$i]['geprueft']; ?></div></td>
+					<td style="width: 80"><div align="center"><? if($this->nachweis->Dokumente[$i]['gueltigkeit']){echo 'ja';} else {echo 'nein';} ?></div></td>
+					<td style="width: 80"><div align="center"><? if($this->nachweis->Dokumente[$i]['geprueft']){echo 'ja';} else {echo 'nein';} ?></div></td>
           <td style="width: 80"><div align="center"><? echo $this->formvars['format']=$this->nachweis->Dokumente[$i]['format']; ?> 
             </div></td>
 					<td style="width: 30">
@@ -515,7 +526,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td style="width: 30">
           	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){
 									if($this->nachweis->Dokumente[$i]['geprueft'] == 0 OR $this->Stelle->isFunctionAllowed('gepruefte_Nachweise_bearbeiten')){	?>
-										<a href="index.php?go=Nachweisformular&id=<? echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a>
+										<a href="index.php?go=Nachweisformular&id=<? echo $this->nachweis->Dokumente[$i]['id'];?>&suchgueltigkeit=<? echo $this->formvars['suchgueltigkeit'] ?>&suchgeprueft=<? echo $this->formvars['suchgeprueft'] ?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a>
 							<? 	} 
 							 } ?>
 					</td>
@@ -634,7 +645,7 @@ Wählen Sie neue Suchparameter.</span><br>
 
 
 <!--[IF !IE]> -->
-<div id="vorschau"  onmouseleave="clearVorschau();" style="z-index: 1000; position: fixed; left:50%; margin-left:-100px;  top:20px; box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.3);"></div>
+<div id="vorschau"  onmouseleave="clearVorschau();" style="z-index: 1000; position: fixed; left:50%; margin-left:-100px;  top:0px; box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.3);"></div>
 <!-- <![ENDIF]-->
  <!--[IF IE]>
 <div id="vorschau" style="position: absolute; left:50%; margin-left:-150px; top: expression((190 + (ignoreMe = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop)) + 'px');"></div>

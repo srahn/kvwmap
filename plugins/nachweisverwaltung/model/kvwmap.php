@@ -68,7 +68,6 @@
 			$label->set('minsize', 8);
 			$label->set('maxsize', 8);
 			$label->color->setRGB(40, 40, 40);
-			$label->set('type', 'TRUETYPE');
 			$label->set('font', 'arial');
 			$klasse->addLabel($label);
 			# Gebäude-Layer erzeugen
@@ -140,8 +139,8 @@
 			$map->setProjection('+init=epsg:'.$GUI->user->rolle->epsg_code,MS_TRUE);
 			$map->web->set('imagepath', IMAGEPATH);
 			$map->web->set('imageurl', IMAGEURL);
-			$map->set('width', 150);
-			$map->set('height', 150);
+			$map->set('width', 300);
+			$map->set('height', 300);
 			$image_map = $map->draw();
 			$filename = $GUI->map_saveWebImage($image_map,'jpeg');
 			$newname = $GUI->user->id.basename($filename);
@@ -205,6 +204,7 @@
 					$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/Einmessungsskizzen');		# und, wenn vorhanden, die Einmessungsskizzen
 					$result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr.'/KVZ');		# und, wenn vorhanden, die KVZ packen
 				}
+				chdir(WWWROOT.APPLVERSION);
       }
     }
     $filename = RECHERCHEERGEBNIS_PATH.$antragsnr.'.zip';
@@ -305,7 +305,7 @@
 					$fromwhere = substr($select, 0, $orderbyposition);
 					$GUI->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 				}
-				$GUI->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+				$GUI->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
 		    if(strpos(strtolower($GUI->formvars['fromwhere']), ' where ') === false){
 		      $GUI->formvars['fromwhere'] .= ' where (1=1)';
 		    }
@@ -535,19 +535,18 @@
 		$sql ='SELECT user_id FROM rolle_nachweise';
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
-		$query=mysql_query($sql,$GUI->database->dbConn);
-		if ($query==0) { $GUI->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		if (mysql_num_rows($query)==0) {
+		$GUI->database->execSQL($sql,4, 1);
+		if ($GUI->database->result->num_rows == 0) {
 			$sql ='INSERT INTO rolle_nachweise ';
 			$sql.='SET user_id='.$user_id.', stelle_id='.$stelle_id;
 			$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
-			$query=mysql_query($sql,$GUI->database->dbConn);
+			$GUI->database->execSQL($sql,4, 1);
 		}
 		$sql ='SELECT * FROM rolle_nachweise';
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
-		$query=mysql_query($sql,$GUI->database->dbConn);
-		$rs=mysql_fetch_assoc($query);
+		$GUI->database->execSQL($sql,4, 1);
+		$rs = $GUI->database->result->fetch_assoc();
 		$rs['suchhauptart'] = array_filter(explode(',', $rs['suchhauptart']));
 		$rs['suchunterart'] = array_filter(explode(',', $rs['suchunterart']));
 		$rs['showhauptart'] = array_filter(explode(',', $rs['showhauptart']));
@@ -561,7 +560,7 @@
 		#echo $sql;
 		$GUI->debug->write("<p>file:users.php class:rolle->save_Dokumentauswahl ",4);
 		$GUI->database->execSQL($sql,4, 1);
-		return mysql_insert_id();
+		return $GUI->database->mysqli->insert_id;
 	};
 	
 	$GUI->delete_Dokumentauswahl = function($id) use ($GUI){
@@ -578,9 +577,8 @@
 		if($dokauswahl_id != '')$sql.=' AND id = '.$dokauswahl_id;
 		#echo $sql;
 		$GUI->debug->write("<p>file:users.php class:rolle->get_Dokumentauswahl ",4);
-		$query=mysql_query($sql,$GUI->database->dbConn);
-		if ($query==0) { $GUI->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		while($rs=mysql_fetch_assoc($query)){
+		$GUI->database->execSQL($sql,4, 1);
+		while($rs = $GUI->database->result->fetch_assoc()){
 			$dokauswahlen[] = $rs;
 		}
 		return $dokauswahlen;
@@ -628,9 +626,8 @@
 		$sql = "SELECT * FROM u_consumeNachweise ";
 		$sql.= "WHERE antrag_nr='".$antrag_nr."' AND stelle_id=".$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->Suchparameter_anhaengen_PDF <br>".$sql,4);
-		$query=mysql_query($sql,$GUI->database->dbConn);
-		if ($query==0) { $GUI->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		while($rs = mysql_fetch_assoc($query)){
+		$GUI->database->execSQL($sql,4, 1);
+		while($rs = $GUI->database->result->fetch_assoc()){
 			$searches[] = $rs;
 		}
 		return $searches;
@@ -1168,7 +1165,9 @@
     #2005-11-24_pk
     $GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
     $hauptarten = $GUI->nachweis->getHauptDokumentarten();
-    $GUI->formvars['artname'] = strtolower($hauptarten[$GUI->formvars['hauptart']]['abkuerzung']);
+		$dokumentarten = $GUI->nachweis->getDokumentarten();
+		$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
+    $GUI->formvars['artname'] = strtolower($dokumentarten[$GUI->formvars['hauptart']][$GUI->formvars['unterart']]['abkuerzung'] ?: $hauptarten[$GUI->formvars['hauptart']]['abkuerzung']);
 		# Zusammensetzen der flurid
     $GUI->formvars['flurid']=$GUI->formvars['Gemarkung'].str_pad(intval(trim($GUI->formvars['Flur'])),3,'0',STR_PAD_LEFT);
     # Zusammensetzen der übergebenen Parameter für das Polygon
@@ -1178,7 +1177,7 @@
     if ($GUI->formvars['id']=='') {
       # Prüfen der Eingabewerte
       #echo '<br>Prüfen der Eingabewerte.';
-      $ret=$GUI->nachweis->pruefeEingabedaten($GUI->formvars['id'], $GUI->formvars['datum'],$GUI->formvars['VermStelle'],$GUI->formvars['hauptart'],$GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['rissnummer'], $GUI->formvars['fortfuehrung'], $GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],true,$GUI->formvars['Bilddatei_name'],$GUI->formvars['pathlength'],$GUI->formvars['umring'], $GUI->formvars['flurid'], $GUI->formvars['Blattnr']);
+      $ret=$GUI->nachweis->pruefeEingabedaten($GUI->formvars['id'], $GUI->formvars['datum'],$GUI->formvars['VermStelle'],$GUI->formvars['hauptart'],$GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['rissnummer'], $GUI->formvars['fortfuehrung'], $GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],true,$GUI->formvars['Bilddatei_name'],$GUI->formvars['pathlength'],$GUI->formvars['umring'], $GUI->formvars['flurid'], $GUI->formvars['Blattnr'], $dokumentarten[$GUI->formvars['hauptart']][$GUI->formvars['unterart']]['pok_pflicht']);
       if ($ret[0]) {
         #echo '<br>Ergebnis der Prüfung: '.$ret;
         $errmsg=$ret[1];
@@ -1195,10 +1194,10 @@
         else {
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank
           $GUI->nachweis->database->begintransaction();
-          $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['unterart_'.$GUI->formvars['hauptart']], $GUI->formvars['gueltigkeit'], $GUI->formvars['geprueft'], $GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['bemerkungen_intern'],$zieldatei,$GUI->formvars['umring'], $GUI->user);
-					$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
+          $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['unterart'], $GUI->formvars['gueltigkeit'], $GUI->formvars['geprueft'], $GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['bemerkungen_intern'],$zieldatei,$GUI->formvars['umring'], $GUI->user);
           if ($ret[0]) {
             $GUI->nachweis->database->rollbacktransaction();
+						$GUI->nachweis->dokumentenDateiLoeschen($zieldatei);
             $errmsg=$ret[1];
           }
           else {
@@ -1270,6 +1269,7 @@
 	};
 
 	$GUI->nachweisFormAnzeige = function($nachweis = NULL) use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
 		include_once(CLASSPATH.'FormObject.php');
 		if($GUI->formvars['reset_layers'])$GUI->reset_layers(NULL);
 
@@ -1308,7 +1308,7 @@
 				$fromwhere = substr($select, 0, $orderbyposition);
 				$GUI->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 			}
-			$GUI->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+			$GUI->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
 	    if(strpos(strtolower($GUI->formvars['fromwhere']), ' where ') === false){
 	      $GUI->formvars['fromwhere'] .= ' where (1=1)';
 	    }
@@ -1339,8 +1339,8 @@
     $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
     $GUI->drawMap();
 	
-		if($GUI->formvars['Gemarkung'] == '')$GUI->formvars['Gemarkung'] = $GUI->Lagebezeichung['gemkgschl'];
-		if($GUI->formvars['Flur'] == '')$GUI->formvars['Flur'] = $GUI->Lagebezeichung['flur'];
+		if($GUI->formvars['Gemarkung'] == '')$GUI->formvars['Gemarkung'] = $GUI->formvars['gemschl'] ?: $GUI->Lagebezeichung['gemkgschl'];
+		if($GUI->formvars['Flur'] == '')$GUI->formvars['Flur'] = (int)$GUI->formvars['FlurID'] ?: $GUI->Lagebezeichung['flur'];
     
     # Abfragen der Gemarkungen
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
@@ -1539,6 +1539,7 @@
   };
 	
 	$GUI->rechercheFormAnzeigen = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
 		include_once(CLASSPATH.'FormObject.php');
 		# Speichern einer neuen Dokumentauswahl
 		if($GUI->formvars['go_plus'] == 'Dokumentauswahl_speichern'){
@@ -1637,7 +1638,7 @@
 				$fromwhere = substr($select, 0, $orderbyposition);
 				$GUI->formvars['orderby'] = ' '.substr($select, $orderbyposition);
 			}
-			$GUI->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
+			$GUI->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
 	    if(strpos(strtolower($GUI->formvars['fromwhere']), ' where ') === false){
 	      $GUI->formvars['fromwhere'] .= ' where (1=1)';
 	    }

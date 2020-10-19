@@ -1,7 +1,7 @@
 <?
 
 	function wms_proxy(){
-		$image_tile_size = 2048;
+		$image_tile_size = 1800;
 		
     $params = array_keys($_REQUEST);
     
@@ -20,11 +20,15 @@
     if(!format)$format = $_REQUEST['format'];
     
     for($i = 0; $i < count($_REQUEST); $i++){
-			if(in_array(strtolower($params[$i]), array('service', 'version', 'request', 'layers', 'format', 'srs', 'styles', 'query_layers', 'x', 'y'))){
+			if(!in_array(strtolower($params[$i]), ['url', 'bbox', 'width', 'height'])){
     		$url.='&'.$params[$i].'='.$_REQUEST[$params[$i]];
     	}
     }
-    
+    ob_end_clean();
+    header('Content-Type:'.$format);
+    header("Pragma: public");
+    header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+    header('Content-Disposition: filename=test.jpg');
     if($width > $image_tile_size OR $heigth > $image_tile_size){		# hier muss gekachelt werden
     	$resultimage = imagecreatetruecolor($width, $height);
     	$extent = explode(',', $bbox);
@@ -80,11 +84,6 @@
   }
   
   function get_map($url, $format){
-  	ob_end_clean();
-    header('Content-Type:'.$format);
-    header("Pragma: public");
-    header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-    #header('Content-Disposition: filename=test.jpg');
 		$ctx = stream_context_create(array('http' => array('timeout' => 10)));
 		return file_get_contents($url, 0, $ctx);
   }

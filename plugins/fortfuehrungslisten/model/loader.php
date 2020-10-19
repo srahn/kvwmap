@@ -4,7 +4,7 @@ class NASLoader extends DOMDocument {
 	static $write_debug = false;
 	public $messages = array();
 	
-	function NASLoader($gui) {
+	function __construct($gui) {
 		$gui->debug->show('Create new Object NASLoader', NASLoader::$write_debug);
 		$this->gui = $gui;
 	}

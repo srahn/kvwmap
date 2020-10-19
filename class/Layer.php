@@ -3,14 +3,20 @@ class Layer extends MyObject {
 
 	static $write_debug = false;
 
-	function Layer($gui) {
-		$this->MyObject($gui, 'layer');
+	function __construct($gui) {
+		parent::__construct($gui, 'layer');
 		$this->identifier = 'Layer_ID';
 	}
 
 	public static	function find($gui, $where) {
 		$layer = new Layer($gui);
 		return $layer->find_where($where);
+	}
+
+	public static	function find_by_name($gui, $name) {
+		$layer = new Layer($gui);
+		$layers = $layer->find_where("Name LIKE '" . $name . "'");
+		return $layers[0];
 	}
 
 	public static function find_by_obergruppe_und_name($gui, $obergruppe_id, $layer_name) {
@@ -27,6 +33,39 @@ class Layer extends MyObject {
 			)
 		);
 		return $result[0];
+	}
+
+	/**
+	* This function return the layer id's of the duplicates of a layer
+	* @param mysql_connection object
+	* @param integer $duplicate_from_layer_id The layer id from witch the others are duplicates
+	* @param array(integer) The layer_ids of the duplicates
+	*/
+	public static function find_by_duplicate_from_layer_id($database, $duplicate_from_layer_id) {
+		$duplicate_layer_ids = array();
+		$sql =  "
+			SELECT
+				`Layer_ID`
+			FROM
+				`layer`
+			WHERE
+				`duplicate_from_layer_id` = " . $duplicate_from_layer_id . "
+				AND `Layer_ID` != `duplicate_from_layer_id`
+		";
+		# letzte Where Bedinung, damit keine Entlosschleifen entstehen beim Aufruf von update_layer falls
+		# Layer_ID fälschlicherweise identisch sein sollte mit duplicate_layer_id was nicht passieren sollte
+		# wenn das Layerformular genutzt wurde.
+		#echo  MyObject::$write_debug ? 'Layer find_by_duplicate_from_layer_id sql:<br> ' . $sql : '';
+		$ret = $database->execSQL($sql, 4, 1, true);
+		if (!$ret['success']) {
+			$database->gui->add_message('error', $ret[1]);
+		}
+		else {
+			while ($rs = $database->result->fetch_assoc()) {				
+				$duplicate_layer_ids[] = $rs['Layer_ID'];
+			}
+		}
+		return $duplicate_layer_ids;
 	}
 
 	/*

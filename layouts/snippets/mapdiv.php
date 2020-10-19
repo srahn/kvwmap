@@ -49,7 +49,13 @@
 				&nbsp;
 				<input type="text" style="width: 150px" name="secondcoords" value=""><?
 			} ?>
-		</div>			
+		</div>
+		
+		<div id="showmeasurement" style="display:none;">
+			<i class="fa fa-close" style="cursor: pointer; float: right; margin: 0 5px 0 5px;" onclick="$('#showmeasurement').hide();"></i>
+			<span class="fett"><?php echo $strMeasurement; ?>:&nbsp;</span>
+			<input type="text" style="width: 150px" id="measurement" name="measurement" value="">
+		</div>
 			
 		</div>
 	

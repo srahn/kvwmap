@@ -5,7 +5,7 @@ class wms_request_obj {
   var $request;
 
   
-  function wms_request_obj($request = NULL) {
+  function __construct($request = NULL) {
 		if($request != NULL){
 			$this->request = $request;
 			$link=explode('?',$this->request);
@@ -166,7 +166,7 @@ class wms_request_obj {
 
 class wms_response_obj {
 
-  function wms_response_obj($img) {
+  function __construct($img) {
     $this->img=$img;
   }
 

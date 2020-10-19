@@ -2,14 +2,8 @@
 	include(LAYOUTPATH.'languages/attribut_privileges_form_'.$this->user->rolle->language.'.php');
 	include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php');
 ?>
-<SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
-<!--
-
-Text[1]=["Hilfe:","Auf dieser Seite können Sie festlegen, welche Rechte eine Stelle beim Zugriff auf einen	bestimmten Layer haben soll.<br><br> Auf Layerebene gibt es 3 verschiedene Privilegien, die Sie der Stelle zuordnen können. Die niedrigste ist 'Lesen und bearbeiten'. Mit dieser Stufe kann der Layer nur abgefragt werden. Mit der zweiten Stufe lassen sich neue Datensätze erzeugen und mit der dritten Stufe außerdem vorhandene Datensätze löschen.<br><br> Darüberhinaus können Sie der Stelle attributbezogene Rechte zuweisen. Ist ein Attribut 'nicht sichtbar', so taucht es in der Sachdatenabfrage nicht auf. Ist ein Attribut lesbar, so erscheint es in der Abfrage. Soll ein Attribut editierbar sein, so wählt man hier das Privileg 'editierbar'. Beim Geometrie-Attribut 'the_geom' gilt: Ist dieses Attribut nicht sichtbar, so kann man auch nicht von der Sachdatenanzeige in die Karte auf das Objekt zoomen. Dafür muß es mindestens lesbar sein.<br>Damit ein Attribut in der Layer-Suche als Suchoption zur Verfügung steht, muss es ebenfalls mindestens lesbar sein.<br><br>Auf der linken Seite können Sie die Default-Rechte für den Layer festlegen, die dann bei der Stellenzuweisung des Layers verwendet werden.<br><br>Wenn Sie den Link 'Default-Rechte allen Stellen zuweisen' verwenden, werden die Defaultrechte allen Stellen zugewiesen und gespeichert. Hierbei ist zu beachten, dass je nach nach Anzahl der Stellen und Attribute eine sehr große Anzahl an Formularvariablen übermittelt wird. Möglicherweise muss dafür in der php.ini der Wert für max_input_vars hoch gesetzt werden."]
-
-
 
 function set_all(attribute_names, stelle, value){
 	names = attribute_names.split('|');
@@ -49,63 +43,125 @@ function get_from_default(attribute_names, stellen){
 }
 
 
-function save(stelle){
+function save(stelle, other_selected_layer_id = '') {
 	document.GUI.stelle.value = stelle;
-	document.GUI.go_plus.value = 'speichern';
+	if (other_selected_layer_id != '') {
+		document.GUI.from_layer_id.value = $('#selected_layer_id').val();
+		document.GUI.to_layer_id.value = other_selected_layer_id;
+		document.GUI.go_plus.value = 'Attributrechte für ausgewählten Layer übernehmen';
+	}
+	else {
+		document.GUI.go_plus.value = 'speichern';
+	}
 	document.GUI.submit();
 }
-  
-//-->
 </script>
 
 <style>
 	.navigation{
 		border-collapse: collapse; 
-		width: 100%;
-		min-width: 940px;
+		width: 940px;
+		background:rgb(248, 248, 249);
 	}
-
 	.navigation th{
-		border: 1px solid <?php echo BG_DEFAULT ?>;
+		border: 1px solid #bbb;
 		border-collapse: collapse;
 		width: 17%;
 	}
-	
 	.navigation th div{
 		padding: 3px;
+		padding: 9px 0 9px 0;
+		width: 100%;
 	}	
-	
-	.navigation th:hover{
-		background-color: <?php echo BG_DEFAULT ?>;
+	.navigation th:not(.navigation-selected) a{
+		color: #888;
+	}	
+	.navigation th:not(.navigation-selected):hover{
+		background-color: rgb(238, 238, 239);
 	}
-	
-	#layerform input[type="text"], #layerform select, #layerform textarea{
-		width: 340px;
+	.navigation-selected{
+		background-color: #c7d9e6;
 	}
-		
-	#stellenzuweisung{
-		display: none;
+	.navigation-selected div{
+		color: #111;
 	}
-</style>
+	.apf-magic {
+		margin-top: 15px;
+	}
+	.apf-template-div-default, .apf-template-div {
+		background-color: #f8f8f9; 
+		border-width:1px 0px 1px 1px;
+		border-style: solid;
+		border-color: #bbb;
+	}
+	.apf-template-div {
+		 float:right; 
+		 overflow:auto; 
+		 overflow-y:hidden;
+	}
+	.apt-main-td {
+		width:280px;
+		border-right: 1px solid #bbb;
+	}
+	.apt-bezeichnung, .apt-defaultrechteanstelle, .apt-attributrechtespeichern {
+		text-align: center;
+		margin: 10px 0px 20px 0px;
+	}
+	.apt-bezeichnung {
+		height: 40px;
+	}
+	.apt-layerzugriffsrechte, .apt-layerexportrechte {
+		margin: 10px 10px 0 4px;
+	}
+	.apt-attributrechte {
+		margin: 20px 0 10px 0;
+	}
+	.apt-attributrechte table{
+		border-spacing: 0;
+	}
+	.apt-attributrechte table td{
+		padding: 0 5px 0 5px;
+	}
+	.apt-attributrechte table tr:last:child {
+		margin-top: 50px;
+	}
+	.apt-attributname {
+		margin-top: 2px;
+		padding: 3px;
+		position: absolute;
+		width: 100px;
+		background-color: #f8f8f9;		
+		overflow: hidden;
+		outline: 1px solid #f8f8f9;
+		cursor: default;
+	}
+	.apt-attributname:hover {
+		width: auto;
+		outline: 1px solid #ccc;
+	}
+	</style>
 
 <table style="width: 700px; margin: 0px 40px 0 40px">
 	<tr>
-    <td align="center">
+		<td align="center">
 			<span class="px17 fetter"><? echo $strLayer;?>:</span>
-      <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
-      <option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option>
-        <?
-    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
-    			echo '<option';
-    			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
-    				echo ' selected';
-    			}
-    			echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
-    		}
-    	?>
-      </select>
+			<select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>><?
+			$layer_options = array(); ?>
+			<option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option><?
+			for ($i = 0; $i < count($this->layerdaten['ID']); $i++) {
+				$layer_options[] = array(
+					'value' => $this->layerdaten['ID'][$i],
+					'output' => $this->layerdaten['Bezeichnung'][$i]
+				);
+				echo '<option';
+				if ($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']) {
+					echo ' selected';
+				}
+				echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
+			} ?>
+			</select>
 		</td>
-  </tr>
+	</tr>
 </table>
 
 <? if($this->formvars['selected_layer_id'] != ''){ ?>
@@ -115,12 +171,12 @@ function save(stelle){
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
-					<th class="fetter"><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
-					<th class="fetter"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
-					<th class="fetter"><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strAttributes; ?></div></a></th>
-					<th class="fetter"><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
-					<th bgcolor="<?php echo BG_DEFAULT ?>" class="fetter"><? echo $strPrivileges; ?></th>
+					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strCommonData; ?></div></a></th>
+					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strClasses; ?></div></a></th>
+					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strStylesLabels; ?></div></a></th>
+					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strAttributes; ?></div></a></th>
+					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1"><div><? echo $strStellenAsignment; ?></div></a></th>
+					<th class="navigation-selected"><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strPrivileges; ?></div></a></th>
 				</tr>
 			</table>
 		</td>
@@ -133,9 +189,49 @@ function save(stelle){
   <? if($this->layer[0]['Name'] != ''){ ?>
 	<tr>
   	<td>
-			<div style="position:relative;">
-				<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()">
-				<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;"></DIV>
+			<div class="apf-tip-magic">
+				<div class="apf-tip">
+<?					echo FormObject::createSelectField(
+						'for_attribute_privileges_selected_layer_id',
+						$layer_options,
+						'',
+						1,
+						'display: none;',
+						'',
+						'',
+						'',
+						'',
+						$strPleaseSelect
+					); ?>
+					<input
+						id="attribute_privileges_for_other_layer_button"
+						style="display: none; margin-left: 10px"
+						type="button"
+						onclick="save(
+							'<? echo implode('|', $this->stellen['ID']); ?>',
+							$('#for_attribute_privileges_selected_layer_id').val()
+						)"
+						value="Attributrechte für ausgewählten Layer übernehmen"
+					>
+					<span style="margin-left: 10px;">
+					<i
+						id="show_attribute_privileges_for_other_layer_button"
+						style="cursor: pointer" 
+						title="Magische Funktion um die Attributrechte auf gleich benannte Attribute eines anderen Layers zu übertragen. Vorgenommene Änderungen müssen vorher gespeichert werden!"
+						class="fa fa-magic apf-magic"
+						aria-hidden="true"
+						onclick="$('#attribute_privileges_for_other_layer_button, #for_attribute_privileges_selected_layer_id, #show_attribute_privileges_for_other_layer_button, #close_attribute_privileges_for_other_layer_button').toggle();"
+					></i>
+					<i
+						id="close_attribute_privileges_for_other_layer_button"
+						title="Den Spuk wieder schließen."
+						style="display: none; cursor: pointer" class="fa fa-times"
+						aria-hidden="true"
+						onclick="$('#attribute_privileges_for_other_layer_button, #for_attribute_privileges_selected_layer_id, #show_attribute_privileges_for_other_layer_button, #close_attribute_privileges_for_other_layer_button').toggle();"
+					></i>
+					&nbsp;
+					<span style="float: right; --left: -650px; --width: 750px" data-tooltip="Globale sowie attributive Rechte der Stelle beim Zugriff den ausgewählten Layer.&#xa;&#xa;Die eingestellten Default-Rechte werden beim erstmaligen Zuordnen eines Layers zu einer Stelle verwendet.&#xa;&#xa;Layerzugriffsrechte&#xa;Globale Privilegien auf Layerebene (globale editierende Rechte am Layer müssen durch die entsprechenden attributbezogenen Rechte aktiviert werden):&#xa;- 'lesen und bearbeiten': Mindestzugriffsrecht. Vorhandene Datensätze können gelesen und bearbeitet werden.&#xa;- 'neue Datensätze erzeugen': Datensätze können gelesen, bearbeitet und neu angelegt werden.&#xa;- 'Datensätze erzeugen und löschen': Datensätze können gelesen, bearbeitet, erzeugt und gelöscht werden.&#xa;&#xa;Layerexportrechte&#xa;- 'Export nicht erlaubt': Datensätze sind in der Sachdatenabfrage grundsätzlich sichtbar, können jedoch nicht exportiert werden.&#xa;- 'nur Sachdaten': Der Export eines Datensatzes ist nur in Nicht-Geometrie-Formate möglich.&#xa;- 'Sach- und Geometriedaten': Default. Der Export eines Datensatzes ist in alle Datenformate möglich.&#xa;&#xa;Attributbezogene Rechte:&#xa;- 'kein Zugriff': Das Attribut erscheint in der Sachdatenabfrage nicht.&#xa;- 'lesen': Das Attribut erscheint in der Sachdatenabfrage, ist aber nicht editierbar.&#xa;- 'editieren': Das Attribut erscheint in der Sachdatenabfrage und ist editierbar.&#xa;&#xa;Ist für das Geometrie-Attribut ('the_geom') das Privileg 'kein Zugriff' eingetragen, kann man nicht von der Sachdatenanzeige in die Karte auf das Objekt zoomen. Dafür muß es mindestens lesbar sein.&#xa;Damit ein Attribut in der Layer-Suche als Suchoption zur Verfügung steht, muss es mindestens lesbar sein.&#xa;&#xa;Tooltip: Inhalt des angehakten Attributs erscheint in der Karte beim Hovern über ein Objekt. Funktioniert auch mit Fotos.&#xa;&#xa;Hinweis 'Default-Rechte allen Stellen zuweisen': Je nach nach Anzahl der Stellen und Attribute kann eine sehr große Anzahl an Formularvariablen übermittelt werden. Möglicherweise muss dafür in der php.ini der Wert für max_input_vars hoch gesetzt werden."></span>
+				</div>
 			</div>
   	</td>
   </tr>
@@ -145,14 +241,13 @@ function save(stelle){
 				<tr>
 					<td></td>
 					<td></td>
-					<td>
-						<? 
-						$stellenanzahl = count($this->stellen['ID']);
+					<td><?
+						$stellenanzahl = ($this->stellen ? count($this->stellen['ID']) : 0);
 						if($stellenanzahl > 0){
-						$width1 = $width = 280*$stellenanzahl;
-						if($width > 840)$width = 840;
-						if($width1 > 840){ ?>
-						<div id="upperscrollbar" style="overflow:auto; overflow-y:hidden;width:840px" onscroll="document.getElementById('stellendiv').scrollLeft=this.scrollLeft">
+						$width1 = $width = 297*$stellenanzahl;
+						if($width > 1187)$width = 1187;
+						if($width1 > 1187){ ?>
+						<div id="upperscrollbar" style="overflow:auto; overflow-y:hidden;width:1187px" onscroll="document.getElementById('stellendiv').scrollLeft=this.scrollLeft">
 							<div style="width:<? echo $width1; ?>px;height:1px"></div>
 						</div>
 						<? } ?>
@@ -160,20 +255,22 @@ function save(stelle){
 				</tr>
   			<tr>
 			  	<td valign="top">
-			  		<div style="border:1px solid black;">
-							<table border="1" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
+			  		<div class="apf-template-div-default">
+							<table border="0" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
 								<tr>  	
-			  					<? include(LAYOUTPATH.'snippets/attribute_privileges_template.php'); ?>
+			  					<? $template_div = 'default'; ?>
+								<? include(LAYOUTPATH.'snippets/attribute_privileges_template.php'); ?>
 			  				</tr>
 							</table>
 						</div>
 					<td>	
 					<td valign="top">
-						<div id="stellendiv" style="border:1px solid black; width:<? echo $width; ?>px; float:right; overflow:auto; overflow-y:hidden" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
-							<table border="1" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
+						<div id="stellendiv" class="apf-template-div" style="width:<? echo $width; ?>px;" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
+							<table border="0" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
 								<tr>
 							<?
 								for($s = 0; $s < count($this->stellen['ID']); $s++){
+									$template_div = '';
 									$this->stelle = new stelle($this->stellen['ID'][$s], $this->database);
 									$this->layer = $this->stelle->getLayer($this->formvars['selected_layer_id']);
 									$this->attributes_privileges = $this->stelle->get_attributes_privileges($this->formvars['selected_layer_id'], true);
@@ -199,7 +296,8 @@ function save(stelle){
 <input type="hidden" name="go" value="Layerattribut-Rechteverwaltung">
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="stelle" value="">
-
+<input type="hidden" name="from_layer_id" value="">
+<input type="hidden" name="to_layer_id" value="">
 <script type="text/javascript">
 
 	if(document.getElementById("stellendiv"))document.getElementById("stellendiv").scrollLeft="<? echo $this->formvars['scrollposition']; ?>"

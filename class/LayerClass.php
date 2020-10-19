@@ -3,8 +3,8 @@ class LayerClass extends MyObject {
 
 	static $write_debug = false;
 
-	function LayerClass($gui) {
-		$this->MyObject($gui, 'classes');
+	function __construct($gui) {
+		parent::__construct($gui, 'classes');
 		$this->identifier = 'Class_ID';
 	}
 

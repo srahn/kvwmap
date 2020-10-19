@@ -122,9 +122,9 @@ function buildwktlinefromsvgpath(svgpath){
 				</tr>
 				<tr>
 					<? if($this->new_entry != true){ ?>
-					<td align="center"><input type="button" style="visibility:hidden" name="split" value="Geometrie in neue Objekte aufteilen" onclick="split_geometries();"></td>
+					<td style="height: 34px" align="center"><input type="button" <? if($this->lines['numgeometries'] < 2){ echo 'style="visibility:hidden"';} ?> name="split" value="Geometrie in neue Objekte aufteilen" onclick="split_geometries();"></td>
 					<? }else{ ?>
-					<td style="height: 24px">&nbsp;</td>
+					<td style="height: 34px">&nbsp;</td>
 					<? } ?>
 				</tr>
 				<tr>

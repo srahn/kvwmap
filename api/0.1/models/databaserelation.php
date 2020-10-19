@@ -1,4 +1,5 @@
 <?php
+# depricated since connections are in mysql table connections
 class Databaserelation {
 	var $host = "localhost";
 	var $port = "5432";

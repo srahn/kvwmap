@@ -5,16 +5,6 @@
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
 	
-	# falls das Geometrie-Attribut editierbar ist, zum nicht eingebetteten Formular wechseln
-	if($layer['attributes']['privileg'][$layer['attributes']['indizes'][$layer['attributes']['the_geom']]] == 1){
-		$this->formvars['embedded'] = '';
-		echo '
-		<script type="text/javascript">
-			location.href = \'index.php?'.http_build_query($this->formvars).'\'
-		</script>';
-		exit;
-	}
-
 	$size = 40;
 	$select_width = 'width:290px;';
 
@@ -47,7 +37,7 @@
 		
 		$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
 		if (is_array($layer['attributes']['privileg'])) {
-			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
+			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't' OR $this->formvars['attribute_privileg'] == '0') {
 				$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
 			}
 		}
@@ -67,7 +57,7 @@
 				if($layer['shape'][$k][$layer['attributes']['name'][$j]] == ''){
 					$layer['shape'][$k][$layer['attributes']['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j]];
 				}
-				if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
+				if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['saveable'][$j] == '0')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 					$layer['attributes']['form_element_type'][$j] .= '_not_saveable';
 				}
 				
@@ -196,7 +186,7 @@
 
 <?
 
-	for($l = 0; $l < count($invisible_attributes[$layer['Layer_ID']]); $l++){
+	for($l = 0; $l < @count($invisible_attributes[$layer['Layer_ID']]); $l++){
 		echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 	}
 
@@ -205,6 +195,14 @@
 <script type="text/javascript">
 	var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
 	[].forEach.call(vchangers, function(vchanger){vchanger.oninput();});
+	
+	var input_fields = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.subform_<? echo $layer['Layer_ID']; ?>, input');
+	for(var input_field of input_fields){
+		if(input_field.type != 'hidden' && !input_field.readonly && input_field.style.display != 'none'){
+			input_field.focus();
+			break;
+		}
+	}
 </script>
 
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_name; ?>">

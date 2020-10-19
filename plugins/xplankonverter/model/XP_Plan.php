@@ -7,14 +7,14 @@ class XP_Plan extends PgObject {
 
 	static $schema = 'xplan_gml';
 
-	function XP_Plan($gui, $planart, $select = '*') {
+	function __construct($gui, $planart, $select = '*') {
 		$this->planart = $planart;
 		$this->planartAbk = strtolower(substr($planart, 0, 2));
 		$this->tableName = $this->planartAbk . '_plan';
 		$this->umlName = strtoupper($this->planartAbk) . '_Plan';
 		$this->bereichTableName = $this->planartAbk . '_bereich';
 		$this->bereichUmlName = strtoupper($this->planartAbk) . '_Bereich';
-		$this->PgObject($gui, XP_Plan::$schema, $this->tableName);
+		parent::__construct($gui, XP_Plan::$schema, $this->tableName);
 		$this->bereiche = array();
 		$this->select = $select;
 		$this->identifier = 'gml_id';
@@ -97,7 +97,45 @@ class XP_Plan extends PgObject {
 		");
 		return $bereiche;
 	}
-	
+
+	/*
+	* Fügt einen Zusatz zum existierenden Kommentar hinzu falls dieser Zusatz nicht schon im Kommentar existiert.
+	* @param string $zustatz, Der Text, der angehängt wird falls er noch nicht existiert
+	*/
+	function add_kommentar_if_not_exists($zusatz) {
+		if (strpos($this->get('kommentar'), $zusatz) === false) {
+			# Hinweis an Kommentar anhängen, weil richtig aber noch nicht vorhanden
+			$this->set(
+				'kommentar',
+				$this->get('kommentar')
+				. ($this->get('kommentar') != '' ? ' ' : '')
+				. $zusatz
+			);
+			$this->update_attr(array("kommentar = '" . $this->get('kommentar') . "'"));
+		}
+	}
+
+	/*
+	* Entfernt einen Zusatz aus einem Kommentar falls dieser darin enthalten ist.
+	* @param string $zusatz, Der Text, der entfernt werden soll falls er existiert
+	*/
+	function remove_kommentar_if_exists($zusatz) {
+		if (strpos($this->get('kommentar'), $zusatz) !== false) {
+			# Hinweis aus Kommentar löschen, weil vorhanden, aber nicht mehr richtig
+			$this->set(
+				'kommentar',
+				trim(
+					str_replace(
+						$zusatz,
+						'',
+						$this->get(kommentar)
+					)
+				)
+			);
+			$this->update_attr(array("kommentar = '" . $this->get('kommentar') . "'"));
+		}
+	}
+
 	/*
 	* Löscht den Plan und alles was damit verbunden ist
 	* Löscht die Bereiche

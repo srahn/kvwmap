@@ -2,26 +2,18 @@
 <script type="text/javascript">
 	
 	function schnellsuche(){
-		save = document.GUI.go.value;
-		document.GUI.go.value = 'SchnellSuche_Suchen';
-		if(document.GUI.legendtouched == undefined || document.GUI.legendtouched.value == 0){		// nur wenn die Legende nicht angefasst wurde, per ajax-Request (wenn Anzeige in extra Fenster eingestellt) laden, ansonsten kompletter submit
-			overlay_submit(document.GUI, true);
-			document.GUI.go.value = save;
+		var data = '';
+		form_fields = Array.prototype.slice.call(document.querySelectorAll('.quicksearch_field'));
+  	for(i = 0; i < form_fields.length; i++){
+			data += '&' + form_fields[i].name + '=' + form_fields[i].value;
 		}
-		else{
-			document.GUI.submit();
-		}
+		window.location.href = 'index.php?go=SchnellSuche_Suchen&quicksearch_layer_id='+document.GUI.quicksearch_layer_id.value+data;
 	}
 
 	function keydown(event){
 		var key = event.keyCode;
 		if (key == 13) {
-			value = event.target.value;
-			if(document.getElementById('operator_'+event.target.id).value == 'LIKE'){
-				event.target.value = '%'+value+'%';
-			}
 			schnellsuche();
-			event.target.value = value;
 			preventDefault(event);		// form-submit unterdruecken
 		}		
 	}
@@ -55,7 +47,7 @@
 	
 	if(count($quicksearch_layer_ids) > 0){
 		$quicksearch_layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL, NULL, $quicksearch_layer_ids);
-		if(count($quicksearch_layerdaten['ID']) > 0){
+		if(@count($quicksearch_layerdaten['ID']) > 0){
 ?>
 		<table>
 			<tr>

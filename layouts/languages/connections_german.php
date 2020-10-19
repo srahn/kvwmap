@@ -1,0 +1,9 @@
+﻿<?php
+	$strTitle="Datenbankverbindungen";
+	$strName="Name";
+	$strHost="Host";
+	$strPort="Port";
+	$strDbName="Datenbankname";
+	$strUser="Datenbanknutzer";
+	$strPasswort="Passwort";
+?>

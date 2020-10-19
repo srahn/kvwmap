@@ -199,26 +199,16 @@
 	top.document.getElementById("svghelp").SVGmoveback = moveback;
 	
 	top.document.getElementById("svghelp").SVGstartup = startup;
-	
+		
 	function moveback(evt){
-		// bei allen anderen Browsern gibt es kein onload für das Kartenbild, deswegen wird diese Funktion als erstes ausgefuehrt
-		document.getElementById("mapimg").setAttribute("xlink:href", "'.dirname($_SERVER['SCRIPT_NAME']).'/'.GRAPHICSPATH.'leer.gif");
-		document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
-		// Tooltip refreshen
-		oldmousex = undefined;
-		// Navigation wieder erlauben
-		top.stopwaiting();
-	}
-	
-	function moveback_ff(evt){
 		// beim Firefox wird diese Funktion beim onload des Kartenbildes ausgefuehrt
 		document.getElementById("mapimg2").setAttribute("style", "display:block");	
-		window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));startup();\', 200);
+		window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("href", document.getElementById("mapimg2").getAttribute("href"));startup();\', 200);
 		// Tooltip refreshen
 		oldmousex = undefined;
 		// Navigation wieder erlauben
 		top.stopwaiting();
-		window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 400);
+		window.setTimeout(\'document.getElementById("mapimg2").setAttribute("href", "")\', 400);
 		window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 400);	
 	}
 
@@ -239,13 +229,13 @@
 	function go_previous(){
 	  document.getElementById("canvas").setAttribute("cursor", "wait");
 	  enclosingForm.CMD.value  = "previous";
-	  submit();
+    get_map_ajax(\'go=navMap_ajax\');
 	}
 	
 	function go_next(){
 	  document.getElementById("canvas").setAttribute("cursor", "wait");
 	  enclosingForm.CMD.value  = "next";
-	  submit();
+	  get_map_ajax(\'go=navMap_ajax\');
 	}	
 
 	function zoomin(){
@@ -453,9 +443,9 @@
       enclosingForm.pathy.value    = pathy;
   }
 
-  function Full_Extent()   {
-      enclosingForm.CMD.value  = "Full_Extent";
-      submit();
+  function Full_Extent(){
+    enclosingForm.CMD.value = "Full_Extent";
+    get_map_ajax(\'go=navMap_ajax\');
   }
 
 	function checkQueryFields(){
@@ -482,22 +472,22 @@
      case "zoomin_point":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
       enclosingForm.CMD.value          = "zoomin";
-      get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value+\'&height_reduction=\'+enclosingForm.height_reduction.value);
+      get_map_ajax(\'go=navMap_ajax\');
      break;
      case "zoomout":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
       enclosingForm.CMD.value          = cmd;
-      get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value+\'&height_reduction=\'+enclosingForm.height_reduction.value);
+      get_map_ajax(\'go=navMap_ajax\');
      break;
      case "zoomin_box":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
       enclosingForm.CMD.value          = "zoomin";
-      get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value+\'&height_reduction=\'+enclosingForm.height_reduction.value);
+      get_map_ajax(\'go=navMap_ajax\');
      break;
      case "recentre":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
       enclosingForm.CMD.value = cmd;
-			get_map_ajax(\'go=navMap_ajax&width_reduction=\'+enclosingForm.width_reduction.value+\'&height_reduction=\'+enclosingForm.height_reduction.value);
+			get_map_ajax(\'go=navMap_ajax\');
      break;
      case "ppquery_point":
 			if(!checkQueryFields())break;
@@ -663,7 +653,7 @@
 		startup();
 		if(window.addEventListener){
 			if(top.browser != "other"){
-				document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback_ff(evt); }, true);
+				document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(evt); }, true);
 			}
 			window.addEventListener(\'mousewheel\', mousewheelchange, {passive: false}); // Chrome/Safari//IE9
 			window.addEventListener(\'DOMMouseScroll\', mousewheelchange, {passive: false});		//Firefox
@@ -1013,7 +1003,7 @@ function mouseup(evt){
 		endPoint(evt);
 		enclosingForm.secondpoly.value = "true";
 		if(enclosingForm.last_doing.value == "add_geom"){
-			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&operation=add_geometry&resulttype=svgwkt&fromwhere="+enclosingForm.fromwhere.value+"&singlegeom="+enclosingForm.singlegeom.checked+"&orderby="+enclosingForm.orderby.value+"&columnname="+enclosingForm.columnname.value+"&geom_from_layer="+enclosingForm.geom_from_layer.value,new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&operation=add_geometry&resulttype=svgwkt&singlegeom="+enclosingForm.singlegeom.checked+"&orderby="+enclosingForm.orderby.value+"&geom_from_layer="+enclosingForm.geom_from_layer.value,new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 			if(polygonfunctions == true){
 				enclosingForm.firstpoly.value = "true";
 			}
@@ -1023,7 +1013,7 @@ function mouseup(evt){
 		}
 		else{
 			if(enclosingForm.last_doing.value == "subtract_geom"){
-				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&operation=subtract_geometry&resulttype=svgwkt&fromwhere="+enclosingForm.fromwhere.value+"&singlegeom="+enclosingForm.singlegeom.checked+"&orderby="+enclosingForm.orderby.value+"&columnname="+enclosingForm.columnname.value+"&geom_from_layer="+enclosingForm.geom_from_layer.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&operation=subtract_geometry&resulttype=svgwkt&singlegeom="+enclosingForm.singlegeom.checked+"&orderby="+enclosingForm.orderby.value+"&geom_from_layer="+enclosingForm.geom_from_layer.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 			}
 		}
 	}
@@ -3138,7 +3128,7 @@ function mouseup(evt){
 				pathx_second.pop();
 				pathy_second.pop();
 			}
-			path_second = buildsvgpath(pathx_second, pathy_second);
+			path_second = "";
 			redrawsecondpolygon();
 			enclosingForm.secondpoly.value = false;
 			enclosingForm.pathx_second.value = "";
@@ -3151,7 +3141,7 @@ function mouseup(evt){
 		enclosingForm.last_doing.value = "subtract_polygon";
 	}
 
-	function add_polygon(){
+	function add_polygon(){		
 		var alles = pathx_second.length;
 		for(var i = 0; i < alles; ++i){
 			pathx_second.pop();
@@ -3575,7 +3565,7 @@ $measurefunctions = '
 	$canvaswithall = '
 	  <rect id="background" style="fill:white" width="100%" height="100%"/>
 		<g id="moveGroup" transform="translate(0 0)">
-			<image id="mapimg" xlink:href="'.$bg_pic.'" height="100%" width="100%" y="0" x="0"/>
+			<image id="mapimg" href="'.$bg_pic.'" height="100%" width="100%" y="0" x="0"/>
 		  <g id="cartesian" transform="translate(0,'.$res_y.') scale(1,-1)">
 				<path d="" id="line_second" style="fill:none;stroke:red;stroke-width:2" />
 		  	<path d="" id="line_first" style="fill:none;stroke:blue;stroke-width:2"/>
@@ -3594,7 +3584,7 @@ $measurefunctions = '
 			<g id="foreignvertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>
 	  </g>
 		<g id="mapimg2_group">
-			<image id="mapimg2" xlink:href="" height="100%" width="100%" y="0" x="0" style="display:none"/>
+			<image id="mapimg2" href="" height="100%" width="100%" y="0" x="0" style="display:none"/>
 		</g>
 	  <g id="templates">
 	  	<circle style="-moz-user-select: none;" id="kreis" cx="-5000" cy="-5000" r="7" opacity="0.3" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="select_vertex(evt)" onmousemove="move_vertex(evt)" onmouseup="end_vertex_move(evt)" />

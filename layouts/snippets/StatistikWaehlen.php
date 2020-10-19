@@ -1,6 +1,4 @@
-<SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 <script type="text/javascript">
-Text[1]=["Tipp:","Durch die Auswahl zwischen Stelle und Nutzer kann die Statistik so angepasst werden, dass die Zugriffe pro Layer und Stelle oder die Zugriffe pro Layer und Nutzer angezeigt werden können. Wählt man hierbei Stelle und Nutzer aus, werden die Zugriffe pro Layer durch den Nutzer über eine bestimmt Stelle angezeigt."]
 
 function display(id) {
   if (id=="tablemonth") {
@@ -101,7 +99,7 @@ function display(id) {
               <? 
               for($i = 2005; $i <= date('Y'); $i++){
               	echo '<option value="'.$i.'"';
-              	if ($this->formvars['year_m'] == $i){
+              	if ($this->formvars['year_w'] == $i){
               		echo ' selected';
               	}
               	echo '>'.$i.'</option>';
@@ -143,7 +141,7 @@ function display(id) {
               <? 
               for($i = 2005; $i <= date('Y'); $i++){
               	echo '<option value="'.$i.'"';
-              	if ($this->formvars['year_m'] == $i){
+              	if ($this->formvars['year_d'] == $i){
               		echo ' selected';
               	}
               	echo '>'.$i.'</option>';
@@ -187,7 +185,7 @@ function display(id) {
               <? 
               for($i = 2005; $i <= date('Y'); $i++){
               	echo '<option value="'.$i.'"';
-              	if ($this->formvars['year_m'] == $i){
+              	if ($this->formvars['year_e1'] == $i){
               		echo ' selected';
               	}
               	echo '>'.$i.'</option>';
@@ -229,7 +227,7 @@ function display(id) {
               <? 
               for($i = 2005; $i <= date('Y'); $i++){
               	echo '<option value="'.$i.'"';
-              	if ($this->formvars['year_m'] == $i){
+              	if ($this->formvars['year_e2'] == $i){
               		echo ' selected';
               	}
               	echo '>'.$i.'</option>';
@@ -250,10 +248,7 @@ function display(id) {
           <td>&nbsp; </td>
           <td>&nbsp;</td>
           <td align="right" >
-						<div>
-							<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()">
-							<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;"></DIV>
-						</div>
+						<span style="--left: -400px" data-tooltip="Durch die Auswahl zwischen Stelle und Nutzer kann die Statistik so angepasst werden, dass die Zugriffe pro Layer und Stelle oder die Zugriffe pro Layer und Nutzer angezeigt werden können. Wählt man hierbei Stelle und Nutzer aus, werden die Zugriffe pro Layer durch den Nutzer über eine bestimmt Stelle angezeigt."></span>
 					</td>
         </tr>
         <tr> 
@@ -283,11 +278,9 @@ function display(id) {
           <td colspan="2" align="center"> <select name="nutzer">
               <!-- onChange="document.GUI.submit()"-->
               <option value=""></option>
-              <?php 
-			for ($i=0;$i<count($this->UserDaten);$i++) { ?>
-              <option value="<?php echo $this->UserID=$this->UserDaten[$i]['ID']; ?>" <?php if ($this->formvars['nutzer']==$this->UserDaten[$i]['ID']) { ?> selected<?php } ?>><?php echo $this->UserDaten[$i]['Name'].', '.$this->UserDaten[$i]['Vorname']; ?></option>
-              <?php  
-           }  ?>
+				<?	for ($i=0;$i<count($this->UserDaten['ID']);$i++) { ?>
+							<option value="<?php echo $this->UserID=$this->UserDaten['ID'][$i]; ?>" <?php if ($this->formvars['nutzer']==$this->UserDaten['ID'][$i]) { ?> selected<? } ?>><? echo $this->UserDaten['Bezeichnung'][$i]; ?></option>
+				<? 	} ?>
             </select>
           </td>
         </tr>

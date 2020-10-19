@@ -1,5 +1,6 @@
 <?php
 	$this->strAnd = "and";
+	$this->strHelp = "Help";
 	$this->strID="ID";
 	$this->strName="Name";
 	$this->strGroup="Group";
@@ -56,4 +57,5 @@
 	$this->strShowMore="Show more";
 	$this->strShowLess="Show less";
 	$this->strLayerParameters="Layer Parameter";
+	$this->strHatching="Hatching";
 ?>

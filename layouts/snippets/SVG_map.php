@@ -45,9 +45,10 @@
   <SCRIPT type="text/ecmascript"><!--
 
 	var nbh = new Array();
-  function go_cmd(cmd)   {
-      document.GUI.CMD.value  = cmd;
-      document.GUI.submit();
+	
+  function go_cmd(cmd){
+    document.GUI.CMD.value  = cmd;
+		get_map_ajax('go=navMap_ajax', '', '');
   }
 	
 	function moveback(){	
@@ -538,8 +539,8 @@ function getEventPoint(evt) {
 
 function init(){
 	startup();
-	if(top.browser != "other"){
-		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback_ff(evt); }, true);
+	if(top.browser != "ie"){
+		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(evt); }, true);
 	}
 	if (window.addEventListener) {
 			window.addEventListener(\'mousewheel\', mousewheelchange, {passive: false}); // Chrome/Safari//IE9
@@ -558,10 +559,10 @@ top.document.getElementById("map").SVGstartup = startup;		// das ist ein Trick, 
 
 top.document.getElementById("svghelp").SVGmoveback = moveback;
 
-function moveback_ff(evt){
-	// beim Firefox wird diese Funktion beim onload des Kartenbildes ausgefuehrt
+function moveback(evt){
+	// diese Funktion dient dazu die verschobene moveGroup wieder zurueck zu schieben
 	document.getElementById("mapimg2").setAttribute("style", "display:block");	
-	window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));startup();\', 200);
+	window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("href", document.getElementById("mapimg2").getAttribute("href"));startup();\', 200);
 	// Redlining-Sachen loeschen
 	while(child = document.getElementById("redlining").firstChild){
   	document.getElementById("redlining").removeChild(child);
@@ -571,7 +572,7 @@ function moveback_ff(evt){
 	hidetooltip(evt);
 	// Navigation wieder erlauben
 	top.stopwaiting();
-	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 400);
+	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("href", "")\', 400);
 	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 400);	
 }
 
@@ -584,23 +585,6 @@ function sleep(milliseconds) {
       break;
     }
   }
-}
-
-
-
-function moveback(evt){
-	// bei allen anderen Browsern gibt es kein onload für das Kartenbild, deswegen wird diese Funktion als erstes ausgefuehrt
-	document.getElementById("mapimg").setAttribute("xlink:href", "'.dirname($_SERVER['SCRIPT_NAME']).'/'.GRAPHICSPATH.'leer.gif");
-	document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
-	// Redlining-Sachen loeschen
-	while(child = document.getElementById("redlining").firstChild){
-  	document.getElementById("redlining").removeChild(child);
-	}
-	// Tooltip refreshen
-	oldmousex = undefined;
-	hidetooltip(evt);
-	// Navigation wieder erlauben
-	top.stopwaiting();
 }
 
 function go_previous(){
@@ -1223,6 +1207,8 @@ function polygonarea(){
 		label.setAttribute("x", Math.floor(bbox.x + bbox.width/2.0) - 50);
 		label.setAttribute("y", -1 * (Math.floor(bbox.y + bbox.height/2.0)));		
 		label.textContent = "Fl"+unescape("%E4")+"cheninhalt: "+area+" m"+unescape("%B2")+" "+unescape("%A0");
+		top.document.getElementById("showmeasurement").style.display = "";
+		top.document.getElementById("measurement").value = area;
 		return;
 	}
 }
@@ -1520,7 +1506,9 @@ function showSectionMeasurement(j){
 	section_text = section_box.childNodes[3];		// 3, weil zwischen den eigentlichen Nodes noch Text steht (wahrscheinlich die Zeilenumbrueche)
 	section_rect.setAttribute("id", "");
 	section_text.setAttribute("id", "");
-	document.getElementById("moveGroup").appendChild(section_box);
+	document.getElementById("moveGroup").appendChild(section_box);	
+	top.document.getElementById("showmeasurement").style.display = "";
+	top.document.getElementById("measurement").value = top.format_number(new_distance, false, freehand_measuring, true);
 }
 
 function showMeasurement(evt){
@@ -1750,7 +1738,7 @@ function highlightbyid(id){
   </defs> 
   <rect id="background" style="fill:white" width="100%" height="100%"/>
   <g id="moveGroup" transform="translate(0 0)">
-    <image id="mapimg" xlink:href="'.$bg_pic.'" height="100%" width="100%" y="0" x="0"/>
+    <image id="mapimg" href="'.$bg_pic.'" height="100%" width="100%" y="0" x="0"/>
     <g id="cartesian" transform="translate(0,'.$res_y.') scale(1,-1)">
       <polygon points="" id="polygon" style="opacity:0.25;fill:yellow;stroke:black;stroke-width:2"/>
 			<text x="-1000" y="-1000" id="polygon_label" transform="scale(1, -1)" style="text-anchor:start;fill:rgb(0,0,0);stroke:none;font-size:12px;font-family:Arial;font-weight:bold"></text>
@@ -1766,7 +1754,7 @@ $svg.='
     </g>
   </g>
 	<g id="mapimg2_group">
-  	<image id="mapimg2" xlink:href="" height="100%" width="100%" y="0" x="0" style="display:none"/>
+  	<image id="mapimg2" href="" height="100%" width="100%" y="0" x="0" style="display:none"/>
   </g>
 	
   <rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt)" onmousemove="mousemove(evt);" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0"/>

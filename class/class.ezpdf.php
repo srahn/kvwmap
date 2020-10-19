@@ -25,7 +25,7 @@ var $ezPageCount=0;
 
 // ------------------------------------------------------------------------------
 
-function Cezpdf($paper='a4',$orientation='portrait'){
+function __construct($paper='a4',$orientation='portrait'){
 	// Assuming that people don't want to specify the paper size using the absolute coordinates
 	// allow a couple of options:
 	// orientation can be 'portrait' or 'landscape'
@@ -111,7 +111,7 @@ function Cezpdf($paper='a4',$orientation='portrait'){
 			$size[3] = ( $paper[1] / 2.54 ) * 72;
 		}
 	}
-	$this->Cpdf($size);
+	parent::__construct($size);
 	$this->ez['pageWidth']=$size[2];
 	$this->ez['pageHeight']=$size[3];
 	
@@ -1551,34 +1551,34 @@ function uline($info){
 
 function box($info){
   // a callback function to create a box around the text
+	$i = $info['nCallback'];
   $lineFactor=0.1; // the thickness of the line as a proportion of the height. also the drop of the line.
   switch($info['status']){
-    case 'start':
-    case 'sol':
-    
-      // the beginning of the underline zone
+    case 'start':    
       if (!isset($this->ez['links'])){
         $this->ez['links']=array();
       }
-      $i = $info['nCallback'];
-      $this->ez['links'][$i] = array('x'=>$info['x'],'y'=>$info['y'],'angle'=>$info['angle'],'decender'=>$info['decender'],'height'=>$info['height']);
+      $this->ez['links'][$i] = array('x'=>$info['x'],'y'=>$info['y'],'angle'=>$info['angle'],'decender'=>$info['decender'],'height'=>$info['height'], 'maxx'=>0);
       $this->saveState();
       $thick = $info['height']*$lineFactor;
       $this->setLineStyle($thick);
       break;
+		case 'eol': 
+			if($this->ez['links'][$i]['maxx'] < $info['x']){
+				$this->ez['links'][$i]['maxx'] = $info['x'];
+			}
+		break;
     case 'end':
-    case 'eol':
       // the end of the link
       // assume that it is the most recent opening which has closed
-      $i = $info['nCallback'];
       $start = $this->ez['links'][$i];
-      // add underlining
-      $a = deg2rad((float)$start['angle']-90.0);
-      $drop = $start['height']*$lineFactor*1.5;
-      $dropx = cos($a)*$drop;
-      $dropy = -sin($a)*$drop;
-			$this->rectangle($start['x']-$dropx, $start['y']-$dropy-1, $info['x']-$start['x'], $start['height']+1);
-      $this->restoreState();
+			if($start['maxx'] < $info['x']){
+				$start['maxx'] = $info['x'];
+			}
+			$oben = $start['y']+$start['height'];
+			$padding = 0.2 * $start['height'];
+			$this->rectangle($start['x']-1*$padding, $oben, $start['maxx']-$start['x']+2*$padding, $info['y']-$oben-2*$padding);
+     # $this->restoreState();
       break;
   }
 }

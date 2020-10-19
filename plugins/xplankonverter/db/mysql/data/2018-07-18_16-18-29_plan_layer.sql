@@ -194,7 +194,7 @@ INSERT INTO classes (`Name`, `Layer_ID`, `Expression`, `drawingorder`, `text`) V
 SET @last_class_id=LAST_INSERT_ID();
 
 -- Style 46 der Class 42
-INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`, `sizeitem`) VALUES (NULL, '', '1', '80 80 80', '', '0 0 0', NULL, '1', '360', '', NULL, NULL, NULL, NULL, '');
+INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`) VALUES (NULL, '', '1', '80 80 80', '', '0 0 0', NULL, '1', '360', '', NULL, NULL, NULL, NULL);
 SET @last_style_id=LAST_INSERT_ID();
 -- Zuordnung Style 46 zu Class 42
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
@@ -274,7 +274,7 @@ INSERT INTO classes (`Name`, `Layer_ID`, `Expression`, `drawingorder`, `text`) V
 SET @last_class_id=LAST_INSERT_ID();
 
 -- Style 45 der Class 41
-INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`, `sizeitem`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL, '');
+INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL);
 SET @last_style_id=LAST_INSERT_ID();
 -- Zuordnung Style 45 zu Class 41
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
@@ -321,7 +321,7 @@ INSERT INTO classes (`Name`, `Layer_ID`, `Expression`, `drawingorder`, `text`) V
 SET @last_class_id=LAST_INSERT_ID();
 
 -- Style 53 der Class 49
-INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`, `sizeitem`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL, '');
+INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL);
 SET @last_style_id=LAST_INSERT_ID();
 -- Zuordnung Style 53 zu Class 49
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
@@ -477,7 +477,7 @@ INSERT INTO classes (`Name`, `Layer_ID`, `Expression`, `drawingorder`, `text`) V
 SET @last_class_id=LAST_INSERT_ID();
 
 -- Style 48 der Class 44
-INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`, `sizeitem`) VALUES (NULL, '', '1', '80 80 80', '', '0 0 0', NULL, '1', '360', '', NULL, NULL, NULL, NULL, '');
+INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`) VALUES (NULL, '', '1', '80 80 80', '', '0 0 0', NULL, '1', '360', '', NULL, NULL, NULL, NULL);
 SET @last_style_id=LAST_INSERT_ID();
 -- Zuordnung Style 48 zu Class 44
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
@@ -557,7 +557,7 @@ INSERT INTO classes (`Name`, `Layer_ID`, `Expression`, `drawingorder`, `text`) V
 SET @last_class_id=LAST_INSERT_ID();
 
 -- Style 47 der Class 43
-INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`, `sizeitem`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL, '');
+INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL);
 SET @last_style_id=LAST_INSERT_ID();
 -- Zuordnung Style 47 zu Class 43
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
@@ -604,7 +604,7 @@ INSERT INTO classes (`Name`, `Layer_ID`, `Expression`, `drawingorder`, `text`) V
 SET @last_class_id=LAST_INSERT_ID();
 
 -- Style 56 der Class 52
-INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`, `sizeitem`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL, '');
+INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL);
 SET @last_style_id=LAST_INSERT_ID();
 -- Zuordnung Style 56 zu Class 52
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
@@ -759,7 +759,7 @@ INSERT INTO classes (`Name`, `Layer_ID`, `Expression`, `drawingorder`, `text`) V
 SET @last_class_id=LAST_INSERT_ID();
 
 -- Style 42 der Class 38
-INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`, `sizeitem`) VALUES (NULL, '', '1', '80 80 80', '', '0 0 0', NULL, '1', '360', '', NULL, NULL, NULL, NULL, '');
+INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`) VALUES (NULL, '', '1', '80 80 80', '', '0 0 0', NULL, '1', '360', '', NULL, NULL, NULL, NULL);
 SET @last_style_id=LAST_INSERT_ID();
 -- Zuordnung Style 42 zu Class 38
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
@@ -833,7 +833,7 @@ INSERT INTO classes (`Name`, `Layer_ID`, `Expression`, `drawingorder`, `text`) V
 SET @last_class_id=LAST_INSERT_ID();
 
 -- Style 41 der Class 37
-INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`, `sizeitem`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL, '');
+INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL);
 SET @last_style_id=LAST_INSERT_ID();
 -- Zuordnung Style 41 zu Class 37
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
@@ -880,7 +880,7 @@ INSERT INTO classes (`Name`, `Layer_ID`, `Expression`, `drawingorder`, `text`) V
 SET @last_class_id=LAST_INSERT_ID();
 
 -- Style 57 der Class 53
-INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`, `sizeitem`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL, '');
+INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL);
 SET @last_style_id=LAST_INSERT_ID();
 -- Zuordnung Style 57 zu Class 53
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
@@ -942,7 +942,7 @@ INSERT INTO classes (`Name`, `Layer_ID`, `Expression`, `drawingorder`, `text`) V
 SET @last_class_id=LAST_INSERT_ID();
 
 -- Style 49 der Class 45
-INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`, `sizeitem`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL, '');
+INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL);
 SET @last_style_id=LAST_INSERT_ID();
 -- Zuordnung Style 49 zu Class 45
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
@@ -1054,7 +1054,7 @@ INSERT INTO classes (`Name`, `Layer_ID`, `Expression`, `drawingorder`, `text`) V
 SET @last_class_id=LAST_INSERT_ID();
 
 -- Style 50 der Class 46
-INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`, `sizeitem`) VALUES (NULL, '', '1', '80 80 80', '', '0 0 0', NULL, '1', '360', '', NULL, NULL, NULL, NULL, '');
+INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`) VALUES (NULL, '', '1', '80 80 80', '', '0 0 0', NULL, '1', '360', '', NULL, NULL, NULL, NULL);
 SET @last_style_id=LAST_INSERT_ID();
 -- Zuordnung Style 50 zu Class 46
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
@@ -1101,7 +1101,7 @@ INSERT INTO classes (`Name`, `Layer_ID`, `Expression`, `drawingorder`, `text`) V
 SET @last_class_id=LAST_INSERT_ID();
 
 -- Style 55 der Class 51
-INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`, `sizeitem`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL, '');
+INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL);
 SET @last_style_id=LAST_INSERT_ID();
 -- Zuordnung Style 55 zu Class 51
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
@@ -1142,7 +1142,7 @@ INSERT INTO classes (`Name`, `Layer_ID`, `Expression`, `drawingorder`, `text`) V
 SET @last_class_id=LAST_INSERT_ID();
 
 -- Style 62 der Class 58
-INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`, `sizeitem`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL, '');
+INSERT INTO styles (`symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `antialias`, `width`, `minwidth`, `maxwidth`) VALUES (NULL, '', '6', '238 255 211', '', '35 203 0', NULL, '8', '360', '', NULL, NULL, NULL, NULL);
 SET @last_style_id=LAST_INSERT_ID();
 -- Zuordnung Style 62 zu Class 58
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);

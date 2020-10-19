@@ -26,8 +26,8 @@ class Konvertierung extends PgObject {
 	);
 	static $write_debug = false;
 
-	function Konvertierung($gui) {
-		$this->PgObject($gui, Konvertierung::$schema, Konvertierung::$tableName);
+	function __construct($gui) {
+		parent::__construct($gui, Konvertierung::$schema, Konvertierung::$tableName);
 	}
 
 	public static	function find_by_id($gui, $by, $id, $select = '*') {
@@ -39,6 +39,87 @@ class Konvertierung extends PgObject {
 			$konvertierung->get_plan();
 		}
 		return $konvertierung;
+	}
+
+	public static	function find_where_with_plan($gui, $where, $order = '') {
+		$konvertierung = new Konvertierung($gui);
+		$konvertierungen = $konvertierung->find_where($where, $order);
+		array_walk(
+			$konvertierungen,
+			function($k) {
+				if ($k->get('planart') != '') {
+					$k->get_plan();
+				}
+			}
+		);
+		return $konvertierungen;
+	}
+
+	public static function find_by_document($gui, $document) {
+		$parts = explode('_', APPLVERSION);
+		$dev = (trim(end($parts),'/') == 'dev' ? '_dev' : '');
+		$path = pathinfo($document);
+		$konvertierung = new Konvertierung($gui);
+		switch (strToLower($path['extension'])) {
+			case 'gml' :
+				$konvertierungen = $konvertierung->find_where('id = ' . explode('_', $path['filename'])[1] . ' AND veroeffentlicht');
+				if (count($konvertierungen) == 0) return false;
+				$konvertierung = $konvertierungen[0];
+				$konvertierung->exportfile = '/var/www/data' . $dev . '/upload/xplankonverter/' . $konvertierung->get('id') . '/xplan_gml' . $document;
+				$konvertierung->contenttype = 'text/xml';
+				return $konvertierung;
+			case 'pdf' :
+				$sql = "
+					SELECT
+						*
+					FROM
+						(
+							SELECT
+								k.*,
+								(unnest(p.externereferenz)).referenzurl
+							FROM
+								xplan_gml.bp_plan p JOIN
+								xplankonverter.konvertierungen k ON p.konvertierung_id = k.id
+						) sub
+					WHERE
+						sub.referenzurl LIKE '%" . $path['basename'] . "%' AND
+						" . ($_SESSION['angemeldet'] ? 'true' : "sub.veroeffentlicht") . "
+				";
+				#echo '<br>Sql zur Abfrage der Konvertierung: ' . $sql;
+				$rows = $konvertierung->getSQLResults($sql)[0];
+				if (count($rows) == 0) return false;
+				$konvertierung->data = $rows[0];
+				$konvertierung->exportfile = '/var/www/data' . $dev . '/xplankonverter/plaene' . $document;
+				$konvertierung->contenttype = 'application/pdf';
+				return $konvertierung;
+			case 'jpg' :
+				$filename = get_name_from_thump($path['basename']);
+				$sql = "
+					SELECT
+						*
+					FROM
+						(
+							SELECT
+								k.*,
+								(unnest(p.externereferenz)).referenzurl
+							FROM
+								xplan_gml.bp_plan p JOIN
+								xplankonverter.konvertierungen k ON p.konvertierung_id = k.id
+						) sub
+					WHERE
+						right(sub.referenzurl, position('/' in reverse(sub.referenzurl)) - 1) LIKE '" . $filename . "%' AND
+						" . ($_SESSION['angemeldet'] ? 'true' : "sub.veroeffentlicht") . "
+				";
+				#echo '<br>Sql zur Abfrage der Konvertierung: ' . $sql;
+				$rows = $konvertierung->getSQLResults($sql)[0];
+				if (count($rows) == 0) return false;
+				$konvertierung->data = $rows[0];
+				$konvertierung->exportfile = '/var/www/data' . $dev . '/xplankonverter/plaene' . $document;
+				$konvertierung->contenttype = 'image/jpg';
+				return $konvertierung;
+			default :
+				return false;
+		}
 	}
 
 	function create($anzeige_name, $epsg_code, $input_epsg_code, $planart, $stelle_id, $user_id) {
@@ -57,6 +138,7 @@ class Konvertierung extends PgObject {
 		$this->debug->show('Create new konvertierung with sql: ' . $sql, Konvertierung::$write_debug);
 		$query = pg_query($this->database->dbConn, $sql);
 		$oid = pg_last_oid($query);
+		#echo '<br>oid: ' . $oid;
 		if (empty($oid)) {
 			$this->lastquery = $query;
 		}
@@ -75,6 +157,7 @@ class Konvertierung extends PgObject {
 			$this->set($this->identifier, $row[$this->identifier]);
 		}
 		$this->debug->show('Konvertierung created with ' . $this->identifier . ': '. $this->get($this->identifier), Konvertierung::$write_debug);
+		#echo '<br>return identifier: ' . $this->identifier . ': ' . $this->get($this->identifier);
 		return $this->get($this->identifier);
 	}
 
@@ -106,6 +189,61 @@ class Konvertierung extends PgObject {
 	function get_file_name($name) {
 		$parts = explode('_', $name);
 		return $this->get_file_path($name) . '/' . $parts[0] . '_' . $this->get('id') . '.' . $parts[1];
+	}
+
+	function create_edited_shapes() {
+		$path = $this->get_file_path('edited_shapes');
+		$this->debug->show('Erzeuge Edited-Shape-Files in. ' . $path, Konvertierung::$write_debug);
+		$export_class = new data_import_export();
+
+		$this->debug->show('Frage Source-Tabellen ab: ', Konvertierung::$write_debug);
+		$sql = "
+			SELECT
+				table_name
+			FROM
+				information_schema.tables
+			WHERE
+				table_schema = 'xplan_shapes_" . $this->get('id') . "'
+		";
+
+		$this->debug->show('sql: ' . $sql, Konvertierung::$write_debug);
+		$result = pg_fetch_all(
+			pg_query($this->database->dbConn, $sql)
+		);
+
+		$class_names = [];
+		if ($result) {
+			$class_names = array_map(
+				function($row) {
+					return $row['table_name'];
+				},
+				$result
+			);
+		}
+		else {
+			$class_names = array();
+		}
+
+		$this->debug->show('Erzeuge Shape-Dateien für jede Klasse:', Konvertierung::$write_debug);
+		foreach ($class_names AS $class_name) {
+			$result = pg_query($this->database->dbConn, $sql);
+			//$result = pg_fetch_assoc($query);
+			if(pg_num_rows($result) == 0) {
+				continue;
+			} else {
+				while($row = pg_fetch_array($result)){
+					$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
+					$sql = "
+						SELECT
+							*
+						FROM
+							xplan_shapes_" . $this->get('id') . "." . $class_name . "
+					";
+					$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
+					$export_class->ogr2ogr_export($sql, '"ESRI Shapefile"', $path . '/' . ltrim($class_name, 'shp_') . '.shp', $this->database);
+				}
+			}
+		}
 	}
 
 	function create_xplan_shapes() {
@@ -358,7 +496,7 @@ class Konvertierung extends PgObject {
 				r.class_name
 			FROM
 				xplankonverter.regeln r LEFT JOIN
-				xplan_gml." . $this->plan->planartAbk . "_bereich b ON r.bereich_gml_id = b.gml_id left JOIN
+				xplan_gml." . $this->plan->planartAbk . "_bereich b ON r.bereich_gml_id = b.gml_id LEFT JOIN
 				xplan_gml." . $this->plan->planartAbk . "_plan bp ON b.gehoertzuplan = bp.gml_id::text LEFT JOIN
 				xplan_gml." . $this->plan->planartAbk . "_plan rp ON r.konvertierung_id = rp.konvertierung_id
 			WHERE
@@ -525,11 +663,15 @@ class Konvertierung extends PgObject {
 		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'detaillierte_requires_bedeutung');
 		$validierung->konvertierung_id = $this->get('id');
 		$bereiche = $this->plan->get_bereiche();
-		foreach($bereiche AS $bereich) {
+		foreach ($bereiche AS $bereich) {
 			$validierung->detaillierte_requires_bedeutung($bereich);
 		}
 
-		if(!empty($regeln)){
+		if (count($bereiche) == 0) {
+			$this->gui->add_message('warning', 'Die Validierung liefert kein Ergebnis, weil zum Plan keine Bereiche hinzugefügt wurden!');
+		}
+
+		if (!empty($regeln)) {
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'regel_existiert');
 			$validierung->konvertierung_id = $this->get('id');
 			if ($validierung->regel_existiert($regeln)) {
@@ -549,10 +691,175 @@ class Konvertierung extends PgObject {
 						}*/
 					}
 				}
+				$alle_sql_ausfuehrbar = true;
 				$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'alle_sql_ausfuehrbar');
 				$validierung->konvertierung_id = $this->get('id');
-				$validierung->alle_sql_ausfuehrbar($success);
+				foreach ($regeln AS $regel) {
+					if (!$validierung->sql_ausfuehrbar($regel)) {
+						$alle_sql_ausfuehrbar = false;
+					}
+				}
+				$validierung->alle_sql_ausfuehrbar($alle_sql_ausfuehrbar);
+
+				if ($alle_sql_ausfuehrbar) {
+					# Prüft die Konformitäten der Klassen der Konvertierung für die aktuelle Version
+					#echo $this->get_version_from_ns_uri(XPLAN_NS_URI);
+					foreach ($this->get_konformitaetsbedingungen($this->get_version_from_ns_uri(XPLAN_NS_URI)) AS $bedingung) {
+						foreach ($bedingung['konformitaet']->validierungen AS $validierung) {
+							$validierung->validiere_konformitaet($this->get('id'), $bedingung);
+						}
+					}
+
+					if (in_array($this->get('planart'), array('BP-Plan', 'FP-Plan', 'SO-Plan'))) {
+						# Flächenschlussprüfung
+						$this->clearTopology();
+						# Create topology of plan objects
+						$this->createTopology();
+						$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'flaechenschluss_ueberlappungen');
+						$validierung->konvertierung_id = $this->get('id');
+						$validierung->flaechenschluss_ueberlappungen($this->plan);
+						$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'flaechenschluss_luecken');
+						$validierung->konvertierung_id = $this->get('id');
+						$validierung->flaechenschluss_luecken($this->plan);
+					}
+				}
 			}
+		}
+	}
+
+	/**
+	* Return the xplan version number from the xplan_ns_uri constants as float
+	*/
+	function get_version_from_ns_uri($uri) {
+		return floatval(implode('.', array_slice(explode('/', $uri), -2)));
+	}
+
+	/**
+	* Return konformitaetsbedingungen der Klassen der Konvertierung in der angegebenen XPlanung-Version
+	*/
+	function get_konformitaetsbedingungen($version) {
+		$sql = "
+			SELECT
+				name, konvertierung_id, nummer, version_von, version_bis, inhalt, bezeichnung
+			FROM
+				xplankonverter.konformitaeten_der_konvertierungen
+			WHERE
+				" . $version . " BETWEEN version_von::float AND coalesce(version_bis::float, 99999) AND
+				konvertierung_id = " . $this->get('id') . "
+		";
+		$this->debug->show('sql to find konformitaetsbedingungen for konvertierung_id: ' . $this->get('id') . ' für XPlanung Version: ' . $version, false);
+		$query = pg_query($this->database->dbConn, $sql);
+		while ($rs = pg_fetch_assoc($query)) {
+			$bedingungen[] = array(
+				'class_name' => $rs['name'],
+				'konformitaet' => Konformitaetsbedingung::find_by_id($this->gui, $rs['nummer'], $rs['version_von'])
+			);
+		}
+		return $bedingungen;
+	}
+
+
+	/**
+	* Clear the topology from all flaechenschlussobjekten of the plan
+	*/
+	function clearTopology() {
+		# Lösche die Topologie der flaechenschlussobjekte des Planes
+		$sql ="
+			UPDATE xplankonverter.flaechenschlussobjekte
+			SET topo = topology.clearTopoGeom(topo)
+			WHERE
+				konvertierung_id = " . $this->get('id') . "
+		";
+		#echo '<p>SQL zum Löschen der Topology: ' . $sql;
+		$result = $this->database->execSQL($sql, 0, 3);
+		if (!$result['success']) {
+			$this->gui->add_message('Fehler', 'Fehler beim Löschen der Toplogie!');
+			return false;
+		}
+
+		# Lösche die flaechenschlussobjekte des Plans in temporärer Tabelle flaechenschlussobjekte
+		$sql ="
+			DELETE FROM xplankonverter.flaechenschlussobjekte
+			WHERE
+				konvertierung_id = " . $this->get('id') . "
+		";
+		#echo '<p>SQL zum Löschne die flaechenschlussobjekte: ' . $sql;
+		$result = $this->database->execSQL($sql, 0, 3);
+		if (!$result['success']) {
+			$this->gui->add_message('Fehler', 'Fehler beim Löschen die flaechenschlussobjekte!');
+			return false;
+		}
+	}
+
+	/**
+	* Creates a topology from all flaechenschlussobjekten of the plan
+	*/
+	function createTopology() {
+		# Füge vorhandene Flächenschlussobjekte neu in Tabelle flächenschlussobjekte ein
+		$sql = "
+			INSERT INTO xplankonverter.flaechenschlussobjekte (gml_id, uuid, konvertierung_id, teilpolygon, teilpolygon_nr)
+			SELECT
+				gml_id,
+				uuid,
+				konvertierung_id,
+				(st_dump(position)).geom AS teilpolygon,
+				(st_dump(position)).path[1] AS teilpolygon_nr
+			FROM
+				xplan_gml.bp_flaechenschlussobjekt
+			WHERE
+				flaechenschluss AND
+				ebene = 0 OR ebene IS NULL AND
+				konvertierung_id = " . $this->get('id') . "
+		";
+		#echo '<p>SQL zur Erzeugung von Topology: ' . $sql;
+		$result = $this->database->execSQL($sql, 0, 3);
+		if (!$result['success']) {
+			$this->gui->add_message('Fehler', 'Fehler beim Anlegen der Toplogie!');
+			return false;
+		}
+
+		# Füge ein umschließendes Polygon des raeumlichen Geltungsbereiches zur Tabelle flaechenschlussobjekte hinzu
+		$sql = "
+			INSERT INTO xplankonverter.flaechenschlussobjekte (gml_id, uuid, konvertierung_id, teilpolygon, teilpolygon_nr)
+	 		SELECT
+				gml_id,
+				'räumlicher Geltungsbereich Plan' AS uuid,
+				konvertierung_id,
+				(st_dump(position)).geom AS teilpolygon,
+				(st_dump(position)).path[1] AS teilpolygon_nr
+			FROM
+			(
+				SELECT
+					gml_id,
+					konvertierung_id,
+					ST_Multi(ST_Difference(ST_SetSrid(ST_Buffer(Box2d(raeumlichergeltungsbereich)::geometry, 1), 25833), raeumlichergeltungsbereich)) AS position
+				FROM
+					xplan_gml.bp_plan
+				WHERE
+					konvertierung_id = " . $this->get('id') . "
+			) plan
+		";
+		#echo '<p>SQL Füge ein umschließendes Polygon des raeumlichen Geltungsbereiches zur Tabelle flaechenschlussobjekte hinzu: ' . $sql;
+		$result = $this->database->execSQL($sql, 0, 3);
+		if (!$result['success']) {
+			$this->gui->add_message('Fehler', 'Fehler beim hinzufügen eines umschließenden Polygon des raeumlichen Geltungsbereiches zur Tabelle flaechenschlussobjekte!');
+			return false;
+		}
+
+		# Berechne die topologie der flaechenschlussobjekte
+		$sql = "
+			UPDATE
+				xplankonverter.flaechenschlussobjekte
+			SET
+				topo = topology.toTopoGeom(teilpolygon, 'flaechenschluss_topology', 1, 0.002)
+			WHERE
+				konvertierung_id = " . $this->get('id') . "
+		";
+		#echo '<p>SQL zur Berechnung der topologie der flaechenschlussobjekte: ' . $sql;
+		$result = $this->database->execSQL($sql, 0, 3);
+		if (!$result['success']) {
+			$this->gui->add_message('Fehler', 'Fehler bei der Berechnung der Topologie der flaechenschlussobjekte!');
+			return false;
 		}
 	}
 

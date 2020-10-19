@@ -1,5 +1,6 @@
 <?php
 	$this->strAnd = "und";
+	$this->strHelp = "Hilfe";
 	$this->strID = "ID";
 	$this->strChoose = "Auswahl";
 	$this->strChange = "Ändern";
@@ -17,6 +18,7 @@
 	$this->TaskChangeWarning = "Sie sind nicht berechtigt zur Ausführung der Funktion in dieser Stelle.";
 	$this->strButtonBack = "Zurück";	
 	$this->strCancel = "Abbrechen";
+  $this->strCreate = "Anlegen";
 	$this->strSend = "Senden";
 	$this->strSearch = "Suchen";
 	$this->strEnter = "Übernehmen";
@@ -57,4 +59,6 @@
 	$this->strShowMore="Mehr anzeigen";
 	$this->strShowLess="Weniger anzeigen";
 	$this->strLayerParameters="Themenparameter";
+	$this->strColor="Farbe";
+	$this->strHatching="Schraffur";
 ?>

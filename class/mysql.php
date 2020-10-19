@@ -33,8 +33,10 @@ class database {
   var $logfile;
   var $commentsign;
   var $blocktransaction;
+	var $success;
+	var $errormessage;
 
-  function database() {
+  function __construct($open = false) {
     global $debug;
 		global $GUI;
 		$this->gui = $GUI;
@@ -55,6 +57,13 @@ class database {
     # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
     # Dazu Fehlerausschriften bearchten.
     $this->blocktransaction=0;
+		if ($open) {
+			$this->host = MYSQL_HOST;
+			$this->user = MYSQL_USER;
+			$this->passwd = MYSQL_PASSWORD;
+			$this->dbName = MYSQL_DBNAME;
+			$this->open();
+		}
   }
 
 	function login_user($username, $passwort, $agreement = ''){
@@ -71,7 +80,7 @@ class database {
 		$ret = $this->execSQL($sql, 4, 0);
 		if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
 
-		$colunn_aggreement_accepted = (mysql_num_rows($ret[1]) == 1 ? ', agreement_accepted' : ', 1');
+		$colunn_aggreement_accepted = (mysqli_num_rows($this->result) == 1 ? ', agreement_accepted' : ', 1');
 
 		$sql = "
 			SELECT
@@ -90,12 +99,12 @@ class database {
 		"; # Zeiteinschränkung wird nicht berücksichtigt.
 		#echo $sql;
 		$this->execSQL("SET NAMES '" . MYSQL_CHARSET . "'", 0, 0);
-		$ret=$this->execSQL($sql, 4, 0);
-		if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$ret = mysql_fetch_array($ret[1]);
-		if ($ret[0] != '') {
+		$this->execSQL($sql, 4, 0);
+		if (!$this->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
+		$rs = $this->result->fetch_array();
+		if (mysqli_num_rows($this->result) != '') {
 			# wenn Nutzer bisher noch nicht akzeptiert hatte
-			if (defined('AGREEMENT_MESSAGE') AND AGREEMENT_MESSAGE != '' AND $ret['agreement_accepted'] == 0) {
+			if (defined('AGREEMENT_MESSAGE') AND AGREEMENT_MESSAGE != '' AND $rs['agreement_accepted'] == 0) {
 				if ($agreement != '') { # es wurde jetzt akzeptiert
 					$sql = "
 						UPDATE
@@ -103,9 +112,9 @@ class database {
 						SET
 							agreement_accepted = TRUE
 						WHERE
-							ID = " . $ret['ID'] . "
+							ID = " . $rs['ID'] . "
 					";
-					$ret2 = $this->execSQL($sql, 4, 0);
+					$this->execSQL($sql, 4, 0);
 					return true;
 				}
 				else { # jetzt wurde auch nicht akzeptiert
@@ -125,12 +134,10 @@ class database {
   function read_colors(){	
   	$sql = "SELECT * FROM colors";
   	#echo $sql;
-  	$ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    if($ret[0]==0){
-      while($row = mysql_fetch_array($ret[1])){
-        $colors[] = $row;
-      }
+  	$this->execSQL($sql, 4, 0);
+    if (!$this->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    while ($rs = $this->result->fetch_assoc()) {
+      $colors[] = $rs;
     }
     return $colors;
   }
@@ -141,7 +148,7 @@ class database {
   	$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     if($ret[0]==0){
-      $color = mysql_fetch_array($ret[1]);
+      $color = $this->result->fetch_assoc();
     }
     return $color;
   }
@@ -179,14 +186,14 @@ class database {
 			);
 		";
 		#echo '<br>sql: ' . $sql;
-		$query = mysql_query($sql);
+		$this->execSQL($sql, 4, 0);
 
 		# ID des Gastnutzers abfragen
 		$sql = "
 			SELECT LAST_INSERT_ID();
 		";
-		$query = mysql_query($sql);
-		$row = mysql_fetch_row($query);
+		$this->execSQL($sql, 4, 0);
+		$row = $this->result->fetch_row();
 		$new_user_id = $row[0];
 
 		include_once(CLASSPATH . 'stelle.php');
@@ -211,7 +218,7 @@ class database {
     $sql.= " WHERE ".$where;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $ret[1]=mysql_fetch_assoc($ret[1]);
+    $ret[1] = $this->result->fetch_assoc();
     return $ret;
   }
 
@@ -223,11 +230,11 @@ class database {
 	* @params $layertyp Integer, 0 point, 1 line, 2 polygon, 5 query
 	*
 	*/
-	function generate_layer($schema, $table, $group_id = 0, $connection, $epsg = 25832, $geometrie_column = 'the_geom', $geometrietyp = '', $layertyp = '2') {
+	function generate_layer($schema, $table, $group_id = 0, $connection_id, $epsg = 25832, $geometrie_column = 'the_geom', $geometrietyp = '', $layertyp = '2') {
 		#echo '<br>Create Layer: ' . $table['name'];
 		if ($geometrietyp != '') $geometrie_column = "({$geometrie_column}).{$geometrietyp}";
 		if ($group_id == 0) $group_id = '@group_id';
-		if ($connection == '') $connection = '@connection';
+		if ($connection_id == '') $connection_id = '@connection_id';
 		$sql = "
 -- Create layer {$table['name']}
 INSERT INTO layer (
@@ -238,7 +245,7 @@ INSERT INTO layer (
 	`maintable`,
 	`Data`,
 	`schema`,
-	`connection`,
+	`connection_id`,
 	`connectiontype`,
 	`tolerance`,
 	`toleranceunits`,
@@ -262,7 +269,7 @@ VALUES (
 	'{$table['name']}',
 	'geom from (select oid, {$geometrie_column} AS geom FROM {$schema}.{$table['name']}) as foo using unique oid using srid={$epsg}',
 	'{$schema}',
-	'{$connection}',
+	'{$connection_id}'
 	'6',
 	'3',
 	'pixels',
@@ -500,15 +507,12 @@ INSERT INTO u_styles2classes (
 		#echo '<br>sql: ' . $sql;
 		#echo '<br>extra: ' . $extra;
 		$this->debug->write("<p>file:kvwmap class:database->create_insert_dump :<br>".$sql,4);
-		$query = mysql_query($sql);
-		if ($query==0) {
-			$this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0;
-		}
+		$this->execSQL($sql, 4, 0);
 
-		$feld_anzahl = mysql_num_fields($query);
+		$feld_anzahl = $this->result->field_count;
 		#echo '<br>Anzahl Felder: ' . $feld_anzahl;
 		for ($i = 0; $i < $feld_anzahl; $i++) {
-			$meta = mysql_fetch_field($query, $i);
+			$meta = $this->result->fetch_field_direct($i);
 			#echo '<br>Meta name: ' . $meta->name;
 			# array mit feldnamen
 			$felder[$i] = $meta->name;
@@ -516,14 +520,18 @@ INSERT INTO u_styles2classes (
 				$connectiontype = $i;
 			}
 			if($meta->name == 'connection'){
-				$connection = $i;
+				$connection_field_index = $i;
+			}
+			if($meta->name == 'connection_id'){
+				$connection_id_field_index = $i;
 			}
 		}
 
-		while ($rs = mysql_fetch_array($query)) {
+		while ($rs = $this->result->fetch_array()) {
 			$insert = '';
 			if ($rs[$connectiontype] == 6) {
-				$rs[$connection] = '@connection';
+				$rs[$connection_field_index] = '@connection';
+				$rs[$connection_id_field_index] = '@connection_id';
 			}
 			$insert .= 'INSERT INTO '.$table.' (';
 			for ($i = 0; $i < $feld_anzahl; $i++) {
@@ -539,7 +547,8 @@ INSERT INTO u_styles2classes (
 						$insert .= addslashes($rs[$i]);
 					}
 					else {
-						if (mysql_field_type($query, $i) != 'string' AND mysql_field_type($query, $i) != 'blob' AND $rs[$i] == '') {
+						$field = $this->result->fetch_field_direct($i);
+						if ($field->type != 'string' AND $field->type != 'blob' AND $rs[$i] == '') {
 							$insert .= "NULL";
 						} else{
 							$insert .= "'".addslashes($rs[$i])."'";
@@ -562,12 +571,11 @@ INSERT INTO u_styles2classes (
 		# Funktion erstellt zu einer Tabelle einen Update-Dump und liefert ihn als String zurück
 		$sql = 'SELECT * FROM '.$table;
 		$this->debug->write("<p>file:kvwmap class:database->create_update_dump :<br>".$sql,4);
-	  $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		$ret = $this->execSQL($sql, 4, 0);
 
-    $feld_anzahl = mysql_num_fields($query);
+    $feld_anzahl = $this->result->field_count;
     for($i = 0; $i < $feld_anzahl; $i++){
-    	$meta = mysql_fetch_field($query,$i);
+    	$meta = $this->result->fetch_field_direct($i);
     	# array mit feldnamen
     	$felder[$i] = $meta->name;
     	# array mit indizes der primary-keys
@@ -575,7 +583,7 @@ INSERT INTO u_styles2classes (
     		$keys[] = $i;
     	}
     }
-    while($rs = mysql_fetch_array($query)){
+    while ($rs = $this->result->fetch_array()) {
     	$update = 'UPDATE '.$table.' SET ';
     	$update .= $felder[0].' = '.$rs[0];
     	for($i = 1; $i < $feld_anzahl; $i++){
@@ -595,28 +603,35 @@ INSERT INTO u_styles2classes (
 ####################################################
 # database Funktionen
 ###########################################################
-  function open() {
-    $this->debug->write("<br>MySQL Verbindung öffnen mit Host: ".$this->host." User: ".$this->user,4);
-    $this->dbConn=mysql_connect($this->host,$this->user,$this->passwd);
-    $this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswählen.",4);
-    return mysql_select_db($this->dbName,$this->dbConn);
-  }
+	function open() {
+		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
+		$this->mysqli = mysqli_connect($this->host, $this->user, $this->passwd, $this->dbName);
+	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
+		$this->debug->write("<br>MySQL Fehlernummer: " . mysqli_connect_errno(), 4);
+		$this->debug->write("<br>MySQL Fehler: " . mysqli_connect_error(), 4);
+		return mysqli_connect_error();
+	}
 
-  function close() {
-    $this->debug->write("<br>MySQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
-    if (LOG_LEVEL>0){
-    	$this->logfile->close();
-    }
-    return mysql_close($this->dbConn);
-  }
+	function close() {
+		$this->debug->write("<br>MySQL Verbindung ID: " . $this->mysqli->thread_id . " schließen.", 4);
+		if (LOG_LEVEL > 0) {
+			$this->logfile->close();
+		}
+		return $this->mysqli->close();
+	}
 
-	function exec_commands($commands_string, $search, $replace, $replace_constants = false, $suppress_err_msg = false) {
+	function exec_commands($commands_string, $replace_connection, $replace_connection_id, $replace_constants = false, $suppress_err_msg = false) {
 		if ($commands_string != '') {
 			foreach (explode(';' . chr(10), $commands_string) as $query2) { // verschiedene Varianten des Zeilenumbruchs berücksichtigen
 				foreach (explode(';' . chr(13), $query2) as $query) {
 					$query_to_execute = '';
 					$query = trim($query);
-					if ($search != NULL) $query = str_replace($search, $replace, $query);
+					if ($replace_connection != NULL) {
+						$query = str_replace('user=xxxx password=xxxx dbname=kvwmapsp', $replace_connection, $query);
+					}
+					if ($replace_connection_id != NULL) {
+						$query = str_replace('xxxx_connection_id_xxxx', $replace_connection_id, $query);
+					}
 					// foreach (explode(chr(10), $query) as $line) {
 						// if ($line != '' AND strpos($line, "--") !== 0 && strpos($line, "#") !== 0) { // Zeilen mit Kommentarzeichen ignorieren
 							// $query_to_execute .= ' '.$line;
@@ -686,10 +701,6 @@ INSERT INTO u_styles2classes (
     return $ret;
   }
 
-  function getAffectedRows($query) {
-    return mysql_affected_rows();
-  }
-
   function setLogLevel($loglevel,$logfile) {
   	if ($loglevel==-1) {
   		# setzen der Defaulteinstellungen
@@ -702,7 +713,16 @@ INSERT INTO u_styles2classes (
   	}
   }
 
-	function execSQL($sql, $debuglevel, $loglevel, $suppress_error_msg = false) {
+	/**
+	* Führt die in $sql übergebene SQL-Anweisung aus
+	* @param varchar $sql Das SQL-Statement
+	* @return array(
+	*		0 => integer 0 Erfolgreiche Abfrage, 1 Fehler bei der Abfrage)
+	*   1 => varchar query mysql_result object wenn 0 = 0 und die Fehlermeldung als varchar wenn 0 = 1
+	*   'query' => mysql_result object
+	*   'success' => boolean true bei Erfolg, false bei Fehler 
+	*/
+	function execSQL($sql, $debuglevel = 4, $loglevel = 0, $suppress_error_msg = false) {
 		switch ($this->loglevel) {
 			case 0 : {
 				$logsql=0;
@@ -719,32 +739,33 @@ INSERT INTO u_styles2classes (
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
 		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
 			#echo '<br>sql in execSQL: ' . $sql;
-			$query = mysql_query($sql, $this->dbConn);
-			if ($query == 0) {
-				$ret[0]=1;
+			if ($result = $this->mysqli->query($sql)) {
+				$ret[0] = 0;
+				$ret['success'] = $this->success = true;
+				$ret[1] = $ret['query'] = $ret['result'] = $this->result = $result;
+				$this->errormessage = '';
+				if ($logsql) {
+					$this->logfile->write($sql . ';');
+				}
+				$this->debug->write(date('H:i:s')."<br>" . $sql, $debuglevel);
+			}
+			else {
+				$ret[0] = 1;
+				$ret['success'] = $this->success = false;
 				$div_id = rand(1, 99999);
-				$errormessage = mysql_error($this->dbConn);
-				$ret[1] = sql_err_msg('MySQL', $sql, $errormessage, $div_id);
+				$errormessage = $this->mysqli->error;
+				$ret[1] = $this->errormessage = sql_err_msg('MySQL', $sql, $errormessage, $div_id);
 				if ($logsql) {
 					$this->logfile->write("#" . $errormessage);
 				}
 				if (!$suppress_error_msg) {
 					if (gettype($this->gui) == 'object') {
-						$this->gui->add_message('error', $ret[1]);
+						$this->gui->add_message('error', $this->errormessage);
 					}
 					else {
-						echo '<br>error: ' . $ret[1];
+						echo '<br>error: ' . $this->errormessage;
 					}
 				}
-			}
-			else {
-				$ret[0] = 0;
-				$ret['success'] = true;
-				$ret[1] = $ret['query'] = $query;
-				if ($logsql) {
-					$this->logfile->write($sql . ';');
-				}
-				$this->debug->write(date('H:i:s')."<br>" . $sql, $debuglevel);
 			}
 			$ret[2] = $sql;
 		}

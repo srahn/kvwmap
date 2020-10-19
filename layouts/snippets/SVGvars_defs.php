@@ -132,22 +132,25 @@ $SVGvars_defs = '
 	$nexttime=$ret[1]['next'];
 	$prevtime=$ret[1]['prev'];
 
-	if($nexttime!=''){
-		$mouseupfunction='go_next();';
-		$next_disabled='';
-	}
-	else{
-		$mouseupfunction='';
-		$next_disabled='disabled';
-	}
-	if($prevtime!='' AND $this->prevtime!='0000-00-00 00:00:00'){
-		$prevmouseupfunction='go_previous();';
-		$prev_disabled='';
-	}
-	else{
-		$prevmouseupfunction='';
-		$prev_disabled='disabled';
-	}
+	// if($nexttime!=''){
+		// $mouseupfunction='go_next();';
+		// $next_disabled='';
+	// }
+	// else{
+		// $mouseupfunction='';
+		// $next_disabled='disabled';
+	// }
+	// if($prevtime!='' AND $this->prevtime!='0000-00-00 00:00:00'){
+		// $prevmouseupfunction='go_previous();';
+		// $prev_disabled='';
+	// }
+	// else{
+		// $prevmouseupfunction='';
+		// $prev_disabled='disabled';
+	// }
+	
+	$mouseupfunction='go_next();';
+	$prevmouseupfunction='go_previous();';
 	
 	function previous($prev_disabled, $strPreviousView, $prevmouseupfunction){
 		global $last_x;global $events;
@@ -487,8 +490,9 @@ $SVGvars_defs = '
 	}
 
 	function gps_follow($strGPS, $gps_follow){
-		global $last_x;global $events;
-		$mobile .= '
+		global $last_x;
+		global $events;
+		$mobile = '
 		<g id="gps" transform="translate('.$last_x.' 0)">
 			<rect id="gps0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strGPS.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();switch_gps_follow();highlightbyid(this.id);noMeasuring();"' : '').' x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 			<g class="navbutton" transform="translate(5 5) scale(0.8)">

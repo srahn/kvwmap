@@ -1,11 +1,10 @@
 credentials.php
 config.php
-fonts/custom/*
-layouts/custom/*
-layouts/snippets/custom/*
-symbols/custom/*
-graphics/wappen/*
-graphics/custom/*
+custom/
+custom/*
+custom/*/*
+custom/*/*/*
+custom/*/*/*/*
 plugins/*/config/config.php
 plugins/*/config/config.sh
 plugins/*/img/*
