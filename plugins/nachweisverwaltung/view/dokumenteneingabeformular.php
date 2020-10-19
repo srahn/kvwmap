@@ -473,7 +473,7 @@ $legendheight = $this->map->height + 20;
 							Geometrie übernehmen von
 						</div>
 						<div class="dokein-geom-uebernehmen-obj">
-							<select name="geom_from_layer" onchange="document.GUI.submit();">
+							<select name="geom_from_layer">
 								<option value="">--- Auswahl ---</option>
 								<?
 									for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){

@@ -110,7 +110,7 @@ function buildwktpolygonfromsvgpath(svgpath){
   
   <tr>
   	<td>Geometrieabfrage-Layer:<br>
-  		<select name="geom_from_layer" onchange="document.GUI.submit();">
+  		<select name="geom_from_layer" style="width: 300px">
 				<option value="0"> - alle - </option>
   			<?
   				for($i = 0; $i < count($this->queryable_postgis_layers['ID']); $i++){

@@ -17,26 +17,7 @@
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
       $GUI->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
     }
-    if($GUI->formvars['geom_from_layer']){
-      $layerset = $GUI->user->rolle->getLayer($GUI->formvars['geom_from_layer']);
-      $data = $GUI->mapDB->getData($GUI->formvars['geom_from_layer']);
-      $data_explosion = explode(' ', $data);
-      $GUI->formvars['columnname'] = $data_explosion[0];
-      $select = $fromwhere = $GUI->mapDB->getSelectFromData($data);
-			# order by rausnehmen
-			$GUI->formvars['orderby'] = '';
-			$orderbyposition = strrpos(strtolower($select), 'order by');
-			$lastfromposition = strrpos(strtolower($select), 'from');
-			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-				$fromwhere = substr($select, 0, $orderbyposition);
-				$GUI->formvars['orderby'] = ' '.substr($select, $orderbyposition);
-			}
-			$GUI->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
-      if(strpos(strtolower($GUI->formvars['fromwhere']), ' where ') === false){
-        $GUI->formvars['fromwhere'] .= ' where (1=1)';
-      }
-    }
-    else{
+    if(!$GUI->formvars['geom_from_layer']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
       $GUI->formvars['layer_id'] = $layerset[0]['Layer_ID'];
     }    
