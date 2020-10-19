@@ -279,7 +279,7 @@ class Gml_builder {
 				# Might need a change in xplan_uml generation to contain association sequenceorder/index
 			if($sequence_attr == 10) {
 					# $aggregated_bereich_gml_ids = explode(',', substr($gml_object['bereiche_gml_ids'], 1, -1));
-					$aggregated_bereich_gml_ids = explode(',', $gml_object['bereiche_gml_ids']);
+					$aggregated_bereich_gml_ids = explode(',', trim($gml_object['bereiche_gml_ids'], '{}'));
 					// entnimmt mögliche doppelte Werte
 					$aggregated_bereich_gml_ids = array_unique($aggregated_bereich_gml_ids);
 					foreach ($aggregated_bereich_gml_ids as $bereich_gml_id) {
@@ -467,12 +467,12 @@ class Gml_builder {
 								for ($j = 0; $j < count($gml_value_array); $j++){
 									$gmlStr .= $this->wrapWithElement(
 									"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
-									htmlspecialchars($gml_value_array[$j],ENT_QUOTES|ENT_XML1,"UTF-8"));
+									htmlspecialchars($gml_value_array[$j],ENT_QUOTES|ENT_XML1|ENT_SUBSTITUTE,"UTF-8"));
 								}
 							} else {
 								$gmlStr .= $this->wrapWithElement(
 								"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
-								htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"));
+								htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1|ENT_SUBSTITUTE,"UTF-8"));
 							}
 						}
 					} break;
@@ -551,6 +551,39 @@ class Gml_builder {
   * Array zurück.
   */
   function parseCompositeDataType($data_string) {
+		// First replace commas within strings (delimited by \" with an uncommon delimiter
+		// Also make sure to not use codelist-types (also delimited by "/ but followed with a ( when opening or prefixed with a ) when opening
+		$char_array = str_split($data_string);
+		$component_is_maybe_string = false;
+		for($i = 0; $i < count($char_array); $i++) {
+			switch ($char_array[$i]) {
+				case '\\':
+					if ($char_array[$i + 1] == '"' and ($char_array[$i + 2] != '(' or $char_array[$i - 1] != ')')) {
+						$component_is_string = !$component_is_string;
+					}
+					break;
+				case ',':
+					if($component_is_string and $char_array[$i + 1] != '\\') {
+						// Replaces the string pos with an alternate delimiter in the original string
+						$data_string[$i] = '|';
+					}
+					break;
+				case '(':
+					if($component_is_string) {
+						// Replaces the string pos with an alternate delimiter in the original string
+						$data_string[$i] = '^';
+					}
+					break;
+				case ')':
+					if($component_is_string) {
+						// Replaces the string pos with an alternate delimiter in the original string
+						$data_string[$i] = '$';
+					}
+					break;
+				default:
+					break;
+			}
+		}
     $value_array = array();
     $stack = array();
     $curr_value = '';
@@ -571,7 +604,7 @@ class Gml_builder {
     // cast string to array
     $value_str_array = str_split($value_str);
     // parse character by character
-    foreach ($value_str_array as $char) {
+		foreach ($value_str_array as $char) {
       switch ($char) {
         case '(':
           array_push($stack,$value_array);
@@ -589,9 +622,18 @@ class Gml_builder {
         default:
           $curr_value .= $char;
       }
-    }
-    $value_array[] = $curr_value;
-    return $value_array;
-  }
+		}
+		$value_array[] = $curr_value;
+
+		// Revert pipe escape for commas within strings
+		$value_array_2 = array();
+		foreach($value_array as $value_new) {
+			$value_new = str_replace('|',',', $value_new);
+			$value_new = str_replace('^','(', $value_new);
+			$value_new = str_replace('$',')', $value_new);
+			$value_array_2[] = $value_new;
+		}
+		return $value_array_2;
+	}
 }
 ?>

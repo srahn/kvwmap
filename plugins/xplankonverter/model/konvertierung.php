@@ -110,6 +110,21 @@ class Konvertierung extends PgObject {
 
 	function create_xplan_shapes() {
 		$path = $this->get_file_path('xplan_shapes');
+
+		// Delete existing shapes
+		$this->debug->show('Lösche xplan-konforme-shape-Dateien', Konvertierung::$write_debug);
+		$files = glob($path);
+		foreach($files as $file){
+			if(is_file($file)) {
+				unlink($file);
+			}
+		}
+		// Delete existing zip if exists
+		$zip_file = $this->get_file_path('') . '/' . 'xplan_shapes.zip';
+		if(file_exists($zip_file)) {
+			unlink($zip_file);
+		}
+
 		$this->debug->show('Erzeuge XPlan-Shape-Files in: ' . $path, Konvertierung::$write_debug);
 		$export_class = new data_import_export();
 
@@ -127,6 +142,20 @@ class Konvertierung extends PgObject {
 					konvertierung_id = " . $this->get('id') . "
 			";
 			$result = pg_query($this->database->dbConn, $sql);
+			// Get src srid of table as its not necessarily konvertierung dependent
+			$sql_srid = "
+				SELECT
+					DISTINCT ST_SRID(position)
+				FROM
+					xplan_gml. " . strtolower($class_name). "
+				WHERE
+					konvertierung_id = " . $this->get('id') . "
+				LIMIT 1
+			";
+			$result_srid = pg_query($this->database->dbConn, $sql_srid);
+			// fallback input-epsg konvertierung
+			$src_srid = !empty(pg_fetch_result($result_srid, 0, 0)) ? pg_fetch_result($result_srid, 0, 0) : $this->get('output_epsg');
+
 			//$result = pg_fetch_assoc($query);
 			if(pg_num_rows($result) == 0) {
 				continue;
@@ -145,7 +174,7 @@ class Konvertierung extends PgObject {
 								ST_GeometryType(position) = 'ST_MultiPoint'
 						";
 						$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
-						$export_class->ogr2ogr_export($sql_point, '"ESRI Shapefile"', $path . '/' . $class_name . '_point.shp', $this->database);
+						$export_class->ogr2ogr_export($sql_point, '"ESRI Shapefile" -s_srs epsg:' . $src_srid . ' -t_srs epsg:' . $this->get('output_epsg') . ' -nlt MULTIPOINT', $path . '/' . $class_name . '_point.shp', $this->database);
 					}
 					if ($row[0] == 'ST_MultiLineString') {
 						$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
@@ -160,7 +189,7 @@ class Konvertierung extends PgObject {
 								ST_GeometryType(position) = 'ST_MultiLineString'
 						";
 						$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
-						$export_class->ogr2ogr_export($sql_line, '"ESRI Shapefile"', $path . '/' . $class_name . '_line.shp', $this->database);
+						$export_class->ogr2ogr_export($sql_line, '"ESRI Shapefile" -s_srs epsg:' . $src_srid . ' -t_srs epsg:' . $this->get('output_epsg') . ' -nlt MULTILINESTRING ', $path . '/' . $class_name . '_line.shp', $this->database);
 					}
 					if ($row[0] == 'ST_MultiPolygon') {
 						$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
@@ -175,7 +204,7 @@ class Konvertierung extends PgObject {
 								ST_GeometryType(position) = 'ST_MultiPolygon'
 						";
 						$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
-						$export_class->ogr2ogr_export($sql_poly, '"ESRI Shapefile"', $path . '/' . $class_name . '_poly.shp', $this->database);
+						$export_class->ogr2ogr_export($sql_poly, '"ESRI Shapefile" -s_srs epsg:' . $src_srid . ' -t_srs epsg:' . $this->get('output_epsg') . ' -nlt MULTIPOLYGON', $path . '/' . $class_name . '_poly.shp', $this->database);
 					}
 				}
 			}
@@ -183,21 +212,44 @@ class Konvertierung extends PgObject {
 
 		// Fuer Plan
 		$this->debug->show('Klasse: ' . $this->plan->umlName, Konvertierung::$write_debug);
+		// As plan has multiple geometries in its source table, it must be checked against UML (which only holds one geom field)
+		include(PLUGINS . 'xplankonverter/model/TypeInfo.php');
+		$typeInfo = new TypeInfo($this->database);
+		$uml_attribs = $typeInfo->getInfo($this->plan->tableName);
+		foreach ($uml_attribs as $uml_attrib) {
+			$select_string .= $uml_attrib['col_name'] . ',';
+		}
+		$select_string = rtrim($select_string, ',');
+
 		$sql = "
-			SELECT
-				*
+			SELECT " . 
+				$select_string . " 
 			FROM
 				xplan_gml." . $this->plan->tableName . "
 			WHERE
 				konvertierung_id = " . $this->get('id')
 		;
 		$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
-		$export_class->ogr2ogr_export($sql, '"ESRI Shapefile"', $path . '/' . $this->plan->umlName . '.shp', $this->database);
+
+		$sql_srid = "
+				SELECT
+					DISTINCT ST_SRID(raeumlichergeltungsbereich)
+				FROM
+					xplan_gml." . $this->plan->tableName . " 
+				WHERE
+					konvertierung_id = " . $this->get('id') . " 
+				LIMIT 1
+			";
+		$result_srid = pg_query($this->database->dbConn, $sql_srid);
+		// fallback input-epsg konvertierung
+		$src_srid = !empty(pg_fetch_result($result_srid, 0, 0)) ? pg_fetch_result($result_srid, 0,0) : $this->get('output_epsg');
+		$export_class->ogr2ogr_export($sql, '"ESRI Shapefile" -s_srs epsg:' . $src_srid . ' -t_srs epsg:' . $this->get('output_epsg') . ' -nlt MULTIPOLYGON', $path . '/' . $this->plan->umlName . '.shp', $this->database);
 	}
 
 	function create_export_file($file_type) {
 		$path = $this->get_file_path($file_type);
-		exec(ZIP_PATH . ' ' . $path . ' ' . $path . '/*');
+		// -j for removing directory structure in .zip
+		exec(ZIP_PATH . ' -j ' . $path . ' ' . $path . '/*');
 		
 		$exportfile = $path . '.zip';
 		return $exportfile;
