@@ -733,7 +733,7 @@ hide_versions = function(flst){
 									</td>
 								</tr>
 								<? } ?>
-								<? if($privileg_['eigentuemer']){
+								<? if($privileg_['bestandsnr']){
 										$currenttime=date('Y-m-d H:i:s',time());
 										$this->user->rolle->setConsumeALB($currenttime, 'Flurstücksanzeige', array($flst->FlurstKennz), 0, 'NULL');		# das Flurstückskennzeichen wird geloggt
 								?>
@@ -742,58 +742,56 @@ hide_versions = function(flst){
 										<table border="0" cellspacing="0" cellpadding="2">
 										<? 
 										for ($b=0;$b<count($flst->Buchungen);$b++) {
-											if($privileg_['bestandsnr']){
-												$BestandStr = $flst->Buchungen[$b]['bezeichnung'].' ';
-												$BestandStr.='<a href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
-												$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-												$BestandStr.=', Laufende Nummer '.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-												if($flst->Buchungen[$b]['sondereigentum'] != ''){
-													$BestandStr.='<br><br>verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.';
-												} ?>
-												<tr>
-													<td class="fett">Buchung:</td>
-												</tr>
-												<tr>
-													<td colspan="2" style="padding-left: 20px"><? echo $BestandStr; ?></td>
-												</tr>
-												<? if($flst->Buchungen[$b]['buchungstext'] != ''){ ?>
-												<tr>
-													<td class="fett">Buchungstext:</td>
-												</tr>
-												<tr>
-													<td colspan="2" style="padding-left: 20px">
-														<? echo nl2br($flst->Buchungen[$b]['buchungstext']); ?>
-													</td>
-												</tr>
-											<?	} 
-												if($flst->Buchungen[$b]['blattart'] == 3000){ ?>
-												<tr>
-													<td></td>
-													<td colspan="2">Im Grundbuch noch nicht gebucht.</td>
-												</tr>
-											<? }
-											}
-											if($Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr'])){
-												reset($Eigentuemerliste);
-												?>
-												<tr>
-													<td class="fett">
-													<? 	if($flst->Buchungen[$b]['buchungsart'] >= 2101){
-																echo 'Berechtigter';
-															}
-															else{
-																echo 'Eigentümer';
-															}
-													?>:
-													</td>
-												</tr>
-												<tr>
-													<td colspan="3">
-														<table>				<?
-												echo $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Long', $this->Stelle->isFunctionAllowed('Adressaenderungen'), NULL, $this->database);
-												?>	</table>
-													</td>
-												</tr>
+											$BestandStr = $flst->Buchungen[$b]['bezeichnung'].' ';
+											$BestandStr.='<a href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
+											$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+											$BestandStr.=', Laufende Nummer '.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+											if($flst->Buchungen[$b]['sondereigentum'] != ''){
+												$BestandStr.='<br><br>verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.';
+											} ?>
+											<tr>
+												<td class="fett">Buchung:</td>
+											</tr>
+											<tr>
+												<td colspan="2" style="padding-left: 20px"><? echo $BestandStr; ?></td>
+											</tr>
+											<? if($flst->Buchungen[$b]['buchungstext'] != ''){ ?>
+											<tr>
+												<td class="fett">Buchungstext:</td>
+											</tr>
+											<tr>
+												<td colspan="2" style="padding-left: 20px">
+													<? echo nl2br($flst->Buchungen[$b]['buchungstext']); ?>
+												</td>
+											</tr>
+										<?	} 
+											if($flst->Buchungen[$b]['blattart'] == 3000){ ?>
+											<tr>
+												<td></td>
+												<td colspan="2">Im Grundbuch noch nicht gebucht.</td>
+											</tr>
+										<? }
+										if($privileg_['eigentuemer'] AND $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr'])){
+											reset($Eigentuemerliste);
+											?>
+											<tr>
+												<td class="fett">
+												<? 	if($flst->Buchungen[$b]['buchungsart'] >= 2101){
+															echo 'Berechtigter';
+														}
+														else{
+															echo 'Eigentümer';
+														}
+												?>:
+												</td>
+											</tr>
+											<tr>
+												<td colspan="3">
+													<table>				<?
+											echo $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Long', $this->Stelle->isFunctionAllowed('Adressaenderungen'), NULL, $this->database);
+											?>	</table>
+												</td>
+											</tr>
 								<?	}} ?>
 									</table>
 								</td>
