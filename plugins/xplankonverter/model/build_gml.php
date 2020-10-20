@@ -278,7 +278,7 @@ class Gml_builder {
 			# index 10 is the current position (XPlanGML 5.0.1) for gehoertzubereich association to be implemented
 			# TODO Make this more generic to reflect possible changes in index and support all associations
 			# Might need a change in xplan_uml generation to contain association sequenceorder/index
-			if($sequence_attr == 10) {
+			if ($sequence_attr == 10) {
 				$aggregated_bereich_gml_ids = explode(',', trim($gml_object['bereiche_gml_ids'], '{}'));
 				$str = str_replace("{", "", $gml_object['bereiche_gml_ids']);  
 				// entnimmt mögliche doppelte Werte
@@ -470,12 +470,12 @@ class Gml_builder {
 								for ($j = 0; $j < count($gml_value_array); $j++){
 									$gmlStr .= $this->wrapWithElement(
 									"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
-									htmlspecialchars($gml_value_array[$j],ENT_QUOTES|ENT_XML1,"UTF-8"));
+									htmlspecialchars($gml_value_array[$j],ENT_QUOTES|ENT_XML1|ENT_SUBSTITUTE,"UTF-8"));
 								}
 							} else {
 								$gmlStr .= $this->wrapWithElement(
 								"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
-								htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1,"UTF-8"));
+								htmlspecialchars($gml_value,ENT_QUOTES|ENT_XML1|ENT_SUBSTITUTE,"UTF-8"));
 							}
 						}
 					} break;
@@ -568,7 +568,6 @@ class Gml_builder {
 		// First replace commas within strings (delimited by \" with an uncommon delimiter
 		// Also make sure to not use codelist-types (also delimited by "/ but followed with a ( when opening or prefixed with a ) when opening
 		$char_array = str_split($data_string);
-		$component_is_maybe_string = false;
 		for($i = 0; $i < count($char_array); $i++) {
 			switch ($char_array[$i]) {
 				case '\\':
@@ -577,19 +576,19 @@ class Gml_builder {
 					}
 					break;
 				case ',':
-					if($component_is_string and $char_array[$i + 1] != '\\') {
+					if ($component_is_string and $char_array[$i + 1] != '\\') {
 						// Replaces the string pos with an alternate delimiter in the original string
 						$data_string[$i] = '|';
 					}
 					break;
 				case '(':
-					if($component_is_string) {
+					if ($component_is_string) {
 						// Replaces the string pos with an alternate delimiter in the original string
 						$data_string[$i] = '^';
 					}
 					break;
 				case ')':
-					if($component_is_string) {
+					if ($component_is_string) {
 						// Replaces the string pos with an alternate delimiter in the original string
 						$data_string[$i] = '$';
 					}
