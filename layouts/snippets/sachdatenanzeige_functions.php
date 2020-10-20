@@ -369,7 +369,7 @@ include('funktionen/input_check_functions.php');
 		if(weiter_erfassen)params += '&weiter_erfassen='+weiter_erfassen;
 		if(weiter_erfassen_params)params += '&weiter_erfassen_params='+weiter_erfassen_params;
 		if(further_params)params += further_params;
-		ahah('index.php?go=Layer-Suche_Suchen', params, new Array(list_div), new Array('sethtml'));
+		root.ahah('index.php?go=Layer-Suche_Suchen', params, new Array(list_div), new Array('sethtml'));
 	}
 
 	save = function(){
@@ -435,7 +435,7 @@ include('funktionen/input_check_functions.php');
 			formData.append('chosen_layer_id', layer_id);
 			formData.append('oid', oid);
 			formData.append('reload_object', reload_object);
-			ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
+			root.ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
 		}
 	}
 
@@ -476,7 +476,7 @@ include('funktionen/input_check_functions.php');
 		formData.append('targetobject', targetobject);
 		formData.append('form_field_names', form_fieldstring);
 		formData.append('embedded', 'true');
-		ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
+		root.ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
 	}
 
 	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, reload, list_edit){
@@ -517,7 +517,7 @@ include('funktionen/input_check_functions.php');
 		formData.append('form_field_names', form_fieldstring);
 		formData.append('embedded', 'true');
 		formData.append('list_edit', list_edit);
-		ahah('index.php', formData, new Array(document.getElementById(fromobject), document.getElementById(targetobject), ''), new Array('sethtml', 'sethtml', 'execute_function'));
+		root.ahah('index.php', formData, new Array(document.getElementById(fromobject), document.getElementById(targetobject), ''), new Array('sethtml', 'sethtml', 'execute_function'));
 	}
 
 	clearsubforms = function(layer_id){
@@ -562,7 +562,7 @@ include('funktionen/input_check_functions.php');
 		else{
 			suggest_field.style.display = 'none';
 			if (inputvalue.length > 0) {
-				ahah('index.php', 'go=autocomplete_request&layer_id=' + layer_id + '&attribute=' + attribute + '&inputvalue=' + inputvalue + '&field_id=' + field_id + (listentyp != '' ? '&listentyp=' + listentyp : ''), new Array(suggest_field, ""), new Array("sethtml", "execute_function"));
+				root.ahah('index.php', 'go=autocomplete_request&layer_id=' + layer_id + '&attribute=' + attribute + '&inputvalue=' + inputvalue + '&field_id=' + field_id + (listentyp != '' ? '&listentyp=' + listentyp : ''), new Array(suggest_field, ""), new Array("sethtml", "execute_function"));
 			}
 			else{
 				document.getElementById(field_id).value = '';
@@ -598,7 +598,7 @@ include('funktionen/input_check_functions.php');
 	
 	auto_generate = function(attributenamesarray, geom_attribute, attribute, k, layer_id){
 		names_values = get_current_attribute_values(layer_id, attributenamesarray, geom_attribute, k);
-		ahah("index.php", "go=auto_generate&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1], new Array(document.getElementById(layer_id+'_'+attribute+'_'+k)), new Array("setvalue"));
+		root.ahah("index.php", "go=auto_generate&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1], new Array(document.getElementById(layer_id+'_'+attribute+'_'+k)), new Array("setvalue"));
 	}
 	
 	openCustomSubform = function(layer_id, attribute, attributenamesarray, field_id, k){
@@ -611,7 +611,7 @@ include('funktionen/input_check_functions.php');
 		subform += '<iframe id="customSubform" style="width:100%; height:100%" src=""></iframe>';
 		subform += '</div>';
 		document.getElementById('waitingdiv').innerHTML= subform;
-		ahah("index.php", "go=openCustomSubform&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1]+"&field_id="+field_id, new Array(document.getElementById('customSubform')), new Array("src"));
+		root.ahah("index.php", "go=openCustomSubform&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+names_values[0]+"&attributevalues="+names_values[1]+"&field_id="+field_id, new Array(document.getElementById('customSubform')), new Array("src"));
 	}
 	
 	closeCustomSubform = function(){
@@ -653,7 +653,7 @@ include('funktionen/input_check_functions.php');
 	}
 
 	highlight_object = function(layer_id, oid){
-		ahah('index.php', 'go=tooltip_query&querylayer_id='+layer_id+'&oid='+oid, new Array(root.document.GUI.result, ''), new Array('setvalue', 'execute_function'));
+		root.ahah('index.php', 'go=tooltip_query&querylayer_id='+layer_id+'&oid='+oid, new Array(root.document.GUI.result, ''), new Array('setvalue', 'execute_function'));
 	}
 	
 	zoom2object = function(layer_id, geomtype, tablename, columnname, oid, selektieren){
@@ -772,7 +772,7 @@ include('funktionen/input_check_functions.php');
 			enclosingForm.chosen_layer_id.value = layer_id;
 			enclosingForm.go.value = 'Datensaetze_Merken';
 			formdata = new FormData(enclosingForm);
-			ahah("index.php", formdata, new Array(), new Array());
+			root.ahah("index.php", formdata, new Array(), new Array());
 			enclosingForm.go.value = saved_go;
 			message([{'type': 'notice', 'msg': 'Datensätze gemerkt'}]);
 		}
@@ -784,7 +784,7 @@ include('funktionen/input_check_functions.php');
 			enclosingForm.chosen_layer_id.value = layer_id;
 			enclosingForm.go.value = 'Datensaetze_nicht_mehr_merken';
 			formdata = new FormData(enclosingForm);
-			ahah("index.php", formdata, new Array(), new Array());
+			root.ahah("index.php", formdata, new Array(), new Array());
 			enclosingForm.go.value = saved_go;
 			message([{'type': 'notice', 'msg': 'Datensätze entfernt'}]);
 		}
@@ -886,7 +886,7 @@ include('funktionen/input_check_functions.php');
 			type = element.type;
 			if(type == 'text'){action = 'setvalue'};
 			if(type == 'select-one'){action = 'sethtml'};
-			ahah("index.php", "go=get_select_list&layer_id="+layer_id+datatype+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type="+type, new Array(element), new Array(action));
+			root.ahah("index.php", "go=get_select_list&layer_id="+layer_id+datatype+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type="+type, new Array(element), new Array(action));
 		}
 	}
 

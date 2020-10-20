@@ -14,6 +14,7 @@ else{
 }
 
 var query_tab;
+var root = window;
 
 function ahah(url, data, target, action, progress){
 	for(k = 0; k < target.length; ++k){
@@ -276,14 +277,6 @@ function checkForUnsavedChanges(event){
 		root.allowSubmit();
 	}
 	return sure;
-}
-
-if(window.opener != null && window.opener.name == 'root'){
-	var root = window.opener;
-}
-else{
-	var root = window;
-	window.name = 'root';
 }
 
 function startwaiting(lock) {

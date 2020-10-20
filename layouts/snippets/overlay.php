@@ -3,16 +3,17 @@
 		<title><? echo TITLE; ?></title>
 		<? include(SNIPPETS . 'gui_head.php'); ?>
 	</head>
-	<body onload="onload_functions();">
+	<body>
 		<script type="text/javascript">
-			if(typeof(stopwaiting) == "function"){
-				stopwaiting();	// wenn man aus der Karte abgefragt hatte, Warteanimation beenden		
+			root = window.opener;
+			if(typeof(root.stopwaiting) == "function"){
+				root.stopwaiting();	// wenn man aus der Karte abgefragt hatte, Warteanimation beenden		
 		<? if($this->formvars['mime_type'] == 'overlay_html' AND $this->zoomed){ ?>		// wenn nicht aus normaler Suchmaske heraus gesucht wurde und (durch die Funktion generischeSuche_Suchen) auf die Treffer gezoomt wurde, Karte neu laden
-				startwaiting();
+				root.startwaiting();
 				root.location.href="index.php";
 		<? } ?>
 			}
-			activate_overlay();
+			//activate_overlay();
 		</script>
 		<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
 			<div id="contentdiv" style="background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;max-width:<? echo $width; ?>px;position:relative;">
