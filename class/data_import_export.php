@@ -831,8 +831,18 @@ class data_import_export {
 		$command .= ' "' . $importfile . '" ' . $layer;
 		$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
 		$output = array();
+		#echo '<p>command: ' . $command;
 		exec($command, $output, $ret);
-		if ($ret != 0) { $ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; }
+		if ($ret != 0) {
+			# versuche mit noch mal mit UTF-8
+			$command = str_replace('PGCLIENTENCODING='.$encoding, 'PGCLIENTENCODING=UTF-8', $command);
+			#echo '<p>command mit UTF-8: ' . $command;
+			exec($command, $output, $ret);
+			if ($ret != 0) {
+				exec("sed -i -e 's/".$database->passwd."/xxxx/g' ".IMAGEPATH.$tablename.'.err');		# falls das DB-Passwort in der Fehlermeldung vorkommt => ersetzen
+				$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; 
+			}
+		}
 		return $ret;
 	}
 

@@ -541,18 +541,6 @@ include('funktionen/input_check_functions.php');
 		overlay_submit(enclosingForm, false);
 	}
 	
-	add_calendar = function(event, elementid, type, setnow){
-		event.stopPropagation();
-		remove_calendar();
-		calendar = new CalendarJS();
-		calendar.init(elementid, type, setnow);
-		document.getElementById('layer').calendar = calendar;
-	}
-	 
-	remove_calendar = function(){
-		if(document.getElementById('layer').calendar != undefined)document.getElementById('layer').calendar.destroy();
-	}
-
 	autocomplete1 = function(event, layer_id, attribute, field_id, inputvalue, listentyp) {
 		listentyp = listentyp || 'ok';
 		var suggest_field = document.getElementById('suggests_' + field_id);

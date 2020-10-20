@@ -41,8 +41,11 @@ function ahahDone(url, targets, req, actions) {
 				window.location = url;
 				return;
 			}
-			if(req.getResponseHeader('error') == 'true'){
+			if (req.getResponseHeader('error') == 'true'){
 				message(req.responseText);
+			}
+			if (req.getResponseHeader('warning') == 'true'){
+				message([{ type: 'warning', msg: req.responseText}]);
 			}
 			var found = false;
 			var response = "" + req.responseText;
@@ -150,6 +153,18 @@ function ahahDone(url, targets, req, actions) {
 			//alert(target.value);
 		}
 	}
+}
+
+add_calendar = function(event, elementid, type, setnow){
+	event.stopPropagation();
+	remove_calendar();
+	calendar = new CalendarJS();
+	calendar.init(elementid, type, setnow);
+	document.getElementById('gui-table').calendar = calendar;
+}
+ 
+remove_calendar = function(){
+	if(document.getElementById('gui-table').calendar != undefined)document.getElementById('gui-table').calendar.destroy();
 }
 
 function Bestaetigung(link,text) {

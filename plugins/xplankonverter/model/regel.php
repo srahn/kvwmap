@@ -478,7 +478,7 @@ class Regel extends PgObject {
 					xplan_gml.rp_plan spp ON spp.konvertierung_id = r.konvertierung_id
 				WHERE
 					r.id = " . $regel_id . "
-				";
+			";
 
 			#echo '<br>SQL zum Abfragen der konvertierung_id der Regel: ' . $sql;
 			$result = pg_query($this->database->dbConn, $sql);

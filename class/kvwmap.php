@@ -150,6 +150,10 @@ class GUI {
 			$this->login_failed_reason = 'authentication';
 			return false;
 		}
+		if ($user->start != '0000-00-00' AND date('Y-m-d') < $user->start) {
+			$this->login_failed_reason = 'not_yet_started';
+			return false;
+		}
 		if ($user->stop != '0000-00-00' AND date('Y-m-d') > $user->stop) {
 			$this->login_failed_reason = 'expired';
 			return false;
@@ -169,6 +173,9 @@ class GUI {
 			} break;
 			case 'expired' : {
 				$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers ist abgelaufen.');
+			} break;
+			case 'not_yet_started' : {
+				$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers hat noch nicht begonnen.');
 			} break;
 		}
 		$this->log_loginfail->write(
@@ -220,9 +227,23 @@ class GUI {
 	* @params $layer Array mit Angben des Layers aus der MySQL-Datenbank
 	*/
 	function exec_trigger_function($fired, $event, $layer, $oid = '', $old_dataset = array()) {
+		global $GUI;
+		$custom_kvwmap_php = WWWROOT.APPLVERSION.CUSTOM_PATH.'class/kvwmap.php';
+		if(file_exists($custom_kvwmap_php)){
+			include_once($custom_kvwmap_php);
+		}
 		$trigger_result = array('executed' => false);
 		if (array_key_exists($layer['trigger_function'], $this->trigger_functions)) {
 			$trigger_result = $this->trigger_functions[$layer['trigger_function']](
+				$fired,
+				$event,
+				$layer,
+				$oid,
+				$old_dataset
+			);
+		}
+		if (array_key_exists($layer['trigger_function'], $this->custom_trigger_functions)) {
+			$trigger_result = $this->custom_trigger_functions[$layer['trigger_function']](
 				$fired,
 				$event,
 				$layer,
@@ -2762,9 +2783,11 @@ echo '			</table>
   }
 
   function getLagebezeichnung($epsgcode) {
+		global $GUI;
     switch (LAGEBEZEICHNUNGSART) {
       case 'Flurbezeichnung' : {
-        $Lagebezeichnung = $this->getFlurbezeichnung($epsgcode);
+				include_once(PLUGINS.'alkis/model/kvwmap.php');
+        $Lagebezeichnung = $GUI->getFlurbezeichnung($epsgcode);
 			} break;
 			default : {
 			  $Lagebezeichnung = '';
@@ -4867,7 +4890,7 @@ echo '			</table>
 		$this->formvars['layer_columnname'] = $attributes['the_geom'];
 		$this->formvars['layer_tablename'] = $attributes['table_name'][$attributes['the_geom']];
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
-		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
+		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
 		$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 
 		if (
@@ -5869,7 +5892,6 @@ echo '			</table>
     $this->map->legend->set("keyspacingx", $size*$this->map_factor);
     $this->map->legend->set("keyspacingy", $size*0.83*$this->map_factor);
     $this->map->legend->label->set("size", $size*$this->map_factor);
-		$this->map->legend->label->set("type", 'truetype');
 		$this->map->legend->label->set("font", 'arial');
     $this->map->legend->label->set("position", MS_C);
     #$this->map->legend->label->set("offsetx", $size*-5*$this->map_factor);
@@ -6684,6 +6706,7 @@ echo '			</table>
 
 			# Lagebezeichnung
 			if(LAGEBEZEICHNUNGSART == 'Flurbezeichnung'){
+				include_once(PLUGINS.'alkis/model/kataster.php');
 				$flur = new Flur('','','',$this->pgdatabase);
 				$bildmitte['rw']=$this->formvars['refpoint_x'];
 				$bildmitte['hw']=$this->formvars['refpoint_y'];
@@ -10038,6 +10061,24 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->sachdaten_druck_editor();
 	}
 
+	/**
+	* Function edit settings of free thema print layout lines in table druckfreilinien
+	* @param integer $line_id It query for existing print layout with line_id
+	* @param string $line_attribute_name Name of the attribute that has to be changed with $line_attribute_value
+	* @param string $line_attribute_value Value of the attribute $line_attribute_name
+	* @return Json String with result from MyObject update function
+	*/
+	function sachdaten_druck_editor_linie_aendern($line_id, $line_attribute_name, $line_attribute_value) {
+		$myObj = new MyObject($this, 'druckfreilinien');
+		$druckfreilinie = $myObj->find_by_ids($line_id);
+		$druckfreilinie->set($line_attribute_name, $line_attribute_value);
+		$this->qlayerset[0]['shape'] = $druckfreilinie->update();
+		$this->mime_type = 'application/json';
+		$this->formvars['format'] = 'json';
+		$this->formvars['content_type'] = 'application/json';
+		$this->output();
+	}
+
 	function sachdaten_druck_editor_Linieloeschen(){
 		$this->sachdaten_druck_editor_aendern();
     $this->ddl->removeline($this->formvars);
@@ -11239,7 +11280,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$deleteuser[] = $users['ID'][$i];
 			}
 		}
-		$anzdeleteuser = count($deleteuser);
+		$anzdeleteuser = @count($deleteuser);
 		if ($anzdeleteuser > 0) {
 			for($i=0; $i<$anzdeleteuser; $i++){
 				$this->user->rolle->deleteRollen($deleteuser[$i], array($Stelle->id));
@@ -11327,7 +11368,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			);
 						
 			# Zuweisung in den Kindstellen
-			$old_children = $Stelle->getChildren($this->formvars['selected_stelle_id'], " ORDER BY Bezeichnung", 'only_ids');
+			$old_children = $Stelle->getChildren($this->formvars['selected_stelle_id'], " ORDER BY Bezeichnung", 'only_ids', true);
 			foreach(array_unique(array_merge($old_children, $selectedchildren)) AS $child_id){
 				$drop_child = !in_array($child_id, $selectedchildren) ? true : false;
 				if(!in_array($child_id, $old_children)){
@@ -14598,7 +14639,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				else{		################ mouseover auf Datensatz in Sachdatenanzeige ################
 					$showdata = 'false';
-					$sql_where = " AND ".$geometrie_tabelle."_oid = ".$this->formvars['oid'];
+					$sql_where = " AND ".pg_quote($geometrie_tabelle.'_oid')." = ".$this->formvars['oid'];					
 				}
 
 				# SVG-Geometrie abfragen für highlighting
@@ -15745,7 +15786,7 @@ class db_mapObj{
 	function zoomToDatasets($oids, $oid_name, $tablename, $columnname, $border, $layerdb, $layer_epsg, $client_epsg) {
   	$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
   	$sql.=" FROM (SELECT st_transform(ST_SetSRID(ST_Extent(" . $columnname."), " . $layer_epsg."), " . $client_epsg.") as bbox";
-  	$sql.=" FROM " . $tablename." WHERE ".$oid_name." IN (";
+  	$sql.=" FROM " . pg_quote($tablename)." WHERE ".$oid_name." IN (";
   	for($i = 0; $i < count($oids); $i++){
     	$sql .= "'" . $oids[$i]."',";
     }
@@ -16135,7 +16176,7 @@ class db_mapObj{
 
 	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $only_current_enums = false) {
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
-		for($i = 0; $i < count($attributes['name']); $i++) {
+		for($i = 0; $i < @count($attributes['name']); $i++) {
 			$type = ltrim($attributes['type'][$i], '_');
 			if (is_numeric($type) AND $query_result != NULL) {			# Attribut ist ein Datentyp
 				$query_result2 = array();

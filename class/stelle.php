@@ -510,7 +510,7 @@ class stelle {
 		return $parents;
 	}
 
-	function getChildren($parent_id, $order = '', $return = '') {
+	function getChildren($parent_id, $order = '', $return = '', $recursive = false) {
 		$children = array();
 		$sql = "
 			SELECT
@@ -530,7 +530,9 @@ class stelle {
 
 		while($rs = $this->database->result->fetch_assoc()) {
 			$children[] = ($return == 'only_ids' ? $rs['ID'] : $rs);
-			#$children = array_merge($children, $this->getChildren($rs['ID'], $order, $return));
+			if($recursive){
+				$children = array_merge($children, $this->getChildren($rs['ID'], $order, $return, true));
+			}
 		};
 		return $children;
 	}
@@ -1310,7 +1312,7 @@ class stelle {
 		return $layer;
 	}
 
-	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL){
+	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_geom_layer = false){
 		global $language;
 		$sql = 'SELECT layer.Layer_ID, ';
 		if($language != 'german') {
@@ -1329,6 +1331,9 @@ class stelle {
 		}
 		else{
 			$sql .=' AND used_layer.queryable = \'1\'';
+		}
+		if($only_geom_layer){
+			$sql .=' AND layer.Datentyp < 4';
 		}
 		if($privileg != NULL){
 			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
@@ -1455,7 +1460,7 @@ class stelle {
 	* Abfragen der Layer der Stelle
 	*/
 	function getLayer($Layer_id, $result = '') {
-		#echo '<br>stelle.php getLayer';
+		$layer = array();
 		$sql = "
 			SELECT
 				l.*,

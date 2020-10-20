@@ -1544,6 +1544,7 @@ tbody.gle>tr {
 	margin-left:auto;
 	margin-right:auto;
 	background-color: #F6F6F6;
+	height: 200px;
 }
 
 .calendar tr { 
@@ -2138,4 +2139,23 @@ tbody.gle>tr {
 
 .red {
 	color: red;
+}
+
+.edit_button {
+  margin-left: 5px;
+}
+
+.edit_button.fa-pencil:hover {
+	cursor: pointer;
+	color: red;
+}
+
+.edit_button.fa-undo:hover {
+	cursor: pointer;
+	color: blue;
+}
+
+.edit_button.fa-check:hover {
+	cursor: pointer;
+	color: green;
 }

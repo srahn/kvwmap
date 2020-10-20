@@ -342,8 +342,6 @@ $(document).on('click', function(e){
 #gsl_suchhinweise {
 	max-width: 750px;
 	margin: 0 20px 20px 20px;
-	font-style: italic;
-	font-size: 0.8em;
 	text-align: left;
 }
 /*

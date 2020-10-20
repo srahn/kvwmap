@@ -10,7 +10,7 @@
 			</div>
 		</div>
 		<a name="oben"></a>
-		<table id="gui-table" border="0" cellspacing="0" cellpadding="0">
+		<table id="gui-table" border="0" cellspacing="0" cellpadding="0" onclick="remove_calendar();">
 			<tr>
 				<td align="center" valign="top">
 					<form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">

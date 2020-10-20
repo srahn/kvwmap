@@ -398,7 +398,9 @@ class spatial_processor {
 			
 			case 'add_geometry':{
 				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], $formvars['fromwhere'], $formvars['columnname'], $formvars['singlegeom'], $formvars['orderby']);
-				if($querygeometryWKT == ''){
+				if($querygeometryWKT == '') {
+					header('warning: true');
+					echo 'Keine Geometrie zum Hinzufügen an der Kartenposition gefunden.';
 					break;
 				}
 				if($polywkt1 == ''){
@@ -413,7 +415,8 @@ class spatial_processor {
 			case 'subtract_geometry':{
 				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], $formvars['fromwhere'], $formvars['columnname'], $formvars['singlegeom'], $formvars['orderby']);
 				if ($querygeometryWKT == '') {
-					echo 'Keine Geometrie zur Übernahme an der Stelle gefunden.';
+					header('warning: true');
+					echo 'Keine Geometrie zum Abziehen an der Kartenposition gefunden.';
 					break;
 				}
 				if($polywkt1 == ''){
@@ -439,26 +442,26 @@ class spatial_processor {
 	
 	function queryMap($input_coord, $pixsize, $layer_id, $fromwhere, $columnname, $singlegeom, $orderby) {
 		# pixsize wird übergeben, weil sie aus dem Geometrieeditor anders sein kann, da es dort eine andere Kartengröße geben kann
-    # Abfragebereich berechnen
-		if($input_coord){
-			$corners=explode(';',$input_coord);
-			$lo=explode(',',$corners[0]); # linke obere Ecke in Bildkoordinaten von links oben gesehen
-			$ru=explode(',',$corners[1]); # reche untere Ecke des Auswahlbereiches in Bildkoordinaten von links oben gesehen
-			$width=$pixsize*($ru[0]-$lo[0]); # Breite des Auswahlbereiches in m
-			$height=$pixsize*($ru[1]-$lo[1]); # H�he des Auswahlbereiches in m
+		# Abfragebereich berechnen
+		if ($input_coord) {
+			$corners = explode(';' ,$input_coord);
+			$lo = explode(',', $corners[0]); # linke obere Ecke in Bildkoordinaten von links oben gesehen
+			$ru = explode(',', $corners[1]); # reche untere Ecke des Auswahlbereiches in Bildkoordinaten von links oben gesehen
+			$width = $pixsize * ($ru[0] - $lo[0]); # Breite des Auswahlbereiches in m
+			$height = $pixsize * ($ru[1] - $lo[1]); # H�he des Auswahlbereiches in m
 			#echo 'Abfragerechteck im Bild: '.$lo[0].' '.$lo[1].' '.$ru[0].' '.$ru[1];
 			# linke obere Ecke im Koordinatensystem in m
-			$minx=$this->rolle->oGeorefExt->minx+$pixsize*$lo[0]; # x Wert
-			$miny=$this->rolle->oGeorefExt->miny+$pixsize*($this->rolle->nImageHeight-$ru[1]); # y Wert
-			$maxx=$minx+$width;
-			$maxy=$miny+$height;
-			$rect=ms_newRectObj();
-			$rect->setextent($minx,$miny,$maxx,$maxy);
+			$minx = $this->rolle->oGeorefExt->minx + $pixsize * $lo[0]; # x Wert
+			$miny = $this->rolle->oGeorefExt->miny + $pixsize * ($this->rolle->nImageHeight - $ru[1]); # y Wert
+			$maxx = $minx + $width;
+			$maxy = $miny + $height;
+			$rect = ms_newRectObj();
+			$rect->setextent($minx, $miny, $maxx, $maxy);
 		}
-    $geom = $this->getgeometrybyquery($rect, $layer_id, $fromwhere, $columnname, $singlegeom, $orderby);
-    return $geom;
-  }
-  
+		$geom = $this->getgeometrybyquery($rect, $layer_id, $fromwhere, $columnname, $singlegeom, $orderby);
+		return $geom;
+	}
+ 
   function buffer($geom_1, $width){
   	if(substr_count($geom_1, ',') == 1){			# wenn Polygon nur aus einem Eckpunkt besteht -> in POINT umwandeln -> Kreis entsteht
   		$geom_1 = $this->pointfrompolygon($geom_1);
@@ -608,33 +611,35 @@ class spatial_processor {
     }
     return $rs[0];
   }
-  
-  function getgeometrybyquery($rect, $layer_id, $fromwhere, $columnname, $singlegeom, $orderby) {
-  	$dbmap = new db_mapObj($this->rolle->stelle_id, $this->rolle->user_id);
-  	if($layer_id != ''){
-    	if($layer_id < 0){	# Rollenlayer
+
+	function getgeometrybyquery($rect, $layer_id, $fromwhere, $columnname, $singlegeom, $orderby) {
+		$dbmap = new db_mapObj($this->rolle->stelle_id, $this->rolle->user_id);
+		if ($layer_id != '') {
+			if ($layer_id < 0) { # Rollenlayer
 				$layerset = $dbmap->read_RollenLayer(-$layer_id);
-    	}
-    	else{	# normaler Layer
-	    	$layerset = $this->rolle->getLayer($layer_id);
-	    }
-    }
-    else return NULL;
-    switch ($layerset[0]['toleranceunits']) {
-      case 'pixels' : $pixsize=$this->rolle->pixsize; break;
-      case 'meters' : $pixsize=1; break;
-      default : $pixsize=$this->rolle->pixsize;
-    }
-    $rand=$layerset[0]['tolerance']*$pixsize;
-    
-    switch ($layerset[0]['connectiontype']){
-    	case 6 : {
-	      #Abfrage eines postgislayers
-	      # Aktueller EPSG in der die Abfrage ausgeführt wurde
-	      $client_epsg=$this->rolle->epsg_code;
-	      # EPSG-Code des Layers der Abgefragt werden soll
-	      $layer_epsg=$layerset[0]['epsg_code'];
-				
+			}
+			else { # normaler Layer
+				$layerset = $this->rolle->getLayer($layer_id);
+			}
+		}
+		else {
+			return NULL;
+		}
+		switch ($layerset[0]['toleranceunits']) {
+			case 'pixels' : $pixsize = $this->rolle->pixsize; break;
+			case 'meters' : $pixsize = 1; break;
+			default : $pixsize=$this->rolle->pixsize;
+		}
+		$rand = $layerset[0]['tolerance'] * $pixsize;
+
+		switch ($layerset[0]['connectiontype']) {
+			case 6 : {
+				#Abfrage eines postgislayers
+				# Aktueller EPSG in der die Abfrage ausgeführt wurde
+				$client_epsg = $this->rolle->epsg_code;
+				# EPSG-Code des Layers der Abgefragt werden soll
+				$layer_epsg = $layerset[0]['epsg_code'];
+
 				$data = replace_params(
 					$layerset[0]['Data'],
 					rolle::$layer_params,
@@ -651,24 +656,24 @@ class spatial_processor {
 				$orderby = '';
 				$orderbyposition = strrpos(strtolower($select), 'order by');
 				$lastfromposition = strrpos(strtolower($select), 'from');
-				if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+				if ($orderbyposition !== false AND $orderbyposition > $lastfromposition) {
 					$fromwhere = substr($select, 0, $orderbyposition);
-					$orderby = ' '.substr($select, $orderbyposition);
+					$orderby = ' ' . substr($select, $orderbyposition);
 				}
 
-	      # Bildung der Where-Klausel für die räumliche Abfrage mit der searchbox
-	      $searchbox_wkt ="POLYGON((";
-	      $searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny).",";
-	      $searchbox_wkt.=strval($rect->maxx)." ".strval($rect->miny).",";
-	      $searchbox_wkt.=strval($rect->maxx)." ".strval($rect->maxy).",";
-	      $searchbox_wkt.=strval($rect->minx)." ".strval($rect->maxy).",";
-	      $searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny)."))";
-	      
-	      if($columnname == ''){
-	      	$columnname = 'the_geom';
-	      }
-	      
-				if($rect){
+				# Bildung der Where-Klausel für die räumliche Abfrage mit der searchbox
+				$searchbox_wkt ="POLYGON((";
+				$searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny).",";
+				$searchbox_wkt.=strval($rect->maxx)." ".strval($rect->miny).",";
+				$searchbox_wkt.=strval($rect->maxx)." ".strval($rect->maxy).",";
+				$searchbox_wkt.=strval($rect->minx)." ".strval($rect->maxy).",";
+				$searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny)."))";
+				#echo '<br>wkt: ' . $searchbox_wkt;
+
+				if ($columnname == '') {
+					$columnname = 'the_geom';
+				}
+				if ($rect) {
 					# Wenn das Koordinatenssystem des Views anders ist als vom Layer wird die Suchbox und die Suchgeometrie
 					# in epsg des layers transformiert
 					if ($client_epsg!=$layer_epsg) {
@@ -677,7 +682,7 @@ class spatial_processor {
 					else {
 						$sql_where =" AND ".$columnname." && st_geomfromtext('".$searchbox_wkt."',".$client_epsg.")";
 					}
-					
+
 					# Wenn es sich bei der Suche um eine punktuelle Suche handelt, wird die where Klausel um eine
 					# Umkreissuche mit dem Suchradius weiter eingeschränkt.
 					if ($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy) {
@@ -711,13 +716,12 @@ class spatial_processor {
 				#$fromwhere = pg_escape_string('from (' . $fromwhere . ') as foo where 1=1');
 				$fromwhere = 'from (' . $fromwhere . ') as foo where 1=1';
 
-
 				if (strpos(strtolower($fromwhere), ' where ') === false) {
 					$fromwhere .= ' where (1=1)';
 				}
 				if ($fromwhere != '') {
 					if ($singlegeom == 'true') {
-						$fromwhere = preg_replace('/ ([a-z_]*\.)?'.$columnname.'/', ' (st_dump($0)).geom as the_geom', $fromwhere);		# Einzelgeometrien abfragen
+						$fromwhere = preg_replace('/ ([a-z_]*\.)?'.$columnname.'/', ' (st_dump($0)).geom as ' . $columnname, $fromwhere);		# Einzelgeometrien abfragen
 					}
 					if (!$punktuell) {
 						# bei punktueller Abfrage wird immer nur eine Objektgeometrie geholt, bei Rechteck-Abfrage die Vereinigung aller getroffenen Geometrien
@@ -740,8 +744,11 @@ class spatial_processor {
 				$sql .= ' LIMIT ' . MAXQUERYROWS;
 				$ret = $this->pgdatabase->execSQL($sql,4, 0);
 				#echo '<br>SQL: ' . $sql;
-				if (!$ret[0]) {
-					while ($rs=pg_fetch_array($ret[1])) {
+				if ($ret[0]) {
+					echo $ret['msg'];
+				}
+				else {
+					while ($rs = pg_fetch_array($ret[1])) {
 						$layerset[0]['shape'][]=$rs;
 					}
 				}

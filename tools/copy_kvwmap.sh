@@ -223,7 +223,7 @@ sql="
 "
 exec_pgsql
 
-echo "Stelle Produktionsdatenbank ${SOURCE_PGSQL_DBNAME} in Datenbank ${TARGET_PGSQL_DBNAME} wieder her"
+echo "Stelle Source-Datenbank ${SOURCE_PGSQL_DBNAME} in Target-Datenbank ${TARGET_PGSQL_DBNAME} wieder her"
 docker exec pgsql-server ${PGSQL_BIN}/pg_restore -U $PGSQL_USER -Fc -d ${TARGET_PGSQL_DBNAME} /var/${DUMP_DIR}/${TARGET_PGSQL_DBNAME}.dump
 
 echo "Nehme Ersetzungen in PostgreSQL-Datenbank ${TARGET_PGSQL_DBNAME} vor"
@@ -232,7 +232,7 @@ PGSQL_DBNAME=${TARGET_PGSQL_DBNAME}
 exec_pgsql
 
 MYSQL_DBNAME=$SOURCE_MYSQ_DBNAME
-echo "Lösche Testdatenbank ${TARGET_MYSQL_DBNAME}, erzeuge eine neue leere und spiele die Sicherung von ${SOURCE_MYSQL_DBNAME} ein"
+echo "Lösche Target-Datenbank ${TARGET_MYSQL_DBNAME}, erzeuge eine neue leere und spiele die Sicherung von Source-Datenbank ${SOURCE_MYSQL_DBNAME} ein"
 sql="DROP DATABASE IF EXISTS ${TARGET_MYSQL_DBNAME}"
 exec_mysql
 

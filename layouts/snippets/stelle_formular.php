@@ -795,25 +795,25 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 <input type="hidden" name="go" value="Stelleneditor">
 <input type="hidden" name="selmenues" value="<?
         echo $this->formvars['selmenues']["ID"][0];
-        for($i=1; $i < count($this->formvars['selmenues']["Bezeichnung"]); $i++){
+        for($i=1; $i < @count($this->formvars['selmenues']["Bezeichnung"]); $i++){
           echo ', '.$this->formvars['selmenues']["ID"][$i];
         }
       ?>">
 <input type="hidden" name="selfunctions" value="<?
         echo $this->formvars['selfunctions'][0]["id"];
-        for($i=1; $i < count($this->formvars['selfunctions']); $i++){
+        for($i=1; $i < @count($this->formvars['selfunctions']); $i++){
           echo ', '.$this->formvars['selfunctions'][$i]["id"];
         }
       ?>">
 <input type="hidden" name="selframes" value="<?
         echo $this->formvars['selframes'][0]["id"];
-        for($i=1; $i < count($this->formvars['selframes']); $i++){
+        for($i=1; $i < @count($this->formvars['selframes']); $i++){
           echo ', '.$this->formvars['selframes'][$i]["id"];
         }
       ?>">      
 <input type="hidden" name="sellayouts" value="<?
         echo $this->formvars['sellayouts'][0]["id"];
-        for($i=1; $i < count($this->formvars['sellayouts']); $i++){
+        for($i=1; $i < @count($this->formvars['sellayouts']); $i++){
           echo ', '.$this->formvars['sellayouts'][$i]["id"];
         }
       ?>">

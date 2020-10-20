@@ -15,28 +15,32 @@ class ALKIS {
     $database->setDebugLevel=1;
   }
 	
-	function dhk_wsdl_login(){phpinfo();
+	function dhk_wsdl_login(){
 		$params = Array(
-			'soap_version' => 'SOAP_1_1'
+			'soap_version' => 'SOAP_1_1',
+			'login' => "rahn", 
+			'password' => "d1dPv_r*",
+			'trace' => 1,
+			'exceptions' => 1
 		);
 		$client = new SoapClient('http://webdhk-vr.lk-vr.de:8090/?wsdl', $params);
-		$functions = $client->__getFunctions();
-		print_r($functions);
+		$auth = array(
+        'Username'=>'rahn',
+        'Password'=>'d1dPv_r*',
+    );
+		#$header = new SoapHeader('http://webdhk-vr.lk-vr.de:8090/?wsdl','UserIdentifierSoapHeaderIn',$auth,false);
+		#$header = new SoapHeader('http://webdhk-vr.lk-vr.de:8090/?wsdl','SOAPAction','getCapabilities',false);
+		$client->__setSoapHeaders($header);
+		#$functions = $client->__getFunctions();
+		#print_r($functions);
+		$response = $client->getCapabilities();
+		echo "Request-Headers:\n".$client->__getLastRequestHeaders();
+		echo "Response-Headers:\n".$client->__getLastResponseHeaders();
+		echo $client->__getLastRequest();
+		var_dump($response);
 	}
 	
-	function create_wsdl_request_xml_file(){
-		$xml = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-xmlns:web="http://webservice.sgjonlinecmd.supportgis.de/">
-<soapenv:Header/>
-<soapenv:Body>
-<web:getCapabilities/>
-</soapenv:Body>
-</soapenv:Envelope>';
-		$currenttime = date('Y-m-d_H_i_s',time());
-		$file = IMAGEPATH.'nas_call_'.$currenttime.'-'.rand(0, 1000000).'.xml';
-		file_put_contents($file, $xml);
-		return $file;
-	}	
+
 	
 	function dhk_call_login($url, $username, $password){
 		$data = 'cmd=login&j_username='.$username.'&j_password='.$password;
