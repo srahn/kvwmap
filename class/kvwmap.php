@@ -649,8 +649,12 @@ echo '			</table>
 		$this->user->rolle->switch_gle_view($this->formvars['chosen_layer_id']);
 		$this->last_query = $this->user->rolle->get_last_query();
 		$this->formvars['go'] = $this->last_query['go'];
-		if($this->formvars['go'] == 'Layer-Suche_Suchen')$this->GenerischeSuche_Suchen();
-		else $this->queryMap();
+		if ($this->formvars['go'] == 'Layer-Suche_Suchen') {
+			$this->GenerischeSuche_Suchen();
+		}
+		else {
+			$this->queryMap();
+		}
 	}
 
 	function setHistTimestamp(){
@@ -1770,33 +1774,31 @@ echo '			</table>
 		$this->debug->write('<br>Lade Layer: ' . $layerset['Name'], 4);
 		$layer = ms_newLayerObj($map);
 		$layer->setMetaData('wfs_request_method', 'GET');
-		if(value_of($layerset, 'wms_name')){
-			$layer->setMetaData('wms_name', $layerset['wms_name']);
-			if($layerset['wms_keywordlist'])$layer->setMetaData('ows_keywordlist', $layerset['wms_keywordlist']);
-			$layer->setMetaData('wfs_typename', $layerset['wms_name']);
-			$layer->setMetaData('ows_title', $layerset['Name']); # required
-			$layer->setMetaData('wms_group_title',$layerset['Gruppenname']);
-			$layer->setMetaData('wms_queryable',$layerset['queryable']);
-			$layer->setMetaData('wms_format',$layerset['wms_format']);
-			$layer->setMetaData('ows_server_version',$layerset['wms_server_version']);
-			$layer->setMetaData('ows_version',$layerset['wms_server_version']);
-			if($layerset['metalink']){
-				$layer->setMetaData('ows_metadataurl_href',$layerset['metalink']);
-				$layer->setMetaData('ows_metadataurl_type', 'ISO 19115');
-				$layer->setMetaData('ows_metadataurl_format', 'text/plain');
-			}
-			if($layerset['ows_srs'] == '') $layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
-			$layer->setMetaData('ows_srs', $layerset['ows_srs']);
-			$layer->setMetaData('wms_connectiontimeout',$layerset['wms_connectiontimeout']);
-			$layer->setMetaData('ows_auth_username', $layerset['wms_auth_username']);
-			$layer->setMetaData('ows_auth_password', $layerset['wms_auth_password']);
-			$layer->setMetaData('ows_auth_type', 'basic');
-			$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
-			# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
-			#$layer->setMetaData("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
-			$layer->setMetaData("gml_featureid", "ogc_fid");
-			$layer->setMetaData("gml_include_items", "all");
+		$layer->setMetaData('wms_name', $layerset['wms_name']);
+		if($layerset['wms_keywordlist'])$layer->setMetaData('ows_keywordlist', $layerset['wms_keywordlist']);
+		$layer->setMetaData('wfs_typename', $layerset['wms_name']);
+		$layer->setMetaData('ows_title', $layerset['Name']); # required
+		$layer->setMetaData('wms_group_title',$layerset['Gruppenname']);
+		$layer->setMetaData('wms_queryable',$layerset['queryable']);
+		$layer->setMetaData('wms_format',$layerset['wms_format']);
+		$layer->setMetaData('ows_server_version',$layerset['wms_server_version']);
+		$layer->setMetaData('ows_version',$layerset['wms_server_version']);
+		if($layerset['metalink']){
+			$layer->setMetaData('ows_metadataurl_href',$layerset['metalink']);
+			$layer->setMetaData('ows_metadataurl_type', 'ISO 19115');
+			$layer->setMetaData('ows_metadataurl_format', 'text/plain');
 		}
+		if($layerset['ows_srs'] == '') $layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
+		$layer->setMetaData('ows_srs', $layerset['ows_srs']);
+		$layer->setMetaData('wms_connectiontimeout',$layerset['wms_connectiontimeout']);
+		$layer->setMetaData('ows_auth_username', $layerset['wms_auth_username']);
+		$layer->setMetaData('ows_auth_password', $layerset['wms_auth_password']);
+		$layer->setMetaData('ows_auth_type', 'basic');
+		$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
+		# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
+		#$layer->setMetaData("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
+		$layer->setMetaData("gml_featureid", "ogc_fid");
+		$layer->setMetaData("gml_include_items", "all");
 
 		$layer->set('dump', 0);
 		$layer->set('type',$layerset['Datentyp']);
@@ -8233,7 +8235,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		if ($this->formvars['selected_layer_id'] > 0) {
-			$layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+			$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		}
 		else {
 			$layerset=$this->user->rolle->getRollenlayer(-$this->formvars['selected_layer_id']);
@@ -8495,6 +8497,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$layerset[0]['sql'] = $sql;
 
 				#echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
+				$this->debug->write("<p>Suchanfrage ausführen: ", 4);
 				$ret = $layerdb->execSQL($sql . $sql_order . $sql_limit, 4, 0, true);
 				if ($ret['success']) {
 					$layerset[0]['shape'] = array();
