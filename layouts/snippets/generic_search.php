@@ -113,7 +113,8 @@ function suche(){
 		document.getElementById('gs_loader').style.display = '';
 		setTimeout('document.getElementById(\'loaderimg\').src=\'graphics/ajax-loader.gif\'', 50);
 		document.GUI.go_plus.value = 'Suchen';
-		document.GUI.submit();
+		//document.GUI.submit();
+		overlay_submit(document.GUI, true);
 	}
 }
 

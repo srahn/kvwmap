@@ -99,9 +99,9 @@ class polygoneditor {
   function eintragenFlaeche($umring, $oid, $tablename, $columnname, $geomtype) {
 		$geometry = ($umring == '' ? "NULL" : "ST_Transform(ST_GeometryFromText('" . $umring . "', " . $this->clientepsg . "), " . $this->layerepsg . ")");
 		$sql = "
-			UPDATE " . $tablename . "
-			SET " . $columnname . " = " . (substr($geomtype, 0, 5) == 'MULTI' ? "ST_Multi(" . $geometry . ")" : $geometry) . "
-			WHERE ".$this->oid_attribute." = " . quote($oid) . "
+			UPDATE " . pg_quote($tablename) . "
+			SET " . pg_quote($columnname) . " = " . (substr($geomtype, 0, 5) == 'MULTI' ? "ST_Multi(" . $geometry . ")" : $geometry) . "
+			WHERE ".pg_quote($this->oid_attribute)." = " . quote($oid) . "
 		";
 		$ret = $this->database->execSQL($sql, 4, 1, true);
 		if (!$ret['success']) {

@@ -2892,7 +2892,6 @@ echo '			</table>
 				}
 			} break;
 			case 'overlay_html' : {
-				$this->overlaymain = $this->main;
 				include (LAYOUTPATH.'snippets/overlay.php');
 				if($this->alert != ''){
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
@@ -8701,12 +8700,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 				$this->saveMap('');
-				if (value_of($this->formvars, 'mime_type') != 'overlay_html') {
-					// bei Suche aus normaler Suchmaske (nicht aus Overlay) heraus --> Zeichnen der Karte und Darstellung der Sachdaten im Overlay
-					$this->drawMap();
-					$this->main = 'map.php';
-					$this->overlaymain = 'sachdatenanzeige.php';
-				}
 			}
 			$this->output();
 		}
@@ -9214,6 +9207,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$this->formvars['no_output'] = true;
 				$this->GenerischeSuche_Suchen();
 				$this->formvars['no_output'] = false;
+				$this->formvars['search'] = false;
+				$this->search = false;
 			}
 			
 			$sql = "
@@ -13623,7 +13618,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     }
     else {
       $this->SachdatenAnzeige($rect);
-			if (
+			if (false and 		// deaktiviert wegen Sachdatenanzeige im extra Browser-Fenster
 				$this->go == 'Layer_Datensaetze_Loeschen' AND
 				array_reduce(
 					$this->qlayerset,
@@ -14190,12 +14185,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       } # ende der Behandlung der zur Abfrage ausgewählten Layer
     } # ende der Schleife zur Abfrage der Layer der Stelle
 
-		if ($this->formvars['printversion'] == '' AND $this->formvars['mime_type'] != 'overlay_html' AND $this->last_query != '' AND $this->user->rolle->querymode == 1) {
+		if ($this->formvars['printversion'] == '' AND $this->last_query != '' AND $this->user->rolle->querymode == 1) {
 			# bei get_last_query (nicht aus Overlay) und aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer
 			$attributes = $this->qlayerset[0]['attributes'];
 			$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
 			$this->loadMap('DataBase');
-			if($this->last_query['go'] != 'Sachdaten' AND count($this->qlayerset[0]['shape']) > 0 AND ($this->qlayerset[0]['shape'][0][$attributes['the_geom']] != '')){			# wenn es eine Suche war und was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
+			if(count($this->qlayerset[0]['shape']) > 0 AND ($this->qlayerset[0]['shape'][0][$attributes['the_geom']] != '')){			# wenn was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
 				$this->zoomed = true;
 				switch ($this->qlayerset[0]['connectiontype']) {
 					case MS_POSTGIS : {
@@ -14220,13 +14215,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 			$this->saveMap('');
-			$this->drawMap();
-			$this->main = 'map.php';
-			$this->overlaymain = 'sachdatenanzeige.php';
 		}
-		else {
-			$this->main = 'sachdatenanzeige.php';
-		}
+		$this->main = 'sachdatenanzeige.php';
   }
 
   function WLDGE_Auswaehlen() {
@@ -14830,7 +14820,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       }
       # highlighting-Geometrie anfügen
       $output .= '||| '.$highlight_geom;
-      echo umlaute_javascript(umlaute_html($output)).'█showtooltip(top.document.GUI.result.value, '.$showdata.');';
+			echo umlaute_javascript(umlaute_html($output)).'█root.showtooltip(root.document.GUI.result.value, '.$showdata.');';
     }
   }
 
@@ -16468,7 +16458,7 @@ class db_mapObj{
 
 	function save_attributes($layer_id, $attributes){
 		$insert_count = 0;
-		for ($i = 0; $i < count($attributes); $i++) {
+		for ($i = 0; $i < @count($attributes); $i++) {
 			if($attributes[$i] == NULL)continue;
 			if($attributes[$i]['nullable'] == '')$attributes[$i]['nullable'] = 'NULL';
 			if($attributes[$i]['saveable'] == '')$attributes[$i]['saveable'] = 0;

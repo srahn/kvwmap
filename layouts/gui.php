@@ -65,9 +65,10 @@
 						<input type="hidden" name="browserheight">
 						<input type="hidden" name="stopnavigation" value="0">
 						<input type="hidden" name="gle_changed" value="">
+						<input type="hidden" name="mime_type" value="">
 					</form><?
 					if ($this->user->rolle->querymode == 1) {
-						include(LAYOUTPATH.'snippets/overlayframe.php');
+						//include(LAYOUTPATH.'snippets/overlayframe.php');
 					} ?>
 				</td>
 			</tr><?php

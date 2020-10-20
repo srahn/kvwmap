@@ -164,7 +164,7 @@ add_calendar = function(event, elementid, type, setnow){
 }
  
 remove_calendar = function(){
-	if(document.getElementById('gui-table').calendar != undefined)document.getElementById('gui-table').calendar.destroy();
+	if(root.document.getElementById('gui-table').calendar != undefined)document.getElementById('gui-table').calendar.destroy();
 }
 
 function Bestaetigung(link,text) {
@@ -262,7 +262,7 @@ function printMapFast(){
 
 function checkForUnsavedChanges(event){
 	var sure = true;
-	if(document.GUI.gle_changed.value == 1){
+	if(root.document.GUI.gle_changed.value == 1){
 		sure = confirm('Es gibt noch ungespeicherte Datensätze. Wollen Sie dennoch fortfahren?');
 	}
 	if(!sure){
@@ -270,24 +270,32 @@ function checkForUnsavedChanges(event){
 		preventSubmit();
 	}
 	else{
-		document.GUI.gle_changed.value = 0;
-		allowSubmit();
+		root.document.GUI.gle_changed.value = 0;
+		root.allowSubmit();
 	}
 	return sure;
 }
 
+if(window.opener){
+	var root = window.opener;
+}
+else{
+	var root = window;
+	window.name = 'root';
+}
+
 function startwaiting(lock) {
 	var lock = lock || false;
-	document.GUI.stopnavigation.value = 1;
-	waitingdiv = document.getElementById('waitingdiv');
+	root.document.GUI.stopnavigation.value = 1;
+	waitingdiv = root.document.getElementById('waitingdiv');
 	waitingdiv.style.display='';
 	if(lock)waitingdiv.className='waitingdiv_spinner_lock';
 	else waitingdiv.className='waitingdiv_spinner';
 }
 
 function stopwaiting() {
-	document.GUI.stopnavigation.value = 0;
-	waitingdiv = document.getElementById('waitingdiv');
+	root.document.GUI.stopnavigation.value = 0;
+	waitingdiv = root.document.getElementById('waitingdiv');
 	waitingdiv.style.display='none';
 }
 
@@ -302,8 +310,8 @@ function getBrowserSize(){
 		width = document.body.clientWidth;
 		height = document.body.clientHeight;
 	}
-	document.GUI.browserwidth.value = width;
-	document.GUI.browserheight.value = height;
+	root.document.GUI.browserwidth.value = width;
+	root.document.GUI.browserheight.value = height;
 }
 
 function resizemap2window(){
@@ -539,14 +547,15 @@ function drag(event) {
 }
 
 function activate_overlay(){
-	document.getElementById('contentdiv').scrollTop = 0;
-	document.getElementById('contentdiv').style.display = '';
-	overlay = document.getElementById('overlaydiv');
-	overlay.style.left = document.GUI.overlayx.value+'px';
-	overlay.style.top = document.GUI.overlayy.value+'px';
-	overlay.style.display='';
-	if(document.SVG != undefined){
-		svgdoc = document.SVG.getSVGDocument();	
+	//root.document.getElementById('contentdiv').scrollTop = 0;
+	//root.document.getElementById('contentdiv').style.display = '';
+	//overlay = document.getElementById('overlaydiv');
+	//overlay.style.left = document.GUI.overlayx.value+'px';
+	//overlay.style.top = document.GUI.overlayy.value+'px';
+	//overlay.style.display='';
+	query_tab.focus();
+	if(root.document.SVG != undefined){
+		svgdoc = root.document.SVG.getSVGDocument();	
 		if(svgdoc != undefined)svgdoc.getElementById('polygon').setAttribute("points", "");
 	}
 }
@@ -658,25 +667,33 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	document.GUI.CMD.value = '';
 }
 
-function overlay_submit(gui, start){
-	// diese Funktion macht beim Fenstermodus und einer Kartenabfrage oder einem Aufruf aus dem Overlay-Fenster einen ajax-Request mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
+function overlay_submit(gui, start, target){
+	// diese Funktion öffnet beim Fenstermodus und einer Kartenabfrage oder einem Aufruf aus dem Overlay-Fenster ein Browser-Fenster (bzw. benutzt es falls schon vorhanden) mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
 	startwaiting();
-	if(typeof FormData !== 'undefined' && (querymode == 1 && start || gui.id == 'GUI2')){	
-		formdata = new FormData(gui);
-		formdata.append("mime_type", "overlay_html");	
-		ahah("index.php", formdata, new Array(document.getElementById('contentdiv')), new Array("sethtml"));	
-		if(document.GUI.CMD != undefined)document.GUI.CMD.value = "";
-	}else{
-		document.GUI.submit();
+	if(!gui){
+		gui = root.document.GUI;
 	}
+	if(querymode == 1 && (start || gui.id == 'GUI2')){
+		if(target){
+			gui.target = target;
+		}
+		else{
+			query_tab = root.window.open("", "Sachdaten", "location=0,status=0,height=800,width=700,scrollbars=1");
+			gui.mime_type.value = 'overlay_html';
+			gui.target = 'Sachdaten';
+		}
+	}
+	gui.submit();
+	if(gui.CMD != undefined)gui.CMD.value = "";
+	gui.target = '';
 }
 
-function overlay_link(data){
-	// diese Funktion macht bei Aufruf aus dem Overlay-Fenster einen ajax-Request mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
+function overlay_link(data, start){
+	// diese Funktion öffnet bei Aufruf aus dem Overlay-Fenster ein Browser-Fenster (bzw. benutzt es falls schon vorhanden) mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
 	if(checkForUnsavedChanges()){
-		if(currentform.name == 'GUI2'){
-			ahah("index.php", data+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv')), new Array("sethtml"));	
-			if(document.GUI.CMD != undefined)document.GUI.CMD.value = "";
+		if(querymode == 1 && (start || currentform.name == 'GUI2')){
+			query_tab = root.window.open("index.php?"+data+"&mime_type=overlay_html", "Sachdaten", "location=0,status=0,height=800,width=700,scrollbars=1");
+			if(root.document.GUI.CMD != undefined)root.document.GUI.CMD.value = "";
 		}else{
 			window.location.href = 'index.php?'+data;
 		}

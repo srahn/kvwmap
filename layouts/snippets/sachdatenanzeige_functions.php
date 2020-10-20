@@ -286,7 +286,7 @@ include('funktionen/input_check_functions.php');
 				obj.value = 0;
 			}
 			obj.value = parseInt(obj.value) + <? echo $this->formvars['anzahl']; ?>;
-			overlay_submit(enclosingForm, false);
+			root.overlay_submit(enclosingForm, false);
 		}
 	}
 	
@@ -306,7 +306,7 @@ include('funktionen/input_check_functions.php');
 				obj.value = 0;
 			}
 			obj.value = count - (count % <? echo $this->formvars['anzahl']; ?>);
-			overlay_submit(enclosingForm, false);
+			root.overlay_submit(enclosingForm, false);
 		}
 	}
 	
@@ -323,7 +323,7 @@ include('funktionen/input_check_functions.php');
 			}
 			obj = document.getElementById('offset_'+layer_id);
 			obj.value = 0;
-			overlay_submit(enclosingForm, false);
+			root.overlay_submit(enclosingForm, false);
 		}
 	}
 
@@ -343,7 +343,7 @@ include('funktionen/input_check_functions.php');
 				obj.value = 0;
 			}
 			obj.value = parseInt(obj.value) - <? echo $this->formvars['anzahl']; ?>;
-			overlay_submit(enclosingForm, false);
+			root.overlay_submit(enclosingForm, false);
 		}
 	}
 
@@ -393,8 +393,8 @@ include('funktionen/input_check_functions.php');
 		enclosingForm.go.value = 'Sachdaten_speichern';
 		document.getElementById('loader').style.display = '';
 		setTimeout('document.getElementById(\'loaderimg\').src=\'graphics/ajax-loader.gif\'', 50);
-		document.GUI.gle_changed.value = '';
-		overlay_submit(enclosingForm, false);
+		root.document.GUI.gle_changed.value = '';
+		root.overlay_submit(enclosingForm, false);
 	}
 
 	<? echo $this->currentform; ?>.save_new_dataset = function(){
@@ -653,14 +653,14 @@ include('funktionen/input_check_functions.php');
 	}
 
 	highlight_object = function(layer_id, oid){
-		ahah('index.php', 'go=tooltip_query&querylayer_id='+layer_id+'&oid='+oid, new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));
+		ahah('index.php', 'go=tooltip_query&querylayer_id='+layer_id+'&oid='+oid, new Array(root.document.GUI.result, ''), new Array('setvalue', 'execute_function'));
 	}
 	
 	zoom2object = function(layer_id, geomtype, tablename, columnname, oid, selektieren){
 		params = 'go=zoomto'+geomtype+'&oid='+oid+'&layer_tablename='+tablename+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
 		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
 			startwaiting();
-			get_map_ajax(params, '', 'highlight_object('+layer_id+', '+oid+');');		// Objekt highlighten
+			root.get_map_ajax(params, '', 'highlight_object('+layer_id+', '+oid+');');		// Objekt highlighten
 		}
 		else{
 			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
@@ -703,7 +703,8 @@ include('funktionen/input_check_functions.php');
 			enclosingForm.layer_tablename.value = tablename;
 			enclosingForm.layer_columnname.value = columnname;
 			enclosingForm.go.value = 'zoomto_selected_datasets';
-			enclosingForm.submit();
+			//enclosingForm.submit();
+			root.overlay_submit(enclosingForm, false, 'root');
 		}
 	}
 
@@ -716,7 +717,8 @@ include('funktionen/input_check_functions.php');
 			if(confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')){
 				enclosingForm.chosen_layer_id.value = layer_id;
 				enclosingForm.go.value = 'Layer_Datensaetze_Loeschen';
-				enclosingForm.submit();
+				//enclosingForm.submit();
+				root.overlay_submit(enclosingForm, false);
 			}
 		}
 	}

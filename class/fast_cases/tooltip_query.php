@@ -179,7 +179,7 @@ class GUI {
   var $map_factor;
   var $formatter;
 
-  function GUI($main, $style, $mime_type) {
+  function __construct($main, $style, $mime_type) {
     # Debugdatei setzen
     global $debug;
     $this->debug=$debug;
@@ -627,7 +627,7 @@ class GUI {
       }
       # highlighting-Geometrie anfügen
       $output .= '||| '.$highlight_geom;
-      echo umlaute_javascript(umlaute_html($output)).'█showtooltip(top.document.GUI.result.value, '.$showdata.');';
+      echo umlaute_javascript(umlaute_html($output)).'█root.showtooltip(root.document.GUI.result.value, '.$showdata.');';
     }
   }
 
@@ -1882,7 +1882,7 @@ class db_mapObj{
 
   function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $only_current_enums = false){
     # Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
-    for($i = 0; $i < count($attributes['name']); $i++){
+    for($i = 0; $i < @count($attributes['name']); $i++){
 			$type = ltrim($attributes['type'][$i], '_');
 			if(is_numeric($type)){
 				$attributes['type_attributes'][$i] = $this->add_attribute_values($attributes['type_attributes'][$i], $database, $query_result, $withvalues, $stelle_id, $only_current_enums);
