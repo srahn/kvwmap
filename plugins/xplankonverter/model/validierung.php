@@ -809,7 +809,7 @@ class Validierung extends PgObject {
 					SELECT
 						*
 					FROM
-						xplan_gml." . $bedingung['class_name'] . "
+						xplan_gml." . strtolower($bedingung['class_name']) . "
 					WHERE
 						NOT (" . substr($this->get('functionsargumente'), 2, -2) . ") AND
 						konvertierung_id = " . $konvertierung_id . "
