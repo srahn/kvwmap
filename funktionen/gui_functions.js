@@ -13,6 +13,8 @@ else{
 	var browser = 'ie';
 }
 
+var query_tab;
+
 function ahah(url, data, target, action, progress){
 	for(k = 0; k < target.length; ++k){
 		if(target[k] != null && target[k].tagName == "DIV"){
@@ -276,7 +278,7 @@ function checkForUnsavedChanges(event){
 	return sure;
 }
 
-if(window.opener){
+if(window.opener != null && window.opener.name == 'root'){
 	var root = window.opener;
 }
 else{
@@ -553,7 +555,6 @@ function activate_overlay(){
 	//overlay.style.left = document.GUI.overlayx.value+'px';
 	//overlay.style.top = document.GUI.overlayy.value+'px';
 	//overlay.style.display='';
-	query_tab.focus();
 	if(root.document.SVG != undefined){
 		svgdoc = root.document.SVG.getSVGDocument();	
 		if(svgdoc != undefined)svgdoc.getElementById('polygon').setAttribute("points", "");
@@ -681,6 +682,7 @@ function overlay_submit(gui, start, target){
 			query_tab = root.window.open("", "Sachdaten", "location=0,status=0,height=800,width=700,scrollbars=1");
 			gui.mime_type.value = 'overlay_html';
 			gui.target = 'Sachdaten';
+			query_tab.focus();
 		}
 	}
 	gui.submit();
@@ -693,6 +695,7 @@ function overlay_link(data, start){
 	if(checkForUnsavedChanges()){
 		if(querymode == 1 && (start || currentform.name == 'GUI2')){
 			query_tab = root.window.open("index.php?"+data+"&mime_type=overlay_html", "Sachdaten", "location=0,status=0,height=800,width=700,scrollbars=1");
+			query_tab.focus();
 			if(root.document.GUI.CMD != undefined)root.document.GUI.CMD.value = "";
 		}else{
 			window.location.href = 'index.php?'+data;
