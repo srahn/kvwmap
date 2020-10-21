@@ -265,7 +265,7 @@ function printMapFast(){
 
 function checkForUnsavedChanges(event){
 	var sure = true;
-	if(root.document.GUI.gle_changed.value == 1){
+	if(currentform.gle_changed.value == 1){
 		sure = confirm('Es gibt noch ungespeicherte Datensätze. Wollen Sie dennoch fortfahren?');
 	}
 	if(!sure){
@@ -338,19 +338,18 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 	console.log('Show Message: %o: ', messages);
 	confirm_value = confirm_value || 'ok';
 	var messageTimeoutID;
-	var msgBoxDiv = $('#message_box');
+	var msgBoxDiv = root.$('#message_box');
 	if (msgBoxDiv.is(':visible')) {
-		console.log('msgBox is visible for message: %o', messages);
-		$('#message_box').stop().show();
+		root.$('#message_box').stop().show();
 		msgBoxDiv.stop().css('opacity', '1').show();
 	}
 	else {
 		msgBoxDiv.html('');
 	}
-	if (document.getElementById('messages') == null) {
+	if (root.document.getElementById('messages') == null) {
     msgBoxDiv.append('<div id="messages"></div>');
   }
-	var msgDiv = $('#messages');
+	var msgDiv = root.$('#messages');
 	var confirm = false;
 
 	t_visible   = (typeof t_visible   !== 'undefined') ? t_visible   : 1000;		// Zeit, die die Message-Box komplett zu sehen ist
@@ -388,18 +387,18 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 	};
 	//	,confirmMsgDiv = false;
 
-	if (!$.isArray(messages)) {
+	if (!root.$.isArray(messages)) {
 		messages = [{
 			'type': 'warning',
 			'msg': messages
 		}];
 	}
 
-	$.each(messages, function (index, msg) {
+	root.$.each(messages, function (index, msg) {
 		msg.type = (['notice', 'info', 'error'].indexOf(msg.type) > -1 ? msg.type : 'warning');
 		msgDiv.append('<div class="message-box message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
-		if (types[msg.type].confirm && document.getElementById('message_ok_button') == null) {
-			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="$(\'#message_box\').hide();" value="' + confirm_value + '" style="margin: 10px 0px 0px 0px;">');
+		if (types[msg.type].confirm && root.document.getElementById('message_ok_button') == null) {
+			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="root.$(\'#message_box\').hide();" value="' + confirm_value + '" style="margin: 10px 0px 0px 0px;">');
 		}
 	});
 	
@@ -407,12 +406,12 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 		msgBoxDiv.show();
 	}
 
-	if (document.getElementById('message_ok_button') == null) {		// wenn kein OK-Button da ist, ausblenden
-    messageTimeoutID = setTimeout(function() { console.log('start to fade out for message: %o', messages); msgBoxDiv.fadeOut(t_fade); }, t_visible);
+	if (root.document.getElementById('message_ok_button') == null) {		// wenn kein OK-Button da ist, ausblenden
+    messageTimeoutID = setTimeout(function() { msgBoxDiv.fadeOut(t_fade); }, t_visible);
 	}
   else {
 		clearTimeout(messageTimeoutID);
-    $('#message_box').stop().fadeIn();
+    root.$('#message_box').stop().fadeIn();
   }
 
 }

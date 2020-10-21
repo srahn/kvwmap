@@ -43,11 +43,21 @@ include('funktionen/input_check_functions.php');
 	}
 
 	scrolltop = function(){
-		document.getElementById('contentdiv').scrollTop = 0;
+		if(querymode == 1){
+			window.scrollTo(0, 0);
+		}
+		else{
+			document.getElementById('contentdiv').scrollTop = 0;
+		}
 	}
 	
 	scrollbottom = function(){
-		document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
+		if(querymode == 1){
+			window.scrollTo(0, 9999999);
+		}
+		else{
+			document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
+		}
 	}
 	
 	toggle_group = function(id){
@@ -181,6 +191,9 @@ include('funktionen/input_check_functions.php');
 	
 	buildJSONString = function(id, is_array) {
 		var field = document.getElementById(id);
+		var value;
+		var name;
+		var type;
 		values = new Array();
 		elements = document.getElementsByClassName(id);
 		for (i = 0; i < elements.length; i++) {
@@ -397,12 +410,12 @@ include('funktionen/input_check_functions.php');
 		root.overlay_submit(enclosingForm, false);
 	}
 
-	<? echo $this->currentform; ?>.save_new_dataset = function(){
-		if((geom_not_null && this.newpath.value == '' && this.loc_x == undefined) || (geom_not_null && this.loc_x != undefined && this.loc_x.value == '')){ 
+	save_new_dataset = function(){
+		if((geom_not_null && enclosingForm.newpath.value == '' && enclosingForm.loc_x == undefined) || (geom_not_null && enclosingForm.loc_x != undefined && enclosingForm.loc_x.value == '')){ 
 			message('Sie haben keine Geometrie angegeben.');
 			return;
 		}
-  	form_fieldstring = this.form_field_names.value+'';
+  	form_fieldstring = enclosingForm.form_field_names.value+'';
   	form_fields = form_fieldstring.split('|');
   	for(i = 0; i < form_fields.length; i++){
   		fieldstring = form_fields[i]+'';
@@ -419,10 +432,10 @@ include('funktionen/input_check_functions.php');
 				}
   		}
   	}
-  	this.go.value = 'neuer_Layer_Datensatz_speichern';
+  	enclosingForm.go.value = 'neuer_Layer_Datensatz_speichern';
 		document.getElementById('sachdatenanzeige_save_button').disabled = true;
-		document.GUI.gle_changed.value = '';
-  	overlay_submit(this, false);
+		enclosingForm.gle_changed.value = '';
+  	overlay_submit(enclosingForm, false);
 	}
 
 	subdelete_data = function(layer_id, fromobject, oid, reload_object){
@@ -751,7 +764,7 @@ include('funktionen/input_check_functions.php');
 			enclosingForm.chosen_layer_id.value = layer_id;
 			enclosingForm.go_backup.value = enclosingForm.go.value;
 			enclosingForm.go.value = 'Daten_Export';
-			enclosingForm.submit();
+			root.overlay_submit(enclosingForm, false, 'root');
 		}
 	}
 
@@ -798,7 +811,13 @@ include('funktionen/input_check_functions.php');
 			enclosingForm.newpath.value = '';
 			enclosingForm.go_backup.value = enclosingForm.go.value;
 			enclosingForm.go.value = 'neuer_Layer_Datensatz';
-			enclosingForm.submit();
+			//enclosingForm.submit();
+			if(document.getElementById('geom_privileg_'+layer_id).value == 1){
+				root.overlay_submit(enclosingForm, false, 'root');
+			}
+			else{
+				root.overlay_submit(enclosingForm, false);
+			}
 		}
 	}
 	
@@ -808,7 +827,7 @@ include('funktionen/input_check_functions.php');
 				enclosingForm.chosen_layer_id.value = layer_id;
 				enclosingForm.go_backup.value = enclosingForm.go.value;
 				enclosingForm.go.value = 'Datensatz_dublizieren';
-				enclosingForm.submit();
+				root.overlay_submit(enclosingForm, false);
 			}
 		}
 	}	
@@ -818,7 +837,7 @@ include('funktionen/input_check_functions.php');
 			enclosingForm.chosen_layer_id.value = layer_id;
 			enclosingForm.go_backup.value = enclosingForm.go.value;
 			enclosingForm.go.value = 'generischer_sachdaten_druck';
-			enclosingForm.submit();
+			root.overlay_submit(enclosingForm, false, 'root');
 		}
 	}
 

@@ -3440,12 +3440,12 @@ echo '			</table>
 		}
 
 		# Dokument-Pfade abfragen
-		if (count($document_attributes) > 0) {
+		if (@count($document_attributes) > 0) {
 			$sql = "
 				SELECT
 					" . implode(',', $document_attributes) . "
 				FROM
-					" . $layerset[0]['maintable'] . "
+					" . pg_quote($layerset[0]['maintable']) . "
 				WHERE
 					" . implode(' AND ', $where) . "
 			";
@@ -3465,7 +3465,7 @@ echo '			</table>
 		for ($i = 0; $i < $count; $i++) { # das ist die Schleife, wie oft insgesamt kopiert werden soll
 			# zunächst als reine Kopie
 			$sql = "
-				SELECT Coalesce(max(".$layerset[0]['oid']."), 0) AS oid FROM " . $layerset[0]['maintable'] . "
+				SELECT Coalesce(max(".$layerset[0]['oid']."), 0) AS oid FROM " . pg_quote($layerset[0]['maintable']) . "
 			";
 			#echo '<p>SQL zur Abfrage der letzen oid: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 0);
@@ -3490,13 +3490,15 @@ echo '			</table>
 			else {
 				$insert_columns = $select_columns = $attributes;
 			}
+			array_walk($insert_columns, function(&$attributename, $key){$attributename = pg_quote($attributename);});
+			array_walk($select_columns, function(&$attributename, $key){$attributename = pg_quote($attributename);});
 			$sql = "
 				INSERT INTO
-					" . $layerset[0]['maintable'] . " (" . implode(', ', $insert_columns) . ")
+					" . pg_quote($layerset[0]['maintable']) . " (" . implode(', ', $insert_columns) . ")
 				SELECT
 					" . implode(', ', $select_columns) . "
 				FROM
-					" . $layerset[0]['maintable'] . "
+					" . pg_quote($layerset[0]['maintable']) . "
 				WHERE
 					" . implode(' AND ', $where) . "
 			";
@@ -3508,7 +3510,7 @@ echo '			</table>
 
 			$sql = "
 				SELECT ".$layerset[0]['oid']."
-				FROM " . $layerset[0]['maintable'] . "
+				FROM " . pg_quote($layerset[0]['maintable']) . "
 				WHERE
 					".$layerset[0]['oid']." > " . $max_oid . "
 			";
@@ -3523,7 +3525,7 @@ echo '			</table>
 				$new_oids[] = $rs[0];
 				$all_new_oids[] = $rs[0];
 				# Dokumente kopieren
-				for ($p = 0; $p < count($orig_dataset[$d]['document_paths']); $p++) { # diese Schleife durchläuft alle Dokument-Attribute innerhalb eines kopierten Datensatzes
+				for ($p = 0; $p < @count($orig_dataset[$d]['document_paths']); $p++) { # diese Schleife durchläuft alle Dokument-Attribute innerhalb eines kopierten Datensatzes
 					if ($orig_dataset[$d]['document_paths'][$p] != '') {
 						$path_parts = explode('&', $orig_dataset[$d]['document_paths'][$p]);		# &original_name=... abtrennen
 						$orig_path = $path_parts[0];
@@ -3533,7 +3535,7 @@ echo '			</table>
 						copy($orig_path, $new_path);
 						$complete_new_path = $new_path.'&'.$path_parts[1];
 						$sql = "
-							UPDATE " . $layerset[0]['maintable'] . "
+							UPDATE " . pg_quote($layerset[0]['maintable']) . "
 							SET " . $document_attributes[$p] . " = '" . $complete_new_path . "'
 							WHERE ".$layerset[0]['oid']." = " . $rs[0] . "
 						";
@@ -3547,7 +3549,7 @@ echo '			</table>
 			if ($new_oids[0] != '') {
 				for ($u = 0; $u < count($update_columns); $u++) {
 					$sql = "
-						UPDATE " . $layerset[0]['maintable'] . "
+						UPDATE " . pg_quote($layerset[0]['maintable']) . "
 						SET " . $update_columns[$u] . " = '" . $update_values[$i][$u] . "'
 						WHERE ".$layerset[0]['oid']." IN (" . implode(',', $new_oids) . ")
 					";
@@ -3586,7 +3588,7 @@ echo '			</table>
 							SELECT
 								" . implode(',', $subform_pks_realnames) . "
 							FROM
-								" . $layerset[0]['maintable'] . "
+								" . pg_quote($layerset[0]['maintable']) . "
 							" . (count($subformpk_where) > 0 ? ' WHERE ' . implode(' AND ', $subformpk_where) : '') . "
 						";
 						#echo '<p>SQL zur Abfrage der Werte der SubformPK-Schlüssel aus dem alten Datensatz: ' . $sql;
@@ -3599,7 +3601,7 @@ echo '			</table>
 							SELECT
 								" . implode(',', $subform_pks_realnames) . "
 							FROM
-								" . $layerset[0]['maintable'] . "
+								" . pg_quote($layerset[0]['maintable']) . "
 							WHERE
 								" . $layerset[0]['oid'] . " IN (" . implode(',', $all_new_oids) . ")
 						";
@@ -3618,7 +3620,7 @@ echo '			</table>
 			# Original löschen
 			if ($delete_original) {
 				$sql = "
-					DELETE FROM " . $layerset[0]['maintable'] . "
+					DELETE FROM " . pg_quote($layerset[0]['maintable']) . "
 					WHERE " . implode(' AND ', $where) . "
 				";
 				#echo $sql.'<br>';
@@ -8997,10 +8999,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 		$sql = 'DELETE FROM zwischenablage WHERE user_id = '.$this->user->id.' AND stelle_id = '.$this->Stelle->id;
 		if($this->formvars['chosen_layer_id'] != '')$sql.= ' AND layer_id = '.$this->formvars['chosen_layer_id'];
-		if(count($oids) > 0)$sql.= ' AND oid IN ('.implode(', ', $oids).')';
+		if(@count($oids) > 0)$sql.= ' AND oid IN ('.implode(', ', $oids).')';
 		#echo $sql.'<br>';
 		$ret = $this->database->execSQL($sql,4, 1);
-		if(count($oids) == 0){
+		if(@count($oids) == 0){
 			$this->Zwischenablage();
 		}
 	}
@@ -14189,7 +14191,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       } # ende der Behandlung der zur Abfrage ausgewählten Layer
     } # ende der Schleife zur Abfrage der Layer der Stelle
 
-		if ($this->formvars['printversion'] == '' AND $this->last_query != '' AND $this->user->rolle->querymode == 1) {
+/*		if ($this->formvars['printversion'] == '' AND $this->last_query != '' AND $this->user->rolle->querymode == 1) {
 			# bei get_last_query (nicht aus Overlay) und aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer
 			$attributes = $this->qlayerset[0]['attributes'];
 			$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
@@ -14219,7 +14221,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 			$this->saveMap('');
-		}
+		}*/
 		$this->main = 'sachdatenanzeige.php';
   }
 

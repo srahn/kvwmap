@@ -29,6 +29,7 @@
 								<td align="center" width="100%" height="100%" valign="top" style="background: url('<?php echo BG_IMAGE; ?>'); border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
 									<div id="container_paint" style="height:100%; position: relative; overflow: hidden;">		<!-- overflow wird für rausfliegende Legende benötigt und height:100% für den Box-Shadow unter der MapFunctionsBar und Legende -->
 										<script type="text/javascript">
+											window.name = 'root';
 											currentform = document.GUI;
 											<? $this->currentform = 'document.GUI'; ?>
 											function set_hist_timestamp() {
@@ -66,10 +67,7 @@
 						<input type="hidden" name="stopnavigation" value="0">
 						<input type="hidden" name="gle_changed" value="">
 						<input type="hidden" name="mime_type" value="">
-					</form><?
-					if ($this->user->rolle->querymode == 1) {
-						//include(LAYOUTPATH.'snippets/overlayframe.php');
-					} ?>
+					</form>
 				</td>
 			</tr><?php
 			if ($this->user->funktion == 'admin' AND DEBUG_LEVEL > 0) { ?>

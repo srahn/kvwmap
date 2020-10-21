@@ -34,14 +34,15 @@
       <? }
 				}
       if($this->qlayerset[$i]['template']==''){ # wenn man ein Template für einen embeddeden Layer gesetzt hat, will man diesen Layer ja nur in der embeddeten Anzeige sehen?>
-   			<input type="button" name="extrabutton" value="Datensatz anzeigen" onclick="location.href='index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->qlayerset[$i]['Layer_ID'].'&value_'.$this->qlayerset[$i]['maintable'].'_oid='.$this->qlayerset[$i]['shape'][0][$this->qlayerset[$i]['maintable'].'_oid']; ?>'">
+   			<input type="button" name="extrabutton" value="Datensatz anzeigen" onclick="overlay_link('go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->qlayerset[$i]['Layer_ID'].'&value_'.$this->qlayerset[$i]['maintable'].'_oid='.$this->qlayerset[$i]['shape'][0][$this->qlayerset[$i]['maintable'].'_oid']; ?>');">
    		<? } ?>
       </td>
     </tr>
   </table>
 █
-var overlay_bottom = parseInt(<? echo $this->user->rolle->nImageHeight+30; ?>) + parseInt(document.GUI.overlayy.value);
 var button_bottom = document.getElementById('savebutton').getBoundingClientRect().bottom;
-if(button_bottom > overlay_bottom)document.getElementById('savebutton').scrollIntoView({block: "end", behavior: "smooth"});
+if(button_bottom > window.innerHeight){
+	window.scrollTo({top: button_bottom - window.innerHeight + 40, behavior: 'smooth'});		// wegen Overlayfooter geht kein scrollintoview
+}
   
  

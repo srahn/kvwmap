@@ -13,7 +13,7 @@
 				root.location.href="index.php";
 		<? } ?>
 			}
-			//activate_overlay();
+			activate_overlay();
 		</script>
 		<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
 			<div id="contentdiv" style="background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;max-width:<? echo $width; ?>px;position:relative;">
@@ -49,6 +49,7 @@
 				</table>
 			</div>
 			<input type="hidden" name="mime_type" value="">
+			<input type="hidden" name="gle_changed" value="">
 		</form>
 	</body>
 </html>

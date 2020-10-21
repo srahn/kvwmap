@@ -47,18 +47,7 @@
    ?></table>
 
 <?
-if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
-	
-	# falls das Geometrie-Attribut editierbar ist und wir uns im Overlay-Fenster befinden, das Ganze ohne Overlay aufrufen
-	if($this->currentform == 'document.GUI2' AND $this->qlayerset[0]['attributes']['privileg'][$this->qlayerset[0]['attributes']['indizes'][$this->qlayerset[0]['attributes']['the_geom']]] == 1){
-		$this->formvars['mime_type'] = '';
-		echo '
-		<script type="text/javascript">
-			location.href = \'index.php?'.http_build_query($this->formvars).'\'
-		</script>';
-		exit;
-	}	
-	
+if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){	
 	$i = 0;	
 	if($this->qlayerset[0]['template']=='generic_layer_editor.php' OR $this->qlayerset[0]['template']==''){
 		include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise auch bei spaltenweiser Darstellung
@@ -89,7 +78,7 @@ if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 		<? if($this->formvars['subform'] == 'true'){ ?>
 			<input type="button" name="abort" value="<? echo $this->strCancel; ?>" onclick="currentform.go.value='get_last_query';currentform.submit();">&nbsp;&nbsp;&nbsp;&nbsp;
 		<? } ?>
-  		<input type="button" name="go_plus" id="sachdatenanzeige_save_button" value="<? echo $strSave; ?>" onclick="<? echo $this->currentform; ?>.save_new_dataset();">&nbsp;&nbsp;&nbsp;&nbsp;
+  		<input type="button" name="go_plus" id="sachdatenanzeige_save_button" value="<? echo $strSave; ?>" onclick="save_new_dataset();">&nbsp;&nbsp;&nbsp;&nbsp;
   		<input type="checkbox" name="weiter_erfassen" value="1" <? if($this->formvars['weiter_erfassen'] == 1)echo 'checked="true"'; ?>><? echo $strCreateAnotherOne; ?>
   	</td>
 	</tr>

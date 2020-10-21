@@ -168,6 +168,9 @@ if($this->formvars['printversion'] == ''){ ?>
 	<a style="float: right" href="javascript:scrolltop();"	title="<? echo $strToTop; ?>">
 		<i class="fa fa-arrow-up hover-border" aria-hidden="true"></i>
 	</a>
+	<br>
+	<br>
+	<br>
 <? } ?>
 
 <?
