@@ -14153,6 +14153,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 						$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 						$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], NULL, $privileges['attributenames']);
+						$request = '';
 						if($this->last_query != '' AND $this->last_query[$layerset[$i]['Layer_ID']]['sql'] != ''){
 							$request = $this->last_query[$layerset[$i]['Layer_ID']]['sql'];
 							if($this->formvars['anzahl'] == '')$this->formvars['anzahl'] = $this->last_query[$layerset[$i]['Layer_ID']]['limit'];
