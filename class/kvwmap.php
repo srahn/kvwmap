@@ -16032,7 +16032,7 @@ class db_mapObj{
 		#echo '<br>GUI->getlayerdatabase layer_id: ' . $layer_id;
 		$layerdb = new pgdatabase();
 		$rs = $this->get_layer_connection($layer_id);
-		if (count($rs) == 0) {
+		if (@count($rs) == 0) {
 			return null;
 		}
 		$rs['schema'] = replace_params(
