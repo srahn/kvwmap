@@ -15,7 +15,8 @@
 			<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>" onload="currentform = document.GUI2;">
 <?
 $this->currentform = 'document.GUI2';
-include (LAYOUTPATH.'snippets/'.$this->overlaymain);
+
+include ((strpos($this->overlaymain, PLUGINS) === false ? LAYOUTPATH . 'snippets/' : '') . $this->overlaymain);
 ?>
 		</td>
 	</tr>
