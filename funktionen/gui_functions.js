@@ -680,6 +680,7 @@ function overlay_submit(gui, start, target){
 	gui.submit();
 	if(gui.CMD != undefined)gui.CMD.value = "";
 	gui.target = '';
+	gui.mime_type.value = '';
 }
 
 function overlay_link(data, start){

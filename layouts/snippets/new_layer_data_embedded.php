@@ -37,7 +37,7 @@
 	<table width="100%" border="0" cellpadding="2" cellspacing="0">
 		<tr align="right"> 
 	  	<td height="30" valign="middle">
-	  		<a tabindex="1" name="go_plus" class="buttonlink" id="go_plus" href="javascript:subsave_new_layer_data(<? echo $this->formvars['selected_layer_id']; ?>, '<? echo $this->formvars['fromobject'] ?>', '<? echo $this->formvars['targetobject'] ?>', '<? echo $this->formvars['targetlayer_id'] ?>', '<? echo $this->formvars['targetattribute'] ?>', '<? echo $this->formvars['reload'] ?>', '<? echo $this->formvars['list_edit'] ?>');"><span><? echo $strSave; ?></span></a>
+	  		<a tabindex="1" name="go_plus" class="buttonlink" id="sub_savebutton" href="javascript:subsave_new_layer_data(<? echo $this->formvars['selected_layer_id']; ?>, '<? echo $this->formvars['fromobject'] ?>', '<? echo $this->formvars['targetobject'] ?>', '<? echo $this->formvars['targetlayer_id'] ?>', '<? echo $this->formvars['targetattribute'] ?>', '<? echo $this->formvars['reload'] ?>', '<? echo $this->formvars['list_edit'] ?>');"><span><? echo $strSave; ?></span></a>
 	  		<a tabindex="1" name="cancelbutton" class="buttonlink" href="javascript:clearsubform('<? echo $this->formvars['fromobject'] ?>');"><span><? echo $strCancel; ?></span></a>&nbsp;&nbsp;&nbsp;&nbsp;
 				<?if($CreateAnotherOne){?>
 					<input type="checkbox" tabindex="1" class="subform_<? echo $this->formvars['selected_layer_id']; ?>" name="weiter_erfassen" value="1" <? if($this->formvars['weiter_erfassen'] == 1)echo 'checked="true"'; ?>><? echo $strCreateAnotherOne; ?>
@@ -50,8 +50,9 @@
 	<input type="hidden" name="geomtype" class="<? echo $this->subform_classname; ?>" value="<? echo $this->geomtype; ?>">
 	
 █
-var overlay_bottom = parseInt(<? echo $this->user->rolle->nImageHeight+30; ?>) + parseInt(document.GUI.overlayy.value);
-var button_bottom = document.getElementById('go_plus').getBoundingClientRect().bottom;
-if(button_bottom > overlay_bottom)document.getElementById('go_plus').scrollIntoView({block: "end", behavior: "smooth"});
+var button_bottom = document.getElementById('sub_savebutton').getBoundingClientRect().bottom;
+if(button_bottom > window.innerHeight){
+	window.scrollBy({top: button_bottom - window.innerHeight + 40, behavior: 'smooth'});		// wegen Overlayfooter geht kein scrollintoview
+}
 	
  
