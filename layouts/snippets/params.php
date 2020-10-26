@@ -63,7 +63,9 @@
 													'',																		# style
 													'onLayerParameterChanged(this);',			# onchange
 													'layer_parameter_' . $param['key'],		# id
-													''																		# multiple
+													'',																		# multiple
+													'',																		# class
+													''																		# first option
 												); ?>
 											</td>
 										</tr><?php

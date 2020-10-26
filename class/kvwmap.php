@@ -385,8 +385,8 @@ class GUI {
 						echo '
 							</ul>
 							<table class="ul_table">';
+						$this->get_layer_params_form(NULL, $this->formvars['layer_id']);
 						if($layer[0]['connectiontype'] == 6){
-							$this->get_layer_params_form(NULL, $this->formvars['layer_id']);
 							if($this->formvars['layer_id'] < 0 OR $layer[0]['original_labelitem'] != ''){		# für Rollenlayer oder normale Layer mit labelitem
 								echo '<tr>
 												<td>
@@ -7383,6 +7383,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$mapDB->save_all_layer_params($this->formvars);
 		$this->params = $mapDB->get_all_layer_params();
+		$this->params_layer = $mapDB->get_layer_params_layer();
 		# Ergänze und lösche Layerparameter in Rollen
 		$this->update_layer_parameter_in_rollen($this->params);
 		$this->output();
@@ -18077,7 +18078,7 @@ class db_mapObj{
 					" . $formvars['id'][$i] . ",
 					'" . $formvars['key'][$i] . "',
 					'" . $formvars['alias'][$i] . "',
-					'" . $formvars['default_value'][$i] . "',
+					'" . $this->db->mysqli->real_escape_string($formvars['default_value'][$i]) . "',
 					'" . $this->db->mysqli->real_escape_string($formvars['options_sql'][$i]) . "'
 				)";
 				$komma = true;
