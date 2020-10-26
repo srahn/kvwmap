@@ -163,11 +163,11 @@ add_calendar = function(event, elementid, type, setnow){
 	remove_calendar();
 	calendar = new CalendarJS();
 	calendar.init(elementid, type, setnow);
-	document.getElementById('gui-table').calendar = calendar;
+	root.document.getElementById('gui-table').calendar = calendar;
 }
  
 remove_calendar = function(){
-	if(root.document.getElementById('gui-table').calendar != undefined)document.getElementById('gui-table').calendar.destroy();
+	if(root.document.getElementById('gui-table').calendar != undefined)root.document.getElementById('gui-table').calendar.destroy();
 }
 
 function Bestaetigung(link,text) {
