@@ -541,12 +541,13 @@ function drag(event) {
 }
 
 function activate_overlay(){
-	//root.document.getElementById('contentdiv').scrollTop = 0;
-	//root.document.getElementById('contentdiv').style.display = '';
-	//overlay = document.getElementById('overlaydiv');
-	//overlay.style.left = document.GUI.overlayx.value+'px';
-	//overlay.style.top = document.GUI.overlayy.value+'px';
-	//overlay.style.display='';
+	window.onmouseout = function(evt){
+		if(evt.relatedTarget == evt.toElement){
+			root.document.GUI.overlayx.value = window.screenX;
+			root.document.GUI.overlayy.value = window.screenY;
+			ahah('index.php', 'go=saveOverlayPosition&overlayx='+window.screenX+'&overlayy='+window.screenY, new Array(''), new Array(""));
+		}
+	};
 	if(root.document.SVG != undefined){
 		svgdoc = root.document.SVG.getSVGDocument();	
 		if(svgdoc != undefined)svgdoc.getElementById('polygon').setAttribute("points", "");
@@ -671,7 +672,7 @@ function overlay_submit(gui, start, target){
 			gui.target = target;
 		}
 		else{
-			query_tab = root.window.open("", "Sachdaten", "location=0,status=0,height=800,width=700,scrollbars=1");
+			query_tab = root.window.open("", "Sachdaten", "left="+root.document.GUI.overlayx.value+",location=0,status=0,height=800,width=700,scrollbars=1");
 			gui.mime_type.value = 'overlay_html';
 			gui.target = 'Sachdaten';
 			query_tab.focus();
