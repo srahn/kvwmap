@@ -16,7 +16,7 @@
 			activate_overlay();
 		</script>
 		<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
-			<div id="contentdiv" style="background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;max-width:<? echo $width; ?>px;position:relative;">
+			<div id="contentdiv" style="background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;width: min-content;position:relative;">
 				<table border="0" height="100%" cellpadding="0" cellspacing="0" style="width: 100%">
 					<tr>
 						<td align="center" width="100%" valign="top" >
