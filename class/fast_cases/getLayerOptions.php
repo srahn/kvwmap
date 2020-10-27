@@ -257,8 +257,8 @@ class GUI {
 						echo '
 							</ul>
 							<table class="ul_table">';
+						$this->get_layer_params_form(NULL, $this->formvars['layer_id']);
 						if($layer[0]['connectiontype'] == 6){
-							$this->get_layer_params_form(NULL, $this->formvars['layer_id']);
 							if($this->formvars['layer_id'] < 0 OR $layer[0]['original_labelitem'] != ''){		# für Rollenlayer oder normale Layer mit labelitem
 								echo '<tr>
 												<td>

@@ -1295,24 +1295,6 @@
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
       $GUI->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
     }
-    if($GUI->formvars['geom_from_layer']){
-	    $data = $GUI->mapDB->getData($GUI->formvars['geom_from_layer']);
-	    $data_explosion = explode(' ', $data);
-	    $GUI->formvars['columnname'] = $data_explosion[0];
-	    $select = $fromwhere = $GUI->mapDB->getSelectFromData($data);
-			# order by rausnehmen
-			$GUI->formvars['orderby'] = '';
-			$orderbyposition = strrpos(strtolower($select), 'order by');
-			$lastfromposition = strrpos(strtolower($select), 'from');
-			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-				$fromwhere = substr($select, 0, $orderbyposition);
-				$GUI->formvars['orderby'] = ' '.substr($select, $orderbyposition);
-			}
-			$GUI->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
-	    if(strpos(strtolower($GUI->formvars['fromwhere']), ' where ') === false){
-	      $GUI->formvars['fromwhere'] .= ' where (1=1)';
-	    }
-	  }
     $oldscale=round($GUI->map_scaledenom);  
 		$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
     if ($GUI->formvars['CMD']!=''){			
@@ -1333,6 +1315,17 @@
       $GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
     }
 		elseif($GUI->formvars['zoom_layer_id'] != '')$GUI->zoomToMaxLayerExtent($GUI->formvars['zoom_layer_id']);	# zoomToMaxLayerExtent
+		
+		if($GUI->formvars['FlurstKennz'] != ''){		# über die Flurstückssuche gefundene Flurstücke -> Geometrie als Suchpolygon übernehmen
+			$GUI->formvars['suchpolygon'] = $GUI->pgdatabase->getGeomfromFlurstuecke($GUI->formvars['FlurstKennz'], $GUI->user->rolle->epsg_code);
+		}
+		if($GUI->formvars['zurueck'] OR $GUI->formvars['FlurstKennz'] != ''){
+			$GUI->formvars['pathwkt'] = $GUI->formvars['suchpolygon'];
+			$GUI->formvars['newpathwkt'] = $GUI->formvars['suchpolygon'];
+			$GUI->formvars['firstpoly'] = 'true';
+			$GUI->formvars['last_doing'] = 'draw_second_polygon';
+			$GUI->formvars['last_button'] = 'pgon0';
+		}
     
     $GUI->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());
@@ -1624,24 +1617,6 @@
   	if(!$GUI->formvars['geom_from_layer']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
       $GUI->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
-    }
-    if($GUI->formvars['geom_from_layer']){
-	    $data = $GUI->mapDB->getData($GUI->formvars['geom_from_layer']);
-	    $data_explosion = explode(' ', $data);
-	    $GUI->formvars['columnname'] = $data_explosion[0];
-			$select = $fromwhere = $GUI->mapDB->getSelectFromData($data);
-			# order by rausnehmen
-			$GUI->formvars['orderby'] = '';
-			$orderbyposition = strrpos(strtolower($select), 'order by');
-			$lastfromposition = strrpos(strtolower($select), 'from');
-			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-				$fromwhere = substr($select, 0, $orderbyposition);
-				$GUI->formvars['orderby'] = ' '.substr($select, $orderbyposition);
-			}
-			$GUI->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
-	    if(strpos(strtolower($GUI->formvars['fromwhere']), ' where ') === false){
-	      $GUI->formvars['fromwhere'] .= ' where (1=1)';
-	    }
     }
     $GUI->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());

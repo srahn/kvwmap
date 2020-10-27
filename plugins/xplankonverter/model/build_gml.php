@@ -568,7 +568,6 @@ class Gml_builder {
 		// First replace commas within strings (delimited by \" with an uncommon delimiter
 		// Also make sure to not use codelist-types (also delimited by "/ but followed with a ( when opening or prefixed with a ) when opening
 		$char_array = str_split($data_string);
-		$component_is_maybe_string = false;
 		for($i = 0; $i < count($char_array); $i++) {
 			switch ($char_array[$i]) {
 				case '\\':

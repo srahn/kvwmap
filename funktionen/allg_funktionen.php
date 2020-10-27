@@ -11,7 +11,7 @@ function quote($var){
 }
 
 function pg_quote($column){
-	return ctype_lower($column) ? $column : '"'.$column.'"';
+	return (ctype_lower($column) OR strpos($column, "'") === 0) ? $column : '"'.$column.'"';
 }
 
 function get_din_formats() {

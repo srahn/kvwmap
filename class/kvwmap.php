@@ -385,8 +385,8 @@ class GUI {
 						echo '
 							</ul>
 							<table class="ul_table">';
+						$this->get_layer_params_form(NULL, $this->formvars['layer_id']);
 						if($layer[0]['connectiontype'] == 6){
-							$this->get_layer_params_form(NULL, $this->formvars['layer_id']);
 							if($this->formvars['layer_id'] < 0 OR $layer[0]['original_labelitem'] != ''){		# für Rollenlayer oder normale Layer mit labelitem
 								echo '<tr>
 												<td>
@@ -2894,7 +2894,6 @@ echo '			</table>
 				}
 			} break;
 			case 'overlay_html' : {
-				$this->overlaymain = $this->main;
 				include (LAYOUTPATH.'snippets/overlay.php');
 				if($this->alert != ''){
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
@@ -3441,12 +3440,12 @@ echo '			</table>
 		}
 
 		# Dokument-Pfade abfragen
-		if (count($document_attributes) > 0) {
+		if (@count($document_attributes) > 0) {
 			$sql = "
 				SELECT
 					" . implode(',', $document_attributes) . "
 				FROM
-					" . $layerset[0]['maintable'] . "
+					" . pg_quote($layerset[0]['maintable']) . "
 				WHERE
 					" . implode(' AND ', $where) . "
 			";
@@ -3466,7 +3465,7 @@ echo '			</table>
 		for ($i = 0; $i < $count; $i++) { # das ist die Schleife, wie oft insgesamt kopiert werden soll
 			# zunächst als reine Kopie
 			$sql = "
-				SELECT Coalesce(max(".$layerset[0]['oid']."), 0) AS oid FROM " . $layerset[0]['maintable'] . "
+				SELECT Coalesce(max(".$layerset[0]['oid']."), 0) AS oid FROM " . pg_quote($layerset[0]['maintable']) . "
 			";
 			#echo '<p>SQL zur Abfrage der letzen oid: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 0);
@@ -3491,13 +3490,15 @@ echo '			</table>
 			else {
 				$insert_columns = $select_columns = $attributes;
 			}
+			array_walk($insert_columns, function(&$attributename, $key){$attributename = pg_quote($attributename);});
+			array_walk($select_columns, function(&$attributename, $key){$attributename = pg_quote($attributename);});
 			$sql = "
 				INSERT INTO
-					" . $layerset[0]['maintable'] . " (" . implode(', ', $insert_columns) . ")
+					" . pg_quote($layerset[0]['maintable']) . " (" . implode(', ', $insert_columns) . ")
 				SELECT
 					" . implode(', ', $select_columns) . "
 				FROM
-					" . $layerset[0]['maintable'] . "
+					" . pg_quote($layerset[0]['maintable']) . "
 				WHERE
 					" . implode(' AND ', $where) . "
 			";
@@ -3509,7 +3510,7 @@ echo '			</table>
 
 			$sql = "
 				SELECT ".$layerset[0]['oid']."
-				FROM " . $layerset[0]['maintable'] . "
+				FROM " . pg_quote($layerset[0]['maintable']) . "
 				WHERE
 					".$layerset[0]['oid']." > " . $max_oid . "
 			";
@@ -3524,7 +3525,7 @@ echo '			</table>
 				$new_oids[] = $rs[0];
 				$all_new_oids[] = $rs[0];
 				# Dokumente kopieren
-				for ($p = 0; $p < count($orig_dataset[$d]['document_paths']); $p++) { # diese Schleife durchläuft alle Dokument-Attribute innerhalb eines kopierten Datensatzes
+				for ($p = 0; $p < @count($orig_dataset[$d]['document_paths']); $p++) { # diese Schleife durchläuft alle Dokument-Attribute innerhalb eines kopierten Datensatzes
 					if ($orig_dataset[$d]['document_paths'][$p] != '') {
 						$path_parts = explode('&', $orig_dataset[$d]['document_paths'][$p]);		# &original_name=... abtrennen
 						$orig_path = $path_parts[0];
@@ -3534,7 +3535,7 @@ echo '			</table>
 						copy($orig_path, $new_path);
 						$complete_new_path = $new_path.'&'.$path_parts[1];
 						$sql = "
-							UPDATE " . $layerset[0]['maintable'] . "
+							UPDATE " . pg_quote($layerset[0]['maintable']) . "
 							SET " . $document_attributes[$p] . " = '" . $complete_new_path . "'
 							WHERE ".$layerset[0]['oid']." = " . $rs[0] . "
 						";
@@ -3548,7 +3549,7 @@ echo '			</table>
 			if ($new_oids[0] != '') {
 				for ($u = 0; $u < count($update_columns); $u++) {
 					$sql = "
-						UPDATE " . $layerset[0]['maintable'] . "
+						UPDATE " . pg_quote($layerset[0]['maintable']) . "
 						SET " . $update_columns[$u] . " = '" . $update_values[$i][$u] . "'
 						WHERE ".$layerset[0]['oid']." IN (" . implode(',', $new_oids) . ")
 					";
@@ -3587,7 +3588,7 @@ echo '			</table>
 							SELECT
 								" . implode(',', $subform_pks_realnames) . "
 							FROM
-								" . $layerset[0]['maintable'] . "
+								" . pg_quote($layerset[0]['maintable']) . "
 							" . (count($subformpk_where) > 0 ? ' WHERE ' . implode(' AND ', $subformpk_where) : '') . "
 						";
 						#echo '<p>SQL zur Abfrage der Werte der SubformPK-Schlüssel aus dem alten Datensatz: ' . $sql;
@@ -3600,7 +3601,7 @@ echo '			</table>
 							SELECT
 								" . implode(',', $subform_pks_realnames) . "
 							FROM
-								" . $layerset[0]['maintable'] . "
+								" . pg_quote($layerset[0]['maintable']) . "
 							WHERE
 								" . $layerset[0]['oid'] . " IN (" . implode(',', $all_new_oids) . ")
 						";
@@ -3619,7 +3620,7 @@ echo '			</table>
 			# Original löschen
 			if ($delete_original) {
 				$sql = "
-					DELETE FROM " . $layerset[0]['maintable'] . "
+					DELETE FROM " . pg_quote($layerset[0]['maintable']) . "
 					WHERE " . implode(' AND ', $where) . "
 				";
 				#echo $sql.'<br>';
@@ -7382,6 +7383,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$mapDB->save_all_layer_params($this->formvars);
 		$this->params = $mapDB->get_all_layer_params();
+		$this->params_layer = $mapDB->get_layer_params_layer();
 		# Ergänze und lösche Layerparameter in Rollen
 		$this->update_layer_parameter_in_rollen($this->params);
 		$this->output();
@@ -8704,12 +8706,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 				$this->saveMap('');
-				if (value_of($this->formvars, 'mime_type') != 'overlay_html') {
-					// bei Suche aus normaler Suchmaske (nicht aus Overlay) heraus --> Zeichnen der Karte und Darstellung der Sachdaten im Overlay
-					$this->drawMap();
-					$this->main = 'map.php';
-					$this->overlaymain = 'sachdatenanzeige.php';
-				}
 			}
 			$this->output();
 		}
@@ -9004,10 +9000,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 		$sql = 'DELETE FROM zwischenablage WHERE user_id = '.$this->user->id.' AND stelle_id = '.$this->Stelle->id;
 		if($this->formvars['chosen_layer_id'] != '')$sql.= ' AND layer_id = '.$this->formvars['chosen_layer_id'];
-		if(count($oids) > 0)$sql.= ' AND oid IN ('.implode(', ', $oids).')';
+		if(@count($oids) > 0)$sql.= ' AND oid IN ('.implode(', ', $oids).')';
 		#echo $sql.'<br>';
 		$ret = $this->database->execSQL($sql,4, 1);
-		if(count($oids) == 0){
+		if(@count($oids) == 0){
 			$this->Zwischenablage();
 		}
 	}
@@ -9217,6 +9213,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$this->formvars['no_output'] = true;
 				$this->GenerischeSuche_Suchen();
 				$this->formvars['no_output'] = false;
+				$this->formvars['search'] = false;
+				$this->search = false;
 			}
 			
 			$sql = "
@@ -13626,7 +13624,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     }
     else {
       $this->SachdatenAnzeige($rect);
-			if (
+			if (false and 		// deaktiviert wegen Sachdatenanzeige im extra Browser-Fenster
 				$this->go == 'Layer_Datensaetze_Loeschen' AND
 				array_reduce(
 					$this->qlayerset,
@@ -14158,6 +14156,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 						$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 						$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], NULL, $privileges['attributenames']);
+						$request = '';
 						if($this->last_query != '' AND $this->last_query[$layerset[$i]['Layer_ID']]['sql'] != ''){
 							$request = $this->last_query[$layerset[$i]['Layer_ID']]['sql'];
 							if($this->formvars['anzahl'] == '')$this->formvars['anzahl'] = $this->last_query[$layerset[$i]['Layer_ID']]['limit'];
@@ -14193,12 +14192,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       } # ende der Behandlung der zur Abfrage ausgewählten Layer
     } # ende der Schleife zur Abfrage der Layer der Stelle
 
-		if ($this->formvars['printversion'] == '' AND $this->formvars['mime_type'] != 'overlay_html' AND $this->last_query != '' AND $this->user->rolle->querymode == 1) {
+/*		if ($this->formvars['printversion'] == '' AND $this->last_query != '' AND $this->user->rolle->querymode == 1) {
 			# bei get_last_query (nicht aus Overlay) und aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer
 			$attributes = $this->qlayerset[0]['attributes'];
 			$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
 			$this->loadMap('DataBase');
-			if($this->last_query['go'] != 'Sachdaten' AND count($this->qlayerset[0]['shape']) > 0 AND ($this->qlayerset[0]['shape'][0][$attributes['the_geom']] != '')){			# wenn es eine Suche war und was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
+			if(count($this->qlayerset[0]['shape']) > 0 AND ($this->qlayerset[0]['shape'][0][$attributes['the_geom']] != '')){			# wenn was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
 				$this->zoomed = true;
 				switch ($this->qlayerset[0]['connectiontype']) {
 					case MS_POSTGIS : {
@@ -14223,13 +14222,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 			$this->saveMap('');
-			$this->drawMap();
-			$this->main = 'map.php';
-			$this->overlaymain = 'sachdatenanzeige.php';
-		}
-		else {
-			$this->main = 'sachdatenanzeige.php';
-		}
+		}*/
+		$this->main = 'sachdatenanzeige.php';
   }
 
   function WLDGE_Auswaehlen() {
@@ -14833,7 +14827,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       }
       # highlighting-Geometrie anfügen
       $output .= '||| '.$highlight_geom;
-      echo umlaute_javascript(umlaute_html($output)).'█showtooltip(top.document.GUI.result.value, '.$showdata.');';
+			echo umlaute_javascript(umlaute_html($output)).'█root.showtooltip(root.document.GUI.result.value, '.$showdata.');';
     }
   }
 
@@ -16042,7 +16036,7 @@ class db_mapObj{
 		#echo '<br>GUI->getlayerdatabase layer_id: ' . $layer_id;
 		$layerdb = new pgdatabase();
 		$rs = $this->get_layer_connection($layer_id);
-		if (count($rs) == 0) {
+		if (@count($rs) == 0) {
 			return null;
 		}
 		$rs['schema'] = replace_params(
@@ -16471,7 +16465,7 @@ class db_mapObj{
 
 	function save_attributes($layer_id, $attributes){
 		$insert_count = 0;
-		for ($i = 0; $i < count($attributes); $i++) {
+		for ($i = 0; $i < @count($attributes); $i++) {
 			if($attributes[$i] == NULL)continue;
 			if($attributes[$i]['nullable'] == '')$attributes[$i]['nullable'] = 'NULL';
 			if($attributes[$i]['saveable'] == '')$attributes[$i]['saveable'] = 0;
@@ -18084,7 +18078,7 @@ class db_mapObj{
 					" . $formvars['id'][$i] . ",
 					'" . $formvars['key'][$i] . "',
 					'" . $formvars['alias'][$i] . "',
-					'" . $formvars['default_value'][$i] . "',
+					'" . $this->db->mysqli->real_escape_string($formvars['default_value'][$i]) . "',
 					'" . $this->db->mysqli->real_escape_string($formvars['options_sql'][$i]) . "'
 				)";
 				$komma = true;
