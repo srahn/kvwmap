@@ -48,7 +48,7 @@
 				if($this->formvars['backlink'] == ''){
 					$this->formvars['backlink'] = 'javascript:currentform.go.value=\'get_last_search\';currentform.submit();';
 				}
-				echo '<a href="'.$this->formvars['backlink'].'" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
+				echo '<a href="'.strip_pg_escape_string($this->formvars['backlink']).'" target="root" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
 			} ?>
 		</td>
 		<td align="right" valign="top" style="padding: 0 10 0 0">
