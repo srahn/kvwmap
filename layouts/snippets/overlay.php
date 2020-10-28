@@ -3,7 +3,7 @@
 		<title><? echo TITLE; ?></title>
 		<? include(SNIPPETS . 'gui_head.php'); ?>
 	</head>
-	<body>
+	<body onload="activate_overlay();">
 		<script type="text/javascript">
 			root = window.opener;
 			if(typeof(root.stopwaiting) == "function"){
@@ -13,7 +13,6 @@
 				root.location.href="index.php";
 		<? } ?>
 			}
-			activate_overlay();
 		</script>
 		<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
 			<div id="contentdiv" style="background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;width: fit-content;width: -moz-fit-content;position:relative;">

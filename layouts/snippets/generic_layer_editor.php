@@ -21,7 +21,7 @@
 		$layer['Name'] = $layer['alias'];
 	}
 	$doit = false;
-  $anzObj = count($layer['shape']);
+  $anzObj = @count($layer['shape']);
   if ($anzObj > 0) {
   	$this->found = 'true';
 		$k = 0;
@@ -547,7 +547,7 @@
 </table>
 	<? } 
 	
-	for($l = 0; $l < count($invisible_attributes[$layer['Layer_ID']]); $l++){
+	for($l = 0; $l < @count($invisible_attributes[$layer['Layer_ID']]); $l++){
 		echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 	}
 	

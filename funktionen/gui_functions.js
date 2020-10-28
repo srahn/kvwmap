@@ -15,6 +15,7 @@ else{
 
 var query_tab;
 var root = window;
+root.resized = 0;
 
 function ahah(url, data, target, action, progress){
 	for(k = 0; k < target.length; ++k){
@@ -548,10 +549,25 @@ function activate_overlay(){
 			ahah('index.php', 'go=saveOverlayPosition&overlayx='+window.screenX+'&overlayy='+window.screenY, new Array(''), new Array(""));
 		}
 	};
+	window.onresize = function(evt){
+		root.resized++;
+	};
 	if(root.document.SVG != undefined){
 		svgdoc = root.document.SVG.getSVGDocument();	
 		if(svgdoc != undefined)svgdoc.getElementById('polygon').setAttribute("points", "");
 	}
+	if(root.resized < 2){		// wenn resized > 1 hat der Nutzer von Hand die Groesse veraendert, dann keine automatische Anpassung
+		root.resized = 0;
+		var contentWidth = document.getElementById("contentdiv").offsetWidth;
+		if(contentWidth < screen.width){
+			window.resizeTo(contentWidth+35, 800);
+		}
+		else{
+			window.resizeTo(screen.width, screen.height);
+			window.moveTo(0, 0);
+		}
+	}
+	window.focus();
 }
 
 function deactivate_overlay(){
@@ -674,8 +690,7 @@ function overlay_submit(gui, start, target){
 		else{
 			query_tab = root.window.open("", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1");
 			gui.mime_type.value = 'overlay_html';
-			gui.target = 'Sachdaten';
-			query_tab.focus();
+			gui.target = 'Sachdaten';			
 		}
 	}
 	gui.submit();
@@ -689,7 +704,6 @@ function overlay_link(data, start){
 	if(checkForUnsavedChanges()){
 		if(querymode == 1 && (start || currentform.name == 'GUI2')){
 			query_tab = root.window.open("index.php?"+data+"&mime_type=overlay_html", "Sachdaten", "location=0,status=0,height=800,width=700,scrollbars=1");
-			query_tab.focus();
 			if(root.document.GUI.CMD != undefined)root.document.GUI.CMD.value = "";
 		}else{
 			window.location.href = 'index.php?'+data;
