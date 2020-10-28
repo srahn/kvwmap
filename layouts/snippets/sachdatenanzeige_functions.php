@@ -716,7 +716,6 @@ include('funktionen/input_check_functions.php');
 			enclosingForm.layer_tablename.value = tablename;
 			enclosingForm.layer_columnname.value = columnname;
 			enclosingForm.go.value = 'zoomto_selected_datasets';
-			//enclosingForm.submit();
 			root.overlay_submit(enclosingForm, false, 'root');
 		}
 	}
@@ -730,7 +729,6 @@ include('funktionen/input_check_functions.php');
 			if(confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')){
 				enclosingForm.chosen_layer_id.value = layer_id;
 				enclosingForm.go.value = 'Layer_Datensaetze_Loeschen';
-				//enclosingForm.submit();
 				root.overlay_submit(enclosingForm, false);
 			}
 		}
@@ -748,7 +746,7 @@ include('funktionen/input_check_functions.php');
 			}
 			else {												// normaler Layer
 				enclosingForm.go.value = 'Sachdaten_speichern';
-				enclosingForm.submit();
+				root.overlay_submit(enclosingForm, false);
 			}
 		}
 	}
@@ -811,7 +809,6 @@ include('funktionen/input_check_functions.php');
 			enclosingForm.newpath.value = '';
 			enclosingForm.go_backup.value = enclosingForm.go.value;
 			enclosingForm.go.value = 'neuer_Layer_Datensatz';
-			//enclosingForm.submit();
 			if(document.getElementById('geom_privileg_'+layer_id).value == 1){
 				root.overlay_submit(enclosingForm, false, 'root');
 			}
@@ -866,7 +863,7 @@ include('funktionen/input_check_functions.php');
 			enclosingForm.width.value = 700;
 			enclosingForm.go_backup.value = enclosingForm.go.value;
 			enclosingForm.go.value = 'generisches_sachdaten_diagramm';
-			enclosingForm.submit();
+			root.overlay_submit(enclosingForm, false, 'root');
 			enclosingForm.target = "";
 		}
 	}
