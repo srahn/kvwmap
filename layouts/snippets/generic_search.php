@@ -273,7 +273,7 @@ $(document).on('click', function(e){
 }
 #gsl_gruppe_waehlen, #gsl_layer_waehlen  {
 	display: flex;
-	justify-content: center;
+	width: 500px;
 }
 #gsl_gruppe_waehlen>div, #gsl_layer_waehlen>div  {
 	margin: 0px 0px 10px 0px;
@@ -281,7 +281,7 @@ $(document).on('click', function(e){
 }
 #gsl_gruppe_waehlen select {
 	height: 25px;
-	width: 260px;
+	width: 360px;
 }
 #gsl_layer_waehlen select {
 	height: 35px;
@@ -290,6 +290,7 @@ $(document).on('click', function(e){
 #gsl_gruppe_waehlen div div:first-child, #gsl_layer_waehlen div div:first-child {
 	margin-right: 10px;
 	align-self: center;
+	width: 50px;
 }
 #gsl_suche_speichern>div {
 	margin-top: 10px;
