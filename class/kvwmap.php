@@ -126,6 +126,7 @@ class GUI {
 		if (isset ($mime_type)) $this->mime_type=$mime_type;
 		$this->scaleUnitSwitchScale = 239210;
 		$this->trigger_functions = array();
+		$this->custom_trigger_functions = array();
 		
 		$this->queryrect = new rectObj();
 	}
