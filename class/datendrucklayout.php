@@ -795,7 +795,7 @@ class ddl {
 				}			
 			}break;
 			case 'Autovervollständigungsfeld' : {
-				if(count($this->attributes['enum_output'][$j]) == 0){	
+				if(@count($this->attributes['enum_output'][$j]) == 0){	
 					$output = $value;		# preview
 				}	
 				else $output = $this->attributes['enum_output'][$j][$i];
