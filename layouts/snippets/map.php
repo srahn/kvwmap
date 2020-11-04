@@ -50,6 +50,10 @@ function showtooltip(result, showdata){
 	document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
+function clearMeasurement(){
+	document.getElementById("map").SVGclearMeasurement();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
 function showMapImage(){
 	svgdoc = document.SVG.getSVGDocument();	
 	var svg = svgdoc.getElementById("moveGroup");
