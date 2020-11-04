@@ -1271,8 +1271,8 @@ class ALKIS {
 		unset($namenszeilen);
 		if($eigentuemer->vorname != '')$namenszeilen[0] = $eigentuemer->vorname.' ';
 		$namenszeilen[0] .= $eigentuemer->nachnameoderfirma;
-		if($Eigentuemer->namensbestandteil != '')$namenszeilen[0] .= ', '.$Eigentuemer->namensbestandteil;
-		if($Eigentuemer->akademischergrad != '')$namenszeilen[0] .= ', '.$Eigentuemer->akademischergrad;
+		if($eigentuemer->namensbestandteil != '')$namenszeilen[0] .= ', '.$eigentuemer->namensbestandteil;
+		if($eigentuemer->akademischergrad != '')$namenszeilen[0] .= ', '.$eigentuemer->akademischergrad;
 		if($eigentuemer->geburtsname != '')$namenszeilen[1] .= 'geb. '.$eigentuemer->geburtsname.' ';
 		$namenszeilen[1] .= $eigentuemer->geburtsdatum;
 		$namenszeilen[2] .= $eigentuemer->anschriften[0]['strasse'].' '.$eigentuemer->anschriften[0]['hausnummer'];
