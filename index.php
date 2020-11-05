@@ -1,6 +1,16 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
 
+# CLI-Parameterübergabe
+if(isset($argv)){
+	array_shift($argv);
+	$_REQUEST = array();
+	foreach ($argv AS $arg) {
+		list($key, $val) = explode('=', $arg);
+		$_REQUEST[$key] = $val;
+	}
+}
+
 include('credentials.php');
 include('config.php');
 
