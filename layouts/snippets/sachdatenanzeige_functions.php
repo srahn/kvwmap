@@ -434,7 +434,7 @@ include('funktionen/input_check_functions.php');
   	}
   	enclosingForm.go.value = 'neuer_Layer_Datensatz_speichern';
 		document.getElementById('sachdatenanzeige_save_button').disabled = true;
-		enclosingForm.gle_changed.value = '';
+		root.document.GUI.gle_changed.value = '';
   	overlay_submit(enclosingForm, false);
 	}
 
@@ -483,6 +483,7 @@ include('funktionen/input_check_functions.php');
 				formData.append(form_fields[i].name, value);
 			}
   	}
+		root.document.GUI.gle_changed.value = '';
 		formData.append('go', 'Sachdaten_speichern');
 		if(reload)formData.append('reload', reload);
 		formData.append('selected_layer_id', layer_id);
@@ -521,6 +522,7 @@ include('funktionen/input_check_functions.php');
 				formData.append(form_fields[i].name, value);
 			}
   	}
+		root.document.GUI.gle_changed.value = '';
 		formData.append('go', 'neuer_Layer_Datensatz_speichern');
 		if(reload)formData.append('reload', reload);
 		formData.append('selected_layer_id', layer_id);

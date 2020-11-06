@@ -557,6 +557,8 @@ function init(){
 
 top.document.getElementById("map").SVGstartup = startup;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
+top.document.getElementById("map").SVGclearMeasurement = clearMeasurement;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+
 top.document.getElementById("svghelp").SVGmoveback = moveback;
 
 function moveback(evt){
@@ -1215,6 +1217,14 @@ function polygonarea(){
 
 //-------------------------------------------------------
 		
+function clearMeasurement(){
+	if(doing == "measure"){
+		measure();
+	}
+	else if(doing == "polygonquery"){
+		polygonquery();
+	}
+}
 
 // ----------------------------strecke messen---------------------------------
 

@@ -22,7 +22,12 @@
 							<img src="<? echo GRAPHICSPATH.'leer.gif'; ?>" onload="currentform = document.GUI2;">
 				<?
 				$this->currentform = 'document.GUI2';
-				include (LAYOUTPATH.'snippets/'.$this->main);
+				if (file_exists($this->main)) {
+					include($this->main); # Pluginviews
+				}
+				else {
+					include(LAYOUTPATH . "snippets/" . $this->main);		# normale snippets
+				}
 				?>
 						</td>
 					</tr>
@@ -48,7 +53,6 @@
 				</table>
 			</div>
 			<input type="hidden" name="mime_type" value="">
-			<input type="hidden" name="gle_changed" value="">
 		</form>
 	</body>
 </html>

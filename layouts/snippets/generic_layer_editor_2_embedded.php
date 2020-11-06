@@ -44,7 +44,7 @@
 ?>
 	<tr>
 		<td>
-			<input type="hidden" value="" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
+			<input type="hidden" value="" onchange="root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
 			<table class="tgle" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
 			  <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle"'; else echo 'class="nogle"'; ?>>
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);

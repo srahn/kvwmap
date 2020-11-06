@@ -266,7 +266,7 @@ function printMapFast(){
 
 function checkForUnsavedChanges(event){
 	var sure = true;
-	if(currentform.gle_changed.value == 1){
+	if(root.document.GUI.gle_changed.value == 1){
 		sure = confirm('Es gibt noch ungespeicherte Datensätze. Wollen Sie dennoch fortfahren?');
 	}
 	if(!sure){
@@ -703,7 +703,7 @@ function overlay_link(data, start){
 	// diese Funktion öffnet bei Aufruf aus dem Overlay-Fenster ein Browser-Fenster (bzw. benutzt es falls schon vorhanden) mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
 	if(checkForUnsavedChanges()){
 		if(querymode == 1 && (start || currentform.name == 'GUI2')){
-			query_tab = root.window.open("index.php?"+data+"&mime_type=overlay_html", "Sachdaten", "location=0,status=0,height=800,width=700,scrollbars=1");
+			query_tab = root.window.open("index.php?"+data+"&mime_type=overlay_html", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1");
 			if(root.document.GUI.CMD != undefined)root.document.GUI.CMD.value = "";
 		}else{
 			window.location.href = 'index.php?'+data;

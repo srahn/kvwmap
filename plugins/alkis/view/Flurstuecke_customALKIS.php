@@ -39,7 +39,7 @@ send_selected_flurst = function(go, formnummer, wz, target){
 		currentform.FlurstKennz.value=flurstkennz;
 		currentform.formnummer.value=formnummer;
 		currentform.wz.value=wz;
-		currentform.submit();
+		overlay_submit(currentform, false, 'root')
 	}
 }
 
@@ -354,7 +354,7 @@ hide_versions = function(flst){
 														if($flst->endet != ''){
 															if($this->Stelle->hist_timestamp AND ($timestamp == NULL OR $timestamp < $beginnt OR $timestamp >= $endet)){
 																$set_timestamp = 'setHistTimestamp&timestamp='.$flst->beginnt;
-																echo '<a href="index.php?go='.$set_timestamp.'" title="in die Zeit des Flurstücks wechseln">&nbsp;(endet: '.$flst->endet.')</a>';
+																echo '<a target="root" href="index.php?go='.$set_timestamp.'" title="in die Zeit des Flurstücks wechseln">&nbsp;(endet: '.$flst->endet.')</a>';
 															}
 															else echo "&nbsp;(endet: ".$flst->endet.")";
 														} 
@@ -362,7 +362,7 @@ hide_versions = function(flst){
 													else{
 														if($this->Stelle->hist_timestamp AND $timestamp != NULL AND $timestamp < $beginnt){
 															$set_timestamp = 'setHistTimestamp';
-															echo '<a href="index.php?go='.$set_timestamp.'" title="Zeitpunkt auf aktuell setzen">aktuelles&nbsp;Flurst&uuml;ck</a>';
+															echo '<a target="root" href="index.php?go='.$set_timestamp.'" title="Zeitpunkt auf aktuell setzen">aktuelles&nbsp;Flurst&uuml;ck</a>';
 														}
 														else{
 															echo "aktuelles&nbsp;Flurst&uuml;ck";
@@ -425,7 +425,7 @@ hide_versions = function(flst){
 												?>
 											<tr>
 												<td align="right"><span class="fett"> Baudaten&nbsp;</span></td>
-												<td><a href="index.php?go=Bauauskunft_Suche_Suchen&flurstkennz=<? echo $flst->Flurstkennz_alt; ?>&distinct=1">anzeigen</a></td>
+												<td><a target="root" href="index.php?go=Bauauskunft_Suche_Suchen&flurstkennz=<? echo $flst->Flurstkennz_alt; ?>&distinct=1">anzeigen</a></td>
 											</tr>
 												<?
 												}
@@ -697,7 +697,7 @@ hide_versions = function(flst){
 											<tr>
 												<td>
 											<?php
-											$anzNutzung=count($flst->Nutzung);
+											$anzNutzung = @count($flst->Nutzung);
 											if($anzNutzung > 0){
 												for ($j=0;$j<$anzNutzung;$j++){
 													if($flst->Nutzung[$j]['bereich'] != $flst->Nutzung[$j-1]['bereich']){
@@ -741,9 +741,9 @@ hide_versions = function(flst){
 								<td colspan="2">
 										<table border="0" cellspacing="0" cellpadding="2">
 										<? 
-										for ($b=0;$b<count($flst->Buchungen);$b++) {
+										for ($b=0; $b < @count($flst->Buchungen);$b++) {
 											$BestandStr = $flst->Buchungen[$b]['bezeichnung'].' ';
-											$BestandStr.='<a href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
+											$BestandStr.='<a target="root" href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
 											$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 											$BestandStr.=', Laufende Nummer '.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
 											if($flst->Buchungen[$b]['sondereigentum'] != ''){
@@ -810,13 +810,13 @@ hide_versions = function(flst){
 								<tr align="center" valign="top">
 									<td colspan="2">
 										<div class="fstanzeigecontainer button_background">
-											<a href="index.php?go=Flurstueck_<? if($flst->endet!="" OR $flst->hist_alb == 1)echo 'hist_';?>Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
+											<a target="root" href="index.php?go=Flurstueck_<? if($flst->endet!="" OR $flst->hist_alb == 1)echo 'hist_';?>Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
 											?>&GemID=<?php echo $flst->GemeindeID;
 											?>&GemkgID=<?php echo $flst->GemkgSchl; ?>&FlurID=<?php echo $flst->FlurID;
 											?>&FlstID=<?php echo $flst->FlurstKennz; ?>">
 												<div class="fstanzeigehover">&nbsp;&nbsp;zur Flurstückssuche&nbsp;&nbsp;</div>
 											</a>
-											<a href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
+											<a target="root" href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
 											?>&GemID=<? echo $flst->GemeindeID;
 											?>&StrID=<? echo $flst->Adresse[0]["strasse"];
 											?>&selHausID=<? if($flst->selHausID != '')echo implode($flst->selHausID, ', '); ?>">
@@ -828,9 +828,9 @@ hide_versions = function(flst){
 													if($set_timestamp != '')$zoomlink = $set_timestamp.'&go_next='.urlencode($zoomlink);else $zoom_all = true;
 											?>
 													&nbsp;&nbsp;
-													<a title="Zoom auf Flurstück und Flurstück hervorheben" href="index.php?go=<? echo $zoomlink;?>"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+													<a target="root" title="Zoom auf Flurstück und Flurstück hervorheben" href="index.php?go=<? echo $zoomlink;?>"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													&nbsp;&nbsp;
-													<a title="Zoom auf Flurstück und andere Flurstücke ausblenden" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['Layer_ID'];?>, 'Polygon', 'ax_flurstueck', 'wkb_geometry', '<?php echo $flst->oid; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+													<a target="root" title="Zoom auf Flurstück und andere Flurstücke ausblenden" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['Layer_ID'];?>, 'Polygon', 'ax_flurstueck', 'wkb_geometry', '<?php echo $flst->oid; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													
 											<? }
 											if (in_array('kolibri', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Kolibristart')) { ?>
