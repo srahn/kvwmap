@@ -1,5 +1,0 @@
-BEGIN;
-
-  ALTER TABLE `stelle` ADD `style` VARCHAR(100);
-
-COMMIT;

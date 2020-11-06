@@ -1,5 +1,0 @@
-BEGIN;
-
-ALTER TABLE `rolle` ADD `print_scale` VARCHAR(11) NOT NULL DEFAULT 'auto';
-
-COMMIT;
