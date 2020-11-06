@@ -18028,6 +18028,7 @@ class db_mapObj{
 	}
 	
 	function get_layer_params_layer($param_id = NULL, $layer_id = NULL){
+		$params = array();
 		$sql = "
 			SELECT
 				p.id, l.Layer_ID, l.Name
