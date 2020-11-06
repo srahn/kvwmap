@@ -51,7 +51,10 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 						}
 					}
 					$element_id = 'subform_dataset_tr_' . $layer['Layer_ID'] . '_' . $layer['shape'][$k][$layer['maintable'] . '_oid']; ?>
-					<tr id="<? echo $element_id; ?>"><?
+					<tr id="<? echo $element_id; ?>">
+						<td style="display: none">
+							<input type="hidden" value="" onchange="root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
+						</td><?
 						$editable = false;
 						for ($j = 0; $j < count($attributes['name']); $j++) {
 							if ($layer['attributes']['privileg'][$j] >= '0') {
@@ -113,7 +116,7 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 					 clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$this->formvars['selected_layer_id'].'\');"><span>'.$strNewEmbeddedPK.'</span></a>';
 		}
 		if ($this->formvars['list_edit']) {
-			echo '&nbsp;<a tabindex="1" style="font-size: '.$linksize.'px;" class="show_all_button buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
+			echo '&nbsp;<a tabindex="1" style="font-size: '.$linksize.'px;" class="show_all_button buttonlink" href="javascript:void(0);" onclick="overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
 			for($p = 0; $p < count($this->formvars['attributenames']); $p++){
 				echo '&value_'.$this->formvars['attributenames'][$p].'='.$this->formvars['values'][$p];
 				echo '&operator_'.$this->formvars['attributenames'][$p].'==';
@@ -215,7 +218,7 @@ else{ ?>
 					}
 					if ($this->formvars['embedded'] == 'true') {
 						echo '<tr style="border: none">
-										<td'. get_td_class_or_style(array($dataset[$attributes['style']], 'subFormListItem')) . '>'.($preview != ''? $preview.'</td><td valign="top">' : '').'<a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:if (document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&reload='.$this->formvars['reload'].'&attribute_privileg='.$this->formvars['attribute_privileg'].'\', new Array(document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].'\');">'.implode(' ', $output).'</a><div id="subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
+										<td'. get_td_class_or_style(array($dataset[$attributes['style']], 'subFormListItem')) . '>'.($preview != ''? $preview.'</td><td valign="top">' : '').'<a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:void(0);" onclick="checkForUnsavedChanges(event);if (document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&reload='.$this->formvars['reload'].'&attribute_privileg='.$this->formvars['attribute_privileg'].'\', new Array(document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].'\');">'.implode(' ', $output).'</a><div id="subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
 									</tr>
 			';
 					}
@@ -239,7 +242,7 @@ else{ ?>
 						if ($anzObj > 1) {
 							# alle in Liste anzeigen
 							if ($this->formvars['embedded'] == 'true') {
-								echo '<a tabindex="1" id="edit_list_'.$this->formvars['targetobject'].'" class="list_edit_button buttonlink" href="javascript:reload_subform_list(\''.$this->formvars['targetobject'].'\', 1)"><span>'.$strShowAll.'</span></a>';
+								echo '<a tabindex="1" id="edit_list_'.$this->formvars['targetobject'].'" class="list_edit_button buttonlink" href="javascript:void(0);" onclick="checkForUnsavedChanges(event); reload_subform_list(\''.$this->formvars['targetobject'].'\', 1)"><span>'.$strShowAll.'</span></a>';
 							}
 							else{		# alle separat anzeigen
 								echo '&nbsp;<a tabindex="1" style="font-size: '.$linksize.'px;" class="show_all_button buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];

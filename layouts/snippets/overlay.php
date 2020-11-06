@@ -53,7 +53,6 @@
 				</table>
 			</div>
 			<input type="hidden" name="mime_type" value="">
-			<input type="hidden" name="gle_changed" value="">
 		</form>
 	</body>
 </html>

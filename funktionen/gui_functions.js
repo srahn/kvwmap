@@ -266,7 +266,7 @@ function printMapFast(){
 
 function checkForUnsavedChanges(event){
 	var sure = true;
-	if(currentform.gle_changed.value == 1){
+	if(root.document.GUI.gle_changed.value == 1){
 		sure = confirm('Es gibt noch ungespeicherte Datensätze. Wollen Sie dennoch fortfahren?');
 	}
 	if(!sure){
