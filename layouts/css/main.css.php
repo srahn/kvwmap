@@ -66,6 +66,111 @@ body {
 	margin: auto;	
 }
 
+
+input[type="checkbox"], input[type="radio"] {
+	position: relative;
+	margin-bottom: auto;
+	width: 14px;
+	height: 14px;
+	color: #000;
+	border: 1px solid #353535;
+	border-radius: 3px;
+	appearance: none;
+	outline: 0;
+	cursor: pointer;
+}
+
+input[type="checkbox"][disabled="true"], input[type="checkbox"][disabled=""], input[type="radio"][disabled="true"], input[type="radio"][disabled=""] {
+	border: 1px solid #aaa;
+}
+
+input[type="radio"] {
+	border-radius: 50%;
+}
+
+input[type="checkbox"]::before, input[type="radio"]::before {
+	position: absolute;
+	content: '';
+	display: block;
+	top: 1px;
+	left: 3px;
+	width: 3px;
+	height: 6px;
+	border-style: solid;
+	border-color: #fff;
+	border-width: 0 2px 2px 0;
+	transform: rotate(35deg);
+	opacity: 0;
+}
+
+input[type="radio"]::before {
+	top: 3px;
+	left: 3px;
+	width: 2px;
+	height: 2px;
+	border-width: 2px;
+	border-radius: 50%;
+	background-color: #fff;
+}
+
+input[type="checkbox"]:checked, input[type="radio"]:checked {
+	color: #fff;
+	background: #4f9f72;
+}
+
+input[type="checkbox"][disabled="true"]:checked, input[type="checkbox"][disabled=""]:checked, input[type="radio"][disabled="true"]:checked, input[type="radio"][disabled=""]:checked {
+	background: #fff0;
+}
+
+input[type="checkbox"]:hover, input[type="radio"]:hover {
+	color: #fff;
+	border-color: #4999d8;
+	background: #fff;
+}
+
+input[type="checkbox"][disabled="true"]:hover, input[type="checkbox"][disabled=""]:hover, input[type="radio"][disabled="true"]:hover, input[type="radio"][disabled=""]:hover {
+	color: #fff0;
+	background: #fff0;
+	border-color: #aaa;
+	cursor: default;
+}
+
+input[type="checkbox"]:checked::before, input[type="radio"]:checked::before {
+	opacity: 1;
+}
+
+input[type="checkbox"][disabled="true"]:checked::before, input[type="checkbox"][disabled=""]:checked::before, input[type="radio"][disabled="true"]:checked::before, input[type="radio"][disabled=""]:checked::before {
+	border-color: #aaa;
+}
+
+input[type="checkbox"]:hover::before, input[type="radio"]:hover::before {
+	opacity: 1;
+	border-color: #bfbfbf;
+}
+
+input[type="checkbox"][disabled="true"]:hover::before, input[type="checkbox"][disabled=""]:hover::before, input[type="radio"][disabled="true"]:hover::before, input[type="radio"][disabled=""]:hover::before {
+	opacity: 0;
+}
+
+input[type="checkbox"]:checked:hover::before, input[type="radio"]:checked:hover::before {
+	opacity: 1;
+	border-color: #fff;
+}
+
+input[type="checkbox"][disabled="true"]:checked:hover::before, input[type="checkbox"][disabled=""]:checked:hover::before, input[type="radio"][disabled="true"]:checked:hover::before, input[type="radio"][disabled=""]:checked:hover::before {
+	background-color: #fff0;
+	border-color: #aaa;
+}
+
+input[type="radio"]:hover::before {
+	background-color: #bfbfbf;
+}
+
+input[type="radio"]:checked:hover::before {
+	background-color: #fff;
+}
+
+
 input[type="button"][value='«'], input[type="button"][value='»'] {
 	margin: 0.2em;
 	padding: 0px 0.5em 3px 0.5em;
