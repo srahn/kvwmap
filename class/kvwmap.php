@@ -10039,7 +10039,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$layerdb->setClientEncoding();
 		$this->ddl->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 		if($this->formvars['size'] != '')$size = $this->formvars['size'];	else $size = 11;
-		$font = $this->formvars['font'];
+		$font = ($this->formvars['font'] == '' ? 'Helvetica.afm' : $this->formvars['font']); # font darf nicht leer sein weil beim Export null rauskommen würde. ToDo: Warum kommt beim Layer-Export mit '' eigentlich null raus?
 		if($this->formvars['posx'] != '')$posx = $this->formvars['posx']; else $posx = 70;
 		if($this->formvars['posy'][$i] != '')$posy = $this->formvars['posy']-20; else $posy = 0;
     $new_freetext_id = $this->ddl->addfreetext($this->formvars['aktivesLayout'], $this->formvars['texttext'.$i], $posx, $posy, $size, $font, $this->formvars['textoffset_attribute'.$i]);
@@ -16746,9 +16746,9 @@ class db_mapObj{
 				$dump_text .= "\n\n-- Datendrucklayout " . $ddls['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $ddls['insert'][$j];
 				$dump_text .= "\nSET @last_ddl_id=LAST_INSERT_ID();\n";
 
-				$ddl_elemente = $database->create_insert_dump('ddl_elemente', '', 'SELECT `ddl_id`, `name`, `xpos`, `ypos`, `offset_attribute`, `width`, `border`, `font`, `fontsize` FROM `ddl_elemente` WHERE ddl_id = '.$ddls['extra'][$j]);				
+				$ddl_elemente = $database->create_insert_dump('ddl_elemente', '', 'SELECT \'@last_ddl_id\' AS ddl_id, `name`, `xpos`, `ypos`, `offset_attribute`, `width`, `border`, `font`, `fontsize` FROM `ddl_elemente` WHERE ddl_id = ' . $ddls['extra'][$j]);
 				for ($k = 0; $k < @count($ddl_elemente['insert']); $k++) {
-					$dump_text .= "\n" . $ddl_elemente['insert'][$j];
+					$dump_text .= "\n" . $ddl_elemente['insert'][$k];
 				}
 				
 				$druckfreitexte = $database->create_insert_dump('druckfreitexte', 'id', 'SELECT `id`, `text`, `posx`, `posy`, `offset_attribute`, `size`, `width`, `border`, `font`, `angle`, `type` FROM `druckfreitexte`, `ddl2freitexte` WHERE freitext_id = id AND ddl_id = '.$ddls['extra'][$j]);				
@@ -19167,7 +19167,7 @@ class Document {
     $sql .= ' posx = 0,';
     $sql .= ' posy = 0,';
     $sql .= ' size = 0,';
-    $sql .= ' font = "",';
+    $sql .= ' font = "Helvetica.afm",'; // Ein Wert muss gesetzt werden, weil beim Layer-Export Null rauskommen würde und das darf für font nicht sein.
     $sql .= ' angle = 0';
     $this->debug->write("<p>file:kvwmap class:Document->addfreetext :",4);
     $this->database->execSQL($sql,4, 1);
