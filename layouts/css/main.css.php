@@ -76,8 +76,15 @@ input[type="checkbox"], input[type="radio"] {
 	border: 1px solid #353535;
 	border-radius: 3px;
 	appearance: none;
+	-moz-appearance:none;
+	-webkit-appearance:none;
+	-o-appearance:none;
 	outline: 0;
 	cursor: pointer;
+}
+
+#scrolldiv input[type="checkbox"], #scrolldiv input[type="radio"] {
+	margin: 3px;
 }
 
 input[type="checkbox"][disabled="true"], input[type="checkbox"][disabled=""], input[type="radio"][disabled="true"], input[type="radio"][disabled=""] {
