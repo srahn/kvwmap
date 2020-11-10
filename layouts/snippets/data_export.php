@@ -300,12 +300,24 @@ $j=0;
 
 			if($groupnames OR $document_attributes){ ?>
 				<div style="border-bottom:1px solid #C3C7C3; border-left: 1px solid #C3C7C3; border-right: 1px solid #C3C7C3; padding-top:10px; padding-bottom:5px; padding-left:5px; padding-right:5px;">
-					&nbsp;&nbsp;<? echo $strOptions; ?>:
-					<table cellspacing="7"><?
-						if($groupnames){ ?>
+					&nbsp;&nbsp;<? echo $strOptions; ?>:<br>
+					<table cellspacing="7">
+						<tr>
+							<td>
+								<input type="checkbox" name="with_metadata_document" value="1" checked> <? echo $strExportMetadatadocument; ?>
+							</td>
+						</tr><?
+						if ($groupnames){ ?>
 							<tr>
 								<td>
-									<div id="groupnames_div" style="<? if($this->formvars['export_format'] != 'CSV'){echo 'visibility:hidden';}else{echo 'visibility:visible';} ?>"><input type="checkbox" name="export_groupnames"><? echo $strExportGroupnames; ?></div>
+									<div id="groupnames_div" style="<?
+										if ($this->formvars['export_format'] != 'CSV'){
+											echo 'visibility:hidden';
+										}
+										else {
+											echo 'visibility:visible';
+										} ?>"><input type="checkbox" name="export_groupnames"> <? echo $strExportGroupnames; ?>
+									</div>
 								</td>
 							</tr><?
 						}

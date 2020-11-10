@@ -1288,6 +1288,22 @@ class data_import_export {
 					}
 				}
 			}
+
+			# Bei Bedarf auch Metadatendatei mit dazupacken
+			if ($this->formvars['with_metadata_document'] != '' AND $layerset[0]['metalink'] != '') {
+				$metadata_file = IMAGEPATH . $folder. '/' . basename($layerset[0]['metalink']);
+				if (file_put_contents($metadata_file, file_get_contents($layerset[0]['metalink']))) {
+					# echo '<br>Metadatendatei heruntergeladen von: ' . $layerset[0]['metalink'];
+					# echo '<br>und gespeichert unter: ' . $metadata_file;
+				}
+				else { ?>
+					Download der Metadatendatei des Layers ist fehlgeschlagen!<br>Tragen Sie den Metadatenlink des Layers korrekt ein oder sorgen Sie für eine korrekte Internetverbindung zwischen dem Server und der Quelle des Dokumentes.<br>Informieren Sie Ihrem Administrator bei wiederholtem Auftreten dieses Fehlers.
+					<p><a href="index.php?go=Daten_Export">Weiter mit Daten-Export</a>
+					<p><a href="index.php?go=neu Laden">Zur Karte</a><?php
+					exit;
+				}
+			}
+
 			# bei Bedarf zippen
 			if($zip){
 				# Beim Zippen gehen die Umlaute in den Dateinamen kaputt, deswegen vorher umwandeln
