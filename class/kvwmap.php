@@ -5894,6 +5894,9 @@ echo '			</table>
     $this->map->legend->set("keyspacingx", $size*$this->map_factor);
     $this->map->legend->set("keyspacingy", $size*0.83*$this->map_factor);
     $this->map->legend->label->set("size", $size*$this->map_factor);
+		if(MAPSERVERVERSION < '700'){
+			$this->map->legend->label->set("type", 'truetype');
+		}
 		$this->map->legend->label->set("font", 'arial');
     $this->map->legend->label->set("position", MS_C);
     #$this->map->legend->label->set("offsetx", $size*-5*$this->map_factor);
