@@ -1455,7 +1455,7 @@ class GUI {
 						<i class="fa fa-bars pointer button layerOptionsIcon" title="'.$this->layerOptions.'"></i>
 					</a>';
 				}
-				$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
+				$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"> </div>';
 			}
 			if($layer['aktivStatus'] == 1 AND isset($layer['Class'][0]) AND $layer['Class'][0]['Name'] != ''){
 				if($layer['requires'] == '' AND $layer['Layer_ID'] > 0){
