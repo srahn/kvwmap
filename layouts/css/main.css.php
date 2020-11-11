@@ -1561,7 +1561,6 @@ a:hover .preview_image{
 
 table.tgle {
  border:1px solid gray;
- border-bottom: none;
  border-collapse:collapse;
  margin-left:auto;
  margin-right:auto;
@@ -1595,10 +1594,6 @@ thead.gle th {
 .readonly_text{
 	word-wrap: break-word;
 	padding: 0 0 0 3;
-}
-
-tbody.gle>tr { 
- border:1px solid #999;
 }
 
 .gle1_table{
