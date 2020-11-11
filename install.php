@@ -298,8 +298,14 @@ function install() {
     else {
       $success = install_admin_stelle($mysqlKvwmapDb);
     } ?>
-    <br>
-    <br>
+		<p>Lege credentials.php Datei an.<?php
+		file_put_contents('credentials.php', "<?php
+	define('MYSQL_HOST', 'mysql');
+	define('MYSQL_USER', 'kvwmap');
+	define('MYSQL_PASSWORD', '" . MYSQL_PASSWORD . "');
+	define('MYSQL_DBNAME', 'kvwmapdb');
+	define('MYSQL_HOSTS_ALLOWED', '172.17.%');
+?>"); ?><p>
     Schließe Verbindung zur Datenbank: <?php echo $mysqlRootDb->dbName; ?><br><?php
     $mysqlRootDb->close(); ?>
     Schließe Verbindung zur Datenbank: <?php echo $mysqlKvwmapDb->dbName; ?><br><?php
