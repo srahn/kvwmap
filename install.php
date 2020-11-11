@@ -282,7 +282,7 @@ function install() {
         '+proj=tmerc +towgs84=0,0,0 +lat_0=0 +lon_0=15 +k=0.9996 +x_0=3500000 +y_0=0 +ellps=GRS80 +units=m +no_defs <>'
         )*/
     ";
-    $pgsqlKvwmapDb->execSQL($sql, 0, 1);?>
+    $pgsqlKvwmapDb->execSQL($sql, 0, 1); ?>
 
     <h1>Migrationen für kvwmap Schemas in MySQL und PostgreSQL ausführen</h1><?php
     #
@@ -290,30 +290,47 @@ function install() {
     #
     migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb);
 
-    #
-    # Richte eine Stelle für einen Administrator ein, wenn noch keine existiert.
-    #
-    if (admin_stelle_exists($mysqlKvwmapDb)) { ?>
-      Adminstelle ist schon eingerichtet.<br><?php
-    }
-    else {
-      $success = install_admin_stelle($mysqlKvwmapDb);
-    } ?><p>
+		#
+		# Richte eine Stelle für einen Administrator ein, wenn noch keine existiert.
+		#
+		if (admin_stelle_exists($mysqlKvwmapDb)) { ?>
+			Adminstelle ist schon eingerichtet.<br><?php
+		}
+		else {
+			$success = install_admin_stelle($mysqlKvwmapDb); ?><br>
+			Setze kvwmap init Password...<?php
+			$sql = "
+				UPDATE connections
+				SET password = '" . KVWMAP_INIT_PASSWORD . "'
+				WHERE id = 1
+			";
+			$mysqlKvwmapDb->execSQL($sql, 0, 1); ?>
+		} ?>...fertig<p><?php
 
-		Lege credentials.php Datei an ...<?php
-		file_put_contents('credentials.php', "<?php
+		if (file_exists('credentials.php')) { ?>
+			credentials.php existiert schon.<?php
+		}
+		else { ?>
+			Lege credentials.php Datei an ...<?php
+			file_put_contents('credentials.php', "<?php
 	define('MYSQL_HOST', 'mysql');
 	define('MYSQL_USER', 'kvwmap');
 	define('MYSQL_PASSWORD', '" . MYSQL_PASSWORD . "');
 	define('MYSQL_DBNAME', 'kvwmapdb');
 	define('MYSQL_HOSTS_ALLOWED', '172.17.%');
 ?>"); ?><br>
-		... fertig<p>
+			... fertig<p><?php
+		}
 
-		Lege config.php Datei an ...<?php
-		$administration = new administration($mysqlKvwmapDb, $pgsqlKvwmapDb);
-		$administration->write_config_file(''); ?><br>
-		...fertig<p>
+		if (file_exists('config.php')) { ?>
+			config.php existiert schon.<?php
+		}
+		else { ?>
+			Lege config.php Datei an ...<?php
+			$administration = new administration($mysqlKvwmapDb, $pgsqlKvwmapDb);
+			$administration->write_config_file(''); ?><br>
+			...fertig<p><?php
+		} ?>
 
     Schließe Verbindung zur Datenbank: <?php echo $mysqlRootDb->dbName; ?><br><?php
     $mysqlRootDb->close(); ?>
