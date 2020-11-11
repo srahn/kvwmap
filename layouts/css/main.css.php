@@ -81,6 +81,7 @@ input[type="checkbox"], input[type="radio"] {
 	-o-appearance:none;
 	outline: 0;
 	cursor: pointer;
+	background: #fff;
 }
 
 #scrolldiv input[type="checkbox"], #scrolldiv input[type="radio"] {
