@@ -304,8 +304,9 @@ function install() {
 				SET password = '" . KVWMAP_INIT_PASSWORD . "'
 				WHERE id = 1
 			";
-			$mysqlKvwmapDb->execSQL($sql, 0, 1); ?>
-		} ?>...fertig<p><?php
+			$mysqlKvwmapDb->execSQL($sql, 0, 1);
+		} ?><br>
+		...fertig<p><?php
 
 		if (file_exists('credentials.php')) { ?>
 			credentials.php existiert schon.<?php
