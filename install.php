@@ -32,7 +32,6 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 $debug; $log_mysql; $log_postgres;
 define('KVWMAP_INIT_PASSWORD', (getenv('KVWMAP_INIT_PASSWORD') == '') ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'));
-include(CLASSPATH . 'administration.php');
 
 class GUI {
 	function __construct() {
@@ -50,6 +49,7 @@ output_header();
 if (!file_exists('config.php')) {
 	# Lade default Konfigurationsparameter
 	init_config();
+	include(CLASSPATH . 'administration.php');
 	$kvwmap_plugins = array();
 	include(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');
 	if ($_REQUEST['go'] == 'Installation starten') {
