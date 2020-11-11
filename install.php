@@ -32,6 +32,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 $debug; $log_mysql; $log_postgres;
 define('KVWMAP_INIT_PASSWORD', (getenv('KVWMAP_INIT_PASSWORD') == '') ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'));
+include(CLASSPATH . 'administration.php');
 
 class GUI {
 	function __construct() {
@@ -297,15 +298,23 @@ function install() {
     }
     else {
       $success = install_admin_stelle($mysqlKvwmapDb);
-    } ?>
-		<p>Lege credentials.php Datei an.<?php
+    } ?><p>
+
+		Lege credentials.php Datei an ...<?php
 		file_put_contents('credentials.php', "<?php
 	define('MYSQL_HOST', 'mysql');
 	define('MYSQL_USER', 'kvwmap');
 	define('MYSQL_PASSWORD', '" . MYSQL_PASSWORD . "');
 	define('MYSQL_DBNAME', 'kvwmapdb');
 	define('MYSQL_HOSTS_ALLOWED', '172.17.%');
-?>"); ?><p>
+?>"); ?><br>
+		... fertig<p>
+
+		Lege config.php Datei an ...<?php
+		$administration = new administration($mysqlKvwmapDb, $pgsqlKvwmapDb);
+		$administration->write_config_file(''); ?><br>
+		...fertig<p>
+
     Schließe Verbindung zur Datenbank: <?php echo $mysqlRootDb->dbName; ?><br><?php
     $mysqlRootDb->close(); ?>
     Schließe Verbindung zur Datenbank: <?php echo $mysqlKvwmapDb->dbName; ?><br><?php
@@ -525,7 +534,6 @@ function install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb) { ?>
 */
 function migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb) {
 	$mysqlKvwmapDb->execSQL("SET NAMES 'UTF8'",0,0);
-  include(CLASSPATH . 'administration.php');
   $administration = new administration($mysqlKvwmapDb, $pgsqlKvwmapDb);
 	echo '<br>Frage Datenbankstati ab.';
   $administration->get_database_status();
