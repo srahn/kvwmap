@@ -688,6 +688,9 @@ function overlay_submit(gui, start, target){
 			gui.target = target;
 		}
 		else{
+			if(browser == 'firefox' && query_tab != undefined && root.resized < 2){
+				query_tab.close();
+			}
 			query_tab = root.window.open("", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1");
 			gui.mime_type.value = 'overlay_html';
 			gui.target = 'Sachdaten';			
