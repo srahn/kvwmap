@@ -17,6 +17,9 @@ class Debugger {
 	################################################################################
 
 	function __construct($filename, $mime_type = 'text/html') {
+		if ($_SESSION == null) {
+			$_SESSION = array();
+		}
 		$this->filename = LOGPATH . (dirname($filename) != '.' ? dirname($filename) . '/' : '') . (array_key_exists('login_name', $_SESSION) ? $_SESSION['login_name'] : '') . basename($filename);
 		$this->fp=fopen($this->filename,'w');
 		$this->mime_type = $mime_type;

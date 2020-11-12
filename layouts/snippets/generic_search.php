@@ -65,7 +65,7 @@ function operatorchange(layer_id, attributname, searchmask_number){
 function suche(){
 	var nogo = '';
 	<?
-	for($i = 0; $i < count($this->attributes['type']); $i++) {
+	for($i = 0; $i < @count($this->attributes['type']); $i++) {
 		if($this->attributes['mandatory'][$i] == '' or $this->attributes['mandatory'][$i] > -1){
 			if($this->attributes['type'][$i] != 'geometry' AND $this->attributes['form_element_type'][$i] != 'SubFormFK' AND $this->attributes['form_element_type'][$i] != 'dynamicLink') {
 				if($this->attributes['mandatory'][$i] == 1){

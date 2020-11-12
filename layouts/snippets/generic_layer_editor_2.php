@@ -84,7 +84,7 @@
 				}
 			}
 			?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
-			<table class="tgle dstable" style="border-bottom: 1px solid grey" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
+			<table class="tgle dstable" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="5" cellspacing="0"';}else{echo 'border="1"';} ?>>
 				<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
         <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle"'; ?>>
 <?							
@@ -295,7 +295,7 @@
 						echo'
 							</td>
 						</tr>';						
-						if($this->user->rolle->geom_edit_first)echo '</table><table class="tgle" border="0" cellspacing="0" cellpadding="2"><tbody class="gle">'.$datapart;
+						if($this->user->rolle->geom_edit_first)echo '</table><table class="tgle dstable" style="margin-top: 10px" border="0" cellspacing="0" cellpadding="5"><tbody class="gle">'.$datapart;
 					}
 					else echo $datapart;
 				}

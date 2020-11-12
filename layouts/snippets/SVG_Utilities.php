@@ -467,7 +467,7 @@
     // navY[0] enthaelt den Hochwert des ersten Punktes im Bild in Pixeln
     // allerdings von oben nach untern gerechnet
     // [2] jeweils den anderen Punkt wenn ein Rechteck uebergeben wurde
-		enclosingForm.action = "index.php#geoedit_anchor";
+		enclosingForm.action = "index.php";
     switch(cmd) {
      case "zoomin_point":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
@@ -650,6 +650,11 @@
 	}
  	
 	function init(){
+		// Bug Workaround fuer Firefox
+		var nav_button_bgs = document.querySelectorAll(\'.navbutton_bg\');
+		[].forEach.call(nav_button_bgs, function (nav_button_bg){
+			nav_button_bg.setAttribute(\'width\', parseInt(nav_button_bg.getAttribute(\'width\')) + 0.01);
+		});
 		startup();
 		if(window.addEventListener){
 			if(top.browser != "other"){

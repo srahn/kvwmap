@@ -77,6 +77,7 @@ INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
 (20, 'Nachweise_bearbeiten', NULL),
 (22, 'Kolibristart', NULL),
 (23, 'Administratorfunktionen', NULL);
+(24, 'Stelle_waehlen', NULL);
 
 ####################################################################################
 # Eintragen von Berechtigungen für einen Administrator zum Ausführen von Funktionen
@@ -100,6 +101,7 @@ INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (19,@stelle_i
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (20,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (22,@stelle_id);
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (23,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (24,@stelle_id);
 
 ###########################
 # Einträge der Menüpunkte #
@@ -361,8 +363,8 @@ SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id, 92);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
-# Shape Anzeigen
-INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Shape-Anzeigen', 'index.php?go=SHP_Anzeigen', @last_level1menue_id, 2, NULL);
+# Daten-Import
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Daten-Import', 'index.php?go=Daten_Import', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id, 94);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
@@ -432,7 +434,7 @@ INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (8, 'Verkehr', 300)
 INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (9, 'Administration', 100);
 
 # einen ersten WMS Layer anlegen
-INSERT INTO layer (`Name`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`) VALUES('ORKa-MV (OSM)', '', '3', '1', NULL, NULL, NULL, NULL, NULL, '', '', '', '', NULL, NULL, '', 'http://www.orka-mv.de/geodienste/orkamv/wms?VERSION=1.1.1&LAYERS=orkamv&STYLES=&FORMAT=image/jpeg', '', 7, '', '', 3, 'pixels', '25833', '', '0', NULL, NULL, NULL, NULL, '', 'EPSG:25833', 'stadtplan', '1.1.1', 'image/png', 60, '', '', '', 'radio', '0', '', '', '', '');
+INSERT INTO layer (`Name`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`) VALUES('ORKa-MV (OSM)', '', '3', '1', NULL, NULL, NULL, NULL, NULL, '', '', '', '', NULL, NULL, '', 'http://www.orka-mv.de/geodienste/orkamv/wms?VERSION=1.1.1&LAYERS=orkamv&STYLES=&FORMAT=image/jpeg', '', 7, '', 3, 'pixels', '25833', '', '0', NULL, NULL, NULL, NULL, '', 'EPSG:25833', 'stadtplan', '1.1.1', 'image/png', 60, '', '', '', 'radio', '0', '', '', '', '');
 INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `Filter` , `template` , `header` , `footer` , `symbolscale`, `privileg` )VALUES ('1', '1', '0', '', '', '', '' , NULL, NULL,'' , NULL , NULL , NULL, '0');
 INSERT IGNORE INTO u_groups2rolle SELECT DISTINCT 1, 1, u_groups.id, 1 FROM (SELECT @id AS id, @id := IF(@id IS NOT NULL, (SELECT obergruppe FROM u_groups WHERE id = @id), NULL) AS obergruppe FROM u_groups, (SELECT @id := (SELECT Gruppe FROM layer where layer.Layer_ID = 1)) AS vars WHERE @id IS NOT NULL	 ) AS dat	JOIN u_groups ON dat.id = u_groups.id;
 INSERT IGNORE INTO u_rolle2used_layer (
@@ -553,7 +555,7 @@ INSERT INTO `config` (`name`, `prefix`, `value`, `description`, `type`, `group`,
 ('DRUCKRAHMEN_PATH', 'SHAPEPATH', 'druckrahmen/', 'Pfad zum Speichern der Kartendruck-Layouts\r\n', 'string', 'Pfadeinstellungen', '', 1, 2),
 ('THIRDPARTY_PATH', '', '../3rdparty/', '3rdparty Pfad\r\n', 'string', 'Pfadeinstellungen', '', 1, 2),
 ('FONTAWESOME_PATH', 'THIRDPARTY_PATH', 'font-awesome-4.6.3/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
-('JQUERY_PATH', 'THIRDPARTY_PATH', 'jQuery-1.12.0/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
+('JQUERY_PATH', 'THIRDPARTY_PATH', 'jQuery-3.5.1/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
 ('BOOTSTRAP_PATH', 'THIRDPARTY_PATH', 'bootstrap-3.3.6/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
 ('BOOTSTRAPTABLE_PATH', 'THIRDPARTY_PATH', 'bootstrap-table-1.11.0/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
 ('PROJ4JS_PATH', 'THIRDPARTY_PATH', 'proj4js-2.4.3/', '', 'string', 'Pfadeinstellungen', '', 1, 2),

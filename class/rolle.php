@@ -1172,7 +1172,7 @@ class rolle {
 				styles 
 			SET 
 				color = "'.$formvars['layer_options_color'].'",
-				symbolname = "'.$formvars['layer_options_hatching'].'"
+				symbolname = CASE WHEN symbolname IS NULL OR symbolname = "hatch" OR symbolname = "" THEN "'.$formvars['layer_options_hatching'].'" ELSE symbolname END
 			WHERE 
 				Style_ID = '.$style_id;
 		$this->debug->write("<p>file:rolle.php class:rolle->setColor:",4);

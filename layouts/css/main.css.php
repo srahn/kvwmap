@@ -76,8 +76,16 @@ input[type="checkbox"], input[type="radio"] {
 	border: 1px solid #353535;
 	border-radius: 3px;
 	appearance: none;
+	-moz-appearance:none;
+	-webkit-appearance:none;
+	-o-appearance:none;
 	outline: 0;
 	cursor: pointer;
+	background: #fff;
+}
+
+#scrolldiv input[type="checkbox"], #scrolldiv input[type="radio"] {
+	margin: 3px;
 }
 
 input[type="checkbox"][disabled="true"], input[type="checkbox"][disabled=""], input[type="radio"][disabled="true"], input[type="radio"][disabled=""] {
@@ -1554,7 +1562,6 @@ a:hover .preview_image{
 
 table.tgle {
  border:1px solid gray;
- border-bottom: none;
  border-collapse:collapse;
  margin-left:auto;
  margin-right:auto;
@@ -1588,10 +1595,6 @@ thead.gle th {
 .readonly_text{
 	word-wrap: break-word;
 	padding: 0 0 0 3;
-}
-
-tbody.gle>tr { 
- border:1px solid #999;
 }
 
 .gle1_table{

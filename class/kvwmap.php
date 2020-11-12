@@ -1032,7 +1032,7 @@ echo '			</table>
 						<i class="fa fa-bars pointer button layerOptionsIcon" title="'.$this->layerOptions.'"></i>
 					</a>';
 				}
-				$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
+				$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"> </div>';
 			}
 			if($layer['aktivStatus'] == 1 AND isset($layer['Class'][0]) AND $layer['Class'][0]['Name'] != ''){
 				if(value_of($layer, 'requires') == '' AND $layer['Layer_ID'] > 0){
@@ -1198,7 +1198,7 @@ echo '			</table>
 				$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 			}
 			$legend .= ' >'.html_umlaute($layer['alias']).'</span></a>';
-			$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
+			$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"> </div>';
 			if($layer['status'] != ''){
 				$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['status'].'" src="'.GRAPHICSPATH.'warning.png">';
 			}
@@ -5899,6 +5899,9 @@ echo '			</table>
     $this->map->legend->set("keyspacingx", $size*$this->map_factor);
     $this->map->legend->set("keyspacingy", $size*0.83*$this->map_factor);
     $this->map->legend->label->set("size", $size*$this->map_factor);
+		if(MAPSERVERVERSION < '700'){
+			$this->map->legend->label->set("type", 'truetype');
+		}
 		$this->map->legend->label->set("font", 'arial');
     $this->map->legend->label->set("position", MS_C);
     #$this->map->legend->label->set("offsetx", $size*-5*$this->map_factor);
@@ -16209,7 +16212,7 @@ class db_mapObj{
 					case 'Auswahlfeld' : {
 						if ($attributes['options'][$i] != '') {		 # das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
 							if (strpos($attributes['options'][$i], "'") === 0) {			# Aufzählung wie 'wert1','wert2','wert3'
-								$attributes['enum_value'][$i] = explode("','", trim(str_replace(["', ", chr(10), chr(13)], ["',", '', ''], $attributes['options'][$i]), "'"));
+								$attributes['enum_value'][$i] = explode("','", substr(str_replace(["', ", chr(10), chr(13)], ["',", '', ''], $attributes['options'][$i]), 1, -1));
 								$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
 							}
 							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {		 # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
