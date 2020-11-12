@@ -538,6 +538,9 @@ function getEventPoint(evt) {
 }
 
 function init(){
+	// Bug Workaround fuer Firefox
+	var nav_button_bg = document.querySelector(\'.navbutton_bg\');
+	nav_button_bg.setAttribute(\'width\', parseInt(nav_button_bg.getAttribute(\'width\')) + 0.01);
 	startup();
 	if(top.browser != "ie"){
 		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(evt); }, true);
