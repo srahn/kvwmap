@@ -307,7 +307,6 @@ else{ ?>
 					href_save = document.getElementById("new_'.$this->formvars['targetobject'].'").href;
 					document.getElementById("new_'.$this->formvars['targetobject'].'").href = document.getElementById("new_'.$this->formvars['targetobject'].'").href.replace("go=neuer_Layer_Datensatz", "go=neuer_Layer_Datensatz&weiter_erfassen=1'.urldecode($this->formvars['weiter_erfassen_params']).'")
 					document.getElementById("new_'.$this->formvars['targetobject'].'").click();
-					document.getElementById("new_'.$this->formvars['targetobject'].'").focus();
 					document.getElementById("new_'.$this->formvars['targetobject'].'").href = href_save;
 				</script>';
 		}
