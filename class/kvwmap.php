@@ -5051,7 +5051,12 @@ echo '			</table>
         $this->formvars['firstpoly']="";
         $this->formvars['secondpoly']="";
         $this->add_message('notice', 'Eintrag erfolgreich!');
-				if($ret[3])$this->add_message('info', $ret[3]);
+				if ($ret[3]) {
+					$this->add_message('info', $ret[3]);
+				}
+				elseif ($ret['msg'] != '') {
+					$this->add_message('info', $ret['msg']);
+				}
       }
       $this->formvars['CMD'] = '';
       $this->PolygonEditor();
