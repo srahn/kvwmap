@@ -688,7 +688,10 @@ function overlay_submit(gui, start, target){
 			gui.target = target;
 		}
 		else{
-			if(browser == 'firefox' && query_tab != undefined && root.resized < 2){
+			if(query_tab != undefined && query_tab.closed){		// wenn Fenster geschlossen wurde, resized zuruecksetzen
+				root.resized = 0;
+			}
+			else if(browser == 'firefox' && query_tab != undefined && root.resized < 2){	// bei Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
 				query_tab.close();
 			}
 			query_tab = root.window.open("", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1");
