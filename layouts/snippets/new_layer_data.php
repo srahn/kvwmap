@@ -71,8 +71,7 @@
 <div id="nds_titel">
 	<p><?php echo $strtitle; ?><? if($this->qlayerset[0]['alias'] != '' or $this->qlayerset[0]['Name'] != '')echo ': '; ?><? if($this->qlayerset[0]['alias'] != '')echo $this->qlayerset[0]['alias']; else echo $this->qlayerset[0]['Name']; ?></p>
 </div>
-<? if($this->formvars['selected_layer_id'] == '') { ?>
-<div id="nds_formular">
+<div id="nds_formular" <? if($this->formvars['selected_layer_id'] != '')echo 'style="display:none"'; ?>>
 	<div class="nds_select">
 		<div><?php echo $strLayer; ?></div>
 		<div>
@@ -91,7 +90,6 @@
 		</div>
 	</div>	
 </div>
-<? } ?>
 <div id="nds_edit">
 <?
 if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){	
