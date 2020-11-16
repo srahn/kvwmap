@@ -1234,7 +1234,7 @@ function showExtentURL(epsg_code) {
 			msg = " \
 				<div style=\"text-align: left\"> \
 					<h2>URL des aktuellen Kartenausschnitts</h2><br> \
-					<input id=\"extenturl\" style=\"width: 350px\" type=\"text\" value=\""+document.baseURI+"go=zoom2coord&INPUT_COORD="+toFixed(gui.minx.value, 3)+","+toFixed(gui.miny.value, 3)+";"+toFixed(gui.maxx.value, 3)+","+toFixed(gui.maxy.value, 3)+"&epsg_code="+epsg_code+"\"><br> \
+					<input id=\"extenturl\" style=\"width: 350px\" type=\"text\" value=\""+document.baseURI.match(/.*\//)+"index.php?go=zoom2coord&INPUT_COORD="+toFixed(gui.minx.value, 3)+","+toFixed(gui.miny.value, 3)+";"+toFixed(gui.maxx.value, 3)+","+toFixed(gui.maxy.value, 3)+"&epsg_code="+epsg_code+"\"><br> \
 				</div> \
 			";
 	message([{
