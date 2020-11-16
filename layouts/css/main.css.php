@@ -1596,12 +1596,14 @@ thead.gle th {
 }
 
 .gle_attribute_value input[type="radio"] {
-	margin-top: 5.5px;
-	margin-bottom: 2px;
+	margin-top: 6px;
+	margin-bottom: 5px;
 }
 
 .gle_attribute_value label {
 	position: relative;
+	vertical-align: top;
+	top: 5px;
 }
 
 .tglegroup {
@@ -1630,7 +1632,7 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]), table.t
 	border: 1px solid #777;
 }
 
-table.tgle .gledata select, table.tgle .gledata input:not([type=radio]) {
+table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([type=checkbox]) {
 	height: 25px;
 }
 
