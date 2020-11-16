@@ -877,8 +877,15 @@ class rolle {
 
 	function getRollenLayer($LayerName, $typ = NULL) {
 		$sql ="
-			SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, gle_view,
-				concat('(', rollenfilter, ')') as Filter
+			SELECT 
+				l.*, 
+				4 as tolerance, 
+				-l.id as Layer_ID, 
+				l.query as pfad, 
+				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, 
+				gle_view,
+				concat('(', rollenfilter, ')') as Filter,
+				'oid' as oid
 			FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
     if ($LayerName!='') {

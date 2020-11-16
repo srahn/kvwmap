@@ -14545,7 +14545,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				);
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
-				$path = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
+				if($layerset[$i]['Layer_ID'] > 0){			# bei Rollenlayern nicht
+					$path = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
+				}
 
 				# order by rausnehmen
 				$orderbyposition = strrpos(strtolower($path), 'order by');
