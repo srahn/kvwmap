@@ -17127,7 +17127,6 @@ class db_mapObj{
 					'queryable',
 					'use_geom',
 					'transparency',
-					'drawingorder',
 					'legendorder',
 					'minscale',
 					'maxscale',
@@ -17175,6 +17174,7 @@ class db_mapObj{
 		# Schreibt alle Attribute, die '0' bekommen sollen wenn Wert == '' ist
 		foreach(
 			array(
+				'drawingorder',			
 				'sync',
 				'listed'
 			) AS $key
