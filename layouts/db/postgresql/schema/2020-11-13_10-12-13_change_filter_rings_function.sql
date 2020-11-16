@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION public.filter_rings(
     RETURNS geometry
     LANGUAGE 'sql'
     COST 100
-    IMMUTABLE PARALLEL UNSAFE
+    IMMUTABLE
 AS $BODY$
 SELECT ST_BuildArea(ST_Collect(b.final_geom)) AS filtered_geom
   FROM (SELECT ST_MakePolygon((/* Get outer ring of polygon */
