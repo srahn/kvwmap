@@ -84,9 +84,9 @@
 				}
 			}
 			?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
-			<table class="tgle dstable" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="5" cellspacing="0"';}else{echo 'border="1"';} ?>>
+			<table class="tgle dstable" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="5" cellspacing="0"';}else{echo 'border="0"';} ?>>
 				<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
-        <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle"'; ?>>
+        <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle gledata"'; ?>>
 <?							
 			for($j = 0; $j < count($layer['attributes']['name']); $j++) {
 				$attribute_class = (($this->new_entry == true AND $layer['attributes']['dont_use_for_new'][$j] == -1) ? 'hidden' : 'visible');
@@ -105,15 +105,15 @@
 					$groupname_short = str_replace(' ', '_', $groupname_short[0]);
 					$datapart .= '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.'">
 									<td colspan="2" width="100%">
-										<div style="border-bottom: 1px solid grey">
-											<table width="100%" class="tgle" border="2"><tbody class="gle">
+										<div class="tglegroup">
+											<table width="100%" class="tgle" border="0"><tbody class="gle glehead">
 												<tr>
-													<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="40">&nbsp;<a href="javascript:void(0);" onclick="toggle_group(\''.$layer['Layer_ID'].'_'.$j.'_'.$k.'\')">
+													<td colspan="40">&nbsp;<a href="javascript:void(0);" onclick="toggle_group(\''.$layer['Layer_ID'].'_'.$j.'_'.$k.'\')">
 														<img id="group_img'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" border="0" src="'.GRAPHICSPATH.'/'; if($collapsed)$datapart .= 'plus.gif'; else $datapart .= 'minus.gif'; $datapart .= '"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span>
 													</td>
 												</tr>
 											</table>
-											<table width="100%" class="tgle" id="group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" '; if($collapsed)$datapart .= 'style="display:none"'; $datapart .= 'border="2"><tbody class="gle">';
+											<table width="100%" class="tgle" id="group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" '; if($collapsed)$datapart .= 'style="display:none"'; $datapart .= 'border="0"><tbody class="gle gledata">';
 				}
 
 				if($layer['attributes']['visible'][$j]){
@@ -233,14 +233,14 @@
 				
 				if(($columnname != '' OR $layer['shape'][$k]['wfs_geom'] != '') AND $this->new_entry != true AND value_of($this->formvars, 'printversion') == ''){
 					if($layer['attributes']['group'][0] != ''){ ?>
-						<tr><td colspan="2"><table width="100%" class="tgle" border="2" cellpadding="0" cellspacing="0"><tbody class="gle">
+						<tr><td colspan="2"><table width="100%" class="tgle" border="0" cellpadding="0" cellspacing="0"><tbody class="gle glegeom">
 					<? } ?>
 				 
 					<tr>
 						<? if(value_of($layer, 'querymaps') AND $layer['querymaps'][$k] != ''){ ?>
-						<td <? if($layer['attributes']['group'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;" align="center"><img style="border:1px solid grey" src="<? echo $layer['querymaps'][$k]; ?>"></td>
+						<td <? if($layer['attributes']['group'][0] != '')echo 'width="203px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;border-right: 1px solid #ccc" align="center"><img style="border:1px solid grey" src="<? echo $layer['querymaps'][$k]; ?>"></td>
 						<? } else { ?>
-			    	    <td <? if($layer['attributes']['group'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td>
+			    	    <td <? if($layer['attributes']['group'][0] != '')echo 'width="203px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;border-right: 1px solid #ccc">&nbsp;</td>
 			    	    <? } ?>
 			    	    <td class="button_background" style="box-shadow: none; padding: 5px;" valign="middle" colspan="19">
 <?						

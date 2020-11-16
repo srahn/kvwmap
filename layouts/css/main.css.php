@@ -1493,7 +1493,7 @@ a:hover .preview_image{
 }
 
 .datensatz {
-	border:0px solid gray;
+	border:1px solid #999;
 	border-collapse:collapse;
 	padding:0px 0px 0px 0px;
 }
@@ -1561,10 +1561,10 @@ a:hover .preview_image{
 }
 
 table.tgle {
- border:1px solid gray;
- border-collapse:collapse;
- margin-left:auto;
- margin-right:auto;
+	border: 0px solid gray;
+	border-collapse:collapse;
+	margin-left:auto;
+	margin-right:auto;
 }
 
 thead.gle th { 
@@ -1572,29 +1572,77 @@ thead.gle th {
  text-align:left;
 }
 
-.gle-attribute-name { 
- position: relative;
- background-clip: padding-box;
- padding-left: 2px;
- padding-right: 2px;
- vertical-align: top;
- background-color: <? echo BG_GLEATTRIBUTE; ?>;
+.gle-attribute-name {
+	position: relative;
+	background-clip: padding-box;
+	padding: 3px 2px;
+	vertical-align: top;
+	background-color: <? echo BG_GLEATTRIBUTE; ?>;
 }
 
 .gle-attribute-mandatory {
 }
 
 .gle_attribute_value {
- background-clip: padding-box;
- position: relative;
- padding: 4px 5px 0 4px;
- vertical-align: top;
- min-width: 30px;
+	background-clip: padding-box;
+	position: relative;
+	padding: 3px 5px;
+	vertical-align: top;
+	min-width: 30px;
 }
+
+.gle_attribute_value input[type="checkbox"] {
+	margin: 5.5px;
+}
+
+.gle_attribute_value input[type="radio"] {
+	margin-top: 5.5px;
+	margin-bottom: 2px;
+}
+
+.gle_attribute_value label {
+	position: relative;
+}
+
+.tglegroup {
+	border: 1px solid #aaa;
+}
+
+table.tgle .glehead tr {
+	height: 26px;
+}
+
+table.tgle .glehead td {
+	background: <? echo BG_GLEATTRIBUTE; ?>;
+	border-bottom: 1px solid #888;
+}
+
+table.tgle .gledata tr {
+	border-top: 1px solid #aaa;
+}
+
+table.tgle .gledata tr:first-child {
+	border-top: none;
+}
+
+table.tgle .gledata select, table.tgle .gledata input:not([type=radio]), table.tgle .gledata textarea {
+	border-radius: 2px;
+	border: 1px solid #777;
+}
+
+table.tgle .gledata select, table.tgle .gledata input:not([type=radio]) {
+	height: 25px;
+}
+
+table.tgle .glegeom tr {
+	border: 1px solid #aaa;
+}
+
 
 .readonly_text{
 	word-wrap: break-word;
-	padding: 0 0 0 3;
+	padding: 3px 0px 0px 3px;
+	min-height: 21px;
 }
 
 .gle1_table{
