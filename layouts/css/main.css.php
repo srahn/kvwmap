@@ -743,7 +743,7 @@ a.invisiblelayerlink:hover{
 	text-align: center;
 	color: black;
 	border-radius: 5px;
-	padding: 1px 7px 5px 7px;
+	padding: 2px 7px 6px 7px;
 	margin: 0px 2px 0px 2px;
 	text-overflow: ellipsis;
 	overflow: hidden;
@@ -1573,6 +1573,7 @@ thead.gle th {
 }
 
 .gle-attribute-name {
+	height: 32px;
 	position: relative;
 	background-clip: padding-box;
 	padding: 3px 2px;
@@ -1597,13 +1598,12 @@ thead.gle th {
 
 .gle_attribute_value input[type="radio"] {
 	margin-top: 6px;
-	margin-bottom: 5px;
+	margin-bottom: 1px;
 }
 
 .gle_attribute_value label {
 	position: relative;
-	vertical-align: top;
-	top: 5px;
+	vertical-align: bottom;
 }
 
 .tglegroup {
