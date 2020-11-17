@@ -1580,6 +1580,9 @@ thead.gle th {
 	vertical-align: top;
 	background-color: <? echo BG_GLEATTRIBUTE; ?>;
 	border-right: 1px solid #ccc;
+}
+
+.gle-attribute-name:not(first-child){
 	border-left: 1px solid #ccc;
 }
 
