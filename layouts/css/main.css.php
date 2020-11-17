@@ -1595,8 +1595,7 @@ thead.gle th {
 .gle_attribute_value {
 	background-clip: padding-box;
 	position: relative;
-	padding: 3px 5px;
-	vertical-align: top;
+	padding: 0px 5px;
 	min-width: 30px;
 }
 
