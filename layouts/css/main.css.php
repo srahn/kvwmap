@@ -1579,6 +1579,7 @@ thead.gle th {
 	padding: 3px 2px;
 	vertical-align: top;
 	background-color: <? echo BG_GLEATTRIBUTE; ?>;
+	border-right: 1px solid #ccc;
 }
 
 .gle-attribute-mandatory {
@@ -1643,8 +1644,6 @@ table.tgle .glegeom tr {
 
 .readonly_text{
 	word-wrap: break-word;
-	padding: 3px 0px 0px 3px;
-	min-height: 21px;
 }
 
 .gle1_table{
