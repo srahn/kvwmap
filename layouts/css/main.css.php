@@ -1567,6 +1567,16 @@ table.tgle {
 	margin-right:auto;
 }
 
+table.tgle > tbody > tr > td {
+	font-size: 15px;
+	border: 1px solid #bbb;
+}
+
+.tglegroup{
+	border: 1px solid #bbb;
+	border-bottom: none;
+}
+
 thead.gle th { 
  padding: 0;
  text-align:left;
@@ -1581,13 +1591,6 @@ thead.gle th {
 	background-color: <? echo BG_GLEATTRIBUTE; ?>;
 }
 
-.gle-attribute-name:not(:first-child){
-	border-left: 1px solid #ccc;
-}
-
-.gle-attribute-name:not(:last-child){
-	border-right: 1px solid #ccc;
-}
 
 .gle-attribute-mandatory {
 }
@@ -1613,25 +1616,12 @@ thead.gle th {
 	vertical-align: bottom;
 }
 
-.tglegroup {
-	border: 1px solid #aaa;
-}
-
 table.tgle .glehead tr {
 	height: 26px;
 }
 
 table.tgle .glehead td {
 	background: <? echo BG_GLEATTRIBUTE; ?>;
-	border-bottom: 1px solid #888;
-}
-
-table.tgle .gledata tr {
-	border-top: 1px solid #aaa;
-}
-
-table.tgle .gledata tr:first-child {
-	border-top: none;
 }
 
 table.tgle .gledata select, table.tgle .gledata input:not([type=radio]), table.tgle .gledata textarea {
@@ -1642,11 +1632,6 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]), table.t
 table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([type=checkbox]) {
 	height: 25px;
 }
-
-table.tgle .glegeom tr {
-	border: 1px solid #aaa;
-}
-
 
 .readonly_text{
 	word-wrap: break-word;

@@ -105,8 +105,8 @@
 					$groupname_short = str_replace(' ', '_', $groupname_short[0]);
 					$datapart .= '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.'">
 									<td colspan="2" width="100%">
-										<div class="tglegroup">
-											<table width="100%" class="tgle" border="0"><tbody class="gle glehead">
+										<div>
+											<table width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">
 												<tr>
 													<td colspan="40">&nbsp;<a href="javascript:void(0);" onclick="toggle_group(\''.$layer['Layer_ID'].'_'.$j.'_'.$k.'\')">
 														<img id="group_img'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" border="0" src="'.GRAPHICSPATH.'/'; if($collapsed)$datapart .= 'plus.gif'; else $datapart .= 'minus.gif'; $datapart .= '"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span>
