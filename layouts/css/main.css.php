@@ -1579,11 +1579,14 @@ thead.gle th {
 	padding: 3px 2px;
 	vertical-align: top;
 	background-color: <? echo BG_GLEATTRIBUTE; ?>;
-	border-right: 1px solid #ccc;
 }
 
-.gle-attribute-name:not(first-child){
+.gle-attribute-name:not(:first-child){
 	border-left: 1px solid #ccc;
+}
+
+.gle-attribute-name:not(:last-child){
+	border-right: 1px solid #ccc;
 }
 
 .gle-attribute-mandatory {
