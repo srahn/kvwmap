@@ -76,7 +76,7 @@ INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
 (19, 'sendeFestpunktskizze', NULL),
 (20, 'Nachweise_bearbeiten', NULL),
 (22, 'Kolibristart', NULL),
-(23, 'Administratorfunktionen', NULL);
+(23, 'Administratorfunktionen', NULL),
 (24, 'Stelle_waehlen', NULL);
 
 ####################################################################################
