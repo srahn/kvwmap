@@ -336,7 +336,7 @@
 				case 'Checkbox' : {
 					$datapart .= '<input class="'.$field_class.'" type="checkbox" id="'.$layer_id.'_'.$name.'_'.$k.'" title="'.$alias.'" cols="45" onchange="'.$onchange.'"';
 					if($attribute_privileg == '0' OR $lock[$k]){
-						$datapart .= ' onclick="return false" style="border:0px;background-color:transparent;"';
+						$datapart .= ' onclick="return false"';
 					}
 					else{
 						$datapart .= ' tabindex="1" ';

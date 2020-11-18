@@ -688,6 +688,12 @@ function overlay_submit(gui, start, target){
 			gui.target = target;
 		}
 		else{
+			if(query_tab != undefined && query_tab.closed){		// wenn Fenster geschlossen wurde, resized zuruecksetzen
+				root.resized = 0;
+			}
+			else if(gui.id == 'GUI' && browser == 'firefox' && query_tab != undefined && root.resized < 2){	// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
+				query_tab.close();
+			}
 			query_tab = root.window.open("", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1");
 			gui.mime_type.value = 'overlay_html';
 			gui.target = 'Sachdaten';			
@@ -1228,7 +1234,7 @@ function showExtentURL(epsg_code) {
 			msg = " \
 				<div style=\"text-align: left\"> \
 					<h2>URL des aktuellen Kartenausschnitts</h2><br> \
-					<input id=\"extenturl\" style=\"width: 350px\" type=\"text\" value=\""+document.baseURI+"go=zoom2coord&INPUT_COORD="+toFixed(gui.minx.value, 3)+","+toFixed(gui.miny.value, 3)+";"+toFixed(gui.maxx.value, 3)+","+toFixed(gui.maxy.value, 3)+"&epsg_code="+epsg_code+"\"><br> \
+					<input id=\"extenturl\" style=\"width: 350px\" type=\"text\" value=\""+document.baseURI.match(/.*\//)+"index.php?go=zoom2coord&INPUT_COORD="+toFixed(gui.minx.value, 3)+","+toFixed(gui.miny.value, 3)+";"+toFixed(gui.maxx.value, 3)+","+toFixed(gui.maxy.value, 3)+"&epsg_code="+epsg_code+"\"><br> \
 				</div> \
 			";
 	message([{

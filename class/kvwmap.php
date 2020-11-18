@@ -1032,7 +1032,7 @@ echo '			</table>
 						<i class="fa fa-bars pointer button layerOptionsIcon" title="'.$this->layerOptions.'"></i>
 					</a>';
 				}
-				$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
+				$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"> </div>';
 			}
 			if($layer['aktivStatus'] == 1 AND isset($layer['Class'][0]) AND $layer['Class'][0]['Name'] != ''){
 				if(value_of($layer, 'requires') == '' AND $layer['Layer_ID'] > 0){
@@ -1198,7 +1198,7 @@ echo '			</table>
 				$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 			}
 			$legend .= ' >'.html_umlaute($layer['alias']).'</span></a>';
-			$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
+			$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"> </div>';
 			if($layer['status'] != ''){
 				$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['status'].'" src="'.GRAPHICSPATH.'warning.png">';
 			}
@@ -3378,7 +3378,16 @@ echo '			</table>
 		}
 		else {
 			$this->add_message('error', 'Kopiervorgang fehlgeschlagen.');
-			$this->GenerischeSuche_Suchen();
+			$this->last_query = $this->user->rolle->get_last_query();
+			if ($this->formvars['search']) {
+				# man kam von der Suche -> nochmal suchen
+				$this->GenerischeSuche_Suchen();
+			}
+			else {
+				# man kam aus einer Sachdatenabfrage -> nochmal abfragen
+				$this->last_query_requested = true;
+				$this->queryMap();
+			}
 		}
 	}
 
@@ -5051,7 +5060,12 @@ echo '			</table>
         $this->formvars['firstpoly']="";
         $this->formvars['secondpoly']="";
         $this->add_message('notice', 'Eintrag erfolgreich!');
-				if($ret[3])$this->add_message('info', $ret[3]);
+				if ($ret[3]) {
+					$this->add_message('info', $ret[3]);
+				}
+				elseif ($ret['msg'] != '') {
+					$this->add_message('info', $ret['msg']);
+				}
       }
       $this->formvars['CMD'] = '';
       $this->PolygonEditor();
@@ -5894,6 +5908,9 @@ echo '			</table>
     $this->map->legend->set("keyspacingx", $size*$this->map_factor);
     $this->map->legend->set("keyspacingy", $size*0.83*$this->map_factor);
     $this->map->legend->label->set("size", $size*$this->map_factor);
+		if(MAPSERVERVERSION < '700'){
+			$this->map->legend->label->set("type", 'truetype');
+		}
 		$this->map->legend->label->set("font", 'arial');
     $this->map->legend->label->set("position", MS_C);
     #$this->map->legend->label->set("offsetx", $size*-5*$this->map_factor);
@@ -13911,6 +13928,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								$filter = " AND " . $layerset[$i]['Filter'];
 							}
 							if($this->formvars['CMD'] == 'touchquery'){
+								$the_geom = $layerset[$i]['attributes']['table_alias_name'][$geometrie_tabelle].'.'.$the_geom;
 								if(substr_count(strtolower($pfad), ' from ') > 1){			# mehrere froms -> das FROM der Hauptabfrage muss groß geschrieben sein
 									$fromposition = strpos($pfad, ' FROM ');
 								}
@@ -14527,7 +14545,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				);
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
-				$path = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
+				if($layerset[$i]['Layer_ID'] > 0){			# bei Rollenlayern nicht
+					$path = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
+				}
 
 				# order by rausnehmen
 				$orderbyposition = strrpos(strtolower($path), 'order by');
@@ -16204,7 +16224,7 @@ class db_mapObj{
 					case 'Auswahlfeld' : {
 						if ($attributes['options'][$i] != '') {		 # das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
 							if (strpos($attributes['options'][$i], "'") === 0) {			# Aufzählung wie 'wert1','wert2','wert3'
-								$attributes['enum_value'][$i] = explode("','", trim(str_replace(["', ", chr(10), chr(13)], ["',", '', ''], $attributes['options'][$i]), "'"));
+								$attributes['enum_value'][$i] = explode("','", substr(str_replace(["', ", chr(10), chr(13)], ["',", '', ''], $attributes['options'][$i]), 1, -1));
 								$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
 							}
 							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {		 # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
@@ -17119,7 +17139,6 @@ class db_mapObj{
 					'queryable',
 					'use_geom',
 					'transparency',
-					'drawingorder',
 					'legendorder',
 					'minscale',
 					'maxscale',
@@ -17167,6 +17186,7 @@ class db_mapObj{
 		# Schreibt alle Attribute, die '0' bekommen sollen wenn Wert == '' ist
 		foreach(
 			array(
+				'drawingorder',			
 				'sync',
 				'listed'
 			) AS $key

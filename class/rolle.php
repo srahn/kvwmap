@@ -877,8 +877,15 @@ class rolle {
 
 	function getRollenLayer($LayerName, $typ = NULL) {
 		$sql ="
-			SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, gle_view,
-				concat('(', rollenfilter, ')') as Filter
+			SELECT 
+				l.*, 
+				4 as tolerance, 
+				-l.id as Layer_ID, 
+				l.query as pfad, 
+				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, 
+				gle_view,
+				concat('(', rollenfilter, ')') as Filter,
+				'oid' as oid
 			FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
     if ($LayerName!='') {
@@ -1172,7 +1179,7 @@ class rolle {
 				styles 
 			SET 
 				color = "'.$formvars['layer_options_color'].'",
-				symbolname = "'.$formvars['layer_options_hatching'].'"
+				symbolname = CASE WHEN symbolname IS NULL OR symbolname = "hatch" OR symbolname = "" THEN "'.$formvars['layer_options_hatching'].'" ELSE symbolname END
 			WHERE 
 				Style_ID = '.$style_id;
 		$this->debug->write("<p>file:rolle.php class:rolle->setColor:",4);
@@ -1181,9 +1188,12 @@ class rolle {
 
 	function setTransparency($formvars) {
 		if($formvars['layer_options_open'] > 0){		# normaler Layer
-			$sql ='UPDATE u_rolle2used_layer set transparency = '.$formvars['layer_options_transparency'];
-			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-			$sql.=' AND layer_id='.$formvars['layer_options_open'];
+			$sql ='
+				UPDATE u_rolle2used_layer 
+				INNER JOIN layer ON layer.Layer_ID = u_rolle2used_layer.layer_id
+				set u_rolle2used_layer.transparency = '.$formvars['layer_options_transparency'].'
+				WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.'
+				AND (u_rolle2used_layer.layer_id='.$formvars['layer_options_open'].' OR requires = '.$formvars['layer_options_open'].')';
 			$this->debug->write("<p>file:rolle.php class:rolle->setTransparency:",4);
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}

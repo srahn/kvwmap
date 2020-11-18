@@ -41,7 +41,7 @@ $SVGvars_defs = '
 			fill: url(#LinearGradient);
 			opacity: 0.5;
 			transition: all 1s cubic-bezier(0.09, 0.93, 0.76, 0.84);
-		}                            
+		}
 		.active{
 			fill: #b0d4f2 !important;
 			opacity: 1 !important;

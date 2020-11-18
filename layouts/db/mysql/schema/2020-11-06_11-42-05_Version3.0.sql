@@ -223,6 +223,24 @@ CREATE TABLE IF NOT EXISTS `ddl2freilinien` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `druckfreirechtecke`
+--
+
+CREATE TABLE IF NOT EXISTS `druckfreirechtecke` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `posx` int(11) NOT NULL,
+  `posy` int(11) NOT NULL,
+  `endposx` int(11) NOT NULL,
+  `endposy` int(11) NOT NULL,
+  `breite` float NOT NULL,
+  `color` int(11) DEFAULT NULL,
+  `offset_attribute_start` varchar(255) DEFAULT NULL,
+  `offset_attribute_end` varchar(255) DEFAULT NULL,
+  `type` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
 -- Table structure for table `ddl2freirechtecke`
 --
 
@@ -300,6 +318,32 @@ CREATE TABLE IF NOT EXISTS `ddl_elemente` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `user`
+--
+
+CREATE TABLE IF NOT EXISTS `user` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `login_name` varchar(100) NOT NULL DEFAULT '',
+  `Name` varchar(100) NOT NULL DEFAULT '',
+  `Vorname` varchar(100) DEFAULT NULL,
+  `Namenszusatz` varchar(50) DEFAULT NULL,
+  `passwort` varchar(32) NOT NULL DEFAULT '',
+  `password_setting_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `start` date NOT NULL DEFAULT '0000-00-00',
+  `stop` date NOT NULL DEFAULT '0000-00-00',
+  `ips` text,
+  `Funktion` enum('admin','user','gast') NOT NULL DEFAULT 'user',
+  `stelle_id` int(11) DEFAULT NULL,
+  `phon` varchar(25) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `agreement_accepted` tinyint(1) NOT NULL DEFAULT '0',
+  `num_login_failed` int(11) NOT NULL DEFAULT '0' COMMENT 'Anzahl der nacheinander fehlgeschlagenen Loginversuche mit diesem login_namen',
+  `organisation` varchar(255) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 PACK_KEYS=0;
+
+--
 -- Table structure for table `druckausschnitte`
 --
 
@@ -352,25 +396,7 @@ CREATE TABLE IF NOT EXISTS `druckfreilinien` (
 
 -- --------------------------------------------------------
 
---
--- Table structure for table `druckfreirechtecke`
---
 
-CREATE TABLE IF NOT EXISTS `druckfreirechtecke` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `posx` int(11) NOT NULL,
-  `posy` int(11) NOT NULL,
-  `endposx` int(11) NOT NULL,
-  `endposy` int(11) NOT NULL,
-  `breite` float NOT NULL,
-  `color` int(11) DEFAULT NULL,
-  `offset_attribute_start` varchar(255) DEFAULT NULL,
-  `offset_attribute_end` varchar(255) DEFAULT NULL,
-  `type` tinyint(1) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
 
 --
 -- Table structure for table `druckfreitexte`
@@ -712,90 +738,6 @@ CREATE TABLE IF NOT EXISTS `layer_attributes` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `layer_attributes2rolle`
---
-
-CREATE TABLE IF NOT EXISTS `layer_attributes2rolle` (
-  `layer_id` int(11) NOT NULL,
-  `attributename` varchar(255) NOT NULL,
-  `stelle_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `switchable` tinyint(1) NOT NULL DEFAULT '1',
-  `switched_on` tinyint(1) NOT NULL DEFAULT '1',
-  `sortable` tinyint(1) NOT NULL DEFAULT '1',
-  `sort_order` int(11) NOT NULL DEFAULT '1',
-  `sort_direction` enum('asc','desc') NOT NULL DEFAULT 'asc',
-  PRIMARY KEY (`layer_id`,`attributename`,`stelle_id`,`user_id`),
-  KEY `user_id` (`user_id`,`stelle_id`),
-	CONSTRAINT `layer_attributes2rolle_ibfk_2` FOREIGN KEY (`user_id`,`stelle_id`) REFERENCES `rolle` (`user_id`, `stelle_id`) ON DELETE CASCADE,
-  CONSTRAINT `layer_attributes2rolle_ibfk_1` FOREIGN KEY (`layer_id`,`attributename`,`stelle_id`) REFERENCES `layer_attributes2stelle` (`layer_id`, `attributename`, `stelle_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `layer_attributes2stelle`
---
-
-CREATE TABLE IF NOT EXISTS `layer_attributes2stelle` (
-  `layer_id` int(11) NOT NULL,
-  `attributename` varchar(255) NOT NULL,
-  `stelle_id` int(11) NOT NULL,
-  `privileg` tinyint(1) NOT NULL,
-  `tooltip` tinyint(1) DEFAULT '0',
-  PRIMARY KEY (`layer_id`,`attributename`,`stelle_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `layer_parameter`
---
-
-CREATE TABLE IF NOT EXISTS `layer_parameter` (
-  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `key` varchar(255) NOT NULL,
-  `alias` varchar(255) NOT NULL,
-  `default_value` varchar(255) NOT NULL,
-  `options_sql` text NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `migrations`
---
-
-CREATE TABLE IF NOT EXISTS `migrations` (
-  `component` varchar(50) NOT NULL,
-  `type` enum('mysql','postgresql') NOT NULL,
-  `filename` varchar(255) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `referenzkarten`
---
-
-CREATE TABLE IF NOT EXISTS `referenzkarten` (
-  `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `Name` varchar(100) NOT NULL DEFAULT '',
-  `Dateiname` varchar(100) NOT NULL DEFAULT '',
-  `epsg_code` int(11) NOT NULL DEFAULT '2398',
-  `xmin` double NOT NULL DEFAULT '0',
-  `ymin` double NOT NULL DEFAULT '0',
-  `xmax` double NOT NULL DEFAULT '0',
-  `ymax` double NOT NULL DEFAULT '0',
-  `width` int(4) UNSIGNED NOT NULL DEFAULT '0',
-  `height` int(4) UNSIGNED NOT NULL DEFAULT '0',
-  PRIMARY KEY (`ID`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `rolle`
 --
 
@@ -851,6 +793,96 @@ CREATE TABLE IF NOT EXISTS `rolle` (
   KEY `user_id_idx` (`user_id`),
 	CONSTRAINT `rolle_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`ID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+--
+-- Table structure for table `layer_attributes2stelle`
+--
+
+CREATE TABLE IF NOT EXISTS `layer_attributes2stelle` (
+  `layer_id` int(11) NOT NULL,
+  `attributename` varchar(255) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `privileg` tinyint(1) NOT NULL,
+  `tooltip` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`layer_id`,`attributename`,`stelle_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+--
+-- Table structure for table `layer_attributes2rolle`
+--
+
+CREATE TABLE IF NOT EXISTS `layer_attributes2rolle` (
+  `layer_id` int(11) NOT NULL,
+  `attributename` varchar(255) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `switchable` tinyint(1) NOT NULL DEFAULT '1',
+  `switched_on` tinyint(1) NOT NULL DEFAULT '1',
+  `sortable` tinyint(1) NOT NULL DEFAULT '1',
+  `sort_order` int(11) NOT NULL DEFAULT '1',
+  `sort_direction` enum('asc','desc') NOT NULL DEFAULT 'asc',
+  PRIMARY KEY (`layer_id`,`attributename`,`stelle_id`,`user_id`),
+  KEY `user_id` (`user_id`,`stelle_id`),
+	CONSTRAINT `layer_attributes2rolle_ibfk_2` FOREIGN KEY (`user_id`,`stelle_id`) REFERENCES `rolle` (`user_id`, `stelle_id`) ON DELETE CASCADE,
+  CONSTRAINT `layer_attributes2rolle_ibfk_1` FOREIGN KEY (`layer_id`,`attributename`,`stelle_id`) REFERENCES `layer_attributes2stelle` (`layer_id`, `attributename`, `stelle_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `layer_parameter`
+--
+
+CREATE TABLE IF NOT EXISTS `layer_parameter` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `key` varchar(255) NOT NULL,
+  `alias` varchar(255) NOT NULL,
+  `default_value` varchar(255) NOT NULL,
+  `options_sql` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `migrations`
+--
+
+CREATE TABLE IF NOT EXISTS `migrations` (
+  `component` varchar(50) NOT NULL,
+  `type` enum('mysql','postgresql') NOT NULL,
+  `filename` varchar(255) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `referenzkarten`
+--
+
+CREATE TABLE IF NOT EXISTS `referenzkarten` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `Name` varchar(100) NOT NULL DEFAULT '',
+  `Dateiname` varchar(100) NOT NULL DEFAULT '',
+  `epsg_code` int(11) NOT NULL DEFAULT '2398',
+  `xmin` double NOT NULL DEFAULT '0',
+  `ymin` double NOT NULL DEFAULT '0',
+  `xmax` double NOT NULL DEFAULT '0',
+  `ymax` double NOT NULL DEFAULT '0',
+  `width` int(4) UNSIGNED NOT NULL DEFAULT '0',
+  `height` int(4) UNSIGNED NOT NULL DEFAULT '0',
+  PRIMARY KEY (`ID`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+
 
 -- --------------------------------------------------------
 
@@ -1403,22 +1435,6 @@ CREATE TABLE IF NOT EXISTS `u_menue2rolle` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `u_menue2stelle`
---
-
-CREATE TABLE IF NOT EXISTS `u_menue2stelle` (
-  `stelle_id` int(11) NOT NULL DEFAULT '0',
-  `menue_id` int(11) NOT NULL DEFAULT '0',
-  `menue_order` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`stelle_id`,`menue_id`),
-  KEY `menue_id` (`menue_id`),
-	CONSTRAINT `u_menue2stelle_ibfk_1` FOREIGN KEY (`stelle_id`) REFERENCES `stelle` (`ID`) ON DELETE CASCADE,
-  CONSTRAINT `u_menue2stelle_ibfk_2` FOREIGN KEY (`menue_id`) REFERENCES `u_menues` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `u_menues`
 --
 
@@ -1439,6 +1455,23 @@ CREATE TABLE IF NOT EXISTS `u_menues` (
   `button_class` varchar(30) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Table structure for table `u_menue2stelle`
+--
+
+CREATE TABLE IF NOT EXISTS `u_menue2stelle` (
+  `stelle_id` int(11) NOT NULL DEFAULT '0',
+  `menue_id` int(11) NOT NULL DEFAULT '0',
+  `menue_order` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`stelle_id`,`menue_id`),
+  KEY `menue_id` (`menue_id`),
+	CONSTRAINT `u_menue2stelle_ibfk_1` FOREIGN KEY (`stelle_id`) REFERENCES `stelle` (`ID`) ON DELETE CASCADE,
+  CONSTRAINT `u_menue2stelle_ibfk_2` FOREIGN KEY (`menue_id`) REFERENCES `u_menues` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
 
 -- --------------------------------------------------------
 
@@ -1507,8 +1540,6 @@ CREATE TABLE IF NOT EXISTS `zwischenablage` (
 	CONSTRAINT `zwischenablage_ibfk_1` FOREIGN KEY (`user_id`,`stelle_id`) REFERENCES `rolle` (`user_id`, `stelle_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
-DELETE FROM `migrations` WHERE type = 'mysql' AND component = 'kvwmap';
 
 
 COMMIT;

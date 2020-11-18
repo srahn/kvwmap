@@ -611,7 +611,7 @@
           $SelectedFlstNrFormObj->outputHTML();
         }
         else{
-          $FlstNrFormObj=new FormObject("FlstNr","text","","","","5","5","multiple",NULL);
+          $FlstNrFormObj=new FormObject("FlstNr","text","","","","0","0","multiple",NULL);
         }
       }
     }

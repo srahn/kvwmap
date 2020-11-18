@@ -76,8 +76,16 @@ input[type="checkbox"], input[type="radio"] {
 	border: 1px solid #353535;
 	border-radius: 3px;
 	appearance: none;
+	-moz-appearance:none;
+	-webkit-appearance:none;
+	-o-appearance:none;
 	outline: 0;
 	cursor: pointer;
+	background: #fff;
+}
+
+#scrolldiv input[type="checkbox"], #scrolldiv input[type="radio"] {
+	margin: 3px;
 }
 
 input[type="checkbox"][disabled="true"], input[type="checkbox"][disabled=""], input[type="radio"][disabled="true"], input[type="radio"][disabled=""] {
@@ -735,7 +743,7 @@ a.invisiblelayerlink:hover{
 	text-align: center;
 	color: black;
 	border-radius: 5px;
-	padding: 1px 7px 5px 7px;
+	padding: 2px 7px 6px 7px;
 	margin: 0px 2px 0px 2px;
 	text-overflow: ellipsis;
 	overflow: hidden;
@@ -1485,7 +1493,7 @@ a:hover .preview_image{
 }
 
 .datensatz {
-	border:0px solid gray;
+	border:1px solid #999;
 	border-collapse:collapse;
 	padding:0px 0px 0px 0px;
 }
@@ -1553,11 +1561,20 @@ a:hover .preview_image{
 }
 
 table.tgle {
- border:1px solid gray;
- border-bottom: none;
- border-collapse:collapse;
- margin-left:auto;
- margin-right:auto;
+	border: 0px solid gray;
+	border-collapse:collapse;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+table.tgle > tbody > tr > td {
+	font-size: 15px;
+	border: 1px solid #bbb;
+}
+
+.tglegroup{
+	border: 1px solid #bbb;
+	border-bottom: none;
 }
 
 thead.gle th { 
@@ -1565,33 +1582,59 @@ thead.gle th {
  text-align:left;
 }
 
-.gle-attribute-name { 
- position: relative;
- background-clip: padding-box;
- padding-left: 2px;
- padding-right: 2px;
- vertical-align: top;
- background-color: <? echo BG_GLEATTRIBUTE; ?>;
+.gle-attribute-name {
+	height: 32px;
+	position: relative;
+	background-clip: padding-box;
+	padding: 3px 2px;
+	vertical-align: top;
+	background-color: <? echo BG_GLEATTRIBUTE; ?>;
 }
+
 
 .gle-attribute-mandatory {
 }
 
 .gle_attribute_value {
- background-clip: padding-box;
- position: relative;
- padding: 4px 5px 0 4px;
- vertical-align: top;
- min-width: 30px;
+	background-clip: padding-box;
+	position: relative;
+	padding: 0px 5px;
+	min-width: 30px;
+}
+
+.gle_attribute_value input[type="checkbox"] {
+	margin: 5.5px;
+}
+
+.gle_attribute_value input[type="radio"] {
+	margin-top: 6px;
+	margin-bottom: 1px;
+}
+
+.gle_attribute_value label {
+	position: relative;
+	vertical-align: bottom;
+}
+
+table.tgle .glehead tr {
+	height: 26px;
+}
+
+table.tgle .glehead td {
+	background: <? echo BG_GLEATTRIBUTE; ?>;
+}
+
+table.tgle .gledata select, table.tgle .gledata input:not([type=radio]), table.tgle .gledata textarea {
+	border-radius: 2px;
+	border: 1px solid #777;
+}
+
+table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([type=checkbox]) {
+	height: 25px;
 }
 
 .readonly_text{
 	word-wrap: break-word;
-	padding: 0 0 0 3;
-}
-
-tbody.gle>tr { 
- border:1px solid #999;
 }
 
 .gle1_table{

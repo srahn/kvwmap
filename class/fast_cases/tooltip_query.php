@@ -326,7 +326,9 @@ class GUI {
 				);
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
-				$path = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
+				if($layerset[$i]['Layer_ID'] > 0){			# bei Rollenlayern nicht
+					$path = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
+				}
 
 				# order by rausnehmen
 				$orderbyposition = strrpos(strtolower($path), 'order by');
@@ -1336,8 +1338,15 @@ class rolle {
 
 	function getRollenLayer($LayerName, $typ = NULL) {
 		$sql ="
-			SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, gle_view,
-				concat('(', rollenfilter, ')') as Filter
+			SELECT 
+				l.*, 
+				4 as tolerance, 
+				-l.id as Layer_ID, 
+				l.query as pfad, 
+				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, 
+				gle_view,
+				concat('(', rollenfilter, ')') as Filter,
+				'oid' as oid
 			FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
     if ($LayerName!='') {
