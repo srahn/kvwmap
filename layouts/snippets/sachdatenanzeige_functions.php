@@ -125,26 +125,34 @@ include('funktionen/input_check_functions.php');
 
 	field_has_value = function(field, operator, value){
 		var field_value = field.value;
-		if(field.type == 'radio'){
+		if (field.type == 'radio'){
 			var radio = document.querySelector('input[name="'+field.name+'"]:checked');
-			if(radio != null)field_value = radio.value;
+			if (radio != null) {
+				field_value = radio.value;
+			}
 		}
-		if(field.type == 'checkbox'){
-			if((operator == '==' && value == 't' && field.checked) || 
+		if (field.type == 'checkbox') {
+			if ((operator == '==' && value == 't' && field.checked) || 
 				 (operator == '==' && value != 't' && !field.checked) ||
 				 (operator == '!=' && value == 't' && !field.checked) ||
 				 (operator == '!=' && value != 't' && field.checked)
 				 )return true;
-			else return false;
-		}
-		else{
-			if(operator == 'IN'){
-				value_array = value.split('|');
-				if(value_array.indexOf(field_value) > -1) return true;
-				else return false;
+			else {
+				return false;
 			}
-			else{
-				return eval("'"+field_value+"' "+operator+" '"+value+"'")
+		}
+		else {
+			if (operator == 'IN') {
+				value_array = value.split('|');
+				if (value_array.indexOf(field_value) > -1) {
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+			else {
+				return eval("'" + field_value + "' " + operator + " '" + value + "'");
 			}
 		}
 	}	
