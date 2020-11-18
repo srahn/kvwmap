@@ -39,7 +39,7 @@ class GUI {
 
 	function add_message($type, $msg) {
 		echo '<p>Fehlerart: ' . $type;
-		echo '<br><textarea cols="4" style="width: 500px">' . $msg . '</textarea>';
+		echo '<br>' . $msg;
 	}
 }
 $GUI = new GUI();

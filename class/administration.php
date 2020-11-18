@@ -65,7 +65,7 @@ class administration{
 				) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 			";
 			$result = $this->database->execSQL($sql,0, 0);
-			if (!$this->database->success) {
+			if ($this->database->success) {
 				echo ' Migrationstabelle erfolgreich angelegt!';
 			}
 			else {
