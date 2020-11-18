@@ -1,10 +1,10 @@
 <?php
 
 	$sql = "
-		SELECT
-			filename
-		FROM
-			migrations
+		SELECT * 
+		FROM information_schema.tables
+		WHERE table_schema = '".$this->database->dbName."' 
+		AND table_name = 'migrations'
 	";
 	$this->database->execSQL($sql, 0, 0);
 
