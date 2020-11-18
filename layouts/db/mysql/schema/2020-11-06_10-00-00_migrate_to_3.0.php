@@ -1,6 +1,6 @@
 <?php
 	$sql = "
-		SELECT count(*)
+		SELECT *
 		FROM migrations
 	";
 	echo '<br>Frage Anzahl der registrierten Migrationen ab mit SQL: ' . $sql;
