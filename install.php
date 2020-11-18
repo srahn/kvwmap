@@ -198,7 +198,7 @@ function install() {
   Verbindungsdaten für Zugang zu PostgreSQL kvwmap Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $pgsqlKvwmapDb->host; ?><br>
   User: <?php echo $pgsqlKvwmapDb->user; ?><br>
-  Password: <?php# echo $pgsqlKvwmapDb->passwd; ?><br>
+  Password: <?php # echo $pgsqlKvwmapDb->passwd; ?><br>
   Datenbankname: <?php echo $pgsqlKvwmapDb->dbName; ?><br><?php
 
   if (kvwmapsp_exists($pgsqlPostgresDb, $pgsqlKvwmapDb)) { ?>
