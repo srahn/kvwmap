@@ -40,12 +40,12 @@ class administration{
 	var $migration_logs;
 	var $migration_files;
 	var $migrations_to_execute;
-	
+
 	function __construct($database, $pgdatabase) {
 		$this->database = $database;
 		$this->pgdatabase = $pgdatabase;
 	}
-	
+
 	function get_migration_logs() {
 		#echo '<br>Get Migration logs';
 		$migrations = array();
@@ -56,7 +56,22 @@ class administration{
 		#echo '<br>SQL zur Abfrage der registrierten Migrationen: ' . $sql;
 		$result = $this->database->execSQL($sql,0, 0);
 		if (!$this->database->success) {
-			echo '<br>Migrationstabelle existiert noch nicht. Bei Neuinstallation wird sie angelegt.<br>'; 	// bei Neuinstallation gibt es diese Tabelle noch nicht
+			echo '<br>Migrationstabelle existiert noch nicht. Bei Neuinstallation wird sie angelegt ... <br>'; // bei Neuinstallation gibt es diese Tabelle noch nicht
+			$sql = "
+				CREATE TABLE IF NOT EXISTS `migrations` (
+				  `component` varchar(50) NOT NULL,
+				  `type` enum('mysql','postgresql') NOT NULL,
+				  `filename` varchar(255) NOT NULL
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+			";
+			$result = $this->database->execSQL($sql,0, 0);
+			if (!$this->database->success) {
+				echo ' Migrationstabelle erfolgreich angelegt!';
+			}
+			else {
+				echo '<br>Breche Installationsvorgang ab, da migrationstabelle nicht angelegt werden konnte und somit keine Migrationen registriert werden können!';
+				exit;
+			}
 		}
 		else {
 			while ($rs = $this->database->result->fetch_array()) {
@@ -66,7 +81,7 @@ class administration{
 		#echo '<br>Gefundene Migrationen: ' . print_r($migrations, true);
 		return $migrations;
 	}
-	
+
 	function get_schema_migration_files() {
 		#echo '<br>Get Schema Migration Files';
 		global $kvwmap_plugins;
