@@ -8,6 +8,9 @@
 
 	if ($this->database->result->num_rows > 0) {
 		echo '<br>Anzahl der Einträge in migrations Tabelle: ' . $this->database->result->num_rows;
+		while ($rs = $this->database->result->fetch_array()) {
+			echo '<br>Komponente: ' . $rs['component'] . ' Typ: ' . $rs['type'] . ' Datei: ' . $rs['filename'];
+		}
 		echo '<br>Download alle Migrations-Dateien von vor Version 3.0 um eventuell fehlende auszuführen.';
 		$success = false;
 		$zip_file = LAYOUTPATH.'db/mysql/schema/mysql_migrations_upto_3.0.zip';
@@ -27,5 +30,8 @@
 			$success = true;
 		}
 		$result[0] = !$success;
+	}
+	else {
+		echo '<br>Keine registrierten Migrationsdateien gefunden.';
 	}
 ?>

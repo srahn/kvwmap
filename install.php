@@ -564,7 +564,7 @@ function migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb) {
   }
   else{
     if (count($administration->migrations_to_execute['mysql']) > 0) { ?>
-      <br>Anlegen des MySQL-Schemas fehlgeschlagen.<br><?php
+      <br>Es konnten nicht alle MySQL-Migrationen ausgeführt werden.<br><?php
 			echo '<br>Folgende wurden noch nicht ausgeführt: <ul><li>' . implode('</li><li>', $administration->migrations_to_execute['mysql']['kvwmap']) . '</li></ul>';
     }
     if (count($administration->migrations_to_execute['postgresql']) > 0) { ?>
