@@ -663,6 +663,9 @@
 							if ($explosion[2] != 'no_new_window') {
 								$datapart .= 'target="_blank"';
 							}
+							else{
+								$datapart .= 'target="root"';
+							}
 							$datapart .= ' class="dynamicLink" style="font-size: ' . $fontsize . 'px" ' . (($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') ? 'onclick="checkForUnsavedChanges(event);"' : '').' href="' . $href . '">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
