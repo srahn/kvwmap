@@ -1,4 +1,6 @@
 <?php
+	global $GUI;
+	
 	$sql = "
 		SELECT *
 		FROM migrations
@@ -8,7 +10,7 @@
 	if ($this->database->result->num_rows > 0) {
 		$success = false;
 		if(!is_writable(LAYOUTPATH.'db/mysql/schema')){
-			$this->add_message('Keine Schreibrechte in '.LAYOUTPATH.'db/mysql/schema/. Sorgen Sie bitte in diesem Verzeichnis für Gruppenschreibrechte.');
+			$GUI->add_message('Keine Schreibrechte in '.LAYOUTPATH.'db/mysql/schema/. Sorgen Sie bitte in diesem Verzeichnis für Gruppenschreibrechte.');
 		}
 		else{
 			$zip_file = LAYOUTPATH.'db/mysql/schema/mysql_migrations_upto_3.0.zip';
