@@ -133,7 +133,6 @@ input[type="checkbox"][disabled="true"]:checked, input[type="checkbox"][disabled
 input[type="checkbox"]:hover, input[type="radio"]:hover {
 	color: #fff;
 	border-color: #4999d8;
-	background: #fff;
 }
 
 input[type="checkbox"][disabled="true"]:hover, input[type="checkbox"][disabled=""]:hover, input[type="radio"][disabled="true"]:hover, input[type="radio"][disabled=""]:hover {
