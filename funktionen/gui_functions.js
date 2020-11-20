@@ -17,6 +17,13 @@ var query_tab;
 var root = window;
 root.resized = 0;
 
+window.onbeforeunload = function(){
+	document.activeElement.blur();
+	if(root.document.GUI.gle_changed.value == 1){
+		return "Es existieren ungespeicherte Datensätze. Wollen Sie wirklich fortfahren?";
+	}
+}
+
 function ahah(url, data, target, action, progress){
 	for(k = 0; k < target.length; ++k){
 		if(target[k] != null && target[k].tagName == "DIV"){
