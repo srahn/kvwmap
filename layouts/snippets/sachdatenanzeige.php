@@ -164,7 +164,7 @@ if($this->formvars['printversion'] == '' AND $this->formvars['mime_type'] != 'ov
 </table>
 
 <?
-if($this->formvars['printversion'] == ''){ ?>
+if($this->formvars['printversion'] == '' AND $this->formvars['mime_type'] != 'overlay_html'){ ?>
 	<a style="float: right" href="javascript:scrolltop();"	title="<? echo $strToTop; ?>">
 		<i class="fa fa-arrow-up hover-border" aria-hidden="true"></i>
 	</a>
