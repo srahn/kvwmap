@@ -433,7 +433,7 @@ include('funktionen/input_check_functions.php');
   			message('Das Datumsfeld '+form_fields[i].title+' hat nicht das Format TT.MM.JJJJ.');
   			return;
   		}
-			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
+			if (['checkbox', 'radio'].indexOf(form_fields[i].type) == -1 || form_fields[i].checked) {
 				if(form_fields[i].type == 'file' && form_fields[i].files[0] != undefined)value = form_fields[i].files[0];
 				else value = form_fields[i].value;
 				formData.append(form_fields[i].name, value);
