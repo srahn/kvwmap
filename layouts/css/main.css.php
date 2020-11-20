@@ -1471,7 +1471,7 @@ a:hover .preview_image{
 .raster_record_open .gle tr:hover{border:1px solid #03476F;}
 .raster_record_open td{line-height: 16px;padding: 2px;transition: all 0.25s ease;}
 .raster_record_open a{font-size: 15px;transition: all 0.25s ease;}
-.raster_record_open input{width:200px;font-size: 15px;height:22px;transition: all 0.25s ease;}
+.raster_record_open input[type=text]{width:200px;font-size: 15px;height:22px;transition: all 0.25s ease;}
 .raster_record_open input[type=checkbox]{width:12px;font-size: 15px;height:12px;transition: all 0.25s ease;}
 .raster_record_open textarea{font-size: 15px;transition: all 0.25s ease;}
 .raster_record_open .tr_show #formelement{width: 100%;overflow: visible}
