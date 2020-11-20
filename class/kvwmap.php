@@ -8012,7 +8012,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       $stelle = new stelle($stellen_ids[$i], $this->database);
       $stelle->addLayer($layer_ids,	0, $filter, $assign_default_values);
       $users = $stelle->getUser();
-      for($j = 0; $j < count($users['ID']); $j++){
+      for($j = 0; $j < @count($users['ID']); $j++){
         $this->user->rolle->setGroups($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id, $layer_ids); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
         $this->user->rolle->setLayer($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id); # Hinzufügen der Layer zur Rolle
       }

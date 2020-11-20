@@ -1541,7 +1541,5 @@ CREATE TABLE IF NOT EXISTS `zwischenablage` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-DELETE FROM `migrations` WHERE type = 'mysql' AND component = 'kvwmap';
-
 
 COMMIT;

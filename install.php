@@ -39,7 +39,7 @@ class GUI {
 
 	function add_message($type, $msg) {
 		echo '<p>Fehlerart: ' . $type;
-		echo '<br><textarea cols="4" style="width: 500px">' . $msg . '</textarea>';
+		echo '<br>' . $msg;
 	}
 }
 $GUI = new GUI();
@@ -198,7 +198,7 @@ function install() {
   Verbindungsdaten für Zugang zu PostgreSQL kvwmap Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $pgsqlKvwmapDb->host; ?><br>
   User: <?php echo $pgsqlKvwmapDb->user; ?><br>
-  Password: <?php# echo $pgsqlKvwmapDb->passwd; ?><br>
+  Password: <?php # echo $pgsqlKvwmapDb->passwd; ?><br>
   Datenbankname: <?php echo $pgsqlKvwmapDb->dbName; ?><br><?php
 
   if (kvwmapsp_exists($pgsqlPostgresDb, $pgsqlKvwmapDb)) { ?>
@@ -564,7 +564,7 @@ function migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb) {
   }
   else{
     if (count($administration->migrations_to_execute['mysql']) > 0) { ?>
-      <br>Anlegen des MySQL-Schemas fehlgeschlagen.<br><?php
+      <br>Es konnten nicht alle MySQL-Migrationen ausgeführt werden.<br><?php
 			echo '<br>Folgende wurden noch nicht ausgeführt: <ul><li>' . implode('</li><li>', $administration->migrations_to_execute['mysql']['kvwmap']) . '</li></ul>';
     }
     if (count($administration->migrations_to_execute['postgresql']) > 0) { ?>
