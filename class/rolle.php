@@ -1703,17 +1703,22 @@ class rolle {
 		return 1;
 	}
 
-	function deleteLayer($user_id,$stellen,$layer) {
+	function deleteLayer($user_id, $stellen, $layer) {
 		# löscht die Layer der übergebenen Stellen für einen Benutzer.
-		for ($i=0;$i<count($stellen);$i++) {
-			for ($j=0;$j<count($layer);$j++) {
-				$sql ='DELETE FROM `u_rolle2used_layer` WHERE `stelle_id` = '.$stellen[$i];
-				if($user_id != 0){
-					$sql .= ' AND user_id = '.$user_id;
-				}
-				if($layer != 0){
-					$sql.=' AND `layer_id` = '.$layer[$j];
-				}
+		for ($i = 0; $i < count($stellen); $i++) {
+			if (!is_array($layer)) {
+				$layer = array();
+			}
+			for ($j = 0; $j < count($layer); $j++) {
+				$sql = "
+					DELETE
+					FROM
+						`u_rolle2used_layer`
+					WHERE
+						`stelle_id` = " . $stellen[$i] .
+						($user_id != 0 ? " AND `user_id` = " . $user_id : "") .
+						($layer != 0 ? " AND `layer_id` = " . $layer[$j] : "") . "
+				";
 				#echo '<br>'.$sql;
 				$this->debug->write("<p>file:rolle.php class:rolle function:deleteLayer - Löschen der Layer der Rollen:<br>".$sql,4);
 				$this->database->execSQL($sql);
