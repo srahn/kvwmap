@@ -362,7 +362,7 @@ class administration{
 		$this->get_config_params();
 		$config = '';
 		foreach ($this->config_params as $param) {
-			#echo '<br>p: ' . $param['name'] . ' real: ' . $param['real_value'];
+			#echo '<br>plugin: ' . $param['plugin'] . ' name: ' . $param['name'] . ' type: ' . $param['type'] . ' real: ' . $param['real_value'];
 			if ($param['plugin'] == $plugin) {
 				if ($param['description'] != '') {
 					$param['description'] = rtrim($param['description']);
@@ -372,7 +372,12 @@ class administration{
 					}
 				}
 				if ($param['type'] == 'array') {
-					$config .= "$" . $param['name'] . " = " . str_replace(['(object) ', 'stdClass::__set_state'], '', var_export(json_decode($param['value']), true)) . ";\n\n";
+					$param_array_str = str_replace(['(object) ', 'stdClass::__set_state'], '', var_export(json_decode($param['value']), true));
+					if ($param_array_str == 'NULL') {
+						$this->database->gui->add_message('error', 'Syntaxfehler im Parameter: ' . $param['name'] . '!<br>Bitte auf das richtige setzen von Anführungsstrichen<br>und Klammern achten.');
+						$param_array_str = 'array()';
+					}
+					$config .= "$" . $param['name'] . " = " . $param_array_str . ";\n\n";
 				}
 				else {
 					if ($param['type'] == 'string' OR $param['type'] == 'password') {
@@ -400,6 +405,7 @@ class administration{
 				$result[1] = 'Fehler beim Schreiben der config-Datei ' . $prepath . 'config.php';
 			}
 			else {
+				$this->database->gui->add_message('warning', 'Konfigurationsdatei config.php geschrieben.<br>Zum wirksamwerden muss noch ein mal<br>die Seite geladen werden.');
 				$result[0] = 0;
 			}
 		}
