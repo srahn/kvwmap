@@ -1540,6 +1540,7 @@ echo '			</table>
 				else {
 					$map = new mapObj(DEFAULTMAPFILE, SHAPEPATH);
 				}
+
         $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 
         # Allgemeine Parameter
@@ -1550,7 +1551,12 @@ echo '			</table>
         #$map->set('interlace', MS_ON);
         $map->set('status', MS_ON);
         $map->set('name', MAPFILENAME);
-        $map->set('debug', MS_ON);
+
+				define('MS_DEBUG_LEVEL', 0);
+				if (MS_DEBUG_LEVEL > 0) {
+					$map->setConfigOption('MS_ERRORFILE', '/var/www/logs/mapserver.log');
+					$map->set('debug', MS_DEBUG_LEVEL);
+				};
         $map->imagecolor->setRGB(255,255,255);
         $map->maxsize = 4096;
         $map->setProjection('+init=epsg:'.$this->user->rolle->epsg_code,MS_TRUE);
@@ -1814,13 +1820,15 @@ echo '			</table>
 		//---- wenn die Layer einer eingeklappten Gruppe nicht in der Karte //
 		//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
 		//---- der layer_status auf 0 gesetzt werden//
-		if($layerset['aktivStatus'] == 0){
-		$layer->set('status', 0);
+		if ($layerset['aktivStatus'] == 0){
+			$layer->set('status', 0);
 		}
 		else{
-		$layer->set('status', 1);
+			$layer->set('status', 1);
 		}
-		$layer->set('debug',MS_ON);
+		if (MS_DEBUG_LEVEL > 0) {
+			$layer->set('debug', 5);
+		};
 
 		# fremde Layer werden auf Verbindung getestet
 		if ($layerset['aktivStatus'] != 0 AND $layerset['connectiontype'] == 6) {
@@ -2682,7 +2690,9 @@ echo '			</table>
 		for($i = 0; $i < count($this->layers_replace_scale); $i++){
 			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
+
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
+
 		if (!$img_urls) {
 			ob_start();
 			$this->image_map->saveImage();

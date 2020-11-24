@@ -122,7 +122,7 @@ class Konvertierung extends PgObject {
 		}
 	}
 
-	function create($anzeige_name, $epsg_code, $input_epsg_code, $planart, $stelle_id, $user_id) {
+	function create($anzeige_name = '', $epsg_code = '', $input_epsg_code = '', $planart = '', $stelle_id = '', $user_id = '') {
 		$sql = "
 			INSERT INTO " . $this->schema . "." . $this->tableName . " (
 				bezeichnung, epsg, input_epsg, output_epsg, planart, stelle_id, user_id
