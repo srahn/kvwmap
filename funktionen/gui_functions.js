@@ -549,6 +549,9 @@ function drag(event) {
 }
 
 function activate_overlay(){
+	document.onmousemove = drag;
+  document.onmouseup = dragstop;
+	document.onmousedown = stop;
 	window.onmouseout = function(evt){
 		if(evt.relatedTarget == evt.toElement && (root.document.GUI.overlayx.value != window.screenX || root.document.GUI.overlayy.value != window.screenY)){
 			root.document.GUI.overlayx.value = window.screenX;
@@ -571,9 +574,10 @@ function activate_overlay(){
 		}
 		else{
 			window.resizeTo(screen.width, screen.height);
-			window.moveTo(0, 0);
+			//window.moveTo(0, 0);
 		}
 	}
+	document.fullyLoaded = true;
 	window.focus();
 }
 

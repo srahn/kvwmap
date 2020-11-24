@@ -1552,7 +1552,6 @@ echo '			</table>
         $map->set('status', MS_ON);
         $map->set('name', MAPFILENAME);
 
-				define('MS_DEBUG_LEVEL', 0);
 				if (MS_DEBUG_LEVEL > 0) {
 					$map->setConfigOption('MS_ERRORFILE', '/var/www/logs/mapserver.log');
 					$map->set('debug', MS_DEBUG_LEVEL);
@@ -1820,7 +1819,7 @@ echo '			</table>
 		//---- wenn die Layer einer eingeklappten Gruppe nicht in der Karte //
 		//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
 		//---- der layer_status auf 0 gesetzt werden//
-		if ($layerset['aktivStatus'] == 0){
+		if ($layerset['aktivStatus'] == 0) {
 			$layer->set('status', 0);
 		}
 		else{

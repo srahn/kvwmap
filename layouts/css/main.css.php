@@ -1566,7 +1566,7 @@ table.tgle {
 	margin-right:auto;
 }
 
-table.tgle > tbody > tr > td {
+.gledata > tr > td, .glegeom > tr > td {
 	font-size: 15px;
 	border: 1px solid #bbb;
 }
