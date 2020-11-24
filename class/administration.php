@@ -405,7 +405,9 @@ class administration{
 				$result[1] = 'Fehler beim Schreiben der config-Datei ' . $prepath . 'config.php';
 			}
 			else {
-				$this->database->gui->add_message('warning', 'Konfigurationsdatei config.php geschrieben.<br>Zum wirksamwerden muss noch ein mal<br>die Seite geladen werden.');
+				if($plugin == ''){
+					$this->database->gui->add_message('warning', 'Konfigurationsdatei config.php geschrieben.<br>Zum Wirksamwerden muss die Seite nochmal geladen werden.');
+				}
 				$result[0] = 0;
 			}
 		}
