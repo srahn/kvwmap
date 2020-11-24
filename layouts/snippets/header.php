@@ -3,7 +3,7 @@
   <tr> 
 	  <td width="31%" align="right" valign="middle"><span class="fett px20"><?php echo $this->Stelle->Bezeichnung; ?></span></td>
 		<td width="30%" align="left">
-			<? if($this->user->rolle->hist_timestamp != '') echo '<a href="index.php?go=setHistTimestamp" title="Zeitpunkt auf aktuell setzen"><h2 style="color: #a82e2e;">Zeitpunkt ALKIS-Historie: '.$this->user->rolle->hist_timestamp.'</h2></a>'; ?>
+			<? if ($this->user->rolle->hist_timestamp_de != '') echo '<a href="index.php?go=setHistTimestamp" title="Zeitpunkt auf aktuell setzen"><h2 style="color: #a82e2e;">Zeitpunkt ALKIS-Historie: ' . $this->user->rolle->hist_timestamp_de . '</h2></a>'; ?>
 		</td>
 		<td width="30%" align="right">
 			<table>

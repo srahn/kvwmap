@@ -341,8 +341,8 @@ $legendheight = $this->map->height + 20;
 							<div class="dokein-dokart-sub">
 								<select name="unterart_<? echo $hauptdokumentart['id']; ?>" class="dokein-dokart-select" style="<? if($this->formvars['hauptart'] != $hauptdokumentart['id'])echo 'display:none'; ?>">
 									<option value="">-- Auswahl --</option>
-									<? for($i = 0; $i < count($this->dokumentarten[$hauptdokumentart['id']]); $i++){?>
-									<option <? if($this->formvars['unterart'] == $this->dokumentarten[$hauptdokumentart['id']][$i]['id']){echo 'selected';} ?> value="<? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['id']; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	
+									<? foreach($this->dokumentarten[$hauptdokumentart['id']] as $dokumentart){ ?>
+									<option <? if($this->formvars['unterart'] == $dokumentart['id']){echo 'selected';} ?> value="<? echo $dokumentart['id']; ?>"><? echo $dokumentart['art']; ?></option>	
 									<? } ?>
 								</select>
 							</div>
@@ -473,7 +473,7 @@ $legendheight = $this->map->height + 20;
 							Geometrie übernehmen von
 						</div>
 						<div class="dokein-geom-uebernehmen-obj">
-							<select name="geom_from_layer" onchange="document.GUI.submit();">
+							<select name="geom_from_layer">
 								<option value="">--- Auswahl ---</option>
 								<?
 									for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
@@ -528,7 +528,7 @@ $legendheight = $this->map->height + 20;
 											</div>
 											<div id="scrolldiv" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 												<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
-												<div id="legend">
+												<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
 													<? echo $this->legende; ?>
 												</div>
 											</div>

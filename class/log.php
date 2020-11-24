@@ -16,11 +16,16 @@ class Debugger {
 	#
 	################################################################################
 
-	function Debugger($filename, $mime_type = 'text/html') {
-		$this->filename = LOGPATH.(dirname($filename) != '.'? dirname($filename).'/' : '').$_SESSION['login_name'].basename($filename);
+	function __construct($filename, $mime_type = 'text/html') {
+		if ($_SESSION == null) {
+			$_SESSION = array();
+		}
+		$this->filename = LOGPATH . (dirname($filename) != '.' ? dirname($filename) . '/' : '') . (array_key_exists('login_name', $_SESSION) ? $_SESSION['login_name'] : '') . basename($filename);
 		$this->fp=fopen($this->filename,'w');
+		$this->mime_type = $mime_type;
+		$this->level;
 
-		if ($mime_type == 'text/html') {
+		if ($this->mime_type == 'text/html') {
 			fwrite($this->fp,"<html>\n<head>\n  <title>kvwmap Debug-Datei</title>\n<META http-equiv=Content-Type content='text/html; charset=UTF-8'>\n</head>\n<body>");
 			fwrite($this->fp,"<h2>Debug Datei</h2>");
 		}
@@ -30,17 +35,18 @@ class Debugger {
 	}
 
 	function write($msg, $level = 4, $echo = false) {
+		$this->level = $level;
 		if ($echo) {
 			echo '<br>' . $msg;
 		}
-		if ($level>=DEBUG_LEVEL) {
-			if ($mime_type == 'text/html') {
+		if ($level >= DEBUG_LEVEL) {
+			if ($this->mime_type == 'text/html') {
 				fwrite($this->fp, "\n<br>");
 			}
 			else {
 				fwrite($this->fp, PHP_EOL);
 			}
-			$ret=@fwrite($this->fp, $msg);
+			$ret = @fwrite($this->fp, $msg);
 			if (!$ret) {
 				$this->Fehlermeldung ='In die Debugdatei '.$this->filename.' läßt sich nicht schreiben.';
 				$this->Fehlermeldung.='<br>Das kann daran liegen, dass für den WebServer, in dem kvwmap läuft, keine Schreibrechte gesetzt sind.';
@@ -52,11 +58,11 @@ class Debugger {
 	}
 
 	function show($msg, $debug = false) {
-		if ($debug or $level > 1) echo '<br>' . $msg;
+		if ($debug) echo '<br>' . $msg;
 	}
 
 	function close() {
-		if ($mime_type == 'text/html') {
+		if ($this->mime_type == 'text/html') {
 			fwrite($this->fp,"\n</body>\n</html>");
 		}
 		fclose($this->fp);
@@ -82,7 +88,7 @@ class LogFile {
 	################################################################################
 
 	# öffnet die Logdatei
-	function LogFile($filename,$format,$title,$headline) {
+	function __construct($filename,$format,$title,$headline) {
 		$this->name=$filename;
 		$this->fp=fopen($filename,"a");
 		$this->format=$format;

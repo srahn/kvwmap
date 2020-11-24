@@ -37,14 +37,14 @@
 		
 		$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
 		if (is_array($layer['attributes']['privileg'])) {
-			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') {
+			if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't' OR $this->formvars['attribute_privileg'] == '0') {
 				$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
 			}
 		}
 ?>
 	<tr>
 		<td>
-			<input type="hidden" value="" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
+			<input type="hidden" value="" onchange="root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
 			<table class="tgle" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
 			  <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle"'; else echo 'class="nogle"'; ?>>
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
@@ -186,7 +186,7 @@
 
 <?
 
-	for($l = 0; $l < count($invisible_attributes[$layer['Layer_ID']]); $l++){
+	for($l = 0; $l < @count($invisible_attributes[$layer['Layer_ID']]); $l++){
 		echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 	}
 
@@ -195,6 +195,14 @@
 <script type="text/javascript">
 	var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
 	[].forEach.call(vchangers, function(vchanger){vchanger.oninput();});
+	
+	var input_fields = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.subform_<? echo $layer['Layer_ID']; ?>, input');
+	for(var input_field of input_fields){
+		if(input_field.type != 'hidden' && !input_field.readonly && input_field.style.display != 'none'){
+			//input_field.focus();
+			break;
+		}
+	}
 </script>
 
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_name; ?>">

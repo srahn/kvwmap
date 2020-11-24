@@ -3,7 +3,6 @@
   include(LAYOUTPATH.'languages/druckausschnittswahl_'.$this->user->rolle->language.'.php');
 	include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
  ?>
-<script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 <!--
 

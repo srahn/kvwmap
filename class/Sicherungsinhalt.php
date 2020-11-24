@@ -4,8 +4,8 @@ class Sicherungsinhalt extends MyObject {
 
 	static $write_debug = false;
 
-	function Sicherungsinhalt($gui) {
-		$this->MyObject($gui, 'sicherungsinhalte');
+	function __construct($gui) {
+		parent::__construct($gui, 'sicherungsinhalte');
 		$this->identifier = 'id';
 		$this->setKeys(
 			array(

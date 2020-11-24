@@ -1,5 +1,0 @@
-BEGIN;
-
-ALTER TABLE  `rollenlayer` CHANGE  `Data`  `Data` LONGTEXT NOT NULL;
-
-COMMIT;

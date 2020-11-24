@@ -40,12 +40,12 @@ class administration{
 	var $migration_logs;
 	var $migration_files;
 	var $migrations_to_execute;
-	
-	function administration($database, $pgdatabase) {
+
+	function __construct($database, $pgdatabase) {
 		$this->database = $database;
 		$this->pgdatabase = $pgdatabase;
 	}
-	
+
 	function get_migration_logs() {
 		#echo '<br>Get Migration logs';
 		$migrations = array();
@@ -55,19 +55,35 @@ class administration{
 		";
 		#echo '<br>SQL zur Abfrage der registrierten Migrationen: ' . $sql;
 		$result = $this->database->execSQL($sql,0, 0);
-		if ($result[0]) {
-			echo '<br>Fehler bei der Abfrage der Tabelle migrations.<br>'; 	// bei Neuinstallation gibt es diese Tabelle noch nicht
+		if (!$this->database->success) {
+			echo '<br>Migrationstabelle existiert noch nicht. Bei Neuinstallation wird sie angelegt ... <br>'; // bei Neuinstallation gibt es diese Tabelle noch nicht
+			$sql = "
+				CREATE TABLE IF NOT EXISTS `migrations` (
+				  `component` varchar(50) NOT NULL,
+				  `type` enum('mysql','postgresql') NOT NULL,
+				  `filename` varchar(255) NOT NULL
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+			";
+			$result = $this->database->execSQL($sql,0, 0);
+			if ($this->database->success) {
+				echo ' Migrationstabelle erfolgreich angelegt!';
+			}
+			else {
+				echo '<br>Breche Installationsvorgang ab, da migrationstabelle nicht angelegt werden konnte und somit keine Migrationen registriert werden können!';
+				exit;
+			}
 		}
 		else {
-			while($rs=mysql_fetch_array($result[1])) {
+			while ($rs = $this->database->result->fetch_array()) {
 				$migrations[$rs['component']][$rs['type']][$rs['filename']] = 1;
 			}
 		}
 		#echo '<br>Gefundene Migrationen: ' . print_r($migrations, true);
 		return $migrations;
 	}
-	
+
 	function get_schema_migration_files() {
+		#echo '<br>Get Schema Migration Files';
 		global $kvwmap_plugins;
 		$migrations['kvwmap']['mysql'] = array_diff (scandir(LAYOUTPATH.'db/mysql/schema'), array('.', '..'));
 		sort($migrations['kvwmap']['mysql']);
@@ -108,7 +124,9 @@ class administration{
 		foreach ($this->schema_migration_files as $component => $file_component_migrations) {
 			foreach ($file_component_migrations as $type => $file_component_type_migrations) {
 				foreach ($file_component_type_migrations as $file) {
-					if ($this->migration_logs[$component][$type][$file] != 1)$this->migrations_to_execute[$type][$component][] = $file;
+					if ($this->migration_logs[$component][$type][$file] != 1) {
+						$this->migrations_to_execute[$type][$component][] = $file;
+					}
 				}
 			}
 		}
@@ -116,7 +134,9 @@ class administration{
 			foreach ($this->seed_files as $component => $file_component_seeds) {
 				foreach ($file_component_seeds as $type => $file_component_type_seeds) {
 					foreach ($file_component_type_seeds as $file) {
-						if ($this->migration_logs[$component][$type][$file] != 1)$this->seeds_to_execute[$type][$component][] = $file;
+						if ($this->migration_logs[$component][$type][$file] != 1) {
+							$this->seeds_to_execute[$type][$component][] = $file;
+						}
 					}
 				}
 			}
@@ -147,9 +167,13 @@ class administration{
 			$prepath = PLUGINS.$component.'/';
 			foreach ($component_seed as $file) {
 				$filepath = $prepath.'db/mysql/data/'.$file;
-				$connection = 'user='.$this->pgdatabase->user.' password='.$this->pgdatabase->passwd.' dbname='.$this->pgdatabase->dbName;
-				if ($this->pgdatabase->host != '')$connection .= ' host='.$this->pgdatabase->host;
-				$result = $this->database->exec_commands(file_get_contents($filepath), 'user=xxxx password=xxxx dbname=kvwmapsp', $connection, true); # replace known constants
+				#echo '<br>Execute SQL from seed file: ' . $filepath;
+				$result = $this->database->exec_commands(
+					file_get_contents($filepath),
+					$this->pgdatabase->get_connection_string(),
+					$this->pgdatabase->connection_id,
+					true
+				); # replace known constants
 				if ($result[0]) {
 					echo $result[1] . getTimestamp('H:i:s', 4). ' Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
 				}
@@ -174,6 +198,7 @@ class administration{
 			foreach ($migrations as $migration) {
 				$component = $migration['component'];
 				$file = $migration['file'];
+				#echo '<br>Execute sql from migration for component: ' . $component . ' from file: ' . $file;
 				if ($component == 'kvwmap') {
 					$prepath = LAYOUTPATH;
 				}
@@ -182,6 +207,7 @@ class administration{
 				}
 				$filepath = $prepath . 'db/' . $database_type . '/schema/';
 				$filetype = pathinfo($filepath . $file)['extension'];
+				#echo ' filetype: ' . $filetype;
 				switch ($filetype) {
 					case 'sql' : {
 						$sql = file_get_contents($filepath . $file);
@@ -189,6 +215,7 @@ class administration{
 							$sql = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $sql);
 							$sql = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $sql);
 							if ($database_type == 'mysql') {
+								#echo ' Exec SQL';
 								$result = $this->database->exec_commands($sql, NULL, NULL, false, true);	# mysql
 							}
 							else {
@@ -204,6 +231,7 @@ class administration{
 								foreach ($sql_parts AS $sql) {
 									$sql = trim($sql);
 									if ($sql != '') {
+										#echo ' Query SQL';
 										$result = $this->pgdatabase->execSQL($sql, 4, 0, true);	# postgresql
 									}
 								}
@@ -218,6 +246,7 @@ class administration{
 				if ($result[0]) {
 					$err_msgs[] = getTimestamp('H:i:s', 4) . ': Fehler beim Ausführen von migration-Datei:<br>' . $file . '<br>in Pfad: ' . str_replace(WWWROOT.APPLVERSION, '../', $filepath) . '<br>' . $result[1];
 					$result = $this->pgdatabase->execSQL('ROLLBACK;', 0, 0, false);
+					break;
 				}
 				else{
 					$sql = "
@@ -231,6 +260,7 @@ class administration{
 							'" . $file . "'
 						);
 					";
+					#echo 'register migration with sql: ' . $sql;
 					$result=$this->database->execSQL($sql, 4, 0);
 				}
 			}
@@ -240,12 +270,21 @@ class administration{
 	
 	function update_code() {
 		$folder = WWWROOT.APPLVERSION;
-		if (defined('HTTP_PROXY'))putenv('https_proxy='.HTTP_PROXY);
-		exec('cd '.$folder.' && sudo -u '.GIT_USER.' git stash && sudo -u '.GIT_USER.' git pull origin', $ausgabe, $ret);
-		if ($ret != 0) {
-			showAlert('Fehler bei der Ausführung von "git pull origin".');
+		if (defined('HTTP_PROXY')) {
+			putenv('https_proxy='.HTTP_PROXY);
 		}
-		return $ausgabe;
+		exec("git status -s --porcelain 2>&1", $output, $return_var);
+		if (count($output) > 0) {
+			$this->database->gui->add_message('Fehler', 'Update kann nicht erfolgen!<p>Es gibt folgende noch nicht committete Änderungen:<br>' . implode('<br>', $output) . '<br>Erst Änderungen committen oder auschecken!');
+			return false;
+		}
+		else {
+			exec('cd '.$folder.' && sudo -u '.GIT_USER.' git stash && sudo -u '.GIT_USER.' git pull origin', $ausgabe, $ret);
+			if ($ret != 0) {
+				$this->database->gui->add_message('Fehler', 'Fehler bei der Ausführung von "git pull origin"!');
+			}
+			return $ausgabe;
+		}
 	}
 	
 	function get_config_params() {
@@ -256,12 +295,12 @@ class administration{
 			ORDER BY `group`, name
 		";
 		#echo 'SQL: ' . $sql;
-		$result = $this->database->execSQL($sql, 0, 0);
-		if ($result[0]) {
+		$this->database->execSQL($sql, 0, 0);
+		if (!$this->database->success) {
 			#echo '<br>Fehler bei der Abfrage der Tabelle config.<br>';
 		}
 		else {
-			while ($rs = mysql_fetch_assoc($result[1])) {
+			while ($rs = $this->database->result->fetch_assoc()) {
 				$this->config_params[$rs['name']] = $rs;
 			}
 			foreach ($this->config_params as &$param) {
@@ -323,7 +362,7 @@ class administration{
 		$this->get_config_params();
 		$config = '';
 		foreach ($this->config_params as $param) {
-			#echo '<br>p: ' . $param['name'] . ' real: ' . $param['real_value'];
+			#echo '<br>plugin: ' . $param['plugin'] . ' name: ' . $param['name'] . ' type: ' . $param['type'] . ' real: ' . $param['real_value'];
 			if ($param['plugin'] == $plugin) {
 				if ($param['description'] != '') {
 					$param['description'] = rtrim($param['description']);
@@ -333,7 +372,12 @@ class administration{
 					}
 				}
 				if ($param['type'] == 'array') {
-					$config .= "$" . $param['name'] . " = " . preg_replace('/stdClass::__set_state/', '', var_export(json_decode($param['value']), true)) . ";\n\n";
+					$param_array_str = str_replace(['(object) ', 'stdClass::__set_state'], '', var_export(json_decode($param['value']), true));
+					if ($param_array_str == 'NULL') {
+						$this->database->gui->add_message('error', 'Syntaxfehler im Parameter: ' . $param['name'] . '!<br>Bitte auf das richtige setzen von Anführungsstrichen<br>und Klammern achten.');
+						$param_array_str = 'array()';
+					}
+					$config .= "$" . $param['name'] . " = " . $param_array_str . ";\n\n";
 				}
 				else {
 					if ($param['type'] == 'string' OR $param['type'] == 'password') {
@@ -361,6 +405,9 @@ class administration{
 				$result[1] = 'Fehler beim Schreiben der config-Datei ' . $prepath . 'config.php';
 			}
 			else {
+				if($plugin == ''){
+					$this->database->gui->add_message('warning', 'Konfigurationsdatei config.php geschrieben.<br>Zum Wirksamwerden muss die Seite nochmal geladen werden.');
+				}
 				$result[0] = 0;
 			}
 		}
@@ -502,6 +549,23 @@ class administration{
 	function update_backups_in_crontab() {
 		
 	}
+
+	function create_inserts_from_dataset($schema, $table, $where) {
+		global $GUI;
+		include_once(CLASSPATH . 'PgObject.php');
+		$pgo = new PgObject($GUI, $schema, $table);
+		$datasets = $pgo->find_where($where);
+		if (count($datasets) > 0) {
+			$fkeys = $datasets[0]->get_fkey_constraints();
+			$attribute_types = $datasets[0]->get_attribute_types();
+			#echo '<p>attribute_types from table ' . $datasets[0]->tableName . ': ' . print_r($attribute_types, 1);
+			foreach ($datasets AS $dataset) {
+				#echo '<p>return inserts for '. $table . ': ' . $dataset->get('id');
+				return $dataset->as_inserts_with_childs($fkeys, $attribute_types);
+			}
+		}
+	}
+
 }
 
 ?>

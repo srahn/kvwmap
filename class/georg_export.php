@@ -33,7 +33,7 @@ class georg_export {
   # georg_export($database)
   ##################################################################################################################################################
 
-  function georg_export() {
+  function __construct() {
     global $debug;
     $this->debug=$debug;
   }

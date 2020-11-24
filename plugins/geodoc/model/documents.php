@@ -36,7 +36,7 @@ class textdocument {
   var $recursive;
   var $stopwordlist;
 
-  function textdocument($database) {
+  function __construct($database) {
     global $debug;
     $this->debug=$debug;
     $this->database = $database;

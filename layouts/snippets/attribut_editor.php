@@ -126,6 +126,21 @@
 			'value' => 'Editiersperre',
 			'output' => 'Editiersperre',
 			'title' => 'Sperrt die Möglichkeit zum Editieren, wenn das Attribut den Wert 1 hat.'
+		),
+		array(
+			'value' => 'ExifLatLng',
+			'output' => 'Exif-Koordinate',
+			'title' => 'Übernimmt die LatLng-Koordinaten beim Upload des Fotos aus dem Exif-Header falls vorhanden. (Format: Latitude Longitude Dezimal)'
+		),
+		array(
+			'value' => 'ExifRichtung',
+			'output' => 'Exif-Richtung',
+			'title' => 'Übernimmt die Richtung beim Upload des Fotos aus dem Exif-Header falls vorhanden. (Format: Float Dezimal)'
+		),
+		array(
+			'value' => 'ExifErstellungszeit',
+			'output' => 'Exif-Erstellungszeit',
+			'title' => 'Übernimmt den Zeitstempel beim Upload des Fotos aus dem Exif-Header falls vorhanden. (Format: YYYY-MM-DD hh:mm:ss)'
 		)
 	);
 
@@ -133,10 +148,7 @@
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 <!--
-
-<? if ((count($this->attributes))!=0) { ?>
-var attributes = new Array('<? echo implode("', '", $this->attributes['name']); ?>');
-<? } ?>
+var attributes = new Array(<? echo (@count($this->attributes['name']) == 0 ? "" : "'" . implode("', '", $this->attributes['name']) . "'"); ?>);
 
 function update_visibility_form(visibility, attributename){
 	if(visibility == 2)document.getElementById('visibility_form_'+attributename).style.display = '';
@@ -217,10 +229,11 @@ function alias_replace(name){
 	<tr>
     <td align="center">
 			<span class="px17 fetter"><? echo $strLayer;?>:</span>
-      <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="submitLayerSelector();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
-      <option value=""><?php echo $strPleaseSelect; ?></option>
-        <?
-    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
+      <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="submitLayerSelector();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>><?
+			$layer_options = array(); ?>
+      <option value=""><?php echo $strPleaseSelect; ?></option><?
+				for ($i = 0; $i < count($this->layerdaten['ID']); $i++) {
+					$layer_options[] = array('value' => $this->layerdaten['ID'][$i], 'output' => $this->layerdaten['Bezeichnung'][$i]);
     			echo '<option';
     			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
     				echo ' selected';
@@ -289,7 +302,7 @@ function alias_replace(name){
 						  	<input type="text"
 								  name="order_<?php echo $this->attributes['name'][$i]; ?>"
 									value="<?php echo $this->attributes['order'][$i]; ?>"
-									size="1"
+									style="width: 27px"
 								>
 						  </td>
 						  <td align="left" valign="top">
@@ -326,13 +339,12 @@ function alias_replace(name){
 							</td>
 
 						  <td align="left" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header">Optionen</div>';
-							if($this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){ ?>
-						  	<input disabled style="width:180px" name="options_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo $this->attributes['constraints'][$i]; ?>"><?php
-						  }
-						  else { ?>
-								<textarea name="options_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:180px"><?php echo $this->attributes['options'][$i]; ?></textarea><?php
-						  } ?>
+							<? if($i == 0)echo '<div class="fett scrolltable_header">Optionen</div>';
+								if($this->attributes['options'][$i] == '' AND $this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){
+									$this->attributes['options'][$i] = $this->attributes['constraints'][$i];
+								}
+						  ?>
+								<textarea name="options_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:180px"><?php echo $this->attributes['options'][$i]; ?></textarea>
 						  </td>
 
 						  <td align="left" valign="top">
@@ -504,7 +516,35 @@ function alias_replace(name){
 		if(count($this->attributes) > 0 AND ($this->layer['editable'] OR $this->formvars['selected_datatype_id'])){ ?>
 			<tr>
 				<td align="center" style="height: 50px">
-					<input type="submit" name="go_plus" value="speichern">
+					<input id="attribut_editor_save" type="submit" name="go_plus" value="speichern"><?
+					echo FormObject::createSelectField(
+						'for_attributes_selected_layer_id',
+						$layer_options,
+						'',
+						1,
+						'display: none;',
+						'',
+						'',
+						'',
+						'',
+						$strPleaseSelect
+					); ?>
+					<input id="attributes_for_other_layer_button" style="display: none; margin-left: 10px" type="submit" name="go_plus" value="Attributeinstellungen für ausgewählten Layer übernehmen">
+					<span style="margin-left: 10px;">
+					<i
+						id="show_attributes_for_other_layer_button"
+						title="Magische Funktion um die Attributeinstellungen auf gleich benannte Attribute eines anderen Layers zu übertragen. Vorgenommene Änderungen müssen vorher gespeichert werden!"
+						class="fa fa-magic"
+						aria-hidden="true"
+						onclick="$('#attributes_for_other_layer_button, #for_attributes_selected_layer_id, #attribut_editor_save, #show_attributes_for_other_layer_button, #close_attributes_for_other_layer_button').toggle();"
+					></i>
+					<i
+						id="close_attributes_for_other_layer_button"
+						title="Den Spuk wieder schließen."
+						style="display: none;" class="fa fa-times"
+						aria-hidden="true"
+						onclick="$('#attributes_for_other_layer_button, #for_attributes_selected_layer_id, #attribut_editor_save, #show_attributes_for_other_layer_button, #close_attributes_for_other_layer_button').toggle();"
+					></i>
 				</td>
 			</tr><?php
 		}	

@@ -1,6 +1,6 @@
 <?php
 # Objekt für graphische Benutzeroberfläche erzeugen mit default-Werten
-$GUI = new GUI("map.php", "main.css.php", "html");
+$GUI = new GUI("map.php", "layouts/css/main.css.php", "html");
 $GUI->user = new stdClass();
 $GUI->user->rolle = new stdClass();
 $GUI->user->rolle->querymode = 0;
@@ -12,17 +12,17 @@ $GUI->echo = false;
 #################################################################################
 # Setzen der Konstante, ob in die Datenbank geschrieben werden soll oder nicht.
 # Kann z.B. zu Testzwecken ausgeschaltet werden.
-if ($GUI->formvars['disableDbWrite']=='1') {
+if (array_key_exists('disableDbWrite', $GUI->formvars) and $GUI->formvars['disableDbWrite'] == '1') {
 	define('DBWRITE',false);
 }
 else {
-	define('DBWRITE',DEFAULTDBWRITE);
+	define('DBWRITE', DEFAULTDBWRITE);
 }
 if (!DBWRITE) { echo '<br>Das Schreiben in die Datenbank wird unterdrückt!'; }
 
 # Öffnen der Datenbankverbindung zur Kartenverwaltung (MySQL)
 # Erzeugen des MYSQL-DB-Objekts, falls es noch nicht durch den Login erzeugt wurde
-if ($userDb == NULL){
+if (!isset($userDb)) {
 	$userDb = new database();
 	$userDb->host = MYSQL_HOST;
 	$userDb->user = MYSQL_USER;
@@ -30,15 +30,13 @@ if ($userDb == NULL){
 	$userDb->dbName = MYSQL_DBNAME;
 }
 $GUI->database = $userDb;
-if (!$GUI->database->open()) {
+if ($GUI->database->open() != 0) {
   # Prüfen ob eine neue Datenbank angelegt werden soll
-  if ($GUI->formvars['go']=='install-mysql-db') {
+  if ($GUI->formvars['go'] == 'install-mysql-db') {
     # Anlegen der neuen Datenbank
     # Herstellen der Verbindung mit defaultwerten
-    $GUI->dbConn=mysql_connect(MYSQL_HOST,'kvwmap','kvwmap');
-    $GUI->debug->write("MySQL Datenbank mit ID: ".$GUI->dbConn." und Name: mysql auswählen.",4);
-    # Auswählen der Datenbank mysql
-    mysql_select_db('mysql',$GUI->dbConn);
+		$GUI->mysqli = new mysqli(MYSQL_HOST, 'kvwmap', 'kvwmap', 'mysql');
+    $GUI->debug->write('MySQL Datenbankverbindung hergestellt mit (' . MYSQL_HOST . ', kvwmap, kvwmap, mysql) thread_id: ' . $GUI->mysqli->thread_id, 4);
     # Erzeugen der leeren Datenbank für kvwmap
     $sql = 'CREATE DATABASE '.$GUI->database->dbName.' CHARACTER SET latin1 COLLATE latin1_german2_ci';
     $GUI->database->execSQL($sql,4,0);
@@ -49,7 +47,7 @@ if (!$GUI->database->open()) {
       $GUI->database->execSQL($sql,4,0);
     }
     # Abfrage ob Zugang zur neuen Datenbank jetzt möglich
-    if (mysql_select_db($GUI->database->dbName,$GUI->dbConn)) {
+    if ($GUI->database->select_db($GUI->database->dbName)) {
       $GUI->debug->write("Verbindung zur MySQL Datenbank erfolgreich hergestellt.",4);
     }
     else {
@@ -90,9 +88,9 @@ else {
 # Angeben, dass die Texte in latin1 zurückgegeben werden sollen
 $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
 
-/**
-	Hier findet sich die gesamte Loging für Login und Reggistrierung, sowie Stellenwechsel
-**/
+/*
+*	Hier findet sich die gesamte Loging für Login und Reggistrierung, sowie Stellenwechsel
+*/
 #$GUI->debug->write('Formularvariablen: ' . print_r($GUI->formvars, true), 4, $GUI->echo);
 # logout
 if (is_logout($GUI->formvars)) {
@@ -165,6 +163,7 @@ else {
 
 			# Frage den Nutzer mit dem login_namen ab
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
+			$GUI->debug->write('Nutzer ' . $GUI->user->id . ' mit login_name ' . $GUI->formvars['login_name'] . ' gefunden.', 4, $GUI->echo);
 
 			if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
 				$GUI->debug->write('Set Session', 4, $GUI->echo);
@@ -267,7 +266,7 @@ else {
 
 # $show_login_form = true nach login cases 3, 6, 7, 8, 9, 10
 if (!$show_login_form) {
-	if (is_new_stelle($GUI->formvars['Stelle_ID'], $GUI->user)) {
+	if (is_new_stelle($GUI->formvars, $GUI->user)) {
 		$GUI->debug->write('Neue Stelle ' . $GUI->formvars['Stelle_ID'] . ' angefragt.', 4, $GUI->echo);
 		$GUI->Stelle = new stelle($GUI->formvars['Stelle_ID'], $GUI->database);
 	}
@@ -277,7 +276,7 @@ if (!$show_login_form) {
 	}
 
 	# check stelle wenn noch nicht angemeldet gewesen, wenn noch nicht in Stelle angemeldet auch wenn stelle gewechselt wird.
-	if (is_login($GUI->formvars) OR !is_logged_in_stelle() OR is_new_stelle($GUI->formvars['Stelle_ID'], $GUI->user)) {
+	if (is_login($GUI->formvars) OR !is_logged_in_stelle() OR is_new_stelle($GUI->formvars, $GUI->user)) {
 		$GUI->debug->write('Zugang zu Stelle ' . $GUI->Stelle->id . ' wird angefragt.', 4, $GUI->echo);
 
 		$GUI->user->Stellen = $GUI->user->getStellen(0);
@@ -357,7 +356,7 @@ if ($show_login_form) {
 else {
 	$GUI->debug->write('Lade Stelle und ordne Rolle dem User zu.', 4, $GUI->echo);
 
-	$GUI->debug->write('Ordne Nutzer: ' . $GUI->user->id . ' Stelle: ' . $GUI->Stelle->ID . ' zu.', 4, $GUI->echo);
+	$GUI->debug->write('Ordne Nutzer: ' . $GUI->user->id . ' Stelle: ' . $GUI->user->stelle_id . ' zu.', 4, $GUI->echo);
 	$GUI->user->setRolle($GUI->user->stelle_id);
 
 	# Alles was man immer machen muss bevor die go's aufgerufen werden
@@ -379,50 +378,23 @@ else {
 	$GUI->debug->write('Stellenbezeichnung: ' . $GUI->Stelle->Bezeichnung, 4);
 	$GUI->debug->write('Host_ID: ' . getenv("REMOTE_ADDR"), 4);
 
-	if(BEARBEITER == 'true') {
+	if (defined('BEARBEITER') AND BEARBEITER == 'true') {
 		define('BEARBEITER_NAME', 'Bearbeiter: ' . $GUI->user->Name);
 	}
 
-	if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, den PGConnect und Trafos weglassen
-		##############################################################################
-		# Übergeben der Datenbank für die raumbezogenen Daten (PostgreSQL mit PostGIS)
-		if(POSTGRES_DBNAME != '') {
-			$PostGISdb=new pgdatabase();
-			$PostGISdb->host = POSTGRES_HOST;
-			$PostGISdb->user = POSTGRES_USER;
-			$PostGISdb->passwd = POSTGRES_PASSWORD;
-			$PostGISdb->dbName = POSTGRES_DBNAME;
-		}
-		else {
-			# pgdbname ist leer, die Informationen zur Verbindung mit der PostGIS Datenbank
-			# mit Geometriedaten werden aus der Tabelle stelle
-			# der kvwmap-Datenbank $GUI->database gelesen
-			$PostGISdb=new pgdatabase();
-			$PostGISdb->host = $GUI->Stelle->pgdbhost;
-			$PostGISdb->dbName = $GUI->Stelle->pgdbname;
-			$PostGISdb->user = $GUI->Stelle->pgdbuser;
-			$PostGISdb->passwd = $GUI->Stelle->pgdbpasswd;
-			$PostGISdb->port = $GUI->Stelle->port;
-		}
-		if ($PostGISdb->dbName != '') {
-			# Übergeben der GIS-Datenbank für GIS-Daten an die GUI
-			$GUI->pgdatabase = $PostGISdb;
-			# Übergeben der GIS-Datenbank für die Bauaktendaten an die GUI
-			$GUI->baudatabase = $PostGISdb;
-
-			if (!$GUI->pgdatabase->open()) {
-				echo 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
-				echo '<br>Host: '.$GUI->pgdatabase->host;
-				echo '<br>User: '.$GUI->pgdatabase->user;
-			 # echo '<br>Passwd: '.$GUI->database->passwd;
-				echo '<br>Datenbankname: '.$GUI->pgdatabase->dbName;
-				exit;
-			}
-			else {
-				$GUI->debug->write("Verbindung zur PostGIS Datenbank erfolgreich hergestellt.", 4);
-				$GUI->pgdatabase->setClientEncoding();
-			}
-		}
+	##############################################################################
+	# kvwmap uses the database defined in postgres_connection_id of stelle object or if not exists from POSTGRES_CONNECTION_ID
+	$GUI->pgdatabase = $GUI->baudatabase = new pgdatabase();
+	#echo '<br>GUI->Stelle-->postgres_connection_id: ' . $GUI->Stelle->postgres_connection_id;
+	#echo '<br>POSTGRES_CONNECTION_ID: ' . POSTGRES_CONNECTION_ID;
+	$connection_id = ($GUI->Stelle->postgres_connection_id != '' ? $GUI->Stelle->postgres_connection_id : POSTGRES_CONNECTION_ID);
+	#echo '<br>connection_id: ' . $connection_id;
+	if (!$GUI->pgdatabase->open($connection_id)) {
+		echo $GUI->pgdatabase->err_msg;
+		exit;
+	}
+	
+	if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, die Trafos weglassen
 		$GUI->epsg_codes = $GUI->pgdatabase->read_epsg_codes(false);
 		# Umrechnen der für die Stelle eingetragenen Koordinaten in das aktuelle System der Rolle
 		# wenn die EPSG-Codes voneinander abweichen
@@ -478,7 +450,9 @@ else {
 	    }
 		}
 		# Zurücksetzen des histtimestamps
-		if($GUI->user->rolle->hist_timestamp != '')$GUI->setHistTimestamp();
+		if ($GUI->user->rolle->hist_timestamp_de != '') {
+			$GUI->setHistTimestamp();
+		}
 		# Zurücksetzen der veränderten Klassen
 		#$GUI->user->rolle->resetClasses();
 		if (defined('LOGIN_ROUTINE') AND LOGIN_ROUTINE != '') {
@@ -491,11 +465,12 @@ else {
 	}
 
 	# Anpassen der Kartengröße an das Browserfenster
-	if ($GUI->user->rolle->auto_map_resize AND $GUI->formvars['browserwidth'] != '') {
+	if ($go != 'navMap_ajax' AND $GUI->user->rolle->auto_map_resize AND $GUI->formvars['browserwidth'] != '') {
 		$GUI->resizeMap2Window();
 	}
 
-	if(isset($_FILES)) {
+	if (isset($_FILES)) {
+		$forbidden_files = array();
 		foreach ($_FILES AS $datei) {
 	    if (!is_array($datei['name'])) # $datei so umformen als wäre es ein multi file upload
 	      $datei = array_map(
@@ -526,11 +501,11 @@ else {
 }
 
 /**
- Functions
+* Functions
 **/
 
 function is_logout($formvars) {
-	return ($formvars['go'] == 'logout');
+	return (array_key_exists('go', $formvars) AND $formvars['go'] == 'logout');
 }
 
 function is_logged_in() {
@@ -553,7 +528,7 @@ function is_logged_out() {
 }
 
 function is_gast_login($formvars, $gast_stellen) {
-	return $formvars['gast'] != '' AND $formvars['login_name'] == '' AND in_array($formvars['gast'], $gast_stellen);
+	return array_key_exists('gast', $formvars) AND $formvars['gast'] != '' AND $formvars['login_name'] == '' AND in_array($formvars['gast'], $gast_stellen);
 }
 
 function has_width_and_height($var) {
@@ -561,15 +536,15 @@ function has_width_and_height($var) {
 }
 
 function is_login($formvars) {
-	return $formvars['login_name'] != '' AND $formvars['passwort'] != '';
+	return array_key_exists('login_name', $formvars) AND $formvars['login_name'] != '' AND array_key_exists('passwort', $formvars) AND $formvars['passwort'] != '';
 }
 
 function is_agreement_accepted($user) {
 	return $user->agreement_accepted == 1;
 }
 
-function is_new_stelle($new_stelle_id, $user) {
-	return ($new_stelle_id != '' AND $new_stelle_id != $user->stelle_id);
+function is_new_stelle($formvars, $user) {
+	return (array_key_exists('Stelle_ID', $formvars) AND $formvars['Stelle_ID'] != '' AND $formvars['Stelle_ID'] != $user->stelle_id);
 }
 
 function is_user_member_in_stelle($user_stelle_id, $allowed_stellen_ids) {
@@ -588,9 +563,6 @@ function get_permission_in_stelle($GUI) {
 
 		if (is_password_expired($GUI->user, $GUI->Stelle)) {
 			$GUI->debug->write('Passwort ist abgelaufen.', 4, $GUI->echo);
-			if (new_password)
-
-
 			$allowed = false;
 			$reason = 'password expired';
 			$errmsg = 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist in der Stelle ' . $GUI->stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gütligkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten. Geben Sie ein neues Passwort ein und notieren Sie es sich.';
@@ -651,7 +623,7 @@ function is_password_expired($user, $stelle) {
 }
 
 function is_registration($formvars) {
-	return strpos($formvars['go'], 'invitation') === false AND $formvars['token'] != '' AND $formvars['email'] != '' AND $formvars['stelle_id'] != '';
+	return array_key_exists('go', $formvars) AND strpos($formvars['go'], 'invitation') === false AND array_key_exists('token', $formvars) AND $formvars['token'] != '' AND $formvars['email'] != '' AND $formvars['stelle_id'] != '';
 }
 
 function checkRegistration($gui) {
@@ -749,7 +721,7 @@ function is_ows_request($formvars) {
 }
 
 function new_options_sent($formvars) {
-	return $formvars['gui'] != '';
+	return (array_key_exists('gui', $formvars) AND $formvars['gui'] != '');
 }
 
 function logout() {
@@ -757,6 +729,7 @@ function logout() {
 	$_SESSION = array();
 	if (ini_get("session.use_cookies")){
 		$params = session_get_cookie_params();
+		$params['path'] = explode(';', $params['path'])[0];
 		setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
 	}
 	session_destroy();

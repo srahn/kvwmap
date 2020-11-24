@@ -5,8 +5,8 @@ class Referenzkarte extends MyObject {
 	static $write_debug = true;
 	static $identifier = 'ID';
 
-	function Referenzkarte($gui) {
-		$this->MyObject($gui, 'referenzkarten');
+	function __construct($gui) {
+		parent::__construct($gui, 'referenzkarten');
 		$this->validations = array();
 	}
 

@@ -6,6 +6,7 @@
 	include(SNIPPETS . 'sachdatenanzeige_functions.php');
 	global $supportedLanguages;
 	global $last_x;
+	$show_layer_parameter = value_of($this->formvars, 'show_layer_parameter');
 ?>
 
 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15">
@@ -14,36 +15,7 @@
 	</defs>
 </svg>
 
-<script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
-
-	Text_task=["<? echo $strHelp; ?>:","<? echo $strHintTask; ?>"];
-	Text_password=["<? echo $strHelp; ?>:","<? echo PASSWORD_INFO; ?>"];
-	Text_language=["<? echo $strHelp; ?>:","<? echo $strHintLanguage; ?>"];
-	Text_gui=["<? echo $strHelp; ?>:","<? echo $strHintGUI; ?>"];
-	Text_buttons=["<? echo $strHelp; ?>:","<? echo $strHintButtons; ?>"];
-	Text_color=["<? echo $strHelp; ?>:","<? echo $strHintColor; ?>"];
-	Text_instantreload=["<? echo $strHelp; ?>:","<? echo $strHintInstantReload; ?>"];
-	Text_menueautoclose=["<? echo $strHelp; ?>:","<? echo $strHintMenuAutoClose; ?>"];
-	Text_visuallyimpaired=["<? echo $strHelp; ?>:","<? echo $strHintVisuallyImpaired; ?>"];
-	Text_zoomfactor=["<? echo $strHelp; ?>:","<? echo $strHintZoomFactor; ?>"];
-	Text_mapsize=["<? echo $strHelp; ?>:","<? echo $strHintMapSize; ?>"];
-	Text_mapextent=["<? echo $strHelp; ?>:","<? echo $strHintMapExtent; ?>"];
-	Text_mapprojection=["<? echo $strHelp; ?>:","<? echo $strHintMapProjection; ?>"];
-	Text_secondmapprojection=["<? echo $strHelp; ?>:","<? echo $strHintSecondMapProjection; ?>"];
-	Text_coordtype=["<? echo $strHelp; ?>:","<? echo $strHintCoordType; ?>"];
-	Text_runningcoords=["<? echo $strHelp; ?>:","<? echo $strHintRunningCoords; ?>"];
-	Text_showmapfunctions=["<? echo $strHelp; ?>:","<? echo $strHintShowMapFunctions; ?>"];
-	Text_singlequery=["<? echo $strHelp; ?>:","<? echo $strHintSingleQuery; ?>"];
-	Text_querymode=["<? echo $strHelp; ?>:","<? echo $strHintQuerymode; ?>"];
-	Text_newdatasetorder=["<? echo $strHelp; ?>:","<? echo $strHintNewDatasetOrder; ?>"];
-	Text_fontsizegle=["<? echo $strHelp; ?>:","<? echo $strHintFontSizeGLE; ?>"];
-	Text_highlight=["<? echo $strHelp; ?>:","<? echo $strHintHighlight; ?>"];
-	Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"];
-	Text_showlayeroptions=["<? echo $strHelp; ?>:","<? echo $strHintShowLayerOptions; ?>"];
-	Text_menue_buttons=["<? echo $strHelp; ?>:","<? echo $strHintMenueButtons; ?>"];
-	Text_print_scale=["<? echo $strHelp; ?>:","<? echo $strHintPrintScale; ?>"];
-	Text_showrollenfilter=["<? echo $strHelp; ?>:","<? echo $strHintShowRollenFilter; ?>"];
 
 	function start1(){
 		document.GUI.submit();
@@ -128,10 +100,10 @@ if ($this->Fehlermeldung!='') {
 
 <div id="rollenwahl_main_div">
 	<div id="rollenwahl_optionen_div" class="tabbed">
-		<? if ($this->formvars['show_layer_parameter']){ ?>
-		<input id="tab1" type="radio" name="tabs" />
+		<? if ($this->formvars['show_layer_parameter']) { ?>
+		<input id="tab1"<? echo ($show_layer_parameter ? ' checked="checked"' : '') ?> type="radio" name="tabs" />
 		<? } ?>
-		<input checked="checked" id="tab2" type="radio" name="tabs" />
+		<input id="tab2"<? echo ($show_layer_parameter ? '' : ' checked="checked"') ?> type="radio" name="tabs" />
 		<input id="tab3" type="radio" name="tabs" />
 		<input id="tab4" type="radio" name="tabs" />
 		<input id="tab5" type="radio" name="tabs" />
@@ -139,7 +111,7 @@ if ($this->Fehlermeldung!='') {
 		<nav>
 			<table width="100%" cellpadding="0" cellspacing="0">
 				<tr>
-					<? if ($this->formvars['show_layer_parameter']){ ?>
+					<? if ($show_layer_parameter) { ?>
 					<th width="20%" align="center"><label for="tab1">&nbsp;<? echo $this->strLayerParameters; ?>&nbsp;</label></th>
 					<? } ?>
 					<th width="20%" align="center"><label for="tab2"><? echo $strGeneralOptions; ?></label></th>
@@ -151,7 +123,7 @@ if ($this->Fehlermeldung!='') {
 		</nav>
 
 		<figure>
-			<? if ($this->formvars['show_layer_parameter']){ ?>
+			<? if ($show_layer_parameter) { ?>
 			<div id="layer_parameters_div" class="tab1">
 					<? $this->get_layer_params_form(); ?>
 			</div>
@@ -161,7 +133,7 @@ if ($this->Fehlermeldung!='') {
 					<tr>
 						<td class="rollenwahl-gruppen-options">
 							<table border="0" cellpadding="0" cellspacing="0"><?
-								if ($this->formvars['hide_stellenwahl']) { ?>
+								if (value_of($this->formvars, 'hide_stellenwahl')) { ?>
 									<tr>
 										<td>
 											<input type="hidden" name="Stelle_ID" value="<? echo $this->user->stelle_id; ?>">
@@ -179,8 +151,7 @@ if ($this->Fehlermeldung!='') {
 													<? echo $this->StellenForm->html; ?>
 												</div>
 												<div style="float: left; margin-left: 5px;">
-													<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_task, Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
-													<div id="Tip1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+													<span data-tooltip="<? echo $strHintTask; ?>"></span>
 												</div>
 												<div style="width: 80px; text-align: center;">
 													<i id="sign_in_stelle" title="<? echo $this->strEnter; ?>" class="fa fa-sign-out fa-2x" onclick="document.GUI.submit();" style="cursor: pointer;display: none;"></i>
@@ -189,14 +160,15 @@ if ($this->Fehlermeldung!='') {
 										</td>
 									</tr><?
 								}
-								if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) { ?>
+								if (array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) {
+									if($this->user->Name != 'gast'){ ?>
 									<tr>
 										<td valign="top" class="rollenwahl-option-header">
 											<? echo $strPassword; ?>:
 										</td>
 										<td class="rollenwahl-option-data">
 											<i class="fa fa-key options-button" aria-hidden="true"></i><a href="javascript:openPasswordForm();"><? echo $strChangePassword; ?></a>
-											<div id="password_form" style="border: 1px solid #cbcbcb;width: 290px;<? if($this->PasswordError == '')echo 'display: none'; ?>">
+											<div id="password_form" style="border: 1px solid #cbcbcb;width: 290px;<? if ($this->PasswordError == '') echo 'display: none'; ?>">
 												<table cellspacing="3" style="width: 100%">
 													<tr>
 														<td><span class="px16"><? echo $strCurrentPassword; ?>: </span></td>
@@ -217,12 +189,7 @@ if ($this->Fehlermeldung!='') {
 															<input style="width: 130px" maxlength="<? echo PASSWORD_MAXLENGTH; ?>" type="password" value="<? echo $this->formvars['new_password']; ?>" id="new_password" name="new_password"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password').attr('type') == 'text') { $('#new_password').attr('type', 'password') } else { $('#new_password').attr('type', 'text'); }"></i><?php
 															if (defined ('PASSWORD_INFO') AND PASSWORD_INFO != '') { ?>
 																<div style="float: right; margin-left: 5px;">
-																	<img
-																		src="<? echo GRAPHICSPATH;?>icon_i.png"
-																		onMouseOver="stm(Text_password, Style[0], document.getElementById('Tip1a'))"
-																		onmouseout="htm()"
-																	>
-																	<div id="Tip1a" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+																	<span data-tooltip="<? echo PASSWORD_INFO; ?>"></span>
 																</div><?php
 															} ?>
 														</td>
@@ -240,6 +207,7 @@ if ($this->Fehlermeldung!='') {
 											</div>
 										</td>
 									</tr>
+									<? } ?>
 									<tr>
 										<td class="rollenwahl-option-header">
 											<? echo $strLanguage; ?>:
@@ -251,34 +219,21 @@ if ($this->Fehlermeldung!='') {
 												<? if(in_array('english', $supportedLanguages)){ ?><option value="english"<? if($this->user->rolle->language == 'english') { echo ' selected'; }	?>><? echo $strEnglish; ?></option><? } ?>
 												<? if(in_array('polish', $supportedLanguages)){ ?><option value="polish"<? if($this->user->rolle->language == 'polish') { echo ' selected'; }	?>><? echo $strPolish; ?></option><? } ?>
 												<? if(in_array('vietnamese', $supportedLanguages)){ ?><option value="vietnamese"<? if($this->user->rolle->language == 'vietnamese') { echo ' selected'; }	?>><? echo $strVietnamese; ?></option><? } ?>
-											</select>
-											<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_language, Style[0], document.getElementById('Tip2'))" onmouseout="htm()">
-											<div id="Tip2" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+											</select>&nbsp;
+											<span data-tooltip="<? echo $strHintLanguage; ?>"></span>
 										</td>
 									</tr>
-									<tr>
+									<tr <? if(count($this->guifiles) < 2){echo 'style="display: none"';} ?>>
 										<td class="rollenwahl-option-header">
 											<? echo $strGUI; ?>:
 										</td>
 										<td class="rollenwahl-option-data">
 											<select name="gui"><?
-												# Anzeige der GUI´s, die kvwmap bereitstellt
 												for ($i = 0; $i < count($this->guifiles); $i++) { ?>
-													<option
-														value="<? echo $this->guifiles[$i]; ?>"<?
-														echo ($this->user->rolle->gui == $this->guifiles[$i] ? ' selected' : ''); ?>
-													><? echo $this->guifiles[$i]; ?></option><?
-												}
-												# Anzeige der GUI´s, die Admins in ihren custom Verzeichnissen haben
-												for ($i = 0; $i < count($this->customguifiles); $i++) { ?>
-													<option
-														value="<? echo basename($this->customguifiles[$i]); ?>"<?
-														echo ($this->user->rolle->gui == basename($this->customguifiles[$i]) ? ' selected' : '') ?>
-													><? echo $this->customguifiles[$i]; ?></option><?
-												} ?>
+													<option	value="<? echo $this->guifiles[$i]; ?>"<?	echo ($this->user->rolle->gui == $this->guifiles[$i] ? ' selected' : ''); ?>><? echo $this->guifiles[$i]; ?></option>
+										<?	}		?>
 											</select>
-											<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_gui, Style[0], document.getElementById('Tip3'))" onmouseout="htm()">
-											<div id="Tip3" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+											<span data-tooltip="<? echo $strHintGUI; ?>"></span>
 										</td>
 									</tr>
 									<tr>
@@ -287,8 +242,7 @@ if ($this->Fehlermeldung!='') {
 										</td>
 										<td class="rollenwahl-option-data">
 											<input name="visually_impaired" type="checkbox" value="1" <? if($this->user->rolle->visually_impaired == '1') { echo 'checked="true"';} ?> >
-											<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_visuallyimpaired, Style[0], document.getElementById('Tip24'))" onmouseout="htm()">
-											<div id="Tip24" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+											<span data-tooltip="<? echo $strHintVisuallyImpaired; ?>"></span>
 										</td>
 									</tr><?
 								} ?>
@@ -329,8 +283,9 @@ if ($this->Fehlermeldung!='') {
 											<div title="<? echo $strFreeText; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freetext($strFreeText); ?></svg></div><input type="checkbox" name="freetext" value="1" <? if($this->user->rolle->freetext){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strFreeArrow; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freearrow($strFreeArrow); ?></svg></div><input type="checkbox" name="freearrow" value="1" <? if($this->user->rolle->freearrow){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strGPS; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo gps_follow($strGPS, 'on'); ?></svg></div><input type="checkbox" name="gps" value="1" <? if($this->user->rolle->gps){echo 'checked="true"';} ?>>&nbsp;
-											<div style="width: 30px;position: relative"><img style="position: absolute; right: 0px; bottom: 0px" src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_buttons, Style[0], document.getElementById('Tip4'))" onmouseout="htm()"></div>
-											<div id="Tip4" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+											<div style="padding: 20px; width: 30px; text-align: right">
+												<span data-tooltip="<? echo $strHintButtons; ?>"></span>
+											</div>
 										</div>
 									</td>
 								</tr>
@@ -339,9 +294,8 @@ if ($this->Fehlermeldung!='') {
 										<? echo $strMapFunctions; ?>:
 									</td>
 									<td class="rollenwahl-option-data">
-										<input name="showmapfunctions" type="checkbox" value="1" <? if($this->user->rolle->showmapfunctions == '1') { echo 'checked="true"'; } ?> >
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_showmapfunctions, Style[0], document.getElementById('Tip21'))" onmouseout="htm()">
-										<div id="Tip21" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										<input name="showmapfunctions" type="checkbox" value="1" <? if($this->user->rolle->showmapfunctions == '1') { echo 'checked="true"'; } ?> >&nbsp;
+										<span data-tooltip="<? echo $strHintShowMapFunctions; ?>"></span>
 									</td>
 								</tr>
 								<tr>
@@ -349,9 +303,8 @@ if ($this->Fehlermeldung!='') {
 										<? echo $strShowLayerOptions; ?>:
 									</td>
 									<td class="rollenwahl-option-data">
-										<input name="showlayeroptions" type="checkbox" value="1" <? if($this->user->rolle->showlayeroptions == '1') { echo 'checked="true"'; } ?> >
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_showlayeroptions, Style[0], document.getElementById('Tip22'))" onmouseout="htm()">
-										<div id="Tip22" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										<input name="showlayeroptions" type="checkbox" value="1" <? if($this->user->rolle->showlayeroptions == '1') { echo 'checked="true"'; } ?> >&nbsp;
+										<span data-tooltip="<? echo $strHintShowLayerOptions; ?>"></span>
 									</td>
 								</tr>
 								<tr <? if(!ROLLENFILTER){echo 'style="display: none"'; ?>>
@@ -359,9 +312,8 @@ if ($this->Fehlermeldung!='') {
 										<? echo $strShowRollenFilter; ?>:
 									</td>
 									<td class="rollenwahl-option-data">
-										<input name="showrollenfilter" type="checkbox" value="1" <? if($this->user->rolle->showrollenfilter == '1') { echo 'checked="true"'; } ?> >
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_showrollenfilter, Style[0], document.getElementById('Tip25'))" onmouseout="htm()">
-										<div id="Tip25" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										<input name="showrollenfilter" type="checkbox" value="1" <? if($this->user->rolle->showrollenfilter == '1') { echo 'checked="true"'; } ?> >&nbsp;
+										<span data-tooltip="<? echo $strHintShowRollenFilter; ?>"></span>
 									</td>
 								</tr>
 								<? } ?>
@@ -370,9 +322,8 @@ if ($this->Fehlermeldung!='') {
 										<? echo $strMenuAutoClose; ?>:
 									</td>
 									<td class="rollenwahl-option-data">
-										<input name="menu_auto_close" type="checkbox" value="1" <? if($this->user->rolle->menu_auto_close == '1'){echo 'checked="true"';} ?> >
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_menueautoclose, Style[0], document.getElementById('Tip7'))" onmouseout="htm()">
-										<div id="Tip7" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										<input name="menu_auto_close" type="checkbox" value="1" <? if($this->user->rolle->menu_auto_close == '1'){echo 'checked="true"';} ?> >&nbsp;
+										<span data-tooltip="<? echo $strHintMenuAutoClose; ?>"></span>
 									</td>
 								</tr>
 								<tr>
@@ -380,9 +331,8 @@ if ($this->Fehlermeldung!='') {
 										<? echo $strMenueButtons; ?>:
 									</td>
 									<td class="rollenwahl-option-data">
-										<input name="menue_buttons" type="checkbox" value="1" <? if($this->user->rolle->menue_buttons == '1'){echo 'checked="true"';} ?> >
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_menue_buttons, Style[0], document.getElementById('Tip23'))" onmouseout="htm()">
-										<div id="Tip23" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										<input name="menue_buttons" type="checkbox" value="1" <? if($this->user->rolle->menue_buttons == '1'){echo 'checked="true"';} ?> >&nbsp;
+										<span data-tooltip="<? echo $strHintMenueButtons; ?>"></span>
 									</td>
 								</tr>
 							</table>
@@ -401,9 +351,8 @@ if ($this->Fehlermeldung!='') {
 										<? echo $strZoomFactor; ?>:
 									</td>
 									<td class="rollenwahl-option-data">
-										<input name="nZoomFactor" type="text" value="<? echo $this->user->rolle->nZoomFactor; ?>" size="2" maxlength="3">
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_zoomfactor, Style[0], document.getElementById('Tip8'))" onmouseout="htm()">
-										<div id="Tip8" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										<input name="nZoomFactor" type="text" value="<? echo $this->user->rolle->nZoomFactor; ?>" size="2" maxlength="3">&nbsp;
+										<span data-tooltip="<? echo $strHintZoomFactor; ?>"></span>
 									</td>
 								</tr>
 								<tr>
@@ -428,9 +377,8 @@ if ($this->Fehlermeldung!='') {
 											<? if($selected == false){ ?>
 											<option value="<? echo $this->user->rolle->mapsize; ?>" selected><? echo $this->user->rolle->mapsize; ?></option>              	
 											<? } ?>
-										</select>
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_mapsize, Style[0], document.getElementById('Tip9'))" onmouseout="htm()">
-										<div id="Tip9" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										</select>&nbsp;
+										<span data-tooltip="<? echo $strHintMapSize; ?>"></span>
 									</td>
 								</tr>
 								<tr>
@@ -439,9 +387,8 @@ if ($this->Fehlermeldung!='') {
 									</td>
 									<td class="rollenwahl-option-data"><?
 										$curExtentText=round($this->user->rolle->oGeorefExt->minx, 3).' '.round($this->user->rolle->oGeorefExt->miny, 3).', '.round($this->user->rolle->oGeorefExt->maxx, 3).' '.round($this->user->rolle->oGeorefExt->maxy, 3);
-									 ?><input name="newExtent" id="newExtent" type="text" size="<? echo strlen($curExtentText); ?>" value="<? echo $curExtentText; ?>">
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_mapextent, Style[0], document.getElementById('Tip10'))" onmouseout="htm()">
-										<div id="Tip10" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+									 ?><input name="newExtent" id="newExtent" type="text" size="<? echo strlen($curExtentText); ?>" value="<? echo $curExtentText; ?>">&nbsp;
+										<span data-tooltip="<? echo $strHintMapExtent; ?>"></span>
 									</td>
 								</tr>
 								<tr>
@@ -457,9 +404,8 @@ if ($this->Fehlermeldung!='') {
 												echo ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
 											}
 											?>
-										</select>
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_mapprojection, Style[0], document.getElementById('Tip11'))" onmouseout="htm()">
-										<div id="Tip11" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										</select>&nbsp;
+										<span style="--left: -500px" data-tooltip="<? echo $strHintMapProjection; ?>"></span>
 									</td>
 								</tr>
 								<tr>
@@ -476,9 +422,8 @@ if ($this->Fehlermeldung!='') {
 												echo ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
 											}
 											?>
-										</select>
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_secondmapprojection, Style[0], document.getElementById('Tip12'))" onmouseout="htm()">
-										<div id="Tip12" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										</select>&nbsp;
+										<span style="--left: -500px" data-tooltip="<? echo $strHintSecondMapProjection; ?>"></span>
 									</td>
 								</tr>
 								<tr>
@@ -490,9 +435,8 @@ if ($this->Fehlermeldung!='') {
 											<option value="dec" <? if ($this->user->rolle->coordtype=="dec") { echo "selected"; } ?>><? echo $strdecimal; ?></option>
 											<option value="dms" <? if ($this->user->rolle->coordtype=="dms") { echo "selected"; } ?>><? echo $strgrad1; ?></option>
 											<option value="dmin" <? if ($this->user->rolle->coordtype=="dmin") { echo "selected"; } ?>><? echo $strgrad2; ?></option>				
-										</select>
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_coordtype, Style[0], document.getElementById('Tip13'))" onmouseout="htm()">
-										<div id="Tip13" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										</select>&nbsp;
+										<span data-tooltip="<? echo $strHintCoordType; ?>"></span>
 									</td>
 								</tr>
 								<tr>
@@ -503,9 +447,8 @@ if ($this->Fehlermeldung!='') {
 										<select name="print_scale">
 											<option value="auto" <? if($this->user->rolle->print_scale == "auto"){ echo "selected"; } ?>><? echo $strPrintScaleAuto; ?></option>
 											<option value="" <? if($this->user->rolle->print_scale != "auto"){ echo "selected"; } ?>><? echo $strPrintScaleLast; ?></option>
-										</select>
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_print_scale, Style[0], document.getElementById('Tip15'))" onmouseout="htm()">
-										<div id="Tip15" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										</select>&nbsp;
+										<span data-tooltip="<? echo $strHintPrintScale; ?>"></span>
 									</td>
 								</tr>
 								<tr>
@@ -513,9 +456,8 @@ if ($this->Fehlermeldung!='') {
 										<? echo $strRunningCoords; ?>:
 									</td>
 									<td class="rollenwahl-option-data">
-										<input name="runningcoords" type="checkbox" value="1" <? if($this->user->rolle->runningcoords == '1'){echo 'checked="true"';} ?> >
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_runningcoords, Style[0], document.getElementById('Tip14'))" onmouseout="htm()">
-										<div id="Tip14" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										<input name="runningcoords" type="checkbox" value="1" <? if($this->user->rolle->runningcoords == '1'){echo 'checked="true"';} ?> >&nbsp;
+										<span data-tooltip="<? echo $strHintRunningCoords; ?>"></span>
 									</td>
 								</tr>
 								<tr>
@@ -524,8 +466,7 @@ if ($this->Fehlermeldung!='') {
 									</td>
 									<td class="rollenwahl-option-data">
 										<input name="instant_reload" type="checkbox" value="1" <? if($this->user->rolle->instant_reload == '1'){echo 'checked="true"';} ?> >
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_instantreload, Style[0], document.getElementById('Tip6'))" onmouseout="htm()">
-										<div id="Tip6" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										<span style="--left: -200px" data-tooltip="<? echo $strHintInstantReload; ?>"></span>
 									</td>
 								</tr>
 								<tr>
@@ -555,9 +496,8 @@ if ($this->Fehlermeldung!='') {
 												echo "</option>\n";
 											}
 											?>
-										</select>
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_color, Style[0], document.getElementById('Tip5'))" onmouseout="htm()">
-										<div id="Tip5" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										</select>&nbsp;
+										<span data-tooltip="<? echo $strHintColor; ?>"></span>
 									</td>
 								</tr>
 								<tr>
@@ -593,9 +533,8 @@ if ($this->Fehlermeldung!='') {
 										<? echo $strSingleQuery; ?>:
 									</td>
 									<td  class="rollenwahl-option-data">
-										<input name="singlequery" type="checkbox" value="1" <? if($this->user->rolle->singlequery == '1'){echo 'checked="true"';} ?> >
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_singlequery, Style[0], document.getElementById('Tip15'))" onmouseout="htm()">
-										<div id="Tip15" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										<input name="singlequery" type="checkbox" value="1" <? if($this->user->rolle->singlequery == '1'){echo 'checked="true"';} ?> >&nbsp;
+										<span data-tooltip="<? echo $strHintSingleQuery; ?>"></span>
 									</td>
 								</tr>
 								<tr>
@@ -603,9 +542,8 @@ if ($this->Fehlermeldung!='') {
 										<? echo $strQuerymode; ?>:
 									</td>
 									<td class="rollenwahl-option-data">
-										<input name="querymode" type="checkbox" value="1" <? if($this->user->rolle->querymode == '1'){echo 'checked="true"';} ?> >
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_querymode, Style[0], document.getElementById('Tip16'))" onmouseout="htm()">
-										<div id="Tip16" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										<input name="querymode" type="checkbox" value="1" <? if($this->user->rolle->querymode == '1'){echo 'checked="true"';} ?> >&nbsp;
+										<span data-tooltip="<? echo $strHintQuerymode; ?>"></span>
 									</td>
 								</tr>
 								<tr>
@@ -616,9 +554,8 @@ if ($this->Fehlermeldung!='') {
 										<select name="geom_edit_first">
 											<option value="0"<? if($this->user->rolle->geom_edit_first == '0') { echo ' selected'; }	?>><? echo $strGeomSecond; ?></option>
 											<option value="1"<? if($this->user->rolle->geom_edit_first == '1') { echo ' selected'; }	?>><? echo $strGeomFirst; ?></option>
-										</select>
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_newdatasetorder, Style[0], document.getElementById('Tip17'))" onmouseout="htm()">
-										<div id="Tip17" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										</select>&nbsp;
+										<span data-tooltip="<? echo $strHintNewDatasetOrder; ?>"></span>
 									</td>
 								</tr>
 								<tr>
@@ -626,9 +563,8 @@ if ($this->Fehlermeldung!='') {
 										<? echo $strFontSizeGLE; ?>:
 									</td>
 									<td class="rollenwahl-option-data">
-										<input name="fontsize_gle" type="text" value="<? echo $this->user->rolle->fontsize_gle; ?>" size="2" maxlength="2">
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_fontsizegle, Style[0], document.getElementById('Tip18'))" onmouseout="htm()">
-										<div id="Tip18" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										<input name="fontsize_gle" type="text" value="<? echo $this->user->rolle->fontsize_gle; ?>" size="2" maxlength="2">&nbsp;
+										<span data-tooltip="<? echo $strHintFontSizeGLE; ?>"></span>
 									</td>
 								</tr>
 								<tr>
@@ -636,18 +572,16 @@ if ($this->Fehlermeldung!='') {
 										<? echo $strHighlight; ?>:
 									</td>
 									<td  class="rollenwahl-option-data">
-										<input name="highlighting" type="checkbox" value="1" <? if($this->user->rolle->highlighting == '1'){echo 'checked="true"';} ?> >
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_highlight, Style[0], document.getElementById('Tip19'))" onmouseout="htm()">
-										<div id="Tip19" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+										<input name="highlighting" type="checkbox" value="1" <? if($this->user->rolle->highlighting == '1'){echo 'checked="true"';} ?> >&nbsp;
+										<span data-tooltip="<? echo $strHintHighlight; ?>"></span>
 									</td>
 								</tr>		
 								<tr <? if(!$this->Stelle->hist_timestamp)echo 'style="display:none"'; ?> >		
 									<td class="rollenwahl-option-header">
 										<? echo $this->histTimestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp', 'timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_hist_timestamp" class="calendar" style="bottom:40px"></div></td>
 									<td class="rollenwahl-option-data">
-										<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp" name="hist_timestamp" type="text" value="<? echo $this->user->rolle->hist_timestamp; ?>" size="16">
-										<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_histtimestamp, Style[0], document.getElementById('Tip20'))" onmouseout="htm()">
-										<div id="Tip20" style="visibility:hidden;position:absolute;bottom:80px;z-index:1000;"></div>
+										<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp" name="hist_timestamp" type="text" value="<? echo $this->user->rolle->hist_timestamp_de; ?>" size="16">&nbsp;
+										<span data-tooltip="<? echo $strHinthist_timestamp; ?>"></span>
 									</td>			
 								</tr>
 							</table>

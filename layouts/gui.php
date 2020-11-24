@@ -10,7 +10,7 @@
 			</div>
 		</div>
 		<a name="oben"></a>
-		<table id="gui-table" border="0" cellspacing="0" cellpadding="0">
+		<table id="gui-table" border="0" cellspacing="0" cellpadding="0" onclick="remove_calendar();">
 			<tr>
 				<td align="center" valign="top">
 					<form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">
@@ -29,25 +29,26 @@
 								<td align="center" width="100%" height="100%" valign="top" style="background: url('<?php echo BG_IMAGE; ?>'); border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
 									<div id="container_paint" style="height:100%; position: relative; overflow: hidden;">		<!-- overflow wird für rausfliegende Legende benötigt und height:100% für den Box-Shadow unter der MapFunctionsBar und Legende -->
 										<script type="text/javascript">
+											window.name = 'root';
 											currentform = document.GUI;
 											<? $this->currentform = 'document.GUI'; ?>
-											function set_hist_timestamp(){
+											function set_hist_timestamp() {
 												$('#hist_timestamp_form').show();
 											}
 										</script>
 										<div id="hist_timestamp_form" style="display:none;">
 											<i class="fa fa-close" style="cursor: pointer; float: right; margin: 0 5px 0 5px;" onclick="$('#hist_timestamp_form').hide();"></i>
 											<? echo $this->histTimestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp2', 'timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_hist_timestamp2" class="calendar" style="top:35px;left:150px"></div>
-											<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp2" name="hist_timestamp2" type="text" value="<? echo $this->user->rolle->hist_timestamp; ?>" size="16">
+											<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp2" name="hist_timestamp2" type="text" value="<? echo $this->user->rolle->hist_timestamp_de; ?>" size="16">
 											<input type="button" onclick="location.href='index.php?go=setHistTimestamp&timestamp='+document.GUI.hist_timestamp2.value" value="ok">
 										</div>
 										<?php
 										$this->debug->write("<br>Include <b>".$this->main."</b> in gui.php",4);
-										if(file_exists($this->main)){
-											include($this->main);			# Pluginviews
+										if (file_exists($this->main)) {
+											include($this->main); # Pluginviews
 										}
 										else {
-											include(LAYOUTPATH."snippets/".$this->main);		# normale snippets
+											include(LAYOUTPATH . "snippets/" . $this->main);		# normale snippets
 										} ?>
 									</div>
 								</td>
@@ -65,10 +66,8 @@
 						<input type="hidden" name="browserheight">
 						<input type="hidden" name="stopnavigation" value="0">
 						<input type="hidden" name="gle_changed" value="">
-					</form><?
-					if ($this->user->rolle->querymode == 1) {
-						include(LAYOUTPATH.'snippets/overlayframe.php');
-					} ?>
+						<input type="hidden" name="mime_type" value="">
+					</form>
 				</td>
 			</tr><?php
 			if ($this->user->funktion == 'admin' AND DEBUG_LEVEL > 0) { ?>

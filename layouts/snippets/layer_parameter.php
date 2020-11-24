@@ -1,7 +1,8 @@
 <script type="text/javascript">
 <!--
-	function addParam(){
+	function addParam() {
 		document.getElementById('param-1').style.display = '';
+
 		param = document.getElementById('param-1').cloneNode(true);
 		document.getElementById('param-1').style.display = 'none';
 		document.getElementById('params_table').getElementsByTagName('tbody')[0].appendChild(param);
@@ -22,6 +23,7 @@
 					<th align="left" style="border:1px solid #C3C7C3">Alias</th>
 					<th align="left" style="border:1px solid #C3C7C3">Standard-Wert</th>
 					<th align="left" style="border:1px solid #C3C7C3">Auswahlmöglichkeiten</th>
+					<th align="left" style="border:1px solid #C3C7C3">Verwendung in Layer</th>
 					<th align="left" style="border:1px solid #C3C7C3">&nbsp;</th>
 				</tr><?
 				for ($i = -1; $i < count($this->params); $i++) { ?>
@@ -31,6 +33,18 @@
 						<td style="border:1px solid #C3C7C3"><input name="alias[]" type="text" value="<? echo $this->params[$i]['alias']; ?>" size="20" maxlength="50"></td>
 						<td style="border:1px solid #C3C7C3"><input name="default_value[]" type="text" value="<? echo $this->params[$i]['default_value'];; ?>" size="20"></td>
 						<td style="border:1px solid #C3C7C3"><textarea name="options_sql[]" style="height: 22px"><? echo $this->params[$i]['options_sql']; ?></textarea></td>
+						<td style="border:1px solid #C3C7C3"><?
+							$layer_count = @count($this->params_layer[$this->params[$i]['id']]);
+							if($layer_count > 0){
+								echo '<ul>';
+								for ($j = 0; $j < $layer_count; $j++){
+									echo '<li>
+										<a href="index.php?go=Layereditor&selected_layer_id=' . $this->params_layer[$this->params[$i]['id']][$j]['Layer_ID'] . '">' . $this->params_layer[$this->params[$i]['id']][$j]['Name'] . ' (' . $this->params_layer[$this->params[$i]['id']][$j]['Layer_ID'] . ')</a>
+									</li>';
+								}
+								echo '</ul>';
+							} ?>
+						</td>
 						<td style="border:1px solid #C3C7C3"><i class="fa fa-trash pointer" aria-hidden="true" onclick="$(this).parent().parent().find(':input').val('')"></i></td>
 					</tr><?
 				} ?>
@@ -41,7 +55,7 @@
 		</td>
 	</tr>
 	<tr>
-		<td align="center">			
+		<td align="center">	
 			<input type="submit" value="Speichern">
 		</td>
 	</tr>

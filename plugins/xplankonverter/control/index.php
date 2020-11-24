@@ -18,6 +18,7 @@ include(PLUGINS . 'xplankonverter/model/konvertierung.php');
 include(PLUGINS . 'xplankonverter/model/regel.php');
 include(PLUGINS . 'xplankonverter/model/shapefiles.php');
 include(PLUGINS . 'xplankonverter/model/validierung.php');
+include(PLUGINS . 'xplankonverter/model/konformitaetsbedingungen.php');
 include(PLUGINS . 'xplankonverter/model/validierungsergebnis.php');
 include(PLUGINS . 'xplankonverter/model/xplan.php');
 include(PLUGINS . 'xplankonverter/model/extract_gml.php');
@@ -312,7 +313,7 @@ function go_switch_xplankonverter($go){
 
 
 					# Ordne layer zur Stelle
-					$GUI->Stellenzuweisung(
+					$GUI->addLayersToStellen(
 						array($shapeFile->get('layer_id')),
 						array($GUI->konvertierung->get('stelle_id'))
 					);
@@ -414,6 +415,9 @@ function go_switch_xplankonverter($go){
 										$GUI->formvars['maintable'] = $shapeFile->dataTableName();
 										$GUI->formvars['schema'] = $shapeFile->dataSchemaName();
 										$GUI->formvars['connection'] = $GUI->pgdatabase->connect_string;
+										if ($GUI->pgdatabase->connection_id != '') {
+											$GUI->formvars['connection_id'] = $GUI->pgdatabase->connection_id;
+										}
 										$GUI->formvars['connectiontype'] = '6';
 										$GUI->formvars['filteritem'] = 'oid';
 										$GUI->formvars['tolerance'] = '5';
@@ -436,7 +440,7 @@ function go_switch_xplankonverter($go){
 										$shapeFile->update();
 
 										# Ordne layer zur Stelle
-										$GUI->Stellenzuweisung(
+										$GUI->addLayersToStellen(
 											array($shapeFile->get('layer_id')),
 											array($GUI->konvertierung->get('stelle_id'))
 										);
@@ -576,7 +580,8 @@ function go_switch_xplankonverter($go){
 	        $validPredecessorStates,
 	        function($isValid,$predStatus) use ($currStatus) {
 	          return isValid || ($predStatus == $currStatus);
-	    }, $isValid);
+	    		}, $isValid
+			);
 	    if (!$isValid) {
 	      $response['success'] = false;
 	      $response['msg'] = "Status '$statusToSet' ist kein gueltiger Folgestatus von '$currStatus'";
@@ -683,68 +688,132 @@ function go_switch_xplankonverter($go){
 			$GUI->output();
 		} break;
 
+		/**
+		* Case erzeugt xplan_gml-Dateien von Konvertierungen und liefert ein JSON mit success und msg zurück
+		* In folgenden Fällen wird keine Datei erzeugt, success = false und in msg eine Fehlermeldung geliefert:
+		* - Wenn alle_veroeffentlichen angegeben ist aber user nicht die Funktion admin hat
+		* - Wenn alle_veroeffentlichen und konvertierung_id beide leer sind
+		* - Wenn alle_veroeffentlichen leer ist aber keine Konvertierung mit konvertierung_id gefunden werden konnte.
+		* - Wenn alle_veroeffentlichen leer ist aber die gefundene Konvertierung nicht die gleiche Stellen ID hat wie die aktuelle Stelle
+		* - Wenn alle_veroeffentlichen angegeben ist aber keine Konvertierungen gefunden wurden
+		* - Wenn der Status der Konvertierung vorher nicht einen der folgenden Werte hat: ERSTELLT, KONVERTIERUNG_OK, IN_GML_ERSTELLUNG, GML_ERSTELLUNG_OK
+		*/
 		case 'xplankonverter_gml_generieren' : {
 			include(PLUGINS . 'xplankonverter/model/build_gml.php');
 			include(PLUGINS . 'xplankonverter/model/TypeInfo.php');
-			$response = array();
-			if ($GUI->formvars['konvertierung_id'] == '') {
-				$response['success'] = false;
-				$response['msg'] = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			$success = true;
+			$messages = array();
+			$konvertierung_id = $GUI->formvars['konvertierung_id'];
+			header('Content-Type: application/json');
+
+			if ($GUI->formvars['alle_veroeffentlichten'] AND $GUI->user->funktion != 'admin') {
+				echo json_encode(
+					array(
+						'success' => false,
+						'msg' => 'Die Erzeugung von XPlanGML für alle veröffentlichten Konvertierungen ist nur für einen Nutzer mit der Funktion admin erlaubt!'
+					)
+				);
+				break;
 			}
-			else {
-				$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
-				if (isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
-					if ($GUI->konvertierung->get('status') == Konvertierung::$STATUS['KONVERTIERUNG_OK']
-					 || $GUI->konvertierung->get('status') == Konvertierung::$STATUS['IN_GML_ERSTELLUNG']
-					 || $GUI->konvertierung->get('status') == Konvertierung::$STATUS['GML_ERSTELLUNG_OK']) {
-						// Status setzen
-						$GUI->konvertierung->set('status', Konvertierung::$STATUS['IN_GML_ERSTELLUNG']);
-						$GUI->konvertierung->update();
 
-						// XPlan-GML ausgeben
-						$GUI->gml_builder = new Gml_builder($GUI->pgdatabase);
-						$plan = XP_Plan::find_by_id($GUI,'konvertierung_id', $GUI->konvertierung->get('id'), $GUI->konvertierung->get('planart'));
-						if (!$GUI->gml_builder->build_gml($GUI->konvertierung, $plan)) {
-	  					// Status setzen
-	  					$GUI->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']);
-	  					$GUI->konvertierung->update();
-	  					// Antwort absenden und case beenden
-	  					$response['success'] = false;
-	  					$response['msg'] = 'Bei der XPlan-GML-Generierung ist ein Fehler aufgetreten.';
-	        		header('Content-Type: application/json');
-	        		echo json_encode($response);
-	        		break;
-						}
-						# Creates path if it doesnt exist (e.g. because of gmlas-creation
-						if(!file_exists($GUI->konvertierung->get_file_path('xplan_gml'))) {
-							echo 'test';
-							mkdir($GUI->konvertierung->get_file_path('xplan_gml'), 0777, true);
-						}
-						$GUI->gml_builder->save($GUI->konvertierung->get_file_name('xplan_gml'));
+			if ($GUI->formvars['alle_veroeffentlichten'] == '' AND $konvertierung_id == '') {
+				echo json_encode(
+					array(
+						'success' => false,
+						'msg' => 'Diese Erzeugung von XPlanGML für eine Konvertierung kann nur aufgerufen werden wenn eine Konvertierung Id angegeben wurde!'
+					)
+				);
+				break;
+			}
 
-						// Status setzen
-						$GUI->konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_OK']);
-						$GUI->konvertierung->update();
+			$konvertierungen = Konvertierung::find_where_with_plan($GUI, $GUI->formvars['alle_veroeffentlichten'] ? 'veroeffentlicht' : 'id = ' . $konvertierung_id, 'id');
 
-						// Erzeuge Layergruppe, falls noch nicht vorhanden
-						$layer_group_id = $GUI->konvertierung->create_layer_group('GML');
-						// vorhandene Layer dieser Konvertierung löschen
-						// Neue Layer von Vorlagen GML kopieren
-						/*
-						$GUI->formvars['group_id'] = $layer_group_id;
-						$GUI->formvars['pg_schema'] = XPLANKONVERTER_CONTENT_SCHEMA;
-						$GUI->layer_generator_erzeugen(); # Funktion aus kvwmap.php
-						*/
-						$response['success'] = true;
-						$response['msg'] = 'XPlan-GML-Datei erfolgreich erstellt.';
-					} else {
-						$response['success'] = false;
-						$response['msg'] = 'Die ausgewählte Konvertierung muss zuerst ausgeführt werden.';
+			if ($GUI->formvars['alle_veroeffentlichten'] == '' AND count($konvertierungen) == 0) {
+				echo json_encode(
+					array(
+						'success' => false,
+						'msg' => 'Zur Id: ' . $konvertierung_id . ' konnte keine Konvertierung gefunden werden!'
+					)
+				);
+				break;
+			}
+
+			if ($GUI->formvars['alle_veroeffentlichten'] == '' AND !isInStelleAllowed($GUI->Stelle, $konvertierungen[0]->get('stelle_id'))) {
+				echo json_encode(
+					array(
+						'success' => false,
+						'msg' => 'Von Konvertierung ' . $konvertierung_id . ' kann nur in Stelle ' . $konvertierungen[0]->get('stelle_id') . ' eine XPlanGML-Datei erstellt werden! Sie sind in Stelle ist ' . $GUI->Stelle->id . '!'
+					)
+				);
+				break;
+			}
+
+			if ($GUI->formvars['alle_veroeffentlichten'] != '' AND count($konvertierungen) == 0) {
+				echo json_encode(
+					array(
+						'success' => false,
+						'msg' => 'Es konnten keine veröffentlichten Pläne gefunden werden!'
+					)
+				);
+				break;
+			}
+
+			foreach ($konvertierungen AS $konvertierung) {
+				if (in_array($konvertierung->get('status'), array(
+					Konvertierung::$STATUS['ERSTELLT'],
+					Konvertierung::$STATUS['KONVERTIERUNG_OK'],
+					Konvertierung::$STATUS['IN_GML_ERSTELLUNG'],
+					Konvertierung::$STATUS['GML_ERSTELLUNG_OK']
+				))) {
+					// Status setzen
+					$konvertierung->set('status', Konvertierung::$STATUS['IN_GML_ERSTELLUNG']);
+					$konvertierung->update();
+
+					// XPlan-GML ausgeben
+					$GUI->gml_builder = new Gml_builder($GUI->pgdatabase);
+					$plan = XP_Plan::find_by_id($GUI,'konvertierung_id', $konvertierung->get('id'), $konvertierung->get('planart'));
+					if (!$GUI->gml_builder->build_gml($konvertierung, $plan)) {
+  					// Status setzen
+						$konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']);
+						$konvertierung->update();
+						// Antwort absenden und case beenden
+						$success = false;
+						$messages[] = 'Bei der XPlan-GML-Generierung ist ein Fehler aufgetreten.';
 					}
+					# Creates path if it doesnt exist (e.g. because of gmlas-creation
+					if (!file_exists($konvertierung->get_file_path('xplan_gml'))) {
+						mkdir($konvertierung->get_file_path('xplan_gml'), 0777, true);
+					}
+
+					$GUI->gml_builder->save($konvertierung->get_file_name('xplan_gml'));
+
+					// Status setzen
+					$konvertierung->set('status', Konvertierung::$STATUS['GML_ERSTELLUNG_OK']);
+					$konvertierung->update();
+
+					// Erzeuge Layergruppe, falls noch nicht vorhanden
+					$layer_group_id = $konvertierung->create_layer_group('GML');
+					// vorhandene Layer dieser Konvertierung löschen
+					// Neue Layer von Vorlagen GML kopieren
+					/*
+					$GUI->formvars['group_id'] = $layer_group_id;
+					$GUI->formvars['pg_schema'] = XPLANKONVERTER_CONTENT_SCHEMA;
+					$GUI->layer_generator_erzeugen(); # Funktion aus kvwmap.php
+					*/
+					$messages[] = 'XPlanGML-Datei ' . $konvertierung->get_file_name('xplan_gml') . ' für Konvertierung ' . $konvertierung->get('id') . ' erfolgreich erstellt.<br>';
+				}
+				else {
+					$success = false;
+					$messages[] = 'Die Konvertierung ' . $konvertierung->get('id') . ' muss zuerst ausgeführt werden.<br>';
 				}
 			}
-			header('Content-Type: application/json');
-			echo json_encode($response);
+
+			echo json_encode(
+				array(
+					'success' => $success,
+					'msg' => implode('<br>', $messages)
+				)
+			);
 		} break;
 
 		case 'xplankonverter_konvertierung_loeschen' : {
@@ -1040,6 +1109,8 @@ function go_switch_xplankonverter($go){
 
 		case 'xplankonverter_download_edited_shapes' : {
 			if ($GUI->xplankonverter_is_case_forbidden()) return;
+
+			$GUI->konvertierung->create_edited_shapes();
 
 			if (!$GUI->konvertierung->files_exists('edited_shapes')) {
 				$GUI->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');

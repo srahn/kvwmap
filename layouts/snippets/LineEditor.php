@@ -64,9 +64,6 @@ function buildwktlinefromsvgpath(svgpath){
 ?>
 <table style="border-bottom: 1px solid grey; border-collapse: separate; width: 100%" border="0" cellpadding="0" cellspacing="5" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
-    <td align="center" colspan="2"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
-  </tr>
-  <tr> 
     <td>
 			<table cellspacing="0" cellpadding="0">
 				<tr>
@@ -169,7 +166,7 @@ function buildwktlinefromsvgpath(svgpath){
 				<tr>
 					<td align="center">
 						<? if($this->new_entry != true){ ?>
-						<a href="index.php?go=Layer-Suche&go_plus=Suchen&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>">Sachdatenanzeige</a>
+						<a href="javascript:void(0);" onclick="overlay_link('go=Layer-Suche&go_plus=Suchen&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>', true);">Sachdatenanzeige</a>
 						<? } ?>&nbsp;
 					</td>
 				</tr>

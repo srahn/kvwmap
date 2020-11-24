@@ -60,6 +60,11 @@
 				$shapefile->deleteUploadFiles();
 			} break;
 
+			case ($fired == 'AFTER' AND $event == 'DELETE') : {
+				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_shapes Funktion aus.', true);
+				$GUI->add_message('warning', 'Lösche Gruppe wenn keine Layer mehr enthalten sind.');
+			}
+
 			default : {
 				$executed = false;
 			}
@@ -98,7 +103,7 @@
 		switch(true) {
 
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
-				#echo '<br>Führe ' . $fired . ' ' . $event . ' in handle_rp_plan Funktion aus.';
+				#echo '<br>Führe ' . $fired . ' ' . $event . ' in handle_xp_plan Funktion aus.';
 				$xp_plan = XP_Plan::find_by_id($GUI, 'oid', $oid, $planart);
 
 				# Create Konvertierung and get konvertierung_id
@@ -119,7 +124,7 @@
 				$GUI->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
 				$konvertierung->set_status();
 
-				if ($GUI->formvars['20;;;;Text_not_saveable;;not_saveable'] == 'xplan_gmlas_' . $GUI->user->id) {
+				if ($GUI->formvars['20;layer_schemaname;;;Text_not_saveable;;unknown;0'] == 'xplan_gmlas_' . $GUI->user->id) {
 					# Creates Bereiche for each Plan loaded with GMLAS
 					$gml_extractor = new Gml_extractor($GUI->pgdatabase, 'placeholder', 'xplan_gmlas_' . $GUI->user->id);
 					$gml_extractor->insert_into_bereich($bereichtable, $konvertierung_id, $GUI->user->id);
@@ -166,7 +171,7 @@
 			} break;
 
 			case ($fired == 'AFTER' AND $event == 'UPDATE') : {
-				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, true);
+				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, false);
 				$regel = Regel::find_by_id($GUI, 'oid', $oid);
 				#$regel->delete_gml_layer();
 				$regel->create_gml_layer();

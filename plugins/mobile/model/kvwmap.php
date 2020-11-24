@@ -45,13 +45,14 @@
 		}
 		else {
 			$stellen = array();
-			while ($rs = mysql_fetch_assoc($ret[1])) {
+			while ($rs = $GUI->database->result->fetch_assoc()) {
 				$stellen[] = $rs;
 			}
 
 			$result = array(
 				"success" => true,
 				"user_id" => $GUI->user->id,
+				"user_name" => $GUI->user->Vorname . ' ' . $GUI->user->Name,
 				"stellen" => $stellen
 			);
 		}
@@ -67,7 +68,6 @@
 		$mobile_layers = array();
 
 		foreach($layers['ID'] AS $layer_id) {
-
 			if ($layer_id != '') {
 				# Abfragen der Layerdefinition
 				$layerset = $GUI->user->rolle->getLayer($layer_id);
@@ -95,7 +95,7 @@
 						$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
 						#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
 					}
-					$layer = $GUI->mobile_reformat_layer($layerset[0]);
+					$layer = $GUI->mobile_reformat_layer($layerset[0], $attributes);
 					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID);
 					$layer['attributes'] = $GUI->mobile_reformat_attributes($attributes);
 
@@ -231,17 +231,18 @@
 		return $result;
 	};
 
-	$GUI->mobile_reformat_layer = function($layerset) use ($GUI) {
+	$GUI->mobile_reformat_layer = function($layerset, $attributes) use ($GUI) {
 		$geometry_types = array(
 			"Point", "Line", "Polygon"
 		);
+
 		$layer = array(
 			"id" => $layerset['Layer_ID'],
 			"title" => $layerset['Name'],
 			"alias" => $layerset['alias'],
-			"id_attribute" => "id",
+			"id_attribute" => $layerset['oid'],
 			"name_attribute" => $layerset['labelitem'],
-			"title_attribute" => "title",
+			"geometry_attribute" => $attributes['the_geom'],
 			"geometry_type" => $geometry_types[$layerset['Datentyp']],
 			"table_name" => $layerset['maintable'],
 			"schema_name" => $layerset['schema'],
@@ -274,6 +275,7 @@
 				"tooltip" => $attr['tooltip'][$key],
 				"type" => $attr['type'][$key],
 				"nullable" => $attr['nullable'][$key],
+				"saveable" => $attr['saveable'][$key],
 				"form_element_type" => $attr['form_element_type'][$key],
 				"options" => $attr['options'][$key],
 				"privilege" => $attr['privileg'][$key],
@@ -289,7 +291,17 @@
 				return array(
 					'id' => $class['Class_ID'],
 					'name' => $class['Name'],
-					'expression' => $class['Expression']
+					'expression' => $class['Expression'],
+					'style' => array(
+						'id' => $class['Style'][0]['Style_ID'],
+						'symbol' => $class['Style'][0]['symbol'],
+						'stroke' => ($class['Style'][0]['outlinecolor'] == '-1 -1 -1' ? false : true),
+						'fillColor' => $class['Style'][0]['color'],
+						'opacity' => $class['Style'][0]['opacity'],
+						'color' => $class['Style'][0]['outlinecolor'],
+						'weight' => $class['Style'][0]['width'],
+						'size' => $class['Style'][0]['size']
+					)
 				);
 			},
 			$classes
@@ -377,17 +389,17 @@
 					--raise notice '_query: %', _query;
 					foreach part in array string_to_array(_query, ';')
 					loop
-					-- replace horizontal tabs, new lines and carriage returns
-					part = trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
+						-- replace horizontal tabs, new lines and carriage returns
+						part = trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
 
-					IF strpos(lower(part), 'set search_path') = 1 THEN
-					search_path_schema = trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
-					--RAISE notice 'schema in search_path %', search_path_schema;
-					END IF;
+						IF strpos(lower(part), 'set search_path') = 1 THEN
+						search_path_schema = trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
+						--RAISE notice 'schema in search_path %', search_path_schema;
+						END IF;
 
-					IF strpos(lower(part), 'insert into ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'insert into ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
-					_sql := part;
-					END IF;
+						IF strpos(lower(part), 'insert into ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'insert into ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
+						_sql := part;
+						END IF;
 					end loop;
 					--raise notice 'sql nach split by ; und select by update: %', _sql;
 
@@ -395,7 +407,7 @@
 					--RAISE notice 'sql nach remove line feeds %', _sql;
 
 					_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
-					--RAISE notice 'sql nach remove %', TG_TABLE_SCHEMA || '.';
+					--RAISE notice 'sql nach add schema %', TG_TABLE_SCHEMA || '.';
 
 					_sql := kvw_insert_str_before(_sql, ', version', ')');
 					--RAISE notice 'sql nach add column version %', _sql;
@@ -405,6 +417,9 @@
 
 					_sql := substr(_sql, 1, strpos(_sql, 'VALUES') - 1) || regexp_replace(substr(_sql, strpos(_sql, 'VALUES')), '\)+', ', ' || new_version || ')', 'g');
 					--RAISE notice 'sql nach add values for version %', _sql;
+
+					_sql := replace(_sql, 'RETURNING uuid', '');
+					--RAISE notice 'sql nach entfernen von RETURNING uuid';
 
 					--RAISE notice 'Eintragen des INSERT-Statements mit Version: %', new_version; 
 					INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);
@@ -436,20 +451,20 @@
 					--raise notice '_query: %', _query;
 					foreach part in array string_to_array(_query, ';')
 					loop
-					--raise notice 'part in loop vor trim und replace: %', part;
-					-- replace horizontal tabs, new lines and carriage returns
-					part = trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
-					--raise notice 'part in loop nach trim und replace: %', part;
-					--raise notice 'suche nach %', 'update ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME;
+						--raise notice 'part in loop vor trim und replace: %', part;
+						-- replace horizontal tabs, new lines and carriage returns
+						part = trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
+						--raise notice 'part in loop nach trim und replace: %', part;
+						--raise notice 'suche nach %', 'update ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME;
 
-					IF strpos(lower(part), 'set search_path') = 1 THEN
-					search_path_schema = trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
-					--RAISE notice 'schema in search_path %', search_path_schema;
-					END IF;
+						IF strpos(lower(part), 'set search_path') = 1 THEN
+						search_path_schema = trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
+						--RAISE notice 'schema in search_path %', search_path_schema;
+						END IF;
 
-					IF strpos(lower(part), 'update ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'update ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
-					_sql := part;
-					END IF;
+						IF strpos(lower(part), 'update ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'update ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
+						_sql := part;
+						END IF;
 					end loop;
 					--raise notice 'sql nach split by ; und select by update: %', _sql;
 

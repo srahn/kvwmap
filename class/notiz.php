@@ -18,7 +18,7 @@ class notiz {
   # getNotizen
   ################################################################
 
-  function notiz($db, $client_epsg) {
+  function __construct($db, $client_epsg) {
     global $debug;
     $this->debug=$debug;
     $this->database=$db;

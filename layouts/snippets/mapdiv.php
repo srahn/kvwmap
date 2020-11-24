@@ -29,7 +29,6 @@
 			<input type="hidden" name="measured_distance" value="<? echo $this->formvars['measured_distance']; ?>">
 			<input type="hidden" name="layer_options_open" value="">
 			<input type="hidden" name="group_options_open" value="">
-			<input type="hidden" name="hauptkarte" value="<?php echo $this->img['hauptkarte']; ?>">
 			<input type="hidden" name="free_polygons" value="">
 			<input type="hidden" name="free_texts" value="">
 			<?php
@@ -49,7 +48,13 @@
 				&nbsp;
 				<input type="text" style="width: 150px" name="secondcoords" value=""><?
 			} ?>
-		</div>			
+		</div>
+		
+		<div id="showmeasurement" style="display:none;">
+			<i class="fa fa-close" style="cursor: pointer; float: right; margin: 0 5px 0 5px;" onclick="$('#showmeasurement').hide();clearMeasurement();"></i>
+			<span class="fett"><?php echo $strMeasurement; ?>:&nbsp;</span>
+			<input type="text" style="width: 150px" id="measurement" name="measurement" value="">
+		</div>
 			
 		</div>
 	

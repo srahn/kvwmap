@@ -35,5 +35,5 @@
  $strCopyDataset="Datensatz kopieren";
  $strNewDataset="neuen Datensatz anlegen";
  $strToBottom="nach unten";
- $strEditList="Liste bearbeiten";
+ $strShowAllSeparat="alle separat anzeigen";
 ?>

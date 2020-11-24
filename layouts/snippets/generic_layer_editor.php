@@ -1,7 +1,6 @@
 <?
-
 	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
-  
+ 
 	$checkbox_names = '';
 	$columnname = '';
 	$geom_tablename = '';
@@ -10,13 +9,19 @@
 	$privileg = '';
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
+
+	if (!$invisible_attributes) {
+		$invisible_attributes = array();
+		$invisible_attributes[$layer['Layer_ID']] = array();
+	};
+
 	$size = 16;
 	$select_width = 'width: 100%;'; 
 	if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
 		$layer['Name'] = $layer['alias'];
 	}
 	$doit = false;
-  $anzObj = count($layer['shape']);
+  $anzObj = @count($layer['shape']);
   if ($anzObj > 0) {
   	$this->found = 'true';
 		$k = 0;
@@ -30,7 +35,6 @@
 	
 	if($doit == true){
 ?>
-<SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 
 <div id="layer" onclick="remove_calendar();">
 <input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
@@ -39,14 +43,15 @@
 	<tr>
 		<? if (!$this->user->rolle->visually_impaired AND $anzObj > 0) { ?>
 		<td align="right" valign="top" style="padding: 0 10 0 0">
-		<?	if($this->search == true AND $this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
-				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" title="'.$strbackToSearch.'"><img class="hover-border" src="'.GRAPHICSPATH.'pfeil_links.gif"></a>';
+		<?	
+			if($this->search == true AND $this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
+				if($this->formvars['backlink'] == ''){
+					$this->formvars['backlink'] = 'javascript:currentform.go.value=\'get_last_search\';currentform.submit();';
+				}
+				echo '<a href="'.strip_pg_escape_string($this->formvars['backlink']).'" target="root" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
 			} ?>
 		</td>
 		<td align="right" valign="top" style="padding: 0 10 0 0">
-			<a href="javascript:scrollbottom();"	title="<? echo $strToBottom; ?>">
-				<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
-			</a>
 		</td>
 		<td valign="top" style="padding: 0 0 0 0">
 			<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
@@ -58,9 +63,6 @@
 			<img onclick="checkForUnsavedChanges(event);switch_gle_view1(<? echo $layer['Layer_ID']; ?>);"" title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border pointer" src="<? echo GRAPHICSPATH.'rows.png'; ?>">
 		</td>
 		<td align="right" valign="top">
-			<a href="javascript:scrollbottom();"	title="<? echo $strToBottom; ?>">
-				<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
-			</a>
 		</td>
 		<? } ?>
 	</tr>
@@ -86,18 +88,18 @@
 							if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								if($explosion[1] != '')$collapsed = true;else $collapsed = false;
-								$groupname = $explosion[0];
+								$groupname = str_replace(' ', '_', $explosion[0]);
 								if($collapsed)echo '1';
 								else echo $colspan;
 								echo '" data-colspan="'.$colspan.'">';
-								echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\''.$groupname.'\')"><img id="img_'.$groupname.'" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;<span>'.$groupname.'</span></td><td style="border:none;background: url('.BG_IMAGE.');"></td>';
+								echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\''.$groupname.'\')"><img id="img_'.$groupname.'" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;<span>'.$explosion[0].'</span></td><td style="border:none;background: url('.BG_IMAGE.');"></td>';
 								$colspan = 0;
 								if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
 									#$colspan = 1;
 								}
 								if($j < count($this->qlayerset[$i]['attributes']['name'])-1){
 									$explosion = explode(';', $layer['attributes']['group'][$j+1]);
-									$groupname = $explosion[0];
+									$groupname = str_replace(' ', '_', $explosion[0]);
 									echo '<td id="'.$groupname.'" style="background: '.BG_GLEATTRIBUTE.'" colspan="';								
 								}
 							}
@@ -112,7 +114,7 @@
 			  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 						$explosion = explode(';', $layer['attributes']['group'][$j]);
 						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
-						$groupname = $explosion[0];
+						$groupname = str_replace(' ', '_', $explosion[0]);
 						if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 						}
@@ -181,7 +183,7 @@
 		  <table>
 				<tr>
 					<td style="line-height: 1px; ">
-						<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
+						<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>"> 
 						<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't')echo 'no_edit'; ?>" name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID']; ?>">&nbsp;
 					</td>
 				</tr>
@@ -194,7 +196,7 @@
 		for($j = 0; $j < count($layer['attributes']['name']); $j++){
 			$explosion = explode(';', $layer['attributes']['group'][$j]);
 			if($explosion[1] != '')$collapsed = true;else $collapsed = false;
-			$groupname = $explosion[0];
+			$groupname = str_replace(' ', '_', $explosion[0]);
 			if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 				echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 			}
@@ -204,7 +206,7 @@
 			if($layer['attributes']['visible'][$j]){
 				if($layer['attributes']['type'][$j] != 'geometry') {
 					if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-						echo '<td id="value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" '.get_td_class_or_style(array('group_'.$groupname, $layer['shape'][$k][$layer['attributes']['style']], 'position: relative; text-align: right'.($collapsed ? ';display: none' : ''))) . '>';
+						echo '<td id="value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" '.get_td_class_or_style(array('group_'.$groupname.' value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j], $layer['shape'][$k][$layer['attributes']['style']], 'position: relative; text-align: right'.($collapsed ? ';display: none' : ''))) . '>';
 						if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
 							echo calendar($layer['attributes']['type'][$j], $layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
 						}
@@ -278,7 +280,7 @@
 					for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 						$explosion = explode(';', $layer['attributes']['group'][$j]);
 						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
-						$groupname = $explosion[0];
+						$groupname = str_replace(' ', '_', $explosion[0]);
 						if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 						}
@@ -328,7 +330,7 @@
 			  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 						$explosion = explode(';', $layer['attributes']['group'][$j]);
 						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
-						$groupname = $explosion[0];
+						$groupname = str_replace(' ', '_', $explosion[0]);
 						if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 							echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 						}
@@ -369,14 +371,13 @@
 
 				<tr id="edit_all4_<? echo $layer['Layer_ID']; ?>" style="display: none">
 					<td style="text-align: center; background-color:<? echo BG_DEFAULT; ?>;">
-						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(new Array('Hilfe:','Sie können hier die Attribut-Werte von mehreren Datensätzen gleichzeitig bearbeiten. Die Werte werden nur für die ausgewählten Datensätze übernommen.'),Style[0], document.getElementById('TipLayer<? echo $layer['Layer_ID']; ?>'))" onmouseout="htm()">
-						<DIV id="TipLayer<? echo $layer['Layer_ID']; ?>" style="visibility:hidden;position:absolute;z-index:1000;"></DIV>
+						<span style="--left: 0px" data-tooltip="Sie können hier die Attribut-Werte von mehreren Datensätzen gleichzeitig bearbeiten. Die Werte werden nur für die ausgewählten Datensätze übernommen."></span>
 					</td>
 					<?					
 						for($j = 0; $j < count($layer['attributes']['name']); $j++){
 							$explosion = explode(';', $layer['attributes']['group'][$j]);
 							if($explosion[1] != '')$collapsed = true;else $collapsed = false;
-							$groupname = $explosion[0];
+							$groupname = str_replace(' ', '_', $explosion[0]);
 							if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 								echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 							}
@@ -546,7 +547,7 @@
 </table>
 	<? } 
 	
-	for($l = 0; $l < count($invisible_attributes[$layer['Layer_ID']]); $l++){
+	for($l = 0; $l < @count($invisible_attributes[$layer['Layer_ID']]); $l++){
 		echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 	}
 	

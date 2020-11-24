@@ -7,12 +7,13 @@ class XP_Object extends PgObject {
 
 	static $schema = 'xplan_gml';
 
-	function XP_Object($konvertierung, $class_name) {
-		$this->PgObject($konvertierung->gui, XP_Object::$schema, strtolower($class_name));
+	function __construct($konvertierung, $class_name) {
+		parent::__construct($konvertierung->gui, XP_Object::$schema, strtolower($class_name));
 		$this->class_name = $class_name;
 		$this->konvertierung = $konvertierung;
 		$this->identifier = 'gml_id';
 		$this->identifier_type = 'text';
+		$this->konformitaetsbedingungen = array();
 	}
 
 	public function get_sub_classes() {
@@ -43,6 +44,7 @@ class XP_Object extends PgObject {
 		return $sub_classes;
 	}
 
+	# Order by gml_id to always get same order if a plan is reloaded with GMLAS
 	public function get_object_rows() {
 		$sub_classes = $this->get_sub_classes();
 		$sql = "
@@ -101,6 +103,8 @@ class XP_Object extends PgObject {
 						$sub_classes
 					)
 				) . "
+			ORDER BY
+				gml_id
 		";
 
 		$this->debug->show('sql to find objects for class ' . $this->tableName . ': ' . $sql, false);

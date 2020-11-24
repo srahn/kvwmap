@@ -1,7 +1,6 @@
 <?php
 # 2007-12-30 pk
   include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
-	include(LAYOUTPATH.'snippets/ahah.php');
 	$show_legend_graphic = (defined('LEGEND_GRAPHIC_FILE') AND LEGEND_GRAPHIC_FILE != '' AND file_exists(SNIPPETS.LEGEND_GRAPHIC_FILE));
 	global $selectable_scales;
 	$selectable_scales = array_reverse($selectable_scales);
@@ -49,6 +48,10 @@ function startup(){
 
 function showtooltip(result, showdata){
 	document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
+function clearMeasurement(){
+	document.getElementById("map").SVGclearMeasurement();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
 function showMapImage(){

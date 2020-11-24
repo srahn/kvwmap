@@ -40,7 +40,7 @@ class Nachweis {
   var $database;
   var $client_epsg;
     
-  function Nachweis($database, $client_epsg) {
+  function __construct($database, $client_epsg) {
     global $debug;
     $this->debug=$debug;
     $this->database=$database;
@@ -118,10 +118,25 @@ class Nachweis {
     }
 	}
 	
+	function get_next_nachweis_id(){
+		$sql = "select last_value + 1 from nachweisverwaltung.n_nachweise_id_seq";
+		$ret = $this->database->execSQL($sql,4, 0);
+		if(!$ret[0]){
+			$rs = pg_fetch_row($ret[1]);
+			return $rs[0];
+		}
+	}
+	
   function getZielDateiName($formvars) {
     #2005-11-24_pk
     $pathparts=pathinfo($formvars['Bilddatei_name']);
-    $zieldateiname=$formvars['flurid'].'-'.$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'-'.$formvars['artname'].'-'.str_pad(trim($formvars['Blattnr']),3,'0',STR_PAD_LEFT).'.'.$pathparts['extension'];
+		if($formvars[NACHWEIS_PRIMARY_ATTRIBUTE] == ''){		# primäres Ordungskriterium leer -> Nachweis-ID nehmen
+			$id = $secondary.str_pad(($formvars['id'] ?: $this->get_next_nachweis_id()), RISSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
+		}
+		else{
+			$id = $this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]);
+		}
+    $zieldateiname=$formvars['flurid'].'-'.$id.'-'.$formvars['artname'].'-'.str_pad(trim($formvars['Blattnr']),3,'0',STR_PAD_LEFT).'.'.$pathparts['extension'];
     #echo $zieldateiname;
     return $zieldateiname;
   }
@@ -131,7 +146,8 @@ class Nachweis {
     $this->database->begintransaction();        
 
     # 2. Prüfen der Eingabewerte
-    $ret=$this->pruefeEingabedaten($formvars['id'], $formvars['datum'],$formvars['VermStelle'],$formvars['hauptart'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['Blattformat'],$formvars['Blattnr'],false,$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring'], $formvars['flurid'], $formvars['Blattnr']);
+		$dokumentarten = $this->getDokumentarten();
+    $ret=$this->pruefeEingabedaten($formvars['id'], $formvars['datum'],$formvars['VermStelle'],$formvars['hauptart'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['Blattformat'],$formvars['Blattnr'],false,$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring'], $formvars['flurid'], $formvars['Blattnr'], $dokumentarten[$formvars['hauptart']][$formvars['unterart']]['pok_pflicht']);
     if ($ret[0]) {
       # Fehler bei den Eingabewerten entdeckt.  
       #echo '<br>Ergebnis der Prüfung: '.$ret;
@@ -241,11 +257,11 @@ class Nachweis {
   }	
   
   function getDokumentarten(){
-  	$sql="SELECT * FROM nachweisverwaltung.n_dokumentarten order by sortierung, art"; 
+  	$sql="SELECT id, art, geometrie_relevant, hauptart, sortierung, abkuerzung, pok_pflicht::integer FROM nachweisverwaltung.n_dokumentarten order by sortierung, art"; 
     $ret=$this->database->execSQL($sql,4, 0);    
     if (!$ret[0]) {
-      while($rs=pg_fetch_array($ret[1])){
-				$art[$rs['hauptart']][] = $rs;
+      while($rs=pg_fetch_assoc($ret[1])){
+				$art[$rs['hauptart']][$rs['id']] = $rs;
       }
     }
     return $art;
@@ -311,10 +327,10 @@ class Nachweis {
   	return $result;
   }
   
-  function pruefeEingabedaten($id, $datum, $VermStelle, $hauptart, $gueltigkeit, $stammnr, $rissnummer, $fortfuehrung, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring, $flur, $blattnr){
+  function pruefeEingabedaten($id, $datum, $VermStelle, $hauptart, $gueltigkeit, $stammnr, $rissnummer, $fortfuehrung, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring, $flur, $blattnr, $pok_pflicht){
 		global $nachweis_unique_attributes;
 		# Test ob schon ein Nachweis mit dieser Kombination existiert
-		if($nachweis_unique_attributes != NULL){
+		if($pok_pflicht AND $nachweis_unique_attributes != NULL){
 			if(NACHWEIS_SECONDARY_ATTRIBUTE == 'fortfuehrung')$test_fortfuehrung = $fortfuehrung;
 			if(in_array('art', $nachweis_unique_attributes)){
 				$test_art = array($hauptart);
@@ -391,8 +407,10 @@ class Nachweis {
     # Testen der Stammnummer
     if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){
 	    $stammnr=trim($stammnr);
-	    if ($stammnr == ''){ 
-	      $errmsg.='Bitte geben Sie die Antragsnummer korrekt ein! <br>';
+	    if ($stammnr == ''){
+				if($pok_pflicht){
+					$errmsg.='Bitte geben Sie die Antragsnummer korrekt ein! <br>';
+				}
 	    }
 	    else{
 	      $nums = array ( "-", "(", ")", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" );
@@ -410,8 +428,10 @@ class Nachweis {
   	# Testen der Rissnummer
     if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
 	    $rissnummer=trim($rissnummer);
-	    if ($rissnummer == ''){ 
-	      $errmsg.='Bitte geben Sie die Rissnummer korrekt ein! <br>';
+	    if ($rissnummer == ''){
+				if($pok_pflicht){
+					$errmsg.='Bitte geben Sie die Rissnummer korrekt ein! <br>';
+				}
 	    }
 	    else{
 	      $nums = array ( "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" );
@@ -1348,7 +1368,7 @@ class Festpunkte {
   ################################################################################
 
 # 2016-11-03 H.Riedel - fp_punkte_temp durch fp_punkte_alkis ersetzt
-  function Festpunkte($dateiname,$database) {
+  function __construct($dateiname,$database) {
     global $debug;
     $this->debug=$debug;
     $this->database=$database;
@@ -1744,7 +1764,7 @@ class Vermessungsstelle {
   #
   ################################################################################
 
-  function Vermessungsstelle($db){
+  function __construct($db){
     $this->database=$db;
   }
 
@@ -1782,7 +1802,7 @@ class Vermessungsart {
   #
   ################################################################################
 
-  function Vermessungsart($db){
+  function __construct($db){
     $this->database=$db;
   }
 

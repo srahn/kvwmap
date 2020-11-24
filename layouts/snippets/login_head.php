@@ -3,7 +3,6 @@
 		<? include(SNIPPETS . 'gui_head.php'); ?>
 		<script type="text/javascript">
 			function load() {
-				console.log('login form loaded.');
 				$('input[name="browserwidth"]').val($(window).width());
 				setTimeout(function() { $("input#login_name").focus(); }, 100);
 			}

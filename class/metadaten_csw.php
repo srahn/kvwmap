@@ -39,7 +39,7 @@ class metadata_csw {
   #
   ################################################################
 
-  function metadata_csw($db) {
+  function __construct($db) {
     global $debug;
     $this->debug=$debug;
     $this->database=$db;

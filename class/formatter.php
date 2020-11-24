@@ -2,7 +2,7 @@
 class formatter {
 	
   # Konstruktor
-  function formatter($data, $format, $content_type, $callback) {
+  function __construct($data, $format, $content_type, $callback) {
 		$this->data = $data;
 		$this->format = $format;
     $this->content_type = $content_type;

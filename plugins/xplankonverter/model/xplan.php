@@ -30,12 +30,12 @@
 #############################
 
 class xplan {
-    
-  function xplan($database) {
-    global $debug;
-    $this->debug=$debug;
-    $this->database = $database;
-  }
+
+	function __construct($database) {
+		global $debug;
+		$this->debug=$debug;
+		$this->database = $database;
+	}
 }
-  
+
 ?>

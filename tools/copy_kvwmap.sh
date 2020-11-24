@@ -1,6 +1,8 @@
 #!/bin/bash
 usage() {
   echo "Usage: copy_kvwmap.sh [OPTIONS] SOURCE TARGET"
+  echo ""
+  echo "Das Script muss auf dem Hostrechner ausgeführt werden."
   echo "SOURCE kann folgende Werte haben:"
   echo "  dev   Kopiert von Entwicklungsversion nach TARGET"
   echo "  demo  Kopiert von Demoversion nach TARGET"
@@ -221,7 +223,7 @@ sql="
 "
 exec_pgsql
 
-echo "Stelle Produktionsdatenbank ${SOURCE_PGSQL_DBNAME} in Datenbank ${TARGET_PGSQL_DBNAME} wieder her"
+echo "Stelle Source-Datenbank ${SOURCE_PGSQL_DBNAME} in Target-Datenbank ${TARGET_PGSQL_DBNAME} wieder her"
 docker exec pgsql-server ${PGSQL_BIN}/pg_restore -U $PGSQL_USER -Fc -d ${TARGET_PGSQL_DBNAME} /var/${DUMP_DIR}/${TARGET_PGSQL_DBNAME}.dump
 
 echo "Nehme Ersetzungen in PostgreSQL-Datenbank ${TARGET_PGSQL_DBNAME} vor"
@@ -230,16 +232,16 @@ PGSQL_DBNAME=${TARGET_PGSQL_DBNAME}
 exec_pgsql
 
 MYSQL_DBNAME=$SOURCE_MYSQ_DBNAME
-echo "Lösche Testdatenbank ${TARGET_MYSQL_DBNAME}, erzeuge eine neue leere und spiele die Sicherung von ${SOURCE_MYSQL_DBNAME} ein"
+echo "Lösche Target-Datenbank ${TARGET_MYSQL_DBNAME}, erzeuge eine neue leere und spiele die Sicherung von Source-Datenbank ${SOURCE_MYSQL_DBNAME} ein"
 sql="DROP DATABASE IF EXISTS ${TARGET_MYSQL_DBNAME}"
 exec_mysql
 
 sql="CREATE DATABASE ${TARGET_MYSQL_DBNAME}"
 exec_mysql
 
-echo "exec: mysqldump -h ${MYSQL_SERVER} -u $MYSQL_USER --password=${MYSQL_PASSWORD} ${SOURCE_MYSQL_DBNAME} > /home/gisadmin/${DUMP_DIR}/${TARGET_MYSQL_DBNAME}.dump"
+echo "exec: mysqldump -h ${MYSQL_SERVER} -u $MYSQL_USER --password=xxxx ${SOURCE_MYSQL_DBNAME} > /home/gisadmin/${DUMP_DIR}/${TARGET_MYSQL_DBNAME}.dump"
 docker exec web mysqldump -h ${MYSQL_SERVER} -u $MYSQL_USER --password=${MYSQL_PASSWORD} ${SOURCE_MYSQL_DBNAME} > /home/gisadmin/${DUMP_DIR}/${TARGET_MYSQL_DBNAME}.dump
-echo "exec: mysql -h ${MYSQL_SERVER} -u $MYSQL_USER --password=${MYSQL_PASSWORD} ${TARGET_MYSQL_DBNAME} < /home/gisadmin/${DUMP_DIR}/${TARGET_MYSQL_DBNAME}.dump"
+echo "exec: mysql -h ${MYSQL_SERVER} -u $MYSQL_USER --password=xxxx ${TARGET_MYSQL_DBNAME} < /home/gisadmin/${DUMP_DIR}/${TARGET_MYSQL_DBNAME}.dump"
 docker exec -i web mysql -h ${MYSQL_SERVER} -u $MYSQL_USER --password=${MYSQL_PASSWORD} ${TARGET_MYSQL_DBNAME} < /home/gisadmin/${DUMP_DIR}/${TARGET_MYSQL_DBNAME}.dump
 
 MYSQL_DBNAME=$TARGET_MYSQL_DBNAME

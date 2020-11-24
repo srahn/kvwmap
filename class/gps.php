@@ -35,7 +35,7 @@ class gps {
   # gps($database)
   ##################################################################################################################################################
 
-  function gps($source) {
+  function __construct($source) {
     global $debug;
     $this->debug=$debug;
     $this->source=$source;

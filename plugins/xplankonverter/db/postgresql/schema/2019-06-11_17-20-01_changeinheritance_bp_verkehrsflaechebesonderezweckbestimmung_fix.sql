@@ -33,7 +33,7 @@ CREATE TABLE xplan_gml.bp_strassenverkehrsflaeche_temp
   wirdausgeglichendurchflaeche text,
   wirdausgeglichendurchabe text,
   reftextinhalt text,
-  "position" geometry(MultiPolygon) NOT NULL,
+  position geometry(MultiPolygon) NOT NULL,
   flaechenschluss boolean NOT NULL,
   nutzungsform xplan_gml.xp_nutzungsform, -- nutzungsform enumeration XP_Nutzungsform 0..1
   begrenzungslinie text, -- Assoziation zu: FeatureType BP_StrassenbegrenzungsLinie (bp_strassenbegrenzungslinie) 0..*
@@ -128,7 +128,7 @@ COMMENT ON COLUMN xplan_gml.bp_strassenverkehrsflaeche_temp.zu_ausn IS 'Ableitun
 
 
 INSERT INTO
-    xplan_gml.bp_strassenverkehrsflaeche_temp(gml_id,uuid,text,rechtsstand,gesetzlichegrundlage,gliederung1,gliederung2,ebene,hatgenerattribut,hoehenangabe,user_id,created_at,updated_at,konvertierung_id,refbegruendunginhalt,gehoertzubereich,wirddargestelltdurch,externereferenz,startbedingung,endebedingung,rechtscharakter,wirdausgeglichendurchspemassnahme,wirdausgeglichendurchmassnahme,wirdausgeglichendurchspeflaeche,wirdausgeglichendurchflaeche,wirdausgeglichendurchabe,reftextinhalt,"position",flaechenschluss,nutzungsform,begrenzungslinie,maxzahlwohnungen,fmin,fmax,bmin,bmax,tmin,tmax,gfzmin,gfzmax,gfz,gfz_ausn,gfmin,gfmax,gf,gf_ausn,bmz,bmz_ausn,bm,bm_ausn,grzmin,grzmax,grz,grz_ausn,grmin,grmax,gr,gr_ausn,zmin,zmax,zzwingend,z,z_ausn,z_staffel,z_dach,zumin,zumax,zuzwingend,zu,zu_ausn,aufschrift)
+    xplan_gml.bp_strassenverkehrsflaeche_temp(gml_id,uuid,text,rechtsstand,gesetzlichegrundlage,gliederung1,gliederung2,ebene,hatgenerattribut,hoehenangabe,user_id,created_at,updated_at,konvertierung_id,refbegruendunginhalt,gehoertzubereich,wirddargestelltdurch,externereferenz,startbedingung,endebedingung,rechtscharakter,wirdausgeglichendurchspemassnahme,wirdausgeglichendurchmassnahme,wirdausgeglichendurchspeflaeche,wirdausgeglichendurchflaeche,wirdausgeglichendurchabe,reftextinhalt,position,flaechenschluss,nutzungsform,begrenzungslinie,maxzahlwohnungen,fmin,fmax,bmin,bmax,tmin,tmax,gfzmin,gfzmax,gfz,gfz_ausn,gfmin,gfmax,gf,gf_ausn,bmz,bmz_ausn,bm,bm_ausn,grzmin,grzmax,grz,grz_ausn,grmin,grmax,gr,gr_ausn,zmin,zmax,zzwingend,z,z_ausn,z_staffel,z_dach,zumin,zumax,zuzwingend,zu,zu_ausn,aufschrift)
 SELECT
     a.gml_id as gml_id,
     a.uuid as uuid,
@@ -157,7 +157,7 @@ SELECT
     a.wirdausgeglichendurchflaeche as wirdausgeglichendurchflaeche,
     a.wirdausgeglichendurchabe as wirdausgeglichendurchabe,
     a.reftextinhalt as reftextinhalt,
-    a."position" as "position",
+    a.position as position,
     a.flaechenschluss as flaechenschluss,
     a.nutzungsform as nutzungsform,
     a.begrenzungslinie as begrenzungslinie,

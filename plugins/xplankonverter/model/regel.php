@@ -9,9 +9,9 @@ class Regel extends PgObject {
 	static $tableName = 'regeln';
 	static $write_debug = false;
 
-	function Regel($gui) {
+	function __construct($gui) {
 		$gui->debug->show('Create new Object Regel', Regel::$write_debug);
-		$this->PgObject($gui, Regel::$schema, Regel::$tableName);
+		parent::__construct($gui, Regel::$schema, Regel::$tableName);
 		$this->layertypen = array(
 			'Punkte',
 			'Linien',
@@ -24,11 +24,18 @@ class Regel extends PgObject {
 		);
 	}
 
-public static	function find_by_id($gui, $by, $id) {
+	public static	function find_by_id($gui, $by, $id) {
 		$regel = new Regel($gui);
 		$regel->find_by($by, $id);
 		$regel->konvertierung = $regel->get_konvertierung();
 		return $regel;
+	}
+
+	public static	function find_by_konvertierung_and_class_name($gui, $konvertierung_id, $class_name) {
+		#echo '<br>Finde Regel mit konvertierung_id = ' . $konvertierung_id . " AND class_name LIKE '" . $class_name . "'";
+		$regel = new Regel($gui);
+		$regeln = $regel->find_where("konvertierung_id = " . $konvertierung_id . " AND class_name LIKE '" . $class_name . "'", $id);
+		return $regeln;
 	}
 
 	/*
@@ -40,8 +47,8 @@ public static	function find_by_id($gui, $by, $id) {
 		$full_table_name_arr = explode('.', $full_table_name);
 		$table_name = $full_table_name_arr[1];
 		
-		$sql = 
-		"SELECT
+		$sql = "
+			SELECT
 			EXISTS(
 				SELECT
 					column_name
@@ -105,30 +112,29 @@ public static	function find_by_id($gui, $by, $id) {
 
 			$this->debug->show('<br>bereich_gml_id: ' . $this->get('bereich_gml_id'), Regel::$write_debug);
 			if ($sql_ausfuehrbar) {
+				$this->debug->show('<br>SQL der Regel: ' . $this->get('name') . ' ausfuehrbar', Regel::$write_debug);
 
-					$this->debug->show('<br>SQL der Regel: ' . $this->get('name') . ' ausfuehrbar', Regel::$write_debug);
-					# Prüft ob die erzeugten Geometrien valide sind.
-					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geometrie_isvalid');
+				# Prüft ob die erzeugten Geometrien valide sind.
+				$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geometrie_isvalid');
+				$validierung->konvertierung_id = $konvertierung_id;
+				$all_geom_isvalid = $validierung->geometrie_isvalid($this, $konvertierung);
+
+				if ($all_geom_isvalid) {
+					# Prüft ob die erzeugten Geometrien im räumlichen Geltungsbereich des Planes liegen.
+					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geom_within_plan');
 					$validierung->konvertierung_id = $konvertierung_id;
-					$all_geom_isvalid = $validierung->geometrie_isvalid($this, $konvertierung);
-					
-					if ($all_geom_isvalid) {
-						# Prüft ob die erzeugten Geometrien im räumlichen Geltungsbereich des Planes liegen.
-						$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geom_within_plan');
-						$validierung->konvertierung_id = $konvertierung_id;
-						$validierung->geom_within_plan($this, $konvertierung);
+					$validierung->geom_within_plan($this, $konvertierung);
 
-						# Prüft ob die erzeugten Geometrien im Geltungsbereich der Bereiche liegen.
-						$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geom_within_bereich');
-						$validierung->konvertierung_id = $konvertierung_id;
-						$validierung->geom_within_bereich($this, $konvertierung);
+					# Prüft ob die erzeugten Geometrien im Geltungsbereich der Bereiche liegen.
+					$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geom_within_bereich');
+					$validierung->konvertierung_id = $konvertierung_id;
+					$validierung->geom_within_bereich($this, $konvertierung);
 				}
 			}
 			else {
 				$this->debug->show('<br>Regel->validate(): SQL der Regel: ' . $this->get('name') . ' nicht ausfuehrbar', true);
 				$success = false;
 			}
-
 		}
 		else {
 			$success = false;
@@ -185,7 +191,12 @@ public static	function find_by_id($gui, $by, $id) {
 
 	function get_shape_table_name() {
 		$this->debug->show('<br>Extrahiere Tabellenname der Shape-Datei aus sql: ' . $this->get($sql), Validierung::$write_debug);
-		$shape_table_name = get_first_word_after($this->get('sql'), 'FROM');
+		$parts1 = explode('FROM', $this->get('sql'));
+		$parts2 = explode('WHERE', $parts1[1]);
+		$parts3 = trim($parts2[0]);
+		// Remove alias etc.
+		$parts4 = explode(' ', $parts3);
+		$shape_table_name = $parts4[0];
 		$this->debug->show('<br>Shape table name: ' . $shape_table_name, Validierung::$write_debug);
 		return $shape_table_name;
 	}
@@ -432,36 +443,42 @@ public static	function find_by_id($gui, $by, $id) {
 			$konvertierung = Konvertierung::find_by_id($this->gui, 'id', $this->get('konvertierung_id'));
 		}
 		else {
+			$regel_id = $this->get('id');
+			if(empty($regel_id)) {
+				$regel_id = 0; // can't exist, but necessary for int comparison in SQL
+			}
 			#echo '<br>Regel gehört über einen Bereich und Plan zur Konvertierung.';
-			$sql = "
+			/*$sql = "
 				SELECT
 					b.konvertierung_id
 				FROM
 					xplan_gml.xp_bereich b JOIN
 					xplankonverter.regeln r ON b.gml_id = r.bereich_gml_id
 				WHERE
-					r.id = " . $this->get('id') . "
+					r.id = " . $regel_id . "
+			";*/
+
+			// currently bereich does not (always) hold konvertierung_id and association is not on xp_schema
+			$sql = "
+				SELECT
+					coalesce(bp.konvertierung_id, rp.konvertierung_id) AS konvertierung_id
+				FROM
+					xplankonverter.regeln r LEFT JOIN
+					xplan_gml.bp_bereich bb ON r.bereich_gml_id = bb.gml_id LEFT JOIN
+					xplan_gml.fp_bereich fb ON r.bereich_gml_id = fb.gml_id LEFT JOIN
+					xplan_gml.rp_bereich rb ON r.bereich_gml_id = rb.gml_id LEFT JOIN
+					xplan_gml.so_bereich sb ON r.bereich_gml_id = sb.gml_id LEFT JOIN
+					xplan_gml.bp_plan bp ON bp.gml_id::text = bb.gehoertzuplan LEFT JOIN
+					xplan_gml.fp_plan fp ON fp.gml_id::text = fb.gehoertzuplan LEFT JOIN
+					xplan_gml.rp_plan rp ON rp.gml_id::text = rb.gehoertzuplan LEFT JOIN
+					xplan_gml.so_plan sp ON sp.gml_id::text = sb.gehoertzuplan LEFT JOIN
+					xplan_gml.rp_plan bpp ON bpp.konvertierung_id = r.konvertierung_id LEFT JOIN
+					xplan_gml.rp_plan fpp ON fpp.konvertierung_id = r.konvertierung_id LEFT JOIN
+					xplan_gml.rp_plan rpp ON rpp.konvertierung_id = r.konvertierung_id LEFT JOIN
+					xplan_gml.rp_plan spp ON spp.konvertierung_id = r.konvertierung_id
+				WHERE
+					r.id = " . $regel_id . "
 			";
-/*
-			SELECT
-				coalesce(bp.konvertierung_id, rp.konvertierung_id) AS konvertierung_id
-			FROM
-				xplankonverter.regeln r LEFT JOIN
-				xplan_gml.bp_bereich bb ON r.bereich_gml_id = bb.gml_id LEFT JOIN
-				xplan_gml.fp_bereich fb ON r.bereich_gml_id = fb.gml_id LEFT JOIN
-				xplan_gml.rp_bereich rb ON r.bereich_gml_id = rb.gml_id LEFT JOIN
-				xplan_gml.so_bereich sb ON r.bereich_gml_id = sb.gml_id LEFT JOIN
-				xplan_gml.bp_plan bp ON bp.gml_id::text = bb.gehoertzuplan LEFT JOIN
-				xplan_gml.fp_plan fp ON fp.gml_id::text = fb.gehoertzuplan LEFT JOIN
-				xplan_gml.rp_plan rp ON rp.gml_id::text = rb.gehoertzuplan LEFT JOIN
-				xplan_gml.so_plan sp ON sp.gml_id::text = sb.gehoertzuplan LEFT JOIN
-				xplan_gml.rp_plan bpp ON bpp.konvertierung_id = r.konvertierung_id LEFT JOIN
-				xplan_gml.rp_plan fpp ON fpp.konvertierung_id = r.konvertierung_id LEFT JOIN
-				xplan_gml.rp_plan rpp ON rpp.konvertierung_id = r.konvertierung_id LEFT JOIN
-				xplan_gml.rp_plan spp ON spp.konvertierung_id = r.konvertierung_id
-			WHERE
-				r.id = " . $this->get('id')
-*/
 
 			#echo '<br>SQL zum Abfragen der konvertierung_id der Regel: ' . $sql;
 			$result = pg_query($this->database->dbConn, $sql);
@@ -506,7 +523,7 @@ public static	function find_by_id($gui, $by, $id) {
 
 				$formvars_before = $this->gui->formvars;
 
-				$stellen = $this->gui->Stellenzuweisung(
+				$stellen = $this->gui->addLayersToStellen(
 					array($gml_layer->get($gml_layer->identifier)),
 					array($this->gui->Stelle->id),
 					'(konvertierung_id = ' . $this->konvertierung->get('id') .')'

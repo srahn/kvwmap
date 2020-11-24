@@ -23,20 +23,20 @@
 - Consider automation of xslt creation by holding transformation logic in a database and 
 -->
 <xsl:stylesheet version="1.0"
-				xmlns="http://www.xplanung.de/xplangml/5/1"
-				xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-				xmlns:xplan="http://www.xplanung.de/xplangml/5/1"
-				xmlns:wfs="http://www.opengis.net/wfs/2.0"
-				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-				xmlns:gml="http://www.opengis.net/gml/3.2"
-				xmlns:xlink="http://www.w3.org/1999/xlink"
-				xmlns:plu="http://inspire.ec.europa.eu/schemas/plu/4.0"
-				xmlns:base="http://inspire.ec.europa.eu/schemas/base/3.3"
-				xmlns:base2="http://inspire.ec.europa.eu/schemas/base2/1.0"
-				xsi:schemaLocation="http://www.xplanung.de/xplangml/5/1 http://www.xplanungwiki.de/upload/XPlanGML/5.1/Schema/XPlanung-Operationen.xsd
-				http://inspire.ec.europa.eu/schemas/plu/4.0 http://inspire.ec.europa.eu/schemas/plu/4.0/PlannedLandUse.xsd
-				http://www.opengis.net/wfs/2.0 http://schemas.opengis.net/wfs/2.0/wfs.xsd
-				http://inspire.ec.europa.eu/schemas/base/3.3 http://inspire.ec.europa.eu/schemas/base/3.3/BaseTypes.xsd"
+                xmlns="http://www.xplanung.de/xplangml/5/1"
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:xplan="http://www.xplanung.de/xplangml/5/1"
+                xmlns:wfs="http://www.opengis.net/wfs/2.0"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xmlns:gml="http://www.opengis.net/gml/3.2"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                xmlns:plu="http://inspire.ec.europa.eu/schemas/plu/4.0"
+                xmlns:base="http://inspire.ec.europa.eu/schemas/base/3.3"
+                xmlns:base2="http://inspire.ec.europa.eu/schemas/base2/1.0"
+                xsi:schemaLocation="http://www.xplanung.de/xplangml/5/1 http://www.xplanungwiki.de/upload/XPlanGML/5.1/Schema/XPlanung-Operationen.xsd
+                http://inspire.ec.europa.eu/schemas/plu/4.0 http://inspire.ec.europa.eu/schemas/plu/4.0/PlannedLandUse.xsd
+                http://www.opengis.net/wfs/2.0 http://schemas.opengis.net/wfs/2.0/wfs.xsd
+                http://inspire.ec.europa.eu/schemas/base/3.3 http://inspire.ec.europa.eu/schemas/base/3.3/BaseTypes.xsd"
     >
   <!-- xsl -->
   <xsl:output method="xml"
@@ -53,7 +53,7 @@
       <xsl:text>http://inspire.ec.europa.eu/codelist/SupplementaryRegulationValue/</xsl:text>
     </xsl:variable>
     <xsl:variable name="gsrv">
-      <xsl:text>http://xplan-raumordnung.de/iqvoc/de/concepts/_</xsl:text>
+      <xsl:text>https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/LandUse/</xsl:text>
     </xsl:variable>
     <xsl:variable name="hilucs">
       <xsl:text>http://inspire.ec.europa.eu/codelist/HILUCSValue/</xsl:text>
@@ -94,7 +94,59 @@
               </base:localId>
               <!--Namespace derzeit DE_ + bundesland ID von INSPIRE-->
               <base:namespace>
-                <xsl:value-of select="concat('DE_', xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland)"/>
+                <xsl:choose>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1000" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bb/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1100" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'be/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1200" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bw/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1300" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.','by/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1400" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hb/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1500" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'he/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1600" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hh/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1700" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'mv/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1800" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'ni/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1900" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'nw/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2000" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'rp/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2100" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sh/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2200" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sl/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2300" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sn/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2400" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'st/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2500" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'th/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=3000" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bund/')" />
+                    </xsl:when>
+                </xsl:choose>
               </base:namespace>
               <base:versionId nilReason="unknown" xsi:nil="true" />
             </base:Identifier>
@@ -179,31 +231,31 @@
           <!-- Für planTypeName sobald Listen von GDI-De bereitgestellt werden, Verweis auf diese (sollen auf nationaler Ebene festgelegt werden) -->
           <xsl:choose>
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=1000">
-              <plu:planTypeName xlink:href="Regionalplan"/>
+              <plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/3_1_Regionalplan"/>
             </xsl:when>
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=2000">
-              <plu:planTypeName xlink:href="SachlicherTeilplanRegionalebene"/>
+              <plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/3_3_SachlicherTeilplanRegionalebene"/>
             </xsl:when>
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=2001">
-              <plu:planTypeName xlink:href="SachlicherTeilplanLandesebene"/>
+              <plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/2_2_SachlicherTeilplanLandesebene"/>
             </xsl:when>
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=3000">
-              <plu:planTypeName xlink:href="Braunkohlenplan"/>
+              <plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/2_3_Braunkohlenplan"/>
             </xsl:when>
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=4000">
-              <plu:planTypeName xlink:href="LandesweiterRaumordnungsplan"/>
+              <plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/2_1_LandesweiterRaumordnungsplan"/>
             </xsl:when>
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=5000">
-              <plu:planTypeName xlink:href="StandortkonzeptBund"/>
+              <plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/1_1_StandortkonzeptBund"/>
             </xsl:when>
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=5001">
-              <plu:planTypeName xlink:href="AWZPlan"/>
+              <plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/1_2_AWZPlan"/>
             </xsl:when>
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=6000">
-              <plu:planTypeName xlink:href="RaeumlicherTeilplan"/>
+              <plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/3_2_RaeumlicherTeilplan"/>
             </xsl:when>
             <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:planArt=9999">
-              <plu:planTypeName xlink:href="Sonstiges"/>
+              <plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/9_1_SonstigerRaumordnungsplan"/>
             </xsl:when>
             <xsl:otherwise>
               <xsl:message terminate="yes">
@@ -453,9 +505,61 @@
                     </base:localId>
                   </xsl:otherwise>
                 </xsl:choose>
-                <base:namespace>
-                  <xsl:value-of select="concat('DE_', /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland)"/>
-                </base:namespace>
+              <base:namespace>
+                <xsl:choose>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1000" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bb/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1100" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'be/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1200" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bw/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1300" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.','by/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1400" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hb/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1500" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'he/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1600" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hh/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1700" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'mv/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1800" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'ni/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1900" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'nw/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2000" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'rp/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2100" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sh/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2200" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sl/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2300" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sn/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2400" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'st/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2500" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'th/')" />
+                    </xsl:when>
+                    <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=3000" >
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bund/')" />
+                    </xsl:when>
+                </xsl:choose>
+              </base:namespace>
                 <base:versionId nilReason="unknown" xsi:nil="true" />
               </base:Identifier>
             </plu:inspireId>
@@ -507,7 +611,59 @@
                       <xsl:value-of select="concat('inspirelocalid_' , generate-id())"/>
                     </base:localId>
                     <base:namespace>
-                      <xsl:value-of select="concat('DE_', /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland)"/>
+                        <xsl:choose>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1000" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bb/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1100" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'be/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1200" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bw/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1300" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.','by/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1400" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hb/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1500" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'he/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1600" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hh/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1700" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'mv/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1800" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'ni/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1900" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'nw/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2000" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'rp/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2100" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sh/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2200" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sl/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2300" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sn/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2400" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'st/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2500" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'th/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=3000" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bund/')" />
+                            </xsl:when>
+                        </xsl:choose>
                     </base:namespace>
                     <base:versionId nilReason="unknown" xsi:nil="true" />
                   </base:Identifier>
@@ -884,26 +1040,26 @@
             <!-- SUPPLEMENTARY REGULATION -->
             <wfs:member>
               <plu:SupplementaryRegulation gml:id="{concat('GML_' , generate-id(.))}">
-			    <xsl:choose>
-				  <xsl:when test="child::xplan:startBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut">
-					<plu:validFrom>
-					  <xsl:apply-templates select="child::xplan:startBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut"/>
-					</plu:validFrom>
-				  </xsl:when>
-				  <xsl:otherwise>
-					<plu:validFrom nilReason="unknown" xsi:nil="true" />
-				  </xsl:otherwise>
-				</xsl:choose>
-				<xsl:choose>
-				  <xsl:when test="child::xplan:endeBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut">
-					<plu:validTo>
-					  <xsl:apply-templates select="child::xplan:endeBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut"/>
-					</plu:validTo>
-				  </xsl:when>
-				  <xsl:otherwise>
-					<plu:validTo nilReason="unknown" xsi:nil="true" />
-				  </xsl:otherwise>
-				</xsl:choose>
+                <xsl:choose>
+                    <xsl:when test="child::xplan:startBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut">
+                        <plu:validFrom>
+                            <xsl:apply-templates select="child::xplan:startBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut"/>
+                        </plu:validFrom>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <plu:validFrom nilReason="unknown" xsi:nil="true" />
+                    </xsl:otherwise>
+                </xsl:choose>
+                <xsl:choose>
+                <xsl:when test="child::xplan:endeBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut">
+                    <plu:validTo>
+                    <xsl:apply-templates select="child::xplan:endeBedingung/xplan:XP_WirksamkeitBedingung/xplan:datumAbsolut"/>
+                    </plu:validTo>
+                </xsl:when>
+                <xsl:otherwise>
+                    <plu:validTo nilReason="unknown" xsi:nil="true" />
+                    </xsl:otherwise>
+                </xsl:choose>
 
                 <!-- Anfang Nationale Codeliste Zuordnung -->
                 <!--Hier choose für Featuretypes, da diese eindeutig sind und if für Attribute, da mehrere zulässig sind-->
@@ -911,1938 +1067,1938 @@
                 <xsl:choose>
                   <xsl:when test="self::xplan:RP_ErneuerbareEnergie">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_10_1_Windenergie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_10_1_Windenergie')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_10_2_Solarenergie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_10_2_Solarenergie')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_10_3_Geothermie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_10_3_Geothermie')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_10_4_Biomasse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_10_4_Biomasse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_10_5_SonstigeErneuerbareEnergie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_10_5_SonstigeErneuerbareEnergie')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_10_ErneuerbareEnergie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_10_ErneuerbareEnergie')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Forstwirtschaft">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_11_1_Wald')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_11_1_Wald')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_11_2_Bannwald')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_11_2_Bannwald')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_11_3_Schonwald')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_11_3_Schonwald')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_11_4_Waldmehrung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_11_4_Waldmehrung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_11_5_WaldmehrungErholung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_11_5_WaldmehrungErholung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_11_6_VergroesserungDesWaldanteils')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_11_6_VergroesserungDesWaldanteils')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_11_7_Waldschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_11_7_Waldschutz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_11_8_BesondereSchutzfunktionDesWaldes')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_11_8_BesondereSchutzfunktionDesWaldes')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_11_9_VonAufforstungFreizuhalten')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_11_9_VonAufforstungFreizuhalten')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_11_10_Erhaltungsflaeche')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_11_10_Erhaltungsflaeche')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_11_11_Entwicklungsflaeche')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_11_11_Entwicklungsflaeche')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_11_12_GruenflaecheUeberwWaldanteil')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_11_12_GruenflaecheUeberwWaldanteil')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_11_13_SonstigeForstwirtschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_11_13_SonstigeForstwirtschaft')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_11_Forstwirtschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_11_Forstwirtschaft')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Bodenschutz">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_1_BeseitigungErheblicherBodenbelastung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_1_1_BeseitigungErheblicherBodenbelastung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_2_SicherungSanierungAltlasten')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_1_2_SicherungSanierungAltlasten')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_Erosionsschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_1_3_Erosionsschutz')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_Torferhalt')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_1_4_Torferhalt')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_5_SonstigerBodenschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_1_5_SonstigerBodenschutz')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_Bodenschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_1_Bodenschutz')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Kulturlandschaft">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_12_1_KulturellesSachgut')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_12_1_KulturellesSachgut')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_12_2_Welterbe')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_12_2_Welterbe')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_12_3_KulturerbeLandschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_12_3_KulturerbeLandschaft')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_12_4_KulturDenkmalpflege')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_12_4_KulturDenkmalpflege')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_12_5_SonstigeKulturlandschaftTypen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_12_5_SonstigeKulturlandschaftTypen')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_12_Kulturlandschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_12_Kulturlandschaft')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Landwirtschaft">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_13_1_LandwirtschaftlicheNutzung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_13_1_LandwirtschaftlicheNutzung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_13_2_KernzoneLandwirtschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_13_2_KernzoneLandwirtschaft')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_13_3_IntensivLandwirtschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_13_3_IntensivLandwirtschaft')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_13_4_Fischerei')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_13_4_Fischerei')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_13_5_Weinbau')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_13_5_Weinbau')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_13_6_AufGrundHohenErtragspotenzials')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_13_6_AufGrundHohenErtragspotenzials')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_13_7_AufGrundBesondererFunktionen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_13_7_AufGrundBesondererFunktionen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_13_8_Gruenlandbewirtschaftung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_13_8_Gruenlandbewirtschaftung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=8000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_13_9_Sonderkultur')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_13_9_Sonderkultur')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_13_10_SonstigeLandwirtschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_13_10_SonstigeLandwirtschaft')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_13_Landwirtschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_13_Landwirtschaft')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_RadwegWanderweg">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_14_1_Wanderweg')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_14_1_Wanderweg')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_14_2_Fernwanderweg')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_14_2_Fernwanderweg')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_14_3_Radwandern')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_14_3_Radwandern')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_14_4_Fernradweg')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_14_4_Fernradweg')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_14_5_Reiten')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_14_5_Reiten')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_14_6_Wasserwandern')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_14_6_Wasserwandern')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_14_7_SonstigerWanderweg')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_14_7_SonstigerWanderweg')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_14_RadwegWanderweg')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_14_RadwegWanderweg')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Sportanlage">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_15_1_AllgemeineSportanlage')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_15_1_AllgemeineSportanlage')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_15_2_Wassersport')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_15_2_Wassersport')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_15_3_Motorsport')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_15_3_Motorsport')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_15_4_Flugsport')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_15_4_Flugsport')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_15_5_Reitsport')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_15_5_Reitsport')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_15_6_Golfsport')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_15_6_Golfsport')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_15_7_Sportzentrum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_15_7_Sportzentrum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_15_8_SonstigeSportanlage')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_15_8_SonstigeSportanlage')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_15_Sportanlage')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_15_Sportanlage')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Rohstoff">
                     <xsl:if test="child::xplan:zeitstufe=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_1_1_Zeitstufe1')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_1_1_Zeitstufe1')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:zeitstufe=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_1_2_Zeitstufe2')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_1_2_Zeitstufe2')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:tiefe=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_2_1_Oberflaechennah')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_2_1_Oberflaechennah')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:tiefe=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_2_2_Tiefliegend')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_2_2_Tiefliegend')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:bergbauplanungTyp=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_1_Lagerstaette')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_3_1_Lagerstaette')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:bergbauplanungTyp=1100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_2_Sicherung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_3_2_Sicherung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:bergbauplanungTyp=1200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_3_Gewinnung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_3_3_Gewinnung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:bergbauplanungTyp=1300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_4_Abbau')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_3_4_Abbau')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:bergbauplanungTyp=1400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_5_Sicherheitszone')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_3_5_Sicherheitszone')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:bergbauplanungTyp=1500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_6_AnlageEinrichtungBergbau')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_3_6_AnlageEinrichtungBergbau')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:bergbauplanungTyp=1600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_7_Halde')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_3_7_Halde')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:bergbauplanungTyp=1700">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_8_Sanierungsflaeche')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_3_8_Sanierungsflaeche')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:bergbauplanungTyp=1800">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_9_AnsiedlungUmsiedlung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_3_9_AnsiedlungUmsiedlung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:bergbauplanungTyp=1900">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_10_Bergbaufolgelandschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_3_10_Bergbaufolgelandschaft')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:bergbauplanungTyp=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_3_11_SonstigeBergbauplanung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_3_11_SonstigeBergbauplanung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:folgenutzung=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_4_1_FolgenutzungLandwirtschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_4_1_FolgenutzungLandwirtschaft')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:folgenutzung=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_4_2_FolgenutzungForstwirtschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_4_2_FolgenutzungForstwirtschaft')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:folgenutzung=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_4_3_FolgenutzungGruenlandbewirtschaftung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_4_3_FolgenutzungGruenlandbewirtschaftung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:folgenutzung=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_4_4_FolgenutzungNaturLandschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_4_4_FolgenutzungNaturLandschaft')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:folgenutzung=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_4_5_FolgenutzungNaturschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_4_5_FolgenutzungNaturschutz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:folgenutzung=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_4_6_FolgenutzungErholung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_4_6_FolgenutzungErholung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:folgenutzung=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_4_7_FolgenutzungGewaesser')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_4_7_FolgenutzungGewaesser')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:folgenutzung=8000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_4_8_FolgenutzungVerkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_4_8_FolgenutzungVerkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:folgenutzung=9000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_4_9_FolgenutzungAltbergbau')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_4_9_FolgenutzungAltbergbau')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:folgenutzung=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_4_11_SonstigeFolgenutzung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_4_11_SonstigeFolgenutzung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_1_Anhydritstein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_1_Anhydritstein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=1100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_2_Baryt')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_2_Baryt')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=1200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_3_BasaltDiabas')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_3_BasaltDiabas')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=1300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_4_Bentonit')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_4_Bentonit')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=1400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_5_Blaehton')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_5_Blaehton')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=1500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_6_Braunkohle')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_6_Braunkohle')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=1600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_7_Buntsandstein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_7_Buntsandstein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=1700">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_8_Dekostein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_8_Dekostein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=1800">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_9_Diorit')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_9_Diorit')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=1900">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_10_Dolomitstein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_10_Dolomitstein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_11_Erdgas')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_11_Erdgas')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=2100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_12_Erdoel')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_12_Erdoel')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=2200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_13_Erz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_13_Erz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=2300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_14_Feldspat')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_14_Feldspat')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=2400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_15_Festgestein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_15_Festgestein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=2500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_16_Flussspat')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_16_Flussspat')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=2600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_17_Gangquarz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_17_Gangquarz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=2700">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_18_Gipsstein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_18_Gipsstein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=2800">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_19_Gneis')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_19_Gneis')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=2900">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_20_Granit')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_20_Granit')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_21_Grauwacke')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_21_Grauwacke')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=3100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_22_Hartgestein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_22_Hartgestein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=3200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_23_KalkKalktuffKreide')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_23_KalkKalktuffKreide')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=3300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_24_Kalkmergelstein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_24_Kalkmergelstein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=3400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_25_Kalkstein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_25_Kalkstein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=3500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_26_Kaolin')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_26_Kaolin')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=3600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_27_Karbonatgestein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_27_Karbonatgestein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=3700">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_28_Kies')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_28_Kies')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=3800">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_29_Kieselgur')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_29_Kieselgur')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=3900">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_30_KieshaltigerSand')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_30_KieshaltigerSand')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_31_KiesSand')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_31_KiesSand')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=4100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_32_Klei')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_32_Klei')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=4200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_33_Kristallin')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_33_Kristallin')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=4300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_34_Kupfer')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_34_Kupfer')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=4400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_35_Lehm')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_35_Lehm')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=4500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_36_Marmor')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_36_Marmor')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=4600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_37_Mergel')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_37_Mergel')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=4700">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_38_Mergelstein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_38_Mergelstein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=4800">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_39_MikrogranitGranitporphyr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_39_MikrogranitGranitporphyr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=4900">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_40_Monzonit')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_40_Monzonit')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_41_Muschelkalk')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_41_Muschelkalk')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=5100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_42_Naturstein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_42_Naturstein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=5200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_43_Naturwerkstein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_43_Naturwerkstein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=5300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_44_Oelschiefer')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_44_Oelschiefer')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=5400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_45_Pegmatitsand')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_45_Pegmatitsand')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=5500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_46_Quarzit')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_46_Quarzit')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=5600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_47_Quarzsand')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_47_Quarzsand')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=5700">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_48_Rhyolith')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_48_Rhyolith')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=5800">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_49_RhyolithQuarzporphyr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_49_RhyolithQuarzporphyr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=5900">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_50_Salz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_50_Salz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_51_Sand')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_51_Sand')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=6100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_52_Sandstein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_52_Sandstein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=6200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_53_Spezialton')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_53_Spezialton')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=6300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_54_SteineundErden')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_54_SteineundErden')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=6400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_55_Steinkohle')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_55_Steinkohle')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=6500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_56_Ton')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_56_Ton')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=6600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_57_Tonstein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_57_Tonstein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=6700">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_58_Torf')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_58_Torf')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=6800">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_59_TuffBimsstein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_59_TuffBimsstein')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=6900">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_60_Uran')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_60_Uran')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_61_Vulkanit')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_61_Vulkanit')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=7100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_62_Werkstein')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_62_Werkstein')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:rohstoffTyp=7200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_63_Andesit')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_63_Andesit')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:rohstoffTyp=7300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_64_Formsand')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_64_Formsand')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:rohstoffTyp=7400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_65_Gabbro')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_65_Gabbro')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:rohstoffTyp=7500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_66_MikrodioritAndesit')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_66_MikrodioritAndesit')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_5_67_SonstigerRohstoff')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_67_SonstigerRohstoff')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:rohstoffTyp or child::xplan:tiefe or child::xplan:zeitstufe or child::xplan:folgenutzung or child::xplan:bergbauplanungTyp)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_16_Rohstoff')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_Rohstoff')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_SonstigerFreiraumschutz">
-                    <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_17_SonstigerFreiraumschutz')}"/>
+                    <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_17_SonstigerFreiraumschutz')}"/>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_GruenzugGruenzaesur">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_Gruenzug')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_2_1_Gruenzug')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_Gruenzaesur')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_2_2_Gruenzaesur')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_3_Siedlungszaesur')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_2_3_Siedlungszaesur')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_GruenzugGruenzaesur')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_2_GruenzugGruenzaesur')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Hochwasserschutz">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_Hochwasserschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_1_Hochwasserschutz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_2_TechnischerHochwasserschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_2_TechnischerHochwasserschutz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_3_Hochwasserrueckhaltebecken')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_3_Hochwasserrueckhaltebecken')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1101">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_HochwasserrueckhaltebeckenPolder')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_4_HochwasserrueckhaltebeckenPolder')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1102">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_HochwasserrueckhaltebeckenBauwerk')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_5_HochwasserrueckhaltebeckenBauwerk')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_RisikobereichHochwasser')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_6_RisikobereichHochwasser')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_7_Kuestenhochwasserschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_7_Kuestenhochwasserschutz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1301">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_8_Deich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_8_Deich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1302">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_9_Deichrueckverlegung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_1_3_9_Deichrueckverlegung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1303">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_10_DeichgeschuetztesGebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_10_DeichgeschuetztesGebiet')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_11_Sperrwerk')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_11_Sperrwerk')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_12_HochwGefaehrdeteKuestenniederung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_12_HochwGefaehrdeteKuestenniederung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_13_Ueberschwemmungsgebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_13_Ueberschwemmungsgebiet')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1700">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_14_UeberschwemmungsgefaehrdeterBereich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_14_UeberschwemmungsgefaehrdeterBereich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1800">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_15_Retentionsraum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_15_Retentionsraum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1801">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_16_PotenziellerRetentionsraum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_16_PotenziellerRetentionsraum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_17_SonstigerHochwasserschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_17_SonstigerHochwasserschutz')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_AllgemeinerHochwasserschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_3_AllgemeinerHochwasserschutz')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_NaturLandschaft">
                   <xsl:if test=" child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_NaturLandschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_1_NaturLandschaft')}"/>
                     </xsl:if>
                   <xsl:if test=" child::xplan:typ=1100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_2_NaturschutzLandschaftspflege')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_2_NaturschutzLandschaftspflege')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=1101">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_3_NaturschutzLandschaftspflegeAufGewaessern')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_3_NaturschutzLandschaftspflegeAufGewaessern')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=1200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_4_Flurdurchgruenung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_4_Flurdurchgruenung')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=1300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_5_UnzerschnitteneRaeume')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_5_UnzerschnitteneRaeume')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=1301">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_6_UnzerschnitteneVerkehrsarmeRaeume')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_6_UnzerschnitteneVerkehrsarmeRaeume')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=1400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_7_Feuchtgebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_7_Feuchtgebiet')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=1500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_8_OekologischesVerbundssystem')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_8_OekologischesVerbundssystem')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=1501">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_9_OekologischerRaum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_9_OekologischerRaum')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=1600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_10_VerbesserungLandschaftsstrukturNaturhaushalt')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_10_VerbesserungLandschaftsstrukturNaturhaushalt')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=1700">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_11_Biotop')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_11_Biotop')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=1701">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_12_Biotopverbund')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_12_Biotopverbund')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=1702">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_13_Biotopverbundachse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_13_Biotopverbundachse')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=1703">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_14_ArtenBiotopschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_14_ArtenBiotopschutz')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=1704">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_15_Regionalpark')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_15_Regionalpark')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=1800">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_16_KompensationEntwicklung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_16_KompensationEntwicklung')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=1900">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_17_GruenlandBewirtschaftungPflegeEntwicklung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_17_GruenlandBewirtschaftungPflegeEntwicklung')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_18_Landschaftsstruktur')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_18_Landschaftsstruktur')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=2100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_19_LandschaftsgebErholung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_19_LandschaftsgebErholung')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=2200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_20_Landschaftspraegend')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_20_Landschaftspraegend')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=2300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_21_SchutzderNatur')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_21_SchutzderNatur')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=2400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_22_SchutzdesLandschaftsbildes')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_22_SchutzdesLandschaftsbildes')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=2500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_23_Alpenpark')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_23_Alpenpark')}"/>
                     </xsl:if>
                     <xsl:if test=" child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_24_SonstigerNaturLandschaftSchutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_24_SonstigerNaturLandschaftSchutz')}"/>
                     </xsl:if>
                     <xsl:if test=" not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_AllgemeineNaturLandschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_4_AllgemeineNaturLandschaft')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_NaturschutzrechtlichesSchutzgebiet">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_1_Naturschutzgebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_5_1_Naturschutzgebiet')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_2_Nationalpark')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_5_2_Nationalpark')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_3_Biosphaerenreservat')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_5_3_Biosphaerenreservat')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_4_Landschaftsschutzgebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_5_4_Landschaftsschutzgebiet')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_5_Naturpark')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_5_5_Naturpark')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_6_Naturdenkmal')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_5_6_Naturdenkmal')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_7_GeschuetzterLandschaftsBestandteil')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_5_7_GeschuetzterLandschaftsBestandteil')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1700">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_8_GesetzlichGeschuetztesBiotop')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_5_8_GesetzlichGeschuetztesBiotop')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1800">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_9_Natura2000')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_5_9_Natura2000')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=18000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_10_GebietGemeinschaftlicherBedeutung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_5_10_GebietGemeinschaftlicherBedeutung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=18001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_11_EuropaeischesSchutzgebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_5_11_EuropaeischesSchutzgebiet')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_12_NationalesNaturmonument')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_5_12_NationalesNaturmonument')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_13_SonstigesNaturschutzrechtlichesSchutzgebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_5_13_SonstigesNaturschutzrechtlichesSchutzgebiet')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_5_NaturschutzrechtlichesSchutzgebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_5_NaturschutzrechtlichesSchutzgebiet')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Gewaesser">
-                    <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_6_Gewaesser')}"/>
+                    <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_6_Gewaesser')}"/>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Wasserschutz">
                     <xsl:if test="child::xplan:zone=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_12_Zone1')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_7_12_Zone1')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:zone=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_13_Zone2')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_7_13_Zone2')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:zone=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_14_Zone3')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_7_14_Zone3')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_1_Wasserschutzgebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_7_1_Wasserschutzgebiet')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_2_Grundwasserschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_7_2_Grundwasserschutz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_3_Grundwasservorkommen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_7_3_Grundwasservorkommen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_4_Trinkwasserschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_7_4_Trinkwasserschutz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_5_Trinkwassergewinnung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_7_5_Trinkwassergewinnung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_6_EinzugsgebietTrinkwassser')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_7_6_EinzugsgebietTrinkwassser')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_7_EinzugsgebietTalsperre')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_7_7_EinzugsgebietTalsperre')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_8_Oberflaechenwasserschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_7_8_Oberflaechenwasserschutz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=8000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_9_Heilquelle')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_7_9_Heilquelle')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_10_Wasserversorgung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_7_10_Wasserversorgung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_11_SonstigerWasserschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_7_11_SonstigerWasserschutz')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ or child::xplan:zone)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_7_Wasserschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_7_Wasserschutz')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Klimaschutz">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_8_1_Kaltluft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_8_1_Kaltluft')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_8_2_Frischluft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_8_2_Frischluft')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_8_3_BesondereKlimaschutzfunktion')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_8_3_BesondereKlimaschutzfunktion')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_8_4_SonstigeLuftTypen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_8_4_SonstigeLuftTypen')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_8_Klimaschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_8_Klimaschutz')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Erholung">
                     <xsl:if test="child::xplan:typTourismus=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_12_SonstigerTourismus')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_12_SonstigerTourismus')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_13_EntwicklungsgebietTourismusErholung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_13_EntwicklungsgebietTourismusErholung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_14_KernbereichTourismusErholung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_14_KernbereichTourismusErholung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_15_BesondereEntwicklungsaufgabeTourismusErholung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_15_BesondereEntwicklungsaufgabeTourismusErholung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typErholung=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_1_Erholung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_1_Erholung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typErholung=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_2_RuhigeErholungInNaturUndLandschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_2_RuhigeErholungInNaturUndLandschaft')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:typErholung=2001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_2_LandschaftsbezogeneErholung')}"/><!-- Hier selbe Nummer da mittelfristig ein Wert abfallen wird -->
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_2_LandschaftsbezogeneErholung')}"/><!-- Hier selbe Nummer da mittelfristig ein Wert abfallen wird -->
                     </xsl:if>
                     <xsl:if test="child::xplan:typErholung=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_3_ErholungMitStarkerInanspruchnahmeDurchBevoelkerung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_3_ErholungMitStarkerInanspruchnahmeDurchBevoelkerung')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:typErholung=3001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_3_InfrastrukturelleErholung')}"/><!-- Hier selbe Nummer da mittelfristig ein Wert abfallen wird -->
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_3_InfrastrukturelleErholung')}"/><!-- Hier selbe Nummer da mittelfristig ein Wert abfallen wird -->
                     </xsl:if>
                     <xsl:if test="child::xplan:typErholung=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_4_Erholungswald')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_4_Erholungswald')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typErholung=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_5_Freizeitanlage')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_5_Freizeitanlage')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typErholung=5100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_6_Ferieneinrichtung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_6_Ferieneinrichtung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typErholung=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_7_ErholungslandschaftAlpen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_7_ErholungslandschaftAlpen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typErholung=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_8_Kureinrichtung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_8_Kureinrichtung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typErholung=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_9_SonstigeErholung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_9_SonstigeErholung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typTourismus=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_10_Tourismus')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_10_Tourismus')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typTourismus=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_11_Kuestenraumtourismus')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_11_Kuestenraumtourismus')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typErholung or child::xplan:typTourismus or child::xplan:besondererTyp)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_9_ErholungTourismus')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_9_ErholungTourismus')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Freiraum">
-                    <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_Freiraum')}"/>
+                    <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_Freiraum')}"/>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Energieversorgung">
                     <xsl:if test="child::xplan:typ=4001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_10_VerstetigungSpeicherung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_1_10_VerstetigungSpeicherung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_11_Untergrundspeicher')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_1_11_Untergrundspeicher')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_12_Umspannwerk')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_1_12_Umspannwerk')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_13_Raffinerie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_1_13_Raffinerie')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_14_Leitungsabbau')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_1_14_Leitungsabbau')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:typ=8000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_15_Korridor')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_1_15_Korridor')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_16_SonstigeEnergieversorgung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_1_16_SonstigeEnergieversorgung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_1_Leitungstrasse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_1_1_Leitungstrasse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_2_Hochspannungsleitung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_1_2_Hochspannungsleitung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_3_KabeltrasseNetzanbindung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_1_3_KabeltrasseNetzanbindung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_4_Pipeline')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_1_4_Pipeline')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_5_Uebergabestation')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_1_5_Uebergabestation')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_6_Kraftwerk')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_1_6_Kraftwerk')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_7_Grosskraftwerk')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_1_7_Grosskraftwerk')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_8_Energiegewinnung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_1_8_Energiegewinnung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_1_9_Energiespeicherung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_1_9_Energiespeicherung')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ or child::xplan:spannung or child::xplan:primaerenergieTyp)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_Energieversorgung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_Energieversorgung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:primaerenergieTyp=9000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_2_10_ErneuerbareEnergie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_2_10_ErneuerbareEnergie')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:primaerenergieTyp=9001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_2_11_Windenergie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_2_11_Windenergie')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:primaerenergieTyp=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_2_12_SonstigePrimaerenergie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_2_12_SonstigePrimaerenergie')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:primaerenergieTyp=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_2_1_Erdoel')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_2_1_Erdoel')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:primaerenergieTyp=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_2_2_Gas')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_2_2_Gas')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:primaerenergieTyp=2001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_2_3_Ferngas')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_2_3_Ferngas')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:primaerenergieTyp=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_2_4_Fernwaerme')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_2_4_Fernwaerme')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:primaerenergieTyp=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_2_5_Kraftstoff')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_2_5_Kraftstoff')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:primaerenergieTyp=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_2_6_Kohle')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_2_6_Kohle')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:primaerenergieTyp=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_2_7_Wasser')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_2_7_Wasser')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:primaerenergieTyp=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_2_8_Kernenergie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_2_8_Kernenergie')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:primaerenergieTyp=8000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_2_9_Reststoffverwertung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_2_9_Reststoffverwertung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:spannung=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_3_1_KV110')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_3_1_KV110')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:spannung=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_3_2_KV220')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_3_2_KV220')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:spannung=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_3_3_KV330')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_3_3_KV330')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:spannung=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_1_3_4_KV380')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_1_3_4_KV380')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Entsorgung">
                     <xsl:if test="child::xplan:typAE=1800">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_1_10_Standortsicherung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_1_10_Standortsicherung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAE=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_1_11_SonstigeAbfallentsorgung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_1_11_SonstigeAbfallentsorgung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAE=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_1_1_BeseitigungEntsorgung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_1_1_BeseitigungEntsorgung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAE=1100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_1_2_Abfallbeseitigungsanlage')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_1_2_Abfallbeseitigungsanlage')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAE=1101">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_1_3_ZentraleAbfallbeseitigungsanlage')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_1_3_ZentraleAbfallbeseitigungsanlage')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAE=1200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_1_4_Deponie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_1_4_Deponie')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAE=1300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_1_5_Untertageeinlagerung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_1_5_Untertageeinlagerung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAE=1400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_1_6_Behandlung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_1_6_Behandlung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAE=1500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_1_7_Kompostierung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_1_7_Kompostierung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAE=1600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_1_8_Verbrennung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_1_8_Verbrennung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAE=1700">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_1_9_Umladestation')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_1_9_Umladestation')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:abfallTyp=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_2_1_Siedlungsabfall')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_2_1_Siedlungsabfall')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:abfallTyp=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_2_2_Mineralstoffabfall')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_2_2_Mineralstoffabfall')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:abfallTyp=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_2_3_Industrieabfall')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_2_3_Industrieabfall')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:abfallTyp=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_2_4_Sonderabfall')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_2_4_Sonderabfall')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:abfallTyp=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_2_5_RadioaktiverAbfall')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_2_5_RadioaktiverAbfall')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:abfallTyp=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_2_6_SonstigerAbfall')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_2_6_SonstigerAbfall')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAW=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_3_1_Klaeranlage')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_3_1_Klaeranlage')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAW=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_3_2_ZentraleKlaeranlage')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_3_2_ZentraleKlaeranlage')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAW=1002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_3_3_Grossklaerwerk')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_3_3_Grossklaerwerk')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAW=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_3_4_Hauptwasserableitung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_3_4_Hauptwasserableitung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAW=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_3_5_Abwasserverwertungsflaeche')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_3_5_Abwasserverwertungsflaeche')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAW=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_3_6_Abwasserbehandlungsanlage')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_3_6_Abwasserbehandlungsanlage')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typAW=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_3_7_SonstigeAbwasserinfrastruktur')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_3_7_SonstigeAbwasserinfrastruktur')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typAW or child::xplan:typAE or child::xplan:abfallTyp)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_2_Entsorgung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_2_Entsorgung')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Kommunikation">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_3_1_Richtfunkstrecke')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_3_1_Richtfunkstrecke')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_3_2_Fernmeldeanlage')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_3_2_Fernmeldeanlage')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_3_3_SendeEmpfangsstation')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_3_3_SendeEmpfangsstation')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_3_4_TonFernsehsender')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_3_4_TonFernsehsender')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_3_5_SonstigeKommunikation')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_3_5_SonstigeKommunikation')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_3_Kommunikation')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_3_Kommunikation')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_LaermschutzBauschutz">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_4_1_Laermbereich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_4_1_Laermbereich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_4_2_Laermschutzbereich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_4_2_Laermschutzbereich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_4_3_Siedlungsbeschraenkungsbereich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_4_3_Siedlungsbeschraenkungsbereich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_4_4_ZoneA')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_4_4_ZoneA')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_4_5_ZoneB')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_4_5_ZoneB')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_4_6_ZoneC')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_4_6_ZoneC')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_4_7_SonstigerLaermschutzBauschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_4_7_SonstigerLaermschutzBauschutz')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_4_LaermschutzBauschutz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_4_LaermschutzBauschutz')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_SozialeInfrastruktur">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_5_1_Kultur')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_5_1_Kultur')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_5_2_Sozialeinrichtung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_5_2_Sozialeinrichtung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_5_3_Gesundheit')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_5_3_Gesundheit')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_5_4_Krankenhaus')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_5_4_Krankenhaus')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_5_5_BildungForschung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_5_5_BildungForschung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_5_6_Hochschule')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_5_6_Hochschule')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_5_7_Polizei')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_5_7_Polizei')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_5_8_SonstigeSozialeInfrastruktur')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_5_8_SonstigeSozialeInfrastruktur')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_5_SozialeInfrastruktur')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_5_SozialeInfrastruktur')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Wasserwirtschaft">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_6_1_Wasserleitung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_6_1_Wasserleitung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_6_2_Wasserwerk')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_6_2_Wasserwerk')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_6_3_StaudammDeich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_6_3_StaudammDeich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_6_4_Speicherbecken')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_6_4_Speicherbecken')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_6_5_Rueckhaltebecken')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_6_5_Rueckhaltebecken')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_6_6_Talsperre')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_6_6_Talsperre')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_6_7_PumpwerkSchoepfwerk')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_6_7_PumpwerkSchoepfwerk')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_6_8_SonstigeWasserwirtschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_6_8_SonstigeWasserwirtschaft')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_6_Wasserwirtschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_6_Wasserwirtschaft')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Schienenverkehr">
                     <xsl:if test="child::xplan:typ=1400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_10_AnschlussgleisIndustrieGewerbe')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_10_AnschlussgleisIndustrieGewerbe')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_11_Haltepunkt')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_11_Haltepunkt')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_12_Bahnhof')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_12_Bahnhof')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1700">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_13_Hochgeschwindigkeitsverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_13_Hochgeschwindigkeitsverkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1800">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_14_Bahnbetriebsgelaende')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_14_Bahnbetriebsgelaende')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1801">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_15_AnlagemitgrossemFlaechenbedarf')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_15_AnlagemitgrossemFlaechenbedarf')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_16_Eingleisig')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_16_Eingleisig')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_17_Zweigleisig')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_17_Zweigleisig')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=1002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_18_Mehrgleisig')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_18_Mehrgleisig')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_19_OhneBetrieb')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_19_OhneBetrieb')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_1_AllgemeinerSchienenverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_1_AllgemeinerSchienenverkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_20_MitFernerkehrsfunktion')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_20_MitFernerkehrsfunktion')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=3001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_21_MitVerknuepfungsfunktionFuerOEPNV')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_21_MitVerknuepfungsfunktionFuerOEPNV')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_22_ElektrischerBetrieb')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_22_ElektrischerBetrieb')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=4001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_23_ZuElektrifizieren')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_23_ZuElektrifizieren')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_24_VerbesserungLeistungsfaehigkeit')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_24_VerbesserungLeistungsfaehigkeit')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_25_RaeumlicheFreihaltungentwidmeterBahntrassen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_25_RaeumlicheFreihaltungentwidmeterBahntrassen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=6001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_26_NachnutzungstillgelegterStrecken')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_26_NachnutzungstillgelegterStrecken')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_27_Personenverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_27_Personenverkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=7001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_28_Gueterverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_28_Gueterverkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=8000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_29_Nahverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_29_Nahverkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_2_Eisenbahnstrecke')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_2_Eisenbahnstrecke')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=8001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_30_Fernverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_30_Fernverkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_31_SonstigerSchienenverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_31_SonstigerSchienenverkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_3_Haupteisenbahnstrecke')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_3_Haupteisenbahnstrecke')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_4_Trasse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_4_Trasse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_5_Schienennetz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_5_Schienennetz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_6_Stadtbahn')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_6_Stadtbahn')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1301">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_7_Strassenbahn')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_7_Strassenbahn')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1302">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_8_SBahn')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_8_SBahn')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1303">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_9_UBahn')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_9_UBahn')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ or child::xplan:besondererTyp)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_1_Schienenverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_1_Schienenverkehr')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Strassenverkehr">
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_10_Strassennetz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_10_Strassennetz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_11_Busverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_11_Busverkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_12_Anschlussstelle')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_12_Anschlussstelle')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_13_Strassentunnel')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_13_Strassentunnel')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_14_Zweistreifig')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_14_Zweistreifig')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_15_Dreistreifig')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_15_Dreistreifig')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=1002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_16_Vierstreifig')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_16_Vierstreifig')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=1003">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_17_Sechsstreifig')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_17_Sechsstreifig')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_18_Problembereich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_18_Problembereich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_19_GruenbrueckeQuerungsmoeglichkeit')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_19_GruenbrueckeQuerungsmoeglichkeit')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_1_AllgemeinerStrassenverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_1_AllgemeinerStrassenverkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_20_SonstigerStrassenverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_20_SonstigerStrassenverkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_2_Hauptverkehrsstrasse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_2_Hauptverkehrsstrasse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_3_Autobahn')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_3_Autobahn')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1003">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_4_Bundesstrasse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_4_Bundesstrasse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1004">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_5_Staatsstrasse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_5_Staatsstrasse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1005">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_6_Landesstrasse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_6_Landesstrasse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1006">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_7_Kreissstrasse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_7_Kreissstrasse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1007">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_8_Fernstrasse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_8_Fernstrasse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_9_Trasse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_9_Trasse')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ or child::xplan:besondererTyp)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_2_Strassenverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_2_Strassenverkehr')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Luftverkehr">
                     <xsl:if test="child::xplan:typ=2003">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_10_SonstigerFlugplatz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_10_SonstigerFlugplatz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_11_Bauschutzbereich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_11_Bauschutzbereich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_12_Militaerflughafen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_12_Militaerflughafen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_13_Landeplatz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_13_Landeplatz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_14_Verkehrslandeplatz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_14_Verkehrslandeplatz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_15_Hubschrauberlandeplatz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_15_Hubschrauberlandeplatz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5003">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_16_Landebahn')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_16_Landebahn')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_17_SonstigerLuftverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_17_SonstigerLuftverkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_1_Flughafen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_1_Flughafen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_2_Verkehrsflughafen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_2_Verkehrsflughafen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_3_Regionalflughafen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_3_Regionalflughafen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1003">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_4_InternationalerFlughafen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_4_InternationalerFlughafen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1004">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_5_InternationalerVerkehrsflughafen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_5_InternationalerVerkehrsflughafen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1005">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_6_Flughafenentwicklung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_6_Flughafenentwicklung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_7_Flugplatz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_7_Flugplatz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_8_Regionalflugplatz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_8_Regionalflugplatz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_9_Segelflugplatz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_9_Segelflugplatz')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_3_Luftverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_3_Luftverkehr')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Wasserverkehr">
                     <xsl:if test="child::xplan:typ=4002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_4_10_SonstigerSchifffahrtsweg')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_4_10_SonstigerSchifffahrtsweg')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4003">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_4_11_Wasserstrasse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_4_11_Wasserstrasse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_4_12_Reede')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_4_12_Reede')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_4_13_SonstigerWasserverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_4_13_SonstigerWasserverkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_4_1_Hafen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_4_1_Hafen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_4_2_Seehafen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_4_2_Seehafen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_4_3_Binnenhafen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_4_3_Binnenhafen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1003">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_4_4_Sportboothafen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_4_4_Sportboothafen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1004">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_4_5_Laende')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_4_5_Laende')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_4_6_Umschlagplatz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_4_6_Umschlagplatz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_4_7_SchleuseHebewerk')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_4_7_SchleuseHebewerk')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_4_8_Schifffahrt')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_4_8_Schifffahrt')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_4_9_WichtigerSchifffahrtsweg')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_4_9_WichtigerSchifffahrtsweg')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_4_Wasserverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_4_Wasserverkehr')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_SonstVerkehr">
                     <xsl:if test="child::xplan:typ=1900">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_10_Tunnel')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_5_10_Tunnel')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_11_NeueVerkehrstechniken')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_5_11_NeueVerkehrstechniken')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:typ=2001">
-											<plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_12_Teststrecke')}"/>
+											<plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_5_12_Teststrecke')}"/>
 										</xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_13_SonstigerVerkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_5_13_SonstigerVerkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_1_Verkehrsanlage')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_5_1_Verkehrsanlage')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_2_Gueterverkehrszentrum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_5_2_Gueterverkehrszentrum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_3_Logistikzentrum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_5_3_Logistikzentrum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_4_TerminalkombinierterVerkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_5_4_TerminalkombinierterVerkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_5_OEPNV')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_5_5_OEPNV')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_6_VerknuepfungspunktBahnBus')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_5_6_VerknuepfungspunktBahnBus')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_7_ParkandRideBikeandRide')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_5_7_ParkandRideBikeandRide')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1700">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_8_Faehrverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_5_8_Faehrverkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1800">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_9_Infrastrukturkorridor')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_5_9_Infrastrukturkorridor')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_5_SonstVerkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_5_SonstVerkehr')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Verkehr">
                     <xsl:if test="child::xplan:status=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_6_10_SonstigerVerkehrStatus')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_6_10_SonstigerVerkehrStatus')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:status=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_6_1_Ausbau')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_6_1_Ausbau')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:status=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_6_2_LineinfuehrungOffen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_6_2_LineinfuehrungOffen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:status=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_6_3_Sicherung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_6_3_Sicherung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:status=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_6_4_Neubau')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_6_4_Neubau')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:status=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_6_5_ImBau')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_6_5_ImBau')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:status=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_6_6_VorPlanfestgestLinienbestGrobtrasse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_6_6_VorPlanfestgestLinienbestGrobtrasse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:status=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_6_7_BedarfsplanmassnahmeOhneRaeumlFestlegung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_6_7_BedarfsplanmassnahmeOhneRaeumlFestlegung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:status=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_6_8_Korridor')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_6_8_Korridor')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:status=8000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_6_9_Verlegung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_6_9_Verlegung')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:allgemeinerTyp or child::xplan:status)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_7_Verkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_7_Verkehr')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_SonstigeInfrastruktur">
-                    <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'2_8_SonstigeInfrastruktur')}"/>
+                    <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_2_8_SonstigeInfrastruktur')}"/>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Raumkategorie">
                     <xsl:if test="child::xplan:typ=1200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_10_LaendlicherRaum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_10_LaendlicherRaum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1201">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_11_VerdichteterBereichimLaendlichenRaum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_11_VerdichteterBereichimLaendlichenRaum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1202">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_12_Gestaltungsraum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_12_Gestaltungsraum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1203">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_13_LaendlicherGestaltungsraum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_13_LaendlicherGestaltungsraum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_14_StadtUmlandRaum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_14_StadtUmlandRaum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1301">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_15_StadtUmlandBereichLaendlicherRaum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_15_StadtUmlandBereichLaendlicherRaum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_16_AbgrenzungOrdnungsraum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_16_AbgrenzungOrdnungsraum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_17_DuennbesiedeltesAbgelegenesGebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_17_DuennbesiedeltesAbgelegenesGebiet')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_18_Umkreis10KM')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_18_Umkreis10KM')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1700">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_19_RaummitbesonderemHandlungsbedarf')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_19_RaummitbesonderemHandlungsbedarf')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_1_Ordnungsraum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_1_Ordnungsraum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1800">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_20_Funktionsraum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_20_Funktionsraum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1900">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_21_GrenzeWirtschaftsraum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_21_GrenzeWirtschaftsraum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_22_Funktionsschwerpunkt')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_22_Funktionsschwerpunkt')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_23_Grundversorgung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_23_Grundversorgung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_24_Alpengebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_24_Alpengebiet')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_25_RaeumeMitGuenstigenEntwicklungsvoraussetzungen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_25_RaeumeMitGuenstigenEntwicklungsvoraussetzungen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_26_RaeumeMitAusgeglichenenEntwicklungspotenzialen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_26_RaeumeMitAusgeglichenenEntwicklungspotenzialen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_27_RaeumeMitBesonderenEntwicklungsaufgaben')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_27_RaeumeMitBesonderenEntwicklungsaufgaben')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_28_Grenzgebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_28_Grenzgebiet')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_29_RaumkategorieBergbaufolgelandschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_29_RaumkategorieBergbaufolgelandschaft')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_2_OrdnungsraumTourismusErholung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_2_OrdnungsraumTourismusErholung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:besondererTyp=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_30_RaumkategorieBraunkohlefolgelandschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_30_RaumkategorieBraunkohlefolgelandschaft')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_3_Verdichtungsraum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_3_Verdichtungsraum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1101">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_4_KernzoneVerdichtungsraum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_4_KernzoneVerdichtungsraum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1102">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_5_RandzoneVerdichtungsraum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_5_RandzoneVerdichtungsraum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1103">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_6_Ballungskernzone')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_6_Ballungskernzone')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1104">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_7_Ballungsrandzone')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_7_Ballungsrandzone')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1105">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_8_HochverdichteterRaum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_8_HochverdichteterRaum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1106">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_9_StadtUmlandBereichVerdichtungsraum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_9_StadtUmlandBereichVerdichtungsraum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_31_SonstigeRaumkategorie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_31_SonstigeRaumkategorie')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ or child::xplan:besondererTyp)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_1_Raumkategorie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_1_Raumkategorie')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Achse">
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_2_10_SonstigeAchse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_2_10_SonstigeAchse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_2_1_AllgemeineAchse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_2_1_AllgemeineAchse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_2_2_Siedlungsachse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_2_2_Siedlungsachse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_2_3_Entwicklungsachse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_2_3_Entwicklungsachse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_2_4_Landesentwicklungsachse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_2_4_Landesentwicklungsachse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_2_5_Verbindungsachse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_2_5_Verbindungsachse')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3003">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_2_6_Entwicklungskorridor')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_2_6_Entwicklungskorridor')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_2_7_AbgrenzungEntwicklungsEntlastungsorte')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_2_7_AbgrenzungEntwicklungsEntlastungsorte')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_2_8_Achsengrundrichtung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_2_8_Achsengrundrichtung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_2_9_AuessererAchsenSchwerpunkt')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_2_9_AuessererAchsenSchwerpunkt')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_2_Achse')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_2_Achse')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Sperrgebiet">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_3_1_Verteidigung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_3_1_Verteidigung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_3_2_SondergebietBund')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_3_2_SondergebietBund')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_3_3_Warngebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_3_3_Warngebiet')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_3_4_MilitaerischeEinrichtung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_3_4_MilitaerischeEinrichtung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_3_5_GrosseMilitaerischeAnlage')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_3_5_GrosseMilitaerischeAnlage')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_3_6_MilitaerischeLiegenschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_3_6_MilitaerischeLiegenschaft')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_3_7_Konversionsflaeche')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_3_7_Konversionsflaeche')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_3_8_SonstigesSperrgebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_3_8_SonstigesSperrgebiet')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_3_Sperrgebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_3_Sperrgebiet')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_ZentralerOrt">
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_10_LaendlicherZentralort')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_10_LaendlicherZentralort')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_11_Stadtrandkern1Ordnung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_11_Stadtrandkern1Ordnung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=6001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_12_Stadtrandkern2Ordnung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_12_Stadtrandkern2Ordnung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_13_VersorgungskernSiedlungskern')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_13_VersorgungskernSiedlungskern')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=8000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_14_ZentralesSiedlungsgebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_14_ZentralesSiedlungsgebiet')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_15_Metropole')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_15_Metropole')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_16_SonstigerZentralerOrt')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_16_SonstigerZentralerOrt')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:sonstigerTyp=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_17_Doppelzentrum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_17_Doppelzentrum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:sonstigerTyp=1100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_18_Funktionsteilig')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_18_Funktionsteilig')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:sonstigerTyp=1101">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_19_MitOberzentralerTeilfunktion')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_19_MitOberzentralerTeilfunktion')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_1_Oberzentrum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_1_Oberzentrum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:sonstigerTyp=1102">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_20_MitMittelzentralerTeilfunktion')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_20_MitMittelzentralerTeilfunktion')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:sonstigerTyp=1200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_21_ImVerbund')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_21_ImVerbund')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:sonstigerTyp=1300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_22_Kooperierend')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_22_Kooperierend')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:sonstigerTyp=1301">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_23_KooperierendFreiwillig')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_23_KooperierendFreiwillig')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:sonstigerTyp=1302">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_24_KooperierendVerpflichtend')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_24_KooperierendVerpflichtend')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:sonstigerTyp=1400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_25_ImVerdichtungsraum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_25_ImVerdichtungsraum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:sonstigerTyp=1500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_26_SiedlungsGrundnetz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_26_SiedlungsGrundnetz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:sonstigerTyp=1501">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_27_SiedlungsErgaenzungsnetz')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_27_SiedlungsErgaenzungsnetz')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:sonstigerTyp=1600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_28_Entwicklungsschwerpunkt')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_28_Entwicklungsschwerpunkt')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:sonstigerTyp=1700">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_29_Ueberschneidungsbereich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_29_Ueberschneidungsbereich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_2_GemeinsamesOberzentrum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_2_GemeinsamesOberzentrum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:sonstigerTyp=1800">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_30_Ergaenzungsfunktion')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_30_Ergaenzungsfunktion')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:sonstigerTyp=1900">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_31_Nachbar')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_31_Nachbar')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:sonstigerTyp=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_32_MoeglichesZentrum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_32_MoeglichesZentrum')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:sonstigerTyp=2100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_33_FunktionsraumEindeutigeAusrichtung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_33_FunktionsraumEindeutigeAusrichtung')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:sonstigerTyp=2101">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_34_FunktionsraumBilateraleAusrichtung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_34_FunktionsraumBilateraleAusrichtung')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:sonstigerTyp=2200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_35_Kongruenzraum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_35_Kongruenzraum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_3_Oberbereich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_3_Oberbereich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_4_Mittelzentrum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_4_Mittelzentrum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_5_Mittelbereich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_5_Mittelbereich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_6_Grundzentrum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_6_Grundzentrum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_7_Unterzentrum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_7_Unterzentrum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_8_Nahbereich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_8_Nahbereich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_9_Kleinzentrum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_9_Kleinzentrum')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ or child::xplan:sonstigerTyp)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_4_ZentralerOrt')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_4_ZentralerOrt')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Funktionszuweisung">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_5_1_Wohnen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_1_Wohnen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_5_2_Arbeit')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_2_Arbeit')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_5_3_GewerbeDienstleistung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_3_GewerbeDienstleistung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_5_4_Einzelhandel')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_4_Einzelhandel')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_5_5_Landwirtschaft')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_5_Landwirtschaft')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_5_6_ErholungFremdenverkehr')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_6_ErholungFremdenverkehr')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_5_7_Verteidigung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_7_Verteidigung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=8000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_5_8_UeberoertlicheVersorgungsfunktionLaendlicherRaum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_8_UeberoertlicheVersorgungsfunktionLaendlicherRaum')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:typ=9000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_5_9_LaendlicheSiedlung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_9_LaendlicheSiedlung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_5_10_SonstigeFunktion')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_10_SonstigeFunktion')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_5_Funktionszuweisung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_Funktionszuweisung')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_WohnenSiedlung">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_1_1_Wohnen')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_1_1_Wohnen')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_1_2_Baugebietsgrenze')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_1_2_Baugebietsgrenze')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_1_3_Siedlungsgebiet')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_1_3_Siedlungsgebiet')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_1_4_Siedlungsschwerpunkt')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_1_4_Siedlungsschwerpunkt')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_1_5_Siedlungsentwicklung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_1_5_Siedlungsentwicklung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3003">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_1_6_Siedlungsbeschraenkung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_1_6_Siedlungsbeschraenkung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3004">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_1_7_Siedlungsnutzung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_1_7_Siedlungsnutzung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_1_8_SicherungEntwicklungWohnstaetten')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_1_8_SicherungEntwicklungWohnstaetten')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_1_9_AllgemeinerSiedlungsbereichASB')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_1_9_AllgemeinerSiedlungsbereichASB')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_1_10_SonstigeWohnenSiedlung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_1_10_SonstigeWohnenSiedlung')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_1_WohnenSiedlung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_1_WohnenSiedlung')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Einzelhandel">
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_2_10_SonstigerEinzelhandel')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_2_10_SonstigerEinzelhandel')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_2_1_AllgemeinerEinzelhandel')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_2_1_AllgemeinerEinzelhandel')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_2_2_ZentralerVersorgungsbereich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_2_2_ZentralerVersorgungsbereich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_2_3_ZentralerEinkaufsbereich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_2_3_ZentralerEinkaufsbereich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_2_4_ZentrenrelevantesGrossprojekt')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_2_4_ZentrenrelevantesGrossprojekt')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_2_5_NichtzentrenrelevantesGrossprojekt')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_2_5_NichtzentrenrelevantesGrossprojekt')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_2_6_GrossflaechigerEinzelhandel')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_2_6_GrossflaechigerEinzelhandel')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_2_7_Fachmarktstandort')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_2_7_Fachmarktstandort')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=8000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_2_8_Ergaenzungsstandort')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_2_8_Ergaenzungsstandort')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_2_9_StaedtischerKernbereich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_2_9_StaedtischerKernbereich')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_2_Einzelhandel')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_2_Einzelhandel')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_IndustrieGewerbe">
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_3_1_Industrie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_3_1_Industrie')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_3_3_2_IndustrielleAnlage')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_3_3_2_IndustrielleAnlage')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_3_3_Gewerbe')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_3_3_Gewerbe')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_3_4_GewerblicherBereich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_3_4_GewerblicherBereich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2002">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_3_5_Gewerbepark')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_3_5_Gewerbepark')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2003">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_3_6_DienstleistungGewerbeZentrum')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_3_6_DienstleistungGewerbeZentrum')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_3_7_GewerbeIndustrie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_3_7_GewerbeIndustrie')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=3001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_3_8_BedeutsamerEntwicklungsstandortGewerbeIndustrie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_3_8_BedeutsamerEntwicklungsstandortGewerbeIndustrie')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_3_9_SicherungundEntwicklungvonArbeitsstaetten')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_3_9_SicherungundEntwicklungvonArbeitsstaetten')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_3_10_FlaechenintensivesGrossvorhaben')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_3_10_FlaechenintensivesGrossvorhaben')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_3_11_BetriebsanlageBergbau')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_3_11_BetriebsanlageBergbau')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_3_12_HafenorientierteWirtschaftlicheAnlage')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_3_12_HafenorientierteWirtschaftlicheAnlage')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=8000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_3_13_TankRastanlage')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_3_13_TankRastanlage')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_3_14_BereichFuerGewerblicheUndIndustrielleNutzungGIB')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_3_14_BereichFuerGewerblicheUndIndustrielleNutzungGIB')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_3_15_SonstigeIndustrieGewerbe')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_3_15_SonstigeIndustrieGewerbe')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_3_IndustrieGewerbe')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_3_IndustrieGewerbe')}"/>
                     </xsl:if>
                     <xsl:if test="self::xplan:RP_SonstigerSiedlungsbereich">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_4_SonstigerSiedlungsbereich')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_4_SonstigerSiedlungsbereich')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Siedlung">
-                    <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'3_6_Siedlung')}"/>
+                    <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_6_Siedlung')}"/>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Grenze">
                     <xsl:if test="child::xplan:typ=1550">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_10_Amtsgrenze')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_10_Amtsgrenze')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1600">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_11_Stadtteilgrenze')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_11_Stadtteilgrenze')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_12_VorgeschlageneGrundstuecksgrenze')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_12_VorgeschlageneGrundstuecksgrenze')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=2100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_13_GrenzeBestehenderBebauungsplan')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_13_GrenzeBestehenderBebauungsplan')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_14_SonstGrenze')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_14_SonstGrenze')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:spezifischerTyp=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_15_Zwoelfmeilenzone')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_15_Zwoelfmeilenzone')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:spezifischerTyp=1001">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_16_BegrenzungDesKuestenmeeres')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_16_BegrenzungDesKuestenmeeres')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:spezifischerTyp=2000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_17_VerlaufUmstritten')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_17_VerlaufUmstritten')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:spezifischerTyp=3000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_18_GrenzeDtAusschlWirtschaftszone')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_18_GrenzeDtAusschlWirtschaftszone')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:spezifischerTyp=4000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_19_MittlereTideHochwasserlinie')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_19_MittlereTideHochwasserlinie')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_1_Bundesgrenze')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_1_Bundesgrenze')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:spezifischerTyp=5000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_20_PlanungsregionsgrenzeRegion')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_20_PlanungsregionsgrenzeRegion')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:spezifischerTyp=6000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_21_PlanungsregionsgrenzeLand')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_21_PlanungsregionsgrenzeLand')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:spezifischerTyp=7000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_22_GrenzeBraunkohlenplan')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_22_GrenzeBraunkohlenplan')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:spezifischerTyp=8000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_23_Grenzuebergangsstelle')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_23_Grenzuebergangsstelle')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1100">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_2_Landesgrenze')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_2_Landesgrenze')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1200">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_3_Regierungsbezirksgrenze')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_3_Regierungsbezirksgrenze')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1250">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_4_Bezirksgrenze')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_4_Bezirksgrenze')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_5_Kreisgrenze')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_5_Kreisgrenze')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1400">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_6_Gemeindegrenze')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_6_Gemeindegrenze')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1450">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_7_Verbandsgemeindegrenze')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_7_Verbandsgemeindegrenze')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1500">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_8_Samtgemeindegrenze')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_8_Samtgemeindegrenze')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=1510">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_9_Mitgliedsgemeindegrenze')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_9_Mitgliedsgemeindegrenze')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ or child::xplan:spezifischerTyp or child::xplan:sonstTyp)">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_1_Grenze')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_1_Grenze')}"/>
                     </xsl:if>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_Planungsraum and not(child::xplan:typ)">
-                    <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_2_Planungsraum')}"/>
+                    <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_2_Planungsraum')}"/>
                   </xsl:when>
                   <xsl:when test="self::xplan:RP_GenerischesObjekt">
-                    <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'4_3_GenerischesObjekt')}"/>
+                    <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_4_3_GenerischesObjekt')}"/>
                   </xsl:when>
                 </xsl:choose>
                 <!-- Ende Nationale Codeliste Zuordnung-->
@@ -2879,8 +3035,60 @@
                       <xsl:value-of select="concat('inspirelocalid_' , generate-id())"/>
                     </base:localId>
                     <base:namespace>
-                      <xsl:value-of select="concat('DE_', /xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland)"/>
-                    </base:namespace>
+                        <xsl:choose>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1000" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bb/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1100" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'be/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1200" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bw/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1300" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.','by/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1400" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hb/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1500" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'he/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1600" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hh/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1700" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'mv/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1800" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'ni/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1900" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'nw/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2000" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'rp/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2100" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sh/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2200" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sl/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2300" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sn/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2400" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'st/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2500" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'th/')" />
+                            </xsl:when>
+                            <xsl:when test="/xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=3000" >
+                                <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bund/')" />
+                            </xsl:when>
+                        </xsl:choose>
+                      </base:namespace>
                     <base:versionId nilReason="unknown" xsi:nil="true" />
                   </base:Identifier>
                 </plu:inspireId>
@@ -3181,9 +3389,7 @@
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_4_4_UrbanArea')}"/>
                       </xsl:when>
                       <xsl:when test="child::xplan:typ=1800 or
-                                                child::xplan:typ=1300 or
-                                                child::xplan:typ=1800 or
-                                                child::xplan:typ=1300 or
+												child::xplan:typ=1300 or
                                                 child::xplan:typ=1301 or
                                                 child::xplan:typ=2000">
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_4_6_FunctionalUrbanArea')}"/>

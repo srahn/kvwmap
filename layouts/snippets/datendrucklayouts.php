@@ -1,15 +1,43 @@
-<script src="funktionen/tooltip.js" language="JavaScript"	type="text/javascript"></script><?php
+<?php
 	include(SNIPPETS . 'sachdatenanzeige_functions.php');
 	include_once(CLASSPATH . 'FormObject.php');
+		
 ?>
+
+<style>
+	select{
+		width: 144px;
+	}
+</style>
 
 <script type="text/javascript">
 <!--
 
 var counter = 0;
+var fonts = ['<? echo implode("','", array_map(function ($entry) {return $entry["value"];}, $this->ddl->fonts)); ?>'];
+var attributes = ['', '<? echo implode("','", $this->ddl->attributes["name"]); ?>'];
 
-Text[0]=["Hilfe:","In Freitexten können folgende Schlüsselwörter verwendet werden, die dann durch andere Texte ersetzt werden:<ul><li>$stelle: die aktuelle Stellenbezeichung</li><li>$user: der Name des Nutzers</li><li>$pagenumber: die aktuelle Seitennummer<br>(Platzierung \"auf jeder Seite\" erforderlich)</li><li>$pagecount: die Gesamtseitenzahl<br>(Platzierung \"auf jeder Seite\" erforderlich)</li><li>${<i>&lt;attributname&gt;</i>}: der Wert des Attributs</li></ul>"]
-Text[1]=["Hilfe:","Hier kann der Name der erzeugten PDF-Datei angegeben werden. Im Dateinamen können auch Attribute in der Form ${<i>&lt;attributname&gt;</i>} und die Schlüsselwörter $user, $stelle und $date verwendet werden, wodurch der Dateiname dynamisch wird. Wird kein Dateiname angegeben, erhält die PDF-Datei einen automatisch generierten Namen."]
+function show_select(input, options){
+	var parent = input.parentNode;
+	var value = input.value;
+	var select = '<select name="'+input.name+'" onchange="hide_select(this, \''+options+'\')">';
+	if(options == 'fonts'){
+		options_array = fonts;
+	}
+	else{
+		options_array = attributes;
+	}
+	options_array.forEach(function(value){select = select + '<option value="'+value+'">'+value+'</option>'});
+	select = select + '</select>';
+	parent.innerHTML = select;
+	console.log(parent.firstChild);
+	parent.firstChild.value = value;
+}
+
+function hide_select(select, options){
+	var parent = select.parentNode;
+	parent.innerHTML = '<input type="text" onmouseenter="show_select(this, \''+options+'\')" name="'+select.name+'" value="'+select.value+'">';
+}
 
 function highlight_line(id){
 	var form = document.getElementById('line_form_'+id);
@@ -31,6 +59,29 @@ function de_highlight_line(id){
 
 function jump_to_line(id){
 	var form = document.getElementById('line_form_'+id);
+	form.scrollIntoView({behavior: 'smooth'});
+}
+
+function highlight_rect(id){
+	var form = document.getElementById('rect_form_'+id);
+	form.classList.add('legend_layer_highlight');
+	svg_rect = document.getElementById('rect_'+id)
+	if(svg_rect){	
+		svg_rect.classList.add('line_highlight');
+	}
+}
+
+function de_highlight_rect(id){
+	var form = document.getElementById('rect_form_'+id);
+	form.classList.remove('legend_layer_highlight');
+	svg_rect = document.getElementById('rect_'+id)
+	if(svg_rect){	
+		svg_rect.classList.remove('line_highlight');
+	}
+}
+
+function jump_to_rect(id){
+	var form = document.getElementById('rect_form_'+id);
 	form.scrollIntoView({behavior: 'smooth'});
 }
 
@@ -79,11 +130,21 @@ function update_options(){
 }
 
 function addfreetext(layer_id, ddl_id){
-	ahah('index.php?go=sachdaten_druck_editor_Freitexthinzufuegen&selected_layer_id='+layer_id+'&aktivesLayout='+ddl_id, '', new Array(document.getElementById('add_freetext')), new Array('prependhtml'));
+	var posx = [].slice.call(document.getElementsByName('textposx[]')).pop().value;
+	var posy = [].slice.call(document.getElementsByName('textposy[]')).pop().value;
+	var font = [].slice.call(document.getElementsByName('textfont[]')).pop().value;
+	var size = [].slice.call(document.getElementsByName('textsize[]')).pop().value;
+	ahah('index.php?go=sachdaten_druck_editor_Freitexthinzufuegen&selected_layer_id='+layer_id+'&aktivesLayout='+ddl_id+'&posx='+posx+'&posy='+posy+'&size='+size+'&font='+font, '', new Array(document.getElementById('add_freetext')), new Array('prependhtml'));
+	document.GUI.textcount.value = document.GUI.textcount.value + 1;
 }
 
 function addline(){
 	document.GUI.go.value = 'sachdaten_druck_editor_Liniehinzufuegen';
+	document.GUI.submit();
+}
+
+function addrect(){
+	document.GUI.go.value = 'sachdaten_druck_editor_Rechteckhinzufuegen';
 	document.GUI.submit();
 }
 
@@ -172,7 +233,7 @@ function scrolltop(){
 			<tr>
 				<td colspan="8" align="center">
 					<? if($this->previewfile){ ?>
-						<div id="preview_div" align="left" onmouseenter="document.getElementById('preview_page').style.visibility='';" onmouseleave="document.getElementById('preview_page').style.visibility='hidden';document.getElementById('coords').style.visibility='hidden';" onmousemove="image_coords(event)" style="position: relative; border:1px solid black;width:595px;height:842px;background-image:url('<? echo $this->previewfile; ?>');">
+						<div id="preview_div" align="left" onmouseenter="document.getElementById('preview_page').style.visibility='';" onmouseleave="document.getElementById('preview_page').style.visibility='hidden';document.getElementById('coords').style.visibility='hidden';" onmousemove="image_coords(event)" style="position: relative; border:1px solid black;width:<? echo $this->ddl->selectedlayout[0]['width']; ?>px;height:<? echo $this->ddl->selectedlayout[0]['height']; ?>px;background-repeat: no-repeat;background-image:url('<? echo $this->previewfile; ?>');">
 							<div id="preview_page" style="background-color: white; visibility: hidden; margin: auto; width: 150px; padding: 10px; position: relative; z-index: 2">
 									<span class="fett">Vorschau:</span>
 								<?
@@ -195,6 +256,7 @@ function scrolltop(){
 									<style type="text/css"><![CDATA[
 										.line{
 											stroke: steelblue;
+											fill: steelblue;
 											stroke-width: 6;
 											opacity: 0.01;
 										}
@@ -211,6 +273,14 @@ function scrolltop(){
 										$lines = $this->lines[$this->formvars['page']];
 										for($l = 0; $l < count($lines); $l++){
 											echo '<line id="line_'.$lines[$l]['id'].'" x1="'.$lines[$l]['x1'].'" y1="'.$lines[$l]['y1'].'" x2="'.$lines[$l]['x2'].'" y2="'.$lines[$l]['y2'].'" class="line" onmouseenter="highlight_line('.$lines[$l]['id'].')" onmouseleave="de_highlight_line('.$lines[$l]['id'].')" onclick="jump_to_line('.$lines[$l]['id'].')"/>';
+										}
+									}
+									
+									if($this->rectangles){
+										$this->rectangles = array_values($this->rectangles);
+										$rectangles = $this->rectangles[$this->formvars['page']];
+										for($l = 0; $l < count($rectangles); $l++){
+											echo '<rect id="rect_'.$rectangles[$l]['id'].'" x="'.$rectangles[$l]['x1'].'" y="'.$rectangles[$l]['y1'].'" width="'.$rectangles[$l]['x2'].'" height="'.$rectangles[$l]['y2'].'" class="line" onmouseenter="highlight_rect('.$rectangles[$l]['id'].')" onmouseleave="de_highlight_rect('.$rectangles[$l]['id'].')" onclick="jump_to_rect('.$rectangles[$l]['id'].')"/>';
 										}
 									}
 								?>
@@ -235,7 +305,7 @@ function scrolltop(){
 					<td>
 						<table width="597" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
 							<tr>
-								<td class="fett" align="center" style="border-top:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3">&nbsp;Themen-Auswahl</td>
+								<td colspan="2" class="fett" align="center" style="border-top:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3">&nbsp;Themen-Auswahl</td>
 							</tr>
 							<tr>
 								<td> 
@@ -249,6 +319,11 @@ function scrolltop(){
 											echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
 										} ?>
 									</select>
+								</td>
+								<td align="center">
+								<? if($this->formvars['selected_layer_id'] != ''){ ?>
+									<input type="submit" name="go_plus" value="Layout automatisch erzeugen">
+								<? } ?>
 								</td>
 							</tr>
 						</table>
@@ -267,7 +342,7 @@ function scrolltop(){
 								</tr>
 								<tr>
 									<td colspan=1>
-										&nbsp;<select	name="aktivesLayout" onchange="document.GUI.submit()">
+										<select	name="aktivesLayout" style="width:250px" onchange="document.GUI.submit()">
 										<option value="">--- bitte wählen ---</option>
 										<?	
 										for($i = 0; $i < count($this->ddl->layouts); $i++){
@@ -280,7 +355,7 @@ function scrolltop(){
 										<input type="submit" name="go_plus" value="übernehmen >>">
 									</td>
 									<td style="border-left:1px solid #C3C7C3">
-										&nbsp;<select	name="stelle">
+										<select	name="stelle" style="width:250px">
 										<option value="">--- bitte wählen ---</option>
 											<?
 											for($i = 0; $i < count($this->stellendaten['ID']); $i++){
@@ -326,13 +401,25 @@ function scrolltop(){
 								</tr>
 								<tr>
 									<td style="border-bottom:1px solid #C3C7C3">
-										<span class="fett">Dateiname:</span> <img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1], Style[0], document.getElementById('Tip2'))" onmouseout="htm()">
+										<span class="fett">Dateiname:</span>&nbsp;
+										<span style="--left: 0px" data-tooltip="Hier kann der Name der erzeugten PDF-Datei angegeben werden.&#xa;Im Dateinamen können auch Attribute in der Form ${&lt;attributname&gt;} und die Schlüsselwörter $user, $stelle und $date verwendet werden, wodurch der Dateiname dynamisch wird. Wird kein Dateiname angegeben, erhält die PDF-Datei einen automatisch generierten Namen."></span>
 									</td>
-									<td colspan="3" style="border-bottom:1px solid #C3C7C3">
+									<td style="border-bottom:1px solid #C3C7C3">
 										<input type="text" name="filename" value="<? echo $this->ddl->selectedlayout[0]['filename'] ?>" size="35">
 										<div style="position:relative">
 											<div id="Tip2" style="visibility:hidden;position:absolute;bottom:20px;z-index:1000;"></div>
 										</div>
+									</td>
+									<td style="border-bottom:1px solid #C3C7C3">
+										<span class="fett">Format:</span>
+									</td>
+									<td style="border-bottom:1px solid #C3C7C3">
+										<select name="format">
+											<option value="A4 hoch" <? if($this->ddl->selectedlayout[0]['format'] == 'A4 hoch')echo 'selected' ?>>A4 hoch</option>
+											<option value="A4 quer" <? if($this->ddl->selectedlayout[0]['format'] == 'A4 quer')echo 'selected' ?>>A4 quer</option>
+											<option value="A3 hoch" <? if($this->ddl->selectedlayout[0]['format'] == 'A3 hoch')echo 'selected' ?>>A3 hoch</option>
+											<option value="A3 quer" <? if($this->ddl->selectedlayout[0]['format'] == 'A3 quer')echo 'selected' ?>>A3 quer</option>
+										</select>
 									</td>
 								</tr>
 								<tr id="list_type_options" style="display:<? if($this->ddl->selectedlayout[0]['type'] == 0)echo 'none' ?>">
@@ -468,14 +555,7 @@ function scrolltop(){
 												<td style="border-top:1px solid #C3C7C3" width="60px">&nbsp;Breite:</td>
 												<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3"><input	type="text" name="width_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['width']; ?>" size="5"></td>
 												<td style="border-top:1px solid #C3C7C3" align="left" colspan="2" align="center">
-													<?php echo output_select(
-														'font_' . $this->ddl->attributes['name'][$i],
-														$this->ddl->fonts,
-														$this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['font'],
-														null,
-														'Schriftart',
-														' - Bitte wählen - '
-													); ?>
+													<input type="text" onmouseenter="show_select(this, 'fonts')" name="font_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['font']; ?>">
 												</td>
 												<td style="border-top:1px solid #C3C7C3" align="left" align="center"><input type="text" title="Schriftgröße" name="fontsize_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['fontsize']; ?>" size="2">&nbsp;pt</td>
 											</tr>
@@ -484,20 +564,7 @@ function scrolltop(){
 												<td><input type="text" name="posy_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['ypos']; ?>" size="5"></td>
 												<td width="60px">&nbsp;unterhalb&nbsp;von:</td>
 												<td style="border-right:1px solid #C3C7C3">
-													<select name="offset_attribute_<? echo $this->ddl->attributes['name'][$i]; ?>">
-														<option value="">- Auswahl -</option>
-														<?
-														for($j = 0; $j < count($this->ddl->attributes['name']); $j++){
-															if($this->ddl->attributes['name'][$j] != $this->ddl->attributes['name'][$i]){
-																echo '<option ';
-																if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['offset_attribute'] == $this->ddl->attributes['name'][$j]){
-																	echo 'selected ';
-																}
-																echo 'value="'.$this->ddl->attributes['name'][$j].'">'.$this->ddl->attributes['name'][$j].'</option>';
-															}
-														}
-														?>
-													</select>
+													<input type="text" onmouseenter="show_select(this, 'attributes')" name="offset_attribute_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['offset_attribute']; ?>">
 												</td>
 												<td>&nbsp;Rahmen:</td>
 												<td><input type="checkbox" name="border_<? echo $this->ddl->attributes['name'][$i]; ?>" value="1" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['border'] == '1'){echo 'checked="true"';} ?> size="5"></td>
@@ -578,11 +645,8 @@ function scrolltop(){
 							<table width="597" border=0 cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
 								<tr>
 									<td class="fett" style="border-top:2px solid #C3C7C3" colspan=8 align="center">
-										<span id="freitexte">Freitexte</span>
-										<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[0], Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
-										<div style="position:relative">
-											<div id="Tip1" style="visibility:hidden;position:absolute;top:15px;z-index:1000;"></div>
-										</div>
+										<span id="freitexte">Freitexte</span>&nbsp;
+										<span data-tooltip="In Freitexten können folgende Schlüsselwörter verwendet werden, die dann durch andere Texte ersetzt werden:&#xa;- $stelle: die aktuelle Stellenbezeichung&#xa;- $user: der Name des Nutzers&#xa;- $pagenumber: die aktuelle Seitennummer  (Platzierung 'auf jeder Seite' erforderlich)&#xa;- $pagecount: die Gesamtseitenzahl  (Platzierung 'auf jeder Seite' erforderlich)&#xa;- ${&lt;attributname&gt;}: der Wert des Attributs"></span>
 									</td>
 								</tr>
 						<?  echo $this->ddl->output_freetext_form($this->ddl->selectedlayout[0]['texts'], $this->formvars['selected_layer_id'], $this->formvars['aktivesLayout']); ?>
@@ -596,28 +660,112 @@ function scrolltop(){
 									<td class="fett" style="border-top:2px solid #C3C7C3" colspan=8 align="center">
 										<span id="linien">Linien</span>
 									</td>
+								</tr><?
+									for ($i = 0; $i < ($this->formvars['nolines'] == '1' ? 0 : @count($this->ddl->selectedlayout[0]['lines'])); $i++) { ?>
+										<tbody
+											id="line_form_<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>"
+											onmouseenter="highlight_line(<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>)"
+											onmouseleave="de_highlight_line(<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>)"
+										>
+											<tr>
+												<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Start<input type="hidden" name="line_id<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>"></td>
+												<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Ende</td>
+												<td colspan="2" style="border-top:2px solid #C3C7C3"></td>
+											</tr>
+											<tr>
+												<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
+												<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="lineposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posx'] ?>" size="5"></td>
+												<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
+												<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="lineendposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposx'] ?>" size="5"></td>
+												<td colspan="2">Breite:&nbsp;<input type="text" name="breite<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['breite'] ?>" size="5"></td>
+											</tr>
+											<tr>
+												<td>&nbsp;y:</td>
+												<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posy'] ?>" size="5"></td>
+												<td>&nbsp;y:</td>
+												<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposy'] ?>" size="5"></td>
+												<td colspan="2"></td>
+											</tr>
+											<tr>
+												<td colspan="2" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
+												<td colspan="2" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
+												<td colspan="2" valign="bottom">&nbsp;Platzierung:</td>
+											</tr>
+											<tr>
+												<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
+													<input type="text" onmouseenter="show_select(this, 'attributes')" name="lineoffset_attribute_start<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute_start']; ?>">
+												</td>
+												<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
+													<input type="text" onmouseenter="show_select(this, 'attributes')" name="lineoffset_attribute_end<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute_end']; ?>">
+												</td>
+												<td align="left" valign="top">
+													<select style="width: 110px" name="linetype<? echo $i ?>">
+														<option value="0">normal</option>
+														<? if($this->ddl->selectedlayout[0]['type'] != 0){ ?>
+														<option value="1" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 1)echo ' selected '; ?>>fixiert</option>
+														<? } ?>
+														<option value="2" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 2)echo ' selected '; ?>>auf jeder Seite</option>
+													</select>
+												</td>
+												<td align="right">
+													<a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Linieloeschen&line_id=<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie die Linie wirklich löschen?');">löschen&nbsp;</a>
+												</td>
+											</tr>
+										</tbody><?
+									} ?>
+								<tr>
+									<td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;<a href="javascript:addline();">Linie hinzufügen</a></td>
 								</tr>
-								<? for($i = 0; $i < count($this->ddl->selectedlayout[0]['lines']); $i++){
+							</table>
+							<br>
+							<table width="597" border=0 cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
+								<tr>
+									<td class="fett" style="border-top:2px solid #C3C7C3" colspan=8 align="center">
+										<span id="rechtecke">Rechtecke</span>
+									</td>
+								</tr>
+								<? for($i = 0; $i < @count($this->ddl->selectedlayout[0]['rectangles']); $i++){
 									 ?>
-									<tbody id="line_form_<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>" onmouseenter="highlight_line(<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>)" onmouseleave="de_highlight_line(<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>)">
+									<tbody id="rect_form_<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>" onmouseenter="highlight_rect(<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>)" onmouseleave="de_highlight_rect(<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>)">
 									<tr>
-										<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Start<input type="hidden" name="line_id<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>"></td>
+										<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Start<input type="hidden" name="rect_id<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id'] ?>"></td>
 										<td colspan="2" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3">Ende</td>
 										<td colspan="2" style="border-top:2px solid #C3C7C3"></td>
 									</tr>
 									<tr>
 										<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
-										<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="lineposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posx'] ?>" size="5"></td>
+										<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="rectposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['posx'] ?>" size="5"></td>
 										<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
-										<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="lineendposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposx'] ?>" size="5"></td>
-										<td colspan="2">Breite:&nbsp;<input type="text" name="breite<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['breite'] ?>" size="5"></td>
+										<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="rectendposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['endposx'] ?>" size="5"></td>
+										<td colspan="2">Linienbreite:&nbsp;<input type="text" name="rectbreite<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['breite'] ?>" size="5"></td>
 									</tr>
 									<tr>
 										<td>&nbsp;y:</td>
-										<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posy'] ?>" size="5"></td>
+										<td style="border-right:1px solid #C3C7C3"><input type="text" name="rectposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['posy'] ?>" size="5"></td>
 										<td>&nbsp;y:</td>
-										<td style="border-right:1px solid #C3C7C3"><input type="text" name="lineendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposy'] ?>" size="5"></td>
-										<td colspan="2"></td>
+										<td style="border-right:1px solid #C3C7C3"><input type="text" name="rectendposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['endposy'] ?>" size="5"></td>
+										<td colspan="2">
+											Füllfarbe:
+											<?											
+												$selected_color = $this->ddl->colors[$this->ddl->selectedlayout[0]['rectangles'][$i]['color']];
+												$bgcolor = $selected_color['red'].', '.$selected_color['green'].', '.$selected_color['blue'];
+											?>
+											<select name="rectcolor<? echo $i ?>" style="background-color: rgb(<? echo $bgcolor; ?>)" onchange="this.setAttribute('style', this.options[this.selectedIndex].getAttribute('style'));">
+												<option value=""> - keine - </option>
+												<?
+												foreach($this->ddl->colors as $color){
+													echo '<option ';
+													if($selected_color['id'] == $color['id']){
+														echo ' selected';
+													}
+													echo ' style="background-color: rgb('.$color['red'].', '.$color['green'].', '.$color['blue'].')"';
+													echo ' value="'.$color['id'].'">';
+													echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+													echo "</option>\n";
+												}
+												?>
+											</select>
+										</td>
 									</tr>
 									<tr>
 										<td colspan="2" valign="bottom" style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
@@ -626,50 +774,29 @@ function scrolltop(){
 									</tr>
 									<tr>
 										<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
-											<select name="lineoffset_attribute_start<? echo $i ?>" style="width: 200px">
-												<option value="">- Auswahl -</option>
-												<?
-												for($j = 0; $j < count($this->ddl->attributes['name']); $j++){
-													echo '<option ';
-													if($this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute_start'] == $this->ddl->attributes['name'][$j]){
-														echo 'selected ';
-													}
-													echo 'value="'.$this->ddl->attributes['name'][$j].'">'.$this->ddl->attributes['name'][$j].'</option>';
-												}
-												?>
-											</select>
+											<input type="text" onmouseenter="show_select(this, 'attributes')" name="rectoffset_attribute_start<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['offset_attribute_start']; ?>">
 										</td>
 										<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
-											<select name="lineoffset_attribute_end<? echo $i ?>" style="width: 200px">
-												<option value="">- Auswahl -</option>
-												<?
-												for($j = 0; $j < count($this->ddl->attributes['name']); $j++){
-													echo '<option ';
-													if($this->ddl->selectedlayout[0]['lines'][$i]['offset_attribute_end'] == $this->ddl->attributes['name'][$j]){
-														echo 'selected ';
-													}
-													echo 'value="'.$this->ddl->attributes['name'][$j].'">'.$this->ddl->attributes['name'][$j].'</option>';
-												}
-												?>
-											</select>
+											<input type="text" onmouseenter="show_select(this, 'attributes')" name="rectoffset_attribute_end<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['offset_attribute_end']; ?>">
 										</td>
 										<td align="left" valign="top">
-											<select style="width: 110px" name="linetype<? echo $i ?>">
+											<select style="width: 110px" name="recttype<? echo $i ?>">
 												<option value="0">normal</option>
 												<? if($this->ddl->selectedlayout[0]['type'] != 0){ ?>
-												<option value="1" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 1)echo ' selected '; ?>>fixiert</option>
+												<option value="3" <? if($this->ddl->selectedlayout[0]['rectangles'][$i]['type'] == 3)echo ' selected '; ?>>alternierend</option>
+												<option value="1" <? if($this->ddl->selectedlayout[0]['rectangles'][$i]['type'] == 1)echo ' selected '; ?>>fixiert</option>
 												<? } ?>
-												<option value="2" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 2)echo ' selected '; ?>>auf jeder Seite</option>
+												<option value="2" <? if($this->ddl->selectedlayout[0]['rectangles'][$i]['type'] == 2)echo ' selected '; ?>>auf jeder Seite</option>
 											</select>
 										</td>
 										<td align="right">
-											<a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Linieloeschen&line_id=<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie die Linie wirklich löschen?');">löschen&nbsp;</a>
+											<a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Rechteckloeschen&rect_id=<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie das Rechteck wirklich löschen?');">löschen&nbsp;</a>
 										</td>
 									</tr>
 									</tbody>
 								<? } ?>
 								<tr>
-									<td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;<a href="javascript:addline();">Linie hinzufügen</a></td>
+									<td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;<a href="javascript:addrect();">Rechteck hinzufügen</a></td>
 								</tr>
 							</table>
 						</td>
@@ -690,5 +817,6 @@ function scrolltop(){
 </div>
 <input type="hidden" name="textcount" value="<? echo count($this->ddl->selectedlayout[0]['texts']); ?>">
 <input type="hidden" name="linecount" value="<? echo count($this->ddl->selectedlayout[0]['lines']); ?>">
+<input type="hidden" name="rectcount" value="<? echo count($this->ddl->selectedlayout[0]['rectangles']); ?>">
 <input type="hidden" name="bgsrc_save" value="<? echo $this->ddl->selectedlayout[0]['bgsrc'] ?>">
 

@@ -1,5 +1,0 @@
-BEGIN;
-
-ALTER TABLE `u_consumeALB` CHANGE `format` `format` VARCHAR(50) NOT NULL;
-
-COMMIT;

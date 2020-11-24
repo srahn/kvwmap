@@ -11,57 +11,91 @@
 		if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'none';
 	</script>
 <? } ?>
-<table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
-  <tr align="center"> 
-    <td colspan="5"><h2><?php echo $strtitle; ?>:&nbsp;<? if($this->qlayerset[0]['alias'] != '')echo $this->qlayerset[0]['alias']; else echo $this->qlayerset[0]['Name']; ?></h2></td>
-  </tr>
-  <tr <? if($this->formvars['selected_layer_id'] != '')echo 'style="display:none"'; ?>>
-  	<td>&nbsp;</td>
-  </tr>
-  <tr <? if($this->formvars['selected_layer_id'] != '')echo 'style="display:none"'; ?>> 
-    <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="5"><?php echo $strLayer;?></td>
-  </tr>
-  <tr <? if($this->formvars['selected_layer_id'] != '')echo 'style="display:none"'; ?>> 
-    <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
-      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
-      	<option value=""><?php echo $strPleaseSelect; ?></option>
-        <?
-    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){    			
-    			echo '<option';
-    			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
-    				echo ' selected';
-    			}
-    			echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
-    		}
-    	?>
-      </select> </td>
-  </tr>
-  <?php if($this->Fehler != ''){
-  	?>
-  <tr>
-  	<td><?php
-  	 echo $this->Fehler;
-  	 ?></td>
-  </tr><?php
-   }
-   ?></table>
 
+<style>
+#nds_titel {
+	font-family: SourceSansPro3;
+	font-size: 20px;
+	margin-bottom: 0px;
+	margin-top: 20px;
+}
+#nds_titel p {
+	margin: -15px 0px 0px 0px;
+}
+#nds_formular {
+	margin: 40px 0px 20px 0px;
+	padding-left: 20px;
+}
+.nds_select  {
+	display: flex;
+	width: 500px;
+	margin: 0px 0px 10px 0px;
+}
+.nds_select select {
+	height: 25px;
+	width: 360px;
+	border-radius: 2px;
+	border: 1px solid #777;
+	padding-left: 5px;
+}
+.nds_select div:first-child {
+	margin-right: 10px;
+	align-self: center;
+	width: 50px;
+}
+#nds_submit {
+	display:flex;
+	flex-flow: row nowrap;
+	justify-content: center;
+	margin-bottom: 30px;
+}
+#nds_submit>div {
+	display: flex;
+	align-items: center;
+}
+#nds_submit input {
+	margin-right: 5px;
+}
+#nds_submit input[type="checkbox"] {
+	margin-top: auto;
+	margin-bottom: auto;
+	margin-left: 15px;
+}
+#nds_submit span {
+	margin: auto;
+	margin-left: 3px;
+}
+</style>
+
+
+<div id="nds_titel">
+	<p><?php echo $strtitle; ?><? if($this->qlayerset[0]['alias'] != '' or $this->qlayerset[0]['Name'] != '')echo ': '; ?><? if($this->qlayerset[0]['alias'] != '')echo $this->qlayerset[0]['alias']; else echo $this->qlayerset[0]['Name']; ?></p>
+</div>
+<div id="nds_formular" <? if($this->formvars['selected_layer_id'] != '')echo 'style="display:none"'; ?>>
+	<div class="nds_select">
+		<div><?php echo $strLayer; ?></div>
+		<div>
+			<select size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+				<option value=""><?php echo $strPleaseSelect; ?></option>
 <?
-if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
-	
-	# falls das Geometrie-Attribut editierbar ist und wir uns im Overlay-Fenster befinden, das Ganze ohne Overlay aufrufen
-	if($this->currentform == 'document.GUI2' AND $this->qlayerset[0]['attributes']['privileg'][$this->qlayerset[0]['attributes']['indizes'][$this->qlayerset[0]['attributes']['the_geom']]] == 1){
-		$this->formvars['mime_type'] = '';
-		echo '
-		<script type="text/javascript">
-			location.href = \'index.php?'.http_build_query($this->formvars).'\'
-		</script>';
-		exit;
-	}	
-	
+				for($i = 0; $i < count($this->layerdaten['ID']); $i++){    			
+					echo '<option';
+					if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
+						echo ' selected';
+					}
+					echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
+				}
+?>			
+			</select>
+		</div>
+	</div>	
+</div>
+<div id="nds_edit">
+<?
+if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){	
 	$i = 0;	
 	if($this->qlayerset[0]['template']=='generic_layer_editor.php' OR $this->qlayerset[0]['template']==''){
-		include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise auch bei spaltenweiser Darstellung
+		include(SNIPPETS.'generic_layer_editor_2.php');
 	}
 	else{
 		if(is_file(SNIPPETS.$this->qlayerset[0]['template'])){
@@ -69,35 +103,24 @@ if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 		}
 		else{
 			if(file_exists(PLUGINS.$this->qlayerset[0]['template'])){
-				include(PLUGINS.$this->qlayerset[0]['template']);			# Pluginviews
+				include(PLUGINS.$this->qlayerset[0]['template']);
 			}
 			else{
-	   		#Version 1.6.5 pk 2007-04-17
-	   	 	echo '<p>Das in den stellenbezogenen Layereigenschaften angegebene Templatefile:';
-	   	 	echo '<br><span class="fett">'.SNIPPETS.$this->qlayerset[0]['template'].'</span>';
-	   	 	echo '<br>kann nicht gefunden werden. Überprüfen Sie ob der angegebene Dateiname richtig ist oder eventuell Leerzeichen angegeben sind.';
-	   	 	echo ' Die Templatezuordnung für die Sachdatenanzeige ändern Sie über Stellen anzeigen, ändern, Layer bearbeiten, stellenbezogen bearbeiten.';
-	   	 	#echo '<p><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->qlayerset[0]['Layer_ID'].'&selected_stelle_id='.$this->Stelle->id.'&stellen_name='.$this->Stelle->Bezeichnung.'">zum Stellenbezogener Layereditor</a> (nur mit Berechtigung möglich)';
+				$this->alert = 'Kein Template vorhanden.\nBitte kontaktieren Sie die Administration!';
 			}
 		}
-	}
-		
+	}	
 ?>
-<table width="100%" border="0" cellpadding="2" cellspacing="0">
-	<tr align="center"> 
-  	<td>
+<div id="nds_submit">
+	<div>
 		<? if($this->formvars['subform'] == 'true'){ ?>
-			<input type="button" name="abort" value="<? echo $this->strCancel; ?>" onclick="currentform.go.value='get_last_query';currentform.submit();">&nbsp;&nbsp;&nbsp;&nbsp;
+		<input type="button" name="abort" value="<? echo $this->strCancel; ?>" onclick="currentform.go.value='get_last_query';currentform.submit();">
 		<? } ?>
-  		<input type="button" name="go_plus" id="sachdatenanzeige_save_button" value="<? echo $strSave; ?>" onclick="<? echo $this->currentform; ?>.save_new_dataset();">&nbsp;&nbsp;&nbsp;&nbsp;
-  		<input type="checkbox" name="weiter_erfassen" value="1" <? if($this->formvars['weiter_erfassen'] == 1)echo 'checked="true"'; ?>><? echo $strCreateAnotherOne; ?>
-  	</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
-	</tr>
-</table>
-<? } ?>
+		<input type="button" name="go_plus" id="sachdatenanzeige_save_button" value="<? echo $strSave; ?>" onclick="save_new_dataset();">
+		<input type="checkbox" name="weiter_erfassen" value="1" <? if($this->formvars['weiter_erfassen'] == 1)echo 'checked="true"'; ?>><span><? echo $strCreateAnotherOne; ?></span>
+	</div>
+</div>
+	<? } ?>
 
 <input type="hidden" name="close_window" value="">
 <input type="hidden" name="go" value="neuer_Layer_Datensatz">

@@ -105,7 +105,7 @@
 	</div>
 	<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop; scrollLayerOptions();">
 		<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
-		<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
+		<div onmousedown="document.GUI.legendtouched.value = 1;" id="legend">
 			<? echo $this->legende; ?>
 		</div>
 		<script type="text/javascript">

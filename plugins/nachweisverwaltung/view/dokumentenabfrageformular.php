@@ -3,12 +3,8 @@
 ?>
 
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
-<SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 <script type="text/javascript">
 <!--
-
-Text[1]=["Achtung:","Bei Auswahl von 'räumlich' erfolgt eine räumliche Suche über die aktuelle Flurgeometrie. Soll stattdessen über die in den Metainformationen gespeicherte Flur gesucht werden, muss 'thematisch' ausgewählt werden."]
-
 
 function save(){
 	var dokument_art_selected = false;
@@ -210,8 +206,8 @@ else {
 				<?				if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
 									&nbsp;<select name="suchunterart[]" multiple="true" style="height: 20px;z-index:<? echo $z_index-=1; ?>;position: absolute;width: 219px" onmousedown="if(this.style.height=='20px'){this.style.height = this.length * 20;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='20px';scrollToSelected(this);}"">
 										<option value="">alle</option>
-										<? for($i = 0; $i < count($this->dokumentarten[$hauptdokumentart['id']]); $i++){?>
-											<option <? if(in_array($this->dokumentarten[$hauptdokumentart['id']][$i]['id'], $this->formvars['suchunterart'])){echo 'selected';} ?> value="<? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['id']; ?>"><? echo $this->dokumentarten[$hauptdokumentart['id']][$i]['art']; ?></option>	
+										<? foreach($this->dokumentarten[$hauptdokumentart['id']] as $dokumentart){ ?>
+											<option <? if(in_array($dokumentart['id'], $this->formvars['suchunterart'])){echo 'selected';} ?> value="<? echo $dokumentart['id']; ?>"><? echo $dokumentart['art']; ?></option>	
 										<? } ?>
 									</select>
 									<? } ?>
@@ -311,14 +307,13 @@ else {
 				<tr>
 					<td align="left" colspan="3">Flur:&nbsp;
 						<div style="position: relative">
-						<input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3">
-						&nbsp;&nbsp;&nbsp;						
-						<input type="radio" name="flur_thematisch" <? if($this->formvars['flur_thematisch'] != '1')echo 'checked'; ?> value="0">räumlich
-						&nbsp;&nbsp;&nbsp;
-						<input type="radio" name="flur_thematisch" <? if($this->formvars['flur_thematisch'] == '1')echo 'checked'; ?> value="1">thematisch
-						&nbsp;
-						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()">
-						<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;left: -50px"></DIV>
+							<input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3">
+							&nbsp;&nbsp;&nbsp;						
+							<input type="radio" name="flur_thematisch" <? if($this->formvars['flur_thematisch'] != '1')echo 'checked'; ?> value="0">räumlich
+							&nbsp;&nbsp;&nbsp;
+							<input type="radio" name="flur_thematisch" <? if($this->formvars['flur_thematisch'] == '1')echo 'checked'; ?> value="1">thematisch
+							&nbsp;
+							<span style="--left: none" data-tooltip="Bei Auswahl von 'räumlich' erfolgt eine räumliche Suche über die aktuelle Flurgeometrie. Soll stattdessen über die in den Metainformationen gespeicherte Flur gesucht werden, muss 'thematisch' ausgewählt werden."></span>
 						</div>
 					</td>
 				</tr>
@@ -402,7 +397,7 @@ else {
   </tr>
   <tr>
   	<td colspan="2">Geometrie übernehmen von:<br>
-  		<select name="geom_from_layer" onchange="document.GUI.submit();">
+  		<select name="geom_from_layer">
   			<option value="">--- Auswahl ---</option>
   			<?
   				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){

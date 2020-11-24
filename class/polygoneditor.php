@@ -31,21 +31,20 @@
 
 class polygoneditor {
 
-  function polygoneditor($database, $layerepsg, $clientepsg) {
+  function __construct($database, $layerepsg, $clientepsg, $oid_attribute) {
     global $debug;
     $this->debug=$debug;
     $this->database=$database;
     $this->clientepsg = $clientepsg;
-    #echo '<br>EPSG-Code im Client:'.$this->clientepsg;
     $this->layerepsg = $layerepsg;
-    #echo '<br>EPSG-Code vom Layer:'.$this->layerepsg;
+    $this->oid_attribute = $oid_attribute;
   }
 
   function zoomTopolygon($oid, $tablename, $columnname,  $border, $schemaname = '') {
   	# Eine Variante mit der nur einmal transformiert wird
   	$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
   	$sql.=" FROM (SELECT box2D(st_transform(".$columnname.", ".$this->clientepsg.")) as bbox";
-  	$sql.=" FROM " . ($schemaname != '' ? $schemaname . '.' : '') .$tablename." WHERE oid = '".$oid."') AS foo";
+  	$sql.=" FROM " . ($schemaname != '' ? $schemaname . '.' : '') .pg_quote($tablename)." WHERE ".$this->oid_attribute." = '".$oid."') AS foo";
     $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
 		$rect = ms_newRectObj();
@@ -100,9 +99,9 @@ class polygoneditor {
   function eintragenFlaeche($umring, $oid, $tablename, $columnname, $geomtype) {
 		$geometry = ($umring == '' ? "NULL" : "ST_Transform(ST_GeometryFromText('" . $umring . "', " . $this->clientepsg . "), " . $this->layerepsg . ")");
 		$sql = "
-			UPDATE " . $tablename . "
-			SET " . $columnname . " = " . (substr($geomtype, 0, 5) == 'MULTI' ? "ST_Multi(" . $geometry . ")" : $geometry) . "
-			WHERE oid = " . $oid . "
+			UPDATE " . pg_quote($tablename) . "
+			SET " . pg_quote($columnname) . " = " . (substr($geomtype, 0, 5) == 'MULTI' ? "ST_Multi(" . $geometry . ")" : $geometry) . "
+			WHERE ".pg_quote($this->oid_attribute)." = " . quote($oid) . "
 		";
 		$ret = $this->database->execSQL($sql, 4, 1, true);
 		if (!$ret['success']) {
@@ -126,8 +125,8 @@ class polygoneditor {
 	}
 
 	function getpolygon($oid, $tablename, $columnname, $extent, $schemaname = ''){
-		$sql = "SELECT st_assvg(st_transform(st_union(".$columnname."),".$this->clientepsg."), 0, 8) AS svggeom, st_astext(st_transform(st_union(".$columnname."),".$this->clientepsg.")) AS wktgeom, st_numGeometries(st_union(".$columnname.")) as numgeometries FROM " . ($schemaname != '' ? $schemaname . '.' : '') . $tablename;
-		if($oid != NULL)$sql .= " WHERE oid = ".$oid;
+		$sql = "SELECT st_assvg(st_transform(st_union(".$columnname."),".$this->clientepsg."), 0, 15) AS svggeom, st_astext(st_transform(st_union(".$columnname."),".$this->clientepsg.")) AS wktgeom, st_numGeometries(st_union(".$columnname.")) as numgeometries FROM " . ($schemaname != '' ? $schemaname . '.' : '') . pg_quote($tablename);
+		if($oid != NULL)$sql .= " WHERE ".$this->oid_attribute." = ".quote($oid);
 		#echo '<br>sql: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$polygon = pg_fetch_array($ret[1]);

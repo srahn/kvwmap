@@ -1,4 +1,5 @@
 <?php
+# vg 
 ###################################################################
 # kvwmap - Kartenserver für Kreisverwaltungen										 #
 ###################################################################
@@ -38,7 +39,7 @@
 */
 class synchro {
 
-	function synchro($stelle, $user, $database) {
+	function __construct($stelle, $user, $database) {
 		$this->Stelle = $stelle;
 		$this->user = $user;
 		$this->database = $database;
@@ -286,7 +287,7 @@ class synchro {
 	* - Fragt ob die angefragte Syncronisation schon mal abgearbeitet wurde
 	* - Wenn ja:
 	* 	- Legt eine neue Syncronisation in der Datenbank an mit
-	* 		$client_id, $user_name, $pull_version_from, $pull_version_to und $push_version_from.
+	* 		$client_id, $user_name, $pull_from_version, $pull_to_version und $push_from_version.
 	* 	- Trägt alle mitgesendeten Änderungen ($client_deltas) in die Datenbank ein
 	* 	- Trägt die neue letzte Version $push_version_to in die aktuelle Syncronisation ein.
 	* - Ansonsten immer:
@@ -296,6 +297,46 @@ class synchro {
 	*/
 	function sync($client_id, $username, $schema_name, $table_name, $client_time, $last_client_version, $client_deltas) {
 		$pull_from_version = $last_client_version + 1;
+		$client_pushed_deltas = count($client_deltas->rows) > 0;
+
+		if (!$client_pushed_deltas) {
+			# Because client sent no deltas, request for new deltas starting with pull_from_version in server database before creating a synchronization in sync table
+			$sql = "
+				SELECT
+					*
+				FROM
+					" . $schema_name . "." . $table_name . "_deltas
+				WHERE
+					version >= " . $pull_from_version . "
+			";
+			$res = $this->database->execSQL($sql, 0, 1, true);
+			if ($res[0]) {
+				$result = array(
+					'success' => false,
+					'err_msg' => 'Fehler bei der Syncronisation auf dem Server. ' . $res[1]
+				);
+				return $result;
+			}
+			if (pg_num_rows($res[1]) == 0) {
+				# There are also no new deltas on client side, send a result with no new data and push_to_version = $last_client_version
+				$result = array(
+					'success' => true,
+					'syncData' => array(array(
+						'client_id' => $client_id,
+						'client_time' => $client_time,
+						'schema_name' => $schema_name,
+						'table_name' => $table_name,
+						'pull_from_version' => null,
+						'pull_to_version' => null,
+						'push_from_version' => null,
+						'push_to_version' => $last_client_version
+					)),
+					'deltas' => array(),
+					'log'	=> 'Es wurden keine Änderungen vom Client auf den Server übertragen und es gab auch keine Änderungen vom Server zu holen!'
+				);
+				return $result;
+			}
+		}
 
 		/*
 		# Frage ab ob die Syncronisation schon mal abgefragt wurde
@@ -344,7 +385,7 @@ class synchro {
 					'" . $table_name . "',
 					" . $pull_from_version  . ",
 					(SELECT coalesce(max(version), 1) FROM " . $schema_name . "." . $table_name . "_deltas),
-					(SELECT coalesce(max(version), 1) FROM " . $schema_name . "." . $table_name . "_deltas) + 1
+					(SELECT coalesce(max(version), 1) FROM " . $schema_name . "." . $table_name . "_deltas)" . ($client_pushed_deltas ? " + 1" : '') . "
 				);
 			";
 
@@ -396,7 +437,7 @@ class synchro {
 			FROM
 				" . $schema_name . "." . $table_name . "_deltas
 			WHERE
-				version > " . $last_client_version . " AND
+				version >= " . $pull_from_version . " AND
 				version <= (
 					SELECT
 						pull_to_version
@@ -434,6 +475,7 @@ class synchro {
 				syncs
 			WHERE
 				client_id = '" . $client_id . "' AND
+				client_time = '" . $client_time . "' AND
 				username = '" . $username . "' AND
 				schema_name = '" . $schema_name ."' AND
 				table_name = '" . $table_name ."' AND

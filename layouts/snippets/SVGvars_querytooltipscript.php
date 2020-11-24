@@ -4,13 +4,9 @@
 $layerset = $this->layerset['list'];
 
 $SVGvars_querytooltipscript = '
-
-		var layerset = new Array();
 		var layernumber = new Array();';
 for($i = 0; $i < count($layerset); $i++){
 	if($layerset[$i]['Layer_ID'] != ''){
-		$SVGvars_querytooltipscript.= 'layerset['.$i.'] = top.document.getElementById("qLayer'.$layerset[$i]['Layer_ID'].'");
-		';
 		$SVGvars_querytooltipscript.= 'layernumber['.$i.'] = '.$layerset[$i]['Layer_ID'].';
 		';
 	}
@@ -93,6 +89,14 @@ $SVGvars_querytooltipscript .= '
 						}
 						var anzahl_bilder = elements.length-1;
 						for(j = 1; j < elements.length; j++){
+							if(j%2 == 0){
+								xpos = 165;
+								maxwidth = 305;
+								ypos = ypos - 110;
+							}
+							else{
+								xpos = 5;
+							}
 							pics[i] = new Array();
 							pics[i][j] = document.createElementNS("http://www.w3.org/2000/svg", "image");
 							pics[i][j].setAttributeNS(null, "id", "pic_"+i+j);
@@ -110,6 +114,7 @@ $SVGvars_querytooltipscript .= '
 							}
 						}
 						ypos = ypos + 12;
+						xpos = 5;
 					}
 				}
 				tooltipframe.setAttribute("x", xpos-8);
@@ -239,8 +244,9 @@ $SVGvars_querytooltipscript .= '
 			if(doing == "ppquery" && mouse_down == false && tooltipstate == "ready_for_request" && prevent != 1){ 		// wenn bereit fuer Request
 				if(Math.abs(oldmousex-mousex) < 1 && Math.abs(oldmousey-mousey) < 1){		// Maus stillhalten
 					tooltipstate = "request_sent";
-					for(i = 0; i < layerset.length; i++){
-						if(layerset[i] != undefined && layerset[i].checked){
+					for(i = 0; i < layernumber.length; i++){
+						query_layer_field = top.document.getElementById("qLayer"+layernumber[i]);
+						if(query_layer_field != undefined && query_layer_field.checked){
 							querylayer += "&qLayer"+layernumber[i]+"=1";
 						}
 					}

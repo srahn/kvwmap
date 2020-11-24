@@ -666,7 +666,7 @@ update_require_attribute = function(attributes, layer_id, value){
 				</tr>
 			  <tr>
 			  	<td colspan="3">Geometrie übernehmen von:<br>
-			  		<select name="geom_from_layer" onchange="document.GUI.submit();">
+			  		<select name="geom_from_layer">
 			  			<option value="">--- Auswahl ---</option>
 			  			<?
 			  				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){

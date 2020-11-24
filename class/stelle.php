@@ -28,15 +28,15 @@ class stelle {
 	var $pixsize;
 	var $selectedButton;
 	var $database;
+	var $language;
 
-	function stelle($id, $database) {
+	function __construct($id, $database) {
 		global $debug;
 		global $log_mysql;
 		$this->debug = $debug;
 		$this->log = $log_mysql;
 		$this->id = $id;
 		$this->database = $database;
-		$this->Bezeichnung = $this->getName();
 		$this->readDefaultValues();
 	}
 
@@ -52,12 +52,12 @@ class stelle {
 		$sql .=' AND u_menue2stelle.menue_id = u_menues.id';
 		$sql .= ' ORDER BY menue_order';
 		$this->debug->write("<p>file:stelle.php class:stelle->getsubMenues - Lesen der UnterMenuepunkte eines Menüpunktes:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
-		else{
-			while($rs=mysql_fetch_array($query)) {
+		else {
+			while ($rs = $this->database->result->fetch_array()) {
 				$menue['name'][]=$rs['name'];
 				$menue['target'][]=$rs['target'];
 				$menue['links'][]=$rs['links'];
@@ -98,11 +98,13 @@ class stelle {
       $sql.='`Bezeichnung_'.$this->language.'` AS ';
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
-    #echo $sql;
-    $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
+    #echo '<p>SQL zur Abfrage des Stellennamens: ' . $sql;
+    $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>",4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+		}
+		$rs = $this->database->result->fetch_array();
     $this->Bezeichnung=$rs['Bezeichnung'];
     return $rs['Bezeichnung'];
   }
@@ -110,23 +112,34 @@ class stelle {
 	function readDefaultValues() {
 		$sql = "
 			SELECT
-				*
+				*,";
+		if ($this->language != 'german' AND $this->language != ''){
+      $sql.='`Bezeichnung_'.$this->language.'` AS ';
+    }
+    $sql.="
+				Bezeichnung
 			FROM
 				stelle
 			WHERE
 				ID = " . $this->id . "
 		";
-		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
-		$query = mysql_query($sql,$this->database->dbConn);
-		if ($query == 0) { $this->debug->write('<br>Abbruch Zeile: ' . __LINE__, 4); return 0; }
-		$rs = mysql_fetch_array($query);    
+		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+		}
+		$rs = $this->database->result->fetch_array();
+		$this->Bezeichnung=$rs['Bezeichnung'];
 		$this->MaxGeorefExt = ms_newRectObj();
 		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
-		$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
-		$this->pgdbname = $rs['pgdbname'];
-		$this->pgdbuser = $rs['pgdbuser'];
-		$this->pgdbpasswd = $rs['pgdbpasswd'];
+		$this->postgres_connection_id = $rs['postgres_connection_id'];
+		# ---> deprecated
+			$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
+			$this->pgdbname = $rs['pgdbname'];
+			$this->pgdbuser = $rs['pgdbuser'];
+			$this->pgdbpasswd = $rs['pgdbpasswd'];
+		# <---
 		$this->protected = $rs['protected'];
 		//---------- OWS Metadaten ----------//
 		$this->ows_title = $rs['ows_title'];
@@ -149,12 +162,20 @@ class stelle {
 	}
 
   function checkClientIpIsOn() {
-    $sql ='SELECT check_client_ip FROM stelle WHERE ID = '.$this->id;
+    $sql = "
+			SELECT
+				check_client_ip
+			FROM
+				stelle
+			WHERE ID = " . $this->id . "
+		";
     $this->debug->write("<p>file:stelle.php class:stelle->checkClientIpIsOn- Abfragen ob IP's der Nutzer in der Stelle getestet werden sollen<br>".$sql,4);
     #echo '<br>'.$sql;
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+		}
+		$rs = $this->database->result->fetch_array();
     if ($rs['check_client_ip']=='1') {
       return 1;
     }
@@ -183,8 +204,8 @@ class stelle {
 		";
 		#echo '<br>stelle.php deleteMenue(' . (is_array($menue_ids) ? implode(', ', $menue_ids) : $menue_ids) . ') Löschen der Menüpunkte der Stelle mit sql: ' . $sql . '!';
 		$this->debug->write("<p>file:stelle.php class:stelle function:deleteMenue - Löschen der Menuepunkte der Stelle in menue2stelle:<br>" . $sql, 4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 
 		/*		erstmal rausgenommen, weil sonst beim Ändern einer Stelle die Menüeinstellungen der Nutzer, insbesondere des Default-Nutzers verloren gehen
 		# Löschen der Zuordnung der Menüs zu den Rollen der Stelle
@@ -197,8 +218,8 @@ class stelle {
 		";
 		#echo '<br>stelle.php deleteMenue (' . (is_array($menue_ids) ? implode(', ', $menue_ids) : $menue_ids) . 'Löschen der Menüpunkte der Rollen der Stellen sql: ' . $sql . '!';
 		$this->debug->write("<p>file:stelle.php class:stelle function:deleteMenue - Löschen der Menuepunkte der Rollen der Stelle in menue2rolle:<br>" . $sql, 4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		*/
 		return 1;
 	}
@@ -209,49 +230,49 @@ class stelle {
 			# löscht alle Layer der Stelle
 			$sql ='DELETE FROM `used_layer` WHERE `Stelle_ID` = '.$this->id;
 			$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 			$sql ='DELETE FROM `layer_attributes2stelle` WHERE `stelle_id` = '.$this->id;
 			$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 			# Filter löschen
 			$sql ='SELECT attributvalue FROM `u_attributfilter2used_layer` WHERE `type` = \'geometry\' AND `Stelle_ID` = '.$this->id;
 			$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-			while($rs=mysql_fetch_row($query)){
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			while ($rs = $this->database->result->fetch_row()) {
 				$poly_id = $rs[0];
 				if($poly_id != '')$pgdatabase->deletepolygon($poly_id);
 			}
 			$sql ='DELETE FROM `u_attributfilter2used_layer` WHERE `Stelle_ID` = '.$this->id;
 			$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
 		else{
 			# löscht die übergebenen Layer der Stelle
 			for ($i=0;$i<count($layer);$i++) {
 				$sql ='DELETE FROM `used_layer` WHERE `Stelle_ID` = '.$this->id.' AND `Layer_ID` = '.$layer[$i];
 				$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
-				$query=mysql_query($sql,$this->database->dbConn);
-				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+				$this->database->execSQL($sql);
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 				$sql ='DELETE FROM `layer_attributes2stelle` WHERE `stelle_id` = '.$this->id.' AND `layer_id` = '.$layer[$i];
 				$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
-				$query=mysql_query($sql,$this->database->dbConn);
-				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; 	}			
+				$this->database->execSQL($sql);
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; 	}			
 				# Filter löschen
 				$sql ='SELECT attributvalue FROM `u_attributfilter2used_layer` WHERE `type` = \'geometry\' AND `Stelle_ID` = '.$this->id.' AND `Layer_ID` = '.$layer[$i];
 				$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
-				$query=mysql_query($sql,$this->database->dbConn);
-				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-				$rs=mysql_fetch_row($query);
+				$this->database->execSQL($sql);
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+				$rs = $this->database->result->fetch_array();
 				$poly_id = $rs[0];
 				if($poly_id != '')$pgdatabase->deletepolygon($poly_id);
 				$sql ='DELETE FROM `u_attributfilter2used_layer` WHERE `Stelle_ID` = '.$this->id.' AND `Layer_ID` = '.$layer[$i];
 				$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
-				$query=mysql_query($sql,$this->database->dbConn);
-				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+				$this->database->execSQL($sql);
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 			}
 		}
 		return 1;
@@ -262,8 +283,8 @@ class stelle {
 		$sql ='DELETE FROM `druckrahmen2stelle` WHERE `stelle_id` = '.$this->id;
 		#echo '<br>'.$sql;
 		$this->debug->write("<p>file:stelle.php class:stelle function:deleteDruckrahmen - Löschen der Druckrahmen der Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		return 1;
 	}
 	
@@ -272,8 +293,8 @@ class stelle {
 		$sql ='DELETE FROM `stelle_gemeinden` WHERE `Stelle_ID` = '.$this->id;
 		#echo '<br>'.$sql;
 		$this->debug->write("<p>file:stelle.php class:stelle function:deleteStelleGemeinden - Löschen der StelleGemeinden der Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		return 1;
 	}
 	
@@ -282,8 +303,8 @@ class stelle {
 		$sql ='DELETE FROM `u_funktion2stelle` WHERE `stelle_id` = '.$this->id;
 		#echo '<br>'.$sql;
 		$this->debug->write("<p>file:stelle.php class:stelle function:deleteFunktionen - Löschen der Funktionen der Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		return 1;
 	}
 
@@ -296,10 +317,11 @@ class stelle {
 			WHERE
 				ID = " . $this->id . "
 		";
+		#echo '<p>SQL zum Abfragen der Stellendaten: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getstellendaten - Abfragen der Stellendaten<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		$rs=mysql_fetch_array($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		$rs=$this->database->result->fetch_array();
 		return $rs;
 	}
 
@@ -319,6 +341,9 @@ class stelle {
 		$sql.=', epsg_code= "'.$stellendaten['epsg_code'].'"';
 		$sql.=', start= "'.$stellendaten['start'].'"';
 		$sql.=', stop= "'.$stellendaten['stop'].'"';
+		if ($stellendaten['postgres_connection_id'] != '') {
+			$sql .= ', postgres_connection_id = ' . $stellendaten['postgres_connection_id'];
+		}
 		if ($stellendaten['pgdbhost']!='') {
 			$sql.=', pgdbhost= "'.$stellendaten['pgdbhost'].'"';
 		}
@@ -358,16 +383,16 @@ class stelle {
 			$sql ='SELECT ID FROM stelle WHERE';
 			$sql.=' Bezeichnung="'.$stellendaten['bezeichnung'].'"';
 			# Starten der Anfrage
-			$ret=$this->database->execSQL($sql,4, 0);
+			$this->database->execSQL($sql,4, 0);
 			#echo $sql;
-			if ($ret[0]) {
+			if (!$this->database->success) {
 				# Fehler bei der Datenbankanfrage
-				$ret[1].='<br>Die Stellendaten konnten nicht eingetragen werden.<br>'.$ret[1];
+				$ret[1] .= '<br>Die Stellendaten konnten nicht eingetragen werden.<br>' . $this->database->errormessage;
 			}
 			else {
 				# Abfrage erfolgreich durchgeführt, übergeben der stelle_id zur Rückgabe der Funktion
-				$rs=mysql_fetch_array($ret[1]);
-				$ret[1]=$rs['ID'];
+				$rs = $this->database->result->fetch_array();
+				$ret[1] = $rs['ID'];
 			}
 		}
 		return $ret;
@@ -376,7 +401,7 @@ class stelle {
 	# Stelle ändern
 	function Aendern($stellendaten) {
 		$stelle = ($stellendaten['id'] != '' ? "`ID` = " . $stellendaten['id'] . ", " : "");
-		$wappen = ($stellendaten['wappen'] != '' ? "`wappen` = '" . $stellendaten['wappen'] . "', " : "");
+		$wappen = (value_of($stellendaten, 'wappen') != '' ? "`wappen` = '" . $stellendaten['wappen'] . "', " : "");
 		$sql = "
 			UPDATE
 				stelle
@@ -392,6 +417,7 @@ class stelle {
 				`epsg_code` = '" . $stellendaten['epsg_code'] . "',
 				`start` = '" . $stellendaten['start'] . "',
 				`stop` = '" . $stellendaten['stop'] . "',
+				`postgres_connection_id` = " . ($stellendaten['postgres_connection_id'] != '' ? $stellendaten['postgres_connection_id'] : 'NULL') . ",
 				`pgdbhost` = '" . $stellendaten['pgdbhost'] . "',
 				`pgdbname` = '" . $stellendaten['pgdbname'] . "',
 				`pgdbuser` = '" . $stellendaten['pgdbuser'] . "',
@@ -408,8 +434,8 @@ class stelle {
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
 				`check_client_ip` =				'" . ($stellendaten['checkClientIP'] 			== '1'	? "1" : "0") . "',
 				`check_password_age` =		'" . ($stellendaten['checkPasswordAge'] 	== '1'	? "1" : "0") . "',
-				`use_layer_aliases` = 		'" . ($stellendaten['use_layer_aliases'] 	== '1'	? "1" : "0") . "',
-				`hist_timestamp` = 				'" . ($stellendaten['hist_timestamp'] 		== '1'	? "1" : "0") . "',
+				`use_layer_aliases` = 		'" . (value_of($stellendaten, 'use_layer_aliases') 	== '1'	? "1" : "0") . "',
+				`hist_timestamp` = 				'" . (value_of($stellendaten, 'hist_timestamp') 		== '1'	? "1" : "0") . "',
 				`allowed_password_age` = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "',
 				`default_user_id` = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . "
 			WHERE
@@ -428,7 +454,7 @@ class stelle {
 
 	function getStellen($order, $user_id = 0) {
 		global $admin_stellen;
-
+		$where = '';
 		if ($order != '') {
 			$order = " ORDER BY `" . $order . "`";
 		}
@@ -446,15 +472,15 @@ class stelle {
 				s.Bezeichnung
 			FROM
 				`stelle` AS s" .
-				$where .
-				$order . "
+			$where .
+			$order . "
 		";
 		#echo '<br>sql: ' . $sql;
 
 		$this->debug->write("<p>file:stelle.php class:stelle->getStellen - Abfragen aller Stellen<br>" . $sql, 4);
-		$query = mysql_query($sql, $this->database->dbConn);
-		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		while($rs = mysql_fetch_array($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		while($rs = $this->database->result->fetch_array()) {
 			$stellen['ID'][]=$rs['ID'];
 			$stellen['Bezeichnung'][]=$rs['Bezeichnung'];
 		}
@@ -471,23 +497,21 @@ class stelle {
 				`stelle` AS s JOIN
 				`stellen_hierarchie` AS h ON (s.`ID` = h.`parent_id`)
 			WHERE
-				h.`child_id`= " . $this->id . "
-				" . $order . "
-		";
+				h.`child_id`= ".$this->id." "
+			.$order;
 		#echo '<br>stelle.php getParents sql:<br>' . $sql;
 
 		$this->debug->write("<p>file:stelle.php class:stelle->getParents - Abfragen aller Elternstellen<br>" . $sql, 4);
-		$query = mysql_query($sql, $this->database->dbConn);
-		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
-		while($rs = mysql_fetch_assoc($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
+		while($rs = $this->database->result->fetch_assoc()) {
 			$parents[] = ($return == 'only_ids' ? $rs['ID'] : $rs);
 		};
 		return $parents;
 	}
 
-	function getChildren($parent_id, $order = '') {
+	function getChildren($parent_id, $order = '', $return = '', $recursive = false) {
 		$children = array();
-		if ($order != '') $order = " ORDER BY `" . $order . "`";
 		$sql = "
 			SELECT
 				s.`ID`,
@@ -496,52 +520,37 @@ class stelle {
 				`stelle` AS s JOIN
 				`stellen_hierarchie` AS h ON (s.`ID` = h.`child_id`)
 			WHERE
-				h.`parent_id`= " . $parent_id .
-			$order . "
-		";
+				h.`parent_id`= ".$parent_id." "
+			.$order;
 		#echo '<br>sql: ' . $sql;
 
 		$this->debug->write("<p>file:stelle.php class:getChildren - Abfragen aller Kindstellen<br>" . $sql, 4);
-		$query = mysql_query($sql, $this->database->dbConn);
-		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
 
-		while($rs = mysql_fetch_assoc($query)) {
-			$children[] = $rs;
-			$children = array_merge($children, $this->getChildren($rs['ID']));
+		while($rs = $this->database->result->fetch_assoc()) {
+			$children[] = ($return == 'only_ids' ? $rs['ID'] : $rs);
+			if($recursive){
+				$children = array_merge($children, $this->getChildren($rs['ID'], $order, $return, true));
+			}
 		};
 		return $children;
 	}
 
-	/*
-	* function collect all distinct menue_ids from parents of this stelle  
-	*/
-	function get_parent_menues() {
-		#echo '<p>stelle.php get_parent_menues';
-		$parent_menue_ids = array();
-		foreach($this->getParents() AS $parent) {
-			$parent_stelle = new stelle($parent['ID'], $this->database);
-			$parent_menues = $parent_stelle->getMenue(0);
-			foreach($parent_menues['ID'] AS $parent_menue_id) {
-				if (!in_array($parent_menue_id, $parent_menue_ids)) $parent_menue_ids[] = $parent_menue_id;
-			}
-		}
-		#echo '<br>Returned parent_menue_ids: ' . implode(', ', $parent_menue_ids);
-		return $parent_menue_ids;
-	}
-
 	function getFunktionen($return = '') {
+		$funktionen = array();
 		# Abfragen der Funktionen, die in der Stelle ausgeführt werden dürfen
 		$sql ='SELECT f.id,f.bezeichnung, 1 as erlaubt FROM u_funktionen AS f,u_funktion2stelle AS f2s';
 		$sql.=' WHERE f.id=f2s.funktion_id AND f2s.stelle_id='.$this->id.' ORDER BY bezeichnung';
 		$this->debug->write("<p>file:stelle.php class:stelle->getFunktionen - Fragt die Funktionen der Stelle ab:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
 			$errmsg='Fehler bei der Abfrage der Funktionen für die Stelle';
 			return $errmsg;
 		}
 		else {
-			while($rs=mysql_fetch_array($query)) {
+			while($rs=$this->database->result->fetch_array()) {
 				if ($return == 'only_ids') {
 					$funktionen[] = $rs['id'];
 				}
@@ -556,8 +565,10 @@ class stelle {
 	}
 
 	function isFunctionAllowed($functionname) {
-		if($this->funktionen == NULL)$this->getFunktionen();
-		if($this->funktionen[$functionname]['erlaubt']) {
+		if ($this->funktionen == NULL) {
+			$this->getFunktionen();
+		}
+		if ($this->funktionen[$functionname]['erlaubt']) {
 			return 1;
 		}
 		else {
@@ -570,13 +581,13 @@ class stelle {
 		$sql.= "WHERE links LIKE 'index.php?go=".$menuename."%' AND b.menue_id = a.id AND b.stelle_id = ".$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->isMenueAllowed - Guckt ob der Menuepunkt der Stelle zugeordnet ist:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
 			$errmsg='Fehler bei der Ueberpruefung des Menuepunkts für die Stelle';
 		}
 		else{
-			$rs=mysql_fetch_array($query);
+			$rs=$this->database->result->fetch_array();
 		}
 		if($rs[0] != '') {
 			return 1;
@@ -587,11 +598,11 @@ class stelle {
 	}
 
 	function getFlurstueckeAllowed($FlurstKennz, $database) {
-		include_(CLASSPATH.'alb.php');
+		include_once(PLUGINS.'alkis/model/alkis.php');
 		$GemeindenStelle = $this->getGemeindeIDs();
 		if($GemeindenStelle != NULL){
-			$alb = new ALB($database);
-			$ret=$alb->getFlurstKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz);
+			$alkis = new alkis($database);
+			$ret=$alkis->getFlurstKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz);
 			if ($ret[0]==0) {
 				$anzFlurstKennz=count($ret[1]);
 				if ($anzFlurstKennz==0) {
@@ -618,18 +629,16 @@ class stelle {
 		&$functions,
 		&$frames,
 		&$layouts,
-		&$layer,
-		&$selectedusers
+		&$layer
 	) {
 		include_once(CLASSPATH . 'datendrucklayout.php');
 		$results = array();
 		$old_parents = $this->getParents('ORDER BY `ID`', 'only_ids');
 		$document = new Document($this->database);
 		$ddl = new ddl($this->database);
-		
-		# Entferne Einstellungen der Elternstellen von Stelle
-		foreach(array_diff($old_parents, $selected_parents) AS $drop_parent_id) {
-			# echo '<br>Entferne Elternstelle ' . $drop_parent_id;
+				
+		# immer alle Elternstellen und deren Zuordnungen entfernen und wieder neu hinzufügen
+		foreach($old_parents AS $drop_parent_id) {
 			$parent_stelle = new stelle($drop_parent_id, $this->database);
 			$menues = array_values(array_diff($menues, $parent_stelle->getMenue(0, 'only_ids')));
 			$functions = array_values(array_diff($functions, $parent_stelle->getFunktionen('only_ids')));
@@ -637,31 +646,37 @@ class stelle {
 			$frames = array_values(array_diff($frames, $document->load_frames($drop_parent_id, false, 'only_ids')));
 			$parent_layer = $parent_stelle->getLayer('', 'only_ids');
 			$layer = array_values(array_diff($layer, $parent_layer));
-			$selectedusers = array_values(array_diff($selectedusers, $parent_stelle->getUser('only_ids')));
-			$results[] = $this->dropParent($drop_parent_id);
+			$this->dropParent($drop_parent_id);
 		}
-
+		
 		# Füge Einstellungen der Elternstellen zur Stelle hinzu
-		foreach(array_diff($selected_parents, $old_parents) AS $new_parent_id) {
+		foreach($selected_parents AS $new_parent_id) {
 			$parent_stelle = new stelle($new_parent_id, $this->database);
-
-			$menues = $this->merge_menues($menues, $parent_stelle->getMenue(0, 'only_ids'));
+			$menues = $this->merge_menues($menues, $parent_stelle->getMenue(0));
 			$functions = array_values(array_unique(array_merge($functions, $parent_stelle->getFunktionen('only_ids'))));
 			$layouts = array_values(array_unique(array_merge($layouts, $ddl->load_layouts($new_parent_id, '', '', '', 'only_ids'))));
 			$frames = array_values(array_unique(array_merge($frames, $document->load_frames($new_parent_id, false, 'only_ids'))));
 			$layer = array_values(array_unique(array_merge($layer, $parent_stelle->getLayer('', 'only_ids'))));
-			$selectedusers = array_values(array_unique(array_merge($selectedusers, $parent_stelle->getUser('only_ids'))));
 			$results[] = $this->addParent($new_parent_id);
 		}
 		return $results;
 	}
 
-	/*
-	* Merge $new_menues in correct order with $menue
-	* ToDo: replace array_merge by correct logig to merge with order not only append
-	*/
-	function merge_menues($menues, $new_menues) {
-		$result = array_values(array_unique(array_merge($menues, $new_menues)));
+	function merge_menues($menues, $new_menues){
+		$menue_objects = empty($menues) ? array() : Menue::find($this, ' id IN ('.implode(',', $menues).')', 'FIELD(id, '.implode(',', $menues).')');
+		$insert_index = 0;
+		for($i = 0; $i < count($new_menues['ID']); $i++){
+			if($new_menues['menueebene'][$i] == 1){
+				while($menue_objects[$insert_index]->data['menueebene'] == 1 AND $menue_objects[$insert_index]->data['order'] < $new_menues['ORDER'][$i]){
+					$insert_index++;
+				}
+			}
+			array_splice($menue_objects, $insert_index, 0, [(object)['data' => ['id' => $new_menues['ID'][$i], 'order' => $new_menues['ORDER'][$i], 'name' => $new_menues['Bezeichnung'][$i]]]]);
+			$insert_index++;
+		}
+		foreach($menue_objects as $menue){
+			$result[] = $menue->data['id'];
+		}
 		return $result;
 	}
 
@@ -678,12 +693,12 @@ class stelle {
 		";
 		#echo 'Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->addParent - Add Parent Id: " . $parent_id . " zu Stelle Id: " . $this->id . "<br>" . $sql, 4);
-		$query = mysql_query($sql, $this->database->dbConn);
-		if ($query == 0) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
 			return array(
 				'type' => 'error',
-				'message' => 'Fehler beim Eintragen der Elternstelle: ' . mysql_error()
+				'message' => 'Fehler beim Eintragen der Elternstelle: ' . $this->databse->errormessage
 			);
 		}
 
@@ -701,21 +716,70 @@ class stelle {
 				`child_id` = " . $this->id . "
 		";
 		#echo '<p>stelle.php dropParent(' . $drop_parent_id . ') Sql: ' . $sql;
-		$this->debug->write("<p>file:stelle.php class:stelle->dropParent - Delete Parent Id: " . $drop_parent_id . " von Stelle Id: " . $this->id . "<br>" . $sql, 4);
-		$query = mysql_query($sql, $this->database->dbConn);
-		if ($query==0) {
+		$this->debug->write("<p>file:stelle.php class:stelle->dropParent - Delete Parent Id: " . $drop_parent_id . " von Stelle Id: " . $this->id . "<br>", 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
 			return array(
 				'type' => 'error',
-				'message' => 'Fehler beim Löschen der Elternstelle: ' . mysql_error()
+				'message' => 'Fehler beim Löschen der Elternstelle: ' . $this->databse->errormessage
+			);
+		}
+		return array(
+			'type' => 'notice',
+			'message' => 'Elternstelle ID: ' . $drop_parent_id . ' erfolgreich entfernt.'
+		);
+	}
+	
+	function addChild($child_id) {
+		$sql = "
+			INSERT INTO `stellen_hierarchie` (
+				`parent_id`,
+				`child_id`
+			)
+			VALUES (
+				" . $this->id . ",
+				" . $child_id . "
+			)
+		";
+		#echo 'Sql: ' . $sql;
+		$this->debug->write("<p>file:stelle.php class:stelle->addChild - Add Child Id: " . $child_id . " zu Stelle Id: " . $this->id . "<br>", 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
+			return array(
+				'type' => 'error',
+				'message' => 'Fehler beim Eintragen der Kindstelle: ' . $this->databse->errormessage
 			);
 		}
 
 		return array(
 			'type' => 'notice',
-			'message' => 'Elternstelle Id: ' . $drop_parent_id . ' erfolgreich gelöscht.'
+			'message' => 'Kindstelle ID: ' . $child_id . ' erfolgreich zugewiesen.'
 		);
-	}
+	}	
+	
+	function dropChild($drop_child_id) {
+		$sql = "
+			DELETE FROM `stellen_hierarchie`
+			WHERE
+				`parent_id` = " . $this->id . " AND
+				`child_id` = " . $drop_child_id . "
+		";
+		$this->debug->write("<p>file:stelle.php class:stelle->dropChild - Delete Child Id: " . $drop_child_id . " von Stelle Id: " . $this->id . "<br>", 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
+			return array(
+				'type' => 'error',
+				'message' => 'Fehler beim Löschen der Kindstelle: ' . $this->databse->errormessage
+			);
+		}
+		return array(
+			'type' => 'notice',
+			'message' => 'Kindstelle ID: ' . $drop_child_id . ' erfolgreich entfernt.'
+		);
+	}	
 
 	/*
 	* Hinzufügen von Menuepunkten zur Stelle
@@ -731,12 +795,12 @@ class stelle {
 		";
 		#echo '<br>stelle.php addMenue Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->addMenue - Lesen der maximalen menue_order der Menuepunkte der Stelle:<br>".$sql,4);
-		$query = mysql_query($sql, $this->database->dbConn);
-		if ($query==0) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
 		else {
-			$rs = mysql_fetch_array($query);
+			$rs = $this->database->result->fetch_array();
 		}
 		$count = ($rs[0] == '' ? 0 : $rs[0]);
 		for ($i = 0; $i < count($menue_ids); $i++) {
@@ -756,32 +820,15 @@ class stelle {
 			#echo '<br>stelle.php addMenue Sql: ' . $sql;
 			$count++;
 			$this->debug->write("<p>file:stelle.php class:stelle->addMenue - Hinzufügen von Menuepunkten zur Stelle:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-
-			/* $sql ='SELECT id FROM u_menues WHERE obermenue = '.$menue_ids[$i];
-			 $this->debug->write("<p>file:stelle.php class:stelle->addMenue - Lesen der Untermenuepunkte zu den Obermenuepunken zur Stelle:<br>".$sql,4);
-			 $query=mysql_query($sql,$this->database->dbConn);
-			 if ($query==0) {
-			 $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
-			 }
-			 else{
-			 while($rs=mysql_fetch_array($query)) {
-			 $sql ="INSERT IGNORE INTO u_menue2stelle ( `stelle_id` , `menue_id` , `menue_order` ) VALUES ('".$this->id."', '".$rs[0]."', '".$count."')";
-			 $count++;
-			 $this->debug->write("<p>file:stelle.php class:stelle->addMenue - Hinzufügen von Menuepunkten zur Stelle:<br>".$sql,4);
-			 $query1=mysql_query($sql,$this->database->dbConn);
-			 if ($query1==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-			 }
-			 }
-			 */
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
 		return 1;
 	}
 
 	function getMenue($ebene, $return = '') {
 		global $language;
-
+		$menue['ID'] = array();
 		# Lesen der Menuepunkte zur Stelle
 		if ($language != 'german') {
 			$name_column = "
@@ -810,12 +857,12 @@ class stelle {
 		";
 		#echo '<br>stelle.php getMenue(' . $ebene . ') Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getMenue - Lesen der Menuepunkte zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
 		else{
-			while($rs=mysql_fetch_array($query)) {
+			while($rs=$this->database->result->fetch_array()) {
 				$menue['ID'][]=$rs['menue_id'];
 				$menue['ORDER'][]=$rs['order'];
 				$menue['menueebene'][]=$rs['menueebene'];
@@ -840,14 +887,14 @@ class stelle {
 			$sql ='INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `template` , `header` , `footer` , `symbolscale`, `logconsume`, `requires`, `privileg` )';
 			$sql .= ' SELECT '.$this->id.', `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `template` , `header` , `footer` , `symbolscale`, `logconsume`, `requires`, `privileg` FROM used_layer WHERE Stelle_ID = '.$alte_stelle_id.' AND Layer_ID = '.$layer_ids[$i];
 			$this->debug->write("<p>file:stelle.php class:stelle->copyLayerfromStelle - kopieren der Layer von einer Stelle:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 			# Layerattributrechte mitkopieren
 			$sql ='INSERT IGNORE INTO layer_attributes2stelle (layer_id, attributename, stelle_id, privileg, tooltip) ';
 			$sql.='SELECT layer_id, attributename, '.$this->id.', privileg, tooltip FROM layer_attributes2stelle WHERE stelle_id = '.$alte_stelle_id.' AND layer_id = '.$layer_ids[$i];
 			$this->debug->write("<p>file:stelle.php class:stelle->copyLayerfromStelle - kopieren der Layer von einer Stelle:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
 		return 1;
 	}
@@ -858,8 +905,8 @@ class stelle {
 			$sql ='INSERT IGNORE INTO u_funktion2stelle ( `funktion_id` , `stelle_id`)';
 			$sql.="VALUES ('".$function_ids[$i]."', '".$this->id."')";
 			$this->debug->write("<p>file:stelle.php class:stelle->addFunctions - Hinzufügen von Funktionen zur Stelle:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
 		return 1;
 	}
@@ -869,8 +916,8 @@ class stelle {
 		$sql ='DELETE FROM u_funktion2stelle ';
 		$sql.='WHERE stelle_id = '.$this->id;
 		$this->debug->write("<p>file:stelle.php class:stelle->removeFunctions - Entfernen von Funktionen zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		return 1;
 	}
 
@@ -882,6 +929,7 @@ class stelle {
 					`Stelle_ID`,
 					`Layer_ID`,
 					`queryable`,
+					`use_geom`,
 					`drawingorder`,
 					`legendorder`,
 					`minscale`,
@@ -902,6 +950,7 @@ class stelle {
 					'" . $this->id . "',
 					'" . $layer_ids[$i] . "',
 					queryable,
+					use_geom,
 					drawingorder, 
 					legendorder, 
 					minscale, 
@@ -925,6 +974,7 @@ class stelle {
 					$sql .= "
 					ON DUPLICATE KEY UPDATE 
 						queryable = l.queryable, 
+						use_geom = l.use_geom, 
 						drawingorder = l.drawingorder, 
 						legendorder = l.legendorder, 
 						minscale = l.minscale, 
@@ -939,22 +989,23 @@ class stelle {
 				}
 			#echo '<br>SQL zur Zuordnung eines Layers zur Stelle: ' . $sql;
 			$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 
-			if(!$assign_default_values AND mysql_affected_rows() > 0){
+			if(!$assign_default_values AND $this->database->mysqli->affected_rows > 0){
 				$sql = "INSERT IGNORE INTO layer_attributes2stelle (layer_id, attributename, stelle_id, privileg, tooltip) ";
 				$sql.= "SELECT ".$layer_ids[$i].", name, ".$this->id.", privileg, query_tooltip FROM layer_attributes WHERE layer_id = ".$layer_ids[$i]." AND privileg IS NOT NULL";
 				#echo $sql.'<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
-				$query=mysql_query($sql,$this->database->dbConn);
-				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+				$this->database->execSQL($sql);
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 			}
 		}
 		return 1;
 	}
 	
 	function updateLayerParams() {
+		/*
 		$sql = "
 			UPDATE
 				stelle
@@ -976,10 +1027,58 @@ class stelle {
 			WHERE
 				stelle.ID = " . $this->id . "
 		";
-		#echo '<br>SQL zur Aktualisierung der LayerParams: ' . $sql;
+		*/
+		$sql = "
+			UPDATE stelle
+			SET
+				selectable_layer_params = COALESCE((
+					SELECT GROUP_CONCAT(id)
+					FROM
+						(
+							SELECT DISTINCT
+								id
+							FROM
+								(
+									SELECT
+										id
+									FROM
+										`layer_parameter` as p,
+										used_layer as ul,
+										layer as l
+									WHERE
+										ul.Stelle_ID = " . $this->id . " AND
+										ul.Layer_ID = l.Layer_ID AND
+										locate(
+											concat('$', p.key),
+											concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
+										) > 0
+									UNION
+									SELECT
+										p.id
+									FROM
+										u_menues AS m JOIN
+										u_menue2stelle AS m2s ON (m.id = m2s.menue_id) JOIN
+										layer_parameter AS p ON (
+											locate(
+												concat('$', p.key),
+												m.links
+											) > 0
+										)
+									WHERE
+										m2s.stelle_id = " . $this->id . "
+								) AS params
+						) AS foo
+					),
+					''
+				)
+			WHERE stelle.ID = " . $this->id . "
+		";
+
+		#echo '<br>SQL zur Aktualisierung der selectable_layer_params: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
-		$query = mysql_query($sql,$this->database->dbConn);
-		if ($query == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 
 		$sql = "
 			UPDATE
@@ -1007,8 +1106,9 @@ class stelle {
 		";
 		#echo '<br>SQL zum Aktualisieren der Layerparameter in den Rollen: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
-		$query = mysql_query($sql,$this->database->dbConn);
-		if ($query == 0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 	}
 
 	function updateLayer($formvars){
@@ -1053,8 +1153,8 @@ class stelle {
 		$sql .= ' WHERE Stelle_ID = '.$formvars['selected_stelle_id'].' AND Layer_ID = '.$formvars['selected_layer_id'];
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayer - Aktualisieren der LayerzuStelle-Eigenschaften:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 	}
 
 	function updateLayerOrder($formvars){
@@ -1066,8 +1166,8 @@ class stelle {
 		$sql .= ' WHERE Stelle_ID = '.$formvars['selected_stelle_id'].' AND Layer_ID = '.$formvars['selected_layer_id'];
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerdrawingorder - Aktualisieren der LayerzuStelle-Eigenschaften:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 	}
 
   function getGroups() {
@@ -1082,9 +1182,9 @@ class stelle {
 		$sql.=' ORDER BY `order`';
 		#echo $sql;
     $this->debug->write("<p>file:kvwmap class:stelle->getGroups - Lesen der Gruppen der Stelle:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    while ($rs=mysql_fetch_assoc($query)) {
+    $this->database->execSQL($sql);
+    if (!$this->database->success) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+    while ($rs=$this->database->result->fetch_assoc()) {
       $groups[$rs['id']]=$rs;
 			if($rs['obergruppe'])$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
     }
@@ -1122,13 +1222,13 @@ class stelle {
 		";
 		#echo '<br>stelle.php getLayers Sql:<br>' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayers - Lesen der Layer zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
 		else{
 			$i = 0;
-			while($rs=mysql_fetch_assoc($query)) {
+			while($rs=$this->database->result->fetch_assoc()) {
 				$layer['ID'][]=$rs['Layer_ID'];
 				$layer['Bezeichnung'][]=$rs['Name'];
 				$layer['drawingorder'][]=$rs['drawingorder'];
@@ -1187,12 +1287,12 @@ class stelle {
 		}
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getqueryablePostgisLayers - Lesen der abfragbaren PostgisLayer zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
 		else{
-			while($rs=mysql_fetch_array($query)) {
+			while($rs=$this->database->result->fetch_array()) {
 				if($rs['alias'] != '' AND $this->useLayerAliases){
 					$rs['Name'] = $rs['alias'];
 				}
@@ -1212,7 +1312,7 @@ class stelle {
 		return $layer;
 	}
 
-	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL){
+	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_geom_layer = false){
 		global $language;
 		$sql = 'SELECT layer.Layer_ID, ';
 		if($language != 'german') {
@@ -1231,6 +1331,9 @@ class stelle {
 		}
 		else{
 			$sql .=' AND used_layer.queryable = \'1\'';
+		}
+		if($only_geom_layer){
+			$sql .=' AND layer.Datentyp < 4';
 		}
 		if($privileg != NULL){
 			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
@@ -1255,12 +1358,12 @@ class stelle {
 		$sql .= ' ORDER BY Name';
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getqueryableVectorLayers - Lesen der abfragbaren VektorLayer zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);		
-		if ($query==0) {
+		$this->database->execSQL($sql);		
+		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
 		else{
-			while($rs=mysql_fetch_assoc($query)){
+			while($rs=$this->database->result->fetch_assoc()){
 				 
 				# fremde Layer werden auf Verbindung getestet (erstmal rausgenommen, dauert relativ lange)
 				// if(strpos($rs['connection'], 'host') !== false AND strpos($rs['connection'], 'host=localhost') === false){
@@ -1309,8 +1412,8 @@ class stelle {
 			$sql ='UPDATE used_layer SET aktivStatus="1"';
 			$sql.=' WHERE Stelle_ID='.$this->id.' AND Layer_ID='.$layerid[$i];
 			$this->debug->write("<p>file:stelle.php class:stelle->addAktivLayer - Hinzufügen von aktiven Layern zur Stelle:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
 		return 1;
 	}
@@ -1328,8 +1431,8 @@ class stelle {
 			$sql ='UPDATE used_layer SET aktivStatus="'.$aktiv_status.'"';
 			$sql.=' WHERE Stelle_ID='.$this->id.' AND Layer_ID='.$layerset[$i]['Layer_ID'];
 			$this->debug->write("<p>file:stelle.php class:stelle->setAktivLayer - Speichern der aktiven Layer zur Stelle:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
 		return 1;
 	}
@@ -1347,8 +1450,8 @@ class stelle {
 			$sql ='UPDATE used_layer set queryStatus="'.$query_status.'"';
 			$sql.=' WHERE Layer_ID='.$layerset[$i]['Layer_ID'];
 			$this->debug->write("<p>file:stelle.php class:stelle->setQueryStatus - Speichern des Abfragestatus der Layer zur Stelle:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
 		return 1;
 	}
@@ -1357,7 +1460,7 @@ class stelle {
 	* Abfragen der Layer der Stelle
 	*/
 	function getLayer($Layer_id, $result = '') {
-		#echo '<br>stelle.php getLayer';
+		$layer = array();
 		$sql = "
 			SELECT
 				l.*,
@@ -1371,9 +1474,9 @@ class stelle {
 		";
 		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		while ($rs=mysql_fetch_array($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		while ($rs=$this->database->result->fetch_array()) {
 			$layer[] = ($result == 'only_ids' ? $rs['Layer_ID'] : $rs);
 		}
 		return $layer;
@@ -1392,9 +1495,9 @@ class stelle {
 				`layer_id` = " . $layer_id;
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
-		$query = mysql_query($sql, $this->database->dbConn);
-		if ($query == 0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
-		while ($rs = mysql_fetch_array($query)) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
+		while ($rs = $this->database->result->fetch_array()) {
 			$privileges[$rs['attributename']] = $rs['privileg'];
 			$privileges['tooltip_' . $rs['attributename']] = $rs['tooltip'];
 			$privileges['attributenames'][] = $rs['attributename'];
@@ -1403,6 +1506,7 @@ class stelle {
 	}
 
 	function parse_path($database, $path, $privileges, $attributes = NULL){
+		$newattributesstring = '';
 		$path = str_replace(array("\r\n", "\n"), ' ', $path);
 		$distinctpos = strpos(strtolower($path), 'distinct');
 		if($distinctpos !== false && $distinctpos < 10){
@@ -1436,11 +1540,11 @@ class stelle {
 				$real_attributename = substr($fieldstring[$i], 0, $as_pos);
 			}
 			else{   # tabellenname.attributname oder attributname
-				$explosion = explode('.', strtolower($fieldstring[$i]));
+				$explosion = explode('.', $fieldstring[$i]);
 				$attributename = trim($explosion[count($explosion)-1]);
 				$real_attributename = $fieldstring[$i];
 			}
-			if($privileges[$attributename] != ''){
+			if(value_of($privileges, trim($attributename, '"')) != ''){
 				$type = $attributes['type'][$attributes['indizes'][$attributename]];
 				if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$real_attributename.') as '.$attributename.', ';		# Array oder Datentyp
 				else $newattributesstring .= $fieldstring[$i].', ';																																			# normal
@@ -1458,8 +1562,8 @@ class stelle {
 		$sql = 'UPDATE used_layer SET privileg = "'.$privileg.'", export_privileg = "'.$exportprivileg.'" WHERE ';
 		$sql.= 'layer_id = '.$layer_id.' AND stelle_id = '.$this->id;
 		$this->debug->write("<p>file:stelle.php class:stelle->set_layer_privileges - Speichern der Layerrechte zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 	}
 
 	function set_attributes_privileges($formvars, $attributes){
@@ -1473,8 +1577,8 @@ class stelle {
 		";
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>" . $sql, 4);
-		$query=mysql_query($sql, $this->database->dbConn);
-		if ($query == 0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
 		# dann Attributrechte eintragen
 		for ($i = 0; $i < count($attributes['type']); $i++) {
 			if($formvars['privileg_'.$attributes['name'][$i].'_'.$this->id] !== '') {
@@ -1490,8 +1594,8 @@ class stelle {
 				";
 				#echo '<br>Sql: ' . $sql;
 				$this->debug->write("<p>file:stelle.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>" . $sql, 4);
-				$query=mysql_query($sql, $this->database->dbConn);
-				if ($query==0) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
+				$this->database->execSQL($sql);
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
 			}
 		}
 	}
@@ -1500,13 +1604,13 @@ class stelle {
 		$sql = 'SELECT Gemeinde_ID, Gemarkung, Flur FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if(mysql_num_rows($query) > 0){
+		$this->database->execSQL($sql);
+		if($this->database->result->num_rows > 0){
 			$liste['ganze_gemeinde'] = Array();
 			$liste['eingeschr_gemeinde'] = Array();
 			$liste['ganze_gemarkung'] = Array();
 			$liste['eingeschr_gemarkung'] = Array();
-			while($rs=mysql_fetch_assoc($query)) {
+			while($rs=$this->database->result->fetch_assoc()) {
 				if($rs['Gemarkung'] != ''){
 					$liste['eingeschr_gemeinde'][$rs['Gemeinde_ID']] = NULL;
 					if($rs['Flur'] != '')$liste['eingeschr_gemarkung'][$rs['Gemarkung']][] = $rs['Flur'];
@@ -1517,18 +1621,19 @@ class stelle {
 				}
 			}
 		}
-		return $liste;		
+		return $liste;
 	}
 
+/*
 	function getGemeinden($database) {
 		if($database->type == 'mysql'){
 			$ret=$this->database->getGemeindebyID_Name($this->id);
 			if ($ret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-			if (mysql_num_rows($ret[1])==0) {
+			if ($this->database->result->num_rows == 0) {
 				$GemeindeListe['ID'][0]=0;
 			}
 			else{
-				while ($rs=mysql_fetch_array($ret[1])) {
+				while ($rs = $this->database->result->fetch_array()) {
 					$GemeindeListe['ID'][]=$rs['ID'];
 					$GemeindeListe['Name'][]=$rs['Name'];
 				}
@@ -1544,8 +1649,10 @@ class stelle {
 		}
 		return $GemeindeListe;
 	}
+*/
 
 	function getUser($result = '') {
+		$user['ID'] = array();
 		# Lesen der User zur Stelle
 		$sql = "
 			SELECT
@@ -1559,22 +1666,24 @@ class stelle {
 		";
 		#echo "<br>Sql: " . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getUser - Lesen der User zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) {
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
 		else{
-			while($rs=mysql_fetch_array($query)) {
+			while($rs=$this->database->result->fetch_array()) {
 				$user['ID'][]=$rs['ID'];
 				$user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
 				$user['email'][]=$rs['email'];
 			}
-			// Sortieren der User unter Berücksichtigung von Umlauten
-			$sorted_arrays = umlaute_sortieren($user['Bezeichnung'], $user['ID']);
-			$sorted_arrays2 = umlaute_sortieren($user['Bezeichnung'], $user['email']);
-			$user['Bezeichnung'] = $sorted_arrays['array'];
-			$user['ID'] = $sorted_arrays['second_array'];
-			$user['email'] = $sorted_arrays2['second_array'];
+			if(!empty($user['ID'])){
+				// Sortieren der User unter Berücksichtigung von Umlauten
+				$sorted_arrays = umlaute_sortieren($user['Bezeichnung'], $user['ID']);
+				$sorted_arrays2 = umlaute_sortieren($user['Bezeichnung'], $user['email']);
+				$user['Bezeichnung'] = $sorted_arrays['array'];
+				$user['ID'] = $sorted_arrays['second_array'];
+				$user['email'] = $sorted_arrays2['second_array'];
+			}
 		}
 		if ($result == 'only_ids') {
 			return $user['ID'];
@@ -1594,9 +1703,9 @@ class stelle {
 				ID = " . $this->id . "
 		";
 		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>" . $sql, 4);
-		$query = mysql_query($sql,$this->database->dbConn);
-		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$rs = mysql_fetch_array($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
+		$rs = $this->database->result->fetch_array();
 		return $rs['wappen'];
 	}
 
@@ -1609,10 +1718,23 @@ class stelle {
 			WHERE ID = " . $this->id . "
 		";
 		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>" . $sql, 4);
-		$query = mysql_query($sql,$this->database->dbConn);
-		if ($query == 0) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$rs = mysql_fetch_array($query);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
+		$rs = $this->database->result->fetch_array();
 		return $rs['wappen_link'];
+	}
+
+	/**
+	* Function reads all mapfiles in directory WMS_MAPFILE_PATH . $this->Stelle->id
+	* @return array An array of mapfiles in the mapfiles directory of the stelle
+	*/
+	function get_mapfiles() {
+		$mapfiles = array();
+		if (is_dir(WMS_MAPFILE_PATH . $this->id)) {
+			$mapfiles = array_diff(scandir(WMS_MAPFILE_PATH . $this->id), array('.', '..'));
+		}
+		#echo '<p>Stelle->get_mapfile returns mapfiles: ' . print_r($mapfiles, true);
+		return $mapfiles;
 	}
 }
 ?>

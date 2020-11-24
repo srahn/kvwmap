@@ -4,8 +4,8 @@ class CronJob extends MyObject {
 
 	static $write_debug = false;
 
-	function CronJob($gui) {
-		$this->MyObject($gui, 'cron_jobs');
+	function __construct($gui) {
+		parent::__construct($gui, 'cron_jobs');
 		$this->identifier = 'id';
 		$this->setKeys(
 			array(
@@ -17,13 +17,14 @@ class CronJob extends MyObject {
 				"dbname",
 				"function",
 				"user_id",
-				"stelle_id"
+				"stelle_id",
+				"user"
 			)
 		);
 		$this->log_file_name = '/var/www/logs/cron/cron.log';
 	}
 
-	public function validate() {
+	public function validate($on = '') {
 		$results = array();
 		$results[] = $this->validates('bezeichnung', 'presence');
 		$results[] = $this->validates('bezeichnung', 'not_null', 'Bezeichnung muss angegeben werden.');
@@ -31,6 +32,9 @@ class CronJob extends MyObject {
 		$results[] = $this->validates('time', 'not_null', 'Zeit muss angegeben werden.');
 		$results[] = $this->validates('time', 'format', 'Zeit muss im Format Minute (*|0-59), Stunde(*|0-23), Tag(*|1-31), Monat(*|1-12), Tag der Woche (*|0-6, 0 = Sonntag) mit Leerzeichen getrennt angegeben werden, z.B. "0 10 1 * *" für jeden 1. des Monats um 10:00 Uhr morgens.', '* * * * *');
 		$results[] = $this->validates(array('query', 'function'), 'presence_one_of', 'Es muss entweder <i>SQL-Anfrage</i> oder <i>Shell Komando</i> angegeben werden.');
+		$results[] = $this->validates('user', 'presence');
+		$results[] = $this->validates('user', 'not_null', '"ausführen als" muss angegeben sein.');
+		$results[] = $this->validates('user', 'validate_value_is_one_off', '', array('gisadmin', 'root'));
 
 		$messages = array();
 		foreach($results AS $result) {
@@ -65,7 +69,7 @@ class CronJob extends MyObject {
 
 		if (!empty($this->get('time'))) {
 			if (!empty($this->get('query'))) {
-				$line = $this->get('time') . ' PGPASSWORD=' . $this->gui->pgdatabase->passwd . ' psql -h pgsql -U ' . $this->gui->pgdatabase->user . ' -c "' . preg_replace('/\s+/', ' ', $this->get('query')) . '" ' . $dbname . ' >> ' . $this->log_file_name;
+				$line = $this->get('time') . ' psql -h pgsql -U ' . $this->gui->pgdatabase->user . ' -c "' . preg_replace('/\s+/', ' ', $this->get('query')) . '" ' . $dbname . ' >> ' . $this->log_file_name . ' 2>&1';
 			}
 			else {
 				if (!empty($this->get('function'))) {

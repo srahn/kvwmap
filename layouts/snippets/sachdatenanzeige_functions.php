@@ -1,5 +1,7 @@
 <?
-if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
+if (value_of($this->formvars, 'anzahl') == '') {
+	$this->formvars['anzahl'] = 0;
+}
 
 include('funktionen/input_check_functions.php');
 ?>
@@ -17,19 +19,44 @@ include('funktionen/input_check_functions.php');
 		document.getElementById("svghelp").SVGshow_foreign_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
 
+	completeDate = function(datefield){
+		var d = new Date();
+		var year = d.getFullYear();
+		var split = datefield.value.split(".");
+		if (split.length == 2) {
+			if (split[1] != '') {
+				datefield.value += '.' + year;
+			}
+		}
+		else if (split.length == 3) {
+			if (split[2] == '') {
+				datefield.value += year;
+			}
+			else {
+				if (split[2].length == 2) {
+					// add century
+					split[2] = String(year).slice(0,2) + split[2];
+					datefield.value = split.join('.');
+				}
+			}
+		}
+	}
+
 	scrolltop = function(){
-		if(enclosingForm.name == 'GUI2'){
+		if(querymode == 1){
+			window.scrollTo(0, 0);
+		}
+		else{
 			document.getElementById('contentdiv').scrollTop = 0;
-		}else{
-			window.scrollTo(0,0);
 		}
 	}
 	
 	scrollbottom = function(){
-		if(enclosingForm.name == 'GUI2'){
+		if(querymode == 1){
+			window.scrollTo(0, 9999999);
+		}
+		else{
 			document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
-		}else{
-			window.scrollTo(0, document.body.scrollHeight);
 		}
 	}
 	
@@ -164,6 +191,9 @@ include('funktionen/input_check_functions.php');
 	
 	buildJSONString = function(id, is_array) {
 		var field = document.getElementById(id);
+		var value;
+		var name;
+		var type;
 		values = new Array();
 		elements = document.getElementsByClassName(id);
 		for (i = 0; i < elements.length; i++) {
@@ -269,7 +299,7 @@ include('funktionen/input_check_functions.php');
 				obj.value = 0;
 			}
 			obj.value = parseInt(obj.value) + <? echo $this->formvars['anzahl']; ?>;
-			overlay_submit(enclosingForm, false);
+			root.overlay_submit(enclosingForm, false);
 		}
 	}
 	
@@ -289,7 +319,7 @@ include('funktionen/input_check_functions.php');
 				obj.value = 0;
 			}
 			obj.value = count - (count % <? echo $this->formvars['anzahl']; ?>);
-			overlay_submit(enclosingForm, false);
+			root.overlay_submit(enclosingForm, false);
 		}
 	}
 	
@@ -306,7 +336,7 @@ include('funktionen/input_check_functions.php');
 			}
 			obj = document.getElementById('offset_'+layer_id);
 			obj.value = 0;
-			overlay_submit(enclosingForm, false);
+			root.overlay_submit(enclosingForm, false);
 		}
 	}
 
@@ -326,7 +356,7 @@ include('funktionen/input_check_functions.php');
 				obj.value = 0;
 			}
 			obj.value = parseInt(obj.value) - <? echo $this->formvars['anzahl']; ?>;
-			overlay_submit(enclosingForm, false);
+			root.overlay_submit(enclosingForm, false);
 		}
 	}
 
@@ -344,13 +374,14 @@ include('funktionen/input_check_functions.php');
 		enclosingForm.printversion.value = '';
 	}
 	
-	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen, weiter_erfassen_params){
+	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen, weiter_erfassen_params, further_params){
 		list_div = document.getElementById(list_div_id);
 		var params = list_div.dataset.reload_params;
 		if(enclosingForm.name == 'GUI2')params += '&mime_type=overlay_html';
 		if(list_edit)params += '&list_edit='+list_edit;
 		if(weiter_erfassen)params += '&weiter_erfassen='+weiter_erfassen;
 		if(weiter_erfassen_params)params += '&weiter_erfassen_params='+weiter_erfassen_params;
+		if(further_params)params += further_params;
 		ahah('index.php?go=Layer-Suche_Suchen', params, new Array(list_div), new Array('sethtml'));
 	}
 
@@ -365,23 +396,26 @@ include('funktionen/input_check_functions.php');
 				return;
 			}
 			if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-				message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
-				return;
+				completeDate(document.getElementsByName(fieldstring)[0]);
+				if(!checkDate(document.getElementsByName(fieldstring)[0].value)){
+					message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+					return;
+				}
 			}
 		}
 		enclosingForm.go.value = 'Sachdaten_speichern';
 		document.getElementById('loader').style.display = '';
 		setTimeout('document.getElementById(\'loaderimg\').src=\'graphics/ajax-loader.gif\'', 50);
-		document.GUI.gle_changed.value = '';
-		overlay_submit(enclosingForm, false);
+		root.document.GUI.gle_changed.value = '';
+		root.overlay_submit(enclosingForm, false);
 	}
 
-	<? echo $this->currentform; ?>.save_new_dataset = function(){
-		if((geom_not_null && this.newpath.value == '' && this.loc_x == undefined) || (geom_not_null && this.loc_x != undefined && this.loc_x.value == '')){ 
+	save_new_dataset = function(){
+		if((geom_not_null && enclosingForm.newpath.value == '' && enclosingForm.loc_x == undefined) || (geom_not_null && enclosingForm.loc_x != undefined && enclosingForm.loc_x.value == '')){ 
 			message('Sie haben keine Geometrie angegeben.');
 			return;
 		}
-  	form_fieldstring = this.form_field_names.value+'';
+  	form_fieldstring = enclosingForm.form_field_names.value+'';
   	form_fields = form_fieldstring.split('|');
   	for(i = 0; i < form_fields.length; i++){
   		fieldstring = form_fields[i]+'';
@@ -391,14 +425,17 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
   		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-  			message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
-  			return;
+				completeDate(document.getElementsByName(fieldstring)[0]);
+				if(!checkDate(document.getElementsByName(fieldstring)[0].value)){
+					message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+					return;
+				}
   		}
   	}
-  	this.go.value = 'neuer_Layer_Datensatz_speichern';
+  	enclosingForm.go.value = 'neuer_Layer_Datensatz_speichern';
 		document.getElementById('sachdatenanzeige_save_button').disabled = true;
-		document.GUI.gle_changed.value = '';
-  	overlay_submit(this, false);
+		root.document.GUI.gle_changed.value = '';
+  	overlay_submit(enclosingForm, false);
 	}
 
 	subdelete_data = function(layer_id, fromobject, oid, reload_object){
@@ -422,25 +459,33 @@ include('funktionen/input_check_functions.php');
 		form_fields = Array.prototype.slice.call(document.getElementById(fromobject).querySelectorAll('.subform_'+layer_id));
 		form_fieldstring = '';
 		var formData = new FormData();
-  	for(i = 0; i < form_fields.length; i++){
-			if(form_fields[i].name.slice(-4) != '_alt')form_fieldstring += form_fields[i].name+'|';
+  	for (i = 0; i < form_fields.length; i++){
+			if (form_fields[i].name.slice(-4) != '_alt')form_fieldstring += form_fields[i].name+'|';
   		field = form_fields[i].name.split(';');
-  		if(field[4] != 'Dokument' && form_fields[i].readOnly != true && field[5] == '0' && form_fields[i].value == ''){
+  		if (field[4] != 'Dokument' && form_fields[i].readOnly != true && field[5] == '0' && form_fields[i].value == ''){
   			message('Das Feld '+form_fields[i].title+' erfordert eine Eingabe.');
   			return;
   		}
-  		if(field[6] == 'date' && field[4] != 'Time' && form_fields[i].value != '' && !checkDate(form_fields[i].value)){
-  			message('Das Datumsfeld '+form_fields[i].title+' hat nicht das Format TT.MM.JJJJ.');
-  			return;
+  		if (field[6] == 'date' && field[4] != 'Time' && form_fields[i].value != '' && !checkDate(form_fields[i].value)){
+				completeDate(form_fields[i]);
+				if(!checkDate(form_fields[i].value)){
+					message('Das Datumsfeld '+form_fields[i].title+' hat nicht das Format TT.MM.JJJJ.');
+					return;
+				}
   		}
 			if (['checkbox', 'radio'].indexOf(form_fields[i].type) == -1 || form_fields[i].checked) {
-				if(form_fields[i].type == 'file' && form_fields[i].files[0] != undefined)value = form_fields[i].files[0];
-				else value = form_fields[i].value;
+				if (form_fields[i].type == 'file' && form_fields[i].files[0] != undefined) {
+					value = form_fields[i].files[0];
+				}
+				else {
+					value = form_fields[i].value;
+				}
 				formData.append(form_fields[i].name, value);
 			}
   	}
+		root.document.GUI.gle_changed.value = '';
 		formData.append('go', 'Sachdaten_speichern');
-		formData.append('reload', reload);
+		if(reload)formData.append('reload', reload);
 		formData.append('selected_layer_id', layer_id);
 		formData.append('targetobject', targetobject);
 		formData.append('form_field_names', form_fieldstring);
@@ -465,8 +510,11 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
   		if(field[6] == 'date' && field[4] != 'Time' && form_fields[i].value != '' && !checkDate(form_fields[i].value)){
-  			message('Das Datumsfeld '+form_fields[i].title+' hat nicht das Format TT.MM.JJJJ.');
-  			return;
+  			completeDate(form_fields[i]);
+				if(!checkDate(form_fields[i].value)){
+					message('Das Datumsfeld '+form_fields[i].title+' hat nicht das Format TT.MM.JJJJ.');
+					return;
+				}
   		}
 			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
 				if(form_fields[i].type == 'file' && form_fields[i].files[0] != undefined)value = form_fields[i].files[0];
@@ -474,8 +522,9 @@ include('funktionen/input_check_functions.php');
 				formData.append(form_fields[i].name, value);
 			}
   	}
+		root.document.GUI.gle_changed.value = '';
 		formData.append('go', 'neuer_Layer_Datensatz_speichern');
-		formData.append('reload', reload);
+		if(reload)formData.append('reload', reload);
 		formData.append('selected_layer_id', layer_id);
 		formData.append('targetobject', targetobject);
 		formData.append('targetlayer_id', targetlayer_id);
@@ -507,18 +556,6 @@ include('funktionen/input_check_functions.php');
 		overlay_submit(enclosingForm, false);
 	}
 	
-	add_calendar = function(event, elementid, type, setnow){
-		event.stopPropagation();
-		remove_calendar();
-		calendar = new CalendarJS();
-		calendar.init(elementid, type, setnow);
-		document.getElementById('layer').calendar = calendar;
-	}
-	 
-	remove_calendar = function(){
-		if(document.getElementById('layer').calendar != undefined)document.getElementById('layer').calendar.destroy();
-	}
-
 	autocomplete1 = function(event, layer_id, attribute, field_id, inputvalue, listentyp) {
 		listentyp = listentyp || 'ok';
 		var suggest_field = document.getElementById('suggests_' + field_id);
@@ -631,14 +668,14 @@ include('funktionen/input_check_functions.php');
 	}
 
 	highlight_object = function(layer_id, oid){
-		ahah('index.php', 'go=tooltip_query&querylayer_id='+layer_id+'&oid='+oid, new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));
+		root.ahah('index.php', 'go=tooltip_query&querylayer_id='+layer_id+'&oid='+oid, new Array(root.document.GUI.result, ''), new Array('setvalue', 'execute_function'));
 	}
 	
 	zoom2object = function(layer_id, geomtype, tablename, columnname, oid, selektieren){
 		params = 'go=zoomto'+geomtype+'&oid='+oid+'&layer_tablename='+tablename+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
 		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
 			startwaiting();
-			get_map_ajax(params, '', 'highlight_object('+layer_id+', '+oid+');');		// Objekt highlighten
+			root.get_map_ajax(params, '', 'highlight_object('+layer_id+', '+oid+');');		// Objekt highlighten
 		}
 		else{
 			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
@@ -681,7 +718,7 @@ include('funktionen/input_check_functions.php');
 			enclosingForm.layer_tablename.value = tablename;
 			enclosingForm.layer_columnname.value = columnname;
 			enclosingForm.go.value = 'zoomto_selected_datasets';
-			enclosingForm.submit();
+			root.overlay_submit(enclosingForm, false, 'root');
 		}
 	}
 
@@ -694,24 +731,24 @@ include('funktionen/input_check_functions.php');
 			if(confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')){
 				enclosingForm.chosen_layer_id.value = layer_id;
 				enclosingForm.go.value = 'Layer_Datensaetze_Loeschen';
-				enclosingForm.submit();
+				root.overlay_submit(enclosingForm, false);
 			}
 		}
 	}
 
 	delete_document = function(attributename, layer_id, fromobject, targetobject, reload){
-		if(confirm('Wollen Sie das ausgewählte Dokument wirklich löschen?')){
+		if (confirm('Wollen Sie das ausgewählte Dokument wirklich löschen?')){
 			field = document.getElementsByName(attributename);
 			field[0].type = 'hidden'; // bei einem Typ "file" kann man sonst den value nicht setzen
-			field[0].value = 'file:'+attributename;	// damit der JSON-String eines evtl. vorhandenen übergeordneten Attributs richtig gebildet wird
+			field[0].value = 'file:' + attributename;	// damit der JSON-String eines evtl. vorhandenen übergeordneten Attributs richtig gebildet wird
 			field[0].onchange(); // --||--
 			field[0].value = 'delete';
-			if(fromobject != ''){		// SubForm-Layer
+			if (fromobject != '') {		// SubForm-Layer
 				subsave_data(layer_id, fromobject, targetobject, reload);
 			}
-			else{												// normaler Layer
+			else {												// normaler Layer
 				enclosingForm.go.value = 'Sachdaten_speichern';
-				enclosingForm.submit();
+				root.overlay_submit(enclosingForm, false);
 			}
 		}
 	}
@@ -727,7 +764,7 @@ include('funktionen/input_check_functions.php');
 			enclosingForm.chosen_layer_id.value = layer_id;
 			enclosingForm.go_backup.value = enclosingForm.go.value;
 			enclosingForm.go.value = 'Daten_Export';
-			enclosingForm.submit();
+			root.overlay_submit(enclosingForm, false, 'root');
 		}
 	}
 
@@ -748,7 +785,7 @@ include('funktionen/input_check_functions.php');
 			enclosingForm.chosen_layer_id.value = layer_id;
 			enclosingForm.go.value = 'Datensaetze_Merken';
 			formdata = new FormData(enclosingForm);
-			ahah("index.php", formdata, new Array(), new Array());
+			root.ahah("index.php", formdata, new Array(), new Array());
 			enclosingForm.go.value = saved_go;
 			message([{'type': 'notice', 'msg': 'Datensätze gemerkt'}]);
 		}
@@ -760,7 +797,7 @@ include('funktionen/input_check_functions.php');
 			enclosingForm.chosen_layer_id.value = layer_id;
 			enclosingForm.go.value = 'Datensaetze_nicht_mehr_merken';
 			formdata = new FormData(enclosingForm);
-			ahah("index.php", formdata, new Array(), new Array());
+			root.ahah("index.php", formdata, new Array(), new Array());
 			enclosingForm.go.value = saved_go;
 			message([{'type': 'notice', 'msg': 'Datensätze entfernt'}]);
 		}
@@ -774,7 +811,12 @@ include('funktionen/input_check_functions.php');
 			enclosingForm.newpath.value = '';
 			enclosingForm.go_backup.value = enclosingForm.go.value;
 			enclosingForm.go.value = 'neuer_Layer_Datensatz';
-			enclosingForm.submit();
+			if(document.getElementById('geom_privileg_'+layer_id).value == 1){
+				root.overlay_submit(enclosingForm, false, 'root');
+			}
+			else{
+				root.overlay_submit(enclosingForm, false);
+			}
 		}
 	}
 	
@@ -784,7 +826,7 @@ include('funktionen/input_check_functions.php');
 				enclosingForm.chosen_layer_id.value = layer_id;
 				enclosingForm.go_backup.value = enclosingForm.go.value;
 				enclosingForm.go.value = 'Datensatz_dublizieren';
-				enclosingForm.submit();
+				root.overlay_submit(enclosingForm, false);
 			}
 		}
 	}	
@@ -794,7 +836,7 @@ include('funktionen/input_check_functions.php');
 			enclosingForm.chosen_layer_id.value = layer_id;
 			enclosingForm.go_backup.value = enclosingForm.go.value;
 			enclosingForm.go.value = 'generischer_sachdaten_druck';
-			enclosingForm.submit();
+			root.overlay_submit(enclosingForm, false, 'root');
 		}
 	}
 
@@ -823,7 +865,7 @@ include('funktionen/input_check_functions.php');
 			enclosingForm.width.value = 700;
 			enclosingForm.go_backup.value = enclosingForm.go.value;
 			enclosingForm.go.value = 'generisches_sachdaten_diagramm';
-			enclosingForm.submit();
+			root.overlay_submit(enclosingForm, false, 'root');
 			enclosingForm.target = "";
 		}
 	}
@@ -917,6 +959,13 @@ include('funktionen/input_check_functions.php');
 			flag.value=1;
 			if(flag.onchange)flag.onchange();
 		}
+	}
+	
+	activate_save_button = function(layerdiv, layer_id){
+		var button = layerdiv.querySelector('#subform_save_button_'+layer_id);
+		if(button && button.style.display == 'none'){
+			button.style.display = '';
+		}		
 	}
 
 </script>
