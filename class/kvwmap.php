@@ -18193,6 +18193,8 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_stellen_from_layer - Lesen der Stellen eines Layers:<br>" . $sql, 4);
     $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+    $stellen['ID'] = array();
+    $stellen['Bezeichnung'] = array();
     while ($rs = $this->db->result->fetch_array()) {
       $stellen['ID'][] = $rs['ID'];
       $stellen['Bezeichnung'][] = $rs['Bezeichnung'];
