@@ -16400,13 +16400,13 @@ class db_mapObj{
 									}
 									elseif (strpos($further_options[$k], 'horizontal') !== false) {			 # Radiobuttons nebeneinander anzeigen
 										$explosion = explode('=', $further_options[$k]);
-										if($explosion[1] != ''){
+										if (count($explosion) == 2 AND $explosion[1] != '') {
 											$attributes['horizontal'][$i] = $explosion[1];
 										}
 										else{
-											$attributes['horizontal'][$i] = true;
+											$attributes['horizontal'][$i] = 0;
 										}
-									}										
+									}
 								}
 							}
 						}

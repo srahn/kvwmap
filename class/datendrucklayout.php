@@ -807,7 +807,7 @@ class ddl {
 					}
 					else $output .= '<box>    </box>  ';
 					$output .= $this->attributes['enum_output'][$j][$e].'   ';
-					if(!$this->attributes['horizontal'][$j] OR ($e+1) % $this->attributes['horizontal'][$j] == 0){
+					if (isset($this->attributes['horizontal'][$j]) AND $this->attributes['horizontal'][$j] > 0 AND ($e + 1) % $this->attributes['horizontal'][$j] == 0) {
 						$output .= chr(10).chr(10);
 					}
 				}
