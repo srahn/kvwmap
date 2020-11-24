@@ -84,7 +84,7 @@
 				}
 			}
 			?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
-			<table class="tgle dstable" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="5" cellspacing="0"';}else{echo 'border="0"';} ?>>
+			<table class="tgle dstable" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="'.(!$this->user->rolle->geom_edit_first ? '5' : '0').'" cellspacing="0"';}else{echo 'border="0"';} ?>>
 				<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
         <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle gledata"'; ?>>
 <?							
@@ -281,7 +281,7 @@
 
 				if($this->new_entry == true){
 					if($privileg == 1){
-						if(!$this->user->rolle->geom_edit_first)echo $datapart.'</table><table style="width: 100%" class="tgle" border="0" cellspacing="0" cellpadding="0">';
+						if(!$this->user->rolle->geom_edit_first)echo $datapart.'</table><br><table style="width: 100%" class="tgle" border="0" cellspacing="0" cellpadding="0">';
 						if($nullable === '0'){ ?>
 							<script type="text/javascript">
     						geom_not_null = true;
