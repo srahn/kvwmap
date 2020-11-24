@@ -805,9 +805,11 @@ class ddl {
 					if($this->attributes['enum_value'][$j][$e] == $value){
 						$output .= '<box><b> X </b></box>  ';
 					}
-					else $output .= ' <box>    </box>  ';
+					else $output .= '<box>    </box>  ';
 					$output .= $this->attributes['enum_output'][$j][$e].'   ';
-					if(!$this->attributes['horizontal'][$j])$output .= chr(10);
+					if(!$this->attributes['horizontal'][$j] OR ($e+1) % $this->attributes['horizontal'][$j] == 0){
+						$output .= chr(10).chr(10);
+					}
 				}
 				if(count($this->attributes['enum_value'][$j]) == 0){	
 					$output = $value;

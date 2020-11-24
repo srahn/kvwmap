@@ -7007,11 +7007,6 @@ echo '			</table>
 		if ($gridlayer) {
 			$this->map->removeLayer($gridlayer->index);
 		}
-		# Layernamen anpassen
-		for ($i = 0; $i < $this->map->numlayers; $i++) {
-			$layer = $this->map->getlayer($i);
-			$layer->set('name', umlaute_umwandeln($layer->name));
-		}
 		if ($this->formvars['totalExtent'] == 1) {
 			$bb = array($this->Stelle->MaxGeorefExt->minx, $this->Stelle->MaxGeorefExt->miny, $this->Stelle->MaxGeorefExt->maxx, $this->Stelle->MaxGeorefExt->maxy);
 		}
@@ -7044,9 +7039,11 @@ echo '			</table>
 
 		for ($i = 0; $i < $this->map->numlayers; $i++) {
 			$layer = $this->map->getLayer($i);
+			$layer->set('name', umlaute_umwandeln($layer->name));
 			$layer->setMetaData("ows_title", $layer->name);
 			$layer->setMetaData("ows_extent", implode(', ', $bb));
 			$layer->setMetaData("ows_srs", OWS_SRS . ' EPSG:3857');
+			$this->exportierte_layer[] = $layer->name;
 		}
 
 		/*
@@ -7063,12 +7060,10 @@ echo '			</table>
 				if ($layer->connectiontype == 6) {
 					$sql = $mapDb->getSelectFromData($layer->data);
 					$filter = '';
-					foreach (attributes_from_select($sql) AS $attribute) {
-						if ($attribute['alias'] == $filter_attribute) {
-							$filter = $attribute['alias'];
-						}
-						elseif (strpos($attribute['base_expr'], '.' . $filter_attribute) !== false) {
-							$filter = $attribute['base_expr'];
+					$attributes = $this->pgdatabase->getFieldsfromSelect($sql);
+					for($i = 0; $i < count($attributes[1])-2; $i++){
+						if ($attributes[1][$i]['name'] == $filter_attribute) {
+							$filter = $attributes[1][$i]['name'];
 						}
 						if ($filter != '') {
 							$this->gefilterte_layer[] = $layer->name;
@@ -7091,7 +7086,7 @@ echo '			</table>
 			. 'WIDTH=' . $this->map->width . '&'
 			. 'HEIGHT=' . $this->map->height . '&'
 			. 'FORMAT=image/png';
-		define('SUPORTED_WFS_VERSION', '1.3.0');
+		define('SUPORTED_WFS_VERSION', '1.0.0');
 		$this->getFeatureRequestExample = $this->wms_onlineresource
 			. 'SERVICE=WFS&'
 			. 'REQUEST=GetFeature&'
@@ -16138,7 +16133,9 @@ class db_mapObj{
 						$this->User_ID,
 						$this->Stelle_ID,
 						rolle::$hist_timestamp,
-						$language
+						$language,
+						NULL,
+						1000
 					);
   }
 
@@ -16401,8 +16398,14 @@ class db_mapObj{
 									if ($further_options[$k] == 'embedded') {			 # Subformular soll embedded angezeigt werden
 										$attributes['embedded'][$i] = true;
 									}
-									elseif ($further_options[$k] == 'horizontal') {			 # Radiobuttons nebeneinander anzeigen
-										$attributes['horizontal'][$i] = true;
+									elseif (strpos($further_options[$k], 'horizontal') !== false) {			 # Radiobuttons nebeneinander anzeigen
+										$explosion = explode('=', $further_options[$k]);
+										if($explosion[1] != ''){
+											$attributes['horizontal'][$i] = $explosion[1];
+										}
+										else{
+											$attributes['horizontal'][$i] = true;
+										}
 									}										
 								}
 							}
