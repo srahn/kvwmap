@@ -1034,6 +1034,8 @@ class ddl {
 				$dateiname = str_replace('$stelle', $this->Stelle->Bezeichnung, $dateiname);
 				# Datum
 				$dateiname = str_replace('$date', $currenttime, $dateiname);
+				# / ersetzen
+				$dateiname = str_replace('/', '|', $dateiname);
 			}
 			if($dateiname == ''){
 				$dateiname = umlaute_umwandeln($this->user->Name.'-'.$currenttime);
