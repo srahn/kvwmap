@@ -1336,6 +1336,17 @@ function go_switch_xplankonverter($go){
 			$GUI->goNotExecutedInPlugins = true;
 		} break;
 
+		/*
+		* Importiert die gml-Daten eines WFS in die Plantabellen
+		* - Läd das gml herunter
+		* - Spielt die Daten in eine import Tabelle
+		* - Führt SQL zum Update der Plantabellen aus
+		*   Berücksichtigt dabei das Anlegen von Konvertierung und extref Tabelle
+		*/
+		case 'xplankonverter_import_plaene_from_dienst' : {
+			
+		} break;
+
 		default : {
 			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 		}
