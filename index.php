@@ -15,11 +15,13 @@ include('credentials.php');
 include('config.php');
 
 # Session
-$maxlifetime = 0;
-$path = (!USE_EXISTING_SESSION AND array_key_exists('CONTEXT_PREFIX', $_SERVER)) ? $_SERVER['CONTEXT_PREFIX'] : '/';
-$samesite = 'strict';
-session_set_cookie_params($maxlifetime, $path.'; samesite='.$samesite);
-session_start();
+if(!isset($_SESSION)){
+	$maxlifetime = 0;
+	$path = (!USE_EXISTING_SESSION AND array_key_exists('CONTEXT_PREFIX', $_SERVER)) ? $_SERVER['CONTEXT_PREFIX'] : '/';
+	$samesite = 'strict';
+	session_set_cookie_params($maxlifetime, $path.'; samesite='.$samesite);
+	session_start();
+}
 
 # Laden der Plugins config.phps
 for ($i = 0; $i < count($kvwmap_plugins); $i++) {
