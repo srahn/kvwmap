@@ -133,7 +133,6 @@ input[type="checkbox"][disabled="true"]:checked, input[type="checkbox"][disabled
 input[type="checkbox"]:hover, input[type="radio"]:hover {
 	color: #fff;
 	border-color: #4999d8;
-	background: #fff;
 }
 
 input[type="checkbox"][disabled="true"]:hover, input[type="checkbox"][disabled=""]:hover, input[type="radio"][disabled="true"]:hover, input[type="radio"][disabled=""]:hover {
@@ -1472,7 +1471,7 @@ a:hover .preview_image{
 .raster_record_open .gle tr:hover{border:1px solid #03476F;}
 .raster_record_open td{line-height: 16px;padding: 2px;transition: all 0.25s ease;}
 .raster_record_open a{font-size: 15px;transition: all 0.25s ease;}
-.raster_record_open input{width:200px;font-size: 15px;height:22px;transition: all 0.25s ease;}
+.raster_record_open input[type=text]{width:200px;font-size: 15px;height:22px;transition: all 0.25s ease;}
 .raster_record_open input[type=checkbox]{width:12px;font-size: 15px;height:12px;transition: all 0.25s ease;}
 .raster_record_open textarea{font-size: 15px;transition: all 0.25s ease;}
 .raster_record_open .tr_show #formelement{width: 100%;overflow: visible}
@@ -1567,7 +1566,7 @@ table.tgle {
 	margin-right:auto;
 }
 
-table.tgle > tbody > tr > td {
+.gledata > tr > td, .glegeom > tr > td {
 	font-size: 15px;
 	border: 1px solid #bbb;
 }

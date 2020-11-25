@@ -78,10 +78,10 @@
   function init() {
     var map = L.map('map').setView([<?php echo $this->center->y; ?>, <?php echo $this->center->x; ?>], 13);
     var wmsLayer = L.tileLayer.wms("<?php echo $this->wms_onlineresource; ?>", {
-        layers: 'B_Plaene',
+        layers: '<? echo implode(',', $this->exportierte_layer); ?>',
         format: 'image/png',
         transparent: true,
-        attribution: "bauleitplaene-mv.de"
+        attribution: "<? echo URL; ?>"
     }).addTo(map);
   }
 </script>
@@ -97,10 +97,10 @@
 				<script>
 			    var wms_export_sample_map = L.map('wms_export_sample_map').setView([<?php echo $this->center->y; ?>, <?php echo $this->center->x; ?>], 10);
 			    var wmsLayer = L.tileLayer.wms("<?php echo $this->wms_onlineresource; ?>", {
-			        layers: 'B_Plaene',
+			        layers: '<? echo implode(',', $this->exportierte_layer); ?>',
 			        format: 'image/png',
 			        transparent: true,
-			        attribution: "bauleitplaene-mv.de"
+			        attribution: "<? echo URL; ?>"
 			    }).addTo(wms_export_sample_map);
 			</script>
 			</td>

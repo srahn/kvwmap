@@ -1540,6 +1540,7 @@ echo '			</table>
 				else {
 					$map = new mapObj(DEFAULTMAPFILE, SHAPEPATH);
 				}
+
         $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 
         # Allgemeine Parameter
@@ -1550,7 +1551,11 @@ echo '			</table>
         #$map->set('interlace', MS_ON);
         $map->set('status', MS_ON);
         $map->set('name', MAPFILENAME);
-        $map->set('debug', MS_ON);
+
+				if (MS_DEBUG_LEVEL > 0) {
+					$map->setConfigOption('MS_ERRORFILE', '/var/www/logs/mapserver.log');
+					$map->set('debug', MS_DEBUG_LEVEL);
+				};
         $map->imagecolor->setRGB(255,255,255);
         $map->maxsize = 4096;
         $map->setProjection('+init=epsg:'.$this->user->rolle->epsg_code,MS_TRUE);
@@ -1814,13 +1819,15 @@ echo '			</table>
 		//---- wenn die Layer einer eingeklappten Gruppe nicht in der Karte //
 		//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
 		//---- der layer_status auf 0 gesetzt werden//
-		if($layerset['aktivStatus'] == 0){
-		$layer->set('status', 0);
+		if ($layerset['aktivStatus'] == 0) {
+			$layer->set('status', 0);
 		}
 		else{
-		$layer->set('status', 1);
+			$layer->set('status', 1);
 		}
-		$layer->set('debug',MS_ON);
+		if (MS_DEBUG_LEVEL > 0) {
+			$layer->set('debug', 5);
+		};
 
 		# fremde Layer werden auf Verbindung getestet
 		if ($layerset['aktivStatus'] != 0 AND $layerset['connectiontype'] == 6) {
@@ -2682,7 +2689,9 @@ echo '			</table>
 		for($i = 0; $i < count($this->layers_replace_scale); $i++){
 			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
+
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
+
 		if (!$img_urls) {
 			ob_start();
 			$this->image_map->saveImage();
@@ -6998,11 +7007,6 @@ echo '			</table>
 		if ($gridlayer) {
 			$this->map->removeLayer($gridlayer->index);
 		}
-		# Layernamen anpassen
-		for ($i = 0; $i < $this->map->numlayers; $i++) {
-			$layer = $this->map->getlayer($i);
-			$layer->set('name', umlaute_umwandeln($layer->name));
-		}
 		if ($this->formvars['totalExtent'] == 1) {
 			$bb = array($this->Stelle->MaxGeorefExt->minx, $this->Stelle->MaxGeorefExt->miny, $this->Stelle->MaxGeorefExt->maxx, $this->Stelle->MaxGeorefExt->maxy);
 		}
@@ -7035,9 +7039,11 @@ echo '			</table>
 
 		for ($i = 0; $i < $this->map->numlayers; $i++) {
 			$layer = $this->map->getLayer($i);
+			$layer->set('name', umlaute_umwandeln($layer->name));
 			$layer->setMetaData("ows_title", $layer->name);
 			$layer->setMetaData("ows_extent", implode(', ', $bb));
 			$layer->setMetaData("ows_srs", OWS_SRS . ' EPSG:3857');
+			$this->exportierte_layer[] = $layer->name;
 		}
 
 		/*
@@ -7054,12 +7060,10 @@ echo '			</table>
 				if ($layer->connectiontype == 6) {
 					$sql = $mapDb->getSelectFromData($layer->data);
 					$filter = '';
-					foreach (attributes_from_select($sql) AS $attribute) {
-						if ($attribute['alias'] == $filter_attribute) {
-							$filter = $attribute['alias'];
-						}
-						elseif (strpos($attribute['base_expr'], '.' . $filter_attribute) !== false) {
-							$filter = $attribute['base_expr'];
+					$attributes = $this->pgdatabase->getFieldsfromSelect($sql);
+					for($i = 0; $i < count($attributes[1])-2; $i++){
+						if ($attributes[1][$i]['name'] == $filter_attribute) {
+							$filter = $attributes[1][$i]['name'];
 						}
 						if ($filter != '') {
 							$this->gefilterte_layer[] = $layer->name;
@@ -7076,19 +7080,19 @@ echo '			</table>
 			. 'SERVICE=WMS&'
 			. 'REQUEST=GetMap&'
 			. 'VERSION=' . SUPORTED_WMS_VERSION . '&'
-			. 'LAYERS=B_Plaene&'
-			. 'CRS=EPSG:' . $this->user->rolle->epsg_code . '&'
+			. 'LAYERS='.implode(',', $this->exportierte_layer).'&'
+			. 'SRS=EPSG:' . $this->user->rolle->epsg_code . '&'
 			. 'BBOX=' . implode(',', $bb) .'&'
 			. 'WIDTH=' . $this->map->width . '&'
 			. 'HEIGHT=' . $this->map->height . '&'
 			. 'FORMAT=image/png';
-		define('SUPORTED_WFS_VERSION', '1.3.0');
+		define('SUPORTED_WFS_VERSION', '1.0.0');
 		$this->getFeatureRequestExample = $this->wms_onlineresource
 			. 'SERVICE=WFS&'
 			. 'REQUEST=GetFeature&'
 			. 'VERSION=' . SUPORTED_WFS_VERSION . '&'
-			. 'TYPENAME=B_Plaene&'
-			. 'CRS=EPSG:' . $this->user->rolle->epsg_code;
+			. 'TYPENAME='.implode(',', $this->exportierte_layer).'&'
+			. 'SRS=EPSG:' . $this->user->rolle->epsg_code;
 
 		$this->mapfiles_der_stelle = $this->Stelle->get_mapfiles();
 
@@ -8012,7 +8016,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       $stelle = new stelle($stellen_ids[$i], $this->database);
       $stelle->addLayer($layer_ids,	0, $filter, $assign_default_values);
       $users = $stelle->getUser();
-      for($j = 0; $j < count($users['ID']); $j++){
+      for($j = 0; $j < @count($users['ID']); $j++){
         $this->user->rolle->setGroups($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id, $layer_ids); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
         $this->user->rolle->setLayer($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id); # Hinzufügen der Layer zur Rolle
       }
@@ -16129,7 +16133,9 @@ class db_mapObj{
 						$this->User_ID,
 						$this->Stelle_ID,
 						rolle::$hist_timestamp,
-						$language
+						$language,
+						NULL,
+						1000
 					);
   }
 
@@ -16392,8 +16398,14 @@ class db_mapObj{
 									if ($further_options[$k] == 'embedded') {			 # Subformular soll embedded angezeigt werden
 										$attributes['embedded'][$i] = true;
 									}
-									elseif ($further_options[$k] == 'horizontal') {			 # Radiobuttons nebeneinander anzeigen
-										$attributes['horizontal'][$i] = true;
+									elseif (strpos($further_options[$k], 'horizontal') !== false) {			 # Radiobuttons nebeneinander anzeigen
+										$explosion = explode('=', $further_options[$k]);
+										if($explosion[1] != ''){
+											$attributes['horizontal'][$i] = $explosion[1];
+										}
+										else{
+											$attributes['horizontal'][$i] = true;
+										}
 									}										
 								}
 							}
@@ -18184,6 +18196,8 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_stellen_from_layer - Lesen der Stellen eines Layers:<br>" . $sql, 4);
     $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+    $stellen['ID'] = array();
+    $stellen['Bezeichnung'] = array();
     while ($rs = $this->db->result->fetch_array()) {
       $stellen['ID'][] = $rs['ID'];
       $stellen['Bezeichnung'][] = $rs['Bezeichnung'];

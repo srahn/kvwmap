@@ -249,26 +249,42 @@ XML-namespace
 );
 
 $config_file = PLUGINS.'xplankonverter/config/config.php';
-if(file_exists($config_file)){
+if (file_exists($config_file)) {
 	$own_constants = $this->get_constants_from_config(file($config_file), 'xplankonverter');
-	foreach($constants as &$const){
-		if(array_key_exists($const['name'], $own_constants)){
+	foreach ($constants as &$const) {
+		if(array_key_exists($const['name'], $own_constants)) {
 			$const['value'] = $own_constants[$const['name']]['value'];
 			$const['saved'] = 1;
 		}
 	}
 }
 
-$sql = "SELECT * FROM config WHERE plugin = 'xplankonverter'";
-$result=$this->database->execSQL($sql,0, 0);
-if($result[0]){
+$sql = "
+	SELECT *
+	FROM config
+	WHERE plugin = 'xplankonverter'
+";
+$result = $this->database->execSQL($sql, 0, 0);
+if ($result[0]) {
 	echo '<br>Fehler bei der Abfrage der Tabelle config.<br>';
 }
-else{
-	if($this->database->result->num_rows() == 0){
+else {
+	if ($this->database->result->num_rows == 0) {
 		$sql = '';
 		foreach($constants as $constant){
-			$sql.="INSERT INTO config (name, prefix, value, description, type, `group`, `plugin`, `saved`) VALUES ('".$constant['name']."', '".$constant['prefix']."', '".addslashes($constant['value'])."', '".addslashes($constant['description'])."', '".$constant['type']."', '".$constant['group']."', '".$constant['plugin']."', ".$constant['saved'].");\n";
+			$sql .= "
+				INSERT INTO config (name, prefix, value, description, type, `group`, `plugin`, `saved`)
+				VALUES (
+					'" . $constant['name'] . "',
+					'" . $constant['prefix'] . "',
+					'" . addslashes($constant['value']) . "',
+					'" . addslashes($constant['description']) . "',
+					'" . $constant['type'] . "',
+					'" . $constant['group'] . "',
+					'" . $constant['plugin'] . "',
+					" . $constant['saved'] . "
+				);\n
+			";
 		}
 		# config Tabelle befüllen
 		$result = $this->database->exec_commands($sql, NULL, NULL);

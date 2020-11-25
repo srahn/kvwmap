@@ -955,7 +955,7 @@
 <input type="hidden" name="assign_default_values" value="0">
 <input type="hidden" name="selstellen" value="<? 
 	echo $this->formvars['selstellen']["ID"][0];
-	for($i=1; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++){
+	for($i=1; $i < @count($this->formvars['selstellen']["Bezeichnung"]); $i++){
 		echo ', '.$this->formvars['selstellen']["ID"][$i];
 	}
 ?>">

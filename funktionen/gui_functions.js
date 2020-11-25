@@ -17,6 +17,13 @@ var query_tab;
 var root = window;
 root.resized = 0;
 
+window.onbeforeunload = function(){
+	document.activeElement.blur();
+	if(root.document.GUI.gle_changed.value == 1){
+		return "Es existieren ungespeicherte Datensätze. Wollen Sie wirklich fortfahren?";
+	}
+}
+
 function ahah(url, data, target, action, progress){
 	for(k = 0; k < target.length; ++k){
 		if(target[k] != null && target[k].tagName == "DIV"){
@@ -542,6 +549,9 @@ function drag(event) {
 }
 
 function activate_overlay(){
+	document.onmousemove = drag;
+  document.onmouseup = dragstop;
+	document.onmousedown = stop;
 	window.onmouseout = function(evt){
 		if(evt.relatedTarget == evt.toElement && (root.document.GUI.overlayx.value != window.screenX || root.document.GUI.overlayy.value != window.screenY)){
 			root.document.GUI.overlayx.value = window.screenX;
@@ -564,9 +574,10 @@ function activate_overlay(){
 		}
 		else{
 			window.resizeTo(screen.width, screen.height);
-			window.moveTo(0, 0);
+			//window.moveTo(0, 0);
 		}
 	}
+	document.fullyLoaded = true;
 	window.focus();
 }
 
@@ -709,6 +720,12 @@ function overlay_link(data, start){
 	// diese Funktion öffnet bei Aufruf aus dem Overlay-Fenster ein Browser-Fenster (bzw. benutzt es falls schon vorhanden) mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
 	if(checkForUnsavedChanges()){
 		if(querymode == 1 && (start || currentform.name == 'GUI2')){
+			if(query_tab != undefined && query_tab.closed){		// wenn Fenster geschlossen wurde, resized zuruecksetzen
+				root.resized = 0;
+			}
+			else if(start && browser == 'firefox' && query_tab != undefined && root.resized < 2){	// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
+				query_tab.close();
+			}
 			query_tab = root.window.open("index.php?"+data+"&mime_type=overlay_html", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1");
 			if(root.document.GUI.CMD != undefined)root.document.GUI.CMD.value = "";
 		}else{

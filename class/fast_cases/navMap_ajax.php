@@ -358,12 +358,11 @@ class GUI {
 		//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
 		//---- der layer_status auf 0 gesetzt werden//
 		if($layerset['aktivStatus'] == 0){
-		$layer->set('status', 0);
+			$layer->set('status', 0);
 		}
 		else{
-		$layer->set('status', 1);
+			$layer->set('status', 1);
 		}
-		$layer->set('debug',MS_ON);
 
 		# fremde Layer werden auf Verbindung getestet
 		if (
@@ -863,7 +862,6 @@ class GUI {
         #$map->set('interlace', MS_ON);
         $map->set('status', MS_ON);
         $map->set('name', MAPFILENAME);
-        $map->set('debug', MS_ON);
         $map->imagecolor->setRGB(255,255,255);
         $map->maxsize = 4096;
         $map->setProjection('+init=epsg:'.$this->user->rolle->epsg_code,MS_TRUE);
