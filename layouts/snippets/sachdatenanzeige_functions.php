@@ -748,6 +748,7 @@ include('funktionen/input_check_functions.php');
 			}
 			else {												// normaler Layer
 				enclosingForm.go.value = 'Sachdaten_speichern';
+				root.document.GUI.gle_changed.value = '';
 				root.overlay_submit(enclosingForm, false);
 			}
 		}
