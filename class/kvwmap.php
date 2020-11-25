@@ -7080,8 +7080,8 @@ echo '			</table>
 			. 'SERVICE=WMS&'
 			. 'REQUEST=GetMap&'
 			. 'VERSION=' . SUPORTED_WMS_VERSION . '&'
-			. 'LAYERS=B_Plaene&'
-			. 'CRS=EPSG:' . $this->user->rolle->epsg_code . '&'
+			. 'LAYERS='.implode(',', $this->exportierte_layer).'&'
+			. 'SRS=EPSG:' . $this->user->rolle->epsg_code . '&'
 			. 'BBOX=' . implode(',', $bb) .'&'
 			. 'WIDTH=' . $this->map->width . '&'
 			. 'HEIGHT=' . $this->map->height . '&'
@@ -7091,8 +7091,8 @@ echo '			</table>
 			. 'SERVICE=WFS&'
 			. 'REQUEST=GetFeature&'
 			. 'VERSION=' . SUPORTED_WFS_VERSION . '&'
-			. 'TYPENAME=B_Plaene&'
-			. 'CRS=EPSG:' . $this->user->rolle->epsg_code;
+			. 'TYPENAME='.implode(',', $this->exportierte_layer).'&'
+			. 'SRS=EPSG:' . $this->user->rolle->epsg_code;
 
 		$this->mapfiles_der_stelle = $this->Stelle->get_mapfiles();
 
