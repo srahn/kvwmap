@@ -1599,6 +1599,7 @@ thead.gle th {
 	position: relative;
 	padding: 0px 5px;
 	min-width: 30px;
+	height: 32px;
 }
 
 .gle_attribute_value input[type="checkbox"] {
