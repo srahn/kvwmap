@@ -583,18 +583,24 @@
 					}
 					if ($attribute_privileg != '0') {
 						$datapart .= '
-							<label id="label_'.$id.'" for="'.$id.'" class="buttonlink">
-								Durchsuchen...
+							<label id="label_'.$id.'" for="'.$id.'" class="buttonlink" style="position: relative;">
+								<input
+									tabindex="1"
+									onchange="'.$onchange.'; if(this.files){document.getElementById(\'label_'.$id.'\').lastElementChild.innerHTML = this.files[0][\'name\']};"
+									style=" position: absolute;
+													top: 0;
+													left: 0;
+													opacity: 0;
+													width: 100%;
+													height: 100%;
+													display: block;"
+									size="43"
+									type="file"
+									id="'.$id.'"
+									class="' . $field_class . '" name="' . $fieldname . '"
+								>
+								<span>Durchsuchen...</span>
 							</label>
-							<input
-								tabindex="1"
-								onchange="'.$onchange.'; if(this.files){document.getElementById(\'label_'.$id.'\').innerHTML = this.files[0][\'name\']};"
-								style="display: none;"
-								size="43"
-								type="file"
-								id="'.$id.'"
-								class="' . $field_class . '" name="' . $fieldname . '"
-							>
 							';
 					}
 					else {
