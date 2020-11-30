@@ -936,7 +936,7 @@ class Nachweis {
 						if($rs['link_datei'] != '')$rs['dokument_path']='../Nachweise/'.$rs['flurid'].'/'.$this->buildNachweisNr($rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$rs['hauptart_abk'].'/'.basename($rs['link_datei']);
             $nachweise[]=$rs;
           }
-          $this->erg_dokumente=count($nachweise);
+          $this->erg_dokumente=@count($nachweise);
           $this->Dokumente=$nachweise;
         }
       } break;
