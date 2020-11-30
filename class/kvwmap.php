@@ -682,8 +682,11 @@ echo '			</table>
 		foreach ($this->formvars AS $key => $value) {
 			$param_key = str_replace($prefix . 'layer_parameter_', '', $key);		// $prefix dient zur Unterscheidung zwischen den Layer-Parametern im Header und denen in den Optionen
 			if ($param_key != $key) {
-				$layer_params[] = '"' . $param_key . '":"' . $value . '"';
+				rolle::$layer_params[$param_key] = $value;
 			}
+		}
+		foreach(rolle::$layer_params as $param_key => $value){
+			$layer_params[] = '"' . $param_key . '":"' . $value . '"';
 		}
 		if (!empty($layer_params)) {
 			$this->user->rolle->set_layer_params(implode(',', $layer_params));
