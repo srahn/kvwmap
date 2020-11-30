@@ -391,7 +391,7 @@ include('funktionen/input_check_functions.php');
 		for(i = 0; i < form_fields.length-1; i++){
 			fieldstring = form_fields[i]+'';
 			field = fieldstring.split(';');
-			if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
+			if(document.getElementsByName(fieldstring)[0] != undefined && (document.getElementsByName(fieldstring)[0].type != 'hidden') && field[4] != 'Dokument' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
 				message('Das Feld '+document.getElementsByName(fieldstring)[0].title + ' erfordert eine Eingabe.');
 				return;
 			}
