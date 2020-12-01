@@ -282,7 +282,7 @@ function formatFlurstkennzALKIS($FlurstKennzListe){
 					$nenner = $explosion[1];
 					if($nenner != '000.00'){
 						$explosion = explode('.',$nenner);
-						$vorkomma = str_pad($explosion[0], 3, '0', STR_PAD_LEFT);
+						$vorkomma = str_pad($explosion[0], 4, '0', STR_PAD_LEFT);
 					}
 					else $vorkomma = '';
 				}
@@ -295,7 +295,7 @@ function formatFlurstkennzALKIS($FlurstKennzListe){
 					$nenner = $explosion[4];
 					if($nenner != ''){
 						$explosion = explode('.',$nenner);
-						$vorkomma = str_pad($explosion[0], 3, '0', STR_PAD_LEFT);
+						$vorkomma = str_pad($explosion[0], 4, '0', STR_PAD_LEFT);
 					}
 					else $vorkomma = '';
 				}
