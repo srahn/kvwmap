@@ -190,7 +190,7 @@ function save(){
         <tr width="100%">
           <td valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
             <?php
-            if(count($paechterliste) == 0) {
+            if(@count($paechterliste) == 0) {
             echo '<span class="fett">P&auml;chter</span>';
             } else {
             ?>
@@ -201,10 +201,10 @@ function save(){
           </td>
           <td valign="top">
         <?php
-        if(count($paechterliste) == 0){
+        if(@count($paechterliste) == 0){
         	echo 'keine P&auml;chterdaten';
         }
-        for($p = 0; $p < count($paechterliste); $p++){
+        for($p = 0; $p < @count($paechterliste); $p++){
         	echo $paechterliste[$p]['nachname'].',&nbsp;'.$paechterliste[$p]['vorname'].'<br>';
         }
         ?>
@@ -221,15 +221,15 @@ function save(){
         <tr><td colspan="2">&nbsp;</td></tr>
         <tr>
           <td colspan="2" bgcolor="<?php echo BG_DEFAULT ?>">
-            <a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="" onclick="this.href='index.php?go=zoomtoPolygon&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>&layer_tablename=jagdbezirke&layer_columnname=the_geom&layer_id=<? echo $this->qlayerset[$i]['Layer_ID'];?>&selektieren='+currentform.selektieren<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$j; ?>.checked;">Kartenausschnitt</a>&nbsp;&nbsp;<span style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px">Selektieren</span><input type="checkbox" name="selektieren<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$j; ?>" value="1">&nbsp;|&nbsp;
+            <a target="root" style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="" onclick="this.href='index.php?go=zoomtoPolygon&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>&layer_tablename=jagdbezirke&layer_columnname=the_geom&layer_id=<? echo $this->qlayerset[$i]['Layer_ID'];?>&selektieren='+currentform.selektieren<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$j; ?>.checked;">Kartenausschnitt</a>&nbsp;&nbsp;<span style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px">Selektieren</span><input type="checkbox" name="selektieren<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$j; ?>" value="1">&nbsp;|&nbsp;
 						<? if($flst_privileges['eigentuemer'] != ''){ ?>
-            <a href="index.php?go=jagdkatastereditor_Flurstuecke_Listen&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>&name=<? echo $this->qlayerset[$i]['shape'][$j]['name'] ?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>">enthaltene Flurstücke</a>&nbsp;|&nbsp;
-            <a href="index.php?go=jagdkatastereditor_Eigentuemer_Listen&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>&name=<? echo $this->qlayerset[$i]['shape'][$j]['name'] ?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>">Eigentümer auflisten</a>&nbsp;|&nbsp;
+            <a target="root" href="index.php?go=jagdkatastereditor_Flurstuecke_Listen&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>&name=<? echo $this->qlayerset[$i]['shape'][$j]['name'] ?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>">enthaltene Flurstücke</a>&nbsp;|&nbsp;
+            <a target="root" href="index.php?go=jagdkatastereditor_Eigentuemer_Listen&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>&name=<? echo $this->qlayerset[$i]['shape'][$j]['name'] ?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>">Eigentümer auflisten</a>&nbsp;|&nbsp;
 						<? }
 							 if($editable){ ?>
-            <a href="index.php?go=jagdkatastereditor&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>">bearbeiten</a>&nbsp;|&nbsp;
-            <a href="javascript:Bestaetigung('index.php?go=jagdkatastereditor_Loeschen&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>', 'Wollen Sie diesen Jagdbezirk wirklich löschen?');">löschen</a>&nbsp;|&nbsp;
-            <a href="index.php?go=jagdkatastereditor_kopieren&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>">kopieren</a>
+            <a target="root" href="index.php?go=jagdkatastereditor&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>">bearbeiten</a>&nbsp;|&nbsp;
+            <a target="root" href="javascript:Bestaetigung('index.php?go=jagdkatastereditor_Loeschen&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>', 'Wollen Sie diesen Jagdbezirk wirklich löschen?');">löschen</a>&nbsp;|&nbsp;
+            <a target="root" href="index.php?go=jagdkatastereditor_kopieren&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>">kopieren</a>
 						<? } ?>
           </td>
         </tr>
