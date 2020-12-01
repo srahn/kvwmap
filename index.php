@@ -187,6 +187,11 @@ function go_switch($go, $exit = false) {
 	global $newPassword;
 	global $passwort;
 	global $username;
+	if ($go == 'get_last_query') {
+		$GUI->last_query = $GUI->user->rolle->get_last_query();
+		$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
+		$GUI->formvars['go'] = $go = $GUI->last_query['go'];
+	}
 	if (!FAST_CASE) {
 		$old_go = $GUI->go;
 		$GUI->go_switch_plugins($go);
@@ -196,11 +201,6 @@ function go_switch($go, $exit = false) {
 		}
 	}
 	if (FAST_CASE OR $GUI->goNotExecutedInPlugins) {
-		if ($go == 'get_last_query') {
-			$GUI->last_query = $GUI->user->rolle->get_last_query();
-			$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
-			$GUI->formvars['go'] = $go = $GUI->last_query['go'];
-		}
 		switch($go) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
