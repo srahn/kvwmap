@@ -1112,6 +1112,7 @@
   };
 
 	$GUI->export_flurst_csv_exportieren = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
 		include_once(PLUGINS.'alkis/model/alkis.php');
     $flurstuecke = explode(';', $GUI->formvars['FlurstKennz']);
     $ret = $GUI->Stelle->getFlurstueckeAllowed($flurstuecke, $GUI->pgdatabase);
