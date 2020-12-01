@@ -43,7 +43,8 @@ function get_from_default(attribute_names, stellen){
 }
 
 
-function save(stelle, other_selected_layer_id = '') {
+function save(stelle, other_selected_layer_id) {
+	other_selected_layer_id = other_selected_layer_id || '';
 	document.GUI.stelle.value = stelle;
 	if (other_selected_layer_id != '') {
 		document.GUI.from_layer_id.value = $('#selected_layer_id').val();
