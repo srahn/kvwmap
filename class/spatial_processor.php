@@ -766,6 +766,7 @@ class spatial_processor {
 	      $searchbox_maxx=strval($rect->maxx+$rand);
 	      $searchbox_maxy=strval($rect->maxy+$rand);
 				$request = $layerset[0]['connection'].'&service=wfs&version=1.1.0&request=getfeature&srsName=EPSG:'.$layerset[0]['epsg_code'].'&typename='.$layerset[0]['wms_name'].'&bbox='.$searchbox_minx.','.$searchbox_miny.','.$searchbox_maxx.','.$searchbox_maxy;
+				$request .= ',EPSG:'.$layerset[0]['epsg_code'];
         $this->debug->write("<br>WFS-Request: ".$request,4);
 	      $gml = url_get_contents($request, $layerset[0]['wms_auth_username'], $layerset[0]['wms_auth_password']);
         #$this->debug->write("<br>WFS-Response: ".$gml,4);
@@ -1056,6 +1057,30 @@ class spatial_processor {
   		$rs=pg_fetch_array($ret[1]);
   		return $rs[0];	
     }
+  }
+	
+	function composePolygonArrayWKTStringFromGML($gml, $geom_attribute, $epsg){
+    $polygons = explode('<gml:Polygon', $gml);
+    for($i = 1; $i < count($polygons); $i++){
+    	$wkt_polygon[$i-1] = 'st_geomfromtext(\'POLYGON(';
+    	$rings = explode('<gml:posList', $polygons[$i]);
+      for($j = 1; $j < count($rings); $j++){
+      	if($j > 1){$wkt_polygon[$i-1] .= ',';}
+      	$wkt_polygon[$i-1] .= '(';
+      	$start = strpos($rings[$j], '>')+1;
+      	$end = strpos($rings[$j], '</gml:posList>');
+      	$coords = substr($rings[$j], $start, $end-$start);
+				$coord_array = explode(' ', $coords);
+				$wkt_coords = $coord_array[0].' '.$coord_array[1];
+      	for($k = 2; $k < count($coord_array)-1; $k=$k+2){
+					$wkt_coords .= ','.$coord_array[$k].' '.$coord_array[$k+1];
+				}
+      	$wkt_polygon[$i-1] .= $wkt_coords;
+      	$wkt_polygon[$i-1] .= ')';
+      }
+      $wkt_polygon[$i-1] .= ')\', '.$epsg.')';
+    }
+    return 'ARRAY['.implode(',', $wkt_polygon).']';
   }
 	
 	function composeMultipointWKTStringFromGML($gml, $geom_attribute){
