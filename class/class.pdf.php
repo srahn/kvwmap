@@ -2250,6 +2250,7 @@ function addText($x,$y,$size,$text,$angle=0,$wordSpaceAdjust=0){
 * this can be called externally, but is alse used by the other class functions
 */
 function getTextWidth($size,$text){
+	$text = utf8_encode($text);		# $text ist Ansi für die PDF-Ausgabe, muss aber in dieser Funktion UTF8 sein, sonst sind die Umlaute nicht richtig
   // this function should not change any of the settings, though it will need to
   // track any directives which change during calculation, so copy them at the start
   // and put them back at the end.
