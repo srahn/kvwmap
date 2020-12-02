@@ -1024,6 +1024,7 @@ function umlaute_umwandeln($name){
 	$name = str_replace('*', '_', $name);
 	$name = str_replace('$', '', $name);
 	$name = str_replace('&', '_', $name);
+	$name = iconv("UTF-8", "UTF-8//IGNORE", $name);
 	return $name;
 }
 
