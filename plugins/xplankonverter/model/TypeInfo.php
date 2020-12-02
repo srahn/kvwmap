@@ -48,7 +48,6 @@ class TypeInfo {
   }
 
   function fetchUmlAttributesForType($typename, $include_inherited=true) {
-    $structure_schema = STRUCTURE_SCHEME;
     $structure_schema = 'xplan_uml';
     $sql = "
         WITH " . ($include_inherited ? "RECURSIVE " : "") . "inheritance AS (
