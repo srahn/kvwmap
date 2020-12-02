@@ -3270,13 +3270,14 @@ echo '			</table>
 			$rect = $this->user->rolle->oGeorefExt;
 			$rect->project($projFROM, $projTO);
 			$request = $layer['connection'].'&service=wfs&version=1.1.0&request=getfeature&srsName=EPSG:'.$layer['epsg_code'].'&typename='.$layer['wms_name'].'&bbox='.$rect->minx.','.$rect->miny.','.$rect->maxx.','.$rect->maxy;
+			$request .= ',EPSG:'.$layer['epsg_code'];
 			$this->debug->write("<br>WFS-Request: ".$request,4);
 			$gml = url_get_contents($request, $layer['wms_auth_username'], $layer['wms_auth_password']);
 			#$this->debug->write("<br>WFS-Response: ".$gml,4);
 			$spatial_processor = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
 			switch($layer['Datentyp']){
 				case MS_LAYER_POLYGON : {
-					$wkt = $spatial_processor->composeMultipolygonWKTStringFromGML($gml, $layer['wfs_geom']);
+					$wkt = $spatial_processor->composePolygonArrayWKTStringFromGML($gml, $layer['wfs_geom'], $layer['epsg_code']);
 				}break;
 				
 				case MS_LAYER_POINT : {
@@ -3284,8 +3285,7 @@ echo '			</table>
 				}break;
 			}
 			#$this->debug->write("<br>WKT von GML-Geometrie: ".$wkt,4);
-			if($layer['epsg_code'] != $this->user->rolle->epsg_code)$wkt = $this->pgdatabase->transformPoly($wkt, $layer['epsg_code'], $this->user->rolle->epsg_code);
-			$fromwhere = "from (select st_geomfromtext('".$wkt."', ".$this->user->rolle->epsg_code.") as geom) as foo";
+			$fromwhere = "from (select st_transform(unnest(".$wkt."), ".$this->user->rolle->epsg_code.") as geom) as foo";
 			$geom = 'geom';
 			$layerdb = $this->pgdatabase;
 		}
