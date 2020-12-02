@@ -12312,6 +12312,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					$layers = $stelle->getLayers(NULL);
 					$this->user->rolle->setGroups($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id, $layers['ID']);
+					# Layerparameter aktualisieren
+					$stelle->updateLayerParams();
 					$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				}
         if ($ret[0]) {
@@ -12344,6 +12346,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				$layers = $stelle->getLayers(NULL);
 				$this->user->rolle->setGroups($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id, $layers['ID']);
+				# Layerparameter aktualisieren
+				$stelle->updateLayerParams();
 				$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 			}
       $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
