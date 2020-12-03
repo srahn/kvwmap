@@ -284,6 +284,7 @@ function save_bearbeitungshinweis(id){
 		padding: 5px;
 		left: 45px;
 		box-shadow: 3px 0px 4px #bbb;
+		z-index: 1;
 	}
 	
 	.bearbeitungshinweise_div div{
