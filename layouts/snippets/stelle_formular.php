@@ -781,7 +781,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
   <tr>
     <td align="center">
     	<input type="hidden" name="go_plus" id="go_plus" value="">
-    	<input type="reset" value="<?php echo $this->strButtonBack; ?>">&nbsp;<?php
+    	<input type="button" onclick="location.href='index.php?go=Stellen_Anzeigen'" value="<?php echo $this->strButtonBack; ?>">&nbsp;<?php
      if ($this->formvars['selected_stelle_id']>0) {
      	?><input type="hidden" name="selected_stelle_id" value="<?php echo $this->formvars['selected_stelle_id']; ?>"><?php
      	 	# 2007-12-30 pk
