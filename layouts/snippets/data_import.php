@@ -10,6 +10,7 @@
 	var totalCount = 0;
 	var totalSize = 0;
 	var maxTotalSize = <? echo MAXUPLOADSIZE; ?>;
+	var maxFileSize = <? echo min([(int)ini_get('post_max_size'), (int)ini_get('upload_max_filesize')]) ?>;
 	var currentUpload = null; // Enthält die Datei, die aktuell hochgeladen wird
 	var currentUploadId = 0;
 
@@ -28,7 +29,11 @@
 		});
 		for(var i = 0; i < files.length; i++){
 			if(totalSize + files[i].size > maxTotalSize * 1024 * 1024){		// Byte -> MegaByte
-				message('<? echo $strMaxFileSize; ?> von ' + maxTotalSize + ' MB <? echo $this->strExceeded; ?>');
+				message('<? echo $strMaxUploadSize; ?> von ' + maxTotalSize + ' MB <? echo $this->strExceeded; ?>');
+				return;
+			}
+			if(files[i].size > maxFileSize * 1024 * 1024){		// Byte -> MegaByte
+				message('<? echo $strMaxFileSize; ?> von ' + maxFileSize + ' MB <? echo $this->strExceeded; ?>');
 				return;
 			}
 			filelist.push(files[i]);

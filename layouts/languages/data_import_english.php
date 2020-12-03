@@ -4,5 +4,6 @@
 	$strPointlist = "Coordinate-List";
 	$strDropFilesHere = "drop files here";
 	$strSupportedFileTypes = "supported formats: ";
-	$strMaxFileSizeExceeded = "Max uploadsize";
+	$strMaxUploadSize = "Max uploadsize";
+	$strMaxFileSize = "Max filesize";
 ?>  
