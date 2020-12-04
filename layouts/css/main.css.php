@@ -699,7 +699,7 @@ a.invisiblelayerlink:hover{
 
 #data_import_upload_progress{
 	display: table;
-	width: 600px;
+	width: 100%;
 	border-collapse: separate;
   border-spacing: 5px;
 }
