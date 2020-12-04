@@ -2111,13 +2111,13 @@ echo '			</table>
             $style->set('initialgap', $dbStyle['initialgap']);
           }
 					if($dbStyle['linecap'] != '') {
-	          $style->set('linecap', constant(MS_CJC_.strtoupper($dbStyle['linecap'])));
+	          $style->set('linecap', constant('MS_CJC_'.strtoupper($dbStyle['linecap'])));
 	        }
 					else {
 						$style->set('linecap', constant('MS_CJC_ROUND'));
 					}
 					if($dbStyle['linejoin'] != '') {
-	          $style->set('linejoin', constant(MS_CJC_.strtoupper($dbStyle['linejoin'])));
+	          $style->set('linejoin', constant('MS_CJC_'.strtoupper($dbStyle['linejoin'])));
 	        }
 					if($dbStyle['linejoinmaxsize'] != '') {
 	          $style->set('linejoinmaxsize', $dbStyle['linejoinmaxsize']);
@@ -3823,7 +3823,7 @@ echo '			</table>
   xmlns="http://www.w3.org/2000/svg" version="1.1"
   xmlns:xlink="http://www.w3.org/1999/xlink">
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>';
-		$this->formvars['svg_string'] = preg_replace('/<image id="mapimg" href=".*"/', '<image id="mapimg" xlink:href="'.$this->img['hauptkarte'].'" xmlns:xlink="http://www.w3.org/1999/xlink" height="100%" width="100%" y="0" x="0"', $this->formvars['svg_string']);
+		$this->formvars['svg_string'] = preg_replace('/href="data:image.*"/', 'xlink:href="'.$this->img['hauptkarte'].'" xmlns:xlink="http://www.w3.org/1999/xlink" ', $this->formvars['svg_string']);
 		$this->formvars['svg_string'] = str_replace(IMAGEURL, IMAGEPATH, $this->formvars['svg_string']).'</svg>';
 		$svg.= str_replace('points=""', 'points="-1000,-1000 -2000,-2000 -3000,-3000 -1000,-1000"', $this->formvars['svg_string']);
 		fputs($fpsvg, $svg);
@@ -6096,10 +6096,10 @@ echo '			</table>
         $style->set('initialgap', $dbStyle['initialgap']);
       }
 			if($dbStyle['linecap'] != '') {
-				$style->set('linecap', constant(MS_CJC_.strtoupper($dbStyle['linecap'])));
+				$style->set('linecap', constant('MS_CJC_'.strtoupper($dbStyle['linecap'])));
 			}
 			if($dbStyle['linejoin'] != '') {
-				$style->set('linejoin', constant(MS_CJC_.strtoupper($dbStyle['linejoin'])));
+				$style->set('linejoin', constant('MS_CJC_'.strtoupper($dbStyle['linejoin'])));
 			}
 			if($dbStyle['linejoinmaxsize'] != '') {
 				$style->set('linejoinmaxsize', $dbStyle['linejoinmaxsize']);
