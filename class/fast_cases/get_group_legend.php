@@ -896,10 +896,10 @@ class GUI {
             $style->set('initialgap', $dbStyle['initialgap']);
           }
 					if($dbStyle['linecap'] != '') {
-	          $style->set('linecap', constant(MS_CJC_.strtoupper($dbStyle['linecap'])));
+	          $style->set('linecap', constant('MS_CJC_'.strtoupper($dbStyle['linecap'])));
 	        }
 					if($dbStyle['linejoin'] != '') {
-	          $style->set('linejoin', constant(MS_CJC_.strtoupper($dbStyle['linejoin'])));
+	          $style->set('linejoin', constant('MS_CJC_'.strtoupper($dbStyle['linejoin'])));
 	        }
 					if($dbStyle['linejoinmaxsize'] != '') {
 	          $style->set('linejoinmaxsize', $dbStyle['linejoinmaxsize']);
