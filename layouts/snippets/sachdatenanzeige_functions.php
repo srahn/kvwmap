@@ -901,11 +901,16 @@ include('funktionen/input_check_functions.php');
 			if (scope.querySelector('#\\3'+id1+' '+id2+'_'+attribute[i]+'_'+k) == undefined) {
 				scope = document; // ansonsten global
 			}
-			var element = scope.querySelector('#\\3'+id1+' '+id2+'_'+attribute[i]+'_'+k);
-			type = element.type;
-			if(type == 'text'){action = 'setvalue'};
-			if(type == 'select-one'){action = 'sethtml'};
-			ahah("index.php", "go=get_select_list&layer_id="+layer_id+datatype+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type="+type, new Array(element), new Array(action));
+			var elements = [].slice.call(scope.querySelectorAll('#\\3'+id1+' '+id2+'_'+attribute[i]+'_'+k));
+			console.log(elements);
+			elements.forEach(function(element){
+				type = element.type;
+				if(['text', 'select-one'].indexOf(type) !== -1){
+					if(type == 'text'){action = 'setvalue'};
+					if(type == 'select-one'){action = 'sethtml'};
+					ahah("index.php", "go=get_select_list&layer_id="+layer_id+datatype+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type="+type, new Array(element), new Array(action));
+				}
+			})
 		}
 	}
 

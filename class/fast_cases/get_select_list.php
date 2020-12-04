@@ -79,7 +79,7 @@ class GUI {
   var $map_factor;
   var $formatter;
 
-  function GUI($main, $style, $mime_type) {
+  function __construct($main, $style, $mime_type) {
     # Debugdatei setzen
     global $debug;
     $this->debug=$debug;
@@ -267,7 +267,7 @@ class user {
   var $database;
   var $remote_addr;
 
-	function user($login_name,$id,$database) {
+	function __construct($login_name,$id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->database=$database;
@@ -415,7 +415,7 @@ class stelle {
   var $selectedButton;
   var $database;
 
-	function stelle($id,$database) {
+	function __construct($id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->id=$id;
@@ -1136,6 +1136,11 @@ class pgdatabase {
 			return true;
 		}
 	}
+	
+  function close() {
+    $this->debug->write("<br>PostgreSQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
+    return pg_close($this->dbConn);
+  }	
 
 	/**
 	* return the credential details as array from connections_table
