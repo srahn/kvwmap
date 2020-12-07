@@ -832,7 +832,7 @@ class GUI {
 	}
 
   function loadclasses($layer, $layerset, $classset, $map){
-    $anzClass=count($classset);
+    $anzClass=@count($classset);
     for ($j=0;$j<$anzClass;$j++) {
       $klasse = ms_newClassObj($layer);
       if ($classset[$j]['Name']!='') {
@@ -853,7 +853,7 @@ class GUI {
 				$imagename = '../' . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
 				$klasse->set('keyimage', $imagename);
 			}
-      for ($k=0;$k<count($classset[$j]['Style']);$k++) {
+      for ($k=0;$k<@count($classset[$j]['Style']);$k++) {
         $dbStyle=$classset[$j]['Style'][$k];
 				if (MAPSERVERVERSION < 600) {
           $style = ms_newStyleObj($klasse);

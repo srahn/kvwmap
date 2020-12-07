@@ -858,7 +858,7 @@
 			$layer[0]['attributes']['privileg'][$layer[0]['attributes']['name'][$j]] = $privileges[$layer[0]['attributes']['name'][$j]];
 		}
     $GUI->qlayerset[] = $layer[0];
-    $GUI->main = PLUGINS.$layer[0]['template'];
+    $GUI->main = $layer[0]['template'];
 
 		$GUI->user->rolle->delete_last_query();
 		$GUI->user->rolle->save_last_query('Flurstueck_Anzeigen', $layer[0]['Layer_ID'], implode(';', $FlurstKennzListe), NULL, NULL, NULL);
