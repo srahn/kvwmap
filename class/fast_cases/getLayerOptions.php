@@ -2089,7 +2089,7 @@ class pgdatabase {
 				a.attname AS name,
 				NOT a.attnotnull AS nullable,
 				a.attnum AS ordinal_position,
-				ad.adsrc as default,
+				pg_get_expr(ad.adbin, ad.adrelid) as default,
 				t.typname AS type_name,
 				tns.nspname as type_schema,
 				CASE WHEN t.typarray = 0 THEN eat.typname ELSE t.typname END AS type,
@@ -2156,7 +2156,7 @@ class pgdatabase {
 
   function pg_table_constraints($table){
   	if($table != ''){
-	    $sql = "SELECT consrc FROM pg_constraint, pg_class WHERE contype = 'check'";
+	    $sql = "SELECT pg_get_expr(conbin, conrelid) FROM pg_constraint, pg_class WHERE contype = 'check'";
 	    $sql.= " AND pg_class.oid = pg_constraint.conrelid AND pg_class.relname = '".$table."'";
 	    $ret = $this->execSQL($sql, 4, 0);
 	    if($ret[0]==0){

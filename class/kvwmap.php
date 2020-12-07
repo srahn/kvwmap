@@ -6038,7 +6038,7 @@ echo '			</table>
   function getlegendimage($layer_id, $style_id){
     # liefert eine url zu einem Legendenbild eines Layers mit einem bestimmten Style
     $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-    $map = ms_newMapObj(DEFAULTMAPFILE);
+		$map = (MAPSERVERVERSION < 600) ? ms_newMapObj(DEFAULTMAPFILE) : new mapObj(DEFAULTMAPFILE);
     $map->setextent(100,100,200,200);
     $map->set('width',10);
     $map->set('height',10);
@@ -13697,7 +13697,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$rollenlayer = $this->user->rolle->getRollenLayer('', 'import');
 		$layerset = array_merge($layer, $rollenlayer);
     $anzLayer=count($layerset)-1;
-    $map=ms_newMapObj('');
+		$map = (MAPSERVERVERSION < 600) ? ms_newMapObj('') : new mapObj('');
     $map->set('shapepath', SHAPEPATH);
     for ($i = 0; $i < $anzLayer; $i++) {
     	$sql_order = '';
@@ -14263,7 +14263,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
   }
 
   function createReferenceMap($width, $height, $refwidth, $refheight, $angle, $minx, $miny, $maxx, $maxy, $zoomfactor, $refmapfile){
-    $refmap = ms_newMapObj($refmapfile);
+		$refmap = (MAPSERVERVERSION < 600) ? ms_newMapObj($refmapfile) : new mapObj($refmapfile);
     $refmap->set('width', $width);
     $refmap->set('height', $height);
     $refmap->setextent($minx,$miny,$maxx,$maxy);
@@ -14356,7 +14356,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       $this->symbolcount = 0;
       $this->groupcount = 0;
       $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-      $this->mapobject = ms_newMapObj($formvars['mapfilename']);
+			$this->mapobject = (MAPSERVERVERSION < 600) ? ms_newMapObj($formvars['mapfilename']) : new mapObj($formvars['mapfilename']);
 
       # Fonts
       if($this->formvars['checkfont'] AND $this->mapobject->fontsetfilename != ''){
@@ -14465,7 +14465,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->formvars['mapfile'] = $nachDatei;
       if(move_uploaded_file($_files['mapfile']['tmp_name'],$nachDatei)){
         #echo '<br>Lade '.$_files['mapfile']['tmp_name'].' nach '.$nachDatei.' hoch';
-        $this->mapobject = ms_newMapObj($nachDatei);
+				$this->mapobject = (MAPSERVERVERSION < 600) ? ms_newMapObj($nachDatei) : new mapObj($nachDatei);
         for($i = 0; $i < $this->mapobject->numlayers; $i++){
           $this->layers[] = $this->mapobject->getLayer($i);
         }
@@ -14504,7 +14504,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     }
     elseif($formvars['zipmapfile']){      # aus dem Zip-Archiv wurde eine Mapdatei ausgewählt
       $this->formvars['mapfile'] = $formvars['zipmapfile'];
-      $this->mapobject = ms_newMapObj($formvars['zipmapfile']);
+			$this->mapobject = (MAPSERVERVERSION < 600) ? ms_newMapObj($formvars['zipmapfile']) : new mapObj($formvars['zipmapfile']);
       # Layerarray füllen und nach Gruppen sortieren
       for($i = 0; $i < $this->mapobject->numlayers; $i++){
         $this->layers[] = $this->mapobject->getLayer($i);
@@ -14531,7 +14531,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$layerset = $this->user->rolle->getLayer('');
 		}
     $anzLayer=count($layerset);
-    $map=ms_newMapObj('');
+		$map = (MAPSERVERVERSION < 600) ? ms_newMapObj('') : new mapObj('');
     $map->set('shapepath', SHAPEPATH);
 		$found = false;
     for ($i=0;$i<$anzLayer;$i++) {

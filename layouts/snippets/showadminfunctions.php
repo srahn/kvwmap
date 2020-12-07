@@ -238,6 +238,38 @@ function toggleGroup(group, show){
 						</div>
 					</td>
 				</tr>
+				<tr style="border:1px solid #C3C7C3;">
+					<td align="center">
+						<span class="fett" onclick="$('#show_constants').toggle();"><a href="#">Zeige Konstanten an</a></span>
+						<style>
+							.constant-name {
+								width: 40%;
+								text-align: left;
+							}
+							.constant-value {
+								text-align: left;
+							}
+							.constant-box {
+								display: none;
+							}
+						</style>
+						<div id="show_constants" style="margin-left: 20px; text-align: center; display: none;">
+							- <span id="show_all_constants" onclick="$('.constant-box').show(); $('#show_all_constants, #hide_all_constants').toggle()"><a href="#">alle aufklappen</a></span><span id="hide_all_constants" style="display: none;" onclick="$('.constant-box').hide(); $('#show_all_constants, #hide_all_constants')"><a href="#">alle zuklappen</a></span> -<?php
+							$constant_array = get_defined_constants(true);
+							foreach ($constant_array AS $category => $constants) { ?>
+								<a name="<?php echo $category; ?>"></a>
+								<h3 onclick="$(this).next().toggle();"><a href="#<?php echo $category; ?>"><?php echo $category; ?></a></h3>
+								<div class="constant-box"><?php
+								foreach ($constants AS $constant => $value) { ?>
+									<label class="constant-name"><?php echo $constant; ?></label>
+									<div class="constant-value"><?php echo (($category == 'user' AND in_array($constant, array('MYSQL_PASSWORD', 'POSTGRES_PASSWORD'))) ? '*****' : $value); ?></div>
+									<div style="clear: both"></div><?
+								} ?>
+								</div><?php
+							} ?>
+						</div>
+					</td>
+				</tr>
 			</table>
 		</td>
 	</tr>
