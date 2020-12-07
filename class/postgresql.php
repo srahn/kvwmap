@@ -123,17 +123,30 @@ class pgdatabase {
 	* @return string the postgres connection string
 	*/
 	function format_pg_connection_string($credentials) {
-		$connection_string = '' .
-			'host=' . 		$credentials['host'] 		. ' ' .
-			'port=' . 		$credentials['port'] 		. ' ' .
-			'dbname=' . 	$credentials['dbname'] 	. ' ' .
-			'user=' . 		$credentials['user'] 		. ' ' .
-			'password=' .	$credentials['password'];
+		$connection_string = "" .
+			"host='" .		 $credentials['host'] 		. "' " .
+			"port='" .		 $credentials['port'] 		. "' " .
+			"dbname='" .	 $credentials['dbname'] 	. "' " .
+			"user='" .		 $credentials['user'] 		. "' " .
+			"password='" . $credentials['password'] . "'";
 		return $connection_string;
 	}
 
 	function get_connection_string() {
 		return $this->format_pg_connection_string($this->get_credentials($this->connection_id));
+	}
+	
+	function format_pg_connection_string_p($credentials) {
+		$connection_string = "" .
+			"host='" .		 $credentials['host'] 		. "' " .
+			"port='" .		 $credentials['port'] 		. "' " .
+			"dbname='" .	 $credentials['dbname'] 	. "' " .
+			"user='" .		 $credentials['user'] 		. "'";
+		return $connection_string;
+	}
+
+	function get_connection_string_p() {
+		return $this->format_pg_connection_string_p($this->get_credentials($this->connection_id));
 	}
 
 	/**
