@@ -5,6 +5,7 @@ function go_switch_probaug($go){
 	switch($go){		
 		case 'Bauauskunft_Suche' : {
 			$GUI->checkCaseAllowed($go);
+			include_once(PLUGINS.'alkis/model/kataster.php');
 			include_once(PLUGINS.'probaug/model/kvwmap.php');
 			include_once(PLUGINS.'probaug/model/bau.php');
 			$GUI->bauauskunftSuche();
@@ -13,6 +14,7 @@ function go_switch_probaug($go){
 
 	  case 'Bauauskunft_Suche_Suchen' : {
 			$GUI->checkCaseAllowed('Bauakteneinsicht');
+			include_once(PLUGINS.'alkis/model/kataster.php');
 			include_once(PLUGINS.'probaug/model/kvwmap.php');
 			include_once(PLUGINS.'probaug/model/bau.php');
 			$GUI->bauauskunftSucheSenden($GUI->formvars['flurstkennz']);
@@ -21,6 +23,7 @@ function go_switch_probaug($go){
 
 	  case 'Baudatenanzeige' : {
 			$GUI->checkCaseAllowed('Bauakteneinsicht');
+			include_once(PLUGINS.'alkis/model/kataster.php');
 			include_once(PLUGINS.'probaug/model/kvwmap.php');
 			include_once(PLUGINS.'probaug/model/bau.php');
 			$GUI->bauauskunftanzeige();
@@ -29,6 +32,8 @@ function go_switch_probaug($go){
 		
 		case 'zoom2bauakte' : {
 			$GUI->checkCaseAllowed('Bauakteneinsicht');
+			include_once(PLUGINS.'alkis/model/kvwmap.php');
+			include_once(PLUGINS.'alkis/model/kataster.php');
 			include_once(PLUGINS.'probaug/model/kvwmap.php');
 			include_once(PLUGINS.'probaug/model/bau.php');
 			$GUI->zoom2bauakte();
