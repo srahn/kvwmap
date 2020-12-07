@@ -9,7 +9,7 @@
 				for($j = 0; $j < count($flst); $j++){
 					$GUI->bau->grundstueck[] = $GUI->bau->formatFlurstKennz($GUI->bau->baudata[$i]['feld39'].$GUI->bau->baudata[$i]['feld12'].'-'.$GUI->bau->baudata[$i]['feld13'].'-'.$flst[$j]);
 				}
-			}		
+			}
 			$GUI->zoomToALKFlurst($GUI->bau->grundstueck, 10);
 			if($GUI->bau->baudata[0]['geom_status'] == 't'){
 				$GUI->formvars['oid'] = $GUI->bau->baudata[0]['geom_oid'];
@@ -17,8 +17,16 @@
 				$GUI->formvars['layer_columnname'] = 'the_geom';
 				$GUI->formvars['layer_id'] = LAYER_ID_BAUAKTEN_GEOMETRIEN;
 				$GUI->formvars['selektieren'] = 'zoomonly';
+				$GUI->zoom_toPoint();
 			}
-			$GUI->zoom_toPoint();
+			else{
+				$GUI->saveMap('');
+				$currenttime=date('Y-m-d H:i:s',time());
+				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				$GUI->drawMap();
+				$GUI->layerhiddenstring = 'reload ';		// Legenden-Reload erzwingen, damit Suchergebnis-Layer angezeigt werden
+				$GUI->output();
+			}
 		}
 		else{
 			$GUI->loadMap('DataBase');

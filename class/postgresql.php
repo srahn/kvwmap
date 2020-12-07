@@ -751,7 +751,7 @@ FROM
 				a.attname AS name,
 				NOT a.attnotnull AS nullable,
 				a.attnum AS ordinal_position,
-				ad.adsrc as default,
+				pg_get_expr(ad.adbin, ad.adrelid) as default,
 				t.typname AS type_name,
 				tns.nspname as type_schema,
 				CASE WHEN t.typarray = 0 THEN eat.typname ELSE t.typname END AS type,
@@ -1016,7 +1016,7 @@ FROM
   function pg_table_constraints($table_oid){
   	if($table_oid != ''){
 			$constraints = array();
-	    $sql = "SELECT consrc FROM pg_constraint, pg_class WHERE contype = 'check'";
+	    $sql = "SELECT pg_get_expr(conbin, conrelid) FROM pg_constraint, pg_class WHERE contype = 'check'";
 	    $sql.= " AND pg_class.oid = pg_constraint.conrelid AND pg_class.oid = '".$table_oid."'";
 	    $ret = $this->execSQL($sql, 4, 0);
 	    if($ret[0]==0){
@@ -1321,18 +1321,22 @@ FROM
     $sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
 		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungohnehausnummer lo ON lo.gml_id = ANY(f.zeigtauf)";
     $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage = s.lage OR (lo.kreis=s.kreis AND lo.gemeinde=s.gemeinde AND lo.lage = s.lage)";
-    $sql.=" WHERE f.gemeindezugehoerigkeit_gemeinde = g.gemeinde AND g.gemeinde = s.gemeinde";
+    $sql.=" WHERE f.gemeindezugehoerigkeit_gemeinde = g.gemeinde AND g.gemeinde = s.gemeinde AND g.gemeinde = l.gemeinde";
     if ($HausNr!='') {
     	if($HausNr == 'ohne'){
     		$HausNr = '';
     	}
-    	if(strpos($HausNr, ', ') !== false){							# wenn mehrere Hausnummern:					1, 2, 3a, 4
-    		$HausNr = str_replace(", ", "','", $HausNr);		# Hochkommas dazwischen hinzufï¿½gen: 1','2','3a','4
-    		$sql.=" AND g.schluesselgesamt||'-'||l.lage||'-'||TRIM(".HAUSNUMMER_TYPE."(l.hausnummer)) IN ('".$HausNr."')";		# und noch die ï¿½uï¿½eren:      			 '1','2','3a','4'
-    	}
-    	else{
-      	$sql.=" AND g.schluesselgesamt||'-'||l.lage||'-'||TRIM(".HAUSNUMMER_TYPE."(l.hausnummer))='".$HausNr."'";
-    	}
+			$adressen = explode(', ', $HausNr);
+			foreach($adressen as $adresse){
+				$adress = explode('-', $adresse);
+				$ors[] = " (
+					g.schluesselgesamt = '".$adress[0]."' 
+					AND l.lage = '".$adress[1]."' 
+					AND TRIM(LOWER(l.hausnummer)) = '".$adress[2]."'
+					)
+				";
+			}
+			$sql.=" AND (".implode(' OR ', $ors).")";
     }
     else{
     	$sql.=" AND g.schluesselgesamt='".$GemeindeSchl."'";
