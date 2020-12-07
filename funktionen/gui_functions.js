@@ -705,7 +705,7 @@ function overlay_submit(gui, start, target){
 			else if(gui.id == 'GUI' && browser == 'firefox' && query_tab != undefined && root.resized < 2){	// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
 				query_tab.close();
 			}
-			query_tab = root.window.open("", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1");
+			query_tab = root.window.open("", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
 			gui.mime_type.value = 'overlay_html';
 			gui.target = 'Sachdaten';			
 		}
@@ -726,7 +726,7 @@ function overlay_link(data, start){
 			else if(start && browser == 'firefox' && query_tab != undefined && root.resized < 2){	// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
 				query_tab.close();
 			}
-			query_tab = root.window.open("index.php?"+data+"&mime_type=overlay_html", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1");
+			query_tab = root.window.open("index.php?"+data+"&mime_type=overlay_html", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
 			if(root.document.GUI.CMD != undefined)root.document.GUI.CMD.value = "";
 		}else{
 			window.location.href = 'index.php?'+data;

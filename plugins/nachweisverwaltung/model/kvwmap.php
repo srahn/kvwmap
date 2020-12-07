@@ -256,6 +256,7 @@
 
 	$GUI->nachweisAenderungsformular = function() use ($GUI){
 		include_once(CLASSPATH.'FormObject.php');
+		include_once(PLUGINS.'alkis/model/kataster.php');
     $GUI->menue='menue.php';
     $GUI->main= PLUGINS.'nachweisverwaltung/view/dokumenteneingabeformular.php';
     $GUI->titel='Dokument überarbeiten';    

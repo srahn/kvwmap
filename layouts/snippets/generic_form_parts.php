@@ -374,10 +374,10 @@
 							$datapart .= 	' class="buttonlink"><span>'.$strShowPK.'</span></a>&nbsp;';
 						}
 						if($attributes['subform_layer_privileg'][$j] > 0 AND $attribute_privileg > 0){
-							$datapart .= '<a href="" onclick="this.href=\'index.php?go=neuer_Layer_Datensatz&subform=true&selected_layer_id='.$attributes['subform_layer_id'][$j];
+							$datapart .= '<a href="javascript:void(0);" onclick="overlay_link(\'go=neuer_Layer_Datensatz&subform=true&selected_layer_id='.$attributes['subform_layer_id'][$j];
 							for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 								$datapart .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
-								$datapart .= '&values['.$p.']=\'+document.getElementById(\''.$layer_id.'_'.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value';
+								$datapart .= '&values['.$p.']=\'+document.getElementById(\''.$layer_id.'_'.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value)';
 							}
 							$datapart .= 	'"';
 							if($attributes['no_new_window'][$j] != true){
@@ -583,18 +583,24 @@
 					}
 					if ($attribute_privileg != '0') {
 						$datapart .= '
-							<label id="label_'.$id.'" for="'.$id.'" class="buttonlink">
-								Durchsuchen...
+							<label id="label_'.$id.'" for="'.$id.'" class="buttonlink" style="position: relative;">
+								<input
+									tabindex="1"
+									onchange="'.$onchange.'; if(this.files){document.getElementById(\'label_'.$id.'\').lastElementChild.innerHTML = this.files[0][\'name\']};"
+									style=" position: absolute;
+													top: 0;
+													left: 0;
+													opacity: 0;
+													width: 100%;
+													height: 100%;
+													display: block;"
+									size="43"
+									type="file"
+									id="'.$id.'"
+									class="' . $field_class . '" name="' . $fieldname . '"
+								>
+								<span>Durchsuchen...</span>
 							</label>
-							<input
-								tabindex="1"
-								onchange="'.$onchange.'; if(this.files){document.getElementById(\'label_'.$id.'\').innerHTML = this.files[0][\'name\']};"
-								style="display: none;"
-								size="43"
-								type="file"
-								id="'.$id.'"
-								class="' . $field_class . '" name="' . $fieldname . '"
-							>
 							';
 					}
 					else {

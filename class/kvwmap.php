@@ -682,8 +682,11 @@ echo '			</table>
 		foreach ($this->formvars AS $key => $value) {
 			$param_key = str_replace($prefix . 'layer_parameter_', '', $key);		// $prefix dient zur Unterscheidung zwischen den Layer-Parametern im Header und denen in den Optionen
 			if ($param_key != $key) {
-				$layer_params[] = '"' . $param_key . '":"' . $value . '"';
+				rolle::$layer_params[$param_key] = $value;
 			}
+		}
+		foreach(rolle::$layer_params as $param_key => $value){
+			$layer_params[] = '"' . $param_key . '":"' . $value . '"';
 		}
 		if (!empty($layer_params)) {
 			$this->user->rolle->set_layer_params(implode(',', $layer_params));
@@ -3267,13 +3270,14 @@ echo '			</table>
 			$rect = $this->user->rolle->oGeorefExt;
 			$rect->project($projFROM, $projTO);
 			$request = $layer['connection'].'&service=wfs&version=1.1.0&request=getfeature&srsName=EPSG:'.$layer['epsg_code'].'&typename='.$layer['wms_name'].'&bbox='.$rect->minx.','.$rect->miny.','.$rect->maxx.','.$rect->maxy;
+			$request .= ',EPSG:'.$layer['epsg_code'];
 			$this->debug->write("<br>WFS-Request: ".$request,4);
 			$gml = url_get_contents($request, $layer['wms_auth_username'], $layer['wms_auth_password']);
 			#$this->debug->write("<br>WFS-Response: ".$gml,4);
 			$spatial_processor = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
 			switch($layer['Datentyp']){
 				case MS_LAYER_POLYGON : {
-					$wkt = $spatial_processor->composeMultipolygonWKTStringFromGML($gml, $layer['wfs_geom']);
+					$wkt = $spatial_processor->composePolygonArrayWKTStringFromGML($gml, $layer['wfs_geom'], $layer['epsg_code']);
 				}break;
 				
 				case MS_LAYER_POINT : {
@@ -3281,8 +3285,7 @@ echo '			</table>
 				}break;
 			}
 			#$this->debug->write("<br>WKT von GML-Geometrie: ".$wkt,4);
-			if($layer['epsg_code'] != $this->user->rolle->epsg_code)$wkt = $this->pgdatabase->transformPoly($wkt, $layer['epsg_code'], $this->user->rolle->epsg_code);
-			$fromwhere = "from (select st_geomfromtext('".$wkt."', ".$this->user->rolle->epsg_code.") as geom) as foo";
+			$fromwhere = "from (select st_transform(unnest(".$wkt."), ".$this->user->rolle->epsg_code.") as geom) as foo";
 			$geom = 'geom';
 			$layerdb = $this->pgdatabase;
 		}
@@ -3820,7 +3823,7 @@ echo '			</table>
   xmlns="http://www.w3.org/2000/svg" version="1.1"
   xmlns:xlink="http://www.w3.org/1999/xlink">
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>';
-		$this->formvars['svg_string'] = preg_replace('/<image id="mapimg" href=".*"/', '<image id="mapimg" xlink:href="'.$this->img['hauptkarte'].'" xmlns:xlink="http://www.w3.org/1999/xlink" height="100%" width="100%" y="0" x="0"', $this->formvars['svg_string']);
+		$this->formvars['svg_string'] = preg_replace('/href="data:image.*"/', 'xlink:href="'.$this->img['hauptkarte'].'" xmlns:xlink="http://www.w3.org/1999/xlink" ', $this->formvars['svg_string']);
 		$this->formvars['svg_string'] = str_replace(IMAGEURL, IMAGEPATH, $this->formvars['svg_string']).'</svg>';
 		$svg.= str_replace('points=""', 'points="-1000,-1000 -2000,-2000 -3000,-3000 -1000,-1000"', $this->formvars['svg_string']);
 		fputs($fpsvg, $svg);
@@ -10877,12 +10880,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			switch ($after_import_action) {
 				case 'use_geometry' : {
 					if (!in_array($filetype, array('tiff', 'tif', 'geotif'))) {
-						echo '&nbsp;=>&nbsp;<a href="javascript:void(0);" onclick="enclosingForm.last_doing.value=\'add_geom\';enclosingForm.secondpoly.value=\'true\';ahah(\'index.php\', \'go=spatial_processing&path1=\'+enclosingForm.pathwkt.value+\'&operation=add_geometry&resulttype=svgwkt&geom_from_layer='.$layer_id.'&code2execute=zoomToMaxLayerExtent('.$layer_id.');\', new Array(enclosingForm.result, \'\', \'\'), new Array(\'setvalue\', \'execute_function\', \'execute_function\'));">Geometrie übernehmen</a>';
+						echo '&nbsp;=>&nbsp;<a href="javascript:void(0);" onclick="enclosingForm.last_doing.value=\'add_geom\';enclosingForm.secondpoly.value=\'true\';ahah(\'index.php\', \'go=spatial_processing&path1=\'+enclosingForm.pathwkt.value+\'&operation=add_geometry&resulttype=svgwkt&geom_from_layer='.$layer_id.'&code2execute=zoomToMaxLayerExtent('.$layer_id.');\', new Array(enclosingForm.result, \'\', \'\'), new Array(\'setvalue\', \'execute_function\', \'execute_function\'));">Geometrie&nbsp;übernehmen</a>';
 					}
 				} break;
 				
 				default : {
-					echo '&nbsp;=>&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom auf Layer</a>';
+					echo '&nbsp;=>&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom&nbsp;auf&nbsp;Layer</a><br>';
 				}
 			}
 		}
@@ -12309,6 +12312,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 					$layers = $stelle->getLayers(NULL);
 					$this->user->rolle->setGroups($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id, $layers['ID']);
+					# Layerparameter aktualisieren
+					$stelle->updateLayerParams();
 					$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				}
         if ($ret[0]) {
@@ -12341,6 +12346,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$this->user->rolle->setLayer($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				$layers = $stelle->getLayers(NULL);
 				$this->user->rolle->setGroups($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id, $layers['ID']);
+				# Layerparameter aktualisieren
+				$stelle->updateLayerParams();
 				$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 			}
       $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);

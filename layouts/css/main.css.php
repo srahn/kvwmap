@@ -699,7 +699,7 @@ a.invisiblelayerlink:hover{
 
 #data_import_upload_progress{
 	display: table;
-	width: 600px;
+	width: 100%;
 	border-collapse: separate;
   border-spacing: 5px;
 }
@@ -1599,6 +1599,7 @@ thead.gle th {
 	position: relative;
 	padding: 0px 5px;
 	min-width: 30px;
+	height: 32px;
 }
 
 .gle_attribute_value input[type="checkbox"] {
@@ -2240,7 +2241,7 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 }
 
 .scrolltable thead, .scrolltable tbody {
-	display: block;
+	display: inline-table;
 }
 
 .scrolltable tbody {

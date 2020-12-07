@@ -579,7 +579,7 @@ function go_switch_xplankonverter($go){
 	    $isValid = array_reduce(
 	        $validPredecessorStates,
 	        function($isValid,$predStatus) use ($currStatus) {
-	          return isValid || ($predStatus == $currStatus);
+	          return $isValid || ($predStatus == $currStatus);
 	    		}, $isValid
 			);
 	    if (!$isValid) {

@@ -399,7 +399,7 @@ include('funktionen/input_check_functions.php');
 		for(i = 0; i < form_fields.length-1; i++){
 			fieldstring = form_fields[i]+'';
 			field = fieldstring.split(';');
-			if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
+			if(document.getElementsByName(fieldstring)[0] != undefined && document.getElementsByName(fieldstring)[0].type != 'hidden' && field[4] != 'Dokument' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
 				message('Das Feld '+document.getElementsByName(fieldstring)[0].title + ' erfordert eine Eingabe.');
 				return;
 			}
@@ -428,7 +428,7 @@ include('funktionen/input_check_functions.php');
   	for(i = 0; i < form_fields.length; i++){
   		fieldstring = form_fields[i]+'';
   		field = fieldstring.split(';'); 
-  		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'SubFormFK' && field[7] != '0' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
+  		if(document.getElementsByName(fieldstring)[0] != undefined && document.getElementsByName(fieldstring)[0].type != 'hidden' && field[4] != 'SubFormFK' && field[7] != '0' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
 			  message('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
   			return;
   		}
@@ -756,6 +756,7 @@ include('funktionen/input_check_functions.php');
 			}
 			else {												// normaler Layer
 				enclosingForm.go.value = 'Sachdaten_speichern';
+				root.document.GUI.gle_changed.value = '';
 				root.overlay_submit(enclosingForm, false);
 			}
 		}
@@ -908,11 +909,16 @@ include('funktionen/input_check_functions.php');
 			if (scope.querySelector('#\\3'+id1+' '+id2+'_'+attribute[i]+'_'+k) == undefined) {
 				scope = document; // ansonsten global
 			}
-			var element = scope.querySelector('#\\3'+id1+' '+id2+'_'+attribute[i]+'_'+k);
-			type = element.type;
-			if(type == 'text'){action = 'setvalue'};
-			if(type == 'select-one'){action = 'sethtml'};
-			ahah("index.php", "go=get_select_list&layer_id="+layer_id+datatype+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type="+type, new Array(element), new Array(action));
+			var elements = [].slice.call(scope.querySelectorAll('#\\3'+id1+' '+id2+'_'+attribute[i]+'_'+k));
+			console.log(elements);
+			elements.forEach(function(element){
+				type = element.type;
+				if(['text', 'select-one'].indexOf(type) !== -1){
+					if(type == 'text'){action = 'setvalue'};
+					if(type == 'select-one'){action = 'sethtml'};
+					ahah("index.php", "go=get_select_list&layer_id="+layer_id+datatype+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type="+type, new Array(element), new Array(action));
+				}
+			})
 		}
 	}
 

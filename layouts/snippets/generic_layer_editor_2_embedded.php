@@ -46,7 +46,7 @@
 		<td>
 			<input type="hidden" value="" onchange="root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
 			<table class="tgle" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
-			  <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle"'; else echo 'class="nogle"'; ?>>
+			  <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gledata"'; else echo 'class="nogle"'; ?>>
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
 			if($layer['shape'][$k]['lock'] == 'bereits übertragen' OR $trans_oid[1] != '' AND $layer['shape'][$k][$layer['maintable'].'_oid'] == $trans_oid[1]){
 				echo '<tr><td colspan="2" align="center"><span class="red">Dieser Datensatz wurde bereits übertragen und kann nicht bearbeitet werden.</span></td></tr>';
@@ -68,14 +68,14 @@
 					$datapart .= '<tr>
 									<td colspan="2" width="100%">
 										<div style="border-bottom: 1px solid grey">
-											<table width="100%" class="tgle" border="2"><tbody class="gle">
+											<table width="100%" class="tgle" border="2"><tbody class="gledata">
 												<tr>
 													<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="40">&nbsp;<a href="javascript:void(0);" onclick="toggle_group(\''.$layer['Layer_ID'].'_'.$j.'_'.$k.'\')">
 														<img id="group_img'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" border="0" src="'.GRAPHICSPATH.'/'; if($collapsed)$datapart .= 'plus.gif'; else $datapart .= 'minus.gif'; $datapart .= '"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span>
 													</td>
 												</tr>
 											</table>
-											<table width="100%" class="tgle" id="group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" '; if($collapsed)$datapart .= 'style="display:none"'; $datapart .= 'border="2"><tbody class="gle">';
+											<table width="100%" class="tgle" id="group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" '; if($collapsed)$datapart .= 'style="display:none"'; $datapart .= 'border="2"><tbody class="gledata">';
 				}
 
 				if($layer['attributes']['visible'][$j] AND ($this->new_entry != true OR $layer['attributes']['dont_use_for_new'][$j] != -1)){
@@ -146,7 +146,7 @@
 				}
 				if($this->new_entry != true AND $this->formvars['printversion'] == '' AND $layer['shape'][$k]['the_geom']){
  					if($layer['attributes']['group'][0] != ''){ ?>
-						<tr><td colspan="2"><table width="100%" class="tgle" border="2" cellpadding="0" cellspacing="0"><tbody class="gle">
+						<tr><td colspan="2"><table width="100%" class="tgle" border="2" cellpadding="0" cellspacing="0"><tbody class="gledata">
 					<? } ?>
 					<tr>
 						<? if($layer['querymaps'][$k] != ''){ ?>

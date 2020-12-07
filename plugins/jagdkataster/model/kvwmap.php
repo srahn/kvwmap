@@ -197,6 +197,7 @@
   };
 
 	$GUI->jagdkatastereditor_listflurst_csv = function() use ($GUI){
+		include(PLUGINS.'alkis/model/kataster.php');	
 		if($GUI->formvars['FlurstKennz'] != ''){
 			$selected_flurstuecke = explode(';', $GUI->formvars['FlurstKennz']);
 		}
@@ -228,6 +229,7 @@
   };
   
 	$GUI->jagdkatastereditor_listflurst = function() use ($GUI){
+		include(PLUGINS.'alkis/model/kataster.php');	
     $GUI->main = PLUGINS.'jagdkataster/view/jagdkataster_flurstlist.php';
     if($GUI->formvars['oid'])$GUI->titel='Im Jagdbezirk '.$GUI->formvars['name'].' enthaltene Flurstücke';
     else $GUI->titel='Enthaltene Flurstücke in Jagdbezirken';

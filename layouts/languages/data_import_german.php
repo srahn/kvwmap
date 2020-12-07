@@ -4,5 +4,6 @@
 	$strPointlist = "Punktliste";
 	$strDropFilesHere = "Dateien hier reinziehen";
 	$strSupportedFileTypes = "Unterstützte Formate: ";
-	$strMaxFileSize = "Maximale Uploadgröße";
+	$strMaxUploadSize = "Maximale Uploadgröße";
+	$strMaxFileSize = "Maximale Dateigröße";
 ?>

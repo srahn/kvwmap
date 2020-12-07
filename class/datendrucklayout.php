@@ -325,7 +325,7 @@ class ddl {
 								$this->pdf->reopenObject($page_id_start);
 								$this->pdf->filledRectangle($x, $this->layout['margin_bottom'], $endx-$x, $y - $this->layout['margin_bottom'], $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
 								$this->pdf->closeObject();
-								$this->pdf->filledRectangle($x, $endy, $endx-$x, $this->layout['height'] - $this->layout['margin_top'] + 12 - $endy, $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
+								$this->pdf->filledRectangle($x, $endy, $endx-$x, $this->layout['height'] - $this->layout['margin_top'] - $endy, $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
 							}
 							else{
 								$this->pdf->filledRectangle($x, $y, $endx-$x, $endy-$y, $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
@@ -341,7 +341,7 @@ class ddl {
 							$this->pdf->reopenObject($page_id_start);
 							$this->pdf->rectangle($x, $this->layout['margin_bottom'], $endx-$x, $y - $this->layout['margin_bottom']);
 							$this->pdf->closeObject();
-							$this->pdf->rectangle($x, $endy, $endx-$x, $this->layout['height'] - $this->layout['margin_top'] + 12 - $endy);
+							$this->pdf->rectangle($x, $endy, $endx-$x, $this->layout['height'] - $this->layout['margin_top']  - $endy);
 						}
 						else{
 							$this->pdf->rectangle($x, $y, $endx-$x, $endy-$y);
@@ -574,7 +574,7 @@ class ddl {
 						else $rand = 100;
 						if($attributes['geomtype'][$attributes['the_geom']] == 'POINT'){
 							include_(CLASSPATH.'pointeditor.php');
-							$pointeditor = new pointeditor($layerdb, $this->layerset['epsg_code'], $this->gui->user->rolle->epsg_code);							
+							$pointeditor = new pointeditor($layerdb, $this->layerset['epsg_code'], $this->gui->user->rolle->epsg_code, $this->layerset['oid']);							
 							$point = $pointeditor->getpoint($oid, $attributes['table_name'][$attributes['the_geom']], $attributes['real_name'][$attributes['the_geom']]);
 							$rect = ms_newRectObj();
 							$rect->minx = $point['pointx']-$rand;
@@ -696,7 +696,7 @@ class ddl {
 	}
 	
 	function putText($text, $fontsize, $width, $x, $y, $offsetx, $border = false, $type = 'running'){	
-		if($type == 'running' AND $y < $this->layout['margin_bottom']){
+		if($y < $this->layout['margin_bottom']){
 			$nextpage = $this->getNextPage($this->pdf->currentContents);
 			if($nextpage != NULL){
 				$this->pdf->reopenObject($nextpage);
@@ -708,7 +708,7 @@ class ddl {
 				if($this->layout['type'] == 2)$this->offsety = 50;
 				$this->page_overflow = true;
 			}
-			$y = $this->layout['height'] - $this->layout['margin_top'];
+			$y = $this->layout['height'] - $this->layout['margin_top'] - 20;
 		}
 		if($x < 0){		# rechtsbündig
 			$x = $this->layout['width'] + $x;
@@ -1034,6 +1034,8 @@ class ddl {
 				$dateiname = str_replace('$stelle', $this->Stelle->Bezeichnung, $dateiname);
 				# Datum
 				$dateiname = str_replace('$date', $currenttime, $dateiname);
+				# / ersetzen
+				$dateiname = str_replace('/', '_', $dateiname);
 			}
 			if($dateiname == ''){
 				$dateiname = umlaute_umwandeln($this->user->Name.'-'.$currenttime);

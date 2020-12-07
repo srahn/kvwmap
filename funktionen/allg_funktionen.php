@@ -269,38 +269,40 @@ if(!function_exists('mb_substr')){		# Workaround, falls es die Funktion nicht gi
 function formatFlurstkennzALKIS($FlurstKennzListe){
 	$Flurstuecke = explode(';', $FlurstKennzListe);
 	for($i = 0; $i < count($Flurstuecke); $i++){
-		$FlurstKennz = $Flurstuecke[$i];
-		if(strpos($FlurstKennz, '/') !== false OR strpos($FlurstKennz, '-') !== false){
-			if(strpos($FlurstKennz, '/') !== false){		# ALB-Schreibweise 131234-001-00234/005.00
-				$explosion = explode('-', $FlurstKennz);
-				$gem = trim($explosion[0]);
-				$flur = trim($explosion[1]);
-				$flurst = trim($explosion[2]);
-				$explosion = explode('/',$flurst);
-				$zaehler = $explosion[0];
-				$nenner = $explosion[1];
-				if($nenner != '000.00'){
-					$explosion = explode('.',$nenner);
-					$vorkomma = str_pad($explosion[0], 3, '0', STR_PAD_LEFT);
+		if($Flurstuecke[$i] != ''){
+			$FlurstKennz = $Flurstuecke[$i];
+			if(strpos($FlurstKennz, '/') !== false OR strpos($FlurstKennz, '-') !== false){
+				if(strpos($FlurstKennz, '/') !== false){		# ALB-Schreibweise 131234-001-00234/005.00
+					$explosion = explode('-', $FlurstKennz);
+					$gem = trim($explosion[0]);
+					$flur = trim($explosion[1]);
+					$flurst = trim($explosion[2]);
+					$explosion = explode('/',$flurst);
+					$zaehler = $explosion[0];
+					$nenner = $explosion[1];
+					if($nenner != '000.00'){
+						$explosion = explode('.',$nenner);
+						$vorkomma = str_pad($explosion[0], 4, '0', STR_PAD_LEFT);
+					}
+					else $vorkomma = '';
 				}
-				else $vorkomma = '';
-			}
-			elseif(strpos($FlurstKennz, '-') !== false){		# Kurzschreibweise 13-1234-1-234-5
-				$explosion = explode('-', $FlurstKennz);
-				$land = $explosion[0];
-				$gem = $explosion[1];
-				$flur = str_pad($explosion[2], 3, '0', STR_PAD_LEFT);
-				$zaehler = str_pad($explosion[3], 5, '0', STR_PAD_LEFT);
-				$nenner = $explosion[4];
-				if($nenner != ''){
-					$explosion = explode('.',$nenner);
-					$vorkomma = str_pad($explosion[0], 3, '0', STR_PAD_LEFT);
+				elseif(strpos($FlurstKennz, '-') !== false){		# Kurzschreibweise 13-1234-1-234-5
+					$explosion = explode('-', $FlurstKennz);
+					$land = $explosion[0];
+					$gem = $explosion[1];
+					$flur = str_pad($explosion[2], 3, '0', STR_PAD_LEFT);
+					$zaehler = str_pad($explosion[3], 5, '0', STR_PAD_LEFT);
+					$nenner = $explosion[4];
+					if($nenner != ''){
+						$explosion = explode('.',$nenner);
+						$vorkomma = str_pad($explosion[0], 4, '0', STR_PAD_LEFT);
+					}
+					else $vorkomma = '';
 				}
-				else $vorkomma = '';
+				$FlurstKennz = $land.$gem.$flur.$zaehler.$vorkomma;
 			}
-			$FlurstKennz = $land.$gem.$flur.$zaehler.$vorkomma;
+			$Flurstuecke[$i] = str_pad($FlurstKennz, 20, '_', STR_PAD_RIGHT);
 		}
-		$Flurstuecke[$i] = str_pad($FlurstKennz, 20, '_', STR_PAD_RIGHT);
 	}
   return implode(';', $Flurstuecke);
 }
@@ -1022,6 +1024,7 @@ function umlaute_umwandeln($name){
 	$name = str_replace('*', '_', $name);
 	$name = str_replace('$', '', $name);
 	$name = str_replace('&', '_', $name);
+	$name = iconv("UTF-8", "UTF-8//IGNORE", $name);
 	return $name;
 }
 
