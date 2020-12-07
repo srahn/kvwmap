@@ -1991,12 +1991,12 @@ echo '			</table>
 			if($layerset['Filter'] != ''){
 				$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
 			 if (substr($layerset['Filter'],0,1)=='(') {
-				 $expr=$layerset['Filter'];
+				 $layer->set('data', $layerset['Data'] . ' AND ' . $layerset['Filter']);
 			 }
 			 else {
 				 $expr=buildExpressionString($layerset['Filter']);
+				 $layer->setFilter($expr);
 			 }
-			 $layer->setFilter($expr);
 			}
 			if ($layerset['styleitem']!='') {
 				$layer->set('styleitem',$layerset['styleitem']);
@@ -15096,12 +15096,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if ($layerset['Filter'] != '') {
 					$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
 					if (substr($layerset['Filter'], 0, 1) == '(') {
-						$expr = $layerset['Filter'];
+						$layer->set('data', $layerset['Data'] . ' AND ' . $layerset['Filter']);
 					}
 					else {
 						$expr = buildExpressionString($layerset['Filter']);
+						$layer->setFilter($expr);
 					}
-					$layer->setFilter($expr);
 				}
 				$layer->set('status',MS_ON);
 				$layer->set('template', ' ');
