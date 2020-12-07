@@ -4,11 +4,11 @@
 	$sql = "
 		SELECT *
 		FROM migrations
+		WHERE `filename` = '2014-09-12_16-33-22_Version2.0.sql'
 	";
 	$this->database->execSQL($sql, 0, 0);
 
 	if ($this->database->result->num_rows > 0) {
-		$success = false;
 		if(!is_writable(LAYOUTPATH.'db/mysql/schema')){
 			$GUI->add_message('Fehler', 'Keine Schreibrechte in '.LAYOUTPATH.'db/mysql/schema/. Sorgen Sie bitte in diesem Verzeichnis für Gruppenschreibrechte.');
 		}
@@ -27,9 +27,9 @@
 			if (file_exists($zip_file)) {
 				unzip($zip_file, false, false, true);
 				unlink($zip_file);
-				$success = true;
+				$GUI->add_message('Notice', 'Herunterladen erfolgreich. <br>Der folgende Fehler in Migrationsdatei 2020-11-06_10-00-00_migrate_to_3.0.php kann ignoriert werden. Bitte nochmals auf Aktualisieren klicken.');
 			}
 		}
-		$result[0] = !$success;
+		$result[0] = true;		# abbrechen, damit nachfolgende Migrationen nicht ausgeführt werden
 	}
 ?>
