@@ -10,8 +10,8 @@ class Gml_extractor {
 		$this->xsd_location = '/var/www/html/modell/xsd/5.1/XPlanung-Operationen.xsd';
 		$this->docker_gdal_cmd = 'docker exec gdal';
 		#TODO consider other options of parsing epsgs from the file (e.g. with ogrinfo) or have an input field on upload 
-		$this->input_epsg = '25833';
-		$this->epsg = '25833';
+		$this->input_epsg = '25832';
+		$this->epsg = '25832';
 	}
 
 	/*
@@ -71,6 +71,7 @@ class Gml_extractor {
 		}
 
 		# Mapping of input to output schema
+		# Dynamic function
 		$formdata = array();
 		$fill_form_table = 'fill_form_' . $tablename;
 		$formdata = $this->$fill_form_table($gml_id);
@@ -97,7 +98,7 @@ class Gml_extractor {
 		}
 		# get extent of geometry for zooming 
 		$extent = $this->get_bbox_from_wkt($GUI->formvars['pathwkt']);
-		$GUI->formvars = $GUI->formvars + $extent;		
+		$GUI->formvars = $GUI->formvars + $extent;
 		
 		$GUI->formvars['checkbox_names_' . $GUI->formvars['chosen_layer_id']] = 'check;' . $layername . ';' . $tablename . ';' . $oid . '|';
 		$GUI->formvars['check;' . $layername .';' . $tablename . ';' . $oid] = 'on';
@@ -132,7 +133,7 @@ class Gml_extractor {
 			}
 			#echo 'could not find XPlan srsName within double quotes. checking single quotes:<br>';
 		}
-		echo $matched_epsg_str[1] . '<br>';
+		# echo $matched_epsg_str[1] . '<br>';
 		if(isset($matched_epsg_str[1])) {
 			// e.g. for EPSG:25832
 			$epsg_elements_array = explode(':',$matched_epsg_str[1]);
@@ -212,7 +213,8 @@ class Gml_extractor {
 	*/
 	function ogr2ogr_gmlas() {
 		# For Logging add: . ' >> /var/www/logs/ogr_' . $gml_id . '.log 2>> /var/www/logs/ogr_' . $gml_id . '.err'
-		$cmd = $this->docker_gdal_cmd . ' ' . OGR_BINPATH_GDAL . 'ogr2ogr -f "PostgreSQL" PG:"' . $this->pgdatabase->get_connection_string() . ' SCHEMAS=' . $this->gmlas_schema .'" GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location;
+		# escape for passwords with shell 
+		$cmd = $this->docker_gdal_cmd . ' ' . OGR_BINPATH_GDAL . 'ogr2ogr -f "PostgreSQL" PG:"' . $this->pgdatabase->get_connection_string_p() . ' SCHEMAS=' . $this->gmlas_schema .'" GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location;
 		# echo $cmd;
 		exec($cmd, $output, $error_code);
 		# echo '<pre>'; print_r($output); echo '</pre>';
@@ -246,7 +248,7 @@ class Gml_extractor {
 			;";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$result = pg_fetch_all($ret[1]);
-		$result = (!empty($result)) ? array_column($result, 'table_name') : array();
+		//$result = (!empty($result)) ? array_column($result, 'table_name') : array();
 		return $result;
 	}
 
@@ -268,7 +270,7 @@ class Gml_extractor {
 			;";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$result = pg_fetch_all($ret[1]);
-		//$result = (!empty($result)) ? array_column($result, 'table_name') : array();
+		#$result = (!empty($result)) ? array_column($result, 'table_name') : array();
 		return $result;
 	}
 
