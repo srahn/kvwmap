@@ -673,7 +673,7 @@ class Gml_extractor {
 				gmlas.bedeutung::xplan_gml.xp_bedeutungenbereich AS bedeutung,
 				gmlas.detailliertebedeutung AS detailliertebedeutung,
 				gmlas.erstellungsmassstab AS erstellungsmassstab,
-				ST_ForceRHR(st_transform(gmlas.geltungsbereich,". $this->epsg .")) AS geltungsbereich,
+				ST_Multi(ST_ForceRHR(st_transform(gmlas.geltungsbereich,". $this->epsg ."))) AS geltungsbereich,
 				" . $user_id . " AS user_id,
 				" . $konvertierung_id . " AS konvertierung_id,
 				trim(leading '#gml_' FROM lower(gmlas.rasterbasis_href)) AS rasterbasis,";
