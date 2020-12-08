@@ -89,7 +89,6 @@ function ahahDone(url, targets, req, actions) {
 						case "sethtml":
 							if (targets[i] != undefined && req.getResponseHeader('error') != 'true') {
 								targets[i].innerHTML = responsevalues[i];
-								$(targets[i]).change();
 								scripts = targets[i].getElementsByTagName("script"); // Alle script-Bloecke evaln damit diese Funktionen bekannt sind
 								for (s = 0; s < scripts.length; s++) {
 									if (scripts[s].hasAttribute("src")) {
