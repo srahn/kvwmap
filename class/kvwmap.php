@@ -5337,7 +5337,12 @@ echo '			</table>
     # aktuellen Kartenausschnitt laden
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+    if ($this->formvars['layer_id'] > 0) {
+			$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		}
+		else {
+			$layerset=$this->user->rolle->getRollenlayer(-$this->formvars['layer_id']);
+		}
     $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
     if($this->formvars['oid'] != ''){
 			if($this->formvars['selektieren'] != 'zoomonly'){
@@ -5367,7 +5372,12 @@ echo '			</table>
 		include_(CLASSPATH.'polygoneditor.php');
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		if ($this->formvars['layer_id'] > 0) {
+			$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		}
+		else {
+			$layerset=$this->user->rolle->getRollenlayer(-$this->formvars['layer_id']);
+		}
     $polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
     if($this->formvars['oid'] != ''){
     	if($this->formvars['selektieren'] != 'zoomonly'){
@@ -5421,7 +5431,12 @@ echo '			</table>
   function zoom_toPoint(){
 		include_(CLASSPATH.'pointeditor.php');
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+    if ($this->formvars['layer_id'] > 0) {
+			$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		}
+		else {
+			$layerset=$this->user->rolle->getRollenlayer(-$this->formvars['layer_id']);
+		}
     $layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
     $pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
     if($this->formvars['oid'] != '') {
@@ -8265,7 +8280,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		if($this->last_query != '') {
 			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
 		}
-		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		if ($this->formvars['selected_layer_id'] > 0) {
 			$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		}
