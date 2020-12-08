@@ -1341,7 +1341,7 @@ echo '			</table>
 			$label = new labelObj();
 			$label->set('size', 10*$map_factor);
 			$label->color->setRGB(255, 0, 0);
-			$label->set('type', 'TRUETYPE');
+			#$label->set('type', 'TRUETYPE');
 			$label->set('font', 'arial');
 			$label->set('position', MS_LR);
 			$label->set('offsety', -9);
@@ -1355,7 +1355,12 @@ echo '			</table>
 			$value = $parts[1];
 			switch($property){
 				case 'opacity' : {
-					$layer->set('opacity', $value * 100);
+					if (MAPSERVERVERSION > 700) {
+						$layer->updateFromString("LAYER COMPOSITE OPACITY ".($value * 100)." END END");
+					}
+					else{
+						$layer->set('opacity', $value * 100);
+					}
 				}break;
 				case 'fill' : {
 					$rgb = explode(',', substr($value, 4, -1));
