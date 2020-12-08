@@ -735,8 +735,15 @@ class ddl {
 			$text = '<box>'.$text.'</box>';
 		}
 		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252//TRANSLIT", $text), $fontsize, $options);
+		$lines = explode(chr(10), $text);
+		foreach($lines as $line){
+			$maxx = $this->pdf->getTextWidth($fontsize, $line);
+			if($this->layout['maxx'] < $maxx){
+				$this->layout['maxx'] = $maxx;			# maximaler x-Wert für Spaltenanordnung
+			}
+		}
 		$page_id_after_puttext = $this->pdf->currentContents;
-		#echo $page_id_before_puttext.' '.$page_id_after_puttext.' - '.$y.' - '.$text.'<br>';
+		#if($this->user->id == 2)echo $page_id_before_puttext.' '.$page_id_after_puttext.' - '.$y.' - '.$text.'<br>';
 		if($page_id_before_puttext != $page_id_after_puttext){
 			$this->page_overflow = true; 
 			if($this->getNextPage($page_id_before_puttext) != $page_id_after_puttext)$this->pdf->overflow_error = true;		# eine oder mehr Seiten übersprungen -> Fehler
@@ -898,10 +905,12 @@ class ddl {
 				if($this->i_on_page % 3 == 0){
 					$this->xoffset_onpage = 0;
 					$new_column = false;
+					$this->layout['maxx'] = 0;
 				}
 				else{
-					$this->xoffset_onpage = $this->xoffset_onpage + 170;
+					$this->xoffset_onpage = $this->xoffset_onpage + $this->layout['maxx'] + $this->layout['gap'];
 					$new_column = true;
+					$this->miny[$lastpage] = $this->maxy;
 				}
 			}
 			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];					# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
