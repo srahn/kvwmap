@@ -123,17 +123,30 @@ class pgdatabase {
 	* @return string the postgres connection string
 	*/
 	function format_pg_connection_string($credentials) {
-		$connection_string = '' .
-			'host=' . 		$credentials['host'] 		. ' ' .
-			'port=' . 		$credentials['port'] 		. ' ' .
-			'dbname=' . 	$credentials['dbname'] 	. ' ' .
-			'user=' . 		$credentials['user'] 		. ' ' .
-			'password=' .	$credentials['password'];
+		$connection_string = "" .
+			"host='" .		 $credentials['host'] 		. "' " .
+			"port='" .		 $credentials['port'] 		. "' " .
+			"dbname='" .	 $credentials['dbname'] 	. "' " .
+			"user='" .		 $credentials['user'] 		. "' " .
+			"password='" . $credentials['password'] . "'";
 		return $connection_string;
 	}
 
 	function get_connection_string() {
 		return $this->format_pg_connection_string($this->get_credentials($this->connection_id));
+	}
+	
+	function format_pg_connection_string_p($credentials) {
+		$connection_string = "" .
+			"host='" .		 $credentials['host'] 		. "' " .
+			"port='" .		 $credentials['port'] 		. "' " .
+			"dbname='" .	 $credentials['dbname'] 	. "' " .
+			"user='" .		 $credentials['user'] 		. "'";
+		return $connection_string;
+	}
+
+	function get_connection_string_p() {
+		return $this->format_pg_connection_string_p($this->get_credentials($this->connection_id));
 	}
 
 	/**
@@ -828,7 +841,7 @@ FROM
 				INSERT INTO datatypes (
 					`name`,
 					`schema`,
-					`connectino_id`
+					`connection_id`
 				)
 				VALUES (
 					'" . $typname . "',
@@ -2480,8 +2493,8 @@ FROM
     $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_gemarkung as gem, alkis.ax_flurstueck as f";
     $sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
 		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungohnehausnummer lo ON lo.gml_id = ANY(f.zeigtauf)";
-    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = l.lage OR (lo.kreis=s.kreis AND lo.gemeinde=s.gemeinde AND lo.lage=s.lage)";
-		$sql.=" WHERE g.gemeinde = f.gemeindezugehoerigkeit_gemeinde AND g.kreis=f.gemeindezugehoerigkeit_kreis AND f.gemarkungsnummer = gem.gemarkungsnummer AND f.gemeindezugehoerigkeit_gemeinde = s.gemeinde";
+    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON f.gemeindezugehoerigkeit_gemeinde = s.gemeinde AND l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = l.lage OR (lo.kreis=s.kreis AND lo.gemeinde=s.gemeinde AND lo.lage=s.lage)";
+		$sql.=" WHERE s.lage IS NOT NULL AND g.gemeinde = f.gemeindezugehoerigkeit_gemeinde AND g.kreis=f.gemeindezugehoerigkeit_kreis AND f.gemarkungsnummer = gem.gemarkungsnummer ";
     if ($GemID!='') {
       $sql.=" AND g.schluesselgesamt='".$GemID."'";
     }

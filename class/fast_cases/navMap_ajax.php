@@ -538,12 +538,17 @@ class GUI {
 			if($layerset['Filter'] != ''){
 				$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
 			 if (substr($layerset['Filter'],0,1)=='(') {
-				 $expr=$layerset['Filter'];
+				 if(MAPSERVERVERSION > 700){
+						$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
+					}
+					else{
+						$layer->setFilter($layerset['Filter']);
+					}
 			 }
 			 else {
 				 $expr=buildExpressionString($layerset['Filter']);
+				 $layer->setFilter($expr);
 			 }
-			 $layer->setFilter($expr);
 			}
 			if ($layerset['styleitem']!='') {
 				$layer->set('styleitem',$layerset['styleitem']);

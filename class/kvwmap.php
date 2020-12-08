@@ -1341,7 +1341,7 @@ echo '			</table>
 			$label = new labelObj();
 			$label->set('size', 10*$map_factor);
 			$label->color->setRGB(255, 0, 0);
-			$label->set('type', 'TRUETYPE');
+			#$label->set('type', 'TRUETYPE');
 			$label->set('font', 'arial');
 			$label->set('position', MS_LR);
 			$label->set('offsety', -9);
@@ -1355,7 +1355,12 @@ echo '			</table>
 			$value = $parts[1];
 			switch($property){
 				case 'opacity' : {
-					$layer->set('opacity', $value * 100);
+					if (MAPSERVERVERSION > 700) {
+						$layer->updateFromString("LAYER COMPOSITE OPACITY ".($value * 100)." END END");
+					}
+					else{
+						$layer->set('opacity', $value * 100);
+					}
 				}break;
 				case 'fill' : {
 					$rgb = explode(',', substr($value, 4, -1));
@@ -1990,13 +1995,18 @@ echo '			</table>
 			# Setzen des Filters
 			if($layerset['Filter'] != ''){
 				$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
-			 if (substr($layerset['Filter'],0,1)=='(') {
-				 $expr=$layerset['Filter'];
+				if(substr($layerset['Filter'],0,1)=='('){
+					if(MAPSERVERVERSION > 700){
+						$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
+					}
+					else{
+						$layer->setFilter($layerset['Filter']);
+					}
 			 }
 			 else {
 				 $expr=buildExpressionString($layerset['Filter']);
+				 $layer->setFilter($expr);
 			 }
-			 $layer->setFilter($expr);
 			}
 			if ($layerset['styleitem']!='') {
 				$layer->set('styleitem',$layerset['styleitem']);
@@ -2047,7 +2057,7 @@ echo '			</table>
 	}
 
   function loadclasses($layer, $layerset, $classset, $map){
-    $anzClass=count($classset);
+    $anzClass=@count($classset);
     for ($j=0;$j<$anzClass;$j++) {
       $klasse = ms_newClassObj($layer);
       if ($classset[$j]['Name']!='') {
@@ -2068,7 +2078,7 @@ echo '			</table>
 				$imagename = '../' . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
 				$klasse->set('keyimage', $imagename);
 			}
-      for ($k=0;$k<count($classset[$j]['Style']);$k++) {
+      for ($k=0;$k<@count($classset[$j]['Style']);$k++) {
         $dbStyle=$classset[$j]['Style'][$k];
 				if (MAPSERVERVERSION < 600) {
           $style = ms_newStyleObj($klasse);
@@ -5332,7 +5342,12 @@ echo '			</table>
     # aktuellen Kartenausschnitt laden
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+    if ($this->formvars['layer_id'] > 0) {
+			$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		}
+		else {
+			$layerset=$this->user->rolle->getRollenlayer(-$this->formvars['layer_id']);
+		}
     $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
     if($this->formvars['oid'] != ''){
 			if($this->formvars['selektieren'] != 'zoomonly'){
@@ -5362,7 +5377,12 @@ echo '			</table>
 		include_(CLASSPATH.'polygoneditor.php');
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		if ($this->formvars['layer_id'] > 0) {
+			$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		}
+		else {
+			$layerset=$this->user->rolle->getRollenlayer(-$this->formvars['layer_id']);
+		}
     $polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
     if($this->formvars['oid'] != ''){
     	if($this->formvars['selektieren'] != 'zoomonly'){
@@ -5416,7 +5436,12 @@ echo '			</table>
   function zoom_toPoint(){
 		include_(CLASSPATH.'pointeditor.php');
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+    if ($this->formvars['layer_id'] > 0) {
+			$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		}
+		else {
+			$layerset=$this->user->rolle->getRollenlayer(-$this->formvars['layer_id']);
+		}
     $layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
     $pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
     if($this->formvars['oid'] != '') {
@@ -8260,7 +8285,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		if($this->last_query != '') {
 			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
 		}
-		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		if ($this->formvars['selected_layer_id'] > 0) {
 			$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		}
@@ -15096,12 +15120,17 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if ($layerset['Filter'] != '') {
 					$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
 					if (substr($layerset['Filter'], 0, 1) == '(') {
-						$expr = $layerset['Filter'];
+						if(MAPSERVERVERSION > 700){
+							$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
+						}
+						else{
+							$layer->setFilter($layerset['Filter']);
+						}
 					}
 					else {
 						$expr = buildExpressionString($layerset['Filter']);
+						$layer->setFilter($expr);
 					}
-					$layer->setFilter($expr);
 				}
 				$layer->set('status',MS_ON);
 				$layer->set('template', ' ');

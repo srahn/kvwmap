@@ -1763,7 +1763,7 @@ class pgdatabase {
 				INSERT INTO datatypes (
 					`name`,
 					`schema`,
-					`connectino_id`
+					`connection_id`
 				)
 				VALUES (
 					'" . $typname . "',
