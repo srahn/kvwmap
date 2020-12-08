@@ -67,12 +67,11 @@ class wfs{
 						$operator = 'PropertyIsGreaterThan';
 					}break;
 					
-					/*case 'LIKE' : {									# geht noch nicht, weil man den requeststring hierfür url-encoden muss und dann ist er zu lang 
+					case 'LIKE' : {									# geht noch nicht, weil man den requeststring hierfür url-encoden muss und dann ist er zu lang 
 						$operator = 'PropertyIsLike';
 						$operator_attributes = " wildCard='*' singleChar='.' escape='!'";
 						$values[$i] = str_replace('%', '*', $values[$i]);
 					}break;
-					*/
 				}
 				
 				$filter .= '<ogc:'.$operator.$operator_attributes.'>';
@@ -84,7 +83,7 @@ class wfs{
 				$filter .= '</ogc:And>';
 			}
 			$filter .= '</ogc:Filter>';
-			$filter .= '&namespace=xmlns('.$this->namespace.'='.$this->targetnamespace.')';
+			#$filter .= '&namespace=xmlns('.$this->namespace.'='.$this->targetnamespace.')';
 		}
 		return $filter;
 				
