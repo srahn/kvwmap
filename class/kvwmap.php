@@ -1990,8 +1990,13 @@ echo '			</table>
 			# Setzen des Filters
 			if($layerset['Filter'] != ''){
 				$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
-			 if (substr($layerset['Filter'],0,1)=='(') {
-				 $layer->set('data', $layerset['Data'] . ' AND ' . $layerset['Filter']);
+				if(substr($layerset['Filter'],0,1)=='('){
+					if(MAPSERVERVERSION > 700){
+						$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
+					}
+					else{
+						$layer->setFilter($layerset['Filter']);
+					}
 			 }
 			 else {
 				 $expr=buildExpressionString($layerset['Filter']);
@@ -15096,7 +15101,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if ($layerset['Filter'] != '') {
 					$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
 					if (substr($layerset['Filter'], 0, 1) == '(') {
-						$layer->set('data', $layerset['Data'] . ' AND ' . $layerset['Filter']);
+						if(MAPSERVERVERSION > 700){
+							$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
+						}
+						else{
+							$layer->setFilter($layerset['Filter']);
+						}
 					}
 					else {
 						$expr = buildExpressionString($layerset['Filter']);
