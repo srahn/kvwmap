@@ -30,7 +30,6 @@ function show_select(input, options){
 	options_array.forEach(function(value){select = select + '<option value="'+value+'">'+value+'</option>'});
 	select = select + '</select>';
 	parent.innerHTML = select;
-	console.log(parent.firstChild);
 	parent.firstChild.value = value;
 }
 
@@ -130,10 +129,13 @@ function update_options(){
 }
 
 function addfreetext(layer_id, ddl_id){
-	var posx = [].slice.call(document.getElementsByName('textposx[]')).pop().value;
-	var posy = [].slice.call(document.getElementsByName('textposy[]')).pop().value;
-	var font = [].slice.call(document.getElementsByName('textfont[]')).pop().value;
-	var size = [].slice.call(document.getElementsByName('textsize[]')).pop().value;
+	var posx = '', posy = '', font = '', size = '';
+	if(document.getElementsByName('textposx[]').length > 0){
+		posx = [].slice.call(document.getElementsByName('textposx[]')).pop().value;
+		posy = [].slice.call(document.getElementsByName('textposy[]')).pop().value;
+		font = [].slice.call(document.getElementsByName('textfont[]')).pop().value;
+		size = [].slice.call(document.getElementsByName('textsize[]')).pop().value;
+	}
 	ahah('index.php?go=sachdaten_druck_editor_Freitexthinzufuegen&selected_layer_id='+layer_id+'&aktivesLayout='+ddl_id+'&posx='+posx+'&posy='+posy+'&size='+size+'&font='+font, '', new Array(document.getElementById('add_freetext')), new Array('prependhtml'));
 	document.GUI.textcount.value = document.GUI.textcount.value + 1;
 }
