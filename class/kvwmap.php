@@ -12427,6 +12427,17 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->user_count = count($all_users['ID']);
     $this->output();
   }
+	
+	function BenutzerderStelleAnzeigen(){
+    $this->titel='Benutzer-Stellen-Übersicht';
+    $this->main='userstellendaten.php';
+		$this->stellen['ID'][0] = $this->Stelle->id;
+		$this->stellen['Bezeichnung'][0] = $this->Stelle->Bezeichnung;
+		# Abfragen der Benutzer der Stelle
+		$this->stellen['user'][0] = $this->Stelle->getUser();
+		$this->user_count = count($this->stellen['user'][0]['ID']);
+    $this->output();
+  }	
 
 	function connections_anzeigen() {
 		include_once(CLASSPATH . 'Connection.php');
