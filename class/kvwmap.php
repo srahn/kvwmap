@@ -3544,7 +3544,7 @@ echo '			</table>
 				SELECT ".$layerset[0]['oid']."
 				FROM " . pg_quote($layerset[0]['maintable']) . "
 				WHERE
-					".$layerset[0]['oid']." > " . $max_oid . "
+					".$layerset[0]['oid']." > " . quote($max_oid) . "
 			";
 			#echo '<p>SQL zum Abfragen der neuen oids: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 0);
@@ -3569,7 +3569,7 @@ echo '			</table>
 						$sql = "
 							UPDATE " . pg_quote($layerset[0]['maintable']) . "
 							SET " . $document_attributes[$p] . " = '" . $complete_new_path . "'
-							WHERE ".$layerset[0]['oid']." = " . $rs[0] . "
+							WHERE ".$layerset[0]['oid']." = " . quote($rs[0]) . "
 						";
 						#echo '<p>SQL zum Update der Dokumentattribute: ' . $sql;
 						$ret1 = $layerdb->execSQL($sql,4, 0);
@@ -9270,7 +9270,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				DELETE FROM
 					" . pg_quote($layer['maintable']) . "
 				WHERE
-					".$layer['oid']." = " . quote($oid) . "
+					".pg_quote($layer['oid'])." = " . quote($oid) . "
 			";
 			$oids[] = $element[3];
 			$ret = $layerdb->execSQL($sql, 4, 1, true);
@@ -10241,7 +10241,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
 				$sql = "
 					SELECT " . $newpath . "
-						AND " . $element[1] . ".".$layerset[0]['oid']." = " . $element[3] . "
+						AND " . $element[1] . ".".pg_quote($layerset[0]['oid'])." = " . quote($element[3]) . "
 				";
         $oids[] = $element[3];
        # echo $sql.'<br><br>';
@@ -10368,7 +10368,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$sql = "
 						SELECT
 							" . $newpath . " AND
-							" . $element[1] . ".".$layerset[0]['oid']." = " . $element[3] . "
+							" . $element[1] . ".".pg_quote($layerset[0]['oid'])." = " . quote($element[3]) . "
 					";
 					$oids[] = $element[3];
 					#echo '<p>SQL zur Abfrage der Datensätze die gedruckt werden sollen:<br>' . $sql;
@@ -14700,7 +14700,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				else{		################ mouseover auf Datensatz in Sachdatenanzeige ################
 					$showdata = 'false';
-					$sql_where = " AND ".pg_quote($geometrie_tabelle.'_oid')." = ".$this->formvars['oid'];					
+					$sql_where = " AND ".pg_quote($geometrie_tabelle.'_oid')." = ".quote($this->formvars['oid']);					
 				}
 
 				# SVG-Geometrie abfragen für highlighting
@@ -15109,7 +15109,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						FROM
 							" . pg_quote($tablename) . "
 						WHERE
-							" . $layerset['oid'] . " = '" . $oid . "'
+							" . $layerset['oid'] . " = " . quote($oid) . "
 					) AS foo
 			";
 			$ret = $layerdb->execSQL($sql, 4, 0);
