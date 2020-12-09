@@ -560,6 +560,19 @@ if ($this->Fehlermeldung!='') {
 								</tr>
 								<tr>
 									<td class="rollenwahl-option-header">
+										<? echo $strAlwaysCreateNext; ?>:
+									</td>
+									<td class="rollenwahl-option-data">
+										<input
+											name="immer_weiter_erfassen"
+											type="checkbox"
+											value="1"<?
+											echo ($this->user->rolle->immer_weiter_erfassen == '1' ? ' checked="true"' : ''); ?>
+										>&nbsp;<span data-tooltip="<? echo $strHintAlwaysCreateNext; ?>"></span>
+									</td>
+								</tr>
+								<tr>
+									<td class="rollenwahl-option-header">
 										<? echo $strFontSizeGLE; ?>:
 									</td>
 									<td class="rollenwahl-option-data">

@@ -100,7 +100,7 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 	 }
 		if ($layer['privileg'] > 0 AND $this->formvars['attribute_privileg'] > 0){
 			echo '<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
-			for($p = 0; $p < count($this->formvars['attributenames']); $p++){
+			for ($p = 0; $p < count($this->formvars['attributenames']); $p++) {
 				echo '&attributenames['.$p.']='.$this->formvars['attributenames'][$p];
 				echo '&values['.$p.']='.$this->formvars['values'][$p];
 			}

@@ -36,6 +36,7 @@
 	$strSingleQuery="nur ein Thema abfragbar";
 	$strQuerymode="Sachdatenanzeige in extra Fenster";
 	$strNewDatasetOrder="Reihenfolge Datensatz-Erfassung";
+	$strAlwaysCreateNext="Nach dem Speichern einen weiteren Datensatz erfassen";
 	$strGeomSecond="Sachdaten zuerst";
 	$strGeomFirst="Geometrie zuerst";
 	$strGeneralOptions="Allgemein";
@@ -70,6 +71,7 @@
 	$strHintSingleQuery="Wenn Sie diese Option auswählen, erscheinen die Abfragehäkchenfelder in der Legende als sog. Radiobutton. Es kann dann immer nur genau ein Thema abfragbar geschaltet werden.";
 	$strHintQuerymode="Wenn Sie diese Option auswählen, erscheinen Sachdatenabfragen als eigene Fenster, die über der Karte schweben.";
 	$strHintNewDatasetOrder="Wählen Sie, ob bei der Erfassung neuer Daten der Geometrie-Editor oberhalb der Sachdaten erscheinen soll oder darunter.";
+	$strHintAlwaysCreateNext="Das Datenerfassungsformular bleibt nach dem Speichern geöffnet und man kann gleich den nächsten Datensatz erfassen.";
 	$strHintFontSizeGLE="Wählen Sie die Schriftgröße der Texte in der Sachdatenanzeige";
 	$strHintHighlight="Wenn Sie diese Option auswählen, werden Objekte von Themen, die abfragbar geschaltet sind, in der Karte mit blauem Rand hervorgehoben, wenn Sie mit dem Cursor darüber fahren.";
 	$strHinthist_timestamp="Wenn Sie hier ein Datum eingeben, werden ALKIS-Objekte in der Karte mit diesem historischen Stand dargestellt. Abfragen auf Flurstücke liefern ebenfalls Ergebnisse zu diesem historischen Stand.";
