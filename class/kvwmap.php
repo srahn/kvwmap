@@ -6492,6 +6492,8 @@ echo '			</table>
     $this->Docu->activeframe = $this->Docu->load_frames(NULL, $frame_id);
 
 		if($this->Docu->activeframe[0]['dhk_call'] != ''){
+			global $GUI;
+			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$output = $this->ALKIS_Kartenauszug($this->Docu->activeframe[0], $this->formvars);
 		}
 		else{
