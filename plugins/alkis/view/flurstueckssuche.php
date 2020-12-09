@@ -193,7 +193,7 @@ Eingabeformate:
 </div>
 <div>
 	<input type="hidden" name="go_plus" id="go_plus" value="">
-	<input type="button" name="dummy" value="<?php echo $strSearch; ?>" onclick="submitWithValue('GUI','go_plus','Suchen')">
+	<input type="button" name="dummy" value="<?php echo $strSearch; ?>" onclick="document.GUI.go_plus.value = 'Suchen';overlay_submit(document.GUI, true);document.GUI.go_plus.value = '';">
 </div>
 <br>
 <br>

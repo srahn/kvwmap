@@ -7,7 +7,7 @@
   	for(i = 0; i < form_fields.length; i++){
 			data += '&' + form_fields[i].name + '=' + form_fields[i].value;
 		}
-		window.location.href = 'index.php?go=SchnellSuche_Suchen&quicksearch_layer_id='+document.GUI.quicksearch_layer_id.value+data;
+		overlay_link('go=SchnellSuche_Suchen&quicksearch_layer_id='+document.GUI.quicksearch_layer_id.value+data, true);
 	}
 
 	function keydown(event){
