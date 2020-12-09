@@ -4,6 +4,10 @@ function pg_quote($column){
 	return ctype_lower($column) ? $column : '"'.$column.'"';
 }
 
+function quote($var){
+	return is_numeric($var) ? $var : "'".$var."'";
+}
+
 function sql_err_msg($title, $sql, $msg, $div_id) {
 	$err_msg = "
 		<div style=\"text-align: left;\">" .
@@ -435,7 +439,7 @@ class GUI {
 				}
 				else{		################ mouseover auf Datensatz in Sachdatenanzeige ################
 					$showdata = 'false';
-					$sql_where = " AND ".pg_quote($geometrie_tabelle.'_oid')." = ".$this->formvars['oid'];
+					$sql_where = " AND ".pg_quote($geometrie_tabelle.'_oid')." = ".quote($this->formvars['oid']);
 				}
 
 				# SVG-Geometrie abfragen für highlighting
