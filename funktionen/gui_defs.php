@@ -1,7 +1,7 @@
 <script language="javascript" type="text/javascript">
 
 	var scrolldown = <? echo $this->scrolldown ?: 0; ?>;
-	var auto_map_resize = <? echo ($this->user->rolle->auto_map_resize ? $this->user->rolle->auto_map_resize : true); ?>;
+	var auto_map_resize = <? echo ($this->user->rolle->auto_map_resize ? $this->user->rolle->auto_map_resize : 0); ?>;
 	var querymode = <? echo $this->user->rolle->querymode; ?>;
 	var deactivatelayer = '<? echo $this->deactivatelayer; ?>';
 	var deactivatequery = '<? echo $this->deactivatequery; ?>';

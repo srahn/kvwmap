@@ -1341,7 +1341,7 @@ echo '			</table>
 			$label = new labelObj();
 			$label->set('size', 10*$map_factor);
 			$label->color->setRGB(255, 0, 0);
-			$label->set('type', 'TRUETYPE');
+			#$label->set('type', 'TRUETYPE');
 			$label->set('font', 'arial');
 			$label->set('position', MS_LR);
 			$label->set('offsety', -9);
@@ -1355,7 +1355,12 @@ echo '			</table>
 			$value = $parts[1];
 			switch($property){
 				case 'opacity' : {
-					$layer->set('opacity', $value * 100);
+					if (MAPSERVERVERSION > 700) {
+						$layer->updateFromString("LAYER COMPOSITE OPACITY ".($value * 100)." END END");
+					}
+					else{
+						$layer->set('opacity', $value * 100);
+					}
 				}break;
 				case 'fill' : {
 					$rgb = explode(',', substr($value, 4, -1));
@@ -3539,7 +3544,7 @@ echo '			</table>
 				SELECT ".$layerset[0]['oid']."
 				FROM " . pg_quote($layerset[0]['maintable']) . "
 				WHERE
-					".$layerset[0]['oid']." > " . $max_oid . "
+					".$layerset[0]['oid']." > " . quote($max_oid) . "
 			";
 			#echo '<p>SQL zum Abfragen der neuen oids: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 0);
@@ -3564,7 +3569,7 @@ echo '			</table>
 						$sql = "
 							UPDATE " . pg_quote($layerset[0]['maintable']) . "
 							SET " . $document_attributes[$p] . " = '" . $complete_new_path . "'
-							WHERE ".$layerset[0]['oid']." = " . $rs[0] . "
+							WHERE ".$layerset[0]['oid']." = " . quote($rs[0]) . "
 						";
 						#echo '<p>SQL zum Update der Dokumentattribute: ' . $sql;
 						$ret1 = $layerdb->execSQL($sql,4, 0);
@@ -5337,7 +5342,12 @@ echo '			</table>
     # aktuellen Kartenausschnitt laden
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+    if ($this->formvars['layer_id'] > 0) {
+			$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		}
+		else {
+			$layerset=$this->user->rolle->getRollenlayer(-$this->formvars['layer_id']);
+		}
     $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
     if($this->formvars['oid'] != ''){
 			if($this->formvars['selektieren'] != 'zoomonly'){
@@ -5367,7 +5377,12 @@ echo '			</table>
 		include_(CLASSPATH.'polygoneditor.php');
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		if ($this->formvars['layer_id'] > 0) {
+			$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		}
+		else {
+			$layerset=$this->user->rolle->getRollenlayer(-$this->formvars['layer_id']);
+		}
     $polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
     if($this->formvars['oid'] != ''){
     	if($this->formvars['selektieren'] != 'zoomonly'){
@@ -5421,7 +5436,12 @@ echo '			</table>
   function zoom_toPoint(){
 		include_(CLASSPATH.'pointeditor.php');
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+    if ($this->formvars['layer_id'] > 0) {
+			$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		}
+		else {
+			$layerset=$this->user->rolle->getRollenlayer(-$this->formvars['layer_id']);
+		}
     $layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
     $pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
     if($this->formvars['oid'] != '') {
@@ -6428,7 +6448,7 @@ echo '			</table>
     $this->loadMap('DataBase');
     $this->map->selectOutputFormat('jpeg');
     # Zeichnen der Karte
-    $this->drawMap();
+    $this->drawMap(true);
     # Einbinden der PDF Klassenbibliotheken
     include (CLASSPATH.'class.ezpdf.php');
     # Erzeugen neue Dokument-Klasse
@@ -6472,6 +6492,8 @@ echo '			</table>
     $this->Docu->activeframe = $this->Docu->load_frames(NULL, $frame_id);
 
 		if($this->Docu->activeframe[0]['dhk_call'] != ''){
+			global $GUI;
+			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$output = $this->ALKIS_Kartenauszug($this->Docu->activeframe[0], $this->formvars);
 		}
 		else{
@@ -8265,7 +8287,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		if($this->last_query != '') {
 			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
 		}
-		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		if ($this->formvars['selected_layer_id'] > 0) {
 			$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		}
@@ -9251,7 +9272,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				DELETE FROM
 					" . pg_quote($layer['maintable']) . "
 				WHERE
-					".$layer['oid']." = " . quote($oid) . "
+					".pg_quote($layer['oid'])." = " . quote($oid) . "
 			";
 			$oids[] = $element[3];
 			$ret = $layerdb->execSQL($sql, 4, 1, true);
@@ -10222,7 +10243,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
 				$sql = "
 					SELECT " . $newpath . "
-						AND " . $element[1] . ".".$layerset[0]['oid']." = " . $element[3] . "
+						AND " . $element[1] . ".".pg_quote($layerset[0]['oid'])." = " . quote($element[3]) . "
 				";
         $oids[] = $element[3];
        # echo $sql.'<br><br>';
@@ -10349,7 +10370,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$sql = "
 						SELECT
 							" . $newpath . " AND
-							" . $element[1] . ".".$layerset[0]['oid']." = " . $element[3] . "
+							" . $element[1] . ".".pg_quote($layerset[0]['oid'])." = " . quote($element[3]) . "
 					";
 					$oids[] = $element[3];
 					#echo '<p>SQL zur Abfrage der Datensätze die gedruckt werden sollen:<br>' . $sql;
@@ -10771,7 +10792,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->loadMap('DataBase');
     $this->tif = new tif($this->map, $this->formvars['resolution']);
     $this->map = $this->tif->setmap();
-    $this->drawMap();
+    $this->drawMap(true);
     $this->tif->create_tif($this->img['hauptkarte']);
     $this->tif->create_tfw();
     $this->titel='TIF-Export';
@@ -12408,6 +12429,17 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->user_count = count($all_users['ID']);
     $this->output();
   }
+	
+	function BenutzerderStelleAnzeigen(){
+    $this->titel='Benutzer-Stellen-Übersicht';
+    $this->main='userstellendaten.php';
+		$this->stellen['ID'][0] = $this->Stelle->id;
+		$this->stellen['Bezeichnung'][0] = $this->Stelle->Bezeichnung;
+		# Abfragen der Benutzer der Stelle
+		$this->stellen['user'][0] = $this->Stelle->getUser();
+		$this->user_count = count($this->stellen['user'][0]['ID']);
+    $this->output();
+  }	
 
 	function connections_anzeigen() {
 		include_once(CLASSPATH . 'Connection.php');
@@ -14670,7 +14702,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				else{		################ mouseover auf Datensatz in Sachdatenanzeige ################
 					$showdata = 'false';
-					$sql_where = " AND ".pg_quote($geometrie_tabelle.'_oid')." = ".$this->formvars['oid'];					
+					$sql_where = " AND ".pg_quote($geometrie_tabelle.'_oid')." = ".quote($this->formvars['oid']);					
 				}
 
 				# SVG-Geometrie abfragen für highlighting
@@ -15079,7 +15111,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						FROM
 							" . pg_quote($tablename) . "
 						WHERE
-							" . $layerset['oid'] . " = '" . $oid . "'
+							" . $layerset['oid'] . " = " . quote($oid) . "
 					) AS foo
 			";
 			$ret = $layerdb->execSQL($sql, 4, 0);

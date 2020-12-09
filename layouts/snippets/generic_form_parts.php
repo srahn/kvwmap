@@ -498,7 +498,7 @@
 
 				case 'Time': {
 					$datapart .= '<input class="'.$field_class.'" readonly style="padding: 0 0 0 3;border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
-					$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" value="' . htmlspecialchars($value) . '">';
+					$datapart .= ' size="15" type="text" name="'.$fieldname.'" value="' . htmlspecialchars($value) . '">';
 				}break;
 
 				case 'Dokument': {
@@ -666,11 +666,16 @@
 						}
 						else {
 							$datapart .= '<a tabindex="1"';
-							if ($explosion[2] != 'no_new_window') {
-								$datapart .= 'target="_blank"';
-							}
-							else{
-								$datapart .= 'target="root"';
+							switch ($explosion[2]) { 
+								CASE 'no_new_window' : {
+									$datapart .= 'target="_self"';
+								}break;
+								CASE 'root' : {
+									$datapart .= 'target="root"';
+								}break;
+								default : {
+									$datapart .= 'target="_blank"';
+								}
 							}
 							$datapart .= ' class="dynamicLink" style="font-size: ' . $fontsize . 'px" ' . (($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') ? 'onclick="checkForUnsavedChanges(event);"' : '').' href="' . $href . '">';
 							$datapart .= $alias;

@@ -1375,7 +1375,8 @@ class ddl {
 				if($formvars['rectoffset_attribute_end'.$i] !== NULL)$sql .= ", `offset_attribute_end` = '".$formvars['rectoffset_attribute_end'.$i]."'";
         else $sql .= ", `offset_attribute_end` = NULL";
         if($formvars['recttype'.$i] == '')$formvars['recttype'.$i] = 0;
-        $sql .= ", `color` = '".$formvars['rectcolor'.$i]."'";
+				if($formvars['rectcolor'.$i])$sql .= ", `color` = '".$formvars['rectcolor'.$i]."'";
+				else $sql .= ", `color` = NULL";
 				$sql .= ", `type` = '".$formvars['recttype'.$i]."'";
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->save_layout :",4);
