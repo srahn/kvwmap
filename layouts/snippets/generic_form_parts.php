@@ -666,11 +666,16 @@
 						}
 						else {
 							$datapart .= '<a tabindex="1"';
-							if ($explosion[2] != 'no_new_window') {
-								$datapart .= 'target="_blank"';
-							}
-							else{
-								$datapart .= 'target="root"';
+							switch ($explosion[2]) { 
+								CASE 'no_new_window' : {
+									$datapart .= 'target="_self"';
+								}break;
+								CASE 'root' : {
+									$datapart .= 'target="root"';
+								}break;
+								default : {
+									$datapart .= 'target="_blank"';
+								}
 							}
 							$datapart .= ' class="dynamicLink" style="font-size: ' . $fontsize . 'px" ' . (($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') ? 'onclick="checkForUnsavedChanges(event);"' : '').' href="' . $href . '">';
 							$datapart .= $alias;
