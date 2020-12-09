@@ -6448,7 +6448,7 @@ echo '			</table>
     $this->loadMap('DataBase');
     $this->map->selectOutputFormat('jpeg');
     # Zeichnen der Karte
-    $this->drawMap();
+    $this->drawMap(true);
     # Einbinden der PDF Klassenbibliotheken
     include (CLASSPATH.'class.ezpdf.php');
     # Erzeugen neue Dokument-Klasse
@@ -10790,7 +10790,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->loadMap('DataBase');
     $this->tif = new tif($this->map, $this->formvars['resolution']);
     $this->map = $this->tif->setmap();
-    $this->drawMap();
+    $this->drawMap(true);
     $this->tif->create_tif($this->img['hauptkarte']);
     $this->tif->create_tfw();
     $this->titel='TIF-Export';
