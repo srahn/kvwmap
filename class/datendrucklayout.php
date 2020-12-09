@@ -824,7 +824,7 @@ class ddl {
 			}break;			
 			case 'Checkbox' : {
 				$option = (json_decode($this->attributes['options'][$j]));
-				$output = ($value == 't' ? ($option->print->true != '' ? $option->print->true : 'ja') : ($option->print->false != '' ? $option->print->false : 'nein'));
+				$output = ($value != 'f' ? ($option->print->true != '' ? $option->print->true : 'ja') : ($option->print->false != '' ? $option->print->false : 'nein'));
 			} break;			
 			default: {
 				if(!$preview AND $this->attributes['type'][$j] == 'bool'){
