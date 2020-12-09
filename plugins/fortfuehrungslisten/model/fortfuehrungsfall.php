@@ -11,7 +11,7 @@ class Fortfuehrungsfall extends PgObject {
 
 	function __construct($gui) {
 		$gui->debug->show('Create new Object Fortfuhrungsfall', Fortfuehrungsfall::$write_debug);
-		$this->PgObject($gui, Fortfuehrungsfall::$schema, Fortfuehrungsfall::$tableName);
+		parent::__construct($gui, Fortfuehrungsfall::$schema, Fortfuehrungsfall::$tableName);
 	}
 
 public static	function find_by_id($gui, $by, $id) {

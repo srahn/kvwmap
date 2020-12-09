@@ -12,7 +12,7 @@ class Fortfuehrungsauftrag extends PgObject {
 
 	function __construct($gui) {
 		$gui->debug->show('Create new Object Fortfuehrungsauftrag', Fortfuehrungsauftrag::$write_debug);
-		$this->PgObject($gui, Fortfuehrungsauftrag::$schema, Fortfuehrungsauftrag::$tableName);
+		parent::__construct($gui, Fortfuehrungsauftrag::$schema, Fortfuehrungsauftrag::$tableName);
 	}
 
 public static	function find_by_id($gui, $by, $id) {
