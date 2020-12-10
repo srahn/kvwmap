@@ -84,7 +84,7 @@ if($this->formvars['list_edit'] OR $layer['template']=='generic_layer_editor_doc
 				} ?>
 			</table>
 <?
-			for($l = 0; $l < count($invisible_attributes[$layer['Layer_ID']]); $l++){
+			for($l = 0; $l < @count($invisible_attributes[$layer['Layer_ID']]); $l++){
 				echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 			}
 		}

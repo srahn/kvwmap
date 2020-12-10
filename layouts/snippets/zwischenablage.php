@@ -20,7 +20,7 @@
 		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 		<td>
 			<table cellpadding="0" cellspacing="0">
-		<?	for($i = 0; $i < count($this->layer); $i++){ ?>
+		<?	for($i = 0; $i < @count($this->layer); $i++){ ?>
 					<tr>
 						<td style="background-color:<? echo BG_GLEATTRIBUTE; ?>;border:1px solid #C3C7C3;border-right:none;">
 							<a href="index.php?go=gemerkte_Datensaetze_anzeigen&layer_id=<? echo $this->layer[$i]['layer_id']; ?>"><div style="padding:4px;"><span class="fett"><? echo $this->layer[$i]['Name']; ?>:</span></div></a>
