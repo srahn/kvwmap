@@ -267,6 +267,7 @@ function printMapFast(){
 	document.GUI.go.value = 'Schnelle_Druckausgabe';
 	document.GUI.target = '_blank';
 	document.GUI.submit();
+	document.GUI.go.value = 'neu Laden';
 	document.GUI.target = '';
 }
 
