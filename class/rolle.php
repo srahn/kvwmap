@@ -391,7 +391,8 @@ class rolle {
 			$this->menue_buttons=$rs['menue_buttons'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
-			$this->geom_edit_first=$rs['geom_edit_first'];		
+			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
@@ -401,6 +402,7 @@ class rolle {
 			$this->legendtype = $rs['legendtype'];
 			$this->print_legend_separate = $rs['print_legend_separate'];
 			$this->print_scale = $rs['print_scale'];
+			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
 			if ($rs['hist_timestamp'] != '') {
 				$this->hist_timestamp_de = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
@@ -1306,6 +1308,7 @@ class rolle {
 					`singlequery`,
 					`querymode`,
 					`geom_edit_first`,
+					`immer_weiter_erfassen`,
 					`overlayx`, `overlayy`,
 					`instant_reload`,
 					`menu_auto_close`,
@@ -1336,7 +1339,7 @@ class rolle {
 					`scrollposition`,
 					`result_color`,
 					`result_hatching`,
-					`result_transparency`,					
+					`result_transparency`,
 					`always_draw`,
 					`runningcoords`,
 					`showmapfunctions`,
@@ -1345,6 +1348,7 @@ class rolle {
 					`singlequery`,
 					`querymode`,
 					`geom_edit_first`,
+					`immer_weiter_erfassen`,
 					`overlayx`, `overlayy`,
 					`instant_reload`,
 					`menu_auto_close`,

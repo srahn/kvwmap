@@ -117,7 +117,12 @@ if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 		<input type="button" name="abort" value="<? echo $this->strCancel; ?>" onclick="currentform.go.value='get_last_query';currentform.submit();">
 		<? } ?>
 		<input type="button" name="go_plus" id="sachdatenanzeige_save_button" value="<? echo $strSave; ?>" onclick="save_new_dataset();">
-		<input type="checkbox" name="weiter_erfassen" value="1" <? if($this->formvars['weiter_erfassen'] == 1)echo 'checked="true"'; ?>><span><? echo $strCreateAnotherOne; ?></span>
+		<input
+			type="checkbox"
+			name="weiter_erfassen"
+			value="1"<?
+			echo (($this->formvars['weiter_erfassen'] == 1 OR $this->user->rolle->immer_weiter_erfassen) ? ' checked="true"' : ''); ?>
+		><span><? echo $strCreateAnotherOne; ?></span>
 	</div>
 </div>
 	<? } ?>
