@@ -640,8 +640,12 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	var cmd = document.GUI.CMD.value;
 	var width_reduction = '';
 	var height_reduction = '';
+	var browserwidth = '';
+	var browserheight = '';
 	if(document.GUI.width_reduction)width_reduction = document.GUI.width_reduction.value;
 	if(document.GUI.height_reduction)height_reduction = document.GUI.height_reduction.value;
+	if(document.GUI.browserwidth)browserwidth = document.GUI.browserwidth.value;
+	if(document.GUI.browserheight)browserheight = document.GUI.browserheight.value;
 	
 	if(browser == 'ie'){
 		code2execute_after += 'moveback()';
@@ -649,7 +653,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	
 	if(document.GUI.punktfang != undefined && document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
 
-	postdata = postdata+"&mime_type=map_ajax&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
+	postdata = postdata+"&mime_type=map_ajax&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
 
 	if(document.GUI.legendtouched.value == 1){		// Legende benutzt -> gesamtes Formular mitschicken
 		var formdata = new FormData(document.GUI);

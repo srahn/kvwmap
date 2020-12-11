@@ -198,6 +198,41 @@ class GUI {
 		$this->trigger_functions = array();
   }
 	
+	function resizeMap2Window() {
+		global $sizes;
+
+		$size = $sizes[$this->user->rolle->gui];
+
+		if (array_key_exists('legenddisplay', $this->formvars) AND $this->formvars['legenddisplay'] !== NULL) {
+			$hideLegend = $this->formvars['legenddisplay'];		// falls die Legende gerade ein/ausgeblendet wurde
+		}
+		else {
+			$hideLegend = $this->user->rolle->hideLegend;
+		}
+
+		$width = $this->formvars['browserwidth'] -
+			$size['margin']['width'] -
+			($this->user->rolle->hideMenue  == 1 ? $size['menue']['hide_width'] : $size['menue']['width']) -
+			($hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width'])
+			- 18;	# Breite für möglichen Scrollbalken
+
+		$height = $this->formvars['browserheight'] -
+			$size['margin']['height'] -
+			$size['header']['height'] -
+			$size['scale_bar']['height'] -
+			((defined('LAGEBEZEICHNUNGSART') AND LAGEBEZEICHNUNGSART != '') ? $size['lagebezeichnung_bar']['height'] : 0) -
+			($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0) -
+			$size['footer']['height'];
+
+		if($width  < 0) $width = 10;
+		if($height < 0) $height = 10;
+		if($height % 2 != 0)$height = $height - 1;		# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
+		if($width  % 2 != 0)$width = $width - 1;				# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
+
+		$this->user->rolle->setSize($width.'x'.$height);
+		$this->user->rolle->readSettings();
+	}	
+	
 	function zoomToMaxLayerExtent($layer_id) {
     # Abfragen der maximalen Ausdehnung aller Daten eines Layers
 		if($layer_id > 0){
@@ -2319,6 +2354,27 @@ class rolle {
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
 	}
+	
+	function setSize($mapsize) {
+		# setzen der Werte, die aktuell für die Nutzung der Stelle durch den Nutzer gelten sollen.
+		$teil = explode('x',$mapsize);
+		$nImageWidth = $teil[0];
+		$nImageHeight = $teil[1];
+		$sql = "
+			UPDATE
+				rolle
+			SET
+				nImageWidth = " . $nImageWidth . ",
+				nImageHeight = " . $nImageHeight . "
+			WHERE
+				stelle_id = " . $this->stelle_id . "
+				AND user_id = " . $this->user_id . "
+		";
+		$this->debug->write("<p>file:rolle.php class:rolle->setSize - Setzen der Einstellungen für die Bildgröße", 4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+		$this->debug->write('Neue Werte für Rolle eingestellt: ' . $nImageWidth . ', ' . $nImageHeight, 4);
+		return 1;
+	}	
 	
   function getConsume($consumetime, $user_id = NULL) {
 		if($user_id == NULL)$user_id = $this->user_id;		# man kann auch eine user_id übergeben um den Kartenausschnitt eines anderen Users abzufragen
