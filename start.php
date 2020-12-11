@@ -465,7 +465,7 @@ else {
 	}
 
 	# Anpassen der Kartengröße an das Browserfenster
-	if ($go != 'navMap_ajax' AND $GUI->user->rolle->auto_map_resize AND $GUI->formvars['browserwidth'] != '') {
+	if ($GUI->user->rolle->auto_map_resize AND $GUI->formvars['browserwidth'] != '') {
 		$GUI->resizeMap2Window();
 	}
 
