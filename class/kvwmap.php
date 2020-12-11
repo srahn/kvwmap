@@ -8578,7 +8578,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				else {
 					$ret['msg'] = sql_err_msg(
-						'Fehler bei der Datenbankabfrage von Sachdaten in der Funktion GenerischeSuche_Suchen Zeile ' . __LINE__, $sql,
+						'Fehler bei der Datenbankabfrage von Sachdaten in der Funktion GenerischeSuche_Suchen Zeile ' . __LINE__, $sql. $sql_order . $sql_limit,
 						$ret['msg'],
 						'error_div_' . rand(1, 99999)
 					);
