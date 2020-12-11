@@ -104,6 +104,7 @@ if (is_logout($GUI->formvars)) {
 		logout();
 	}
 	else {
+		$GUI->add_message('error', 'Logout nicht möglich. Sie sind nicht angemeldet.');
 		$GUI->debug->write('Ist schon logged out.', 4, $GUI->echo);
 	}
 }
