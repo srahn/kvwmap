@@ -279,7 +279,7 @@
 			    	    <? } ?>
 			    	    <td style="padding-top:5px; padding-bottom:5px;" valign="middle">
 <?						
-							if(!$layer['shape'][$k]['geom']){		// kein WFS
+							if(!$layer['shape'][$k]['wfs_geom']){		// kein WFS
 								echo '<input type="hidden" id="'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';
 ?>								
 								<table cellspacing="0" cellpadding="0">
