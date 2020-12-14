@@ -1847,7 +1847,6 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 								float: left;
 								margin: auto;
 								visibility: visible;
-								z-index:3;
 								line-height: 30px;
 }
 
