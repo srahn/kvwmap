@@ -1286,7 +1286,7 @@ FROM
 			$sql.= "AND land||gemarkungsnummer = '".$GemkgID."' ";
 			$sql.= "AND flurnummer = ".$FlurID." ";
 			$sql.= "AND flurstueckskennzeichen = ANY(zeigtaufaltesflurstueck) ";
-			$sql.= "AND NOT flurstueckskennzeichen = ANY(zeigtaufneuesflurstueck) ";
+			$sql.= "AND (NOT flurstueckskennzeichen = ANY(zeigtaufneuesflurstueck) OR zeigtaufneuesflurstueck IS NULL)";
 			$sql.= "AND ax_flurstueck.endet IS NOT NULL ";
 			$sql.= "UNION ";
 			$sql.= "SELECT flurstueckskennzeichen as flurstkennz, zaehler, nenner ";
@@ -1958,9 +1958,18 @@ FROM
   }
 	  
 	function getNachfolger($FlurstKennz) {
-		$sql = "SELECT DISTINCT ON (nachfolger) nachfolger, c.endet FROM (";
-    $sql.= "SELECT unnest(zeigtaufneuesflurstueck) as nachfolger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['" . $FlurstKennz . "'::varchar] <@ zeigtaufaltesflurstueck AND NOT ARRAY['" . $FlurstKennz . "'::varchar] <@ zeigtaufneuesflurstueck) as foo ";
-		$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger ORDER BY nachfolger, c.endet DESC";
+		$sql = "SELECT 
+							DISTINCT ON (nachfolger) nachfolger, c.endet 
+						FROM (
+							SELECT 
+								unnest(coalesce(zeigtaufneuesflurstueck, ARRAY['BOV'])) as nachfolger 
+							FROM 
+								alkis.ax_fortfuehrungsfall 
+							WHERE ARRAY['" . $FlurstKennz . "'::varchar] <@ zeigtaufaltesflurstueck 
+							AND (NOT ARRAY['" . $FlurstKennz . "'::varchar] <@ zeigtaufneuesflurstueck OR zeigtaufneuesflurstueck IS NULL)
+						)	as foo
+						LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger 
+						ORDER BY nachfolger, c.endet DESC";
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
       $ret[0]=1;
