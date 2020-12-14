@@ -223,6 +223,9 @@ class data_import_export {
 		elseif(file_exists($uploadpath.$file.'.DBF'))$filename = $uploadpath.$file.'.DBF';
 		else return;
 		$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $filename, $pgdatabase, NULL, $sql, '-lco FID=gid', $encoding);
+		if(file_exists('.esri.gz')){
+			unlink('.esri.gz');
+		}
 		if ($ret !== 0) {
 			$custom_table['error'] = $ret;
 			return array($custom_table);

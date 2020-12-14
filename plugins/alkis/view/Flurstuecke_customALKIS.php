@@ -390,11 +390,11 @@ hide_versions = function(flst){
 											</td>
 										</tr>
 										<? } ?>
-										<?php if ($privileg_['nachfolger'] AND $flst->Nachfolger != '') { ?>
+										<?php if ($privileg_['nachfolger'] AND $flst->Nachfolger != '' AND $flst->Nachfolger[0]['nachfolger'] != 'BOV') { ?>
 										<tr>
 											<td align="right" valign="top"><span class="fett">Nachfolger</span></td>
 											<td>
-												<?php
+												<?
 												for($v = 0; $v < count($flst->Nachfolger); $v++){ ?>
 													<a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Nachfolger[$v]['nachfolger']; ?>&without_temporal_filter=1');">
 													<? echo formatFlurstkennzALK($flst->Nachfolger[$v]['nachfolger']);
@@ -825,7 +825,7 @@ hide_versions = function(flst){
 											<?
 												if($flst->hist_alb != 1){
 													$zoomlink = 'ZoomToFlst&FlurstKennz='.$flst->FlurstKennz; 
-													if($set_timestamp != '')$zoomlink = $set_timestamp.'&go_next='.urlencode($zoomlink);else $zoom_all = true;
+													if($set_timestamp != '')$zoomlink = $set_timestamp.'&go_next='.$zoomlink;else $zoom_all = true;
 											?>
 													&nbsp;&nbsp;
 													<a target="root" title="Zoom auf Flurstück und Flurstück hervorheben" href="index.php?go=<? echo $zoomlink;?>"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>

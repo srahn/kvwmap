@@ -380,6 +380,7 @@ class ddl {
 				if($attributes['type'][$j] != 'geometry'){
 					switch ($attributes['form_element_type'][$j]){
 						case 'SubFormPK' : case 'SubFormEmbeddedPK' : {
+							if($this->page_overflow)$this->pdf->reopenObject($this->record_startpage);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 							if(true or $this->layout['elements'][$attributes['name'][$j]]['font'] != ''){
 								# Parameter saven ##
 								$layerid_save = $selected_layer_id;
@@ -470,6 +471,7 @@ class ddl {
 								$this->gui->formvars['chosen_layer_id'] = $layerid_save;
 								$this->gui->formvars['aktivesLayout'] = $layoutid_save;
 							}
+							if($this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
 						}break;
 						
 						default : {
@@ -555,7 +557,7 @@ class ddl {
 								}								
 								$this->layout['offset_attributes'][$attributes['name'][$j]] = $y;					# den unteren y-Wert dieses Elements in das Offset-Array schreiben
 								$this->layout['page_id'][$attributes['name'][$j]] = $this->pdf->currentContents;		# und die Page-ID merken, in der das Attribut beendet wurde
-								if($this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
+								if($this->page_overflow AND $this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
 							}
 						}
 					}

@@ -104,6 +104,7 @@ if (is_logout($GUI->formvars)) {
 		logout();
 	}
 	else {
+		$GUI->add_message('error', 'Logout nicht möglich. Sie sind nicht angemeldet.');
 		$GUI->debug->write('Ist schon logged out.', 4, $GUI->echo);
 	}
 }
@@ -465,7 +466,7 @@ else {
 	}
 
 	# Anpassen der Kartengröße an das Browserfenster
-	if ($go != 'navMap_ajax' AND $GUI->user->rolle->auto_map_resize AND $GUI->formvars['browserwidth'] != '') {
+	if ($GUI->user->rolle->auto_map_resize AND $GUI->formvars['browserwidth'] != '') {
 		$GUI->resizeMap2Window();
 	}
 
