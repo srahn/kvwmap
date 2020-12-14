@@ -1876,6 +1876,7 @@ class Gml_extractor {
 			if(!in_array($a, array_column($mapping_table, 'o_column'))) {
 				continue;
 			}
+
 			foreach($mapping_table as $mapping) {
 				if(($mapping['o_column'] == $a) and ($mapping['o_table'] == $gml_class)) {
 					# gehoertzubereich wird automatisiert bei der Konvertierung in die Regel eingearbeitet 
@@ -1883,21 +1884,43 @@ class Gml_extractor {
 					if($mapping['t_column'] == 'gehoertzubereich') {
 						continue;
 					}
-                    # fix for varying encountered gml-geometry types that are valid for xplanung (according to konformitaetsbedingungen-document) but can cause problems
-                    # e.g. in display, in export, for wms/wfs services or are not supported by the konverter
-                    if($mapping['t_column'] == 'position') {
-                        if(($geom_type == 'ST_CurvePolygon') or
-                            ($geom_type == 'ST_MultiSurface') or
-                            ($geom_type == 'ST_CompoundCurve') or
-                            ($geom_type == 'ST_MultiCurve'))
-                        {
-                            $mapping['regel'] = 'ST_CurveToLine(gmlas.position) AS position';
-                        }
-                    }
+
+					# fix for varying encountered gml-geometry types that are valid for xplanung (according to konformitaetsbedingungen-document) but can cause problems
+					# e.g. in display, in export, for wms/wfs services or are not supported by the konverter
+					if($mapping['t_column'] == 'position') {
+						if(($geom_type == 'ST_CurvePolygon') or
+							($geom_type == 'ST_MultiSurface') or
+							($geom_type == 'ST_CompoundCurve') or
+							($geom_type == 'ST_MultiCurve'))
+						{
+							$mapping['regel'] = 'ST_CurveToLine(gmlas.position) AS position';
+						}
+					}
 					$gml_attributes[] = $mapping['t_column'];
 					$select_sql .=  $mapping['regel'];
 					$select_sql .= ",";
 				}
+			}
+		}
+
+		# attributes of normalized gmlas tables, e.g. praesentationsobjekte '_dientzurdarstellungvon', '_wirddargestelltdurch'
+		# TODO generically read all normalized tables
+		$norm_attributes = array("wirddargestelltdurch","dientzurdarstellungvon");
+		foreach($norm_attributes AS $n_a) {
+			# check if table exists
+				$sql_checkexists_norm_table = "
+					SELECT 
+						EXISTS (
+						 SELECT FROM information_schema.tables 
+						 WHERE table_schema = '" . $this->gmlas_schema . "'
+						 AND table_name = '" . $gml_class . '_' . $n_a . "'
+						);";
+			$ret = $this->pgdatabase->execSQL($sql_checkexists_norm_table, 4, 0);
+			$result = pg_fetch_row($ret[1]);
+			if($result[0] === 't') {
+				# single ' escaped later
+				$select_sql .= "(SELECT string_agg(href,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " norm_table WHERE gmlas.id = norm_table.parent_id) AS " . $n_a;
+				$gml_attributes[] = $n_a;
 			}
 		}
 
@@ -2051,7 +2074,9 @@ class Gml_extractor {
 				) AND
 				i.table_name NOT LIKE '%_plan' AND
 				i.table_name NOT LIKE '%_bereich' AND
-				i.table_name NOT LIKE '%_textabschnitt';
+				i.table_name NOT LIKE '%_textabschnitt'
+			ORDER BY
+				i.table_name;
 			";
 		$ret = $this->pgdatabase->execSQL($sql,4, 0);
 		$classes = pg_fetch_all_columns($ret[1]);
