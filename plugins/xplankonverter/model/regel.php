@@ -1,6 +1,6 @@
 <?php
 #############################
-# Klasse Konvertierung #
+# Klasse Regel #
 #############################
 
 class Regel extends PgObject {
@@ -191,7 +191,10 @@ class Regel extends PgObject {
 
 	function get_shape_table_name() {
 		$this->debug->show('<br>Extrahiere Tabellenname der Shape-Datei aus sql: ' . $this->get($sql), Validierung::$write_debug);
-		$parts1 = explode('FROM', $this->get('sql'));
+		# only search starting from last from to ignore potential earlier subqueries
+		$partsfrompos = substr($this->get('sql'),strrpos($this->get('sql'),'FROM'));
+	
+		$parts1 = explode('FROM', $partsfrompos);
 		$parts2 = explode('WHERE', $parts1[1]);
 		$parts3 = trim($parts2[0]);
 		// Remove alias etc.
@@ -215,7 +218,7 @@ class Regel extends PgObject {
 		);
 		$sql = str_ireplace(
 			'select',
-			"select gml_id::uuid,",
+			"SELECT gml_id::uuid,",
 			$sql
 		);
 		$sql = str_ireplace(
@@ -278,11 +281,15 @@ class Regel extends PgObject {
 			strpos($sql, '('),
 			strlen('(')
 		);
-		$sql = str_ireplace(
-			'select',
-			"select {$konvertierung_id} AS konvertierung_id,",
-			$sql
+
+		# to only replace first insensitive instance of where (to ignore subqueries inside query)
+		$sql = substr_replace(
+			$sql,
+			" select {$konvertierung_id} AS konvertierung_id, ",
+			stripos($sql, 'select'),
+			strlen("select")
 		);
+
 		$this->debug->show('sql nach konvertierung_id hinzufügen:<br>' . $sql, Regel::$write_debug);
 
 		# transformation hinzufügen
@@ -304,20 +311,20 @@ class Regel extends PgObject {
 			);
 		}
 		$this->debug->show('sql nach transformation:<br>' . $sql, Regel::$write_debug);
-
+		
 		# nur nicht leere Geometrien übernehmen
 		if (strpos(strtolower($sql), 'where') === false) {
-			$sql .= ' WHERE ' . $geometry_col . ' IS NOT NULL';
+			$sql .= ' where ' . $geometry_col . ' IS NOT NULL';
 		}
 		else {
-			$sql = str_ireplace(
+			#str_ilreplace to only replace last insensitive instance of where (to ignore subqueries inside query)
+			$sql = Validierung::str_ilreplace(
 				'where',
-				"WHERE " . $geometry_col . " IS NOT NULL AND",
+				' where ' . $geometry_col . ' IS NOT NULL AND ',
 				$sql
 			);
 		}
 		$this->debug->show('sql nach nicht leere Geometrien:<br>' . $sql, Regel::$write_debug);
-
 
 		if ($this->get('bereich_gml_id') != '') {
 			$sql = substr_replace(
@@ -326,12 +333,14 @@ class Regel extends PgObject {
 				strpos($sql, '('),
 				strlen('(')
 			);
+			#to only replace first insensitive instance of where (to ignore subqueries inside query)
+			$sql = substr_replace(
+				$sql,
+				" select '" . $this->get_bereich_gml_id() . "' AS gehoertzubereich, ",
+				stripos($sql, 'select'),
+				strlen('select')
+		);
 			
-			$sql = str_ireplace(
-				'select',
-				"select '" . $this->get_bereich_gml_id() . "' AS gehoertzubereich,",
-				$sql
-			);
 		}
 		$this->debug->show('sql nach bereich:<br>' . $sql, Regel::$write_debug);
 
