@@ -145,6 +145,19 @@ class Validierung extends PgObject {
 	}
 
 	/*
+	* Replaces last and only last (strRpos) case-insensitive occurence of a value in a string, else return the original string.
+	*/
+	
+	public static function str_ilreplace($search, $replace, $string) {
+		$pos = strrpos(strtolower($string), strtolower($search));
+		if($pos !== false) {
+			$search_length = strlen($search);
+			$string = substr_replace($string, $replace, $pos, $search_length);
+		}
+		return $string;
+	}
+
+	/*
 	* Funktion findet alle Shape-Objekte, die the_geom = NULL haben.
 	* ToDo: Eigentlich müsste hier noch die Shape-Tabelle, bzw. der Shape-Layer extrahiert werden,
 	* damit in der Meldung direkt auf die fehlerhaften Objekte verwiesen werden kann.
@@ -165,24 +178,26 @@ class Validierung extends PgObject {
 		$search_path  = ($sourcetype == 'gmlas') ? "xplan_gmlas_{$this->gui->user->id}" : "xplan_shapes_{$this->konvertierung_id}";
 
 		# Frage gid mit ab
-		$sql = str_ireplace(
-			'select',
-			"select " . $gid_or_oid . ",",
-			$sql
+		$sql = substr_replace(
+			$sql,
+			" SELECT " . $gid_or_oid . ", ",
+			stripos($sql, 'select'),
+			strlen('select')
 		);
 		$this->debug->show('<br>sql mit ' . $gid_or_oid . ': ' . $sql, Validierung::$write_debug);
 
 		# Hänge Where Klauses is null an
 		if (strpos(strtolower($sql), 'where') === false) {
-			$sql .= ' where ' . $geometry_col .' IS NULL';
+			$sql .= ' WHERE ' . $geometry_col .' IS NULL';
 		}
 		else {
-			$sql = str_ireplace(
+			$sql = $this->str_ilreplace(
 				'where',
-				"WHERE " . $geometry_col . " IS NULL AND (",
+				"WHERE " . $geometry_col . " IS NULL AND ",
+				#"WHERE " . $geometry_col . " IS NULL AND (",
 				$sql
 			);
-			$sql .= ')';
+			#$sql .= ')';
 		}
 		$this->debug->show('<br>sql mit where Klausel: ' . $sql, Validierung::$write_debug);
 
@@ -233,35 +248,44 @@ class Validierung extends PgObject {
 
 		if($sourcetype != 'gmlas') {
 			# Selektiere gid zur eindeutigen Identifizierung des Datensatzes und st_isvalidreason
-			$sql = str_ireplace(
-				'select',
-				"select
+			$sql = substr_replace(
+				$sql,
+				" SELECT
 					gid,
 					st_isvalidreason(" . $geometry_col . ") validreason,
-				",
-				$sql
+				 ",
+				stripos($sql, 'select'),
+				strlen('select')
 			);
 			$this->debug->show('<br>sql mit gid und is_validreason: ' . $sql, Validierung::$write_debug);
-
 		} else {
 			# Selektiere gid zur eindeutigen Identifizierung des Datensatzes und st_isvalidreason
-			$sql = str_ireplace(
-				'select',
-				"select
+			$sql = substr_replace(
+				$sql,
+				"SELECT
 					st_isvalidreason(" . $geometry_col .") validreason,
 				",
-				$sql
+				stripos($sql, 'select'),
+				strlen('select')
+			);
+			$sql = substr_replace(
+				$sql,
+				" SELECT
+					st_isvalidreason(" . $geometry_col .") validreason,
+				" ,
+				stripos($sql, 'select'),
+				strlen('select')
 			);
 			$this->debug->show('<br>sql mit is_validreason: ' . $sql, Validierung::$write_debug);
 		}
 
-	# where klausel für plan hinzufügen
-	$sql = str_ireplace(
-		'where',
-		"where
-			NOT st_isvalid(" . $geometry_col . ") AND (
-		",
-		$sql
+		# where klausel für plan hinzufügen
+		$sql = $this->str_ilreplace(
+			'where',
+			"WHERE
+				NOT st_isvalid(" . $geometry_col . ") AND (
+			",
+			$sql
 		);
 
 		$this->debug->show('<br>sql mit where st_isvalid: ' . $sql, Validierung::$write_debug);
@@ -278,6 +302,7 @@ class Validierung extends PgObject {
 
 		if (!$result) {
 			$this->debug->show('<br>sql ist nicht ausführbar: ' . $sql, Validierung::$write_debug);
+			if(!$ausfuehrbar) echo 'case2222<br>' . $sql . '<br><br><br><br>';
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
 			$validierungsergebnis->create(
 				array(
@@ -362,34 +387,40 @@ class Validierung extends PgObject {
 		# e.g. ST_AsText with precision, ST_QuantizeCoordinates
 		# or build a custom ST_Within (and ST_Intersection?) variant, that utilizes the relevant equivalency distance
 		$tolerance_meters = '0.001';
-
+		
 		if($sourcetype != 'gmlas') {
-			$sql = str_ireplace(
-				'select',
-				"select
+			# replaces only first occurence to allow later subqueries
+			$sql = substr_replace(
+				$sql,
+				" SELECT
 					gid,
 					NOT st_within(" . $geometry_col . ", ST_Buffer(" . $plantype . ".raeumlichergeltungsbereich," . $tolerance_meters . ")) AS ausserhalb,
 					st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), ST_Transform(" . $plantype . ".raeumlichergeltungsbereich, " . $konvertierung->get('input_epsg') ."))/1000 AS distance,
-				",
-				$sql
+				 ",
+				stripos($sql, 'select'),
+				strlen('select')
 			);
+			
+
 			$this->debug->show('<br>sql mit gid, within und distance: ' . $sql, Validierung::$write_debug);
 		} else {
-			$sql = str_ireplace(
-				'select',
-				"select
+			$sql = substr_replace(
+				$sql,
+				" SELECT
 					NOT st_within(" . $geometry_col . ", ST_Buffer(" . $plantype . ".raeumlichergeltungsbereich," . $tolerance_meters . ")) AS ausserhalb,
 					st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), ST_Transform(" . $plantype . ".raeumlichergeltungsbereich, " . $konvertierung->get('input_epsg') ."))/1000 AS distance,
-				",
-				$sql
+				 ",
+				stripos($sql, 'select'),
+				strlen('select')
 			);
+
 			$this->debug->show('<br>sql mit gid, within und distance: ' . $sql, Validierung::$write_debug);
 		}
 
 		# tabelle " . $plantype . " hinzufügen
-		$sql = str_ireplace(
+		$sql = $this->str_ilreplace(
 			'from',
-			"from
+			"FROM
 				xplan_gml." . $plantype . " " . $plantype . ",
 			",
 			$sql
@@ -397,14 +428,15 @@ class Validierung extends PgObject {
 		$this->debug->show('<br>sql mit " . $plantype . " Tabelle: ' . $sql, Validierung::$write_debug);
 
 		# where klausel für plan hinzufügen
-		$sql = str_ireplace(
+		$sql = $this->str_ilreplace(
 			'where',
-			"where
+			"WHERE
 				" . $plantype . ".konvertierung_id = " . $konvertierung->get('id') . " AND 
 				NOT st_within(" . $geometry_col . ", ST_Buffer(raeumlichergeltungsbereich," . $tolerance_meters . ")) AND (
 			",
 			$sql
 		);
+
 		$this->debug->show('<br>sql mit where Klausel für ' . $plantype . ': ' . $sql, Validierung::$write_debug);
 
 		#$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . 
@@ -503,22 +535,25 @@ class Validierung extends PgObject {
 		# Tolerance and buffer, see comment in geom_within_plan
 		$tolerance_meters = '0.001';
 		# gid zur eindeutigen Identifizierung des Datensatzes (nicht bei gmlas) sowie within und distance zum select hinzufügen
-
-		$sql = str_ireplace(
-			'select',
+		# replace only first instance, not potential following subqueries
+		$sql = substr_replace(
+			$sql,
 			"select
 				" . ($sourcetype == 'gmlas' ? '' : 'gid,') . "
 				NOT st_within(" . $geometry_col . ", ST_Buffer(" . $bereichtype . ".geltungsbereich," . $tolerance_meters . ")) AS ausserhalb,
 				st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), ST_Transform(" . $bereichtype . ".geltungsbereich, " . $konvertierung->get('input_epsg') . "))/1000 AS distance,
 			",
-			$sql
+			stripos($sql, 'select'),
+			strlen('select')
+		
 		);
+
 		$this->debug->show('<br>sql mit gid (nicht bei gmlas), within und distance: ' . $sql, Validierung::$write_debug);
 
 		# Tabelle " . $bereichtype . " hinzufügen
-		$sql = str_ireplace(
+		$sql = $this->str_ilreplace(
 			'from',
-			"from
+			"FROM
 				xplan_gml." . $bereichtype . " " . $bereichtype . ",
 			",
 			$sql
@@ -526,15 +561,17 @@ class Validierung extends PgObject {
 		$this->debug->show('<br>sql mit " . $plantype . " Tabelle: ' . $sql, Validierung::$write_debug);
 
 		# where klausel für bereich hinzufügen
-		$sql = str_ireplace(
+		$sql = $this->str_ilreplace(
 			'where',
-			"where
+			"WHERE
 				" . $bereichtype . ".gml_id = '" . $regel->get('bereich_gml_id') . "' AND
 				" . $bereichtype . ".konvertierung_id = " . $konvertierung->get('id') . " AND 
 				NOT st_within(" . $geometry_col . ", ST_Buffer(" . $bereichtype . ".geltungsbereich," . $tolerance_meters . ")) AND (
 			",
 			$sql
 		);
+		
+
 		$this->debug->show('<br>sql mit where Klausel für ' . $bereichtype . ': ' . $sql, Validierung::$write_debug);
 		$sql = substr($sql, 0, stripos($sql, 'returning')) . ')';
 		$this->debug->show('<br>sql ohne returning: ' . $sql, Validierung::$write_debug);
