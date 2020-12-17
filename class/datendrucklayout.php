@@ -904,7 +904,7 @@ class ddl {
 			// else $new_column = false;
 			# spaltenweiser Typ von links nach rechts
 			if($this->layout['columns'] AND $this->i_on_page > 0){
-				if($this->i_on_page % 3 == 0){
+				if($this->layout['maxx'] > ($this->layout['width'] - $this->layout['margin_right'] - 30)){
 					$this->xoffset_onpage = 0;
 					$new_column = false;
 					$this->layout['maxx'] = 0;

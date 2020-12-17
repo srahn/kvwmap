@@ -39,7 +39,7 @@ function back(){
 
 ?>       
 
-<table border="0" cellspacing="2" cellpadding="0">
+<table id="sachdatendruck_table_<? echo $this->formvars['chosen_layer_id']; ?>" border="0" cellspacing="2" cellpadding="0">
   <tr>
     <td colspan=3>&nbsp;</td>
   </tr>
@@ -48,18 +48,22 @@ function back(){
 		<td>
 			 <table width=100% cellpadding="4" cellspacing="0" style="border:1px solid #C3C7C3">
         <tr>
-          <td class="fett" colspan=3 style="border-bottom:1px solid #C3C7C3">&nbsp;Layout-Auswahl</td>
+					<td id="sachdatendruck_title_<? echo $this->formvars['chosen_layer_id']; ?>" class="fett" colspan=3 style="border-bottom:1px solid #C3C7C3">
+						&nbsp;Layout-Auswahl
+					</td>
         </tr>
         <tr>
           <td style="border-bottom:1px solid #C3C7C3">
-            &nbsp;<select name="aktivesLayout" onchange="document.GUI.go_plus.value = '';document.GUI.submit()">
-            <option value="">--- bitte wählen ---</option>
-            <?  
-            for ($i = 0; $i < count($this->ddl->layouts); $i++){
-              echo ($this->formvars['aktivesLayout']<>$this->ddl->layouts[$i]['id']) ? '<option value="'.$this->ddl->layouts[$i]['id'].'">'.$this->ddl->layouts[$i]['name'].'</option>' : '<option value="'.$this->ddl->layouts[$i]['id'].'" selected>'.$this->ddl->layouts[$i]['name'].'</option>';
-            }
-            ?>
-          </select> 
+						&nbsp;
+						<select name="aktivesLayout" onchange="document.GUI.go_plus.value = '';document.GUI.submit()">
+							<option value="">--- bitte wählen ---</option><?
+							for ($i = 0; $i < count($this->ddl->layouts); $i++) {
+								$select = ($this->formvars['aktivesLayout'] == $this->ddl->layouts[$i]['id'] ? ' selected' : ''); ?>
+								<option value="<?php echo $this->ddl->layouts[$i]['id']; ?>"<? echo $select; ?>><?
+									echo $this->ddl->layouts[$i]['name']; ?>
+								</option><?
+							} ?>
+						</select>
           </td>
           <td align="left" style="border-bottom:1px solid #C3C7C3"> 
 			    	<input type="button" name="zurueck" value="zurück" onclick="back();">
