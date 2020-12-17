@@ -154,7 +154,7 @@
 						
 							if(value_of($row, 'sidebyside') OR value_of($next_row, 'sidebyside')){
 								$select_width2 = '';
-								$size2 = 1;
+								$size2 = 10;
 							}
 							else{
 								$size2 = $size;
