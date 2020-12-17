@@ -10,7 +10,7 @@
 				root.stopwaiting();	// wenn man aus der Karte abgefragt hatte, Warteanimation beenden		
 		<? if($this->formvars['mime_type'] == 'overlay_html' AND $this->zoomed){ ?>		// wenn nicht aus normaler Suchmaske heraus gesucht wurde und (durch die Funktion generischeSuche_Suchen) auf die Treffer gezoomt wurde, Karte neu laden
 				root.startwaiting();
-				root.location.href="index.php";
+				root.location.href="index.php<? echo ($this->formvars['quicksearch_layer_id'] != '') ? '?quicksearch_layer_id='.$this->formvars['quicksearch_layer_id'] : ''; ?>";
 		<? } ?>
 			}
 		</script>

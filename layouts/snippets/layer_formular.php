@@ -424,17 +424,17 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelMaxScale; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="labelmaxscale" type="text" value="<?php echo $this->formvars['labelmaxscale']; ?>" size="50" maxlength="100">
-						</td>
-					</tr>
-					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelMinScale; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="labelminscale" type="text" value="<?php echo $this->formvars['labelminscale']; ?>" size="50" maxlength="100">
 						</td>
 					</tr>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelMaxScale; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="labelmaxscale" type="text" value="<?php echo $this->formvars['labelmaxscale']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>					
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelRequires; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
