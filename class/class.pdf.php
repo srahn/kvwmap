@@ -1829,10 +1829,17 @@ function polygon($p,$np,$f=0){
 }
 
 /**
-* a filled rectangle, note that it is the width and height of the rectangle which are the secondary paramaters, not
-* the coordinates of the upper-right corner
+* dieses gefüllte Rechteck wird in der Zeichenreihenfolge erscheinen, in der es hinzugefügt wurde
 */
-function filledRectangle($x1,$y1,$width,$height,$r,$g,$b){
+
+function filledRectangle($x1,$y1,$width,$height){
+  $this->objects[$this->currentContents]['c'].="\n".sprintf('%.3f',$x1).' '.sprintf('%.3f',$y1).' '.sprintf('%.3f',$width).' '.sprintf('%.3f',$height).' re f';
+}
+
+/**
+* dieses gefüllte Rechteck wird in der Zeichenreihenfolge immer ganz unten erscheinen
+*/
+function filledRectangleBelow($x1,$y1,$width,$height,$r,$g,$b){
 	$this->objects[$this->currentContents]['c'] = 
 	sprintf('%.3f',$r).' '.sprintf('%.3f',$g).' '.sprintf('%.3f',$b)." rg\n".
 	sprintf('%.3f',$x1).' '.sprintf('%.3f',$y1).' '.sprintf('%.3f',$width).' '.sprintf('%.3f',$height)." re f\n".

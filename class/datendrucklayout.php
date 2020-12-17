@@ -323,12 +323,12 @@ class ddl {
 							$this->layout['rectangles'][$j]['printed'] = true;
 							if($overflow){		# Seitenumbruch dazwischen
 								$this->pdf->reopenObject($page_id_start);
-								$this->pdf->filledRectangle($x, $this->layout['margin_bottom'], $endx-$x, $y - $this->layout['margin_bottom'], $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
+								$this->pdf->filledRectangleBelow($x, $this->layout['margin_bottom'], $endx-$x, $y - $this->layout['margin_bottom'], $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
 								$this->pdf->closeObject();
-								$this->pdf->filledRectangle($x, $endy, $endx-$x, $this->layout['height'] - $this->layout['margin_top'] - $endy, $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
+								$this->pdf->filledRectangleBelow($x, $endy, $endx-$x, $this->layout['height'] - $this->layout['margin_top'] - $endy, $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
 							}
 							else{
-								$this->pdf->filledRectangle($x, $y, $endx-$x, $endy-$y, $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
+								$this->pdf->filledRectangleBelow($x, $y, $endx-$x, $endy-$y, $this->colors[$color_id]['red']/255,$this->colors[$color_id]['green']/255,$this->colors[$color_id]['blue']/255);
 							}							
 						}
 						else{
