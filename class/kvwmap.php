@@ -18478,7 +18478,10 @@ class db_mapObj{
 				elseif($classitem != ''){		# Classitem davor setzen
 					if(substr($exp, 0, 1) != "'")$quote = "'";
 					$exp = $classitem."::text = ".$quote.$exp.$quote;
-				}	
+				}
+				if($exp == ''){
+					$exp = 'true';
+				}
 				$sql = 'SELECT * FROM ('.$select.") as foo WHERE (" . $exp.")";
         $this->debug->write("<p>file:kvwmap class:db_mapObj->getClassFromObject - Lesen einer Klasse eines Objektes:<br>" . $sql,4);
         $query=pg_query($sql);
