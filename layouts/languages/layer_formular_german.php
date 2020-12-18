@@ -87,7 +87,7 @@
 	$strStatus="Status";
 	$strPostlabelcache="Postlabelcache";
 	$strrequires="Requires";
-	$strClusterMaxdistance="Cluster:Maxdistance";
+	$strClusterMaxdistance="Cluster_Maxdistance";
 	$strTriggerFunction="Triggerfunktion";
 	$strClassification="Klassifizierung";
 	$strWidth="Breite";

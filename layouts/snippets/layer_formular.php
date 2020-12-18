@@ -464,7 +464,7 @@
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClusterMaxdistance; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="cluster_maxdistance" type="text" value="<?php echo $this->formvars['cluster_maxdistance']; ?>" size="50" maxlength="11">&nbsp;
-							<span data-tooltip="Bei Punktlayern kann durch Angabe dieses Wertes die Clusterbildung aktiviert werden.&#xa;Der Wert ist der Radius in Pixeln, in dem Punktobjekte zu einem Cluster zusammengefasst werden.&#xa;Damit die Cluster dargestellt werden können, muss es eine Klasse mit der Expression&#xa;('[Cluster:FeatureCount]' != '1')&#xa;geben. Cluster:FeatureCount kann auch als Labelitem verwendet werden, um die Anzahl der Punkte pro Cluster anzuzeigen."></span>
+							<span data-tooltip="Bei Punktlayern kann durch Angabe dieses Wertes die Clusterbildung aktiviert werden.&#xa;Der Wert ist der Radius in Pixeln, in dem Punktobjekte zu einem Cluster zusammengefasst werden.&#xa;Damit die Cluster dargestellt werden können, muss es eine Klasse mit der Expression&#xa;('[Cluster_FeatureCount]' != '1')&#xa;geben. Cluster_FeatureCount kann auch als Labelitem verwendet werden, um die Anzahl der Punkte pro Cluster anzuzeigen."></span>
 						</td>
 					</tr>
 					<tr>
