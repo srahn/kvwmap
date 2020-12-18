@@ -5188,7 +5188,7 @@ echo '			</table>
       $this->formvars['Datentyp'] = $layerset[0]['Datentyp'];;
       $this->formvars['Data'] = $datastring;
       $this->formvars['connectiontype'] = 6;
-			if($layerset[0]['labelitem'] != 'Cluster:FeatureCount')$this->formvars['labelitem'] = $layerset[0]['labelitem'];
+			if($layerset[0]['labelitem'] != 'Cluster_FeatureCount')$this->formvars['labelitem'] = $layerset[0]['labelitem'];
       $this->formvars['connection_id'] = $layerdb->connection_id;
       $this->formvars['epsg_code'] = $layerset[0]['epsg_code'];
       $this->formvars['transparency'] = 75;
@@ -5316,7 +5316,7 @@ echo '			</table>
 		$this->formvars['Datentyp'] = $layerset[0]['Datentyp'];
 		$this->formvars['Data'] = $datastring;
 		$this->formvars['connectiontype'] = 6;
-		if($layerset[0]['labelitem'] != 'Cluster:FeatureCount')$this->formvars['labelitem'] = $layerset[0]['labelitem'];
+		if($layerset[0]['labelitem'] != 'Cluster_FeatureCount')$this->formvars['labelitem'] = $layerset[0]['labelitem'];
 		$this->formvars['classitem'] = $layerset[0]['classitem'];
 		$this->formvars['connection_id'] = $layerdb->connection_id;
 		$this->formvars['epsg_code'] = $layerset[0]['epsg_code'];
