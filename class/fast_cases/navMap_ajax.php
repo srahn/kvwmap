@@ -177,6 +177,7 @@ class GUI {
 	var $form_field_names;
 	var $editable;
 	var $groupset;
+	var $layers_replace_scale = array();
 
   function __construct($main, $style, $mime_type) {
     # Debugdatei setzen

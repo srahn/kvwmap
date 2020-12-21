@@ -94,6 +94,7 @@ class GUI {
 	var $scrolldown;
 	var $queryrect;
 	var $notices;
+	var $layers_replace_scale = array();
 
 	# Konstruktor
 	function __construct($main, $style, $mime_type) {
