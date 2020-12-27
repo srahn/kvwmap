@@ -16246,9 +16246,11 @@ class db_mapObj{
 	}
 
 	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $only_current_enums = false) {
+		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
-		for($i = 0; $i < @count($attributes['name']); $i++) {
+		for ($i = 0; $i < @count($attributes['name']); $i++) {
 			$type = ltrim($attributes['type'][$i], '_');
+			$requires_options = '';
 			if (is_numeric($type) AND $query_result != NULL) {			# Attribut ist ein Datentyp
 				$query_result2 = array();
 				foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
@@ -16261,7 +16263,11 @@ class db_mapObj{
 				}
 				$attributes['type_attributes'][$i] = $this->add_attribute_values($attributes['type_attributes'][$i], $database, $query_result2, $withvalues, $stelle_id, $only_current_enums);
 			}
-			if ($attributes['options'][$i] == '' AND $attributes['constraints'][$i] != '' AND !in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))) {	# das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
+			if (
+				$attributes['options'][$i] == '' AND
+				$attributes['constraints'][$i] != '' AND
+				!in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))
+			) {	# das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
 				$attributes['enum_value'][$i] = explode("','", trim($attributes['constraints'][$i], "'"));
 				$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
 			}
@@ -16278,71 +16284,108 @@ class db_mapObj{
 				switch ($attributes['form_element_type'][$i]) {
 					# Auswahlfelder
 					case 'Auswahlfeld' : {
-						if ($attributes['options'][$i] != '') {		 # das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
-							if (strpos($attributes['options'][$i], "'") === 0) {			# Aufzählung wie 'wert1','wert2','wert3'
+						if ($attributes['options'][$i] != '') {
+							# das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
+							if (strpos($attributes['options'][$i], "'") === 0) {
+								# Aufzählung wie 'wert1','wert2','wert3'
 								$attributes['enum_value'][$i] = explode("','", substr(str_replace(["', ", chr(10), chr(13)], ["',", '', ''], $attributes['options'][$i]), 1, -1));
 								$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
 							}
-							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {		 # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
+							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {
+								# SQL-Abfrage wie select attr1 as value, atrr2 as output from table1
 								$optionen = explode(';', $attributes['options'][$i]);	# SQL; weitere Optionen
 								# --------- weitere Optionen -----------
 								if (value_of($optionen, 1) != '') {
-									$further_options = explode(' ', $optionen[1]);			# die weiteren Optionen exploden (opt1 opt2 opt3)
-									for($k = 0; $k < count($further_options); $k++) {
-										if (strpos($further_options[$k], 'layer_id') !== false) {		 #layer_id=XX bietet die Möglichkeit hier eine Layer_ID zu definieren, für die man einen neuen Datensatz erzeugen kann
+									# die weiteren Optionen exploden (opt1 opt2 opt3)
+									$further_options = explode(' ', $optionen[1]);
+									for ($k = 0; $k < count($further_options); $k++) {
+										if (strpos($further_options[$k], 'layer_id') !== false) {
+											#layer_id=XX bietet die Möglichkeit hier eine Layer_ID zu definieren, für die man einen neuen Datensatz erzeugen kann
 											$attributes['subform_layer_id'][$i] = array_pop(explode('=', $further_options[$k]));
 											$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
 											$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
 										}
-										elseif ($further_options[$k] == 'embedded') {			 # Subformular soll embedded angezeigt werden
+										elseif ($further_options[$k] == 'embedded') {
+											# Subformular soll embedded angezeigt werden
 											$attributes['embedded'][$i] = true;
 										}
 									}
 								}
 								# --------- weitere Optionen -----------
 								if (value_of($attributes, 'subform_layer_id') AND $attributes['subform_layer_id'][$i] != NULL) {
-									$attributes['options'][$i] = str_replace(' from ', ',oid from ', strtolower($optionen[0]));		# auch die oid abfragen
+									# auch die oid abfragen
+									$attributes['options'][$i] = str_replace(' from ', ',oid from ', strtolower($optionen[0]));
 								}
 								# ------------ SQL ---------------------
-								else $attributes['options'][$i] = $optionen[0];
+								else {
+									$attributes['options'][$i] = $optionen[0];
+								}
 								# ------<required by>------
 								$req_by_start = strpos(strtolower($attributes['options'][$i]), "<required by>");
 								if ($req_by_start > 0) {
 									$req_by_end = strpos(strtolower($attributes['options'][$i]), "</required by>");
-									$req_by = trim(substr($attributes['options'][$i], $req_by_start+13, $req_by_end-$req_by_start-13));
-									$attributes['req_by'][$i] = $req_by;		# das abhängige Attribut
-									$attributes['options'][$i] = substr($attributes['options'][$i], 0, $req_by_start);		# required-Tag aus SQL entfernen
+									$req_by = trim(substr($attributes['options'][$i], $req_by_start + 13, $req_by_end - $req_by_start - 13));
+									$attributes['req_by'][$i] = $req_by; # das abhängige Attribut
+									$attributes['options'][$i] = substr($attributes['options'][$i], 0, $req_by_start); # required-Tag aus SQL entfernen
 								}
 								# ------<required by>------
 								# -----<requires>------
 								if (strpos(strtolower($attributes['options'][$i]), "<requires>") > 0) {
-									if ($only_current_enums) {		# Ermittlung der Spalte, die als value dient
+									if ($only_current_enums) {
+										# Ermittlung der Spalte, die als value dient
 										$explo1 = explode(' as value', strtolower($attributes['options'][$i]));
 										$attribute_value_column = array_pop(explode(' ', $explo1[0]));
 									}
 									if ($query_result != NULL) {
-										foreach ($attributes['name'] as $attributename) {
-											if (strpos($attributes['options'][$i], '<requires>'.$attributename.'</requires>') !== false) {
-												$attributes['req'][$i][] = $attributename;			# die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
-											}
+										if ($query_result === 'all') {
+											# Ermittelt das Attribut das Abhängig ist
+											$attributes['requires'][$i] = get_first_word_after($attributes['options'][$i], '<requires', '>', '<');
+											# Liefert das SQL, welches das required Attribut im Select hat und kein WHERE um alle abzufragen
+											$requires_options = get_requires_options($attributes['options'][$i], $attributes['requires'][$i]);
 										}
-										foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
-											$options = $attributes['options'][$i];
-											foreach ($attributes['req'][$i] as $attributename) {
-												if ($query_result[$k][$attributename] != '') {
-													if ($only_current_enums) {	# in diesem Fall werden nicht alle Auswahlmöglichkeiten abgefragt, sondern nur die aktuellen Werte des Datensatzes (wird z.B. beim Daten-Export verwendet, da hier nur lesend zugegriffen wird und die Datenmengen sehr groß sein können)
-														$options = str_ireplace('where', 'where '.$attribute_value_column.'::text = \''.$query_result[$k][$attributes['name'][$i]].'\' AND ', $options);
-													}
-													$options = str_replace('<requires>'.$attributename.'</requires>', "'" . $query_result[$k][$attributename]."'", $options);
+										else {
+											foreach ($attributes['name'] as $attributename) {
+												if (strpos($attributes['options'][$i], '<requires>'.$attributename.'</requires>') !== false) {
+													$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
 												}
 											}
-											if (strpos($options, '<requires>') !== false) {
-												#$options = '';		# wenn in diesem Datensatz des Query-Results ein benötigtes Attribut keinen Wert hat (also nicht alle <requires>-Einträge ersetzt wurden), sind die abhängigen Optionen für diesen Datensatz leer
-												$attribute_value = $query_result[$k][$attributes['name'][$i]];
-												if ($attribute_value != '')$options = "select '" . $attribute_value."' as value, '" . $attribute_value."' as output";
-												else $options = '';		# wenn in diesem Datensatz des Query-Results ein benötigtes Attribut keinen Wert hat (also nicht alle <requires>-Einträge ersetzt wurden) aber das eigentliche Attribut einen Wert hat, wird dieser Wert als value und output genommen, ansonsten sind die Optionen leer
+											foreach ($query_result as $k => $record) { # bei Erfassung eines neuen DS hat $k den Wert -1
+												$options = $attributes['options'][$i];
+												foreach ($attributes['req'][$i] as $attributename) {
+													if ($query_result[$k][$attributename] != '') {
+														if ($only_current_enums) {
+															/*
+															* In diesem Fall werden nicht alle Auswahlmöglichkeiten abgefragt,
+															* sondern nur die aktuellen Werte des Datensatzes
+															* (wird z.B. beim Daten-Export verwendet,
+															* da hier nur lesend zugegriffen wird und die Datenmengen sehr groß sein können)
+															*/
+															$options = str_ireplace(
+																'where',
+																'where ' . $attribute_value_column . '::text = \'' . $query_result[$k][$attributes['name'][$i]] . '\' AND ',
+																$options
+															);
+														}
+														$options = str_replace(
+															'<requires>' . $attributename.'</requires>',
+															"'" . $query_result[$k][$attributename] . "'",
+															$options
+														);
+													}
+												}
+												if (strpos($options, '<requires>') !== false) {
+													#$options = '';		# wenn in diesem Datensatz des Query-Results ein benötigtes Attribut keinen Wert hat (also nicht alle <requires>-Einträge ersetzt wurden), sind die abhängigen Optionen für diesen Datensatz leer
+													$attribute_value = $query_result[$k][$attributes['name'][$i]];
+													if ($attribute_value != '') {
+														$options = "select '" . $attribute_value . "' as value, '" . $attribute_value . "' as output";
+													}
+													else {
+														$options = '';
+														# wenn in diesem Datensatz des Query-Results ein benötigtes Attribut keinen Wert hat (also nicht alle <requires>-Einträge ersetzt wurden) aber das eigentliche Attribut einen Wert hat, wird dieser Wert als value und output genommen, ansonsten sind die Optionen leer
+													}
+												}
+												$attributes['dependent_options'][$i][$k] = $options;
 											}
-											$attributes['dependent_options'][$i][$k] = $options;
 										}
 									}
 									else {
@@ -16350,8 +16393,13 @@ class db_mapObj{
 									}
 								}
 								# -----<requires>------
-								if (value_of($attributes, 'dependent_options') AND is_array($attributes['dependent_options'][$i])) {	 # mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-									foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
+								if (
+									value_of($attributes, 'dependent_options') AND
+									is_array($attributes['dependent_options'][$i])
+								) {
+									# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+									foreach ($query_result as $k => $record) {
+										# bei Erfassung eines neuen DS hat $k den Wert -1
 										$sql = $attributes['dependent_options'][$i][$k];
 										if ($sql != '') {
 											$ret = $database->execSQL($sql, 4, 0);
@@ -16360,7 +16408,7 @@ class db_mapObj{
 												return 0;
 											}
 											$attributes['enum_value'][$i][$k] = array();
-											while($rs = pg_fetch_array($ret[1])) {
+											while ($rs = pg_fetch_array($ret[1])) {
 												$attributes['enum_value'][$i][$k][] = $rs['value'];
 												$attributes['enum_output'][$i][$k][] = $rs['output'];
 												$attributes['enum_oid'][$i][$k][] = $rs['oid'];
@@ -16369,14 +16417,23 @@ class db_mapObj{
 									}
 								}
 								elseif ($attributes['options'][$i] != '') {
-									$sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
+									if ($requires_options != '') {
+										$sql = $requires_options;
+									}
+									else {
+										$sql = $attributes['options'][$i];
+									}
+									$sql = str_replace('$stelleid', $stelle_id, $sql);
 									$sql = str_replace('$userid', $this->User_ID, $sql);
 									$ret = $database->execSQL($sql, 4, 0);
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-									while($rs = pg_fetch_array($ret[1])) {
+									while ($rs = pg_fetch_array($ret[1])) {
 										$attributes['enum_value'][$i][] = $rs['value'];
 										$attributes['enum_output'][$i][] = $rs['output'];
 										$attributes['enum_oid'][$i][] = value_of($rs, 'oid');
+										if ($requires_options != '') {
+											$attributes['enum_requires_value'][$i][] = $rs['requires'];
+										}
 									}
 								}
 							}
@@ -18068,7 +18125,8 @@ class db_mapObj{
 				l.kurzbeschreibung,
 				l.datenherr,
 				l.drawingorder,
-				l.alias
+				l.alias,
+				l.sync
 			FROM
 				layer l LEFT JOIN
 				u_groups g ON l.Gruppe = g.id" .
@@ -18097,16 +18155,17 @@ class db_mapObj{
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
-		while($rs = $ret['result']->fetch_array()){
-			$layer['ID'][]=$rs['Layer_ID'];
-			$layer['Bezeichnung'][]=$rs['Name'];
-			$layer['Gruppe'][]=$rs['Gruppenname'];
-			$layer['GruppeID'][]=$rs['Gruppe'];
-			$layer['Kurzbeschreibung'][]=$rs['kurzbeschreibung'];
-			$layer['Datenherr'][]=$rs['datenherr'];
-			$layer['alias'][]=$rs['alias'];
+		while ($rs = $ret['result']->fetch_array()) {
+			$layer['ID'][] = $rs['Layer_ID'];
+			$layer['Bezeichnung'][] = $rs['Name'];
+			$layer['Gruppe'][] = $rs['Gruppenname'];
+			$layer['GruppeID'][] = $rs['Gruppe'];
+			$layer['Kurzbeschreibung'][] = $rs['kurzbeschreibung'];
+			$layer['Datenherr'][] = $rs['datenherr'];
+			$layer['alias'][] = $rs['alias'];
 			$layer['default_drawingorder'][] = $rs['drawingorder'];
 			$layer['layers_of_group'][$rs['Gruppe']][] = $i;
+			$layer['sync'][] = $rs['sync'];
 			$i++;
 		}
 		if ($order == 'Bezeichnung') {

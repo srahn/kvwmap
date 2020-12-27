@@ -1,10 +1,11 @@
 <?php
 	/*
 	* Cases:
+	* mobile_add_select_options
 	* mobile_create_layer_sync
 	* mobile_delete_images
 	* mobile_drop_layer_sync
-	* mobile_get_layers 
+	* mobile_get_layers
 	* mobile_get_stellen
 	* mobile_prepare_layer_sync
 	* mobile_reformat_attributes
@@ -96,7 +97,7 @@
 						#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
 					}
 					$layer = $GUI->mobile_reformat_layer($layerset[0], $attributes);
-					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID);
+					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, 'all', true, $GUI->Stelle->ID);
 					$layer['attributes'] = $GUI->mobile_reformat_attributes($attributes);
 
 					$classes = $mapDB->read_Classes($layer_id, NULL, false, $layerset[0]['classification']);
@@ -255,18 +256,22 @@
 
 	$GUI->mobile_reformat_attributes = function($attr) use ($GUI) {
 		$attributes = array();
-		foreach($attr['name'] AS $key => $value) {
+		foreach ($attr['name'] AS $key => $value) {
 			if ($attr['enum_value'][$key]) {
 				$attr['options'][$key] = array();
-				foreach($attr['enum_value'][$key] AS $enum_key => $enum_value) {
-					$attr['options'][$key][] = array(
+				foreach ($attr['enum_value'][$key] AS $enum_key => $enum_value) {
+					 $option = array(
 						'value' => $attr['enum_value'][$key][$enum_key],
 						'output' => $attr['enum_output'][$key][$enum_key]
 					);
+					if ($attr['requires'][$key] != '') {
+						$option['requires'] = $attr['enum_requires_value'][$key][$enum_key];
+					}
+					$attr['options'][$key][] = $option;
 				}
 			}
 
-			$attributes[] = array(
+			$attribute = array(
 				"index" => $attr['indizes'][$value],
 				"name" => $value,
 				"real_name" => $attr['real_name'][$value],
@@ -281,8 +286,19 @@
 				"privilege" => $attr['privileg'][$key],
 				"default" => $attr['default'][$key]
 			);
+			if ($attr['req_by'][$key] != '') {
+				$attribute['req_by'] = $attr['req_by'][$key];
+			}
+			if ($attr['requires'][$key] != '') {
+				$attribute['requires'] = $attr['requires'][$key];
+			}
+			$attributes[] = $attribute;
 		}
 		return $attributes;
+	};
+
+	$GUI->mobile_add_all_select_options = function($attributes) use ($GUI) {
+		#
 	};
 
 	$GUI->mobile_reformat_classes = function($classes) use ($GUI) {

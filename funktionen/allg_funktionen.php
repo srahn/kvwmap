@@ -2096,4 +2096,40 @@ function attributes_from_select($sql) {
 	}
 	return $attributes;
 }
+
+function get_requires_options($sql, $requires) {
+	include_once(WWWROOT . APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
+	include_once(WWWROOT . APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLCreator.php');
+	# Entfernt requires Tag damit kein Syntax-Fehler im sql ist.
+	$sql = str_replace(
+		'<requires>',
+		'',
+		str_replace(
+			'</requires>',
+			'',
+			$sql
+		)
+	);
+	$parser = new PHPSQLParser($sql, true);
+	# Füge das Requires Attribut zum Select hinzu
+	array_unshift(
+		$parser->parsed['SELECT'],
+		array(
+			'expr_type' => 'colref',
+			'alias' => array(
+				'as' => 1,
+				'name' => 'requires',
+				'base_expr' => 'AS requires',
+				'no_quotes' => 'requires',
+			),
+			'base_expr' => $requires,
+			'no_quotes' => $requires,
+			'delim' => ', '
+		)
+	);
+	# Entferne die WHERE Klausel
+	unset($parser->parsed['WHERE']);
+	$creator = new PHPSQLCreator($parser->parsed);
+	return $creator->created;
+}
 ?>
