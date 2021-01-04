@@ -12379,14 +12379,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
       # Löschen der in der Selectbox entfernten Stellen
       $userstellen =  $this->selected_user->getStellen(0);
-      for ($i = 0; $i < count($userstellen['ID']); $i++) {
+			$deletestellen = array();
+      for ($i = 0; $i < @count($userstellen['ID']); $i++) {
         $found = false;
         for ($j = 0; $j < count($stellen); $j++) {
           if ($stellen[$j] == $userstellen['ID'][$i]) {
             $found = true;
           }
         }
-        $deletestellen = array();
         if ($found == false) {
           $deletestellen[] = $userstellen['ID'][$i];
         }
