@@ -2107,7 +2107,7 @@ echo '			</table>
 						$style->setGeomTransform($dbStyle['geomtransform']);
 					}
           if ($dbStyle['pattern']!='') {
-            $style->setPattern(explode(' ',$dbStyle['pattern']));
+						$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END");
             $style->linecap = 'butt';
           }
 					if($dbStyle['gap'] != '') {
@@ -15183,7 +15183,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						from
 							" . $tablename. "
 						WHERE
-					  	" . $layerset['oid'] . " = " . $oid ."
+					  	" . $layerset['oid'] . " = " . quote($oid) ."
 					) as foo using unique " . $layerset['oid'] . " using srid=" . $layerset['epsg_code'];
 				$layer->set('data', $datastring);
 				$layer->set('status', MS_ON);
