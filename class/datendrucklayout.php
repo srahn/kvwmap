@@ -870,7 +870,7 @@ class ddl {
 		if($this->layout['columns']){	# spaltenweiser Typ
 			$rowcount = ceil(count($result) / 3);
 		}
-    for($i = 0; $i < count($result); $i++){
+    for($i = 0; $i < @count($result); $i++){
 			$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
     	$this->i_on_page++;
 			# beim Untereinander-Typ oder eingebettet-Typ ohne Sublayouts oder wenn Datensätze nicht durch Seitenumbruch 
@@ -946,7 +946,7 @@ class ddl {
 				}
 			}
 			$test = 0;			
-			while($test < 100 AND count($this->remaining_attributes) > 0){
+			while($test < 100 AND @count($this->remaining_attributes) > 0){
 				$this->add_attribute_elements($selected_layer_id, $layerdb, $this->attributes, $offsetx, $i, $preview);	# übrig sind die, die noch nicht geschrieben wurden, weil sie abhängig sind
 				$test++;
 			}			
