@@ -12,9 +12,9 @@
     <td>
     <? $umlaute=array("Ä","Ö","Ü");
        for ($i=0;$i<count($this->userdaten);$i++) {
-         if(!in_array(strtoupper(substr($this->userdaten[$i]['Name'],0,1)),$umlaute) AND strtolower(substr($this->userdaten[$i]['Name'],0,1)) != $first) {
-					 echo "<a href='#".strtoupper(substr($this->userdaten[$i]['Name'],0,1))."'><div class='menu abc'>".strtoupper(substr($this->userdaten[$i]['Name'],0,1))."</div></a>";
-           $first=strtolower(substr($this->userdaten[$i]['Name'],0,1));
+         if(!in_array(strtoupper(mb_substr($this->userdaten[$i]['Name'],0,1)),$umlaute) AND strtolower(mb_substr($this->userdaten[$i]['Name'],0,1)) != $first) {
+					 echo "<a href='#".strtoupper(mb_substr($this->userdaten[$i]['Name'],0,1))."'><div class='menu abc'>".strtoupper(mb_substr($this->userdaten[$i]['Name'],0,1))."</div></a>";
+           $first=strtolower(mb_substr($this->userdaten[$i]['Name'],0,1));
          }
        } ?> 
     </td>
@@ -40,7 +40,7 @@
 					<?php 
 					for ($i=0;$i<count($this->userdaten);$i++) {
 					if($this->formvars['order']=="Name") {
-						$first=strtoupper(substr($this->userdaten[$i]['Name'],0,1));
+						$first=strtoupper(mb_substr($this->userdaten[$i]['Name'],0,1));
 							if (in_array($first,$umlaute)) {
 								switch ($first) {
 									case 'Ä': {
