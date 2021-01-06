@@ -648,7 +648,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	if(document.GUI.browserheight)browserheight = document.GUI.browserheight.value;
 	
 	if(browser == 'ie'){
-		code2execute_after += 'moveback()';
+		code2execute_after += 'moveback();';
 	}
 	
 	if(document.GUI.punktfang != undefined && document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
