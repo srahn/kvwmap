@@ -351,7 +351,7 @@ class GUI {
 
 				if($rect->minx != ''){	####### Kartenabfrage
 					$show = false;
-					for($j = 0; $j < count($layerset[$i]['attributes']['name']); $j++){
+					for($j = 0; $j < @count($layerset[$i]['attributes']['name']); $j++){
 						$layerset[$i]['attributes']['tooltip'][$j] = $privileges['tooltip_'.$layerset[$i]['attributes']['name'][$j]];
 						if($layerset[$i]['attributes']['tooltip'][$j] == 1){
 							$show = true;
@@ -1690,7 +1690,7 @@ class db_mapObj{
 		#echo '<br>GUI->getlayerdatabase layer_id: ' . $layer_id;
 		$layerdb = new pgdatabase();
 		$rs = $this->get_layer_connection($layer_id);
-		if (count($rs) == 0) {
+		if (@count($rs) == 0) {
 			return null;
 		}
 		$layerdb->schema = ($rs['schema'] == '' ? 'public' : $rs['schema']);
