@@ -1157,7 +1157,7 @@ class GUI {
 				$imagename = WWWROOT . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
 				$klasse->set('keyimage', $imagename);
 			}
-      for ($k=0;$k<count($classset[$j]['Style']);$k++) {
+      for ($k=0; $k < @count($classset[$j]['Style']);$k++) {
         $dbStyle=$classset[$j]['Style'][$k];
 				if (MAPSERVERVERSION < 600) {
           $style = ms_newStyleObj($klasse);
@@ -2481,7 +2481,7 @@ class rolle {
 			$aktiv_status = value_of($formvars, 'thema'.value_of($this->layerset[$i], 'Layer_ID'));
 			$requires_status = value_of($formvars, 'thema'.value_of($this->layerset[$i], 'requires'));
 			if($aktiv_status != '' OR $requires_status != ''){										// entweder ist der Layer selber an oder sein requires-Layer
-				$aktiv_status = $aktiv_status + (int)$requires_status;
+				$aktiv_status = (int)$aktiv_status + (int)$requires_status;
 				if($this->layerset[$i]['Layer_ID'] > 0){
 					$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
