@@ -1917,7 +1917,7 @@ class pgdatabase {
 					$constraints = $this->pg_table_constraints($tablename);		# todo
 					if($fieldtype != 'geometry'){
 						# testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
-						for($j = 0; $j < count($constraints); $j++){
+						for($j = 0; $j < @count($constraints); $j++){
 							if(strpos($constraints[$j], '('.$fieldname.')')){
 								$options = explode("'", $constraints[$j]);
 								for($k = 0; $k < count($options); $k++){
@@ -2040,7 +2040,7 @@ class pgdatabase {
 					if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
 						# Parse als JSON String
 						$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
-						if (array_key_exists('success', $notice_obj)) {
+						if ($notice_obj AND array_key_exists('success', $notice_obj)) {
 							if (!$notice_obj['success']) {
 								$ret['success'] = false;
 							}

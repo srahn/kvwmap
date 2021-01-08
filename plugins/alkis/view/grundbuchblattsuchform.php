@@ -169,7 +169,7 @@ Eingabeformate:
 				<tr>
 					<td>
 						<select size="12" style="width: 170px;" multiple="true" name="selectedBlatt">
-						<? for($i=0; $i < count($this->selblattliste); $i++){ ?>
+						<? for($i=0; $i < @count($this->selblattliste); $i++){ ?>
 							<option value=" <? echo $this->selblattliste[$i]; ?>"><? echo $this->selblattliste[$i]; ?></option>';
 						<? } ?>
 						</select>

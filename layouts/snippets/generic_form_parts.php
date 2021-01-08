@@ -1042,7 +1042,7 @@
 			$req = array();
 		}
 		if($privileg == '0' OR $lock){
-			for($e = 0; $e < count($enum_value); $e++){
+			for($e = 0; $e < @count($enum_value); $e++){
 				if($enum_value[$e] == $value){
 					$auswahlfeld_output = $enum_output[$e];
 					$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
