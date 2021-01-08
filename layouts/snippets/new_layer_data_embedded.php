@@ -9,9 +9,10 @@
 		# falls das Geometrie-Attribut editierbar ist, zum nicht eingebetteten Formular wechseln
 		if($this->qlayerset[0]['attributes']['privileg'][$this->qlayerset[0]['attributes']['indizes'][$this->qlayerset[0]['attributes']['the_geom']]] == 1){
 			$this->formvars['embedded'] = '';
+			$this->formvars['mime_type'] = '';
 			echo '
 			<script type="text/javascript">
-				location.href = \'index.php?'.http_build_query($this->formvars).'\'
+				root.location.href = \'index.php?'.http_build_query($this->formvars).'\'
 			</script>';
 			exit;
 		}

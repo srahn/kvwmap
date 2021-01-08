@@ -11740,7 +11740,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				for ($j = 0; $j < count($this->selected_layers); $j++){
 					$filter = $this->mapDB->readAttributeFilter($this->formvars['stelle'], $this->selected_layers[$j]);
-					for ($i = 0; $i < count($filter); $i++) {
+					for ($i = 0; $i < @count($filter); $i++) {
 						if (
 							$this->formvars['value_'.$filter[$i]['attributname']] == NULL OR
 							(
@@ -11757,9 +11757,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
             }
           }
         }
-        for($i = 0; $i < count($setKeys); $i++){
+        for($i = 0; $i < @count($setKeys); $i++){
           $element = each($setKeys);
-          if($element['value'] < count($this->selected_layers)){
+          if($element['value'] < @count($this->selected_layers)){
             $this->formvars['value_'.$element['key']] = '---- verschieden ----';
           }
         }
