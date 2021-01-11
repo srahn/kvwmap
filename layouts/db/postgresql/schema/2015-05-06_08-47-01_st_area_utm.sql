@@ -166,9 +166,6 @@ BEGIN;
 	
 	SET client_encoding = 'UTF8';
 	SET search_path = public, pg_catalog;
-	SET default_with_oids = true;
-
-
 
 	CREATE TABLE utm_nbh (
 			gid integer NOT NULL,
