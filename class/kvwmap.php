@@ -14178,7 +14178,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
             $maxxy=explode(',',$imgxy[1]);
             $x=($maxxy[0]+$minxy[0])/2;
             $y=($maxxy[1]+$minxy[1])/2;
-            $request .='&X='.$x.'&Y='.$y;
+						if($layerset[$i]['wms_format'] == '1.3.0'){
+							$request .='&I='.$x.'&J='.$y;
+						}
+						else{
+							$request .='&X='.$x.'&Y='.$y;
+						}
 
             # Ausgabeformat
             if(strpos(strtolower($request), 'info_format') === false){
