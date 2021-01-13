@@ -17245,6 +17245,7 @@ class db_mapObj{
 		$formvars['schema'] = trim($formvars['schema']);
 		$formvars['pfad'] = pg_escape_string($formvars['pfad']);
 		$formvars['Data'] = pg_escape_string($formvars['Data']);
+		$formvars['metalink'] = pg_escape_string($formvars['metalink']);
 		$formvars['duplicate_criterion'] = pg_escape_string($formvars['duplicate_criterion']);
 		if ($formvars['id'] != '') {
 			$formvars['selected_layer_id'] = $formvars['id'];

@@ -11,7 +11,7 @@ BEGIN;
           WHERE b.path[1] = 0 /* ie the outer ring */
         ) c,
        (/* Get all inner rings > a particular area */
-        SELECT ST_Accum(ST_ExteriorRing(b.the_geom)) as inner_rings
+        SELECT array_agg(ST_ExteriorRing(b.the_geom)) as inner_rings
           FROM (SELECT (ST_DumpRings((ST_Dump($1)).geom)).geom As the_geom, path(ST_DumpRings((ST_Dump($1)).geom)) as path) b
           WHERE b.path[1] > 0 /* ie not the outer ring */
             AND ST_Area(b.the_geom) > $2
