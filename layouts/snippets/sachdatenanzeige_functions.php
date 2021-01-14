@@ -670,13 +670,14 @@ include('funktionen/input_check_functions.php');
 
 	selectall = function(layer_id){
 		var k = 0;
-		var obj = document.getElementById(layer_id+'_'+k);
+		var obj = document.getElementById(layer_id + '_' + k);
 		var status = obj.checked;
-		while(obj != undefined){
+		while (obj != undefined) {
 			obj.checked = !status;
 			k++;
-			obj = document.getElementById(layer_id+'_'+k);
+			obj = document.getElementById(layer_id + '_' + k);
 		}
+		$('#sellectDatasetsLinkText, #desellectDatasetsLinkText').toggle();
 	}
 
 	highlight_object = function(layer_id, oid){

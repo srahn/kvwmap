@@ -4,6 +4,7 @@
  $strAndHighlight=" und Objekt hervorheben";
  $strAndHide=" und andere Objekte ausblenden";
  $strSelectAll="alle auswählen";
+ $strDeselectAll = "alle abwählen";
  $strdelete="löschen";
  $strSelectedDatasets="ausgewählte Datensätze";
  $strAllDatasets="alle gefundenen Datensätze";
@@ -13,6 +14,7 @@
  $strPrint="drucken";
  $strCreateChart="als Diagramm ausgeben";
  $strSelectAllShown="alle angezeigten auswählen";
+ $strDeselectAllShown = "alle angezeigten deselektieren";
  $strSelectThisDataset="Datensatz auswählen";
  $strNoMatch="Zu diesem Thema wurden keine Objekte gefunden!";
  $strDeleteThisDataset="Datensatz löschen";

@@ -415,30 +415,8 @@
 	<tr>
 		<td colspan="2"align="left">
 		<? if($this->new_entry != true){ ?>
-			<table width="100%" border="0" cellspacing="4" cellpadding="0">
-				<tr>
-					<td colspan="2">
-						<i><? echo $layer['Name'] ?></i>:&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:selectall(<? echo $layer['Layer_ID']; ?>);">
-						<? if ($layer['count'] > MAXQUERYROWS) {
-						    echo $strSelectAllShown;
-						   } else {
-						    echo $strSelectAll;
-						   } ?>
-						</a>
-					</td>
-				</tr>
-				<tr>
-					<? if($layer['export_privileg'] != 0){ ?>
-					<td style="padding: 5 0 0 0;">
-						<select id="all_<? echo $layer['Layer_ID']; ?>" name="all_<? echo $layer['Layer_ID']; ?>" onchange="update_buttons(this.value, <? echo $layer['Layer_ID']; ?>);">
-							<option value=""><? echo $strSelectedDatasets.':'; ?></option>
-							<option value="true"><? echo $strAllDatasets.':'; ?><? if ($layer['count'] > MAXQUERYROWS){	echo "&nbsp;(".$layer['count'].")"; } ?></option>
-						</select>
-					</td>					
-					<? }else{ ?>
-					<td style="padding: 5 0 0 0;"><? echo $strSelectedDatasets.':'; ?></td>
-					<? } ?>
-				</tr>
+			<table width="100%" border="0" cellspacing="4" cellpadding="0"><?
+				include(SNIPPETS . 'generic_layer_editor_common_part.php'); ?>
 				<tr>
 					<td>
 						<table cellspacing="0" cellpadding="0">
