@@ -4,16 +4,16 @@
 CONFIG_FILE="$(dirname $0)/../credentials.php"
 #echo "CONFIG_FILE: ${CONFIG_FILE}"
 
-MYSQL_HOST=$(grep "MYSQL_HOST," $CONFIG_FILE | cut -d "'" -f 2)
+MYSQL_HOST=$(grep "MYSQL_HOST'," $CONFIG_FILE | cut -d "'" -f 4)
 #echo "MYSQL_HOST: ${MYSQL_HOST}"
 
-MYSQL_DATABASE=$(grep "MYSQL_DBNAME" $CONFIG_FILE | cut -d "'" -f 2)
+MYSQL_DATABASE=$(grep "MYSQL_DBNAME'" $CONFIG_FILE | cut -d "'" -f 4)
 #echo "MYSQL_DATABASE: ${MYSQL_DATABASE}"
 
-MYSQL_USER=$(grep "MYSQL_USER" $CONFIG_FILE | cut -d "'" -f 2)
+MYSQL_USER=$(grep "MYSQL_USER'" $CONFIG_FILE | cut -d "'" -f 4)
 #echo "MYSQL_USER: ${MYSQL_USER}"
 
-MYSQL_PASSWORD=$(grep "MYSQL_PASSWORD" $CONFIG_FILE | cut -d "'" -f 2)
+MYSQL_PASSWORD=$(grep "MYSQL_PASSWORD'" $CONFIG_FILE | cut -d "'" -f 4)
 #echo "MYSQL_PASSWORD: ${MYSQL_PASSWORD}"
 
 CURRENT_TIME=$(date -d yesterday '+%Y-%m-%d %H:%M:%S')
