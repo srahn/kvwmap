@@ -4,6 +4,7 @@ if (value_of($this->formvars, 'anzahl') == '') {
 }
 
 include('funktionen/input_check_functions.php');
+include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
 ?>
 
 <script type="text/javascript">
@@ -668,16 +669,18 @@ include('funktionen/input_check_functions.php');
 		}
 	} 
 
-	selectall = function(layer_id){
-		var k = 0;
-		var obj = document.getElementById(layer_id + '_' + k);
-		var status = obj.checked;
+	selectall = function(layer_id) {
+		var k = 0,
+				obj = document.getElementById(layer_id + '_' + k),
+				status = obj.checked;
+
 		while (obj != undefined) {
 			obj.checked = !status;
 			k++;
 			obj = document.getElementById(layer_id + '_' + k);
 		}
 		$('#sellectDatasetsLinkText, #desellectDatasetsLinkText').toggle();
+		message([{ 'type': 'notice', 'msg': (status ? '<? echo $strAllDeselected; ?>' : '<? echo $strAllSelected; ?>')}]);
 	}
 
 	highlight_object = function(layer_id, oid){

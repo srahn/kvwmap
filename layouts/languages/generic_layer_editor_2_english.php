@@ -4,7 +4,9 @@
  $strAndHighlight=" and highlight object";
  $strAndHide=" and hide other objects";
  $strSelectAll="select all";
+ $strAllSelected = "Selection finished";
  $strDeselectAll = "deselect all";
+ $strAllDeselected = "Deselection finished";
  $strdelete="delete";
  $strSelectedDatasets="selected records";
  $strAllDatasets="all records found";

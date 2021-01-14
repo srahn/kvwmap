@@ -4,7 +4,9 @@
  $strAndHighlight=" und Objekt hervorheben";
  $strAndHide=" und andere Objekte ausblenden";
  $strSelectAll="alle auswählen";
+ $strAllSelected = "Auswahl abgeschlossen";
  $strDeselectAll = "alle abwählen";
+ $strAllDeselected = "Abwahl abgeschlossen";
  $strdelete="löschen";
  $strSelectedDatasets="ausgewählte Datensätze";
  $strAllDatasets="alle gefundenen Datensätze";
