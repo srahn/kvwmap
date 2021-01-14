@@ -123,20 +123,24 @@ include('funktionen/input_check_functions.php');
 		})
 	}
 
-	field_has_value = function(field, operator, value){
+	field_has_value = function(field, operator, value) {
 		var field_value = field.value;
-		if (field.type == 'radio'){
+		if (field.type == 'radio') {
+			field_value = '';
 			var radio = document.querySelector('input[name="'+field.name+'"]:checked');
 			if (radio != null) {
 				field_value = radio.value;
 			}
 		}
 		if (field.type == 'checkbox') {
-			if ((operator == '==' && value == 't' && field.checked) || 
-				 (operator == '==' && value != 't' && !field.checked) ||
-				 (operator == '!=' && value == 't' && !field.checked) ||
-				 (operator == '!=' && value != 't' && field.checked)
-				 )return true;
+			if (
+				(operator == '==' && value == 't' && field.checked)  ||
+				(operator == '==' && value != 't' && !field.checked) ||
+				(operator == '!=' && value == 't' && !field.checked) ||
+				(operator == '!=' && value != 't' && field.checked)
+			) {
+				return true;
+			}
 			else {
 				return false;
 			}
@@ -155,7 +159,7 @@ include('funktionen/input_check_functions.php');
 				return eval("'" + field_value + "' " + operator + " '" + value + "'");
 			}
 		}
-	}	
+	}
 
 	toggleGroup = function(groupname){			// fuer die spaltenweise Ansicht
 		var group_elements = document.querySelectorAll('.group_'+groupname);
