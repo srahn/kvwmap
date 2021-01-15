@@ -123,12 +123,12 @@ class pgdatabase {
 	* @return string the postgres connection string
 	*/
 	function format_pg_connection_string($credentials) {
-		$connection_string = '' .
-			'host=' . 		$credentials['host'] 		. ' ' .
-			'port=' . 		$credentials['port'] 		. ' ' .
-			'dbname=' . 	$credentials['dbname'] 	. ' ' .
-			'user=' . 		$credentials['user'] 		. ' ' .
-			'password=' .	$credentials['password'];
+		$connection_string = "" .
+			"host='" .		 $credentials['host'] 		. "' " .
+			"port='" .		 $credentials['port'] 		. "' " .
+			"dbname='" .	 $credentials['dbname'] 	. "' " .
+			"user='" .		 $credentials['user'] 		. "' " .
+			"password='" . addslashes($credentials['password']) . "'";
 		return $connection_string;
 	}
 
