@@ -12498,7 +12498,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			else {
 				$this->connection->data = formvars_strip($this->formvars, $this->connection->getKeys(), 'keep');
 				$results = $this->connection->validate();
-				if (count($result) > 0) {
+				if (count($results) > 0) {
 					$result = array(
 						'success' => false,
 						'err_msg' => implode(', ', $results)
