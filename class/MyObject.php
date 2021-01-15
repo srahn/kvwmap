@@ -159,7 +159,8 @@ class MyObject {
 			FROM
 				`" . $this->tableName . "`
 			WHERE
-				`" . $key . "` = {$quote}" . $this->get($key) . "{$quote}
+				`" . $key . "` = {$quote}" . $this->get($key) . "{$quote} AND
+				NOT " . $this->get_identifier_expression() . "
 		";
 		$this->debug->show('mysql exists sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
@@ -237,23 +238,33 @@ class MyObject {
 	}
 
 	/**
-	* Function return the expression to identify the unique dataset in a
-	* where or update statement
+	* Function return the expression to identify the unique dataset
+	* SQL-Statements
+	* It compose it from the identifier and its value or
+	* from more identifiers if these are defined in an array
 	* @return string The expression representing true or false in a sql statement
 	*/
 	function get_identifier_expression() {
+	    $where = array();
 		if ($this->identifier_type == 'array' AND getType($this->identifier) == 'array') {
 			$where = array_map(
 				function($id) {
 					$quote = ($id['type'] == 'text' ? "'" : "");
 					return $id['key'] . " = " . $quote . $this->get($id['key']) . $quote;
 				},
-				$this->identifier
+				array_filter(
+					$this->identifier,
+					function($id) {
+						return in_array($id['key'], $this->getKeys()) AND $this->get($id['key']) != null AND $this->get($id['key']) != '';
+					}
+				)
 			);
 		}
 		else {
-			$quote = ($this->identifier_type == 'text' ? "'" : "");
-			$where = array($this->identifier . " = " . $quote . $this->get($this->identifier) . $quote);
+			if (in_array($this->identifier, $this->getKeys()) AND $this->get($this->identifier) != null AND $this->get($this->identifier) != '') {
+				$quote = ($this->identifier_type == 'text' ? "'" : "");
+				$where = array($this->identifier . " = " . $quote . $this->get($this->identifier) . $quote);
+			}
 		}
 		return implode(' AND ', $where);
 	}

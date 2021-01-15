@@ -12501,7 +12501,15 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if (count($results) > 0) {
 					$result = array(
 						'success' => false,
-						'err_msg' => implode(', ', $results)
+						'err_msg' => implode(
+							', ',
+							array_map(
+								function($e) {
+									return $e['type'] . ': ' . $e['msg'];
+								},
+								$results
+							)
+						)
 					);
 				}
 				else {
