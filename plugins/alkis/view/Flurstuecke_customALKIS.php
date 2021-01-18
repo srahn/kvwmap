@@ -39,7 +39,8 @@ send_selected_flurst = function(go, formnummer, wz, target){
 		currentform.FlurstKennz.value=flurstkennz;
 		currentform.formnummer.value=formnummer;
 		currentform.wz.value=wz;
-		overlay_submit(currentform, false, 'root')
+		overlay_submit(currentform, false, 'root');
+		stopwaiting();
 	}
 }
 
