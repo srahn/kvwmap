@@ -165,6 +165,10 @@ function ahahDone(url, targets, req, actions) {
 	}
 }
 
+highlight_object = function(layer_id, oid){
+	root.ahah('index.php', 'go=tooltip_query&querylayer_id='+layer_id+'&oid='+oid, new Array(root.document.GUI.result, ''), new Array('setvalue', 'execute_function'));
+}
+
 add_calendar = function(event, elementid, type, setnow){
 	event.stopPropagation();
 	remove_calendar();
