@@ -678,10 +678,6 @@ include('funktionen/input_check_functions.php');
 			obj = document.getElementById(layer_id+'_'+k);
 		}
 	}
-
-	highlight_object = function(layer_id, oid){
-		root.ahah('index.php', 'go=tooltip_query&querylayer_id='+layer_id+'&oid='+oid, new Array(root.document.GUI.result, ''), new Array('setvalue', 'execute_function'));
-	}
 	
 	zoom2object = function(layer_id, geomtype, tablename, columnname, oid, selektieren){
 		params = 'go=zoomto'+geomtype+'&oid='+oid+'&layer_tablename='+tablename+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
