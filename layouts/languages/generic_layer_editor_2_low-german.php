@@ -2,6 +2,7 @@
  $strEditGeom="Anner Geometrie marachen";
  $strMapZoom="Koortutsnitt";
  $strSelectAll="all utsöken";
+ $strDeselectAll = "all afwahlen";
  $strdelete="löschen";
  $strSelectedDatasets="utsökt Datensetts";
  $strCSVExport="in een CSV-Datei exporteren";
@@ -11,6 +12,7 @@
  $strPrint="Drucken";
  $strCreateChart="Diagramm erzeugen";
  $strSelectAllShown="all opwiest Datensetts utsöken";
+ $strDeselectAllShown = "all opwiest Datensetts afwahlen";
  $strSelectThisDataset="disse Datensett utwählen";
  $strNoMatch="To disse Layer heff ik nix funnen!";
  $strDeleteThisDataset="disse Datensett löschen";

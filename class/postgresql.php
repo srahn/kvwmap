@@ -128,7 +128,7 @@ class pgdatabase {
 			"port='" .		 $credentials['port'] 		. "' " .
 			"dbname='" .	 $credentials['dbname'] 	. "' " .
 			"user='" .		 $credentials['user'] 		. "' " .
-			"password='" . $credentials['password'] . "'";
+			"password='" . addslashes($credentials['password']) . "'";
 		return $connection_string;
 	}
 

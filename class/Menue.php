@@ -169,22 +169,7 @@ class Menue extends MyObject {
 		);
 		return $menues;
 	}
-	/*
-	public function validate() {
-		$results = array();
-		foreach($this->validations AS $validation) {
-			$results[] = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['option']);
-		}
 
-		$messages = array();
-		foreach($results AS $result) {
-			if (!empty($result)) {
-				$messages[] = $result;
-			}
-		}
-		return $messages;
-	}
-*/
 	function is_selected() {
 		$is_selected = true;
 		$formvars = $_REQUEST;
