@@ -251,7 +251,12 @@ include('funktionen/input_check_functions.php');
 			json = '{'+values.join()+'}';
 		}
 		else {
-			json = JSON.stringify(values);
+			if(values.length > 0){
+				json = JSON.stringify(values);
+			}
+			else{
+				json = '';
+			}
 		}
 		field.value = json;
 		if (field.onchange) {
