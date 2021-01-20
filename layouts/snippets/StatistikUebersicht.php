@@ -132,7 +132,7 @@ function popup(id){
 		                    </tr>
 		                    <?php
 												//$accessarray=$this->account->ALKNumbOfAccessUserStelleM;
-												if ( count($this->account->ALKNumbOfAccess)==0 ) { ?>
+												if ( @count($this->account->ALKNumbOfAccess)==0 ) { ?>
 		                    	<tr>
 		                      	<td align="center" colspan="2">
 		                        	<?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
@@ -200,7 +200,7 @@ function popup(id){
 		                    </tr>
 		                    <?php
 												//$accessarray=$this->account->ALKNumbOfAccessUserStelleM;
-												if ( count($this->account->ALBNumbOfAccess)==0 ) { ?>
+												if ( @count($this->account->ALBNumbOfAccess)==0 ) { ?>
 		                    	<tr>
 		                      	<td align="center" colspan="2">
 		                        	<?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
@@ -208,7 +208,7 @@ function popup(id){
 		                      <?php
 												}
 												else {
-		          						for ($i=0;$i<count($this->account->ALBNumbOfAccess);$i++) {
+		          						for ($i=0; $i < @count($this->account->ALBNumbOfAccess);$i++) {
 					  							?>
 		            					<tr bgcolor="<?php if ($i%2!=0) { echo 'FFFFFF'; } else { echo 'EBEBEB'; } ?>">
 		                					<td><a href="javascript:popup('alb<? echo $i; ?>');"><?php echo $this->account->ALBNumbOfAccess[$i]['format']; ?></a></td>
@@ -268,7 +268,7 @@ function popup(id){
 		                    </tr>
 		                    <?php
 												//$accessarray=$this->account->ALKNumbOfAccessUserStelleM;
-												if ( count($this->account->CSVNumbOfAccess)==0 ) { ?>
+												if ( @count($this->account->CSVNumbOfAccess)==0 ) { ?>
 		                    	<tr>
 		                      	<td align="center" colspan="2">
 		                        	<?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
@@ -337,7 +337,7 @@ function popup(id){
 		                    </tr>
 		                    <?php
 												//$accessarray=$this->account->ALKNumbOfAccessUserStelleM;
-												if ( count($this->account->ShapeNumbOfAccess)==0 ) { ?>
+												if ( @count($this->account->ShapeNumbOfAccess)==0 ) { ?>
 		                    	<tr>
 		                      	<td align="center" colspan="2">
 		                        	<?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
