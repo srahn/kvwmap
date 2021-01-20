@@ -12065,7 +12065,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
     $this->account->ALKA4 = 0;
     $this->account->ALKA3 = 0;
-    for($i = 0; $i < count($this->account->ALKNumbOfAccess); $i++){
+    for($i = 0; $i < @count($this->account->ALKNumbOfAccess); $i++){
       if(($this->account->ALKNumbOfAccess[$i]['Druckformat'] == 'A4hoch' OR $this->account->ALKNumbOfAccess[$i]['Druckformat'] == 'A4quer') AND $this->account->ALKNumbOfAccess[$i]['Preis'] > 0){
         $this->account->ALKA4 += $this->account->ALKNumbOfAccess[$i]['NumberOfAccess'];
       }
@@ -12074,7 +12074,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       }
     }
     $this->account->ALB = 0;
-    for($i = 0; $i < count($this->account->ALBNumbOfAccess); $i++){
+    for($i = 0; $i < @count($this->account->ALBNumbOfAccess); $i++){
         $this->account->ALB += $this->account->ALBNumbOfAccess[$i]['NumberOfAccess'];
     }
 
