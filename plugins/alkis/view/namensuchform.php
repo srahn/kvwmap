@@ -494,6 +494,10 @@ Suche genau nach der Eingabe"></span>
 
 	
 <? }
+		else{ ?>
+			<input name="anzahl" size="2" onkeyup="checknumbers(this, 'int2', '', '');" type="text" value="<?php echo $this->formvars['anzahl']; ?>" tabindex="17">
+			<?php echo $strShowHits; ?>
+<? }
 if ($anzNamen>0) {
 ?>
 <div id="nsf_treffer">
