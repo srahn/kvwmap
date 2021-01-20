@@ -252,7 +252,12 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			json = '{'+values.join()+'}';
 		}
 		else {
-			json = JSON.stringify(values);
+			if(values.length > 0){
+				json = JSON.stringify(values);
+			}
+			else{
+				json = '';
+			}
 		}
 		field.value = json;
 		if (field.onchange) {
