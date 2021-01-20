@@ -8335,6 +8335,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$attributes['privileg'][$attributes['name'][$j]] = $privileges[$attributes['name'][$j]];
 				}
 				$sql_where = '';
+				$spatial_sql_where = '';
 				for($m = 0; $m <= value_of($this->formvars, 'searchmask_count'); $m++){
 					if($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
 						$prefix = $m.'_';
@@ -8446,7 +8447,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							}
 						}
 						# räumliche Einschränkung
-						$spatial_sql_where = '';
 						if($m == 0 AND $attributes['name'][$i] == $attributes['the_geom']){		// nur einmal machen, also nur bei $m == 0
 							if(value_of($this->formvars, 'newpathwkt') != ''){
 								if(strpos(strtolower($this->formvars['newpathwkt']), 'polygon') !== false){
