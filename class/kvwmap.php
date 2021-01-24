@@ -8292,7 +8292,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		}
 		else {
-			$layerset=$this->user->rolle->getRollenlayer(-$this->formvars['selected_layer_id']);
+			$layerset = $this->user->rolle->getRollenlayer(-$this->formvars['selected_layer_id']);
 		}
 		if ($layerset == NULL) {
 			$ret['success'] = false;
@@ -8310,7 +8310,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if($this->formvars['selected_layer_id'] > 0){			# bei Rollenlayern nicht
 					$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
 				}
-				else $newpath = $path;
+				else {
+					$newpath = $path;
+				}
 
 		    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 		   	# $attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true); kann weg, weils weiter unten steht
@@ -8479,39 +8481,45 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         }
 				$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
         $j = 0;
-        foreach($attributes['all_table_names'] as $tablename){
-					if(($tablename == $layerset[0]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[0]['oid'] != ''){
-            $pfad = pg_quote($attributes['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'].' AS '.pg_quote($tablename.'_oid').', '.$pfad;
-						if(value_of($this->formvars, 'operator_'.$tablename.'_oid') == '')$this->formvars['operator_'.$tablename.'_oid'] = '=';
-            if(value_of($this->formvars, 'value_'.$tablename.'_oid')){
-              $sql_where .= ' AND '.pg_quote($tablename.'_oid').' '.$this->formvars['operator_'.$tablename.'_oid'].' '.quote($this->formvars['value_'.$tablename.'_oid']);
-            }
-          }
-          $j++;
-        }
-
+        foreach ($attributes['all_table_names'] as $tablename){
+					if (($tablename == $layerset[0]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[0]['oid'] != '') {
+            $pfad = pg_quote($attributes['table_alias_name'][$tablename]) . '.' . $layerset[0]['oid'] .' AS '.pg_quote($tablename.'_oid') . ', ' . $pfad;
+						if (value_of($this->formvars, 'operator_'.$tablename.'_oid') == '') {
+							$this->formvars['operator_'.$tablename.'_oid'] = '=';
+						}
+						if (value_of($this->formvars, 'value_'.$tablename.'_oid')) {
+							$sql_where .= ' AND '  .pg_quote($tablename.'_oid') . ' '.$this->formvars['operator_' . $tablename . '_oid'] . ' ' . quote($this->formvars['value_' . $tablename . '_oid']);
+						}
+					}
+					$j++;
+				}
         # 2008-10-22 sr   Filter zur Where-Klausel hinzugefügt
         if($layerset[0]['Filter'] != ''){
         	$layerset[0]['Filter'] = str_replace('$userid', $this->user->id, $layerset[0]['Filter']);
           $sql_where .= " AND " . $layerset[0]['Filter'];
         }
 
-        if($distinct == true){
-          $pfad = 'DISTINCT '.$pfad;
+        if ($distinct == true) {
+          $pfad = 'DISTINCT ' . $pfad;
         }
 
 				# group by wieder einbauen
 				if(value_of($attributes, 'groupby') != ''){
 					$pfad .= $attributes['groupby'];
 					$j = 0;
-					foreach($attributes['all_table_names'] as $tablename){
-						if($tablename == $layerset[0]['maintable'] AND $layerset[0]['oid'] != ''){		# hat Haupttabelle oids?
-							$pfad .= ','.pg_quote($tablename.'_oid').' ';
+					foreach($attributes['all_table_names'] as $tablename) {
+						if ($tablename == $layerset[0]['maintable'] AND $layerset[0]['oid'] != '') {
+							# Haupttabelle hat oids
+							$pfad .= ',' . pg_quote($tablename . '_oid') . ' ';
 						}
 						$j++;
 					}
   			}
-        $sql = "SELECT * FROM (SELECT " . $pfad.") as query WHERE 1=1 " . $sql_where;
+				$sql = "
+					SELECT * FROM (
+						SELECT " . $pfad . "
+					) as query
+				WHERE 1=1 " . $sql_where;
 
         # order by
 				$sql_order = '';

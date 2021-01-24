@@ -886,9 +886,13 @@ class rolle {
 				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, 
 				gle_view,
 				concat('(', rollenfilter, ')') as Filter,
-				'oid' as oid
-			FROM rollenlayer AS l";
-    $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
+				'gid' as oid
+			FROM
+				rollenlayer AS l
+			WHERE
+				l.stelle_id = " . $this->stelle_id . " AND
+				l.user_id = " . $this->user_id . "
+		";
     if ($LayerName!='') {
       $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
       if(is_numeric($LayerName)){
@@ -898,8 +902,8 @@ class rolle {
         $sql.=')';
       }
     }
-		if($typ != NULL){
-			$sql .= " AND Typ = '".$typ."'";
+		if ($typ != NULL){
+			$sql .= " AND Typ = '" . $typ . "'";
 		}
     #echo $sql.'<br>';
     $this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
@@ -907,7 +911,7 @@ class rolle {
     if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
     while ($rs = $this->database->result->fetch_assoc()) {
-      $layer[]=$rs;
+      $layer[] = $rs;
     }
     return $layer;
   }

@@ -78,9 +78,9 @@ class data_import_export {
 				$custom_tables = $this->import_custom_pointlist($formvars, $pgdatabase);
 			} break;
 		}
-		if ($custom_tables != NULL){
-			if ($custom_tables[0]['error'] != ''){
-				echo $custom_tables[0]['error'];
+		if ($custom_tables != NULL) {
+			if ($custom_tables[0]['error'] != '') {
+				echo $custom_tables[0]['error']['msg'];
 			}
 			else {
 				foreach ($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
@@ -88,7 +88,7 @@ class data_import_export {
 						$pgdatabase,
 						$stelle,
 						$user,
-						basename($filename) . " (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
+						basename($filename) . " (" . date('d.m. H:i',time()) . ")" . str_repeat(' ', $custom_table['datatype']),
 						$custom_table,
 						$epsg
 					);
@@ -143,13 +143,13 @@ class data_import_export {
 		$this->formvars['Typ'] = 'import';
 		$this->formvars['Datentyp'] = $custom_table['datatype'];
 		$this->formvars['epsg_code'] = $epsg;
-		if($custom_table['datatype'] == 3){	# Raster
+		if ($custom_table['datatype'] == 3){ # Raster
 			$this->formvars['Data'] = $custom_table['data'];
 			$this->formvars['transparency'] = 100;
 		}
-		else{
-			$select = 'oid, *';
-			$this->formvars['Data'] = 'the_geom from (SELECT ' . $select . ' FROM ' . CUSTOM_SHAPE_SCHEMA . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ')as foo using unique oid using srid=' . $epsg;
+		else {
+			$select = '*';
+			$this->formvars['Data'] = 'the_geom from (SELECT ' . $select . ' FROM ' . CUSTOM_SHAPE_SCHEMA . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ') as foo using unique gid using srid=' . $epsg;
 			$this->formvars['query'] = 'SELECT * FROM ' . $custom_table['tablename'] . ' WHERE 1=1' . $custom_table['where'];
 			$this->formvars['connection_id'] = $pgdatabase->connection_id;
 			$this->formvars['connectiontype'] = 6;
@@ -223,7 +223,7 @@ class data_import_export {
 		elseif(file_exists($uploadpath.$file.'.DBF'))$filename = $uploadpath.$file.'.DBF';
 		else return;
 		$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $filename, $pgdatabase, NULL, $sql, '-lco FID=gid', $encoding);
-		if(file_exists('.esri.gz')){
+		if (file_exists('.esri.gz')) {
 			unlink('.esri.gz');
 		}
 		if ($ret !== 0) {
@@ -232,25 +232,29 @@ class data_import_export {
 		}
 		else {
 			$sql = "
-				ALTER TABLE ".$schemaname.".".$tablename." SET WITH OIDS;
-				SELECT convert_column_names('".$schemaname . "', '" . $tablename . "');
+				ALTER TABLE " . $schemaname . "." . $tablename . " ADD COLUMN IF NOT EXISTS gid SERIAL NOT NULL;
+				SELECT convert_column_names('" . $schemaname . "', '" . $tablename . "');
 				" . $this->rename_reserved_attribute_names($schemaname, $tablename) . "
 				SELECT geometrytype(the_geom) AS geometrytype FROM " . $schemaname . "." . $tablename . " LIMIT 1;
 			";
 			$ret = $pgdatabase->execSQL($sql,4, 0);
-			if (!$ret[0]) {
+			if ($ret[0]) {
+				$custom_table['error'] = $ret;
+			}
+			else {
 				$rs = pg_fetch_assoc($ret[1]);
 				$custom_table['datatype'] = geometrytype_to_datatype($rs['geometrytype']);
 				$custom_table['tablename'] = $tablename;
-				return array($custom_table);
 			}
+			return array($custom_table);
 		}
 	}
 
 	function rename_reserved_attribute_names($schema, $table) {
 		$reserved_words = array('desc', 'number', 'end');
-		foreach($reserved_words as $word){
-			$sql .= "SELECT rename_if_exists('".$schema."', '".$table."', '".$word."');";
+		foreach ($reserved_words as $word) {
+			$sql .= "
+				SELECT rename_if_exists('" . $schema . "', '" . $table . "', '" . $word . "');";
 		}
 		return $sql;
 	}
@@ -301,18 +305,24 @@ class data_import_export {
 			# tracks
 			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
 			$ret = $this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, NULL);
-			if($ret !== 0){
+			if ($ret !== 0) {
 				$custom_table['error'] = $ret;
 				return array($custom_table);
 			}
-			else{
-				$sql = '
-					ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
-					'.$this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename).'
-					SELECT geometrytype(the_geom), count(*) FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' GROUP BY geometrytype(the_geom);
-				';
+			else {
+				$sql = "
+					ALTER TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
+					ADD COLUMN IF NOT EXISTS gid SERIAL NOT NULL;
+					" . $this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename) . "
+					SELECT
+						geometrytype(the_geom),
+						count(*)
+					FROM
+						" . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
+					GROUP BY geometrytype(the_geom)
+				";
 				$ret = $pgdatabase->execSQL($sql,4, 0);
-				if(!$ret[0]){
+				if (!$ret[0]) {
 					$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'MULTILINESTRING' => 1, 'POLYGON' => 2, 'MULTIPOLYGON' => 2);
 					while($result = pg_fetch_assoc($ret[1])){
 						if($result['count'] > 0 AND $geom_types[$result['geometrytype']] !== NULL){
@@ -333,13 +343,16 @@ class data_import_export {
 			# tracks
 			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
 			$ret = $this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, 'tracks', NULL, NULL, 'UTF8');
-			if($ret !== 0){
+			if ($ret !== 0) {
 				$custom_table['error'] = $ret;
 				return array($custom_table);
 			}
-			else{
-				$sql = 'ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
-					'.$this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename);
+			else {
+				$sql = "
+					ALTER TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
+					ADD COLUMN IF NOT EXISTS gid SERIAL NOT NULL;
+					" . $this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename) . "
+				";
 				$ret = $pgdatabase->execSQL($sql,4, 0);
 				$custom_table['datatype'] = 1;
 				$custom_table['tablename'] = $tablename;
@@ -347,8 +360,12 @@ class data_import_export {
 				# waypoints
 				$tablename = 'a'.strtolower(umlaute_umwandeln(basename($filename))).rand(1,1000000);
 				$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, 'waypoints', NULL, NULL, 'UTF8');
-				$sql = 'ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
-					'.$this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename);
+				$sql = "
+					ALTER TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
+					ADD COLUMN IF NOT EXISTS gid SERIAL NOT NULL;
+					" . $this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename) . "
+				";
+				$sql = $this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename);
 				$ret = $pgdatabase->execSQL($sql,4, 0);
 				$custom_table['datatype'] = 0;
 				$custom_table['tablename'] = $tablename;
@@ -393,7 +410,7 @@ class data_import_export {
 					if($objects[$i]['startpoint'] == '')$objects[$i]['startpoint'] = $objects[$i]['geom'];
 				}
 			}
-			for($i = 0; $i < count($objects); $i++){
+			for ($i = 0; $i < count($objects); $i++){
 				switch($objects[0]['Typ']){			# alle Objekte müssen vom gleichen Typ sein
 					case 2 : case 6:	{
 						$geomtype = 'POINT';
@@ -413,24 +430,36 @@ class data_import_export {
 						$custom_table['datatype'] = 2;
 					}break;
 				}
-				$inserts[] = "('".$objects[$i]['Text']."', st_geomfromtext('".$objects[$i]['geom']."', ".$epsg."))";
+				$inserts[] = "(
+					'" . $objects[$i]['Text'] . "',
+					st_geomfromtext('" . $objects[$i]['geom'] . "', " . $epsg . ")
+				)";
 			}
-			$sql = "CREATE TABLE ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (";
-			$sql.= "label varchar";
-			$sql.= ")WITH (OIDS=TRUE);";
-			$sql.= "SELECT AddGeometryColumn('".CUSTOM_SHAPE_SCHEMA."', '".$tablename."', 'the_geom', ".$epsg.", '".$geomtype."', 2);";
-
-			$sql.= "INSERT INTO ".CUSTOM_SHAPE_SCHEMA.".".$tablename." VALUES ";
-			$sql.= implode(', ', $inserts).";";
+			$sql = "
+				CREATE TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . " (
+					gid serial NOT NULL,
+					label varchar
+				);
+				SELECT AddGeometryColumn(
+					'" . CUSTOM_SHAPE_SCHEMA . "',
+					'" . $tablename . "',
+					'the_geom',
+					" . $epsg . ",
+					'" . $geomtype . "',
+					2
+				);
+				INSERT INTO " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . " (label, the_geom)
+				VALUES " . implode(', ', $inserts) . ";
+			";
 			#echo $sql;
 			$ret = $pgdatabase->execSQL($sql,4, 0);
-			if(!$ret[0]){
+			if (!$ret[0]) {
 				$custom_table['tablename'] = $tablename;
 				$custom_table['labelitem'] = 'label';
 				return array($custom_table);
 			}
 		}
-	}	
+	}
 
 	function import_custom_dxf($filename, $pgdatabase, $epsg){
 		if(file_exists($filename)){
@@ -440,21 +469,26 @@ class data_import_export {
 			}
 			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
 			$ret = $this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, NULL);
-			if($ret !== 0){
+			if ($ret !== 0) {
 				$custom_table['error'] = $ret;
 				return array($custom_table);
 			}
-			else{
-				$sql = '
-					ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
-
-					SELECT geometrytype(the_geom), count(*) FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' GROUP BY geometrytype(the_geom);
-				';
+			else {
+				$sql = "
+					ALTER TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
+					ADD COLUMN IF NOT EXISTS gid SERIAL NOT NULL;
+					SELECT
+						geometrytype(the_geom),
+						count(*)
+					FROM
+						" . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
+					GROUP BY geometrytype(the_geom)
+				";
 				$ret = $pgdatabase->execSQL($sql,4, 0);
-				if(!$ret[0]){
+				if (!$ret[0]) {
 					$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'MULTILINESTRING' => 1, 'POLYGON' => 2, 'MULTIPOLYGON' => 2);
-					while($result = pg_fetch_assoc($ret[1])){
-						if($result['count'] > 0 AND $geom_types[$result['geometrytype']] !== NULL){
+					while ($result = pg_fetch_assoc($ret[1])){
+						if ($result['count'] > 0 AND $geom_types[$result['geometrytype']] !== NULL) {
 							$custom_table['datatype'] = $geom_types[$result['geometrytype']];
 							$custom_table['tablename'] = $tablename;
 							$custom_table['where'] = " AND geometrytype(the_geom) = '".$result['geometrytype']."'";
@@ -470,47 +504,49 @@ class data_import_export {
 	function import_custom_geojson($filename, $pgdatabase){
 		return $this->geojson_import($filename, $pgdatabase, CUSTOM_SHAPE_SCHEMA, NULL);
 	}
-	
+
 	function import_geojson($pgdatabase, $schema, $tablename){		# Admin-Import
 		$_files = $_FILES;
-		if($_files['file1']['name']){
-      $filename = UPLOADPATH.$_files['file1']['name'];
-      if(move_uploaded_file($_files['file1']['tmp_name'],$filename)){
-				return $this->geojson_import($filename, $pgdatabase, $schema, $tablename);	
+		if ($_files['file1']['name']) {
+			$filename = UPLOADPATH.$_files['file1']['name'];
+			if (move_uploaded_file($_files['file1']['tmp_name'],$filename)) {
+				return $this->geojson_import($filename, $pgdatabase, $schema, $tablename);
 			}
 		}
 	}
-	
+
 	function geojson_import($filename, $pgdatabase, $schema, $tablename){
-		if(file_exists($filename)){
+		if (file_exists($filename)) {
 			$json = json_decode(file_get_contents($filename));
 			if(strpos($json->crs->properties->name, 'EPSG:') !== false)$epsg = trim(array_pop(explode('EPSG:', $json->crs->properties->name)), ':');
 			else $epsg = 4326;
 			if($tablename == NULL)$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
 			$ret = $this->ogr2ogr_import($schema, $tablename, $epsg, $filename, $pgdatabase, NULL, NULL, NULL, 'UTF8');
-			if($ret !== 0){
+			if ($ret !== 0) {
 				$custom_table['error'] = $ret;
 				return array($custom_table);
 			}
-			else{
-				$sql = '
-					ALTER TABLE '.$schema.'.'.$tablename.' SET WITH OIDS;
-					SELECT geometrytype(the_geom) AS geometrytype FROM '.$schema.'.'.$tablename.' LIMIT 1;';
+			else {
+				$sql = "
+					ALTER TABLE " . $schema . "." . $tablename . "
+					ADD COLUMN IF NOT EXISTS gid SERIAL NOT NULL;
+					SELECT geometrytype(the_geom) AS geometrytype FROM " . $schema . "." . $tablename . " LIMIT 1
+				";
 				$ret = $pgdatabase->execSQL($sql,4, 0);
-				if(!$ret[0]) {
+				if (!$ret[0]) {
 					$rs = pg_fetch_assoc($ret[1]);
 					$datatype = geometrytype_to_datatype($rs['geometrytype']);
 				}
 				$custom_tables[0]['datatype'] = $datatype;
 				$custom_tables[0]['tablename'] = $tablename;
 				$custom_tables[0]['epsg'] = $epsg;
-				if(!$ret[0]){
+				if (!$ret[0]) {
 					return $custom_tables;
 				}
 			}
 		}
 	}
-	
+
 	function load_custom_pointlist($user){
 		$_files = $_FILES;
 		if($_files['file1']['name']){
@@ -544,54 +580,85 @@ class data_import_export {
 		for($i = 0; $i < count($columns); $i++){
 			if($formvars['column'.$i] == 'x' AND !is_numeric(str_replace(',', '.', $columns[$i])))$headlines = true;		// die erste Zeile enthält die Spaltenüberschriften
 		}
-		$sql = "CREATE TABLE ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (";
+		$sql = "
+			CREATE TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . " (
+				gid serial NOT NULL,
+		";
 		$komma = false;
-		for($i = 0; $i < count($columns); $i++){
-			if($formvars['column'.$i] != 'x' AND $formvars['column'.$i] != 'y'){
-				if($komma)$sql.= ", ";
-				$j = $i+1;
-				if($headlines){
-					if(is_numeric(substr($columns[$i], 0, 1)))$columns[$i] = '_'.$columns[$i];
-					$column = strtolower(umlaute_umwandeln(utf8_encode($columns[$i])));
-					$sql.= $column." varchar";
-					if($formvars['column'.$i] == 'label')$labelitem = $column;
+		for ($i = 0; $i < count($columns); $i++) {
+			if ($formvars['column' . $i] != 'x' AND $formvars['column' . $i] != 'y'){
+				if ($komma) {
+					$sql .= ", ";
 				}
-				else{
-					$sql.= "spalte".$j." varchar";
-					if($formvars['column'.$i] == 'label')$labelitem = 'spalte'.$j;
+				$j = $i + 1;
+				if ($headlines) {
+					if (is_numeric(substr($columns[$i], 0, 1))) {
+						$columns[$i] = '_' . $columns[$i];
+					}
+					$column = strtolower(umlaute_umwandeln(utf8_encode($columns[$i])));
+					$sql .= $column . " varchar";
+					if ($formvars['column'.$i] == 'label') {
+						$labelitem = $column;
+					}
+				}
+				else {
+					$sql .= "spalte" . $j . " varchar";
+					if ($formvars['column'.$i] == 'label') {
+						$labelitem = 'spalte' . $j;
+					}
 				}
 				$komma = true;
 			}
 		}
-		$sql.= ")WITH (OIDS=TRUE);";
-		$sql.= "SELECT AddGeometryColumn('".CUSTOM_SHAPE_SCHEMA."', '".$tablename."', 'the_geom', ".$formvars['epsg'].", 'POINT', 2);";
-		$sql.= "CREATE INDEX ".$tablename."_gist_idx ON ".CUSTOM_SHAPE_SCHEMA.".".$tablename." USING gist (the_geom );";
+		$sql.= ");
+			SELECT AddGeometryColumn(
+				'" . CUSTOM_SHAPE_SCHEMA . "', '" . $tablename . "',
+				'the_geom',
+				" . $formvars['epsg'] . ",
+				'POINT',
+				2
+			);
+			CREATE INDEX " . $tablename . "_gist_idx ON " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . " USING gist (the_geom);";
 		$i = 0;
-		foreach($rows as $row){
-			if($headlines AND $i == 0 OR trim($row, $formvars['delimiter']."\n\r") == ''){$i++;continue;}				// Überschriftenzeile und Leerzeilen auslassen
+		foreach ($rows as $row) {
+			if ($headlines AND $i == 0 OR trim($row, $formvars['delimiter']."\n\r") == '') {
+				$i++;
+				continue;
+			} // Überschriftenzeile und Leerzeilen auslassen
 			$columns = explode($formvars['delimiter'], $row);
-			$sql.= "INSERT INTO ".CUSTOM_SHAPE_SCHEMA.".".$tablename." VALUES(";
+			$sql .= "
+				INSERT INTO " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . " VALUES(
+			";
 			$komma = false;
-			for($i = 0; $i < count($columns); $i++){
-				if($formvars['column'.$i] != 'x' AND $formvars['column'.$i] != 'y'){
-					if($komma)$sql.= ", ";
-					$sql.= "E'".addslashes(utf8_encode($columns[$i]))."'";
+			for ($i = 0; $i < count($columns); $i++){
+				if ($formvars['column'.$i] != 'x' AND $formvars['column'.$i] != 'y'){
+					if ($komma) {
+						$sql.= ", ";
+					}
+					$sql .= "E'" . addslashes(utf8_encode($columns[$i])) . "'";
 					$komma = true;
 				}
-				else{
-					$$formvars['column'.$i] = $columns[$i];			# Hier werden $x und $y gesetzt (nicht das doppelte $ wegnehmen!)
+				else {
+					# Hier werden $x und $y gesetzt (nicht das doppelte $ wegnehmen!)
+					$$formvars['column' . $i] = $columns[$i];
 				}
 			}
 			$x = str_replace(',', '.', $x);
 			$y = str_replace(',', '.', $y);
-			if($komma)$sql.= ", ";
-			if(!is_numeric($x) OR !is_numeric($y))$sql.= "NULL);";
-			else $sql.= "st_geomfromtext('POINT(".$x." ".$y.")', ".$formvars['epsg']."));";
+			if ($komma) {
+				$sql.= ", ";
+			}
+			if (!is_numeric($x) OR !is_numeric($y)) {
+				$sql .= "NULL);";
+			}
+			else {
+				$sql .= "st_geomfromtext('POINT(" . $x . " " . $y . ")', " . $formvars['epsg'] . "));";
+			}
 			$i++;
 		}
 		#echo $sql;
 		$ret = $pgdatabase->execSQL($sql,4, 0);
-		if(!$ret[0]){
+		if (!$ret[0]){
 			$custom_table['datatype'] = 0;
 			$custom_table['tablename'] = $tablename;
 			$custom_table['labelitem'] = $labelitem;
@@ -691,10 +758,7 @@ class data_import_export {
 			if ($ret == '') {
 				$table = $this->formvars['schema_name'] . "." . $this->formvars['table_name'];
 				$sql = "
-					ALTER TABLE " . $table . "
-					SET WITH OIDS;
-				";
-				$sql .= "
+					ALTER TABLE " . $table . " ADD COLUMN IF NOT EXISTS gid SERIAL NOT NULL;
 					SELECT
 						count(*),
 						max(geometrytype(the_geom)) AS geometrytype
@@ -779,14 +843,24 @@ class data_import_export {
 			$wkt = str_replace(chr(10).'FL-'.chr(10).'KOO ', '),(', $wkt);
 			$wkt = str_replace(chr(10).'KOO ', ',', $wkt);
 			$wkt.= ')))';
-			$sql = "CREATE TABLE ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (";
-			$sql.= "id serial";
-			$sql.= ")WITH (OIDS=TRUE);";
-			$sql.= "SELECT AddGeometryColumn('".CUSTOM_SHAPE_SCHEMA."', '".$tablename."', 'the_geom', ".$epsg.", 'MULTIPOLYGON', 2);";
-			
-			$sql.= "INSERT INTO ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (the_geom) VALUES(st_geomfromtext('".$wkt."', ".$epsg."))";
+			$sql = "
+				CREATE TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . " (
+					gid serial NOT NULL,
+					id serial
+				);
+				SELECT AddGeometryColumn(
+					'" . CUSTOM_SHAPE_SCHEMA . "',
+					'" . $tablename . "',
+					'the_geom',
+					" . $epsg . ",
+					'MULTIPOLYGON',
+					2
+				);
+				INSERT INTO " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . " (the_geom)
+				VALUES (st_geomfromtext('" . $wkt . "', " . $epsg . "))
+			";
 			$ret = $pgdatabase->execSQL($sql,4, 1);
-			if(!$ret[0]){
+			if (!$ret[0]){
 				$custom_table['tablename'] = $tablename;
 				$custom_table['epsg'] = $epsg;
 				$custom_table['datatype'] = 2;
@@ -1068,7 +1142,7 @@ class data_import_export {
 		# oid auch abfragen
 		$distinctpos = strpos(strtolower($sql), 'distinct');
 		if ($distinctpos !== false && $distinctpos < 10) {
-			$pfad = substr(trim($sql), $distinctpos+8);
+			$pfad = substr(trim($sql), $distinctpos + 8);
 			$distinct = true;
 		}
 		else {
@@ -1078,9 +1152,9 @@ class data_import_export {
 		foreach ($this->attributes['all_table_names'] as $tablename) {
 			if (($tablename == $layerset[0]['maintable']) AND $layerset[0]['oid'] != '') {
 				# hat Haupttabelle oids?
-				$pfad = pg_quote($this->attributes['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'].' AS '.pg_quote($tablename.'_oid').', '.$pfad;
+				$pfad = pg_quote($this->attributes['table_alias_name'][$tablename]) . '.' . $layerset[0]['oid'] . ' AS ' . pg_quote($tablename.'_oid') . ', ' . $pfad;
 				if ($groupby != '') {
-					$groupby .= ',' . pg_quote($this->attributes['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'];
+					$groupby .= ',' . pg_quote($this->attributes['table_alias_name'][$tablename]) . '.' . $layerset[0]['oid'];
 				}
 			}
 			$j++;
