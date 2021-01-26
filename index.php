@@ -1664,6 +1664,11 @@ function go_switch($go, $exit = false) {
 				$GUI->deleteRollenlayer();
 			} break;
 
+			case 'share_rollenlayer': {
+				$GUI->checkCaseAllowed('share_rollenlayer');
+				$GUI->share_rollenlayer();
+			} break;
+
 			default : {
 				# Karteninformationen lesen
 				$GUI->loadMap('DataBase');

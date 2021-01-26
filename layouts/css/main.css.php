@@ -417,7 +417,7 @@ span[data-tooltip]:hover::after {
 	float: left;
 	text-align: right;
 	font-size: 17px;
-	width: 210px;
+	width: 240px;
 	height: 15px;
 	margin-right: 10px;
 }
@@ -434,7 +434,7 @@ span[data-tooltip]:hover::after {
 .input-form input[type=text] {
 	float: left;
 	text-align: left;
-	width: 400px;
+	width: 370px;
 }
 
 .input-form input[type=reset] {
@@ -2305,4 +2305,10 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 .edit_button.fa-check:hover {
 	cursor: pointer;
 	color: green;
+}
+
+#shareRollenlayerDiv {
+	display: none;
+	color: black;
+	margin-bottom: 5px;
 }

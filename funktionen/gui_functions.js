@@ -343,11 +343,12 @@ function resizemap2window(){
 *		message([
 *			{ type: 'error', msg: 'Dieser Text ist eine Fehlermeldung'},
 *			{ type: 'info', msg: 'Hier noch eine Info.'},
-*			{ type: 'notice', msg: 'und eine Notiz'},
+*			{ type: 'waring', msg: 'Dies ist nur eine Warung.'},
+*			{ type: 'notice', msg: 'und eine Notiz'}
 *		]);
 */
-function message(messages, t_visible, t_fade, css_top, confirm_value) {
-	console.log('Show Message: %o: ', messages);
+function message(messages, t_visible, t_fade, css_top, confirm_value, callback) {
+	console.log('function message with callback: %o: ', callback);
 	confirm_value = confirm_value || 'ok';
 	var messageTimeoutID;
 	var msgBoxDiv = root.$('#message_box');
@@ -395,6 +396,11 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 			'icon': 'fa-ban',
 			'color': 'red',
 			'confirm': true
+		},
+		'confirm': {
+			'description' : 'Bestätigung',
+			'icon': 'fa-question-circle-o',
+			'color': 'red'
 		}
 	};
 	//	,confirmMsgDiv = false;
@@ -407,10 +413,14 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 	}
 
 	root.$.each(messages, function (index, msg) {
-		msg.type = (['notice', 'info', 'error'].indexOf(msg.type) > -1 ? msg.type : 'warning');
+		msg.type = (['notice', 'info', 'error', 'confirm'].indexOf(msg.type) > -1 ? msg.type : 'warning');
 		msgDiv.append('<div class="message-box message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
 		if (types[msg.type].confirm && root.document.getElementById('message_ok_button') == null) {
 			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="root.$(\'#message_box\').hide();" value="' + confirm_value + '" style="margin: 10px 0px 0px 0px;">');
+		}
+		if (msg.type == 'confirm' && root.document.getElementById('message_confirm_button') == null) {
+			msgBoxDiv.append('<input id="message_confirm_button" type="button" onclick="root.$(\'#message_box\').hide();' + (callback ? callback + '(' + confirm_value + ')' : '') + '" value="Ja" style="margin: 10px 0px 0px 0px;">');
+			msgBoxDiv.append('<input id="message_cancle_button" type="button" onclick="root.$(\'#message_box\').hide();" value="Abbrechen" style="margin: 0px 0px -6px 8px;">');
 		}
 	});
 	
@@ -418,7 +428,8 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 		msgBoxDiv.show();
 	}
 
-	if (root.document.getElementById('message_ok_button') == null) {		// wenn kein OK-Button da ist, ausblenden
+	if (root.document.getElementById('message_ok_button') == null && root.document.getElementById('message_confirm_button') == null) {
+		// wenn kein OK-Button da ist, ausblenden
     messageTimeoutID = setTimeout(function() { msgBoxDiv.fadeOut(t_fade); }, t_visible);
 	}
   else {
@@ -992,10 +1003,30 @@ function zoomToMaxLayerExtent(zoom_layer_id){
 	currentform.zoom_layer_id.value = '';
 }
 
-function getLayerOptions(layer_id){
-	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
+function getLayerOptions(layer_id) {
+	if (document.GUI.layer_options_open.value != '') {
+    closeLayerOptions(document.GUI.layer_options_open.value);
+  }
 	ahah('index.php', 'go=getLayerOptions&layer_id=' + layer_id, new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'));
 	document.GUI.layer_options_open.value = layer_id;
+}
+
+function sendShareRollenlayer(layer_id) {
+	console.log('send Form to share Rollenlayer layer_id: %o', layer_id);
+	document.GUI.go.value = 'share_rollenlayer';
+	document.GUI.submit();
+}
+
+function shareRollenlayer(layer_id) {
+  console.log('shareRollenLayer layer_id: %s', layer_id);
+  if (typeof $('input[name=shared_layer_group_id]:checked').val() === "undefined") {
+    message([{ type: "error", msg: "Es muss erst eine Layergruppe ausgewählt werden."}]);
+  }
+	else {
+		message([{ type: "confirm", msg: "Soll der Rollenlayer wirklich freigegeben werden?"}], 1000, 2000, undefined, layer_id, 'sendShareRollenlayer');
+	}
+//	document.GUI.go.value = 'shareRollenlayer';
+//	document.GUI.submit();
 }
 
 function getGroupOptions(group_id) {

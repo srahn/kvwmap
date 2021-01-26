@@ -55,10 +55,12 @@
 	$this->attributeditor="Attributeditor";
 	$this->strPrivileges="Rechte";
 	$this->strStyles="Styles";
-	$this->strRemove="entfernen";
+	$this->strRemove="Entfernen";
 	$this->strShowMore="Mehr anzeigen";
 	$this->strShowLess="Weniger anzeigen";
 	$this->strLayerParameters="Themenparameter";
 	$this->strColor="Farbe";
 	$this->strHatching="Schraffur";
+	$this->strShareRollenlayer = "Layer freigeben";
+	$this->strShareRollenLayerLong = "Diesen Layer für andere Nutzer in diesem WebGIS freigeben.";
 ?>

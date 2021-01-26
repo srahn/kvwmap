@@ -203,6 +203,18 @@ else {
 					</td>
 				</tr>
 				<tr>
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strShareRollenlayerAllowedLabel; ?></th>
+					<td style="border-bottom:1px solid #C3C7C3">
+						<input
+							name="share_rollenlayer_allowed"
+							type="checkbox"
+							value="1"
+							<?php echo ($this->formvars['share_rollenlayer_allowed'] ? 'checked' : ''); ?>
+						><?php echo $strShareRollenlayerAllowedCheckboxText; ?>
+						<span data-tooltip="<?php echo $strShareRollenlayerAllowedDescription; ?>"></span>
+					</td>
+				</tr>
+				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTelephone;?></th>
 					<td style="border-bottom:1px solid #C3C7C3"><input name="phon" type="text" value="<?php echo $this->formvars['phon']; ?>" size="25" maxlength="25"></td>
 				</tr>

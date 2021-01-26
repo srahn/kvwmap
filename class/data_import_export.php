@@ -219,14 +219,21 @@ class data_import_export {
 	}
 
 	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1') {
-		if(file_exists($uploadpath.$file.'.dbf'))$filename = $uploadpath.$file.'.dbf';
-		elseif(file_exists($uploadpath.$file.'.DBF'))$filename = $uploadpath.$file.'.DBF';
-		else return;
+		if (file_exists($uploadpath.$file.'.dbf')) {
+			$filename = $uploadpath.$file.'.dbf';
+		}
+		elseif (file_exists($uploadpath.$file.'.DBF')) {
+			$filename = $uploadpath.$file.'.DBF';
+		}
+		else {
+			return;
+		}
 		$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $filename, $pgdatabase, NULL, $sql, '-lco FID=gid', $encoding);
 		if (file_exists('.esri.gz')) {
 			unlink('.esri.gz');
 		}
 		if ($ret !== 0) {
+			echo '<br>ret: ' . $ret;
 			$custom_table['error'] = $ret;
 			return array($custom_table);
 		}
@@ -917,25 +924,27 @@ class data_import_export {
 			exec($command, $output, $ret);
 			if ($ret != 0) {
 				exec("sed -i -e 's/".$database->passwd."/xxxx/g' ".IMAGEPATH.$tablename.'.err');		# falls das DB-Passwort in der Fehlermeldung vorkommt => ersetzen
-				$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; 
+				$ret['msg'] = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; 
 			}
 		}
 		return $ret;
 	}
 
-	function getEncoding($dbf){
+	function getEncoding($dbf) {
 		$folder = dirname($dbf);
-		$command = OGR_BINPATH.'ogr2ogr -f CSV "'.$folder.'/test.csv" "'.$dbf.'"';
+		$command = OGR_BINPATH . 'ogr2ogr -f CSV "' . $folder . '/test.csv" "' . $dbf . '"';
 		#echo '<br>Command ogr2ogr: ' . $command;
 		exec($command, $output, $ret);
-		$command = 'file '.$folder.'/test.csv';
+		$command = 'file ' . $folder . '/test.csv';
 		#echo '<br>Command file: ' . $command;
 		exec($command, $output, $ret);
-		unlink($folder.'/test.csv');
+		if (file_exists($folder . '/test.csv')) {
+			unlink($folder . '/test.csv');
+		}
 		#echo '<br>output: ' . $output[0];
-		if(strpos($output[0], 'UTF') !== false)$encoding = 'UTF-8';
-		if(strpos($output[0], 'ISO-8859') !== false)$encoding = 'LATIN1';
-		if(strpos($output[0], 'ASCII') !== false)$encoding = 'LATIN1';
+		if (strpos($output[0], 'UTF') !== false) 			$encoding = 'UTF-8';
+		if (strpos($output[0], 'ISO-8859') !== false) $encoding = 'LATIN1';
+		if (strpos($output[0], 'ASCII') !== false) 		$encoding = 'LATIN1';
 		#echo '<br>encoding: ' . $encoding;
 		return $encoding;
 	}

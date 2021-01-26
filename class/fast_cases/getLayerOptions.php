@@ -54,6 +54,14 @@ function pg_quote($column){
 	return ctype_lower($column) ? $column : '"'.$column.'"';
 }
 
+function replace_semicolon($text) {
+	return str_replace(';', '', $text);
+}
+
+function value_of($array, $key) {
+	if(!is_array($array))$array = array();
+	return (array_key_exists($key, $array) ? $array[$key] :	'');
+}
 
 class GUI {
 
@@ -243,7 +251,8 @@ class GUI {
 		else {
 			$layer = $this->user->rolle->getRollenLayer(-$this->formvars['layer_id']);
 		}
-		if ($layer[0]['connectiontype']==6) {
+		$selectable_layer_groups = $mapDB->read_Groups(true, 'Gruppenname', "`selectable_for_shared_layers`");
+		if ($layer[0]['connectiontype'] == 6) {
 			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
 			$attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id'], false);
 			$query_attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
@@ -257,27 +266,62 @@ class GUI {
 			<table cellspacing="0" cellpadding="0" style="padding-bottom: 8px">
 				<tr>
 					<td class="layerOptionsHeader">
-						<span class="fett">'.$this->layerOptions.'</span>
+						<span class="fett">' . $this->layerOptions . '</span>
 					</td>
 				</tr>
 				<tr>
 					<td>
 						<ul>';
-						if($this->formvars['layer_id'] < 0){
-							echo '<li><a href="index.php?go=delete_rollenlayer&id='.(-$this->formvars['layer_id']).'">'.$this->strRemove.'</a></li>';
-							echo '<li><span>'.$this->strName.':</span> <input type="text" name="layer_options_name" value="'.$layer[0]['Name'].'"></li>';
+						if ($this->formvars['layer_id'] < 0) {
+							echo '<li><a href="index.php?go=delete_rollenlayer&id=' . (-$this->formvars['layer_id']) . '">' . $this->strRemove.'</a></li>';
+							echo '<li><span>' . $this->strName . ':</span> <input type="text" name="layer_options_name" value="' . $layer[0]['Name'] . '"></li>';
+							if ($this->user->share_rollenlayer_allowed AND count($selectable_layer_groups) > 0) {
+								echo '
+									<li id="shareRollenlayerLink">
+										<a href="javascript:$(\'#shareRollenlayerDiv, #shareRollenlayerLink\').toggle()" title="' . $this->strShareRollenlayerLong . '">' . $this->strShareRollenlayer . '</a>
+									</li>
+									<div id="shareRollenlayerDiv">
+										Name korrekt? Dann wähle eine Layergruppe aus:<br>
+										<input type="hidden" name="selected_rollenlayer_id" value="' . (-$this->formvars['layer_id']) . '"> ' .
+										implode('<br>', array_map(
+											function($group) {
+												return '<input
+													type="radio"
+													name="shared_layer_group_id"
+													value="' . $group['id'] . '"
+													style="vertical-align: middle"
+												>' . $group['Gruppenname'];
+											},
+											$selectable_layer_groups
+										)) . '<br>
+										<input type="button" onclick="shareRollenlayer(' . (-$this->formvars['layer_id']) . ')" value="Freigeben">
+										<input type="button" onclick="$(\'#shareRollenlayerDiv, #shareRollenlayerLink\').toggle()")" value="Abbrechen">
+									</div>
+								';
+							}
 						}
-						else{
-							if($this->Stelle->isMenueAllowed('Layer_Anzeigen')){
-								echo '<li><span><a href="javascript:toggle(document.getElementById(\'layer_properties\'));">'.$this->properties.'</a></span></li>';
-								echo '<div id="layer_properties" style="display: none">
-												<ul>
-													<li><a href="index.php?go=Layereditor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->layerDefinition.'</a></li>
-													<li><a href="index.php?go=Attributeditor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->attributeditor.'</a></li>
-													<li><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strPrivileges.'</a></li>
-													<li><a href="index.php?go=Style_Label_Editor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strStyles.'</a></li>
-												</ul>
-											</div>';
+						else {
+							if ($this->Stelle->isMenueAllowed('Layer_Anzeigen') OR $layer[0]['shared_from'] == $this->user->id) {
+								echo '
+									<li>
+										<span><a href="javascript:toggle(document.getElementById(\'layer_properties\'));">' . $this->properties . '</a></span>
+									</li>
+									<div id="layer_properties" style="display: none">
+										<ul>' . (!(!$this->Stelle->isMenueAllowed('Layer_Anzeigen') AND $layer[0]['shared_from'] == $this->user->id) ? '
+											<li>
+												<a href="index.php?go=Layereditor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->layerDefinition.'</a>
+											</li>' : '') . '
+											<li>
+												<a href="index.php?go=Attributeditor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->attributeditor.'</a>
+											</li>
+											<li>
+												<a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strPrivileges.'</a>
+											</li>
+											<li>
+												<a href="index.php?go=Style_Label_Editor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strStyles.'</a>
+											</li>
+										</ul>
+									</div>';
 							}
 						}
 						if($layer[0]['connectiontype']==6 OR($layer[0]['Datentyp']==MS_LAYER_RASTER AND $layer[0]['connectiontype']!=7)){
@@ -625,7 +669,7 @@ class user {
 		";
 		#echo '<br>Sql: ' . $sql;
 
-		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>" . $sql, 3);
+		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>", 3);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
 		$rs = $this->database->result->fetch_array();
@@ -645,6 +689,7 @@ class user {
 		$this->agreement_accepted = $rs['agreement_accepted'];
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
+		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
 	}
 
 	function setRolle($stelle_id) {
@@ -990,7 +1035,7 @@ class rolle {
 		$layer_name_filter = '';
 		
 		# Abfragen der Layer in der Rolle
-		if($language != 'german') {
+		if ($language != 'german') {
 			$name_column = "
 			CASE
 				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
@@ -1011,7 +1056,7 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, ddl_attribute, classification, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
+				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
 				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
@@ -1019,6 +1064,9 @@ class rolle {
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
 				l.labelitem as original_labelitem,
+				l.`duplicate_from_layer_id`,
+				l.`duplicate_criterion`,
+				l.`shared_from`,
 				ul.`postlabelcache`,
 				`Filter`,
 				r2ul.gle_view,
@@ -1070,7 +1118,8 @@ class rolle {
 					$this->user_id,
 					$this->stelle_id,
 					rolle::$hist_timestamp,
-					$language
+					$language,
+					$rs['duplicate_criterion']
 				);
 			}
 			$layer[$i]=$rs;
@@ -1579,6 +1628,56 @@ class db_mapObj {
 			$Labels[]=$rs;
 		}
 		return $Labels;
+	}
+
+	function read_Groups($all = false, $order = '', $where = 'true') {
+		global $language;
+		if ($language != 'german') {
+			$gruppenname_column = "
+			CASE
+				WHEN g.`Gruppenname_" . $language . "` != \"\" THEN g.`Gruppenname_" . $language . "`
+				ELSE g.`Gruppenname`
+			END";
+		}
+		else {
+			$gruppenname_column = "g.`Gruppenname`";
+		}
+
+		$sql = "
+			SELECT
+				g.id,
+				" . $gruppenname_column . " AS Gruppenname,
+				g.obergruppe,
+				g.selectable_for_shared_layers " .
+				(!$all ? ", g2r.status" : "") . "
+			FROM
+				u_groups AS g" . ($all ? "" : "
+				JOIN u_groups2rolle AS g2r ON g.id = g2r.id") . "
+			WHERE
+				" . $where . ($all ? "" : " AND
+				g2r.stelle_ID = " . $this->Stelle_ID . " AND
+				g2r.user_id = " . $this->User_ID) . "
+			ORDER BY " .
+				($order != '' ? replace_semicolon($order) : "g.`order`") . "
+		";
+		#echo $sql;
+
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Groups - Lesen der Gruppen der Rolle:<br>",4);
+		$this->db->execSQL($sql);
+		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+		$groups = array();
+		while ($rs = $this->db->result->fetch_assoc()) {
+			$groups[$rs['id']]['status'] = value_of($rs, 'status');
+			$groups[$rs['id']]['Gruppenname'] = $rs['Gruppenname'];
+			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
+			$groups[$rs['id']]['id'] = $rs['id'];
+			$groups[$rs['id']]['selectable_for_shared_layers'] = $rs['selectable_for_shared_layers'];
+			if ($rs['obergruppe']) {
+				$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
+			}
+		}
+		$this->anzGroups = count($groups);
+		return $groups;
 	}
 }
 

@@ -604,13 +604,13 @@ class account {
 		return $NumbOfAccess;
 	} #END of function getAccessToALK
 
-	function getLayer($logged){
+	function getLayer($logged) {
 		# Abfrage der Anzahl der Layer
 		$sql ='SELECT COUNT(Layer_ID) AS layers FROM layer';
 		if ($logged) {
 			$sql.=' WHERE logconsume="1"';
 		}
-		$this->debug->write("<p>file:kvwmap class:account->getNumber_of_Access_to_Layer:<br>".$sql,4);
+		$this->debug->write("<p>file:users.php class:user->getLayer:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
 		$rs = $this->database->result->fetch_array();
@@ -682,6 +682,56 @@ class user {
 		}
 	}
 
+	/*
+	* Function return true if the case is for the user allowed to execute
+	* Currently only the following cases will be tested against the rights of the user
+	* 	- share_rollenlayer
+	* This method works independently from the functions isMenueAllowed AND isFunctionAllowed.
+	* It means, when these other functions would return false this function can
+	* nevertheless return true. It cares not on the outher case permissions
+	* @param $case The name of the use case, normaly used in switch from index.php
+	* @return true if case is allowed else false
+	*/
+	function is_case_allowed($case) {
+		if ($case == 'share_rollenlayer' AND $this->share_rollenlayer_allowed) {
+			return true;
+		}
+		elseif (
+			in_array($case, array('Attributeditor', 'Klasseneditor', 'Style_Label_Editor', 'Layerattribut-Rechteverwaltung')) AND
+			$this->database->gui->formvars['selected_layer_id'] != '' AND
+			$this->layerIsSharedFrom($this->database->gui->formvars['selected_layer_id'], $this->id)
+		) {
+			return true;
+		}
+		elseif (
+			$case == 'Layereditor' AND
+			$this->database->gui->go == 'Klasseneditor'
+		) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	function layerIsSharedFrom($layer_id, $user_id) {
+		$sql = "
+			SELECT
+				shared_from
+			FROM
+				layer
+			WHERE
+				Layer_ID = " . $layer_id . " AND
+				shared_from = " . $user_id . "
+		";
+		$this->debug->write("<p>file:users.php class:user->layerIsSharedFrom:<br>" . $sql, 4);
+		$ret = $this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0;
+		}
+		return (mysqli_num_rows($this->database->result) > 0);
+	}
+
 	function clientIpIsValide($remote_addr) {
     # Prüfen ob die übergebene IP Adresse zu den für den Nutzer eingetragenen Adressen passt
     $ips=explode(';',$this->ips);
@@ -734,6 +784,7 @@ class user {
 		$this->agreement_accepted = $rs['agreement_accepted'];
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
+		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
 	}
 
 	/*
@@ -1313,7 +1364,8 @@ class user {
 				`email` = '".$userdaten['email']."',
 				`organisation` = '".$userdaten['organisation']."',
 				`position` = '".$userdaten['position']."',
-				`ips` = '" . $userdaten['ips'] . "'" .
+				`ips` = '" . $userdaten['ips'] . "',
+				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) .
 				$passwort_column .
 				$passwort_setting_time_column . "
 			WHERE

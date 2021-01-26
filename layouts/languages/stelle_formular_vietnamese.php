@@ -39,4 +39,6 @@
   $strAllowedPasswordAge="Allowed age of passwords in this task, if checked (in months)";
   $strStart="Start";
   $strStop="Stop";
+	$strShowSharedLayersText = "Show shared layer in this Stelle.";
+	$strShowSharedLayersDescription = "When this permission is granted, all layer from users with the permission to share Rollenlayer will be assigned to this Stelle and shown to all Users of this Stelle. These Layers will be marked as Shared layers in the legend and in the options form is shown who has shared the layer for other.";
 ?>  

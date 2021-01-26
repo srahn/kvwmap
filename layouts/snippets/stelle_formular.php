@@ -745,6 +745,20 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 					</td>
 				</tr>
 
+				<tr>
+					<td align="right" style="border-bottom:1px solid #C3C7C3">
+						<input
+							name="show_shared_layers"
+							type="checkbox"
+							value="1"
+							<?php echo ($this->formvars['show_shared_layers'] ? 'checked' : ''); ?>
+						>
+					</td>
+					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3">
+						<?php echo $strShowSharedLayersText; ?>
+						<span data-tooltip="<?php echo $strShowSharedLayersDescription; ?>"></span>
+					</td>
+				</tr>
         <tr>
           <td align="right" style="border-bottom:1px solid #C3C7C3">
             <input name="checkClientIP" type="checkbox" value="1" <?php if ($this->formvars['checkClientIP']) { ?> checked<?php } ?>>
@@ -774,7 +788,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
             <input name="hist_timestamp" type="checkbox" value="1" <?php if ($this->formvars['hist_timestamp']) { ?> checked<?php } ?>>
           </td>
           <td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strhist_timestamp; ?></td>
-        </tr>				
+        </tr>
     </table>
   </td>
   </tr>

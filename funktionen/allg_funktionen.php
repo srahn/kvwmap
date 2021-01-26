@@ -227,7 +227,7 @@ function strip_pg_escape_string($string){
 }
 
 function replace_semicolon($text) {
-  return str_replace(';', '', $text);
+	return str_replace(';', '', $text);
 }
 
 function InchesPerUnit($unit, $center_y){
@@ -1820,7 +1820,7 @@ function output_select($form_field_name, $data, $selected_value = null, $onchang
 * Über die optionalen Parameter $delim1 und $delim2 kann man die Trennzeichen vor und nach dem Wort angeben.
 * Wenn der optionale Parameter $last true ist, wird das letzte Vorkommen des Wortes verwendet.
 */
-function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
+function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false) {
 	if ($last) {
 		$word_pos = strripos($str, $word);
 	}

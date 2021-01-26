@@ -27,4 +27,6 @@
 	$this->strLoad="Loden";
 	$this->strUseGeometryOf="Geometrie övernehmen von";
 	$this->strSearch="Nu sök";
+	$this->strShareRollenlayer = "Layer teilen";
+	$this->strShareRollenLayerLong = "Diesen Layer für andere Nutzer in diesem WebGIS freigeben.";
 ?>
