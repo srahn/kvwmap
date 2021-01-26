@@ -9632,7 +9632,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 		}
 
-
 		if ($this->formvars['embedded'] != '') {    
 			# wenn es ein neuer Datensatz aus einem embedded-Formular ist, 
 			# muss das entsprechende Attribut des Hauptformulars aktualisiert werden
@@ -9685,12 +9684,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					# Hier wird keine weitere Funktion zum Laden von views aufgerufen
 				}
 				else {
+					$this->formvars['newpathwkt'] = '';
 	        if($this->formvars['weiter_erfassen'] == 1){
 	        	$this->formvars['firstpoly'] = '';
 	        	$this->formvars['firstline'] = '';
 	        	$this->formvars['secondpoly'] = '';
 	        	$this->formvars['pathwkt'] = '';
-	        	$this->formvars['newpathwkt'] = '';
 	        	$this->formvars['newpath'] = '';
 	        	$this->formvars['last_doing'] = '';
 	        	$this->neuer_Layer_Datensatz();
