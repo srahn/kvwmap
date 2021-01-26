@@ -9613,7 +9613,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 
 				if(!empty($insert)){
-					if(!$layerset[0]['maintable_is_view'])$sql = "LOCK TABLE " . $table['tablename']." IN SHARE ROW EXCLUSIVE MODE;";
+					if(!$layerset[0]['maintable_is_view'])$sql = "LOCK TABLE " . pg_quote($table['tablename'])." IN SHARE ROW EXCLUSIVE MODE;";
 					$attr = array_keys($insert);
 					array_walk($attr, function(&$attributename, $key){$attributename = pg_quote($attributename);});
 					$sql.= "INSERT INTO " . pg_quote($table['tablename']) . " (";
@@ -9690,7 +9690,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 		}
 
-
 		if ($this->formvars['embedded'] != '') {    
 			# wenn es ein neuer Datensatz aus einem embedded-Formular ist, 
 			# muss das entsprechende Attribut des Hauptformulars aktualisiert werden
@@ -9743,12 +9742,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					# Hier wird keine weitere Funktion zum Laden von views aufgerufen
 				}
 				else {
+					$this->formvars['newpathwkt'] = '';
 	        if($this->formvars['weiter_erfassen'] == 1){
 	        	$this->formvars['firstpoly'] = '';
 	        	$this->formvars['firstline'] = '';
 	        	$this->formvars['secondpoly'] = '';
 	        	$this->formvars['pathwkt'] = '';
-	        	$this->formvars['newpathwkt'] = '';
 	        	$this->formvars['newpath'] = '';
 	        	$this->formvars['last_doing'] = '';
 	        	$this->neuer_Layer_Datensatz();
@@ -10486,7 +10485,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					SET
 						" . $dokument_attribute . " = '" . $attribute_value . "'
 					WHERE
-						oid = " . $oids[0] . "
+						".pg_quote($layerset[0]['oid'])." = " . $oids[0] . "
 				";
 				#echo '<p>Sql zum Update des Dokumentattributes:<br>' . $sql;
 				$ret = $layerdb->execSQL($sql, 4, 1);

@@ -563,7 +563,7 @@ class data_import_export {
 			if(move_uploaded_file($_files['file1']['tmp_name'], $this->pointfile)){
 				$rows = file($this->pointfile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 				$delimiters = implode($this->delimiters);
-				while(count($this->delimiters) > 0 AND count($this->columns) < 2){
+				while(@count($this->delimiters) > 0 AND @count($this->columns) < 2){
 					$this->delimiter = array_shift($this->delimiters);
 					$i = 0;
 					while(trim($rows[$i], "$delimiters\n\r") == ''){	// Leerzeilen überspringen bis zur ersten Zeile mit Inhalt
@@ -645,9 +645,9 @@ class data_import_export {
 					$sql .= "E'" . addslashes(utf8_encode($columns[$i])) . "'";
 					$komma = true;
 				}
-				else {
+				else{
 					# Hier werden $x und $y gesetzt (nicht das doppelte $ wegnehmen!)
-					$$formvars['column' . $i] = $columns[$i];
+					${$formvars['column' . $i]} = $columns[$i];
 				}
 			}
 			$x = str_replace(',', '.', $x);
