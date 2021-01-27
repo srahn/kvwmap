@@ -8352,9 +8352,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$value = value_of($this->formvars, $prefix.'value_'.$attributes['name'][$i]);
 						$operator = value_of($this->formvars, $prefix.'operator_'.$attributes['name'][$i]);
 						if (is_array($value)) {			# multible-Auswahlfelder
-							if($operator == '=')$operator = 'IN';
-							else $operator = 'NOT IN';
-							$value = implode($value, '|');
+							if(count($value) > 1){
+								$value = implode($value, '|');
+								if($operator == '=')$operator = 'IN';
+								else $operator = 'NOT IN';
+							}
+							else{
+								$value = $value[0];
+							}
 						}
 						if($value != '' OR $operator == 'IS NULL' OR $operator == 'IS NOT NULL'){
 							if(substr($attributes['type'][$i], 0, 1) == '_' AND $operator != 'IS NULL'){		# Array-Datentyp
