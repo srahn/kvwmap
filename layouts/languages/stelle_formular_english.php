@@ -11,6 +11,7 @@
   $strPostGISDataBankName="PostGIS data bank name";
   $strPostGISUserName="PostGIS user name";
   $strPostGISPassword="PostGIS password";
+	$strPostgisConnection = "Postgres Connection";
   $strOwsTitle="OWS title";
   $strOwsAbstract="OWS abstract";
   $strWmsAccessConstraints="WMS access constraints";

@@ -57,7 +57,9 @@
 	$this->strShowMore="Show more";
 	$this->strShowLess="Show less";
 	$this->strLayerParameters="Layer Parameter";
+	$this->strColor="Draw Color";
 	$this->strHatching="Hatching";
 	$this->strShareRollenlayer = "Share Layer";
 	$this->strShareRollenLayerLong = "Share this layer for other user in this WebGIS";
+	$this->strSettings = "Settings";
 ?>

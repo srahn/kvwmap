@@ -109,7 +109,7 @@ class Menue extends MyObject {
 			array(
 				'select' => " DISTINCT
 					m.id,".
-					($gui->user->rolle->language != 'german' ? "m.`name_" . $gui->user->rolle->language . "` AS" : "") . " m.name,
+					($gui->user->rolle->language != 'german' ? "m.`name_" . $gui->user->rolle->language . "` AS" : "") . " name,
 					m.`order`,
 					m.menueebene
 				",

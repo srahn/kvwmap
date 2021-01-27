@@ -11,6 +11,7 @@
   $strPostGISDataBankName="Tên CSDL PostGIS";
   $strPostGISUserName="Tên ngư�?i dùng PostGIS";
   $strPostGISPassword="Mã khóa PostGIS";
+	$strPostgisConnection = "Postgres Connection";
   $strOwsTitle="Tiêu đ�? OWS";
   $strOwsAbstract="Tóm lược OWS";
   $strWmsAccessConstraints="Rào cản truy cập WMS";

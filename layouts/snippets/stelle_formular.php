@@ -182,19 +182,19 @@ else {
         </tr>
         <tr>
         	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEpsgCode; ?></th>
-		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-		      		<select name="epsg_code">
-		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
-		      			<? 
-		      			foreach($this->epsg_codes as $epsg_code){
-									echo '<option ';
-		      				if($this->formvars['epsg_code'] == $epsg_code['srid'])echo 'selected ';
-		      				echo ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
-		      			}
-		      			?>	      			
-		      		</select>
-		  		</td>
-        </tr>
+					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+						<select name="epsg_code">
+							<option value=""><?php echo $this->strPleaseSelect; ?></option><? 
+							foreach ($this->epsg_codes as $epsg_code) {
+								echo '
+									<option' .
+										($this->formvars['epsg_code'] == $epsg_code['srid'] ? ' selected ' : '') . '
+										value="' . $epsg_code['srid'] . '"
+									>' . $epsg_code['srid'] . ': ' . $epsg_code['srtext'] . '</option>';
+							} ?>
+						</select>
+					</td>
+				</tr>
 				<tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStart; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">

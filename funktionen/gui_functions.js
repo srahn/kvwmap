@@ -1018,15 +1018,24 @@ function sendShareRollenlayer(layer_id) {
 }
 
 function shareRollenlayer(layer_id) {
-  console.log('shareRollenLayer layer_id: %s', layer_id);
+  //console.log('shareRollenLayer layer_id: %s', layer_id);
   if (typeof $('input[name=shared_layer_group_id]:checked').val() === "undefined") {
     message([{ type: "error", msg: "Es muss erst eine Layergruppe ausgewählt werden."}]);
   }
 	else {
 		message([{ type: "confirm", msg: "Soll der Rollenlayer wirklich freigegeben werden?"}], 1000, 2000, undefined, layer_id, 'sendShareRollenlayer');
 	}
-//	document.GUI.go.value = 'shareRollenlayer';
-//	document.GUI.submit();
+}
+
+function sendDeleteSharedLayer(layer_id) {
+	console.log('send Form to delete shared layer_id: %o', layer_id);
+	document.GUI.go.value = 'delete_shared_layer';
+	document.GUI.submit();
+}
+
+function deleteSharedLayer(layer_id) {
+  //console.log('shareRollenLayer layer_id: %s', layer_id);
+	message([{ type: "confirm", msg: "Soll der freigegebene Layer wirklich gelöscht werden?"}], 1000, 2000, undefined, layer_id, 'sendDeleteSharedLayer');
 }
 
 function getGroupOptions(group_id) {

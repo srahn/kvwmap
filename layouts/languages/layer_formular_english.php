@@ -49,7 +49,7 @@
   $strBack="Back";
   $strButtonSave="Save";
   $strButtonSaveAsNewLayer="Save as new layer";
-  $strCommonData="general information";
+  $strCommonData="General information";
   $strtransparency="transparency";
   $strDrawingOrder="drawingorder";
 	$strLegendOrder="legend order";	

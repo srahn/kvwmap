@@ -1315,6 +1315,17 @@ function go_switch($go, $exit = false) {
 				$GUI->LayerAnzeigen();
 			} break;
 
+			case 'delete_shared_layer' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->LayerLoeschen();
+				$GUI->add_message('notice', 'Geteilten Layer erfolgreich gelöscht!');
+				$GUI->loadMap('DataBase');
+				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+				$GUI->saveMap('');
+				$GUI->drawMap();
+				$GUI->output();
+			} break;
+
 			case 'Layer2Stelle_Reihenfolge' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->Layer2Stelle_Reihenfolge();
