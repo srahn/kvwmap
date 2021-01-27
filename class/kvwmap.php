@@ -3919,7 +3919,7 @@ echo '			</table>
   xmlns="http://www.w3.org/2000/svg" version="1.1"
   xmlns:xlink="http://www.w3.org/1999/xlink">
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>';
-		$this->formvars['svg_string'] = preg_replace('/href="data:image.*"/', 'xlink:href="'.$this->img['hauptkarte'].'" xmlns:xlink="http://www.w3.org/1999/xlink" ', $this->formvars['svg_string']);
+		$this->formvars['svg_string'] = preg_replace('/href="data:image[^ ]*"/', 'xlink:href="'.$this->img['hauptkarte'].'" xmlns:xlink="http://www.w3.org/1999/xlink" ', $this->formvars['svg_string']);
 		$this->formvars['svg_string'] = str_replace(IMAGEURL, IMAGEPATH, $this->formvars['svg_string']).'</svg>';
 		$svg.= str_replace('points=""', 'points="-1000,-1000 -2000,-2000 -3000,-3000 -1000,-1000"', $this->formvars['svg_string']);
 		fputs($fpsvg, $svg);
@@ -3945,21 +3945,7 @@ echo '			</table>
 					<title>Kartenbild</title>
 				</head>
 				<body style=\"text-align:center\">
-					<script>
-						function copyImage(){
-							var img=document.getElementById('mapimg');
-							var r = document.createRange();
-							r.setStartBefore(img);
-							r.setEndAfter(img);
-							r.selectNode(img);
-							var sel = window.getSelection();
-							sel.addRange(r);
-							document.execCommand('Copy');
-							sel.removeAllRanges();
-						}
-					</script>
-					<img id=\"mapimg\" src=\"".TEMPPATH_REL.$jpgfile."\" style=\"box-shadow:  0px 0px 14px #777;\"><br><br>
-					<input type=\"button\" onclick=\"copyImage();\" value=\"Bild kopieren\">
+					<img id=\"mapimg\" src=\"".TEMPPATH_REL.$jpgfile."\" style=\"box-shadow:  0px 0px 14px #777;\">
 				</body>
 			</html>
 			";
@@ -8439,9 +8425,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$value = value_of($this->formvars, $prefix.'value_'.$attributes['name'][$i]);
 						$operator = value_of($this->formvars, $prefix.'operator_'.$attributes['name'][$i]);
 						if (is_array($value)) {			# multible-Auswahlfelder
-							if($operator == '=')$operator = 'IN';
-							else $operator = 'NOT IN';
-							$value = implode($value, '|');
+							if(count($value) > 1){
+								$value = implode($value, '|');
+								if($operator == '=')$operator = 'IN';
+								else $operator = 'NOT IN';
+							}
+							else{
+								$value = $value[0];
+							}
 						}
 						if($value != '' OR $operator == 'IS NULL' OR $operator == 'IS NOT NULL'){
 							if(substr($attributes['type'][$i], 0, 1) == '_' AND $operator != 'IS NULL'){		# Array-Datentyp
