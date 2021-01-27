@@ -1830,7 +1830,7 @@ function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last =
 	if ($word_pos !== false) {
 		$str_from_word_pos = substr($str, $word_pos + strlen($word));
 		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
-		return $parts[0];
+		return trim($parts[0]);
 	}
 }
 
