@@ -111,8 +111,8 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 								<? if(!in_array($this->attributes['type'][$i], array('text'))){ ?>
 							<option title="<? echo $strLowerHint; ?>" value="<" <? if($operator == '<'){ echo 'selected';} ?> ><</option>
 							<option title="<? echo $strGreaterHint; ?>" value=">" <? if($operator == '>'){ echo 'selected';} ?> >></option>
-							<option title="<? echo $strLowerEqualHint; ?>" value="<" <? if($operator == '<='){ echo 'selected';} ?> ><=</option>
-							<option title="<? echo $strGreaterEqualHint; ?>" value=">" <? if($operator == '>='){ echo 'selected';} ?> >>=</option>
+							<option title="<? echo $strLowerEqualHint; ?>" value="<=" <? if($operator == '<='){ echo 'selected';} ?> ><=</option>
+							<option title="<? echo $strGreaterEqualHint; ?>" value=">=" <? if($operator == '>='){ echo 'selected';} ?> >>=</option>
 								<? }
 								if($this->attributes['form_element_type'][$i] == 'Autovervollständigungsfeld' OR !in_array($this->attributes['type'][$i], array('int2', 'int4', 'int8', 'numeric', 'float4', 'float8', 'date', 'timestampt', 'timestamptz'))){ ?>
 							<option title="<? echo $strLikeHint; ?>" value="LIKE" <? if($operator == 'LIKE'){ echo 'selected';} ?> ><? echo $strLike; ?></option>
