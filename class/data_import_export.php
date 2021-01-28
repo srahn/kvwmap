@@ -233,7 +233,6 @@ class data_import_export {
 			unlink('.esri.gz');
 		}
 		if ($ret !== 0) {
-			echo '<br>ret: ' . $ret;
 			$custom_table['error'] = $ret;
 			return array($custom_table);
 		}
