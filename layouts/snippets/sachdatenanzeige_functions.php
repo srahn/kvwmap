@@ -405,7 +405,7 @@ include('funktionen/input_check_functions.php');
 	save = function(){
 		var open_subforms = document.querySelectorAll('.subForm:not(:empty)');
 		if(open_subforms.length > 0){
-			message('Es gibt noch offene Unterformulare, die noch nicht gespeichert wurden!');
+			message([{'type': 'info', 'msg': 'Es gibt noch offene Unterformulare, die noch nicht gespeichert wurden!'}]);
 			return;
 		}
 		form_fieldstring = enclosingForm.form_field_names.value+'';
