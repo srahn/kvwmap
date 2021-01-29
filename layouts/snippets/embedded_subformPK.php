@@ -253,41 +253,49 @@ else{ ?>
 						}
 						# neu
 						if ($layer['privileg'] > 0 AND $this->formvars['attribute_privileg'] > 0){
+							if($attributes['privileg'][$attributes['indizes'][$attributes['the_geom']]] == 1){		# falls das Geometrie-Attribut editierbar ist, im Hauptfenster öffnen
+								$target = 'root';
+							}
+							$data = array();
+							$data[] = 'go=neuer_Layer_Datensatz';
+							$data[] = 'selected_layer_id=' . $this->formvars['selected_layer_id'];
+							for ($p = 0; $p < count($this->formvars['attributenames']); $p++) {
+								$data[] = 'attributenames[' . $p . ']=' . $this->formvars['attributenames'][$p];
+								$data[] = 'values[' . $p . ']=' . $this->formvars['values'][$p];
+							}
 							if ($this->formvars['embedded'] == 'true'){
-								echo '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
-								for($p = 0; $p < count($this->formvars['attributenames']); $p++){
-									echo '&attributenames['.$p.']='.$this->formvars['attributenames'][$p];
-									echo '&values['.$p.']='.$this->formvars['values'][$p];
+								$data[] = 'fromobject=new_dataset_'.$this->formvars['targetobject'];
+								$data[] = 'weiter_erfassen='.$this->formvars['weiter_erfassen'];
+								echo '&nbsp;<a tabindex="1" id="new_'.$this->formvars['targetobject'].'" class="buttonlink" ';
+								if($target == 'root'){		# im Hauptfenster öffnen
+									echo 'target="root" href="index.php?'.implode('&', $data).'">';
 								}
-								echo '&selected_layer_id='.$this->formvars['selected_layer_id'].
-										 '&embedded=true&fromobject=new_dataset_'.$this->formvars['targetobject'].
-										 '&weiter_erfassen='.$this->formvars['weiter_erfassen'].
-										 '&targetobject='.$this->formvars['targetobject'].
-										 '&targetlayer_id='.$this->formvars['targetlayer_id'].
-										 '&targetattribute='.$this->formvars['targetattribute'].
-										 '&mime_type='.$this->formvars['mime_type'].
-										 '&reload='.$this->formvars['reload'].'\', 
-										 new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
-										 new Array(\'sethtml\', \'execute_function\'));
-										 clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$this->formvars['selected_layer_id'].'\');"><span>'.$strNewEmbeddedPK.'</span></a>';
+								else{											# eingebettet öffnen
+									$data[] = 'embedded=true';
+									$data[] = 'targetobject='.$this->formvars['targetobject'];
+									$data[] = 'targetlayer_id='.$this->formvars['targetlayer_id'];
+									$data[] = 'targetattribute='.$this->formvars['targetattribute'];
+									$data[] = 'mime_type='.$this->formvars['mime_type'];
+									$data[] = 'reload='.$this->formvars['reload'];
+									echo '
+										href="javascript:ahah(\'index.php\', \''.implode('&', $data).'\',
+										new Array(document.getElementById(\'new_dataset_'.$this->formvars['targetobject'].'\'), \'\'), 
+										new Array(\'sethtml\', \'execute_function\'));
+										clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$this->formvars['selected_layer_id'].'\');">';
+								}
+								echo '<span>'.$strNewEmbeddedPK.'</span></a>';
 							}
 							else {
-								$data = array();
-								$data[] = 'go=neuer_Layer_Datensatz';
 								$data[] = 'subform=true';
-								for ($p = 0; $p < count($this->formvars['attributenames']); $p++) {
-									$data[] = 'attributenames[' . $p . ']=' . $this->formvars['attributenames'][$p];
-									$data[] = 'values[' . $p . ']=' . $this->formvars['values'][$p];
-								}
-								$data[] = 'selected_layer_id=' . $this->formvars['selected_layer_id'];
 								$data[] = 'layer_id_mother=' . $this->formvars['targetlayer_id'];
 								$data[] = 'oid_mother=' . $this->formvars['oid_mother'];
 								$data[] = 'tablename_mother=' . $this->formvars['tablename_mother'];
-								$data[] = 'columnname_mother=' . $this->formvars['columnname_mother']; ?>
+								$data[] = 'columnname_mother=' . $this->formvars['columnname_mother']; 
+								?>
 								<a class="buttonlink"<?
 									if ($this->formvars['no_new_window'] != true) {
 										echo ' target="_blank"';
-									}	?>	href="javascript:overlay_link('&<? echo implode('&', $data); ?>')">
+									}	?>	href="javascript:overlay_link('&<? echo implode('&', $data); ?>', false, '<? echo $target; ?>')">
 									<span>&nbsp;<?php echo $strNewEmbeddedPK; ?></span>
 								</a><?
 							}
