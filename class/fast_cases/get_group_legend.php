@@ -1335,15 +1335,29 @@ class GUI {
   }
 
 	function create_layer_legend($layer, $requires = false){		
-		if(!$requires AND $layer['requires'] != '' OR $requires AND $layer['requires'] == '')return;
+		if(!$requires AND value_of($layer, 'requires') != '' OR $requires AND value_of($layer, 'requires') == '')return;
 		global $legendicon_size;
 		$visible = $this->check_layer_visibility($layer);
 		# sichtbare Layer
 		if ($visible) {
-			if ($layer['requires'] == '') {
+			if (value_of($layer, 'requires') == '') {
 				$legend = '<tr><td valign="top">';
 
-				if ($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']) {
+				if (!empty($layer['shared_from'])) {
+					$user_daten = $this->user->getUserDaten($layer['shared_from'], '', '');
+					$legend .= ' <a
+						href="javascript:void(0)"
+						onclick="message([{ \'type\': \'info\', \'msg\' : \'' . $this->strLayerSharedFrom . ' ' . $user_daten[0]['Vorname'] . ' ' . $user_daten[0]['Name'] . (!empty($user_daten[0]['organisation']) ? ' (' . $user_daten[0]['organisation'] . ')' : '') . '\'}])"
+						style="
+						font-size: 10px;
+						margin-left: -7px;
+						margin-top: 5px;
+						position: absolute;
+						"
+					><i class="fa fa-share-alt" aria-hidden="true"></i></a>';
+				}
+
+				if ($layer['queryable'] == 1 AND !value_of($this->formvars, 'nurFremdeLayer')) {
 					$input_attr['id'] = 'qLayer' . $layer['Layer_ID'];
 					$input_attr['name'] = 'qLayer' . $layer['Layer_ID'];
 					$input_attr['title'] = ($layer['queryStatus'] == 1 ? $this->deactivatequery : $this->activatequery);
@@ -1402,7 +1416,7 @@ class GUI {
 				$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="0">';
 
 				$legend .=  '<input id="thema_'.$layer['Layer_ID'].'" ';
-				if($layer['selectiontype'] == 'radio'){
+				if(value_of($layer, 'selectiontype') == 'radio'){
 					$legend .=  'type="radio" ';
 					$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$layer['Gruppe'].', '.$this->user->rolle->instant_reload.')"';
 					$this->radiolayers[$layer['Gruppe']] = value_of($this->radiolayers, $layer['Gruppe']).$layer['Layer_ID'].'|';
@@ -1425,7 +1439,7 @@ class GUI {
 				if ($this->user->rolle->showlayeroptions) {
 					$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
 				}
-				if($layer['metalink'] != ''){
+				if(value_of($layer, 'metalink') != ''){
 					if(substr($layer['metalink'], 0, 10) != 'javascript'){
 						$legend .= ' target="_blank"';
 						if(strpos($layer['metalink'], '?') === false)$layer['metalink'] .= '?';
@@ -1437,28 +1451,28 @@ class GUI {
 				else
 					$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
 				$legend .= '<span id="'.str_replace('"', '', str_replace("'", '', str_replace('-', '_', $layer['alias']))).'"';
-				if($layer['minscale'] != -1 AND $layer['maxscale'] > 0){
+				if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
 					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 				}
-				$legend .=' >'.html_umlaute($layer['alias']).'</span>';
+				$legend .=' >' . html_umlaute($layer['alias']).'</span>';
 				$legend .= '</a>';
 
 				# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
 				if ($layer['aktivStatus'] == 1 and $this->user->rolle->showlayeroptions) {
 					$legend .= '&nbsp';
 					if ($layer['rollenfilter'] != '') {
-						$legend .= '<a href="javascript:void(0);" onclick="getLayerOptions('.$layer['Layer_ID'].');">
+						$legend .= '<a href="javascript:void(0)" onclick="getLayerOptions('.$layer['Layer_ID'] . ')">
 							<i class="fa fa-filter button layerOptionsIcon" title="' . $layer['rollenfilter'] . '"></i>
 						</a>';
 					}
-					$legend .= '<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')">
+					$legend .= '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer['Layer_ID'] . ')">
 						<i class="fa fa-bars pointer button layerOptionsIcon" title="'.$this->layerOptions.'"></i>
 					</a>';
 				}
 				$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"> </div>';
 			}
 			if($layer['aktivStatus'] == 1 AND isset($layer['Class'][0]) AND $layer['Class'][0]['Name'] != ''){
-				if($layer['requires'] == '' AND $layer['Layer_ID'] > 0){
+				if(value_of($layer, 'requires') == '' AND $layer['Layer_ID'] > 0){
 					$legend .= '<input id="classes_'.$layer['Layer_ID'].'" name="classes_'.$layer['Layer_ID'].'" type="hidden" value="'.$layer['showclasses'].'">';
 				}
 				if ($layer['showclasses'] != 0) {
@@ -1511,7 +1525,7 @@ class GUI {
 								}
 							}
 							$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
-							if($s > 0){
+							if($s > 0 OR $class->status == MS_OFF){
 								$width = $height = '';
 								if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
 								if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
@@ -1573,7 +1587,7 @@ class GUI {
 		}
 
 		# unsichtbare Layer
-		if($layer['requires'] == '' AND !$visible){
+		if(value_of($layer, 'requires') == '' AND !$visible){
 			$legend .=  '
 						<tr>
 							<td valign="top">';
@@ -1637,7 +1651,7 @@ class GUI {
 		}
 		
 		# requires-Layer
-		if($layer['required'] != ''){
+		if(value_of($layer, 'required') != ''){
 			foreach($layer['required'] as $require_layer_id){
 				$legend .= $this->create_layer_legend($this->layerset['layer_ids'][$require_layer_id], true);
 			}

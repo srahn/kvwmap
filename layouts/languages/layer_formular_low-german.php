@@ -73,4 +73,6 @@
 	$strStylesLabels="Styles und Labels";
 	$strDdlAttribute="DDL Default Attribut";
 	$strIdAttribute="ID-Spalte";
+	$strSharedFrom = "Geteilt von Nutzer ID";
+	$strSharedFromHelp = "Lösche die ID wenn der Layer in der Layerlegende nicht länger als geteilt markiert werden soll.";
 ?>

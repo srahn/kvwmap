@@ -63,5 +63,6 @@
 	$this->strHatching="Schraffur";
 	$this->strShareRollenlayer = "Layer freigeben";
 	$this->strShareRollenLayerLong = "Diesen Layer für andere Nutzer in diesem WebGIS freigeben.";
+	$this->strLayerSharedFrom = "Dieser Layer wurde geteilt durch Nutzer";
 	$this->strSettings = "Einstellungen";
 ?>

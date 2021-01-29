@@ -999,6 +999,20 @@ echo '			</table>
 			if (value_of($layer, 'requires') == '') {
 				$legend = '<tr><td valign="top">';
 
+				if (!empty($layer['shared_from'])) {
+					$user_daten = $this->user->getUserDaten($layer['shared_from'], '', '');
+					$legend .= ' <a
+						href="javascript:void(0)"
+						onclick="message([{ \'type\': \'info\', \'msg\' : \'' . $this->strLayerSharedFrom . ' ' . $user_daten[0]['Vorname'] . ' ' . $user_daten[0]['Name'] . (!empty($user_daten[0]['organisation']) ? ' (' . $user_daten[0]['organisation'] . ')' : '') . '\'}])"
+						style="
+							font-size: 10px;
+							margin-left: -7px;
+							margin-top: 5px;
+							position: absolute;
+						"
+					><i class="fa fa-share-alt" aria-hidden="true"></i></a>';
+				}
+
 				if ($layer['queryable'] == 1 AND !value_of($this->formvars, 'nurFremdeLayer')) {
 					$input_attr['id'] = 'qLayer' . $layer['Layer_ID'];
 					$input_attr['name'] = 'qLayer' . $layer['Layer_ID'];
@@ -1096,18 +1110,18 @@ echo '			</table>
 				if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
 					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 				}
-				$legend .=' >'.html_umlaute($layer['alias']).'</span>';
+				$legend .=' >' . html_umlaute($layer['alias']).'</span>';
 				$legend .= '</a>';
 
 				# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
 				if ($layer['aktivStatus'] == 1 and $this->user->rolle->showlayeroptions) {
 					$legend .= '&nbsp';
 					if ($layer['rollenfilter'] != '') {
-						$legend .= '<a href="javascript:void(0);" onclick="getLayerOptions('.$layer['Layer_ID'].');">
+						$legend .= '<a href="javascript:void(0)" onclick="getLayerOptions('.$layer['Layer_ID'] . ')">
 							<i class="fa fa-filter button layerOptionsIcon" title="' . $layer['rollenfilter'] . '"></i>
 						</a>';
 					}
-					$legend .= '<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')">
+					$legend .= '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer['Layer_ID'] . ')">
 						<i class="fa fa-bars pointer button layerOptionsIcon" title="'.$this->layerOptions.'"></i>
 					</a>';
 				}
@@ -15743,6 +15757,7 @@ class db_mapObj{
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
+				l.shared_from,
 				g.id, ".$group_column.", g.obergruppe, g.order
 			FROM
 				u_rolle2used_layer AS rl,
@@ -15784,7 +15799,7 @@ class db_mapObj{
 					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
 				}
 			}
-			if($rs['alias'] == '' OR !$useLayerAliases){
+			if ($rs['alias'] == '' OR !$useLayerAliases){
 				$rs['alias'] = $rs['Name'];
 			}
 			$rs['id'] = $i;
@@ -15802,13 +15817,21 @@ class db_mapObj{
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
 				# bei withclasses == 2 werden für alle Layer die Klassen geladen,
 				# bei withclasses == 1 werden Klassen nur dann geladen, wenn der Layer aktiv ist
-				$rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes, false, $rs['classification']);
+				$rs['Class'] = $this->read_Classes($rs['Layer_ID'], $this->disabled_classes, false, $rs['classification']);
 			}
-			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
-			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
-			$layer['list'][$i]=$rs;
-			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];		# Pointer auf requires-Array
-			if($rs['requires'] != '')$requires_layer[$rs['requires']][] = $rs['Layer_ID'];		# requires-Array füllen
+			if ($rs['maxscale'] > 0) {
+				$rs['maxscale'] = $rs['maxscale'] + 0.3;
+			}
+			if ($rs['minscale'] > 0) {
+				$rs['minscale'] = $rs['minscale'] - 0.3;
+			}
+			$layer['list'][$i] = $rs;
+			# Pointer auf requires-Array
+			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];
+			if ($rs['requires'] != '') {
+				# requires-Array füllen
+				$requires_layer[$rs['requires']][] = $rs['Layer_ID'];
+			}
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer['list'][$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
 		}
@@ -17499,7 +17522,8 @@ class db_mapObj{
 				'labelmaxscale',
 				'labelminscale',
 				'connection_id',
-				'max_query_rows'
+				'max_query_rows',
+				'shared_from'
 			) AS $key
 		) {
 			$attribute_sets[] = $key . " = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");

@@ -309,12 +309,7 @@ class GUI {
 							}
 						}
 						else {
-							if ($this->Stelle->isMenueAllowed('Layer_Anzeigen') OR $layer[0]['shared_from'] == $this->user->id) {
-								if (!empty($layer[0]['shared_from'])) { echo '
-									<li>
-										<span style="color: black;">Geteilt durch Nutzer-ID: ' . $layer[0]['shared_from'] . '</span>
-									</li>';
-								} echo '
+							if ($this->Stelle->isMenueAllowed('Layer_Anzeigen') OR $layer[0]['shared_from'] == $this->user->id) { echo '
 								<li>
 									<span><a href="javascript:void(0);" onclick="toggle(document.getElementById(\'layer_properties\'))">' . ucfirst($this->properties) . '</a></span>
 								</li>

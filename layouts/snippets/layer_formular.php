@@ -679,7 +679,14 @@
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="listed" type="checkbox" value="1"<?php if ($this->formvars['listed']) echo ' checked'; ?>>
 						</td>
-					</tr>				
+					</tr>
+					<tr>
+						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSharedFrom; ?></th>
+						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="shared_from" type="text" value="<?php echo $this->formvars['shared_from']; ?>" style="width: <?php echo (strlen($this->formvars['shared_from']) * 15) + 15 ?>px">
+							<span data-tooltip="<?php echo 	$strSharedFromHelp; ?>"></span>
+						</td>
+					</tr>
 				</table>
 		</div>
 		

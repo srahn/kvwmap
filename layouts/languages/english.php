@@ -61,5 +61,6 @@
 	$this->strHatching="Hatching";
 	$this->strShareRollenlayer = "Share Layer";
 	$this->strShareRollenLayerLong = "Share this layer for other user in this WebGIS";
+	$this->strLayerSharedFrom = "This Layer was shared by user";
 	$this->strSettings = "Settings";
 ?>
