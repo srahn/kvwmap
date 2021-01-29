@@ -452,28 +452,21 @@ class stelle {
 		return $ret[1];
 	}
 
-	function getStellen($order, $user_id = 0) {
+	function getStellen($order, $user_id = 0, $where = "1") {
 		global $admin_stellen;
-		$where = '';
-		if ($order != '') {
-			$order = " ORDER BY `" . $order . "`";
-		}
-
-		if ($user_id > 0 AND !in_array($this->id, $admin_stellen)) {
-			$where = "
-				LEFT JOIN `rolle` AS r ON s.ID = r.stelle_id
-				WHERE r.user_id = ".$user_id." OR r.stelle_id IS NULL
-			";
-		}
-
 		$sql = "
 			SELECT
 				s.ID,
 				s.Bezeichnung
 			FROM
-				`stelle` AS s" .
-			$where .
-			$order . "
+				`stelle` AS s" . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " LEFT JOIN
+				`rolle` AS r ON s.ID = r.stelle_id
+				" : "") . "
+			WHERE " .
+				$where . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " AND
+				(r.user_id = " . $user_id . " OR r.stelle_id IS NULL)" : "") . "
+			ORDER BY " .
+				($order != '' ? "`" . $order . "`" : "s.`Bezeichnung`") . "
 		";
 		#echo '<br>sql: ' . $sql;
 
@@ -481,8 +474,8 @@ class stelle {
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		while($rs = $this->database->result->fetch_array()) {
-			$stellen['ID'][]=$rs['ID'];
-			$stellen['Bezeichnung'][]=$rs['Bezeichnung'];
+			$stellen['ID'][] = $rs['ID'];
+			$stellen['Bezeichnung'][] = $rs['Bezeichnung'];
 		}
 		return $stellen;
 	}
