@@ -20,6 +20,7 @@
 			}
 		</script>
 		<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
+			<div id="message_box"></div>		<!-- muss innerhalb des form stehen -->
 			<div id="contentdiv" style="background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;width: fit-content;width: -moz-fit-content;position:relative;">
 				<table border="0" height="100%" cellpadding="0" cellspacing="0" style="width: 100%">
 					<tr>
