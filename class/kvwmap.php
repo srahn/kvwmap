@@ -3957,9 +3957,28 @@ echo '			</table>
 			<html>
 				<head>
 					<title>Kartenbild</title>
+					<script type=\"text/javascript\">
+						function copyImageById(Id){
+							var imgs = document.createElement('img');
+							imgs.src = document.getElementById(Id).src;
+							var bodys = document.body;
+							bodys.appendChild(imgs);							
+							if(document.createRange){
+								var myrange = document.createRange();
+								myrange.setStartBefore(imgs);
+								myrange.setEndAfter(imgs);
+								myrange.selectNode(imgs);
+							}															
+							var sel = window.getSelection();
+							sel.addRange(myrange);
+							var successful = document.execCommand('copy');							
+							bodys.removeChild(imgs);
+						}
+					</script>
 				</head>
 				<body style=\"text-align:center\">
-					<img id=\"mapimg\" src=\"".TEMPPATH_REL.$jpgfile."\" style=\"box-shadow:  0px 0px 14px #777;\">
+					<img id=\"mapimg\" src=\"".TEMPPATH_REL.$jpgfile."\" style=\"box-shadow:  0px 0px 14px #777;\"><br><br>
+					<input type=\"button\" onclick=\"copyImageById('mapimg');\" value=\"Bild kopieren\">
 				</body>
 			</html>
 			";

@@ -42,7 +42,7 @@
 █
 var button_bottom = document.getElementById('sub_savebutton').getBoundingClientRect().bottom;
 if(button_bottom > window.innerHeight){
-	window.scrollBy({top: button_bottom - window.innerHeight + 40, behavior: 'smooth'});		// wegen Overlayfooter geht kein scrollintoview
+	window.scrollBy({top: button_bottom - window.innerHeight + 70, behavior: 'smooth'});		// wegen Overlayfooter geht kein scrollintoview
 }
   
  

@@ -727,6 +727,7 @@
             }
             else{
             	$GUI->flurstAnzeige($FlurstKennz);
+							$GUI->zoomed = true;
             }
           }
         } # ende Suche nach Flurstück

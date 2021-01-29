@@ -1551,7 +1551,6 @@ a:hover .preview_image{
 	padding: 0px;
 	max-width: 480px;
 	text-align: left;
-	word-break: break-all;
 }
 
 .dstable{
@@ -1649,6 +1648,14 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 	border: 1px solid grey;
 	border-collapse: collapse;
 	margin: 2px 2px 2px 0;
+}
+
+.subForm:not(:empty){
+	border: 1px solid #bbb;
+	margin: 10px 5px 10px 5px;
+	box-shadow: 0px 0px 4px #999;
+	padding: 0 5px 5px 0;
+	background: #fdfdfd;
 }
 
 .subFormListItem{
