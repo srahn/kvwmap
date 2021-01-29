@@ -527,8 +527,8 @@ class stelle {
 		$this->debug->write("<p>file:stelle.php class:getChildren - Abfragen aller Kindstellen<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
-
-		while($rs = $this->database->result->fetch_assoc()) {
+		$result = $this->database->result;
+		while($rs = $result->fetch_assoc()) {
 			$children[] = ($return == 'only_ids' ? $rs['ID'] : $rs);
 			if($recursive){
 				$children = array_merge($children, $this->getChildren($rs['ID'], $order, $return, true));
