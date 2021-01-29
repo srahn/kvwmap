@@ -4,6 +4,9 @@
  $strAndHighlight=" and highlight object";
  $strAndHide=" and hide other objects";
  $strSelectAll="select all";
+ $strAllSelected = "Selection finished";
+ $strDeselectAll = "deselect all";
+ $strAllDeselected = "Deselection finished";
  $strdelete="delete";
  $strSelectedDatasets="selected records";
  $strAllDatasets="all records found";
@@ -13,6 +16,7 @@
  $strPrint="print";
  $strCreateChart="create chart";
  $strSelectAllShown="Select all shown records";
+ $strDeselectAllShown = "Deselect all shown records";
  $strSelectThisDataset="select record";
  $strNoMatch="No objects found in this layer!";
  $strDeleteThisDataset="delete record";

@@ -189,8 +189,10 @@
    	$datastring.=") ";
 		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
 		# Filter
-		$filter = $dbmap->getFilter($layerset[0]['Layer_ID'], $GUI->Stelle->id);
-		if($filter != '')$datastring.= ' AND '.$filter;
+		if($layerset[0]['Layer_ID'] != ''){
+			$filter = $dbmap->getFilter($layerset[0]['Layer_ID'], $GUI->Stelle->id);
+			if($filter != '')$datastring.= ' AND '.$filter;
+		}
 		$datastring.=") as foo using unique " . $end;
     $group = $dbmap->getGroupbyName('Suchergebnis');
     if($group != ''){
@@ -725,6 +727,7 @@
             }
             else{
             	$GUI->flurstAnzeige($FlurstKennz);
+							$GUI->zoomed = true;
             }
           }
         } # ende Suche nach Flurstück

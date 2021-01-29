@@ -165,6 +165,10 @@ function ahahDone(url, targets, req, actions) {
 	}
 }
 
+highlight_object = function(layer_id, oid){
+	root.ahah('index.php', 'go=tooltip_query&querylayer_id='+layer_id+'&oid='+oid, new Array(root.document.GUI.result, ''), new Array('setvalue', 'execute_function'));
+}
+
 add_calendar = function(event, elementid, type, setnow){
 	event.stopPropagation();
 	remove_calendar();
@@ -346,18 +350,18 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 	console.log('Show Message: %o: ', messages);
 	confirm_value = confirm_value || 'ok';
 	var messageTimeoutID;
-	var msgBoxDiv = root.$('#message_box');
+	var msgBoxDiv = $('#message_box');
 	if (msgBoxDiv.is(':visible')) {
-		root.$('#message_box').stop().show();
+		$('#message_box').stop().show();
 		msgBoxDiv.stop().css('opacity', '1').show();
 	}
 	else {
 		msgBoxDiv.html('');
 	}
-	if (root.document.getElementById('messages') == null) {
+	if (document.getElementById('messages') == null) {
     msgBoxDiv.append('<div id="messages"></div>');
   }
-	var msgDiv = root.$('#messages');
+	var msgDiv = $('#messages');
 	var confirm = false;
 
 	t_visible   = (typeof t_visible   !== 'undefined') ? t_visible   : 1000;		// Zeit, die die Message-Box komplett zu sehen ist
@@ -395,18 +399,18 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 	};
 	//	,confirmMsgDiv = false;
 
-	if (!root.$.isArray(messages)) {
+	if (!$.isArray(messages)) {
 		messages = [{
 			'type': 'warning',
 			'msg': messages
 		}];
 	}
 
-	root.$.each(messages, function (index, msg) {
+	$.each(messages, function (index, msg) {
 		msg.type = (['notice', 'info', 'error'].indexOf(msg.type) > -1 ? msg.type : 'warning');
 		msgDiv.append('<div class="message-box message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
-		if (types[msg.type].confirm && root.document.getElementById('message_ok_button') == null) {
-			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="root.$(\'#message_box\').hide();" value="' + confirm_value + '" style="margin: 10px 0px 0px 0px;">');
+		if (types[msg.type].confirm && document.getElementById('message_ok_button') == null) {
+			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="$(\'#message_box\').hide();" value="' + confirm_value + '" style="margin: 10px 0px 0px 0px;">');
 		}
 	});
 	
@@ -414,12 +418,12 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 		msgBoxDiv.show();
 	}
 
-	if (root.document.getElementById('message_ok_button') == null) {		// wenn kein OK-Button da ist, ausblenden
+	if (document.getElementById('message_ok_button') == null) {		// wenn kein OK-Button da ist, ausblenden
     messageTimeoutID = setTimeout(function() { msgBoxDiv.fadeOut(t_fade); }, t_visible);
 	}
   else {
 		clearTimeout(messageTimeoutID);
-    root.$('#message_box').stop().fadeIn();
+    $('#message_box').stop().fadeIn();
   }
 
 }
@@ -720,20 +724,26 @@ function overlay_submit(gui, start, target){
 	gui.mime_type.value = '';
 }
 
-function overlay_link(data, start){
+function overlay_link(data, start, target){
 	// diese Funktion öffnet bei Aufruf aus dem Overlay-Fenster ein Browser-Fenster (bzw. benutzt es falls schon vorhanden) mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
 	if(checkForUnsavedChanges()){
-		if(querymode == 1 && (start || currentform.name == 'GUI2')){
-			if(query_tab != undefined && query_tab.closed){		// wenn Fenster geschlossen wurde, resized zuruecksetzen
-				root.resized = 0;
+		if(target == 'root'){
+			root.location.href = 'index.php?'+data;
+		}
+		else{
+			if(querymode == 1 && (start || currentform.name == 'GUI2')){
+				if(query_tab != undefined && query_tab.closed){		// wenn Fenster geschlossen wurde, resized zuruecksetzen
+					root.resized = 0;
+				}
+				else if(start && browser == 'firefox' && query_tab != undefined && root.resized < 2){	// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
+					query_tab.close();
+				}
+				query_tab = root.window.open("index.php?"+data+"&mime_type=overlay_html", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
+				if(root.document.GUI.CMD != undefined)root.document.GUI.CMD.value = "";
 			}
-			else if(start && browser == 'firefox' && query_tab != undefined && root.resized < 2){	// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
-				query_tab.close();
+			else{
+				window.location.href = 'index.php?'+data;
 			}
-			query_tab = root.window.open("index.php?"+data+"&mime_type=overlay_html", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
-			if(root.document.GUI.CMD != undefined)root.document.GUI.CMD.value = "";
-		}else{
-			window.location.href = 'index.php?'+data;
 		}
 	}
 }

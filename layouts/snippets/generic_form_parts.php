@@ -241,22 +241,53 @@
 		}
 
 		###### normal #####
-		if ($field_id != NULL) $id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
-		else $id = $layer_id.'_'.$name.'_'.$k;	# oberste Ebene ($id kann eigentlich für alle Typen verwendet werden)
-		if($attributes['constraints'][$j] != '' AND !in_array($attributes['constraints'][$j], array('PRIMARY KEY', 'UNIQUE'))){
-			if($attributes['privileg'][$j] == '0' OR $lock[$k]){
-				$size1 = 1.3*strlen($dataset[$attributes['name'][$j]]);
-				$datapart .= '<input class="'.$field_class.'" readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$size1.'" type="text" name="'.$fieldname.'" value="' . htmlspecialchars($value) . '">';
-			}
-			else{
-				$datapart .= '<select class="'.$field_class.'" id="'.$layer_id.'_'.$attributes['name'][$j].'_'.$k.'" onchange="'.$onchange.'" title="'.$attributes['alias'][$j].'"  style="'.$select_width.'font-size: '.$fontsize.'px" name="'.$fieldname.'">';
-				if($attributes['nullable'][$j] != '0' OR $gui->new_entry == true)$datapart .= '<option value="">-- '.$gui->strPleaseSelect.' --</option>';
-				for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-					$datapart .= '<option ';
-					if($attributes['enum_value'][$j][$e] == $dataset[$attributes['name'][$j]]){
-						$datapart .= 'selected ';
+		if ($field_id != NULL) {
+			$id = $field_id; # wenn field_id übergeben wurde (nicht die oberste Ebene)
+		}
+		else {
+			$id = $layer_id.'_'.$name.'_'.$k;	# oberste Ebene ($id kann eigentlich für alle Typen verwendet werden)
+		}
+		if ($attributes['constraints'][$j] != '' AND !in_array($attributes['constraints'][$j], array('PRIMARY KEY', 'UNIQUE'))) {
+			if ($attributes['privileg'][$j] == '0' OR $lock[$k]) {
+				$output_value = $value;
+				if (is_array($attributes['enum_value'][$j]) AND count($attributes['enum_value'][$j]) > 0) {
+					$enum_index = array_search($value, $attributes['enum_value'][$j]);
+					if ($enum_index !== false) {
+						$output_value = $attributes['enum_output'][$j][$enum_index];
 					}
-					$datapart .= 'value="'.$attributes['enum_value'][$j][$e].'">'.$attributes['enum_output'][$j][$e].'</option>';
+				}
+				$size1 = 1.3 * strlen($output_value);
+				$datapart .= '<input
+					class="' . $field_class . '"
+					readonly
+					style="
+						border: 0px;
+						background-color: transparent;
+						font-size: ' . $fontsize . 'px;
+					"
+					size="' . $size1 . '"
+					type="text"
+					name="' . $fieldname . '" value="' . htmlspecialchars($output_value) . '"
+				>';
+			}
+			else {
+				$datapart .= '<select
+					class="' . $field_class . '"
+					id="' . $layer_id . '_' . $attributes['name'][$j] . '_' . $k . '"
+					onchange="' . $onchange.'"
+					title="'.$attributes['alias'][$j] . '"
+					style="' . $select_width . 'font-size: ' . $fontsize.'px"
+					name="' . $fieldname . '"
+				>';
+				if ($attributes['nullable'][$j] != '0' OR $gui->new_entry == true) {
+					$datapart .= '<option value="">-- '.$gui->strPleaseSelect.' --</option>';
+				}
+				for ($e = 0; $e < count($attributes['enum_value'][$j]); $e++) {
+					$datapart .= '<option'
+						. ($attributes['enum_value'][$j][$e] == $dataset[$attributes['name'][$j]] ? ' selected' : '')
+						. ' value="' . $attributes['enum_value'][$j][$e] . '">'
+							. $attributes['enum_output'][$j][$e]
+						. '</option>';
 				}
 				$datapart .= '</select>';
 			}
@@ -293,7 +324,7 @@
 					}
 				}break;
 
-				case 'Auswahlfeld' : case 'Auswahlfeld_not_saveable' : {					
+				case 'Auswahlfeld' : case 'Auswahlfeld_not_saveable' : {
 					if(is_array($attributes['dependent_options'][$j])){
 						$enum_value = $attributes['enum_value'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 						$enum_output = $attributes['enum_output'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
@@ -305,7 +336,7 @@
 					if($attributes['nullable'][$j] != '0')$strPleaseSelect = '-';
 					if($gui->new_entry == true)$strPleaseSelect = '-- '.$gui->strPleaseSelect.' --';
 					$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class, $attributes['datatype_id'][$j]);
-				}break;
+				} break;
 				
 				case 'Autovervollständigungsfeld' : {
 					$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $change_all, $size, $onchange, $field_class);
@@ -1042,7 +1073,7 @@
 			$req = array();
 		}
 		if($privileg == '0' OR $lock){
-			for($e = 0; $e < count($enum_value); $e++){
+			for($e = 0; $e < @count($enum_value); $e++){
 				if($enum_value[$e] == $value){
 					$auswahlfeld_output = $enum_output[$e];
 					$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;

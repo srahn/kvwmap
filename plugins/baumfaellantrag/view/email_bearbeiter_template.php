@@ -1,6 +1,6 @@
 <?php
 	# E-Mail, die an den Sachbearbeiter gesendet wird. 
-	$mail_bearbeiter['from_email'] = $mail_bearbeiter['reply_email'] = ($data['email'] != '') ? $data['email'] : $data['authority_email'];
+	$mail_bearbeiter['from_email'] = $mail_bearbeiter['reply_email'] = (MAILREPLYADDRESS != '' ? MAILREPLYADDRESS : $data['authority_email']);
 	$mail_bearbeiter['from_name'] = $data['forename'] . ' ' . $data['surname'];
 
 	$mail_bearbeiter['to_email'] = $data['authority_email'];

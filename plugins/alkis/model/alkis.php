@@ -786,13 +786,13 @@ class ALKIS {
 	      if($formvars['grundbuchbezirkschl']){ $csv .= $flst->Grundbuchbezirk['schluessel'].';';}
 	      if($formvars['grundbuchbezirkname']){ $csv .= $flst->Grundbuchbezirk['name'].';';}
 	      if($formvars['lagebezeichnung']){
-	        $anzStrassen=count($flst->Adresse);
+	        $anzStrassen = @count($flst->Adresse);
 	        for ($s=0;$s<$anzStrassen;$s++) {
 	          $csv .= $flst->Adresse[$s]["gemeindename"].' ';
 	          $csv .= $flst->Adresse[$s]["strassenname"].' ';
 	          $csv .= $flst->Adresse[$s]["hausnr"].' ';
 	        }
-	        $anzLage=count($flst->Lage);
+	        $anzLage = @count($flst->Lage);
 	        $Lage='';
 	        for ($j=0;$j<$anzLage;$j++) {
 	          $Lage.=' '.$flst->Lage[$j];
@@ -952,12 +952,12 @@ class ALKIS {
 			}
 
         
-        $csv .= $flst->Nutzung[$n][flaeche].';';
-        $csv .= $flst->Nutzung[$n][nutzungskennz].';';
-        if($flst->Nutzung[$n][abkuerzung]!='') {
-          $csv .= $flst->Nutzung[$n][abkuerzung].'-';
+        $csv .= $flst->Nutzung[$n]['flaeche'].';';
+        $csv .= $flst->Nutzung[$n]['nutzungskennz'].';';
+        if($flst->Nutzung[$n]['abkuerzung']!='') {
+          $csv .= $flst->Nutzung[$n]['abkuerzung'].'-';
         }
-        $csv .= $flst->Nutzung[$n][bezeichnung].';';             
+        $csv .= $flst->Nutzung[$n]['bezeichnung'].';';             
        
       	$csv .= ';';
 
@@ -1043,7 +1043,7 @@ class ALKIS {
       if($formvars['grundbuchbezirkschl']){ $csv .= $flst->Grundbuchbezirk['schluessel'].';';}
       if($formvars['grundbuchbezirkname']){ $csv .= $flst->Grundbuchbezirk['name'].';';}
       if($formvars['lagebezeichnung']){
-        $anzStrassen=count($flst->Adresse);
+			$anzStrassen = @count($flst->Adresse);
         for ($s=0;$s<$anzStrassen;$s++) {
           $csv .= $flst->Adresse[$s]["gemeindename"].' ';
           $csv .= $flst->Adresse[$s]["strassenname"].' ';
@@ -1142,12 +1142,12 @@ class ALKIS {
         $anzNutzung=count($flst->Nutzung);
         for ($j = 0; $j < $anzNutzung; $j++){
         	if($j > 0)$csv .= ' | ';
-          $csv .= $flst->Nutzung[$j][flaeche].' m2 ';
-          $csv .= $flst->Nutzung[$j][nutzungskennz].' ';
-          if($flst->Nutzung[$j][abkuerzung]!='') {
-            $csv .= $flst->Nutzung[$j][abkuerzung].'-';
+          $csv .= $flst->Nutzung[$j]['flaeche'].' m2 ';
+          $csv .= $flst->Nutzung[$j]['nutzungskennz'].' ';
+          if($flst->Nutzung[$j]['abkuerzung']!='') {
+            $csv .= $flst->Nutzung[$j]['abkuerzung'].'-';
           }
-          $csv .= $flst->Nutzung[$j][bezeichnung];
+          $csv .= $flst->Nutzung[$j]['bezeichnung'];
         }
         $csv .= ';';
       }
@@ -1457,7 +1457,7 @@ class ALKIS {
           }
           # Ausgabe Lagebezeichnung falls vorhanden
           $Lagebezeichnung=$flst->Lage;
-          for ($i=0;$i<count($Lagebezeichnung);$i++) {
+          for ($i=0; $i < @count($Lagebezeichnung); $i++) {
             $pdf->addText($col2,$row-=12,$fontSize,utf8_decode($Lagebezeichnung[$i]));
           }
 

@@ -6,15 +6,6 @@
 
 	<?  
 	if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
-		# falls das Geometrie-Attribut editierbar ist, zum nicht eingebetteten Formular wechseln
-		if($this->qlayerset[0]['attributes']['privileg'][$this->qlayerset[0]['attributes']['indizes'][$this->qlayerset[0]['attributes']['the_geom']]] == 1){
-			$this->formvars['embedded'] = '';
-			echo '
-			<script type="text/javascript">
-				location.href = \'index.php?'.http_build_query($this->formvars).'\'
-			</script>';
-			exit;
-		}
 		$i = 0;
 		if($this->qlayerset[$i]['template']=='' OR in_array($this->qlayerset[$i]['template'], array('generic_layer_editor.php', 'generic_layer_editor_2.php'))){
 	   	include(SNIPPETS.'generic_layer_editor_2_embedded.php');
@@ -58,6 +49,6 @@
 var button_bottom = document.getElementById('sub_savebutton').getBoundingClientRect().bottom;
 document.getElementById('<? echo $this->formvars['fromobject'] ?>').querySelectorAll('[tabindex="1"]')[0].focus();
 if(button_bottom > window.innerHeight){
-	window.scrollBy({top: button_bottom - window.innerHeight + 40, behavior: 'smooth'});		// wegen Overlayfooter geht kein scrollintoview
+	window.scrollBy({top: button_bottom - window.innerHeight + 70, behavior: 'smooth'});		// wegen Overlayfooter geht kein scrollintoview
 }
  

@@ -520,7 +520,7 @@ class data_import_export {
 			if(move_uploaded_file($_files['file1']['tmp_name'], $this->pointfile)){
 				$rows = file($this->pointfile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 				$delimiters = implode($this->delimiters);
-				while(count($this->delimiters) > 0 AND count($this->columns) < 2){
+				while(@count($this->delimiters) > 0 AND @count($this->columns) < 2){
 					$this->delimiter = array_shift($this->delimiters);
 					$i = 0;
 					while(trim($rows[$i], "$delimiters\n\r") == ''){	// Leerzeilen überspringen bis zur ersten Zeile mit Inhalt
@@ -579,7 +579,7 @@ class data_import_export {
 					$komma = true;
 				}
 				else{
-					$$formvars['column'.$i] = $columns[$i];			# Hier werden $x und $y gesetzt (nicht das doppelte $ wegnehmen!)
+					${$formvars['column'.$i]} = $columns[$i];			# Hier werden $x und $y gesetzt (nicht das doppelte $ wegnehmen!)
 				}
 			}
 			$x = str_replace(',', '.', $x);
@@ -1277,14 +1277,20 @@ class data_import_export {
 					foreach($result[$i] As $key => $value){
 						$j = $this->attributes['indizes'][$key];
 						if($this->attributes['form_element_type'][$j] == 'Dokument' AND $value != ''){
-							$parts = explode('&original_name=', $value);
-							if($parts[1] == '')$parts[1] = basename($parts[0]);		# wenn kein Originalname da, Dateinamen nehmen
-							if(file_exists($parts[0])){
-								if(file_exists(IMAGEPATH.$folder.'/'.$parts[1])){		# wenn schon eine Datei mit dem Originalnamen existiert, wird der Dateiname angehängt
-									$file_parts = explode('.', $parts[1]);
-									$parts[1] = $file_parts[0].'_'.basename($parts[0]);
+							$docs = array($value);
+							if(substr($this->attributes['type'][$j], 0, 1) == '_'){		# Array
+								$docs = explode(',', trim($value, '{}'));
+							}
+							foreach($docs as $doc){
+								$parts = explode('&original_name=', $doc);
+								if($parts[1] == '')$parts[1] = basename($parts[0]);		# wenn kein Originalname da, Dateinamen nehmen
+								if(file_exists($parts[0])){
+									if(file_exists(IMAGEPATH.$folder.'/'.$parts[1])){		# wenn schon eine Datei mit dem Originalnamen existiert, wird der Dateiname angehängt
+										$file_parts = explode('.', $parts[1]);
+										$parts[1] = $file_parts[0].'_'.basename($parts[0]);
+									}
+									copy($parts[0], IMAGEPATH.$folder.'/'.$parts[1]);
 								}
-								copy($parts[0], IMAGEPATH.$folder.'/'.$parts[1]);
 							}
 							$zip = true;
 						}
@@ -1362,13 +1368,13 @@ class data_import_export {
 			$err = 'Abfrage fehlgeschlagen!';
 		}
 		if ($err == '') {
-			ob_end_clean();
-			header('Content-type: '.$contenttype);
-			header("Content-disposition:	attachment; filename=".basename($exportfile));
-			#header("Content-Length: ".filesize($exportfile));			# hat bei großen Datenmengen dazu geführt, dass der Download abgeschnitten wird
-			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-			header('Pragma: public');
-			readfile($exportfile);
+			  ob_end_clean();
+			  header('Content-type: '.$contenttype);
+			  header("Content-disposition:	attachment; filename=".basename($exportfile));
+			  #header("Content-Length: ".filesize($exportfile));			# hat bei großen Datenmengen dazu geführt, dass der Download abgeschnitten wird
+			  header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+			  header('Pragma: public');
+			  readfile($exportfile);
 		}
 		else {
 			$GUI->add_message('error', $err);
