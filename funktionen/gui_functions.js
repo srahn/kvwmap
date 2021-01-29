@@ -350,18 +350,18 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 	console.log('Show Message: %o: ', messages);
 	confirm_value = confirm_value || 'ok';
 	var messageTimeoutID;
-	var msgBoxDiv = root.$('#message_box');
+	var msgBoxDiv = $('#message_box');
 	if (msgBoxDiv.is(':visible')) {
-		root.$('#message_box').stop().show();
+		$('#message_box').stop().show();
 		msgBoxDiv.stop().css('opacity', '1').show();
 	}
 	else {
 		msgBoxDiv.html('');
 	}
-	if (root.document.getElementById('messages') == null) {
+	if (document.getElementById('messages') == null) {
     msgBoxDiv.append('<div id="messages"></div>');
   }
-	var msgDiv = root.$('#messages');
+	var msgDiv = $('#messages');
 	var confirm = false;
 
 	t_visible   = (typeof t_visible   !== 'undefined') ? t_visible   : 1000;		// Zeit, die die Message-Box komplett zu sehen ist
@@ -399,18 +399,18 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 	};
 	//	,confirmMsgDiv = false;
 
-	if (!root.$.isArray(messages)) {
+	if (!$.isArray(messages)) {
 		messages = [{
 			'type': 'warning',
 			'msg': messages
 		}];
 	}
 
-	root.$.each(messages, function (index, msg) {
+	$.each(messages, function (index, msg) {
 		msg.type = (['notice', 'info', 'error'].indexOf(msg.type) > -1 ? msg.type : 'warning');
 		msgDiv.append('<div class="message-box message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
-		if (types[msg.type].confirm && root.document.getElementById('message_ok_button') == null) {
-			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="root.$(\'#message_box\').hide();" value="' + confirm_value + '" style="margin: 10px 0px 0px 0px;">');
+		if (types[msg.type].confirm && document.getElementById('message_ok_button') == null) {
+			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="$(\'#message_box\').hide();" value="' + confirm_value + '" style="margin: 10px 0px 0px 0px;">');
 		}
 	});
 	
@@ -418,12 +418,12 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 		msgBoxDiv.show();
 	}
 
-	if (root.document.getElementById('message_ok_button') == null) {		// wenn kein OK-Button da ist, ausblenden
+	if (document.getElementById('message_ok_button') == null) {		// wenn kein OK-Button da ist, ausblenden
     messageTimeoutID = setTimeout(function() { msgBoxDiv.fadeOut(t_fade); }, t_visible);
 	}
   else {
 		clearTimeout(messageTimeoutID);
-    root.$('#message_box').stop().fadeIn();
+    $('#message_box').stop().fadeIn();
   }
 
 }
