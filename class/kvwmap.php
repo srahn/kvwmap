@@ -11508,7 +11508,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         $menues = explode(', ',$this->formvars['selmenues']);
         $functions = explode(', ',$this->formvars['selfunctions']);
         $frames = explode(', ',$this->formvars['selframes']);
-        $layer = explode(', ',$this->formvars['sellayer']);
+        $layer = array_filter(explode(', ',$this->formvars['sellayer']));
         $users = explode(', ',$this->formvars['selusers']);
         # wenn Stelle ausgewählt, Daten kopieren
         if($this->formvars['selected_stelle_id']){
