@@ -20,6 +20,7 @@ class Gml_extractor {
 	function extract_gml_class($classname) {
 		global $GUI;
 		$this->input_epsg = $this->get_source_srid();
+		$this->xsd_location = '/var/www/html/modell/xsd/' . $this->get_xsd_version() . '/XPlanung-Operationen.xsd';
 		# TODO should the target EPSG be stelle or rolle specific?
 		$this->epsg = $GUI->Stelle->epsg_code;
 
@@ -33,8 +34,10 @@ class Gml_extractor {
 		# It must be assumed that source data conforms to the GML standard (left hand order) on all geometries
 		# For Polygons alone, this could be deduced through an inside/outside check (e.g. with ST_ForceRHR())
 		$fachobjekte_tables_and_geometries = $this->get_fachobjekte_geometry_tables_attributes($this->gmlas_schema);
-		foreach($fachobjekte_tables_and_geometries as $fachobjekt_table_and_geometry) {
-			$this->revert_vertex_order_for_table_with_geom_column_in_schema($fachobjekt_table_and_geometry['table_name'],$fachobjekt_table_and_geometry['column_name'],$this->gmlas_schema);
+		if(!empty($fachobjekte_tables_and_geometries)) {			
+			foreach($fachobjekte_tables_and_geometries as $fachobjekt_table_and_geometry) {
+				$this->revert_vertex_order_for_table_with_geom_column_in_schema($fachobjekt_table_and_geometry['table_name'],$fachobjekt_table_and_geometry['column_name'],$this->gmlas_schema);
+			}
 		}
 
 		$layername = '';
@@ -132,7 +135,7 @@ class Gml_extractor {
 			}
 			#echo 'could not find XPlan srsName within double quotes. checking single quotes:<br>';
 		}
-		echo $matched_epsg_str[1] . '<br>';
+		#echo $matched_epsg_str[1] . '<br>';
 		if(isset($matched_epsg_str[1])) {
 			// e.g. for EPSG:25832
 			$epsg_elements_array = explode(':',$matched_epsg_str[1]);
@@ -143,17 +146,73 @@ class Gml_extractor {
 			}
 		}
 		else {
-			$msg  = 'could not find Envelope srs within double quotes or single quotes<br>';
-			$msg .= 'Please make sure that an Envelope element is proviced according to XPlan-Konformitaetsbedingung 2.1.3.1, e.g. in the following style: ';
+			$msg  = 'Konnte das SRS des XPlan-Envelope nicht innerhalb von Doppelten oder einfachen Anführungszeichen finden'; 
+			$msg .= 'Bitte stellen Sie sicher, das ein Envelope-Element nach XPlan-Konformitaetsbedingung 2.1.3.1 vorhanden ist, z.B. wie folgt:<br>';
 			$msg .= '<pre>' . htmlentities('<gml:boundedBy><gml:Envelope srsName="EPSG:25833">...</gml:Envelope></gml:boundedBy>') . '</pre>...<br>';
-			$msg .= 'A fallback SRS of ' . $this->fallback_epsg . ' will be used.<br>';
-			$GUI->add_message('Warning', $msg);
+			$msg .= 'Ein Fallback SRS mit EPSG ' . $this->fallback_epsg . ' wird benutzt.<br>';
+			$GUI->add_message('warning', $msg);
 			$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
 			$GUI->output();
 		}
 		// fallback value
 		return $epsg;
 	}
+	/* 
+	* parses current xplan-version from file
+	* does not check whether current version is supported
+	*/
+	function get_xsd_version() {
+		global $GUI;
+		//will check if current version is supported or not
+		$version = '5.1'; //default
+		$lines = file($this->gml_location);
+		$matched_ns_str;
+		foreach ($lines as $lineNumber => $line) {
+			if(strpos($line, 'XPlanAuszug') === false) {
+				continue;
+			}
+			# needs to check for both single and double quotes as both are permitted by XML spec
+			if (preg_match('/xplan="([^"]+)"/', $line, $matched_ns_str)) {
+				break; #found it
+			}
+			if (preg_match('/xplan=\'([^"]+)\'/', $line, $matched_ns_str)) {
+				break; #found it
+			}
+			if (preg_match('/xplan=\'([^"]+)\'/', $line, $matched_ns_str)) {
+				break; #found it
+			} else {
+				$msg  = 'Konnte XPlanAuszug oder Namespace xplan nicht in Datei finden.<br>';
+				$msg .= 'Überprüfen Sie die Validität der XPlanung-Datei';
+				$GUI->add_message('warning', $msg);
+				$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
+				$GUI->output();
+				#echo 'Could not find XPlanAuszug. XPlan-file is not valid';
+			}
+			#echo 'could not find XPlan srsName within double quotes. checking single quotes:<br>';
+		}
+		#echo $matched_ns_str[1] . '<br>';
+		if (preg_match('/5\/1/', $matched_ns_str[1], $matched_version_str)) {
+				echo $matched_ns_str[1] . '<br>';
+				$version = '5.1';
+				break; #found it
+		} else if (preg_match('/5.1/', $matched_ns_str[1], $matched_version_str)) {
+				$version = '5.1';
+		} else if (preg_match('/5\/2/', $matched_ns_str[1], $matched_version_str)) {
+				$version = '5.2';
+		} else if (preg_match('/5.2/', $matched_ns_str[1], $matched_version_str)) {
+				$version = '5.2';
+		} else {
+			$msg  = 'Die XPlan-GML Version der Datei kann nicht identifiziert werden.<br>';
+			$msg .= 'Bitte überprüfen Sie, ob die XPlan-Version valide ist und der Namespace in Version 5.1 oder 5.2 liegt<br>';
+			$msg .= 'Es wird eine Fallback-Version 5.1 verwendet.<br>';
+			$GUI->add_message('warning', $msg);
+			$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
+			$GUI->output();
+			#echo 'Could not identify a valid XPlan version.<br>Please make sure that the XPlan-version is valid an in namespace version 5.2 or 5.1.<br>A fallback version of ' . $version . ' will be used.<br>';
+		}
+		#echo 'version:' . $version;
+		return $version;
+	}	
 
 	/*
 	* Returns TRUE OR FALSE, depending on whether the schema exists
