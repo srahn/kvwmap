@@ -320,9 +320,9 @@ class account {
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
 			$query_array[] = $this->database->execSQL($sql);
-			if (!$query_array[count($query_array)-1]->success) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			if (!$this->database->success) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 			$NumbOfAccessTimeIDs = array();
-			while ($rs = $query_array[count($query_array) - 1]['result']->fetch_array()) {
+			while ($rs = $this->database->result->fetch_array()) {
 				$NumbOfAccessTimeIDs[] = $rs;
 			}
 			$NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
@@ -407,9 +407,9 @@ class account {
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToShape:<br>".$sql,4);
 			$query_array[] = $this->database->execSQL($sql);
-			if (!$query_array[count($query_array)-1]->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
 			$NumbOfAccessTimeIDs = array();
-			while ($rs = $query_array[count($query_array) - 1]->result->fetch_array()) {
+			while ($rs = $this->database->result->fetch_array()) {
 				$NumbOfAccessTimeIDs[]=$rs;
 			}
 			$NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
@@ -499,9 +499,9 @@ class account {
 
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToALB:<br>".$sql,4);
 			$query_array[] = $this->database->execSQL($sql);
-			if (!$query_array[count($query_array)-1]->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
 			$NumbOfAccessTimeIDs = array();
-			while ($rs = $query_array[count($query_array) - 1]->result->fetch_array()) {
+			while ($rs = $this->database->result->fetch_array()) {
 				$NumbOfAccessTimeIDs[] = $rs;
 			}
 			$NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
@@ -594,9 +594,9 @@ class account {
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToALK:<br>".$sql,4);
 			$query_array[] = $this->database->execSQL($sql);
-			if (!$query_array[count($query_array) - 1]->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
 			$NumbOfAccessTimeIDs = array();
-			while ($rs = $query_array[count($query_array)-1]->result->fetch_array()) {
+			while ($rs = $this->database->result->fetch_array()) {
 				$NumbOfAccessTimeIDs[] = $rs;
 			}
 			$NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
