@@ -279,7 +279,7 @@ class GUI {
 							if ($this->user->share_rollenlayer_allowed AND count($selectable_layer_groups) > 0) {
 								echo '
 									<li id="shareRollenlayerLink">
-										<a href="javascript:void(0);" onclick="$(\'#shareRollenlayerDiv, #shareRollenlayerLink\').toggle();" title="' . $this->strShareRollenlayerLong . '">' . $this->strShareRollenlayer . '</a>
+										<a href="javascript:void(0);" onclick="$(\'#shareRollenlayerDiv, #shareRollenlayerLink\').toggle();" title="' . $this->strShareRollenLayerLong . '">' . $this->strShareRollenlayer . '</a>
 									</li>
 									<div id="shareRollenlayerDiv">
 										Name korrekt? Dann wähle eine Layergruppe aus:<br>' .
@@ -302,6 +302,11 @@ class GUI {
 												)
 											)
 										) . '<br>
+										<select name="layer_options_privileg" style="margin-bottom: 5px">
+											<option value="readable">' . $this->strReadable . '</option>
+											<option value="editable_only_in_this_stelle" selected>' . $this->strEditableOnlyInThisStelle . '</option>
+											<option value="editable">' . $this->strEditableInAllStellen . '</option>
+										</select><br>
 										<input type="button" onclick="shareRollenlayer(' . (-$this->formvars['layer_id']) . ')" value="' . $this->strShareRollenlayer . '">
 										<input type="button" onclick="$(\'#shareRollenlayerDiv, #shareRollenlayerLink\').toggle()")" value="' . $this->strCancel . '">
 									</div>

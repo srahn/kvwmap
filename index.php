@@ -1317,7 +1317,7 @@ function go_switch($go, $exit = false) {
 
 			case 'delete_shared_layer' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
-				$GUI->LayerLoeschen();
+				$GUI->LayerLoeschen(true); # Delete maintable too if possible
 				$GUI->add_message('notice', 'Geteilten Layer erfolgreich gelöscht!');
 				$GUI->loadMap('DataBase');
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;

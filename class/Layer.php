@@ -13,6 +13,11 @@ class Layer extends MyObject {
 		return $layer->find_where($where);
 	}
 
+	public static	function find_by_id($gui, $id) {
+		$layer = new Layer($gui);
+		return $layer->find_by('Layer_ID', $id);
+	}
+
 	public static	function find_by_name($gui, $name) {
 		$layer = new Layer($gui);
 		$layers = $layer->find_where("Name LIKE '" . $name . "'");
@@ -110,5 +115,37 @@ class Layer extends MyObject {
 			$attribute->copy($new_layer_id);
 		}
 	}
+
+	/*
+	* Function return true, if table of this layer is used at least in on other layer
+	* It searches for layers with same maintable and schema
+	* or schema.maintable used in Data exclude it self
+	* @return boolean true if at least one other layer uses the table els false
+	*/
+	function tableUsedFromOtherLayers() {
+		$data = $this->data;
+		$layers = $this->find_where("
+			(
+				(
+					`maintable` = '" . $this->get('maintable') . "' AND
+					`schema` = '" . $this->get('schema') . "'
+				) OR
+				`Data` LIKE '%" . $this->get('schema') . "." . $this->get('maintable') . "%'
+			) AND
+			`Layer_ID` != " . $this->get($this->identifier) . "
+		");
+		$this->data = $data;
+		return (count($layers) > 0);
+	}
+
+	function delete() {
+		#echo '<br>Class Layer Method delete';
+		$ret = parent::delete();
+		if (MYSQLVERSION > 412) {
+			parent::reset_auto_increment();
+		}
+		return $ret;
+	}
+
 }
 ?>

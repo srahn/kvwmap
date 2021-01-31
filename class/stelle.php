@@ -934,11 +934,12 @@ class stelle {
 		return 1;
 	}
 
-	function addLayer($layer_ids, $drawingorder, $filter = '', $assign_default_values = false) {
+	function addLayer($layer_ids, $drawingorder, $filter = '', $assign_default_values = false, $privileg = 'from_layer') {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
-		for ($i=0;$i<count($layer_ids);$i++){
-			$sql = "INSERT ".(!$assign_default_values ? "IGNORE" : "")." INTO used_layer (
+		for ($i = 0; $i < count($layer_ids); $i++) {
+			$sql = "
+				INSERT " . (!$assign_default_values ? "IGNORE" : "") . " INTO used_layer (
 					`Stelle_ID`,
 					`Layer_ID`,
 					`queryable`,
@@ -974,40 +975,59 @@ class stelle {
 					'" . $filter . "',
 					template, 
 					NULL,
-					NULL,
-					`privileg`,
+					NULL," .
+					($privileg == 'from_layer' ? "`privileg`" : "'" . ($privileg == 'readable' ? '0' : '2') . "'") . ",
 					`export_privileg`,
 					postlabelcache,
 					requires
 				FROM
 					layer as l
 				WHERE
-					l.Layer_ID = ".$layer_ids[$i];
-				if($assign_default_values){
-					$sql .= "
-					ON DUPLICATE KEY UPDATE 
-						queryable = l.queryable, 
-						use_geom = l.use_geom, 
-						drawingorder = l.drawingorder, 
-						legendorder = l.legendorder, 
-						minscale = l.minscale, 
-						maxscale = l.maxscale, 
-						symbolscale = l.symbolscale, 
-						offsite = l.offsite, 
-						transparency = l.transparency, 
-						template = l.template, 
-						postlabelcache = l.postlabelcache,
-						requires = l.requires
-					";
-				}
+					l.Layer_ID = " . $layer_ids[$i] . "
+			";
+			if ($assign_default_values) {
+				$sql .= "
+				ON DUPLICATE KEY UPDATE
+					queryable = l.queryable,
+					use_geom = l.use_geom,
+					drawingorder = l.drawingorder,
+					legendorder = l.legendorder,
+					minscale = l.minscale,
+					maxscale = l.maxscale,
+					symbolscale = l.symbolscale,
+					offsite = l.offsite,
+					transparency = l.transparency,
+					template = l.template,
+					postlabelcache = l.postlabelcache,
+					requires = l.requires
+				";
+			}
 			#echo '<br>SQL zur Zuordnung eines Layers zur Stelle: ' . $sql;
 			$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 
-			if(!$assign_default_values AND $this->database->mysqli->affected_rows > 0){
-				$sql = "INSERT IGNORE INTO layer_attributes2stelle (layer_id, attributename, stelle_id, privileg, tooltip) ";
-				$sql.= "SELECT ".$layer_ids[$i].", name, ".$this->id.", privileg, query_tooltip FROM layer_attributes WHERE layer_id = ".$layer_ids[$i]." AND privileg IS NOT NULL";
+			if (!$assign_default_values AND $this->database->mysqli->affected_rows > 0) {
+				$sql = "
+					INSERT IGNORE INTO layer_attributes2stelle (
+						layer_id,
+						attributename,
+						stelle_id,
+						privileg,
+						tooltip
+					)
+					SELECT
+						" . $layer_ids[$i] . ",
+						name, " .
+						$this->id . "," .
+						($privileg == 'from_layer' ? "`privileg`" : ($privileg == 'readable' ? '1' : '2')) . ",
+						query_tooltip
+					FROM
+						layer_attributes
+					WHERE
+						layer_id = " . $layer_ids[$i] . " AND
+						privileg IS NOT NULL
+				";
 				#echo $sql.'<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);

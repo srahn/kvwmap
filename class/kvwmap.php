@@ -8146,12 +8146,15 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	* @param boolean (optional) Flag, ob die Defaultwerte auch an die bereits zugeordneten Stellen übertragen werden sollen
 	* @return void
 	*/
-	function addLayersToStellen($layer_ids, $stellen_ids, $filter = '', $assign_default_values = false) {
+	function addLayersToStellen($layer_ids, $stellen_ids, $filter = '', $assign_default_values = false, $privileg = 'from_layer') {
 		for ($i = 0; $i < count($stellen_ids); $i++) {
+			if ($privileg == 'editable_only_in_this_stelle') {
+				$privileg = ($stellen_ids[$i] == $this->stelle->id ? 'editable' : 'readable');
+			}
 			$stelle = new stelle($stellen_ids[$i], $this->database);
-			$stelle->addLayer($layer_ids,	0, $filter, $assign_default_values);
+			$stelle->addLayer($layer_ids,	0, $filter, $assign_default_values, $privileg);
 			$users = $stelle->getUser();
-			for ($j = 0; $j < @count($users['ID']); $j++){
+			for ($j = 0; $j < @count($users['ID']); $j++) {
 				$this->user->rolle->setGroups($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id, $layer_ids); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
 				$this->user->rolle->setLayer($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id); # Hinzufügen der Layer zur Rolle
 			}
@@ -8160,9 +8163,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		return $stellen_ids;
 	}
 
-	function LayerLoeschen(){
+	function LayerLoeschen($delete_maintable = false) {
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$mapDB->deleteLayer($this->formvars['selected_layer_id']);
+		$mapDB->deleteLayer($this->formvars['selected_layer_id'], $delete_maintable);
 		# auch die Klassen löschen
 		$this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id']);
 		for($i = 0; $i < count($this->classes); $i++){
@@ -11727,6 +11730,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->formvars['selparents'] = $Stelle->getParents("ORDER BY `Bezeichnung`"); // formatted mysql resultset, ordered by Bezeichnung
 			$this->formvars['selchildren'] = $Stelle->getChildren($this->formvars['selected_stelle_id'], "ORDER BY Bezeichnung"); // formatted mysql resultset, ordered by Bezeichnung
 			$this->formvars['default_user_id'] = $this->stellendaten['default_user_id'];
+			$this->formvars['show_shared_layers'] = $this->stellendaten['show_shared_layers'];
 			$where = 'ID != '.$this->formvars['selected_stelle_id'];
 			
 			$children_ids = array_map(function($child) {return $child['ID'];}, $this->formvars['selchildren']);
@@ -15538,7 +15542,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			array($this->formvars['selected_layer_id']),
 			$shared_stellen['ID'],
 			NULL,
-			NULL
+			NULL,
+			$this->formvars['layer_options_privileg']
 		);
 
 		# ToDo:
@@ -16367,7 +16372,10 @@ class db_mapObj{
 			$this->rolle->language
 		);
 		$layerdb->schema = ($rs['schema'] == '' ? 'public' : $rs['schema']);
-		$layerdb->host = $host; # depricated since host is allways in connection table
+		# Take hosts from layers connection_id, if empty from $host, if empty 'pgsql'
+		# ToDo: Check if host realy must be set here!
+		# It is not neccessary since get_credentials($connection_id) can be used to get host from everywhere
+		$layerdb->host = ($rs['host'] == '' ? ($host == '' ? 'pgsql' : $host) : $rs['host']);
 		if (!$layerdb->open($rs['connection_id'])) {
 			echo 'Die Verbindung zur PostGIS-Datenbank konnte mit connection_id: ' . $rs['connection_id'] . ' nicht hergestellt werden:';
 			exit;
@@ -16381,6 +16389,7 @@ class db_mapObj{
 	* @return array with integer connection_id and string schema name, return an empty array if no connection for layer_id found
 	*/
 	function get_layer_connection($layer_id) {
+		#echo 'Class db_map Method get_layer_connection';
 		# $layer_id < 0 Rollenlayer else normal layer
 		$sql = "
 			SELECT
@@ -16392,6 +16401,7 @@ class db_mapObj{
 				" . ($layer_id < 0 ? "-id" : "Layer_ID") . " = " . $layer_id . " AND
 				`connectiontype` = 6
 		";
+		#echo '<br>sql: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_layer_connection - Lesen der connection Daten des Layers:<br>" . $sql, 4);
 		$this->db->execSQL($sql);
 		if ($this->db->success) {
@@ -17203,7 +17213,6 @@ class db_mapObj{
 				$dump_text .= "\n\n-- Datatype_attributes " . $datatype['id'] . "\n" . $datatype_attributes_dump['insert'][0];
 			}
 		}
-			
 
 		$filename = rand(0, 1000000).'.sql';
 		$fp = fopen(IMAGEPATH . $filename, 'w');
@@ -17218,21 +17227,38 @@ class db_mapObj{
 		);
 	}
 
-  function deleteLayer($id){
-    $sql = 'DELETE FROM layer WHERE Layer_ID = '.$id;
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->deleteLayer - Löschen eines Layers:<br>" . $sql,4);
-    $ret = $this->db->execSQL($sql);
-		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-    if(MYSQLVERSION > 412){
-      # Den Autowert für die Layer_id zurücksetzen
-      $sql ="ALTER TABLE layer AUTO_INCREMENT = 1";
-      $this->debug->write("<p>file:kvwmap class:db_mapObj->deleteLayer - Zurücksetzen des Auto_Incrementwertes:<br>" . $sql,4);
-      #echo $sql;
-      $ret = $this->db->execSQL($sql);
-			if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-    }
-  }
+	/*
+	* Delete layer in MySQL-Database and
+	* delete also its maintable if delete_maintable is true
+	* @param $id integer The Layer id of the layer in MySQL-Database
+	* @param $delete_maintable boolean Delete the maintable of the layer or not
+	* @return boolean true if maintable has been deleted or false if not deleted or error
+	*/
+	function deleteLayer($id, $delete_maintable = false) {
+		include_once(CLASSPATH . 'Layer.php');
+		$layer = Layer::find_by_id($this->GUI, $id);
+
+		if (
+			$delete_maintable AND
+			$layer->get('connectiontype') == 6 AND
+			$layer->get('maintable') != '' AND
+			$layer->get('schema') != '' AND
+			!$layer->tableUsedFromOtherLayers()
+		) {
+			$layerDb = $this->getlayerdatabase($id, 'pgsql');
+			$ret = $layerDb->drop_table($layer->get('schema'), $layer->get('maintable'));
+			if ($ret['success']) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		};
+
+		$layer->delete();
+
+		return false;
+	}
 
 	function deleteRollenFilter(){
 		$sql = 'UPDATE u_rolle2used_layer SET rollenfilter = NULL WHERE user_id = '.$this->User_ID;

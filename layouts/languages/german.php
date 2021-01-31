@@ -64,5 +64,8 @@
 	$this->strShareRollenlayer = "Layer freigeben";
 	$this->strShareRollenLayerLong = "Diesen Layer für andere Nutzer in diesem WebGIS freigeben.";
 	$this->strLayerSharedFrom = "Dieser Layer wurde geteilt durch Nutzer";
+	$this->strReadable = "Überall nur lesbar";
+	$this->strEditableOnlyInThisStelle = "Nur editierbar in dieser Stelle";
+	$this->strEditableInAllStellen = "In allen Stellen editierbar";
 	$this->strSettings = "Einstellungen";
 ?>

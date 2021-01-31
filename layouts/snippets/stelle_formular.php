@@ -751,7 +751,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 							name="show_shared_layers"
 							type="checkbox"
 							value="1"
-							<?php echo ($this->formvars['show_shared_layers'] ? 'checked' : ''); ?>
+							<?php echo ($this->formvars['show_shared_layers'] ? ' checked' : ''); ?>
 						>
 					</td>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3">

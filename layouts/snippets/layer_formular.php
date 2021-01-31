@@ -679,14 +679,22 @@
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="listed" type="checkbox" value="1"<?php if ($this->formvars['listed']) echo ' checked'; ?>>
 						</td>
-					</tr>
-					<tr>
-						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSharedFrom; ?></th>
-						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="shared_from" type="text" value="<?php echo $this->formvars['shared_from']; ?>" style="width: <?php echo (strlen($this->formvars['shared_from']) * 15) + 15 ?>px">
-							<span data-tooltip="<?php echo 	$strSharedFromHelp; ?>"></span>
-						</td>
-					</tr>
+					</tr><?
+					if ($this->formvars['shared_from'] OR $this->is_admin_user($this->user->id)) { ?>
+						<tr>
+							<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSharedFrom; ?></th>
+							<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3"><?
+								if ($this->is_admin_user($this->user->id)) { ?>
+									<input name="shared_from" type="text" value="<?php echo $this->formvars['shared_from']; ?>" style="width: <?php echo (strlen($this->formvars['shared_from']) * 15) + 15 ?>px">
+									<span data-tooltip="<?php echo 	$strSharedFromHelp; ?>"></span><?
+								}
+								else {
+									$user_daten = $this->user->getUserDaten($this->formvars['shared_from'], '', '');
+									echo $user_daten[0]['Vorname'] . ' ' . $user_daten[0]['Name'] . (!empty($user_daten[0]['organisation']) ? ' (' . $user_daten[0]['organisation'] . ')' : '');
+								} ?>
+							</td>
+						</tr><?
+					} ?>
 				</table>
 		</div>
 		
