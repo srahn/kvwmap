@@ -3132,7 +3132,7 @@ echo '			</table>
 	*/
 	function is_admin_user($user_id) {
 		global $admin_stellen;
-		$ret = false;
+		$result = false;
 
 		$sql = "
 			SELECT DISTINCT
@@ -3149,13 +3149,13 @@ echo '			</table>
 		$ret = $this->database->execSQL($sql, 0, 0);
 		if ($ret['success']) {
 			if ($this->database->result->num_rows == 1) {
-				$ret = true;
+				$result = true;
 			}
 		}
 		else {
 			$this->add_message('error', 'Fehler beim Abfragen ob der Nutzer mit der ID: ' . $user_id . ' ein Administrator ist.');
 		}
-		return $ret;
+		return $result;
 	}
 
 	function user_is_in_fremden_stellen($user_id, $stellen) {
