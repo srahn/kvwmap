@@ -1680,6 +1680,7 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 			$str = str_replace('$'.$key, $value, $str);
 		}
 	}
+	$str = str_replace('$current_timestamp', date('Y-m-d G:i:s'), $str);
 	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
 	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
