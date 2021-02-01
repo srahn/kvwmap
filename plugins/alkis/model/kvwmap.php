@@ -534,7 +534,7 @@
 			$importliste = file($_files['importliste']['tmp_name'], FILE_IGNORE_NEW_LINES);
 			$bom = pack('H*','EFBBBF');
 			$importliste[0] = preg_replace("/^$bom/", '', $importliste[0]);
-			$importliste_string = implode('; ', $importliste);
+			$importliste_string = implode(';', $importliste);
 			$importliste_string = formatFlurstkennzALKIS($importliste_string);
 			$importliste = explode(';', $importliste_string);
 			$GUI->formvars['selFlstID'] = implode(', ', $importliste);
