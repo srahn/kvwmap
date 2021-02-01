@@ -348,9 +348,9 @@ class ddl {
 						}
 					}
 					$rectangle['x1'] = $x;
-					$rectangle['y1'] = $y + ($endy-$y);
+					$rectangle['y1'] = min($y, $endy);
 					$rectangle['x2'] = $endx-$x;
-					$rectangle['y2'] = -($endy-$y);
+					$rectangle['y2'] = abs($endy-$y);
 					$rectangle['id'] = $this->layout['rectangles'][$j]['id'];
 					$this->gui->rectangles[$this->pdf->currentContents][] = $rectangle;
 					#echo 'zeichne Rechteck: '.$x.' '.$y.' '.$endx.' '.$endy.'<br>';
