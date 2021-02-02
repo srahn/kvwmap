@@ -697,7 +697,7 @@ class user {
 			return true;
 		}
 		elseif (
-			in_array($case, array('Attributeditor', 'Klasseneditor', 'Style_Label_Editor', 'Layerattribut-Rechteverwaltung')) AND
+			in_array($case, array('Attributeditor', 'Layereditor', 'Klasseneditor', 'Style_Label_Editor', 'Layerattribut-Rechteverwaltung')) AND
 			$this->database->gui->formvars['selected_layer_id'] != '' AND
 			$this->layerIsSharedFrom($this->database->gui->formvars['selected_layer_id'], $this->id)
 		) {

@@ -2134,4 +2134,34 @@ function get_requires_options($sql, $requires) {
 	$creator = new PHPSQLCreator($parser->parsed);
 	return $creator->created;
 }
+
+/*
+* This function convert an assosiative array with 1-dim vectors of values of the same length
+* to an array with associative arrays e.g.
+* from: array(
+* 	'id' => array(1,2,3),
+* 	'name' => array('a', 'b', 'c');
+* );
+* to: array(
+* 	array('id' => 1, 'name' => 'a'),
+* 	array('id' => 2, 'name' => 'b'),
+* 	array('id' => 3, 'name' => 'c')
+* )
+*/
+function vectors_to_assoc_array($vectors) {
+	$keys = array_keys($vectors);
+	if (count($keys) == 0) {
+		return array();
+	}
+	$first_vector = $vectors[$keys[0]];
+	$result = array();
+	foreach ($first_vector AS $id => $value) {
+		$assoc = array();
+		foreach ($keys AS $key) {
+			$assoc[$key] = $vectors[$key][$id];  
+		}
+		$result[] = $assoc;
+	}
+	return $result;
+}
 ?>

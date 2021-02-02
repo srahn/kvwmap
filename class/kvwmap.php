@@ -7613,10 +7613,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$this->formvars = array_merge($this->formvars, $this->layerdata);
 			}
 			# Abfragen der Stellen des Layer
-			$this->formvars['selstellen']=$mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
+			$this->formvars['selstellen'] = $mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
 			$this->grouplayers = $mapDB->get_layersfromgroup($this->layerdata['Gruppe']);
 		}
-		$this->stellen=$this->Stelle->getStellen('Bezeichnung');
+		$this->stellen = $this->Stelle->getStellen('Bezeichnung');
 		$this->Groups = $mapDB->get_Groups();
 		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
 		$this->output();
@@ -18786,10 +18786,10 @@ class db_mapObj{
 
   function get_Groups($layergruppen = NULL) {
 		$this->groupset = $this->read_Groups(true, 'Gruppenname');
-		if($layergruppen == NULL){	# alle abfragen
+		if ($layergruppen == NULL) {	# alle abfragen
 			$layergruppen['ID'] = array_unique(array_keys($this->groupset));
 		}
-		foreach($layergruppen['ID'] as $groupid){
+		foreach ($layergruppen['ID'] as $groupid){
 			$uppergroupnames = $this->list_uppergroups($groupid);
 			$layergruppen['Bezeichnung'][] = implode('->', array_reverse($uppergroupnames));;
 		}
@@ -18797,6 +18797,10 @@ class db_mapObj{
     $sorted_arrays = umlaute_sortieren($layergruppen['Bezeichnung'], $layergruppen['ID']);
     $layergruppen['Bezeichnung'] = $sorted_arrays['array'];
     $layergruppen['ID'] = $sorted_arrays['second_array'];
+		$layergruppen['selectable_for_shared_layers'] = array();
+		foreach ($layergruppen['ID'] AS $group_id) {
+			$layergruppen['selectable_for_shared_layers'][] = $this->groupset[$group_id]['selectable_for_shared_layers'];
+		}
 		return $layergruppen;
   }
 

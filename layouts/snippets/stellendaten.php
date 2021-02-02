@@ -32,8 +32,10 @@
 							<td><?php echo $this->stellendaten['Bezeichnung'][$i]; ?></td><?
 							if ($has_shared_stelle) { ?>
 								<td><?
-									if ($this->stellendaten['show_shared_layers']) { ?>
-										<i class="fa fa-share-alt" title="<? echo $strShowSharedLayer; ?>"></i><?
+									if ($this->stellendaten['show_shared_layers'][$i]) { ?>
+										<a href="javascript:void(0)" onclick="message([{'type': 'info', 'msg': '<? echo $strShowSharedLayer; ?>'}])">
+											<i class="fa fa-share-alt"title="<? echo $strShowSharedLayer; ?>"></i>
+										</a><?
 									}
 									else { ?>
 										&nbsp; <?
