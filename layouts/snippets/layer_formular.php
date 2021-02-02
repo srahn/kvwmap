@@ -684,13 +684,16 @@
 						<tr>
 							<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSharedFrom; ?></th>
 							<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3"><?
+								$shared_user = $this->user->getUserDaten($this->formvars['shared_from'], '', '')[0];
+								$shared_name = $shared_user['Vorname'] . ' ' . $shared_user['Name'] . (!empty($shared_user['organisation']) ? ' (' . $shared_user['organisation'] . ')' : '');
 								if ($this->is_admin_user($this->user->id)) { ?>
-									<input name="shared_from" type="text" value="<?php echo $this->formvars['shared_from']; ?>" style="width: <?php echo (strlen($this->formvars['shared_from']) * 15) + 15 ?>px">
+									<input name="shared_from" type="text" value="<?php echo $this->formvars['shared_from']; ?>" style="width: <?php echo (strlen($this->formvars['shared_from']) * 15) + 15 ?>px"> <?
+									echo $shared_name; ?>
 									<span data-tooltip="<?php echo 	$strSharedFromHelp; ?>"></span><?
 								}
-								else {
-									$user_daten = $this->user->getUserDaten($this->formvars['shared_from'], '', '');
-									echo $user_daten[0]['Vorname'] . ' ' . $user_daten[0]['Name'] . (!empty($user_daten[0]['organisation']) ? ' (' . $user_daten[0]['organisation'] . ')' : '');
+								else { ?>
+									<input name="shared_from" type="hidden" value="<?php echo $this->formvars['shared_from']; ?>"><?
+									echo $shared_name;
 								} ?>
 							</td>
 						</tr><?
@@ -932,7 +935,7 @@
 					</table>
 				</td>				
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
-					<? if($this->formvars['editable']){ ?>
+					<? if($this->formvars['editable']) { ?>
 					<a href="javascript:Bestaetigung('index.php?go=Layereditor_Klasse_Löschen&class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>#Klassen',	'<?php echo $this->strDeleteWarningMessage; ?>');"><?php echo $this->strDelete; ?></a>
 					<? } ?>
 				</td>
@@ -947,14 +950,26 @@
 	</tr>
 	<tr> 
 		<td align="center">
-			<input type="hidden" name="go_plus" id="go_plus" value="">
-			<?
-		if ($this->formvars['selected_layer_id'] > 0) { ?>
-			<? if($this->formvars['editable']){ ?>
-			<input id="layer_formular_submit_button" type="button" name="dummy" value="<?php echo $strButtonSave; ?>" onclick="submitWithValue('GUI','go_plus','Speichern')">
-			<?
-			}
-		} ?>&nbsp;<input type="button" id="saveAsNewLayerButton" name="dummy" value="<?php echo $strButtonSaveAsNewLayer; ?>" onclick="submitWithValue('GUI','go_plus','Als neuen Layer eintragen')">		 
+			<input type="hidden" name="go_plus" id="go_plus" value=""><?
+			if (
+				$this->formvars['selected_layer_id'] > 0 AND
+				$this->formvars['editable']
+			) { ?>
+				<input
+					id="layer_formular_submit_button"
+					type="button"
+					name="dummy"
+					value="<?php echo $strButtonSave; ?>"
+					onclick="submitWithValue('GUI','go_plus','Speichern')"
+				><?
+			} ?>
+			<input
+				type="button"
+				id="saveAsNewLayerButton"
+				name="dummy"
+				value="<?php echo $strButtonSaveAsNewLayer; ?>"
+				onclick="submitWithValue('GUI','go_plus','Als neuen Layer eintragen')"
+			>
 		</td>
 	</tr>
 	<tr>

@@ -958,7 +958,7 @@ class user {
 			return 0;
 		}
 		while ($rs = $this->database->result->fetch_array()) {
-			$userdaten[]=$rs;
+			$userdaten[] = $rs;
 		}
 		return $userdaten;
 	}

@@ -1,3 +1,4 @@
 ﻿<?php
-  $strTitel="Tasks"; 
+	$strTitel = "Tasks";
+	$strShowSharedLayer = "Shared Layers are available in this working group.";
 ?>  

@@ -326,7 +326,7 @@ class MyObject {
 					", ",
 					array_map(
 						function ($value) {
-							if ($value === NULL OR $value == '') {
+							if ($value === NULL OR $value == '' AND $value != 0) {
 								$v = 'NULL';
 							}
 							else if (is_numeric($value)) {

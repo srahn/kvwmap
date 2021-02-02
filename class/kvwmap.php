@@ -4282,11 +4282,16 @@ echo '			</table>
     }
   }
 
-  function get_sub_menues(){
+  function get_sub_menues() {
     $submenues = Menue::getsubmenues($this, $this->formvars['menue_id']);
     echo '<select name="submenues" size="6" multiple style="width:300px">';
-    for($i=0; $i < count($submenues); $i++){
-      echo '<option selected title="'.$submenues[$i]->data['name'].'" id="'.$submenues[$i]->data['order'].'_all_'.$submenues[$i]->data['menueebene'].'_'.$i.'" value="'.$submenues[$i]->data['id'].'">&nbsp;&nbsp;-->&nbsp;'.$submenues[$i]->data['name'].'</option>';
+    for ($i = 0; $i < count($submenues); $i++) {
+      echo '<option
+					selected
+					title="' . $submenues[$i]->data['name'] . '"
+					id="' . $submenues[$i]->data['order'] . '_all_'.$submenues[$i]->data['menueebene'] . '_' . $i . '"
+					value="' . $submenues[$i]->data['id'] . '"
+				>&nbsp;&nbsp;-->&nbsp;' . $submenues[$i]->data['name'] . '</option>';
     }
     echo '</select>';
   }
@@ -8235,8 +8240,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		include_once(CLASSPATH . 'LayerGroup.php');
 		$this->layergruppe = new LayerGroup($this);
 		$this->layergruppe->data = formvars_strip($this->formvars, $this->layergruppe->setKeysFromTable(), 'keep');
-
 		$this->layergruppe->set('Gruppenname', $this->formvars['Gruppenname']);
+		if ($this->layergruppe->get('selectable_for_shared_layers') == '') {
+			$this->layergruppe->set('selectable_for_shared_layers', 0);
+		}
 		$results = $this->layergruppe->validate();
 		if (empty($results)) {
 			$results = $this->layergruppe->create();
@@ -11665,9 +11672,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		if(value_of($this->formvars, 'order') == ''){
 			$this->formvars['order'] = 'Bezeichnung';
 		}
-		$this->stellendaten=$this->Stelle->getStellen($this->formvars['order'], $this->user->id);
-		$this->titel='Stellendaten';
-		$this->main='stellendaten.php';
+		$this->stellendaten = $this->Stelle->getStellen($this->formvars['order'], $this->user->id);
+		$this->titel = 'Stellendaten';
+		$this->main = 'stellendaten.php';
 		$this->output();
 	}
 
@@ -12381,7 +12388,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->main='userdaten_formular.php';
 		# Abfragen der Benutzerdaten wenn eine user_id zur Änderung selektiert ist
 		if ($this->formvars['selected_user_id'] > 0) {
-			$this->userdaten=$this->user->getUserDaten($this->formvars['selected_user_id'], '', '', $this->Stelle->id, $this->user->id);
+			$this->userdaten = $this->user->getUserDaten($this->formvars['selected_user_id'], '', '', $this->Stelle->id, $this->user->id);
 			$this->formvars['nachname'] 									= $this->userdaten[0]['Name'];
 			$this->formvars['vorname'] 										= $this->userdaten[0]['Vorname'];
 			$this->formvars['loginname'] 									= $this->userdaten[0]['login_name'];
@@ -12434,7 +12441,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->titel='Benutzerdaten';
 		$this->main='userdaten.php';
 		# Abfragen aller Benutzer
-		$this->userdaten=$this->user->getUserDaten(0, '', $this->formvars['order'], $this->Stelle->id, $this->user->id);
+		$this->userdaten = $this->user->getUserDaten(0, '', $this->formvars['order'], $this->Stelle->id, $this->user->id);
 		$this->output();
 	}
 
@@ -17328,7 +17335,13 @@ class db_mapObj{
   }
 
 	function addRollenLayerStyling($layer_id, $datatype, $labelitem, $user){
+		global $supportedLanguages;
 		$attrib['name'] = ' ';
+		foreach ($supportedLanguages as $language) {
+			if ($language != 'german') {
+				$attrib['name_' . $language] = ' ';
+			}
+		}
 		$attrib['layer_id'] = -$layer_id;
 		$attrib['expression'] = '';
 		$attrib['order'] = 0;
@@ -18382,7 +18395,14 @@ class db_mapObj{
 				LEFT JOIN used_layer ul ON l.Layer_ID = ul.Layer_id
 				LEFT JOIN rolle radm ON ul.Stelle_ID = radm.stelle_id
 			";
-			$where[] = "(radm.user_id = ".$this->User_ID." OR ul.Layer_id IS NULL)";
+			$where[] = "(radm.user_id = " . $this->User_ID . " OR ul.Layer_id IS NULL)";
+		}
+
+		if (
+			# Show non-admin users only layers that they self have shared
+			!$this->GUI->is_admin_user($this->GUI->user->id)
+		) {
+			$where[] = "l.shared_from = " . $this->GUI->user->id;
 		}
 
 		if ($order != '') {
@@ -18399,7 +18419,8 @@ class db_mapObj{
 				l.datenherr,
 				l.drawingorder,
 				l.alias,
-				l.sync
+				l.sync,
+				l.shared_from
 			FROM
 				layer l LEFT JOIN
 				u_groups g ON l.Gruppe = g.id" .
@@ -18428,6 +18449,24 @@ class db_mapObj{
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
+		$layer = array(
+			'ID' => array(),
+			'Bezeichnung' => array(),
+			'Gruppe' => array(),
+			'GruppeID' => array(),
+			'Kurzbeschreibung' => array(),
+			'Datenherr' => array(),
+			'alias' => array(),
+			'default_drawingorder' => array(),
+			'layers_of_group' => array(),
+			'sync' => array(),
+			'shared_from' => array(),
+			'ID' => array(),
+			'ID' => array(),
+			'ID' => array(),
+			'ID' => array(),
+			'ID' => array(),
+		);
 		while ($rs = $ret['result']->fetch_array()) {
 			$layer['ID'][] = $rs['Layer_ID'];
 			$layer['Bezeichnung'][] = $rs['Name'];
@@ -18439,8 +18478,10 @@ class db_mapObj{
 			$layer['default_drawingorder'][] = $rs['drawingorder'];
 			$layer['layers_of_group'][$rs['Gruppe']][] = $i;
 			$layer['sync'][] = $rs['sync'];
+			$layer['shared_from'][] = $rs['shared_from'];
 			$i++;
 		}
+
 		if ($order == 'Bezeichnung') {
 			# Sortieren der Layer unter Berücksichtigung von Umlauten
 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);

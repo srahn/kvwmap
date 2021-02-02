@@ -1,8 +1,3 @@
 ﻿<?php
-  $this->strID="ID";
-  $this->strName="Naam";
-  $this->strChange="Ännern";
-  $this->strDelete="Löschen";
-  
-  
+	$strNoLayers = "Es gibt noch keine Layer in Ihrem Verantwortungsbereich";
 ?>  

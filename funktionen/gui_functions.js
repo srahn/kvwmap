@@ -1344,3 +1344,7 @@ function htmlspecialchars(value) {
 function toggleSyncLayer() {
   $('.no-sync').toggle();
 }
+
+function toggleSharedLayer() {
+  $('.no-shared').toggle();
+}

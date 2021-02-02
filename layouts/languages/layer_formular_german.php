@@ -108,6 +108,6 @@
 	$strClassificationHelp="Hier kann der Name der Klassifizierung eingetragen werden, die verwendet werden soll. Eine Klassifizierung ist eine Sammlung zusammengehöriger Klassen.&#xa;Der hier einetragene Klassifizierungsname kann auch einen Themen-Parameter enthalten und dadurch dynamisch sein.";
 	$strStatusHelp="Dieses Feld kann mit einem Fehlerstatus befüllt werden. Der Layer ist dadurch deaktiviert und in der Legende mit einem Hinweissymbol versehen.&#xa;Das Tool 'wms_checker.php' befüllt diese Feld automatisch.";
 	$strTriggerFunctionHelp="Hier kann der Name einer PHP-Triggerfunktion eingetragen werden, die bei Insert, Update oder Delete in diesem Layer ausgeführt werden soll. Die Triggerfunktion muss innerhalb eines Plugins oder unter custom/class/kvwmap.php definiert werden.";
-	$strSharedFrom = "Geteilt von Nutzer ID";
+	$strSharedFrom = "Geteilt von Nutzer";
 	$strSharedFromHelp = "Lösche die ID wenn der Layer in der Layerlegende nicht länger als geteilt markiert werden soll.";
 ?>
