@@ -645,9 +645,9 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	var minx = document.GUI.minx;
 	var miny = document.GUI.miny;
 	var maxx = document.GUI.maxx;
-	var maxy = document.GUI.maxy;			
+	var maxy = document.GUI.maxy;
 	var pixelsize = document.GUI.pixelsize;
-	var polygon = svgdoc.getElementById("polygon");			
+	var polygon = svgdoc.getElementById("polygon");
 	// nix
 	
 	var input_coord = document.GUI.INPUT_COORD.value;
@@ -669,13 +669,13 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 
 	postdata = postdata+"&mime_type=map_ajax&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
 
-	if(document.GUI.legendtouched.value == 1){		// Legende benutzt -> gesamtes Formular mitschicken
+	if (document.GUI.legendtouched.value == 1) { // Legende benutzt -> gesamtes Formular mitschicken
 		var formdata = new FormData(document.GUI);
 	}
-	else{																				// nur navigiert -> Formular muss nicht mitgeschickt werden
+	else {																				// nur navigiert -> Formular muss nicht mitgeschickt werden
 		var formdata = new FormData();
 	}
-			
+
 	postdata.split("&")
 		.forEach(function (item) {
 			pos = item.indexOf('=');
@@ -683,25 +683,27 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 			value = item.substring(pos+1);
 			formdata.append(key, value);			// hier muesste eigentlich set verwendet werden, kann der IE 11 aber nicht
 		});
-	
-	ahah("index.php", formdata, 
-	new Array(
-		'',
-		mapimg, 
-		scalebar,
-		refmap, 
-		scale,
-		lagebezeichnung,
-		minx,
-		miny,
-		maxx,
-		maxy,
-		pixelsize,			
-		polygon,
-		''
-	), 			 
-	new Array("execute_function", "href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "points", "execute_function"));
-				
+
+	ahah(
+		"index.php",
+		formdata,
+		new Array(
+			'',
+			mapimg, 
+			scalebar,
+			refmap, 
+			scale,
+			lagebezeichnung,
+			minx,
+			miny,
+			maxx,
+			maxy,
+			pixelsize,
+			polygon,
+			''
+		),
+		new Array("execute_function", "href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "points", "execute_function")
+	);
 	document.GUI.INPUT_COORD.value = '';
 	document.GUI.CMD.value = '';
 }
@@ -901,36 +903,38 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 	if(reload)neuLaden();
 }
 
-function updateQuery(event, thema, query, radiolayers, instantreload){
-  if(query){
-    if(thema.checked == false){
-      query.checked = false;
+function updateQuery(event, thema, query, radiolayers, instantreload) {
+	if (query) {
+		if (thema.checked == false){
+			query.checked = false;
 			thema.title = activatelayer;
 			query.title = activatequery;
-    }
-		else{
+		}
+		else {
 			thema.title = deactivatelayer;
 		}
-  }
-  if(radiolayers != '' && radiolayers.value != ''){  
-  	preventDefault(event);
-  	radiolayerstring = radiolayers.value+'';
-  	radiolayer = radiolayerstring.split('|');
-  	for(i = 0; i < radiolayer.length-1; i++){
-  		if(document.getElementById('thema_'+radiolayer[i]) != thema){
-  			document.getElementById('thema_'+radiolayer[i]).checked = false;
-				document.getElementById('thema'+radiolayer[i]).value = 0;		// damit nicht sichtbare Radiolayers ausgeschaltet werden
-  		}
-  		else{
-  			thema.checked = !thema.checked;
+	}
+	if (radiolayers != '' && radiolayers.value != '') {
+		preventDefault(event);
+		radiolayerstring = radiolayers.value + '';
+		radiolayer = radiolayerstring.split('|');
+		for (i = 0; i < radiolayer.length -1; i++) {
+			if (document.getElementById('thema_' + radiolayer[i]) != thema) {
+				document.getElementById('thema_' + radiolayer[i]).checked = false;
+				document.getElementById('thema' + radiolayer[i]).value = 0;		// damit nicht sichtbare Radiolayers ausgeschaltet werden
+			}
+			else {
+				thema.checked = !thema.checked;
 				thema.checked2 = thema.checked;		// den check-Status hier nochmal merken, damit man ihn bei allen Click-Events setzen kann, sonst setzt z.B. Chrome den immer wieder zurueck
-  		}
-  		if(document.getElementById('qLayer'+radiolayer[i]) != undefined){
-  			document.getElementById('qLayer'+radiolayer[i]).checked = false;
-  		}
-  	}
-  }
-	if(instantreload)neuLaden();
+			}
+			if (document.getElementById('qLayer' + radiolayer[i]) != undefined) {
+				document.getElementById('qLayer' + radiolayer[i]).checked = false;
+			}
+		}
+	}
+	if (instantreload) {
+		neuLaden();
+	}
 }
 
 function deleteRollenlayer(type){
@@ -942,7 +946,9 @@ function deleteRollenlayer(type){
 
 function neuLaden(){
 	startwaiting(true);
-	if(currentform.neuladen)currentform.neuladen.value='true';
+	if (currentform.neuladen) {
+		currentform.neuladen.value = 'true';
+	}
 	get_map_ajax('go=navMap_ajax', '', 'if(document.GUI.oldscale != undefined){document.GUI.oldscale.value=document.GUI.nScale.value;}');
 }
 
