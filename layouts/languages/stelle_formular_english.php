@@ -1,7 +1,7 @@
 ﻿<?php
   $strTitle="Task Editor";
   $strAsteriskRequired="Fields marked with an asterisk * are required";
-  $strDataBankID="Data bank ID";
+  $strDataBankID="Database ID";
 	$strDefaultUserID="Standard user";
   $strTask="Task*";
   $strReferenceMap="Reference map*";

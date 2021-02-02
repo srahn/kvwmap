@@ -5,31 +5,31 @@
 <div class="center-outerdiv">
 	<div class="input-form">
 		<h2><? echo ($this->formvars['selected_invitation_id'] != '' ? $strTitelEdit : $strTitelNew); ?></h2>
-		<em><span class="px13">Werte mit * mussen eingetragen werden</span></em><br>
+		<em><span class="px13"><? echo $this->strAsteriskRequired; ?></span></em><br>
 		<input name="token" type="hidden" value="<? echo $this->formvars['token']; ?>">
 		<input name="inviter_id" type="hidden" value="<? echo $this->formvars['inviter_id']; ?>">
 		<div class="clear"></div>
-		<div style="float: left">	Wer soll eingeladen werden?</div>
+		<div style="float: left"><? echo $strWhoShallBeInvided; ?></div>
 		<div class="clear"></div>
 		<label class="fetter" for="email">E-Mail *</label>
 		<input name="email" type="text" value="<? echo $this->formvars['email']; ?>">
 		<div class="clear"></div>
-		<label class="fetter" for="name">Nachname *</label>
+		<label class="fetter" for="name"><? echo $this->strName; ?> *</label>
 		<input name="name" type="text" value="<? echo $this->formvars['name']; ?>">
 		<div class="clear"></div>
-		<label class="fetter" for="name">Vorname</label>
+		<label class="fetter" for="name"><? echo $this->strForeName; ?></label>
 		<input name="vorname" type="text" value="<? echo $this->formvars['vorname']; ?>">
 		<div class="clear"></div>
-		<div style="float: left">Wo soll mitgearbeitet werden?</div>
+		<div style="float: left"><? echo $strWhereShallBeWorked; ?></div>
 		<div class="clear"></div>
-		<label class="fetter" for="stelle_id">Arbeitsstelle *</label>
+		<label class="fetter" for="stelle_id"><? echo $this->strTask; ?> *</label>
 		<? echo FormObject::createSelectField('stelle_id', $this->invitation->stellen, $this->invitation->get('stelle_id')); ?>
 		<div class="clear"></div><?
 		if ($this->formvars['selected_invitation_id'] != '') { ?>
-			<label class="fetter" for="email">Kennung:</label>
+			<label class="fetter" for="email"><? echo $strToken; ?>:</label>
 			<div style="float: left"><? echo $this->formvars['token']; ?></div>
 			<div class="clear"></div>
-			<div style="float: left"><a href="mailto:<?php echo $this->invitation->mailto_text(); ?>">Einladung noch mal per E-Mail versenden</a></div><?
+			<div style="float: left"><a href="mailto:<?php echo $this->invitation->mailto_text(); ?>"><? echo $strSendInvitationPerEMail; ?></a></div><?
 		} ?>
 		<div class="clear"></div>
 		<div style="text-align: -webkit-center">

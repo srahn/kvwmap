@@ -56,7 +56,8 @@ class Invitation extends MyObject {
 			'&stelle_id=' . $this->get('stelle_id') .
 			'&Name=' . urlencode($this->get('name')) .
 			'&Vorname=' . urlencode($this->get('vorname')) .
-			'&login_name=' . strToLower(umlaute_umwandeln(substr($this->get('vorname'), 0, 1) . $this->get('name')));
+			'&login_name=' . strToLower(umlaute_umwandeln(substr($this->get('vorname'), 0, 1) . $this->get('name'))) .
+			'&language=' . $this->gui->user->rolle->language;
 		$msg = $this->get('email') . 
 '?subject=Einladung zur Registrierung bei ' . TITLE .
 '&body=' . rawurlencode('Einladung für ' . $this->get('vorname') . ' ' . $this->get('name') . ',

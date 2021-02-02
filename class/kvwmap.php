@@ -11679,6 +11679,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
   function Stelleneditor() {
+		global $language;
 		#echo '<p><b>Stelleneditor</b>';
 		include_(CLASSPATH.'datendrucklayout.php');
 		include_(CLASSPATH.'funktion.php');
@@ -11698,6 +11699,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       $Stelle->language = $this->Stelle->language;
       $this->stellendaten = $Stelle->getstellendaten();
       $this->formvars['bezeichnung'] = $this->stellendaten['Bezeichnung'];
+			if ($language != 'german') {
+				$this->formvars['Bezeichnung_' . $language] = $this->stellendaten['Bezeichnung_' . $language];
+			}
       $this->formvars['minxmax'] = $this->stellendaten['minxmax'];
       $this->formvars['minymax'] = $this->stellendaten['minymax'];
       $this->formvars['maxxmax'] = $this->stellendaten['maxxmax'];

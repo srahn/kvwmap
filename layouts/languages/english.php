@@ -66,4 +66,10 @@
 	$this->strEditableOnlyInThisStelle = "Only editable in this working group";
 	$this->strEditableInAllStellen = "Everywhere editable";
 	$this->strSettings = "Settings";
+	$this->strAsteriskRequired = "Fields marked with an asterisk * are required";
+	$this->strName = "Surame";
+	$this->strForeName = "First name";
+	$this->strUser = "User";
+	$this->strLabel = "Label";
+	$this->strNameSuffix = "Name suffix";
 ?>

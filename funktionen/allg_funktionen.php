@@ -681,40 +681,28 @@ function isPasswordValide($oldPassword, $newPassword, $newPassword2) {
 * Erzeugt an Hand der Einstellungen für die Passwortstärke einen Hilfetext für die
 * Vergabe eines neuen Passwortes
 */
-function password_erstellungs_hinweis($lang) {
+function password_erstellungs_hinweis($language) {
+	include_once(LAYOUTPATH . 'languages/allg_funktionen_' . $language . '.php');
 	$condition = array();
 	$msg = '';
-	if (substr(PASSWORD_CHECK, 0, 1) == '0') {
-		$msg = 'Das Passwort muss 3 der 4 Kriterien: Kleinbuchstaben, Großbuchstaben, Zahlen und Sonderzeichen enthalten.';
+	if (substr(PASSWORD_CHECK, 0, 1) == '1') {
+		$msg = $strPasswordCheck0;
 	}
 	else {
 		if (substr(PASSWORD_CHECK, 1, 1) == '1') {
-			$conditions[] = 'ein Kleinbuchstaben';
+			$conditions[] = $strLCLetters;
 		}
 		if (substr(PASSWORD_CHECK, 2, 1) == '1') {
-			$conditions[] = 'ein Großbuchstaben';
+			$conditions[] = $strUCLetters;
 		}
 		if (substr(PASSWORD_CHECK, 3, 1) == '1') {
-			$conditions[] = 'eine Zahl';
+			$conditions[] = $strNumbers;
 		}
 		if (substr(PASSWORD_CHECK, 4, 1) == '1') {
-			$conditions[] = 'ein Sonderzeichen';
+			$conditions[] = $strSpecialCharacters;
 		}
 
-		$msg = 'Das Passwort muss mindestens ';
-		$num_conditions = count($conditions);
-		for ($i = 0; $i < $num_conditions; $i++) {
-			$msg .= $conditions[$i];
-			if ($i < $num_conditions - 2) {
-				$msg .= ', ';
-			}
-			else {
-				if ($i < $num_conditions - 1) {
-					$msg .= ' ' . $lang['strAnd'] . ' ';
-				}
-			}
-		}
-		$msg .= ' beinhalten.';
+		$msg = $strMinimum . ' ' . implode(', ', $conditions) . '.';
 	}
 	return $msg;
 }

@@ -413,6 +413,7 @@ class stelle {
 
 	# Stelle ändern
 	function Aendern($stellendaten) {
+		$language = $this->database->gui->user->rolle->language;
 		$stelle = ($stellendaten['id'] != '' ? "`ID` = " . $stellendaten['id'] . ", " : "");
 		$wappen = (value_of($stellendaten, 'wappen') != '' ? "`wappen` = '" . $stellendaten['wappen'] . "', " : "");
 		$sql = "
@@ -421,7 +422,9 @@ class stelle {
 			SET" .
 				$stelle .
 				$wappen . "
-				`Bezeichnung` = '" . $stellendaten['bezeichnung'] . "',
+				`Bezeichnung` = '" . $stellendaten['bezeichnung'] . "'," .
+				(array_key_exists('Bezeichnung_' . $language, $stellendaten) ? "
+					`Bezeichnung_" . $language . "` = '" . $stellendaten['Bezeichnung_' . $language] . "'," : "") . "
 				`Referenzkarte_ID` = " . $stellendaten['Referenzkarte_ID'] . ",
 				`minxmax` = '" . $stellendaten['minxmax'] . "',
 				`minymax` = '" . $stellendaten['minymax'] . "',
