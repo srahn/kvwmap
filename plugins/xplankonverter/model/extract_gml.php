@@ -183,7 +183,8 @@ class Gml_extractor {
 			}
 			if (preg_match('/xplan=\'([^"]+)\'/', $line, $matched_ns_str)) {
 				break; #found it
-			} else {
+			}
+			else {
 				$msg  = 'Konnte XPlanAuszug oder Namespace xplan nicht in Datei finden.<br>';
 				$msg .= 'Überprüfen Sie die Validität der XPlanung-Datei';
 				$GUI->add_message('warning', $msg);
@@ -193,17 +194,16 @@ class Gml_extractor {
 			}
 			#echo 'could not find XPlan srsName within double quotes. checking single quotes:<br>';
 		}
-		#echo $matched_ns_str[1] . '<br>';
+		echo $matched_ns_str[1] . '<br>';
+
 		if (preg_match('/5\/1/', $matched_ns_str[1], $matched_version_str)) {
-				echo $matched_ns_str[1] . '<br>';
-				$version = '5.1';
-				break; #found it
+			$version = '5.1';
 		} else if (preg_match('/5.1/', $matched_ns_str[1], $matched_version_str)) {
-				$version = '5.1';
+			$version = '5.1';
 		} else if (preg_match('/5\/2/', $matched_ns_str[1], $matched_version_str)) {
-				$version = '5.2';
+			$version = '5.2';
 		} else if (preg_match('/5.2/', $matched_ns_str[1], $matched_version_str)) {
-				$version = '5.2';
+			$version = '5.2';
 		} else {
 			$msg  = 'Die XPlan-GML Version der Datei kann nicht identifiziert werden.<br>';
 			$msg .= 'Bitte überprüfen Sie, ob die XPlan-Version valide ist und der Namespace in Version 5.1 oder 5.2 liegt<br>';
@@ -215,7 +215,7 @@ class Gml_extractor {
 		}
 		#echo 'version:' . $version;
 		return $version;
-	}	
+	}
 
 	/*
 	* Returns TRUE OR FALSE, depending on whether the schema exists
