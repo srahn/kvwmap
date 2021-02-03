@@ -753,7 +753,7 @@ class user {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name LIKE '" . $login_name . "'");
-		if ($passwort != '') array_push($where, "passwort = md5('" . $passwort . "')");
+		if ($passwort != '') array_push($where, "passwort = md5('" . $this->database->mysqli->real_escape_string($passwort) . "')");
 		$sql = "
 			SELECT
 				*
@@ -1275,7 +1275,7 @@ class user {
 		$sql.=',Vorname="'.$userdaten['vorname'].'"';
 		$sql.=',login_name="'.$userdaten['loginname'].'"';
 		$sql.=',Namenszusatz="'.$userdaten['Namenszusatz'].'"';
-		$sql.=',passwort=MD5("'.$userdaten['password2'].'")';
+		$sql.=',passwort = MD5("' . $this->database->mysqli->real_escape_string($userdaten['password2']) . '")';
 		$sql.=',password_setting_time=CURRENT_TIMESTAMP()';
 		if ($userdaten['phon']!='') {
 			$sql.=',phon="'.$userdaten['phon'].'"';
@@ -1341,7 +1341,7 @@ class user {
 
 	function Aendern($userdaten) {
 		if ($userdaten['changepasswd']) {
-			$passwort_column = ", `passwort` = MD5('" . $userdaten['password2'] . "')";
+			$passwort_column = ", `passwort` = MD5('" . $this->database->mysqli->real_escape_string($userdaten['password2']) . "')";
 			$passwort_setting_time_column = ", `password_setting_time` = CURRENT_TIMESTAMP()";
 		}
 		# Wurde ein password_setting_time explizit mitgeschickt, wird dieses eingetragen statt current_timestamp
@@ -1398,7 +1398,7 @@ class user {
 			UPDATE
 				user
 			SET
-				`passwort` = MD5('" . $password . "'),
+				`passwort` = MD5('" . $this->database->mysqli->real_escape_string($password) . "'),
 				`password_setting_time` = '" . $password_setting_time . "'
 			WHERE
 				`ID` = " . $this->id . "

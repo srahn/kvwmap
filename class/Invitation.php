@@ -53,7 +53,7 @@ class Invitation extends MyObject {
 		$link = URL . APPLVERSION .
 			'index.php?go=logout&token=' . $this->get('token') .
 			'&email=' . $this->get('email') .
-			'&stelle_id=' . $this->get('stelle_id') .
+			'&Stelle_ID=' . $this->get('stelle_id') .
 			'&Name=' . urlencode($this->get('name')) .
 			'&Vorname=' . urlencode($this->get('vorname')) .
 			'&login_name=' . strToLower(umlaute_umwandeln(substr($this->get('vorname'), 0, 1) . $this->get('name'))) .
