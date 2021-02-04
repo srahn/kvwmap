@@ -15497,7 +15497,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	function share_rollenlayer() {
 		$shared_table_schema = 'shared';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-		if (!$ret = $mapDB->read_RollenLayer($this->formvar['selected_rollenlayer'])) {
+		if (!$ret = $mapDB->read_RollenLayer($this->formvars['selected_rollenlayer_id'])) {
 			return 0; // do not create the layer
 		}
 		# Set initial values from rollenlayer
@@ -15543,8 +15543,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			SELECT * FROM " . CUSTOM_SHAPE_SCHEMA .  "." . $rollenlayer_table . "
 		";
 
-		$ret = $this->pgdatabase->execSQL($sql, 4, 0, true);
-		if (!$ret['success']) { echo err_msg('kvwmap.php', __LINE__, $sql); return 0; }
+		$ret = $this->pgdatabase->execSQL($sql, 4, 0, false);
+		if (!$ret['success']) { $this->add_message('error', err_msg('kvwmap.php', __LINE__, $sql)); return 0; }
 
 		# Set formvars from layer
 		$this->formvars = $layer;
@@ -15561,16 +15561,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		);
 
 		# ToDo:
-		# - When a user delete a shared layer, also its table must be removed
-		# otherwise we could create a lot of garbage in the database
 		# - limit for the size of shared layers?
-
-		$this->loadMap('DataBase');
-		$currenttime=date('Y-m-d H:i:s',time());
-		$this->user->rolle->setConsumeActivity($currenttime,'getMap', $this->user->rolle->last_time_id);
-		$this->saveMap('');
-		$this->drawMap();
-		$this->output();
 	}
 
 	function get_layer_params_form($stelle_id = NULL, $layer_id = NULL){

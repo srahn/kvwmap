@@ -1678,6 +1678,12 @@ function go_switch($go, $exit = false) {
 			case 'share_rollenlayer': {
 				$GUI->checkCaseAllowed('share_rollenlayer');
 				$GUI->share_rollenlayer();
+				$GUI->loadMap('DataBase');
+				$currenttime = date('Y-m-d H:i:s',time());
+				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap', $GUI->user->rolle->last_time_id);
+				$GUI->saveMap('');
+				$GUI->drawMap();
+				$GUI->output();
 			} break;
 
 			default : {
