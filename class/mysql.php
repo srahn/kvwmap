@@ -91,7 +91,7 @@ class database {
 				user
 			WHERE
 				login_name = '" . addslashes($username) . "' AND
-				passwort = '" . md5($passwort) . "' AND
+				passwort = md5('" . $this->database->mysqli->real_escape_string($passwort) . "') AND
 				(
 					('" . date('Y-m-d h:i:s') . "' >= start AND '" . date('Y-m-d h:i:s') . "' <= stop) OR
 					(start='0000-00-00 00:00:00' AND stop='0000-00-00 00:00:00')

@@ -566,7 +566,7 @@ class user {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name LIKE '" . $login_name . "'");
-		if ($passwort != '') array_push($where, "passwort = md5('" . $passwort . "')");
+		if ($passwort != '') array_push($where, "passwort = md5('" . $this->database->mysqli->real_escape_string($passwort) . "')");
 		$sql = "
 			SELECT
 				*
