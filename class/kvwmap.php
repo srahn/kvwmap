@@ -7973,6 +7973,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->formvars['Data'] = pg_escape_string($this->formvars['Data']);
 			$this->formvars['duplicate_criterion'] = pg_escape_string($this->formvars['duplicate_criterion']);
 			$this->formvars['selected_layer_id'] = $mapDB->newLayer($this->formvars);
+			if ($this->formvars['selected_layer_id'] == 0) {
+				return false;
+			}
 
 			if ($this->formvars['connectiontype'] == 6 AND $this->formvars['pfad'] != '') {
 				#---------- Speichern der Layerattribute -------------------
@@ -17701,7 +17704,7 @@ class db_mapObj{
         $sql.="'" . $formvars['id']."', ";
       }
       $sql .= "'" . $formvars['Name']."', ";
-			foreach($supportedLanguages as $language){
+			foreach ($supportedLanguages as $language){
 				if($language != 'german'){
 					$sql .= "'" . $formvars['Name_'.$language]."', ";
 				}
@@ -17809,7 +17812,7 @@ class db_mapObj{
 			 		" . ($formvars['listed'] == '' ? 0 : "'" . $formvars['listed'] . "'") . ",
 					" . ($formvars['duplicate_from_layer_id'] == '' ? "NULL" : $formvars['duplicate_from_layer_id']) . ",
 					'" . $formvars['duplicate_criterion'] . "',
-					" . $formvars['shared_from'] . "
+					" . ($formvars['shared_from'] == '' ? "NULL" : "1") . "
 				)
 			";
     }
@@ -17848,7 +17851,9 @@ class db_mapObj{
     #echo '<p>SQL zum Eintragen eines Layers: '. $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->newLayer - Erzeugen eines Layers:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql, $this->connection); return 0; }
+    if (!$this->db->success) {
+			return 0;
+		}
     return $this->db->mysqli->insert_id;
   }
 
