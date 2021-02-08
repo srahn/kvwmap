@@ -1886,12 +1886,15 @@ echo '			</table>
 		}
 		$layer->setProjection('+init=epsg:'.$layerset['epsg_code']); # recommended
 		if ($layerset['connection']!='') {
-			if ($this->map_factor != '' AND $layerset['connectiontype'] == 7) {		# WMS-Layer
-				if ($layerset['printconnection']!=''){
-					$layerset['connection'] = $layerset['printconnection']; 		# wenn es eine Druck-Connection gibt, wird diese verwendet
-				}
-				else{
-					//$layerset['connection'] .= '&mapfactor='.$this->map_factor;			# bei WMS-Layern wird der map_factor durchgeschleift (für die eigenen WMS) erstmal rausgenommen, weil einige WMS-Server der zusätzliche Parameter mapfactor stört
+			if($layerset['connectiontype'] == 7) {		# WMS-Layer
+				$layerset['connection'] .= '&SERVICE=WMS';
+				if ($this->map_factor != ''){
+					if ($layerset['printconnection']!=''){
+						$layerset['connection'] = $layerset['printconnection']; 		# wenn es eine Druck-Connection gibt, wird diese verwendet
+					}
+					else{
+						//$layerset['connection'] .= '&mapfactor='.$this->map_factor;			# bei WMS-Layern wird der map_factor durchgeschleift (für die eigenen WMS) erstmal rausgenommen, weil einige WMS-Server der zusätzliche Parameter mapfactor stört
+					}
 				}
 			}
 			if ($layerset['connectiontype'] == 6) {
@@ -7997,7 +8000,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       );
   		if ($formvars['assign_default_values']) {
   			$this->add_message('notice', 'Die Defaultwerte wurden an die zugeordneten Stellen übertragen.');
-  		}
+  		}			
       # Löschen der in der Selectbox entfernten Stellen
       $layerstellen = $mapDB->get_stellen_from_layer($formvars['selected_layer_id']);
       for ($i = 0; $i < count($layerstellen['ID']); $i++){
@@ -8012,15 +8015,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         }
       }
       if ($deletestellen != 0){
-        for($i = 0; $i < count($deletestellen); $i++){
-          $stelle = new stelle($deletestellen[$i], $this->database);
-          $stelle->deleteLayer(array($formvars['selected_layer_id']), $this->pgdatabase);
-          $users = $stelle->getUser();
-          for($j = 0; $j < count($users['ID']); $j++){
-            $this->user->rolle->deleteLayer($users['ID'][$j], array($deletestellen[$i]), array($formvars['selected_layer_id']));
-            $this->user->rolle->updateGroups($users['ID'][$j],$deletestellen[$i], $formvars['selected_layer_id']);
-          }
-        }
+        $this->removeLayerFromStellen($formvars['selected_layer_id'], $deletestellen);
       }
       # /Löschen der in der Selectbox entfernten Stellen
     }
@@ -8057,9 +8052,27 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         $this->user->rolle->setLayer($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id); # Hinzufügen der Layer zur Rolle
       }
 			$stelle->updateLayerParams();
+			# Kindstellen
+			$children = $stelle->getChildren($stellen_ids[$i], " ORDER BY Bezeichnung", 'only_ids', false);
+			$stellen_ids = array_merge($stellen_ids, $this->addLayersToStellen($layer_ids, $children, $filter, $assign_default_values));
     }
     return $stellen_ids;
   }
+	
+	function removeLayerFromStellen($layer_id, $deletestellen) {
+		for($i = 0; $i < count($deletestellen); $i++){
+			$stelle = new stelle($deletestellen[$i], $this->database);
+			$stelle->deleteLayer(array($layer_id), $this->pgdatabase);
+			$users = $stelle->getUser();
+			for($j = 0; $j < count($users['ID']); $j++){
+				$this->user->rolle->deleteLayer($users['ID'][$j], array($deletestellen[$i]), array($layer_id));
+				$this->user->rolle->updateGroups($users['ID'][$j],$deletestellen[$i], $layer_id);
+			}
+			# Kindstellen
+			$children = $stelle->getChildren($deletestellen[$i], " ORDER BY Bezeichnung", 'only_ids', false);
+			$this->removeLayerFromStellen($layer_id, $children);
+		}
+	}
 
 	function LayerLoeschen(){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
