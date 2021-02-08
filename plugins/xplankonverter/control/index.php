@@ -408,18 +408,19 @@ function go_switch_xplankonverter($go){
 										$GUI->formvars['Gruppe'] = $layer_group_id;
 										$GUI->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
 										$GUI->formvars['Data'] = 'the_geom from (
-											SELECT oid, *
+											SELECT *
 											FROM ' . $shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() . '
 											WHERE 1=1
-										) as foo using unique oid using srid=' . $shapeFile->get('epsg_code');
+										) as foo using unique gid using srid=' . $shapeFile->get('epsg_code');
 										$GUI->formvars['maintable'] = $shapeFile->dataTableName();
 										$GUI->formvars['schema'] = $shapeFile->dataSchemaName();
+										$GUI->formvars['oid'] = 'gid';
 										$GUI->formvars['connection'] = $GUI->pgdatabase->connect_string;
 										if ($GUI->pgdatabase->connection_id != '') {
 											$GUI->formvars['connection_id'] = $GUI->pgdatabase->connection_id;
 										}
 										$GUI->formvars['connectiontype'] = '6';
-										$GUI->formvars['filteritem'] = 'oid';
+										$GUI->formvars['filteritem'] = 'gid';
 										$GUI->formvars['tolerance'] = '5';
 										$GUI->formvars['toleranceunits'] = 'pixels';
 										$GUI->formvars['epsg_code'] = $shapeFile->get('epsg_code');

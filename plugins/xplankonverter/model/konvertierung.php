@@ -65,7 +65,7 @@ class Konvertierung extends PgObject {
 				$konvertierungen = $konvertierung->find_where('id = ' . explode('_', $path['filename'])[1] . ' AND veroeffentlicht');
 				if (count($konvertierungen) == 0) return false;
 				$konvertierung = $konvertierungen[0];
-				$konvertierung->exportfile = '/var/www/data' . $dev . '/upload/xplankonverter/' . $konvertierung->get('id') . '/xplan_gml' . $document;
+				$konvertierung->exportfile = '/var/www/data' . $dev . '/upload/xplankonverter/' . $konvertierung->get($this->identifier) . '/xplan_gml' . $document;
 				$konvertierung->contenttype = 'text/xml';
 				return $konvertierung;
 			case 'pdf' :
@@ -134,10 +134,12 @@ class Konvertierung extends PgObject {
 				'" . $planart . "',
 				" . $stelle_id . ",
 				" . $user_id . "
+			RETURNING " . $this->identifier . "
 		)";
 		$this->debug->show('Create new konvertierung with sql: ' . $sql, Konvertierung::$write_debug);
 		$query = pg_query($this->database->dbConn, $sql);
-		$oid = pg_last_oid($query);
+		$row = pg_fetch_assoc($query);
+		$oid = $row[$this->identifier];
 		#echo '<br>oid: ' . $oid;
 		if (empty($oid)) {
 			$this->lastquery = $query;
@@ -149,9 +151,9 @@ class Konvertierung extends PgObject {
 				FROM
 					" . $this->schema . "." . $this->tableName . "
 				WHERE
-					oid = " . $oid . "
+					" . $this->identifier . " = " . $oid . "
 			";
-			$this->debug->show('Query created oid with sql: ' . $sql, Konvertierung::$write_debug);
+			$this->debug->show('Query created ' . $this->identifier . ' with sql: ' . $sql, Konvertierung::$write_debug);
 			$query = pg_query($this->database->dbConn, $sql);
 			$row = pg_fetch_assoc($query);
 			$this->set($this->identifier, $row[$this->identifier]);
@@ -183,12 +185,12 @@ class Konvertierung extends PgObject {
 	}
 
 	function get_file_path($directory) {
-		return XPLANKONVERTER_FILE_PATH . $this->get('id') . '/' . $directory;
+		return XPLANKONVERTER_FILE_PATH . $this->get($this->identifier) . '/' . $directory;
 	}
 
 	function get_file_name($name) {
 		$parts = explode('_', $name);
-		return $this->get_file_path($name) . '/' . $parts[0] . '_' . $this->get('id') . '.' . $parts[1];
+		return $this->get_file_path($name) . '/' . $parts[0] . '_' . $this->get($this->identifier) . '.' . $parts[1];
 	}
 
 	function create_edited_shapes() {
@@ -203,7 +205,7 @@ class Konvertierung extends PgObject {
 			FROM
 				information_schema.tables
 			WHERE
-				table_schema = 'xplan_shapes_" . $this->get('id') . "'
+				table_schema = 'xplan_shapes_" . $this->get($this->identifier) . "'
 		";
 
 		$this->debug->show('sql: ' . $sql, Konvertierung::$write_debug);
@@ -237,7 +239,7 @@ class Konvertierung extends PgObject {
 						SELECT
 							*
 						FROM
-							xplan_shapes_" . $this->get('id') . "." . $class_name . "
+							xplan_shapes_" . $this->get($this->identifier) . "." . $class_name . "
 					";
 					$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
 					$export_class->ogr2ogr_export($sql, '"ESRI Shapefile"', $path . '/' . ltrim($class_name, 'shp_') . '.shp', $this->database);
@@ -277,7 +279,7 @@ class Konvertierung extends PgObject {
 				FROM
 					xplan_gml. " . strtolower($class_name). "
 				WHERE
-					konvertierung_id = " . $this->get('id') . "
+					konvertierung_id = " . $this->get($this->identifier) . "
 			";
 			$result = pg_query($this->database->dbConn, $sql);
 			// Get src srid of table as its not necessarily konvertierung dependent
@@ -287,7 +289,7 @@ class Konvertierung extends PgObject {
 				FROM
 					xplan_gml. " . strtolower($class_name). "
 				WHERE
-					konvertierung_id = " . $this->get('id') . "
+					konvertierung_id = " . $this->get($this->identifier) . "
 				LIMIT 1
 			";
 			$result_srid = pg_query($this->database->dbConn, $sql_srid);
@@ -307,7 +309,7 @@ class Konvertierung extends PgObject {
 							FROM
 								xplan_gml. " . strtolower($class_name) . "
 							WHERE
-								konvertierung_id = " . $this->get('id') . "
+								konvertierung_id = " . $this->get($this->identifier) . "
 							AND
 								ST_GeometryType(position) = 'ST_MultiPoint'
 						";
@@ -322,7 +324,7 @@ class Konvertierung extends PgObject {
 							FROM
 								xplan_gml. " . strtolower($class_name) . "
 							WHERE
-								konvertierung_id = " . $this->get('id') . "
+								konvertierung_id = " . $this->get($this->identifier) . "
 							AND
 								ST_GeometryType(position) = 'ST_MultiLineString'
 						";
@@ -337,7 +339,7 @@ class Konvertierung extends PgObject {
 							FROM
 								xplan_gml. " . strtolower($class_name) . "
 							WHERE
-								konvertierung_id = " . $this->get('id') . "
+								konvertierung_id = " . $this->get($this->identifier) . "
 							AND
 								ST_GeometryType(position) = 'ST_MultiPolygon'
 						";
@@ -365,7 +367,7 @@ class Konvertierung extends PgObject {
 			FROM
 				xplan_gml." . $this->plan->tableName . "
 			WHERE
-				konvertierung_id = " . $this->get('id')
+				konvertierung_id = " . $this->get($this->identifier)
 		;
 		$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
 
@@ -375,7 +377,7 @@ class Konvertierung extends PgObject {
 				FROM
 					xplan_gml." . $this->plan->tableName . " 
 				WHERE
-					konvertierung_id = " . $this->get('id') . " 
+					konvertierung_id = " . $this->get($this->identifier) . " 
 				LIMIT 1
 			";
 		$result_srid = pg_query($this->database->dbConn, $sql_srid);
@@ -430,7 +432,7 @@ class Konvertierung extends PgObject {
 		$regeln = array();
 		$regel = new Regel($this->gui);
 		$regeln_ohne_bereich = $regel->find_where("
-			konvertierung_id = {$this->get('id')} AND
+			konvertierung_id = {$this->get($this->identifier)} AND
 			bereich_gml_id IS NULL
 		");
 		$this->debug->show(count($regeln_ohne_bereich) . ' Regeln ohne Bereich gefunden.', Konvertierung::$write_debug);
@@ -455,7 +457,7 @@ class Konvertierung extends PgObject {
 			'<br>',
 			array_map(
 				function($regel) {
-					return '<br>id: ' . $regel->get('id') . '<br>sql: ' . $regel->get('sql');
+					return '<br>id: ' . $regel->get($this->identifier) . '<br>sql: ' . $regel->get('sql');
 				},
 				$regeln
 			)
@@ -465,9 +467,9 @@ class Konvertierung extends PgObject {
 
 	function get_plan() {
 		if (!$this->plan) {
-			$this->debug->show('get_plan with planart: ' . $this->get('planart') . ' for konvertierung: ' . $this->get('id'), Konvertierung::$write_debug);
+			$this->debug->show('get_plan with planart: ' . $this->get('planart') . ' for konvertierung: ' . $this->get($this->identifier), Konvertierung::$write_debug);
 			$plan = new XP_Plan($this->gui, $this->get('planart'));
-			$plan = $plan->find_where('konvertierung_id = ' . $this->get('id'));
+			$plan = $plan->find_where('konvertierung_id = ' . $this->get($this->identifier));
 			$this->debug->show('found ' . count($plan) . ' Pläne', Konvertierung::$write_debug);
 			if (count($plan) > 0) {
 				$this->plan = $plan[0];
@@ -500,8 +502,8 @@ class Konvertierung extends PgObject {
 				xplan_gml." . $this->plan->planartAbk . "_plan bp ON b.gehoertzuplan = bp.gml_id::text LEFT JOIN
 				xplan_gml." . $this->plan->planartAbk . "_plan rp ON r.konvertierung_id = rp.konvertierung_id
 			WHERE
-				bp.konvertierung_id = " . $this->get('id') . " OR
-				rp.konvertierung_id = " . $this->get('id') . "
+				bp.konvertierung_id = " . $this->get($this->identifier) . " OR
+				rp.konvertierung_id = " . $this->get($this->identifier) . "
 		";
 
 		$this->debug->show('sql: ' . $sql, Konvertierung::$write_debug);
@@ -537,7 +539,7 @@ class Konvertierung extends PgObject {
 					xplan_gml." . strtolower(substr($this->get('planart'), 0, 2)) . "_plan p ON k.id = p.konvertierung_id LEFT JOIN
 					xplankonverter.regeln r ON k.id = r.konvertierung_id
 				WHERE
-					k.id = {$this->get('id')}
+					k.id = {$this->get($this->identifier)}
 			";
 			$this->debug->show('<br>Setze Status mit sql: ' . $sql, Konvertierung::$write_debug);
 			$query = pg_query($this->database->dbConn, $sql);
@@ -588,7 +590,7 @@ class Konvertierung extends PgObject {
 					'Gruppenname' => $this->get('bezeichnung') . ' ' . $layer_type
 				));
 			}
-			$this->set(strtolower($layer_type) . '_layer_group_id', $layerGroup->get('id'));
+			$this->set(strtolower($layer_type) . '_layer_group_id', $layerGroup->get($this->identifier));
 			$this->update();
 		}
 		return $this->get(strtolower($layer_type) . '_layer_group_id');
@@ -604,7 +606,7 @@ class Konvertierung extends PgObject {
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (!empty($layer_group_id)) {
 			$layer_group = new MyObject($this->gui, 'u_groups');
-			$layer_group->set('id', $layer_group_id);
+			$layer_group->set($this->identifier, $layer_group_id);
 			$layer_group->identifier = 'id';
 			$layer_group->identifier_type = 'integer';
 			return $layer_group->delete();
@@ -619,9 +621,9 @@ class Konvertierung extends PgObject {
 	* XPlan GML Datensätze, Beziehungen und Validierungsergebnisse
 	*/
 	function reset_mapping() {
-		$this->debug->show('Konvertierung: reset_mapping mit konvertierung_id: ' . $this->get('id'), Konvertierung::$write_debug);
+		$this->debug->show('Konvertierung: reset_mapping mit konvertierung_id: ' . $this->get($this->identifier), Konvertierung::$write_debug);
 		# Lösche vorhandene Validierungsergebnisse der Konvertierung
-		Validierungsergebnis::delete_by_id($this->gui, 'konvertierung_id', $this->get('id'));
+		Validierungsergebnis::delete_by_id($this->gui, 'konvertierung_id', $this->get($this->identifier));
 
 		# Lösche vorhandene Datenobjekte der Konvertierung
 		foreach($this->get_class_names() AS $class_name) {
@@ -632,13 +634,13 @@ class Konvertierung extends PgObject {
 				WHERE
 					konvertierung_id = $1
 			;";
-			$this->debug->show("Delete Objekte von {$class_name} with konvertierung_id " . $this->get('id') . ' und sql: ' . $sql . ' in reset Mapping.', Konvertierung::$write_debug);
+			$this->debug->show("Delete Objekte von {$class_name} with konvertierung_id " . $this->get($this->identifier) . ' und sql: ' . $sql . ' in reset Mapping.', Konvertierung::$write_debug);
 			#echo '<br>sql: ' . $sql;
-			$query = pg_query_params($this->database->dbConn, $sql, array($this->get('id')));
+			$query = pg_query_params($this->database->dbConn, $sql, array($this->get($this->identifier)));
 		}
 
 		# Lösche vorhandene xplan_shapes Export-Dateien
-		$file = XPLANKONVERTER_FILE_PATH . $this->get('id') . '/xplan_shapes.zip';
+		$file = XPLANKONVERTER_FILE_PATH . $this->get($this->identifier) . '/xplan_shapes.zip';
 		if (file_exists($file)) unlink($file);
 		array_map('unlink', glob($this->get_file_path('xplan_shapes') . '/*'));
 	}
@@ -661,7 +663,7 @@ class Konvertierung extends PgObject {
 
 		// validate Bereiche
 		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'detaillierte_requires_bedeutung');
-		$validierung->konvertierung_id = $this->get('id');
+		$validierung->konvertierung_id = $this->get($this->identifier);
 		$bereiche = $this->plan->get_bereiche();
 		foreach ($bereiche AS $bereich) {
 			$validierung->detaillierte_requires_bedeutung($bereich);
@@ -673,7 +675,7 @@ class Konvertierung extends PgObject {
 
 		if (!empty($regeln)) {
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'regel_existiert');
-			$validierung->konvertierung_id = $this->get('id');
+			$validierung->konvertierung_id = $this->get($this->identifier);
 			if ($validierung->regel_existiert($regeln)) {
 				$success = true;
 				foreach($regeln AS $regel) {
@@ -693,7 +695,7 @@ class Konvertierung extends PgObject {
 				}
 				$alle_sql_ausfuehrbar = true;
 				$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'alle_sql_ausfuehrbar');
-				$validierung->konvertierung_id = $this->get('id');
+				$validierung->konvertierung_id = $this->get($this->identifier);
 				foreach ($regeln AS $regel) {
 					if (!$validierung->sql_ausfuehrbar($regel)) {
 						$alle_sql_ausfuehrbar = false;
@@ -706,7 +708,7 @@ class Konvertierung extends PgObject {
 					#echo $this->get_version_from_ns_uri(XPLAN_NS_URI);
 					foreach ($this->get_konformitaetsbedingungen($this->get_version_from_ns_uri(XPLAN_NS_URI)) AS $bedingung) {
 						foreach ($bedingung['konformitaet']->validierungen AS $validierung) {
-							$validierung->validiere_konformitaet($this->get('id'), $bedingung);
+							$validierung->validiere_konformitaet($this->get($this->identifier), $bedingung);
 						}
 					}
 
@@ -716,10 +718,10 @@ class Konvertierung extends PgObject {
 						# Create topology of plan objects
 						$this->createTopology();
 						$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'flaechenschluss_ueberlappungen');
-						$validierung->konvertierung_id = $this->get('id');
+						$validierung->konvertierung_id = $this->get($this->identifier);
 						$validierung->flaechenschluss_ueberlappungen($this->plan);
 						$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'flaechenschluss_luecken');
-						$validierung->konvertierung_id = $this->get('id');
+						$validierung->konvertierung_id = $this->get($this->identifier);
 						$validierung->flaechenschluss_luecken($this->plan);
 					}
 				}
@@ -745,9 +747,9 @@ class Konvertierung extends PgObject {
 				xplankonverter.konformitaeten_der_konvertierungen
 			WHERE
 				" . $version . " BETWEEN version_von::float AND coalesce(version_bis::float, 99999) AND
-				konvertierung_id = " . $this->get('id') . "
+				konvertierung_id = " . $this->get($this->identifier) . "
 		";
-		$this->debug->show('sql to find konformitaetsbedingungen for konvertierung_id: ' . $this->get('id') . ' für XPlanung Version: ' . $version, false);
+		$this->debug->show('sql to find konformitaetsbedingungen for konvertierung_id: ' . $this->get($this->identifier) . ' für XPlanung Version: ' . $version, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		while ($rs = pg_fetch_assoc($query)) {
 			$bedingungen[] = array(
@@ -768,7 +770,7 @@ class Konvertierung extends PgObject {
 			UPDATE xplankonverter.flaechenschlussobjekte
 			SET topo = topology.clearTopoGeom(topo)
 			WHERE
-				konvertierung_id = " . $this->get('id') . "
+				konvertierung_id = " . $this->get($this->identifier) . "
 		";
 		#echo '<p>SQL zum Löschen der Topology: ' . $sql;
 		$result = $this->database->execSQL($sql, 0, 3);
@@ -781,7 +783,7 @@ class Konvertierung extends PgObject {
 		$sql ="
 			DELETE FROM xplankonverter.flaechenschlussobjekte
 			WHERE
-				konvertierung_id = " . $this->get('id') . "
+				konvertierung_id = " . $this->get($this->identifier) . "
 		";
 		#echo '<p>SQL zum Löschne die flaechenschlussobjekte: ' . $sql;
 		$result = $this->database->execSQL($sql, 0, 3);
@@ -809,7 +811,7 @@ class Konvertierung extends PgObject {
 			WHERE
 				flaechenschluss AND
 				ebene = 0 OR ebene IS NULL AND
-				konvertierung_id = " . $this->get('id') . "
+				konvertierung_id = " . $this->get($this->identifier) . "
 		";
 		#echo '<p>SQL zur Erzeugung von Topology: ' . $sql;
 		$result = $this->database->execSQL($sql, 0, 3);
@@ -836,7 +838,7 @@ class Konvertierung extends PgObject {
 				FROM
 					xplan_gml.bp_plan
 				WHERE
-					konvertierung_id = " . $this->get('id') . "
+					konvertierung_id = " . $this->get($this->identifier) . "
 			) plan
 		";
 		#echo '<p>SQL Füge ein umschließendes Polygon des raeumlichen Geltungsbereiches zur Tabelle flaechenschlussobjekte hinzu: ' . $sql;
@@ -853,7 +855,7 @@ class Konvertierung extends PgObject {
 			SET
 				topo = topology.toTopoGeom(teilpolygon, 'flaechenschluss_topology', 1, 0.002)
 			WHERE
-				konvertierung_id = " . $this->get('id') . "
+				konvertierung_id = " . $this->get($this->identifier) . "
 		";
 		#echo '<p>SQL zur Berechnung der topologie der flaechenschlussobjekte: ' . $sql;
 		$result = $this->database->execSQL($sql, 0, 3);
@@ -871,7 +873,7 @@ class Konvertierung extends PgObject {
 				xplankonverter.validierungsergebnisse
 			WHERE
 				status = 'Fehler' AND
-				konvertierung_id = {$this->get('id')}
+				konvertierung_id = {$this->get($this->identifier)}
 		";
 		return pg_num_rows(pg_query($this->database->dbConn, $sql)) == 0;
 	}
@@ -892,7 +894,7 @@ class Konvertierung extends PgObject {
 		$regeln = array();
 		$regel = new Regel($this->gui);
 		$regeln = $regel->find_where("
-			konvertierung_id = {$this->get('id')} AND
+			konvertierung_id = {$this->get($this->identifier)} AND
 			bereich_gml_id IS NULL
 		");
 		foreach($regeln AS $regel) {
@@ -919,7 +921,7 @@ class Konvertierung extends PgObject {
 		# Destroy the xplan_shapes_ + $konvertierung_id if it exists
 		# Destroy the xplan_gmlas: + $user_id schema if it exists
 		$sql = "
-			DROP SCHEMA IF EXISTS xplan_shapes_" .  $this->get('id') . " CASCADE;
+			DROP SCHEMA IF EXISTS xplan_shapes_" .  $this->get($this->identifier) . " CASCADE;
 			DROP SCHEMA IF EXISTS xplan_gmlas_" .  $this->gui->user->id . " CASCADE;
 		";
 		pg_query($this->database->dbConn, $sql);
