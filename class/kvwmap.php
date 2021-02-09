@@ -11166,6 +11166,18 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$stellen = explode('|', $formvars['stelle']);
 			foreach ($stellen as $stelleid) {
 				$stelle = new stelle($stelleid, $this->database);
+				$this->layer = $stelle->getLayer($formvars['selected_layer_id']);
+				$formvars['used_layer_parent_id'] = $this->layer[0]['used_layer_parent_id'];
+				if ($formvars['used_layer_parent_id'] != '') {
+					# wenn Eltern-Stelle für diesen Layer vorhanden, deren Rechte übernehmen
+					while (!isset($formvars['privileg_' . $this->attributes['name'][0] .'_'. $formvars['used_layer_parent_id']])) {
+						# oberste Elternstelle suchen
+						$parent_stelle = new stelle($formvars['used_layer_parent_id'], $this->database);
+						$this->layer = $parent_stelle->getLayer($formvars['selected_layer_id']);
+						$formvars['used_layer_parent_id'] = $this->layer[0]['used_layer_parent_id'];
+					}
+					$stelleid = $formvars['used_layer_parent_id'];
+				}
 				$stelle->set_attributes_privileges($formvars, $this->attributes);
 				$stelle->set_layer_privileges($formvars['selected_layer_id'], $formvars['privileg' . $stelleid], $formvars['export_privileg' . $stelleid]);
 			}
@@ -11273,7 +11285,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		
 		# Layer
 		if($layer[0] != NULL) {
-			$new_stelle->addLayer($layer, 0); # Hinzufügen der Layer zur Stelle
+			$new_stelle->addLayer($layer, 0, '', false); # Hinzufügen der Layer zur Stelle
 		}
 		
 		# Funktionen
@@ -11423,25 +11435,26 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$layer
 			);
 
-			foreach($results AS $result) {
+			foreach ($results AS $result) {
 				$this->add_message($result['type'], $result['message']);
 			}
 			
 			# Zuweisung in der geänderten Stelle
       $this->Stellenzuweisung(
-				$Stelle, 
-				$new_stelle, 
+				$Stelle,
+				$new_stelle,
 				$menues,
 				$functions,
 				$frames,
 				$layouts,
 				$layer,
-				$selectedusers
+				$selectedusers,
+				$selectedparents[0]
 			);
 						
 			# Zuweisung in den Kindstellen
 			$old_children = $Stelle->getChildren($this->formvars['selected_stelle_id'], " ORDER BY Bezeichnung", 'only_ids', true);
-			foreach(array_unique(array_merge($old_children, $selectedchildren)) AS $child_id){
+			foreach (array_unique(array_merge($old_children, $selectedchildren)) AS $child_id){
 				$drop_child = !in_array($child_id, $selectedchildren) ? true : false;
 				if(!in_array($child_id, $old_children)){
 					$new_stelle->addChild($child_id);
@@ -11473,7 +11486,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$frames,
 					$layouts,
 					$layer,
-					$selectedusers
+					$selectedusers,
+					$new_stelle->id
 				);
 				# Kindstelle entfernen
 				if($drop_child){
