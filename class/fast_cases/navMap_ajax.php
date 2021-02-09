@@ -2112,21 +2112,22 @@ class user {
 		}
 	}
 
-	function readUserDaten($id, $login_name) {
+	function readUserDaten($id, $login_name, $passwort = '') {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name LIKE '" . $login_name . "'");
+		if ($passwort != '') array_push($where, "passwort = md5('" . $this->database->mysqli->real_escape_string($passwort) . "')");
 		$sql = "
 			SELECT
 				*
 			FROM
 				user
-			WHERE " .
-				implode(" AND ", $where) . "
+			WHERE
+				" . implode(" AND ", $where) . "
 		";
 		#echo '<br>Sql: ' . $sql;
 
-		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>" . $sql, 3);
+		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>", 3);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
 		$rs = $this->database->result->fetch_array();
@@ -2143,7 +2144,10 @@ class user {
 		}
 		$this->funktion = $rs['Funktion'];
 		$this->password_setting_time = $rs['password_setting_time'];
-  }
+		$this->agreement_accepted = $rs['agreement_accepted'];
+		$this->start = $rs['start'];
+		$this->stop = $rs['stop'];
+	}
 
 	function getLastStelle() {
 		$sql = "
