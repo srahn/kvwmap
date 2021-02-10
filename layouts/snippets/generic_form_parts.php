@@ -610,7 +610,12 @@
 
 				case 'Link': {
 					if ($value!='') {
-						if (substr($value, 0, 4) == 'http') $target = '_blank';
+						if (substr($value, 0, 4) == 'http') {
+							$target = '_blank';
+						}
+						else {
+							$target = 'root';
+						}
 						$datapart .= '<a style="padding: 0 0 0 3;" class="link" target="'.$target.'" style="font-size: '.$fontsize.'px" href="' . htmlspecialchars($value) .'">';
 						if($attributes['options'][$j] != ''){
 							$datapart .= $attributes['options'][$j];
