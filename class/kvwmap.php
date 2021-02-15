@@ -136,6 +136,11 @@ class GUI {
 			return call_user_func_array($this->{$method}, $arguments);
 		}
 	}
+	
+	function layer_check_oids() {
+		$this->main = 'layer_check_oids.php';
+		$this->output();
+	}
 
 	function login() {
 		$this->expect = array('login_name', 'passwort', 'mobile');
