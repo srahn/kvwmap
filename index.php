@@ -219,6 +219,10 @@ function go_switch($go, $exit = false) {
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
 			}break;
+			
+			case 'layer_check_oids' : {
+				$GUI->layer_check_oids();
+			} break;
 
 			case 'login' : {
 				$GUI->login();
