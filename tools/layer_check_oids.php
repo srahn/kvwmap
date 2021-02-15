@@ -101,13 +101,26 @@ $result = $userDb->execSQL($query);
 	}
 	
 	textarea{
-		height: 38px;
+		height: 50px;
+		width: 300px;
 	}
 	
 	#main{
 		width: 100%
 	}
 </style>
+
+<script type="text/javascript">
+
+	function select_text(textarea, str){
+		var index = textarea.value.indexOf(str);
+		if(index > 0){
+			textarea.focus();
+			textarea.setSelectionRange(index, index + str.length);
+		}
+	}
+
+</script>
 
 <table id="main">
 	<tr>
@@ -124,13 +137,13 @@ $result = $userDb->execSQL($query);
 			Data
 		</td>
 		<td>
+			oid-Alternative
+		</td>		
+		<td>
 			Haupttabelle
 		</td>
 		<td>
 			Fehlermeldung
-		</td>
-		<td>
-			oid-Alternative
 		</td>
 	</tr>
 
@@ -151,20 +164,20 @@ while($layer = $userDb->result->fetch_assoc()){
 				' . $layer['oid'] . '
 			</td>
 			<td style="background-color: '.$color[$status['query']].'">
-				<textarea>' . $layer['pfad'] . '</textarea>
+				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['pfad'] . '</textarea>
 			</td>
 			<td style="background-color: '.$color[$status['data']].'">
-				<textarea>' . $layer['Data'] . '</textarea>
+				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['Data'] . '</textarea>
 			</td>
+			<td>
+				' . $result['oid_alternative'] . '
+			</td>			
 			<td>
 				' . $layer['maintable'] . '
 			</td>
 			<td>
-				' . $result['error'] . '
+				<div style="width: 250px; overflow: hidden">' . $result['error'] . '</div>
 			</td>
-			<td>
-				' . $result['oid_alternative'] . '
-			</td<
 		</tr>';
 }
 echo '</table>';
