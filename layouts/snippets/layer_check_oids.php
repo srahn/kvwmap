@@ -134,33 +134,34 @@ while($layer = $this->database->result->fetch_assoc()){
 	if (!$status['oid']) {
 		$result = get_oid_alternative($layer);
 	}
-		
-  echo '
-		<tr>
-			<td>
-				<div style="width: 200px; overflow: auto;">
-					<a href="index.php?go=Layereditor&selected_layer_id='.$layer["Layer_ID"].'"target="_blank">'.$layer["Name"].'</a>
-				</div>
-			</td>
-			<td style="background-color: '.$color[$status['oid']].'">
-				' . $layer['oid'] . '
-			</td>
-			<td style="background-color: '.$color[$status['query']].'">
-				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['pfad'] . '</textarea>
-			</td>
-			<td style="background-color: '.$color[$status['data']].'">
-				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['Data'] . '</textarea>
-			</td>
-			<td>
-				' . $result['oid_alternative'] . '
-			</td>			
-			<td>
-				' . $layer['maintable'] . '
-			</td>
-			<td>
-				<div style="width: 250px; overflow: hidden">' . $result['error'] . '</div>
-			</td>
-		</tr>';
+	if (!$status['oid'] AND !$status['query'] AND !$status['data'])	{
+		echo '
+			<tr>
+				<td>
+					<div style="width: 200px; overflow: auto;">
+						<a href="index.php?go=Layereditor&selected_layer_id='.$layer["Layer_ID"].'"target="_blank">'.$layer["Name"].'</a>
+					</div>
+				</td>
+				<td style="background-color: '.$color[$status['oid']].'">
+					' . $layer['oid'] . '
+				</td>
+				<td style="background-color: '.$color[$status['query']].'">
+					<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['pfad'] . '</textarea>
+				</td>
+				<td style="background-color: '.$color[$status['data']].'">
+					<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['Data'] . '</textarea>
+				</td>
+				<td>
+					' . $result['oid_alternative'] . '
+				</td>			
+				<td>
+					' . $layer['maintable'] . '
+				</td>
+				<td>
+					<div style="width: 250px; overflow: hidden">' . $result['error'] . '</div>
+				</td>
+			</tr>';
+	}
 }
 echo '</table>';
 
