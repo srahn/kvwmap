@@ -10967,7 +10967,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		) {
 			$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
 			$this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
-		}
+		}		
     if ($this->formvars['geom_from_layer']) {
 	    # Geometrie-Übernahme-Layer:
 	    # Spaltenname und from-where abfragen
@@ -11026,7 +11026,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 		}
 		####################################################################################################
-    if ($this->formvars['CMD'] == 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
+    if ($this->formvars['go_plus'] != '' OR $this->formvars['export_setting'] != '' OR $this->formvars['CMD'] == 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
       $this->navMap($this->formvars['CMD']);
     }
     else{
@@ -11034,6 +11034,33 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     }
 
 		$this->data_import_export->export($this->formvars, $this->Stelle, $this->user, $this->mapDB);
+		
+		# Export-Einstellungen speichern
+		if ($this->formvars['go_plus'] == 'Einstellungen_speichern') {
+			$this->user->rolle->saveExportSettings($this->formvars);
+		}
+		# die Namen aller gespeicherten Export-Einstellungen dieser Rolle zu diesem Layer laden
+		$this->export_settings = $this->user->rolle->getExportSettings($this->formvars['selected_layer_id']);
+		if ($this->formvars['export_setting'] != ''){
+			# die ausgewählte Export-Einstellung laden
+			$this->selected_export_setting = $this->user->rolle->getExportSettings($this->formvars['selected_layer_id'], $this->formvars['export_setting']);
+			$this->formvars['export_format'] = $this->selected_export_setting[0]['format'];
+			$this->formvars['epsg'] = $this->selected_export_setting[0]['epsg'];
+			$this->formvars['with_metadata_document'] = $this->selected_export_setting[0]['metadata'];
+			$this->formvars['export_groupnames'] = $this->selected_export_setting[0]['groupnames'];
+			$this->formvars['download_documents'] = $this->selected_export_setting[0]['documents'];
+			$this->formvars['newpathwkt'] = $this->selected_export_setting[0]['geom'];
+			$this->formvars['within'] = $this->selected_export_setting[0]['within'];
+			$this->formvars['singlegeom'] = $this->selected_export_setting[0]['singlegeom'];
+			$attributes = explode(',', $this->selected_export_setting[0]['attributes']);
+			for ($i = 0; $i < count($this->data_import_export->attributes['name']); $i++) {
+				$this->formvars['check_' . $this->data_import_export->attributes['name'][$i]] = 0;
+			}
+			foreach ($attributes as $attribute) {
+				$this->formvars['check_' . $attribute] = 1;
+			}
+		}
+		
 		if ($this->formvars['epsg'] == '') $this->formvars['epsg'] = $this->data_import_export->layerset[0]['epsg_code'];		// originäres System
     $this->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());

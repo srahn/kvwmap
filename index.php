@@ -1023,6 +1023,16 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Daten_Export');
 				$GUI->daten_export_exportieren();
 			} break;
+			
+			case 'Daten_Export_Einstellungen_speichern' : {
+				$GUI->checkCaseAllowed('Daten_Export');
+				$GUI->daten_export();
+			} break;
+			
+			case 'Daten_Export_Einstellungen_löschen' : {
+				$GUI->checkCaseAllowed('Daten_Export');
+				$GUI->daten_export();
+			} break;
 
 			case 'get_last_search' : {
 				$GUI->formvars['selected_layer_id'] = $GUI->user->rolle->get_last_search_layer_id();
