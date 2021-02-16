@@ -17,6 +17,11 @@ var counter = 0;
 var fonts = ['<? echo implode("','", array_map(function ($entry) {return $entry["value"];}, $this->ddl->fonts)); ?>'];
 var attributes = ['', '<? echo implode("','", $this->ddl->attributes["name"]); ?>'];
 
+function input_check_num(field){
+	field.value = field.value.replace(/[^(0-9| |\.|,|\-)]/g, '');
+	field.value = field.value.replace(/,/g, '.');
+}
+
 function show_select(input, options){
 	var parent = input.parentNode;
 	var value = input.value;
@@ -679,7 +684,7 @@ function scrolltop(){
 												<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="lineposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['posx'] ?>" size="5"></td>
 												<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
 												<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="lineendposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['endposx'] ?>" size="5"></td>
-												<td colspan="2">Breite:&nbsp;<input type="text" name="breite<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['breite'] ?>" size="5"></td>
+												<td colspan="2">Breite:&nbsp;<input type="text" oninput="input_check_num(this);" name="breite<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['lines'][$i]['breite'] ?>" size="5"></td>
 											</tr>
 											<tr>
 												<td>&nbsp;y:</td>
@@ -739,7 +744,7 @@ function scrolltop(){
 										<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="rectposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['posx'] ?>" size="5"></td>
 										<td style="border-top:2px solid #C3C7C3">&nbsp;x:</td>
 										<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="rectendposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['endposx'] ?>" size="5"></td>
-										<td colspan="2">Linienbreite:&nbsp;<input type="text" name="rectbreite<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['breite'] ?>" size="5"></td>
+										<td colspan="2">Linienbreite:&nbsp;<input type="text" oninput="input_check_num(this);" name="rectbreite<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['breite'] ?>" size="5"></td>
 									</tr>
 									<tr>
 										<td>&nbsp;y:</td>
