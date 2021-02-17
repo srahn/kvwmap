@@ -11039,25 +11039,37 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		if ($this->formvars['go_plus'] == 'Einstellungen_speichern') {
 			$this->user->rolle->saveExportSettings($this->formvars);
 		}
-		# die Namen aller gespeicherten Export-Einstellungen dieser Rolle zu diesem Layer laden
-		$this->export_settings = $this->user->rolle->getExportSettings($this->formvars['selected_layer_id']);
-		if ($this->formvars['export_setting'] != ''){
-			# die ausgewählte Export-Einstellung laden
-			$this->selected_export_setting = $this->user->rolle->getExportSettings($this->formvars['selected_layer_id'], $this->formvars['export_setting']);
-			$this->formvars['export_format'] = $this->selected_export_setting[0]['format'];
-			$this->formvars['epsg'] = $this->selected_export_setting[0]['epsg'];
-			$this->formvars['with_metadata_document'] = $this->selected_export_setting[0]['metadata'];
-			$this->formvars['export_groupnames'] = $this->selected_export_setting[0]['groupnames'];
-			$this->formvars['download_documents'] = $this->selected_export_setting[0]['documents'];
-			$this->formvars['newpathwkt'] = $this->selected_export_setting[0]['geom'];
-			$this->formvars['within'] = $this->selected_export_setting[0]['within'];
-			$this->formvars['singlegeom'] = $this->selected_export_setting[0]['singlegeom'];
-			$attributes = explode(',', $this->selected_export_setting[0]['attributes']);
-			for ($i = 0; $i < count($this->data_import_export->attributes['name']); $i++) {
-				$this->formvars['check_' . $this->data_import_export->attributes['name'][$i]] = 0;
-			}
-			foreach ($attributes as $attribute) {
-				$this->formvars['check_' . $attribute] = 1;
+		if ($this->formvars['go_plus'] == 'Einstellungen_löschen') {
+			$this->user->rolle->deleteExportSettings($this->formvars);
+		}
+		if ($this->formvars['selected_layer_id'] != ''){
+			# die Namen aller gespeicherten Export-Einstellungen dieser Rolle zu diesem Layer laden
+			$this->export_settings = $this->user->rolle->getExportSettings($this->formvars['selected_layer_id']);
+			if ($this->formvars['export_setting'] != ''){
+				# die ausgewählte Export-Einstellung laden
+				$this->selected_export_setting = $this->user->rolle->getExportSettings($this->formvars['selected_layer_id'], $this->formvars['export_setting']);
+				$this->formvars['export_format'] = $this->selected_export_setting[0]['format'];
+				$this->formvars['epsg'] = $this->selected_export_setting[0]['epsg'];
+				$this->formvars['with_metadata_document'] = $this->selected_export_setting[0]['metadata'];
+				$this->formvars['export_groupnames'] = $this->selected_export_setting[0]['groupnames'];
+				$this->formvars['download_documents'] = $this->selected_export_setting[0]['documents'];
+				if ($this->selected_export_setting[0]['geom'] != '') {
+					$this->formvars['newpathwkt'] = $this->selected_export_setting[0]['geom'];
+					$this->formvars['firstpoly'] = 'true';
+				}
+				else{
+					$this->formvars['newpathwkt'] = NULL;
+					$this->formvars['newpath'] = NULL;
+				}
+				$this->formvars['within'] = $this->selected_export_setting[0]['within'];
+				$this->formvars['singlegeom'] = $this->selected_export_setting[0]['singlegeom'];
+				$attributes = explode(',', $this->selected_export_setting[0]['attributes']);
+				for ($i = 0; $i < count($this->data_import_export->attributes['name']); $i++) {
+					$this->formvars['check_' . $this->data_import_export->attributes['name'][$i]] = 0;
+				}
+				foreach ($attributes as $attribute) {
+					$this->formvars['check_' . $attribute] = 1;
+				}
 			}
 		}
 		

@@ -873,6 +873,19 @@ class rolle {
 		$this->database->execSQL($sql, 4, 1);
 	}
 	
+	function deleteExportSettings($formvars){
+		$sql = "
+			DELETE FROM 
+				rolle_export_settings 
+			WHERE
+				stelle_id = " . $this->stelle_id . " AND 
+				user_id = " . $this->user_id . " AND 
+				layer_id = " . $formvars['selected_layer_id'] . " AND 
+				name = '" . $formvars['export_setting'] . "'
+		";
+		$this->database->execSQL($sql, 4, 1);
+	}
+	
 	function getExportSettings($layer_id, $name = NULL){
 		$settings = array();
 		$sql = "

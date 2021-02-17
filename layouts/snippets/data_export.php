@@ -154,6 +154,9 @@ function select_document_attributes(ids){
 
 function save_settings(){
 	if(document.GUI.setting_name.value != ''){
+		if(document.GUI.newpathwkt.value == '' && document.GUI.newpath.value != ''){
+			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+		}
 		document.GUI.go_plus.value = 'Einstellungen_speichern';
 		document.GUI.submit();
 	}
