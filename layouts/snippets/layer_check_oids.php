@@ -134,7 +134,7 @@ while($layer = $this->database->result->fetch_assoc()){
 	if (!$status['oid']) {
 		$result = get_oid_alternative($layer);
 	}
-	if (!$status['oid'] AND !$status['query'] AND !$status['data'])	{
+	if (!$status['oid'] OR !$status['query'] OR !$status['data'])	{
 		echo '
 			<tr>
 				<td>
