@@ -73,24 +73,36 @@ $result = $this->database->execSQL($query);
 
 <style>
 	#main{
+		position: relative;
+		padding-top: 80px
+	}
+	#head{
+		position: absolute;
+		top: 10px;
+		margin-left: 40%;
+		line-height: 23px;
+	}
+	#tab{
 		margin: 5px;
 		border-collapse: collapse;
 	}
-	#main td{
+	#tab td{
 		border: 1px solid #555;
 		padding: 5px;
 	}
-	#main th{
+	#tab th{
 		font-face: SourceSansPro3;
 		border: 1px solid #555;
 	}	
-	#main textarea{
+	#tab textarea{
 		height: 50px;
 		width: 300px;
 	}
 </style>
 
 <script type="text/javascript">
+
+	var ok_layer_display = '';
 
 	function select_text(textarea, str){
 		var index = textarea.value.indexOf(str);
@@ -99,70 +111,100 @@ $result = $this->database->execSQL($query);
 			textarea.setSelectionRange(index, index + str.length);
 		}
 	}
+	
+	function toggle_layer(){
+		if (ok_layer_display == '') {
+			ok_layer_display = 'none';
+			document.getElementById('layer_toggle_link').innerHTML = 'alle PostGIS-Layer anzeigen';
+		}
+		else {
+			ok_layer_display = '';
+			document.getElementById('layer_toggle_link').innerHTML = 'nur die anzupassenden PostGIS-Layer anzeigen';
+		}
+		var ok_layers = document.querySelectorAll('.layer_ok');
+		[].forEach.call(ok_layers, function (ok_layer){
+				ok_layer.style.display = ok_layer_display;
+		});
+	}
 
 </script>
 
-<table id="main">
-	<tr>
-		<th>
-			Layer
-		</th>
-		<th>
-			ID-Spalte
-		</th>
-		<th>
-			Query
-		</th>
-		<th>
-			Data
-		</th>
-		<th>
-			oid-Alternative
-		</th>		
-		<th>
-			Haupttabelle
-		</th>
-		<th>
-			Fehlermeldung
-		</th>
-	</tr>
+<div id="main">
+
+	<table id="tab">
+		<tr>
+			<th>
+				Layer
+			</th>
+			<th>
+				ID-Spalte
+			</th>
+			<th>
+				Query
+			</th>
+			<th>
+				Data
+			</th>
+			<th>
+				oid-Alternative
+			</th>		
+			<th>
+				Haupttabelle
+			</th>
+			<th>
+				Fehlermeldung
+			</th>
+		</tr>
 
 <?
+$oid_layer_count = 0;
 while($layer = $this->database->result->fetch_assoc()){
   $status = checkStatus($layer);
 	$result = array();
 	if (!$status['oid']) {
 		$result = get_oid_alternative($layer);
 	}
-	if (!$status['oid'] OR !$status['query'] OR !$status['data'])	{
-		echo '
-			<tr>
-				<td>
-					<div style="width: 200px; overflow: auto;">
-						<a href="index.php?go=Layereditor&selected_layer_id='.$layer["Layer_ID"].'"target="_blank">'.$layer["Name"].'</a>
-					</div>
-				</td>
-				<td style="background-color: '.$color[$status['oid']].'">
-					' . $layer['oid'] . '
-				</td>
-				<td style="background-color: '.$color[$status['query']].'">
-					<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['pfad'] . '</textarea>
-				</td>
-				<td style="background-color: '.$color[$status['data']].'">
-					<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['Data'] . '</textarea>
-				</td>
-				<td>
-					' . $result['oid_alternative'] . '
-				</td>			
-				<td>
-					' . $layer['maintable'] . '
-				</td>
-				<td>
-					<div style="width: 250px; overflow: hidden">' . $result['error'] . '</div>
-				</td>
-			</tr>';
+	if ($status['oid'] AND $status['query'] AND $status['data']) {
+		$class = 'layer_ok';
 	}
+	else{
+		$class = '';
+		$oid_layer_count++;
+	}
+	echo '
+		<tr class="' . $class . '">
+			<td>
+				<div style="width: 200px; overflow: auto;">
+					<a href="index.php?go=Layereditor&selected_layer_id='.$layer["Layer_ID"].'"target="_blank">'.$layer["Name"].'</a>
+				</div>
+			</td>
+			<td style="background-color: '.$color[$status['oid']].'">
+				' . $layer['oid'] . '
+			</td>
+			<td style="background-color: '.$color[$status['query']].'">
+				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['pfad'] . '</textarea>
+			</td>
+			<td style="background-color: '.$color[$status['data']].'">
+				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['Data'] . '</textarea>
+			</td>
+			<td>
+				' . $result['oid_alternative'] . '
+			</td>			
+			<td>
+				' . $layer['maintable'] . '
+			</td>
+			<td>
+				<div style="width: 250px; overflow: hidden">' . $result['error'] . '</div>
+			</td>
+		</tr>';
 }
 echo '</table>';
 
 ?>
+
+	<div id="head">
+		<? echo $this->database->result->num_rows; ?> PostGIS-Layer insgesamt<br>
+		<? echo $oid_layer_count; ?> PostGIS-Layer müssen angepasst werden<br>
+		<a href="javascript:void(0);" id="layer_toggle_link" onclick="toggle_layer();">nur die anzupassenden PostGIS-Layer anzeigen</a>
+	</div>
+</div>
