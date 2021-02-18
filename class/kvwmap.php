@@ -15139,6 +15139,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		if ($layerset['attributes']['the_geom'] != '') {
 			$layer_id = $layerset['Layer_ID'];
 			$tablename = $layerset['attributes']['table_name'][$layerset['attributes']['the_geom']];
+			$geom_index = $layerset['attributes']['indizes'][$layerset['attributes']['the_geom']];
 			$oid = $layerset['shape'][$k][$tablename . '_oid'];
 			$real_geom_name = $layerset['attributes']['real_name'][$layerset['attributes']['the_geom']];
 			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
@@ -15222,8 +15223,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				# Datensatz-Layer erzeugen
 				$layer = ms_newLayerObj($map);
 				$tablename = pg_quote($tablename);
-				if ($layerset['attributes']['schema_name'][$tablename] != '') {
-					$tablename = $layerset['attributes']['schema_name'][$tablename].'.'.$tablename;
+				if ($layerset['attributes']['schema'][$geom_index] != '') {
+					$tablename = $layerset['attributes']['schema'][$geom_index].'.'.$tablename;
 				}
 				elseif ($layerset['schema'] != '') {
 					$tablename = $layerdb->schema.'.'.$tablename;
@@ -16609,6 +16610,7 @@ class db_mapObj{
 					real_name = '" . $attributes[$i]['real_name'] . "',
 					tablename = '" . $attributes[$i]['table_name'] ."',
 					table_alias_name = '" . $attributes[$i]['table_alias_name'] . "',
+					`schema` = '" . $attributes[$i]['schema_name'] . "',
 					type = '" . $attributes[$i]['type'] . "',
 					geometrytype = '" . $attributes[$i]['geomtype'] . "',
 					constraints = '".addslashes($attributes[$i]['constraints']) . "',
@@ -16622,6 +16624,7 @@ class db_mapObj{
 					real_name = '" . $attributes[$i]['real_name'] . "',
 					tablename = '" . $attributes[$i]['table_name'] . "',
 					table_alias_name = '" . $attributes[$i]['table_alias_name'] . "',
+					`schema` = '" . $attributes[$i]['schema_name'] . "',
 					type = '" . $attributes[$i]['type'] . "',
 					geometrytype = '" . $attributes[$i]['geomtype'] . "',
 					constraints = '".addslashes($attributes[$i]['constraints']) . "',
@@ -17877,6 +17880,7 @@ class db_mapObj{
 				`real_name`,
 				`tablename`,
 				`table_alias_name`,
+				a.`schema`,
 				`type`,
 				d.`name` as typename,
 				`geometrytype`,
@@ -17919,20 +17923,15 @@ class db_mapObj{
 		$i = 0;
 		while ($rs = $ret['result']->fetch_array()){
 			$attributes['enum_value'][$i] = array();
-
 			$attributes['order'][$i] = $rs['order'];
 			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
 			if($rs['real_name'] == '')$rs['real_name'] = $rs['name'];
 			$attributes['real_name'][$rs['name']] = $rs['real_name'];
-			if ($rs['tablename']){
-				if (strpos($rs['tablename'], '.') !== false){
-					$explosion = explode('.', $rs['tablename']);
-					$rs['tablename'] = $explosion[1];		# Tabellenname ohne Schema
-					$attributes['schema_name'][$rs['tablename']] = $explosion[0];
-				}
-				$attributes['table_name'][$i]= $rs['tablename'];
+			if ($rs['tablename']) {
+				$attributes['table_name'][$i] = $rs['tablename'];
 				$attributes['table_name'][$rs['name']] = $rs['tablename'];
+				$attributes['schema'][$i] = $rs['schema'];
 			}
 			if ($rs['table_alias_name'])$attributes['table_alias_name'][$i] = $rs['table_alias_name'];
 			if ($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']] = $rs['table_alias_name'];
