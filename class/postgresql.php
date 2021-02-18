@@ -640,7 +640,7 @@ FROM
 					if($schema_names[$table_oid] == NULL){
 						$schema_names[$table_oid] = $this->pg_field_schema($table_oid);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?	
 					}
-					$schemaname = $schema_names[$table_oid];
+					$fields[$i]['schema_name'] = $schemaname = $schema_names[$table_oid];
 					
 					$constraintstring = '';
 					
