@@ -1,5 +1,5 @@
 <?php
-	include(LAYOUTPATH.'languages/cronjobs_'.$this->user->rolle->language.'.php');
+	include(LAYOUTPATH . 'languages/cronjobs_' . $this->user->rolle->language . '.php');
 ?>
 <script language="javascript" type="text/javascript">
 	function update_aktiv(id) {
@@ -7,7 +7,7 @@
 		window.location = 'index.php?go=cronjob_speichern_Speichern&id=' + id + '&aktiv=' + aktiv;
 	}
 </script>
-<table width="700px" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" style="margin-bottom: 40px;">
+<table width="700px" border="0" cellpadding="5" cellspacing="0">" style="margin-bottom: 40px;">
   <tr>
     <td align="center" colspan="4"><h2><?php echo $strTitle; ?></h2></td>
 	</tr>

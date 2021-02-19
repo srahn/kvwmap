@@ -63,9 +63,8 @@ body {
 
 #gui-table {
 	width: 900px;
-	margin: auto;	
+	margin: auto;
 }
-
 
 input[type="checkbox"], input[type="radio"] {
 	position: relative;

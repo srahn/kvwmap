@@ -61,7 +61,7 @@ $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '
 # This program is distributed in the hope that it will be useful, #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of  #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the    #
-# GNU General Public License for more details.                    
+# GNU General Public License for more details.
 #                                                                 #
 # You should have received a copy of the GNU General Public       #
 # License along with this program; if not, write to the Free      #
@@ -95,7 +95,7 @@ if (array_key_exists('go_plus', $formvars) and $formvars['go_plus'] != '') {
 }
 
 ###########################################################################################################
-define('CASE_COMPRESS', false);																																						
+define('CASE_COMPRESS', false);
 #																																																					#
 #		ALLE:						  - die Stelle muss die IP checken  																								  #
 #											- die Stelle muss das Passwortalter checken																					#
@@ -251,6 +251,46 @@ function go_switch($go, $exit = false) {
 			case 'show_snippet' : {
 				$GUI->checkCaseAllowed($go);
 				$GUI->show_snippet();
+			} break;
+
+			case 'Sicherungen_anzeigen' : {
+				$GUI->checkCaseAllowed($go);
+				$GUI->Sicherungen_anzeigen();
+			} break;
+
+			case 'Sicherung_editieren' : {
+				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
+				$GUI->Sicherung_editieren();
+			} break;
+
+			case 'Sicherung_speichern' : {
+				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
+				$GUI->Sicherung_speichern();
+			} break;
+
+			case 'Sicherung_loeschen' : {
+				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
+				$GUI->Sicherung_loeschen();
+			} break;
+
+			case 'sicherungsinhalt_editieren' : {
+				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
+				$GUI->sicherungsinhalt_editieren();
+			} break;
+
+			case 'sicherungsinhalt_speichern' : {
+				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
+				$GUI->sicherungsinhalt_speichern();
+			} break;
+
+			case 'sicherungsinhalt_loeschen' : {
+				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
+				$GUI->sicherungsinhalt_loeschen();
+			} break;
+
+			case 'write_backup_plan' : {
+				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
+				$GUI->write_backup_plan();
 			} break;
 
 			case 'openCustomSubform' : {
@@ -836,12 +876,12 @@ function go_switch($go, $exit = false) {
 				$GUI->druckrahmen_load();
 				$GUI->output();
 			} break;
-			
+
 			case 'Druckausschnitt_laden' : {
 				$GUI->formvars['loadmapsource'] = 'DataBase';
 				$GUI->druckausschnittswahl($GUI->formvars['loadmapsource']);
 			} break;
-			
+
 			case 'Druckausschnitt_loeschen' : {
 				$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
 			} break;
@@ -1168,16 +1208,16 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('sachdaten_druck_editor');
 				$GUI->sachdaten_druck_editor_Linieloeschen();
 			} break;
-			
+
 			case 'sachdaten_druck_editor_Rechteckhinzufuegen' :
 				$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
 				$GUI->sachdaten_druck_editor_Rechteckhinzufuegen();
 			} break;
-			
+
 			case 'sachdaten_druck_editor_Rechteckloeschen' : {
 				$GUI->checkCaseAllowed('sachdaten_druck_editor');
 				$GUI->sachdaten_druck_editor_Rechteckloeschen();
-			} break;			
+			} break;
 
 			case 'Layer_Export' : {
 				$GUI->checkCaseAllowed($go);
@@ -1208,7 +1248,7 @@ function go_switch($go, $exit = false) {
 			case 'Layereditor' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Layereditor();
-			} break;			
+			} break;
 
 			case 'Layereditor_Als neuen Layer eintragen' : {
 				$GUI->checkCaseAllowed('Layereditor');
@@ -1227,11 +1267,11 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Klasseneditor();
 			} break;
-			
+
 			case 'Klasseneditor_Speichern' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Klasseneditor_speichern();
-			} break;			
+			} break;
 
 			case 'Klasseneditor_Klasse_Löschen' : {
 				$GUI->checkCaseAllowed('Layereditor');
@@ -1450,10 +1490,10 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
 				$GUI->BenutzerNachStellenAnzeigen();
 			} break;
-			
+
 			case 'BenutzerderStelleAnzeigen' : {
 				$GUI->BenutzerderStelleAnzeigen();
-			} break;			
+			} break;
 
 			case 'Benutzerdaten_Anzeigen' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
@@ -1592,7 +1632,7 @@ function go_switch($go, $exit = false) {
 				$GUI->drawMap();
 				$GUI->output();
 			} break;
-			
+
 			case "zoomToMaxLayerExtent" : {
 				$GUI->loadMap('DataBase');
 				$GUI->zoomToMaxLayerExtent($GUI->formvars['layer_id']);
@@ -1623,7 +1663,7 @@ function go_switch($go, $exit = false) {
 				$GUI->saveMap('');
 				$GUI->output();
 			} break;
-			
+
 			 # Auswählen einer neuen Stelle
 			case 'Stelle_waehlen' : case 'Stelle_waehlen_Passwort_aendern' : {
 				$GUI->checkCaseAllowed('Stelle_waehlen');
@@ -1655,7 +1695,7 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
 				$GUI->invitation_delete();
 			} break;
-			
+
 			case 'geo_name_query' : {
 				$GUI->geo_name_query();
 			} break;

@@ -1,9 +1,8 @@
 <?php
-# 2008-01-12 pkvvm
-include(LAYOUTPATH . 'languages/sicherungen_formular_' . $this->user->rolle->language . '.php');
+include(LAYOUTPATH . 'languages/sicherungsdaten_' . $this->user->rolle->language . '.php');
 ?>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
-	<tr> 
+	<tr>
 		<td align="left"><h2><?php echo $strTitle; ?></h2></td>
 		<td align="right"><a class="btn btn-new" href="index.php?go=cronjobs_anzeigen"><i class="fa fa-list" style="color: white;"></i> Alle Jobs</a></td></td>
 	</tr>
