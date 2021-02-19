@@ -13,7 +13,7 @@ if(!in_array($this->Stelle->id, $admin_stellen)){
 
 function checkStatus($layer){
 	$status['oid'] = ($layer['oid'] == 'oid' ? false : true);
-	$status['query'] = ((strpos($layer['pfad'], ' oid') !== false OR strpos($layer['pfad'], ',oid') !== false)? false : true);
+	$status['query'] = ((strpos($layer['pfad'], ' oid') !== false OR strpos($layer['pfad'], ',oid') !== false OR strpos($layer['pfad'], '.oid') !== false)? false : true);
 	$status['data'] = (strpos($layer['Data'], 'oid') !== false ? false : true);
 	return $status;
 }
@@ -46,6 +46,30 @@ function get_oid_alternative($layer){
 		}
 	}
 	return $result;
+}
+
+function delete_oid_in_sql($query){
+	$query = str_replace([' as oid', ' AS oid', ' oid,', ',oid', ', oid'], ['', '', ' '], $query);
+	if (strpos($query, '.oid') !== false) {
+		$query = preg_replace('/\w+\.oid,/', '', $query);		#	tablename.oid,
+	}
+	return $query;
+}
+
+function replace_oid_in_data($data, $id){
+	if ($id != '') {
+		$data = delete_oid_in_sql($data);
+		if (!strpos($data, ',' . $id) AND		#	,id
+				!strpos($data, $id . ',') AND		#	id,
+				!strpos($data, '*')) {					# *
+			$pos = stripos($data, 'select ');
+			if ($pos !== false) {
+				$data = substr_replace($data, 'select ' . $id . ', ', $pos, 7);
+			}
+		}
+		$data = str_ireplace('unique oid', 'unique ' . $id, $data);
+	}
+	return $data;
 }
 
 $color[false] = '#db5a5a';
@@ -95,8 +119,12 @@ $result = $this->database->execSQL($query);
 		border: 1px solid #555;
 	}	
 	#tab textarea{
-		height: 50px;
-		width: 300px;
+		height: 100px;
+		width: 350px;
+	}
+	#tab .replaced{
+		padding: 5px;
+		background: yellow;
 	}
 </style>
 
@@ -183,9 +211,11 @@ while($layer = $this->database->result->fetch_assoc()){
 			</td>
 			<td style="background-color: '.$color[$status['query']].'">
 				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['pfad'] . '</textarea>
+				' . ((!$status['query'] AND $result['oid_alternative']) ? '<div class="replaced"><textarea onmouseenter="select_text(this, \'oid\');">' . delete_oid_in_sql($layer['pfad']) . '</textarea></div>' : '') . '
 			</td>
 			<td style="background-color: '.$color[$status['data']].'">
 				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['Data'] . '</textarea>
+				' . ((!$status['data'] AND $result['oid_alternative']) ? '<div class="replaced"><textarea onmouseenter="select_text(this, \'oid\');">' . replace_oid_in_data($layer['Data'], $result['oid_alternative']) . '</textarea></div>' : '') . '
 			</td>
 			<td>
 				' . $result['oid_alternative'] . '
