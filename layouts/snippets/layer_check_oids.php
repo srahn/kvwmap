@@ -211,7 +211,7 @@ while($layer = $this->database->result->fetch_assoc()){
 			</td>
 			<td style="background-color: '.$color[$status['query']].'">
 				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['pfad'] . '</textarea>
-				' . ((!$status['query'] AND $result['oid_alternative']) ? '<div class="replaced"><textarea onmouseenter="select_text(this, \'oid\');">' . delete_oid_in_sql($layer['pfad']) . '</textarea></div>' : '') . '
+				' . ((!$status['query']) ? '<div class="replaced"><textarea onmouseenter="select_text(this, \'oid\');">' . delete_oid_in_sql($layer['pfad']) . '</textarea></div>' : '') . '
 			</td>
 			<td style="background-color: '.$color[$status['data']].'">
 				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['Data'] . '</textarea>
