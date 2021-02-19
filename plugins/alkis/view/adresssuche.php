@@ -35,41 +35,18 @@
   }
 </script>
 <style>
-#titel {
-	font-family: SourceSansPro3;
-	font-size: 20px;
-	margin-bottom: 0px;
-	margin-top: 10px;
-}
-#ads_formular {
-	margin: 40px 0px 20px 0px;
-	padding-left: 20px;
-}
-#ads_formular select, #ads_formular input[type="text"], .ads_suche_hnr select {
-	border-radius: 2px;
-	border: 1px solid #777;
-	padding-left: 5px;
-}
-#ads_formular .ads_suche select, #ads_formular input[type="text"] {
-	height: 25px;
-}
-#ads_formular select {
+#form_formular-main select {
 	width: 260px;
 }
-.ads_suche, .ads_suche_hnr {
+.form_formular-input-selector {
 	width:100%;
 	height: 28px;
 	margin: 0px 0px 10px 0px;
 	display: flex;
 	flex-flow: row nowrap;
 }
-.ads_suche_hnr {
+.form_formular-input-selector {
 	<?	if($this->FormObject["selectedHausNr"]->html != ''){ ?>margin: 0px 0px 250px 0px;<? } ?>
-}
-.ads_suche div:first-child, .ads_suche_hnr>div:first-child {
-	width: 180px;
-	text-align: left;
-	align-self: center;
 }
 .ads_suche_form span {
 	text-align: left;
@@ -81,29 +58,29 @@
 </style>
 
 <input type="hidden" name="go" value="<? if($this->formvars['ALK_Suche']) echo 'ALK-'; ?>Adresse_Auswaehlen">
-<div id="titel"><?php echo $strTitle; ?></div>
+<div id="form-titel"><?php echo $strTitle; ?></div>
 <?php if ($this->Fehlermeldung!='') {
 include(LAYOUTPATH."snippets/Fehlermeldung.php");
 }
 ?>
 
-<div id="ads_formular">
-	<div class="ads_suche" <? if($this->FormObject["Gemarkungen"]->selected){ echo 'style="display: none;"'; }?>>
+<div id="form_formular-main">
+	<div class="form_formular-input form_formular-aic" <? if($this->FormObject["Gemarkungen"]->selected){ echo 'style="display: none;"'; }?>>
 		<div><?php echo $strGem; ?></div>
 		<div><?php echo $this->FormObject["Gemeinden"]->html; ?></div>
 	</div>
-	<div class="ads_suche" <? if($this->FormObject["Gemeinden"]->selected){ echo 'style="display: none;"'; }?>>
+	<div class="form_formular-input form_formular-aic" <? if($this->FormObject["Gemeinden"]->selected){ echo 'style="display: none;"'; }?>>
 		<div><?php echo $strGemkg; ?></div>
 		<div><?php echo $this->FormObject["Gemarkungen"]->html; ?></div>
 	</div>
 <?	if($this->FormObject["Strassen"] != ''){ ?>
-	<div class="ads_suche">
+	<div class="form_formular-input form_formular-aic">
 		<div><?php echo $strStreet; ?></div>
 		<div><?php echo $this->FormObject["Strassen"]->html; ?></div>
 	</div>
 <?	}
 	if($this->FormObject["HausNr"] != ''){ ?>
-	<div class="ads_suche_hnr">
+	<div class="form_formular-input-selector">
 	<?	if($this->FormObject["selectedHausNr"]->html != ''){ ?>
 		<div><?php echo $strHnr; ?></div>
 		<div>

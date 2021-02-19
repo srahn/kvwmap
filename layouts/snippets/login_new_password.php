@@ -3,7 +3,7 @@
 	<body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="load()">
 		<form name="login" action="index.php" method="post">
 			<div id="message_box" class="message_box_hidden"></div>		<!-- muss innerhalb des form stehen -->
-			<input type="hidden" value="<? echo $this->formvars['passwort']; ?>" name="passwort"/>
+			<input type="hidden" value="<? echo htmlspecialchars($this->formvars['passwort']); ?>" name="passwort"/>
 			<input type="hidden" name="browserwidth">
 			<input type="hidden" name="browserheight"><?
 			echo hidden_formvars_fields($this->formvars, $this->expect); ?>

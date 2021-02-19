@@ -219,6 +219,10 @@ function go_switch($go, $exit = false) {
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
 			}break;
+			
+			case 'layer_check_oids' : {
+				$GUI->layer_check_oids();
+			} break;
 
 			case 'login' : {
 				$GUI->login();
@@ -1058,6 +1062,16 @@ function go_switch($go, $exit = false) {
 			case 'Daten_Export_Exportieren' : {
 				$GUI->checkCaseAllowed('Daten_Export');
 				$GUI->daten_export_exportieren();
+			} break;
+			
+			case 'Daten_Export_Einstellungen_speichern' : {
+				$GUI->checkCaseAllowed('Daten_Export');
+				$GUI->daten_export();
+			} break;
+			
+			case 'Daten_Export_Einstellungen_löschen' : {
+				$GUI->checkCaseAllowed('Daten_Export');
+				$GUI->daten_export();
 			} break;
 
 			case 'get_last_search' : {

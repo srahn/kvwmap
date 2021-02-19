@@ -40,12 +40,6 @@ document.onclick =  function(e){
 -->
 </script>
 <style>
-#titel {
-	font-family: SourceSansPro3;
-	font-size: 20px;
-	margin-bottom: 0px;
-	margin-top: 25px;
-}
 #import1 {
 	text-align: left;
 	margin: 0 0 10px 0;
@@ -72,43 +66,30 @@ document.onclick =  function(e){
 #import2 input {
 	margin: 0.5em;
 }
-#gsf_formular, #import1 {
+#import1 {
 	margin: 40px 0px 20px 0px;
 	padding-left: 20px;
 }
-#gsf_formular select, #gsf_formular input[type="text"], .gsf_suche_gbbl select {
-	border-radius: 2px;
-	border: 1px solid #777;
-	padding-left: 5px;
-}
-#gsf_formular .gsf_suche select, #gsf_formular input[type="text"] {
-	height: 25px;
-}
-#gsf_formular select, #gsf_formular input[name="Blatt"] {
+#form_formular-main select, #form_formular-main input[name="Blatt"] {
 	width: 260px;
 }
-.gsf_suche, .gsf_suche_gbbl {
+.form_formular-input-selector {
 	width:100%;
 	height: 28px;
 	margin: 0px 0px 10px 0px;
 	display: flex;
 	flex-flow: row nowrap;
 }
-.gsf_suche_gbbl {
+.form_formular-input-selector {
 	<? if($this->formvars['Bezirk'] != ''){ ?>margin: 0px 0px 250px 0px;<? } ?>
 }
-.gsf_suche div:first-child, .gsf_suche_gbbl>div:first-child {
-	width: 180px;
-	text-align: left;
-	align-self: center;
-}
-.gsf_suche input[name="bezirk"] {
+.form_formular-input input[name="bezirk"] {
 	width: 60px;
 }
 .gsf_suche_form span {
 	text-align: left;
 }
-.gsf_suche_gbbl>div span {
+.form_formular-input-selector>div span {
 	margin-left: 10px;
 	vertical-align: middle;
 }
@@ -118,19 +99,19 @@ document.onclick =  function(e){
 }
 </style>
 
-<div id="titel"><?php echo $strTitle; ?></div>
+<div id="form-titel"><?php echo $strTitle; ?></div>
 
 <?php if ($this->Fehlermeldung!='') {
 include(LAYOUTPATH."snippets/Fehlermeldung.php");
 }
 ?>
 
-<div id="gsf_formular">
-	<div class="gsf_suche">
+<div id="form_formular-main">
+	<div class="form_formular-input form_formular-aic">
 		<div><?php echo $strGbbzschl; ?></div>
 		<div><input name="bezirk" type="text" value="<?php echo $this->formvars['bezirk']; ?>" onkeyup="updateBezirksauswahl();" autofocus onfocus="var temp_value=this.value; this.value=''; this.value=temp_value;" tabindex="1"></div>
 	</div>
-	<div class="gsf_suche">
+	<div class="form_formular-input form_formular-aic">
 		<div><?php echo $strGbbzname; ?></div>
 		<div>
 			<select name="Bezirk" onchange="updateBezirksschluessel();" tabindex="2">
@@ -145,7 +126,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			</select>
 		</div>
 	</div>
-	<div class="gsf_suche_gbbl">
+	<div class="form_formular-input-selector">
 		<div>
 			<?php echo $strGbblatt; ?>
 		</div>

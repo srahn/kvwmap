@@ -33,12 +33,6 @@ document.onclick =  function(e){
 -->
 </script>
 <style>
-#titel {
-	font-family: SourceSansPro3;
-	font-size: 20px;
-	margin-bottom: 0px;
-	margin-top: 10px;
-}
 #import1 {
 	text-align: left;
 	margin: 0 0 10px 0;
@@ -65,50 +59,33 @@ document.onclick =  function(e){
 	margin: 0.5em;
 	transition: unset;
 }
-#fsf_formular {
-	margin: 40px 0px 20px 0px;
-	padding-left: 20px;
-}
-#fsf_formular select, #fsf_formular input[type="text"], .fsf_suche_fst select {
-	border-radius: 2px;
-	border: 1px solid #777;
-	padding-left: 5px;
-}
-#fsf_formular .fsf_suche select, #fsf_formular input[type="text"] {
-	height: 25px;
-}
-#fsf_formular select, #fsf_formular input[name="FlstNr"] {
+#form_formular-main select, #form_formular-main input[name="FlstNr"] {
 	width: 360px;
 }
-#fsf_formular input[name="FlurID"], #fsf_formular select[name="FlurID"] {
+#form_formular-main input[name="FlurID"], #form_formular-main select[name="FlurID"] {
 	width: 100px;
 }
-.fsf_suche, .fsf_suche_fst {
+.form_formular-input-selector {
 	width:100%;
 	height: 28px;
 	margin: 0px 0px 10px 0px;
 	display: flex;
 	flex-flow: row nowrap;
 }
-.fsf_suche_fst {
+.form_formular-input-selector {
 	<?	if($this->FormObject["selectedFlstNr"]->html != ''){ ?>margin: 0px 0px 250px 0px;<? } ?>
 }
-.fsf_suche_fst span[data-tooltip] {
+.form_formular-input-selector span[data-tooltip] {
 	margin-left: 10px;
 }
-.fsf_suche_fst span[data-tooltip]:before {
+.form_formular-input-selector span[data-tooltip]:before {
 	top: 1px;
 	position: relative;
 }
-.fsf_suche div:first-child, .fsf_suche_fst>div:first-child {
-	width: 180px;
-	text-align: left;
-	align-self: center;
-}
-.fsf_suche input[name="gemschl1"] {
+.form_formular-input input[name="gemschl1"] {
 	width:25px;
 }
-.fsf_suche input[name="gemschl2"] {
+.form_formular-input input[name="gemschl2"] {
 	width:70px;
 }
 .fsf_suche_form span {
@@ -121,14 +98,14 @@ document.onclick =  function(e){
 </style>
 
 <input type="hidden" name="go" value="<? if($this->formvars['ALK_Suche']) echo 'ALK-'; ?>Flurstueck_Auswaehlen">
-<div id="titel"><?php echo $strTitle; ?></div>
+<div id="form-titel"><?php echo $strTitle; ?></div>
 <?php
 if ($this->Fehlermeldung!='') {
   include(LAYOUTPATH."snippets/Fehlermeldung.php");
 }
 ?>
-<div id="fsf_formular">
-	<div class="fsf_suche">
+<div id="form_formular-main">
+	<div class="form_formular-input form_formular-aic">
 		<div><?php echo $strGemkgschl; ?></div>
 		<div>
 			<input name="gemschl1" type="text" value="<? echo $this->land_schluessel; ?>" onkeyup="updateGemarkungsauswahl();">
@@ -136,15 +113,15 @@ if ($this->Fehlermeldung!='') {
 			<input name="gemschl" type="hidden" value="<? echo $this->formvars['GemkgID']; ?>">
 		</div>
 	</div>
-	<div class="fsf_suche">
+	<div class="form_formular-input form_formular-aic">
 		<div><?php echo $strGemkgGem; ?></div>
 		<div><?php echo $this->FormObject["Gemarkungen"]->html; ?></div>
 	</div>
-	<div class="fsf_suche">
+	<div class="form_formular-input form_formular-aic">
 		<div><?php echo $strFlur; ?></div>
 		<div><?php echo $this->FormObject["Fluren"]->html; ?></div>
 	</div>
-	<div class="fsf_suche_fst">
+	<div class="form_formular-input-selector">
 		<div>
 			<?php echo $strFst; ?>
 		</div>
