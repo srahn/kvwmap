@@ -64,7 +64,7 @@ function replace_oid_in_data($data, $id){
 				!strpos($data, '*')) {					# *
 			$pos = stripos($data, 'select ');
 			if ($pos !== false) {
-				$data = substr_replace($data, 'select ' . $id . ', ', $pos, 7);
+				$data = substr_replace($data, 'SELECT ' . $id . ', ', $pos, 7);
 			}
 		}
 		$data = str_ireplace('unique oid', 'unique ' . $id, $data);
