@@ -2237,7 +2237,7 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 }
 
 .scrolltable thead, .scrolltable tbody {
-	display: inline-table;
+	display: block;
 }
 
 .scrolltable tbody {
@@ -2247,7 +2247,7 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 
 .scrolltable_header{
 	position: absolute;
-	margin-top: -25px;
+	top: 5px;
 }
 
 .toggle_fa_off i{
