@@ -118,7 +118,7 @@ $result = $this->database->execSQL($query);
 	}
 	#tab{
 		border-collapse: collapse;
-		width: 1680px;
+		width: 1670px;
 	}
 	#tab tbody{
 		border-top: 1px solid #555;
