@@ -212,7 +212,7 @@ while($layer = $this->database->result->fetch_assoc()){
 					$first=strtoupper(mb_substr($layer["Name"],0,1));
 					echo '<a class="nav_link menu abc" name="'.$first.'">'.$first.'</a>';
 				}
-	echo '<div style="width: 200px; overflow: auto; margin-top: 40px;">
+	echo '<div style="width: 200px; margin-top: 40px;">
 					<a href="index.php?go=Layereditor&selected_layer_id='.$layer["Layer_ID"].'"target="_blank">'.$layer["Name"].'</a>
 				</div>
 			</td>
