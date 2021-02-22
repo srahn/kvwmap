@@ -548,7 +548,7 @@ INSERT INTO u_styles2classes (
 					}
 					else {
 						$field = $this->result->fetch_field_direct($i);
-						if ($field->type != 'string' AND $field->type != 'blob' AND $rs[$i] == '') {
+						if (!in_array($field->type, [252, 253, 254]) AND $rs[$i] == '') {
 							$insert .= "NULL";
 						} else{
 							$insert .= "'".addslashes($rs[$i])."'";
