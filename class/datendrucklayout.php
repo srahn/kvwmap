@@ -881,7 +881,10 @@ class ddl {
 		if($this->layout['columns']){	# spaltenweiser Typ
 			$rowcount = ceil(count($result) / 3);
 		}
-    for($i = 0; $i < @count($result); $i++){
+		for ($i = 0; $i < @count($result); $i++){
+			if (true) {
+				$this->layout = $this->load_layouts(NULL, $result[$i][$this->layerset['ddl_attribute']], NULL, array(0,1))[0];
+			}
 			$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
     	$this->i_on_page++;
 			# beim Untereinander-Typ oder eingebettet-Typ ohne Sublayouts oder wenn Datensätze nicht durch Seitenumbruch 
