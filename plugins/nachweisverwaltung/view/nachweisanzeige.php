@@ -448,7 +448,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <th colspan="3" style="width: 150"><div align="center"><?    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></th>
         </tr>
 			</thead>
-			<tbody style="outline: 1px solid gray; max-height: 590px;">
+			<tbody style="outline: 1px solid gray; max-height: 590px; min-height: 300px;">
         <?
 		$bgcolor = '#FFFFFF';
      for ($i=0;$i<$this->nachweis->erg_dokumente;$i++) {
