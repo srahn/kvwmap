@@ -25,16 +25,17 @@ function get_oid_alternative($layer){
 	}
 	else {
 		$sql = "
+			SET search_path = " . ($layer['schema'] != '' ? $layer['schema'] . ', ' : '') . " public;
 			SELECT 
 				a.attname as pk
 			FROM 
 				pg_attribute a 
 				LEFT JOIN pg_index i ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey) AND i.indnatts = 1
 			WHERE  
-				a.attrelid = '" . ($layer['schema'] ?: 'public'). "." . $layer['maintable'] . "'::regclass and 
+				a.attrelid = '" . $layer['maintable'] . "'::regclass and 
 				attnum > 0 and 
 				attisdropped is false and 
-				(pg_get_serial_sequence('" . ($layer['schema'] ?: 'public'). "." . $layer['maintable'] . "', attname) IS NOT NULL OR i.indisunique)
+				(pg_get_serial_sequence('" . $layer['maintable'] . "', attname) IS NOT NULL OR i.indisunique)
 		";
 		$ret = @pg_query($GUI->pgdatabase->dbConn, $sql);
 		if($ret == false){
