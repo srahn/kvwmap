@@ -152,6 +152,29 @@ function select_document_attributes(ids){
 	}
 }
 
+function save_settings(){
+	if(document.GUI.setting_name.value != ''){
+		if(document.GUI.newpathwkt.value == '' && document.GUI.newpath.value != ''){
+			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+		}
+		document.GUI.go_plus.value = 'Einstellungen_speichern';
+		document.GUI.submit();
+	}
+	else{
+		alert('Bitte geben Sie einen Namen für die Export-Einstellungen an.');
+	}
+}
+
+function delete_settings(){
+	if(document.GUI.export_setting.value != ''){
+		document.GUI.go_plus.value = 'Einstellungen_löschen';
+		document.GUI.submit();
+	}
+	else{
+		alert('Es wurde keine Export-Einstellung ausgewählt.');
+	}
+}
+
 //-->
 </script>
 
@@ -255,6 +278,39 @@ $j=0;
 						</table>
 					</div><?
 				} ?>
+				<div style="padding:1px 0 5px 10px; margin-left: 15px; border-left: 1px solid #ccc; margin-left: auto">
+					<table>
+						<tr>
+							<td><? echo $strExportSettings; ?>:</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="text" name="setting_name" value="">
+							</td>
+							<td>
+								<input type="button" style="width: 86px" name="speichern" value="<? echo $this->strSave; ?>" onclick="save_settings();"></span>
+							</td>
+						</tr>					
+						<tr <? if(empty($this->export_settings)){echo 'style="display: none"'; } ?>>
+							<td>
+								<select name="export_setting">
+									<option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
+									<?
+										for($i = 0; $i < count($this->export_settings); $i++){
+											echo '<option value="'.$this->export_settings[$i]['name'].'" ';
+											if($this->selected_export_setting[0]['name'] == $this->export_settings[$i]['name']){echo 'selected ';}
+											echo '>'.$this->export_settings[$i]['name'].'</option>';
+										}
+									?>
+								</select>
+							</td>
+							<td>
+								<input type="button" style="width: 86px" name="laden" value="<? echo $this->strLoad; ?>" onclick="document.GUI.submit();">
+								<a title="<? echo $this->strDelete; ?>" onclick="delete_settings();"><i class="fa fa-trash" name="delete"></i></a>
+							</td>
+						</tr>
+					</table>
+				</div>
 			</div>
 
 			<div id="attributes_div" style="<? if($this->formvars['export_format'] == 'UKO' OR $this->formvars['export_format'] == 'OVL' OR $simple) { echo 'display: none';} else { echo 'visibility: visible';} ?>;border-bottom:1px solid #C3C7C3; border-left: 1px solid #C3C7C3; border-right: 1px solid #C3C7C3; padding-top:10px; padding-bottom:5px; padding-left:5px; padding-right:5px;">
@@ -304,7 +360,7 @@ $j=0;
 					<table cellspacing="7">
 						<tr>
 							<td>
-								<input type="checkbox" name="with_metadata_document" value="1" checked> <? echo $strExportMetadatadocument; ?>
+								<input type="checkbox" name="with_metadata_document" value="1" <? if ($this->formvars['with_metadata_document'] == 1)echo 'checked'; ?>> <? echo $strExportMetadatadocument; ?>
 							</td>
 						</tr><?
 						if ($groupnames){ ?>
@@ -316,7 +372,7 @@ $j=0;
 										}
 										else {
 											echo 'visibility:visible';
-										} ?>"><input type="checkbox" name="export_groupnames"> <? echo $strExportGroupnames; ?>
+										} ?>"><input type="checkbox" name="export_groupnames" <? if ($this->formvars['export_groupnames'] == 1)echo 'checked'; ?>> <? echo $strExportGroupnames; ?>
 									</div>
 								</td>
 							</tr><?
@@ -324,7 +380,7 @@ $j=0;
 						if ($document_attributes){ ?>
 							<tr>
 								<td>
-									<input type="checkbox" onclick="select_document_attributes('<? echo implode(',', $document_ids); ?>');" name="download_documents"><? echo $strDownloadDocuments; ?>
+									<input type="checkbox" onclick="select_document_attributes('<? echo implode(',', $document_ids); ?>');" name="download_documents" <? if ($this->formvars['download_documents'] == 1)echo 'checked'; ?>><? echo $strDownloadDocuments; ?>
 								</td>
 							</tr><?
 						} ?>

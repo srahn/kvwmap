@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ "$1" = "delete" ] ; then
+	DELETE_SCHEMA="true"
+fi
+
 #############
 # functions
 
@@ -68,7 +72,7 @@ convert_nas_files() {
 				head -n 30 ${LOG_PATH}/${ERROR_FILE}
 				break
 			else
-				if [ ! $check_dublicate = 0 ] ; then
+				if [ ! "${DELETE_SCHEMA}" = "true" ] && [ ! $check_dublicate = 0 ] ; then
 					log "Die NAS-Datei ${NAS_FILENAME} wurde bereits eingelesen"
 					break
 				else
@@ -88,6 +92,9 @@ convert_nas_files() {
 				if [ ! -f "${IMPORT_PATH}/import_transaction.sql" ] ; then
 					echo "BEGIN; SET search_path = ${POSTGRES_SCHEMA},public;" > ${IMPORT_PATH}/import_transaction.sql
 				fi
+				if [ "${DELETE_SCHEMA}" = "true" ] ; then
+					echo "SELECT ${POSTGRES_SCHEMA}.delete_object_tables();" >> ${IMPORT_PATH}/import_transaction.sql
+				fi
 				sed -i -e "s/BEGIN;//g" -e "s/END;//g" -e "s/COMMIT;//g" ${SQL_FILE}
 				sed -i -e "s/\"\"/\"objektkoordinaten\"/g" ${SQL_FILE}		# OGR Bug-Workaround
 				cat ${SQL_FILE} >> ${IMPORT_PATH}/import_transaction.sql
@@ -96,7 +103,7 @@ convert_nas_files() {
 				rm ${SQL_FILE}
 				rm -f ${GFS_FILE}
 				if [ ! "$(find ${IMPORT_PATH} -name "*.xml" -not -path ${IMPORT_PATH}/METADATA/*)" ] ; then		# nach der letzten NAS-Datei die Transaktionsdatei abschliessen
-					echo "SELECT alkis.execute_hist_operations();" >> ${IMPORT_PATH}/import_transaction.sql
+					echo "SELECT ${POSTGRES_SCHEMA}.execute_hist_operations();" >> ${IMPORT_PATH}/import_transaction.sql
 					echo "END;COMMIT;" >> ${IMPORT_PATH}/import_transaction.sql
 				fi
 			fi

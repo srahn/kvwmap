@@ -17,4 +17,5 @@
 	$strOptions='Options';
 	$strSingleGeoms = "use singlegeometries";
 	$strWithin = "only within";
+	$strExportSettings = 'export-settings';
 ?>

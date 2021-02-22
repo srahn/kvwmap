@@ -641,7 +641,12 @@
 
 				case 'Link': {
 					if ($value!='') {
-						if (substr($value, 0, 4) == 'http') $target = '_blank';
+						if (substr($value, 0, 4) == 'http') {
+							$target = '_blank';
+						}
+						else {
+							$target = 'root';
+						}
 						$datapart .= '<a style="padding: 0 0 0 3;" class="link" target="'.$target.'" style="font-size: '.$fontsize.'px" href="' . htmlspecialchars($value) .'">';
 						if($attributes['options'][$j] != ''){
 							$datapart .= $attributes['options'][$j];
@@ -708,7 +713,7 @@
 									$datapart .= 'target="_blank"';
 								}
 							}
-							$datapart .= ' class="dynamicLink" style="font-size: ' . $fontsize . 'px" ' . (($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') ? 'onclick="checkForUnsavedChanges(event);"' : '').' href="' . $href . '">';
+							$datapart .= ' class="dynamicLink" style="font-size: ' . $fontsize . 'px" ' . (($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') ? 'onclick="checkForUnsavedChanges(event);"' : '').' href="'.$href.'&mime_type='.$gui->mime_type.'">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
 						}

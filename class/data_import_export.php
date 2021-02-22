@@ -198,7 +198,7 @@ class data_import_export {
 		# 2. Versuch: Abgleich bestimmter Parameter im prj-String mit spatial_ref_sys_alias
 		$datum = get_first_word_after($wkt, 'DATUM[', '"', '"');
 		$projection = get_first_word_after($wkt, 'PROJECTION[', '"', '"');
-		if($projection == '')$projection_sql = 'AND projection IS NULL'; else $projection_sql = "AND '".$projection."' = ANY(projection)";
+		if($projection == '')$projection_sql = 'AND projection IS NULL'; else $projection_sql = "AND '".pg_escape_string($projection)."' = ANY(projection)";
 		$false_easting = get_first_word_after($wkt, 'False_Easting"', ',', ']');
 		if($false_easting == '')$false_easting_sql = 'AND false_easting IS NULL'; else $false_easting_sql = "AND false_easting = ".$false_easting;
 		$central_meridian = get_first_word_after($wkt, 'Central_Meridian"', ',', ']');
@@ -207,12 +207,12 @@ class data_import_export {
 		if($scale_factor == '')$scale_factor_sql = 'AND scale_factor IS NULL'; else $scale_factor_sql = "AND scale_factor = ".$scale_factor;
 		$unit = get_first_word_after($wkt, 'UNIT[', '"', '"', true);
 		$sql = "SELECT srid FROM spatial_ref_sys_alias
-						WHERE '".$datum."' = ANY(datum)
+						WHERE '".pg_escape_string($datum)."' = ANY(datum)
 						".$projection_sql."
 						".$false_easting_sql."
 						".$central_meridian_sql."
 						".$scale_factor_sql."
-						AND '".$unit."' = ANY(unit)";
+						AND '".pg_escape_string($unit)."' = ANY(unit)";
 		$ret = $pgdatabase->execSQL($sql,4, 0);
 		if(!$ret[0])$result = pg_fetch_row($ret[1]);
 		return $result[0];
@@ -1003,7 +1003,7 @@ class data_import_export {
 		}
 		return $ovl;
   }
-
+	
 	function export_exportieren($formvars, $stelle, $user){
 		global $language;
 		global $GUI;
@@ -1169,12 +1169,7 @@ class data_import_export {
 			#showAlert('Abfrage erfolgreich. Es wurden '.$count.' Zeilen geliefert.');
 			$this->formvars['layer_name'] = replace_params($this->formvars['layer_name'], rolle::$layer_params);
 			$this->formvars['layer_name'] = umlaute_umwandeln($this->formvars['layer_name']);
-			$this->formvars['layer_name'] = str_replace('.', '_', $this->formvars['layer_name']);
-			$this->formvars['layer_name'] = str_replace('(', '_', $this->formvars['layer_name']);
-			$this->formvars['layer_name'] = str_replace(')', '_', $this->formvars['layer_name']);
-			$this->formvars['layer_name'] = str_replace('/', '_', $this->formvars['layer_name']);
-			$this->formvars['layer_name'] = str_replace('[', '_', $this->formvars['layer_name']);
-			$this->formvars['layer_name'] = str_replace(']', '_', $this->formvars['layer_name']);
+			$this->formvars['layer_name'] = str_replace(['.', '(', ')', '/', '[', ']', '<', '>'], '_', $this->formvars['layer_name']);
 			$folder = 'Export_'.$this->formvars['layer_name'].rand(0,10000);
 			$old = umask(0);
       mkdir(IMAGEPATH.$folder, 0777);                       # Ordner erzeugen
