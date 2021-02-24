@@ -2,9 +2,9 @@
 
 	$GUI->jagdbezirk_show_data = function() use ($GUI){
 		$GUI->mapDB = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
-    $jagdkataster = new jagdkataster($GUI->pgdatabase);
-    $jagdkataster->clientepsg = $GUI->user->rolle->epsg_code;
 		$layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+    $jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
+    $jagdkataster->clientepsg = $GUI->user->rolle->epsg_code;
 		
 		$privileges = $GUI->Stelle->get_attributes_privileges($layer[0]['Layer_ID']);
     $layer[0]['attributes'] = $GUI->mapDB->read_layer_attributes($layer[0]['Layer_ID'], $GUI->pgdatabase, $privileges['attributenames']);
@@ -29,7 +29,8 @@
   };
 
 	$GUI->zoomtojagdbezirk = function() use ($GUI){
-    $jagdkataster = new jagdkataster($GUI->pgdatabase);
+    $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+    $jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
     $jagdkataster->clientepsg = $GUI->user->rolle->epsg_code;
     $rect = $jagdkataster->zoomTojagdbezirk($GUI->formvars['oid'], 10);
     $GUI->loadMap('DataBase');
@@ -48,7 +49,8 @@
   };
 
 	$GUI->jagdbezirke_auswaehlen_suchen_csv = function() use ($GUI){
-  	$jagdkataster = new jagdkataster($GUI->pgdatabase);
+  	$layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+    $jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
     $GUI->jagdbezirke = $jagdkataster->suchen($GUI->formvars);
     $anz = count($GUI->jagdbezirke);
     for($i = 0; $i < $anz; $i++) {          	
@@ -73,7 +75,8 @@
   };
   
 	$GUI->jagdbezirke_auswaehlen_suchen = function() use ($GUI){
-    $jagdkataster = new jagdkataster($GUI->pgdatabase);
+    $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+    $jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
     $GUI->jagdbezirke = $jagdkataster->suchen($GUI->formvars);
     $GUI->jagdbezirke_auswaehlen();
   };
@@ -114,9 +117,9 @@
 	      $GUI->formvars['fromwhere'] .= ' where (1=1)';
 	    }
     }
-    $jagdkataster = new jagdkataster($GUI->pgdatabase);
-    $layerset = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
-    $jagdkataster->layerepsg = $layerset[0]['epsg_code'];
+    $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+    $jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
+    $jagdkataster->layerepsg = $layer[0]['epsg_code'];
     $jagdkataster->clientepsg = $GUI->user->rolle->epsg_code;
     if ($GUI->formvars['oid']!='') {           # Jagdbezirk bearbeiten
     	$GUI->titel='Jagdbezirk bearbeiten';
@@ -146,9 +149,9 @@
   };
 	
 	$GUI->jagdkatastereditor_senden = function() use ($GUI){
-    $jagdkataster = new jagdkataster($GUI->pgdatabase);
-    $layerset = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
-    $jagdkataster->layerepsg = $layerset[0]['epsg_code'];
+    $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+    $jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
+    $jagdkataster->layerepsg = $layer[0]['epsg_code'];
     $jagdkataster->clientepsg = $GUI->user->rolle->epsg_code;
     # eingeabewerte pruefen:
     $ret = $jagdkataster->pruefeEingabedaten($GUI->formvars['newpathwkt'], $GUI->formvars['nummer']);
@@ -176,7 +179,8 @@
   };
 
 	$GUI->jagdkatastereditor_loeschen = function() use ($GUI){
-    $jagdkataster = new jagdkataster($GUI->pgdatabase);
+    $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+    $jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
     $jagdkataster->deletejagdbezirk($GUI->formvars);
 		if($GUI->formvars['oid'] == ''){
 			$GUI->jagdbezirke_auswaehlen_suchen();		# zurück zum Suchergebnis
@@ -191,7 +195,8 @@
   };
 
 	$GUI->jagdkatastereditor_kopieren = function() use ($GUI){
-    $jagdkataster = new jagdkataster($GUI->pgdatabase);
+    $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+    $jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
     $GUI->formvars['oid'] = $jagdkataster->copyjagdbezirk($GUI->formvars['oid']);
     $GUI->jagdkatastereditor();
   };
@@ -201,7 +206,8 @@
 		if($GUI->formvars['FlurstKennz'] != ''){
 			$selected_flurstuecke = explode(';', $GUI->formvars['FlurstKennz']);
 		}
-  	$GUI->jagdkataster = new jagdkataster($GUI->pgdatabase);
+  	$layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+    $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
   	$GUI->flurstuecke = $GUI->jagdkataster->getIntersectedFlurst($GUI->formvars);
   	for($i = 0; $i < count($GUI->flurstuecke); $i++){
 			if($GUI->formvars['FlurstKennz'] == '' OR in_array($GUI->flurstuecke[$i]['flurstkennz'], $selected_flurstuecke)){
@@ -233,13 +239,15 @@
     $GUI->main = PLUGINS.'jagdkataster/view/jagdkataster_flurstlist.php';
     if($GUI->formvars['oid'])$GUI->titel='Im Jagdbezirk '.$GUI->formvars['name'].' enthaltene Flurstücke';
     else $GUI->titel='Enthaltene Flurstücke in Jagdbezirken';
-    $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase);
+		$layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+    $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
     $GUI->flurstuecke = $GUI->jagdkataster->getIntersectedFlurst($GUI->formvars);
     $GUI->output();
   };
 	
 	$GUI->jagdkatastereditor_listeigentuemer_csv = function() use ($GUI){
-  	$GUI->jagdkataster = new jagdkataster($GUI->pgdatabase);
+  	$layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+    $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
   	$GUI->eigentuemer = $GUI->jagdkataster->getEigentuemerListe($GUI->formvars);
   	for($i = 0; $i < count($GUI->eigentuemer)-1; $i++){          	
     	$csv .= str_replace(';', ' ', $GUI->eigentuemer[$i]['eigentuemer']).';';
@@ -260,7 +268,8 @@
 	$GUI->jagdkatastereditor_listeigentuemer = function() use ($GUI){
     $GUI->main = PLUGINS.'jagdkataster/view/jagdkataster_eigentuemerlist.php';
     $GUI->titel='Eigentümer im Jagdbezirk '.$GUI->formvars['name'];
-    $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase);
+    $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+    $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
     $GUI->eigentuemer = $GUI->jagdkataster->getEigentuemerListe($GUI->formvars);
     $GUI->output();
   };
@@ -268,7 +277,8 @@
 	$GUI->jagdkatastereditor_listpaechter = function() use ($GUI){
     $GUI->main = PLUGINS.'jagdkataster/view/jagdkataster_paechterlist.php';
     $GUI->titel='P&auml;chter im Jagdbezirk '.$GUI->formvars['name'].'';
-    $jagdkataster = new jagdkataster($GUI->pgdatabase);
+    $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+    $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
     $GUI->paechter = $jagdkataster->get_paechter($GUI->formvars['oid']);
     $GUI->output();
   };

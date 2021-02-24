@@ -35,16 +35,17 @@ class jagdkataster {
   # jagdkataster($database)
   ##################################################################################################################################################
 
-  function __construct($database) {
+  function __construct($database, $layer) {
     global $debug;
     $this->debug=$debug;
     $this->database=$database;
+		$this->oid_column = $layer[0]['oid'];
   }
 
   function zoomTojagdbezirk($oid, $border) {
   	$sql = 'SELECT MIN(st_xmin(st_envelope(st_transform(the_geom, '.$this->clientepsg.')))) AS minx, MAX(st_xmax(st_envelope(st_transform(the_geom, '.$this->clientepsg.')))) AS maxx';
     $sql.= ', MIN(st_ymin(st_envelope(st_transform(the_geom, '.$this->clientepsg.')))) AS miny, MAX(st_ymax(st_envelope(st_transform(the_geom, '.$this->clientepsg.')))) AS maxy';
-    $sql.= ' FROM jagdkataster.jagdbezirke WHERE oid = '.$oid;
+    $sql.= ' FROM jagdkataster.jagdbezirke WHERE = ' . $this->oid_column . ' = ' . $oid;
     $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
 		$rect = ms_newRectObj();
@@ -62,7 +63,7 @@ class jagdkataster {
   }
 
   function suchen($formvars){
-  	$sql = 'SELECT oid, * FROM jagdkataster.jagdbezirke WHERE (1 = 1)';
+  	$sql = 'SELECT * FROM jagdkataster.jagdbezirke WHERE (1 = 1)';
   	if($formvars['search_nummer']){
   		$sql.= ' AND (id like \''.$formvars['search_nummer'].'\'';
   		$sql.= ' OR jb_zuordnung like \''.$formvars['search_nummer'].'\')';  		
@@ -105,7 +106,18 @@ class jagdkataster {
   function get_paechter($jagdbezirk){
   	if ($jagdbezirk!='') {
   	  #$sql = "SELECT * FROM jagdkataster.jagdpaechter2bezirke as jpb, jagdkataster.jagdpaechter as jp WHERE jpb.paechterid = jp.id AND jpb.bezirkid = ".$jagdbezirk." ORDER BY jp.nachname ASC";
-  	  $sql = "SELECT jp.* FROM jagdkataster.jagdpaechter2bezirke as jpb, jagdkataster.jagdpaechter as jp, jagdkataster.jagdbezirke jb WHERE jpb.paechterid = jp.id AND CAST(jpb.bezirkid AS text) = jb.concode AND jb.oid= '".$jagdbezirk."' order by jp.nachname;";
+  	  $sql = "
+			SELECT 
+				jp.* 
+			FROM 
+				jagdkataster.jagdpaechter2bezirke as jpb, 
+				jagdkataster.jagdpaechter as jp, 
+				jagdkataster.jagdbezirke jb 
+			WHERE 
+				jpb.paechterid = jp.id AND 
+				CAST(jpb.bezirkid AS text) = jb.concode AND 
+				jb.gid= '".$jagdbezirk."' 
+			order by jp.nachname;";
   	  #echo $sql;
   	  $ret = $this->database->execSQL($sql, 4, 0);
 	  	while($rs = pg_fetch_array($ret[1])){
@@ -116,7 +128,18 @@ class jagdkataster {
   }
 
 	function getjagdbezirkfrompaechter($paechterid){
-		$sql = "SELECT jb.oid, jb.id, jb.name, jb.art FROM jagdkataster.jagdpaechter2bezirke as jpb, jagdkataster.jagdbezirke jb WHERE CAST(jpb.bezirkid AS text) = jb.concode AND jpb.paechterid = ".sprintf("%.0f", $paechterid);
+		$sql = "
+			SELECT 
+				jb.gid, 
+				jb.id, 
+				jb.name, 
+				jb.art 
+			FROM 
+				jagdkataster.jagdpaechter2bezirke as jpb, 
+				jagdkataster.jagdbezirke jb 
+			WHERE 
+				CAST(jpb.bezirkid AS text) = jb.concode 
+				AND jpb.paechterid = ".sprintf("%.0f", $paechterid);
 		#echo $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		while($rs = pg_fetch_array($ret[1])){
@@ -131,7 +154,7 @@ class jagdkataster {
 			$sql.= " id = '".$id."',";
 			$sql.= " name = '".$name."',";
 			$sql.= " art = '".$art."'";
-			$sql.= " WHERE oid = ".sprintf("%.0f", $oid);
+			$sql.= " WHERE " . $this->oid_column . " = ".sprintf("%.0f", $oid);
 		}
 		#echo $sql;
 		$ret = $this->database->execSQL($sql, 4, 1);
@@ -159,7 +182,7 @@ class jagdkataster {
 				$sql.= " status = '".$status."',";
 				$sql.= " verzicht = '".$verzicht."',";
 				$sql.= " art = '".$art."'";
-				$sql.= " WHERE oid = ".sprintf("%.0f", $oid);
+				$sql.= " WHERE " . $this->oid_column . " = ".sprintf("%.0f", $oid);
 			}
 			else{
 				if($umring != ''){
@@ -187,7 +210,15 @@ class jagdkataster {
   }
 
 	function getjagdbezirk($oid){
-		$sql = "SELECT oid, *, st_assvg(st_transform(the_geom, ".$this->clientepsg."), 0, 8) AS svggeom, st_astext(st_transform(the_geom, ".$this->clientepsg.")) AS wktgeom FROM jagdkataster.jagdbezirke WHERE oid = ".sprintf("%.0f", $oid);
+		$sql = "
+			SELECT 
+				*, 
+				st_assvg(st_transform(the_geom, ".$this->clientepsg."), 0, 8) AS svggeom, 
+				st_astext(st_transform(the_geom, ".$this->clientepsg.")) AS wktgeom 
+			FROM 
+				jagdkataster.jagdbezirke 
+			WHERE 
+				" . $this->oid_column . " = ".sprintf("%.0f", $oid);
 		#echo $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$jagdbezirk = pg_fetch_array($ret[1]);
@@ -207,12 +238,24 @@ class jagdkataster {
 		else{				# ein Jagdbezirk
 			$oids[] = $formvars['oid']; 
 		}
-		$sql = "DELETE FROM jagdkataster.jagdbezirke WHERE oid IN (".implode(',', $oids).")";
+		$sql = "
+			DELETE FROM 
+				jagdkataster.jagdbezirke 
+			WHERE 
+				" . $this->oid_column . " IN (".implode(',', $oids).")";
 		$ret = $this->database->execSQL($sql, 4, 1);
 	}
 	
 	function copyjagdbezirk($oid){
-		$sql = "INSERT INTO jagdkataster.jagdbezirke SELECT * FROM jagdkataster.jagdbezirke WHERE oid = ".sprintf("%.0f", $oid);
+		$sql = "
+			INSERT INTO 
+				jagdkataster.jagdbezirke 
+			SELECT 
+				* 
+			FROM 
+				jagdkataster.jagdbezirke 
+			WHERE 
+				" . $this->oid_column . " = ".sprintf("%.0f", $oid);
 		$ret = $this->database->execSQL($sql, 4, 1);
 		return pg_last_oid($ret[1]);
 	}
@@ -300,39 +343,79 @@ class jagdkataster {
   }
 	
 	function getIntersectedFlurstWithJagdbezirke($oids){
-		$sql = "SELECT f.land||f.gemarkungsnummer as gemkgschl, f.flurnummer as flur, f.zaehler, f.nenner, g.bezeichnung as gemkgname, f.flurstueckskennzeichen as flurstkennz, st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") AS flurstflaeche, st_area_utm(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, f.amtlicheflaeche AS albflaeche";
-		$sql.= " FROM alkis.ax_gemarkung AS g, jagdkataster.jagdbezirke, alkis.ax_flurstueck AS f";
-		$sql.= " WHERE f.gemarkungsnummer = g.gemarkungsnummer";
-		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
-		$sql.= " AND f.wkb_geometry && st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND st_intersects(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))";
-		$sql.= " AND st_area_utm(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 1";
-		$sql.= $this->database->build_temporal_filter(array('g', 'f'));
-		$sql.= " ORDER BY jagdbezirke.name";
+		$sql = "
+			SELECT 
+				f.land||f.gemarkungsnummer as gemkgschl, 
+				f.flurnummer as flur, 
+				f.zaehler, 
+				f.nenner, 
+				g.bezeichnung as gemkgname, 
+				f.flurstueckskennzeichen as flurstkennz, 
+				st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") AS flurstflaeche, 
+				st_area_utm(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") AS schnittflaeche, 
+				jagdbezirke.name, 
+				jagdbezirke.art, 
+				f.amtlicheflaeche AS albflaeche 
+			FROM 
+				alkis.ax_gemarkung AS g, 
+				jagdkataster.jagdbezirke, 
+				alkis.ax_flurstueck AS f
+			WHERE 
+				f.gemarkungsnummer = g.gemarkungsnummer AND 
+				jagdbezirke." . $this->oid_column . " IN (".implode(',', $oids).") AND 
+				f.wkb_geometry && st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND 
+				st_intersects(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")) AND 
+				st_area_utm(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 1 
+				" . $this->database->build_temporal_filter(array('g', 'f')) . "
+			ORDER BY 
+				jagdbezirke.name";
 		return $this->database->execSQL($sql, 4, 0);
 	}
 	
 	function getEigentuemerListeFromJagdbezirke($oids){
-		$sql = "SELECT round((st_area_utm(st_union(the_geom_inter), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")*100/j_flaeche)::numeric, 2) as anteil_alk, round(sum(flaeche*(st_area_utm(the_geom_inter, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")/st_area_utm(the_geom, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")))::numeric, 1) AS albflaeche, eigentuemer";
-		$sql.= " FROM(SELECT distinct st_area_utm(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") as j_flaeche, f.amtlicheflaeche as flaeche, array_to_string(array(";
-		$sql.= "SELECT distinct array_to_string(array[p.nachnameoderfirma, p.vorname], ' ') as name ";
-		$sql.= "FROM alkis.ax_flurstueck ff ";		
-		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON ff.istgebucht = s.gml_id OR ARRAY[ff.gml_id::char] <@ s.verweistauf OR ARRAY[ff.istgebucht] <@ s.an ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
-		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart ";
-		$sql.= "LEFT JOIN alkis.ax_person p ON n.benennt = p.gml_id ";
-		$sql.= " WHERE n.laufendenummernachdin1421 IS NOT NULL AND f.flurstueckskennzeichen = ff.flurstueckskennzeichen ";
-		$sql.= $this->database->build_temporal_filter(array('ff', 's', 'g', 'b', 'n', 'p'));
-		$sql.= " order by name),' || ') as eigentuemer,";
-		$sql.= " st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")) AS the_geom_inter, f.wkb_geometry as the_geom";		
-		$sql.= " FROM alkis.ax_gemarkung AS g, jagdkataster.jagdbezirke, alkis.ax_flurstueck AS f";
-		$sql.= " WHERE f.gemarkungsnummer = g.gemarkungsnummer";
-		$sql.= $this->database->build_temporal_filter(array('f'));
-		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
-		$sql.= " AND f.wkb_geometry && st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND st_intersects(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))";
-		$sql.= " AND st_area_utm(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 1) as foo";
-		$sql.= " group by eigentuemer, j_flaeche";
+		$sql = "
+			SELECT 
+				round((st_area_utm(st_union(the_geom_inter), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")*100/j_flaeche)::numeric, 2) as anteil_alk, 
+				round(sum(flaeche*(st_area_utm(the_geom_inter, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")/st_area_utm(the_geom, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")))::numeric, 1) AS albflaeche, 
+				eigentuemer 
+			FROM(
+				SELECT distinct 
+					st_area_utm(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") as j_flaeche, 
+					f.amtlicheflaeche as flaeche, 
+					array_to_string(array(
+						SELECT distinct 
+							array_to_string(array[p.nachnameoderfirma, p.vorname], ' ') as name 
+						FROM 
+							alkis.ax_flurstueck ff 
+							LEFT JOIN alkis.ax_buchungsstelle s ON ff.istgebucht = s.gml_id OR ARRAY[ff.gml_id::char] <@ s.verweistauf OR ARRAY[ff.istgebucht] <@ s.an 
+							LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id 
+							LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk 
+							LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id 
+							LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart 
+							LEFT JOIN alkis.ax_person p ON n.benennt = p.gml_id 
+						WHERE 
+							n.laufendenummernachdin1421 IS NOT NULL AND 
+							f.flurstueckskennzeichen = ff.flurstueckskennzeichen 
+							" . $this->database->build_temporal_filter(array('ff', 's', 'g', 'b', 'n', 'p')) . "
+						order by name),' || '
+					) as eigentuemer,
+					st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")) AS the_geom_inter, 
+					f.wkb_geometry as the_geom
+				FROM 
+					alkis.ax_gemarkung AS g, 
+					jagdkataster.jagdbezirke, 
+					alkis.ax_flurstueck AS f
+				WHERE 
+					f.gemarkungsnummer = g.gemarkungsnummer 
+					" . $this->database->build_temporal_filter(array('f')) . " AND 
+					jagdbezirke." . $this->oid_column . " IN (".implode(',', $oids).") AND 
+					f.wkb_geometry && st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND 
+					st_intersects(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")) AND 
+					st_area_utm(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 1
+			) as foo
+			group by 
+				eigentuemer, 
+				j_flaeche";
 		return $this->database->execSQL($sql, 4, 0);
 	}
 		
