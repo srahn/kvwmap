@@ -76,7 +76,18 @@ function replace_oid_in_data($data, $id){
 $color[false] = '#db5a5a';
 $color[true] = '#36908a';
 
-$query = "SELECT * FROM `layer` WHERE connectiontype = 6 ORDER BY name";
+$this->formvars['order'] = $this->formvars['order'] ?: 'Name';
+
+$query = "
+	SELECT 	
+		layer.*,
+		g.Gruppenname
+	FROM 
+		`layer` 
+		LEFT JOIN	u_groups g ON layer.Gruppe = g.id
+	WHERE 
+		connectiontype = 6 
+	ORDER BY " . $this->formvars['order'];
 
 # nur bestimmte Layer einschließen
 #$with_layer_id = '1,2,3,4';
@@ -99,7 +110,7 @@ $result = $this->database->execSQL($query);
 <style>
 	#main{
 		position: relative;
-		padding-top: 115px;
+		padding-top: 130px;
 	}
 	#head{
 		position: absolute;
@@ -208,12 +219,15 @@ while($layer = $this->database->result->fetch_assoc()){
 		<tr class="' . $class . '">
 			<td valign="top">';
 				if($i == 0)echo '<div class="fett scrolltable_header">Layer</div>';
-				if (!in_array(strtoupper(mb_substr($layer["Name"],0,1,'UTF-8')),$umlaute) AND strtoupper(mb_substr($layer["Name"],0,1,'UTF-8')) != $first) {
-					$nav_bar .= "<a href='#".strtoupper(mb_substr($layer["Name"],0,1,'UTF-8'))."'><div class='menu abc'>".strtoupper(mb_substr($layer["Name"],0,1,'UTF-8'))."</div></a>";
-					$first=strtoupper(mb_substr($layer["Name"],0,1));
+				if (!in_array(strtoupper(mb_substr($layer[$this->formvars['order']],0,1,'UTF-8')),$umlaute) AND strtoupper(mb_substr($layer[$this->formvars['order']],0,1,'UTF-8')) != $first) {
+					$nav_bar .= "<a href='#".strtoupper(mb_substr($layer[$this->formvars['order']],0,1,'UTF-8'))."'><div class='menu abc'>".strtoupper(mb_substr($layer[$this->formvars['order']],0,1,'UTF-8'))."</div></a>";
+					$first=strtoupper(mb_substr($layer[$this->formvars['order']],0,1));
 					echo '<a class="nav_link menu abc" name="'.$first.'">'.$first.'</a>';
 				}
-	echo '<div style="width: 200px; margin-top: 40px;">
+	echo '<div style="float: right; margin-top: 0px;">
+					' . $layer["Gruppenname"] . '
+				</div>
+				<div style="width: 200px; margin-top: 40px;">
 					<a href="index.php?go=Layereditor&selected_layer_id='.$layer["Layer_ID"].'"target="_blank">'.$layer["Name"].'</a>
 				</div>
 			</td>
@@ -254,6 +268,13 @@ echo '</tbody></table></div>';
 		<? echo $this->database->result->num_rows; ?> PostGIS-Layer insgesamt<br>
 		<? echo $oid_layer_count; ?> PostGIS-Layer müssen angepasst werden<br>
 		<a href="javascript:void(0);" id="layer_toggle_link" onclick="toggle_layer();">nur die anzupassenden PostGIS-Layer anzeigen</a>
+		<br>
+		Sortierung: 
+		<select name="order" onchange="document.GUI.submit();">
+			<option value="Name" <? if($this->formvars['order'] == 'Name')echo 'selected'; ?>>Name</option>
+			<option value="Gruppenname" <? if($this->formvars['order'] == 'Gruppenname')echo 'selected'; ?>>Gruppe</option>
+		</select>
 		<div id="nav_bar"><? echo $nav_bar; ?></div>
 	</div>
 </div>
+<input type="hidden" name="go" value="layer_check_oids">
