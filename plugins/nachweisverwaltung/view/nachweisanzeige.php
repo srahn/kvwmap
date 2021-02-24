@@ -453,7 +453,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		$bgcolor = '#FFFFFF';
      for ($i=0;$i<$this->nachweis->erg_dokumente;$i++) {
         ?>
-        <tr style="outline: 1px dotted grey;" <? if($this->formvars['selected_nachweis'] == $this->nachweis->Dokumente[$i]['id'])echo 'class="selected"'; ?> onclick="select(this);" bgcolor="
+        <tr style="min-height: 0px; outline: 1px dotted grey;" <? if($this->formvars['selected_nachweis'] == $this->nachweis->Dokumente[$i]['id'])echo 'class="selected"'; ?> onclick="select(this);" bgcolor="
 			<? $orderelem = explode(',', $this->formvars['order']);
 			if ($this->nachweis->Dokumente[$i][$orderelem[0]] != $this->nachweis->Dokumente[$i-1][$orderelem[0]]){
 				if($bgcolor == '#EBEBEB'){
