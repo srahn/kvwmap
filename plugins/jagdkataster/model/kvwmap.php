@@ -76,8 +76,8 @@
   
 	$GUI->jagdbezirke_auswaehlen_suchen = function() use ($GUI){
     $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
-    $jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
-    $GUI->jagdbezirke = $jagdkataster->suchen($GUI->formvars);
+    $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
+    $GUI->jagdbezirke = $GUI->jagdkataster->suchen($GUI->formvars);
     $GUI->jagdbezirke_auswaehlen();
   };
 
@@ -279,7 +279,7 @@
     $GUI->titel='P&auml;chter im Jagdbezirk '.$GUI->formvars['name'].'';
     $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
     $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
-    $GUI->paechter = $jagdkataster->get_paechter($GUI->formvars['oid']);
+    $GUI->paechter = $GUI->jagdkataster->get_paechter($GUI->formvars['oid']);
     $GUI->output();
   };
 
