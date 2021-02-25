@@ -215,6 +215,7 @@ class jagdkataster {
 			SELECT 
 				*, 
 				gid as jagdbezirke_oid,
+				gid as jagdbezirk_paechter_oid,
 				st_assvg(st_transform(the_geom, ".$this->clientepsg."), 0, 8) AS svggeom, 
 				st_astext(st_transform(the_geom, ".$this->clientepsg.")) AS wktgeom 
 			FROM 
