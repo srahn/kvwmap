@@ -130,7 +130,8 @@ class jagdkataster {
 	function getjagdbezirkfrompaechter($paechterid){
 		$sql = "
 			SELECT 
-				jb.gid, 
+				jb.gid,
+				jb.gid as jagdbezirke_oid, 
 				jb.id, 
 				jb.name, 
 				jb.art 
@@ -213,6 +214,7 @@ class jagdkataster {
 		$sql = "
 			SELECT 
 				*, 
+				gid as jagdbezirke_oid,
 				st_assvg(st_transform(the_geom, ".$this->clientepsg."), 0, 8) AS svggeom, 
 				st_astext(st_transform(the_geom, ".$this->clientepsg.")) AS wktgeom 
 			FROM 
