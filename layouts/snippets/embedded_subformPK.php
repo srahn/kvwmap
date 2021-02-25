@@ -57,7 +57,7 @@
 			$data[] = 'tablename_mother=' . $this->formvars['tablename_mother'];
 			$data[] = 'columnname_mother=' . $this->formvars['columnname_mother']; 
 			$neu_link .= '
-			<a class="buttonlink" ' . ($this->formvars['no_new_window'] != true ? ' target="_blank"': '') . '	href="javascript:overlay_link(\'&' . implode('&', $data) . '\', false, ' . $target . '\')">
+			<a class="buttonlink" ' . ($this->formvars['no_new_window'] != true ? ' target="_blank"': '') . '	href="javascript:overlay_link(\'&' . implode('&', $data) . '\', false, \'' . $target . '\')">
 				<span>&nbsp;' . $strNewEmbeddedPK . '</span>
 			</a>';
 		}
