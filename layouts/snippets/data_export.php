@@ -355,7 +355,7 @@ $j=0;
 			<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>>
 			<? echo $strSingleGeoms; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			<? echo $this->strUseGeometryOf; ?>:
-  		<select name="geom_from_layer" onchange="document.GUI.submit();">
+  		<select name="geom_from_layer" onchange="geom_from_layer_change();">
   			<option value=""><?php echo $this->strPleaseSelect; ?></option>
   			<?
   				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
@@ -380,9 +380,6 @@ $j=0;
 <input type="hidden" name="client_epsg" value="<? echo $this->user->rolle->epsg_code ?>">
 <input type="hidden" name="go" value="Daten_Export">
 <input type="hidden" name="area" value="">
-<INPUT TYPE="hidden" NAME="columnname" VALUE="<? echo $this->formvars['columnname'] ?>">
-<INPUT TYPE="hidden" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
-<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">
 <INPUT TYPE="hidden" NAME="export_columnname" VALUE="<? echo $this->data_import_export->formvars['columnname'] ?>">
 <input type="hidden" name="always_draw" value="<? echo $always_draw; ?>"><?php
 if ($simple) { ?>

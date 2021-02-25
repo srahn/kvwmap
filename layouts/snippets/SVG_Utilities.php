@@ -7,6 +7,29 @@
  
 <script language="JavaScript">
 
+	var enclosingForm = <? echo $this->currentform; ?>;
+
+	function geom_from_layer_change(selected_layer_id){
+		// selected_layer_id ist die Layer-ID des Layers, der gerade im Geometrie-Editor bearbeitet wird
+		// wenn sie gesetzt ist, wird der Geometrieübernahmelayer für diesen Layer gespeichert
+		var data;
+		if (typeof selected_layer_id  !== 'undefined') {
+			data = 'go=saveGeomFromLayer&selected_layer_id=' + selected_layer_id + '&geom_from_layer=' + enclosingForm.geom_from_layer.value;
+			ahah("index.php", data, new Array(""), new Array(""));
+		}
+		if (enclosingForm.geom_from_layer.value < 0 && enclosingForm.newpath.value == '') {
+			// Rollenlayer sofort selektieren, wenn noch keine Geometrie vorhanden
+			var last_doing = enclosingForm.last_doing.value;
+			enclosingForm.last_doing.value = 'add_geom';
+			if (enclosingForm.firstpoly) {
+				enclosingForm.firstpoly.value = 'true';
+			}
+			enclosingForm.secondpoly.value = 'true';
+			data = 'go=spatial_processing&operation=add_geometry&code2execute=enclosingForm.last_doing.value=\'' + last_doing + '\';&resulttype=svgwkt&singlegeom=false&geom_from_layer=' + enclosingForm.geom_from_layer.value;
+			ahah("index.php", data, new Array(enclosingForm.result, "", ""), new Array("setvalue", "execute_function", "execute_function"));
+		}
+	}
+
 	function update_geometry(){
 		document.getElementById("svghelp").SVGupdate_geometry();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
@@ -917,7 +940,7 @@
 				enclosingForm.firstpoly.value = "true";
 				enclosingForm.secondpoly.value = "true";
 				buffer_geom = enclosingForm.buffer_geom.value;		// die gesicherte Geometrie, um die gepuffert werden soll
-				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&path3="+buffer_geom+"&operation=add_buffer_within_polygon&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&resulttype=svgwkt&fromwhere="+enclosingForm.fromwhere.value+"&orderby="+enclosingForm.orderby.value+"&columnname="+enclosingForm.columnname.value+"&geom_from_layer="+enclosingForm.geom_from_layer.value+"&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));				
+				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&path3="+buffer_geom+"&operation=add_buffer_within_polygon&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&resulttype=svgwkt&geom_from_layer="+enclosingForm.geom_from_layer.value+"&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));				
 			break;
 			case "move_geometry":
 				startMoveGeom(client_x, client_y);
@@ -1008,7 +1031,7 @@ function mouseup(evt){
 		endPoint(evt);
 		enclosingForm.secondpoly.value = "true";
 		if(enclosingForm.last_doing.value == "add_geom"){
-			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&operation=add_geometry&resulttype=svgwkt&singlegeom="+enclosingForm.singlegeom.checked+"&orderby="+enclosingForm.orderby.value+"&geom_from_layer="+enclosingForm.geom_from_layer.value,new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&operation=add_geometry&resulttype=svgwkt&singlegeom="+enclosingForm.singlegeom.checked+"&geom_from_layer="+enclosingForm.geom_from_layer.value,new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 			if(polygonfunctions == true){
 				enclosingForm.firstpoly.value = "true";
 			}
@@ -1018,7 +1041,7 @@ function mouseup(evt){
 		}
 		else{
 			if(enclosingForm.last_doing.value == "subtract_geom"){
-				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&operation=subtract_geometry&resulttype=svgwkt&singlegeom="+enclosingForm.singlegeom.checked+"&orderby="+enclosingForm.orderby.value+"&geom_from_layer="+enclosingForm.geom_from_layer.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&operation=subtract_geometry&resulttype=svgwkt&singlegeom="+enclosingForm.singlegeom.checked+"&geom_from_layer="+enclosingForm.geom_from_layer.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 			}
 		}
 	}

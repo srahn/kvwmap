@@ -81,7 +81,7 @@
 				</div>
 				<div>
 					<? echo $this->strUseGeometryOf; ?>: 
-					<select name="geom_from_layer" onchange="document.GUI.submit();">
+					<select name="geom_from_layer" onchange="geom_from_layer_change();">
 					<?
 						for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
 							echo '<option';
