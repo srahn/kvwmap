@@ -269,6 +269,10 @@ function go_switch($go, $exit = false) {
 				$GUI->getGroupOptions();
 			} break;
 
+			case 'saveGeomFromLayer' : {
+				$GUI->saveGeomFromLayer();
+			} break;
+
 			case 'saveLayerOptions' : {
 				$GUI->saveLayerOptions();
 			} break;
