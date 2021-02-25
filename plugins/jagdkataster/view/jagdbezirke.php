@@ -82,7 +82,7 @@ function save(){
 	$flst_privileges = $this->Stelle->get_attributes_privileges($flst_layer[0]['Layer_ID']);
 	################################################################	
 	for ($j=0;$j<$anzObj;$j++) {
-		$paechterliste = $jagdkataster->get_paechter($this->qlayerset[$i]['shape'][$j]['jagdbezirke_oid']);
+		$paechterliste = $jagdkataster->get_paechter($this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid']);
 ?>
 
 
