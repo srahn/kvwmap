@@ -1274,7 +1274,7 @@ class data_import_export {
 						if($this->attributes['form_element_type'][$j] == 'Dokument' AND $value != ''){
 							$docs = array($value);
 							if(substr($this->attributes['type'][$j], 0, 1) == '_'){		# Array
-								$docs = explode(',', trim($value, '{}'));
+								$docs = explode(',', trim($value, '{}"'));
 							}
 							foreach($docs as $doc){
 								$parts = explode('&original_name=', $doc);
