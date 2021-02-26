@@ -498,7 +498,7 @@
 
 				case 'Time': {
 					$datapart .= '<input class="'.$field_class.'" readonly style="padding: 0 0 0 3;border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
-					$datapart .= ' size="15" type="text" name="'.$fieldname.'" value="' . htmlspecialchars($value) . '">';
+					$datapart .= ' size="16" type="text" name="'.$fieldname.'" value="' . htmlspecialchars($value) . '">';
 				}break;
 
 				case 'Dokument': {
