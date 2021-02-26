@@ -566,10 +566,12 @@ include('funktionen/input_check_functions.php');
 				alldivs[i].innerHTML = '';
 			}
 		}
+		auto_resize_overlay();
 	}
 
 	clearsubform = function(subformid){
 		document.getElementById(subformid).innerHTML = '';
+		auto_resize_overlay();
 	}
 	
 	switch_gle_view1 = function(layer_id){
