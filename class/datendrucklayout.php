@@ -433,20 +433,7 @@ class ddl {
 										$y = $this->gui->sachdaten_druck_editor_preview($sublayoutobject[0], $this->pdf, $offx, $offy);
 									}
 									else{
-										$this->gui->formvars['no_output'] = true;
-										for($p = 0; $p < count($attributes['name']); $p++){			# erstmal alle Suchparameter des übergeordneten Layers für die Layersuche leeren
-											$this->gui->formvars['value_'.$attributes['name'][$p]] = '';
-											$this->gui->formvars['operator_'.$attributes['name'][$p]] = '';
-										}
-										$this->gui->formvars['value_'.$this->layerset['maintable'].'_oid'] = '';
-										for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){			# die Suchparameter für die Layersuche
-											$this->gui->formvars['value_'.$this->attributes['subform_pkeys'][$j][$p]] = $this->result[$i][$attributes['subform_pkeys'][$j][$p]];
-											$this->gui->formvars['operator_'.$this->attributes['subform_pkeys'][$j][$p]] = '=';
-										}							
-										$this->gui->GenerischeSuche_Suchen();
-										for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){			# die Suchparameter für die Layersuche wieder leeren
-											$this->gui->formvars['value_'.$this->attributes['subform_pkeys'][$j][$p]] = '';
-										}	
+										$this->gui->getSubFormResultSet($this->attributes, $j, $this->layerset['maintable'], $this->result[$i]);
 										$this->gui->formvars['aktivesLayout'] = $sublayout;
 										$page_id_before_sublayout = $this->pdf->currentContents;
 										$y = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy);
