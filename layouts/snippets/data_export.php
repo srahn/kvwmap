@@ -319,7 +319,7 @@ $j=0;
 					for($s = 0; $s < 4; $s++){ ?>
 						<div style="float: left; padding: 4px;"><?
 							for($i = 0; $i < $floor+$r; $i++) {
-								if(!in_array($this->data_import_export->attributes['form_element_type'][$j], ['dynamicLink']) AND $this->data_import_export->attributes['type'][$j] != 'unknown'){
+								if(!in_array($this->data_import_export->attributes['form_element_type'][$j], ['dynamicLink']) AND ($this->data_import_export->attributes['type'][$j] != 'unknown' OR $this->data_import_export->attributes['form_element_type'][$j] == 'SubFormEmbeddedPK')){
 									if($this->data_import_export->attributes['group'][$j] != '') $groupnames = true;
 									if($this->data_import_export->attributes['form_element_type'][$j] == 'Time' AND $this->data_import_export->attributes['options'][$j] == 'export') $exporttimestamp = true;
 									if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument'){$document_attributes = true; $document_ids[] = $j;} ?>
@@ -354,7 +354,7 @@ $j=0;
 				&nbsp;&nbsp;&nbsp;&nbsp;<a id="selectall_link" href="javascript:selectall('<? echo $this->data_import_export->attributes['the_geom']; ?>')"><? echo $strSelectAll; ?></a>
 			</div><?
 
-			if($groupnames OR $document_attributes){ ?>
+			if($groupnames OR $document_attributes or true){ ?>
 				<div style="border-bottom:1px solid #C3C7C3; border-left: 1px solid #C3C7C3; border-right: 1px solid #C3C7C3; padding-top:10px; padding-bottom:5px; padding-left:5px; padding-right:5px;">
 					&nbsp;&nbsp;<? echo $strOptions; ?>:<br>
 					<table cellspacing="7">
@@ -377,7 +377,7 @@ $j=0;
 								</td>
 							</tr><?
 						}
-						if ($document_attributes){ ?>
+						if ($document_attributes or true){ ?>
 							<tr>
 								<td>
 									<input type="checkbox" onclick="select_document_attributes('<? echo implode(',', $document_ids); ?>');" name="download_documents" <? if ($this->formvars['download_documents'] == 1)echo 'checked'; ?>><? echo $strDownloadDocuments; ?>
