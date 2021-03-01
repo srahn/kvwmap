@@ -9451,10 +9451,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
 									$this->formvars[$table['formfield'][$i]] = 'f';
 								}
+								if ($table['type'][$i] == 'Link') {
+									if (substr($this->formvars[$table['formfield'][$i]], 0, 9) != 'index.php' AND strpos($this->formvars[$table['formfield'][$i]], ':') === false) {
+										# bei externen Links http davor setzen, wenn kein Protokoll angegeben
+										$this->formvars[$table['formfield'][$i]] = 'http://' . $this->formvars[$table['formfield'][$i]];
+									}
+								}
 								$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]]."'"; # Typ "normal"
 							}
 						} break;
-
+		
 						case ($table['type'][$i] == 'ExifLatLng') : {
 							$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
 
@@ -13350,8 +13356,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							$eintrag = $this->formvars[$form_fields[$i]];
 						} break;
 						case 'Zahl' : {
-							$eintrag = removeTausenderTrenner ($this->formvars[$form_fields[$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
+							$eintrag = removeTausenderTrenner($this->formvars[$form_fields[$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
 							if ($this->formvars[$form_fields[$i]] == '')$eintrag = 'NULL';
+						} break;
+						case 'Link' : {
+							$eintrag = $this->formvars[$form_fields[$i]];
+							if ($eintrag != '' AND substr($eintrag, 0, 9) != 'index.php' AND strpos($eintrag, ':') === false)	{
+								# bei externen Links http davor setzen, wenn kein Protokoll angegeben
+								$eintrag = 'http://' . $eintrag;
+							}
+							if ($eintrag == '')$eintrag = 'NULL';
 						} break;
 						default : {
 							if ($tablename AND $formtype != 'dynamicLink' AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom') {

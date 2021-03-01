@@ -1671,6 +1671,13 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 	display: inline-block;
 }
 
+.formelement-link {
+	padding: 5px;
+	margin: 5px 1px;
+	background: #e3e3e3;
+	border-radius: 2px;
+}
+
 .calendar {
 	text-align: center;
 	position: absolute;
