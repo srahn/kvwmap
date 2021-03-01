@@ -137,7 +137,7 @@ class GUI {
 			return call_user_func_array($this->{$method}, $arguments);
 		}
 	}
-	
+
 	function layer_check_oids() {
 		$this->main = 'layer_check_oids.php';
 		$this->output();
@@ -4543,16 +4543,11 @@ echo '			</table>
 					$this->showAdminFunctions();
 				}
 			} break;
-			case "save_sicherungsinhalt" : {
-				$this->administration->save_sicherungsinhalt($this->formvars);
-			} break;
-			case "save_sicherung" : {
-				$this->administration->save_sicherung($this->formvars);
-			} break;
 			case "write_backup_config_and_cron" : {
 				$this->administration->write_backup_config_and_cron($this);
-				$this->Sicherungen_anzeigen();
-				$this->output();
+				include_once(CLASSPATH . 'Sicherung.php');
+				$this->sicherungen = Sicherung::find($this);
+				$this->main = 'sicherungsdaten.php';
 			} break;
 			case "create_inserts_from_dataset" : {
 				$inserts_file = LOGPATH . 'inserts_from_dataset.sql';
@@ -4572,6 +4567,10 @@ echo '			</table>
 		return $result;
 	}
 
+	/**
+	*	views all Sicherungen
+	* @author	Georg Kämmert
+	**/
 	function Sicherungen_anzeigen() {
 		include_once(CLASSPATH . 'Sicherung.php');
 		$this->sicherungen = Sicherung::find($this);
@@ -4579,13 +4578,24 @@ echo '			</table>
 		$this->output();
 	}
 
+	/**
+	*	create new or edit existing Sicherung
+	* @author Georg Kämmert
+	**/
 	function Sicherung_editieren() {
 		include_once(CLASSPATH . 'Sicherung.php');
-		$this->sicherung = Sicherung::find_by_id($this, $this->formvars['sicherung_id'] );
+		$this->sicherung = Sicherung::find_by_id($this, $this->formvars['id'] );
+		if (array_key_exists('id', $this->formvars) AND $this->formvars['id'] != ''){
+			$this->formvars = $this->sicherung->data;
+		}
 		$this->main = 'sicherungsdaten_formular.php';
 		$this->output();
 	}
 
+	/**
+	*	save new or update existing Sicherung
+	*	@author Georg Kämmert
+	**/
 	function Sicherung_speichern() {
 		include_once(CLASSPATH . 'Sicherung.php');
 		$this->sicherung = new Sicherung($this);
@@ -4610,12 +4620,15 @@ echo '			</table>
 				$this->main = 'sicherungsdaten_formular.php';
 				$this->output();
 			} else {
-				$this->formvars['sicherung_id'] = $this->sicherung->get('id');
 				$this->Sicherung_editieren();
 			}
 		}
 	}
 
+	/**
+	*	delete single Sicherung
+	*	@author Georg Kämmert
+	**/
 	function Sicherung_loeschen() {
 		include_once(CLASSPATH . 'Sicherung.php');
 		$this->sicherung = Sicherung::find_by_id($this, $this->formvars['sicherung_id']);
@@ -4629,6 +4642,10 @@ echo '			</table>
 		$this->output();
 	}
 
+	/**
+	*	create new or edit existing Sicherungsinhalt
+	*	@author Georg Kämmert
+	**/
 	function sicherungsinhalt_editieren() {
 		include_once(CLASSPATH . 'Sicherungsinhalt.php');
 		if (array_key_exists('id', $this->formvars) AND $this->formvars['id'] != '') {
@@ -4643,6 +4660,10 @@ echo '			</table>
 		$this->output();
 	}
 
+	/**
+	*	save new or update existing Sicherungsinhalt
+	*	@author Georg Kämmert
+	**/
 	function sicherungsinhalt_speichern() {
 		include_once(CLASSPATH . 'Sicherungsinhalt.php');
 		$this->inhalt = new Sicherungsinhalt($this);
@@ -4654,6 +4675,7 @@ echo '			</table>
 		}
 		if ($result[0]['success']) {
 			$this->add_message('notice', 'Sicherungsinhalt erfolgreich angelegt.');
+			$this->formvars['id'] = $this->formvars['sicherung_id'];
 			$this->Sicherung_editieren();
 		}
 		else {
@@ -4662,6 +4684,10 @@ echo '			</table>
 		}
 	}
 
+	/**
+	*	delete single Sicherungsinhalt
+	*	@author Georg Kämmert
+	**/
 	function sicherungsinhalt_loeschen() {
 		include_once(CLASSPATH . 'Sicherungsinhalt.php');
 		include_once(CLASSPATH . 'Sicherung.php');
@@ -8109,7 +8135,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       );
   		if ($formvars['assign_default_values']) {
   			$this->add_message('notice', 'Die Defaultwerte wurden an die zugeordneten Stellen übertragen.');
-  		}			
+  		}
       # Löschen der in der Selectbox entfernten Stellen
       $layerstellen = $mapDB->get_stellen_from_layer($formvars['selected_layer_id']);
       for ($i = 0; $i < count($layerstellen['ID']); $i++){
@@ -8167,7 +8193,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     }
     return $stellen_ids;
   }
-	
+
 	function removeLayerFromStellen($layer_id, $deletestellen) {
 		for($i = 0; $i < count($deletestellen); $i++){
 			$stelle = new stelle($deletestellen[$i], $this->database);
@@ -11071,7 +11097,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		) {
 			$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
 			$this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
-		}		
+		}
     if ($this->formvars['geom_from_layer']) {
 	    # Geometrie-Übernahme-Layer:
 	    # Spaltenname und from-where abfragen
@@ -11138,7 +11164,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     }
 
 		$this->data_import_export->export($this->formvars, $this->Stelle, $this->user, $this->mapDB);
-		
+
 		# Export-Einstellungen speichern
 		if ($this->formvars['go_plus'] == 'Einstellungen_speichern') {
 			$this->user->rolle->saveExportSettings($this->formvars);
@@ -11176,7 +11202,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 			}
 		}
-		
+
 		if ($this->formvars['epsg'] == '') $this->formvars['epsg'] = $this->data_import_export->layerset[0]['epsg_code'];		// originäres System
     $this->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());

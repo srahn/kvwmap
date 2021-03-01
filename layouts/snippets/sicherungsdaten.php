@@ -16,11 +16,11 @@
 			<tr>
 				<td><?php echo $sicherung->get('name'); ?></td>
 				<td><?php echo $sicherung->get('beschreibung'); ?></td>
-				<td><?php echo $sicherung->get('target_dir') . $sicherung->get_folder_date_notation() ?></td>
+				<td><?php echo $sicherung->get('target_dir') ?></td>
 				<td><?php echo $sicherung->get_intervall_as_plaintext(); ?> </td>
 				<td width="70px" align="center">
-					<a href="index.php?go=Sicherung_editieren&sicherung_id=<?php echo $sicherung->get('id'); ?>"><i class="fa fa-pencil fa_lg" style="color: #a82e2e;"></i></a>
-					<a href="index.php?go=Sicherung_loeschen&sicherung_id=<?php echo $sicherung->get('id'); ?>" style="margin-left: 10px;"><i class="fa fa-trash-o fa_lg" style="color: #a82e2e;"></i></a>
+					<a href="index.php?go=Sicherung_editieren&id=<?php echo $sicherung->get('id'); ?>"><i class="fa fa-pencil fa_lg" style="color: #a82e2e;"></i></a>
+					<a href="index.php?go=Sicherung_loeschen&id=<?php echo $sicherung->get('id'); ?>" style="margin-left: 10px;"><i class="fa fa-trash-o fa_lg" style="color: #a82e2e;"></i></a>
 				</td>
 			</tr><?php
 		} ?>

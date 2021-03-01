@@ -25,7 +25,6 @@ class Sicherung extends MyObject {
 	public function validate($on = '') {
 		$results = array();
 		$results[] = $this->validates('name', 'not_null', 'Es muss ein Name angegeben werden.');
-		$results[] = $this->validates('target_dir', 'not_null', 'Es muss ein Zielverzeichnis angegeben sein.');
 		$results[] = $this->validates('intervall_typ', 'not_null', 'Es muss ein Intervall-Typ angegeben sein.');
 		$results[] = $this->validates('beschreibung','not_null','Es muss eine Beschreibung angegeben sein.');
 		$results[] = $this->validates('intervall_parameter_1','not_null','Es muss ein Ausführungstag angegeben sein.');
@@ -58,30 +57,27 @@ class Sicherung extends MyObject {
 		return $sicherungen;
 	}
 
+	/**
+	*	Writes out the config files for $this Sicherung into given directory $dir
+	*
+	*	@param	$gui	instance of GUI-Class
+	* @param	$dir	directory to write into
+	* @author	Georg Kämmert
+	**/
 	public function write_config_files($gui, $dir){
 		if ( $dir == "" ){
 			return;
 		}
 
 		$dir=rtrim($dir, '/') . '/';
-		//delete + create folder in $dir
 		$folder='sicherung_' . $this->get('id') . '/';
-		if (is_dir($dir . $folder)){
-			foreach (new DirectoryIterator($dir . $folder) as $fileInfo) {
-				if ($fileInfo->isFile()) {
-					unlink($fileInfo->getPathname());
-				}
-			}
-		} else {
-			mkdir($dir . $folder);
-		}
+		mkdir($dir . $folder);
 
-		//backup.confd
+		//backup.conf
 		$sf = fopen($dir.$folder.'backup.conf', "w");
-		fwrite($sf, "BACKUP_PATH=". $this->get('target_dir') ."\n");
-		fwrite($sf, "BACKUP_FOLDER=\n");
-		fwrite($sf, "KEEP_FOR_N_DAYS=7\n");
-		fwrite($sf, "INTERVAL=". $this->get('intervall') ."\n");
+		fwrite($sf, "BACKUP_PATH=". $this->get('target_dir') . PHP_EOL);
+		fwrite($sf, "BACKUP_FOLDER=" . $this->get_folder_date_notation() . PHP_EOL);
+		fwrite($sf, "KEEP_FOR_N_DAYS=" . $this->get('keep_for_n_days'));
 		fclose($sf);
 
 		//Sicherungsinhalte
@@ -89,19 +85,18 @@ class Sicherung extends MyObject {
 		include_once(CLASSPATH . 'Sicherungsinhalt.php');
 		$Inhalte = Sicherungsinhalt::find($gui, 'methode = "Verzeichnissicherung" AND sicherung_id=' . $this->get('id'));
 		if ( !empty($Inhalte) ){
-			$fh = fopen($dir.$folder . 'dirs.conf', "w");
+			$fh = fopen($dir . $folder . 'dirs.conf', "w");
 			foreach ($Inhalte as $inhalt){
-				fwrite($fh, $inhalt->get('source').';'.$inhalt->get('target') . PHP_EOL);
+				fwrite($fh, $inhalt->get('source') . ';'. $inhalt->get('target') . ';' . $inhalt->get_tar_options() . PHP_EOL);
 			}
 			fclose($fh);
 		}
 		//mySQL
-		// Anwendung fehlt in Tabelle
 		$Inhalte = Sicherungsinhalt::find($gui, 'methode = "Mysql Dump"  AND sicherung_id=' . $this->get('id'));
 		if ( !empty($Inhalte) ){
 			$fh = fopen($dir.$folder . 'mysql_dbs.conf', "w");
 			foreach ($Inhalte as $inhalt){
-				fwrite($fh, $inhalt->get('source').';'.$inhalt->get('target').';'.$inhalt->get('app') . PHP_EOL);
+				fwrite($fh, $inhalt->get('source') . ';'.$inhalt->get('target') .  PHP_EOL);
 			}
 			fclose($fh);
 		}
@@ -110,7 +105,7 @@ class Sicherung extends MyObject {
 		if ( !empty($Inhalte) ){
 			$fh = fopen($dir.$folder . 'pg_dbs.conf', "w");
 			foreach ($Inhalte as $inhalt){
-				fwrite($fh, $inhalt->get('source').';'.$inhalt->get('target') . PHP_EOL);
+				fwrite($fh, $inhalt->get_connection_name() . ';' . $inhalt->get('target') . ';' . $inhalt->get_pg_dump_options() . PHP_EOL);
 			}
 			fclose($fh);
 		}
@@ -124,17 +119,30 @@ class Sicherung extends MyObject {
 			}
 			fclose($fh);
 		}
-		// chgrp($dir.$folder, 'gisadmin');
-		// chmod($dir.$folder, 0775);
 	}
 
 
+	/**
+	*	Retuns the value of key "intervall_start_time" that is menant to be the inputvalue of an html5 time-input element.
+	* 24h format with leading zeros, minutes with leading zeros.
+	*
+	*	@return	value of key intervall_start_time
+	* @author Georg Kämmert
+	**/
 	function get_intervall_start_time_for_html_input(){
 		//$t = $this->get('intervall_start_time');
 		//return substr( $t, 0, strpos( $t, ':', -1)
 		return date('H:i', strtotime($this->get('intervall_start_time')));
 	}
 
+	/**
+	*	Translates the day of the week from 0 to 6 into plaintext
+	*
+	* @param	$dow	number 0..6
+	* @return	day of week Montag..Sonntag
+	* @author	Georg Kämmert
+	*
+	**/
 	public static function decode_day_of_week($dow){
 		$dow_array = array('Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag');
 		return $dow_array[$dow];
@@ -155,22 +163,82 @@ class Sicherung extends MyObject {
 		return $ret;
 	}
 
+	/**
+	*	Returns the linux date notation for the folder name each Sicherung has to be safed into. Depending on the intervall_typ
+	*
+	* @return	name of the folder the backup has to be safed in
+	* @author Georg Kämmert
+	**/
 	function get_folder_date_notation(){
 		switch ($this->get('intervall_typ')) {
 			case 'daily':
-				$ret = '$(date +%V)/$(date +%u)';	//Woche[01..53]/Tag[1..7]
+				$ret = '$(date +%m)/$(date +%u)';	//Monat[01..12]/Tag[1..7]
 				break;
 			case 'weekly':
-				$ret = '$(date +%U)';							//Woche[01..53]
+				$ret = '$(date +%m)/$(date +%u)';	//Monat[01..12]/Tag[1..7]
 				break;
 			case 'monthly':
-				$ret = '$(date +%)';								//Monat 1-12
+				$ret = '$(date +%Y)/$(date +%m)';	//Jahr[YYYY]/Monat[01..12]
 				break;
 			default:
 				$ret = '$(date +%Y_%m_%d)';
 				break;
 		}
 		return $ret;
+	}
+
+	/**
+	*
+	*	returns execution time for backup in cronjob notation
+	*
+	*	@return execution time in cron format
+	* @author Georg Kämmert
+	**/
+	function get_cronjob_interval(){
+		$intervall = date('i H',strtotime($this->get('intervall_start_time')));
+		switch ($this->get('intervall_typ')) {
+			case 'daily':
+				$intervall = $intervall . ' * * ' . $this->get('intervall_parameter_1') . '-' . $this->get('intervall_parameter_2');
+				break;
+			case 'weekly':
+				$intervall = $intervall . ' * * ' . $this->get('intervall_parameter_1');
+				break;
+			case 'monthly':
+				$intervall = $intervall . ' * ' . $this->get('intervall_parameter_1') . ' *';
+				break;
+		}
+		return $intervall;
+	}
+
+	/**
+	*
+	*	Checks if the backup is valid for file export
+	*
+	*	@return true/false
+	* @author Georg Kämmert
+	**/
+	function get_valid_for_fileexport(){
+		//if target_dir is empty there can only be Sicherungsinhalte with methode Verzeichnisinhalte kopieren
+		$return = true;
+
+		//export only if Sicherungsinhalte exist
+		$return = !empty($this->inhalte);
+
+		//export only if target_dir is not null or
+		// if null only rsync jobs are defined
+		if ($this->get('target_dir') == ''){
+			foreach ($this->inhalte as $inhalt) {
+				if ($inhalt->get('methode') == 'Verzeichnisinhalte kopieren'){
+					$return = true;
+				}
+			}
+			foreach ($this->inhalte as $inhalt) {
+				if ($inhalt->get('methode') != 'Verzeichnisinhalte kopieren'){
+					$return = false;
+				}
+			}
+		}
+		return $return;
 	}
 
 }

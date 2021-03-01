@@ -477,33 +477,41 @@ class administration{
 	}
 
 	/*
-	* Insert, Update und Delete Settings for backup content in database
-	*/
-	function save_sicherungsinhalte($params) {
-
-	}
-
-	/*
-	* Insert, Update und Delete backup settings in database
-	*/
-	function save_sicherungen($params) {
-
-	}
-
-	/*
 	* This function writes the config and the crontab for backups
 	*/
 	function write_backup_config_and_cron($gui) {
-		include_once(CLASSPATH . 'Sicherung.php');
-		//include_once(CLASSPATH . 'Sicherungsinhalt.php');
-		$sicherungen = Sicherung::find($gui); // TODO nur aktive Sicherungen
+
 		$backup_path = '/var/www/sicherungen/';
-		$fh=fopen('/var/www/sicherungen/crontab_backup', 'w');
+
+		Administration::deleteDir($backup_path);
+		mkdir($backup_path);
+
+		include_once(CLASSPATH . 'Sicherung.php');
+		$sicherungen = Sicherung::find($gui);
+		$fh=fopen('/var/www/sicherungen/backup_crontab', 'w');
 		foreach($sicherungen AS $sicherung) {
-			$sicherung->write_config_files($gui, $backup_path);
-			fwrite($fh, $sicherung->get('intervall'). '/home/gisadmin/kvwmap-server/scripte/sicherung/backup.sh /home/gisadmin/etc/sicherung/sicherung_'.$sicherung->get('id') . PHP_EOL);
+			if ($sicherung->get_valid_for_fileexport()){
+				$sicherung->write_config_files($gui, $backup_path);
+				fwrite($fh, $sicherung->get_cronjob_interval(). '	/home/gisadmin/kvwmap-server/scripte/sicherung/backup.sh /home/gisadmin/etc/sicherung/sicherung_'.$sicherung->get('id') . ' 	#KVWMAP_BACKUPJOB#' . PHP_EOL);
+			}
 		}
 		fclose($fh);
+
+	}
+
+	public static function deleteDir($dirPath) {
+		if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') {
+				$dirPath .= '/';
+		}
+		$files = glob($dirPath . '*', GLOB_MARK);
+		foreach ($files as $file) {
+			if (is_dir($file)) {
+				self::deleteDir($file);
+			} else {
+				unlink($file);
+			}
+		}
+		rmdir($dirPath);
 	}
 
 	function create_inserts_from_dataset($schema, $table, $where) {

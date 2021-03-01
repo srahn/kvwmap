@@ -4,6 +4,37 @@
 
 <script language="javascript" type="text/javascript">
 
+	function set_default_targetname(){
+		const list_methode = document.getElementById('feld_methode');
+		const text_target  = document.getElementById('feld_target');
+
+		if (list_methode && text_target) {
+			var methode			= list_methode.options[list_methode.selectedIndex].value;
+			var source_obj	= document.getElementById('source');
+
+			if (source_obj){
+					switch (list_methode.options[list_methode.selectedIndex].value) {
+						case 'Mysql Dump':
+							text_target.value = source_obj.options[source_obj.selectedIndex].value + '.dump';
+							break;
+						case 'Postgres Dump':
+							text_target.value = source_obj.options[source_obj.selectedIndex].innerHTML + '.dump';
+							break;
+						case 'Verzeichnissicherung':
+							var fullPath = source_obj.value;
+							var startIndex = (fullPath.indexOf('\\') >= 0 ? fullPath.lastIndexOf('\\') : fullPath.lastIndexOf('/'));
+    					var filename = fullPath.substring(startIndex);
+    					if (filename.indexOf('\\') === 0 || filename.indexOf('/') === 0) {
+									filename = filename.substring(1);
+							}
+							text_target.value = filename + '.tar.gz';
+							break;
+					}
+			}
+		}
+
+	}
+
 	function switch_methode(methode){
 		var l = document.getElementById('td_select_source');
 
@@ -16,6 +47,8 @@
 			case 'Mysql Dump':
 				s = document.createElement('select');
 				s.setAttribute("name","source");
+				s.setAttribute("id","source");
+				s.setAttribute("onclick","javascript: set_default_targetname();");
 				<?php
 					$i=0;
 					foreach ($this->inhalt->get_mysql_database_names() as $key => $value) {
@@ -25,16 +58,20 @@
 				?>
 				break;
 			case 'Postgres Dump':
-			s = document.createElement('select');
-			s.setAttribute("name","connection_id");
-			<?php
-				$i=0;
-				foreach ($this->inhalt->get_pgsql_database_names() as $db) {
-					echo "s.options[". $i ."]=new Option('" . $db[1] . "','" . $db[0] . "');";
-					$i++;
-				}
-			?>
-			break;
+				s = document.createElement('select');
+				s.setAttribute("name","connection_id");
+				s.setAttribute("id","source");
+				s.setAttribute("onclick","javascript: set_default_targetname(); ");
+				<?php
+					$i=0;
+					foreach ($this->inhalt->get_pgsql_database_names() as $db) {
+						echo "s.options[". $i ."]=new Option('" . $db[1] . "','" . $db[0] . "');";
+						$i++;
+					}
+				?>
+				break;
+
+
 			default: //file, dir, rsync
 				s = document.createElement('input');
 				s.setAttribute("name","source");
@@ -42,18 +79,41 @@
 				s.setAttribute("size","80");
 				s.setAttribute("maxlength","255");
 				s.setAttribute("placeholder","<? echo $strQuelle; ?>");
+				s.setAttribute("id","source");
+				s.setAttribute("onclick","javascript: set_default_targetname();");
+				s.addEventListener('input', set_default_targetname);
+
+				t = document.getElementById('feld_target');
+				if (t){
+					switch (methode) {
+						case 'Verzeichnisinhalte kopieren':
+							placeholder = "<? echo $strRsyncPlaceholder ?>";
+							break;
+						case 'Verzeichnissicherung':
+						 	placeholder = "";
+							break;
+					}
+					t.setAttribute("placeholder",placeholder);
+				}
 				break;
 		}
 		l.appendChild(s);
 
 		switch_parameter(methode);
-
+		set_default_targetname();
 	}
+
+
 
 	function switch_parameter(methode){
 		var tab_obj = document.getElementById("tab_options");
 
 		if (tab_obj){
+
+			while (tab_obj.firstChild) {
+				tab_obj.removeChild(tab_obj.lastChild);
+			}
+
 			switch (methode) {
 
 				case 'Postgres Dump':
@@ -257,10 +317,32 @@
 
 					break;
 
+				case 'Verzeichnissicherung':
+					//1. Zeile INSERT anstatt COPY
+					var tr1 = tab_obj.insertRow(-1);
+
+					var col1 = document.createElement("td");
+					var col2 = document.createElement("td");
+					col1.setAttribute("class","fetter");
+					col1.setAttribute("align","right");
+					col1.innerHTML = "Archiv komprimieren (gzip)";
+
+					var chkbx_1	=	document.createElement("input");
+					chkbx_1.setAttribute("type","checkbox");
+					chkbx_1.setAttribute("name","tar_compress");
+					chkbx_1.setAttribute("value","1");
+					<?php if ($this->formvars['tar_compress']) { ?>
+						chkbx_1.checked = true;
+					<?php } ?>
+
+					tr1.appendChild(col1);
+					tr1.appendChild(col2);
+					col2.appendChild(chkbx_1);
+
+					break;
+
 				default:
-					while (tab_obj.firstChild) {
-						tab_obj.removeChild(tab_obj.lastChild);
-					}
+					break;
 			}
 		}
 	}
@@ -283,7 +365,15 @@
 	</tr>
 	<tr>
 		<td align="left"><h2><?php echo $strSicherungsinhalt; ?></h2></td>
-		<td align="right"><a class="btn btn-new" href="index.php?go=Sicherung_editieren&sicherung_id=<?php echo ( empty($this->formvars['sicherung_id']) ? $this->formvars['sicherung_id'] : $this->inhalt->get('sicherung_id') )?>" ><i class="fa fa-list" style="color: white;"></i><?php echo $strSicherung_anzeigen ?></a></td>
+		<td align="right"><a class="btn btn-new" href="index.php?go=Sicherung_editieren&id=<?php echo ( empty($this->formvars['sicherung_id']) ? $this->formvars['sicherung_id'] : $this->inhalt->get('sicherung_id') )?>" ><i class="fa fa-list" style="color: white;"></i><?php echo $strSicherung_anzeigen ?></a></td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<? if (!$this->inhalt->get_sicherung_has_target_dir()){
+				echo $strHintNurRSYNC;
+			}
+			 ?>
+		</td>
 	</tr>
 	<tr>
 		<td class="fetter" align="right"><?php echo $strName ?></td>
@@ -301,12 +391,14 @@
 		<td class="fetter" align="right"><?php echo $strMethode ?></td>
 		<td>
 			<select id="feld_methode" name="methode" onchange="javascript: switch_methode(this.options[this.selectedIndex].value);">
-				<option <?php echo ( $this->formvars['methode'] == 'Verzeichnissicherung' ? 'selected' : '' ) ?> value="Verzeichnissicherung">Verzeichnissicherung</option>
-				<option <?php echo ( $this->formvars['methode'] == 'Verzeichnisinhalte kopieren' ? 'selected' : '' ) ?> value="Verzeichnisinhalte kopieren">Verzeichnisinhalte kopieren</option>
-	<!--			<option <?php echo ( $this->formvars['methode'] == 'Datei kopieren' ? 'selected' : '' ) ?> value="Datei kopieren">Datei kopieren</option> -->
-				<option <?php echo ( $this->formvars['methode'] == 'Postgres Dump' ? 'selected' : '' ) ?> value="Postgres Dump">Postgres Dump</option>
-				<option <?php echo ( $this->formvars['methode'] == 'Mysql Dump' ? 'selected' : '' ) ?> value="Mysql Dump">Mysql Dump</option>
+				<? foreach ($this->inhalt->get_option_list_for_methods() as $option) { ?>
+						<option value="<? echo $option['value'] ?>"><? echo $option['label'] ?></option>
+				<?
+				} ?>
+
+
 			</select>
+
 		</td>
 	</tr>
 	<tr>
@@ -323,7 +415,7 @@
 	</tr>
 	<tr>
 		<td colspan=2>
-			<table id="tab_options" border="0"e cellpadding="5" cellspacing="0">
+			<table id="tab_options" border="0" cellpadding="5" cellspacing="0">
 			</table>
 		</td>
 	</tr>
@@ -332,7 +424,7 @@
 			<input type="hidden" name="go" value="sicherungsinhalt_speichern">
 			<input type="hidden" name="sicherung_id" value="<?php echo $this->formvars['sicherung_id'] ?>">
 			<input type="hidden" name="id" value="<?php echo $this->formvars['id']  ?>">
-			<input type="button" name="cancle" value="<? echo $this->strCancel; ?>" onclick="document.location.href = 'index.php?go=Sicherung_editieren&sicherung_id=<?php echo ( empty($this->inhalt->get('sicherung_id')) ? $this->formvars['sicherung_id'] : $this->inhalt->get('sicherung_id') )?>'">
+			<input type="button" name="cancle" value="<? echo $this->strCancel; ?>" onclick="document.location.href = 'index.php?go=Sicherung_editieren&id=<?php echo ( empty($this->inhalt->get('sicherung_id')) ? $this->formvars['sicherung_id'] : $this->inhalt->get('sicherung_id') )?>'">
 			<input type="submit" name="bttn" value="<?php echo ($this->formvars['id'] > 0 ? $this->strSave : $this->strCreate); ?>" >
 		</td>
 	</tr>

@@ -175,8 +175,12 @@
 		</td>
 	</tr>
 	<tr>
-		<td class="fetter"><?php echo $strexectime	?></td>
+		<td class="fetter" align="right"><?php echo $strexectime	?></td>
 		<td> <input type="time" name="intervall_start_time" value="<?php echo $this->sicherung->get_intervall_start_time_for_html_input() ?>"></td>
+	</tr>
+	<tr>
+		<td align="right"><div class="fetter"><? echo $strKeepNDays ?></div> 0 = nicht löschen</td>
+		<td><input type="number" name="keep_for_n_days" min="0" step="1" value="<? echo $this->formvars['keep_for_n_days'] ?>"></td>
 	</tr>
 	<tr>
 		<td><?php echo '' ?></td>
