@@ -529,7 +529,7 @@
 
 				case 'Time': {
 					$datapart .= '<input class="'.$field_class.'" readonly style="padding: 0 0 0 3;border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
-					$datapart .= ' size="15" type="text" name="'.$fieldname.'" value="' . htmlspecialchars($value) . '">';
+					$datapart .= ' size="16" type="text" name="'.$fieldname.'" value="' . htmlspecialchars($value) . '">';
 				}break;
 
 				case 'Dokument': {
@@ -640,6 +640,12 @@
 				} break;
 
 				case 'Link': {
+					if ($attribute_privileg != '0' OR $lock[$k]) {
+						$datapart .= '<input class="'.$field_class.'" tabindex="1" onchange="'.$onchange.'" id="'.$layer_id.'_'.$name.'_'.$k.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+					}
+					else {
+						$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+					}
 					if ($value!='') {
 						if (substr($value, 0, 4) == 'http') {
 							$target = '_blank';
@@ -647,21 +653,16 @@
 						else {
 							$target = 'root';
 						}
-						$datapart .= '<a style="padding: 0 0 0 3;" class="link" target="'.$target.'" style="font-size: '.$fontsize.'px" href="' . htmlspecialchars($value) .'">';
-						if($attributes['options'][$j] != ''){
+						$datapart .= '<div class="formelement-link"><a class="link" target="'.$target.'" style="font-size: '.$fontsize.'px" href="' . htmlspecialchars($value) .'">';
+						if ($attributes['options'][$j] != '') {
 							$datapart .= $attributes['options'][$j];
 						}
-						else{
+						else {
 							$datapart .= htmlspecialchars(basename($value));
 						}
-						$datapart .= '</a><br>';
+						$datapart .= '</a></div>';
 					}
-					if($attribute_privileg != '0' OR $lock[$k]){
-						$datapart .= '<input class="'.$field_class.'" tabindex="1" onchange="'.$onchange.'" id="'.$layer_id.'_'.$name.'_'.$k.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
-					}else{
-						$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
-					}
-				} break;
+				 } break;
 
 				case 'dynamicLink': {
 					$show_link = false;

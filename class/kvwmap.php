@@ -590,6 +590,10 @@ echo '			</table>
 		$(\'#group_options_' . $this->formvars['group_id'] . '\').show()
 		';
 	}
+	
+	function saveGeomFromLayer(){
+		$this->user->rolle->saveGeomFromLayer($this->formvars['selected_layer_id'], $this->formvars['geom_from_layer']);
+	}
 
 	function saveLegendOptions(){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -4908,7 +4912,6 @@ echo '			</table>
 			$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
 		}
 		else{
-			$this->user->rolle->saveGeomFromLayer($this->formvars['selected_layer_id'], $this->formvars['geom_from_layer']);
 			$this->loadMap('DataBase');
 			if($this->formvars['oid'] != '' AND $this->formvars['no_load'] != 'true'){
 				# Linien abfragen
@@ -5078,7 +5081,6 @@ echo '			</table>
 			$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
 		}
 		else {
-			$this->user->rolle->saveGeomFromLayer($this->formvars['selected_layer_id'], $this->formvars['geom_from_layer']);
 			$this->loadMap('DataBase');
 			if($this->formvars['oid'] != '' AND $this->formvars['no_load'] != 'true'){
 				# Polygon abfragen
@@ -5115,44 +5117,6 @@ echo '			</table>
 		}
 		# zoomToMaxLayerExtent
 		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
-		# Geometrie-Übernahme-Layer:
-		# Spaltenname und from-where abfragen
-		$data = $this->mapDB->getData($this->formvars['geom_from_layer']);
-		#echo $data;
-		$data_explosion = explode(' ', $data);
-		$this->formvars['columnname'] = $data_explosion[0];
-		$select = $fromwhere = $this->mapDB->getSelectFromData($data);
-
-		# order by rausnehmen
-		$this->formvars['orderby'] = '';
-		$orderbyposition = strrpos(strtolower($select), 'order by');
-		$lastfromposition = strrpos(strtolower($select), 'from');
-		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-			$fromwhere = substr($select, 0, $orderbyposition);
-			$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
-		}
-
-		$this->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
-		if (strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
-			$this->formvars['fromwhere'] .= ' where (1=1)';
-		}
-
-		if ($this->formvars['newpath'] == '' AND $this->formvars['geom_from_layer'] < 0){	# Suchergebnislayer sofort selektieren
-			$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['geom_from_layer']);
-			if($rollenlayer[0]['Typ'] == 'search'){
-				$layerdb1 = $this->mapDB->getlayerdatabase($this->formvars['geom_from_layer'], $this->Stelle->pgdbhost);
-				include_once (CLASSPATH.'polygoneditor.php');
-				$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
-				$tablename = '('.$fromwhere.') as foo';
-				$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
-				if($this->polygon['wktgeom'] != '') {
-					$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
-					$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-					$this->formvars['newpath'] = $this->polygon['svggeom'];
-					$this->formvars['firstpoly'] = 'true';
-				}
-			}
-		}
 		if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
 			$currenttime=date('Y-m-d H:i:s',time());
 			$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
@@ -9042,49 +9006,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     	$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
     }
     if(value_of($this->formvars, 'selected_layer_id')){
-    	if(value_of($this->formvars, 'geom_from_layer') == '')$this->formvars['geom_from_layer'] = $this->formvars['selected_layer_id'];
-    	$data = $mapdb->getData($this->formvars['geom_from_layer']);
+    	$data = $mapdb->getData($this->formvars['selected_layer_id']);
 	    $data_explosion = explode(' ', $data);
 	    $this->formvars['columnname'] = $data_explosion[0];
     	if(value_of($this->formvars, 'map_flag') != ''){
 	    	################# Map ###############################################
+				if(value_of($this->formvars, 'geom_from_layer') == '')$this->formvars['geom_from_layer'] = $this->formvars['selected_layer_id'];
 				$saved_scale = $this->reduce_mapwidth(10);
 				$this->loadMap('DataBase');
 				if(value_of($this->formvars, 'CMD') == '' AND $saved_scale != NULL)$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
 		    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
-		    # Geometrie-Übernahme-Layer:
-		    # Spaltenname und from-where abfragen
-		    $select = $fromwhere = $this->mapDB->getSelectFromData($data);
-		    # order by rausnehmen
-				$this->formvars['orderby'] = '';
-		  	$orderbyposition = strrpos(strtolower($select), 'order by');
-				$lastfromposition = strrpos(strtolower($select), 'from');
-				if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-					$fromwhere = substr($select, 0, $orderbyposition);
-					$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
-				}
-				$this->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
-		    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
-		      $this->formvars['fromwhere'] .= ' where (1=1)';
-		    }
-
-				if(value_of($this->formvars, 'newpath') == '' AND value_of($this->formvars, 'layer_id') < 0){	# Suchergebnislayer sofort selektieren
-					$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['layer_id']);
-					if($rollenlayer[0]['Typ'] == 'search'){
-						$layerdb = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-						include_once (CLASSPATH.'polygoneditor.php');
-						$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-						$tablename = '('.$fromwhere.') as foo';
-						$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
-						if($this->polygon['wktgeom'] != ''){
-							$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
-							$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-							$this->formvars['newpath'] = $this->polygon['svggeom'];
-							$this->formvars['firstpoly'] = 'true';
-						}
-					}
-				}
-
 		    if(in_array(value_of($this->formvars, 'CMD'), ['Full_Extent', 'recentre', 'zoomin', 'zoomout', 'previous', 'next'])) {
 		      $this->navMap($this->formvars['CMD']);
 		    }
@@ -9650,10 +9581,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
 									$this->formvars[$table['formfield'][$i]] = 'f';
 								}
+								if ($table['type'][$i] == 'Link') {
+									if (substr($this->formvars[$table['formfield'][$i]], 0, 9) != 'index.php' AND strpos($this->formvars[$table['formfield'][$i]], ':') === false) {
+										# bei externen Links http davor setzen, wenn kein Protokoll angegeben
+										$this->formvars[$table['formfield'][$i]] = 'http://' . $this->formvars[$table['formfield'][$i]];
+									}
+								}
 								$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]]."'"; # Typ "normal"
 							}
 						} break;
-
+		
 						case ($table['type'][$i] == 'ExifLatLng') : {
 							$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
 
@@ -9974,7 +9911,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 				$this->geomtype = $this->qlayerset[0]['attributes']['geomtype'][$this->qlayerset[0]['attributes']['the_geom']];
 				if ($this->geomtype != '' AND (value_of($this->formvars, 'mime_type') != 'overlay_html' OR $this->formvars['embedded'] == '')) {
-					$this->user->rolle->saveGeomFromLayer($this->formvars['selected_layer_id'], $this->formvars['geom_from_layer']);
 					$saved_scale = $this->reduce_mapwidth(40);
 					$oldscale=round($this->map_scaledenom);
 					if ($oldscale != value_of($this->formvars, 'nScale') OR value_of($this->formvars, 'neuladen') OR $this->formvars['CMD'] != '') {
@@ -10023,40 +9959,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					) {
 						#-----Polygoneditor und Linieneditor---#
 						$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
-						# Spaltenname und from-where abfragen
-						$data = $mapdb->getData($this->formvars['geom_from_layer']);
-						$space_explosion = explode(' ', $data);
-						$this->formvars['columnname'] = $space_explosion[0];
-						$select = $fromwhere = $mapdb->getSelectFromData($data);
-						# order by rausnehmen
-						$this->formvars['orderby'] = '';
-						$orderbyposition = strrpos(strtolower($select), 'order by');
-						$lastfromposition = strrpos(strtolower($select), 'from');
-						if ($orderbyposition !== false AND $orderbyposition > $lastfromposition) {
-							$fromwhere = substr($select, 0, $orderbyposition);
-							$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
-						}
-						$this->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
-						if (strpos(strtolower($this->formvars['fromwhere']), ' where ') === false) {
-							$this->formvars['fromwhere'] .= ' where (1=1)';
-						}
-
-						if ($this->formvars['newpath'] == '' AND $this->formvars['geom_from_layer'] < 0) {	# Suchergebnislayer sofort selektieren
-							$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['geom_from_layer']);
-							if ($rollenlayer[0]['Typ'] == 'search') {
-								$layerdb1 = $mapdb->getlayerdatabase($this->formvars['geom_from_layer'], $this->Stelle->pgdbhost);
-								include_once (CLASSPATH.'polygoneditor.php');
-								$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
-								$tablename = '('.$fromwhere.') as foo';
-								$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
-								if ($this->polygon['wktgeom'] != '') {
-									$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
-									$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-									$this->formvars['newpath'] = $this->polygon['svggeom'];
-									$this->formvars['firstpoly'] = 'true';
-								}
-							}
-						}
 
 						if ($this->formvars['chosen_layer_id']) {			# für neuen Datensatz verwenden -> Geometrie abfragen
 							if ($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY') {		# Polygonlayer
@@ -10139,7 +10041,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					}
 					$this->drawMap();
 				}
-
 			}
 			else {
 				$this->Fehler = 'Das Erstellen von neuen Datensätzen ist für diesen Layer in dieser Stelle nicht erlaubt.';
@@ -11081,87 +10982,61 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 
-  function daten_export() {
-		include_once (CLASSPATH.'data_import_export.php');
-    if ($this->formvars['chosen_layer_id'] != '') $this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];		# aus der Sachdatenanzeige des GLE
-    $this->main = 'data_export.php';
-    $saved_scale = $this->reduce_mapwidth(10);
+	function daten_export() {
+		include_once (CLASSPATH . 'data_import_export.php');
+		if ($this->formvars['chosen_layer_id'] != '') {
+			$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];		# aus der Sachdatenanzeige des GLE
+		}
+		$this->main = 'data_export.php';
+		$saved_scale = $this->reduce_mapwidth(10);
 		$this->loadMap('DataBase');
-		if($saved_scale != NULL)$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-    $this->epsg_codes = read_epsg_codes($this->pgdatabase);
+		if ($saved_scale != NULL) {
+			# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+			$this->scaleMap($saved_scale);
+		}
+		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
 		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
-    $this->data_import_export = new data_import_export();
-		if (
-			defined('LAYERNAME_FLURSTUECKE') AND
-			!$this->formvars['geom_from_layer']
-		) {
+		$this->data_import_export = new data_import_export();
+		if (defined('LAYERNAME_FLURSTUECKE') AND !$this->formvars['geom_from_layer']) {
 			$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
 			$this->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
-		}
-    if ($this->formvars['geom_from_layer']) {
-	    # Geometrie-Übernahme-Layer:
-	    # Spaltenname und from-where abfragen
-	    $data = $this->mapDB->getData($this->formvars['geom_from_layer']);
-	    #echo $data;
-	    $data_explosion = explode(' ', $data);
-	    $this->formvars['columnname'] = $data_explosion[0];
-	    $select = $fromwhere = $this->mapDB->getSelectFromData($data);
-	    # order by rausnehmen
-			$this->formvars['orderby'] = '';
-			$orderbyposition = strrpos(strtolower($select), 'order by');
-			$lastfromposition = strrpos(strtolower($select), 'from');
-			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-				$fromwhere = substr($select, 0, $orderbyposition);
-				$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
-			}
-			$this->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
-	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
-	      $this->formvars['fromwhere'] .= ' where (1=1)';
-	    }
-			if($this->formvars['newpath'] == '' AND $this->formvars['layer_id'] < 0){	# Suchergebnislayer sofort selektieren
-				$rollenlayer = $this->mapDB->read_RollenLayer(-$this->formvars['layer_id']);
-				if($rollenlayer[0]['Typ'] == 'search'){
-					$layerdb1 = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-					include_once (CLASSPATH.'polygoneditor.php');
-					$polygoneditor = new polygoneditor($layerdb1, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-					$tablename = '('.$fromwhere.') as foo';
-					$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
-					if($this->polygon['wktgeom'] != ''){
-						$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
-						$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-						$this->formvars['newpath'] = $this->polygon['svggeom'];
-						$this->formvars['firstpoly'] = 'true';
-					}
-				}
-			}
 		}
 		###################### über Checkboxen aus der Sachdatenanzeige des GLE ausgewählt ###############
 		if ($this->formvars['all'] == '') {
 			$anzahl = 0;
-			$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
+			$checkbox_names = explode('|', $this->formvars['checkbox_names_' . $this->formvars['chosen_layer_id']]);
 			# Daten abfragen
 			$element = explode(';', $checkbox_names[0]);   #  check;table_alias;table;oid
-			$where = " WHERE " . pg_quote($element[2]."_oid")." IN (";
-			for($i = 0; $i < count($checkbox_names); $i++){
-				if($this->formvars[$checkbox_names[$i]] == 'on'){
+			$where = " WHERE " . pg_quote($element[2]."_oid") . " IN (";
+			for ($i = 0; $i < count($checkbox_names); $i++) {
+				if ($this->formvars[$checkbox_names[$i]] == 'on') {
 					$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
-					$where = $where."'" . $element[3]."',";
+					$where = $where . "'" . $element[3] . "',";
 					$anzahl++;
 				}
 			}
 			$where = substr($where, 0, -1).')';
-			if($anzahl > 0){
+			if ($anzahl > 0) {
 				$this->formvars['sql_'.$this->formvars['selected_layer_id']] = $where.$orderby;
 				$this->formvars['anzahl'] = $anzahl;
 			}
 		}
 		####################################################################################################
-    if ($this->formvars['go_plus'] != '' OR $this->formvars['export_setting'] != '' OR $this->formvars['CMD'] == 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
-      $this->navMap($this->formvars['CMD']);
-    }
-    else{
-      $this->formvars['load'] = true;
-    }
+		if (
+			$this->formvars['go_plus'] != '' OR
+			$this->formvars['export_setting'] != '' OR
+			$this->formvars['CMD'] == 'Full_Extent' OR
+			$this->formvars['CMD'] == 'recentre' OR
+			$this->formvars['CMD'] == 'zoomin' OR
+			$this->formvars['CMD'] == 'zoomout' OR
+			$this->formvars['CMD'] == 'previous' OR
+			$this->formvars['CMD'] == 'next'
+		) {
+			$this->navMap($this->formvars['CMD']);
+		}
+		else {
+			$this->formvars['load'] = true;
+		}
 
 		$this->data_import_export->export($this->formvars, $this->Stelle, $this->user, $this->mapDB);
 
@@ -11172,10 +11047,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		if ($this->formvars['go_plus'] == 'Einstellungen_löschen') {
 			$this->user->rolle->deleteExportSettings($this->formvars);
 		}
-		if ($this->formvars['selected_layer_id'] != ''){
+		if ($this->formvars['selected_layer_id'] != '') {
 			# die Namen aller gespeicherten Export-Einstellungen dieser Rolle zu diesem Layer laden
 			$this->export_settings = $this->user->rolle->getExportSettings($this->formvars['selected_layer_id']);
-			if ($this->formvars['export_setting'] != ''){
+			if ($this->formvars['export_setting'] != '') {
 				# die ausgewählte Export-Einstellung laden
 				$this->selected_export_setting = $this->user->rolle->getExportSettings($this->formvars['selected_layer_id'], $this->formvars['export_setting']);
 				$this->formvars['export_format'] = $this->selected_export_setting[0]['format'];
@@ -11187,7 +11062,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$this->formvars['newpathwkt'] = $this->selected_export_setting[0]['geom'];
 					$this->formvars['firstpoly'] = 'true';
 				}
-				else{
+				else {
 					$this->formvars['newpathwkt'] = NULL;
 					$this->formvars['newpath'] = NULL;
 				}
@@ -11203,13 +11078,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 		}
 
-		if ($this->formvars['epsg'] == '') $this->formvars['epsg'] = $this->data_import_export->layerset[0]['epsg_code'];		// originäres System
-    $this->saveMap('');
-    $currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    $this->drawMap();
-    $this->output();
-  }
+		if ($this->formvars['epsg'] == '') {
+			# originäres System
+			$this->formvars['epsg'] = $this->data_import_export->layerset[0]['epsg_code'];
+		}
+		$this->saveMap('');
+		$currenttime = date('Y-m-d H:i:s',time());
+		$this->user->rolle->setConsumeActivity($currenttime, 'getMap', $this->user->rolle->last_time_id);
+		$this->drawMap();
+		$this->output();
+	}
 
 	function daten_export_exportieren() {
 		if (!(array_key_exists('selected_layer_id', $this->formvars) AND $this->formvars['selected_layer_id'] != '')) {
@@ -13625,8 +13503,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							$eintrag = $this->formvars[$form_fields[$i]];
 						} break;
 						case 'Zahl' : {
-							$eintrag = removeTausenderTrenner ($this->formvars[$form_fields[$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
+							$eintrag = removeTausenderTrenner($this->formvars[$form_fields[$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
 							if ($this->formvars[$form_fields[$i]] == '')$eintrag = 'NULL';
+						} break;
+						case 'Link' : {
+							$eintrag = $this->formvars[$form_fields[$i]];
+							if ($eintrag != '' AND substr($eintrag, 0, 9) != 'index.php' AND strpos($eintrag, ':') === false)	{
+								# bei externen Links http davor setzen, wenn kein Protokoll angegeben
+								$eintrag = 'http://' . $eintrag;
+							}
+							if ($eintrag == '')$eintrag = 'NULL';
 						} break;
 						default : {
 							if ($tablename AND $formtype != 'dynamicLink' AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom') {

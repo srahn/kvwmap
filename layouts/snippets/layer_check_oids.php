@@ -25,16 +25,17 @@ function get_oid_alternative($layer){
 	}
 	else {
 		$sql = "
+			SET search_path = " . ($layer['schema'] != '' ? $layer['schema'] . ', ' : '') . " public;
 			SELECT 
 				a.attname as pk
 			FROM 
 				pg_attribute a 
 				LEFT JOIN pg_index i ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey) AND i.indnatts = 1
 			WHERE  
-				a.attrelid = '" . ($layer['schema'] ?: 'public'). "." . $layer['maintable'] . "'::regclass and 
+				a.attrelid = '" . $layer['maintable'] . "'::regclass and 
 				attnum > 0 and 
 				attisdropped is false and 
-				(pg_get_serial_sequence('" . ($layer['schema'] ?: 'public'). "." . $layer['maintable'] . "', attname) IS NOT NULL OR i.indisunique)
+				(pg_get_serial_sequence('" . $layer['maintable'] . "', attname) IS NOT NULL OR i.indisunique)
 		";
 		$ret = @pg_query($GUI->pgdatabase->dbConn, $sql);
 		if($ret == false){
@@ -75,7 +76,18 @@ function replace_oid_in_data($data, $id){
 $color[false] = '#db5a5a';
 $color[true] = '#36908a';
 
-$query = "SELECT * FROM `layer` WHERE connectiontype = 6 ORDER BY name";
+$this->formvars['order'] = $this->formvars['order'] ?: 'Name';
+
+$query = "
+	SELECT 	
+		layer.*,
+		g.Gruppenname
+	FROM 
+		`layer` 
+		LEFT JOIN	u_groups g ON layer.Gruppe = g.id
+	WHERE 
+		connectiontype = 6 
+	ORDER BY " . $this->formvars['order'];
 
 # nur bestimmte Layer einschließen
 #$with_layer_id = '1,2,3,4';
@@ -98,7 +110,7 @@ $result = $this->database->execSQL($query);
 <style>
 	#main{
 		position: relative;
-		padding-top: 80px
+		padding-top: 130px;
 	}
 	#head{
 		position: absolute;
@@ -106,18 +118,31 @@ $result = $this->database->execSQL($query);
 		margin-left: 40%;
 		line-height: 23px;
 	}
-	#tab{
+	.nav_link{
+		margin-left: -1px;
+	}
+	#tab_div{
 		margin: 5px;
+		position: relative;
+		padding-top: 30px;
+		border: 1px solid #555;
+	}
+	#tab{
 		border-collapse: collapse;
+		width: 1670px;
+	}
+	#tab tbody{
+		border-top: 1px solid #555;
+	}
+	#tab tr{
+		border-bottom: 1px solid #555;
 	}
 	#tab td{
-		border: 1px solid #555;
+		border-right: 1px solid #555;
 		padding: 5px;
+		word-break: break-word;
+		min-width: 80px;
 	}
-	#tab th{
-		font-face: SourceSansPro3;
-		border: 1px solid #555;
-	}	
 	#tab textarea{
 		height: 100px;
 		width: 350px;
@@ -125,6 +150,15 @@ $result = $this->database->execSQL($query);
 	#tab .replaced{
 		padding: 5px;
 		background: yellow;
+	}	
+	.scrolltable_header {
+    position: absolute;
+    top: 5px;
+    height: 31px;
+    border-left: 1px solid #555;
+    padding: 5px 0 0 5px;
+    margin-left: -6px;
+    margin-top: -6px;
 	}
 </style>
 
@@ -159,33 +193,15 @@ $result = $this->database->execSQL($query);
 
 <div id="main">
 
-	<table id="tab">
-		<tr>
-			<th>
-				Layer
-			</th>
-			<th>
-				ID-Spalte
-			</th>
-			<th>
-				Query
-			</th>
-			<th>
-				Data
-			</th>
-			<th>
-				oid-Alternative
-			</th>		
-			<th>
-				Haupttabelle
-			</th>
-			<th>
-				Fehlermeldung
-			</th>
-		</tr>
-
+	<div id="tab_div">
+		<table id="tab" class="scrolltable">
+			<tbody style="max-height: 730px">
 <?
+
+$umlaute=array("Ä","Ö","Ü");
+
 $oid_layer_count = 0;
+$i = 0;
 while($layer = $this->database->result->fetch_assoc()){
   $status = checkStatus($layer);
 	$result = array();
@@ -201,34 +217,50 @@ while($layer = $this->database->result->fetch_assoc()){
 	}
 	echo '
 		<tr class="' . $class . '">
-			<td>
-				<div style="width: 200px; overflow: auto;">
+			<td valign="top">';
+				if($i == 0)echo '<div class="fett scrolltable_header">Layer</div>';
+				if (!in_array(strtoupper(mb_substr($layer[$this->formvars['order']],0,1,'UTF-8')),$umlaute) AND strtoupper(mb_substr($layer[$this->formvars['order']],0,1,'UTF-8')) != $first) {
+					$nav_bar .= "<a href='#".strtoupper(mb_substr($layer[$this->formvars['order']],0,1,'UTF-8'))."'><div class='menu abc'>".strtoupper(mb_substr($layer[$this->formvars['order']],0,1,'UTF-8'))."</div></a>";
+					$first=strtoupper(mb_substr($layer[$this->formvars['order']],0,1));
+					echo '<a class="nav_link menu abc" name="'.$first.'">'.$first.'</a>';
+				}
+	echo '<div style="float: right; margin-top: 0px;">
+					' . $layer["Gruppenname"] . '
+				</div>
+				<div style="width: 200px; margin-top: 40px;">
 					<a href="index.php?go=Layereditor&selected_layer_id='.$layer["Layer_ID"].'"target="_blank">'.$layer["Name"].'</a>
 				</div>
 			</td>
 			<td style="background-color: '.$color[$status['oid']].'">
+				' . ($i == 0 ? '<div class="fett scrolltable_header">ID-Spalte</div>' : '') . '
 				' . $layer['oid'] . '
 			</td>
-			<td style="background-color: '.$color[$status['query']].'">
+			<td valign="top" style="background-color: '.$color[$status['query']].'">
+				' . ($i == 0 ? '<div class="fett scrolltable_header">Query</div>' : '') . '
 				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['pfad'] . '</textarea>
 				' . ((!$status['query']) ? '<div class="replaced"><textarea onmouseenter="select_text(this, \'oid\');">' . delete_oid_in_sql($layer['pfad']) . '</textarea></div>' : '') . '
 			</td>
-			<td style="background-color: '.$color[$status['data']].'">
+			<td valign="top" style="background-color: '.$color[$status['data']].'">
+				' . ($i == 0 ? '<div class="fett scrolltable_header">Data</div>' : '') . '
 				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['Data'] . '</textarea>
 				' . ((!$status['data'] AND $result['oid_alternative']) ? '<div class="replaced"><textarea onmouseenter="select_text(this, \'oid\');">' . replace_oid_in_data($layer['Data'], $result['oid_alternative']) . '</textarea></div>' : '') . '
 			</td>
 			<td>
+				' . ($i == 0 ? '<div class="fett scrolltable_header">oid-Alternative</div>' : '') . '
 				' . $result['oid_alternative'] . '
 			</td>			
 			<td>
+				' . ($i == 0 ? '<div class="fett scrolltable_header">Haupttabelle</div>' : '') . '
 				' . $layer['maintable'] . '
 			</td>
 			<td>
-				<div style="width: 250px; overflow: hidden">' . $result['error'] . '</div>
+				' . ($i == 0 ? '<div class="fett scrolltable_header">Fehlermeldung</div>' : '') . '
+				' . $result['error'] . '
 			</td>
 		</tr>';
+	$i++;
 }
-echo '</table>';
+echo '</tbody></table></div>';
 
 ?>
 
@@ -236,5 +268,13 @@ echo '</table>';
 		<? echo $this->database->result->num_rows; ?> PostGIS-Layer insgesamt<br>
 		<? echo $oid_layer_count; ?> PostGIS-Layer müssen angepasst werden<br>
 		<a href="javascript:void(0);" id="layer_toggle_link" onclick="toggle_layer();">nur die anzupassenden PostGIS-Layer anzeigen</a>
+		<br>
+		Sortierung: 
+		<select name="order" onchange="document.GUI.submit();">
+			<option value="Name" <? if($this->formvars['order'] == 'Name')echo 'selected'; ?>>Name</option>
+			<option value="Gruppenname" <? if($this->formvars['order'] == 'Gruppenname')echo 'selected'; ?>>Gruppe</option>
+		</select>
+		<div id="nav_bar"><? echo $nav_bar; ?></div>
 	</div>
 </div>
+<input type="hidden" name="go" value="layer_check_oids">
