@@ -8268,6 +8268,30 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->invitation->delete();
 		$this->add_message('notice', 'Einladung erfolgreich gelöscht.');
 	}
+	
+	function getSubFormResultSet($attributes, $j, $maintable, $result){
+		# $attributes ist das Attribut-Array des übergeordneten Layers
+		# $j ist der Zähler in diesem Array mit dem SubForm-Attribut
+		# $maintable ist die Hauptabelle des übergeordneten Layers
+		# $result ist der Datensatz im übergeordneten Layer
+		$layerid_save = $this->formvars['selected_layer_id'];
+		$this->formvars['selected_layer_id'] = $attributes['subform_layer_id'][$j];
+		$this->formvars['no_output'] = true;
+		for ($p = 0; $p < count($attributes['name']); $p++) {			# erstmal alle Suchparameter des übergeordneten Layers für die Layersuche leeren
+			$this->formvars['value_'.$attributes['name'][$p]] = '';
+			$this->formvars['operator_'.$attributes['name'][$p]] = '';
+		}
+		$this->formvars['value_' . $maintable . '_oid'] = '';
+		for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++) {			# die Suchparameter für die Layersuche
+			$this->formvars['value_' . $attributes['subform_pkeys'][$j][$p]] = $result[$attributes['subform_pkeys'][$j][$p]];
+			$this->formvars['operator_' . $attributes['subform_pkeys'][$j][$p]] = '=';
+		}
+		$this->GenerischeSuche_Suchen();
+		for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++) {			# die Suchparameter für die Layersuche wieder leeren
+			$this->formvars['value_'.$this->attributes['subform_pkeys'][$j][$p]] = '';
+		}
+		$this->formvars['selected_layer_id'] = $layerid_save;
+	}
 
 	function GenerischeSuche_Suchen() {
 		$this->formvars['search'] = true;
