@@ -1266,39 +1266,10 @@ class data_import_export {
 					while($rs=pg_fetch_assoc($ret[1])){
 						$result[] = $rs;
 					}
-					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, true);
 				}
+				$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, true);
 				for($i = 0; $i < count($result); $i++){
-					$this->copy_documents_to_export_folder($result[$i], $this->attributes, $layerset[0]['maintable'], $folder);
-					
-					// foreach($result[$i] As $key => $value){
-						// $j = $this->attributes['indizes'][$key];
-						// if ($this->attributes['form_element_type'][$j] == 'SubFormEmbeddedPK') {
-							// $GUI->getSubFormResultSet($this->attributes, $j, $layerset[0]['maintable'], $result[$i]);
-							// $sub_privileges = $stelle->get_attributes_privileges($attributes['subform_layer_id'][$j]);
-							// $sub_attributes = $mapdb->read_layer_attributes($attributes['subform_layer_id'][$j], $layerdb, $privileges['attributenames']);
-						// }
-						// if($this->attributes['form_element_type'][$j] == 'Dokument' AND $value != ''){
-							// $docs = array($value);
-							// if(substr($this->attributes['type'][$j], 0, 1) == '_'){		# Array
-								// $docs = explode(',', trim($value, '{}"'));
-							// }
-							// foreach($docs as $doc){
-								// $parts = explode('&original_name=', $doc);
-								// if($parts[1] == '')$parts[1] = basename($parts[0]);		# wenn kein Originalname da, Dateinamen nehmen
-								// if(file_exists($parts[0])){
-									// if(file_exists(IMAGEPATH.$folder.'/'.$parts[1])){		# wenn schon eine Datei mit dem Originalnamen existiert, wird der Dateiname angehängt
-										// $file_parts = explode('.', $parts[1]);
-										// $parts[1] = $file_parts[0].'_'.basename($parts[0]);
-									// }
-									// copy($parts[0], IMAGEPATH.$folder.'/'.$parts[1]);
-								// }
-							// }
-							// $zip = true;
-						// }
-					// }
-					
-					
+					$zip = $this->copy_documents_to_export_folder($result[$i], $this->attributes, $layerset[0]['maintable'], $folder);
 				}
 			}
 
@@ -1318,7 +1289,7 @@ class data_import_export {
 			}
 
 			# bei Bedarf zippen
-			if($zip){
+			if ($zip) {
 				# Beim Zippen gehen die Umlaute in den Dateinamen kaputt, deswegen vorher umwandeln
 				array_walk(searchdir(IMAGEPATH.$folder, true), function($item, $key){
 					$pathinfo = pathinfo($item);
@@ -1388,12 +1359,14 @@ class data_import_export {
 		
 	function copy_documents_to_export_folder($result, $attributes, $maintable, $folder){
 		global $GUI;
+		$zip = false;
 		foreach($result As $key => $value){
 			$j = $attributes['indizes'][$key];
 			if ($attributes['form_element_type'][$j] == 'SubFormEmbeddedPK') {
 				$GUI->getSubFormResultSet($attributes, $j, $maintable, $result);
 				foreach ($GUI->qlayerset[0]['shape'] as $sub_result) {
-					$this->copy_documents_to_export_folder($sub_result, $GUI->qlayerset[0]['attributes'], $GUI->qlayerset[0]['maintable'], $folder);
+					$zip2 = $this->copy_documents_to_export_folder($sub_result, $GUI->qlayerset[0]['attributes'], $GUI->qlayerset[0]['maintable'], $folder);
+					$zip = $zip || $zip2;
 				}
 			}
 			if($attributes['form_element_type'][$j] == 'Dokument' AND $value != ''){
