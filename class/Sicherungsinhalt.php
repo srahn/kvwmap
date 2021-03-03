@@ -200,7 +200,6 @@ class Sicherungsinhalt extends MyObject {
 	function get_sicherung_has_target_dir(){
 		include_once(CLASSPATH . 'Sicherung.php');
 		return Sicherung::find_by_id($this, $this->gui->formvars['sicherung_id'])->get('target_dir') == '' ? false : true ;
-
 	}
 
 	/**

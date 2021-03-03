@@ -488,15 +488,27 @@ class administration{
 
 		include_once(CLASSPATH . 'Sicherung.php');
 		$sicherungen = Sicherung::find($gui);
-		$fh=fopen('/var/www/sicherungen/backup_crontab', 'w');
+		$return = array( 'count_export' => 0
+										,'count_skip' 	=> 0
+										,'crontab'			=> ''
+										);
+		$fh=fopen('/var/www/sicherungen/kvwmap_backup_crontab', 'w');
+		fwrite($fh, 'SHELL=/bin/bash' . PHP_EOL);
+		fwrite($fh, 'PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin' . PHP_EOL);
 		foreach($sicherungen AS $sicherung) {
 			if ($sicherung->get_valid_for_fileexport()){
+				$return['count_export'] = $return['count_export'] + 1;
 				$sicherung->write_config_files($gui, $backup_path);
-				fwrite($fh, $sicherung->get_cronjob_interval(). '	/home/gisadmin/kvwmap-server/scripte/sicherung/backup.sh /home/gisadmin/etc/sicherung/sicherung_'.$sicherung->get('id') . ' 	#KVWMAP_BACKUPJOB#' . PHP_EOL);
+				$cronline = $sicherung->get_cronjob_interval() . ' root	/home/gisadmin/kvwmap-server/scripte/sicherung/backup.sh /home/gisadmin/www/sicherungen/sicherung_'.$sicherung->get('id') . PHP_EOL;
+				fwrite($fh, $cronline);
+				$return['crontab'] = $return['crontab'] . $cronline;
+			}
+			else {
+				$return['count_skip'] = $return['count_skip'] + 1;
 			}
 		}
 		fclose($fh);
-
+		return $return;
 	}
 
 	public static function deleteDir($dirPath) {

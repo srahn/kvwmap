@@ -21,4 +21,5 @@
 	$strexectime							=	"Ausführungsuhrzeit";
 	$strKeepNDays							= "alte Sicherung nach n Tagen löschen";
 	$strHintNurRSYNC					=	"Die übergeordnete Sicherung hat kein Zielverzeichnis. Als Sicherungsinhalt kann nur 'Verzeichnisinhalt kopieren' mit einem entfernten Ziel verwendet werden. Lokale Ziele stehen nicht zur Verfügung.";
+	$strAktiv									= "aktiv";
 ?>
