@@ -9159,13 +9159,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 		if ($output) {
 			if ($this->formvars['embedded'] == '') {
-				if ($this->success == false) {
-					foreach ($results AS $result) {
-						$this->add_message($result['type'], $result['msg']);
-					}
-				}
-				else {
-					$this->add_message('notice', 'Löschen erfolgreich');
+				foreach ($results AS $result) {
+					$this->add_message($result['type'], $result['msg']);
 				}
 				$this->last_query = $this->user->rolle->get_last_query();
 				if ($this->formvars['search']) {
@@ -9266,14 +9261,17 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$oids[] = $element[3];
 			$ret = $layerdb->execSQL($sql, 4, 1, true);
 			if ($ret['success']) {
-				# Frage Meldung ab über last notice ab
+				# Frage Meldung  über last notice ab
 				$last_notice = pg_last_notice($layerdb->dbConn);
-				$notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
-				if ($notice_result['success']) {
+				$msg_type = 'info';
+				if ($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true)) {
 					if ($notice_result['msg']) {
-						$results[] = array('type' => 'info', 'msg' => $notice_result['msg']);
+						$last_notice = $notice_result['msg'];
+						$msg_type = $notice_result['msg_type'];
 					}
 				}
+				$results[] = array('type' => $msg_type, 'msg' => $last_notice);
+				
 				# Frage Meldung über SQL result ab
 				$sql_result = pg_fetch_row($ret['query']);
 				if ($sql_result[0] != '') {
@@ -9285,7 +9283,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$this->success = false;
 				}
 				else {
-					$results[] = array('type' => 'notice', 'msg' => 'Datensatz wurde gelöscht!<br>');
+					$results[] = array('type' => 'notice', 'msg' => 'Löschen erfolgreich<br>');
 				}
 			}
 			else {
