@@ -26,34 +26,34 @@
 		switch (value) {
 			case "daily":
 				document.getElementById('label_para1_list').innerHTML='ausführen an Wochentag von';
-				l1.options[0]=new Option("Montag",0);
-				l1.options[1]=new Option("Dienstag",1);
-				l1.options[2]=new Option("Mittwoch",2);
-				l1.options[3]=new Option("Donnerstag",3);
-				l1.options[4]=new Option("Freitag",4);
-				l1.options[5]=new Option("Samstag",5);
-				l1.options[6]=new Option("Sonntag",6);
+				l1.options[0]=new Option("Sonntag",0);
+				l1.options[1]=new Option("Montag",1);
+				l1.options[2]=new Option("Dienstag",2);
+				l1.options[3]=new Option("Mittwoch",3);
+				l1.options[4]=new Option("Donnerstag",4);
+				l1.options[5]=new Option("Freitag",5);
+				l1.options[6]=new Option("Samstag",6);
 
 				document.getElementById('tr_select_para2_list').style.display='';
 				document.getElementById('label_para2_list').innerHTML='bis';
-				l2.options[0]=new Option("Montag",0);
-				l2.options[1]=new Option("Dienstag",1);
-				l2.options[2]=new Option("Mittwoch",2);
-				l2.options[3]=new Option("Donnerstag",3);
-				l2.options[4]=new Option("Freitag",4);
-				l2.options[5]=new Option("Samstag",5);
-				l2.options[6]=new Option("Sonntag",6);
+				l2.options[0]=new Option("Sonntag",0);
+				l2.options[1]=new Option("Montag",1);
+				l2.options[2]=new Option("Dienstag",2);
+				l2.options[3]=new Option("Mittwoch",3);
+				l2.options[4]=new Option("Donnerstag",4);
+				l2.options[5]=new Option("Freitag",5);
+				l2.options[6]=new Option("Samstag",6);
 
 				break;
 			case "weekly":
 				document.getElementById('label_para1_list').innerHTML='ausführen am Wochentag';
-				l1.options[0]=new Option("Montag",0);
-				l1.options[1]=new Option("Dienstag",1);
-				l1.options[2]=new Option("Mittwoch",2);
-				l1.options[3]=new Option("Donnerstag",3);
-				l1.options[4]=new Option("Freitag",4);
-				l1.options[5]=new Option("Samstag",5);
-				l1.options[6]=new Option("Sonntag",6);
+				l1.options[0]=new Option("Sonntag",0);
+				l1.options[1]=new Option("Montag",1);
+				l1.options[2]=new Option("Dienstag",2);
+				l1.options[3]=new Option("Mittwoch",3);
+				l1.options[4]=new Option("Donnerstag",4);
+				l1.options[5]=new Option("Freitag",5);
+				l1.options[6]=new Option("Samstag",6);
 
 				document.getElementById('tr_select_para2_list').style.display='none';
 

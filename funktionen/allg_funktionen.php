@@ -139,11 +139,11 @@ function get_exif_data($img_path) {
 			'LatLng' => ((array_key_exists('GPSLatitude', $exif) AND array_key_exists('GPSLongitude', $exif)) ? (
 				floatval(substr($exif['GPSLatitude' ][0], 0, strlen($exif['GPSLatitude' ][0]) - 2))
 				+ float_from_slash_text($exif['GPSLatitude' ][1]) / 60
-				+ float_from_slash_text($exif['GPSLatitude' ][2]) / 6000
+				+ float_from_slash_text($exif['GPSLatitude' ][2]) / 3600
 			) . ' ' . (
 				floatval(substr($exif['GPSLongitude'][0], 0, strlen($exif['GPSLongitude'][0]) - 2))
 				+ float_from_slash_text($exif['GPSLongitude'][1]) / 60
-				+ float_from_slash_text($exif['GPSLongitude'][2]) / 6000
+				+ float_from_slash_text($exif['GPSLongitude'][2]) / 3600
 			) : NULL),
 			'Richtung' => (array_key_exists('GPSImgDirection', $exif) ? float_from_slash_text($exif['GPSImgDirection']) : NULL),
 			'Erstellungszeit' => (array_key_exists('DateTimeOriginal', $exif) ? (
