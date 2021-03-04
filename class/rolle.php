@@ -861,11 +861,11 @@ class rolle {
 				layer_id = " . $formvars['selected_layer_id'] . ",
 				name = '" . $formvars['setting_name'] . "',
 				format = '" . $formvars['export_format'] . "',
-				epsg = " . $formvars['epsg'] . ",
+				epsg = " . ($formvars['epsg'] ?: 'NULL') . ",
 				attributes = '" . implode(',', $selected_attributes) . "',
 				metadata = " . ($formvars['with_metadata_document'] ?: '0'). ",
 				groupnames = " . ($formvars['export_groupnames'] ? '1': '0'). ",
-				documents = " . ($formvars['download_documents'] ?: '0') . ",
+				documents = " . ($formvars['download_documents'] ? '1' : '0') . ",
 				geom = '" . $formvars['newpathwkt'] . "',
 				within = " . ($formvars['within'] ?: '0'). ",
 				singlegeom = " . ($formvars['singlegeom'] ?: '0'). "
