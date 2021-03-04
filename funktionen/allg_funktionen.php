@@ -1680,6 +1680,8 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 			$str = str_replace('$'.$key, $value, $str);
 		}
 	}
+	$str = str_replace('$current_date', date('Y-m-d'), $str);
+	$str = str_replace('$current_timestamp', date('Y-m-d G:i:s'), $str);
 	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
 	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
@@ -1716,7 +1718,7 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 	switch ($mode) {
 		case 'sendEmail async': {
 			# Erstelle Befehl für sendEmail und schreibe in mail queue Verzeichnis.
-			$str = array('to_email' => $to_email, 'from_email' => $from_email, 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
+			$str = array('to_email' => $to_email, 'from_email' => $from_email, 'from_name' => $from_name, 'cc_email' => $cc_email, 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
 			if(!is_dir(MAILQUEUEPATH)){
 				mkdir(MAILQUEUEPATH);
 				chmod(MAILQUEUEPATH, 'g+w');
@@ -1830,7 +1832,7 @@ function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last =
 	if ($word_pos !== false) {
 		$str_from_word_pos = substr($str, $word_pos + strlen($word));
 		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
-		return $parts[0];
+		return trim($parts[0]);
 	}
 }
 

@@ -58,8 +58,13 @@ class account {
 	function getStatistik($nutzer,$nutzung,$stelle,$zeitraum,$day_d,$week_w,$month_d,$month_w,$month_m,$year_m,$year_w,$year_d,$day_e1,$day_e2,$month_e1,$month_e2,$year_e1,$year_e2){
 			# Ausführen der einzelnen Funktionen für
 			# die Statistik zur Anfrage
-			$BezeichnungStelle = new stelle($stelle,$this->database);
-			$UserName = new user('','',$this->database);
+			if($stelle != ''){
+				$BezeichnungStelle = new stelle($stelle,$this->database);
+			}
+			if($nutzer != ''){
+				$UserName = new user('',$nutzer,$this->database);
+				$this->UName=$UserName->getUserDaten($nutzer,'','');
+			}
 
 			$this->epoch=$this->epoch();
 			#$this->getLayer=$this->getLayer('');
@@ -86,7 +91,6 @@ class account {
 					$this->ShapeNumbOfAccess=$this->getAccessToShape($nutzung,$zeitraum,$date1,$date2,'u_consumeShape.stelle_id','MONTH',$month_m, $year_m,$stelle,'');
 				}
 				if ($nutzung=='nutzer') {
-					$this->UName=$UserName->getUserDaten($nutzer,'','');
 					$this->NumbOfAccess=$this->getAccessToLayer($nutzung,$zeitraum,$date1,$date2,'c.user_id','MONTH',$month_m,$year_m,$nutzer,'');
 					$this->ALKNumbOfAccess=$this->getAccessToALK($nutzung,$zeitraum,$date1,$date2,'u_consumeALK.user_id','MONTH',$month_m,$year_m,$nutzer,'');
 					$this->ALBNumbOfAccess=$this->getAccessToALB($nutzung,$zeitraum,$date1,$date2,'u_consumeALB.user_id','MONTH',$month_m, $year_m,$nutzer,'');
@@ -95,7 +99,6 @@ class account {
 				}
 				if ($nutzung=='stelle_nutzer') {
 					$this->Bezeichnung=$BezeichnungStelle->getName();
-					$this->UName=$UserName->getUserDaten($nutzer,'','');
 					$this->NumbOfAccess=$this->getAccessToLayer($nutzung,$zeitraum,$date1,$date2,'c.stelle_id, c.user_id','MONTH',$month_m,$year_m,$stelle,$nutzer);
 					$this->ALKNumbOfAccess=$this->getAccessToALK($nutzung,$zeitraum,$date1,$date2,'u_consumeALK.stelle_id, u_consumeALK.user_id','MONTH',$month_m,$year_m,$stelle,$nutzer);
 					$this->ALBNumbOfAccess=$this->getAccessToALB($nutzung,$zeitraum,$date1,$date2,'u_consumeALB.stelle_id, u_consumeALB.user_id','MONTH',$month_m,$year_m,$stelle,$nutzer);
@@ -113,7 +116,6 @@ class account {
 					$this->ShapeNumbOfAccess=$this->getAccessToShape($nutzung,$zeitraum,$date1,$date2,'u_consumeShape.stelle_id','WEEK',$week_w, $year_w,$stelle,'');
 				}
 				if ($nutzung=='nutzer') {
-					$this->UName=$UserName->getUserDaten($nutzer,'','');
 					$this->NumbOfAccess=$this->getAccessToLayer($nutzung,$zeitraum,$date1,$date2,'c.user_id','WEEK',$week_w,$year_w,$nutzer,'');
 					$this->ALKNumbOfAccess=$this->getAccessToALK($nutzung,$zeitraum,$date1,$date2,'u_consumeALK.user_id','WEEK',$week_w,$year_w,$nutzer,'');
 					$this->ALBNumbOfAccess=$this->getAccessToALB($nutzung,$zeitraum,$date1,$date2,'u_consumeALB.user_id','WEEK',$week_w,$year_w,$nutzer,'');
@@ -122,7 +124,6 @@ class account {
 				}
 				if ($nutzung=='stelle_nutzer') {
 					$this->Bezeichnung=$BezeichnungStelle->getName();
-					$this->UName=$UserName->getUserDaten($nutzer,'','');
 					$this->NumbOfAccess=$this->getAccessToLayer($nutzung,$zeitraum,$date1,$date2,'c.stelle_id, c.user_id','WEEK',$week_w,$year_w,$stelle,$nutzer);
 					$this->ALKNumbOfAccess=$this->getAccessToALK($nutzung,$zeitraum,$date1,$date2,'u_consumeALK.stelle_id, u_consumeALK.user_id','WEEK',$week_w,$year_w,$stelle,$nutzer);
 					$this->ALBNumbOfAccess=$this->getAccessToALB($nutzung,$zeitraum,$date1,$date2,'u_consumeALB.stelle_id, u_consumeALB.user_id','WEEK',$week_w,$year_w,$stelle,$nutzer);
@@ -140,7 +141,6 @@ class account {
 					$this->ShapeNumbOfAccess=$this->getAccessToShape($nutzung,$zeitraum,$date1,$date2,'u_consumeShape.stelle_id','DATE',$year_d.'-'.$month_d.'-'.$day_d,'',$stelle,'');
 				}
 				if ($nutzung=='nutzer') {
-					$this->UName=$UserName->getUserDaten($nutzer,'','');
 					$this->NumbOfAccess=$this->getAccessToLayer($nutzung,$zeitraum,$date1,$date2,'c.user_id','DATE',$year_d.'-'.$month_d.'-'.$day_d,'',$nutzer,'');
 					$this->ALKNumbOfAccess=$this->getAccessToALK($nutzung,$zeitraum,$date1,$date2,'u_consumeALK.user_id','DATE',$year_d.'-'.$month_d.'-'.$day_d,'',$nutzer,'');
 					$this->ALBNumbOfAccess=$this->getAccessToALB($nutzung,$zeitraum,$date1,$date2,'u_consumeALB.user_id','DATE',$year_d.'-'.$month_d.'-'.$day_d,'',$nutzer,'');
@@ -149,7 +149,6 @@ class account {
 				}
 				if ($nutzung=='stelle_nutzer'){
 					$this->Bezeichnung=$BezeichnungStelle->getName();
-					$this->UName=$UserName->getUserDaten($nutzer,'','');
 					$this->NumbOfAccess=$this->getAccessToLayer($nutzung,$zeitraum,$date1,$date2,'c.stelle_id, c.user_id','DATE',$year_d.'-'.$month_d.'-'.$day_d,'',$stelle,$nutzer);
 					$this->ALKNumbOfAccess=$this->getAccessToALK($nutzung,$zeitraum,$date1,$date2,'u_consumeALK.stelle_id, u_consumeALK.user_id','DATE',$year_d.'-'.$month_d.'-'.$day_d,'',$stelle,$nutzer);
 					$this->ALBNumbOfAccess=$this->getAccessToALB($nutzung,$zeitraum,$date1,$date2,'u_consumeALB.stelle_id, u_consumeALB.user_id','DATE',$year_d.'-'.$month_d.'-'.$day_d,'',$stelle,$nutzer);
@@ -167,7 +166,6 @@ class account {
 					$this->ShapeNumbOfAccess=$this->getAccessToShape($nutzung,$zeitraum,$date1,$date2,'u_consumeShape.stelle_id','DATE','','',$stelle,'');
 				}
 				if ($nutzung=='nutzer') {
-					$this->UName=$UserName->getUserDaten($nutzer,'','');
 					$this->NumbOfAccess=$this->getAccessToLayer($nutzung,$zeitraum,$date1,$date2,'c.user_id','DATE','','',$nutzer,'');
 					$this->ALKNumbOfAccess=$this->getAccessToALK($nutzung,$zeitraum,$date1,$date2,'u_consumeALK.user_id','DATE','','',$nutzer,'');
 					$this->ALBNumbOfAccess=$this->getAccessToALB($nutzung,$zeitraum,$date1,$date2,'u_consumeALB.user_id','DATE','','',$nutzer,'');
@@ -176,7 +174,6 @@ class account {
 				}
 				if ($nutzung=='stelle_nutzer'){
 					$this->Bezeichnung=$BezeichnungStelle->getName();
-					$this->UName=$UserName->getUserDaten($nutzer,'','');
 					$this->NumbOfAccess=$this->getAccessToLayer($nutzung,$zeitraum,$date1,$date2,'c.stelle_id, c.user_id','DATE','','',$stelle,$nutzer);
 					$this->ALKNumbOfAccess=$this->getAccessToALK($nutzung,$zeitraum,$date1,$date2,'u_consumeALK.stelle_id, u_consumeALK.user_id','DATE','','',$stelle,$nutzer);
 					$this->ALBNumbOfAccess=$this->getAccessToALB($nutzung,$zeitraum,$date1,$date2,'u_consumeALB.stelle_id, u_consumeALB.user_id','DATE','','',$stelle,$nutzer);
@@ -323,9 +320,9 @@ class account {
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
 			$query_array[] = $this->database->execSQL($sql);
-			if (!$query_array[count($query_array)-1]->success) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			if (!$this->database->success) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 			$NumbOfAccessTimeIDs = array();
-			while ($rs = $query_array[count($query_array) - 1]['result']->fetch_array()) {
+			while ($rs = $this->database->result->fetch_array()) {
 				$NumbOfAccessTimeIDs[] = $rs;
 			}
 			$NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
@@ -410,9 +407,9 @@ class account {
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToShape:<br>".$sql,4);
 			$query_array[] = $this->database->execSQL($sql);
-			if (!$query_array[count($query_array)-1]->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
 			$NumbOfAccessTimeIDs = array();
-			while ($rs = $query_array[count($query_array) - 1]->result->fetch_array()) {
+			while ($rs = $this->database->result->fetch_array()) {
 				$NumbOfAccessTimeIDs[]=$rs;
 			}
 			$NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
@@ -502,9 +499,9 @@ class account {
 
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToALB:<br>".$sql,4);
 			$query_array[] = $this->database->execSQL($sql);
-			if (!$query_array[count($query_array)-1]->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
 			$NumbOfAccessTimeIDs = array();
-			while ($rs = $query_array[count($query_array) - 1]->result->fetch_array()) {
+			while ($rs = $this->database->result->fetch_array()) {
 				$NumbOfAccessTimeIDs[] = $rs;
 			}
 			$NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
@@ -597,9 +594,9 @@ class account {
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToALK:<br>".$sql,4);
 			$query_array[] = $this->database->execSQL($sql);
-			if (!$query_array[count($query_array) - 1]->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
 			$NumbOfAccessTimeIDs = array();
-			while ($rs = $query_array[count($query_array)-1]->result->fetch_array()) {
+			while ($rs = $this->database->result->fetch_array()) {
 				$NumbOfAccessTimeIDs[] = $rs;
 			}
 			$NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
@@ -706,7 +703,7 @@ class user {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name LIKE '" . $login_name . "'");
-		if ($passwort != '') array_push($where, "passwort = md5('" . $passwort . "')");
+		if ($passwort != '') array_push($where, "passwort = md5('" . $this->database->mysqli->real_escape_string($passwort) . "')");
 		$sql = "
 			SELECT
 				*
@@ -1227,7 +1224,7 @@ class user {
 		$sql.=',Vorname="'.$userdaten['vorname'].'"';
 		$sql.=',login_name="'.$userdaten['loginname'].'"';
 		$sql.=',Namenszusatz="'.$userdaten['Namenszusatz'].'"';
-		$sql.=',passwort=MD5("'.$userdaten['password2'].'")';
+		$sql.=',passwort = MD5("' . $this->database->mysqli->real_escape_string($userdaten['password2']) . '")';
 		$sql.=',password_setting_time=CURRENT_TIMESTAMP()';
 		if ($userdaten['phon']!='') {
 			$sql.=',phon="'.$userdaten['phon'].'"';
@@ -1293,7 +1290,7 @@ class user {
 
 	function Aendern($userdaten) {
 		if ($userdaten['changepasswd']) {
-			$passwort_column = ", `passwort` = MD5('" . $userdaten['password2'] . "')";
+			$passwort_column = ", `passwort` = MD5('" . $this->database->mysqli->real_escape_string($userdaten['password2']) . "')";
 			$passwort_setting_time_column = ", `password_setting_time` = CURRENT_TIMESTAMP()";
 		}
 		# Wurde ein password_setting_time explizit mitgeschickt, wird dieses eingetragen statt current_timestamp
@@ -1349,7 +1346,7 @@ class user {
 			UPDATE
 				user
 			SET
-				`passwort` = MD5('" . $password . "'),
+				`passwort` = MD5('" . $this->database->mysqli->real_escape_string($password) . "'),
 				`password_setting_time` = '" . $password_setting_time . "'
 			WHERE
 				`ID` = " . $this->id . "

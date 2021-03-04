@@ -103,7 +103,7 @@ class administration{
 		}
 		return $migrations;
 	}
-	
+
 	function get_seed_files() {
 		global $kvwmap_plugins;
 		for($i = 0; $i < count($kvwmap_plugins); $i++) {
@@ -112,7 +112,7 @@ class administration{
 		}
 		return $seeds;
 	}
-	
+
 	function get_database_status() {
 		$this->migrations_to_execute['mysql'] = array();
 		$this->migrations_to_execute['postgresql'] = array();
@@ -142,7 +142,7 @@ class administration{
 			}
 		}
 	}
-	
+
 	function update_databases() {
 		$err_msgs = array();
 		foreach ($this->migrations_to_execute['mysql'] as $component => $component_migration) {
@@ -238,7 +238,7 @@ class administration{
 							}
 						}
 					}break;
-					
+
 					case 'php' : {
 						include $filepath . $file;
 					}break;
@@ -267,7 +267,7 @@ class administration{
 		}
 		return $err_msgs;
 	}
-	
+
 	function update_code() {
 		$folder = WWWROOT.APPLVERSION;
 		if (defined('HTTP_PROXY')) {
@@ -286,7 +286,7 @@ class administration{
 			return $ausgabe;
 		}
 	}
-	
+
 	function get_config_params() {
 		$this->config_params = array();
 		$sql = "
@@ -357,7 +357,7 @@ class administration{
 			$this->write_config_file($kvwmap_plugins[$i]);
 		}
 	}
-	
+
 	function write_config_file($plugin) {
 		$this->get_config_params();
 		$config = '';
@@ -413,17 +413,17 @@ class administration{
 		}
 		return $result;
 	}
-	
-	
+
+
 	function get_constants_from_config($config_lines, $plugin) {			# diese Funktion wird nur in den Migrationen gebraucht, die von config.php auf config-Tabelle umstellen
 		$def_constants = get_defined_constants(true)['user'];
 		foreach ($config_lines as $config_line) {
 			if (substr(ltrim($config_line), 0, 6) == 'define') {																												# Konstanten
-				$name = get_first_word_after(str_replace(' ', '', $config_line), 'define', '(', ',');				
+				$name = get_first_word_after(str_replace(' ', '', $config_line), 'define', '(', ',');
 				$name = trim($name, '"\'');
 				$value = ltrim(substr($config_line, strpos($config_line, ',')+1));
 				$value = rtrim(substr($value, 0, strpos($value, ');')));
-				if (substr($value, 0, 1) == '$')$value = $def_constants[$name];					
+				if (substr($value, 0, 1) == '$')$value = $def_constants[$name];
 				$prefix = explode('"', $value)[0];
 				$prefix = explode("'", $prefix)[0];
 				if (strpos($value, '"') === false AND strpos($value, "'") === false AND is_numeric(trim($value, "'\"")))$type = 'numeric';
@@ -477,77 +477,41 @@ class administration{
 	}
 
 	/*
-	* Insert, Update und Delete Settings for backup content in database
+	* This function writes the config and the crontab for backups
 	*/
-	function save_sicherungsinhalte($params) {
-		
-	}
+	function write_backup_config_and_cron($gui) {
 
-	/*
-	* Insert, Update und Delete backup settings in database
-	*/
-	function save_sicherungen($params) {
-		
-	}
+		$backup_path = '/var/www/sicherungen/';
 
-	/*
-	* This function write backup scripts based on table sicherungen_inhalte
-	*/
-	function write_backup_scripts() {
-		global $GUI;
+		Administration::deleteDir($backup_path);
+		mkdir($backup_path);
+
 		include_once(CLASSPATH . 'Sicherung.php');
-		include_once(CLASSPATH . 'Sicherungsinhalt.php');
-		$sicherungen = Sicherung::find($GUI);
-		$backup_path = WWWROOT . 'backups/';
+		$sicherungen = Sicherung::find($gui);
+		$fh=fopen('/var/www/sicherungen/backup_crontab', 'w');
 		foreach($sicherungen AS $sicherung) {
-			echo '<p>Sicherung: ' . print_r($sicherung->data, true);
-			if (!file_exists(INSTALLPATH . 'cron/')) {
-				mkdir(INSTALLPATH . 'cron/', 0777, true);
+			if ($sicherung->get_valid_for_fileexport()){
+				$sicherung->write_config_files($gui, $backup_path);
+				fwrite($fh, $sicherung->get_cronjob_interval(). '	/home/gisadmin/kvwmap-server/scripte/sicherung/backup.sh /home/gisadmin/etc/sicherung/sicherung_'.$sicherung->get('id') . ' 	#KVWMAP_BACKUPJOB#' . PHP_EOL);
 			}
-			$script_path = INSTALLPATH . 'cron/' . $sicherung->get('name') . '.sh';
-			echo '<br>Schreibe backup_script ' . $script_path;
-			$sf = fopen($script_path, "w");
-			fwrite($sf, "#!/bin/bash\n");
-			fwrite($sf, 'logfile=' . LOGPATH . 'cron/' . $sicherung->get('name') . ".log\n");
-			fwrite($sf, 'target_dir=' . $backup_path . $sicherung->get('target_dir') . "\n");
-			fwrite($sf, 'mkdir -p $target_dir' . "\n");
-
-			if (!file_exists(LOGPATH . 'cron/')) {
-				mkdir(LOGPATH . 'cron/', 0777, true);
-			}
-			foreach($sicherung->inhalte AS $inhalt) {
-				echo '<br>Inhalt: ' . print_r($inhalt->data, true);
-				fwrite($sf, "\n# " . $inhalt->get('name') . "\n");
-				switch ($inhalt->get('methode')) {
-					case 'Verzeichnissicherung' : {
-						$cmd = 'tar cvfz ${target_dir}/' . $inhalt->get('target') . '.tar.gz ' . $inhalt->get('source') . ' > /dev/null 2>> $logfile' . "\n";
-					} break;
-					case 'Verzeichnisinhalte kopieren' : {
-						$cmd = 'cp ' . $inhalt->get('source') . '/* ' . $inhalt->get('target');
-					} break;
-					case 'Postgres Dump' : {
-						$cmd = 'pg_dump -h pgsql -U kvwmap -Fc -f ${target_dir}/' . $inhalt->get('target') . ' ' . $inhalt->get('source') . ' &>> $logfile' . "\n";
-					} break;
-					case 'Mysql Dump' : {
-						$cmd = 'mysqldump -h mysql --user=kvwmap --password=${PASSWORD} --databases ' . $inhalt->get('source') . ' > ${target_dir}/' . $inhalt->get('target') . "\n";
-					} break;
-					default : { # Datei kopieren
-						$cmd = "cp " . $inhalt->get('source') . ' ' . $inhalt->get('target') . "\n";
-					} break;
-				}
-				fwrite($sf, $cmd);
-			}
-			fclose($sf);
-			chgrp($script_path, 'gisadmin');
-			chmod($script_path, 0775);
 		}
+		fclose($fh);
+
 	}
 
-	/*
-	* and update the crontab based on table sicherungen
-	*/
-	function update_backups_in_crontab() {
-		
+	public static function deleteDir($dirPath) {
+		if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') {
+				$dirPath .= '/';
+		}
+		$files = glob($dirPath . '*', GLOB_MARK);
+		foreach ($files as $file) {
+			if (is_dir($file)) {
+				self::deleteDir($file);
+			} else {
+				unlink($file);
+			}
+		}
+		rmdir($dirPath);
 	}
 
 	function create_inserts_from_dataset($schema, $table, $where) {

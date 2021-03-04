@@ -198,7 +198,7 @@ class data_import_export {
 		# 2. Versuch: Abgleich bestimmter Parameter im prj-String mit spatial_ref_sys_alias
 		$datum = get_first_word_after($wkt, 'DATUM[', '"', '"');
 		$projection = get_first_word_after($wkt, 'PROJECTION[', '"', '"');
-		if($projection == '')$projection_sql = 'AND projection IS NULL'; else $projection_sql = "AND '".$projection."' = ANY(projection)";
+		if($projection == '')$projection_sql = 'AND projection IS NULL'; else $projection_sql = "AND '".pg_escape_string($projection)."' = ANY(projection)";
 		$false_easting = get_first_word_after($wkt, 'False_Easting"', ',', ']');
 		if($false_easting == '')$false_easting_sql = 'AND false_easting IS NULL'; else $false_easting_sql = "AND false_easting = ".$false_easting;
 		$central_meridian = get_first_word_after($wkt, 'Central_Meridian"', ',', ']');
@@ -207,12 +207,12 @@ class data_import_export {
 		if($scale_factor == '')$scale_factor_sql = 'AND scale_factor IS NULL'; else $scale_factor_sql = "AND scale_factor = ".$scale_factor;
 		$unit = get_first_word_after($wkt, 'UNIT[', '"', '"', true);
 		$sql = "SELECT srid FROM spatial_ref_sys_alias
-						WHERE '".$datum."' = ANY(datum)
+						WHERE '".pg_escape_string($datum)."' = ANY(datum)
 						".$projection_sql."
 						".$false_easting_sql."
 						".$central_meridian_sql."
 						".$scale_factor_sql."
-						AND '".$unit."' = ANY(unit)";
+						AND '".pg_escape_string($unit)."' = ANY(unit)";
 		$ret = $pgdatabase->execSQL($sql,4, 0);
 		if(!$ret[0])$result = pg_fetch_row($ret[1]);
 		return $result[0];
@@ -520,7 +520,7 @@ class data_import_export {
 			if(move_uploaded_file($_files['file1']['tmp_name'], $this->pointfile)){
 				$rows = file($this->pointfile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 				$delimiters = implode($this->delimiters);
-				while(count($this->delimiters) > 0 AND count($this->columns) < 2){
+				while(@count($this->delimiters) > 0 AND @count($this->columns) < 2){
 					$this->delimiter = array_shift($this->delimiters);
 					$i = 0;
 					while(trim($rows[$i], "$delimiters\n\r") == ''){	// Leerzeilen überspringen bis zur ersten Zeile mit Inhalt
@@ -579,7 +579,7 @@ class data_import_export {
 					$komma = true;
 				}
 				else{
-					$$formvars['column'.$i] = $columns[$i];			# Hier werden $x und $y gesetzt (nicht das doppelte $ wegnehmen!)
+					${$formvars['column'.$i]} = $columns[$i];			# Hier werden $x und $y gesetzt (nicht das doppelte $ wegnehmen!)
 				}
 			}
 			$x = str_replace(',', '.', $x);
@@ -1003,7 +1003,7 @@ class data_import_export {
 		}
 		return $ovl;
   }
-
+	
 	function export_exportieren($formvars, $stelle, $user){
 		global $language;
 		global $GUI;
@@ -1169,12 +1169,7 @@ class data_import_export {
 			#showAlert('Abfrage erfolgreich. Es wurden '.$count.' Zeilen geliefert.');
 			$this->formvars['layer_name'] = replace_params($this->formvars['layer_name'], rolle::$layer_params);
 			$this->formvars['layer_name'] = umlaute_umwandeln($this->formvars['layer_name']);
-			$this->formvars['layer_name'] = str_replace('.', '_', $this->formvars['layer_name']);
-			$this->formvars['layer_name'] = str_replace('(', '_', $this->formvars['layer_name']);
-			$this->formvars['layer_name'] = str_replace(')', '_', $this->formvars['layer_name']);
-			$this->formvars['layer_name'] = str_replace('/', '_', $this->formvars['layer_name']);
-			$this->formvars['layer_name'] = str_replace('[', '_', $this->formvars['layer_name']);
-			$this->formvars['layer_name'] = str_replace(']', '_', $this->formvars['layer_name']);
+			$this->formvars['layer_name'] = str_replace(['.', '(', ')', '/', '[', ']', '<', '>'], '_', $this->formvars['layer_name']);
 			$folder = 'Export_'.$this->formvars['layer_name'].rand(0,10000);
 			$old = umask(0);
       mkdir(IMAGEPATH.$folder, 0777);                       # Ordner erzeugen
@@ -1239,7 +1234,6 @@ class data_import_export {
 					while ($rs=pg_fetch_assoc($ret[1])){
 						$result[] = $rs;
 					}
-					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, true);
 					$csv = $this->create_csv($result, $this->attributes, $formvars['export_groupnames']);
 					$exportfile = $exportfile.'.csv';
 					$fp = fopen($exportfile, 'w');
@@ -1273,22 +1267,9 @@ class data_import_export {
 						$result[] = $rs;
 					}
 				}
+				$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, true);
 				for($i = 0; $i < count($result); $i++){
-					foreach($result[$i] As $key => $value){
-						$j = $this->attributes['indizes'][$key];
-						if($this->attributes['form_element_type'][$j] == 'Dokument' AND $value != ''){
-							$parts = explode('&original_name=', $value);
-							if($parts[1] == '')$parts[1] = basename($parts[0]);		# wenn kein Originalname da, Dateinamen nehmen
-							if(file_exists($parts[0])){
-								if(file_exists(IMAGEPATH.$folder.'/'.$parts[1])){		# wenn schon eine Datei mit dem Originalnamen existiert, wird der Dateiname angehängt
-									$file_parts = explode('.', $parts[1]);
-									$parts[1] = $file_parts[0].'_'.basename($parts[0]);
-								}
-								copy($parts[0], IMAGEPATH.$folder.'/'.$parts[1]);
-							}
-							$zip = true;
-						}
-					}
+					$zip = $this->copy_documents_to_export_folder($result[$i], $this->attributes, $layerset[0]['maintable'], $folder);
 				}
 			}
 
@@ -1308,7 +1289,7 @@ class data_import_export {
 			}
 
 			# bei Bedarf zippen
-			if($zip){
+			if ($zip) {
 				# Beim Zippen gehen die Umlaute in den Dateinamen kaputt, deswegen vorher umwandeln
 				array_walk(searchdir(IMAGEPATH.$folder, true), function($item, $key){
 					$pathinfo = pathinfo($item);
@@ -1375,5 +1356,41 @@ class data_import_export {
 			$GUI->daten_export();
 		}
 	}
+		
+	function copy_documents_to_export_folder($result, $attributes, $maintable, $folder){
+		global $GUI;
+		$zip = false;
+		foreach($result As $key => $value){
+			$j = $attributes['indizes'][$key];
+			if ($attributes['form_element_type'][$j] == 'SubFormEmbeddedPK') {
+				$GUI->getSubFormResultSet($attributes, $j, $maintable, $result);
+				foreach ($GUI->qlayerset[0]['shape'] as $sub_result) {
+					$zip2 = $this->copy_documents_to_export_folder($sub_result, $GUI->qlayerset[0]['attributes'], $GUI->qlayerset[0]['maintable'], $folder);
+					$zip = $zip || $zip2;
+				}
+			}
+			if($attributes['form_element_type'][$j] == 'Dokument' AND $value != ''){
+				$docs = array($value);
+				if(substr($attributes['type'][$j], 0, 1) == '_'){		# Array
+					$docs = explode(',', $value);
+				}
+				foreach($docs as $doc){
+					$doc = trim($doc, '[]{}"');
+					$parts = explode('&original_name=', $doc);
+					if($parts[1] == '')$parts[1] = basename($parts[0]);		# wenn kein Originalname da, Dateinamen nehmen
+					if(file_exists($parts[0])){
+						if(file_exists(IMAGEPATH.$folder.'/'.$parts[1])){		# wenn schon eine Datei mit dem Originalnamen existiert, wird der Dateiname angehängt
+							$file_parts = explode('.', $parts[1]);
+							$parts[1] = $file_parts[0].'_'.basename($parts[0]);
+						}
+						copy($parts[0], IMAGEPATH.$folder.'/'.$parts[1]);
+					}
+				}
+				$zip = true;
+			}
+		}
+		return $zip;
+	}
+	
 }
 ?>

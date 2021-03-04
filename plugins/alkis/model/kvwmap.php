@@ -189,8 +189,10 @@
    	$datastring.=") ";
 		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
 		# Filter
-		$filter = $dbmap->getFilter($layerset[0]['Layer_ID'], $GUI->Stelle->id);
-		if($filter != '')$datastring.= ' AND '.$filter;
+		if($layerset[0]['Layer_ID'] != ''){
+			$filter = $dbmap->getFilter($layerset[0]['Layer_ID'], $GUI->Stelle->id);
+			if($filter != '')$datastring.= ' AND '.$filter;
+		}
 		$datastring.=") as foo using unique " . $end;
     $group = $dbmap->getGroupbyName('Suchergebnis');
     if($group != ''){
@@ -532,7 +534,7 @@
 			$importliste = file($_files['importliste']['tmp_name'], FILE_IGNORE_NEW_LINES);
 			$bom = pack('H*','EFBBBF');
 			$importliste[0] = preg_replace("/^$bom/", '', $importliste[0]);
-			$importliste_string = implode('; ', $importliste);
+			$importliste_string = implode(';', $importliste);
 			$importliste_string = formatFlurstkennzALKIS($importliste_string);
 			$importliste = explode(';', $importliste_string);
 			$GUI->formvars['selFlstID'] = implode(', ', $importliste);
@@ -725,6 +727,7 @@
             }
             else{
             	$GUI->flurstAnzeige($FlurstKennz);
+							$GUI->zoomed = true;
             }
           }
         } # ende Suche nach Flurstück

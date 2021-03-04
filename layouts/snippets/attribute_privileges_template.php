@@ -1,3 +1,10 @@
+<?
+	$disabled = '';
+	if ($this->layer[0]['used_layer_parent_id'] != ''){
+		$disabled = 'disabled="true"';
+	}
+?>
+
 <td class="apt-main-td">
 <div class="apt-main-div">
 	<div class="apt-bezeichnung">
@@ -9,7 +16,7 @@
 	</div>
 	<div class="apt-layerzugriffsrechte">
 		<span class="fett"><? echo $strLayerAccessPrivileges; ?></span><br>
-		<select name="privileg<? echo $this->stelle->id; ?>">
+		<select name="privileg<? echo $this->stelle->id; ?>" <? echo $disabled; ?>>
 			<option <? if($this->layer[0]['privileg'] == '0'){echo 'selected';} ?> value="0"><? echo $strReadAndEdit; ?></option>
 			<option <? if($this->layer[0]['privileg'] == '1'){echo 'selected';} ?> value="1"><? echo $strCreateNewRecords; ?></option>
 			<option <? if($this->layer[0]['privileg'] == '2'){echo 'selected';} ?> value="2"><? echo $strCreateAndDelete; ?></option>
@@ -17,7 +24,7 @@
 	</div>
 	<div class="apt-layerexportrechte">
 		<span class="fett"><? echo $strLayerExportPrivileges; ?></span><br>
-		<select name="export_privileg<? echo $this->stelle->id; ?>">
+		<select name="export_privileg<? echo $this->stelle->id; ?>" <? echo $disabled; ?>>
 			<option <? if($this->layer[0]['export_privileg'] == '0'){echo 'selected';} ?> value="0"><? echo $strNoExport; ?></option>						  			
 				<option <? if($this->layer[0]['export_privileg'] == '2'){echo 'selected';} ?> value="2"><? echo $strOnlyData; ?></option>
 				<option <? if($this->layer[0]['export_privileg'] == '1'){echo 'selected';} ?> value="1"><? echo $strDataAndGeom; ?></option>
@@ -72,7 +79,7 @@ if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) { ?>
 				)
 			);
 ?>
-					<select style="width:100px" name="privileg_<? echo $this->attributes['name'][$i].'_'.$this->stelle->id; ?>">
+					<select style="width:100px" name="privileg_<? echo $this->attributes['name'][$i].'_'.$this->stelle->id; ?>"  <? echo $disabled; ?>>
 <?
 			foreach($privilege_options AS $option) {
 				$selected = ($this->attributes_privileges[$this->attributes['name'][$i]] == $option['value'] ? ' selected' : '');
@@ -82,7 +89,7 @@ if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) { ?>
 				</select>
 				</td>
 				<td style="text-align: center;">
-					<input type="checkbox" name="tooltip_<? echo $this->attributes['name'][$i].'_'.$this->stelle->id; ?>"&nbsp;
+					<input type="checkbox" name="tooltip_<? echo $this->attributes['name'][$i].'_'.$this->stelle->id; ?>"&nbsp; <? echo $disabled; ?>
 					<? if($this->attributes_privileges['tooltip_'.$this->attributes['name'][$i]] == 1){ echo 'checked'; } ?> >
 				</td>
 			</tr>			
@@ -90,7 +97,7 @@ if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) { ?>
 			<tr height="50px" valign="middle">
 				<td><? if($this->formvars['stelle'] != 'a'){ ?>Alle<? } ?></td>
 				<td>
-					<select style="width:100px" name="" onchange="set_all('<? echo $attributenames; ?>', '<? echo $this->stelle->id; ?>', this.value);">
+					<select style="width:100px" name="" onchange="set_all('<? echo $attributenames; ?>', '<? echo $this->stelle->id; ?>', this.value);"  <? echo $disabled; ?>>
 						<option value=""> - <? echo $this->strChoose; ?> - </option>
 						<option value=""><? echo $strNoAccess; ?></option>
 						<option value="0"><? echo $strRead; ?></option>

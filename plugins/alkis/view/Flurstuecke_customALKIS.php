@@ -39,7 +39,8 @@ send_selected_flurst = function(go, formnummer, wz, target){
 		currentform.FlurstKennz.value=flurstkennz;
 		currentform.formnummer.value=formnummer;
 		currentform.wz.value=wz;
-		overlay_submit(currentform, false, 'root')
+		overlay_submit(currentform, false, 'root');
+		stopwaiting();
 	}
 }
 
@@ -51,7 +52,7 @@ backto = function(go){
 show_all = function(){
 	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = 0;
 	currentform.anzahl.value = currentform.anzahl.options[currentform.anzahl.options.length-1].value;
-	currentform.submit();
+	overlay_submit(currentform, false);
 }
 
 show_versions = function(flst){
@@ -82,7 +83,7 @@ hide_versions = function(flst){
 	$forall = false;
 	if($i == '')$i = 0;
 	$gesamt = $this->qlayerset[$i]['count'];
-  $anzObj = count($this->qlayerset[$i]['shape']);
+  $anzObj = @count($this->qlayerset[$i]['shape']);
 	if($gesamt == '')$gesamt = $anzObj;
 	$von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + 1;
 	$bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + $this->formvars['anzahl'];
@@ -830,7 +831,7 @@ hide_versions = function(flst){
 													&nbsp;&nbsp;
 													<a target="root" title="Zoom auf Flurstück und Flurstück hervorheben" href="index.php?go=<? echo $zoomlink;?>"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													&nbsp;&nbsp;
-													<a target="root" title="Zoom auf Flurstück und andere Flurstücke ausblenden" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['Layer_ID'];?>, 'Polygon', 'ax_flurstueck', 'wkb_geometry', '<?php echo $flst->oid; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+													<a title="Zoom auf Flurstück und andere Flurstücke ausblenden" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['Layer_ID'];?>, 'Polygon', 'ax_flurstueck', 'wkb_geometry', '<?php echo $flst->oid; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													
 											<? }
 											if (in_array('kolibri', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Kolibristart')) { ?>
@@ -1019,7 +1020,7 @@ hide_versions = function(flst){
 <input type="hidden" name="FlurstKennz" value="">
 <input type="hidden" name="formnummer" value="">
 <input type="hidden" name="wz" value="">
-<input type="hidden" name="selected_layer_id" value="">
+<input type="hidden" name="selected_layer_id" value="<? echo $this->formvars['selected_layer_id']; ?>">
 
 <?
 if($this->formvars['go'] != 'neu Laden' AND $this->formvars['go'] != 'Layer-Suche' AND $this->formvars['go'] != 'Layer-Suche_Suchen' AND $this->formvars['go'] != 'Sachdaten'){

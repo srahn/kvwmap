@@ -7,6 +7,45 @@ class Connection extends MyObject {
 	function __construct($gui) {
 		parent::__construct($gui, 'connections');
 		$this->identifier = 'id';
+		$this->validations = array(
+			array(
+				'attribute' => 'name',
+				'condition' => 'not_null',
+				'description' => 'Es muss ein Name für die Auswahl angegeben werden.',
+				'option' => null
+			),
+			array(
+				'attribute' => 'name',
+				'condition' => 'unique',
+				'description' => 'Falscher Name.',
+				'option' => null
+			),
+			array(
+				'attribute' => 'host',
+				'condition' => 'not_null',
+				'description' => 'Es muss ein Host angegeben werden.',
+				'option' => null
+			),
+			array(
+				'attribute' => 'dbname',
+				'condition' => 'not_null',
+				'description' => 'Es muss eine Datenbank angegeben werden.',
+				'option' => null
+			),
+			array(
+				'attribute' => 'user',
+				'condition' => 'not_null',
+				'description' => 'Es muss eine Datenbanknutzer angegeben werden.',
+				'option' => null
+			),
+			array(
+				'attribute' => 'password',
+				'condition' => 'not_null',
+				'description' => 'Es muss eine Passwort angegeben werden.',
+				'option' => null
+			)
+		);
+
 		$this->setKeys(
 			array(
 				"id",
@@ -18,24 +57,6 @@ class Connection extends MyObject {
 				"password"
 			)
 		);
-	}
-
-	public function validate($on = '') {
-		$results = array();
-		$results[] = $this->validates('name', 'not_null', 'Es muss ein Name für die Auswahl angegeben werden.');
-		$results[] = $this->validates('name', 'unique', 'Falscher Name.');
-		$results[] = $this->validates('host', 'not_null', 'Es muss ein Host angegeben werden.');
-		$results[] = $this->validates('dbname', 'not_null', 'Es muss eine Datenbank angegeben werden.');
-		$results[] = $this->validates('user', 'not_null', 'Es muss ein Datenbanknutzer angegeben werden.');
-		$results[] = $this->validates('password', 'not_null', 'Es muss ein Password angegeben werden.');
-
-		$messages = array();
-		foreach($results AS $result) {
-			if (!empty($result)) {
-				$messages[] = $result;
-			}
-		}
-		return $messages;
 	}
 
 	public static function find_by_id($gui, $id) {

@@ -156,12 +156,6 @@ if($bis > $this->anzNamenGesamt){
 body {
   overflow-y:scroll;
 }
-#titel {
-	font-family: SourceSansPro3;
-	font-size: 20px;
-	margin-bottom: 0px;
-	margin-top: 10px;
-}
 #nsf_formular_oeffnen_wrap {
 	position: absolute;
 	top: 10px;
@@ -200,7 +194,7 @@ body {
 	background: #345;
 	border-radius: 0 0 0 30px;
 }
-#nsf_formular {
+#form_formular-main {
 	display: <? if ($anzNamen>0) { echo 'none'; } else { echo 'block'; } ?>;
 }
 #nsf_person, #nsf_gebiet, #nsf_platzhalterhinweis, #nsf_treffer {
@@ -235,16 +229,11 @@ body {
 .nsf_suche {
 	padding-left: 20px;
 }
-.nsf_suche_child, .nsf_name_child {
+.form_formular-input {
 	width:100%;
 	height: 28px;
 	margin: 0px 0px 10px 0px;
 	display: flex;
-}
-.nsf_suche_child div:first-child, .nsf_name_child div:first-child {
-	width: 180px;
-	text-align: left;
-	align-self: center;
 }
 .nsf_name>div:last-child {
 	margin-left: 20px;
@@ -278,7 +267,7 @@ body {
 #nsf_parameter div {
 	display: flex;
 }
-#nsf_parameter span, #nsf_parameter div:last-child div:last-child, .nsf_suche_child_cal div:last-child img {
+.nsf_suche_child_cal div:last-child img {
 	align-self: center;
 	margin: auto;
 }
@@ -369,7 +358,7 @@ body {
 }
 </style>
 
-<div id="titel"><?php echo $strTitle; ?></div>
+<div id="form-titel"><?php echo $strTitle; ?></div>
 <?php if ($this->Fehlermeldung!='') {
 include(LAYOUTPATH."snippets/Fehlermeldung.php");
 }
@@ -382,12 +371,12 @@ if ($anzNamen>0) {
 ?>
 <div id="nsf_formular_oeffnen_wrap">
 	<div id="nsf_formular_oeffnen">
-		<input id="nsf_formular_oeffnen_sign" type="checkbox" onclick="toggle_visibility('nsf_formular');" /><label for="nsf_formular_oeffnen_sign" id="nsf_formular_oeffnen_label">+</label>
+		<input id="nsf_formular_oeffnen_sign" type="checkbox" onclick="toggle_visibility('form_formular-main');" /><label for="nsf_formular_oeffnen_sign" id="nsf_formular_oeffnen_label">+</label>
 	</div>
 </div>
 <? } ?>
 
-<div id="nsf_formular">
+<div id="form_formular-main">
 
 	<div id="nsf_platzhalterhinweis">
 		<?php echo $strHintWildcard; ?>.
@@ -397,52 +386,52 @@ if ($anzNamen>0) {
 		<div class="nsf_suche">
 			<div class="nsf_name">
 				<div>
-					<div class="nsf_name_child">
+					<div class="form_formular-input form_formular-aic">
 						<div><?php echo $strName1; ?></div>
 						<div class="float_right"><input name="name1" type="text" value="<? echo htmlentities($this->formvars['name1'], NULL, 'UTF-8'); ?>" autofocus tabindex="1"></div>
 					</div>
-					<div class="nsf_name_child">
+					<div class="form_formular-input form_formular-aic">
 						<div><?php echo $strName2; ?></div>
 						<div class="float_right"><input name="name2" type="text" value="<?php echo $this->formvars['name2']; ?>" tabindex="2"></div>
 					</div>
 				</div>
-				<div><div>
+				<div><div class="form_formular-aic">
 					<input style="cursor: pointer;" type="checkbox" name="exakt" value="1" tabindex="3" <? if($this->formvars['exakt']) echo 'checked'; ?>>
 					<span><?php echo $strExactSearch; ?></span>
 					<span data-tooltip="Name/Firma und Vorname:
 Suche genau nach der Eingabe"></span>
 				</div></div>
 			</div>
-			<div class="nsf_suche_child">
+			<div class="form_formular-input form_formular-aic">
 				<div><?php echo $strName3; ?></div>
 				<div><input name="name9" type="text" value="<?php echo $this->formvars['name9']; ?>" tabindex="4"></div>
 			</div>
-			<div class="nsf_suche_child">
+			<div class="form_formular-input form_formular-aic">
 				<div><?php echo $strName4; ?></div>
 				<div><input name="name10" type="text" value="<?php echo $this->formvars['name10']; ?>" tabindex="5"></div>
 			</div>
-			<div class="nsf_suche_child">
+			<div class="form_formular-input form_formular-aic">
 				<div><?php echo $strName5; ?></div>
 				<div><input name="name3" type="text" value="<?php echo $this->formvars['name3']; ?>" tabindex="6"></div>
 			</div>
-			<div class="nsf_suche_child nsf_suche_child_cal">
+			<div class="form_formular-input form_formular-aic nsf_suche_child_cal">
 				<div><?php echo $strName6; ?></div>
 				<div><input name="name4" type="text" value="<?php echo $this->formvars['name4']; ?>" tabindex="7"></div>
 				<div><img title="TT.MM.JJJJ" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></div>
 			</div>
-			<div class="nsf_suche_child">
+			<div class="form_formular-input form_formular-aic">
 				<div><?php echo $strName7; ?></div>
 				<div><input name="name5" type="text" value="<?php echo $this->formvars['name5']; ?>" tabindex="8"></div>
 			</div>
-			<div class="nsf_suche_child">
+			<div class="form_formular-input form_formular-aic">
 				<div><?php echo $strName8; ?></div>
 				<div><input name="name6" type="text" value="<?php echo $this->formvars['name6']; ?>" tabindex="9"></div>
 			</div>
-			<div class="nsf_suche_child">
+			<div class="form_formular-input form_formular-aic">
 				<div><?php echo $strName9; ?></div>
 				<div><input name="name7" type="text" value="<?php echo $this->formvars['name7']; ?>" tabindex="10"></div>
 			</div>
-			<div class="nsf_suche_child">
+			<div class="form_formular-input form_formular-aic">
 				<div><?php echo $strName10; ?></div>
 				<div><input name="name8" type="text" value="<?php echo $this->formvars['name8']; ?>" tabindex="11"></div>
 			</div>			
@@ -451,19 +440,19 @@ Suche genau nach der Eingabe"></span>
 	<div id="nsf_gebiet">
 		<div class="nsf_titel menu"><?php echo $strGebiet; ?></div>
 		<div class="nsf_suche">
-			<div class="nsf_suche_child">
+			<div class="form_formular-input form_formular-aic">
 				<div><?php echo $strGbbez; ?></div>
 				<div><input name="bezirk" type="text" value="<?php echo $this->formvars['bezirk']; ?>" tabindex="12"></div>
 			</div>
-			<div class="nsf_suche_child">
+			<div class="form_formular-input form_formular-aic">
 				<div><?php echo $strGbbl; ?></div>
 				<div><input name="blatt" type="text" value="<?php echo $this->formvars['blatt']; ?>" tabindex="13"></div>
 			</div>
-			<div class="nsf_suche_child">
+			<div class="form_formular-input form_formular-aic">
 				<div><?php echo $strGemkg; ?></div>
 				<div tabindex="14"><?php echo $this->GemkgFormObj->html; ?></div>
 			</div>
-			<div class="nsf_suche_child">
+			<div class="form_formular-input form_formular-aic">
 				<div><?php echo $strFlur; ?></div>
 				<div tabindex="15"><?php echo $this->FlurFormObj->html; ?></div>
 			</div>
@@ -473,7 +462,7 @@ Suche genau nach der Eingabe"></span>
 </div>
 
 <div id="nsf_parameter">
-	<div>
+	<div class="form_formular-aic">
 		<div>
 			<input name="withflurst" type="checkbox" <? if($this->formvars['withflurst'] == 'on'){echo 'checked';} ?> tabindex="16">
 		</div>		
@@ -482,7 +471,7 @@ Suche genau nach der Eingabe"></span>
 			<span data-tooltip="Zeige auch die zum Grundbuchblatt gehörenden Flurstücke an"></span>
 		</div>
 	</div>
-	<div class="">
+	<div class="form_formular-aic">
 		<div><input name="anzahl" size="2" onkeyup="checknumbers(this, 'int2', '', '');" type="text" value="<?php echo $this->formvars['anzahl']; ?>" tabindex="17"></div>
 		<div><?php echo $strShowHits; ?></div>
 	</div>
@@ -493,6 +482,10 @@ Suche genau nach der Eingabe"></span>
 
 
 	
+<? }
+		else{ ?>
+			<input name="anzahl" size="2" onkeyup="checknumbers(this, 'int2', '', '');" type="text" value="<?php echo $this->formvars['anzahl']; ?>" tabindex="17">
+			<?php echo $strShowHits; ?>
 <? }
 if ($anzNamen>0) {
 ?>

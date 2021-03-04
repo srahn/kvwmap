@@ -252,7 +252,12 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			json = '{'+values.join()+'}';
 		}
 		else {
-			json = JSON.stringify(values);
+			if(values.length > 0){
+				json = JSON.stringify(values);
+			}
+			else{
+				json = '';
+			}
 		}
 		field.value = json;
 		if (field.onchange) {
@@ -399,6 +404,11 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	}
 
 	save = function(){
+		var open_subforms = document.querySelectorAll('.subForm:not(:empty)');
+		if(open_subforms.length > 0){
+			message([{'type': 'info', 'msg': 'Es gibt noch offene Unterformulare, die noch nicht gespeichert wurden!'}]);
+			return;
+		}
 		form_fieldstring = enclosingForm.form_field_names.value+'';
 		form_fields = form_fieldstring.split('|');
 		for(i = 0; i < form_fields.length-1; i++){
@@ -557,10 +567,12 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				alldivs[i].innerHTML = '';
 			}
 		}
+		auto_resize_overlay();
 	}
 
 	clearsubform = function(subformid){
 		document.getElementById(subformid).innerHTML = '';
+		auto_resize_overlay();
 	}
 	
 	switch_gle_view1 = function(layer_id){
@@ -681,10 +693,6 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		}
 		$('#sellectDatasetsLinkText, #desellectDatasetsLinkText').toggle();
 		message([{ 'type': 'notice', 'msg': (status ? '<? echo $strAllDeselected; ?>' : '<? echo $strAllSelected; ?>')}]);
-	}
-
-	highlight_object = function(layer_id, oid){
-		root.ahah('index.php', 'go=tooltip_query&querylayer_id='+layer_id+'&oid='+oid, new Array(root.document.GUI.result, ''), new Array('setvalue', 'execute_function'));
 	}
 	
 	zoom2object = function(layer_id, geomtype, tablename, columnname, oid, selektieren){

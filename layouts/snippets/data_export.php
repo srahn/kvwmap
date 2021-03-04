@@ -152,6 +152,29 @@ function select_document_attributes(ids){
 	}
 }
 
+function save_settings(){
+	if(document.GUI.setting_name.value != ''){
+		if(document.GUI.newpathwkt.value == '' && document.GUI.newpath.value != ''){
+			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+		}
+		document.GUI.go_plus.value = 'Einstellungen_speichern';
+		document.GUI.submit();
+	}
+	else{
+		alert('Bitte geben Sie einen Namen für die Export-Einstellungen an.');
+	}
+}
+
+function delete_settings(){
+	if(document.GUI.export_setting.value != ''){
+		document.GUI.go_plus.value = 'Einstellungen_löschen';
+		document.GUI.submit();
+	}
+	else{
+		alert('Es wurde keine Export-Einstellung ausgewählt.');
+	}
+}
+
 //-->
 </script>
 
@@ -255,6 +278,39 @@ $j=0;
 						</table>
 					</div><?
 				} ?>
+				<div style="padding:1px 0 5px 10px; margin-left: 15px; border-left: 1px solid #ccc; margin-left: auto">
+					<table>
+						<tr>
+							<td><? echo $strExportSettings; ?>:</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="text" name="setting_name" value="">
+							</td>
+							<td>
+								<input type="button" style="width: 86px" name="speichern" value="<? echo $this->strSave; ?>" onclick="save_settings();"></span>
+							</td>
+						</tr>					
+						<tr <? if(empty($this->export_settings)){echo 'style="display: none"'; } ?>>
+							<td>
+								<select name="export_setting">
+									<option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
+									<?
+										for($i = 0; $i < count($this->export_settings); $i++){
+											echo '<option value="'.$this->export_settings[$i]['name'].'" ';
+											if($this->selected_export_setting[0]['name'] == $this->export_settings[$i]['name']){echo 'selected ';}
+											echo '>'.$this->export_settings[$i]['name'].'</option>';
+										}
+									?>
+								</select>
+							</td>
+							<td>
+								<input type="button" style="width: 86px" name="laden" value="<? echo $this->strLoad; ?>" onclick="document.GUI.submit();">
+								<a title="<? echo $this->strDelete; ?>" onclick="delete_settings();"><i class="fa fa-trash" name="delete"></i></a>
+							</td>
+						</tr>
+					</table>
+				</div>
 			</div>
 
 			<div id="attributes_div" style="<? if($this->formvars['export_format'] == 'UKO' OR $this->formvars['export_format'] == 'OVL' OR $simple) { echo 'display: none';} else { echo 'visibility: visible';} ?>;border-bottom:1px solid #C3C7C3; border-left: 1px solid #C3C7C3; border-right: 1px solid #C3C7C3; padding-top:10px; padding-bottom:5px; padding-left:5px; padding-right:5px;">
@@ -263,7 +319,7 @@ $j=0;
 					for($s = 0; $s < 4; $s++){ ?>
 						<div style="float: left; padding: 4px;"><?
 							for($i = 0; $i < $floor+$r; $i++) {
-								if(!in_array($this->data_import_export->attributes['form_element_type'][$j], ['dynamicLink']) AND $this->data_import_export->attributes['type'][$j] != 'unknown'){
+								if(!in_array($this->data_import_export->attributes['form_element_type'][$j], ['dynamicLink']) AND ($this->data_import_export->attributes['type'][$j] != 'unknown' OR $this->data_import_export->attributes['form_element_type'][$j] == 'SubFormEmbeddedPK')){
 									if($this->data_import_export->attributes['group'][$j] != '') $groupnames = true;
 									if($this->data_import_export->attributes['form_element_type'][$j] == 'Time' AND $this->data_import_export->attributes['options'][$j] == 'export') $exporttimestamp = true;
 									if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument'){$document_attributes = true; $document_ids[] = $j;} ?>
@@ -298,13 +354,13 @@ $j=0;
 				&nbsp;&nbsp;&nbsp;&nbsp;<a id="selectall_link" href="javascript:selectall('<? echo $this->data_import_export->attributes['the_geom']; ?>')"><? echo $strSelectAll; ?></a>
 			</div><?
 
-			if($groupnames OR $document_attributes){ ?>
+			if($groupnames OR $document_attributes or true){ ?>
 				<div style="border-bottom:1px solid #C3C7C3; border-left: 1px solid #C3C7C3; border-right: 1px solid #C3C7C3; padding-top:10px; padding-bottom:5px; padding-left:5px; padding-right:5px;">
 					&nbsp;&nbsp;<? echo $strOptions; ?>:<br>
 					<table cellspacing="7">
 						<tr>
 							<td>
-								<input type="checkbox" name="with_metadata_document" value="1" checked> <? echo $strExportMetadatadocument; ?>
+								<input type="checkbox" name="with_metadata_document" value="1" <? if ($this->formvars['with_metadata_document'] == 1)echo 'checked'; ?>> <? echo $strExportMetadatadocument; ?>
 							</td>
 						</tr><?
 						if ($groupnames){ ?>
@@ -316,15 +372,15 @@ $j=0;
 										}
 										else {
 											echo 'visibility:visible';
-										} ?>"><input type="checkbox" name="export_groupnames"> <? echo $strExportGroupnames; ?>
+										} ?>"><input type="checkbox" name="export_groupnames" <? if ($this->formvars['export_groupnames'] == 1)echo 'checked'; ?>> <? echo $strExportGroupnames; ?>
 									</div>
 								</td>
 							</tr><?
 						}
-						if ($document_attributes){ ?>
+						if ($document_attributes or true){ ?>
 							<tr>
 								<td>
-									<input type="checkbox" onclick="select_document_attributes('<? echo implode(',', $document_ids); ?>');" name="download_documents"><? echo $strDownloadDocuments; ?>
+									<input type="checkbox" onclick="select_document_attributes('<? echo implode(',', $document_ids); ?>');" name="download_documents" <? if ($this->formvars['download_documents'] == 1)echo 'checked'; ?>><? echo $strDownloadDocuments; ?>
 								</td>
 							</tr><?
 						} ?>
@@ -355,7 +411,7 @@ $j=0;
 			<input type="checkbox" name="singlegeom" value="true" <? if($this->formvars['singlegeom'])echo 'checked="true"'; ?>>
 			<? echo $strSingleGeoms; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			<? echo $this->strUseGeometryOf; ?>:
-  		<select name="geom_from_layer" onchange="document.GUI.submit();">
+  		<select name="geom_from_layer" onchange="geom_from_layer_change();">
   			<option value=""><?php echo $this->strPleaseSelect; ?></option>
   			<?
   				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
@@ -380,9 +436,6 @@ $j=0;
 <input type="hidden" name="client_epsg" value="<? echo $this->user->rolle->epsg_code ?>">
 <input type="hidden" name="go" value="Daten_Export">
 <input type="hidden" name="area" value="">
-<INPUT TYPE="hidden" NAME="columnname" VALUE="<? echo $this->formvars['columnname'] ?>">
-<INPUT TYPE="hidden" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
-<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">
 <INPUT TYPE="hidden" NAME="export_columnname" VALUE="<? echo $this->data_import_export->formvars['columnname'] ?>">
 <input type="hidden" name="always_draw" value="<? echo $always_draw; ?>"><?php
 if ($simple) { ?>

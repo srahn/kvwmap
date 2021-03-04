@@ -348,9 +348,9 @@ class ddl {
 						}
 					}
 					$rectangle['x1'] = $x;
-					$rectangle['y1'] = $y + ($endy-$y);
+					$rectangle['y1'] = min($y, $endy);
 					$rectangle['x2'] = $endx-$x;
-					$rectangle['y2'] = -($endy-$y);
+					$rectangle['y2'] = abs($endy-$y);
 					$rectangle['id'] = $this->layout['rectangles'][$j]['id'];
 					$this->gui->rectangles[$this->pdf->currentContents][] = $rectangle;
 					#echo 'zeichne Rechteck: '.$x.' '.$y.' '.$endx.' '.$endy.'<br>';
@@ -434,20 +434,7 @@ class ddl {
 										$y = $this->gui->sachdaten_druck_editor_preview($sublayoutobject[0], $this->pdf, $offx, $offy);
 									}
 									else{
-										$this->gui->formvars['no_output'] = true;
-										for($p = 0; $p < count($attributes['name']); $p++){			# erstmal alle Suchparameter des übergeordneten Layers für die Layersuche leeren
-											$this->gui->formvars['value_'.$attributes['name'][$p]] = '';
-											$this->gui->formvars['operator_'.$attributes['name'][$p]] = '';
-										}
-										$this->gui->formvars['value_'.$this->layerset['maintable'].'_oid'] = '';
-										for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){			# die Suchparameter für die Layersuche
-											$this->gui->formvars['value_'.$this->attributes['subform_pkeys'][$j][$p]] = $this->result[$i][$attributes['subform_pkeys'][$j][$p]];
-											$this->gui->formvars['operator_'.$this->attributes['subform_pkeys'][$j][$p]] = '=';
-										}							
-										$this->gui->GenerischeSuche_Suchen();
-										for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){			# die Suchparameter für die Layersuche wieder leeren
-											$this->gui->formvars['value_'.$this->attributes['subform_pkeys'][$j][$p]] = '';
-										}	
+										$this->gui->getSubFormResultSet($this->attributes, $j, $this->layerset['maintable'], $this->result[$i]);
 										$this->gui->formvars['aktivesLayout'] = $sublayout;
 										$page_id_before_sublayout = $this->pdf->currentContents;
 										$y = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy);
@@ -881,7 +868,10 @@ class ddl {
 		if($this->layout['columns']){	# spaltenweiser Typ
 			$rowcount = ceil(count($result) / 3);
 		}
-    for($i = 0; $i < @count($result); $i++){
+		for ($i = 0; $i < @count($result); $i++){
+			if (true) {
+				$this->layout = $this->load_layouts(NULL, $result[$i][$this->layerset['ddl_attribute']], NULL, array(0,1))[0];
+			}
 			$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
     	$this->i_on_page++;
 			# beim Untereinander-Typ oder eingebettet-Typ ohne Sublayouts oder wenn Datensätze nicht durch Seitenumbruch 

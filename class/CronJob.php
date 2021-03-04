@@ -69,7 +69,8 @@ class CronJob extends MyObject {
 
 		if (!empty($this->get('time'))) {
 			if (!empty($this->get('query'))) {
-				$line = $this->get('time') . ' psql -h pgsql -U ' . $this->gui->pgdatabase->user . ' -c "' . preg_replace('/\s+/', ' ', $this->get('query')) . '" ' . $dbname . ' >> ' . $this->log_file_name . ' 2>&1';
+				$pg_credentials = $this->gui->pgdatabase->get_object_credentials();
+				$line = $this->get('time') . ' psql -h ' . $pg_credentials['host'] . ' -U ' . $pg_credentials['user'] . ' -c "' . preg_replace('/\s+/', ' ', $this->get('query')) . '" ' . $dbname . ' >> ' . $this->log_file_name . ' 2>&1';
 			}
 			else {
 				if (!empty($this->get('function'))) {
