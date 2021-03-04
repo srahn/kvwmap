@@ -5,6 +5,8 @@
 		SELECT *
 		FROM migrations
 		WHERE `filename` = '2014-09-12_16-33-22_Version2.0.sql'
+		AND `component` = 'kvwmap'
+		AND `type` = 'mysql'
 	";
 	$this->database->execSQL($sql, 0, 0);
 
