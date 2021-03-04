@@ -11,11 +11,13 @@
 			document.getElementById('udf_changepasswd').classList.add('udf_pw-active');
 			document.GUI.password1.disabled=false;
 			document.GUI.password2.disabled=false;
+			document.GUI.changepasswd.value = 1;
 		}
 		else{
 			document.getElementById('udf_changepasswd').classList.remove('udf_pw-active');
 			document.GUI.password1.disabled=true;
 			document.GUI.password2.disabled=true;
+			document.GUI.changepasswd.value = 0;
 		}
 	}
 	
@@ -40,7 +42,7 @@
 		}).appendTo('#GUI');
 		$('#GUI input[name=password1]').prop('disabled', false).val(newPassword);
 		$('#GUI input[name=password2]').prop('disabled', false).val(newPassword);
-		$('#GUI input[name=changepasswd]').attr('checked', true);
+		document.GUI.changepasswd.value = 1;
 	}
 	
 </script>
@@ -258,6 +260,7 @@
 ?>
 				<div class="udf_eingabe-pw-change">
 					<div id="udf_changepasswd" class="" onclick="toggle_password();">
+						<input name="changepasswd" type="hidden" value="">
 						<i class="fa fa-pencil" aria-hidden="true"></i><? echo $strChangePassword;?>
 					</div>
 
