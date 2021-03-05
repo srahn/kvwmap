@@ -8710,6 +8710,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$layerset[0]['shape'] = array();
 					while ($rs = pg_fetch_assoc($ret[1])) {
 						$layerset[0]['shape'][] = $rs;
+						if ($rs[$attributes['the_geom']] != '') {
+							$geometries_found = true;
+						}
 					}
 					$num_rows = pg_num_rows($ret[1]);
 					if (value_of($this->formvars, 'offset_'.$layerset[0]['Layer_ID']) == '' AND $num_rows < $this->formvars['anzahl']) {
@@ -8826,6 +8829,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$attributes['visible'][$k] = true;
           }
           $layerset[0]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
+					if ($features[$j]['geom'] != '') {
+						$geometries_found = true;
+					}
         }
 				# last_search speichern
 				if($this->last_query == ''){
@@ -8879,14 +8885,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			if (value_of($this->formvars, 'printversion') == '' AND $this->user->rolle->querymode == 1) {
 				# bei aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer (das Zeichnen der Karte passiert in einem separaten Ajax-Request aus dem Overlay heraus)
 				$this->loadMap('DataBase');
-				if (
-					count($this->qlayerset[$i]['shape']) > 0 AND
-					(
-						$layerset[0]['shape'][0][$attributes['the_geom']] != '' OR
-						$layerset[0]['shape'][0]['wfs_geom'] != ''
-					)
-				) {
-					# wenn was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
+				if ($geometries_found) {
+					# wenn was mit Geometrie gefunden wurde, auf Datensätze zoomen
 					$this->zoomed = true;
 					switch ($layerset[0]['connectiontype']) {
 						case MS_POSTGIS : {
