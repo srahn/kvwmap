@@ -9264,15 +9264,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$ret = $layerdb->execSQL($sql, 4, 1, true);
 			if ($ret['success']) {
 				# Frage Meldung  über last notice ab
-				$last_notice = pg_last_notice($layerdb->dbConn);
-				$msg_type = 'info';
-				if ($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true)) {
-					if ($notice_result['msg']) {
-						$last_notice = $notice_result['msg'];
-						$msg_type = $notice_result['msg_type'];
+				if ($last_notice = pg_last_notice($layerdb->dbConn)) {
+					$msg_type = 'info';
+					if ($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true)) {
+						if ($notice_result['msg']) {
+							$last_notice = $notice_result['msg'];
+							$msg_type = $notice_result['msg_type'];
+						}
 					}
+					$results[] = array('type' => $msg_type, 'msg' => $last_notice);
 				}
-				$results[] = array('type' => $msg_type, 'msg' => $last_notice);
 				
 				# Frage Meldung über SQL result ab
 				$sql_result = pg_fetch_row($ret['query']);
