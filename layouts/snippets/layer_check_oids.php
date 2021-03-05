@@ -73,6 +73,42 @@ function replace_oid_in_data($data, $id){
 	return $data;
 }
 
+switch ($this->formvars['action']) {
+	case 'set_new_oid' : {
+		foreach ($this->formvars['layer_id'] as $layer_id) {
+			if ($this->formvars['check_' . $layer_id] AND $this->formvars['new_oid_' . $layer_id] != '') {
+				$sql = "UPDATE layer SET oid = '" . $this->formvars['new_oid_' . $layer_id] . "' WHERE Layer_ID = " . $layer_id;
+				$result = $this->database->execSQL($sql);
+			}
+		}
+	}break;
+	case 'set_new_query' : {
+		foreach ($this->formvars['layer_id'] as $layer_id) {
+			if ($this->formvars['check_' . $layer_id] AND $this->formvars['new_query_' . $layer_id] != '') {
+				$sql = "UPDATE layer SET pfad = '" . addcslashes($this->formvars['new_query_' . $layer_id], "'") . "' WHERE Layer_ID = " . $layer_id;
+				$result = $this->database->execSQL($sql);
+			}
+		}
+	}break;
+	case 'set_new_data' : {
+		foreach ($this->formvars['layer_id'] as $layer_id) {
+			if ($this->formvars['check_' . $layer_id] AND strpos($this->formvars['new_data_' . $layer_id], 'using ') !== false) {
+				$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+				$select = $mapDB->getSelectFromData($this->formvars['new_data_' . $layer_id]);
+				$from = substr($select, strrpos(strtolower($select), 'from') + 5);
+				if (strpos($from, ',') === false) {
+					$table = explode(' ', $from);
+					$table_part = explode('.', $table[0]);
+					if ($table_part[1] == $this->formvars['maintable_' . $layer_id]) {
+						$sql = "UPDATE layer SET Data = '" . addcslashes($this->formvars['new_data_' . $layer_id], "'") . "' WHERE Layer_ID = " . $layer_id;
+						$result = $this->database->execSQL($sql);
+					}
+				}
+			}
+		}
+	}break;
+}
+
 $color[false] = '#db5a5a';
 $color[true] = '#36908a';
 
@@ -205,9 +241,7 @@ $i = 0;
 while($layer = $this->database->result->fetch_assoc()){
   $status = checkStatus($layer);
 	$result = array();
-	if (!$status['oid']) {
-		$result = get_oid_alternative($layer);
-	}
+	$result = get_oid_alternative($layer);
 	if ($status['oid'] AND $status['query'] AND $status['data']) {
 		$class = 'layer_ok';
 	}
@@ -228,7 +262,9 @@ while($layer = $this->database->result->fetch_assoc()){
 					' . $layer["Gruppenname"] . '
 				</div>
 				<div style="width: 200px; margin-top: 40px;">
-					<a href="index.php?go=Layereditor&selected_layer_id='.$layer["Layer_ID"].'"target="_blank">'.$layer["Name"].'</a>
+					<input type="hidden" name="layer_id[]" value="' . $layer["Layer_ID"] . '">
+					<input style="float: left" type="checkbox" name="check_' . $layer["Layer_ID"] . '" value="1">
+					<div>&nbsp;<a href="index.php?go=Layereditor&selected_layer_id='.$layer["Layer_ID"].'"target="_blank">'.$layer["Name"].'</a></div>
 				</div>
 			</td>
 			<td style="background-color: '.$color[$status['oid']].'">
@@ -238,20 +274,20 @@ while($layer = $this->database->result->fetch_assoc()){
 			<td valign="top" style="background-color: '.$color[$status['query']].'">
 				' . ($i == 0 ? '<div class="fett scrolltable_header">Query</div>' : '') . '
 				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['pfad'] . '</textarea>
-				' . ((!$status['query']) ? '<div class="replaced"><textarea onmouseenter="select_text(this, \'oid\');">' . delete_oid_in_sql($layer['pfad']) . '</textarea></div>' : '') . '
+				' . ((!$status['query']) ? '<div class="replaced"><textarea name="new_query_' . $layer["Layer_ID"] . '" onmouseenter="select_text(this, \'oid\');">' . delete_oid_in_sql($layer['pfad']) . '</textarea></div>' : '') . '
 			</td>
 			<td valign="top" style="background-color: '.$color[$status['data']].'">
 				' . ($i == 0 ? '<div class="fett scrolltable_header">Data</div>' : '') . '
 				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['Data'] . '</textarea>
-				' . ((!$status['data'] AND $result['oid_alternative']) ? '<div class="replaced"><textarea onmouseenter="select_text(this, \'oid\');">' . replace_oid_in_data($layer['Data'], $result['oid_alternative']) . '</textarea></div>' : '') . '
+				' . ((!$status['data'] AND $result['oid_alternative']) ? '<div class="replaced"><textarea name="new_data_' . $layer["Layer_ID"] . '" onmouseenter="select_text(this, \'oid\');">' . replace_oid_in_data($layer['Data'], $result['oid_alternative']) . '</textarea></div>' : '') . '
 			</td>
 			<td>
 				' . ($i == 0 ? '<div class="fett scrolltable_header">oid-Alternative</div>' : '') . '
-				' . $result['oid_alternative'] . '
+				<input type="text" size="15" name="new_oid_' . $layer["Layer_ID"] . '" value="' . $result['oid_alternative'] . '">
 			</td>			
 			<td>
 				' . ($i == 0 ? '<div class="fett scrolltable_header">Haupttabelle</div>' : '') . '
-				' . $layer['maintable'] . '
+				<input type="text" size="15" name="maintable_' . $layer["Layer_ID"] . '" value="' . $layer['maintable'] . '">
 			</td>
 			<td>
 				' . ($i == 0 ? '<div class="fett scrolltable_header">Fehlermeldung</div>' : '') . '
@@ -265,16 +301,29 @@ echo '</tbody></table></div>';
 ?>
 
 	<div id="head">
-		<? echo $this->database->result->num_rows; ?> PostGIS-Layer insgesamt<br>
-		<? echo $oid_layer_count; ?> PostGIS-Layer müssen angepasst werden<br>
-		<a href="javascript:void(0);" id="layer_toggle_link" onclick="toggle_layer();">nur die anzupassenden PostGIS-Layer anzeigen</a>
-		<br>
-		Sortierung: 
-		<select name="order" onchange="document.GUI.submit();">
-			<option value="Name" <? if($this->formvars['order'] == 'Name')echo 'selected'; ?>>Name</option>
-			<option value="Gruppenname" <? if($this->formvars['order'] == 'Gruppenname')echo 'selected'; ?>>Gruppe</option>
-		</select>
-		<div id="nav_bar"><? echo $nav_bar; ?></div>
+		<table>
+			<tr>
+				<td>
+					<? echo $this->database->result->num_rows; ?> PostGIS-Layer insgesamt<br>
+					<? echo $oid_layer_count; ?> PostGIS-Layer müssen angepasst werden<br>
+					<a href="javascript:void(0);" id="layer_toggle_link" onclick="toggle_layer();">nur die anzupassenden PostGIS-Layer anzeigen</a>
+					<br>
+					Sortierung: 
+					<select name="order" onchange="document.GUI.submit();">
+						<option value="Name" <? if($this->formvars['order'] == 'Name')echo 'selected'; ?>>Name</option>
+						<option value="Gruppenname" <? if($this->formvars['order'] == 'Gruppenname')echo 'selected'; ?>>Gruppe</option>
+					</select>
+					<div id="nav_bar"><? echo $nav_bar; ?></div>
+				</td>
+				<td valign="top">
+					Für alle ausgewählten Layer:<br>
+					<input type="button" onclick="document.GUI.action.value='set_new_oid';document.GUI.submit();" value="oid-Alternative als ID-Spalte übernehmen"><br>
+					<input type="button" onclick="document.GUI.action.value='set_new_query';document.GUI.submit();" value="Query-Vorschlag übernehmen"><br>
+					<input type="button" onclick="document.GUI.action.value='set_new_data';document.GUI.submit();" value="Data-Vorschlag übernehmen">
+				</td>
+			</tr>
+		</table>
 	</div>
 </div>
 <input type="hidden" name="go" value="layer_check_oids">
+<input type="hidden" name="action" value="">
