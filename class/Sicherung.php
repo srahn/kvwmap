@@ -17,7 +17,8 @@ class Sicherung extends MyObject {
 				"intervall_start_time",
 				"intervall_parameter_1",
 				"intervall_parameter_2",
-				"keep_for_n_days"
+				"keep_for_n_days",
+				"active"
 			)
 		);
 	}
@@ -36,6 +37,18 @@ class Sicherung extends MyObject {
 			}
 		}
 		return $messages;
+	}
+
+	/**
+	*
+	*	Set not set values to default.
+	*
+	*	@author Georg Kämmert
+	**/
+	public function disable_options($formvars){
+		if (!isset($formvars['active'])) {
+			$this->set('active', false);
+		}
 	}
 
 	public static function find_by_id($gui, $id) {
@@ -139,12 +152,12 @@ class Sicherung extends MyObject {
 	*	Translates the day of the week from 0 to 6 into plaintext
 	*
 	* @param	$dow	number 0..6
-	* @return	day of week Montag..Sonntag
+	* @return	day of week Sonntag..Samstag
 	* @author	Georg Kämmert
 	*
 	**/
 	public static function decode_day_of_week($dow){
-		$dow_array = array('Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag');
+		$dow_array = array('Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag');
 		return $dow_array[$dow];
 	}
 
@@ -226,7 +239,7 @@ class Sicherung extends MyObject {
 
 		//export only if target_dir is not null or
 		// if null only rsync jobs are defined
-		if ($this->get('target_dir') == ''){
+		if ($this->get('target_dir') == '') {
 			foreach ($this->inhalte as $inhalt) {
 				if ($inhalt->get('methode') == 'Verzeichnisinhalte kopieren'){
 					$return = true;
@@ -238,6 +251,10 @@ class Sicherung extends MyObject {
 				}
 			}
 		}
+
+		//is Sicherung active?
+		$return = $this->get('active');
+
 		return $return;
 	}
 

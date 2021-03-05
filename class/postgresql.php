@@ -355,7 +355,7 @@ FROM
     return $ret;
   }
 
-	function execSQL($sql, $debuglevel, $loglevel, $suppress_err_msg = false) {
+	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false) {
 		$ret = array(); // Array with results to return
 		$strip_context = true;
 

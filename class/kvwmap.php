@@ -590,7 +590,7 @@ echo '			</table>
 		$(\'#group_options_' . $this->formvars['group_id'] . '\').show()
 		';
 	}
-	
+
 	function saveGeomFromLayer(){
 		$this->user->rolle->saveGeomFromLayer($this->formvars['selected_layer_id'], $this->formvars['geom_from_layer']);
 	}
@@ -4549,9 +4549,12 @@ echo '			</table>
 				}
 			} break;
 			case "write_backup_config_and_cron" : {
-				$this->administration->write_backup_config_and_cron($this);
+				$result = $this->administration->write_backup_config_and_cron($this);
 				include_once(CLASSPATH . 'Sicherung.php');
 				$this->sicherungen = Sicherung::find($this);
+				$this->formvars['crontab'] = $result['crontab'];
+				$this->formvars['count_export'] = $result['count_export'];
+				$this->formvars['count_skip'] = $result['count_skip'];
 				$this->main = 'sicherungsdaten.php';
 			} break;
 			case "create_inserts_from_dataset" : {
@@ -4598,22 +4601,56 @@ echo '			</table>
 	}
 
 	/**
-	*	save new or update existing Sicherung
+	*	Decision-maker, insert odr update Sicherung?
 	*	@author Georg Kämmert
 	**/
 	function Sicherung_speichern() {
+		if (isset($this->formvars['id'])) {
+			$this->Sicherung_update();
+		}
+		else {
+			$this->Sicherung_insert();
+		}
+	}
+
+	/**
+	*	save new Sicherung
+	*	@author Georg Kämmert
+	**/
+	function Sicherung_insert() {
 		include_once(CLASSPATH . 'Sicherung.php');
 		$this->sicherung = new Sicherung($this);
 		$this->sicherung->data = formvars_strip($this->formvars, $this->sicherung->getKeys(), 'keep');
 
 		$results = $this->sicherung->validate();
 		if ( empty($results) ){
-			if ( $this->sicherung->get('id') > 0 ) {
-				$results = $this->sicherung->update();
+			$results = $this->sicherung->create();
+		}
+
+		if ($results[0]['success']) {
+			$this->add_message('notice', 'Sicherung erfolgreich angelegt.');
+			$this->Sicherungen_anzeigen();
+		}
+		else {
+			$this->add_message('array', $results);
+			if ( empty($this->sicherung->get('id')) ){
+				$this->main = 'sicherungsdaten_formular.php';
+				$this->output();
 			} else {
-				$results = $this->sicherung->create();
+				$this->Sicherung_editieren();
 			}
 		}
+	}
+
+	/**
+	*	update existing Sicherung
+	*	@author Georg Kämmert
+	**/
+	function Sicherung_update() {
+		include_once(CLASSPATH . 'Sicherung.php');
+		$this->sicherung = Sicherung::find_by_id($this, $this->formvars['id']);
+		$this->sicherung->data = formvars_strip($this->formvars, $this->sicherung->getKeys(), 'keep');
+		$results = $this->sicherung->update();
 
 		if ($results[0]['success']) {
 			$this->add_message('notice', 'Sicherung erfolgreich angelegt.');
@@ -8400,7 +8437,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->invitation->delete();
 		$this->add_message('notice', 'Einladung erfolgreich gelöscht.');
 	}
-	
+
 	function getSubFormResultSet($attributes, $j, $maintable, $result){
 		# $attributes ist das Attribut-Array des übergeordneten Layers
 		# $j ist der Zähler in diesem Array mit dem SubForm-Attribut
@@ -9614,7 +9651,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]]."'"; # Typ "normal"
 							}
 						} break;
-		
+
 						case ($table['type'][$i] == 'ExifLatLng') : {
 							$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
 

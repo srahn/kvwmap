@@ -2,18 +2,32 @@
   include(LAYOUTPATH . 'languages/sicherungsdaten_' . $this->user->rolle->language . '.php');
 ?>
 <script>$('#gui-table').css('width', '100%')</script>
+<script>
+	function update_aktiv(id) {
+		var aktiv = ($('#aktiv_' + id).is(':checked') ? 1 : 0);
+		window.location = 'index.php?go=Sicherung_speichern&id=' + id + '&active=' + aktiv;
+	}
+
+</script>
 <h2><? echo $strTitel; ?></h2>
 <br>
 <table cellpadding=5 cellspacing=0>
 	<tr>
-		<th><?php echo $strName ?></th>
-		<th><?php echo $strBeschreibung ?></th>
-		<th><?php echo $strZielVerz ?></th>
-		<th><?php echo $strIntervall ?></th>
+		<th align="left"><?php echo $strAktiv ?></th>
+		<th align="left"><?php echo $strName ?></th>
+		<th align="left"><?php echo $strBeschreibung ?></th>
+		<th align="left"><?php echo $strZielVerz ?></th>
+		<th align="left"><?php echo $strIntervall ?></th>
 		<th width="70px"></th>
 	</tr><?php
 		foreach ($this->sicherungen as $sicherung) { ?>
 			<tr>
+				<td>	<input type="checkbox"
+										value="<? echo $sicherung->get('id') ?>"
+										id="aktiv_<? echo $sicherung->get('id') ?>"
+										name="active" <? echo $sicherung->get('active') ? "checked" : "" ?>
+										onchange="update_aktiv(this.value);"
+							>
 				<td><?php echo $sicherung->get('name'); ?></td>
 				<td><?php echo $sicherung->get('beschreibung'); ?></td>
 				<td><?php echo $sicherung->get('target_dir') ?></td>
@@ -32,3 +46,29 @@
 		</td>
 	</tr>
 </table>
+
+<div style="text-align: left; margin-top: 20px; margin-left: 20px;">
+	<? echo isset($this->formvars['count_export']) ? 'Es wurden ' . $this->formvars['count_export'] . ' Sicherungen exportiert. <br>' : '';
+		 echo (isset($this->formvars['count_skip']) && $this->formvars['count_skip'] > 0) ? $this->formvars['count_skip'] . ' Sicherungen wurden nicht exportiert. Entweder diese sind nicht akiv oder haben keinen Sicherungsinhalt.' : '';
+	?>
+	<? if (isset($this->formvars['crontab'])) { ?>
+		<br><br>
+	Folgender Crontab wird innerhalb der nächsten Stunde nach /etc/cron.d/kvwmap_backup_crontab kopiert.
+	<div style="
+		color: white;
+		background-color: #000;
+		border: 1px solid #fff;
+		text-align: left;
+		margin-top: 5px;
+		margin-right: 20px;
+		margin-bottom: 30px;
+		padding: 5px;
+		border-radius: 0px;
+		max-width: 800px;
+	">
+	<? echo $this->formvars['crontab'] ?>
+	</div>
+</div>
+<?
+}
+?>
