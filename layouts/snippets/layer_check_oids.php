@@ -76,7 +76,7 @@ function replace_oid_in_data($data, $id){
 switch ($this->formvars['action']) {
 	case 'set_new_oid' : {
 		foreach ($this->formvars['layer_id'] as $layer_id) {
-			if ($this->formvars['new_oid_' . $layer_id] != '') {
+			if ($this->formvars['check_' . $layer_id] AND $this->formvars['new_oid_' . $layer_id] != '') {
 				$sql = "UPDATE layer SET oid = '" . $this->formvars['new_oid_' . $layer_id] . "' WHERE Layer_ID = " . $layer_id;
 				$result = $this->database->execSQL($sql);
 			}
@@ -84,7 +84,7 @@ switch ($this->formvars['action']) {
 	}break;
 	case 'set_new_query' : {
 		foreach ($this->formvars['layer_id'] as $layer_id) {
-			if ($this->formvars['new_query_' . $layer_id] != '') {
+			if ($this->formvars['check_' . $layer_id] AND $this->formvars['new_query_' . $layer_id] != '') {
 				$sql = "UPDATE layer SET pfad = '" . addcslashes($this->formvars['new_query_' . $layer_id], "'") . "' WHERE Layer_ID = " . $layer_id;
 				$result = $this->database->execSQL($sql);
 			}
@@ -92,7 +92,7 @@ switch ($this->formvars['action']) {
 	}break;
 	case 'set_new_data' : {
 		foreach ($this->formvars['layer_id'] as $layer_id) {
-			if (strpos($this->formvars['new_data_' . $layer_id], 'using ') !== false) {
+			if ($this->formvars['check_' . $layer_id] AND strpos($this->formvars['new_data_' . $layer_id], 'using ') !== false) {
 				$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 				$select = $mapDB->getSelectFromData($this->formvars['new_data_' . $layer_id]);
 				$from = substr($select, strrpos(strtolower($select), 'from') + 5);
@@ -263,7 +263,8 @@ while($layer = $this->database->result->fetch_assoc()){
 				</div>
 				<div style="width: 200px; margin-top: 40px;">
 					<input type="hidden" name="layer_id[]" value="' . $layer["Layer_ID"] . '">
-					<a href="index.php?go=Layereditor&selected_layer_id='.$layer["Layer_ID"].'"target="_blank">'.$layer["Name"].'</a>
+					<input style="float: left" type="checkbox" name="check_' . $layer["Layer_ID"] . '" value="1">
+					<div>&nbsp;<a href="index.php?go=Layereditor&selected_layer_id='.$layer["Layer_ID"].'"target="_blank">'.$layer["Name"].'</a></div>
 				</div>
 			</td>
 			<td style="background-color: '.$color[$status['oid']].'">
@@ -315,7 +316,7 @@ echo '</tbody></table></div>';
 					<div id="nav_bar"><? echo $nav_bar; ?></div>
 				</td>
 				<td valign="top">
-					Für alle Layer:<br>
+					Für alle ausgewählten Layer:<br>
 					<input type="button" onclick="document.GUI.action.value='set_new_oid';document.GUI.submit();" value="oid-Alternative als ID-Spalte übernehmen"><br>
 					<input type="button" onclick="document.GUI.action.value='set_new_query';document.GUI.submit();" value="Query-Vorschlag übernehmen"><br>
 					<input type="button" onclick="document.GUI.action.value='set_new_data';document.GUI.submit();" value="Data-Vorschlag übernehmen">
