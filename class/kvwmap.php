@@ -4605,7 +4605,7 @@ echo '			</table>
 	*	@author Georg Kämmert
 	**/
 	function Sicherung_speichern() {
-		if (isset($this->formvars['id'])) {
+		if (isset($this->formvars['id']) AND $this->formvars['id'] != '' ) {
 			$this->Sicherung_update();
 		}
 		else {
@@ -4673,7 +4673,7 @@ echo '			</table>
 	**/
 	function Sicherung_loeschen() {
 		include_once(CLASSPATH . 'Sicherung.php');
-		$this->sicherung = Sicherung::find_by_id($this, $this->formvars['sicherung_id']);
+		$this->sicherung = Sicherung::find_by_id($this, $this->formvars['id']);
 		if (!empty($this->sicherung)) {
 			$this->sicherung->delete();
 			$this->add_message('notice', 'Sicherung gelöscht.');
@@ -9440,7 +9440,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					}
 				}
 				$results[] = array('type' => $msg_type, 'msg' => $last_notice);
-				
+
 				# Frage Meldung über SQL result ab
 				$sql_result = pg_fetch_row($ret['query']);
 				if ($sql_result[0] != '') {
