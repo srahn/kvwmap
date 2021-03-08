@@ -788,9 +788,9 @@ class Nachweis {
 			$order="n.flurid, n.stammnr, n.datum";
 		}
 		$order_rissnummer = "
-			(regexp_matches(n.rissnummer, '^\D*'))[1],
+			(regexp_matches(coalesce(n.rissnummer, ''), '^\D*'))[1],
 			NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::bigint,
-			(regexp_matches(n.rissnummer, '\D*$'))[1]
+			(regexp_matches(coalesce(n.rissnummer, ''), '\D*$'))[1]
 		";
 		$order = str_replace('blattnummer', "NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint", $order);		// nach Blattnummer nummerisch sortieren
 		$order = str_replace('rissnummer', $order_rissnummer, $order);		// nach Rissnummer 3-stufig alphanumerisch und nummerisch sortieren
@@ -1126,7 +1126,7 @@ class Nachweis {
             while ($rs=pg_fetch_assoc($ret[1])) {
               $nachweise[]=$rs;
             }
-            $this->erg_dokumente=count($nachweise);
+            $this->erg_dokumente = @count($nachweise);
             $this->Dokumente=$nachweise;      
           }
         }
