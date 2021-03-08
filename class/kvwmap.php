@@ -14163,7 +14163,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
             # Abfrage absetzen
             $request = $wfs->get_feature_request($request, $bbox, NULL, intval($this->formvars['anzahl']));
             $features = $wfs->extract_features();
-            for($j = 0; $j < count($features); $j++){
+            for($j = 0; $j < @count($features); $j++){
               for($k = 0; $k < count($layerset[$i]['attributes']['name']); $k++){
 								$layerset[$i]['shape'][$j][$layerset[$i]['attributes']['name'][$k]] = $features[$j]['value'][$layerset[$i]['attributes']['name'][$k]];
               }
@@ -14173,7 +14173,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							$layerset[$i]['attributes']['privileg'][$j] = $privileges[$layerset[$i]['attributes']['name'][$j]];
 							$layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['name'][$j]] = $privileges[$layerset[$i]['attributes']['name'][$j]];
 						}
-						if(count($features) > 0){
+						if(@count($features) > 0){
 							if(!$last_query_deleted){			# damit nur die letzte Query gelöscht wird und nicht eine bereits gespeicherte Query eines anderen Layers der aktuellen Abfrage
 								$this->user->rolle->delete_last_query();
 								$last_query_deleted = true;
