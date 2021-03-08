@@ -1126,7 +1126,7 @@ class Nachweis {
             while ($rs=pg_fetch_assoc($ret[1])) {
               $nachweise[]=$rs;
             }
-            $this->erg_dokumente=count($nachweise);
+            $this->erg_dokumente = @count($nachweise);
             $this->Dokumente=$nachweise;      
           }
         }
