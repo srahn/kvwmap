@@ -702,21 +702,31 @@
 							$datapart .= '<div style="display:inline" id="dynamicLink'.$layer_id.'_'.$k.'_'.$j.'"></div>';
 						}
 						else {
-							$datapart .= '<a tabindex="1"';
 							switch ($explosion[2]) { 
-								CASE 'no_new_window' : {
-									$datapart .= 'target="_self"';
-								}break;
-								CASE 'root' : {
-									$datapart .= 'target="root"';
-								}break;
+								case 'no_new_window' : {
+									$link_target = '_self';
+								} break;
+								case 'root' : {
+									$link_target = 'root';
+								} break;
 								default : {
-									$datapart .= 'target="_blank"';
+									$link_target = '_blank';
 								}
 							}
-							$datapart .= ' class="dynamicLink" style="font-size: ' . $fontsize . 'px" ' . (($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') ? 'onclick="checkForUnsavedChanges(event);"' : '').' href="'.$href.'&mime_type='.$gui->mime_type.'">';
-							$datapart .= $alias;
-							$datapart .= '</a><br>';
+							if ($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') {
+								$link_attribute = 'onclick="checkForUnsavedChanges(event);"';
+							}
+							else {
+								$link_attribute = 'href="' . $href . (strpos($href, 'javascript') === false ? '&mime_type=' . $gui->mime_type : '') . '"';
+							}
+							$datapart .= '<a
+								tabindex="1"
+								target="' . $link_target . '"
+								class="dynamicLink"
+								style="font-size: ' . $fontsize . 'px"
+								' . $link_attribute . '
+								target="' . $link_target . '"
+							>' . $alias . '</a><br>';
 						}
 					}
 				} break;
