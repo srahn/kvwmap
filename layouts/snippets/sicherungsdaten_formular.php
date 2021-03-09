@@ -86,30 +86,20 @@
 	}
 
 	function init(){
+
 		var intervaltyp = '<?php echo $this->sicherung->get('intervall_typ'); ?>';
-		set_intervall_typ(intervaltyp);
-		set_intervall_optionen(intervaltyp);
-/*
-		if ('<?php echo $this->sicherung->get('intervall_parameter_1'); ?>'.length == 0){
-			pos1 = 0
-		} else {
-			pos1 = <?php echo $this->sicherung->get('intervall_parameter_1'); ?>-1;
+		if (intervaltyp == ''){
+			set_intervall_typ('daily');
+			set_intervall_optionen('daily');
 		}
-
-		if ('<?php echo $this->sicherung->get('intervall_parameter_2'); ?>'.length == 0){
-			pos2 = 0
-		} else {
-			pos2 = <?php echo $this->sicherung->get('intervall_parameter_2'); ?>-1;
+		else {
+			set_intervall_typ(intervaltyp);
+			set_intervall_optionen(intervaltyp);
 		}
-*/
-		//document.getElementById('select_parameter1_list').options[pos1].selected='selected';
-		//document.getElementById('select_parameter2_list').options[pos2].selected='selected';
-
 	}
 
 	document.addEventListener("DOMContentLoaded", function(event) {
 		init();
-
 	});
 
 </script>
