@@ -6,8 +6,15 @@
 
 $errors = array();
 
-function quote($var){
-	return is_numeric($var) ? $var : "'".$var."'";
+function quote($var, $type = NULL){
+	switch ($type) {
+		case 'text' : case 'varchar' : {
+			return "'".$var."'";
+		}break;
+		default : {
+			return is_numeric($var) ? $var : "'".$var."'";
+		}
+	}
 }
 
 function pg_quote($column){
