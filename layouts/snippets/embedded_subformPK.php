@@ -9,7 +9,7 @@
 	$size = 50;
 
 	$doit = false;
-	$anzObj = count($layer['shape']);
+	$anzObj = @count($layer['shape']);
   if ($anzObj > 0) {
 		$this->found = 'true';
 		$doit = true;
