@@ -7,7 +7,6 @@
 		var aktiv = ($('#aktiv_' + id).is(':checked') ? 1 : 0);
 		window.location = 'index.php?go=Sicherung_speichern&id=' + id + '&active=' + aktiv;
 	}
-
 </script>
 <h2><? echo $strTitel; ?></h2>
 <br>
@@ -21,8 +20,8 @@
 		<th width="70px"></th>
 	</tr><?php
 		foreach ($this->sicherungen as $sicherung) { ?>
-			<tr>
-				<td>	<input type="checkbox"
+			<tr<? echo ($sicherung->get('active') ? '' : ' class="small-gray"'); ?>>
+				<td><input type="checkbox"
 										value="<? echo $sicherung->get('id') ?>"
 										id="aktiv_<? echo $sicherung->get('id') ?>"
 										name="active" <? echo $sicherung->get('active') ? "checked" : "" ?>
@@ -47,7 +46,7 @@
 	</tr>
 </table>
 
-<div style="text-align: left; margin-top: 20px; margin-left: 20px;">
+<div style="text-align: left; margin-top: 20px; margin-left: 20px; width: 100%" id="crontab_div">
 	<? echo isset($this->formvars['count_export']) ? 'Es wurden ' . $this->formvars['count_export'] . ' Sicherungen exportiert. <br>' : '';
 		 echo (isset($this->formvars['count_skip']) && $this->formvars['count_skip'] > 0) ? $this->formvars['count_skip'] . ' Sicherungen wurden nicht exportiert. Entweder diese sind nicht akiv oder haben keinen Sicherungsinhalt.' : '';
 	?>
@@ -60,14 +59,15 @@
 		border: 1px solid #fff;
 		text-align: left;
 		margin-top: 5px;
-		margin-right: 20px;
+		margin-right: 80px;
 		margin-bottom: 30px;
 		padding: 5px;
 		border-radius: 0px;
-		max-width: 800px;
-	">
+	"
+	>
 	<? echo $this->formvars['crontab'] ?>
 	</div>
+	<a href="#" onclick="document.getElementById('crontab_div').style.display = 'none'">Meldung schließen</a>
 </div>
 <?
 }

@@ -1,6 +1,12 @@
 <?php
   include(LAYOUTPATH . 'languages/sicherungsinhalte_' . $this->user->rolle->language . '.php');
 ?>
+<script>
+	function update_aktiv(id) {
+		var aktiv = ($('#aktiv_' + id).is(':checked') ? 1 : 0);
+		window.location = 'index.php?go=sicherungsinhalt_speichern&id=' + id + '&sicherung_id=<? echo $this->sicherung->get('id'); ?>&active=' + aktiv;
+	}
+</script>
 <table style="width: 100%">
 	<tr>
 		<td align="left"><h2><? echo $strTitle; ?></h2></td>
@@ -10,6 +16,7 @@
 <table id="tbl_inhalte" style="width: 100%" cellpadding="5" cellspacing="0">
 	<head>
 		<tr>
+			<th align="left"><?php echo $strAktiv ?></th>
 			<th align="left"><?php echo $strName ?></td>
 			<th align="left"><?php echo $strBeschreibung ?></td>
 			<th align="left"><?php echo $strMethode ?></td>
@@ -20,7 +27,14 @@
 	<body><?php
 		if (!empty($this->sicherung->inhalte)) {
 			foreach ($this->sicherung->inhalte as $inhalt) { ?>
-				<tr>
+				<tr <? echo ($inhalt->get('active') ? ' ' : 'class="small-gray"'); ?>>
+					<td><input
+						type="checkbox"
+						value="<? echo $inhalt->get('id') ?>"
+						id="aktiv_<? echo $inhalt->get('id') ?>"
+						name="active" <? echo $inhalt->get('active') ? "checked" : "" ?>
+						onchange="update_aktiv(this.value);"
+					></td>
 					<td align="left"><?php echo $inhalt->get('name') ?></td>
 					<td align="left"><?php echo $inhalt->get('beschreibung') ?></td>
 					<td align="left"><?php echo $inhalt->get('methode') ?></td>
