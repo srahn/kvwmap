@@ -559,6 +559,15 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
+			case 'zoomto_selected_datasets' : {
+				$GUI->zoomto_selected_datasets();
+			}break;
+
+			case 'zoomto_dataset' : {
+				if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
+				$GUI->zoomto_dataset();
+			}break;
+
 			# PointEditor
 			case 'PointEditor' : {
 				$GUI->PointEditor();
@@ -567,28 +576,6 @@ function go_switch($go, $exit = false) {
 			# PointEditor
 			case 'PointEditor_Senden' : {
 				$GUI->PointEditor_Senden();
-			}break;
-
-			case 'zoomto_selected_datasets' : {
-				$GUI->zoomto_selected_datasets();
-			}break;
-
-			# zoomToPoint
-			case 'zoomtoPoint' : {
-				if(value_of($GUI->formvars, 'mime_type') != '')$GUI->mime_type = $GUI->formvars['mime_type'];
-				$GUI->zoom_toPoint();
-			}break;
-
-			# zoomToPolygon
-			case 'zoomtoPolygon' : {
-				if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
-				$GUI->zoom_toPolygon();
-			}break;
-
-			# zoomToLine
-			case 'zoomtoLine' : {
-				if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
-				$GUI->zoom_toLine();
 			}break;
 
 			# PolygonEditor
