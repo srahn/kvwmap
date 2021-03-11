@@ -187,16 +187,16 @@ class Sicherung extends MyObject {
 	function get_folder_date_notation(){
 		switch ($this->get('intervall_typ')) {
 			case 'daily':
-				$ret = '$(date +%m)/$(date +%u)';	//Monat[01..12]/Tag[1..7]
+				$ret = '$(date +%Y)/$(date +%m)/$(date +%d)';	//	Jahr[YYYY]/Monat[01..12]/Tag des Monats[1..31]
 				break;
 			case 'weekly':
-				$ret = '$(date +%m)/$(date +%u)';	//Monat[01..12]/Tag[1..7]
+				$ret = '$(date +%Y)/$(date +%U)';							//	Jahr[YYYY]/Woche des Jahres[0..53]
 				break;
 			case 'monthly':
-				$ret = '$(date +%Y)/$(date +%m)';	//Jahr[YYYY]/Monat[01..12]
+				$ret = '$(date +%Y)/$(date +%m)';							//	Jahr[YYYY]/Jahr[YYYY]/Monat[01..12]
 				break;
 			default:
-				$ret = '$(date +%Y_%m_%d)';
+				$ret = '$(date +%Y_%m_%d)';										//	Jahr_Monat_Tag
 				break;
 		}
 		return $ret;
