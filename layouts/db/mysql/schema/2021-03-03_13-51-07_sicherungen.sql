@@ -17,7 +17,7 @@ BEGIN;
 
   # Wochensicherung
   INSERT INTO `sicherungen` (`name`, `beschreibung`, `target_dir`, `intervall_typ`, `intervall_start_time`, `intervall_parameter_1`, `intervall_parameter_2`, `keep_for_n_days`, `active`) VALUES
-  ('Wochensicherung', 'sichert die letzte Tagessicherung', '/home/gisadmin/Sicherungen/woechentlich', 'weekly', '01:00:00', '0', '', 365, 0),;
+  ('Wochensicherung', 'sichert die letzte Tagessicherung', '/home/gisadmin/Sicherungen/woechentlich', 'weekly', '01:00:00', '0', '', 365, 0);
   SET @last_sicherung_id=LAST_INSERT_ID();
   INSERT INTO `sicherungsinhalte` (`name`, `beschreibung`, `methode`, `source`, `connection_id`, `target`, `overwrite`, `sicherung_id`, `tar_compress`, `pgdump_insert`, `pgdump_columninserts`, `pgdump_in_exclude_schemas`, `pgdump_schema_list`, `pgdump_in_exclude_tables`, `pgdump_table_list`, `active`) VALUES
   ('Wochensicherung kopieren', 'wöchentliche Sicherung der letzten Wochensicherung', 'Verzeichnissicherung', '/home/gisadmin/Sicherungen/taeglich/latest', NULL, 'wochensicherung.tar.gz', 1, @last_sicherung_id, 1, NULL, NULL, NULL, NULL, NULL, NULL, 0);

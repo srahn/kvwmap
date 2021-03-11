@@ -8680,7 +8680,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
             if(value_of($this->formvars, 'value_'.$tablename.'_oid')){
 							$sql_where .= ' AND '.pg_quote($tablename.'_oid').' '.$this->formvars['operator_'.$tablename.'_oid'].' ';
 							if($this->formvars['operator_'.$tablename.'_oid'] != 'IN'){
-								$sql_where .= quote($this->formvars['value_'.$tablename.'_oid']);
+								$sql_where .= quote($this->formvars['value_'.$tablename.'_oid'], $attributes['type'][$attributes['indizes'][$layerset[0]['oid']]]);
 							}
 							else{
 								$sql_where .= $this->formvars['value_'.$tablename.'_oid'];
@@ -13410,7 +13410,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$width = $width - $width_reduction;
 		$height = $height - $height_reduction;
 		if($this->user->rolle->hideMenue == 1){$width = $width - 195;}
-		if($this->user->rolle->hideLegend == 1){$width = $width - 254;}
+		if($width_reduction == '' AND $this->user->rolle->hideLegend == 1){$width = $width - 254;}	# nur in der Hauptkarte berücksichtigen
 		$this->user->rolle->nImageWidth = $width;
 		$this->user->rolle->nImageHeight = $height;
 		return $scale;
