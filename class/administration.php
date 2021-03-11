@@ -486,6 +486,8 @@ class administration{
 		Administration::deleteDir($backup_path);
 		mkdir($backup_path);
 
+		$this->get_config_params();
+
 		include_once(CLASSPATH . 'Sicherung.php');
 		$sicherungen = Sicherung::find($gui);
 		$return = array( 'count_export' => 0
@@ -497,11 +499,12 @@ class administration{
 		fwrite($fh, 'PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin' . PHP_EOL);
 		foreach($sicherungen AS $sicherung) {
 			if ($sicherung->get_valid_for_fileexport()){
+				$app = rtrim($this->config_params['APPLVERSION']['value'], '/');
 				$return['count_export'] = $return['count_export'] + 1;
-				$sicherung->write_config_files($gui, $backup_path);
-				$cronline = $sicherung->get_cronjob_interval() . ' root	/home/gisadmin/kvwmap-server/scripte/sicherung/backup.sh /home/gisadmin/www/sicherungen/sicherung_'.$sicherung->get('id') . PHP_EOL;
+				$sicherung->write_config_files($gui, $backup_path, $app);
+				$cronline = $sicherung->get_cronjob_interval() . ' root	/home/gisadmin/kvwmap-server/scripte/sicherung/backup.sh /home/gisadmin/www/sicherungen/' . $app . '_' . $sicherung->get('id') . PHP_EOL;
 				fwrite($fh, $cronline);
-				$return['crontab'] = $return['crontab'] . $cronline;
+				$return['crontab'] = $return['crontab'] . $cronline . '<br>';
 			}
 			else {
 				$return['count_skip'] = $return['count_skip'] + 1;
@@ -512,18 +515,20 @@ class administration{
 	}
 
 	public static function deleteDir($dirPath) {
-		if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') {
-				$dirPath .= '/';
-		}
-		$files = glob($dirPath . '*', GLOB_MARK);
-		foreach ($files as $file) {
-			if (is_dir($file)) {
-				self::deleteDir($file);
-			} else {
-				unlink($file);
+		if (is_dir($dirPath)){
+			if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') {
+					$dirPath .= '/';
 			}
+			$files = glob($dirPath . '*', GLOB_MARK);
+			foreach ($files as $file) {
+				if (is_dir($file)) {
+					self::deleteDir($file);
+				} else {
+					unlink($file);
+				}
+			}
+			rmdir($dirPath);
 		}
-		rmdir($dirPath);
 	}
 
 	function create_inserts_from_dataset($schema, $table, $where) {

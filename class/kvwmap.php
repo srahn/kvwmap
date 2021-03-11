@@ -4672,8 +4672,13 @@ echo '			</table>
 		include_once(CLASSPATH . 'Sicherung.php');
 		$this->sicherung = Sicherung::find_by_id($this, $this->formvars['id']);
 		if (!empty($this->sicherung)) {
-			$this->sicherung->delete();
-			$this->add_message('notice', 'Sicherung gelöscht.');
+			if (!empty($this->sicherung->inhalte)){
+				$this->add_message('error','Sicherung enthält noch Inhalte und kann nicht gelöscht werden.');
+			}
+			else {
+				$this->sicherung->delete();
+				$this->add_message('notice', 'Sicherung gelöscht.');
+			}
 		}
 
 		$this->main = 'sicherungsdaten.php';
@@ -4708,17 +4713,25 @@ echo '			</table>
 		$this->inhalt = new Sicherungsinhalt($this);
 		$this->inhalt->data = formvars_strip($this->formvars, $this->inhalt->getKeys(), 'keep');
 		$this->inhalt->disable_options($this->formvars);
-		$results = $this->inhalt->validate();
+		if ($this->inhalt->get('active') == '') {
+			$results = $this->inhalt->validate();
+		}
 		if (empty($results)) {
 			$result = ($this->inhalt->get('id') > 0 ? $this->inhalt->update() : $this->inhalt->create());
-		}
-		if ($result[0]['success']) {
-			$this->add_message('notice', 'Sicherungsinhalt erfolgreich angelegt.');
-			$this->formvars['id'] = $this->formvars['sicherung_id'];
-			$this->Sicherung_editieren();
+			if ($result[0]['success']) {
+				$this->add_message('notice', 'Sicherungsinhalt erfolgreich gespeichert.');
+				$this->formvars['id'] = $this->formvars['sicherung_id'];
+				$this->Sicherung_editieren();
+			}
+			else {
+				$this->add_message('error', $result['err_msg']);
+				$this->sicherungsinhalt_editieren();
+			}
 		}
 		else {
-			$this->add_message('error', $result['err_msg']);
+			foreach ($results AS $result) {
+				$this->add_message($result['type'], $result['msg']);
+			}
 			$this->sicherungsinhalt_editieren();
 		}
 	}

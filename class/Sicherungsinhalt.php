@@ -11,6 +11,7 @@ class Sicherungsinhalt extends MyObject {
 		$this->setKeys(
 			array(
 				"id",
+				"active",
 				"name",
 				"beschreibung",
 				"methode",
@@ -34,7 +35,7 @@ class Sicherungsinhalt extends MyObject {
 		$results = array();
 		$results[] = $this->validates('name', 'not_null', 'Es muss ein Name angegeben werden.');
 		$results[] = $this->validates('methode', 'not_null', 'Wähle eine Methode aus.');
-		//$results[] = $this->validates('target', 'not_null', 'Wähle ein Ziel der Sicherung aus.');
+		$results[] = $this->validates('target', 'not_null', 'Wähle einen Dateinamen im Zielverzeichnis aus.');
 		$results[] = $this->validates('sicherung_id', 'not_null', 'Wähle eine Sicherung aus mit der der Inhalt gesichert werden soll.');
 
 		switch ($this->get('methode')) {
@@ -46,9 +47,8 @@ class Sicherungsinhalt extends MyObject {
 				$results[] = $this->validates('source', 'not_null', 'Wähle eine Quelle der Sicherung aus.');
 				break;
 		}
-
 		$messages = array();
-		foreach($results AS $result) {
+		foreach ($results AS $result) {
 			if (!empty($result)) {
 				$messages[] = $result;
 			}
@@ -111,6 +111,19 @@ class Sicherungsinhalt extends MyObject {
 		include_once(CLASSPATH . 'Connection.php');
 		$connection = Connection::find_by_id($this->gui, $this->get('connection_id'));
 		return $connection->get('name');
+	}
+
+	/**
+	*
+	*	Returns the dbname of the connection
+	*
+	* @return	name of pgsql-connection
+	* @author Georg Kämmert
+	**/
+	function get_connection_dbname(){
+		include_once(CLASSPATH . 'Connection.php');
+		$connection = Connection::find_by_id($this->gui, $this->get('connection_id'));
+		return $connection->get('dbname');
 	}
 
 	/**
@@ -211,11 +224,12 @@ class Sicherungsinhalt extends MyObject {
 	**/
 	function get_option_list_for_methods(){
 		include(LAYOUTPATH . 'languages/sicherungsinhalte_' . $this->gui->user->rolle->language . '.php');
-		$optionen = array( 'TAR' 				=> array('value' => 'Verzeichnissicherung', 				'label' => $strVerzeichnissicherung)
-											,'RSYNC'			=> array('value' => 'Verzeichnisinhalte kopieren', 	'label' => $strVerzeichnskopieren)
-											,'PG_DUMP'		=> array('value' => 'Postgres Dump', 								'label' => $strPostgresDump)
-											,'MYSQLDUMP'	=> array('value' => 'Mysql Dump', 									'label' => $strMysqlDump)
-										);
+		$optionen = array(
+			'TAR' 			=> array('value' => 'Verzeichnissicherung', 				'output' => $strVerzeichnissicherung),
+			'RSYNC' 		=> array('value' => 'Verzeichnisinhalte kopieren', 	'output' => $strVerzeichnskopieren),
+			'PG_DUMP' 	=> array('value' => 'Postgres Dump', 								'output' => $strPostgresDump),
+			'MYSQLDUMP' => array('value' => 'Mysql Dump', 									'output' => $strMysqlDump)
+		);
 		if (!$this->get_sicherung_has_target_dir()){
 			unset($optionen['TAR']);
 			unset($optionen['PG_DUMP']);
