@@ -13380,14 +13380,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		if ($updates != NULL) {
 			foreach ($updates as $layer_id => $layer) {
 				foreach ($layer as $tablename => $table) {
-					foreach ($table as $oid => $attributes) {
-						if (count($attributes) > 0) {
+					foreach ($table as $oid => $attribs) {
+						if (count($attribs) > 0) {
 							if (!$layerset[$layer_id][0]['maintable_is_view']) {
 								$sql_lock = "LOCK TABLE " . pg_quote($tablename)." IN SHARE ROW EXCLUSIVE MODE;";
 							}
 
 							$attributes_set = array();
-							foreach ($attributes AS $attribute => $properties) {
+							foreach ($attribs AS $attribute => $properties) {
 								if (is_array($properties['value'])) {
 									# ist bei Dokumenten in einem Array der Fall
 									for ($a = 0; $a < count($properties['value']); $a++) {
@@ -13402,7 +13402,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								}
 							}
 
-							$where_condition = $layerset[$layer_id][0]['oid'].' = '.quote($oid);
+							$where_condition = $layerset[$layer_id][0]['oid'].' = '.quote($oid, $attributes['type'][$attributes['indizes'][$layerset[$layer_id][0]['oid']]]);
 
 							$sql = $sql_lock . "
 								UPDATE
@@ -14767,7 +14767,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 										case 'Auswahlfeld': {
 											$auswahlfeld_output = '';
 											if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-												for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
+												for($e = 0; $e < @count($attributes['enum_value'][$j][$k]); $e++){
 													if($attributes['enum_value'][$j][$k][$e] == $value){
 														$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
 														break;
@@ -14775,7 +14775,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 												}
 											}
 											else{
-												for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
+												for($e = 0; $e < @count($attributes['enum_value'][$j]); $e++){
 													if($attributes['enum_value'][$j][$e] == $value){
 														$auswahlfeld_output = $attributes['enum_output'][$j][$e];
 														break;
@@ -14789,7 +14789,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 										} break;
 										case 'Radiobutton': {
 											$radiobutton_output = '';
-											for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
+											for($e = 0; $e < @count($attributes['enum_value'][$j]); $e++){
 												if($attributes['enum_value'][$j][$e] == $value){
 													$radiobutton_output = $attributes['enum_output'][$j][$e];
 													break;

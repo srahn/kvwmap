@@ -573,7 +573,7 @@ class GUI {
 										case 'Auswahlfeld': {
 											$auswahlfeld_output = '';
 											if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-												for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
+												for($e = 0; $e < @count($attributes['enum_value'][$j][$k]); $e++){
 													if($attributes['enum_value'][$j][$k][$e] == $value){
 														$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
 														break;
@@ -581,7 +581,7 @@ class GUI {
 												}
 											}
 											else{
-												for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
+												for($e = 0; $e < @count($attributes['enum_value'][$j]); $e++){
 													if($attributes['enum_value'][$j][$e] == $value){
 														$auswahlfeld_output = $attributes['enum_output'][$j][$e];
 														break;
@@ -595,7 +595,7 @@ class GUI {
 										} break;
 										case 'Radiobutton': {
 											$radiobutton_output = '';
-											for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
+											for($e = 0; $e < @count($attributes['enum_value'][$j]); $e++){
 												if($attributes['enum_value'][$j][$e] == $value){
 													$radiobutton_output = $attributes['enum_output'][$j][$e];
 													break;
