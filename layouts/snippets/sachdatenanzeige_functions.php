@@ -679,8 +679,8 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
-	zoom2object = function(layer_id, geomtype, tablename, columnname, oid, selektieren){
-		params = 'go=zoomto'+geomtype+'&oid='+oid+'&layer_tablename='+tablename+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
+	zoom2object = function(layer_id, columnname, oid, selektieren){
+		params = 'go=zoomto_dataset&oid='+oid+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
 		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
 			startwaiting();
 			root.get_map_ajax(params, '', 'highlight_object('+layer_id+', '+oid+');');		// Objekt highlighten
