@@ -717,7 +717,8 @@
 								$link_attribute = 'onclick="checkForUnsavedChanges(event);"';
 							}
 							else {
-								$link_attribute = 'href="' . $href . (strpos($href, 'javascript') === false ? '&mime_type=' . $gui->mime_type : '') . '"';
+								$link_type = explode(':', $href)[0];
+								$link_attribute = 'href="' . $href . (in_array($link_type, array('javascript', 'mailto')) ? '' : '&mime_type=' . $gui->mime_type) . '"';
 							}
 							$datapart .= '<a
 								tabindex="1"

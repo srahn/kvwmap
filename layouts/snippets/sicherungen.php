@@ -24,8 +24,8 @@
 		<th>Stelle Id</th//-->
 		<th></th>
 	<tr><?php
-	foreach($this->cronjobs AS $cronjob) { ?>
-		<tr>
+	foreach ($this->cronjobs AS $cronjob) { ?>
+		<tr class="small-gray">
 			<td>
 				<input
 					id="aktiv_<?php echo $cronjob->get('id'); ?>"

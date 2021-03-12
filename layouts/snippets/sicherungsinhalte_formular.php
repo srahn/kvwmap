@@ -1,11 +1,12 @@
 <?php
   include(LAYOUTPATH . 'languages/sicherungsdaten_' . $this->user->rolle->language . '.php');
+	include_once(CLASSPATH . 'FormObject.php');
 ?>
 
 <script language="javascript" type="text/javascript">
 
 	function set_default_targetname(){
-		const list_methode = document.getElementById('feld_methode');
+		const list_methode = document.getElementById('methode');
 		const text_target  = document.getElementById('feld_target');
 
 		if (list_methode && text_target) {
@@ -52,7 +53,8 @@
 				<?php
 					$i=0;
 					foreach ($this->inhalt->get_mysql_database_names() as $key => $value) {
-						echo "s.options[". $i ."]=new Option('" . $value['Database'] . "','" . $value['Database'] . "');";
+						echo "s.options[". $i ."]=new Option('" . $value['Database'] . "','" . $value['Database'] . "');" . PHP_EOL;
+						echo $this->formvars['source'] == $value['Database']?"s.options[". $i ."].selected=true;":"";
 						$i++;
 					}
 				?>
@@ -65,16 +67,18 @@
 				<?php
 					$i=0;
 					foreach ($this->inhalt->get_pgsql_database_names() as $db) {
-						echo "s.options[". $i ."]=new Option('" . $db[1] . "','" . $db[0] . "');";
+						echo "s.options[". $i ."]=new Option('" . $db[1] . "','" . $db[0] . "');" . PHP_EOL;
+						echo $this->formvars['connection_id'] == $db[0]?"s.options[". $i ."].selected=true;":"";
 						$i++;
 					}
 				?>
 				break;
 
 
-			default: //file, dir, rsync
+			default: //dir, rsync
 				s = document.createElement('input');
 				s.setAttribute("name","source");
+				s.setAttribute("type","text");
 				s.setAttribute("value","<?php echo $this->inhalt->get('source'); ?>");
 				s.setAttribute("size","80");
 				s.setAttribute("maxlength","255");
@@ -389,16 +393,15 @@
 	</tr>
 	<tr>
 		<td class="fetter" align="right"><?php echo $strMethode ?></td>
-		<td>
-			<select id="feld_methode" name="methode" onchange="javascript: switch_methode(this.options[this.selectedIndex].value);">
-				<? foreach ($this->inhalt->get_option_list_for_methods() as $option) { ?>
-						<option value="<? echo $option['value'] ?>"><? echo $option['label'] ?></option>
-				<?
-				} ?>
-
-
-			</select>
-
+		<td><?
+			echo FormObject::createSelectField(
+				'methode',
+				$this->inhalt->get_option_list_for_methods(),
+				$this->formvars['methode'],
+				1,
+				'',
+				'javascript: switch_methode(this.options[this.selectedIndex].value)'
+			); ?>
 		</td>
 	</tr>
 	<tr>
@@ -431,7 +434,7 @@
 </table>
 <script>
 
-	var o = document.getElementById('feld_methode');
+	var o = document.getElementById('methode');
 	if (o) {
 		o.onchange();
 	}
