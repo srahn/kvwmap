@@ -5079,11 +5079,11 @@ echo '			</table>
 						if ($value != '') {
 							$sql = "
 								UPDATE
-									" . $this->formvars['layer_tablename'] . "
+									" . pg_quote($this->formvars['layer_tablename']) . "
 								SET
 									" . $this->attributes['name'][$i] . " = " . $value . "
 								WHERE
-									oid = " . $this->formvars['oid'] . "
+									" . $layerset[0]['oid'] . " = " . $this->formvars['oid'] . "
 							";
 							$this->debug->write("<p>file:kvwmap :LineEditor_Senden :", 4);
 							$ret = $layerdb->execSQL($sql, 4, 1);
@@ -5212,22 +5212,22 @@ echo '			</table>
 						$this->attributes['form_element_type'][$i] == 'Time' AND
 						in_array($this->attributes['options'][$i], array('', 'update'))
 					) {
-						$sql = "UPDATE " . $this->formvars['layer_tablename']." SET " . $this->attributes['name'][$i]." = '".date('Y-m-d G:i:s')."' WHERE oid = '" . $this->formvars['oid']."'";
+						$sql = "UPDATE " . pg_quote($this->formvars['layer_tablename']) . " SET " . $this->attributes['name'][$i]." = '".date('Y-m-d G:i:s')."' WHERE " . $layerset[0]['oid'] . " = '" . $this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
 						$ret2 = $layerdb->execSQL($sql,4, 1);
 					}
 					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Fläche'){
-						$sql = "UPDATE " . $this->formvars['layer_tablename']." SET " . $this->attributes['name'][$i]." = '" . $this->formvars['area']."' WHERE oid = '" . $this->formvars['oid']."'";
+						$sql = "UPDATE " . pg_quote($this->formvars['layer_tablename']) . " SET " . $this->attributes['name'][$i]." = '" . $this->formvars['area']."' WHERE " . $layerset[0]['oid'] . " = '" . $this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
 						$ret2 = $layerdb->execSQL($sql,4, 1);
 					}
 					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'User' AND in_array($this->attributes['options'][$i], array('', 'update'))){
-						$sql = "UPDATE " . $this->formvars['layer_tablename']." SET " . $this->attributes['name'][$i]." = '" . $this->user->Vorname." " . $this->user->Name."' WHERE oid = '" . $this->formvars['oid']."'";
+						$sql = "UPDATE " . pg_quote($this->formvars['layer_tablename']) . " SET " . $this->attributes['name'][$i]." = '" . $this->user->Vorname." " . $this->user->Name."' WHERE " . $layerset[0]['oid'] . " = '" . $this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
 						$ret2 = $layerdb->execSQL($sql,4, 1);
 					}
 					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'UserID'  AND in_array($this->attributes['options'][$i], array('', 'update'))){
-						$sql = "UPDATE " . $this->formvars['layer_tablename']." SET " . $this->attributes['name'][$i]." = " . $this->user->id." WHERE oid = '" . $this->formvars['oid']."'";
+						$sql = "UPDATE " . pg_quote($this->formvars['layer_tablename']) . " SET " . $this->attributes['name'][$i]." = " . $this->user->id." WHERE " . $layerset[0]['oid'] . " = '" . $this->formvars['oid']."'";
 						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
 						$ret2 = $layerdb->execSQL($sql,4, 1);
 					}
@@ -8805,7 +8805,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							for ($k = 0; $k < count($this->qlayerset[$i]['shape']); $k++){
 								$oids[] = $this->qlayerset[$i]['shape'][$k][$geometrie_tabelle.'_oid'];
 							}
-							$rect = $mapDB->zoomToDatasets($oids, $layerset[0]['oid'], $geometrie_tabelle, $attributes['real_name'][$attributes['the_geom']], 10, $layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+							$rect = $mapDB->zoomToDatasets($oids, $layerset[0], $attributes['real_name'][$attributes['the_geom']], 10, $layerdb, $this->user->rolle->epsg_code, $this->Stelle);
 							$this->map->setextent($rect->minx, $rect->miny, $rect->maxx, $rect->maxy);
 							if (MAPSERVERVERSION > 600) {
 								$this->map_scaledenom = $this->map->scaledenom;
@@ -9874,7 +9874,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						# das sind die Sachen vom "Mutter"-Layer
 						$parentlayerset = $this->user->rolle->getLayer($this->formvars['layer_id_mother']);
 						$layerdb2 = $this->mapDB->getlayerdatabase($this->formvars['layer_id_mother'], $this->Stelle->pgdbhost);
-						$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid_mother']), $parentlayerset[0]['oid'], $this->formvars['tablename_mother'], $this->formvars['columnname_mother'], 10, $layerdb2, $parentlayerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+						$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid_mother']), $parentlayerset[0], $this->formvars['columnname_mother'], 10, $layerdb2, $this->user->rolle->epsg_code, $this->Stelle);
 						if ($rect->minx != '') {
 							$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy); # Zoom auf den "Mutter"-Datensatz
 							if (MAPSERVERVERSION > 600) {
