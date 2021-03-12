@@ -115,6 +115,7 @@ function suche(){
 		document.GUI.go_plus.value = 'Suchen';
 		//document.GUI.submit();
 		overlay_submit(document.GUI, true);
+		document.GUI.go_plus.value = '';
 	}
 }
 
