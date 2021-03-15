@@ -518,13 +518,17 @@
 					$reloadParams .= '&columnname_mother='.$attributes['the_geom'];																								# dito
 					$reloadParams .= '&attribute_privileg='.$attribute_privileg;
 					
-					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'" style="margin-top: 3px"><img src="'.GRAPHICSPATH.'leer.gif" ';
+					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'" style="margin-top: 3px">';
 					if($gui->new_entry != true){
 						$subform_request = true;
-						$onload = 'onload="reload_subform_list(\''.$layer_id.'_'.$name.'_'.$k.'\', 0, 0)"';
+						$datapart .= '
+							<script type="text/javascript">
+								reload_subform_list(\''.$layer_id.'_'.$name.'_'.$k.'\', 0, 0);
+							</script>
+						';
 					}
-					$datapart .= ($subform_request? $onload : '').'></div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
-					$datapart .= '</td></tr></table>';
+					$datapart .= '</div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
+					$datapart .= '</td></tr></table>';					
 				}break;
 
 				case 'Time': {

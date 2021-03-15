@@ -9307,19 +9307,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$oids[] = $element[3];
 			$ret = $layerdb->execSQL($sql, 4, 1, true);
 			if ($ret['success']) {
-				# Frage Meldung  über last notice ab
-				if ($last_notice = pg_last_notice($layerdb->dbConn)) {
-					$msg_type = 'info';
-					if ($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true)) {
-						if ($notice_result['msg']) {
-							$last_notice = $notice_result['msg'];
-							$msg_type = $notice_result['msg_type'];
-						}
-					}
-					$results[] = array('type' => $msg_type, 'msg' => $last_notice);
+				if ($ret['msg']) {	# Notice aus Trigger
+					$results[] = array('type' => $ret['type'], 'msg' => $ret['msg']);
 				}
-				# Frage Meldung über SQL result ab
-				$sql_result = pg_fetch_row($ret['query']);
+				$sql_result = pg_fetch_row($ret['query']);	# Select aus Regel
 				if ($sql_result[0] != '') {
 					$results[] = array('type' => 'info', 'msg' => $sql_result[0]);
 				}
@@ -10230,7 +10221,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$geometrie_tabelle = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']];
 		$j = 0;
 		foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
-			if(($tablename == $layerset[0]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[0]['oid'] != ''){		# hat Haupttabelle oder Geometrietabelle oids?
+			if(($tablename == $layerset[0]['maintable']) AND $layerset[0]['oid'] != ''){
 				$newpath = pg_quote($layerset[0]['attributes']['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'].' AS '.pg_quote($tablename.'_oid').', '.$newpath;
 			}
 			$j++;
@@ -10429,7 +10420,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					SET
 						" . $dokument_attribute . " = '" . $attribute_value . "'
 					WHERE
-						".pg_quote($layerset[0]['oid'])." = " . $oids[0] . "
+						".pg_quote($layerset[0]['oid'])." = " . quote($oids[0]) . "
 				";
 				#echo '<p>Sql zum Update des Dokumentattributes:<br>' . $sql;
 				$ret = $layerdb->execSQL($sql, 4, 1);
@@ -11163,7 +11154,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$stelle = new stelle($stelleid, $this->database);
 				$this->layer = $stelle->getLayer($formvars['selected_layer_id']);
 				$formvars['used_layer_parent_id'] = $this->layer[0]['used_layer_parent_id'];
-				if ($formvars['used_layer_parent_id'] != '') {
+				if ($formvars['used_layer_parent_id'] != '' AND $formvars['use_parent_privileges' . $stelleid] == 1) {
 					# wenn Eltern-Stelle für diesen Layer vorhanden, deren Rechte übernehmen
 					while (!isset($formvars['privileg_' . $this->attributes['name'][0] .'_'. $formvars['used_layer_parent_id']])) {
 						# oberste Elternstelle suchen
@@ -11174,7 +11165,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$stelleid = $formvars['used_layer_parent_id'];
 				}
 				$stelle->set_attributes_privileges($formvars, $this->attributes);
-				$stelle->set_layer_privileges($formvars['selected_layer_id'], $formvars['privileg' . $stelleid], $formvars['export_privileg' . $stelleid]);
+				$stelle->set_layer_privileges($formvars['selected_layer_id'], $formvars['privileg' . $stelleid], $formvars['export_privileg' . $stelleid], $formvars['use_parent_privileges' . $stelle->id]);
 			}
 		}
 		elseif ($formvars['selected_layer_id'] != '') {

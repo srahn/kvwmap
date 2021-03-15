@@ -16,6 +16,7 @@ else{
 var query_tab;
 var root = window;
 root.resized = 0;
+root.open_subform_requests = 0;
 
 window.onbeforeunload = function(){
 	document.activeElement.blur();

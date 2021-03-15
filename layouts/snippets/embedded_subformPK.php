@@ -303,4 +303,9 @@
 				document.getElementById("new_'.$this->formvars['targetobject'].'").href = href_save;
 			</script>';
 	}
+	
+	echo '
+		<script type="text/javascript">
+			root.open_subform_requests--;
+		</script>';
 ?>
