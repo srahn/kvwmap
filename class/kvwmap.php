@@ -8362,10 +8362,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$distinct = false;
           $pfad = substr(trim($newpath), 7);
         }
-				$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
         $j = 0;
         foreach($attributes['all_table_names'] as $tablename){
-					if(($tablename == $layerset[0]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[0]['oid'] != ''){
+					if(($tablename == $layerset[0]['maintable']) AND $layerset[0]['oid'] != ''){
             $pfad = pg_quote($attributes['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'].' AS '.pg_quote($tablename.'_oid').', '.$pfad;
 						if(value_of($this->formvars, 'operator_'.$tablename.'_oid') == '')$this->formvars['operator_'.$tablename.'_oid'] = '=';
             if(value_of($this->formvars, 'value_'.$tablename.'_oid')){
@@ -8629,7 +8628,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					switch ($layerset[0]['connectiontype']) {
 						case MS_POSTGIS : {
 							for ($k = 0; $k < count($this->qlayerset[$i]['shape']); $k++){
-								$oids[] = $this->qlayerset[$i]['shape'][$k][$geometrie_tabelle.'_oid'];
+								$oids[] = $this->qlayerset[$i]['shape'][$k][$layerset[0]['maintable'].'_oid'];
 							}
 							$rect = $mapDB->zoomToDatasets($oids, $layerset[0], $attributes['real_name'][$attributes['the_geom']], 10, $layerdb, $this->user->rolle->epsg_code, $this->Stelle);
 							$this->map->setextent($rect->minx, $rect->miny, $rect->maxx, $rect->maxy);
@@ -14807,19 +14806,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	*/
 	function createQueryMap($layerset, $k) {
 		global $language;
-		if ($layerset['attributes']['the_geom'] != '') {
+		$geom = $layerset['shape'][$k][$layerset['attributes']['the_geom']];
+		if ($geom != '') {
 			$layer_id = $layerset['Layer_ID'];
-			$tablename = $layerset['attributes']['table_name'][$layerset['attributes']['the_geom']];
-			$geom_index = $layerset['attributes']['indizes'][$layerset['attributes']['the_geom']];
-			$oid = $layerset['shape'][$k][$tablename . '_oid'];
-			$real_geom_name = $layerset['attributes']['real_name'][$layerset['attributes']['the_geom']];
 			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-			if (MAPSERVERVERSION < 600) {
-				$map = ms_newMapObj(NULL);
-			}
-			else {
-				$map = new mapObj(NULL);
-			}
+			$map = new mapObj(NULL);
 			$map->set('debug', 5);
 			$layerdb = $mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 			# Auf den Datensatz zoomen
@@ -14832,11 +14823,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				FROM
 					(
 						SELECT
-							box2D(st_transform(" . $real_geom_name . ", " . $this->user->rolle->epsg_code . ")) as bbox
-						FROM
-							" . pg_quote($tablename) . "
-						WHERE
-							" . $layerset['oid'] . " = " . quote($oid) . "
+							box2D(st_transform('" . $geom . "'::geometry, " . $this->user->rolle->epsg_code . ")) as bbox
 					) AS foo
 			";
 			$ret = $layerdb->execSQL($sql, 4, 0);
@@ -14887,39 +14874,17 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$klasse->set('status', MS_ON);
 				$style=ms_newStyleObj($klasse);
 				$style->color->setRGB(12, 255, 12);
-				if (MAPSERVERVERSION > '500') {
-					$style->set('width', 1);
-				}
+				$style->set('width', 1);
 				$style->outlinecolor->setRGB(110, 110, 110);
 				# Datensatz-Layer erzeugen
 				$layer = ms_newLayerObj($map);
-				$tablename = pg_quote($tablename);
-				if ($layerset['attributes']['schema'][$geom_index] != '') {
-					$tablename = $layerset['attributes']['schema'][$geom_index].'.'.$tablename;
-				}
-				elseif ($layerset['schema'] != '') {
-					$tablename = $layerdb->schema.'.'.$tablename;
-				}
-				$datastring  = $real_geom_name
-					. " from (
-						select
-							" . $layerset['oid'] . ", " . $real_geom_name . "
-						from
-							" . $tablename. "
-						WHERE
-					  	" . $layerset['oid'] . " = " . quote($oid) ."
-					) as foo using unique " . $layerset['oid'] . " using srid=" . $layerset['epsg_code'];
+				$datastring  = "the_geom from (select	'" . $geom . "'::geometry as the_geom, 1 as id) as foo using unique id using srid=" . $layerset['epsg_code'];
 				$layer->set('data', $datastring);
 				$layer->set('status', MS_ON);
 				$layer->set('template', ' ');
 				$layer->set('name', 'querymap' . $k);
 				$layer->set('type', $layerset['Datentyp']);
-				if (MAPSERVERVERSION < '540') {
-					$layer->set('connectiontype', 6);
-				}
-				else {
-					$layer->setConnectionType(6);
-				}
+				$layer->setConnectionType(6);
 				$layer->set('connection', $layerset['connection']);
 				$layer->setProjection('+init=epsg:' . $layerset['epsg_code']);
 				$layer->setMetaData('wms_queryable', '0');
@@ -14927,9 +14892,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$klasse->set('status', MS_ON);
 				$style=ms_newStyleObj($klasse);
 				$style->color->setRGB(255, 5, 12);
-				if (MAPSERVERVERSION > '500') {
-					$style->set('width', 2);
-				}
+				$style->set('width', 2);
 				$style->outlinecolor->setRGB(0,0,0);
 				# Karte rendern
 				$map->setProjection('+init=epsg:' . $this->user->rolle->epsg_code, MS_TRUE);
@@ -14937,6 +14900,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$map->web->set('imageurl', IMAGEURL);
 				$map->set('width', 50);
 				$map->set('height', 50);
+				$map->save('/var/www/logs/test.map');
 				$image_map = $map->draw();
 				$filename = $this->map_saveWebImage($image_map, 'jpeg');
 				$newname = $this->user->id . basename($filename);
