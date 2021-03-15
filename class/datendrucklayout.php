@@ -1109,9 +1109,7 @@ class ddl {
 			$test = 0;
 			while ($test < 100 AND @count($this->remaining_attributes) > 0) {
 				# übrig sind die, die noch nicht geschrieben wurden, weil sie abhängig sind
-				if ($test == 0) {
-					$this->add_attribute_elements($selected_layer_id, $layerdb, $this->attributes, $offsetx, $i, $preview);
-				}
+				$this->add_attribute_elements($selected_layer_id, $layerdb, $this->attributes, $offsetx, $i, $preview);
 				$test++;
 			}
 
