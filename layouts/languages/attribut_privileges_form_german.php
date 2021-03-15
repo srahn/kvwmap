@@ -15,5 +15,6 @@
 	$strUseDefaultPrivileges="Default-Rechte übernehmen";
 	$strAssignDefaultPrivileges="Default-Rechte allen Stellen zuweisen";
 	$strToTaskAssignment="zur Stellenzuweisung";
+	$strUseParentPrivileges="Rechte von Elternstelle übernehmen";
 	
 ?>  
