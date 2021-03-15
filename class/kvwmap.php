@@ -3694,8 +3694,8 @@ echo '			</table>
     $this->output();
   }
 
-  function import_layer_importieren(){
-		include_(CLASSPATH.'synchronisation.php');
+  function import_layer_importieren() {
+		include_(CLASSPATH . 'synchronisation.php');
     $this->loadMap('DataBase');
     $this->synchro = new synchro($this->Stelle, $this->user, $this->pgdatabase);
     $layerset = $this->user->rolle->getLayer('');
@@ -3735,8 +3735,8 @@ echo '			</table>
     $this->output();
   }
 
-  function export_layer_exportieren(){
-		include_(CLASSPATH.'synchronisation.php');
+  function export_layer_exportieren() {
+		include_(CLASSPATH . 'synchronisation.php');
     $this->loadMap('DataBase');
     $this->synchro = new synchro($this->Stelle, $this->user, $this->pgdatabase);
     $layerset = $this->user->rolle->getLayer('');
