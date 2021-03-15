@@ -9,7 +9,7 @@
 	$strAlleSicherungen				=	"Alle Sicherungen";
 	$strMethode								=	"Methode";
 	$strQuelle								=	"Quelle";
-	$strZielBezeichnung				=	"Dateiname im Zielverzeichnis / Zielverzeichnis";
+	$strZielBezeichnung				=	"Dateiname im Zielverzeichnis";
 	$strRsyncPlaceholder			=	"user@host:pfad/zum/backup";
 	$strOverwrite							=	"Überschreiben";
 	$strSpeichern							= "Speichern";

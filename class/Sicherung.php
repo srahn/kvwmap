@@ -77,20 +77,22 @@ class Sicherung extends MyObject {
 	* @param	$dir	directory to write into
 	* @author	Georg Kämmert
 	**/
-	public function write_config_files($gui, $dir){
+	public function write_config_files($gui, $dir, $app){
 		if ( $dir == "" ){
 			return;
 		}
 
 		$dir=rtrim($dir, '/') . '/';
-		$folder='sicherung_' . $this->get('id') . '/';
+
+		$folder=$app . '_' . $this->get('id') . '/';
 		mkdir($dir . $folder);
 
 		//backup.conf
 		$sf = fopen($dir.$folder.'backup.conf', "w");
 		fwrite($sf, "BACKUP_PATH=". $this->get('target_dir') . PHP_EOL);
 		fwrite($sf, "BACKUP_FOLDER=" . $this->get_folder_date_notation() . PHP_EOL);
-		fwrite($sf, "KEEP_FOR_N_DAYS=" . $this->get('keep_for_n_days'));
+		fwrite($sf, "KEEP_FOR_N_DAYS=" . $this->get('keep_for_n_days') . PHP_EOL);
+		fwrite($sf, "PROD_APP=" . $app);
 		fclose($sf);
 
 		//Sicherungsinhalte
@@ -118,7 +120,7 @@ class Sicherung extends MyObject {
 		if ( !empty($Inhalte) ){
 			$fh = fopen($dir.$folder . 'pg_dbs.conf', "w");
 			foreach ($Inhalte as $inhalt){
-				fwrite($fh, $inhalt->get_connection_name() . ';' . $inhalt->get('target') . ';' . $inhalt->get_pg_dump_options() . PHP_EOL);
+				fwrite($fh, $inhalt->get_connection_dbname() . ';' . $inhalt->get('target') . ';' . $inhalt->get_pg_dump_options() . PHP_EOL);
 			}
 			fclose($fh);
 		}
@@ -185,16 +187,16 @@ class Sicherung extends MyObject {
 	function get_folder_date_notation(){
 		switch ($this->get('intervall_typ')) {
 			case 'daily':
-				$ret = '$(date +%m)/$(date +%u)';	//Monat[01..12]/Tag[1..7]
+				$ret = '$(date +%Y)/$(date +%m)/$(date +%d)';	//	Jahr[YYYY]/Monat[01..12]/Tag des Monats[1..31]
 				break;
 			case 'weekly':
-				$ret = '$(date +%m)/$(date +%u)';	//Monat[01..12]/Tag[1..7]
+				$ret = '$(date +%Y)/$(date +%U)';							//	Jahr[YYYY]/Woche des Jahres[0..53]
 				break;
 			case 'monthly':
-				$ret = '$(date +%Y)/$(date +%m)';	//Jahr[YYYY]/Monat[01..12]
+				$ret = '$(date +%Y)/$(date +%m)';							//	Jahr[YYYY]/Jahr[YYYY]/Monat[01..12]
 				break;
 			default:
-				$ret = '$(date +%Y_%m_%d)';
+				$ret = '$(date +%Y_%m_%d)';										//	Jahr_Monat_Tag
 				break;
 		}
 		return $ret;
@@ -231,11 +233,8 @@ class Sicherung extends MyObject {
 	* @author Georg Kämmert
 	**/
 	function get_valid_for_fileexport(){
-		//if target_dir is empty there can only be Sicherungsinhalte with methode Verzeichnisinhalte kopieren
-		$return = true;
 
-		//export only if Sicherungsinhalte exist
-		$return = !empty($this->inhalte);
+		$return = true;
 
 		//export only if target_dir is not null or
 		// if null only rsync jobs are defined
@@ -252,6 +251,14 @@ class Sicherung extends MyObject {
 			}
 		}
 
+		//export only if active Sicherungsinhalte exist
+		foreach ($this->inhalte as $inhalt) {
+			if ($inhalt->get('active') == 0){
+				$return = false;
+			}
+		}
+
+		$return = !empty($this->inhalte);
 		//is Sicherung active?
 		$return = $this->get('active');
 

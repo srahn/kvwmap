@@ -9,7 +9,7 @@
 	$size = 50;
 
 	$doit = false;
-	$anzObj = count($layer['shape']);
+	$anzObj = @count($layer['shape']);
   if ($anzObj > 0) {
 		$this->found = 'true';
 		$doit = true;
@@ -254,7 +254,7 @@
 								<td'. get_td_class_or_style(array($dataset[$attributes['style']], 'subFormListItem')) . '>'.($preview != ''? $preview.'</td><td valign="top">' : '');
 								
 				if ($this->formvars['embedded'] == 'true') {
-					echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:void(0);" onclick="checkForUnsavedChanges(event);if (document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&reload='.$this->formvars['reload'].'&attribute_privileg='.$this->formvars['attribute_privileg'].'\', new Array(document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].'\');">'.implode(' ', $output).'</a><div class="subForm" id="subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>';
+					echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:void(0);" onclick="checkForUnsavedChanges(event);if (document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&reload='.$this->formvars['reload'].'&attribute_privileg='.$this->formvars['attribute_privileg'].'&mime_type='.$this->mime_type.'\', new Array(document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].'\');">'.implode(' ', $output).'</a><div class="subForm" id="subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>';
 				}
 				else {
 					echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
@@ -303,4 +303,9 @@
 				document.getElementById("new_'.$this->formvars['targetobject'].'").href = href_save;
 			</script>';
 	}
+	
+	echo '
+		<script type="text/javascript">
+			root.open_subform_requests--;
+		</script>';
 ?>
