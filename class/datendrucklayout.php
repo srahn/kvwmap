@@ -669,7 +669,7 @@ class ddl {
 						$this->gui->formvars['layer_id'] = $selected_layer_id;
 						$this->gui->formvars['oid'] = $oid;
 						$this->gui->formvars['selektieren'] = 'false';
-						$rollenlayer_id = $this->gui->createZoomRollenlayer($this->gui->mapDB, $layerdb, array($this->layerset));
+						$rollenlayer_id = $this->gui->createZoomRollenlayer($this->gui->mapDB, $layerdb, array($this->layerset), array($oid));
 						$rollenlayer = $this->gui->mapDB->read_RollenLayer($rollenlayer_id);
 						$this->gui->loadlayer($this->gui->map, $rollenlayer[0]);
 						$this->gui->map->setextent($rect->minx, $rect->miny, $rect->maxx, $rect->maxy);
