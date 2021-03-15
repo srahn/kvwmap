@@ -10233,99 +10233,103 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	function generischer_sachdaten_druck() {
-		include_(CLASSPATH.'datendrucklayout.php');
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		include_(CLASSPATH . 'datendrucklayout.php');
+		$result = array();
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$this->ddl = new ddl($this->database, $this);
 		$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
-    $layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
+		$layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
 		$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, NULL, false, true);
-    $layerdb->setClientEncoding();
-    $path = $mapDB->getPath($this->formvars['chosen_layer_id']);
-    $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
+		$layerdb->setClientEncoding();
+		$path = $mapDB->getPath($this->formvars['chosen_layer_id']);
+		$privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
 		# Attribute laden
 		$attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
-    $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
-    # order by rausnehmen
+		$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
+		# order by rausnehmen
 
 		$orderbyposition = strrpos(strtolower($newpath), 'order by');
 		$lastfromposition = strrpos(strtolower($newpath), 'from');
-		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-	  	$newpath = substr($newpath, 0, $orderbyposition);
-  	}
+		if ($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+			$newpath = substr($newpath, 0, $orderbyposition);
+		}
 		$distinctpos = strpos(strtolower($newpath), 'distinct');
-		if($distinctpos !== false && $distinctpos < 10){
-			$pfad = substr(trim($newpath), $distinctpos+8);
+		if ($distinctpos !== false && $distinctpos < 10) {
+			$pfad = substr(trim($newpath), $distinctpos + 8);
 			$distinct = true;
 		}
-		else{
+		else {
 			$newpath = substr(trim($newpath), 7);
 		}
 		$geometrie_tabelle = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']];
 		$j = 0;
-		foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
-			if(($tablename == $layerset[0]['maintable']) AND $layerset[0]['oid'] != ''){
-				$newpath = pg_quote($layerset[0]['attributes']['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'].' AS '.pg_quote($tablename.'_oid').', '.$newpath;
+		foreach ($layerset[0]['attributes']['all_table_names'] as $tablename) {
+			if (
+				$tablename == $layerset[0]['maintable'] AND
+				$layerset[0]['oid'] != ''
+			) {
+				$newpath = pg_quote($layerset[0]['attributes']['table_alias_name'][$tablename]) . '.' . $layerset[0]['oid'] . ' AS ' . pg_quote($tablename.'_oid') . ', ' . $newpath;
 			}
 			$j++;
 		}
-		if($distinct == true){
-			$newpath = 'DISTINCT '.$newpath;
+		if ($distinct == true) {
+			$newpath = 'DISTINCT ' . $newpath;
 		}
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
-    # Daten abfragen
-    for($i = 0; $i < count($checkbox_names); $i++){
-      if($this->formvars[$checkbox_names[$i]] == 'on'){
-        $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
+		# Daten abfragen
+		for ($i = 0; $i < count($checkbox_names); $i++) {
+			if ($this->formvars[$checkbox_names[$i]] == 'on') {
+				$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
 				$sql = "
 					SELECT " . $newpath . "
-						AND " . $element[1] . ".".pg_quote($layerset[0]['oid'])." = " . quote($element[3]) . "
+						AND " . $element[1] . "." . pg_quote($layerset[0]['oid']) . " = " . quote($element[3]) . "
 				";
-        $oids[] = $element[3];
-       # echo $sql.'<br><br>';
-        $this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
-        $ret = $layerdb->execSQL($sql,4, 1);
-        if (!$ret[0]) {
-          while ($rs=pg_fetch_array($ret[1])) {
-            $result[] = $rs;
-          }
-        }
-      }
-    }
-    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
+				$oids[] = $element[3];
+				#echo "<br>SQL zur Abfrage von Datensätzen für den Sachdatendruch: " . $sql;
+				$this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
+				$ret = $layerdb->execSQL($sql,4, 1);
+				if (!$ret[0]) {
+					while ($rs=pg_fetch_array($ret[1])) {
+						$result[] = $rs;
+					}
+				}
+			}
+		}
+		# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $result, true, $this->Stelle->id);
 		$this->attributes = $attributes;
-    # Layouts abfragen
-    $this->ddl->layouts = $this->ddl->load_layouts($this->Stelle->id, NULL, $this->formvars['chosen_layer_id'], array(0,1));
+		# Layouts abfragen
+		$this->ddl->layouts = $this->ddl->load_layouts($this->Stelle->id, NULL, $this->formvars['chosen_layer_id'], array(0,1));
 
 		if (count($this->ddl->layouts) == 1) {
 			$this->formvars['aktivesLayout'] = $this->ddl->layouts[0]['id'];
 		}
 		else {
-			if($this->formvars['aktivesLayout'] == '')$this->formvars['aktivesLayout'] = $result[0][$layerset[0]['ddl_attribute']];
+			if ($this->formvars['aktivesLayout'] == '') {
+				$this->formvars['aktivesLayout'] = $result[0][$layerset[0]['ddl_attribute']];
+			}
 		}
 
 		# aktives Layout abfragen
-		if($this->formvars['aktivesLayout'] != ''){
+		if ($this->formvars['aktivesLayout'] != '') {
 			$this->ddl->selectedlayout = $this->ddl->load_layouts(NULL, $this->formvars['aktivesLayout'], NULL, array(0,1));
-			for ($i = 0; $i < count($this->ddl->selectedlayout[0]['texts']); $i++){
-				if(strpos($this->ddl->selectedlayout[0]['texts'][$i]['text'], '$pagenumber') !== false)$this->page_numbering = true;
+			for ($i = 0; $i < count($this->ddl->selectedlayout[0]['texts']); $i++) {
+				if (strpos($this->ddl->selectedlayout[0]['texts'][$i]['text'], '$pagenumber') !== false) {
+					$this->page_numbering = true;
+				}
 			}
 			# PDF erzeugen
 			$pdf_file = $this->ddl->createDataPDF(NULL, NULL, NULL, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $this->ddl->selectedlayout[0], $result, $this->Stelle, $this->user, $this->formvars['record_paging']);
-	    # in jpg umwandeln
-	    $currenttime = date('Y-m-d_H_i_s',time());
-	    exec(IMAGEMAGICKPATH . 'convert "' . $pdf_file . '[0]" -resize 595x1000 "' . dirname($pdf_file) . '/' . basename($pdf_file, ".pdf") . '-' . $currenttime . '.jpg"');
-	    #echo IMAGEMAGICKPATH . 'convert "' . $pdf_file . '[0]" -resize 595x1000 "' . dirname($pdf_file) . '/' . basename($pdf_file, ".pdf") . '-' . $currenttime . '.jpg"';
-	    if(!file_exists(IMAGEPATH.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg')){
-	    	$this->previewfile = TEMPPATH_REL.basename($pdf_file, ".pdf").'-'.$currenttime.'-0.jpg';
-	    }
-	    else{
-	    	$this->previewfile = TEMPPATH_REL.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg';
-	    }
-    }
-    $this->main='generischer_sachdaten_druck.php';
-    $this->titel='Sachdaten-Druck';
-    $this->output();
+			# in jpg umwandeln
+			$file_name = basename($pdf_file, ".pdf") . '-' . date('Y-m-d_H_i_s', time()) . '.jpg';
+			$command = IMAGEMAGICKPATH . 'convert "' . $pdf_file . '[0]" -resize 595x1000 "' . dirname($pdf_file) . '/' . $file_name . '"';
+			exec($command);
+			#echo $command;
+			$this->previewfile = TEMPPATH_REL . (file_exists(IMAGEPATH . $file_name) ? $file_name : substr_replace($file_name, '-0.jpg', -4));
+		}
+		$this->main = 'generischer_sachdaten_druck.php';
+		$this->titel = 'Sachdaten-Druck';
+		$this->output();
 	}
 
 	/*
@@ -10338,35 +10342,35 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	* archiveren => 1 Wenn PDF in Dokumentpfad gespeichert und in Dokument Attribut hinterlegt werden soll statt download
 	*/
 	function generischer_sachdaten_druck_drucken($pdfobject = NULL, $offsetx = NULL, $offsety = NULL) {
-		include_(CLASSPATH.'datendrucklayout.php');
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		include_(CLASSPATH . 'datendrucklayout.php');
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$ddl = new ddl($this->database, $this);
 		$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
-    $layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
+		$layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
 		$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, NULL, false, true);
-    $layerdb->setClientEncoding();
-    $path = $mapDB->getPath($this->formvars['chosen_layer_id']);
-    $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
+		$layerdb->setClientEncoding();
+		$path = $mapDB->getPath($this->formvars['chosen_layer_id']);
+		$privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
 		# Attribute laden
 		$attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
-    $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
-    # order by rausnehmen
-  	$orderbyposition = strrpos(strtolower($newpath), 'order by');
+		$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
+		# order by rausnehmen
+		$orderbyposition = strrpos(strtolower($newpath), 'order by');
 		$lastfromposition = strrpos(strtolower($newpath), 'from');
-		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-	  	$newpath = substr($newpath, 0, $orderbyposition);
-  	}
+		if ($orderbyposition !== false AND $orderbyposition > $lastfromposition) {
+			$newpath = substr($newpath, 0, $orderbyposition);
+		}
 		$distinctpos = strpos(strtolower($newpath), 'distinct');
-		if($distinctpos !== false && $distinctpos < 10){
-			$pfad = substr(trim($newpath), $distinctpos+8);
+		if ($distinctpos !== false && $distinctpos < 10) {
+			$pfad = substr(trim($newpath), $distinctpos + 8);
 			$distinct = true;
 		}
-		else{
+		else {
 			$newpath = substr(trim($newpath), 7);
 		}
 		$geometrie_tabelle = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']];
 		$j = 0;
-		foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
+		foreach($layerset[0]['attributes']['all_table_names'] as $tablename) {
 			if (
 				(
 					$tablename == $layerset[0]['maintable'] OR
@@ -10374,12 +10378,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				) AND
 				$layerset[0]['oid'] != ''
 			) {
-				$newpath = pg_quote($layerset[0]['attributes']['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'].' AS '.pg_quote($tablename.'_oid').', '.$newpath;
+				$newpath = pg_quote($layerset[0]['attributes']['table_alias_name'][$tablename]) . '.' . $layerset[0]['oid'] . ' AS ' . pg_quote($tablename.'_oid') . ', ' . $newpath;
 			}
 			$j++;
 		}
-		if($distinct == true){
-			$newpath = 'DISTINCT '.$newpath;
+		if ($distinct == true) {
+			$newpath = 'DISTINCT ' . $newpath;
 		}
 
 		if ($this->formvars['archivieren']) {
@@ -10395,39 +10399,39 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 
 		# Daten abfragen
-		if ($this->qlayerset[0]['shape'] != null){
+		if ($this->qlayerset[0]['shape'] != null) {
 			$result = $this->qlayerset[0]['shape'];
 		}
 		else {
 			for ($i = 0; $i < count($checkbox_names); $i++){
-				if ($this->formvars[$checkbox_names[$i]] == 'on'){
+				if ($this->formvars[$checkbox_names[$i]] == 'on') {
 					$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
 					$sql = "
 						SELECT
 							" . $newpath . " AND
-							" . $element[1] . ".".pg_quote($layerset[0]['oid'])." = " . quote($element[3]) . "
+							" . $element[1] . "." . pg_quote($layerset[0]['oid']) . " = " . quote($element[3]) . "
 					";
 					$oids[] = $element[3];
 					#echo '<p>SQL zur Abfrage der Datensätze die gedruckt werden sollen:<br>' . $sql;
 					$this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :", 4);
 					$ret = $layerdb->execSQL($sql,4, 1);
 					if (!$ret[0]) {
-						while ($rs=pg_fetch_array($ret[1])) {
+						while ($rs = pg_fetch_array($ret[1])) {
 							$result[] = $rs;
 						}
 					}
 				}
 			}
 		}
-    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
+		# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $result, true, $this->Stelle->id);
 		$this->attributes = $attributes;
-    # aktives Layout abfragen
-    if($this->formvars['aktivesLayout'] != ''){
-    	$ddl->selectedlayout = $ddl->load_layouts(NULL, $this->formvars['aktivesLayout'], NULL, NULL);
-	    # PDF erzeugen
-	    $output = $ddl->createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $ddl->selectedlayout[0], $result, $this->Stelle, $this->user, NULL, $this->formvars['record_paging']);
-    }
+		# aktives Layout abfragen
+		if ($this->formvars['aktivesLayout'] != '') {
+			$ddl->selectedlayout = $ddl->load_layouts(NULL, $this->formvars['aktivesLayout'], NULL, NULL);
+			# PDF erzeugen
+			$output = $ddl->createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $ddl->selectedlayout[0], $result, $this->Stelle, $this->user, NULL, $this->formvars['record_paging']);
+		}
 		if ($pdfobject == NULL) {
 			# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF anzeigen
 			$this->outputfile = basename($output);
@@ -10445,7 +10449,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				# Attributname ermitteln in dem der Attributwert eingetragen werden soll
 				$dokument_attribute = array_keys(array_filter(
 					$layerset[0]['attributes']['form_element_type'],
-					function($value, $key) {
+					function ($value, $key) {
 						return (!is_int($key) AND $value == 'Dokument');
 					},
 					ARRAY_FILTER_USE_BOTH

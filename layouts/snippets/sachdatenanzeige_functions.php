@@ -855,10 +855,10 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				root.overlay_submit(enclosingForm, false);
 			}
 		}
-	}	
+	}
 
 	print_data = function(layer_id){
-		if(check_for_selection(layer_id)){
+		if (check_for_selection(layer_id)) {
 			enclosingForm.chosen_layer_id.value = layer_id;
 			enclosingForm.go_backup.value = enclosingForm.go.value;
 			enclosingForm.go.value = 'generischer_sachdaten_druck';
