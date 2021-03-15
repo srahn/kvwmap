@@ -1,7 +1,14 @@
 <?
 	$disabled = '';
 	if ($this->layer[0]['used_layer_parent_id'] != ''){
-		$disabled = 'disabled="true"';
+		if ($this->layer[0]['use_parent_privileges']) {
+			$disabled = 'disabled="true"';
+		}
+		$parent_privileges_checkbox = '
+			<div class="apt-use_parent_privileges">
+				<input id="parent' . $this->stelle->id . '" value="1" type="checkbox" onclick="toggle_privileges(this);" name="use_parent_privileges' . $this->stelle->id . '" '. ($this->layer[0]['use_parent_privileges'] ? 'checked="true"' : '') .'>
+				<label for="parent' . $this->stelle->id . '" class="fett">' . $strUseParentPrivileges . '</label>
+			</div>';
 	}
 ?>
 
@@ -14,6 +21,7 @@
 		<span class="fetter px16"><? echo $strDefaultPrivileges; ?></span>
 		<? } ?>
 	</div>
+	<? echo $parent_privileges_checkbox; ?>
 	<div class="apt-layerzugriffsrechte">
 		<span class="fett"><? echo $strLayerAccessPrivileges; ?></span><br>
 		<select name="privileg<? echo $this->stelle->id; ?>" <? echo $disabled; ?>>
