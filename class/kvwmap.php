@@ -9232,11 +9232,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if (!empty($instead_updates)) {			# statt zu Löschen sollen hier nur die Auto-Felder gesetzt werden
 					$sql = "
 							UPDATE
-								".$element[2]."
+								" . pg_quote($element[2]) . "
 							SET
-								".implode(', ', $instead_updates)."
+								" . implode(', ', $instead_updates) . "
 							WHERE
-								oid = ".$element[3];
+								" . $layer['oid'] . " = " . quote($element[3]);
 						$ret = $layerdb->execSQL($sql, 4, 1, true);
 						$this->success = $ret['success'];
 				}
