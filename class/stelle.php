@@ -965,6 +965,7 @@ class stelle {
 					used_layer as l,
 					stellen_hierarchie
 				WHERE
+					(select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
 					layer_id = " . $layer_ids[$i] . " AND
 					stelle_id = parent_id AND
 					child_id = " . $this->id . "
@@ -983,12 +984,12 @@ class stelle {
 					`privileg` = l.`privileg`,
 					`export_privileg` = l.`export_privileg`,
 					requires = l.requires";
-			#echo $sql.'<br>';
+			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 			if ($this->database->mysqli->affected_rows == 0) {
-				# wenn nicht von Elternstelle übernommen, Defaulteinstellungen übernehmen
+				# wenn nicht von Elternstelle übernommen, Defaulteinstellungen übernehmen bzw. ignorieren, falls schon vorhanden
 				$sql = "INSERT " . (!$assign_default_values ? "IGNORE" : "") . " INTO used_layer " . $insert . "
 					SELECT
 						'" . $this->id . "',
@@ -1059,6 +1060,7 @@ class stelle {
 						layer_attributes2stelle l,
 						stellen_hierarchie
 					WHERE
+						(select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
 						layer_id = " . $layer_ids[$i] . " AND
 						stelle_id = parent_id AND
 						child_id = " . $this->id . "
@@ -1678,9 +1680,17 @@ class stelle {
 		return $newpath;
 	}
 
-	function set_layer_privileges($layer_id, $privileg, $exportprivileg){
-		$sql = 'UPDATE used_layer SET privileg = "'.$privileg.'", export_privileg = "'.$exportprivileg.'" WHERE ';
-		$sql.= 'layer_id = '.$layer_id.' AND stelle_id = '.$this->id;
+	function set_layer_privileges($layer_id, $privileg, $exportprivileg, $use_parent_privileges){
+		$sql = '
+			UPDATE 
+				used_layer 
+			SET 
+				privileg = "' . $privileg . '", 
+				export_privileg = "' . $exportprivileg . '" ,
+				use_parent_privileges = "' . ($use_parent_privileges ?: 0) . '" 
+			WHERE 
+				layer_id = '.$layer_id.' AND 
+				stelle_id = '.$this->id;
 		$this->debug->write("<p>file:stelle.php class:stelle->set_layer_privileges - Speichern der Layerrechte zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
@@ -1701,7 +1711,7 @@ class stelle {
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
 		# dann Attributrechte eintragen
 		for ($i = 0; $i < count($attributes['type']); $i++) {
-			if ($formvars['used_layer_parent_id'] != '') {
+			if ($formvars['used_layer_parent_id'] != '' AND $formvars['use_parent_privileges' . $this->id] == 1) {
 				# wenn Eltern-Stelle für diesen Layer vorhanden, deren Rechte übernehmen
 				$formvars['privileg_' . $attributes['name'][$i] .'_'. $this->id] = $formvars['privileg_' . $attributes['name'][$i] .'_'. $formvars['used_layer_parent_id']];
 				$formvars['tooltip_' . $attributes['name'][$i] .'_'. $this->id] = $formvars['tooltip_' . $attributes['name'][$i] .'_'. $formvars['used_layer_parent_id']];

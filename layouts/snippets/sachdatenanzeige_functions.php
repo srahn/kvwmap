@@ -393,6 +393,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	}
 	
 	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen, weiter_erfassen_params, further_params){
+		root.open_subform_requests++;
 		list_div = document.getElementById(list_div_id);
 		var params = list_div.dataset.reload_params;
 		if(enclosingForm.name == 'GUI2')params += '&mime_type=overlay_html';

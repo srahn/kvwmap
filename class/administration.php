@@ -494,12 +494,12 @@ class administration{
 										,'count_skip' 	=> 0
 										,'crontab'			=> ''
 										);
-		$fh=fopen('/var/www/sicherungen/kvwmap_backup_crontab', 'w');
+		$app = rtrim($this->config_params['APPLVERSION']['value'], '/');
+		$fh=fopen('/var/www/sicherungen/kvwmap_backup_crontab_' . $app, 'w');
 		fwrite($fh, 'SHELL=/bin/bash' . PHP_EOL);
 		fwrite($fh, 'PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin' . PHP_EOL);
 		foreach($sicherungen AS $sicherung) {
 			if ($sicherung->get_valid_for_fileexport()){
-				$app = rtrim($this->config_params['APPLVERSION']['value'], '/');
 				$return['count_export'] = $return['count_export'] + 1;
 				$sicherung->write_config_files($gui, $backup_path, $app);
 				$cronline = $sicherung->get_cronjob_interval() . ' root	/home/gisadmin/kvwmap-server/scripte/sicherung/backup.sh /home/gisadmin/www/sicherungen/' . $app . '_' . $sicherung->get('id') . PHP_EOL;
