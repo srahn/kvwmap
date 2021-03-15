@@ -721,7 +721,30 @@
 								$link_attribute = 'onclick="checkForUnsavedChanges(event);"';
 							}
 							else {
-								$link_attribute = 'href="' . $href . (strpos($href, 'javascript') === false ? '&mime_type=' . $gui->mime_type : '') . '"';
+								# link_parts: link_type:link_url
+								# mailto:$kunde_email?subject=Rechnung%20$emailbetreff%20$zeitraum&body=$anrede%0A%0Ahiermit%20sende%20ich%20Ihnen%20die%20Rechnung%20$rechnungsnummer%20zu%20$rechnungsgegenstand%20im%20Zeitraum%20$zeitraum.%0A%0AMit%20freundlichen%20Grüßen%0APeter%20Korduan;E-Mail;no_new_window
+								$link_type = explode(':', $href)[0];
+								$link_url = explode(':', $href)[1];
+								switch ($link_type) {
+									case 'mailto' : {
+										$url_parts = explode('?', $link_url);
+										$mail_addresses = explode(' ', $url_parts[0]);
+										$params = array();
+										if (count($mail_addresses) > 1) {
+											# append extra email addresses in cc deliminated by ;
+											$params[] = 'cc=' . implode(';', array_slice($mail_addresses, 1));
+										}
+										$params[] = $url_parts[1];
+										$href_parts = array($link_type, $mail_addresses[0] . '?' . implode('&', $params));
+									} break;
+									case 'javascript' : {
+										$href_parts = array($link_type, $link_url);
+									}
+									default : {
+										$href_parts = array($href . '&mime_type=' . $gui->mime_type);
+									}
+								}
+								$link_attribute = 'href="' . implode(':', $href_parts) . '"';
 							}
 							$datapart .= '<a
 								tabindex="1"

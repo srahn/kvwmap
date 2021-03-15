@@ -3694,8 +3694,8 @@ echo '			</table>
     $this->output();
   }
 
-  function import_layer_importieren(){
-		include_(CLASSPATH.'synchronisation.php');
+  function import_layer_importieren() {
+		include_(CLASSPATH . 'synchronisation.php');
     $this->loadMap('DataBase');
     $this->synchro = new synchro($this->Stelle, $this->user, $this->pgdatabase);
     $layerset = $this->user->rolle->getLayer('');
@@ -3735,8 +3735,8 @@ echo '			</table>
     $this->output();
   }
 
-  function export_layer_exportieren(){
-		include_(CLASSPATH.'synchronisation.php');
+  function export_layer_exportieren() {
+		include_(CLASSPATH . 'synchronisation.php');
     $this->loadMap('DataBase');
     $this->synchro = new synchro($this->Stelle, $this->user, $this->pgdatabase);
     $layerset = $this->user->rolle->getLayer('');
@@ -4706,20 +4706,62 @@ echo '			</table>
 
 	/**
 	*	save new or update existing Sicherungsinhalt
+	* acts as a switch
 	*	@author Georg Kämmert
 	**/
 	function sicherungsinhalt_speichern() {
 		include_once(CLASSPATH . 'Sicherungsinhalt.php');
+		if (isset($this->formvars['id']) AND $this->formvars['id'] != '' ) {
+			$this->sicherungsinhalt_update();
+		}
+		else {
+			$this->sicherungsinhalt_insert();
+		}
+	}
+
+	/**
+	*	save new Sicherungsinhalt
+	*	@author Georg Kämmert
+	**/
+	function sicherungsinhalt_insert() {
+		include_once(CLASSPATH . 'Sicherungsinhalt.php');
 		$this->inhalt = new Sicherungsinhalt($this);
 		$this->inhalt->data = formvars_strip($this->formvars, $this->inhalt->getKeys(), 'keep');
-		$this->inhalt->disable_options($this->formvars);
-		if ($this->inhalt->get('active') == '') {
-			$results = $this->inhalt->validate();
-		}
+		$results = $this->inhalt->validate();
 		if (empty($results)) {
-			$result = ($this->inhalt->get('id') > 0 ? $this->inhalt->update() : $this->inhalt->create());
+			$result = $this->inhalt->create();
 			if ($result[0]['success']) {
 				$this->add_message('notice', 'Sicherungsinhalt erfolgreich gespeichert.');
+				$this->formvars['id'] = $this->formvars['sicherung_id'];
+				$this->Sicherung_editieren();
+			}
+			else {
+				$this->add_message('error', $result['err_msg']);
+				$this->sicherungsinhalt_editieren();
+			}
+		}
+		else {
+			foreach ($results AS $result) {
+				$this->add_message($result['type'], $result['msg']);
+			}
+			$this->sicherungsinhalt_editieren();
+		}
+	}
+
+	/**
+	*	update existing Sicherungsinhalt
+	*	@author Georg Kämmert
+	**/
+	function sicherungsinhalt_update() {
+		include_once(CLASSPATH . 'Sicherungsinhalt.php');
+		$this->inhalt = Sicherungsinhalt::find_by_id($this, $this->formvars['id']);
+		$this->inhalt->data = formvars_strip($this->formvars, $this->inhalt->getKeys(), 'keep');
+		$this->inhalt->disable_options($this->formvars);
+		//$results = $this->inhalt->validate();
+		if (empty($results)) {
+			$result = $this->inhalt->update();
+			if ($result[0]['success']) {
+				$this->add_message('notice', 'Sicherungsinhalt erfolgreich geändert.');
 				$this->formvars['id'] = $this->formvars['sicherung_id'];
 				$this->Sicherung_editieren();
 			}

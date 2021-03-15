@@ -53,7 +53,8 @@
 				<?php
 					$i=0;
 					foreach ($this->inhalt->get_mysql_database_names() as $key => $value) {
-						echo "s.options[". $i ."]=new Option('" . $value['Database'] . "','" . $value['Database'] . "');";
+						echo "s.options[". $i ."]=new Option('" . $value['Database'] . "','" . $value['Database'] . "');" . PHP_EOL;
+						echo $this->formvars['source'] == $value['Database']?"s.options[". $i ."].selected=true;":"";
 						$i++;
 					}
 				?>
@@ -66,7 +67,8 @@
 				<?php
 					$i=0;
 					foreach ($this->inhalt->get_pgsql_database_names() as $db) {
-						echo "s.options[". $i ."]=new Option('" . $db[1] . "','" . $db[0] . "');";
+						echo "s.options[". $i ."]=new Option('" . $db[1] . "','" . $db[0] . "');" . PHP_EOL;
+						echo $this->formvars['connection_id'] == $db[0]?"s.options[". $i ."].selected=true;":"";
 						$i++;
 					}
 				?>
