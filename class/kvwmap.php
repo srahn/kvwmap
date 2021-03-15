@@ -8339,6 +8339,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function GenerischeSuche_Suchen() {
 		$this->formvars['search'] = true;
+		if ($this->formvars['mime_type']) {
+			$this->mime_type = $this->formvars['mime_type'];
+		}
 		if($this->last_query != '') {
 			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
 		}
