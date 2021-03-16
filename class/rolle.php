@@ -884,8 +884,7 @@ class rolle {
 				l.query as pfad, 
 				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, 
 				gle_view,
-				concat('(', rollenfilter, ')') as Filter,
-				'oid' as oid
+				concat('(', rollenfilter, ')') as Filter
 			FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
     if ($LayerName!='') {
