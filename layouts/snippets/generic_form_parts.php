@@ -518,18 +518,22 @@
 					$reloadParams .= '&columnname_mother='.$attributes['the_geom'];																								# dito
 					$reloadParams .= '&attribute_privileg='.$attribute_privileg;
 					
-					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'" style="margin-top: 3px"><img src="'.GRAPHICSPATH.'leer.gif" ';
+					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'" style="margin-top: 3px">';
 					if($gui->new_entry != true){
 						$subform_request = true;
-						$onload = 'onload="reload_subform_list(\''.$layer_id.'_'.$name.'_'.$k.'\', 0, 0)"';
+						$datapart .= '
+							<script type="text/javascript">
+								reload_subform_list(\''.$layer_id.'_'.$name.'_'.$k.'\', 0, 0);
+							</script>
+						';
 					}
-					$datapart .= ($subform_request? $onload : '').'></div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
-					$datapart .= '</td></tr></table>';
+					$datapart .= '</div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
+					$datapart .= '</td></tr></table>';					
 				}break;
 
 				case 'Time': {
 					$datapart .= '<input class="'.$field_class.'" readonly style="padding: 0 0 0 3;border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
-					$datapart .= ' size="15" type="text" name="'.$fieldname.'" value="' . htmlspecialchars($value) . '">';
+					$datapart .= ' size="16" type="text" name="'.$fieldname.'" value="' . htmlspecialchars($value) . '">';
 				}break;
 
 				case 'Dokument': {
@@ -640,6 +644,12 @@
 				} break;
 
 				case 'Link': {
+					if ($attribute_privileg != '0' OR $lock[$k]) {
+						$datapart .= '<input class="'.$field_class.'" tabindex="1" onchange="'.$onchange.'" id="'.$layer_id.'_'.$name.'_'.$k.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+					}
+					else {
+						$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+					}
 					if ($value!='') {
 						if (substr($value, 0, 4) == 'http') {
 							$target = '_blank';
@@ -647,21 +657,16 @@
 						else {
 							$target = 'root';
 						}
-						$datapart .= '<a style="padding: 0 0 0 3;" class="link" target="'.$target.'" style="font-size: '.$fontsize.'px" href="' . htmlspecialchars($value) .'">';
-						if($attributes['options'][$j] != ''){
+						$datapart .= '<div class="formelement-link"><a class="link" target="'.$target.'" style="font-size: '.$fontsize.'px" href="' . htmlspecialchars($value) .'">';
+						if ($attributes['options'][$j] != '') {
 							$datapart .= $attributes['options'][$j];
 						}
-						else{
+						else {
 							$datapart .= htmlspecialchars(basename($value));
 						}
-						$datapart .= '</a><br>';
+						$datapart .= '</a></div>';
 					}
-					if($attribute_privileg != '0' OR $lock[$k]){
-						$datapart .= '<input class="'.$field_class.'" tabindex="1" onchange="'.$onchange.'" id="'.$layer_id.'_'.$name.'_'.$k.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
-					}else{
-						$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
-					}
-				} break;
+				 } break;
 
 				case 'dynamicLink': {
 					$show_link = false;
@@ -701,21 +706,54 @@
 							$datapart .= '<div style="display:inline" id="dynamicLink'.$layer_id.'_'.$k.'_'.$j.'"></div>';
 						}
 						else {
-							$datapart .= '<a tabindex="1"';
 							switch ($explosion[2]) { 
-								CASE 'no_new_window' : {
-									$datapart .= 'target="_self"';
-								}break;
-								CASE 'root' : {
-									$datapart .= 'target="root"';
-								}break;
+								case 'no_new_window' : {
+									$link_target = '_self';
+								} break;
+								case 'root' : {
+									$link_target = 'root';
+								} break;
 								default : {
-									$datapart .= 'target="_blank"';
+									$link_target = '_blank';
 								}
 							}
-							$datapart .= ' class="dynamicLink" style="font-size: ' . $fontsize . 'px" ' . (($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') ? 'onclick="checkForUnsavedChanges(event);"' : '').' href="'.$href.'&mime_type='.$gui->mime_type.'">';
-							$datapart .= $alias;
-							$datapart .= '</a><br>';
+							if ($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') {
+								$link_attribute = 'onclick="checkForUnsavedChanges(event);"';
+							}
+							else {
+								# link_parts: link_type:link_url
+								# mailto:$kunde_email?subject=Rechnung%20$emailbetreff%20$zeitraum&body=$anrede%0A%0Ahiermit%20sende%20ich%20Ihnen%20die%20Rechnung%20$rechnungsnummer%20zu%20$rechnungsgegenstand%20im%20Zeitraum%20$zeitraum.%0A%0AMit%20freundlichen%20Grüßen%0APeter%20Korduan;E-Mail;no_new_window
+								$link_type = explode(':', $href)[0];
+								$link_url = explode(':', $href)[1];
+								switch ($link_type) {
+									case 'mailto' : {
+										$url_parts = explode('?', $link_url);
+										$mail_addresses = explode(' ', $url_parts[0]);
+										$params = array();
+										if (count($mail_addresses) > 1) {
+											# append extra email addresses in cc deliminated by ;
+											$params[] = 'cc=' . implode(';', array_slice($mail_addresses, 1));
+										}
+										$params[] = $url_parts[1];
+										$href_parts = array($link_type, $mail_addresses[0] . '?' . implode('&', $params));
+									} break;
+									case 'javascript' : {
+										$href_parts = array($link_type, $link_url);
+									}
+									default : {
+										$href_parts = array($href . '&mime_type=' . $gui->mime_type);
+									}
+								}
+								$link_attribute = 'href="' . implode(':', $href_parts) . '"';
+							}
+							$datapart .= '<a
+								tabindex="1"
+								target="' . $link_target . '"
+								class="dynamicLink"
+								style="font-size: ' . $fontsize . 'px"
+								' . $link_attribute . '
+								target="' . $link_target . '"
+							>' . $alias . '</a><br>';
 						}
 					}
 				} break;

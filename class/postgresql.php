@@ -355,7 +355,7 @@ FROM
     return $ret;
   }
 
-	function execSQL($sql, $debuglevel, $loglevel, $suppress_err_msg = false) {
+	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false) {
 		$ret = array(); // Array with results to return
 		$strip_context = true;
 
@@ -486,7 +486,7 @@ FROM
 				# gebe Fehlermeldung aus.
 				$ret[1] = $ret['msg'] = sql_err_msg('Fehler bei der Abfrage der PostgreSQL-Datenbank:', $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
 				$this->gui->add_message($ret['type'], $ret['msg']);
-				header('error: true');	// damit ajax-Requests das auch mitkriegen
+				#header('error: true');	// damit ajax-Requests das auch mitkriegen
 			}
 		}
 		return $ret;
@@ -640,7 +640,7 @@ FROM
 					if($schema_names[$table_oid] == NULL){
 						$schema_names[$table_oid] = $this->pg_field_schema($table_oid);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?	
 					}
-					$schemaname = $schema_names[$table_oid];
+					$fields[$i]['schema_name'] = $schemaname = $schema_names[$table_oid];
 					
 					$constraintstring = '';
 					

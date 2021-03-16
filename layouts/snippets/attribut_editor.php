@@ -411,7 +411,7 @@ function alias_replace(name){
 							</td>
 							
 						  <td align="center" valign="top">
-								<? if($i == 0)echo '<div style="margin-top: -40px;" class="fett scrolltable_header">Bei der<br>Suche</div>';
+								<? if($i == 0)echo '<div style="margin-top: -9px;" class="fett scrolltable_header">Bei der<br>Suche</div>';
 								echo FormObject::createSelectField(
 											'mandatory_' . $this->attributes['name'][$i],
 											array(
@@ -426,7 +426,7 @@ function alias_replace(name){
 							</td>
 
 							<td align="center" valign="top">
-								<? if($i == 0)echo '<div style="margin-top: -40px;" class="fett scrolltable_header">Für neuen<br>Datensatz</div>';
+								<? if($i == 0)echo '<div style="margin-top: -9px;" class="fett scrolltable_header">Für neuen<br>Datensatz</div>';
 								echo FormObject::createSelectField(
 											'dont_use_for_new_' . $this->attributes['name'][$i],
 											array(

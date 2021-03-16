@@ -103,9 +103,8 @@ body {
 
 #gui-table {
 	width: 900px;
-	margin: auto;	
+	margin: auto;
 }
-
 
 input[type="checkbox"], input[type="radio"] {
 	position: relative;
@@ -1671,6 +1670,13 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 	display: inline-block;
 }
 
+.formelement-link {
+	padding: 5px;
+	margin: 5px 1px;
+	background: #e3e3e3;
+	border-radius: 2px;
+}
+
 .calendar {
 	text-align: center;
 	position: absolute;
@@ -2237,7 +2243,7 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 }
 
 .scrolltable thead, .scrolltable tbody {
-	display: inline-table;
+	display: block;
 }
 
 .scrolltable tbody {
@@ -2247,7 +2253,7 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 
 .scrolltable_header{
 	position: absolute;
-	margin-top: -25px;
+	top: 5px;
 }
 
 .toggle_fa_off i{

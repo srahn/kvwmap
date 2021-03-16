@@ -30,8 +30,8 @@
 
 <script type="text/javascript">
 
-function zoomto(layer_id, oid, tablename, columnname){
-  location.href="index.php?go=zoomtoPolygon&oid="+oid+"&layer_tablename="+tablename+"&layer_columnname="+columnname+"&layer_id="+layer_id+"&selektieren=zoomonly";
+function zoomto(layer_id, oid, columnname){
+  location.href="index.php?go=zoomto_dataset&oid="+oid+"&layer_columnname="+columnname+"&layer_id="+layer_id+"&selektieren=zoomonly";
 }
 
 function toggle_vertices(){	
