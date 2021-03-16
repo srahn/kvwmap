@@ -5340,6 +5340,13 @@ echo '			</table>
 		else {
 			$layerset = $this->user->rolle->getRollenlayer(-$this->formvars['layer_id']);
 		}
+		$attributes = $dbmap->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL, false, false);
+		if ($layerset[0]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
+			$layerset[0]['maintable'] = $attributes['table_name'][$attributes['the_geom']];
+		}
+		if ($layerset[0]['oid'] == '' AND count($attributes['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+			$layerset[0]['oid'] = $attributes['pk'][0];
+		}
     if($this->formvars['oid'] != ''){
     	if($this->formvars['selektieren'] != 'zoomonly'){
 				$this->createZoomRollenlayer($dbmap, $layerdb, $layerset, array($this->formvars['oid']));
@@ -8406,6 +8413,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 				$attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
+				if ($layerset[0]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
+					$layerset[0]['maintable'] = $attributes['table_name'][$attributes['the_geom']];
+				}
+				if ($layerset[0]['oid'] == '' AND count($attributes['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+					$layerset[0]['oid'] = $attributes['pk'][0];
+				}
 				if($this->formvars['selected_layer_id'] > 0){			# bei Rollenlayern nicht
 					$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
 				}
@@ -8581,23 +8594,19 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$distinct = false;
           $pfad = substr(trim($newpath), 7);
         }
-        $j = 0;
-        foreach($attributes['all_table_names'] as $tablename){
-					if(($tablename == $layerset[0]['maintable']) AND $layerset[0]['oid'] != ''){
-            $pfad = pg_quote($attributes['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'].' AS '.pg_quote($tablename.'_oid').', '.$pfad;
-						if(value_of($this->formvars, 'operator_'.$tablename.'_oid') == '')$this->formvars['operator_'.$tablename.'_oid'] = '=';
-            if(value_of($this->formvars, 'value_'.$tablename.'_oid')){
-							$sql_where .= ' AND '.pg_quote($tablename.'_oid').' '.$this->formvars['operator_'.$tablename.'_oid'].' ';
-							if($this->formvars['operator_'.$tablename.'_oid'] != 'IN'){
-								$sql_where .= quote($this->formvars['value_'.$tablename.'_oid'], $attributes['type'][$attributes['indizes'][$layerset[0]['oid']]]);
-							}
-							else{
-								$sql_where .= $this->formvars['value_'.$tablename.'_oid'];
-							}
-            }
-          }
-          $j++;
-        }
+				if ($layerset[0]['maintable'] != '' AND $layerset[0]['oid'] != '') {
+					$pfad = pg_quote($attributes['table_alias_name'][$layerset[0]['maintable']]).'.'.$layerset[0]['oid'].' AS '.pg_quote($layerset[0]['maintable'].'_oid').', '.$pfad;
+					if(value_of($this->formvars, 'operator_'.$layerset[0]['maintable'].'_oid') == '')$this->formvars['operator_'.$layerset[0]['maintable'].'_oid'] = '=';
+					if(value_of($this->formvars, 'value_'.$layerset[0]['maintable'].'_oid')){
+						$sql_where .= ' AND '.pg_quote($layerset[0]['maintable'].'_oid').' '.$this->formvars['operator_'.$layerset[0]['maintable'].'_oid'].' ';
+						if($this->formvars['operator_'.$layerset[0]['maintable'].'_oid'] != 'IN'){
+							$sql_where .= quote($this->formvars['value_'.$layerset[0]['maintable'].'_oid'], $attributes['type'][$attributes['indizes'][$layerset[0]['oid']]]);
+						}
+						else{
+							$sql_where .= $this->formvars['value_'.$layerset[0]['maintable'].'_oid'];
+						}
+					}
+				}
 
         # 2008-10-22 sr   Filter zur Where-Klausel hinzugefügt
         if($layerset[0]['Filter'] != ''){
@@ -8612,12 +8621,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				# group by wieder einbauen
 				if(value_of($attributes, 'groupby') != ''){
 					$pfad .= $attributes['groupby'];
-					$j = 0;
-					foreach($attributes['all_table_names'] as $tablename){
-						if($tablename == $layerset[0]['maintable'] AND $layerset[0]['oid'] != ''){		# hat Haupttabelle oids?
-							$pfad .= ','.pg_quote($tablename.'_oid').' ';
-						}
-						$j++;
+					if ($layerset[0]['maintable'] != '' AND $layerset[0]['oid'] != '') {
+						$pfad .= ','.pg_quote($layerset[0]['maintable'].'_oid').' ';
 					}
   			}
         $sql = "SELECT * FROM (SELECT " . $pfad.") as query WHERE 1=1 " . $sql_where;
@@ -13970,13 +13975,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							if ($layerset[$i]['Layer_ID'] > 0 AND empty($privileges)) {
 								$pfad = 'NULL::geometry as ' . $layerset[$i]['attributes']['the_geom'] . ' ' . $pfad;
 							}
-							$geometrie_tabelle = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
-							$j = 0;
-							foreach($layerset[$i]['attributes']['all_table_names'] as $tablename) {
-								if ($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != '') {
-									$pfad = pg_quote($layerset[$i]['attributes']['table_alias_name'][$tablename]).'.'.$layerset[$i]['oid'].' AS ' . pg_quote($tablename . '_oid').', ' . $pfad;
-								}
-								$j++;
+							if ($layerset[$i]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
+								$layerset[$i]['maintable'] = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
+							}
+							if ($layerset[$i]['oid'] == '' AND count($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+								$layerset[$i]['oid'] = $layerset[$i]['attributes']['pk'][0];
+							}
+							if ($layerset[$i]['maintable'] != '' AND $layerset[$i]['oid'] != '') {
+								$pfad = pg_quote($layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['maintable']]).'.'.$layerset[$i]['oid'].' AS ' . pg_quote($layerset[$i]['maintable'] . '_oid').', ' . $pfad;
 							}
 							if ($distinct == true) {
 								$pfad = 'DISTINCT ' . $pfad;
@@ -14673,9 +14679,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$layerset[$i]['Name'] = $layerset[$i]['alias'];
 				}
 				$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);				
-				$pfad = $this->mapDB->getQueryWithOid($layerset[$i], $layerdb, $this->Stelle);
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
+
+				if ($layerset[$i]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
+					$layerset[$i]['maintable'] = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
+				}
+				if ($layerset[$i]['oid'] == '' AND count($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+					$layerset[$i]['oid'] = $layerset[$i]['attributes']['pk'][0];
+				}
+				$pfad = $this->mapDB->getQueryWithOid($layerset[$i], $layerdb, $this->Stelle);
 				
 				if($rect->minx != ''){	####### Kartenabfrage
 					$show = false;
@@ -15913,12 +15926,8 @@ class db_mapObj{
 		else{
 			$pfad = substr(trim($path), 7);
 		}
-		$j = 0;
-		foreach($layerset['attributes']['all_table_names'] as $tablename){
-			if ($tablename == $layerset['maintable'] AND $layerset['oid'] != '') {
-				$pfad = pg_quote($layerset['attributes']['table_alias_name'][$tablename]).'.'.$layerset['oid'].' AS ' . pg_quote($tablename . '_oid').', ' . $pfad;
-			}					
-			$j++;
+		if ($layerset['maintable'] != '' AND $layerset['oid'] != '') {
+			$pfad = pg_quote($layerset['attributes']['table_alias_name'][$layerset['maintable']]).'.'.$layerset['oid'].' AS ' . pg_quote($layerset['maintable'] . '_oid').', ' . $pfad;
 		}
 
 		$the_geom = $layerset['attributes']['the_geom'];
@@ -18008,6 +18017,9 @@ class db_mapObj{
 			$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
 			$attributes['constraints'][$i]= $rs['constraints'];
 			$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
+			if ($rs['constraints'] == 'PRIMARY KEY') {
+				$attributes['pk'][] = $rs['real_name'];
+			}
 			$attributes['saveable'][$i]= $rs['saveable'];
 			$attributes['nullable'][$i]= $rs['nullable'];
 			$attributes['length'][$i]= $rs['length'];
