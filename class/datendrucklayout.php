@@ -1838,7 +1838,7 @@ class ddl {
 			FROM
 				datendrucklayouts d LEFT JOIN
 				ddl2stelle d2s ON d.id = d2s.ddl_id
-			WHERE
+			" . (!empty($where_clauses)? ' WHERE ' : '') . "
 				" . implode(" AND ", $where_clauses) . "
 			ORDER BY
 				layer_id,
