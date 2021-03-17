@@ -13139,6 +13139,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$attributes = $mapdb->read_layer_attributes($layer_id, $layerdb[$layer_id], NULL);
 					#$filter = $mapdb->getFilter ($layer_id, $this->Stelle->id);		# siehe unten
 					$old_layer_id = $layer_id;
+					if ($layerset[$layer_id][0]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
+						$layerset[$layer_id][0]['maintable'] = $attributes['table_name'][$attributes['the_geom']];
+					}
+					if ($layerset[$layer_id][0]['oid'] == '' AND count($attributes['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+						$layerset[$layer_id][0]['oid'] = $attributes['pk'][0];
+					}
 				}
 				if (
 					(
