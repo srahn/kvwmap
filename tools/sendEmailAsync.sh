@@ -32,13 +32,14 @@ do
     #echo Mit attachement sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=yes -u ${subject} -m ${message} -a $attachment
     sendEmail -v -t $to_email -f $from_email -s ${smtp_server}:${smtp_port} -o tls=yes  -xu ${mail_smtp_user} -xp ${mail_smtp_password} -o message-charset=utf8 -u "${subject}" -m "${message}" -a $attachment > /dev/null 2>&1
     if [[ -z $mail_copy_attachment ]]; then
+	
       mv $attachment $mail_archiv_path
-    }
-    else {
+    
+    else 
       cp $attachment $mail_archiv_path
-    }
+    
+    fi
   fi
- 
   mv $file $mail_archiv_path
   #echo "E-Mail $file gesendet."
   file=`find $mail_queue_path -name "email*" | head -n 1`
