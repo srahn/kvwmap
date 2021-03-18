@@ -324,7 +324,7 @@
 					}
 				}break;
 
-				case 'Auswahlfeld' : case 'Auswahlfeld_not_saveable' : {
+				case 'Auswahlfeld' : {
 					if(is_array($attributes['dependent_options'][$j])){
 						$enum_value = $attributes['enum_value'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 						$enum_output = $attributes['enum_output'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten

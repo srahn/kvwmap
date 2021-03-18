@@ -9420,6 +9420,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         $attributname = $element[1];
         $table_name = $element[2];
         $formtype = $element[4];
+				$saveable = $element[7];
 				$tablename[$table_name]['tablename'] = $table_name;
 				$tablename[$table_name]['attributname'][] = $attributenames[] = $attributname;
 				$form_field_indizes[$attributname] = $i;
@@ -9543,8 +9544,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						} break;
 
 						case (
-							$table['type'][$i] != 'Text_not_saveable' AND
-							$table['type'][$i] != 'Auswahlfeld_not_saveable' AND
+							$saveable AND
 							$table['type'][$i] != 'SubFormPK' AND
 							$table['type'][$i] != 'SubFormFK' AND
 							($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')
@@ -13505,7 +13505,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							if ($eintrag == '')$eintrag = 'NULL';
 						} break;
 						default : {
-							if ($tablename AND $formtype != 'dynamicLink' AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom') {
+							if ($tablename AND $formtype != 'dynamicLink' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom') {
 								if ($this->formvars[$form_fields[$i]] == '') {
 									$eintrag = 'NULL';
 								}
