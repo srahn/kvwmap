@@ -16,7 +16,7 @@
 
 	$legend_height = $this->map->height +
 		$size['scale_bar']['height'] +
-		+ (LAGEBEZEICHNUNGSART != '' ? $size['lagebezeichnung_bar']['height'] : 0)
+		+ ((defined('LAGEBEZEICHNUNGSART') AND LAGEBEZEICHNUNGSART != '') ? $size['lagebezeichnung_bar']['height'] : 0)
 		+ ($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0);
 
 	$res_x    = $this->map->width;

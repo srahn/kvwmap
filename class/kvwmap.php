@@ -2816,19 +2816,24 @@ echo '			</table>
     include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'.php');
   }
 
-  function getLagebezeichnung($epsgcode) {
+	function getLagebezeichnung($epsgcode) {
 		global $GUI;
-    switch (LAGEBEZEICHNUNGSART) {
-      case 'Flurbezeichnung' : {
-				include_once(PLUGINS.'alkis/model/kvwmap.php');
-        $Lagebezeichnung = $GUI->getFlurbezeichnung($epsgcode);
-			} break;
-			default : {
-			  $Lagebezeichnung = '';
+		if (defined('LAGEBEZEICHNUNGSART')) {
+			switch (LAGEBEZEICHNUNGSART) {
+				case 'Flurbezeichnung' : {
+					include_once(PLUGINS.'alkis/model/kvwmap.php');
+					$Lagebezeichnung = $GUI->getFlurbezeichnung($epsgcode);
+				} break;
+				default : {
+					$Lagebezeichnung = '';
+				}
 			}
-	  }
-    return $Lagebezeichnung;
-  }
+		}
+		else {
+			$Lagebezeichnung = '';
+		}
+		return $Lagebezeichnung;
+	}
 
 	# extrahiert die Daten aus qlayerset in ein Array
 	function qlayersetParamStrip() {
@@ -6826,7 +6831,7 @@ echo '			</table>
 			}
 
 			# Lagebezeichnung
-			if(LAGEBEZEICHNUNGSART == 'Flurbezeichnung'){
+			if(defined('LAGEBEZEICHNUNGSART') AND LAGEBEZEICHNUNGSART == 'Flurbezeichnung') {
 				include_once(PLUGINS.'alkis/model/kataster.php');
 				$flur = new Flur('','','',$this->pgdatabase);
 				$bildmitte['rw']=$this->formvars['refpoint_x'];
