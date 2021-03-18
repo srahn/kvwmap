@@ -678,6 +678,7 @@
 							switch ($explosion[2]) { 
 								CASE 'no_new_window' : {
 									$datapart .= 'target="_self"';
+									$mimetype = $gui->mime_type;
 								}break;
 								CASE 'root' : {
 									$datapart .= 'target="root"';
@@ -686,7 +687,7 @@
 									$datapart .= 'target="_blank"';
 								}
 							}
-							$datapart .= ' class="dynamicLink" style="font-size: ' . $fontsize . 'px" ' . (($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') ? 'onclick="checkForUnsavedChanges(event);"' : '').' href="'.$href.'&mime_type='.$gui->mime_type.'">';
+							$datapart .= ' class="dynamicLink" style="font-size: ' . $fontsize . 'px" ' . (($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') ? 'onclick="checkForUnsavedChanges(event);"' : '').' href="'.$href.'&mime_type='.$mime_type.'">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
 						}
