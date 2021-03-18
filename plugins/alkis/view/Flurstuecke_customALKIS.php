@@ -170,7 +170,7 @@ hide_versions = function(flst){
   </tr>
   <tr>
     <td>
-			<div <? if($this->user->rolle->querymode == 1){ ?>onmouseenter="highlight_object(<? echo $this->qlayerset[$i]['Layer_ID']; ?>, '<? echo $flst->oid; ?>');" <? } ?> style="position:relative; top:0px; right:0px; padding:0px; border: 1px solid <?php echo BG_DEFAULT ?>;">
+			<div <? if($this->user->rolle->querymode == 1){ ?>onmouseenter="highlight_object(<? echo $this->qlayerset[$i]['Layer_ID']; ?>, '<? echo $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'] . '_oid']; ?>');" <? } ?> style="position:relative; top:0px; right:0px; padding:0px; border: 1px solid <?php echo BG_DEFAULT ?>;">
 				<table width="100%" border="0" cellspacing="0" cellpadding="0">
 					<tr>
 						<td colspan="2">
@@ -831,7 +831,7 @@ hide_versions = function(flst){
 													&nbsp;&nbsp;
 													<a target="root" title="Zoom auf Flurstück und Flurstück hervorheben" href="index.php?go=<? echo $zoomlink;?>"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													&nbsp;&nbsp;
-													<a title="Zoom auf Flurstück und andere Flurstücke ausblenden" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['Layer_ID'];?>, 'Polygon', 'ax_flurstueck', 'wkb_geometry', '<?php echo $flst->oid; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+													<a title="Zoom auf Flurstück und andere Flurstücke ausblenden" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['Layer_ID'];?>, 'wkb_geometry', '<?php echo $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'] . '_oid']; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													
 											<? }
 											if (in_array('kolibri', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Kolibristart')) { ?>
