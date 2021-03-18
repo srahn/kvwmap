@@ -31,7 +31,7 @@
 										echo 'onchange="update_require_attribute(\''.$attributes['req_by'][$i].'\','.LAYER_ID_SCHNELLSPRUNG.', this.value);" ';
 									}
 									if($attributes['name'][$i] == 'oid'){
-										echo 'onchange="zoomto('.LAYER_ID_SCHNELLSPRUNG.', this.value, \''.$layerset[0]['maintable'].'\', \''.$attributes['the_geom'].'\');"';
+										echo 'onchange="zoomto('.LAYER_ID_SCHNELLSPRUNG.', this.value, \''.$attributes['the_geom'].'\');"';
 									}
 								?> 
 									id="value_<?php echo $attributes['name'][$i]; ?>" name="value_<?php echo $attributes['name'][$i]; ?>"><?echo "\n"; ?>
