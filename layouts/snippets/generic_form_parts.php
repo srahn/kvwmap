@@ -739,7 +739,7 @@
 									} break;
 									case 'javascript' : {
 										$href_parts = array($link_type, $link_url);
-									}
+									} break;
 									default : {
 										$href_parts = array($href . '&mime_type=' . $mimetype);
 									}
@@ -754,6 +754,9 @@
 								' . $link_attribute . '
 								target="' . $link_target . '"
 							>' . $alias . '</a><br>';
+							if ($GUI->user->id == 1) {
+								echo '<br><textarea>' . $link_attribute . '</textarea>';
+							}
 						}
 					}
 				} break;

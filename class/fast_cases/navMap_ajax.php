@@ -1817,17 +1817,24 @@ class GUI {
     }
 	}
 
-  function getLagebezeichnung($epsgcode) {
-    switch (LAGEBEZEICHNUNGSART) {
-      case 'Flurbezeichnung' : {
-        $Lagebezeichnung = $this->getFlurbezeichnung($epsgcode);
-			} break;
-			default : {
-			  $Lagebezeichnung = '';
+	function getLagebezeichnung($epsgcode) {
+		global $GUI;
+		if (defined('LAGEBEZEICHNUNGSART')) {
+			switch (LAGEBEZEICHNUNGSART) {
+				case 'Flurbezeichnung' : {
+					include_once(PLUGINS.'alkis/model/kvwmap.php');
+					$Lagebezeichnung = $GUI->getFlurbezeichnung($epsgcode);
+				} break;
+				default : {
+					$Lagebezeichnung = '';
+				}
 			}
-	  }
-    return $Lagebezeichnung;
-  }
+		}
+		else {
+			$Lagebezeichnung = '';
+		}
+		return $Lagebezeichnung;
+	}
 
   function getFlurbezeichnung($epsgcode) {
     $Flurbezeichnung = '';
