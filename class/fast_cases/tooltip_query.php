@@ -393,7 +393,7 @@ class GUI {
 				}
 				else{		################ mouseover auf Datensatz in Sachdatenanzeige ################
 					$showdata = 'false';
-					$sql_where = " AND ".pg_quote($layerset[$i]['maintable'].'_oid')." = ".quote($this->formvars['oid'], $layerset[$i]['attributes']['type'][$layerset[$i]['attributes']['indizes'][$layerset[$i]['oid']]]);
+					$sql_where = " AND ".pg_quote($layerset[$i]['maintable'].'_oid')." = '" . $this->formvars['oid'] . "'";
 				}
 
 				# SVG-Geometrie abfragen für highlighting
