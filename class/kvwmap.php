@@ -9198,6 +9198,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$saveable = $element[7];
 				$tablename[$table_name]['tablename'] = $table_name;
 				$tablename[$table_name]['attributname'][] = $attributenames[] = $attributname;
+				$tablename[$table_name]['saveable'][] = $saveable;
 				$form_field_indizes[$attributname] = $i;
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
 				if($this->formvars['embedded'] != ''){
@@ -9319,7 +9320,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						} break;
 
 						case (
-							$saveable AND
+							$table['saveable'][$i] AND
 							$table['type'][$i] != 'SubFormPK' AND
 							$table['type'][$i] != 'SubFormFK' AND
 							($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')
