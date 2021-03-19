@@ -126,7 +126,7 @@ class polygoneditor {
 
 	function getpolygon($oid, $tablename, $columnname, $extent, $schemaname = ''){
 		$sql = "SELECT st_assvg(st_transform(st_union(".$columnname."),".$this->clientepsg."), 0, 15) AS svggeom, st_astext(st_transform(st_union(".$columnname."),".$this->clientepsg.")) AS wktgeom, st_numGeometries(st_union(".$columnname.")) as numgeometries FROM " . ($schemaname != '' ? $schemaname . '.' : '') . pg_quote($tablename);
-		if($oid != NULL)$sql .= " WHERE ".$this->oid_attribute." = ".quote($oid);
+		if($oid != NULL)$sql .= " WHERE ".$this->oid_attribute." = '" . $oid. "'";
 		#echo '<br>sql: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$polygon = pg_fetch_array($ret[1]);
