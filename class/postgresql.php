@@ -1224,7 +1224,7 @@ FROM
   function getGemeindeListeByGemIDByGemkgSchl($ganzeGemID, $GemkgID){
     $sql ="SELECT DISTINCT pp.schluesselgesamt as GemkgID, pp.gemarkungsname as Name, gem.bezeichnung as gemeindename, gem.schluesselgesamt as gemeinde ";
     $sql.="FROM alkis.ax_gemeinde AS gem, alkis.pp_gemarkung as pp ";
-    $sql.="WHERE pp.gemeinde=gem.gemeinde AND pp.kreis=gem.kreis ";
+    $sql.="WHERE pp.gemeinde=gem.gemeinde AND pp.kreis=gem.kreis AND gem.endet IS NULL ";
 		if($ganzeGemID[0]!='' OR $GemkgID[0]!=''){
 			$sql.="AND (FALSE ";
 			if($ganzeGemID[0]!=''){
