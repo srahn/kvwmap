@@ -103,7 +103,7 @@ class pointeditor {
 		$sql = "
 			UPDATE " . $tablename . "
 			SET " . implode(', ', $kvps) . "
-			WHERE ".$this->oid_attribute." = " . quote($oid) . "
+			WHERE ".$this->oid_attribute." = '" . $oid . "'
 		";
 		#echo '<p>SQL zum Updaten von Punktgeometrie: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 1, true);
