@@ -231,7 +231,7 @@ class ALKIS {
     for($i = 0; $i < count($flurstuecke); $i++) {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
-      $flst->readALB_Data($flurstkennz, true);
+      $flst->readALB_Data($flurstkennz, true, 'ogc_fid');
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
 			$emzges_222 = 0; $emzges_223 = 0;
@@ -507,7 +507,7 @@ class ALKIS {
     for($i = 0; $i < count($flurstuecke); $i++) {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
-      $flst->readALB_Data($flurstkennz, true);
+      $flst->readALB_Data($flurstkennz, true, 'ogc_fid');
       $flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
 				for($b = 0; $b < count($flst->Buchungen); $b++){
@@ -762,7 +762,7 @@ class ALKIS {
     for($i = 0; $i < count($flurstuecke); $i++) {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
-      $flst->readALB_Data($flurstkennz, true);
+      $flst->readALB_Data($flurstkennz, true, 'ogc_fid');
       $flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
       $anzNutzung=count($flst->Nutzung);
@@ -1021,7 +1021,7 @@ class ALKIS {
     for($i = 0; $i < count($flurstuecke); $i++) {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
-      $flst->readALB_Data($flurstkennz, true);
+      $flst->readALB_Data($flurstkennz, true, 'ogc_fid');
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
       if($formvars['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}
@@ -1353,7 +1353,7 @@ class ALKIS {
       $nennerausgabe= '';
       $flst=new flurstueck($FlurstKennz[$f],$this->database);
       $flst->database=$this->database;
-      $ret=$flst->readALB_Data($FlurstKennz[$f], true);
+      $ret=$flst->readALB_Data($FlurstKennz[$f], true, 'ogc_fid');
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
       if ($ret!='') {
@@ -1863,7 +1863,7 @@ class ALKIS {
     # ein Flurstück erzeugen
     $flst=new flurstueck($buchungen[0]['flurstkennz'],$this->database);
     $flst->database=$this->database;
-    $ret=$flst->readALB_Data($buchungen[0]['flurstkennz'], true);
+    $ret=$flst->readALB_Data($buchungen[0]['flurstkennz'], true, 'ogc_fid');
 		$flst->Grundbuecher=$flst->getGrundbuecher();
 
     $seite=1;
@@ -2002,7 +2002,7 @@ class ALKIS {
           # Flurstück erzeugen
           $flst=new flurstueck($buchungen[$b]['flurstkennz'],$this->database);
           $flst->database=$this->database;
-          $ret=$flst->readALB_Data($buchungen[$b]['flurstkennz'], true);
+          $ret=$flst->readALB_Data($buchungen[$b]['flurstkennz'], true, 'ogc_fid');
 
           # Seitenumbruch wenn erforderlich
           if($row<120) {
@@ -2191,7 +2191,7 @@ class ALKIS {
           # Flurstück erzeugen
           $flst=new flurstueck($buchungen[$b]['flurstkennz'],$this->database);
           $flst->database=$this->database;
-          $ret=$flst->readALB_Data($buchungen[$b]['flurstkennz'], true);
+          $ret=$flst->readALB_Data($buchungen[$b]['flurstkennz'], true, 'ogc_fid');
 
           # Seitenumbruch wenn erforderlich
           if($row<120) {
