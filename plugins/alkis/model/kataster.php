@@ -816,9 +816,9 @@ class flurstueck {
     return $ret[1];
   }
 
-  function readALB_Data($FlurstKennz, $without_temporal_filter = false) {
+  function readALB_Data($FlurstKennz, $without_temporal_filter = false, $oid_column) {
     $this->debug->write("<p>kataster.php flurstueck->readALB_Data (vom Flurstück)",4);
-    $ret=$this->database->getALBData($FlurstKennz, $without_temporal_filter);
+    $ret=$this->database->getALBData($FlurstKennz, $without_temporal_filter, $oid_column);
     if ($ret[0] AND DBWRITE) {
       $errmsg ='<p>kvwmap readALB_Data Abfragen der ALB-Flurstücksdaten';
       $errmsg.='in line: '.__LINE__.'<br>'.$ret[1];
@@ -829,7 +829,7 @@ class flurstueck {
 			else rolle::$hist_timestamp = '';
 		}
     $rs=$ret[1];
-		$this->oid=$rs['oid'];
+		$this->oid = $rs['oid'];
 		$this->gml_id=$rs['gml_id'];
     $this->Zaehler=intval($rs['zaehler']);
     $this->Nenner=intval($rs['nenner']);
