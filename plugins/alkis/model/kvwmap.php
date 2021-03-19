@@ -1349,6 +1349,7 @@
 
 	$GUI->nameSuchen = function() use ($GUI){
 		include_once(PLUGINS.'alkis/model/kataster.php');
+		$layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
 		$GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
 		if(!empty($GemeindenStelle['ganze_gemeinde'])){
 			$Gemarkung=new gemarkung('',$GUI->pgdatabase);
@@ -1380,7 +1381,7 @@
             $ret[1] = $flurstueck->getFlurstByGrundbuecher(array($GUI->namen[$i]['bezirk'].'-'.$GUI->namen[$i]['blatt']));
             $GUI->namen[$i]['flurstuecke'] = $ret[1];
             for($j = 0; $j < count($GUI->namen[$i]['flurstuecke']); $j++){
-              $ret = $GUI->pgdatabase->getALBData($GUI->namen[$i]['flurstuecke'][$j]);
+              $ret = $GUI->pgdatabase->getALBData($GUI->namen[$i]['flurstuecke'][$j], false, $layerset[0]['oid']);
               $GUI->namen[$i]['alb_data'][$j] = $ret[1];
             }
           }
