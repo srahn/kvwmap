@@ -236,10 +236,16 @@ class gemarkung {
 
 
   function getGemarkungListe($ganzeGemID, $GemkgID) {
-    # Abfragen der Gemarkungen mit seinen GemeindeNamen
-    $Liste=$this->database->getGemeindeListeByGemIDByGemkgSchl($ganzeGemID, $GemkgID);
+    # Abfragen der aktuellen Gemarkungen mit seinen GemeindeNamen
+    $Liste=$this->database->getGemarkungListe($ganzeGemID, $GemkgID);
     return $Liste;
   }
+	
+  function getGemarkungListeAll($ganzeGemID, $GemkgID) {
+    # Abfragen aller Gemarkungen (auch der untergegangenen) mit seinen GemeindeNamen (todo)
+    $Liste=$this->database->getGemarkungListeAll($ganzeGemID, $GemkgID);
+    return $Liste;
+  }	
   
 } # end of class Gemarkung
 
