@@ -131,7 +131,7 @@ class pointeditor {
 			FROM
 				" . $tablename . "
 			WHERE
-				".$this->oid_attribute." = " . quote($oid) . "
+				".$this->oid_attribute." = '" . $oid . "'
 		";
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$point = pg_fetch_array($ret[1]);
