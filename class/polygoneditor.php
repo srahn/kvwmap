@@ -101,7 +101,7 @@ class polygoneditor {
 		$sql = "
 			UPDATE " . pg_quote($tablename) . "
 			SET " . pg_quote($columnname) . " = " . (substr($geomtype, 0, 5) == 'MULTI' ? "ST_Multi(" . $geometry . ")" : $geometry) . "
-			WHERE ".pg_quote($this->oid_attribute)." = " . quote($oid) . "
+			WHERE ".pg_quote($this->oid_attribute)." = '" . $oid . "'
 		";
 		$ret = $this->database->execSQL($sql, 4, 1, true);
 		if (!$ret['success']) {
