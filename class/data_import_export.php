@@ -613,16 +613,15 @@ class data_import_export {
 				$sql = '';
 			}
 			else {
-				$sql = 'SELECT ';
 				for($i = 0; $i < count($this->dbf->header); $i++){
 					if($this->formvars['check_'.$this->dbf->header[$i][0]]){
 						if($this->formvars['primary_key'] != $this->formvars['sql_name_'.$this->dbf->header[$i][0]]){
 							if($i > 0)$sql .= ', ';
-							$sql .= $this->formvars['dbf_name_'.$this->dbf->header[$i][0]].' as '.strtolower($this->formvars['sql_name_'.$this->dbf->header[$i][0]]);
+							$columns[] = '"' . $this->formvars['dbf_name_'.$this->dbf->header[$i][0]].'" as "'.strtolower($this->formvars['sql_name_'.$this->dbf->header[$i][0]]) . '"';
 						}
 					}
 				}
-				$sql .= ' FROM "'.$importfile.'"';
+				$sql = 'SELECT ' . implode(', ', $columns) . ' FROM "'.$importfile.'"';
 			}
 			$options = $this->formvars['table_option'];
 			$options.= ' -lco FID=gid';
@@ -697,7 +696,7 @@ class data_import_export {
 				$sql .= "
 					SELECT
 						count(*),
-						max(geometrytype(the_geom)) AS geometrytype
+						max(geometrytype(geom)) AS geometrytype
 					FROM
 						" . $table . ";
 				";
