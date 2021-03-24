@@ -42,7 +42,7 @@ class wfs{
 	function create_filter($attributenames, $operators, $values){
 		# Diese Funktion generiert aus Attributnamen, Operatoren und Werten einen über 'And' verknüpften WFS-Filterstring
 		if($this->namespace != '')$namespace = $this->namespace.':';
-		$count = count($attributenames);
+		$count = @count($attributenames);
 		if($count > 0){
 			$filter = '<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">';
 			if($count > 1){
@@ -135,7 +135,7 @@ class wfs{
 		elseif(strpos($this->gml, 'gml:posList') !== false)$geomtag = 'gml:posList';
 		elseif(strpos($this->gml, 'gml:coordinates') !== false)$geomtag = 'gml:coordinates';
 		else $geomtag = 'gml:pos';
-		for($i=0; $i < count($this->objects); $i++){		# durchläuft alle Objekte
+		for($i=0; $i < @count($this->objects); $i++){		# durchläuft alle Objekte
 			for($j = 0; $j < count($this->objects[$i]); $j++){		# durchläuft alle Tags im Objekt
 				$coord_pair = array();
 				# Boundingbox entnehmen und ins aktuelle System transformieren

@@ -393,6 +393,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	}
 	
 	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen, weiter_erfassen_params, further_params){
+		root.open_subform_requests++;
 		list_div = document.getElementById(list_div_id);
 		var params = list_div.dataset.reload_params;
 		if(enclosingForm.name == 'GUI2')params += '&mime_type=overlay_html';
@@ -567,10 +568,12 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				alldivs[i].innerHTML = '';
 			}
 		}
+		auto_resize_overlay();
 	}
 
 	clearsubform = function(subformid){
 		document.getElementById(subformid).innerHTML = '';
+		auto_resize_overlay();
 	}
 	
 	switch_gle_view1 = function(layer_id){
@@ -693,8 +696,8 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		message([{ 'type': 'notice', 'msg': (status ? '<? echo $strAllDeselected; ?>' : '<? echo $strAllSelected; ?>')}]);
 	}
 	
-	zoom2object = function(layer_id, geomtype, tablename, columnname, oid, selektieren){
-		params = 'go=zoomto'+geomtype+'&oid='+oid+'&layer_tablename='+tablename+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
+	zoom2object = function(layer_id, columnname, oid, selektieren){
+		params = 'go=zoomto_dataset&oid='+oid+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
 		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
 			startwaiting();
 			root.get_map_ajax(params, '', 'highlight_object('+layer_id+', '+oid+');');		// Objekt highlighten
@@ -852,10 +855,10 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				root.overlay_submit(enclosingForm, false);
 			}
 		}
-	}	
+	}
 
 	print_data = function(layer_id){
-		if(check_for_selection(layer_id)){
+		if (check_for_selection(layer_id)) {
 			enclosingForm.chosen_layer_id.value = layer_id;
 			enclosingForm.go_backup.value = enclosingForm.go.value;
 			enclosingForm.go.value = 'generischer_sachdaten_druck';

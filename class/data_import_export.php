@@ -80,7 +80,9 @@ class data_import_export {
 		}
 		if ($custom_tables != NULL){
 			if ($custom_tables[0]['error'] != ''){
-				echo $custom_tables[0]['error'];
+				if ($filetype != 'point') {
+					echo $custom_tables[0]['error'];
+				}
 			}
 			else {
 				foreach ($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
@@ -594,9 +596,13 @@ class data_import_export {
 		if(!$ret[0]){
 			$custom_table['datatype'] = 0;
 			$custom_table['tablename'] = $tablename;
-			$custom_table['labelitem'] = $labelitem;
-			return array($custom_table);
+			$custom_table['labelitem'] = $labelitem;			
 		}
+		else {
+			$pgdatabase->gui->add_message('error', 'Import fehlgeschlagen: Bitte prüfen Sie die Formatierung der Punktliste.');
+			$custom_table['error'] = $ret['msg'];
+		}
+		return array($custom_table);
 	}	
 
 
@@ -613,16 +619,15 @@ class data_import_export {
 				$sql = '';
 			}
 			else {
-				$sql = 'SELECT ';
 				for($i = 0; $i < count($this->dbf->header); $i++){
 					if($this->formvars['check_'.$this->dbf->header[$i][0]]){
 						if($this->formvars['primary_key'] != $this->formvars['sql_name_'.$this->dbf->header[$i][0]]){
 							if($i > 0)$sql .= ', ';
-							$sql .= $this->formvars['dbf_name_'.$this->dbf->header[$i][0]].' as '.strtolower($this->formvars['sql_name_'.$this->dbf->header[$i][0]]);
+							$columns[] = '"' . $this->formvars['dbf_name_'.$this->dbf->header[$i][0]].'" as "'.strtolower($this->formvars['sql_name_'.$this->dbf->header[$i][0]]) . '"';
 						}
 					}
 				}
-				$sql .= ' FROM "'.$importfile.'"';
+				$sql = 'SELECT ' . implode(', ', $columns) . ' FROM "'.$importfile.'"';
 			}
 			$options = $this->formvars['table_option'];
 			$options.= ' -lco FID=gid';
@@ -697,7 +702,7 @@ class data_import_export {
 				$sql .= "
 					SELECT
 						count(*),
-						max(geometrytype(the_geom)) AS geometrytype
+						max(geometrytype(geom)) AS geometrytype
 					FROM
 						" . $table . ";
 				";
@@ -814,7 +819,7 @@ class data_import_export {
 
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb) {
 		$command = 'export PGDATESTYLE="ISO, MDY";export PGCLIENTENCODING=UTF-8;'
-			. OGR_BINPATH . 'ogr2ogr -f ' . $exportformat . ' -lco ENCODING=UTF-8 -sql "' . $sql . '" ' . $exportfile
+			. OGR_BINPATH . 'ogr2ogr -f ' . $exportformat . ' -lco ENCODING=UTF-8 -sql "' . str_replace(["\t", chr(10), chr(13)], [' ', ''], $sql) . '" ' . $exportfile
 			. ' PG:"' . $layerdb->get_connection_string() . ' active_schema=' . $layerdb->schema . '"';
 		$errorfile = rand(0, 1000000);
 		$command .= ' 2> '.IMAGEPATH.$errorfile.'.err';
@@ -1275,28 +1280,9 @@ class data_import_export {
 						$result[] = $rs;
 					}
 				}
+				$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, true);
 				for($i = 0; $i < count($result); $i++){
-					foreach($result[$i] As $key => $value){
-						$j = $this->attributes['indizes'][$key];
-						if($this->attributes['form_element_type'][$j] == 'Dokument' AND $value != ''){
-							$docs = array($value);
-							if(substr($this->attributes['type'][$j], 0, 1) == '_'){		# Array
-								$docs = explode(',', trim($value, '{}'));
-							}
-							foreach($docs as $doc){
-								$parts = explode('&original_name=', $doc);
-								if($parts[1] == '')$parts[1] = basename($parts[0]);		# wenn kein Originalname da, Dateinamen nehmen
-								if(file_exists($parts[0])){
-									if(file_exists(IMAGEPATH.$folder.'/'.$parts[1])){		# wenn schon eine Datei mit dem Originalnamen existiert, wird der Dateiname angehängt
-										$file_parts = explode('.', $parts[1]);
-										$parts[1] = $file_parts[0].'_'.basename($parts[0]);
-									}
-									copy($parts[0], IMAGEPATH.$folder.'/'.$parts[1]);
-								}
-							}
-							$zip = true;
-						}
-					}
+					$zip = $this->copy_documents_to_export_folder($result[$i], $this->attributes, $layerset[0]['maintable'], $folder);
 				}
 			}
 
@@ -1316,7 +1302,7 @@ class data_import_export {
 			}
 
 			# bei Bedarf zippen
-			if($zip){
+			if ($zip) {
 				# Beim Zippen gehen die Umlaute in den Dateinamen kaputt, deswegen vorher umwandeln
 				array_walk(searchdir(IMAGEPATH.$folder, true), function($item, $key){
 					$pathinfo = pathinfo($item);
@@ -1370,18 +1356,54 @@ class data_import_export {
 			$err = 'Abfrage fehlgeschlagen!';
 		}
 		if ($err == '') {
-			  ob_end_clean();
-			  header('Content-type: '.$contenttype);
-			  header("Content-disposition:	attachment; filename=".basename($exportfile));
-			  #header("Content-Length: ".filesize($exportfile));			# hat bei großen Datenmengen dazu geführt, dass der Download abgeschnitten wird
-			  header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-			  header('Pragma: public');
-			  readfile($exportfile);
+			ob_end_clean();
+			header('Content-type: '.$contenttype);
+			header("Content-disposition:	attachment; filename=".basename($exportfile));
+			#header("Content-Length: ".filesize($exportfile));			# hat bei großen Datenmengen dazu geführt, dass der Download abgeschnitten wird
+			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+			header('Pragma: public');
+			readfile($exportfile);
 		}
 		else {
 			$GUI->add_message('error', $err);
 			$GUI->daten_export();
 		}
 	}
+		
+	function copy_documents_to_export_folder($result, $attributes, $maintable, $folder){
+		global $GUI;
+		$zip = false;
+		foreach($result As $key => $value){
+			$j = $attributes['indizes'][$key];
+			if ($attributes['form_element_type'][$j] == 'SubFormEmbeddedPK') {
+				$GUI->getSubFormResultSet($attributes, $j, $maintable, $result);
+				foreach ($GUI->qlayerset[0]['shape'] as $sub_result) {
+					$zip2 = $this->copy_documents_to_export_folder($sub_result, $GUI->qlayerset[0]['attributes'], $GUI->qlayerset[0]['maintable'], $folder);
+					$zip = $zip || $zip2;
+				}
+			}
+			if($attributes['form_element_type'][$j] == 'Dokument' AND $value != ''){
+				$docs = array($value);
+				if(substr($attributes['type'][$j], 0, 1) == '_'){		# Array
+					$docs = explode(',', $value);
+				}
+				foreach($docs as $doc){
+					$doc = trim($doc, '[]{}"');
+					$parts = explode('&original_name=', $doc);
+					if($parts[1] == '')$parts[1] = basename($parts[0]);		# wenn kein Originalname da, Dateinamen nehmen
+					if(file_exists($parts[0])){
+						if(file_exists(IMAGEPATH.$folder.'/'.$parts[1])){		# wenn schon eine Datei mit dem Originalnamen existiert, wird der Dateiname angehängt
+							$file_parts = explode('.', $parts[1]);
+							$parts[1] = $file_parts[0].'_'.basename($parts[0]);
+						}
+						copy($parts[0], IMAGEPATH.$folder.'/'.$parts[1]);
+					}
+				}
+				$zip = true;
+			}
+		}
+		return $zip;
+	}
+	
 }
 ?>

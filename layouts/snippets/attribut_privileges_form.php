@@ -5,6 +5,15 @@
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 
+function toggle_privileges(checkbox){
+	var fields = checkbox.closest('.apt-main-div').querySelectorAll('input[type=“checkbox”], select');
+	[].forEach.call(fields, function (field){		// DropZones groesser machen
+    if (field != checkbox) {
+			field.disabled = checkbox.checked;
+		}
+  });
+}
+
 function set_all(attribute_names, stelle, value){
 	names = attribute_names.split('|');
 	for(i = 0; i < names.length; i++){
@@ -114,6 +123,9 @@ function save(stelle, other_selected_layer_id) {
 	.apt-layerzugriffsrechte, .apt-layerexportrechte {
 		margin: 10px 10px 0 4px;
 	}
+	.apt-use_parent_privileges {
+		margin-top: -30px;
+	}	
 	.apt-attributrechte {
 		margin: 20px 0 10px 0;
 	}

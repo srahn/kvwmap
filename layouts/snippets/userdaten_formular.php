@@ -11,11 +11,13 @@
 			document.getElementById('udf_changepasswd').classList.add('udf_pw-active');
 			document.GUI.password1.disabled=false;
 			document.GUI.password2.disabled=false;
+			document.GUI.changepasswd.value = 1;
 		}
 		else {
 			document.getElementById('udf_changepasswd').classList.remove('udf_pw-active');
 			document.GUI.password1.disabled=true;
 			document.GUI.password2.disabled=true;
+			document.GUI.changepasswd.value = 0;
 		}
 		$('#GUI input[name=changepasswd]').val(($('#GUI input[name=changepasswd]').val() == 1 ? 0 : 1));
 	}

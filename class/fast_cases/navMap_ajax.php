@@ -713,7 +713,7 @@ class GUI {
 		$width = $width - $width_reduction;
 		$height = $height - $height_reduction;
 		if($this->user->rolle->hideMenue == 1){$width = $width - 195;}
-		if($this->user->rolle->hideLegend == 1){$width = $width - 254;}
+		if($width_reduction == '' AND $this->user->rolle->hideLegend == 1){$width = $width - 254;}
 		$this->user->rolle->nImageWidth = $width;
 		$this->user->rolle->nImageHeight = $height;
 		return $scale;
@@ -1282,9 +1282,6 @@ class GUI {
           }
         }
         if ($dbStyle['width']!='') {
-          if ($dbStyle['antialias']!='') {
-            $style -> set('antialias',$dbStyle['antialias']);
-          }
 					if($this->map_factor != '') {
 						if(is_numeric($dbStyle['width']))$style->set('width', $dbStyle['width']*$this->map_factor/1.414);
 						else $style->updateFromString("STYLE WIDTH [" . $dbStyle['width']."] END");
@@ -1820,17 +1817,24 @@ class GUI {
     }
 	}
 
-  function getLagebezeichnung($epsgcode) {
-    switch (LAGEBEZEICHNUNGSART) {
-      case 'Flurbezeichnung' : {
-        $Lagebezeichnung = $this->getFlurbezeichnung($epsgcode);
-			} break;
-			default : {
-			  $Lagebezeichnung = '';
+	function getLagebezeichnung($epsgcode) {
+		global $GUI;
+		if (defined('LAGEBEZEICHNUNGSART')) {
+			switch (LAGEBEZEICHNUNGSART) {
+				case 'Flurbezeichnung' : {
+					include_once(PLUGINS.'alkis/model/kvwmap.php');
+					$Lagebezeichnung = $GUI->getFlurbezeichnung($epsgcode);
+				} break;
+				default : {
+					$Lagebezeichnung = '';
+				}
 			}
-	  }
-    return $Lagebezeichnung;
-  }
+		}
+		else {
+			$Lagebezeichnung = '';
+		}
+		return $Lagebezeichnung;
+	}
 
   function getFlurbezeichnung($epsgcode) {
     $Flurbezeichnung = '';

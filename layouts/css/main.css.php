@@ -103,9 +103,8 @@ body {
 
 #gui-table {
 	width: 900px;
-	margin: auto;	
+	margin: auto;
 }
-
 
 input[type="checkbox"], input[type="radio"] {
 	position: relative;
@@ -1669,6 +1668,13 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 	background-color: #236dbf;
 	vertical-align: top;
 	display: inline-block;
+}
+
+.formelement-link {
+	padding: 5px;
+	margin: 5px 1px;
+	background: #e3e3e3;
+	border-radius: 2px;
 }
 
 .calendar {

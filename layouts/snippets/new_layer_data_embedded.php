@@ -51,4 +51,5 @@ document.getElementById('<? echo $this->formvars['fromobject'] ?>').querySelecto
 if(button_bottom > window.innerHeight){
 	window.scrollBy({top: button_bottom - window.innerHeight + 70, behavior: 'smooth'});		// wegen Overlayfooter geht kein scrollintoview
 }
+auto_resize_overlay();
  
