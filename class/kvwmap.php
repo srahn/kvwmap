@@ -5302,6 +5302,7 @@ echo '			</table>
     $layerdb = $dbmap->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
     $layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
     $checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
+		$this->formvars['selektieren'] = 'false';
     for($i = 0; $i < count($checkbox_names); $i++){
       if($this->formvars[$checkbox_names[$i]] == 'on'){
         $element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
@@ -5443,7 +5444,7 @@ echo '			</table>
 
 		if($this->formvars['selektieren'] == 'false'){      # highlighten (mit der ausgewählten Farbe)
 			# ------------ automatische Klassifizierung -------------------
-			if($attribute != ''){
+			if($auto_class_attribute != ''){
 				$attributes = $layerset[0]['attributes'];
 				for($i = 0; $i < count($result); $i++){		# Auswahlfelder behandeln
 					foreach($result[$i] As $key => $value){
@@ -5467,12 +5468,12 @@ echo '			</table>
 								}
 							}
 						}
-						if($attribute === $key){
+						if($auto_class_attribute === $key){
 							$classes[$value] = $name;
 						}
 					}
 				}
-				$dbmap->createAutoClasses(array_unique($classes), $attribute, $layer_id, $layerset[0]['Datentyp'], $this->database);
+				$dbmap->createAutoClasses(array_unique($classes), $auto_class_attribute, $layer_id, $layerset[0]['Datentyp'], $this->database);
 			}
 			# ------------ automatische Klassifizierung Ende -------------------
 			else{
