@@ -10,8 +10,7 @@
   </tr>
   <?php
   for ($i = 0; $i < count($this->paechter); $i++) {
-    $jagdkataster = new jagdkataster($this->pgdatabase);
-	$bezirkliste = $jagdkataster->getjagdbezirkfrompaechter($this->paechter[$i]['id']);
+		$bezirkliste = $this->jagdkataster->getjagdbezirkfrompaechter($this->paechter[$i]['id']);
   ?>
   <tr>
     <td>
@@ -83,21 +82,21 @@
             ?>
               <tr>
                 <td>
-                  <a href="index.php?go=jagdbezirk_show_data&oid=<?php echo $bezirkliste[$j]['oid']; ?>">
+                  <a href="index.php?go=jagdbezirk_show_data&oid=<?php echo $bezirkliste[$j]['gid']; ?>">
                   <?
                   echo $bezirkliste[$j]['name']." (";
                   $art = $bezirkliste[$j]['art'];
                   switch ($art) {
-                    case ejb:
+                    case 'ejb':
                       echo "Eigenjagdbezirk";
                       break;
-                    case gjb:
+                    case 'gjb':
                       echo "Gemeinschaftlicher Jagdbezirk";
                       break;
-                    case tjb:
+                    case 'tjb':
                       echo "Teiljagdbezirk";
                       break;
-                    case sf:
+                    case 'sf':
                       echo "Sonderfläche";
                       break;
                   }

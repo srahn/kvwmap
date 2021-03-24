@@ -44,7 +44,7 @@
 			$map->setFontSet(FONTSET);
 			# FST-Layer erzeugen
 			$layer=ms_newLayerObj($map);
-			$layer->set('data', 'the_geom from (SELECT ogc_fid, zaehler||\'/\'||nenner as fsnum, wkb_geometry as the_geom FROM alkis.ax_flurstueck WHERE endet IS NULL) as foo using unique ogc_fid using srid='.EPSGCODE_ALKIS);
+			$layer->set('data', 'the_geom from (SELECT ogc_fid, zaehler||coalesce(\'/\'||nenner, \'\') as fsnum, wkb_geometry as the_geom FROM alkis.ax_flurstueck WHERE endet IS NULL) as foo using unique ogc_fid using srid='.EPSGCODE_ALKIS);
 			$layer->set('status',MS_ON);
 			$layer->set('template', ' ');
 			$layer->set('name','querymap'.$k);
@@ -64,6 +64,9 @@
 			$style->set('maxwidth', 0.2);
 			$style->outlinecolor->setRGB(100,100,100);
 			$label=new labelObj();
+			if (MAPSERVERVERSION < 700 ) {
+				$label->set('type', 'truetype');
+			}			
 			$label->set('size', 8);
 			$label->set('minsize', 8);
 			$label->set('maxsize', 8);
@@ -241,7 +244,7 @@
       if ($ret[0]) {
         $errmsg="Festpunkte konnten nicht abgefragt werden.";
       }
-      elseif(count($festpunkte->liste) > 0){
+      elseif(@count($festpunkte->liste) > 0){
         $ret=$antrag->EinmessungsskizzenInOrdnerZusammenstellen($festpunkte);
         $msg.=$ret;
       }
@@ -1501,7 +1504,7 @@
     if ($GUI->formvars['bestaetigung']=='') {
       # Der Löschvorgang wurde noch nicht bestätigt
       $GUI->suchparameterSetzen();
-			if(count($GUI->formvars['id']) > 1) $GUI->formvars['nachfrage']='Möchten Sie die Nachweise wirklich löschen? ';
+			if(@count($GUI->formvars['id']) > 1) $GUI->formvars['nachfrage']='Möchten Sie die Nachweise wirklich löschen? ';
       else $GUI->formvars['nachfrage']='Möchten Sie den Nachweis wirklich löschen? ';
       $GUI->bestaetigungsformAnzeigen();
     }

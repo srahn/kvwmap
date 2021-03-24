@@ -66,7 +66,7 @@ class Layer extends MyObject {
 			$database->gui->add_message('error', $ret[1]);
 		}
 		else {
-			while ($rs = $database->result->fetch_assoc()) {				
+			while ($rs = $database->result->fetch_assoc()) {
 				$duplicate_layer_ids[] = $rs['Layer_ID'];
 			}
 		}
@@ -147,5 +147,58 @@ class Layer extends MyObject {
 		return $ret;
 	}
 
+	function get_subform_layers() {
+		include_once(CLASSPATH . 'LayerAttribute.php');
+		$subform_layer_ids = array_unique(
+			array_map(
+				function($attribute) {
+					return explode(',', $attribute->get('options'))[0];
+				},
+				LayerAttribute::find($this->gui, "Layer_ID = " . $this->get('Layer_ID') . " AND form_element_type LIKE 'SubForm%PK'")
+			)
+		);
+		if (count($subform_layer_ids) > 0) {
+			return Layer::find(
+				$this->gui,
+				"Layer_ID IN (" . implode(', ', $subform_layer_ids) . ')'
+			);
+		}
+		else {
+			return array();
+		}
+	}
+
+	function get_parentform_layers() {
+		include_once(CLASSPATH . 'LayerAttribute.php');
+		$parentform_layer_ids = array_unique(
+			array_map(
+				function($attribute) {
+					return $attribute->get('layer_id');
+				},
+				LayerAttribute::find($this->gui, "Layer_ID != " . $this->get('Layer_ID') . " AND options LIKE '" . $this->get('Layer_ID') . ",%' AND form_element_type LIKE 'SubForm%PK'")
+			)
+		);
+		if (count($parentform_layer_ids) > 0) {
+			return Layer::find(
+				$this->gui,
+				"Layer_ID IN (" . implode(', ', $parentform_layer_ids) . ')'
+			);
+		}
+		else {
+			return array();
+		}
+	}
+
+	function get_edit_link_list($layers, $anchor = '') {
+		return '<ul><li>' . implode(
+			'</li><li>',
+			array_map(
+				function($layer) use ($anchor) {
+					return '<a title="Layereditor anzeigen" href="index.php?go=Layereditor&selected_layer_id=' . $layer->get('Layer_ID') . '#' . $anchor . '" target="_blank">' . $layer->get('Name') . ' (ID: ' . $layer->get('Layer_ID') . ')</a>';
+				},
+				$layers
+			)
+		) . '</li></ul>';
+	}
 }
 ?>

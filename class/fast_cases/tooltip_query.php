@@ -4,8 +4,15 @@ function pg_quote($column){
 	return ctype_lower($column) ? $column : '"'.$column.'"';
 }
 
-function quote($var){
-	return is_numeric($var) ? $var : "'".$var."'";
+function quote($var, $type = NULL){
+	switch ($type) {
+		case 'text' : case 'varchar' : {
+			return "'".$var."'";
+		}break;
+		default : {
+			return is_numeric($var) ? $var : "'".$var."'";
+		}
+	}
 }
 
 function sql_err_msg($title, $sql, $msg, $div_id) {
@@ -319,37 +326,18 @@ class GUI {
 				if($layerset[$i]['alias'] != '' AND $this->Stelle->useLayerAliases){
 					$layerset[$i]['Name'] = $layerset[$i]['alias'];
 				}
-				$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
-				#$path = $layerset[$i]['pfad'];
-				$path = replace_params(
-					$layerset[$i]['pfad'],
-					rolle::$layer_params,
-					$this->user->id,
-					$this->Stelle->id,
-					rolle::$hist_timestamp,
-					$this->user->rolle->language
-				);
+				$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);				
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
-				if($layerset[$i]['Layer_ID'] > 0){			# bei Rollenlayern nicht
-					$path = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
-				}
 
-				# order by rausnehmen
-				$orderbyposition = strrpos(strtolower($path), 'order by');
-				$lastfromposition = strrpos(strtolower($path), 'from');
-				if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-					$layerset[$i]['attributes']['orderby'] = ' '.substr($path, $orderbyposition);
-					$path = substr($path, 0, $orderbyposition);
+				if ($layerset[$i]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
+					$layerset[$i]['maintable'] = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 				}
-
-				# group by rausnehmen
-				$groupbyposition = strrpos(strtolower($path), 'group by');
-				if($groupbyposition !== false){
-					$layerset[$i]['attributes']['groupby'] = ' '.substr($path, $groupbyposition);
-					$path = substr($path, 0, $groupbyposition);
+				if ($layerset[$i]['oid'] == '' AND count($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+					$layerset[$i]['oid'] = $layerset[$i]['attributes']['pk'][0];
 				}
-
+				$pfad = $this->mapDB->getQueryWithOid($layerset[$i], $layerdb, $this->Stelle);
+				
 				if($rect->minx != ''){	####### Kartenabfrage
 					$show = false;
 					for($j = 0; $j < @count($layerset[$i]['attributes']['name']); $j++){
@@ -362,46 +350,11 @@ class GUI {
 						continue;
 					}
 				}
-
-				$distinctpos = strpos(strtolower($path), 'distinct');
-				if($distinctpos !== false && $distinctpos < 10){
-					$pfad = substr(trim($path), $distinctpos+8);
-					$distinct = true;
-				}
-				else{
-					$pfad = substr(trim($path), 7);
-				}
-				$geometrie_tabelle = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
-				$j = 0;
-				foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-					if (($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['oid'] != '') {
-						$pfad = pg_quote($layerset[$i]['attributes']['table_alias_name'][$tablename]).'.'.$layerset[$i]['oid'].' AS ' . pg_quote($tablename . '_oid').', ' . $pfad;
-					}					
-					$j++;
-				}
-
-				/*if(strpos(strtolower($pfad), 'as the_geom') !== false){
-					$the_geom = 'query.the_geom';
-				}
-				else{*/
-					if($layerset[$i]['attributes']['the_geom'] == ''){					# Geometriespalte ist nicht geladen, da auf "nicht sichtbar" gesetzt --> aus Data holen
-						$data_attributes = $this->mapDB->getDataAttributes($layerdb, $layerset[$i]['Layer_ID']);
-						$layerset[$i]['attributes']['the_geom'] = $data_attributes['the_geom'];
-					}
-					/*if($layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']]){
-						$the_geom = $layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$layerset[$i]['attributes']['the_geom'];
-					}
-					else{*/
-						$the_geom = $layerset[$i]['attributes']['the_geom'];
-				//  }
-				//}
-
-				//$the_geom = $layerset[$i]['attributes']['the_geom'];
-
-					# Aktueller EPSG in der die Abfrage ausgeführt wurde
-					$client_epsg=$this->user->rolle->epsg_code;
-					# EPSG-Code des Layers der Abgefragt werden soll
-					$layer_epsg=$layerset[$i]['epsg_code'];
+				$the_geom = $layerset[$i]['attributes']['the_geom'];
+				# Aktueller EPSG in der die Abfrage ausgeführt wurde
+				$client_epsg=$this->user->rolle->epsg_code;
+				# EPSG-Code des Layers der Abgefragt werden soll
+				$layer_epsg=$layerset[$i]['epsg_code'];
 
 				if($rect->minx != ''){		################ Kartenabfrage ################
 					switch ($layerset[$i]['toleranceunits']) {
@@ -440,7 +393,7 @@ class GUI {
 				}
 				else{		################ mouseover auf Datensatz in Sachdatenanzeige ################
 					$showdata = 'false';
-					$sql_where = " AND ".pg_quote($geometrie_tabelle.'_oid')." = ".quote($this->formvars['oid']);
+					$sql_where = " AND ".pg_quote($layerset[$i]['maintable'].'_oid')." = '" . $this->formvars['oid'] . "'";
 				}
 
 				# SVG-Geometrie abfragen für highlighting
@@ -471,23 +424,7 @@ class GUI {
 					$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
 					$sql_where .= " AND ".$layerset[$i]['Filter'];
 				}
-				
-				# group by wieder einbauen
-				if($layerset[$i]['attributes']['groupby'] != ''){
-					$pfad .= $layerset[$i]['attributes']['groupby'];
-					$j = 0;
-					foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-						if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != ''){		# hat Haupttabelle oids?
-							$pfad .= ','.pg_quote($tablename.'_oid').' ';
-						}
-						$j++;
-					}
-				}
-				
-				if($distinct == true){
-					$pfad = 'DISTINCT '.$pfad;
-				}
-				
+								
 				#if($the_geom == 'query.the_geom'){
 					$sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
 				/*}
@@ -573,7 +510,7 @@ class GUI {
 										case 'Auswahlfeld': {
 											$auswahlfeld_output = '';
 											if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-												for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
+												for($e = 0; $e < @count($attributes['enum_value'][$j][$k]); $e++){
 													if($attributes['enum_value'][$j][$k][$e] == $value){
 														$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
 														break;
@@ -581,7 +518,7 @@ class GUI {
 												}
 											}
 											else{
-												for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
+												for($e = 0; $e < @count($attributes['enum_value'][$j]); $e++){
 													if($attributes['enum_value'][$j][$e] == $value){
 														$auswahlfeld_output = $attributes['enum_output'][$j][$e];
 														break;
@@ -595,7 +532,7 @@ class GUI {
 										} break;
 										case 'Radiobutton': {
 											$radiobutton_output = '';
-											for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
+											for($e = 0; $e < @count($attributes['enum_value'][$j]); $e++){
 												if($attributes['enum_value'][$j][$e] == $value){
 													$radiobutton_output = $attributes['enum_output'][$j][$e];
 													break;
@@ -805,7 +742,7 @@ class user {
   var $database;
   var $remote_addr;
 
-	function user($login_name,$id,$database) {
+	function __construct($login_name,$id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->database=$database;
@@ -953,7 +890,7 @@ class stelle {
   var $selectedButton;
   var $database;
 
-	function stelle($id,$database) {
+	function __construct($id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->id=$id;
@@ -1132,7 +1069,7 @@ class rolle {
   static $hist_timestamp;
   static $layer_params;
 
-	function rolle($user_id,$stelle_id,$database) {
+	function __construct($user_id,$stelle_id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->user_id=$user_id;
@@ -1351,8 +1288,7 @@ class rolle {
 				l.query as pfad, 
 				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, 
 				gle_view,
-				concat('(', rollenfilter, ')') as Filter,
-				'oid' as oid
+				concat('(', rollenfilter, ')') as Filter
 			FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
     if ($LayerName!='') {
@@ -1731,6 +1667,65 @@ class db_mapObj{
 			return array();
 		}
 	}
+	
+	function getQueryWithOid($layerset, $layerdb, $stelle){
+		$path = replace_params(
+			$layerset['pfad'],
+			rolle::$layer_params,
+			$this->user->id,
+			$stelle->id,
+			rolle::$hist_timestamp,
+			$this->user->rolle->language
+		);
+		$privileges = $stelle->get_attributes_privileges($layerset['Layer_ID']);
+		$layerset['attributes'] = $this->read_layer_attributes($layerset['Layer_ID'], $layerdb, $privileges['attributenames']);
+		if($layerset['Layer_ID'] > 0){			# bei Rollenlayern nicht
+			$path = $stelle->parse_path($layerdb, $path, $privileges, $layerset['attributes']);
+		}
+
+		# order by rausnehmen
+		$orderbyposition = strrpos(strtolower($path), 'order by');
+		$lastfromposition = strrpos(strtolower($path), 'from');
+		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+			$layerset['attributes']['orderby'] = ' '.substr($path, $orderbyposition);
+			$path = substr($path, 0, $orderbyposition);
+		}
+
+		# group by rausnehmen
+		$groupbyposition = strrpos(strtolower($path), 'group by');
+		if($groupbyposition !== false){
+			$layerset['attributes']['groupby'] = ' '.substr($path, $groupbyposition);
+			$path = substr($path, 0, $groupbyposition);
+		}
+
+		$distinctpos = strpos(strtolower($path), 'distinct');
+		if($distinctpos !== false && $distinctpos < 10){
+			$pfad = substr(trim($path), $distinctpos+8);
+			$distinct = true;
+		}
+		else{
+			$pfad = substr(trim($path), 7);
+		}
+		if ($layerset['maintable'] != '' AND $layerset['oid'] != '') {
+			$pfad = pg_quote($layerset['attributes']['table_alias_name'][$layerset['maintable']]).'.'.$layerset['oid'].' AS ' . pg_quote($layerset['maintable'] . '_oid').', ' . $pfad;
+		}
+
+		$the_geom = $layerset['attributes']['the_geom'];
+
+				
+		# group by wieder einbauen
+		if($layerset['attributes']['groupby'] != ''){
+			$pfad .= $layerset['attributes']['groupby'];
+			$j = 0;
+			foreach($layerset['attributes']['all_table_names'] as $tablename){
+				if($tablename == $layerset['maintable'] AND $layerset['oid'] != ''){		# hat Haupttabelle oids?
+					$pfad .= ','.pg_quote($tablename.'_oid').' ';
+				}
+				$j++;
+			}
+		}
+		return $pfad;
+	}	
 
   function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false){
 		global $language;
@@ -1832,6 +1827,9 @@ class db_mapObj{
 			$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
 			$attributes['constraints'][$i]= $rs['constraints'];
 			$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
+			if ($rs['constraints'] == 'PRIMARY KEY') {
+				$attributes['pk'][] = $rs['real_name'];
+			}			
 			$attributes['nullable'][$i]= $rs['nullable'];
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];

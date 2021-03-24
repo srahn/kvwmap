@@ -474,14 +474,14 @@ function setScale(select){
 			        </tr>
 			        <tr align="left">
 			          <td>
-			          <div align="center"><input type="button" name="neuladen_button" onclick="neuLaden();" value="neu Laden"></div>
+			          <div align="center"><input type="button" name="neuladen_button" onclick="document.GUI.legendtouched.value = 1;neuLaden();" value="neu Laden"></div>
 			          <br>
 			        	<div style="width:230; height:<?php echo $this->map->height-59; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 				          &nbsp;
 				          <img src="graphics/tool_info_2.png" alt="Informationsabfrage" title="Informationsabfrage" width="17">&nbsp;
 				          <img src="graphics/layer.png" alt="Themensteuerung" title="Themensteuerung" width="20" height="20"><br>
 									<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
-				          <div id="legend_div" onclick="document.GUI.legendtouched.value = 1;">
+				          <div id="legend" onclick="document.GUI.legendtouched.value = 1;">
 										<? echo $this->legende; ?>
 									</div>
 				        </div>

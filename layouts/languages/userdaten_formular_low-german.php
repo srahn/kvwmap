@@ -1,23 +1,34 @@
 ﻿<?php
-	$strAsteriskRequired="Weerte mit een * mööst du indragen";
+	$strTitle="Brukerdaten Editor";
 	$strDataBankID="Datenbank ID";
-	$strName="Achternaam*";
-	$strForeName="Förnaam*";
-	$strLogInName="Loginnaam*";
+	$strName="Achternaam";
+	$strUserTitle="Tosatz";
+	$strForeName="Förnaam";
+	$strLogInName="Loginnaam";
 	$strChangePassword="Wist ook dat Passwoort Ännern?";
+	$strResetPassword="Passwoort dörch Bruker ännern";
+	$strLastModPassword="Letzt Ännerung";
+	$strPasswordExpired="Afflopen";
+	$strPasswordValid="Güllig";
+	$strPasswordExpiredDays="Dag";
 	$strPassword="Passwoort";
-	$strReEnterPassword='Passwoort nochmal maken';
+	$strNewPassword="Nieges Passwoort";
+	$strReEnterPassword='Nochmaal';
 	$strAuthorizeTask="Berechtigte Stäen";
 	$strTelephone="Telefoon";
-	$strEmail="E-Mail";
-	$strButtonBack="Trüggsetten";
-	$strButtonEdit="Ännern";
-	$strButtonSaveAs="As niegen Bruker indragen";
-	$strTitle="Brukerdaten Editor";
-	$strAllowedIps="verlööft IP-Adressen";
+	$strEmail="Email";
 	$strOrganisation="Organisation";
 	$strPosition="Position";
 	$strShareRollenlayerAllowedCheckboxText = "Darf Rollenlayer mit anderen Nutzern teilen.";
 	$strShareRollenlayerAllowedDescription = "Wenn der Nutzer das Recht hat, darf er seine eigenen importierten Rollenlayer sich selbst und anderen Nutzern als reguläre Layer zuweisen! Die Zuweisung erfolgt für alle Nutzer in Stellen, die das Recht haben dass ihr freigegebene Rollenlayer zugeordnet werden dürfen, siehe Stelleneinstellungen. Nur der Nutzer selbst und der Admin kann diese sogenannten freigegebenen Layer ändern und auch wieder löschen.";
-
+	$strSendEmail="Mail versennen";
+	$strButtonSaveAs="As niegen Bruker indragen";
+	$strAllowedIps="verlööft IP / Domain";
+	$strStart="Start ranlaten";
+	$strStop="Stop ranlaten";
+	$strActiveLayers="utwählt Themen";
+	$strDeactiveLayer="Utwahl wegmaken";
+	$strActiveSite="Aktive Stäe";
+	$strChangeUser="Bruker wesseln";
+	$strLoginAsUser="As düsse Bruker ranlaten";
 ?>

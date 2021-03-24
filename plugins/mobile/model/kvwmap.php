@@ -326,8 +326,8 @@
 
 	$GUI->mobile_prepare_layer_sync = function($layerdb, $id, $sync) use ($GUI) {
 		include_once(CLASSPATH . 'Layer.php');
+		$msg = '';
 		$layer = Layer::find($GUI, 'Layer_ID = ' . $id)[0];
-
 		$sql = "
 			SELECT EXISTS (
 				SELECT 1
@@ -340,16 +340,35 @@
 		#echo '<p>Plugin: Mobile, function: prepare_layer_sync, Query if delta table exists SQL:<br>' . $sql;
 		$ret = $layerdb->execSQL($sql, 4, 0);
 		if ($ret[0]) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
-
-		# ToDo create Table syncs if not exists
-
 		$rs = pg_fetch_assoc($ret[1]);
 		if ($rs['table_exists'] == 't' and $sync == 0) {
+			# switch off sync mode
 			$GUI->mobile_drop_layer_sync($layerdb, $layer);
+			$pending_layers = array_filter(
+				$layer->get_parentform_layers(),
+				function($parentform_layer) {
+					return $parentform_layer->get('sync') == '1';
+				}
+			);
+			if (count($pending_layers) > 0) {
+				$msg = 'Bei den folgenden übergeordneten Layern ist der Sync-Modus noch eingeschaltet:<br>' . $layer->get_edit_link_list($pending_layers, 'sync') . 'Schalten Sie den Sync-Modus bei diesen Layern gegebenenfalls auch aus. Wenn diese eingeschaltet bleiben kann man die Daten offline in kvmobile anzeigen und bearbeiten aber sieht die Daten in den Unterformularen nicht!';
+			}
 		}
-
 		if ($rs['table_exists'] == 'f' and $sync == 1) {
+			# switch on sync mode
 			$GUI->mobile_create_layer_sync($layerdb, $layer);
+			$pending_layers = array_filter(
+				$layer->get_subform_layers(),
+				function($subform_layer) {
+					return $subform_layer->get('sync') == '0';
+				}
+			);
+			if (count($pending_layers) > 0) {
+				$msg = 'Bei den folgenden verknüpften Layern ist der Sync-Modus noch nicht eingeschaltet:<br>' . $layer->get_edit_link_list($pending_layers, 'sync') . 'Schalten Sie den Sync-Modus bei diesen Layern auch ein, um die Daten in kvmobile offline anzeigen und bearbeiten zu können!';
+			}
+		}
+		if ($msg != '') {
+			$GUI->add_message('warning', $msg);
 		}
 	};
 
@@ -375,6 +394,9 @@
 		$GUI->add_message('notice', 'Sync-Tabelle und Trigger gelöscht.');
 	};
 
+	/**
+	* Create Tables for sync Function of $layer in $layerdb
+	*/
 	$GUI->mobile_create_layer_sync = function($layerdb, $layer) use ($GUI) {
 		# create table for deltas
 		$sql = "

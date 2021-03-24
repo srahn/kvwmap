@@ -844,6 +844,71 @@ class rolle {
 		}
 		return $search;
 	}
+	
+	function saveExportSettings($formvars){
+		$layerset = $this->getLayer($formvars['selected_layer_id']);
+		$mapdb = new db_mapObj($this->stelle_id, $this->user_id);
+		$layerdb = $mapdb->getlayerdatabase($formvars['selected_layer_id'], $stelle->pgdbhost);
+		$this->attributes = $mapdb->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL);
+		# Attribute
+		for ($i = 0; $i < count($this->attributes['name']); $i++) {
+			if ($formvars['check_'.$this->attributes['name'][$i]]) {
+				$selected_attributes[] = $this->attributes['name'][$i];
+			}
+		}
+		$sql = "
+			REPLACE INTO rolle_export_settings SET
+				stelle_id = " . $this->stelle_id . ",
+				user_id = " . $this->user_id . ",
+				layer_id = " . $formvars['selected_layer_id'] . ",
+				name = '" . $formvars['setting_name'] . "',
+				format = '" . $formvars['export_format'] . "',
+				epsg = " . ($formvars['epsg'] ?: 'NULL') . ",
+				attributes = '" . implode(',', $selected_attributes) . "',
+				metadata = " . ($formvars['with_metadata_document'] ?: '0'). ",
+				groupnames = " . ($formvars['export_groupnames'] ? '1': '0'). ",
+				documents = " . ($formvars['download_documents'] ? '1' : '0') . ",
+				geom = '" . $formvars['newpathwkt'] . "',
+				within = " . ($formvars['within'] ?: '0'). ",
+				singlegeom = " . ($formvars['singlegeom'] ?: '0'). "
+		";
+		$this->database->execSQL($sql, 4, 1);
+	}
+	
+	function deleteExportSettings($formvars){
+		$sql = "
+			DELETE FROM 
+				rolle_export_settings 
+			WHERE
+				stelle_id = " . $this->stelle_id . " AND 
+				user_id = " . $this->user_id . " AND 
+				layer_id = " . $formvars['selected_layer_id'] . " AND 
+				name = '" . $formvars['export_setting'] . "'
+		";
+		$this->database->execSQL($sql, 4, 1);
+	}
+	
+	function getExportSettings($layer_id, $name = NULL){
+		$settings = array();
+		$sql = "
+			SELECT 
+				* 
+			FROM 
+				rolle_export_settings 
+			WHERE 
+				layer_id = " . $layer_id . " AND
+				user_id = " . $this->user_id . " AND 
+				stelle_id = " . $this->stelle_id . 
+				($name ? " AND name = '" . $name . "'": '') . "
+			ORDER BY name";
+		$this->debug->write("<p>file:rolle.php class:rolle->getsettings - Abfragen der gespeicherten Export-Einstellungen der Rolle:<br>".$sql,4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		while ($rs = $this->database->result->fetch_assoc()) {
+			$settings[]=$rs;
+		}
+		return $settings;
+	}
 
 	function read_Group($id) {
 		$sql ='SELECT g2r.*, g.Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r';
@@ -887,21 +952,20 @@ class rolle {
 				l.query as pfad, 
 				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, 
 				gle_view,
-				concat('(', rollenfilter, ')') as Filter,
-				'gid' as oid
+				concat('(', rollenfilter, ')') as Filter
 			FROM
 				rollenlayer AS l
 			WHERE
 				l.stelle_id = " . $this->stelle_id . " AND
 				l.user_id = " . $this->user_id . "
 		";
-    if ($LayerName!='') {
-      $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
-      if(is_numeric($LayerName)){
-        $sql.='OR l.id = "'.$LayerName.'")';
+    if ($LayerName != '') {
+      $sql .=' AND (l.Name LIKE "'.$LayerName.'" ';
+      if (is_numeric($LayerName)) {
+        $sql .= 'OR l.id = "' . $LayerName . '")';
       }
-      else{
-        $sql.=')';
+      else {
+        $sql .= ')';
       }
     }
 		if ($typ != NULL){
