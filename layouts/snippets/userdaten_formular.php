@@ -7,16 +7,17 @@
 
 	function toggle_password(){
 		document.getElementById('udf_changepasswd').classList.value;
-		if(document.getElementById('udf_changepasswd').classList.length == 0){
+		if (document.getElementById('udf_changepasswd').classList.length == 0){
 			document.getElementById('udf_changepasswd').classList.add('udf_pw-active');
 			document.GUI.password1.disabled=false;
 			document.GUI.password2.disabled=false;
 		}
-		else{
+		else {
 			document.getElementById('udf_changepasswd').classList.remove('udf_pw-active');
 			document.GUI.password1.disabled=true;
 			document.GUI.password2.disabled=true;
 		}
+		$('#GUI input[name=changepasswd]').val(($('#GUI input[name=changepasswd]').val() == 1 ? 0 : 1));
 	}
 	
 	function deactivate_layer(user_id, stelle_id, layer_id){
@@ -40,7 +41,7 @@
 		}).appendTo('#GUI');
 		$('#GUI input[name=password1]').prop('disabled', false).val(newPassword);
 		$('#GUI input[name=password2]').prop('disabled', false).val(newPassword);
-		$('#GUI input[name=changepasswd]').attr('checked', true);
+		$('#GUI input[name=changepasswd]').val(1);
 	}
 	
 </script>
@@ -233,42 +234,45 @@
 		}
 ?>
 					</span>
-				</div>				
-<?
-	}
-?>
-				<div class="udf_eingabe-pw-input">
-						<div>
-							<div><input name="password1" readonly onfocus="this.removeAttribute('readonly');"
-							<? if ($this->formvars['selected_user_id'] > 0) { ?>
-								disabled="true"
-							<? } ?>
-								type="password" maxlength="30" placeholder="<? echo $strNewPassword;?>"></div>
-						</div>
-						<div>
-							<input name="password2" readonly onfocus="this.removeAttribute('readonly');"
-							<? if ($this->formvars['selected_user_id']>0) { ?>
-								disabled="true"
-							<? } ?>
-								type="password" maxlength="30" placeholder="<? echo $strReEnterPassword;?>">
-						</div>
-				</div>					
-<?
-	if ($this->formvars['selected_user_id'] > 0) {
-?>
-				<div class="udf_eingabe-pw-change">
-					<div id="udf_changepasswd" class="" onclick="toggle_password();">
-						<i class="fa fa-pencil" aria-hidden="true"></i><? echo $strChangePassword;?>
-					</div>
-
-					<div>
-						<i class="fa fa-undo" aria-hidden="true"></i>
-						<a href="javascript:void(0);" id="resetPassword" onclick="resetPassword();"><? echo $strResetPassword; ?></a>
-					</div>
 				</div>
 <?
-	} 
-?>
+	} ?>
+				<div class="udf_eingabe-pw-input">
+					<input type="hidden" name="changepasswd" value="0">
+					<div>
+						<input
+							name="password1"
+							readonly
+							onfocus="this.removeAttribute('readonly');"
+							disabled="<? echo ($this->formvars['selected_user_id'] > 0 ? "true" : "false") ?>"
+							type="password"
+							maxlength="30"
+							placeholder="<? echo $strNewPassword;?>"
+						>
+					</div>
+					<div>
+						<input
+							name="password2"
+							readonly
+							onfocus="this.removeAttribute('readonly');"
+						  disabled="<? echo ($this->formvars['selected_user_id'] > 0 ? "true" : "false") ?>"
+							type="password"
+							maxlength="30"
+							placeholder="<? echo $strReEnterPassword;?>"
+						>
+					</div>
+				</div><?
+				if ($this->formvars['selected_user_id'] > 0) { ?>
+					<div class="udf_eingabe-pw-change">
+						<div id="udf_changepasswd" class="" onclick="toggle_password();">
+							<i class="fa fa-pencil" aria-hidden="true"></i><? echo $strChangePassword;?>
+						</div>
+						<div>
+							<i class="fa fa-undo" aria-hidden="true"></i>
+							<a href="javascript:void(0);" id="resetPassword" onclick="resetPassword();"><? echo $strResetPassword; ?></a>
+						</div>
+					</div><?
+				} ?>
 			</div>
 		</div>
 

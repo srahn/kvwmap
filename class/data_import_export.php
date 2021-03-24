@@ -1134,7 +1134,7 @@ class data_import_export {
 		$data_sql = $sql;
 		#echo '<br>Frage Daten ab mit SQL: '. $sql;
 
-		$temp_table = 'shp_export_'.rand(1, 10000);
+		$temp_table = 'shp_export_'.rand(1, 1000000);
 
 		# temporäre Tabelle erzeugen, falls Argumentliste durch das SQL zu lang
     $sql = "
@@ -1146,7 +1146,13 @@ class data_import_export {
 
 		for ($s = 0; $s < count($selected_attributes); $s++){
 			# Transformieren der Geometrie
-			if ($this->attributes['the_geom'] == $selected_attributes[$s])$selected_attributes[$s] = 'st_transform('.$selected_attributes[$s].', '.$this->formvars['epsg'].') as '.$selected_attributes[$s];
+			if ($this->attributes['the_geom'] == $selected_attributes[$s]) {
+				$selected_attributes[$s] = 'st_transform(' . $selected_attributes[$s] . ', ' . $this->formvars['epsg'] . ') ';
+				if ($this->formvars['precision'] != '') {
+					$selected_attributes[$s] = 'st_snaptogrid(' . $selected_attributes[$s] . ', 0.' . str_repeat('0', $this->formvars['precision'] - 1) . '1) ';
+				}	
+				$selected_attributes[$s] .= 'as ' . $this->attributes['the_geom'];
+			}
 			# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
 			if ($this->formvars['export_format'] == 'Shape') {
 				if (in_array($selected_attr_types[$s], array('text', 'varchar'))) $selected_attributes[$s] = pg_quote($selected_attributes[$s]).'::varchar(254)';
@@ -1206,6 +1212,7 @@ class data_import_export {
 				case 'GeoJSON' : {
 					$exportfile = $exportfile.'.json';
 					$err = $this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
+					$contenttype = 'application/vnd.geo+json';
 				}break;
 
 				case 'GeoJSONPlus': {
