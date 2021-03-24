@@ -80,7 +80,9 @@ class data_import_export {
 		}
 		if ($custom_tables != NULL){
 			if ($custom_tables[0]['error'] != ''){
-				echo $custom_tables[0]['error'];
+				if ($filetype != 'point') {
+					echo $custom_tables[0]['error'];
+				}
 			}
 			else {
 				foreach ($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
@@ -594,9 +596,13 @@ class data_import_export {
 		if(!$ret[0]){
 			$custom_table['datatype'] = 0;
 			$custom_table['tablename'] = $tablename;
-			$custom_table['labelitem'] = $labelitem;
-			return array($custom_table);
+			$custom_table['labelitem'] = $labelitem;			
 		}
+		else {
+			$pgdatabase->gui->add_message('error', 'Import fehlgeschlagen: Bitte prüfen Sie die Formatierung der Punktliste.');
+			$custom_table['error'] = $ret['msg'];
+		}
+		return array($custom_table);
 	}	
 
 
