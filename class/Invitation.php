@@ -48,6 +48,8 @@ class Invitation extends MyObject {
 	}
 
 	function mailto_text() {
+		include(LAYOUTPATH . 'languages/Invitation_' . $this->gui->user->rolle->language . '.php');
+
 		# // ToDo Den Einladungstext fertig machen mit richtigem Ansprechpartner etc.
 			#//ToDo Werte des Einladenden mit abfragen.
 		$link = URL . APPLVERSION .
@@ -60,24 +62,21 @@ class Invitation extends MyObject {
 			'&language=' . $this->gui->user->rolle->language;
 		$msg = $this->get('email') . 
 '?subject=Einladung zur Registrierung bei ' . TITLE .
-'&body=' . rawurlencode('Einladung für ' . $this->get('vorname') . ' ' . $this->get('name') . ',
+'&body=' . rawurlencode($strInvitationHeader . ' ' . $this->get('vorname') . ' ' . $this->get('name') . ',
 
-Sie sind von ' . $this->inviter->get('Vorname') . ' ' . $this->inviter->get('Name') .  ' zur Mitarbeit bei ' . TITLE . ' eingeladen worden.
-Um der Einladung zu folgen klicken Sie bitte auf den nachstehenden Link.
+' . $strInvitaiionText . ' ' . $this->inviter->get('Vorname') . ' ' . $this->inviter->get('Name') .  '
 
+' .  $strInvitationLink . ':
 ' . $link . '
 
-Sollte sich kein Browserfenster öffnen, können Sie auch manuell ein Browserfenster öffnen und den Link in die Adresszeile kopieren. Achten Sie bitte darauf den vollständigen Text zu kopieren.
+' . $strInvitationLinkAlternative . ' ' . TITLE . '.
 
-Der Link verweist auf die Registrierungsseite von ' . TITLE . '.
-Dort werden Sie aufgefordert sich ein Benutzernamen und ein Passwort zu vergeben.
-Ist die Registrierung erfolgreich abgeschlossen können Sie mit diesem Login in der Web-Anwendung arbeiten.
+' . $strInvitationAfterLinkText . '
 
-Für Rückfragen wenden Sie sich bitte an
-' . $this->inviter->get('Vorname') . ' ' . $this->inviter->get('Name') . ' unter der E-Mail: ' . $this->inviter->get('email') . '
+' . $strInvitationQuestionsTo . '
+' . $this->inviter->get('Vorname') . ' ' . $this->inviter->get('Name') . ' E-Mail: ' . $this->inviter->get('email') . '
 
-Diese E-Mail wurde automatisch mit kvwmap erstellt und ist nur für den Nutzer mit der angegebenen E-Mail-Adresse gedacht.
-Bitte geben sie diese E-Mail nicht an Dritte weiter. Sie könnten sich statt Ihnen bei ' . TITLE . ' anmelden und in Ihrem Namen dort arbeiten und eingetragene Rechte wahrnehmen!');
+' . $strInvitationAutomationText);
 		return $msg;
 	}
 }
