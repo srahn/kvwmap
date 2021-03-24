@@ -8859,7 +8859,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							for ($k = 0; $k < count($this->qlayerset[$i]['shape']); $k++){
 								$oids[] = $this->qlayerset[$i]['shape'][$k][$layerset[0]['maintable'].'_oid'];
 							}
-							$rect = $mapDB->zoomToDatasets($oids, $layerset[0], $attributes['real_name'][$attributes['the_geom']], 10, $layerdb, $this->user->rolle->epsg_code, $this->Stelle);
+							$rect = $mapDB->zoomToDatasets($oids, $layerset[0], $attributes['the_geom'], 10, $layerdb, $this->user->rolle->epsg_code, $this->Stelle);
 							$this->map->setextent($rect->minx, $rect->miny, $rect->maxx, $rect->maxy);
 							if (MAPSERVERVERSION > 600) {
 								$this->map_scaledenom = $this->map->scaledenom;
@@ -15216,7 +15216,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$map->web->set('imageurl', IMAGEURL);
 				$map->set('width', 50);
 				$map->set('height', 50);
-				$map->save('/var/www/logs/test.map');
+				#$map->save('/var/www/logs/test.map');
 				$image_map = $map->draw();
 				$filename = $this->map_saveWebImage($image_map, 'jpeg');
 				$newname = $this->user->id . basename($filename);
