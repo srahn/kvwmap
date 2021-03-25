@@ -7679,6 +7679,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $begin = strpos($this->layerdata['Data'], '(') + 1;
     $end = strrpos($this->layerdata['Data'], ')');
     $data_sql = substr($this->layerdata['Data'], $begin, $end - $begin);
+		$data_sql = str_replace('$scale', 1000, $data_sql);
 
     $auto_classes = $this->AutoklassenErzeugen($layerdb, $data_sql, $this->formvars['classification_column'], $this->formvars['classification_method'], $this->formvars['num_classes'], $this->formvars['classification_name'], $this->formvars['classification_color']);
 
@@ -7700,9 +7701,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $classes = array();
     switch ($method) {
 			case 1 : {		# für jeden Wert eine Klasse
-        $sql = "
-          SELECT DISTINCT " . $class_item."
-          FROM (" . $data_sql.") AS data ORDER BY " . replace_semicolon($class_item) . " LIMIT 100";
+        $sql = '
+          SELECT DISTINCT "' . $class_item . '"
+          FROM (' . $data_sql.') AS data ORDER BY "' . replace_semicolon($class_item) . '" LIMIT 100';
 
         $ret=$layerdb->execSQL($sql, 4, 0);
 				if ($ret['success']==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
@@ -7717,15 +7718,15 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       } break;
 
       case 2 : {		# gleiche Klassengröße
-        $sql = "
+        $sql = '
           SELECT
-            min(" . $class_item . "),
-            max(" . $class_item . ")
+            min("' . $class_item . '"),
+            max("' . $class_item . '")
           FROM
             (
-              " . $data_sql . "
+              ' . $data_sql . '
             ) AS data
-        ";
+        ';
         #echo '<br>' . $sql;
 
         $ret=$layerdb->execSQL($sql, 4, 0);
@@ -7749,16 +7750,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       } break;
 
       case 3 : {		# gleiche Anzahl Klassenmitglieder
-        $sql = "
+        $sql = '
           SELECT
-            " . $class_item . "
+            "' . $class_item . '"
           FROM
             (
-              " . $data_sql . "
+              ' . $data_sql . '
             ) AS data
           ORDER BY
-            " . replace_semicolon($class_item) . "
-        ";
+            "' . replace_semicolon($class_item) . '"
+        ';
 
         $ret=$layerdb->execSQL($sql, 4, 0);
     		if ($ret['success']==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
@@ -7781,16 +7782,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       case 4 : {		# Clustering nach Jenk, Initialisierung mit Histogramm-Maxima
         include_(CLASSPATH.'k-Means_clustering.php');
         // fetch data
-        $sql = "
+        $sql = '
           SELECT
-            " . $class_item . "
+            "' . $class_item . '"
           FROM
             (
-              " . $data_sql . "
+              ' . $data_sql . '
             ) AS data
           ORDER BY
-            " . replace_semicolon($class_item) . "
-        ";
+            "' . replace_semicolon($class_item) . '"
+        ';
         $ret=$layerdb->execSQL($sql, 4, 0);
 				if ($ret['success']==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
         $data = pg_fetch_all($ret[1]);
@@ -7802,30 +7803,30 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         }, array(&$flatData,$class_item));
 
         // fetch histogram
-        $sql = "
+        $sql = '
           SELECT
             round(
-              (" . $class_item . " - (
+              ("' . $class_item . '" - (
                 SELECT
-                  min(" . $class_item . ")
+                  min("' . $class_item . '")
                 FROM
-                  (" . $data_sql . ") AS data
+                  (' . $data_sql . ') AS data
                 )
               ) * (
                 SELECT
-                  100 / (max(" . $class_item . ") - min(" . $class_item . "))
+                  100 / (max("' . $class_item . '") - min("' . $class_item . '"))
                 FROM
-                  (" . $data_sql . ") AS data
+                  (' . $data_sql . ') AS data
               )
             ) prozent,
             count(*) anzahl
           FROM
-            (" . $data_sql . ") AS data
+            (' . $data_sql . ') AS data
           GROUP BY
             prozent
           ORDER BY
             prozent
-        ";
+        ';
         $ret=$layerdb->execSQL($sql, 4, 0);
 				if ($ret['success']==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
         $histogram = pg_fetch_all($ret[1]);
@@ -7860,16 +7861,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       case 5 : {		# Clustering nach Jenk, Mininierung Abweichung i.d. Klassen
         include_(CLASSPATH.'k-Means_clustering.php');
         // fetch data
-        $sql = "
+        $sql = '
           SELECT
-            " . $class_item . "
+            "' . $class_item . '"
           FROM
             (
-              " . $data_sql . "
+              ' . $data_sql . '
             ) AS data
           ORDER BY
-            " . replace_semicolon($class_item) . "
-        ";
+            "' . replace_semicolon($class_item) . '"
+        ';
         #echo '<p>' . $sql;
         $ret=$layerdb->execSQL($sql, 4, 0);
 				if ($ret['success']==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
