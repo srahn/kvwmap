@@ -13799,8 +13799,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 										$geoms[]=$rs[0];
 									}
 								}
-								if(count($geoms) > 0)$sql = '';
-								for($g = 0; $g < count($geoms); $g++){
+								if(@count($geoms) > 0)$sql = '';
+								for($g = 0; $g < @count($geoms); $g++){
 									if($g > 0)$sql .= " UNION ";
 									$sql .= "SELECT " . $pfad . $filter . " AND " . $the_geom." && ('" . $geoms[$g]."') AND (st_intersects(" . $the_geom.", ('" . $geoms[$g]."'::geometry)) OR " . $the_geom." = ('" . $geoms[$g]."'))";
 								}
@@ -14040,12 +14040,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
             $request = $wfs->get_feature_request($request, $bbox, NULL, intval($this->formvars['anzahl']));
             $features = $wfs->extract_features();
             for($j = 0; $j < @count($features); $j++){
-              for($k = 0; $k < count($layerset[$i]['attributes']['name']); $k++){
+              for($k = 0; $k < @count($layerset[$i]['attributes']['name']); $k++){
 								$layerset[$i]['shape'][$j][$layerset[$i]['attributes']['name'][$k]] = $features[$j]['value'][$layerset[$i]['attributes']['name'][$k]];
               }
               $layerset[$i]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
             }
-						for($j = 0; $j < count($layerset[$i]['attributes']['name']); $j++){
+						for($j = 0; $j < @count($layerset[$i]['attributes']['name']); $j++){
 							$layerset[$i]['attributes']['privileg'][$j] = $privileges[$layerset[$i]['attributes']['name'][$j]];
 							$layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['name'][$j]] = $privileges[$layerset[$i]['attributes']['name'][$j]];
 						}

@@ -2676,7 +2676,7 @@ FROM
     $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkis.ax_flurstueck AS f";
     $sql.=" WHERE 1=1";
-    $anzflst=count($flurstkennz);
+    $anzflst = @count($flurstkennz);
     if ($anzflst>0) {
       $sql.=" AND f.flurstueckskennzeichen IN ('".$flurstkennz[0]."'";
       for ($i=1;$i<$anzflst;$i++) {

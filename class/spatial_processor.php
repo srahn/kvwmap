@@ -107,7 +107,7 @@ class spatial_processor {
 		#echo $sql;
 		$ret = $this->pgdatabase->execSQL($sql,4, 0, true);
 		if ($ret[0]) {
-			$rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+			echo '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
 		}
 		else {
 			$rs = pg_fetch_assoc($ret[1]);
