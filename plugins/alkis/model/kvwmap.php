@@ -180,9 +180,11 @@
 		#$datastring.=" " . $alias.".flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
 		$datastring.=" flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
     $legendentext="Flurstück";
-    if(count($FlurstListe) > 1)$legendentext .= "e";
+    if (@count($FlurstListe) > 1) {
+			$legendentext .= "e";
+		}
     $legendentext .= " (".date('d.m. H:i',time())."):<br>" . $FlurstListe[0];
-    for ($i=1;$i<count($FlurstListe);$i++) {
+    for ($i=1; $i < @count($FlurstListe); $i++) {
       $datastring.=",'" . $FlurstListe[$i]."'";
       $legendentext.=",<br>" . $FlurstListe[$i];
     }

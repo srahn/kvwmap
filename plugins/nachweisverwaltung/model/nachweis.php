@@ -311,20 +311,24 @@ class Nachweis {
   function check_poly_in_flur($polygon, $flur, $gemarkung, $epsg){
   	$sql = "SELECT st_isvalid(st_geomfromtext('".$polygon."', ".$epsg."))";
   	$ret=$this->database->execSQL($sql,4, 1);
-  	$rs = pg_fetch_row($ret[1]);
-		if($rs[0] == 'f'){
-			$result = 'invalid';
-			return $result;
+		if(!$ret[0]){
+			$rs = pg_fetch_row($ret[1]);
+			if($rs[0] == 'f'){
+				$result = 'invalid';
+				return $result;
+			}
+			$ret=$this->database->check_poly_in_flur($polygon, $epsg);
+			if(!$ret[0]){
+				$result = 'f';	
+				while($rs = pg_fetch_row($ret[1])){
+					if($gemarkung == $rs[0] AND $flur == ltrim($rs[1], '0')){
+						$result = 't';
+						break;
+					}
+				}
+				return $result;
+			}
 		}
-  	$ret=$this->database->check_poly_in_flur($polygon, $epsg);
-  	$result = 'f';	
-  	while($rs = pg_fetch_row($ret[1])){
-  		if($gemarkung == $rs[0] AND $flur == ltrim($rs[1], '0')){
-  			$result = 't';
-  			break;
-  		}
-  	}
-  	return $result;
   }
   
   function pruefeEingabedaten($id, $datum, $VermStelle, $hauptart, $gueltigkeit, $stammnr, $rissnummer, $fortfuehrung, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring, $flur, $blattnr, $pok_pflicht){
