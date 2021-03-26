@@ -1539,19 +1539,23 @@ function url_get_contents($url, $username = NULL, $password = NULL, $useragent =
 	try {
 		$ctx['http']['timeout'] = 20;
 		#$ctx['http']['header'] = 'Referer: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];		// erstmal wieder rausgenommen, da sonst Authorization nicht funktioniert
-		if($useragent)$ctx['http']['header'] = 'User-Agent: '.$useragent;
-		if($username)$ctx['http']['header'].= "Authorization: Basic ".base64_encode($username.':'.$password);
+		if ($useragent) {
+			$ctx['http']['header'] = 'User-Agent: ' . $useragent;
+		}
+		if ($username) {
+			$ctx['http']['header'].= "Authorization: Basic ".base64_encode($username . ':' . $password);
+		}
 		$proxy = getenv('HTTP_PROXY');
-		if($proxy != '' AND $hostname != 'localhost'){
+		if ($proxy != '' AND $hostname != 'localhost') {
 			$ctx['http']['proxy'] = $proxy;
 			$ctx['http']['request_fulluri'] = true;
 			$ctx['ssl']['SNI_server_name'] = $hostname;
 			$ctx['ssl']['SNI_enabled'] = true;
 		}
 		$context = stream_context_create($ctx);
-		$response =  file_get_contents($url, false, $context);
+		$response = file_get_contents($url, false, $context);
 		if ($response === false) {
-			throw new Exception("Fehler beim Abfragen der URL mit file_get_contents(".$url.")");
+			throw new Exception("Fehler beim Abfragen der URL mit file_get_contents(" . $url . ")");
 		}
 	}
 	catch (Exception $e) {
@@ -1563,18 +1567,21 @@ function url_get_contents($url, $username = NULL, $password = NULL, $useragent =
 function curl_get_contents($url, $username = NULL, $password = NULL) {
 	$url_parts = explode('?',  $url);
 	parse_str($url_parts[1], $get_array);
-  $ch = curl_init($url_parts[0]);		# url
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	$ch = curl_init($url_parts[0]);		# url
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 	if($username)curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
 	curl_setopt($ch, CURLOPT_POST, true);
 	#curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $get_array);
 	$result = curl_exec($ch);
-  if (curl_getinfo($ch, CURLINFO_HTTP_CODE)==404) {
+	if (curl_getinfo($ch, CURLINFO_HTTP_CODE) == 404) {
 		$result = "Fehler 404: File not found. Die Resource konnte mit der URL: ".$url." nicht auf dem Server gefunden werden!";
-  }
-  curl_close($ch);
-  return $result;
+	}
+	if (curl_getinfo($ch, CURLINFO_HTTP_CODE) == 401) {
+		$result = "Fehler 401: Unauthorized. Auf die Resource konnte mit der URL: ".$url." nicht zugegriffen werden!";
+	}
+	curl_close($ch);
+	return $result;
 }
 
 function debug_write($msg, $debug = false) {

@@ -7244,15 +7244,15 @@ echo '			</table>
 		$this->output();
   }
 
-	function wmsImportFormular(){
+	function wmsImportFormular() {
 		$this->titel='WMS Import';
-    $this->main="wms_import.php";
-		if($this->formvars['wms_url']){
+		$this->main="wms_import.php";
+		if ($this->formvars['wms_url']) {
 			include(CLASSPATH.'wms.php');
 			$wms = new wms_request_obj();
-			$this->layers = $wms->parseCapabilities($this->formvars['wms_url']);
+			$this->layers = $wms->parseCapabilities($this->formvars['wms_url'], $this->formvars['wms_auth_username'], $this->formvars['wms_auth_password']);
 		}
-    $this->output();
+		$this->output();
 	}
 
 	function wmsImportieren(){
@@ -7276,7 +7276,7 @@ echo '			</table>
 			else $this->formvars['wms_url'] .= '?';
 			for($i = 0; $i < count($this->formvars['layers']); $i++){
 				$this->formvars['Name'] = $this->formvars['layers'][$i];
-				$this->formvars['connection'] = $this->formvars['wms_url'].'VERSION=1.1.1&FORMAT=image/png&transparent=true&styles=&LAYERS='.$this->formvars['layers'][$i];
+				$this->formvars['connection'] = $this->formvars['wms_url'] . 'VERSION=1.1.1&FORMAT=image/png&transparent=true&styles=&LAYERS=' . $this->formvars['layers'][$i];
 				$layer_id = $dbmap->newRollenLayer($this->formvars);
 				$classdata['layer_id'] = -$layer_id;
 				$classdata['name'] = '_';
@@ -17214,7 +17214,6 @@ class db_mapObj{
 	function newRollenLayer($formvars) {
 		$formvars['Data'] = str_replace ( "'", "''", $formvars['Data']);
 		$formvars['query'] = str_replace ( "'", "''", value_of($formvars, 'query'));
-
 		$sql = "
 			INSERT INTO rollenlayer (
 				`user_id`,
@@ -17232,7 +17231,9 @@ class db_mapObj{
 				`transparency`,
 				`epsg_code`,
 				`labelitem`,
-				`classitem`
+				`classitem`,
+				`wms_auth_username`,
+				`wms_auth_password`
 			)
 			VALUES (
 				'" . $formvars['user_id'] . "',
@@ -17250,7 +17251,9 @@ class db_mapObj{
 				'" . $formvars['transparency'] . "',
 				'" . $formvars['epsg_code'] . "',
 				'" . $formvars['labelitem'] . "',
-				'" . $formvars['classitem'] . "'
+				'" . $formvars['classitem'] . "',
+				'" . $formvars['wms_auth_username'] . "',
+				'" . $formvars['wms_auth_password'] . "'
 			)
 		";
     #echo 'SQL: ' . $sql;

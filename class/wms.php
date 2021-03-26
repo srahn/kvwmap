@@ -28,20 +28,23 @@ class wms_request_obj {
     }
     return $param;
   }
-	
-	function parseCapabilities($onlineResource){
-		if(strpos($onlineResource, '?') !== false)$onlineResource .= '&';
-		else $onlineResource .= '?';
-		$doc = url_get_contents($onlineResource.'SERVICE=WMS&VERSION=1.1.0&REQUEST=GetCapabilities');
+
+	function parseCapabilities($onlineResource, $wms_auth_username = '', $wms_auth_password = '') {
+		$doc = url_get_contents(
+			$onlineResource . (strpos($onlineResource, '?') === false ? '?' : '&') . 'SERVICE=WMS&VERSION=1.1.0&REQUEST=GetCapabilities',
+			$wms_auth_username,
+			$wms_auth_password
+		);
 		$parser = xml_parser_create();
 		xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE,1);
 		xml_parse_into_struct($parser, $doc, $values, $index);
 		xml_parser_free($parser);
 		$indexlistLayers = $index['LAYER'];
 		#print_r($indexlistLayers);
-		$layers = $this->searchLayers($values,$indexlistLayers[0],false);
+		$layers = $this->searchLayers($values, $indexlistLayers[0], false);
 		return $layers[0];
 	}
+
 	/*
 	* @param {array[array[string]]} $values liste aller werte eines xml dokuments
 	* @param {integer} $i indexzähler
