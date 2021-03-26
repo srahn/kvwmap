@@ -97,7 +97,7 @@
 			$style->outlinecolor->setRGB(0,0,0);
 			# Flur-Layer erzeugen
 			$layer=ms_newLayerObj($map);
-			$layer->set('data', 'the_geom from alkis.pp_flur as foo using unique oid using srid='.EPSGCODE_ALKIS);
+			$layer->set('data', 'the_geom from alkis.pp_flur as foo using unique gid using srid='.EPSGCODE_ALKIS);
 			$layer->set('status',MS_ON);
 			$layer->set('template', ' ');
 			$layer->set('name','querymap'.$k);
@@ -1276,14 +1276,7 @@
 		include_once(PLUGINS.'alkis/model/kataster.php');
 		include_once(CLASSPATH.'FormObject.php');
 		if($GUI->formvars['reset_layers'])$GUI->reset_layers(NULL);
-
-    # Wenn eine oid in formvars übergeben wurde ist es eine Änderung, sonst Neueingabe
-    if ($GUI->formvars['oid']=='') {
-      $GUI->titel='Dokumenteneingabe';
-    }
-    else {
-      $GUI->titel='Dokumenteneingabe (neuer Ausschnitt)';
-    }
+    $GUI->titel='Dokumenteneingabe';
     $GUI->main = PLUGINS."nachweisverwaltung/view/dokumenteneingabeformular.php";
     if($GUI->formvars['bufferwidth'] == '')$GUI->formvars['bufferwidth'] = 2;
     $saved_scale = $GUI->reduce_mapwidth(100);
@@ -1576,13 +1569,7 @@
 		}
     # erzeugen des Formularobjektes für Antragsnr
     $GUI->FormObjAntr_nr=$GUI->getFormObjAntr_nr($GUI->formvars['suchantrnr']);    
-    # Wenn eine oid in formvars übergeben wurde ist es eine Änderung, sonst Neueingabe
-    if ($GUI->formvars['oid']=='') {
-      $GUI->titel='Dokumentenrecherche';
-    }
-    else {
-      $GUI->titel='Dokumentenrecherche ändern';
-    }
+    $GUI->titel='Dokumentenrecherche';
     $GUI->main= PLUGINS."nachweisverwaltung/view/dokumentenabfrageformular.php";
     
 		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
