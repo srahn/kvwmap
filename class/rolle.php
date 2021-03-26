@@ -942,40 +942,45 @@ class rolle {
 	}
 
 	function getRollenLayer($LayerName, $typ = NULL) {
-		$sql ="
-			SELECT 
-				l.*, 
-				4 as tolerance, 
-				-l.id as Layer_ID, 
-				l.query as pfad, 
-				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, 
+		$where = array();
+		$where[] = "l.stelle_id = " . $this->stelle_id;
+		$where[] = "l.user_id = " . $this->user_id;
+		if ($LayerName != '') {
+			if (is_numeric($LayerName)) {
+				$where[] = "l.id = " . $LayerName;
+			}
+			else {
+				$where[] = "l.`Name` LIKE '" . $LayerName . "'";
+			}
+		}
+		if ($typ != NULL) {
+			$where[] = "`Typ` = '" . $typ . "'";
+		}
+		$sql = "
+			SELECT
+				l.*,
+				4 as tolerance,
+				-l.id as Layer_ID,
+				l.query as pfad,
+				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable,
 				gle_view,
 				concat('(', rollenfilter, ')') as Filter
-			FROM rollenlayer AS l";
-    $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
-    if ($LayerName!='') {
-      $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
-      if(is_numeric($LayerName)){
-        $sql.='OR l.id = "'.$LayerName.'")';
-      }
-      else{
-        $sql.=')';
-      }
-    }
-		if($typ != NULL){
-			$sql .= " AND Typ = '".$typ."'";
-		}
-    #echo $sql.'<br>';
-    $this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
-    $this->database->execSQL($sql);
-    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			FROM
+				rollenlayer AS l
+			" . (count($where) > 0 ? "WHERE " . implode(" AND ", $where) : '') . "
+		";
+
+		#echo $sql.'<br>';
+		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
-    while ($rs = $this->database->result->fetch_assoc()) {
-      $layer[]=$rs;
-    }
-    return $layer;
-  }
-	
+		while ($rs = $this->database->result->fetch_assoc()) {
+			$layer[]=$rs;
+		}
+		return $layer;
+	}
+
 	function resetLayers($layer_id){
 		$this->update_layer_status($layer_id, '0');
 	}
