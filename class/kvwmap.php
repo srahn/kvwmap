@@ -16058,11 +16058,7 @@ class db_mapObj{
 									}
 								}
 								# --------- weitere Optionen -----------
-								if (value_of($attributes, 'subform_layer_id') AND $attributes['subform_layer_id'][$i] != NULL) {
-									$attributes['options'][$i] = str_replace(' from ', ',oid from ', strtolower($optionen[0]));		# auch die oid abfragen
-								}
-								# ------------ SQL ---------------------
-								else $attributes['options'][$i] = $optionen[0];
+								$attributes['options'][$i] = $optionen[0];
 								# ------<required by>------
 								$req_by_start = strpos(strtolower($attributes['options'][$i]), "<required by>");
 								if ($req_by_start > 0) {
@@ -16121,7 +16117,6 @@ class db_mapObj{
 											while($rs = pg_fetch_array($ret[1])) {
 												$attributes['enum_value'][$i][$k][] = $rs['value'];
 												$attributes['enum_output'][$i][$k][] = $rs['output'];
-												$attributes['enum_oid'][$i][$k][] = $rs['oid'];
 											}
 										}
 									}
@@ -16134,7 +16129,6 @@ class db_mapObj{
 									while($rs = pg_fetch_array($ret[1])) {
 										$attributes['enum_value'][$i][] = $rs['value'];
 										$attributes['enum_output'][$i][] = $rs['output'];
-										$attributes['enum_oid'][$i][] = value_of($rs, 'oid');
 									}
 								}
 							}
