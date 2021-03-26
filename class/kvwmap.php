@@ -13288,13 +13288,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 							# Before Update trigger
 							if (!empty($layerset[$layer_id][0]['trigger_function'])) {
+								if($layerset[$layer_id][0]['oid'] == 'oid'){
+									$oid_sql = 'oid,';
+								}
 								$sql_old = "
-									SELECT
-										oid, *
+									SELECT " .
+										$oid_sql . " *
 									FROM
-										" . pg_quote($tablename)."
+										" . $layer['schema'] . '.' . pg_quote($layer['maintable']) . "
 									WHERE
-										oid = " . $oid;
+										" . $layerset[$layer_id][0]['oid'] . " = '" . $oid . "'";
 								#echo '<br>sql before update: ' . $sql_old; #pk
 								$ret = $layerdb[$layer_id]->execSQL($sql_old, 4, 1);
 								$old_dataset = ($ret[0] == 0 ? pg_fetch_assoc($ret[1]) : array());
@@ -13771,6 +13774,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								$filter = " AND " . $layerset[$i]['Filter'];
 							}
 							if($this->formvars['CMD'] == 'touchquery'){
+								$geometrie_tabelle = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 								$the_geom = $layerset[$i]['attributes']['table_alias_name'][$geometrie_tabelle].'.'.$the_geom;
 								if(substr_count(strtolower($pfad), ' from ') > 1){			# mehrere froms -> das FROM der Hauptabfrage muss groß geschrieben sein
 									$fromposition = strpos($pfad, ' FROM ');
@@ -13801,13 +13805,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								#if($the_geom == 'query.the_geom'){
 									# group by wieder einbauen
 									if(value_of($layerset[$i]['attributes'], 'groupby') != ''){
-										$pfad .= $layerset[$i]['attributes']['groupby'];
-										$j = 0;
-										foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-											if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != ''){		# hat Haupttabelle oids?
-												$pfad .= ','.pg_quote($tablename.'_oid').' ';
-											}
-											$j++;
+										$pfad .= $layerset[$i]['attributes']['groupby'];										
+										if ($layerset[$i]['oid'] != '') {
+											$pfad .= ','.pg_quote($layerset[$i]['maintable'].'_oid').' ';
 										}
 									}
 									$sql = "SELECT * FROM (SELECT " . $pfad.") as query WHERE 1=1 " . $filter . $sql_where;
@@ -13834,14 +13834,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								elseif(value_of($layerset[$i]['attributes'], 'orderby') != ''){														# Fall 2: der Layer hat im Pfad ein ORDER BY
 									$sql_order = $layerset[$i]['attributes']['orderby'];
 								}
-								if($layerset[$i]['template'] == ''){																				# standardmäßig wird nach der oid sortiert
-									$j = 0;
-									foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-										if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['oid'] != ''){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
-											if($sql_order == '')$sql_order = ' ORDER BY ' . pg_quote(replace_semicolon($layerset[$i]['maintable']).'_oid').' ';
-											else $sql_order .= ', '.pg_quote($layerset[$i]['maintable'].'_oid').' ';
+								if($layerset[$i]['template'] == ''){
+									if ($layerset[$i]['oid'] != '') {	# hat der Layer eine oid, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
+										if ($sql_order == '') {
+											$sql_order = ' ORDER BY ' . pg_quote(replace_semicolon($layerset[$i]['maintable']).'_oid').' ';
 										}
-										$j++;
+										else {
+											$sql_order .= ', '.pg_quote($layerset[$i]['maintable'].'_oid').' ';
+										}
 									}
 								}
 							}
@@ -13896,8 +13896,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							if($layerset[$i]['count'] != 0){
 							
 								# wenn nur ein Treffer und "anderes Objekt bearbeiten" eingestellt, in die Geometriebearbeitung gehen
+								
 								if($num_rows == 1 AND value_of($this->formvars, 'edit_other_object') == 1 AND $layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['the_geom']]){
-									$this->formvars['oid'] = $layerset[$i]['shape'][0][$geometrie_tabelle.'_oid'];
+									$this->formvars['oid'] = $layerset[$i]['shape'][0][$layerset[$i]['maintable'].'_oid'];
 									$this->formvars['selected_layer_id'] = $layerset[$i]['Layer_ID'];
 									$geomtype = $layerset[$i]['attributes']['geomtype'][$layerset[$i]['attributes']['the_geom']];
 									if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY')$geomtype = 'Polygon';
@@ -14449,7 +14450,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				else{		################ mouseover auf Datensatz in Sachdatenanzeige ################
 					$showdata = 'false';
-					$sql_where = " AND ".pg_quote($layerset[$i]['maintable'].'_oid')." = '" . $this->formvars['oid'] . "'";
+					$sql_where = " AND " . pg_quote($layerset[$i]['maintable'] . '_oid')." = '" . $this->formvars['oid'] . "'";
 				}
 
 				# SVG-Geometrie abfragen für highlighting
@@ -15631,7 +15632,7 @@ class db_mapObj{
 			$pfad = substr(trim($path), 7);
 		}
 		if ($layerset['maintable'] != '' AND $layerset['oid'] != '') {
-			$pfad = pg_quote($layerset['attributes']['table_alias_name'][$layerset['maintable']]).'.'.$layerset['oid'].' AS ' . pg_quote($layerset['maintable'] . '_oid').', ' . $pfad;
+			$pfad = pg_quote($layerset['attributes']['table_alias_name'][$layerset['maintable']]) . '.' . $layerset['oid'] . ' AS ' . pg_quote($layerset['maintable'] . '_oid').', ' . $pfad;
 		}
 
 		$the_geom = $layerset['attributes']['the_geom'];
@@ -15640,12 +15641,8 @@ class db_mapObj{
 		# group by wieder einbauen
 		if($layerset['attributes']['groupby'] != ''){
 			$pfad .= $layerset['attributes']['groupby'];
-			$j = 0;
-			foreach($layerset['attributes']['all_table_names'] as $tablename){
-				if($tablename == $layerset['maintable'] AND $layerset['oid'] != ''){		# hat Haupttabelle oids?
-					$pfad .= ','.pg_quote($tablename.'_oid').' ';
-				}
-				$j++;
+			if ($layerset['oid'] != '') {
+				$pfad .= ','.pg_quote($layerset['maintable'].'_oid').' ';
 			}
 		}
 		return $pfad;
