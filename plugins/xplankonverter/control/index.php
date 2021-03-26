@@ -482,7 +482,7 @@ function go_switch_xplankonverter($go){
 				$response = array(
 					'success' => $success,
 					'type' => ($success ? 'notice' : 'error'),
-					'msg' => ($success ? 'Shape-Datei erfolgreich gelöscht. ' : $GUI->messages[0]['msg'])
+					'msg' => ($success ? 'Shape-Datei erfolgreich gelöscht. ' : GUI::$messages[0]['msg'])
 				);
 			}
 			header('Content-Type: application/json');
@@ -824,7 +824,7 @@ function go_switch_xplankonverter($go){
 			$response = array(
 				'success' => $success,
 				'type' => ($success ? 'notice' : 'error'),
-				'msg' => ($success ? 'Plan und Konvertierung erfolgreich gelöscht. ' : $GUI->messages[0]['msg'])
+				'msg' => ($success ? 'Plan und Konvertierung erfolgreich gelöscht. ' : GUI::$messages[0]['msg'])
 			);
 			header('Content-Type: application/json');
 			echo json_encode($response);

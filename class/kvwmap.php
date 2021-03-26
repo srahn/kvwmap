@@ -52,7 +52,6 @@ class GUI {
 	var $FormObject;
 	var $StellenForm;
 	var $Fehlermeldung;
-	var $messages = array();
 	var $Hinweis;
 	var $Stelle;
 	var $ALB;
@@ -95,6 +94,7 @@ class GUI {
 	var $queryrect;
 	var $notices;
 	var $layers_replace_scale = array();
+	static $messages = array();
 
 	# Konstruktor
 	function __construct($main, $style, $mime_type) {
@@ -2884,30 +2884,34 @@ echo '			</table>
 	}
 
 	function add_message($type, $msg) {
+		GUI::add_message_($type, $msg);
+	}
+
+	public static function add_message_($type, $msg) {
 		if (is_array($msg) AND array_key_exists('success', $msg) AND is_array($msg)) {
 			$type = 'notice';
 			$msg = $msg['msg'];
 		}
 		if ($type == 'array' or is_array($msg)) {
 			foreach($msg AS $m) {
-				$this->add_message($m['type'], $m['msg']);
+				GUI::add_message($m['type'], $m['msg']);
 			}
 		}
 		else {
-			$this->messages[] = array(
+			GUI::$messages[] = array(
 				'type' => $type,
 				'msg' => $msg
 			);
 		}
 	}
 
-	function output_messages($option = 'with_script_tags') {
-		$html = "message(" . json_encode($this->messages) . ");";
+	function output_messages($option = 'with_script_tags') {		
+		$html = "message(" . json_encode(GUI::$messages) . ");";
 		if ($option == 'with_script_tags') {
 			$html = "<script type=\"text/javascript\">" . $html . "</script>";
 		}
 		echo $html;
-		$this->messages = array();
+		GUI::$messages = array();
 	}
 
 	# Ausgabe der Seite
@@ -2933,7 +2937,7 @@ echo '			</table>
 				if ($this->alert != '') {
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
 				}
-				if (!empty($this->messages)) {
+				if (!empty(GUI::$messages)) {
 					$this->output_messages();
 				}
 			} break;
@@ -2942,7 +2946,7 @@ echo '			</table>
 				if($this->alert != ''){
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
 				}
-				if (!empty($this->messages)) {
+				if (!empty(GUI::$messages)) {
 					$this->output_messages();
 				}
 			} break;
@@ -3091,7 +3095,7 @@ echo '			</table>
 	}
 
 	/*
-	* Erzeugt eine Fehlermeldung in $this->messages und wechselt zum default use case,
+	* Erzeugt eine Fehlermeldung in GUI::$messages und wechselt zum default use case,
 	* wenn der Bearbeiter $editor_user nicht zu einer Admin-Stelle gehört aber
 	* der $selected_user zu einer Admin-Stelle gehört
 	*/
@@ -3106,7 +3110,7 @@ echo '			</table>
 	}
 
 	/*
-	* Erzeugt eine Fehlermeldung in $this->messages und wechselt zum default use case,
+	* Erzeugt eine Fehlermeldung in GUI::$messages und wechselt zum default use case,
 	* wenn der Bearbeiter $editor_user nicht zu einer Admin-Stelle gehört und
 	* wenn die $selected_stelle nicht zu den Stellen zählt, die der $editor_user sehen kann.
 	*/
@@ -3121,7 +3125,7 @@ echo '			</table>
 	}
 
 	/*
-	* Erzeugt eine Fehlermeldung in $this->messages und wechselt zum default use case,
+	* Erzeugt eine Fehlermeldung in GUI::$messages und wechselt zum default use case,
 	* wenn der Bearbeiter $editor_user nicht zu einer Admin-Stelle gehört und
 	* wenn der $selected_user erstens nicht zu den Nutzern zählt, die der $editor_user sehen kann ($editor_users) oder
 	* zweitens wenn der $selected_user noch zu anderen Stellen gehört, die der $bearbeiter_user nicht sehen kann.
@@ -3148,7 +3152,7 @@ echo '			</table>
 	* Liefert true wenn der Nutzer mit $user_id zu einer Stelle gehört, die in $admin_stellen
 	* registriert ist, also wenn der Nutzer Administrator ist.
 	* Liefert ansonsten false und setzt wenn es einen Fehler bei der Abfrage gab,
-	* zusätzlich eine Fehlermeldung in $this->messages
+	* zusätzlich eine Fehlermeldung in GUI::$messages
 	*/
 	function is_admin_user($user_id) {
 		global $admin_stellen;
@@ -9756,8 +9760,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					else{
 						echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
 					}
-					if(!empty($this->messages)){
-						echo 'message('.json_encode($this->messages).');';
+					if(!empty(GUI::$messages)){
+						echo 'message('.json_encode(GUI::$messages).');';
 					}
         } break;
       }
@@ -11546,7 +11550,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						function($message) {
 							if ($message['type'] == 'error') return $message;
 						},
-						$this->messages
+						GUI::$messages
 					)
 				) == 0
 			) $this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
@@ -13670,8 +13674,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 			else{				# ansonsten wird das embedded-Formular entfernt und das Listen-DIV neu geladen (getrennt durch █)
 				echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
-				if(!empty($this->messages)){
-					echo 'message('.json_encode($this->messages).');';
+				if(!empty(GUI::$messages)){
+					echo 'message('.json_encode(GUI::$messages).');';
 				}
 			}
 		}
