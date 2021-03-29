@@ -144,7 +144,6 @@ class GUI {
 	var $FormObject;
 	var $StellenForm;
 	var $Fehlermeldung;
-	var $messages = array();
 	var $Hinweis;
 	var $Stelle;
 	var $ALB;
@@ -178,6 +177,7 @@ class GUI {
 	var $editable;
 	var $groupset;
 	var $layers_replace_scale = array();
+	static $messages = array();
 
   function __construct($main, $style, $mime_type) {
     # Debugdatei setzen
@@ -1817,17 +1817,24 @@ class GUI {
     }
 	}
 
-  function getLagebezeichnung($epsgcode) {
-    switch (LAGEBEZEICHNUNGSART) {
-      case 'Flurbezeichnung' : {
-        $Lagebezeichnung = $this->getFlurbezeichnung($epsgcode);
-			} break;
-			default : {
-			  $Lagebezeichnung = '';
+	function getLagebezeichnung($epsgcode) {
+		global $GUI;
+		if (defined('LAGEBEZEICHNUNGSART')) {
+			switch (LAGEBEZEICHNUNGSART) {
+				case 'Flurbezeichnung' : {
+					include_once(PLUGINS.'alkis/model/kvwmap.php');
+					$Lagebezeichnung = $GUI->getFlurbezeichnung($epsgcode);
+				} break;
+				default : {
+					$Lagebezeichnung = '';
+				}
 			}
-	  }
-    return $Lagebezeichnung;
-  }
+		}
+		else {
+			$Lagebezeichnung = '';
+		}
+		return $Lagebezeichnung;
+	}
 
   function getFlurbezeichnung($epsgcode) {
     $Flurbezeichnung = '';
@@ -1892,29 +1899,34 @@ class GUI {
 	}
 
 	function add_message($type, $msg) {
+		GUI::add_message_($type, $msg);
+	}
+
+	public static function add_message_($type, $msg) {
 		if (is_array($msg) AND array_key_exists('success', $msg) AND is_array($msg)) {
 			$type = 'notice';
 			$msg = $msg['msg'];
 		}
 		if ($type == 'array' or is_array($msg)) {
 			foreach($msg AS $m) {
-				$this->add_message($m['type'], $m['msg']);
+				GUI::add_message($m['type'], $m['msg']);
 			}
 		}
 		else {
-			$this->messages[] = array(
+			GUI::$messages[] = array(
 				'type' => $type,
 				'msg' => $msg
 			);
 		}
 	}
 
-	function output_messages($option = 'with_script_tags') {
-		$html = "message(" . json_encode($this->messages) . ");";
+	function output_messages($option = 'with_script_tags') {		
+		$html = "message(" . json_encode(GUI::$messages) . ");";
 		if ($option == 'with_script_tags') {
 			$html = "<script type=\"text/javascript\">" . $html . "</script>";
 		}
 		echo $html;
+		GUI::$messages = array();
 	}
 
   function output() {
@@ -1933,7 +1945,7 @@ class GUI {
 				if ($this->alert != '') {
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
 				}
-				if (!empty($this->messages)) {
+				if (!empty(GUI::$messages)) {
 					$this->output_messages();
 				}
       } break;
@@ -1943,7 +1955,7 @@ class GUI {
 				if($this->alert != ''){
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
 				}
-				if (!empty($this->messages)) {
+				if (!empty(GUI::$messages)) {
 					$this->output_messages();
 				}
 			} break;

@@ -308,7 +308,7 @@
 					$datapart .= ' rows="3" name="'.$fieldname.'">' . htmlspecialchars($value) . '</textarea>';
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
 						if(strtolower(substr($attributes['options'][$j], 0, 6)) == 'select'){
-							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.')"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.'"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 						else{
 							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode($attributes['name'], "','").'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
@@ -324,7 +324,7 @@
 					}
 				}break;
 
-				case 'Auswahlfeld' : case 'Auswahlfeld_not_saveable' : {
+				case 'Auswahlfeld' : {
 					if(is_array($attributes['dependent_options'][$j])){
 						$enum_value = $attributes['enum_value'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 						$enum_output = $attributes['enum_output'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
@@ -709,6 +709,7 @@
 							switch ($explosion[2]) { 
 								case 'no_new_window' : {
 									$link_target = '_self';
+									$mimetype = $gui->mime_type;
 								} break;
 								case 'root' : {
 									$link_target = 'root';
@@ -722,7 +723,6 @@
 							}
 							else {
 								# link_parts: link_type:link_url
-								# mailto:$kunde_email?subject=Rechnung%20$emailbetreff%20$zeitraum&body=$anrede%0A%0Ahiermit%20sende%20ich%20Ihnen%20die%20Rechnung%20$rechnungsnummer%20zu%20$rechnungsgegenstand%20im%20Zeitraum%20$zeitraum.%0A%0AMit%20freundlichen%20Grüßen%0APeter%20Korduan;E-Mail;no_new_window
 								$link_type = explode(':', $href)[0];
 								$link_url = explode(':', $href)[1];
 								switch ($link_type) {
@@ -739,7 +739,7 @@
 									} break;
 									case 'javascript' : {
 										$href_parts = array($link_type, $link_url);
-									}
+									} break;
 									default : {
 										if (strpos($href, 'mime_type=') === false) {
 											$anchor_parts = explode('#', $href);
@@ -760,6 +760,9 @@
 								' . $link_attribute . '
 								target="' . $link_target . '"
 							>' . $alias . '</a><br>';
+							if ($GUI->user->id == 1) {
+								echo '<br><textarea>' . $link_attribute . '</textarea>';
+							}
 						}
 					}
 				} break;

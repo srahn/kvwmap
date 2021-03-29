@@ -180,9 +180,11 @@
 		#$datastring.=" " . $alias.".flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
 		$datastring.=" flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
     $legendentext="Flurstück";
-    if(count($FlurstListe) > 1)$legendentext .= "e";
+    if (@count($FlurstListe) > 1) {
+			$legendentext .= "e";
+		}
     $legendentext .= " (".date('d.m. H:i',time())."):<br>" . $FlurstListe[0];
-    for ($i=1;$i<count($FlurstListe);$i++) {
+    for ($i=1; $i < @count($FlurstListe); $i++) {
       $datastring.=",'" . $FlurstListe[$i]."'";
       $legendentext.=",<br>" . $FlurstListe[$i];
     }
@@ -712,11 +714,11 @@
           else {
             # Es wurde mindestens ein eindeutiges FlurstKennz in FlstID ausgewählt, oder ein oder mehrere über FlstNr gefunden
             # Zoom auf Flurstücke
+						$GUI->zoomToALKFlurst($FlurstKennz,10);
+						$GUI->saveMap('');
             if($GUI->formvars['ALK_Suche'] == 1){
-		          $GUI->zoomToALKFlurst($FlurstKennz,10);
 							if($GUI->formvars['go_next'] != ''){
 								$GUI->formvars['FlurstKennz'] = $FlurstKennz;
-								$GUI->saveMap('');
 								go_switch($GUI->formvars['go_next']);
 								exit();
 							}
@@ -1349,6 +1351,7 @@
 
 	$GUI->nameSuchen = function() use ($GUI){
 		include_once(PLUGINS.'alkis/model/kataster.php');
+		$layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
 		$GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
 		if(!empty($GemeindenStelle['ganze_gemeinde'])){
 			$Gemarkung=new gemarkung('',$GUI->pgdatabase);
@@ -1380,7 +1383,7 @@
             $ret[1] = $flurstueck->getFlurstByGrundbuecher(array($GUI->namen[$i]['bezirk'].'-'.$GUI->namen[$i]['blatt']));
             $GUI->namen[$i]['flurstuecke'] = $ret[1];
             for($j = 0; $j < count($GUI->namen[$i]['flurstuecke']); $j++){
-              $ret = $GUI->pgdatabase->getALBData($GUI->namen[$i]['flurstuecke'][$j]);
+              $ret = $GUI->pgdatabase->getALBData($GUI->namen[$i]['flurstuecke'][$j], false, $layerset[0]['oid']);
               $GUI->namen[$i]['alb_data'][$j] = $ret[1];
             }
           }

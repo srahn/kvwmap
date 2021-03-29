@@ -189,6 +189,7 @@ class GUI {
   var $map_scaledenom;
   var $map_factor;
   var $formatter;
+	static $messages = array();
 
   function __construct($main, $style, $mime_type) {
     # Debugdatei setzen
@@ -211,17 +212,21 @@ class GUI {
   }
 
 	function add_message($type, $msg) {
+		GUI::add_message_($type, $msg);
+	}
+
+	public static function add_message_($type, $msg) {
 		if (is_array($msg) AND array_key_exists('success', $msg) AND is_array($msg)) {
 			$type = 'notice';
 			$msg = $msg['msg'];
 		}
 		if ($type == 'array' or is_array($msg)) {
 			foreach($msg AS $m) {
-				$this->add_message($m['type'], $m['msg']);
+				GUI::add_message($m['type'], $m['msg']);
 			}
 		}
 		else {
-			$this->messages[] = array(
+			GUI::$messages[] = array(
 				'type' => $type,
 				'msg' => $msg
 			);
@@ -327,9 +332,16 @@ class GUI {
 					$layerset[$i]['Name'] = $layerset[$i]['alias'];
 				}
 				$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);				
-				$pfad = $this->mapDB->getQueryWithOid($layerset[$i], $layerdb, $this->Stelle);
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
+
+				if ($layerset[$i]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
+					$layerset[$i]['maintable'] = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
+				}
+				if ($layerset[$i]['oid'] == '' AND count($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+					$layerset[$i]['oid'] = $layerset[$i]['attributes']['pk'][0];
+				}
+				$pfad = $this->mapDB->getQueryWithOid($layerset[$i], $layerdb, $this->Stelle);
 				
 				if($rect->minx != ''){	####### Kartenabfrage
 					$show = false;
@@ -386,7 +398,7 @@ class GUI {
 				}
 				else{		################ mouseover auf Datensatz in Sachdatenanzeige ################
 					$showdata = 'false';
-					$sql_where = " AND ".pg_quote($layerset[$i]['maintable'].'_oid')." = ".quote($this->formvars['oid'], $layerset[$i]['attributes']['type'][$layerset[$i]['attributes']['indizes'][$layerset[$i]['oid']]]);
+					$sql_where = " AND ".pg_quote($layerset[$i]['maintable'].'_oid')." = '" . $this->formvars['oid'] . "'";
 				}
 
 				# SVG-Geometrie abfragen für highlighting
@@ -1281,8 +1293,7 @@ class rolle {
 				l.query as pfad, 
 				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, 
 				gle_view,
-				concat('(', rollenfilter, ')') as Filter,
-				'oid' as oid
+				concat('(', rollenfilter, ')') as Filter
 			FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
     if ($LayerName!='') {
@@ -1700,12 +1711,8 @@ class db_mapObj{
 		else{
 			$pfad = substr(trim($path), 7);
 		}
-		$j = 0;
-		foreach($layerset['attributes']['all_table_names'] as $tablename){
-			if ($tablename == $layerset['maintable'] AND $layerset['oid'] != '') {
-				$pfad = pg_quote($layerset['attributes']['table_alias_name'][$tablename]).'.'.$layerset['oid'].' AS ' . pg_quote($tablename . '_oid').', ' . $pfad;
-			}					
-			$j++;
+		if ($layerset['maintable'] != '' AND $layerset['oid'] != '') {
+			$pfad = pg_quote($layerset['attributes']['table_alias_name'][$layerset['maintable']]).'.'.$layerset['oid'].' AS ' . pg_quote($layerset['maintable'] . '_oid').', ' . $pfad;
 		}
 
 		$the_geom = $layerset['attributes']['the_geom'];
@@ -1825,6 +1832,9 @@ class db_mapObj{
 			$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
 			$attributes['constraints'][$i]= $rs['constraints'];
 			$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
+			if ($rs['constraints'] == 'PRIMARY KEY') {
+				$attributes['pk'][] = $rs['real_name'];
+			}			
 			$attributes['nullable'][$i]= $rs['nullable'];
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];

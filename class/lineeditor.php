@@ -103,7 +103,7 @@ class lineeditor {
 			SET
 				" . $columnname . " = " . $geom . "
 			WHERE
-				".$this->oid_attribute." = " . quote($oid) . "
+				".$this->oid_attribute." = '" . $oid . "'
 		";
 		$ret = $this->database->execSQL($sql, 4, 1, true);
 		if (!$ret[0]) {
@@ -120,7 +120,7 @@ class lineeditor {
 	}
 
 	function getlines($oid, $tablename, $columnname) {
-		$sql = "SELECT st_assvg(st_transform(" . $columnname.", " . $this->clientepsg."), 0, 15) AS svggeom, st_astext(st_transform(" . $columnname.", " . $this->clientepsg.")) AS wktgeom, st_numGeometries(".$columnname.") as numgeometries FROM " . $tablename." WHERE ".$this->oid_attribute." = " . quote($oid);
+		$sql = "SELECT st_assvg(st_transform(" . $columnname.", " . $this->clientepsg."), 0, 15) AS svggeom, st_astext(st_transform(" . $columnname.", " . $this->clientepsg.")) AS wktgeom, st_numGeometries(".$columnname.") as numgeometries FROM " . $tablename." WHERE ".$this->oid_attribute." = '" . $oid . "'";
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$lines = pg_fetch_array($ret[1]);
 		return $lines;

@@ -381,22 +381,24 @@ class rok {
   	$sql.= "INSERT INTO b_plan_stammdaten (gkz, art, pl_nr, gemeinde_alt, geltungsbereich, bezeichnung, aktuell, lfd_rok_nr, aktenzeichen, kap_gemziel, kap_nachstell, datumeing, datumzust, datumabl, datumgenehm, datumbeka, datumaufh, erteilteaufl, ert_hinweis, ert_bemerkungen) ";
   	$sql.= "SELECT gkz, art, pl_nr, gemeinde_alt, geltungsbereich, bezeichnung, aktuell, lfd_rok_nr, aktenzeichen, kap_gemziel, kap_nachstell, datumeing, datumzust, datumabl, datumgenehm, datumbeka, datumaufh, erteilteaufl, ert_hinweis, ert_bemerkungen FROM b_plan_stammdaten ";
   	$sql.= "WHERE plan_id = ".$plan_id;
+		$sql.= " RETURNING plan_id";
   	$ret = $this->database->execSQL($sql,4, 1);
-  	$new_oid = pg_last_oid($ret[1]);
-  	$sql = "SELECT plan_id FROM b_plan_stammdaten WHERE oid = ".$new_oid;
-  	$ret = $this->database->execSQL($sql, 4, 0);
-		$rs = pg_fetch_array($ret[1]);
-		$sql = "INSERT INTO b_plan_gebiete SELECT ".$rs['plan_id'].", gebietstyp, flaeche, kap_gemziel, kap_nachstell, konkretisierung FROM b_plan_gebiete WHERE plan_id = ".$plan_id.";";
-		$sql.= "INSERT INTO b_plan_sondergebiete SELECT ".$rs['plan_id'].", gebietstyp, flaeche, kap1_gemziel, kap1_nachstell, kap2_gemziel, kap2_nachstell, konkretisierung FROM b_plan_sondergebiete WHERE plan_id = ".$plan_id.";";
-		$sql.= "COMMIT;"; 
-		$ret = $this->database->execSQL($sql, 4, 0);
-  	if ($ret[0]) {
-     showAlert('Kopieren fehlgeschlagen');
-    }
-    else{
-    	showAlert('Kopieren erfolgreich');
-    }
-    return $new_oid;
+		$ret = $layerdb->execSQL($sql, 4, 1, false);
+		if ($ret['success']) {
+			$result = pg_fetch_row($ret['query']);
+			$new_plan_id = $result[0];
+			$sql = "INSERT INTO b_plan_gebiete SELECT " . $new_plan_id . ", gebietstyp, flaeche, kap_gemziel, kap_nachstell, konkretisierung FROM b_plan_gebiete WHERE plan_id = ".$plan_id.";";
+			$sql.= "INSERT INTO b_plan_sondergebiete SELECT " . $new_plan_id . ", gebietstyp, flaeche, kap1_gemziel, kap1_nachstell, kap2_gemziel, kap2_nachstell, konkretisierung FROM b_plan_sondergebiete WHERE plan_id = ".$plan_id.";";
+			$sql.= "COMMIT;"; 
+			$ret = $this->database->execSQL($sql, 4, 0);
+			if ($ret[0]) {
+			 showAlert('Kopieren fehlgeschlagen');
+			}
+			else{
+				showAlert('Kopieren erfolgreich');
+			}
+			return $new_plan_id;
+		}
   }
 	
 	function copy_fplan($plan_id){
@@ -404,22 +406,23 @@ class rok {
   	$sql.= "INSERT INTO f_plan_stammdaten (gkz, art, pl_nr, gemeinde_alt, bezeichnung, aktuell, lfd_rok_nr, aktenzeichen, datumeing, datumzust, datumabl, datumgenehm, datumbeka, datumaufh, erteilteaufl, ert_hinweis, ert_bemerkungen) ";
   	$sql.= "SELECT gkz, art, pl_nr, gemeinde_alt, bezeichnung, aktuell, lfd_rok_nr, aktenzeichen, datumeing, datumzust, datumabl, datumgenehm, datumbeka, datumaufh, erteilteaufl, ert_hinweis, ert_bemerkungen FROM f_plan_stammdaten ";
   	$sql.= "WHERE plan_id = ".$plan_id;
+		$sql.= " RETURNING plan_id";
   	$ret = $this->database->execSQL($sql,4, 1);
-  	$new_oid = pg_last_oid($ret[1]);
-  	$sql = "SELECT plan_id FROM f_plan_stammdaten WHERE oid = ".$new_oid;
-  	$ret = $this->database->execSQL($sql, 4, 0);
-		$rs = pg_fetch_array($ret[1]);
-		$sql = "INSERT INTO f_plan_gebiete SELECT ".$rs['plan_id'].", gebietstyp, flaeche, kap_gemziel, kap_nachstell FROM f_plan_gebiete WHERE plan_id = ".$plan_id.";";
-		$sql.= "INSERT INTO f_plan_sondergebiete SELECT ".$rs['plan_id'].", gebietstyp, flaeche, kap_gemziel, kap_nachstell FROM f_plan_sondergebiete WHERE plan_id = ".$plan_id.";";
-		$sql.= "COMMIT;"; 
-		$ret = $this->database->execSQL($sql, 4, 0);
-  	if ($ret[0]) {
-     showAlert('Kopieren fehlgeschlagen');
-    }
-    else{
-    	showAlert('Kopieren erfolgreich');
-    }
-    return $new_oid;
+  	if ($ret['success']) {
+			$result = pg_fetch_row($ret['query']);
+			$new_plan_id = $result[0];
+			$sql = "INSERT INTO f_plan_gebiete SELECT " . $new_plan_id . ", gebietstyp, flaeche, kap_gemziel, kap_nachstell FROM f_plan_gebiete WHERE plan_id = ".$plan_id.";";
+			$sql.= "INSERT INTO f_plan_sondergebiete SELECT " . $new_plan_id . ", gebietstyp, flaeche, kap_gemziel, kap_nachstell FROM f_plan_sondergebiete WHERE plan_id = ".$plan_id.";";
+			$sql.= "COMMIT;"; 
+			$ret = $this->database->execSQL($sql, 4, 0);
+			if ($ret[0]) {
+			 showAlert('Kopieren fehlgeschlagen');
+			}
+			else{
+				showAlert('Kopieren erfolgreich');
+			}
+			return $new_oid;
+		}
   }
     
   function getExtentFromRokNrBplan($roknr, $art, $border, $epsg) {
