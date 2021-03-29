@@ -67,6 +67,7 @@
 						<input type="hidden" name="stopnavigation" value="0">
 						<input type="hidden" name="gle_changed" value="">
 						<input type="hidden" name="mime_type" value="">
+						<input type="hidden" name="window_type" value="">
 					</form>
 				</td>
 			</tr><?php
