@@ -8,7 +8,7 @@
 			root = window.opener;
 			if(typeof(root.stopwaiting) == "function"){
 				root.stopwaiting();	// wenn man aus der Karte abgefragt hatte, Warteanimation beenden		
-		<? if($this->formvars['mime_type'] == 'overlay_html' AND $this->zoomed){ ?>		// wenn nicht aus normaler Suchmaske heraus gesucht wurde und (durch die Funktion generischeSuche_Suchen) auf die Treffer gezoomt wurde, Karte neu laden
+		<? if($this->formvars['window_type'] == 'overlay' AND $this->zoomed){ ?>		// wenn nicht aus normaler Suchmaske heraus gesucht wurde und (durch die Funktion generischeSuche_Suchen) auf die Treffer gezoomt wurde, Karte neu laden
 				root.startwaiting();
 				if(root.document.getElementById('map')){
 					root.neuLaden();
@@ -58,7 +58,7 @@
 					</tr>
 				</table>
 			</div>
-			<input type="hidden" name="mime_type" value="">
+			<input type="hidden" name="window_type" value="">
 		</form>
 	</body>
 </html>

@@ -2926,30 +2926,22 @@ echo '			</table>
 				include (LAYOUTPATH.'snippets/printversion.php');
 			} break;
 			case 'html' : {
-				if ($this->only_main) {
-					include_once(SNIPPETS . $this->main);
+				if ($this->formvars['window_type'] == 'overlay') {
+					$this->overlaymain = $this->main;
+					include (LAYOUTPATH.'snippets/overlay.php');
 				}
 				else {
 					$guifile = $this->get_guifile();
 					$this->debug->write("<br>Include <b>" . $guifile . "</b> in kvwmap.php function output()",4);
-					include ($guifile);
+					include($guifile);
 				}
-				if ($this->alert != '') {
-					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
-				}
-				if (!empty(GUI::$messages)) {
-					$this->output_messages();
-				}
-			} break;
-			case 'overlay_html' : {
-				include (LAYOUTPATH.'snippets/overlay.php');
 				if($this->alert != ''){
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
 				}
 				if (!empty(GUI::$messages)) {
 					$this->output_messages();
 				}
-			} break;
+      } break;
 			case 'map_ajax' : {
 				$this->debug->write("Include <b>".LAYOUTPATH."snippets/map_ajax.php</b> in kvwmap.php function output()",4);
 				include (LAYOUTPATH.'snippets/map_ajax.php');
@@ -8404,9 +8396,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function GenerischeSuche_Suchen() {
 		$this->formvars['search'] = true;
-		if ($this->formvars['mime_type']) {
-			$this->mime_type = $this->formvars['mime_type'];
-		}
 		if($this->last_query != '') {
 			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
 		}
@@ -9900,7 +9889,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$this->new_entry = true;
 
 				$this->geomtype = $this->qlayerset[0]['attributes']['geomtype'][$this->qlayerset[0]['attributes']['the_geom']];
-				if ($this->geomtype != '' AND (value_of($this->formvars, 'mime_type') != 'overlay_html' OR $this->formvars['embedded'] == '')) {
+				if ($this->geomtype != '' AND ($this->formvars['window_type'] != 'overlay' OR $this->formvars['embedded'] == '')) {
 					$saved_scale = $this->reduce_mapwidth(40);
 					$oldscale=round($this->map_scaledenom);
 					if ($oldscale != value_of($this->formvars, 'nScale') OR value_of($this->formvars, 'neuladen') OR $this->formvars['CMD'] != '') {
