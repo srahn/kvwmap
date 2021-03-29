@@ -8698,7 +8698,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$this->add_message('error', $ret['msg']);
 					#err_msg('Datei: kvwmap.php<br>Funktion: GenerischeSuche_Suchen<br>', __LINE__, $ret['msg']);
 				}
-
 				# Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
 				# Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
 				$attributes = $mapDB->add_attribute_values($attributes, $layerdb, value_of($layerset[0], 'shape'), true, $this->Stelle->id);
@@ -8806,7 +8805,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 		$layerset[0]['attributes'] = $attributes;
 		$this->qlayerset[0]=$layerset[0];
-
 		$i = 0;
 		$this->search = true;
 		if (value_of($this->formvars, 'no_output')) {

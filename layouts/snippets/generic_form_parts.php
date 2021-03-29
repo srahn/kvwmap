@@ -741,7 +741,13 @@
 										$href_parts = array($link_type, $link_url);
 									}
 									default : {
-										$href_parts = array($href . '&mime_type=' . $gui->mime_type);
+										if (strpos($href, 'mime_type=') === false) {
+											$anchor_parts = explode('#', $href);
+											$href_parts = array($anchor_parts[0] . '&mime_type=' . $gui->mime_type . ($anchor_parts[1] != '' ? '#' . $anchor_parts[1] : ''));
+										}
+										else {
+											$href_parts = array($href);
+										}
 									}
 								}
 								$link_attribute = 'href="' . implode(':', $href_parts) . '"';
