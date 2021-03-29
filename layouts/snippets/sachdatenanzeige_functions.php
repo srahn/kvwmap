@@ -18,6 +18,12 @@ include('funktionen/input_check_functions.php');
 	show_foreign_vertices = function(){
 		document.getElementById("svghelp").SVGshow_foreign_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
+	
+	adjustHref = function(link){
+		if (link.target != 'root' && enclosingForm.name == 'GUI2') {
+			link.href = link.href.replace('?', '?window_type=overlay&');
+		}
+	}
 
 	completeDate = function(datefield){
 		var d = new Date();
@@ -395,7 +401,7 @@ include('funktionen/input_check_functions.php');
 		root.open_subform_requests++;
 		list_div = document.getElementById(list_div_id);
 		var params = list_div.dataset.reload_params;
-		if(enclosingForm.name == 'GUI2')params += '&mime_type=overlay_html';
+		if(enclosingForm.name == 'GUI2')params += '&window_type=overlay';
 		if(list_edit)params += '&list_edit='+list_edit;
 		if(weiter_erfassen)params += '&weiter_erfassen='+weiter_erfassen;
 		if(weiter_erfassen_params)params += '&weiter_erfassen_params='+weiter_erfassen_params;
