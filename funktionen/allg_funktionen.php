@@ -1553,9 +1553,11 @@ function url_get_contents($url, $username = NULL, $password = NULL, $useragent =
 			$ctx['ssl']['SNI_enabled'] = true;
 		}
 		$context = stream_context_create($ctx);
-		$response = file_get_contents($url, false, $context);
+		$response =  @file_get_contents($url, false, $context);
 		if ($response === false) {
-			throw new Exception("Fehler beim Abfragen der URL mit file_get_contents(" . $url . ")");
+			$error = 'Fehler beim Abfragen der URL mit file_get_contents(' . $url . ')';
+			GUI::add_message_('error', $error);
+			throw new Exception($error);
 		}
 	}
 	catch (Exception $e) {

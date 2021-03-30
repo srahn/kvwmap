@@ -52,7 +52,6 @@ class GUI {
 	var $FormObject;
 	var $StellenForm;
 	var $Fehlermeldung;
-	var $messages = array();
 	var $Hinweis;
 	var $Stelle;
 	var $ALB;
@@ -95,6 +94,7 @@ class GUI {
 	var $queryrect;
 	var $notices;
 	var $layers_replace_scale = array();
+	static $messages = array();
 
 	# Konstruktor
 	function __construct($main, $style, $mime_type) {
@@ -2884,30 +2884,34 @@ echo '			</table>
 	}
 
 	function add_message($type, $msg) {
+		GUI::add_message_($type, $msg);
+	}
+
+	public static function add_message_($type, $msg) {
 		if (is_array($msg) AND array_key_exists('success', $msg) AND is_array($msg)) {
 			$type = 'notice';
 			$msg = $msg['msg'];
 		}
 		if ($type == 'array' or is_array($msg)) {
 			foreach($msg AS $m) {
-				$this->add_message($m['type'], $m['msg']);
+				GUI::add_message($m['type'], $m['msg']);
 			}
 		}
 		else {
-			$this->messages[] = array(
+			GUI::$messages[] = array(
 				'type' => $type,
 				'msg' => $msg
 			);
 		}
 	}
 
-	function output_messages($option = 'with_script_tags') {
-		$html = "message(" . json_encode($this->messages) . ");";
+	function output_messages($option = 'with_script_tags') {		
+		$html = "message(" . json_encode(GUI::$messages) . ");";
 		if ($option == 'with_script_tags') {
 			$html = "<script type=\"text/javascript\">" . $html . "</script>";
 		}
 		echo $html;
-		$this->messages = array();
+		GUI::$messages = array();
 	}
 
 	# Ausgabe der Seite
@@ -2922,30 +2926,22 @@ echo '			</table>
 				include (LAYOUTPATH.'snippets/printversion.php');
 			} break;
 			case 'html' : {
-				if ($this->only_main) {
-					include_once(SNIPPETS . $this->main);
+				if ($this->formvars['window_type'] == 'overlay') {
+					$this->overlaymain = $this->main;
+					include (LAYOUTPATH.'snippets/overlay.php');
 				}
 				else {
 					$guifile = $this->get_guifile();
 					$this->debug->write("<br>Include <b>" . $guifile . "</b> in kvwmap.php function output()",4);
-					include ($guifile);
+					include($guifile);
 				}
-				if ($this->alert != '') {
-					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
-				}
-				if (!empty($this->messages)) {
-					$this->output_messages();
-				}
-			} break;
-			case 'overlay_html' : {
-				include (LAYOUTPATH.'snippets/overlay.php');
 				if($this->alert != ''){
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
 				}
-				if (!empty($this->messages)) {
+				if (!empty(GUI::$messages)) {
 					$this->output_messages();
 				}
-			} break;
+      } break;
 			case 'map_ajax' : {
 				$this->debug->write("Include <b>".LAYOUTPATH."snippets/map_ajax.php</b> in kvwmap.php function output()",4);
 				include (LAYOUTPATH.'snippets/map_ajax.php');
@@ -3091,7 +3087,7 @@ echo '			</table>
 	}
 
 	/*
-	* Erzeugt eine Fehlermeldung in $this->messages und wechselt zum default use case,
+	* Erzeugt eine Fehlermeldung in GUI::$messages und wechselt zum default use case,
 	* wenn der Bearbeiter $editor_user nicht zu einer Admin-Stelle gehört aber
 	* der $selected_user zu einer Admin-Stelle gehört
 	*/
@@ -3106,7 +3102,7 @@ echo '			</table>
 	}
 
 	/*
-	* Erzeugt eine Fehlermeldung in $this->messages und wechselt zum default use case,
+	* Erzeugt eine Fehlermeldung in GUI::$messages und wechselt zum default use case,
 	* wenn der Bearbeiter $editor_user nicht zu einer Admin-Stelle gehört und
 	* wenn die $selected_stelle nicht zu den Stellen zählt, die der $editor_user sehen kann.
 	*/
@@ -3121,7 +3117,7 @@ echo '			</table>
 	}
 
 	/*
-	* Erzeugt eine Fehlermeldung in $this->messages und wechselt zum default use case,
+	* Erzeugt eine Fehlermeldung in GUI::$messages und wechselt zum default use case,
 	* wenn der Bearbeiter $editor_user nicht zu einer Admin-Stelle gehört und
 	* wenn der $selected_user erstens nicht zu den Nutzern zählt, die der $editor_user sehen kann ($editor_users) oder
 	* zweitens wenn der $selected_user noch zu anderen Stellen gehört, die der $bearbeiter_user nicht sehen kann.
@@ -3148,7 +3144,7 @@ echo '			</table>
 	* Liefert true wenn der Nutzer mit $user_id zu einer Stelle gehört, die in $admin_stellen
 	* registriert ist, also wenn der Nutzer Administrator ist.
 	* Liefert ansonsten false und setzt wenn es einen Fehler bei der Abfrage gab,
-	* zusätzlich eine Fehlermeldung in $this->messages
+	* zusätzlich eine Fehlermeldung in GUI::$messages
 	*/
 	function is_admin_user($user_id) {
 		global $admin_stellen;
@@ -5355,7 +5351,7 @@ echo '			</table>
 		if ($layerset[0]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
 			$layerset[0]['maintable'] = $attributes['table_name'][$attributes['the_geom']];
 		}
-		if ($layerset[0]['oid'] == '' AND count($attributes['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+		if ($layerset[0]['oid'] == '' AND @count($attributes['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
 			$layerset[0]['oid'] = $attributes['pk'][0];
 		}
     if($this->formvars['oid'] != ''){
@@ -8399,9 +8395,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function GenerischeSuche_Suchen() {
 		$this->formvars['search'] = true;
-		if ($this->formvars['mime_type']) {
-			$this->mime_type = $this->formvars['mime_type'];
-		}
 		if($this->last_query != '') {
 			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
 		}
@@ -8427,7 +8420,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if ($layerset[0]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[0]['maintable'] = $attributes['table_name'][$attributes['the_geom']];
 				}
-				if ($layerset[0]['oid'] == '' AND count($attributes['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+				if ($layerset[0]['oid'] == '' AND @count($attributes['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[0]['oid'] = $attributes['pk'][0];
 				}
 				if($this->formvars['selected_layer_id'] > 0){			# bei Rollenlayern nicht
@@ -8714,7 +8707,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$this->add_message('error', $ret['msg']);
 					#err_msg('Datei: kvwmap.php<br>Funktion: GenerischeSuche_Suchen<br>', __LINE__, $ret['msg']);
 				}
-
 				# Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
 				# Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
 				$attributes = $mapDB->add_attribute_values($attributes, $layerdb, value_of($layerset[0], 'shape'), true, $this->Stelle->id);
@@ -8822,7 +8814,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 		$layerset[0]['attributes'] = $attributes;
 		$this->qlayerset[0]=$layerset[0];
-
 		$i = 0;
 		$this->search = true;
 		if (value_of($this->formvars, 'no_output')) {
@@ -9663,19 +9654,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
 
 					#echo '<p>SQL zum Anlegen des Datensatzes: ' . $sql;
-					$ret = $layerdb->execSQL($sql, 4, 1, false);
-
-					if ($last_notice = pg_last_notice($layerdb->dbConn)) {
-						if (strpos($last_notice, 'CONTEXT: ') !== false) {
-							$last_notice = $msg = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
-						}
-						if ($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{')), true)) {
-							$last_notice = $notice_result['msg'];
-						}
-						$this->add_message('info', $last_notice);
-					}
+					$ret = $layerdb->execSQL($sql, 4, 1, true);
 
 					if ($ret['success']) {
+						if ($ret['msg'] != '') {
+							$this->add_message('info', $ret['msg']);
+						}
 						$result = pg_fetch_row($ret['query']);
 						if (pg_affected_rows($ret['query']) > 0) {
 							# dataset was created
@@ -9714,7 +9698,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					else {
 						# query not successfull set query error message
 						$this->success = false;
-					#	$this->add_message($ret['type'], $ret['msg']);
+						$this->add_message(
+									$ret['type'],
+									sql_err_msg('Kann Datensatz nicht speichern:<br>', $sql, $ret['msg'], 'error_div_' . rand(1, 99999))
+								);
 					}
 				}
 			}
@@ -9757,8 +9744,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					else{
 						echo '██reload_subform_list(\''.$this->formvars['targetobject'].'\', \''.$this->formvars['list_edit'].'\', \''.$this->formvars['weiter_erfassen'].'\', \''.urlencode($formfieldstring).'\');';
 					}
-					if(!empty($this->messages)){
-						echo 'message('.json_encode($this->messages).');';
+					if(!empty(GUI::$messages)){
+						echo 'message('.json_encode(GUI::$messages).');';
 					}
         } break;
       }
@@ -9897,7 +9884,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$this->new_entry = true;
 
 				$this->geomtype = $this->qlayerset[0]['attributes']['geomtype'][$this->qlayerset[0]['attributes']['the_geom']];
-				if ($this->geomtype != '' AND (value_of($this->formvars, 'mime_type') != 'overlay_html' OR $this->formvars['embedded'] == '')) {
+				if ($this->geomtype != '' AND ($this->formvars['window_type'] != 'overlay' OR $this->formvars['embedded'] == '')) {
 					$saved_scale = $this->reduce_mapwidth(40);
 					$oldscale=round($this->map_scaledenom);
 					if ($oldscale != value_of($this->formvars, 'nScale') OR value_of($this->formvars, 'neuladen') OR $this->formvars['CMD'] != '') {
@@ -11555,7 +11542,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						function($message) {
 							if ($message['type'] == 'error') return $message;
 						},
-						$this->messages
+						GUI::$messages
 					)
 				) == 0
 			) $this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
@@ -13452,7 +13439,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					if ($layerset[$layer_id][0]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
 						$layerset[$layer_id][0]['maintable'] = $attributes['table_name'][$attributes['the_geom']];
 					}
-					if ($layerset[$layer_id][0]['oid'] == '' AND count($attributes['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+					if ($layerset[$layer_id][0]['oid'] == '' AND @count($attributes['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
 						$layerset[$layer_id][0]['oid'] = $attributes['pk'][0];
 					}
 				}
@@ -13611,7 +13598,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									SELECT
 										oid, *
 									FROM
-										" . pg_quote($tablename)."
+										" . $layerset[$layer_id][0]['schema'] . '.' . pg_quote($layerset[$layer_id][0]['maintable']) . "
 									WHERE
 										oid = " . $oid;
 								#echo '<br>sql before update: ' . $sql_old; #pk
@@ -13676,8 +13663,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 			else{				# ansonsten wird das embedded-Formular entfernt und das Listen-DIV neu geladen (getrennt durch █)
 				echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
-				if(!empty($this->messages)){
-					echo 'message('.json_encode($this->messages).');';
+				if(!empty(GUI::$messages)){
+					echo 'message('.json_encode(GUI::$messages).');';
 				}
 			}
 		}
@@ -14001,7 +13988,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							if ($layerset[$i]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
 								$layerset[$i]['maintable'] = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 							}
-							if ($layerset[$i]['oid'] == '' AND count($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+							if ($layerset[$i]['oid'] == '' AND @count($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
 								$layerset[$i]['oid'] = $layerset[$i]['attributes']['pk'][0];
 							}
 							if ($layerset[$i]['maintable'] != '' AND $layerset[$i]['oid'] != '') {
@@ -14708,7 +14695,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if ($layerset[$i]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[$i]['maintable'] = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 				}
-				if ($layerset[$i]['oid'] == '' AND count($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+				if ($layerset[$i]['oid'] == '' AND @count($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[$i]['oid'] = $layerset[$i]['attributes']['pk'][0];
 				}
 				$pfad = $this->mapDB->getQueryWithOid($layerset[$i], $layerdb, $this->Stelle);
