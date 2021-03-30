@@ -9655,19 +9655,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
 
 					#echo '<p>SQL zum Anlegen des Datensatzes: ' . $sql;
-					$ret = $layerdb->execSQL($sql, 4, 1, false);
-
-					if ($last_notice = pg_last_notice($layerdb->dbConn)) {
-						if (strpos($last_notice, 'CONTEXT: ') !== false) {
-							$last_notice = $msg = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
-						}
-						if ($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{')), true)) {
-							$last_notice = $notice_result['msg'];
-						}
-						$this->add_message('info', $last_notice);
-					}
+					$ret = $layerdb->execSQL($sql, 4, 1, true);
 
 					if ($ret['success']) {
+						if ($ret['msg'] != '') {
+							$this->add_message('info', $ret['msg']);
+						}
 						$result = pg_fetch_row($ret['query']);
 						if (pg_affected_rows($ret['query']) > 0) {
 							# dataset was created
@@ -9706,7 +9699,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					else {
 						# query not successfull set query error message
 						$this->success = false;
-					#	$this->add_message($ret['type'], $ret['msg']);
+						$this->add_message(
+									$ret['type'],
+									sql_err_msg('Kann Datensatz nicht speichern:<br>', $sql, $ret['msg'], 'error_div_' . rand(1, 99999))
+								);
 					}
 				}
 			}
@@ -13596,7 +13592,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									SELECT " .
 										$oid_sql . " *
 									FROM
-										" . $layer['schema'] . '.' . pg_quote($layer['maintable']) . "
+										" . $layerset[$layer_id][0]['schema'] . '.' . pg_quote($layerset[$layer_id][0]['maintable']) . "
 									WHERE
 										" . $layerset[$layer_id][0]['oid'] . " = '" . $oid . "'";
 								#echo '<br>sql before update: ' . $sql_old; #pk

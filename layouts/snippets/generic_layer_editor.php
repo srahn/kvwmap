@@ -174,7 +174,7 @@
 		$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID'].'|';
 ?>
 	<tr 
-	<? if($this->user->rolle->querymode == 1){ ?>
+	<? if($this->user->rolle->querymode == 1 AND $layer['attributes']['the_geom'] != ''){ ?>
 		onmouseenter="highlight_object(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');"
 	<? } ?>
 	>
