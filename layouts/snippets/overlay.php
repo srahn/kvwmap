@@ -39,7 +39,7 @@
 					</tr>
 				</table>
 			</div>
-			<div id="overlayfooter" style="<? if($this->found == 'false' OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;width: 100%; position:fixed; bottom: 0px">
+			<div id="overlayfooter" style="<? if ($this->new_entry OR $this->found == 'false' OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;width: 100%; position:fixed; bottom: 0px">
 				<table style="width:100%">
 					<tr>
 						<td style="width:40%" class="px13">&nbsp;<? echo $this->strLimit; ?>&nbsp;										
