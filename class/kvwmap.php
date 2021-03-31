@@ -9404,7 +9404,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$layerdb->setClientEncoding();
-		$attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+		$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);		# Rechte
+		$attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 		$doc_path = $layerset[0]['document_path'];
 		$doc_url = $layerset[0]['document_url'];
 		$layer_epsg = $layerset[0]['epsg_code'];
@@ -9505,133 +9506,134 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$exif_data = array();
 			if ($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']) {		# nur Attribute aus der Haupttabelle werden gespeichert
 				for ($i = 0; $i < count($table['attributname']); $i++) {
-
-					switch (true) {
-						case ($table['type'][$i] == 'Time') : {                       # Typ "Time"
-							if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-								$insert[$table['attributname'][$i]] = "'".date("Y-m-d H:i:s")."'";
-							}
-						} break;
-
-						case ($table['type'][$i] == 'User') : {                       # Typ "User"
-							if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-								$insert[$table['attributname'][$i]] = "'" . $this->user->Vorname." " . $this->user->Name."'";
-							}
-						} break;
-
-						case ($table['type'][$i] == 'UserID') : {                       # Typ "UserID"
-							if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-								$insert[$table['attributname'][$i]] = "'" . $this->user->id."'";
-							}
-						} break;
-
-						case ($table['type'][$i] == 'Stelle') : {                       # Typ "Stelle"
-							if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-								$insert[$table['attributname'][$i]] = "'" . $this->Stelle->Bezeichnung."'";
-							}
-						} break;
-
-						case ($table['type'][$i] == 'StelleID') : {                       # Typ "StelleID"
-							if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
-								$insert[$table['attributname'][$i]] = "'" . $this->Stelle->id."'";
-							}
-						} break;
-
-						case ($table['type'][$i] == 'Dokument' AND $this->formvars[$table['formfield'][$i]] != '') : {
-							$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]]."'";
-							$this->formvars[$table['formfield'][$i]] = ''; # leeren, for the case weiter_erfassen angehakt
-						} break;
-
-						case (
-							$table['saveable'][$i] AND
-							$table['type'][$i] != 'SubFormPK' AND
-							$table['type'][$i] != 'SubFormFK' AND
-							($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')
-						) : {
-							if ($table['type'][$i] != 'Dokument' AND (substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i]))){		// bei Dokumenten wurde das JSON schon weiter oben verarbeitet
-								# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
-								$insert[$table['attributname'][$i]] = "'" . $this->processJSON($this->formvars[$table['formfield'][$i]], $doc_path, $doc_url)."'";
-							}
-							else {
-								if($table['type'][$i] == 'Zahl') {
-									# bei Zahlen den Punkt (Tausendertrenner) entfernen
-									$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
+					if (array_key_exists($table['attributname'][$i], $attributes['indizes'])) { 	# Rechte
+						switch (true) {
+							case ($table['type'][$i] == 'Time') : {                       # Typ "Time"
+								if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+									$insert[$table['attributname'][$i]] = "'".date("Y-m-d H:i:s")."'";
 								}
-								if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
-									$this->formvars[$table['formfield'][$i]] = 'f';
+							} break;
+
+							case ($table['type'][$i] == 'User') : {                       # Typ "User"
+								if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+									$insert[$table['attributname'][$i]] = "'" . $this->user->Vorname." " . $this->user->Name."'";
 								}
-								if ($table['type'][$i] == 'Link') {
-									if (substr($this->formvars[$table['formfield'][$i]], 0, 9) != 'index.php' AND strpos($this->formvars[$table['formfield'][$i]], ':') === false) {
-										# bei externen Links http davor setzen, wenn kein Protokoll angegeben
-										$this->formvars[$table['formfield'][$i]] = 'http://' . $this->formvars[$table['formfield'][$i]];
+							} break;
+
+							case ($table['type'][$i] == 'UserID') : {                       # Typ "UserID"
+								if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+									$insert[$table['attributname'][$i]] = "'" . $this->user->id."'";
+								}
+							} break;
+
+							case ($table['type'][$i] == 'Stelle') : {                       # Typ "Stelle"
+								if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+									$insert[$table['attributname'][$i]] = "'" . $this->Stelle->Bezeichnung."'";
+								}
+							} break;
+
+							case ($table['type'][$i] == 'StelleID') : {                       # Typ "StelleID"
+								if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
+									$insert[$table['attributname'][$i]] = "'" . $this->Stelle->id."'";
+								}
+							} break;
+
+							case ($table['type'][$i] == 'Dokument' AND $this->formvars[$table['formfield'][$i]] != '') : {
+								$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]]."'";
+								$this->formvars[$table['formfield'][$i]] = ''; # leeren, for the case weiter_erfassen angehakt
+							} break;
+
+							case (
+								$table['saveable'][$i] AND
+								$table['type'][$i] != 'SubFormPK' AND
+								$table['type'][$i] != 'SubFormFK' AND
+								($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')
+							) : {
+								if ($table['type'][$i] != 'Dokument' AND (substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i]))){		// bei Dokumenten wurde das JSON schon weiter oben verarbeitet
+									# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
+									$insert[$table['attributname'][$i]] = "'" . $this->processJSON($this->formvars[$table['formfield'][$i]], $doc_path, $doc_url)."'";
+								}
+								else {
+									if($table['type'][$i] == 'Zahl') {
+										# bei Zahlen den Punkt (Tausendertrenner) entfernen
+										$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
+									}
+									if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
+										$this->formvars[$table['formfield'][$i]] = 'f';
+									}
+									if ($table['type'][$i] == 'Link') {
+										if (substr($this->formvars[$table['formfield'][$i]], 0, 9) != 'index.php' AND strpos($this->formvars[$table['formfield'][$i]], ':') === false) {
+											# bei externen Links http davor setzen, wenn kein Protokoll angegeben
+											$this->formvars[$table['formfield'][$i]] = 'http://' . $this->formvars[$table['formfield'][$i]];
+										}
+									}
+									$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]]."'"; # Typ "normal"
+								}
+							} break;
+
+							case ($table['type'][$i] == 'ExifLatLng') : {
+								$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
+
+								if (!$exif_data[$document_attribute_name]) {
+									$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+								}
+								if ($exif_data[$document_attribute_name]['success']) {
+									$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['LatLng'] ? "'" . $exif_data[$document_attribute_name]['LatLng'] . "'" : "NULL");
+								}
+							} break;
+
+							case ($table['type'][$i] == 'ExifRichtung') : {
+								$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
+								if (!$exif_data[$document_attribute_name]) {
+									$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+								}
+								if ($exif_data[$document_attribute_name]['success']) {
+									$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['Richtung'] ? $exif_data[$document_attribute_name]['Richtung'] : "NULL");
+								}
+							} break;
+
+							case ($table['type'][$i] == 'ExifErstellungszeit') : {
+								$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
+								if (!$exif_data[$document_attribute_name]) {
+									$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
+								}
+								if ($exif_data[$document_attribute_name]['success']) {
+									$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['Erstellungszeit']  ? "'" . $exif_data[$document_attribute_name]['Erstellungszeit'] . "'" : "NULL");
+								}
+							} break;
+
+							case ($table['type'][$i] == 'Geometrie') : {
+								if ($this->formvars['geomtype'] == 'POINT'){
+									if ($this->formvars['loc_x'] != '') {
+										# ToDo: Test if a new Point can be stored and if the statement contain the wkb_geometrie in stead of the ST_GeomFromGeo Gedöns.
+										include_once (CLASSPATH.'pointeditor.php');
+										$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
+										$result = $pointeditor->get_wkb_geometry(array(
+											'loc_x' => $this->formvars['loc_x'],
+											'loc_y' => $this->formvars['loc_y'],
+											'dimension' => $this->formvars['dimension']
+										));
+										if ($result['success']) {
+											$insert[$table['attributname'][$i]] = "'" . $result['wkb_geometry'] . "'";
+										}
+										else {
+											$this->add_message('error', 'Umwandeln der Punktgeometrie in WKB-Geometry gescheitert! ' . $result['err_msg']);
+											$this->success = false;
+										}
 									}
 								}
-								$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]]."'"; # Typ "normal"
-							}
-						} break;
-
-						case ($table['type'][$i] == 'ExifLatLng') : {
-							$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
-
-							if (!$exif_data[$document_attribute_name]) {
-								$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
-							}
-							if ($exif_data[$document_attribute_name]['success']) {
-								$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['LatLng'] ? "'" . $exif_data[$document_attribute_name]['LatLng'] . "'" : "NULL");
-							}
-						} break;
-
-						case ($table['type'][$i] == 'ExifRichtung') : {
-							$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
-							if (!$exif_data[$document_attribute_name]) {
-								$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
-							}
-							if ($exif_data[$document_attribute_name]['success']) {
-								$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['Richtung'] ? $exif_data[$document_attribute_name]['Richtung'] : "NULL");
-							}
-						} break;
-
-						case ($table['type'][$i] == 'ExifErstellungszeit') : {
-							$document_attribute_name = $attributes['options'][$table['attributname'][$i]];
-							if (!$exif_data[$document_attribute_name]) {
-								$exif_data[$document_attribute_name] = get_exif_data(get_document_file_path($document_attributes[$form_field_indizes[$document_attribute_name]]['insert'], $doc_path, $doc_url));
-							}
-							if ($exif_data[$document_attribute_name]['success']) {
-								$insert[$table['attributname'][$i]] = ($exif_data[$document_attribute_name]['Erstellungszeit']  ? "'" . $exif_data[$document_attribute_name]['Erstellungszeit'] . "'" : "NULL");
-							}
-						} break;
-
-						case ($table['type'][$i] == 'Geometrie') : {
-							if ($this->formvars['geomtype'] == 'POINT'){
-								if ($this->formvars['loc_x'] != '') {
-									# ToDo: Test if a new Point can be stored and if the statement contain the wkb_geometrie in stead of the ST_GeomFromGeo Gedöns.
-									include_once (CLASSPATH.'pointeditor.php');
-									$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
-									$result = $pointeditor->get_wkb_geometry(array(
-										'loc_x' => $this->formvars['loc_x'],
-										'loc_y' => $this->formvars['loc_y'],
-										'dimension' => $this->formvars['dimension']
-									));
-									if ($result['success']) {
-										$insert[$table['attributname'][$i]] = "'" . $result['wkb_geometry'] . "'";
+								elseif ($this->formvars['newpathwkt'] != '') {
+									# ToDo: Replace this also with a get_wkb_geometry function from polygoneditor and replace wkb_geometry generation in
+									# PointEditor_Senden also by a function and also for Line and Polygon editing cases
+									$geom = "ST_GeomFromText('" . $this->formvars['newpathwkt'] . "', " . $client_epsg . ")";
+									if (substr($this->formvars['geomtype'], 0, 5) == 'MULTI') {					# Erzeuge immer Multigeometrie
+										$geom = "ST_Multi(" . $geom . ")";
 									}
-									else {
-										$this->add_message('error', 'Umwandeln der Punktgeometrie in WKB-Geometry gescheitert! ' . $result['err_msg']);
-										$this->success = false;
-									}
+									$insert[$table['attributname'][$i]] = "ST_Transform(" . $geom . ", " . $layer_epsg . ")";
 								}
-							}
-							elseif ($this->formvars['newpathwkt'] != '') {
-								# ToDo: Replace this also with a get_wkb_geometry function from polygoneditor and replace wkb_geometry generation in
-								# PointEditor_Senden also by a function and also for Line and Polygon editing cases
-								$geom = "ST_GeomFromText('" . $this->formvars['newpathwkt'] . "', " . $client_epsg . ")";
-								if (substr($this->formvars['geomtype'], 0, 5) == 'MULTI') {					# Erzeuge immer Multigeometrie
-									$geom = "ST_Multi(" . $geom . ")";
-								}
-								$insert[$table['attributname'][$i]] = "ST_Transform(" . $geom . ", " . $layer_epsg . ")";
-							}
-						} break;
-					} # end of switch
+							} break;
+						} # end of switch
+					}
 				}
 
 				if(!empty($insert)){
@@ -13424,7 +13426,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if ($layer_id != $old_layer_id AND $tablename != '') {
 					$layerdb[$layer_id] = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 					$layerdb[$layer_id]->setClientEncoding();
-					$attributes = $mapdb->read_layer_attributes($layer_id, $layerdb[$layer_id], NULL);
+					$privileges = $this->Stelle->get_attributes_privileges($layer_id);		# Rechte
+					$attributes = $mapdb->read_layer_attributes($layer_id, $layerdb[$layer_id], $privileges['attributenames']);
 					#$filter = $mapdb->getFilter ($layer_id, $this->Stelle->id);		# siehe unten
 					$old_layer_id = $layer_id;
 					if ($layerset[$layer_id][0]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
@@ -13440,6 +13443,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$this->formvars['changed_' . $layer_id . '_' . str_replace('-', '', $oid)] == 1 OR
 						$this->formvars['embedded']
 					) AND
+					array_key_exists($attributname, $attributes['indizes']) AND 	# Rechte
 					$attributname != $layerset[$layer_id][0]['oid'] AND
 					$tablename != '' AND
 					$saveable AND
