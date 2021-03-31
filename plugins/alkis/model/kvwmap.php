@@ -714,8 +714,10 @@
           else {
             # Es wurde mindestens ein eindeutiges FlurstKennz in FlstID ausgewählt, oder ein oder mehrere über FlstNr gefunden
             # Zoom auf Flurstücke
-						$GUI->zoomToALKFlurst($FlurstKennz,10);
-						$GUI->saveMap('');
+						if ($GUI->user->rolle->querymode == 1 OR $GUI->formvars['ALK_Suche'] == 1) {
+							$GUI->zoomToALKFlurst($FlurstKennz,10);
+							$GUI->saveMap('');
+						}						
             if($GUI->formvars['ALK_Suche'] == 1){
 							if($GUI->formvars['go_next'] != ''){
 								$GUI->formvars['FlurstKennz'] = $FlurstKennz;
