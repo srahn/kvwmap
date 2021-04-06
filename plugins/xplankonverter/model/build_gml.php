@@ -162,7 +162,7 @@ class Gml_builder {
 				) AS envelope
 			FROM
 				" . XPLANKONVERTER_CONTENT_SCHEMA . "." . $plan->bereichTableName . " b JOIN
-				" . XPLANKONVERTER_CONTENT_SCHEMA . "." . $plan->tableName . " p ON (b.gehoertzuplan = p.gml_id::text)
+				" . XPLANKONVERTER_CONTENT_SCHEMA . "." . $plan->tableName . " p ON (b.gehoertzuplan::text = p.gml_id::text)
 			WHERE
 				p.konvertierung_id = " .$konvertierung->get('id') . " 
 		";

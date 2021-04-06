@@ -111,10 +111,12 @@ function get_document_file_path($document_attribute_value, $layer_document_path,
 	}
 }
 
-function url2filepath($url, $doc_path, $doc_url){
-	if($doc_path == '')$doc_path = CUSTOM_IMAGE_PATH;
+function url2filepath($url, $doc_path, $doc_url) {
+	if ($doc_path == '') {
+		$doc_path = CUSTOM_IMAGE_PATH;
+	}
 	$url_parts = explode($doc_url, $url);
-	return $doc_path.$url_parts[1];
+	return $doc_path . $url_parts[1];
 }
 
 /*

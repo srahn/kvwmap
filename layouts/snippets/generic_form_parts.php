@@ -539,11 +539,15 @@
 						$dateipfad = $pfadteil[0];
 						if ($layer['document_url'] != '') {
 							$remote_url = false;
-							if($_SERVER['HTTP_HOST'] != parse_url($layer['document_url'], PHP_URL_HOST))$remote_url = true;		# die URL verweist auf einen anderen Server
+							$port = parse_url($layer['document_url'], PHP_URL_PORT);
+							if ($_SERVER['HTTP_HOST'] != parse_url($layer['document_url'], PHP_URL_HOST) . ($port != '' ? ':' . $port : '')) {
+								# die URL verweist auf einen anderen Server
+								$remote_url = true;
+							}
 							$dateipfad = url2filepath($dateipfad, $layer['document_path'], $layer['document_url']);
 						}
-						if ($dateipfad != ''){
-							if(file_exists($dateipfad) OR $remote_url) {
+						if ($dateipfad != '') {
+							if (file_exists($dateipfad) OR $remote_url) {
 								$pathinfo = pathinfo($dateipfad);
 								$type = strtolower($pathinfo['extension']);
 								$thumbname = $gui->get_dokument_vorschau(

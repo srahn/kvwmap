@@ -764,7 +764,7 @@ class Gml_extractor {
 		// string needs to be lowered both to simplify cutting #gml_ in all forms and
 		// because uuid (e.g. in gml_id of the associated plan) is always lowercase when cast to text
 		$sql .= "
-				trim(leading '#gml_' FROM lower(gmlas.gehoertzuplan_href)) AS gehoertzuplan
+				trim(leading '#gml_' FROM lower(gmlas.gehoertzuplan_href))::uuid AS gehoertzuplan
 			FROM
 				" . $this->gmlas_schema . "." . $table . " gmlas
 			;";

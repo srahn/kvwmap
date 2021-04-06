@@ -351,6 +351,12 @@ class GUI {
 		}
   }
 
+	function login_agreement() {
+		$this->expect = array('agreement_accepted');
+		$this->gui = LOGIN_AGREEMENT;
+		$this->output();
+	}
+
 	function loadlayer($map, $layerset){
 		$layer = ms_newLayerObj($map);
 		$layer->setMetaData('wfs_request_method', 'GET');

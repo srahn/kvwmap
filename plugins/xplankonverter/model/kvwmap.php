@@ -77,7 +77,7 @@
 	* Trigger für XP_Plan Objekte
 	*/
 	$GUI->trigger_functions['handle_xp_plan'] = function($fired, $event, $layer = '', $oid = 0, $old_dataset = array()) use ($GUI) {
-		#echo '<br>Trigger Funktion handle_xp_plan ' . $fired . ' ' . $event . ' aufgerufen.';
+		#echo '<br>Trigger Funktion handle_xp_plan ' . $fired . ' ' . $event . ' mit id: ' . $oid . ' aufgerufen.';
 		$executed = true;
 		$success = true;
 
@@ -103,7 +103,7 @@
 		switch(true) {
 
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
-				#echo '<br>Führe ' . $fired . ' ' . $event . ' in handle_xp_plan Funktion aus.';
+				echo '<br>Führe ' . $fired . ' ' . $event . ' mit gml_id: ' . $oid . ' in handle_xp_plan Funktion aus.';
 				$xp_plan = XP_Plan::find_by_id($GUI, 'gml_id', $oid, $planart);
 
 				# Create Konvertierung and get konvertierung_id

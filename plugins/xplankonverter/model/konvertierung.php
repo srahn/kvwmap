@@ -499,7 +499,7 @@ class Konvertierung extends PgObject {
 			FROM
 				xplankonverter.regeln r LEFT JOIN
 				xplan_gml." . $this->plan->planartAbk . "_bereich b ON r.bereich_gml_id = b.gml_id LEFT JOIN
-				xplan_gml." . $this->plan->planartAbk . "_plan bp ON b.gehoertzuplan = bp.gml_id::text LEFT JOIN
+				xplan_gml." . $this->plan->planartAbk . "_plan bp ON b.gehoertzuplan::text = bp.gml_id::text LEFT JOIN
 				xplan_gml." . $this->plan->planartAbk . "_plan rp ON r.konvertierung_id = rp.konvertierung_id
 			WHERE
 				bp.konvertierung_id = " . $this->get($this->identifier) . " OR

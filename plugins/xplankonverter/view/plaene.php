@@ -104,7 +104,6 @@
 	};
 
 	starteXplanGmlGenerierung = function(e) {
-		debug_e = e;
 		var konvertierung_id = $(e).parent().attr('konvertierung_id'),
 				symbol = $(e).children();
 
@@ -323,7 +322,7 @@
                  || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']; ?>"
                  || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
                  || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Konvertierung durchführen & validieren" class="btn btn-link btn-xs xpk-func-btn' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=xplankonverter_konvertierung&konvertierung_id=' + value + '" onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"><i class="btn-link fa fa-lg fa-cogs"></i></a>';
+		output += '<a title="Konvertierung durchführen & validieren" class="btn btn-link btn-xs xpk-func-btn' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=xplankonverter_konvertierung&konvertierung_id=' + value + '&planart=<?php echo $this->formvars['planart']; ?>" onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"><i class="btn-link fa fa-lg fa-cogs"></i></a>';
 
 		// Validierungsergebnisse anzeigen
     funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['ERSTELLT'          ]; ?>"
@@ -440,11 +439,12 @@ else { ?>
 </div//-->
 <table
 	id="konvertierungen_table"
+	data-unique-id="konvertierung_id"
 	data-toggle="table"
 	data-url="index.php"
 	data-height="100%"
 	data-click-to-select="false"
-	data-filter-control="true" 
+	data-filter-control="true"
 	data-sort-name="Name"
 	data-sort-order="asc"
 	data-search="true"
@@ -460,77 +460,64 @@ else { ?>
 	data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
 	data-toggle="table"
 	data-toolbar="#toolbar"
-	data-unique-id="konvertierung_id"
 >
 	<thead>
 		<tr>
-			<th
-				data-field="konvertierung_id"
-				data-sortable="true"
-				data-visible="false"
-				data-switchable="true"
-			>Konvertierung Id</th>
-			<th
-				data-field="plan_gml_id"
-				data-sortable="true"
-				data-visible="false"
-				data-switchable="true"
-			>Plan-Id</th>
-			<th
-				data-field="stelle_id"
-				data-sortable="true"
-				data-visible="false"
-				data-switchable="true"
-			>Stelle Id</th>
 			<th
 				data-field="anzeigename"
 				data-sortable="true"
 				data-visible="true"
 				data-formatter="konvertierungHtmlSpecialchars"
 				class="col-md-7"
+				data-filter-control="input"
 			>Name</th>
 			<th
 				data-field="nummer"
 				data-sortable="true"
 				data-visible="false"
 				class="col-md-2"
+				data-filter-control="input"
 			>Nr</th><?php
-				if ($this->plan_layer_id == XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
-					<th
-						data-field="bundesland"
-						data-visible="false"
-						data-sortable="true"
-						data-formatter="konvertierungBundeslandFormatter"
-						class="col-md-2"
-					>Bundesland</th><?php
-				}
-				else { ?>
-					<th
-						data-field="gemeinde"
-						data-visible="true"
-						data-sortable="true"
-						data-formatter="konvertierungGemeindeFormatter"
-						class="col-md-2"
-					>Gemeinden</th><?php
-				}
-				if ($this->plan_layer_id != XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
-					<th
-						data-field="konvertierung_status"
-						data-visible="true"
-						data-sortable="true"
-						data-formatter="konvertierungStatusFormatter"
-						class="col-md-2"
-					>Status</th><?php
-				}
-				if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
-					<th
-						data-field="veroeffentlicht"
-						data-visible="true"
-						data-sortable="true"
-						data-formatter="konvertierungVeroeffentlichtFormatter"
-						data-switchable="true"
-					><i title="Veröffentlichung" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
-				} ?>
+			if ($this->plan_layer_id == XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
+				<th
+					data-field="bundesland"
+					data-visible="false"
+					data-sortable="true"
+					data-formatter="konvertierungBundeslandFormatter"
+					class="col-md-2"
+					data-filter-control="select"
+				>Bundesland</th><?php
+			}
+			else { ?>
+				<th
+					data-field="gemeinde"
+					data-visible="true"
+					data-sortable="true"
+					data-formatter="konvertierungGemeindeFormatter"
+					class="col-md-2"
+					data-filter-control="select"
+				>Gemeinden</th><?php
+			}
+			if ($this->plan_layer_id != XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
+				<th
+					data-field="konvertierung_status"
+					data-visible="true"
+					data-sortable="true"
+					data-formatter="konvertierungStatusFormatter"
+					class="col-md-2"
+					data-filter-control="select"
+				>Status</th><?php
+			}
+			if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
+				<th
+					data-field="veroeffentlicht"
+					data-visible="true"
+					data-sortable="true"
+					data-formatter="konvertierungVeroeffentlichtFormatter"
+					data-switchable="true"
+					data-filter-control="select"
+				>text<i title="Veröffentlichung" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
+			} ?>
 			<th
 				data-field="konvertierung_id"
 				data-visible="true"
@@ -551,6 +538,24 @@ else { ?>
 				data-formatter="konvertierungEditFunctionsFormatter"
 				data-switchable="false"
 			>Edit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+			<th
+				data-field="konvertierung_id"
+				data-sortable="true"
+				data-visible="false"
+				data-switchable="true"
+			>Konvertierung Id</th>
+			<th
+				data-field="plan_gml_id"
+				data-sortable="true"
+				data-visible="false"
+				data-switchable="true"
+			>Plan-Id</th>
+			<th
+				data-field="stelle_id"
+				data-sortable="true"
+				data-visible="false"
+				data-switchable="true"
+			>Stelle Id</th>
 		</tr>
 	</thead>
 </table>
