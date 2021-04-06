@@ -1,4 +1,6 @@
 <?
+	
+	error_reporting(E_ALL & ~(E_STRICT|E_NOTICE));
 
 	function wms_proxy(){
 		$image_tile_size = 1800;
@@ -17,7 +19,7 @@
     if(!$height)$height = $_REQUEST['height'];
     
     $format = $_REQUEST['FORMAT'];
-    if(!format)$format = $_REQUEST['format'];
+    if(!$format)$format = $_REQUEST['format'];
     
     for($i = 0; $i < count($_REQUEST); $i++){
 			if(!in_array(strtolower($params[$i]), ['url', 'bbox', 'width', 'height'])){

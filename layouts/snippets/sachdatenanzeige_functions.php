@@ -19,6 +19,12 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	show_foreign_vertices = function(){
 		document.getElementById("svghelp").SVGshow_foreign_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
+	
+	adjustHref = function(link){
+		if (link.href.substring(0,9) != 'index.php' && link.target != 'root' && enclosingForm.name == 'GUI2') {
+			link.href = link.href.replace('?', '?window_type=overlay&');
+		}
+	}
 
 	completeDate = function(datefield){
 		var d = new Date();
@@ -393,9 +399,10 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	}
 	
 	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen, weiter_erfassen_params, further_params){
+		root.open_subform_requests++;
 		list_div = document.getElementById(list_div_id);
 		var params = list_div.dataset.reload_params;
-		if(enclosingForm.name == 'GUI2')params += '&mime_type=overlay_html';
+		if(enclosingForm.name == 'GUI2')params += '&window_type=overlay';
 		if(list_edit)params += '&list_edit='+list_edit;
 		if(weiter_erfassen)params += '&weiter_erfassen='+weiter_erfassen;
 		if(weiter_erfassen_params)params += '&weiter_erfassen_params='+weiter_erfassen_params;
@@ -567,10 +574,12 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				alldivs[i].innerHTML = '';
 			}
 		}
+		auto_resize_overlay();
 	}
 
 	clearsubform = function(subformid){
 		document.getElementById(subformid).innerHTML = '';
+		auto_resize_overlay();
 	}
 	
 	switch_gle_view1 = function(layer_id){
@@ -693,8 +702,8 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		message([{ 'type': 'notice', 'msg': (status ? '<? echo $strAllDeselected; ?>' : '<? echo $strAllSelected; ?>')}]);
 	}
 	
-	zoom2object = function(layer_id, geomtype, tablename, columnname, oid, selektieren){
-		params = 'go=zoomto'+geomtype+'&oid='+oid+'&layer_tablename='+tablename+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
+	zoom2object = function(layer_id, columnname, oid, selektieren){
+		params = 'go=zoomto_dataset&oid='+oid+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
 		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
 			startwaiting();
 			root.get_map_ajax(params, '', 'highlight_object('+layer_id+', '+oid+');');		// Objekt highlighten
@@ -852,10 +861,10 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				root.overlay_submit(enclosingForm, false);
 			}
 		}
-	}	
+	}
 
 	print_data = function(layer_id){
-		if(check_for_selection(layer_id)){
+		if (check_for_selection(layer_id)) {
 			enclosingForm.chosen_layer_id.value = layer_id;
 			enclosingForm.go_backup.value = enclosingForm.go.value;
 			enclosingForm.go.value = 'generischer_sachdaten_druck';

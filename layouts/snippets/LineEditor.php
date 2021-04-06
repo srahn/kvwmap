@@ -126,7 +126,7 @@ function buildwktlinefromsvgpath(svgpath){
 				</tr>
 				<tr>
 					<td><? echo $strGeomFrom; ?>:<br>
-						<select name="geom_from_layer" style="width: 250px" onchange="startwaiting(true);document.GUI.no_load.value='true';document.GUI.submit();">
+						<select name="geom_from_layer" style="width: 250px" onchange="geom_from_layer_change(<? echo $this->formvars['selected_layer_id']; ?>);">
 							<option value="0"> - alle - </option>
 							<?
 							for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
@@ -175,9 +175,6 @@ function buildwktlinefromsvgpath(svgpath){
 	</tr>
 </table>
 <INPUT TYPE="HIDDEN" NAME="zoom" VALUE="">
-<INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<?php echo $this->formvars['columnname']; ?>">
-<INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
-<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">
 <INPUT TYPE="HIDDEN" NAME="layer_columnname" VALUE="<?php echo $this->formvars['layer_columnname']; ?>">
 <INPUT TYPE="HIDDEN" NAME="layer_tablename" VALUE="<?php echo $this->formvars['layer_tablename']; ?>">
 <INPUT TYPE="HIDDEN" NAME="geom_nullable" VALUE="<?php echo $this->formvars['geom_nullable']; ?>">

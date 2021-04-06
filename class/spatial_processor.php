@@ -107,7 +107,7 @@ class spatial_processor {
 		#echo $sql;
 		$ret = $this->pgdatabase->execSQL($sql,4, 0, true);
 		if ($ret[0]) {
-			$rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+			echo '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
 		}
 		else {
 			$rs = pg_fetch_assoc($ret[1]);
@@ -397,7 +397,7 @@ class spatial_processor {
 			}break;
 			
 			case 'add_geometry':{
-				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], $formvars['fromwhere'], $formvars['columnname'], $formvars['singlegeom'], $formvars['orderby']);
+				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], $formvars['singlegeom']);
 				if($querygeometryWKT == '') {
 					header('warning: true');
 					echo 'Keine Geometrie zum Hinzufügen an der Kartenposition gefunden.';
@@ -413,7 +413,7 @@ class spatial_processor {
 			}break;
 			
 			case 'subtract_geometry':{
-				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], $formvars['fromwhere'], $formvars['columnname'], $formvars['singlegeom'], $formvars['orderby']);
+				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], $formvars['singlegeom']);
 				if ($querygeometryWKT == '') {
 					header('warning: true');
 					echo 'Keine Geometrie zum Abziehen an der Kartenposition gefunden.';
@@ -440,7 +440,7 @@ class spatial_processor {
 		echo $result;
 	}
 	
-	function queryMap($input_coord, $pixsize, $layer_id, $fromwhere, $columnname, $singlegeom, $orderby) {
+	function queryMap($input_coord, $pixsize, $layer_id, $singlegeom) {
 		# pixsize wird übergeben, weil sie aus dem Geometrieeditor anders sein kann, da es dort eine andere Kartengröße geben kann
 		# Abfragebereich berechnen
 		if ($input_coord) {
@@ -458,7 +458,7 @@ class spatial_processor {
 			$rect = ms_newRectObj();
 			$rect->setextent($minx, $miny, $maxx, $maxy);
 		}
-		$geom = $this->getgeometrybyquery($rect, $layer_id, $fromwhere, $columnname, $singlegeom, $orderby);
+		$geom = $this->getgeometrybyquery($rect, $layer_id, $singlegeom);
 		return $geom;
 	}
  
@@ -506,7 +506,7 @@ class spatial_processor {
   }
 		
 	function add_buffer_within_polygon($geom_1, $geom_2, $formvars){
-		$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], $formvars['fromwhere'], $formvars['columnname'], false, $formvars['orderby']);
+		$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], false);
   	if(substr_count($geom_2, ',') == 0){			# wenn Linestring nur aus einem Eckpunkt besteht -> in POINT umwandeln -> Kreis entsteht
   		$geom_2 = $this->pointfromlinestring($geom_2);
   	}
@@ -612,7 +612,7 @@ class spatial_processor {
     return $rs[0];
   }
 
-	function getgeometrybyquery($rect, $layer_id, $fromwhere, $columnname, $singlegeom, $orderby) {
+	function getgeometrybyquery($rect, $layer_id, $singlegeom) {
 		$dbmap = new db_mapObj($this->rolle->stelle_id, $this->rolle->user_id);
 		if ($layer_id != '') {
 			if ($layer_id < 0) { # Rollenlayer

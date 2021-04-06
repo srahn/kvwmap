@@ -115,6 +115,7 @@ function suche(){
 		document.GUI.go_plus.value = 'Suchen';
 		//document.GUI.submit();
 		overlay_submit(document.GUI, true);
+		document.GUI.go_plus.value = '';
 	}
 }
 
@@ -515,9 +516,6 @@ span[data-tooltip] {
 <input type="hidden" name="titel" value="<? echo value_of($this->formvars, 'titel'); ?>">
 <input type="hidden" name="map_flag" value="<? echo value_of($this->formvars, 'map_flag'); ?>">
 <input type="hidden" name="area" value="">
-<INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<? echo $this->formvars['columnname']; ?>">
-<INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
-<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">
 <input type="hidden" name="always_draw" value="<? echo $always_draw; ?>">
 <input type="hidden" name="searchmask_count" value="<? echo $this->formvars['searchmask_count']; ?>">
 

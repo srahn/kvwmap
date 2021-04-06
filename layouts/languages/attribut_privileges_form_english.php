@@ -15,5 +15,6 @@
 	$strUseDefaultPrivileges="use default privileges";
 	$strAssignDefaultPrivileges="assign default privileges to all tasks";
 	$strToTaskAssignment="to task assignment";
+	$strUseParentPrivileges="use parent privileges";
 	
 ?>  

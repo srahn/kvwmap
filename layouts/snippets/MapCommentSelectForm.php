@@ -12,7 +12,7 @@
   <th>&nbsp;</th>
 </tr>
 <?php
-  $anzMapComments=count($this->mapComments);
+  $anzMapComments = @count($this->mapComments);
   for ($i=0;$i<$anzMapComments;$i++) {
   	?>
   <tr>

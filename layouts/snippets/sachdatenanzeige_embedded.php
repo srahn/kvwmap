@@ -44,5 +44,6 @@ var button_bottom = document.getElementById('sub_savebutton').getBoundingClientR
 if(button_bottom > window.innerHeight){
 	window.scrollBy({top: button_bottom - window.innerHeight + 70, behavior: 'smooth'});		// wegen Overlayfooter geht kein scrollintoview
 }
+auto_resize_overlay();
   
  

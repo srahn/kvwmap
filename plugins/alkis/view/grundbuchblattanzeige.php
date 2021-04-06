@@ -23,6 +23,7 @@ function flurstanzeige(flurstkennz){
 <?php
 $alle_flst = array();
 $this->Stelle->getFunktionen();
+$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
 for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	$this->buchungen = $this->gbblaetter[$gb];
 	$alle_flst_pro_buchung = array();	
@@ -31,7 +32,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
   $anzObj=count($this->buchungen);
   if ($anzObj>0) { 
 		$flst=new flurstueck($this->buchungen[0]['flurstkennz'],$this->pgdatabase);
-	  $ret=$flst->readALB_Data($this->buchungen[0]['flurstkennz']);
+	  $ret=$flst->readALB_Data($this->buchungen[0]['flurstkennz'], false, $layerset[0]['oid']);
     $Eigentuemerliste=$flst->getEigentuemerliste($this->buchungen[0]['bezirk'],$this->buchungen[0]['blatt'],$this->buchungen[0]['bvnr']);
     $Eigentuemer = '<tr><td colspan="2" valign="top" style="height: 16px">Eigentümer:</td></tr>';
 		reset($Eigentuemerliste);
@@ -57,7 +58,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	  	$flst=new flurstueck($this->buchungen[$i]['flurstkennz'],$this->pgdatabase);
 	  	$alle_flst_pro_buchung[] = $this->buchungen[$i]['flurstkennz'];
 			$alle_flst[] = $this->buchungen[$i]['flurstkennz'];
-	  	$ret=$flst->readALB_Data($this->buchungen[$i]['flurstkennz']);
+	  	$ret=$flst->readALB_Data($this->buchungen[$i]['flurstkennz'], false, $layerset[0]['oid']);
 	  	for($s=0; $s < @count($flst->Adresse);$s++) {
 	      $Adressbezeichnung.=$flst->Adresse[$s]["strassenname"];
 	      $Adressbezeichnung.='&nbsp;'.$flst->Adresse[$s]["hausnr"];

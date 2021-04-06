@@ -918,7 +918,7 @@ class stelle {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
 		for ($i=0;$i<count($layer_ids);$i++){
-			$sql = "INSERT ".(!$assign_default_values ? "IGNORE" : "")." INTO used_layer (
+			$insert = "(
 					`Stelle_ID`,
 					`Layer_ID`,
 					`queryable`,
@@ -938,7 +938,9 @@ class stelle {
 					`export_privileg`,
 					`postlabelcache`,
 					`requires`
-				)
+				)";
+			# Einstellungen von der Elternstelle übernehmen
+			$sql = "INSERT INTO used_layer " . $insert . "
 				SELECT
 					'" . $this->id . "',
 					'" . $layer_ids[$i] . "',
@@ -951,43 +953,164 @@ class stelle {
 					symbolscale, 
 					offsite, 
 					transparency, 
-					'" . $filter . "',
+					filter,
 					template, 
-					NULL,
-					NULL,
+					header,
+					footer,
 					`privileg`,
 					`export_privileg`,
 					postlabelcache,
 					requires
 				FROM
-					layer as l
+					used_layer as l,
+					stellen_hierarchie
 				WHERE
-					l.Layer_ID = ".$layer_ids[$i];
-				if($assign_default_values){
-					$sql .= "
-					ON DUPLICATE KEY UPDATE 
-						queryable = l.queryable, 
-						use_geom = l.use_geom, 
-						drawingorder = l.drawingorder, 
-						legendorder = l.legendorder, 
-						minscale = l.minscale, 
-						maxscale = l.maxscale, 
-						symbolscale = l.symbolscale, 
-						offsite = l.offsite, 
-						transparency = l.transparency, 
-						template = l.template, 
-						postlabelcache = l.postlabelcache,
-						requires = l.requires
-					";
-				}
-			#echo '<br>SQL zur Zuordnung eines Layers zur Stelle: ' . $sql;
+					(select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
+					layer_id = " . $layer_ids[$i] . " AND
+					stelle_id = parent_id AND
+					child_id = " . $this->id . "
+				ON DUPLICATE KEY UPDATE 
+					queryable = l.queryable, 
+					use_geom = l.use_geom, 
+					drawingorder = l.drawingorder, 
+					legendorder = l.legendorder, 
+					minscale = l.minscale, 
+					maxscale = l.maxscale, 
+					symbolscale = l.symbolscale, 
+					offsite = l.offsite, 
+					transparency = l.transparency, 
+					template = l.template, 
+					postlabelcache = l.postlabelcache,
+					`privileg` = l.`privileg`,
+					`export_privileg` = l.`export_privileg`,
+					requires = l.requires";
+			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			if ($this->database->mysqli->affected_rows == 0) {
+				# wenn nicht von Elternstelle übernommen, Defaulteinstellungen übernehmen bzw. ignorieren, falls schon vorhanden
+				$sql = "INSERT " . (!$assign_default_values ? "IGNORE" : "") . " INTO used_layer " . $insert . "
+					SELECT
+						'" . $this->id . "',
+						'" . $layer_ids[$i] . "',
+						queryable,
+						use_geom,
+						drawingorder, 
+						legendorder, 
+						minscale, 
+						maxscale, 
+						symbolscale, 
+						offsite, 
+						transparency, 
+						'" . $filter . "',
+						template, 
+						NULL,
+						NULL,
+						`privileg`,
+						`export_privileg`,
+						postlabelcache,
+						requires
+					FROM
+						layer as l
+					WHERE
+						l.Layer_ID = ".$layer_ids[$i];
+					if($assign_default_values){
+						$sql .= "
+						ON DUPLICATE KEY UPDATE 
+							queryable = l.queryable, 
+							use_geom = l.use_geom, 
+							drawingorder = l.drawingorder, 
+							legendorder = l.legendorder, 
+							minscale = l.minscale, 
+							maxscale = l.maxscale, 
+							symbolscale = l.symbolscale, 
+							offsite = l.offsite, 
+							transparency = l.transparency, 
+							template = l.template, 
+							postlabelcache = l.postlabelcache,
+							requires = l.requires
+						";
+					}
+				#echo '<br>SQL zur Zuordnung eines Layers zur Stelle: ' . $sql;
+				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
+				$this->database->execSQL($sql);
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			}
 
-			if(!$assign_default_values AND $this->database->mysqli->affected_rows > 0){
-				$sql = "INSERT IGNORE INTO layer_attributes2stelle (layer_id, attributename, stelle_id, privileg, tooltip) ";
-				$sql.= "SELECT ".$layer_ids[$i].", name, ".$this->id.", privileg, query_tooltip FROM layer_attributes WHERE layer_id = ".$layer_ids[$i]." AND privileg IS NOT NULL";
+			if (!$assign_default_values AND $this->database->mysqli->affected_rows > 0) {
+				$insert = "
+					INSERT INTO layer_attributes2stelle (
+						layer_id,
+						attributename,
+						stelle_id,
+						privileg,
+						tooltip
+					)
+				";
+				# Rechte von der Elternstelle übernehmen
+				$sql = $insert . "
+					SELECT 
+						layer_id,
+						attributename,
+						" . $this->id . ",
+						privileg,
+						tooltip
+					FROM
+						layer_attributes2stelle l,
+						stellen_hierarchie
+					WHERE
+						(select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
+						layer_id = " . $layer_ids[$i] . " AND
+						stelle_id = parent_id AND
+						child_id = " . $this->id . "
+					ON DUPLICATE KEY UPDATE
+						layer_id = l.layer_id, 
+						attributename = l.attributename, 
+						stelle_id = " . $this->id . ", 
+						privileg = l.privileg, 
+						tooltip = l.tooltip
+					";
+				#echo $sql.'<br>';
+				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
+				$this->database->execSQL($sql);
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+				if ($this->database->mysqli->affected_rows != 0) {
+					# löschen der Einträge für "kein Zugriff" Rechte
+					$sql = "
+					DELETE l 
+					FROM 
+						layer_attributes2stelle l 
+						LEFT JOIN stellen_hierarchie ON l.stelle_id = child_id 
+						LEFT JOIN layer_attributes2stelle l2 ON 
+							l2.layer_id = " . $layer_ids[$i] . " AND 
+							l2.stelle_id = parent_id AND 
+							l.attributename = l2.attributename 
+					WHERE
+						l.layer_id = " . $layer_ids[$i] . " AND 
+						l.stelle_id = " . $this->id . " AND 
+						l2.attributename IS NULL;
+						";
+					#echo $sql.'<br>';
+					$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
+					$this->database->execSQL($sql);
+					if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+				}
+				else {
+					# wenn nicht von Elternstelle übernommen, Defaultrechte übernehmen
+					$sql = $insert . "
+						SELECT 
+							" . $layer_ids[$i] . ",
+							name,
+							" . $this->id . ",
+							privileg,
+							query_tooltip 
+						FROM 
+							layer_attributes 
+						WHERE 
+							layer_id = ".$layer_ids[$i]." AND 
+							privileg IS NOT NULL";
+				}
 				#echo $sql.'<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
@@ -1457,19 +1580,25 @@ class stelle {
 		$sql = "
 			SELECT
 				l.*,
-				ul.*
+				ul.*,
+				parent_id,
+				ul2.Stelle_ID as used_layer_parent_id
 			FROM
-				layer AS l JOIN
-				used_layer AS ul ON l.Layer_ID = ul.Layer_ID
+				layer AS l 
+				JOIN used_layer AS ul ON l.Layer_ID = ul.Layer_ID
+				LEFT JOIN stellen_hierarchie ON child_id = " . $this->id . "
+				LEFT JOIN used_layer AS ul2 ON 
+					l.Layer_ID = ul2.Layer_ID AND	
+					ul2.Stelle_ID = parent_id
 			WHERE
-				Stelle_ID = " . $this->id .
+				ul.Stelle_ID = " . $this->id .
 				($Layer_id != '' ? " AND l.Layer_ID = " . $Layer_id : '') . "
 		";
 		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		while ($rs=$this->database->result->fetch_array()) {
+		while ($rs=$this->database->result->fetch_assoc()) {
 			$layer[] = ($result == 'only_ids' ? $rs['Layer_ID'] : $rs);
 		}
 		return $layer;
@@ -1551,9 +1680,17 @@ class stelle {
 		return $newpath;
 	}
 
-	function set_layer_privileges($layer_id, $privileg, $exportprivileg){
-		$sql = 'UPDATE used_layer SET privileg = "'.$privileg.'", export_privileg = "'.$exportprivileg.'" WHERE ';
-		$sql.= 'layer_id = '.$layer_id.' AND stelle_id = '.$this->id;
+	function set_layer_privileges($layer_id, $privileg, $exportprivileg, $use_parent_privileges){
+		$sql = '
+			UPDATE 
+				used_layer 
+			SET 
+				privileg = "' . $privileg . '", 
+				export_privileg = "' . $exportprivileg . '" ,
+				use_parent_privileges = "' . ($use_parent_privileges ?: 0) . '" 
+			WHERE 
+				layer_id = '.$layer_id.' AND 
+				stelle_id = '.$this->id;
 		$this->debug->write("<p>file:stelle.php class:stelle->set_layer_privileges - Speichern der Layerrechte zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
@@ -1574,6 +1711,11 @@ class stelle {
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
 		# dann Attributrechte eintragen
 		for ($i = 0; $i < count($attributes['type']); $i++) {
+			if ($formvars['used_layer_parent_id'] != '' AND $formvars['use_parent_privileges' . $this->id] == 1) {
+				# wenn Eltern-Stelle für diesen Layer vorhanden, deren Rechte übernehmen
+				$formvars['privileg_' . $attributes['name'][$i] .'_'. $this->id] = $formvars['privileg_' . $attributes['name'][$i] .'_'. $formvars['used_layer_parent_id']];
+				$formvars['tooltip_' . $attributes['name'][$i] .'_'. $this->id] = $formvars['tooltip_' . $attributes['name'][$i] .'_'. $formvars['used_layer_parent_id']];
+			}
 			if($formvars['privileg_'.$attributes['name'][$i].'_'.$this->id] !== '') {
 				$sql = "
 					INSERT INTO

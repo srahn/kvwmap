@@ -1334,16 +1334,16 @@ class GUI {
     return $legend;
   }
 
-	function create_layer_legend($layer, $requires = false){		
-		if(!$requires AND $layer['requires'] != '' OR $requires AND $layer['requires'] == '')return;
+	function create_layer_legend($layer, $requires = false){
+		if(!$requires AND value_of($layer, 'requires') != '' OR $requires AND value_of($layer, 'requires') == '')return;
 		global $legendicon_size;
 		$visible = $this->check_layer_visibility($layer);
 		# sichtbare Layer
 		if ($visible) {
-			if ($layer['requires'] == '') {
+			if (value_of($layer, 'requires') == '') {
 				$legend = '<tr><td valign="top">';
 
-				if ($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']) {
+				if ($layer['queryable'] == 1 AND !value_of($this->formvars, 'nurFremdeLayer')) {
 					$input_attr['id'] = 'qLayer' . $layer['Layer_ID'];
 					$input_attr['name'] = 'qLayer' . $layer['Layer_ID'];
 					$input_attr['title'] = ($layer['queryStatus'] == 1 ? $this->deactivatequery : $this->activatequery);
@@ -1402,7 +1402,7 @@ class GUI {
 				$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="0">';
 
 				$legend .=  '<input id="thema_'.$layer['Layer_ID'].'" ';
-				if($layer['selectiontype'] == 'radio'){
+				if(value_of($layer, 'selectiontype') == 'radio'){
 					$legend .=  'type="radio" ';
 					$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$layer['Gruppe'].', '.$this->user->rolle->instant_reload.')"';
 					$this->radiolayers[$layer['Gruppe']] = value_of($this->radiolayers, $layer['Gruppe']).$layer['Layer_ID'].'|';
@@ -1425,7 +1425,7 @@ class GUI {
 				if ($this->user->rolle->showlayeroptions) {
 					$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
 				}
-				if($layer['metalink'] != ''){
+				if(value_of($layer, 'metalink') != ''){
 					if(substr($layer['metalink'], 0, 10) != 'javascript'){
 						$legend .= ' target="_blank"';
 						if(strpos($layer['metalink'], '?') === false)$layer['metalink'] .= '?';
@@ -1437,7 +1437,7 @@ class GUI {
 				else
 					$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
 				$legend .= '<span id="'.str_replace('"', '', str_replace("'", '', str_replace('-', '_', $layer['alias']))).'"';
-				if($layer['minscale'] != -1 AND $layer['maxscale'] > 0){
+				if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
 					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 				}
 				$legend .=' >'.html_umlaute($layer['alias']).'</span>';
@@ -1458,22 +1458,23 @@ class GUI {
 				$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"> </div>';
 			}
 			if($layer['aktivStatus'] == 1 AND isset($layer['Class'][0]) AND $layer['Class'][0]['Name'] != ''){
-				if($layer['requires'] == '' AND $layer['Layer_ID'] > 0){
+				if(value_of($layer, 'requires') == '' AND $layer['Layer_ID'] > 0){
 					$legend .= '<input id="classes_'.$layer['Layer_ID'].'" name="classes_'.$layer['Layer_ID'].'" type="hidden" value="'.$layer['showclasses'].'">';
 				}
 				if ($layer['showclasses'] != 0) {
 					if($layer['connectiontype'] == 7){      # WMS
 						if($layer['Class'][$k]['legendgraphic'] != ''){
 							$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
-							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><img src="'.$imagename.'"></div><br>';
+							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$imagename.'"></div><br>';
 						}
 						else{
+							$url = str_ireplace('&styles=', '&style=', $layer['connection']);
 							$layersection = substr($layer['connection'], strpos(strtolower($layer['connection']), 'layers')+7);
 							$pos = strpos($layersection, '&');
 							if($pos !== false)$layersection = substr($layersection, 0, $pos);
 							$layers = explode(',', $layersection);
 							for($l = 0; $l < count($layers); $l++){
-								$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div><br>';
+								$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="' . $url . '&layer=' . $layers[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div><br>';
 							}
 						}
 					}
@@ -1499,6 +1500,9 @@ class GUI {
 										$style->set('width', 2);
 										$style->set('maxwidth', 2);
 									}
+									if ($maplayer->type == MS_LAYER_CHART) {
+										$maplayer->set('type', MS_LAYER_POLYGON);		# Bug-Workaround Chart-Typ
+									}
 								}
 								else{		# Punktlayer
 									if($style->size > 14)$style->set('size', 14);
@@ -1511,7 +1515,7 @@ class GUI {
 								}
 							}
 							$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
-							if($s > 0){
+							if($s > 0 OR $class->status == MS_OFF){
 								$width = $height = '';
 								if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
 								if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
@@ -1573,7 +1577,7 @@ class GUI {
 		}
 
 		# unsichtbare Layer
-		if($layer['requires'] == '' AND !$visible){
+		if(value_of($layer, 'requires') == '' AND !$visible){
 			$legend .=  '
 						<tr>
 							<td valign="top">';
@@ -1635,13 +1639,13 @@ class GUI {
 			$legend .=  '</td>
 					</tr>';
 		}
-		
+
 		# requires-Layer
-		if($layer['required'] != ''){
+		if(value_of($layer, 'required') != ''){
 			foreach($layer['required'] as $require_layer_id){
 				$legend .= $this->create_layer_legend($this->layerset['layer_ids'][$require_layer_id], true);
 			}
-		}		
+		}
 		return $legend;
 	}
 

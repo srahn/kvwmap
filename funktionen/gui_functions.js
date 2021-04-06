@@ -16,10 +16,11 @@ else{
 var query_tab;
 var root = window;
 root.resized = 0;
+root.open_subform_requests = 0;
 
 window.onbeforeunload = function(){
 	document.activeElement.blur();
-	if(root.document.GUI.gle_changed.value == 1){
+	if(root.document && root.document.GUI.gle_changed.value == 1){
 		return "Es existieren ungespeicherte Datensätze. Wollen Sie wirklich fortfahren?";
 	}
 }
@@ -434,7 +435,6 @@ function onload_functions() {
 	}
 	document.onmousemove = drag;
   document.onmouseup = dragstop;
-	document.onmousedown = stop;
 	getBrowserSize();
 	if(auto_map_resize){
 		window.onresize = function(){ clearTimeout(doit); doit = setTimeout(resizemap2window, 200);};
@@ -458,12 +458,6 @@ var height = 0;
 // Mausposition
 var posx = 0;
 var posy = 0;
-
-function stop(event){
-	if(dragobjekt != null || resizeobjekt != null){		// markieren von Elementen verhindern, falls Mauszeiger aus Overlay gezogen wird
-		preventDefault(event);
-	}
-}
 
 function dragstart(element){
 	if(document.fullyLoaded){
@@ -489,13 +483,6 @@ function resizestart(element, type){
 
 
 function dragstop(){
-	if(dragobjekt){
-		document.GUI.overlayx.value = parseInt(dragobjekt.style.left);
-		document.GUI.overlayy.value = parseInt(dragobjekt.style.top);
-		if(document.GUI.overlayx.value < 0)document.GUI.overlayx.value = 10;
-		if(window.innerHeight - 20 - document.GUI.overlayy.value < 0)document.GUI.overlayy.value = window.innerHeight - 20;
-		ahah('index.php', 'go=saveOverlayPosition&overlayx='+document.GUI.overlayx.value+'&overlayy='+document.GUI.overlayy.value, new Array(''), new Array(""));
-	}
   dragobjekt = null;
 	resizeobjekt = null;
 }
@@ -552,10 +539,23 @@ function drag(event) {
   }
 }
 
+function auto_resize_overlay(){
+	if (root.resized < 2) {		// wenn resized > 1 hat der Nutzer von Hand die Groesse veraendert, dann keine automatische Anpassung
+		root.resized = 0;
+		var contentWidth = document.getElementById("contentdiv").offsetWidth;
+		if (contentWidth < screen.width) {
+			window.resizeTo(contentWidth+35, 800);
+		}
+		else {
+			window.resizeTo(screen.width, screen.height);
+			//window.moveTo(0, 0);
+		}
+	}
+}
+
 function activate_overlay(){
 	document.onmousemove = drag;
   document.onmouseup = dragstop;
-	document.onmousedown = stop;
 	window.onmouseout = function(evt){
 		if(evt.relatedTarget == evt.toElement && (root.document.GUI.overlayx.value != window.screenX || root.document.GUI.overlayy.value != window.screenY)){
 			root.document.GUI.overlayx.value = window.screenX;
@@ -570,17 +570,7 @@ function activate_overlay(){
 		svgdoc = root.document.SVG.getSVGDocument();	
 		if(svgdoc != undefined)svgdoc.getElementById('polygon').setAttribute("points", "");
 	}
-	if(root.resized < 2){		// wenn resized > 1 hat der Nutzer von Hand die Groesse veraendert, dann keine automatische Anpassung
-		root.resized = 0;
-		var contentWidth = document.getElementById("contentdiv").offsetWidth;
-		if(contentWidth < screen.width){
-			window.resizeTo(contentWidth+35, 800);
-		}
-		else{
-			window.resizeTo(screen.width, screen.height);
-			//window.moveTo(0, 0);
-		}
-	}
+	auto_resize_overlay();
 	document.fullyLoaded = true;
 	window.focus();
 }
@@ -589,19 +579,6 @@ function deactivate_overlay(){
 	if(checkForUnsavedChanges()){
 		document.getElementById('contentdiv').scrollTop = 0;
 		document.getElementById('overlaydiv').style.display='none';
-	}
-}
-
-function minimize_overlay(){
-	if(document.getElementById('contentdiv').style.display != 'none'){
-		document.getElementById('contentdiv').style.display = 'none';
-		document.getElementById('overlayfooter').style.display = 'none';
-		document.getElementById('minmaxlink').title = 'Maximieren';
-	}
-	else{
-		document.getElementById('contentdiv').style.display = '';
-		document.getElementById('overlayfooter').style.display = 'block';
-		document.getElementById('minmaxlink').title = 'Minimieren';
 	}
 }
 
@@ -714,14 +691,14 @@ function overlay_submit(gui, start, target){
 				query_tab.close();
 			}
 			query_tab = root.window.open("", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
-			gui.mime_type.value = 'overlay_html';
+			gui.window_type.value = 'overlay';
 			gui.target = 'Sachdaten';			
 		}
 	}
 	gui.submit();
 	if(gui.CMD != undefined)gui.CMD.value = "";
 	gui.target = '';
-	gui.mime_type.value = '';
+	gui.window_type.value = '';
 }
 
 function overlay_link(data, start, target){
@@ -738,7 +715,7 @@ function overlay_link(data, start, target){
 				else if(start && browser == 'firefox' && query_tab != undefined && root.resized < 2){	// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
 					query_tab.close();
 				}
-				query_tab = root.window.open("index.php?"+data+"&mime_type=overlay_html", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
+				query_tab = root.window.open("index.php?"+data+"&window_type=overlay", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
 				if(root.document.GUI.CMD != undefined)root.document.GUI.CMD.value = "";
 			}
 			else{

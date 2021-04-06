@@ -109,7 +109,7 @@ class Nachweis {
       while($rs=pg_fetch_array($ret[1])){
 				$art[] = $rs['art'];
       }
-			if(count($art) > 0){
+			if (@count($art) > 0) {
 				$fp = fopen($pfad.'readme.txt', 'w');
 				fwrite($fp, 'Diese Dokumentarten wurden bei der Berechnung der Flurstückszuordnung und des Gesamtpolygons nicht berücksichtigt:'.chr(10).chr(10));
 				fwrite($fp, implode(chr(10), array_unique($art)));
@@ -311,20 +311,24 @@ class Nachweis {
   function check_poly_in_flur($polygon, $flur, $gemarkung, $epsg){
   	$sql = "SELECT st_isvalid(st_geomfromtext('".$polygon."', ".$epsg."))";
   	$ret=$this->database->execSQL($sql,4, 1);
-  	$rs = pg_fetch_row($ret[1]);
-		if($rs[0] == 'f'){
-			$result = 'invalid';
-			return $result;
+		if(!$ret[0]){
+			$rs = pg_fetch_row($ret[1]);
+			if($rs[0] == 'f'){
+				$result = 'invalid';
+				return $result;
+			}
+			$ret=$this->database->check_poly_in_flur($polygon, $epsg);
+			if(!$ret[0]){
+				$result = 'f';	
+				while($rs = pg_fetch_row($ret[1])){
+					if($gemarkung == $rs[0] AND $flur == ltrim($rs[1], '0')){
+						$result = 't';
+						break;
+					}
+				}
+				return $result;
+			}
 		}
-  	$ret=$this->database->check_poly_in_flur($polygon, $epsg);
-  	$result = 'f';	
-  	while($rs = pg_fetch_row($ret[1])){
-  		if($gemarkung == $rs[0] AND $flur == ltrim($rs[1], '0')){
-  			$result = 't';
-  			break;
-  		}
-  	}
-  	return $result;
   }
   
   function pruefeEingabedaten($id, $datum, $VermStelle, $hauptart, $gueltigkeit, $stammnr, $rissnummer, $fortfuehrung, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring, $flur, $blattnr, $pok_pflicht){
@@ -788,9 +792,9 @@ class Nachweis {
 			$order="n.flurid, n.stammnr, n.datum";
 		}
 		$order_rissnummer = "
-			(regexp_matches(n.rissnummer, '^\D*'))[1],
+			(regexp_matches(coalesce(n.rissnummer, ''), '^\D*'))[1],
 			NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::bigint,
-			(regexp_matches(n.rissnummer, '\D*$'))[1]
+			(regexp_matches(coalesce(n.rissnummer, ''), '\D*$'))[1]
 		";
 		$order = str_replace('blattnummer', "NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint", $order);		// nach Blattnummer nummerisch sortieren
 		$order = str_replace('rissnummer', $order_rissnummer, $order);		// nach Rissnummer 3-stufig alphanumerisch und nummerisch sortieren
@@ -968,7 +972,7 @@ class Nachweis {
 					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
 					if($alle_der_messung){
-						$sql.=" JOIN nachweisverwaltung.n_nachweise AS n2 ON n.oid = n2.oid OR (n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "").")";
+						$sql.=" JOIN nachweisverwaltung.n_nachweise AS n2 ON n.id = n2.id OR (n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "").")";
 						$n = 'n2';
 					}					
           $sql.=" WHERE 1=1 ";
@@ -1072,7 +1076,7 @@ class Nachweis {
             while ($rs=pg_fetch_assoc($ret[1])) {
               $nachweise[]=$rs;
             }
-            $this->erg_dokumente=count($nachweise);
+            $this->erg_dokumente = @count($nachweise);
             $this->Dokumente=$nachweise;
           }
         }
@@ -1096,7 +1100,7 @@ class Nachweis {
           $sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";					
 					$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
 					if($alle_der_messung){
-						$sql.=" JOIN nachweisverwaltung.n_nachweise AS n2 ON n.oid = n2.oid OR (n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "").")";
+						$sql.=" JOIN nachweisverwaltung.n_nachweise AS n2 ON n.id = n2.id OR (n.flurid = n2.flurid AND n.".NACHWEIS_PRIMARY_ATTRIBUTE." = n2.".NACHWEIS_PRIMARY_ATTRIBUTE." ".((NACHWEIS_SECONDARY_ATTRIBUTE) ? "and n.".NACHWEIS_SECONDARY_ATTRIBUTE." = n2.".NACHWEIS_SECONDARY_ATTRIBUTE : "").")";
 						$n = 'n2';
 					}
  					$sql.=" WHERE 1=1";
@@ -1126,7 +1130,7 @@ class Nachweis {
             while ($rs=pg_fetch_assoc($ret[1])) {
               $nachweise[]=$rs;
             }
-            $this->erg_dokumente=count($nachweise);
+            $this->erg_dokumente = @count($nachweise);
             $this->Dokumente=$nachweise;      
           }
         }

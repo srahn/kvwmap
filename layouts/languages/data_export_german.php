@@ -17,4 +17,5 @@
 	$strOptions='Optionen';
 	$strSingleGeoms = "Einzelgeometrien abfragen";
 	$strWithin = "nur innenliegend";
+	$strExportSettings = 'Export-Einstellungen';
 ?>
