@@ -61,11 +61,10 @@ class spatial_processor {
     }
     else {
     	$rs = pg_fetch_assoc($ret[1]);
+			$result = $rs['svg'] . '||' . $rs['wkt'];
+			return $result;
     }
-    return $rs;
   }
-  
-
 	
 	function union($geom_1, $geom_2, $normalize = true) {
 		$union = "
@@ -107,12 +106,13 @@ class spatial_processor {
 		#echo $sql;
 		$ret = $this->pgdatabase->execSQL($sql,4, 0, true);
 		if ($ret[0]) {
-			echo '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+			$rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
 		}
 		else {
 			$rs = pg_fetch_assoc($ret[1]);
-		}
-		return $rs;
+			$result = $rs['svg'] . '||' . $rs['wkt'];
+			return $result;
+		}		
 	}
 
 	/*
@@ -165,8 +165,9 @@ class spatial_processor {
 		}
 		else {
 			$rs = pg_fetch_assoc($ret[1]);
+			$result = $rs['svg'] . '||' . $rs['wkt'];
+			return $result;
 		}
-		return $rs;
 	}
 
   function area($geom, $unit){
@@ -205,8 +206,9 @@ class spatial_processor {
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
+			$result = $rs['svg'] . '||' . $rs['wkt'];
+			return $result;
     }
-    return $rs;
   }
 	
 	function reverse($geom){
@@ -217,8 +219,9 @@ class spatial_processor {
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
+			$result = $rs['svg'] . '||' . $rs['wkt'];
+			return $result;
     }
-    return $rs;
   }	
   
   function process_query($formvars){
@@ -297,85 +300,54 @@ class spatial_processor {
 					}
 				}
 			}break;
-			
-			case 'get_closest_line':{
-				$rs = $this->get_closest_line($polywkt1, $formvars['fromwhere']);
-				$result = $rs['svg'];
-				$result .= '||';
-				$result .= $rs['wkt'];
-			}break;
-			
+						
 			case 'translate':{
-				$rs = $this->translate($polywkt1, $formvars['translate_x'], $formvars['translate_y']);
-				$result = $rs['svg'];
-				$result .= '||';
-				$result .= $rs['wkt'];
+				$result = $this->translate($polywkt1, $formvars['translate_x'], $formvars['translate_y']);
 			}break;
 			
 			case 'reverse':{
-				$rs = $this->reverse($polywkt1);
-				$result = $rs['svg'];
-				$result .= '||';
-				$result .= $rs['wkt'];
+				$result = $this->reverse($polywkt1);
 			}break;
 			
 			case 'buffer':{
-				if($formvars['width'] == ''){$formvars['width'] = 50;}
-				$rs = $this->buffer($polywkt1, $formvars['width']);
-				$result = $rs['svg'];
-				$result .= '||';
-				$result .= $rs['wkt'];
+				if ($formvars['width'] == '') {
+					$formvars['width'] = 50;
+				}
+				$result = $this->buffer($polywkt1, $formvars['width']);				
 			}break;
 			
 			case 'buffer_ring':{
-				$rs = $this->buffer_ring($polywkt1, $formvars['width']);
-				$result = $rs['svg'];
-				$result .= '||';
-				$result .= $rs['wkt'];
+				$result = $this->buffer_ring($polywkt1, $formvars['width']);
 			}break;
 			
 			case 'add_buffer_within_polygon':{
-				$rs = $this->add_buffer_within_polygon($polywkt1, $polywkt2, $formvars);
-				$result = $rs['svg'];
-				$result .= '||';
-				$result .= $rs['wkt'];
+				$result = $this->add_buffer_within_polygon($polywkt1, $polywkt2, $formvars);
 			}break;			
 		
 			case 'add_buffered_line':{
-				if($formvars['width'] == ''){$formvars['width'] = 50;}
-				$rs = $this->add_buffered_line($polywkt1, $polywkt2, $formvars['width']);
-				$result = $rs['svg'];
-				$result .= '||';
-				$result .= $rs['wkt'];
+				if ($formvars['width'] == '') {
+					$formvars['width'] = 50;
+				}
+				$result = $this->add_buffered_line($polywkt1, $polywkt2, $formvars['width']);
 			}break;
 			
 			case 'add_parallel_polygon':{
-				if($formvars['width'] == ''){$formvars['width'] = 50;}
-				$rs = $this->add_parallel_polygon($polywkt1, $polywkt2, $formvars['width'], $formvars['side'], $formvars['subtract']);
-				$result = $rs['svg'];
-				$result .= '||';
-				$result .= $rs['wkt'];
+				if ($formvars['width'] == '') {
+					$formvars['width'] = 50;
+				}
+				$result = $this->add_parallel_polygon($polywkt1, $polywkt2, $formvars['width'], $formvars['side'], $formvars['subtract']);
 			}break;
 		
 			case 'split':{
-				$rs = $this->split($polywkt1, $polywkt2);
-				$result = $rs['svg'];
-				$result .= '||';
-				$result .= $rs['wkt'];
+				$result = $this->split($polywkt1, $polywkt2);
 			}break;
 		
 			case 'add':{
-				$rs = $this->union($polywkt1, $polywkt2);
-				$result = $rs['svg'];
-				$result .= '||';
-				$result .= $rs['wkt'];
+				$result = $this->union($polywkt1, $polywkt2);
 			}break;
 			
 			case 'subtract':{
-				$rs = $this->difference($polywkt1, $polywkt2);
-				$result = $rs['svg'];
-				$result .= '||';
-				$result .= $rs['wkt'];
+				$result = $this->difference($polywkt1, $polywkt2);
 			}break;
 			
 			case 'area':{
@@ -406,10 +378,7 @@ class spatial_processor {
 				if($polywkt1 == ''){
 					$polywkt1 = 'POINT EMPTY';
 				}
-				$rs = $this->union($polywkt1, $querygeometryWKT);
-				$result = $rs['svg'];
-				$result .= '||';
-				$result .= $rs['wkt'];
+				$result = $this->union($polywkt1, $querygeometryWKT);
 			}break;
 			
 			case 'subtract_geometry':{
@@ -423,10 +392,7 @@ class spatial_processor {
 					$polywkt1 = $querygeometryWKT;
 				}
 				$diff = $polywkt1;
-				$rs = $this->difference($diff, $querygeometryWKT);
-				$result = $rs['svg'];
-				$result .= '||';
-				$result .= $rs['wkt'];
+				$result = $this->difference($diff, $querygeometryWKT);
 			}break;
 			
 		}
@@ -473,8 +439,9 @@ class spatial_processor {
     }
     else {
     	$rs = pg_fetch_assoc($ret[1]);
+			$result = $rs['svg'] . '||' . $rs['wkt'];
+			return $result;
     }
-    return $rs;
   }
   
 	function buffer_ring($geom_1, $width){
@@ -501,8 +468,9 @@ class spatial_processor {
     }
     else {
     	$rs = pg_fetch_assoc($ret[1]);
+			$result = $rs['svg'] . '||' . $rs['wkt'];
+			return $result;
     }
-    return $rs;
   }
 		
 	function add_buffer_within_polygon($geom_1, $geom_2, $formvars){
@@ -520,8 +488,9 @@ class spatial_processor {
     }
     else {
     	$rs = pg_fetch_assoc($ret[1]);
+			$result = $rs['svg'] . '||' . $rs['wkt'];
+			return $result;
     }
-    return $rs;
   }
 	
 	function add_buffered_line($geom_1, $geom_2, $width){
@@ -544,8 +513,9 @@ class spatial_processor {
     }
     else {
     	$rs = pg_fetch_assoc($ret[1]);
+			$result = $rs['svg'] . '||' . $rs['wkt'];
+			return $result;
     }
-    return $rs;
   }
 	
 	function add_parallel_polygon($geom_1, $geom_2, $width, $side, $subtract){
@@ -582,34 +552,9 @@ class spatial_processor {
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
+			$result = $rs['svg'] . '||' . $rs['wkt'];
+			return $result;
     }
-    return $rs;
-  }
-
-  
-  function get_closest_line($input_coord, $type, $fromwhere){		# wird nicht verwendet
-  	$coord1 = explode(';',$input_coord);
-  	$coord2 = explode(',',$coord1[0]);
-  	$worldx = $this->rolle->oGeorefExt->minx+$this->rolle->pixsize*$coord2[0]; # x Wert
-    $worldy = $this->rolle->oGeorefExt->miny+$this->rolle->pixsize*($this->rolle->nImageHeight-$coord2[1]); # y Wert
-    $point = 'POINT('.$worldx.' '.$worldy.')';  	
-    
-  	if($type == 'wkt'){
-  		$sql = "SELECT '".$point."'";
-  	}																				# wkt liefert nur den Punkt, svg die Linie
-  	else{
-  		$sql = "select st_assvg(snapline(linefrompoly(the_geom),st_geomfromtext('".$point."',2398)), 0, 15) AS Segment ";
-  	}
- 		$sql .= $fromwhere;
-  	$sql .= " AND st_within(st_geomfromtext('".$point."',2398), the_geom)"; 	
-  	$ret = $this->pgdatabase->execSQL($sql,4, 0);
-    if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
-    }
-    else {
-    	$rs = pg_fetch_array($ret[1]);
-    }
-    return $rs[0];
   }
 
 	function getgeometrybyquery($rect, $layer_id, $singlegeom) {
