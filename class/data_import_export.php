@@ -694,7 +694,7 @@ class data_import_export {
 				$sql = "
 					SELECT
 						count(*),
-						max(geometrytype(geom)) AS geometrytype
+						max(geometrytype(the_geom)) AS geometrytype
 					FROM
 						" . $table . ";
 				";
