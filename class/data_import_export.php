@@ -42,6 +42,7 @@ class data_import_export {
 		$file_name_parts[0] = substr($filename, 0, strrpos($filename, '.'));
 		$file_name_parts[1] = substr($filename, strrpos($filename, '.')+1);
 		if($filetype == NULL)$filetype = strtolower($file_name_parts[1]);
+		$unique_column = 'gid';
 		switch($filetype) {
 			case 'shp' : case 'dbf' : case 'shx' : {
 				$custom_tables = $this->import_custom_shape($file_name_parts, $user, $pgdatabase, $epsg);
@@ -69,6 +70,7 @@ class data_import_export {
 			case 'json' : case 'geojson' : {
 				$custom_tables = $this->import_custom_geojson($filename, $pgdatabase, $epsg);
 				$epsg = $custom_tables[0]['epsg'];
+				$unique_column = 'ogc_fid';
 			} break;
 			case 'geotif' : case 'tiff' : case 'tif' : {
 				$custom_tables = $this->import_custom_geotif($filename, $pgdatabase, $epsg);
@@ -92,7 +94,8 @@ class data_import_export {
 						$user,
 						basename($filename) . " (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
 						$custom_table,
-						$epsg
+						$epsg,
+						$unique_column
 					);
 				}
 				return -$layer_id;
@@ -127,7 +130,7 @@ class data_import_export {
 		";
 	}
 
-	function create_rollenlayer($pgdatabase, $stelle, $user, $layername, $custom_table, $epsg) {
+	function create_rollenlayer($pgdatabase, $stelle, $user, $layername, $custom_table, $epsg, $unique_column) {
 		$dbmap = new db_mapObj($stelle->id, $user->id);
 		$group = $dbmap->getGroupbyName('Eigene Importe');
 		if ($group != '') {
@@ -150,7 +153,7 @@ class data_import_export {
 			$this->formvars['transparency'] = 100;
 		}
 		else{
-			$this->formvars['Data'] = 'the_geom from (SELECT * FROM ' . CUSTOM_SHAPE_SCHEMA . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ')as foo using unique gid using srid=' . $epsg;
+			$this->formvars['Data'] = 'the_geom from (SELECT * FROM ' . CUSTOM_SHAPE_SCHEMA . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ')as foo using unique ' . $unique_column . ' using srid=' . $epsg;
 			$this->formvars['query'] = 'SELECT * FROM ' . $custom_table['tablename'] . ' WHERE 1=1' . $custom_table['where'];
 			$this->formvars['connection_id'] = $pgdatabase->connection_id;
 			$this->formvars['connectiontype'] = 6;
