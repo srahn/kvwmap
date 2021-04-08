@@ -5381,7 +5381,7 @@ echo '			</table>
 		$data = $dbmap->getData($layerset[0]['Layer_ID']);
 		$explosion = explode(' ', $data);
 		$datageom = $explosion[0];
-		$select = $dbmap->getSelectFromData($data);
+		$select = $dbmap->getSelectFromData($data);		
 
 		$orderbyposition = strrpos(strtolower($select), 'order by');
 		$lastfromposition = strrpos(strtolower($select), 'from');
@@ -5395,10 +5395,15 @@ echo '			</table>
 		if($auto_class_attribute != '' AND strpos($select, '*') === false AND strpos($select, $auto_class_attribute) === false){			# Attribut für automatische Klassifizierung mit ins data packen
 			$select = str_replace(' from ', ', '.$auto_class_attribute.' from ', strtolower($select));
 		}
-		if(strpos(strtolower($select), 'where') === false){
+		$wherepos = strpos(strtolower($select), 'where');
+		if($wherepos === false){
 			$select .= " WHERE ";
 		}
-		else{
+		else{			
+			include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
+			$parser = new PHPSQLParser($select, true);
+			$select = substr($select, 0, $wherepos);
+			$select .= ' WHERE (' . sql_from_parse_tree($parser->parsed['WHERE']) . ')';	# Where-Klausel klammern
 			$select .= " AND ";
 		}
 		$oid = $layerset[0]['oid'];
