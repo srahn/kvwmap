@@ -2103,4 +2103,18 @@ function attributes_from_select($sql) {
 	}
 	return $attributes;
 }
+
+function sql_from_parse_tree($parse_tree){
+	$sql = array();
+	foreach ($parse_tree as $node) {
+		if ($node['sub_tree'] != '') {
+			$sql[] .= sql_from_parse_tree($node['sub_tree']);
+		}
+		else {
+			$sql[] .= $node['base_expr'];
+		}
+	}
+	return implode(' ', $sql);
+}
+
 ?>
