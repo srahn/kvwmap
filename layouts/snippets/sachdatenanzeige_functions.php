@@ -21,7 +21,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	}
 	
 	adjustHref = function(link){
-		if (link.href.substring(0,9) != 'index.php' && link.target != 'root' && enclosingForm.name == 'GUI2') {
+		if (link.href.substring(0,9) == 'index.php' && link.target != 'root' && enclosingForm.name == 'GUI2') {
 			link.href = link.href.replace('?', '?window_type=overlay&');
 		}
 	}
