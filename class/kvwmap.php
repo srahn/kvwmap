@@ -8393,7 +8393,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 		$this->GenerischeSuche_Suchen();
 		for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++) {			# die Suchparameter für die Layersuche wieder leeren
-			$this->formvars['value_'.$this->attributes['subform_pkeys'][$j][$p]] = '';
+			$this->formvars['value_'.$attributes['subform_pkeys'][$j][$p]] = '';
 		}
 		$this->formvars['selected_layer_id'] = $layerid_save;
 	}
