@@ -71,7 +71,7 @@
 			if ($layer_id != '') {
 				# Abfragen der Layerdefinition
 				$layerset = $GUI->user->rolle->getLayer($layer_id);
-				if ($layerset and $layerset[0]['connectiontype'] == '6') {
+				if ($layerset and $layerset[0]['sync'] and $layerset[0]['connectiontype'] == '6') {
 					# Abfragen der Privilegien der Attribute
 					$privileges = $GUI->Stelle->get_attributes_privileges($layer_id);
 
