@@ -805,6 +805,7 @@ function getlegend(groupid, layerid, fremde) {
 function updateThema(event, thema, query, groupradiolayers, queryradiolayers, instantreload){
 	var status = query.checked;
 	var reload = false;
+	document.GUI.legendtouched.value = 1;
   if(status == true){
     if(thema.checked == false){
 			thema.checked = true;
@@ -869,6 +870,7 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 }
 
 function updateQuery(event, thema, query, radiolayers, instantreload){
+	document.GUI.legendtouched.value = 1;
   if(query){
     if(thema.checked == false){
       query.checked = false;
