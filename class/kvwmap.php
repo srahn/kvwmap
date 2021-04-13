@@ -3301,7 +3301,7 @@ echo '			</table>
 				}break;
 			}
 			#$this->debug->write("<br>WKT von GML-Geometrie: ".$wkt,4);
-			$fromwhere = "from (select st_transform(unnest(".$wkt."), ".$this->user->rolle->epsg_code.") as geom) as foo";
+			$fromwhere = "from (select unnest(".$wkt.") as geom) as foo";
 			$geom = 'geom';
 			$layerdb = $this->pgdatabase;
 		}
