@@ -741,6 +741,7 @@ function update_legend(layerhiddenstring){
 			(document.getElementById('thema_'+parts[j]) != undefined && document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 0) || 	// wenn Layer nicht sichtbar war und jetzt sichtbar ist
 			(document.getElementById('thema_'+parts[j]) != undefined && !document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 1)) 	// oder andersrum
 		{
+			clearLegendRequests();
 			legende = document.getElementById('legend');
 			root.getlegend_requests.push(ahah('index.php', 'go=get_legend', new Array(legende), ""));
 			break;
@@ -886,12 +887,16 @@ function deleteRollenlayer(type){
 
 function neuLaden(){
 	startwaiting(true);
+	clearLegendRequests();
+	if(currentform.neuladen)currentform.neuladen.value='true';
+	get_map_ajax('go=navMap_ajax', '', 'if(document.GUI.oldscale != undefined){document.GUI.oldscale.value=document.GUI.nScale.value;}');
+}
+
+function clearLegendRequests(){
 	[].forEach.call(root.getlegend_requests, function (request){	// noch laufende getlegend-Requests abbrechen
 		request.abort();				
 	});
 	root.getlegend_requests = new Array();
-	if(currentform.neuladen)currentform.neuladen.value='true';
-	get_map_ajax('go=navMap_ajax', '', 'if(document.GUI.oldscale != undefined){document.GUI.oldscale.value=document.GUI.nScale.value;}');
 }
 
 function preventDefault(e){
