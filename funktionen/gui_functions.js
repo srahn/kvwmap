@@ -17,6 +17,7 @@ var query_tab;
 var root = window;
 root.resized = 0;
 root.open_subform_requests = 0;
+root.getlegend_requests = new Array();
 
 window.onbeforeunload = function(){
 	document.activeElement.blur();
@@ -735,41 +736,19 @@ function datecheck(value){
 function update_legend(layerhiddenstring){
 	parts = layerhiddenstring.split(' ');
 	for(j = 0; j < parts.length-1; j=j+2){
-		if((parts[j] == 'reload')||																																																								// wenn Legenden-Reload erzwungen wird oder
+		if (
+			(parts[j] == 'reload') ||																																																								// wenn Legenden-Reload erzwungen wird oder
 			(document.getElementById('thema_'+parts[j]) != undefined && document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 0) || 	// wenn Layer nicht sichtbar war und jetzt sichtbar ist
-			(document.getElementById('thema_'+parts[j]) != undefined && !document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 1)){	// oder andersrum
+			(document.getElementById('thema_'+parts[j]) != undefined && !document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 1)) 	// oder andersrum
+		{
 			legende = document.getElementById('legend');
-			ahah('index.php', 'go=get_legend', new Array(legende), "");
+			[].forEach.call(root.getlegend_requests, function (request){
+				request.abort();				
+			});
+			root.getlegend_requests = new Array();
+			root.getlegend_requests.push(ahah('index.php', 'go=get_legend', new Array(legende), ""));
 			break;
 		}
-	}
-}
-
-function getlegend(groupid, layerid, fremde){
-	groupdiv = document.getElementById('groupdiv_'+groupid);
-	if(layerid == ''){														// eine Gruppe wurde auf- oder zugeklappt
-		group = document.getElementById('group_'+groupid);
-		if(group.value == 0){												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
-			group.value = 1;
-			ahah('index.php', 'go=get_group_legend&'+group.name+'='+group.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
-		}
-		else{																// eine Gruppe wurde zugeklappt -> Layerstruktur nur verstecken
-			group.value = 0;
-			layergroupdiv = document.getElementById('layergroupdiv_'+groupid);
-			groupimg = document.getElementById('groupimg_'+groupid);
-			layergroupdiv.style.display = 'none';			
-			groupimg.src = 'graphics/plus.gif';
-		}
-	}
-	else{																	// eine Klasse wurde auf- oder zugeklappt
-		layer = document.getElementById('classes_'+layerid);
-		if(layer.value == 0){
-			layer.value = 1;
-		}
-		else{
-			layer.value = 0;
-		}
-		ahah('index.php', 'go=get_group_legend&layer_id='+layerid+'&show_classes='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
 	}
 }
 
