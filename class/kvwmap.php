@@ -5165,11 +5165,7 @@ echo '			</table>
 		if($wherepos === false){
 			$select .= " WHERE ";
 		}
-		else{			
-			include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
-			$parser = new PHPSQLParser($select, true);
-			$select = substr($select, 0, $wherepos);
-			$select .= ' WHERE (' . sql_from_parse_tree($parser->parsed['WHERE']) . ')';	# Where-Klausel klammern
+		else{
 			$select .= " AND ";
 		}
 		$oid = $layerset[0]['oid'];
