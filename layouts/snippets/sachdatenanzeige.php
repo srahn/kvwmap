@@ -18,7 +18,7 @@
 		<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
 	</a>
 	<a name="oben"></a><?
-	if ($this->formvars['mime_type'] == 'overlay_html') { ?>
+	if ($this->formvars['window_type'] == 'overlay') { ?>
 		<script type="text/javascript">
 			if (document.getElementById('overlayfooter') != undefined) 	document.getElementById('overlayfooter').style.display = 'none';
 			if (document.getElementById('savebutton') != undefined) 		document.getElementById('savebutton').style.display = 'none';
@@ -32,7 +32,7 @@ if ($anzLayer==0) {
 	<?php	
 }
 	
-if($this->formvars['printversion'] == '' AND $this->formvars['mime_type'] != 'overlay_html') { ?>
+if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != 'overlay') { ?>
 <div id="contentdiv" style="width: 100%;max-height:<? echo $this->user->rolle->nImageHeight; ?>px;position:relative;overflow-y: auto;overflow-x: hidden; border-bottom: 1px solid #bbb">
 	<div style="margin-right: 10px">
 <? }
@@ -145,7 +145,7 @@ if(!empty($this->noMatchLayers)){
 <? }
 }
 
-if($this->formvars['printversion'] == '' AND $this->formvars['mime_type'] != 'overlay_html') { ?>
+if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != 'overlay') { ?>
 </div></div>
 <? } ?>
 
@@ -170,7 +170,7 @@ if($this->formvars['printversion'] == ''){ ?>
 	</a>
 <? 
 }
-if($this->formvars['mime_type'] == 'overlay_html'){ ?>
+if($this->formvars['window_type'] == 'overlay'){ ?>
 	<br>
 	<br>
 	<br>
@@ -181,7 +181,7 @@ if($this->formvars['mime_type'] == 'overlay_html'){ ?>
 		<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
     <tr>
     	<td width="49%" class="px13">
-				<? if($this->formvars['mime_type'] == 'overlay_html'){ ?>
+				<? if($this->formvars['window_type'] == 'overlay'){ ?>
 					<script type="text/javascript">
 						if(document.getElementById('overlayfooter') != undefined){
 							document.getElementById('overlayfooter').style.display = 'block';
@@ -205,7 +205,7 @@ if($this->formvars['mime_type'] == 'overlay_html'){ ?>
 			</td>
       <td align="center">
 			<?  if($this->editable != ''){
-						if($this->formvars['mime_type'] == 'overlay_html'){ ?>
+						if($this->formvars['window_type'] == 'overlay'){ ?>
 							<script type="text/javascript">
 								if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'block';
 							</script>
@@ -215,7 +215,7 @@ if($this->formvars['mime_type'] == 'overlay_html'){ ?>
 					}?>
 			</td>
 			<td align="right" width="49%">
-		<? if($this->formvars['mime_type'] == 'overlay_html'){ ?>
+		<? if($this->formvars['window_type'] == 'overlay'){ ?>
 					<script type="text/javascript">
 						if(document.getElementById('overlayfooter') != undefined)document.getElementById('overlayfooter').style.display = 'block';
 					</script>

@@ -1289,7 +1289,7 @@ class user {
 	}
 
 	function Aendern($userdaten) {
-		if ($userdaten['changepasswd']) {
+		if ($userdaten['changepasswd'] == 1) {
 			$passwort_column = ", `passwort` = MD5('" . $this->database->mysqli->real_escape_string($userdaten['password2']) . "')";
 			$passwort_setting_time_column = ", `password_setting_time` = CURRENT_TIMESTAMP()";
 		}

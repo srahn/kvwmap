@@ -73,7 +73,7 @@
 			<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
 			<div id="datensatz_<? echo $layer['Layer_ID'].'_'.$k; ?>" class="datensatz"
 				<?
-				if ($this->new_entry != true AND $this->user->rolle->querymode == 1) { ?>
+				if ($this->new_entry != true AND $this->user->rolle->querymode == 1 AND $layer['attributes']['the_geom'] != '') { ?>
 					onmouseenter="highlight_object(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');"<?
 				} ?>
 			><?php
@@ -88,7 +88,7 @@
 				<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
         <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle gledata"'; ?>>
 <?							
-			for($j = 0; $j < count($layer['attributes']['name']); $j++) {
+			for($j = 0; $j < @count($layer['attributes']['name']); $j++) {
 				$attribute_class = (($this->new_entry == true AND $layer['attributes']['dont_use_for_new'][$j] == -1) ? 'hidden' : 'visible');
 				// if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['saveable'][$j] == '0')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 					// $layer['attributes']['form_element_type'][$j] .= '_not_saveable';

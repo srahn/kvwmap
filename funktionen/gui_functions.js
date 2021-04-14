@@ -17,6 +17,7 @@ var query_tab;
 var root = window;
 root.resized = 0;
 root.open_subform_requests = 0;
+root.getlegend_requests = new Array();
 
 window.onbeforeunload = function(){
 	document.activeElement.blur();
@@ -691,14 +692,14 @@ function overlay_submit(gui, start, target){
 				query_tab.close();
 			}
 			query_tab = root.window.open("", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
-			gui.mime_type.value = 'overlay_html';
+			gui.window_type.value = 'overlay';
 			gui.target = 'Sachdaten';			
 		}
 	}
 	gui.submit();
 	if(gui.CMD != undefined)gui.CMD.value = "";
 	gui.target = '';
-	gui.mime_type.value = '';
+	gui.window_type.value = '';
 }
 
 function overlay_link(data, start, target){
@@ -715,7 +716,7 @@ function overlay_link(data, start, target){
 				else if(start && browser == 'firefox' && query_tab != undefined && root.resized < 2){	// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
 					query_tab.close();
 				}
-				query_tab = root.window.open("index.php?"+data+"&mime_type=overlay_html", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
+				query_tab = root.window.open("index.php?"+data+"&window_type=overlay", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
 				if(root.document.GUI.CMD != undefined)root.document.GUI.CMD.value = "";
 			}
 			else{
@@ -735,41 +736,16 @@ function datecheck(value){
 function update_legend(layerhiddenstring){
 	parts = layerhiddenstring.split(' ');
 	for(j = 0; j < parts.length-1; j=j+2){
-		if((parts[j] == 'reload')||																																																								// wenn Legenden-Reload erzwungen wird oder
+		if (
+			(parts[j] == 'reload') ||																																																								// wenn Legenden-Reload erzwungen wird oder
 			(document.getElementById('thema_'+parts[j]) != undefined && document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 0) || 	// wenn Layer nicht sichtbar war und jetzt sichtbar ist
-			(document.getElementById('thema_'+parts[j]) != undefined && !document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 1)){	// oder andersrum
+			(document.getElementById('thema_'+parts[j]) != undefined && !document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 1)) 	// oder andersrum
+		{
+			clearLegendRequests();
 			legende = document.getElementById('legend');
-			ahah('index.php', 'go=get_legend', new Array(legende), "");
+			root.getlegend_requests.push(ahah('index.php', 'go=get_legend', new Array(legende), ""));
 			break;
 		}
-	}
-}
-
-function getlegend(groupid, layerid, fremde){
-	groupdiv = document.getElementById('groupdiv_'+groupid);
-	if(layerid == ''){														// eine Gruppe wurde auf- oder zugeklappt
-		group = document.getElementById('group_'+groupid);
-		if(group.value == 0){												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
-			group.value = 1;
-			ahah('index.php', 'go=get_group_legend&'+group.name+'='+group.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
-		}
-		else{																// eine Gruppe wurde zugeklappt -> Layerstruktur nur verstecken
-			group.value = 0;
-			layergroupdiv = document.getElementById('layergroupdiv_'+groupid);
-			groupimg = document.getElementById('groupimg_'+groupid);
-			layergroupdiv.style.display = 'none';			
-			groupimg.src = 'graphics/plus.gif';
-		}
-	}
-	else{																	// eine Klasse wurde auf- oder zugeklappt
-		layer = document.getElementById('classes_'+layerid);
-		if(layer.value == 0){
-			layer.value = 1;
-		}
-		else{
-			layer.value = 0;
-		}
-		ahah('index.php', 'go=get_group_legend&layer_id='+layerid+'&show_classes='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
 	}
 }
 
@@ -805,6 +781,7 @@ function getlegend(groupid, layerid, fremde) {
 function updateThema(event, thema, query, groupradiolayers, queryradiolayers, instantreload){
 	var status = query.checked;
 	var reload = false;
+	document.GUI.legendtouched.value = 1;
   if(status == true){
     if(thema.checked == false){
 			thema.checked = true;
@@ -869,6 +846,7 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 }
 
 function updateQuery(event, thema, query, radiolayers, instantreload){
+	document.GUI.legendtouched.value = 1;
   if(query){
     if(thema.checked == false){
       query.checked = false;
@@ -909,8 +887,16 @@ function deleteRollenlayer(type){
 
 function neuLaden(){
 	startwaiting(true);
+	clearLegendRequests();
 	if(currentform.neuladen)currentform.neuladen.value='true';
 	get_map_ajax('go=navMap_ajax', '', 'if(document.GUI.oldscale != undefined){document.GUI.oldscale.value=document.GUI.nScale.value;}');
+}
+
+function clearLegendRequests(){
+	[].forEach.call(root.getlegend_requests, function (request){	// noch laufende getlegend-Requests abbrechen
+		request.abort();				
+	});
+	root.getlegend_requests = new Array();
 }
 
 function preventDefault(e){

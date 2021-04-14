@@ -700,7 +700,7 @@
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					if ($show_link) {
 						if ($explosion[2] == 'embedded'){
-							$datapart .= '<a class="dynamicLink" href="javascript:void(0);" onclick="if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
+							$datapart .= '<a class="dynamicLink" href="javascript:void(0);" onclick="if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'&embedded=true\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
 							$datapart .= '<div style="display:inline" id="dynamicLink'.$layer_id.'_'.$k.'_'.$j.'"></div>';
@@ -709,7 +709,6 @@
 							switch ($explosion[2]) { 
 								case 'no_new_window' : {
 									$link_target = '_self';
-									$mimetype = $gui->mime_type;
 								} break;
 								case 'root' : {
 									$link_target = 'root';
@@ -718,45 +717,34 @@
 									$link_target = '_blank';
 								}
 							}
-							if ($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') {
-								$link_attribute = 'onclick="checkForUnsavedChanges(event);"';
+							if ($explosion[2] == 'no_new_window' AND substr($href, 0, 10) != 'javascript') {
+								$onclick = 'checkForUnsavedChanges(event);adjustHref(this);';
 							}
-							else {
-								# link_parts: link_type:link_url
-								$link_type = explode(':', $href)[0];
-								$link_url = explode(':', $href)[1];
-								switch ($link_type) {
-									case 'mailto' : {
-										$url_parts = explode('?', $link_url);
-										$mail_addresses = explode(' ', $url_parts[0]);
-										$params = array();
-										if (count($mail_addresses) > 1) {
-											# append extra email addresses in cc deliminated by ;
-											$params[] = 'cc=' . implode(';', array_slice($mail_addresses, 1));
-										}
-										$params[] = $url_parts[1];
-										$href_parts = array($link_type, $mail_addresses[0] . '?' . implode('&', $params));
-									} break;
-									case 'javascript' : {
-										$href_parts = array($link_type, $link_url);
-									} break;
-									default : {
-										$href_parts = array($href . '&mime_type=' . $mimetype);
+							# link_parts: link_type:link_url
+							$link_type = explode(':', $href)[0];
+							$link_url = explode(':', $href)[1];
+							switch ($link_type) {
+								case 'mailto' : {
+									$url_parts = explode('?', $link_url);
+									$mail_addresses = explode(' ', $url_parts[0]);
+									$params = array();
+									if (count($mail_addresses) > 1) {
+										# append extra email addresses in cc deliminated by ;
+										$params[] = 'cc=' . implode(';', array_slice($mail_addresses, 1));
 									}
-								}
-								$link_attribute = 'href="' . implode(':', $href_parts) . '"';
+									$params[] = $url_parts[1];
+									$href = $link_type . ':' . $mail_addresses[0] . '?' . implode('&', $params);
+								} break;								
 							}
+							
 							$datapart .= '<a
 								tabindex="1"
 								target="' . $link_target . '"
 								class="dynamicLink"
 								style="font-size: ' . $fontsize . 'px"
-								' . $link_attribute . '
-								target="' . $link_target . '"
+								onclick="' . $onclick . '"
+								href="' . $href . '"
 							>' . $alias . '</a><br>';
-							if ($GUI->user->id == 1) {
-								echo '<br><textarea>' . $link_attribute . '</textarea>';
-							}
 						}
 					}
 				} break;

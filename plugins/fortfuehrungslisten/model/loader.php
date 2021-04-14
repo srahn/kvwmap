@@ -41,7 +41,7 @@ class NASLoader extends DOMDocument {
 			}
 			if (empty($xml_file_name)) {
 				$success = false;
-				$this->messages[] = array(
+				GUI::$messages[] = array(
 					'msg' => "Keine Datei mit der Endung _2000 in Zip-Datei gefunden. Prüfen Sie bitte ob Sie die richtige Zip-Datei hochgeladen haben.",
 					'type' => 'error'
 				);
@@ -54,7 +54,7 @@ class NASLoader extends DOMDocument {
 
 		if (empty($xml_file_name)) {
 			$success = false;
-			$this->messages[] = array(
+			GUI::$messages[] = array(
 				'msg' => "Keine Datei gefunden. Prüfen Sie ob Sie schon eine Datei hochgeladen haben.",
 				'type' => 'error'
 			);
@@ -92,7 +92,7 @@ class NASLoader extends DOMDocument {
 
 			if ($antragsnummer_datei != $ff_auftrag->get('antragsnr')) {
 				$success = false;
-				$this->messages[] = array(
+				GUI::$messages[] = array(
 					'msg' => "Die Antragsnummer in der Auftragsdatei (" . $antragsnummer_datei . ") stimmt nicht mit der Antragsnr im Formular (" . $ff_auftrag->get('antragsnr') . ") überein.<br>Prüfen Sie die Eingabe und die Datei<br>und laden Sie ggf. eine neue Datei hoch!",
 					'type' => 'warning'
 				);
@@ -108,7 +108,7 @@ class NASLoader extends DOMDocument {
 							if (!$success) {
 								$msg .= "<br>Korrigieren Sie die Gemarkungsnummer im Formular, prüfen Sie ob die Auftragsdatei korrekt ist oder speichern Sie vorher, dass der Datensatz nicht geprüft werden soll.";
 							}
-							$this->messages[] = array(
+							GUI::$messages[] = array(
 								'msg' => $msg,
 								'type' => ($ff_auftrag->get('an_pruefen') == 't' ? 'error' : 'warning')
 							);
@@ -178,14 +178,14 @@ class NASLoader extends DOMDocument {
 										$result = $this->is_last_nenner($child_node->nodeValue, $ff->get('fortfuehrungsfallnummer'));
 										if ($result['success']) {
 											if (!empty($result['bigger_kennz'])) {
-												$this->messages[] = array(
+												GUI::$messages[] = array(
 													'msg' => $result['msg'],
 													'type' => 'warning'
 												);
 											}
 										}
 										else {
-											$this->messages[] = array(
+											GUI::$messages[] = array(
 												'msg' => $result['msg'],
 												'type' => 'error'
 											);
@@ -196,7 +196,7 @@ class NASLoader extends DOMDocument {
 									$ff->set_array($tag, $child_node->nodeValue);
 								}
 								else {
-									$this->messages[] = array(
+									GUI::$messages[] = array(
 										'msg' => 'Im Fortführungsfall Nr.: ' . $ff->get('fortfuehrungsfallnummer') . ' ist die alte Flurstücksnummer:<br>' . $ff->get('zeigtaufaltesflurstueck')[0] . ' identisch mit der neuen Nummer.<br>In dem Fall wird die neue Nummer nicht gespeichert.',
 										'type' => 'warning'
 									);

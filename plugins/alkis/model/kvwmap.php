@@ -180,9 +180,11 @@
 		#$datastring.=" " . $alias.".flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
 		$datastring.=" flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
     $legendentext="Flurstück";
-    if(count($FlurstListe) > 1)$legendentext .= "e";
+    if (@count($FlurstListe) > 1) {
+			$legendentext .= "e";
+		}
     $legendentext .= " (".date('d.m. H:i',time())."):<br>" . $FlurstListe[0];
-    for ($i=1;$i<count($FlurstListe);$i++) {
+    for ($i=1; $i < @count($FlurstListe); $i++) {
       $datastring.=",'" . $FlurstListe[$i]."'";
       $legendentext.=",<br>" . $FlurstListe[$i];
     }
@@ -712,8 +714,10 @@
           else {
             # Es wurde mindestens ein eindeutiges FlurstKennz in FlstID ausgewählt, oder ein oder mehrere über FlstNr gefunden
             # Zoom auf Flurstücke
-						$GUI->zoomToALKFlurst($FlurstKennz,10);
-						$GUI->saveMap('');
+						if ($GUI->user->rolle->querymode == 1 OR $GUI->formvars['ALK_Suche'] == 1) {
+							$GUI->zoomToALKFlurst($FlurstKennz,10);
+							$GUI->saveMap('');
+						}						
             if($GUI->formvars['ALK_Suche'] == 1){
 							if($GUI->formvars['go_next'] != ''){
 								$GUI->formvars['FlurstKennz'] = $FlurstKennz;

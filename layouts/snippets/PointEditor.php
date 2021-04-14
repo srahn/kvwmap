@@ -30,7 +30,7 @@ function send(){
 </script>
 
 <?php
-if ($this->messages != '') {
+if (GUI::$messages != '') {
 	$bgcolor = BG_FORM;
 }
 else {

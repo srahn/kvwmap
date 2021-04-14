@@ -76,7 +76,6 @@ class GUI {
   var $FormObject;
   var $StellenForm;
   var $Fehlermeldung;
-  var $messages;
   var $Hinweis;
   var $Stelle;
   var $ALB;
@@ -109,6 +108,7 @@ class GUI {
   var $form_field_names;
   var $editable;
 	var $notices;
+	static $messages = array();
 
 	function __construct($main, $style, $mime_type) {
 		# Debugdatei setzen
@@ -143,17 +143,21 @@ class GUI {
 	}
 
 	function add_message($type, $msg) {
+		GUI::add_message_($type, $msg);
+	}
+
+	public static function add_message_($type, $msg) {
 		if (is_array($msg) AND array_key_exists('success', $msg) AND is_array($msg)) {
 			$type = 'notice';
 			$msg = $msg['msg'];
 		}
 		if ($type == 'array' or is_array($msg)) {
 			foreach($msg AS $m) {
-				$this->add_message($m['type'], $m['msg']);
+				GUI::add_message($m['type'], $m['msg']);
 			}
 		}
 		else {
-			$this->messages[] = array(
+			GUI::$messages[] = array(
 				'type' => $type,
 				'msg' => $msg
 			);
