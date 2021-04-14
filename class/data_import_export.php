@@ -55,6 +55,7 @@ class data_import_export {
 			case 'gpx' : {
 				$epsg = 4326;
 				$custom_tables = $this->import_custom_gpx($filename, $pgdatabase, $epsg);
+				$unique_column = 'ogc_fid';
 			} break;
 			case 'ovl' : {
 				$epsg = 4326;
