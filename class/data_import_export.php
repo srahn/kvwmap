@@ -1257,18 +1257,21 @@ class data_import_export {
 				}break;
 			}
 			# Dokumente auch mit dazupacken
-			if($this->formvars['download_documents'] != ''){
-				if($result == NULL){
-					while($rs=pg_fetch_assoc($ret[1])){
+			if ($this->formvars['download_documents'] != '') {
+				if ($result == NULL) {
+					while ($rs=pg_fetch_assoc($ret[1])){
 						$result[] = $rs;
 					}
 				}
 				$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, true);
-				for($i = 0; $i < count($result); $i++){
+				$zip_empty = true;
+				for ($i = 0; $i < count($result); $i++) {
 					$zip = $this->copy_documents_to_export_folder($result[$i], $this->attributes, $layerset[0]['maintable'], $folder);
+					if ($zip) {
+						$zip_empty = false;
+					}
 				}
 			}
-
 			# Bei Bedarf auch Metadatendatei mit dazupacken
 			if ($this->formvars['with_metadata_document'] != '' AND $layerset[0]['metalink'] != '') {
 				$metadata_file = IMAGEPATH . $folder. '/' . basename($layerset[0]['metalink']);
@@ -1285,7 +1288,7 @@ class data_import_export {
 			}
 
 			# bei Bedarf zippen
-			if ($zip) {
+			if (!$zip_empty) {
 				# Beim Zippen gehen die Umlaute in den Dateinamen kaputt, deswegen vorher umwandeln
 				array_walk(searchdir(IMAGEPATH.$folder, true), function($item, $key){
 					$pathinfo = pathinfo($item);
@@ -1297,12 +1300,11 @@ class data_import_export {
 				$contenttype = 'application/octet-stream';
 			}
 			# temp. Tabelle wieder löschen
-			$sql = 'DROP TABLE '.$temp_table;
+			$sql = 'DROP TABLE ' . $temp_table;
 			$ret = $layerdb->execSQL($sql,4, 0);
 			if ($this->formvars['export_format'] != 'CSV') {
 				$user->rolle->setConsumeShape($currenttime, $this->formvars['selected_layer_id'], $count);
 			}
-
 			if ($err == '') {
 				// Update timestamp formular_element_types having option export
 				$time_attributes = array();
@@ -1314,7 +1316,6 @@ class data_import_export {
 						$time_attributes[] = $value . " = '" . $currenttime . "'";
 					}
 				};
-
 				if (!$layerset[0]['maintable_is_view'] AND count($time_attributes) > 0) {
 					$update_table = $layerset[0]['schema'] . '.' . $layerset[0]['maintable'];
 					$sql = "
@@ -1328,9 +1329,9 @@ class data_import_export {
 							update_table." . $layerset[0]['oid'] . " = data_table." . $layerset[0]['oid'] . "
 					";
 					#echo '<br>sql: ' . $sql;
-					$ret = $layerdb->execSQL($sql, 4, 0);
+					$ret = $layerdb->execSQL($sql, 4, 0, true);
 					if ($ret[0]) {
-						$err_msg = 'Speicherung der Zeitstempel ' . implode(", ", $time_attributes) . ' fehlgeschlagen.<br>' . $ret[1];
+						$err = 'Speicherung der Zeitstempel ' . implode(", ", $time_attributes) . ' fehlgeschlagen.<br>' . sql_err_msg('Die Datenbank meldet:', $sql, $ret[1], 'error_div_' . rand(1, 99999));
 					}
 				}
 			}
@@ -1356,7 +1357,7 @@ class data_import_export {
 	function copy_documents_to_export_folder($result, $attributes, $maintable, $folder){
 		global $GUI;
 		$zip = false;
-		foreach($result As $key => $value){
+		foreach ($result As $key => $value) {
 			$j = $attributes['indizes'][$key];
 			if ($attributes['form_element_type'][$j] == 'SubFormEmbeddedPK') {
 				$GUI->getSubFormResultSet($attributes, $j, $maintable, $result);
@@ -1365,17 +1366,22 @@ class data_import_export {
 					$zip = $zip || $zip2;
 				}
 			}
-			if($attributes['form_element_type'][$j] == 'Dokument' AND $value != ''){
+			if ($attributes['form_element_type'][$j] == 'Dokument' AND $value != '') {
 				$docs = array($value);
-				if(substr($attributes['type'][$j], 0, 1) == '_'){		# Array
+				if (substr($attributes['type'][$j], 0, 1) == '_') {
+					# Array
 					$docs = explode(',', $value);
 				}
-				foreach($docs as $doc){
+				foreach ($docs as $doc) {
 					$doc = trim($doc, '[]{}"');
 					$parts = explode('&original_name=', $doc);
-					if($parts[1] == '')$parts[1] = basename($parts[0]);		# wenn kein Originalname da, Dateinamen nehmen
-					if(file_exists($parts[0])){
-						if(file_exists(IMAGEPATH.$folder.'/'.$parts[1])){		# wenn schon eine Datei mit dem Originalnamen existiert, wird der Dateiname angehängt
+					if ($parts[1] == '') {
+						# wenn kein Originalname da, Dateinamen nehmen
+						$parts[1] = basename($parts[0]);
+					}
+					if (file_exists($parts[0])) {
+						if (file_exists(IMAGEPATH . $folder . '/' . $parts[1])) {
+							# wenn schon eine Datei mit dem Originalnamen existiert, wird der Dateiname angehängt
 							$file_parts = explode('.', $parts[1]);
 							$parts[1] = $file_parts[0].'_'.basename($parts[0]);
 						}
