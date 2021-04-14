@@ -1,5 +1,6 @@
 <?
 	$disabled = '';
+	$parent_privileges_checkbox = '';
 	if ($this->layer[0]['used_layer_parent_id'] != ''){
 		if ($this->layer[0]['use_parent_privileges']) {
 			$disabled = 'disabled="true"';
