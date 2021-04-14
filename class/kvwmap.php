@@ -9506,7 +9506,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$exif_data = array();
 			if ($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']) {		# nur Attribute aus der Haupttabelle werden gespeichert
 				for ($i = 0; $i < count($table['attributname']); $i++) {
-					if (array_key_exists($table['attributname'][$i], $attributes['indizes'])) { 	# Rechte
+					if (array_key_exists($table['attributname'][$i], $attributes['constraints'])) { 	# Rechte
 						switch (true) {
 							case ($table['type'][$i] == 'Time') : {                       # Typ "Time"
 								if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
@@ -13453,7 +13453,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$this->formvars['changed_' . $layer_id . '_' . str_replace('-', '', $oid)] == 1 OR
 						$this->formvars['embedded']
 					) AND
-					array_key_exists($attributname, $attributes['indizes']) AND 	# Rechte
+					array_key_exists($attributname, $attributes['constraints']) AND 	# Rechte
 					$attributname != $layerset[$layer_id][0]['oid'] AND
 					$tablename != '' AND
 					$saveable AND
