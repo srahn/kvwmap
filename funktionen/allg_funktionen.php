@@ -2119,15 +2119,7 @@ function get_requires_options($sql, $requires) {
 	include_once(WWWROOT . APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
 	include_once(WWWROOT . APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLCreator.php');
 	# Entfernt requires Tag damit kein Syntax-Fehler im sql ist.
-	$sql = str_replace(
-		'<requires>',
-		'',
-		str_replace(
-			'</requires>',
-			'',
-			$sql
-		)
-	);
+	$sql = str_replace(['<requires>', '</requires>'],	'',	$sql);
 	$parser = new PHPSQLParser($sql, true);
 	# Füge das Requires Attribut zum Select hinzu
 	array_unshift(
@@ -2150,4 +2142,18 @@ function get_requires_options($sql, $requires) {
 	$creator = new PHPSQLCreator($parser->parsed);
 	return $creator->created;
 }
+
+function sql_from_parse_tree($parse_tree){
+	$sql = array();
+	foreach ($parse_tree as $node) {
+		if ($node['sub_tree'] != '') {
+			$sql[] .= sql_from_parse_tree($node['sub_tree']);
+		}
+		else {
+			$sql[] .= $node['base_expr'];
+		}
+	}
+	return implode(' ', $sql);
+}
+
 ?>
