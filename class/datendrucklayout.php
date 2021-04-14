@@ -945,7 +945,7 @@ class ddl {
 	function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $result, $stelle, $user, $preview = NULL, $record_paging = NULL ) {
 		$result = (!$result ? array() : $result);
 		$this->layerset = $layerset[0];
-		$this->layout = $layout;		
+		$this->layout = $layout;
 		$this->Stelle = $stelle;
 		$this->attributes = $attributes;
 		$this->result = $result;
@@ -1242,7 +1242,7 @@ class ddl {
 			}
 			$dateiname = $dateiname . '.pdf';
 			$this->outputfile = $dateiname;
-			$fp = fopen($dateipfad.$dateiname,'wb');
+			$fp = fopen($dateipfad . $dateiname, 'wb');
 			fwrite($fp, $this->pdf->ezOutput());
 			fclose($fp);
 			return $dateipfad . $dateiname;

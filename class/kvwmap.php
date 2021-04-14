@@ -8718,7 +8718,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$layerset[0]['layouts'] = $ddl->load_layouts($this->Stelle->id, NULL, $layerset[0]['Layer_ID'], array(0,1));
 
 				# last_search speichern
-				if($this->formvars['no_last_search'] == '' AND $this->last_query == '' AND value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'subform_link') == ''){
+				if ($this->formvars['no_last_search'] == '' AND $this->last_query == '' AND value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'subform_link') == ''){
 					$this->formvars['search_name'] = '<last_search>';
 					$this->user->rolle->delete_search($this->formvars['search_name']);		# das muss hier stehen bleiben, denn in save_search wird mit der Layer-ID gelöscht
 					$this->user->rolle->save_search($attributes, $this->formvars);
@@ -10340,13 +10340,15 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	/*
-	* Übergebene Parameter:
+	* Übergebene formvars Daten:
 	* go=generischer_sachdaten_druck_Drucken
 	* aktivesLayout=31
 	* chosen_layer_id=743
+	* archiveren => 1 Wenn PDF in Dokumentpfad gespeichert und in Dokument Attribut hinterlegt werden soll statt download
+	* Wenn archivieren = 1 wird auch oid übergeben und daraus werden die beiden folgenden Parameter abgeleitet
+	* oid => 23453
 	* checkbox_names_743=check;rechnungen;rechnungen;222792641| Nur ein Feld wenn archivieren
 	* check;rechnungen;rechnungen;222792641=on
-	* archiveren => 1 Wenn PDF in Dokumentpfad gespeichert und in Dokument Attribut hinterlegt werden soll statt download
 	*/
 	function generischer_sachdaten_druck_drucken($pdfobject = NULL, $offsetx = NULL, $offsety = NULL) {
 		include_(CLASSPATH . 'datendrucklayout.php');
@@ -10410,7 +10412,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$result = $this->qlayerset[0]['shape'];
 		}
 		else {
-			for ($i = 0; $i < count($checkbox_names); $i++){
+			for ($i = 0; $i < count($checkbox_names); $i++) {
 				if ($this->formvars[$checkbox_names[$i]] == 'on') {
 					$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
 					$sql = "
@@ -10439,13 +10441,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			# PDF erzeugen
 			$output = $ddl->createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $ddl->selectedlayout[0], $result, $this->Stelle, $this->user, NULL, $this->formvars['record_paging']);
 		}
+
 		if ($pdfobject == NULL) {
 			# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF anzeigen
 			$this->outputfile = basename($output);
 			if ($this->formvars['archivieren']) {
-
 				# Dokumentpfad ermitteln
-				$document_path = $layerset[0]['document_path'];
+				$document_path = ($layerset[0]['document_path'] != '' ? $layerset[0]['document_path'] . '/' : CUSTOM_IMAGE_PATH);
 
 				# Dateiname für Speicherung im Dokumentpfad ermitteln
 				$document_file = $this->outputfile;
@@ -10463,7 +10465,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				))[0];
 
 				# Datei von tmp in das Ziel verschieben
-				#echo '<p>Verschiebe : ' . $output . ' nach: ' . $document_path . $document_file;
+				if (!is_dir($document_path)) {
+					mkdir($document_path, 0755);
+				}
 				rename($output, $document_path . $document_file);
 
 				# Wert in Attribut eintragen
@@ -10481,6 +10485,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if (!$ret['success']) {
 					$this->add_message('error', $ret[2]);
 				}
+				else {
+					$this->add_message('notice', 'PDF-Dokument erfolgreich erzeugt und hinzugefügt.');
+				}
+				$this->formvars['no_output'] = false;
 				$this->GenerischeSuche_Suchen();
 			}
 			else {
