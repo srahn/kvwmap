@@ -67,6 +67,7 @@ class data_import_export {
 			} break;
 			case 'dxf' : {
 				$custom_tables = $this->import_custom_dxf($filename, $pgdatabase, $epsg);
+				$unique_column = 'ogc_fid';
 			} break;
 			case 'json' : case 'geojson' : {
 				$custom_tables = $this->import_custom_geojson($filename, $pgdatabase, $epsg);
