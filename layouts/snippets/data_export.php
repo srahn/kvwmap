@@ -219,6 +219,9 @@ $j=0;
 												$format == 'CSV'
 											) {
 												echo '<option' . ($this->formvars['export_format'] == $format ? ' selected' : '') . ' value="' . $format . '">' . $format . '</option>';
+												if ($this->formvars['export_format'] == '') {
+													$this->formvars['export_format'] = $format;
+												}
 											}
 										} ?>
 									</select>

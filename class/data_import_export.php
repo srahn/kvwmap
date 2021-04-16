@@ -51,10 +51,12 @@ class data_import_export {
 			case 'kml' : {
 				$epsg = 4326;
 				$custom_tables = $this->import_custom_kml($filename, $pgdatabase, $epsg);
+				$unique_column = 'ogc_fid';
 			} break;
 			case 'gpx' : {
 				$epsg = 4326;
 				$custom_tables = $this->import_custom_gpx($filename, $pgdatabase, $epsg);
+				$unique_column = 'ogc_fid';
 			} break;
 			case 'ovl' : {
 				$epsg = 4326;
@@ -66,6 +68,7 @@ class data_import_export {
 			} break;
 			case 'dxf' : {
 				$custom_tables = $this->import_custom_dxf($filename, $pgdatabase, $epsg);
+				$unique_column = 'ogc_fid';
 			} break;
 			case 'json' : case 'geojson' : {
 				$custom_tables = $this->import_custom_geojson($filename, $pgdatabase, $epsg);
@@ -542,49 +545,45 @@ class data_import_export {
 		for($i = 0; $i < count($columns); $i++){
 			if($formvars['column'.$i] == 'x' AND !is_numeric(str_replace(',', '.', $columns[$i])))$headlines = true;		// die erste Zeile enthält die Spaltenüberschriften
 		}
-		$sql = "CREATE TABLE ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (";
-		$komma = false;
-		for($i = 0; $i < count($columns); $i++){
-			if($formvars['column'.$i] != 'x' AND $formvars['column'.$i] != 'y'){
-				if($komma)$sql.= ", ";
-				$j = $i+1;
-				if($headlines){
-					if(is_numeric(substr($columns[$i], 0, 1)))$columns[$i] = '_'.$columns[$i];
-					$column = strtolower(umlaute_umwandeln(utf8_encode($columns[$i])));
-					$sql.= $column." varchar";
-					if($formvars['column'.$i] == 'label')$labelitem = $column;
-				}
-				else{
-					$sql.= "spalte".$j." varchar";
-					if($formvars['column'.$i] == 'label')$labelitem = 'spalte'.$j;
-				}
-				$komma = true;
+		for ($i = 0; $i < count($columns); $i++) {
+			$j = $i+1;
+			if ($headlines) {
+				$table_column = strtolower(umlaute_umwandeln(utf8_encode($columns[$i])));
 			}
+			else{
+				$table_column = 'spalte' . $j;
+			}
+			if ($formvars['column' . $i] == 'label') {
+				$labelitem = $table_column;
+			}
+			if (in_array($formvars['column' . $i], ['x', 'y'])) {
+				$index[$formvars['column' . $i]] = $i;
+			}
+			$table_columns[] = $table_column;
 		}
-		$sql.= ");";
-		$sql.= "SELECT AddGeometryColumn('".CUSTOM_SHAPE_SCHEMA."', '".$tablename."', 'the_geom', ".$formvars['epsg'].", 'POINT', 2);";
-		$sql.= "CREATE INDEX ".$tablename."_gist_idx ON ".CUSTOM_SHAPE_SCHEMA.".".$tablename." USING gist (the_geom );";
+		$sql = '
+			CREATE TABLE ' . CUSTOM_SHAPE_SCHEMA . '.' . $tablename  .' (
+				gid serial,
+				"' . implode('" varchar, "', $table_columns) . "\" varchar
+			);
+			SELECT AddGeometryColumn('" . CUSTOM_SHAPE_SCHEMA . "', '" . $tablename . "', 'the_geom', " . $formvars['epsg'] . ", 'POINT', 2);
+			CREATE INDEX " . $tablename . "_gist_idx ON " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . " USING gist (the_geom );";
 		$i = 0;
-		foreach($rows as $row){
-			if($headlines AND $i == 0 OR trim($row, $formvars['delimiter']."\n\r") == ''){$i++;continue;}				// Überschriftenzeile und Leerzeilen auslassen
-			$columns = explode($formvars['delimiter'], $row);
-			$sql.= "INSERT INTO ".CUSTOM_SHAPE_SCHEMA.".".$tablename." VALUES(";
-			$komma = false;
-			for($i = 0; $i < count($columns); $i++){
-				if($formvars['column'.$i] != 'x' AND $formvars['column'.$i] != 'y'){
-					if($komma)$sql.= ", ";
-					$sql.= "E'".addslashes(utf8_encode($columns[$i]))."'";
-					$komma = true;
-				}
-				else{
-					${$formvars['column'.$i]} = $columns[$i];			# Hier werden $x und $y gesetzt (nicht das doppelte $ wegnehmen!)
-				}
+		foreach ($rows as $row) {
+			if ($headlines AND $i == 0 OR trim($row, $formvars['delimiter']."\n\r") == '') {
+				// Überschriftenzeile und Leerzeilen auslassen
+				$i++;continue;
 			}
-			$x = str_replace(',', '.', $x);
-			$y = str_replace(',', '.', $y);
-			if($komma)$sql.= ", ";
-			if(!is_numeric($x) OR !is_numeric($y))$sql.= "NULL);";
-			else $sql.= "st_geomfromtext('POINT(".$x." ".$y.")', ".$formvars['epsg']."));";
+			$values = explode($formvars['delimiter'], $row);
+			$x = str_replace(',', '.', $values[$index['x']]);
+			$y = str_replace(',', '.', $values[$index['y']]);
+			array_walk($values, function(&$value, $key){$value = "E'" . addslashes(utf8_encode($value)) . "'";});		
+			$sql.= '
+				INSERT INTO ' . CUSTOM_SHAPE_SCHEMA . '.' . $tablename .
+				'("' . implode('", "', $table_columns) . '", the_geom)
+				VALUES(
+				' . implode(', ', $values) . ',
+				' . ((!is_numeric($x) OR !is_numeric($y))? "NULL);" : "st_geomfromtext('POINT(" . $x . " " . $y . ")', " . $formvars['epsg'] . "));");
 			$i++;
 		}
 		#echo $sql;
