@@ -10,7 +10,7 @@
 				root.stopwaiting();	// wenn man aus der Karte abgefragt hatte, Warteanimation beenden		
 		<? if($this->formvars['window_type'] == 'overlay' AND $this->zoomed){ ?>		// wenn nicht aus normaler Suchmaske heraus gesucht wurde und (durch die Funktion generischeSuche_Suchen) auf die Treffer gezoomt wurde, Karte neu laden
 				root.startwaiting();
-				if(root.document.getElementById('map')){
+				if(root.document.getElementById('mapimage')){
 					root.neuLaden();
 				}
 				else{

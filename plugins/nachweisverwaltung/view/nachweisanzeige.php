@@ -84,13 +84,15 @@ function create_condition(){		// fuer alle der Messung
 }
 
 function zum_Auftrag_hinzufuegen(){
-	document.GUI.go_plus.value='zum_Auftrag_hinzufuegen';
-	document.GUI.submit();
+	currentform.go_plus.value='zum_Auftrag_hinzufuegen';
+	overlay_submit(currentform, false);
 }
 
 function aus_Auftrag_entfernen(){
-	document.GUI.go_plus.value='aus_Auftrag_entfernen';
-	document.GUI.submit();
+	if (window.confirm("Möchten sie wirklich Dokumente von der Antragsnummer: " + currentform.suchantrnr.value + " entfernen!?")){
+		currentform.go_plus.value='aus_Auftrag_entfernen';
+		overlay_submit(currentform, false);
+	}
 }
 
 function vorlage(){
@@ -103,8 +105,8 @@ function vorlage(){
 	}
 	if(count == 0)message([{ 'type': 'warning', 'msg': 'Bitte wählen Sie den Nachweis aus, der als Vorlage verwendet werden soll.' }]);
 	else{
-		document.GUI.go.value='Nachweisformular_Vorlage';
-		document.GUI.submit();
+		currentform.go.value='Nachweisformular_Vorlage';
+		overlay_submit(currentform, false, 'root');
 	}
 }
 
@@ -125,9 +127,9 @@ function updategeoms(){
 	}
 	if(count == 0)message([{ 'type': 'warning', 'msg': 'Bitte wählen Sie die Nachweise aus, deren Geometrie überschrieben werden soll.' }]);
 	else{
-		if(window.confirm("Wollen Sie wirklich "+count+" Nachweisgeometrien überschreiben?")){
-			document.GUI.go.value='Nachweisanzeige_Geometrieuebernahme';
-			document.GUI.submit();
+		if (window.confirm("Wollen Sie wirklich "+count+" Nachweisgeometrien überschreiben?")) {
+			currentform.go.value='Nachweisanzeige_Geometrieuebernahme';
+			overlay_submit(currentform, false);
 		}
 	}
 }
@@ -138,34 +140,44 @@ function bearbeiten(){
 	for(i = 0; i < ids.length; i++){
 		if(ids[i].checked)selected_ids.push(ids[i].value);
 	}
-	document.GUI.go.value='Layer-Suche_Suchen';
-	document.GUI.value_id.value = selected_ids.join('|');
-	document.GUI.submit();
+	currentform.go.value='Layer-Suche_Suchen';
+	currentform.value_id.value = selected_ids.join('|');
+	overlay_submit(currentform, true);
 }
 
-function loeschen(){
-	document.GUI.go.value='Nachweisloeschen';
-	document.GUI.submit();
+function loeschen(id){
+	if (id != null) {
+		if (window.confirm("Möchten Sie den Nachweis wirklich löschen?")) {
+			currentform.go.value='Nachweisloeschen';
+			overlay_link('go=Nachweisloeschen&id=' + id, false);
+		}
+	}
+	else {
+		if (window.confirm("Möchten Sie die Nachweise wirklich löschen?")) {
+			currentform.go.value='Nachweisloeschen';
+			overlay_submit(currentform, false);
+		}
+	}
 }
 
 function add_to_order(order){
-	if(document.GUI.order.value != '')document.GUI.order.value = document.GUI.order.value + ',';
-	document.GUI.order.value = document.GUI.order.value + order;
-	document.GUI.submit();
+	if(currentform.order.value != '')currentform.order.value = currentform.order.value + ',';
+	currentform.order.value = currentform.order.value + order;
+	overlay_submit(currentform, false);
 }
 
 function remove_from_order(order){
-	var before = document.GUI.order.value;
+	var before = currentform.order.value;
 	before = before.replace(order+',', '');
 	before = before.replace(','+order, '');
 	var after = before.replace(order, '');
-	document.GUI.order.value = after;
-	document.GUI.submit();
+	currentform.order.value = after;
+	overlay_submit(currentform, false);
 }
 
 function set_richtung(richtung){
-	document.GUI.richtung.value = richtung;
-	document.GUI.submit();
+	currentform.richtung.value = richtung;
+	overlay_submit(currentform, false);
 }
 
 function set_magnifier(evt, magnifier){
@@ -218,9 +230,9 @@ function close_all_bearbeitungshinweise(){
 }
 
 function save_bearbeitungshinweis(id){
-	document.GUI.bearbeitungshinweis_id.value = id;
-	document.GUI.bearbeitungshinweis_text.value = document.getElementById('bearbeitungshinweis_'+id).value;
-	document.GUI.submit();
+	currentform.bearbeitungshinweis_id.value = id;
+	currentform.bearbeitungshinweis_text.value = document.getElementById('bearbeitungshinweis_'+id).value;
+	overlay_submit(currentform, false);
 }
 
 //-->
@@ -342,7 +354,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		  ?>
 	  </td>
 				<tr>
-					<td><a href="index.php?go=Nachweisrechercheformular&zurueck=1&VermStelle=<? echo $this->formvars['VermStelle']; ?>&geom_from_layer=<? echo $this->formvars['geom_from_layer']; ?>"><span style="font-size: 140%">&laquo;</span> Nachweisrecherche</a></td>
+					<td><a target="root" href="index.php?go=Nachweisrechercheformular&zurueck=1&VermStelle=<? echo $this->formvars['VermStelle']; ?>&geom_from_layer=<? echo $this->formvars['geom_from_layer']; ?>"><span style="font-size: 140%">&laquo;</span> Nachweisrecherche</a></td>
 				</tr>
         </tr>
         <tr> 
@@ -453,7 +465,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		$bgcolor = '#FFFFFF';
      for ($i=0;$i<$this->nachweis->erg_dokumente;$i++) {
         ?>
-        <tr style="min-height: 0px; outline: 1px dotted grey;" <? if($this->formvars['selected_nachweis'] == $this->nachweis->Dokumente[$i]['id'])echo 'class="selected"'; ?> onclick="select(this);" bgcolor="
+        <tr style="min-height: 0px; outline: 1px dotted grey;" <? if($this->formvars['selected_nachweis'] == $this->nachweis->Dokumente[$i]['id'])echo 'class="selected"'; ?> onclick="select(this);" onmouseenter="highlight_object(<? echo LAYER_ID_NACHWEISE; ?>, <? echo $this->nachweis->Dokumente[$i]['id']; ?>)" bgcolor="
 			<? $orderelem = explode(',', $this->formvars['order']);
 			if ($this->nachweis->Dokumente[$i][$orderelem[0]] != $this->nachweis->Dokumente[$i-1][$orderelem[0]]){
 				if($bgcolor == '#EBEBEB'){
@@ -472,7 +484,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 					<input type="checkbox" name="id[]" id="id_<? echo $this->nachweis->Dokumente[$i]['id']; ?>" onchange="clear_selections('markhauptart[]', '');" value="<? echo $this->nachweis->Dokumente[$i]['id']; ?>"<? 
         # Püfen ob das Dokument markiert werden soll
                 				
-				if($this->formvars['markhauptart'][0] != '000' AND ($this->formvars['id'] == NULL OR in_array($this->nachweis->Dokumente[$i]['id'], $this->formvars['id'])))echo ' checked';
+				if($this->formvars['markhauptart'][0] != '000' AND ($this->formvars['id'] == NULL OR @in_array($this->nachweis->Dokumente[$i]['id'], $this->formvars['id'])))echo ' checked';
 				
         ?>>	
 				<? if($this->nachweis->Dokumente[$i]['bemerkungen'] != ''){ ?>
@@ -533,7 +545,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 					</td>
           <td style="width: 30">
           	<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>
-          	<a href="index.php?go=Nachweisloeschen&id=<? echo $this->nachweis->Dokumente[$i]['id']; ?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>"  title="löschen"><img src="graphics/button_drop.png" border="0"></a>
+          	<a href="javascript:void()0;" onclick="loeschen(<? echo $this->nachweis->Dokumente[$i]['id']; ?>);"  title="löschen"><img src="graphics/button_drop.png" border="0"></a>
           	<? } ?>
           </td>
 					<td style="width: 24">
@@ -600,7 +612,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 										<? } ?>
 										<br><br>
 										<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>
-											<a href="javascript:loeschen();"><span class="fett">löschen</span></a>
+											<a href="javascript:loeschen(null);"><span class="fett">löschen</span></a>
 										<? } ?>
 									</td>		
 								</tr>

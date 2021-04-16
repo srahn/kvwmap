@@ -348,7 +348,7 @@
 				if($nachweis->document['wkt_umring'] != ''){
 					if($GUI->formvars['neuladen'] == ''){
 						# Zoom zum Polygon des Dokumentes
-						$GUI->zoomToNachweis($nachweis,10);
+						$GUI->zoomToNachweise($nachweis, array($nachweis->document['id']), 10);
 						$GUI->user->rolle->saveSettings($GUI->map->extent);
 						$GUI->user->rolle->readSettings();
 					}
@@ -703,7 +703,15 @@
         $GUI->rechercheFormAnzeigen();				
       }
       else {
-        # Anzeige des Rechercheergebnisses
+        # Zoom auf Nachweise
+				for ($i=0; $i < $GUI->nachweis->erg_dokumente; $i++) {
+					$ids[] = $GUI->nachweis->Dokumente[$i]['id'];
+				}
+				$GUI->loadMap('DataBase');
+				$GUI->zoomToNachweise($GUI->nachweis, $ids, 10);
+				$GUI->user->rolle->saveSettings($GUI->map->extent);
+				$GUI->zoomed = true;
+				# Anzeige des Rechercheergebnisses
         $GUI->nachweisAnzeige();
       }
     }
@@ -1403,7 +1411,7 @@
     }
     # Zurück zur Anzeige des Rechercheergebnisses mit Meldung über Zuordnung der Dokumente zum Auftrag
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
-    $GUI->formvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
+    $GUI->formvars = array_merge($GUI->formvars, $GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id));
 		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchgueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['suchgeprueft']);
     if ($ret!='') {
       $errmsg.=$ret;
@@ -1426,42 +1434,26 @@
     $GUI->nachweis = new nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
 		$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
     $GUI->dokumentarten = $GUI->nachweis->getDokumentarten();
-    # Abfrage, ob schon Löschvorgang schon bestätigt wurde
-    if($GUI->formvars['bestaetigung']=='') {
-      # Löschvorgang wurde noch nicht bestätigt
-      # Aufrufen eines Formulars zur Bestätigung des Löschvorganges
-      $GUI->formvars['nachfrage_quelle']='Antrag_entfernen';
-      $GUI->formvars['nachfrage']='Möchten sie wirklich Dokumente von der Antragsnummer: ['.$suchantrnr.'] entfernen!';
-      $GUI->bestaetigungsformAnzeigen($suchantrnr);
-    }
-    else {
-      if ($GUI->formvars['bestaetigung']=='JA') {
-        # Löschvorgang wurde bestätigt
-        # Eingabeparameter prüfen
-        $ret=$GUI->nachweis->pruefe_Auftrag_hinzufuegen_entfernen($suchantrnr,$stelle_id);
-        if($ret!=''){ # Fehler bei der Prüfung der Eingangsparameter
-          $errmsg=$ret;
-        }
-        else {
-          # Eingabeparameter in Ordnung
-          # Nachweise aus Antrag entfernen
-          $result=$GUI->nachweis->aus_Auftrag_entfernen($suchantrnr,$stelle_id,$GUI->formvars['id']);
-          $errmsg=$result[0];
-					$okmsg=$result[1];
-        } # ende Eingabeparameter sind ok
-      } # ende Löschvorgang wurde bestätigt
-      else { # Löschvorgang wurde abgebrochen
-        $errmsg='Löschvorgang abgebrochen.';
-      }
-      # Zurück zur Anzeige des Rechercheergebnisses mit Meldung über Zuordnung der Dokumente zum Auftrag
-      # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
-      $GUI->formvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
-			$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchgueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['suchgeprueft']);
-      # Anzeige der Rechercheergebnisse			
-			if($errmsg)$GUI->add_message('error', $errmsg);
-			if($okmsg)$GUI->add_message('notice', $okmsg);
-      $GUI->nachweisAnzeige();
-    } # ende Bestätigung ist erfolgt
+		# Eingabeparameter prüfen
+		$ret=$GUI->nachweis->pruefe_Auftrag_hinzufuegen_entfernen($suchantrnr,$stelle_id);
+		if($ret!=''){ # Fehler bei der Prüfung der Eingangsparameter
+			$errmsg=$ret;
+		}
+		else {
+			# Eingabeparameter in Ordnung
+			# Nachweise aus Antrag entfernen
+			$result=$GUI->nachweis->aus_Auftrag_entfernen($suchantrnr,$stelle_id,$GUI->formvars['id']);
+			$errmsg=$result[0];
+			$okmsg=$result[1];
+		} # ende Eingabeparameter sind ok
+		# Zurück zur Anzeige des Rechercheergebnisses mit Meldung über Zuordnung der Dokumente zum Auftrag
+		# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
+		$GUI->formvars = array_merge($GUI->formvars, $GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id));
+		$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchgueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['suchgeprueft']);
+		# Anzeige der Rechercheergebnisse			
+		if($errmsg)$GUI->add_message('error', $errmsg);
+		if($okmsg)$GUI->add_message('notice', $okmsg);
+		$GUI->nachweisAnzeige();
   };
 
 	$GUI->nachweisDokumentAnzeigen = function() use ($GUI){
@@ -1493,39 +1485,25 @@
   };
 	
 	$GUI->nachweisLoeschen = function() use ($GUI){
-    # Abfragen ob der Löschvorgang schon bestätigt wurde.
-    if ($GUI->formvars['bestaetigung']=='') {
-      # Der Löschvorgang wurde noch nicht bestätigt
-      $GUI->suchparameterSetzen();
-			if(@count($GUI->formvars['id']) > 1) $GUI->formvars['nachfrage']='Möchten Sie die Nachweise wirklich löschen? ';
-      else $GUI->formvars['nachfrage']='Möchten Sie den Nachweis wirklich löschen? ';
-      $GUI->bestaetigungsformAnzeigen();
-    }
-    else {
-      $GUI->nachweis = new nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-			$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
-      # Abfrage ob gelöscht werden soll oder nicht
-      if ($GUI->formvars['bestaetigung']=='JA') {
-        # Der Löschvorgang wurde bestätigt und wird jetzt ausgeführt
-        $idListe=$GUI->formvars['id'];
-        $ret=$GUI->nachweis->nachweiseLoeschen($idListe,1);
-        if ($ret[0]) { # Fehler beim Löschen in Fehlermeldung übergeben
-          $GUI->Fehlermeldung=$ret[1];
-        }
-        else {
-					$GUI->add_message('info', $ret[1]);
-        }
-      }
-      # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
-			$GUI->formvars = array_merge($GUI->formvars, $GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id));
-      # Abfragen der Nachweise entsprechend der eingestellten Suchparameter
-			$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchgueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['suchgeprueft']);
-      if ($ret!='') {
-        $GUI->Fehlermeldung.=$ret;
-      }
-      # Anzeige der Rechercheergebnisse
-      $GUI->nachweisAnzeige();
-    }
+		$GUI->nachweis = new nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
+		$idListe=$GUI->formvars['id'];
+		$ret=$GUI->nachweis->nachweiseLoeschen($idListe,1);
+		if ($ret[0]) { # Fehler beim Löschen in Fehlermeldung übergeben
+			$GUI->Fehlermeldung=$ret[1];
+		}
+		else {
+			$GUI->add_message('info', $ret[1]);
+		}
+		# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
+		$GUI->formvars = array_merge($GUI->formvars, $GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id));
+		# Abfragen der Nachweise entsprechend der eingestellten Suchparameter
+		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchgueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['suchgeprueft']);
+		if ($ret!='') {
+			$GUI->Fehlermeldung.=$ret;
+		}
+		# Anzeige der Rechercheergebnisse
+		$GUI->nachweisAnzeige();
   };
 	
 	$GUI->rechercheFormAnzeigen = function() use ($GUI){
@@ -1625,9 +1603,9 @@
     $GUI->output();
   };
 	
-	$GUI->zoomToNachweis = function($nachweis,$border) use ($GUI){
+	$GUI->zoomToNachweise = function($nachweis, $ids, $border) use ($GUI){
     # Abfragen der Ausdehnung des Umringes des Nachweises
-    $ret=$nachweis->getBBoxAsRectObj($nachweis->document['id'],'nachweis');
+    $ret=$nachweis->getBBoxAsRectObj($ids);
     if ($ret[0]) {
       # Fehler bei der Abfrage der BoundingBox
       # Es erfolgt keine Änderung der aktuellen Ausdehnung
