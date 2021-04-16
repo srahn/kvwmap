@@ -9397,7 +9397,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function neuer_Layer_Datensatz_speichern() {
 		foreach($this->formvars as $key => $value) {
-			if (is_string($value)) $this->formvars[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
+			if (is_string($value)) {
+				$this->formvars[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
+			}
 		}
 		$_files = $_FILES;
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
@@ -9412,29 +9414,29 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$client_epsg = $this->user->rolle->epsg_code;
 		$form_fields = explode('|', $this->formvars['form_field_names']);
 
-		for($i = 0; $i < count($form_fields); $i++){
-			if($form_fields[$i] != ''){
+		for ($i = 0; $i < count($form_fields); $i++) {
+			if ($form_fields[$i] != '') {
 				$element = explode(';', $form_fields[$i]);
 				$layer_id = $element[0];
-        $attributname = $element[1];
-        $table_name = $element[2];
-        $formtype = $element[4];
+				$attributname = $element[1];
+				$table_name = $element[2];
+				$formtype = $element[4];
 				$saveable = $element[7];
 				$tablename[$table_name]['tablename'] = $table_name;
 				$tablename[$table_name]['attributname'][] = $attributenames[] = $attributname;
 				$tablename[$table_name]['saveable'][] = $saveable;
 				$form_field_indizes[$attributname] = $i;
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
-				if($this->formvars['embedded'] != ''){
-					$formfieldstring .= '&'.$form_fields[$i].'='.$this->formvars[$form_fields[$i]];
+				if ($this->formvars['embedded'] != '') {
+					$formfieldstring .= '&'.$form_fields[$i] . '=' . $this->formvars[$form_fields[$i]];
 					$insert_data[0][$attributname] = $this->formvars[$form_fields[$i]];
 				}
 				$tablename[$table_name]['type'][] = $formtype;
 				$tablename[$table_name]['datatype'][] = $element[6];
 				$tablename[$table_name]['formfield'][] = $form_fields[$i];
 				# Dokumente sammeln
-				if($formtype == 'Dokument'){
-					if($_files[$form_fields[$i]]['name'] OR $this->formvars[$form_fields[$i]]){
+				if ($formtype == 'Dokument') {
+					if ($_files[$form_fields[$i]]['name'] OR $this->formvars[$form_fields[$i]]) {
 						$document_attributes[$i]['layer_id'] = $layer_id;
 						$document_attributes[$i]['attributename'] = $attributname;
 						$document_attributes[$i]['datatype'] = $element[6];
@@ -9464,13 +9466,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->formvars['geomtype'] = $geomtypes[$this->formvars['Datentyp']];
 		}
 
-		if($this->formvars['geomtype'] == 'POLYGON' OR $this->formvars['geomtype'] == 'MULTIPOLYGON') {
-			if($this->formvars['newpathwkt'] == '' AND $this->formvars['newpath'] != ''){   # wenn keine WKT-Geoemtrie da ist, muss die WKT-Geometrie aus dem SVG erzeugt werden
+		if ($this->formvars['geomtype'] == 'POLYGON' OR $this->formvars['geomtype'] == 'MULTIPOLYGON') {
+			if ($this->formvars['newpathwkt'] == '' AND $this->formvars['newpath'] != ''){   # wenn keine WKT-Geoemtrie da ist, muss die WKT-Geometrie aus dem SVG erzeugt werden
 				include_(CLASSPATH.'spatial_processor.php');
 				$spatial_pro = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
 				$this->formvars['newpathwkt'] = $spatial_pro->composePolygonWKTStringFromSVGPath($this->formvars['newpath']);
 			}
-			if($this->formvars['newpathwkt'] != ''){
+			if ($this->formvars['newpathwkt'] != '') {
 				include_(CLASSPATH.'polygoneditor.php');
 				$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 				$ret = $polygoneditor->pruefeEingabedaten($this->formvars['newpathwkt']);
@@ -9482,13 +9484,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 			}
 		}
-		elseif($this->formvars['geomtype'] == 'LINESTRING' OR $this->formvars['geomtype'] == 'MULTILINESTRING'){
-			if($this->formvars['newpathwkt'] == '' AND $this->formvars['newpath'] != ''){   # wenn keine WKT-Geoemtrie da ist, muss die WKT-Geometrie aus dem SVG erzeugt werden
+		elseif ($this->formvars['geomtype'] == 'LINESTRING' OR $this->formvars['geomtype'] == 'MULTILINESTRING') {
+			if ($this->formvars['newpathwkt'] == '' AND $this->formvars['newpath'] != '') {
+				# wenn keine WKT-Geoemtrie da ist, muss die WKT-Geometrie aus dem SVG erzeugt werden
 				include_(CLASSPATH.'spatial_processor.php');
 				$spatial_pro = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
 				$this->formvars['newpathwkt'] = $spatial_pro->composeLineWKTStringFromSVGPath($this->formvars['newpath']);
 			}
-			if($this->formvars['newpathwkt'] != ''){
+			if ($this->formvars['newpathwkt'] != '') {
 				include_(CLASSPATH.'lineeditor.php');
 				$lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 				# eingeabewerte pruefen:
@@ -9501,7 +9504,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 		}
 		$this->success = true;
-		foreach($tablename as $table){
+		foreach ($tablename as $table) {
 			$insert = array();
 			$exif_data = array();
 			if ($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']) {		# nur Attribute aus der Haupttabelle werden gespeichert
@@ -9603,7 +9606,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							} break;
 
 							case ($table['type'][$i] == 'Geometrie') : {
-								if ($this->formvars['geomtype'] == 'POINT'){
+								if ($this->formvars['geomtype'] == 'POINT') {
 									if ($this->formvars['loc_x'] != '') {
 										# ToDo: Test if a new Point can be stored and if the statement contain the wkb_geometrie in stead of the ST_GeomFromGeo Gedöns.
 										include_once (CLASSPATH.'pointeditor.php');
@@ -9635,19 +9638,21 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						} # end of switch
 					}
 				}
-
-				if(!empty($insert)){
-					if(!$layerset[0]['maintable_is_view'])$sql = "LOCK TABLE " . pg_quote($table['tablename'])." IN SHARE ROW EXCLUSIVE MODE;";
+				if (!empty($insert)) {
+					if (!$layerset[0]['maintable_is_view']) {
+						$sql = "LOCK TABLE " . pg_quote($table['tablename']) . " IN SHARE ROW EXCLUSIVE MODE;";
+					}
 					$attr = array_keys($insert);
 					array_walk($attr, function(&$attributename, $key){$attributename = pg_quote($attributename);});
-					$sql.= "INSERT INTO " . pg_quote($table['tablename']) . " (";
-					$sql.= implode(', ', $attr);
-					$sql.= ") VALUES (";
-					$sql.= implode(', ', $insert);
-					$sql.= ")";
-					if($layerset[0]['oid'] != 'oid'){
-						$sql.= " RETURNING ".$layerset[0]['oid'];
-					}
+					$sql = "
+						INSERT INTO " . pg_quote($table['tablename']) . " (
+							" . implode(', ', $attr) . "
+						)
+						VALUES (
+							" . implode(', ', $insert) . "
+						)"
+						. ($layerset[0]['oid'] != 'oid' ? " RETURNING " . $layerset[0]['oid'] : "") . "
+					";
 
 					# Before Insert trigger
 					if (!empty($layerset[0]['trigger_function'])) {
@@ -9655,7 +9660,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					}
 
 					$this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
-
 					#echo '<p>SQL zum Anlegen des Datensatzes: ' . $sql;
 					$ret = $layerdb->execSQL($sql, 4, 1, true);
 
@@ -9753,17 +9757,17 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         } break;
       }
     }
-    else {
-      if ($this->success == false) {
-        $this->neuer_Layer_Datensatz();
-      }
-      else {
+		else {
+			if ($this->success == false) {
+				$this->neuer_Layer_Datensatz();
+			}
+			else {
 				if ($this->formvars['only_create']) {
 					# Hier wird keine weitere Funktion zum Laden von views aufgerufen
 				}
 				else {
 					$this->formvars['newpathwkt'] = '';
-	        if($this->formvars['weiter_erfassen'] == 1){
+	        if ($this->formvars['weiter_erfassen'] == 1) {
 	        	$this->formvars['firstpoly'] = '';
 	        	$this->formvars['firstline'] = '';
 	        	$this->formvars['secondpoly'] = '';

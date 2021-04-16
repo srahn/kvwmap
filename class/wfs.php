@@ -20,8 +20,12 @@ class wfs{
 				$request .= '&bbox='.$bbox;
 				if($this->version == '1.1.0')$request .= ',EPSG:'.$this->epsg;
 			}
-			if($filter != ''){$request .= '&filter='.urlencode($filter);}
-			if($maxfeatures != ''){$request .= '&maxfeatures='.$maxfeatures;}
+			if ($filter != '') {
+				$request .= '&filter='.urlencode($filter);
+			}
+			if ($maxfeatures != '') {
+				$request .= '&maxfeatures='.$maxfeatures;
+			}
 		}
 		#echo $request;
 		$this->gml = url_get_contents($request, $this->username, $this->password);
@@ -126,43 +130,61 @@ class wfs{
     }
     $this->objects = $objects;
 	}
-			
-	function extract_features(){
+
+	function extract_features() {
 		# liefert die Datensätze einer getfeature-Abfrage (zuvor muss get_feature_request() ausgeführt werden)
-		if(strpos($this->gml, 'gmlx:featureMember') !== false)$this->parse_gml('gmlx:featureMember');
-		else $this->parse_gml('gml:featureMember');		
-		if(strpos($this->gml, 'gmlx:posList') !== false)$geomtag = 'gmlx:posList';
-		elseif(strpos($this->gml, 'gml:posList') !== false)$geomtag = 'gml:posList';
-		elseif(strpos($this->gml, 'gml:coordinates') !== false)$geomtag = 'gml:coordinates';
-		else $geomtag = 'gml:pos';
-		for($i=0; $i < @count($this->objects); $i++){		# durchläuft alle Objekte
-			for($j = 0; $j < count($this->objects[$i]); $j++){		# durchläuft alle Tags im Objekt
+		if (strpos($this->gml, 'gmlx:featureMember') !== false) {
+			$this->parse_gml('gmlx:featureMember');
+		}
+		else {
+			$this->parse_gml('gml:featureMember');
+		}
+		if (strpos($this->gml, 'gmlx:posList') !== false) {
+			$geomtag = 'gmlx:posList';
+		}
+		elseif (strpos($this->gml, 'gml:posList') !== false) {
+			$geomtag = 'gml:posList';
+		}
+		elseif (strpos($this->gml, 'gml:coordinates') !== false) {
+			$geomtag = 'gml:coordinates';
+		}
+		else {
+			$geomtag = 'gml:pos';
+		}
+		for ($i = 0; $i < @count($this->objects); $i++) {
+			# durchläuft alle Objekte
+			for ($j = 0; $j < count($this->objects[$i]); $j++) {
+				# durchläuft alle Tags im Objekt
 				$coord_pair = array();
 				# Boundingbox entnehmen und ins aktuelle System transformieren
-				if($this->objects[$i][$j]["tag"] == $geomtag AND $features[$i]['geom'] == ''){
+				if ($this->objects[$i][$j]["tag"] == $geomtag AND $features[$i]['geom'] == '') {
 					#4495561.758,5997768.92 4495532.625,5997774.389 4495517.732,5997697.398 4495530.82,5997694.958 4495538.126,5997693.31 4495545.292,5997691.136 4495547.163,5997690.416 4495561.758,5997768.92
 					$coords = $this->objects[$i][$j]["value"];
-					if($coords != ''){
-						if(strpos($coords, ',') === false){						# GML 3 ohne Kommas
+					if ($coords != '') {
+						if (strpos($coords, ',') === false) {
+							# GML 3 ohne Kommas
 							$explosion = explode(' ', $coords);
-							$num_coords = count($explosion)/2;
-							for($e = 0; $e < count($explosion); $e=$e+2){
-								if($explosion[$e] != '')$coord_pair[] = $explosion[$e].' '.$explosion[$e+1];
+							$num_coords = count($explosion) / 2;
+							for ($e = 0; $e < count($explosion); $e = $e + 2) {
+								if ($explosion[$e] != '') {
+									$coord_pair[] = $explosion[$e] . ' ' . $explosion[$e + 1];
+								}
 							}
 							$coords = implode(', ', $coord_pair);
 						}
-						else{
+						else {
 							$coords = str_replace(' ', '_', trim($coords));
 							$coords = str_replace(',', ' ', $coords);
 							$coords = str_replace('_', ',', $coords);
 							$num_coords = substr_count($coords, ' ');
 						}
-						if($num_coords > 1)$features[$i]['geom'] = 'LINESTRING('.$coords.')';
-						else $features[$i]['geom'] = 'POINT('.$coords.')';
+						$features[$i]['geom'] = ($num_coords > 1 ? 'LINESTRING' : 'POINT') . '(' . $coords . ')';
 					}
 				}
-				if($this->objects[$i][$j]["type"] == 'complete' AND $this->objects[$i][$j]["tag"] != $geomtag){			# alle kompletten Tags und keine Geometrie-Tags
-					$this->objects[$i][$j]["tag"] = str_replace($this->namespace.':', '', $this->objects[$i][$j]["tag"]);		# evtl. Namespace davor entfernen
+				if ($this->objects[$i][$j]["type"] == 'complete' AND $this->objects[$i][$j]["tag"] != $geomtag) {
+					# alle kompletten Tags und keine Geometrie-Tags
+					# evtl. Namespace davor entfernen
+					$this->objects[$i][$j]["tag"] = str_replace($this->namespace . ':', '', $this->objects[$i][$j]["tag"]);
 		  		$features[$i]['value'][$this->objects[$i][$j]["tag"]] = $this->objects[$i][$j]["value"];
 				}
 			}
