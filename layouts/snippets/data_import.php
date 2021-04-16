@@ -98,7 +98,7 @@
     <td align="center" valign="top" style="height: 40px"><h2><?php echo $strTitle; ?></h2></td>
   </tr>
 	<tr> 
-    <td align="center" valign="top"><? echo $strSupportedFileTypes; ?>Shape (*.dbf, *.shp, *.shx), GeoJSON, KML, DXF, GPX, UKO, OVL, GeoTiff</td>
+    <td align="center" valign="top"><? echo $strSupportedFileTypes; ?>Shape (*.dbf, *.shp, *.shx), GeoJSON, KML, KMZ, DXF, GPX, UKO, OVL, GeoTiff</td>
   </tr>
 	<tr>
 		<td>
