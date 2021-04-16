@@ -48,7 +48,7 @@ class data_import_export {
 				$custom_tables = $this->import_custom_shape($file_name_parts, $user, $pgdatabase, $epsg);
 				$epsg = $custom_tables[0]['epsg'];
 			} break;
-			case 'kml' : {
+			case 'kml' : case 'kmz' : {
 				$epsg = 4326;
 				$custom_tables = $this->import_custom_kml($filename, $pgdatabase, $epsg);
 				$unique_column = 'ogc_fid';
