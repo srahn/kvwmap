@@ -496,6 +496,7 @@ class data_import_export {
 			}
 			else{
 				$sql = '
+					SELECT convert_column_names(\'' . $schema . '\', \'' . $tablename . '\');
 					SELECT geometrytype(the_geom) AS geometrytype FROM '.$schema.'.'.$tablename.' LIMIT 1;';
 				$ret = $pgdatabase->execSQL($sql,4, 0);
 				if(!$ret[0]) {
