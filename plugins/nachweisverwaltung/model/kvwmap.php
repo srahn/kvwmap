@@ -1367,6 +1367,7 @@
     $GUI->titel='Rechercheergebnis';
     $GUI->main= PLUGINS.'nachweisverwaltung/view/nachweisanzeige.php';
     $GUI->FormObjAntr_nr=$GUI->getFormObjAntr_nr($GUI->formvars['suchantrnr'], 8);
+		$GUI->noOverlayFooter = true;
     $GUI->output();
   };
 	
