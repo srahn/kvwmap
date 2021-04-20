@@ -321,11 +321,18 @@ class GUI {
     $map->set('shapepath', SHAPEPATH);
 		$found = false;
     for ($i=0;$i<$anzLayer;$i++) {
-			if($found)break;		# wenn in einem Layer was gefunden wurde, abbrechen
-			if(	$layerset[$i]['connectiontype'] == 6 AND
+			if ($found)break;		# wenn in einem Layer was gefunden wurde, abbrechen
+			if ($layerset[$i]['connectiontype'] == 6 AND
 					$layerset[$i]['queryable'] AND
 					($this->formvars['qLayer'.$layerset[$i]['Layer_ID']]=='1' OR $this->formvars['qLayer'.$layerset[$i]['requires']]=='1') 	AND
-					(($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom) OR $this->last_query != '')
+					(
+						(
+							($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND 
+							($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom)
+						) OR 
+						$this->last_query != '' OR
+						$this->formvars['querylayer_id'] != ''
+					)
 				) {
 				# Dieser Layer soll abgefragt werden
 				if($layerset[$i]['alias'] != '' AND $this->Stelle->useLayerAliases){
