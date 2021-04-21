@@ -178,23 +178,23 @@ class Gml_extractor {
 			if (preg_match('/xplan="([^"]+)"/', $line, $matched_ns_str)) {
 				break; #found it
 			}
-			if (preg_match('/xplan=\'([^"]+)\'/', $line, $matched_ns_str)) {
+			else if (preg_match('/xplan=\'([^"]+)\'/', $line, $matched_ns_str)) {
 				break; #found it
 			}
-			if (preg_match('/xplan=\'([^"]+)\'/', $line, $matched_ns_str)) {
+			else if (preg_match('/xplan=\'([^"]+)\'/', $line, $matched_ns_str)) {
 				break; #found it
 			}
 			else {
 				$msg  = 'Konnte XPlanAuszug oder Namespace xplan nicht in Datei finden.<br>';
 				$msg .= 'Überprüfen Sie die Validität der XPlanung-Datei';
-				$GUI->add_message('warning', $msg);
-				$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
-				$GUI->output();
+				#$GUI->add_message('warning', $msg);
+				#$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
+				#$GUI->output();
 				#echo 'Could not find XPlanAuszug. XPlan-file is not valid';
 			}
 			#echo 'could not find XPlan srsName within double quotes. checking single quotes:<br>';
 		}
-		echo $matched_ns_str[1] . '<br>';
+		#echo $matched_ns_str[1] . '<br>';
 
 		if (preg_match('/5\/1/', $matched_ns_str[1], $matched_version_str)) {
 			$version = '5.1';
@@ -208,9 +208,9 @@ class Gml_extractor {
 			$msg  = 'Die XPlan-GML Version der Datei kann nicht identifiziert werden.<br>';
 			$msg .= 'Bitte überprüfen Sie, ob die XPlan-Version valide ist und der Namespace in Version 5.1 oder 5.2 liegt<br>';
 			$msg .= 'Es wird eine Fallback-Version 5.1 verwendet.<br>';
-			$GUI->add_message('warning', $msg);
-			$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
-			$GUI->output();
+			#$GUI->add_message('warning', $msg);
+			#$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
+			#$GUI->output();
 			#echo 'Could not identify a valid XPlan version.<br>Please make sure that the XPlan-version is valid an in namespace version 5.2 or 5.1.<br>A fallback version of ' . $version . ' will be used.<br>';
 		}
 		#echo 'version:' . $version;
@@ -437,8 +437,27 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".bp_plan gmlas LEFT JOIN
 				" . $this->gmlas_schema . ".bp_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN
-				" . $this->gmlas_schema . ".bp_plan_externereferenz externereferenzlink ON gmlas.id = externereferenzlink.parent_id LEFT JOIN
-				" . $this->gmlas_schema . ".xp_spezexternereferenz e ON externereferenzlink.xp_spezexternereferenz_pkid = e.ogr_pkid LEFT JOIN
+				(
+					SElECT
+						COUNT(*) AS count_externeref,
+						externereferenzlink_sub.parent_id,
+						array_agg((e_sub.georefurl,
+								(e_sub.georefmimetype_codespace, e_sub.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.art::xplan_gml.xp_externereferenzart,
+								e_sub.informationssystemurl,
+								e_sub.referenzname,
+								e_sub.referenzurl,
+								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.beschreibung,
+								to_char(e_sub.datum, 'DD.MM.YYYY'),
+								e_sub.typ::xplan_gml.xp_externereferenztyp
+							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+					FROM
+						" . $this->gmlas_schema . ".bp_plan_externereferenz externereferenzlink_sub LEFT JOIN
+						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
+					GROUP BY
+						externereferenzlink_sub.parent_id
+				) externeref ON gmlas.id = externeref.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".bp_plan_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid LEFT JOIN
@@ -492,17 +511,9 @@ class Gml_extractor {
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
 				END AS verfahrensmerkmale,
-				CASE WHEN e.georefurl IS NOT NULL OR e.georefmimetype_codespace IS NOT NULL OR e.georefmimetype IS NOT NULL OR e.art IS NOT NULL OR e.informationssystemurl IS NOT NULL OR e.referenzname IS NOT NULL OR e.referenzmimetype_codespace IS NOT NULL OR e.referenzmimetype IS NOT NULL OR e.beschreibung IS NOT NULL OR e.datum IS NOT NULL OR e.typ IS NOT NULL THEN 
-					array_to_json(ARRAY[(e.georefurl, 
-						(e.georefmimetype_codespace, e.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.art::xplan_gml.xp_externereferenzart,
-						e.informationssystemurl,
-						e.referenzname, e.referenzurl,
-						(e.referenzmimetype_codespace, e.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.beschreibung,
-						to_char(e.datum, 'DD.MM.YYYY'),
-						e.typ::xplan_gml.xp_externereferenztyp
-					)]::xplan_gml.xp_spezexternereferenz[])
+				CASE
+					WHEN count_externeref > 0
+					THEN array_to_json(externeref.externereferenz)
 					ELSE NULL
 				END AS externereferenz,
 				array_to_json(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[]) AS auslegungsenddatum,
@@ -526,8 +537,27 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".fp_plan gmlas LEFT JOIN
 				" . $this->gmlas_schema . ".fp_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN
-				" . $this->gmlas_schema . ".fp_plan_externereferenz externereferenzlink ON gmlas.id = externereferenzlink.parent_id LEFT JOIN
-				" . $this->gmlas_schema . ".xp_spezexternereferenz e ON externereferenzlink.xp_spezexternereferenz_pkid = e.ogr_pkid LEFT JOIN
+				(
+					SElECT
+						COUNT(*) AS count_externeref,
+						externereferenzlink_sub.parent_id,
+						array_agg((e_sub.georefurl,
+								(e_sub.georefmimetype_codespace, e_sub.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.art::xplan_gml.xp_externereferenzart,
+								e_sub.informationssystemurl,
+								e_sub.referenzname,
+								e_sub.referenzurl,
+								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.beschreibung,
+								to_char(e_sub.datum, 'DD.MM.YYYY'),
+								e_sub.typ::xplan_gml.xp_externereferenztyp
+							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+					FROM
+						" . $this->gmlas_schema . ".fp_plan_externereferenz externereferenzlink_sub LEFT JOIN
+						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
+					GROUP BY
+						externereferenzlink_sub.parent_id
+				) externeref ON gmlas.id = externeref.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".fp_plan_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid LEFT JOIN
@@ -581,17 +611,9 @@ class Gml_extractor {
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
 				END AS verfahrensmerkmale,
-				CASE WHEN e.georefurl IS NOT NULL OR e.georefmimetype_codespace IS NOT NULL OR e.georefmimetype IS NOT NULL OR e.art IS NOT NULL OR e.informationssystemurl IS NOT NULL OR e.referenzname IS NOT NULL OR e.referenzmimetype_codespace IS NOT NULL OR e.referenzmimetype IS NOT NULL OR e.beschreibung IS NOT NULL OR e.datum IS NOT NULL OR e.typ IS NOT NULL THEN 
-					array_to_json(ARRAY[(e.georefurl, 
-						(e.georefmimetype_codespace, e.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.art::xplan_gml.xp_externereferenzart,
-						e.informationssystemurl,
-						e.referenzname, e.referenzurl,
-						(e.referenzmimetype_codespace, e.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.beschreibung,
-						to_char(e.datum, 'DD.MM.YYYY'),
-						e.typ::xplan_gml.xp_externereferenztyp
-					)]::xplan_gml.xp_spezexternereferenz[])
+				CASE
+					WHEN count_externeref > 0
+					THEN array_to_json(externeref.externereferenz)
 					ELSE NULL
 				END AS externereferenz,
 				to_json((pg.name, pg.kennziffer)::xplan_gml.xp_plangeber) AS plangeber,
@@ -601,8 +623,27 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".so_plan gmlas LEFT JOIN
 				/*" . $this->gmlas_schema . ".so_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN*/
 				/*" . $this->gmlas_schema . ".xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN*/
-				" . $this->gmlas_schema . ".so_plan_externereferenz externereferenzlink ON gmlas.id = externereferenzlink.parent_id LEFT JOIN
-				" . $this->gmlas_schema . ".xp_spezexternereferenz e ON externereferenzlink.xp_spezexternereferenz_pkid = e.ogr_pkid LEFT JOIN
+				(
+					SElECT
+						COUNT(*) AS count_externeref,
+						externereferenzlink_sub.parent_id,
+						array_agg((e_sub.georefurl,
+								(e_sub.georefmimetype_codespace, e_sub.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.art::xplan_gml.xp_externereferenzart,
+								e_sub.informationssystemurl,
+								e_sub.referenzname,
+								e_sub.referenzurl,
+								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.beschreibung,
+								to_char(e_sub.datum, 'DD.MM.YYYY'),
+								e_sub.typ::xplan_gml.xp_externereferenztyp
+							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+					FROM
+						" . $this->gmlas_schema . ".so_plan_externereferenz externereferenzlink_sub LEFT JOIN
+						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
+					GROUP BY
+						externereferenzlink_sub.parent_id
+				) externeref ON gmlas.id = externeref.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".so_plan_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
@@ -652,17 +693,9 @@ class Gml_extractor {
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
 				END AS verfahrensmerkmale,
-				CASE WHEN e.georefurl IS NOT NULL OR e.georefmimetype_codespace IS NOT NULL OR e.georefmimetype IS NOT NULL OR e.art IS NOT NULL OR e.informationssystemurl IS NOT NULL OR e.referenzname IS NOT NULL OR e.referenzmimetype_codespace IS NOT NULL OR e.referenzmimetype IS NOT NULL OR e.beschreibung IS NOT NULL OR e.datum IS NOT NULL OR e.typ IS NOT NULL THEN 
-					array_to_json(ARRAY[(e.georefurl, 
-						(e.georefmimetype_codespace, e.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.art::xplan_gml.xp_externereferenzart,
-						e.informationssystemurl,
-						e.referenzname, e.referenzurl,
-						(e.referenzmimetype_codespace, e.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.beschreibung,
-						to_char(e.datum, 'DD.MM.YYYY'),
-						e.typ::xplan_gml.xp_externereferenztyp
-					)]::xplan_gml.xp_spezexternereferenz[])
+				CASE
+					WHEN count_externeref > 0
+					THEN array_to_json(externeref.externereferenz)
 					ELSE NULL
 				END AS externereferenz,
 				gmlas.planungsregion AS planungsregion,
@@ -684,8 +717,27 @@ class Gml_extractor {
 				gmlas.planart::xplan_gml.rp_art AS planart
 			FROM
 				" . $this->gmlas_schema . ".rp_plan gmlas LEFT JOIN
-				" . $this->gmlas_schema . ".rp_plan_externereferenz externereferenzlink ON gmlas.id = externereferenzlink.parent_id LEFT JOIN
-				" . $this->gmlas_schema . ".xp_spezexternereferenz e ON externereferenzlink.xp_spezexternereferenz_pkid = e.ogr_pkid LEFT JOIN
+				(
+					SElECT
+						COUNT(*) AS count_externeref,
+						externereferenzlink_sub.parent_id,
+						array_agg((e_sub.georefurl,
+								(e_sub.georefmimetype_codespace, e_sub.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.art::xplan_gml.xp_externereferenzart,
+								e_sub.informationssystemurl,
+								e_sub.referenzname,
+								e_sub.referenzurl,
+								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.beschreibung,
+								to_char(e_sub.datum, 'DD.MM.YYYY'),
+								e_sub.typ::xplan_gml.xp_externereferenztyp
+							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+					FROM
+						" . $this->gmlas_schema . ".rp_plan_externereferenz externereferenzlink_sub LEFT JOIN
+						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
+					GROUP BY
+						externereferenzlink_sub.parent_id
+				) externeref ON gmlas.id = externeref.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".rp_plan_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid LEFT JOIN
@@ -763,8 +815,12 @@ class Gml_extractor {
 		}
 		// string needs to be lowered both to simplify cutting #gml_ in all forms and
 		// because uuid (e.g. in gml_id of the associated plan) is always lowercase when cast to text
+		// will take first plan encountered in gmlas-schema if bereich id is not set (or could not be read by ogr)
 		$sql .= "
-				trim(leading '#gml_' FROM lower(gmlas.gehoertzuplan_href)) AS gehoertzuplan
+				CASE
+					WHEN gmlas.gehoertzuplan_href IS NOT NULL THEN trim(leading '#gml_' FROM lower(gmlas.gehoertzuplan_href))
+					ELSE trim(leading '#gml_' FROM lower((SELECT DISTINCT id FROM " . $this->gmlas_schema . "." . substr($table,0,3) . "plan LIMIT 1)))
+					END AS gehoertzuplan
 			FROM
 				" . $this->gmlas_schema . "." . $table . " gmlas
 			;";
@@ -1955,6 +2011,13 @@ class Gml_extractor {
 							($geom_type == 'ST_MultiCurve'))
 						{
 							$mapping['regel'] = 'ST_CurveToLine(gmlas.position) AS position';
+						}
+						// Cast to multi-geometries (konverter-convention)
+						if(($geom_type == 'ST_Point') or
+							($geom_type == 'ST_LineString') or
+							($geom_type == 'ST_Polygon'))
+						{
+							$mapping['regel'] = 'ST_Multi(gmlas.position) AS position';
 						}
 					}
 					$gml_attributes[] = $mapping['t_column'];
