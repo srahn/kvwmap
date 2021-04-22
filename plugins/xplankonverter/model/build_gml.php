@@ -221,7 +221,7 @@ class Gml_builder {
 			fwrite($this->tmpFile, "\n" . $this->formatXML($this->wrapWithFeatureMember($bereich_gml . "</{$xplan_ns_prefix}{$plan->bereichUmlName}>")));
 		}
 
-// und nun alle Fachobjekte generieren
+		// und nun alle Fachobjekte generieren
 		// dazu alle Fachobjektklassen finden die mit der Konvertierung verknüpft sind
 		$class_names = $konvertierung->get_class_names();
 		# zu jeder Objektklassse die Objekte holen, die mit der Konvertierung verknüpft sind

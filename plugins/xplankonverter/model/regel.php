@@ -542,8 +542,9 @@ class Regel extends PgObject {
 				$this->set('layer_id', $gml_layer->get($gml_layer->identifier));
 				$this->update();
 			}
-
-			$this->gui->formvars = $formvars_before;
+			if(isset($formvars_before) &&  !empty($formvars_before)) {
+				$this->gui->formvars = $formvars_before;
+			}
 		}
 
 	}
