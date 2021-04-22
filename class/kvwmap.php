@@ -9110,10 +9110,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$this->formvars['value_'.$layer['maintable'].'_oid'] = $oid;
 				$this->formvars['operator_'.$layer['maintable'].'_oid'] = '=';
 				$this->formvars['no_output'] = true;
+				$search_save = $this->formvars['search'];
 				$this->GenerischeSuche_Suchen();
 				$this->formvars['no_output'] = false;
-				$this->formvars['search'] = false;
-				$this->search = false;
+				$this->formvars['search'] = $search_save;
+				$this->search = $search_save;
 			}
 			
 			$sql = "
