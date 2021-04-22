@@ -428,7 +428,9 @@ span[data-tooltip] {
 .gsm_tabelle_attribute .gsm_tabelle_td_third {
 	padding-right: 5px;
 }
-.gsm_tabelle_attribute .gsm_tabelle_td_second select, .gsm_tabelle_attribute .gsm_tabelle_td_third select, .gsm_tabelle_attribute .gsm_tabelle_td_third input {
+.gsm_tabelle_attribute .gsm_tabelle_td_second select, 
+.gsm_tabelle_attribute .gsm_tabelle_td_third > div > select, 
+.gsm_tabelle_attribute .gsm_tabelle_td_third input {
 	border-radius: 2px;
 	border: 1px solid #777;
 	height: 25px;
