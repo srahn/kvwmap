@@ -136,7 +136,7 @@
 
 		###### Array-Typ #####
 		if (POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
-			if ($field_id != NULL) $id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
+			if ($field_id != NULL) $id = $field_id.'_'.$name;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
 			else $id = $layer_id.'_'.$name.'_'.$k;	# oberste Ebene
 			$datapart .= '<input type="hidden" class="'.$field_class.'" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$datapart .= '<div id="'.$id.'_elements" '.($attributes['form_element_type'][$j] == 'Dokument' ? 'style="max-width: 735px; display: flex; flex-wrap: wrap; align-items: flex-start"' : '').'>';
