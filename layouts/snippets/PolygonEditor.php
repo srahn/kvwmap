@@ -13,8 +13,11 @@ function toggle_vertices(){
 }
 
 function split_geometries(){
-	document.GUI.go.value = 'Multi_Geometrien_splitten';
-	document.GUI.submit();
+	var r = confirm("Wollen Sie diesen Datensatz wirklich in mehrere Datensätze aufteilen?");
+	if (r) {
+		document.GUI.go.value = 'Multi_Geometrien_splitten';
+		document.GUI.submit();
+	}
 }
 
 function send(zoom){
