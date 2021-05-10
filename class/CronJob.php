@@ -66,10 +66,11 @@ class CronJob extends MyObject {
 		$dbname_from_gui = $this->gui->pgdatabase->dbName;
 		$dbname = (!empty($dbname_from_job) ? $dbname_from_job : (!empty($dbname_from_stelle) ? $dbname_from_stelle :  $dbname_from_gui));
 		#echo "<br>dbname from job: {$dbname_from_job}, stelle: {$dbname_from_stelle}, gui: {$dbname_from_gui}, chosen: {$dbname}";
+		$credentials = $this->gui->pgdatabase->get_credentials($this->gui->pgdatabase->connection_id);
 
 		if (!empty($this->get('time'))) {
 			if (!empty($this->get('query'))) {
-				$line = $this->get('time') . ' psql -h pgsql -U ' . $this->gui->pgdatabase->user . ' -c "' . preg_replace('/\s+/', ' ', $this->get('query')) . '" ' . $dbname . ' >> ' . $this->log_file_name . ' 2>&1';
+				$line = $this->get('time') . ' psql -h pgsql -U ' . $credentials['user'] . ' -c "' . preg_replace('/\s+/', ' ', $this->get('query')) . '" ' . $dbname . ' >> ' . $this->log_file_name . ' 2>&1';
 			}
 			else {
 				if (!empty($this->get('function'))) {
