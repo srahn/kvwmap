@@ -1,5 +1,7 @@
 BEGIN;
 
+DROP VIEW alkis.lk_grenzpunkte;
+
 CREATE OR REPLACE VIEW alkis.lk_grenzpunkte AS
 
 SELECT o.ogc_fid, 
