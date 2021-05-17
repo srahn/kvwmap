@@ -1267,12 +1267,9 @@ class data_import_export {
 					}
 				}
 				$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, true);
-				$zip_empty = true;
 				for ($i = 0; $i < count($result); $i++) {
-					$zip = $this->copy_documents_to_export_folder($result[$i], $this->attributes, $layerset[0]['maintable'], $folder);
-					if ($zip) {
-						$zip_empty = false;
-					}
+					$doc_zip = $this->copy_documents_to_export_folder($result[$i], $this->attributes, $layerset[0]['maintable'], $folder);
+					$zip = $zip || $doc_zip;
 				}
 			}
 			# Bei Bedarf auch Metadatendatei mit dazupacken
@@ -1291,7 +1288,7 @@ class data_import_export {
 			}
 
 			# bei Bedarf zippen
-			if (!$zip_empty) {
+			if ($zip) {
 				# Beim Zippen gehen die Umlaute in den Dateinamen kaputt, deswegen vorher umwandeln
 				array_walk(searchdir(IMAGEPATH.$folder, true), function($item, $key){
 					$pathinfo = pathinfo($item);
