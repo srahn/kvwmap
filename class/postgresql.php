@@ -317,9 +317,11 @@ FROM
 				minx, miny, maxx, maxy
 			FROM
 				spatial_ref_sys LEFT JOIN
-				spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid" . ($anzSupportedSRIDs > 0 ? "
-			WHERE spatial_ref_sys.srid IN (" . implode(', ', $supportedSRIDs) . ")" : 'true') . ($order ? "
-			ORDER BY srtext" : '') . "
+				spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid
+			WHERE
+				" . ($anzSupportedSRIDs > 0 ? "spatial_ref_sys.srid IN (" . implode(', ', $supportedSRIDs) . ")" : "true") . "
+			ORDER BY
+				" . ($order ? $order : "srtext") . "
 		";
 		#echo 'SQL zum Abfragen der EPSG-Codes: ' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
