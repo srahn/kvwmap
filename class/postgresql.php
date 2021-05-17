@@ -132,8 +132,12 @@ class pgdatabase {
 		return $connection_string;
 	}
 
-	function get_connection_string() {
-		return $this->format_pg_connection_string($this->get_credentials($this->connection_id));
+	function get_connection_string($bash_escaping = false) {
+		$connection_string = $this->format_pg_connection_string($this->get_credentials($this->connection_id));
+		if ($bash_escaping) {
+			$connection_string = str_replace('$', '\$', $connection_string);
+		}
+		return $connection_string;
 	}
 	
 	function format_pg_connection_string_p($credentials) {
