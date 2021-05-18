@@ -2748,16 +2748,17 @@ echo '			</table>
 		# Erstellen des Maßstabes
 		$this->map_scaledenom = $this->map->scaledenom;
     $this->switchScaleUnitIfNecessary();
+		$this->map->selectOutputFormat('png');
     $img_scalebar = $this->map->drawScaleBar();
 		if(!$img_urls){
 			ob_start();
 			$img_scalebar->saveImage();
 			$image = ob_get_clean();
-			$this->img['scalebar'] = 'data:image/jpg;base64,'.base64_encode($image);
+			$this->img['scalebar'] = 'data:image/png;base64,'.base64_encode($image);
 		}
 		else{
 			$filename = $this->user->id.'_'.rand(0, 1000000).'.png';
-			$img_scalebar->saveImage(IMAGEPATH.$filename);
+			$this->img['scalebar'] = $img_scalebar->saveImage(IMAGEPATH.$filename);
 			$this->img['scalebar'] = IMAGEURL.$filename;
 		}
 		$this->calculatePixelSize();
