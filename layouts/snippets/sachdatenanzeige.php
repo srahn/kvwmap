@@ -77,17 +77,12 @@ for($i=0;$i<$anzLayer;$i++){
   }
 	$template = $this->qlayerset[$i]['template'];
 	if (in_array($template, array('', 'generic_layer_editor.php', 'generic_layer_editor_doc_raster.php'))) {
-		if($this->qlayerset[$i]['connectiontype'] == MS_WMS){
-			include(SNIPPETS.'getfeatureinfo.php');			# getfeatureinfo bei WMS
+		if($template == '')$template = 'generic_layer_editor_2.php';
+		if($this->qlayerset[$i]['gle_view'] == '1'){
+			include(SNIPPETS.$template);			# Attribute zeilenweise bzw. Raster-Template
 		}
 		else{
-			if($template == '')$template = 'generic_layer_editor_2.php';
-			if($this->qlayerset[$i]['gle_view'] == '1'){
-				include(SNIPPETS.$template);			# Attribute zeilenweise bzw. Raster-Template
-			}
-			else{
-				include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
-			}
+			include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
 		}
 	}
 	else{
