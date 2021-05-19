@@ -5836,7 +5836,7 @@ echo '			</table>
 	          $filename = $this->map_saveWebImage($classimage,'jpeg');
 	          $newname = $this->user->id.basename($filename);
 	          rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-	          $classimage = imagecreatefromjpeg(IMAGEPATH.$newname);
+	          $classimage = imagecreatefrompng(IMAGEPATH.$newname);
           }
 	        else{
 						$layer->connection = str_replace('jpeg', 'png', $layer->connection);
