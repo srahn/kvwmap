@@ -373,7 +373,7 @@ class GUI {
 						if(in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
 							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strSearch.'</a></li>';
 						}
-						if($layer[0]['privileg'] > 0){
+						if($layer[0]['queryable'] AND $layer[0]['privileg'] > 0){
 							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->newDataset.'</a></li>';
 						}
 						if($layer[0]['Class'][0]['Name'] != ''){
@@ -2751,16 +2751,17 @@ echo '			</table>
 		# Erstellen des Maßstabes
 		$this->map_scaledenom = $this->map->scaledenom;
     $this->switchScaleUnitIfNecessary();
+		$this->map->selectOutputFormat('png');
     $img_scalebar = $this->map->drawScaleBar();
 		if(!$img_urls){
 			ob_start();
 			$img_scalebar->saveImage();
 			$image = ob_get_clean();
-			$this->img['scalebar'] = 'data:image/jpg;base64,'.base64_encode($image);
+			$this->img['scalebar'] = 'data:image/png;base64,'.base64_encode($image);
 		}
 		else{
 			$filename = $this->user->id.'_'.rand(0, 1000000).'.png';
-			$img_scalebar->saveImage(IMAGEPATH.$filename);
+			$this->img['scalebar'] = $img_scalebar->saveImage(IMAGEPATH.$filename);
 			$this->img['scalebar'] = IMAGEURL.$filename;
 		}
 		$this->calculatePixelSize();
@@ -6068,7 +6069,7 @@ echo '			</table>
 	          $filename = $this->map_saveWebImage($classimage,'jpeg');
 	          $newname = $this->user->id.basename($filename);
 	          rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-	          $classimage = imagecreatefromjpeg(IMAGEPATH.$newname);
+	          $classimage = imagecreatefrompng(IMAGEPATH.$newname);
           }
 	        else{
 						$layer->connection = str_replace('jpeg', 'png', $layer->connection);
@@ -11778,6 +11779,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->main='filterverwaltung.php';
     $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
     $showpolygon = true;
+		$setKeys = array();
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
 
 		if (
@@ -11850,12 +11852,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
             }
           }
         }
-        for($i = 0; $i < @count($setKeys); $i++){
-          $element = each($setKeys);
-          if($element['value'] < @count($this->selected_layers)){
-            $this->formvars['value_'.$element['key']] = '---- verschieden ----';
+        foreach($setKeys as $key => $value){
+          if($value < @count($this->selected_layers)){
+            $this->formvars['value_'.$key] = '---- verschieden ----';
           }
-        }
+        }				
         if ($this->formvars['CMD']!='') {
           # Es soll navigiert werden
           # Navigieren
@@ -13597,7 +13598,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								}
 							}
 
-							$where_condition = $layerset[$layer_id][0]['oid'].' = '.quote($oid, $attributes['type'][$attributes['indizes'][$layerset[$layer_id][0]['oid']]]);
+							$where_condition = $layerset[$layer_id][0]['oid'] . " = '" . $oid . "'";
 
 							$sql = $sql_lock . "
 								UPDATE
@@ -13615,13 +13616,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 							# Before Update trigger
 							if (!empty($layerset[$layer_id][0]['trigger_function'])) {
+								if ($layerset[$layer_id][0]['oid'] == 'oid'){
+									$oid_sql = 'oid,';
+								}
 								$sql_old = "
-									SELECT
-										oid, *
+									SELECT ".
+										$oid_sql." *
 									FROM
 										" . $layerset[$layer_id][0]['schema'] . '.' . pg_quote($layerset[$layer_id][0]['maintable']) . "
 									WHERE
-										oid = " . $oid;
+										" . $where_condition;
 								#echo '<br>sql before update: ' . $sql_old; #pk
 								$ret = $layerdb[$layer_id]->execSQL($sql_old, 4, 1);
 								$old_dataset = ($ret[0] == 0 ? pg_fetch_assoc($ret[1]) : array());
@@ -14308,14 +14312,53 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						}
 
             # Ausgabeformat
-            if(strpos(strtolower($request), 'info_format') === false){
-            	$request .='&INFO_FORMAT=text/html';
-            }
-
-            $layerset[$i]['GetFeatureInfoRequest']=$request;
-            #echo $request;
-
-            $this->qlayerset[]=$layerset[$i];
+						if ($layerset[$i]['template'] != '') {		# getfeatureinfo.php
+							if(strpos(strtolower($request), 'info_format') === false){
+								$request .='&INFO_FORMAT=text/html';
+							}
+							$layerset[$i]['GetFeatureInfoRequest']=$request;
+						}
+						else {																		# GLE
+							$request .='&INFO_FORMAT=application/vnd.ogc.gml';
+							if($this->last_query != '' AND $this->last_query[$layerset[$i]['Layer_ID']]['sql'] != ''){
+								$request = $this->last_query[$layerset[$i]['Layer_ID']]['sql'];
+								if($this->formvars['anzahl'] == '')$this->formvars['anzahl'] = $this->last_query[$layerset[$i]['Layer_ID']]['limit'];
+							}
+							$response = url_get_contents($request, $layerset[$i]['wms_auth_username'], $layerset[$i]['wms_auth_password']);
+							$url = $layerset[$i]['connection'];
+							$version = $layerset[$i]['wms_server_version'];
+							$epsg = $layerset[$i]['epsg_code'];
+							$typename = $layerset[$i]['wms_name'];
+							$namespace = substr($typename, 0, strpos($typename, ':'));
+							include_(CLASSPATH.'wfs.php');
+							$wfs = new wfs($url, $version, $typename, $namespace, $epsg, NULL, NULL);
+							$wfs->gml = $response;
+							$features = $wfs->extract_features();
+							if (!empty($features)) {
+								for($j = 0; $j < @count($features); $j++){
+									foreach($features[$j]['value'] as $attribute => $value){
+										$layerset[$i]['shape'][$j][$attribute] = $value;
+									}
+									if ($features[$j]['geom'] != '') {
+										$layerset[$i]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
+									}
+								}
+								foreach($layerset[$i]['shape'][0] as $attribute => $value){
+									$layerset[$i]['attributes']['privileg'][] = 0;
+									$layerset[$i]['attributes']['privileg'][$attribute] = 0;
+									if ($attribute != 'wfs_geom') {
+										$layerset[$i]['attributes']['visible'][] = 1;
+									}
+									$layerset[$i]['attributes']['name'][] = $attribute;
+								}
+								if(!$last_query_deleted){			# damit nur die letzte Query gelöscht wird und nicht eine bereits gespeicherte Query eines anderen Layers der aktuellen Abfrage
+									$this->user->rolle->delete_last_query();
+									$last_query_deleted = true;
+								}
+								$this->user->rolle->save_last_query('Sachdaten', $layerset[$i]['Layer_ID'], $request, NULL, $this->formvars['anzahl'], NULL);
+							}
+						}
+						$this->qlayerset[]=$layerset[$i];
           }  break;
 
           case MS_WFS : { # WFS Layer (9)

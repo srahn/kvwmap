@@ -55,7 +55,7 @@
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=DEFER;');
+			$layer->setProcessing('CLOSE_CONNECTION=DEFER');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
 			$style=ms_newStyleObj($klasse);
@@ -87,7 +87,7 @@
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=DEFER;');
+			$layer->setProcessing('CLOSE_CONNECTION=DEFER');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
 			$style=ms_newStyleObj($klasse);
@@ -108,7 +108,7 @@
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=DEFER;');
+			$layer->setProcessing('CLOSE_CONNECTION=DEFER');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
 			$style=ms_newStyleObj($klasse);
@@ -131,7 +131,7 @@
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.$layerset[0]['epsg_code']);
 			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=DEFER;');
+			$layer->setProcessing('CLOSE_CONNECTION=DEFER');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
 			$style=ms_newStyleObj($klasse);
@@ -559,8 +559,13 @@
 	};
 	
 	$GUI->save_Dokumentauswahl = function($stelle_id, $user_id, $formvars) use ($GUI){
-		$sql ='INSERT INTO rolle_nachweise_dokumentauswahl (stelle_id, user_id, name, suchhauptart, suchunterart) VALUES (';
-		$sql .= $stelle_id.', '.$user_id.', "'.$formvars['dokauswahl_name'].'", "'.implode(',', $formvars['suchhauptart']).'", "'.implode(',', $formvars['suchunterart']).'"';
+		$sql ='
+			INSERT INTO rolle_nachweise_dokumentauswahl (stelle_id, user_id, name, suchhauptart, suchunterart) VALUES (
+			' . $stelle_id . ', 
+			' . $user_id . ',
+			"' . $formvars['dokauswahl_name'] . '", 
+			"' . implode(',', $formvars['suchhauptart']) . '", 
+			"' . implode(',', $formvars['suchunterart']) . '")';
 		#echo $sql;
 		$GUI->debug->write("<p>file:users.php class:rolle->save_Dokumentauswahl ",4);
 		$GUI->database->execSQL($sql,4, 1);
@@ -1543,8 +1548,8 @@
 		if($GUI->formvars['dokauswahlen'] != ''){
 			$GUI->selected_dokauswahlset = $GUI->get_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['dokauswahlen']);
 			$GUI->formvars['dokauswahl_name'] = $GUI->selected_dokauswahlset[0]['name'];			
-			$GUI->formvars['suchhauptart'] = $GUI->selected_dokauswahlset[0]['suchhauptart'];
-			$GUI->formvars['suchunterart'] = $GUI->selected_dokauswahlset[0]['suchunterart'];
+			$GUI->formvars['suchhauptart'] = explode(',', $GUI->selected_dokauswahlset[0]['suchhauptart']);
+			$GUI->formvars['suchunterart'] = explode(',', $GUI->selected_dokauswahlset[0]['suchunterart']);
 		}
     # erzeugen des Formularobjektes für Antragsnr
     $GUI->FormObjAntr_nr=$GUI->getFormObjAntr_nr($GUI->formvars['suchantrnr']);    

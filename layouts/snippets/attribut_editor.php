@@ -36,6 +36,11 @@
 			'title' => 'Autovervollständigungsfeld getrennt durch Leerzeichen'
 		),
 		array(
+			'value' => 'Farbauswahl',
+			'output' => 'Farbauswahl',
+			'title' => 'Farbauswahl'
+		),		
+		array(
 			'value' => 'Radiobutton',
 			'output' => 'Radiobutton',
 			'title' => 'Radiobutton'

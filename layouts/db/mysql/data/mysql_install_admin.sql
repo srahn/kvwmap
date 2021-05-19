@@ -189,8 +189,13 @@ SET @last_menue_id = LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id, menue_id, menue_order) VALUES (@stelle_id, @last_menue_id, 51);
 INSERT INTO u_menue2rolle (user_id, stelle_id, menue_id,status) VALUES (@user_id, @stelle_id, @last_menue_id, 0);
 
+<<<<<<< HEAD
 # Cronjobs
 INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`, `title`) VALUES ('Cronjobs', 'index.php?go=cronjobs_anzeigen', @last_level1menue_id, 2, NULL, 14, 'Cronjobs einstellen');
+=======
+# Update und Config
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Sicherungen', 'index.php?go=Sicherungen_anzeigen', @last_level1menue_id, 2, NULL);
+>>>>>>> 275eee4c5ceb4643d422b87eff07c1c70df9eecd
 SET @last_menue_id = LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id, menue_id, menue_order) VALUES (@stelle_id, @last_menue_id, 52);
 INSERT INTO u_menue2rolle (user_id, stelle_id, menue_id,status) VALUES (@user_id, @stelle_id, @last_menue_id, 0);

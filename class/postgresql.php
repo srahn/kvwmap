@@ -132,8 +132,12 @@ class pgdatabase {
 		return $connection_string;
 	}
 
-	function get_connection_string() {
-		return $this->format_pg_connection_string($this->get_credentials($this->connection_id));
+	function get_connection_string($bash_escaping = false) {
+		$connection_string = $this->format_pg_connection_string($this->get_credentials($this->connection_id));
+		if ($bash_escaping) {
+			$connection_string = str_replace('$', '\$', $connection_string);
+		}
+		return $connection_string;
 	}
 	
 	function format_pg_connection_string_p($credentials) {
@@ -313,9 +317,11 @@ FROM
 				minx, miny, maxx, maxy
 			FROM
 				spatial_ref_sys LEFT JOIN
-				spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid" . ($anzSupportedSRIDs > 0 ? "
-			WHERE spatial_ref_sys.srid IN (" . implode(', ', $supportedSRIDs) . ")" : 'true') . ($order ? "
-			ORDER BY srtext" : '') . "
+				spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid
+			WHERE
+				" . ($anzSupportedSRIDs > 0 ? "spatial_ref_sys.srid IN (" . implode(', ', $supportedSRIDs) . ")" : "true") . "
+			ORDER BY
+				" . ($order ? $order : "srtext") . "
 		";
 		#echo 'SQL zum Abfragen der EPSG-Codes: ' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
@@ -1192,7 +1198,7 @@ FROM
 			$sql.=", b.bezeichnung as gbname FROM alkis.ax_buchungsblatt g ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
-			$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR f.istgebucht = ANY(s.an) ";
+			$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR (s.verweistauf IS NULL AND f.istgebucht = ANY(s.an)) ";		# angepasst wegen Gebäudeeigentum bei 13274300200046______
 			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
 			$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";		
 		}
