@@ -307,7 +307,7 @@ if ($this->Fehlermeldung!='') {
 										<span data-tooltip="<? echo $strHintShowLayerOptions; ?>"></span>
 									</td>
 								</tr>
-								<tr <? if(!ROLLENFILTER){echo 'style="display: none"'; ?>>
+								<tr <? if(!ROLLENFILTER){echo 'style="display: none"';} ?>>
 									<td class="rollenwahl-option-header">
 										<? echo $strShowRollenFilter; ?>:
 									</td>
@@ -316,7 +316,6 @@ if ($this->Fehlermeldung!='') {
 										<span data-tooltip="<? echo $strHintShowRollenFilter; ?>"></span>
 									</td>
 								</tr>
-								<? } ?>
 								<tr>
 									<td class="rollenwahl-option-header">
 										<? echo $strMenuAutoClose; ?>:
