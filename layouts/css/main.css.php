@@ -1618,7 +1618,7 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]), table.t
 }
 
 table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([type=checkbox]) {
-	min-height: 25px;
+	height: 25px;
 }
 
 .readonly_text{

@@ -13595,7 +13595,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								}
 							}
 
-							$where_condition = $layerset[$layer_id][0]['oid'].' = '.quote($oid, $attributes['type'][$attributes['indizes'][$layerset[$layer_id][0]['oid']]]);
+							$where_condition = $layerset[$layer_id][0]['oid'] . " = '" . $oid . "'";
 
 							$sql = $sql_lock . "
 								UPDATE
@@ -13613,13 +13613,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 							# Before Update trigger
 							if (!empty($layerset[$layer_id][0]['trigger_function'])) {
+								if ($layerset[$layer_id][0]['oid'] == 'oid'){
+									$oid_sql = 'oid,';
+								}
 								$sql_old = "
-									SELECT
-										oid, *
+									SELECT ".
+										$oid_sql." *
 									FROM
 										" . $layerset[$layer_id][0]['schema'] . '.' . pg_quote($layerset[$layer_id][0]['maintable']) . "
 									WHERE
-										oid = " . $oid;
+										" . $where_condition;
 								#echo '<br>sql before update: ' . $sql_old; #pk
 								$ret = $layerdb[$layer_id]->execSQL($sql_old, 4, 1);
 								$old_dataset = ($ret[0] == 0 ? pg_fetch_assoc($ret[1]) : array());
