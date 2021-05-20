@@ -78,7 +78,19 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			group.style.display = 'none';
 			group_img.src = 'graphics/plus.gif';
 		}
-	}	
+	}
+	
+	toggle_tab = function(layer_id, k, tabname){
+		var dataset = document.getElementById('datensatz_' + layer_id + '_' + k);
+		var groups_to_close = dataset.querySelectorAll('.tab');
+		[].forEach.call(groups_to_close, function (group){
+			group.style.display = 'none';
+		});
+		var groups_to_open = dataset.querySelectorAll('.tab_' + layer_id + '_' + k + '_' + tabname);
+		[].forEach.call(groups_to_open, function (group){
+			group.style.display = '';
+		});
+	}
 	
 	check_visibility = function(layer_id, object, dependents, k){
 		if(object == null)return;

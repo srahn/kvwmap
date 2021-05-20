@@ -103,7 +103,8 @@
 					$groupname = $explosion[0];
 					$groupname_short = explode('<br>', $groupname);
 					$groupname_short = str_replace(' ', '_', $groupname_short[0]);
-					$datapart .= '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.'">
+					$tabname = str_replace(' ', '_', $layer['attributes']['tab'][$j]);
+					$datapart .= '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.' tab tab_' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . '">
 									<td colspan="2" width="100%">
 										<div>
 											<table width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">

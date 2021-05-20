@@ -377,6 +377,11 @@ function alias_replace(name){
 								<input name="group_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['group'][$i]); ?>">
 							</td>
 							
+							<td align="left" valign="top">
+								<? if($i == 0)echo '<div class="fett scrolltable_header">Tab</div>'; ?>
+								<input name="tab_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['tab'][$i]); ?>">
+							</td>							
+							
 							<?php
 							if ($this->attributes['arrangement'][$i] == 0) { $bgcolor = 'white'; }
 							if ($this->attributes['arrangement'][$i] == 1) { $bgcolor = '#faef1e'; } ?>
