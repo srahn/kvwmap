@@ -62,11 +62,13 @@ if ($this->new_entry != true AND value_of($this->formvars, 'printversion') == ''
 	if (!empty($layer['attributes']['tabs'])) { ?>
 	<tr>
 		<th>
-			<div style="display: flex">
+			<div class="gle_tabs">
 				<? 
+				$first_tab = true;
 				foreach ($layer['attributes']['tabs'] as $tab) {
 					$tabname = str_replace(' ', '_', $tab);
-					echo '<div onclick="toggle_tab(' . $layer['Layer_ID'] . ', ' . $k . ', \'' . $tabname . '\');">' . $tab . '</div>';
+					echo '<div ' . ($first_tab? 'class="active_tab"' : '') . ' onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', \'' . $tabname . '\');">' . $tab . '</div>';
+					$first_tab = false;
 				}
 				?>
 			</div>

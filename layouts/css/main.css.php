@@ -1569,6 +1569,28 @@ thead.gle th {
  text-align:left;
 }
 
+.gle_tabs{
+	display: flex;
+	margin: 5px 5px -6px 5px;
+	border-left: 1px solid #bbb;
+	height: 27px
+}
+
+.gle_tabs > div{
+	padding: 0 5px 0 5px;
+	cursor: pointer;
+	border: 1px solid #bbb;
+	border-left: none;
+	background-color: #fff;
+	color: #aaa;
+}
+
+.gle_tabs > div.active_tab{
+	border-bottom: 1px dashed #bbb;
+	background-color: <? echo BG_GLEATTRIBUTE; ?>;
+	color: black;
+}
+
 .gle-attribute-name {
 	height: 32px;
 	position: relative;

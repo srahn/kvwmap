@@ -103,8 +103,14 @@
 					$groupname = $explosion[0];
 					$groupname_short = explode('<br>', $groupname);
 					$groupname_short = str_replace(' ', '_', $groupname_short[0]);
-					$tabname = str_replace(' ', '_', $layer['attributes']['tab'][$j]);
-					$datapart .= '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.' tab tab_' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . '">
+					if ($layer['attributes']['tab'][$j] != ''){
+						$tabname = str_replace(' ', '_', $layer['attributes']['tab'][$j]);
+						$display = '';
+						if ($layer['attributes']['tab'][$j] != $layer['attributes']['tab'][0]) {	# nur den ersten Tab öffnen
+							$display = 'style="display: none"';
+						}
+					}
+					$datapart .= '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.' tab tab_' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . '" ' . $display . '>
 									<td colspan="2" width="100%">
 										<div>
 											<table width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">
