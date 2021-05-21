@@ -367,6 +367,10 @@ class GUI {
 											</div>';
 							}
 						}
+						if ($layer[0]['metalink'] != '' AND substr($layer[0]['metalink'], 0, 10) != 'javascript') {
+							$href = $layer[0]['metalink'] . (strpos($layer[0]['metalink'], '?') === false ? '?' : '&') . 'time='.time();
+							echo '<li><a href="' . $href . '" target="_blank">' . $this->strMetadata . '</a></li>';
+						}						
 						if($layer[0]['connectiontype']==6 OR($layer[0]['Datentyp']==MS_LAYER_RASTER AND $layer[0]['connectiontype']!=7)){
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
 						}
@@ -1018,13 +1022,7 @@ echo '			</table>
 					$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
 				}
 				if(value_of($layer, 'metalink') != ''){
-					if(substr($layer['metalink'], 0, 10) != 'javascript'){
-						$legend .= ' target="_blank"';
-						if(strpos($layer['metalink'], '?') === false)$layer['metalink'] .= '?';
-						else $layer['metalink'] .= '&';
-						$layer['metalink'] .= 'time='.time();
-					}
-					$legend .= ' class="metalink boldhover" href="'.$layer['metalink'].'">';
+					$legend .= ' class="metalink boldhover" href="javascript:void(0);">';
 				}
 				else
 					$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';

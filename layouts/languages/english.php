@@ -58,4 +58,5 @@
 	$this->strShowLess="Show less";
 	$this->strLayerParameters="Layer Parameter";
 	$this->strHatching="Hatching";
+	$this->strMetadata="Metadata";
 ?>
