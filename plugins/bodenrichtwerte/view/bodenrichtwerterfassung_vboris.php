@@ -699,7 +699,7 @@ update_require_attribute = function(attributes, layer_id, value){
 		</td>
 	</tr>
 </table>
-<input type="hidden" name="oid" value="<? echo $this->formvars['oid']; ?>">
+<input type="hidden" name="gid" value="<? echo $this->formvars['gid']; ?>">
 <input type="hidden" name="area" value="">
 <input type="hidden" name="go" value="Bodenrichtwertformular">
 <input type="hidden" name="go_plus" value="">
