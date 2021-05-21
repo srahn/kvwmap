@@ -2895,7 +2895,7 @@ echo '			</table>
 		}
 		if ($type == 'array' or is_array($msg)) {
 			foreach($msg AS $m) {
-				GUI::add_message($m['type'], $m['msg']);
+				GUI::add_message_($m['type'], $m['msg']);
 			}
 		}
 		else {
@@ -8261,7 +8261,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		include_once(CLASSPATH . 'Invitation.php');
 		$this->invitations = Invitation::find(
 			$this,
-			'inviter_id = ' . $this->user->id,
+			($this->formvars['all'] != '' ? 'true' : 'inviter_id = ' . $this->user->id),
 			($this->formvars['order'] == '' ? 'email' : '')
 		);
 
@@ -12760,21 +12760,24 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 		# erzeugt die Zeilen für den crontab
 		$crontab_lines = array('gisadmin' => array(), 'root' => array());
-		foreach($this->cronjobs AS $cronjob) {
+		foreach ($this->cronjobs AS $cronjob) {
 			if ($cronjob->get('aktiv')) {
 				$crontab_lines[$cronjob->get('user')][] = $cronjob->get_crontab_line();
 			}
 		}
 		# schreibt die Zeilen in die crontab Dateien von root und gisadmin falls vorhanden
-		foreach($crontab_lines AS $user => $lines) {
+		foreach ($crontab_lines AS $user => $lines) {
+			$crontab_file = '/var/www/cron/crontab_' . $user;
+			$fp = fopen($crontab_file, 'w');
 			if (count($lines) > 0) {
-				$crontab_file = '/var/www/cron/crontab_' . $user;
-				$fp = fopen($crontab_file, 'w');
 				foreach($lines AS $line) {
 					fwrite($fp, $line . PHP_EOL);
 				}
-				fclose($fp);
 			}
+			else {
+				fwrite($fp, '# no crontab lines defined in kvwmap!');
+			}
+			fclose($fp);
 		}
 
 		# crontab starten

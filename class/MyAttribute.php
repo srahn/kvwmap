@@ -24,6 +24,18 @@ class MyAttribute {
 		) > 0;
 	}
 
+	function get_input_type() {
+		switch ($this->type) {
+			case ('tinyint(1)') : {
+				$input_type = 'checkbox';
+			} break;
+			default : {
+				$input_type = 'text';
+			}
+		}
+		return $input_type;
+	}
+
 	function as_form_html() {
 		$html = '';
 		if (!($this->is_identifier and $this->value == '')) {
@@ -32,7 +44,7 @@ class MyAttribute {
 				$html .= "<span style=\"padding-top: 2px; float: left\">" . $this->value . "</span>";
 			}
 			else {
-				$html .= "<input name=\"" . $this->name . "\" type=\"text\" value=\"" . $this->value . "\">";
+				$html .= "<input name=\"" . $this->name . "\" type=\"" . $this->get_input_type() . "\" value=\"" . $this->value . "\">";
 			}
 		}
 		return $html;

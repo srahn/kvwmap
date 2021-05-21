@@ -405,7 +405,7 @@ span[data-tooltip]:hover::after {
 .input-form label {
 	float: left;
 	text-align: right;
-	font-size: 17px;
+	font-size: 15px;
 	width: 210px;
 	height: 15px;
 	margin-right: 10px;
@@ -424,6 +424,11 @@ span[data-tooltip]:hover::after {
 	float: left;
 	text-align: left;
 	width: 400px;
+}
+
+.input-form input[type=checkbox] {
+	float: left;
+	margin-left: 0px;
 }
 
 .input-form input[type=reset] {
