@@ -5483,7 +5483,7 @@ echo '			</table>
 			}
 			# ------------ automatische Klassifizierung Ende -------------------
 			else{
-				$dbmap->addRollenLayerStyling($layer_id, $layerset[0]['Datentyp'], $this->formvars['labelitem'], $this->user);
+				$dbmap->addRollenLayerStyling($layer_id, $layerset[0]['Datentyp'], $this->formvars['labelitem'], $this->user, 'zoom');
 			}
 		}
 		else{         # selektieren (eigenen Style verwenden)
@@ -17202,7 +17202,7 @@ class db_mapObj{
 		}
   }
 
-	function addRollenLayerStyling($layer_id, $datatype, $labelitem, $user){
+	function addRollenLayerStyling($layer_id, $datatype, $labelitem, $user, $type){
 		$attrib['name'] = ' ';
 		$attrib['layer_id'] = -$layer_id;
 		$attrib['expression'] = '';
@@ -17219,8 +17219,11 @@ class db_mapObj{
 		$style['outlinecolor'] = $style['outlinecolorred'] . ' ' . $style['outlinecolorgreen'] . ' ' . $style['outlinecolorblue'];
 		switch ($datatype) {
 			case 0 : {
-				if(defined('ZOOM2POINT_STYLE_ID') AND ZOOM2POINT_STYLE_ID != ''){
+				if($type == 'zoom' AND defined('ZOOM2POINT_STYLE_ID') AND ZOOM2POINT_STYLE_ID != ''){
 					$style_id = $this->copyStyle(ZOOM2POINT_STYLE_ID);
+				}
+				if($type == 'import' AND defined('IMPORT_POINT_STYLE_ID') AND IMPORT_POINT_STYLE_ID != ''){
+					$style_id = $this->copyStyle(IMPORT_POINT_STYLE_ID);
 				}
 				else{
 					$style['size'] = 8;
