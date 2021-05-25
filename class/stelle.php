@@ -457,11 +457,14 @@ class stelle {
 		$sql = "
 			SELECT
 				s.ID,
-				s.Bezeichnung
+				s.Bezeichnung,
+				es.Bezeichnung as Bezeichnung_parent
 			FROM
 				`stelle` AS s" . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " LEFT JOIN
 				`rolle` AS r ON s.ID = r.stelle_id
 				" : "") . "
+			LEFT JOIN `stellen_hierarchie` AS h ON (s.`ID` = h.`child_id`)
+			LEFT JOIN stelle es ON es.ID = h.parent_id
 			WHERE " .
 				$where . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " AND
 				(r.user_id = " . $user_id . " OR r.stelle_id IS NULL)" : "") . "
@@ -476,6 +479,7 @@ class stelle {
 		while($rs = $this->database->result->fetch_array()) {
 			$stellen['ID'][] = $rs['ID'];
 			$stellen['Bezeichnung'][] = $rs['Bezeichnung'];
+			$stellen['Bezeichnung_parent'][] = $rs['Bezeichnung_parent'];
 		}
 		return $stellen;
 	}
