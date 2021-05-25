@@ -48,6 +48,21 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			}
 		}
 	}
+	
+	completeTime = function(timefield){
+		timefield.value = timefield.value.replace('.', ':');
+		var split = timefield.value.split(":");
+		if (split.length == 2) {
+			if (split[1] == '') {
+				timefield.value += '00';
+			}
+		}
+		else {
+			if (split.length == 1) {
+				timefield.value += ':00';
+			}
+		}
+	}	
 
 	scrolltop = function(){
 		if(querymode == 1){
@@ -444,6 +459,13 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				completeDate(document.getElementsByName(fieldstring)[0]);
 				if(!checkDate(document.getElementsByName(fieldstring)[0].value)){
 					message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+					return;
+				}
+			}
+			if (document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'time' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)) {
+				completeTime(document.getElementsByName(fieldstring)[0]);
+				if(!checkTime(document.getElementsByName(fieldstring)[0].value)){
+					message('Das Uhrzeitfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format hh:mm:ss.');
 					return;
 				}
 			}
