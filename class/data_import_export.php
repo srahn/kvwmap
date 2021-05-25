@@ -172,7 +172,7 @@ class data_import_export {
 			$path = $this->formvars['query'];
 			$attributes = $dbmap->load_attributes($layerdb, $path);
 			$dbmap->save_postgis_attributes(-$layer_id, $attributes, '', '');
-			$dbmap->addRollenLayerStyling($layer_id, $custom_table['datatype'], $custom_table['labelitem'], $user);
+			$dbmap->addRollenLayerStyling($layer_id, $custom_table['datatype'], $custom_table['labelitem'], $user, 'import');
 		}
     return $layer_id;
 	}
@@ -813,7 +813,7 @@ class data_import_export {
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb) {
 		$command = 'export PGDATESTYLE="ISO, MDY";export PGCLIENTENCODING=UTF-8;'
 			. OGR_BINPATH . 'ogr2ogr -f ' . $exportformat . ' -lco ENCODING=UTF-8 -sql "' . str_replace(["\t", chr(10), chr(13)], [' ', ''], $sql) . '" ' . $exportfile
-			. ' PG:"' . $layerdb->get_connection_string() . ' active_schema=' . $layerdb->schema . '"';
+			. ' PG:"' . $layerdb->get_connection_string(true) . ' active_schema=' . $layerdb->schema . '"';
 		$errorfile = rand(0, 1000000);
 		$command .= ' 2> '.IMAGEPATH.$errorfile.'.err';
 		$output = array();
@@ -828,7 +828,7 @@ class data_import_export {
 		if ($options != NULL) $command.= $options;
 		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco precision=NO -nlt PROMOTE_TO_MULTI -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
 		if ($sql != NULL) $command.= ' -sql \''.$sql.'\'';
-		$command .= ' -append PG:"' . $database->get_connection_string() . ' active_schema=' . $schema . '"';
+		$command .= ' -append PG:"' . $database->get_connection_string(true) . ' active_schema=' . $schema . '"';
 		$command .= ' "' . $importfile . '" ' . $layer;
 		$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
 		$output = array();
@@ -1267,12 +1267,9 @@ class data_import_export {
 					}
 				}
 				$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, true);
-				$zip_empty = true;
 				for ($i = 0; $i < count($result); $i++) {
-					$zip = $this->copy_documents_to_export_folder($result[$i], $this->attributes, $layerset[0]['maintable'], $folder);
-					if ($zip) {
-						$zip_empty = false;
-					}
+					$doc_zip = $this->copy_documents_to_export_folder($result[$i], $this->attributes, $layerset[0]['maintable'], $folder);
+					$zip = $zip || $doc_zip;
 				}
 			}
 			# Bei Bedarf auch Metadatendatei mit dazupacken
@@ -1291,7 +1288,7 @@ class data_import_export {
 			}
 
 			# bei Bedarf zippen
-			if (!$zip_empty) {
+			if ($zip) {
 				# Beim Zippen gehen die Umlaute in den Dateinamen kaputt, deswegen vorher umwandeln
 				array_walk(searchdir(IMAGEPATH.$folder, true), function($item, $key){
 					$pathinfo = pathinfo($item);

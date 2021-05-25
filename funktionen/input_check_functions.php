@@ -68,4 +68,22 @@
 			return false;
 		}
 	}
+	
+	checkTime = function(string){
+		var split = string.split(":");
+		var hours = parseInt(split[0], 10);
+		var minutes = parseInt(split[1], 10);
+		var seconds = parseInt(split[2] ?? 0, 10);
+		var check = new Date(2021, 4, 25, hours, minutes, seconds);
+		var hours2 = check.getHours();
+		var minutes2 = check.getMinutes();
+		var seconds2 = check.getSeconds();
+		if (hours2 == hours && minutes == minutes2 && seconds == seconds2) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
 </script>

@@ -27,4 +27,5 @@
 	$this->strLoad="Loden";
 	$this->strUseGeometryOf="Geometrie övernehmen von";
 	$this->strSearch="Nu sök";
+	$this->strMetadata="Metadaten";
 ?>

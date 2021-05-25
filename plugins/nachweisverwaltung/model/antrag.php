@@ -245,6 +245,9 @@ class antrag {
 			$pdf->addText(330,$row-=20,16,utf8_decode('Liste der ausgegebenen Unterlagen'));
 			$row-=3; $pdf->line(330,$row,557,$row);
 			$row-=3; $pdf->line(330,$row,557,$row);
+			if (defined('ZUSATZ_UEBERGABEPROTOKOLL') AND ZUSATZ_UEBERGABEPROTOKOLL != '') {
+				$pdf->addText(296,$row-=16,12,utf8_decode(ZUSATZ_UEBERGABEPROTOKOLL));
+			}
 		}
 	}
 	
