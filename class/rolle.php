@@ -1186,6 +1186,9 @@ class rolle {
 	}
 
 	function setTransparency($formvars) {
+		if ($formvars['layer_options_transparency'] < 0 OR $formvars['layer_options_transparency'] > 100) {
+			$formvars['layer_options_transparency'] = 100;
+		}
 		if($formvars['layer_options_open'] > 0){		# normaler Layer
 			$sql ='
 				UPDATE u_rolle2used_layer 
