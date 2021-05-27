@@ -1032,6 +1032,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		var same_fields = document.querySelectorAll('[name="' + field.name + '"]');
 		[].forEach.call(same_fields, function (same_field){
 			same_field.value = field.value;
+			same_field.onchange();
 		});
 		flag = field.closest('#layer').querySelector('[name="' + flag_name + '"]');
 		if(flag != undefined){
