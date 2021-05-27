@@ -11,6 +11,23 @@ if(isset($argv)){
 	}
 }
 
+
+function CustomErrorHandler($errno, $errstr, $errfile, $errline){
+	global $errors;
+	if (!(error_reporting() & $errno)) {
+		// This error code is not included in error_reporting
+		return;
+	}
+	$errors[] = $errstr;
+	http_response_code(500);
+	include_once('layouts/snippets/general_error_page.php');
+	exit;
+	/* Don't execute PHP internal error handler */
+	return true;
+}
+
+set_error_handler("CustomErrorHandler");
+
 include('credentials.php');
 include('config.php');
 

@@ -4,8 +4,6 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
-$errors = array();
-
 function quote($var, $type = NULL){
 	switch ($type) {
 		case 'text' : case 'varchar' : {
