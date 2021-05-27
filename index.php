@@ -11,17 +11,29 @@ if(isset($argv)){
 	}
 }
 
+# Error Handling for Fatal-Errors
+register_shutdown_function(function () {
+	global $errors;
+	$err = error_get_last();
+	if (error_reporting() & $err['type']) {		// This error code is included in error_reporting		
+		ob_end_clean();
+		if (! is_null($err)) {
+				$errors[] = $err['message'];
+		}
+		http_response_code(500);
+		include_once('layouts/snippets/general_error_page.php');
+	}
+});
 
+# Error-Handling
 function CustomErrorHandler($errno, $errstr, $errfile, $errline){
 	global $errors;
-	if (!(error_reporting() & $errno)) {
-		// This error code is not included in error_reporting
+	if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
 		return;
 	}
 	$errors[] = $errstr;
 	http_response_code(500);
 	include_once('layouts/snippets/general_error_page.php');
-	exit;
 	/* Don't execute PHP internal error handler */
 	return true;
 }
