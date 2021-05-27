@@ -34,7 +34,7 @@
 </script>
 
 <div id="layer" align="left" onclick="remove_calendar();">
-<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" onchange="activate_save_button(this.closest('#layer'), '<? echo $layer['Layer_ID']; ?>');" name="changed_<? echo $layer['Layer_ID']; ?>">
+<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" onchange="activate_save_button(this.closest('#layer').parentElement, '<? echo $layer['Layer_ID']; ?>');" name="changed_<? echo $layer['Layer_ID']; ?>">
 <? if($this->formvars['embedded_subformPK'] == '' AND $this->new_entry != true){ ?>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
