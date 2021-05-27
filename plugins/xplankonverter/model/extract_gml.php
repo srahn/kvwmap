@@ -8,7 +8,7 @@ class Gml_extractor {
 		$this->gml_location = $gml_location;
 		$this->gmlas_schema = $gmlas_schema;
 		$this->xsd_location = '/var/www/html/modell/xsd/5.1/XPlanung-Operationen.xsd';
-		$this->docker_gdal_cmd = 'docker exec gdal';
+		#$this->docker_gdal_cmd = 'docker exec gdal';
 		#TODO consider other options of parsing epsgs from the file (e.g. with ogrinfo) or have an input field on upload 
 		$this->input_epsg = '25832';
 		$this->epsg = '25832';
@@ -42,7 +42,7 @@ class Gml_extractor {
 
 		$layername = '';
 		$tablename = strtolower($classname); #for DB
-
+		
 		switch ($classname) {
 			case 'BP_Plan' : {
 				$layername = 'B-Pläne';
@@ -78,7 +78,6 @@ class Gml_extractor {
 		$formdata = array();
 		$fill_form_table = 'fill_form_' . $tablename;
 		$formdata = $this->$fill_form_table($gml_id);
-
 		$rect = ms_newRectObj();
 
 		# iterate over all attributes as formvars
@@ -275,11 +274,29 @@ class Gml_extractor {
 	function ogr2ogr_gmlas() {
 		# For Logging add: . ' >> /var/www/logs/ogr_' . $gml_id . '.log 2>> /var/www/logs/ogr_' . $gml_id . '.err'
 		# escape for passwords with shell 
-		$cmd = $this->docker_gdal_cmd . ' ' . OGR_BINPATH_GDAL . 'ogr2ogr -f "PostgreSQL" PG:"' . $this->pgdatabase->get_connection_string_p() . ' SCHEMAS=' . $this->gmlas_schema .'" GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location;
-		# echo $cmd;
-		exec($cmd, $output, $error_code);
-		# echo '<pre>'; print_r($output); echo '</pre>';
-		# echo 'Error-Code:' . $error_code;
+		#$cmd = $this->docker_gdal_cmd . ' ' . OGR_BINPATH_GDAL . 'ogr2ogr -f "PostgreSQL" PG:"' . $this->pgdatabase->get_connection_string_p() . ' SCHEMAS=' . $this->gmlas_schema .'" GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location;
+		#echo $cmd;
+		#exec($cmd, $output, $error_code);
+		#echo '<pre>'; print_r($output); echo '</pre>';
+		#echo 'Error-Code:' . $error_code;
+		
+		$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
+		$param_1                = urlencode('-f "PostgreSQL" PG:');
+		$connection_string      = urlencode('"' . $this->pgdatabase->get_connection_string_p() . ' SCHEMAS=' . $this->gmlas_schema . '" ');
+		$param_2                = urlencode('GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
+		
+		$url = $gdal_container_connect . $param_1 . $connection_string . $param_2;	
+		#echo 'url:   ' . $url . '<br><br>';
+
+		$ch = curl_init();
+		#$url = curl_escape($ch, $url);
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,300);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		$output = curl_exec($ch);
+		curl_close($ch);
+		
+		#echo empty($output) ? "Nothing returned from ogr2ogr curl request" : $output;
 		return $output;
 	}
 
