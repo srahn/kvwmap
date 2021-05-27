@@ -1031,14 +1031,15 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	set_changed_flag = function(field, flag_name){
 		var same_fields = document.querySelectorAll('[name="' + field.name + '"]');
 		[].forEach.call(same_fields, function (same_field){
-			same_field.value = field.value;
-			same_field.onchange();
+			same_field.value = field.value;	// alle gleichen Feldern auf den selben Wert setzen
 		});
-		flag = field.closest('#layer').querySelector('[name="' + flag_name + '"]');
-		if(flag != undefined){
-			flag.value=1;
-			if(flag.onchange)flag.onchange();
-		}
+		var flags = document.querySelectorAll('[name="' + flag_name + '"]');
+		[].forEach.call(flags, function (flag){
+			if(flag != undefined){
+				flag.value=1;
+				if(flag.onchange)flag.onchange();
+			}
+		});
 	}
 	
 	activate_save_button = function(layerdiv, layer_id){
