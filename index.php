@@ -31,7 +31,7 @@ function CustomErrorHandler($errno, $errstr, $errfile, $errline){
 	if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
 		return;
 	}
-	$errors[] = $errstr;
+	$errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
 	http_response_code(500);
 	include_once('layouts/snippets/general_error_page.php');
 	/* Don't execute PHP internal error handler */

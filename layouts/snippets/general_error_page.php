@@ -24,7 +24,6 @@ global $errors;
 						</p>
 						<? } ?>
 					</div>
-					 In der Regel passiert das, wenn der Zugriff auf die Datenbank nicht funktioniert oder wenn ein Dienst nicht zur Verfügung steht. Normalerweise sind diese Phänomene nur kurzfristig, haben Sie daher ein wenig Geduld.
 			 </p>
 			</div>
 			<div style="width:7%;float:left;">
@@ -34,12 +33,12 @@ global $errors;
 			</div>
 			<div style="width:53%;float:left;">
 			 <p>
-				 <h4>Was können Sie tun?</h4>
-										<ul>
-											<li style="padding:10px;"> Warten Sie einige Augenblicke und versuchen Sie dann, die Seite erneut zu laden. Klicken Sie dazu auf diesen Link:<br><a href="index.php">Neu laden</a>
-											<li style="padding:10px;"> Sollte diese Meldung danach immer noch kommen, geben Sie bitte der Geoadministration einen Hinweis. Sie können eine Email erstellen, indem Sie auf diesen Link klicken:<br><a href="mailto:<? echo $email; ?>?subject=<? echo $subject; ?>&body=<? echo $body; ?>">Hinweis versenden</a>
-											<li style="padding:10px;"> Damit Sie in kvwmap weiterarbeiten können, können Sie Versuchen alle Themen auszuschalten. Klicken Sie auf diesen Link:<br><a href="index.php?go=reset_layers">Themen ausschalten</a>
-										</ul>
+				<h4>Was können Sie tun?</h4>
+				<ul>
+					<li style="padding:10px;"> Warten Sie einige Augenblicke und versuchen Sie dann, die Seite erneut zu laden. Klicken Sie dazu auf diesen Link:<br><a href="index.php">Neu laden</a>
+					<li style="padding:10px;"> Sollte diese Meldung danach immer noch kommen, geben Sie bitte der Geoadministration einen Hinweis. Sie können eine Email erstellen, indem Sie auf diesen Link klicken:<br><a href="mailto:<? echo $email; ?>?subject=<? echo $subject; ?>&body=<? echo $body; ?>">Hinweis versenden</a>
+					<li style="padding:10px;"> Damit Sie in kvwmap weiterarbeiten können, können Sie Versuchen alle Themen auszuschalten. Klicken Sie auf diesen Link:<br><a href="index.php?go=reset_layers">Themen ausschalten</a>
+				</ul>
 			 </p>
 			</div>
 		</div>
