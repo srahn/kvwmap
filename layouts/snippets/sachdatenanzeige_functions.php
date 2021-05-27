@@ -1031,7 +1031,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	set_changed_flag = function(field, flag_name){
 		var same_fields = document.querySelectorAll('[name="' + field.name + '"]');
 		[].forEach.call(same_fields, function (same_field){
-			same_field.value = field.value;	// alle gleichen Feldern auf den selben Wert setzen
+			same_field.value = field.value;	// alle gleichen Felder auf den selben Wert setzen
 		});
 		var flags = document.querySelectorAll('[name="' + flag_name + '"]');
 		[].forEach.call(flags, function (flag){
