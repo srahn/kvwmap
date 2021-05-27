@@ -59,23 +59,6 @@ if ($this->new_entry != true AND value_of($this->formvars, 'printversion') == ''
 		</th>
 	</tr>
 	<?
-	if (!empty($layer['attributes']['tabs'])) { ?>
-	<tr>
-		<th>
-			<div class="gle_tabs">
-				<? 
-				$first_tab = true;
-				foreach ($layer['attributes']['tabs'] as $tab) {
-					$tabname = str_replace(' ', '_', $tab);
-					echo '<div ' . ($first_tab? 'class="active_tab"' : '') . ' onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', \'' . $tabname . '\');">' . $tab . '</div>';
-					$first_tab = false;
-				}
-				?>
-			</div>
-		</th>
-	</tr>
-	<?
-	}
 	if (!$this->user->rolle->visually_impaired) { ?>
 		</thead><?
 	}

@@ -1576,7 +1576,7 @@ thead.gle th {
 
 .gle_tabs{
 	display: flex;
-	margin: 5px 5px -6px 5px;
+	margin-bottom: -11px;
 	border-left: 1px solid #bbb;
 	height: 27px
 }
