@@ -1028,7 +1028,8 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		}		
 	}
 
-	set_changed_flag = function(flag){
+	set_changed_flag = function(field, flag_name){
+		flag = field.closest('#layer').querySelector('[name="' + flag_name + '"]');
 		if(flag != undefined){
 			flag.value=1;
 			if(flag.onchange)flag.onchange();

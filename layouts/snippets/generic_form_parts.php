@@ -116,7 +116,7 @@
 		else $fieldname = $field_name;
 				
 		if(!$change_all){
-			$onchange .= 'set_changed_flag(currentform.changed_'.$layer_id.'_'.str_replace('-', '', $oid).');';
+			$onchange .= 'set_changed_flag(this, \'changed_'.$layer_id.'_'.str_replace('-', '', $oid).'\');';
 		}
 		else{
 			$onchange .= 'change_all('.$layer_id.', '.$k.', \''.$layer_id.'_'.$name.'\');';
@@ -471,7 +471,7 @@
 									$enum_output = $attributes['enum_output'][$index];
 								}
 								if($attributes['nullable'][$index] != '0')$strPleaseSelect = $gui->strPleaseSelect;
-								$onchange = 'set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.');';
+								$onchange = 'set_changed_flag(this, \'changed_'.$layer_id.'_'.$oid.'\');';
 								$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $enum_value, $enum_output, $attributes['req_by'][$index], $attributes['req'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class);
 							}break;
 							default : {
@@ -974,7 +974,7 @@
 										);
 									}' . $onchange_output . '
 									if (\'' . $oid . '\' != \'\') {
-										set_changed_flag(currentform.changed_' . $layer_id . '_' . $oid . ')
+										set_changed_flag(this, \'changed_' . $layer_id . '_' . $oid . '\')
 									}
 								"' .
 								(($privileg == '0' OR $lock)
@@ -1078,7 +1078,7 @@
 									}
 									' . $onchange_output . '
 									if (\'' . $oid . '\' != \'\') {
-										set_changed_flag(currentform.changed_' . $layer_id . '_' . $oid . ')
+										set_changed_flag(this, \'changed_' . $layer_id . '_' . $oid . '\')
 									}
 								"' .
 								(($privileg == '0' OR $lock)
