@@ -77,7 +77,7 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 		// This error code is not included in error_reporting
 		return;
 	}
-	$errors[] = $errstr;
+	$errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
 	/* Don't execute PHP internal error handler */
 	return true;
 }

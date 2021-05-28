@@ -18,7 +18,7 @@ register_shutdown_function(function () {
 	if (error_reporting() & $err['type']) {		// This error code is included in error_reporting		
 		ob_end_clean();
 		if (! is_null($err)) {
-				$errors[] = $err['message'];
+				$errors[] = '<b>' . $err['message'] . '</b><br> in Datei ' . $err['file'] . '<br>in Zeile '. $err['line'];
 		}
 		http_response_code(500);
 		include_once('layouts/snippets/general_error_page.php');
