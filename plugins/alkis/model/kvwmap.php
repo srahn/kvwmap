@@ -809,7 +809,7 @@
 											<td></td>
 											<td>';
 												if(count($versionen) > 0){
-			$output.= '					<select name="versions_'.$k.'" onchange="root.location.href=\'index.php?go=setHistTimestamp&timestamp=\'+this.value+\'&go_next=get_last_query\'" style="max-width: 500px">';
+			$output.= '					<select name="versions_'.$k.'" onchange="overlay_link(\'go=setHistTimestamp&timestamp=\' + this.value + \'&go_next=get_last_query\', false); if(root.document.getElementById(\'map\')){root.neuLaden();}" style="max-width: 500px">';
 													$selected = false;
 													$v = 1;
 													$count = count($versionen);
