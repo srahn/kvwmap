@@ -507,7 +507,7 @@ FROM
 		}
 		else{
 			foreach($tablenames as $tablename){
-				$filter .= ' AND '.$tablename.'.beginnt <= \''.$timestamp.'\' and (\''.$timestamp.'\' < '.$tablename.'.endet or '.$tablename.'.endet IS NULL) ';
+				$filter .= ' AND tsrange(' . $tablename . '.beginnt, ' . $tablename . '.endet) @> COALESCE(NULLIF(\'' . $timestamp . '\', \'\')::timestamp, localtimestamp) ';
 			}
 		}
 		return $filter;
@@ -1381,14 +1381,14 @@ FROM
   }
   
   function getALBData($FlurstKennz, $without_temporal_filter = false, $oid_column){		
-		$sql ="SELECT distinct f." . $oid_column . "::text as oid, f.gml_id, 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, CASE WHEN f.abweichenderrechtszustand = 'true' THEN 'ja' ELSE 'nein' END AS abweichenderrechtszustand, CASE WHEN f.zweifelhafterflurstuecksnachweis = 'true' THEN 'ja' ELSE 'nein' END as zweifelhafterflurstuecksnachweis, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
+		$sql ="SELECT distinct f." . $oid_column . "::text as oid, f.gml_id, 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, CASE WHEN f.abweichenderrechtszustand = 'true' THEN 'ja' ELSE 'nein' END AS abweichenderrechtszustand, CASE WHEN f.zweifelhafterflurstuecksnachweis = 'true' THEN 'ja' ELSE 'nein' END as zweifelhafterflurstuecksnachweis, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt, f.endet ";
 		$sql.="FROM alkis.ax_kreisregion AS k, alkis.ax_gemeinde as g, alkis.ax_gemarkung AS gem, alkis.ax_flurstueck AS f ";
 		$sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle = ANY(f.zustaendigestelle_stelle) ";
 		$sql.="WHERE f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land AND f.gemeindezugehoerigkeit_kreis = g.kreis AND f.gemeindezugehoerigkeit_gemeinde = g.gemeinde AND f.gemeindezugehoerigkeit_kreis = k.kreis AND f.flurstueckskennzeichen='" . $FlurstKennz . "'";
 		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('k', 'g', 'gem', 'f', 'd'));
 		else{
 			$sql.= " UNION ";
-			$sql.= "SELECT distinct NULL, f.gml_id, 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, CASE WHEN f.abweichenderrechtszustand = 'true' THEN 'ja' ELSE 'nein' END AS abweichenderrechtszustand, CASE WHEN f.zweifelhafterflurstuecksnachweis = 'true' THEN 'ja' ELSE 'nein' END as zweifelhafterflurstuecksnachweis, zaehler, nenner, '0' AS kreisid, '' as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
+			$sql.= "SELECT distinct NULL, f.gml_id, 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, CASE WHEN f.abweichenderrechtszustand = 'true' THEN 'ja' ELSE 'nein' END AS abweichenderrechtszustand, CASE WHEN f.zweifelhafterflurstuecksnachweis = 'true' THEN 'ja' ELSE 'nein' END as zweifelhafterflurstuecksnachweis, zaehler, nenner, '0' AS kreisid, '' as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt, f.endet ";
 			$sql.= "FROM alkis.ax_historischesflurstueckohneraumbezug as f ";
 			$sql.= "LEFT JOIN alkis.ax_gemarkung AS gem ON f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land ";
 			$sql.= "LEFT JOIN alkis.pp_gemarkung ppg ON gem.land = ppg.land AND gem.gemarkungsnummer = ppg.gemarkung ";
@@ -2036,10 +2036,10 @@ FROM
 	function getVersionen($table, $gml_ids, $start){
 		$versionen = array();
 		if($gml_ids != NULL){
-			$sql = "SELECT beginnt::timestamp, endet::timestamp, value as anlass, '".$table."' as table ";
+			$sql = "SELECT beginnt, endet, value as anlass, '".$table."' as table ";
 			$sql.= "FROM alkis.".$table." LEFT JOIN alkis.aa_anlassart ON id = anlass[1] ";
 			$sql.= "WHERE gml_id IN ('".implode("','", $gml_ids)."') ";
-			if($start)$sql.= "AND beginnt::timestamp > '".$start."' ";
+			if($start)$sql.= "AND beginnt > '".$start."' ";
 			$sql.= "ORDER BY beginnt";
 			#echo $sql.'<br>';
 			$queryret=$this->execSQL($sql, 4, 0);
