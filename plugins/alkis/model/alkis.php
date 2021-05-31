@@ -368,12 +368,12 @@ class ALKIS {
 	        $anzNutzung=count($flst->Nutzung);
 	        for ($j = 0; $j < $anzNutzung; $j++){
 	        	if($j > 0)$csv .= ' | ';
-	          $csv .= $flst->Nutzung[$j][flaeche].' m2 ';
-	          $csv .= $flst->Nutzung[$j][nutzungskennz].' ';
-	          if($flst->Nutzung[$j][abkuerzung]!='') {
-	            $csv .= $flst->Nutzung[$j][abkuerzung].'-';
+	          $csv .= $flst->Nutzung[$j]['flaeche'].' m2 ';
+	          $csv .= $flst->Nutzung[$j]['nutzungskennz'].' ';
+	          if($flst->Nutzung[$j]['abkuerzung']!='') {
+	            $csv .= $flst->Nutzung[$j]['abkuerzung'].'-';
 	          }
-	          $csv .= $flst->Nutzung[$j][bezeichnung];
+	          $csv .= $flst->Nutzung[$j]['bezeichnung'];
 	        }
 	        $csv .= ';';
 	      }
@@ -635,12 +635,12 @@ class ALKIS {
 								$anzNutzung=count($flst->Nutzung);
 								for ($j = 0; $j < $anzNutzung; $j++){
 									if($j > 0)$csv .= ' | ';
-									$csv .= $flst->Nutzung[$j][flaeche].'m2 ';
-									$csv .= $flst->Nutzung[$j][nutzungskennz].' ';
-									if($flst->Nutzung[$j][abkuerzung]!='') {
-										$csv .= $flst->Nutzung[$j][abkuerzung].'-';
+									$csv .= $flst->Nutzung[$j]['flaeche'].'m2 ';
+									$csv .= $flst->Nutzung[$j]['nutzungskennz'].' ';
+									if($flst->Nutzung[$j]['abkuerzung']!='') {
+										$csv .= $flst->Nutzung[$j]['abkuerzung'].'-';
 									}
-									$csv .= $flst->Nutzung[$j][bezeichnung];
+									$csv .= $flst->Nutzung[$j]['bezeichnung'];
 								}
 								$csv .= ';';
 							}
