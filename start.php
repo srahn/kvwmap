@@ -31,6 +31,12 @@ if (!isset($userDb)) {
 	$userDb->dbName = MYSQL_DBNAME;
 }
 $GUI->database = $userDb;
+
+if ($formvars['go'] == 'health_check') {
+	include(SNIPPETS . 'health_check.php');
+	exit;
+}
+
 if (!$GUI->database->open()) {
   # Prüfen ob eine neue Datenbank angelegt werden soll
   if ($GUI->formvars['go'] == 'install-mysql-db') {
