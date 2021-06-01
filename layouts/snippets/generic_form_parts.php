@@ -116,7 +116,7 @@
 		else $fieldname = $field_name;
 				
 		if(!$change_all){
-			$onchange .= 'set_changed_flag(currentform.changed_'.$layer_id.'_'.str_replace('-', '', $oid).');';
+			$onchange .= 'set_changed_flag(this, \'changed_'.$layer_id.'_'.str_replace('-', '', $oid).'\');';
 		}
 		else{
 			$onchange .= 'change_all('.$layer_id.', '.$k.', \''.$layer_id.'_'.$name.'\');';
@@ -169,7 +169,7 @@
 
 		###### Nutzer-Datentyp #####
 		if(is_numeric($attributes['type'][$j])){
-			if($field_id != NULL)$id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
+			if($field_id != NULL)$id = $field_id.'_'.$name;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
 			else $id = $k.'_'.$name;	# oberste Ebene
 			$datapart .= '<input type="hidden" class="'.$field_class.'" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$type_attributes = $attributes['type_attributes'][$j];
@@ -471,7 +471,7 @@
 									$enum_output = $attributes['enum_output'][$index];
 								}
 								if($attributes['nullable'][$index] != '0')$strPleaseSelect = $gui->strPleaseSelect;
-								$onchange = 'set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.');';
+								$onchange = 'set_changed_flag(this, \'changed_'.$layer_id.'_'.$oid.'\');';
 								$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $enum_value, $enum_output, $attributes['req_by'][$index], $attributes['req'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class);
 							}break;
 							default : {
@@ -528,6 +528,7 @@
 					$reloadParams .= '&embedded_subformPK=true';
 					if($attributes['embedded'][$j] == true)$reloadParams .= '&embedded=true';
 					if($attributes['list_edit'][$j] == true)$reloadParams .= '&list_edit=true';
+					if($attributes['show_count'][$j] == true)$reloadParams .= '&show_count=true';
 					$reloadParams .= '&targetobject='.$layer_id.'_'.$name.'_'.$k;
 					$reloadParams .= '&fromobject='.$layer_id.'_'.$name.'_'.$k;
 					$reloadParams .= '&targetlayer_id='.$layer_id;
@@ -974,7 +975,7 @@
 										);
 									}' . $onchange_output . '
 									if (\'' . $oid . '\' != \'\') {
-										set_changed_flag(currentform.changed_' . $layer_id . '_' . $oid . ')
+										set_changed_flag(this, \'changed_' . $layer_id . '_' . $oid . '\')
 									}
 								"' .
 								(($privileg == '0' OR $lock)
@@ -1078,7 +1079,7 @@
 									}
 									' . $onchange_output . '
 									if (\'' . $oid . '\' != \'\') {
-										set_changed_flag(currentform.changed_' . $layer_id . '_' . $oid . ')
+										set_changed_flag(this, \'changed_' . $layer_id . '_' . $oid . '\')
 									}
 								"' .
 								(($privileg == '0' OR $lock)

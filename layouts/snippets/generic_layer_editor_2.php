@@ -88,6 +88,22 @@
 				<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
         <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle gledata"'; ?>>
 <?							
+			if (!empty($layer['attributes']['tabs'])) {
+				$datapart .= '
+				<tr>
+					<th>
+						<div class="gle_tabs">';
+							$first_tab = true;
+							foreach ($layer['attributes']['tabs'] as $tab) {
+								$tabname = str_replace(' ', '_', $tab);
+								$datapart .= '<div ' . ($first_tab? 'class="active_tab"' : '') . ' onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', \'' . $tabname . '\');">' . $tab . '</div>';
+								$first_tab = false;
+							}
+							$datapart .= '
+						</div>
+					</th>
+				</tr>';
+			}
 			for($j = 0; $j < @count($layer['attributes']['name']); $j++) {
 				$attribute_class = (($this->new_entry == true AND $layer['attributes']['dont_use_for_new'][$j] == -1) ? 'hidden' : 'visible');
 				// if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['saveable'][$j] == '0')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar

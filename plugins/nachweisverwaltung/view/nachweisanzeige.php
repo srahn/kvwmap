@@ -10,6 +10,12 @@ var nachweise = new Array();
 	}
 ?>
 
+function save_selection(){
+	var formdata = new FormData(currentform);
+	formdata.append('go', 'Nachweisanzeige_auswahl_speichern');
+	ahah("index.php", formdata, new Array(''), new Array(''));
+}
+
 function update_selection(selection){
 	var condition;
 	var checked = true;
@@ -42,6 +48,7 @@ function update_selection(selection){
 	[].forEach.call(nachweise, function (nachweis){
 		if(eval(condition))document.getElementById('id_'+nachweis.id).checked = checked;
   });
+	save_selection();
 }
 
 function clear_selections(name, except){		// alle Haken rausnehmen außer einem
@@ -65,6 +72,7 @@ function set_selections(name, except){			// alle Haken setzen außer einem Array
 			}
 		}
 	);
+	save_selection();
 }
 
 function create_condition(){		// fuer alle der Messung
@@ -465,7 +473,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		$bgcolor = '#FFFFFF';
      for ($i=0;$i<$this->nachweis->erg_dokumente;$i++) {
         ?>
-        <tr style="min-height: 0px; outline: 1px dotted grey;" <? if($this->formvars['selected_nachweis'] == $this->nachweis->Dokumente[$i]['id'])echo 'class="selected"'; ?> onclick="select(this);" onmouseenter="highlight_object(<? echo LAYER_ID_NACHWEISE; ?>, <? echo $this->nachweis->Dokumente[$i]['id']; ?>)" bgcolor="
+        <tr style="min-height: 0px; outline: 1px dotted grey;" <? if($this->formvars['selected_nachweis'] == $this->nachweis->Dokumente[$i]['id'])echo 'class="selected"'; ?> onclick="select(this);" onmouseenter="if (window.name != 'root')highlight_object(<? echo LAYER_ID_NACHWEISE; ?>, <? echo $this->nachweis->Dokumente[$i]['id']; ?>)" bgcolor="
 			<? $orderelem = explode(',', $this->formvars['order']);
 			if ($this->nachweis->Dokumente[$i][$orderelem[0]] != $this->nachweis->Dokumente[$i-1][$orderelem[0]]){
 				if($bgcolor == '#EBEBEB'){
@@ -481,10 +489,15 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			"> 
 				<td align="left" style="width: 80">
 					<a name="<? echo $this->nachweis->Dokumente[$i]['id']; ?>">
-					<input type="checkbox" name="id[]" id="id_<? echo $this->nachweis->Dokumente[$i]['id']; ?>" onchange="clear_selections('markhauptart[]', '');" value="<? echo $this->nachweis->Dokumente[$i]['id']; ?>"<? 
+					<input type="checkbox" name="id[]" id="id_<? echo $this->nachweis->Dokumente[$i]['id']; ?>" onchange="save_selection(); clear_selections('markhauptart[]', '');" value="<? echo $this->nachweis->Dokumente[$i]['id']; ?>"<? 
         # Püfen ob das Dokument markiert werden soll
                 				
-				if($this->formvars['markhauptart'][0] != '000' AND ($this->formvars['id'] == NULL OR @in_array($this->nachweis->Dokumente[$i]['id'], $this->formvars['id'])))echo ' checked';
+				if (
+					$this->formvars['markhauptart'][0] != '000' AND 
+					($this->formvars['id'] == NULL OR @in_array($this->nachweis->Dokumente[$i]['id'], $this->formvars['id']))
+				){
+					echo ' checked';
+				}
 				
         ?>>	
 				<? if($this->nachweis->Dokumente[$i]['bemerkungen'] != ''){ ?>

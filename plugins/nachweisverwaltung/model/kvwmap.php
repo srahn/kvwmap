@@ -477,13 +477,57 @@
     $GUI->formvars['abfrageart']='antr_nr';
     $GUI->nachweiseRecherchieren();
   };
+	
+	$GUI->nachweiseAuswahlSpeichern = function($stelle_id, $user_id, $nachweis_ids) use ($GUI){
+		$sql = '
+			DELETE FROM 
+				rolle_nachweise_rechercheauswahl 
+			WHERE
+				stelle_id = ' . $stelle_id . ' AND
+				user_id = ' . $user_id;
+		#echo $sql;
+		$GUI->debug->write("<p>nachweiseAuswahlSpeichern - Speichern der aktuellen Auswahl im Rechercheergebnis",4);
+		$GUI->database->execSQL($sql,4, 1);
+		if (@count($nachweis_ids) > 0) {
+			$sql = '
+				INSERT INTO 
+					rolle_nachweise_rechercheauswahl 
+				VALUES ';
+			for ($i = 0; $i < count($nachweis_ids); $i++){
+				$sql .= ($i > 0? ',' : '') . '(
+					' . $stelle_id . ', 
+					' . $user_id . ',
+					' . $nachweis_ids[$i] . ')';
+			}
+			#echo $sql;
+			$GUI->debug->write("<p>nachweiseAuswahlSpeichern - Speichern der aktuellen Auswahl im Rechercheergebnis",4);
+			$GUI->database->execSQL($sql,4, 1);
+		}
+		return 1;
+	};
+	
+	$GUI->getNachweiseAuswahl = function($stelle_id, $user_id) use ($GUI){
+		$sql = '
+			SELECT * FROM 
+				rolle_nachweise_rechercheauswahl 
+			WHERE
+				stelle_id = ' . $stelle_id . ' AND
+				user_id = ' . $user_id;
+		#echo $sql;
+		$GUI->debug->write("<p>getNachweiseAuswahl - abfragen der aktuellen Auswahl im Rechercheergebnis",4);
+		$GUI->database->execSQL($sql,4, 1);
+		while($rs = $GUI->database->result->fetch_assoc()){
+			$nachweisauswahl[] = $rs['nachweis_id'];
+		}
+		return $nachweisauswahl;
+	};
 
 	$GUI->setNachweisOrder = function($stelle_id, $user_id, $order) use ($GUI){
 		$sql ='UPDATE rolle_nachweise SET ';
 		$sql.='`order`="'.$order.'"';
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		#echo $sql;
-		$GUI->debug->write("<p>file:users.php class:rolle->setNachweisOrder - Setzen der aktuellen Order für die Nachweissuche",4);
+		$GUI->debug->write("<p>setNachweisOrder - Setzen der aktuellen Order für die Nachweissuche",4);
 		$GUI->database->execSQL($sql,4, 1);
 		return 1;
 	};
@@ -517,7 +561,7 @@
 		$sql .= 'user_id = '.$user_id;
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		#echo $sql;
-		$GUI->debug->write("<p>file:users.php class:rolle->setNachweisSuchparameter - Setzen der aktuellen Parameter für die Nachweissuche",4);
+		$GUI->debug->write("<p>setNachweisSuchparameter - Setzen der aktuellen Parameter für die Nachweissuche",4);
 		$GUI->database->execSQL($sql,4, 1);
 		return 1;
 	};

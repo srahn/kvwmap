@@ -20,6 +20,8 @@
 					echo '&layer_parameter_' . $param['key'] . "=' + document.getElementById('layer_parameter_" . $param['key'] . "').value + '";
 				} ?>';
 				ahah('index.php', data, [''], ['execute_function']);
+				document.GUI.legendtouched.value = 1;
+				neuLaden();
 			}
 
 			function onLayerParameterChanged(parameter) {
