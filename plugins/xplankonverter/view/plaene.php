@@ -515,8 +515,7 @@ else { ?>
 					data-sortable="true"
 					data-formatter="konvertierungVeroeffentlichtFormatter"
 					data-switchable="true"
-					data-filter-control="select"
-				>text<i title="Veröffentlichung" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
+				><i title="Veröffentlichung" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
 			} ?>
 			<th
 				data-field="konvertierung_id"
