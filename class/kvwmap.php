@@ -268,7 +268,7 @@ class GUI {
 		$projTO = ms_newprojectionobj("init=epsg:4326");
 		$stellen_extent->project($projFROM, $projTO);
 		$show = false;
-		for($i = 0; $i < count($result['features']); $i++){
+		for($i = 0; $i < @count($result['features']); $i++){
 			$coord = $result['features'][$i]['geometry']['coordinates'];
 			if($stellen_extent->minx < $coord[0] AND $coord[0] < $stellen_extent->maxx AND $stellen_extent->miny < $coord[1] AND $coord[1] < $stellen_extent->maxy){
 				$show = true;
