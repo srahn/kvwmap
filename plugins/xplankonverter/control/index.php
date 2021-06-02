@@ -1,5 +1,4 @@
 <?php
-
 include(PLUGINS . 'xplankonverter/model/kvwmap.php');
 include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'MyObject.php');
@@ -56,8 +55,9 @@ include(PLUGINS . 'xplankonverter/model/extract_standard_shp.php');
 if (stripos($GUI->go, 'xplankonverter_') === 0) {
 	function isInStelleAllowed($stelle, $requestStelleId) {
 		global $GUI;
-		if ($stelle->id == $requestStelleId)
+		if ($stelle->id == $requestStelleId) {
 			return true;
+		}
 		else {
 			$GUI->add_message('error', 'Das angefragte Objekt darf nicht in dieser Stelle bearbeitet werden.' . ($requestStelleId != '' ? ' Es gehört zur Stelle mit der ID: ' . $requestStelleId : ''));
 			return false;
@@ -214,7 +214,6 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			$GUI->formvars['planart'] = 'Plan';
 			$GUI->plan_class = 'XP_Plan';
 			$GUI->title = 'Plan';
-			$GUI->plan_layer_id = XPLANKONVERTER_XP_PLAENE_LAYER_ID;
 		} break;
 	}
 
@@ -222,7 +221,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 	$GUI->plan_oid_name = $GUI->plan_table_name . '_oid';
 }
 
-function go_switch_xplankonverter($go){
+function go_switch_xplankonverter($go) {
 	global $GUI;
 	switch ($go) {
 		case 'xplankonverter_konvertierungen_index' : {
@@ -408,18 +407,19 @@ function go_switch_xplankonverter($go){
 										$GUI->formvars['Gruppe'] = $layer_group_id;
 										$GUI->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
 										$GUI->formvars['Data'] = 'the_geom from (
-											SELECT oid, *
+											SELECT *
 											FROM ' . $shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() . '
 											WHERE 1=1
-										) as foo using unique oid using srid=' . $shapeFile->get('epsg_code');
+										) as foo using unique gid using srid=' . $shapeFile->get('epsg_code');
 										$GUI->formvars['maintable'] = $shapeFile->dataTableName();
 										$GUI->formvars['schema'] = $shapeFile->dataSchemaName();
+										$GUI->formvars['oid'] = 'gid';
 										$GUI->formvars['connection'] = $GUI->pgdatabase->connect_string;
 										if ($GUI->pgdatabase->connection_id != '') {
 											$GUI->formvars['connection_id'] = $GUI->pgdatabase->connection_id;
 										}
 										$GUI->formvars['connectiontype'] = '6';
-										$GUI->formvars['filteritem'] = 'oid';
+										$GUI->formvars['filteritem'] = 'gid';
 										$GUI->formvars['tolerance'] = '5';
 										$GUI->formvars['toleranceunits'] = 'pixels';
 										$GUI->formvars['epsg_code'] = $shapeFile->get('epsg_code');
@@ -699,6 +699,7 @@ function go_switch_xplankonverter($go){
 		* - Wenn der Status der Konvertierung vorher nicht einen der folgenden Werte hat: ERSTELLT, KONVERTIERUNG_OK, IN_GML_ERSTELLUNG, GML_ERSTELLUNG_OK
 		*/
 		case 'xplankonverter_gml_generieren' : {
+			# Hier weiter machen mit Bug 'Fehler beim Start der GML-Generierung
 			include(PLUGINS . 'xplankonverter/model/build_gml.php');
 			include(PLUGINS . 'xplankonverter/model/TypeInfo.php');
 			$success = true;
