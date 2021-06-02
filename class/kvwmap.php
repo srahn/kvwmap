@@ -18199,7 +18199,16 @@ class db_mapObj{
     }
     else{
       for($i = 0; $i < $anzahl; $i++){
-        $exp = str_replace(array("'[", "]'", '[', ']'), '', $classes[$i]['Expression']);
+				if ($classes[$i]['Expression'] == '') {
+          return $classes[$i]['Class_ID'];
+        }
+				if (strpos($classes[$i]['Expression'], '/') !== false) {		# regex
+					$operator = '~';
+				}
+				else {
+					$operator = '=';
+				}
+        $exp = str_replace(array("'[", "]'", '[', ']', '/'), '', $classes[$i]['Expression']);
         $exp = str_replace(' eq ', '=', $exp);
         $exp = str_replace(' ne ', '!=', $exp);
 
@@ -18219,7 +18228,7 @@ class db_mapObj{
 				}
 				elseif($classitem != ''){		# Classitem davor setzen
 					if(substr($exp, 0, 1) != "'")$quote = "'";
-					$exp = $classitem."::text = ".$quote.$exp.$quote;
+					$exp = '"' . $classitem . '"::text ' . $operator . ' ' . $quote . $exp . $quote;
 				}
 				if($exp == ''){
 					$exp = 'true';
