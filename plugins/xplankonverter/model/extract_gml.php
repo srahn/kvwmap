@@ -837,7 +837,7 @@ class Gml_extractor {
 				CASE
 					WHEN gmlas.gehoertzuplan_href IS NOT NULL THEN trim(leading '#gml_' FROM lower(gmlas.gehoertzuplan_href))
 					ELSE trim(leading '#gml_' FROM lower((SELECT DISTINCT id FROM " . $this->gmlas_schema . "." . substr($table,0,3) . "plan LIMIT 1)))
-					END AS gehoertzuplan
+				END AS gehoertzuplan
 			FROM
 				" . $this->gmlas_schema . "." . $table . " gmlas
 			;";

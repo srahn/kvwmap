@@ -6479,30 +6479,34 @@ echo '			</table>
 		}
 	}
 
-  function get_dokument_vorschau($dateinamensteil, $remote_url = false){
+	function get_dokument_vorschau($dateinamensteil, $remote_url = false) {
 		$type = strtolower($dateinamensteil[1]);
-  	$dokument = $dateinamensteil[0].'.'.$dateinamensteil[1];
-		if(!$remote_url AND in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){			// für Bilder und PDFs werden automatisch Thumbnails erzeugt
-			$thumbname = $dateinamensteil[0].'_thumb.jpg';
-			if(!file_exists($thumbname)){
-				exec(IMAGEMAGICKPATH.'convert -filter Hanning "'.$dokument.'"[0] -quality 75 -background white -flatten -resize '.PREVIEW_IMAGE_WIDTH.'x1000\> "'.$thumbname.'"');
+		$dokument = $dateinamensteil[0] . '.' . $dateinamensteil[1];
+		if (!$remote_url AND in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){
+			# für Bilder und PDFs werden automatisch Thumbnails erzeugt
+			$thumbname = $dateinamensteil[0] . '_thumb.jpg';
+			if (!file_exists($thumbname)) {
+				$command = IMAGEMAGICKPATH . 'convert -filter Hanning "' . $dokument . '"[0] -quality 75 -background white -flatten -resize ' . PREVIEW_IMAGE_WIDTH . 'x1000\> "' . $thumbname . '"';
+				#echo 'Erzeuge Thumbnail mit commando: ' . $command;
+				exec($command);
 			}
 		}
-		else{																// alle anderen Dokumenttypen oder Dateien auf fremden Servern bekommen entsprechende Dokumentensymbole als Vorschaubild
+		else {
+			#echo '<br>alle anderen Dokumenttypen oder Dateien auf fremden Servern bekommen entsprechende Dokumentensymbole als Vorschaubild';
 			$dateinamensteil[1] = 'gif';
   		switch ($type) {
-  			default : {
-  				$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
-          $blue = ImageColorAllocate ($image, 26, 87, 150);
+				default : {
+					$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
+					$blue = ImageColorAllocate ($image, 26, 87, 150);
 					if(strlen($type) > 3)$xoffset = 4;
-          imagettftext($image, 12, 0, 23-$xoffset, 34, $blue, WWWROOT.APPLVERSION.'fonts/SourceSansPro-Semibold.ttf', $type);
-          $thumbname = IMAGEPATH.rand(0,100000).'.gif';
-          imagegif($image, $thumbname);
-  			}
-  		}
-  	}
+					imagettftext($image, 12, 0, 23-$xoffset, 34, $blue, WWWROOT.APPLVERSION.'fonts/SourceSansPro-Semibold.ttf', $type);
+					$thumbname = IMAGEPATH.rand(0,100000).'.gif';
+					imagegif($image, $thumbname);
+				}
+			}
+		}
 		return $thumbname;
-  }
+	}
 
 	function write_document_loader(){
 		$handle = fopen(IMAGEPATH.$this->document_loader_name, 'w');
@@ -9287,16 +9291,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	function Datensatz_Loeschen($layerdb, $layer, $attributes, $oid) {
 		$results = array();
 		if (!empty($layer['trigger_function'])) {
-			if($layer['oid'] == 'oid'){
+			if ($layer['oid'] == 'oid') {
 				$oid_sql = 'oid,';
 			}
 			$sql_old = "
 				SELECT ".
-					$oid_sql." *
+					$oid_sql . " *
 				FROM
 					" . $layer['schema'] . '.' . pg_quote($layer['maintable']) . "
 				WHERE
-					".$layer['oid']." = " . quote($oid);
+					" . $layer['oid'] . " = " . quote($oid);
 			#echo '<br>Sql before delete: ' . $sql_old; #pk
 			$ret = $layerdb->execSQL($sql_old, 4, 1, true);
 			if ($ret['success']) {

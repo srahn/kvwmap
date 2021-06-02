@@ -477,10 +477,10 @@ class Regel extends PgObject {
 					xplan_gml.fp_bereich fb ON r.bereich_gml_id = fb.gml_id LEFT JOIN
 					xplan_gml.rp_bereich rb ON r.bereich_gml_id = rb.gml_id LEFT JOIN
 					xplan_gml.so_bereich sb ON r.bereich_gml_id = sb.gml_id LEFT JOIN
-					xplan_gml.bp_plan bp ON bp.gml_id::text = bb.gehoertzuplan LEFT JOIN
-					xplan_gml.fp_plan fp ON fp.gml_id::text = fb.gehoertzuplan LEFT JOIN
-					xplan_gml.rp_plan rp ON rp.gml_id::text = rb.gehoertzuplan LEFT JOIN
-					xplan_gml.so_plan sp ON sp.gml_id::text = sb.gehoertzuplan LEFT JOIN
+					xplan_gml.bp_plan bp ON bp.gml_id::text = bb.gehoertzuplan::text LEFT JOIN
+					xplan_gml.fp_plan fp ON fp.gml_id::text = fb.gehoertzuplan::text LEFT JOIN
+					xplan_gml.rp_plan rp ON rp.gml_id::text = rb.gehoertzuplan::text LEFT JOIN
+					xplan_gml.so_plan sp ON sp.gml_id::text = sb.gehoertzuplan::text LEFT JOIN
 					xplan_gml.rp_plan bpp ON bpp.konvertierung_id = r.konvertierung_id LEFT JOIN
 					xplan_gml.rp_plan fpp ON fpp.konvertierung_id = r.konvertierung_id LEFT JOIN
 					xplan_gml.rp_plan rpp ON rpp.konvertierung_id = r.konvertierung_id LEFT JOIN
@@ -569,7 +569,7 @@ class Regel extends PgObject {
 						rb.*
 					FROM
 						xplan_gml.xp_plan p JOIN
-						xplan_gml.xp_bereich b ON p.gml_id::text = b.gehoertzuplan JOIN
+						xplan_gml.xp_bereich b ON p.gml_id::text = b.gehoertzuplan::text JOIN
 						xplankonverter.regeln rb ON b.gml_id = rb.bereich_gml_id
 					WHERE
 						p.konvertierung_id = {$this->konvertierung->get('id')}

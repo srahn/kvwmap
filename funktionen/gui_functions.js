@@ -749,11 +749,15 @@ function update_legend(layerhiddenstring){
 	}
 }
 
-function getlegend(groupid, layerid, fremde) {
+/*
+* optional status to set values irrespective of current value
+*/
+function getlegend(groupid, layerid, fremde, status) {
 	groupdiv = document.getElementById('groupdiv_' + groupid);
 	if (layerid == '') {														// eine Gruppe wurde auf- oder zugeklappt
 		group = document.getElementById('group_' + groupid);
-		if (group.value == 0) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
+		status = status || !parseInt(group.value);
+		if (status) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
 			group.value = 1;
 			ahah('index.php', 'go=get_group_legend&' + group.name + '=' + group.value + '&group=' + groupid + '&nurFremdeLayer=' + fremde, new Array(groupdiv), "");
 		}
@@ -933,7 +937,19 @@ function selectgroupquery(group, instantreload){
 }
 
 function selectgroupthema(group, instantreload){
-  var value = group.value+"";
+	var value = "";
+	if(Array.isArray(group)) {
+		//activates/deactivates all passed array of groups layers. 
+		//non-opened groups will be undefined and skipped (can be worked around with getlegend(..) on group-id call before this function
+		// remove potential undefined values
+		group = group.filter(function( x ) {
+			return x !== undefined;
+		});
+		value = group.map(x => x.value+"").join(",");
+	} else {
+		value = group.value+"";
+	}
+  
   var layers = value.split(",");
 	var check;
   for(i = 0; i < layers.length; i++){			// erst den ersten checkbox-Layer suchen und den check-Status merken
