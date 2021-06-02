@@ -1,4 +1,4 @@
-<html>
+<html lang="de">
 	<head>
 		<title><? echo TITLE; ?></title>
 		<? include(SNIPPETS . 'gui_head.php'); ?>

@@ -11,7 +11,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_achse'
+	AND o_column = 'aufschrift'
+	AND id = 4349
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4350,
@@ -24,7 +31,15 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_freiraum'
+	AND o_column = 'aufschrift'
+	AND id = 4350
+);
+
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4351,
@@ -37,7 +52,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_siedlung'
+	AND o_column = 'aufschrift'
+	AND id = 4351
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4352,
@@ -50,7 +72,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_energieversorgung'
+	AND o_column = 'aufschrift'
+	AND id = 4352
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4353,
@@ -63,7 +92,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_entsorgung'
+	AND o_column = 'aufschrift'
+	AND id = 4353
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4354,
@@ -76,7 +112,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_funktionszuweisung'
+	AND o_column = 'aufschrift'
+	AND id = 4354
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4355,
@@ -89,7 +132,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_generischesobjekt'
+	AND o_column = 'aufschrift'
+	AND id = 4355
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4356,
@@ -102,7 +152,15 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_grenze'
+	AND o_column = 'aufschrift'
+	AND id = 4356
+);
+
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4357,
@@ -115,7 +173,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_kommunikation'
+	AND o_column = 'aufschrift'
+	AND id = 4357
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4358,
@@ -128,7 +193,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_laermschutzbauschutz'
+	AND o_column = 'aufschrift'
+	AND id = 4358
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4359,
@@ -141,7 +213,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_verkehr'
+	AND o_column = 'aufschrift'
+	AND id = 4359
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4360,
@@ -154,7 +233,15 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_planungsraum'
+	AND o_column = 'aufschrift'
+	AND id = 4360
+);
+
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4361,
@@ -167,7 +254,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_raumkategorie'
+	AND o_column = 'aufschrift'
+	AND id = 4361
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4362,
@@ -180,7 +274,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_sonstigeinfrastruktur'
+	AND o_column = 'aufschrift'
+	AND id = 4362
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4363,
@@ -193,7 +294,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_sozialeinfrastruktur'
+	AND o_column = 'aufschrift'
+	AND id = 4363
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4364,
@@ -206,7 +314,15 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_sperrgebiet'
+	AND o_column = 'aufschrift'
+	AND id = 4364
+);
+
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4365,
@@ -219,7 +335,15 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_wasserwirtschaft'
+	AND o_column = 'aufschrift'
+	AND id = 4365
+);
+
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4366,
@@ -232,7 +356,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'rp_zentralerort'
+	AND o_column = 'aufschrift'
+	AND id = 4366
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4367,
@@ -245,7 +376,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_flaechenschlussobjekt'
+	AND o_column = 'aufschrift'
+	AND id = 4367
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4368,
@@ -258,7 +396,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_ueberlagerungsobjekt'
+	AND o_column = 'aufschrift'
+	AND id = 4368
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4369,
@@ -271,7 +416,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_abgrabungsflaeche'
+	AND o_column = 'aufschrift'
+	AND id = 4369
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4370,
@@ -284,7 +436,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_bodenschaetzeflaeche'
+	AND o_column = 'aufschrift'
+	AND id = 4370
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4371,
@@ -297,7 +456,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_rekultivierungsflaeche'
+	AND o_column = 'aufschrift'
+	AND id = 4371
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4372,
@@ -310,7 +476,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_aufschuettungsflaeche'
+	AND o_column = 'aufschrift'
+	AND id = 4372
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4373,
@@ -323,7 +496,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_besonderernutzungszweckflaeche'
+	AND o_column = 'aufschrift'
+	AND id = 4373
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4374,
@@ -336,7 +516,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_ausgleichsflaeche'
+	AND o_column = 'aufschrift'
+	AND id = 4374
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4375,
@@ -349,7 +536,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_schutzpflegeentwicklungsflaeche'
+	AND o_column = 'aufschrift'
+	AND id = 4375
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4376,
@@ -362,7 +556,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_kennzeichnungsflaeche'
+	AND o_column = 'aufschrift'
+	AND id = 4376
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4377,
@@ -375,7 +576,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_wasserwirtschaftsflaeche'
+	AND o_column = 'aufschrift'
+	AND id = 4377
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4378,
@@ -388,7 +596,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_einfahrtpunkt'
+	AND o_column = 'aufschrift'
+	AND id = 4378
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4379,
@@ -401,7 +616,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_gemeinschaftsanlagenzuordnung'
+	AND o_column = 'aufschrift'
+	AND id = 4379
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4380,
@@ -414,7 +636,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_ausgleichsmassnahme'
+	AND o_column = 'aufschrift'
+	AND id = 4380
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4381,
@@ -427,7 +656,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_anpflanzungbindungerhaltung'
+	AND o_column = 'aufschrift'
+	AND id = 4381
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4382,
@@ -440,7 +676,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_schutzpflegeentwicklungsmassnahme'
+	AND o_column = 'aufschrift'
+	AND id = 4382
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4383,
@@ -453,7 +696,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_unverbindlichevormerkung'
+	AND o_column = 'aufschrift'
+	AND id = 4383
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4384,
@@ -466,7 +716,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_abstandsmass'
+	AND o_column = 'aufschrift'
+	AND id = 4384
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4385,
@@ -479,7 +736,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_generischesobjekt'
+	AND o_column = 'aufschrift'
+	AND id = 4385
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4386,
@@ -492,7 +756,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_wegerecht'
+	AND o_column = 'aufschrift'
+	AND id = 4386
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4387,
@@ -505,7 +776,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_hoehenmass'
+	AND o_column = 'aufschrift'
+	AND id = 4387
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4388,
@@ -518,7 +796,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_festsetzungnachlandesrecht'
+	AND o_column = 'aufschrift'
+	AND id = 4388
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4389,
@@ -531,7 +816,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_immissionsschutz'
+	AND o_column = 'aufschrift'
+	AND id = 4389
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4390,
@@ -544,7 +836,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_verentsorgung'
+	AND o_column = 'aufschrift'
+	AND id = 4390
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4391,
@@ -557,7 +856,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_strassenkoerper'
+	AND o_column = 'aufschrift'
+	AND id = 4391
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4392,
@@ -570,7 +876,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_flaechenschlussobjekt'
+	AND o_column = 'aufschrift'
+	AND id = 4392
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4393,
@@ -583,7 +896,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_ueberlagerungsobjekt'
+	AND o_column = 'aufschrift'
+	AND id = 4393
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4394,
@@ -596,7 +916,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_keinezentrabwasserbeseitigungflaeche'
+	AND o_column = 'aufschrift'
+	AND id = 4394
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4395,
@@ -609,7 +936,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_ausgleichsflaeche'
+	AND o_column = 'aufschrift'
+	AND id = 4395
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4396,
@@ -622,7 +956,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_vorbehalteflaeche'
+	AND o_column = 'aufschrift'
+	AND id = 4396
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4397,
@@ -635,7 +976,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_aufschuettung'
+	AND o_column = 'aufschrift'
+	AND id = 4397
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4398,
@@ -648,7 +996,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_bodenschaetze'
+	AND o_column = 'aufschrift'
+	AND id = 4398
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4399,
@@ -661,7 +1016,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_abgrabung'
+	AND o_column = 'aufschrift'
+	AND id = 4399
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4400,
@@ -674,7 +1036,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_anpassungklimawandel'
+	AND o_column = 'aufschrift'
+	AND id = 4400
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4401,
@@ -687,7 +1056,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_spielsportanlage'
+	AND o_column = 'aufschrift'
+	AND id = 4401
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4402,
@@ -700,7 +1076,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_gemeinbedarf'
+	AND o_column = 'aufschrift'
+	AND id = 4402
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4403,
@@ -713,7 +1096,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_gruen'
+	AND o_column = 'aufschrift'
+	AND id = 4403
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4404,
@@ -726,7 +1116,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_schutzpflegeentwicklung'
+	AND o_column = 'aufschrift'
+	AND id = 4404
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4405,
@@ -739,7 +1136,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_unverbindlichevormerkung'
+	AND o_column = 'aufschrift'
+	AND id = 4405
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4406,
@@ -752,7 +1156,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_privilegiertesvorhaben'
+	AND o_column = 'aufschrift'
+	AND id = 4406
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4407,
@@ -765,7 +1176,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_kennzeichnung'
+	AND o_column = 'aufschrift'
+	AND id = 4407
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4408,
@@ -778,7 +1196,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_generischesobjekt'
+	AND o_column = 'aufschrift'
+	AND id = 4408
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4409,
@@ -791,7 +1216,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_strassenverkehr'
+	AND o_column = 'aufschrift'
+	AND id = 4409
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4410,
@@ -804,7 +1236,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_gewaesser'
+	AND o_column = 'aufschrift'
+	AND id = 4410
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4411,
@@ -817,7 +1256,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_wasserwirtschaft'
+	AND o_column = 'aufschrift'
+	AND id = 4411
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4412,
@@ -830,7 +1276,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'so_gebiet'
+	AND o_column = 'aufschrift'
+	AND id = 4412
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4413,
@@ -843,7 +1296,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'so_bodenschutzrecht'
+	AND o_column = 'aufschrift'
+	AND id = 4413
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4414,
@@ -856,7 +1316,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'so_sonstigesrecht'
+	AND o_column = 'aufschrift'
+	AND id = 4414
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4415,
@@ -869,7 +1336,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'so_luftverkehrsrecht'
+	AND o_column = 'aufschrift'
+	AND id = 4415
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4416,
@@ -882,7 +1356,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'so_strassenverkehrsrecht'
+	AND o_column = 'aufschrift'
+	AND id = 4416
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4417,
@@ -895,7 +1376,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'so_forstrecht'
+	AND o_column = 'aufschrift'
+	AND id = 4417
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4418,
@@ -908,7 +1396,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'so_wasserrecht'
+	AND o_column = 'aufschrift'
+	AND id = 4418
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4419,
@@ -921,7 +1416,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'so_denkmalschutzrecht'
+	AND o_column = 'aufschrift'
+	AND id = 4419
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4420,
@@ -934,7 +1436,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'so_schienenverkehrsrecht'
+	AND o_column = 'aufschrift'
+	AND id = 4420
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4421,
@@ -947,7 +1456,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'so_schutzgebietsonstigesrecht'
+	AND o_column = 'aufschrift'
+	AND id = 4421
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4422,
@@ -960,7 +1476,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'so_schutzgebietnaturschutzrecht'
+	AND o_column = 'aufschrift'
+	AND id = 4422
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4423,
@@ -973,7 +1496,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'so_schutzgebietwasserrecht'
+	AND o_column = 'aufschrift'
+	AND id = 4423
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4424,
@@ -986,7 +1516,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'so_grenze'
+	AND o_column = 'aufschrift'
+	AND id = 4424
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4425,
@@ -999,7 +1536,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_landwirtschaft'
+	AND o_column = 'aufschrift'
+	AND id = 4425
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4426,
@@ -1012,7 +1556,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_verentsorgung'
+	AND o_column = 'aufschrift'
+	AND id = 4426
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4427,
@@ -1025,7 +1576,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'bp_verkehrsflaechebesondererzweckbestimmung'
+	AND o_column = 'aufschrift'
+	AND id = 4427
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4428,
@@ -1038,7 +1596,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'fp_landwirtschaft'
+	AND o_column = 'aufschrift'
+	AND id = 4428
+);
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml(id,feature_class, o_table, o_column, o_data_type, t_table, t_column, t_data_type, codespace, complex_type, regel) SELECT
 4429,
@@ -1051,6 +1616,14 @@ TRUE,
 'character varying',
 NULL,
 NULL,
-'gmlas.aufschrift AS aufschrift' ON CONFLICT DO NOTHING;
+'gmlas.aufschrift AS aufschrift'
+WHERE NOT exists (
+	SELECT id 
+	FROM xplankonverter.mappingtable_gmlas_to_gml
+	WHERE o_table = 'so_gewaesser'
+	AND o_column = 'aufschrift'
+	AND id = 4429
+);
+
 
 COMMIT;

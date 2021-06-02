@@ -176,7 +176,7 @@ class MyObject {
 					return $validation['attribute'] == $key;
 				}
 			);
-			$attributes[] = new MyAttribute($this->debug, $key, 'text', $value, $attribute_validations, $this->identifier);
+			$attributes[] = new MyAttribute($this->debug, $key, $this->columns[$key]['Type'], $value, $attribute_validations, $this->identifier);
 		}
 		return $attributes;
 	}
@@ -213,7 +213,7 @@ class MyObject {
 
 	function getColumnsFromTable() {
 		#$this->debug->show('getColumnsFromTable', MyObject::$write_debug);
-		$columns = array();
+		$this->columns = array();
 		$sql = "
 			SHOW COLUMNS
 			FROM
@@ -222,9 +222,9 @@ class MyObject {
 		$this->debug->show('sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
 		while ($column = $this->database->result->fetch_assoc()) {
-			$columns[] = $column;
+			$this->columns[$column['Field']] = $column;
 		};
-		return $columns;
+		return $this->columns;
 	}
 
 	function getTypesFromColumns() {

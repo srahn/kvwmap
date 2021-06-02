@@ -170,7 +170,7 @@ hide_versions = function(flst){
   </tr>
   <tr>
     <td>
-			<div <? if($this->user->rolle->querymode == 1){ ?>onmouseenter="highlight_object(<? echo $this->qlayerset[$i]['Layer_ID']; ?>, '<? echo $flst->oid; ?>');" <? } ?> style="position:relative; top:0px; right:0px; padding:0px; border: 1px solid <?php echo BG_DEFAULT ?>;">
+			<div <? if($this->user->rolle->querymode == 1 AND $flst->oid){ ?>onmouseenter="highlight_object(<? echo $this->qlayerset[$i]['Layer_ID']; ?>, '<? echo $flst->oid; ?>');" <? } ?> style="position:relative; top:0px; right:0px; padding:0px; border: 1px solid <?php echo BG_DEFAULT ?>;">
 				<table width="100%" border="0" cellspacing="0" cellpadding="0">
 					<tr>
 						<td colspan="2">

@@ -405,7 +405,7 @@ span[data-tooltip]:hover::after {
 .input-form label {
 	float: left;
 	text-align: right;
-	font-size: 17px;
+	font-size: 15px;
 	width: 210px;
 	height: 15px;
 	margin-right: 10px;
@@ -424,6 +424,11 @@ span[data-tooltip]:hover::after {
 	float: left;
 	text-align: left;
 	width: 400px;
+}
+
+.input-form input[type=checkbox] {
+	float: left;
+	margin-left: 0px;
 }
 
 .input-form input[type=reset] {
@@ -1569,6 +1574,28 @@ thead.gle th {
  text-align:left;
 }
 
+.gle_tabs{
+	display: flex;
+	margin: 2px 0 -11px 0;
+	border-left: 1px solid #bbb;
+	height: 27px
+}
+
+.gle_tabs > div{
+	padding: 0 5px 0 5px;
+	cursor: pointer;
+	border: 1px solid #bbb;
+	border-left: none;
+	background-color: #fff;
+	color: #aaa;
+}
+
+.gle_tabs > div.active_tab{
+	border-bottom: 1px dashed #bbb;
+	background-color: <? echo BG_GLEATTRIBUTE; ?>;
+	color: black;
+}
+
 .gle-attribute-name {
 	height: 32px;
 	position: relative;
@@ -1618,7 +1645,7 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]), table.t
 }
 
 table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([type=checkbox]) {
-	min-height: 25px;
+	height: 25px;
 }
 
 .readonly_text{
@@ -1650,6 +1677,10 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 .subFormListItem{
 	height: 20px;
 	padding: 0 0 8px 0;
+}
+
+.subFormShowCount{
+	margin: 5px 5px 5px 8px;
 }
 
 .gle_hr{

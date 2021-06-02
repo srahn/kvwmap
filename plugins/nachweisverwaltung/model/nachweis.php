@@ -277,12 +277,20 @@ class Nachweis {
     return $anzahl;
   }
   
-  function getBBoxAsRectObj($id,$source) {
-    # ermittelt die Boundingbox des Nachweises $id
-    $sql ='SELECT st_xmin(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS minx,st_ymin(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS miny';
-    $sql.=',st_xmax(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS maxx,st_ymax(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS maxy';
-    if ($source=='nachweis') { $sql.=' FROM nachweisverwaltung.n_nachweise '; }
-    $sql.='WHERE id='.$id;
+  function getBBoxAsRectObj($ids) {
+    # ermittelt die Boundingbox der Nachweise
+    $sql ='
+			SELECT 
+				st_xmin(extent) AS minx,
+				st_ymin(extent) AS miny,
+				st_xmax(extent) AS maxx,
+				st_ymax(extent) AS maxy
+			FROM (
+				SELECT st_extent(st_transform(the_geom, '.$this->client_epsg.')) as extent
+				FROM 
+					nachweisverwaltung.n_nachweise 
+				WHERE id IN (' . implode(',', $ids) . ')
+			) as foo';
     $ret=$this->database->execSQL($sql,4, 0);
     if ($ret[0]) {
       $ret[1].='Fehler bei der Abfrage der Boundingbox des Nachweisdokumentes! \n';

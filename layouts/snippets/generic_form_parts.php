@@ -116,7 +116,7 @@
 		else $fieldname = $field_name;
 				
 		if(!$change_all){
-			$onchange .= 'set_changed_flag(currentform.changed_'.$layer_id.'_'.str_replace('-', '', $oid).');';
+			$onchange .= 'set_changed_flag(this, \'changed_'.$layer_id.'_'.str_replace('-', '', $oid).'\');';
 		}
 		else{
 			$onchange .= 'change_all('.$layer_id.', '.$k.', \''.$layer_id.'_'.$name.'\');';
@@ -136,7 +136,7 @@
 
 		###### Array-Typ #####
 		if (POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
-			if ($field_id != NULL) $id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
+			if ($field_id != NULL) $id = $field_id.'_'.$name;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
 			else $id = $layer_id.'_'.$name.'_'.$k;	# oberste Ebene
 			$datapart .= '<input type="hidden" class="'.$field_class.'" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$datapart .= '<div id="'.$id.'_elements" '.($attributes['form_element_type'][$j] == 'Dokument' ? 'style="max-width: 735px; display: flex; flex-wrap: wrap; align-items: flex-start"' : '').'>';
@@ -169,7 +169,7 @@
 
 		###### Nutzer-Datentyp #####
 		if(is_numeric($attributes['type'][$j])){
-			if($field_id != NULL)$id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
+			if($field_id != NULL)$id = $field_id.'_'.$name;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
 			else $id = $k.'_'.$name;	# oberste Ebene
 			$datapart .= '<input type="hidden" class="'.$field_class.'" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$type_attributes = $attributes['type_attributes'][$j];
@@ -338,6 +338,26 @@
 					$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class, $attributes['datatype_id'][$j]);
 				} break;
 				
+				case 'Farbauswahl' : {
+					if ($gui->result_colors == '') {
+						$gui->result_colors = $gui->database->read_colors();
+					}
+					$datapart .= '
+						<select class="'.$field_class.'" tabindex="1" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="width: 80px; background-color: rgb(' . $value . ')" onchange="' . $onchange . ';this.setAttribute(\'style\', this.options[this.selectedIndex].getAttribute(\'style\'));">';
+						for($i = 0; $i < count($gui->result_colors); $i++){
+							$rgb = $gui->result_colors[$i]['red'] . ' ' . $gui->result_colors[$i]['green'] . ' ' . $gui->result_colors[$i]['blue'];
+							$datapart .= '<option ';
+							if ($value == $rgb){
+								$datapart .= ' selected';
+							}
+							$datapart .= '	style="width: 80px; background-color: rgb(' . $rgb . ')"
+															value="' . $rgb . '">
+															&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+														</option>' . "\n";
+						}
+					$datapart .= '</select>';
+				} break;
+				
 				case 'Autovervollständigungsfeld' : {
 					$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $change_all, $size, $onchange, $field_class);
 				} break;
@@ -451,7 +471,7 @@
 									$enum_output = $attributes['enum_output'][$index];
 								}
 								if($attributes['nullable'][$index] != '0')$strPleaseSelect = $gui->strPleaseSelect;
-								$onchange = 'set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.');';
+								$onchange = 'set_changed_flag(this, \'changed_'.$layer_id.'_'.$oid.'\');';
 								$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $enum_value, $enum_output, $attributes['req_by'][$index], $attributes['req'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class);
 							}break;
 							default : {
@@ -508,6 +528,7 @@
 					$reloadParams .= '&embedded_subformPK=true';
 					if($attributes['embedded'][$j] == true)$reloadParams .= '&embedded=true';
 					if($attributes['list_edit'][$j] == true)$reloadParams .= '&list_edit=true';
+					if($attributes['show_count'][$j] == true)$reloadParams .= '&show_count=true';
 					$reloadParams .= '&targetobject='.$layer_id.'_'.$name.'_'.$k;
 					$reloadParams .= '&fromobject='.$layer_id.'_'.$name.'_'.$k;
 					$reloadParams .= '&targetlayer_id='.$layer_id;
@@ -704,7 +725,7 @@
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					if ($show_link) {
 						if ($explosion[2] == 'embedded'){
-							$datapart .= '<a class="dynamicLink" href="javascript:void(0);" onclick="if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
+							$datapart .= '<a class="dynamicLink" href="javascript:void(0);" onclick="if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'&embedded=true\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
 							$datapart .= '<div style="display:inline" id="dynamicLink'.$layer_id.'_'.$k.'_'.$j.'"></div>';
@@ -958,7 +979,7 @@
 										);
 									}' . $onchange_output . '
 									if (\'' . $oid . '\' != \'\') {
-										set_changed_flag(currentform.changed_' . $layer_id . '_' . $oid . ')
+										set_changed_flag(this, \'changed_' . $layer_id . '_' . $oid . '\')
 									}
 								"' .
 								(($privileg == '0' OR $lock)
@@ -1062,7 +1083,7 @@
 									}
 									' . $onchange_output . '
 									if (\'' . $oid . '\' != \'\') {
-										set_changed_flag(currentform.changed_' . $layer_id . '_' . $oid . ')
+										set_changed_flag(this, \'changed_' . $layer_id . '_' . $oid . '\')
 									}
 								"' .
 								(($privileg == '0' OR $lock)

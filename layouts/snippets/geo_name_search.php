@@ -6,6 +6,7 @@
 			[].forEach.call(search_requests, function (search_request){
 				search_request.abort();
 			});
+			search_requests = new Array();
 			document.getElementById('geo_name_search_result_div').innerHTML = '';
 			search_requests.push(ahah("index.php", "go=geo_name_query&q="+query, new Array(document.getElementById('geo_name_search_result_div')), new Array('sethtml', $('#geo_name_search_result_div').show())));
 		}

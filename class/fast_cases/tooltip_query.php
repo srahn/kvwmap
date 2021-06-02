@@ -321,11 +321,18 @@ class GUI {
     $map->set('shapepath', SHAPEPATH);
 		$found = false;
     for ($i=0;$i<$anzLayer;$i++) {
-			if($found)break;		# wenn in einem Layer was gefunden wurde, abbrechen
-			if(	$layerset[$i]['connectiontype'] == 6 AND
+			if ($found)break;		# wenn in einem Layer was gefunden wurde, abbrechen
+			if ($layerset[$i]['connectiontype'] == 6 AND
 					$layerset[$i]['queryable'] AND
 					($this->formvars['qLayer'.$layerset[$i]['Layer_ID']]=='1' OR $this->formvars['qLayer'.$layerset[$i]['requires']]=='1') 	AND
-					(($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom) OR $this->last_query != '')
+					(
+						(
+							($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND 
+							($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom)
+						) OR 
+						$this->last_query != '' OR
+						$this->formvars['querylayer_id'] != ''
+					)
 				) {
 				# Dieser Layer soll abgefragt werden
 				if($layerset[$i]['alias'] != '' AND $this->Stelle->useLayerAliases){
@@ -662,9 +669,12 @@ class database {
 
 	function open() {
 		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
-		$this->mysqli = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+		$this->mysqli = mysqli_init();
+		$ret = $this->mysqli->real_connect($this->host, $this->user, $this->passwd, $this->dbName, 3306, null, MYSQLI_CLIENT_FOUND_ROWS);
 	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
-		return $this->mysqli->connect_errno;
+		$this->debug->write("<br>MySQL Fehlernummer: " . mysqli_connect_errno(), 4);
+		$this->debug->write("<br>MySQL Fehler: " . mysqli_connect_error(), 4);
+		return $ret;
 	}
 
 	function close() {
@@ -1636,6 +1646,14 @@ class db_mapObj{
 		if (@count($rs) == 0) {
 			return null;
 		}
+		$rs['schema'] = replace_params(
+			$rs['schema'],
+			rolle::$layer_params,
+			$this->User_ID,
+			$this->Stelle_ID,
+			rolle::$hist_timestamp,
+			$this->rolle->language
+		);
 		$layerdb->schema = ($rs['schema'] == '' ? 'public' : $rs['schema']);
 		$layerdb->host = $host; # depricated since host is allways in connection table
 		if (!$layerdb->open($rs['connection_id'])) {

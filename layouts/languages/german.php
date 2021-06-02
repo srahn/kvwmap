@@ -61,4 +61,5 @@
 	$this->strLayerParameters="Themenparameter";
 	$this->strColor="Farbe";
 	$this->strHatching="Schraffur";
+	$this->strMetadata="Metadaten";
 ?>

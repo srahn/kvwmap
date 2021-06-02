@@ -21,7 +21,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	}
 	
 	adjustHref = function(link){
-		if (link.href.substring(0,9) != 'index.php' && link.target != 'root' && enclosingForm.name == 'GUI2') {
+		if (link.href.substring(0,9) == 'index.php' && link.target != 'root' && enclosingForm.name == 'GUI2') {
 			link.href = link.href.replace('?', '?window_type=overlay&');
 		}
 	}
@@ -48,6 +48,21 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			}
 		}
 	}
+	
+	completeTime = function(timefield){
+		timefield.value = timefield.value.replace('.', ':');
+		var split = timefield.value.split(":");
+		if (split.length == 2) {
+			if (split[1] == '') {
+				timefield.value += '00';
+			}
+		}
+		else {
+			if (split.length == 1) {
+				timefield.value += ':00';
+			}
+		}
+	}	
 
 	scrolltop = function(){
 		if(querymode == 1){
@@ -78,7 +93,22 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			group.style.display = 'none';
 			group_img.src = 'graphics/plus.gif';
 		}
-	}	
+	}
+	
+	toggle_tab = function(tab, layer_id, k, tabname){
+		var dataset = document.getElementById('datensatz_' + layer_id + '_' + k);
+		var active_tab = dataset.querySelector('.active_tab');
+		active_tab.classList.remove("active_tab");
+		tab.classList.add("active_tab");
+		var groups_to_close = dataset.querySelectorAll('.tab');
+		[].forEach.call(groups_to_close, function (group){
+			group.style.display = 'none';
+		});
+		var groups_to_open = dataset.querySelectorAll('.tab_' + layer_id + '_' + k + '_' + tabname);
+		[].forEach.call(groups_to_open, function (group){
+			group.style.display = '';
+		});
+	}
 	
 	check_visibility = function(layer_id, object, dependents, k){
 		if(object == null)return;
@@ -429,6 +459,13 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				completeDate(document.getElementsByName(fieldstring)[0]);
 				if(!checkDate(document.getElementsByName(fieldstring)[0].value)){
 					message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+					return;
+				}
+			}
+			if (document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'time' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)) {
+				completeTime(document.getElementsByName(fieldstring)[0]);
+				if(!checkTime(document.getElementsByName(fieldstring)[0].value)){
+					message('Das Uhrzeitfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format hh:mm:ss.');
 					return;
 				}
 			}
@@ -991,11 +1028,18 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		}		
 	}
 
-	set_changed_flag = function(flag){
-		if(flag != undefined){
-			flag.value=1;
-			if(flag.onchange)flag.onchange();
-		}
+	set_changed_flag = function(field, flag_name){
+		var same_fields = document.querySelectorAll('[name="' + field.name + '"]');
+		[].forEach.call(same_fields, function (same_field){
+			same_field.value = field.value;	// alle gleichen Felder auf den selben Wert setzen
+		});
+		var flags = document.querySelectorAll('[name="' + flag_name + '"]');
+		[].forEach.call(flags, function (flag){
+			if(flag != undefined){
+				flag.value=1;
+				if(flag.onchange)flag.onchange();
+			}
+		});
 	}
 	
 	activate_save_button = function(layerdiv, layer_id){

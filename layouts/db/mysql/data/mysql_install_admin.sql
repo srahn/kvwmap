@@ -184,9 +184,20 @@ INSERT INTO u_menue2stelle (stelle_id, menue_id, menue_order) VALUES (@stelle_id
 INSERT INTO u_menue2rolle (user_id, stelle_id, menue_id,status) VALUES (@user_id, @stelle_id,@last_level1menue_id, 0);
 
 # Update und Config
-INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Update und Config', 'index.php?go=Administratorfunktionen', @last_level1menue_id, 2, NULL);
+INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`, `title`) VALUES ('Update und Config', 'index.php?go=Administratorfunktionen', @last_level1menue_id, 2, NULL, 12, 'Update und Config');
 SET @last_menue_id = LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id, menue_id, menue_order) VALUES (@stelle_id, @last_menue_id, 51);
+INSERT INTO u_menue2rolle (user_id, stelle_id, menue_id,status) VALUES (@user_id, @stelle_id, @last_menue_id, 0);
+
+<<<<<<< HEAD
+# Cronjobs
+INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`, `title`) VALUES ('Cronjobs', 'index.php?go=cronjobs_anzeigen', @last_level1menue_id, 2, NULL, 14, 'Cronjobs einstellen');
+=======
+# Update und Config
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Sicherungen', 'index.php?go=Sicherungen_anzeigen', @last_level1menue_id, 2, NULL);
+>>>>>>> 275eee4c5ceb4643d422b87eff07c1c70df9eecd
+SET @last_menue_id = LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id, menue_id, menue_order) VALUES (@stelle_id, @last_menue_id, 52);
 INSERT INTO u_menue2rolle (user_id, stelle_id, menue_id,status) VALUES (@user_id, @stelle_id, @last_menue_id, 0);
 
 #### Stellenverwaltung
@@ -463,7 +474,7 @@ INSERT INTO `druckrahmen2stelle` (`stelle_id`, `druckrahmen_id`) VALUES (@last_d
 
 # Insert default cron_jobs
 INSERT INTO `cron_jobs` (`id`, `bezeichnung`, `beschreibung`, `time`, `query`, `function`, `url`, `user_id`, `stelle_id`, `aktiv`, `dbname`, `user`) VALUES
-(1, 'Leere tmp Verzeichnis', 'Löscht /var/www/tmp jeden Tag', '1 1 * * *', '', 'find /var/www/tmp -mtime +1 ! -path /var/www/tmp -exec rm -rf {} +', NULL, 0, 0, 1, '', 'gisadmin'),
+(1, 'Leere tmp Verzeichnis', 'Löscht jeden Tag Dateien die älter als 1 Tag sind aus Verzeichnis /var/www/tmp', '1 1 * * *', '', 'find /var/www/tmp -mtime +1 ! -path /var/www/tmp -exec rm -rf {} +', NULL, 0, 0, 1, '', 'gisadmin'),
 (2, 'Update Let\'s Encrypt Certificate', 'Führt regelmäßig certbot-auto renew zur Aktualisierung des https Zertifikates aus.', '0 0,12 * * *', '', 'python -c \'import random; import time; time.sleep(random.random() * 3600)\' && rm -rf /etc/apt/sources.list.d/* || true && /usr/local/certbot-auto renew -q', NULL, 0, 0, 1, '', 'root');
 
 

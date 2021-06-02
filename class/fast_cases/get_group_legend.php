@@ -1426,13 +1426,7 @@ class GUI {
 					$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
 				}
 				if(value_of($layer, 'metalink') != ''){
-					if(substr($layer['metalink'], 0, 10) != 'javascript'){
-						$legend .= ' target="_blank"';
-						if(strpos($layer['metalink'], '?') === false)$layer['metalink'] .= '?';
-						else $layer['metalink'] .= '&';
-						$layer['metalink'] .= 'time='.time();
-					}
-					$legend .= ' class="metalink boldhover" href="'.$layer['metalink'].'">';
+					$legend .= ' class="metalink boldhover" href="javascript:void(0);">';
 				}
 				else
 					$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
@@ -1702,9 +1696,12 @@ class database {
 
 	function open() {
 		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
-		$this->mysqli = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+		$this->mysqli = mysqli_init();
+		$ret = $this->mysqli->real_connect($this->host, $this->user, $this->passwd, $this->dbName, 3306, null, MYSQLI_CLIENT_FOUND_ROWS);
 	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
-		return $this->mysqli->connect_errno;
+		$this->debug->write("<br>MySQL Fehlernummer: " . mysqli_connect_errno(), 4);
+		$this->debug->write("<br>MySQL Fehler: " . mysqli_connect_error(), 4);
+		return $ret;
 	}
 
 	function execSQL($sql, $debuglevel = 4, $loglevel = 0, $suppress_error_msg = false) {

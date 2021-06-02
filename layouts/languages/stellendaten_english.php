@@ -1,3 +1,4 @@
 ﻿<?php
-  $strTitel="Tasks"; 
+  $strTitel="Usergroup";
+	$strParentStelle="Parent Usergroup";
 ?>  

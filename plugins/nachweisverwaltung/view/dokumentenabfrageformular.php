@@ -53,14 +53,10 @@ function save(){
 		}
 		else{
 			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
-			document.GUI.go_plus.value = 'Senden';
-			document.GUI.submit();
 		}
 	}
-	else{
-		document.GUI.go_plus.value = 'Senden';
-		document.GUI.submit();
-	}
+	document.GUI.go_plus.value = 'Senden';
+	overlay_submit(document.GUI, true);
 }
 
 function buildwktpolygonfromsvgpath(svgpath){

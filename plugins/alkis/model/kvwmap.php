@@ -218,7 +218,7 @@
 
     $layer_id = $dbmap->newRollenLayer($GUI->formvars);
 		
-		$dbmap->addRollenLayerStyling($layer_id, $GUI->formvars['Datentyp'], $GUI->formvars['labelitem'], $GUI->user);
+		$dbmap->addRollenLayerStyling($layer_id, $GUI->formvars['Datentyp'], $GUI->formvars['labelitem'], $GUI->user, 'zoom');
 		
     $GUI->user->rolle->set_one_Group($GUI->user->id, $GUI->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 
@@ -312,7 +312,7 @@
 
 	    $layer_id = $dbmap->newRollenLayer($GUI->formvars);
 
-	    $dbmap->addRollenLayerStyling($layer_id, $GUI->formvars['Datentyp'], $GUI->formvars['labelitem'], $GUI->user);
+	    $dbmap->addRollenLayerStyling($layer_id, $GUI->formvars['Datentyp'], $GUI->formvars['labelitem'], $GUI->user, 'zoom');
 			
 	    $GUI->user->rolle->set_one_Group($GUI->user->id, $GUI->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 
@@ -714,8 +714,10 @@
           else {
             # Es wurde mindestens ein eindeutiges FlurstKennz in FlstID ausgewählt, oder ein oder mehrere über FlstNr gefunden
             # Zoom auf Flurstücke
-						$GUI->zoomToALKFlurst($FlurstKennz,10);
-						$GUI->saveMap('');
+						if ($GUI->user->rolle->querymode == 1 OR $GUI->formvars['ALK_Suche'] == 1) {
+							$GUI->zoomToALKFlurst($FlurstKennz,10);
+							$GUI->saveMap('');
+						}						
             if($GUI->formvars['ALK_Suche'] == 1){
 							if($GUI->formvars['go_next'] != ''){
 								$GUI->formvars['FlurstKennz'] = $FlurstKennz;
@@ -807,7 +809,7 @@
 											<td></td>
 											<td>';
 												if(count($versionen) > 0){
-			$output.= '					<select name="versions_'.$k.'" onchange="root.location.href=\'index.php?go=setHistTimestamp&timestamp=\'+this.value+\'&go_next=get_last_query\'" style="max-width: 500px">';
+			$output.= '					<select name="versions_'.$k.'" onchange="overlay_link(\'go=setHistTimestamp&timestamp=\' + this.value + \'&go_next=get_last_query\', false); if(root.document.getElementById(\'map\')){root.neuLaden();}" style="max-width: 500px">';
 													$selected = false;
 													$v = 1;
 													$count = count($versionen);

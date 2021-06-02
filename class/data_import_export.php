@@ -42,18 +42,21 @@ class data_import_export {
 		$file_name_parts[0] = substr($filename, 0, strrpos($filename, '.'));
 		$file_name_parts[1] = substr($filename, strrpos($filename, '.')+1);
 		if($filetype == NULL)$filetype = strtolower($file_name_parts[1]);
+		$unique_column = 'gid';
 		switch($filetype) {
 			case 'shp' : case 'dbf' : case 'shx' : {
 				$custom_tables = $this->import_custom_shape($file_name_parts, $user, $pgdatabase, $epsg);
 				$epsg = $custom_tables[0]['epsg'];
 			} break;
-			case 'kml' : {
+			case 'kml' : case 'kmz' : {
 				$epsg = 4326;
 				$custom_tables = $this->import_custom_kml($filename, $pgdatabase, $epsg);
+				$unique_column = 'ogc_fid';
 			} break;
 			case 'gpx' : {
 				$epsg = 4326;
 				$custom_tables = $this->import_custom_gpx($filename, $pgdatabase, $epsg);
+				$unique_column = 'ogc_fid';
 			} break;
 			case 'ovl' : {
 				$epsg = 4326;
@@ -65,10 +68,12 @@ class data_import_export {
 			} break;
 			case 'dxf' : {
 				$custom_tables = $this->import_custom_dxf($filename, $pgdatabase, $epsg);
+				$unique_column = 'ogc_fid';
 			} break;
 			case 'json' : case 'geojson' : {
 				$custom_tables = $this->import_custom_geojson($filename, $pgdatabase, $epsg);
 				$epsg = $custom_tables[0]['epsg'];
+				$unique_column = 'ogc_fid';
 			} break;
 			case 'geotif' : case 'tiff' : case 'tif' : {
 				$custom_tables = $this->import_custom_geotif($filename, $pgdatabase, $epsg);
@@ -92,7 +97,8 @@ class data_import_export {
 						$user,
 						basename($filename) . " (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
 						$custom_table,
-						$epsg
+						$epsg,
+						$unique_column
 					);
 				}
 				return -$layer_id;
@@ -127,7 +133,7 @@ class data_import_export {
 		";
 	}
 
-	function create_rollenlayer($pgdatabase, $stelle, $user, $layername, $custom_table, $epsg) {
+	function create_rollenlayer($pgdatabase, $stelle, $user, $layername, $custom_table, $epsg, $unique_column) {
 		$dbmap = new db_mapObj($stelle->id, $user->id);
 		$group = $dbmap->getGroupbyName('Eigene Importe');
 		if ($group != '') {
@@ -150,7 +156,7 @@ class data_import_export {
 			$this->formvars['transparency'] = 100;
 		}
 		else{
-			$this->formvars['Data'] = 'the_geom from (SELECT * FROM ' . CUSTOM_SHAPE_SCHEMA . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ')as foo using unique gid using srid=' . $epsg;
+			$this->formvars['Data'] = 'the_geom from (SELECT * FROM ' . CUSTOM_SHAPE_SCHEMA . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ')as foo using unique ' . $unique_column . ' using srid=' . $epsg;
 			$this->formvars['query'] = 'SELECT * FROM ' . $custom_table['tablename'] . ' WHERE 1=1' . $custom_table['where'];
 			$this->formvars['connection_id'] = $pgdatabase->connection_id;
 			$this->formvars['connectiontype'] = 6;
@@ -166,7 +172,7 @@ class data_import_export {
 			$path = $this->formvars['query'];
 			$attributes = $dbmap->load_attributes($layerdb, $path);
 			$dbmap->save_postgis_attributes(-$layer_id, $attributes, '', '');
-			$dbmap->addRollenLayerStyling($layer_id, $custom_table['datatype'], $custom_table['labelitem'], $user);
+			$dbmap->addRollenLayerStyling($layer_id, $custom_table['datatype'], $custom_table['labelitem'], $user, 'import');
 		}
     return $layer_id;
 	}
@@ -490,6 +496,7 @@ class data_import_export {
 			}
 			else{
 				$sql = '
+					SELECT convert_column_names(\'' . $schema . '\', \'' . $tablename . '\');
 					SELECT geometrytype(the_geom) AS geometrytype FROM '.$schema.'.'.$tablename.' LIMIT 1;';
 				$ret = $pgdatabase->execSQL($sql,4, 0);
 				if(!$ret[0]) {
@@ -539,49 +546,45 @@ class data_import_export {
 		for($i = 0; $i < count($columns); $i++){
 			if($formvars['column'.$i] == 'x' AND !is_numeric(str_replace(',', '.', $columns[$i])))$headlines = true;		// die erste Zeile enthält die Spaltenüberschriften
 		}
-		$sql = "CREATE TABLE ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (";
-		$komma = false;
-		for($i = 0; $i < count($columns); $i++){
-			if($formvars['column'.$i] != 'x' AND $formvars['column'.$i] != 'y'){
-				if($komma)$sql.= ", ";
-				$j = $i+1;
-				if($headlines){
-					if(is_numeric(substr($columns[$i], 0, 1)))$columns[$i] = '_'.$columns[$i];
-					$column = strtolower(umlaute_umwandeln(utf8_encode($columns[$i])));
-					$sql.= $column." varchar";
-					if($formvars['column'.$i] == 'label')$labelitem = $column;
-				}
-				else{
-					$sql.= "spalte".$j." varchar";
-					if($formvars['column'.$i] == 'label')$labelitem = 'spalte'.$j;
-				}
-				$komma = true;
+		for ($i = 0; $i < count($columns); $i++) {
+			$j = $i+1;
+			if ($headlines) {
+				$table_column = strtolower(umlaute_umwandeln(utf8_encode($columns[$i])));
 			}
+			else{
+				$table_column = 'spalte' . $j;
+			}
+			if ($formvars['column' . $i] == 'label') {
+				$labelitem = $table_column;
+			}
+			if (in_array($formvars['column' . $i], ['x', 'y'])) {
+				$index[$formvars['column' . $i]] = $i;
+			}
+			$table_columns[] = $table_column;
 		}
-		$sql.= ");";
-		$sql.= "SELECT AddGeometryColumn('".CUSTOM_SHAPE_SCHEMA."', '".$tablename."', 'the_geom', ".$formvars['epsg'].", 'POINT', 2);";
-		$sql.= "CREATE INDEX ".$tablename."_gist_idx ON ".CUSTOM_SHAPE_SCHEMA.".".$tablename." USING gist (the_geom );";
+		$sql = '
+			CREATE TABLE ' . CUSTOM_SHAPE_SCHEMA . '.' . $tablename  .' (
+				gid serial,
+				"' . implode('" varchar, "', $table_columns) . "\" varchar
+			);
+			SELECT AddGeometryColumn('" . CUSTOM_SHAPE_SCHEMA . "', '" . $tablename . "', 'the_geom', " . $formvars['epsg'] . ", 'POINT', 2);
+			CREATE INDEX " . $tablename . "_gist_idx ON " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . " USING gist (the_geom );";
 		$i = 0;
-		foreach($rows as $row){
-			if($headlines AND $i == 0 OR trim($row, $formvars['delimiter']."\n\r") == ''){$i++;continue;}				// Überschriftenzeile und Leerzeilen auslassen
-			$columns = explode($formvars['delimiter'], $row);
-			$sql.= "INSERT INTO ".CUSTOM_SHAPE_SCHEMA.".".$tablename." VALUES(";
-			$komma = false;
-			for($i = 0; $i < count($columns); $i++){
-				if($formvars['column'.$i] != 'x' AND $formvars['column'.$i] != 'y'){
-					if($komma)$sql.= ", ";
-					$sql.= "E'".addslashes(utf8_encode($columns[$i]))."'";
-					$komma = true;
-				}
-				else{
-					${$formvars['column'.$i]} = $columns[$i];			# Hier werden $x und $y gesetzt (nicht das doppelte $ wegnehmen!)
-				}
+		foreach ($rows as $row) {
+			if ($headlines AND $i == 0 OR trim($row, $formvars['delimiter']."\n\r") == '') {
+				// Überschriftenzeile und Leerzeilen auslassen
+				$i++;continue;
 			}
-			$x = str_replace(',', '.', $x);
-			$y = str_replace(',', '.', $y);
-			if($komma)$sql.= ", ";
-			if(!is_numeric($x) OR !is_numeric($y))$sql.= "NULL);";
-			else $sql.= "st_geomfromtext('POINT(".$x." ".$y.")', ".$formvars['epsg']."));";
+			$values = explode($formvars['delimiter'], $row);
+			$x = str_replace(',', '.', $values[$index['x']]);
+			$y = str_replace(',', '.', $values[$index['y']]);
+			array_walk($values, function(&$value, $key){$value = "E'" . addslashes(utf8_encode($value)) . "'";});		
+			$sql.= '
+				INSERT INTO ' . CUSTOM_SHAPE_SCHEMA . '.' . $tablename .
+				'("' . implode('", "', $table_columns) . '", the_geom)
+				VALUES(
+				' . implode(', ', $values) . ',
+				' . ((!is_numeric($x) OR !is_numeric($y))? "NULL);" : "st_geomfromtext('POINT(" . $x . " " . $y . ")', " . $formvars['epsg'] . "));");
 			$i++;
 		}
 		#echo $sql;
@@ -691,7 +694,7 @@ class data_import_export {
 				$sql = "
 					SELECT
 						count(*),
-						max(geometrytype(geom)) AS geometrytype
+						max(geometrytype(the_geom)) AS geometrytype
 					FROM
 						" . $table . ";
 				";
@@ -810,7 +813,7 @@ class data_import_export {
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb) {
 		$command = 'export PGDATESTYLE="ISO, MDY";export PGCLIENTENCODING=UTF-8;'
 			. OGR_BINPATH . 'ogr2ogr -f ' . $exportformat . ' -lco ENCODING=UTF-8 -sql "' . str_replace(["\t", chr(10), chr(13)], [' ', ''], $sql) . '" ' . $exportfile
-			. ' PG:"' . $layerdb->get_connection_string() . ' active_schema=' . $layerdb->schema . '"';
+			. ' PG:"' . $layerdb->get_connection_string(true) . ' active_schema=' . $layerdb->schema . '"';
 		$errorfile = rand(0, 1000000);
 		$command .= ' 2> '.IMAGEPATH.$errorfile.'.err';
 		$output = array();
@@ -825,7 +828,7 @@ class data_import_export {
 		if ($options != NULL) $command.= $options;
 		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco precision=NO -nlt PROMOTE_TO_MULTI -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
 		if ($sql != NULL) $command.= ' -sql \''.$sql.'\'';
-		$command .= ' -append PG:"' . $database->get_connection_string() . ' active_schema=' . $schema . '"';
+		$command .= ' -append PG:"' . $database->get_connection_string(true) . ' active_schema=' . $schema . '"';
 		$command .= ' "' . $importfile . '" ' . $layer;
 		$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
 		$output = array();
@@ -1257,18 +1260,18 @@ class data_import_export {
 				}break;
 			}
 			# Dokumente auch mit dazupacken
-			if($this->formvars['download_documents'] != ''){
-				if($result == NULL){
-					while($rs=pg_fetch_assoc($ret[1])){
+			if ($this->formvars['download_documents'] != '') {
+				if ($result == NULL) {
+					while ($rs=pg_fetch_assoc($ret[1])){
 						$result[] = $rs;
 					}
 				}
 				$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, true);
-				for($i = 0; $i < count($result); $i++){
-					$zip = $this->copy_documents_to_export_folder($result[$i], $this->attributes, $layerset[0]['maintable'], $folder);
+				for ($i = 0; $i < count($result); $i++) {
+					$doc_zip = $this->copy_documents_to_export_folder($result[$i], $this->attributes, $layerset[0]['maintable'], $folder);
+					$zip = $zip || $doc_zip;
 				}
 			}
-
 			# Bei Bedarf auch Metadatendatei mit dazupacken
 			if ($this->formvars['with_metadata_document'] != '' AND $layerset[0]['metalink'] != '') {
 				$metadata_file = IMAGEPATH . $folder. '/' . basename($layerset[0]['metalink']);
@@ -1297,12 +1300,11 @@ class data_import_export {
 				$contenttype = 'application/octet-stream';
 			}
 			# temp. Tabelle wieder löschen
-			$sql = 'DROP TABLE '.$temp_table;
+			$sql = 'DROP TABLE ' . $temp_table;
 			$ret = $layerdb->execSQL($sql,4, 0);
 			if ($this->formvars['export_format'] != 'CSV') {
 				$user->rolle->setConsumeShape($currenttime, $this->formvars['selected_layer_id'], $count);
 			}
-
 			if ($err == '') {
 				// Update timestamp formular_element_types having option export
 				$time_attributes = array();
@@ -1314,7 +1316,6 @@ class data_import_export {
 						$time_attributes[] = $value . " = '" . $currenttime . "'";
 					}
 				};
-
 				if (!$layerset[0]['maintable_is_view'] AND count($time_attributes) > 0) {
 					$update_table = $layerset[0]['schema'] . '.' . $layerset[0]['maintable'];
 					$sql = "
@@ -1328,9 +1329,9 @@ class data_import_export {
 							update_table." . $layerset[0]['oid'] . " = data_table." . $layerset[0]['oid'] . "
 					";
 					#echo '<br>sql: ' . $sql;
-					$ret = $layerdb->execSQL($sql, 4, 0);
+					$ret = $layerdb->execSQL($sql, 4, 0, true);
 					if ($ret[0]) {
-						$err_msg = 'Speicherung der Zeitstempel ' . implode(", ", $time_attributes) . ' fehlgeschlagen.<br>' . $ret[1];
+						$err = 'Speicherung der Zeitstempel ' . implode(", ", $time_attributes) . ' fehlgeschlagen.<br>' . sql_err_msg('Die Datenbank meldet:', $sql, $ret[1], 'error_div_' . rand(1, 99999));
 					}
 				}
 			}
@@ -1356,7 +1357,7 @@ class data_import_export {
 	function copy_documents_to_export_folder($result, $attributes, $maintable, $folder){
 		global $GUI;
 		$zip = false;
-		foreach($result As $key => $value){
+		foreach ($result As $key => $value) {
 			$j = $attributes['indizes'][$key];
 			if ($attributes['form_element_type'][$j] == 'SubFormEmbeddedPK') {
 				$GUI->getSubFormResultSet($attributes, $j, $maintable, $result);
@@ -1365,17 +1366,22 @@ class data_import_export {
 					$zip = $zip || $zip2;
 				}
 			}
-			if($attributes['form_element_type'][$j] == 'Dokument' AND $value != ''){
+			if ($attributes['form_element_type'][$j] == 'Dokument' AND $value != '') {
 				$docs = array($value);
-				if(substr($attributes['type'][$j], 0, 1) == '_'){		# Array
+				if (substr($attributes['type'][$j], 0, 1) == '_') {
+					# Array
 					$docs = explode(',', $value);
 				}
-				foreach($docs as $doc){
+				foreach ($docs as $doc) {
 					$doc = trim($doc, '[]{}"');
 					$parts = explode('&original_name=', $doc);
-					if($parts[1] == '')$parts[1] = basename($parts[0]);		# wenn kein Originalname da, Dateinamen nehmen
-					if(file_exists($parts[0])){
-						if(file_exists(IMAGEPATH.$folder.'/'.$parts[1])){		# wenn schon eine Datei mit dem Originalnamen existiert, wird der Dateiname angehängt
+					if ($parts[1] == '') {
+						# wenn kein Originalname da, Dateinamen nehmen
+						$parts[1] = basename($parts[0]);
+					}
+					if (file_exists($parts[0])) {
+						if (file_exists(IMAGEPATH . $folder . '/' . $parts[1])) {
+							# wenn schon eine Datei mit dem Originalnamen existiert, wird der Dateiname angehängt
 							$file_parts = explode('.', $parts[1]);
 							$parts[1] = $file_parts[0].'_'.basename($parts[0]);
 						}
