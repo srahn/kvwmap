@@ -1,4 +1,59 @@
 BEGIN;
+/* fix to add primary keys to tables before adding bereich foreign key
+all tables already have an abstract primary key xp_plan_pkey from xp_plan
+*/
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'bp_plan_pkey') THEN
+			ALTER TABLE
+				xplan_gml.bp_plan
+			ADD CONSTRAINT
+				bp_plan_pkey
+			PRIMARY KEY
+				(gml_id);
+    END IF;
+END;
+$$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fp_plan_pkey') THEN
+			ALTER TABLE
+				xplan_gml.bp_plan
+			ADD CONSTRAINT
+				bp_plan_pkey
+			PRIMARY KEY
+				(gml_id);
+    END IF;
+END;
+$$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'so_plan_pkey') THEN
+			ALTER TABLE
+				xplan_gml.bp_plan
+			ADD CONSTRAINT
+				bp_plan_pkey
+			PRIMARY KEY
+				(gml_id);
+    END IF;
+END;
+$$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'rp_plan_pkey') THEN
+			ALTER TABLE
+				xplan_gml.bp_plan
+			ADD CONSTRAINT
+				bp_plan_pkey
+			PRIMARY KEY
+				(gml_id);
+    END IF;
+END;
+$$;
+
 --bp_bereich
 ALTER TABLE
 	xplan_gml.bp_bereich
