@@ -828,7 +828,7 @@ class data_import_export {
 		if ($options != NULL) $command.= $options;
 		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco precision=NO -nlt PROMOTE_TO_MULTI -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
 		if ($sql != NULL) $command.= ' -sql \''.$sql.'\'';
-		$command .= ' -append PG:"' . $database->get_connection_string(true) . ' active_schema=' . $schema . '"';
+		$command .= ' PG:"' . $database->get_connection_string(true) . ' active_schema=' . $schema . '"';
 		$command .= ' "' . $importfile . '" ' . $layer;
 		$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
 		$output = array();
