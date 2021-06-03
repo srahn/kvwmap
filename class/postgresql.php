@@ -1273,7 +1273,7 @@ FROM
     return $GemeindeListe;
   }
   
-  function getFlurstuecksListe($GemID,$GemkgID,$FlurID, $historical = false){
+  function getFlurstuecksListe($GemID, $GemkgID, $FlurID, $FlstID, $historical = false){
 		if(!$historical){
 			$sql ="SELECT flurstueckskennzeichen as flurstkennz, zaehler, nenner";
 			$sql.=" FROM alkis.ax_flurstueck WHERE 1=1";
@@ -1282,6 +1282,9 @@ FROM
 			}
 			if ($FlurID!='') {
 				$sql.=" AND flurnummer=".$FlurID;
+			}
+			if ($FlstID != '') {
+				$sql.=" AND zaehler || coalesce('/' || nenner, '') IN ('" . implode("','", $FlstID) . "')";
 			}
 			$sql.= $this->build_temporal_filter(array('ax_flurstueck'));
 			$sql.=" ORDER BY flurstueckskennzeichen";
@@ -1417,12 +1420,17 @@ FROM
 		if($GemeindenStelle != NULL){
 			$sql.="AND (FALSE";
 			if($GemeindenStelle['ganze_gemeinde'] != NULL)$sql.=" OR g.land::text||g.regierungsbezirk||g.kreis||g.gemeinde IN ('".implode("','", array_keys($GemeindenStelle['ganze_gemeinde']))."')";
-			if($GemeindenStelle['ganze_gemarkung'] != NULL)$sql.=" OR f.land||f.gemarkungsnummer IN ('".implode("','", array_keys($GemeindenStelle['ganze_gemarkung']))."')";
-			if($GemeindenStelle['eingeschr_gemarkung'] != NULL){
-				foreach($GemeindenStelle['eingeschr_gemarkung'] as $eingeschr_gemkg_id => $fluren){
-					$sql.=" OR (f.land||f.gemarkungsnummer = '".$eingeschr_gemkg_id."' AND flurnummer IN (".implode(',', $fluren)."))";
+			if($GemeindenStelle['ganze_gemarkung'] != NULL)$sql.=" OR f.land||f.gemarkungsnummer IN ('".implode("','", array_keys($GemeindenStelle['ganze_gemarkung']))."')";			
+			if (count($GemeindenStelle['eingeschr_gemarkung']) > 0) {
+				foreach ($GemeindenStelle['ganze_flur'] as $eingeschr_gemkg_id => $ganze_fluren) {
+					$sql.=" OR (f.land||f.gemarkungsnummer = '" . $eingeschr_gemkg_id . "' AND flurnummer IN (" . implode(',', $ganze_fluren) . "))";
 				}
-			}
+				foreach ($GemeindenStelle['eingeschr_flur'] as $eingeschr_gemkg_id => $eingeschr_fluren) {
+					foreach ($eingeschr_fluren as $eingeschr_flur => $flurstuecke) {
+						$sql.=" OR (f.land||f.gemarkungsnummer = '" . $eingeschr_gemkg_id . "' AND flurnummer = " . $eingeschr_flur . "  AND f.zaehler || coalesce('/' || f.nenner, '') IN ('" . implode("','", $flurstuecke) . "'))";
+					}
+				}
+			}			
 			$sql .= ") ";
 		}		
 		$sql.="UNION ";
@@ -1432,11 +1440,16 @@ FROM
 			$sql.="AND (FALSE";
 			if($GemeindenStelle['ganze_gemeinde'] != NULL)$sql.=" OR f.land||f.gemeindezugehoerigkeit_regierungsbezirk||f.gemeindezugehoerigkeit_kreis||f.gemeindezugehoerigkeit_gemeinde IN ('".implode("','", array_keys($GemeindenStelle['ganze_gemeinde']))."')";
 			if($GemeindenStelle['ganze_gemarkung'] != NULL)$sql.=" OR f.land||f.gemarkungsnummer IN ('".implode("','", array_keys($GemeindenStelle['ganze_gemarkung']))."')";
-			if($GemeindenStelle['eingeschr_gemarkung'] != NULL){
-				foreach($GemeindenStelle['eingeschr_gemarkung'] as $eingeschr_gemkg_id => $fluren){
-					$sql.=" OR (f.land||f.gemarkungsnummer = '".$eingeschr_gemkg_id."' AND flurnummer IN (".implode(',', $fluren)."))";
+			if (count($GemeindenStelle['eingeschr_gemarkung']) > 0) {
+				foreach ($GemeindenStelle['ganze_flur'] as $eingeschr_gemkg_id => $ganze_fluren) {
+					$sql.=" OR (f.land||f.gemarkungsnummer = '" . $eingeschr_gemkg_id . "' AND flurnummer IN (" . implode(',', $ganze_fluren) . "))";
 				}
-			}
+				foreach ($GemeindenStelle['eingeschr_flur'] as $eingeschr_gemkg_id => $eingeschr_fluren) {
+					foreach ($eingeschr_fluren as $eingeschr_flur => $flurstuecke) {
+						$sql.=" OR (f.land||f.gemarkungsnummer = '" . $eingeschr_gemkg_id . "' AND flurnummer = " . $eingeschr_flur . "  AND f.zaehler || coalesce('/' || f.nenner, '') IN ('" . implode("','", $flurstuecke) . "'))";
+					}
+				}
+			}	
 			$sql .= ") ORDER BY flurstkennz";
 		}
     $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstückskennzeichen nach Gemeindeids:<br>".$sql,4);
@@ -2168,7 +2181,7 @@ FROM
 		}
 	}
   
-  function getNamen($formvars, $ganze_gemkg_ids, $eingeschr_gemkg_ids){
+  function getNamen($formvars, $ganze_gemkg_ids, $eingeschr_gemkg_ids, $ganze_flur_ids, $eingeschr_flur_ids){
 		if(!$formvars['exakt']){
 			$n1 = '%'.$formvars['name1'].'%';
 			$n2 = '%'.$formvars['name2'].'%';
@@ -2235,9 +2248,14 @@ FROM
 			if($ganze_gemkg_ids[0] != ''){
 				$sql.="OR f.land||f.gemarkungsnummer IN ('".implode("','", $ganze_gemkg_ids)."')";
 			}
-			if(count($eingeschr_gemkg_ids) > 0){
-				foreach($eingeschr_gemkg_ids as $eingeschr_gemkg_id => $fluren){
-					$sql.=" OR (f.land||f.gemarkungsnummer = '".$eingeschr_gemkg_id."' AND flurnummer IN (".implode(',', $fluren)."))";
+			if (count($eingeschr_gemkg_ids) > 0) {
+				foreach ($ganze_flur_ids as $eingeschr_gemkg_id => $ganze_fluren) {
+					$sql.=" OR (f.land||f.gemarkungsnummer = '" . $eingeschr_gemkg_id . "' AND flurnummer IN (" . implode(',', $ganze_fluren) . "))";
+				}
+				foreach ($eingeschr_flur_ids as $eingeschr_gemkg_id => $eingeschr_fluren) {
+					foreach ($eingeschr_fluren as $eingeschr_flur => $flurstuecke) {
+						$sql.=" OR (f.land||f.gemarkungsnummer = '" . $eingeschr_gemkg_id . "' AND flurnummer = " . $eingeschr_flur . "  AND f.zaehler || coalesce('/' || f.nenner, '') IN ('" . implode("','", $flurstuecke) . "'))";
+					}
 				}
 			}
 			$sql.=")";
@@ -2374,7 +2392,7 @@ FROM
     return $liste;
 	}
 	
-	function getGrundbuchblattlisteByGemkgIDs($bezirk, $ganze_gemkg_ids, $eingeschr_gemkg_ids){
+	function getGrundbuchblattlisteByGemkgIDs($bezirk, $ganze_gemkg_ids, $eingeschr_gemkg_ids, $ganze_flur_ids, $eingeschr_flur_ids){
 		$sql = "SELECT DISTINCT buchungsblattnummermitbuchstabenerweiterung as blatt, rtrim(ltrim(buchungsblattnummermitbuchstabenerweiterung,'PF0'),'ABCDEFGHIJKLMNOPQRSTUVWXYZ')::integer ";
 		$sql.="FROM alkis.ax_flurstueck f ";
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.gml_id = ANY(s.verweistauf) ";		
@@ -2383,9 +2401,14 @@ FROM
 		if($ganze_gemkg_ids[0] != ''){
 			$sql.="OR f.land||f.gemarkungsnummer IN ('".implode("','", $ganze_gemkg_ids)."')";
 		}
-		if(count($eingeschr_gemkg_ids) > 0){
-			foreach($eingeschr_gemkg_ids as $eingeschr_gemkg_id => $fluren){
-				$sql.=" OR (f.land||f.gemarkungsnummer = '".$eingeschr_gemkg_id."' AND flurnummer IN (".implode(',', $fluren)."))";
+		if (count($eingeschr_gemkg_ids) > 0) {
+			foreach ($ganze_flur_ids as $eingeschr_gemkg_id => $ganze_fluren) {
+				$sql.=" OR (f.land||f.gemarkungsnummer = '" . $eingeschr_gemkg_id . "' AND flurnummer IN (" . implode(',', $ganze_fluren) . "))";
+			}
+			foreach ($eingeschr_flur_ids as $eingeschr_gemkg_id => $eingeschr_fluren) {
+				foreach ($eingeschr_fluren as $eingeschr_flur => $flurstuecke) {
+					$sql.=" OR (f.land||f.gemarkungsnummer = '" . $eingeschr_gemkg_id . "' AND flurnummer = " . $eingeschr_flur . "  AND f.zaehler || coalesce('/' || f.nenner, '') IN ('" . implode("','", $flurstuecke) . "'))";
+				}
 			}
 		}
 		$sql.= ")";

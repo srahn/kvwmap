@@ -601,7 +601,7 @@ class stelle {
 			$alkis = new alkis($database);
 			$ret=$alkis->getFlurstKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz);
 			if ($ret[0]==0) {
-				$anzFlurstKennz=count($ret[1]);
+				$anzFlurstKennz = @count($ret[1]);
 				if ($anzFlurstKennz==0) {
 					$ret[0]=1;
 					$ret[1]="Sie haben keine Berechtigung zur Ansicht diese(s)r Flurstücke(s)";
@@ -1740,20 +1740,32 @@ class stelle {
 	}
 
 	function getGemeindeIDs() {
-		$sql = 'SELECT Gemeinde_ID, Gemarkung, Flur FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
+		$sql = 'SELECT Gemeinde_ID, Gemarkung, Flur, Flurstueck FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
-		if($this->database->result->num_rows > 0){
+		if ($this->database->result->num_rows > 0) {
 			$liste['ganze_gemeinde'] = Array();
 			$liste['eingeschr_gemeinde'] = Array();
 			$liste['ganze_gemarkung'] = Array();
 			$liste['eingeschr_gemarkung'] = Array();
-			while($rs=$this->database->result->fetch_assoc()) {
-				if($rs['Gemarkung'] != ''){
+			$liste['ganze_flur'] = Array();
+			$liste['eingeschr_flur'] = Array();
+			while ($rs=$this->database->result->fetch_assoc()) {
+				if ($rs['Gemarkung'] != '') {
 					$liste['eingeschr_gemeinde'][$rs['Gemeinde_ID']] = NULL;
-					if($rs['Flur'] != '')$liste['eingeschr_gemarkung'][$rs['Gemarkung']][] = $rs['Flur'];
-					else $liste['ganze_gemarkung'][$rs['Gemarkung']] = NULL;
+					if ($rs['Flur'] != '') {
+						$liste['eingeschr_gemarkung'][$rs['Gemarkung']][] = $rs['Flur'];
+						if ($rs['Flurstueck'] != '') {
+							$liste['eingeschr_flur'][$rs['Gemarkung']][$rs['Flur']][] = $rs['Flurstueck'];
+						}
+						else {
+							$liste['ganze_flur'][$rs['Gemarkung']][] = $rs['Flur'];
+						}
+					}
+					else {
+						$liste['ganze_gemarkung'][$rs['Gemarkung']] = NULL;
+					}
 				}
 				else{
 					$liste['ganze_gemeinde'][$rs['Gemeinde_ID']] = NULL;
