@@ -1471,6 +1471,11 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->StellenAnzeigen();
 			} break;
+			
+			case 'Stellenhierarchie' : {
+				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->Stellenhierarchie();
+			} break;			
 
 			case 'Menues_Anzeigen' : {
 				$GUI->checkCaseAllowed('Menues_Anzeigen');
