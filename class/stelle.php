@@ -458,6 +458,7 @@ class stelle {
 			SELECT
 				s.ID,
 				s.Bezeichnung,
+				h.parent_id,
 				es.Bezeichnung as Bezeichnung_parent
 			FROM
 				`stelle` AS s" . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " LEFT JOIN
@@ -479,6 +480,7 @@ class stelle {
 		while($rs = $this->database->result->fetch_array()) {
 			$stellen['ID'][] = $rs['ID'];
 			$stellen['Bezeichnung'][] = $rs['Bezeichnung'];
+			$stellen['parent_id'][] = $rs['parent_id'];
 			$stellen['Bezeichnung_parent'][] = $rs['Bezeichnung_parent'];
 		}
 		return $stellen;
