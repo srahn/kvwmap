@@ -458,33 +458,57 @@ class stelle {
 			SELECT
 				s.ID,
 				s.Bezeichnung,
-				h.parent_id,
-				es.Bezeichnung as Bezeichnung_parent
+				(
+					SELECT 
+						group_concat(es.Bezeichnung)
+					FROM 
+						`stellen_hierarchie` AS h,
+						stelle es
+					WHERE
+						s.`ID` = h.`child_id` AND 
+						es.ID = h.parent_id
+				) as Bezeichnung_parent
 			FROM
 				`stelle` AS s" . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " LEFT JOIN
 				`rolle` AS r ON s.ID = r.stelle_id
 				" : "") . "
-			LEFT JOIN `stellen_hierarchie` AS h ON (s.`ID` = h.`child_id`)
-			LEFT JOIN stelle es ON es.ID = h.parent_id
 			WHERE " .
 				$where . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " AND
 				(r.user_id = " . $user_id . " OR r.stelle_id IS NULL)" : "") . "
 			ORDER BY " .
-				($order != '' ? "`" . $order . "`" : "s.`Bezeichnung`") . "
+				($order != '' ? $order : "s.`Bezeichnung`") . "
 		";
 		#echo '<br>sql: ' . $sql;
 
 		$this->debug->write("<p>file:stelle.php class:stelle->getStellen - Abfragen aller Stellen<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		$i = 0;
 		while($rs = $this->database->result->fetch_array()) {
 			$stellen['ID'][] = $rs['ID'];
+			$stellen['index'][$rs['ID']] = $i;
 			$stellen['Bezeichnung'][] = $rs['Bezeichnung'];
-			$stellen['parent_id'][] = $rs['parent_id'];
 			$stellen['Bezeichnung_parent'][] = $rs['Bezeichnung_parent'];
+			$i++;
 		}
 		return $stellen;
 	}
+	
+	function getStellenhierarchie() {
+		$sql = "
+			SELECT
+				*
+			FROM
+				`stellen_hierarchie`
+		";
+		$this->debug->write("<p>file:stelle.php class:stelle->getStellenhierarchie - <br>" . $sql, 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
+		while($rs = $this->database->result->fetch_assoc()) {
+			$stellenhierarchie[$rs['parent_id']][] = $rs['child_id'];
+		};
+		return $stellenhierarchie;
+	}	
 
 	function getParents($order = '', $return = '') {
 		$parents = array();

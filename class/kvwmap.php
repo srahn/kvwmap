@@ -11655,6 +11655,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	
 	function Stellenhierarchie(){
 		$this->stellendaten = $this->Stelle->getStellen($this->formvars['order'], $this->user->id);
+		$this->stellenhierarchie = $this->Stelle->getStellenhierarchie();
 		$this->titel='Stellenhierachie';
 		$this->main='stellenhierarchie.php';
 		$this->output();
