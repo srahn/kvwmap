@@ -133,9 +133,9 @@ class Konvertierung extends PgObject {
 				'" . $epsg_code . "'::xplankonverter.epsg_codes,
 				'" . $planart . "',
 				" . $stelle_id . ",
-				" . $user_id . "
+				" . $user_id . ")
 			RETURNING " . $this->identifier . "
-		)";
+		";
 		$this->debug->show('Create new konvertierung with sql: ' . $sql, Konvertierung::$write_debug);
 		$query = pg_query($this->database->dbConn, $sql);
 		$row = pg_fetch_assoc($query);

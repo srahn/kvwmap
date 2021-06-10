@@ -40,6 +40,7 @@ class Gml_extractor {
 			}
 		}
 
+
 		$layername = '';
 		$tablename = strtolower($classname); #for DB
 		
@@ -98,10 +99,10 @@ class Gml_extractor {
 				$oid = $r_value;
 			}
 		}
+
 		# get extent of geometry for zooming 
 		$extent = $this->get_bbox_from_wkt($GUI->formvars['pathwkt']);
 		$GUI->formvars = $GUI->formvars + $extent;
-		
 		$GUI->formvars['checkbox_names_' . $GUI->formvars['chosen_layer_id']] = 'check;' . $layername . ';' . $tablename . ';' . $oid . '|';
 		$GUI->formvars['check;' . $layername .';' . $tablename . ';' . $oid] = 'on';
 		$GUI->formvars['attributenames'][] = 'layer_schemaname';
@@ -387,7 +388,7 @@ class Gml_extractor {
 	function fill_form_bp_plan($gml_id) {
 		$sql = "
 			SELECT
-				gmlas.oid," . 
+				" . 
 				"'" . $this->trim_gml_prefix_if_exists($gml_id) . "'::text::uuid AS plan_gml_id,
 				gmlas.xplan_name AS name,
 				gmlas.nummer AS nummer,
@@ -413,17 +414,9 @@ class Gml_extractor {
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
 				END AS verfahrensmerkmale,
-				CASE WHEN e.georefurl IS NOT NULL OR e.georefmimetype_codespace IS NOT NULL OR e.georefmimetype IS NOT NULL OR e.art IS NOT NULL OR e.informationssystemurl IS NOT NULL OR e.referenzname IS NOT NULL OR e.referenzmimetype_codespace IS NOT NULL OR e.referenzmimetype IS NOT NULL OR e.beschreibung IS NOT NULL OR e.datum IS NOT NULL OR e.typ IS NOT NULL THEN 
-					array_to_json(ARRAY[(e.georefurl, 
-						(e.georefmimetype_codespace, e.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.art::xplan_gml.xp_externereferenzart,
-						e.informationssystemurl,
-						e.referenzname, e.referenzurl,
-						(e.referenzmimetype_codespace, e.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.beschreibung,
-						to_char(e.datum, 'DD.MM.YYYY'),
-						e.typ::xplan_gml.xp_externereferenztyp
-					)]::xplan_gml.xp_spezexternereferenz[])
+				CASE
+					WHEN count_externeref > 0
+					THEN array_to_json(externeref.externereferenz)
 					ELSE NULL
 				END AS externereferenz,
 				to_char(gmlas.veraenderungssperredatum, 'DD.MM.YYYY') AS veraenderungssperredatum,
@@ -502,7 +495,7 @@ class Gml_extractor {
 	function fill_form_fp_plan($gml_id) {
 		$sql = "
 			SELECT
-				gmlas.oid," . 
+				" . 
 				"'" . $this->trim_gml_prefix_if_exists($gml_id) . "'::text::uuid AS plan_gml_id,
 				gmlas.xplan_name AS name,
 				gmlas.nummer AS nummer,
@@ -602,7 +595,7 @@ class Gml_extractor {
 	function fill_form_so_plan($gml_id) {
 		$sql = "
 			SELECT
-				gmlas.oid," . 
+				" . 
 				"'" . $this->trim_gml_prefix_if_exists($gml_id) . "'::text::uuid AS plan_gml_id,
 				gmlas.xplan_name AS name,
 				gmlas.nummer AS nummer,
@@ -684,7 +677,7 @@ class Gml_extractor {
 	function fill_form_rp_plan($gml_id) {
 		$sql = "
 			SELECT
-				gmlas.oid," . 
+				" . 
 				"'" . $this->trim_gml_prefix_if_exists($gml_id) . "'::text::uuid AS plan_gml_id,
 				gmlas.xplan_name AS name,
 				gmlas.nummer AS nummer,
@@ -889,9 +882,6 @@ class Gml_extractor {
 				identifier_codespace character varying,
 				identifier character varying,
 				CONSTRAINT xplanauszug_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".xplanauszug_featuremember
@@ -1096,9 +1086,6 @@ class Gml_extractor {
 				abstractfeature_xp_rasterdarstellung_pkid character varying,
 				abstractfeature_rp_legendenobjekt_pkid character varying,
 				CONSTRAINT xplanauszug_featuremember_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan
@@ -1145,9 +1132,6 @@ class Gml_extractor {
 				gruenordnungsplan boolean,
 				raeumlichergeltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT bp_plan_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_bereich
@@ -1183,9 +1167,6 @@ class Gml_extractor {
 				gehoertzuplan_pkid character varying,
 				geltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT bp_bereich_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan
@@ -1225,9 +1206,6 @@ class Gml_extractor {
 				wirksamkeitsdatum date,
 				raeumlichergeltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT fp_plan_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_bereich
@@ -1263,9 +1241,6 @@ class Gml_extractor {
 				gehoertzuplan_pkid character varying,
 				geltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT fp_bereich_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan
@@ -1294,9 +1269,6 @@ class Gml_extractor {
 				plangeber_xp_plangeber_pkid character varying,
 				raeumlichergeltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT so_plan_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_bereich
@@ -1326,9 +1298,6 @@ class Gml_extractor {
 				gehoertzuplan_pkid character varying,
 				geltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT so_bereich_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 
@@ -1371,9 +1340,6 @@ class Gml_extractor {
 				amtlicherschluessel integer,
 				raeumlichergeltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT rp_plan_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_bereich
@@ -1409,9 +1375,7 @@ class Gml_extractor {
 				geltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT rp_bereich_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_bereich
 			(
@@ -1425,9 +1389,7 @@ class Gml_extractor {
 				bereich_pkid character varying,
 				CONSTRAINT bp_plan_bereich_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_bereich
 			(
@@ -1441,9 +1403,7 @@ class Gml_extractor {
 				bereich_pkid character varying,
 				CONSTRAINT fp_plan_bereich_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_bereich
 			(
@@ -1457,9 +1417,7 @@ class Gml_extractor {
 				bereich_pkid character varying,
 				CONSTRAINT rp_plan_bereich_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan_bereich
 			(
@@ -1473,9 +1431,7 @@ class Gml_extractor {
 				bereich_pkid character varying,
 				CONSTRAINT so_plan_bereich_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".xp_verbundenerplan
 			(
@@ -1490,9 +1446,7 @@ class Gml_extractor {
 				verbundenerplan_nilreason character varying,
 				CONSTRAINT xp_verbundenerplan_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".aendert
 			(
@@ -1501,9 +1455,7 @@ class Gml_extractor {
 				xp_verbundenerplan_pkid character varying,
 				CONSTRAINT aendert_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_aendert_aendert
 			(
@@ -1513,9 +1465,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT bp_plan_aendert_aendert_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_aendert_aendert
@@ -1526,9 +1476,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT fp_plan_aendert_aendert_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_aendert_aendert
 			(
@@ -1538,9 +1486,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT rp_plan_aendert_aendert_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan_aendert_aendert
 			(
@@ -1550,9 +1496,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT so_plan_aendert_aendert_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".wurdegeaendertvon
 			(
@@ -1561,9 +1505,7 @@ class Gml_extractor {
 				xp_verbundenerplan_pkid character varying,
 				CONSTRAINT wurdegeaendertvon_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_wurdegeaendertvon_wurdegeaendertvon
 			(
@@ -1573,9 +1515,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT bp_plan_wurdegeaendertvon_wurdegeaendertvon_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_wurdegeaendertvon_wurdegeaendertvon
 			(
@@ -1585,9 +1525,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT fp_plan_wurdegeaendertvon_wurdegeaendertvon_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_wurdegeaendertvon_wurdegeaendertvon
 			(
@@ -1597,9 +1535,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT rp_plan_wurdegeaendertvon_wurdegeaendertvon_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan_wurdegeaendertvon_wurdegeaendertvon
 			(
@@ -1609,9 +1545,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT so_plan_wurdegeaendertvon_wurdegeaendertvon_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".verfahrensmerkmale
 			(
@@ -1623,9 +1557,7 @@ class Gml_extractor {
 				xp_verfahrensmerkmal_signiert boolean,
 				CONSTRAINT verfahrensmerkmale_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_verfahrensmerkmale_verfahrensmerkmale
 			(
@@ -1635,9 +1567,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT bp_plan_verfahrensmerkmale_verfahrensmerkmale_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_verfahrensmerkmale_verfahrensmerkmale
 			(
@@ -1647,9 +1577,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT fp_plan_verfahrensmerkmale_verfahrensmerkmale_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_verfahrensmerkmale_verfahrensmerkmale
 			(
@@ -1659,9 +1587,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT rp_plan_verfahrensmerkmale_verfahrensmerkmale_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan_verfahrensmerkmale_verfahrensmerkmale
 			(
@@ -1671,9 +1597,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT so_plan_verfahrensmerkmale_verfahrensmerkmale_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".xp_spezexternereferenz
 			(
@@ -1693,9 +1617,7 @@ class Gml_extractor {
 				typ character varying NOT NULL,
 				CONSTRAINT xp_spezexternereferenz_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_externereferenz
 			(
@@ -1705,9 +1627,7 @@ class Gml_extractor {
 				xp_spezexternereferenz_pkid character varying,
 				CONSTRAINT bp_plan_externereferenz_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_externereferenz
 			(
@@ -1717,9 +1637,7 @@ class Gml_extractor {
 				xp_spezexternereferenz_pkid character varying,
 				CONSTRAINT fp_plan_externereferenz_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_externereferenz
 			(
@@ -1729,9 +1647,7 @@ class Gml_extractor {
 				xp_spezexternereferenz_pkid character varying,
 				CONSTRAINT rp_plan_externereferenz_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan_externereferenz
 			(
@@ -1741,9 +1657,7 @@ class Gml_extractor {
 				xp_spezexternereferenz_pkid character varying,
 				CONSTRAINT so_plan_externereferenz_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".xp_plangeber
 			(
@@ -1753,9 +1667,7 @@ class Gml_extractor {
 				kennziffer character varying,
 				CONSTRAINT xp_plangeber_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".xp_gemeinde
 			(
@@ -1767,9 +1679,7 @@ class Gml_extractor {
 				ortsteilname character varying,
 				CONSTRAINT xp_gemeinde_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_gemeinde
 			(
@@ -1779,9 +1689,7 @@ class Gml_extractor {
 				xp_gemeinde_pkid character varying,
 				CONSTRAINT bp_plan_gemeinde_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_gemeinde
 			(
@@ -1791,9 +1699,7 @@ class Gml_extractor {
 				xp_gemeinde_pkid character varying,
 				CONSTRAINT fp_plan_gemeinde_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_auslegungsenddatum
 			(
@@ -1803,9 +1709,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT bp_plan_auslegungsenddatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_auslegungsstartdatum
 			(
@@ -1815,9 +1719,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT bp_plan_auslegungsstartdatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_traegerbeteiligungsenddatum
 			(
@@ -1827,9 +1729,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT bp_plan_traegerbeteiligungsenddatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_traegerbeteiligungsstartdatum
 			(
@@ -1839,9 +1739,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT bp_plan_traegerbeteiligungsstartdatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_auslegungsenddatum
 			(
@@ -1851,9 +1749,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT fp_plan_auslegungsenddatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_auslegungsstartdatum
 			(
@@ -1863,9 +1759,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT fp_plan_auslegungsstartdatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_traegerbeteiligungsenddatum
 			(
@@ -1875,9 +1769,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT fp_plan_traegerbeteiligungsenddatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_traegerbeteiligungsstartdatum
 			(
@@ -1887,9 +1779,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT fp_plan_traegerbeteiligungsstartdatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_auslegungsenddatum
 			(
@@ -1899,9 +1789,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT rp_plan_auslegungsenddatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_auslegungsstartdatum
 			(
@@ -1911,9 +1799,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT rp_plan_auslegungsstartdatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_traegerbeteiligungsenddatum
 			(
@@ -1923,9 +1809,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT rp_plan_traegerbeteiligungsenddatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_traegerbeteiligungsstartdatum
 			(
@@ -1935,9 +1819,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT rp_plan_traegerbeteiligungsstartdatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);";
+			;";
 		$ret = $this->pgdatabase->execSQL($sql, 4,0);
 	}
 
@@ -2213,9 +2095,9 @@ class Gml_extractor {
 					i.table_name IN('xp_ppo','xp_lpo','xp_fpo','xp_tpo','xp_pto','xp_lto') OR
 					i.table_name NOT LIKE 'xp_%'
 				) AND
-				i.table_name NOT LIKE '%_plan' AND
-				i.table_name NOT LIKE '%_bereich' AND
-				i.table_name NOT LIKE '%_textabschnitt'
+				i.table_name NOT LIKE '%\_plan' AND
+				i.table_name NOT LIKE '%\_bereich' AND
+				i.table_name NOT LIKE '%\_textabschnitt'
 			ORDER BY
 				i.table_name;
 			";
