@@ -2,10 +2,14 @@
 
 <script type="text/javascript">
 
+	var max_depth;
+
 	function create_force_layout(cluster_index){
 		var json = cluster[cluster_index];
 		var width = 1200,
 				height = 700
+				
+		max_depth = 0;
 				
 		var lowest_y = 1000;
 
@@ -24,6 +28,7 @@
 				node.y = 400;
 				node.children = [];
 				node.parents = [];
+				node.depth = 0;
 			});			
 
 		force
@@ -45,10 +50,12 @@
 			node.append("svg:circle")
 					.attr("r", 6);
 
-			node.append("text")
-					.attr("dx", -40)
-					.attr("dy", 20)
-					.text(function(d) { return d.name });
+			node.append("g")
+					.attr("transform", 'translate(-40, 20)')
+					.append("a")
+							.attr("href", function(d) { return '<? echo get_url(); ?>?go=Stelleneditor&selected_stelle_id=' + d.id })
+							.append("text")
+									.text(function(d) { return d.name });
 					
 			json.links.forEach(function(link, i) {
 				link.target.parents.push(link.source);
@@ -60,17 +67,13 @@
 					calculate_depth(node, 1);
 				}
 			});
-			
-			console.log(json.nodes);
+					
+			svg.attr("height", 100 + (100 * max_depth));	// Hoehe des SVGs auf die Hierarchietiefe anpassen
 			
 			force.on("tick", function(e) {
 				var ky =  e.alpha;
 			  json.nodes.forEach(function(node, i) {
 					node.y += ((node.depth * 100) - node.y) * 5 * ky;
-					//node.y -= ((node.depth * 100) - node.y) * 5 * ky;
-					if (node.y < lowest_y) {
-						lowest_y = node.y;
-					}
 			  });			 
 			link.attr("x1", function(d) { return d.source.x; })
 					.attr("y1", function(d) { return d.source.y; })
@@ -82,7 +85,12 @@
 	}
 		
 		function calculate_depth(node, depth){
-			node.depth = depth;
+			if (depth > node.depth) {
+				node.depth = depth;
+				if (max_depth < depth) {
+					max_depth = depth;
+				}
+			}
 			if (node.children.length > 0) {
 				node.children.forEach(function(child, i){
 					calculate_depth(child, depth+1);
@@ -94,12 +102,16 @@
 
 <style>
 
+	.hierarchy{
+		border-bottom: 1px solid #ccc;
+		margin: 0 10px 0 10px;
+	}
+
 	.link {
 		stroke: #ccc;
 	}
 
 	.node text {
-		pointer-events: none;
 		font: 12px SourceSansPro2;
 	}
 	
@@ -111,6 +123,10 @@
 
 </style>
 
+<br>
+<h1><? echo $this->titel; ?></h1>
+<br>
+
 <? 
 
 	$node_index = Array();
@@ -119,7 +135,7 @@
 		$nodes = [];
 		$links = [];
 		foreach ($cluster as $stelle_id) {
-			$nodes[] = '{"name": "' . $this->stellendaten['Bezeichnung'][$this->stellendaten['index'][$stelle_id]] . '"}';
+			$nodes[] = '{"name": "' . $this->stellendaten['Bezeichnung'][$this->stellendaten['index'][$stelle_id]] . '", "id": "' . $stelle_id . '"}';
 			$node_index[$stelle_id] = count($nodes) - 1;
 		}
 		foreach ($cluster as $stelle_id) {
@@ -137,7 +153,7 @@
 		$i++;
 ?>
 
-<div id="hierarchy_<? echo $i; ?>" style="border: 1px solid #ccc">
+<div id="hierarchy_<? echo $i; ?>" class="hierarchy">
 </div>
 
 <script type="text/javascript">
