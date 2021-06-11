@@ -24,7 +24,7 @@
 				.size([width, height]);
 				
 			json.nodes.forEach(function(node, i) {
-				node.x = width/4 + i*100;
+				node.x = width/4 + i*200;
 				node.y = 400;
 				node.children = [];
 				node.parents = [];
