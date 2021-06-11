@@ -11559,6 +11559,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$Stelle->dropChild($child_id);
 				}
 			}
+			# Test auf Zirkelbezug
+			$children = $Stelle->getChildren($this->formvars['selected_stelle_id'], " ORDER BY Bezeichnung", 'only_ids', true, true);
 
 			if (
 				count(

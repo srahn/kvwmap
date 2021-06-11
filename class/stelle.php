@@ -621,7 +621,7 @@ class stelle {
 		return $parents;
 	}
 
-	function getChildren($parent_id, $order = '', $return = '', $recursive = false) {
+	function getChildren($parent_id, $order = '', $return = '', $recursive = false, $loop_test = false, $loop_counter = 0) {
 		$children = array();
 		$sql = "
 			SELECT
@@ -640,9 +640,15 @@ class stelle {
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
 		$result = $this->database->result;
 		while($rs = $result->fetch_assoc()) {
+			if ($loop_counter == 1000) {
+				if ($loop_test) {
+					GUI::add_message_('error', 'Achtung! Es gibt einen Zirkelbezug in der Stellenhierarchie!');
+				}
+				return [];
+			}
 			$children[] = ($return == 'only_ids' ? $rs['ID'] : $rs);
 			if($recursive){
-				$children = array_merge($children, $this->getChildren($rs['ID'], $order, $return, true));
+				$children = array_merge($children, $this->getChildren($rs['ID'], $order, $return, true, $loop_test, $loop_counter++));
 			}
 		};
 		return $children;
@@ -914,7 +920,7 @@ class stelle {
 			$rs = $this->database->result->fetch_array();
 		}
 		$count = ($rs[0] == '' ? 0 : $rs[0]);
-		for ($i = 0; $i < count($menue_ids); $i++) {
+		for ($i = 0; $i <@ count($menue_ids); $i++) {
 			$sql ="
 				INSERT IGNORE INTO
 					u_menue2stelle (
