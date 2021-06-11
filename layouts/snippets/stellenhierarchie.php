@@ -11,8 +11,6 @@
 				
 		max_depth = 0;
 				
-		var lowest_y = 1000;
-
 		var svg = d3.select("#hierarchy_" + cluster_index).append("svg")
 				.attr("width", width)
 				.attr("height", height);
