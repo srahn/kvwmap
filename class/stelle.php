@@ -508,10 +508,11 @@ class stelle {
 			$this->links[$rs['parent_id']][] = $rs['child_id'];
 		};
 		
-		$this->clusters = Array();					# Stellen-Cluster
-		$cluster_of_root = Array();					# ein Array, dass den Clusterindex zu jeder Wurzel angibt
-		$this->all_childs_of = Array();			# Kinder und Kindeskinder jeder Stelle
-		$this->all_childs = Array();				# alle Kindstellen mit ihren direkten Eltern
+		$this->multi_parent_childs = Array();	# die Stellen, die mehrere Eltern haben
+		$this->clusters = Array();						# Stellen-Cluster
+		$cluster_of_root = Array();						# ein Array, dass den Clusterindex zu jeder Wurzel angibt
+		$this->all_childs_of = Array();				# Kinder und Kindeskinder jeder Stelle
+		$this->all_childs = Array();					# alle Kindstellen mit ihren direkten Eltern
 
 		# zu jeder Elternstelle alle Kindstellen finden (Kindeskinder) und in $this->all_childs_of speichern
 		# und gleichzeitig die Stellen ermitteln, die mehrere Eltern haben und in $this->multi_parent_childs speichern
