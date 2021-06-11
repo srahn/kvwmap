@@ -505,9 +505,97 @@ class stelle {
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
 		while($rs = $this->database->result->fetch_assoc()) {
-			$stellenhierarchie[$rs['parent_id']][] = $rs['child_id'];
+			$this->links[$rs['parent_id']][] = $rs['child_id'];
 		};
-		return $stellenhierarchie;
+		
+		$this->multi_parent_childs = Array();	# die Stellen, die mehrere Eltern haben
+		$this->clusters = Array();						# Stellen-Cluster
+		$cluster_of_root = Array();						# ein Array, dass den Clusterindex zu jeder Wurzel angibt
+		$this->all_childs_of = Array();				# Kinder und Kindeskinder jeder Stelle
+		$this->all_childs = Array();					# alle Kindstellen mit ihren direkten Eltern
+
+		# zu jeder Elternstelle alle Kindstellen finden (Kindeskinder) und in $this->all_childs_of speichern
+		# und gleichzeitig die Stellen ermitteln, die mehrere Eltern haben und in $this->multi_parent_childs speichern
+		foreach ($this->links as $parent => $childs) {
+			if (!array_key_exists($parent, $this->all_childs)) {
+				$this->getAllChildren($parent);
+			}
+		}
+		
+		# die Eltern, die selber Kinder sind, wieder aus $this->all_childs_of entfernen
+		foreach ($this->all_childs_of as $parent => $childs) {
+			if (array_key_exists($parent, $this->all_childs)) {
+				unset($this->all_childs_of[$parent]);
+			}
+		}
+		# in $this->all_childs_of bleiben die Stellen übrig, die keine Eltern haben (Wurzeln)
+		
+		# jetzt muss ermittelt werden, welche Stellenbäume mit einander verbunden sind
+		# dazu werden ausgehend von den $this->multi_parent_childs die Bäume nach oben durchlaufen und am Ende die Wurzeln ermittelt, die weiter unten verbunden sind
+		# diese Stellen werden zu einem Cluster zusammengefasst
+		foreach ($this->multi_parent_childs as $multi_child) {
+			$cluster_index = -1;
+			$connected_roots = $this->getHighestParents($multi_child);
+			if (count($connected_roots) > 1) {
+				$cluster = Array();
+				foreach ($connected_roots as $root) {
+					if (!array_key_exists($root, $cluster_of_root)) {
+						# alle noch nicht zu einem Cluster zugeordneten, verbundenen Wurzeln zu einem temporären Cluster zusammensammeln
+						$cluster = array_unique(array_merge($cluster, array_merge(array($root), $this->all_childs_of[$root])));
+						unset($this->all_childs_of[$root]);
+					}
+					else {
+						$cluster_index = $cluster_of_root[$root];		# wenn diese Wurzel schon einem Cluster zugeordnet wurde, Clusterindex merken
+					}
+				}
+				if (!empty($cluster)) {
+					if ($cluster_index == -1) {	# kein Cluster gefunden, zu dem mind. eine Wurzel gehört -> neues Cluster anlegen
+						$this->clusters[] = Array();
+						$cluster_index = count($this->clusters) - 1;
+					}
+					foreach ($connected_roots as $root) {
+						# alle Wurzeln zum Cluster zuordnen
+						$cluster_of_root[$root] = $cluster_index;
+					}
+					# das temporäre Cluster dem Cluster mit dem Clusterindex hinzufügen
+					$this->clusters[$cluster_index] = array_unique(array_merge($this->clusters[$cluster_index] ?: [], $cluster));
+				}
+			}
+		}
+		
+		# jetzt noch die Bäume zum Cluster-Array hinzufügen, die nur eine Wurzel haben
+		foreach ($this->all_childs_of as $root => $childs) {
+			$this->clusters[] = array_merge(array($root), $this->all_childs_of[$root]);
+		}
+		
+		return ['clusters' => $this->clusters, 'links' => $this->links];
+	}
+	
+	function getHighestParents($child){
+		$parents = Array();
+		if (!array_key_exists($child, $this->all_childs)){
+			$parents[] = $child;
+		}
+		else {
+			foreach ($this->all_childs[$child] as $parent) {
+				$parents = array_unique(array_merge($parents, $this->getHighestParents($parent)));
+			}
+		}
+		return $parents;
+	}
+	
+	function getAllChildren($parent){
+		if (array_key_exists($parent, $this->links)) {
+			foreach ($this->links[$parent] as $child) {
+				$this->all_childs_of[$parent][] = $child;
+				$this->all_childs_of[$parent] = array_merge($this->all_childs_of[$parent], $this->all_childs_of[$child] ?: $this->getAllChildren($child));
+				$this->all_childs[$child][] = $parent;
+				if (count($this->all_childs[$child]) == 2) {
+					$this->multi_parent_childs[] = $child;
+				}
+			}
+		}
+		return $this->all_childs_of[$parent] ?: [];
 	}	
 
 	function getParents($order = '', $return = '') {
@@ -533,7 +621,7 @@ class stelle {
 		return $parents;
 	}
 
-	function getChildren($parent_id, $order = '', $return = '', $recursive = false) {
+	function getChildren($parent_id, $order = '', $return = '', $recursive = false, $loop_test = false, $loop_counter = 0) {
 		$children = array();
 		$sql = "
 			SELECT
@@ -552,9 +640,15 @@ class stelle {
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
 		$result = $this->database->result;
 		while($rs = $result->fetch_assoc()) {
+			if ($loop_counter == 1000) {
+				if ($loop_test) {
+					GUI::add_message_('error', 'Achtung! Es gibt einen Zirkelbezug in der Stellenhierarchie!');
+				}
+				return [];
+			}
 			$children[] = ($return == 'only_ids' ? $rs['ID'] : $rs);
 			if($recursive){
-				$children = array_merge($children, $this->getChildren($rs['ID'], $order, $return, true));
+				$children = array_merge($children, $this->getChildren($rs['ID'], $order, $return, true, $loop_test, $loop_counter++));
 			}
 		};
 		return $children;
@@ -826,7 +920,7 @@ class stelle {
 			$rs = $this->database->result->fetch_array();
 		}
 		$count = ($rs[0] == '' ? 0 : $rs[0]);
-		for ($i = 0; $i < count($menue_ids); $i++) {
+		for ($i = 0; $i <@ count($menue_ids); $i++) {
 			$sql ="
 				INSERT IGNORE INTO
 					u_menue2stelle (

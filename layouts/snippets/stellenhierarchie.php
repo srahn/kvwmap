@@ -1,161 +1,116 @@
 <script type="text/javascript" src="//d3js.org/d3.v3.js"></script>
 
-<? 
-	$node_index = Array();
-	for ($i = 0; $i < count($this->stellendaten['ID']); $i++) {
-		$stelle_id = $this->stellendaten['ID'][$i];
-		if ($this->stellenhierarchie[$stelle_id] != '') {
-			if ($node_index[$stelle_id] === NULL) {
-				$nodes[] = '{"name": "' . $this->stellendaten['Bezeichnung'][$i] . '"}';
-				$node_index[$stelle_id] = count($nodes) - 1;
-			}
-			foreach ($this->stellenhierarchie[$stelle_id] as $child) {
-				if ($node_index[$child] === NULL) {
-					$nodes[] = '{"name": "' . $this->stellendaten['Bezeichnung'][$this->stellendaten['index'][$child]] . '"}';
-					$node_index[$child] = count($nodes) - 1;
-				}
-				$links[] = '{"source": ' . $node_index[$stelle_id] . ', "target": ' . $node_index[$child] . '}';
-			}
-		}
-	}
-	
-?>
-
-<div id="hierarchy">
-</div>
-
 <script type="text/javascript">
 
-	var json = {
-		"nodes": [
-			<? echo implode(',', $nodes); ?>
-		],
-		"links": [
-			<? echo implode(',', $links); ?>
-		]
-	};
+	var max_depth;
 
-	var width = 1500,
-			height = 800
-			
-	var lowest_y = 1000;
-
-	var svg = d3.select("#hierarchy").append("svg")
-			.attr("width", width)
-			.attr("height", height);
-			
-	var force = d3.layout.force()
-			.gravity(.3)
-			.distance(100)
-			.charge(-10000)
-			.size([width, height]);
-			
-		json.nodes.forEach(function(node, i) {
-			node.x = width/4 + i*50;
-			node.y = 10*i + 600;
-			node.children = [];
-		});			
-
-	force
-				.nodes(json.nodes)
-				.links(json.links)
-				.start();
-
-		var link = svg.selectAll(".link")
-				.data(json.links)
-			.enter().append("line")
-				.attr("class", "link");
-
-		var node = svg.selectAll(".node")
-				.data(json.nodes)
-			.enter().append("g")
-				.attr("class", "node")
-				.call(force.drag);
-
-		node.append("svg:circle")
-				.attr("r", 6);
-
-		node.append("text")
-				.attr("dx", -40)
-				.attr("dy", 20)
-				.text(function(d) { return d.name });
+	function create_force_layout(cluster_index){
+		var json = cluster[cluster_index];
+		var width = 1200,
+				height = 700
 				
-		json.links.forEach(function(link, i) {
-			link.source.children.push(link.target);
-		});
+		max_depth = 0;
+				
+		var svg = d3.select("#hierarchy_" + cluster_index).append("svg")
+				.attr("width", width)
+				.attr("height", height);
+				
+		var force = d3.layout.force()
+				.gravity(.3)
+				.distance(100)
+				.charge(-5000)
+				.size([width, height]);
+				
+			json.nodes.forEach(function(node, i) {
+				node.x = width/4 + i*200;
+				node.y = 400;
+				node.children = [];
+				node.parents = [];
+				node.depth = 0;
+			});			
+
+		force
+					.nodes(json.nodes)
+					.links(json.links)
+					.start();
+
+			var link = svg.selectAll(".link")
+					.data(json.links)
+				.enter().append("line")
+					.attr("class", "link");
+
+			var node = svg.selectAll(".node")
+					.data(json.nodes)
+				.enter().append("g")
+					.attr("class", "node")
+					.call(force.drag);
+
+			node.append("svg:circle")
+					.attr("r", 6);
+
+			node.append("g")
+					.attr("transform", 'translate(-40, 20)')
+					.append("a")
+							.attr("href", function(d) { return '<? echo get_url(); ?>?go=Stelleneditor&selected_stelle_id=' + d.id })
+							.append("text")
+									.text(function(d) { return d.name });
+					
+			json.links.forEach(function(link, i) {
+				link.target.parents.push(link.source);
+				link.source.children.push(link.target);
+			});
+				
+			json.nodes.forEach(function(node, i) {
+				if (node.parents.length == 0) {
+					calculate_depth(node, 1);
+				}
+			});
+					
+			svg.attr("height", 100 + (100 * max_depth));	// Hoehe des SVGs auf die Hierarchietiefe anpassen
 			
-		json.nodes.forEach(function(node, i) {
-			if (!node.depth) {
-				calculate_depth(node);
-			}
+			force.on("tick", function(e) {
+				var ky =  e.alpha;
+			  json.nodes.forEach(function(node, i) {
+					node.y += ((node.depth * 100) - node.y) * 5 * ky;
+			  });			 
+			link.attr("x1", function(d) { return d.source.x; })
+					.attr("y1", function(d) { return d.source.y; })
+					.attr("x2", function(d) { return d.target.x; })
+					.attr("y2", function(d) { return d.target.y; });
+
+			node.attr("transform", function(d) { return "translate(" + d.x + "," + (d.y) + ")"; });
 		});
+	}
 		
-		function calculate_depth(node){
-			node.depth = 1;
+		function calculate_depth(node, depth){
+			if (depth > node.depth) {
+				node.depth = depth;
+				if (max_depth < depth) {
+					max_depth = depth;
+				}
+			}
 			if (node.children.length > 0) {
 				node.children.forEach(function(child, i){
-					var child_depth = calculate_depth(child);
-					if (child_depth > node.depth) {
-						node.depth = child_depth;
-					}
+					calculate_depth(child, depth+1);
 				});
-				node.depth++;
 			}
-			return node.depth;
 		}
-
-		force.on("tick", function(e) {
-				var ky =  e.alpha;
-			// json.links.forEach(function(d, i) {
-				// d.source.y -= k;
-				// d.target.y += k;
-			// });
-			  json.nodes.forEach(function(node, i) {
-				  //node.y += (node.depth * 100 - node.y) * 5 * ky;
-					node.y -= ((node.depth * 100) + node.y) * 5 * ky;
-					if (node.y < lowest_y) {
-						lowest_y = node.y;
-					}
-			  });
-			 
-			// json.links.forEach(function(d, i) {
-				// d.target.y += (d.target.depth * 100 - d.target.y) * 5 * ky;
-			// });
-			// json.nodes.forEach(function(d, i) {
-					// if(d.children) {
-							// if(i>0) {
-									// var childrenSumX = 0;
-									// d.children.forEach(function(d, i) {
-											// childrenSumX += d.x;
-									// });
-									// var childrenCount = d.children.length;
-									// d.x += ((childrenSumX/childrenCount) - d.x) * 5 * ky;
-							// }
-							// else {
-									// d.x += (width/2 - d.x) * 5 * ky;
-							// };
-					// };
-			// });			 
-			 
-			link.attr("x1", function(d) { return d.source.x; })
-					.attr("y1", function(d) { return d.source.y-lowest_y-200; })
-					.attr("x2", function(d) { return d.target.x; })
-					.attr("y2", function(d) { return d.target.y-lowest_y-200; });
-
-			node.attr("transform", function(d) { return "translate(" + d.x + "," + (d.y-lowest_y-200) + ")"; });
-		});
 
 </script>
 
 <style>
+
+	.hierarchy{
+		border-bottom: 1px solid #ccc;
+		margin: 0 10px 0 10px;
+	}
 
 	.link {
 		stroke: #ccc;
 	}
 
 	.node text {
-		pointer-events: none;
-		font: 10px sans-serif;
+		font: 12px SourceSansPro2;
 	}
 	
 	.node circle{
@@ -165,3 +120,61 @@
 	}
 
 </style>
+
+<br>
+<h1><? echo $this->titel; ?></h1>
+<br>
+
+<? 
+
+	$node_index = Array();
+	
+	foreach ($this->stellenhierarchie['clusters'] as $cluster) {
+		$nodes = [];
+		$links = [];
+		foreach ($cluster as $stelle_id) {
+			$nodes[] = '{"name": "' . $this->stellendaten['Bezeichnung'][$this->stellendaten['index'][$stelle_id]] . '", "id": "' . $stelle_id . '"}';
+			$node_index[$stelle_id] = count($nodes) - 1;
+		}
+		foreach ($cluster as $stelle_id) {
+			if (array_key_exists($stelle_id, $this->stellenhierarchie['links'])) {
+				foreach ($this->stellenhierarchie['links'][$stelle_id] as $child) {
+					$links[] = '{"source": ' . $node_index[$stelle_id] . ', "target": ' . $node_index[$child] . '}';
+				}
+			}
+		}
+		$nodeclusters[] = ['nodes' => $nodes, 'links' => $links];
+	}
+
+	$i = -1;
+	foreach ($nodeclusters as $nodecluster) {
+		$i++;
+?>
+
+<div id="hierarchy_<? echo $i; ?>" class="hierarchy">
+</div>
+
+<script type="text/javascript">
+
+	var cluster_index = <? echo $i; ?>;
+	
+	var cluster = [];
+
+	cluster[cluster_index] = {
+		"nodes": [
+			<? echo implode(',', $nodecluster['nodes']); ?>
+		],
+		"links": [
+			<? echo implode(',', $nodecluster['links']); ?>
+		]
+	};
+	
+	create_force_layout(cluster_index);
+
+</script>
+
+<?
+	}
+?>
+
+

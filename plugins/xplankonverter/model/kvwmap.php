@@ -103,7 +103,7 @@
 		switch(true) {
 
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
-				echo '<br>Führe ' . $fired . ' ' . $event . ' mit gml_id: ' . $oid . ' in handle_xp_plan Funktion aus.';
+				# echo '<br>Führe ' . $fired . ' ' . $event . ' mit gml_id: ' . $oid . ' in handle_xp_plan Funktion aus.';
 				$xp_plan = XP_Plan::find_by_id($GUI, 'gml_id', $oid, $planart);
 
 				# Create Konvertierung and get konvertierung_id
