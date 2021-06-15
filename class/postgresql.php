@@ -1022,12 +1022,12 @@ FROM
   function pg_table_constraints($table_oid){
   	if($table_oid != ''){
 			$constraints = array();
-	    $sql = "SELECT pg_get_expr(conbin, conrelid) FROM pg_constraint, pg_class WHERE contype = 'check'";
+	    $sql = "SELECT pg_get_expr(conbin, conrelid) as constraint FROM pg_constraint, pg_class WHERE contype = 'check'";
 	    $sql.= " AND pg_class.oid = pg_constraint.conrelid AND pg_class.oid = '".$table_oid."'";
 	    $ret = $this->execSQL($sql, 4, 0);
 	    if($ret[0]==0){
 	      while($row = pg_fetch_assoc($ret[1])){
-	        $constraints[] = $row['consrc'];
+	        $constraints[] = $row['constraint'];
 	      }
 	    }
 	    return $constraints;
