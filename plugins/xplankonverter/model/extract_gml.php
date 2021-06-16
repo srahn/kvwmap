@@ -25,7 +25,11 @@ class Gml_extractor {
 		$this->epsg = $GUI->Stelle->epsg_code;
 
 		$this->build_basic_tables();
-		$this->ogr2ogr_gmlas();
+		$gmlas_output = $this->ogr2ogr_gmlas();
+		if($gmlas_output == "Nothing returned from ogr2ogr curl request") {
+			echo 'Laden der Daten mit GML-AS fehlgeschlagen. Bitte kontaktieren Sie Ihren Administrator!';
+			return;
+		}
 		# $tables = $this->get_all_tables_in_schema($this->gmlas_schema);
 
 		# Revert the geom of GML to database specific winding order of vertices (CW/RHR IN DB and Shape, CCW/LHR in GML)
@@ -207,6 +211,10 @@ class Gml_extractor {
 			$version = '5.2';
 		} else if (preg_match('/5.2/', $matched_ns_str[1], $matched_version_str)) {
 			$version = '5.2';
+		} else if (preg_match('/5\/0/', $matched_ns_str[1], $matched_version_str)) {
+			$version = '5.0';
+		} else if (preg_match('/5.0/', $matched_ns_str[1], $matched_version_str)) {
+			$version = '5.0';	
 		} else {
 			$msg  = 'Die XPlan-GML Version der Datei kann nicht identifiziert werden.<br>';
 			$msg .= 'Bitte überprüfen Sie, ob die XPlan-Version valide ist und der Namespace in Version 5.1 oder 5.2 liegt<br>';
@@ -286,7 +294,7 @@ class Gml_extractor {
 		
 		$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
 		$param_1                = urlencode('-f "PostgreSQL" PG:');
-		$connection_string      = urlencode('"' . $this->pgdatabase->get_connection_string_p() . ' SCHEMAS=' . $this->gmlas_schema . '" ');
+		$connection_string      = urlencode('"' . $this->pgdatabase->get_connection_string() . ' SCHEMAS=' . $this->gmlas_schema . '" ');
 		$param_2                = urlencode('GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
 		
 		$url = $gdal_container_connect . $param_1 . $connection_string . $param_2;	
@@ -831,8 +839,8 @@ class Gml_extractor {
 		// will take first plan encountered in gmlas-schema if bereich id is not set (or could not be read by ogr)
 		$sql .= "
 				CASE
-					WHEN gmlas.gehoertzuplan_href IS NOT NULL THEN trim(leading '#gml_' FROM lower(gmlas.gehoertzuplan_href))
-					ELSE trim(leading '#gml_' FROM lower((SELECT DISTINCT id FROM " . $this->gmlas_schema . "." . substr($table,0,3) . "plan LIMIT 1)))
+					WHEN gmlas.gehoertzuplan_href IS NOT NULL THEN trim(leading '#gml_' FROM lower(gmlas.gehoertzuplan_href))::uuid
+					ELSE trim(leading '#gml_' FROM lower((SELECT DISTINCT id FROM " . $this->gmlas_schema . "." . substr($table,0,3) . "plan LIMIT 1)))::uuid
 				END AS gehoertzuplan
 			FROM
 				" . $this->gmlas_schema . "." . $table . " gmlas
