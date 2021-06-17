@@ -1498,6 +1498,7 @@ a:hover .preview_image{
 }
 
 #message_box {
+	white-space: pre-line;
 	opacity: 1;
 	position: fixed;
 	display: none;
