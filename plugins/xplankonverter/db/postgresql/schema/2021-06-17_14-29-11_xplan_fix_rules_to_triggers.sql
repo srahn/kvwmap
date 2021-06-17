@@ -1,4 +1,6 @@
 BEGIN;
+-- EXECUTE FUNCTION only works in Postgres 11 or higher, therefore use EXECUTE PROCEDURE for backwards compatibility
+
 -- Rewrites rules to triggers as triggers won't work with returning and it's currently a mix of each
 DROP RULE IF EXISTS check_text_reftext_on_update ON xplan_gml.xp_textabschnitt;
 DROP RULE IF EXISTS check_text_reftext_on_insert ON xplan_gml.xp_textabschnitt;
@@ -128,7 +130,7 @@ CREATE TRIGGER validate_rechtsstand_datum_reference
     BEFORE INSERT OR UPDATE 
     ON xplan_gml.bp_plan
     FOR EACH ROW
-    EXECUTE FUNCTION xplankonverter.check_bp_rechtsstand_datum_reference();
+    EXECUTE PROCEDURE xplankonverter.check_bp_rechtsstand_datum_reference();
 
 -------------------------------------------------------------------------------------------------------------------
 
@@ -166,7 +168,7 @@ CREATE TRIGGER validate_rechtsstand_datum_reference
     BEFORE INSERT OR UPDATE 
     ON xplan_gml.fp_plan
     FOR EACH ROW
-    EXECUTE FUNCTION xplankonverter.check_fp_rechtsstand_datum_reference();
+    EXECUTE PROCEDURE xplankonverter.check_fp_rechtsstand_datum_reference();
 
 -------------------------------------------------------------------------------------------------------------------
 
@@ -198,7 +200,7 @@ CREATE TRIGGER validate_bedeutung
     BEFORE INSERT OR UPDATE 
     ON xplan_gml.bp_bereich
     FOR EACH ROW
-    EXECUTE FUNCTION xplankonverter.check_bp_bereich_bedeutung();
+    EXECUTE PROCEDURE xplankonverter.check_bp_bereich_bedeutung();
 
 
 CREATE OR REPLACE FUNCTION xplankonverter.check_fp_bereich_bedeutung()
@@ -229,7 +231,7 @@ CREATE TRIGGER validate_bedeutung
     BEFORE INSERT OR UPDATE 
     ON xplan_gml.fp_bereich
     FOR EACH ROW
-    EXECUTE FUNCTION xplankonverter.check_fp_bereich_bedeutung();
+    EXECUTE PROCEDURE xplankonverter.check_fp_bereich_bedeutung();
 
 CREATE OR REPLACE FUNCTION xplankonverter.check_rp_bereich_bedeutung()
     RETURNS trigger
@@ -259,7 +261,7 @@ CREATE TRIGGER validate_bedeutung
     BEFORE INSERT OR UPDATE 
     ON xplan_gml.rp_bereich
     FOR EACH ROW
-    EXECUTE FUNCTION xplankonverter.check_rp_bereich_bedeutung();
+    EXECUTE PROCEDURE xplankonverter.check_rp_bereich_bedeutung();
 
 CREATE OR REPLACE FUNCTION xplankonverter.check_so_bereich_bedeutung()
     RETURNS trigger
@@ -289,7 +291,7 @@ CREATE TRIGGER validate_bedeutung
     BEFORE INSERT OR UPDATE 
     ON xplan_gml.so_bereich
     FOR EACH ROW
-    EXECUTE FUNCTION xplankonverter.check_so_bereich_bedeutung();
+    EXECUTE PROCEDURE xplankonverter.check_so_bereich_bedeutung();
 
 -------------------------------------------------------------------------------------------------------------------
 
@@ -321,7 +323,7 @@ CREATE TRIGGER validate_text_reftext_on_insert
     BEFORE INSERT OR UPDATE 
     ON xplan_gml.bp_textabschnitt
     FOR EACH ROW
-    EXECUTE FUNCTION xplankonverter.check_bp_textabschnitt_reftext_on_insert();
+    EXECUTE PROCEDURE xplankonverter.check_bp_textabschnitt_reftext_on_insert();
 
 CREATE OR REPLACE FUNCTION xplankonverter.check_fp_textabschnitt_reftext_on_insert()
     RETURNS trigger
@@ -351,7 +353,7 @@ CREATE TRIGGER validate_text_reftext_on_insert
     BEFORE INSERT OR UPDATE 
     ON xplan_gml.fp_textabschnitt
     FOR EACH ROW
-    EXECUTE FUNCTION xplankonverter.check_fp_textabschnitt_reftext_on_insert();
+    EXECUTE PROCEDURE xplankonverter.check_fp_textabschnitt_reftext_on_insert();
 
 CREATE OR REPLACE FUNCTION xplankonverter.check_rp_textabschnitt_reftext_on_insert()
     RETURNS trigger
@@ -381,7 +383,7 @@ CREATE TRIGGER validate_text_reftext_on_insert
     BEFORE INSERT OR UPDATE 
     ON xplan_gml.rp_textabschnitt
     FOR EACH ROW
-    EXECUTE FUNCTION xplankonverter.check_rp_textabschnitt_reftext_on_insert();
+    EXECUTE PROCEDURE xplankonverter.check_rp_textabschnitt_reftext_on_insert();
 
 CREATE OR REPLACE FUNCTION xplankonverter.check_so_textabschnitt_reftext_on_insert()
     RETURNS trigger
@@ -411,7 +413,7 @@ CREATE TRIGGER validate_text_reftext_on_insert
     BEFORE INSERT OR UPDATE 
     ON xplan_gml.so_textabschnitt
     FOR EACH ROW
-    EXECUTE FUNCTION xplankonverter.check_so_textabschnitt_reftext_on_insert();
+    EXECUTE PROCEDURE xplankonverter.check_so_textabschnitt_reftext_on_insert();
 
 CREATE OR REPLACE FUNCTION xplankonverter.check_xp_textabschnitt_reftext_on_insert()
     RETURNS trigger
@@ -441,7 +443,7 @@ CREATE TRIGGER validate_text_reftext_on_insert
     BEFORE INSERT OR UPDATE 
     ON xplan_gml.xp_textabschnitt
     FOR EACH ROW
-    EXECUTE FUNCTION xplankonverter.check_xp_textabschnitt_reftext_on_insert();
+    EXECUTE PROCEDURE xplankonverter.check_xp_textabschnitt_reftext_on_insert();
 
 CREATE OR REPLACE FUNCTION xplankonverter.check_xp_begruendungabschnitt_reftext_on_insert()
     RETURNS trigger
@@ -471,6 +473,6 @@ CREATE TRIGGER validate_text_reftext_on_insert
     BEFORE INSERT OR UPDATE 
     ON xplan_gml.xp_begruendungabschnitt
     FOR EACH ROW
-    EXECUTE FUNCTION xplankonverter.check_xp_begruendungabschnitt_reftext_on_insert();
+    EXECUTE PROCEDURE xplankonverter.check_xp_begruendungabschnitt_reftext_on_insert();
 
 COMMIT;
