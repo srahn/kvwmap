@@ -859,13 +859,16 @@ function go_switch_xplankonverter($go) {
 			}
 
 			if ($success) {
-		    $GUI->konvertierung->set('status', Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']);
-		    $GUI->konvertierung->update();
-
+				$GUI->konvertierung->set('status', Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']);
+				$GUI->konvertierung->update();
 				# set and run the XSLT-Processor
-				$proc = new XsltProcessor;
-				$proc->importStylesheet(DOMDocument::load($xsl)); // load script
-				$output = $proc->transformToXML(DomDocument::load($fileinput)); // load your file
+				$proc = new XsltProcessor();
+				$doc = new DOMDocument();
+				$doc->load($xsl);
+				$proc->importStylesheet($doc); // load script
+				$docfile = new DOMDocument();
+				$docfile->load($fileinput);
+				$output = $proc->transformToXML($docfile); // load your file
 				file_put_contents($fileoutput, $output, FILE_APPEND | LOCK_EX);
 		    $status = Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK'];
 				$msg = 'Die Konvertierung nach INSPIRE-GML wurde erfolgreich ausgeführt. Sie können die Datei jetzt herunterladen.';
