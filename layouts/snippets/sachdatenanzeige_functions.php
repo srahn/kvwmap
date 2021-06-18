@@ -274,24 +274,21 @@ include('funktionen/input_check_functions.php');
 	}
 	
 	removeArrayElement = function(fieldname, remove_element_id){
-		getFileAttributesInArray(remove_element_id);
-		outer_div = document.getElementById(fieldname+'_elements');
-		remove_element = document.getElementById('div_'+remove_element_id);
+		var outer_div = document.getElementById(fieldname+'_elements');
+		var remove_element = document.getElementById('div_'+remove_element_id);
+		getFileAttributesInArray(remove_element);
 		outer_div.removeChild(remove_element);
 		buildJSONString(fieldname, false);
 	}
-	
-	function getFileAttributesInArray(id){
-		elements = document.getElementsByClassName(id);
-		for(i = 0; i < elements.length; i++){
-			if(elements[i].type == 'file'){
-				old_file_path = document.getElementsByName(elements[i].name+'_alt');
-				if(old_file_path[0] != undefined)enclosingForm.delete_documents.value += old_file_path[0].value+'|';
+
+	function getFileAttributesInArray(remove_element){
+		var file_attributes = remove_element.querySelectorAll('input[type="file"]');
+		[].forEach.call(file_attributes, function (file_attribute){
+			var old_file_path = document.getElementsByName(file_attribute.name + '_alt');
+			if (old_file_path[0] != undefined) {
+				enclosingForm.delete_documents.value += old_file_path[0].value+'|';
 			}
-			else{
-				getFileAttributesInArray(elements[i].id);
-			}
-		}
+		});
 	}
 	
 	nextdatasets = function(layer_id){
