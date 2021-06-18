@@ -6225,20 +6225,30 @@ echo '			</table>
   }
 
 	function deleteDokument($path, $doc_path, $doc_url, $only_thumb = false){
-		if ($path != '') {
-			if ($doc_url != '') {
-				$path = url2filepath($path, $doc_path, $doc_url);			# Dokument mit URL
+		if (is_string($path) AND strpos($path, '[') !== false){
+			$paths = json_decode($path);
+		}
+		if (is_array($paths)) {		// Array-Datentyp
+			foreach ($paths as $path) {
+				$this->deleteDokument($path, $doc_path, $doc_url, $only_thumb);
 			}
-			else {
-				$parts = explode('&original_name', $path);
-				$path = array_shift($parts);
-			}
-			if (!$only_thumb AND file_exists($path)) {
-				unlink($path);
-			}
-			$pathinfo = pathinfo($path);
-			if (file_exists($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg')) {
-				unlink($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg');
+		}
+		else {
+			if ($path != '') {
+				if ($doc_url != '') {
+					$path = url2filepath($path, $doc_path, $doc_url);			# Dokument mit URL
+				}
+				else {
+					$parts = explode('&original_name', $path);
+					$path = array_shift($parts);
+				}
+				if (!$only_thumb AND file_exists($path)) {
+					unlink($path);
+				}
+				$pathinfo = pathinfo($path);
+				if (file_exists($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg')) {
+					unlink($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg');
+				}
 			}
 		}
 	}
@@ -13151,7 +13161,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							# die Dokument-Attribute werden hier zusammen gesammelt,
 							# weil der Datei-Upload gemacht werden muss,
 							# nachdem alle Attribute durchlaufen worden sind (wegen dem DocumentPath)
-							if ($_files[$form_fields[$i]]['name'] OR $this->formvars[$form_fields[$i]]) {
+							if ($_files[$form_fields[$i]]['name'] OR $this->formvars[$form_fields[$i]] OR substr($datatype, 0, 1) == '_') {
 								$attr_oid['layer_id'] = $layer_id;
 								$attr_oid['tablename'] = $tablename;
 								$attr_oid['attributename'] = $attributname;
@@ -13192,7 +13202,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									$eintrag = 'NULL';
 								}
 								else {
-									if (POSTGRESVERSION >= 930 AND (substr ($datatype, 0, 1) == '_' OR is_numeric($datatype))) {
+									if (POSTGRESVERSION >= 930 AND (substr($datatype, 0, 1) == '_' OR is_numeric($datatype))) {
 										$eintrag = $this->processJSON($this->formvars[$form_fields[$i]], $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']); # bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
 									}
 									else $eintrag = $this->formvars[$form_fields[$i]];
@@ -13255,7 +13265,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									}
 								}
 								else {
-									$attributes_set[] = pg_quote($attribute) . " = " . ($properties['value'] == 'NULL' ? "NULL" : "'" . $properties['value'] . "'");
+									$attributes_set[] = pg_quote($attribute) . " = " . (in_array($properties['value'], ['NULL', '']) ? "NULL" : "'" . $properties['value'] . "'");
 								}
 							}
 
