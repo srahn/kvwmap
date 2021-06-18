@@ -6224,20 +6224,30 @@ echo '			</table>
   }
 
 	function deleteDokument($path, $doc_path, $doc_url, $only_thumb = false){
-		if ($path != '') {
-			if ($doc_url != '') {
-				$path = url2filepath($path, $doc_path, $doc_url);			# Dokument mit URL
+		if (is_string($path) AND strpos($path, '[') !== false){
+			$paths = json_decode($path);
+		}
+		if (is_array($paths)) {		// Array-Datentyp
+			foreach ($paths as $path) {
+				$this->deleteDokument($path, $doc_path, $doc_url, $only_thumb);
 			}
-			else {
-				$parts = explode('&original_name', $path);
-				$path = array_shift($parts);
-			}
-			if (!$only_thumb AND file_exists($path)) {
-				unlink($path);
-			}
-			$pathinfo = pathinfo($path);
-			if (file_exists($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg')) {
-				unlink($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg');
+		}
+		else {
+			if ($path != '') {
+				if ($doc_url != '') {
+					$path = url2filepath($path, $doc_path, $doc_url);			# Dokument mit URL
+				}
+				else {
+					$parts = explode('&original_name', $path);
+					$path = array_shift($parts);
+				}
+				if (!$only_thumb AND file_exists($path)) {
+					unlink($path);
+				}
+				$pathinfo = pathinfo($path);
+				if (file_exists($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg')) {
+					unlink($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg');
+				}
 			}
 		}
 	}
