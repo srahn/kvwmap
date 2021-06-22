@@ -3449,6 +3449,7 @@ echo '			</table>
 
 		# Query table constraints
 		$table = new PgObject($this, $layerdb->schema, $layerset[0]['maintable']);
+		$table->database = $layerdb;
 		$table->get_constraints();
 
 		# Attribute, die kopiert werden sollen ermitteln
