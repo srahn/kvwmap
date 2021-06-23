@@ -1,6 +1,6 @@
 BEGIN;
 --delete triggerfuntion rechtsstand and datum, as now checked through check_bp_rechtsstand_datum_reference()
-DROP FUNCTION IF EXISTS xplankonverter.check_rechtsstand_and_datum;
+DROP FUNCTION IF EXISTS xplankonverter.check_rechtsstand_and_datum();
 
 -- Change function from Exception to notice
 CREATE OR REPLACE FUNCTION xplankonverter.check_bp_rechtsstand_datum_reference()
