@@ -72,7 +72,7 @@ function format_human_filesize($bytes, $precision = 2) {
 
 function human_filesize($file) {
 	$bytes = @filesize($file);
-	format_human_filesize($bytes);
+	return format_human_filesize($bytes);
 }
 
 function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
