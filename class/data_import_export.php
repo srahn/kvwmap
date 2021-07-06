@@ -42,7 +42,7 @@ class data_import_export {
 		$file_name_parts[0] = substr($filename, 0, strrpos($filename, '.'));
 		$file_name_parts[1] = substr($filename, strrpos($filename, '.')+1);
 		if($filetype == NULL)$filetype = strtolower($file_name_parts[1]);
-		$unique_column = 'gid';
+		$this->unique_column = 'gid';
 		switch($filetype) {
 			case 'shp' : case 'dbf' : case 'shx' : {
 				$custom_tables = $this->import_custom_shape($file_name_parts, $user, $pgdatabase, $epsg);
@@ -50,13 +50,13 @@ class data_import_export {
 			} break;
 			case 'kml' : {
 				$epsg = 4326;
+				$this->unique_column = 'ogc_fid';
 				$custom_tables = $this->import_custom_kml($filename, $pgdatabase, $epsg);
-				$unique_column = 'ogc_fid';
 			} break;
 			case 'gpx' : {
 				$epsg = 4326;
+				$this->unique_column = 'ogc_fid';
 				$custom_tables = $this->import_custom_gpx($filename, $pgdatabase, $epsg);
-				$unique_column = 'ogc_fid';
 			} break;
 			case 'ovl' : {
 				$epsg = 4326;
@@ -67,13 +67,13 @@ class data_import_export {
 				$epsg = $custom_tables[0]['epsg'];
 			} break;
 			case 'dxf' : {
+				$this->unique_column = 'ogc_fid';
 				$custom_tables = $this->import_custom_dxf($filename, $pgdatabase, $epsg);
-				$unique_column = 'ogc_fid';
 			} break;
 			case 'json' : case 'geojson' : {
+				$this->unique_column = 'ogc_fid';
 				$custom_tables = $this->import_custom_geojson($filename, $pgdatabase, $epsg);
 				$epsg = $custom_tables[0]['epsg'];
-				$unique_column = 'ogc_fid';
 			} break;
 			case 'geotif' : case 'tiff' : case 'tif' : {
 				$custom_tables = $this->import_custom_geotif($filename, $pgdatabase, $epsg);
@@ -98,7 +98,7 @@ class data_import_export {
 						basename($filename) . " (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
 						$custom_table,
 						$epsg,
-						$unique_column
+						$this->unique_column
 					);
 				}
 				return -$layer_id;
@@ -826,7 +826,7 @@ class data_import_export {
 	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1') {
 		$command = 'export PGCLIENTENCODING='.$encoding.';'.OGR_BINPATH.'ogr2ogr ';
 		if ($options != NULL) $command.= $options;
-		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco precision=NO -nlt PROMOTE_TO_MULTI -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
+		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco FID=' . $this->unique_column . ' -lco precision=NO -nlt PROMOTE_TO_MULTI -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
 		if ($sql != NULL) $command.= ' -sql \''.$sql.'\'';
 		$command .= ' PG:"' . $database->get_connection_string(true) . ' active_schema=' . $schema . '"';
 		$command .= ' "' . $importfile . '" ' . $layer;
