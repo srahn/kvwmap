@@ -395,6 +395,7 @@ class rolle {
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
+			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
@@ -1382,6 +1383,7 @@ class rolle {
 					`querymode`,
 					`geom_edit_first`,
 					`immer_weiter_erfassen`,
+					`upload_only_file_metadata`,
 					`overlayx`, `overlayy`,
 					`instant_reload`,
 					`menu_auto_close`,
@@ -1422,6 +1424,7 @@ class rolle {
 					`querymode`,
 					`geom_edit_first`,
 					`immer_weiter_erfassen`,
+					`upload_only_file_metadata`,
 					`overlayx`, `overlayy`,
 					`instant_reload`,
 					`menu_auto_close`,

@@ -1159,6 +1159,11 @@ function go_switch($go, $exit = false) {
 				$GUI->layer_Datensaetze_loeschen(($GUI->formvars['output'] == 'false' ? false : true));
 			} break;
 
+			case 'belated_file_upload' : {
+				$GUI->checkCaseAllowed('belated_file_upload');
+				$GUI->belated_file_upload();
+			} break;
+
 			case 'Dokument_Loeschen' : {
 				$GUI->sachdaten_speichern();
 			} break;
