@@ -268,7 +268,7 @@ class GUI {
 		$projTO = ms_newprojectionobj("init=epsg:4326");
 		$stellen_extent->project($projFROM, $projTO);
 		$show = false;
-		for($i = 0; $i < count($result['features']); $i++){
+		for($i = 0; $i < @count($result['features']); $i++){
 			$coord = $result['features'][$i]['geometry']['coordinates'];
 			if($stellen_extent->minx < $coord[0] AND $coord[0] < $stellen_extent->maxx AND $stellen_extent->miny < $coord[1] AND $coord[1] < $stellen_extent->maxy){
 				$show = true;
@@ -1570,14 +1570,15 @@ echo '			</table>
 
         $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 
-        # Allgemeine Parameter
-        $map->set('width',$this->user->rolle->nImageWidth);
-        $map->set('height',$this->user->rolle->nImageHeight);
-        $map->set('resolution',96);
-        #$map->set('transparent', MS_OFF);
-        #$map->set('interlace', MS_ON);
-        $map->set('status', MS_ON);
-        $map->set('name', MAPFILENAME);
+				# Allgemeine Parameter
+				define('MINIMAGESIZE', 10); # prevent error in setextent
+				$map->set('width', ($this->user->rolle->nImageWidth < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageWidth));
+				$map->set('height', ($this->user->rolle->nImageHeight < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageHeight));
+				$map->set('resolution', 96);
+				#$map->set('transparent', MS_OFF);
+				#$map->set('interlace', MS_ON);
+				$map->set('status', MS_ON);
+				$map->set('name', MAPFILENAME);
 
 				if (MS_DEBUG_LEVEL > 0) {
 					$map->setConfigOption('MS_ERRORFILE', '/var/www/logs/mapserver.log');
@@ -3454,6 +3455,7 @@ echo '			</table>
 
 		# Query table constraints
 		$table = new PgObject($this, $layerdb->schema, $layerset[0]['maintable']);
+		$table->database = $layerdb;
 		$table->get_constraints();
 
 		# Attribute, die kopiert werden sollen ermitteln
@@ -6466,48 +6468,62 @@ echo '			</table>
   }
 
 	function deleteDokument($path, $doc_path, $doc_url, $only_thumb = false){
-		if ($path != '') {
-			if ($doc_url != '') {
-				$path = url2filepath($path, $doc_path, $doc_url);			# Dokument mit URL
+		if (is_string($path) AND strpos($path, '[') !== false){
+			$paths = json_decode($path);
+		}
+		if (is_array($paths)) {		// Array-Datentyp
+			foreach ($paths as $path) {
+				$this->deleteDokument($path, $doc_path, $doc_url, $only_thumb);
 			}
-			else {
-				$parts = explode('&original_name', $path);
-				$path = array_shift($parts);
-			}
-			if (!$only_thumb AND file_exists($path)) {
-				unlink($path);
-			}
-			$pathinfo = pathinfo($path);
-			if (file_exists($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg')) {
-				unlink($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg');
+		}
+		else {
+			if ($path != '') {
+				if ($doc_url != '') {
+					$path = url2filepath($path, $doc_path, $doc_url);			# Dokument mit URL
+				}
+				else {
+					$parts = explode('&original_name', $path);
+					$path = array_shift($parts);
+				}
+				if (!$only_thumb AND file_exists($path)) {
+					unlink($path);
+				}
+				$pathinfo = pathinfo($path);
+				if (file_exists($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg')) {
+					unlink($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg');
+				}
 			}
 		}
 	}
 
-  function get_dokument_vorschau($dateinamensteil, $remote_url = false){
+	function get_dokument_vorschau($dateinamensteil, $remote_url = false) {
 		$type = strtolower($dateinamensteil[1]);
-  	$dokument = $dateinamensteil[0].'.'.$dateinamensteil[1];
-		if(!$remote_url AND in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){			// für Bilder und PDFs werden automatisch Thumbnails erzeugt
-			$thumbname = $dateinamensteil[0].'_thumb.jpg';
-			if(!file_exists($thumbname)){
-				exec(IMAGEMAGICKPATH.'convert -filter Hanning "'.$dokument.'"[0] -quality 75 -background white -flatten -resize '.PREVIEW_IMAGE_WIDTH.'x1000\> "'.$thumbname.'"');
+		$dokument = $dateinamensteil[0] . '.' . $dateinamensteil[1];
+		if (!$remote_url AND in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){
+			# für Bilder und PDFs werden automatisch Thumbnails erzeugt
+			$thumbname = $dateinamensteil[0] . '_thumb.jpg';
+			if (!file_exists($thumbname)) {
+				$command = IMAGEMAGICKPATH . 'convert -filter Hanning "' . $dokument . '"[0] -quality 75 -background white -flatten -resize ' . PREVIEW_IMAGE_WIDTH . 'x1000\> "' . $thumbname . '"';
+				#echo 'Erzeuge Thumbnail mit commando: ' . $command;
+				exec($command);
 			}
 		}
-		else{																// alle anderen Dokumenttypen oder Dateien auf fremden Servern bekommen entsprechende Dokumentensymbole als Vorschaubild
+		else {
+			#echo '<br>alle anderen Dokumenttypen oder Dateien auf fremden Servern bekommen entsprechende Dokumentensymbole als Vorschaubild';
 			$dateinamensteil[1] = 'gif';
   		switch ($type) {
-  			default : {
-  				$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
-          $blue = ImageColorAllocate ($image, 26, 87, 150);
+				default : {
+					$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
+					$blue = ImageColorAllocate ($image, 26, 87, 150);
 					if(strlen($type) > 3)$xoffset = 4;
-          imagettftext($image, 12, 0, 23-$xoffset, 34, $blue, WWWROOT.APPLVERSION.'fonts/SourceSansPro-Semibold.ttf', $type);
-          $thumbname = IMAGEPATH.rand(0,100000).'.gif';
-          imagegif($image, $thumbname);
-  			}
-  		}
-  	}
+					imagettftext($image, 12, 0, 23-$xoffset, 34, $blue, WWWROOT.APPLVERSION.'fonts/SourceSansPro-Semibold.ttf', $type);
+					$thumbname = IMAGEPATH.rand(0,100000).'.gif';
+					imagegif($image, $thumbname);
+				}
+			}
+		}
 		return $thumbname;
-  }
+	}
 
 	function write_document_loader(){
 		$handle = fopen(IMAGEPATH.$this->document_loader_name, 'w');
@@ -9292,16 +9308,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	function Datensatz_Loeschen($layerdb, $layer, $attributes, $oid) {
 		$results = array();
 		if (!empty($layer['trigger_function'])) {
-			if($layer['oid'] == 'oid'){
+			if ($layer['oid'] == 'oid') {
 				$oid_sql = 'oid,';
 			}
 			$sql_old = "
 				SELECT ".
-					$oid_sql." *
+					$oid_sql . " *
 				FROM
 					" . $layer['schema'] . '.' . pg_quote($layer['maintable']) . "
 				WHERE
-					".$layer['oid']." = " . quote($oid);
+					" . $layer['oid'] . " = " . quote($oid);
 			#echo '<br>Sql before delete: ' . $sql_old; #pk
 			$ret = $layerdb->execSQL($sql_old, 4, 1, true);
 			if ($ret['success']) {
@@ -11603,6 +11619,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$Stelle->dropChild($child_id);
 				}
 			}
+			# Test auf Zirkelbezug
+			$children = $Stelle->getChildren($this->formvars['selected_stelle_id'], " ORDER BY Bezeichnung", 'only_ids', true, true);
 
 			if (
 				count(
@@ -11694,6 +11712,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->stellendaten=$this->Stelle->getStellen($this->formvars['order'], $this->user->id);
 		$this->titel='Stellendaten';
 		$this->main='stellendaten.php';
+		$this->output();
+	}
+	
+	function Stellenhierarchie(){
+		$this->stellendaten = $this->Stelle->getStellen($this->formvars['order'], $this->user->id);
+		$this->stellenhierarchie = $this->Stelle->getStellenhierarchie();
+		$this->titel='Stellenhierachie';
+		$this->main='stellenhierarchie.php';
 		$this->output();
 	}
 
@@ -13544,7 +13570,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							# die Dokument-Attribute werden hier zusammen gesammelt,
 							# weil der Datei-Upload gemacht werden muss,
 							# nachdem alle Attribute durchlaufen worden sind (wegen dem DocumentPath)
-							if ($_files[$form_fields[$i]]['name'] OR $this->formvars[$form_fields[$i]]) {
+							if ($_files[$form_fields[$i]]['name'] OR $this->formvars[$form_fields[$i]] OR substr($datatype, 0, 1) == '_') {
 								$attr_oid['layer_id'] = $layer_id;
 								$attr_oid['tablename'] = $tablename;
 								$attr_oid['attributename'] = $attributname;
@@ -13593,7 +13619,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									$eintrag = 'NULL';
 								}
 								else {
-									if (POSTGRESVERSION >= 930 AND (substr ($datatype, 0, 1) == '_' OR is_numeric($datatype))) {
+									if (POSTGRESVERSION >= 930 AND (substr($datatype, 0, 1) == '_' OR is_numeric($datatype))) {
 										$eintrag = $this->processJSON($this->formvars[$form_fields[$i]], $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']); # bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
 									}
 									else $eintrag = $this->formvars[$form_fields[$i]];
@@ -13663,7 +13689,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									}
 								}
 								else {
-									$attributes_set[] = pg_quote($attribute) . " = " . ($properties['value'] == 'NULL' ? "NULL" : "'" . $properties['value'] . "'");
+									$attributes_set[] = pg_quote($attribute) . " = " . (in_array($properties['value'], ['NULL', '']) ? "NULL" : "'" . $properties['value'] . "'");
 								}
 							}
 
@@ -16834,6 +16860,9 @@ class db_mapObj{
 										case 'reload': {														# die komplette Sachdatenanzeige soll neu geladen werden
 											$attributes['reload'][$i] = true;
 										} break;
+										case 'show_count': {														# die Anzahl der Subform-Datensätze anzeigen
+											$attributes['show_count'][$i] = true;
+										} break;										
 									}
 								}
 							}
@@ -18789,7 +18818,16 @@ class db_mapObj{
     }
     else{
       for($i = 0; $i < $anzahl; $i++){
-        $exp = str_replace(array("'[", "]'", '[', ']'), '', $classes[$i]['Expression']);
+				if ($classes[$i]['Expression'] == '') {
+          return $classes[$i]['Class_ID'];
+        }
+				if (strpos($classes[$i]['Expression'], '/') !== false) {		# regex
+					$operator = '~';
+				}
+				else {
+					$operator = '=';
+				}
+        $exp = str_replace(array("'[", "]'", '[', ']', '/'), '', $classes[$i]['Expression']);
         $exp = str_replace(' eq ', '=', $exp);
         $exp = str_replace(' ne ', '!=', $exp);
 
@@ -18809,7 +18847,7 @@ class db_mapObj{
 				}
 				elseif($classitem != ''){		# Classitem davor setzen
 					if(substr($exp, 0, 1) != "'")$quote = "'";
-					$exp = $classitem."::text = ".$quote.$exp.$quote;
+					$exp = '"' . $classitem . '"::text ' . $operator . ' ' . $quote . $exp . $quote;
 				}
 				if($exp == ''){
 					$exp = 'true';

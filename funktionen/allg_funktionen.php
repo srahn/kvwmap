@@ -4,6 +4,10 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
+function get_url(){	# die Konstante URL kann durch diese Funktion ersetzt werden
+	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_URL]";
+}
+
 function quote($var, $type = NULL){
 	switch ($type) {
 		case 'text' : case 'varchar' : {
@@ -81,7 +85,7 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 		// This error code is not included in error_reporting
 		return;
 	}
-	$errors[] = $errstr;
+	$errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
 	/* Don't execute PHP internal error handler */
 	return true;
 }
@@ -120,10 +124,12 @@ function get_document_file_path($document_attribute_value, $layer_document_path,
 	}
 }
 
-function url2filepath($url, $doc_path, $doc_url){
-	if($doc_path == '')$doc_path = CUSTOM_IMAGE_PATH;
+function url2filepath($url, $doc_path, $doc_url) {
+	if ($doc_path == '') {
+		$doc_path = CUSTOM_IMAGE_PATH;
+	}
 	$url_parts = explode($doc_url, $url);
-	return $doc_path.$url_parts[1];
+	return $doc_path . $url_parts[1];
 }
 
 /*

@@ -1498,6 +1498,7 @@ a:hover .preview_image{
 }
 
 #message_box {
+	white-space: pre-line;
 	opacity: 1;
 	position: fixed;
 	display: none;
@@ -1576,7 +1577,7 @@ thead.gle th {
 
 .gle_tabs{
 	display: flex;
-	margin-bottom: -11px;
+	margin: 2px 0 -11px 0;
 	border-left: 1px solid #bbb;
 	height: 27px
 }
@@ -1677,6 +1678,10 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 .subFormListItem{
 	height: 20px;
 	padding: 0 0 8px 0;
+}
+
+.subFormShowCount{
+	margin: 5px 5px 5px 8px;
 }
 
 .gle_hr{

@@ -176,8 +176,8 @@ body {
 }
 
 table { 
-  border-spacing: 2px;
-  border-collapse: separate;
+/*  border-spacing: 2px;
+  border-collapse: separate;*/
 }
 
 table.planzeichen th {

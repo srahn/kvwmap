@@ -72,9 +72,10 @@ function go_switch_nachweisverwaltung($go){
 			$GUI->nachweisLoeschen();
 	  } break;
 
-
-		#Documente die in der Ergebnisliste ausgewählt wurden sollen weiterverarbeitet werden!
-		# 2006-01-26 pk
+		case 'Nachweisanzeige_auswahl_speichern' : {
+			$GUI->nachweiseAuswahlSpeichern($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['id']);
+	  } break;
+		
 	  case 'Nachweisanzeige_zum_Auftrag_hinzufuegen' : {
 			$GUI->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
@@ -110,6 +111,9 @@ function go_switch_nachweisverwaltung($go){
 			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 			$GUI->savedformvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
 			$GUI->formvars=array_merge($GUI->savedformvars,$GUI->formvars);
+			if ($GUI->formvars['auswahl']) {
+				$GUI->formvars['id'] = $GUI->getNachweiseAuswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
+			}
 			if($GUI->formvars['showhauptart'][0] == '')$GUI->formvars['showhauptart'] = $GUI->formvars['suchhauptart'];		# ist bei "alle einblenden" der Fall			
 			$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
 			$ret=$GUI->nachweis->getNachweise($ids,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['showhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'], $GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchgueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['suchgeprueft'], $GUI->formvars['alle_der_messung']);

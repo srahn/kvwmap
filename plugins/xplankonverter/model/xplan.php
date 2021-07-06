@@ -33,7 +33,7 @@ class xplan {
 
 	function __construct($database) {
 		global $debug;
-		$this->debug=$debug;
+		$this->debug = $debug;
 		$this->database = $database;
 	}
 }

@@ -160,7 +160,10 @@
 		</div>
 	<?
 	}		# Ende list-edit oder Rasterlayout, Anfang "normale" Subformliste
-	else { ?>
+	else { 
+		if ($this->formvars['show_count']) {	?>
+			<div class="subFormShowCount"><? echo $anzObj . (($anzObj == 1)? ' Datensatz' : ' Datensätze'); ?></div>
+<?  }	?>
 		<table border="0" cellspacing="0" cellpadding="2" width="100%"><?
 			$preview_attributes = explode(' ', $this->formvars['preview_attribute']);
 			for ($k=0;$k<$anzObj;$k++) {
