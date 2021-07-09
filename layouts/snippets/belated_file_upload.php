@@ -1,32 +1,13 @@
 <?php
 	include(LAYOUTPATH . 'languages/belated_file_upload_' . $this->user->rolle->language . '.php');
 ?>
-<script>
-	function loadScript(url, callback) {
-		var head = document.getElementsByTagName('head')[0];
-		var script = document.createElement('script');
-		script.type = 'text/javascript';
-		script.src = url;
-		script.onreadystatechange = callback;
-		if (callback) {
-			script.onload = callback;
-		}
-		head.appendChild(script);
-	}
-
-	function loaded() {
-		loadScript("<?php echo CUSTOM_PATH; ?>layouts/snippets/multiPhotoUploadDiv.js");
-	}
-
-	function unloaded() {
-		if (window.kvwmapApp) {
-			window.kvwmapApp = null;
-		}
-	}
-
-	window.addEventListener('load', loaded);
-	window.addEventListener('unload', unloaded);
+<script type="text/javascript">
+	
+	var Formdata = new FormData();
+	Formdata.append('go', 'belated_file_upload_speichern');
+	
 </script>
+
 <h2><?php echo $strTitel; ?></h2><?
 if (count($this->belated_files) == 0) { ?>
 	<div style="
@@ -49,7 +30,6 @@ else { ?>
 						<th><a href="index.php?go=belated_file_upload&order=name">Dateiname</a></th>
 						<th><a href="index.php?go=belated_file_upload&order=lastmodified">Änderungsdatum</a></th>
 						<th><a href="index.php?go=belated_file_upload&order=size">Dateigröße</a></th>
-						<th>Dateien einzeln hochladen</th>
 					</tr><?php
 					foreach ($this->belated_files AS $belated_file) { ?>
 						<tr id="$belated_file_<?php echo $belated_file->get('id'); ?>">
@@ -74,9 +54,6 @@ else { ?>
 							<td>
 								<span><?php echo $belated_file->get('size'); ?></span>
 							</td>
-							<td>
-								<input size="43" type="file" id="belated_file_<? echo $belated_file->get('id'); ?>" name="file_metadata_<? echo $belated_file->get('id'); ?>">
-							</td>
 						</tr><?php
 					} ?>
 				</table>
@@ -84,12 +61,5 @@ else { ?>
 		</tr>
 	</table>
 	<div id="new_109_fotos_0"></div>
-	<div id="dropArea" style="
-		margin-top: 10px;
-		display: inline-block;
-		border: 1px solid gray;
-		position:relative;
-		background-color: #c1d1e3;
-		padding: 100px;
-	"><a href="javascript:createMultiPhotoUploadDiv(105, 'fotos', 109, 'kartierung_id', 260672)">Massendatenupload</a></div><?
+	<? include(SNIPPETS . 'multi_file_upload.php');
 } ?>
