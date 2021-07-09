@@ -696,6 +696,7 @@ a.invisiblelayerlink:hover{
 	width: 100%;
 	border-collapse: separate;
   border-spacing: 5px;
+	margin-top: 15px;
 }
 
 #data_import_upload_progress .file_status{

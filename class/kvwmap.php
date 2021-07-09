@@ -299,7 +299,7 @@ class GUI {
 		}
 
 		if (empty($error_msg)) {
-			if (strtolower($this->formvars['format']) == 'json' OR $this->formvars['only_main']) {
+			if (strtolower($this->formvars['format']) == 'json') {
 				include_once($snippet_path . $snippet_file);
 			}
 		}
@@ -2936,9 +2936,14 @@ echo '			</table>
 					include (LAYOUTPATH.'snippets/overlay.php');
 				}
 				else {
-					$guifile = $this->get_guifile();
-					$this->debug->write("<br>Include <b>" . $guifile . "</b> in kvwmap.php function output()",4);
-					include($guifile);
+					if ($this->formvars['only_main']) {
+						include_once(SNIPPETS . $this->main);
+					}
+					else {
+						$guifile = $this->get_guifile();
+						$this->debug->write("<br>Include <b>" . $guifile . "</b> in kvwmap.php function output()",4);
+						include($guifile);
+					}
 				}
 				if($this->alert != ''){
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
@@ -9373,7 +9378,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				DELETE FROM
 					" . pg_quote($layer['maintable']) . "
 				WHERE
-					".pg_quote($layer['oid'])." = " . quote($oid) . "
+					" . pg_quote($layer['oid']) . " = " . quote($oid) . "
 			";
 			$oids[] = $element[3];
 			$ret = $layerdb->execSQL($sql, 4, 1, true);
@@ -9391,6 +9396,22 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$this->success = false;
 				}
 				else {
+					if ($this->user->rolle->upload_only_file_metadata == 1) {
+						include_once(CLASSPATH . 'BelatedFile.php');
+						foreach ($this->qlayerset[0]['shape'] AS $dataset) {
+							foreach ($document_attributes AS $document_attribute) {
+								$where = "
+									`user_id` = " . $this->user->id . " AND
+									`layer_id` = " . $layer['Layer_ID'] . " AND
+									`attribute_name` = '" . $document_attribute . "' AND
+									`file` = '" . $dataset['datei'] . "'
+								";
+								foreach (BelatedFile::find($this, $where) AS $belated_file) {
+									$belated_file->delete();
+								}
+							}
+						}
+					}
 					$results[] = array('type' => 'notice', 'msg' => 'Löschen erfolgreich<br>');
 				}
 			}
@@ -9468,6 +9489,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 		# Dokumente speichern
 		if (@count($document_attributes) > 0) {
+			if ($this->user->rolle->upload_only_file_metadata == 1) {
+				$belated_files = array();
+			}
 			foreach ($document_attributes as $i => $document_attribute) {
 				$options = $attributes['options'][$document_attribute['attributename']];
 				if (substr($document_attribute['datatype'], 0, 1) == '_') {
@@ -9477,6 +9501,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				else {
 					$insert = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attributenames, $attributevalues, $layerdb);	// normales Dokument-Attribut
+					if ($this->user->rolle->upload_only_file_metadata == 1) {
+						$belated_files[$i] = $this->formvars[$form_fields[$i]];
+					}
 				}
 				$this->formvars[$form_fields[$i]] = $document_attributes[$i]['insert'] = $insert;
 			}
@@ -9707,6 +9734,25 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							if ($last_oid == '') {
 								$last_oid = $notice_result['oid'];
 							}
+							if ($last_oid != '' AND $this->user->rolle->upload_only_file_metadata == 1) {
+								include_once(CLASSPATH . 'BelatedFile.php');
+								$results = array();
+								foreach ($document_attributes AS $i => $document_attribute) {
+									$file = json_decode($belated_files[$i]);
+									$results[] = BelatedFile::insert(
+										$this, array(
+											'user_id' => $this->user->id,
+											'layer_id' => $this->formvars['selected_layer_id'],
+											'dataset_id' => $last_oid,
+											'attribute_name' => $document_attribute['attributename'],
+											'name' => $file->name,
+											'size' => $file->size,
+											'lastmodified' => $file->lastmodified,
+											'file' => $document_attribute['insert']
+										)
+									);
+								}
+							}
 
 							if ($this->formvars['embedded'] == '') {
 								$this->formvars['value_' . $table['tablename'] . '_oid'] = $last_oid;
@@ -9727,9 +9773,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						# query not successfull set query error message
 						$this->success = false;
 						$this->add_message(
-									$ret['type'],
-									sql_err_msg('Kann Datensatz nicht speichern:<br>', $sql, $ret['msg'], 'error_div_' . rand(1, 99999))
-								);
+							$ret['type'],
+							sql_err_msg('Kann Datensatz nicht speichern:<br>', $sql, $ret['msg'], 'error_div_' . rand(1, 99999))
+						);
 					}
 				}
 			}
@@ -9779,12 +9825,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       }
     }
 		else {
-			if ($this->success == false) {
-				$this->neuer_Layer_Datensatz();
+			if ($this->formvars['only_create']) {
+				# Hier wird keine weitere Funktion zum Laden von views aufgerufen
 			}
 			else {
-				if ($this->formvars['only_create']) {
-					# Hier wird keine weitere Funktion zum Laden von views aufgerufen
+				if ($this->success == false) {
+					$this->neuer_Layer_Datensatz();
 				}
 				else {
 					$this->formvars['newpathwkt'] = '';
@@ -13448,7 +13494,88 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 			}
 		}
-  }
+	}
+
+	function belated_file_upload() {
+		include_once(CLASSPATH . 'BelatedFile.php');
+		$this->belated_files = BelatedFile::find(
+			$this,
+			'user_id = ' . $this->user->id,
+			($this->formvars['order'] == '' ? 'layer_id, dataset_id, name, lastmodified' : '')
+		);
+		$this->main = 'belated_file_upload.php';
+		$this->output();
+	}
+	
+	function belated_file_upload_speichern() {
+		include_once(CLASSPATH . 'BelatedFile.php');
+		if (isset($_FILES['uploadfile'])) {
+			$this->user->rolle->upload_only_file_metadata = 0;
+			$filename = $_FILES['uploadfile']['name'];
+			$filetype = $_FILES['uploadfile']['type'];
+			$filesize = $_FILES['uploadfile']['size'];
+			
+			$this->belated_files = BelatedFile::find(
+				$this,
+				"user_id = " . $this->user->id . " AND 
+				 name = '" . $filename . "' AND 
+				 size = " . $filesize . " AND 
+				 lastmodified = " . $this->formvars['lastmodified']
+			);
+			
+			for ($b = 0; $b < count($this->belated_files); $b++) {
+				$belated_file = $this->belated_files[$b];
+				$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
+				$layerset = $this->user->rolle->getLayer($belated_file->data['layer_id']);				
+				$this->formvars['selected_layer_id'] = $belated_file->data['layer_id'];
+				$this->formvars['value_' . $layerset[0]['maintable'] . '_oid'] = $belated_file->data['dataset_id'];
+				$this->formvars['operator_' . $layerset[0]['maintable'] . '_oid'] = '=';
+				$this->formvars['no_output'] = true;
+				$this->GenerischeSuche_Suchen();
+				$attributes = $this->qlayerset[0]['attributes'];
+				$fieldnames = array();
+				$this->formvars['changed_' . $belated_file->data['layer_id'] . '_' . str_replace('-', '', $belated_file->data['dataset_id'])] = 1;
+				$fieldnames[0] = $belated_file->data['layer_id'] . ';' . $belated_file->data['attribute_name'] . ';' . $layerset[0]['maintable'] . ';' . $belated_file->data['dataset_id'] . ';Dokument;1;varchar;1';
+				if (count($this->belated_files) > $b + 1) {	# für das nächste belated File sichern, da es nach move_uploaded_file nicht mehr da ist
+					$tmp_save = date('Y-m-d_G_i_s');
+					copy($_FILES['uploadfile']['tmp_name'], IMAGEPATH . $tmp_save);
+				}
+				$_FILES[$fieldnames[0]] = $_FILES['uploadfile'];
+				for ($i = 0; $i < count($attributes['name']); $i++) {
+					$fieldname = $belated_file->data['layer_id'] . ';' . $attributes['name'][$i] . ';' . $attributes['tablename'][$i] . ';' . $belated_file->data['dataset_id'] . ';' . $attributes['form_element_type'][$i] . ';1;' . $attributes['type'][$i] . ';1';
+					$this->formvars[$fieldname] = $this->qlayerset[0]['shape'][0][$attributes['name'][$i]];
+					$fieldnames[] = $fieldname;
+				}
+				$this->formvars['form_field_names'] = implode('|', $fieldnames);
+				$this->formvars['only_update'] = true;
+				$this->Sachdaten_speichern();
+				if (count($this->belated_files) > $b + 1) {
+					$_FILES['uploadfile']['tmp_name'] = IMAGEPATH . $tmp_save;
+					$_FILES['uploadfile']['source_handling'] = 'copy';
+				}
+				if ($this->success) {
+					$belated_file->delete();
+					?>
+					<div class="s">
+						Erfolgreich im Datensatz <? echo $belated_file->data['dataset_id']; ?> gespeichert.<br>
+						Typ: <? echo $filetype; ?><br>
+						Dateigröße: <? echo $filesize; ?>
+					</div><?
+				}
+				else { ?>
+					<div class="s">
+						<p>Fehler beim Speichern des Fotos <? echo $filename; ?> im Datensatz <? echo $belated_file->data['dataset_id']; ?>.</p>
+						<p>Type: <? echo $filetype; ?></p>
+						<p>Dateigröße: <? echo $filesize; ?></p>
+						<p>Fehler: <? echo $this->errMsg; ?></p>
+					</div><?
+				}
+			}
+			if ($this->success) {
+				echo '█startNextUpload();';
+			}
+		}
+	}	
 
 	function sachdaten_speichern() {
 		$document_attributes = array();
@@ -13575,6 +13702,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 		}
 		if (count($document_attributes) > 0) {
+			if ($this->user->rolle->upload_only_file_metadata == 1) {
+				$belated_files = array();
+				include_once(CLASSPATH . 'BelatedFile.php');
+			}
 			foreach ($document_attributes as $i => $attr_oid) {
 				$doc_path = $layerset[$attr_oid['layer_id']][0]['document_path'];
 				$doc_url = $layerset[$attr_oid['layer_id']][0]['document_url'];
@@ -13591,7 +13722,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					# normales Dokument-Attribut
 					$update = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);
 				}
-				$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $update;
+				$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $document_attributes[$i]['update'] = $update;
+				if ($this->user->rolle->upload_only_file_metadata == 1) {
+					$belated_files[$attr_oid['oid']][$i] = $this->formvars[$form_fields[$i]];
+				}
 			}
 		}
 		if ($this->formvars['delete_documents'] != '') {
@@ -13673,6 +13807,39 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									#if (!$ret['success']) {
 									#	$this->add_message('error', $ret[1]);
 									#}
+									
+									if ($this->user->rolle->upload_only_file_metadata == 1 AND array_key_exists($oid, $belated_files)) {
+										foreach ($belated_files[$oid] AS $i => $belated_file) {
+											$file = json_decode($belated_file);											
+											$where = "
+												`user_id` = " . $this->user->id . " AND
+												`layer_id` = " . $layer_id . " AND
+												`attribute_name` = '" . $document_attributes[$i]['attributename'] . "' AND
+												`dataset_id` = '" . $oid . "'
+											";
+											if ($old_belated_file = BelatedFile::find($this, $where)) {	# ein "=" ist richtig, da Zuweisung
+												$old_belated_file[0]->set('name', $file->name);
+												$old_belated_file[0]->set('size', $file->size);
+												$old_belated_file[0]->set('lastmodified', $file->lastmodified);
+												$old_belated_file[0]->set('file', $document_attributes[$i]['update']);
+												$old_belated_file[0]->update();
+											}
+											else {
+												BelatedFile::insert(
+													$this, array(
+														'user_id' => $this->user->id,
+														'layer_id' => $layer_id,
+														'dataset_id' => $oid,
+														'attribute_name' => $document_attributes[$i]['attributename'],
+														'name' => $file->name,
+														'size' => $file->size,
+														'lastmodified' => $file->lastmodified,
+														'file' => $document_attributes[$i]['update']
+													)
+												);
+											}
+										}
+									}
 
 									# After Update trigger
 									if (!empty($layerset[$layer_id][0]['trigger_function'])) {
@@ -13710,27 +13877,32 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		else {
 			$this->add_message('warning', 'Keine Änderung.');
 		}
-		if ($this->formvars['embedded'] != '') {
-			# es wurde ein Datensatz aus einem embedded-Formular gespeichert
-			if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
-				echo '█currentform.go.value=\'get_last_query\';	overlay_submit(currentform, false);';
-			}
-			else{				# ansonsten wird das embedded-Formular entfernt und das Listen-DIV neu geladen (getrennt durch █)
-				echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
-				if(!empty(GUI::$messages)){
-					echo 'message('.json_encode(GUI::$messages).');';
-				}
-			}
+		if ($this->formvars['only_update']) {
+			# Hier erfolgt keine weitere Ausgabe
 		}
 		else {
-			$this->last_query = $this->user->rolle->get_last_query();
-			if ($this->formvars['search']) {
-				# man kam von der Suche	 -> nochmal suchen
-				$this->GenerischeSuche_Suchen();
+			if ($this->formvars['embedded'] != '') {
+				# es wurde ein Datensatz aus einem embedded-Formular gespeichert
+				if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+					echo '█currentform.go.value=\'get_last_query\';	overlay_submit(currentform, false);';
+				}
+				else{				# ansonsten wird das embedded-Formular entfernt und das Listen-DIV neu geladen (getrennt durch █)
+					echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
+					if(!empty(GUI::$messages)){
+						echo 'message('.json_encode(GUI::$messages).');';
+					}
+				}
 			}
 			else {
-				# man kam aus einer Sachdatenabfrage -> nochmal abfragen
-				$this->queryMap();
+				$this->last_query = $this->user->rolle->get_last_query();
+				if ($this->formvars['search']) {
+					# man kam von der Suche	 -> nochmal suchen
+					$this->GenerischeSuche_Suchen();
+				}
+				else {
+					# man kam aus einer Sachdatenabfrage -> nochmal abfragen
+					$this->queryMap();
+				}
 			}
 		}
 	}
@@ -13778,26 +13950,48 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db){
-		$_files = $_FILES;
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+		if ($this->user->rolle->upload_only_file_metadata == 1) {
+			$file = json_decode($this->formvars[$input_name]);
+			$_files = array(
+				$input_name => array(
+					'name' => $file->name,
+					'type' => 'image/jpg',
+					'tmp_name' => WWWROOT . APPLVERSION . GRAPHICSPATH . 'belated_file.jpg',
+					'error' => 0,
+					'size' => $file->size,
+					'source_handling' => 'copy'
+				)
+			);
+		}
+		else {
+			$_files = $_FILES;
+		}
 		if ($_files[$input_name]['name'] != '' OR $this->formvars[$input_name] == 'delete') {
 			$name_array = explode('.', basename($_files[$input_name]['name']));
 			$datei_name = $name_array[0];
-			$datei_erweiterung = array_pop($name_array);
+			$datei_erweiterung = ($this->user->rolle->upload_only_file_metadata == 1 ? 'jpg' : array_pop($name_array));
 			$doc_paths = $mapdb->getDocument_Path($doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $datei_name);
-			$nachDatei = $doc_paths['doc_path'].'.'.$datei_erweiterung;
-			if ($doc_paths['doc_url'] != ''){
+			$nachDatei = $doc_paths['doc_path'] . '.' . $datei_erweiterung;
+			if ($doc_paths['doc_url'] != '') {
 				$db_input = $doc_paths['doc_url'] . '.' . $datei_erweiterung;			# die URL zu der Datei wird gespeichert (Permalink)
 			}
 			else {
-				$db_input = $nachDatei."&original_name=" . $_files[$input_name]['name'];			# absoluter Dateipfad wird gespeichert
+				$db_input = $nachDatei . "&original_name=" . $_files[$input_name]['name']; # absoluter Dateipfad wird gespeichert
 			}
 			if ($this->formvars[$input_name] == 'delete') {
 				$db_input = 'NULL';
 			}
 			# Bild in das Datenverzeichnis kopieren
-			#echo '<p>move uploaded file: ' . $_files[$input_name]['tmp_name'] . ' to file: ' . $nachDatei;
-			if (move_uploaded_file($_files[$input_name]['tmp_name'], $nachDatei) OR $this->formvars[$input_name] == 'delete'){
+			if ($_files[$input_name]['source_handling'] == 'copy') {
+				#echo '<p>copy dummy file: ' . $_files[$input_name]['tmp_name'] . ' to file: ' . $nachDatei;
+				$file_copy_success = copy($_files[$input_name]['tmp_name'], $nachDatei);
+			}
+			else {
+				#echo '<p>move uploaded file: ' . $_files[$input_name]['tmp_name'] . ' to file: ' . $nachDatei;
+				$file_copy_success = move_uploaded_file($_files[$input_name]['tmp_name'], $nachDatei);
+			}
+			if ($file_copy_success OR $this->formvars[$input_name] == 'delete') {
 				# bei dynamischem Dateipfad das Vorschaubild löschen
 				if (strtolower(substr($options, 0, 6)) == 'select') {
 					$this->deleteDokument($nachDatei, $doc_path, $doc_url, true);

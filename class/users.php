@@ -1060,7 +1060,10 @@ class user {
 			}
 			else $sql.=',querymode="0", overlayx=400, overlayy=150';
 			$sql .= ',geom_edit_first="' . $formvars['geom_edit_first'] . '"';
-			$sql .= ',immer_weiter_erfassen="' . $formvars['immer_weiter_erfassen'] . '"';
+			$sql .= "
+				,immer_weiter_erfassen = '" . $formvars['immer_weiter_erfassen'] . "'
+				,upload_only_file_metadata = '" . $formvars['upload_only_file_metadata'] . "'
+			";
 			$sql.=',print_scale = CASE WHEN print_scale = "auto" OR "'.$formvars['print_scale'].'" = "auto" THEN "'.$formvars['print_scale'].'" ELSE print_scale END';
 			if($formvars['hist_timestamp'] != '') $sql.=',hist_timestamp="'.DateTime::createFromFormat('d.m.Y H:i:s', $formvars['hist_timestamp'])->format('Y-m-d H:i:s').'"';
 			else $sql.=',hist_timestamp = NULL';

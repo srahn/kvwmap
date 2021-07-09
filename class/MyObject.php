@@ -245,7 +245,7 @@ class MyObject {
 	* @return string The expression representing true or false in a sql statement
 	*/
 	function get_identifier_expression() {
-	    $where = array();
+		$where = array();
 		if ($this->identifier_type == 'array' AND getType($this->identifier) == 'array') {
 			$where = array_map(
 				function($id) {
