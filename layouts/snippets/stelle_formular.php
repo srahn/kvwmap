@@ -72,7 +72,7 @@ function getInsertIndex(insertObj, id, order, start){
 	menueebene_to_be_inserted = parseInt(ordersplit[2]);
 	for(i=start; i<insertObj.length; i++) {
 		if(insertObj.options[i].value == id){
-			return -i;			// Menü ist bereits vorhanden -> index negieren
+			return -i - 100;			// Menü ist bereits vorhanden -> index negieren und 100 abziehen fuer den Fall dass i = 0 ist
 		}
 		options_order_string = insertObj.options[i].id + "";
 		options_order_split = options_order_string.split('_');
@@ -96,7 +96,7 @@ function addMenues(){
 		}
 	}
 	else{					// Obermenue ist bereits vorhanden
-		index = -1 * index + 1;				// index für die Untermenüs ermitteln, beginnend beim index des Obermenues
+		index = -1 * index - 99;				// index für die Untermenüs ermitteln, beginnend beim index des Obermenues
 		submenueindex = getInsertIndex(document.GUI.selectedmenues, document.GUI.submenues.options[document.GUI.submenues.selectedIndex].value, document.GUI.submenues.options[document.GUI.submenues.selectedIndex].id, index);
 		if(submenueindex > 0){
 			addOptionsWithIndex(document.GUI.submenues,document.GUI.selectedmenues,document.GUI.selmenues,'value', submenueindex);		// Untermenüs hinzufügen
