@@ -1114,12 +1114,11 @@ class data_import_export {
 		if ($this->formvars['newpathwkt']){
 			# über Polygon einschränken
 			if ($this->formvars['within'] == 1) {
-				$sp_op = 'st_within';
+				$sql .= " AND st_within(".$this->attributes['the_geom'].", st_buffer(st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."), 0.0001))";
 			}
 			else {
-				$sp_op = 'st_intersects';
+				$sql .= " AND st_intersects(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
 			}
-			$sql .= " AND ".$sp_op."(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
 		}
     $sql.= $orderby;
 		$data_sql = $sql;
