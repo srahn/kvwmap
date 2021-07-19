@@ -1,5 +1,7 @@
 BEGIN;
 
+DROP VIEW alkis.lk_ap;
+
 CREATE OR REPLACE VIEW alkis.lk_ap AS
 SELECT o.ogc_fid,
        o.gml_id,
@@ -74,6 +76,8 @@ SELECT o.ogc_fid,
  WHERE d.endet IS NULL;
  
 
+DROP VIEW alkis.lk_gebaeudepunkte;
+
 CREATE OR REPLACE VIEW alkis.lk_gebaeudepunkte AS
 SELECT o.ogc_fid,
        o.gml_id,
@@ -142,6 +146,8 @@ SELECT o.ogc_fid,
  WHERE d.endet IS NULL;
 
 
+DROP VIEW alkis.lk_so_punkte;
+
 CREATE OR REPLACE VIEW alkis.lk_so_punkte AS
 SELECT o.ogc_fid,
        o.beginnt,
@@ -166,6 +172,7 @@ SELECT o.ogc_fid,
   LEFT JOIN alkis.ax_vertrauenswuerdigkeit_punktort n
        ON n.wert = p.vertrauenswuerdigkeit;
 
+DROP VIEW alkis.lk_sp;
 
 CREATE OR REPLACE VIEW alkis.lk_sp AS
 SELECT o.ogc_fid,
