@@ -652,7 +652,7 @@ class stelle {
 		# Füge Einstellungen der Elternstellen zur Stelle hinzu
 		foreach($selected_parents AS $new_parent_id) {
 			$parent_stelle = new stelle($new_parent_id, $this->database);
-			$menues = $this->merge_menues($menues, $parent_stelle->getMenue(0));
+			$menues = $this->sort_menues(array_merge($menues, $parent_stelle->getMenue(0, 'only_ids')));
 			$functions = array_values(array_unique(array_merge($functions, $parent_stelle->getFunktionen('only_ids'))));
 			$layouts = array_values(array_unique(array_merge($layouts, $ddl->load_layouts($new_parent_id, '', '', '', 'only_ids'))));
 			$frames = array_values(array_unique(array_merge($frames, $document->load_frames($new_parent_id, false, 'only_ids'))));
@@ -662,20 +662,27 @@ class stelle {
 		return $results;
 	}
 
-	function merge_menues($menues, $new_menues){
-		$menue_objects = empty($menues) ? array() : Menue::find($this, ' id IN ('.implode(',', $menues).')', 'FIELD(id, '.implode(',', $menues).')');
-		$insert_index = 0;
-		for($i = 0; $i < count($new_menues['ID']); $i++){
-			if($new_menues['menueebene'][$i] == 1){
-				while($menue_objects[$insert_index]->data['menueebene'] == 1 AND $menue_objects[$insert_index]->data['order'] < $new_menues['ORDER'][$i]){
-					$insert_index++;
-				}
-			}
-			array_splice($menue_objects, $insert_index, 0, [(object)['data' => ['id' => $new_menues['ID'][$i], 'order' => $new_menues['ORDER'][$i], 'name' => $new_menues['Bezeichnung'][$i]]]]);
-			$insert_index++;
+	function sort_menues($menues){
+		# sortiert zunächst die Menüs von Ebene 1 nach order und dann innerhalb der Obermenüpunkte die Untermenüpunkte nach order
+		$sql = '
+			SELECT 
+				CASE WHEN m.menueebene = 1 THEN m.`order` ELSE om.`order` END as order1, 
+				CASE WHEN m.menueebene = 1 THEN m.`id` ELSE m.`obermenue` END as order2,
+				m.`id`
+			FROM `u_menues` as m 
+			LEFT JOIN `u_menues` as om ON om.id = m.obermenue
+			WHERE
+				m.id IN (' . implode(',', $menues) . ')
+			ORDER BY order1, order2, m.menueebene, m.`order`
+		';
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
-		foreach($menue_objects as $menue){
-			$result[] = $menue->data['id'];
+		else{
+			while($rs=$this->database->result->fetch_array()) {
+				$result[] = $rs['id'];
+			}
 		}
 		return $result;
 	}
@@ -1047,7 +1054,7 @@ class stelle {
 
 			if (!$assign_default_values AND $this->database->mysqli->affected_rows > 0) {
 				$insert = "
-					INSERT INTO layer_attributes2stelle (
+					INSERT IGNORE INTO layer_attributes2stelle (
 						layer_id,
 						attributename,
 						stelle_id,
