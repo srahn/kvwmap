@@ -234,6 +234,20 @@ class GUI {
 		$this->user->rolle->readSettings();
 	}	
 	
+	function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
+		if ($last) {
+			$word_pos = strripos($str, $word);
+		}
+		else {
+			$word_pos = stripos($str, $word);
+		}
+		if ($word_pos !== false) {
+			$str_from_word_pos = substr($str, $word_pos + strlen($word));
+			$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+			return trim($parts[0]);
+		}
+	}
+	
 	function zoomToMaxLayerExtent($layer_id) {
     # Abfragen der maximalen Ausdehnung aller Daten eines Layers
 		if($layer_id > 0){
@@ -296,8 +310,8 @@ class GUI {
 						$command = OGR_BINPATH.'gdalinfo '.$raster_file.' > '.IMAGEPATH.$output.'.info';
 						exec($command);
 						$infotext = file_get_contents(IMAGEPATH.$output.'.info');
-						$ll = explode(', ', trim(get_first_word_after($infotext, 'Lower Left', '', ')'), ' ('));
-						$ur = explode(', ', trim(get_first_word_after($infotext, 'Upper Right', '', ')'), ' ('));
+						$ll = explode(', ', trim($this->get_first_word_after($infotext, 'Lower Left', '', ')'), ' ('));
+						$ur = explode(', ', trim($this->get_first_word_after($infotext, 'Upper Right', '', ')'), ' ('));
 					}
 				}
 				elseif($layer[0]['tileindex'] != ''){		# ein Tile-Index
