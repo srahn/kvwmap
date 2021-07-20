@@ -3213,7 +3213,6 @@ echo '			</table>
 
 	function getSVG_all_vertices(){
 		# Diese Funktion liefert die Eckpunkte der Geometrien von allen aktiven Postgis-Layern, die im aktuellen Kartenausschnitt liegen
-		#$this->user->rolle->readSettings();
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$mapDB->nurAktiveLayer = true;
 		$mapDB->OhneRequires = true;
@@ -3262,7 +3261,6 @@ echo '			</table>
 
 	function getSVG_vertices(){
 		# Diese Funktion liefert die Eckpunkte der Geometrien des übergebenen Vektor-Layers, die im aktuellen Kartenausschnitt liegen
-		#$this->user->rolle->readSettings();
 		if($this->formvars['geom_from_layer'] == 0){		# wenn kein Layer ausgewählt ==> alle aktiven abfragen
 			$this->getSVG_all_vertices();
 			return;
@@ -3283,16 +3281,7 @@ echo '			</table>
 			$geom = $data_attributes['the_geom'];
     	$select = $mapDB->getSelectFromData($layer['Data']);
 			$select = preg_replace ("/ FROM /", ' from ', $select);
-#			if ($this->formvars['geom_from_layer'] > 0) {
-#				$select = str_replace_last(' from ', ', ' . $data_attributes[$data_attributes['the_geom_id']]['table_alias_name'] . '.oid as exclude_oid' . ' from ', $select); # bei Rollenlayern nicht machen
-#			}
-
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$geom.', '.$extent.') ';
-
-#			if($layer['Datentyp'] !== '1' AND $this->formvars['geom_from_layer'] > 0 AND $this->formvars['oid']){		# bei Linienlayern werden auch die eigenen Punkte geholt, bei Polygonen nicht
-#				$fromwhere .= 'AND exclude_oid != '.$this->formvars['oid'];
-#			}
-
 			# Filter hinzufügen
 			if($layer['Filter'] != ''){
 				$layer['Filter'] = str_replace('$userid', $this->user->id, $layer['Filter']);
