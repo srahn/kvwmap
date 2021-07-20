@@ -3,8 +3,10 @@
 // Sie können diese Seite nach Ihren Wünschen verändern, sollten sie dann aber nach .../snippets/custom kopieren und die Konstante LAYER_ERROR_PAGE entsprechend anpassen
 
 $email = '';
-$subject = 'Fehler in kvwmap - Thema '.umlaute_javascript($error_layername).' kann nicht angezeigt werden';
-$body = 'Sehr geehrte Damen und Herren,%0D%0A%0D%0Adas Thema '.umlaute_javascript($error_layername).' verursacht einen Fehler und kann nicht angezeigt werden. Folgende Fehlermeldung wird ausgegeben:%0D%0A%0D%0A'.umlaute_javascript($error_details);
+//$subject = 'Fehler in kvwmap - Thema '.umlaute_javascript($error_layername).' kann nicht angezeigt werden';
+//$body = 'Sehr geehrte Damen und Herren,%0D%0A%0D%0Adas Thema '.umlaute_javascript($error_layername).' verursacht einen Fehler und kann nicht angezeigt werden. Folgende Fehlermeldung wird ausgegeben:%0D%0A%0D%0A'.umlaute_javascript($error_details);
+$subject = 'Fehler in kvwmap - Thema  kann nicht angezeigt werden';
+$body = 'Sehr geehrte Damen und Herren,%0D%0A%0D%0Adas Thema verursacht einen Fehler und kann nicht angezeigt werden. Folgende Fehlermeldung wird ausgegeben:%0D%0A%0D%0A';
 global $errors;
 ?>
 <html>
