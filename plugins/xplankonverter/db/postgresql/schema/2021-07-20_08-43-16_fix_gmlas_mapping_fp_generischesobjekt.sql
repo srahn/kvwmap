@@ -16,7 +16,8 @@ WHERE
 
 
 DELETE FROM xplankonverter.mappingtable_gmlas_to_gml
-WHERE feature_class = 'fp_verentsorgung_detailliertezweckbestimmung'
+WHERE o_table = 'fp_verentsorgung_detailliertezweckbestimmung'
 AND o_column = 'value'
 AND t_data_type = 'fp_detailzweckbestverentsorgung';
+
 COMMIT;
