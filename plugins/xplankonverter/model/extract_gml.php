@@ -2133,6 +2133,7 @@ class Gml_extractor {
 	* Returns a possible list of filtered tables that can be associated with rules
 	*/
 	function get_possible_classes_for_regeln($schema) {
+		# escape underscore e.g. for fp_zentralerversorgungsbereich
 		$sql = "
 			SELECT
 				i.table_name
@@ -2144,9 +2145,9 @@ class Gml_extractor {
 					i.table_name IN('xp_ppo','xp_lpo','xp_fpo','xp_tpo','xp_pto','xp_lto') OR
 					i.table_name NOT LIKE 'xp_%'
 				) AND
-				i.table_name NOT LIKE '%_plan' AND
-				i.table_name NOT LIKE '%_bereich' AND
-				i.table_name NOT LIKE '%_textabschnitt'
+				i.table_name NOT LIKE '%\_plan' AND
+				i.table_name NOT LIKE '%\_bereich' AND
+				i.table_name NOT LIKE '%\_textabschnitt'
 			ORDER BY
 				i.table_name;
 			";
