@@ -479,12 +479,12 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
-			case 'getSVG_vertices' : {
-				$GUI->getSVG_vertices();
+			case 'getSVG_all_vertices' : {
+				$GUI->getSVG_all_vertices();
 			} break;
 
-			case 'getSVG_foreign_vertices' : {
-				$GUI->getSVG_foreign_vertices();
+			case 'getSVG_vertices' : {
+				$GUI->getSVG_vertices();
 			} break;
 
 			case 'ResizeMap2Window' : {
