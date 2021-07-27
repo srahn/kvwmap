@@ -823,25 +823,46 @@ class data_import_export {
 		return $ret;
 	}
 
+	
 	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1') {
-		$command = 'export PGCLIENTENCODING='.$encoding.';'.OGR_BINPATH.'ogr2ogr ';
+		$command = '';
 		if ($options != NULL) $command.= $options;
 		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco FID=' . $this->unique_column . ' -lco precision=NO -nlt PROMOTE_TO_MULTI -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
 		if ($sql != NULL) $command.= ' -sql \''.$sql.'\'';
 		$command .= ' PG:"' . $database->get_connection_string(true) . ' active_schema=' . $schema . '"';
 		$command .= ' "' . $importfile . '" ' . $layer;
-		$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
-		$output = array();
-		#echo '<p>command: ' . $command;
-		exec($command, $output, $ret);
-		if ($ret != 0) {
-			# versuche mit noch mal mit UTF-8
-			$command = str_replace('PGCLIENTENCODING='.$encoding, 'PGCLIENTENCODING=UTF-8', $command);
-			#echo '<p>command mit UTF-8: ' . $command;
+		if (OGR_BINPATH == '') {
+			$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';		
+			#echo '<p>command: ' . $command;
+			$url = $gdal_container_connect . urlencode(trim($command));
+			#echo 'url:   ' . $url . '<br><br>';
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,300);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			$output = curl_exec($ch);
+			curl_close($ch);
+			$result = json_decode($output);
+			$ret = $result->exitCode;
+			if ($ret != 0) {
+				$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br>' . $result->stderr;
+			}
+		}
+		else {
+			$command = 'export PGCLIENTENCODING='.$encoding.';'.OGR_BINPATH.'ogr2ogr ' . $command;
+			$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
+			$output = array();
+			#echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
 			if ($ret != 0) {
-				exec("sed -i -e 's/".$database->passwd."/xxxx/g' ".IMAGEPATH.$tablename.'.err');		# falls das DB-Passwort in der Fehlermeldung vorkommt => ersetzen
-				$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; 
+				# versuche mit noch mal mit UTF-8
+				$command = str_replace('PGCLIENTENCODING='.$encoding, 'PGCLIENTENCODING=UTF-8', $command);
+				#echo '<p>command mit UTF-8: ' . $command;
+				exec($command, $output, $ret);
+				if ($ret != 0) {
+					exec("sed -i -e 's/".$database->passwd."/xxxx/g' ".IMAGEPATH.$tablename.'.err');		# falls das DB-Passwort in der Fehlermeldung vorkommt => ersetzen
+					$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; 
+				}
 			}
 		}
 		return $ret;
