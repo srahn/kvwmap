@@ -2127,8 +2127,17 @@ echo '			</table>
 					if($dbStyle['geomtransform'] != '') {
 						$style->setGeomTransform($dbStyle['geomtransform']);
 					}
-          if ($dbStyle['pattern']!='') {
-						$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END");
+          if ($dbStyle['pattern'] != '') {
+						if($this->map_factor != ''){
+							$pattern = explode(' ', $dbStyle['pattern']);
+							foreach($pattern as &$pat){
+								$pat = $pat * $this->map_factor;
+							}
+							$style->updateFromString("STYLE PATTERN " . implode(' ', $pattern) . " END");
+						}
+						else {
+							$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END");
+						}
             $style->linecap = 'butt';
           }
 					if($dbStyle['gap'] != '') {
@@ -2159,30 +2168,6 @@ echo '			</table>
 	        }
         }
 
-        if($this->map_factor != ''){
-          if (MAPSERVERVERSION >= 620) {
-            $pattern = $style->getpatternarray();
-            if($pattern){
-					    foreach($pattern as &$pat){
-					      $pat = $pat * $this->map_factor;
-					    }
-					    $style->setPattern($pattern);
-				    }
-          }
-          else {
-            if($style->symbol > 0){
-              $symbol = $map->getSymbolObjectById($style->symbol);
-              $pattern = $symbol->getpatternarray();
-              if(is_array($pattern) AND $symbol->inmapfile != 1){
-                foreach($pattern as &$pat){
-                  $pat = $pat * $this->map_factor;
-                }
-                $symbol->setpattern($pattern);
-                $symbol->set('inmapfile', 1);
-              }
-            }
-          }
-        }
 				if($dbStyle['size'] != ''){
 					if ($layerset['Datentyp'] == 8) {
 						# Skalierung der Stylegröße when Type Chart
@@ -6742,7 +6727,7 @@ echo '			</table>
 				}
 			}
 	*/
-			#$this->saveMap('');
+			$this->saveMap('');
 			#$this->debug->write("<p>Maßstab des Drucks:" . $this->map_scaledenom,4);
 			$this->drawMap('true');
 
