@@ -6472,7 +6472,7 @@ echo '			</table>
 	function get_dokument_vorschau($dateinamensteil, $remote_url = false) {
 		$type = strtolower($dateinamensteil[1]);
 		$dokument = $dateinamensteil[0] . '.' . $dateinamensteil[1];
-		if (!$remote_url AND in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){
+		if (!$remote_url AND in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ) {
 			# für Bilder und PDFs werden automatisch Thumbnails erzeugt
 			$thumbname = $dateinamensteil[0] . '_thumb.jpg';
 			if (!file_exists($thumbname)) {
@@ -6486,11 +6486,13 @@ echo '			</table>
 			$dateinamensteil[1] = 'gif';
   		switch ($type) {
 				default : {
-					$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
+					$image = imagecreatefromgif(GRAPHICSPATH . 'document.gif');
 					$blue = ImageColorAllocate ($image, 26, 87, 150);
-					if(strlen($type) > 3)$xoffset = 4;
-					imagettftext($image, 12, 0, 23-$xoffset, 34, $blue, WWWROOT.APPLVERSION.'fonts/SourceSansPro-Semibold.ttf', $type);
-					$thumbname = IMAGEPATH.rand(0,100000).'.gif';
+					if (strlen($type) > 3) {
+						$xoffset = 4;
+					}
+					imagettftext($image, 12, 0, 23-$xoffset, 34, $blue, WWWROOT . APPLVERSION . 'fonts/SourceSansPro-Semibold.ttf', $type);
+					$thumbname = IMAGEPATH . rand(0,100000) . '.gif';
 					imagegif($image, $thumbname);
 				}
 			}
@@ -13787,7 +13789,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									
 									if ($this->user->rolle->upload_only_file_metadata == 1 AND array_key_exists($oid, $belated_files)) {
 										foreach ($belated_files[$oid] AS $i => $belated_file) {
-											$file = json_decode($belated_file);											
+											$file = json_decode($belated_file);
 											$where = "
 												`user_id` = " . $this->user->id . " AND
 												`layer_id` = " . $layer_id . " AND
@@ -13860,12 +13862,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		else {
 			if ($this->formvars['embedded'] != '') {
 				# es wurde ein Datensatz aus einem embedded-Formular gespeichert
-				if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+				if ($this->formvars['reload']) {
+					# in diesem Fall wird die komplette Seite neu geladen
 					echo '█currentform.go.value=\'get_last_query\';	overlay_submit(currentform, false);';
 				}
-				else{				# ansonsten wird das embedded-Formular entfernt und das Listen-DIV neu geladen (getrennt durch █)
+				else {
+					# ansonsten wird das embedded-Formular entfernt und das Listen-DIV neu geladen (getrennt durch █)
 					echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
-					if(!empty(GUI::$messages)){
+					if (!empty(GUI::$messages)){
 						echo 'message('.json_encode(GUI::$messages).');';
 					}
 				}
@@ -14015,7 +14019,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     }
     else {
       $this->SachdatenAnzeige($rect);
-			if (false and 		// deaktiviert wegen Sachdatenanzeige im extra Browser-Fenster
+			if (
+				false AND # deaktiviert wegen Sachdatenanzeige im extra Browser-Fenster
 				$this->go == 'Layer_Datensaetze_Loeschen' AND
 				array_reduce(
 					$this->qlayerset,
@@ -14041,74 +14046,91 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     }
   }
 
- # 2006-07-26 pk
-	function SachdatenAnzeige($rect){
+	function SachdatenAnzeige($rect) {
 		$this->qlayerset = array();
 		$last_query_deleted = false;
-		if($this->last_query != ''){
-			foreach($this->last_query['layer_ids'] as $layer_id){
+		if ($this->last_query != '') {
+			foreach($this->last_query['layer_ids'] as $layer_id) {
 				$this->formvars['qLayer'.$layer_id] = 1;
 			}
 		}
-    if(is_string($rect)){
-      $this->querypolygon = $rect;
-    }
-    $this->queryrect = $rect;
-    # Abfragen der Layer, die zur Stelle gehören
-    $layer = $this->user->rolle->getLayer('');
+		if (is_string($rect)){
+			$this->querypolygon = $rect;
+		}
+		$this->queryrect = $rect;
+		# Abfragen der Layer, die zur Stelle gehören
+		$layer = $this->user->rolle->getLayer('');
 		$rollenlayer = $this->user->rolle->getRollenLayer('', 'import');
 		$layerset = array_merge($layer, $rollenlayer);
-    $anzLayer=count($layerset)-1;
+		$anzLayer = count($layerset)-1;
 		$map = (MAPSERVERVERSION < 600) ? ms_newMapObj('') : new mapObj('');
-    $map->set('shapepath', SHAPEPATH);
-    for ($i = 0; $i < $anzLayer; $i++) {
-    	$sql_order = '';
-      if($layerset[$i]['queryable'] AND
-				(value_of($this->formvars, 'qLayer'.$layerset[$i]['Layer_ID'])=='1' OR value_of($this->formvars, 'qLayer'.$layerset[$i]['requires'])=='1') 	AND
-				(($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom)
-				OR $this->last_query != '')) {
-        # Dieser Layer soll abgefragt werden
-				if(value_of($this->formvars, 'anzahl') == ''){
+		$map->set('shapepath', SHAPEPATH);
+		for ($i = 0; $i < $anzLayer; $i++) {
+			$sql_order = '';
+			if (
+				$layerset[$i]['queryable'] AND
+				(
+					value_of($this->formvars, 'qLayer'.$layerset[$i]['Layer_ID'])=='1' OR
+					value_of($this->formvars, 'qLayer'.$layerset[$i]['requires'])=='1'
+				) AND
+				(
+					($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom) OR
+					$this->last_query != ''
+				)
+			) {
+				# Dieser Layer soll abgefragt werden
+				if (value_of($this->formvars, 'anzahl') == '') {
 					$this->formvars['anzahl'] = $layerset[$i]['max_query_rows'] ?: MAXQUERYROWS;
 				}
-        switch ($layerset[$i]['connectiontype']) {
-          case MS_SHAPEFILE : { # Shape File Layer (1)
-            if ($this->formvars['searchradius'] > 0 OR $this->querypolygon != '') {
-              showAlert('Sie können für die Abfrage von Shape- und Rasterlayern nur die einfache Sachdatenabfrage verwenden.');
-            }
-            else{
-              $layer=ms_newLayerObj($map);
-              $layer->set('data', $layerset[$i]['Data']);
-							if($layerset[$i]['tileindex'] != '')$layer->set('tileindex', SHAPEPATH.$layerset[$i]['tileindex']);
-              $layer->set('status',MS_ON);
+				switch ($layerset[$i]['connectiontype']) {
+					case MS_SHAPEFILE : { # Shape File Layer (1)
+						if ($this->formvars['searchradius'] > 0 OR $this->querypolygon != '') {
+							showAlert('Sie können für die Abfrage von Shape- und Rasterlayern nur die einfache Sachdatenabfrage verwenden.');
+						}
+						else {
+							$layer = ms_newLayerObj($map);
+							$layer->set('data', $layerset[$i]['Data']);
+							if ($layerset[$i]['tileindex'] != '') {
+								$layer->set('tileindex', SHAPEPATH.$layerset[$i]['tileindex']);
+							}
+							$layer->set('status',MS_ON);
 							$layer->set('type',$layerset[$i]['Datentyp']);
-              if ($layerset[$i]['template']!='') {
-                $layer->set('template',$layerset[$i]['template']);
-              }
-              else {
-                $layer->set('template', ' ');		# ohne Template kann der Layer über den Mapserver nicht abgefragt werden
-              }
-              $projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
-    					$projTO = ms_newprojectionobj("init=epsg:" . $layerset[$i]['epsg_code']);
+							if ($layerset[$i]['template']!='') {
+								$layer->set('template',$layerset[$i]['template']);
+							}
+							else {
+								$layer->set('template', ' ');		# ohne Template kann der Layer über den Mapserver nicht abgefragt werden
+							}
+							$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
+							$projTO = ms_newprojectionobj("init=epsg:" . $layerset[$i]['epsg_code']);
 							$rect2=ms_newRectObj();
 							$rect2->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 							$rect2->project($projFROM, $projTO);
-							if($layerset[$i]['Datentyp'] == 3){		# bei Rasterlayern nur punktuell abfragen
+							if ($layerset[$i]['Datentyp'] == 3) {
+								# bei Rasterlayern nur punktuell abfragen
 								$point=ms_newPointObj();
 								$point->setXY($rect2->minx+($rect2->maxx-$rect2->minx)/2, $rect2->miny+($rect2->maxy-$rect2->miny)/2);
 								@$layer->queryByPoint($point, MS_MULTIPLE, 0);
 							}
-							else{
+							else {
 								@$layer->queryByRect($rect2);
 							}
-              $anzResult=$layer->getNumResults();
-              for ($j=0;$j<$anzResult;$j++){
+							$anzResult=$layer->getNumResults();
+							for ($j = 0; $j < $anzResult; $j++) {
 								$result = $layer->getResult($j);
-								if(MAPSERVERVERSION < '600') $s = $layer->getFeature($result->shapeindex);
-								else $s = $layer->getShape($result);
+								if (MAPSERVERVERSION < '600') {
+									$s = $layer->getFeature($result->shapeindex);
+								}
+								else {
+									$s = $layer->getShape($result);
+								}
 								$count = 0;
-								foreach($s->values as $key => $value){
-									if($layerset[$i]['Datentyp'] != 3 OR in_array($key, array('x','y','value_0'))){		# für Rasterlayer nur diese Daten ausgeben
+								foreach ($s->values as $key => $value) {
+									if (
+										$layerset[$i]['Datentyp'] != 3 OR
+										in_array($key, array('x','y','value_0'))
+									) {
+										# für Rasterlayer nur diese Daten ausgeben
 										$layerset[$i]['shape'][$j][$key] = utf8_encode($value);
 										$layerset[$i]['attributes']['name'][$count] = $key;
 										$layerset[$i]['attributes']['privileg'][$count] = 0;
@@ -14151,8 +14173,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$this->qlayerset[]=$layerset[$i];
 					} break;
 
-					case MS_POSTGIS : { # PostGIS Layer (6)
-						if($layerset[$i]['pfad'] != ''){
+					case MS_POSTGIS : {
+						# PostGIS Layer (6)
+						if ($layerset[$i]['pfad'] != '') {
 							# Für die performante Suche wird immer zunächst ein Suchrechteck (searchbox) gebildet, egal ob punktuell
 							# oder in einem Suchfenster gesucht wird
 							# Für die Bildung der searchbox wird entweder mit dem angegebenen Suchradius tolerance in der Einheit toleranceunit
@@ -14172,17 +14195,20 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							$path = $layerset[$i]['pfad'];
 							$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 							$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames'], false, true);
-							if($layerset[$i]['Layer_ID'] > 0){			# bei Rollenlayern nicht
+							if ($layerset[$i]['Layer_ID'] > 0) {
+								# bei Rollenlayern nicht
 								$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
 							}
-							else $newpath = $path;
+							else {
+								$newpath = $path;
+							}
 
 							# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)  ---> steht weiter unten
 
 							# order by rausnehmen
 							$orderbyposition = strrpos(strtolower($newpath), 'order by');
 							$lastfromposition = strrpos(strtolower($newpath), 'from');
-							if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+							if ($orderbyposition !== false AND $orderbyposition > $lastfromposition) {
 								$layerset[$i]['attributes']['orderby'] = ' '.substr($newpath, $orderbyposition);
 								$newpath = substr($newpath, 0, $orderbyposition);
 							}
@@ -14194,17 +14220,17 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								$newpath = substr($newpath, 0, $groupbyposition);
 							}
 
-							for($j = 0; $j < count($layerset[$i]['attributes']['name']); $j++){
+							for($j = 0; $j < count($layerset[$i]['attributes']['name']); $j++) {
 								$layerset[$i]['attributes']['privileg'][$j] = $privileges[$layerset[$i]['attributes']['name'][$j]];
 								$layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['name'][$j]] = $privileges[$layerset[$i]['attributes']['name'][$j]];
 							}
 							$distinct = false;
 							$distinctpos = strpos(strtolower($newpath), 'distinct');
-							if($distinctpos !== false && $distinctpos < 10){
+							if ($distinctpos !== false && $distinctpos < 10) {
 								$pfad = substr(trim($newpath), $distinctpos+8);
 								$distinct = true;
 							}
-							else{
+							else {
 								$pfad = substr(trim($newpath), 7);
 							}
 							if ($layerset[$i]['Layer_ID'] > 0 AND empty($privileges)) {
@@ -14661,13 +14687,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->saveMap('');
 		}*/
 		$this->main = 'sachdatenanzeige.php';
-  }
-
-  function WLDGE_Auswaehlen() {
-    $this->debug->write("kvwmap.php WLDGE_Auswaehlen",4);
-    $this->titel='WLDGE Datei auswählen';
-    $this->main='wldgedateiauswahl.php';
-  }
+	}
 
   function createReferenceMap($width, $height, $refwidth, $refheight, $angle, $minx, $miny, $maxx, $maxy, $zoomfactor, $refmapfile){
 		$refmap = (MAPSERVERVERSION < 600) ? ms_newMapObj($refmapfile) : new mapObj($refmapfile);
