@@ -6469,23 +6469,44 @@ echo '			</table>
 		}
 	}
 
-	function get_dokument_vorschau($dateinamensteil, $remote_url = false) {
-		$type = strtolower($dateinamensteil[1]);
-		$dokument = $dateinamensteil[0] . '.' . $dateinamensteil[1];
-		if (!$remote_url AND in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){
-			# für Bilder und PDFs werden automatisch Thumbnails erzeugt
-			$thumbname = $dateinamensteil[0] . '_thumb.jpg';
-			if (!file_exists($thumbname)) {
-				$command = IMAGEMAGICKPATH . 'convert -filter Hanning "' . $dokument . '"[0] -quality 75 -background white -flatten -resize ' . PREVIEW_IMAGE_WIDTH . 'x1000\> "' . $thumbname . '"';
-				#echo 'Erzeuge Thumbnail mit commando: ' . $command;
-				exec($command);
+	function get_dokument_vorschau($value, $document_path, $document_url) {
+		$doc_type = '';
+		$pfadteil = explode('&original_name=', $value);
+		$dateipfad = $pfadteil[0];
+		if ($document_url != '') {
+			if (parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST) != parse_url($document_url, PHP_URL_HOST)) {
+				# die URL verweist auf einen anderen Server
+				$doc_type = 'remote_url';
 			}
+			$dateipfad = url2filepath($dateipfad, $layer['document_path'], $layer['document_url']);
 		}
-		else {
-			#echo '<br>alle anderen Dokumenttypen oder Dateien auf fremden Servern bekommen entsprechende Dokumentensymbole als Vorschaubild';
-			$dateinamensteil[1] = 'gif';
-  		switch ($type) {
-				default : {
+		if ($dateipfad != '') {
+			if (file_exists($dateipfad) OR $doc_type == 'remote_url') {
+				$pathinfo = pathinfo($dateipfad);
+				if ($doc_type != 'remote_url') {
+					$type = strtolower($pathinfo['extension']);
+					if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
+						$doc_type = 'local_img';
+					}
+					elseif ($layer['document_url'] != '' AND in_array($type, array('mp4'))) {
+						$doc_type = 'local_videostream';
+					}
+					else {
+						$doc_type = 'local_doc';
+					}
+				}
+				###### Vorschaubild generieren #################
+				if ($doc_type == 'local_img'){
+					# für lokale Bilder und PDFs werden automatisch Thumbnails erzeugt
+					$thumbname = $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg';
+					if (!file_exists($thumbname)) {
+						$command = IMAGEMAGICKPATH . 'convert -filter Hanning "' . $dateipfad . '"[0] -quality 75 -background white -flatten -resize ' . PREVIEW_IMAGE_WIDTH . 'x1000\> "' . $thumbname . '"';
+						#echo 'Erzeuge Thumbnail mit commando: ' . $command;
+						exec($command);
+					}
+				}
+				else {
+					#	alle anderen Dokumenttypen oder Dateien auf fremden Servern bekommen entsprechende Dokumentensymbole als Vorschaubild
 					$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
 					$blue = ImageColorAllocate ($image, 26, 87, 150);
 					if(strlen($type) > 3)$xoffset = 4;
@@ -6493,9 +6514,36 @@ echo '			</table>
 					$thumbname = IMAGEPATH.rand(0,100000).'.gif';
 					imagegif($image, $thumbname);
 				}
+				################################################
+				if ($document_url != '') {
+					$original_name = basename($dateipfad);
+					$doc_src = $value;										# URL zu der Datei (komplette URL steht schon in $value)
+					$target = 'target="_blank"';
+					if(dirname($thumbname).'/' == IMAGEPATH){
+						$thumbname = IMAGEURL.basename($thumbname);
+					}
+					else{
+						$thumbname = dirname($value).'/'.basename($thumbname);
+					}
+					$thumb_src = $thumbname;
+				}
+				else {
+					$original_name = $pfadteil[1];
+					$this->allowed_documents[] = addslashes($dateipfad);
+					$this->allowed_documents[] = addslashes($thumbname);
+					$url = IMAGEURL.$this->document_loader_name.'?dokument=';
+					$doc_src = $url . $value;
+					$thumb_src = $url . $thumbname;
+				}				
+				$preview['filesize'] = human_filesize($dateipfad);
 			}
 		}
-		return $thumbname;
+		$preview['doc_src'] = $doc_src;
+		$preview['doc_type'] = $doc_type;
+		$preview['thumb_src'] = $thumb_src;
+		$preview['original_name'] = $original_name;
+		$preview['target'] = $target;
+		return $preview;
 	}
 
 	function write_document_loader(){
@@ -15113,25 +15161,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								foreach($values as $value){
 									switch ($attributes['form_element_type'][$j]){
 										case 'Dokument' : {
-											$dokumentpfad = $value;
-											$pfadteil = explode('&original_name=', $dokumentpfad);
-											$dateiname = $pfadteil[0];
-											if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
-											$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
-											$original_name = $pfadteil[1];
-											$dateinamensteil=explode('.', $dateiname);
-											$type = $dateinamensteil[1];
-											$thumbname = $this->get_dokument_vorschau($dateinamensteil);
-											if($layer['document_url'] != ''){
-												$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
-												$url = '';
-											}
-											else{
-												$this->allowed_documents[] = addslashes($dateiname);
-												$this->allowed_documents[] = addslashes($thumbname);
-												$url = IMAGEURL.$this->document_loader_name.'?dokument=';
-											}
-											$pictures .= '| '.$url.$thumbname;
+											$preview = $this->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url']);
+											$pictures .= '| ' . $preview['thumb_src'];
 										}break;
 										case 'Link': {
 											$attribcount++;
