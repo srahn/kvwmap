@@ -6,6 +6,16 @@ include_once(PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Kl
 function go_switch_nachweisverwaltung($go){
 	global $GUI;	
 	switch($go){
+		case 'LENRIS_get_all_nachweise' : {
+			$GUI->checkCaseAllowed('LENRIS');
+			$GUI->LENRIS_get_all_nachweise();
+	  } break;
+		
+		case 'LENRIS_get_new_nachweise' : {
+			$GUI->checkCaseAllowed('LENRIS');
+			$GUI->LENRIS_get_new_nachweise();
+	  } break;		
+		
 		case 'Antraege_Anzeigen' : {
 			$GUI->checkCaseAllowed('Antraege_Anzeigen');
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden

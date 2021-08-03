@@ -46,6 +46,44 @@ class Nachweis {
     $this->database=$database;
     $this->client_epsg=$client_epsg;
   }
+	
+	function LENRIS_get_all_nachweise(){
+		$sql = "
+			SELECT 
+				*
+      FROM 
+				nachweisverwaltung.n_nachweise
+			ORDER BY id";
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+      $nachweise = pg_fetch_all($ret[1]);
+			foreach ($nachweise as $index => $nachweis) {
+				$nachweise[$index]['last_modified'] = date('Y-m-d H:i:s', filemtime($nachweis['link_datei']));
+			}
+			$json = json_encode($nachweise);
+			echo $json;
+		}
+	}
+	
+	function LENRIS_get_new_nachweise(){
+		$sql = "
+			SELECT 
+				*
+      FROM 
+				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.lenris_worker as b on a.id = b.id_nachweis
+			WHERE
+				b.db_action = 'INSERT'
+			ORDER BY a.id";
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+      $nachweise = pg_fetch_all($ret[1]);
+			foreach ($nachweise as $index => $nachweis) {
+				$nachweise[$index]['last_modified'] = date('Y-m-d H:i:s', filemtime($nachweis['link_datei']));
+			}
+			$json = json_encode($nachweise);
+			echo $json;
+		}
+	}	
 
 	function check_documentpath($old_dataset){		
 		$ret=$this->getNachweise($old_dataset['id'],'','','','','','','','bySingleID','','');
