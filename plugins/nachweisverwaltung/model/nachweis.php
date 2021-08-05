@@ -68,7 +68,7 @@ class Nachweis {
 	function LENRIS_get_new_nachweise(){
 		$sql = "
 			SELECT 
-				*
+				a.*
       FROM 
 				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.lenris_worker as b on a.id = b.id_nachweis
 			WHERE
@@ -78,12 +78,32 @@ class Nachweis {
     if (!$ret[0]) {
       $nachweise = pg_fetch_all($ret[1]);
 			foreach ($nachweise as $index => $nachweis) {
-				$nachweise[$index]['last_modified'] = date('Y-m-d H:i:s', filemtime($nachweis['link_datei']));
+				$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', filemtime($nachweis['link_datei']));
 			}
 			$json = json_encode($nachweise);
 			echo $json;
 		}
-	}	
+	}
+	
+	function LENRIS_get_changed_nachweise(){
+		$sql = "
+			SELECT 
+				a.*
+      FROM 
+				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.lenris_worker as b on a.id = b.id_nachweis
+			WHERE
+				b.db_action = 'UPDATE'
+			ORDER BY a.id";
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+      $nachweise = pg_fetch_all($ret[1]);
+			foreach ($nachweise as $index => $nachweis) {
+				$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', filemtime($nachweis['link_datei']));
+			}
+			$json = json_encode($nachweise);
+			echo $json;
+		}
+	}		
 
 	function check_documentpath($old_dataset){		
 		$ret=$this->getNachweise($old_dataset['id'],'','','','','','','','bySingleID','','');

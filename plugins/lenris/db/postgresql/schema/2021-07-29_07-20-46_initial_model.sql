@@ -32,14 +32,16 @@ CREATE TABLE client_nachweise
   nachweis_id integer NOT NULL,
   client_nachweis_id integer NOT NULL,
 	client_id integer NOT NULL,
-	dokument_last_modified timestamp without time zone
+	document_last_modified timestamp without time zone
 );
 
 
 CREATE TABLE zu_holende_dokumente
 (
   client_id integer NOT NULL,
-	dokument character varying
+	client_nachweis_id integer NOT NULL,
+	dokument character varying,
+  CONSTRAINT pk_zu_holende_dokumente PRIMARY KEY (client_id, client_nachweis_id)
 	-- order ?
 );
 

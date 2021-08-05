@@ -31,6 +31,11 @@
 		$nachweis->LENRIS_get_new_nachweise();
 	};	
 	
+	$GUI->LENRIS_get_changed_nachweise = function() use ($GUI){
+		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$nachweis->LENRIS_get_changed_nachweise();
+	};	
+	
 	$GUI->getGeomPreview = function($id) use ($GUI){
 		$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 		$layerset = $GUI->user->rolle->getLayer(LAYER_ID_NACHWEISE);
