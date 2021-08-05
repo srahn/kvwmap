@@ -210,7 +210,7 @@
 												$preview_link = '<a class="preview_link" ' . $preview['target'] . ' href="' . $preview['doc_src'] . '"><img class="preview_doc" src="' . $preview['thumb_src'] . '"></a>';
 											}break;
 											
-											case 'local_videostream' : {	# Videostream
+											case 'videostream' : {	# Videostream
 												$preview_link = '
 													<video width="'.PREVIEW_IMAGE_WIDTH.'" controls>
 														<source src="' . $preview['doc_src'] . '" type="video/mp4">

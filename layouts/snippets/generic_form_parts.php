@@ -566,21 +566,21 @@
 								$onmouseover = 'onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
 							}
 							switch ($preview['doc_type']) {
-								case 'local_img' : {	# Bilder mit Vorschaubild
+								case 'local_img' : { # Bilder mit Vorschaubild
 									$datapart .= '<a href="' . $preview['doc_src'] . '" ' . $preview['target'] . '><img class="preview_image" src="' . $preview['thumb_src'] . '" ' . $onmouseover . '></a>';
-								}break;
-								
-								case 'local_doc' : case 'remote_url' : {	# lokale Dateien oder fremde URLs
+								} break;
+
+								case 'local_doc' : case 'remote_url' : { # lokale Dateien oder fremde URLs
 									$datapart .= '<a href="' . $preview['doc_src'] . '" ' . $preview['target'] . '><img class="preview_doc" src="' . $preview['thumb_src'] . '"></a>';
-								}break;							
-								
-								case 'local_videostream' : {	# Videostream
+								} break;
+
+								case 'videostream' : { # Videostream
 									$datapart .= '
-										<video width="'.PREVIEW_IMAGE_WIDTH.'" controls>
+										<video width="' . PREVIEW_IMAGE_WIDTH . '" controls>
 											<source src="' . $preview['doc_src'] . '" type="video/mp4">
 										</video>
-										';
-								}break;
+									';
+								} break;
 							}
 							$datapart .= '<br>';
 							if ($attribute_privileg != '0' AND !$lock[$k]) {
