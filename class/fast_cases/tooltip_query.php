@@ -581,81 +581,91 @@ class GUI {
     }
   }
 
+	function create_dokument_vorschau($doc_type, $pathinfo) {
+		if ($doc_type == 'local_img') {
+			# für lokale Bilder und PDFs werden automatisch Thumbnails erzeugt
+			$thumbname = $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg';
+			if (!file_exists($thumbname)) {
+				$command = IMAGEMAGICKPATH . 'convert -filter Hanning "' . $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '.' . $pathinfo['extension'] . '"[0] -quality 75 -background white -flatten -resize ' . PREVIEW_IMAGE_WIDTH . 'x1000\> "' . $thumbname . '"';
+				#echo 'Erzeuge Thumbnail mit commando: ' . $command;
+				exec($command);
+			}
+		}
+		else {
+			#	alle anderen Dokumenttypen oder Dateien auf fremden Servern bekommen entsprechende Dokumentensymbole als Vorschaubild
+			$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
+			$blue = ImageColorAllocate ($image, 26, 87, 150);
+			if (strlen(strtolower($pathinfo['extension'])) > 3) {
+				$xoffset = 4;
+			}
+			imagettftext($image, 12, 0, 23-$xoffset, 34, $blue, WWWROOT.APPLVERSION.'fonts/SourceSansPro-Semibold.ttf', $pathinfo['extension']);
+			$thumbname = IMAGEPATH.rand(0,100000).'.gif';
+			imagegif($image, $thumbname);
+		}
+		return $thumbname;
+	}
+
 	function get_dokument_vorschau($value, $document_path, $document_url) {
-		$doc_type = '';
+		$doc_src = $doc_type = $thumb_src = $original_name = $target = $filesize = '';
+
 		$pfadteil = explode('&original_name=', $value);
 		$dateipfad = $pfadteil[0];
-		if ($document_url != '') {
-			if (parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST) != parse_url($document_url, PHP_URL_HOST)) {
+
+		if ($layer['document_url'] != '') {
+			if (in_array($type, array('mp4'))) {
+				$doc_type = 'videostream';
+			}
+			else if (parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST) != parse_url($document_url, PHP_URL_HOST)) {
 				# die URL verweist auf einen anderen Server
 				$doc_type = 'remote_url';
 			}
-			$dateipfad = url2filepath($dateipfad, $layer['document_path'], $layer['document_url']);
+			$dateipfad = url2filepath($dateipfad, $document_path, $document_url);
 		}
-		if ($dateipfad != '') {
-			if (file_exists($dateipfad) OR $doc_type == 'remote_url') {
-				$pathinfo = pathinfo($dateipfad);
-				if ($doc_type != 'remote_url') {
-					$type = strtolower($pathinfo['extension']);
-					if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
-						$doc_type = 'local_img';
-					}
-					elseif ($layer['document_url'] != '' AND in_array($type, array('mp4'))) {
-						$doc_type = 'local_videostream';
-					}
-					else {
-						$doc_type = 'local_doc';
-					}
-				}
-				###### Vorschaubild generieren #################
-				if ($doc_type == 'local_img'){
-					# für lokale Bilder und PDFs werden automatisch Thumbnails erzeugt
-					$thumbname = $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg';
-					if (!file_exists($thumbname)) {
-						$command = IMAGEMAGICKPATH . 'convert -filter Hanning "' . $dateipfad . '"[0] -quality 75 -background white -flatten -resize ' . PREVIEW_IMAGE_WIDTH . 'x1000\> "' . $thumbname . '"';
-						#echo 'Erzeuge Thumbnail mit commando: ' . $command;
-						exec($command);
-					}
+		if (file_exists($dateipfad) OR $doc_type != '') {
+			$pathinfo = pathinfo($dateipfad);
+			if ($doc_type == '') {
+				$type = strtolower($pathinfo['extension']);
+				if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
+					$doc_type = 'local_img';
 				}
 				else {
-					#	alle anderen Dokumenttypen oder Dateien auf fremden Servern bekommen entsprechende Dokumentensymbole als Vorschaubild
-					$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
-					$blue = ImageColorAllocate ($image, 26, 87, 150);
-					if(strlen($type) > 3)$xoffset = 4;
-					imagettftext($image, 12, 0, 23-$xoffset, 34, $blue, WWWROOT.APPLVERSION.'fonts/SourceSansPro-Semibold.ttf', $type);
-					$thumbname = IMAGEPATH.rand(0,100000).'.gif';
-					imagegif($image, $thumbname);
+					$doc_type = 'local_doc';
 				}
-				################################################
-				if ($document_url != '') {
-					$original_name = basename($dateipfad);
-					$doc_src = $value;										# URL zu der Datei (komplette URL steht schon in $value)
-					$target = 'target="_blank"';
-					if(dirname($thumbname).'/' == IMAGEPATH){
-						$thumbname = IMAGEURL.basename($thumbname);
-					}
-					else{
-						$thumbname = dirname($value).'/'.basename($thumbname);
-					}
-					$thumb_src = $thumbname;
-				}
-				else {
-					$original_name = $pfadteil[1];
-					$this->allowed_documents[] = addslashes($dateipfad);
-					$this->allowed_documents[] = addslashes($thumbname);
-					$url = IMAGEURL.$this->document_loader_name.'?dokument=';
-					$doc_src = $url . $value;
-					$thumb_src = $url . $thumbname;
-				}				
-				$preview['filesize'] = human_filesize($dateipfad);
 			}
+
+			$thumbname = $this->create_dokument_vorschau($doc_type, $pathinfo);
+
+			if ($document_url != '') {
+				$original_name = basename($dateipfad);
+				$doc_src = $value; # URL zu der Datei (komplette URL steht schon in $value)
+				$target = 'target="_blank"';
+				if (dirname($thumbname).'/' == IMAGEPATH){
+					$thumbname = IMAGEURL.basename($thumbname);
+				}
+				else {
+					$thumbname = dirname($value).'/'.basename($thumbname);
+				}
+				$thumb_src = $thumbname;
+			}
+			else {
+				$original_name = $pfadteil[1];
+				$this->allowed_documents[] = addslashes($dateipfad);
+				$this->allowed_documents[] = addslashes($thumbname);
+				$url = IMAGEURL . $this->document_loader_name . '?dokument=';
+				$doc_src = $url . $value;
+				$thumb_src = $url . $thumbname;
+			}
+			$filesize = human_filesize($dateipfad);
 		}
-		$preview['doc_src'] = $doc_src;
-		$preview['doc_type'] = $doc_type;
-		$preview['thumb_src'] = $thumb_src;
-		$preview['original_name'] = $original_name;
-		$preview['target'] = $target;
-		return $preview;
+
+		return array(
+			'doc_src' => $doc_src,
+			'doc_type' => $doc_type,
+			'thumb_src' => $thumb_src,
+			'original_name' => $original_name,
+			'target' => $target,
+			'filesize' => $filesize
+		);
 	}
 
 	function write_document_loader(){

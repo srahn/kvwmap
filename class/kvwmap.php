@@ -6469,81 +6469,154 @@ echo '			</table>
 		}
 	}
 
+	function is_local_file($pfad) {
+		return (strpos($pfad, '&original_name=') !== false);
+	}
+
+	/**
+	 * Function return typ of document
+	 * local_img when doc_value is a local img
+	 * local_doc when doc_value is a local file but not an image
+	 * 
+	 * If value is a pfad to a local image return local_img
+	 * If doc_url is set it is an url
+	 * If the url is a link to a video file return video_url
+	 * If the url point to the origin of the server return local_url
+	 * else remote_url
+	 * If nothing of this function returns unknown
+	 */
+	function get_document_type($doc_value, $doc_path, $doc_url) {
+		if (is_local_file($doc_val) AND
+			file_exists(substr($doc_val, 0, strpos($doc_val, '&original_name='))) AND
+			is_readable(substr($doc_val, 0, strpos($doc_val, '&original_name=')))
+		) {
+			if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
+				$doc_type = 'local_img';
+			}
+			elseif ($document_url != '' AND in_array($type, array('mp4'))) {
+				$doc_type = 'local_videostream';
+			}
+			else {
+				$doc_type = 'local_doc';
+			}
+			return 'local_img';
+		}
+	}
+
+	function create_dokument_vorschau($doc_type, $pathinfo) {
+		if ($doc_type == 'local_img') {
+			# für lokale Bilder und PDFs werden automatisch Thumbnails erzeugt
+			$thumbname = $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg';
+			if (!file_exists($thumbname)) {
+				$command = IMAGEMAGICKPATH . 'convert -filter Hanning "' . $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '.' . $pathinfo['extension'] . '"[0] -quality 75 -background white -flatten -resize ' . PREVIEW_IMAGE_WIDTH . 'x1000\> "' . $thumbname . '"';
+				#echo 'Erzeuge Thumbnail mit commando: ' . $command;
+				exec($command);
+			}
+		}
+		else {
+			#	alle anderen Dokumenttypen oder Dateien auf fremden Servern bekommen entsprechende Dokumentensymbole als Vorschaubild
+			$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
+			$blue = ImageColorAllocate ($image, 26, 87, 150);
+			if (strlen(strtolower($pathinfo['extension'])) > 3) {
+				$xoffset = 4;
+			}
+			imagettftext($image, 12, 0, 23-$xoffset, 34, $blue, WWWROOT.APPLVERSION.'fonts/SourceSansPro-Semibold.ttf', $pathinfo['extension']);
+			$thumbname = IMAGEPATH.rand(0,100000).'.gif';
+			imagegif($image, $thumbname);
+		}
+		return $thumbname;
+	}
+
+	/**
+	 * Function create a preview image of a document or an pictogram for documents
+	 * from which we can not create an image depending on the type of the document
+	 * and return the infos about this document type and preview file.
+	 * @param string $value Wert der in dem Dokumentattribut in der Datenbank steht.
+	 * @param string $document_path Pfad für Dokumente in dem Layer.
+	 * @param string $document_url URL für den Zugriff auf die Dokumente von außen.
+	 * @return array[ Array with values about doc type and preview with the following elements:
+	 *	'doc_src' => string, URL für den Zugriff auf die Datei von außen
+	 *	'doc_type' => string, Art des Dokumentes und damit auch der typ der Dokumentenvorschau
+	 *	'thumb_src' => string, URL auf das Vorschaubild
+	 *	'$original_name' => string, Name der Datei, die original hochgeladen wurde.
+	 *	'target' => string, Ob der Link auf das Dokument im gleichen Tab aufgehen soll (leer) oder in einem neuen Tab oder Fenster (_blank)
+	 *	'$preview_filesize' => string, Größe der Datei des Dokumentes
+	 * ]
+	 * Fälle von dokument_vorschau
+	 * doc_type = local_img
+	 * 	- Datei ist auf dem Server, Thumb vom Bild muss erzeugt werden, doc_src auf document_loader, mit mouseover
+	 * 	- Datei ist auf dem Server, Thumb vom Bild muss erzeugt werden, doc_src auf download alias, mit mouseover
+	 * doc_type = local_doc
+	 * 	- Datei ist auf dem Server, Thumb vom Piktogram mit oder ohne Extension im Text muss erzeugt werden und Kopie nach IMAGEPATH, doc_src auf IMAGEPATH
+	 * 	- Datei ist auf dem Server, Thumb vom Piktogram mit oder ohne Extension im Text muss erzeugt werden und Kopie nach IMAGEPATH, doc_src auf download alias
+   * doc_type = videostream
+	 *  - egal ob lokal oder remote, Es ist ein Video, Anzeige des Videos ohne Vorschau, Link auf die Datei direkt über die URL
+	 * doc_type = remote_url
+	 *  - Datei ist nicht auf dem Server (Remote URL), Link auf die Datei direkt über die URL
+	 * 		- Vorschau als Piktogram mit Extension
+	 * 		- Vorschau als Piktogram ohne Extension
+	 */
 	function get_dokument_vorschau($value, $document_path, $document_url) {
-		$doc_type = '';
+		$doc_src = $doc_type = $thumb_src = $original_name = $target = $filesize = '';
+
 		$pfadteil = explode('&original_name=', $value);
 		$dateipfad = $pfadteil[0];
-		if ($document_url != '') {
-			if (parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST) != parse_url($document_url, PHP_URL_HOST)) {
+
+		if ($layer['document_url'] != '') {
+			if (in_array($type, array('mp4'))) {
+				$doc_type = 'videostream';
+			}
+			else if (parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST) != parse_url($document_url, PHP_URL_HOST)) {
 				# die URL verweist auf einen anderen Server
 				$doc_type = 'remote_url';
 			}
-			$dateipfad = url2filepath($dateipfad, $layer['document_path'], $layer['document_url']);
+			$dateipfad = url2filepath($dateipfad, $document_path, $document_url);
 		}
-		if ($dateipfad != '') {
-			if (file_exists($dateipfad) OR $doc_type == 'remote_url') {
-				$pathinfo = pathinfo($dateipfad);
-				if ($doc_type != 'remote_url') {
-					$type = strtolower($pathinfo['extension']);
-					if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
-						$doc_type = 'local_img';
-					}
-					elseif ($layer['document_url'] != '' AND in_array($type, array('mp4'))) {
-						$doc_type = 'local_videostream';
-					}
-					else {
-						$doc_type = 'local_doc';
-					}
-				}
-				###### Vorschaubild generieren #################
-				if ($doc_type == 'local_img'){
-					# für lokale Bilder und PDFs werden automatisch Thumbnails erzeugt
-					$thumbname = $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg';
-					if (!file_exists($thumbname)) {
-						$command = IMAGEMAGICKPATH . 'convert -filter Hanning "' . $dateipfad . '"[0] -quality 75 -background white -flatten -resize ' . PREVIEW_IMAGE_WIDTH . 'x1000\> "' . $thumbname . '"';
-						#echo 'Erzeuge Thumbnail mit commando: ' . $command;
-						exec($command);
-					}
+		if (file_exists($dateipfad) OR $doc_type != '') {
+			$pathinfo = pathinfo($dateipfad);
+			if ($doc_type == '') {
+				$type = strtolower($pathinfo['extension']);
+				if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
+					$doc_type = 'local_img';
 				}
 				else {
-					#	alle anderen Dokumenttypen oder Dateien auf fremden Servern bekommen entsprechende Dokumentensymbole als Vorschaubild
-					$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
-					$blue = ImageColorAllocate ($image, 26, 87, 150);
-					if(strlen($type) > 3)$xoffset = 4;
-					imagettftext($image, 12, 0, 23-$xoffset, 34, $blue, WWWROOT.APPLVERSION.'fonts/SourceSansPro-Semibold.ttf', $type);
-					$thumbname = IMAGEPATH.rand(0,100000).'.gif';
-					imagegif($image, $thumbname);
+					$doc_type = 'local_doc';
 				}
-				################################################
-				if ($document_url != '') {
-					$original_name = basename($dateipfad);
-					$doc_src = $value;										# URL zu der Datei (komplette URL steht schon in $value)
-					$target = 'target="_blank"';
-					if(dirname($thumbname).'/' == IMAGEPATH){
-						$thumbname = IMAGEURL.basename($thumbname);
-					}
-					else{
-						$thumbname = dirname($value).'/'.basename($thumbname);
-					}
-					$thumb_src = $thumbname;
-				}
-				else {
-					$original_name = $pfadteil[1];
-					$this->allowed_documents[] = addslashes($dateipfad);
-					$this->allowed_documents[] = addslashes($thumbname);
-					$url = IMAGEURL.$this->document_loader_name.'?dokument=';
-					$doc_src = $url . $value;
-					$thumb_src = $url . $thumbname;
-				}				
-				$preview['filesize'] = human_filesize($dateipfad);
 			}
+
+			$thumbname = $this->create_dokument_vorschau($doc_type, $pathinfo);
+
+			if ($document_url != '') {
+				$original_name = basename($dateipfad);
+				$doc_src = $value; # URL zu der Datei (komplette URL steht schon in $value)
+				$target = 'target="_blank"';
+				if (dirname($thumbname).'/' == IMAGEPATH){
+					$thumbname = IMAGEURL.basename($thumbname);
+				}
+				else {
+					$thumbname = dirname($value).'/'.basename($thumbname);
+				}
+				$thumb_src = $thumbname;
+			}
+			else {
+				$original_name = $pfadteil[1];
+				$this->allowed_documents[] = addslashes($dateipfad);
+				$this->allowed_documents[] = addslashes($thumbname);
+				$url = IMAGEURL . $this->document_loader_name . '?dokument=';
+				$doc_src = $url . $value;
+				$thumb_src = $url . $thumbname;
+			}
+			$filesize = human_filesize($dateipfad);
 		}
-		$preview['doc_src'] = $doc_src;
-		$preview['doc_type'] = $doc_type;
-		$preview['thumb_src'] = $thumb_src;
-		$preview['original_name'] = $original_name;
-		$preview['target'] = $target;
-		return $preview;
+
+		return array(
+			'doc_src' => $doc_src,
+			'doc_type' => $doc_type,
+			'thumb_src' => $thumb_src,
+			'original_name' => $original_name,
+			'target' => $target,
+			'filesize' => $filesize
+		);
 	}
 
 	function write_document_loader(){
