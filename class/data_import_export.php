@@ -1041,7 +1041,7 @@ class data_import_export {
 			$user->rolle->language
 		);
 		$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-		$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
+		$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
 		$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
 
 		# Where-Klausel aus Sachdatenabfrage-SQL
@@ -1082,7 +1082,7 @@ class data_import_export {
 			}
     }
 
-    $sql = $stelle->parse_path($layerdb, $sql, $selection);		# parse_path wird hier benutzt um die Auswahl der Attribute auf das Pfad-SQL zu übertragen
+    $sql = $stelle->parse_path($layerdb, $sql, $selection, $this->attributes);		# parse_path wird hier benutzt um die Auswahl der Attribute auf das Pfad-SQL zu übertragen
 
 		# oid auch abfragen
 		$distinctpos = strpos(strtolower($sql), 'distinct');
@@ -1288,7 +1288,7 @@ class data_import_export {
 				}
 				$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, true);
 				for ($i = 0; $i < count($result); $i++) {
-					$doc_zip = $this->copy_documents_to_export_folder($result[$i], $this->attributes, $layerset[0]['maintable'], $folder);
+					$doc_zip = $this->copy_documents_to_export_folder($result[$i], $this->attributes, $layerset[0]['maintable'], $folder, $layerset[0]['document_path'], $layerset[0]['document_url']);
 					$zip = $zip || $doc_zip;
 				}
 			}
@@ -1374,7 +1374,7 @@ class data_import_export {
 		}
 	}
 		
-	function copy_documents_to_export_folder($result, $attributes, $maintable, $folder){
+	function copy_documents_to_export_folder($result, $attributes, $maintable, $folder, $doc_path, $doc_url){
 		global $GUI;
 		$zip = false;
 		foreach ($result As $key => $value) {
@@ -1382,33 +1382,48 @@ class data_import_export {
 			if ($attributes['form_element_type'][$j] == 'SubFormEmbeddedPK') {
 				$GUI->getSubFormResultSet($attributes, $j, $maintable, $result);
 				foreach ($GUI->qlayerset[0]['shape'] as $sub_result) {
-					$zip2 = $this->copy_documents_to_export_folder($sub_result, $GUI->qlayerset[0]['attributes'], $GUI->qlayerset[0]['maintable'], $folder);
+					$zip2 = $this->copy_documents_to_export_folder($sub_result, $GUI->qlayerset[0]['attributes'], $GUI->qlayerset[0]['maintable'], $folder, $doc_path, $doc_url);
 					$zip = $zip || $zip2;
 				}
 			}
-			if ($attributes['form_element_type'][$j] == 'Dokument' AND $value != '') {
-				$docs = array($value);
-				if (substr($attributes['type'][$j], 0, 1) == '_') {
-					# Array
-					$docs = explode(',', $value);
-				}
-				foreach ($docs as $doc) {
-					$doc = trim($doc, '[]{}"');
-					$parts = explode('&original_name=', $doc);
-					if ($parts[1] == '') {
-						# wenn kein Originalname da, Dateinamen nehmen
-						$parts[1] = basename($parts[0]);
+			if ($value != '') {
+				if (substr($attributes['type'][$j], 0, 1) == '_' AND is_numeric(substr($attributes['type'][$j], 1))) {		# Array aus Datentypen
+					$array_elements = (!is_array($value)? json_decode($value, true) : $value);
+					foreach ($array_elements as $array_element) {
+						$zip2 = $this->copy_documents_to_export_folder($array_element, $attributes['type_attributes'][$j], $GUI->qlayerset[0]['maintable'], $folder, $doc_path, $doc_url);
+						$zip = $zip || $zip2;
 					}
-					if (file_exists($parts[0])) {
-						if (file_exists(IMAGEPATH . $folder . '/' . $parts[1])) {
-							# wenn schon eine Datei mit dem Originalnamen existiert, wird der Dateiname angehängt
-							$file_parts = explode('.', $parts[1]);
-							$parts[1] = $file_parts[0].'_'.basename($parts[0]);
+				}
+				if (is_numeric($attributes['type'][$j])) {		# Datentyp
+					$datatype_elements = (!is_array($value)? json_decode($value, true) : $value);
+					$zip2 = $this->copy_documents_to_export_folder($datatype_elements, $attributes['type_attributes'][$j], $GUI->qlayerset[0]['maintable'], $folder, $doc_path, $doc_url);
+					$zip = $zip || $zip2;
+				}				
+				if ($attributes['form_element_type'][$j] == 'Dokument') {
+					$docs = array($value);
+					if (substr($attributes['type'][$j], 0, 1) == '_') {		# Array aus Dokumenten
+						$docs = json_decode($value);
+					}
+					foreach ($docs as $doc) {
+						$parts = explode('&original_name=', $doc);
+						if ($parts[1] == '') {
+							# wenn kein Originalname da, Dateinamen nehmen
+							$parts[1] = basename($parts[0]);
 						}
-						copy($parts[0], IMAGEPATH.$folder.'/'.$parts[1]);
+						if ($doc_url != '') {
+							$parts[0] = url2filepath($parts[0], $doc_path, $doc_url);
+						}
+						if (file_exists($parts[0])) {
+							if (file_exists(IMAGEPATH . $folder . '/' . $parts[1])) {
+								# wenn schon eine Datei mit dem Originalnamen existiert, wird der Dateiname angehängt
+								$file_parts = explode('.', $parts[1]);
+								$parts[1] = $file_parts[0].'_'.basename($parts[0]);
+							}
+							copy($parts[0], IMAGEPATH.$folder.'/'.$parts[1]);
+						}
 					}
+					$zip = true;
 				}
-				$zip = true;
 			}
 		}
 		return $zip;
