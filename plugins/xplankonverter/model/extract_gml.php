@@ -1922,11 +1922,13 @@ class Gml_extractor {
 							$mapping['regel'] = 'ST_CurveToLine(gmlas.position) AS position';
 						}
 						// Cast to multi-geometries (konverter-convention)
-						if(($geom_type == 'ST_Point') or
+						else if(($geom_type == 'ST_Point') or
 							($geom_type == 'ST_LineString') or
 							($geom_type == 'ST_Polygon'))
 						{
 							$mapping['regel'] = 'ST_Multi(gmlas.position) AS position';
+						} else {
+							$mapping['regel'] = 'gmlas.position AS position';
 						}
 					}
 					$gml_attributes[] = $mapping['t_column'];
@@ -1987,7 +1989,7 @@ class Gml_extractor {
 						$norm_2 = "norm_table_" . $i . "_" . $i;
 						$norm_3 = "norm_table_" . $i . "_" . $i . "_" . $i;
 						$norm_4 = "norm_table_" . $i . "_" . $i . "_" . $i . "_" . $i;
-						$select_sql .= "CASE WHEN (SELECT TRUE FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_2 . " WHERE " . $norm_2 . ".parent_id = gmlas.id) THEN ARRAY[((SELECT DISTINCT codespace FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_3 . " WHERE gmlas.id = " . $norm_3 . ".parent_id LIMIT 1),";
+						$select_sql .= "CASE WHEN (SELECT TRUE FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_2 . " WHERE " . $norm_2 . ".parent_id = gmlas.id LIMIT 1) THEN ARRAY[((SELECT DISTINCT codespace FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_3 . " WHERE gmlas.id = " . $norm_3 . ".parent_id LIMIT 1),";
 						$select_sql .= "(SELECT string_agg(value,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_4 . " WHERE gmlas.id = " . $norm_4 . ".parent_id),NULL)]::xplan_gml." . $special_datatype . " ELSE NULL END AS " . $n_a . ",";
 						$gml_attributes[] = $n_a;
 					}
