@@ -110,6 +110,7 @@ class LENRIS {
 	}
 	
 	function update_changed_nachweise($client, $nachweise){
+		$updated_nachweise = array();
 		foreach ($nachweise as $n) {
 			$sql = "
 				SELECT 
@@ -173,6 +174,7 @@ class LENRIS {
 								LENRIS::log_error($ret[1]);
 							}
 						}
+						$updated_nachweise[] = $n['id'];
 					}
 					else {
 						LENRIS::log_error($ret[1]);
@@ -186,6 +188,12 @@ class LENRIS {
 				LENRIS::log_error($ret[1]);
 			}
 		}
+		$this->confirm_changed_nachweise($client, $updated_nachweise);
+	}
+	
+	function confirm_changed_nachweise($client, $updated_nachweise){
+		$response = curl_get_contents($client['url'] . '&go=LENRIS_confirm_changed_nachweise&ids=' . implode(',', $updated_nachweise));
+		LENRIS::log('Bestätigung bei ' . $response . ' von ' . count($updated_nachweise) . ' veränderten Nachweisen für Client ' . $client['client_id'] . ' erfolgreich');
 	}	
 	
 }
