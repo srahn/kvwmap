@@ -426,31 +426,33 @@ FROM
 				$ret[1] = $ret['query'] = $query;
 
 				# Prüfe ob eine Fehlermeldung in der Notice steckt
-				$last_notice = pg_last_notice($this->dbConn);
-				if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
-					$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
-				}
-				# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
-				if ($last_notice != '' AND ($this->gui->notices == NULL OR !in_array($last_notice, $this->gui->notices))) {
-					$this->gui->notices[] = $last_notice;
-					if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
-						# Parse als JSON String
-						$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
-						if ($notice_obj AND array_key_exists('success', $notice_obj)) {
-							if (!$notice_obj['success']) {
-								$ret['success'] = false;
-							}
-							if (array_key_exists('msg_type', $notice_obj)) {
-								$ret['type'] = $notice_obj['msg_type'];
-							}
-							if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
-								$ret['msg'] = $notice_obj['msg'];
+				$last_notices = pg_last_notice($this->dbConn, PGSQL_NOTICE_ALL);
+				foreach ($last_notices as $last_notice) {
+					if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
+						$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
+					}
+					# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
+					if ($last_notice != '' AND ($this->gui->notices == NULL OR !in_array($last_notice, $this->gui->notices))) {
+						$this->gui->notices[] = $last_notice;
+						if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
+							# Parse als JSON String
+							$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
+							if ($notice_obj AND array_key_exists('success', $notice_obj)) {
+								if (!$notice_obj['success']) {
+									$ret['success'] = false;
+								}
+								if (array_key_exists('msg_type', $notice_obj)) {
+									$ret['type'] = $notice_obj['msg_type'];
+								}
+								if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
+									$ret['msg'] = $notice_obj['msg'];
+								}
 							}
 						}
-					}
-					else {
-						# Gebe Noticetext wie er ist zurück
-						$ret['msg'] = $last_notice;
+						else {
+							# Gebe Noticetext wie er ist zurück
+							$ret['msg'] .= $last_notice.chr(10).chr(10);
+						}
 					}
 				}
 
