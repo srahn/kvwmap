@@ -103,7 +103,20 @@ class Nachweis {
 			$json = json_encode($nachweise);
 			echo $json;
 		}
-	}		
+	}
+	
+	function LENRIS_confirm_new_nachweise($ids){
+		$sql = "
+			DELETE FROM 
+				nachweisverwaltung.lenris_worker 
+			WHERE 
+				id_nachweis IN (" . $ids . ") and db_action = 'INSERT'";
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+			$rows = pg_affected_rows($ret[1]);
+			echo $rows;
+		}
+	}
 
 	function check_documentpath($old_dataset){		
 		$ret=$this->getNachweise($old_dataset['id'],'','','','','','','','bySingleID','','');

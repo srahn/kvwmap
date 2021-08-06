@@ -14,6 +14,10 @@ class LENRIS {
 		echo 'LENRIS Error log: ' . $error . chr(10);
 	}
 	
+	public static function log($msg){
+		echo 'LENRIS log: ' . $msg . chr(10);
+	}	
+	
 	function get_client_information($client_id = NULL){
 		$sql = "
 			SELECT 
@@ -27,8 +31,13 @@ class LENRIS {
 				lenris.clients
 			" . ($client_id != NULL? ' WHERE client_id = ' . $client_id : '');
 		$ret = $this->database->execSQL($sql, 4, 0, true);
-		$clients = pg_fetch_all($ret[1]);
-		return $clients;
+		if (!$ret[0]) {
+			$clients = pg_fetch_all($ret[1]);
+			return $clients;
+		}
+		else {
+			LENRIS::log_error($ret[1]);
+		}
 	}
 	
 	function get_new_nachweise($client){
@@ -42,6 +51,7 @@ class LENRIS {
 	}
 	
 	function insert_new_nachweise($client, $nachweise){
+		$inserted_nachweise = array();
 		foreach ($nachweise as $n) {
 			$sql = "
 				INSERT INTO
@@ -59,7 +69,7 @@ class LENRIS {
 					" . ($n['messungszahlen'] ?: 'NULL') . ", " . ($n['bov_ersetzt'] ?: 'NULL') . ", " . ($n['zeit_geprueft'] ? "'" . $n['zeit_geprueft'] . "'" : 'NULL') . ", '" . $n['freigegeben'] . "')
 				RETURNING id
 			";
-			$ret = $this->database->execSQL($sql, 4, 0);
+			$ret = $this->database->execSQL($sql, 4, 0, true);
 			if (!$ret[0]) {
 				$rs = pg_fetch_assoc($ret[1]);
 				$sql = "
@@ -69,7 +79,7 @@ class LENRIS {
 					VALUES
 						(" . $rs['id'] . ", " . $n['id'] . ", " . $client['client_id'] . ", '" . $n['document_last_modified'] . "')
 				";				
-				$ret = $this->database->execSQL($sql, 4, 0);
+				$ret = $this->database->execSQL($sql, 4, 0, true);
 				if (!$ret[0]) {
 					$sql = "
 						INSERT INTO 
@@ -77,10 +87,26 @@ class LENRIS {
 						VALUES
 							(" . $client['client_id'] . ", " . $n['id'] . ", '" . $n['link_datei'] . "')
 					";
-					$ret = $this->database->execSQL($sql, 4, 0);
+					$ret = $this->database->execSQL($sql, 4, 0, true);
+					
+					if (!$ret[0]) {
+						$inserted_nachweise[] = $n['id'];
+					}
+				}
+				else {
+					LENRIS::log_error($ret[1]);
 				}
 			}
+			else {
+				LENRIS::log_error($ret[1]);
+			}
 		}
+		$this->confirm_new_nachweise($client, $inserted_nachweise);
+	}
+	
+	function confirm_new_nachweise($client, $inserted_nachweise){
+		$response = curl_get_contents($client['url'] . '&go=LENRIS_confirm_new_nachweise&ids=' . implode(',', $inserted_nachweise));
+		LENRIS::log('Bestätigung bei ' . $response . ' von ' . count($inserted_nachweise) . ' neuen Nachweisen für Client ' . $client['client_id'] . ' erfolgreich');
 	}
 	
 	function update_changed_nachweise($client, $nachweise){
@@ -94,7 +120,7 @@ class LENRIS {
 					client_id = " . $client['client_id'] . " AND 
 					client_nachweis_id = " . $n['id'] . "
 			";				
-			$ret = $this->database->execSQL($sql, 4, 0);
+			$ret = $this->database->execSQL($sql, 4, 0, true);
 			if (!$ret[0]) {
 				$rs = pg_fetch_assoc($ret[1]);
 				if ($rs['nachweis_id'] != '') {
@@ -131,7 +157,7 @@ class LENRIS {
 						WHERE
 							id = " . $rs['nachweis_id'] . "
 					";
-					$ret = $this->database->execSQL($sql, 4, 0);
+					$ret = $this->database->execSQL($sql, 4, 0, true);
 					if (!$ret[0]) {
 						if ($n['document_last_modified'] != $rs['document_last_modified']) {
 							$sql = "
@@ -143,12 +169,21 @@ class LENRIS {
 									dokument = '" . $n['link_datei'] . "'
 							";
 							$ret = $this->database->execSQL($sql, 4, 0);
+							if ($ret[0]){
+								LENRIS::log_error($ret[1]);
+							}
 						}
+					}
+					else {
+						LENRIS::log_error($ret[1]);
 					}
 				}
 				else {
 					LENRIS::log_error('Nachweis nicht in Tabelle lenris.client_nachweise gefunden (client_id = ' . $client['client_id'] . ', client_nachweis_id = ' . $n['id'] . ')');
 				}
+			}
+			else {
+				LENRIS::log_error($ret[1]);
 			}
 		}
 	}	

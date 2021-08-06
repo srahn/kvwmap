@@ -2,29 +2,12 @@
 
 error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_WARNING));
 
-class GUI {
-	function __construct() {
-	}
-
-	function add_message($type, $msg) {
-		LENRIS::log_error('Fehlerart: ' . $type . chr(10) . $msg);
-	}
-}
-$GUI = new GUI();
-
-function sql_err_msg($title, $sql, $msg, $div_id) {
-	$err_msg = $msg . '
-	aufgetreten bei
-	' . $sql;
-	return $err_msg;
-}
-
-
 if(!isset($argv[1])){
 	echo 'Fehler: Keine Landkreis-ID übergeben.';
 }
 else {
 	include('../../../config.php');
+	include(WWWROOT . APPLVERSION . 'funktionen/allg_funktionen.php');
 	include(CLASSPATH.'log.php');
 	include(CLASSPATH.'postgresql.php');
 	include(PLUGINS.'lenris/model/lenris.php');

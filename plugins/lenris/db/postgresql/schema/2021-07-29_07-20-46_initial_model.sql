@@ -32,7 +32,8 @@ CREATE TABLE client_nachweise
   nachweis_id integer NOT NULL,
   client_nachweis_id integer NOT NULL,
 	client_id integer NOT NULL,
-	document_last_modified timestamp without time zone
+	document_last_modified timestamp without time zone,
+  CONSTRAINT pk_client_nachweise PRIMARY KEY (nachweis_id)
 );
 
 

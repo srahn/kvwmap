@@ -14,12 +14,17 @@ function go_switch_nachweisverwaltung($go){
 		case 'LENRIS_get_new_nachweise' : {
 			$GUI->checkCaseAllowed('LENRIS');
 			$GUI->LENRIS_get_new_nachweise();
-	  } break;		
+	  } break;
 		
 		case 'LENRIS_get_changed_nachweise' : {
 			$GUI->checkCaseAllowed('LENRIS');
 			$GUI->LENRIS_get_changed_nachweise();
 	  } break;		
+		
+		case 'LENRIS_confirm_new_nachweise' : {
+			$GUI->checkCaseAllowed('LENRIS');
+			$GUI->LENRIS_confirm_new_nachweise();
+	  } break;
 		
 		case 'Antraege_Anzeigen' : {
 			$GUI->checkCaseAllowed('Antraege_Anzeigen');
