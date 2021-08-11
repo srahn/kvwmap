@@ -189,8 +189,8 @@ function set_richtung(richtung){
 }
 
 function set_magnifier(evt, magnifier){
-	mousex = evt.clientX - document.getElementById('vorschau').offsetLeft;
-	mousey = evt.clientY - document.getElementById('vorschau').offsetTop;
+	mousex = evt.clientX - document.getElementById('vorschau_nwv').offsetLeft;
+	mousey = evt.clientY - document.getElementById('vorschau_nwv').offsetTop;
 	width = magnifier.offsetWidth;
 	height = magnifier.offsetHeight;
 	magnifier.style.left = mousex - (width/2);
@@ -208,17 +208,17 @@ function getvorschau(url){
 			<img style="width: 1800px; transform: translate(-300px, -300px);" src="'+url+'">\
 		</div>\
 	';
-	document.getElementById('vorschau').innerHTML = img;
+	document.getElementById('vorschau_nwv').innerHTML = img;
 }
 
 function getGeomPreview(id){
-	img = '<img id="preview_img" style="border: 1px solid black" src="">';
-	document.getElementById('vorschau').innerHTML = img;
-	ahah("index.php", "go=get_geom_preview&id="+id, new Array(document.getElementById('preview_img')), new Array("src"));
+	img = '<img id="preview_img_nwv" style="border: 1px solid black" src="">';
+	document.getElementById('vorschau_nwv').innerHTML = img;
+	ahah("index.php", "go=get_geom_preview&id="+id, new Array(document.getElementById('preview_img_nwv')), new Array("src"));
 }
 
 function clearVorschau(){
-	document.getElementById('vorschau').innerHTML = '';
+	document.getElementById('vorschau_nwv').innerHTML = '';
 }
 
 function select(row){
@@ -671,7 +671,7 @@ Wählen Sie neue Suchparameter.</span><br>
 
 
 <!--[IF !IE]> -->
-<div id="vorschau"  onmouseleave="clearVorschau();" style="z-index: 1000; position: fixed; left:50%; margin-left:-100px;  top:0px; box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.3);"></div>
+<div id="vorschau_nwv"  onmouseleave="clearVorschau();" style="z-index: 1000; position: fixed; left:50%; margin-left:-100px;  top:0px; box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.3);"></div>
 <!-- <![ENDIF]-->
  <!--[IF IE]>
 <div id="vorschau" style="position: absolute; left:50%; margin-left:-150px; top: expression((190 + (ignoreMe = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop)) + 'px');"></div>
