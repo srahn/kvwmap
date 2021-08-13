@@ -50,6 +50,10 @@ class LENRIS {
 		return json_decode($json, true);
 	}
 	
+	function adjust_path($link_datei, $client_id){
+		return str_replace('nachweise/', 'nachweise/' . $client_id . '/', $link_datei);
+	}
+	
 	function insert_new_nachweise($client, $nachweise){
 		$inserted_nachweise = array();
 		foreach ($nachweise as $n) {
@@ -62,7 +66,7 @@ class LENRIS {
 					 art, datum_bis, aenderungsnummer, antragsnummer_alt, rissfuehrer_id, 
 					 messungszahlen, bov_ersetzt, zeit_geprueft, freigegeben)
 				VALUES
-					(" . $n['flurid'] . ", '" . $n['blattnummer'] . "', '" . $n['datum'] . "', '" . $n['vermstelle'] . "', " . $n['gueltigkeit'] . ", '" . $n['link_datei'] . "', 
+					(" . $n['flurid'] . ", '" . $n['blattnummer'] . "', '" . $n['datum'] . "', '" . $n['vermstelle'] . "', " . $n['gueltigkeit'] . ", '" . $this->adjust_path($n['link_datei'], $client['client_id']) . "', 
 					'" . $n['format'] . "', '" . $n['stammnr'] . "', '" . $n['the_geom'] . "', " . $n['fortfuehrung'] . ", '" . $n['rissnummer'] . "', '" . $n['bemerkungen'] . "', 
 					'" . $n['bearbeiter'] . "', '" . $n['zeit'] . "', '" . $n['erstellungszeit'] . "', '" . $n['bemerkungen_intern'] . "', " . $n['geprueft'] . ", 
 					" . $n['art'] . ", " . ($n['datum_bis'] ? "'" . $n['datum_bis'] . "'" : 'NULL') . ", '" . $n['aenderungsnummer'] . "', '" . $n['antragsnummer_alt'] . "', " . ($n['rissfuehrer_id'] ?: 'NULL') . ", 
