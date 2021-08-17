@@ -68,7 +68,7 @@ function output_header() { ?>
 		<meta http-equiv=Content-Type content="text/html; charset=UTF-8">
 		<link rel="stylesheet" href="layouts/css/main.css.php">
 		<link rel="stylesheet" href="../3rdparty/font-awesome-4.6.3/css/font-awesome.min.css">
-		<script src="../3rdparty/jQuery-3.5.1/jquery-3.5.1.min.js"></script>
+		<script src="../3rdparty/jQuery-3.6.0/jquery.min.js"></script>
 	</head>
 	<body style="font-family: Arial, Verdana, Helvetica, sans-serif"><?php
 }
