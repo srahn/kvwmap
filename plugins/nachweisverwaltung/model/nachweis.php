@@ -105,6 +105,22 @@ class Nachweis {
 		}
 	}
 	
+	function LENRIS_get_deleted_nachweise(){
+		$sql = "
+			SELECT 
+				id_nachweis
+      FROM 
+				nachweisverwaltung.lenris_worker
+			WHERE
+				db_action = 'DELETE'";
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+      $nachweise = pg_fetch_all($ret[1]);
+			$ids = implode(',', $nachweise);
+			echo $ids;
+		}
+	}	
+	
 	function LENRIS_confirm_new_nachweise($ids){
 		$sql = "
 			DELETE FROM 
@@ -129,7 +145,20 @@ class Nachweis {
 			$rows = pg_affected_rows($ret[1]);
 			echo $rows;
 		}
-	}	
+	}
+	
+	function LENRIS_confirm_deleted_nachweise($ids){
+		$sql = "
+			DELETE FROM 
+				nachweisverwaltung.lenris_worker 
+			WHERE 
+				id_nachweis IN (" . $ids . ") and db_action = 'DELETE'";
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+			$rows = pg_affected_rows($ret[1]);
+			echo $rows;
+		}
+	}		
 
 	function check_documentpath($old_dataset){		
 		$ret=$this->getNachweise($old_dataset['id'],'','','','','','','','bySingleID','','');

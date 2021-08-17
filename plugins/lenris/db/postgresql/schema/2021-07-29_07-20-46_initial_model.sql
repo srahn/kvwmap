@@ -13,6 +13,9 @@ CREATE TABLE clients
 	nachweis_primary_attribute character varying,
 	nachweis_secondary_attribute character varying,
 	nachweis_unique_attributes character varying[],
+	last_sync date,
+	sync_time time,
+	status integer,
   CONSTRAINT pk_clients_id PRIMARY KEY (client_id)
 );
 
