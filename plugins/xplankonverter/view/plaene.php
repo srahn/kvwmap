@@ -250,10 +250,11 @@
 
 					row.veroeffentlicht = result.veroeffentlicht;
 					$('#konvertierungen_table').bootstrapTable('updateByUniqueId', { id: konvertierung_id, row: row});
+          console.log(result);
 
 					message([{
 						"type": "notice",
-						"msg" : 'Plan' + (result.veroeffentlicht == 't' ? ' erfolgreich veröffentlicht' : 'veröffentlichung zurückgenommen') + '!'
+						"msg" : 'Plan' + (result.veroeffentlicht == 'Ja' ? ' erfolgreich veröffentlicht' : 'veröffentlichung zurückgenommen') + '!'
 					}]);
 				}
 				else {

@@ -479,12 +479,12 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
-			case 'getSVG_vertices' : {
-				$GUI->getSVG_vertices();
+			case 'getSVG_all_vertices' : {
+				$GUI->getSVG_all_vertices();
 			} break;
 
-			case 'getSVG_foreign_vertices' : {
-				$GUI->getSVG_foreign_vertices();
+			case 'getSVG_vertices' : {
+				$GUI->getSVG_vertices();
 			} break;
 
 			case 'ResizeMap2Window' : {
@@ -1158,6 +1158,16 @@ function go_switch($go, $exit = false) {
 			case 'Layer_Datensaetze_Loeschen' : {
 				$GUI->layer_Datensaetze_loeschen(($GUI->formvars['output'] == 'false' ? false : true));
 			} break;
+
+			case 'belated_file_upload' : {
+				$GUI->checkCaseAllowed('belated_file_upload');
+				$GUI->belated_file_upload();
+			} break;
+			
+			case 'belated_file_upload_speichern' : {
+				$GUI->checkCaseAllowed('belated_file_upload');
+				$GUI->belated_file_upload_speichern();
+			} break;	
 
 			case 'Dokument_Loeschen' : {
 				$GUI->sachdaten_speichern();

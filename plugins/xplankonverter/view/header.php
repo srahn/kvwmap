@@ -13,8 +13,10 @@
 <script src="<?php echo BOOTSTRAP_PATH; ?>js/bootstrap-table-flatJSON.js"></script>
 <script src="<?php echo BOOTSTRAPTABLE_PATH; ?>bootstrap-table.min.js"></script>
 
-<script src="<?php echo BOOTSTRAPTABLE_PATH; ?>extensions/export/bootstrap-table-export.min.js"></script>
-<script src="<?php echo BOOTSTRAPTABLE_PATH; ?>extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
+<script src="<?php echo BOOTSTRAPTABLE_PATH; ?>extensions/export/bootstrap-table-export.min.js"></script><?
+if (BOOTSTRAPTABLE_PATH == 'bootstrap-table-1.18.2') { ?>
+  <script src="<?php echo BOOTSTRAPTABLE_PATH; ?>extensions/filter-control/bootstrap-table-filter-control.min.js"></script><?
+} ?>
 <script src="<?php echo BOOTSTRAPTABLE_PATH; ?>libs/FileSaver/FileSaver.min.js"></script>
 <script src="<?php echo BOOTSTRAPTABLE_PATH; ?>libs/js-xlsx/xlsx.core.min.js"></script>
 

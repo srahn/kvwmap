@@ -298,7 +298,7 @@ class Gml_extractor {
 		$param_2                = urlencode('GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
 		
 		$url = $gdal_container_connect . $param_1 . $connection_string . $param_2;	
-		#echo 'url:   ' . $url . '<br><br>';
+		#echo 'url: ' . $url . '<br><br>';
 
 		$ch = curl_init();
 		#$url = curl_escape($ch, $url);
@@ -1843,7 +1843,6 @@ class Gml_extractor {
 		
 		# TODO Check for each regel if bereich = bereich, and enter it accordingly in rule
 		#$bereich_gml_id = 'd48608a2-6f3c-11e8-8ca0-1f2b7a47118e'; #Placeholder
-		#TODO filter here for each bereich then for each geometrytype, then for each regel
 
 		$classes = $this->get_possible_classes_for_regeln($this->gmlas_schema);
 		
@@ -1923,15 +1922,17 @@ class Gml_extractor {
 							$mapping['regel'] = 'ST_CurveToLine(gmlas.position) AS position';
 						}
 						// Cast to multi-geometries (konverter-convention)
-						if(($geom_type == 'ST_Point') or
+						else if(($geom_type == 'ST_Point') or
 							($geom_type == 'ST_LineString') or
 							($geom_type == 'ST_Polygon'))
 						{
 							$mapping['regel'] = 'ST_Multi(gmlas.position) AS position';
+						} else {
+							$mapping['regel'] = 'gmlas.position AS position';
 						}
 					}
 					$gml_attributes[] = $mapping['t_column'];
-					$select_sql .=  $mapping['regel'];
+					$select_sql .= $mapping['regel'];
 					$select_sql .= ",";
 				}
 			}
@@ -1939,8 +1940,11 @@ class Gml_extractor {
 
 		# attributes of normalized gmlas tables, e.g. praesentationsobjekte '_dientzurdarstellungvon', '_wirddargestelltdurch'
 		# TODO generically read all normalized tables
-		$norm_attributes = array("wirddargestelltdurch","dientzurdarstellungvon");
+		# zweckbestimmung e.g. for fp_generischesobjekt_zweckbestimmung
+		$norm_attributes = array("wirddargestelltdurch","dientzurdarstellungvon","detailliertezweckbestimmung","zweckbestimmung");
+		$i = 0;
 		foreach($norm_attributes AS $n_a) {
+			$i++;
 			# check if table exists
 				$sql_checkexists_norm_table = "
 					SELECT 
@@ -1953,10 +1957,46 @@ class Gml_extractor {
 			$result = pg_fetch_row($ret[1]);
 			if($result[0] === 't') {
 				# single ' escaped later
-				$select_sql .= "(SELECT string_agg(href,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " norm_table WHERE gmlas.id = norm_table.parent_id) AS " . $n_a;
-				$gml_attributes[] = $n_a;
+				$norm_1 = "norm_table_" . $i;
+				if($n_a == "wirddargestelltdurch" or $n_a == "dientzurdarstellungvon") {
+						$select_sql .= "(SELECT string_agg(href,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " ". $norm_1 . " WHERE gmlas.id = " .$norm_1 . ".parent_id) AS " . $n_a . ",";
+					$gml_attributes[] = $n_a;
+				}
+				if($n_a == "detailliertezweckbestimmung" or $n_a == "zweckbestimmung") {
+					$special_datatype = "";
+
+					$sql = "
+						SELECT
+							udt_name
+						FROM
+							information_schema.columns
+						WHERE
+							table_schema = 'xplan_gml'
+						AND
+							table_name = '" . $gml_class . "'
+						AND
+							column_name = '" . $n_a . "'
+						LIMIT 1
+					";
+					$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+					$result = pg_fetch_row($ret[1]);
+					$special_datatype = $result[0];
+					if(substr($special_datatype,0,1) == "_") {
+						// remove leading underscore (for arrays) and add [] brackets at the end
+						$special_datatype = ltrim($special_datatype, "_") . "[]";
+					}
+					if($special_datatype != "") {
+						$norm_2 = "norm_table_" . $i . "_" . $i;
+						$norm_3 = "norm_table_" . $i . "_" . $i . "_" . $i;
+						$norm_4 = "norm_table_" . $i . "_" . $i . "_" . $i . "_" . $i;
+						$select_sql .= "CASE WHEN (SELECT TRUE FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_2 . " WHERE " . $norm_2 . ".parent_id = gmlas.id LIMIT 1) THEN ARRAY[((SELECT DISTINCT codespace FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_3 . " WHERE gmlas.id = " . $norm_3 . ".parent_id LIMIT 1),";
+						$select_sql .= "(SELECT string_agg(value,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_4 . " WHERE gmlas.id = " . $norm_4 . ".parent_id),NULL)]::xplan_gml." . $special_datatype . " ELSE NULL END AS " . $n_a . ",";
+						$gml_attributes[] = $n_a;
+					}
+				}
 			}
 		}
+
 
 		// Add INSERT INTO and FROM
 		$sql  = 'INSERT INTO ' . XPLANKONVERTER_CONTENT_SCHEMA . '.' . $gml_class . '(';
@@ -2035,7 +2075,7 @@ class Gml_extractor {
 	* Returns a mapping table that should cover all mappable classes between gdal xplan_gmlas and the konverter xplan_gml schemas
 	*/
 	function get_gmlas_to_gml_mapping_table($class) {
-		$sql  = "SELECT o_table, o_column, t_table, t_column, t_data_type, regel FROM xplankonverter.mappingtable_gmlas_to_gml WHERE t_table = '" . $class . "';";
+		$sql = "SELECT o_table, o_column, t_table, t_column, t_data_type, regel FROM xplankonverter.mappingtable_gmlas_to_gml WHERE t_table = '" . $class . "';";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$result = pg_fetch_all($ret[1]);
 		return $result;
@@ -2095,6 +2135,7 @@ class Gml_extractor {
 	* Returns a possible list of filtered tables that can be associated with rules
 	*/
 	function get_possible_classes_for_regeln($schema) {
+		# escape underscore e.g. for fp_zentralerversorgungsbereich
 		$sql = "
 			SELECT
 				i.table_name
@@ -2106,9 +2147,9 @@ class Gml_extractor {
 					i.table_name IN('xp_ppo','xp_lpo','xp_fpo','xp_tpo','xp_pto','xp_lto') OR
 					i.table_name NOT LIKE 'xp_%'
 				) AND
-				i.table_name NOT LIKE '%_plan' AND
-				i.table_name NOT LIKE '%_bereich' AND
-				i.table_name NOT LIKE '%_textabschnitt'
+				i.table_name NOT LIKE '%\_plan' AND
+				i.table_name NOT LIKE '%\_bereich' AND
+				i.table_name NOT LIKE '%\_textabschnitt'
 			ORDER BY
 				i.table_name;
 			";

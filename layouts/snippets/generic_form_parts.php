@@ -565,7 +565,7 @@
 						if ($layer['document_url'] != '') {
 							$remote_url = false;
 							$port = parse_url($layer['document_url'], PHP_URL_PORT);
-							if ($_SERVER['HTTP_HOST'] != parse_url($layer['document_url'], PHP_URL_HOST) . ($port != '' ? ':' . $port : '')) {
+							if (parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST) != parse_url($layer['document_url'], PHP_URL_HOST) . ($port != '' ? ':' . $port : '')) {
 								# die URL verweist auf einen anderen Server
 								$remote_url = true;
 							}

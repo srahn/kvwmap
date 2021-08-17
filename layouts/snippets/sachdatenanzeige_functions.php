@@ -436,34 +436,54 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		if(further_params)params += further_params;
 		ahah('index.php?go=Layer-Suche_Suchen', params, new Array(list_div), new Array('sethtml'));
 	}
+	
+	convert_belated = function(field){
+		if (field.type == 'file' && field.files && field.files.length > 0) {
+			file = field.files[0];
+			field.setAttribute('onchange', "");
+			field.type = 'text';
+			field.value  = JSON.stringify({
+				name: file.name,
+				size: file.size,
+				lastmodified: file.lastModified
+			});
+		}
+	}
 
 	save = function(){
 		var open_subforms = document.querySelectorAll('.subForm:not(:empty)');
-		if(open_subforms.length > 0){
+		if (open_subforms.length > 0) {
 			message([{'type': 'info', 'msg': 'Es gibt noch offene Unterformulare, die noch nicht gespeichert wurden!'}]);
 			return;
 		}
-		form_fieldstring = enclosingForm.form_field_names.value+'';
+		form_fieldstring = enclosingForm.form_field_names.value + '';
 		form_fields = form_fieldstring.split('|');
-		for(i = 0; i < form_fields.length-1; i++){
+		for (i = 0; i < form_fields.length-1; i++) {
 			fieldstring = form_fields[i]+'';
 			field = fieldstring.split(';');
-			if(document.getElementsByName(fieldstring)[0] != undefined && document.getElementsByName(fieldstring)[0].type != 'hidden' && field[4] != 'Dokument' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-				message('Das Feld '+document.getElementsByName(fieldstring)[0].title + ' erfordert eine Eingabe.');
+			var element = document.getElementsByName(fieldstring)[0];
+			
+			if (element != undefined && element.type != 'hidden' && field[4] != 'Dokument' && (element.readOnly != true) && field[5] == '0' && element.value == ''){
+				message('Das Feld ' + element.title + ' erfordert eine Eingabe.');
 				return;
 			}
-			if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-				completeDate(document.getElementsByName(fieldstring)[0]);
-				if(!checkDate(document.getElementsByName(fieldstring)[0].value)){
-					message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+			if (element != undefined && field[6] == 'date' && field[4] != 'Time' && element.value != '' && !checkDate(element.value)){
+				completeDate(element);
+				if(!checkDate(element.value)){
+					message('Das Datumsfeld ' + element.title + ' hat nicht das Format TT.MM.JJJJ.');
 					return;
 				}
 			}
-			if (document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'time' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)) {
-				completeTime(document.getElementsByName(fieldstring)[0]);
-				if(!checkTime(document.getElementsByName(fieldstring)[0].value)){
-					message('Das Uhrzeitfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format hh:mm:ss.');
+			if (element != undefined && field[6] == 'time' && field[4] != 'Time' && element.value != '' && !checkDate(element.value)) {
+				completeTime(element);
+				if(!checkTime(element.value)){
+					message('Das Uhrzeitfeld ' + element.title + ' hat nicht das Format hh:mm:ss.');
 					return;
+				}
+			}
+			if (upload_only_file_metadata == 1) {
+				if (field[4] == 'Dokument') {
+					convert_belated(element);
 				}
 			}
 		}
@@ -480,26 +500,32 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			return;
 		}
   	form_fieldstring = enclosingForm.form_field_names.value+'';
-  	form_fields = form_fieldstring.split('|');
-  	for(i = 0; i < form_fields.length; i++){
-  		fieldstring = form_fields[i]+'';
-  		field = fieldstring.split(';'); 
-  		if(document.getElementsByName(fieldstring)[0] != undefined && document.getElementsByName(fieldstring)[0].type != 'hidden' && field[4] != 'SubFormFK' && field[7] != '0' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-			  message('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
-  			return;
-  		}
-  		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-				completeDate(document.getElementsByName(fieldstring)[0]);
-				if(!checkDate(document.getElementsByName(fieldstring)[0].value)){
-					message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+		form_fields = form_fieldstring.split('|');
+		for (i = 0; i < form_fields.length; i++) {
+			fieldstring = form_fields[i] + '';
+			field = fieldstring.split(';');
+			var element = document.getElementsByName(fieldstring)[0];
+			if (element != undefined && element.type != 'hidden' && field[4] != 'SubFormFK' && field[7] != '0' && (element.readOnly != true) && field[5] == '0' && element.value == ''){
+			  message('Das Feld '+element.title+' erfordert eine Eingabe.');
+				return;
+			}
+			if (element != undefined && field[6] == 'date' && field[4] != 'Time' && element.value != '' && !checkDate(element.value)){
+				completeDate(element);
+				if(!checkDate(element.value)){
+					message('Das Datumsfeld '+element.title+' hat nicht das Format TT.MM.JJJJ.');
 					return;
 				}
-  		}
-  	}
-  	enclosingForm.go.value = 'neuer_Layer_Datensatz_speichern';
+			}
+			if (upload_only_file_metadata == 1) {
+				if (field[4] == 'Dokument') {
+					convert_belated(element);
+				}
+			}
+		}
+		enclosingForm.go.value = 'neuer_Layer_Datensatz_speichern';
 		document.getElementById('sachdatenanzeige_save_button').disabled = true;
 		root.document.GUI.gle_changed.value = '';
-  	overlay_submit(enclosingForm, false);
+		overlay_submit(enclosingForm, false);
 	}
 
 	subdelete_data = function(layer_id, fromobject, oid, reload_object){
@@ -516,28 +542,35 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		}
 	}
 
-	subsave_data = function(layer_id, fromobject, targetobject, reload){
+	subsave_data = function(layer_id, fromobject, targetobject, reload) {
 		// layer_id ist die von dem Layer, in dem die Datensätze gespeichert werden soll
 		// fromobject ist die id von dem div, welches das Formular der Datensätze enthält
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des Datensatzes aktualisiert werden soll
-		form_fields = Array.prototype.slice.call(document.getElementById(fromobject).querySelectorAll('.subform_'+layer_id));
+		form_fields = Array.prototype.slice.call(document.getElementById(fromobject).querySelectorAll('.subform_' + layer_id));
 		form_fieldstring = '';
 		var formData = new FormData();
-  	for (i = 0; i < form_fields.length; i++){
-			if (form_fields[i].name.slice(-4) != '_alt')form_fieldstring += form_fields[i].name+'|';
-  		field = form_fields[i].name.split(';');
-  		if (field[4] != 'Dokument' && form_fields[i].readOnly != true && field[5] == '0' && form_fields[i].value == ''){
-  			message('Das Feld '+form_fields[i].title+' erfordert eine Eingabe.');
-  			return;
-  		}
-  		if (field[6] == 'date' && field[4] != 'Time' && form_fields[i].value != '' && !checkDate(form_fields[i].value)){
+		for (i = 0; i < form_fields.length; i++) {
+			if (form_fields[i].name.slice(-4) != '_alt') {
+				form_fieldstring += form_fields[i].name + '|';
+			}
+			field = form_fields[i].name.split(';');
+			if (field[4] != 'Dokument' && form_fields[i].readOnly != true && field[5] == '0' && form_fields[i].value == ''){
+				message('Das Feld ' + form_fields[i].title + ' erfordert eine Eingabe.');
+				return;
+			}
+			if (field[6] == 'date' && field[4] != 'Time' && form_fields[i].value != '' && !checkDate(form_fields[i].value)){
 				completeDate(form_fields[i]);
 				if(!checkDate(form_fields[i].value)){
-					message('Das Datumsfeld '+form_fields[i].title+' hat nicht das Format TT.MM.JJJJ.');
+					message('Das Datumsfeld ' + form_fields[i].title + ' hat nicht das Format TT.MM.JJJJ.');
 					return;
 				}
-  		}
+			}
 			if (['checkbox', 'radio'].indexOf(form_fields[i].type) == -1 || form_fields[i].checked) {
+				if (upload_only_file_metadata == 1) {
+					if (field[4] == 'Dokument') {
+						convert_belated(form_fields[i]);
+					}
+				}
 				if (form_fields[i].type == 'file' && form_fields[i].files[0] != undefined) {
 					value = form_fields[i].files[0];
 				}
@@ -546,10 +579,12 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				}
 				formData.append(form_fields[i].name, value);
 			}
-  	}
+		}
 		root.document.GUI.gle_changed.value = '';
 		formData.append('go', 'Sachdaten_speichern');
-		if(reload)formData.append('reload', reload);
+		if (reload) {
+			formData.append('reload', reload);
+		}
 		formData.append('selected_layer_id', layer_id);
 		formData.append('targetobject', targetobject);
 		formData.append('form_field_names', form_fieldstring);
@@ -1025,11 +1060,13 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		}		
 	}
 
-	set_changed_flag = function(field, flag_name){
-		var same_fields = document.querySelectorAll('[name="' + field.name + '"]');
-		[].forEach.call(same_fields, function (same_field){
-			same_field.value = field.value;	// alle gleichen Felder auf den selben Wert setzen
-		});
+	set_changed_flag = function(field, flag_name) {
+		if (field.type != 'file') {
+			var same_fields = document.querySelectorAll('[name="' + field.name + '"]');
+			[].forEach.call(same_fields, function (same_field) {
+				same_field.value = field.value;	// alle gleichen Felder auf den selben Wert setzen, falls der gleiche Datensatz im GLE nochmal vorkommt (durch Subforms)
+			});
+		}
 		var flags = document.querySelectorAll('[name="' + flag_name + '"]');
 		[].forEach.call(flags, function (flag){
 			if(flag != undefined){

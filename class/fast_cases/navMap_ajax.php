@@ -234,6 +234,20 @@ class GUI {
 		$this->user->rolle->readSettings();
 	}	
 	
+	function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
+		if ($last) {
+			$word_pos = strripos($str, $word);
+		}
+		else {
+			$word_pos = stripos($str, $word);
+		}
+		if ($word_pos !== false) {
+			$str_from_word_pos = substr($str, $word_pos + strlen($word));
+			$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+			return trim($parts[0]);
+		}
+	}
+	
 	function zoomToMaxLayerExtent($layer_id) {
     # Abfragen der maximalen Ausdehnung aller Daten eines Layers
 		if($layer_id > 0){
@@ -296,8 +310,8 @@ class GUI {
 						$command = OGR_BINPATH.'gdalinfo '.$raster_file.' > '.IMAGEPATH.$output.'.info';
 						exec($command);
 						$infotext = file_get_contents(IMAGEPATH.$output.'.info');
-						$ll = explode(', ', trim(get_first_word_after($infotext, 'Lower Left', '', ')'), ' ('));
-						$ur = explode(', ', trim(get_first_word_after($infotext, 'Upper Right', '', ')'), ' ('));
+						$ll = explode(', ', trim($this->get_first_word_after($infotext, 'Lower Left', '', ')'), ' ('));
+						$ur = explode(', ', trim($this->get_first_word_after($infotext, 'Upper Right', '', ')'), ' ('));
 					}
 				}
 				elseif($layer[0]['tileindex'] != ''){		# ein Tile-Index
@@ -733,6 +747,7 @@ class GUI {
   }
 
   function loadMap($loadMapSource) {
+		$this->group_has_active_layers = array();
     $this->debug->write("<p>Funktion: loadMap('" . $loadMapSource . ")",4);
     switch ($loadMapSource) {
       # lade Karte aus Post-Parametern
@@ -743,8 +758,8 @@ class GUI {
 				else {
 				  $map = new mapObj(SHAPEPATH.'MapFiles/tk_niedersachsen.map');
 				}
-				echo '<br>MapServer Version: '.ms_GetVersionInt();
-				echo '<br>Details: '.ms_GetVersion();
+				#echo '<br>MapServer Version: '.ms_GetVersionInt();
+				#echo '<br>Details: '.ms_GetVersion();
 
         # Allgemeine Parameter
         #var_dump($this->formvars);
@@ -902,16 +917,23 @@ class GUI {
 				else {
 					$map = new mapObj(DEFAULTMAPFILE, SHAPEPATH);
 				}
+
         $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 
-        # Allgemeine Parameter
-        $map->set('width',$this->user->rolle->nImageWidth);
-        $map->set('height',$this->user->rolle->nImageHeight);
-        $map->set('resolution',96);
-        #$map->set('transparent', MS_OFF);
-        #$map->set('interlace', MS_ON);
-        $map->set('status', MS_ON);
-        $map->set('name', MAPFILENAME);
+				# Allgemeine Parameter
+				define('MINIMAGESIZE', 10); # prevent error in setextent
+				$map->set('width', ($this->user->rolle->nImageWidth < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageWidth));
+				$map->set('height', ($this->user->rolle->nImageHeight < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageHeight));
+				$map->set('resolution', 96);
+				#$map->set('transparent', MS_OFF);
+				#$map->set('interlace', MS_ON);
+				$map->set('status', MS_ON);
+				$map->set('name', MAPFILENAME);
+
+				if (MS_DEBUG_LEVEL > 0) {
+					$map->setConfigOption('MS_ERRORFILE', '/var/www/logs/mapserver.log');
+					$map->set('debug', MS_DEBUG_LEVEL);
+				};
         $map->imagecolor->setRGB(255,255,255);
         $map->maxsize = 4096;
         $map->setProjection('+init=epsg:'.$this->user->rolle->epsg_code,MS_TRUE);
@@ -1073,12 +1095,11 @@ class GUI {
         $b = substr(BG_MENUETOP, 5, 2);
         $map->scalebar->imagecolor->setRGB(hexdec($r), hexdec($g), hexdec($b));
         $map->scalebar->outlinecolor->setRGB(0,0,0);
-				$map->scalebar->label->font = 'SourceSansPro';
+				$map->scalebar->label->set('font', 'SourceSansPro');		# Kommentarzeichen wieder entfernt, da sonst auf Metropolplaner Fehler
 				if (MAPSERVERVERSION < 700 ) {
 					$map->scalebar->label->type = 'truetype';
 				}
 				$map->scalebar->label->size = 10.5;
-
         # Groups
         if(value_of($this->formvars, 'nurAufgeklappteLayer') == ''){
 	        $this->groupset=$mapDB->read_Groups();
@@ -1096,17 +1117,18 @@ class GUI {
         $layerset['list'] = array_merge($layerset['list'], $rollenlayer);
         $layerset['anzLayer'] = count($layerset['list']);
         unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
-        for($i=0; $i < $layerset['anzLayer']; $i++){
+				$layerset['layer_group_has_legendorder'] = array();
+				for ($i=0; $i < $layerset['anzLayer']; $i++) {
 					$layerset['layers_of_group'][$layerset['list'][$i]['Gruppe']][] = $i;
-					if($layerset['list'][$i]['legendorder'] != ''){
+					if(value_of($layerset['list'][$i], 'legendorder') != ''){
 						$layerset['layer_group_has_legendorder'][$layerset['list'][$i]['Gruppe']] = true;
 					}
-					if($layerset['list'][$i]['requires'] == ''){
+					if(value_of($layerset['list'][$i], 'requires') == ''){
 						$this->layer_ids_of_group[$layerset['list'][$i]['Gruppe']][] = $layerset['list'][$i]['Layer_ID'];				# die Layer-IDs in einer Gruppe
 					}
 					$this->layer_id_string .= $layerset['list'][$i]['Layer_ID'].'|';							# alle Layer-IDs hintereinander in einem String
 
-					if($layerset['list'][$i]['requires'] != ''){
+					if(value_of($layerset['list'][$i], 'requires') != ''){
 						$layerset['list'][$i]['aktivStatus'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['aktivStatus'];
 						$layerset['list'][$i]['showclasses'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['showclasses'];
 					}
@@ -2754,6 +2776,7 @@ class rolle {
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
+			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
