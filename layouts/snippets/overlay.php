@@ -42,6 +42,7 @@
 			<div id="overlayfooter" style="<? if ($this->noOverlayFooter OR $this->new_entry OR $this->found == 'false' OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;width: 100%; position:fixed; bottom: 0px">
 				<table style="width:100%">
 					<tr>
+						<? if (is_array($selectable_limits)) { ?>
 						<td style="width:40%" class="px13">&nbsp;<? echo $this->strLimit; ?>&nbsp;										
 							<select name="anzahl" id="anzahl" onchange="javascript:currentform.go.value = 'get_last_query'; overlay_submit(currentform, false);">
 								<? foreach($selectable_limits as $limit){
@@ -53,6 +54,7 @@
 								<? } ?>
 							</select>
 						</td>
+						<? } ?>
 						<td align="center"><div id="savebutton" <? if($this->editable == '')echo 'style="display:none"'; ?>><input type="button" id="sachdatenanzeige_save_button" name="savebutton" value="<? echo $this->strSave; ?>" onclick="save();"></div></td>
 						<td style="width:40%" align="right"><a href="javascript:druck();" class="px13"><? echo $this->printversion; ?></a>&nbsp;</td>
 					</tr>
