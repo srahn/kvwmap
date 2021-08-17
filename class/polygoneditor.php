@@ -104,23 +104,6 @@ class polygoneditor {
 			WHERE ".pg_quote($this->oid_attribute)." = '" . $oid . "'
 		";
 		$ret = $this->database->execSQL($sql, 4, 1, true);
-		if (!$ret['success']) {
-			if (is_resource($ret[1]) AND pg_affected_rows($ret[1]) == 0) {
-				$result = pg_fetch_row($ret[1]);
-				$ret[1] = 'Eintrag der Geometrie nicht erfolgreich!' . $result[0];
-			}
-			else {
-				if ($last_notice = $msg = pg_last_notice($this->database->dbConn)) {
-					if ($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true)) {
-						$msg = $notice_result['msg'];
-					}
-					$ret[3] = $msg;
-				}
-				else {
-					$ret[1] = sql_err_msg('Auf Grund eines Datenbankfehlers konnte die Flaeche nicht eingetragen werden!', $sql, $ret[1], 'error_div_' . rand(1, 99999));
-				}
-			}
-		}
 		return $ret;
 	}
 
