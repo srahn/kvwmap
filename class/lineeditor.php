@@ -113,9 +113,6 @@ class lineeditor {
 				$ret[1]='Eintrag nicht erfolgreich.' . $result[0];
 			}
 		}
-		else {
-			$ret[1] = 'Auf Grund eines Datenbankfehlers konnte die Linie nicht eingetragen werden!<p>' . $ret[1];
-		}
 		return $ret;
 	}
 
