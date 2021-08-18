@@ -426,7 +426,12 @@ FROM
 				$ret[1] = $ret['query'] = $query;
 
 				# Prüfe ob eine Fehlermeldung in der Notice steckt
-				$last_notices = pg_last_notice($this->dbConn, PGSQL_NOTICE_ALL);
+				if (PHPVERSION >= 710) {
+					$last_notices = pg_last_notice($this->dbConn, PGSQL_NOTICE_ALL);
+				}
+				else {
+					$last_notices = array(pg_last_notice($this->dbConn));
+				}
 				foreach ($last_notices as $last_notice) {
 					if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
 						$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
