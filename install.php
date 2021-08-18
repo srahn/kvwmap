@@ -103,9 +103,8 @@ function install() {
 	User: <?php echo $mysqlRootDb->user; ?><br>
 	Password: <?php #echo $mysqlRootDb->passwd; ?><br>
 	Datenbankname: <?php echo $mysqlRootDb->dbName; ?><br><?php
-	
-	$mysql_error = mysql_exists($mysqlRootDb);
-	if ($mysql_error == null) { ?>
+
+	if (mysql_exists($mysqlRootDb)) { ?>
 		MySQL-Server läuft, Verbindung hergestellt zu Host: <?php echo $mysqlRootDb->host; ?> Datenbank: <?php echo $mysqlRootDb->dbName; ?> mit Nutzer: <?php echo $mysqlRootDb->user; ?>!<br><?php
 	}
 	else { ?>
