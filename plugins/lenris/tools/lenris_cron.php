@@ -16,12 +16,13 @@ $lenris = new LENRIS($database);
 $clients = $lenris->get_client_information();
 
 /*
+	status:
 	0 - Ruhe
 	1 - Sync angefordert (setzen über GUI)
 	2 - Sync läuft
 	3 - Erstimport angefordert	(setzen über GUI)
 	4 - Erstimport läuft
-	*/
+*/
 
 function is_sync_required($client){
 	if (
@@ -34,7 +35,7 @@ function is_sync_required($client){
 foreach ($clients as $client) {
 	# Synchronisation
 	if (is_sync_required($client)) {
-		$lenris->update_client($client['client_id'], 'status = 2')
+		$lenris->update_client($client['client_id'], 'status = 2');
 		# neue Nachweise abfragen
 		$new_nachweise = $lenris->get_new_nachweise($client);
 		# neue Nachweise eintragen
@@ -55,9 +56,18 @@ foreach ($clients as $client) {
 	if ($client['status'] === 3){
 		
 	}
+	
+	# Dokumente holen
+	if ($client['doc_download'] != 't'){
+		$downloadable_documents = $lenris->get_downloadable_documents($client['client_id']);
+		if (!empty($downloadable_documents)) {
+			$lenris->update_client($client['client_id'], 'doc_download = true');
+			$downloaded_documents = $lenris->download_documents($client, $downloadable_documents);
+			$lenris->delete_downloadable_documents($client['client_id'], $downloaded_documents);
+			$lenris->update_client($client['client_id'], 'doc_download = false');
+		}
+	}
 }
-
-# Dokumente holen
 
 
 ?>

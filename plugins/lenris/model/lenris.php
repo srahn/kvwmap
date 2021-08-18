@@ -29,7 +29,8 @@ class LENRIS {
 				to_json(nachweis_unique_attributes) as nachweis_unique_attributes
 				last_sync,
 				sync_time,
-				status
+				status,
+				doc_download
 			FROM
 				lenris.clients
 			" . ($client_id != NULL? ' WHERE client_id = ' . $client_id : '');
@@ -75,6 +76,45 @@ class LENRIS {
 		else {
 			LENRIS::log_error($ret[1]);
 		}
+	}
+	
+	function get_downloadable_documents($client_id){
+		$sql = "
+			SELECT 
+				*
+			FROM
+				lenris.zu_holende_dokumente
+			WHERE	
+				client_id = " . $client_id;
+		$ret = $this->database->execSQL($sql, 4, 0, true);
+		if (!$ret[0]) {
+			$docs = pg_fetch_all($ret[1]);
+			return $docs;
+		}
+		else {
+			LENRIS::log_error($ret[1]);
+		}
+	}
+	
+	function delete_downloadable_documents($client_id, $client_nachweis_ids){
+		$sql = "
+			DELETE FROM 
+				lenris.zu_holende_dokumente
+			WHERE
+				client_id = " . $client_id . " AND 
+				client_nachweis_id IN (" . implode(',', $client_nachweis_ids) . ")";
+		$ret = $this->database->execSQL($sql, 4, 0);
+	}
+	
+	function download_documents($client, $downloadable_documents){
+		foreach ($downloadable_documents as $downloadable_document) {
+			$dest_path = $this->adjust_path($downloadable_document['dokument'], $client['client_id']);
+			exec('wget -O ' . $dest_path . ' ' . $client['url'] . '&go=LENRIS_get_document&document=' . $downloadable_document['dokument']);
+			if (file_exists($dest_path)) {
+				$successful_downloaded_docs[] = $downloadable_document['client_nachweis_id'];
+			}
+		}
+		return $successful_downloaded_docs;
 	}
 	
 	function get_new_nachweise($client){

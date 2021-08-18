@@ -16,6 +16,7 @@ CREATE TABLE clients
 	last_sync date,
 	sync_time time,
 	status integer,
+	doc_download boolean,
   CONSTRAINT pk_clients_id PRIMARY KEY (client_id)
 );
 
