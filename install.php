@@ -103,9 +103,8 @@ function install() {
 	User: <?php echo $mysqlRootDb->user; ?><br>
 	Password: <?php #echo $mysqlRootDb->passwd; ?><br>
 	Datenbankname: <?php echo $mysqlRootDb->dbName; ?><br><?php
-	
-	$mysql_error = mysql_exists($mysqlRootDb);
-	if ($mysql_error == null) { ?>
+
+	if (mysql_exists($mysqlRootDb)) { ?>
 		MySQL-Server läuft, Verbindung hergestellt zu Host: <?php echo $mysqlRootDb->host; ?> Datenbank: <?php echo $mysqlRootDb->dbName; ?> mit Nutzer: <?php echo $mysqlRootDb->user; ?>!<br><?php
 	}
 	else { ?>
@@ -375,7 +374,7 @@ function init_config() {
 	define('CLASSPATH', 'class/');
 	define('LAYOUTPATH', 'layouts/');
 	define('LOG_LEVEL', 4);
-	define('LOGPATH', $installpath . 'logs/');
+	define('LOGPATH', $installpath . 'logs/kvwmap/');
 	define('DEBUG_LEVEL', 1);
 	define('DEBUGFILE', 'install.log');
 	define('LOGFILE_MYSQL', LOGPATH . 'install.log');
