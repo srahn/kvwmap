@@ -374,7 +374,7 @@ function init_config() {
 	define('CLASSPATH', 'class/');
 	define('LAYOUTPATH', 'layouts/');
 	define('LOG_LEVEL', 4);
-	define('LOGPATH', $installpath . 'logs/');
+	define('LOGPATH', $installpath . 'logs/kvwmap/');
 	define('DEBUG_LEVEL', 1);
 	define('DEBUGFILE', 'install.log');
 	define('LOGFILE_MYSQL', LOGPATH . 'install.log');
