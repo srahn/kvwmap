@@ -108,6 +108,9 @@ switch ($this->formvars['action']) {
 				if (strpos($from, ',') === false) {
 					$table = explode(' ', $from);
 					$table_part = explode('.', $table[0]);
+					if ($table_part[1] == ''){
+						$table_part[1] = $table_part[0];
+					}
 					if ($table_part[1] == $this->formvars['maintable_' . $layer_id]) {
 						$sql = "UPDATE layer SET Data = '" . addcslashes($this->formvars['new_data_' . $layer_id], "'") . "' WHERE Layer_ID = " . $layer_id;
 						$result = $this->database->execSQL($sql);
