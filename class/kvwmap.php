@@ -12407,6 +12407,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
   function BenutzerdatenFormular() {
     $this->titel='Benutzerdaten Editor';
     $this->main='userdaten_formular.php';
+		$this->admin_user = $this->is_admin_user($this->user->id);
     # Abfragen der Benutzerdaten wenn eine user_id zur Änderung selektiert ist
     if($this->formvars['selected_user_id']>0){
       $this->userdaten=$this->user->getUserDaten($this->formvars['selected_user_id'],'','', $this->Stelle->id, $this->user->id);
