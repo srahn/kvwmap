@@ -9832,21 +9832,21 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							if ($last_oid == '') {
 								$last_oid = $notice_result['oid'];
 							}
-							if ($last_oid != '' AND $this->user->rolle->upload_only_file_metadata == 1) {
+							if ($last_oid != '' AND $this->user->rolle->upload_only_file_metadata == 1 AND is_array($belated_files)) {
 								include_once(CLASSPATH . 'BelatedFile.php');
 								$results = array();
-								foreach ($document_attributes AS $i => $document_attribute) {
-									$file = json_decode($belated_files[$i]);
+								foreach ($belated_files AS $i => $belated_file) {
+									$file = json_decode($belated_file);
 									$results[] = BelatedFile::insert(
 										$this, array(
 											'user_id' => $this->user->id,
 											'layer_id' => $this->formvars['selected_layer_id'],
 											'dataset_id' => $last_oid,
-											'attribute_name' => $document_attribute['attributename'],
+											'attribute_name' => $document_attributes[$i]['attributename'],
 											'name' => $file->name,
 											'size' => $file->size,
 											'lastmodified' => $file->lastmodified,
-											'file' => $document_attribute['insert']
+											'file' => $document_attributes[$i]['insert']
 										)
 									);
 								}
@@ -12526,6 +12526,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
   function BenutzerdatenFormular() {
     $this->titel='Benutzerdaten Editor';
     $this->main='userdaten_formular.php';
+		$this->admin_user = $this->is_admin_user($this->user->id);
     # Abfragen der Benutzerdaten wenn eine user_id zur Änderung selektiert ist
     if($this->formvars['selected_user_id']>0){
       $this->userdaten=$this->user->getUserDaten($this->formvars['selected_user_id'],'','', $this->Stelle->id, $this->user->id);
@@ -13799,6 +13800,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 			}
 		}
+
 		if (count($document_attributes) > 0) {
 			if ($this->user->rolle->upload_only_file_metadata == 1) {
 				$belated_files = array();
@@ -13821,7 +13823,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$update = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);
 				}
 				$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $document_attributes[$i]['update'] = $update;
+        if ($this->user->id == 1) {
+          echo '<br>upload_only_file_metadata: ' . print_r($this->rolle->upload_only_file_metadata, true);
+        }
 				if ($this->user->rolle->upload_only_file_metadata == 1) {
+          if ($this->user->id == 1) {
+            echo '<br>form_fields: ' . print_r($this->formvars[$form_fields[$i]], true);
+          }
 					$belated_files[$attr_oid['oid']][$i] = $this->formvars[$form_fields[$i]];
 				}
 			}
@@ -13905,36 +13913,37 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									#if (!$ret['success']) {
 									#	$this->add_message('error', $ret[1]);
 									#}
-									
-									if ($this->user->rolle->upload_only_file_metadata == 1 AND array_key_exists($oid, $belated_files)) {
+									if ($this->user->rolle->upload_only_file_metadata == 1 AND is_array($belated_files) AND array_key_exists($oid, $belated_files)) {
 										foreach ($belated_files[$oid] AS $i => $belated_file) {
-											$file = json_decode($belated_file);
-											$where = "
-												`user_id` = " . $this->user->id . " AND
-												`layer_id` = " . $layer_id . " AND
-												`attribute_name` = '" . $document_attributes[$i]['attributename'] . "' AND
-												`dataset_id` = '" . $oid . "'
-											";
-											if ($old_belated_file = BelatedFile::find($this, $where)) {	# ein "=" ist richtig, da Zuweisung
-												$old_belated_file[0]->set('name', $file->name);
-												$old_belated_file[0]->set('size', $file->size);
-												$old_belated_file[0]->set('lastmodified', $file->lastmodified);
-												$old_belated_file[0]->set('file', $document_attributes[$i]['update']);
-												$old_belated_file[0]->update();
-											}
-											else {
-												BelatedFile::insert(
-													$this, array(
-														'user_id' => $this->user->id,
-														'layer_id' => $layer_id,
-														'dataset_id' => $oid,
-														'attribute_name' => $document_attributes[$i]['attributename'],
-														'name' => $file->name,
-														'size' => $file->size,
-														'lastmodified' => $file->lastmodified,
-														'file' => $document_attributes[$i]['update']
-													)
-												);
+											if ($belated_file != '') {
+												$file = json_decode($belated_file);
+												$where = "
+													`user_id` = " . $this->user->id . " AND
+													`layer_id` = " . $layer_id . " AND
+													`attribute_name` = '" . $document_attributes[$i]['attributename'] . "' AND
+													`dataset_id` = '" . $oid . "'
+												";
+												if ($old_belated_file = BelatedFile::find($this, $where)) {	# ein "=" ist richtig, da Zuweisung
+													$old_belated_file[0]->set('name', $file->name);
+													$old_belated_file[0]->set('size', $file->size);
+													$old_belated_file[0]->set('lastmodified', $file->lastmodified);
+													$old_belated_file[0]->set('file', $document_attributes[$i]['update']);
+													$old_belated_file[0]->update();
+												}
+												else {
+													BelatedFile::insert(
+														$this, array(
+															'user_id' => $this->user->id,
+															'layer_id' => $layer_id,
+															'dataset_id' => $oid,
+															'attribute_name' => $document_attributes[$i]['attributename'],
+															'name' => $file->name,
+															'size' => $file->size,
+															'lastmodified' => $file->lastmodified,
+															'file' => $document_attributes[$i]['update']
+														)
+													);
+												}
 											}
 										}
 									}
@@ -14447,7 +14456,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								$filter = " AND " . $layerset[$i]['Filter'];
 							}
 							if($this->formvars['CMD'] == 'touchquery'){
-								$the_geom = $layerset[$i]['attributes']['table_alias_name'][$geometrie_tabelle].'.'.$the_geom;
+								if(!empty($layerset[$i]['attributes']['table_alias_name'][$geometrie_tabelle])) {
+									$the_geom = $layerset[$i]['attributes']['table_alias_name'][$geometrie_tabelle].'.'.$the_geom;
+								}
+								
 								if(substr_count(strtolower($pfad), ' from ') > 1){			# mehrere froms -> das FROM der Hauptabfrage muss groß geschrieben sein
 									$fromposition = strpos($pfad, ' FROM ');
 								}

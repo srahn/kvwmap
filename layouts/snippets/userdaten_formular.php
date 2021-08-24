@@ -5,6 +5,15 @@
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script type="text/javascript">
 
+	function nutzer_aendern(){
+		if (document.GUI.admin_user.value != 1 && document.GUI.selectedstellen.length == 0){
+			if (!window.confirm("Wenn Sie dem Nutzer keine Stellen zuordnen, können Sie ihn anschließend nicht mehr bearbeiten. Wirklich Fortfahren?")) {
+				return;
+			}
+		}
+		submitWithValue('GUI','go_plus','Ändern');
+	}
+
 	function toggle_password(){
 		document.getElementById('udf_changepasswd').classList.value;
 		if (document.getElementById('udf_changepasswd').classList.length == 0) {
@@ -373,11 +382,12 @@
 
 <div id="udf_submit">
 	<input type="hidden" name="go_plus" id="go_plus" value="">
+	<input type="hidden" name="admin_user" value="<? echo $this->admin_user; ?>">
 <?
 	if ($this->formvars['selected_user_id'] > 0) {
 ?>
 	<input type="hidden" name="selected_user_id" value="<? echo $this->formvars['selected_user_id']; ?>">
-	<input type="button" name="dummy" value="<? echo $this->strSave; ?>" onclick="submitWithValue('GUI','go_plus','Ändern')">
+	<input type="button" name="dummy" value="<? echo $this->strSave; ?>" onclick="nutzer_aendern()">
 <?
 	}
 ?>
