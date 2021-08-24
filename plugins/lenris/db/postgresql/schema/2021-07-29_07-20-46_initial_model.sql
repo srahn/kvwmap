@@ -22,13 +22,13 @@ CREATE TABLE clients
 
 
 INSERT INTO clients VALUES 
-	(1, 'Landkreis Rostock',											'https://gdi-service.de/kvwmap_dev/index.php',	'stammnr',		NULL,						'{"gemarkung", "flur", "stammnr", "art", "blattnr"}'),
-	(2, 'Landkreis Mecklenburgische Seenplatte',	NULL,																						'rissnummer',	NULL,						'{"gemarkung", "flur", "rissnummer", "art", "blattnr"}'),
-	(3, 'Landkreis Vorpommern-Rügen',							NULL,																						'rissnummer', 'fortfuehrung', '{"gemarkung", "flur", "rissnummer", "fortfuehrung", "blattnr", "art"}'),
-	(4, 'Landkreis Vorpommern-Greifswald',				NULL,																						'rissnummer',	NULL,						'{"gemarkung", "flur", "rissnummer", "art", "blattnr"}'),
-	(5, 'Landkreis Ludwigslust-Parchim',					NULL,																						'rissnummer',	NULL,						'{"gemarkung", "flur", "rissnummer", "blattnr"}'),
-	(6, 'Landkreis Nordwestmecklenburg',					NULL,																						NULL,					NULL,						NULL),
-	(7, 'Hansestadt Rostock',											NULL,																						NULL,					NULL,						NULL);
+	(1, 'Landkreis Rostock',											NULL,	'stammnr',		NULL,						'{"gemarkung", "flur", "stammnr", "art", "blattnr"}'),
+	(2, 'Landkreis Mecklenburgische Seenplatte',	NULL,	'rissnummer',	NULL,						'{"gemarkung", "flur", "rissnummer", "art", "blattnr"}'),
+	(3, 'Landkreis Vorpommern-Rügen',							NULL,	'rissnummer', 'fortfuehrung', '{"gemarkung", "flur", "rissnummer", "fortfuehrung", "blattnr", "art"}'),
+	(4, 'Landkreis Vorpommern-Greifswald',				NULL,	'rissnummer',	NULL,						'{"gemarkung", "flur", "rissnummer", "art", "blattnr"}'),
+	(5, 'Landkreis Ludwigslust-Parchim',					NULL,	'rissnummer',	NULL,						'{"gemarkung", "flur", "rissnummer", "blattnr"}'),
+	(6, 'Landkreis Nordwestmecklenburg',					NULL,	NULL,					NULL,						NULL),
+	(7, 'Hansestadt Rostock',											NULL,	NULL,					NULL,						NULL);
 
 
 CREATE TABLE client_nachweise
