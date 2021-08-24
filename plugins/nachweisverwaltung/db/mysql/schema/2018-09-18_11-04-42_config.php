@@ -189,7 +189,7 @@ if($result[0]){
 	echo '<br>Fehler bei der Abfrage der Tabelle config.<br>';
 }
 else{
-	if($this->database->result->num_rows() == 0){
+	if($this->database->result->num_rows == 0){
 		$sql = '';
 		foreach($constants as $constant){
 			$sql.="INSERT INTO config (name, prefix, value, description, type, `group`, `plugin`, `saved`) VALUES ('".$constant['name']."', '".$constant['prefix']."', '".addslashes($constant['value'])."', '".addslashes($constant['description'])."', '".$constant['type']."', '".$constant['group']."', '".$constant['plugin']."', ".$constant['saved'].");\n";
