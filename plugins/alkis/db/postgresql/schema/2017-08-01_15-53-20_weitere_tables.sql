@@ -8,9 +8,6 @@ CREATE TABLE alkis.import
  datum timestamp without time zone DEFAULT now(),
  datei text,
  status text
-)
-WITH(
- OIDS=TRUE
 );
 
 -- Tabellen für Adressänderungsfunktionalität
@@ -21,7 +18,7 @@ CREATE TABLE alkis.ax_person_temp(											-- am 03.06.2015 hinzugefügt
 	datum timestamp without time zone,										-- am 03.06.2015 hinzugefügt
 	user_id integer,																			-- am 03.06.2015 hinzugefügt
   CONSTRAINT ax_person_temp_pk PRIMARY KEY (gml_id)			-- am 03.06.2015 hinzugefügt
-)WITH OIDS;																							-- am 03.06.2015 hinzugefügt
+);																							-- am 03.06.2015 hinzugefügt
 
 CREATE SEQUENCE alkis.ax_anschrift_temp_seq
   INCREMENT 1
@@ -40,6 +37,6 @@ CREATE TABLE alkis.ax_anschrift_temp(
 	datum timestamp without time zone,
 	user_id integer,
   CONSTRAINT ax_anschrift_temp_pk PRIMARY KEY (gml_id)
-)WITH OIDS;
+);
 
 COMMIT;

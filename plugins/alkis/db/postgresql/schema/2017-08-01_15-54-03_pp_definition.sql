@@ -40,7 +40,6 @@ BEGIN;
 -- Der View "gemeinde_gemarkung" kann entfallen, wenn Navigation umgestellt wurde.
 
 SET client_encoding = 'UTF-8';
-SET default_with_oids = true;
 SET search_path = alkis, public;
 
 -- Alles auf Anfang!
@@ -276,7 +275,7 @@ CREATE TABLE pp_strassenname
     art character varying,
     winkel double precision,
     CONSTRAINT pp_snam_pk  PRIMARY KEY (gid)
-) WITH (OIDS=FALSE);
+);
 
 SELECT AddGeometryColumn('pp_strassenname','the_geom',:alkis_epsg,'POINT',2);
 CREATE INDEX pp_snam_gidx ON pp_strassenname USING gist(the_geom); 
@@ -300,9 +299,6 @@ CREATE TABLE pp_zuordungspfeilspitze_flurstueck
 	beginnt character(20),
 	endet character(20),
 	abweichenderrechtszustand varchar			-- eingefügt am 25.06.2015
-)
-WITH (
-  OIDS=TRUE
 );
 
 SELECT AddGeometryColumn('pp_zuordungspfeilspitze_flurstueck','geom',:alkis_epsg,'POINT',2);
@@ -313,9 +309,6 @@ CREATE TABLE pp_zuordungspfeilspitze_bodensch
 (
   ogc_fid integer,
   winkel double precision
-)
-WITH (
-  OIDS=TRUE
 );
 
 SELECT AddGeometryColumn('pp_zuordungspfeilspitze_bodensch','geom',:alkis_epsg,'POINT',2);

@@ -4,13 +4,13 @@ SELECT setval('nachweisverwaltung.n_dokumentarten_id_seq', max(id), true)
 FROM nachweisverwaltung.n_dokumentarten;
 
 
-DELETE 
-FROM nachweisverwaltung.n_nachweise2dokumentarten n2d
-USING nachweisverwaltung.n_nachweise n, nachweisverwaltung.n_nachweise2dokumentarten n2d2
-LEFT JOIN nachweisverwaltung.n_dokumentarten d ON d.id = n2d2.dokumentart_id
-WHERE n2d.oid = n2d2.oid 
-AND n.id = n2d.nachweis_id
-AND (d.hauptart != n.art OR d.id IS NULL);
+--DELETE 
+--FROM nachweisverwaltung.n_nachweise2dokumentarten n2d
+--USING nachweisverwaltung.n_nachweise n, nachweisverwaltung.n_nachweise2dokumentarten n2d2
+--LEFT JOIN nachweisverwaltung.n_dokumentarten d ON d.id = n2d2.dokumentart_id
+--WHERE n2d.oid = n2d2.oid 
+--AND n.id = n2d.nachweis_id
+--AND (d.hauptart != n.art OR d.id IS NULL);
 
 
 INSERT INTO nachweisverwaltung.n_dokumentarten (art, geometrie_relevant, hauptart)

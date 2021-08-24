@@ -3,7 +3,7 @@ BEGIN;
   CREATE TABLE nachweisverwaltung.n_rissfuehrer (
     id serial NOT NULL PRIMARY KEY,
     name character varying (255)
-  ) WITH OIDS;
+  );
 
   ALTER TABLE nachweisverwaltung.n_nachweise
     ADD COLUMN datum_bis date,

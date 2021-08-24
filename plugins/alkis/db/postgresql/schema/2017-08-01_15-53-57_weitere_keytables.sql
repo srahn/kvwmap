@@ -11,8 +11,6 @@ SET search_path = alkis, public, pg_catalog;
 
 SET default_tablespace = '';
 
-SET default_with_oids = true;
-
 
 -- lk_ax_genauigkeitsstufe_punktort => ax_genauigkeitsstufe_punktort
 
