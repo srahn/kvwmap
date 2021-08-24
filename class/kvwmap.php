@@ -16066,7 +16066,7 @@ class db_mapObj{
 			$groups[$rs['id']]['id'] = $rs['id'];
 			if($rs['obergruppe'])$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
     }
-    $this->anzGroups=count($groups);
+    $this->anzGroups = @count($groups);
     return $groups;
   }
 
