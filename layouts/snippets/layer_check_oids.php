@@ -11,6 +11,8 @@ if(!in_array($this->Stelle->id, $admin_stellen)){
 	exit;
 }
 
+$this->layer_dbs = array();
+
 function checkStatus($layer){
 	$status['oid'] = ($layer['oid'] == 'oid' ? false : true);
 	$status['query'] = ((strpos($layer['pfad'], ' oid') !== false OR strpos($layer['pfad'], ',oid') !== false OR strpos($layer['pfad'], '.oid') !== false)? false : true);
@@ -20,6 +22,13 @@ function checkStatus($layer){
 
 function get_oid_alternative($layer){
 	global $GUI;
+	if (!array_key_exists($layer['connection_id'], $GUI->layer_dbs)){
+		$GUI->layer_dbs[$layer['connection_id']] = new pgdatabase();
+		if (!$GUI->layer_dbs[$layer['connection_id']]->dbConn = @pg_connect($layer['connectionstring'])){
+			$result['error'] = 'Verbindung zur PostgreSQL-DB nicht erfolgreich!';
+			return $result;
+		}
+	}
 	if ($layer['maintable'] == ''){
 		$result['error'] = 'Haupttabelle ist nicht gesetzt.';
 	}
@@ -37,9 +46,9 @@ function get_oid_alternative($layer){
 				attisdropped is false and 
 				(pg_get_serial_sequence('" . $layer['maintable'] . "', attname) IS NOT NULL OR i.indisunique)
 		";
-		$ret = @pg_query($GUI->pgdatabase->dbConn, $sql);
+		$ret = @pg_query($GUI->layer_dbs[$layer['connection_id']]->dbConn, $sql);
 		if($ret == false){
-			$result['error'] = pg_last_error($GUI->pgdatabase->dbConn);
+			$result['error'] = @pg_last_error($GUI->layer_dbs[$layer['connection_id']]->dbConn);
 		}
 		else{
 			$rs=pg_fetch_assoc($ret);
@@ -99,6 +108,9 @@ switch ($this->formvars['action']) {
 				if (strpos($from, ',') === false) {
 					$table = explode(' ', $from);
 					$table_part = explode('.', $table[0]);
+					if ($table_part[1] == ''){
+						$table_part[1] = $table_part[0];
+					}
 					if ($table_part[1] == $this->formvars['maintable_' . $layer_id]) {
 						$sql = "UPDATE layer SET Data = '" . addcslashes($this->formvars['new_data_' . $layer_id], "'") . "' WHERE Layer_ID = " . $layer_id;
 						$result = $this->database->execSQL($sql);
@@ -117,10 +129,12 @@ $this->formvars['order'] = $this->formvars['order'] ?: 'Name';
 $query = "
 	SELECT 	
 		layer.*,
+		CONCAT('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as connectionstring,
 		g.Gruppenname
 	FROM 
 		`layer` 
 		LEFT JOIN	u_groups g ON layer.Gruppe = g.id
+		LEFT JOIN connections c ON c.id = connection_id
 	WHERE 
 		connectiontype = 6 
 	ORDER BY " . $this->formvars['order'];
@@ -238,7 +252,8 @@ $umlaute=array("Ä","Ö","Ü");
 
 $oid_layer_count = 0;
 $i = 0;
-while($layer = $this->database->result->fetch_assoc()){
+$layer_count = $this->database->result->num_rows;
+while ($layer = $this->database->result->fetch_assoc()) {
   $status = checkStatus($layer);
 	$result = array();
 	$result = get_oid_alternative($layer);
@@ -304,7 +319,7 @@ echo '</tbody></table></div>';
 		<table>
 			<tr>
 				<td>
-					<? echo $this->database->result->num_rows; ?> PostGIS-Layer insgesamt<br>
+					<? echo $layer_count; ?> PostGIS-Layer insgesamt<br>
 					<? echo $oid_layer_count; ?> PostGIS-Layer müssen angepasst werden<br>
 					<a href="javascript:void(0);" id="layer_toggle_link" onclick="toggle_layer();">nur die anzupassenden PostGIS-Layer anzeigen</a>
 					<br>

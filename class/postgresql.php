@@ -128,7 +128,8 @@ class pgdatabase {
 			"port='" .		 $credentials['port'] 		. "' " .
 			"dbname='" .	 $credentials['dbname'] 	. "' " .
 			"user='" .		 $credentials['user'] 		. "' " .
-			"password='" . addslashes($credentials['password']) . "'";
+			"password='" . addslashes($credentials['password']) . "' " .
+			"application_name=kvwmap_user_" . $this->gui->user->id;
 		return $connection_string;
 	}
 

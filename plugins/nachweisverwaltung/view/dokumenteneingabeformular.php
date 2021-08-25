@@ -151,6 +151,7 @@ $legendheight = $this->map->height + 20;
 		margin-left: 20px;
 	}
 	.dokein-title{
+		position: relative;
 		margin-bottom: 3px;
 	}
 	#dokein-head-attributes {

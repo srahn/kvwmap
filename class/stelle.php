@@ -1769,7 +1769,7 @@ class stelle {
 
 	function parse_path($database, $path, $privileges, $attributes = NULL){
 		$newattributesstring = '';
-		$path = str_replace(array("\r\n", "\n"), ' ', $path);
+		$path = str_replace(["\r\n", "\n", "\t"], ' ', $path);
 		$distinctpos = strpos(strtolower($path), 'distinct');
 		if($distinctpos !== false && $distinctpos < 10){
 			$offset = $distinctpos+8;
