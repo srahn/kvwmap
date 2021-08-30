@@ -4886,7 +4886,7 @@ echo '			</table>
 								SET
 									" . $this->attributes['name'][$i] . " = " . $value . "
 								WHERE
-									" . $layerset[0]['oid'] . " = " . $this->formvars['oid'] . "
+									" . $layerset[0]['oid'] . " = '" . $this->formvars['oid'] . "'
 							";
 							$this->debug->write("<p>file:kvwmap :LineEditor_Senden :", 4);
 							$ret = $layerdb->execSQL($sql, 4, 1);
