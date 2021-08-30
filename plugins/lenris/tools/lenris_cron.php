@@ -25,11 +25,11 @@ $clients = $lenris->get_client_information();
 */
 
 function is_sync_required($client){
-	if (
-		$client['status'] === 0 AND $client['sync_time'] < date("H-i-s") AND $client['last_sync'] < date("Y-m-d") 	# nach Plan
+	return (
+		($client['status'] == 0 AND $client['sync_time'] < date("H-i-s") AND $client['last_sync'] != '' AND $client['last_sync'] < date("Y-m-d")) 	# nach Plan
 		OR
-		$client['status'] === 1		# auf GUI angefordert
-	)
+		$client['status'] == 1		# auf GUI angefordert
+	);
 }
 
 foreach ($clients as $client) {
@@ -37,19 +37,35 @@ foreach ($clients as $client) {
 	if (is_sync_required($client)) {
 		$lenris->update_client($client['client_id'], 'status = 2');
 		# neue Nachweise abfragen
-		$new_nachweise = $lenris->get_new_nachweise($client);
-		# neue Nachweise eintragen
-		$lenris->insert_new_nachweise($client, $new_nachweise);
+		if ($new_nachweise = $lenris->get_new_nachweise($client)){
+			# neue Nachweise eintragen
+			LENRIS::log(count($new_nachweise) . ' neue Nachweise von Client ' . $client['client_id']);
+			$lenris->insert_new_nachweise($client, $new_nachweise);
+		}
+		else{
+			LENRIS::log('Keine neuen Nachweise von Client ' . $client['client_id']);
+		}
 
 		# veränderte Nachweise abfragen
-		$changed_nachweise = $lenris->get_changed_nachweise($client);
-		# veränderte Nachweise aktualisieren
-		$lenris->update_changed_nachweise($client, $changed_nachweise);
+		if ($changed_nachweise = $lenris->get_changed_nachweise($client)) {
+			# veränderte Nachweise aktualisieren
+			LENRIS::log(count($changed_nachweise) . ' veränderte Nachweise von Client ' . $client['client_id']);
+			$lenris->update_changed_nachweise($client, $changed_nachweise);
+		}
+		else {
+			LENRIS::log('Keine veränderten Nachweise von Client ' . $client['client_id']);
+		}
 
 		# gelöschte Nachweise abfragen
-		$deleted_nachweis_ids = $lenris->get_deleted_nachweise($client);
-		# gelöschte Nachweise löschen
-		$lenris->delete_deleted_nachweise($client, $deleted_nachweis_ids);
+		if ($deleted_nachweise = $lenris->get_deleted_nachweise($client)) {
+			# gelöschte Nachweise löschen
+			LENRIS::log(count($deleted_nachweise) . ' gelöschte Nachweise von Client ' . $client['client_id']);
+			$lenris->delete_deleted_nachweise($client, $deleted_nachweise);
+		}
+		else {
+			LENRIS::log('Keine gelöschten Nachweise von Client ' . $client['client_id']);
+		}
+		$lenris->update_client($client['client_id'], 'status = 0');
 	}
 	
 	# Erstimport

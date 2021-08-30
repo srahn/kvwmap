@@ -15,7 +15,7 @@ CREATE TABLE clients
 	nachweis_unique_attributes character varying[],
 	last_sync date,
 	sync_time time,
-	status integer,
+	status integer NOT NULL DEFAULT 0,
 	doc_download boolean,
   CONSTRAINT pk_clients_id PRIMARY KEY (client_id)
 );

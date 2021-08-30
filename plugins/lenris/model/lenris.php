@@ -26,7 +26,7 @@ class LENRIS {
 				url, 
 				nachweis_primary_attribute, 
 				nachweis_secondary_attribute, 
-				to_json(nachweis_unique_attributes) as nachweis_unique_attributes
+				to_json(nachweis_unique_attributes) as nachweis_unique_attributes,
 				last_sync,
 				sync_time,
 				status,
@@ -64,7 +64,7 @@ class LENRIS {
 				lenris.client_nachweise cn,
 				nachweisverwaltung.n_nachweise n
 			WHERE
-				cn.nachweis_id = n.id
+				cn.nachweis_id = n.id AND
 				cn.client_id = " . $client_id . " AND 
 				cn.client_nachweis_id = " . $client_nachweis_id . "
 		";				
@@ -97,18 +97,23 @@ class LENRIS {
 	}
 	
 	function delete_downloadable_documents($client_id, $client_nachweis_ids){
-		$sql = "
-			DELETE FROM 
-				lenris.zu_holende_dokumente
-			WHERE
-				client_id = " . $client_id . " AND 
-				client_nachweis_id IN (" . implode(',', $client_nachweis_ids) . ")";
-		$ret = $this->database->execSQL($sql, 4, 0);
+		if ($client_nachweis_ids) {
+			$sql = "
+				DELETE FROM 
+					lenris.zu_holende_dokumente
+				WHERE
+					client_id = " . $client_id . " AND 
+					client_nachweis_id IN (" . implode(',', $client_nachweis_ids) . ")";
+			$ret = $this->database->execSQL($sql, 4, 0, true);
+		}
 	}
 	
 	function download_documents($client, $downloadable_documents){
 		foreach ($downloadable_documents as $downloadable_document) {
 			$dest_path = $this->adjust_path($downloadable_document['dokument'], $client['client_id']);
+			if (!is_dir(dirname($dest_path))) {
+				mkdir(dirname($dest_path), 0777, true);
+			}
 			exec('wget -O ' . $dest_path . ' ' . $client['url'] . '&go=LENRIS_get_document&document=' . $downloadable_document['dokument']);
 			if (file_exists($dest_path)) {
 				$successful_downloaded_docs[] = $downloadable_document['client_nachweis_id'];
@@ -118,18 +123,21 @@ class LENRIS {
 	}
 	
 	function get_new_nachweise($client){
-		$json = file_get_contents($client['url'] . '&go=LENRIS_get_new_nachweise');
-		return json_decode($json, true);
+		if ($json = file_get_contents($client['url'] . '&go=LENRIS_get_new_nachweise'))	{
+			return json_decode($json, true);
+		}
 	}
 	
 	function get_changed_nachweise($client){
-		$json = file_get_contents($client['url'] . '&go=LENRIS_get_changed_nachweise');
-		return json_decode($json, true);
+		if ($json = file_get_contents($client['url'] . '&go=LENRIS_get_changed_nachweise'))	{
+			return json_decode($json, true);
+		}
 	}
 	
 	function get_deleted_nachweise($client){
-		$ids = file_get_contents($client['url'] . '&go=LENRIS_get_deleted_nachweise');
-		return $ids;
+		if ($json = file_get_contents($client['url'] . '&go=LENRIS_get_deleted_nachweise')) {
+			return json_decode($json, true);
+		}
 	}	
 	
 	function adjust_path($link_datei, $client_id){
@@ -195,10 +203,10 @@ class LENRIS {
 		LENRIS::log('Bestätigung bei ' . $response . ' von ' . count($inserted_nachweise) . ' neuen Nachweisen für Client ' . $client['client_id'] . ' erfolgreich');
 	}
 	
-	function delete_deleted_nachweise($client, $nachweis_client_ids){
+	function delete_deleted_nachweise($client, $nachweise){
 		$deleted_nachweise = array();
-		foreach ($nachweis_client_ids as $nachweis_client_id) {
-			$rs = $this->get_nachweis_info($client['client_id'], $nachweis_client_id);
+		foreach ($nachweise as $n) {
+			$rs = $this->get_nachweis_info($client['client_id'], $n['id_nachweis']);
 			if ($rs['nachweis_id'] != '') {
 				$sql = "
 					DELETE FROM
@@ -213,10 +221,10 @@ class LENRIS {
 							lenris.client_nachweise
 						WHERE 
 							client_id = " . $client['client_id'] . " AND 
-							client_nachweis_id = " . $nachweis_client_id;
+							client_nachweis_id = " . $n['id_nachweis'];
 						$ret = $this->database->execSQL($sql, 4, 0, true);
 						if (!$ret[0]) {
-							$deleted_nachweise[] = $nachweis_client_id;
+							$deleted_nachweise[] = $n['id_nachweis'];
 						}
 						else {
 							LENRIS::log_error($ret[1]);
@@ -243,7 +251,7 @@ class LENRIS {
 	
 	function confirm_deleted_nachweise($client, $deleted_nachweise){
 		$response = curl_get_contents($client['url'] . '&go=LENRIS_confirm_deleted_nachweise&ids=' . implode(',', $deleted_nachweise));
-		LENRIS::log('Bestätigung bei ' . $response . ' von ' . count($deleted_nachweise) . ' neuen Nachweisen für Client ' . $client['client_id'] . ' erfolgreich');
+		LENRIS::log('Bestätigung bei ' . $response . ' von ' . count($deleted_nachweise) . ' gelöschten Nachweisen für Client ' . $client['client_id'] . ' erfolgreich');
 	}	
 	
 	function update_changed_nachweise($client, $nachweise){
