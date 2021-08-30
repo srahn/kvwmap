@@ -85,6 +85,58 @@ class lineeditor {
 		return $ret; 
 	}
 
+	/**
+	 * Function returns a WKT MultiLineString from a line, transformed from client to layer system.
+	 * @params string $line The line as comma separated text
+	 * @return string The WKT MultiLineString
+	 */
+	function get_multi_linestring($line) {
+		return "ST_Multi(" . $this->get_linestring($line) . ")";
+	}
+
+	/**
+	 * Function returns a WKT LineString from a line, transformed from client to layer system.
+	 * @params string $line The line as comma separated text
+	 * @return string The WKT LineString
+	 */
+	function get_linestring($line) {
+		return "ST_GeometryFromText('" . $line . "', " . $this->clientepsg . ")";
+	}
+
+	/**
+	 * Function returns wkb_geometry from line and geomtype given in options
+	 * transformed from client to layerepsg of this pointeditor object.
+	 * @params array options with line = WKT-Line and geomtype = Postgis-Geometrytype string
+	 * @return array success = false and err_msg if error in database request and true and
+	 * wkb_geometry with the requested WKB Geometry of that line
+	 */
+	function get_wkb_geometry($options) {
+		$linestring = ()
+		$sql = "
+			SELECT
+				ST_Transform(
+					" . (strtoupper(substr($geomtype, 0, 5)) == 'MULTI' ? $this->get_multi_linestring($line) : $this->get_linestring($line)) . ",
+					" . $this->layerepsg . "
+				) AS wkb_geometry
+		";
+		#echo '<p>SQL zum Berechnen der WKB-Geometrie der Linie: ' . $sql;
+		$ret = $this->database->execSQL($sql, 4, 1, true);
+		if ($ret[0]) {
+			# Fehler beim Berechnen der WKB-Geometrie in der Datenbank
+			return array(
+				'success' => false,
+				'err_msg' => 'Auf Grund eines Fehlers bei der Anfrage an die Datenbank konnte die Geometrie der Linie nicht berechnet werden!<br>' . $ret[1]
+			);
+		}
+		else {
+			$rs = pg_fetch_assoc($ret['query']);
+			return array(
+				'success' => true,
+				'wkb_geometry' => $rs['wkb_geometry']
+			);
+		}
+	}
+
 	function eintragenLinie($line, $oid, $tablename, $columnname, $geomtype) {
 		if ($line == '') {
 			$geom = "NULL";
