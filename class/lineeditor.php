@@ -105,17 +105,16 @@ class lineeditor {
 
 	/**
 	 * Function returns wkb_geometry from line and geomtype given in options
-	 * transformed from client to layerepsg of this pointeditor object.
+	 * transformed from client to layerepsg of this lineeditor object.
 	 * @params array options with line = WKT-Line and geomtype = Postgis-Geometrytype string
 	 * @return array success = false and err_msg if error in database request and true and
 	 * wkb_geometry with the requested WKB Geometry of that line
 	 */
 	function get_wkb_geometry($options) {
-		$linestring = ()
 		$sql = "
 			SELECT
 				ST_Transform(
-					" . (strtoupper(substr($geomtype, 0, 5)) == 'MULTI' ? $this->get_multi_linestring($line) : $this->get_linestring($line)) . ",
+					" . (strtoupper(substr($options['geomtype'], 0, 5)) == 'MULTI' ? $this->get_multi_linestring($options['line']) : $this->get_linestring($options['line'])) . ",
 					" . $this->layerepsg . "
 				) AS wkb_geometry
 		";
@@ -137,39 +136,49 @@ class lineeditor {
 		}
 	}
 
-	function eintragenLinie($line, $oid, $tablename, $columnname, $geomtype) {
+	function eintragenLinie($line, $oid, $tablename, $columnname, $geomtype, $kvps) {
 		if ($line == '') {
-			$geom = "NULL";
+			$wkb_geometry = 'NULL';
 		}
 		else {
-			if (strtoupper(substr($geomtype, 0, 5)) == 'MULTI') {
-				$geom = "st_transform(ST_MULTI(st_geometryfromtext('" . $line . "', " . $this->clientepsg . ")), " . $this->layerepsg . ")";
+			$ret = $this->get_wkb_geometry(array(
+				'geomtype' => $geomtype,
+				'line' => $line
+			));
+			if (!$ret['success']) {
+				return $ret;
 			}
-			else {
-				$geom = "st_transform(st_geometryfromtext('" . $line . "', " . $this->clientepsg."), " . $this->layerepsg . ")";
-			}
+			$wkb_geometry = "'" . $ret['wkb_geometry'] . "'";
 		}
+		$kvps[] = $columnname . ' = ' . $wkb_geometry;
 		$sql = "
-			UPDATE
-				" . $tablename . "
-			SET
-				" . $columnname . " = " . $geom . "
-			WHERE
-				".$this->oid_attribute." = '" . $oid . "'
+			UPDATE " . $tablename . "
+			SET " . implode(', ', $kvps) . "
+			WHERE ".$this->oid_attribute." = '" . $oid . "'
 		";
+		#echo '<p>SQL zum Updaten von Liniengeometrie: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 1, true);
 		if (!$ret[0]) {
 			if (pg_affected_rows($ret[1]) == 0) {
 				$ret[0] = 1;
 				$result = pg_fetch_row($ret[1]);
-				$ret[1]='Eintrag nicht erfolgreich.' . $result[0];
+				$ret[1] = 'Eintrag nicht erfolgreich.' . $result[0];
 			}
 		}
 		return $ret;
 	}
 
 	function getlines($oid, $tablename, $columnname) {
-		$sql = "SELECT st_assvg(st_transform(" . $columnname.", " . $this->clientepsg."), 0, 15) AS svggeom, st_astext(st_transform(" . $columnname.", " . $this->clientepsg.")) AS wktgeom, st_numGeometries(".$columnname.") as numgeometries FROM " . $tablename." WHERE ".$this->oid_attribute." = '" . $oid . "'";
+		$sql = "
+			SELECT
+				st_assvg(st_transform(" . $columnname . ", " . $this->clientepsg."), 0, 15) AS svggeom,
+				st_astext(st_transform(" . $columnname . ", " . $this->clientepsg.")) AS wktgeom,
+				st_numGeometries(" . $columnname . ") as numgeometries
+			FROM
+				" . $tablename . "
+			WHERE
+				" . $this->oid_attribute . " = '" . $oid . "'
+		";
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$lines = pg_fetch_array($ret[1]);
 		return $lines;
