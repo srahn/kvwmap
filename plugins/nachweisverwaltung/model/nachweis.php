@@ -56,12 +56,13 @@ class Nachweis {
 			ORDER BY id";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
-      $nachweise = pg_fetch_all($ret[1]);
-			foreach ($nachweise as $index => $nachweis) {
-				$nachweise[$index]['last_modified'] = date('Y-m-d H:i:s', filemtime($nachweis['link_datei']));
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				foreach ($nachweise as $index => $nachweis) {
+					$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', @filemtime($nachweis['link_datei']));
+				}
+				$json = json_encode($nachweise);
+				echo $json;
 			}
-			$json = json_encode($nachweise);
-			echo $json;
 		}
 	}
 	
@@ -76,12 +77,13 @@ class Nachweis {
 			ORDER BY a.id";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
-      $nachweise = pg_fetch_all($ret[1]);
-			foreach ($nachweise as $index => $nachweis) {
-				$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', filemtime($nachweis['link_datei']));
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				foreach ($nachweise as $index => $nachweis) {
+					$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', @filemtime($nachweis['link_datei']));
+				}
+				$json = json_encode($nachweise);
+				echo $json;
 			}
-			$json = json_encode($nachweise);
-			echo $json;
 		}
 	}
 	
@@ -96,12 +98,13 @@ class Nachweis {
 			ORDER BY a.id";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
-      $nachweise = pg_fetch_all($ret[1]);
-			foreach ($nachweise as $index => $nachweis) {
-				$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', filemtime($nachweis['link_datei']));
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				foreach ($nachweise as $index => $nachweis) {
+					$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', @filemtime($nachweis['link_datei']));
+				}
+				$json = json_encode($nachweise);
+				echo $json;
 			}
-			$json = json_encode($nachweise);
-			echo $json;
 		}
 	}
 	
@@ -115,9 +118,10 @@ class Nachweis {
 				db_action = 'DELETE'";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
-      $nachweise = pg_fetch_all($ret[1]);
-			$json = json_encode($nachweise);
-			echo $json;
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				$json = json_encode($nachweise);
+				echo $json;
+			}
 		}
 	}	
 	
@@ -161,7 +165,7 @@ class Nachweis {
 	}		
 
 	function LENRIS_get_document($document){
-		if (strpos($document, NACHWEISDOCPATH) !== false) {
+		if (strpos($document, NACHWEISDOCPATH) !== false AND file_exists($document)) {
 			readfile($document);
 		}
 	}
