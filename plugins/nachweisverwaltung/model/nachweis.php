@@ -160,6 +160,12 @@ class Nachweis {
 		}
 	}		
 
+	function LENRIS_get_document($document){
+		if (strpos($document, NACHWEISDOCPATH) !== false) {
+			readfile($document);
+		}
+	}
+
 	function check_documentpath($old_dataset){		
 		$ret=$this->getNachweise($old_dataset['id'],'','','','','','','','bySingleID','','');
 		if ($ret=='') {
