@@ -4702,34 +4702,15 @@ echo '			</table>
 		}
 		else {
 			$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-			# collect key value pairs for update statement
-			$kvps = array();
-			for ($i = 0; $i < count($this->attributes['type']); $i++) {
-				if ($this->attributes['name'][$i] != 'oid') {
-					switch (true) {
-						case (
-							$this->attributes['form_element_type'][$i] == 'Time' AND
-							in_array($this->attributes['options'][$i], array('', 'update'))
-						) : $kvps[] = $this->attributes['name'][$i] . " = '" . date('Y-m-d G:i:s') . "'";
-						break;
-						case (
-							$this->attributes['form_element_type'][$i] == 'User' AND
-							in_array($this->attributes['options'][$i], array('', 'update'))
-						) : $kvps[] = $this->attributes['name'][$i] . " = '" . $this->user->Vorname . " " . $this->user->Name . "'";
-						break;
-						case (
-							$this->attributes['form_element_type'][$i] == 'UserID' AND
-							in_array($this->attributes['options'][$i], array('', 'update'))
-						) : $kvps[] = $this->attributes['name'][$i] . " = " . $this->user->id;
-						break;
-						case (
-							$this->attributes['form_element_type'][$i] == 'Winkel'
-						) : $kvps[] = $this->attributes['name'][$i] . " = " . $this->formvars['angle'];
-						break;
-					}
-				}
-			}
-			$ret = $pointeditor->eintragenPunkt($this->formvars['loc_x'], $this->formvars['loc_y'], $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->formvars['dimension'], $kvps);
+			$ret = $pointeditor->eintragenPunkt(
+				$this->formvars['loc_x'],
+				$this->formvars['loc_y'],
+				$this->formvars['oid'],
+				$this->formvars['layer_tablename'],
+				$this->formvars['layer_columnname'],
+				$this->formvars['dimension'],
+				$this->get_auto_attribute_kvps()
+			);
 			if ($ret['success']) {
 				$this->add_message('notice', 'Eintrag erfolgreich!');
 				if ($ret['info_msg']) {
@@ -4827,12 +4808,63 @@ echo '			</table>
     $this->output();
   }
 
+	/**
+	 * function collect key value pairs of auto attributes for an update statement
+	 * @return array key value pairs as strings for update statements
+	 */
+	function get_auto_attribute_kvps() {
+		$kvps = array();
+		for ($i = 0; $i < count($this->attributes['type']); $i++) {
+			if ($this->attributes['name'][$i] != 'oid') {
+				switch (true) {
+					case (
+						$this->attributes['form_element_type'][$i] == 'Time' AND
+						in_array($this->attributes['options'][$i], array('', 'update'))
+					) : $kvps[] = $this->attributes['name'][$i] . " = '" . date('Y-m-d G:i:s') . "'";
+					break;
+					case (
+						$this->attributes['form_element_type'][$i] == 'User' AND
+						in_array($this->attributes['options'][$i], array('', 'update'))
+					) : $kvps[] = $this->attributes['name'][$i] . " = '" . $this->user->Vorname . " " . $this->user->Name . "'";
+					break;
+					case (
+						$this->attributes['form_element_type'][$i] == 'UserID' AND
+						in_array($this->attributes['options'][$i], array('', 'update'))
+					) : $kvps[] = $this->attributes['name'][$i] . " = " . $this->user->id;
+					break;
+					case (
+						$this->attributes['form_element_type'][$i] == 'Stelle' AND
+						in_array($this->attributes['options'][$i], array('', 'update'))
+					) : $kvps[] = $this->attributes['name'][$i] . " = '" . $this->Stelle->Bezeichnung . "'";
+					break;
+					case (
+						$this->attributes['form_element_type'][$i] == 'StelleID' AND
+						in_array($this->attributes['options'][$i], array('', 'update'))
+					) : $kvps[] = $this->attributes['name'][$i] . " = " . $this->Stelle->id;
+					break;
+					case ( # only for points
+						$this->attributes['form_element_type'][$i] == 'Winkel'
+					) : $kvps[] = $this->attributes['name'][$i] . " = " . $this->formvars['angle'];
+					break;
+					case ( # only for lines
+						$this->attributes['form_element_type'][$i] == 'Länge'
+					) : $kvps[] = $this->attributes['name'][$i] . " = '" . $this->formvars['linelength'] . "'";
+					break;
+					case ( # only for polygons
+						$this->attributes['form_element_type'][$i] == 'Fläche'
+					) : $kvps[] = $this->attributes['name'][$i] . " = '" . $this->formvars['area'] . "'";
+					break;
+				}
+			}
+		}
+		return $kvps;
+	}
+
 	function LineEditor_Senden() {
 		include_(CLASSPATH . 'lineeditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-		$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 		$lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 		# eingeabewerte pruefen:
 		$ret = $lineeditor->pruefeEingabedaten($this->formvars['newpathwkt']);
@@ -4844,55 +4876,20 @@ echo '			</table>
 			return;
 		}
 		else {
-			$umring = $this->formvars['newpathwkt'];
-			$ret = $lineeditor->eintragenLinie($umring, $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->attributes['geomtype'][$this->attributes['the_geom']]);
+			$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+			$ret = $lineeditor->eintragenLinie(
+				$this->formvars['newpathwkt'],
+				$this->formvars['oid'],
+				$this->formvars['layer_tablename'],
+				$this->formvars['layer_columnname'],
+				$this->attributes['geomtype'][$this->attributes['the_geom']],
+				$this->get_auto_attribute_kvps()
+			);
 			if ($ret[0]) { # fehler beim eintrag
 				$this->add_message('error', $ret[1]);
 				$this->formvars['no_load'] = 'true';
 			}
 			else { # eintrag erfolgreich
-				# wenn Time-Attribute vorhanden, aktuelle Zeit speichern
-				for ($i = 0; $i < count($this->attributes['type']); $i++) {
-					$value = '';
-					if (
-						$this->attributes['name'][$i] != 'oid' AND
-						in_array($this->attributes['form_element_type'][$i], array('Time', 'Länge', 'User', 'UserID'))
-					) {
-						switch (true) {
-							case (
-								$this->attributes['form_element_type'][$i] == 'Time' AND
-								in_array($this->attributes['options'][$i], array('', 'update'))
-							) : $value = "'" . date('Y-m-d G:i:s') . "'";
-							break;
-							case (
-								$this->attributes['form_element_type'][$i] == 'Länge'
-							) : $value = "'". $this->formvars['linelength'] . "'";
-								break;
-							case (
-								$this->attributes['form_element_type'][$i] == 'User' AND
-								in_array($this->attributes['options'][$i], array('', 'update'))
-							) : $value = "'" . $this->user->Vorname . " " . $this->user->Name . "'";
-							break;
-							case (
-								$this->attributes['form_element_type'][$i] == 'UserID' AND
-								in_array($this->attributes['options'][$i], array('', 'update'))
-							) : $value = $this->user->id;
-								break;
-						}
-						if ($value != '') {
-							$sql = "
-								UPDATE
-									" . pg_quote($this->formvars['layer_tablename']) . "
-								SET
-									" . $this->attributes['name'][$i] . " = " . $value . "
-								WHERE
-									" . $layerset[0]['oid'] . " = " . $this->formvars['oid'] . "
-							";
-							$this->debug->write("<p>file:kvwmap :LineEditor_Senden :", 4);
-							$ret = $layerdb->execSQL($sql, 4, 1);
-						}
-					}
-				}
 				$this->formvars['newpath'] = "";
 				$this->formvars['newpathwkt'] = "";
 				$this->formvars['pathwkt'] = "";
@@ -4978,7 +4975,7 @@ echo '			</table>
 	}
 
 	function PolygonEditor_Senden(){
-		include_(CLASSPATH.'polygoneditor.php');
+		include_(CLASSPATH . 'polygoneditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
@@ -5001,57 +4998,31 @@ echo '			</table>
 				$umring, $this->formvars['oid'],
 				$this->formvars['layer_tablename'],
 				$this->formvars['layer_columnname'],
-				$this->attributes['geomtype'][$this->attributes['the_geom']]
+				$this->attributes['geomtype'][$this->attributes['the_geom']],
+				$this->get_auto_attribute_kvps()
 			);
 			if (!$ret['success']) { # fehler beim eintrag
 				$this->Meldung = $ret[1];
 				$this->formvars['no_load'] = 'true';
 			}
 			else { # eintrag erfolgreich
-				# wenn auto-Attribute vorhanden, auto-Werte eintragen
-				for ($i = 0; $i < count($this->attributes['type']); $i++){
-					if (
-						$this->attributes['name'][$i] != 'oid' AND
-						$this->attributes['form_element_type'][$i] == 'Time' AND
-						in_array($this->attributes['options'][$i], array('', 'update'))
-					) {
-						$sql = "UPDATE " . pg_quote($this->formvars['layer_tablename']) . " SET " . $this->attributes['name'][$i]." = '".date('Y-m-d G:i:s')."' WHERE " . $layerset[0]['oid'] . " = '" . $this->formvars['oid']."'";
-						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
-						$ret2 = $layerdb->execSQL($sql,4, 1);
-					}
-					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Fläche'){
-						$sql = "UPDATE " . pg_quote($this->formvars['layer_tablename']) . " SET " . $this->attributes['name'][$i]." = '" . $this->formvars['area']."' WHERE " . $layerset[0]['oid'] . " = '" . $this->formvars['oid']."'";
-						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
-						$ret2 = $layerdb->execSQL($sql,4, 1);
-					}
-					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'User' AND in_array($this->attributes['options'][$i], array('', 'update'))){
-						$sql = "UPDATE " . pg_quote($this->formvars['layer_tablename']) . " SET " . $this->attributes['name'][$i]." = '" . $this->user->Vorname." " . $this->user->Name."' WHERE " . $layerset[0]['oid'] . " = '" . $this->formvars['oid']."'";
-						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
-						$ret2 = $layerdb->execSQL($sql,4, 1);
-					}
-					elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'UserID'  AND in_array($this->attributes['options'][$i], array('', 'update'))){
-						$sql = "UPDATE " . pg_quote($this->formvars['layer_tablename']) . " SET " . $this->attributes['name'][$i]." = " . $this->user->id." WHERE " . $layerset[0]['oid'] . " = '" . $this->formvars['oid']."'";
-						$this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
-						$ret2 = $layerdb->execSQL($sql,4, 1);
-					}
-				}
-        $this->formvars['newpath']="";
-        $this->formvars['newpathwkt']="";
-        $this->formvars['pathwkt']="";
-        $this->formvars['firstpoly']="";
-        $this->formvars['secondpoly']="";
-        $this->add_message('notice', 'Eintrag erfolgreich!');
+				$this->formvars['newpath']="";
+				$this->formvars['newpathwkt']="";
+				$this->formvars['pathwkt']="";
+				$this->formvars['firstpoly']="";
+				$this->formvars['secondpoly']="";
+				$this->add_message('notice', 'Eintrag erfolgreich!');
 				if ($ret[3]) {
 					$this->add_message('info', $ret[3]);
 				}
 				elseif ($ret['msg'] != '') {
 					$this->add_message('info', $ret['msg']);
 				}
-      }
-      $this->formvars['CMD'] = '';
-      $this->PolygonEditor();
-    }
-  }
+			}
+			$this->formvars['CMD'] = '';
+			$this->PolygonEditor();
+		}
+	}
 
 	function zoomto_selected_datasets(){
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
