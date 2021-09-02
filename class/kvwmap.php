@@ -5204,7 +5204,7 @@ echo '			</table>
 	}
 
 	function PolygonEditor_Senden(){
-		include_(CLASSPATH.'polygoneditor.php');
+		include_(CLASSPATH . 'polygoneditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
@@ -5235,23 +5235,23 @@ echo '			</table>
 				$this->formvars['no_load'] = 'true';
 			}
 			else { # eintrag erfolgreich
-        $this->formvars['newpath']="";
-        $this->formvars['newpathwkt']="";
-        $this->formvars['pathwkt']="";
-        $this->formvars['firstpoly']="";
-        $this->formvars['secondpoly']="";
-        $this->add_message('notice', 'Eintrag erfolgreich!');
+				$this->formvars['newpath']="";
+				$this->formvars['newpathwkt']="";
+				$this->formvars['pathwkt']="";
+				$this->formvars['firstpoly']="";
+				$this->formvars['secondpoly']="";
+				$this->add_message('notice', 'Eintrag erfolgreich!');
 				if ($ret[3]) {
 					$this->add_message('info', $ret[3]);
 				}
 				elseif ($ret['msg'] != '') {
 					$this->add_message('info', $ret['msg']);
 				}
-      }
-      $this->formvars['CMD'] = '';
-      $this->PolygonEditor();
-    }
-  }
+			}
+			$this->formvars['CMD'] = '';
+			$this->PolygonEditor();
+		}
+	}
 
 	function zoomto_selected_datasets(){
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);

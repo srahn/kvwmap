@@ -154,7 +154,7 @@ class lineeditor {
 		$sql = "
 			UPDATE " . $tablename . "
 			SET " . implode(', ', $kvps) . "
-			WHERE ".$this->oid_attribute." = '" . $oid . "'
+			WHERE " . $this->oid_attribute." = '" . $oid . "'
 		";
 		#echo '<p>SQL zum Updaten von Liniengeometrie: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 1, true);
