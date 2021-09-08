@@ -240,16 +240,16 @@ class Nachweis {
 		}
 	}
 	
-  function getZielDateiName($formvars) {
+  function getZielDateiName($formvars, $nachweis_primary_attribute = NACHWEIS_PRIMARY_ATTRIBUTE, $nachweis_secondary_attribute = NACHWEIS_SECONDARY_ATTRIBUTE) {
     #2005-11-24_pk
     $pathparts=pathinfo($formvars['Bilddatei_name']);
-		if($formvars[NACHWEIS_PRIMARY_ATTRIBUTE] == ''){		# primäres Ordungskriterium leer -> Nachweis-ID nehmen
+		if($formvars[$nachweis_primary_attribute] == ''){		# primäres Ordungskriterium leer -> Nachweis-ID nehmen
 			$id = $secondary.str_pad(($formvars['id'] ?: $this->get_next_nachweis_id()), RISSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
 		}
 		else{
-			$id = $this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]);
+			$id = $this->buildNachweisNr($formvars[$nachweis_primary_attribute], $formvars[$nachweis_secondary_attribute]);
 		}
-    $zieldateiname=$formvars['flurid'].'-'.$id.'-'.$formvars['artname'].'-'.str_pad(trim($formvars['Blattnr']),3,'0',STR_PAD_LEFT).'.'.$pathparts['extension'];
+    $zieldateiname = $formvars['flurid'].'-'.$id.'-'.$formvars['artname'].'-'.str_pad(trim($formvars['Blattnr']),3,'0',STR_PAD_LEFT).'.'.$pathparts['extension'];
     #echo $zieldateiname;
     return $zieldateiname;
   }
@@ -369,13 +369,20 @@ class Nachweis {
     return $art;
   }	
   
-  function getDokumentarten(){
+  function getDokumentarten($grouped_by_hauptart = true){
   	$sql="SELECT id, art, geometrie_relevant, hauptart, sortierung, abkuerzung, pok_pflicht::integer FROM nachweisverwaltung.n_dokumentarten order by sortierung, art"; 
     $ret=$this->database->execSQL($sql,4, 0);    
     if (!$ret[0]) {
-      while($rs=pg_fetch_assoc($ret[1])){
-				$art[$rs['hauptart']][$rs['id']] = $rs;
-      }
+			if ($grouped_by_hauptart) {
+				while($rs=pg_fetch_assoc($ret[1])){
+					$art[$rs['hauptart']][$rs['id']] = $rs;
+				}
+			}
+			else {
+				while($rs=pg_fetch_assoc($ret[1])){
+					$art[$rs['id']] = $rs;
+				}
+			}
     }
     return $art;
   }
@@ -608,8 +615,8 @@ class Nachweis {
     return $ret;
   }
 
-  static function buildNachweisNr($primary, $secondary){
-  	if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
+  static function buildNachweisNr($primary, $secondary, $nachweis_primary_attribute = NACHWEIS_PRIMARY_ATTRIBUTE){
+  	if($nachweis_primary_attribute == 'rissnummer'){
   		return $secondary.str_pad($primary, RISSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
   	}
   	else{

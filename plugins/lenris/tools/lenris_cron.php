@@ -3,6 +3,7 @@
 error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_WARNING));
 
 include('../../../config.php');
+include(PLUGINS.'nachweisverwaltung/config/config.php');
 include(WWWROOT . APPLVERSION . 'funktionen/allg_funktionen.php');
 include(CLASSPATH.'log.php');
 include(CLASSPATH.'postgresql.php');
@@ -13,7 +14,6 @@ $database->open();
 $client_id = $argv[1];
 
 $lenris = new LENRIS($database);
-$clients = $lenris->get_client_information();
 
 /*
 	status:
@@ -26,15 +26,16 @@ $clients = $lenris->get_client_information();
 
 function is_sync_required($client){
 	return (
-		($client['status'] == 0 AND $client['sync_time'] < date("H-i-s") AND $client['last_sync'] != '' AND $client['last_sync'] < date("Y-m-d")) 	# nach Plan
+		($client['status'] == 0 AND $client['sync_time'] < date("H:i:s") AND $client['last_sync'] != '' AND $client['last_sync'] < date("Y-m-d")) 	# nach Plan
 		OR
 		$client['status'] == 1		# auf GUI angefordert
 	);
 }
 
-foreach ($clients as $client) {
+foreach ($lenris->clients as $client) {
 	# Synchronisation
 	if (is_sync_required($client)) {
+		$lenris->database->begintransaction();
 		$lenris->update_client($client['client_id'], 'status = 2');
 		# neue Nachweise abfragen
 		if ($new_nachweise = $lenris->get_new_nachweise($client)){
@@ -65,12 +66,22 @@ foreach ($clients as $client) {
 		else {
 			LENRIS::log('Keine gelöschten Nachweise von Client ' . $client['client_id']);
 		}
-		$lenris->update_client($client['client_id'], 'status = 0');
+		$lenris->update_client($client['client_id'], "status = 0, last_sync = '" . date("Y-m-d H:i:s") . "'");
+		$lenris->database->committransaction();
 	}
 	
 	# Erstimport
-	if ($client['status'] === 3){
-		
+	if ($client['status'] == 3){
+		$lenris->database->begintransaction();
+		$lenris->update_client($client['client_id'], 'status = 4');
+		if ($lenris->delete_nachweise($client['client_id'])) {
+			if ($all_nachweise = $lenris->get_all_nachweise($client)) {
+				LENRIS::log('Erstimport: ' . count($all_nachweise) . ' Nachweise von Client ' . $client['client_id']);
+				$lenris->insert_new_nachweise($client, $all_nachweise, false);
+			}
+		}
+		$lenris->update_client($client['client_id'], "status = 0, last_sync = '" . date("Y-m-d H:i:s") . "'");
+		$lenris->database->committransaction();
 	}
 	
 	# Dokumente holen
