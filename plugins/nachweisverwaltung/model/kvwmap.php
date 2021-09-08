@@ -36,6 +36,11 @@
 		$nachweis->LENRIS_get_changed_nachweise();
 	};
 	
+	$GUI->LENRIS_get_deleted_nachweise = function() use ($GUI){
+		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$nachweis->LENRIS_get_deleted_nachweise();
+	};	
+	
 	$GUI->LENRIS_confirm_new_nachweise = function() use ($GUI){
 		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
 		$nachweis->LENRIS_confirm_new_nachweise($GUI->formvars['ids']);

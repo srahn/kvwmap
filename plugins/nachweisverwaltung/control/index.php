@@ -21,6 +21,11 @@ function go_switch_nachweisverwaltung($go){
 			$GUI->LENRIS_get_changed_nachweise();
 	  } break;		
 		
+		case 'LENRIS_get_deleted_nachweise' : {
+			$GUI->checkCaseAllowed('LENRIS');
+			$GUI->LENRIS_get_deleted_nachweise();
+	  } break;
+		
 		case 'LENRIS_confirm_new_nachweise' : {
 			$GUI->checkCaseAllowed('LENRIS');
 			$GUI->LENRIS_confirm_new_nachweise();

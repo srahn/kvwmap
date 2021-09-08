@@ -116,8 +116,8 @@ class Nachweis {
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
       $nachweise = pg_fetch_all($ret[1]);
-			$ids = implode(',', $nachweise);
-			echo $ids;
+			$json = json_encode($nachweise);
+			echo $json;
 		}
 	}	
 	
@@ -134,7 +134,7 @@ class Nachweis {
 		}
 	}
 	
-	function LENRIS_confirm_updated_nachweise($ids){
+	function LENRIS_confirm_changed_nachweise($ids){
 		$sql = "
 			DELETE FROM 
 				nachweisverwaltung.lenris_worker 
