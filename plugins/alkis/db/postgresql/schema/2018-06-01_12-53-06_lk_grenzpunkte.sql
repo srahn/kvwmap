@@ -3,7 +3,7 @@ BEGIN;
 DROP VIEW alkis.lk_grenzpunkte;
 
 CREATE VIEW alkis.lk_grenzpunkte AS
- SELECT o.oid,
+ SELECT
     o.gml_id,
     o.beginnt AS o_beginnt,
     o.endet AS o_endet,

@@ -1,7 +1,5 @@
 BEGIN;
 
-DROP FUNCTION alkis.kvw_geomto3d(character varying, character varying);
-
 CREATE OR REPLACE FUNCTION alkis.delete_object_tables()
   RETURNS character varying AS
 $BODY$

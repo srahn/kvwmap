@@ -3023,7 +3023,7 @@ FROM
     # after BEGIN command will be executed in a single transaction
     # until an explicit COMMIT or ROLLBACK is given
     if ($this->blocktransaction==0) {
-      $ret=$this->execSQL('START TRANSACTION',4, 1);
+      $ret=$this->execSQL('BEGIN',4, 0);
     }
     return $ret;
   }
@@ -3034,7 +3034,7 @@ FROM
     # rolls back the current transaction and causes all the updates
     # made by the transaction to be discarded
     if ($this->blocktransaction==0) {
-      $ret=$this->execSQL('ROLLBACK',4, 1);
+      $ret=$this->execSQL('ROLLBACK',4, 0);
     }
     return $ret;
   }
@@ -3044,7 +3044,7 @@ FROM
     # commits the current transaction. All changes made by the transaction
     # become visible to others and are guaranteed to be durable if a crash occurs
     if ($this->blocktransaction==0) {
-      $ret=$this->execSQL('COMMIT',4, 1);
+      $ret=$this->execSQL('COMMIT',4, 0);
     }
     return $ret;
   }

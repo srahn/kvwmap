@@ -5,7 +5,7 @@ SET search_path = alkis, public;
 -- Sicht zur Darstellung der Grenzpunkte:
 
 CREATE OR REPLACE VIEW alkis.lk_grenzpunkte AS 
- SELECT COALESCE(p.oid, o.oid) AS oid,
+ SELECT 
     o.gml_id,
     o.beginnt AS o_beginnt,
     o.endet AS o_endet,
@@ -75,7 +75,7 @@ CREATE OR REPLACE VIEW s_zuordungspfeil_flurstueck AS
 -- Sicht zur Darstellung der Aufnahmepunkte:
 
 CREATE OR REPLACE VIEW alkis.lk_ap AS 
-SELECT o.oid, o.gml_id, o.beginnt, o.endet, o.punktkennung, o.sonstigeeigenschaft, o.vermarkung_marke, l.beschreibung as verm_bedeutung, p.genauigkeitsstufe, m.beschreibung as punktgenauigkeit, p.vertrauenswuerdigkeit, n.beschreibung as bedeutung, rtrim(ltrim(st_astext(p.wkb_geometry), 'POINT('::text), ')'::text) AS koord, p.wkb_geometry
+SELECT  o.gml_id, o.beginnt, o.endet, o.punktkennung, o.sonstigeeigenschaft, o.vermarkung_marke, l.beschreibung as verm_bedeutung, p.genauigkeitsstufe, m.beschreibung as punktgenauigkeit, p.vertrauenswuerdigkeit, n.beschreibung as bedeutung, rtrim(ltrim(st_astext(p.wkb_geometry), 'POINT('::text), ')'::text) AS koord, p.wkb_geometry
 FROM alkis.ax_aufnahmepunkt o
 LEFT JOIN alkis.ax_punktortau p ON o.gml_id = any(p.istteilvon)
 LEFT JOIN alkis.ax_marke l ON l.wert = o.vermarkung_marke
@@ -86,7 +86,7 @@ LEFT JOIN alkis.ax_vertrauenswuerdigkeit_punktort n ON n.wert = p.vertrauenswuer
 
 
 CREATE OR REPLACE VIEW alkis.lk_sp AS 
-SELECT o.oid, o.punktkennung, o.beginnt, o.endet, o.sonstigeeigenschaft, o.vermarkung_marke, l.beschreibung as verm_bedeutung, p.genauigkeitsstufe, m.beschreibung AS punktgenauigkeit, p.vertrauenswuerdigkeit, n.beschreibung as bedeutung, rtrim(ltrim(st_astext(p.wkb_geometry), 'POINT('::text), ')'::text) AS koord, p.wkb_geometry
+SELECT  o.punktkennung, o.beginnt, o.endet, o.sonstigeeigenschaft, o.vermarkung_marke, l.beschreibung as verm_bedeutung, p.genauigkeitsstufe, m.beschreibung AS punktgenauigkeit, p.vertrauenswuerdigkeit, n.beschreibung as bedeutung, rtrim(ltrim(st_astext(p.wkb_geometry), 'POINT('::text), ')'::text) AS koord, p.wkb_geometry
 FROM alkis.ax_sicherungspunkt o
 LEFT JOIN alkis.ax_punktortau p ON o.gml_id = any(p.istteilvon)
 LEFT JOIN alkis.ax_marke l ON l.wert = o.vermarkung_marke
@@ -97,7 +97,7 @@ LEFT JOIN alkis.ax_vertrauenswuerdigkeit_punktort n ON n.wert = p.vertrauenswuer
 -- Sicht zur Darstellung der sonstigen Vermessungspunkte:
 
 CREATE OR REPLACE VIEW alkis.lk_so_punkte AS 
-SELECT o.oid,o.beginnt,o.endet, o.punktkennung, o.sonstigeeigenschaft, o.vermarkung_marke, l.beschreibung as verm_bedeutung, p.genauigkeitsstufe, m.beschreibung AS punktgenauigkeit, p.vertrauenswuerdigkeit, n.beschreibung as bedeutung, st_astext(p.wkb_geometry) AS koord, p.wkb_geometry
+SELECT o.beginnt,o.endet, o.punktkennung, o.sonstigeeigenschaft, o.vermarkung_marke, l.beschreibung as verm_bedeutung, p.genauigkeitsstufe, m.beschreibung AS punktgenauigkeit, p.vertrauenswuerdigkeit, n.beschreibung as bedeutung, st_astext(p.wkb_geometry) AS koord, p.wkb_geometry
 FROM alkis.ax_sonstigervermessungspunkt o
 LEFT JOIN alkis.ax_punktortau p ON o.gml_id = any(p.istteilvon)
 LEFT JOIN alkis.ax_marke l ON l.wert = o.vermarkung_marke
@@ -107,7 +107,7 @@ LEFT JOIN alkis.ax_vertrauenswuerdigkeit_punktort n ON n.wert = p.vertrauenswuer
 -- Sicht zur Darstellung der Gebäude:
 
 CREATE OR REPLACE VIEW alkis.lk_gebaeude AS 
- SELECT o.oid, o.ogc_fid, o.gml_id, o.beginnt, o.endet, o.gebaeudefunktion, p.beschreibung as bezeichner, w.wert AS weiterefunktion, o.name, o.zustand, z.beschreibung AS gebaeudezustand, o.objekthoehe,
+ SELECT  o.ogc_fid, o.gml_id, o.beginnt, o.endet, o.gebaeudefunktion, p.beschreibung as bezeichner, w.wert AS weiterefunktion, o.name, o.zustand, z.beschreibung AS gebaeudezustand, o.objekthoehe,
  o.lagezurerdoberflaeche, o.dachform, d.beschreibung AS dach_bezeichner, o.hochhaus, o.herkunft_source_source_ax_datenerhebung[1] ax_datenerhebung, da.beschreibung AS herkunft, o.wkb_geometry
    FROM alkis.ax_gebaeude o
    LEFT JOIN alkis.ax_gebaeudefunktion p ON p.wert = o.gebaeudefunktion
@@ -119,14 +119,14 @@ CREATE OR REPLACE VIEW alkis.lk_gebaeude AS
 -- Sicht zur Darstellung besonderer Gebäude:
 
 CREATE OR REPLACE VIEW alkis.lk_bes_gebaeude AS 
- SELECT o.oid, o.ogc_fid, o.gml_id, o.beginnt, o.endet, o.bauwerksfunktion, p.beschreibung, o.wkb_geometry
+ SELECT  o.ogc_fid, o.gml_id, o.beginnt, o.endet, o.bauwerksfunktion, p.beschreibung, o.wkb_geometry
    FROM alkis.ax_sonstigesbauwerkodersonstigeeinrichtung o
    LEFT JOIN alkis.ax_bauwerksfunktion_sonstigesbauwerkodersonstigeeinrichtun p ON p.wert = o.bauwerksfunktion;
 
 -- Sicht zur Darstellung der Gebäudepunkte:
 
 CREATE OR REPLACE VIEW alkis.lk_gebaeudepunkte AS 
- SELECT DISTINCT o.oid, p.gml_id, o.beginnt, o.endet, o.punktkennung, m.wert, m.beschreibung AS punktgenauigkeit, p.vertrauenswuerdigkeit, n.beschreibung, p.wkb_geometry, rtrim(ltrim(st_astext(p.wkb_geometry), 'POINT('::text), ')'::text) AS koord
+ SELECT DISTINCT  p.gml_id, o.beginnt, o.endet, o.punktkennung, m.wert, m.beschreibung AS punktgenauigkeit, p.vertrauenswuerdigkeit, n.beschreibung, p.wkb_geometry, rtrim(ltrim(st_astext(p.wkb_geometry), 'POINT('::text), ')'::text) AS koord
    FROM alkis.ax_besonderergebaeudepunkt o
    LEFT JOIN alkis.ax_punktortag p ON o.gml_id = any(p.istteilvon)
    LEFT JOIN alkis.ax_genauigkeitsstufe_punktort m ON m.wert = p.genauigkeitsstufe
@@ -135,7 +135,7 @@ CREATE OR REPLACE VIEW alkis.lk_gebaeudepunkte AS
 -- Sicht zur Darstellung der Nutzungsarten:
 
 CREATE OR REPLACE VIEW alkis.lk_nutzungen AS 
-SELECT n.oid, n.gml_id, n.beginnt, n.endet, n.werteart1, n.werteart2, n.info, n.zustand, n.name, n.bezeichnung, 
+SELECT  n.gml_id, n.beginnt, n.endet, n.werteart1, n.werteart2, n.info, n.zustand, n.name, n.bezeichnung, 
 nas.nutzungsartengruppe::text||nas.nutzungsart::text||nas.untergliederung1::text||nas.untergliederung2::text as nutzungsartschluessel,
 nag.bereich, nag.gruppe as nutzungsartengruppe, na.nutzungsart, nu1.untergliederung1, nu2.untergliederung2, 
 nas.nutzungsartengruppe as nutzungsartengruppeschl,nas.nutzungsart as nutzungsartschl,nas.untergliederung1 as untergliederung1schl,nas.untergliederung2 as untergliederung2schl,
@@ -150,7 +150,7 @@ LEFT JOIN alkis.n_untergliederung2 nu2 on nas.nutzungsartengruppe = nu2.nutzungs
 -- Sicht zur Darstellung der Muster- und Vergleichsstücke:
 
 CREATE OR REPLACE VIEW alkis.lk_muster_vergleichsstueck AS 
- SELECT mu.oid, mu.ogc_fid, mu.gml_id, mu.gml_id as identifier, mu.beginnt, mu.endet, mu.advstandardmodell, mu.anlass, mu.merkmal, me.beschreibung AS gruppe, mu.nummer, mu.kulturart, ku.beschreibung AS kultur, mu.bodenart, art.beschreibung, mu.zustandsstufeoderbodenstufe, zu.beschreibung AS zustand_bodenstufe, mu.entstehungsartoderklimastufewasserverhaeltnisse, ent.beschreibung AS entstehung, mu.bodenzahlodergruenlandgrundzahl, mu.ackerzahlodergruenlandzahl, mu.wkb_geometry AS the_geom
+ SELECT  mu.ogc_fid, mu.gml_id, mu.gml_id as identifier, mu.beginnt, mu.endet, mu.advstandardmodell, mu.anlass, mu.merkmal, me.beschreibung AS gruppe, mu.nummer, mu.kulturart, ku.beschreibung AS kultur, mu.bodenart, art.beschreibung, mu.zustandsstufeoderbodenstufe, zu.beschreibung AS zustand_bodenstufe, mu.entstehungsartoderklimastufewasserverhaeltnisse, ent.beschreibung AS entstehung, mu.bodenzahlodergruenlandgrundzahl, mu.ackerzahlodergruenlandzahl, mu.wkb_geometry AS the_geom
    FROM alkis.ax_musterlandesmusterundvergleichsstueck mu
    LEFT JOIN alkis.ax_merkmal_musterlandesmusterundvergleichsstueck me ON mu.merkmal = me.wert
    LEFT JOIN alkis.ax_bodenart_bodenschaetzung art ON mu.bodenart = art.wert
@@ -161,7 +161,7 @@ CREATE OR REPLACE VIEW alkis.lk_muster_vergleichsstueck AS
 -- Sicht zur Darstellung der Grablöcher:
 
 CREATE OR REPLACE VIEW alkis.lk_grabloch AS 
- SELECT gr.oid, gr.ogc_fid, gr.gml_id, gr.gml_id as identifier, gr.beginnt, gr.endet, gr.advstandardmodell, gr.anlass, gr.zeigtaufexternes_art as art, gr.zeigtaufexternes_name AS name, gr.bedeutung, be.beschreibung, gr.ingemarkung_land, gr.kennziffer_nummerierungsbezirk nummerierungsbezirk, gr.ingemarkung_gemarkungsnummer, gr.nummerdesgrablochs, gr.wkb_geometry AS the_geom
+ SELECT  gr.ogc_fid, gr.gml_id, gr.gml_id as identifier, gr.beginnt, gr.endet, gr.advstandardmodell, gr.anlass, gr.zeigtaufexternes_art as art, gr.zeigtaufexternes_name AS name, gr.bedeutung, be.beschreibung, gr.ingemarkung_land, gr.kennziffer_nummerierungsbezirk nummerierungsbezirk, gr.ingemarkung_gemarkungsnummer, gr.nummerdesgrablochs, gr.wkb_geometry AS the_geom
    FROM alkis.ax_grablochderbodenschaetzung gr, alkis.ax_bedeutung_grablochderbodenschaetzung be
   WHERE be.wert = ANY (gr.bedeutung);
 
