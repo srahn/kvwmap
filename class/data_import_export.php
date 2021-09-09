@@ -1074,7 +1074,7 @@ class data_import_export {
 		}
 		$pfad = pg_quote($this->attributes['table_alias_name'][$layerset[0]['maintable']]).'.'.$layerset[0]['oid'].' AS '.pg_quote($layerset[0]['maintable'].'_oid').', '.$pfad;
 		if ($groupby != '') {
-			$groupby .= ',' . pg_quote($this->attributes['table_alias_name'][$tablename]).'.'.$layerset[0]['oid'];
+			$groupby .= ',' . pg_quote($this->attributes['table_alias_name'][$layerset[0]['maintable']]).'.'.$layerset[0]['oid'];
 		}
 		if ($distinct == true) {
 			$pfad = "
@@ -1109,6 +1109,9 @@ class data_import_export {
 					. $groupby . "
 				) as query
 				WHERE " . $filter;
+		}
+		else {
+			$sql.= $groupby;
 		}
 		#echo '<br>sql: ' . $sql;
 		if ($this->formvars['newpathwkt']){
