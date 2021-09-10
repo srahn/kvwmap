@@ -1132,7 +1132,7 @@ class data_import_export {
 				WHERE " . $filter;
 		}
 		else {
-			$sql.= $groupby;
+			$insert_groupby = true;
 		}
 		#echo '<br>sql: ' . $sql;
 		if ($this->formvars['newpathwkt']){
@@ -1143,6 +1143,9 @@ class data_import_export {
 			else {
 				$sql .= " AND st_intersects(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
 			}
+		}
+		if ($insert_groupby) {
+			$sql.= $groupby;
 		}
     $sql.= $orderby;
 		$data_sql = $sql;
