@@ -1112,42 +1112,34 @@ class data_import_export {
 		if ($where != '') {
 			# Where-Klausel aus Sachdatenabfrage-SQL (abgefragter Extent, Suchparameter oder oids)
 			$orderbyposition = strpos(strtolower($where), 'order by');
-			if ($orderbyposition)$where = substr($where, 0, $orderbyposition);
-			$sql = "
+			if ($orderbyposition) {
+				$where = substr($where, 0, $orderbyposition);
+			}
+		}
+		elseif ($filter != '') {		# Filter muss nur dazu, wenn kein $where vorhanden, also keine Abfrage gemacht wurde, sondern der gesamte Layer exportiert werden soll (Filter ist ja schon im $where enthalten)
+			$filter = str_replace('$userid', $user->id, $filter);
+    	$where = 'WHERE ' . $filter;
+		}
+		else {
+			$where = 'WHERE true ';
+		}
+		if ($this->formvars['newpathwkt']){
+			# über Polygon einschränken
+			if ($this->formvars['within'] == 1) {
+				$where .= " AND st_within(".$this->attributes['the_geom'].", st_buffer(st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."), 0.0001))";
+			}
+			else {
+				$where .= " AND st_intersects(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
+			}
+		}
+		$sql = "
 				SELECT *
 				FROM ("
 					. $sql
 					.$groupby . "
 				) as query "
-				. $where;
-		}
-		elseif ($filter != '') {		# Filter muss nur dazu, wenn kein $where vorhanden, also keine Abfrage gemacht wurde, sondern der gesamte Layer exportiert werden soll (Filter ist ja schon im $where enthalten)
-			$filter = str_replace('$userid', $user->id, $filter);
-    	$sql = "
-				SELECT *
-				FROM ("
-					. $sql
-					. $groupby . "
-				) as query
-				WHERE " . $filter;
-		}
-		else {
-			$insert_groupby = true;
-		}
-		#echo '<br>sql: ' . $sql;
-		if ($this->formvars['newpathwkt']){
-			# über Polygon einschränken
-			if ($this->formvars['within'] == 1) {
-				$sql .= " AND st_within(".$this->attributes['the_geom'].", st_buffer(st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."), 0.0001))";
-			}
-			else {
-				$sql .= " AND st_intersects(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
-			}
-		}
-		if ($insert_groupby) {
-			$sql.= $groupby;
-		}
-    $sql.= $orderby;
+				. $where
+				. $orderby;
 		$data_sql = $sql;
 		#echo '<br>Frage Daten ab mit SQL: '. $sql;
 
