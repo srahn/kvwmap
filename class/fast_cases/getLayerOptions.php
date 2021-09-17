@@ -1120,11 +1120,20 @@ class db_mapObj {
 		}
 		if($layer_id != NULL){
 			$sql .= " 
+			AND l.Layer_ID NOT IN (
+					SELECT 
+						SUBSTRING_INDEX(options, ';', 1) 
+					FROM 
+						layer_attributes as a
+					WHERE 
+						a.layer_id = " . $layer_id . " AND 
+						a.form_element_type = 'SubformEmbeddedPK'
+			) 
 			GROUP BY 
 				p.id
       HAVING 
 				count(l.Layer_ID) = 1 AND 
-				l.Layer_ID = ".$layer_id;
+				l.Layer_ID = " . $layer_id;
 		}
 		$this->db->execSQL($sql);
 		if (!$this->db->success) {
