@@ -48,6 +48,7 @@ class Nachweis {
   }
 	
 	function LENRIS_get_all_nachweise(){
+		ini_set('memory_limit', '1024M');
 		$sql = "
 			DELETE FROM 
 				nachweisverwaltung.lenris_worker;
@@ -55,15 +56,19 @@ class Nachweis {
 				*
       FROM 
 				nachweisverwaltung.n_nachweise
-			ORDER BY id";
+			WHERE
+				gueltigkeit = 1
+			ORDER BY id
+			limit 10000";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
-      $nachweise = pg_fetch_all($ret[1]);
-			foreach ($nachweise as $index => $nachweis) {
-				$nachweise[$index]['last_modified'] = date('Y-m-d H:i:s', filemtime($nachweis['link_datei']));
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				foreach ($nachweise as $index => $nachweis) {
+					$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', @filemtime($nachweis['link_datei']));
+				}
+				$json = json_encode($nachweise);
+				echo $json;
 			}
-			$json = json_encode($nachweise);
-			echo $json;
 		}
 	}
 	
@@ -74,16 +79,18 @@ class Nachweis {
       FROM 
 				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.lenris_worker as b on a.id = b.id_nachweis
 			WHERE
+				gueltigkeit = 1 AND
 				b.db_action = 'INSERT'
 			ORDER BY a.id";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
-      $nachweise = pg_fetch_all($ret[1]);
-			foreach ($nachweise as $index => $nachweis) {
-				$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', filemtime($nachweis['link_datei']));
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				foreach ($nachweise as $index => $nachweis) {
+					$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', @filemtime($nachweis['link_datei']));
+				}
+				$json = json_encode($nachweise);
+				echo $json;
 			}
-			$json = json_encode($nachweise);
-			echo $json;
 		}
 	}
 	
@@ -94,16 +101,18 @@ class Nachweis {
       FROM 
 				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.lenris_worker as b on a.id = b.id_nachweis
 			WHERE
+				gueltigkeit = 1 AND 
 				b.db_action = 'UPDATE'
 			ORDER BY a.id";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
-      $nachweise = pg_fetch_all($ret[1]);
-			foreach ($nachweise as $index => $nachweis) {
-				$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', filemtime($nachweis['link_datei']));
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				foreach ($nachweise as $index => $nachweis) {
+					$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', @filemtime($nachweis['link_datei']));
+				}
+				$json = json_encode($nachweise);
+				echo $json;
 			}
-			$json = json_encode($nachweise);
-			echo $json;
 		}
 	}
 	
@@ -114,12 +123,14 @@ class Nachweis {
       FROM 
 				nachweisverwaltung.lenris_worker
 			WHERE
+				gueltigkeit = 1 AND 
 				db_action = 'DELETE'";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
-      $nachweise = pg_fetch_all($ret[1]);
-			$json = json_encode($nachweise);
-			echo $json;
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				$json = json_encode($nachweise);
+				echo $json;
+			}
 		}
 	}	
 	
@@ -161,6 +172,12 @@ class Nachweis {
 			echo $rows;
 		}
 	}		
+
+	function LENRIS_get_document($document){
+		if (strpos($document, NACHWEISDOCPATH) !== false AND file_exists($document)) {
+			readfile($document);
+		}
+	}
 
 	function check_documentpath($old_dataset){		
 		$ret=$this->getNachweise($old_dataset['id'],'','','','','','','','bySingleID','','');
