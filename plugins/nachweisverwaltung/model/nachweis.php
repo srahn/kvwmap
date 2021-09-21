@@ -49,6 +49,8 @@ class Nachweis {
 	
 	function LENRIS_get_all_nachweise(){
 		$sql = "
+			DELETE FROM 
+				nachweisverwaltung.lenris_worker;
 			SELECT 
 				*
       FROM 
