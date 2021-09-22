@@ -1571,7 +1571,6 @@ class stelle {
 	}
 
 	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_geom_layer = false){
-		echo 'k';
 		global $language;
 		$sql = 'SELECT layer.Layer_ID, ';
 		if($language != 'german') {
