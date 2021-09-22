@@ -85,13 +85,14 @@ foreach ($lenris->clients as $client) {
 	}
 	
 	# Dokumente holen
-	if ($client['doc_download'] != 't'){
-		$downloadable_documents = $lenris->get_downloadable_documents($client['client_id']);
+	$client = $lenris->get_client_information($client['client_id'])[0];
+	if ($client['doc_download'] < 6){
+		$downloadable_documents = $lenris->get_downloadable_documents($client);
 		if (!empty($downloadable_documents)) {
-			$lenris->update_client($client['client_id'], 'doc_download = true');
+			$lenris->update_client($client['client_id'], 'doc_download = doc_download + 1');
 			$downloaded_documents = $lenris->download_documents($client, $downloadable_documents);
 			$lenris->delete_downloadable_documents($client['client_id'], $downloaded_documents);
-			$lenris->update_client($client['client_id'], 'doc_download = false');
+			$lenris->update_client($client['client_id'], 'doc_download = doc_download - 1');
 		}
 	}
 }

@@ -13,6 +13,7 @@ class LENRIS {
     $this->database=$database;
 		$this->clients = $this->get_client_information();
 		$this->dokumentart_mapping = $this->get_dokumentart_mapping();
+		$this->vermessungsstellen_mapping = $this->get_vermessungsstellen_mapping();
 		$this->dokumentarten = $this->nachweis->getDokumentarten(false);
 		$this->hauptarten = $this->nachweis->getHauptDokumentarten();
   }
@@ -104,6 +105,34 @@ class LENRIS {
 		}
 	}
 	
+	function get_vermessungsstellen_mapping(){
+		$sql = "
+			SELECT 
+				*
+			FROM
+				lenris.client_vermessungsstellen";
+		$ret = $this->database->execSQL($sql, 4, 0, true);
+		if (!$ret[0]) {
+			while ($rs = pg_fetch_assoc($ret[1])) {
+				$vermessungsstellen_mapping[$rs['client_id']][$rs['client_vermstelle_id']] = $rs['vermstelle_id'];
+			}
+			return $vermessungsstellen_mapping;
+		}
+		else {
+			LENRIS::log_error($ret[1]);
+		}
+	}
+		
+	function map_dokumentart($client_id, $art){
+		$new_art = $this->dokumentart_mapping[$client_id][$art];
+		return $new_art ?: 0;
+	}
+	
+	function map_vermessungsstelle($client_id, $vermessungsstelle){
+		$new_vermessungsstelle = $this->vermessungsstellen_mapping[$client_id][$vermessungsstelle];
+		return $new_vermessungsstelle ?: 0;
+	}	
+	
 	function delete_nachweise($client_id){
 		$sql = "
 			DELETE FROM 
@@ -159,14 +188,15 @@ class LENRIS {
 		return true;
 	}
 	
-	function get_downloadable_documents($client_id){
+	function get_downloadable_documents($client){
 		$sql = "
 			SELECT 
-				*
+				d.*
 			FROM
-				lenris.zu_holende_dokumente
+				lenris.zu_holende_dokumente d
 			WHERE	
-				client_id = " . $client_id;
+				d.client_id = " . $client['client_id'] . " 
+			LIMIT 1000 OFFSET " . $client['doc_download'] . " * 1000";
 		$ret = $this->database->execSQL($sql, 4, 0, true);
 		if (!$ret[0]) {
 			$docs = pg_fetch_all($ret[1]);
@@ -195,7 +225,7 @@ class LENRIS {
 			if (!is_dir(dirname($dest_path))) {
 				mkdir(dirname($dest_path), 0777, true);
 			}
-			exec('wget -nv -O "' . $dest_path . '" "' . $client['url'] . '&go=LENRIS_get_document&document=' . $downloadable_document['source_path'] . '"');
+			exec('wget -nv --timeout=5 -O "' . $dest_path . '" "' . $client['url'] . '&go=LENRIS_get_document&document=' . $downloadable_document['source_path'] . '"');
 			if (file_exists($dest_path) AND filesize($dest_path) == 0) {
 				unlink($dest_path);		# leere Dateien löschen
 			}
@@ -232,19 +262,20 @@ class LENRIS {
 	}	
 	
 	function adjust_path($client, $n){		
+		$doc = $n;
 		$doc['artname'] = strtolower($this->hauptarten[$this->dokumentarten[$n['art']]['hauptart']]['abkuerzung']);
 		$doc['Bilddatei_name'] = $n['link_datei'];
-		$doc['Blattnr'] = $n['blattnummer'];
-		$doc['flurid'] = $n['flurid'];
+		$doc['Blattnr'] = $n['blattnummer'];		
 		$zieldateiname = $this->nachweis->getZielDateiName($doc, $client['nachweis_primary_attribute'], $client['nachweis_secondary_attribute']);
-		$newpath = NACHWEISDOCPATH.$n['flurid'].'/'.$this->nachweis->buildNachweisNr($n[$client['nachweis_primary_attribute']], $n[$client['nachweis_secondary_attribute']], $client['nachweis_primary_attribute']).'/'.$doc['artname'].'/'.$zieldateiname;
+		$newpath = NACHWEISDOCPATH . $client['client_id'] . '/' . $n['flurid'] . '/' . $this->nachweis->buildNachweisNr($n[$client['nachweis_primary_attribute']], $n[$client['nachweis_secondary_attribute']], $client['nachweis_primary_attribute']) . '/' . $doc['artname'] . '/' . $zieldateiname;
 		return $newpath;
 	}
 	
 	function insert_new_nachweise($client, $nachweise, $confirm = true){
 		$inserted_nachweise = array();
 		foreach ($nachweise as $n) {
-			$n['art'] = $this->dokumentart_mapping[$client['client_id']][$n['art']];
+			$n['art'] = $this->map_dokumentart($client['client_id'], $n['art']);
+			$n['vermstelle'] = $this->map_vermessungsstelle($client['client_id'], $n['vermstelle']);
 			$newpath = $this->adjust_path($client, $n);
 			$sql = "
 				INSERT INTO
@@ -254,12 +285,34 @@ class LENRIS {
 					 bearbeiter, zeit, erstellungszeit, bemerkungen_intern, geprueft, 
 					 art, datum_bis, aenderungsnummer, antragsnummer_alt, rissfuehrer_id, 
 					 messungszahlen, bov_ersetzt, zeit_geprueft, freigegeben)
-				VALUES
-					(" . $n['flurid'] . ", '" . $n['blattnummer'] . "', '" . $n['datum'] . "', '" . $n['vermstelle'] . "', " . $n['gueltigkeit'] . ", '" . $newpath . "', 
-					'" . $n['format'] . "', '" . $n['stammnr'] . "', '" . $n['the_geom'] . "', " . ($n['fortfuehrung'] ?: 'NULL') . ", '" . $n['rissnummer'] . "', '" . $n['bemerkungen'] . "', 
-					'" . $n['bearbeiter'] . "', '" . $n['zeit'] . "', '" . $n['erstellungszeit'] . "', '" . $n['bemerkungen_intern'] . "', " . $n['geprueft'] . ", 
-					" . $n['art'] . ", " . ($n['datum_bis'] ? "'" . $n['datum_bis'] . "'" : 'NULL') . ", '" . $n['aenderungsnummer'] . "', '" . $n['antragsnummer_alt'] . "', " . ($n['rissfuehrer_id'] ?: 'NULL') . ", 
-					" . ($n['messungszahlen'] ?: 'NULL') . ", " . ($n['bov_ersetzt'] ?: 'NULL') . ", " . ($n['zeit_geprueft'] ? "'" . $n['zeit_geprueft'] . "'" : 'NULL') . ", '" . $n['freigegeben'] . "')
+				VALUES (
+					" . $n['flurid'] . ", 
+					'" . $n['blattnummer'] . "', 
+					" . ($n['datum'] ? "'" . $n['datum'] . "'" : 'NULL') . ", 
+					'" . $n['vermstelle'] . "', 
+					" . $n['gueltigkeit'] . ", 
+					'" . $newpath . "', 
+					'" . $n['format'] . "', 
+					'" . $n['stammnr'] . "', 
+					'" . $n['the_geom'] . "', 
+					" . ($n['fortfuehrung'] ?: 'NULL') . ", 
+					'" . $n['rissnummer'] . "', 
+					'" . $n['bemerkungen'] . "', 
+					'" . $n['bearbeiter'] . "', 
+					" . ($n['zeit'] ? "'" . $n['zeit'] . "'" : 'NULL') . ", 
+					" . ($n['erstellungszeit'] ? "'" . $n['erstellungszeit'] . "'" : 'NULL') . ", 
+					'" . $n['bemerkungen_intern'] . "', 
+					" . $n['geprueft'] . ", 
+					" . $n['art'] . ", 
+					" . ($n['datum_bis'] ? "'" . $n['datum_bis'] . "'" : 'NULL') . ", 
+					'" . $n['aenderungsnummer'] . "', 
+					'" . $n['antragsnummer_alt'] . "', 
+					" . ($n['rissfuehrer_id'] ?: 'NULL') . ", 
+					" . ($n['messungszahlen'] ?: 'NULL') . ", 
+					" . ($n['bov_ersetzt'] ?: 'NULL') . ", 
+					" . ($n['zeit_geprueft'] ? "'" . $n['zeit_geprueft'] . "'" : 'NULL') . ", 
+					'" . $n['freigegeben'] . "'
+					)
 				RETURNING id
 			";
 			$ret = $this->database->execSQL($sql, 4, 0, true);
@@ -361,7 +414,8 @@ class LENRIS {
 			# mit der client_id und der client_nachweis_id die nachweis_id ermitteln, sowie zusätzlich den Dateipfad abfragen
 			$rs = $this->get_nachweis_info($client['client_id'], $n['id']);
 			if ($rs['nachweis_id'] != '') {
-				$n['art'] = $this->dokumentart_mapping[$client['client_id']][$n['art']];
+				$n['art'] = $this->map_dokumentart($client['client_id'], $n['art']);
+				$n['vermstelle'] = $this->map_vermessungsstelle($client['client_id'], $n['vermstelle']);
 				$newpath = $this->adjust_path($client, $n);
 				# Nachweis aktualisieren
 				$sql = "

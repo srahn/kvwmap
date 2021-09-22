@@ -50,6 +50,8 @@ class Nachweis {
 	function LENRIS_get_all_nachweise(){
 		ini_set('memory_limit', '1024M');
 		$sql = "
+			DELETE FROM 
+				nachweisverwaltung.lenris_worker;
 			SELECT 
 				*
       FROM 
