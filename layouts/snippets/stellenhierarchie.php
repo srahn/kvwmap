@@ -17,7 +17,7 @@
 				
 		var force = d3.layout.force()
 				.gravity(.3)
-				.distance(100)
+				.distance(40)
 				.charge(-5000)
 				.size([width, height]);
 				

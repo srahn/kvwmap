@@ -13819,9 +13819,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
           echo '<br>upload_only_file_metadata: ' . print_r($this->rolle->upload_only_file_metadata, true);
         }
 				if ($this->user->rolle->upload_only_file_metadata == 1) {
-          if ($this->user->id == 1) {
-            echo '<br>form_fields: ' . print_r($this->formvars[$form_fields[$i]], true);
-          }
 					$belated_files[$attr_oid['oid']][$i] = $this->formvars[$form_fields[$i]];
 				}
 			}
