@@ -238,6 +238,8 @@ class LENRIS {
 	}
 
 	function get_all_nachweise($client){
+		set_time_limit(600);
+		ini_set('default_socket_timeout', 600);
 		if ($json = file_get_contents($client['url'] . '&go=LENRIS_get_all_nachweise'))	{
 			return json_decode($json, true);
 		}
