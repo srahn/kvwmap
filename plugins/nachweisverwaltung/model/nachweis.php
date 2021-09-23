@@ -48,7 +48,8 @@ class Nachweis {
   }
 	
 	function LENRIS_get_all_nachweise(){
-		ini_set('memory_limit', '1024M');
+		ini_set('memory_limit', '4096M');
+		set_time_limit(600);
 		$sql = "
 			DELETE FROM 
 				nachweisverwaltung.lenris_worker;
@@ -59,7 +60,7 @@ class Nachweis {
 			WHERE
 				gueltigkeit = 1
 			ORDER BY id
-			limit 10000";
+			";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
       if ($nachweise = pg_fetch_all($ret[1])) {
