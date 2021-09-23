@@ -286,46 +286,6 @@ function go_switch($go, $exit = false) {
 				$GUI->show_snippet();
 			} break;
 
-			case 'Sicherungen_anzeigen' : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->Sicherungen_anzeigen();
-			} break;
-
-			case 'Sicherung_editieren' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->Sicherung_editieren();
-			} break;
-
-			case 'Sicherung_speichern' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->Sicherung_speichern();
-			} break;
-
-			case 'Sicherung_loeschen' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->Sicherung_loeschen();
-			} break;
-
-			case 'sicherungsinhalt_editieren' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->sicherungsinhalt_editieren();
-			} break;
-
-			case 'sicherungsinhalt_speichern' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->sicherungsinhalt_speichern();
-			} break;
-
-			case 'sicherungsinhalt_loeschen' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->sicherungsinhalt_loeschen();
-			} break;
-
-			case 'write_backup_plan' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->write_backup_plan();
-			} break;
-
 			case 'openCustomSubform' : {
 				$GUI->openCustomSubform();
 			} break;

@@ -1063,7 +1063,7 @@ echo '			</table>
 					if($layer['connectiontype'] == 7){      # WMS
 						if($layer['Class'][$k]['legendgraphic'] != ''){
 							$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
-							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$imagename.'"></div><br>';
+							$legend .=  '<div id="lg'.$j.'_'.$l.'"><img src="'.$imagename.'"></div>';
 						}
 						else{
 							$url = str_ireplace('&styles=', '&style=', $layer['connection']);
@@ -1072,7 +1072,7 @@ echo '			</table>
 							if($pos !== false)$layersection = substr($layersection, 0, $pos);
 							$layers = explode(',', $layersection);
 							for($l = 0; $l < count($layers); $l++){
-								$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="' . $url . '&layer=' . $layers[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div><br>';
+								$legend .=  '<div id="lg'.$j.'_'.$l.'"><img src="' . $url . '&layer=' . $layers[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
 							}
 						}
 					}
@@ -2258,7 +2258,8 @@ echo '			</table>
         if ($dbStyle['outlinecolor']!='') {
           $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
         	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-          $style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					if(is_numeric($RGB[0]))$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					else $style->updateFromString("STYLE OUTLINECOLOR [" . $dbStyle['outlinecolor']."] END");					
         }
         if ($dbStyle['backgroundcolor']!='') {
           $RGB = array_filter(explode(" ",$dbStyle['backgroundcolor']), 'strlen');
@@ -4538,15 +4539,6 @@ echo '			</table>
 					$this->showAdminFunctions();
 				}
 			} break;
-			case "write_backup_config_and_cron" : {
-				$result = $this->administration->write_backup_config_and_cron($this);
-				include_once(CLASSPATH . 'Sicherung.php');
-				$this->sicherungen = Sicherung::find($this);
-				$this->formvars['crontab'] = $result['crontab'];
-				$this->formvars['count_export'] = $result['count_export'];
-				$this->formvars['count_skip'] = $result['count_skip'];
-				$this->main = 'sicherungsdaten.php';
-			} break;
 			case "create_inserts_from_dataset" : {
 				$inserts_file = LOGPATH . 'inserts_from_dataset.sql';
 #				echo $this->administration->create_inserts_from_dataset($this->formvars['schema'], $this->formvars['table'], $this->formvars['where']);
@@ -4563,230 +4555,6 @@ echo '			</table>
 			}
 		}
 		return $result;
-	}
-
-	/**
-	*	views all Sicherungen
-	* @author	Georg Kämmert
-	**/
-	function Sicherungen_anzeigen() {
-		include_once(CLASSPATH . 'Sicherung.php');
-		$this->sicherungen = Sicherung::find($this);
-		$this->main = 'sicherungsdaten.php';
-		$this->output();
-	}
-
-	/**
-	*	create new or edit existing Sicherung
-	* @author Georg Kämmert
-	**/
-	function Sicherung_editieren() {
-		include_once(CLASSPATH . 'Sicherung.php');
-		$this->sicherung = Sicherung::find_by_id($this, $this->formvars['id'] );
-		if (array_key_exists('id', $this->formvars) AND $this->formvars['id'] != ''){
-			$this->formvars = $this->sicherung->data;
-		}
-		$this->main = 'sicherungsdaten_formular.php';
-		$this->output();
-	}
-
-	/**
-	*	Decision-maker, insert odr update Sicherung?
-	*	@author Georg Kämmert
-	**/
-	function Sicherung_speichern() {
-		if (isset($this->formvars['id']) AND $this->formvars['id'] != '' ) {
-			$this->Sicherung_update();
-		}
-		else {
-			$this->Sicherung_insert();
-		}
-	}
-
-	/**
-	*	save new Sicherung
-	*	@author Georg Kämmert
-	**/
-	function Sicherung_insert() {
-		include_once(CLASSPATH . 'Sicherung.php');
-		$this->sicherung = new Sicherung($this);
-		$this->sicherung->data = formvars_strip($this->formvars, $this->sicherung->getKeys(), 'keep');
-
-		$results = $this->sicherung->validate();
-		if ( empty($results) ){
-			$results = $this->sicherung->create();
-		}
-
-		if ($results[0]['success']) {
-			$this->add_message('notice', 'Sicherung erfolgreich angelegt.');
-			$this->Sicherungen_anzeigen();
-		}
-		else {
-			$this->add_message('array', $results);
-			if ( empty($this->sicherung->get('id')) ){
-				$this->main = 'sicherungsdaten_formular.php';
-				$this->output();
-			} else {
-				$this->Sicherung_editieren();
-			}
-		}
-	}
-
-	/**
-	*	update existing Sicherung
-	*	@author Georg Kämmert
-	**/
-	function Sicherung_update() {
-		include_once(CLASSPATH . 'Sicherung.php');
-		$this->sicherung = Sicherung::find_by_id($this, $this->formvars['id']);
-		$this->sicherung->data = formvars_strip($this->formvars, $this->sicherung->getKeys(), 'keep');
-		$results = $this->sicherung->update();
-
-		if ($results[0]['success']) {
-			$this->add_message('notice', 'Sicherung erfolgreich angelegt.');
-			$this->Sicherungen_anzeigen();
-		}
-		else {
-			$this->add_message('array', $results);
-			if ( empty($this->sicherung->get('id')) ){
-				$this->main = 'sicherungsdaten_formular.php';
-				$this->output();
-			} else {
-				$this->Sicherung_editieren();
-			}
-		}
-	}
-
-	/**
-	*	delete single Sicherung
-	*	@author Georg Kämmert
-	**/
-	function Sicherung_loeschen() {
-		include_once(CLASSPATH . 'Sicherung.php');
-		$this->sicherung = Sicherung::find_by_id($this, $this->formvars['id']);
-		if (!empty($this->sicherung)) {
-			if (!empty($this->sicherung->inhalte)){
-				$this->add_message('error','Sicherung enthält noch Inhalte und kann nicht gelöscht werden.');
-			}
-			else {
-				$this->sicherung->delete();
-				$this->add_message('notice', 'Sicherung gelöscht.');
-			}
-		}
-
-		$this->main = 'sicherungsdaten.php';
-		$this->sicherungen = Sicherung::find($this);
-		$this->output();
-	}
-
-	/**
-	*	create new or edit existing Sicherungsinhalt
-	*	@author Georg Kämmert
-	**/
-	function sicherungsinhalt_editieren() {
-		include_once(CLASSPATH . 'Sicherungsinhalt.php');
-		if (array_key_exists('id', $this->formvars) AND $this->formvars['id'] != '') {
-			$this->formvars = Sicherungsinhalt::find_by_id($this, $this->formvars['id'])->data;
-			$this->inhalt = Sicherungsinhalt::find_by_id($this, $this->formvars['id']);
-		}
-		elseif ( array_key_exists('sicherung_id', $this->formvars) AND $this->formvars['sicherung_id'] != '') {
-			$this->inhalt = new Sicherungsinhalt($this);
-			$this->inhalt->set('sicherung_id', $this->formvars['sicherung_id']);
-		}
-		$this->main = 'sicherungsinhalte_formular.php';
-		$this->output();
-	}
-
-	/**
-	*	save new or update existing Sicherungsinhalt
-	* acts as a switch
-	*	@author Georg Kämmert
-	**/
-	function sicherungsinhalt_speichern() {
-		include_once(CLASSPATH . 'Sicherungsinhalt.php');
-		if (isset($this->formvars['id']) AND $this->formvars['id'] != '' ) {
-			$this->sicherungsinhalt_update();
-		}
-		else {
-			$this->sicherungsinhalt_insert();
-		}
-	}
-
-	/**
-	*	save new Sicherungsinhalt
-	*	@author Georg Kämmert
-	**/
-	function sicherungsinhalt_insert() {
-		include_once(CLASSPATH . 'Sicherungsinhalt.php');
-		$this->inhalt = new Sicherungsinhalt($this);
-		$this->inhalt->data = formvars_strip($this->formvars, $this->inhalt->getKeys(), 'keep');
-		$results = $this->inhalt->validate();
-		if (empty($results)) {
-			$result = $this->inhalt->create();
-			if ($result[0]['success']) {
-				$this->add_message('notice', 'Sicherungsinhalt erfolgreich gespeichert.');
-				$this->formvars['id'] = $this->formvars['sicherung_id'];
-				$this->Sicherung_editieren();
-			}
-			else {
-				$this->add_message('error', $result['err_msg']);
-				$this->sicherungsinhalt_editieren();
-			}
-		}
-		else {
-			foreach ($results AS $result) {
-				$this->add_message($result['type'], $result['msg']);
-			}
-			$this->sicherungsinhalt_editieren();
-		}
-	}
-
-	/**
-	*	update existing Sicherungsinhalt
-	*	@author Georg Kämmert
-	**/
-	function sicherungsinhalt_update() {
-		include_once(CLASSPATH . 'Sicherungsinhalt.php');
-		$this->inhalt = Sicherungsinhalt::find_by_id($this, $this->formvars['id']);
-		$this->inhalt->data = formvars_strip($this->formvars, $this->inhalt->getKeys(), 'keep');
-		$this->inhalt->disable_options($this->formvars);
-		//$results = $this->inhalt->validate();
-		if (empty($results)) {
-			$result = $this->inhalt->update();
-			if ($result[0]['success']) {
-				$this->add_message('notice', 'Sicherungsinhalt erfolgreich geändert.');
-				$this->formvars['id'] = $this->formvars['sicherung_id'];
-				$this->Sicherung_editieren();
-			}
-			else {
-				$this->add_message('error', $result['err_msg']);
-				$this->sicherungsinhalt_editieren();
-			}
-		}
-		else {
-			foreach ($results AS $result) {
-				$this->add_message($result['type'], $result['msg']);
-			}
-			$this->sicherungsinhalt_editieren();
-		}
-	}
-
-	/**
-	*	delete single Sicherungsinhalt
-	*	@author Georg Kämmert
-	**/
-	function sicherungsinhalt_loeschen() {
-		include_once(CLASSPATH . 'Sicherungsinhalt.php');
-		include_once(CLASSPATH . 'Sicherung.php');
-		$this->inhalt = Sicherungsinhalt::find_by_id($this, $this->formvars['id']);
-		if (!empty($this->inhalt)){
-			$sicherung_id = $this->inhalt->get('sicherung_id');
-			$this->inhalt->delete();
-			$this->add_message('notice', 'Sicherungsinhalt gelöscht.');
-		}
-		$this->main = 'sicherungsdaten_formular.php';
-		$this->sicherung = Sicherung::find_by_id($this, $sicherung_id);
-		$this->output();
 	}
 
 	function save_all_layer_attributes() {
@@ -11149,7 +10917,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->scaleMap($saved_scale);
 		}
 		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
-		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
 		$this->data_import_export = new data_import_export();
 		if (defined('LAYERNAME_FLURSTUECKE') AND !$this->formvars['geom_from_layer']) {
 			$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -13818,9 +13585,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
           echo '<br>upload_only_file_metadata: ' . print_r($this->rolle->upload_only_file_metadata, true);
         }
 				if ($this->user->rolle->upload_only_file_metadata == 1) {
-          if ($this->user->id == 1) {
-            echo '<br>form_fields: ' . print_r($this->formvars[$form_fields[$i]], true);
-          }
 					$belated_files[$attr_oid['oid']][$i] = $this->formvars[$form_fields[$i]];
 				}
 			}
@@ -14652,7 +14416,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
             $maxxy=explode(',',$imgxy[1]);
             $x=($maxxy[0]+$minxy[0])/2;
             $y=($maxxy[1]+$minxy[1])/2;
-						if($layerset[$i]['wms_format'] == '1.3.0'){
+						if($layerset[$i]['wms_server_version'] == '1.3.0'){
 							$request .='&I='.$x.'&J='.$y;
 						}
 						else{
@@ -18704,13 +18468,22 @@ class db_mapObj{
 		if($param_id != NULL){
 			$sql .= " AND p.id = ".$params_id;
 		}
-		if($layer_id != NULL){
-			$sql .= "
-			GROUP BY
+		if($layer_id != NULL){	# nur die Parameter abfragen, die nur dieser Layer hat aber eigene Subform-Layer dabei ignorieren
+			$sql .= " 
+			AND l.Layer_ID NOT IN (
+					SELECT 
+						SUBSTRING_INDEX(options, ';', 1) 
+					FROM 
+						layer_attributes as a
+					WHERE 
+						a.layer_id = " . $layer_id . " AND 
+						a.form_element_type = 'SubformEmbeddedPK'
+			) 
+			GROUP BY 
 				p.id
-      HAVING
-				count(l.Layer_ID) = 1 AND
-				l.Layer_ID = ".$layer_id;
+      HAVING 
+				count(l.Layer_ID) = 1 AND 
+				l.Layer_ID = " . $layer_id;
 		}
 		$this->db->execSQL($sql);
 		if (!$this->db->success) {
