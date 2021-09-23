@@ -48,10 +48,11 @@ class Nachweis {
   }
 	
 	function LENRIS_get_all_nachweise(){
-		ini_set('memory_limit', '1024M');
+		ini_set('memory_limit', '4096M');
+		set_time_limit(600);
 		$sql = "
 			DELETE FROM 
-				nachweisverwaltung.lenris_worker;
+				nachweisverwaltung.n_nachweisaenderungen;
 			SELECT 
 				*
       FROM 
@@ -59,7 +60,7 @@ class Nachweis {
 			WHERE
 				gueltigkeit = 1
 			ORDER BY id
-			limit 10000";
+			";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
       if ($nachweise = pg_fetch_all($ret[1])) {
@@ -77,7 +78,7 @@ class Nachweis {
 			SELECT 
 				a.*
       FROM 
-				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.lenris_worker as b on a.id = b.id_nachweis
+				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
 			WHERE
 				gueltigkeit = 1 AND
 				b.db_action = 'INSERT'
@@ -99,7 +100,7 @@ class Nachweis {
 			SELECT 
 				a.*
       FROM 
-				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.lenris_worker as b on a.id = b.id_nachweis
+				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
 			WHERE
 				gueltigkeit = 1 AND 
 				b.db_action = 'UPDATE'
@@ -121,10 +122,10 @@ class Nachweis {
 			SELECT 
 				id_nachweis
       FROM 
-				nachweisverwaltung.lenris_worker
+				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
 			WHERE
 				gueltigkeit = 1 AND 
-				db_action = 'DELETE'";
+				b.db_action = 'DELETE'";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
       if ($nachweise = pg_fetch_all($ret[1])) {
@@ -137,7 +138,7 @@ class Nachweis {
 	function LENRIS_confirm_new_nachweise($ids){
 		$sql = "
 			DELETE FROM 
-				nachweisverwaltung.lenris_worker 
+				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE 
 				id_nachweis IN (" . $ids . ") and db_action = 'INSERT'";
 		$ret = $this->database->execSQL($sql,4, 1);    
@@ -150,7 +151,7 @@ class Nachweis {
 	function LENRIS_confirm_changed_nachweise($ids){
 		$sql = "
 			DELETE FROM 
-				nachweisverwaltung.lenris_worker 
+				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE 
 				id_nachweis IN (" . $ids . ") and db_action = 'UPDATE'";
 		$ret = $this->database->execSQL($sql,4, 1);    
@@ -163,7 +164,7 @@ class Nachweis {
 	function LENRIS_confirm_deleted_nachweise($ids){
 		$sql = "
 			DELETE FROM 
-				nachweisverwaltung.lenris_worker 
+				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE 
 				id_nachweis IN (" . $ids . ") and db_action = 'DELETE'";
 		$ret = $this->database->execSQL($sql,4, 1);    
