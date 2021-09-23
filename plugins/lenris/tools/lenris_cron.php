@@ -35,8 +35,8 @@ function is_sync_required($client){
 foreach ($lenris->clients as $client) {
 	# Synchronisation
 	if (is_sync_required($client)) {
-		$lenris->database->begintransaction();
 		$lenris->update_client($client['client_id'], 'status = 2');
+		$lenris->database->begintransaction();
 		# neue Nachweise abfragen
 		if ($new_nachweise = $lenris->get_new_nachweise($client)){
 			# neue Nachweise eintragen
@@ -72,8 +72,8 @@ foreach ($lenris->clients as $client) {
 	
 	# Erstimport
 	if ($client['status'] == 3){
-		$lenris->database->begintransaction();
 		$lenris->update_client($client['client_id'], 'status = 4');
+		$lenris->database->begintransaction();
 		if ($lenris->delete_nachweise($client['client_id'])) {
 			if ($all_nachweise = $lenris->get_all_nachweise($client)) {
 				LENRIS::log('Erstimport: ' . count($all_nachweise) . ' Nachweise von Client ' . $client['client_id']);
