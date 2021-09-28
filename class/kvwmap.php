@@ -13579,14 +13579,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				else {
 					# normales Dokument-Attribut
 					$update = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);
+					if ($this->user->rolle->upload_only_file_metadata == 1) {
+						$belated_files[$attr_oid['oid']][$i] = $this->formvars[$form_fields[$i]];
+					}
 				}
 				$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $document_attributes[$i]['update'] = $update;
         if ($this->user->id == 1) {
           echo '<br>upload_only_file_metadata: ' . print_r($this->rolle->upload_only_file_metadata, true);
         }
-				if ($this->user->rolle->upload_only_file_metadata == 1) {
-					$belated_files[$attr_oid['oid']][$i] = $this->formvars[$form_fields[$i]];
-				}
 			}
 		}
 		if ($this->formvars['delete_documents'] != '') {
