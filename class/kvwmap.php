@@ -14445,6 +14445,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							include_(CLASSPATH.'wfs.php');
 							$wfs = new wfs($url, $version, $typename, $namespace, $epsg, NULL, NULL);
 							$wfs->gml = $response;
+							$wfs->rename_features();
 							$features = $wfs->extract_features();
 							if (!empty($features)) {
 								for($j = 0; $j < @count($features); $j++){
