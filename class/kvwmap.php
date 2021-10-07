@@ -9375,7 +9375,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$this->success = false;
 				}
 				else {
-					if ($this->user->rolle->upload_only_file_metadata == 1) {
+					if ($this->user->rolle->upload_only_file_metadata == 1 AND is_array($this->qlayerset) AND is_array($this->qlayerset[0]) AND is_array($this->qlayerset[0]['shape'])) {
 						include_once(CLASSPATH . 'BelatedFile.php');
 						foreach ($this->qlayerset[0]['shape'] AS $dataset) {
 							foreach ($document_attributes AS $document_attribute) {
@@ -10097,7 +10097,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function sachdaten_druck_editor(){
 		global $admin_stellen;
-		include_once(CLASSPATH.'datendrucklayout.php');
+		include_once(CLASSPATH . 'datendrucklayout.php');
 		$ddl=new ddl($this->database, $this);
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->ddl=$ddl;
