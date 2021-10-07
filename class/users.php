@@ -1000,8 +1000,8 @@ class user {
 		else {
 			$auto_map_resize = '0';
 			$teil = explode('x', $formvars['mapsize']);
-			$nImageWidth = $teil[0];
-			$nImageHeight = $teil[1];
+			$nImageWidth = ($teil[0] > 0 ? $teil[0] : 1000);
+			$nImageHeight = ($teil[1] > 0 ? $teil[1] : 800);
 		}
 		# Zoomfaktor (Wenn 1 erfolgt kein Zoom durch einfaches klicken in die Karte)
 		if ($formvars['nZoomFactor']=='' OR $formvars['nZoomFactor']==0) {

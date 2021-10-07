@@ -1549,6 +1549,8 @@ class stelle {
 		}
 		else{
 			while($rs=$this->database->result->fetch_array()) {
+				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
+				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
 				if($rs['alias'] != '' AND $this->useLayerAliases){
 					$rs['Name'] = $rs['alias'];
 				}
@@ -1769,7 +1771,7 @@ class stelle {
 
 	function parse_path($database, $path, $privileges, $attributes = NULL){
 		$newattributesstring = '';
-		$path = str_replace(array("\r\n", "\n"), ' ', $path);
+		$path = str_replace(["\r\n", "\n", "\t"], ' ', $path);
 		$distinctpos = strpos(strtolower($path), 'distinct');
 		if($distinctpos !== false && $distinctpos < 10){
 			$offset = $distinctpos+8;

@@ -449,6 +449,7 @@ else { ?>
 	data-sort-name="Name"
 	data-sort-order="asc"
 	data-search="true"
+	data-visible-search="true"
 	data-show-export="false"
 	data-show-refresh="false"
 	data-show-toggle="false"
@@ -515,6 +516,7 @@ else { ?>
 					data-visible="true"
 					data-sortable="true"
 					data-formatter="konvertierungVeroeffentlichtFormatter"
+					data-searchable="false"
 					data-switchable="true"
 				><i title="Veröffentlichung" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
 			} ?>
@@ -537,12 +539,13 @@ else { ?>
 				data-visible="true"
 				data-formatter="konvertierungEditFunctionsFormatter"
 				data-switchable="false"
-			>Edit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+			>Edit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 			<th
 				data-field="konvertierung_id"
 				data-sortable="true"
 				data-visible="false"
 				data-switchable="true"
+				data-searchable="false"
 			>Konvertierung Id</th>
 			<th
 				data-field="plan_gml_id"

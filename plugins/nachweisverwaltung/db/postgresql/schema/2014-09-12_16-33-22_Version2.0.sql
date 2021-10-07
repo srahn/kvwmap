@@ -5,8 +5,6 @@ CREATE SCHEMA nachweisverwaltung;
 
 SET search_path = nachweisverwaltung, public;
 
-SET default_with_oids = true;
-
 --#######################################
 --# Tabellen für die Nachweisverwaltung #
 --#######################################
@@ -31,8 +29,7 @@ CREATE TABLE n_nachweise (
     art character(3),
     format character(2),
     stammnr character varying(15)
-)
-WITH OIDS;
+);
 SELECT AddGeometryColumn('nachweisverwaltung', 'n_nachweise','the_geom',2398,'GEOMETRY', 2);
 CREATE INDEX n_nachweise_the_geom_gist ON n_nachweise USING GIST (the_geom);
 ALTER TABLE n_nachweise ADD CONSTRAINT enforce_geotype_the_geom CHECK (geometrytype(the_geom) = 'POLYGON'::text OR geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL);
@@ -151,16 +148,14 @@ INSERT INTO n_vermstelle (name) VALUES ('Zeise, Petra');
 CREATE TABLE n_dokumentarten(
    id serial NOT NULL, 
    art character varying(100)
-) 
-WITH OIDS;
+);
 
 -- Tabelle für die Zuordnung von Nachweisen zu anderen Dokumentarten
 
 CREATE TABLE n_nachweise2dokumentarten(
    nachweis_id integer NOT NULL, 
    dokumentart_id integer NOT NULL
-) 
-WITH OIDS;
+);
 
 --##########################################################
 --# Tabellen für die Punktdatei des Liegenschaftskatasters #
@@ -196,8 +191,7 @@ CREATE TABLE fp_punkte
   datei varchar(50),
   verhandelt int4 DEFAULT 0,
   vermarkt int4 DEFAULT 0
-) 
-WITH OIDS;
+);
 SELECT AddGeometryColumn('nachweisverwaltung', 'fp_punkte','the_geom',2398,'POINT', 3);
 CREATE INDEX fp_punkte_the_geom_gist ON fp_punkte USING GIST (the_geom);
 
@@ -230,8 +224,7 @@ CREATE TABLE fp_punkte2
   datei varchar(50),
   verhandelt int4 DEFAULT 0,
   vermarkt int4 DEFAULT 0
-) 
-WITH OIDS;
+);
 SELECT AddGeometryColumn('nachweisverwaltung', 'fp_punkte2','the_geom',2399,'POINT', 3);
 CREATE INDEX fp_punkte2_the_geom_gist ON fp_punkte2 USING GIST (the_geom);
 
@@ -271,9 +264,6 @@ CREATE TABLE fp_punkte_temp
   CONSTRAINT fp_punkte_temp_pkey PRIMARY KEY (pkz ),
   CONSTRAINT enforce_dims_koordinaten CHECK (st_ndims(the_geom) = 3),
   CONSTRAINT enforce_geotype_koordinaten CHECK (geometrytype(the_geom) = 'POINT'::text OR the_geom IS NULL)
-)
-WITH (
-  OIDS=TRUE
 );
 
 --#####################################################
@@ -288,7 +278,6 @@ CREATE TABLE fp_punkte2antraege
   antrag_nr varchar(11) NOT NULL,
   zeitstempel timestamp,
   CONSTRAINT fp_punkte2antraege_pkey PRIMARY KEY (pkz, antrag_nr)
-) 
-WITHOUT OIDS;
+);
 
 COMMIT;

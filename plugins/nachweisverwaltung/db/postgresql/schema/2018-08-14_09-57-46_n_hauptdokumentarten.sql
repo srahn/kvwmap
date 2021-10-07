@@ -5,9 +5,6 @@ CREATE TABLE nachweisverwaltung.n_hauptdokumentarten
   id serial NOT NULL,
   art character varying(100),
   abkuerzung character varying(6)
-)
-WITH (
-  OIDS=TRUE
 );
 
 INSERT INTO nachweisverwaltung.n_hauptdokumentarten (art, abkuerzung) VALUES 

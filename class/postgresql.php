@@ -128,7 +128,8 @@ class pgdatabase {
 			"port='" .		 $credentials['port'] 		. "' " .
 			"dbname='" .	 $credentials['dbname'] 	. "' " .
 			"user='" .		 $credentials['user'] 		. "' " .
-			"password='" . addslashes($credentials['password']) . "'";
+			"password='" . addslashes($credentials['password']) . "' " .
+			"application_name=kvwmap_user_" . $this->gui->user->id;
 		return $connection_string;
 	}
 
@@ -426,7 +427,12 @@ FROM
 				$ret[1] = $ret['query'] = $query;
 
 				# Prüfe ob eine Fehlermeldung in der Notice steckt
-				$last_notices = pg_last_notice($this->dbConn, PGSQL_NOTICE_ALL);
+				if (PHPVERSION >= 710) {
+					$last_notices = pg_last_notice($this->dbConn, PGSQL_NOTICE_ALL);
+				}
+				else {
+					$last_notices = array(pg_last_notice($this->dbConn));
+				}
 				foreach ($last_notices as $last_notice) {
 					if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
 						$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
@@ -3017,7 +3023,7 @@ FROM
     # after BEGIN command will be executed in a single transaction
     # until an explicit COMMIT or ROLLBACK is given
     if ($this->blocktransaction==0) {
-      $ret=$this->execSQL('START TRANSACTION',4, 1);
+      $ret=$this->execSQL('BEGIN',4, 0);
     }
     return $ret;
   }
@@ -3028,7 +3034,7 @@ FROM
     # rolls back the current transaction and causes all the updates
     # made by the transaction to be discarded
     if ($this->blocktransaction==0) {
-      $ret=$this->execSQL('ROLLBACK',4, 1);
+      $ret=$this->execSQL('ROLLBACK',4, 0);
     }
     return $ret;
   }
@@ -3038,7 +3044,7 @@ FROM
     # commits the current transaction. All changes made by the transaction
     # become visible to others and are guaranteed to be durable if a crash occurs
     if ($this->blocktransaction==0) {
-      $ret=$this->execSQL('COMMIT',4, 1);
+      $ret=$this->execSQL('COMMIT',4, 0);
     }
     return $ret;
   }

@@ -1,4 +1,8 @@
-<script type="text/javascript" src="//d3js.org/d3.v3.js"></script>
+<? if (file_exists(THIRDPARTY_PATH . 'd3js-v3/d3.v3.min.js')) { ?>
+	<script type="text/javascript" src="<? echo THIRDPARTY_PATH; ?>d3js-v3/d3.v3.min.js"></script>
+<? } else { ?>
+	<script type="text/javascript" src="//d3js.org/d3.v3.min.js"></script>
+<? } ?>
 
 <script type="text/javascript">
 
@@ -17,7 +21,7 @@
 				
 		var force = d3.layout.force()
 				.gravity(.3)
-				.distance(100)
+				.distance(40)
 				.charge(-5000)
 				.size([width, height]);
 				

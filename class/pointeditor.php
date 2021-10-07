@@ -107,18 +107,6 @@ class pointeditor {
 		";
 		#echo '<p>SQL zum Updaten von Punktgeometrie: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 1, true);
-		if (!$ret['success']) {
-			return array(
-				'success' => false,
-				'err_msg' => 'Auf Grund eines Datenbankfehlers konnte der Punkt nicht eingetragen werden!<br>' . $ret[1]
-			);
-		}
-		if ($last_notice = $msg = pg_last_notice($this->database->dbConn)) {
-			if ($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true)) {
-				$msg = $notice_result['msg'];
-			}
-			$ret['info_msg'] = $msg;
-		}
 		return $ret;
 	}
 

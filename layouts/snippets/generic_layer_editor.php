@@ -87,7 +87,7 @@ if ($doit == true) { ?>
 									if($layer['attributes']['visible'][$j] AND $layer['attributes']['SubFormFK_hidden'][$j] != 1)$colspan++;
 									if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){
 										$explosion = explode(';', $layer['attributes']['group'][$j]);
-										if($explosion[1] != '')$collapsed = true;else $collapsed = false;
+										if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
 										$groupname = str_replace(' ', '_', $explosion[0]);
 										if($collapsed)echo '1';
 										else echo $colspan;
@@ -113,7 +113,7 @@ if ($doit == true) { ?>
 							$has_geom = false;
 					  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
-								if($explosion[1] != '')$collapsed = true;else $collapsed = false;
+								if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
 								$groupname = str_replace(' ', '_', $explosion[0]);
 								if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 									echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
@@ -196,7 +196,7 @@ if ($doit == true) { ?>
 
 				for($j = 0; $j < count($layer['attributes']['name']); $j++){
 					$explosion = explode(';', $layer['attributes']['group'][$j]);
-					if($explosion[1] != '')$collapsed = true;else $collapsed = false;
+					if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
 					$groupname = str_replace(' ', '_', $explosion[0]);
 					if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 						echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
@@ -280,7 +280,7 @@ if ($doit == true) { ?>
 							</td><?
 							for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
-								if($explosion[1] != '')$collapsed = true;else $collapsed = false;
+								if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
 								$groupname = str_replace(' ', '_', $explosion[0]);
 								if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 									echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
@@ -330,7 +330,7 @@ if ($doit == true) { ?>
 					  <?
 					  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
-								if($explosion[1] != '')$collapsed = true;else $collapsed = false;
+								if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
 								$groupname = str_replace(' ', '_', $explosion[0]);
 								if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 									echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
@@ -377,7 +377,7 @@ if ($doit == true) { ?>
 							<?					
 								for($j = 0; $j < count($layer['attributes']['name']); $j++){
 									$explosion = explode(';', $layer['attributes']['group'][$j]);
-									if($explosion[1] != '')$collapsed = true;else $collapsed = false;
+									if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
 									$groupname = str_replace(' ', '_', $explosion[0]);
 									if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 										echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';

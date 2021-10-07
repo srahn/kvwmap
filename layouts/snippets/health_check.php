@@ -34,6 +34,15 @@ LAYER
       SYMBOL "circle"
       SIZE 10
     END
+		TEXT \'Test\'
+		LABEL
+			FONT "arial"
+			SIZE 11
+			OFFSET 0 0
+			OUTLINECOLOR 255 255 255
+			POSITION CC
+			SHADOWSIZE 1 1
+		END
   END
 END
 ');
