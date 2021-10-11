@@ -10917,6 +10917,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->scaleMap($saved_scale);
 		}
 		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
+		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
 		$this->data_import_export = new data_import_export();
 		if (defined('LAYERNAME_FLURSTUECKE') AND !$this->formvars['geom_from_layer']) {
 			$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
