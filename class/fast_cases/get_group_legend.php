@@ -1428,9 +1428,11 @@ class GUI {
 				if($layer['metalink'] != ''){
 					if(substr($layer['metalink'], 0, 10) != 'javascript'){
 						$legend .= ' target="_blank"';
-						if(strpos($layer['metalink'], '?') === false)$layer['metalink'] .= '?';
-						else $layer['metalink'] .= '&';
-						$layer['metalink'] .= 'time='.time();
+						$meta_parts = explode('#', $layer['metalink']);
+						if(strpos($meta_parts[0], '?') === false)$meta_parts[0] .= '?';
+						else $meta_parts[0] .= '&';
+						$meta_parts[0] .= 'time='.time();
+						$layer['metalink'] = implode('#', $meta_parts);
 					}
 					$legend .= ' class="metalink boldhover" href="'.$layer['metalink'].'">';
 				}
