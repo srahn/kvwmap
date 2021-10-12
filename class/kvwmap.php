@@ -3375,7 +3375,7 @@ echo '			</table>
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$spatial_processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
 		$single_geoms = $spatial_processor->split_multi_geometries($this->formvars['newpathwkt'], $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-		$this->copy_dataset($mapdb, $this->formvars['selected_layer_id'], array('oid'), array($this->formvars['oid']), count($single_geoms), array($this->formvars['layer_columnname']), $single_geoms, true);
+		$this->copy_dataset($mapdb, $this->formvars['selected_layer_id'], array($layerset[0]['oid']), array($this->formvars['oid']), count($single_geoms), array($this->formvars['layer_columnname']), $single_geoms, true);
 		$this->loadMap('DataBase');					# Karte anzeigen
 		$currenttime=date('Y-m-d H:i:s',time());
     $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
