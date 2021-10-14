@@ -49,7 +49,7 @@ class Nachweis {
 	
 	function LENRIS_get_all_nachweise(){
 		ini_set('memory_limit', '8192M');
-		set_time_limit(1200);
+		set_time_limit(1800);
 		$sql = "
 			DELETE FROM 
 				nachweisverwaltung.n_nachweisaenderungen;
