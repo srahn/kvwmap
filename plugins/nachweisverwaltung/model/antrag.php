@@ -252,9 +252,6 @@ class antrag {
 		}
 	}
 
-
-
-	
   function erzeugenUbergabeprotokoll_PDF(){
     $pdf=new Cezpdf('A4', 'landscape');
     $tmp = array('b'=>'Helvetica-Bold.afm','i'=>'Helvetica-Oblique.afm','bi'=>'Helvetica-BoldOblique.afm');
@@ -272,12 +269,12 @@ class antrag {
     $title='';
     # Konfiguration der Tabelle
     # Allgemeine Einstellungen für die ganze Tabelle
-    $options=array('xPos'=>'left','xOrientation'=>'right','rowGap'=>$rowGap,'colGap'=>$colGap,'showLines'=>2, 'lineCol'=> [0.9,0.9,0.9], 'width'=>780,'showHeadings'=>1,'fontSize'=>8, 'shaded'=>0, 'textCol'=> [0.1,0.1,0.1], 'shadeHeadingCol'=> [0.9,0.9,0.9]);
+    $options=array('xPos'=>'left','xOrientation'=>'right','rowGap'=>$rowGap,'colGap'=>$colGap,'showLines'=>2, 'lineCol'=> [0.9,0.9,0.9], 'width'=>780,'showHeadings'=>1,'fontSize'=>8, 'shaded'=>0, 'textCol'=> [0.1,0.1,0.1]);
     # Individuelle Einstellungen für die Spalten.
 		foreach($this->FFR[0] as $property => $value){
 			$options['cols'][$property]=array('justification'=>'left');
 		}		
-		$options['cols']['FFR']=$options['cols']['KVZ']=$options['cols']['GN']=$options['cols']['FPN']=$options['cols']['KRT']=$options['cols']['PL']=$options['cols']['ERG']=array('justification'=>'center');
+		#$options['cols']['FFR']=$options['cols']['KVZ']=$options['cols']['GN']=$options['cols']['FPN']=$options['cols']['KRT']=$options['cols']['PL']=$options['cols']['ERG']=array('justification'=>'center');
 		$options['cols']['Datei']=array('width'=>210);
 		$options['cols'][utf8_decode('Gültigkeit')]=array('width'=>62);
 		$pdf->ezSetY($table_row);
