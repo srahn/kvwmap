@@ -41,7 +41,8 @@ class LENRIS {
 				doc_download
 			FROM
 				lenris.clients
-			" . ($client_id != NULL? ' WHERE client_id = ' . $client_id : '');
+			" . ($client_id != NULL? ' WHERE client_id = ' . $client_id : '') . "
+			ORDER BY client_id";
 		$ret = $this->database->execSQL($sql, 4, 0, true);
 		if (!$ret[0]) {
 			$clients = pg_fetch_all($ret[1]);
@@ -237,8 +238,9 @@ class LENRIS {
 	}
 
 	function get_all_nachweise($client){
-		set_time_limit(600);
-		ini_set('default_socket_timeout', 600);
+		set_time_limit(1800);
+		ini_set('memory_limit', '8192M');
+		ini_set('default_socket_timeout', 1800);
 		if ($json = file_get_contents($client['url'] . '&go=LENRIS_get_all_nachweise'))	{
 			return json_decode($json, true);
 		}
@@ -295,7 +297,7 @@ class LENRIS {
 					'" . $newpath . "', 
 					'" . $n['format'] . "', 
 					'" . $n['stammnr'] . "', 
-					'" . $n['the_geom'] . "', 
+					st_transform('" . $n['the_geom'] . "', 2398), 
 					" . ($n['fortfuehrung'] ?: 'NULL') . ", 
 					'" . $n['rissnummer'] . "', 
 					'" . $n['bemerkungen'] . "', 
@@ -431,7 +433,7 @@ class LENRIS {
 						link_datei = '" . $newpath . "', 
 						format = '" . $n['format'] . "',
 						stammnr = '" . $n['stammnr'] . "', 
-						the_geom = '" . $n['the_geom'] . "', 
+						the_geom = st_transform('" . $n['the_geom'] . "', 2398), 
 						fortfuehrung = " . ($n['fortfuehrung'] ?: 'NULL') . ", 
 						rissnummer = '" . $n['rissnummer'] . "', 
 						bemerkungen = '" . $n['bemerkungen'] . "', 
