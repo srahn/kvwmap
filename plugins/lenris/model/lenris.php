@@ -280,6 +280,7 @@ class LENRIS {
 			$n['art'] = $this->map_dokumentart($client['client_id'], $n['art']);
 			$n['vermstelle'] = $this->map_vermessungsstelle($client['client_id'], $n['vermstelle']);
 			$newpath = $this->adjust_path($client, $n);
+			$geom = ($n['the_geom'] ? "st_transform('" . $n['the_geom'] . "', 2398)" : 'NULL');
 			$sql = "
 				INSERT INTO
 					nachweisverwaltung.n_nachweise
@@ -297,7 +298,7 @@ class LENRIS {
 					'" . $newpath . "', 
 					'" . $n['format'] . "', 
 					'" . $n['stammnr'] . "', 
-					st_transform('" . $n['the_geom'] . "', 2398), 
+					" . $geom . ", 
 					" . ($n['fortfuehrung'] ?: 'NULL') . ", 
 					'" . $n['rissnummer'] . "', 
 					'" . $n['bemerkungen'] . "', 
@@ -419,6 +420,7 @@ class LENRIS {
 			if ($rs['nachweis_id'] != '') {
 				$n['art'] = $this->map_dokumentart($client['client_id'], $n['art']);
 				$n['vermstelle'] = $this->map_vermessungsstelle($client['client_id'], $n['vermstelle']);
+				$geom = ($n['the_geom'] ? "st_transform('" . $n['the_geom'] . "', 2398)" : 'NULL');
 				$newpath = $this->adjust_path($client, $n);
 				# Nachweis aktualisieren
 				$sql = "
@@ -433,7 +435,7 @@ class LENRIS {
 						link_datei = '" . $newpath . "', 
 						format = '" . $n['format'] . "',
 						stammnr = '" . $n['stammnr'] . "', 
-						the_geom = st_transform('" . $n['the_geom'] . "', 2398), 
+						the_geom = " . $geom . ", 
 						fortfuehrung = " . ($n['fortfuehrung'] ?: 'NULL') . ", 
 						rissnummer = '" . $n['rissnummer'] . "', 
 						bemerkungen = '" . $n['bemerkungen'] . "', 
