@@ -371,7 +371,9 @@ class GUI {
 							$href = $layer[0]['metalink'];
 							$target = '';
 							if (substr($layer[0]['metalink'], 0, 10) != 'javascript') {
-								$href .= (strpos($layer[0]['metalink'], '?') === false ? '?' : '&') . 'time=' . time();
+								$meta_parts = explode('#', $href);
+								$meta_parts[0] .= (strpos($meta_parts[0], '?') === false ? '?' : '&') . 'time=' . time();
+								$href = implode('#', $meta_parts);
 								$target = '_blank';
 							}
 							echo '<li><a href="' . $href . '" target="' . $target . '">' . $this->strMetadata . '</a></li>';
@@ -3375,7 +3377,7 @@ echo '			</table>
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$spatial_processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
 		$single_geoms = $spatial_processor->split_multi_geometries($this->formvars['newpathwkt'], $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-		$this->copy_dataset($mapdb, $this->formvars['selected_layer_id'], array('oid'), array($this->formvars['oid']), count($single_geoms), array($this->formvars['layer_columnname']), $single_geoms, true);
+		$this->copy_dataset($mapdb, $this->formvars['selected_layer_id'], array($layerset[0]['oid']), array($this->formvars['oid']), count($single_geoms), array($this->formvars['layer_columnname']), $single_geoms, true);
 		$this->loadMap('DataBase');					# Karte anzeigen
 		$currenttime=date('Y-m-d H:i:s',time());
     $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
@@ -10917,6 +10919,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->scaleMap($saved_scale);
 		}
 		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
+		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
 		$this->data_import_export = new data_import_export();
 		if (defined('LAYERNAME_FLURSTUECKE') AND !$this->formvars['geom_from_layer']) {
 			$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -12347,13 +12350,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $ret=$this->user->checkUserDaten($this->formvars);
     if ($ret[0]) {
       # Fehler bei der Formulareingabe
-      $this->Meldung=$ret[1];
+      $this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1]);
     }
     else{
       $ret=$this->user->NeuAnlegen($this->formvars);
       if ($ret[0]) {
         # Fehler beim Eintragen der Benutzerdaten
-        $this->Meldung=$ret[1];
+        $this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1]);
       }
       else {
         $this->formvars['selected_user_id']=$ret[1];
@@ -13579,14 +13582,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				else {
 					# normales Dokument-Attribut
 					$update = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);
+					if ($this->user->rolle->upload_only_file_metadata == 1) {
+						$belated_files[$attr_oid['oid']][$i] = $this->formvars[$form_fields[$i]];
+					}
 				}
 				$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $document_attributes[$i]['update'] = $update;
         if ($this->user->id == 1) {
           echo '<br>upload_only_file_metadata: ' . print_r($this->rolle->upload_only_file_metadata, true);
         }
-				if ($this->user->rolle->upload_only_file_metadata == 1) {
-					$belated_files[$attr_oid['oid']][$i] = $this->formvars[$form_fields[$i]];
-				}
 			}
 		}
 		if ($this->formvars['delete_documents'] != '') {
@@ -14445,6 +14448,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							include_(CLASSPATH.'wfs.php');
 							$wfs = new wfs($url, $version, $typename, $namespace, $epsg, NULL, NULL);
 							$wfs->gml = $response;
+							$wfs->rename_features();
 							$features = $wfs->extract_features();
 							if (!empty($features)) {
 								for($j = 0; $j < @count($features); $j++){

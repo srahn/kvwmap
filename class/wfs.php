@@ -130,8 +130,12 @@ class wfs{
     }
     $this->objects = $objects;
 	}
+	
+	function rename_features(){
+		$this->gml = preg_replace('/\w+_feature/', 'gml:featureMember', $this->gml);
+	}
 
-	function extract_features() {
+	function extract_features(){
 		# liefert die Datensätze einer getfeature-Abfrage (zuvor muss get_feature_request() ausgeführt werden)
 		if (strpos($this->gml, 'gmlx:featureMember') !== false) {
 			$this->parse_gml('gmlx:featureMember');
