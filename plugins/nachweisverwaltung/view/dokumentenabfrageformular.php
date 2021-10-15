@@ -53,14 +53,10 @@ function save(){
 		}
 		else{
 			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
-			document.GUI.go_plus.value = 'Senden';
-			document.GUI.submit();
 		}
 	}
-	else{
-		document.GUI.go_plus.value = 'Senden';
-		document.GUI.submit();
-	}
+	document.GUI.go_plus.value = 'Senden';
+	overlay_submit(document.GUI, true);
 }
 
 function buildwktpolygonfromsvgpath(svgpath){
@@ -204,7 +200,7 @@ else {
 								</div>
 								<div style="width: 215px;">
 				<?				if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
-									&nbsp;<select name="suchunterart[]" multiple="true" style="height: 20px;z-index:<? echo $z_index-=1; ?>;position: absolute;width: 219px" onmousedown="if(this.style.height=='20px'){this.style.height = this.length * 20;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='20px';scrollToSelected(this);}"">
+									&nbsp;<select name="suchunterart[]" multiple="true" style="height: 20px;z-index:<? echo $z_index-=1; ?>;position: absolute;width: 219px" onmousedown="if(this.style.height=='20px'){this.style.height = this.length * 20;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='20px';scrollToSelected(this);}">
 										<option value="">alle</option>
 										<? foreach($this->dokumentarten[$hauptdokumentart['id']] as $dokumentart){ ?>
 											<option <? if(in_array($dokumentart['id'], $this->formvars['suchunterart'])){echo 'selected';} ?> value="<? echo $dokumentart['id']; ?>"><? echo $dokumentart['art']; ?></option>	
@@ -255,6 +251,8 @@ else {
 				</tr>
 			</table>
 		</td>
+	</tr>
+	<? if (!$this->plugin_loaded('lenris')) { ?>
   <tr>
 		<td>&nbsp;Gültigkeit:</td>
 		<td>
@@ -275,6 +273,7 @@ else {
 			</select>
 		</td>
   </tr>
+	<? } ?>
   <tr> 
     <td colspan="2"><hr align="center" noshade></td>
   </tr>

@@ -144,7 +144,6 @@ class GUI {
 	var $FormObject;
 	var $StellenForm;
 	var $Fehlermeldung;
-	var $messages = array();
 	var $Hinweis;
 	var $Stelle;
 	var $ALB;
@@ -178,6 +177,7 @@ class GUI {
 	var $editable;
 	var $groupset;
 	var $layers_replace_scale = array();
+	static $messages = array();
 
   function __construct($main, $style, $mime_type) {
     # Debugdatei setzen
@@ -233,6 +233,20 @@ class GUI {
 		$this->user->rolle->setSize($width.'x'.$height);
 		$this->user->rolle->readSettings();
 	}	
+	
+	function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
+		if ($last) {
+			$word_pos = strripos($str, $word);
+		}
+		else {
+			$word_pos = stripos($str, $word);
+		}
+		if ($word_pos !== false) {
+			$str_from_word_pos = substr($str, $word_pos + strlen($word));
+			$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+			return trim($parts[0]);
+		}
+	}
 	
 	function zoomToMaxLayerExtent($layer_id) {
     # Abfragen der maximalen Ausdehnung aller Daten eines Layers
@@ -296,8 +310,8 @@ class GUI {
 						$command = OGR_BINPATH.'gdalinfo '.$raster_file.' > '.IMAGEPATH.$output.'.info';
 						exec($command);
 						$infotext = file_get_contents(IMAGEPATH.$output.'.info');
-						$ll = explode(', ', trim(get_first_word_after($infotext, 'Lower Left', '', ')'), ' ('));
-						$ur = explode(', ', trim(get_first_word_after($infotext, 'Upper Right', '', ')'), ' ('));
+						$ll = explode(', ', trim($this->get_first_word_after($infotext, 'Lower Left', '', ')'), ' ('));
+						$ur = explode(', ', trim($this->get_first_word_after($infotext, 'Upper Right', '', ')'), ' ('));
 					}
 				}
 				elseif($layer[0]['tileindex'] != ''){		# ein Tile-Index
@@ -350,6 +364,12 @@ class GUI {
 			}
 		}
   }
+
+	function login_agreement() {
+		$this->expect = array('agreement_accepted');
+		$this->gui = LOGIN_AGREEMENT;
+		$this->output();
+	}
 
 	function loadlayer($map, $layerset){
 		$layer = ms_newLayerObj($map);
@@ -727,6 +747,7 @@ class GUI {
   }
 
   function loadMap($loadMapSource) {
+		$this->group_has_active_layers = array();
     $this->debug->write("<p>Funktion: loadMap('" . $loadMapSource . ")",4);
     switch ($loadMapSource) {
       # lade Karte aus Post-Parametern
@@ -737,8 +758,8 @@ class GUI {
 				else {
 				  $map = new mapObj(SHAPEPATH.'MapFiles/tk_niedersachsen.map');
 				}
-				echo '<br>MapServer Version: '.ms_GetVersionInt();
-				echo '<br>Details: '.ms_GetVersion();
+				#echo '<br>MapServer Version: '.ms_GetVersionInt();
+				#echo '<br>Details: '.ms_GetVersion();
 
         # Allgemeine Parameter
         #var_dump($this->formvars);
@@ -896,16 +917,23 @@ class GUI {
 				else {
 					$map = new mapObj(DEFAULTMAPFILE, SHAPEPATH);
 				}
+
         $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 
-        # Allgemeine Parameter
-        $map->set('width',$this->user->rolle->nImageWidth);
-        $map->set('height',$this->user->rolle->nImageHeight);
-        $map->set('resolution',96);
-        #$map->set('transparent', MS_OFF);
-        #$map->set('interlace', MS_ON);
-        $map->set('status', MS_ON);
-        $map->set('name', MAPFILENAME);
+				# Allgemeine Parameter
+				define('MINIMAGESIZE', 10); # prevent error in setextent
+				$map->set('width', ($this->user->rolle->nImageWidth < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageWidth));
+				$map->set('height', ($this->user->rolle->nImageHeight < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageHeight));
+				$map->set('resolution', 96);
+				#$map->set('transparent', MS_OFF);
+				#$map->set('interlace', MS_ON);
+				$map->set('status', MS_ON);
+				$map->set('name', MAPFILENAME);
+
+				if (MS_DEBUG_LEVEL > 0) {
+					$map->setConfigOption('MS_ERRORFILE', '/var/www/logs/mapserver.log');
+					$map->set('debug', MS_DEBUG_LEVEL);
+				};
         $map->imagecolor->setRGB(255,255,255);
         $map->maxsize = 4096;
         $map->setProjection('+init=epsg:'.$this->user->rolle->epsg_code,MS_TRUE);
@@ -1067,12 +1095,11 @@ class GUI {
         $b = substr(BG_MENUETOP, 5, 2);
         $map->scalebar->imagecolor->setRGB(hexdec($r), hexdec($g), hexdec($b));
         $map->scalebar->outlinecolor->setRGB(0,0,0);
-				$map->scalebar->label->font = 'SourceSansPro';
+				$map->scalebar->label->set('font', 'SourceSansPro');		# Kommentarzeichen wieder entfernt, da sonst auf Metropolplaner Fehler
 				if (MAPSERVERVERSION < 700 ) {
 					$map->scalebar->label->type = 'truetype';
 				}
 				$map->scalebar->label->size = 10.5;
-
         # Groups
         if(value_of($this->formvars, 'nurAufgeklappteLayer') == ''){
 	        $this->groupset=$mapDB->read_Groups();
@@ -1090,17 +1117,18 @@ class GUI {
         $layerset['list'] = array_merge($layerset['list'], $rollenlayer);
         $layerset['anzLayer'] = count($layerset['list']);
         unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
-        for($i=0; $i < $layerset['anzLayer']; $i++){
+				$layerset['layer_group_has_legendorder'] = array();
+				for ($i=0; $i < $layerset['anzLayer']; $i++) {
 					$layerset['layers_of_group'][$layerset['list'][$i]['Gruppe']][] = $i;
-					if($layerset['list'][$i]['legendorder'] != ''){
+					if(value_of($layerset['list'][$i], 'legendorder') != ''){
 						$layerset['layer_group_has_legendorder'][$layerset['list'][$i]['Gruppe']] = true;
 					}
-					if($layerset['list'][$i]['requires'] == ''){
+					if(value_of($layerset['list'][$i], 'requires') == ''){
 						$this->layer_ids_of_group[$layerset['list'][$i]['Gruppe']][] = $layerset['list'][$i]['Layer_ID'];				# die Layer-IDs in einer Gruppe
 					}
 					$this->layer_id_string .= $layerset['list'][$i]['Layer_ID'].'|';							# alle Layer-IDs hintereinander in einem String
 
-					if($layerset['list'][$i]['requires'] != ''){
+					if(value_of($layerset['list'][$i], 'requires') != ''){
 						$layerset['list'][$i]['aktivStatus'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['aktivStatus'];
 						$layerset['list'][$i]['showclasses'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['showclasses'];
 					}
@@ -1282,9 +1310,6 @@ class GUI {
           }
         }
         if ($dbStyle['width']!='') {
-          if ($dbStyle['antialias']!='') {
-            $style -> set('antialias',$dbStyle['antialias']);
-          }
 					if($this->map_factor != '') {
 						if(is_numeric($dbStyle['width']))$style->set('width', $dbStyle['width']*$this->map_factor/1.414);
 						else $style->updateFromString("STYLE WIDTH [" . $dbStyle['width']."] END");
@@ -1821,17 +1846,24 @@ class GUI {
     }
 	}
 
-  function getLagebezeichnung($epsgcode) {
-    switch (LAGEBEZEICHNUNGSART) {
-      case 'Flurbezeichnung' : {
-        $Lagebezeichnung = $this->getFlurbezeichnung($epsgcode);
-			} break;
-			default : {
-			  $Lagebezeichnung = '';
+	function getLagebezeichnung($epsgcode) {
+		global $GUI;
+		if (defined('LAGEBEZEICHNUNGSART')) {
+			switch (LAGEBEZEICHNUNGSART) {
+				case 'Flurbezeichnung' : {
+					include_once(PLUGINS.'alkis/model/kvwmap.php');
+					$Lagebezeichnung = $GUI->getFlurbezeichnung($epsgcode);
+				} break;
+				default : {
+					$Lagebezeichnung = '';
+				}
 			}
-	  }
-    return $Lagebezeichnung;
-  }
+		}
+		else {
+			$Lagebezeichnung = '';
+		}
+		return $Lagebezeichnung;
+	}
 
   function getFlurbezeichnung($epsgcode) {
     $Flurbezeichnung = '';
@@ -1896,29 +1928,34 @@ class GUI {
 	}
 
 	function add_message($type, $msg) {
+		GUI::add_message_($type, $msg);
+	}
+
+	public static function add_message_($type, $msg) {
 		if (is_array($msg) AND array_key_exists('success', $msg) AND is_array($msg)) {
 			$type = 'notice';
 			$msg = $msg['msg'];
 		}
 		if ($type == 'array' or is_array($msg)) {
 			foreach($msg AS $m) {
-				$this->add_message($m['type'], $m['msg']);
+				GUI::add_message($m['type'], $m['msg']);
 			}
 		}
 		else {
-			$this->messages[] = array(
+			GUI::$messages[] = array(
 				'type' => $type,
 				'msg' => $msg
 			);
 		}
 	}
 
-	function output_messages($option = 'with_script_tags') {
-		$html = "message(" . json_encode($this->messages) . ");";
+	function output_messages($option = 'with_script_tags') {		
+		$html = "message(" . json_encode(GUI::$messages) . ");";
 		if ($option == 'with_script_tags') {
 			$html = "<script type=\"text/javascript\">" . $html . "</script>";
 		}
 		echo $html;
+		GUI::$messages = array();
 	}
 
   function output() {
@@ -1942,7 +1979,7 @@ class GUI {
 				if($this->alert != ''){
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
 				}
-				if (!empty($this->messages)) {
+				if (!empty(GUI::$messages)) {
 					$this->output_messages();
 				}
       } break;
@@ -2008,9 +2045,12 @@ class database {
 
 	function open() {
 		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
-		$this->mysqli = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+		$this->mysqli = mysqli_init();
+		$ret = $this->mysqli->real_connect($this->host, $this->user, $this->passwd, $this->dbName, 3306, null, MYSQLI_CLIENT_FOUND_ROWS);
 	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
-		return $this->mysqli->connect_errno;
+		$this->debug->write("<br>MySQL Fehlernummer: " . mysqli_connect_errno(), 4);
+		$this->debug->write("<br>MySQL Fehler: " . mysqli_connect_error(), 4);
+		return $ret;
 	}
 
 	function execSQL($sql, $debuglevel = 4, $loglevel = 0, $suppress_error_msg = false) {
@@ -2108,21 +2148,22 @@ class user {
 		}
 	}
 
-	function readUserDaten($id, $login_name) {
+	function readUserDaten($id, $login_name, $passwort = '') {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name LIKE '" . $login_name . "'");
+		if ($passwort != '') array_push($where, "passwort = md5('" . $this->database->mysqli->real_escape_string($passwort) . "')");
 		$sql = "
 			SELECT
 				*
 			FROM
 				user
-			WHERE " .
-				implode(" AND ", $where) . "
+			WHERE
+				" . implode(" AND ", $where) . "
 		";
 		#echo '<br>Sql: ' . $sql;
 
-		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>" . $sql, 3);
+		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>", 3);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
 		$rs = $this->database->result->fetch_array();
@@ -2139,7 +2180,10 @@ class user {
 		}
 		$this->funktion = $rs['Funktion'];
 		$this->password_setting_time = $rs['password_setting_time'];
-  }
+		$this->agreement_accepted = $rs['agreement_accepted'];
+		$this->start = $rs['start'];
+		$this->stop = $rs['stop'];
+	}
 
 	function getLastStelle() {
 		$sql = "
@@ -2542,9 +2586,15 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, classification, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
-				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
-				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
+				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
+				CASE 
+					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
+					ELSE l.connection 
+				END as connection, 
+				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
+				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function,
+				sync,
+				ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
@@ -2616,33 +2666,44 @@ class rolle {
 	}
 
 	function getRollenLayer($LayerName, $typ = NULL) {
-		$sql ="
-			SELECT l.*, 4 as tolerance, -l.id as Layer_ID, l.query as pfad, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, gle_view,
-				concat('(', rollenfilter, ')') as Filter
-			FROM rollenlayer AS l";
-    $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
-    if ($LayerName!='') {
-      $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
-      if(is_numeric($LayerName)){
-        $sql.='OR l.id = "'.$LayerName.'")';
-      }
-      else{
-        $sql.=')';
-      }
-    }
-		if($typ != NULL){
-			$sql .= " AND Typ = '".$typ."'";
+		$where = array();
+		$where[] = "l.stelle_id = " . $this->stelle_id;
+		$where[] = "l.user_id = " . $this->user_id;
+		if ($LayerName != '') {
+			if (is_numeric($LayerName)) {
+				$where[] = "l.id = " . $LayerName;
+			}
+			else {
+				$where[] = "l.`Name` LIKE '" . $LayerName . "'";
+			}
 		}
-    #echo $sql.'<br>';
-    $this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
-    $this->database->execSQL($sql);
-    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		if ($typ != NULL) {
+			$where[] = "`Typ` = '" . $typ . "'";
+		}
+		$sql = "
+			SELECT
+				l.*,
+				4 as tolerance,
+				-l.id as Layer_ID,
+				l.query as pfad,
+				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable,
+				gle_view,
+				concat('(', rollenfilter, ')') as Filter
+			FROM
+				rollenlayer AS l
+			" . (count($where) > 0 ? "WHERE " . implode(" AND ", $where) : '') . "
+		";
+
+		#echo $sql.'<br>';
+		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
-    while ($rs = $this->database->result->fetch_assoc()) {
-      $layer[]=$rs;
-    }
-    return $layer;
-  }
+		while ($rs = $this->database->result->fetch_assoc()) {
+			$layer[]=$rs;
+		}
+		return $layer;
+	}
 
 	function setQueryStatus($formvars) {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
@@ -2720,7 +2781,9 @@ class rolle {
 			$this->menue_buttons=$rs['menue_buttons'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
-			$this->geom_edit_first=$rs['geom_edit_first'];		
+			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
+			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
@@ -3523,7 +3586,7 @@ class db_mapObj{
 				l.labelmaxscale, l.labelminscale, l.labelrequires,
 				l.connection_id,
 				CASE
-					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password)
+					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', gr.user_id)
 					ELSE l.connection
 				END as connection,
 				l.printconnection,
@@ -3743,7 +3806,7 @@ class db_mapObj{
 		return $Labels;
 	}
 
-	function read_RollenLayer($id = NULL, $typ = NULL){
+	function read_RollenLayer($id = NULL, $typ = NULL) {
 		$sql = "
 			SELECT DISTINCT
 				l.`id`,
@@ -3760,8 +3823,10 @@ class db_mapObj{
 				l.`query`,
 				l.`connectiontype`,
 				l.connection_id,
+				l.wms_auth_username,
+				l.wms_auth_password,
 				CASE
-					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password)
+					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', l.user_id)
 					ELSE l.connection
 				END as connection,
 				l.`epsg_code`,
@@ -3787,13 +3852,13 @@ class db_mapObj{
 				($id != NULL ? " AND l.id = " . $id : '') .
 				($typ != NULL ? " AND l.Typ = '" . $typ . "'" : '') . "
 		";
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>" . $sql,4);
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>",4);
 		# echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-    $Layer = array();
-    while ($rs = $ret['result']->fetch_array()) {
-      $rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
+		$Layer = array();
+		while ($rs = $ret['result']->fetch_array()) {
+			$rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
 			foreach (array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
@@ -3805,10 +3870,10 @@ class db_mapObj{
 					$rs['duplicate_criterion']
 				);
 			}
-      $Layer[] = $rs;
-    }
-    return $Layer;
-  }
+			$Layer[] = $rs;
+		}
+		return $Layer;
+	}
 
 }
 

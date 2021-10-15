@@ -4,6 +4,7 @@ if (value_of($this->formvars, 'anzahl') == '') {
 }
 
 include('funktionen/input_check_functions.php');
+include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
 ?>
 
 <script type="text/javascript">
@@ -20,7 +21,7 @@ include('funktionen/input_check_functions.php');
 	}
 	
 	adjustHref = function(link){
-		if (link.target != 'root' && enclosingForm.name == 'GUI2') {
+		if (link.href.substring(0,9) == 'index.php' && link.target != 'root' && enclosingForm.name == 'GUI2') {
 			link.href = link.href.replace('?', '?window_type=overlay&');
 		}
 	}
@@ -47,6 +48,21 @@ include('funktionen/input_check_functions.php');
 			}
 		}
 	}
+	
+	completeTime = function(timefield){
+		timefield.value = timefield.value.replace('.', ':');
+		var split = timefield.value.split(":");
+		if (split.length == 2) {
+			if (split[1] == '') {
+				timefield.value += '00';
+			}
+		}
+		else {
+			if (split.length == 1) {
+				timefield.value += ':00';
+			}
+		}
+	}	
 
 	scrolltop = function(){
 		if(querymode == 1){
@@ -77,7 +93,22 @@ include('funktionen/input_check_functions.php');
 			group.style.display = 'none';
 			group_img.src = 'graphics/plus.gif';
 		}
-	}	
+	}
+	
+	toggle_tab = function(tab, layer_id, k, tabname){
+		var dataset = document.getElementById('datensatz_' + layer_id + '_' + k);
+		var active_tab = dataset.querySelector('.active_tab');
+		active_tab.classList.remove("active_tab");
+		tab.classList.add("active_tab");
+		var groups_to_close = dataset.querySelectorAll('.tab');
+		[].forEach.call(groups_to_close, function (group){
+			group.style.display = 'none';
+		});
+		var groups_to_open = dataset.querySelectorAll('.tab_' + layer_id + '_' + k + '_' + tabname);
+		[].forEach.call(groups_to_open, function (group){
+			group.style.display = '';
+		});
+	}
 	
 	check_visibility = function(layer_id, object, dependents, k){
 		if(object == null)return;
@@ -140,7 +171,7 @@ include('funktionen/input_check_functions.php');
 		}
 		if (field.type == 'checkbox') {
 			if (
-				(operator == '==' && value == 't' && field.checked) ||
+				(operator == '==' && value == 't' && field.checked)  ||
 				(operator == '==' && value != 't' && !field.checked) ||
 				(operator == '!=' && value == 't' && !field.checked) ||
 				(operator == '!=' && value != 't' && field.checked)
@@ -405,27 +436,54 @@ include('funktionen/input_check_functions.php');
 		if(further_params)params += further_params;
 		ahah('index.php?go=Layer-Suche_Suchen', params, new Array(list_div), new Array('sethtml'));
 	}
+	
+	convert_belated = function(field){
+		if (field.type == 'file' && field.files && field.files.length > 0) {
+			file = field.files[0];
+			field.setAttribute('onchange', "");
+			field.type = 'text';
+			field.value  = JSON.stringify({
+				name: file.name,
+				size: file.size,
+				lastmodified: file.lastModified
+			});
+		}
+	}
 
 	save = function(){
 		var open_subforms = document.querySelectorAll('.subForm:not(:empty)');
-		if(open_subforms.length > 0){
+		if (open_subforms.length > 0) {
 			message([{'type': 'info', 'msg': 'Es gibt noch offene Unterformulare, die noch nicht gespeichert wurden!'}]);
 			return;
 		}
-		form_fieldstring = enclosingForm.form_field_names.value+'';
+		form_fieldstring = enclosingForm.form_field_names.value + '';
 		form_fields = form_fieldstring.split('|');
-		for(i = 0; i < form_fields.length-1; i++){
+		for (i = 0; i < form_fields.length-1; i++) {
 			fieldstring = form_fields[i]+'';
 			field = fieldstring.split(';');
-			if(document.getElementsByName(fieldstring)[0] != undefined && document.getElementsByName(fieldstring)[0].type != 'hidden' && field[4] != 'Dokument' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-				message('Das Feld '+document.getElementsByName(fieldstring)[0].title + ' erfordert eine Eingabe.');
+			var element = document.getElementsByName(fieldstring)[0];
+			
+			if (element != undefined && element.type != 'hidden' && field[4] != 'Dokument' && (element.readOnly != true) && field[5] == '0' && element.value == ''){
+				message('Das Feld ' + element.title + ' erfordert eine Eingabe.');
 				return;
 			}
-			if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-				completeDate(document.getElementsByName(fieldstring)[0]);
-				if(!checkDate(document.getElementsByName(fieldstring)[0].value)){
-					message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+			if (element != undefined && field[6] == 'date' && field[4] != 'Time' && element.value != '' && !checkDate(element.value)){
+				completeDate(element);
+				if(!checkDate(element.value)){
+					message('Das Datumsfeld ' + element.title + ' hat nicht das Format TT.MM.JJJJ.');
 					return;
+				}
+			}
+			if (element != undefined && field[6] == 'time' && field[4] != 'Time' && element.value != '' && !checkDate(element.value)) {
+				completeTime(element);
+				if(!checkTime(element.value)){
+					message('Das Uhrzeitfeld ' + element.title + ' hat nicht das Format hh:mm:ss.');
+					return;
+				}
+			}
+			if (upload_only_file_metadata == 1) {
+				if (field[4] == 'Dokument') {
+					convert_belated(element);
 				}
 			}
 		}
@@ -442,26 +500,32 @@ include('funktionen/input_check_functions.php');
 			return;
 		}
   	form_fieldstring = enclosingForm.form_field_names.value+'';
-  	form_fields = form_fieldstring.split('|');
-  	for(i = 0; i < form_fields.length; i++){
-  		fieldstring = form_fields[i]+'';
-  		field = fieldstring.split(';'); 
-  		if(document.getElementsByName(fieldstring)[0] != undefined && document.getElementsByName(fieldstring)[0].type != 'hidden' && field[4] != 'SubFormFK' && field[7] != '0' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-			  message('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
-  			return;
-  		}
-  		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-				completeDate(document.getElementsByName(fieldstring)[0]);
-				if(!checkDate(document.getElementsByName(fieldstring)[0].value)){
-					message('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+		form_fields = form_fieldstring.split('|');
+		for (i = 0; i < form_fields.length; i++) {
+			fieldstring = form_fields[i] + '';
+			field = fieldstring.split(';');
+			var element = document.getElementsByName(fieldstring)[0];
+			if (element != undefined && element.type != 'hidden' && field[4] != 'SubFormFK' && field[7] != '0' && (element.readOnly != true) && field[5] == '0' && element.value == ''){
+			  message('Das Feld '+element.title+' erfordert eine Eingabe.');
+				return;
+			}
+			if (element != undefined && field[6] == 'date' && field[4] != 'Time' && element.value != '' && !checkDate(element.value)){
+				completeDate(element);
+				if(!checkDate(element.value)){
+					message('Das Datumsfeld '+element.title+' hat nicht das Format TT.MM.JJJJ.');
 					return;
 				}
-  		}
-  	}
-  	enclosingForm.go.value = 'neuer_Layer_Datensatz_speichern';
+			}
+			if (upload_only_file_metadata == 1) {
+				if (field[4] == 'Dokument') {
+					convert_belated(element);
+				}
+			}
+		}
+		enclosingForm.go.value = 'neuer_Layer_Datensatz_speichern';
 		document.getElementById('sachdatenanzeige_save_button').disabled = true;
 		root.document.GUI.gle_changed.value = '';
-  	overlay_submit(enclosingForm, false);
+		overlay_submit(enclosingForm, false);
 	}
 
 	subdelete_data = function(layer_id, fromobject, oid, reload_object){
@@ -478,28 +542,35 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 
-	subsave_data = function(layer_id, fromobject, targetobject, reload){
+	subsave_data = function(layer_id, fromobject, targetobject, reload) {
 		// layer_id ist die von dem Layer, in dem die Datensätze gespeichert werden soll
 		// fromobject ist die id von dem div, welches das Formular der Datensätze enthält
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des Datensatzes aktualisiert werden soll
-		form_fields = Array.prototype.slice.call(document.getElementById(fromobject).querySelectorAll('.subform_'+layer_id));
+		form_fields = Array.prototype.slice.call(document.getElementById(fromobject).querySelectorAll('.subform_' + layer_id));
 		form_fieldstring = '';
 		var formData = new FormData();
-  	for (i = 0; i < form_fields.length; i++){
-			if (form_fields[i].name.slice(-4) != '_alt')form_fieldstring += form_fields[i].name+'|';
-  		field = form_fields[i].name.split(';');
-  		if (field[4] != 'Dokument' && form_fields[i].readOnly != true && field[5] == '0' && form_fields[i].value == ''){
-  			message('Das Feld '+form_fields[i].title+' erfordert eine Eingabe.');
-  			return;
-  		}
-  		if (field[6] == 'date' && field[4] != 'Time' && form_fields[i].value != '' && !checkDate(form_fields[i].value)){
+		for (i = 0; i < form_fields.length; i++) {
+			if (form_fields[i].name.slice(-4) != '_alt') {
+				form_fieldstring += form_fields[i].name + '|';
+			}
+			field = form_fields[i].name.split(';');
+			if (field[4] != 'Dokument' && form_fields[i].readOnly != true && field[5] == '0' && form_fields[i].value == ''){
+				message('Das Feld ' + form_fields[i].title + ' erfordert eine Eingabe.');
+				return;
+			}
+			if (field[6] == 'date' && field[4] != 'Time' && form_fields[i].value != '' && !checkDate(form_fields[i].value)){
 				completeDate(form_fields[i]);
 				if(!checkDate(form_fields[i].value)){
-					message('Das Datumsfeld '+form_fields[i].title+' hat nicht das Format TT.MM.JJJJ.');
+					message('Das Datumsfeld ' + form_fields[i].title + ' hat nicht das Format TT.MM.JJJJ.');
 					return;
 				}
-  		}
+			}
 			if (['checkbox', 'radio'].indexOf(form_fields[i].type) == -1 || form_fields[i].checked) {
+				if (upload_only_file_metadata == 1) {
+					if (field[4] == 'Dokument') {
+						convert_belated(form_fields[i]);
+					}
+				}
 				if (form_fields[i].type == 'file' && form_fields[i].files[0] != undefined) {
 					value = form_fields[i].files[0];
 				}
@@ -508,10 +579,12 @@ include('funktionen/input_check_functions.php');
 				}
 				formData.append(form_fields[i].name, value);
 			}
-  	}
+		}
 		root.document.GUI.gle_changed.value = '';
 		formData.append('go', 'Sachdaten_speichern');
-		if(reload)formData.append('reload', reload);
+		if (reload) {
+			formData.append('reload', reload);
+		}
 		formData.append('selected_layer_id', layer_id);
 		formData.append('targetobject', targetobject);
 		formData.append('form_field_names', form_fieldstring);
@@ -684,15 +757,18 @@ include('funktionen/input_check_functions.php');
 		}
 	} 
 
-	selectall = function(layer_id){
-		var k = 0;
-		var obj = document.getElementById(layer_id+'_'+k);
-		var status = obj.checked;
-		while(obj != undefined){
+	selectall = function(layer_id) {
+		var k = 0,
+				obj = document.getElementById(layer_id + '_' + k),
+				status = obj.checked;
+
+		while (obj != undefined) {
 			obj.checked = !status;
 			k++;
-			obj = document.getElementById(layer_id+'_'+k);
+			obj = document.getElementById(layer_id + '_' + k);
 		}
+		$('#sellectDatasetsLinkText, #desellectDatasetsLinkText').toggle();
+		message([{ 'type': 'notice', 'msg': (status ? '<? echo $strAllDeselected; ?>' : '<? echo $strAllSelected; ?>')}]);
 	}
 	
 	zoom2object = function(layer_id, columnname, oid, selektieren){
@@ -710,7 +786,7 @@ include('funktionen/input_check_functions.php');
 		params = 'go=zoom2wkt&wkt='+wkt+'&epsg='+epsg;
 		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
 			startwaiting();
-			get_map_ajax(params, '', '');
+			root.get_map_ajax(params, '', '');
 		}
 		else{
 			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
@@ -854,10 +930,10 @@ include('funktionen/input_check_functions.php');
 				root.overlay_submit(enclosingForm, false);
 			}
 		}
-	}	
+	}
 
 	print_data = function(layer_id){
-		if(check_for_selection(layer_id)){
+		if (check_for_selection(layer_id)) {
 			enclosingForm.chosen_layer_id.value = layer_id;
 			enclosingForm.go_backup.value = enclosingForm.go.value;
 			enclosingForm.go.value = 'generischer_sachdaten_druck';
@@ -984,11 +1060,20 @@ include('funktionen/input_check_functions.php');
 		}		
 	}
 
-	set_changed_flag = function(flag){
-		if(flag != undefined){
-			flag.value=1;
-			if(flag.onchange)flag.onchange();
+	set_changed_flag = function(field, flag_name) {
+		if (field.type != 'file') {
+			var same_fields = document.querySelectorAll('[name="' + field.name + '"]');
+			[].forEach.call(same_fields, function (same_field) {
+				same_field.value = field.value;	// alle gleichen Felder auf den selben Wert setzen, falls der gleiche Datensatz im GLE nochmal vorkommt (durch Subforms)
+			});
 		}
+		var flags = document.querySelectorAll('[name="' + flag_name + '"]');
+		[].forEach.call(flags, function (flag){
+			if(flag != undefined){
+				flag.value=1;
+				if(flag.onchange)flag.onchange();
+			}
+		});
 	}
 	
 	activate_save_button = function(layerdiv, layer_id){

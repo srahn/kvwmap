@@ -11,6 +11,35 @@ if(isset($argv)){
 	}
 }
 
+# Error Handling for Fatal-Errors
+register_shutdown_function(function () {
+	global $errors;
+	$err = error_get_last();
+	if (error_reporting() & $err['type']) {		// This error code is included in error_reporting		
+		ob_end_clean();
+		if (! is_null($err)) {
+				$errors[] = '<b>' . $err['message'] . '</b><br> in Datei ' . $err['file'] . '<br>in Zeile '. $err['line'];
+		}
+		http_response_code(500);
+		include_once('layouts/snippets/general_error_page.php');
+	}
+});
+
+# Error-Handling
+function CustomErrorHandler($errno, $errstr, $errfile, $errline){
+	global $errors;
+	if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
+		return;
+	}
+	$errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
+	http_response_code(500);
+	include_once('layouts/snippets/general_error_page.php');
+	/* Don't execute PHP internal error handler */
+	return true;
+}
+
+set_error_handler("CustomErrorHandler");
+
 include('credentials.php');
 include('config.php');
 
@@ -61,7 +90,7 @@ $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '
 # This program is distributed in the hope that it will be useful, #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of  #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the    #
-# GNU General Public License for more details.                    
+# GNU General Public License for more details.
 #                                                                 #
 # You should have received a copy of the GNU General Public       #
 # License along with this program; if not, write to the Free      #
@@ -95,7 +124,7 @@ if (array_key_exists('go_plus', $formvars) and $formvars['go_plus'] != '') {
 }
 
 ###########################################################################################################
-define('CASE_COMPRESS', false);																																						
+define('CASE_COMPRESS', false);
 #																																																					#
 #		ALLE:						  - die Stelle muss die IP checken  																								  #
 #											- die Stelle muss das Passwortalter checken																					#
@@ -410,12 +439,12 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
-			case 'getSVG_vertices' : {
-				$GUI->getSVG_vertices();
+			case 'getSVG_all_vertices' : {
+				$GUI->getSVG_all_vertices();
 			} break;
 
-			case 'getSVG_foreign_vertices' : {
-				$GUI->getSVG_foreign_vertices();
+			case 'getSVG_vertices' : {
+				$GUI->getSVG_vertices();
 			} break;
 
 			case 'ResizeMap2Window' : {
@@ -831,12 +860,12 @@ function go_switch($go, $exit = false) {
 				$GUI->druckrahmen_load();
 				$GUI->output();
 			} break;
-			
+
 			case 'Druckausschnitt_laden' : {
 				$GUI->formvars['loadmapsource'] = 'DataBase';
 				$GUI->druckausschnittswahl($GUI->formvars['loadmapsource']);
 			} break;
-			
+
 			case 'Druckausschnitt_loeschen' : {
 				$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
 			} break;
@@ -1014,6 +1043,16 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Daten_Export');
 				$GUI->daten_export_exportieren();
 			} break;
+			
+			case 'Daten_Export_Einstellungen_speichern' : {
+				$GUI->checkCaseAllowed('Daten_Export');
+				$GUI->daten_export();
+			} break;
+			
+			case 'Daten_Export_Einstellungen_löschen' : {
+				$GUI->checkCaseAllowed('Daten_Export');
+				$GUI->daten_export();
+			} break;
 
 			case 'get_last_search' : {
 				$GUI->formvars['selected_layer_id'] = $GUI->user->rolle->get_last_search_layer_id();
@@ -1079,6 +1118,16 @@ function go_switch($go, $exit = false) {
 			case 'Layer_Datensaetze_Loeschen' : {
 				$GUI->layer_Datensaetze_loeschen(($GUI->formvars['output'] == 'false' ? false : true));
 			} break;
+
+			case 'belated_file_upload' : {
+				$GUI->checkCaseAllowed('belated_file_upload');
+				$GUI->belated_file_upload();
+			} break;
+			
+			case 'belated_file_upload_speichern' : {
+				$GUI->checkCaseAllowed('belated_file_upload');
+				$GUI->belated_file_upload_speichern();
+			} break;	
 
 			case 'Dokument_Loeschen' : {
 				$GUI->sachdaten_speichern();
@@ -1163,16 +1212,16 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('sachdaten_druck_editor');
 				$GUI->sachdaten_druck_editor_Linieloeschen();
 			} break;
-			
+
 			case 'sachdaten_druck_editor_Rechteckhinzufuegen' :
 				$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
 				$GUI->sachdaten_druck_editor_Rechteckhinzufuegen();
 			} break;
-			
+
 			case 'sachdaten_druck_editor_Rechteckloeschen' : {
 				$GUI->checkCaseAllowed('sachdaten_druck_editor');
 				$GUI->sachdaten_druck_editor_Rechteckloeschen();
-			} break;			
+			} break;
 
 			case 'Layer_Export' : {
 				$GUI->checkCaseAllowed($go);
@@ -1203,7 +1252,7 @@ function go_switch($go, $exit = false) {
 			case 'Layereditor' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Layereditor();
-			} break;			
+			} break;
 
 			case 'Layereditor_Als neuen Layer eintragen' : {
 				$GUI->checkCaseAllowed('Layereditor');
@@ -1222,11 +1271,11 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Klasseneditor();
 			} break;
-			
+
 			case 'Klasseneditor_Speichern' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Klasseneditor_speichern();
-			} break;			
+			} break;
 
 			case 'Klasseneditor_Klasse_Löschen' : {
 				$GUI->checkCaseAllowed('Layereditor');
@@ -1392,6 +1441,11 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->StellenAnzeigen();
 			} break;
+			
+			case 'Stellenhierarchie' : {
+				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->Stellenhierarchie();
+			} break;			
 
 			case 'Menues_Anzeigen' : {
 				$GUI->checkCaseAllowed('Menues_Anzeigen');
@@ -1445,10 +1499,10 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
 				$GUI->BenutzerNachStellenAnzeigen();
 			} break;
-			
+
 			case 'BenutzerderStelleAnzeigen' : {
 				$GUI->BenutzerderStelleAnzeigen();
-			} break;			
+			} break;
 
 			case 'Benutzerdaten_Anzeigen' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
@@ -1587,7 +1641,7 @@ function go_switch($go, $exit = false) {
 				$GUI->drawMap();
 				$GUI->output();
 			} break;
-			
+
 			case "zoomToMaxLayerExtent" : {
 				$GUI->loadMap('DataBase');
 				$GUI->zoomToMaxLayerExtent($GUI->formvars['layer_id']);
@@ -1618,7 +1672,7 @@ function go_switch($go, $exit = false) {
 				$GUI->saveMap('');
 				$GUI->output();
 			} break;
-			
+
 			 # Auswählen einer neuen Stelle
 			case 'Stelle_waehlen' : case 'Stelle_waehlen_Passwort_aendern' : {
 				$GUI->checkCaseAllowed('Stelle_waehlen');
@@ -1650,7 +1704,7 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Einladungen_Anzeigen');
 				$GUI->invitation_delete();
 			} break;
-			
+
 			case 'geo_name_query' : {
 				$GUI->geo_name_query();
 			} break;

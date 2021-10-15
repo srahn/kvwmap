@@ -1334,16 +1334,16 @@ class GUI {
     return $legend;
   }
 
-	function create_layer_legend($layer, $requires = false){		
-		if(!$requires AND $layer['requires'] != '' OR $requires AND $layer['requires'] == '')return;
+	function create_layer_legend($layer, $requires = false){
+		if(!$requires AND value_of($layer, 'requires') != '' OR $requires AND value_of($layer, 'requires') == '')return;
 		global $legendicon_size;
 		$visible = $this->check_layer_visibility($layer);
 		# sichtbare Layer
 		if ($visible) {
-			if ($layer['requires'] == '') {
+			if (value_of($layer, 'requires') == '') {
 				$legend = '<tr><td valign="top">';
 
-				if ($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']) {
+				if ($layer['queryable'] == 1 AND !value_of($this->formvars, 'nurFremdeLayer')) {
 					$input_attr['id'] = 'qLayer' . $layer['Layer_ID'];
 					$input_attr['name'] = 'qLayer' . $layer['Layer_ID'];
 					$input_attr['title'] = ($layer['queryStatus'] == 1 ? $this->deactivatequery : $this->activatequery);
@@ -1402,7 +1402,7 @@ class GUI {
 				$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="0">';
 
 				$legend .=  '<input id="thema_'.$layer['Layer_ID'].'" ';
-				if($layer['selectiontype'] == 'radio'){
+				if(value_of($layer, 'selectiontype') == 'radio'){
 					$legend .=  'type="radio" ';
 					$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$layer['Gruppe'].', '.$this->user->rolle->instant_reload.')"';
 					$this->radiolayers[$layer['Gruppe']] = value_of($this->radiolayers, $layer['Gruppe']).$layer['Layer_ID'].'|';
@@ -1425,21 +1425,13 @@ class GUI {
 				if ($this->user->rolle->showlayeroptions) {
 					$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
 				}
-				if($layer['metalink'] != ''){
-					if(substr($layer['metalink'], 0, 10) != 'javascript'){
-						$legend .= ' target="_blank"';
-						$meta_parts = explode('#', $layer['metalink']);
-						if(strpos($meta_parts[0], '?') === false)$meta_parts[0] .= '?';
-						else $meta_parts[0] .= '&';
-						$meta_parts[0] .= 'time='.time();
-						$layer['metalink'] = implode('#', $meta_parts);
-					}
-					$legend .= ' class="metalink boldhover" href="'.$layer['metalink'].'">';
+				if(value_of($layer, 'metalink') != ''){
+					$legend .= ' class="metalink boldhover" href="javascript:void(0);">';
 				}
 				else
 					$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
 				$legend .= '<span id="'.str_replace('"', '', str_replace("'", '', str_replace('-', '_', $layer['alias']))).'"';
-				if($layer['minscale'] != -1 AND $layer['maxscale'] > 0){
+				if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
 					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 				}
 				$legend .=' >'.html_umlaute($layer['alias']).'</span>';
@@ -1460,7 +1452,7 @@ class GUI {
 				$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"> </div>';
 			}
 			if($layer['aktivStatus'] == 1 AND isset($layer['Class'][0]) AND $layer['Class'][0]['Name'] != ''){
-				if($layer['requires'] == '' AND $layer['Layer_ID'] > 0){
+				if(value_of($layer, 'requires') == '' AND $layer['Layer_ID'] > 0){
 					$legend .= '<input id="classes_'.$layer['Layer_ID'].'" name="classes_'.$layer['Layer_ID'].'" type="hidden" value="'.$layer['showclasses'].'">';
 				}
 				if ($layer['showclasses'] != 0) {
@@ -1502,6 +1494,9 @@ class GUI {
 										$style->set('width', 2);
 										$style->set('maxwidth', 2);
 									}
+									if ($maplayer->type == MS_LAYER_CHART) {
+										$maplayer->set('type', MS_LAYER_POLYGON);		# Bug-Workaround Chart-Typ
+									}
 								}
 								else{		# Punktlayer
 									if($style->size > 14)$style->set('size', 14);
@@ -1514,7 +1509,7 @@ class GUI {
 								}
 							}
 							$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
-							if($s > 0){
+							if($s > 0 OR $class->status == MS_OFF){
 								$width = $height = '';
 								if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
 								if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
@@ -1576,7 +1571,7 @@ class GUI {
 		}
 
 		# unsichtbare Layer
-		if($layer['requires'] == '' AND !$visible){
+		if(value_of($layer, 'requires') == '' AND !$visible){
 			$legend .=  '
 						<tr>
 							<td valign="top">';
@@ -1638,13 +1633,13 @@ class GUI {
 			$legend .=  '</td>
 					</tr>';
 		}
-		
+
 		# requires-Layer
-		if($layer['required'] != ''){
+		if(value_of($layer, 'required') != ''){
 			foreach($layer['required'] as $require_layer_id){
 				$legend .= $this->create_layer_legend($this->layerset['layer_ids'][$require_layer_id], true);
 			}
-		}		
+		}
 		return $legend;
 	}
 
@@ -1701,9 +1696,12 @@ class database {
 
 	function open() {
 		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
-		$this->mysqli = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+		$this->mysqli = mysqli_init();
+		$ret = $this->mysqli->real_connect($this->host, $this->user, $this->passwd, $this->dbName, 3306, null, MYSQLI_CLIENT_FOUND_ROWS);
 	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
-		return $this->mysqli->connect_errno;
+		$this->debug->write("<br>MySQL Fehlernummer: " . mysqli_connect_errno(), 4);
+		$this->debug->write("<br>MySQL Fehler: " . mysqli_connect_error(), 4);
+		return $ret;
 	}
 
 	function execSQL($sql, $debuglevel = 4, $loglevel = 0, $suppress_error_msg = false) {
@@ -2018,7 +2016,9 @@ class rolle {
 			$this->menue_buttons=$rs['menue_buttons'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
-			$this->geom_edit_first=$rs['geom_edit_first'];		
+			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
+			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];

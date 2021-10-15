@@ -38,6 +38,7 @@ if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != '
 <? }
 
 for($i=0;$i<$anzLayer;$i++){
+	$this->queried_layers[] = $this->qlayerset[$i]['alias'] ?: $this->qlayerset[$i]['Name'];
 	$gesamt = $this->qlayerset[$i]['count'];
   if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $gesamt > 1){
 	   # Blätterfunktion
@@ -76,17 +77,12 @@ for($i=0;$i<$anzLayer;$i++){
   }
 	$template = $this->qlayerset[$i]['template'];
 	if (in_array($template, array('', 'generic_layer_editor.php', 'generic_layer_editor_doc_raster.php'))) {
-		if($this->qlayerset[$i]['connectiontype'] == MS_WMS){
-			include(SNIPPETS.'getfeatureinfo.php');			# getfeatureinfo bei WMS
+		if($template == '')$template = 'generic_layer_editor_2.php';
+		if($this->qlayerset[$i]['gle_view'] == '1'){
+			include(SNIPPETS.$template);			# Attribute zeilenweise bzw. Raster-Template
 		}
 		else{
-			if($template == '')$template = 'generic_layer_editor_2.php';
-			if($this->qlayerset[$i]['gle_view'] == '1'){
-				include(SNIPPETS.$template);			# Attribute zeilenweise bzw. Raster-Template
-			}
-			else{
-				include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
-			}
+			include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
 		}
 	}
 	else{
@@ -187,6 +183,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 							document.getElementById('overlayfooter').style.display = 'block';
 							document.getElementById('anzahl').value = '<? echo $this->formvars['anzahl']; ?>';
 						}
+						document.title = '<? echo implode(' - ', $this->queried_layers); ?>';
 					</script>
 				<? }else{
 							echo '&nbsp;'.$strLimit; ?>&nbsp;

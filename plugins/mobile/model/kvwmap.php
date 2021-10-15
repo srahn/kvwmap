@@ -1,10 +1,11 @@
 <?php
 	/*
 	* Cases:
+	* mobile_add_select_options
 	* mobile_create_layer_sync
 	* mobile_delete_images
 	* mobile_drop_layer_sync
-	* mobile_get_layers 
+	* mobile_get_layers
 	* mobile_get_stellen
 	* mobile_prepare_layer_sync
 	* mobile_reformat_attributes
@@ -96,7 +97,7 @@
 						#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
 					}
 					$layer = $GUI->mobile_reformat_layer($layerset[0], $attributes);
-					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID);
+					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, 'all', true, $GUI->Stelle->ID);
 					$layer['attributes'] = $GUI->mobile_reformat_attributes($attributes);
 
 					$classes = $mapDB->read_Classes($layer_id, NULL, false, $layerset[0]['classification']);
@@ -255,18 +256,22 @@
 
 	$GUI->mobile_reformat_attributes = function($attr) use ($GUI) {
 		$attributes = array();
-		foreach($attr['name'] AS $key => $value) {
+		foreach ($attr['name'] AS $key => $value) {
 			if ($attr['enum_value'][$key]) {
 				$attr['options'][$key] = array();
-				foreach($attr['enum_value'][$key] AS $enum_key => $enum_value) {
-					$attr['options'][$key][] = array(
+				foreach ($attr['enum_value'][$key] AS $enum_key => $enum_value) {
+					 $option = array(
 						'value' => $attr['enum_value'][$key][$enum_key],
 						'output' => $attr['enum_output'][$key][$enum_key]
 					);
+					if ($attr['requires'][$key] != '') {
+						$option['requires'] = $attr['enum_requires_value'][$key][$enum_key];
+					}
+					$attr['options'][$key][] = $option;
 				}
 			}
 
-			$attributes[] = array(
+			$attribute = array(
 				"index" => $attr['indizes'][$value],
 				"name" => $value,
 				"real_name" => $attr['real_name'][$value],
@@ -281,8 +286,19 @@
 				"privilege" => $attr['privileg'][$key],
 				"default" => $attr['default'][$key]
 			);
+			if ($attr['req_by'][$key] != '') {
+				$attribute['req_by'] = $attr['req_by'][$key];
+			}
+			if ($attr['requires'][$key] != '') {
+				$attribute['requires'] = $attr['requires'][$key];
+			}
+			$attributes[] = $attribute;
 		}
 		return $attributes;
+	};
+
+	$GUI->mobile_add_all_select_options = function($attributes) use ($GUI) {
+		#
 	};
 
 	$GUI->mobile_reformat_classes = function($classes) use ($GUI) {
@@ -310,8 +326,8 @@
 
 	$GUI->mobile_prepare_layer_sync = function($layerdb, $id, $sync) use ($GUI) {
 		include_once(CLASSPATH . 'Layer.php');
+		$msg = '';
 		$layer = Layer::find($GUI, 'Layer_ID = ' . $id)[0];
-
 		$sql = "
 			SELECT EXISTS (
 				SELECT 1
@@ -324,16 +340,35 @@
 		#echo '<p>Plugin: Mobile, function: prepare_layer_sync, Query if delta table exists SQL:<br>' . $sql;
 		$ret = $layerdb->execSQL($sql, 4, 0);
 		if ($ret[0]) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
-
-		# ToDo create Table syncs if not exists
-
 		$rs = pg_fetch_assoc($ret[1]);
 		if ($rs['table_exists'] == 't' and $sync == 0) {
+			# switch off sync mode
 			$GUI->mobile_drop_layer_sync($layerdb, $layer);
+			$pending_layers = array_filter(
+				$layer->get_parentform_layers(),
+				function($parentform_layer) {
+					return $parentform_layer->get('sync') == '1';
+				}
+			);
+			if (count($pending_layers) > 0) {
+				$msg = 'Bei den folgenden übergeordneten Layern ist der Sync-Modus noch eingeschaltet:<br>' . $layer->get_edit_link_list($pending_layers, 'sync') . 'Schalten Sie den Sync-Modus bei diesen Layern gegebenenfalls auch aus. Wenn diese eingeschaltet bleiben kann man die Daten offline in kvmobile anzeigen und bearbeiten aber sieht die Daten in den Unterformularen nicht!';
+			}
 		}
-
 		if ($rs['table_exists'] == 'f' and $sync == 1) {
+			# switch on sync mode
 			$GUI->mobile_create_layer_sync($layerdb, $layer);
+			$pending_layers = array_filter(
+				$layer->get_subform_layers(),
+				function($subform_layer) {
+					return $subform_layer->get('sync') == '0';
+				}
+			);
+			if (count($pending_layers) > 0) {
+				$msg = 'Bei den folgenden verknüpften Layern ist der Sync-Modus noch nicht eingeschaltet:<br>' . $layer->get_edit_link_list($pending_layers, 'sync') . 'Schalten Sie den Sync-Modus bei diesen Layern auch ein, um die Daten in kvmobile offline anzeigen und bearbeiten zu können!';
+			}
+		}
+		if ($msg != '') {
+			$GUI->add_message('warning', $msg);
 		}
 	};
 
@@ -359,6 +394,9 @@
 		$GUI->add_message('notice', 'Sync-Tabelle und Trigger gelöscht.');
 	};
 
+	/**
+	* Create Tables for sync Function of $layer in $layerdb
+	*/
 	$GUI->mobile_create_layer_sync = function($layerdb, $layer) use ($GUI) {
 		# create table for deltas
 		$sql = "
@@ -591,7 +629,6 @@
 			$msg = 'Konnte hochgeladene Datei: ' . $files['image']['tmp_name'] . ' nicht nach ' . $doc_path . $files['image']['name'] . ' kopieren!';
 		}
 		else {
-			$vorschaubild = $GUI->get_dokument_vorschau(explode('.', $doc_path . $files['image']['name']));
 			$success = true;
 			$msg = 'Datei erfolgreich auf dem Server gespeichert unter: ' . $doc_path . $files['image']['name'];
 		}

@@ -109,31 +109,16 @@ INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (24,@stelle_i
 #### gegebenenfalls vorherige Einträge löschen
 # TRUNCATE u_menues;
 # TRUNCATE u_menue2stelle;
+# TRUNCATE u_menue2rolle;
 
-# Die nachfolgenden Statements müssen in 1.5 angepasst werden
-# Alle Gruppen von Menüs sind in einer separaten Tabelle u_groups enthalten und in der Tabelle u_menues erscheinen in der Spalte
-# Gruppe nur noch die ID´s der Gruppen aus der Tabelle u_groups
-# Wer seine Tabellen dahingehend anpassen möchte muss das entsprechende Statement aus mysql_update.php ausführen.
-# siehe "Erzeugen einer neuen Tabelle groups"
-
+# Stellen wählen
 INSERT INTO `u_menues` (name, links, obermenue, menueebene, target, `order`, `title`, `button_class`) VALUES ('Stelle wählen', 'index.php?go=Stelle Wählen', 0, 1, NULL, 1, 'Zu anderen Stellen und den Einstellungen', 'optionen');
-SET @last_menue_id=LAST_INSERT_ID();
-INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,1);
-INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
-
-#### Volle Ausdehnung (Übersicht) und letzte Kartenansicht
 # Übersicht
 INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`, `title`, `button_class`) VALUES ('Übersicht', 'index.php?go=Full_Extent', 0, 1, NULL, 2, 'Maximale Kartenausdehnung', 'gesamtansicht');
-SET @last_menue_id=LAST_INSERT_ID();
-INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,2);
-INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 # Karte
 INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`, `title`, `button_class`) VALUES ('Karte', 'index.php', 0, 1, NULL, 3, 'Karte anzeigen', 'karte');
-SET @last_menue_id=LAST_INSERT_ID();
-INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,3);
-INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 ##### Suchfunktionen
 # Obermenü für die Suchfunktionen
@@ -184,9 +169,15 @@ INSERT INTO u_menue2stelle (stelle_id, menue_id, menue_order) VALUES (@stelle_id
 INSERT INTO u_menue2rolle (user_id, stelle_id, menue_id,status) VALUES (@user_id, @stelle_id,@last_level1menue_id, 0);
 
 # Update und Config
-INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Update und Config', 'index.php?go=Administratorfunktionen', @last_level1menue_id, 2, NULL);
+INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`, `title`) VALUES ('Update und Config', 'index.php?go=Administratorfunktionen', @last_level1menue_id, 2, NULL, 12, 'Update und Config');
 SET @last_menue_id = LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id, menue_id, menue_order) VALUES (@stelle_id, @last_menue_id, 51);
+INSERT INTO u_menue2rolle (user_id, stelle_id, menue_id,status) VALUES (@user_id, @stelle_id, @last_menue_id, 0);
+
+# Cronjobs
+INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`, `title`) VALUES ('Cronjobs', 'index.php?go=cronjobs_anzeigen', @last_level1menue_id, 2, NULL, 14, 'Cronjobs einstellen');
+SET @last_menue_id = LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id, menue_id, menue_order) VALUES (@stelle_id, @last_menue_id, 53);
 INSERT INTO u_menue2rolle (user_id, stelle_id, menue_id,status) VALUES (@user_id, @stelle_id, @last_menue_id, 0);
 
 #### Stellenverwaltung
@@ -370,7 +361,7 @@ INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 # Druckausgabe
-INSERT INTO u_menues (`name`, `links`, `obermenue`, `menueebene`, `target`, `title`, `button_class`) VALUES ('Druckausgabe', 'index.php?go=Schnelle_Druckausgabe', @last_level1menue_id, 2, '_blank', 'Karte sofort ausdrucken', 'schnelldruck');
+INSERT INTO u_menues (`name`, `links`, `obermenue`, `menueebene`, `target`, `title`, `button_class`) VALUES ('Druckausgabe', 'index.php?go=Schnelle_Druckausgabe', @last_level1menue_id, 2, '_blank', 'Karte sofort ausdrucken', '');
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id, 96);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
@@ -400,7 +391,7 @@ INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@
 
 #### Drucken
 INSERT INTO u_menues ( `name` , `links` , `obermenue` , `menueebene` , `target`, `title`, `button_class`)
-VALUES ( 'Drucken', 'index.php?go=Druckausschnittswahl', @last_level1menue_id, '2', NULL, 'Zur Druckausschnittswahl', 'drucken');
+VALUES ( 'Drucken', 'index.php?go=Druckausschnittswahl', @last_level1menue_id, '2', NULL, 'Zur Druckausschnittswahl', '');
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO `u_menue2stelle` ( `stelle_id` , `menue_id` , `menue_order` )
 VALUES (@stelle_id, @last_menue_id, '91');
@@ -463,7 +454,7 @@ INSERT INTO `druckrahmen2stelle` (`stelle_id`, `druckrahmen_id`) VALUES (@last_d
 
 # Insert default cron_jobs
 INSERT INTO `cron_jobs` (`id`, `bezeichnung`, `beschreibung`, `time`, `query`, `function`, `url`, `user_id`, `stelle_id`, `aktiv`, `dbname`, `user`) VALUES
-(1, 'Leere tmp Verzeichnis', 'Löscht /var/www/tmp jeden Tag', '1 1 * * *', '', 'find /var/www/tmp -mtime +1 ! -path /var/www/tmp -exec rm -rf {} +', NULL, 0, 0, 1, '', 'gisadmin'),
+(1, 'Leere tmp Verzeichnis', 'Löscht jeden Tag Dateien die älter als 1 Tag sind aus Verzeichnis /var/www/tmp', '1 1 * * *', '', 'find /var/www/tmp -mtime +1 ! -path /var/www/tmp -exec rm -rf {} +', NULL, 0, 0, 1, '', 'gisadmin'),
 (2, 'Update Let\'s Encrypt Certificate', 'Führt regelmäßig certbot-auto renew zur Aktualisierung des https Zertifikates aus.', '0 0,12 * * *', '', 'python -c \'import random; import time; time.sleep(random.random() * 3600)\' && rm -rf /etc/apt/sources.list.d/* || true && /usr/local/certbot-auto renew -q', NULL, 0, 0, 1, '', 'root');
 
 
@@ -555,7 +546,7 @@ INSERT INTO `config` (`name`, `prefix`, `value`, `description`, `type`, `group`,
 ('DRUCKRAHMEN_PATH', 'SHAPEPATH', 'druckrahmen/', 'Pfad zum Speichern der Kartendruck-Layouts\r\n', 'string', 'Pfadeinstellungen', '', 1, 2),
 ('THIRDPARTY_PATH', '', '../3rdparty/', '3rdparty Pfad\r\n', 'string', 'Pfadeinstellungen', '', 1, 2),
 ('FONTAWESOME_PATH', 'THIRDPARTY_PATH', 'font-awesome-4.6.3/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
-('JQUERY_PATH', 'THIRDPARTY_PATH', 'jQuery-3.5.1/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
+('JQUERY_PATH', 'THIRDPARTY_PATH', 'jQuery-3.6.0/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
 ('BOOTSTRAP_PATH', 'THIRDPARTY_PATH', 'bootstrap-3.3.6/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
 ('BOOTSTRAPTABLE_PATH', 'THIRDPARTY_PATH', 'bootstrap-table-1.11.0/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
 ('PROJ4JS_PATH', 'THIRDPARTY_PATH', 'proj4js-2.4.3/', '', 'string', 'Pfadeinstellungen', '', 1, 2),

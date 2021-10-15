@@ -1497,7 +1497,7 @@ function mouseup(evt){
 	top.document.getElementById("svghelp").SVGrotate_point_direction = rotate_point_direction;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function rotate_point_direction(){
-		angle = enclosingForm.angle.value;
+		angle = 360 - enclosingForm.angle.value;
 		custom_angle = top.document.getElementById("custom_angle");
 		if(custom_angle != undefined)custom_angle.value = angle;
 		dir_arrow = document.getElementById("point_direction");
@@ -3285,7 +3285,7 @@ $vertex_catch_functions = '
 	}
 
 	function request_foreign_vertices(){
-		top.ahah("index.php", "go=getSVG_foreign_vertices&geom_from_layer="+enclosingForm.geom_from_layer.value, new Array(enclosingForm.vertices, ""), new Array("setvalue", "execute_function"));
+		top.ahah("index.php", "go=getSVG_vertices&geom_from_layer="+enclosingForm.geom_from_layer.value, new Array(enclosingForm.vertices, ""), new Array("setvalue", "execute_function"));
 	}
 
 	function remove_foreign_vertices(){

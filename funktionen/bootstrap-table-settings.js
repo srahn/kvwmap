@@ -36,7 +36,7 @@ writeSwitchedOn = function(evt) {
         message([{ type: 'notice', msg: 'Einstellung gespeichert'}], 1000, 500, '13%');
       }
       else {
-        message([{ type: 'error', msg: response[1]}], 1000, 500, '13%');
+        message([{ type: 'error', msg: response.err_msg}], 1000, 500, '13%');
       }
     },
     error: function(err) {

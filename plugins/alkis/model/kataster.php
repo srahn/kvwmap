@@ -367,8 +367,8 @@ class grundbuch {
   	return $this->database->getGrundbuchblattliste($bezirk);
   }
 	
-	function getGrundbuchblattlisteByGemkgIDs($bezirk, $ganze_gemkg_ids, $eingeschr_gemkg_ids){
-  	return $this->database->getGrundbuchblattlisteByGemkgIDs($bezirk, $ganze_gemkg_ids, $eingeschr_gemkg_ids);
+	function getGrundbuchblattlisteByGemkgIDs($bezirk, $ganze_gemkg_ids, $eingeschr_gemkg_ids, $ganze_flur_ids, $eingeschr_flur_ids){
+  	return $this->database->getGrundbuchblattlisteByGemkgIDs($bezirk, $ganze_gemkg_ids, $eingeschr_gemkg_ids, $ganze_flur_ids, $eingeschr_flur_ids);
   }
 }
 
@@ -888,8 +888,8 @@ class flurstueck {
     $this->Nutzung=$this->getNutzung();
   }
 
-  function getFlstListe($GemID,$GemkgID,$FlurID, $historical = false) {
-    $Liste=$this->database->getFlurstuecksListe($GemID,$GemkgID,$FlurID, $historical);
+  function getFlstListe($GemID, $GemkgID, $FlurID, $FlstID, $historical = false) {
+    $Liste=$this->database->getFlurstuecksListe($GemID, $GemkgID, $FlurID, $FlstID, $historical);
     return $Liste;
   }
   
@@ -903,7 +903,7 @@ class flurstueck {
     return $Flurstuecke;
   }
 
-  function getNamen($formvars,$ganze_gemkg_ids, $eingeschr_gemkg_ids) {
+  function getNamen($formvars,$ganze_gemkg_ids, $eingeschr_gemkg_ids, $ganze_flur_ids, $eingeschr_flur_ids) {
     if ($formvars['name1']=='' AND $formvars['name2']=='' AND $formvars['name3']=='' AND $formvars['name4']=='' AND $formvars['name5']=='' AND $formvars['name6']=='' AND $formvars['name7']=='' AND $formvars['name8']=='' AND $formvars['gml_id']=='') {
       $ret[0]=1;
       $ret[1]='<br>Geben Sie mindestens einen Suchbegriff ein!';
@@ -912,7 +912,7 @@ class flurstueck {
     	if($blatt != ''){
     		$blatt = str_pad($blatt, 5, '0', STR_PAD_LEFT);
     	}
-      $ret=$this->database->getNamen($formvars, $ganze_gemkg_ids, $eingeschr_gemkg_ids);
+      $ret=$this->database->getNamen($formvars, $ganze_gemkg_ids, $eingeschr_gemkg_ids, $ganze_flur_ids, $eingeschr_flur_ids);
       if ($ret[0]) {
         $ret[1]='<br>Fehler bei der Abfrage der Eigentümernamen.'.$ret[1];
       }

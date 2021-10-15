@@ -162,7 +162,7 @@ class Gml_builder {
 				) AS envelope
 			FROM
 				" . XPLANKONVERTER_CONTENT_SCHEMA . "." . $plan->bereichTableName . " b JOIN
-				" . XPLANKONVERTER_CONTENT_SCHEMA . "." . $plan->tableName . " p ON (b.gehoertzuplan = p.gml_id::text)
+				" . XPLANKONVERTER_CONTENT_SCHEMA . "." . $plan->tableName . " p ON (b.gehoertzuplan::text = p.gml_id::text)
 			WHERE
 				p.konvertierung_id = " .$konvertierung->get('id') . " 
 		";
@@ -221,7 +221,7 @@ class Gml_builder {
 			fwrite($this->tmpFile, "\n" . $this->formatXML($this->wrapWithFeatureMember($bereich_gml . "</{$xplan_ns_prefix}{$plan->bereichUmlName}>")));
 		}
 
-// und nun alle Fachobjekte generieren
+		// und nun alle Fachobjekte generieren
 		// dazu alle Fachobjektklassen finden die mit der Konvertierung verknüpft sind
 		$class_names = $konvertierung->get_class_names();
 		# zu jeder Objektklassse die Objekte holen, die mit der Konvertierung verknüpft sind
@@ -293,6 +293,16 @@ class Gml_builder {
 			$sequence_attr++;
 			// leere Felder auslassen
 			if ($gml_object[$uml_attribute['col_name']] == '' OR $gml_object[$uml_attribute['col_name']] == '{}') continue;
+
+			// special arraycheck as some attributes with same name can appear twice in same class due to unknown hierarchical depth
+			// only known example currently (xplan 5.1) is: 
+			// XP_Plan: <xplan:name>  and --><xplan:plangeber>--><xplan:XP_Plangeber>--><xplan:name>
+			// plangeber sub-elements has the field kennziffer, which doesn't exist on plan-hierarchy-level
+			// TODO consider solving this in a generic fashion
+			if(is_array($gml_object[$uml_attribute['col_name']]) and array_key_exists('kennziffer', $gml_object)) {
+				$gml_object[$uml_attribute['col_name']] = $gml_object[$uml_attribute['col_name']][0];
+			}
+
 			#$gmlStr .= '<note>attributname: ' . $uml_attribute['name'] . ' type_type: ' . $uml_attribute['type_type'] . ' stereotype: ' . $uml_attribute['stereotype'] . ' uml-attribute-type: '. $uml_attribute['type'] . ' uml-attribute-datatype: '. $uml_attribute['uml_dtype'] . '</note>';
 			switch ($uml_attribute['type_type']) {
 				case 'c': // custom datatype
@@ -303,7 +313,8 @@ class Gml_builder {
 							$gml_value_array = is_array($gml_object[$uml_attribute['col_name']])
 								? $gml_object[$uml_attribute['col_name']]
 								: explode(',',substr($gml_object[$uml_attribute['col_name']], 1, -1));
-							$codeSpaceUri = $gml_value_array[0];
+							//ltrim in case of array field, e.g. zweckbestimmung[*] that may also exist as non-array field e.g. zweckbestimmung[1]
+							$codeSpaceUri = ltrim($gml_value_array[0], '"(');
 							$code_value = $gml_value_array[1];
 							if(!empty($codeSpaceUri) || !empty($code_value)) {
 								$gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']} codeSpace=\"$codeSpaceUri\">$code_value</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";

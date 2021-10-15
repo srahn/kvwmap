@@ -78,9 +78,9 @@ $constants = array (
     'plugin' => 'xplankonverter',
     'saved' => 0,
   ),
-  'XPLANKONVERTER_XP_PLAENE_LAYER_ID' => 
+  'XPLANKONVERTER_BP_PLAENE_LAYER_ID' => 
   array (
-    'name' => 'XPLANKONVERTER_XP_PLAENE_LAYER_ID',
+    'name' => 'XPLANKONVERTER_BP_PLAENE_LAYER_ID',
     'value' => '0',
     'prefix' => '',
     'type' => 'numeric',

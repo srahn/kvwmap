@@ -10,12 +10,14 @@ class formatter {
   }
 	
 	function output() {
-    if (in_array($this->format, array('json', 'jsonp', 'dump', 'html', 'print_r')))
+    if (in_array($this->format, array('json', 'jsonp', 'dump', 'html', 'print_r'))) {
       $format = $this->format;
-    else
+		}
+    else {
       $format = 'dump';
+		}
     
-		eval("\$output = \$this->output_".$format."();");
+		eval("\$output = \$this->output_" . $format . "();");
 		return $output;
 	}
 	

@@ -1,4 +1,30 @@
 <?
+# ohne Fehlermeldung fehlen die Funktionen
+# sql_err_msg aus funktionen/allg_funktionen.php
+# add_message in Class GUI aus kvwmap.php
+
+function sql_err_msg($title, $sql, $msg, $div_id) {
+	$err_msg = "
+		<div style=\"text-align: left;\">" .
+		$title . "<br>" .
+		$msg . "
+		<div style=\"text-align: center\">
+			<a href=\"#\" onclick=\"debug_t = this; $('#error_details_" . $div_id . "').toggle(); $(this).children().toggleClass('fa-caret-down fa-caret-up')\"><i class=\"fa fa-caret-down\" aria-hidden=\"true\"></i></a>
+		</div>
+		<div id=\"error_details_" . $div_id . "\" style=\"display: none\">
+			Aufgetreten bei SQL-Anweisung:<br>
+			<textarea id=\"sql_statement_" . $div_id . "\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px; max-height: 600px\">
+				" . $sql . "
+			</textarea><br>
+			<button type=\"button\" onclick=\"
+				copyText = document.getElementById('sql_statement_" . $div_id . "');
+				copyText.select();
+				document.execCommand('copy');
+			\">In Zwischenablage kopieren</button>
+		</div>
+	</div>";
+	return $err_msg;
+}
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
@@ -50,7 +76,6 @@ class GUI {
   var $FormObject;
   var $StellenForm;
   var $Fehlermeldung;
-  var $messages;
   var $Hinweis;
   var $Stelle;
   var $ALB;
@@ -83,6 +108,7 @@ class GUI {
   var $form_field_names;
   var $editable;
 	var $notices;
+	static $messages = array();
 
 	function __construct($main, $style, $mime_type) {
 		# Debugdatei setzen
@@ -114,6 +140,28 @@ class GUI {
 		if (isset ($mime_type)) $this->mime_type=$mime_type;
 		$this->scaleUnitSwitchScale = 239210;
 		$this->trigger_functions = array();
+	}
+
+	function add_message($type, $msg) {
+		GUI::add_message_($type, $msg);
+	}
+
+	public static function add_message_($type, $msg) {
+		if (is_array($msg) AND array_key_exists('success', $msg) AND is_array($msg)) {
+			$type = 'notice';
+			$msg = $msg['msg'];
+		}
+		if ($type == 'array' or is_array($msg)) {
+			foreach($msg AS $m) {
+				GUI::add_message($m['type'], $m['msg']);
+			}
+		}
+		else {
+			GUI::$messages[] = array(
+				'type' => $type,
+				'msg' => $msg
+			);
+		}
 	}
 
 	function loadMultiLingualText($language) {
@@ -191,11 +239,15 @@ class GUI {
 		}
 	}
 
-	function getLayerOptions(){
+	function getLayerOptions() {
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		if($this->formvars['layer_id'] > 0)$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
-		else $layer = $this->user->rolle->getRollenLayer(-$this->formvars['layer_id']);
-		if($layer[0]['connectiontype']==6){
+		if ($this->formvars['layer_id'] > 0) {
+			$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		}
+		else {
+			$layer = $this->user->rolle->getRollenLayer(-$this->formvars['layer_id']);
+		}
+		if ($layer[0]['connectiontype']==6) {
 			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
 			$attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id'], false);
 			$query_attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
@@ -232,13 +284,24 @@ class GUI {
 											</div>';
 							}
 						}
+						if ($layer[0]['metalink'] != '') {
+							$href = $layer[0]['metalink'];
+							$target = '';
+							if (substr($layer[0]['metalink'], 0, 10) != 'javascript') {
+								$meta_parts = explode('#', $href);
+								$meta_parts[0] .= (strpos($meta_parts[0], '?') === false ? '?' : '&') . 'time=' . time();
+								$href = implode('#', $meta_parts);
+								$target = '_blank';
+							}
+							echo '<li><a href="' . $href . '" target="' . $target . '">' . $this->strMetadata . '</a></li>';
+						}
 						if($layer[0]['connectiontype']==6 OR($layer[0]['Datentyp']==MS_LAYER_RASTER AND $layer[0]['connectiontype']!=7)){
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
 						}
 						if(in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
 							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->strSearch.'</a></li>';
 						}
-						if($layer[0]['privileg'] > 0){
+						if($layer[0]['queryable'] AND $layer[0]['privileg'] > 0){
 							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->newDataset.'</a></li>';
 						}
 						if($layer[0]['Class'][0]['Name'] != ''){
@@ -451,9 +514,12 @@ class database {
 
 	function open() {
 		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
-		$this->mysqli = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+		$this->mysqli = mysqli_init();
+		$ret = $this->mysqli->real_connect($this->host, $this->user, $this->passwd, $this->dbName, 3306, null, MYSQLI_CLIENT_FOUND_ROWS);
 	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
-		return $this->mysqli->connect_errno;
+		$this->debug->write("<br>MySQL Fehlernummer: " . mysqli_connect_errno(), 4);
+		$this->debug->write("<br>MySQL Fehler: " . mysqli_connect_error(), 4);
+		return $ret;
 	}
 	
   function read_colors(){	
@@ -891,7 +957,9 @@ class rolle {
 			$this->menue_buttons=$rs['menue_buttons'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
-			$this->geom_edit_first=$rs['geom_edit_first'];		
+			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
+			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
@@ -1724,7 +1792,7 @@ class pgdatabase {
 				INSERT INTO datatypes (
 					`name`,
 					`schema`,
-					`connectino_id`
+					`connection_id`
 				)
 				VALUES (
 					'" . $typname . "',
@@ -1808,21 +1876,22 @@ class pgdatabase {
 		set_error_handler($myErrorHandler);
 		$sql = 'SET client_min_messages=\'log\';SET debug_print_parse=true;'.$select." LIMIT 0;";		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
 		$ret = $this->execSQL($sql, 4, 0);
-		error_reporting($error_reporting);		
+
+		error_reporting($error_reporting);
 		if ($ret['success']) {
 			$query_plan = $error_list[0];
 			$table_alias_names = $this->get_table_alias_names($query_plan);
 			$field_plan_info = explode("\n      :resno", $query_plan);
 			
-			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {				
+			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
 				# Attributname
 				$fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
 				
 				# Spaltennummer in der Tabelle
-				$col_num = get_first_word_after($field_plan_info[$i+1], ':resorigcol');				
+				$col_num = get_first_word_after($field_plan_info[$i+1], ':resorigcol');
 				
 				# Tabellen-oid des Attributs
-				$table_oid = pg_field_table($ret[1], $i, true);			
+				$table_oid = pg_field_table($ret[1], $i, true);
 
 				# wenn das Attribut eine Tabellenspalte ist -> weitere Attributeigenschaften holen
 				if ($table_oid > 0){					
@@ -2016,7 +2085,6 @@ class pgdatabase {
 						$ret['msg'] = $last_notice;
 					}
 				}
-
 				# Schreibe Meldungen in Log und Debugfile
 				$this->debug->write("<br>" . $sql, $debuglevel);
 				if ($logsql) {
@@ -2098,7 +2166,7 @@ class pgdatabase {
 				a.attname AS name,
 				NOT a.attnotnull AS nullable,
 				a.attnum AS ordinal_position,
-				ad.adsrc as default,
+				pg_get_expr(ad.adbin, ad.adrelid) as default,
 				t.typname AS type_name,
 				tns.nspname as type_schema,
 				CASE WHEN t.typarray = 0 THEN eat.typname ELSE t.typname END AS type,
@@ -2165,7 +2233,7 @@ class pgdatabase {
 
   function pg_table_constraints($table){
   	if($table != ''){
-	    $sql = "SELECT consrc FROM pg_constraint, pg_class WHERE contype = 'check'";
+	    $sql = "SELECT pg_get_expr(conbin, conrelid) FROM pg_constraint, pg_class WHERE contype = 'check'";
 	    $sql.= " AND pg_class.oid = pg_constraint.conrelid AND pg_class.relname = '".$table."'";
 	    $ret = $this->execSQL($sql, 4, 0);
 	    if($ret[0]==0){

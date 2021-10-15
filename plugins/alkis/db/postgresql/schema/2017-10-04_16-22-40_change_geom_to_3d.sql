@@ -28,7 +28,6 @@ WHERE
 
 CREATE OR REPLACE VIEW alkis.lk_so_punkte AS 
 SELECT
-	o.oid,
 	o.beginnt,
 	o.endet,
 	o.punktkennung,
@@ -50,7 +49,6 @@ FROM
 
 CREATE OR REPLACE VIEW alkis.lk_sp AS 
 SELECT
-	o.oid,
 	o.punktkennung,
 	o.beginnt,
 	o.endet,
@@ -72,7 +70,6 @@ FROM
 
 CREATE OR REPLACE VIEW alkis.lk_ap AS 
 SELECT
-	o.oid,
 	o.gml_id,
 	o.beginnt,
 	o.endet,
@@ -95,7 +92,6 @@ FROM
 
 CREATE OR REPLACE VIEW alkis.lk_gebaeudepunkte AS 
 SELECT DISTINCT
-	o.oid,
 	p.gml_id,
 	o.beginnt,
 	o.endet,
@@ -113,7 +109,7 @@ FROM
 	alkis.ax_vertrauenswuerdigkeit_punktort n ON n.wert = p.vertrauenswuerdigkeit;
 
 CREATE OR REPLACE VIEW alkis.lk_grenzpunkte AS 
-SELECT COALESCE(p.oid, o.oid) AS oid,
+SELECT 
 	o.gml_id,
 	o.beginnt AS o_beginnt,
 	o.endet AS o_endet,

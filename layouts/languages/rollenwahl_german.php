@@ -36,6 +36,8 @@
 	$strSingleQuery="nur ein Thema abfragbar";
 	$strQuerymode="Sachdatenanzeige in extra Fenster";
 	$strNewDatasetOrder="Reihenfolge Datensatz-Erfassung";
+	$strAlwaysCreateNext="Nach dem Speichern einen weiteren Datensatz erfassen";
+	$strUploadOnlyFileMetadata="Nur Metadaten von Dateien hochladen";
 	$strGeomSecond="Sachdaten zuerst";
 	$strGeomFirst="Geometrie zuerst";
 	$strGeneralOptions="Allgemein";
@@ -70,6 +72,8 @@
 	$strHintSingleQuery="Wenn Sie diese Option auswählen, erscheinen die Abfragehäkchenfelder in der Legende als sog. Radiobutton. Es kann dann immer nur genau ein Thema abfragbar geschaltet werden.";
 	$strHintQuerymode="Wenn Sie diese Option auswählen, erscheinen Sachdatenabfragen als eigene Fenster, die über der Karte schweben.";
 	$strHintNewDatasetOrder="Wählen Sie, ob bei der Erfassung neuer Daten der Geometrie-Editor oberhalb der Sachdaten erscheinen soll oder darunter.";
+	$strHintAlwaysCreateNext="Das Datenerfassungsformular bleibt nach dem Speichern geöffnet und man kann gleich den nächsten Datensatz erfassen.";
+	$strHintUploadOnlyFileMetadata="Beim Hochladen von Dokumenten werden zunächst nur die Metadaten Dateiname, Änderungszeit und Dateigröße hochgeladen und gespeichert. Die Dateien selbst werden noch nicht hochgeladen. Als Vorschaubilder erscheinen dann nur Hinweise, dass die Dateien noch fehlen. Die Dateien können nachträglich hochgeladen werden, entweder über den Menüpunkt Dateien nachträglich hochladen oder bei ausgeschalteter Option einzeln im Sachdatenformular. Die Zuordnung der im Menü 'Daten nachträglich hochladen' hochgeladenen Dateien zu den Metadaten funktioniert nur, wenn es der selbe kvwmap-Nutzer macht, der auch die Metadaten hochgeladen hat und sich der Dateiname, die Dateigröße und das Änderungsdatum nicht zwischenzeitlich geändert haben.";
 	$strHintFontSizeGLE="Wählen Sie die Schriftgröße der Texte in der Sachdatenanzeige";
 	$strHintHighlight="Wenn Sie diese Option auswählen, werden Objekte von Themen, die abfragbar geschaltet sind, in der Karte mit blauem Rand hervorgehoben, wenn Sie mit dem Cursor darüber fahren.";
 	$strHinthist_timestamp="Wenn Sie hier ein Datum eingeben, werden ALKIS-Objekte in der Karte mit diesem historischen Stand dargestellt. Abfragen auf Flurstücke liefern ebenfalls Ergebnisse zu diesem historischen Stand.";

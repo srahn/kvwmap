@@ -218,7 +218,7 @@
 
     $layer_id = $dbmap->newRollenLayer($GUI->formvars);
 		
-		$dbmap->addRollenLayerStyling($layer_id, $GUI->formvars['Datentyp'], $GUI->formvars['labelitem'], $GUI->user);
+		$dbmap->addRollenLayerStyling($layer_id, $GUI->formvars['Datentyp'], $GUI->formvars['labelitem'], $GUI->user, 'zoom');
 		
     $GUI->user->rolle->set_one_Group($GUI->user->id, $GUI->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 
@@ -312,7 +312,7 @@
 
 	    $layer_id = $dbmap->newRollenLayer($GUI->formvars);
 
-	    $dbmap->addRollenLayerStyling($layer_id, $GUI->formvars['Datentyp'], $GUI->formvars['labelitem'], $GUI->user);
+	    $dbmap->addRollenLayerStyling($layer_id, $GUI->formvars['Datentyp'], $GUI->formvars['labelitem'], $GUI->user, 'zoom');
 			
 	    $GUI->user->rolle->set_one_Group($GUI->user->id, $GUI->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 
@@ -369,7 +369,7 @@
 			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
 		}		
 		# Wenn nur eine Gemeinde zur Auswahl steht, wird diese gewählt; Verhalten so, als würde die Gemeinde vorher gewählt worden sein.
-		if(count($GemListe['ID'])==1)$GemID=$GemListe['ID'][0];
+		if(@count($GemListe['ID'])==1)$GemID=$GemListe['ID'][0];
     // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
     $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
     $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
@@ -591,7 +591,7 @@
         # Abfragen der Flurstücke zur Flur
         $FlstNr=new flurstueck('',$GUI->pgdatabase);
         if ($FlurID==0) { $FlurID=$FlurListe['FlurID'][0]; }
-        $FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,$FlurID, $GUI->formvars['historical']);
+				$FlstNrListe=$FlstNr->getFlstListe($GemID, $GemkgID, $FlurID, $GemeindenStelle['eingeschr_flur'][$GemkgID][(int)$FlurID], $GUI->formvars['historical']);
         # Erzeugen des Formobjektes für die Flurstücksauswahl
         if (count($FlstNrListe['FlstID'])==1){
           $FLstID=$FlstNrListe['FlstID'][0];
@@ -1160,8 +1160,11 @@
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
     if($GemeindenStelle != ''){   // Stelle ist auf Gemeinden eingeschränkt
       $Gemarkung=new gemarkung('',$GUI->pgdatabase);
-			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), NULL);
-			$ganze_gemarkungen = array_merge($GemkgListe['GemkgID'], array_keys($GemeindenStelle['ganze_gemarkung']));
+			$ganze_gemarkungen = array_keys($GemeindenStelle['ganze_gemarkung']);
+			if (!empty($GemeindenStelle['ganze_gemeinde'])) {
+				$GemkgListe = $Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), NULL);
+				$ganze_gemarkungen = array_merge($GemkgListe['GemkgID'], $ganze_gemarkungen);
+			}
       $gbliste = $grundbuch->getGrundbuchbezirkslisteByGemkgIDs($ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung']);
     }
     else{
@@ -1185,7 +1188,7 @@
     if($GUI->formvars['Bezirk'] != ''){
     	if($GUI->formvars['selBlatt'])$GUI->selblattliste = explode(', ',$GUI->formvars['selBlatt']);
 			if($GemeindenStelle != ''){   // Stelle ist auf Gemeinden eingeschränkt
-				$GUI->blattliste = $grundbuch->getGrundbuchblattlisteByGemkgIDs($GUI->formvars['Bezirk'], $ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung']);
+				$GUI->blattliste = $grundbuch->getGrundbuchblattlisteByGemkgIDs($GUI->formvars['Bezirk'], $ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung'], $GemeindenStelle['ganze_flur'], $GemeindenStelle['eingeschr_flur']);
 			}
 			else{
 				$GUI->blattliste = $grundbuch->getGrundbuchblattliste($GUI->formvars['Bezirk']);
@@ -1362,7 +1365,7 @@
 		}
     $formvars = $GUI->formvars;
     $flurstueck=new flurstueck('',$GUI->pgdatabase);
-		$ret=$flurstueck->getNamen($formvars,@array_keys($GemeindenStelle['ganze_gemarkung']), $GemeindenStelle['eingeschr_gemarkung']);
+		$ret=$flurstueck->getNamen($formvars,@array_keys($GemeindenStelle['ganze_gemarkung']), $GemeindenStelle['eingeschr_gemarkung'], $GemeindenStelle['ganze_flur'], $GemeindenStelle['eingeschr_flur']);
     if ($ret[0]) {
       $GUI->Fehlermeldung='<br>Es konnten keine Namen abgefragt werden'.$ret[1];
       $GUI->namenWahl();
@@ -1375,7 +1378,7 @@
       else {
 				$formvars['anzahl'] = '';
 				$formvars['offset'] = '';
-				$ret=$flurstueck->getNamen($formvars, @array_keys($GemeindenStelle['ganze_gemarkung']), $GemeindenStelle['eingeschr_gemarkung']);
+				$ret=$flurstueck->getNamen($formvars, @array_keys($GemeindenStelle['ganze_gemarkung']), $GemeindenStelle['eingeschr_gemarkung'], $GemeindenStelle['ganze_flur'], $GemeindenStelle['eingeschr_flur']);
         $GUI->anzNamenGesamt=count($ret[1]);
 
 				for($i = 0; $i < count($GUI->namen); $i++){

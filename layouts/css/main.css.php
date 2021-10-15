@@ -7,6 +7,46 @@
 	$size =	$sizes[$key];
 ?>
 
+#form-titel {
+	font-family: SourceSansPro3;
+	font-size: 20px;
+	margin-bottom: 0px;
+	margin-top: 20px;
+}
+#form_formular-main {
+	margin: 40px 0px 20px 0px;
+	padding-left: 20px;
+	cursor: default;
+}
+.form_formular-aic {
+	align-items: center;
+}
+.form_formular-input {
+	width:100%;
+	margin: 0px 0px 10px 0px;
+	display: flex;
+	flex-flow: row nowrap;
+}
+#form_formular-main select, #form_formular-main input[type="text"], .form_formular-input-selector select {
+	border-radius: 2px;
+	border: 1px solid #777;
+	padding-left: 5px;
+}
+#form_formular-main .form_formular-input select, #form_formular-main input[type="text"] {
+	height: 25px;
+}
+.form_formular-input > div:first-child, .form_formular-input-selector > div:first-child {
+	width: 210px;
+	text-align: right;
+	margin-right: 10px;
+	font-family: SourceSansPro3;
+	line-height: 20px;
+	font-size: 17px;
+}
+.form_formular-input-selector > div:first-child {
+	margin-top: 3px;
+}
+
 .clear {
 	clear: both;
 }
@@ -63,9 +103,8 @@ body {
 
 #gui-table {
 	width: 900px;
-	margin: auto;	
+	margin: auto;
 }
-
 
 input[type="checkbox"], input[type="radio"] {
 	position: relative;
@@ -328,10 +367,6 @@ span[data-tooltip]:hover::after {
 	background-position: 307px;
 }
 
-.search-form {
-	display: inline-block;
-}
-
 .table_border_collapse{
 	border-collapse:	collapse;
 }
@@ -358,52 +393,6 @@ span[data-tooltip]:hover::after {
 	padding: 3px;
 }
 
-.search-form h2 {
-	color: black;
-	margin-bottom: 10px
-}
-
-.search-form label {
-	border: 1px solid #ddd;
-	border-radius: 5px;
-	background-color: #eee;	
-	padding: 3px;
-	float: left;
-	text-align: left;
-	width: 150px;
-	height: 15px;
-	margin-right: 10px;
-}
-
-.search-form select {
-	float: left;
-	text-align: left;
-	width: 150px;
-}
-
-.search-form input[type=text] {
-	float: left;
-	text-align: left;
-	width: 150px;
-}
-
-.search-form input[type=reset] {
-	float: none;
-	text-align: center;
-	width: 80px;
-}
-
-.search-form input[type=button] {
-	float: none;
-	text-align: center;
-	width: 80px;
-}
-
-.search-form .clear {
-	clear: both;
-	padding-top: 10px;
-}
-
 .input-form {
 	display: inline-block;
 }
@@ -416,7 +405,7 @@ span[data-tooltip]:hover::after {
 .input-form label {
 	float: left;
 	text-align: right;
-	font-size: 17px;
+	font-size: 15px;
 	width: 210px;
 	height: 15px;
 	margin-right: 10px;
@@ -435,6 +424,11 @@ span[data-tooltip]:hover::after {
 	float: left;
 	text-align: left;
 	width: 400px;
+}
+
+.input-form input[type=checkbox] {
+	float: left;
+	margin-left: 0px;
 }
 
 .input-form input[type=reset] {
@@ -702,6 +696,7 @@ a.invisiblelayerlink:hover{
 	width: 100%;
 	border-collapse: separate;
   border-spacing: 5px;
+	margin-top: 15px;
 }
 
 #data_import_upload_progress .file_status{
@@ -1581,6 +1576,28 @@ thead.gle th {
  text-align:left;
 }
 
+.gle_tabs{
+	display: flex;
+	margin: 2px 0 -11px 0;
+	border-left: 1px solid #bbb;
+	height: 27px
+}
+
+.gle_tabs > div{
+	padding: 0 5px 0 5px;
+	cursor: pointer;
+	border: 1px solid #bbb;
+	border-left: none;
+	background-color: #fff;
+	color: #aaa;
+}
+
+.gle_tabs > div.active_tab{
+	border-bottom: 1px dashed #bbb;
+	background-color: <? echo BG_GLEATTRIBUTE; ?>;
+	color: black;
+}
+
 .gle-attribute-name {
 	height: 32px;
 	position: relative;
@@ -1630,7 +1647,7 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]), table.t
 }
 
 table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([type=checkbox]) {
-	min-height: 25px;
+	height: 25px;
 }
 
 .readonly_text{
@@ -1664,6 +1681,10 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 	padding: 0 0 8px 0;
 }
 
+.subFormShowCount{
+	margin: 5px 5px 5px 8px;
+}
+
 .gle_hr{
 	height: 3px; 
 	margin: 15 0; 
@@ -1680,6 +1701,13 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 	background-color: #236dbf;
 	vertical-align: top;
 	display: inline-block;
+}
+
+.formelement-link {
+	padding: 5px;
+	margin: 5px 1px;
+	background: #e3e3e3;
+	border-radius: 2px;
 }
 
 .calendar {

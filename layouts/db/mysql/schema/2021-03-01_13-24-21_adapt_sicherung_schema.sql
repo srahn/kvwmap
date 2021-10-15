@@ -1,0 +1,10 @@
+BEGIN;
+	ALTER TABLE `sicherungen` DROP `intervall`;
+	ALTER TABLE `sicherungen` ADD `intervall_typ` ENUM('daily','weekly','monthly','manual') NOT NULL DEFAULT 'daily' COMMENT 'Methode/Typ des Intervalls. daily, weekly, monthly oder manual wenn das Cron-Interval händisch eingegeben werden soll.' AFTER `target_dir`;
+	ALTER TABLE `sicherungen` ADD `intervall_start_time` TIME NULL DEFAULT NULL COMMENT 'Startzeit (Stunde, Minute) des Cronjobs' AFTER `intervall_typ`;
+	ALTER TABLE `sicherungen` ADD `intervall_parameter_1` VARCHAR(100) NOT NULL COMMENT 'daily: dow from weekly: dow monthly: dom manual: cron intervall' AFTER `intervall_start_time`;
+	ALTER TABLE `sicherungen` ADD `intervall_parameter_2` VARCHAR(100) COMMENT 'daily: dow until weekly: null monthly: null manual: null' AFTER `intervall_parameter_1`;
+	ALTER TABLE `sicherungen` ADD `keep_for_n_days` INT NOT NULL DEFAULT '7' COMMENT 'Wie lange sollen Daten der Sicherung aufbewahrt werden, in Tagen.' AFTER `intervall_parameter_2`;
+	ALTER TABLE `sicherungsinhalte` ADD `tar_compress` BOOLEAN NULL COMMENT 'Soll tar mit -z aufgerufen werden?' AFTER `sicherung_id`, ADD `pgdump_insert` BOOLEAN NULL COMMENT 'Soll pg_dump mit --insert aufgerufen werden?' AFTER `tar_compress`, ADD `pgdump_columninserts` BOOLEAN NULL COMMENT 'Soll pg_dump mit --column-inserts aufgerufen werden?' AFTER `pgdump_insert`, ADD `pgdump_in_exclude_schemas` VARCHAR(1) NULL COMMENT 'Sollen Schemas ein- oder ausgeschlossen werden? n oder N' AFTER `pgdump_columninserts`, ADD `pgdump_schema_list` TEXT NULL COMMENT 'Liste der Schemata' AFTER `pgdump_in_exclude_schemas`, ADD `pgdump_in_exclude_tables` VARCHAR(1) NULL COMMENT 'Sollen Tabellen ein- oder ausgeschlossen werden? t oder T' AFTER `pgdump_schema_list`, ADD `pgdump_table_list` TEXT NULL COMMENT 'Liste der Tabellen' AFTER `pgdump_in_exclude_tables`;
+	ALTER TABLE `sicherungen` CHANGE `target_dir` `target_dir` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL;
+COMMIT;

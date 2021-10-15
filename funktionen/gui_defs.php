@@ -7,6 +7,7 @@
 	var deactivatequery = '<? echo $this->deactivatequery; ?>';
 	var activatequery = '<? echo $this->activatequery; ?>';
 	var activatelayer = '<? echo $this->activatelayer; ?>';
+	var upload_only_file_metadata = <? echo $this->user->rolle->upload_only_file_metadata; ?>;
  
 <?
  	if($this->user->rolle->legendtype == 1){ # alphabetisch sortierte Legende
