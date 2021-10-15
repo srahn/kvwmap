@@ -22,6 +22,7 @@ $lenris = new LENRIS($database);
 	2 - Sync läuft
 	3 - Erstimport angefordert	(setzen über GUI)
 	4 - Erstimport läuft
+	5 - Fehler
 */
 
 function is_sync_required($client){
