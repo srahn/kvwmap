@@ -245,7 +245,6 @@ class data_import_export {
 		}
 		else {
 			$sql = "
-				ALTER TABLE " . $schemaname . "." . $tablename . " ADD COLUMN IF NOT EXISTS gid SERIAL NOT NULL;
 				SELECT convert_column_names('" . $schemaname . "', '" . $tablename . "');
 				" . $this->rename_reserved_attribute_names($schemaname, $tablename) . "
 				SELECT geometrytype(the_geom) AS geometrytype FROM " . $schemaname . "." . $tablename . " LIMIT 1;
