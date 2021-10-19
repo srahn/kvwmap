@@ -1,7 +1,6 @@
 BEGIN;
 
 SET client_encoding = 'UTF-8';
-SET default_with_oids = true;
 SET search_path = alkis, public;
 
 
@@ -420,9 +419,6 @@ CREATE TABLE n_nutzungsartengruppe
   schluessel integer NOT NULL,
   gruppe character varying(100) NOT NULL,
   bereich character varying(100) NOT NULL
-)
-WITH (
-  OIDS=TRUE
 );
 ALTER TABLE n_nutzungsartengruppe
   ADD CONSTRAINT n_nutzungsartengruppe_pk PRIMARY KEY(schluessel);
@@ -465,9 +461,6 @@ CREATE TABLE n_nutzungsart
   nutzungsartengruppe integer NOT NULL,
   schluessel integer NOT NULL,
   nutzungsart character varying(100) NOT NULL
-)
-WITH (
-  OIDS=TRUE
 );
 ALTER TABLE n_nutzungsart
   ADD CONSTRAINT n_nutzungsart_pk PRIMARY KEY(nutzungsartengruppe,schluessel);
@@ -515,9 +508,6 @@ CREATE TABLE n_untergliederung1
   nutzungsart integer NOT NULL,
   schluessel integer NOT NULL,
   untergliederung1 character varying(100) NOT NULL
-)
-WITH (
-  OIDS=TRUE
 );
 ALTER TABLE n_untergliederung1
   ADD CONSTRAINT n_untergliederung1_pk PRIMARY KEY(nutzungsartengruppe,nutzungsart,schluessel);
@@ -668,9 +658,6 @@ CREATE TABLE n_untergliederung2
   untergliederung1 integer NOT NULL,
   schluessel integer NOT NULL,
   untergliederung2 character varying(100) NOT NULL
-)
-WITH (
-  OIDS=TRUE
 );
 ALTER TABLE n_untergliederung2
   ADD CONSTRAINT n_untergliederung2_pk PRIMARY KEY(nutzungsartengruppe,nutzungsart,untergliederung1,schluessel);

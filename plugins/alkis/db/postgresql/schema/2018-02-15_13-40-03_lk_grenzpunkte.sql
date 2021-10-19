@@ -1,7 +1,7 @@
 BEGIN;
 
 CREATE OR REPLACE VIEW alkis.lk_grenzpunkte AS 
- SELECT COALESCE(p.oid, o.oid) AS oid,
+ SELECT 
     o.gml_id,
     o.beginnt AS o_beginnt,
     o.endet AS o_endet,

@@ -1,5 +1,4 @@
-<script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript">
-</script>
+<script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <div class="center-outerdiv">
 	<div class="input-form">
 		<h2><?php echo $this->titel; ?></h2>
@@ -31,3 +30,51 @@
 		</div>
 	</div>
 </div>
+<script>
+	function getMenueLink(elm) {
+		if (elm.name == 'onclick') {
+			return '?' + elm.value.match(/'([^']+)'/)[1];
+		}
+		else {
+			return elm.value;
+		}
+	}
+	function createMenueLink(elm) {
+		$('input[name=' + elm.name + ']').attr('style', 'width: 374px').after($('<a id="link_' + elm.name + '" style="\
+			float: right;\
+			margin-top: 2px;\
+			font-size: 19px;\
+			margin-right: 2px;\
+		" href="' + getMenueLink(elm) + '" target="_blank" title="Link in neuem Tab anzeigen"><i style="color: firebrick" class="fa fa-external-link" aria-hidden="true"></i></a>'));
+	}
+	function updateMenueLink(elm) {
+		var link;
+		if (elm.value != '' && !elm.value.includes('javascript:void(0)')) {
+			if ($('#link_' + elm.name).length == 0) {
+				createMenueLink(elm);
+			}
+			else {
+				$('#link_' + elm.name).attr('href', getMenueLink(elm));
+			}
+		}
+		else {
+			if ($('#link_' + elm.name).length > 0) {
+				removeMenueLink(elm);
+			}
+		}
+	}
+	function removeMenueLink(elm) {
+		$('input[name=' + elm.name + ']').attr('style', 'width: 400px');
+		$('#link_' + elm.name).remove();
+	}
+
+	$('input[name=links], input[name=onclick]').on(
+		'change',
+		function(evt) {
+			updateMenueLink(evt.target);
+		}
+	);
+
+	updateMenueLink($('input[name=links]')[0]);
+	updateMenueLink($('input[name=onclick]')[0]);
+</script>

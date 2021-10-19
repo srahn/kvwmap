@@ -34,7 +34,7 @@
 </script>
 
 <div id="layer" align="left" onclick="remove_calendar();">
-<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" onchange="activate_save_button(this.closest('#layer'), '<? echo $layer['Layer_ID']; ?>');" name="changed_<? echo $layer['Layer_ID']; ?>">
+<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" onchange="activate_save_button(this.closest('#layer').parentElement, '<? echo $layer['Layer_ID']; ?>');" name="changed_<? echo $layer['Layer_ID']; ?>">
 <? if($this->formvars['embedded_subformPK'] == '' AND $this->new_entry != true){ ?>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
@@ -61,7 +61,7 @@
 <?
 		}
   	$doit = false;
-	  $anzObj = count($layer['shape']);
+	  $anzObj = @count($layer['shape']);
 		if ($anzObj > 0) {
 			$this->found = 'true';
 			$k = 0;
@@ -120,7 +120,7 @@
 										id="<? echo $layer['Layer_ID'] . '_' . $k; ?>"
 										type="checkbox"
 										class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
-										name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"
+										name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID']; ?>"
 									>&nbsp;<span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span><?
 									if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { ?>
 										<span class="editier_sperre fa-stack" title="Dieser Datensatz ist zur Bearbeitung gesperrt">
@@ -478,7 +478,7 @@
 	</tr>
 	<? } ?>
 	
-<table>
+</table>
 </div>
 
 <?

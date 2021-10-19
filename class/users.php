@@ -1051,8 +1051,8 @@ class user {
 		else {
 			$auto_map_resize = '0';
 			$teil = explode('x', $formvars['mapsize']);
-			$nImageWidth = $teil[0];
-			$nImageHeight = $teil[1];
+			$nImageWidth = ($teil[0] > 0 ? $teil[0] : 1000);
+			$nImageHeight = ($teil[1] > 0 ? $teil[1] : 800);
 		}
 		# Zoomfaktor (Wenn 1 erfolgt kein Zoom durch einfaches klicken in die Karte)
 		if ($formvars['nZoomFactor']=='' OR $formvars['nZoomFactor']==0) {
@@ -1111,7 +1111,10 @@ class user {
 			}
 			else $sql.=',querymode="0", overlayx=400, overlayy=150';
 			$sql .= ',geom_edit_first="' . $formvars['geom_edit_first'] . '"';
-			$sql .= ',immer_weiter_erfassen="' . $formvars['immer_weiter_erfassen'] . '"';
+			$sql .= "
+				,immer_weiter_erfassen = '" . $formvars['immer_weiter_erfassen'] . "'
+				,upload_only_file_metadata = '" . $formvars['upload_only_file_metadata'] . "'
+			";
 			$sql.=',print_scale = CASE WHEN print_scale = "auto" OR "'.$formvars['print_scale'].'" = "auto" THEN "'.$formvars['print_scale'].'" ELSE print_scale END';
 			if($formvars['hist_timestamp'] != '') $sql.=',hist_timestamp="'.DateTime::createFromFormat('d.m.Y H:i:s', $formvars['hist_timestamp'])->format('Y-m-d H:i:s').'"';
 			else $sql.=',hist_timestamp = NULL';
@@ -1340,7 +1343,7 @@ class user {
 	}
 
 	function Aendern($userdaten) {
-		if ($userdaten['changepasswd']) {
+		if ($userdaten['changepasswd'] == 1) {
 			$passwort_column = ", `passwort` = MD5('" . $this->database->mysqli->real_escape_string($userdaten['password2']) . "')";
 			$passwort_setting_time_column = ", `password_setting_time` = CURRENT_TIMESTAMP()";
 		}

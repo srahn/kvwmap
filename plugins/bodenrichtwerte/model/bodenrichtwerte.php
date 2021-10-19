@@ -48,11 +48,10 @@ class bodenrichtwertzone {
   }
   
   
-  function getBBoxAsRectObj($oid) {
-    # ermittelt die Boundingbox der Bodenrichtwertzone $oid
+  function getBBoxAsRectObj($gid) {
     $sql ='SELECT st_xmin(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS minx,st_ymin(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS miny';
     $sql.=',st_xmax(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS maxx,st_ymax(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS maxy';
-    $sql.=' FROM bodenrichtwerte.bw_zonen WHERE oid='.$oid;
+    $sql.=' FROM bodenrichtwerte.bw_zonen WHERE gid = '.$gid;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 0);
     if ($ret[0]) {
@@ -80,14 +79,10 @@ class bodenrichtwertzone {
     return $ret;
   }
 
-  function deleteBodenrichtwertzonen($oidliste){
+  function deleteBodenrichtwertzonen($gidliste){
     $this->debug->write('file:bodenrichtwerte.php class:bodenrichtwerte function:deleteBodenrichtwertzonen<br>Löschen von Bodenrichtwertzonen aus<br>PostGIS:',4);
     $sql ="DELETE FROM bodenrichtwerte.bw_zonen";
-    $sql.=" WHERE oid IN (".$oidliste[0];
-    for ($i=1;$i<count($oidliste);$i++) {
-      $sql.=",".$oidliste[$i];
-    }
-    $sql.=")";
+    $sql.=" WHERE gid IN (" . implode(',', $gidliste) . ")";
     $ret=$this->database->execSQL($sql,4, 1);    
     if ($ret[0]) {
       $ret[1]='Fehler beim Löschen der Bodenrichtwerte in der Datenbank.<br>'.$ret[1];
@@ -95,17 +90,20 @@ class bodenrichtwertzone {
     return $ret;
   }
   
-  function getBodenrichtwertzonen($oid){
+  function getBodenrichtwertzonen($gid){
     # Prüfen der Suchparameter
     # Es muss ein gültiges Polygon vorhanden sein.
     $this->debug->write('file:bodenrichtwerte.php class:bodenrichtwerte function:getBodenrichtwertzonen<br>Abfragen des Umrings und der Textpunkte aus<br>PostGIS:',4);
-    $sql ="SELECT *,";
-    $sql.=" st_asText(st_transform(the_geom, ".$this->client_epsg.")) AS wkt_umring, st_asSVG(st_transform(the_geom, ".$this->client_epsg.")) AS svg_umring,";
-    $sql .=" st_asText(st_transform(textposition, ".$this->client_epsg.")) AS wkt_textposition";
-    $sql.=" FROM bodenrichtwerte.bw_zonen";
-    $sql.=" WHERE 1=1";
-    if ($oid!='') {
-      $sql.=" AND oid=".sprintf("%.0f", $oid);
+    $sql ="
+			SELECT 
+				*,
+				st_asText(st_transform(the_geom, ".$this->client_epsg.")) AS wkt_umring, 
+				st_asSVG(st_transform(the_geom, ".$this->client_epsg.")) AS svg_umring,
+				st_asText(st_transform(textposition, ".$this->client_epsg.")) AS wkt_textposition
+			FROM bodenrichtwerte.bw_zonen
+			WHERE 1=1";
+    if ($gid != '') {
+      $sql.=" AND gid = ".sprintf("%.0f", $gid);
     }
     $ret=$this->database->execSQL($sql,4, 0);    
     if ($ret[0]) {
@@ -243,7 +241,7 @@ class bodenrichtwertzone {
     return $ret; 
   }
 
-  function aktualisierenZone($oid,$formvars) {
+  function aktualisierenZone($gid, $formvars) {
 		if($formvars['umring'] != ''){
 			$sql = "SELECT st_IsValidReason(st_geometryfromtext('".$formvars['umring']."', ".$this->client_epsg."))";
 			$ret = $this->database->execSQL($sql, 4, 0);
@@ -309,7 +307,7 @@ class bodenrichtwertzone {
 			$sql.= "bemerkungen = '".$formvars['bemerkungen']."', ";
 			$sql.= "the_geom = st_transform(st_GeometryFromText('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
 			$sql.= ", textposition = st_transform(st_GeometryFromText('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg.")";
-			$sql.=" WHERE oid=".sprintf("%.0f", $oid);
+			$sql.=" WHERE gid = ".sprintf("%.0f", $gid);
 			#echo $sql;
 			$ret=$this->database->execSQL($sql,4, 1);
 			if ($ret[0]) {

@@ -18,7 +18,7 @@
 		<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
 	</a>
 	<a name="oben"></a><?
-	if ($this->formvars['mime_type'] == 'overlay_html') { ?>
+	if ($this->formvars['window_type'] == 'overlay') { ?>
 		<script type="text/javascript">
 			if (document.getElementById('overlayfooter') != undefined) 	document.getElementById('overlayfooter').style.display = 'none';
 			if (document.getElementById('savebutton') != undefined) 		document.getElementById('savebutton').style.display = 'none';
@@ -32,12 +32,13 @@ if ($anzLayer==0) {
 	<?php	
 }
 	
-if($this->formvars['printversion'] == '' AND $this->formvars['mime_type'] != 'overlay_html') { ?>
+if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != 'overlay') { ?>
 <div id="contentdiv" style="width: 100%;max-height:<? echo $this->user->rolle->nImageHeight; ?>px;position:relative;overflow-y: auto;overflow-x: hidden; border-bottom: 1px solid #bbb">
 	<div style="margin-right: 10px">
 <? }
 
 for($i=0;$i<$anzLayer;$i++){
+	$this->queried_layers[] = $this->qlayerset[$i]['alias'] ?: $this->qlayerset[$i]['Name'];
 	$gesamt = $this->qlayerset[$i]['count'];
   if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $gesamt > 1){
 	   # Blätterfunktion
@@ -76,17 +77,12 @@ for($i=0;$i<$anzLayer;$i++){
   }
 	$template = $this->qlayerset[$i]['template'];
 	if (in_array($template, array('', 'generic_layer_editor.php', 'generic_layer_editor_doc_raster.php'))) {
-		if($this->qlayerset[$i]['connectiontype'] == MS_WMS){
-			include(SNIPPETS.'getfeatureinfo.php');			# getfeatureinfo bei WMS
+		if($template == '')$template = 'generic_layer_editor_2.php';
+		if($this->qlayerset[$i]['gle_view'] == '1'){
+			include(SNIPPETS.$template);			# Attribute zeilenweise bzw. Raster-Template
 		}
 		else{
-			if($template == '')$template = 'generic_layer_editor_2.php';
-			if($this->qlayerset[$i]['gle_view'] == '1'){
-				include(SNIPPETS.$template);			# Attribute zeilenweise bzw. Raster-Template
-			}
-			else{
-				include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
-			}
+			include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
 		}
 	}
 	else{
@@ -145,7 +141,7 @@ if(!empty($this->noMatchLayers)){
 <? }
 }
 
-if($this->formvars['printversion'] == '' AND $this->formvars['mime_type'] != 'overlay_html') { ?>
+if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != 'overlay') { ?>
 </div></div>
 <? } ?>
 
@@ -170,7 +166,7 @@ if($this->formvars['printversion'] == ''){ ?>
 	</a>
 <? 
 }
-if($this->formvars['mime_type'] == 'overlay_html'){ ?>
+if($this->formvars['window_type'] == 'overlay'){ ?>
 	<br>
 	<br>
 	<br>
@@ -181,12 +177,13 @@ if($this->formvars['mime_type'] == 'overlay_html'){ ?>
 		<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
     <tr>
     	<td width="49%" class="px13">
-				<? if($this->formvars['mime_type'] == 'overlay_html'){ ?>
+				<? if($this->formvars['window_type'] == 'overlay'){ ?>
 					<script type="text/javascript">
 						if(document.getElementById('overlayfooter') != undefined){
 							document.getElementById('overlayfooter').style.display = 'block';
 							document.getElementById('anzahl').value = '<? echo $this->formvars['anzahl']; ?>';
 						}
+						document.title = '<? echo implode(' - ', $this->queried_layers); ?>';
 					</script>
 				<? }else{
 							echo '&nbsp;'.$strLimit; ?>&nbsp;
@@ -205,7 +202,7 @@ if($this->formvars['mime_type'] == 'overlay_html'){ ?>
 			</td>
       <td align="center">
 			<?  if($this->editable != ''){
-						if($this->formvars['mime_type'] == 'overlay_html'){ ?>
+						if($this->formvars['window_type'] == 'overlay'){ ?>
 							<script type="text/javascript">
 								if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'block';
 							</script>
@@ -215,7 +212,7 @@ if($this->formvars['mime_type'] == 'overlay_html'){ ?>
 					}?>
 			</td>
 			<td align="right" width="49%">
-		<? if($this->formvars['mime_type'] == 'overlay_html'){ ?>
+		<? if($this->formvars['window_type'] == 'overlay'){ ?>
 					<script type="text/javascript">
 						if(document.getElementById('overlayfooter') != undefined)document.getElementById('overlayfooter').style.display = 'block';
 					</script>
@@ -266,7 +263,7 @@ if($this->formvars['mime_type'] == 'overlay_html'){ ?>
 			}
 */
 	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
-				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" style="margin: 5px" aria-hidden="true"></i></a>';
+				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" target="root" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" style="margin: 5px" aria-hidden="true"></i></a>';
 	  	}
   	}
   	else{
@@ -316,7 +313,3 @@ if($this->formvars['mime_type'] == 'overlay_html'){ ?>
 <input type="hidden" name="searchmask_count" value="<? echo $this->formvars['searchmask_count']; ?>">
 <input type="hidden" name="within" value="<? echo value_of($this->formvars, 'within'); ?>">
 <input type="hidden" name="backlink" value="<? echo strip_pg_escape_string($this->formvars['backlink']); ?>">
-
-<div id="vorschau" style="pointer-events:none; box-shadow: 12px 10px 14px #777;z-index: 1000000; position: fixed; right:10px; top:5px; ">
-	<img id="preview_img" style="max-height: 940px" src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
-</div>

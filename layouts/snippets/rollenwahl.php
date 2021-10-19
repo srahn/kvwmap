@@ -307,7 +307,7 @@ if ($this->Fehlermeldung!='') {
 										<span data-tooltip="<? echo $strHintShowLayerOptions; ?>"></span>
 									</td>
 								</tr>
-								<tr <? if(!ROLLENFILTER){echo 'style="display: none"'; ?>>
+								<tr <? if(!ROLLENFILTER){echo 'style="display: none"';} ?>>
 									<td class="rollenwahl-option-header">
 										<? echo $strShowRollenFilter; ?>:
 									</td>
@@ -316,7 +316,6 @@ if ($this->Fehlermeldung!='') {
 										<span data-tooltip="<? echo $strHintShowRollenFilter; ?>"></span>
 									</td>
 								</tr>
-								<? } ?>
 								<tr>
 									<td class="rollenwahl-option-header">
 										<? echo $strMenuAutoClose; ?>:
@@ -569,6 +568,19 @@ if ($this->Fehlermeldung!='') {
 											value="1"<?
 											echo ($this->user->rolle->immer_weiter_erfassen == '1' ? ' checked="true"' : ''); ?>
 										>&nbsp;<span data-tooltip="<? echo $strHintAlwaysCreateNext; ?>"></span>
+									</td>
+								</tr>
+								<tr>
+									<td class="rollenwahl-option-header">
+										<? echo $strUploadOnlyFileMetadata; ?>:
+									</td>
+									<td class="rollenwahl-option-data">
+										<input
+											name="upload_only_file_metadata"
+											type="checkbox"
+											value="1"<?
+											echo ($this->user->rolle->upload_only_file_metadata == '1' ? ' checked="true"' : ''); ?>
+										>&nbsp;<span data-tooltip="<? echo $strHintUploadOnlyFileMetadata; ?>"></span>
 									</td>
 								</tr>
 								<tr>

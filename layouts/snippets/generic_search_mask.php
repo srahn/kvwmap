@@ -160,14 +160,18 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 							}
 							for($o = 0; $o < @count($this->attributes['enum_value'][$i]); $o++){
 ?>
-							<option 
-<? 
-								if(!is_array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]))$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]);
-								if(in_array($this->attributes['enum_value'][$i][$o], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]) AND $this->attributes['enum_value'][$i][$o] != ''){ echo 'selected';} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
+								<option 
+	<? 
+								if (!is_array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]])) {
+									$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]);
+								}
+								if (in_array($this->attributes['enum_value'][$i][$o], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]) AND $this->attributes['enum_value'][$i][$o] != '') {
+									echo 'selected';
+								} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
 							}
 ?>
-	                    </select>
-	                    <input id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">
+	            </select>
+	            <input id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">
 <?
 						}break;
 								

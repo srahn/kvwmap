@@ -475,7 +475,17 @@ class stelle {
 			SELECT
 				s.ID,
 				s.Bezeichnung,
-				s.show_shared_layers
+				s.show_shared_layers,
+				(
+					SELECT 
+						group_concat(es.Bezeichnung)
+					FROM 
+						`stellen_hierarchie` AS h,
+						stelle es
+					WHERE
+						s.`ID` = h.`child_id` AND 
+						es.ID = h.parent_id
+				) as Bezeichnung_parent
 			FROM
 				`stelle` AS s" . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " LEFT JOIN
 				`rolle` AS r ON s.ID = r.stelle_id
@@ -484,20 +494,128 @@ class stelle {
 				$where . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " AND
 				(r.user_id = " . $user_id . " OR r.stelle_id IS NULL)" : "") . "
 			ORDER BY " .
-				($order != '' ? "`" . $order . "`" : "s.`Bezeichnung`") . "
+				($order != '' ? $order : "s.`Bezeichnung`") . "
 		";
 		#echo '<br>sql: ' . $sql;
 
 		$this->debug->write("<p>file:stelle.php class:stelle->getStellen - Abfragen aller Stellen<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		$i = 0;
 		while($rs = $this->database->result->fetch_array()) {
 			$stellen['ID'][] = $rs['ID'];
+			$stellen['index'][$rs['ID']] = $i;
 			$stellen['Bezeichnung'][] = $rs['Bezeichnung'];
 			$stellen['show_shared_layers'][] = $rs['show_shared_layers'];
+			$stellen['Bezeichnung_parent'][] = $rs['Bezeichnung_parent'];
+			$i++;
 		}
 		return $stellen;
 	}
+	
+	function getStellenhierarchie() {
+		$sql = "
+			SELECT
+				*
+			FROM
+				`stellen_hierarchie`
+		";
+		$this->debug->write("<p>file:stelle.php class:stelle->getStellenhierarchie - <br>" . $sql, 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
+		while($rs = $this->database->result->fetch_assoc()) {
+			$this->links[$rs['parent_id']][] = $rs['child_id'];
+		};
+		
+		$this->multi_parent_childs = Array();	# die Stellen, die mehrere Eltern haben
+		$this->clusters = Array();						# Stellen-Cluster
+		$cluster_of_root = Array();						# ein Array, dass den Clusterindex zu jeder Wurzel angibt
+		$this->all_childs_of = Array();				# Kinder und Kindeskinder jeder Stelle
+		$this->all_childs = Array();					# alle Kindstellen mit ihren direkten Eltern
+
+		# zu jeder Elternstelle alle Kindstellen finden (Kindeskinder) und in $this->all_childs_of speichern
+		# und gleichzeitig die Stellen ermitteln, die mehrere Eltern haben und in $this->multi_parent_childs speichern
+		foreach ($this->links as $parent => $childs) {
+			if (!array_key_exists($parent, $this->all_childs)) {
+				$this->getAllChildren($parent);
+			}
+		}
+		
+		# die Eltern, die selber Kinder sind, wieder aus $this->all_childs_of entfernen
+		foreach ($this->all_childs_of as $parent => $childs) {
+			if (array_key_exists($parent, $this->all_childs)) {
+				unset($this->all_childs_of[$parent]);
+			}
+		}
+		# in $this->all_childs_of bleiben die Stellen übrig, die keine Eltern haben (Wurzeln)
+		
+		# jetzt muss ermittelt werden, welche Stellenbäume mit einander verbunden sind
+		# dazu werden ausgehend von den $this->multi_parent_childs die Bäume nach oben durchlaufen und am Ende die Wurzeln ermittelt, die weiter unten verbunden sind
+		# diese Stellen werden zu einem Cluster zusammengefasst
+		foreach ($this->multi_parent_childs as $multi_child) {
+			$cluster_index = -1;
+			$connected_roots = $this->getHighestParents($multi_child);
+			if (count($connected_roots) > 1) {
+				$cluster = Array();
+				foreach ($connected_roots as $root) {
+					if (!array_key_exists($root, $cluster_of_root)) {
+						# alle noch nicht zu einem Cluster zugeordneten, verbundenen Wurzeln zu einem temporären Cluster zusammensammeln
+						$cluster = array_unique(array_merge($cluster, array_merge(array($root), $this->all_childs_of[$root])));
+						unset($this->all_childs_of[$root]);
+					}
+					else {
+						$cluster_index = $cluster_of_root[$root];		# wenn diese Wurzel schon einem Cluster zugeordnet wurde, Clusterindex merken
+					}
+				}
+				if (!empty($cluster)) {
+					if ($cluster_index == -1) {	# kein Cluster gefunden, zu dem mind. eine Wurzel gehört -> neues Cluster anlegen
+						$this->clusters[] = Array();
+						$cluster_index = count($this->clusters) - 1;
+					}
+					foreach ($connected_roots as $root) {
+						# alle Wurzeln zum Cluster zuordnen
+						$cluster_of_root[$root] = $cluster_index;
+					}
+					# das temporäre Cluster dem Cluster mit dem Clusterindex hinzufügen
+					$this->clusters[$cluster_index] = array_unique(array_merge($this->clusters[$cluster_index] ?: [], $cluster));
+				}
+			}
+		}
+		
+		# jetzt noch die Bäume zum Cluster-Array hinzufügen, die nur eine Wurzel haben
+		foreach ($this->all_childs_of as $root => $childs) {
+			$this->clusters[] = array_merge(array($root), $this->all_childs_of[$root]);
+		}
+		
+		return ['clusters' => $this->clusters, 'links' => $this->links];
+	}
+	
+	function getHighestParents($child){
+		$parents = Array();
+		if (!array_key_exists($child, $this->all_childs)){
+			$parents[] = $child;
+		}
+		else {
+			foreach ($this->all_childs[$child] as $parent) {
+				$parents = array_unique(array_merge($parents, $this->getHighestParents($parent)));
+			}
+		}
+		return $parents;
+	}
+	
+	function getAllChildren($parent){
+		if (array_key_exists($parent, $this->links)) {
+			foreach ($this->links[$parent] as $child) {
+				$this->all_childs_of[$parent][] = $child;
+				$this->all_childs_of[$parent] = array_merge($this->all_childs_of[$parent], $this->all_childs_of[$child] ?: $this->getAllChildren($child));
+				$this->all_childs[$child][] = $parent;
+				if (count($this->all_childs[$child]) == 2) {
+					$this->multi_parent_childs[] = $child;
+				}
+			}
+		}
+		return $this->all_childs_of[$parent] ?: [];
+	}	
 
 	function getParents($order = '', $return = '') {
 		$parents = array();
@@ -522,7 +640,7 @@ class stelle {
 		return $parents;
 	}
 
-	function getChildren($parent_id, $order = '', $return = '', $recursive = false) {
+	function getChildren($parent_id, $order = '', $return = '', $recursive = false, $loop_test = false, $loop_counter = 0) {
 		$children = array();
 		$sql = "
 			SELECT
@@ -541,9 +659,15 @@ class stelle {
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return array(); }
 		$result = $this->database->result;
 		while($rs = $result->fetch_assoc()) {
+			if ($loop_counter == 1000) {
+				if ($loop_test) {
+					GUI::add_message_('error', 'Achtung! Es gibt einen Zirkelbezug in der Stellenhierarchie!');
+				}
+				return [];
+			}
 			$children[] = ($return == 'only_ids' ? $rs['ID'] : $rs);
 			if($recursive){
-				$children = array_merge($children, $this->getChildren($rs['ID'], $order, $return, true));
+				$children = array_merge($children, $this->getChildren($rs['ID'], $order, $return, true, $loop_test, $loop_counter++));
 			}
 		};
 		return $children;
@@ -589,8 +713,17 @@ class stelle {
 	}
 
 	function isMenueAllowed($menuename){
-		$sql = "SELECT distinct a.* from u_menues as a, u_menue2stelle as b ";
-		$sql.= "WHERE links LIKE 'index.php?go=".$menuename."%' AND b.menue_id = a.id AND b.stelle_id = ".$this->id;
+		$sql = "
+			SELECT
+				distinct a.*
+			FROM
+				u_menues as a,
+				u_menue2stelle as b
+			WHERE
+				links LIKE 'index.php?go=" . $menuename . "%' AND
+				b.menue_id = a.id AND
+				b.stelle_id = " . $this->id . "
+		";
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->isMenueAllowed - Guckt ob der Menuepunkt der Stelle zugeordnet ist:<br>".$sql,4);
 		$this->database->execSQL($sql);
@@ -616,7 +749,7 @@ class stelle {
 			$alkis = new alkis($database);
 			$ret=$alkis->getFlurstKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz);
 			if ($ret[0]==0) {
-				$anzFlurstKennz=count($ret[1]);
+				$anzFlurstKennz = @count($ret[1]);
 				if ($anzFlurstKennz==0) {
 					$ret[0]=1;
 					$ret[1]="Sie haben keine Berechtigung zur Ansicht diese(s)r Flurstücke(s)";
@@ -664,7 +797,7 @@ class stelle {
 		# Füge Einstellungen der Elternstellen zur Stelle hinzu
 		foreach($selected_parents AS $new_parent_id) {
 			$parent_stelle = new stelle($new_parent_id, $this->database);
-			$menues = $this->merge_menues($menues, $parent_stelle->getMenue(0));
+			$menues = $this->sort_menues(array_merge($menues, $parent_stelle->getMenue(0, 'only_ids')));
 			$functions = array_values(array_unique(array_merge($functions, $parent_stelle->getFunktionen('only_ids'))));
 			$layouts = array_values(array_unique(array_merge($layouts, $ddl->load_layouts($new_parent_id, '', '', '', 'only_ids'))));
 			$frames = array_values(array_unique(array_merge($frames, $document->load_frames($new_parent_id, false, 'only_ids'))));
@@ -674,20 +807,27 @@ class stelle {
 		return $results;
 	}
 
-	function merge_menues($menues, $new_menues){
-		$menue_objects = empty($menues) ? array() : Menue::find($this, ' id IN ('.implode(',', $menues).')', 'FIELD(id, '.implode(',', $menues).')');
-		$insert_index = 0;
-		for($i = 0; $i < count($new_menues['ID']); $i++){
-			if($new_menues['menueebene'][$i] == 1){
-				while($menue_objects[$insert_index]->data['menueebene'] == 1 AND $menue_objects[$insert_index]->data['order'] < $new_menues['ORDER'][$i]){
-					$insert_index++;
-				}
-			}
-			array_splice($menue_objects, $insert_index, 0, [(object)['data' => ['id' => $new_menues['ID'][$i], 'order' => $new_menues['ORDER'][$i], 'name' => $new_menues['Bezeichnung'][$i]]]]);
-			$insert_index++;
+	function sort_menues($menues){
+		# sortiert zunächst die Menüs von Ebene 1 nach order und dann innerhalb der Obermenüpunkte die Untermenüpunkte nach order
+		$sql = '
+			SELECT 
+				CASE WHEN m.menueebene = 1 THEN m.`order` ELSE om.`order` END as order1, 
+				CASE WHEN m.menueebene = 1 THEN m.`id` ELSE m.`obermenue` END as order2,
+				m.`id`
+			FROM `u_menues` as m 
+			LEFT JOIN `u_menues` as om ON om.id = m.obermenue
+			WHERE
+				m.id IN (' . implode(',', $menues) . ')
+			ORDER BY order1, order2, m.menueebene, m.`order`
+		';
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
-		foreach($menue_objects as $menue){
-			$result[] = $menue->data['id'];
+		else{
+			while($rs=$this->database->result->fetch_array()) {
+				$result[] = $rs['id'];
+			}
 		}
 		return $result;
 	}
@@ -815,7 +955,7 @@ class stelle {
 			$rs = $this->database->result->fetch_array();
 		}
 		$count = ($rs[0] == '' ? 0 : $rs[0]);
-		for ($i = 0; $i < count($menue_ids); $i++) {
+		for ($i = 0; $i <@ count($menue_ids); $i++) {
 			$sql ="
 				INSERT IGNORE INTO
 					u_menue2stelle (
@@ -1059,7 +1199,7 @@ class stelle {
 
 			if (!$assign_default_values AND $this->database->mysqli->affected_rows > 0) {
 				$insert = "
-					INSERT INTO layer_attributes2stelle (
+					INSERT IGNORE INTO layer_attributes2stelle (
 						layer_id,
 						attributename,
 						stelle_id,
@@ -1428,6 +1568,8 @@ class stelle {
 		}
 		else{
 			while($rs=$this->database->result->fetch_array()) {
+				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
+				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
 				if($rs['alias'] != '' AND $this->useLayerAliases){
 					$rs['Name'] = $rs['alias'];
 				}
@@ -1648,7 +1790,7 @@ class stelle {
 
 	function parse_path($database, $path, $privileges, $attributes = NULL){
 		$newattributesstring = '';
-		$path = str_replace(array("\r\n", "\n"), ' ', $path);
+		$path = str_replace(["\r\n", "\n", "\t"], ' ', $path);
 		$distinctpos = strpos(strtolower($path), 'distinct');
 		if($distinctpos !== false && $distinctpos < 10){
 			$offset = $distinctpos+8;
@@ -1755,20 +1897,32 @@ class stelle {
 	}
 
 	function getGemeindeIDs() {
-		$sql = 'SELECT Gemeinde_ID, Gemarkung, Flur FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
+		$sql = 'SELECT Gemeinde_ID, Gemarkung, Flur, Flurstueck FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
-		if($this->database->result->num_rows > 0){
+		if ($this->database->result->num_rows > 0) {
 			$liste['ganze_gemeinde'] = Array();
 			$liste['eingeschr_gemeinde'] = Array();
 			$liste['ganze_gemarkung'] = Array();
 			$liste['eingeschr_gemarkung'] = Array();
-			while($rs=$this->database->result->fetch_assoc()) {
-				if($rs['Gemarkung'] != ''){
+			$liste['ganze_flur'] = Array();
+			$liste['eingeschr_flur'] = Array();
+			while ($rs=$this->database->result->fetch_assoc()) {
+				if ($rs['Gemarkung'] != '') {
 					$liste['eingeschr_gemeinde'][$rs['Gemeinde_ID']] = NULL;
-					if($rs['Flur'] != '')$liste['eingeschr_gemarkung'][$rs['Gemarkung']][] = $rs['Flur'];
-					else $liste['ganze_gemarkung'][$rs['Gemarkung']] = NULL;
+					if ($rs['Flur'] != '') {
+						$liste['eingeschr_gemarkung'][$rs['Gemarkung']][] = $rs['Flur'];
+						if ($rs['Flurstueck'] != '') {
+							$liste['eingeschr_flur'][$rs['Gemarkung']][$rs['Flur']][] = $rs['Flurstueck'];
+						}
+						else {
+							$liste['ganze_flur'][$rs['Gemarkung']][] = $rs['Flur'];
+						}
+					}
+					else {
+						$liste['ganze_gemarkung'][$rs['Gemarkung']] = NULL;
+					}
 				}
 				else{
 					$liste['ganze_gemeinde'][$rs['Gemeinde_ID']] = NULL;

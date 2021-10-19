@@ -11,6 +11,35 @@ if(isset($argv)){
 	}
 }
 
+# Error Handling for Fatal-Errors
+register_shutdown_function(function () {
+	global $errors;
+	$err = error_get_last();
+	if (error_reporting() & $err['type']) {		// This error code is included in error_reporting		
+		ob_end_clean();
+		if (! is_null($err)) {
+				$errors[] = '<b>' . $err['message'] . '</b><br> in Datei ' . $err['file'] . '<br>in Zeile '. $err['line'];
+		}
+		http_response_code(500);
+		include_once('layouts/snippets/general_error_page.php');
+	}
+});
+
+# Error-Handling
+function CustomErrorHandler($errno, $errstr, $errfile, $errline){
+	global $errors;
+	if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
+		return;
+	}
+	$errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
+	http_response_code(500);
+	include_once('layouts/snippets/general_error_page.php');
+	/* Don't execute PHP internal error handler */
+	return true;
+}
+
+set_error_handler("CustomErrorHandler");
+
 include('credentials.php');
 include('config.php');
 
@@ -257,46 +286,6 @@ function go_switch($go, $exit = false) {
 				$GUI->show_snippet();
 			} break;
 
-			case 'Sicherungen_anzeigen' : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->Sicherungen_anzeigen();
-			} break;
-
-			case 'Sicherung_editieren' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->Sicherung_editieren();
-			} break;
-
-			case 'Sicherung_speichern' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->Sicherung_speichern();
-			} break;
-
-			case 'Sicherung_loeschen' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->Sicherung_loeschen();
-			} break;
-
-			case 'sicherungsinhalt_editieren' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->sicherungsinhalt_editieren();
-			} break;
-
-			case 'sicherungsinhalt_speichern' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->sicherungsinhalt_speichern();
-			} break;
-
-			case 'sicherungsinhalt_loeschen' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->sicherungsinhalt_loeschen();
-			} break;
-
-			case 'write_backup_plan' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->write_backup_plan();
-			} break;
-
 			case 'openCustomSubform' : {
 				$GUI->openCustomSubform();
 			} break;
@@ -450,12 +439,12 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
-			case 'getSVG_vertices' : {
-				$GUI->getSVG_vertices();
+			case 'getSVG_all_vertices' : {
+				$GUI->getSVG_all_vertices();
 			} break;
 
-			case 'getSVG_foreign_vertices' : {
-				$GUI->getSVG_foreign_vertices();
+			case 'getSVG_vertices' : {
+				$GUI->getSVG_vertices();
 			} break;
 
 			case 'ResizeMap2Window' : {
@@ -1130,6 +1119,16 @@ function go_switch($go, $exit = false) {
 				$GUI->layer_Datensaetze_loeschen(($GUI->formvars['output'] == 'false' ? false : true));
 			} break;
 
+			case 'belated_file_upload' : {
+				$GUI->checkCaseAllowed('belated_file_upload');
+				$GUI->belated_file_upload();
+			} break;
+			
+			case 'belated_file_upload_speichern' : {
+				$GUI->checkCaseAllowed('belated_file_upload');
+				$GUI->belated_file_upload_speichern();
+			} break;	
+
 			case 'Dokument_Loeschen' : {
 				$GUI->sachdaten_speichern();
 			} break;
@@ -1453,6 +1452,11 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->StellenAnzeigen();
 			} break;
+			
+			case 'Stellenhierarchie' : {
+				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->Stellenhierarchie();
+			} break;			
 
 			case 'Menues_Anzeigen' : {
 				$GUI->checkCaseAllowed('Menues_Anzeigen');

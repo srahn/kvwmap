@@ -426,6 +426,11 @@ span[data-tooltip]:hover::after {
 	width: 370px;
 }
 
+.input-form input[type=checkbox] {
+	float: left;
+	margin-left: 0px;
+}
+
 .input-form input[type=reset] {
 	float: none;
 	text-align: center;
@@ -691,6 +696,7 @@ a.invisiblelayerlink:hover{
 	width: 100%;
 	border-collapse: separate;
   border-spacing: 5px;
+	margin-top: 15px;
 }
 
 #data_import_upload_progress .file_status{
@@ -1493,6 +1499,7 @@ a:hover .preview_image{
 }
 
 #message_box {
+	white-space: pre-line;
 	opacity: 1;
 	position: fixed;
 	display: none;
@@ -1569,6 +1576,28 @@ thead.gle th {
  text-align:left;
 }
 
+.gle_tabs{
+	display: flex;
+	margin: 2px 0 -11px 0;
+	border-left: 1px solid #bbb;
+	height: 27px
+}
+
+.gle_tabs > div{
+	padding: 0 5px 0 5px;
+	cursor: pointer;
+	border: 1px solid #bbb;
+	border-left: none;
+	background-color: #fff;
+	color: #aaa;
+}
+
+.gle_tabs > div.active_tab{
+	border-bottom: 1px dashed #bbb;
+	background-color: <? echo BG_GLEATTRIBUTE; ?>;
+	color: black;
+}
+
 .gle-attribute-name {
 	height: 32px;
 	position: relative;
@@ -1618,7 +1647,7 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]), table.t
 }
 
 table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([type=checkbox]) {
-	min-height: 25px;
+	height: 25px;
 }
 
 .readonly_text{
@@ -1650,6 +1679,10 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 .subFormListItem{
 	height: 20px;
 	padding: 0 0 8px 0;
+}
+
+.subFormShowCount{
+	margin: 5px 5px 5px 8px;
 }
 
 .gle_hr{

@@ -18,13 +18,14 @@
 				<table width="100%" border="0" cellspacing="0" cellpadding="2">
 					<tr class="stellendaten-header">
 						<th align="right"><a href="index.php?go=Stellen_Anzeigen&order=ID"><?php echo $this->strID; ?></a></th>
-						<th align="left"><a href="index.php?go=Stellen_Anzeigen&order=bezeichnung"><?php echo $this->strName; ?></a></th><?
+						<th align="left"><a href="index.php?go=Stellen_Anzeigen&order=Bezeichnung"><?php echo $this->strName; ?></a></th>
+						<th align="left"><a href="index.php?go=Stellen_Anzeigen&order=Bezeichnung_parent"><?php echo $strParentStelle; ?></a></th><?
 						if ($has_shared_stelle) { ?>
-							<td>&nbsp;</td><?
+							<th>&nbsp;</th><?
 						} ?>
-						<td>&nbsp;</td>
-						<td>&nbsp;</td>
-						<td>&nbsp;</td>
+						<th>&nbsp;</th>
+						<th>&nbsp;</th>
+						<th>&nbsp;</th>
 					</tr><?php
 					for ($i = 0; $i < count($this->stellendaten['ID']); $i++) { ?>
 						<tr class="listen-tr">

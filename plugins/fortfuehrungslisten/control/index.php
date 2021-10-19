@@ -10,7 +10,7 @@ function go_switch_fortfuehrungslisten($go){
 		case 'auftragsdatei_loeschen': {
 			$ff_auftrag_id = $_REQUEST['ff_auftrag_id'];
 			if (empty($ff_auftrag_id)) {
-				$GUI->messages[] = array(
+				GUI::$messages[] = array(
 					'msg' => 'Sie müssen eine Fortführungsauftrags Id angeben im Parameter ff_auftrag_id!',
 					'type' => 'error'
 				);
@@ -28,7 +28,7 @@ function go_switch_fortfuehrungslisten($go){
 		case 'lade_fortfuehrungsfaelle': {
 			$ff_auftrag_id = $_REQUEST['ff_auftrag_id'];
 			if (empty($ff_auftrag_id)) {
-				$GUI->messages[] = array(
+				GUI::$messages[] = array(
 					'type' => 'error',
 					'msg' => 'Sie müssen eine Fortführungsauftrags Id angeben im Parameter ff_auftrag_id!'
 				);
@@ -36,7 +36,7 @@ function go_switch_fortfuehrungslisten($go){
 			else {
 				$ff_auftrag = Fortfuehrungsauftrag::find_by_id($GUI, 'id', $ff_auftrag_id);
 				if ($ff_auftrag->get('auftragsdatei') == '') {
-					$GUI->messages[] = array(
+					GUI::$messages[] = array(
 						'type' => 'error',
 						'msg' => 'Sie müssen erst eine Auftragsdatei zum Fortführungsauftrag hochladen!'
 					);
@@ -44,7 +44,7 @@ function go_switch_fortfuehrungslisten($go){
 				else {
 					$GUI->loader = new NASLoader($GUI);
 					$result = $GUI->loader->load_fortfuehrungsfaelle($ff_auftrag);
-					$GUI->messages = array_merge($GUI->messages, $GUI->loader->messages);
+					GUI::$messages = array_merge(GUI::$messages, $GUI->loader->messages);
 
 					if ($result['success']) {
 						$result = $ff_auftrag->auftragsdatei_loeschen();
@@ -52,7 +52,7 @@ function go_switch_fortfuehrungslisten($go){
 				}
 			}
 
-			$GUI->messages = array_merge($GUI->messages, $ff_auftrag->messages);
+			GUI::$messages = array_merge(GUI::$messages, $ff_auftrag->messages);
 
 			$GUI->formvars['selected_layer_id'] = LAYER_ID_FF_AUFTRAG;
 			$GUI->formvars['operator_ff_auftrag_id'] = '=';

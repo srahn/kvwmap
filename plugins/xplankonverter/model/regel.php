@@ -383,7 +383,7 @@ class Regel extends PgObject {
 			UPDATE
 				xplan_shapes_". $this->konvertierung->get('id') . '.' . $this->get_shape_table_name() . " AS shape
 			SET
-				gml_id = xplan.gml_id
+				gml_id::text = xplan.gml_id::text
 			FROM
 				gml_id_gid_table() AS xplan
 			WHERE
@@ -473,14 +473,14 @@ class Regel extends PgObject {
 					coalesce(bp.konvertierung_id, rp.konvertierung_id) AS konvertierung_id
 				FROM
 					xplankonverter.regeln r LEFT JOIN
-					xplan_gml.bp_bereich bb ON r.bereich_gml_id = bb.gml_id LEFT JOIN
-					xplan_gml.fp_bereich fb ON r.bereich_gml_id = fb.gml_id LEFT JOIN
-					xplan_gml.rp_bereich rb ON r.bereich_gml_id = rb.gml_id LEFT JOIN
-					xplan_gml.so_bereich sb ON r.bereich_gml_id = sb.gml_id LEFT JOIN
-					xplan_gml.bp_plan bp ON bp.gml_id::text = bb.gehoertzuplan LEFT JOIN
-					xplan_gml.fp_plan fp ON fp.gml_id::text = fb.gehoertzuplan LEFT JOIN
-					xplan_gml.rp_plan rp ON rp.gml_id::text = rb.gehoertzuplan LEFT JOIN
-					xplan_gml.so_plan sp ON sp.gml_id::text = sb.gehoertzuplan LEFT JOIN
+					xplan_gml.bp_bereich bb ON r.bereich_gml_id::text = bb.gml_id::text LEFT JOIN
+					xplan_gml.fp_bereich fb ON r.bereich_gml_id::text = fb.gml_id::text LEFT JOIN
+					xplan_gml.rp_bereich rb ON r.bereich_gml_id::text = rb.gml_id::text LEFT JOIN
+					xplan_gml.so_bereich sb ON r.bereich_gml_id::text = sb.gml_id::text LEFT JOIN
+					xplan_gml.bp_plan bp ON bp.gml_id::text = bb.gehoertzuplan::text LEFT JOIN
+					xplan_gml.fp_plan fp ON fp.gml_id::text = fb.gehoertzuplan::text LEFT JOIN
+					xplan_gml.rp_plan rp ON rp.gml_id::text = rb.gehoertzuplan::text LEFT JOIN
+					xplan_gml.so_plan sp ON sp.gml_id::text = sb.gehoertzuplan::text LEFT JOIN
 					xplan_gml.rp_plan bpp ON bpp.konvertierung_id = r.konvertierung_id LEFT JOIN
 					xplan_gml.rp_plan fpp ON fpp.konvertierung_id = r.konvertierung_id LEFT JOIN
 					xplan_gml.rp_plan rpp ON rpp.konvertierung_id = r.konvertierung_id LEFT JOIN
@@ -542,8 +542,9 @@ class Regel extends PgObject {
 				$this->set('layer_id', $gml_layer->get($gml_layer->identifier));
 				$this->update();
 			}
-
-			$this->gui->formvars = $formvars_before;
+			if(isset($formvars_before) &&  !empty($formvars_before)) {
+				$this->gui->formvars = $formvars_before;
+			}
 		}
 
 	}
@@ -568,8 +569,8 @@ class Regel extends PgObject {
 						rb.*
 					FROM
 						xplan_gml.xp_plan p JOIN
-						xplan_gml.xp_bereich b ON p.gml_id::text = b.gehoertzuplan JOIN
-						xplankonverter.regeln rb ON b.gml_id = rb.bereich_gml_id
+						xplan_gml.xp_bereich b ON p.gml_id::text = b.gehoertzuplan::text JOIN
+						xplankonverter.regeln rb ON b.gml_id::text = rb.bereich_gml_id::text
 					WHERE
 						p.konvertierung_id = {$this->konvertierung->get('id')}
 				) regeln

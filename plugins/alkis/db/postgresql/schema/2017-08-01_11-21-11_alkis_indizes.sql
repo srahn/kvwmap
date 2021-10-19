@@ -92,7 +92,6 @@ COMMENT ON INDEX ax_flurstueck_kennz IS 'Suche nach Flurstückskennzeichen';
 -- TOC entry 16885 (class 1259 OID 13391539)
 -- Name: ax_flurstueck_oid; Type: INDEX; Schema: alkis; Owner: -; Tablespace: 
 --
-CREATE INDEX ax_flurstueck_oid ON ax_flurstueck USING btree (oid);
 
 --
 -- TOC entry 17158 (class 1259 OID 13391545)

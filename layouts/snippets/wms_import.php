@@ -42,16 +42,57 @@ if ($this->Fehlermeldung!='') {
 }
 ?></td>
   </tr>
-  <tr>
-    <td colspan="2"><span class="fett"><?php echo $strAdresse; ?></span>&nbsp;&nbsp;<input type="text" size="60" name="wms_url" value="<? echo $this->formvars['wms_url']; ?>"></td>
-  </tr>
-  <tr>
-    <td align="right">&nbsp;</td> 
-    <td align="center">
-      <input type="submit" name="Input" value="<?php echo $this->strConnect; ?>">
+	<tr>
+		<td>
+			<span class="fett"><?php echo $strAdresse; ?></span>
+		</td>
+		<td>
+			<input style="width: 100%" type="text" size="60" name="wms_url" value="<? echo $this->formvars['wms_url']; ?>">
 		</td>
 	</tr>
-	<? if($this->layers != ''){ ?>
+	<tr class="wms-auth" style="display: none;">
+		<td>
+			<span class="fett">Nutzername:</span>
+		</td>
+		<td>
+			<input style="width: 150px" type="text" maxlength="100" name="wms_auth_username" value="<? echo $this->formvars['wms_auth_username']; ?>">
+		</td>
+	</tr>
+	<tr class="wms-auth" style="display: none;">
+		<td>
+			<span class="fett">Password:</span>
+		</td>
+		<td>
+			<input style="width: 150px" type="password" maxlength="50" name="wms_auth_password" value="<? echo $this->formvars['wms_auth_password']; ?>">
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" align="center">
+			<input
+				class="wms-auth"
+				type="button"
+				value="ohne Basic Authentication"
+				onclick="
+					$('.wms-auth').toggle();
+					$('input[name=wms_auth_username], input[name=wms_auth_password]').val('');
+				"
+				style="float: left; display: none;"
+			>
+			<input
+				class="wms-auth"
+				type="button"
+				value="mit Basic Authentication"
+				onclick="$('.wms-auth').toggle()"
+				style="float: left; display: block;"
+			>
+			<input
+				type="submit"
+				name="Input"
+				value="<?php echo $this->strConnect; ?>"
+				style="margin-left: 20px; float: left"
+			>
+		</td>
+	</tr><? if ($this->layers != '') { ?>
 	<tr>
 		<td colspan="2"><span class="fett"><? echo $strAvailableLayers; ?>&nbsp;</span><span><? echo $strName.' ('.$strTitle.')' ?></span></td>
 	</tr>

@@ -74,4 +74,5 @@
 	$this->strUser = "Nutzer";
 	$this->strLabel = "Bezeichnung";
 	$this->strNameSuffix = "Namenszusatz";
+	$this->strMetadata="Metadaten";
 ?>

@@ -17,6 +17,7 @@ var query_tab;
 var root = window;
 root.resized = 0;
 root.open_subform_requests = 0;
+root.getlegend_requests = new Array();
 
 window.onbeforeunload = function(){
 	document.activeElement.blur();
@@ -345,10 +346,11 @@ function resizemap2window(){
 *			{ type: 'error', msg: 'Dieser Text ist eine Fehlermeldung'},
 *			{ type: 'info', msg: 'Hier noch eine Info.'},
 *			{ type: 'waring', msg: 'Dies ist nur eine Warung.'},
-*			{ type: 'notice', msg: 'und eine Notiz'}
+*			{ type: 'notice', msg: 'und eine Notiz'},
 *		]);
 */
 function message(messages, t_visible, t_fade, css_top, confirm_value, callback) {
+	console.log('Show Message: %o: ', messages);
 	console.log('function message with callback: %o: ', callback);
 	confirm_value = confirm_value || 'ok';
 	var messageTimeoutID;
@@ -402,8 +404,8 @@ function message(messages, t_visible, t_fade, css_top, confirm_value, callback) 
 			'description' : 'Bestätigung',
 			'icon': 'fa-question-circle-o',
 			'color': 'red'
-		}
-	};
+	  }
+	}
 	//	,confirmMsgDiv = false;
 
 	if (!$.isArray(messages)) {
@@ -431,12 +433,12 @@ function message(messages, t_visible, t_fade, css_top, confirm_value, callback) 
 
 	if (document.getElementById('message_ok_button') == null && document.getElementById('message_confirm_button') == null) {
 		// wenn kein OK-Button da ist, ausblenden
-    messageTimeoutID = setTimeout(function() { msgBoxDiv.fadeOut(t_fade); }, t_visible);
+		messageTimeoutID = setTimeout(function() { msgBoxDiv.fadeOut(t_fade); }, t_visible);
 	}
-  else {
+	else {
 		clearTimeout(messageTimeoutID);
-    $('#message_box').stop().fadeIn();
-  }
+		$('#message_box').stop().fadeIn();
+	}
 }
 
 function onload_functions() {
@@ -646,10 +648,12 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 
 	postdata = postdata+"&mime_type=map_ajax&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
 
-	if (document.GUI.legendtouched.value == 1) { // Legende benutzt -> gesamtes Formular mitschicken
+	if (document.GUI.legendtouched.value == 1) {
+		// Legende benutzt -> gesamtes Formular mitschicken
 		var formdata = new FormData(document.GUI);
 	}
-	else {																				// nur navigiert -> Formular muss nicht mitgeschickt werden
+	else {
+		// nur navigiert -> Formular muss nicht mitgeschickt werden
 		var formdata = new FormData();
 	}
 
@@ -660,10 +664,10 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 			value = item.substring(pos+1);
 			formdata.append(key, value);			// hier muesste eigentlich set verwendet werden, kann der IE 11 aber nicht
 		});
-
+	
 	ahah(
 		"index.php",
-		formdata,
+		formdata, 
 		new Array(
 			'',
 			mapimg, 
@@ -703,14 +707,14 @@ function overlay_submit(gui, start, target){
 				query_tab.close();
 			}
 			query_tab = root.window.open("", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
-			gui.mime_type.value = 'overlay_html';
+			gui.window_type.value = 'overlay';
 			gui.target = 'Sachdaten';			
 		}
 	}
 	gui.submit();
 	if(gui.CMD != undefined)gui.CMD.value = "";
 	gui.target = '';
-	gui.mime_type.value = '';
+	gui.window_type.value = '';
 }
 
 function overlay_link(data, start, target){
@@ -727,7 +731,7 @@ function overlay_link(data, start, target){
 				else if(start && browser == 'firefox' && query_tab != undefined && root.resized < 2){	// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
 					query_tab.close();
 				}
-				query_tab = root.window.open("index.php?"+data+"&mime_type=overlay_html", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
+				query_tab = root.window.open("index.php?"+data+"&window_type=overlay", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
 				if(root.document.GUI.CMD != undefined)root.document.GUI.CMD.value = "";
 			}
 			else{
@@ -747,49 +751,28 @@ function datecheck(value){
 function update_legend(layerhiddenstring){
 	parts = layerhiddenstring.split(' ');
 	for(j = 0; j < parts.length-1; j=j+2){
-		if((parts[j] == 'reload')||																																																								// wenn Legenden-Reload erzwungen wird oder
+		if (
+			(parts[j] == 'reload') ||																																																								// wenn Legenden-Reload erzwungen wird oder
 			(document.getElementById('thema_'+parts[j]) != undefined && document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 0) || 	// wenn Layer nicht sichtbar war und jetzt sichtbar ist
-			(document.getElementById('thema_'+parts[j]) != undefined && !document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 1)){	// oder andersrum
+			(document.getElementById('thema_'+parts[j]) != undefined && !document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 1)) 	// oder andersrum
+		{
+			clearLegendRequests();
 			legende = document.getElementById('legend');
-			ahah('index.php', 'go=get_legend', new Array(legende), "");
+			root.getlegend_requests.push(ahah('index.php', 'go=get_legend', new Array(legende), ""));
 			break;
 		}
 	}
 }
 
-function getlegend(groupid, layerid, fremde){
-	groupdiv = document.getElementById('groupdiv_'+groupid);
-	if(layerid == ''){														// eine Gruppe wurde auf- oder zugeklappt
-		group = document.getElementById('group_'+groupid);
-		if(group.value == 0){												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
-			group.value = 1;
-			ahah('index.php', 'go=get_group_legend&'+group.name+'='+group.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
-		}
-		else{																// eine Gruppe wurde zugeklappt -> Layerstruktur nur verstecken
-			group.value = 0;
-			layergroupdiv = document.getElementById('layergroupdiv_'+groupid);
-			groupimg = document.getElementById('groupimg_'+groupid);
-			layergroupdiv.style.display = 'none';			
-			groupimg.src = 'graphics/plus.gif';
-		}
-	}
-	else{																	// eine Klasse wurde auf- oder zugeklappt
-		layer = document.getElementById('classes_'+layerid);
-		if(layer.value == 0){
-			layer.value = 1;
-		}
-		else{
-			layer.value = 0;
-		}
-		ahah('index.php', 'go=get_group_legend&layer_id='+layerid+'&show_classes='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
-	}
-}
-
-function getlegend(groupid, layerid, fremde) {
+/*
+* optional status to set values irrespective of current value
+*/
+function getlegend(groupid, layerid, fremde, status) {
 	groupdiv = document.getElementById('groupdiv_' + groupid);
 	if (layerid == '') {														// eine Gruppe wurde auf- oder zugeklappt
 		group = document.getElementById('group_' + groupid);
-		if (group.value == 0) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
+		status = status || !parseInt(group.value);
+		if (status) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
 			group.value = 1;
 			ahah('index.php', 'go=get_group_legend&' + group.name + '=' + group.value + '&group=' + groupid + '&nurFremdeLayer=' + fremde, new Array(groupdiv), "");
 		}
@@ -817,6 +800,7 @@ function getlegend(groupid, layerid, fremde) {
 function updateThema(event, thema, query, groupradiolayers, queryradiolayers, instantreload){
 	var status = query.checked;
 	var reload = false;
+	document.GUI.legendtouched.value = 1;
   if(status == true){
     if(thema.checked == false){
 			thema.checked = true;
@@ -880,38 +864,37 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 	if(reload)neuLaden();
 }
 
-function updateQuery(event, thema, query, radiolayers, instantreload) {
-	if (query) {
-		if (thema.checked == false){
-			query.checked = false;
+function updateQuery(event, thema, query, radiolayers, instantreload){
+	document.GUI.legendtouched.value = 1;
+  if(query){
+    if(thema.checked == false){
+      query.checked = false;
 			thema.title = activatelayer;
 			query.title = activatequery;
-		}
-		else {
+    }
+		else{
 			thema.title = deactivatelayer;
 		}
-	}
-	if (radiolayers != '' && radiolayers.value != '') {
-		preventDefault(event);
-		radiolayerstring = radiolayers.value + '';
-		radiolayer = radiolayerstring.split('|');
-		for (i = 0; i < radiolayer.length -1; i++) {
-			if (document.getElementById('thema_' + radiolayer[i]) != thema) {
-				document.getElementById('thema_' + radiolayer[i]).checked = false;
-				document.getElementById('thema' + radiolayer[i]).value = 0;		// damit nicht sichtbare Radiolayers ausgeschaltet werden
-			}
-			else {
-				thema.checked = !thema.checked;
+  }
+  if(radiolayers != '' && radiolayers.value != ''){  
+  	preventDefault(event);
+  	radiolayerstring = radiolayers.value+'';
+  	radiolayer = radiolayerstring.split('|');
+  	for(i = 0; i < radiolayer.length-1; i++){
+  		if(document.getElementById('thema_'+radiolayer[i]) != thema){
+  			document.getElementById('thema_'+radiolayer[i]).checked = false;
+				document.getElementById('thema'+radiolayer[i]).value = 0;		// damit nicht sichtbare Radiolayers ausgeschaltet werden
+  		}
+  		else{
+  			thema.checked = !thema.checked;
 				thema.checked2 = thema.checked;		// den check-Status hier nochmal merken, damit man ihn bei allen Click-Events setzen kann, sonst setzt z.B. Chrome den immer wieder zurueck
-			}
-			if (document.getElementById('qLayer' + radiolayer[i]) != undefined) {
-				document.getElementById('qLayer' + radiolayer[i]).checked = false;
-			}
-		}
-	}
-	if (instantreload) {
-		neuLaden();
-	}
+  		}
+  		if(document.getElementById('qLayer'+radiolayer[i]) != undefined){
+  			document.getElementById('qLayer'+radiolayer[i]).checked = false;
+  		}
+  	}
+  }
+	if(instantreload)neuLaden();
 }
 
 function deleteRollenlayer(type){
@@ -923,10 +906,18 @@ function deleteRollenlayer(type){
 
 function neuLaden(){
 	startwaiting(true);
+	clearLegendRequests();
 	if (currentform.neuladen) {
-		currentform.neuladen.value = 'true';
+		currentform.neuladen.value='true';
 	}
 	get_map_ajax('go=navMap_ajax', '', 'if(document.GUI.oldscale != undefined){document.GUI.oldscale.value=document.GUI.nScale.value;}');
+}
+
+function clearLegendRequests(){
+	[].forEach.call(root.getlegend_requests, function (request){	// noch laufende getlegend-Requests abbrechen
+		request.abort();				
+	});
+	root.getlegend_requests = new Array();
 }
 
 function preventDefault(e){
@@ -963,7 +954,19 @@ function selectgroupquery(group, instantreload){
 }
 
 function selectgroupthema(group, instantreload){
-  var value = group.value+"";
+	var value = "";
+	if(Array.isArray(group)) {
+		//activates/deactivates all passed array of groups layers. 
+		//non-opened groups will be undefined and skipped (can be worked around with getlegend(..) on group-id call before this function
+		// remove potential undefined values
+		group = group.filter(function( x ) {
+			return x !== undefined;
+		});
+		value = group.map(x => x.value+"").join(",");
+	} else {
+		value = group.value+"";
+	}
+  
   var layers = value.split(",");
 	var check;
   for(i = 0; i < layers.length; i++){			// erst den ersten checkbox-Layer suchen und den check-Status merken
@@ -991,10 +994,8 @@ function zoomToMaxLayerExtent(zoom_layer_id){
 	currentform.zoom_layer_id.value = '';
 }
 
-function getLayerOptions(layer_id) {
-	if (document.GUI.layer_options_open.value != '') {
-    closeLayerOptions(document.GUI.layer_options_open.value);
-  }
+function getLayerOptions(layer_id){
+	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
 	ahah('index.php', 'go=getLayerOptions&layer_id=' + layer_id, new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'));
 	document.GUI.layer_options_open.value = layer_id;
 }
@@ -1325,9 +1326,9 @@ function htmlspecialchars(value) {
 }
 
 function toggleSyncLayer() {
-  $('.no-sync').toggle();
+	$('.no-sync').toggle();
 }
 
 function toggleSharedLayer() {
-  $('.no-shared').toggle();
+	$('.no-shared').toggle();
 }

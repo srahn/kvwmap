@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title><? echo TITLE; ?></title>
+		<title><? echo $this->titel ?: TITLE; ?></title>
 		<? include(SNIPPETS . 'gui_head.php'); ?>
 	</head>
 	<body onload="activate_overlay();">
@@ -8,9 +8,9 @@
 			root = window.opener;
 			if(typeof(root.stopwaiting) == "function"){
 				root.stopwaiting();	// wenn man aus der Karte abgefragt hatte, Warteanimation beenden		
-		<? if($this->formvars['mime_type'] == 'overlay_html' AND $this->zoomed){ ?>		// wenn nicht aus normaler Suchmaske heraus gesucht wurde und (durch die Funktion generischeSuche_Suchen) auf die Treffer gezoomt wurde, Karte neu laden
+		<? if($this->formvars['window_type'] == 'overlay' AND $this->zoomed){ ?>		// wenn auf die Treffer gezoomt wurde, Karte neu laden
 				root.startwaiting();
-				if(root.document.getElementById('map')){
+				if(root.document.getElementById('mapimage')){
 					root.neuLaden();
 				}
 				else{
@@ -39,9 +39,10 @@
 					</tr>
 				</table>
 			</div>
-			<div id="overlayfooter" style="<? if($this->found == 'false' OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;width: 100%; position:fixed; bottom: 0px">
+			<div id="overlayfooter" style="<? if ($this->noOverlayFooter OR $this->new_entry OR $this->found == 'false' OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;width: 100%; position:fixed; bottom: 0px">
 				<table style="width:100%">
 					<tr>
+						<? if (is_array($selectable_limits)) { ?>
 						<td style="width:40%" class="px13">&nbsp;<? echo $this->strLimit; ?>&nbsp;										
 							<select name="anzahl" id="anzahl" onchange="javascript:currentform.go.value = 'get_last_query'; overlay_submit(currentform, false);">
 								<? foreach($selectable_limits as $limit){
@@ -53,12 +54,13 @@
 								<? } ?>
 							</select>
 						</td>
+						<? } ?>
 						<td align="center"><div id="savebutton" <? if($this->editable == '')echo 'style="display:none"'; ?>><input type="button" id="sachdatenanzeige_save_button" name="savebutton" value="<? echo $this->strSave; ?>" onclick="save();"></div></td>
 						<td style="width:40%" align="right"><a href="javascript:druck();" class="px13"><? echo $this->printversion; ?></a>&nbsp;</td>
 					</tr>
 				</table>
 			</div>
-			<input type="hidden" name="mime_type" value="">
+			<input type="hidden" name="window_type" value="">
 		</form>
 	</body>
 </html>

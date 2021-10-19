@@ -5,15 +5,24 @@
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script type="text/javascript">
 
+	function nutzer_aendern(){
+		if (document.GUI.admin_user.value != 1 && document.GUI.selectedstellen.length == 0){
+			if (!window.confirm("Wenn Sie dem Nutzer keine Stellen zuordnen, können Sie ihn anschließend nicht mehr bearbeiten. Wirklich Fortfahren?")) {
+				return;
+			}
+		}
+		submitWithValue('GUI','go_plus','Ändern');
+	}
+
 	function toggle_password(){
 		document.getElementById('udf_changepasswd').classList.value;
-		if(document.getElementById('udf_changepasswd').classList.length == 0){
+		if (document.getElementById('udf_changepasswd').classList.length == 0) {
 			document.getElementById('udf_changepasswd').classList.add('udf_pw-active');
 			document.GUI.password1.disabled=false;
 			document.GUI.password2.disabled=false;
 			document.GUI.changepasswd.value = 1;
 		}
-		else{
+		else {
 			document.getElementById('udf_changepasswd').classList.remove('udf_pw-active');
 			document.GUI.password1.disabled=true;
 			document.GUI.password2.disabled=true;
@@ -128,7 +137,7 @@
 
 <div class="udf_back">
 <?
-	if($this->formvars['nutzerstellen']) {
+	if ($this->formvars['nutzerstellen']) {
 ?>
 	<a href="index.php?go=BenutzerStellen_Anzeigen#<? echo $this->formvars['nutzerstellen'].'user'.$this->formvars['selected_user_id']; ?>">&raquo;&nbsp;<? echo $this->strButtonBack; ?></a>
 
@@ -240,20 +249,20 @@
 	}
 ?>
 				<div class="udf_eingabe-pw-input">
-						<div>
-							<div><input name="password1" readonly onfocus="this.removeAttribute('readonly');"
-							<? if ($this->formvars['selected_user_id'] > 0) { ?>
-								disabled="true"
-							<? } ?>
-								type="password" maxlength="30" placeholder="<? echo $strNewPassword;?>"></div>
-						</div>
-						<div>
-							<input name="password2" readonly onfocus="this.removeAttribute('readonly');"
-							<? if ($this->formvars['selected_user_id']>0) { ?>
-								disabled="true"
-							<? } ?>
-								type="password" maxlength="30" placeholder="<? echo $strReEnterPassword;?>">
-						</div>
+					<div>
+						<div><input name="password1" readonly onfocus="this.removeAttribute('readonly');"
+						<? if ($this->formvars['selected_user_id'] > 0) { ?>
+							disabled="true"
+						<? } ?>
+							type="password" maxlength="30" placeholder="<? echo $strNewPassword;?>"></div>
+					</div>
+					<div>
+						<input name="password2" readonly onfocus="this.removeAttribute('readonly');"
+						<? if ($this->formvars['selected_user_id']>0) { ?>
+							disabled="true"
+						<? } ?>
+							type="password" maxlength="30" placeholder="<? echo $strReEnterPassword;?>">
+					</div>
 				</div>					
 <?
 	if ($this->formvars['selected_user_id'] > 0) {
@@ -301,21 +310,22 @@
 						<td>
 							<select name="selectedstellen" style="height: auto;" size="5" multiple>
 								<? 
-								for($i=0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++){
+								for ($i=0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++) {
 									echo '<option value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
 								}
 								?>
 							</select>
 						</td>
 						<td class="fsf_suche_form_add">
-							<div><input type="button" name="addPlaces" value="&laquo;" onClick=addOptions(document.GUI.allstellen,document.GUI.selectedstellen,document.GUI.selstellen,'value')></div>
-							<div><input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedstellen,document.GUI.selstellen,'value')></div>
+							<div><input type="button" name="addPlaces" value="&laquo;" onClick="addOptions(document.GUI.allstellen,document.GUI.selectedstellen,document.GUI.selstellen,'value');"></div>
+							<div><input type="button" name="substractPlaces" value="&raquo;" onClick="substractOptions(document.GUI.selectedstellen,document.GUI.selstellen,'value');"></div>
 						</td>
 						<td>
 							<select name="allstellen" style="height: auto;" size="5" multiple>
-								<? for($i=0; $i < count($this->formvars['stellen']["Bezeichnung"]); $i++){
+								<? 
+								for ($i=0; $i < count($this->formvars['stellen']["Bezeichnung"]); $i++) {
 									echo '<option value="'.$this->formvars['stellen']["ID"][$i].'" title="'.$this->formvars['stellen']["Bezeichnung"][$i].'">'.$this->formvars['stellen']["Bezeichnung"][$i].'</option>';
-									}
+								}
 								?>
 							</select>
 						</td>
@@ -339,7 +349,8 @@
 			<div><? echo $strActiveLayers;?></div>
 			<div class="udf_eingabe-layers">
 				<table>
-				<?	for($i = 0; $i < count($this->active_layers); $i++){ ?>
+				<?	
+					for ($i = 0; $i < count($this->active_layers); $i++) { ?>
 					<tr id="layer_<? echo $this->active_layers[$i]['Layer_ID']; ?>" class="tr_hover">
 						<td>
 							<? echo $this->active_layers[$i]['alias']; ?>
@@ -359,7 +370,6 @@
 				<a href="index.php?go=als_nutzer_anmelden&loginname=<? echo $this->formvars['loginname']; ?>"><? echo $strLoginAsUser; ?></a>
 			</div>
 		</div>
-
 <?
 	} 
 ?>
@@ -369,11 +379,12 @@
 
 <div id="udf_submit">
 	<input type="hidden" name="go_plus" id="go_plus" value="">
+	<input type="hidden" name="admin_user" value="<? echo $this->admin_user; ?>">
 <?
-	if ($this->formvars['selected_user_id']>0) {
+	if ($this->formvars['selected_user_id'] > 0) {
 ?>
 	<input type="hidden" name="selected_user_id" value="<? echo $this->formvars['selected_user_id']; ?>">
-	<input type="button" name="dummy" value="<? echo $this->strSave; ?>" onclick="submitWithValue('GUI','go_plus','Ändern')">
+	<input type="button" name="dummy" value="<? echo $this->strSave; ?>" onclick="nutzer_aendern()">
 <?
 	}
 ?>

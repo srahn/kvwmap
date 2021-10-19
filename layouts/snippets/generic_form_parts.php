@@ -116,7 +116,7 @@
 		else $fieldname = $field_name;
 				
 		if(!$change_all){
-			$onchange .= 'set_changed_flag(currentform.changed_'.$layer_id.'_'.str_replace('-', '', $oid).');';
+			$onchange .= 'set_changed_flag(this, \'changed_'.$layer_id.'_'.str_replace('-', '', $oid).'\');';
 		}
 		else{
 			$onchange .= 'change_all('.$layer_id.', '.$k.', \''.$layer_id.'_'.$name.'\');';
@@ -136,7 +136,7 @@
 
 		###### Array-Typ #####
 		if (POSTGRESVERSION >= 930 AND substr($attributes['type'][$j], 0, 1) == '_'){
-			if ($field_id != NULL) $id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
+			if ($field_id != NULL) $id = $field_id.'_'.$name;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
 			else $id = $layer_id.'_'.$name.'_'.$k;	# oberste Ebene
 			$datapart .= '<input type="hidden" class="'.$field_class.'" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$datapart .= '<div id="'.$id.'_elements" '.($attributes['form_element_type'][$j] == 'Dokument' ? 'style="max-width: 735px; display: flex; flex-wrap: wrap; align-items: flex-start"' : '').'>';
@@ -169,7 +169,7 @@
 
 		###### Nutzer-Datentyp #####
 		if(is_numeric($attributes['type'][$j])){
-			if($field_id != NULL)$id = $field_id;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
+			if($field_id != NULL)$id = $field_id.'_'.$name;		# wenn field_id übergeben wurde (nicht die oberste Ebene)
 			else $id = $k.'_'.$name;	# oberste Ebene
 			$datapart .= '<input type="hidden" class="'.$field_class.'" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$type_attributes = $attributes['type_attributes'][$j];
@@ -338,6 +338,26 @@
 					$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class, $attributes['datatype_id'][$j]);
 				} break;
 				
+				case 'Farbauswahl' : {
+					if ($gui->result_colors == '') {
+						$gui->result_colors = $gui->database->read_colors();
+					}
+					$datapart .= '
+						<select class="'.$field_class.'" tabindex="1" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="width: 80px; background-color: rgb(' . $value . ')" onchange="' . $onchange . ';this.setAttribute(\'style\', this.options[this.selectedIndex].getAttribute(\'style\'));">';
+						for($i = 0; $i < count($gui->result_colors); $i++){
+							$rgb = $gui->result_colors[$i]['red'] . ' ' . $gui->result_colors[$i]['green'] . ' ' . $gui->result_colors[$i]['blue'];
+							$datapart .= '<option ';
+							if ($value == $rgb){
+								$datapart .= ' selected';
+							}
+							$datapart .= '	style="width: 80px; background-color: rgb(' . $rgb . ')"
+															value="' . $rgb . '">
+															&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+														</option>' . "\n";
+						}
+					$datapart .= '</select>';
+				} break;
+				
 				case 'Autovervollständigungsfeld' : {
 					$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $change_all, $size, $onchange, $field_class);
 				} break;
@@ -451,7 +471,7 @@
 									$enum_output = $attributes['enum_output'][$index];
 								}
 								if($attributes['nullable'][$index] != '0')$strPleaseSelect = $gui->strPleaseSelect;
-								$onchange = 'set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.');';
+								$onchange = 'set_changed_flag(this, \'changed_'.$layer_id.'_'.$oid.'\');';
 								$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $enum_value, $enum_output, $attributes['req_by'][$index], $attributes['req'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class);
 							}break;
 							default : {
@@ -508,6 +528,7 @@
 					$reloadParams .= '&embedded_subformPK=true';
 					if($attributes['embedded'][$j] == true)$reloadParams .= '&embedded=true';
 					if($attributes['list_edit'][$j] == true)$reloadParams .= '&list_edit=true';
+					if($attributes['show_count'][$j] == true)$reloadParams .= '&show_count=true';
 					$reloadParams .= '&targetobject='.$layer_id.'_'.$name.'_'.$k;
 					$reloadParams .= '&fromobject='.$layer_id.'_'.$name.'_'.$k;
 					$reloadParams .= '&targetlayer_id='.$layer_id;
@@ -538,81 +559,47 @@
 
 				case 'Dokument': {
 					if ($value != '') {
-						$dokumentpfad = $value;
-						$pfadteil = explode('&original_name=', $dokumentpfad);
-						$dateipfad = $pfadteil[0];
-						if ($layer['document_url'] != '') {
-							$remote_url = false;
-							if($_SERVER['HTTP_HOST'] != parse_url($layer['document_url'], PHP_URL_HOST))$remote_url = true;		# die URL verweist auf einen anderen Server
-							$dateipfad = url2filepath($dateipfad, $layer['document_path'], $layer['document_url']);
-						}
-						if ($dateipfad != ''){
-							if(file_exists($dateipfad) OR $remote_url) {
-								$pathinfo = pathinfo($dateipfad);
-								$type = strtolower($pathinfo['extension']);
-								$thumbname = $gui->get_dokument_vorschau(
-									array(
-										$pathinfo['dirname'] . '/' . $pathinfo['filename'],
-										$pathinfo['extension']
-									),
-									$remote_url
-								);
-								if ($layer['document_url'] != '') {
-									$original_name = basename($dateipfad);
-									$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
-									$target = 'target="_blank"';
-									if(dirname($thumbname).'/' == IMAGEPATH){
-										$thumbname = IMAGEURL.basename($thumbname);
-									}
-									else{
-										$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
-									}
-								}
-								else {
-									$original_name = $pfadteil[1];
-									$gui->allowed_documents[] = addslashes($dateipfad);
-									$gui->allowed_documents[] = addslashes($thumbname);
-									$url = IMAGEURL.$gui->document_loader_name.'?dokument='; # absoluter Dateipfad
-								}
-								$datapart .= '<table border="0"><tr><td>';
-								if ($hover_preview) {
-									$onmouseover = 'onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
-								}
-								# Bilder mit Vorschaubild
-								if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
-									$datapart .= '<a href="' . $url . $dokumentpfad . '" ' . $target . '><img class="preview_image" src="' . $url . $thumbname . '" ' . $onmouseover . '></a>';
-								}
-								# Videostream
-								elseif ($layer['document_url'] != '' AND in_array($type, array('mp4'))) {
+						$preview = $gui->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url']);
+						if ($preview['doc_src'] != '') {
+							$datapart .= '<table border="0"><tr><td>';
+							if ($hover_preview) {
+								$onmouseover = 'onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
+							}
+							switch ($preview['doc_type']) {
+								case 'local_img' : { # Bilder mit Vorschaubild
+									$datapart .= '<a href="' . $preview['doc_src'] . '" ' . $preview['target'] . '><img class="preview_image" src="' . $preview['thumb_src'] . '" ' . $onmouseover . '></a>';
+								} break;
+
+								case 'local_doc' : case 'remote_url' : { # lokale Dateien oder fremde URLs
+									$datapart .= '<a href="' . $preview['doc_src'] . '" ' . $preview['target'] . '><img class="preview_doc" src="' . $preview['thumb_src'] . '"></a>';
+								} break;
+
+								case 'videostream' : { # Videostream
 									$datapart .= '
-										<video width="'.PREVIEW_IMAGE_WIDTH.'" controls>
-											<source src="'.$dokumentpfad.'" type="video/mp4">
+										<video width="' . PREVIEW_IMAGE_WIDTH . '" controls>
+											<source src="' . $preview['doc_src'] . '" type="video/mp4">
 										</video>
-										';
-								}
-								# Rest
-								else {
-									$datapart .= '<a href="' . $url . $dokumentpfad . '" ' . $target . '><img class="preview_doc" src="' . $url . $thumbname . '"></a>';
-								}
-								$datapart .= '<br>';
-								if ($attribute_privileg != '0' AND !$lock[$k]) {
-									//$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\');"><span>Dokument <br>löschen</span></a>';
-									$datapart .= '<a href="javascript:delete_document(\'' . $fieldname . '\', ' . $layer_id . ', \'' . $gui->formvars['fromobject'] . '\', \'' . $gui->formvars['targetobject'] . '\',  \'' . $gui->formvars['reload'] . '\');"><span>Dokument löschen</span></a>';
-								}
-								$datapart .= '</td></tr>';
-								$datapart .= '<tr><td colspan="2"><span id="image_original_name">' . $original_name . ' (' . human_filesize($dateipfad) . ')</span></td></tr>';
-								$datapart .= '</table>';
+									';
+								} break;
 							}
-							else {
-								$datapart .= '<div>';
-								$datapart .= 'Oooops!<p>';
-								$datapart .= 'Die Datei ' . $dateipfad . ' wurde nicht auf dem Server gefunden.';
-								if ($layer['document_url'] == '') {
-									$datapart .= '<br>Der originale Name der Datei war ' . $pfadteil[1];
-								}
-								$datapart .= '<br>Laden Sie die Datei neu auf den Server hoch oder fragen Sie Ihren Administrator warum die Datei auf dem Server fehlt und lassen Sie sie wiederherstellen.';
-								$datapart .= '</div>';
+							$datapart .= '<br>';
+							if ($attribute_privileg != '0' AND !$lock[$k]) {
+								//$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\');"><span>Dokument <br>löschen</span></a>';
+								$datapart .= '<a href="javascript:delete_document(\'' . $fieldname . '\', ' . $layer_id . ', \'' . $gui->formvars['fromobject'] . '\', \'' . $gui->formvars['targetobject'] . '\',  \'' . $gui->formvars['reload'] . '\');"><span>Dokument löschen</span></a>';
 							}
+							$datapart .= '</td></tr>';
+							$datapart .= '<tr><td colspan="2"><span id="image_original_name">' . $preview['original_name'] . ' (' . $preview['filesize'] . ')</span></td></tr>';
+							$datapart .= '</table>';
+						}
+						else {
+							$datapart .= '<div>';
+							$datapart .= 'Oooops!<p>';
+							$datapart .= 'Die Datei ' . $dateipfad . ' wurde nicht auf dem Server gefunden.';
+							if ($layer['document_url'] == '') {
+								$datapart .= '<br>Der originale Name der Datei war ' . $preview['original_name'];
+							}
+							$datapart .= '<br>Laden Sie die Datei neu auf den Server hoch oder fragen Sie Ihren Administrator warum die Datei auf dem Server fehlt und lassen Sie sie wiederherstellen.';
+							$datapart .= '</div>';
 						}
 						$datapart .= '<input type="hidden" name="'.$fieldname.'_alt" class="' . $field_class . '" value="' . htmlspecialchars($value) . '">';
 					}
@@ -700,7 +687,7 @@
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					if ($show_link) {
 						if ($explosion[2] == 'embedded'){
-							$datapart .= '<a class="dynamicLink" href="javascript:void(0);" onclick="if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
+							$datapart .= '<a class="dynamicLink" href="javascript:void(0);" onclick="if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'&embedded=true\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
 							$datapart .= '<div style="display:inline" id="dynamicLink'.$layer_id.'_'.$k.'_'.$j.'"></div>';
@@ -709,7 +696,6 @@
 							switch ($explosion[2]) { 
 								case 'no_new_window' : {
 									$link_target = '_self';
-									$mimetype = $gui->mime_type;
 								} break;
 								case 'root' : {
 									$link_target = 'root';
@@ -718,45 +704,34 @@
 									$link_target = '_blank';
 								}
 							}
-							if ($explosion[2] == 'no_new_window' AND !substr($href, 0, 10) == 'javascript') {
-								$link_attribute = 'onclick="checkForUnsavedChanges(event);"';
+							if ($explosion[2] == 'no_new_window' AND substr($href, 0, 10) != 'javascript') {
+								$onclick = 'checkForUnsavedChanges(event);adjustHref(this);';
 							}
-							else {
-								# link_parts: link_type:link_url
-								$link_type = explode(':', $href)[0];
-								$link_url = explode(':', $href)[1];
-								switch ($link_type) {
-									case 'mailto' : {
-										$url_parts = explode('?', $link_url);
-										$mail_addresses = explode(' ', $url_parts[0]);
-										$params = array();
-										if (count($mail_addresses) > 1) {
-											# append extra email addresses in cc deliminated by ;
-											$params[] = 'cc=' . implode(';', array_slice($mail_addresses, 1));
-										}
-										$params[] = $url_parts[1];
-										$href_parts = array($link_type, $mail_addresses[0] . '?' . implode('&', $params));
-									} break;
-									case 'javascript' : {
-										$href_parts = array($link_type, $link_url);
-									} break;
-									default : {
-										$href_parts = array($href . '&mime_type=' . $mimetype);
+							# link_parts: link_type:link_url
+							$link_type = explode(':', $href)[0];
+							$link_url = explode(':', $href)[1];
+							switch ($link_type) {
+								case 'mailto' : {
+									$url_parts = explode('?', $link_url);
+									$mail_addresses = explode(' ', $url_parts[0]);
+									$params = array();
+									if (count($mail_addresses) > 1) {
+										# append extra email addresses in cc deliminated by ;
+										$params[] = 'cc=' . implode(';', array_slice($mail_addresses, 1));
 									}
-								}
-								$link_attribute = 'href="' . implode(':', $href_parts) . '"';
+									$params[] = $url_parts[1];
+									$href = $link_type . ':' . $mail_addresses[0] . '?' . implode('&', $params);
+								} break;								
 							}
+							
 							$datapart .= '<a
 								tabindex="1"
 								target="' . $link_target . '"
 								class="dynamicLink"
 								style="font-size: ' . $fontsize . 'px"
-								' . $link_attribute . '
-								target="' . $link_target . '"
+								onclick="' . $onclick . '"
+								href="' . $href . '"
 							>' . $alias . '</a><br>';
-							if ($GUI->user->id == 1) {
-								echo '<br><textarea>' . $link_attribute . '</textarea>';
-							}
 						}
 					}
 				} break;
@@ -966,7 +941,7 @@
 										);
 									}' . $onchange_output . '
 									if (\'' . $oid . '\' != \'\') {
-										set_changed_flag(currentform.changed_' . $layer_id . '_' . $oid . ')
+										set_changed_flag(this, \'changed_' . $layer_id . '_' . $oid . '\')
 									}
 								"' .
 								(($privileg == '0' OR $lock)
@@ -1070,7 +1045,7 @@
 									}
 									' . $onchange_output . '
 									if (\'' . $oid . '\' != \'\') {
-										set_changed_flag(currentform.changed_' . $layer_id . '_' . $oid . ')
+										set_changed_flag(this, \'changed_' . $layer_id . '_' . $oid . '\')
 									}
 								"' .
 								(($privileg == '0' OR $lock)

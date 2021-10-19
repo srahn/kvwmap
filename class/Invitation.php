@@ -52,7 +52,7 @@ class Invitation extends MyObject {
 
 		# // ToDo Den Einladungstext fertig machen mit richtigem Ansprechpartner etc.
 			#//ToDo Werte des Einladenden mit abfragen.
-		$link = URL . APPLVERSION .
+		$link = URL . (substr(URL, -1) != '/' ? '/' : '') . APPLVERSION .
 			'index.php?go=logout&token=' . $this->get('token') .
 			'&email=' . $this->get('email') .
 			'&Stelle_ID=' . $this->get('stelle_id') .

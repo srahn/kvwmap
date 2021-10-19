@@ -72,4 +72,5 @@
 	$this->strUser = "User";
 	$this->strLabel = "Label";
 	$this->strNameSuffix = "Name suffix";
+	$this->strMetadata="Metadata";
 ?>

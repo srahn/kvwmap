@@ -1334,7 +1334,7 @@ class GUI {
     return $legend;
   }
 
-	function create_layer_legend($layer, $requires = false){		
+	function create_layer_legend($layer, $requires = false) {
 		if(!$requires AND value_of($layer, 'requires') != '' OR $requires AND value_of($layer, 'requires') == '')return;
 		global $legendicon_size;
 		$visible = $this->check_layer_visibility($layer);
@@ -1342,7 +1342,6 @@ class GUI {
 		if ($visible) {
 			if (value_of($layer, 'requires') == '') {
 				$legend = '<tr><td valign="top">';
-
 				if (!empty($layer['shared_from'])) {
 					$user_daten = $this->user->getUserDaten($layer['shared_from'], '', '');
 					$legend .= ' <a
@@ -1439,11 +1438,15 @@ class GUI {
 				if ($this->user->rolle->showlayeroptions) {
 					$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
 				}
-				if(value_of($layer, 'metalink') != ''){
-					if(substr($layer['metalink'], 0, 10) != 'javascript'){
+				if (value_of($layer, 'metalink') != ''){
+					if (substr($layer['metalink'], 0, 10) != 'javascript'){
 						$legend .= ' target="_blank"';
-						if(strpos($layer['metalink'], '?') === false)$layer['metalink'] .= '?';
-						else $layer['metalink'] .= '&';
+						if (strpos($layer['metalink'], '?') === false) {
+							$layer['metalink'] .= '?';
+						}
+						else {
+							$layer['metalink'] .= '&';
+						}
 						$layer['metalink'] .= 'time='.time();
 					}
 					$legend .= ' class="metalink boldhover" href="'.$layer['metalink'].'">';
@@ -1479,7 +1482,7 @@ class GUI {
 					if($layer['connectiontype'] == 7){      # WMS
 						if($layer['Class'][$k]['legendgraphic'] != ''){
 							$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
-							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><img src="'.$imagename.'"></div><br>';
+							$legend .=  '<div id="lg'.$j.'_'.$l.'"><img src="'.$imagename.'"></div>';
 						}
 						else{
 							$url = str_ireplace('&styles=', '&style=', $layer['connection']);
@@ -1488,7 +1491,7 @@ class GUI {
 							if($pos !== false)$layersection = substr($layersection, 0, $pos);
 							$layers = explode(',', $layersection);
 							for($l = 0; $l < count($layers); $l++){
-								$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><img src="' . $url . '&layer=' . $layers[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div><br>';
+								$legend .=  '<div id="lg'.$j.'_'.$l.'"><img src="' . $url . '&layer=' . $layers[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
 							}
 						}
 					}
@@ -1513,6 +1516,9 @@ class GUI {
 										$style->set('maxsize', 2);
 										$style->set('width', 2);
 										$style->set('maxwidth', 2);
+									}
+									if ($maplayer->type == MS_LAYER_CHART) {
+										$maplayer->set('type', MS_LAYER_POLYGON);		# Bug-Workaround Chart-Typ
 									}
 								}
 								else{		# Punktlayer
@@ -1650,13 +1656,13 @@ class GUI {
 			$legend .=  '</td>
 					</tr>';
 		}
-		
+
 		# requires-Layer
 		if(value_of($layer, 'required') != ''){
 			foreach($layer['required'] as $require_layer_id){
 				$legend .= $this->create_layer_legend($this->layerset['layer_ids'][$require_layer_id], true);
 			}
-		}		
+		}
 		return $legend;
 	}
 
@@ -1713,9 +1719,12 @@ class database {
 
 	function open() {
 		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
-		$this->mysqli = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+		$this->mysqli = mysqli_init();
+		$ret = $this->mysqli->real_connect($this->host, $this->user, $this->passwd, $this->dbName, 3306, null, MYSQLI_CLIENT_FOUND_ROWS);
 	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
-		return $this->mysqli->connect_errno;
+		$this->debug->write("<br>MySQL Fehlernummer: " . mysqli_connect_errno(), 4);
+		$this->debug->write("<br>MySQL Fehler: " . mysqli_connect_error(), 4);
+		return $ret;
 	}
 
 	function execSQL($sql, $debuglevel = 4, $loglevel = 0, $suppress_error_msg = false) {
@@ -2032,6 +2041,7 @@ class rolle {
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
+			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];

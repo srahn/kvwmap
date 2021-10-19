@@ -33,4 +33,5 @@
 	$this->strEditableOnlyInThisStelle = "Nur editierbar in dieser Stelle";
 	$this->strEditableInAllStellen = "In allen Stellen editierbar";
 	$this->strSettings = "Einstellungen";
+	$this->strMetadata="Metadaten";
 ?>

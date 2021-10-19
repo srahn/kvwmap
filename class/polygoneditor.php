@@ -96,29 +96,84 @@ class polygoneditor {
 		return $ret;
 	}
 
-  function eintragenFlaeche($umring, $oid, $tablename, $columnname, $geomtype) {
-		$geometry = ($umring == '' ? "NULL" : "ST_Transform(ST_GeometryFromText('" . $umring . "', " . $this->clientepsg . "), " . $this->layerepsg . ")");
+	/**
+	 * Function returns a WKT MultiPolygon from a polygon, transformed from client to layer system.
+	 * @params string $polygon The Polygon as comma separated text
+	 * @return string The WKT MultiLineString
+	 */
+	function get_multipolygon($polygon) {
+		return "ST_Multi(" . $this->get_polygon($polygon) . ")";
+	}
+
+	/**
+	 * Function returns a WKT Polygon from a polygon, transformed from client to layer system.
+	 * @params string $polygon The Polygon as comma separated text
+	 * @return string The WKT Polygon
+	 */
+	function get_polygon($polygon) {
+		return "ST_GeometryFromText('" . $polygon . "', " . $this->clientepsg . ")";
+	}
+
+	/**
+	 * Function returns wkb_geometry from polygon and geomtype given in options
+	 * transformed from client to layerepsg of this polygoneditor object.
+	 * @params array options with line = WKT-Line and geomtype = Postgis-Geometrytype string
+	 * @return array success = false and err_msg if error in database request and true and
+	 * wkb_geometry with the requested WKB Geometry of that polygon
+	 */
+	function get_wkb_geometry($options) {
+		$sql = "
+			SELECT
+				ST_Transform(
+					" . (strtoupper(substr($options['geomtype'], 0, 5)) == 'MULTI' ? $this->get_multipolygon($options['polygon']) : $this->get_polygon($options['polygon'])) . ",
+					" . $this->layerepsg . "
+				) AS wkb_geometry
+		";
+		#echo '<p>SQL zum Berechnen der WKB-Geometrie des Polygon: ' . $sql;
+		$ret = $this->database->execSQL($sql, 4, 1, true);
+		if ($ret[0]) {
+			# Fehler beim Berechnen der WKB-Geometrie in der Datenbank
+			return array(
+				'success' => false,
+				'err_msg' => 'Auf Grund eines Fehlers bei der Anfrage an die Datenbank konnte die Geometrie des Polygons nicht berechnet werden!<br>' . $ret[1]
+			);
+		}
+		else {
+			$rs = pg_fetch_assoc($ret['query']);
+			return array(
+				'success' => true,
+				'wkb_geometry' => $rs['wkb_geometry']
+			);
+		}
+	}
+
+	function eintragenFlaeche($polygon, $oid, $tablename, $columnname, $geomtype, $kvps) {
+		if ($polygon == '') {
+			$wkb_geometry = 'NULL';
+		}
+		else {
+			$ret = $this->get_wkb_geometry(array(
+				'geomtype' => $geomtype,
+				'polygon' => $polygon
+			));
+			if (!$ret['success']) {
+				return $ret;
+			}
+			$wkb_geometry = "'" . $ret['wkb_geometry'] . "'";
+		}
+		$kvps[] = pg_quote($columnname) . ' = ' . $wkb_geometry;
 		$sql = "
 			UPDATE " . pg_quote($tablename) . "
-			SET " . pg_quote($columnname) . " = " . (substr($geomtype, 0, 5) == 'MULTI' ? "ST_Multi(" . $geometry . ")" : $geometry) . "
-			WHERE ".pg_quote($this->oid_attribute)." = '" . $oid . "'
+			SET " . implode(', ', $kvps) . "
+			WHERE " . pg_quote($this->oid_attribute) . " = '" . $oid . "'
 		";
+		#echo '<p>SQL zum Updaten von Liniengeometrie: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 1, true);
-		if (!$ret['success']) {
-			if (is_resource($ret[1]) AND pg_affected_rows($ret[1]) == 0) {
+		if (!$ret[0]) {
+			if (pg_affected_rows($ret[1]) == 0) {
+				$ret[0] = 1;
 				$result = pg_fetch_row($ret[1]);
-				$ret[1] = 'Eintrag der Geometrie nicht erfolgreich!' . $result[0];
-			}
-			else {
-				if ($last_notice = $msg = pg_last_notice($this->database->dbConn)) {
-					if ($notice_result = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true)) {
-						$msg = $notice_result['msg'];
-					}
-					$ret[3] = $msg;
-				}
-				else {
-					$ret[1] = sql_err_msg('Auf Grund eines Datenbankfehlers konnte die Flaeche nicht eingetragen werden!', $sql, $ret[1], 'error_div_' . rand(1, 99999));
-				}
+				$ret[1] = 'Eintrag nicht erfolgreich.' . $result[0];
 			}
 		}
 		return $ret;
