@@ -30,7 +30,8 @@
 					for ($i = 0; $i < count($this->stellendaten['ID']); $i++) { ?>
 						<tr class="listen-tr">
 							<td align="right"><?php echo $this->stellendaten['ID'][$i]; ?></td>
-							<td><?php echo $this->stellendaten['Bezeichnung'][$i]; ?></td><?
+							<td><?php echo $this->stellendaten['Bezeichnung'][$i]; ?></td>
+							<td><?php echo $this->stellendaten['Bezeichnung_parent'][$i]; ?></td><?
 							if ($has_shared_stelle) { ?>
 								<td><?
 									if ($this->stellendaten['show_shared_layers'][$i]) { ?>

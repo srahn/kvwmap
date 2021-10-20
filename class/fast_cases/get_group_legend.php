@@ -1334,24 +1334,25 @@ class GUI {
     return $legend;
   }
 
-	function create_layer_legend($layer, $requires = false) {
+	function create_layer_legend($layer, $requires = false){
 		if(!$requires AND value_of($layer, 'requires') != '' OR $requires AND value_of($layer, 'requires') == '')return;
 		global $legendicon_size;
 		$visible = $this->check_layer_visibility($layer);
 		# sichtbare Layer
 		if ($visible) {
 			if (value_of($layer, 'requires') == '') {
-				$legend = '<tr><td valign="top">';
+				$legend = '<tr><td valign="top" style="position: relative;">';
+
 				if (!empty($layer['shared_from'])) {
 					$user_daten = $this->user->getUserDaten($layer['shared_from'], '', '');
 					$legend .= ' <a
 						href="javascript:void(0)"
 						onclick="message([{ \'type\': \'info\', \'msg\' : \'' . $this->strLayerSharedFrom . ' ' . $user_daten[0]['Vorname'] . ' ' . $user_daten[0]['Name'] . (!empty($user_daten[0]['organisation']) ? ' (' . $user_daten[0]['organisation'] . ')' : '') . '\'}])"
 						style="
-						font-size: 10px;
-						margin-left: -7px;
-						margin-top: 5px;
-						position: absolute;
+							font-size: 10px;
+							margin-left: -10px;
+							margin-top: 5px;
+							position: absolute;
 						"
 					><i class="fa fa-share-alt" aria-hidden="true"></i></a>';
 				}
@@ -1858,6 +1859,53 @@ class user {
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
 	}
+	
+	function getUserDaten($id, $login_name, $order, $stelle_id = 0, $admin_id = 0) {
+		global $admin_stellen;
+		$where = array();
+
+		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
+			$more_from = "
+				LEFT JOIN rolle rall ON u.ID = rall.user_id
+				LEFT JOIN rolle radm ON radm.stelle_id = rall.stelle_id
+			";
+			$where[] = "(radm.user_id = ".$admin_id." OR rall.user_id IS NULL)";
+		}
+
+		if ($id > 0) {
+			$where[] = 'u.ID = ' . $id;
+		}
+
+		if ($login_name != '') {
+			$where[] = 'login_name LIKE "' . $login_name . '"';
+		}
+
+		if ($order != '') {
+			$order = ' ORDER BY ' . replace_semicolon($order);
+		}
+
+		$sql = "
+			SELECT DISTINCT
+				u.*, (select max(c.time_id) from u_consume c where u.ID = c.user_id ) as last_timestamp
+			FROM
+				user u " .
+				$more_from .
+			(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") .
+			$order . "
+		";
+		#echo '<br>sql: ' . $sql;
+
+		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>".$sql,4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4);
+			return 0;
+		}
+		while ($rs = $this->database->result->fetch_array()) {
+			$userdaten[] = $rs;
+		}
+		return $userdaten;
+	}	
 
 	function setRolle($stelle_id) {
 		# Abfragen und zuweisen der Einstellungen für die Rolle
@@ -2556,6 +2604,7 @@ class db_mapObj {
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
+				l.shared_from,
 				g.id, ".$group_column.", g.obergruppe, g.order
 			FROM
 				u_rolle2used_layer AS rl,

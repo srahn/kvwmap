@@ -279,7 +279,6 @@ class GUI {
 						if ($this->formvars['layer_id'] < 0) {
 							echo '
 								<input type="hidden" name="selected_rollenlayer_id" value="' . (-$this->formvars['layer_id']) . '">
-								<li><a href="index.php?go=delete_rollenlayer&id=' . (-$this->formvars['layer_id']) . '">'.$this->strRemove.'</a></li>
 								<li><span>' . $this->strName . ':</span> <input type="text" name="layer_options_name" value="' . $layer[0]['Name'] . '"></li>';
 							if ($this->user->share_rollenlayer_allowed AND count($selectable_layer_groups) > 0) {
 								echo '

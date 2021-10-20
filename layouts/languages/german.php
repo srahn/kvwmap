@@ -63,7 +63,7 @@
 	$this->strHatching="Schraffur";
 	$this->strShareRollenlayer = "Layer freigeben";
 	$this->strShareRollenLayerLong = "Diesen Layer für andere Nutzer in diesem WebGIS freigeben.";
-	$this->strLayerSharedFrom = "Dieser Layer wurde geteilt durch Nutzer";
+	$this->strLayerSharedFrom = "Dieser Layer wurde geteilt durch den Nutzer";
 	$this->strReadable = "Überall nur lesbar";
 	$this->strEditableOnlyInThisStelle = "Nur editierbar in dieser Stelle";
 	$this->strEditableInAllStellen = "In allen Stellen editierbar";

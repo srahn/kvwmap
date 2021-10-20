@@ -358,7 +358,6 @@ class GUI {
 						if ($this->formvars['layer_id'] < 0) {
 							echo '
 								<input type="hidden" name="selected_rollenlayer_id" value="' . (-$this->formvars['layer_id']) . '">
-								<li><a href="index.php?go=delete_rollenlayer&id=' . (-$this->formvars['layer_id']) . '">'.$this->strRemove.'</a></li>
 								<li><span>' . $this->strName . ':</span> <input type="text" name="layer_options_name" value="' . $layer[0]['Name'] . '"></li>';
 							if ($this->user->share_rollenlayer_allowed AND count($selectable_layer_groups) > 0) {
 								echo '
@@ -1027,7 +1026,7 @@ echo '			</table>
 		# sichtbare Layer
 		if ($visible) {
 			if (value_of($layer, 'requires') == '') {
-				$legend = '<tr><td valign="top">';
+				$legend = '<tr><td valign="top" style="position: relative;">';
 
 				if (!empty($layer['shared_from'])) {
 					$user_daten = $this->user->getUserDaten($layer['shared_from'], '', '');
@@ -1036,7 +1035,7 @@ echo '			</table>
 						onclick="message([{ \'type\': \'info\', \'msg\' : \'' . $this->strLayerSharedFrom . ' ' . $user_daten[0]['Vorname'] . ' ' . $user_daten[0]['Name'] . (!empty($user_daten[0]['organisation']) ? ' (' . $user_daten[0]['organisation'] . ')' : '') . '\'}])"
 						style="
 							font-size: 10px;
-							margin-left: -7px;
+							margin-left: -10px;
 							margin-top: 5px;
 							position: absolute;
 						"
@@ -8125,7 +8124,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 
-	function LayerLoeschen(){
+	function LayerLoeschen($delete_maintable = false){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$mapDB->deleteLayer($this->formvars['selected_layer_id'], $delete_maintable);
 		# auch die Klassen löschen
@@ -8143,6 +8142,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$stelle[] = $this->Stelle->id;
 		$this->Stelle->deleteLayer($layer, $this->pgdatabase);
 		$this->user->rolle->deleteLayer('', $stelle, $layer);
+
 	}
 
   function DatentypenAnzeigen() {
@@ -18034,7 +18034,7 @@ class db_mapObj{
 			 		" . ($formvars['listed'] == '' ? 0 : "'" . $formvars['listed'] . "'") . ",
 					" . ($formvars['duplicate_from_layer_id'] == '' ? "NULL" : $formvars['duplicate_from_layer_id']) . ",
 					'" . $formvars['duplicate_criterion'] . "',
-					" . ($formvars['shared_from'] == '' ? "NULL" : "1") . "
+					" . ($formvars['shared_from'] == '' ? "NULL" : $formvars['shared_from']) . "
 				)
 			";
     }
