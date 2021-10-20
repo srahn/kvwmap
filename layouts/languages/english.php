@@ -67,7 +67,7 @@
 	$this->strEditableInAllStellen = "Everywhere editable";
 	$this->strSettings = "Settings";
 	$this->strAsteriskRequired = "Fields marked with an asterisk * are required";
-	$this->strName = "Surame";
+	$this->strSurName = "Surname";
 	$this->strForeName = "First name";
 	$this->strUser = "User";
 	$this->strLabel = "Label";

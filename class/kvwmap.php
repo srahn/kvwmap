@@ -359,7 +359,7 @@ class GUI {
 							echo '
 								<input type="hidden" name="selected_rollenlayer_id" value="' . (-$this->formvars['layer_id']) . '">
 								<li><span>' . $this->strName . ':</span> <input type="text" name="layer_options_name" value="' . $layer[0]['Name'] . '"></li>';
-							if ($this->user->share_rollenlayer_allowed AND count($selectable_layer_groups) > 0) {
+							if ($layer[0]['Typ'] == 'import' AND $this->user->share_rollenlayer_allowed AND count($selectable_layer_groups) > 0) {								
 								echo '
 									<li id="shareRollenlayerLink">
 										<a href="javascript:void(0);" onclick="toggle(document.getElementById(\'shareRollenlayerDiv\'))" title="' . $this->strShareRollenLayerLong . '">' . $this->strShareRollenlayer . '</a>
