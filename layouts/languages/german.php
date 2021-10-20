@@ -69,7 +69,7 @@
 	$this->strEditableInAllStellen = "In allen Stellen editierbar";
 	$this->strSettings = "Einstellungen";
 	$this->strAsteriskRequired = "Werte mit * mussen eingetragen werden";
-	$this->strName = "Nachname";
+	$this->strSurName = "Nachname";
 	$this->strForeName = "Vorname";
 	$this->strUser = "Nutzer";
 	$this->strLabel = "Bezeichnung";

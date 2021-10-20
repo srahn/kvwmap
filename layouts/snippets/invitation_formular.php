@@ -14,7 +14,7 @@
 		<label class="fetter" for="email">E-Mail *</label>
 		<input name="email" type="text" value="<? echo $this->formvars['email']; ?>">
 		<div class="clear"></div>
-		<label class="fetter" for="name"><? echo $this->strName; ?> *</label>
+		<label class="fetter" for="name"><? echo $this->strSurName; ?> *</label>
 		<input name="name" type="text" value="<? echo $this->formvars['name']; ?>">
 		<div class="clear"></div>
 		<label class="fetter" for="name"><? echo $this->strForeName; ?></label>
