@@ -345,7 +345,7 @@ class GUI {
 		$layer[0]['Class'] = $mapDB->read_Classes($this->formvars['layer_id'], $disabled_classes, false, $layer[0]['classification']);
 		echo '
 		<div class="layerOptions" id="options_content_'.$this->formvars['layer_id'].'">
-			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:closeLayerOptions('.$this->formvars['layer_id'].');" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>
+			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0);" onclick="closeLayerOptions(' . $this->formvars['layer_id'] . ')" title="Schlie&szlig;en"><img style="border:none" src="' . GRAPHICSPATH . 'exit2.png"></img></a></div>
 			<table cellspacing="0" cellpadding="0" style="padding-bottom: 8px">
 				<tr>
 					<td class="layerOptionsHeader">
@@ -358,13 +358,14 @@ class GUI {
 						if ($this->formvars['layer_id'] < 0) {
 							echo '
 								<input type="hidden" name="selected_rollenlayer_id" value="' . (-$this->formvars['layer_id']) . '">
+								<li><a href="index.php?go=delete_rollenlayer&id=' . (-$this->formvars['layer_id']) . '">'.$this->strRemove.'</a></li>
 								<li><span>' . $this->strName . ':</span> <input type="text" name="layer_options_name" value="' . $layer[0]['Name'] . '"></li>';
 							if ($this->user->share_rollenlayer_allowed AND count($selectable_layer_groups) > 0) {
 								echo '
 									<li id="shareRollenlayerLink">
-										<a href="javascript:$(\'#shareRollenlayerDiv, #shareRollenlayerLink\').toggle()" title="' . $this->strShareRollenlayerLong . '">' . $this->strShareRollenlayer . '</a>
+										<a href="javascript:void(0);" onclick="toggle(document.getElementById(\'shareRollenlayerDiv\'))" title="' . $this->strShareRollenLayerLong . '">' . $this->strShareRollenlayer . '</a>
 									</li>
-									<div id="shareRollenlayerDiv">
+									<div id="shareRollenlayerDiv" style="display: none">
 										Name korrekt? Dann wähle eine Layergruppe aus:<br>' .
 										implode(
 											'<br>',
@@ -385,34 +386,38 @@ class GUI {
 												)
 											)
 										) . '<br>
+										<select name="layer_options_privileg" style="margin-bottom: 5px">
+											<option value="readable">' . $this->strReadable . '</option>
+											<option value="editable_only_in_this_stelle" selected>' . $this->strEditableOnlyInThisStelle . '</option>
+											<option value="editable">' . $this->strEditableInAllStellen . '</option>
+										</select><br>
 										<input type="button" onclick="shareRollenlayer(' . (-$this->formvars['layer_id']) . ')" value="' . $this->strShareRollenlayer . '">
-										<input type="button" onclick="$(\'#shareRollenlayerDiv, #shareRollenlayerLink\').toggle()")" value="' . $this->strCancel . '">
+										<input type="button" onclick="toggle(document.getElementById(\'shareRollenlayerDiv\'))" value="' . $this->strCancel . '">
 									</div>
 								';
 							}
 						}
 						else {
-							if ($this->Stelle->isMenueAllowed('Layer_Anzeigen') OR $layer[0]['shared_from'] == $this->user->id) {
-								echo '
-									<li>
-										<span><a href="javascript:toggle(document.getElementById(\'layer_properties\'));">' . ucfirst($this->properties) . '</a></span>
-									</li>
-									<div id="layer_properties" style="display: none">
-										<ul>' . (!(!$this->Stelle->isMenueAllowed('Layer_Anzeigen') AND $layer[0]['shared_from'] == $this->user->id) ? '
-											<li>
-												<a href="index.php?go=Layereditor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->layerDefinition.'</a>
-											</li>' : '') . '
-											<li>
-												<a href="index.php?go=Attributeditor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->attributeditor.'</a>
-											</li>
-											<li>
-												<a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=' . $this->formvars['layer_id'].'">' . $this->strPrivileges . '</a>
-											</li>
-											<li>
-												<a href="index.php?go=Style_Label_Editor&selected_layer_id='.$this->formvars['layer_id'] . '">' . $this->strStyles . '</a>
-											</li>
-										</ul>
-									</div>';
+							if ($this->Stelle->isMenueAllowed('Layer_Anzeigen') OR $layer[0]['shared_from'] == $this->user->id) { echo '
+								<li>
+									<span><a href="javascript:void(0);" onclick="toggle(document.getElementById(\'layer_properties\'))">' . ucfirst($this->properties) . '</a></span>
+								</li>
+								<div id="layer_properties" style="display: none">
+									<ul>' . (!(!$this->Stelle->isMenueAllowed('Layer_Anzeigen') AND $layer[0]['shared_from'] == $this->user->id) ? '
+										<li>
+											<a href="index.php?go=Layereditor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->layerDefinition.'</a>
+										</li>' : '') . '
+										<li>
+											<a href="index.php?go=Attributeditor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->attributeditor.'</a>
+										</li>
+										<li>
+											<a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=' . $this->formvars['layer_id'].'">' . $this->strPrivileges . '</a>
+										</li>
+										<li>
+											<a href="index.php?go=Style_Label_Editor&selected_layer_id='.$this->formvars['layer_id'] . '">' . $this->strStyles . '</a>
+										</li>
+									</ul>
+								</div>';
 							}
 						}
 						if ($layer[0]['metalink'] != '') {
@@ -425,9 +430,9 @@ class GUI {
 								$target = '_blank';
 							}
 							echo '<li><a href="' . $href . '" target="' . $target . '">' . $this->strMetadata . '</a></li>';
-						}				
+						}
 						if($layer[0]['connectiontype']==6 OR($layer[0]['Datentyp']==MS_LAYER_RASTER AND $layer[0]['connectiontype']!=7)){
-							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">' . ucfirst($this->FullLayerExtent) . '</a></li>';
+							echo '<li><a href="javascript:void();" onclick="zoomToMaxLayerExtent(' . $this->formvars['layer_id'] . ')">' . ucfirst($this->FullLayerExtent) . '</a></li>';
 						}
 						if(in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
 							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">' . $this->strSearch . '</a></li>';
@@ -437,7 +442,7 @@ class GUI {
 						}
 						if ($layer[0]['Class'][0]['Name'] != '') {
 							if ($layer[0]['showclasses'] != '') {
-								echo '<li><a href="javascript:getlegend(\''.$layer[0]['Gruppe'].'\', '.$this->formvars['layer_id'].', document.GUI.nurFremdeLayer.value);closeLayerOptions('.$this->formvars['layer_id'].')">';
+								echo '<li><a href="javascript:void();" onclick="getlegend(\'' . $layer[0]['Gruppe'] . '\', ' . $this->formvars['layer_id'] . ', document.GUI.nurFremdeLayer.value);closeLayerOptions(' . $this->formvars['layer_id'] . ')">';
 								if($layer[0]['showclasses'])echo $this->HideClasses;
 								else echo $this->DisplayClasses;
 								echo '</a></li>';
@@ -453,7 +458,7 @@ class GUI {
 								$function = "activateAllClasses('" . implode(",", $class_ids) . "')";
 								$link_text = ucfirst($this->deactivateAllClasses);
 							}
-							echo '<li><a href="javascript:' . $function . '">' . $link_text . '</a></li>';
+							echo '<li><a href="javascript:void();" onclick="' . $function . '">' . $link_text . '</a></li>';
 						}
 						echo '</ul>
 						<table class="ul_table">';
@@ -474,14 +479,14 @@ class GUI {
 														for($i = 0; $i < count($attributes)-2; $i++){
 															if(
 																	(	$this->formvars['layer_id'] < 0 		# entweder Rollenlayer oder
-																		OR
+																		OR 
 																		(
 																			$privileges[$attributes[$i]['name']] != '' 									# mind. Leserecht
-																			AND
+																			AND 
 																			!in_array($attributes[$i]['name'], [$layer[0]['original_labelitem'], 'oid'])	# und Attribut ist nicht das Originallabelitem oder die oid
 																		)
 																	)
-																	AND
+																	AND 
 																	$attributes['the_geom'] != $attributes[$i]['name']		# Attribut ist nicht das Geometrieattribut
 																) {
 																	echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.($query_attributes['alias'][$attributes[$i]['name']] != ''? $query_attributes['alias'][$attributes[$i]['name']] : $attributes[$i]['name']).'</option>';
@@ -522,7 +527,7 @@ class GUI {
 										</select>
 									</td>
 								</tr>';
-
+								
 							echo '
 								<tr>
 									<td>
@@ -542,7 +547,7 @@ class GUI {
 										</td>
 									</tr>';
 						if (ROLLENFILTER AND $this->user->rolle->showrollenfilter) {
-							echo '
+							echo '	
 									<tr>
 										<td>
 										<a href="javascript:void(0);" onclick="$(\'#rollenfilter, #rollenfilterquestionicon\').toggle()">Filter</a>
@@ -558,7 +563,7 @@ class GUI {
 													) AND
 													$attributes['the_geom'] != $attributes[$i]['name']
 												) {
-													echo '<li>'.$attributes[$i]['name'].'</li>';
+													echo '<li>' . $attributes[$i]['name'] . '</li>';
 												}
 											}
 											echo	'</ul>\

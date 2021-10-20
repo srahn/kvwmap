@@ -40,7 +40,7 @@
 						<input value="zurück" title="Zeigt die ganze Liste an." type="button" name="go" onclick="document.location.href='index.php?go=Einladungen_Anzeigen#invitation_<?php echo $this->invitation->get(Invitation::$identifier); ?>'">&nbsp;<?php
 						if ($this->invitation->get(Invitation::$identifier) != '') { ?>
 							<input value="Ändern" title="Änderungen Speichern" type="button" name="dummy" onclick="submitWithValue('GUI','go_plus','Ändern')">&nbsp;
-							<input value="Zurücksetzen" title="Setzt alle Werte zurück auf die vorhigen." type="reset" name="reset1">&nbsp;
+							<input value="Zurücksetzen" title="Setzt alle Werte zurück auf die vorigen." type="reset" name="reset1">&nbsp;
 							<input type="hidden" name="selected_invitation_id" value="<?php echo  $this->invitation->get(Invitation::$identifier); ?>"><?php
 						}
 						else { ?>

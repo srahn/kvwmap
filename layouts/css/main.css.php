@@ -2344,7 +2344,6 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 }
 
 #shareRollenlayerDiv {
-	display: none;
 	color: black;
 	margin-bottom: 5px;
 }

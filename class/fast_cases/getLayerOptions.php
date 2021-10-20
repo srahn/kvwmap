@@ -279,13 +279,14 @@ class GUI {
 						if ($this->formvars['layer_id'] < 0) {
 							echo '
 								<input type="hidden" name="selected_rollenlayer_id" value="' . (-$this->formvars['layer_id']) . '">
+								<li><a href="index.php?go=delete_rollenlayer&id=' . (-$this->formvars['layer_id']) . '">'.$this->strRemove.'</a></li>
 								<li><span>' . $this->strName . ':</span> <input type="text" name="layer_options_name" value="' . $layer[0]['Name'] . '"></li>';
 							if ($this->user->share_rollenlayer_allowed AND count($selectable_layer_groups) > 0) {
 								echo '
 									<li id="shareRollenlayerLink">
-										<a href="javascript:void(0);" onclick="$(\'#shareRollenlayerDiv, #shareRollenlayerLink\').toggle();" title="' . $this->strShareRollenLayerLong . '">' . $this->strShareRollenlayer . '</a>
+										<a href="javascript:void(0);" onclick="toggle(document.getElementById(\'shareRollenlayerDiv\'))" title="' . $this->strShareRollenLayerLong . '">' . $this->strShareRollenlayer . '</a>
 									</li>
-									<div id="shareRollenlayerDiv">
+									<div id="shareRollenlayerDiv" style="display: none">
 										Name korrekt? Dann wähle eine Layergruppe aus:<br>' .
 										implode(
 											'<br>',
@@ -312,7 +313,7 @@ class GUI {
 											<option value="editable">' . $this->strEditableInAllStellen . '</option>
 										</select><br>
 										<input type="button" onclick="shareRollenlayer(' . (-$this->formvars['layer_id']) . ')" value="' . $this->strShareRollenlayer . '">
-										<input type="button" onclick="$(\'#shareRollenlayerDiv, #shareRollenlayerLink\').toggle()")" value="' . $this->strCancel . '">
+										<input type="button" onclick="toggle(document.getElementById(\'shareRollenlayerDiv\'))" value="' . $this->strCancel . '">
 									</div>
 								';
 							}
