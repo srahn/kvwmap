@@ -1073,7 +1073,7 @@ class stelle {
 		return 1;
 	}
 
-	function addLayer($layer_ids, $drawingorder, $filter = '', $assign_default_values = false, $privileg = 'from_layer') {
+	function addLayer($layer_ids, $drawingorder, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
 		for ($i = 0; $i < count($layer_ids); $i++) {
@@ -1166,7 +1166,7 @@ class stelle {
 						template, 
 						NULL,
 						NULL,
-						`privileg`,
+						" . ($privileg == 'editable'? "'1'" : 'privileg') . ",
 						`export_privileg`,
 						postlabelcache,
 						requires
@@ -1262,7 +1262,7 @@ class stelle {
 							" . $layer_ids[$i] . ",
 							name,
 							" . $this->id . ",
-							privileg,
+							" . ($privileg == 'editable'? '1' : 'privileg') . ",
 							query_tooltip 
 						FROM 
 							layer_attributes 

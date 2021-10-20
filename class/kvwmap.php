@@ -8089,10 +8089,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	* @param boolean (optional) Flag, ob die Defaultwerte auch an die bereits zugeordneten Stellen übertragen werden sollen
 	* @return void
 	*/
-	function addLayersToStellen($layer_ids, $stellen_ids, $filter = '', $assign_default_values = false, $privileg = 'from_layer') {
+	function addLayersToStellen($layer_ids, $stellen_ids, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		for ($i = 0; $i < count($stellen_ids); $i++) {
 			if ($privileg == 'editable_only_in_this_stelle') {
-				$privileg = ($stellen_ids[$i] == $this->stelle->id ? 'editable' : 'readable');
+				$privileg = ($stellen_ids[$i] == $this->Stelle->id ? 'editable' : 'default');
 			}
 			$stelle = new stelle($stellen_ids[$i], $this->database);
 			$stelle->addLayer($layer_ids,	0, $filter, $assign_default_values, $privileg);
@@ -15700,7 +15700,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		if (!$ret['success']) { $this->add_message('error', err_msg('kvwmap.php', __LINE__, $sql)); return 0; }
 
 		# Set formvars from layer
-		$this->formvars = $layer;
+		$this->formvars = array_merge($layer, $this->formvars);
 		$this->LayerAnlegen();
 
 		# Assign new layer $this->formvars['selected_layer_id'] to alle stellen that allow shared layers
