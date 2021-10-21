@@ -33,5 +33,5 @@
 	$strPosition="Position";
 	$strShareRollenlayerAllowedLabel = "Layer Teilen";
 	$strShareRollenlayerAllowedCheckboxText = "Darf Rollenlayer mit anderen Nutzern teilen.";
-	$strShareRollenlayerAllowedDescription = "Wenn der Nutzer das Recht hat, darf er seine eigenen importierten Rollenlayer sich selbst und anderen Nutzern als reguläre Layer zuweisen! Die Zuweisung erfolgt für alle Nutzer in Stellen, die das Recht haben dass ihr freigegebene Rollenlayer zugeordnet werden dürfen, siehe Stelleneinstellungen. Nur der Nutzer selbst und der Admin kann diese sogenannten freigegebenen Layer ändern und auch wieder löschen.";
+	$strShareRollenlayerAllowedDescription = "Wenn der Nutzer das Recht hat, darf er seine eigenen importierten Rollenlayer sich selbst und anderen Nutzern als reguläre Layer zuweisen! Die Zuweisung erfolgt für alle Nutzer in Stellen, die das Recht haben dass ihr freigegebene Rollenlayer zugeordnet werden dürfen, siehe Stelleneinstellungen. Nur der Nutzer selbst und der Admin können diese sogenannten freigegebenen Layer wieder löschen.";
 ?>
