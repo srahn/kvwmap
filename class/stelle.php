@@ -2004,7 +2004,7 @@ class stelle {
 	function getWappen() {
 		$sql = "
 			SELECT
-				wappen
+				wappen, wappen_link
 			FROM
 				stelle
 			WHERE
@@ -2013,23 +2013,8 @@ class stelle {
 		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$rs = $this->database->result->fetch_array();
-		return $rs['wappen'];
-	}
-
-	function getWappenLink() {
-		$sql = "
-			SELECT
-				wappen_link
-			FROM
-				stelle
-			WHERE ID = " . $this->id . "
-		";
-		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>" . $sql, 4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$rs = $this->database->result->fetch_array();
-		return $rs['wappen_link'];
+		$rs = $this->database->result->fetch_assoc();
+		return $rs;
 	}
 
 	/**

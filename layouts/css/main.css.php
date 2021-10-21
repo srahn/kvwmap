@@ -774,6 +774,7 @@ a.invisiblelayerlink:hover{
 	border-color: #CCC; 
 	border-top: none;
 	border-bottom: none;
+	position: relative;
 }
 
 #menue_switch{
@@ -792,6 +793,24 @@ a.invisiblelayerlink:hover{
 
 #menueTable a {
 	color: firebrick;
+}
+
+#menueScrollTable{
+	width: <? echo ($size['menue']['width'] - 2); ?>px;
+	overflow-y: auto;
+	-ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+#menueScrollTable::-webkit-scrollbar {
+  display: none; /* Chrome, Safari und Opera */
+}
+
+#menuefooter {
+	position: absolute;
+	bottom: 0px;
+	left: 0;
+	right: 0;
 }
 
 .menu {
