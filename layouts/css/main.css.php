@@ -806,13 +806,6 @@ a.invisiblelayerlink:hover{
   display: none; /* Chrome, Safari und Opera */
 }
 
-#menuefooter {
-	position: absolute;
-	bottom: 0px;
-	left: 0;
-	right: 0;
-}
-
 .menu {
 	background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);
 	position: relative; 
@@ -1422,8 +1415,11 @@ span.black {
 
 #layer {
 	margin:0px 8px 8px 8px;
-/*	overflow:hidden; */
 	clear: both;
+}
+
+#nds_edit #layer {
+	margin: 0;
 }
 
 /* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf PREVIEW_IMAGE_WIDTH vergrößert */
@@ -1509,6 +1505,10 @@ a:hover .preview_image{
 	border:1px solid #999;
 	border-collapse:collapse;
 	padding:0px 0px 0px 0px;
+}
+
+#nds_edit .datensatz {
+	border: none;
 }
 
 .datensatz_header{
