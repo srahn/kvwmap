@@ -1,5 +1,29 @@
+<script type="text/javascript">
+	function toggleSyncLayer() {
+		$('.no-sync').toggle();
+	}
+
+	function toggleSharedLayer() {
+		$('.no-shared').toggle();
+	}
+</script>
+
 <?php
   include(LAYOUTPATH . 'languages/layerdaten_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/layer_formular_' . $this->user->rolle->language . '.php');
+	
+	$datatypes = [0 => 'Punkt',
+								1 => 'Linie',
+								2 => 'Polygon',
+								3 => 'Raster',
+								5 => 'Query',
+								8 => 'Chart'];
+								
+	$connectiontypes = [1 => 'Shape',
+											6 => 'PostGIS',
+											7 => 'WMS',
+											9 => 'WFS'];
+	
 	$first = $nextfirst = '';
 	$has_sync_layer = array_reduce(
 		$this->layerdaten['sync'],
@@ -66,6 +90,12 @@
 										<?php echo $this->strAlias; ?>&nbsp;[<?php echo $this->strName; ?>]</a>
 									</th><?
 								} ?>
+								<th align="left">
+									<a href="index.php?go=Layer_Anzeigen&order=connectiontype"><?php echo $strConnectionType; ?></a>
+								</th>
+								<th align="left">
+									<a href="index.php?go=Layer_Anzeigen&order=Datentyp"><?php echo $strDataType; ?></a>
+								</th>
 								<th align="left">
 									<a href="index.php?go=Layer_Anzeigen&order=Gruppenname"><?php echo $this->strGroup; ?></a>
 								</th><?
@@ -143,17 +173,22 @@
 										?>">
 										<td>&nbsp;</td>
 										<td><?php echo $this->layerdaten['ID'][$i]; ?>&nbsp;&nbsp;</td>
-										<td><?php
-											if ($this->formvars['order']!="Alias") {
-												echo $this->layerdaten['Bezeichnung'][$i];
-												if ($this->layerdaten['alias'][$i]) {
-													echo '&nbsp;['.$this->layerdaten['alias'][$i].']';
-												}
-											}
-											if ($this->formvars['order']=="Alias") {
-												echo $this->layerdaten['alias'][$i].'&nbsp;['.$this->layerdaten['Bezeichnung'][$i].']';
-											} ?>
+										<td>
+											<a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>" title="<?php echo $this->strChange; ?>">
+												<?php
+													if ($this->formvars['order']!="Alias") {
+														echo $this->layerdaten['Bezeichnung'][$i];
+														if ($this->layerdaten['alias'][$i]) {
+															echo '&nbsp;['.$this->layerdaten['alias'][$i].']';
+														}
+													}
+													if ($this->formvars['order']=="Alias") {
+														echo $this->layerdaten['alias'][$i].'&nbsp;['.$this->layerdaten['Bezeichnung'][$i].']';
+													} ?>
+											</a>
 										</td>
+										<td><?php echo $connectiontypes[$this->layerdaten['connectiontype'][$i]]; ?></td>
+										<td><?php echo $datatypes[$this->layerdaten['Datentyp'][$i]]; ?></td>
 										<td><?php echo $this->layerdaten['Gruppe'][$i]; ?></td><?
 										if ($has_sync_layer) { ?>
 											<td><?php echo ($this->layerdaten['sync'][$i] ? '<i class="fa fa-mobile" aria-hidden="true"></i>' : ''); ?></td><?
@@ -161,7 +196,6 @@
 										if ($has_shared_layer) { ?>
 											<td><?php echo $this->layerdaten['shared_from'][$i]; ?></td><?
 										} ?>
-										<td><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>" title="<?php echo $this->strChange; ?>"><i class="fa fa-pencil"></a></td>
 										<td><a href="javascript:Bestaetigung('index.php?go=Layer_Löschen&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie den Layer <?php echo $this->layerdaten['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete; ?>"><i class="fa fa-trash-o"></i></a></td>
 									</tr><?
 								}

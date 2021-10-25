@@ -14,7 +14,7 @@
 	$strDuplicateCriterion = 'Unterscheidungskriterium';
 	$strDuplicateCriterionHelp = 'Dieser Ausdruck ersetzt den Parameter $duplicate_criterion in Query und Data, falls dort vorhanden, zur Unterscheidung dieses Layers vom Original und anderen Layern, die vom gleichen Original dupliziert wurden.';
 	$strName="Name";
-	$strDataType="Datentyp*";
+	$strDataType="Datentyp";
 	$strGroup="Gruppe*";
 	$strPath="Query";
 	$strData="Data";
@@ -27,7 +27,7 @@
 	$strLabelRequires="Labelrequires";
 	$strConnection="Connection*";
 	$strPrintConnection="Druck-Connection";
-	$strConnectionType="Connectiontype*";
+	$strConnectionType="Connectiontype";
 	$strClassItem="Classitem";
 	$strFilterItem="Filteritem*"; 
 	$strTolerance="Tolerance*";

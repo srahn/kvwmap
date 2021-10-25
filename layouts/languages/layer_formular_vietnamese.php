@@ -5,7 +5,7 @@
 	$strDataBankID="Số ID cơ sở dữ liệu*";
 	$strLayerID="Id lớp*";
 	$strName="Tên*";
-	$strDataType="Kiểu dữ liệu*";
+	$strDataType="Kiểu dữ liệu";
 	$strGroup="Nhóm";
 	$strPath="Đường dẫn";
 	$strData="Số liệu";
@@ -18,7 +18,7 @@
 	$strLabelRequires="Yêu cầu gắn nhãn";
 	$strLayerParams="Thông số lớp";
 	$strConnection="Kết nối*";
-	$strConnectionType="Kiểu kết nối*";
+	$strConnectionType="Kiểu kết nối";
 	$strClassItem="Mục lớp";
 	$strFilterItem="Mục lọc*";
 	$strTolerance="Dung sai*";

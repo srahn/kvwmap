@@ -4,7 +4,7 @@
 	$strDataBankID="warstwa ID*";
 	$strName="nazwa*";
 	$strMaintable="Main Table";
-	$strDataType="rodzaj danych*";
+	$strDataType="rodzaj danych";
 	$strGroup="grupa*";
 	$strPath="ścieżka";
 	$strData="dane";
@@ -18,7 +18,7 @@
 	$strLayerParams="warstwę params";
 	$strConnection="połączenie*";
 	$strPrintConnection="podłączenie do drukarki";
-	$strConnectionType="rodzaj połączenia*";
+	$strConnectionType="rodzaj połączenia";
 	$strClassItem="klasa";
 	$strFilterItem="filtr*";
 	$strTolerance="tolerancja*";

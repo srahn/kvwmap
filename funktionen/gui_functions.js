@@ -1324,11 +1324,3 @@ function htmlspecialchars(value) {
 	};
 	return value.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
-
-function toggleSyncLayer() {
-	$('.no-sync').toggle();
-}
-
-function toggleSharedLayer() {
-	$('.no-shared').toggle();
-}

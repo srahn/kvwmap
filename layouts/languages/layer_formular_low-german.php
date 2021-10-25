@@ -5,7 +5,7 @@
 	$strMaintable="Main Table";
 	$strLayerID="Layer ID*";
 	$strName="Naam*";
-	$strDataType="Datentyp*";
+	$strDataType="Datentyp";
 	$strGroup="Grupp*";
 	$strPath="Padd";
 	$strData="Data";
@@ -18,7 +18,7 @@
 	$strLabelRequires="Labelrequires";
 	$strConnection="Connection*";
 	$strPrintConnection="Druck-Connection";
-	$strConnectionType="Connectiontype*";
+	$strConnectionType="Connectiontype";
 	$strClassItem="Classitem";
 	$strFilterItem="Filteritem*";
 	$strTolerance="Tolerance*";

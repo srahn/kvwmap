@@ -8,7 +8,7 @@
 	$strAdministrative="Administration";
   $strLayerID="Layer ID*";
   $strName="Name";
-  $strDataType="Datatype*";
+  $strDataType="Datatype";
   $strGroup="Group";
   $strPath="Query";
   $strData="Data";
@@ -21,7 +21,7 @@
   $strLabelRequires="Labelrequires";
   $strConnection="Connection*";
   $strPrintConnection="Print-Connection";
-  $strConnectionType="Connectiontype*";
+  $strConnectionType="Connectiontype";
   $strClassItem="Classitem";
   $strFilterItem="Filteritem*";
   $strTolerance="Tolerance*";

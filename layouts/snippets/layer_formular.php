@@ -275,7 +275,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataType; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataType; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<select name="Datentyp">
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>
@@ -292,7 +292,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnectionType; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnectionType; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<select id="connectiontype" name="connectiontype" onchange="updateConnection();">
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>

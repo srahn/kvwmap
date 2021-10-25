@@ -18665,6 +18665,8 @@ class db_mapObj{
 				$gruppenname_column . " AS Gruppenname,
 				l.Layer_ID,
 				l.Gruppe,
+				l.Datentyp,
+				l.connectiontype,
 				l.kurzbeschreibung,
 				l.datenherr,
 				l.drawingorder,
@@ -18710,18 +18712,15 @@ class db_mapObj{
 			'default_drawingorder' => array(),
 			'layers_of_group' => array(),
 			'sync' => array(),
-			'shared_from' => array(),
-			'ID' => array(),
-			'ID' => array(),
-			'ID' => array(),
-			'ID' => array(),
-			'ID' => array(),
+			'shared_from' => array()
 		);
 		while ($rs = $ret['result']->fetch_array()) {
 			$layer['ID'][] = $rs['Layer_ID'];
 			$layer['Bezeichnung'][] = $rs['Name'];
 			$layer['Gruppe'][] = $rs['Gruppenname'];
 			$layer['GruppeID'][] = $rs['Gruppe'];
+			$layer['Datentyp'][] = $rs['Datentyp'];
+			$layer['connectiontype'][] = $rs['connectiontype'];
 			$layer['Kurzbeschreibung'][] = $rs['kurzbeschreibung'];
 			$layer['Datenherr'][] = $rs['datenherr'];
 			$layer['alias'][] = $rs['alias'];
