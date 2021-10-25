@@ -4617,7 +4617,8 @@ echo '			</table>
 		$this->administration->get_database_status();
 		$this->administration->get_config_params();
 		switch ($this->formvars['func']) {
-			case "update_databases" : {
+			case "update_code_and_databases" : {
+				$result = $this->administration->update_code();
 				$err_msgs = $this->administration->update_databases();
 				if (count($err_msgs) > 0) {
 					$this->add_message('error', implode('<br>', $err_msgs));
@@ -4625,10 +4626,14 @@ echo '			</table>
 				$this->administration->get_database_status();
 				$this->administration->get_config_params();
 				$this->showAdminFunctions();
-			} break;
-			case "update_code" : {
-				$result = $this->administration->update_code();
+			} break;			
+			case "update_databases" : {
+				$err_msgs = $this->administration->update_databases();
+				if (count($err_msgs) > 0) {
+					$this->add_message('error', implode('<br>', $err_msgs));
+				}
 				$this->administration->get_database_status();
+				$this->administration->get_config_params();
 				$this->showAdminFunctions();
 			} break;
 			case "save_config" : {
