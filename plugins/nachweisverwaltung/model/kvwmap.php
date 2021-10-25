@@ -792,14 +792,16 @@
         $GUI->rechercheFormAnzeigen();				
       }
       else {
-        # Zoom auf Nachweise
-				for ($i=0; $i < $GUI->nachweis->erg_dokumente; $i++) {
-					$ids[] = $GUI->nachweis->Dokumente[$i]['id'];
+				if ($GUI->user->rolle->querymode == 1) {
+					# Zoom auf Nachweise
+					for ($i=0; $i < $GUI->nachweis->erg_dokumente; $i++) {
+						$ids[] = $GUI->nachweis->Dokumente[$i]['id'];
+					}
+					$GUI->loadMap('DataBase');
+					$GUI->zoomToNachweise($GUI->nachweis, $ids, 10);
+					$GUI->user->rolle->saveSettings($GUI->map->extent);
+					$GUI->zoomed = true;
 				}
-				$GUI->loadMap('DataBase');
-				$GUI->zoomToNachweise($GUI->nachweis, $ids, 10);
-				$GUI->user->rolle->saveSettings($GUI->map->extent);
-				$GUI->zoomed = true;
 				# Anzeige des Rechercheergebnisses
         $GUI->nachweisAnzeige();
       }
