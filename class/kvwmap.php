@@ -17490,10 +17490,7 @@ class db_mapObj{
 		) {
 			$layerDb = $this->getlayerdatabase($id, 'pgsql');
 			$ret = $layerDb->drop_table($layer->get('schema'), $layer->get('maintable'));
-			if ($ret['success']) {
-				return true;
-			}
-			else {
+			if (!$ret['success']) {
 				return false;
 			}
 		};
