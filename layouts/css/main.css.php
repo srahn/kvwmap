@@ -1574,6 +1574,7 @@ a:hover .preview_image{
 }
 
 table.tgle {
+	width: 100%;
 	border: 0px solid gray;
 	border-collapse:collapse;
 	margin-left:auto;

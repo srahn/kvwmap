@@ -111,10 +111,11 @@ if ($doit == true) {
 							}
 						}
 						?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
-						<table class="tgle dstable" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="5" cellspacing="0"';}else{echo 'border="0"';} ?>>
+						<table class="tgle dstable" border="0" cellpadding="5" cellspacing="0">
 							<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
-			        <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle gledata"'; ?>>
+			        <tbody <? if(!$show_geom_editor AND $layer['attributes']['group'][0] == '')echo 'class="gle gledata"'; ?>>
 			<?		
+						$visibility = '';
 						if (empty($layer['attributes']['tabs']) AND $show_geom_editor) {
 							$layer['attributes']['tabs'] = ['Sachdaten'];
 							$sachdaten_tab = true;
@@ -122,7 +123,13 @@ if ($doit == true) {
 						
 						if (!empty($layer['attributes']['tabs'])) {
 							if ($show_geom_editor) {
-								array_unshift($layer['attributes']['tabs'], 'Geometrie');
+								if ($this->user->rolle->geom_edit_first) {
+									array_unshift($layer['attributes']['tabs'], 'Geometrie');
+								}
+								else {
+									array_push($layer['attributes']['tabs'], 'Geometrie');
+									$visibility = 'style="visibility: collapse"';
+								}
 							}
 							echo '
 							<tr>
@@ -141,19 +148,20 @@ if ($doit == true) {
 						}
 						
 						$first_tab = true;
-						$visibility = '';
 						
-						if ($show_geom_editor AND $this->user->rolle->geom_edit_first) {
+						if ($show_geom_editor) {
 							echo '
-							<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_Geometrie">
+							<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_Geometrie" ' . $visibility . '>
 								<td colspan="2" align="center">';
 									include(LAYOUTPATH.'snippets/'.$geomtype.'Editor.php');
 							echo'
 								</td>
 							</tr>';
-							$first_tab = false;
+							if ($this->user->rolle->geom_edit_first) {
+								$first_tab = false;
+							}
 						}
-						
+						$visibility = '';
 						if ($sachdaten_tab) {
 							if (!$first_tab) {	# nur den ersten Tab öffnen
 								$visibility = 'style="visibility: collapse"';
