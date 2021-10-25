@@ -136,6 +136,7 @@ class wfs{
 	}
 
 	function extract_features(){
+		$features = array();
 		# liefert die Datensätze einer getfeature-Abfrage (zuvor muss get_feature_request() ausgeführt werden)
 		if (strpos($this->gml, 'gmlx:featureMember') !== false) {
 			$this->parse_gml('gmlx:featureMember');
