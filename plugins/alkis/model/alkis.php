@@ -261,13 +261,13 @@ class ALKIS {
 	      if($formvars['grundbuchbezirkschl']){ $csv .= $flst->Grundbuchbezirk['schluessel'].';';}
 	      if($formvars['grundbuchbezirkname']){ $csv .= $flst->Grundbuchbezirk['name'].';';}
 	      if($formvars['lagebezeichnung']){
-	        $anzStrassen=count($flst->Adresse);
+	        $anzStrassen= @count($flst->Adresse);
 	        for ($s=0;$s<$anzStrassen;$s++) {
 	          $csv .= $flst->Adresse[$s]["gemeindename"].' ';
 	          $csv .= $flst->Adresse[$s]["strassenname"].' ';
 	          $csv .= $flst->Adresse[$s]["hausnr"].' ';
 	        }
-	        $anzLage=count($flst->Lage);
+	        $anzLage= @count($flst->Lage);
 	        $Lage='';
 	        for ($j=0;$j<$anzLage;$j++) {
 	          $Lage.=' '.$flst->Lage[$j];
@@ -365,7 +365,7 @@ class ALKIS {
 	      	$csv .= ';';
 	      }
 	      if ($formvars['nutzung']){
-	        $anzNutzung=count($flst->Nutzung);
+	        $anzNutzung= @count($flst->Nutzung);
 	        for ($j = 0; $j < $anzNutzung; $j++){
 	        	if($j > 0)$csv .= ' | ';
 	          $csv .= $flst->Nutzung[$j]['flaeche'].' m2 ';
@@ -536,13 +536,13 @@ class ALKIS {
 							if($formvars['grundbuchbezirkschl']){ $csv .= $flst->Grundbuchbezirk['schluessel'].';';}
 							if($formvars['grundbuchbezirkname']){ $csv .= $flst->Grundbuchbezirk['name'].';';}
 							if($formvars['lagebezeichnung']){
-								$anzStrassen=count($flst->Adresse);
+								$anzStrassen= @count($flst->Adresse);
 								for ($s=0;$s<$anzStrassen;$s++) {
 									$csv .= $flst->Adresse[$s]["gemeindename"].' ';
 									$csv .= $flst->Adresse[$s]["strassenname"].' ';
 									$csv .= $flst->Adresse[$s]["hausnr"].' ';
 								}
-								$anzLage=count($flst->Lage);
+								$anzLage= @count($flst->Lage);
 								$Lage='';
 								for ($j=0;$j<$anzLage;$j++) {
 									$Lage.=' '.$flst->Lage[$j];
@@ -632,7 +632,7 @@ class ALKIS {
 								$csv .= ';';
 							}
 							if ($formvars['nutzung']){
-								$anzNutzung=count($flst->Nutzung);
+								$anzNutzung= @count($flst->Nutzung);
 								for ($j = 0; $j < $anzNutzung; $j++){
 									if($j > 0)$csv .= ' | ';
 									$csv .= $flst->Nutzung[$j]['flaeche'].'m2 ';
@@ -765,7 +765,7 @@ class ALKIS {
       $flst->readALB_Data($flurstkennz, true, 'ogc_fid');
       $flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
-      $anzNutzung=count($flst->Nutzung);
+      $anzNutzung= @count($flst->Nutzung);
 			for ($n = 0; $n < $anzNutzung; $n++){
 	      if($formvars['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}
 	      if($formvars['flurstkennz']){ $csv .= "'".$flst->FlurstNr."';";}
@@ -1049,7 +1049,7 @@ class ALKIS {
           $csv .= $flst->Adresse[$s]["strassenname"].' ';
           $csv .= $flst->Adresse[$s]["hausnr"].' ';
         }
-        $anzLage=count($flst->Lage);
+        $anzLage= @count($flst->Lage);
         $Lage='';
         for ($j=0;$j<$anzLage;$j++) {
           $Lage.=' '.$flst->Lage[$j];
@@ -1139,7 +1139,7 @@ class ALKIS {
       	$csv .= ';';
       }
       if ($formvars['nutzung']){
-        $anzNutzung=count($flst->Nutzung);
+        $anzNutzung= @count($flst->Nutzung);
         for ($j = 0; $j < $anzNutzung; $j++){
         	if($j > 0)$csv .= ' | ';
           $csv .= $flst->Nutzung[$j]['flaeche'].' m2 ';
@@ -1277,7 +1277,7 @@ class ALKIS {
 		$namenszeilen[1] .= $eigentuemer->geburtsdatum;
 		$namenszeilen[2] .= $eigentuemer->anschriften[0]['strasse'].' '.$eigentuemer->anschriften[0]['hausnummer'];
 		$namenszeilen[3] .= $eigentuemer->anschriften[0]['postleitzahlpostzustellung'].' '.$eigentuemer->anschriften[0]['ort_post'].' '.$eigentuemer->anschriften[0]['ortsteil'];		
-		$anzNamenszeilen=count($namenszeilen);
+		$anzNamenszeilen= @count($namenszeilen);
 		for ($k=0;$k<$anzNamenszeilen;$k++) {
 			if($namenszeilen[$k] != '')$pdf->addText($_col1,$row-=12,$fontSize,utf8_decode($namenszeilen[$k]));
 		}
@@ -2064,7 +2064,7 @@ class ALKIS {
 #         $pdf->addText($col1b,$row-=12,$fontSize,'Lage');
           $pdf->addText($col10,$row-=12,$fontSize,'Lage');
           # Ausgabe der Adressangabe zur Lage
-          $anzStrassen=count($flst->Adresse);
+          $anzStrassen= @count($flst->Adresse);
           for ($s=0;$s<$anzStrassen;$s++) {
             $Adressbezeichnung.=$flst->Adresse[$s]["strassenname"];
             $Adressbezeichnung.=' '.$flst->Adresse[$s]["hausnr"];
