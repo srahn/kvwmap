@@ -26,9 +26,15 @@ window.onbeforeunload = function(){
 	}
 }
 
-function ahah(url, data, target, action, progress){
-	for(k = 0; k < target.length; ++k){
-		if(target[k] != null && target[k].tagName == "DIV"){
+/*
+* @param url string
+* @param data siehe Doku von XMLHttpRequest (z.B. kvp's String)
+* @param target array ['divname', ...]
+* @param action array ['sethtml'. ...]
+*/
+function ahah(url, data, target, action, progress) {
+	for (k = 0; k < target.length; ++k) {
+		if (target[k] != null && target[k].tagName == "DIV"){
 			waiting_img = document.createElement("img");
 			waiting_img.src = "graphics/ajax-loader.gif";
 			target[k].appendChild(waiting_img);
