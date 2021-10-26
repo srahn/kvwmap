@@ -6309,7 +6309,7 @@ echo '			</table>
 		$pfadteil = explode('&original_name=', $value);
 		$dateipfad = $pfadteil[0];
 
-		if ($layer['document_url'] != '') {
+		if ($document_url != '') {
 			if (in_array($type, array('mp4'))) {
 				$doc_type = 'videostream';
 			}
