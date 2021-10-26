@@ -30,6 +30,7 @@ include(PLUGINS . 'xplankonverter/model/extract_standard_shp.php');
 * xplankonverter_download_uploaded_shapes
 * xplankonverter_download_xplan_gml
 * xplankonverter_download_xplan_shapes
+* xplankonverter_download_files_query
 * xplankonverter_extract_gml_to_form
 * xplankonverter_extract_standardshapes_to_regeln
 * xplankonverter_gml_generieren
@@ -1099,7 +1100,8 @@ function go_switch_xplankonverter($go) {
 		#-------------------------------------------------------------------------------------------------------------------------
 		case 'xplankonverter_download_uploaded_shapes' : {
 			if ($GUI->xplankonverter_is_case_forbidden()) return;
-			if (!$GUI->konvertierung->files_exists('uploaded_shapes')) {
+
+			if (!$GUI->konvertierung->download_files_exists('uploaded_shapes')) {
 				$GUI->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
 				$GUI->main = '../../plugins/xplankonverter/view/konvertierungen.php';
 				$GUI->output();
@@ -1115,10 +1117,11 @@ function go_switch_xplankonverter($go) {
 			if ($GUI->xplankonverter_is_case_forbidden()) return;
 
 			$GUI->konvertierung->create_edited_shapes();
-
-			if (!$GUI->konvertierung->files_exists('edited_shapes')) {
+			if (!$GUI->konvertierung->download_files_exists('edited_shapes')) {
 				$GUI->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
-				$GUI->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+//				$GUI->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+				$GUI->formvars['planart'] = 'BP-Plan';
+				$GUI->main = '../../plugins/xplankonverter/view/plaene.php';
 				$GUI->output();
 				return;
 			}
@@ -1127,12 +1130,27 @@ function go_switch_xplankonverter($go) {
 			$GUI->konvertierung->send_export_file($exportfile, 'application/octet-stream');
 		} break;
 
+		/*
+		* Case query if files of the defined file_type exists for konvertierung_id
+		* If yes show a download link
+		* If not show that there are no files for download
+		*/
+		case 'xplankonverter_download_files_query' : {
+			if ($GUI->xplankonverter_is_case_forbidden()) return;
+
+			$GUI->files_exists = $GUI->konvertierung->files_exists($GUI->formvars['file_type']);
+			$GUI->main = '../../plugins/xplankonverter/view/xplankonverter_download_edited_shapes_query.php';
+			$GUI->formvars['only_main'] = 'true';
+			$GUI->mime_type ='html';
+			$GUI->output();
+		} break;
+
 		case 'xplankonverter_download_xplan_shapes' : {
 			if ($GUI->xplankonverter_is_case_forbidden()) return;
 
 			$GUI->konvertierung->create_xplan_shapes();
 
-			if (!$GUI->konvertierung->files_exists('xplan_shapes')) {
+			if (!$GUI->konvertierung->download_files_exists('xplan_shapes')) {
 				$GUI->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
 				$GUI->main = '../../plugins/xplankonverter/view/konvertierungen.php';
 				$GUI->output();
