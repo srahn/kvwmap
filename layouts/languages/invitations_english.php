@@ -1,3 +1,5 @@
 ﻿<?php
-  $strTitel="User invitations";
+	$strTitel = "User invitations";
+	$strToken = "Token";
+	$strRegistered = "Registered";
 ?>

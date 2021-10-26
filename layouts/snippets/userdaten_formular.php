@@ -329,18 +329,29 @@
 								?>
 							</select>
 						</td>
-					</tr>		
+					</tr>
 				</table>
 			</div>
 		</div>
-
-<?
+		
+		<div class="form_formular-input form_formular-aic">
+			<div><? echo $strShareRollenlayerAllowedLabel; ?></div>
+			<div><input
+							name="share_rollenlayer_allowed"
+							type="checkbox"
+							value="1"
+							<?php echo ($this->formvars['share_rollenlayer_allowed'] ? 'checked' : ''); ?>
+						><?php echo $strShareRollenlayerAllowedCheckboxText; ?>
+						<span data-tooltip="<?php echo $strShareRollenlayerAllowedDescription; ?>"></span>
+			</div>
+		</div>	
+		
+		<?
 	if ($this->formvars['selected_user_id'] > 0) {
 		if (is_array($this->formvars['selstellen'])) {
 			$active_stelle = array_search($this->userdaten[0]['stelle_id'], $this->formvars['selstellen']["ID"]);
 			$active_stelle_bezeichnung = $this->formvars['selstellen']['Bezeichnung'][$active_stelle];
-		}
-?>
+		} ?>
 		<div class="form_formular-input form_formular-aic">
 			<div><? echo $strActiveSite;?></div>
 			<div>

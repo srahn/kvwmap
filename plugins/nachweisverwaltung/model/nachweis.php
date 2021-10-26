@@ -48,20 +48,28 @@ class Nachweis {
   }
 	
 	function LENRIS_get_all_nachweise(){
+		ini_set('memory_limit', '8192M');
+		set_time_limit(1800);
 		$sql = "
+			DELETE FROM 
+				nachweisverwaltung.n_nachweisaenderungen;
 			SELECT 
 				*
       FROM 
 				nachweisverwaltung.n_nachweise
-			ORDER BY id";
+			WHERE
+				gueltigkeit = 1
+			ORDER BY id
+			";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
-      $nachweise = pg_fetch_all($ret[1]);
-			foreach ($nachweise as $index => $nachweis) {
-				$nachweise[$index]['last_modified'] = date('Y-m-d H:i:s', filemtime($nachweis['link_datei']));
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				foreach ($nachweise as $index => $nachweis) {
+					$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', @filemtime($nachweis['link_datei']));
+				}
+				$json = json_encode($nachweise);
+				echo $json;
 			}
-			$json = json_encode($nachweise);
-			echo $json;
 		}
 	}
 	
@@ -70,18 +78,20 @@ class Nachweis {
 			SELECT 
 				a.*
       FROM 
-				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.lenris_worker as b on a.id = b.id_nachweis
+				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
 			WHERE
+				gueltigkeit = 1 AND
 				b.db_action = 'INSERT'
 			ORDER BY a.id";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
-      $nachweise = pg_fetch_all($ret[1]);
-			foreach ($nachweise as $index => $nachweis) {
-				$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', filemtime($nachweis['link_datei']));
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				foreach ($nachweise as $index => $nachweis) {
+					$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', @filemtime($nachweis['link_datei']));
+				}
+				$json = json_encode($nachweise);
+				echo $json;
 			}
-			$json = json_encode($nachweise);
-			echo $json;
 		}
 	}
 	
@@ -90,18 +100,20 @@ class Nachweis {
 			SELECT 
 				a.*
       FROM 
-				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.lenris_worker as b on a.id = b.id_nachweis
+				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
 			WHERE
+				gueltigkeit = 1 AND 
 				b.db_action = 'UPDATE'
 			ORDER BY a.id";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
-      $nachweise = pg_fetch_all($ret[1]);
-			foreach ($nachweise as $index => $nachweis) {
-				$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', filemtime($nachweis['link_datei']));
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				foreach ($nachweise as $index => $nachweis) {
+					$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', @filemtime($nachweis['link_datei']));
+				}
+				$json = json_encode($nachweise);
+				echo $json;
 			}
-			$json = json_encode($nachweise);
-			echo $json;
 		}
 	}
 	
@@ -110,21 +122,23 @@ class Nachweis {
 			SELECT 
 				id_nachweis
       FROM 
-				nachweisverwaltung.lenris_worker
+				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
 			WHERE
-				db_action = 'DELETE'";
+				gueltigkeit = 1 AND 
+				b.db_action = 'DELETE'";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
-      $nachweise = pg_fetch_all($ret[1]);
-			$ids = implode(',', $nachweise);
-			echo $ids;
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				$json = json_encode($nachweise);
+				echo $json;
+			}
 		}
 	}	
 	
 	function LENRIS_confirm_new_nachweise($ids){
 		$sql = "
 			DELETE FROM 
-				nachweisverwaltung.lenris_worker 
+				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE 
 				id_nachweis IN (" . $ids . ") and db_action = 'INSERT'";
 		$ret = $this->database->execSQL($sql,4, 1);    
@@ -134,10 +148,10 @@ class Nachweis {
 		}
 	}
 	
-	function LENRIS_confirm_updated_nachweise($ids){
+	function LENRIS_confirm_changed_nachweise($ids){
 		$sql = "
 			DELETE FROM 
-				nachweisverwaltung.lenris_worker 
+				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE 
 				id_nachweis IN (" . $ids . ") and db_action = 'UPDATE'";
 		$ret = $this->database->execSQL($sql,4, 1);    
@@ -150,7 +164,7 @@ class Nachweis {
 	function LENRIS_confirm_deleted_nachweise($ids){
 		$sql = "
 			DELETE FROM 
-				nachweisverwaltung.lenris_worker 
+				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE 
 				id_nachweis IN (" . $ids . ") and db_action = 'DELETE'";
 		$ret = $this->database->execSQL($sql,4, 1);    
@@ -159,6 +173,12 @@ class Nachweis {
 			echo $rows;
 		}
 	}		
+
+	function LENRIS_get_document($document){
+		if (strpos($document, NACHWEISDOCPATH) !== false AND file_exists($document)) {
+			readfile($document);
+		}
+	}
 
 	function check_documentpath($old_dataset){		
 		$ret=$this->getNachweise($old_dataset['id'],'','','','','','','','bySingleID','','');
@@ -240,16 +260,16 @@ class Nachweis {
 		}
 	}
 	
-  function getZielDateiName($formvars) {
+  function getZielDateiName($formvars, $nachweis_primary_attribute = NACHWEIS_PRIMARY_ATTRIBUTE, $nachweis_secondary_attribute = NACHWEIS_SECONDARY_ATTRIBUTE) {
     #2005-11-24_pk
     $pathparts=pathinfo($formvars['Bilddatei_name']);
-		if($formvars[NACHWEIS_PRIMARY_ATTRIBUTE] == ''){		# primäres Ordungskriterium leer -> Nachweis-ID nehmen
+		if($formvars[$nachweis_primary_attribute] == ''){		# primäres Ordungskriterium leer -> Nachweis-ID nehmen
 			$id = $secondary.str_pad(($formvars['id'] ?: $this->get_next_nachweis_id()), RISSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
 		}
 		else{
-			$id = $this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]);
+			$id = $this->buildNachweisNr($formvars[$nachweis_primary_attribute], $formvars[$nachweis_secondary_attribute]);
 		}
-    $zieldateiname=$formvars['flurid'].'-'.$id.'-'.$formvars['artname'].'-'.str_pad(trim($formvars['Blattnr']),3,'0',STR_PAD_LEFT).'.'.$pathparts['extension'];
+    $zieldateiname = $formvars['flurid'].'-'.$id.'-'.$formvars['artname'].'-'.str_pad(trim($formvars['Blattnr']),3,'0',STR_PAD_LEFT).'.'.$pathparts['extension'];
     #echo $zieldateiname;
     return $zieldateiname;
   }
@@ -369,13 +389,20 @@ class Nachweis {
     return $art;
   }	
   
-  function getDokumentarten(){
+  function getDokumentarten($grouped_by_hauptart = true){
   	$sql="SELECT id, art, geometrie_relevant, hauptart, sortierung, abkuerzung, pok_pflicht::integer FROM nachweisverwaltung.n_dokumentarten order by sortierung, art"; 
     $ret=$this->database->execSQL($sql,4, 0);    
     if (!$ret[0]) {
-      while($rs=pg_fetch_assoc($ret[1])){
-				$art[$rs['hauptart']][$rs['id']] = $rs;
-      }
+			if ($grouped_by_hauptart) {
+				while($rs=pg_fetch_assoc($ret[1])){
+					$art[$rs['hauptart']][$rs['id']] = $rs;
+				}
+			}
+			else {
+				while($rs=pg_fetch_assoc($ret[1])){
+					$art[$rs['id']] = $rs;
+				}
+			}
     }
     return $art;
   }
@@ -608,8 +635,8 @@ class Nachweis {
     return $ret;
   }
 
-  static function buildNachweisNr($primary, $secondary){
-  	if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
+  static function buildNachweisNr($primary, $secondary, $nachweis_primary_attribute = NACHWEIS_PRIMARY_ATTRIBUTE){
+  	if($nachweis_primary_attribute == 'rissnummer'){
   		return $secondary.str_pad($primary, RISSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
   	}
   	else{
@@ -1427,14 +1454,18 @@ class Nachweis {
     return $result;
   }
 	
-	function Geometrieuebernahme($ref_geom, $id){
+	function Geometrieuebernahme($ref_geom, $id, $gepruefte_Nachweise_bearbeiten){
+		if (!$gepruefte_Nachweise_bearbeiten) {
+			$condition = ' AND geprueft = 0';
+		}
 		$sql = "UPDATE nachweisverwaltung.n_nachweise n 
 						SET the_geom = (
 							SELECT st_union(n2.the_geom) 
 							FROM nachweisverwaltung.n_nachweise n2
 							WHERE n2.id IN (".implode(',', $ref_geom).")
 						)
-						WHERE n.id IN (".implode(',', $id).")";
+						WHERE n.id IN (".implode(',', $id).") " .
+						$condition;
 		$ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0])$result[0]='Fehler bei der Geometrieübernahme!';
     else $result[1]='Geometrien erfolgreich übernommen!';

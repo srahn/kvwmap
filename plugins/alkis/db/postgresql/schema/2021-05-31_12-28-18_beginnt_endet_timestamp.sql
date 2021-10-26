@@ -9,7 +9,7 @@ ALTER TABLE alkis.pp_zuordungspfeilspitze_flurstueck ALTER COLUMN beginnt TYPE t
 ALTER TABLE alkis.pp_zuordungspfeilspitze_flurstueck ALTER COLUMN endet TYPE timestamp without time zone USING endet::timestamp without time zone;
 
 CREATE OR REPLACE VIEW alkis.lk_nutzungen AS 
- SELECT n.oid,
+ SELECT 
     n.gml_id,
     n.beginnt,
     n.endet,

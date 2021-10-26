@@ -36,6 +36,11 @@
 		$nachweis->LENRIS_get_changed_nachweise();
 	};
 	
+	$GUI->LENRIS_get_deleted_nachweise = function() use ($GUI){
+		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$nachweis->LENRIS_get_deleted_nachweise();
+	};
+	
 	$GUI->LENRIS_confirm_new_nachweise = function() use ($GUI){
 		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
 		$nachweis->LENRIS_confirm_new_nachweise($GUI->formvars['ids']);
@@ -49,6 +54,11 @@
 	$GUI->LENRIS_confirm_deleted_nachweise = function() use ($GUI){
 		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
 		$nachweis->LENRIS_confirm_deleted_nachweise($GUI->formvars['ids']);
+	};
+	
+	$GUI->LENRIS_get_document = function() use ($GUI){
+		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$nachweis->LENRIS_get_document($GUI->formvars['document']);
 	};
 	
 	$GUI->getGeomPreview = function($id) use ($GUI){
@@ -782,14 +792,16 @@
         $GUI->rechercheFormAnzeigen();				
       }
       else {
-        # Zoom auf Nachweise
-				for ($i=0; $i < $GUI->nachweis->erg_dokumente; $i++) {
-					$ids[] = $GUI->nachweis->Dokumente[$i]['id'];
+				if ($GUI->user->rolle->querymode == 1) {
+					# Zoom auf Nachweise
+					for ($i=0; $i < $GUI->nachweis->erg_dokumente; $i++) {
+						$ids[] = $GUI->nachweis->Dokumente[$i]['id'];
+					}
+					$GUI->loadMap('DataBase');
+					$GUI->zoomToNachweise($GUI->nachweis, $ids, 10);
+					$GUI->user->rolle->saveSettings($GUI->map->extent);
+					$GUI->zoomed = true;
 				}
-				$GUI->loadMap('DataBase');
-				$GUI->zoomToNachweise($GUI->nachweis, $ids, 10);
-				$GUI->user->rolle->saveSettings($GUI->map->extent);
-				$GUI->zoomed = true;
 				# Anzeige des Rechercheergebnisses
         $GUI->nachweisAnzeige();
       }
@@ -1453,7 +1465,7 @@
 	$GUI->nachweiseGeometrieuebernahme = function() use ($GUI){
 		$GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
 		$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
-		$ret=$GUI->nachweis->Geometrieuebernahme($GUI->formvars['ref_geom'],$GUI->formvars['id']);
+		$ret=$GUI->nachweis->Geometrieuebernahme($GUI->formvars['ref_geom'], $GUI->formvars['id'], $GUI->Stelle->isFunctionAllowed('gepruefte_Nachweise_bearbeiten'));
     $GUI->formvars = array_merge($GUI->formvars, $GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id));
 		$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchgueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['suchgeprueft']);
     if($ret[0] != ''){

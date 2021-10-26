@@ -456,15 +456,29 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			<? if(strpos($this->formvars['order'], 'vermst') === false){ ?>
 				<th align="center" style="width: 120"><a href="javascript:add_to_order('vermst');" title="nach Vermessungsstelle sortieren"><span class="fett">VermStelle</span></a></th>
 			<? }else{echo '<th align="center" style="width: 120"><span class="fett">VermStelle</span></th>';} ?>
+			
+			<? if (!$this->plugin_loaded('lenris')) { ?>
+			
 			<? if(strpos($this->formvars['order'], 'gueltigkeit') === false){ ?>
 				<th align="center" style="width: 80"><a href="javascript:add_to_order('gueltigkeit');" title="nach Gültigkeit sortieren"><span class="fett">gültig</span></a></th>
 			<? }else{echo '<th align="center" style="width: 80"><span class="fett">Gültigkeit</span></th>';} ?>
 			<? if(strpos($this->formvars['order'], 'geprueft') === false){ ?>
 				<th align="center" style="width: 80"><a href="javascript:add_to_order('geprueft');" title="nach geprüft sortieren"><span class="fett">geprüft</span></a></th>
 			<? }else{echo '<th align="center" style="width: 80"><span class="fett">geprüft</span></th>';} ?>
+			
+			<? } ?>
+			
 			<? if(strpos($this->formvars['order'], 'format') === false){ ?>
 				<th align="center" style="width: 80"><a href="javascript:add_to_order('format');" title="nach Blattformat sortieren"><span class="fett">Format</span></a></th>
 			<? }else{echo '<th align="center" style="width: 80"><span class="fett">Format</span></th>';} ?>	
+			
+			<? if ($this->plugin_loaded('lenris')) { ?>
+				
+				<th style="width: 80"></th>
+				<th style="width: 80"></th>
+				
+			<? } ?>
+			
           <th colspan="3" style="width: 150"><div align="center"><?    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></th>
         </tr>
 			</thead>
@@ -532,10 +546,23 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td style="width: 80"><div align="center"><? echo $this->nachweis->Dokumente[$i]['datum']; ?></div></td>
           <td style="width: 120"><div align="center"><? echo $this->formvars['fortf']=$this->nachweis->Dokumente[$i]['fortfuehrung']; ?></div></td>
           <td style="width: 120"><div align="center"><? echo $this->formvars['vermstelle']=$this->nachweis->Dokumente[$i]['vermst']; ?></div></td>
+					
+					<? if (!$this->plugin_loaded('lenris')) { ?>
+					
 					<td style="width: 80"><div align="center"><? if($this->nachweis->Dokumente[$i]['gueltigkeit']){echo 'ja';} else {echo 'nein';} ?></div></td>
 					<td style="width: 80"><div align="center"><? if($this->nachweis->Dokumente[$i]['geprueft']){echo 'ja';} else {echo 'nein';} ?></div></td>
-          <td style="width: 80"><div align="center"><? echo $this->formvars['format']=$this->nachweis->Dokumente[$i]['format']; ?> 
-            </div></td>
+					
+					<? } ?>
+					
+          <td style="width: 80"><div align="center"><? echo $this->formvars['format']=$this->nachweis->Dokumente[$i]['format']; ?></div></td>
+					
+					<? if ($this->plugin_loaded('lenris')) { ?>
+					
+					<td style="width: 80"></td>
+					<td style="width: 80"></td>
+					
+					<? } ?>
+					
 					<td style="width: 30">
 					<? 
 						$dateiname = $this->nachweis->Dokumente[$i]['link_datei'];
@@ -671,7 +698,7 @@ Wählen Sie neue Suchparameter.</span><br>
 
 
 <!--[IF !IE]> -->
-<div id="vorschau_nwv"  onmouseleave="clearVorschau();" style="z-index: 1000; position: fixed; left:50%; margin-left:-100px;  top:0px; box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.3);"></div>
+<div id="vorschau_nwv"  onmouseleave="clearVorschau();" style="z-index: 1000; position: fixed; left:400px;  top:0px; box-shadow: 12px 10px 14px rgba(0, 0, 0, 0.3);"></div>
 <!-- <![ENDIF]-->
  <!--[IF IE]>
 <div id="vorschau" style="position: absolute; left:50%; margin-left:-150px; top: expression((190 + (ignoreMe = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop)) + 'px');"></div>

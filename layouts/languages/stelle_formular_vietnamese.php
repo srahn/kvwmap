@@ -11,6 +11,7 @@
   $strPostGISDataBankName="Tên CSDL PostGIS";
   $strPostGISUserName="Tên ngư�?i dùng PostGIS";
   $strPostGISPassword="Mã khóa PostGIS";
+	$strPostgisConnection = "Postgres Connection";
   $strOwsTitle="Tiêu đ�? OWS";
   $strOwsAbstract="Tóm lược OWS";
   $strWmsAccessConstraints="Rào cản truy cập WMS";
@@ -39,4 +40,6 @@
   $strAllowedPasswordAge="Allowed age of passwords in this task, if checked (in months)";
   $strStart="Start";
   $strStop="Stop";
+	$strShowSharedLayersText = "Show shared layer in this Stelle.";
+	$strShowSharedLayersDescription = "When this permission is granted, all layer from users with the permission to share Rollenlayer will be assigned to this Stelle and shown to all Users of this Stelle. These Layers will be marked as Shared layers in the legend and in the options form is shown who has shared the layer for other.";
 ?>  

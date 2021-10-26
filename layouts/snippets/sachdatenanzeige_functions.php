@@ -102,11 +102,11 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		tab.classList.add("active_tab");
 		var groups_to_close = dataset.querySelectorAll('.tab');
 		[].forEach.call(groups_to_close, function (group){
-			group.style.display = 'none';
+			group.style.visibility = 'collapse';
 		});
 		var groups_to_open = dataset.querySelectorAll('.tab_' + layer_id + '_' + k + '_' + tabname);
 		[].forEach.call(groups_to_open, function (group){
-			group.style.display = '';
+			group.style.visibility = 'visible';
 		});
 	}
 	
@@ -786,7 +786,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		params = 'go=zoom2wkt&wkt='+wkt+'&epsg='+epsg;
 		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
 			startwaiting();
-			get_map_ajax(params, '', '');
+			root.get_map_ajax(params, '', '');
 		}
 		else{
 			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen

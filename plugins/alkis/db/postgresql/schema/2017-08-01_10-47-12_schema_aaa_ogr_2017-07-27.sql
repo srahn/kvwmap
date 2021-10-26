@@ -2,7 +2,6 @@
 -- gewählte Pakete: 'ISO/TC 211', 'ISO 19115 All', 'ISO 19115:2003 Metadata', 'Data quality information', 'Citation and responsible party information', 'AAA Basisschema', 'AAA_Basisklassen', 'AAA_GemeinsameGeometrie', 'AAA_Nutzerprofile', 'AAA_Operationen', 'AAA_Praesentationsobjekte', 'AAA_Praesentationsobjekte 3D', 'AAA_Projektsteuerung', 'AAA_Punktmengenobjekte', 'AAA_Spatial Schema', 'AAA_Spatial Schema 3D', 'AAA_Unabhaengige Geometrie', 'AAA_Unabhaengige Geometrie 3D', 'Codelisten', 'AFIS-ALKIS-ATKIS Fachschema', 'Bauwerke, Einrichtungen und sonstige Angaben', 'Bauwerke und Einrichtungen in Siedlungsflächen', 'Bauwerke, Anlagen und Einrichtungen für den Verkehr', 'Besondere Angaben zum Gewässer', 'Besondere Angaben zum Verkehr', 'Besondere Anlagen auf Siedlungsflächen', 'Besondere Eigenschaften von Gewässern', 'Besondere Vegetationsmerkmale', 'Eigentümer', 'Personen- und Bestandsdaten', 'Flurstücke, Lage, Punkte', 'Angaben zu Festpunkten der Landesvermessung', 'Angaben zum Flurstück', 'Angaben zum Netzpunkt', 'Angaben zum Punktort', 'Angaben zur Historie', 'Angaben zur Lage', 'Angaben zu Nutzerprofilen', 'Angaben zur Reservierung', 'Fortführungsnachweis', 'Gebäude', 'Angaben zum Gebäude', 'Gesetzliche Festlegungen, Gebietseinheiten, Kataloge', 'Administrative Gebietseinheiten', 'Bodenschätzung, Bewertung', 'Geographische Gebietseinheiten', 'Kataloge', 'Öffentlich-rechtliche und sonstige Festlegungen', 'Migration', 'Migrationsobjekte', 'Nutzerprofile', 'Angaben zu Nutzerprofilen', 'Relief', 'Primäres DGM', 'Reliefformen', 'Sekundäres DGM', 'Tatsächliche Nutzung', 'Gewässer', 'Siedlung', 'Vegetation', 'Verkehr', 'NAS-Operationen', 'AFIS-ALKIS-ATKIS-Ausgabekatalog', 'AFIS-ALKIS-ATKIS-Ausgaben', 'AFIS-Einzelpunktnachweise', 'AFIS-Punktlisten', 'ALKIS-Ausgaben', 'Komplexe Datentypen für Ausgaben', 'ALKIS-Auswertungen', 'Angaben im Kopf der Ausgaben', 'Externe Datentypen', 'Flurstücksangaben', 'Fortführungsfälle', 'Gebäudeangaben', 'Personen- und Bestandsangaben', 'Punktangaben', 'Reservierungen'
 -- gewählte Filter: Ohne Attribute objektkoordinaten.
 
-SET default_with_oids = true;
 CREATE SCHEMA alkis;
 
 SET search_path = alkis, public;
@@ -13,7 +12,7 @@ CREATE TABLE IF NOT EXISTS aa_advstandardmodell (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE aa_advstandardmodell IS 'Alias: "AA_AdVStandardModell", UML-Typ: Enumeration';
 INSERT INTO aa_advstandardmodell (wert,beschreibung,dokumentation) VALUES
@@ -42,7 +41,7 @@ CREATE TABLE IF NOT EXISTS aa_nas_ausgabeform (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE aa_nas_ausgabeform IS 'Alias: "AA_NAS_Ausgabeform", UML-Typ: Enumeration';
 INSERT INTO aa_nas_ausgabeform (wert,beschreibung,dokumentation) VALUES
@@ -54,7 +53,7 @@ CREATE TABLE IF NOT EXISTS nas_filter_capabilities (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE nas_filter_capabilities IS 'Alias: "NAS_Filter_Capabilities", UML-Typ: Enumeration';
 INSERT INTO nas_filter_capabilities (wert,beschreibung,dokumentation) VALUES
@@ -69,7 +68,7 @@ CREATE TABLE IF NOT EXISTS aa_themendimension (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE aa_themendimension IS 'Alias: "AA_Themendimension", UML-Typ: Enumeration';
 INSERT INTO aa_themendimension (wert,beschreibung,dokumentation) VALUES
@@ -80,7 +79,7 @@ CREATE TABLE IF NOT EXISTS aa_art_themendefinition (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE aa_art_themendefinition IS 'Alias: "AA_Art_Themendefinition", UML-Typ: Enumeration';
 INSERT INTO aa_art_themendefinition (wert,beschreibung,dokumentation) VALUES
@@ -91,7 +90,7 @@ CREATE TABLE IF NOT EXISTS operation (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE operation IS 'Alias: "Operation", UML-Typ: Enumeration';
 INSERT INTO operation (wert,beschreibung,dokumentation) VALUES
@@ -107,7 +106,7 @@ CREATE TABLE IF NOT EXISTS ap_horizontaleausrichtung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ap_horizontaleausrichtung IS 'Alias: "AP_HorizontaleAusrichtung", UML-Typ: Enumeration';
 INSERT INTO ap_horizontaleausrichtung (wert,beschreibung,dokumentation) VALUES
@@ -119,7 +118,7 @@ CREATE TABLE IF NOT EXISTS ap_vertikaleausrichtung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ap_vertikaleausrichtung IS 'Alias: "AP_VertikaleAusrichtung", UML-Typ: Enumeration';
 INSERT INTO ap_vertikaleausrichtung (wert,beschreibung,dokumentation) VALUES
@@ -131,7 +130,7 @@ CREATE TABLE IF NOT EXISTS ap_dateityp_3d (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ap_dateityp_3d IS 'Alias: "AP_DateiTyp_3D", UML-Typ: Enumeration';
 INSERT INTO ap_dateityp_3d (wert,beschreibung,dokumentation) VALUES
@@ -147,7 +146,7 @@ CREATE TABLE IF NOT EXISTS ax_artdesnullpunktes_nullpunkt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artdesnullpunktes_nullpunkt IS 'Alias: "AX_ArtDesNullpunktes_Nullpunkt", UML-Typ: Enumeration';
 INSERT INTO ax_artdesnullpunktes_nullpunkt (wert,beschreibung,dokumentation) VALUES
@@ -159,7 +158,7 @@ CREATE TABLE IF NOT EXISTS ax_li_processstep_mitdatenerhebung_description (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_li_processstep_mitdatenerhebung_description IS 'Alias: "AX_LI_ProcessStep_MitDatenerhebung_Description", UML-Typ: Enumeration';
 INSERT INTO ax_li_processstep_mitdatenerhebung_description (wert,beschreibung,dokumentation) VALUES
@@ -169,7 +168,7 @@ CREATE TABLE IF NOT EXISTS ax_datenerhebung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_datenerhebung IS 'Alias: "AX_Datenerhebung", UML-Typ: Enumeration';
 INSERT INTO ax_datenerhebung (wert,beschreibung,dokumentation) VALUES
@@ -203,7 +202,7 @@ CREATE TABLE IF NOT EXISTS ax_sportart_bauwerkoderanlagefuersportfreizeitunderho
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_sportart_bauwerkoderanlagefuersportfreizeitunderholung IS 'Alias: "AX_Sportart_BauwerkOderAnlageFuerSportFreizeitUndErholung", UML-Typ: Enumeration';
 INSERT INTO ax_sportart_bauwerkoderanlagefuersportfreizeitunderholung (wert,beschreibung,dokumentation) VALUES
@@ -227,7 +226,7 @@ CREATE TABLE IF NOT EXISTS ax_lagezurerdoberflaeche_transportanlage (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_lagezurerdoberflaeche_transportanlage IS 'Alias: "AX_LageZurErdoberflaeche_Transportanlage", UML-Typ: Enumeration';
 INSERT INTO ax_lagezurerdoberflaeche_transportanlage (wert,beschreibung,dokumentation) VALUES
@@ -239,7 +238,7 @@ CREATE TABLE IF NOT EXISTS ax_produkt_transportanlage (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_produkt_transportanlage IS 'Alias: "AX_Produkt_Transportanlage", UML-Typ: Enumeration';
 INSERT INTO ax_produkt_transportanlage (wert,beschreibung,dokumentation) VALUES
@@ -255,7 +254,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerksfunktion_turm (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bauwerksfunktion_turm IS 'Alias: "AX_Bauwerksfunktion_Turm", UML-Typ: Enumeration';
 INSERT INTO ax_bauwerksfunktion_turm (wert,beschreibung,dokumentation) VALUES
@@ -278,7 +277,7 @@ CREATE TABLE IF NOT EXISTS ax_hydrologischesmerkmal_sonstigesbauwerkodersonstige
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_hydrologischesmerkmal_sonstigesbauwerkodersonstigeeinri IS 'Alias: "AX_HydrologischesMerkmal_SonstigesBauwerkOderSonstigeEinrichtung", UML-Typ: Enumeration';
 INSERT INTO ax_hydrologischesmerkmal_sonstigesbauwerkodersonstigeeinri (wert,beschreibung,dokumentation) VALUES
@@ -290,7 +289,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_turm (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_turm IS 'Alias: "AX_Zustand_Turm", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_turm (wert,beschreibung,dokumentation) VALUES
@@ -301,7 +300,7 @@ CREATE TABLE IF NOT EXISTS ax_art_heilquellegasquelle (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_heilquellegasquelle IS 'Alias: "AX_Art_HeilquelleGasquelle", UML-Typ: Enumeration';
 INSERT INTO ax_art_heilquellegasquelle (wert,beschreibung,dokumentation) VALUES
@@ -312,7 +311,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerksfunktion_transportanlage (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bauwerksfunktion_transportanlage IS 'Alias: "AX_Bauwerksfunktion_Transportanlage", UML-Typ: Enumeration';
 INSERT INTO ax_bauwerksfunktion_transportanlage (wert,beschreibung,dokumentation) VALUES
@@ -324,7 +323,7 @@ CREATE TABLE IF NOT EXISTS ax_lagezurerdoberflaeche_vorratsbehaelterspeicherbauw
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_lagezurerdoberflaeche_vorratsbehaelterspeicherbauwerk IS 'Alias: "AX_LageZurErdoberflaeche_VorratsbehaelterSpeicherbauwerk", UML-Typ: Enumeration';
 INSERT INTO ax_lagezurerdoberflaeche_vorratsbehaelterspeicherbauwerk (wert,beschreibung,dokumentation) VALUES
@@ -335,7 +334,7 @@ CREATE TABLE IF NOT EXISTS ax_speicherinhalt_vorratsbehaelterspeicherbauwerk (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_speicherinhalt_vorratsbehaelterspeicherbauwerk IS 'Alias: "AX_Speicherinhalt_VorratsbehaelterSpeicherbauwerk", UML-Typ: Enumeration';
 INSERT INTO ax_speicherinhalt_vorratsbehaelterspeicherbauwerk (wert,beschreibung,dokumentation) VALUES
@@ -356,7 +355,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerksfunktion_bauwerkoderanlagefuerindustrieund
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bauwerksfunktion_bauwerkoderanlagefuerindustrieundgewer IS 'Alias: "AX_Bauwerksfunktion_BauwerkOderAnlageFuerIndustrieUndGewerbe", UML-Typ: Enumeration';
 INSERT INTO ax_bauwerksfunktion_bauwerkoderanlagefuerindustrieundgewer (wert,beschreibung,dokumentation) VALUES
@@ -393,7 +392,7 @@ CREATE TABLE IF NOT EXISTS ax_art_einrichtunginoeffentlichenbereichen (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_einrichtunginoeffentlichenbereichen IS 'Alias: "AX_Art_EinrichtungInOeffentlichenBereichen", UML-Typ: Enumeration';
 INSERT INTO ax_art_einrichtunginoeffentlichenbereichen (wert,beschreibung,dokumentation) VALUES
@@ -437,7 +436,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerksfunktion_bauwerkoderanlagefuersportfreizei
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bauwerksfunktion_bauwerkoderanlagefuersportfreizeitunde IS 'Alias: "AX_Bauwerksfunktion_BauwerkOderAnlageFuerSportFreizeitUndErholung", UML-Typ: Enumeration';
 INSERT INTO ax_bauwerksfunktion_bauwerkoderanlagefuersportfreizeitunde (wert,beschreibung,dokumentation) VALUES
@@ -461,7 +460,7 @@ CREATE TABLE IF NOT EXISTS ax_archaeologischertyp_historischesbauwerkoderhistori
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_archaeologischertyp_historischesbauwerkoderhistorischee IS 'Alias: "AX_ArchaeologischerTyp_HistorischesBauwerkOderHistorischeEinrichtung", UML-Typ: Enumeration';
 INSERT INTO ax_archaeologischertyp_historischesbauwerkoderhistorischee (wert,beschreibung,dokumentation) VALUES
@@ -486,7 +485,7 @@ CREATE TABLE IF NOT EXISTS ax_hydrologischesmerkmal_heilquellegasquelle (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_hydrologischesmerkmal_heilquellegasquelle IS 'Alias: "AX_HydrologischesMerkmal_HeilquelleGasquelle", UML-Typ: Enumeration';
 INSERT INTO ax_hydrologischesmerkmal_heilquellegasquelle (wert,beschreibung,dokumentation) VALUES
@@ -497,7 +496,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_bauwerkoderanlagefuerindustrieundgewerbe (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_bauwerkoderanlagefuerindustrieundgewerbe IS 'Alias: "AX_Zustand_BauwerkOderAnlageFuerIndustrieUndGewerbe", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_bauwerkoderanlagefuerindustrieundgewerbe (wert,beschreibung,dokumentation) VALUES
@@ -510,7 +509,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerksfunktion_sonstigesbauwerkodersonstigeeinri
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bauwerksfunktion_sonstigesbauwerkodersonstigeeinrichtun IS 'Alias: "AX_Bauwerksfunktion_SonstigesBauwerkOderSonstigeEinrichtung", UML-Typ: Enumeration';
 INSERT INTO ax_bauwerksfunktion_sonstigesbauwerkodersonstigeeinrichtun (wert,beschreibung,dokumentation) VALUES
@@ -552,7 +551,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_bauwerk (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_bauwerk IS 'Alias: "AX_Funktion_Bauwerk", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_bauwerk (wert,beschreibung,dokumentation) VALUES
@@ -563,7 +562,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerksfunktion_leitung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bauwerksfunktion_leitung IS 'Alias: "AX_Bauwerksfunktion_Leitung", UML-Typ: Enumeration';
 INSERT INTO ax_bauwerksfunktion_leitung (wert,beschreibung,dokumentation) VALUES
@@ -574,7 +573,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerksfunktion_vorratsbehaelterspeicherbauwerk (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bauwerksfunktion_vorratsbehaelterspeicherbauwerk IS 'Alias: "AX_Bauwerksfunktion_VorratsbehaelterSpeicherbauwerk", UML-Typ: Enumeration';
 INSERT INTO ax_bauwerksfunktion_vorratsbehaelterspeicherbauwerk (wert,beschreibung,dokumentation) VALUES
@@ -590,7 +589,7 @@ CREATE TABLE IF NOT EXISTS ax_befestigung_wegpfadsteig (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_befestigung_wegpfadsteig IS 'Alias: "AX_Befestigung_WegPfadSteig", UML-Typ: Enumeration';
 INSERT INTO ax_befestigung_wegpfadsteig (wert,beschreibung,dokumentation) VALUES
@@ -601,7 +600,7 @@ CREATE TABLE IF NOT EXISTS ax_oberflaechenmaterial_flugverkehrsanlage (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_oberflaechenmaterial_flugverkehrsanlage IS 'Alias: "AX_Oberflaechenmaterial_Flugverkehrsanlage", UML-Typ: Enumeration';
 INSERT INTO ax_oberflaechenmaterial_flugverkehrsanlage (wert,beschreibung,dokumentation) VALUES
@@ -613,7 +612,7 @@ CREATE TABLE IF NOT EXISTS ax_art_gleis (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_gleis IS 'Alias: "AX_Art_Gleis", UML-Typ: Enumeration';
 INSERT INTO ax_art_gleis (wert,beschreibung,dokumentation) VALUES
@@ -623,7 +622,7 @@ CREATE TABLE IF NOT EXISTS ax_bahnkategorie_gleis (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bahnkategorie_gleis IS 'Alias: "AX_Bahnkategorie_Gleis", UML-Typ: Enumeration';
 INSERT INTO ax_bahnkategorie_gleis (wert,beschreibung,dokumentation) VALUES
@@ -645,7 +644,7 @@ CREATE TABLE IF NOT EXISTS ax_art_strassenverkehrsanlage (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_strassenverkehrsanlage IS 'Alias: "AX_Art_Strassenverkehrsanlage", UML-Typ: Enumeration';
 INSERT INTO ax_art_strassenverkehrsanlage (wert,beschreibung,dokumentation) VALUES
@@ -666,7 +665,7 @@ CREATE TABLE IF NOT EXISTS ax_markierung_wegpfadsteig (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_markierung_wegpfadsteig IS 'Alias: "AX_Markierung_WegPfadSteig", UML-Typ: Enumeration';
 INSERT INTO ax_markierung_wegpfadsteig (wert,beschreibung,dokumentation) VALUES
@@ -678,7 +677,7 @@ CREATE TABLE IF NOT EXISTS ax_bahnhofskategorie_bahnverkehrsanlage (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bahnhofskategorie_bahnverkehrsanlage IS 'Alias: "AX_Bahnhofskategorie_Bahnverkehrsanlage", UML-Typ: Enumeration';
 INSERT INTO ax_bahnhofskategorie_bahnverkehrsanlage (wert,beschreibung,dokumentation) VALUES
@@ -690,7 +689,7 @@ CREATE TABLE IF NOT EXISTS ax_bahnkategorie_seilbahnschwebebahn (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bahnkategorie_seilbahnschwebebahn IS 'Alias: "AX_Bahnkategorie_SeilbahnSchwebebahn", UML-Typ: Enumeration';
 INSERT INTO ax_bahnkategorie_seilbahnschwebebahn (wert,beschreibung,dokumentation) VALUES
@@ -705,7 +704,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_bahnverkehrsanlage (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_bahnverkehrsanlage IS 'Alias: "AX_Zustand_Bahnverkehrsanlage", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_bahnverkehrsanlage (wert,beschreibung,dokumentation) VALUES
@@ -716,7 +715,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_bauwerkimgewaesserbereich (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_bauwerkimgewaesserbereich IS 'Alias: "AX_Zustand_BauwerkImGewaesserbereich", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_bauwerkimgewaesserbereich (wert,beschreibung,dokumentation) VALUES
@@ -727,7 +726,7 @@ CREATE TABLE IF NOT EXISTS ax_art_wegpfadsteig (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_wegpfadsteig IS 'Alias: "AX_Art_WegPfadSteig", UML-Typ: Enumeration';
 INSERT INTO ax_art_wegpfadsteig (wert,beschreibung,dokumentation) VALUES
@@ -744,7 +743,7 @@ CREATE TABLE IF NOT EXISTS ax_lagezuroberflaeche_gleis (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_lagezuroberflaeche_gleis IS 'Alias: "AX_LageZurOberflaeche_Gleis", UML-Typ: Enumeration';
 INSERT INTO ax_lagezuroberflaeche_gleis (wert,beschreibung,dokumentation) VALUES
@@ -755,7 +754,7 @@ CREATE TABLE IF NOT EXISTS ax_art_flugverkehrsanlage (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_flugverkehrsanlage IS 'Alias: "AX_Art_Flugverkehrsanlage", UML-Typ: Enumeration';
 INSERT INTO ax_art_flugverkehrsanlage (wert,beschreibung,dokumentation) VALUES
@@ -771,7 +770,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerksfunktion_bauwerkimverkehrsbereich (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bauwerksfunktion_bauwerkimverkehrsbereich IS 'Alias: "AX_Bauwerksfunktion_BauwerkImVerkehrsbereich", UML-Typ: Enumeration';
 INSERT INTO ax_bauwerksfunktion_bauwerkimverkehrsbereich (wert,beschreibung,dokumentation) VALUES
@@ -802,7 +801,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerksfunktion_bauwerkimgewaesserbereich (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bauwerksfunktion_bauwerkimgewaesserbereich IS 'Alias: "AX_Bauwerksfunktion_BauwerkImGewaesserbereich", UML-Typ: Enumeration';
 INSERT INTO ax_bauwerksfunktion_bauwerkimgewaesserbereich (wert,beschreibung,dokumentation) VALUES
@@ -832,7 +831,7 @@ CREATE TABLE IF NOT EXISTS ax_art_einrichtungenfuerdenschiffsverkehr (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_einrichtungenfuerdenschiffsverkehr IS 'Alias: "AX_Art_EinrichtungenFuerDenSchiffsverkehr", UML-Typ: Enumeration';
 INSERT INTO ax_art_einrichtungenfuerdenschiffsverkehr (wert,beschreibung,dokumentation) VALUES
@@ -848,7 +847,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_bauwerkimverkehrsbereich (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_bauwerkimverkehrsbereich IS 'Alias: "AX_Zustand_BauwerkImVerkehrsbereich", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_bauwerkimverkehrsbereich (wert,beschreibung,dokumentation) VALUES
@@ -858,7 +857,7 @@ CREATE TABLE IF NOT EXISTS ax_artdergewaesserachse (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artdergewaesserachse IS 'Alias: "AX_ArtDerGewaesserachse", UML-Typ: Enumeration';
 INSERT INTO ax_artdergewaesserachse (wert,beschreibung,dokumentation) VALUES
@@ -871,7 +870,7 @@ CREATE TABLE IF NOT EXISTS ax_art_schifffahrtsliniefaehrverkehr (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_schifffahrtsliniefaehrverkehr IS 'Alias: "AX_Art_SchifffahrtslinieFaehrverkehr", UML-Typ: Enumeration';
 INSERT INTO ax_art_schifffahrtsliniefaehrverkehr (wert,beschreibung,dokumentation) VALUES
@@ -884,7 +883,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_schleuse (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_schleuse IS 'Alias: "AX_Zustand_Schleuse", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_schleuse (wert,beschreibung,dokumentation) VALUES
@@ -894,7 +893,7 @@ CREATE TABLE IF NOT EXISTS ax_nutzung_hafen (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_nutzung_hafen IS 'Alias: "AX_Nutzung_Hafen", UML-Typ: Enumeration';
 INSERT INTO ax_nutzung_hafen (wert,beschreibung,dokumentation) VALUES
@@ -906,7 +905,7 @@ CREATE TABLE IF NOT EXISTS ax_konstruktionsmerkmalbauart_schleuse (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_konstruktionsmerkmalbauart_schleuse IS 'Alias: "AX_KonstruktionsmerkmalBauart_Schleuse", UML-Typ: Enumeration';
 INSERT INTO ax_konstruktionsmerkmalbauart_schleuse (wert,beschreibung,dokumentation) VALUES
@@ -917,7 +916,7 @@ CREATE TABLE IF NOT EXISTS ax_hafenkategorie_hafen (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_hafenkategorie_hafen IS 'Alias: "AX_Hafenkategorie_Hafen", UML-Typ: Enumeration';
 INSERT INTO ax_hafenkategorie_hafen (wert,beschreibung,dokumentation) VALUES
@@ -933,7 +932,7 @@ CREATE TABLE IF NOT EXISTS ax_art_gewaessermerkmal (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_gewaessermerkmal IS 'Alias: "AX_Art_Gewaessermerkmal", UML-Typ: Enumeration';
 INSERT INTO ax_art_gewaessermerkmal (wert,beschreibung,dokumentation) VALUES
@@ -949,7 +948,7 @@ CREATE TABLE IF NOT EXISTS ax_hydrologischesmerkmal_untergeordnetesgewaesser (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_hydrologischesmerkmal_untergeordnetesgewaesser IS 'Alias: "AX_HydrologischesMerkmal_UntergeordnetesGewaesser", UML-Typ: Enumeration';
 INSERT INTO ax_hydrologischesmerkmal_untergeordnetesgewaesser (wert,beschreibung,dokumentation) VALUES
@@ -960,7 +959,7 @@ CREATE TABLE IF NOT EXISTS ax_lagezurerdoberflaeche_untergeordnetesgewaesser (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_lagezurerdoberflaeche_untergeordnetesgewaesser IS 'Alias: "AX_LageZurErdoberflaeche_UntergeordnetesGewaesser", UML-Typ: Enumeration';
 INSERT INTO ax_lagezurerdoberflaeche_untergeordnetesgewaesser (wert,beschreibung,dokumentation) VALUES
@@ -971,7 +970,7 @@ CREATE TABLE IF NOT EXISTS ax_artdespolders (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artdespolders IS 'Alias: "AX_ArtDesPolders", UML-Typ: Enumeration';
 INSERT INTO ax_artdespolders (wert,beschreibung,dokumentation) VALUES
@@ -983,7 +982,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_polder (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_polder IS 'Alias: "AX_Funktion_Polder", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_polder (wert,beschreibung,dokumentation) VALUES
@@ -994,7 +993,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_untergeordnetesgewaesser (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_untergeordnetesgewaesser IS 'Alias: "AX_Funktion_UntergeordnetesGewaesser", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_untergeordnetesgewaesser (wert,beschreibung,dokumentation) VALUES
@@ -1010,7 +1009,7 @@ CREATE TABLE IF NOT EXISTS ax_hydrologischesmerkmal_gewaessermerkmal (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_hydrologischesmerkmal_gewaessermerkmal IS 'Alias: "AX_HydrologischesMerkmal_Gewaessermerkmal", UML-Typ: Enumeration';
 INSERT INTO ax_hydrologischesmerkmal_gewaessermerkmal (wert,beschreibung,dokumentation) VALUES
@@ -1020,7 +1019,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_vegetationsmerkmal (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_vegetationsmerkmal IS 'Alias: "AX_Funktion_Vegetationsmerkmal", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_vegetationsmerkmal (wert,beschreibung,dokumentation) VALUES
@@ -1030,7 +1029,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_vegetationsmerkmal (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_vegetationsmerkmal IS 'Alias: "AX_Zustand_Vegetationsmerkmal", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_vegetationsmerkmal (wert,beschreibung,dokumentation) VALUES
@@ -1040,7 +1039,7 @@ CREATE TABLE IF NOT EXISTS ax_bewuchs_vegetationsmerkmal (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bewuchs_vegetationsmerkmal IS 'Alias: "AX_Bewuchs_Vegetationsmerkmal", UML-Typ: Enumeration';
 INSERT INTO ax_bewuchs_vegetationsmerkmal (wert,beschreibung,dokumentation) VALUES
@@ -1071,7 +1070,7 @@ CREATE TABLE IF NOT EXISTS ax_eigentuemerart_namensnummer (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_eigentuemerart_namensnummer IS 'Alias: "AX_Eigentuemerart_Namensnummer", UML-Typ: Enumeration';
 INSERT INTO ax_eigentuemerart_namensnummer (wert,beschreibung,dokumentation) VALUES
@@ -1156,7 +1155,7 @@ CREATE TABLE IF NOT EXISTS ax_li_processstep_ohnedatenerhebung_description (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_li_processstep_ohnedatenerhebung_description IS 'Alias: "AX_LI_ProcessStep_OhneDatenerhebung_Description", UML-Typ: Enumeration';
 INSERT INTO ax_li_processstep_ohnedatenerhebung_description (wert,beschreibung,dokumentation) VALUES
@@ -1166,7 +1165,7 @@ CREATE TABLE IF NOT EXISTS ax_blattart_buchungsblatt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_blattart_buchungsblatt IS 'Alias: "AX_Blattart_Buchungsblatt", UML-Typ: Enumeration';
 INSERT INTO ax_blattart_buchungsblatt (wert,beschreibung,dokumentation) VALUES
@@ -1181,7 +1180,7 @@ CREATE TABLE IF NOT EXISTS ax_anrede_person (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_anrede_person IS 'Alias: "AX_Anrede_Person", UML-Typ: Enumeration';
 INSERT INTO ax_anrede_person (wert,beschreibung,dokumentation) VALUES
@@ -1193,7 +1192,7 @@ CREATE TABLE IF NOT EXISTS ax_artderrechtsgemeinschaft_namensnummer (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderrechtsgemeinschaft_namensnummer IS 'Alias: "AX_ArtDerRechtsgemeinschaft_Namensnummer", UML-Typ: Enumeration';
 INSERT INTO ax_artderrechtsgemeinschaft_namensnummer (wert,beschreibung,dokumentation) VALUES
@@ -1206,7 +1205,7 @@ CREATE TABLE IF NOT EXISTS ax_buchungsart_buchungsstelle (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_buchungsart_buchungsstelle IS 'Alias: "AX_Buchungsart_Buchungsstelle", UML-Typ: Enumeration';
 INSERT INTO ax_buchungsart_buchungsstelle (wert,beschreibung,dokumentation) VALUES
@@ -1270,7 +1269,7 @@ CREATE TABLE IF NOT EXISTS ax_klassifikation_hierarchiestufe3d_lagefestpunkt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_klassifikation_hierarchiestufe3d_lagefestpunkt IS 'Alias: "AX_Klassifikation_Hierarchiestufe3D_Lagefestpunkt", UML-Typ: Enumeration';
 INSERT INTO ax_klassifikation_hierarchiestufe3d_lagefestpunkt (wert,beschreibung,dokumentation) VALUES
@@ -1285,7 +1284,7 @@ CREATE TABLE IF NOT EXISTS ax_punktstabilitaet (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_punktstabilitaet IS 'Alias: "AX_Punktstabilitaet", UML-Typ: Enumeration';
 INSERT INTO ax_punktstabilitaet (wert,beschreibung,dokumentation) VALUES
@@ -1306,7 +1305,7 @@ CREATE TABLE IF NOT EXISTS ax_punktstabilitaet_hoehenfestpunkt_geologischestabil
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_punktstabilitaet_hoehenfestpunkt_geologischestabilitaet IS 'Alias: "AX_Punktstabilitaet_Hoehenfestpunkt_GeologischeStabilitaet", UML-Typ: Enumeration';
 INSERT INTO ax_punktstabilitaet_hoehenfestpunkt_geologischestabilitaet (wert,beschreibung,dokumentation) VALUES
@@ -1321,7 +1320,7 @@ CREATE TABLE IF NOT EXISTS ax_klassifikation_ordnung_lagefestpunkt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_klassifikation_ordnung_lagefestpunkt IS 'Alias: "AX_Klassifikation_Ordnung_Lagefestpunkt", UML-Typ: Enumeration';
 INSERT INTO ax_klassifikation_ordnung_lagefestpunkt (wert,beschreibung,dokumentation) VALUES
@@ -1339,7 +1338,7 @@ CREATE TABLE IF NOT EXISTS ax_punktstabilitaet_hoehenfestpunkt_guetedesvermarkun
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_punktstabilitaet_hoehenfestpunkt_guetedesvermarkungstra IS 'Alias: "AX_Punktstabilitaet_Hoehenfestpunkt_GueteDesVermarkungstraegers", UML-Typ: Enumeration';
 INSERT INTO ax_punktstabilitaet_hoehenfestpunkt_guetedesvermarkungstra (wert,beschreibung,dokumentation) VALUES
@@ -1354,7 +1353,7 @@ CREATE TABLE IF NOT EXISTS ax_ordnung_schwerefestpunkt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_ordnung_schwerefestpunkt IS 'Alias: "AX_Ordnung_Schwerefestpunkt", UML-Typ: Enumeration';
 INSERT INTO ax_ordnung_schwerefestpunkt (wert,beschreibung,dokumentation) VALUES
@@ -1370,7 +1369,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_referenzstationspunkt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_referenzstationspunkt IS 'Alias: "AX_Funktion_Referenzstationspunkt", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_referenzstationspunkt (wert,beschreibung,dokumentation) VALUES
@@ -1381,7 +1380,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_lagefestpunkt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_lagefestpunkt IS 'Alias: "AX_Funktion_Lagefestpunkt", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_lagefestpunkt (wert,beschreibung,dokumentation) VALUES
@@ -1394,7 +1393,7 @@ CREATE TABLE IF NOT EXISTS ax_skizzenart_skizze (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_skizzenart_skizze IS 'Alias: "AX_Skizzenart_Skizze", UML-Typ: Enumeration';
 INSERT INTO ax_skizzenart_skizze (wert,beschreibung,dokumentation) VALUES
@@ -1411,7 +1410,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_schwerefestpunkt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_schwerefestpunkt IS 'Alias: "AX_Funktion_Schwerefestpunkt", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_schwerefestpunkt (wert,beschreibung,dokumentation) VALUES
@@ -1422,7 +1421,7 @@ CREATE TABLE IF NOT EXISTS ax_punktstabilitaet_hoehenfestpunkt_hoehenstabilitaet
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_punktstabilitaet_hoehenfestpunkt_hoehenstabilitaetauswi IS 'Alias: "AX_Punktstabilitaet_Hoehenfestpunkt_HoehenstabilitaetAusWiederholungsmessungen", UML-Typ: Enumeration';
 INSERT INTO ax_punktstabilitaet_hoehenfestpunkt_hoehenstabilitaetauswi (wert,beschreibung,dokumentation) VALUES
@@ -1437,7 +1436,7 @@ CREATE TABLE IF NOT EXISTS ax_punktstabilitaet_hoehenfestpunkt_guetedesbaugrunde
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_punktstabilitaet_hoehenfestpunkt_guetedesbaugrundes IS 'Alias: "AX_Punktstabilitaet_Hoehenfestpunkt_GueteDesBaugrundes", UML-Typ: Enumeration';
 INSERT INTO ax_punktstabilitaet_hoehenfestpunkt_guetedesbaugrundes (wert,beschreibung,dokumentation) VALUES
@@ -1452,7 +1451,7 @@ CREATE TABLE IF NOT EXISTS ax_punktstabilitaet_hoehenfestpunkt_grundwasserschwan
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_punktstabilitaet_hoehenfestpunkt_grundwasserschwankung IS 'Alias: "AX_Punktstabilitaet_Hoehenfestpunkt_Grundwasserschwankung", UML-Typ: Enumeration';
 INSERT INTO ax_punktstabilitaet_hoehenfestpunkt_grundwasserschwankung (wert,beschreibung,dokumentation) VALUES
@@ -1467,7 +1466,7 @@ CREATE TABLE IF NOT EXISTS ax_punktstabilitaet_hoehenfestpunkt_topographieundumw
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_punktstabilitaet_hoehenfestpunkt_topographieundumwelt IS 'Alias: "AX_Punktstabilitaet_Hoehenfestpunkt_TopographieUndUmwelt", UML-Typ: Enumeration';
 INSERT INTO ax_punktstabilitaet_hoehenfestpunkt_topographieundumwelt (wert,beschreibung,dokumentation) VALUES
@@ -1482,7 +1481,7 @@ CREATE TABLE IF NOT EXISTS ax_klassifikation_wertigkeit_lagefestpunkt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_klassifikation_wertigkeit_lagefestpunkt IS 'Alias: "AX_Klassifikation_Wertigkeit_Lagefestpunkt", UML-Typ: Enumeration';
 INSERT INTO ax_klassifikation_wertigkeit_lagefestpunkt (wert,beschreibung,dokumentation) VALUES
@@ -1498,7 +1497,7 @@ CREATE TABLE IF NOT EXISTS ax_gnsstauglichkeit (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_gnsstauglichkeit IS 'Alias: "AX_GNSSTauglichkeit", UML-Typ: Enumeration';
 INSERT INTO ax_gnsstauglichkeit (wert,beschreibung,dokumentation) VALUES
@@ -1515,7 +1514,7 @@ CREATE TABLE IF NOT EXISTS ax_punktstabilitaet_hoehenfestpunkt_grundwasserstand 
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_punktstabilitaet_hoehenfestpunkt_grundwasserstand IS 'Alias: "AX_Punktstabilitaet_Hoehenfestpunkt_Grundwasserstand", UML-Typ: Enumeration';
 INSERT INTO ax_punktstabilitaet_hoehenfestpunkt_grundwasserstand (wert,beschreibung,dokumentation) VALUES
@@ -1531,7 +1530,7 @@ CREATE TABLE IF NOT EXISTS ax_punktstabilitaet_hoehenfestpunkt_vermutetehoehenst
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_punktstabilitaet_hoehenfestpunkt_vermutetehoehenstabili IS 'Alias: "AX_Punktstabilitaet_Hoehenfestpunkt_VermuteteHoehenstabilitaet", UML-Typ: Enumeration';
 INSERT INTO ax_punktstabilitaet_hoehenfestpunkt_vermutetehoehenstabili (wert,beschreibung,dokumentation) VALUES
@@ -1546,7 +1545,7 @@ CREATE TABLE IF NOT EXISTS ax_ordnung_hoehenfestpunkt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_ordnung_hoehenfestpunkt IS 'Alias: "AX_Ordnung_Hoehenfestpunkt", UML-Typ: Enumeration';
 INSERT INTO ax_ordnung_hoehenfestpunkt (wert,beschreibung,dokumentation) VALUES
@@ -1564,7 +1563,7 @@ CREATE TABLE IF NOT EXISTS ax_horizontfreiheit_grenzpunkt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_horizontfreiheit_grenzpunkt IS 'Alias: "AX_Horizontfreiheit_Grenzpunkt", UML-Typ: Enumeration';
 INSERT INTO ax_horizontfreiheit_grenzpunkt (wert,beschreibung,dokumentation) VALUES
@@ -1576,7 +1575,7 @@ CREATE TABLE IF NOT EXISTS ax_gruendederausgesetztenabmarkung_grenzpunkt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_gruendederausgesetztenabmarkung_grenzpunkt IS 'Alias: "AX_GruendeDerAusgesetztenAbmarkung_Grenzpunkt", UML-Typ: Enumeration';
 INSERT INTO ax_gruendederausgesetztenabmarkung_grenzpunkt (wert,beschreibung,dokumentation) VALUES
@@ -1595,7 +1594,7 @@ CREATE TABLE IF NOT EXISTS ax_bemerkungzurabmarkung_grenzpunkt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bemerkungzurabmarkung_grenzpunkt IS 'Alias: "AX_BemerkungZurAbmarkung_Grenzpunkt", UML-Typ: Enumeration';
 INSERT INTO ax_bemerkungzurabmarkung_grenzpunkt (wert,beschreibung,dokumentation) VALUES
@@ -1608,7 +1607,7 @@ CREATE TABLE IF NOT EXISTS ax_artderflurstuecksgrenze_besondereflurstuecksgrenze
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderflurstuecksgrenze_besondereflurstuecksgrenze IS 'Alias: "AX_ArtDerFlurstuecksgrenze_BesondereFlurstuecksgrenze", UML-Typ: Enumeration';
 INSERT INTO ax_artderflurstuecksgrenze_besondereflurstuecksgrenze (wert,beschreibung,dokumentation) VALUES
@@ -1634,7 +1633,7 @@ CREATE TABLE IF NOT EXISTS ax_horizontfreiheit_netzpunkt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_horizontfreiheit_netzpunkt IS 'Alias: "AX_Horizontfreiheit_Netzpunkt", UML-Typ: Enumeration';
 INSERT INTO ax_horizontfreiheit_netzpunkt (wert,beschreibung,dokumentation) VALUES
@@ -1646,7 +1645,7 @@ CREATE TABLE IF NOT EXISTS ax_marke (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_marke IS 'Alias: "AX_Marke", UML-Typ: Enumeration';
 INSERT INTO ax_marke (wert,beschreibung,dokumentation) VALUES
@@ -1897,7 +1896,7 @@ CREATE TABLE IF NOT EXISTS ax_genauigkeitsstufe_punktort (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_genauigkeitsstufe_punktort IS 'Alias: "AX_Genauigkeitsstufe_Punktort", UML-Typ: Enumeration';
 INSERT INTO ax_genauigkeitsstufe_punktort (wert,beschreibung,dokumentation) VALUES
@@ -1921,7 +1920,7 @@ CREATE TABLE IF NOT EXISTS ax_messmethode_schwere (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_messmethode_schwere IS 'Alias: "AX_Messmethode_Schwere", UML-Typ: Enumeration';
 INSERT INTO ax_messmethode_schwere (wert,beschreibung,dokumentation) VALUES
@@ -1932,7 +1931,7 @@ CREATE TABLE IF NOT EXISTS ax_koordinatenstatus_punktort (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_koordinatenstatus_punktort IS 'Alias: "AX_Koordinatenstatus_Punktort", UML-Typ: Enumeration';
 INSERT INTO ax_koordinatenstatus_punktort (wert,beschreibung,dokumentation) VALUES
@@ -1947,7 +1946,7 @@ CREATE TABLE IF NOT EXISTS ax_datenerhebung_schwere (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_datenerhebung_schwere IS 'Alias: "AX_Datenerhebung_Schwere", UML-Typ: Enumeration';
 INSERT INTO ax_datenerhebung_schwere (wert,beschreibung,dokumentation) VALUES
@@ -1963,7 +1962,7 @@ CREATE TABLE IF NOT EXISTS ax_vertrauenswuerdigkeit_schwere (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_vertrauenswuerdigkeit_schwere IS 'Alias: "AX_Vertrauenswuerdigkeit_Schwere", UML-Typ: Enumeration';
 INSERT INTO ax_vertrauenswuerdigkeit_schwere (wert,beschreibung,dokumentation) VALUES
@@ -1975,7 +1974,7 @@ CREATE TABLE IF NOT EXISTS ax_schwereanomalie_schwere_art (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_schwereanomalie_schwere_art IS 'Alias: "AX_Schwereanomalie_Schwere_Art", UML-Typ: Enumeration';
 INSERT INTO ax_schwereanomalie_schwere_art (wert,beschreibung,dokumentation) VALUES
@@ -1992,7 +1991,7 @@ CREATE TABLE IF NOT EXISTS ax_vertrauenswuerdigkeit_punktort (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_vertrauenswuerdigkeit_punktort IS 'Alias: "AX_Vertrauenswuerdigkeit_Punktort", UML-Typ: Enumeration';
 INSERT INTO ax_vertrauenswuerdigkeit_punktort (wert,beschreibung,dokumentation) VALUES
@@ -2005,7 +2004,7 @@ CREATE TABLE IF NOT EXISTS ax_schwerestatus_schwere (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_schwerestatus_schwere IS 'Alias: "AX_Schwerestatus_Schwere", UML-Typ: Enumeration';
 INSERT INTO ax_schwerestatus_schwere (wert,beschreibung,dokumentation) VALUES
@@ -2020,7 +2019,7 @@ CREATE TABLE IF NOT EXISTS ax_li_processstep_punktort_description (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_li_processstep_punktort_description IS 'Alias: "AX_LI_ProcessStep_Punktort_Description", UML-Typ: Enumeration';
 INSERT INTO ax_li_processstep_punktort_description (wert,beschreibung,dokumentation) VALUES
@@ -2031,7 +2030,7 @@ CREATE TABLE IF NOT EXISTS ax_genauigkeitsstufe_schwere (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_genauigkeitsstufe_schwere IS 'Alias: "AX_Genauigkeitsstufe_Schwere", UML-Typ: Enumeration';
 INSERT INTO ax_genauigkeitsstufe_schwere (wert,beschreibung,dokumentation) VALUES
@@ -2044,7 +2043,7 @@ CREATE TABLE IF NOT EXISTS ax_datenerhebung_punktort (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_datenerhebung_punktort IS 'Alias: "AX_Datenerhebung_Punktort", UML-Typ: Enumeration';
 INSERT INTO ax_datenerhebung_punktort (wert,beschreibung,dokumentation) VALUES
@@ -2136,7 +2135,7 @@ CREATE TABLE IF NOT EXISTS ax_schweresystem_schwere (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_schweresystem_schwere IS 'Alias: "AX_Schweresystem_Schwere", UML-Typ: Enumeration';
 INSERT INTO ax_schweresystem_schwere (wert,beschreibung,dokumentation) VALUES
@@ -2154,7 +2153,7 @@ CREATE TABLE IF NOT EXISTS ax_blattart_historischesflurstueck (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_blattart_historischesflurstueck IS 'Alias: "AX_Blattart_HistorischesFlurstueck", UML-Typ: Enumeration';
 INSERT INTO ax_blattart_historischesflurstueck (wert,beschreibung,dokumentation) VALUES
@@ -2165,7 +2164,7 @@ CREATE TABLE IF NOT EXISTS ax_qualitaet_hauskoordinate (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_qualitaet_hauskoordinate IS 'Alias: "AX_Qualitaet_Hauskoordinate", UML-Typ: Enumeration';
 INSERT INTO ax_qualitaet_hauskoordinate (wert,beschreibung,dokumentation) VALUES
@@ -2177,7 +2176,7 @@ CREATE TABLE IF NOT EXISTS ax_art_punktkennung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_punktkennung IS 'Alias: "AX_Art_Punktkennung", UML-Typ: Enumeration';
 INSERT INTO ax_art_punktkennung (wert,beschreibung,dokumentation) VALUES
@@ -2194,7 +2193,7 @@ CREATE TABLE IF NOT EXISTS ax_art_reservierung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_reservierung IS 'Alias: "AX_Art_Reservierung", UML-Typ: Enumeration';
 INSERT INTO ax_art_reservierung (wert,beschreibung,dokumentation) VALUES
@@ -2223,7 +2222,7 @@ CREATE TABLE IF NOT EXISTS ax_art_adressat_auszug (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_adressat_auszug IS 'Alias: "AX_Art_Adressat_Auszug", UML-Typ: Enumeration';
 INSERT INTO ax_art_adressat_auszug (wert,beschreibung,dokumentation) VALUES
@@ -2238,7 +2237,7 @@ CREATE TABLE IF NOT EXISTS ax_lagezurerdoberflaeche_bauteil (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_lagezurerdoberflaeche_bauteil IS 'Alias: "AX_LageZurErdoberflaeche_Bauteil", UML-Typ: Enumeration';
 INSERT INTO ax_lagezurerdoberflaeche_bauteil (wert,beschreibung,dokumentation) VALUES
@@ -2249,7 +2248,7 @@ CREATE TABLE IF NOT EXISTS ax_lagezurerdoberflaeche_gebaeude (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_lagezurerdoberflaeche_gebaeude IS 'Alias: "AX_LageZurErdoberflaeche_Gebaeude", UML-Typ: Enumeration';
 INSERT INTO ax_lagezurerdoberflaeche_gebaeude (wert,beschreibung,dokumentation) VALUES
@@ -2260,7 +2259,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_gebaeude (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_gebaeude IS 'Alias: "AX_Zustand_Gebaeude", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_gebaeude (wert,beschreibung,dokumentation) VALUES
@@ -2276,7 +2275,7 @@ CREATE TABLE IF NOT EXISTS ax_dachgeschossausbau_gebaeude (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_dachgeschossausbau_gebaeude IS 'Alias: "AX_Dachgeschossausbau_Gebaeude", UML-Typ: Enumeration';
 INSERT INTO ax_dachgeschossausbau_gebaeude (wert,beschreibung,dokumentation) VALUES
@@ -2289,7 +2288,7 @@ CREATE TABLE IF NOT EXISTS ax_dachform (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_dachform IS 'Alias: "AX_Dachform", UML-Typ: Enumeration';
 INSERT INTO ax_dachform (wert,beschreibung,dokumentation) VALUES
@@ -2313,7 +2312,7 @@ CREATE TABLE IF NOT EXISTS ax_bauweise_gebaeude (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bauweise_gebaeude IS 'Alias: "AX_Bauweise_Gebaeude", UML-Typ: Enumeration';
 INSERT INTO ax_bauweise_gebaeude (wert,beschreibung,dokumentation) VALUES
@@ -2335,7 +2334,7 @@ CREATE TABLE IF NOT EXISTS ax_gebaeudefunktion (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_gebaeudefunktion IS 'Alias: "AX_Gebaeudefunktion", UML-Typ: Enumeration';
 INSERT INTO ax_gebaeudefunktion (wert,beschreibung,dokumentation) VALUES
@@ -2576,7 +2575,7 @@ CREATE TABLE IF NOT EXISTS ax_art_gebaeudepunkt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_gebaeudepunkt IS 'Alias: "AX_Art_Gebaeudepunkt", UML-Typ: Enumeration';
 INSERT INTO ax_art_gebaeudepunkt (wert,beschreibung,dokumentation) VALUES
@@ -2589,7 +2588,7 @@ CREATE TABLE IF NOT EXISTS ax_weitere_gebaeudefunktion (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_weitere_gebaeudefunktion IS 'Alias: "AX_Weitere_Gebaeudefunktion", UML-Typ: Enumeration';
 INSERT INTO ax_weitere_gebaeudefunktion (wert,beschreibung,dokumentation) VALUES
@@ -2623,7 +2622,7 @@ CREATE TABLE IF NOT EXISTS ax_beschaffenheit_besonderegebaeudelinie (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_beschaffenheit_besonderegebaeudelinie IS 'Alias: "AX_Beschaffenheit_BesondereGebaeudelinie", UML-Typ: Enumeration';
 INSERT INTO ax_beschaffenheit_besonderegebaeudelinie (wert,beschreibung,dokumentation) VALUES
@@ -2642,7 +2641,7 @@ CREATE TABLE IF NOT EXISTS ax_bauart_bauteil (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bauart_bauteil IS 'Alias: "AX_Bauart_Bauteil", UML-Typ: Enumeration';
 INSERT INTO ax_bauart_bauteil (wert,beschreibung,dokumentation) VALUES
@@ -2668,7 +2667,7 @@ CREATE TABLE IF NOT EXISTS ax_nutzung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_nutzung IS 'Alias: "AX_Nutzung", UML-Typ: Enumeration';
 INSERT INTO ax_nutzung (wert,beschreibung,dokumentation) VALUES
@@ -2682,7 +2681,7 @@ CREATE TABLE IF NOT EXISTS ax_art_verbandsgemeinde (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_verbandsgemeinde IS 'Alias: "AX_Art_Verbandsgemeinde", UML-Typ: Enumeration';
 INSERT INTO ax_art_verbandsgemeinde (wert,beschreibung,dokumentation) VALUES
@@ -2694,7 +2693,7 @@ CREATE TABLE IF NOT EXISTS ax_art_baublock (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_baublock IS 'Alias: "AX_Art_Baublock", UML-Typ: Enumeration';
 INSERT INTO ax_art_baublock (wert,beschreibung,dokumentation) VALUES
@@ -2705,7 +2704,7 @@ CREATE TABLE IF NOT EXISTS ax_artdergebietsgrenze_gebietsgrenze (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artdergebietsgrenze_gebietsgrenze IS 'Alias: "AX_ArtDerGebietsgrenze_Gebietsgrenze", UML-Typ: Enumeration';
 INSERT INTO ax_artdergebietsgrenze_gebietsgrenze (wert,beschreibung,dokumentation) VALUES
@@ -2721,7 +2720,7 @@ CREATE TABLE IF NOT EXISTS ax_sonstigeangaben_bodenschaetzung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_sonstigeangaben_bodenschaetzung IS 'Alias: "AX_SonstigeAngaben_Bodenschaetzung", UML-Typ: Enumeration';
 INSERT INTO ax_sonstigeangaben_bodenschaetzung (wert,beschreibung,dokumentation) VALUES
@@ -2744,7 +2743,7 @@ CREATE TABLE IF NOT EXISTS ax_kulturart_musterlandesmusterundvergleichsstueck (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_kulturart_musterlandesmusterundvergleichsstueck IS 'Alias: "AX_Kulturart_MusterLandesmusterUndVergleichsstueck", UML-Typ: Enumeration';
 INSERT INTO ax_kulturart_musterlandesmusterundvergleichsstueck (wert,beschreibung,dokumentation) VALUES
@@ -2757,7 +2756,7 @@ CREATE TABLE IF NOT EXISTS ax_entstehungsartoderklimastufewasserverhaeltnisse_bo
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc IS 'Alias: "AX_EntstehungsartOderKlimastufeWasserverhaeltnisse_Bodenschaetzung", UML-Typ: Enumeration';
 INSERT INTO ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc (wert,beschreibung,dokumentation) VALUES
@@ -2814,7 +2813,7 @@ CREATE TABLE IF NOT EXISTS ax_sonstigeangaben_musterlandesmusterundvergleichsstu
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_sonstigeangaben_musterlandesmusterundvergleichsstueck IS 'Alias: "AX_SonstigeAngaben_MusterLandesmusterUndVergleichsstueck", UML-Typ: Enumeration';
 INSERT INTO ax_sonstigeangaben_musterlandesmusterundvergleichsstueck (wert,beschreibung,dokumentation) VALUES
@@ -2834,7 +2833,7 @@ CREATE TABLE IF NOT EXISTS ax_kulturart_bodenschaetzung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_kulturart_bodenschaetzung IS 'Alias: "AX_Kulturart_Bodenschaetzung", UML-Typ: Enumeration';
 INSERT INTO ax_kulturart_bodenschaetzung (wert,beschreibung,dokumentation) VALUES
@@ -2847,7 +2846,7 @@ CREATE TABLE IF NOT EXISTS ax_klassifizierung_bewertung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_klassifizierung_bewertung IS 'Alias: "AX_Klassifizierung_Bewertung", UML-Typ: Enumeration';
 INSERT INTO ax_klassifizierung_bewertung (wert,beschreibung,dokumentation) VALUES
@@ -2906,7 +2905,7 @@ CREATE TABLE IF NOT EXISTS ax_merkmal_musterlandesmusterundvergleichsstueck (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_merkmal_musterlandesmusterundvergleichsstueck IS 'Alias: "AX_Merkmal_MusterLandesmusterUndVergleichsstueck", UML-Typ: Enumeration';
 INSERT INTO ax_merkmal_musterlandesmusterundvergleichsstueck (wert,beschreibung,dokumentation) VALUES
@@ -2918,7 +2917,7 @@ CREATE TABLE IF NOT EXISTS ax_zustandsstufeoderbodenstufe_bodenschaetzung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustandsstufeoderbodenstufe_bodenschaetzung IS 'Alias: "AX_ZustandsstufeOderBodenstufe_Bodenschaetzung", UML-Typ: Enumeration';
 INSERT INTO ax_zustandsstufeoderbodenstufe_bodenschaetzung (wert,beschreibung,dokumentation) VALUES
@@ -2942,7 +2941,7 @@ CREATE TABLE IF NOT EXISTS ax_bedeutung_grablochderbodenschaetzung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bedeutung_grablochderbodenschaetzung IS 'Alias: "AX_Bedeutung_GrablochDerBodenschaetzung", UML-Typ: Enumeration';
 INSERT INTO ax_bedeutung_grablochderbodenschaetzung (wert,beschreibung,dokumentation) VALUES
@@ -2956,7 +2955,7 @@ CREATE TABLE IF NOT EXISTS ax_zustandsstufeoderbodenstufe_musterlandesmusterundv
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustandsstufeoderbodenstufe_musterlandesmusterundvergle IS 'Alias: "AX_ZustandsstufeOderBodenstufe_MusterLandesmusterUndVergleichsstueck", UML-Typ: Enumeration';
 INSERT INTO ax_zustandsstufeoderbodenstufe_musterlandesmusterundvergle (wert,beschreibung,dokumentation) VALUES
@@ -2977,7 +2976,7 @@ CREATE TABLE IF NOT EXISTS ax_entstehungsartoderklimastufewasserverhaeltnisse_mu
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_entstehungsartoderklimastufewasserverhaeltnisse_musterl IS 'Alias: "AX_EntstehungsartOderKlimastufeWasserverhaeltnisse_MusterLandesmusterUndVergleichsstueck", UML-Typ: Enumeration';
 INSERT INTO ax_entstehungsartoderklimastufewasserverhaeltnisse_musterl (wert,beschreibung,dokumentation) VALUES
@@ -3024,7 +3023,7 @@ CREATE TABLE IF NOT EXISTS ax_bodenart_bodenschaetzung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bodenart_bodenschaetzung IS 'Alias: "AX_Bodenart_Bodenschaetzung", UML-Typ: Enumeration';
 INSERT INTO ax_bodenart_bodenschaetzung (wert,beschreibung,dokumentation) VALUES
@@ -3108,7 +3107,7 @@ CREATE TABLE IF NOT EXISTS ax_bodenart_musterlandesmusterundvergleichsstueck (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bodenart_musterlandesmusterundvergleichsstueck IS 'Alias: "AX_Bodenart_MusterLandesmusterUndVergleichsstueck", UML-Typ: Enumeration';
 INSERT INTO ax_bodenart_musterlandesmusterundvergleichsstueck (wert,beschreibung,dokumentation) VALUES
@@ -3162,7 +3161,7 @@ CREATE TABLE IF NOT EXISTS ax_landschaftstyp (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_landschaftstyp IS 'Alias: "AX_Landschaftstyp", UML-Typ: Enumeration';
 INSERT INTO ax_landschaftstyp (wert,beschreibung,dokumentation) VALUES
@@ -3186,7 +3185,7 @@ CREATE TABLE IF NOT EXISTS ax_art_verband (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_verband IS 'Alias: "AX_Art_Verband", UML-Typ: Enumeration';
 INSERT INTO ax_art_verband (wert,beschreibung,dokumentation) VALUES
@@ -3198,7 +3197,7 @@ CREATE TABLE IF NOT EXISTS ax_behoerde (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_behoerde IS 'Alias: "AX_Behoerde", UML-Typ: Enumeration';
 INSERT INTO ax_behoerde (wert,beschreibung,dokumentation) VALUES
@@ -3223,7 +3222,7 @@ CREATE TABLE IF NOT EXISTS ax_administrative_funktion (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_administrative_funktion IS 'Alias: "AX_Administrative_Funktion", UML-Typ: Enumeration';
 INSERT INTO ax_administrative_funktion (wert,beschreibung,dokumentation) VALUES
@@ -3274,7 +3273,7 @@ CREATE TABLE IF NOT EXISTS ax_bezeichnung_verwaltungsgemeinschaft (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bezeichnung_verwaltungsgemeinschaft IS 'Alias: "AX_Bezeichnung_Verwaltungsgemeinschaft", UML-Typ: Enumeration';
 INSERT INTO ax_bezeichnung_verwaltungsgemeinschaft (wert,beschreibung,dokumentation) VALUES
@@ -3288,7 +3287,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_schutzgebietnachwasserrecht (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_schutzgebietnachwasserrecht IS 'Alias: "AX_Funktion_SchutzgebietNachWasserrecht", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_schutzgebietnachwasserrecht (wert,beschreibung,dokumentation) VALUES
@@ -3300,7 +3299,7 @@ CREATE TABLE IF NOT EXISTS ax_artderfestlegung_schutzgebietnachnaturumweltoderbo
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderfestlegung_schutzgebietnachnaturumweltoderbodensc IS 'Alias: "AX_ArtDerFestlegung_SchutzgebietNachNaturUmweltOderBodenschutzrecht", UML-Typ: Enumeration';
 INSERT INTO ax_artderfestlegung_schutzgebietnachnaturumweltoderbodensc (wert,beschreibung,dokumentation) VALUES
@@ -3316,7 +3315,7 @@ CREATE TABLE IF NOT EXISTS ax_artderfestlegung_anderefestlegungnachstrassenrecht
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderfestlegung_anderefestlegungnachstrassenrecht IS 'Alias: "AX_ArtDerFestlegung_AndereFestlegungNachStrassenrecht", UML-Typ: Enumeration';
 INSERT INTO ax_artderfestlegung_anderefestlegungnachstrassenrecht (wert,beschreibung,dokumentation) VALUES
@@ -3337,7 +3336,7 @@ CREATE TABLE IF NOT EXISTS ax_artderfestlegung_schutzgebietnachwasserrecht (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderfestlegung_schutzgebietnachwasserrecht IS 'Alias: "AX_ArtDerFestlegung_SchutzgebietNachWasserrecht", UML-Typ: Enumeration';
 INSERT INTO ax_artderfestlegung_schutzgebietnachwasserrecht (wert,beschreibung,dokumentation) VALUES
@@ -3348,7 +3347,7 @@ CREATE TABLE IF NOT EXISTS ax_besonderefunktion_forstrecht (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_besonderefunktion_forstrecht IS 'Alias: "AX_BesondereFunktion_Forstrecht", UML-Typ: Enumeration';
 INSERT INTO ax_besonderefunktion_forstrecht (wert,beschreibung,dokumentation) VALUES
@@ -3373,7 +3372,7 @@ CREATE TABLE IF NOT EXISTS ax_zone_schutzzone (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zone_schutzzone IS 'Alias: "AX_Zone_Schutzzone", UML-Typ: Enumeration';
 INSERT INTO ax_zone_schutzzone (wert,beschreibung,dokumentation) VALUES
@@ -3393,7 +3392,7 @@ CREATE TABLE IF NOT EXISTS ax_artderfestlegung_klassifizierungnachstrassenrecht 
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderfestlegung_klassifizierungnachstrassenrecht IS 'Alias: "AX_ArtDerFestlegung_KlassifizierungNachStrassenrecht", UML-Typ: Enumeration';
 INSERT INTO ax_artderfestlegung_klassifizierungnachstrassenrecht (wert,beschreibung,dokumentation) VALUES
@@ -3412,7 +3411,7 @@ CREATE TABLE IF NOT EXISTS ax_artderfestlegung_denkmalschutzrecht (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderfestlegung_denkmalschutzrecht IS 'Alias: "AX_ArtDerFestlegung_Denkmalschutzrecht", UML-Typ: Enumeration';
 INSERT INTO ax_artderfestlegung_denkmalschutzrecht (wert,beschreibung,dokumentation) VALUES
@@ -3493,7 +3492,7 @@ CREATE TABLE IF NOT EXISTS ax_artderfestlegung_klassifizierungnachwasserrecht (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderfestlegung_klassifizierungnachwasserrecht IS 'Alias: "AX_ArtDerFestlegung_KlassifizierungNachWasserrecht", UML-Typ: Enumeration';
 INSERT INTO ax_artderfestlegung_klassifizierungnachwasserrecht (wert,beschreibung,dokumentation) VALUES
@@ -3507,7 +3506,7 @@ CREATE TABLE IF NOT EXISTS ax_rechtszustand_schutzzone (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_rechtszustand_schutzzone IS 'Alias: "AX_Rechtszustand_Schutzzone", UML-Typ: Enumeration';
 INSERT INTO ax_rechtszustand_schutzzone (wert,beschreibung,dokumentation) VALUES
@@ -3519,7 +3518,7 @@ CREATE TABLE IF NOT EXISTS ax_artderfestlegung_bauraumoderbodenordnungsrecht (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderfestlegung_bauraumoderbodenordnungsrecht IS 'Alias: "AX_ArtDerFestlegung_BauRaumOderBodenordnungsrecht", UML-Typ: Enumeration';
 INSERT INTO ax_artderfestlegung_bauraumoderbodenordnungsrecht (wert,beschreibung,dokumentation) VALUES
@@ -3581,7 +3580,7 @@ CREATE TABLE IF NOT EXISTS ax_artderfestlegung_anderefestlegungnachwasserrecht (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderfestlegung_anderefestlegungnachwasserrecht IS 'Alias: "AX_ArtDerFestlegung_AndereFestlegungNachWasserrecht", UML-Typ: Enumeration';
 INSERT INTO ax_artderfestlegung_anderefestlegungnachwasserrecht (wert,beschreibung,dokumentation) VALUES
@@ -3601,7 +3600,7 @@ CREATE TABLE IF NOT EXISTS ax_artderfestlegung_forstrecht (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderfestlegung_forstrecht IS 'Alias: "AX_ArtDerFestlegung_Forstrecht", UML-Typ: Enumeration';
 INSERT INTO ax_artderfestlegung_forstrecht (wert,beschreibung,dokumentation) VALUES
@@ -3620,7 +3619,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_naturumweltoderbodenschutzrecht (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_naturumweltoderbodenschutzrecht IS 'Alias: "AX_Zustand_NaturUmweltOderBodenschutzrecht", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_naturumweltoderbodenschutzrecht (wert,beschreibung,dokumentation) VALUES
@@ -3631,7 +3630,7 @@ CREATE TABLE IF NOT EXISTS ax_artderfestlegung_sonstigesrecht (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderfestlegung_sonstigesrecht IS 'Alias: "AX_ArtDerFestlegung_SonstigesRecht", UML-Typ: Enumeration';
 INSERT INTO ax_artderfestlegung_sonstigesrecht (wert,beschreibung,dokumentation) VALUES
@@ -3691,7 +3690,7 @@ CREATE TABLE IF NOT EXISTS ax_artderfestlegung_naturumweltoderbodenschutzrecht (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderfestlegung_naturumweltoderbodenschutzrecht IS 'Alias: "AX_ArtDerFestlegung_NaturUmweltOderBodenschutzrecht", UML-Typ: Enumeration';
 INSERT INTO ax_artderfestlegung_naturumweltoderbodenschutzrecht (wert,beschreibung,dokumentation) VALUES
@@ -3727,7 +3726,7 @@ CREATE TABLE IF NOT EXISTS ax_liniendarstellung_topographischelinie (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_liniendarstellung_topographischelinie IS 'Alias: "AX_Liniendarstellung_TopographischeLinie", UML-Typ: Enumeration';
 INSERT INTO ax_liniendarstellung_topographischelinie (wert,beschreibung,dokumentation) VALUES
@@ -3739,7 +3738,7 @@ CREATE TABLE IF NOT EXISTS ax_darstellung_gebaeudeausgestaltung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_darstellung_gebaeudeausgestaltung IS 'Alias: "AX_Darstellung_Gebaeudeausgestaltung", UML-Typ: Enumeration';
 INSERT INTO ax_darstellung_gebaeudeausgestaltung (wert,beschreibung,dokumentation) VALUES
@@ -3763,7 +3762,7 @@ CREATE TABLE IF NOT EXISTS ax_datenformat_benutzer (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_datenformat_benutzer IS 'Alias: "AX_Datenformat_Benutzer", UML-Typ: Enumeration';
 INSERT INTO ax_datenformat_benutzer (wert,beschreibung,dokumentation) VALUES
@@ -3776,7 +3775,7 @@ CREATE TABLE IF NOT EXISTS ax_art_bereichzeitlich (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_bereichzeitlich IS 'Alias: "AX_Art_BereichZeitlich", UML-Typ: Enumeration';
 INSERT INTO ax_art_bereichzeitlich (wert,beschreibung,dokumentation) VALUES
@@ -3789,7 +3788,7 @@ CREATE TABLE IF NOT EXISTS ax_letzteabgabeart (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_letzteabgabeart IS 'Alias: "AX_LetzteAbgabeArt", UML-Typ: Enumeration';
 INSERT INTO ax_letzteabgabeart (wert,beschreibung,dokumentation) VALUES
@@ -3803,7 +3802,7 @@ CREATE TABLE IF NOT EXISTS ax_ausgabemedium_benutzer (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_ausgabemedium_benutzer IS 'Alias: "AX_Ausgabemedium_Benutzer", UML-Typ: Enumeration';
 INSERT INTO ax_ausgabemedium_benutzer (wert,beschreibung,dokumentation) VALUES
@@ -3816,7 +3815,7 @@ CREATE TABLE IF NOT EXISTS ax_identifikation (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_identifikation IS 'Alias: "AX_Identifikation", UML-Typ: Enumeration';
 INSERT INTO ax_identifikation (wert,beschreibung,dokumentation) VALUES
@@ -3827,7 +3826,7 @@ CREATE TABLE IF NOT EXISTS ax_dqerfassungsmethodemarkantergelaendepunkt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_dqerfassungsmethodemarkantergelaendepunkt IS 'Alias: "AX_DQErfassungsmethodeMarkanterGelaendepunkt", UML-Typ: Enumeration';
 INSERT INTO ax_dqerfassungsmethodemarkantergelaendepunkt (wert,beschreibung,dokumentation) VALUES
@@ -3840,7 +3839,7 @@ CREATE TABLE IF NOT EXISTS ax_dqerfassungsmethodestrukturiertegelaendepunkte (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_dqerfassungsmethodestrukturiertegelaendepunkte IS 'Alias: "AX_DQErfassungsmethodeStrukturierteGelaendepunkte", UML-Typ: Enumeration';
 INSERT INTO ax_dqerfassungsmethodestrukturiertegelaendepunkte (wert,beschreibung,dokumentation) VALUES
@@ -3852,7 +3851,7 @@ CREATE TABLE IF NOT EXISTS ax_dqerfassungsmethode (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_dqerfassungsmethode IS 'Alias: "AX_DQErfassungsmethode", UML-Typ: Enumeration';
 INSERT INTO ax_dqerfassungsmethode (wert,beschreibung,dokumentation) VALUES
@@ -3867,7 +3866,7 @@ CREATE TABLE IF NOT EXISTS ax_besonderebedeutung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_besonderebedeutung IS 'Alias: "AX_BesondereBedeutung", UML-Typ: Enumeration';
 INSERT INTO ax_besonderebedeutung (wert,beschreibung,dokumentation) VALUES
@@ -3878,7 +3877,7 @@ CREATE TABLE IF NOT EXISTS ax_dqerfassungsmethodebesondererhoehenpunkt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_dqerfassungsmethodebesondererhoehenpunkt IS 'Alias: "AX_DQErfassungsmethodeBesondererHoehenpunkt", UML-Typ: Enumeration';
 INSERT INTO ax_dqerfassungsmethodebesondererhoehenpunkt (wert,beschreibung,dokumentation) VALUES
@@ -3892,7 +3891,7 @@ CREATE TABLE IF NOT EXISTS ax_artdergeripplinie (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artdergeripplinie IS 'Alias: "AX_ArtDerGeripplinie", UML-Typ: Enumeration';
 INSERT INTO ax_artdergeripplinie (wert,beschreibung,dokumentation) VALUES
@@ -3904,7 +3903,7 @@ CREATE TABLE IF NOT EXISTS ax_artdergelaendekante (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artdergelaendekante IS 'Alias: "AX_ArtDerGelaendekante", UML-Typ: Enumeration';
 INSERT INTO ax_artdergelaendekante (wert,beschreibung,dokumentation) VALUES
@@ -3918,7 +3917,7 @@ CREATE TABLE IF NOT EXISTS ax_artderstrukturierung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderstrukturierung IS 'Alias: "AX_ArtDerStrukturierung", UML-Typ: Enumeration';
 INSERT INTO ax_artderstrukturierung (wert,beschreibung,dokumentation) VALUES
@@ -3929,7 +3928,7 @@ CREATE TABLE IF NOT EXISTS ax_dqerfassungsmethodegewaesserbegrenzung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_dqerfassungsmethodegewaesserbegrenzung IS 'Alias: "AX_DQErfassungsmethodeGewaesserbegrenzung", UML-Typ: Enumeration';
 INSERT INTO ax_dqerfassungsmethodegewaesserbegrenzung (wert,beschreibung,dokumentation) VALUES
@@ -3945,7 +3944,7 @@ CREATE TABLE IF NOT EXISTS ax_artdernichtgelaendepunkte (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artdernichtgelaendepunkte IS 'Alias: "AX_ArtDerNichtGelaendepunkte", UML-Typ: Enumeration';
 INSERT INTO ax_artdernichtgelaendepunkte (wert,beschreibung,dokumentation) VALUES
@@ -3957,7 +3956,7 @@ CREATE TABLE IF NOT EXISTS ax_artdesmarkantengelaendepunktes (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artdesmarkantengelaendepunktes IS 'Alias: "AX_ArtDesMarkantenGelaendepunktes", UML-Typ: Enumeration';
 INSERT INTO ax_artdesmarkantengelaendepunktes (wert,beschreibung,dokumentation) VALUES
@@ -3969,7 +3968,7 @@ CREATE TABLE IF NOT EXISTS ax_artderaussparung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderaussparung IS 'Alias: "AX_ArtDerAussparung", UML-Typ: Enumeration';
 INSERT INTO ax_artderaussparung (wert,beschreibung,dokumentation) VALUES
@@ -3980,7 +3979,7 @@ CREATE TABLE IF NOT EXISTS ax_besondereartdergewaesserbegrenzung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_besondereartdergewaesserbegrenzung IS 'Alias: "AX_BesondereArtDerGewaesserbegrenzung", UML-Typ: Enumeration';
 INSERT INTO ax_besondereartdergewaesserbegrenzung (wert,beschreibung,dokumentation) VALUES
@@ -3990,7 +3989,7 @@ CREATE TABLE IF NOT EXISTS ax_ursprung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_ursprung IS 'Alias: "AX_Ursprung", UML-Typ: Enumeration';
 INSERT INTO ax_ursprung (wert,beschreibung,dokumentation) VALUES
@@ -4001,7 +4000,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_dammwalldeich (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_dammwalldeich IS 'Alias: "AX_Funktion_DammWallDeich", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_dammwalldeich (wert,beschreibung,dokumentation) VALUES
@@ -4014,7 +4013,7 @@ CREATE TABLE IF NOT EXISTS ax_art_dammwalldeich (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_dammwalldeich IS 'Alias: "AX_Art_DammWallDeich", UML-Typ: Enumeration';
 INSERT INTO ax_art_dammwalldeich (wert,beschreibung,dokumentation) VALUES
@@ -4043,7 +4042,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_einschnitt (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_einschnitt IS 'Alias: "AX_Funktion_Einschnitt", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_einschnitt (wert,beschreibung,dokumentation) VALUES
@@ -4053,7 +4052,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_boeschungkliff (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_boeschungkliff IS 'Alias: "AX_Zustand_BoeschungKliff", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_boeschungkliff (wert,beschreibung,dokumentation) VALUES
@@ -4064,7 +4063,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_hoehleneingang (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_hoehleneingang IS 'Alias: "AX_Zustand_Hoehleneingang", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_hoehleneingang (wert,beschreibung,dokumentation) VALUES
@@ -4076,7 +4075,7 @@ CREATE TABLE IF NOT EXISTS ax_berechnungsmethode (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_berechnungsmethode IS 'Alias: "AX_Berechnungsmethode", UML-Typ: Enumeration';
 INSERT INTO ax_berechnungsmethode (wert,beschreibung,dokumentation) VALUES
@@ -4092,7 +4091,7 @@ CREATE TABLE IF NOT EXISTS ax_verwendeteobjekte (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_verwendeteobjekte IS 'Alias: "AX_VerwendeteObjekte", UML-Typ: Enumeration';
 INSERT INTO ax_verwendeteobjekte (wert,beschreibung,dokumentation) VALUES
@@ -4108,7 +4107,7 @@ CREATE TABLE IF NOT EXISTS ax_berechnungsmethodehoehenlinie (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_berechnungsmethodehoehenlinie IS 'Alias: "AX_BerechnungsmethodeHoehenlinie", UML-Typ: Enumeration';
 INSERT INTO ax_berechnungsmethodehoehenlinie (wert,beschreibung,dokumentation) VALUES
@@ -4119,7 +4118,7 @@ CREATE TABLE IF NOT EXISTS ax_dqerfassungsmethodesekundaeresdgm (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_dqerfassungsmethodesekundaeresdgm IS 'Alias: "AX_DQErfassungsmethodeSekundaeresDGM", UML-Typ: Enumeration';
 INSERT INTO ax_dqerfassungsmethodesekundaeresdgm (wert,beschreibung,dokumentation) VALUES
@@ -4135,7 +4134,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_kanal (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_kanal IS 'Alias: "AX_Zustand_Kanal", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_kanal (wert,beschreibung,dokumentation) VALUES
@@ -4146,7 +4145,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_stehendesgewaesser (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_stehendesgewaesser IS 'Alias: "AX_Funktion_StehendesGewaesser", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_stehendesgewaesser (wert,beschreibung,dokumentation) VALUES
@@ -4161,7 +4160,7 @@ CREATE TABLE IF NOT EXISTS ax_schifffahrtskategorie (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_schifffahrtskategorie IS 'Alias: "AX_Schifffahrtskategorie", UML-Typ: Enumeration';
 INSERT INTO ax_schifffahrtskategorie (wert,beschreibung,dokumentation) VALUES
@@ -4173,7 +4172,7 @@ CREATE TABLE IF NOT EXISTS ax_hydrologischesmerkmal_fliessgewaesser (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_hydrologischesmerkmal_fliessgewaesser IS 'Alias: "AX_HydrologischesMerkmal_Fliessgewaesser", UML-Typ: Enumeration';
 INSERT INTO ax_hydrologischesmerkmal_fliessgewaesser (wert,beschreibung,dokumentation) VALUES
@@ -4183,7 +4182,7 @@ CREATE TABLE IF NOT EXISTS ax_schifffahrtskategorie_kanal (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_schifffahrtskategorie_kanal IS 'Alias: "AX_Schifffahrtskategorie_Kanal", UML-Typ: Enumeration';
 INSERT INTO ax_schifffahrtskategorie_kanal (wert,beschreibung,dokumentation) VALUES
@@ -4195,7 +4194,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_fliessgewaesser (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_fliessgewaesser IS 'Alias: "AX_Funktion_Fliessgewaesser", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_fliessgewaesser (wert,beschreibung,dokumentation) VALUES
@@ -4212,7 +4211,7 @@ CREATE TABLE IF NOT EXISTS ax_widmung_wasserlauf (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_widmung_wasserlauf IS 'Alias: "AX_Widmung_Wasserlauf", UML-Typ: Enumeration';
 INSERT INTO ax_widmung_wasserlauf (wert,beschreibung,dokumentation) VALUES
@@ -4225,7 +4224,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_meer (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_meer IS 'Alias: "AX_Funktion_Meer", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_meer (wert,beschreibung,dokumentation) VALUES
@@ -4235,7 +4234,7 @@ CREATE TABLE IF NOT EXISTS ax_hydrologischesmerkmal_gewaesserachse (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_hydrologischesmerkmal_gewaesserachse IS 'Alias: "AX_HydrologischesMerkmal_Gewaesserachse", UML-Typ: Enumeration';
 INSERT INTO ax_hydrologischesmerkmal_gewaesserachse (wert,beschreibung,dokumentation) VALUES
@@ -4246,7 +4245,7 @@ CREATE TABLE IF NOT EXISTS ax_tidemerkmal_meer (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_tidemerkmal_meer IS 'Alias: "AX_Tidemerkmal_Meer", UML-Typ: Enumeration';
 INSERT INTO ax_tidemerkmal_meer (wert,beschreibung,dokumentation) VALUES
@@ -4256,7 +4255,7 @@ CREATE TABLE IF NOT EXISTS ax_nutzung_hafenbecken (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_nutzung_hafenbecken IS 'Alias: "AX_Nutzung_Hafenbecken", UML-Typ: Enumeration';
 INSERT INTO ax_nutzung_hafenbecken (wert,beschreibung,dokumentation) VALUES
@@ -4268,7 +4267,7 @@ CREATE TABLE IF NOT EXISTS ax_hydrologischesmerkmal_stehendesgewaesser (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_hydrologischesmerkmal_stehendesgewaesser IS 'Alias: "AX_HydrologischesMerkmal_StehendesGewaesser", UML-Typ: Enumeration';
 INSERT INTO ax_hydrologischesmerkmal_stehendesgewaesser (wert,beschreibung,dokumentation) VALUES
@@ -4278,7 +4277,7 @@ CREATE TABLE IF NOT EXISTS ax_widmung_stehendesgewaesser (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_widmung_stehendesgewaesser IS 'Alias: "AX_Widmung_StehendesGewaesser", UML-Typ: Enumeration';
 INSERT INTO ax_widmung_stehendesgewaesser (wert,beschreibung,dokumentation) VALUES
@@ -4291,7 +4290,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_gewaesserachse (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_gewaesserachse IS 'Alias: "AX_Funktion_Gewaesserachse", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_gewaesserachse (wert,beschreibung,dokumentation) VALUES
@@ -4301,7 +4300,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_hafenbecken (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_hafenbecken IS 'Alias: "AX_Funktion_Hafenbecken", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_hafenbecken (wert,beschreibung,dokumentation) VALUES
@@ -4311,7 +4310,7 @@ CREATE TABLE IF NOT EXISTS ax_widmung_kanal (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_widmung_kanal IS 'Alias: "AX_Widmung_Kanal", UML-Typ: Enumeration';
 INSERT INTO ax_widmung_kanal (wert,beschreibung,dokumentation) VALUES
@@ -4324,7 +4323,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_wohnbauflaeche (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_wohnbauflaeche IS 'Alias: "AX_Zustand_Wohnbauflaeche", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_wohnbauflaeche (wert,beschreibung,dokumentation) VALUES
@@ -4335,7 +4334,7 @@ CREATE TABLE IF NOT EXISTS ax_artderbebauung_wohnbauflaeche (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderbebauung_wohnbauflaeche IS 'Alias: "AX_ArtDerBebauung_Wohnbauflaeche", UML-Typ: Enumeration';
 INSERT INTO ax_artderbebauung_wohnbauflaeche (wert,beschreibung,dokumentation) VALUES
@@ -4346,7 +4345,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_flaechebesondererfunktionalerpraegung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_flaechebesondererfunktionalerpraegung IS 'Alias: "AX_Zustand_FlaecheBesondererFunktionalerPraegung", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_flaechebesondererfunktionalerpraegung (wert,beschreibung,dokumentation) VALUES
@@ -4357,7 +4356,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_flaechegemischternutzung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_flaechegemischternutzung IS 'Alias: "AX_Funktion_FlaecheGemischterNutzung", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_flaechegemischternutzung (wert,beschreibung,dokumentation) VALUES
@@ -4379,7 +4378,7 @@ CREATE TABLE IF NOT EXISTS ax_foerdergut_industrieundgewerbeflaeche (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_foerdergut_industrieundgewerbeflaeche IS 'Alias: "AX_Foerdergut_IndustrieUndGewerbeflaeche", UML-Typ: Enumeration';
 INSERT INTO ax_foerdergut_industrieundgewerbeflaeche (wert,beschreibung,dokumentation) VALUES
@@ -4393,7 +4392,7 @@ CREATE TABLE IF NOT EXISTS ax_artderbebauung_flaechegemischternutzung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderbebauung_flaechegemischternutzung IS 'Alias: "AX_ArtDerBebauung_FlaecheGemischterNutzung", UML-Typ: Enumeration';
 INSERT INTO ax_artderbebauung_flaechegemischternutzung (wert,beschreibung,dokumentation) VALUES
@@ -4404,7 +4403,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_sportfreizeitunderholungsflaeche (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_sportfreizeitunderholungsflaeche IS 'Alias: "AX_Zustand_SportFreizeitUndErholungsflaeche", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_sportfreizeitunderholungsflaeche (wert,beschreibung,dokumentation) VALUES
@@ -4415,7 +4414,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_flaechebesondererfunktionalerpraegung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_flaechebesondererfunktionalerpraegung IS 'Alias: "AX_Funktion_FlaecheBesondererFunktionalerPraegung", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_flaechebesondererfunktionalerpraegung (wert,beschreibung,dokumentation) VALUES
@@ -4436,7 +4435,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_sportfreizeitunderholungsflaeche (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_sportfreizeitunderholungsflaeche IS 'Alias: "AX_Funktion_SportFreizeitUndErholungsflaeche", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_sportfreizeitunderholungsflaeche (wert,beschreibung,dokumentation) VALUES
@@ -4484,7 +4483,7 @@ CREATE TABLE IF NOT EXISTS ax_lagergut_industrieundgewerbeflaeche (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_lagergut_industrieundgewerbeflaeche IS 'Alias: "AX_Lagergut_IndustrieUndGewerbeflaeche", UML-Typ: Enumeration';
 INSERT INTO ax_lagergut_industrieundgewerbeflaeche (wert,beschreibung,dokumentation) VALUES
@@ -4502,7 +4501,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_halde (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_halde IS 'Alias: "AX_Zustand_Halde", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_halde (wert,beschreibung,dokumentation) VALUES
@@ -4513,7 +4512,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_bergbaubetrieb (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_bergbaubetrieb IS 'Alias: "AX_Zustand_Bergbaubetrieb", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_bergbaubetrieb (wert,beschreibung,dokumentation) VALUES
@@ -4524,7 +4523,7 @@ CREATE TABLE IF NOT EXISTS ax_abbaugut_tagebaugrubesteinbruch (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_abbaugut_tagebaugrubesteinbruch IS 'Alias: "AX_Abbaugut_TagebauGrubeSteinbruch", UML-Typ: Enumeration';
 INSERT INTO ax_abbaugut_tagebaugrubesteinbruch (wert,beschreibung,dokumentation) VALUES
@@ -4583,7 +4582,7 @@ CREATE TABLE IF NOT EXISTS ax_primaerenergie_industrieundgewerbeflaeche (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_primaerenergie_industrieundgewerbeflaeche IS 'Alias: "AX_Primaerenergie_IndustrieUndGewerbeflaeche", UML-Typ: Enumeration';
 INSERT INTO ax_primaerenergie_industrieundgewerbeflaeche (wert,beschreibung,dokumentation) VALUES
@@ -4603,7 +4602,7 @@ CREATE TABLE IF NOT EXISTS ax_abbaugut_bergbaubetrieb (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_abbaugut_bergbaubetrieb IS 'Alias: "AX_Abbaugut_Bergbaubetrieb", UML-Typ: Enumeration';
 INSERT INTO ax_abbaugut_bergbaubetrieb (wert,beschreibung,dokumentation) VALUES
@@ -4648,7 +4647,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_flaechegemischternutzung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_flaechegemischternutzung IS 'Alias: "AX_Zustand_FlaecheGemischterNutzung", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_flaechegemischternutzung (wert,beschreibung,dokumentation) VALUES
@@ -4659,7 +4658,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_industrieundgewerbeflaeche (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_industrieundgewerbeflaeche IS 'Alias: "AX_Zustand_IndustrieUndGewerbeflaeche", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_industrieundgewerbeflaeche (wert,beschreibung,dokumentation) VALUES
@@ -4670,7 +4669,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_friedhof (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_friedhof IS 'Alias: "AX_Funktion_Friedhof", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_friedhof (wert,beschreibung,dokumentation) VALUES
@@ -4683,7 +4682,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_friedhof (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_friedhof IS 'Alias: "AX_Zustand_Friedhof", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_friedhof (wert,beschreibung,dokumentation) VALUES
@@ -4694,7 +4693,7 @@ CREATE TABLE IF NOT EXISTS ax_lagergut_halde (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_lagergut_halde IS 'Alias: "AX_Lagergut_Halde", UML-Typ: Enumeration';
 INSERT INTO ax_lagergut_halde (wert,beschreibung,dokumentation) VALUES
@@ -4711,7 +4710,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_industrieundgewerbeflaeche (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_industrieundgewerbeflaeche IS 'Alias: "AX_Funktion_IndustrieUndGewerbeflaeche", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_industrieundgewerbeflaeche (wert,beschreibung,dokumentation) VALUES
@@ -4778,7 +4777,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_tagebaugrubesteinbruch (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_tagebaugrubesteinbruch IS 'Alias: "AX_Zustand_TagebauGrubeSteinbruch", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_tagebaugrubesteinbruch (wert,beschreibung,dokumentation) VALUES
@@ -4789,7 +4788,7 @@ CREATE TABLE IF NOT EXISTS ax_artderbebauung_siedlungsflaeche (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderbebauung_siedlungsflaeche IS 'Alias: "AX_ArtDerBebauung_Siedlungsflaeche", UML-Typ: Enumeration';
 INSERT INTO ax_artderbebauung_siedlungsflaeche (wert,beschreibung,dokumentation) VALUES
@@ -4800,7 +4799,7 @@ CREATE TABLE IF NOT EXISTS ax_artderbebauung_flaechebesondererfunktionalerpraegu
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_artderbebauung_flaechebesondererfunktionalerpraegung IS 'Alias: "AX_ArtDerBebauung_FlaecheBesondererFunktionalerPraegung", UML-Typ: Enumeration';
 INSERT INTO ax_artderbebauung_flaechebesondererfunktionalerpraegung (wert,beschreibung,dokumentation) VALUES
@@ -4811,7 +4810,7 @@ CREATE TABLE IF NOT EXISTS ax_vegetationsmerkmal_gehoelz (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_vegetationsmerkmal_gehoelz IS 'Alias: "AX_Vegetationsmerkmal_Gehoelz", UML-Typ: Enumeration';
 INSERT INTO ax_vegetationsmerkmal_gehoelz (wert,beschreibung,dokumentation) VALUES
@@ -4821,7 +4820,7 @@ CREATE TABLE IF NOT EXISTS ax_vegetationsmerkmal_wald (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_vegetationsmerkmal_wald IS 'Alias: "AX_Vegetationsmerkmal_Wald", UML-Typ: Enumeration';
 INSERT INTO ax_vegetationsmerkmal_wald (wert,beschreibung,dokumentation) VALUES
@@ -4835,7 +4834,7 @@ CREATE TABLE IF NOT EXISTS ax_vegetationsmerkmal_landwirtschaft (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_vegetationsmerkmal_landwirtschaft IS 'Alias: "AX_Vegetationsmerkmal_Landwirtschaft", UML-Typ: Enumeration';
 INSERT INTO ax_vegetationsmerkmal_landwirtschaft (wert,beschreibung,dokumentation) VALUES
@@ -4858,7 +4857,7 @@ CREATE TABLE IF NOT EXISTS ax_oberflaechenmaterial_unlandvegetationsloseflaeche 
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_oberflaechenmaterial_unlandvegetationsloseflaeche IS 'Alias: "AX_Oberflaechenmaterial_UnlandVegetationsloseFlaeche", UML-Typ: Enumeration';
 INSERT INTO ax_oberflaechenmaterial_unlandvegetationsloseflaeche (wert,beschreibung,dokumentation) VALUES
@@ -4873,7 +4872,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_unlandvegetationsloseflaeche (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_unlandvegetationsloseflaeche IS 'Alias: "AX_Funktion_UnlandVegetationsloseFlaeche", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_unlandvegetationsloseflaeche (wert,beschreibung,dokumentation) VALUES
@@ -4888,7 +4887,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_gehoelz (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_gehoelz IS 'Alias: "AX_Funktion_Gehoelz", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_gehoelz (wert,beschreibung,dokumentation) VALUES
@@ -4898,7 +4897,7 @@ CREATE TABLE IF NOT EXISTS ax_bahnkategorie (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_bahnkategorie IS 'Alias: "AX_Bahnkategorie", UML-Typ: Enumeration';
 INSERT INTO ax_bahnkategorie (wert,beschreibung,dokumentation) VALUES
@@ -4919,7 +4918,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_weg (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_weg IS 'Alias: "AX_Funktion_Weg", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_weg (wert,beschreibung,dokumentation) VALUES
@@ -4937,7 +4936,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_bahnverkehr (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_bahnverkehr IS 'Alias: "AX_Funktion_Bahnverkehr", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_bahnverkehr (wert,beschreibung,dokumentation) VALUES
@@ -4949,7 +4948,7 @@ CREATE TABLE IF NOT EXISTS ax_verkehrsbedeutunginneroertlich (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_verkehrsbedeutunginneroertlich IS 'Alias: "AX_VerkehrsbedeutungInneroertlich", UML-Typ: Enumeration';
 INSERT INTO ax_verkehrsbedeutunginneroertlich (wert,beschreibung,dokumentation) VALUES
@@ -4962,7 +4961,7 @@ CREATE TABLE IF NOT EXISTS ax_internationalebedeutung_strasse (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_internationalebedeutung_strasse IS 'Alias: "AX_InternationaleBedeutung_Strasse", UML-Typ: Enumeration';
 INSERT INTO ax_internationalebedeutung_strasse (wert,beschreibung,dokumentation) VALUES
@@ -4972,7 +4971,7 @@ CREATE TABLE IF NOT EXISTS ax_besonderefahrstreifen (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_besonderefahrstreifen IS 'Alias: "AX_BesondereFahrstreifen", UML-Typ: Enumeration';
 INSERT INTO ax_besonderefahrstreifen (wert,beschreibung,dokumentation) VALUES
@@ -4984,7 +4983,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_bahnverkehr (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_bahnverkehr IS 'Alias: "AX_Zustand_Bahnverkehr", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_bahnverkehr (wert,beschreibung,dokumentation) VALUES
@@ -4995,7 +4994,7 @@ CREATE TABLE IF NOT EXISTS ax_befestigung_fahrwegachse (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_befestigung_fahrwegachse IS 'Alias: "AX_Befestigung_Fahrwegachse", UML-Typ: Enumeration';
 INSERT INTO ax_befestigung_fahrwegachse (wert,beschreibung,dokumentation) VALUES
@@ -5006,7 +5005,7 @@ CREATE TABLE IF NOT EXISTS ax_spurweite (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_spurweite IS 'Alias: "AX_Spurweite", UML-Typ: Enumeration';
 INSERT INTO ax_spurweite (wert,beschreibung,dokumentation) VALUES
@@ -5018,7 +5017,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_schiffsverkehr (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_schiffsverkehr IS 'Alias: "AX_Zustand_Schiffsverkehr", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_schiffsverkehr (wert,beschreibung,dokumentation) VALUES
@@ -5029,7 +5028,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_platz (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_platz IS 'Alias: "AX_Funktion_Platz", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_platz (wert,beschreibung,dokumentation) VALUES
@@ -5045,7 +5044,7 @@ CREATE TABLE IF NOT EXISTS ax_art_flugverkehr (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_art_flugverkehr IS 'Alias: "AX_Art_Flugverkehr", UML-Typ: Enumeration';
 INSERT INTO ax_art_flugverkehr (wert,beschreibung,dokumentation) VALUES
@@ -5061,7 +5060,7 @@ CREATE TABLE IF NOT EXISTS ax_elektrifizierung (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_elektrifizierung IS 'Alias: "AX_Elektrifizierung", UML-Typ: Enumeration';
 INSERT INTO ax_elektrifizierung (wert,beschreibung,dokumentation) VALUES
@@ -5072,7 +5071,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand IS 'Alias: "AX_Zustand", UML-Typ: Enumeration';
 INSERT INTO ax_zustand (wert,beschreibung,dokumentation) VALUES
@@ -5083,7 +5082,7 @@ CREATE TABLE IF NOT EXISTS ax_fahrbahntrennung_strasse (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_fahrbahntrennung_strasse IS 'Alias: "AX_Fahrbahntrennung_Strasse", UML-Typ: Enumeration';
 INSERT INTO ax_fahrbahntrennung_strasse (wert,beschreibung,dokumentation) VALUES
@@ -5093,7 +5092,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_fahrbahnachse (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_fahrbahnachse IS 'Alias: "AX_Funktion_Fahrbahnachse", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_fahrbahnachse (wert,beschreibung,dokumentation) VALUES
@@ -5103,7 +5102,7 @@ CREATE TABLE IF NOT EXISTS ax_oberflaechenmaterial_strasse (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_oberflaechenmaterial_strasse IS 'Alias: "AX_Oberflaechenmaterial_Strasse", UML-Typ: Enumeration';
 INSERT INTO ax_oberflaechenmaterial_strasse (wert,beschreibung,dokumentation) VALUES
@@ -5116,7 +5115,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_flugverkehr (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_flugverkehr IS 'Alias: "AX_Funktion_Flugverkehr", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_flugverkehr (wert,beschreibung,dokumentation) VALUES
@@ -5126,7 +5125,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_wegachse (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_wegachse IS 'Alias: "AX_Funktion_Wegachse", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_wegachse (wert,beschreibung,dokumentation) VALUES
@@ -5137,7 +5136,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_strasse (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_strasse IS 'Alias: "AX_Zustand_Strasse", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_strasse (wert,beschreibung,dokumentation) VALUES
@@ -5148,7 +5147,7 @@ CREATE TABLE IF NOT EXISTS ax_markierung_wegachse (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_markierung_wegachse IS 'Alias: "AX_Markierung_Wegachse", UML-Typ: Enumeration';
 INSERT INTO ax_markierung_wegachse (wert,beschreibung,dokumentation) VALUES
@@ -5160,7 +5159,7 @@ CREATE TABLE IF NOT EXISTS ax_zustand_flugverkehr (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_zustand_flugverkehr IS 'Alias: "AX_Zustand_Flugverkehr", UML-Typ: Enumeration';
 INSERT INTO ax_zustand_flugverkehr (wert,beschreibung,dokumentation) VALUES
@@ -5171,7 +5170,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_strassenachse (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_strassenachse IS 'Alias: "AX_Funktion_Strassenachse", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_strassenachse (wert,beschreibung,dokumentation) VALUES
@@ -5181,7 +5180,7 @@ CREATE TABLE IF NOT EXISTS ax_verkehrsbedeutungueberoertlich (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_verkehrsbedeutungueberoertlich IS 'Alias: "AX_VerkehrsbedeutungUeberoertlich", UML-Typ: Enumeration';
 INSERT INTO ax_verkehrsbedeutungueberoertlich (wert,beschreibung,dokumentation) VALUES
@@ -5194,7 +5193,7 @@ CREATE TABLE IF NOT EXISTS ax_nutzung_flugverkehr (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_nutzung_flugverkehr IS 'Alias: "AX_Nutzung_Flugverkehr", UML-Typ: Enumeration';
 INSERT INTO ax_nutzung_flugverkehr (wert,beschreibung,dokumentation) VALUES
@@ -5206,7 +5205,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_schiffsverkehr (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_schiffsverkehr IS 'Alias: "AX_Funktion_Schiffsverkehr", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_schiffsverkehr (wert,beschreibung,dokumentation) VALUES
@@ -5220,7 +5219,7 @@ CREATE TABLE IF NOT EXISTS ax_funktion_strasse (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktion_strasse IS 'Alias: "AX_Funktion_Strasse", UML-Typ: Enumeration';
 INSERT INTO ax_funktion_strasse (wert,beschreibung,dokumentation) VALUES
@@ -5233,7 +5232,7 @@ CREATE TABLE IF NOT EXISTS ax_widmung_strasse (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_widmung_strasse IS 'Alias: "AX_Widmung_Strasse", UML-Typ: Enumeration';
 INSERT INTO ax_widmung_strasse (wert,beschreibung,dokumentation) VALUES
@@ -5249,7 +5248,7 @@ CREATE TABLE IF NOT EXISTS ax_anzahlderstreckengleise (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_anzahlderstreckengleise IS 'Alias: "AX_AnzahlDerStreckengleise", UML-Typ: Enumeration';
 INSERT INTO ax_anzahlderstreckengleise (wert,beschreibung,dokumentation) VALUES
@@ -5260,7 +5259,7 @@ CREATE TABLE IF NOT EXISTS ax_funktionoa_k_tngr_all (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktionoa_k_tngr_all IS 'Alias: "AX_FunktionOA_K_TNGR_all", UML-Typ: Enumeration';
 INSERT INTO ax_funktionoa_k_tngr_all (wert,beschreibung,dokumentation) VALUES
@@ -5295,7 +5294,7 @@ CREATE TABLE IF NOT EXISTS ax_klassifizierunggr_k_bewgr (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_klassifizierunggr_k_bewgr IS 'Alias: "AX_KlassifizierungGr_K_BEWGR", UML-Typ: Enumeration';
 INSERT INTO ax_klassifizierunggr_k_bewgr (wert,beschreibung,dokumentation) VALUES
@@ -5315,7 +5314,7 @@ CREATE TABLE IF NOT EXISTS ax_funktionoa_k_tnfl (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktionoa_k_tnfl IS 'Alias: "AX_FunktionOA_K_TNFL", UML-Typ: Enumeration';
 INSERT INTO ax_funktionoa_k_tnfl (wert,beschreibung,dokumentation) VALUES
@@ -5355,7 +5354,7 @@ CREATE TABLE IF NOT EXISTS ax_klassifizierungobg_k_bewfl (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_klassifizierungobg_k_bewfl IS 'Alias: "AX_KlassifizierungOBG_K_BEWFL", UML-Typ: Enumeration';
 INSERT INTO ax_klassifizierungobg_k_bewfl (wert,beschreibung,dokumentation) VALUES
@@ -5396,7 +5395,7 @@ CREATE TABLE IF NOT EXISTS ax_funktionoa_k_tngrerweitert_all (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktionoa_k_tngrerweitert_all IS 'Alias: "AX_FunktionOA_K_TNGRerweitert_all", UML-Typ: Enumeration';
 INSERT INTO ax_funktionoa_k_tngrerweitert_all (wert,beschreibung,dokumentation) VALUES
@@ -5621,7 +5620,7 @@ CREATE TABLE IF NOT EXISTS ax_funktionhgr_k_tnhgr (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_funktionhgr_k_tnhgr IS 'Alias: "AX_FunktionHGr_K_TNHGR", UML-Typ: Enumeration';
 INSERT INTO ax_funktionhgr_k_tnhgr (wert,beschreibung,dokumentation) VALUES
@@ -5634,7 +5633,7 @@ CREATE TABLE IF NOT EXISTS ax_wirtschaftsart (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_wirtschaftsart IS 'Alias: "AX_Wirtschaftsart", UML-Typ: Enumeration';
 INSERT INTO ax_wirtschaftsart (wert,beschreibung,dokumentation) VALUES
@@ -5654,7 +5653,7 @@ CREATE TABLE IF NOT EXISTS ax_punktart_k_punkte (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_punktart_k_punkte IS 'Alias: "AX_Punktart_K_PUNKTE", UML-Typ: Enumeration';
 INSERT INTO ax_punktart_k_punkte (wert,beschreibung,dokumentation) VALUES
@@ -5670,7 +5669,7 @@ CREATE TABLE IF NOT EXISTS ax_k_zeile_punktart (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ax_k_zeile_punktart IS 'Alias: "AX_K_ZEILE_Punktart", UML-Typ: Enumeration';
 INSERT INTO ax_k_zeile_punktart (wert,beschreibung,dokumentation) VALUES
@@ -5686,7 +5685,7 @@ CREATE TABLE IF NOT EXISTS ci_rolecode (
   beschreibung character varying,
   dokumentation character varying,
   PRIMARY KEY (wert)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE ci_rolecode IS 'Alias: "CI_RoleCode", UML-Typ: Enumeration';
 INSERT INTO ci_rolecode (wert,beschreibung,dokumentation) VALUES
@@ -5706,7 +5705,7 @@ CREATE TABLE IF NOT EXISTS aa_besonderemeilensteinkategorie (
   id character varying,
   value text,
   PRIMARY KEY (id)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE aa_besonderemeilensteinkategorie IS 'Alias: "AA_BesondereMeilensteinkategorie", UML-Typ: Code Liste';
 CREATE TABLE IF NOT EXISTS aa_anlassart (
@@ -5714,7 +5713,7 @@ CREATE TABLE IF NOT EXISTS aa_anlassart (
   id character varying,
   value text,
   PRIMARY KEY (id)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE aa_anlassart IS 'Alias: "AA_Anlassart", UML-Typ: Code Liste';
 CREATE TABLE IF NOT EXISTS aa_levelofdetail (
@@ -5722,7 +5721,7 @@ CREATE TABLE IF NOT EXISTS aa_levelofdetail (
   id character varying,
   value text,
   PRIMARY KEY (id)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE aa_levelofdetail IS 'Alias: "AA_LevelOfDetail", UML-Typ: Code Liste';
 CREATE TABLE IF NOT EXISTS aa_anlassart_benutzungsauftrag (
@@ -5730,7 +5729,7 @@ CREATE TABLE IF NOT EXISTS aa_anlassart_benutzungsauftrag (
   id character varying,
   value text,
   PRIMARY KEY (id)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE aa_anlassart_benutzungsauftrag IS 'Alias: "AA_Anlassart_Benutzungsauftrag", UML-Typ: Code Liste';
 CREATE TABLE IF NOT EXISTS aa_weiteremodellart (
@@ -5738,7 +5737,7 @@ CREATE TABLE IF NOT EXISTS aa_weiteremodellart (
   id character varying,
   value text,
   PRIMARY KEY (id)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE aa_weiteremodellart IS 'Alias: "AA_WeitereModellart", UML-Typ: Code Liste';
 CREATE TABLE IF NOT EXISTS aa_instanzenthemen (
@@ -5746,7 +5745,7 @@ CREATE TABLE IF NOT EXISTS aa_instanzenthemen (
   id character varying,
   value text,
   PRIMARY KEY (id)
-) WITH OIDS;
+);
 
 COMMENT ON TABLE aa_instanzenthemen IS 'Alias: "AA_Instanzenthemen", UML-Typ: Code Liste';
 
@@ -5934,7 +5933,7 @@ CREATE TABLE IF NOT EXISTS ax_benutzer (
   ist character(16) NOT NULL,
   gehoertzu character(16) NOT NULL,
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_benutzer_gml ON ax_benutzer USING btree (gml_id,beginnt);
 CREATE INDEX ax_benutzer_endet ON ax_benutzer USING btree (endet);
@@ -5994,7 +5993,7 @@ CREATE TABLE IF NOT EXISTS ax_benutzergruppemitzugriffskontrolle (
   bestehtaus character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_benutzergruppemitzugriffskontrolle_gml ON ax_benutzergruppemitzugriffskontrolle USING btree (gml_id,beginnt);
 CREATE INDEX ax_benutzergruppemitzugriffskontrolle_endet ON ax_benutzergruppemitzugriffskontrolle USING btree (endet);
@@ -6044,7 +6043,7 @@ CREATE TABLE IF NOT EXISTS ax_benutzergruppenba (
   bestehtaus character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_benutzergruppenba_gml ON ax_benutzergruppenba USING btree (gml_id,beginnt);
 CREATE INDEX ax_benutzergruppenba_endet ON ax_benutzergruppenba USING btree (endet);
@@ -6089,7 +6088,7 @@ CREATE TABLE IF NOT EXISTS ap_darstellung (
   istteilvon character(16)[],
   dientzurdarstellungvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ap_darstellung_gml ON ap_darstellung USING btree (gml_id,beginnt);
 CREATE INDEX ap_darstellung_endet ON ap_darstellung USING btree (endet);
@@ -6128,7 +6127,7 @@ CREATE TABLE IF NOT EXISTS aa_projektsteuerung (
   istteilvon character(16)[],
   enthaelt character(16)[] NOT NULL,
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX aa_projektsteuerung_gml ON aa_projektsteuerung USING btree (gml_id,beginnt);
 CREATE INDEX aa_projektsteuerung_endet ON aa_projektsteuerung USING btree (endet);
@@ -6172,7 +6171,7 @@ CREATE TABLE IF NOT EXISTS aa_meilenstein (
   vonaktivitaet character(16)[],
   vonvorgang character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX aa_meilenstein_gml ON aa_meilenstein USING btree (gml_id,beginnt);
 CREATE INDEX aa_meilenstein_endet ON aa_meilenstein USING btree (endet);
@@ -6222,7 +6221,7 @@ CREATE TABLE IF NOT EXISTS aa_antrag (
   bearbeitungsstatus character(16),
   gebiet character(16),
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX aa_antrag_gml ON aa_antrag USING btree (gml_id,beginnt);
 CREATE INDEX aa_antrag_endet ON aa_antrag USING btree (endet);
@@ -6264,7 +6263,7 @@ CREATE TABLE IF NOT EXISTS aa_aktivitaet (
   istteilvon character(16)[],
   status character(16) NOT NULL,
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX aa_aktivitaet_gml ON aa_aktivitaet USING btree (gml_id,beginnt);
 CREATE INDEX aa_aktivitaet_endet ON aa_aktivitaet USING btree (endet);
@@ -6303,7 +6302,7 @@ CREATE TABLE IF NOT EXISTS aa_vorgang (
   enthaelt character(16)[],
   synchronisiertmit character(16),
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX aa_vorgang_gml ON aa_vorgang USING btree (gml_id,beginnt);
 CREATE INDEX aa_vorgang_endet ON aa_vorgang USING btree (endet);
@@ -6384,7 +6383,7 @@ CREATE TABLE IF NOT EXISTS ax_person (
   uebtaus character(16)[],
   besitzt character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_person_gml ON ax_person USING btree (gml_id,beginnt);
 CREATE INDEX ax_person_endet ON ax_person USING btree (endet);
@@ -6475,7 +6474,7 @@ CREATE TABLE IF NOT EXISTS ax_namensnummer (
   hatvorgaenger character(16)[],
   istbestandteilvon character(16) NOT NULL,
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_namensnummer_gml ON ax_namensnummer USING btree (gml_id,beginnt);
 CREATE INDEX ax_namensnummer_endet ON ax_namensnummer USING btree (endet);
@@ -6557,7 +6556,7 @@ CREATE TABLE IF NOT EXISTS ax_anschrift (
   gehoertzu character(16)[],
   beziehtsichauf character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_anschrift_gml ON ax_anschrift USING btree (gml_id,beginnt);
 CREATE INDEX ax_anschrift_endet ON ax_anschrift USING btree (endet);
@@ -6655,7 +6654,7 @@ CREATE TABLE IF NOT EXISTS ax_verwaltung (
   haengtan character(16) NOT NULL,
   beziehtsichauf character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_verwaltung_gml ON ax_verwaltung USING btree (gml_id,beginnt);
 CREATE INDEX ax_verwaltung_endet ON ax_verwaltung USING btree (endet);
@@ -6734,7 +6733,7 @@ CREATE TABLE IF NOT EXISTS ax_buchungsstelle (
   verweistauf character(16)[],
   grundstueckbestehtaus character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_buchungsstelle_gml ON ax_buchungsstelle USING btree (gml_id,beginnt);
 CREATE INDEX ax_buchungsstelle_endet ON ax_buchungsstelle USING btree (endet);
@@ -6792,7 +6791,7 @@ CREATE TABLE IF NOT EXISTS ax_personengruppe (
   istteilvon character(16)[],
   bestehtaus character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_personengruppe_gml ON ax_personengruppe USING btree (gml_id,beginnt);
 CREATE INDEX ax_personengruppe_endet ON ax_personengruppe USING btree (endet);
@@ -6830,7 +6829,7 @@ CREATE TABLE IF NOT EXISTS ax_buchungsblatt (
   istteilvon character(16)[],
   bestehtaus character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_buchungsblatt_gml ON ax_buchungsblatt USING btree (gml_id,beginnt);
 CREATE INDEX ax_buchungsblatt_endet ON ax_buchungsblatt USING btree (endet);
@@ -6873,7 +6872,7 @@ CREATE TABLE IF NOT EXISTS ax_vertretung (
   haengtan character(16) NOT NULL,
   beziehtsichauf character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_vertretung_gml ON ax_vertretung USING btree (gml_id,beginnt);
 CREATE INDEX ax_vertretung_endet ON ax_vertretung USING btree (endet);
@@ -6915,7 +6914,7 @@ CREATE TABLE IF NOT EXISTS ax_skizze (
   skizzenname character varying NOT NULL,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_skizze_gml ON ax_skizze USING btree (gml_id,beginnt);
 CREATE INDEX ax_skizze_endet ON ax_skizze USING btree (endet);
@@ -6961,7 +6960,7 @@ CREATE TABLE IF NOT EXISTS ax_schwere (
   ueberpruefungsdatum date,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_schwere_gml ON ax_schwere USING btree (gml_id,beginnt);
 CREATE INDEX ax_schwere_endet ON ax_schwere USING btree (endet);
@@ -7024,7 +7023,7 @@ CREATE TABLE IF NOT EXISTS ax_historischesflurstueckalb (
   zeitpunktderentstehungdesbezugsflurstuecks date,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_historischesflurstueckalb_gml ON ax_historischesflurstueckalb USING btree (gml_id,beginnt);
 CREATE INDEX ax_historischesflurstueckalb_endet ON ax_historischesflurstueckalb USING btree (endet);
@@ -7102,7 +7101,7 @@ CREATE TABLE IF NOT EXISTS ax_historischesflurstueckohneraumbezug (
   zeigtauf character(16)[],
   weistauf character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_historischesflurstueckohneraumbezug_gml ON ax_historischesflurstueckohneraumbezug USING btree (gml_id,beginnt);
 CREATE INDEX ax_historischesflurstueckohneraumbezug_endet ON ax_historischesflurstueckohneraumbezug USING btree (endet);
@@ -7174,7 +7173,7 @@ CREATE TABLE IF NOT EXISTS ax_lagebezeichnungohnehausnummer (
   gehoertzu character(16)[],
   beschreibt character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_lagebezeichnungohnehausnummer_gml ON ax_lagebezeichnungohnehausnummer USING btree (gml_id,beginnt);
 CREATE INDEX ax_lagebezeichnungohnehausnummer_endet ON ax_lagebezeichnungohnehausnummer USING btree (endet);
@@ -7228,7 +7227,7 @@ CREATE TABLE IF NOT EXISTS ax_lagebezeichnungmithausnummer (
   beziehtsichauchauf character(16),
   beziehtsichauf character(16),
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_lagebezeichnungmithausnummer_gml ON ax_lagebezeichnungmithausnummer USING btree (gml_id,beginnt);
 CREATE INDEX ax_lagebezeichnungmithausnummer_endet ON ax_lagebezeichnungmithausnummer USING btree (endet);
@@ -7285,7 +7284,7 @@ CREATE TABLE IF NOT EXISTS ax_lagebezeichnungmitpseudonummer (
   istteilvon character(16)[],
   gehoertzu character(16),
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_lagebezeichnungmitpseudonummer_gml ON ax_lagebezeichnungmitpseudonummer USING btree (gml_id,beginnt);
 CREATE INDEX ax_lagebezeichnungmitpseudonummer_endet ON ax_lagebezeichnungmitpseudonummer USING btree (endet);
@@ -7340,7 +7339,7 @@ CREATE TABLE IF NOT EXISTS ax_reservierung (
   stelle character varying NOT NULL,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_reservierung_gml ON ax_reservierung USING btree (gml_id,beginnt);
 CREATE INDEX ax_reservierung_endet ON ax_reservierung USING btree (endet);
@@ -7386,7 +7385,7 @@ CREATE TABLE IF NOT EXISTS ax_punktkennunguntergegangen (
   punktkennung character varying NOT NULL,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_punktkennunguntergegangen_gml ON ax_punktkennunguntergegangen USING btree (gml_id,beginnt);
 CREATE INDEX ax_punktkennunguntergegangen_endet ON ax_punktkennunguntergegangen USING btree (endet);
@@ -7421,7 +7420,7 @@ CREATE TABLE IF NOT EXISTS ax_punktkennungvergleichend (
   vorlaeufigepunktkennung character varying NOT NULL,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_punktkennungvergleichend_gml ON ax_punktkennungvergleichend USING btree (gml_id,beginnt);
 CREATE INDEX ax_punktkennungvergleichend_endet ON ax_punktkennungvergleichend USING btree (endet);
@@ -7484,7 +7483,7 @@ CREATE TABLE IF NOT EXISTS ax_fortfuehrungsnachweisdeckblatt (
   istteilvon character(16)[],
   beziehtsichauf character(16)[] NOT NULL,
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_fortfuehrungsnachweisdeckblatt_gml ON ax_fortfuehrungsnachweisdeckblatt USING btree (gml_id,beginnt);
 CREATE INDEX ax_fortfuehrungsnachweisdeckblatt_endet ON ax_fortfuehrungsnachweisdeckblatt USING btree (endet);
@@ -7562,7 +7561,7 @@ CREATE TABLE IF NOT EXISTS ax_fortfuehrungsfall (
   zeigtaufneuesflurstueck character varying[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_fortfuehrungsfall_gml ON ax_fortfuehrungsfall USING btree (gml_id,beginnt);
 CREATE INDEX ax_fortfuehrungsfall_endet ON ax_fortfuehrungsfall USING btree (endet);
@@ -7619,7 +7618,7 @@ CREATE TABLE IF NOT EXISTS ax_gemeinde (
   schluesselgesamt character varying NOT NULL,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gemeinde_gml ON ax_gemeinde USING btree (gml_id,beginnt);
 CREATE INDEX ax_gemeinde_endet ON ax_gemeinde USING btree (endet);
@@ -7665,7 +7664,7 @@ CREATE TABLE IF NOT EXISTS ax_buchungsblattbezirk (
   schluesselgesamt character varying NOT NULL,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_buchungsblattbezirk_gml ON ax_buchungsblattbezirk USING btree (gml_id,beginnt);
 CREATE INDEX ax_buchungsblattbezirk_endet ON ax_buchungsblattbezirk USING btree (endet);
@@ -7709,7 +7708,7 @@ CREATE TABLE IF NOT EXISTS ax_gemarkungsteilflur (
   schluesselgesamt character varying NOT NULL,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gemarkungsteilflur_gml ON ax_gemarkungsteilflur USING btree (gml_id,beginnt);
 CREATE INDEX ax_gemarkungsteilflur_endet ON ax_gemarkungsteilflur USING btree (endet);
@@ -7754,7 +7753,7 @@ CREATE TABLE IF NOT EXISTS ax_kreisregion (
   schluesselgesamt character varying NOT NULL,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_kreisregion_gml ON ax_kreisregion USING btree (gml_id,beginnt);
 CREATE INDEX ax_kreisregion_endet ON ax_kreisregion USING btree (endet);
@@ -7797,7 +7796,7 @@ CREATE TABLE IF NOT EXISTS ax_bundesland (
   schluesselgesamt character varying NOT NULL,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_bundesland_gml ON ax_bundesland USING btree (gml_id,beginnt);
 CREATE INDEX ax_bundesland_endet ON ax_bundesland USING btree (endet);
@@ -7837,7 +7836,7 @@ CREATE TABLE IF NOT EXISTS ax_regierungsbezirk (
   schluesselgesamt character varying NOT NULL,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_regierungsbezirk_gml ON ax_regierungsbezirk USING btree (gml_id,beginnt);
 CREATE INDEX ax_regierungsbezirk_endet ON ax_regierungsbezirk USING btree (endet);
@@ -7879,7 +7878,7 @@ CREATE TABLE IF NOT EXISTS ax_gemeindeteil (
   schluesselgesamt character varying NOT NULL,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gemeindeteil_gml ON ax_gemeindeteil USING btree (gml_id,beginnt);
 CREATE INDEX ax_gemeindeteil_endet ON ax_gemeindeteil USING btree (endet);
@@ -7925,7 +7924,7 @@ CREATE TABLE IF NOT EXISTS ax_lagebezeichnungkatalogeintrag (
   schluesselgesamt character varying NOT NULL,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_lagebezeichnungkatalogeintrag_gml ON ax_lagebezeichnungkatalogeintrag USING btree (gml_id,beginnt);
 CREATE INDEX ax_lagebezeichnungkatalogeintrag_endet ON ax_lagebezeichnungkatalogeintrag USING btree (endet);
@@ -7970,7 +7969,7 @@ CREATE TABLE IF NOT EXISTS ax_gemarkung (
   schluesselgesamt character varying NOT NULL,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gemarkung_gml ON ax_gemarkung USING btree (gml_id,beginnt);
 CREATE INDEX ax_gemarkung_endet ON ax_gemarkung USING btree (endet);
@@ -8014,7 +8013,7 @@ CREATE TABLE IF NOT EXISTS ax_dienststelle (
   istteilvon character(16)[],
   hat character(16),
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_dienststelle_gml ON ax_dienststelle USING btree (gml_id,beginnt);
 CREATE INDEX ax_dienststelle_endet ON ax_dienststelle USING btree (endet);
@@ -8061,7 +8060,7 @@ CREATE TABLE IF NOT EXISTS ax_verband (
   schluesselgesamt character varying NOT NULL,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_verband_gml ON ax_verband USING btree (gml_id,beginnt);
 CREATE INDEX ax_verband_endet ON ax_verband USING btree (endet);
@@ -8103,7 +8102,7 @@ CREATE TABLE IF NOT EXISTS ax_nationalstaat (
   schluesselgesamt character varying NOT NULL,
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_nationalstaat_gml ON ax_nationalstaat USING btree (gml_id,beginnt);
 CREATE INDEX ax_nationalstaat_endet ON ax_nationalstaat USING btree (endet);
@@ -8141,7 +8140,7 @@ CREATE TABLE IF NOT EXISTS ax_besondererbauwerkspunkt (
   bestehtaus character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_besondererbauwerkspunkt_gml ON ax_besondererbauwerkspunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_besondererbauwerkspunkt_endet ON ax_besondererbauwerkspunkt USING btree (endet);
@@ -8200,7 +8199,7 @@ CREATE TABLE IF NOT EXISTS ax_netzknoten (
   bestehtaus character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_netzknoten_gml ON ax_netzknoten USING btree (gml_id,beginnt);
 CREATE INDEX ax_netzknoten_endet ON ax_netzknoten USING btree (endet);
@@ -8310,7 +8309,7 @@ CREATE TABLE IF NOT EXISTS ax_referenzstationspunkt (
   istidentischmithfp character(16),
   unterschiedlicherbezugspunktmitsfp character(16),
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_referenzstationspunkt_gml ON ax_referenzstationspunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_referenzstationspunkt_endet ON ax_referenzstationspunkt USING btree (endet);
@@ -8440,7 +8439,7 @@ CREATE TABLE IF NOT EXISTS ax_lagefestpunkt (
   unterschiedlicherbezugspunktmitsvp character(16),
   istidentischmitsvp character(16),
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_lagefestpunkt_gml ON ax_lagefestpunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_lagefestpunkt_endet ON ax_lagefestpunkt USING btree (endet);
@@ -8564,7 +8563,7 @@ CREATE TABLE IF NOT EXISTS ax_hoehenfestpunkt (
   unterschiedlicherbezugspunktmitsvp character(16),
   unterschiedlicherbezugspunktmitsp character(16),
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_hoehenfestpunkt_gml ON ax_hoehenfestpunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_hoehenfestpunkt_endet ON ax_hoehenfestpunkt USING btree (endet);
@@ -8677,7 +8676,7 @@ CREATE TABLE IF NOT EXISTS ax_schwerefestpunkt (
   istidentischmitsvp character(16),
   istidentischmitsp character(16),
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_schwerefestpunkt_gml ON ax_schwerefestpunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_schwerefestpunkt_endet ON ax_schwerefestpunkt USING btree (endet);
@@ -8772,7 +8771,7 @@ CREATE TABLE IF NOT EXISTS ax_grenzpunkt (
   beziehtsichaufsfp character(16)[],
   zeigtauf character(16),
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_grenzpunkt_gml ON ax_grenzpunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_grenzpunkt_endet ON ax_grenzpunkt USING btree (endet);
@@ -8836,7 +8835,7 @@ CREATE TABLE IF NOT EXISTS ax_aufnahmepunkt (
   hatidentitaet character(16)[],
   hat character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_aufnahmepunkt_gml ON ax_aufnahmepunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_aufnahmepunkt_endet ON ax_aufnahmepunkt USING btree (endet);
@@ -8896,7 +8895,7 @@ CREATE TABLE IF NOT EXISTS ax_sonstigervermessungspunkt (
   gehoertzu character(16)[],
   hat character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_sonstigervermessungspunkt_gml ON ax_sonstigervermessungspunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_sonstigervermessungspunkt_endet ON ax_sonstigervermessungspunkt USING btree (endet);
@@ -8953,7 +8952,7 @@ CREATE TABLE IF NOT EXISTS ax_sicherungspunkt (
   gehoertzu character(16),
   beziehtsichauf character(16),
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_sicherungspunkt_gml ON ax_sicherungspunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_sicherungspunkt_endet ON ax_sicherungspunkt USING btree (endet);
@@ -9002,7 +9001,7 @@ CREATE TABLE IF NOT EXISTS ax_besonderergebaeudepunkt (
   bestehtaus character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_besonderergebaeudepunkt_gml ON ax_besonderergebaeudepunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_besonderergebaeudepunkt_endet ON ax_besonderergebaeudepunkt USING btree (endet);
@@ -9038,7 +9037,7 @@ CREATE TABLE IF NOT EXISTS ax_wirtschaftlicheeinheit (
   bestehtaus character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_wirtschaftlicheeinheit_gml ON ax_wirtschaftlicheeinheit USING btree (gml_id,beginnt);
 CREATE INDEX ax_wirtschaftlicheeinheit_endet ON ax_wirtschaftlicheeinheit USING btree (endet);
@@ -9077,7 +9076,7 @@ CREATE TABLE IF NOT EXISTS ax_verwaltungsgemeinschaft (
   bestehtaus character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_verwaltungsgemeinschaft_gml ON ax_verwaltungsgemeinschaft USING btree (gml_id,beginnt);
 CREATE INDEX ax_verwaltungsgemeinschaft_endet ON ax_verwaltungsgemeinschaft USING btree (endet);
@@ -9144,7 +9143,7 @@ CREATE TABLE IF NOT EXISTS ax_schutzgebietnachnaturumweltoderbodenschutzrecht (
   bestehtaus character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_schutzgebietnachnaturumweltoderbodenschutzrecht_gml ON ax_schutzgebietnachnaturumweltoderbodenschutzrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_schutzgebietnachnaturumweltoderbodenschutzrecht_endet ON ax_schutzgebietnachnaturumweltoderbodenschutzrecht USING btree (endet);
@@ -9232,7 +9231,7 @@ CREATE TABLE IF NOT EXISTS ax_schutzgebietnachwasserrecht (
   bestehtaus character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_schutzgebietnachwasserrecht_gml ON ax_schutzgebietnachwasserrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_schutzgebietnachwasserrecht_endet ON ax_schutzgebietnachwasserrecht USING btree (endet);
@@ -9318,7 +9317,7 @@ CREATE TABLE IF NOT EXISTS ax_boeschungkliff (
   bestehtaus character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_boeschungkliff_gml ON ax_boeschungkliff USING btree (gml_id,beginnt);
 CREATE INDEX ax_boeschungkliff_endet ON ax_boeschungkliff USING btree (endet);
@@ -9379,7 +9378,7 @@ CREATE TABLE IF NOT EXISTS ax_besonderertopographischerpunkt (
   bestehtaus character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_besonderertopographischerpunkt_gml ON ax_besonderertopographischerpunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_besonderertopographischerpunkt_endet ON ax_besonderertopographischerpunkt USING btree (endet);
@@ -9420,7 +9419,7 @@ CREATE TABLE IF NOT EXISTS ax_kanal (
   bestehtaus character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_kanal_gml ON ax_kanal USING btree (gml_id,beginnt);
 CREATE INDEX ax_kanal_endet ON ax_kanal USING btree (endet);
@@ -9463,7 +9462,7 @@ CREATE TABLE IF NOT EXISTS ax_wasserlauf (
   bestehtaus character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_wasserlauf_gml ON ax_wasserlauf USING btree (gml_id,beginnt);
 CREATE INDEX ax_wasserlauf_endet ON ax_wasserlauf USING btree (endet);
@@ -9507,7 +9506,7 @@ CREATE TABLE IF NOT EXISTS ax_strasse (
   bestehtaus character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_strasse_gml ON ax_strasse USING btree (gml_id,beginnt);
 CREATE INDEX ax_strasse_endet ON ax_strasse USING btree (endet);
@@ -9551,7 +9550,7 @@ CREATE TABLE IF NOT EXISTS ap_fpo (
   istteilvon character(16)[],
   dientzurdarstellungvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ap_fpo_gml ON ap_fpo USING btree (gml_id,beginnt);
 CREATE INDEX ap_fpo_endet ON ap_fpo USING btree (endet);
@@ -9594,7 +9593,7 @@ CREATE TABLE IF NOT EXISTS aa_antragsgebiet (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX aa_antragsgebiet_gml ON aa_antragsgebiet USING btree (gml_id,beginnt);
 CREATE INDEX aa_antragsgebiet_endet ON aa_antragsgebiet USING btree (endet);
@@ -9658,7 +9657,7 @@ CREATE TABLE IF NOT EXISTS ax_polder (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_polder_gml ON ax_polder USING btree (gml_id,beginnt);
 CREATE INDEX ax_polder_endet ON ax_polder USING btree (endet);
@@ -9754,7 +9753,7 @@ CREATE TABLE IF NOT EXISTS ax_historischesflurstueck (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_historischesflurstueck_gml ON ax_historischesflurstueck USING btree (gml_id,beginnt);
 CREATE INDEX ax_historischesflurstueck_endet ON ax_historischesflurstueck USING btree (endet);
@@ -9824,7 +9823,7 @@ CREATE TABLE IF NOT EXISTS ax_kondominium (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_kondominium_gml ON ax_kondominium USING btree (gml_id,beginnt);
 CREATE INDEX ax_kondominium_endet ON ax_kondominium USING btree (endet);
@@ -9864,7 +9863,7 @@ CREATE TABLE IF NOT EXISTS ax_baublock (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_baublock_gml ON ax_baublock USING btree (gml_id,beginnt);
 CREATE INDEX ax_baublock_endet ON ax_baublock USING btree (endet);
@@ -9905,7 +9904,7 @@ CREATE TABLE IF NOT EXISTS ax_aussparungsflaeche (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_aussparungsflaeche_gml ON ax_aussparungsflaeche USING btree (gml_id,beginnt);
 CREATE INDEX ax_aussparungsflaeche_endet ON ax_aussparungsflaeche USING btree (endet);
@@ -9968,7 +9967,7 @@ CREATE TABLE IF NOT EXISTS ax_soll (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_soll_gml ON ax_soll USING btree (gml_id,beginnt);
 CREATE INDEX ax_soll_endet ON ax_soll USING btree (endet);
@@ -10054,7 +10053,7 @@ CREATE TABLE IF NOT EXISTS ax_duene (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_duene_gml ON ax_duene USING btree (gml_id,beginnt);
 CREATE INDEX ax_duene_endet ON ax_duene USING btree (endet);
@@ -10142,7 +10141,7 @@ CREATE TABLE IF NOT EXISTS ax_transportanlage (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_transportanlage_gml ON ax_transportanlage USING btree (gml_id,beginnt);
 CREATE INDEX ax_transportanlage_endet ON ax_transportanlage USING btree (endet);
@@ -10237,7 +10236,7 @@ CREATE TABLE IF NOT EXISTS ax_wegpfadsteig (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_wegpfadsteig_gml ON ax_wegpfadsteig USING btree (gml_id,beginnt);
 CREATE INDEX ax_wegpfadsteig_endet ON ax_wegpfadsteig USING btree (endet);
@@ -10333,7 +10332,7 @@ CREATE TABLE IF NOT EXISTS ax_gleis (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gleis_gml ON ax_gleis USING btree (gml_id,beginnt);
 CREATE INDEX ax_gleis_endet ON ax_gleis USING btree (endet);
@@ -10426,7 +10425,7 @@ CREATE TABLE IF NOT EXISTS ax_bahnverkehrsanlage (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_bahnverkehrsanlage_gml ON ax_bahnverkehrsanlage USING btree (gml_id,beginnt);
 CREATE INDEX ax_bahnverkehrsanlage_endet ON ax_bahnverkehrsanlage USING btree (endet);
@@ -10520,7 +10519,7 @@ CREATE TABLE IF NOT EXISTS ax_strassenverkehrsanlage (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_strassenverkehrsanlage_gml ON ax_strassenverkehrsanlage USING btree (gml_id,beginnt);
 CREATE INDEX ax_strassenverkehrsanlage_endet ON ax_strassenverkehrsanlage USING btree (endet);
@@ -10613,7 +10612,7 @@ CREATE TABLE IF NOT EXISTS ax_einrichtungenfuerdenschiffsverkehr (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_einrichtungenfuerdenschiffsverkehr_gml ON ax_einrichtungenfuerdenschiffsverkehr USING btree (gml_id,beginnt);
 CREATE INDEX ax_einrichtungenfuerdenschiffsverkehr_endet ON ax_einrichtungenfuerdenschiffsverkehr USING btree (endet);
@@ -10706,7 +10705,7 @@ CREATE TABLE IF NOT EXISTS ax_flugverkehrsanlage (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_flugverkehrsanlage_gml ON ax_flugverkehrsanlage USING btree (gml_id,beginnt);
 CREATE INDEX ax_flugverkehrsanlage_endet ON ax_flugverkehrsanlage USING btree (endet);
@@ -10798,7 +10797,7 @@ CREATE TABLE IF NOT EXISTS ax_hafen (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_hafen_gml ON ax_hafen USING btree (gml_id,beginnt);
 CREATE INDEX ax_hafen_endet ON ax_hafen USING btree (endet);
@@ -10886,7 +10885,7 @@ CREATE TABLE IF NOT EXISTS ax_testgelaende (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_testgelaende_gml ON ax_testgelaende USING btree (gml_id,beginnt);
 CREATE INDEX ax_testgelaende_endet ON ax_testgelaende USING btree (endet);
@@ -10975,7 +10974,7 @@ CREATE TABLE IF NOT EXISTS ax_schleuse (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_schleuse_gml ON ax_schleuse USING btree (gml_id,beginnt);
 CREATE INDEX ax_schleuse_endet ON ax_schleuse USING btree (endet);
@@ -11065,7 +11064,7 @@ CREATE TABLE IF NOT EXISTS ax_ortslage (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_ortslage_gml ON ax_ortslage USING btree (gml_id,beginnt);
 CREATE INDEX ax_ortslage_endet ON ax_ortslage USING btree (endet);
@@ -11152,7 +11151,7 @@ CREATE TABLE IF NOT EXISTS ax_grenzuebergang (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_grenzuebergang_gml ON ax_grenzuebergang USING btree (gml_id,beginnt);
 CREATE INDEX ax_grenzuebergang_endet ON ax_grenzuebergang USING btree (endet);
@@ -11242,7 +11241,7 @@ CREATE TABLE IF NOT EXISTS ax_gewaessermerkmal (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gewaessermerkmal_gml ON ax_gewaessermerkmal USING btree (gml_id,beginnt);
 CREATE INDEX ax_gewaessermerkmal_endet ON ax_gewaessermerkmal USING btree (endet);
@@ -11335,7 +11334,7 @@ CREATE TABLE IF NOT EXISTS ax_untergeordnetesgewaesser (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_untergeordnetesgewaesser_gml ON ax_untergeordnetesgewaesser USING btree (gml_id,beginnt);
 CREATE INDEX ax_untergeordnetesgewaesser_endet ON ax_untergeordnetesgewaesser USING btree (endet);
@@ -11429,7 +11428,7 @@ CREATE TABLE IF NOT EXISTS ax_vegetationsmerkmal (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_vegetationsmerkmal_gml ON ax_vegetationsmerkmal USING btree (gml_id,beginnt);
 CREATE INDEX ax_vegetationsmerkmal_endet ON ax_vegetationsmerkmal USING btree (endet);
@@ -11528,7 +11527,7 @@ CREATE TABLE IF NOT EXISTS ax_musterlandesmusterundvergleichsstueck (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_musterlandesmusterundvergleichsstueck_gml ON ax_musterlandesmusterundvergleichsstueck USING btree (gml_id,beginnt);
 CREATE INDEX ax_musterlandesmusterundvergleichsstueck_endet ON ax_musterlandesmusterundvergleichsstueck USING btree (endet);
@@ -11599,7 +11598,7 @@ CREATE TABLE IF NOT EXISTS ax_insel (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_insel_gml ON ax_insel USING btree (gml_id,beginnt);
 CREATE INDEX ax_insel_endet ON ax_insel USING btree (endet);
@@ -11639,7 +11638,7 @@ CREATE TABLE IF NOT EXISTS ax_gewann (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gewann_gml ON ax_gewann USING btree (gml_id,beginnt);
 CREATE INDEX ax_gewann_endet ON ax_gewann USING btree (endet);
@@ -11680,7 +11679,7 @@ CREATE TABLE IF NOT EXISTS ax_kleinraeumigerlandschaftsteil (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_kleinraeumigerlandschaftsteil_gml ON ax_kleinraeumigerlandschaftsteil USING btree (gml_id,beginnt);
 CREATE INDEX ax_kleinraeumigerlandschaftsteil_endet ON ax_kleinraeumigerlandschaftsteil USING btree (endet);
@@ -11722,7 +11721,7 @@ CREATE TABLE IF NOT EXISTS ax_landschaft (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_landschaft_gml ON ax_landschaft USING btree (gml_id,beginnt);
 CREATE INDEX ax_landschaft_endet ON ax_landschaft USING btree (endet);
@@ -11788,7 +11787,7 @@ CREATE TABLE IF NOT EXISTS ax_felsenfelsblockfelsnadel (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_felsenfelsblockfelsnadel_gml ON ax_felsenfelsblockfelsnadel USING btree (gml_id,beginnt);
 CREATE INDEX ax_felsenfelsblockfelsnadel_endet ON ax_felsenfelsblockfelsnadel USING btree (endet);
@@ -11862,7 +11861,7 @@ CREATE TABLE IF NOT EXISTS ap_lto (
   dientzurdarstellungvon character(16)[],
   hat character(16),
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ap_lto_gml ON ap_lto USING btree (gml_id,beginnt);
 CREATE INDEX ap_lto_endet ON ap_lto USING btree (endet);
@@ -11938,7 +11937,7 @@ CREATE TABLE IF NOT EXISTS ax_leitung (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_leitung_gml ON ax_leitung USING btree (gml_id,beginnt);
 CREATE INDEX ax_leitung_endet ON ax_leitung USING btree (endet);
@@ -12026,7 +12025,7 @@ CREATE TABLE IF NOT EXISTS ax_abschnitt (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_abschnitt_gml ON ax_abschnitt USING btree (gml_id,beginnt);
 CREATE INDEX ax_abschnitt_endet ON ax_abschnitt USING btree (endet);
@@ -12112,7 +12111,7 @@ CREATE TABLE IF NOT EXISTS ax_ast (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_ast_gml ON ax_ast USING btree (gml_id,beginnt);
 CREATE INDEX ax_ast_endet ON ax_ast USING btree (endet);
@@ -12178,7 +12177,7 @@ CREATE TABLE IF NOT EXISTS ap_lpo (
   istteilvon character(16)[],
   dientzurdarstellungvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ap_lpo_gml ON ap_lpo USING btree (gml_id,beginnt);
 CREATE INDEX ap_lpo_endet ON ap_lpo USING btree (endet);
@@ -12246,7 +12245,7 @@ CREATE TABLE IF NOT EXISTS ax_seilbahnschwebebahn (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_seilbahnschwebebahn_gml ON ax_seilbahnschwebebahn USING btree (gml_id,beginnt);
 CREATE INDEX ax_seilbahnschwebebahn_endet ON ax_seilbahnschwebebahn USING btree (endet);
@@ -12311,7 +12310,7 @@ CREATE TABLE IF NOT EXISTS ax_gebaeudeausgestaltung (
   istteilvon character(16)[],
   zeigtauf character(16) NOT NULL,
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gebaeudeausgestaltung_gml ON ax_gebaeudeausgestaltung USING btree (gml_id,beginnt);
 CREATE INDEX ax_gebaeudeausgestaltung_endet ON ax_gebaeudeausgestaltung USING btree (endet);
@@ -12354,7 +12353,7 @@ CREATE TABLE IF NOT EXISTS ax_topographischelinie (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_topographischelinie_gml ON ax_topographischelinie USING btree (gml_id,beginnt);
 CREATE INDEX ax_topographischelinie_endet ON ax_topographischelinie USING btree (endet);
@@ -12406,7 +12405,7 @@ CREATE TABLE IF NOT EXISTS ax_geripplinie (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_geripplinie_gml ON ax_geripplinie USING btree (gml_id,beginnt);
 CREATE INDEX ax_geripplinie_endet ON ax_geripplinie USING btree (endet);
@@ -12469,7 +12468,7 @@ CREATE TABLE IF NOT EXISTS ax_gewaesserbegrenzung (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gewaesserbegrenzung_gml ON ax_gewaesserbegrenzung USING btree (gml_id,beginnt);
 CREATE INDEX ax_gewaesserbegrenzung_endet ON ax_gewaesserbegrenzung USING btree (endet);
@@ -12533,7 +12532,7 @@ CREATE TABLE IF NOT EXISTS ax_strukturierterfasstegelaendepunkte (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_strukturierterfasstegelaendepunkte_gml ON ax_strukturierterfasstegelaendepunkte USING btree (gml_id,beginnt);
 CREATE INDEX ax_strukturierterfasstegelaendepunkte_endet ON ax_strukturierterfasstegelaendepunkte USING btree (endet);
@@ -12586,7 +12585,7 @@ CREATE TABLE IF NOT EXISTS ax_einschnitt (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_einschnitt_gml ON ax_einschnitt USING btree (gml_id,beginnt);
 CREATE INDEX ax_einschnitt_endet ON ax_einschnitt USING btree (endet);
@@ -12650,7 +12649,7 @@ CREATE TABLE IF NOT EXISTS ax_hoehenlinie (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_hoehenlinie_gml ON ax_hoehenlinie USING btree (gml_id,beginnt);
 CREATE INDEX ax_hoehenlinie_endet ON ax_hoehenlinie USING btree (endet);
@@ -12717,7 +12716,7 @@ CREATE TABLE IF NOT EXISTS ax_abgeleitetehoehenlinie (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_abgeleitetehoehenlinie_gml ON ax_abgeleitetehoehenlinie USING btree (gml_id,beginnt);
 CREATE INDEX ax_abgeleitetehoehenlinie_endet ON ax_abgeleitetehoehenlinie USING btree (endet);
@@ -12771,7 +12770,7 @@ CREATE TABLE IF NOT EXISTS ap_pto (
   dientzurdarstellungvon character(16)[],
   hat character(16),
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ap_pto_gml ON ap_pto USING btree (gml_id,beginnt);
 CREATE INDEX ap_pto_endet ON ap_pto USING btree (endet);
@@ -12848,7 +12847,7 @@ CREATE TABLE IF NOT EXISTS ax_heilquellegasquelle (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_heilquellegasquelle_gml ON ax_heilquellegasquelle USING btree (gml_id,beginnt);
 CREATE INDEX ax_heilquellegasquelle_endet ON ax_heilquellegasquelle USING btree (endet);
@@ -12936,7 +12935,7 @@ CREATE TABLE IF NOT EXISTS ax_wasserspiegelhoehe (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_wasserspiegelhoehe_gml ON ax_wasserspiegelhoehe USING btree (gml_id,beginnt);
 CREATE INDEX ax_wasserspiegelhoehe_endet ON ax_wasserspiegelhoehe USING btree (endet);
@@ -13023,7 +13022,7 @@ CREATE TABLE IF NOT EXISTS ax_nullpunkt (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_nullpunkt_gml ON ax_nullpunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_nullpunkt_endet ON ax_nullpunkt USING btree (endet);
@@ -13124,7 +13123,7 @@ CREATE TABLE IF NOT EXISTS ax_punktortau (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_punktortau_gml ON ax_punktortau USING btree (gml_id,beginnt);
 CREATE INDEX ax_punktortau_endet ON ax_punktortau USING btree (endet);
@@ -13215,7 +13214,7 @@ CREATE TABLE IF NOT EXISTS ax_georeferenziertegebaeudeadresse (
   istteilvon character(16)[],
   hatauch character(16) NOT NULL,
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_georeferenziertegebaeudeadresse_gml ON ax_georeferenziertegebaeudeadresse USING btree (gml_id,beginnt);
 CREATE INDEX ax_georeferenziertegebaeudeadresse_endet ON ax_georeferenziertegebaeudeadresse USING btree (endet);
@@ -13301,7 +13300,7 @@ CREATE TABLE IF NOT EXISTS ax_grablochderbodenschaetzung (
   istteilvon character(16)[],
   gehoertzu character(16),
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_grablochderbodenschaetzung_gml ON ax_grablochderbodenschaetzung USING btree (gml_id,beginnt);
 CREATE INDEX ax_grablochderbodenschaetzung_endet ON ax_grablochderbodenschaetzung USING btree (endet);
@@ -13376,7 +13375,7 @@ CREATE TABLE IF NOT EXISTS ax_wohnplatz (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_wohnplatz_gml ON ax_wohnplatz USING btree (gml_id,beginnt);
 CREATE INDEX ax_wohnplatz_endet ON ax_wohnplatz USING btree (endet);
@@ -13429,7 +13428,7 @@ CREATE TABLE IF NOT EXISTS ax_markantergelaendepunkt (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_markantergelaendepunkt_gml ON ax_markantergelaendepunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_markantergelaendepunkt_endet ON ax_markantergelaendepunkt USING btree (endet);
@@ -13489,7 +13488,7 @@ CREATE TABLE IF NOT EXISTS ax_besondererhoehenpunkt (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_besondererhoehenpunkt_gml ON ax_besondererhoehenpunkt USING btree (gml_id,beginnt);
 CREATE INDEX ax_besondererhoehenpunkt_endet ON ax_besondererhoehenpunkt USING btree (endet);
@@ -13563,7 +13562,7 @@ CREATE TABLE IF NOT EXISTS ax_hoehleneingang (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_hoehleneingang_gml ON ax_hoehleneingang USING btree (gml_id,beginnt);
 CREATE INDEX ax_hoehleneingang_endet ON ax_hoehleneingang USING btree (endet);
@@ -13632,7 +13631,7 @@ CREATE TABLE IF NOT EXISTS ap_ppo (
   istteilvon character(16)[],
   dientzurdarstellungvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ap_ppo_gml ON ap_ppo USING btree (gml_id,beginnt);
 CREATE INDEX ap_ppo_endet ON ap_ppo USING btree (endet);
@@ -13703,7 +13702,7 @@ CREATE TABLE IF NOT EXISTS ax_sickerstrecke (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_sickerstrecke_gml ON ax_sickerstrecke USING btree (gml_id,beginnt);
 CREATE INDEX ax_sickerstrecke_endet ON ax_sickerstrecke USING btree (endet);
@@ -13767,7 +13766,7 @@ CREATE TABLE IF NOT EXISTS ax_firstlinie (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_firstlinie_gml ON ax_firstlinie USING btree (gml_id,beginnt);
 CREATE INDEX ax_firstlinie_endet ON ax_firstlinie USING btree (endet);
@@ -13806,7 +13805,7 @@ CREATE TABLE IF NOT EXISTS ax_besonderegebaeudelinie (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_besonderegebaeudelinie_gml ON ax_besonderegebaeudelinie USING btree (gml_id,beginnt);
 CREATE INDEX ax_besonderegebaeudelinie_endet ON ax_besonderegebaeudelinie USING btree (endet);
@@ -13858,7 +13857,7 @@ CREATE TABLE IF NOT EXISTS ax_gelaendekante (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gelaendekante_gml ON ax_gelaendekante USING btree (gml_id,beginnt);
 CREATE INDEX ax_gelaendekante_endet ON ax_gelaendekante USING btree (endet);
@@ -13975,7 +13974,7 @@ CREATE TABLE IF NOT EXISTS ax_sonstigesbauwerkodersonstigeeinrichtung (
   gehoertzubauwerk_ax_vegetationsmerkmal character(16),
   gehoertzu character(16),
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_sonstigesbauwerkodersonstigeeinrichtung_gml ON ax_sonstigesbauwerkodersonstigeeinrichtung USING btree (gml_id,beginnt);
 CREATE INDEX ax_sonstigesbauwerkodersonstigeeinrichtung_endet ON ax_sonstigesbauwerkodersonstigeeinrichtung USING btree (endet);
@@ -14143,7 +14142,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerkoderanlagefuersportfreizeitunderholung (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_bauwerkoderanlagefuersportfreizeitunderholung_gml ON ax_bauwerkoderanlagefuersportfreizeitunderholung USING btree (gml_id,beginnt);
 CREATE INDEX ax_bauwerkoderanlagefuersportfreizeitunderholung_endet ON ax_bauwerkoderanlagefuersportfreizeitunderholung USING btree (endet);
@@ -14236,7 +14235,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerkoderanlagefuerindustrieundgewerbe (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_bauwerkoderanlagefuerindustrieundgewerbe_gml ON ax_bauwerkoderanlagefuerindustrieundgewerbe USING btree (gml_id,beginnt);
 CREATE INDEX ax_bauwerkoderanlagefuerindustrieundgewerbe_endet ON ax_bauwerkoderanlagefuerindustrieundgewerbe USING btree (endet);
@@ -14327,7 +14326,7 @@ CREATE TABLE IF NOT EXISTS ax_einrichtunginoeffentlichenbereichen (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_einrichtunginoeffentlichenbereichen_gml ON ax_einrichtunginoeffentlichenbereichen USING btree (gml_id,beginnt);
 CREATE INDEX ax_einrichtunginoeffentlichenbereichen_endet ON ax_einrichtunginoeffentlichenbereichen USING btree (endet);
@@ -14415,7 +14414,7 @@ CREATE TABLE IF NOT EXISTS ax_historischesbauwerkoderhistorischeeinrichtung (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_historischesbauwerkoderhistorischeeinrichtung_gml ON ax_historischesbauwerkoderhistorischeeinrichtung USING btree (gml_id,beginnt);
 CREATE INDEX ax_historischesbauwerkoderhistorischeeinrichtung_endet ON ax_historischesbauwerkoderhistorischeeinrichtung USING btree (endet);
@@ -14506,7 +14505,7 @@ CREATE TABLE IF NOT EXISTS ax_turm (
   istteilvon character(16)[],
   zeigtauf character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_turm_gml ON ax_turm USING btree (gml_id,beginnt);
 CREATE INDEX ax_turm_endet ON ax_turm USING btree (endet);
@@ -14601,7 +14600,7 @@ CREATE TABLE IF NOT EXISTS ax_vorratsbehaelterspeicherbauwerk (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_vorratsbehaelterspeicherbauwerk_gml ON ax_vorratsbehaelterspeicherbauwerk USING btree (gml_id,beginnt);
 CREATE INDEX ax_vorratsbehaelterspeicherbauwerk_endet ON ax_vorratsbehaelterspeicherbauwerk USING btree (endet);
@@ -14694,7 +14693,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerkimgewaesserbereich (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_bauwerkimgewaesserbereich_gml ON ax_bauwerkimgewaesserbereich USING btree (gml_id,beginnt);
 CREATE INDEX ax_bauwerkimgewaesserbereich_endet ON ax_bauwerkimgewaesserbereich USING btree (endet);
@@ -14788,7 +14787,7 @@ CREATE TABLE IF NOT EXISTS ax_bauwerkimverkehrsbereich (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_bauwerkimverkehrsbereich_gml ON ax_bauwerkimverkehrsbereich USING btree (gml_id,beginnt);
 CREATE INDEX ax_bauwerkimverkehrsbereich_endet ON ax_bauwerkimverkehrsbereich USING btree (endet);
@@ -14880,7 +14879,7 @@ CREATE TABLE IF NOT EXISTS ax_schifffahrtsliniefaehrverkehr (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_schifffahrtsliniefaehrverkehr_gml ON ax_schifffahrtsliniefaehrverkehr USING btree (gml_id,beginnt);
 CREATE INDEX ax_schifffahrtsliniefaehrverkehr_endet ON ax_schifffahrtsliniefaehrverkehr USING btree (endet);
@@ -14991,7 +14990,7 @@ CREATE TABLE IF NOT EXISTS ax_gebaeude (
   haengtzusammenmit character(16),
   gehoertzu character(16),
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gebaeude_gml ON ax_gebaeude USING btree (gml_id,beginnt);
 CREATE INDEX ax_gebaeude_endet ON ax_gebaeude USING btree (endet);
@@ -15109,7 +15108,7 @@ CREATE TABLE IF NOT EXISTS ax_anderefestlegungnachstrassenrecht (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_anderefestlegungnachstrassenrecht_gml ON ax_anderefestlegungnachstrassenrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_anderefestlegungnachstrassenrecht_endet ON ax_anderefestlegungnachstrassenrecht USING btree (endet);
@@ -15203,7 +15202,7 @@ CREATE TABLE IF NOT EXISTS ax_naturumweltoderbodenschutzrecht (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_naturumweltoderbodenschutzrecht_gml ON ax_naturumweltoderbodenschutzrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_naturumweltoderbodenschutzrecht_endet ON ax_naturumweltoderbodenschutzrecht USING btree (endet);
@@ -15297,7 +15296,7 @@ CREATE TABLE IF NOT EXISTS ax_klassifizierungnachstrassenrecht (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_klassifizierungnachstrassenrecht_gml ON ax_klassifizierungnachstrassenrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_klassifizierungnachstrassenrecht_endet ON ax_klassifizierungnachstrassenrecht USING btree (endet);
@@ -15390,7 +15389,7 @@ CREATE TABLE IF NOT EXISTS ax_sonstigesrecht (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_sonstigesrecht_gml ON ax_sonstigesrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_sonstigesrecht_endet ON ax_sonstigesrecht USING btree (endet);
@@ -15484,7 +15483,7 @@ CREATE TABLE IF NOT EXISTS ax_denkmalschutzrecht (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_denkmalschutzrecht_gml ON ax_denkmalschutzrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_denkmalschutzrecht_endet ON ax_denkmalschutzrecht USING btree (endet);
@@ -15578,7 +15577,7 @@ CREATE TABLE IF NOT EXISTS ax_dammwalldeich (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_dammwalldeich_gml ON ax_dammwalldeich USING btree (gml_id,beginnt);
 CREATE INDEX ax_dammwalldeich_endet ON ax_dammwalldeich USING btree (endet);
@@ -15682,7 +15681,7 @@ CREATE TABLE IF NOT EXISTS ax_punktortag (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_punktortag_gml ON ax_punktortag USING btree (gml_id,beginnt);
 CREATE INDEX ax_punktortag_endet ON ax_punktortag USING btree (endet);
@@ -15764,7 +15763,7 @@ CREATE TABLE IF NOT EXISTS ax_bauteil (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_bauteil_gml ON ax_bauteil USING btree (gml_id,beginnt);
 CREATE INDEX ax_bauteil_endet ON ax_bauteil USING btree (endet);
@@ -15809,7 +15808,7 @@ CREATE TABLE IF NOT EXISTS ax_tagesabschnitt (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_tagesabschnitt_gml ON ax_tagesabschnitt USING btree (gml_id,beginnt);
 CREATE INDEX ax_tagesabschnitt_endet ON ax_tagesabschnitt USING btree (endet);
@@ -15872,7 +15871,7 @@ CREATE TABLE IF NOT EXISTS ax_bewertung (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_bewertung_gml ON ax_bewertung USING btree (gml_id,beginnt);
 CREATE INDEX ax_bewertung_endet ON ax_bewertung USING btree (endet);
@@ -15961,7 +15960,7 @@ CREATE TABLE IF NOT EXISTS ax_anderefestlegungnachwasserrecht (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_anderefestlegungnachwasserrecht_gml ON ax_anderefestlegungnachwasserrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_anderefestlegungnachwasserrecht_endet ON ax_anderefestlegungnachwasserrecht USING btree (endet);
@@ -16053,7 +16052,7 @@ CREATE TABLE IF NOT EXISTS ax_klassifizierungnachwasserrecht (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_klassifizierungnachwasserrecht_gml ON ax_klassifizierungnachwasserrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_klassifizierungnachwasserrecht_endet ON ax_klassifizierungnachwasserrecht USING btree (endet);
@@ -16146,7 +16145,7 @@ CREATE TABLE IF NOT EXISTS ax_forstrecht (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_forstrecht_gml ON ax_forstrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_forstrecht_endet ON ax_forstrecht USING btree (endet);
@@ -16245,7 +16244,7 @@ CREATE TABLE IF NOT EXISTS ax_bauraumoderbodenordnungsrecht (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_bauraumoderbodenordnungsrecht_gml ON ax_bauraumoderbodenordnungsrecht USING btree (gml_id,beginnt);
 CREATE INDEX ax_bauraumoderbodenordnungsrecht_endet ON ax_bauraumoderbodenordnungsrecht USING btree (endet);
@@ -16319,7 +16318,7 @@ CREATE TABLE IF NOT EXISTS ax_schutzzone (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_schutzzone_gml ON ax_schutzzone USING btree (gml_id,beginnt);
 CREATE INDEX ax_schutzzone_endet ON ax_schutzzone USING btree (endet);
@@ -16360,7 +16359,7 @@ CREATE TABLE IF NOT EXISTS ax_boeschungsflaeche (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_boeschungsflaeche_gml ON ax_boeschungsflaeche USING btree (gml_id,beginnt);
 CREATE INDEX ax_boeschungsflaeche_endet ON ax_boeschungsflaeche USING btree (endet);
@@ -16428,7 +16427,7 @@ CREATE TABLE IF NOT EXISTS ax_flurstueck (
   zeigtauf character(16)[],
   weistauf character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_flurstueck_gml ON ax_flurstueck USING btree (gml_id,beginnt);
 CREATE INDEX ax_flurstueck_endet ON ax_flurstueck USING btree (endet);
@@ -16505,7 +16504,7 @@ CREATE TABLE IF NOT EXISTS ax_gebiet_kreis (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gebiet_kreis_gml ON ax_gebiet_kreis USING btree (gml_id,beginnt);
 CREATE INDEX ax_gebiet_kreis_endet ON ax_gebiet_kreis USING btree (endet);
@@ -16549,7 +16548,7 @@ CREATE TABLE IF NOT EXISTS ax_gebiet_bundesland (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gebiet_bundesland_gml ON ax_gebiet_bundesland USING btree (gml_id,beginnt);
 CREATE INDEX ax_gebiet_bundesland_endet ON ax_gebiet_bundesland USING btree (endet);
@@ -16592,7 +16591,7 @@ CREATE TABLE IF NOT EXISTS ax_gebiet_regierungsbezirk (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gebiet_regierungsbezirk_gml ON ax_gebiet_regierungsbezirk USING btree (gml_id,beginnt);
 CREATE INDEX ax_gebiet_regierungsbezirk_endet ON ax_gebiet_regierungsbezirk USING btree (endet);
@@ -16635,7 +16634,7 @@ CREATE TABLE IF NOT EXISTS ax_gebiet_nationalstaat (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gebiet_nationalstaat_gml ON ax_gebiet_nationalstaat USING btree (gml_id,beginnt);
 CREATE INDEX ax_gebiet_nationalstaat_endet ON ax_gebiet_nationalstaat USING btree (endet);
@@ -16682,7 +16681,7 @@ CREATE TABLE IF NOT EXISTS ax_kommunalesgebiet (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_kommunalesgebiet_gml ON ax_kommunalesgebiet USING btree (gml_id,beginnt);
 CREATE INDEX ax_kommunalesgebiet_endet ON ax_kommunalesgebiet USING btree (endet);
@@ -16733,7 +16732,7 @@ CREATE TABLE IF NOT EXISTS ax_gebiet_verwaltungsgemeinschaft (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gebiet_verwaltungsgemeinschaft_gml ON ax_gebiet_verwaltungsgemeinschaft USING btree (gml_id,beginnt);
 CREATE INDEX ax_gebiet_verwaltungsgemeinschaft_endet ON ax_gebiet_verwaltungsgemeinschaft USING btree (endet);
@@ -16808,7 +16807,7 @@ CREATE TABLE IF NOT EXISTS ax_bodenschaetzung (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_bodenschaetzung_gml ON ax_bodenschaetzung USING btree (gml_id,beginnt);
 CREATE INDEX ax_bodenschaetzung_endet ON ax_bodenschaetzung USING btree (endet);
@@ -16906,7 +16905,7 @@ CREATE TABLE IF NOT EXISTS ax_gewaesserstationierungsachse (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gewaesserstationierungsachse_gml ON ax_gewaesserstationierungsachse USING btree (gml_id,beginnt);
 CREATE INDEX ax_gewaesserstationierungsachse_endet ON ax_gewaesserstationierungsachse USING btree (endet);
@@ -16974,7 +16973,7 @@ CREATE TABLE IF NOT EXISTS ax_besondereflurstuecksgrenze (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_besondereflurstuecksgrenze_gml ON ax_besondereflurstuecksgrenze USING btree (gml_id,beginnt);
 CREATE INDEX ax_besondereflurstuecksgrenze_endet ON ax_besondereflurstuecksgrenze USING btree (endet);
@@ -17014,7 +17013,7 @@ CREATE TABLE IF NOT EXISTS ax_gebietsgrenze (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gebietsgrenze_gml ON ax_gebietsgrenze USING btree (gml_id,beginnt);
 CREATE INDEX ax_gebietsgrenze_endet ON ax_gebietsgrenze USING btree (endet);
@@ -17058,7 +17057,7 @@ CREATE TABLE IF NOT EXISTS ax_gewaesserachse (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gewaesserachse_gml ON ax_gewaesserachse USING btree (gml_id,beginnt);
 CREATE INDEX ax_gewaesserachse_endet ON ax_gewaesserachse USING btree (endet);
@@ -17110,7 +17109,7 @@ CREATE TABLE IF NOT EXISTS ax_strassenachse (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_strassenachse_gml ON ax_strassenachse USING btree (gml_id,beginnt);
 CREATE INDEX ax_strassenachse_endet ON ax_strassenachse USING btree (endet);
@@ -17165,7 +17164,7 @@ CREATE TABLE IF NOT EXISTS ax_bahnstrecke (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_bahnstrecke_gml ON ax_bahnstrecke USING btree (gml_id,beginnt);
 CREATE INDEX ax_bahnstrecke_endet ON ax_bahnstrecke USING btree (endet);
@@ -17218,7 +17217,7 @@ CREATE TABLE IF NOT EXISTS ax_fahrwegachse (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_fahrwegachse_gml ON ax_fahrwegachse USING btree (gml_id,beginnt);
 CREATE INDEX ax_fahrwegachse_endet ON ax_fahrwegachse USING btree (endet);
@@ -17269,7 +17268,7 @@ CREATE TABLE IF NOT EXISTS ax_fahrbahnachse (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_fahrbahnachse_gml ON ax_fahrbahnachse USING btree (gml_id,beginnt);
 CREATE INDEX ax_fahrbahnachse_endet ON ax_fahrbahnachse USING btree (endet);
@@ -17351,7 +17350,7 @@ CREATE TABLE IF NOT EXISTS ax_punktortta (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_punktortta_gml ON ax_punktortta USING btree (gml_id,beginnt);
 CREATE INDEX ax_punktortta_endet ON ax_punktortta USING btree (endet);
@@ -17463,7 +17462,7 @@ CREATE TABLE IF NOT EXISTS ax_stehendesgewaesser (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_stehendesgewaesser_gml ON ax_stehendesgewaesser USING btree (gml_id,beginnt);
 CREATE INDEX ax_stehendesgewaesser_endet ON ax_stehendesgewaesser USING btree (endet);
@@ -17571,7 +17570,7 @@ CREATE TABLE IF NOT EXISTS ax_meer (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_meer_gml ON ax_meer USING btree (gml_id,beginnt);
 CREATE INDEX ax_meer_endet ON ax_meer USING btree (endet);
@@ -17676,7 +17675,7 @@ CREATE TABLE IF NOT EXISTS ax_fliessgewaesser (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_fliessgewaesser_gml ON ax_fliessgewaesser USING btree (gml_id,beginnt);
 CREATE INDEX ax_fliessgewaesser_endet ON ax_fliessgewaesser USING btree (endet);
@@ -17779,7 +17778,7 @@ CREATE TABLE IF NOT EXISTS ax_hafenbecken (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_hafenbecken_gml ON ax_hafenbecken USING btree (gml_id,beginnt);
 CREATE INDEX ax_hafenbecken_endet ON ax_hafenbecken USING btree (endet);
@@ -17877,7 +17876,7 @@ CREATE TABLE IF NOT EXISTS ax_bergbaubetrieb (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_bergbaubetrieb_gml ON ax_bergbaubetrieb USING btree (gml_id,beginnt);
 CREATE INDEX ax_bergbaubetrieb_endet ON ax_bergbaubetrieb USING btree (endet);
@@ -17970,7 +17969,7 @@ CREATE TABLE IF NOT EXISTS ax_friedhof (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_friedhof_gml ON ax_friedhof USING btree (gml_id,beginnt);
 CREATE INDEX ax_friedhof_endet ON ax_friedhof USING btree (endet);
@@ -18063,7 +18062,7 @@ CREATE TABLE IF NOT EXISTS ax_flaechegemischternutzung (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_flaechegemischternutzung_gml ON ax_flaechegemischternutzung USING btree (gml_id,beginnt);
 CREATE INDEX ax_flaechegemischternutzung_endet ON ax_flaechegemischternutzung USING btree (endet);
@@ -18157,7 +18156,7 @@ CREATE TABLE IF NOT EXISTS ax_wohnbauflaeche (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_wohnbauflaeche_gml ON ax_wohnbauflaeche USING btree (gml_id,beginnt);
 CREATE INDEX ax_wohnbauflaeche_endet ON ax_wohnbauflaeche USING btree (endet);
@@ -18251,7 +18250,7 @@ CREATE TABLE IF NOT EXISTS ax_flaechebesondererfunktionalerpraegung (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_flaechebesondererfunktionalerpraegung_gml ON ax_flaechebesondererfunktionalerpraegung USING btree (gml_id,beginnt);
 CREATE INDEX ax_flaechebesondererfunktionalerpraegung_endet ON ax_flaechebesondererfunktionalerpraegung USING btree (endet);
@@ -18348,7 +18347,7 @@ CREATE TABLE IF NOT EXISTS ax_industrieundgewerbeflaeche (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_industrieundgewerbeflaeche_gml ON ax_industrieundgewerbeflaeche USING btree (gml_id,beginnt);
 CREATE INDEX ax_industrieundgewerbeflaeche_endet ON ax_industrieundgewerbeflaeche USING btree (endet);
@@ -18443,7 +18442,7 @@ CREATE TABLE IF NOT EXISTS ax_siedlungsflaeche (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_siedlungsflaeche_gml ON ax_siedlungsflaeche USING btree (gml_id,beginnt);
 CREATE INDEX ax_siedlungsflaeche_endet ON ax_siedlungsflaeche USING btree (endet);
@@ -18535,7 +18534,7 @@ CREATE TABLE IF NOT EXISTS ax_tagebaugrubesteinbruch (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_tagebaugrubesteinbruch_gml ON ax_tagebaugrubesteinbruch USING btree (gml_id,beginnt);
 CREATE INDEX ax_tagebaugrubesteinbruch_endet ON ax_tagebaugrubesteinbruch USING btree (endet);
@@ -18629,7 +18628,7 @@ CREATE TABLE IF NOT EXISTS ax_sportfreizeitunderholungsflaeche (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_sportfreizeitunderholungsflaeche_gml ON ax_sportfreizeitunderholungsflaeche USING btree (gml_id,beginnt);
 CREATE INDEX ax_sportfreizeitunderholungsflaeche_endet ON ax_sportfreizeitunderholungsflaeche USING btree (endet);
@@ -18722,7 +18721,7 @@ CREATE TABLE IF NOT EXISTS ax_halde (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_halde_gml ON ax_halde USING btree (gml_id,beginnt);
 CREATE INDEX ax_halde_endet ON ax_halde USING btree (endet);
@@ -18811,7 +18810,7 @@ CREATE TABLE IF NOT EXISTS ax_flaechezurzeitunbestimmbar (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_flaechezurzeitunbestimmbar_gml ON ax_flaechezurzeitunbestimmbar USING btree (gml_id,beginnt);
 CREATE INDEX ax_flaechezurzeitunbestimmbar_endet ON ax_flaechezurzeitunbestimmbar USING btree (endet);
@@ -18898,7 +18897,7 @@ CREATE TABLE IF NOT EXISTS ax_sumpf (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_sumpf_gml ON ax_sumpf USING btree (gml_id,beginnt);
 CREATE INDEX ax_sumpf_endet ON ax_sumpf USING btree (endet);
@@ -18988,7 +18987,7 @@ CREATE TABLE IF NOT EXISTS ax_unlandvegetationsloseflaeche (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_unlandvegetationsloseflaeche_gml ON ax_unlandvegetationsloseflaeche USING btree (gml_id,beginnt);
 CREATE INDEX ax_unlandvegetationsloseflaeche_endet ON ax_unlandvegetationsloseflaeche USING btree (endet);
@@ -19080,7 +19079,7 @@ CREATE TABLE IF NOT EXISTS ax_gehoelz (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_gehoelz_gml ON ax_gehoelz USING btree (gml_id,beginnt);
 CREATE INDEX ax_gehoelz_endet ON ax_gehoelz USING btree (endet);
@@ -19172,7 +19171,7 @@ CREATE TABLE IF NOT EXISTS ax_wald (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_wald_gml ON ax_wald USING btree (gml_id,beginnt);
 CREATE INDEX ax_wald_endet ON ax_wald USING btree (endet);
@@ -19262,7 +19261,7 @@ CREATE TABLE IF NOT EXISTS ax_heide (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_heide_gml ON ax_heide USING btree (gml_id,beginnt);
 CREATE INDEX ax_heide_endet ON ax_heide USING btree (endet);
@@ -19350,7 +19349,7 @@ CREATE TABLE IF NOT EXISTS ax_moor (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_moor_gml ON ax_moor USING btree (gml_id,beginnt);
 CREATE INDEX ax_moor_endet ON ax_moor USING btree (endet);
@@ -19439,7 +19438,7 @@ CREATE TABLE IF NOT EXISTS ax_landwirtschaft (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_landwirtschaft_gml ON ax_landwirtschaft USING btree (gml_id,beginnt);
 CREATE INDEX ax_landwirtschaft_endet ON ax_landwirtschaft USING btree (endet);
@@ -19538,7 +19537,7 @@ CREATE TABLE IF NOT EXISTS ax_bahnverkehr (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_bahnverkehr_gml ON ax_bahnverkehr USING btree (gml_id,beginnt);
 CREATE INDEX ax_bahnverkehr_endet ON ax_bahnverkehr USING btree (endet);
@@ -19643,7 +19642,7 @@ CREATE TABLE IF NOT EXISTS ax_weg (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_weg_gml ON ax_weg USING btree (gml_id,beginnt);
 CREATE INDEX ax_weg_endet ON ax_weg USING btree (endet);
@@ -19745,7 +19744,7 @@ CREATE TABLE IF NOT EXISTS ax_schiffsverkehr (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_schiffsverkehr_gml ON ax_schiffsverkehr USING btree (gml_id,beginnt);
 CREATE INDEX ax_schiffsverkehr_endet ON ax_schiffsverkehr USING btree (endet);
@@ -19850,7 +19849,7 @@ CREATE TABLE IF NOT EXISTS ax_flugverkehr (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_flugverkehr_gml ON ax_flugverkehr USING btree (gml_id,beginnt);
 CREATE INDEX ax_flugverkehr_endet ON ax_flugverkehr USING btree (endet);
@@ -19956,7 +19955,7 @@ CREATE TABLE IF NOT EXISTS ax_platz (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_platz_gml ON ax_platz USING btree (gml_id,beginnt);
 CREATE INDEX ax_platz_endet ON ax_platz USING btree (endet);
@@ -20060,7 +20059,7 @@ CREATE TABLE IF NOT EXISTS ax_strassenverkehr (
   hatdirektunten character(16)[],
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ax_strassenverkehr_gml ON ax_strassenverkehr USING btree (gml_id,beginnt);
 CREATE INDEX ax_strassenverkehr_endet ON ax_strassenverkehr USING btree (endet);
@@ -20131,7 +20130,7 @@ CREATE TABLE IF NOT EXISTS ta_compositesolidcomponent_3d (
   generalisiert character(16),
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ta_compositesolidcomponent_3d_gml ON ta_compositesolidcomponent_3d USING btree (gml_id,beginnt);
 CREATE INDEX ta_compositesolidcomponent_3d_endet ON ta_compositesolidcomponent_3d USING btree (endet);
@@ -20169,7 +20168,7 @@ CREATE TABLE IF NOT EXISTS ta_surfacecomponent_3d (
   generalisiert character(16),
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ta_surfacecomponent_3d_gml ON ta_surfacecomponent_3d USING btree (gml_id,beginnt);
 CREATE INDEX ta_surfacecomponent_3d_endet ON ta_surfacecomponent_3d USING btree (endet);
@@ -20207,7 +20206,7 @@ CREATE TABLE IF NOT EXISTS ta_curvecomponent_3d (
   generalisiert character(16),
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ta_curvecomponent_3d_gml ON ta_curvecomponent_3d USING btree (gml_id,beginnt);
 CREATE INDEX ta_curvecomponent_3d_endet ON ta_curvecomponent_3d USING btree (endet);
@@ -20245,7 +20244,7 @@ CREATE TABLE IF NOT EXISTS ta_pointcomponent_3d (
   generalisiert character(16),
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ta_pointcomponent_3d_gml ON ta_pointcomponent_3d USING btree (gml_id,beginnt);
 CREATE INDEX ta_pointcomponent_3d_endet ON ta_pointcomponent_3d USING btree (endet);
@@ -20283,7 +20282,7 @@ CREATE TABLE IF NOT EXISTS au_trianguliertesoberflaechenobjekt_3d (
   generalisiert character(16),
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX au_trianguliertesoberflaechenobjekt_3d_gml ON au_trianguliertesoberflaechenobjekt_3d USING btree (gml_id,beginnt);
 CREATE INDEX au_trianguliertesoberflaechenobjekt_3d_endet ON au_trianguliertesoberflaechenobjekt_3d USING btree (endet);
@@ -20321,7 +20320,7 @@ CREATE TABLE IF NOT EXISTS au_mehrfachflaechenobjekt_3d (
   generalisiert character(16),
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX au_mehrfachflaechenobjekt_3d_gml ON au_mehrfachflaechenobjekt_3d USING btree (gml_id,beginnt);
 CREATE INDEX au_mehrfachflaechenobjekt_3d_endet ON au_mehrfachflaechenobjekt_3d USING btree (endet);
@@ -20359,7 +20358,7 @@ CREATE TABLE IF NOT EXISTS au_mehrfachlinienobjekt_3d (
   generalisiert character(16),
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX au_mehrfachlinienobjekt_3d_gml ON au_mehrfachlinienobjekt_3d USING btree (gml_id,beginnt);
 CREATE INDEX au_mehrfachlinienobjekt_3d_endet ON au_mehrfachlinienobjekt_3d USING btree (endet);
@@ -20397,7 +20396,7 @@ CREATE TABLE IF NOT EXISTS au_umringobjekt_3d (
   generalisiert character(16),
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX au_umringobjekt_3d_gml ON au_umringobjekt_3d USING btree (gml_id,beginnt);
 CREATE INDEX au_umringobjekt_3d_endet ON au_umringobjekt_3d USING btree (endet);
@@ -20442,7 +20441,7 @@ CREATE TABLE IF NOT EXISTS ap_kpo_3d (
   istteilvon character(16)[],
   dientzurdarstellungvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX ap_kpo_3d_gml ON ap_kpo_3d USING btree (gml_id,beginnt);
 CREATE INDEX ap_kpo_3d_endet ON ap_kpo_3d USING btree (endet);
@@ -20488,7 +20487,7 @@ CREATE TABLE IF NOT EXISTS au_punkthaufenobjekt_3d (
   generalisiert character(16),
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX au_punkthaufenobjekt_3d_gml ON au_punkthaufenobjekt_3d USING btree (gml_id,beginnt);
 CREATE INDEX au_punkthaufenobjekt_3d_endet ON au_punkthaufenobjekt_3d USING btree (endet);
@@ -20526,7 +20525,7 @@ CREATE TABLE IF NOT EXISTS au_koerperobjekt_3d (
   generalisiert character(16),
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX au_koerperobjekt_3d_gml ON au_koerperobjekt_3d USING btree (gml_id,beginnt);
 CREATE INDEX au_koerperobjekt_3d_endet ON au_koerperobjekt_3d USING btree (endet);
@@ -20564,7 +20563,7 @@ CREATE TABLE IF NOT EXISTS au_geometrieobjekt_3d (
   generalisiert character(16),
   istteilvon character(16)[],
   PRIMARY KEY (ogc_fid)
-) WITH OIDS;
+);
 
 CREATE UNIQUE INDEX au_geometrieobjekt_3d_gml ON au_geometrieobjekt_3d USING btree (gml_id,beginnt);
 CREATE INDEX au_geometrieobjekt_3d_endet ON au_geometrieobjekt_3d USING btree (endet);
@@ -20761,7 +20760,7 @@ CREATE TABLE ax_fortfuehrungsauftrag (
 	user_name character varying NOT NULL
 );
 
-ALTER TABLE ax_fortfuehrungsauftrag SET WITH OIDS;CREATE INDEX ap_lpo_art ON ap_lpo USING btree (art);
+CREATE INDEX ap_lpo_art ON ap_lpo USING btree (art);
 CREATE INDEX ap_ppo_art ON ap_ppo USING btree (art);
 CREATE INDEX ap_pto_art ON ap_pto USING btree (art);
 

@@ -245,6 +245,7 @@ class MyObject {
 	* @return string The expression representing true or false in a sql statement
 	*/
 	function get_identifier_expression() {
+		#echo '<br>Class MyObject Method get_identifier_expression';
 		$where = array();
 		if ($this->identifier_type == 'array' AND getType($this->identifier) == 'array') {
 			$where = array_map(
@@ -261,7 +262,11 @@ class MyObject {
 			);
 		}
 		else {
-			if (in_array($this->identifier, $this->getKeys()) AND $this->get($this->identifier) != null AND $this->get($this->identifier) != '') {
+			if (
+				in_array($this->identifier, $this->getKeys()) AND
+				$this->get($this->identifier) != null AND
+				$this->get($this->identifier) != ''
+			) {
 				$quote = ($this->identifier_type == 'text' ? "'" : "");
 				$where = array($this->identifier . " = " . $quote . $this->get($this->identifier) . $quote);
 			}
@@ -321,7 +326,7 @@ class MyObject {
 					", ",
 					array_map(
 						function ($value) {
-							if ($value === NULL OR $value == '') {
+							if ($value === NULL OR $value == '' AND $value != 0) {
 								$v = 'NULL';
 							}
 							else if (is_numeric($value)) {
@@ -411,7 +416,7 @@ class MyObject {
 	function update($data = array()) {
 		$results = array();
 		if (!empty($data)) {
-			array_merge($this->data, $data);
+			$this->data = array_merge($this->data, $data);
 		}
 		$sql = "
 			UPDATE
@@ -432,6 +437,7 @@ class MyObject {
 	}
 
 	function delete() {
+		#echo '<br>Class MyObject Method delete';
 		$sql = "
 			DELETE
 			FROM
@@ -442,6 +448,15 @@ class MyObject {
 		$this->debug->show('MyObject delete sql: ' . $sql, MyObject::$write_debug);
 		$result = $this->database->execSQL($sql);
 		return $result;
+	}
+
+	function reset_auto_increment() {
+		$sql = "
+			ALTER TABLE `" . $this->tableName . "`
+			AUTO_INCREMENT = 1
+		";
+		$this->debug->show('MyObject delete sql: ' . $sql, MyObject::$write_debug);
+		$result = $this->database->execSQL($sql);
 	}
 
 	public function validate($on = '') {

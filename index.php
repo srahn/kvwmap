@@ -286,46 +286,6 @@ function go_switch($go, $exit = false) {
 				$GUI->show_snippet();
 			} break;
 
-			case 'Sicherungen_anzeigen' : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->Sicherungen_anzeigen();
-			} break;
-
-			case 'Sicherung_editieren' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->Sicherung_editieren();
-			} break;
-
-			case 'Sicherung_speichern' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->Sicherung_speichern();
-			} break;
-
-			case 'Sicherung_loeschen' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->Sicherung_loeschen();
-			} break;
-
-			case 'sicherungsinhalt_editieren' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->sicherungsinhalt_editieren();
-			} break;
-
-			case 'sicherungsinhalt_speichern' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->sicherungsinhalt_speichern();
-			} break;
-
-			case 'sicherungsinhalt_loeschen' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->sicherungsinhalt_loeschen();
-			} break;
-
-			case 'write_backup_plan' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->write_backup_plan();
-			} break;
-
 			case 'openCustomSubform' : {
 				$GUI->openCustomSubform();
 			} break;
@@ -1399,6 +1359,17 @@ function go_switch($go, $exit = false) {
 				$GUI->LayerAnzeigen();
 			} break;
 
+			case 'delete_shared_layer' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->LayerLoeschen(true); # Delete maintable too if possible
+				$GUI->add_message('notice', 'Geteilten Layer erfolgreich gelöscht!');
+				$GUI->loadMap('DataBase');
+				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+				$GUI->saveMap('');
+				$GUI->drawMap();
+				$GUI->output();
+			} break;
+
 			case 'Layer2Stelle_Reihenfolge' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->Layer2Stelle_Reihenfolge();
@@ -1751,6 +1722,17 @@ function go_switch($go, $exit = false) {
 
 			case 'delete_rollenlayer' : {
 				$GUI->deleteRollenlayer();
+			} break;
+
+			case 'share_rollenlayer': {
+				$GUI->checkCaseAllowed('share_rollenlayer');
+				$GUI->share_rollenlayer();
+				$GUI->loadMap('DataBase');
+				$currenttime = date('Y-m-d H:i:s',time());
+				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap', $GUI->user->rolle->last_time_id);
+				$GUI->saveMap('');
+				$GUI->drawMap();
+				$GUI->output();
 			} break;
 
 			default : {

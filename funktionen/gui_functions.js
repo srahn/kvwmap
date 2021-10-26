@@ -351,11 +351,13 @@ function resizemap2window(){
 *		message([
 *			{ type: 'error', msg: 'Dieser Text ist eine Fehlermeldung'},
 *			{ type: 'info', msg: 'Hier noch eine Info.'},
+*			{ type: 'waring', msg: 'Dies ist nur eine Warung.'},
 *			{ type: 'notice', msg: 'und eine Notiz'},
 *		]);
 */
-function message(messages, t_visible, t_fade, css_top, confirm_value) {
+function message(messages, t_visible, t_fade, css_top, confirm_value, callback) {
 	console.log('Show Message: %o: ', messages);
+	console.log('function message with callback: %o: ', callback);
 	confirm_value = confirm_value || 'ok';
 	var messageTimeoutID;
 	var msgBoxDiv = $('#message_box');
@@ -403,8 +405,13 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 			'icon': 'fa-ban',
 			'color': 'red',
 			'confirm': true
-		}
-	};
+		},
+		'confirm': {
+			'description' : 'Bestätigung',
+			'icon': 'fa-question-circle-o',
+			'color': 'red'
+	  }
+	}
 	//	,confirmMsgDiv = false;
 
 	if (!$.isArray(messages)) {
@@ -415,10 +422,14 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 	}
 
 	$.each(messages, function (index, msg) {
-		msg.type = (['notice', 'info', 'error'].indexOf(msg.type) > -1 ? msg.type : 'warning');
+		msg.type = (['notice', 'info', 'error', 'confirm'].indexOf(msg.type) > -1 ? msg.type : 'warning');
 		msgDiv.append('<div class="message-box message-box-' + msg.type + '">' + (types[msg.type].icon ? '<div class="message-box-type"><i class="fa ' + types[msg.type].icon + '" style="color: ' + types[msg.type].color + '; cursor: default;"></i></div>' : '') + '<div class="message-box-msg">' + msg.msg + '</div><div style="clear: both"></div></div>');
 		if (types[msg.type].confirm && document.getElementById('message_ok_button') == null) {
 			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="$(\'#message_box\').hide();" value="' + confirm_value + '" style="margin: 10px 0px 0px 0px;">');
+		}
+		if (msg.type == 'confirm' && root.document.getElementById('message_confirm_button') == null) {
+			msgBoxDiv.append('<input id="message_confirm_button" type="button" onclick="root.$(\'#message_box\').hide();' + (callback ? callback + '(' + confirm_value + ')' : '') + '" value="Ja" style="margin: 10px 0px 0px 0px;">');
+			msgBoxDiv.append('<input id="message_cancle_button" type="button" onclick="root.$(\'#message_box\').hide();" value="Abbrechen" style="margin: 0px 0px -6px 8px;">');
 		}
 	});
 	
@@ -426,14 +437,14 @@ function message(messages, t_visible, t_fade, css_top, confirm_value) {
 		msgBoxDiv.show();
 	}
 
-	if (document.getElementById('message_ok_button') == null) {		// wenn kein OK-Button da ist, ausblenden
-    messageTimeoutID = setTimeout(function() { msgBoxDiv.fadeOut(t_fade); }, t_visible);
+	if (document.getElementById('message_ok_button') == null && document.getElementById('message_confirm_button') == null) {
+		// wenn kein OK-Button da ist, ausblenden
+		messageTimeoutID = setTimeout(function() { msgBoxDiv.fadeOut(t_fade); }, t_visible);
 	}
-  else {
+	else {
 		clearTimeout(messageTimeoutID);
-    $('#message_box').stop().fadeIn();
-  }
-
+		$('#message_box').stop().fadeIn();
+	}
 }
 
 function onload_functions() {
@@ -619,9 +630,9 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	var minx = document.GUI.minx;
 	var miny = document.GUI.miny;
 	var maxx = document.GUI.maxx;
-	var maxy = document.GUI.maxy;			
+	var maxy = document.GUI.maxy;
 	var pixelsize = document.GUI.pixelsize;
-	var polygon = svgdoc.getElementById("polygon");			
+	var polygon = svgdoc.getElementById("polygon");
 	// nix
 	
 	var input_coord = document.GUI.INPUT_COORD.value;
@@ -643,13 +654,15 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 
 	postdata = postdata+"&mime_type=map_ajax&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
 
-	if(document.GUI.legendtouched.value == 1){		// Legende benutzt -> gesamtes Formular mitschicken
+	if (document.GUI.legendtouched.value == 1) {
+		// Legende benutzt -> gesamtes Formular mitschicken
 		var formdata = new FormData(document.GUI);
 	}
-	else{																				// nur navigiert -> Formular muss nicht mitgeschickt werden
+	else {
+		// nur navigiert -> Formular muss nicht mitgeschickt werden
 		var formdata = new FormData();
 	}
-			
+
 	postdata.split("&")
 		.forEach(function (item) {
 			pos = item.indexOf('=');
@@ -658,24 +671,26 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 			formdata.append(key, value);			// hier muesste eigentlich set verwendet werden, kann der IE 11 aber nicht
 		});
 	
-	ahah("index.php", formdata, 
-	new Array(
-		'',
-		mapimg, 
-		scalebar,
-		refmap, 
-		scale,
-		lagebezeichnung,
-		minx,
-		miny,
-		maxx,
-		maxy,
-		pixelsize,			
-		polygon,
-		''
-	), 			 
-	new Array("execute_function", "href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "points", "execute_function"));
-				
+	ahah(
+		"index.php",
+		formdata, 
+		new Array(
+			'',
+			mapimg, 
+			scalebar,
+			refmap, 
+			scale,
+			lagebezeichnung,
+			minx,
+			miny,
+			maxx,
+			maxy,
+			pixelsize,
+			polygon,
+			''
+		),
+		new Array("execute_function", "href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "points", "execute_function")
+	);
 	document.GUI.INPUT_COORD.value = '';
 	document.GUI.CMD.value = '';
 }
@@ -898,7 +913,9 @@ function deleteRollenlayer(type){
 function neuLaden(){
 	startwaiting(true);
 	clearLegendRequests();
-	if(currentform.neuladen)currentform.neuladen.value='true';
+	if (currentform.neuladen) {
+		currentform.neuladen.value='true';
+	}
 	get_map_ajax('go=navMap_ajax', '', 'if(document.GUI.oldscale != undefined){document.GUI.oldscale.value=document.GUI.nScale.value;}');
 }
 
@@ -987,6 +1004,33 @@ function getLayerOptions(layer_id){
 	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
 	ahah('index.php', 'go=getLayerOptions&layer_id=' + layer_id, new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'));
 	document.GUI.layer_options_open.value = layer_id;
+}
+
+function sendShareRollenlayer(layer_id) {
+	console.log('send Form to share Rollenlayer layer_id: %o', layer_id);
+	document.GUI.go.value = 'share_rollenlayer';
+	document.GUI.submit();
+}
+
+function shareRollenlayer(layer_id) {
+  //console.log('shareRollenLayer layer_id: %s', layer_id);
+  if (typeof $('input[name=shared_layer_group_id]:checked').val() === "undefined") {
+    message([{ type: "error", msg: "Es muss erst eine Layergruppe ausgewählt werden."}]);
+  }
+	else {
+		message([{ type: "confirm", msg: "Soll der Rollenlayer wirklich freigegeben werden?"}], 1000, 2000, undefined, layer_id, 'sendShareRollenlayer');
+	}
+}
+
+function sendDeleteSharedLayer(layer_id) {
+	console.log('send Form to delete shared layer_id: %o', layer_id);
+	document.GUI.go.value = 'delete_shared_layer';
+	document.GUI.submit();
+}
+
+function deleteSharedLayer(layer_id) {
+  //console.log('shareRollenLayer layer_id: %s', layer_id);
+	message([{ type: "confirm", msg: "Soll der freigegebene Layer wirklich gelöscht werden?"}], 1000, 2000, undefined, layer_id, 'sendDeleteSharedLayer');
 }
 
 function getGroupOptions(group_id) {
@@ -1285,8 +1329,4 @@ function htmlspecialchars(value) {
 		"'": '&#039;'
 	};
 	return value.replace(/[&<>"']/g, function(m) { return map[m]; });
-}
-
-function toggleSyncLayer() {
-  $('.no-sync').toggle();
 }

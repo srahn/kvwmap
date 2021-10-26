@@ -7,6 +7,7 @@ BEGIN;
 		`description`,
 		`type`,
 		`group`,
+		`plugin`,
 		`saved`,
 		`editable`
 	) VALUES (
@@ -15,7 +16,8 @@ BEGIN;
 		'',
 		'Hier kann ein zusätzlicher Text definiert werden, der im Übergabeprotokoll unterhalb des Titels erscheint.',
 		'string',
-		'Nachweisverwaltung',
+		'Plugins/nachweisverwaltung',
+		'nachweisverwaltung',
 		0,
 		2
 	);
