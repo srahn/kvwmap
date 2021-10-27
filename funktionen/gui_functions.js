@@ -1222,18 +1222,24 @@ function deactivateAllClasses(class_ids){
 }
 
 /*Anne*/
-function changeClassStatus(classid,imgsrc,instantreload,width,height){
+function changeClassStatus(classid, imgsrc, instantreload, width, height, type){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
-	if(height < width)height = 12;
-	else height = 18;
-	if(selClass.value=='0'){
+	if (height < width) {
+		height = 12;
+	}
+	else {
+		height = 18;
+	}
+	if (selClass.value == '0') {
 		selClass.value='1';
 		selImg.src=imgsrc;
-	}else if(selClass.value=='1'){
+	}
+	else if (type > 1 && selClass.value == '1') {
 		selClass.value='2';
 		selImg.src="graphics/outline"+height+".jpg";
-	}else if(selClass.value=='2'){
+	}
+	else if (selClass.value == '2' || type < 2) {
 		selClass.value='0';
 		selImg.src="graphics/inactive"+height+".jpg";
 	}
@@ -1241,31 +1247,43 @@ function changeClassStatus(classid,imgsrc,instantreload,width,height){
 }
 
 /*Anne*/
-function mouseOverClassStatus(classid,imgsrc,width,height){
+function mouseOverClassStatus(classid, imgsrc, width, height, type){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
-	if(height < width)height = 12;
-	else height = 18;
-	if(selClass.value=='0'){
-		selImg.src=imgsrc;	
-	}else if(selClass.value=='1'){
+	if (height < width) {
+		height = 12;
+	}
+	else {
+		height = 18;
+	}
+	if (selClass.value == '0'){
+		selImg.src=imgsrc;
+	}
+	else if (type > 1 && selClass.value == '1'){
 		selImg.src="graphics/outline"+height+".jpg";
-	}else if(selClass.value=='2'){
+	}
+	else if (selClass.value == '2' || type < 2){
 		selImg.src="graphics/inactive"+height+".jpg";
 	}
 }
 
 /*Anne*/
-function mouseOutClassStatus(classid,imgsrc,width,height){
+function mouseOutClassStatus(classid, imgsrc, width, height, type){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
-	if(height < width)height = 12;
-	else height = 18;	
-	if(selClass.value=='0'){
+	if (height < width) {
+		height = 12;
+	}
+	else {
+		height = 18;
+	}
+	if (selClass.value == '0') {
 		selImg.src="graphics/inactive"+height+".jpg";	
-	}else if(selClass.value=='1'){
+	}
+	else if (selClass.value == '1'){
 		selImg.src=imgsrc;
-	}else if(selClass.value=='2'){
+	}
+	else if (selClass.value == '2'){
 		selImg.src="graphics/outline"+height+".jpg";
 	}
 }

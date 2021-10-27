@@ -1743,7 +1743,8 @@ class stelle {
 				l.*,
 				ul.*,
 				parent_id,
-				ul2.Stelle_ID as used_layer_parent_id
+				GROUP_CONCAT(ul2.Stelle_ID) as used_layer_parent_id,
+				GROUP_CONCAT(s.Bezeichnung) as used_layer_parent_bezeichnung
 			FROM
 				layer AS l 
 				JOIN used_layer AS ul ON l.Layer_ID = ul.Layer_ID
@@ -1751,6 +1752,7 @@ class stelle {
 				LEFT JOIN used_layer AS ul2 ON 
 					l.Layer_ID = ul2.Layer_ID AND	
 					ul2.Stelle_ID = parent_id
+				LEFT JOIN stelle AS s ON s.ID = ul2.Stelle_ID
 			WHERE
 				ul.Stelle_ID = " . $this->id .
 				($Layer_id != '' ? " AND l.Layer_ID = " . $Layer_id : '') . "
