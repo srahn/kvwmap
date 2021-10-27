@@ -1158,7 +1158,7 @@
 		$GUI->main = PLUGINS.'alkis/view/grundbuchblattsuchform.php';
     $grundbuch = new grundbuch('', '', $GUI->pgdatabase);
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
-    if($GemeindenStelle != ''){   // Stelle ist auf Gemeinden eingeschränkt
+    if (!empty($GemeindenStelle)){   // Stelle ist auf Gemeinden eingeschränkt
       $Gemarkung=new gemarkung('',$GUI->pgdatabase);
 			$ganze_gemarkungen = array_keys($GemeindenStelle['ganze_gemarkung']);
 			if (!empty($GemeindenStelle['ganze_gemeinde'])) {
@@ -1187,7 +1187,7 @@
 		##########################
     if($GUI->formvars['Bezirk'] != ''){
     	if($GUI->formvars['selBlatt'])$GUI->selblattliste = explode(', ',$GUI->formvars['selBlatt']);
-			if($GemeindenStelle != ''){   // Stelle ist auf Gemeinden eingeschränkt
+			if(!empty($GemeindenStelle)){   // Stelle ist auf Gemeinden eingeschränkt
 				$GUI->blattliste = $grundbuch->getGrundbuchblattlisteByGemkgIDs($GUI->formvars['Bezirk'], $ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung'], $GemeindenStelle['ganze_flur'], $GemeindenStelle['eingeschr_flur']);
 			}
 			else{
