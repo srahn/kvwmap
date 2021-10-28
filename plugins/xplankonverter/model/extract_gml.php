@@ -766,7 +766,7 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".wurdegeaendertvon wurdegeaendertvonlinktwo ON wurdegeaendertvonlink.child_pkid = wurdegeaendertvonlinktwo.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".rp_plan_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
-				" . $this->gmlas_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid
+				" . $this->gmlas_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".rp_plan_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".rp_plan_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".rp_plan_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
