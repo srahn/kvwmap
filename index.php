@@ -1359,6 +1359,17 @@ function go_switch($go, $exit = false) {
 				$GUI->LayerAnzeigen();
 			} break;
 
+			case 'delete_shared_layer' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->LayerLoeschen(true); # Delete maintable too if possible
+				$GUI->add_message('notice', 'Geteilten Layer erfolgreich gelöscht!');
+				$GUI->loadMap('DataBase');
+				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+				$GUI->saveMap('');
+				$GUI->drawMap();
+				$GUI->output();
+			} break;
+
 			case 'Layer2Stelle_Reihenfolge' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->Layer2Stelle_Reihenfolge();
@@ -1711,6 +1722,17 @@ function go_switch($go, $exit = false) {
 
 			case 'delete_rollenlayer' : {
 				$GUI->deleteRollenlayer();
+			} break;
+
+			case 'share_rollenlayer': {
+				$GUI->checkCaseAllowed('share_rollenlayer');
+				$GUI->share_rollenlayer();
+				$GUI->loadMap('DataBase');
+				$currenttime = date('Y-m-d H:i:s',time());
+				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap', $GUI->user->rolle->last_time_id);
+				$GUI->saveMap('');
+				$GUI->drawMap();
+				$GUI->output();
 			} break;
 
 			default : {

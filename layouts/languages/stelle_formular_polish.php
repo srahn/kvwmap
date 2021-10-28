@@ -11,6 +11,7 @@
   $strPostGISDataBankName="nazwa bazy danych PostGIS"; 
   $strPostGISUserName="nazwa u żytkownika danych PostGIS"; 
   $strPostGISPassword="hasło do danych PostGIS"; 
+	$strPostgisConnection = "Postgres Connection";
   $strOwsTitle="OWS nazwa"; 
   $strOwsAbstract="OWS skrót"; 
   $strWmsAccessConstraints="ograniczenia dostępu WMS"; 
@@ -38,5 +39,7 @@
   $strCheckPasswordAge="kontrola terminu wa żności haseł"; 
   $strAllowedPasswordAge="zdefiniowanie terminu wa żności hasła (w miesiącach)"; 
   $strStart="start"; 
-  $strStop="stop"; 
+  $strStop="stop";
+	$strShowSharedLayersText = "Show shared layer in this Stelle.";
+	$strShowSharedLayersDescription = "When this permission is granted, all layer from users with the permission to share Rollenlayer will be assigned to this Stelle and shown to all Users of this Stelle. These Layers will be marked as Shared layers in the legend and in the options form is shown who has shared the layer for other.";
 ?>

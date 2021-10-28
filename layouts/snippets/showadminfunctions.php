@@ -41,7 +41,7 @@ function toggleGroup(group, show){
 					<td colspan="2" align="center">
 						<input
 							type="button"
-							onclick="location.href='index.php?go=Administratorfunktionen&func=update_code'"<?
+							onclick="location.href='index.php?go=Administratorfunktionen&func=update_code_and_databases'"<?
 							if ($num_commits_behind == '' AND !$diverged) { ?>
 								disabled<?
 							} ?>

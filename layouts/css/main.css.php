@@ -405,8 +405,8 @@ span[data-tooltip]:hover::after {
 .input-form label {
 	float: left;
 	text-align: right;
-	font-size: 15px;
-	width: 210px;
+	font-size: 17px;
+	width: 240px;
 	height: 15px;
 	margin-right: 10px;
 }
@@ -423,7 +423,7 @@ span[data-tooltip]:hover::after {
 .input-form input[type=text] {
 	float: left;
 	text-align: left;
-	width: 400px;
+	width: 370px;
 }
 
 .input-form input[type=checkbox] {
@@ -774,6 +774,7 @@ a.invisiblelayerlink:hover{
 	border-color: #CCC; 
 	border-top: none;
 	border-bottom: none;
+	position: relative;
 }
 
 #menue_switch{
@@ -792,6 +793,17 @@ a.invisiblelayerlink:hover{
 
 #menueTable a {
 	color: firebrick;
+}
+
+#menueScrollTable{
+	width: <? echo ($size['menue']['width'] - 2); ?>px;
+	overflow-y: auto;
+	-ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+#menueScrollTable::-webkit-scrollbar {
+  display: none; /* Chrome, Safari und Opera */
 }
 
 .menu {
@@ -1403,8 +1415,11 @@ span.black {
 
 #layer {
 	margin:0px 8px 8px 8px;
-/*	overflow:hidden; */
 	clear: both;
+}
+
+#nds_edit #layer {
+	margin: 0;
 }
 
 /* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf PREVIEW_IMAGE_WIDTH vergrößert */
@@ -1492,6 +1507,10 @@ a:hover .preview_image{
 	padding:0px 0px 0px 0px;
 }
 
+#nds_edit .datensatz {
+	border: none;
+}
+
 .datensatz_header{
 	background: linear-gradient(#DAE4EC 0%, lightsteelblue 100%);
 	#background-color:<? echo BG_GLEHEADER; ?>;
@@ -1555,6 +1574,7 @@ a:hover .preview_image{
 }
 
 table.tgle {
+	width: 100%;
 	border: 0px solid gray;
 	border-collapse:collapse;
 	margin-left:auto;
@@ -2341,4 +2361,9 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 .edit_button.fa-check:hover {
 	cursor: pointer;
 	color: green;
+}
+
+#shareRollenlayerDiv {
+	color: black;
+	margin-bottom: 5px;
 }

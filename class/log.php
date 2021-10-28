@@ -48,10 +48,10 @@ class Debugger {
 			}
 			$ret = @fwrite($this->fp, $msg);
 			if (!$ret) {
-				$this->Fehlermeldung ='In die Debugdatei '.$this->filename.' läßt sich nicht schreiben.';
-				$this->Fehlermeldung.='<br>Das kann daran liegen, dass für den WebServer, in dem kvwmap läuft, keine Schreibrechte gesetzt sind.';
-				$this->Fehlermeldung.='<br>Prüfen Sie die Rechte der Datei!';
-				include(LAYOUTPATH."snippets/Fehlermeldung.php");
+				$this->Fehlermeldung  ='In die Debugdatei ' . $this->filename . ' läßt sich nicht schreiben.';
+				$this->Fehlermeldung .='<br>Das kann daran liegen, dass für den WebServer, in dem kvwmap läuft, keine Schreibrechte gesetzt sind.';
+				$this->Fehlermeldung .='<br>Prüfen Sie die Rechte der Datei!';
+				include(LAYOUTPATH . "snippets/Fehlermeldung.php");
 				exit;
 			}
 		}

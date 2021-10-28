@@ -37,6 +37,9 @@ class pgdatabase {
 	var $blocktransaction;
 	var $host;
 	var $port;
+	var $dbname;
+	var $user;
+	var $passwd;
 	var $schema;
 	var $pg_text_attribute_types = array('character', 'character varying', 'text', 'timestamp without time zone', 'timestamp with time zone', 'date', 'USER-DEFINED');
 	var $version = POSTGRESVERSION;
@@ -233,8 +236,6 @@ class pgdatabase {
 			$this->connection_id = $connection_id;
 			return true;
 		}
-
-
 	}
 
 	function table_exists($schema, $table) {
@@ -2942,42 +2943,54 @@ FROM
     return $ret;
   }
 
-  function getMetadata($md) {
-    $sql ="SELECT oid,* FROM md_metadata WHERE (1=1)";
-    if ($md['oid']!='') {
-      $sql.=" AND oid=".(int)$md['oid'];
-    }
-    if ($md['mdfileid']!='') {
-      $sql.=" AND mdfileid=".(int)$md['mdfileid'];
-    }
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]==0) {
-      while($rs=pg_fetch_array($ret[1])) {
-        $mdresult[]=$rs;
-      }
-      $ret[1]=$mdresult;
-    }
-    return $ret;
-  }
+	function getMetadata($md) {
+		# ToDo überarbeiten fuer Postgres Version 12
+		$sql = "
+			SELECT
+				oid, *
+			FROM
+				md_metadata
+			WHERE
+				true" .
+				($md['oid'] != '' 			? " AND oid = " . (int)$md['oid'] : '') .
+				($md['mdfileid'] != '' 	? " AND mdfileid = " . (int)$md['mdfileid'] : '') . "
+		";
+		$ret = $this->execSQL($sql, 4, 0);
+		if ($ret[0]==0) {
+			while ($rs=pg_fetch_array($ret[1])) {
+				$mdresult[] = $rs;
+			}
+			$ret[1] = $mdresult;
+		}
+		return $ret;
+	}
 
-##################################################
-# Funktionen fï¿½r administrative Grenzen
-##################################################
+	##################################################
+	# functions for administrative Grenzen
+	##################################################
   function truncateAdmKreise() {
     $sql ="TRUNCATE adm_landkreise";
     return $this->execSQL($sql, 4, 0);
   }
 
-  function insertAdmKreis($colnames,$row) {
-    $sql ="INSERT INTO adm_landkreis";
-    $sql.=" ('".$colnames[0];
-    for ($i=1;$i<count($row);$i++) { $sql.=",".$colnames[$i];}
-    $sql.=")";
-    $sql.=" VALUES ('".$row[0]."'";
-    for ($i=1;$i<count($row);$i++) { $sql.=",'".$row[$i]."'";}
-    $sql.=")";
-    return $this->execSQL($sql, 4, 0);
-  }
+	function insertAdmKreis($colnames,$row) {
+		$sql = "
+			INSERT INTO adm_landkreis (" .
+				implode(', ', $colnames) . "
+			) VALUES (" .
+				implode(
+					', ',
+					array_map(
+						function($r) {
+							return "'" . $r . "'";
+						},
+						$row
+					)
+				) . "
+			)
+		";
+		return $this->execSQL($sql, 4, 0);
+	}
 
 ##################################################
 # Funktionen der Anwendung kvwmap
@@ -3022,8 +3035,8 @@ FROM
     # initiates a transaction block, that is, all statements
     # after BEGIN command will be executed in a single transaction
     # until an explicit COMMIT or ROLLBACK is given
-    if ($this->blocktransaction==0) {
-      $ret=$this->execSQL('BEGIN',4, 0);
+    if ($this->blocktransaction == 0) {
+      $ret=$this->execSQL('BEGIN', 4, 1);
     }
     return $ret;
   }
@@ -3033,8 +3046,8 @@ FROM
     # und Abbrechen der Transaktion
     # rolls back the current transaction and causes all the updates
     # made by the transaction to be discarded
-    if ($this->blocktransaction==0) {
-      $ret=$this->execSQL('ROLLBACK',4, 0);
+    if ($this->blocktransaction == 0) {
+      $ret=$this->execSQL('ROLLBACK',4 , 1);
     }
     return $ret;
   }
@@ -3043,8 +3056,8 @@ FROM
     # Gueltigmachen und Beenden der Transaktion
     # commits the current transaction. All changes made by the transaction
     # become visible to others and are guaranteed to be durable if a crash occurs
-    if ($this->blocktransaction==0) {
-      $ret=$this->execSQL('COMMIT',4, 0);
+    if ($this->blocktransaction == 0) {
+      $ret = $this->execSQL('COMMIT', 4, 1);
     }
     return $ret;
   }
@@ -3074,4 +3087,12 @@ FROM
   	}
   }
 
+	function drop_table($schema_name, $table_name) {
+		$sql = "
+			DROP TABLE IF EXISTS " . $schema_name . "." . $table_name . "
+		";
+		#echo '<br>SQL: ' . $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		return $ret;
+	}
 }

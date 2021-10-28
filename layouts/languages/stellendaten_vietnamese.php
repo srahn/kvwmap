@@ -1,3 +1,4 @@
 ﻿<?php
-$strTitel="Tác vụ";
+	$strTitel="Tác vụ";
+	$strShowSharedLayer = "Shared Layers are available in this working group.";
 ?>  

@@ -109,7 +109,7 @@ class Menue extends MyObject {
 			array(
 				'select' => " DISTINCT
 					m.id,".
-					($gui->user->rolle->language != 'german' ? "m.`name_" . $gui->user->rolle->language . "` AS" : "") . " m.name,
+					($gui->user->rolle->language != 'german' ? "m.`name_" . $gui->user->rolle->language . "` AS" : "") . " name,
 					m.`order`,
 					m.menueebene
 				",
@@ -145,11 +145,12 @@ class Menue extends MyObject {
 		}
 
 		$menue = new Menue($gui);
+
 		$menues = $menue->find_by_sql(
 			array(
 				'select' => " DISTINCT
-					m.id,".
-					($gui->user->rolle->language != 'german' ? "m.`name_" . $gui->user->rolle->language . "` AS" : "") . " m.name,
+					m.id,
+					m.`name" . ($gui->user->rolle->language != 'german' ? "_" . $gui->user->rolle->language : "") . "` AS name,
 					m.`order`,
 					m.menueebene
 				",

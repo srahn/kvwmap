@@ -57,6 +57,20 @@
 	$this->strShowMore="Show more";
 	$this->strShowLess="Show less";
 	$this->strLayerParameters="Layer Parameter";
+	$this->strColor="Draw Color";
 	$this->strHatching="Hatching";
+	$this->strShareRollenlayer = "Share Layer";
+	$this->strShareRollenLayerLong = "Share this layer for other user in this WebGIS";
+	$this->strLayerSharedFrom = "This Layer was shared by user";
+	$this->strReadable = "Everywhere only readable";
+	$this->strEditableOnlyInThisStelle = "Only editable in this working group";
+	$this->strEditableInAllStellen = "Everywhere editable";
+	$this->strSettings = "Settings";
+	$this->strAsteriskRequired = "Fields marked with an asterisk * are required";
+	$this->strSurName = "Surname";
+	$this->strForeName = "First name";
+	$this->strUser = "User";
+	$this->strLabel = "Label";
+	$this->strNameSuffix = "Name suffix";
 	$this->strMetadata="Metadata";
 ?>
