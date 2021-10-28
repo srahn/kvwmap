@@ -968,7 +968,7 @@ function selectgroupthema(group, instantreload){
 		group = group.filter(function( x ) {
 			return x !== undefined;
 		});
-		value = group.map(x => x.value+"").join(",");
+		value = group.map(function(x){return x.value+""}).join(",");
 	} else {
 		value = group.value+"";
 	}
