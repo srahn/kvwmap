@@ -6,6 +6,15 @@
 <script type="text/javascript">
 <!--
 
+document.onkeydown = function(ev){
+	var key;
+	ev = ev || event;
+	key = ev.keyCode;
+	if (ev.target.className != 'quicksearch_field' && key == 13) {
+		save();
+	}
+}
+
 function save(){
 	var dokument_art_selected = false;
 	dokument_arten = document.getElementsByName('suchhauptart[]');

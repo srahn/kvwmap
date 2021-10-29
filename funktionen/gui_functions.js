@@ -716,7 +716,7 @@ function overlay_link(data, start, target){
 				else if(start && browser == 'firefox' && query_tab != undefined && root.resized < 2){	// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
 					query_tab.close();
 				}
-				query_tab = root.window.open("index.php?"+data+"&window_type=overlay", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
+				query_tab = root.window.open("index.php?window_type=overlay&"+data, "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
 				if(root.document.GUI.CMD != undefined)root.document.GUI.CMD.value = "";
 			}
 			else{
