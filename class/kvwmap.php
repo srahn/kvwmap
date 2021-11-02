@@ -13723,9 +13723,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					}
 				}
 				$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $document_attributes[$i]['update'] = $update;
-        if ($this->user->id == 1) {
-          echo '<br>upload_only_file_metadata: ' . print_r($this->rolle->upload_only_file_metadata, true);
-        }
 			}
 		}
 		if ($this->formvars['delete_documents'] != '') {
