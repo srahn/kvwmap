@@ -85,8 +85,8 @@ hide_versions = function(flst){
 	$gesamt = $this->qlayerset[$i]['count'];
   $anzObj = @count($this->qlayerset[$i]['shape']);
 	if($gesamt == '')$gesamt = $anzObj;
-	$von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + 1;
-	$bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + $this->formvars['anzahl'];
+	$von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] ?: 0 + 1;
+	$bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] ?: 0 + $this->formvars['anzahl'];
   if ($anzObj>0) {
 		$this->found = 'true';
 	?>
