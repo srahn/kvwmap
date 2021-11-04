@@ -163,10 +163,13 @@ if ($doit == true) {
 						}
 						$visibility = '';
 						if ($sachdaten_tab) {
+							$tabname = 'Sachdaten';
 							if (!$first_tab) {	# nur den ersten Tab öffnen
 								$visibility = 'style="visibility: collapse"';
 							}
-							echo '<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_Sachdaten" ' . $visibility . '><td><table class="tgle"><tbody class="gle gledata">';
+							if ($layer['attributes']['group'][0] == '') {
+								echo '<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_' .$tabname. '" ' . $visibility . '><td><table class="tgle"><tbody class="gle gledata">';
+							}
 						}
 						
 						for($j = 0; $j < @count($layer['attributes']['name']); $j++) {
@@ -300,7 +303,7 @@ if ($doit == true) {
 							unset($table);
 							$table = '';
 						}
-						if ($sachdaten_tab) {
+						if ($sachdaten_tab AND $layer['attributes']['group'][0] == '') {
 							echo '</tbody></table></td></tr>';
 						}
 						
