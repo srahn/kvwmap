@@ -118,9 +118,9 @@ class Nachweis {
 			SELECT 
 				id_nachweis
       FROM 
-				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
+				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE
-				b.db_action = 'DELETE'";
+				db_action = 'DELETE'";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
       if ($nachweise = pg_fetch_all($ret[1])) {
