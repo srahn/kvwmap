@@ -8,7 +8,7 @@ Unlike ALTER TYPE ADD VALUE AFTER, this also works within a begin-commit transac
 INSERT INTO
 	pg_enum (enumtypid, enumlabel, enumsortorder)
 SELECT
-	'xplan_gml.xp_externereferenztyp'::regtype::oid, '2700', 
+	'xplan_gml.xp_zweckbestimmunggruen'::regtype::oid, '2700', 
 	CASE
 		WHEN (
 			SELECT enumsortorder + 0.001 
