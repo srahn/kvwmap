@@ -125,8 +125,8 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			var name_dependent = scope.querySelector('#name_'+layer_id+'_'+dependent+'_'+k);
 			var value_dependent = scope.querySelector('#value_'+layer_id+'_'+dependent+'_'+k);
 			if(field_has_value(object, operator, value)){
-				if(name_dependent != null)name_dependent.style.visibility = 'visible';
-				value_dependent.style.visibility = 'visible';
+				if(name_dependent != null)name_dependent.style.visibility = 'inherit';
+				value_dependent.style.visibility = 'inherit';
 			}
 			else{
 				if(name_dependent != null)name_dependent.style.visibility = 'hidden';
