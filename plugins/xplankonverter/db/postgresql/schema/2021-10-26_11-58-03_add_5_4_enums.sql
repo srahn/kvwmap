@@ -1,5 +1,5 @@
 BEGIN;
-  UPDATE xplan_gml.enum_bp_zweckbestimmungstrassenverkehr SET beschreibung = 'Flächen für Ladeinfrastruktur elektrisch betriebener Fahrzeuge.' WHERE wert = '3500'
+  UPDATE xplan_gml.enum_bp_zweckbestimmungstrassenverkehr SET beschreibung = 'Flächen für Ladeinfrastruktur elektrisch betriebener Fahrzeuge.' WHERE wert = '3500';
 /*
 
 Inserts enum value 2700 after enum value 2600
