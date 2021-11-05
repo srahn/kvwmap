@@ -1,6 +1,6 @@
 --BEGIN; Can not run in a transaction
 
-  UPDATE xplan_gml.enum_bp_zweckbestimmungstrassenverkehr SET beschreibung = 'Flächen für Ladeinfrastruktur elektrisch betriebener Fahrzeuge.' WHERE wert = '3500'
+  UPDATE xplan_gml.enum_bp_zweckbestimmungstrassenverkehr SET beschreibung = 'Flächen für Ladeinfrastruktur elektrisch betriebener Fahrzeuge.' WHERE wert = '3500';
 
   ALTER TYPE xplan_gml.xp_zweckbestimmunggruen ADD VALUE '2700' AFTER '1000';
   INSERT INTO xplan_gml.enum_xp_zweckbestimmunggruen (wert, abkuerzung, beschreibung)

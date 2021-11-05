@@ -8,7 +8,7 @@
 		$parent_privileges_checkbox = '
 			<div class="apt-use_parent_privileges">
 				<input id="parent' . $this->stelle->id . '" value="1" type="checkbox" onclick="toggle_privileges(this);" name="use_parent_privileges' . $this->stelle->id . '" '. ($this->layer[0]['use_parent_privileges'] ? 'checked="true"' : '') .'>
-				<label for="parent' . $this->stelle->id . '" class="fett">' . $strUseParentPrivileges . '</label>
+				<label for="parent' . $this->stelle->id . '" class="fett">' . $strUseParentPrivileges . '&nbsp;('.$this->layer[0]['used_layer_parent_bezeichnung'].')</label>
 			</div>';
 	}
 ?>
