@@ -131,12 +131,12 @@ if ($doit == true) { ?>
 								$groupname_short = str_replace(' ', '_', $groupname_short[0]);
 								if ($layer['attributes']['tab'][$j] != ''){
 									$tabname = str_replace(' ', '_', $layer['attributes']['tab'][$j]);
-									$display = '';
+									$visibility = '';
 									if ($layer['attributes']['tab'][$j] != $layer['attributes']['tab'][0]) {	# nur den ersten Tab öffnen
-										$display = 'style="display: none"';
+										$visibility = 'style="visibility: collapse"';
 									}
 								}
-								$datapart .= '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.' tab tab_' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . '" ' . $display . '>
+								$datapart .= '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.' tab tab_' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . '" ' . $visibility . '>
 												<td colspan="2" width="100%">
 													<div>
 														<table width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">
