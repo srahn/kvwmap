@@ -57,8 +57,6 @@ class Nachweis {
 				*
       FROM 
 				nachweisverwaltung.n_nachweise
-			WHERE
-				gueltigkeit = 1
 			ORDER BY id
 			";
 		$ret = $this->database->execSQL($sql,4, 1);    
@@ -80,7 +78,6 @@ class Nachweis {
       FROM 
 				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
 			WHERE
-				gueltigkeit = 1 AND
 				b.db_action = 'INSERT'
 			ORDER BY a.id";
 		$ret = $this->database->execSQL($sql,4, 1);    
@@ -102,7 +99,6 @@ class Nachweis {
       FROM 
 				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
 			WHERE
-				gueltigkeit = 1 AND 
 				b.db_action = 'UPDATE'
 			ORDER BY a.id";
 		$ret = $this->database->execSQL($sql,4, 1);    
@@ -124,7 +120,6 @@ class Nachweis {
       FROM 
 				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
 			WHERE
-				gueltigkeit = 1 AND 
 				b.db_action = 'DELETE'";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
