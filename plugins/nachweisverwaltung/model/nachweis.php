@@ -94,7 +94,7 @@ class Nachweis {
 	
 	function LENRIS_get_changed_nachweise(){
 		$sql = "
-			SELECT 
+			SELECT DISTINCT
 				a.*
       FROM 
 				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
