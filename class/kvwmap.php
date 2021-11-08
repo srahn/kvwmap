@@ -8657,7 +8657,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
         $wfs->get_feature_request($request, NULL, $filter, $this->formvars['anzahl']);
         $features = $wfs->extract_features();
-        for($j = 0; $j < count($features); $j++){
+        for($j = 0; $j < @count($features); $j++){
           for($k = 0; $k < count($attributes['name']); $k++){
             $layerset[0]['shape'][$j][$attributes['name'][$k]] = $features[$j]['value'][$attributes['name'][$k]];
 						$attributes['privileg'][$k] = 0;
