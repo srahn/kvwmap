@@ -134,11 +134,11 @@ if ($doit == true) {
 							echo '
 							<tr>
 								<th>
-									<div class="gle_tabs">';
+									<div class="gle_tabs tab_' . $layer['Layer_ID'] . '_' . $k . '">';
 										$first_tab = true;
 										foreach ($layer['attributes']['tabs'] as $tab) {
 											$tabname = str_replace(' ', '_', $tab);
-											echo '<div ' . ($first_tab? 'class="active_tab"' : '') . ' onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', \'' . $tabname . '\');">' . $tab . '</div>';
+											echo '<div class="' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . ($first_tab? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', \'' . $tabname . '\');">' . $tab . '</div>';
 											$first_tab = false;
 										}
 										echo '
