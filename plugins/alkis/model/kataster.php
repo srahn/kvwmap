@@ -242,7 +242,7 @@ class gemarkung {
   }
 	
   function getGemarkungListeAll($ganzeGemID, $GemkgID) {
-    # Abfragen aller Gemarkungen (auch der untergegangenen) mit seinen GemeindeNamen (todo)
+    # Abfragen aller Gemarkungen (auch der untergegangenen) mit seinen GemeindeNamen
     $Liste=$this->database->getGemarkungListeAll($ganzeGemID, $GemkgID);
     return $Liste;
   }	

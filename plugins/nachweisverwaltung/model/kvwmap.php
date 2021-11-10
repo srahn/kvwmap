@@ -407,7 +407,7 @@
       # Abfragen der Gemarkungen
       # 2006-01-26 pk
       $Gemarkung=new gemarkung('',$GUI->pgdatabase);
-      $GemkgListe=$Gemarkung->getGemarkungListe('','','gmk.GemkgName');
+      $GemkgListe=$Gemarkung->getGemarkungListeAll('','');
       # Erzeugen des Formobjektes für die Gemarkungsauswahl
       $GUI->GemkgFormObj=new FormObject("Gemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['Gemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
 
@@ -1444,10 +1444,10 @@
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
 		if($GemeindenStelle == NULL){
-			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(NULL, NULL);
 		}
 		else{
-			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
 		}
         
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
@@ -1659,10 +1659,10 @@
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
 		if($GemeindenStelle == NULL){
-			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(NULL, NULL);
 		}
 		else{
-			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
 		}
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
     $GUI->GemkgFormObj=new FormObject("suchgemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['suchgemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
