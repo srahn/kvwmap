@@ -77,8 +77,9 @@ class rolle {
 				ELSE l.`Name`
 			END AS Name";
 		}
-		else
+		else {
 			$name_column = "l.Name";
+		}
 
 		if ($LayerName != '') {
 			$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "'";
@@ -91,8 +92,12 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
-				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
+				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
+				CASE 
+					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
+					ELSE l.connection 
+				END as connection, 
+				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function,
 				sync,
 				ul.`queryable`, ul.`drawingorder`,
@@ -101,8 +106,9 @@ class rolle {
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
 				l.labelitem as original_labelitem,
-				l.duplicate_from_layer_id,
-				l.duplicate_criterion,
+				l.`duplicate_from_layer_id`,
+				l.`duplicate_criterion`,
+				l.`shared_from`,
 				ul.`postlabelcache`,
 				`Filter`,
 				r2ul.gle_view,
@@ -395,6 +401,7 @@ class rolle {
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
+			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
@@ -969,16 +976,29 @@ class rolle {
 				concat('(', rollenfilter, ')') as Filter
 			FROM
 				rollenlayer AS l
-			" . (count($where) > 0 ? "WHERE " . implode(" AND ", $where) : '') . "
+			WHERE
+				l.stelle_id = " . $this->stelle_id . " AND
+				l.user_id = " . $this->user_id . "
 		";
-
+		if ($LayerName != '') {
+			$sql .=' AND (l.Name LIKE "'.$LayerName.'" ';
+			if (is_numeric($LayerName)) {
+				$sql .= 'OR l.id = "' . $LayerName . '")';
+			}
+			else {
+				$sql .= ')';
+			}
+		}
+		if ($typ != NULL){
+			$sql .= " AND Typ = '" . $typ . "'";
+		}
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
 		while ($rs = $this->database->result->fetch_assoc()) {
-			$layer[]=$rs;
+			$layer[] = $rs;
 		}
 		return $layer;
 	}
@@ -1259,6 +1279,9 @@ class rolle {
 	}
 
 	function setTransparency($formvars) {
+		if ($formvars['layer_options_transparency'] < 0 OR $formvars['layer_options_transparency'] > 100) {
+			$formvars['layer_options_transparency'] = 100;
+		}
 		if($formvars['layer_options_open'] > 0){		# normaler Layer
 			$sql ='
 				UPDATE u_rolle2used_layer 
@@ -1379,6 +1402,7 @@ class rolle {
 					`querymode`,
 					`geom_edit_first`,
 					`immer_weiter_erfassen`,
+					`upload_only_file_metadata`,
 					`overlayx`, `overlayy`,
 					`instant_reload`,
 					`menu_auto_close`,
@@ -1419,6 +1443,7 @@ class rolle {
 					`querymode`,
 					`geom_edit_first`,
 					`immer_weiter_erfassen`,
+					`upload_only_file_metadata`,
 					`overlayx`, `overlayy`,
 					`instant_reload`,
 					`menu_auto_close`,

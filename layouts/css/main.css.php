@@ -406,7 +406,7 @@ span[data-tooltip]:hover::after {
 	float: left;
 	text-align: right;
 	font-size: 17px;
-	width: 210px;
+	width: 240px;
 	height: 15px;
 	margin-right: 10px;
 }
@@ -423,7 +423,12 @@ span[data-tooltip]:hover::after {
 .input-form input[type=text] {
 	float: left;
 	text-align: left;
-	width: 400px;
+	width: 370px;
+}
+
+.input-form input[type=checkbox] {
+	float: left;
+	margin-left: 0px;
 }
 
 .input-form input[type=reset] {
@@ -691,6 +696,7 @@ a.invisiblelayerlink:hover{
 	width: 100%;
 	border-collapse: separate;
   border-spacing: 5px;
+	margin-top: 15px;
 }
 
 #data_import_upload_progress .file_status{
@@ -768,6 +774,7 @@ a.invisiblelayerlink:hover{
 	border-color: #CCC; 
 	border-top: none;
 	border-bottom: none;
+	position: relative;
 }
 
 #menue_switch{
@@ -786,6 +793,17 @@ a.invisiblelayerlink:hover{
 
 #menueTable a {
 	color: firebrick;
+}
+
+#menueScrollTable{
+	width: <? echo ($size['menue']['width'] - 2); ?>px;
+	overflow-y: auto;
+	-ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+#menueScrollTable::-webkit-scrollbar {
+  display: none; /* Chrome, Safari und Opera */
 }
 
 .menu {
@@ -1397,8 +1415,11 @@ span.black {
 
 #layer {
 	margin:0px 8px 8px 8px;
-/*	overflow:hidden; */
 	clear: both;
+}
+
+#nds_edit #layer {
+	margin: 0;
 }
 
 /* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf PREVIEW_IMAGE_WIDTH vergrößert */
@@ -1486,6 +1507,10 @@ a:hover .preview_image{
 	padding:0px 0px 0px 0px;
 }
 
+#nds_edit .datensatz {
+	border: none;
+}
+
 .datensatz_header{
 	background: linear-gradient(#DAE4EC 0%, lightsteelblue 100%);
 	#background-color:<? echo BG_GLEHEADER; ?>;
@@ -1493,6 +1518,7 @@ a:hover .preview_image{
 }
 
 #message_box {
+	white-space: pre-line;
 	opacity: 1;
 	position: fixed;
 	display: none;
@@ -1548,6 +1574,7 @@ a:hover .preview_image{
 }
 
 table.tgle {
+	width: 100%;
 	border: 0px solid gray;
 	border-collapse:collapse;
 	margin-left:auto;
@@ -1567,6 +1594,28 @@ table.tgle {
 thead.gle th { 
  padding: 0;
  text-align:left;
+}
+
+.gle_tabs{
+	display: flex;
+	margin: 2px 0 -11px 0;
+	border-left: 1px solid #bbb;
+	height: 27px
+}
+
+.gle_tabs > div{
+	padding: 0 5px 0 5px;
+	cursor: pointer;
+	border: 1px solid #bbb;
+	border-left: none;
+	background-color: #fff;
+	color: #aaa;
+}
+
+.gle_tabs > div.active_tab{
+	border-bottom: 1px dashed #bbb;
+	background-color: <? echo BG_GLEATTRIBUTE; ?>;
+	color: black;
 }
 
 .gle-attribute-name {
@@ -1618,7 +1667,7 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]), table.t
 }
 
 table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([type=checkbox]) {
-	min-height: 25px;
+	height: 25px;
 }
 
 .readonly_text{
@@ -1650,6 +1699,10 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 .subFormListItem{
 	height: 20px;
 	padding: 0 0 8px 0;
+}
+
+.subFormShowCount{
+	margin: 5px 5px 5px 8px;
 }
 
 .gle_hr{
@@ -2308,4 +2361,9 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 .edit_button.fa-check:hover {
 	cursor: pointer;
 	color: green;
+}
+
+#shareRollenlayerDiv {
+	color: black;
+	margin-bottom: 5px;
 }

@@ -55,10 +55,24 @@
 	$this->attributeditor="Attributeditor";
 	$this->strPrivileges="Rechte";
 	$this->strStyles="Styles";
-	$this->strRemove="entfernen";
+	$this->strRemove="Entfernen";
 	$this->strShowMore="Mehr anzeigen";
 	$this->strShowLess="Weniger anzeigen";
 	$this->strLayerParameters="Themenparameter";
 	$this->strColor="Farbe";
 	$this->strHatching="Schraffur";
+	$this->strShareRollenlayer = "Layer freigeben";
+	$this->strShareRollenLayerLong = "Diesen Layer für andere Nutzer in diesem WebGIS freigeben.";
+	$this->strLayerSharedFrom = "Dieser Layer wurde geteilt durch den Nutzer";
+	$this->strReadable = "Überall nur lesbar";
+	$this->strEditableOnlyInThisStelle = "Nur editierbar in dieser Stelle";
+	$this->strEditableInAllStellen = "In allen Stellen editierbar";
+	$this->strSettings = "Einstellungen";
+	$this->strAsteriskRequired = "Werte mit * mussen eingetragen werden";
+	$this->strSurName = "Nachname";
+	$this->strForeName = "Vorname";
+	$this->strUser = "Nutzer";
+	$this->strLabel = "Bezeichnung";
+	$this->strNameSuffix = "Namenszusatz";
+	$this->strMetadata="Metadaten";
 ?>

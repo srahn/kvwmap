@@ -21,6 +21,46 @@
 		return array('executed' => $executed, 'success' => $success);
 	};
 	
+	$GUI->LENRIS_get_all_nachweise = function() use ($GUI){
+		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$nachweis->LENRIS_get_all_nachweise();
+	};
+	
+	$GUI->LENRIS_get_new_nachweise = function() use ($GUI){
+		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$nachweis->LENRIS_get_new_nachweise();
+	};
+	
+	$GUI->LENRIS_get_changed_nachweise = function() use ($GUI){
+		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$nachweis->LENRIS_get_changed_nachweise();
+	};
+	
+	$GUI->LENRIS_get_deleted_nachweise = function() use ($GUI){
+		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$nachweis->LENRIS_get_deleted_nachweise();
+	};
+	
+	$GUI->LENRIS_confirm_new_nachweise = function() use ($GUI){
+		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$nachweis->LENRIS_confirm_new_nachweise($GUI->formvars['ids']);
+	};
+	
+	$GUI->LENRIS_confirm_changed_nachweise = function() use ($GUI){
+		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$nachweis->LENRIS_confirm_changed_nachweise($GUI->formvars['ids']);
+	};
+	
+	$GUI->LENRIS_confirm_deleted_nachweise = function() use ($GUI){
+		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$nachweis->LENRIS_confirm_deleted_nachweise($GUI->formvars['ids']);
+	};
+	
+	$GUI->LENRIS_get_document = function() use ($GUI){
+		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+		$nachweis->LENRIS_get_document($GUI->formvars['document']);
+	};
+	
 	$GUI->getGeomPreview = function($id) use ($GUI){
 		$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 		$layerset = $GUI->user->rolle->getLayer(LAYER_ID_NACHWEISE);
@@ -367,7 +407,7 @@
       # Abfragen der Gemarkungen
       # 2006-01-26 pk
       $Gemarkung=new gemarkung('',$GUI->pgdatabase);
-      $GemkgListe=$Gemarkung->getGemarkungListe('','','gmk.GemkgName');
+      $GemkgListe=$Gemarkung->getGemarkungListeAll('','');
       # Erzeugen des Formobjektes für die Gemarkungsauswahl
       $GUI->GemkgFormObj=new FormObject("Gemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['Gemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
 
@@ -477,13 +517,57 @@
     $GUI->formvars['abfrageart']='antr_nr';
     $GUI->nachweiseRecherchieren();
   };
+	
+	$GUI->nachweiseAuswahlSpeichern = function($stelle_id, $user_id, $nachweis_ids) use ($GUI){
+		$sql = '
+			DELETE FROM 
+				rolle_nachweise_rechercheauswahl 
+			WHERE
+				stelle_id = ' . $stelle_id . ' AND
+				user_id = ' . $user_id;
+		#echo $sql;
+		$GUI->debug->write("<p>nachweiseAuswahlSpeichern - Speichern der aktuellen Auswahl im Rechercheergebnis",4);
+		$GUI->database->execSQL($sql,4, 1);
+		if (@count($nachweis_ids) > 0) {
+			$sql = '
+				INSERT INTO 
+					rolle_nachweise_rechercheauswahl 
+				VALUES ';
+			for ($i = 0; $i < count($nachweis_ids); $i++){
+				$sql .= ($i > 0? ',' : '') . '(
+					' . $stelle_id . ', 
+					' . $user_id . ',
+					' . $nachweis_ids[$i] . ')';
+			}
+			#echo $sql;
+			$GUI->debug->write("<p>nachweiseAuswahlSpeichern - Speichern der aktuellen Auswahl im Rechercheergebnis",4);
+			$GUI->database->execSQL($sql,4, 1);
+		}
+		return 1;
+	};
+	
+	$GUI->getNachweiseAuswahl = function($stelle_id, $user_id) use ($GUI){
+		$sql = '
+			SELECT * FROM 
+				rolle_nachweise_rechercheauswahl 
+			WHERE
+				stelle_id = ' . $stelle_id . ' AND
+				user_id = ' . $user_id;
+		#echo $sql;
+		$GUI->debug->write("<p>getNachweiseAuswahl - abfragen der aktuellen Auswahl im Rechercheergebnis",4);
+		$GUI->database->execSQL($sql,4, 1);
+		while($rs = $GUI->database->result->fetch_assoc()){
+			$nachweisauswahl[] = $rs['nachweis_id'];
+		}
+		return $nachweisauswahl;
+	};
 
 	$GUI->setNachweisOrder = function($stelle_id, $user_id, $order) use ($GUI){
 		$sql ='UPDATE rolle_nachweise SET ';
 		$sql.='`order`="'.$order.'"';
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		#echo $sql;
-		$GUI->debug->write("<p>file:users.php class:rolle->setNachweisOrder - Setzen der aktuellen Order für die Nachweissuche",4);
+		$GUI->debug->write("<p>setNachweisOrder - Setzen der aktuellen Order für die Nachweissuche",4);
 		$GUI->database->execSQL($sql,4, 1);
 		return 1;
 	};
@@ -494,7 +578,7 @@
 		$sql ='UPDATE rolle_nachweise SET ';
 		$sql.='suchhauptart="'.implode(',', $suchhauptart).'",';
 		$sql.='suchunterart="'.implode(',', $suchunterart).'",';
-		if ($abfrageart!='') { $sql.='abfrageart="'.$abfrageart.'",'; }
+		if ($abfrageart != '') { $sql.='abfrageart="'.$abfrageart.'",'; }
 		$sql.='suchgemarkung="'.$suchgemarkung.'",';
 		$sql.='suchflur="'.$suchflur.'",';
 		$sql.='suchstammnr="'.$stammnr.'",';
@@ -513,11 +597,13 @@
 		$sql.='suchbemerkung="'.$suchbemerkung.'",';
 		$sql.='flur_thematisch="'.$flur_thematisch.'",';
 		$sql.='alle_der_messung="'.$alle_der_messung.'",';
-		$sql.='`order`="'.$order.'",';
+		if ($order != '') {
+			$sql.='`order`="'.$order.'",';
+		}
 		$sql .= 'user_id = '.$user_id;
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		#echo $sql;
-		$GUI->debug->write("<p>file:users.php class:rolle->setNachweisSuchparameter - Setzen der aktuellen Parameter für die Nachweissuche",4);
+		$GUI->debug->write("<p>setNachweisSuchparameter - Setzen der aktuellen Parameter für die Nachweissuche",4);
 		$GUI->database->execSQL($sql,4, 1);
 		return 1;
 	};
@@ -559,8 +645,13 @@
 	};
 	
 	$GUI->save_Dokumentauswahl = function($stelle_id, $user_id, $formvars) use ($GUI){
-		$sql ='INSERT INTO rolle_nachweise_dokumentauswahl (stelle_id, user_id, name, suchhauptart, suchunterart) VALUES (';
-		$sql .= $stelle_id.', '.$user_id.', "'.$formvars['dokauswahl_name'].'", "'.implode(',', $formvars['suchhauptart']).'", "'.implode(',', $formvars['suchunterart']).'"';
+		$sql ='
+			INSERT INTO rolle_nachweise_dokumentauswahl (stelle_id, user_id, name, suchhauptart, suchunterart) VALUES (
+			' . $stelle_id . ', 
+			' . $user_id . ',
+			"' . $formvars['dokauswahl_name'] . '", 
+			"' . implode(',', $formvars['suchhauptart']) . '", 
+			"' . implode(',', $formvars['suchunterart']) . '")';
 		#echo $sql;
 		$GUI->debug->write("<p>file:users.php class:rolle->save_Dokumentauswahl ",4);
 		$GUI->database->execSQL($sql,4, 1);
@@ -700,17 +791,26 @@
       if ($GUI->nachweis->erg_dokumente==0) {
         # Keine Dokumente zur Auswahl gefunden.
 				$GUI->add_message('error', 'Es konnten keine Dokumente zu der Auswahl gefunden werden. Wählen Sie neue Suchparameter.');
-        $GUI->rechercheFormAnzeigen();				
+				if ($GUI->user->rolle->querymode == 1) {
+					$GUI->nachweisAnzeige();
+				}
+				else {
+					$GUI->rechercheFormAnzeigen();
+				}
       }
       else {
-        # Zoom auf Nachweise
-				for ($i=0; $i < $GUI->nachweis->erg_dokumente; $i++) {
-					$ids[] = $GUI->nachweis->Dokumente[$i]['id'];
+				if ($GUI->user->rolle->querymode == 1) {
+					if (in_array($GUI->formvars['abfrageart'], ['indiv_nr', 'antr_nr'])) {
+						# Zoom auf Nachweise
+						for ($i=0; $i < $GUI->nachweis->erg_dokumente; $i++) {
+							$ids[] = $GUI->nachweis->Dokumente[$i]['id'];
+						}
+						$GUI->loadMap('DataBase');
+						$GUI->zoomToNachweise($GUI->nachweis, $ids, 10);
+						$GUI->user->rolle->saveSettings($GUI->map->extent);
+					}
+					$GUI->zoomed = true;
 				}
-				$GUI->loadMap('DataBase');
-				$GUI->zoomToNachweise($GUI->nachweis, $ids, 10);
-				$GUI->user->rolle->saveSettings($GUI->map->extent);
-				$GUI->zoomed = true;
 				# Anzeige des Rechercheergebnisses
         $GUI->nachweisAnzeige();
       }
@@ -1344,10 +1444,10 @@
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
 		if($GemeindenStelle == NULL){
-			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(NULL, NULL);
 		}
 		else{
-			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
 		}
         
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
@@ -1374,7 +1474,7 @@
 	$GUI->nachweiseGeometrieuebernahme = function() use ($GUI){
 		$GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
 		$GUI->hauptdokumentarten = $GUI->nachweis->getHauptDokumentarten();
-		$ret=$GUI->nachweis->Geometrieuebernahme($GUI->formvars['ref_geom'],$GUI->formvars['id']);
+		$ret=$GUI->nachweis->Geometrieuebernahme($GUI->formvars['ref_geom'], $GUI->formvars['id'], $GUI->Stelle->isFunctionAllowed('gepruefte_Nachweise_bearbeiten'));
     $GUI->formvars = array_merge($GUI->formvars, $GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id));
 		$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchgueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['suchgeprueft']);
     if($ret[0] != ''){
@@ -1543,8 +1643,8 @@
 		if($GUI->formvars['dokauswahlen'] != ''){
 			$GUI->selected_dokauswahlset = $GUI->get_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['dokauswahlen']);
 			$GUI->formvars['dokauswahl_name'] = $GUI->selected_dokauswahlset[0]['name'];			
-			$GUI->formvars['suchhauptart'] = $GUI->selected_dokauswahlset[0]['suchhauptart'];
-			$GUI->formvars['suchunterart'] = $GUI->selected_dokauswahlset[0]['suchunterart'];
+			$GUI->formvars['suchhauptart'] = explode(',', $GUI->selected_dokauswahlset[0]['suchhauptart']);
+			$GUI->formvars['suchunterart'] = explode(',', $GUI->selected_dokauswahlset[0]['suchunterart']);
 		}
     # erzeugen des Formularobjektes für Antragsnr
     $GUI->FormObjAntr_nr=$GUI->getFormObjAntr_nr($GUI->formvars['suchantrnr']);    
@@ -1559,10 +1659,10 @@
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
 		if($GemeindenStelle == NULL){
-			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(NULL, NULL);
 		}
 		else{
-			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
 		}
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
     $GUI->GemkgFormObj=new FormObject("suchgemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['suchgemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);

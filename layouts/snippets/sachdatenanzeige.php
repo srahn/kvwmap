@@ -77,17 +77,12 @@ for($i=0;$i<$anzLayer;$i++){
   }
 	$template = $this->qlayerset[$i]['template'];
 	if (in_array($template, array('', 'generic_layer_editor.php', 'generic_layer_editor_doc_raster.php'))) {
-		if($this->qlayerset[$i]['connectiontype'] == MS_WMS){
-			include(SNIPPETS.'getfeatureinfo.php');			# getfeatureinfo bei WMS
+		if($template == '')$template = 'generic_layer_editor_2.php';
+		if($this->qlayerset[$i]['gle_view'] == '1'){
+			include(SNIPPETS.$template);			# Attribute zeilenweise bzw. Raster-Template
 		}
 		else{
-			if($template == '')$template = 'generic_layer_editor_2.php';
-			if($this->qlayerset[$i]['gle_view'] == '1'){
-				include(SNIPPETS.$template);			# Attribute zeilenweise bzw. Raster-Template
-			}
-			else{
-				include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
-			}
+			include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
 		}
 	}
 	else{
@@ -268,7 +263,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 			}
 */
 	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
-				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" style="margin: 5px" aria-hidden="true"></i></a>';
+				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" target="root" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" style="margin: 5px" aria-hidden="true"></i></a>';
 	  	}
   	}
   	else{
@@ -318,7 +313,3 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 <input type="hidden" name="searchmask_count" value="<? echo $this->formvars['searchmask_count']; ?>">
 <input type="hidden" name="within" value="<? echo value_of($this->formvars, 'within'); ?>">
 <input type="hidden" name="backlink" value="<? echo strip_pg_escape_string($this->formvars['backlink']); ?>">
-
-<div id="vorschau" style="pointer-events:none; box-shadow: 12px 10px 14px #777;z-index: 1000000; position: fixed; right:10px; top:5px; ">
-	<img id="preview_img" style="max-height: 940px" src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
-</div>

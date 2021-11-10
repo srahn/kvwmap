@@ -157,8 +157,8 @@
 	}
 	if(enclosingForm.ortho_point_vertices != undefined){
 		var ortho_point_vertices = new Array();
-		var o_p_local_x = ['.implode(',', $this->formvars['ortho_point_x']).'];
-		var o_p_local_y = ['.implode(',', $this->formvars['ortho_point_y']).'];
+		var o_p_local_x = ['.implode(',', $this->formvars['ortho_point_x'] ?: []).'];
+		var o_p_local_y = ['.implode(',', $this->formvars['ortho_point_y'] ?: []).'];
 	}
 	var helmert;
 	var textx = '.$text_x.';
@@ -3285,7 +3285,7 @@ $vertex_catch_functions = '
 	}
 
 	function request_foreign_vertices(){
-		top.ahah("index.php", "go=getSVG_foreign_vertices&geom_from_layer="+enclosingForm.geom_from_layer.value+"&oid="+enclosingForm.oid.value, new Array(enclosingForm.vertices, ""), new Array("setvalue", "execute_function"));
+		top.ahah("index.php", "go=getSVG_vertices&geom_from_layer="+enclosingForm.geom_from_layer.value, new Array(enclosingForm.vertices, ""), new Array("setvalue", "execute_function"));
 	}
 
 	function remove_foreign_vertices(){

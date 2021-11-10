@@ -5,7 +5,7 @@
 	$strDataBankID="Số ID cơ sở dữ liệu*";
 	$strLayerID="Id lớp*";
 	$strName="Tên*";
-	$strDataType="Kiểu dữ liệu*";
+	$strDataType="Kiểu dữ liệu";
 	$strGroup="Nhóm";
 	$strPath="Đường dẫn";
 	$strData="Số liệu";
@@ -18,7 +18,7 @@
 	$strLabelRequires="Yêu cầu gắn nhãn";
 	$strLayerParams="Thông số lớp";
 	$strConnection="Kết nối*";
-	$strConnectionType="Kiểu kết nối*";
+	$strConnectionType="Kiểu kết nối";
 	$strClassItem="Mục lớp";
 	$strFilterItem="Mục lọc*";
 	$strTolerance="Dung sai*";
@@ -46,7 +46,7 @@
 	$strButtonSave="Lưu sửa đổi";
 	$strButtonSaveAsNewLayer="Lưu lại lớp với tên mới";
 	$strCommonData="general information";
-	$strtransparency="transparency";
+	$strtransparency="opacity";
 	$strdrawingorder="drawingorder";
 	$strminscale="minscale";
 	$strmaxscale="maxscale";
@@ -71,4 +71,6 @@
 	$strStylesLabels="Styles and Labels";
 	$strDdlAttribute="DDL Default Attribute";
 	$strIdAttribute="ID-Column";
+	$strSharedFrom = "Shared from user";
+	$strSharedFromHelp = "Remove the ID when the layer not any longer should be marked as shared by another user in layer legend.";
 ?>

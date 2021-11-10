@@ -74,6 +74,9 @@ class wfs{
 					case 'LIKE' : {									# geht noch nicht, weil man den requeststring hierfür url-encoden muss und dann ist er zu lang 
 						$operator = 'PropertyIsLike';
 						$operator_attributes = " wildCard='*' singleChar='.' escape='!'";
+						if (strpos($values[$i], '%') === false) {
+							$values[$i] = '%' . $values[$i] . '%';
+						}
 						$values[$i] = str_replace('%', '*', $values[$i]);
 					}break;
 				}
@@ -130,8 +133,13 @@ class wfs{
     }
     $this->objects = $objects;
 	}
+	
+	function rename_features(){
+		$this->gml = preg_replace('/\w+_feature/', 'gml:featureMember', $this->gml);
+	}
 
-	function extract_features() {
+	function extract_features(){
+		$features = array();
 		# liefert die Datensätze einer getfeature-Abfrage (zuvor muss get_feature_request() ausgeführt werden)
 		if (strpos($this->gml, 'gmlx:featureMember') !== false) {
 			$this->parse_gml('gmlx:featureMember');

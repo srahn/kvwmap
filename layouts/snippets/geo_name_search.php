@@ -13,7 +13,7 @@
 	}
 </script>
 <div id="search_div">
-	<input id="geo_name_search_field" type="text" name="geo_name_query" autocomplete="off" onkeyup="startQuery();">
+	<input id="geo_name_search_field" readonly onfocus="this.removeAttribute('readonly');" type="text" name="geo_name_query" autocomplete="off" onkeyup="startQuery();">
 </div>
 <div id="geo_name_search_result_div">
 </div>

@@ -17,7 +17,7 @@
 	font-family: SourceSansPro3;
 	font-size: 20px;
 	margin-bottom: 0px;
-	margin-top: 20px;
+	margin-top: 10px;
 }
 #nds_titel p {
 	margin: -15px 0px 0px 0px;
@@ -47,7 +47,7 @@
 	display:flex;
 	flex-flow: row nowrap;
 	justify-content: center;
-	margin-bottom: 30px;
+	margin-bottom: 15px;
 }
 #nds_submit>div {
 	display: flex;
@@ -64,6 +64,10 @@
 #nds_submit span {
 	margin: auto;
 	margin-left: 3px;
+}
+
+#nds_edit #dataset_operations {
+	display: none;
 }
 </style>
 
@@ -114,7 +118,7 @@ if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 <div id="nds_submit">
 	<div>
 		<? if($this->formvars['subform'] == 'true'){ ?>
-		<input type="button" name="abort" value="<? echo $this->strCancel; ?>" onclick="currentform.go.value='get_last_query';currentform.submit();">
+		<input type="button" name="abort" value="<? echo $this->strCancel; ?>" onclick="currentform.go.value='get_last_query';overlay_submit(currentform);">
 		<? } ?>
 		<input type="button" name="go_plus" id="sachdatenanzeige_save_button" value="<? echo $strSave; ?>" onclick="save_new_dataset();">
 		<input

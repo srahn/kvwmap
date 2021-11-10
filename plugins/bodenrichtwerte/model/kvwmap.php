@@ -4,7 +4,7 @@
 	$GUI->bodenRichtWertErfassung = function() use ($GUI){
 		include_once(CLASSPATH.'FormObject.php');
 		include_once(PLUGINS.'alkis/model/kataster.php');
-    if ($GUI->formvars['oid']=='') {
+    if ($GUI->formvars['gid'] == '') {
       $GUI->titel='Bodenrichtwerterfassung';
     }
     else {
@@ -67,7 +67,7 @@
     # Bodenrichtwertzone aus der Datenbank abfragen
     $layer = $GUI->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $bodenrichtwertzone=new bodenrichtwertzone($GUI->pgdatabase, $layer[0]['epsg_code'], $GUI->user->rolle->epsg_code);
-    $ret=$bodenrichtwertzone->getBodenrichtwertzonen($GUI->formvars['oid']);
+    $ret=$bodenrichtwertzone->getBodenrichtwertzonen($GUI->formvars['gid']);
     if ($ret[0]) {
       # Fehler bei der Abfrage
       showAlert($ret);
@@ -76,7 +76,7 @@
       # Abfrage war erfolgreich
       # Zoom zum Polygon des Dokumentes
       $GUI->loadMap('DataBase');
-      $GUI->zoomToBodenrichtwertzone($GUI->formvars['oid'],20);
+      $GUI->zoomToBodenrichtwertzone($GUI->formvars['gid'],20);
       $GUI->user->rolle->saveSettings($GUI->map->extent);
       $GUI->user->rolle->readSettings();
       # Zuweisen der Werte der Zone zum Formular
@@ -116,7 +116,7 @@
     $layer = $GUI->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $bodenrichtwertzone=new bodenrichtwertzone($GUI->pgdatabase, $layer[0]['epsg_code'], $GUI->user->rolle->epsg_code);
 
-		if ($GUI->formvars['oid']=='') {
+		if ($GUI->formvars['gid']=='') {
 			# 2. eintragenNeueZone
 			$ret=$bodenrichtwertzone->eintragenNeueZone($GUI->formvars);
 			if ($ret[0]) {
@@ -133,7 +133,7 @@
 		}
 		else {
 			# 3. aktualisierenZone
-			$ret=$bodenrichtwertzone->aktualisierenZone($GUI->formvars['oid'],$GUI->formvars);
+			$ret=$bodenrichtwertzone->aktualisierenZone($GUI->formvars['gid'],$GUI->formvars);
 			if ($ret[0]) {
 				# 3.1 eintrageung fehlerhaft
 				$GUI->Meldung=$ret[1];
@@ -146,10 +146,10 @@
     $GUI->bodenRichtWertErfassung();
   };
 	
-	$GUI->zoomToBodenrichtwertzone = function($oid,$border) use ($GUI){
+	$GUI->zoomToBodenrichtwertzone = function($gid,$border) use ($GUI){
     $layer = $GUI->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $zone=new bodenrichtwertzone($GUI->pgdatabase, $layer[0]['epsg_code'], $GUI->user->rolle->epsg_code);
-    $ret=$zone->getBBoxAsRectObj($oid);
+    $ret=$zone->getBBoxAsRectObj($gid);
     if ($ret[0]) {
       # Fehler bei der Abfrag der BoundingBox
       # Es erfolgt keine Änderung der aktuellen Ausdehnung
@@ -173,12 +173,12 @@
 	$GUI->bodenRichtWertZoneLoeschen = function() use ($GUI){
     $layer = $GUI->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $zone=new bodenrichtwertzone($GUI->pgdatabase, $layer[0]['epsg_code'], $GUI->user->rolle->epsg_code);
-    $ret=$zone->deleteBodenrichtwertzonen(array($GUI->formvars['oid']));
+    $ret=$zone->deleteBodenrichtwertzonen(array($GUI->formvars['gid']));
     if ($ret[0]) {
       echo 'Bodenrichtwertzone konnte nicht gelöscht werden.<br>'.$ret[1];
     }
     else {
-      //echo 'Bodenrichtwertzone mit oid: '.$GUI->formvars['oid'].' erfolgreich gelöscht.';
+      //echo 'Bodenrichtwertzone mit gid: '.$GUI->formvars['gid'].' erfolgreich gelöscht.';
     }
     $GUI->loadMap('DataBase');
     $currenttime=date('Y-m-d H:i:s',time());

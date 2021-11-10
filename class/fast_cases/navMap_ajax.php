@@ -234,6 +234,20 @@ class GUI {
 		$this->user->rolle->readSettings();
 	}	
 	
+	function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
+		if ($last) {
+			$word_pos = strripos($str, $word);
+		}
+		else {
+			$word_pos = stripos($str, $word);
+		}
+		if ($word_pos !== false) {
+			$str_from_word_pos = substr($str, $word_pos + strlen($word));
+			$parts = explode($delim2, trim($str_from_word_pos, $delim1));
+			return trim($parts[0]);
+		}
+	}
+	
 	function zoomToMaxLayerExtent($layer_id) {
     # Abfragen der maximalen Ausdehnung aller Daten eines Layers
 		if($layer_id > 0){
@@ -296,8 +310,8 @@ class GUI {
 						$command = OGR_BINPATH.'gdalinfo '.$raster_file.' > '.IMAGEPATH.$output.'.info';
 						exec($command);
 						$infotext = file_get_contents(IMAGEPATH.$output.'.info');
-						$ll = explode(', ', trim(get_first_word_after($infotext, 'Lower Left', '', ')'), ' ('));
-						$ur = explode(', ', trim(get_first_word_after($infotext, 'Upper Right', '', ')'), ' ('));
+						$ll = explode(', ', trim($this->get_first_word_after($infotext, 'Lower Left', '', ')'), ' ('));
+						$ur = explode(', ', trim($this->get_first_word_after($infotext, 'Upper Right', '', ')'), ' ('));
 					}
 				}
 				elseif($layer[0]['tileindex'] != ''){		# ein Tile-Index
@@ -350,6 +364,12 @@ class GUI {
 			}
 		}
   }
+
+	function login_agreement() {
+		$this->expect = array('agreement_accepted');
+		$this->gui = LOGIN_AGREEMENT;
+		$this->output();
+	}
 
 	function loadlayer($map, $layerset){
 		$layer = ms_newLayerObj($map);
@@ -727,6 +747,7 @@ class GUI {
   }
 
   function loadMap($loadMapSource) {
+		$this->group_has_active_layers = array();
     $this->debug->write("<p>Funktion: loadMap('" . $loadMapSource . ")",4);
     switch ($loadMapSource) {
       # lade Karte aus Post-Parametern
@@ -737,8 +758,8 @@ class GUI {
 				else {
 				  $map = new mapObj(SHAPEPATH.'MapFiles/tk_niedersachsen.map');
 				}
-				echo '<br>MapServer Version: '.ms_GetVersionInt();
-				echo '<br>Details: '.ms_GetVersion();
+				#echo '<br>MapServer Version: '.ms_GetVersionInt();
+				#echo '<br>Details: '.ms_GetVersion();
 
         # Allgemeine Parameter
         #var_dump($this->formvars);
@@ -896,16 +917,23 @@ class GUI {
 				else {
 					$map = new mapObj(DEFAULTMAPFILE, SHAPEPATH);
 				}
+
         $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 
-        # Allgemeine Parameter
-        $map->set('width',$this->user->rolle->nImageWidth);
-        $map->set('height',$this->user->rolle->nImageHeight);
-        $map->set('resolution',96);
-        #$map->set('transparent', MS_OFF);
-        #$map->set('interlace', MS_ON);
-        $map->set('status', MS_ON);
-        $map->set('name', MAPFILENAME);
+				# Allgemeine Parameter
+				define('MINIMAGESIZE', 10); # prevent error in setextent
+				$map->set('width', ($this->user->rolle->nImageWidth < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageWidth));
+				$map->set('height', ($this->user->rolle->nImageHeight < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageHeight));
+				$map->set('resolution', 96);
+				#$map->set('transparent', MS_OFF);
+				#$map->set('interlace', MS_ON);
+				$map->set('status', MS_ON);
+				$map->set('name', MAPFILENAME);
+
+				if (MS_DEBUG_LEVEL > 0) {
+					$map->setConfigOption('MS_ERRORFILE', '/var/www/logs/mapserver.log');
+					$map->set('debug', MS_DEBUG_LEVEL);
+				};
         $map->imagecolor->setRGB(255,255,255);
         $map->maxsize = 4096;
         $map->setProjection('+init=epsg:'.$this->user->rolle->epsg_code,MS_TRUE);
@@ -1067,12 +1095,11 @@ class GUI {
         $b = substr(BG_MENUETOP, 5, 2);
         $map->scalebar->imagecolor->setRGB(hexdec($r), hexdec($g), hexdec($b));
         $map->scalebar->outlinecolor->setRGB(0,0,0);
-				$map->scalebar->label->font = 'SourceSansPro';
+				$map->scalebar->label->set('font', 'SourceSansPro');		# Kommentarzeichen wieder entfernt, da sonst auf Metropolplaner Fehler
 				if (MAPSERVERVERSION < 700 ) {
 					$map->scalebar->label->type = 'truetype';
 				}
 				$map->scalebar->label->size = 10.5;
-
         # Groups
         if(value_of($this->formvars, 'nurAufgeklappteLayer') == ''){
 	        $this->groupset=$mapDB->read_Groups();
@@ -1090,17 +1117,18 @@ class GUI {
         $layerset['list'] = array_merge($layerset['list'], $rollenlayer);
         $layerset['anzLayer'] = count($layerset['list']);
         unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
-        for($i=0; $i < $layerset['anzLayer']; $i++){
+				$layerset['layer_group_has_legendorder'] = array();
+				for ($i=0; $i < $layerset['anzLayer']; $i++) {
 					$layerset['layers_of_group'][$layerset['list'][$i]['Gruppe']][] = $i;
-					if($layerset['list'][$i]['legendorder'] != ''){
+					if(value_of($layerset['list'][$i], 'legendorder') != ''){
 						$layerset['layer_group_has_legendorder'][$layerset['list'][$i]['Gruppe']] = true;
 					}
-					if($layerset['list'][$i]['requires'] == ''){
+					if(value_of($layerset['list'][$i], 'requires') == ''){
 						$this->layer_ids_of_group[$layerset['list'][$i]['Gruppe']][] = $layerset['list'][$i]['Layer_ID'];				# die Layer-IDs in einer Gruppe
 					}
 					$this->layer_id_string .= $layerset['list'][$i]['Layer_ID'].'|';							# alle Layer-IDs hintereinander in einem String
 
-					if($layerset['list'][$i]['requires'] != ''){
+					if(value_of($layerset['list'][$i], 'requires') != ''){
 						$layerset['list'][$i]['aktivStatus'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['aktivStatus'];
 						$layerset['list'][$i]['showclasses'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['showclasses'];
 					}
@@ -1323,9 +1351,10 @@ class GUI {
 					$style->set('opacity', $dbStyle['opacity']);
 				}
         if ($dbStyle['outlinecolor']!='') {
-          $RGB=explode(" ",$dbStyle['outlinecolor']);
+          $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
         	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-          $style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					if(is_numeric($RGB[0]))$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					else $style->updateFromString("STYLE OUTLINECOLOR [" . $dbStyle['outlinecolor']."] END");					
         }
         if ($dbStyle['backgroundcolor']!='') {
           $RGB=explode(" ",$dbStyle['backgroundcolor']);
@@ -2016,9 +2045,12 @@ class database {
 
 	function open() {
 		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
-		$this->mysqli = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+		$this->mysqli = mysqli_init();
+		$ret = $this->mysqli->real_connect($this->host, $this->user, $this->passwd, $this->dbName, 3306, null, MYSQLI_CLIENT_FOUND_ROWS);
 	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
-		return $this->mysqli->connect_errno;
+		$this->debug->write("<br>MySQL Fehlernummer: " . mysqli_connect_errno(), 4);
+		$this->debug->write("<br>MySQL Fehler: " . mysqli_connect_error(), 4);
+		return $ret;
 	}
 
 	function execSQL($sql, $debuglevel = 4, $loglevel = 0, $suppress_error_msg = false) {
@@ -2554,9 +2586,15 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, document_path, document_url, classification, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
-				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
-				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
+				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
+				CASE 
+					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
+					ELSE l.connection 
+				END as connection, 
+				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
+				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function,
+				sync,
+				ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
@@ -2745,6 +2783,7 @@ class rolle {
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
+			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
@@ -3547,7 +3586,7 @@ class db_mapObj{
 				l.labelmaxscale, l.labelminscale, l.labelrequires,
 				l.connection_id,
 				CASE
-					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password)
+					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', gr.user_id)
 					ELSE l.connection
 				END as connection,
 				l.printconnection,
@@ -3787,7 +3826,7 @@ class db_mapObj{
 				l.wms_auth_username,
 				l.wms_auth_password,
 				CASE
-					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password)
+					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', l.user_id)
 					ELSE l.connection
 				END as connection,
 				l.`epsg_code`,

@@ -1,4 +1,8 @@
 <?php
+$language = (in_array($_REQUEST['language'], array('german', 'english', 'low-german', 'polish', 'vietnamese')) ? $_REQUEST['language'] : 'german');
+include_once(LAYOUTPATH . 'languages/start_' . $language . '.php');
+$errors = array();
+
 # Objekt für graphische Benutzeroberfläche erzeugen mit default-Werten
 $GUI = new GUI("map.php", "layouts/css/main.css.php", "html");
 $GUI->user = new stdClass();
@@ -8,6 +12,7 @@ $GUI->allowed_documents = array();
 $GUI->document_loader_name = session_id().rand(0,99999999).'.php';
 $GUI->formvars=$formvars;
 $GUI->echo = false;
+
 
 #################################################################################
 # Setzen der Konstante, ob in die Datenbank geschrieben werden soll oder nicht.
@@ -30,7 +35,13 @@ if (!isset($userDb)) {
 	$userDb->dbName = MYSQL_DBNAME;
 }
 $GUI->database = $userDb;
-if ($GUI->database->open() != 0) {
+
+if ($formvars['go'] == 'health_check') {
+	include(SNIPPETS . 'health_check.php');
+	exit;
+}
+
+if (!$GUI->database->open()) {
   # Prüfen ob eine neue Datenbank angelegt werden soll
   if ($GUI->formvars['go'] == 'install-mysql-db') {
     # Anlegen der neuen Datenbank
@@ -62,23 +73,16 @@ if ($GUI->database->open() != 0) {
       echo '<li>Die Angaben zum Host, Benutzer und Password in der config.php sind falsch.</li>';
       echo '<li>Die Angaben zum Host, Benutzer und Password in der Tabelle mysql.users sind falsch.</li>';
       echo '</lu>';
-      exit;
     } # ende fehler beim aufbauen der mysql datenbank
   } # ende mysql datenbank installieren
   else {
     # Es konnte keine Datenbankverbindung aufgebaut werden
-    echo 'Die Verbindung zur Kartendatenbank konnte mit folgenden Daten nicht hergestellt werden:';
-    echo '<br>Host: '.$GUI->database->host;
-    echo '<br>User: '.$GUI->database->user;
-   # echo '<br>Passwd: '.$GUI->database->passwd;
-    echo '<br>Datenbankname: '.$GUI->database->dbName;
-    echo '<p>Das kann folgende Gründe haben:<lu>';
-    echo '<li>Die Datenbank existiert noch nicht. Legen Sie eine leere Datenbank an und führen Sie das <a href="install.php">Installationsskript</a> durch.';
-    echo '<li>Der Datenbankserver ist gerade nicht erreichbar.</li>';
-    echo '<li>Die Angaben zum Host, Benutzer und Password in der config.php sind falsch.</li>';
-    echo '<li>Die Angaben zum Host, Benutzer und Password in der Tabelle mysql.users sind falsch.</li>';
-    echo '</lu>';
-    exit;
+    $errors[] = '
+		Die Verbindung zur Kartendatenbank konnte mit folgenden Daten nicht hergestellt werden:<br>
+		Host: ' . $GUI->database->host . '<br>
+		User: ' . $GUI->database->user . '<br>
+		Datenbankname: ' . $GUI->database->dbName . '<br>';
+		exit;
   }
 }
 else {
@@ -104,7 +108,7 @@ if (is_logout($GUI->formvars)) {
 		logout();
 	}
 	else {
-		$GUI->add_message('error', 'Logout nicht möglich. Sie sind nicht angemeldet.');
+		$GUI->add_message('info', $strLoggedOutAlready);
 		$GUI->debug->write('Ist schon logged out.', 4, $GUI->echo);
 	}
 	$GUI->formvars['go'] = '';

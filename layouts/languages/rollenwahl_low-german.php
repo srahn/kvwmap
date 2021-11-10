@@ -31,6 +31,8 @@
 	$strSingleQuery="blot een Thema affraagbar";
 	$strQuerymode="Tüüchdatenaffraag in en egen Finster";
 	$strNewDatasetOrder="Riegfolg bi de Datensatz griepen";
+	$strAlwaysCreateNext="Nach dem Speichern einen weiteren Datensatz erfassen";
+	$strUploadOnlyFileMetadata="Nur Metadaten von Dateien hochladen";
 	$strGeomSecond="toeerst de Tüüchdaten";
 	$strGeomFirst="toeerst de Geometrie";
 	$strhist_timestamp="Tiedpunkt för de verleden Tied";
@@ -63,6 +65,8 @@
 	$strHintSingleQuery="Deist du de Optschoon utwähln, krüzt de Affraaghakenfeller bi de Legend op as Quasselkistpinökel. Es dürt ümmer blot een Thema affraagt warrn.";
 	$strHintQuerymode="Deist du de Optschoon utwähln, krüzen Tüüchdatenaffraag as egen Finster op, de över de Koort fleigen.";
 	$strHintNewDatasetOrder="Sök ut, ob biem Bifaaten nieg Daten de Geometrie-Editor boben or ünern bi de Tüüchdaten sien sall.";
+	$strHintAlwaysCreateNext="Das Datenerfassungsformular bleibt nach dem Speichern geöffnet und man kann gleich den nächsten Datensatz erfassen.";
+	$strHintUploadOnlyFileMetadata="Beim Hochladen von Dokumenten werden zunächst nur die Metadaten Dateiname, Änderungszeit und Dateigröße hochgeladen und gespeichert. Die Dateien selbst werden noch nicht hochgeladen. Als Vorschaubilder erscheinen dann nur Hinweise, dass die Dateien noch fehlen. Die Dateien können nachträglich hochgeladen werden, entweder über den Menüpunkt Dateien nachträglich hochladen oder bei ausgeschalteter Option einzeln im Sachdatenformular. Die Zuordnung der im Menü 'Daten nachträglich hochladen' hochgeladenen Dateien zu den Metadaten funktioniert nur, wenn es der selbe kvwmap-Nutzer macht, der auch die Metadaten hochgeladen hat und sich der Dateiname, die Dateigröße und das Änderungsdatum nicht zwischenzeitlich geändert haben.";
 	$strHintFontSizeGLE="Sök de Grött de Schrift in de Tüüchdatenanzeich.";
 	$strHintHighlight="Deist du de Optschoon utwähln, kieken de affrogen Themenobjekte in de Koort mit blaach Suum rut wenn du mit de Cursor överfleigst.";
 	$strHinthist_timestamp="Deist du een Dach ingeven, warn de ALKIS-Objekt mit düsse verleden Tied vörstellt. Affraag to´n Flurstück ergewen ok düsse verleden Tied.";

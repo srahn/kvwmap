@@ -14,7 +14,7 @@
 	$strDuplicateCriterion = 'Unterscheidungskriterium';
 	$strDuplicateCriterionHelp = 'Dieser Ausdruck ersetzt den Parameter $duplicate_criterion in Query und Data, falls dort vorhanden, zur Unterscheidung dieses Layers vom Original und anderen Layern, die vom gleichen Original dupliziert wurden.';
 	$strName="Name";
-	$strDataType="Datentyp*";
+	$strDataType="Datentyp";
 	$strGroup="Gruppe*";
 	$strPath="Query";
 	$strData="Data";
@@ -27,7 +27,7 @@
 	$strLabelRequires="Labelrequires";
 	$strConnection="Connection*";
 	$strPrintConnection="Druck-Connection";
-	$strConnectionType="Connectiontype*";
+	$strConnectionType="Connectiontype";
 	$strClassItem="Classitem";
 	$strFilterItem="Filteritem*"; 
 	$strTolerance="Tolerance*";
@@ -56,7 +56,7 @@
 	$strSave="Ändern";
 	$strButtonSaveAsNewLayer="Als neuen Layer eintragen";
 	$strCommonData="Allgemeine Angaben";
-	$strtransparency="Transparenz";
+	$strtransparency="Deckkraft";
 	$strDrawingOrder="Zeichenreihenfolge";
 	$strLegendOrder="Legendenreihenfolge";
 	$strLegend="Legende";
@@ -109,4 +109,6 @@
 	$strStatusHelp="Dieses Feld kann mit einem Fehlerstatus befüllt werden. Der Layer ist dadurch deaktiviert und in der Legende mit einem Hinweissymbol versehen.&#xa;Das Tool 'wms_checker.php' befüllt diese Feld automatisch.";
 	$strTriggerFunctionHelp="Hier kann der Name einer PHP-Triggerfunktion eingetragen werden, die bei Insert, Update oder Delete in diesem Layer ausgeführt werden soll. Die Triggerfunktion muss innerhalb eines Plugins oder unter custom/class/kvwmap.php definiert werden.";
   $strNotDublicate = "nicht duplizieren";
+	$strSharedFrom = "Geteilt von Nutzer";
+	$strSharedFromHelp = "Lösche die ID wenn der Layer in der Layerlegende nicht länger als geteilt markiert werden soll.";
 ?>

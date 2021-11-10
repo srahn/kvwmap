@@ -29,11 +29,11 @@
 		<td>
 			<table width="100%" border="0" cellspacing="0" cellpadding="2">
 				<tr>
-					<th><a href="index.php?go=Einladungen_Anzeigen&order=token">Kennung</a></th>
+					<th><a href="index.php?go=Einladungen_Anzeigen&order=token"><? echo $strToken; ?></a></th>
 					<th><a href="index.php?go=Einladungen_Anzeigen&order=email">E-Mail</a></th>
-					<th><a href="index.php?go=Einladungen_Anzeigen&order=stelle_id">Stelle</a></th>
-					<th><a href="index.php?go=Einladungen_Anzeigen&order=name">Nutzer</th>
-					<th><a href="index.php?go=Einladungen_Anzeigen&order=completed">Registriert</a></th>
+					<th><a href="index.php?go=Einladungen_Anzeigen&order=stelle_id"><? echo $strTask; ?></a></th>
+					<th><a href="index.php?go=Einladungen_Anzeigen&order=name"><? echo $this->strUser; ?></th>
+					<th><a href="index.php?go=Einladungen_Anzeigen&order=completed"><? echo $strRegistered; ?></a></th>
 					<th>&nbsp;</th>
 					<th>&nbsp;</th>
 				</tr><?php

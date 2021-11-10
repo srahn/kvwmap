@@ -1,13 +1,16 @@
-<html>
+<html lang="de">
 	<head>
 		<title><? echo TITLE; ?></title>
 		<? include(SNIPPETS . 'gui_head.php'); ?>
 	</head>
 	<body onload="onload_functions();">
-	<div id="waitingdiv" style="position: absolute;height: 100%; width: 100%; display:none; z-index: 1000000; text-align: center">
+		<div id="waitingdiv" style="position: absolute;height: 100%; width: 100%; display:none; z-index: 1000000; text-align: center">
 			<div style="position: absolute;  top: 50%; left: 50%; transform: translate(-50%,-50%);">
 				<i class="fa fa-spinner fa-7x wobble-fix spinner"></i>
 			</div>
+		</div>
+		<div id="vorschau" style="pointer-events:none; box-shadow: 12px 10px 14px #777;z-index: 1000000; position: fixed; right:10px; top:5px; ">
+			<img id="preview_img" style="max-height: 940px" src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
 		</div>
 		<a name="oben"></a>
 		<table id="gui-table" border="0" cellspacing="0" cellpadding="0" onclick="remove_calendar();">

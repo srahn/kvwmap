@@ -24,4 +24,10 @@
 	$this->strShowMore="Hiển thị thêm";
 	$this->strShowLess="Hiển thị ít hơn";
 	$this->strLayerParameters="Layer Parameter";
+	$this->strShareRollenlayer = "Share Layer";
+	$this->strShareRollenLayerLong = "Share this layer for other user in this WebGIS";
+	$this->strLayerSharedFrom = "This Layer was shared by user";
+	$this->strReadable = "Everywhere only readable";
+	$this->strEditableOnlyInThisStelle = "Only editable in this working group";
+	$this->strEditableInAllStellen = "Everywhere editable";
 ?>

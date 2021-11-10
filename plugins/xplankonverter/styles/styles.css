@@ -1,3 +1,9 @@
+.xplankonverter-back-button {
+	position: absolute;
+	bottom: 12px;
+	left: 50%;
+}
+
 .xplankonverter {
   margin: auto;
   width: 97%
@@ -176,8 +182,8 @@ body {
 }
 
 table { 
-  border-spacing: 2px;
-  border-collapse: separate;
+/*  border-spacing: 2px;
+  border-collapse: separate;*/
 }
 
 table.planzeichen th {

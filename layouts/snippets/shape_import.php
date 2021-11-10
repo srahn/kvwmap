@@ -104,7 +104,7 @@
   				<!--td><input name="primary_key" type="radio" value="gid" checked>&nbsp;mit gid-Index</td-->
   			</tr>
   			<tr>
-  				<td><input type="radio" name="table_option" value="-lco OVERWRITE=YES">Tabelle überschreiben</td>
+  				<td><input type="radio" name="table_option" value="-overwrite">Tabelle überschreiben</td>
   				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 					<td></td>
   			</tr>

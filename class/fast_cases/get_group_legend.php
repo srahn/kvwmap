@@ -1341,7 +1341,21 @@ class GUI {
 		# sichtbare Layer
 		if ($visible) {
 			if (value_of($layer, 'requires') == '') {
-				$legend = '<tr><td valign="top">';
+				$legend = '<tr><td valign="top" style="position: relative;">';
+
+				if (!empty($layer['shared_from'])) {
+					$user_daten = $this->user->getUserDaten($layer['shared_from'], '', '');
+					$legend .= ' <a
+						href="javascript:void(0)"
+						onclick="message([{ \'type\': \'info\', \'msg\' : \'' . $this->strLayerSharedFrom . ' ' . $user_daten[0]['Vorname'] . ' ' . $user_daten[0]['Name'] . (!empty($user_daten[0]['organisation']) ? ' (' . $user_daten[0]['organisation'] . ')' : '') . '\'}])"
+						style="
+							font-size: 10px;
+							margin-left: -10px;
+							margin-top: 5px;
+							position: absolute;
+						"
+					><i class="fa fa-share-alt" aria-hidden="true"></i></a>';
+				}
 
 				if ($layer['queryable'] == 1 AND !value_of($this->formvars, 'nurFremdeLayer')) {
 					$input_attr['id'] = 'qLayer' . $layer['Layer_ID'];
@@ -1425,11 +1439,15 @@ class GUI {
 				if ($this->user->rolle->showlayeroptions) {
 					$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
 				}
-				if(value_of($layer, 'metalink') != ''){
-					if(substr($layer['metalink'], 0, 10) != 'javascript'){
+				if (value_of($layer, 'metalink') != ''){
+					if (substr($layer['metalink'], 0, 10) != 'javascript'){
 						$legend .= ' target="_blank"';
-						if(strpos($layer['metalink'], '?') === false)$layer['metalink'] .= '?';
-						else $layer['metalink'] .= '&';
+						if (strpos($layer['metalink'], '?') === false) {
+							$layer['metalink'] .= '?';
+						}
+						else {
+							$layer['metalink'] .= '&';
+						}
 						$layer['metalink'] .= 'time='.time();
 					}
 					$legend .= ' class="metalink boldhover" href="'.$layer['metalink'].'">';
@@ -1440,18 +1458,18 @@ class GUI {
 				if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
 					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 				}
-				$legend .=' >'.html_umlaute($layer['alias']).'</span>';
+				$legend .=' >' . html_umlaute($layer['alias']).'</span>';
 				$legend .= '</a>';
 
 				# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
 				if ($layer['aktivStatus'] == 1 and $this->user->rolle->showlayeroptions) {
 					$legend .= '&nbsp';
 					if ($layer['rollenfilter'] != '') {
-						$legend .= '<a href="javascript:void(0);" onclick="getLayerOptions('.$layer['Layer_ID'].');">
+						$legend .= '<a href="javascript:void(0)" onclick="getLayerOptions('.$layer['Layer_ID'] . ')">
 							<i class="fa fa-filter button layerOptionsIcon" title="' . $layer['rollenfilter'] . '"></i>
 						</a>';
 					}
-					$legend .= '<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')">
+					$legend .= '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer['Layer_ID'] . ')">
 						<i class="fa fa-bars pointer button layerOptionsIcon" title="'.$this->layerOptions.'"></i>
 					</a>';
 				}
@@ -1465,7 +1483,7 @@ class GUI {
 					if($layer['connectiontype'] == 7){      # WMS
 						if($layer['Class'][$k]['legendgraphic'] != ''){
 							$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
-							$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$imagename.'"></div><br>';
+							$legend .=  '<div id="lg'.$j.'_'.$l.'"><img src="'.$imagename.'"></div>';
 						}
 						else{
 							$url = str_ireplace('&styles=', '&style=', $layer['connection']);
@@ -1474,7 +1492,7 @@ class GUI {
 							if($pos !== false)$layersection = substr($layersection, 0, $pos);
 							$layers = explode(',', $layersection);
 							for($l = 0; $l < count($layers); $l++){
-								$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="' . $url . '&layer=' . $layers[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div><br>';
+								$legend .=  '<div id="lg'.$j.'_'.$l.'"><img src="' . $url . '&layer=' . $layers[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
 							}
 						}
 					}
@@ -1563,7 +1581,7 @@ class GUI {
 									$status = 1;
 								}
 								# $original_class_image ist das eigentliche Klassenbild bei Status 1, $imagename das Bild, welches entsprechend des Status gerade gesetzt ist
-								$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.')" onclick="changeClassStatus('.$classid.',\''.$original_class_image.'\', '.$this->user->rolle->instant_reload.', '.$width.', '.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" width="'.$width.'" height="'.$height.'" src="'.$imagename.'"></a>';
+								$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onmouseout="mouseOutClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onclick="changeClassStatus('.$classid.',\''.$original_class_image.'\', '.$this->user->rolle->instant_reload.', '.$width.', '.$height.', ' . $maplayer->type . ')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" width="'.$width.'" height="'.$height.'" src="'.$imagename.'"></a>';
 							}
 							$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
 						}
@@ -1702,9 +1720,12 @@ class database {
 
 	function open() {
 		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
-		$this->mysqli = new mysqli($this->host, $this->user, $this->passwd, $this->dbName);
+		$this->mysqli = mysqli_init();
+		$ret = $this->mysqli->real_connect($this->host, $this->user, $this->passwd, $this->dbName, 3306, null, MYSQLI_CLIENT_FOUND_ROWS);
 	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
-		return $this->mysqli->connect_errno;
+		$this->debug->write("<br>MySQL Fehlernummer: " . mysqli_connect_errno(), 4);
+		$this->debug->write("<br>MySQL Fehler: " . mysqli_connect_error(), 4);
+		return $ret;
 	}
 
 	function execSQL($sql, $debuglevel = 4, $loglevel = 0, $suppress_error_msg = false) {
@@ -1838,6 +1859,53 @@ class user {
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
 	}
+	
+	function getUserDaten($id, $login_name, $order, $stelle_id = 0, $admin_id = 0) {
+		global $admin_stellen;
+		$where = array();
+
+		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
+			$more_from = "
+				LEFT JOIN rolle rall ON u.ID = rall.user_id
+				LEFT JOIN rolle radm ON radm.stelle_id = rall.stelle_id
+			";
+			$where[] = "(radm.user_id = ".$admin_id." OR rall.user_id IS NULL)";
+		}
+
+		if ($id > 0) {
+			$where[] = 'u.ID = ' . $id;
+		}
+
+		if ($login_name != '') {
+			$where[] = 'login_name LIKE "' . $login_name . '"';
+		}
+
+		if ($order != '') {
+			$order = ' ORDER BY ' . replace_semicolon($order);
+		}
+
+		$sql = "
+			SELECT DISTINCT
+				u.*, (select max(c.time_id) from u_consume c where u.ID = c.user_id ) as last_timestamp
+			FROM
+				user u " .
+				$more_from .
+			(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") .
+			$order . "
+		";
+		#echo '<br>sql: ' . $sql;
+
+		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>".$sql,4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4);
+			return 0;
+		}
+		while ($rs = $this->database->result->fetch_array()) {
+			$userdaten[] = $rs;
+		}
+		return $userdaten;
+	}	
 
 	function setRolle($stelle_id) {
 		# Abfragen und zuweisen der Einstellungen für die Rolle
@@ -2021,6 +2089,7 @@ class rolle {
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
+			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
@@ -2535,6 +2604,7 @@ class db_mapObj {
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
+				l.shared_from,
 				g.id, ".$group_column.", g.obergruppe, g.order
 			FROM
 				u_rolle2used_layer AS rl,

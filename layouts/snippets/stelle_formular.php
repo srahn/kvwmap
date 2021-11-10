@@ -1,6 +1,6 @@
 <?php
   # 2007-12-30 pk
-  include(LAYOUTPATH.'languages/stelle_formular_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH . 'languages/stelle_formular_' . $this->user->rolle->language . '.php');
 
 ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript">
 </script>
@@ -72,7 +72,7 @@ function getInsertIndex(insertObj, id, order, start){
 	menueebene_to_be_inserted = parseInt(ordersplit[2]);
 	for(i=start; i<insertObj.length; i++) {
 		if(insertObj.options[i].value == id){
-			return -i;			// Menü ist bereits vorhanden -> index negieren
+			return -i - 100;			// Menü ist bereits vorhanden -> index negieren und 100 abziehen fuer den Fall dass i = 0 ist
 		}
 		options_order_string = insertObj.options[i].id + "";
 		options_order_split = options_order_string.split('_');
@@ -96,7 +96,7 @@ function addMenues(){
 		}
 	}
 	else{					// Obermenue ist bereits vorhanden
-		index = -1 * index + 1;				// index für die Untermenüs ermitteln, beginnend beim index des Obermenues
+		index = -1 * index - 99;				// index für die Untermenüs ermitteln, beginnend beim index des Obermenues
 		submenueindex = getInsertIndex(document.GUI.selectedmenues, document.GUI.submenues.options[document.GUI.submenues.selectedIndex].value, document.GUI.submenues.options[document.GUI.submenues.selectedIndex].id, index);
 		if(submenueindex > 0){
 			addOptionsWithIndex(document.GUI.submenues,document.GUI.selectedmenues,document.GUI.selmenues,'value', submenueindex);		// Untermenüs hinzufügen
@@ -132,14 +132,23 @@ else {
           	<input name="id" type="text" value="<?php echo $this->formvars['selected_stelle_id']; ?>" size="25" maxlength="11">
           </td>
         </tr><?php } ?>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTask; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="bezeichnung" type="text" value="<?php echo $this->formvars['bezeichnung']; ?>" size="25" maxlength="100">
-          </td>
-        </tr>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strReferenceMap; ?></th>
+				<tr>
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strLabel; ?></th>
+					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+						<input name="bezeichnung" type="text" value="<?php echo $this->formvars['bezeichnung']; ?>" size="25" maxlength="100">
+					</td>
+				</tr>
+				<tr><?
+				if ($this->user->rolle->language != 'german') { ?>
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strLabel . ' ' . ucfirst($this->user->rolle->language); ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="Bezeichnung_<? echo $this->user->rolle->language; ?>" type="text" value="<?php echo $this->formvars['Bezeichnung_' . $this->user->rolle->language]; ?>" size="25" maxlength="100">
+						</td>
+					</tr><?
+				} ?>
+				<tr>
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strReferenceMap; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3"><?
 						include_once(CLASSPATH . 'Referenzkarte.php');
 						include_once(CLASSPATH . 'FormObject.php');
@@ -182,19 +191,19 @@ else {
         </tr>
         <tr>
         	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEpsgCode; ?></th>
-		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-		      		<select name="epsg_code">
-		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
-		      			<? 
-		      			foreach($this->epsg_codes as $epsg_code){
-									echo '<option ';
-		      				if($this->formvars['epsg_code'] == $epsg_code['srid'])echo 'selected ';
-		      				echo ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
-		      			}
-		      			?>	      			
-		      		</select>
-		  		</td>
-        </tr>
+					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+						<select name="epsg_code">
+							<option value=""><?php echo $this->strPleaseSelect; ?></option><? 
+							foreach ($this->epsg_codes as $epsg_code) {
+								echo '
+									<option' .
+										($this->formvars['epsg_code'] == $epsg_code['srid'] ? ' selected ' : '') . '
+										value="' . $epsg_code['srid'] . '"
+									>' . $epsg_code['srid'] . ': ' . $epsg_code['srtext'] . '</option>';
+							} ?>
+						</select>
+					</td>
+				</tr>
 				<tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStart; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -745,6 +754,20 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 					</td>
 				</tr>
 
+				<tr>
+					<td align="right" style="border-bottom:1px solid #C3C7C3">
+						<input
+							name="show_shared_layers"
+							type="checkbox"
+							value="1"
+							<?php echo ($this->formvars['show_shared_layers'] ? ' checked' : ''); ?>
+						>
+					</td>
+					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3">
+						<?php echo $strShowSharedLayersText; ?>
+						<span data-tooltip="<?php echo $strShowSharedLayersDescription; ?>"></span>
+					</td>
+				</tr>
         <tr>
           <td align="right" style="border-bottom:1px solid #C3C7C3">
             <input name="checkClientIP" type="checkbox" value="1" <?php if ($this->formvars['checkClientIP']) { ?> checked<?php } ?>>
@@ -774,7 +797,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
             <input name="hist_timestamp" type="checkbox" value="1" <?php if ($this->formvars['hist_timestamp']) { ?> checked<?php } ?>>
           </td>
           <td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strhist_timestamp; ?></td>
-        </tr>				
+        </tr>
     </table>
   </td>
   </tr>

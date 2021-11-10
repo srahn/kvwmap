@@ -176,7 +176,7 @@ class MyObject {
 					return $validation['attribute'] == $key;
 				}
 			);
-			$attributes[] = new MyAttribute($this->debug, $key, 'text', $value, $attribute_validations, $this->identifier);
+			$attributes[] = new MyAttribute($this->debug, $key, $this->columns[$key]['Type'], $value, $attribute_validations, $this->identifier);
 		}
 		return $attributes;
 	}
@@ -213,7 +213,7 @@ class MyObject {
 
 	function getColumnsFromTable() {
 		#$this->debug->show('getColumnsFromTable', MyObject::$write_debug);
-		$columns = array();
+		$this->columns = array();
 		$sql = "
 			SHOW COLUMNS
 			FROM
@@ -222,9 +222,9 @@ class MyObject {
 		$this->debug->show('sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
 		while ($column = $this->database->result->fetch_assoc()) {
-			$columns[] = $column;
+			$this->columns[$column['Field']] = $column;
 		};
-		return $columns;
+		return $this->columns;
 	}
 
 	function getTypesFromColumns() {
@@ -245,7 +245,8 @@ class MyObject {
 	* @return string The expression representing true or false in a sql statement
 	*/
 	function get_identifier_expression() {
-	    $where = array();
+		#echo '<br>Class MyObject Method get_identifier_expression';
+		$where = array();
 		if ($this->identifier_type == 'array' AND getType($this->identifier) == 'array') {
 			$where = array_map(
 				function($id) {
@@ -261,7 +262,11 @@ class MyObject {
 			);
 		}
 		else {
-			if (in_array($this->identifier, $this->getKeys()) AND $this->get($this->identifier) != null AND $this->get($this->identifier) != '') {
+			if (
+				in_array($this->identifier, $this->getKeys()) AND
+				$this->get($this->identifier) != null AND
+				$this->get($this->identifier) != ''
+			) {
 				$quote = ($this->identifier_type == 'text' ? "'" : "");
 				$where = array($this->identifier . " = " . $quote . $this->get($this->identifier) . $quote);
 			}
@@ -321,7 +326,7 @@ class MyObject {
 					", ",
 					array_map(
 						function ($value) {
-							if ($value === NULL OR $value == '') {
+							if ($value === NULL OR $value == '' AND $value != 0) {
 								$v = 'NULL';
 							}
 							else if (is_numeric($value)) {
@@ -411,7 +416,7 @@ class MyObject {
 	function update($data = array()) {
 		$results = array();
 		if (!empty($data)) {
-			array_merge($this->data, $data);
+			$this->data = array_merge($this->data, $data);
 		}
 		$sql = "
 			UPDATE
@@ -432,6 +437,7 @@ class MyObject {
 	}
 
 	function delete() {
+		#echo '<br>Class MyObject Method delete';
 		$sql = "
 			DELETE
 			FROM
@@ -442,6 +448,15 @@ class MyObject {
 		$this->debug->show('MyObject delete sql: ' . $sql, MyObject::$write_debug);
 		$result = $this->database->execSQL($sql);
 		return $result;
+	}
+
+	function reset_auto_increment() {
+		$sql = "
+			ALTER TABLE `" . $this->tableName . "`
+			AUTO_INCREMENT = 1
+		";
+		$this->debug->show('MyObject delete sql: ' . $sql, MyObject::$write_debug);
+		$result = $this->database->execSQL($sql);
 	}
 
 	public function validate($on = '') {

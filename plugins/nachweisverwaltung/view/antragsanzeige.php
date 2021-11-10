@@ -57,7 +57,7 @@
   </tr>
   <tr> 
     <td bgcolor="<?php echo BG_FORM ?>">
-    	<select name="go_plus" onChange="document.GUI.submit();"> 
+    	<select name="go_plus" onChange="if (this.value == 'Zugeordnete_Dokumente_Anzeigen') {overlay_submit(document.GUI, true);} else {document.GUI.submit();}"> 
         <option value="">---</option>
        <?php if($this->Stelle->isFunctionAllowed('Antraganzeige_Zugeordnete_Dokumente_Anzeigen')) { ?>
         <option value="Zugeordnete_Dokumente_Anzeigen"<?php if ($this->formvars['antr_verarbeitung']=='erzeugen') { ?> selected<?php } ?>>Zugeordnete Dokumente Anzeigen</option>
