@@ -326,11 +326,11 @@ class rolle {
 		if($timestamp != ''){
 			$time = new DateTime(DateTime::createFromFormat('d.m.Y H:i:s', $timestamp)->format('Y-m-d H:i:s'));
 			$sql.='hist_timestamp="'.$time->format('Y-m-d H:i:s').'"';
-			showAlert('Der Zeitpunkt der ALKIS-Historie wurde auf '.$time->format('d.m.Y H:i:s').' geändert.');
+			showAlert('Der Zeitpunkt für historische Daten wurde auf '.$time->format('d.m.Y H:i:s').' geändert.');
 		}
 		else{
 			$sql.='hist_timestamp = NULL';
-			if(rolle::$hist_timestamp != '')showAlert('Der Zeitpunkt der ALKIS-Historie ist jetzt wieder aktuell.');
+			if(rolle::$hist_timestamp != '')showAlert('Der Zeitpunkt für historische Daten ist jetzt wieder aktuell.');
 		}
 		$sql.=' WHERE stelle_id='.$this->stelle_id.' AND user_id='.$this->user_id;		
 		#echo $sql;
