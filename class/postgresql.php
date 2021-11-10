@@ -1262,6 +1262,50 @@ FROM
     }
     return $Liste;
   }
+	
+  function getGemarkungListeAll($ganzeGemID, $GemkgID){
+    $sql ="
+			SELECT DISTINCT 
+				pp.schluesselgesamt as GemkgID, pp.gemarkungsname as Name, gem.bezeichnung as gemeindename, gem.schluesselgesamt as gemeinde 
+			FROM 
+				alkis.ax_gemeinde AS gem, 
+				alkis.pp_gemarkung as pp 
+			WHERE 
+				pp.gemeinde=gem.gemeinde AND 
+				pp.kreis=gem.kreis AND 
+				gem.endet IS NULL ";
+		if($ganzeGemID[0]!='' OR $GemkgID[0]!=''){
+			$sql.="AND (FALSE ";
+			if($ganzeGemID[0]!=''){
+				$sql.=" OR gem.schluesselgesamt IN ('".implode("','", $ganzeGemID)."')";
+			}
+			if($GemkgID[0]!=''){
+				$sql.=" OR pp.schluesselgesamt IN ('".implode("','", $GemkgID)."')";
+			}
+			$sql.=")";
+		}
+		$sql .="
+			UNION
+			SELECT DISTINCT 
+				schluesselgesamt as GemkgID, bezeichnung || ' (hist.)' as Name, '' as gemeindename, '' as gemeinde 
+			FROM 
+				alkis.ax_gemarkung
+			WHERE 
+				endet IS NULL AND
+				'http://www.lverma-mv.de/_fdv#7040' = any(zeigtaufexternes_art)
+		";
+    $sql.=" ORDER BY Name";
+    #echo $sql;
+    $queryret=$this->execSQL($sql, 4, 0);
+    if ($queryret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    while ($rs=pg_fetch_assoc($queryret[1])) {
+      $Liste['GemkgID'][]=$rs['gemkgid'];
+      $Liste['Name'][]=$rs['name'];
+      $Liste['gemeinde'][]=$rs['gemeinde'];
+      $Liste['Bezeichnung'][]=$rs['name']." (".$rs['gemkgid'].") ".$rs['gemeindename'];
+    }
+    return $Liste;
+  }	
     
   function getGemeindeListeByKreisGemeinden($Gemeinden){
     $sql ="SELECT DISTINCT g.schluesselgesamt AS id, g.bezeichnung AS name";
