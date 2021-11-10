@@ -19,6 +19,9 @@
 	$this->strSend="Gửi";
 	$this->strEnter="Thực hiện";
 	$this->strReset="Làm lại";
+	$this->strCoordinates = 'Coordinates';
+	$this->strCoordinate = 'Coordinate';
+	$this->strCoordinateReferenceSystem = 'Coordinate Reference System';
 	$this->strSaveMapViewCommittMassage="Phần bản đồ đang xem đã được lưu";
 	$this->strExceeded = "vượt quá";
 	$this->strShowMore="Hiển thị thêm";
