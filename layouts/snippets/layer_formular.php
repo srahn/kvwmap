@@ -194,7 +194,7 @@
 										'',
 										'',
 										'',
-										'nicht duplizieren'
+										$strNotDublicate
 									); ?>&nbsp;
 									<span data-tooltip="<? echo $strDuplicateFromLayerIdHelp; ?>"></span>
 								</div>
