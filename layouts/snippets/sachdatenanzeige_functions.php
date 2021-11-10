@@ -159,7 +159,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			}
 		})
 		// visibility of tabs
-		if (document.querySelector('.gle_tabs.tab_' + layer_id + '_' + k).children != null) {
+		if (document.querySelector('.gle_tabs.tab_' + layer_id + '_' + k) != null) {
 			tabs = [].slice.call(document.querySelector('.gle_tabs.tab_' + layer_id + '_' + k).children);
 			tabs.forEach(function(tab){
 				tab_display = 'none';
