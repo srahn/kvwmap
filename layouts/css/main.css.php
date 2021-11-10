@@ -549,6 +549,7 @@ a.green {
 
 a.metalink {
 	color: black; 
+	cursor: context-menu;
 }
 
 a.visiblelayerlink {
