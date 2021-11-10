@@ -28,7 +28,6 @@ class stelle {
 	var $pixsize;
 	var $selectedButton;
 	var $database;
-	var $language;
 
 	function __construct($id, $database) {
 		global $debug;
@@ -41,9 +40,10 @@ class stelle {
 	}
 
 	function getsubmenues($id){
+		global $language;
 		$sql ='SELECT menue_id,';
-		if ($this->language != 'german') {
-			$sql.='`name_'.$this->language.'` AS ';
+		if ($language != 'german') {
+			$sql.='`name_'.$language.'` AS ';
 		}
 		$sql .=' name, target, links FROM u_menue2stelle, u_menues';
 		$sql .=' WHERE stelle_id = '.$this->id;
@@ -93,9 +93,10 @@ class stelle {
 	}
 	
   function getName() {
+		global $language;
     $sql ='SELECT ';
-    if ($this->language != 'german' AND $this->language != ''){
-      $sql.='`Bezeichnung_'.$this->language.'` AS ';
+    if ($language != 'german' AND $language != ''){
+      $sql.='`Bezeichnung_'.$language.'` AS ';
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo '<p>SQL zur Abfrage des Stellennamens: ' . $sql;
@@ -110,7 +111,8 @@ class stelle {
   }
 
 	function readDefaultValues() {
-		if ($this->language != '' AND $this->language != 'german') {
+		global $language;
+		if ($language != '' AND $language != 'german') {
 			$name_column = "
 			CASE
 				WHEN s.`Bezeichnung_" . $language . "` != \"\" THEN s.`Bezeichnung_" . $language . "`
