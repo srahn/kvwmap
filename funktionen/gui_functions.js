@@ -1288,17 +1288,17 @@ function mouseOutClassStatus(classid, imgsrc, width, height, type){
 	}
 }
 
-function showMapParameter(epsg_code, width, height) {
+function showMapParameter(epsg_code, width, height, l) {
 	var gui = document.GUI,
 			msg = " \
 				<div style=\"text-align: left\"> \
-					<h2>Daten des aktuellen Kartenausschnitts</h2><br> \
-					Koordinatenreferenzsystem: EPSG: " + epsg_code + "<br> \
-					linke untere Ecke: (" + toFixed(gui.minx.value, 3) + ", " + toFixed(gui.miny.value, 3) + ")<br> \
-					rechte obere Ecke: (" + toFixed(gui.maxx.value, 3) + ", " + toFixed(gui.maxy.value, 3) + ")<br> \
-					Ausdehnung: " + toFixed(gui.maxx.value - gui.minx.value, 3) + " x " + toFixed(gui.maxy.value-gui.miny.value,3) + " m<br> \
-					Bildgröße: " + width + " x " + height + " Pixel<br> \
-					Pixelgröße: " + toFixed(gui.pixelsize.value, 3) + " m\
+					<h2>" + l.strShowMapParameterHeader + "</h2><br> \
+					" + l.strCoordinateReferenceSystem + ": EPSG: " + epsg_code + "<br> \
+					" + l.strLowerLeftCorner + ": (" + toFixed(gui.minx.value, 3) + ", " + toFixed(gui.miny.value, 3) + ")<br> \
+					" + l.strUpperRightCorner + ": (" + toFixed(gui.maxx.value, 3) + ", " + toFixed(gui.maxy.value, 3) + ")<br> \
+					" + l.strMapExtent + ": " + toFixed(gui.maxx.value - gui.minx.value, 3) + " x " + toFixed(gui.maxy.value-gui.miny.value,3) + " m<br> \
+					" + l.strMapSize + ": " + width + " x " + height + " Pixel<br> \
+					" + l.strPixelSize + ": " + toFixed(gui.pixelsize.value, 3) + " m\
 				</div> \
 			";
 	message([{

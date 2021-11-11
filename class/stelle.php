@@ -134,6 +134,7 @@ class stelle {
 			WHERE
 				ID = " . $this->id . "
 		";
+		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {

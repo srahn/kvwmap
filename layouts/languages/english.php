@@ -25,7 +25,9 @@
 	$this->strReset="Reset";
 	$this->strSaveMapViewCommittMassage="Mapview is saved";
 	$this->strMapScale="Scale";
-	$this->strCoordinates="Coordinates:";
+	$this->strCoordinates = 'Coordinates';
+	$this->strCoordinate = 'Coordinate';
+	$this->strCoordinateReferenceSystem = 'Coordinate Reference System';
 	$this->strUseGeometryOf="Use Geometry of";
 	$this->strActivateAllQueries="Activate/Deactivate all queries";
 	$this->strActivateAllLayers="Activate/Deactivate all layers";

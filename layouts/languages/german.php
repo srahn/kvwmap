@@ -25,7 +25,9 @@
 	$this->strConnect = "Verbinden";
 	$this->strReset = "Zurücksetzen";
 	$this->strSaveMapViewCommittMassage = "Kartenausschnitt wurde gespeichert";
-	$this->strCoordinates  =  "Koordinaten";
+	$this->strCoordinates  =  'Koordinaten';
+	$this->strCoordinate  =  'Koordinate';
+	$this->strCoordinateReferenceSystem = 'Koordinatenreferenzsystem';
 	$this->strAlias = "Alias";
 	$this->strMapScale = "Maßstab";
 	$this->strUseGeometryOf = "Geometrie übernehmen von";
