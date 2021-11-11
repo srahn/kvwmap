@@ -108,6 +108,7 @@ if ($doit == true) {
 						if (is_array($layer['attributes']['privileg'])) {
 							if (value_of($layer['shape'][$k], value_of($layer['attributes'], 'Editiersperre')) == 't') {
 								$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
+								$privileg = 0;
 							}
 						}
 						?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
@@ -369,6 +370,7 @@ if ($doit == true) {
 				</tr>
 			<?
 					$layer['attributes']['privileg'] = $definierte_attribute_privileges;
+					$privileg = $layer['attributes']['privileg'][$index];
 				}
 				if(value_of($this->formvars, 'printversion') == ''){
 			?>
