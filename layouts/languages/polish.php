@@ -19,6 +19,9 @@
 	$this->strSend = "wyślij"; 
 	$this->strEnter = "start"; 
 	$this->strReset = "ustaw na nowo"; 
+	$this->strCoordinates = 'Coordinates';
+	$this->strCoordinate = 'Coordinate';
+	$this->strCoordinateReferenceSystem = 'Coordinate Reference System';
 	$this->strSaveMapViewCommittMassage = "fragment mapy został zapisany";
 	$this->strExceeded = "przekroczona";
 	$this->strShowMore="Pokaż więcej";

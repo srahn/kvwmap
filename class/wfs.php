@@ -74,6 +74,9 @@ class wfs{
 					case 'LIKE' : {									# geht noch nicht, weil man den requeststring hierfür url-encoden muss und dann ist er zu lang 
 						$operator = 'PropertyIsLike';
 						$operator_attributes = " wildCard='*' singleChar='.' escape='!'";
+						if (strpos($values[$i], '%') === false) {
+							$values[$i] = '%' . $values[$i] . '%';
+						}
 						$values[$i] = str_replace('%', '*', $values[$i]);
 					}break;
 				}

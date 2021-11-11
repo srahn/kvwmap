@@ -21,7 +21,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	}
 	
 	adjustHref = function(link){
-		if (link.href.indexOf('index.php?go=') != -1 && link.target != 'root' && enclosingForm.name == 'GUI2') {
+		if (link.href.indexOf('index.php?') != -1 && link.target != 'root' && enclosingForm.name == 'GUI2') {
 			link.href = link.href.replace('?', '?window_type=overlay&');
 		}
 	}
@@ -125,8 +125,8 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			var name_dependent = scope.querySelector('#name_'+layer_id+'_'+dependent+'_'+k);
 			var value_dependent = scope.querySelector('#value_'+layer_id+'_'+dependent+'_'+k);
 			if(field_has_value(object, operator, value)){
-				if(name_dependent != null)name_dependent.style.visibility = 'visible';
-				value_dependent.style.visibility = 'visible';
+				if(name_dependent != null)name_dependent.style.visibility = 'inherit';
+				value_dependent.style.visibility = 'inherit';
 			}
 			else{
 				if(name_dependent != null)name_dependent.style.visibility = 'hidden';
@@ -158,6 +158,20 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				row.closest('div').closest('tr').style.display = group_display;
 			}
 		})
+		// visibility of tabs
+		if (document.querySelector('.gle_tabs.tab_' + layer_id + '_' + k) != null) {
+			tabs = [].slice.call(document.querySelector('.gle_tabs.tab_' + layer_id + '_' + k).children);
+			tabs.forEach(function(tab){
+				tab_display = 'none';
+				tab_groups = [].slice.call(document.querySelectorAll('.tab.tab_' + tab.classList[0]));
+				tab_groups.forEach(function(tab_group){
+					if (tab_group.style.display != 'none') {
+						tab_display = '';
+					}
+				})
+				tab.style.display = tab_display;
+			})
+		}
 	}
 
 	field_has_value = function(field, operator, value) {

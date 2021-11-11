@@ -19,6 +19,9 @@
 	$this->strSend="Sennen";
 	$this->strEnter="Start";
 	$this->strReset="Trüggsetten";
+	$this->strCoordinates  =  'Koordinaten';
+	$this->strCoordinate  =  'Koordinate';
+	$this->strCoordinateReferenceSystem = 'Coordinate Reference System';
 	$this->strSaveMapViewCommittMassage="Koortutsnitt is spiekert woorn";
 	$this->strExceeded = "überschritten";
 	$this->strShowMore="Mehr anzeigen";
