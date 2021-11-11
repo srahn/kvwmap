@@ -156,16 +156,25 @@ class Nachweis {
 		}
 	}
 	
-	function LENRIS_confirm_deleted_nachweise($ids){
+	function LENRIS_confirm_changed_nachweise($ids){
 		$sql = "
 			DELETE FROM 
 				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE 
-				id_nachweis IN (" . $ids . ") and db_action = 'DELETE'";
-		$ret = $this->database->execSQL($sql,4, 1);    
-    if (!$ret[0]) {
-			$rows = pg_affected_rows($ret[1]);
-			echo $rows;
+				id_nachweis IN (" . $ids . ") and db_action = 'UPDATE'";
+		$ret = $this->database->execSQL($sql,4, 1);
+		if (!$ret[0]) {
+			$sql = "
+				SELECT 
+					count(*)
+				FROM
+					nachweisverwaltung.n_nachweisaenderungen 
+				WHERE 
+					id_nachweis IN (" . $ids . ") and db_action = 'UPDATE'";
+			if (!$ret[0]) {
+				$rest = pg_fetch_row($ret[1]);
+				echo (count($ids) - $rest);
+			}
 		}
 	}		
 
