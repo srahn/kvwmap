@@ -73,7 +73,7 @@
 		var split = string.split(":");
 		var hours = parseInt(split[0], 10);
 		var minutes = parseInt(split[1], 10);
-		var seconds = parseInt(split[2] ?? 0, 10);
+		var seconds = parseInt(split[2] || 0, 10);
 		var check = new Date(2021, 4, 25, hours, minutes, seconds);
 		var hours2 = check.getHours();
 		var minutes2 = check.getMinutes();

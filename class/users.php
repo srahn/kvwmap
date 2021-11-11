@@ -978,10 +978,21 @@ class user {
 	}
 
 	function getStellen($stelle_ID) {
+		global $language;
+		if ($language != '' AND $language != 'german') {
+			$name_column = "
+			CASE
+				WHEN s.`Bezeichnung_" . $language . "` != \"\" THEN s.`Bezeichnung_" . $language . "`
+				ELSE s.`Bezeichnung`
+			END AS Bezeichnung";
+		}
+		else {
+			$name_column = "s.`Bezeichnung`";
+		}
 		$sql = "
 			SELECT
 				s.ID,
-				s.Bezeichnung
+				" . $name_column . "
 			FROM
 				stelle AS s,
 				rolle AS r

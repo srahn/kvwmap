@@ -3138,7 +3138,7 @@ echo '			</table>
 					$count = 2;		# weil ein select-Feld bei size 1 anders funktioniert
 				}
 				pg_result_seek($ret[1], 0);
-				echo'<select size="'.$count.'" style="width: 450px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';document.getElementById(\''.$this->formvars['field_id'].'\').value=this.value;document.getElementById(\''.$this->formvars['field_id'].'\').onchange();document.getElementById(\'output_'.$this->formvars['field_id'].'\').value=this.options[this.selectedIndex].text;document.getElementById(\'output_'.$this->formvars['field_id'].'\').onchange();">';
+				echo'<select size="'.$count.'" class="suggests" onclick="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';document.getElementById(\''.$this->formvars['field_id'].'\').value=this.value;document.getElementById(\''.$this->formvars['field_id'].'\').onchange();document.getElementById(\'output_'.$this->formvars['field_id'].'\').value=this.options[this.selectedIndex].text;document.getElementById(\'output_'.$this->formvars['field_id'].'\').onchange();">';
 				while($rs=pg_fetch_array($ret[1])) {
 					echo '<option onmouseover="this.selected = true;"  value="'.$rs['value'].'">'.$rs['output'].'</option>';
 				}
@@ -8810,7 +8810,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$this->user->rolle->delete_search($this->formvars['search_name']);		# das muss hier stehen bleiben, denn in save_search wird mit der Layer-ID gelöscht
 					$this->user->rolle->save_search($attributes, $this->formvars);
 				}
-				if(count($features) > 0){
+				if(!empty($features)){
 					# last_query speichern
 					$this->user->rolle->delete_last_query();
 					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $request, NULL, $this->formvars['anzahl'], NULL);
@@ -14795,15 +14795,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
   function getRow() {
 		$this->formvars['select'] = str_replace("''", "'", $this->formvars['select']);
 		$this->formvars['where'] = str_replace("''", "'", $this->formvars['where']);
-    $ret=$this->database->getRow($this->formvars['select'],$this->formvars['from'],$this->formvars['where']);
-    $first=1;
-    while (list($key, $val) = each($ret[1])) {
-      if (!$first) {
-        echo "█";
-      }
-      echo $val;
-      $first=0;
-    }
+    $ret = $this->database->getRow($this->formvars['select'],$this->formvars['from'],$this->formvars['where']);
+		foreach ($ret[1] as $key => $value) {
+			$result .= $value . '█';
+		}
+		echo rtrim($result, '█');
   }
 
   function layerfromMapfile(){

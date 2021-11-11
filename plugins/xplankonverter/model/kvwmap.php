@@ -125,7 +125,8 @@
 				$konvertierung->set_status();
 				
 				# layer_schemaname needs to be an empty textfield in the layer definition
-				if ($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;unknown;0'] == 'xplan_gmlas_' . $GUI->user->id) {
+				# 03.11.21 change from ... layer_schemaname;;;Text;;unknown;0' to ... layer_schemaname;;;Text;;text;0'
+				if (($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;unknown;0'] == 'xplan_gmlas_' . $GUI->user->id) || ($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;text;0'] == 'xplan_gmlas_' . $GUI->user->id)) {
 					# Creates Bereiche for each Plan loaded with GMLAS
 					$gml_extractor = new Gml_extractor($GUI->pgdatabase, 'placeholder', 'xplan_gmlas_' . $GUI->user->id);
 					$gml_extractor->insert_into_bereich($bereichtable, $konvertierung_id, $GUI->user->id);

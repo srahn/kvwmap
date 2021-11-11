@@ -28,7 +28,6 @@ class stelle {
 	var $pixsize;
 	var $selectedButton;
 	var $database;
-	var $language;
 
 	function __construct($id, $database) {
 		global $debug;
@@ -41,9 +40,10 @@ class stelle {
 	}
 
 	function getsubmenues($id){
+		global $language;
 		$sql ='SELECT menue_id,';
-		if ($this->language != 'german') {
-			$sql.='`name_'.$this->language.'` AS ';
+		if ($language != 'german') {
+			$sql.='`name_'.$language.'` AS ';
 		}
 		$sql .=' name, target, links FROM u_menue2stelle, u_menues';
 		$sql .=' WHERE stelle_id = '.$this->id;
@@ -93,9 +93,10 @@ class stelle {
 	}
 	
   function getName() {
+		global $language;
     $sql ='SELECT ';
-    if ($this->language != 'german' AND $this->language != ''){
-      $sql.='`Bezeichnung_'.$this->language.'` AS ';
+    if ($language != 'german' AND $language != ''){
+      $sql.='`Bezeichnung_'.$language.'` AS ';
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo '<p>SQL zur Abfrage des Stellennamens: ' . $sql;
@@ -110,7 +111,8 @@ class stelle {
   }
 
 	function readDefaultValues() {
-		if ($this->language != '' AND $this->language != 'german') {
+		global $language;
+		if ($language != '' AND $language != 'german') {
 			$name_column = "
 			CASE
 				WHEN s.`Bezeichnung_" . $language . "` != \"\" THEN s.`Bezeichnung_" . $language . "`
@@ -132,6 +134,7 @@ class stelle {
 			WHERE
 				ID = " . $this->id . "
 		";
+		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
@@ -1740,8 +1743,7 @@ class stelle {
 		$layer = array();
 		$sql = "
 			SELECT
-				l.*,
-				ul.*,
+				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
 				parent_id,
 				GROUP_CONCAT(ul2.Stelle_ID) as used_layer_parent_id,
 				GROUP_CONCAT(s.Bezeichnung) as used_layer_parent_bezeichnung
@@ -1756,6 +1758,8 @@ class stelle {
 			WHERE
 				ul.Stelle_ID = " . $this->id .
 				($Layer_id != '' ? " AND l.Layer_ID = " . $Layer_id : '') . "
+			GROUP BY 
+				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,	parent_id
 		";
 		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);
