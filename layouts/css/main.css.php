@@ -574,6 +574,10 @@ a.invisiblelayerlink:hover{
 	margin-top: 10px;
 }
 
+select[name="geom_from_layer"] {
+	width: 250px;
+}
+
 #params_table{
 	width: 1000px
 }
