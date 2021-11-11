@@ -170,7 +170,7 @@ class Nachweis {
 			DELETE FROM 
 				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE 
-				id_nachweis IN (" . $ids . ") and db_action = 'DELETE'";
+				id_nachweis IN (" . $ids . ")";		# alle Einträge löschen, da es noch UPDATE-Einträge geben kann
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
 			$rows = pg_affected_rows($ret[1]);
