@@ -25,13 +25,19 @@ BEGIN;
 				SELECT
 					ST_Collect(
 						ST_MakePolygon(
-							ST_ExteriorRing(a.geom),
+							ST_ExteriorRing(t2.geom2),
 							ARRAY(
 								SELECT
 									ST_ExteriorRing(
 										ST_CollectionExtract(
 											ST_RemoveRepeatedPoints(
-												ST_Difference(b.geom, ST_Buffer(ST_ExteriorRing(a.geom), %2$s)),
+												ST_Difference(
+													t3.geom,
+													ST_Buffer(
+														ST_ExteriorRing(t2.geom2),
+														%2$s
+													)
+												),
 												%3$s
 											),
 											3
@@ -40,17 +46,17 @@ BEGIN;
 								FROM
 									(
 										SELECT (
-											ST_DumpRings(a.geom)).*
-									) b
+											ST_DumpRings(t2.geom2)).*
+									) t3
 								WHERE
-									b.path[1] > 0 AND
+									t3.path[1] > 0 AND
 									ST_Area(
 										ST_CollectionExtract(
 											ST_RemoveRepeatedPoints(
 												ST_Difference(
-													b.geom,
+													t3.geom,
 													ST_Buffer(
-														ST_ExteriorRing(a.geom),
+														ST_ExteriorRing(t2.geom2),
 														%2$s
 													)
 												),
@@ -64,8 +70,29 @@ BEGIN;
 					) AS geom
 				FROM
 					(
-						SELECT ST_GeometryN(%1$L, generate_series(1, ST_NumGeometries(ST_Multi(%1$L)))) AS geom
-					) AS a
+						SELECT
+							ST_GeometryN(
+								t1.geom1,
+								generate_series(
+									1,
+									ST_NumGeometries(
+										t1.geom1
+									)
+								)
+							) AS geom2
+						FROM
+							(
+								SELECT
+									ST_Multi(
+										ST_CollectionExtract(
+											ST_MakeValid(
+												%1$L
+											),
+											3
+										)
+									) geom1
+							) t1
+					) AS t2
 			', par_geom, par_buffer, par_point_distance_threshold, par_area_threshold
 		);
 		EXECUTE var_sql INTO var_output;
