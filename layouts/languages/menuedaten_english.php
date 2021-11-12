@@ -1,3 +1,3 @@
-﻿<?php
+<?php
   $strTitel="Menu data"; 
 ?>  

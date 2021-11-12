@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strLayer="Layer";
   $strAsteriskRequired="Fields marked with an asterisk * are required";
 	$strBaseParameters="Base-Parameter";

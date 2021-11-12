@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strLayer="Layer";
 	$strAsteriskRequired="wartości oznaczone * muszą zostać wpisane";
 	$strDataBankID="warstwa ID*";

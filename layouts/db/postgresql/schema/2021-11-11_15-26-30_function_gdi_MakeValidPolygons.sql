@@ -10,7 +10,7 @@ BEGIN;
 	RETURNS geometry
 	LANGUAGE 'plpgsql'
 	COST 100
-	VOLATILE PARALLEL UNSAFE
+	VOLATILE 
 	AS $BODY$
 	DECLARE
 		var_output record;

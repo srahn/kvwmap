@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strLayer="Layer";
 	$strAsteriskRequired="Weerte mit een * mööst du indragen";
 	$strClassItem="Classitem";

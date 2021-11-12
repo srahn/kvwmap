@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $strTitleExtent="Gespeicherte Kartenausschnitte wählen";
 $strTitleLayers="Gespeicherte Themenauswahl laden";
 $strTime="Zeitstempel";

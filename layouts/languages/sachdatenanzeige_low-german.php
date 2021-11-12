@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strPrint="utdrucken";
 	$strSave="Spiekern";
 	$strbacktomap="Trügg to'r Koort";

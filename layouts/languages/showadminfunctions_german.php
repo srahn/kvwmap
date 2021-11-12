@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitle="Administrationsfunktionen";
 	$strUpdateCode="Aktualisierung des Quellcodes und der Datenbanken";
 	$strUpdateDBs="Aktualisierung der Datenbanken";
