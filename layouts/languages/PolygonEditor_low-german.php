@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $strSave="Spiekern";
 $strSaveWithoutZoom="Mangspiekern";
 $strArea="Flach";

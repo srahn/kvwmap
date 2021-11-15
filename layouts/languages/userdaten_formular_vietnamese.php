@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitle="Biên tập thông tin người dùng";
 	$strDataBankID="Số ID CSDL";
 	$strName="Họ";

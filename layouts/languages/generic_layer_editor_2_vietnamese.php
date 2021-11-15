@@ -1,4 +1,4 @@
-﻿<?php
+<?php
  $strEditGeom="Edit Geometry";
  $strMapZoom="Zoom To";
  $strSelectAll="select all";

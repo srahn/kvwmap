@@ -724,6 +724,12 @@ class Konvertierung extends PgObject {
 		$regeln = $this->get_regeln($this->plan);
 
 		// validate Plan
+		$validierung = new Validierung($this->gui);
+		$planvalidierungen = $validierung->find_where("functionsname LIKE 'plan_attribute_has_value'");
+		foreach($planvalidierungen AS $planvalidierung) {
+			$planvalidierung->konvertierung_id = $this->get($this->identifier);
+			$planvalidierung->plan_attribute_has_value();
+		}
 
 		// validate Bereiche
 		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'detaillierte_requires_bedeutung');
@@ -733,9 +739,11 @@ class Konvertierung extends PgObject {
 			$validierung->detaillierte_requires_bedeutung($bereich);
 		}
 
-		if (count($bereiche) == 0) {
-			$this->gui->add_message('warning', 'Die Validierung liefert kein Ergebnis, weil zum Plan keine Bereiche hinzugefügt wurden!');
-		}
+		// Set die Planvalidierung durchgeführt wird, führt diese Meldung in die Irre und kann weggelassen werden.
+		// ToDo: Ggf. wird der Hinweis als Validierungsergebnis gespeichert, dann wird er auch angezeigt.
+		#if (count($bereiche) == 0) {
+		#	$this->gui->add_message('warning', 'Die Validierung liefert kein Ergebnis, weil zum Plan keine Bereiche hinzugefügt wurden!');
+		#}
 
 		if (!empty($regeln)) {
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'regel_existiert');

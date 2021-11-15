@@ -1,4 +1,4 @@
-﻿<?php
+<?php
  $strEditGeom="edytuj geometri?";
  $strMapZoom="fragment mapy";
  $strSelectAll="wybierz wszystkie";

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitle="Administration";
 	$strUpdateCode="Update Code and Databases";
 	$strUpdateDBs="Update Databases";

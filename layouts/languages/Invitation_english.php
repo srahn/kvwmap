@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strInvitationHeader = 'Invitation for';
 	$strInvitaiionText = 'You have been invited to collaborate in WebGIS by';
 	$strInvitationLink = 'To accept the invitation, please click on the link below';

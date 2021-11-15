@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitelEdit = "Change user invitation";
 	$strTitelNew = "Invite User";
 	$strWhoShallBeInvided = "Who shall be invided?";

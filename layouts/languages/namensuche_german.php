@@ -1,4 +1,4 @@
-﻿<?php
+<?php
  $strTitle="Eigentümersuche";
  $strPerson="Person";
  $strGebiet="Gebiet";

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
  $strTitle="szukanie własciciela działki"; 
  $strPerson="Person";
  $strGebiet="District";

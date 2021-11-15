@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strInvitationHeader = 'Einladung für';
 	$strInvitaiionText = 'Sie sind zur Mitarbeit im WebGIS eingeladen worden von';
 	$strInvitationLink = 'Um der Einladung zu folgen klicken Sie bitte auf den nachstehenden Link.';
