@@ -13308,7 +13308,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     # Liste der Formularelementnamen, die betroffen sind in der Reihenfolge,
     # wie die Spalten in der Abfrage
     $select ="nZoomFactor,gui, CASE WHEN auto_map_resize = 1 THEN 'auto' ELSE CONCAT(nImageWidth,'x',nImageHeight) END AS mapsize";
-    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, highlighting, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T')";
+    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, highlighting, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T') as hist_timestamp";
     $from ='rolle';
     $where ="stelle_id='+this.form.Stelle_ID.value+' AND user_id=" . $this->user->id;
     $StellenFormObj->addJavaScript(
@@ -14655,10 +14655,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->formvars['select'] = str_replace("''", "'", $this->formvars['select']);
 		$this->formvars['where'] = str_replace("''", "'", $this->formvars['where']);
     $ret = $this->database->getRow($this->formvars['select'],$this->formvars['from'],$this->formvars['where']);
+		$delim = '';
 		foreach ($ret[1] as $key => $value) {
-			$result .= $value . '█';
+			$result .= $delim . $value;
+			$delim = '█';
 		}
-		echo rtrim($result, '█');
+		echo $result;
   }
 
   function layerfromMapfile(){
