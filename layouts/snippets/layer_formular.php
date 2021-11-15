@@ -668,7 +668,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSync; ?></th>
+						<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><a name="sync"></a><?php echo $strSync; ?></th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="sync" type="checkbox" value="1"<?php if ($this->formvars['sync']) echo ' checked'; ?>>&nbsp;
 							<span data-tooltip="<?php echo $strSyncHelp; ?>"></span>
@@ -679,7 +679,7 @@
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="listed" type="checkbox" value="1"<?php if ($this->formvars['listed']) echo ' checked'; ?>>
 						</td>
-					</tr>				
+					</tr>
 				</table>
 		</div>
 		

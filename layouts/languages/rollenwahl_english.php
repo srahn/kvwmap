@@ -34,6 +34,8 @@
 	$strSingleQuery="only one layer queryable";
 	$strQuerymode="show query-results in window";
 	$strNewDatasetOrder="objectcreation-order";
+	$strAlwaysCreateNext="always capture the next dataset";
+	$strUploadOnlyFileMetadata="Upload only file metadata.";
 	$strGeomSecond="attributes first";
 	$strGeomFirst="geometry first";
 	$strGeneralOptions="General";
@@ -67,6 +69,8 @@
 	$strHintSingleQuery="If you activate this option, the legends request checkboxes will be shown as radiobuttons. You may query only one theme per request.";
 	$strHintQuerymode="If you activate this option, a displayed request will appear as a window that is floating above the map.";
 	$strHintNewDatasetOrder="Choose whether you want to edit the geometry or the attributes first, when you are recording a new dataset.";
+	$strAlwaysCreateNext="Keeps the form open to capute the next data set right after save one.";
+	$strHintUploadOnlyFileMetadata="When you upload documents in a formular only there metadata filename, modification date and file size will be upload and saved to the server. The files itself will not be uploaded so far. As preview images a hint will occure, that the files are still missing. The files can be uploaded later. Therefore you use the menue 'Upload belated files' or with this option off in the data formulars. The assignment of the belated uploaded files to there metadata works only if it has been done by the same user that uploaded also the metadata and the filename, file size and modification date not has been changed.";
 	$strHintFontSizeGLE="Choose the font size in the data display.";
 	$strHintHighlight="If you activate this option, objects of your requested theme will be highlighted in the map with a blue enclosure if you hover it with the cursor.";
 	$strHinthist_timestamp="If you insert a calendar date, the ALKIS objects will be shown in the map with this historical timestamp. Requests on cadastral parcels will also provide results with this historical timestamp.";

@@ -10,8 +10,7 @@ CREATE TABLE uko_polygon
   id serial NOT NULL,
   username character varying(25),
   userid integer
-)
-WITH OIDS;
+);
 select AddGeometryColumn ('public','uko_polygon','the_geom',2398,'GEOMETRY',2);  -- oder 2399
 
 
@@ -46,8 +45,7 @@ CREATE TABLE spatial_ref_sys_alias
   maxx integer,
   maxy integer,
   CONSTRAINT spatial_ref_sys_alias_pkey PRIMARY KEY (srid)
-)
-WITH OIDS;
+);
 
 CREATE INDEX spatial_ref_sys_srid_idx
   ON spatial_ref_sys
@@ -69,8 +67,7 @@ CREATE INDEX spatial_ref_sys_alias_srid_idx
 CREATE TABLE shp_import_tables
 (
   tabellenname character varying(255) NOT NULL
-) 
-WITH OIDS;
+) ;
 
 --# Tabellen für Dokumente
 -- # Hinzufügen einer Tabelle u_polygon zur Speicherung von Polygonen
@@ -79,8 +76,7 @@ CREATE TABLE u_polygon
 (
   id serial NOT NULL,
   CONSTRAINT u_polygon_pkey PRIMARY KEY (id)
-) 
-WITH OIDS;
+) ;
 
 SELECT AddGeometryColumn('public', 'u_polygon','the_geom',2398,'GEOMETRY', 2);
 CREATE INDEX u_polygon_the_geom_gist ON u_polygon USING GIST (the_geom);
@@ -92,8 +88,7 @@ CREATE TABLE tabelleninfo
 (
   thema character varying(20),
   datum character varying(10)
-)
-WITH OIDS;
+);
 
 
 --##################################################
@@ -104,8 +99,7 @@ CREATE TABLE q_notizen
   kategorie_id integer,
   person varchar(100),
   datum date
-) 
-WITH OIDS;
+) ;
 SELECT AddGeometryColumn('public', 'q_notizen','the_geom',2398,'GEOMETRY', 2);
 CREATE INDEX q_notizen_the_geom_gist ON q_notizen USING GIST (the_geom);
 -- ALTER TABLE q_notizen DROP CONSTRAINT enforce_geotype_the_geom;
@@ -119,8 +113,7 @@ CREATE TABLE q_notiz_kategorien
   id serial NOT NULL,
   kategorie text,
   CONSTRAINT q_notiz_kategorien_pkey PRIMARY KEY (id)
-) 
-WITH OIDS;
+) ;
 
 INSERT INTO q_notiz_kategorien (id, kategorie) VALUES (1, 'Testkategorie');
 
@@ -131,8 +124,7 @@ CREATE TABLE q_notiz_kategorie2stelle
   lesen bool NOT NULL DEFAULT false,
   anlegen bool NOT NULL DEFAULT false,
   aendern bool DEFAULT false
-) 
-WITH OIDS;
+) ;
 
 CREATE INDEX q_notizen_kategorie_id_idx ON q_notizen USING btree (kategorie_id);
 CREATE INDEX q_notiz_kategorie2stelle_stelle_idx ON q_notiz_kategorie2stelle USING btree (stelle);

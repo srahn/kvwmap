@@ -8,10 +8,10 @@ class Gml_extractor {
 		$this->gml_location = $gml_location;
 		$this->gmlas_schema = $gmlas_schema;
 		$this->xsd_location = '/var/www/html/modell/xsd/5.1/XPlanung-Operationen.xsd';
-		$this->docker_gdal_cmd = 'docker exec gdal';
+		#$this->docker_gdal_cmd = 'docker exec gdal';
 		#TODO consider other options of parsing epsgs from the file (e.g. with ogrinfo) or have an input field on upload 
-		$this->input_epsg = '25833';
-		$this->epsg = '25833';
+		$this->input_epsg = '25832';
+		$this->epsg = '25832';
 	}
 
 	/*
@@ -25,7 +25,11 @@ class Gml_extractor {
 		$this->epsg = $GUI->Stelle->epsg_code;
 
 		$this->build_basic_tables();
-		$this->ogr2ogr_gmlas();
+		$gmlas_output = $this->ogr2ogr_gmlas();
+		if($gmlas_output == "Nothing returned from ogr2ogr curl request") {
+			echo 'Laden der Daten mit GML-AS fehlgeschlagen. Bitte kontaktieren Sie Ihren Administrator!';
+			return;
+		}
 		# $tables = $this->get_all_tables_in_schema($this->gmlas_schema);
 
 		# Revert the geom of GML to database specific winding order of vertices (CW/RHR IN DB and Shape, CCW/LHR in GML)
@@ -40,9 +44,10 @@ class Gml_extractor {
 			}
 		}
 
+
 		$layername = '';
 		$tablename = strtolower($classname); #for DB
-
+		
 		switch ($classname) {
 			case 'BP_Plan' : {
 				$layername = 'B-Pläne';
@@ -74,10 +79,10 @@ class Gml_extractor {
 		}
 
 		# Mapping of input to output schema
+		# Dynamic function
 		$formdata = array();
 		$fill_form_table = 'fill_form_' . $tablename;
 		$formdata = $this->$fill_form_table($gml_id);
-
 		$rect = ms_newRectObj();
 
 		# iterate over all attributes as formvars
@@ -98,10 +103,13 @@ class Gml_extractor {
 				$oid = $r_value;
 			}
 		}
+		if(empty($oid)) {
+			$oid = $this->trim_gml_prefix_if_exists($gml_id); # workaround for now
+		}
+
 		# get extent of geometry for zooming 
 		$extent = $this->get_bbox_from_wkt($GUI->formvars['pathwkt']);
-		$GUI->formvars = $GUI->formvars + $extent;		
-		
+		$GUI->formvars = $GUI->formvars + $extent;
 		$GUI->formvars['checkbox_names_' . $GUI->formvars['chosen_layer_id']] = 'check;' . $layername . ';' . $tablename . ';' . $oid . '|';
 		$GUI->formvars['check;' . $layername .';' . $tablename . ';' . $oid] = 'on';
 		$GUI->formvars['attributenames'][] = 'layer_schemaname';
@@ -135,7 +143,9 @@ class Gml_extractor {
 			}
 			#echo 'could not find XPlan srsName within double quotes. checking single quotes:<br>';
 		}
-		#echo $matched_epsg_str[1] . '<br>';
+
+		# echo $matched_epsg_str[1] . '<br>';
+
 		if(isset($matched_epsg_str[1])) {
 			// e.g. for EPSG:25832
 			$epsg_elements_array = explode(':',$matched_epsg_str[1]);
@@ -175,44 +185,48 @@ class Gml_extractor {
 			if (preg_match('/xplan="([^"]+)"/', $line, $matched_ns_str)) {
 				break; #found it
 			}
-			if (preg_match('/xplan=\'([^"]+)\'/', $line, $matched_ns_str)) {
+			else if (preg_match('/xplan=\'([^"]+)\'/', $line, $matched_ns_str)) {
 				break; #found it
 			}
-			if (preg_match('/xplan=\'([^"]+)\'/', $line, $matched_ns_str)) {
+			else if (preg_match('/xplan=\'([^"]+)\'/', $line, $matched_ns_str)) {
 				break; #found it
-			} else {
+			}
+			else {
 				$msg  = 'Konnte XPlanAuszug oder Namespace xplan nicht in Datei finden.<br>';
 				$msg .= 'Überprüfen Sie die Validität der XPlanung-Datei';
-				$GUI->add_message('warning', $msg);
-				$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
-				$GUI->output();
+				#$GUI->add_message('warning', $msg);
+				#$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
+				#$GUI->output();
 				#echo 'Could not find XPlanAuszug. XPlan-file is not valid';
 			}
 			#echo 'could not find XPlan srsName within double quotes. checking single quotes:<br>';
 		}
 		#echo $matched_ns_str[1] . '<br>';
+
 		if (preg_match('/5\/1/', $matched_ns_str[1], $matched_version_str)) {
-				echo $matched_ns_str[1] . '<br>';
-				$version = '5.1';
-				break; #found it
+			$version = '5.1';
 		} else if (preg_match('/5.1/', $matched_ns_str[1], $matched_version_str)) {
-				$version = '5.1';
+			$version = '5.1';
 		} else if (preg_match('/5\/2/', $matched_ns_str[1], $matched_version_str)) {
-				$version = '5.2';
+			$version = '5.2';
 		} else if (preg_match('/5.2/', $matched_ns_str[1], $matched_version_str)) {
-				$version = '5.2';
+			$version = '5.2';
+		} else if (preg_match('/5\/0/', $matched_ns_str[1], $matched_version_str)) {
+			$version = '5.0';
+		} else if (preg_match('/5.0/', $matched_ns_str[1], $matched_version_str)) {
+			$version = '5.0';	
 		} else {
 			$msg  = 'Die XPlan-GML Version der Datei kann nicht identifiziert werden.<br>';
 			$msg .= 'Bitte überprüfen Sie, ob die XPlan-Version valide ist und der Namespace in Version 5.1 oder 5.2 liegt<br>';
 			$msg .= 'Es wird eine Fallback-Version 5.1 verwendet.<br>';
-			$GUI->add_message('warning', $msg);
-			$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
-			$GUI->output();
+			#$GUI->add_message('warning', $msg);
+			#$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
+			#$GUI->output();
 			#echo 'Could not identify a valid XPlan version.<br>Please make sure that the XPlan-version is valid an in namespace version 5.2 or 5.1.<br>A fallback version of ' . $version . ' will be used.<br>';
 		}
 		#echo 'version:' . $version;
 		return $version;
-	}	
+	}
 
 	/*
 	* Returns TRUE OR FALSE, depending on whether the schema exists
@@ -271,11 +285,30 @@ class Gml_extractor {
 	*/
 	function ogr2ogr_gmlas() {
 		# For Logging add: . ' >> /var/www/logs/ogr_' . $gml_id . '.log 2>> /var/www/logs/ogr_' . $gml_id . '.err'
-		$cmd = $this->docker_gdal_cmd . ' ' . OGR_BINPATH_GDAL . 'ogr2ogr -f "PostgreSQL" PG:"' . $this->pgdatabase->get_connection_string() . ' SCHEMAS=' . $this->gmlas_schema .'" GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location;
-		# echo $cmd;
-		exec($cmd, $output, $error_code);
-		# echo '<pre>'; print_r($output); echo '</pre>';
-		# echo 'Error-Code:' . $error_code;
+		# escape for passwords with shell 
+		#$cmd = $this->docker_gdal_cmd . ' ' . OGR_BINPATH_GDAL . 'ogr2ogr -f "PostgreSQL" PG:"' . $this->pgdatabase->get_connection_string_p() . ' SCHEMAS=' . $this->gmlas_schema .'" GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location;
+		#echo $cmd;
+		#exec($cmd, $output, $error_code);
+		#echo '<pre>'; print_r($output); echo '</pre>';
+		#echo 'Error-Code:' . $error_code;
+		
+		$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
+		$param_1                = urlencode('-f "PostgreSQL" PG:');
+		$connection_string      = urlencode('"' . $this->pgdatabase->get_connection_string() . ' SCHEMAS=' . $this->gmlas_schema . '" ');
+		$param_2                = urlencode('GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
+		
+		$url = $gdal_container_connect . $param_1 . $connection_string . $param_2;	
+		#echo 'url: ' . $url . '<br><br>';
+
+		$ch = curl_init();
+		#$url = curl_escape($ch, $url);
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,300);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		$output = curl_exec($ch);
+		curl_close($ch);
+		
+		#echo empty($output) ? "Nothing returned from ogr2ogr curl request" : $output;
 		return $output;
 	}
 
@@ -305,7 +338,7 @@ class Gml_extractor {
 			;";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$result = pg_fetch_all($ret[1]);
-		$result = (!empty($result)) ? array_column($result, 'table_name') : array();
+		//$result = (!empty($result)) ? array_column($result, 'table_name') : array();
 		return $result;
 	}
 
@@ -327,7 +360,7 @@ class Gml_extractor {
 			;";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$result = pg_fetch_all($ret[1]);
-		//$result = (!empty($result)) ? array_column($result, 'table_name') : array();
+		#$result = (!empty($result)) ? array_column($result, 'table_name') : array();
 		return $result;
 	}
 
@@ -366,7 +399,7 @@ class Gml_extractor {
 	function fill_form_bp_plan($gml_id) {
 		$sql = "
 			SELECT
-				gmlas.oid," . 
+				" . 
 				"'" . $this->trim_gml_prefix_if_exists($gml_id) . "'::text::uuid AS plan_gml_id,
 				gmlas.xplan_name AS name,
 				gmlas.nummer AS nummer,
@@ -392,17 +425,9 @@ class Gml_extractor {
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
 				END AS verfahrensmerkmale,
-				CASE WHEN e.georefurl IS NOT NULL OR e.georefmimetype_codespace IS NOT NULL OR e.georefmimetype IS NOT NULL OR e.art IS NOT NULL OR e.informationssystemurl IS NOT NULL OR e.referenzname IS NOT NULL OR e.referenzmimetype_codespace IS NOT NULL OR e.referenzmimetype IS NOT NULL OR e.beschreibung IS NOT NULL OR e.datum IS NOT NULL OR e.typ IS NOT NULL THEN 
-					array_to_json(ARRAY[(e.georefurl, 
-						(e.georefmimetype_codespace, e.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.art::xplan_gml.xp_externereferenzart,
-						e.informationssystemurl,
-						e.referenzname, e.referenzurl,
-						(e.referenzmimetype_codespace, e.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.beschreibung,
-						to_char(e.datum, 'DD.MM.YYYY'),
-						e.typ::xplan_gml.xp_externereferenztyp
-					)]::xplan_gml.xp_spezexternereferenz[])
+				CASE
+					WHEN count_externeref > 0
+					THEN array_to_json(externeref.externereferenz)
 					ELSE NULL
 				END AS externereferenz,
 				to_char(gmlas.veraenderungssperredatum, 'DD.MM.YYYY') AS veraenderungssperredatum,
@@ -433,8 +458,27 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".bp_plan gmlas LEFT JOIN
 				" . $this->gmlas_schema . ".bp_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN
-				" . $this->gmlas_schema . ".bp_plan_externereferenz externereferenzlink ON gmlas.id = externereferenzlink.parent_id LEFT JOIN
-				" . $this->gmlas_schema . ".xp_spezexternereferenz e ON externereferenzlink.xp_spezexternereferenz_pkid = e.ogr_pkid LEFT JOIN
+				(
+					SElECT
+						COUNT(*) AS count_externeref,
+						externereferenzlink_sub.parent_id,
+						array_agg((e_sub.georefurl,
+								(e_sub.georefmimetype_codespace, e_sub.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.art::xplan_gml.xp_externereferenzart,
+								e_sub.informationssystemurl,
+								e_sub.referenzname,
+								e_sub.referenzurl,
+								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.beschreibung,
+								to_char(e_sub.datum, 'DD.MM.YYYY'),
+								e_sub.typ::xplan_gml.xp_externereferenztyp
+							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+					FROM
+						" . $this->gmlas_schema . ".bp_plan_externereferenz externereferenzlink_sub LEFT JOIN
+						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
+					GROUP BY
+						externereferenzlink_sub.parent_id
+				) externeref ON gmlas.id = externeref.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".bp_plan_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid LEFT JOIN
@@ -462,7 +506,7 @@ class Gml_extractor {
 	function fill_form_fp_plan($gml_id) {
 		$sql = "
 			SELECT
-				gmlas.oid," . 
+				" . 
 				"'" . $this->trim_gml_prefix_if_exists($gml_id) . "'::text::uuid AS plan_gml_id,
 				gmlas.xplan_name AS name,
 				gmlas.nummer AS nummer,
@@ -488,17 +532,9 @@ class Gml_extractor {
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
 				END AS verfahrensmerkmale,
-				CASE WHEN e.georefurl IS NOT NULL OR e.georefmimetype_codespace IS NOT NULL OR e.georefmimetype IS NOT NULL OR e.art IS NOT NULL OR e.informationssystemurl IS NOT NULL OR e.referenzname IS NOT NULL OR e.referenzmimetype_codespace IS NOT NULL OR e.referenzmimetype IS NOT NULL OR e.beschreibung IS NOT NULL OR e.datum IS NOT NULL OR e.typ IS NOT NULL THEN 
-					array_to_json(ARRAY[(e.georefurl, 
-						(e.georefmimetype_codespace, e.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.art::xplan_gml.xp_externereferenzart,
-						e.informationssystemurl,
-						e.referenzname, e.referenzurl,
-						(e.referenzmimetype_codespace, e.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.beschreibung,
-						to_char(e.datum, 'DD.MM.YYYY'),
-						e.typ::xplan_gml.xp_externereferenztyp
-					)]::xplan_gml.xp_spezexternereferenz[])
+				CASE
+					WHEN count_externeref > 0
+					THEN array_to_json(externeref.externereferenz)
 					ELSE NULL
 				END AS externereferenz,
 				array_to_json(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[]) AS auslegungsenddatum,
@@ -522,8 +558,27 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".fp_plan gmlas LEFT JOIN
 				" . $this->gmlas_schema . ".fp_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN
-				" . $this->gmlas_schema . ".fp_plan_externereferenz externereferenzlink ON gmlas.id = externereferenzlink.parent_id LEFT JOIN
-				" . $this->gmlas_schema . ".xp_spezexternereferenz e ON externereferenzlink.xp_spezexternereferenz_pkid = e.ogr_pkid LEFT JOIN
+				(
+					SElECT
+						COUNT(*) AS count_externeref,
+						externereferenzlink_sub.parent_id,
+						array_agg((e_sub.georefurl,
+								(e_sub.georefmimetype_codespace, e_sub.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.art::xplan_gml.xp_externereferenzart,
+								e_sub.informationssystemurl,
+								e_sub.referenzname,
+								e_sub.referenzurl,
+								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.beschreibung,
+								to_char(e_sub.datum, 'DD.MM.YYYY'),
+								e_sub.typ::xplan_gml.xp_externereferenztyp
+							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+					FROM
+						" . $this->gmlas_schema . ".fp_plan_externereferenz externereferenzlink_sub LEFT JOIN
+						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
+					GROUP BY
+						externereferenzlink_sub.parent_id
+				) externeref ON gmlas.id = externeref.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".fp_plan_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid LEFT JOIN
@@ -551,7 +606,7 @@ class Gml_extractor {
 	function fill_form_so_plan($gml_id) {
 		$sql = "
 			SELECT
-				gmlas.oid," . 
+				" . 
 				"'" . $this->trim_gml_prefix_if_exists($gml_id) . "'::text::uuid AS plan_gml_id,
 				gmlas.xplan_name AS name,
 				gmlas.nummer AS nummer,
@@ -577,17 +632,9 @@ class Gml_extractor {
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
 				END AS verfahrensmerkmale,
-				CASE WHEN e.georefurl IS NOT NULL OR e.georefmimetype_codespace IS NOT NULL OR e.georefmimetype IS NOT NULL OR e.art IS NOT NULL OR e.informationssystemurl IS NOT NULL OR e.referenzname IS NOT NULL OR e.referenzmimetype_codespace IS NOT NULL OR e.referenzmimetype IS NOT NULL OR e.beschreibung IS NOT NULL OR e.datum IS NOT NULL OR e.typ IS NOT NULL THEN 
-					array_to_json(ARRAY[(e.georefurl, 
-						(e.georefmimetype_codespace, e.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.art::xplan_gml.xp_externereferenzart,
-						e.informationssystemurl,
-						e.referenzname, e.referenzurl,
-						(e.referenzmimetype_codespace, e.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.beschreibung,
-						to_char(e.datum, 'DD.MM.YYYY'),
-						e.typ::xplan_gml.xp_externereferenztyp
-					)]::xplan_gml.xp_spezexternereferenz[])
+				CASE
+					WHEN count_externeref > 0
+					THEN array_to_json(externeref.externereferenz)
 					ELSE NULL
 				END AS externereferenz,
 				to_json((pg.name, pg.kennziffer)::xplan_gml.xp_plangeber) AS plangeber,
@@ -597,8 +644,27 @@ class Gml_extractor {
 				" . $this->gmlas_schema . ".so_plan gmlas LEFT JOIN
 				/*" . $this->gmlas_schema . ".so_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN*/
 				/*" . $this->gmlas_schema . ".xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN*/
-				" . $this->gmlas_schema . ".so_plan_externereferenz externereferenzlink ON gmlas.id = externereferenzlink.parent_id LEFT JOIN
-				" . $this->gmlas_schema . ".xp_spezexternereferenz e ON externereferenzlink.xp_spezexternereferenz_pkid = e.ogr_pkid LEFT JOIN
+				(
+					SElECT
+						COUNT(*) AS count_externeref,
+						externereferenzlink_sub.parent_id,
+						array_agg((e_sub.georefurl,
+								(e_sub.georefmimetype_codespace, e_sub.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.art::xplan_gml.xp_externereferenzart,
+								e_sub.informationssystemurl,
+								e_sub.referenzname,
+								e_sub.referenzurl,
+								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.beschreibung,
+								to_char(e_sub.datum, 'DD.MM.YYYY'),
+								e_sub.typ::xplan_gml.xp_externereferenztyp
+							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+					FROM
+						" . $this->gmlas_schema . ".so_plan_externereferenz externereferenzlink_sub LEFT JOIN
+						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
+					GROUP BY
+						externereferenzlink_sub.parent_id
+				) externeref ON gmlas.id = externeref.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".so_plan_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
@@ -622,7 +688,7 @@ class Gml_extractor {
 	function fill_form_rp_plan($gml_id) {
 		$sql = "
 			SELECT
-				gmlas.oid," . 
+				" . 
 				"'" . $this->trim_gml_prefix_if_exists($gml_id) . "'::text::uuid AS plan_gml_id,
 				gmlas.xplan_name AS name,
 				gmlas.nummer AS nummer,
@@ -648,17 +714,9 @@ class Gml_extractor {
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
 				END AS verfahrensmerkmale,
-				CASE WHEN e.georefurl IS NOT NULL OR e.georefmimetype_codespace IS NOT NULL OR e.georefmimetype IS NOT NULL OR e.art IS NOT NULL OR e.informationssystemurl IS NOT NULL OR e.referenzname IS NOT NULL OR e.referenzmimetype_codespace IS NOT NULL OR e.referenzmimetype IS NOT NULL OR e.beschreibung IS NOT NULL OR e.datum IS NOT NULL OR e.typ IS NOT NULL THEN 
-					array_to_json(ARRAY[(e.georefurl, 
-						(e.georefmimetype_codespace, e.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.art::xplan_gml.xp_externereferenzart,
-						e.informationssystemurl,
-						e.referenzname, e.referenzurl,
-						(e.referenzmimetype_codespace, e.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
-						e.beschreibung,
-						to_char(e.datum, 'DD.MM.YYYY'),
-						e.typ::xplan_gml.xp_externereferenztyp
-					)]::xplan_gml.xp_spezexternereferenz[])
+				CASE
+					WHEN count_externeref > 0
+					THEN array_to_json(externeref.externereferenz)
 					ELSE NULL
 				END AS externereferenz,
 				gmlas.planungsregion AS planungsregion,
@@ -680,8 +738,27 @@ class Gml_extractor {
 				gmlas.planart::xplan_gml.rp_art AS planart
 			FROM
 				" . $this->gmlas_schema . ".rp_plan gmlas LEFT JOIN
-				" . $this->gmlas_schema . ".rp_plan_externereferenz externereferenzlink ON gmlas.id = externereferenzlink.parent_id LEFT JOIN
-				" . $this->gmlas_schema . ".xp_spezexternereferenz e ON externereferenzlink.xp_spezexternereferenz_pkid = e.ogr_pkid LEFT JOIN
+				(
+					SElECT
+						COUNT(*) AS count_externeref,
+						externereferenzlink_sub.parent_id,
+						array_agg((e_sub.georefurl,
+								(e_sub.georefmimetype_codespace, e_sub.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.art::xplan_gml.xp_externereferenzart,
+								e_sub.informationssystemurl,
+								e_sub.referenzname,
+								e_sub.referenzurl,
+								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.beschreibung,
+								to_char(e_sub.datum, 'DD.MM.YYYY'),
+								e_sub.typ::xplan_gml.xp_externereferenztyp
+							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+					FROM
+						" . $this->gmlas_schema . ".rp_plan_externereferenz externereferenzlink_sub LEFT JOIN
+						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
+					GROUP BY
+						externereferenzlink_sub.parent_id
+				) externeref ON gmlas.id = externeref.parent_id LEFT JOIN
 				" . $this->gmlas_schema . ".rp_plan_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
 				" . $this->gmlas_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid LEFT JOIN
@@ -730,7 +807,7 @@ class Gml_extractor {
 				gmlas.bedeutung::xplan_gml.xp_bedeutungenbereich AS bedeutung,
 				gmlas.detailliertebedeutung AS detailliertebedeutung,
 				gmlas.erstellungsmassstab AS erstellungsmassstab,
-				ST_ForceRHR(st_transform(gmlas.geltungsbereich,". $this->epsg .")) AS geltungsbereich,
+				ST_Multi(ST_ForceRHR(st_transform(gmlas.geltungsbereich,". $this->epsg ."))) AS geltungsbereich,
 				" . $user_id . " AS user_id,
 				" . $konvertierung_id . " AS konvertierung_id,
 				trim(leading '#gml_' FROM lower(gmlas.rasterbasis_href)) AS rasterbasis,";
@@ -759,8 +836,12 @@ class Gml_extractor {
 		}
 		// string needs to be lowered both to simplify cutting #gml_ in all forms and
 		// because uuid (e.g. in gml_id of the associated plan) is always lowercase when cast to text
+		// will take first plan encountered in gmlas-schema if bereich id is not set (or could not be read by ogr)
 		$sql .= "
-				trim(leading '#gml_' FROM lower(gmlas.gehoertzuplan_href)) AS gehoertzuplan
+				CASE
+					WHEN gmlas.gehoertzuplan_href IS NOT NULL THEN trim(leading '#gml_' FROM lower(gmlas.gehoertzuplan_href))::uuid
+					ELSE trim(leading '#gml_' FROM lower((SELECT DISTINCT id FROM " . $this->gmlas_schema . "." . substr($table,0,3) . "plan LIMIT 1)))::uuid
+				END AS gehoertzuplan
 			FROM
 				" . $this->gmlas_schema . "." . $table . " gmlas
 			;";
@@ -812,9 +893,6 @@ class Gml_extractor {
 				identifier_codespace character varying,
 				identifier character varying,
 				CONSTRAINT xplanauszug_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".xplanauszug_featuremember
@@ -1019,9 +1097,6 @@ class Gml_extractor {
 				abstractfeature_xp_rasterdarstellung_pkid character varying,
 				abstractfeature_rp_legendenobjekt_pkid character varying,
 				CONSTRAINT xplanauszug_featuremember_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan
@@ -1068,9 +1143,6 @@ class Gml_extractor {
 				gruenordnungsplan boolean,
 				raeumlichergeltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT bp_plan_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_bereich
@@ -1106,9 +1178,6 @@ class Gml_extractor {
 				gehoertzuplan_pkid character varying,
 				geltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT bp_bereich_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan
@@ -1148,9 +1217,6 @@ class Gml_extractor {
 				wirksamkeitsdatum date,
 				raeumlichergeltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT fp_plan_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_bereich
@@ -1186,9 +1252,6 @@ class Gml_extractor {
 				gehoertzuplan_pkid character varying,
 				geltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT fp_bereich_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan
@@ -1217,9 +1280,6 @@ class Gml_extractor {
 				plangeber_xp_plangeber_pkid character varying,
 				raeumlichergeltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT so_plan_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_bereich
@@ -1249,9 +1309,6 @@ class Gml_extractor {
 				gehoertzuplan_pkid character varying,
 				geltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT so_bereich_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 
@@ -1294,9 +1351,6 @@ class Gml_extractor {
 				amtlicherschluessel integer,
 				raeumlichergeltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT rp_plan_pkey PRIMARY KEY (ogc_fid)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_bereich
@@ -1332,9 +1386,7 @@ class Gml_extractor {
 				geltungsbereich geometry(Geometry," . $this->input_epsg . "),
 				CONSTRAINT rp_bereich_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_bereich
 			(
@@ -1348,9 +1400,7 @@ class Gml_extractor {
 				bereich_pkid character varying,
 				CONSTRAINT bp_plan_bereich_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_bereich
 			(
@@ -1364,9 +1414,7 @@ class Gml_extractor {
 				bereich_pkid character varying,
 				CONSTRAINT fp_plan_bereich_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_bereich
 			(
@@ -1380,9 +1428,7 @@ class Gml_extractor {
 				bereich_pkid character varying,
 				CONSTRAINT rp_plan_bereich_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan_bereich
 			(
@@ -1396,9 +1442,7 @@ class Gml_extractor {
 				bereich_pkid character varying,
 				CONSTRAINT so_plan_bereich_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".xp_verbundenerplan
 			(
@@ -1413,9 +1457,7 @@ class Gml_extractor {
 				verbundenerplan_nilreason character varying,
 				CONSTRAINT xp_verbundenerplan_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".aendert
 			(
@@ -1424,9 +1466,7 @@ class Gml_extractor {
 				xp_verbundenerplan_pkid character varying,
 				CONSTRAINT aendert_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_aendert_aendert
 			(
@@ -1436,9 +1476,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT bp_plan_aendert_aendert_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_aendert_aendert
@@ -1449,9 +1487,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT fp_plan_aendert_aendert_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_aendert_aendert
 			(
@@ -1461,9 +1497,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT rp_plan_aendert_aendert_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan_aendert_aendert
 			(
@@ -1473,9 +1507,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT so_plan_aendert_aendert_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".wurdegeaendertvon
 			(
@@ -1484,9 +1516,7 @@ class Gml_extractor {
 				xp_verbundenerplan_pkid character varying,
 				CONSTRAINT wurdegeaendertvon_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_wurdegeaendertvon_wurdegeaendertvon
 			(
@@ -1496,9 +1526,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT bp_plan_wurdegeaendertvon_wurdegeaendertvon_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_wurdegeaendertvon_wurdegeaendertvon
 			(
@@ -1508,9 +1536,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT fp_plan_wurdegeaendertvon_wurdegeaendertvon_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_wurdegeaendertvon_wurdegeaendertvon
 			(
@@ -1520,9 +1546,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT rp_plan_wurdegeaendertvon_wurdegeaendertvon_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan_wurdegeaendertvon_wurdegeaendertvon
 			(
@@ -1532,9 +1556,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT so_plan_wurdegeaendertvon_wurdegeaendertvon_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".verfahrensmerkmale
 			(
@@ -1546,9 +1568,7 @@ class Gml_extractor {
 				xp_verfahrensmerkmal_signiert boolean,
 				CONSTRAINT verfahrensmerkmale_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_verfahrensmerkmale_verfahrensmerkmale
 			(
@@ -1558,9 +1578,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT bp_plan_verfahrensmerkmale_verfahrensmerkmale_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_verfahrensmerkmale_verfahrensmerkmale
 			(
@@ -1570,9 +1588,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT fp_plan_verfahrensmerkmale_verfahrensmerkmale_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_verfahrensmerkmale_verfahrensmerkmale
 			(
@@ -1582,9 +1598,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT rp_plan_verfahrensmerkmale_verfahrensmerkmale_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan_verfahrensmerkmale_verfahrensmerkmale
 			(
@@ -1594,9 +1608,7 @@ class Gml_extractor {
 				child_pkid character varying NOT NULL,
 				CONSTRAINT so_plan_verfahrensmerkmale_verfahrensmerkmale_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".xp_spezexternereferenz
 			(
@@ -1616,9 +1628,7 @@ class Gml_extractor {
 				typ character varying NOT NULL,
 				CONSTRAINT xp_spezexternereferenz_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_externereferenz
 			(
@@ -1628,9 +1638,7 @@ class Gml_extractor {
 				xp_spezexternereferenz_pkid character varying,
 				CONSTRAINT bp_plan_externereferenz_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_externereferenz
 			(
@@ -1640,9 +1648,7 @@ class Gml_extractor {
 				xp_spezexternereferenz_pkid character varying,
 				CONSTRAINT fp_plan_externereferenz_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_externereferenz
 			(
@@ -1652,9 +1658,7 @@ class Gml_extractor {
 				xp_spezexternereferenz_pkid character varying,
 				CONSTRAINT rp_plan_externereferenz_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".so_plan_externereferenz
 			(
@@ -1664,9 +1668,7 @@ class Gml_extractor {
 				xp_spezexternereferenz_pkid character varying,
 				CONSTRAINT so_plan_externereferenz_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".xp_plangeber
 			(
@@ -1676,9 +1678,7 @@ class Gml_extractor {
 				kennziffer character varying,
 				CONSTRAINT xp_plangeber_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".xp_gemeinde
 			(
@@ -1690,9 +1690,7 @@ class Gml_extractor {
 				ortsteilname character varying,
 				CONSTRAINT xp_gemeinde_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_gemeinde
 			(
@@ -1702,9 +1700,7 @@ class Gml_extractor {
 				xp_gemeinde_pkid character varying,
 				CONSTRAINT bp_plan_gemeinde_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_gemeinde
 			(
@@ -1714,9 +1710,7 @@ class Gml_extractor {
 				xp_gemeinde_pkid character varying,
 				CONSTRAINT fp_plan_gemeinde_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_auslegungsenddatum
 			(
@@ -1726,9 +1720,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT bp_plan_auslegungsenddatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_auslegungsstartdatum
 			(
@@ -1738,9 +1730,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT bp_plan_auslegungsstartdatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_traegerbeteiligungsenddatum
 			(
@@ -1750,9 +1740,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT bp_plan_traegerbeteiligungsenddatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_traegerbeteiligungsstartdatum
 			(
@@ -1762,9 +1750,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT bp_plan_traegerbeteiligungsstartdatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_auslegungsenddatum
 			(
@@ -1774,9 +1760,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT fp_plan_auslegungsenddatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_auslegungsstartdatum
 			(
@@ -1786,9 +1770,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT fp_plan_auslegungsstartdatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_traegerbeteiligungsenddatum
 			(
@@ -1798,9 +1780,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT fp_plan_traegerbeteiligungsenddatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".fp_plan_traegerbeteiligungsstartdatum
 			(
@@ -1810,9 +1790,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT fp_plan_traegerbeteiligungsstartdatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_auslegungsenddatum
 			(
@@ -1822,9 +1800,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT rp_plan_auslegungsenddatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_auslegungsstartdatum
 			(
@@ -1834,9 +1810,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT rp_plan_auslegungsstartdatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_traegerbeteiligungsenddatum
 			(
@@ -1846,9 +1820,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT rp_plan_traegerbeteiligungsenddatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);
+			;
 
 			CREATE TABLE " . $this->gmlas_schema . ".rp_plan_traegerbeteiligungsstartdatum
 			(
@@ -1858,9 +1830,7 @@ class Gml_extractor {
 				value date,
 				CONSTRAINT rp_plan_traegerbeteiligungsstartdatum_pkey PRIMARY KEY (ogc_fid)
 			)
-			WITH (
-				OIDS=TRUE
-			);";
+			;";
 		$ret = $this->pgdatabase->execSQL($sql, 4,0);
 	}
 
@@ -1873,7 +1843,6 @@ class Gml_extractor {
 		
 		# TODO Check for each regel if bereich = bereich, and enter it accordingly in rule
 		#$bereich_gml_id = 'd48608a2-6f3c-11e8-8ca0-1f2b7a47118e'; #Placeholder
-		#TODO filter here for each bereich then for each geometrytype, then for each regel
 
 		$classes = $this->get_possible_classes_for_regeln($this->gmlas_schema);
 		
@@ -1933,6 +1902,7 @@ class Gml_extractor {
 			if(!in_array($a, array_column($mapping_table, 'o_column'))) {
 				continue;
 			}
+
 			foreach($mapping_table as $mapping) {
 				if(($mapping['o_column'] == $a) and ($mapping['o_table'] == $gml_class)) {
 					# gehoertzubereich wird automatisiert bei der Konvertierung in die Regel eingearbeitet 
@@ -1940,23 +1910,93 @@ class Gml_extractor {
 					if($mapping['t_column'] == 'gehoertzubereich') {
 						continue;
 					}
-                    # fix for varying encountered gml-geometry types that are valid for xplanung (according to konformitaetsbedingungen-document) but can cause problems
-                    # e.g. in display, in export, for wms/wfs services or are not supported by the konverter
-                    if($mapping['t_column'] == 'position') {
-                        if(($geom_type == 'ST_CurvePolygon') or
-                            ($geom_type == 'ST_MultiSurface') or
-                            ($geom_type == 'ST_CompoundCurve') or
-                            ($geom_type == 'ST_MultiCurve'))
-                        {
-                            $mapping['regel'] = 'ST_CurveToLine(gmlas.position) AS position';
-                        }
-                    }
+
+					# fix for varying encountered gml-geometry types that are valid for xplanung (according to konformitaetsbedingungen-document) but can cause problems
+					# e.g. in display, in export, for wms/wfs services or are not supported by the konverter
+					if($mapping['t_column'] == 'position') {
+						if(($geom_type == 'ST_CurvePolygon') or
+							($geom_type == 'ST_MultiSurface') or
+							($geom_type == 'ST_CompoundCurve') or
+							($geom_type == 'ST_MultiCurve'))
+						{
+							$mapping['regel'] = 'ST_CurveToLine(gmlas.position) AS position';
+						}
+						// Cast to multi-geometries (konverter-convention)
+						else if(($geom_type == 'ST_Point') or
+							($geom_type == 'ST_LineString') or
+							($geom_type == 'ST_Polygon'))
+						{
+							$mapping['regel'] = 'ST_Multi(gmlas.position) AS position';
+						} else {
+							$mapping['regel'] = 'gmlas.position AS position';
+						}
+					}
 					$gml_attributes[] = $mapping['t_column'];
-					$select_sql .=  $mapping['regel'];
+					$select_sql .= $mapping['regel'];
 					$select_sql .= ",";
 				}
 			}
 		}
+
+		# attributes of normalized gmlas tables, e.g. praesentationsobjekte '_dientzurdarstellungvon', '_wirddargestelltdurch'
+		# TODO generically read all normalized tables
+		# zweckbestimmung e.g. for fp_generischesobjekt_zweckbestimmung
+		$norm_attributes = array("wirddargestelltdurch","dientzurdarstellungvon","detailliertezweckbestimmung","zweckbestimmung");
+		$i = 0;
+		foreach($norm_attributes AS $n_a) {
+			$i++;
+			# check if table exists
+				$sql_checkexists_norm_table = "
+					SELECT 
+						EXISTS (
+						 SELECT FROM information_schema.tables 
+						 WHERE table_schema = '" . $this->gmlas_schema . "'
+						 AND table_name = '" . $gml_class . '_' . $n_a . "'
+						);";
+			$ret = $this->pgdatabase->execSQL($sql_checkexists_norm_table, 4, 0);
+			$result = pg_fetch_row($ret[1]);
+			if($result[0] === 't') {
+				# single ' escaped later
+				$norm_1 = "norm_table_" . $i;
+				if($n_a == "wirddargestelltdurch" or $n_a == "dientzurdarstellungvon") {
+						$select_sql .= "(SELECT string_agg(href,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " ". $norm_1 . " WHERE gmlas.id = " .$norm_1 . ".parent_id) AS " . $n_a . ",";
+					$gml_attributes[] = $n_a;
+				}
+				if($n_a == "detailliertezweckbestimmung" or $n_a == "zweckbestimmung") {
+					$special_datatype = "";
+
+					$sql = "
+						SELECT
+							udt_name
+						FROM
+							information_schema.columns
+						WHERE
+							table_schema = 'xplan_gml'
+						AND
+							table_name = '" . $gml_class . "'
+						AND
+							column_name = '" . $n_a . "'
+						LIMIT 1
+					";
+					$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+					$result = pg_fetch_row($ret[1]);
+					$special_datatype = $result[0];
+					if(substr($special_datatype,0,1) == "_") {
+						// remove leading underscore (for arrays) and add [] brackets at the end
+						$special_datatype = ltrim($special_datatype, "_") . "[]";
+					}
+					if($special_datatype != "") {
+						$norm_2 = "norm_table_" . $i . "_" . $i;
+						$norm_3 = "norm_table_" . $i . "_" . $i . "_" . $i;
+						$norm_4 = "norm_table_" . $i . "_" . $i . "_" . $i . "_" . $i;
+						$select_sql .= "CASE WHEN (SELECT TRUE FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_2 . " WHERE " . $norm_2 . ".parent_id = gmlas.id LIMIT 1) THEN ARRAY[((SELECT DISTINCT codespace FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_3 . " WHERE gmlas.id = " . $norm_3 . ".parent_id LIMIT 1),";
+						$select_sql .= "(SELECT string_agg(value,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_4 . " WHERE gmlas.id = " . $norm_4 . ".parent_id),NULL)]::xplan_gml." . $special_datatype . " ELSE NULL END AS " . $n_a . ",";
+						$gml_attributes[] = $n_a;
+					}
+				}
+			}
+		}
+
 
 		// Add INSERT INTO and FROM
 		$sql  = 'INSERT INTO ' . XPLANKONVERTER_CONTENT_SCHEMA . '.' . $gml_class . '(';
@@ -2035,7 +2075,7 @@ class Gml_extractor {
 	* Returns a mapping table that should cover all mappable classes between gdal xplan_gmlas and the konverter xplan_gml schemas
 	*/
 	function get_gmlas_to_gml_mapping_table($class) {
-		$sql  = "SELECT o_table, o_column, t_table, t_column, t_data_type, regel FROM xplankonverter.mappingtable_gmlas_to_gml WHERE t_table = '" . $class . "';";
+		$sql = "SELECT o_table, o_column, t_table, t_column, t_data_type, regel FROM xplankonverter.mappingtable_gmlas_to_gml WHERE t_table = '" . $class . "';";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$result = pg_fetch_all($ret[1]);
 		return $result;
@@ -2095,6 +2135,7 @@ class Gml_extractor {
 	* Returns a possible list of filtered tables that can be associated with rules
 	*/
 	function get_possible_classes_for_regeln($schema) {
+		# escape underscore e.g. for fp_zentralerversorgungsbereich
 		$sql = "
 			SELECT
 				i.table_name
@@ -2106,9 +2147,11 @@ class Gml_extractor {
 					i.table_name IN('xp_ppo','xp_lpo','xp_fpo','xp_tpo','xp_pto','xp_lto') OR
 					i.table_name NOT LIKE 'xp_%'
 				) AND
-				i.table_name NOT LIKE '%_plan' AND
-				i.table_name NOT LIKE '%_bereich' AND
-				i.table_name NOT LIKE '%_textabschnitt';
+				i.table_name NOT LIKE '%\_plan' AND
+				i.table_name NOT LIKE '%\_bereich' AND
+				i.table_name NOT LIKE '%\_textabschnitt'
+			ORDER BY
+				i.table_name;
 			";
 		$ret = $this->pgdatabase->execSQL($sql,4, 0);
 		$classes = pg_fetch_all_columns($ret[1]);

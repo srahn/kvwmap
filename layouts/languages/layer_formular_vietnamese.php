@@ -46,7 +46,7 @@
 	$strButtonSave="Lưu sửa đổi";
 	$strButtonSaveAsNewLayer="Lưu lại lớp với tên mới";
 	$strCommonData="general information";
-	$strtransparency="transparency";
+	$strtransparency="opacity";
 	$strdrawingorder="drawingorder";
 	$strminscale="minscale";
 	$strmaxscale="maxscale";

@@ -129,17 +129,23 @@
 		# $client_id sollte vorhanden sein, damit das in die syncs Tabelle eingetragen werden kann.
 		# $username muss eigentlich nicht geprüft werden, weil der ja immer da ist nach Anmeldung
 		# $client_time muss eigentlich auch nicht, wen interessiert das?
-		# $last_client_version sollte 1 oder größer sein. ist das leer oder 0, dann wechseln zu DatenExport_Exportieren oder Exeption
+		# $last_client_version sollte 1 oder größer sein. ist das leer oder 0, dann wechseln zu DatenExport_Exportieren oder Exception
 		# $client_deltas Da müssen keine Daten vorhanden sein, aber es könnte geprüft werden ob die die da sind vollständig sind, jeweils mindestens
 		# sql muss vorhanden sein.
 		#		if ($GUI->formvars['selected_layer_id'] != '')
 
+		if (!array_key_exists('client_deltas', $_FILES)) {
+			return array(
+				'success' => false,
+				'err_msg' => ' Es wurde keine Datei mit Änderungsdaten zum Server geschickt.'
+			);
+		}
+
 		$GUI->formvars['client_deltas'] = json_decode(file_get_contents($_FILES['client_deltas']['tmp_name']));
-		//move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
+		move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
 
 		$result = $GUI->mobile_sync_parameter_valide($GUI->formvars);
 		if ($result['success']) {
-
 			# Layer DB abfragen $layerdb = new ...
 			$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 			$layerdb = $mapDB->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
@@ -148,7 +154,7 @@
 			$result = $sync->sync($GUI->formvars['device_id'], $GUI->formvars['username'], $layerdb->schema, $GUI->formvars['table_name'], $GUI->formvars['client_time'], $GUI->formvars['last_client_version'], $GUI->formvars['client_deltas']);
 		}
 		else {
-			$result['err_msg'] = ' Syncronisation auf dem Server abgebrochen wegen folgenden Fehlern: ' . $result['err_msg'];
+			$result['err_msg'] = ' Synchronisation auf dem Server abgebrochen wegen folgenden Fehlern: ' . $result['err_msg'];
 		}
 		return $result;
 	};
@@ -167,7 +173,7 @@
 		$result['msg'] .= ' client_time';
 
 		if (!array_key_exists('last_client_version', $params) || $params['last_client_version'] == '') {
-			$err_msg[] = 'Der Parameter client_time wurde nicht übergeben oder ist leer.';
+			$err_msg[] = 'Der Parameter last_client_version wurde nicht übergeben oder ist leer.';
 		}
 		$result['msg'] .= ' last_client_version';
 
@@ -468,17 +474,19 @@
 					end loop;
 					--raise notice 'sql nach split by ; und select by update: %', _sql;
 
-					_sql := kvw_replace_line_feeds(_sql);
-					--RAISE notice 'sql nach remove line feeds %', _sql;
+					IF _sql IS NOT NULL THEN
+						_sql := kvw_replace_line_feeds(_sql);
+						--RAISE notice 'sql nach remove line feeds %', _sql;
 
-					_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
-					--RAISE notice 'sql nach remove %', TG_TABLE_SCHEMA || '.';
+						_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
+						--RAISE notice 'sql nach remove %', TG_TABLE_SCHEMA || '.';
 
-					_sql := kvw_insert_str_after(_sql, 'version = ' || new_version || ', ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' set ');
-					--RAISE NOTICE 'sql nach insert version value %', _sql;
+						_sql := kvw_insert_str_after(_sql, 'version = ' || new_version || ', ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' set ');
+						--RAISE NOTICE 'sql nach insert version value %', _sql;
 
-					RAISE notice 'Eintragen des UPDATE-Statements mit Version %', new_version;
-					INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);
+						RAISE notice 'Eintragen des UPDATE-Statements mit Version %', new_version;
+						INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);
+					END IF;
 
 					RETURN NEW;
 				END;

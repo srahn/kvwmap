@@ -91,8 +91,12 @@ class rolle {
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
-				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
+				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
+				CASE 
+					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
+					ELSE l.connection 
+				END as connection, 
+				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function,
 				sync,
 				ul.`queryable`, ul.`drawingorder`,
@@ -393,7 +397,9 @@ class rolle {
 			$this->menue_buttons=$rs['menue_buttons'];
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
-			$this->geom_edit_first=$rs['geom_edit_first'];		
+			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
+			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
@@ -847,6 +853,71 @@ class rolle {
 		}
 		return $search;
 	}
+	
+	function saveExportSettings($formvars){
+		$layerset = $this->getLayer($formvars['selected_layer_id']);
+		$mapdb = new db_mapObj($this->stelle_id, $this->user_id);
+		$layerdb = $mapdb->getlayerdatabase($formvars['selected_layer_id'], $stelle->pgdbhost);
+		$this->attributes = $mapdb->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL);
+		# Attribute
+		for ($i = 0; $i < count($this->attributes['name']); $i++) {
+			if ($formvars['check_'.$this->attributes['name'][$i]]) {
+				$selected_attributes[] = $this->attributes['name'][$i];
+			}
+		}
+		$sql = "
+			REPLACE INTO rolle_export_settings SET
+				stelle_id = " . $this->stelle_id . ",
+				user_id = " . $this->user_id . ",
+				layer_id = " . $formvars['selected_layer_id'] . ",
+				name = '" . $formvars['setting_name'] . "',
+				format = '" . $formvars['export_format'] . "',
+				epsg = " . ($formvars['epsg'] ?: 'NULL') . ",
+				attributes = '" . implode(',', $selected_attributes) . "',
+				metadata = " . ($formvars['with_metadata_document'] ?: '0'). ",
+				groupnames = " . ($formvars['export_groupnames'] ? '1': '0'). ",
+				documents = " . ($formvars['download_documents'] ? '1' : '0') . ",
+				geom = '" . $formvars['newpathwkt'] . "',
+				within = " . ($formvars['within'] ?: '0'). ",
+				singlegeom = " . ($formvars['singlegeom'] ?: '0'). "
+		";
+		$this->database->execSQL($sql, 4, 1);
+	}
+	
+	function deleteExportSettings($formvars){
+		$sql = "
+			DELETE FROM 
+				rolle_export_settings 
+			WHERE
+				stelle_id = " . $this->stelle_id . " AND 
+				user_id = " . $this->user_id . " AND 
+				layer_id = " . $formvars['selected_layer_id'] . " AND 
+				name = '" . $formvars['export_setting'] . "'
+		";
+		$this->database->execSQL($sql, 4, 1);
+	}
+	
+	function getExportSettings($layer_id, $name = NULL){
+		$settings = array();
+		$sql = "
+			SELECT 
+				* 
+			FROM 
+				rolle_export_settings 
+			WHERE 
+				layer_id = " . $layer_id . " AND
+				user_id = " . $this->user_id . " AND 
+				stelle_id = " . $this->stelle_id . 
+				($name ? " AND name = '" . $name . "'": '') . "
+			ORDER BY name";
+		$this->debug->write("<p>file:rolle.php class:rolle->getsettings - Abfragen der gespeicherten Export-Einstellungen der Rolle:<br>".$sql,4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		while ($rs = $this->database->result->fetch_assoc()) {
+			$settings[]=$rs;
+		}
+		return $settings;
+	}
 
 	function read_Group($id) {
 		$sql ='SELECT g2r.*, g.Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r';
@@ -882,40 +953,45 @@ class rolle {
 	}
 
 	function getRollenLayer($LayerName, $typ = NULL) {
-		$sql ="
-			SELECT 
-				l.*, 
-				4 as tolerance, 
-				-l.id as Layer_ID, 
-				l.query as pfad, 
-				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable, 
+		$where = array();
+		$where[] = "l.stelle_id = " . $this->stelle_id;
+		$where[] = "l.user_id = " . $this->user_id;
+		if ($LayerName != '') {
+			if (is_numeric($LayerName)) {
+				$where[] = "l.id = " . $LayerName;
+			}
+			else {
+				$where[] = "l.`Name` LIKE '" . $LayerName . "'";
+			}
+		}
+		if ($typ != NULL) {
+			$where[] = "`Typ` = '" . $typ . "'";
+		}
+		$sql = "
+			SELECT
+				l.*,
+				4 as tolerance,
+				-l.id as Layer_ID,
+				l.query as pfad,
+				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable,
 				gle_view,
 				concat('(', rollenfilter, ')') as Filter
-			FROM rollenlayer AS l";
-    $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
-    if ($LayerName!='') {
-      $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
-      if(is_numeric($LayerName)){
-        $sql.='OR l.id = "'.$LayerName.'")';
-      }
-      else{
-        $sql.=')';
-      }
-    }
-		if($typ != NULL){
-			$sql .= " AND Typ = '".$typ."'";
-		}
-    #echo $sql.'<br>';
-    $this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
-    $this->database->execSQL($sql);
-    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			FROM
+				rollenlayer AS l
+			" . (count($where) > 0 ? "WHERE " . implode(" AND ", $where) : '') . "
+		";
+
+		#echo $sql.'<br>';
+		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
-    while ($rs = $this->database->result->fetch_assoc()) {
-      $layer[]=$rs;
-    }
-    return $layer;
-  }
-	
+		while ($rs = $this->database->result->fetch_assoc()) {
+			$layer[]=$rs;
+		}
+		return $layer;
+	}
+
 	function resetLayers($layer_id){
 		$this->update_layer_status($layer_id, '0');
 	}
@@ -1314,6 +1390,8 @@ class rolle {
 					`singlequery`,
 					`querymode`,
 					`geom_edit_first`,
+					`immer_weiter_erfassen`,
+					`upload_only_file_metadata`,
 					`overlayx`, `overlayy`,
 					`instant_reload`,
 					`menu_auto_close`,
@@ -1357,6 +1435,8 @@ class rolle {
 					`singlequery`,
 					`querymode`,
 					`geom_edit_first`,
+					`immer_weiter_erfassen`,
+					`upload_only_file_metadata`,
 					`overlayx`, `overlayy`,
 					`instant_reload`,
 					`menu_auto_close`,

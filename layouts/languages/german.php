@@ -45,7 +45,7 @@
 	$this->strLimit = "Anzahl Treffer:";
 	$this->layerOptions = "Optionen";
 	$this->strExceeded = "überschritten";
-	$this->transparency = "Tranzparenz";
+	$this->transparency = "Deckkraft";
 	$this->label = "Beschriftung";
 	$this->newDataset="neuer Datensatz";
 	$this->noLabel="keine";
@@ -61,4 +61,5 @@
 	$this->strLayerParameters="Themenparameter";
 	$this->strColor="Farbe";
 	$this->strHatching="Schraffur";
+	$this->strMetadata="Metadaten";
 ?>

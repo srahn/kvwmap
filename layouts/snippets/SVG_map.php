@@ -1244,7 +1244,7 @@ function toggle_vertices(){
 
 
 function request_vertices(){
-	top.ahah("index.php", "go=getSVG_vertices&scale="+top.document.getElementById("scale").value, new Array(top.document.GUI.vertices, ""), new Array("setvalue", "execute_function"));
+	top.ahah("index.php", "go=getSVG_all_vertices&scale="+top.document.getElementById("scale").value, new Array(top.document.GUI.vertices, ""), new Array("setvalue", "execute_function"));
 }
 
 function show_vertices(){

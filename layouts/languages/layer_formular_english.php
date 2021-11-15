@@ -50,7 +50,7 @@
   $strButtonSave="Save";
   $strButtonSaveAsNewLayer="Save as new layer";
   $strCommonData="general information";
-  $strtransparency="transparency";
+  $strtransparency="opacity";
   $strDrawingOrder="drawingorder";
 	$strLegendOrder="legend order";	
 	$strLegend="legend";

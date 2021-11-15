@@ -1,4 +1,5 @@
 <?php
+$errors = array();
 # Objekt für graphische Benutzeroberfläche erzeugen mit default-Werten
 $GUI = new GUI("map.php", "layouts/css/main.css.php", "html");
 $GUI->user = new stdClass();
@@ -30,7 +31,13 @@ if (!isset($userDb)) {
 	$userDb->dbName = MYSQL_DBNAME;
 }
 $GUI->database = $userDb;
-if ($GUI->database->open() != 0) {
+
+if ($formvars['go'] == 'health_check') {
+	include(SNIPPETS . 'health_check.php');
+	exit;
+}
+
+if (!$GUI->database->open()) {
   # Prüfen ob eine neue Datenbank angelegt werden soll
   if ($GUI->formvars['go'] == 'install-mysql-db') {
     # Anlegen der neuen Datenbank
@@ -62,23 +69,16 @@ if ($GUI->database->open() != 0) {
       echo '<li>Die Angaben zum Host, Benutzer und Password in der config.php sind falsch.</li>';
       echo '<li>Die Angaben zum Host, Benutzer und Password in der Tabelle mysql.users sind falsch.</li>';
       echo '</lu>';
-      exit;
     } # ende fehler beim aufbauen der mysql datenbank
   } # ende mysql datenbank installieren
   else {
     # Es konnte keine Datenbankverbindung aufgebaut werden
-    echo 'Die Verbindung zur Kartendatenbank konnte mit folgenden Daten nicht hergestellt werden:';
-    echo '<br>Host: '.$GUI->database->host;
-    echo '<br>User: '.$GUI->database->user;
-   # echo '<br>Passwd: '.$GUI->database->passwd;
-    echo '<br>Datenbankname: '.$GUI->database->dbName;
-    echo '<p>Das kann folgende Gründe haben:<lu>';
-    echo '<li>Die Datenbank existiert noch nicht. Legen Sie eine leere Datenbank an und führen Sie das <a href="install.php">Installationsskript</a> durch.';
-    echo '<li>Der Datenbankserver ist gerade nicht erreichbar.</li>';
-    echo '<li>Die Angaben zum Host, Benutzer und Password in der config.php sind falsch.</li>';
-    echo '<li>Die Angaben zum Host, Benutzer und Password in der Tabelle mysql.users sind falsch.</li>';
-    echo '</lu>';
-    exit;
+    $errors[] = '
+		Die Verbindung zur Kartendatenbank konnte mit folgenden Daten nicht hergestellt werden:<br>
+		Host: ' . $GUI->database->host . '<br>
+		User: ' . $GUI->database->user . '<br>
+		Datenbankname: ' . $GUI->database->dbName . '<br>';
+		exit;
   }
 }
 else {
@@ -104,8 +104,10 @@ if (is_logout($GUI->formvars)) {
 		logout();
 	}
 	else {
+		$GUI->add_message('error', 'Logout nicht möglich. Sie sind nicht angemeldet.');
 		$GUI->debug->write('Ist schon logged out.', 4, $GUI->echo);
 	}
+	$GUI->formvars['go'] = '';
 }
 
 # login
@@ -173,7 +175,7 @@ else {
 			}
 			else { # Anmeldung ist fehlgeschlagen
 				$GUI->debug->write('Anmeldung ist fehlgeschlagen.', 4, $GUI->echo);
-				if($GUI->login_failed_reason == 'authentication'){
+				if ($GUI->login_failed_reason == 'authentication') {
 					$GUI->formvars['num_failed'] = Nutzer::increase_num_login_failed($GUI, $GUI->formvars['login_name']);
 					sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
 				}
@@ -195,17 +197,26 @@ else {
 					if (is_registration_valid($new_registration_err)) {
 						$GUI->debug->write('Registrierung ist valide.', 4, $GUI->echo);
 
-						$result = Nutzer::register($GUI, $GUI->formvars['stelle_id']);
+						$result = Nutzer::register($GUI, $GUI->formvars['Stelle_ID']);
 
 						if ($result['success']) {
 							$invitation = Invitation::find_by_id($GUI, $GUI->formvars['token']);
 							$invitation->set('completed', date("Y-m-d H:i:s"));
 							$invitation->update();
 							$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database);
-							unset($GUI->formvars['Stelle_id']);
 							$GUI->add_message('info', 'Nutzer erfolgreich angelegt.<br>Willkommen im WebGIS kvwmap.');
 							$GUI->debug->write('Set Session', 4, $GUI->echo);
 							set_session_vars($GUI->formvars);
+							unset($GUI->formvars['Stelle_ID']);
+							unset($GUI->formvars['token']);
+							unset($GUI->fromvsrs['passwort']);
+							unset($GUI->formvars['new_password']);
+							unset($GUI->formvars['new_password_2']);
+							unset($GUI->formvars['email']);
+							unset($GUI->formvars['Name']);
+							unset($GUI->formvars['Vorname']);
+							unset($GUI->formvars['Namenszusatz']);
+							unset($GUI->formvars['phon']);
 							# login case 9
 						}
 						else {
@@ -216,7 +227,7 @@ else {
 						}
 					}
 					else {
-						$GUI->debug->write('Registrier ist nicht valid.', 4, $GUI->echo);
+						$GUI->debug->write('Registrierung ist nicht valid.', 4, $GUI->echo);
 						$GUI->add_message('error', $new_registration_err . '<br>Die Registrierung ist nicht erfolgreich.<br>Versuchen Sie es erneut oder lassen Sie sich erneut einladen.');
 						$show_login_form = true;
 						$go = 'login_registration';
@@ -238,30 +249,6 @@ else {
 			} # ende keine Registrierung
 		} # ende keine Anmeldung
 	} # ende keine gastanmeldung
-	if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'])){
-		if (
-			!defined('AGREEMENT_MESSAGE') OR
-			AGREEMENT_MESSAGE == '' OR
-			is_agreement_accepted($GUI->user)
-		) {
-			$GUI->debug->write('Agreement ist akzeptiert.', 4, $GUI->echo);
-			# login case 4
-		}
-		else {
-			if ($GUI->formvars['agreement_accepted'] == '1') {
-				$GUI->debug->write('Nutzer bestätigt Agreement. Trage das ein.', 4, $GUI->echo);
-				$GUI->user->update_agreement_accepted($GUI->formvars['agreement_accepted']);
-				# login case 18
-			}
-			else {
-				$GUI->debug->write('Agreement ist nicht akzeptiert.', 4, $GUI->echo);
-				logout();
-				$show_login_form = true;
-				$go = 'login_agreement';
-				# login case 16
-			}
-		}
-	}
 } # ende nicht angemeldet
 
 # $show_login_form = true nach login cases 3, 6, 7, 8, 9, 10
@@ -345,6 +332,44 @@ if (!$show_login_form) {
 			}
 		}
 	}
+}
+
+if (is_logged_in()) {
+	if (
+		!defined('AGREEMENT_MESSAGE') OR
+		AGREEMENT_MESSAGE == '' OR
+		is_agreement_accepted($GUI->user)
+	) {
+		$GUI->debug->write('Agreement ist akzeptiert.', 4, $GUI->echo);
+		# login case 4
+	}
+	else {
+		$GUI->debug->write('Agreement wurde noch nicht akzeptiert.', 4, $GUI->echo);
+		if (array_key_exists('agreement', $GUI->formvars)) {
+			if ($GUI->formvars['agreement_accepted'] == '1') {
+				$GUI->debug->write('Nutzer bestätigt Agreement. Trage das ein.', 4, $GUI->echo);
+				$GUI->user->update_agreement_accepted($GUI->formvars['agreement_accepted']);
+				# login case 18
+			}
+			else {
+				$GUI->debug->write('Agreement wurde abgelehnt, logout.', 4, $GUI->echo);
+				unset($GUI->formvars['agreement']);
+				logout();
+				$show_login_form = true;
+				$go = 'login';
+				# login case 16
+			}
+		}
+		else {
+			$GUI->debug->write('Frage Agreement beim Nutzer ab.', 4, $GUI->echo);
+			$show_login_form = true;
+			$go = 'login_agreement';
+			# login case x
+		}
+	}
+}
+else {
+	$GUI->debug->write('is_logged_in liefert false', 4, $GUI->echo);
 }
 
 # $show_login_form = true nach login cases 3, 6, 7, 8, 9, 10, 11
@@ -623,7 +648,7 @@ function is_password_expired($user, $stelle) {
 }
 
 function is_registration($formvars) {
-	return array_key_exists('go', $formvars) AND strpos($formvars['go'], 'invitation') === false AND array_key_exists('token', $formvars) AND $formvars['token'] != '' AND $formvars['email'] != '' AND $formvars['stelle_id'] != '';
+	return array_key_exists('go', $formvars) AND strpos($formvars['go'], 'invitation') === false AND array_key_exists('token', $formvars) AND $formvars['token'] != '' AND $formvars['email'] != '' AND $formvars['Stelle_ID'] != '';
 }
 
 function checkRegistration($gui) {
@@ -698,14 +723,14 @@ function checkRegistration($gui) {
 	}
 
 	# Prüft ob eine stellen_id übergeben wurde
-	if ($check == 0 AND $params['stelle_id'] == '') {
+	if ($check == 0 AND $params['Stelle_ID'] == '') {
 		$registration_errors[] = 'Parameter stellen_id fehlt.';
 		$check = 1;
 	}
 
 	# Prüft ob stelle_id zum token passt
-	if ($check == 0 AND $params['stelle_id'] != $invitation->get('stelle_id')) {
-		$registration_errors[] = 'stelle_id: ' . $params['stelle_id'] . ' passt nicht zu<br>token: ' . $params['token'] . '.';
+	if ($check == 0 AND $params['Stelle_ID'] != $invitation->get('stelle_id')) {
+		$registration_errors[] = 'stelle_id: ' . $params['Stelle_ID'] . ' passt nicht zu<br>token: ' . $params['token'] . '.';
 		$check = 1;
 	}
 

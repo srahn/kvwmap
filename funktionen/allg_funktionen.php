@@ -4,7 +4,9 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
-$errors = array();
+function get_url(){	# die Konstante URL kann durch diese Funktion ersetzt werden
+	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_URL]";
+}
 
 function quote($var, $type = NULL){
 	switch ($type) {
@@ -66,11 +68,15 @@ function replace_tags($text, $tags) {
 	return $text;
 }
 
-function human_filesize($file){
+function format_human_filesize($bytes, $precision = 2) {
+	$sz = 'BKMGTP';
+	$factor = floor((strlen($bytes) - 1) / 3);
+	return sprintf("%." . $precision. "f", $bytes / pow(1024, $factor)) . ' ' . @$sz[$factor] . 'B';
+}
+
+function human_filesize($file) {
 	$bytes = @filesize($file);
-  $sz = 'BKMGTP';
-  $factor = floor((strlen($bytes) - 1) / 3);
-  return sprintf("%.2f", $bytes / pow(1024, $factor)).' '.@$sz[$factor].'B';
+	return format_human_filesize($bytes);
 }
 
 function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
@@ -79,7 +85,7 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 		// This error code is not included in error_reporting
 		return;
 	}
-	$errors[] = $errstr;
+	$errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
 	/* Don't execute PHP internal error handler */
 	return true;
 }
@@ -118,10 +124,12 @@ function get_document_file_path($document_attribute_value, $layer_document_path,
 	}
 }
 
-function url2filepath($url, $doc_path, $doc_url){
-	if($doc_path == '')$doc_path = CUSTOM_IMAGE_PATH;
+function url2filepath($url, $doc_path, $doc_url) {
+	if ($doc_path == '') {
+		$doc_path = CUSTOM_IMAGE_PATH;
+	}
 	$url_parts = explode($doc_url, $url);
-	return $doc_path.$url_parts[1];
+	return $doc_path . $url_parts[1];
 }
 
 /*
@@ -1539,19 +1547,25 @@ function url_get_contents($url, $username = NULL, $password = NULL, $useragent =
 	try {
 		$ctx['http']['timeout'] = 20;
 		#$ctx['http']['header'] = 'Referer: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];		// erstmal wieder rausgenommen, da sonst Authorization nicht funktioniert
-		if($useragent)$ctx['http']['header'] = 'User-Agent: '.$useragent;
-		if($username)$ctx['http']['header'].= "Authorization: Basic ".base64_encode($username.':'.$password);
+		if ($useragent) {
+			$ctx['http']['header'] = 'User-Agent: ' . $useragent;
+		}
+		if ($username) {
+			$ctx['http']['header'].= "Authorization: Basic ".base64_encode($username . ':' . $password);
+		}
 		$proxy = getenv('HTTP_PROXY');
-		if($proxy != '' AND $hostname != 'localhost'){
+		if ($proxy != '' AND $hostname != 'localhost') {
 			$ctx['http']['proxy'] = $proxy;
 			$ctx['http']['request_fulluri'] = true;
 			$ctx['ssl']['SNI_server_name'] = $hostname;
 			$ctx['ssl']['SNI_enabled'] = true;
 		}
 		$context = stream_context_create($ctx);
-		$response =  file_get_contents($url, false, $context);
+		$response =  @file_get_contents($url, false, $context);
 		if ($response === false) {
-			throw new Exception("Fehler beim Abfragen der URL mit file_get_contents(".$url.")");
+			$error = 'Fehler beim Abfragen der URL mit file_get_contents(' . $url . ')';
+			GUI::add_message_('error', $error);
+			throw new Exception($error);
 		}
 	}
 	catch (Exception $e) {
@@ -1563,18 +1577,21 @@ function url_get_contents($url, $username = NULL, $password = NULL, $useragent =
 function curl_get_contents($url, $username = NULL, $password = NULL) {
 	$url_parts = explode('?',  $url);
 	parse_str($url_parts[1], $get_array);
-  $ch = curl_init($url_parts[0]);		# url
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	$ch = curl_init($url_parts[0]);		# url
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 	if($username)curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
 	curl_setopt($ch, CURLOPT_POST, true);
 	#curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $get_array);
 	$result = curl_exec($ch);
-  if (curl_getinfo($ch, CURLINFO_HTTP_CODE)==404) {
+	if (curl_getinfo($ch, CURLINFO_HTTP_CODE) == 404) {
 		$result = "Fehler 404: File not found. Die Resource konnte mit der URL: ".$url." nicht auf dem Server gefunden werden!";
-  }
-  curl_close($ch);
-  return $result;
+	}
+	if (curl_getinfo($ch, CURLINFO_HTTP_CODE) == 401) {
+		$result = "Fehler 401: Unauthorized. Auf die Resource konnte mit der URL: ".$url." nicht zugegriffen werden!";
+	}
+	curl_close($ch);
+	return $result;
 }
 
 function debug_write($msg, $debug = false) {
@@ -1687,6 +1704,8 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 			$str = str_replace('$'.$key, $value, $str);
 		}
 	}
+	$str = str_replace('$current_date', date('Y-m-d'), $str);
+	$str = str_replace('$current_timestamp', date('Y-m-d G:i:s'), $str);
 	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
 	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
@@ -2104,6 +2123,34 @@ function attributes_from_select($sql) {
 		);
 	}
 	return $attributes;
+}
+
+function get_requires_options($sql, $requires) {
+	include_once(WWWROOT . APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
+	include_once(WWWROOT . APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLCreator.php');
+	# Entfernt requires Tag damit kein Syntax-Fehler im sql ist.
+	$sql = str_replace(['<requires>', '</requires>'],	'',	$sql);
+	$parser = new PHPSQLParser($sql, true);
+	# Füge das Requires Attribut zum Select hinzu
+	array_unshift(
+		$parser->parsed['SELECT'],
+		array(
+			'expr_type' => 'colref',
+			'alias' => array(
+				'as' => 1,
+				'name' => 'requires',
+				'base_expr' => 'AS requires',
+				'no_quotes' => 'requires',
+			),
+			'base_expr' => $requires,
+			'no_quotes' => $requires,
+			'delim' => ', '
+		)
+	);
+	# Entferne die WHERE Klausel
+	unset($parser->parsed['WHERE']);
+	$creator = new PHPSQLCreator($parser->parsed);
+	return $creator->created;
 }
 
 function sql_from_parse_tree($parse_tree){

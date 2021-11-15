@@ -128,7 +128,8 @@ class pgdatabase {
 			"port='" .		 $credentials['port'] 		. "' " .
 			"dbname='" .	 $credentials['dbname'] 	. "' " .
 			"user='" .		 $credentials['user'] 		. "' " .
-			"password='" . addslashes($credentials['password']) . "'";
+			"password='" . addslashes($credentials['password']) . "' " .
+			"application_name=kvwmap_user_" . $this->gui->user->id;
 		return $connection_string;
 	}
 
@@ -363,6 +364,7 @@ FROM
 
 	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false) {
 		$ret = array(); // Array with results to return
+		$ret['msg'] = '';
 		$strip_context = true;
 
 		switch ($this->loglevel) {
@@ -426,31 +428,38 @@ FROM
 				$ret[1] = $ret['query'] = $query;
 
 				# Prüfe ob eine Fehlermeldung in der Notice steckt
-				$last_notice = pg_last_notice($this->dbConn);
-				if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
-					$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
+				if (PHPVERSION >= 710) {
+					$last_notices = pg_last_notice($this->dbConn, PGSQL_NOTICE_ALL);
 				}
-				# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
-				if ($last_notice != '' AND ($this->gui->notices == NULL OR !in_array($last_notice, $this->gui->notices))) {
-					$this->gui->notices[] = $last_notice;
-					if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
-						# Parse als JSON String
-						$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
-						if ($notice_obj AND array_key_exists('success', $notice_obj)) {
-							if (!$notice_obj['success']) {
-								$ret['success'] = false;
-							}
-							if (array_key_exists('msg_type', $notice_obj)) {
-								$ret['type'] = $notice_obj['msg_type'];
-							}
-							if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
-								$ret['msg'] = $notice_obj['msg'];
+				else {
+					$last_notices = array(pg_last_notice($this->dbConn));
+				}
+				foreach ($last_notices as $last_notice) {
+					if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
+						$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
+					}
+					# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
+					if ($last_notice != '' AND ($this->gui->notices == NULL OR !in_array($last_notice, $this->gui->notices))) {
+						$this->gui->notices[] = $last_notice;
+						if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
+							# Parse als JSON String
+							$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
+							if ($notice_obj AND array_key_exists('success', $notice_obj)) {
+								if (!$notice_obj['success']) {
+									$ret['success'] = false;
+								}
+								if (array_key_exists('msg_type', $notice_obj)) {
+									$ret['type'] = $notice_obj['msg_type'];
+								}
+								if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
+									$ret['msg'] = $notice_obj['msg'];
+								}
 							}
 						}
-					}
-					else {
-						# Gebe Noticetext wie er ist zurück
-						$ret['msg'] = $last_notice;
+						else {
+							# Gebe Noticetext wie er ist zurück
+							$ret['msg'] .= $last_notice.chr(10).chr(10);
+						}
 					}
 				}
 
@@ -1253,6 +1262,50 @@ FROM
     }
     return $Liste;
   }
+	
+  function getGemarkungListeAll($ganzeGemID, $GemkgID){
+    $sql ="
+			SELECT DISTINCT 
+				pp.schluesselgesamt as GemkgID, pp.gemarkungsname as Name, gem.bezeichnung as gemeindename, gem.schluesselgesamt as gemeinde 
+			FROM 
+				alkis.ax_gemeinde AS gem, 
+				alkis.pp_gemarkung as pp 
+			WHERE 
+				pp.gemeinde=gem.gemeinde AND 
+				pp.kreis=gem.kreis AND 
+				gem.endet IS NULL ";
+		if($ganzeGemID[0]!='' OR $GemkgID[0]!=''){
+			$sql.="AND (FALSE ";
+			if($ganzeGemID[0]!=''){
+				$sql.=" OR gem.schluesselgesamt IN ('".implode("','", $ganzeGemID)."')";
+			}
+			if($GemkgID[0]!=''){
+				$sql.=" OR pp.schluesselgesamt IN ('".implode("','", $GemkgID)."')";
+			}
+			$sql.=")";
+		}
+		$sql .="
+			UNION
+			SELECT DISTINCT 
+				schluesselgesamt as GemkgID, bezeichnung || ' (hist.)' as Name, '' as gemeindename, '' as gemeinde 
+			FROM 
+				alkis.ax_gemarkung
+			WHERE 
+				endet IS NULL AND
+				'http://www.lverma-mv.de/_fdv#7040' = any(zeigtaufexternes_art)
+		";
+    $sql.=" ORDER BY Name";
+    #echo $sql;
+    $queryret=$this->execSQL($sql, 4, 0);
+    if ($queryret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    while ($rs=pg_fetch_assoc($queryret[1])) {
+      $Liste['GemkgID'][]=$rs['gemkgid'];
+      $Liste['Name'][]=$rs['name'];
+      $Liste['gemeinde'][]=$rs['gemeinde'];
+      $Liste['Bezeichnung'][]=$rs['name']." (".$rs['gemkgid'].") ".$rs['gemeindename'];
+    }
+    return $Liste;
+  }	
     
   function getGemeindeListeByKreisGemeinden($Gemeinden){
     $sql ="SELECT DISTINCT g.schluesselgesamt AS id, g.bezeichnung AS name";
@@ -1273,7 +1326,7 @@ FROM
     return $GemeindeListe;
   }
   
-  function getFlurstuecksListe($GemID,$GemkgID,$FlurID, $historical = false){
+  function getFlurstuecksListe($GemID, $GemkgID, $FlurID, $FlstID, $historical = false){
 		if(!$historical){
 			$sql ="SELECT flurstueckskennzeichen as flurstkennz, zaehler, nenner";
 			$sql.=" FROM alkis.ax_flurstueck WHERE 1=1";
@@ -1282,6 +1335,9 @@ FROM
 			}
 			if ($FlurID!='') {
 				$sql.=" AND flurnummer=".$FlurID;
+			}
+			if ($FlstID != '') {
+				$sql.=" AND zaehler || coalesce('/' || nenner, '') IN ('" . implode("','", $FlstID) . "')";
 			}
 			$sql.= $this->build_temporal_filter(array('ax_flurstueck'));
 			$sql.=" ORDER BY flurstueckskennzeichen";
@@ -1417,12 +1473,17 @@ FROM
 		if($GemeindenStelle != NULL){
 			$sql.="AND (FALSE";
 			if($GemeindenStelle['ganze_gemeinde'] != NULL)$sql.=" OR g.land::text||g.regierungsbezirk||g.kreis||g.gemeinde IN ('".implode("','", array_keys($GemeindenStelle['ganze_gemeinde']))."')";
-			if($GemeindenStelle['ganze_gemarkung'] != NULL)$sql.=" OR f.land||f.gemarkungsnummer IN ('".implode("','", array_keys($GemeindenStelle['ganze_gemarkung']))."')";
-			if($GemeindenStelle['eingeschr_gemarkung'] != NULL){
-				foreach($GemeindenStelle['eingeschr_gemarkung'] as $eingeschr_gemkg_id => $fluren){
-					$sql.=" OR (f.land||f.gemarkungsnummer = '".$eingeschr_gemkg_id."' AND flurnummer IN (".implode(',', $fluren)."))";
+			if($GemeindenStelle['ganze_gemarkung'] != NULL)$sql.=" OR f.land||f.gemarkungsnummer IN ('".implode("','", array_keys($GemeindenStelle['ganze_gemarkung']))."')";			
+			if (count($GemeindenStelle['eingeschr_gemarkung']) > 0) {
+				foreach ($GemeindenStelle['ganze_flur'] as $eingeschr_gemkg_id => $ganze_fluren) {
+					$sql.=" OR (f.land||f.gemarkungsnummer = '" . $eingeschr_gemkg_id . "' AND flurnummer IN (" . implode(',', $ganze_fluren) . "))";
 				}
-			}
+				foreach ($GemeindenStelle['eingeschr_flur'] as $eingeschr_gemkg_id => $eingeschr_fluren) {
+					foreach ($eingeschr_fluren as $eingeschr_flur => $flurstuecke) {
+						$sql.=" OR (f.land||f.gemarkungsnummer = '" . $eingeschr_gemkg_id . "' AND flurnummer = " . $eingeschr_flur . "  AND f.zaehler || coalesce('/' || f.nenner, '') IN ('" . implode("','", $flurstuecke) . "'))";
+					}
+				}
+			}			
 			$sql .= ") ";
 		}		
 		$sql.="UNION ";
@@ -1432,11 +1493,16 @@ FROM
 			$sql.="AND (FALSE";
 			if($GemeindenStelle['ganze_gemeinde'] != NULL)$sql.=" OR f.land||f.gemeindezugehoerigkeit_regierungsbezirk||f.gemeindezugehoerigkeit_kreis||f.gemeindezugehoerigkeit_gemeinde IN ('".implode("','", array_keys($GemeindenStelle['ganze_gemeinde']))."')";
 			if($GemeindenStelle['ganze_gemarkung'] != NULL)$sql.=" OR f.land||f.gemarkungsnummer IN ('".implode("','", array_keys($GemeindenStelle['ganze_gemarkung']))."')";
-			if($GemeindenStelle['eingeschr_gemarkung'] != NULL){
-				foreach($GemeindenStelle['eingeschr_gemarkung'] as $eingeschr_gemkg_id => $fluren){
-					$sql.=" OR (f.land||f.gemarkungsnummer = '".$eingeschr_gemkg_id."' AND flurnummer IN (".implode(',', $fluren)."))";
+			if (count($GemeindenStelle['eingeschr_gemarkung']) > 0) {
+				foreach ($GemeindenStelle['ganze_flur'] as $eingeschr_gemkg_id => $ganze_fluren) {
+					$sql.=" OR (f.land||f.gemarkungsnummer = '" . $eingeschr_gemkg_id . "' AND flurnummer IN (" . implode(',', $ganze_fluren) . "))";
 				}
-			}
+				foreach ($GemeindenStelle['eingeschr_flur'] as $eingeschr_gemkg_id => $eingeschr_fluren) {
+					foreach ($eingeschr_fluren as $eingeschr_flur => $flurstuecke) {
+						$sql.=" OR (f.land||f.gemarkungsnummer = '" . $eingeschr_gemkg_id . "' AND flurnummer = " . $eingeschr_flur . "  AND f.zaehler || coalesce('/' || f.nenner, '') IN ('" . implode("','", $flurstuecke) . "'))";
+					}
+				}
+			}	
 			$sql .= ") ORDER BY flurstkennz";
 		}
     $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstückskennzeichen nach Gemeindeids:<br>".$sql,4);
@@ -2168,7 +2234,7 @@ FROM
 		}
 	}
   
-  function getNamen($formvars, $ganze_gemkg_ids, $eingeschr_gemkg_ids){
+  function getNamen($formvars, $ganze_gemkg_ids, $eingeschr_gemkg_ids, $ganze_flur_ids, $eingeschr_flur_ids){
 		if(!$formvars['exakt']){
 			$n1 = '%'.$formvars['name1'].'%';
 			$n2 = '%'.$formvars['name2'].'%';
@@ -2235,9 +2301,14 @@ FROM
 			if($ganze_gemkg_ids[0] != ''){
 				$sql.="OR f.land||f.gemarkungsnummer IN ('".implode("','", $ganze_gemkg_ids)."')";
 			}
-			if(count($eingeschr_gemkg_ids) > 0){
-				foreach($eingeschr_gemkg_ids as $eingeschr_gemkg_id => $fluren){
-					$sql.=" OR (f.land||f.gemarkungsnummer = '".$eingeschr_gemkg_id."' AND flurnummer IN (".implode(',', $fluren)."))";
+			if (count($eingeschr_gemkg_ids) > 0) {
+				foreach ($ganze_flur_ids as $eingeschr_gemkg_id => $ganze_fluren) {
+					$sql.=" OR (f.land||f.gemarkungsnummer = '" . $eingeschr_gemkg_id . "' AND flurnummer IN (" . implode(',', $ganze_fluren) . "))";
+				}
+				foreach ($eingeschr_flur_ids as $eingeschr_gemkg_id => $eingeschr_fluren) {
+					foreach ($eingeschr_fluren as $eingeschr_flur => $flurstuecke) {
+						$sql.=" OR (f.land||f.gemarkungsnummer = '" . $eingeschr_gemkg_id . "' AND flurnummer = " . $eingeschr_flur . "  AND f.zaehler || coalesce('/' || f.nenner, '') IN ('" . implode("','", $flurstuecke) . "'))";
+					}
 				}
 			}
 			$sql.=")";
@@ -2374,7 +2445,7 @@ FROM
     return $liste;
 	}
 	
-	function getGrundbuchblattlisteByGemkgIDs($bezirk, $ganze_gemkg_ids, $eingeschr_gemkg_ids){
+	function getGrundbuchblattlisteByGemkgIDs($bezirk, $ganze_gemkg_ids, $eingeschr_gemkg_ids, $ganze_flur_ids, $eingeschr_flur_ids){
 		$sql = "SELECT DISTINCT buchungsblattnummermitbuchstabenerweiterung as blatt, rtrim(ltrim(buchungsblattnummermitbuchstabenerweiterung,'PF0'),'ABCDEFGHIJKLMNOPQRSTUVWXYZ')::integer ";
 		$sql.="FROM alkis.ax_flurstueck f ";
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.gml_id = ANY(s.verweistauf) ";		
@@ -2383,9 +2454,14 @@ FROM
 		if($ganze_gemkg_ids[0] != ''){
 			$sql.="OR f.land||f.gemarkungsnummer IN ('".implode("','", $ganze_gemkg_ids)."')";
 		}
-		if(count($eingeschr_gemkg_ids) > 0){
-			foreach($eingeschr_gemkg_ids as $eingeschr_gemkg_id => $fluren){
-				$sql.=" OR (f.land||f.gemarkungsnummer = '".$eingeschr_gemkg_id."' AND flurnummer IN (".implode(',', $fluren)."))";
+		if (count($eingeschr_gemkg_ids) > 0) {
+			foreach ($ganze_flur_ids as $eingeschr_gemkg_id => $ganze_fluren) {
+				$sql.=" OR (f.land||f.gemarkungsnummer = '" . $eingeschr_gemkg_id . "' AND flurnummer IN (" . implode(',', $ganze_fluren) . "))";
+			}
+			foreach ($eingeschr_flur_ids as $eingeschr_gemkg_id => $eingeschr_fluren) {
+				foreach ($eingeschr_fluren as $eingeschr_flur => $flurstuecke) {
+					$sql.=" OR (f.land||f.gemarkungsnummer = '" . $eingeschr_gemkg_id . "' AND flurnummer = " . $eingeschr_flur . "  AND f.zaehler || coalesce('/' || f.nenner, '') IN ('" . implode("','", $flurstuecke) . "'))";
+				}
 			}
 		}
 		$sql.= ")";
@@ -2992,7 +3068,7 @@ FROM
     # after BEGIN command will be executed in a single transaction
     # until an explicit COMMIT or ROLLBACK is given
     if ($this->blocktransaction==0) {
-      $ret=$this->execSQL('START TRANSACTION',4, 1);
+      $ret=$this->execSQL('BEGIN',4, 0);
     }
     return $ret;
   }
@@ -3003,7 +3079,7 @@ FROM
     # rolls back the current transaction and causes all the updates
     # made by the transaction to be discarded
     if ($this->blocktransaction==0) {
-      $ret=$this->execSQL('ROLLBACK',4, 1);
+      $ret=$this->execSQL('ROLLBACK',4, 0);
     }
     return $ret;
   }
@@ -3013,7 +3089,7 @@ FROM
     # commits the current transaction. All changes made by the transaction
     # become visible to others and are guaranteed to be durable if a crash occurs
     if ($this->blocktransaction==0) {
-      $ret=$this->execSQL('COMMIT',4, 1);
+      $ret=$this->execSQL('COMMIT',4, 0);
     }
     return $ret;
   }

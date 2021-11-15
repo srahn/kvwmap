@@ -32,22 +32,22 @@
 				return degrees+"°"+minutes+"\'"+seconds+"\'\'";
 			}			
 		}
-		
+
 		function dms2dec(number, coordtype){
 			var seconds = 0;
-			number = number+"";
+			number = number.trim() + "";
 			part1 = number.split("°");
 			degrees = parseFloat(part1[0]);
 			part2 = part1[1].split("\'");
 			minutes = parseFloat(part2[0]);
-			if(coordtype == "dms"){
+			if (coordtype == "dms") {
 				seconds = part2[1].replace(/\'\'/g, "");
 				seconds = parseFloat(seconds)/60;
 			}
-			minutes = (minutes+seconds)/60;
-			return Math.round((degrees + minutes)*10000)/10000;  
+			minutes = (minutes+seconds) / 60;
+			return Math.round((degrees + minutes) * 10000) / 10000;
 		}
-		
+
 		function format_number(number, convert, freehand, meters){
 			coordtype = \''.$this->user->rolle->coordtype.'\';
 			epsgcode = \''.$this->user->rolle->epsg_code.'\';
@@ -112,24 +112,39 @@
 				if(key == 13)coords_input_submit();
 			}
 		}
-		
-		function coords_input_submit(){
-			coordtype = \''.$this->user->rolle->coordtype.'\';
-			coords1 = document.getElementById(\'input_coords\').value;
-			epsgcode = document.getElementById(\'epsg_code\').value;
-			if(coords1){
-				coords2 = coords1.split(" ");
-				if(epsgcode == 4326 && coordtype != "dec"){
-					coords2[0] = dms2dec(coords2[0], coordtype)+"";
-					coords2[1] = dms2dec(coords2[1], coordtype)+"";
+
+		function coords_input_submit() {
+			var delimiter = " ",
+					rw,
+					hw;
+			coordtype = \'' . $this->user->rolle->coordtype . '\';
+			coordsTxt = document.getElementById(\'input_coords\').value.replace(/\s\s+/g, \' \');
+			epsgcode = document.getElementById(\'epsg_code\').value.trim();
+			if (coordsTxt) {
+				if (coordsTxt.includes(",") && (coordsTxt.match(/,/g) || []).length == 1) {
+					delimiter = ",";
 				}
-				if(!coords2[0] || !coords2[1] || coords2[0].search(/[^-\d.]/g) != -1 || coords2[1].search(/[^-\d.]/g) != -1){
+				coords = coordsTxt.split(delimiter);
+				rw = coords[0].trim();
+				hw = coords[1].trim();
+				if (epsgcode == 4326) {
+					if (coordtype != "dec") {
+						rw = dms2dec(rw, coordtype) + "";
+						hw = dms2dec(hw, coordtype) + "";
+					}
+					if (rw > hw) {
+						var kleiner = hw;
+						hw = rw;
+						rw = kleiner;
+					}
+				}
+				if (!rw || !hw || rw.search(/[^-\d.]/g) != -1 || hw.search(/[^-\d.]/g) != -1) {
 					alert("Falsches Format");
 					return;
 				}
 				document.getElementById(\'message_box\').className = \'message_box_hidden\';
 				startwaiting();
-				document.GUI.INPUT_COORD.value = coords2[0]+","+coords2[1];
+				document.GUI.INPUT_COORD.value = rw + "," + hw;
 				document.GUI.go.value = "zoom2coord";
 				document.GUI.CMD.value = "jump_coords";
 				document.GUI.submit();

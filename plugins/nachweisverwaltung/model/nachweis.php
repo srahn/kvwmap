@@ -46,6 +46,143 @@ class Nachweis {
     $this->database=$database;
     $this->client_epsg=$client_epsg;
   }
+	
+	function LENRIS_get_all_nachweise(){
+		ini_set('memory_limit', '8192M');
+		set_time_limit(1800);
+		$sql = "
+			DELETE FROM 
+				nachweisverwaltung.n_nachweisaenderungen;
+			SELECT 
+				*
+      FROM 
+				nachweisverwaltung.n_nachweise
+			ORDER BY id
+			";
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				foreach ($nachweise as $index => $nachweis) {
+					$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', @filemtime($nachweis['link_datei']));
+				}
+				$json = json_encode($nachweise);
+				echo $json;
+			}
+		}
+	}
+	
+	function LENRIS_get_new_nachweise(){
+		$sql = "
+			SELECT 
+				a.*
+      FROM 
+				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
+			WHERE
+				b.db_action = 'INSERT'
+			ORDER BY a.id";
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				foreach ($nachweise as $index => $nachweis) {
+					$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', @filemtime($nachweis['link_datei']));
+				}
+				$json = json_encode($nachweise);
+				echo $json;
+			}
+		}
+	}
+	
+	function LENRIS_get_changed_nachweise(){
+		$sql = "
+			SELECT DISTINCT
+				a.*
+      FROM 
+				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
+			WHERE
+				b.db_action = 'UPDATE'
+			ORDER BY a.id";
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				foreach ($nachweise as $index => $nachweis) {
+					$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', @filemtime($nachweis['link_datei']));
+				}
+				$json = json_encode($nachweise);
+				echo $json;
+			}
+		}
+	}
+	
+	function LENRIS_get_deleted_nachweise(){
+		$sql = "
+			SELECT 
+				id_nachweis
+      FROM 
+				nachweisverwaltung.n_nachweisaenderungen 
+			WHERE
+				db_action = 'DELETE'";
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				$json = json_encode($nachweise);
+				echo $json;
+			}
+		}
+	}	
+	
+	function LENRIS_confirm_new_nachweise($ids){
+		$sql = "
+			DELETE FROM 
+				nachweisverwaltung.n_nachweisaenderungen 
+			WHERE 
+				id_nachweis IN (" . $ids . ") and db_action = 'INSERT'";
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+			$rows = pg_affected_rows($ret[1]);
+			echo $rows;
+		}
+	}
+		
+	function LENRIS_confirm_changed_nachweise($ids){
+		$sql = "
+			DELETE FROM 
+				nachweisverwaltung.n_nachweisaenderungen 
+			WHERE 
+				id_nachweis IN (" . $ids . ") and db_action = 'UPDATE'";
+		$ret = $this->database->execSQL($sql,4, 1);
+		if (!$ret[0]) {
+			$sql = "
+				SELECT 
+					count(*)
+				FROM
+					nachweisverwaltung.n_nachweisaenderungen 
+				WHERE 
+					id_nachweis IN (" . $ids . ") and db_action = 'UPDATE'";
+			if (!$ret[0]) {
+				$rest = pg_fetch_row($ret[1]);
+				echo (count($ids) - $rest);
+			}
+		}
+	}
+
+	function LENRIS_confirm_deleted_nachweise($ids){
+		$sql = "
+			DELETE FROM 
+				nachweisverwaltung.n_nachweisaenderungen 
+			WHERE 
+				id_nachweis IN (" . $ids . ")";		# alle Einträge löschen, da es noch UPDATE-Einträge geben kann
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+			$rows = pg_affected_rows($ret[1]);
+			echo $rows;
+		}
+	}		
+
+	function LENRIS_get_document($document){
+		if (strpos($document, NACHWEISDOCPATH) !== false AND file_exists($document)) {
+			readfile($document);
+		}
+	}
 
 	function check_documentpath($old_dataset){		
 		$ret=$this->getNachweise($old_dataset['id'],'','','','','','','','bySingleID','','');
@@ -127,16 +264,16 @@ class Nachweis {
 		}
 	}
 	
-  function getZielDateiName($formvars) {
+  function getZielDateiName($formvars, $nachweis_primary_attribute = NACHWEIS_PRIMARY_ATTRIBUTE, $nachweis_secondary_attribute = NACHWEIS_SECONDARY_ATTRIBUTE) {
     #2005-11-24_pk
     $pathparts=pathinfo($formvars['Bilddatei_name']);
-		if($formvars[NACHWEIS_PRIMARY_ATTRIBUTE] == ''){		# primäres Ordungskriterium leer -> Nachweis-ID nehmen
+		if($formvars[$nachweis_primary_attribute] == ''){		# primäres Ordungskriterium leer -> Nachweis-ID nehmen
 			$id = $secondary.str_pad(($formvars['id'] ?: $this->get_next_nachweis_id()), RISSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
 		}
 		else{
-			$id = $this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]);
+			$id = $this->buildNachweisNr($formvars[$nachweis_primary_attribute], $formvars[$nachweis_secondary_attribute]);
 		}
-    $zieldateiname=$formvars['flurid'].'-'.$id.'-'.$formvars['artname'].'-'.str_pad(trim($formvars['Blattnr']),3,'0',STR_PAD_LEFT).'.'.$pathparts['extension'];
+    $zieldateiname = $formvars['flurid'].'-'.$id.'-'.$formvars['artname'].'-'.str_pad(trim($formvars['Blattnr']),3,'0',STR_PAD_LEFT).'.'.$pathparts['extension'];
     #echo $zieldateiname;
     return $zieldateiname;
   }
@@ -256,13 +393,20 @@ class Nachweis {
     return $art;
   }	
   
-  function getDokumentarten(){
+  function getDokumentarten($grouped_by_hauptart = true){
   	$sql="SELECT id, art, geometrie_relevant, hauptart, sortierung, abkuerzung, pok_pflicht::integer FROM nachweisverwaltung.n_dokumentarten order by sortierung, art"; 
     $ret=$this->database->execSQL($sql,4, 0);    
     if (!$ret[0]) {
-      while($rs=pg_fetch_assoc($ret[1])){
-				$art[$rs['hauptart']][$rs['id']] = $rs;
-      }
+			if ($grouped_by_hauptart) {
+				while($rs=pg_fetch_assoc($ret[1])){
+					$art[$rs['hauptart']][$rs['id']] = $rs;
+				}
+			}
+			else {
+				while($rs=pg_fetch_assoc($ret[1])){
+					$art[$rs['id']] = $rs;
+				}
+			}
     }
     return $art;
   }
@@ -277,12 +421,20 @@ class Nachweis {
     return $anzahl;
   }
   
-  function getBBoxAsRectObj($id,$source) {
-    # ermittelt die Boundingbox des Nachweises $id
-    $sql ='SELECT st_xmin(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS minx,st_ymin(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS miny';
-    $sql.=',st_xmax(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS maxx,st_ymax(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS maxy';
-    if ($source=='nachweis') { $sql.=' FROM nachweisverwaltung.n_nachweise '; }
-    $sql.='WHERE id='.$id;
+  function getBBoxAsRectObj($ids) {
+    # ermittelt die Boundingbox der Nachweise
+    $sql ='
+			SELECT 
+				st_xmin(extent) AS minx,
+				st_ymin(extent) AS miny,
+				st_xmax(extent) AS maxx,
+				st_ymax(extent) AS maxy
+			FROM (
+				SELECT st_extent(st_transform(the_geom, '.$this->client_epsg.')) as extent
+				FROM 
+					nachweisverwaltung.n_nachweise 
+				WHERE id IN (' . implode(',', $ids) . ')
+			) as foo';
     $ret=$this->database->execSQL($sql,4, 0);
     if ($ret[0]) {
       $ret[1].='Fehler bei der Abfrage der Boundingbox des Nachweisdokumentes! \n';
@@ -487,8 +639,8 @@ class Nachweis {
     return $ret;
   }
 
-  static function buildNachweisNr($primary, $secondary){
-  	if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
+  static function buildNachweisNr($primary, $secondary, $nachweis_primary_attribute = NACHWEIS_PRIMARY_ATTRIBUTE){
+  	if($nachweis_primary_attribute == 'rissnummer'){
   		return $secondary.str_pad($primary, RISSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
   	}
   	else{

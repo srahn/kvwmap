@@ -399,6 +399,7 @@ class synchro {
 					$client_deltas->rows
 				)
 			) . ';';
+			$this->database->debug->write("SQL der Änderungen vom mobilen Client: " . $sql, 4);
 
 			# Trage gepusht bis ein
 			$sql .= "
@@ -424,7 +425,7 @@ class synchro {
 			if ($res[0]) {
 				$result = array(
 					'success' => false,
-					'err_msg' => 'Fehler bei der Syncronisation auf dem Server. ' . $res[1]
+					'err_msg' => 'Fehler bei der Synchronisation auf dem Server. ' . $res[1]
 				);
 				return $result;
 			}
@@ -458,7 +459,7 @@ class synchro {
 		if ($res[0]) {
 			$result = array(
 				'success' => false,
-				'err_msg' => 'Fehler bei der Syncronisation auf dem Server. ' . $res[1]
+				'err_msg' => 'Fehler bei der Synchronisation auf dem Server. ' . $res[1]
 			);
 			return $result;
 		}

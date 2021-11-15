@@ -56,7 +56,7 @@
 	$strSave="Ändern";
 	$strButtonSaveAsNewLayer="Als neuen Layer eintragen";
 	$strCommonData="Allgemeine Angaben";
-	$strtransparency="Transparenz";
+	$strtransparency="Deckkraft";
 	$strDrawingOrder="Zeichenreihenfolge";
 	$strLegendOrder="Legendenreihenfolge";
 	$strLegend="Legende";
