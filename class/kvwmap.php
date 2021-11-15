@@ -8664,6 +8664,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$attributes['visible'][$k] = true;
           }
           $layerset[0]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
+					$layerset[0]['shape'][$j]['wfs_bbox'] = $features[$j]['bbox'];
 					if ($features[$j]['geom'] != '') {
 						$geometries_found = true;
 					}
@@ -14530,6 +14531,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								$layerset[$i]['shape'][$j][$layerset[$i]['attributes']['name'][$k]] = $features[$j]['value'][$layerset[$i]['attributes']['name'][$k]];
               }
               $layerset[$i]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
+							$layerset[$i]['shape'][$j]['wfs_bbox'] = $features[$j]['bbox'];
             }
 						for($j = 0; $j < @count($layerset[$i]['attributes']['name']); $j++){
 							$layerset[$i]['attributes']['privileg'][$j] = $privileges[$layerset[$i]['attributes']['name'][$j]];
