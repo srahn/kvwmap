@@ -1020,7 +1020,7 @@ function addnewtext(evt){
 
 function create_new_freetext(x, y){
 	var newtext = document.createElementNS("http://www.w3.org/2000/svg","text");
-  newtext.setAttributeNS(null, "style", "fill:rgb(255,0,0);font-size:16px;font-family:Arial;font-weight:bold;");
+  newtext.setAttributeNS(null, "style", "fill:' . $this->user->rolle->redline_text_color . '; font-size:' . $this->user->rolle->redline_font_size . 'px; font-family:' . $this->user->rolle->redline_font_family . '; font-weight:' . $this->user->rolle->redline_font_weight . ';");
 	newtext.setAttributeNS(null, "transform", "scale(1,-1)");
 	newtext.setAttributeNS(null, "x", x);
 	newtext.setAttributeNS(null, "y", -y);

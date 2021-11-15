@@ -2008,7 +2008,9 @@ function send_image_not_found($img) {
 }
 
 function value_of($array, $key) {
-	if(!is_array($array))$array = array();
+	if (!is_array($array)) {
+		$array = array();
+	}
 	return (array_key_exists($key, $array) ? $array[$key] :	'');
 }
 
