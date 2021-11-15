@@ -194,7 +194,18 @@ class wfs{
 					# evtl. Namespace davor entfernen
 					$this->objects[$i][$j]["tag"] = str_replace($this->namespace . ':', '', $this->objects[$i][$j]["tag"]);
 		  		$features[$i]['value'][$this->objects[$i][$j]["tag"]] = $this->objects[$i][$j]["value"];
-				}
+				}				
+			}
+			if ($features[$i]['value']['gml:lowerCorner'] != '') {
+				$lc = explode(' ', $features[$i]['value']['gml:lowerCorner']);
+				$uc = explode(' ', $features[$i]['value']['gml:upperCorner']);
+				$features[$i]['bbox'] = 'POLYGON((' . 
+																	$features[$i]['value']['gml:lowerCorner'] . ', ' . 
+																	$uc[0] . ' ' . $lc[1] . ', ' . 
+																	$features[$i]['value']['gml:upperCorner'] . ', ' . 
+																	$lc[0] . ' ' . $uc[1] . ', ' . 
+																	$features[$i]['value']['gml:lowerCorner'] . 
+																'))';
 			}
   	}
 	  return $features;
