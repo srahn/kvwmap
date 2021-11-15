@@ -1,3 +1,5 @@
-﻿<?php
-  $strTitel="Nutzereinladungen";
+<?php
+	$strTitel = "Nutzereinladungen";
+	$strToken = "Kennung";
+	$strRegistered = "Registriert";
 ?>

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
  $strTitle="Search Cadastral Parcel";
  $strGemkgschl="Key Gemarkung";
  $strGemkgGem="Gemarkung, Gemeinde";

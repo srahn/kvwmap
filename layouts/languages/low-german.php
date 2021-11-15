@@ -19,6 +19,9 @@
 	$this->strSend="Sennen";
 	$this->strEnter="Start";
 	$this->strReset="Trüggsetten";
+	$this->strCoordinates  =  'Koordinaten';
+	$this->strCoordinate  =  'Koordinate';
+	$this->strCoordinateReferenceSystem = 'Coordinate Reference System';
 	$this->strSaveMapViewCommittMassage="Koortutsnitt is spiekert woorn";
 	$this->strExceeded = "überschritten";
 	$this->strShowMore="Mehr anzeigen";
@@ -27,5 +30,11 @@
 	$this->strLoad="Loden";
 	$this->strUseGeometryOf="Geometrie övernehmen von";
 	$this->strSearch="Nu sök";
+	$this->strShareRollenlayer = "Layer teilen";
+	$this->strShareRollenLayerLong = "Diesen Layer für andere Nutzer in diesem WebGIS freigeben.";
+	$this->strLayerSharedFrom = "Dieser Layer wurde geteilt von Nutzer";
+	$this->strEditableOnlyInThisStelle = "Nur editierbar in dieser Stelle";
+	$this->strEditableInAllStellen = "In allen Stellen editierbar";
+	$this->strSettings = "Einstellungen";
 	$this->strMetadata="Metadaten";
 ?>

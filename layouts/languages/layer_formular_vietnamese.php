@@ -1,11 +1,11 @@
-﻿<?php
+<?php
 	$strLayer="Layer";
 	$strAsteriskRequired="Cần điền đủ thông tin cho những trường có dấu *";  
 	$strMaintable="Main Table";
 	$strDataBankID="Số ID cơ sở dữ liệu*";
 	$strLayerID="Id lớp*";
 	$strName="Tên*";
-	$strDataType="Kiểu dữ liệu*";
+	$strDataType="Kiểu dữ liệu";
 	$strGroup="Nhóm";
 	$strPath="Đường dẫn";
 	$strData="Số liệu";
@@ -18,7 +18,7 @@
 	$strLabelRequires="Yêu cầu gắn nhãn";
 	$strLayerParams="Thông số lớp";
 	$strConnection="Kết nối*";
-	$strConnectionType="Kiểu kết nối*";
+	$strConnectionType="Kiểu kết nối";
 	$strClassItem="Mục lớp";
 	$strFilterItem="Mục lọc*";
 	$strTolerance="Dung sai*";
@@ -71,4 +71,6 @@
 	$strStylesLabels="Styles and Labels";
 	$strDdlAttribute="DDL Default Attribute";
 	$strIdAttribute="ID-Column";
+	$strSharedFrom = "Shared from user";
+	$strSharedFromHelp = "Remove the ID when the layer not any longer should be marked as shared by another user in layer legend.";
 ?>

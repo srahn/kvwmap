@@ -1,10 +1,10 @@
-﻿<?php
+<?php
 	$strLayer="Layer";
 	$strAsteriskRequired="wartości oznaczone * muszą zostać wpisane";
 	$strDataBankID="warstwa ID*";
 	$strName="nazwa*";
 	$strMaintable="Main Table";
-	$strDataType="rodzaj danych*";
+	$strDataType="rodzaj danych";
 	$strGroup="grupa*";
 	$strPath="ścieżka";
 	$strData="dane";
@@ -18,7 +18,7 @@
 	$strLayerParams="warstwę params";
 	$strConnection="połączenie*";
 	$strPrintConnection="podłączenie do drukarki";
-	$strConnectionType="rodzaj połączenia*";
+	$strConnectionType="rodzaj połączenia";
 	$strClassItem="klasa";
 	$strFilterItem="filtr*";
 	$strTolerance="tolerancja*";
@@ -74,4 +74,6 @@
 	$strStylesLabels="Styles and Labels";
 	$strDdlAttribute="DDL Default Attribute";
 	$strIdAttribute="ID-Column";
+	$strSharedFrom = "Shared from user";
+	$strSharedFromHelp = "Remove the ID when the layer not any longer should be marked as shared by another user in layer legend.";
 ?>  

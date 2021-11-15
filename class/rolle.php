@@ -77,8 +77,9 @@ class rolle {
 				ELSE l.`Name`
 			END AS Name";
 		}
-		else
+		else {
 			$name_column = "l.Name";
+		}
 
 		if ($LayerName != '') {
 			$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "'";
@@ -105,8 +106,9 @@ class rolle {
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
 				l.labelitem as original_labelitem,
-				l.duplicate_from_layer_id,
-				l.duplicate_criterion,
+				l.`duplicate_from_layer_id`,
+				l.`duplicate_criterion`,
+				l.`shared_from`,
 				ul.`postlabelcache`,
 				`Filter`,
 				r2ul.gle_view,
@@ -324,11 +326,11 @@ class rolle {
 		if($timestamp != ''){
 			$time = new DateTime(DateTime::createFromFormat('d.m.Y H:i:s', $timestamp)->format('Y-m-d H:i:s'));
 			$sql.='hist_timestamp="'.$time->format('Y-m-d H:i:s').'"';
-			showAlert('Der Zeitpunkt der ALKIS-Historie wurde auf '.$time->format('d.m.Y H:i:s').' geändert.');
+			showAlert('Der Zeitpunkt für historische Daten wurde auf '.$time->format('d.m.Y H:i:s').' geändert.');
 		}
 		else{
 			$sql.='hist_timestamp = NULL';
-			if(rolle::$hist_timestamp != '')showAlert('Der Zeitpunkt der ALKIS-Historie ist jetzt wieder aktuell.');
+			if(rolle::$hist_timestamp != '')showAlert('Der Zeitpunkt für historische Daten ist jetzt wieder aktuell.');
 		}
 		$sql.=' WHERE stelle_id='.$this->stelle_id.' AND user_id='.$this->user_id;		
 		#echo $sql;
@@ -978,16 +980,29 @@ class rolle {
 				concat('(', rollenfilter, ')') as Filter
 			FROM
 				rollenlayer AS l
-			" . (count($where) > 0 ? "WHERE " . implode(" AND ", $where) : '') . "
+			WHERE
+				l.stelle_id = " . $this->stelle_id . " AND
+				l.user_id = " . $this->user_id . "
 		";
-
+		if ($LayerName != '') {
+			$sql .=' AND (l.Name LIKE "'.$LayerName.'" ';
+			if (is_numeric($LayerName)) {
+				$sql .= 'OR l.id = "' . $LayerName . '")';
+			}
+			else {
+				$sql .= ')';
+			}
+		}
+		if ($typ != NULL){
+			$sql .= " AND Typ = '" . $typ . "'";
+		}
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
 		while ($rs = $this->database->result->fetch_assoc()) {
-			$layer[]=$rs;
+			$layer[] = $rs;
 		}
 		return $layer;
 	}

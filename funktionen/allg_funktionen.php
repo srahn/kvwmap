@@ -242,7 +242,7 @@ function strip_pg_escape_string($string){
 }
 
 function replace_semicolon($text) {
-  return str_replace(';', '', $text);
+	return str_replace(';', '', $text);
 }
 
 function InchesPerUnit($unit, $center_y){
@@ -696,40 +696,28 @@ function isPasswordValide($oldPassword, $newPassword, $newPassword2) {
 * Erzeugt an Hand der Einstellungen für die Passwortstärke einen Hilfetext für die
 * Vergabe eines neuen Passwortes
 */
-function password_erstellungs_hinweis($lang) {
+function password_erstellungs_hinweis($language) {
+	include_once(LAYOUTPATH . 'languages/allg_funktionen_' . $language . '.php');
 	$condition = array();
 	$msg = '';
-	if (substr(PASSWORD_CHECK, 0, 1) == '0') {
-		$msg = 'Das Passwort muss 3 der 4 Kriterien: Kleinbuchstaben, Großbuchstaben, Zahlen und Sonderzeichen enthalten.';
+	if (substr(PASSWORD_CHECK, 0, 1) == '1') {
+		$msg = $strPasswordCheck0;
 	}
 	else {
 		if (substr(PASSWORD_CHECK, 1, 1) == '1') {
-			$conditions[] = 'ein Kleinbuchstaben';
+			$conditions[] = $strLCLetters;
 		}
 		if (substr(PASSWORD_CHECK, 2, 1) == '1') {
-			$conditions[] = 'ein Großbuchstaben';
+			$conditions[] = $strUCLetters;
 		}
 		if (substr(PASSWORD_CHECK, 3, 1) == '1') {
-			$conditions[] = 'eine Zahl';
+			$conditions[] = $strNumbers;
 		}
 		if (substr(PASSWORD_CHECK, 4, 1) == '1') {
-			$conditions[] = 'ein Sonderzeichen';
+			$conditions[] = $strSpecialCharacters;
 		}
 
-		$msg = 'Das Passwort muss mindestens ';
-		$num_conditions = count($conditions);
-		for ($i = 0; $i < $num_conditions; $i++) {
-			$msg .= $conditions[$i];
-			if ($i < $num_conditions - 2) {
-				$msg .= ', ';
-			}
-			else {
-				if ($i < $num_conditions - 1) {
-					$msg .= ' ' . $lang['strAnd'] . ' ';
-				}
-			}
-		}
-		$msg .= ' beinhalten.';
+		$msg = $strMinimum . ' ' . implode(', ', $conditions) . '.';
 	}
 	return $msg;
 }
@@ -1846,7 +1834,7 @@ function output_select($form_field_name, $data, $selected_value = null, $onchang
 * Über die optionalen Parameter $delim1 und $delim2 kann man die Trennzeichen vor und nach dem Wort angeben.
 * Wenn der optionale Parameter $last true ist, wird das letzte Vorkommen des Wortes verwendet.
 */
-function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false){
+function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false) {
 	if ($last) {
 		$word_pos = strripos($str, $word);
 	}
@@ -2153,7 +2141,37 @@ function get_requires_options($sql, $requires) {
 	return $creator->created;
 }
 
-function sql_from_parse_tree($parse_tree){
+/*
+* This function convert an assosiative array with 1-dim vectors of values of the same length
+* to an array with associative arrays e.g.
+* from: array(
+* 	'id' => array(1,2,3),
+* 	'name' => array('a', 'b', 'c');
+* );
+* to: array(
+* 	array('id' => 1, 'name' => 'a'),
+* 	array('id' => 2, 'name' => 'b'),
+* 	array('id' => 3, 'name' => 'c')
+* )
+*/
+function vectors_to_assoc_array($vectors) {
+	$keys = array_keys($vectors);
+	if (count($keys) == 0) {
+		return array();
+	}
+	$first_vector = $vectors[$keys[0]];
+	$result = array();
+	foreach ($first_vector AS $id => $value) {
+		$assoc = array();
+		foreach ($keys AS $key) {
+			$assoc[$key] = $vectors[$key][$id];  
+		}
+		$result[] = $assoc;
+	}
+	return $result;
+}
+
+function sql_from_parse_tree($parse_tree) {
 	$sql = array();
 	foreach ($parse_tree as $node) {
 		if ($node['sub_tree'] != '') {

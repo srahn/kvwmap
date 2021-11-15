@@ -5,6 +5,7 @@
 	global $strShowAll;
 	global $strNewEmbeddedPK;
 	global $hover_preview;
+	
 	function output_table($table) {
 		$output = '';
 		if (is_array($table['rows'])) {
@@ -146,6 +147,7 @@
 			$attributes2['dependents'][$j] = '';		// die Array-Elemente sollen keine Visibility-Changer sein, nur das gemeinsame Hidden-Feld oben
 			$attributes2['table_name'][$attributes2['name'][$j]] = $tablename;
 			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);			
+			$dataset2 = $dataset;
 			$dataset2[$tablename.'_oid'] = $oid;
 			$onchange2 = 'buildJSONString(\''.$id.'\', true);';
 			for($e = -1; $e < count_or_0($elements); $e++){
@@ -1216,5 +1218,24 @@
 		if(!empty($class))$output = ' class="'.implode($class, ' ').'"';
 		if(!empty($style))$output.= ' style="'.implode($style, ';').'"';
 		return $output;
+	}
+	
+	function getGeomType($column_geomtype, $layer_datatype){
+		$geomtype = $column_geomtype;
+		# Frage den Geometrietyp aus der Layerdefinition ab, wenn in geometry_columns nur als Geometry definiert.
+		if ($geomtype == 'GEOMETRY' OR empty($geomtype)) {
+			$geomtypes = array('POINT', 'LINESTRING', 'POLYGON');
+			$geomtype = $geomtypes[$layer_datatype];
+		}
+		if ($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY') {
+			$geomtype = 'Polygon';
+		}
+		elseif ($geomtype == 'POINT') {
+			$geomtype = 'Point';
+		}
+		elseif ($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') {
+			$geomtype = 'Line';
+		}
+		return $geomtype;
 	}
 ?>

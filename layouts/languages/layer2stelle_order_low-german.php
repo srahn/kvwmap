@@ -1,4 +1,4 @@
-﻿ <?php
+ <?php
   $strTitle="Layer von de Stäe";
   $strDrawingOrder="Teken-<br>reegfolge ";
   $strProperties="Eegenschaften";

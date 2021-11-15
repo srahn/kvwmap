@@ -25,7 +25,9 @@
 	$this->strReset="Reset";
 	$this->strSaveMapViewCommittMassage="Mapview is saved";
 	$this->strMapScale="Scale";
-	$this->strCoordinates="Coordinates:";
+	$this->strCoordinates = 'Coordinates';
+	$this->strCoordinate = 'Coordinate';
+	$this->strCoordinateReferenceSystem = 'Coordinate Reference System';
 	$this->strUseGeometryOf="Use Geometry of";
 	$this->strActivateAllQueries="Activate/Deactivate all queries";
 	$this->strActivateAllLayers="Activate/Deactivate all layers";
@@ -57,6 +59,20 @@
 	$this->strShowMore="Show more";
 	$this->strShowLess="Show less";
 	$this->strLayerParameters="Layer Parameter";
+	$this->strColor="Draw Color";
 	$this->strHatching="Hatching";
+	$this->strShareRollenlayer = "Share Layer";
+	$this->strShareRollenLayerLong = "Share this layer for other user in this WebGIS";
+	$this->strLayerSharedFrom = "This Layer was shared by user";
+	$this->strReadable = "Everywhere only readable";
+	$this->strEditableOnlyInThisStelle = "Only editable in this working group";
+	$this->strEditableInAllStellen = "Everywhere editable";
+	$this->strSettings = "Settings";
+	$this->strAsteriskRequired = "Fields marked with an asterisk * are required";
+	$this->strSurName = "Surname";
+	$this->strForeName = "First name";
+	$this->strUser = "User";
+	$this->strLabel = "Label";
+	$this->strNameSuffix = "Name suffix";
 	$this->strMetadata="Metadata";
 ?>
