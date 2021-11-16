@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strLayer="Layer";
 	$strAsteriskRequired="Cần điền đủ thông tin cho những trường có dấu *";  
 	$strMaintable="Main Table";

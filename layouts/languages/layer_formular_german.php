@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strLayer="Layer";
 	$strAsteriskRequired="Werte mit * mussen eingetragen werden";
 	$strBaseParameters="Basis-Parameter";

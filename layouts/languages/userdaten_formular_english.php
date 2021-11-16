@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitle="User Data Editor";
 	$strDataBankID="Data bank ID";
 	$strName="Name";

@@ -81,4 +81,9 @@
 	$strHintPrintScale="If you activate the first option, a suitable printing scale will be calculated automatically. On the second option, the last used printing scale is used.";
 	$strShowRollenFilter="Show Layer Filter";
 	$strHintShowRollenFilter="If you activate this option, you are able to set a filter in the layer-options.";
+	$strRedlineTextOptions = "Feetext options";
+	$strRedlineTextColor = "Text color";
+	$strRedlineFontFamily = "Font family";
+	$strRedlineFontSize = "Font size";
+	$strRedlineFontWeight = "Font weight";
 ?>  

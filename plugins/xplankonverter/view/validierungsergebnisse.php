@@ -181,6 +181,7 @@ function validierungsergebnisseRowAttribs(row, index){
   </thead>
 </table>
 <script>
+/*
   var $table = $('#validierungsergebnis_table')
 
   $(function() {
@@ -208,6 +209,7 @@ function validierungsergebnisseRowAttribs(row, index){
       })
     }).trigger('change')
   })
+*/
 </script>
 <div style="clear:both"></div>
 <form action="index.php" method="post" enctype="multipart/form-data">
