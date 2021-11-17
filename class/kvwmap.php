@@ -16805,7 +16805,7 @@ class db_mapObj{
 									}
 								}
 								# --------- weitere Optionen -----------
-								if ($layer['oid'] != '') {
+								if ($attributes['subform_layer_id'][$i] != '' AND $layer['oid'] != '') {
 									 # auch die oid abfragen
 									 $attributes['options'][$i] = str_replace(' from ', ', ' . $layer['oid'] . ' as oid from ', strtolower($optionen[0]));
 								}
