@@ -508,7 +508,10 @@ INSERT INTO u_styles2classes (
 		#echo '<br>extra: ' . $extra;
 		$this->debug->write("<p>file:kvwmap class:database->create_insert_dump :<br>".$sql,4);
 		$this->execSQL($sql, 4, 0);
-
+		$dump = array(
+			'insert' => array(),
+			'extra'  => array()
+		);
 		$feld_anzahl = $this->result->field_count;
 		#echo '<br>Anzahl Felder: ' . $feld_anzahl;
 		for ($i = 0; $i < $feld_anzahl; $i++) {

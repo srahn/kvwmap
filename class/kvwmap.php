@@ -16805,7 +16805,7 @@ class db_mapObj{
 									}
 								}
 								# --------- weitere Optionen -----------
-								if ($attributes['subform_layer_id'][$i] != NULL) {
+								if ($attributes['subform_layer_id'][$i] != '' AND $layer['oid'] != '') {
 									 # auch die oid abfragen
 									 $attributes['options'][$i] = str_replace(' from ', ', ' . $layer['oid'] . ' as oid from ', strtolower($optionen[0]));
 								}
@@ -18556,7 +18556,7 @@ class db_mapObj{
 		}
 		$attributes['tabs'] = array_filter(array_unique($attributes['tab']), 'strlen');
 		return $attributes;
-  }
+	}
 
 	/*
 	* Returns a list of datatypes used by layer, given in layer_ids array
@@ -18572,12 +18572,11 @@ class db_mapObj{
 			WHERE
 				la.layer_id IN (" . implode(', ', $layer_ids) . ")
 		";
-
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_datatypes - Lesen der Datentypen der Layer mit id (" . implode(', ', $layer_ids) . "):<br>" . $sql , 4);
-		$this->db->execSQL($sql);
-		if ($query == 0) {
+		$ret = $this->db->execSQL($sql);
+		if (!$ret['success']) {
 			$this->GUI->add_message('error', err_msg($this->script_name, __LINE__, $sql));
-			return 0;
+			return $datatypes;
 		}
 		while ($rs = $this->db->result->fetch_assoc()) {
 			$datatypes[] = $rs;
