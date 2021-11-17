@@ -863,9 +863,12 @@
 					if($name == 'lock'){
 						$datapart .= ' type="hidden"';
 					}
-					if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
-						$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
+					if (in_array($attributes['type'][$j], ['numeric', 'float4', 'float8', 'int2', 'int4', 'int8'])) {
+						$value = str_replace('.', ',', $value);
 					}
+					elseif ($attributes['length'][$j]) {
+						$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
+					}				
 					if($size)$datapart .= ' size="'.$size.'"';
 					$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
 					if($attribute_privileg == '0'){ // nur lesbares Attribut

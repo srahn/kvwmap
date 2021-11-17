@@ -8459,6 +8459,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					for($i = 0; $i < count($attributes['name']); $i++){
 						$value = value_of($this->formvars, $prefix.'value_'.$attributes['name'][$i]);
 						$operator = value_of($this->formvars, $prefix.'operator_'.$attributes['name'][$i]);
+						if ($attributes['form_element_type'][$i] == 'Zahl') {
+							# bei Zahlen den Punkt (Tausendertrenner) entfernen
+							$value = removeTausenderTrenner($value);
+						}
+						elseif (in_array($attributes['type'][$i], ['numeric', 'float4', 'float8'])) {
+							$value = str_replace(',', '.', $value);
+						}
 						if (is_array($value)) {			# multible-Auswahlfelder
 							if(count($value) > 1){
 								$value = implode($value, '|');
@@ -9597,7 +9604,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								else {
 									if($table['type'][$i] == 'Zahl') {
 										# bei Zahlen den Punkt (Tausendertrenner) entfernen
-										$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
+										$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]);
+									}
+									elseif (in_array($table['datatype'][$i], ['numeric', 'float4', 'float8'])) {
+										$this->formvars[$table['formfield'][$i]] = str_replace(',', '.', $this->formvars[$table['formfield'][$i]]);
 									}
 									if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
 										$this->formvars[$table['formfield'][$i]] = 'f';
@@ -13700,7 +13710,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									if (POSTGRESVERSION >= 930 AND (substr($datatype, 0, 1) == '_' OR is_numeric($datatype))) {
 										$eintrag = $this->processJSON($this->formvars[$form_fields[$i]], $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']); # bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
 									}
-									else $eintrag = $this->formvars[$form_fields[$i]];
+									else {
+										if (in_array($datatype, ['numeric', 'float4', 'float8'])) {
+											$eintrag = str_replace(',', '.', $this->formvars[$form_fields[$i]]);
+										}
+										else $eintrag = $this->formvars[$form_fields[$i]];
+									}
 								}
 							}
 						} # end of default case
