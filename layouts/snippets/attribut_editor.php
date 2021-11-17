@@ -7,12 +7,12 @@
 	$form_element_options = array(
 		array(
 			'value' => 'Text',
-			'output' => 'Text',
-			'title' => 'Einfaches Textfeld'
+			'output' => 'Eingabefeld',
+			'title' => 'Einfaches einzeiliges Eingabefeld'
 		),
 		array(
 			'value' => 'Zahl',
-			'output' => 'Zahl',
+			'output' => 'Zahl mit Tausendertrennzeichen',
 			'title' => 'Zahlenfeld'
 		),
 		array(
@@ -230,7 +230,7 @@ function alias_replace(name){
 	}
 </style>
 
-<table style="width: 700px; margin: 0 40px 0 40px">
+<table style="width: 700px; margin: 15px 40px 0 40px">
 	<tr>
     <td align="center">
 			<span class="px17 fetter"><? echo $strLayer;?>:</span>
