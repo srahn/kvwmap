@@ -8459,6 +8459,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					for($i = 0; $i < count($attributes['name']); $i++){
 						$value = value_of($this->formvars, $prefix.'value_'.$attributes['name'][$i]);
 						$operator = value_of($this->formvars, $prefix.'operator_'.$attributes['name'][$i]);
+						if ($attributes['form_element_type'][$i] == 'Zahl') {
+							# bei Zahlen den Punkt (Tausendertrenner) entfernen
+							$value = removeTausenderTrenner($value);
+						}
+						elseif (in_array($attributes['type'][$i], ['numeric', 'float4', 'float8'])) {
+							$value = str_replace(',', '.', $value);
+						}
 						if (is_array($value)) {			# multible-Auswahlfelder
 							if(count($value) > 1){
 								$value = implode($value, '|');
@@ -8800,6 +8807,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$attributes['visible'][$k] = true;
           }
           $layerset[0]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
+					$layerset[0]['shape'][$j]['wfs_bbox'] = $features[$j]['bbox'];
 					if ($features[$j]['geom'] != '') {
 						$geometries_found = true;
 					}
@@ -9596,7 +9604,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								else {
 									if($table['type'][$i] == 'Zahl') {
 										# bei Zahlen den Punkt (Tausendertrenner) entfernen
-										$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
+										$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]);
+									}
+									elseif (in_array($table['datatype'][$i], ['numeric', 'float4', 'float8'])) {
+										$this->formvars[$table['formfield'][$i]] = str_replace(',', '.', $this->formvars[$table['formfield'][$i]]);
 									}
 									if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
 										$this->formvars[$table['formfield'][$i]] = 'f';
@@ -13449,7 +13460,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     # Liste der Formularelementnamen, die betroffen sind in der Reihenfolge,
     # wie die Spalten in der Abfrage
     $select ="nZoomFactor,gui, CASE WHEN auto_map_resize = 1 THEN 'auto' ELSE CONCAT(nImageWidth,'x',nImageHeight) END AS mapsize";
-    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, highlighting, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T')";
+    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, highlighting, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T') as hist_timestamp";
     $from ='rolle';
     $where ="stelle_id='+this.form.Stelle_ID.value+' AND user_id=" . $this->user->id;
     $StellenFormObj->addJavaScript(
@@ -13699,7 +13710,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									if (POSTGRESVERSION >= 930 AND (substr($datatype, 0, 1) == '_' OR is_numeric($datatype))) {
 										$eintrag = $this->processJSON($this->formvars[$form_fields[$i]], $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']); # bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
 									}
-									else $eintrag = $this->formvars[$form_fields[$i]];
+									else {
+										if (in_array($datatype, ['numeric', 'float4', 'float8'])) {
+											$eintrag = str_replace(',', '.', $this->formvars[$form_fields[$i]]);
+										}
+										else $eintrag = $this->formvars[$form_fields[$i]];
+									}
 								}
 							}
 						} # end of default case
@@ -14671,6 +14687,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								$layerset[$i]['shape'][$j][$layerset[$i]['attributes']['name'][$k]] = $features[$j]['value'][$layerset[$i]['attributes']['name'][$k]];
               }
               $layerset[$i]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
+							$layerset[$i]['shape'][$j]['wfs_bbox'] = $features[$j]['bbox'];
             }
 						for($j = 0; $j < @count($layerset[$i]['attributes']['name']); $j++){
 							$layerset[$i]['attributes']['privileg'][$j] = $privileges[$layerset[$i]['attributes']['name'][$j]];
@@ -14796,10 +14813,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->formvars['select'] = str_replace("''", "'", $this->formvars['select']);
 		$this->formvars['where'] = str_replace("''", "'", $this->formvars['where']);
     $ret = $this->database->getRow($this->formvars['select'],$this->formvars['from'],$this->formvars['where']);
+		$delim = '';
 		foreach ($ret[1] as $key => $value) {
-			$result .= $value . '█';
+			$result .= $delim . $value;
+			$delim = '█';
 		}
-		echo rtrim($result, '█');
+		echo $result;
   }
 
   function layerfromMapfile(){
@@ -16801,14 +16820,14 @@ class db_mapObj{
 									}
 								}
 								# --------- weitere Optionen -----------
-								// if (value_of($attributes, 'subform_layer_id') AND $attributes['subform_layer_id'][$i] != NULL) {
-									// # auch die oid abfragen
-									// $attributes['options'][$i] = str_replace(' from ', ',oid from ', strtolower($optionen[0]));
-								// }
-								// # ------------ SQL ---------------------
-								// else {
+								if ($attributes['subform_layer_id'][$i] != '' AND $layer['oid'] != '') {
+									 # auch die oid abfragen
+									 $attributes['options'][$i] = str_replace(' from ', ', ' . $layer['oid'] . ' as oid from ', strtolower($optionen[0]));
+								}
+								# ------------ SQL ---------------------
+								else {
 									$attributes['options'][$i] = $optionen[0];
-								// }
+								}
 								# ------<required by>------
 								$req_by_start = strpos(strtolower($attributes['options'][$i]), "<required by>");
 								if ($req_by_start > 0) {
@@ -19022,7 +19041,17 @@ class db_mapObj{
 	}
 
   function get_used_Layer($id) {
-    $sql ='SELECT * FROM used_layer WHERE Layer_ID = '.$id.' AND Stelle_ID = '.$this->Stelle_ID;
+    $sql = '
+			SELECT 
+				l.oid, 
+				ul.* 
+			FROM 
+				layer as l,
+				used_layer as ul 
+			WHERE 
+				l.Layer_ID = ul.Layer_ID AND
+				l.Layer_ID = '.$id.' AND 
+				ul.Stelle_ID = '.$this->Stelle_ID;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_used_Layer - Lesen eines Layers:<br>" . $sql,4);
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }

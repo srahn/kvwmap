@@ -419,7 +419,7 @@ class rolle {
 				rolle::$hist_timestamp = $this->hist_timestamp_de = '';
 				#rolle::$hist_timestamp = '';
 			}
-			$this->selectedButton=$rs['selectedButton'];
+			$this->selectedButton = $rs['selectedButton'];
 			$buttons = explode(',', $rs['buttons']);
 			$this->back = in_array('back', $buttons);
 			$this->forward = in_array('forward', $buttons);
@@ -439,6 +439,10 @@ class rolle {
 			$this->freearrow = in_array('freearrow', $buttons);
 			$this->gps = in_array('gps', $buttons);
 			$this->geom_buttons = explode(',', str_replace(' ', '', $rs['geom_buttons']));
+			$this->redline_text_color = $rs['redline_text_color'];
+			$this->redline_font_family = $rs['redline_font_family'];
+			$this->redline_font_size = $rs['redline_font_size'];
+			$this->redline_font_weight = $rs['redline_font_weight'];
 			return 1;
 		}
 		else {
@@ -1408,7 +1412,11 @@ class rolle {
 					`menu_auto_close`,
 					`layer_params`,
 					`visually_impaired`,
-					`menue_buttons`
+					`menue_buttons`,
+					`redline_text_color`,
+					`redline_font_family`,
+					`redline_font_size`,
+					`redline_font_weight`
 				) 
 				SELECT ".
 					$user_id.", ".
@@ -1449,7 +1457,11 @@ class rolle {
 					`menu_auto_close`,
 					`layer_params`,
 					`visually_impaired`,
-					`menue_buttons`
+					`menue_buttons`,
+					`redline_text_color`,
+					`redline_font_family`,
+					`redline_font_size`,
+					`redline_font_weight`
 				FROM
 					`rolle`
 				WHERE
