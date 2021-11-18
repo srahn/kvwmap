@@ -65,7 +65,7 @@
     			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
     				echo ' selected';
     			}
-    			echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
+					echo ' value="'.$this->layerdaten['ID'][$i].'">' . $this->layerdaten['Bezeichnung'][$i] . ($this->layerdaten['alias'][$i] != '' ? ' [' . $this->layerdaten['alias'][$i] . ']' : '') . '</option>';
     		}
     	?>
       </select>
