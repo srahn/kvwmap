@@ -717,16 +717,18 @@ echo '			</table>
 			# bei Bedarf Label anlegen
 			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			$classes = $mapDB->read_Classes($this->formvars['layer_options_open']);
-			$this->user->rolle->setStyle($classes[0]['Style'][0]['Style_ID'], $this->formvars);
-			if($classes[0]['Label'] == NULL){
-				$empty_label = new stdClass();
-				$empty_label->font = 'arial';
-				$empty_label->size = '8';
-				$empty_label->minsize = '6';
-				$empty_label->maxsize = '10';
-				$empty_label->position = '6';
-				$new_label_id = $mapDB->new_Label($empty_label);
-				$mapDB->addLabel2Class($classes[0]['Class_ID'], $new_label_id, 0);
+			if (!empty($classes)) {
+				$this->user->rolle->setStyle($classes[0]['Style'][0]['Style_ID'], $this->formvars);
+				if($classes[0]['Label'] == NULL){
+					$empty_label = new stdClass();
+					$empty_label->font = 'arial';
+					$empty_label->size = '8';
+					$empty_label->minsize = '6';
+					$empty_label->maxsize = '10';
+					$empty_label->position = '6';
+					$new_label_id = $mapDB->new_Label($empty_label);
+					$mapDB->addLabel2Class($classes[0]['Class_ID'], $new_label_id, 0);
+				}
 			}
 		}
 		$this->neuLaden();
