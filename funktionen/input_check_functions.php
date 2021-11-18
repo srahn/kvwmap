@@ -8,33 +8,35 @@
 		var cursor_pos;
 		var dot_count_before;
 		var dot_count_after;
-		if (type == 'Zahl') {
-			grouping = true;
-		}
-		input.value = input.value.replace(/[^(0-9| |\.|,|\-)]/g, '');		// Buchstaben raus
-		input.value = input.value.replace(/\.$/, ',');									// Punkt hinten durch Komma ersetzen
-		val = input.value;
-		
-		if (['int2', 'int4', 'int8'].indexOf(datatype) != -1) {
-			if (val.search(/,/g) != -1) {
-				alert('Es sind nur ganzzahlige Angaben erlaubt!');
-				val = val.replace(/,/g, '');
+		if (['int2', 'int4', 'int8', 'float4', 'float8', 'numeric'].indexOf(datatype) != -1) {
+			if (type == 'Zahl') {
+				grouping = true;
 			}
-		}
-		if (val.slice(val.length - 1) != ',') {
-			formated_val = val.replace(/\./g, '');							// Punkte raus
-			formated_val = formated_val.replace(/,/g, '.');			// Komma zu Punkt
-			formated_val = Number(formated_val).toLocaleString('de-DE', {useGrouping: grouping, maximumFractionDigits: decimal_length});
-			if (['NaN', '0'].indexOf(formated_val) == -1) {
-				val = formated_val;
+			input.value = input.value.replace(/[^(0-9| |\.|,|\-)]/g, '');		// Buchstaben raus
+			input.value = input.value.replace(/\.$/, ',');									// Punkt hinten durch Komma ersetzen
+			val = input.value;
+			
+			if (['int2', 'int4', 'int8'].indexOf(datatype) != -1) {
+				if (val.search(/,/g) != -1) {
+					alert('Es sind nur ganzzahlige Angaben erlaubt!');
+					val = val.replace(/,/g, '');
+				}
 			}
-		}
-		if(input.value != val && val != undefined){
-			dot_count_before = input.value.split('.').length - 1;
-			dot_count_after = val.split('.').length - 1;
-			cursor_pos = input.selectionStart + (dot_count_after - dot_count_before);
-			input.value = val;
-			input.setSelectionRange(cursor_pos, cursor_pos);
+			if (val.slice(val.length - 1) != ',') {
+				formated_val = val.replace(/\./g, '');							// Punkte raus
+				formated_val = formated_val.replace(/,/g, '.');			// Komma zu Punkt
+				formated_val = Number(formated_val).toLocaleString('de-DE', {useGrouping: grouping, maximumFractionDigits: decimal_length});
+				if (['NaN', '0'].indexOf(formated_val) == -1) {
+					val = formated_val;
+				}
+			}
+			if(input.value != val && val != undefined){
+				dot_count_before = input.value.split('.').length - 1;
+				dot_count_after = val.split('.').length - 1;
+				cursor_pos = input.selectionStart + (dot_count_after - dot_count_before);
+				input.value = val;
+				input.setSelectionRange(cursor_pos, cursor_pos);
+			}
 		}
 	}
 
