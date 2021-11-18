@@ -542,7 +542,7 @@ class data_import_export {
 				$sql = "
 					ALTER TABLE " . $schema . "." . $tablename . "
 					ADD COLUMN IF NOT EXISTS gid SERIAL NOT NULL;
-					SELECT convert_column_names(\'' . $schema . '\', \'' . $tablename . '\');
+					SELECT convert_column_names('" . $schema . "', '" . $tablename . "');
 					SELECT geometrytype(the_geom) AS geometrytype FROM " . $schema . "." . $tablename . " LIMIT 1
 				";
 				$ret = $pgdatabase->execSQL($sql,4, 0);
