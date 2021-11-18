@@ -18918,7 +18918,8 @@ class db_mapObj{
     $sql = "
 			SELECT
 				Layer_ID,
-				" . $name_column . "
+				" . $name_column . ",
+				alias
 			FROM
 				layer
 			WHERE
@@ -18929,8 +18930,9 @@ class db_mapObj{
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		while ($rs = $this->db->result->fetch_array()) {
-			$layer['ID'][]=$rs['Layer_ID'];
-			$layer['Bezeichnung'][]=$rs['Name'];
+			$layer['ID'][] = $rs['Layer_ID'];
+			$layer['Bezeichnung'][] = $rs['Name'];
+			$layer['alias'][] = $rs['alias'];
 		}
     if ($order == 'Bezeichnung'){
       // Sortieren der Layer unter Berücksichtigung von Umlauten
