@@ -1,7 +1,7 @@
 .xplankonverter-back-button {
-	position: absolute;
-	bottom: 12px;
-	left: 50%;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	float: right;
 }
 
 .xplankonverter {

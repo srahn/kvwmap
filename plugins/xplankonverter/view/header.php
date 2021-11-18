@@ -612,9 +612,8 @@ if (BOOTSTRAPTABLE_PATH == '../3rdparty/bootstrap-table-1.18.2/') { ?>
 	}
 
 	.xplankonverter-back-button {
-		position: absolute;
-		bottom: 12px;
-		right: 12px;
+		margin: 10px;
+		float: right;
 	}
 
 	.xplankonverter {
