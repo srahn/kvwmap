@@ -1649,6 +1649,7 @@ thead.gle th {
 	padding: 0px 5px;
 	min-width: 30px;
 	height: 32px;
+	vertical-align: top;	
 }
 
 .gle_attribute_value input[type="checkbox"] {
