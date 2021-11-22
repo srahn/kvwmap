@@ -14577,10 +14577,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
             $request .='&BBOX='.$bbox->minx.','.$bbox->miny.','.$bbox->maxx.','.$bbox->maxy;
             $request .='&WIDTH='.$this->user->rolle->nImageWidth.'&HEIGHT='.$this->user->rolle->nImageHeight;
 
-            # EPSG-Code anhängen
-            $request .='&SRS=EPSG:'.$layerset[$i]['epsg_code'];
-
-            # Anfrageposition anhängen
+            # Anfrageposition und EPSG-Code anhängen
             $imgxy=explode(';',$this->formvars['INPUT_COORD']);
             $minxy=explode(',',$imgxy[0]);
             $maxxy=explode(',',$imgxy[1]);
@@ -14588,9 +14585,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
             $y=($maxxy[1]+$minxy[1])/2;
 						if($layerset[$i]['wms_server_version'] == '1.3.0'){
 							$request .='&I='.$x.'&J='.$y;
+							$request .='&CRS=EPSG:'.$layerset[$i]['epsg_code'];
 						}
 						else{
 							$request .='&X='.$x.'&Y='.$y;
+							$request .='&SRS=EPSG:'.$layerset[$i]['epsg_code'];
 						}
 
             # Ausgabeformat
