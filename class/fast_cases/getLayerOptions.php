@@ -372,11 +372,11 @@ class GUI {
 							}
 							if ($layer[0]['Class'][0]['Status'] == '1' || $layer[0]['Class'][1]['Status'] == '1') {
 								$function = "deactivateAllClasses('" . implode(",", $class_ids) . "')";
-								$link_text = ucfirst($this->activateAllClasses);
+								$link_text = ucfirst($this->deactivateAllClasses);
 							}
 							if ($layer[0]['Class'][0]['Status'] == '0' || $layer[0]['Class'][1]['Status'] == '0') {
 								$function = "activateAllClasses('" . implode(",", $class_ids) . "')";
-								$link_text = ucfirst($this->deactivateAllClasses);
+								$link_text = ucfirst($this->activateAllClasses);
 							}
 							echo '<li><a href="javascript:void();" onclick="' . $function . '">' . $link_text . '</a></li>';
 						}
