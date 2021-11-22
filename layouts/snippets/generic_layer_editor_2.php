@@ -7,6 +7,7 @@ $geom_tablename = '';
 $geomtype = '';
 $dimension = '';
 $privileg = '';
+$visibility = '';
 # Variablensubstitution
 $layer = $this->qlayerset[$i];
 if($this->currentform == 'document.GUI2')$size = 40;
