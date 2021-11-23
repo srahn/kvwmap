@@ -74,7 +74,7 @@
 	</tr>
 	<tr>
 		<td align="center" style="padding-top: 20px">
-			<a class="btn btn-new" href="index.php?go=Einladung_Editor"><i titel="Legt eine neue Einladung an." class="fa fa-plus" style="color: white; margin-bottom: 10px"></i>&nbsp;Neue&nbsp;Einladung</a>
+			<a class="btn btn-new" href="index.php?go=Einladung_Editor" titel="Legt eine neue Einladung an."><i class="fa fa-plus" style="color: white; margin-bottom: 10px"></i> <?php echo $strInviteNewUser; ?></a>
 		</td>
 	</tr>
 </table>

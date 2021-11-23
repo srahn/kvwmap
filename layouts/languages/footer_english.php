@@ -1,9 +1,9 @@
 <?php
-$strPublisherName="Map server";
-$strVersion="version ";
+$strPublisherName="MEDSAL WebGIS";
+$strVersion="Version ";
 $strPoweredByUMNMapServer=" powered by MapServer. ";
 $strDate="Date: ";
 $strUser=" User: ";
-$strTask=" Usergroup: ";
+$strTask=" Pilot site: ";
 
 ?>  

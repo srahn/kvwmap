@@ -10,8 +10,8 @@
 	$this->strDelete="Delete";
 	$this->strSave="Save";
 	$this->strPleaseSelect="Please select";
-	$this->strNo="No";
-	$this->strYes="Yes";
+	$this->strNo = 'No';
+	$this->strYes = 'Yes';
 	$this->strTask="Task";
 	$this->strLayer="Layer";
 	$this->strDeleteWarningMessage="Are you sure you want to delete?";
