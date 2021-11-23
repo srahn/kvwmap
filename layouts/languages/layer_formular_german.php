@@ -111,4 +111,5 @@
   $strNotDublicate = "nicht duplizieren";
 	$strSharedFrom = "Geteilt von Nutzer";
 	$strSharedFromHelp = "Lösche die ID wenn der Layer in der Layerlegende nicht länger als geteilt markiert werden soll.";
+	$strSizeUnits="Sizeunits";
 ?>

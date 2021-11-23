@@ -470,6 +470,16 @@
 						</td>
 					</tr>
 					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSizeUnits; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<select name="sizeunits">
+									<option value=""><?php echo $this->strPleaseSelect; ?></option>
+									<option <? if($this->formvars['sizeunits'] == MS_PIXELS){echo 'selected';} ?> value="<? echo MS_PIXELS; ?>">Pixel</option>
+									<option <? if($this->formvars['sizeunits'] == MS_METERS){echo 'selected';} ?> value="<? echo MS_METERS; ?>">Meter</option>								
+								</select>
+						</td>
+					</tr>					
+					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClassification; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="layer_classification" type="text" value="<?php echo $this->formvars['classification']; ?>" size="50" maxlength="50">&nbsp;
