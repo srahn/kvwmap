@@ -517,6 +517,7 @@ class stelle {
 	}
 	
 	function getStellenhierarchie() {
+		$this->links = Array();
 		$sql = "
 			SELECT
 				*
