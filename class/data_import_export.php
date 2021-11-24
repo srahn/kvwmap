@@ -1020,7 +1020,7 @@ class data_import_export {
 								$enum_value = $attributes['enum_value'][$j];
 								$enum_output = $attributes['enum_output'][$j];
 							}
-							for($o = 0; $o < count($enum_value); $o++){
+							for($o = 0; $o < @count($enum_value); $o++){
 								if($value == $enum_value[$o]){
 									$value = $enum_output[$o];
 									break;
