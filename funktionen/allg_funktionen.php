@@ -5,7 +5,7 @@
  */
 
 function get_url(){	# die Konstante URL kann durch diese Funktion ersetzt werden
-	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_URL]";
+	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_NAME]";
 }
 
 function quote($var, $type = NULL){
