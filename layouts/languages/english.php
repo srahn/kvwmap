@@ -12,6 +12,8 @@
 	$this->strPleaseSelect="Please select";
 	$this->strNo = 'No';
 	$this->strYes = 'Yes';
+	$this->strEmail = 'E-mail';
+	$this->strTelephone = 'Phone';
 	$this->strTask="Task";
 	$this->strLayer="Layer";
 	$this->strDeleteWarningMessage="Are you sure you want to delete?";

@@ -1,6 +1,6 @@
 <?php
 	global $supportedLanguages;
-	include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php'); 
+	include(LAYOUTPATH . 'languages/layer_formular_' . $this->user->rolle->language . '.php'); 
 	include_once(CLASSPATH . 'FormObject.php');		?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script type="text/javascript">
@@ -555,7 +555,7 @@
 								<select name="toleranceunits">
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>
 									<option <? if($this->formvars['toleranceunits'] == 'pixels'){echo 'selected';} ?> value="pixels">pixels</option>
-									<option <? if($this->formvars['toleranceunits'] == 'meters'){echo 'selected';} ?> value="meters">meters</option>								
+									<option <? if($this->formvars['toleranceunits'] == 'meters'){echo 'selected';} ?> value="meters">meters</option>
 								</select>
 						</td>
 					</tr>
@@ -564,7 +564,7 @@
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<select name="querymap">
 									<option <? if($this->formvars['querymap'] == '0'){echo 'selected ';} ?>value="0"><?php echo $this->strNo; ?></option>
-									<option <? if($this->formvars['querymap'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>								
+									<option <? if($this->formvars['querymap'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>
 								</select>
 						</td>
 					</tr>
@@ -599,8 +599,8 @@
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>
 									<option <? if($this->formvars['wms_server_version'] == '1.0.0'){echo 'selected';} ?> value="1.0.0">1.0.0</option>
 									<option <? if($this->formvars['wms_server_version'] == '1.1.0'){echo 'selected';} ?> value="1.1.0">1.1.0</option>
-									<option <? if($this->formvars['wms_server_version'] == '1.1.1'){echo 'selected';} ?> value="1.1.1">1.1.1</option>		 			
-									<option <? if($this->formvars['wms_server_version'] == '1.3.0'){echo 'selected';} ?> value="1.3.0">1.3.0</option>		 			
+									<option <? if($this->formvars['wms_server_version'] == '1.1.1'){echo 'selected';} ?> value="1.1.1">1.1.1</option>
+									<option <? if($this->formvars['wms_server_version'] == '1.3.0'){echo 'selected';} ?> value="1.3.0">1.3.0</option>
 								</select>
 						</td>
 					</tr>
@@ -611,7 +611,7 @@
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>
 									<option <? if($this->formvars['wms_format'] == 'image/png'){echo 'selected';} ?> value="image/png">image/png</option>
 									<option <? if($this->formvars['wms_format'] == 'image/jpeg'){echo 'selected';} ?> value="image/jpeg">image/jpeg</option>
-									<option <? if($this->formvars['wms_format'] == 'image/gif'){echo 'selected';} ?> value="image/gif">image/gif</option>								
+									<option <? if($this->formvars['wms_format'] == 'image/gif'){echo 'selected';} ?> value="image/gif">image/gif</option>
 								</select>
 						</td>
 					</tr>
@@ -652,11 +652,47 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataOwner; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="datenherr" type="text" value="<?php echo $this->formvars['datenherr']; ?>" size="50" maxlength="100">
+						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strDataSource; ?></th>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<textarea name="datasource" cols="33" rows="2"><? echo $this->formvars['datasource'] ?></textarea>
 						</td>
 					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataOwnerName; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="dataowner_name" type="text" value="<?php echo $this->formvars['dataowner_name']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strEmail; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="dataowner_email" type="text" value="<?php echo $this->formvars['dataowner_email']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strTelephone; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="dataowner_tel" type="text" value="<?php echo $this->formvars['dataowner_tel']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strUpToDateness; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="uptodateness" type="text" value="<?php echo $this->formvars['uptodateness']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strUpdateCycle; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="updatecycle" type="text" value="<?php echo $this->formvars['updatecycle']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMetaLink; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">

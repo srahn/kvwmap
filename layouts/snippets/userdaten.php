@@ -39,8 +39,8 @@
 						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=last_timestamp"><?php echo $strLastActivity;?></a></th>
 						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=organisation"><?php echo $strOrganisation;?></a></th>
 						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=position"><?php echo $strPosition;?></a></th>
-						<th align="left"><?php echo $strTel;?></th>
-						<th align="left"><?php echo $strEMail;?></th><?
+						<th align="left"><?php echo $this->strTel;?></th>
+						<th align="left"><?php echo $this->strEMail;?></th><?
 						if ($has_shared_user) { ?>
 							<th>&nbsp;</th><?
 						} ?>
