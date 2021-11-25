@@ -563,7 +563,7 @@
 						if ($preview['doc_src'] != '') {
 							$datapart .= '<table border="0"><tr><td>';
 							if ($hover_preview) {
-								$onmouseover = 'onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
+								$onmouseover = 'onmouseenter="root.document.getElementById(\'vorschau\').style.border=\'1px solid grey\';root.document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
 							}
 							switch ($preview['doc_type']) {
 								case 'local_img' : { # Bilder mit Vorschaubild
