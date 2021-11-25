@@ -196,12 +196,12 @@
 		</div>
 
 		<div class="form_formular-input form_formular-aic">
-			<div><? echo $strTelephone;?></div>
+			<div><? echo $this->strTelephone;?></div>
 			<div><input name="phon" type="text" value="<? echo $this->formvars['phon']; ?>" maxlength="25"></div>
 		</div>
 
 		<div class="form_formular-input form_formular-aic">
-			<div><? echo $strEmail;?></div>
+			<div><? echo $this->strEmail;?></div>
 			<div>
 				<input name="email" type="text" value="<? echo $this->formvars['email']; ?>" maxlength="100">
 				<a href="mailto:<? echo $this->formvars['email']; ?>" title="<? echo $strSendEmail; ?>"><i class="fa fa-envelope" aria-hidden="true"></i></a>

@@ -1175,7 +1175,7 @@ function go_switch_xplankonverter($go) {
 				$GUI->output();
 				return;
 			}
-			header('Content-Type: text/xml; subtype="gml/3.3"');
+			header('Content-Disposition: attachment; filename="xplan_' . $GUI->formvars['konvertierung_id'] . '.gml"; subtype="gml/3.3"');
 			echo fread(fopen($filename, "r"), filesize($filename));
 		} break;
 

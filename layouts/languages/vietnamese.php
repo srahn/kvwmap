@@ -10,6 +10,8 @@
 	$this->strPleaseSelect="Chọn trong danh sách dưới";
 	$this->strNo="Không";
 	$this->strYes="Có";
+  $this->strTel = 'Điện thoại';
+  $this->strEMail = 'e-mail';
 	$this->strTask="Tác vụ";
 	$this->strLayer="Lớp";
 	$this->strDeleteWarningMessage="Bạn có chắc chắn rằng mình muốn xóa?";

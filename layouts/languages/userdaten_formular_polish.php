@@ -15,8 +15,6 @@
 	$strNewPassword="New Password";
 	$strReEnterPassword='powtórz hasło';
 	$strAuthorizeTask="uprawnione pozycje";
-	$strTelephone="telefon";
-	$strEmail="e-mail";
 	$strOrganisation="organizacja";
 	$strPosition="pozycja";
 	$strShareRollenlayerAllowedLabel = "Share Layer";

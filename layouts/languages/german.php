@@ -15,6 +15,8 @@
 	$this->strSave = "Speichern";
 	$this->strTask = "Stelle";
 	$this->strYes = "Ja";
+	$this->strTelephone = 'Telefon';
+	$this->strEmail = 'E-Mail';
 	$this->TaskChangeWarning = "Sie sind nicht berechtigt zur Ausführung der Funktion in dieser Stelle.";
 	$this->strButtonBack = "Zurück";	
 	$this->strCancel = "Abbrechen";

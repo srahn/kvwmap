@@ -17285,7 +17285,7 @@ class db_mapObj{
 			$layer = $database->create_insert_dump(
 				'layer',
 				'',
-				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `privileg`, `trigger_function`, `sync` FROM layer WHERE Layer_ID=' . $layer_ids[$i]
+				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `privileg`, `trigger_function`, `sync` FROM layer WHERE Layer_ID=' . $layer_ids[$i]
 			);
 			$dump_text .= "\n\n-- Layer " . $layer_ids[$i] . "\n" . $layer['insert'][0];
 			$last_layer_id = '@last_layer_id'.$layer_ids[$i];
@@ -17910,7 +17910,12 @@ class db_mapObj{
 				'querymap',
 				'processing',
 				'kurzbeschreibung',
-				'datenherr',
+				'datasource',
+				'dataowner_name',
+				'dataowner_email',
+				'dataowner_tel',
+				'uptodateness',
+				'updatecycle',
 				'metalink',
 				'status',
 				'trigger_function'
@@ -17952,7 +17957,7 @@ class db_mapObj{
 					$sql .= "`Name_" . $language."`, ";
 				}
 			}
-			$sql .="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `queryable`, `use_geom`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`, `trigger_function`, `sync`, `listed`, `duplicate_from_layer_id`, `duplicate_criterion`, `shared_from`) VALUES(";
+			$sql .="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `queryable`, `use_geom`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `status`, `trigger_function`, `sync`, `listed`, `duplicate_from_layer_id`, `duplicate_criterion`, `shared_from`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'" . $formvars['id']."', ";
       }
@@ -18058,7 +18063,12 @@ class db_mapObj{
 					'" . $formvars['querymap'] . "',
 					'" . $formvars['processing'] . "',
 					'" . $formvars['kurzbeschreibung'] . "',
-					'" . $formvars['datenherr'] . "',
+					'" . $formvars['datasource'] . "',
+					'" . $formvars['dataowner_name'] . "',
+					'" . $formvars['dataowner_email'] . "',
+					'" . $formvars['dataowner_tel'] . "',
+					'" . $formvars['uptodateness'] . "',
+					'" . $formvars['updatecycle'] . "',
 					'" . $formvars['metalink'] . "',
 					'" . $formvars['status'] . "',
 					'" . $formvars['trigger_function'] . "',
@@ -18689,7 +18699,12 @@ class db_mapObj{
 				l.Datentyp,
 				l.connectiontype,
 				l.kurzbeschreibung,
-				l.datenherr,
+				l.datasource,
+				l.dataowner_name,
+				l.dataowner_email,
+				l.dataowner_tel,
+				l.uptodateness,
+				l.updatecycle,
 				l.drawingorder,
 				l.alias,
 				l.sync,
@@ -18702,22 +18717,6 @@ class db_mapObj{
 			$order . "
 		";
 		#echo '<br>sql: ' . $sql;
-
-		/*
-		$sql ='SELECT ';
-		if($language != 'german') {
-			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
-		}
-		$sql.='Name, Layer_ID, Gruppe, kurzbeschreibung, datenherr, alias, ';
-		if($language != 'german') {
-			$sql.='CASE WHEN `Gruppenname_'.$language.'` != "" THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
-		}
-		$sql.='Gruppenname FROM layer, u_groups';
-		$sql.=' WHERE layer.Gruppe = u_groups.id';
-		if($only_listed)$sql.=' AND listed=1';
-		if($order != ''){$sql .= ' ORDER BY ' . replace_semicolon($order);}
-*/
-
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
@@ -18728,7 +18727,12 @@ class db_mapObj{
 			'Gruppe' => array(),
 			'GruppeID' => array(),
 			'Kurzbeschreibung' => array(),
-			'Datenherr' => array(),
+			'datasource' => array(),
+			'dataowner_name' => array(),
+			'dataowner_email' => array(),
+			'dataowner_tel' => array(),
+			'uptodateness' => array(),
+			'updatecycle' => array(),
 			'alias' => array(),
 			'default_drawingorder' => array(),
 			'layers_of_group' => array(),
@@ -18743,7 +18747,12 @@ class db_mapObj{
 			$layer['Datentyp'][] = $rs['Datentyp'];
 			$layer['connectiontype'][] = $rs['connectiontype'];
 			$layer['Kurzbeschreibung'][] = $rs['kurzbeschreibung'];
-			$layer['Datenherr'][] = $rs['datenherr'];
+			$layer['datasource'][] = $rs['datasource'];
+			$layer['dataowner_name'][] = $rs['dataowner_name'];
+			$layer['dataowner_email'][] = $rs['dataowner_email'];
+			$layer['dataowner_tel'][] = $rs['dataowner_tel'];
+			$layer['uptodateness'][] = $rs['uptodateness'];
+			$layer['updatecycle'][] = $rs['updatecycle'];
 			$layer['alias'][] = $rs['alias'];
 			$layer['default_drawingorder'][] = $rs['drawingorder'];
 			$layer['layers_of_group'][$rs['Gruppe']][] = $i;

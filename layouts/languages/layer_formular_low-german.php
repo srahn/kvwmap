@@ -66,7 +66,9 @@
 	$strWMSAuthUsername="wms_auth_username";
 	$strDocument_path="Dokumente Ordner";
 	$strDescribtion="Kurzbeschreibung";
-	$strDataOwner="Datenherr";
+	$strDataOwnerName = 'Datenherr';
+	$strUpToDateness = 'Aktualität';
+	$strUpdateCycle = 'Aktualisierungszyklus';
 	$strTriggerFunction="Trigger function";
 	$strSync="Sync - Mode";
 	$strSyncHelp="In Sync - Mode all changes on the layer will be stored in a table named (Main Table)_deltas with a serialised version number. The mode must be switched on, to enable the layer in the mobile App kvmobile."
