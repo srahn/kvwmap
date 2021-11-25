@@ -1409,7 +1409,7 @@ class data_import_export {
 			if ($err == '') {
 				// Update timestamp formular_element_types having option export
 				$time_attributes = array();
-				@foreach ($this->attributes['name'] AS $key => $value) {
+				foreach ($this->attributes['name'] AS $key => $value) {
 					if (
 						$this->attributes['form_element_type'][$value] == 'Time' AND
 						trim(strtolower($this->attributes['options'][$value])) == 'export'
