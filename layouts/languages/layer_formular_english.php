@@ -73,7 +73,10 @@
 	$strWMSAuthPassword="wms_auth_password";
 	$strDocument_path="Document Path";
 	$strDescribtion="Short Description";
-	$strDataOwner="Data-Owner";
+	$strDataSource = 'Data source';
+	$strDataOwnerName = 'Data owner';
+	$strUpToDateness = 'Up-to-dateness';
+	$strUpdateCycle = 'Update cylce';
 	$strMetaLink="Metadata-Link";
 	$strMaintable="Main Table";
 	$strPrivileges="Privileges";
