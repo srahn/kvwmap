@@ -403,7 +403,17 @@
 						--RAISE notice 'schema in search_path %', search_path_schema;
 						END IF;
 
-						IF strpos(lower(part), 'insert into ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'insert into ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
+						IF
+							strpos(lower(part), 'insert into ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR
+							strpos(lower(part), 'insert into ' || TG_TABLE_SCHEMA || '.\"' || TG_TABLE_NAME || '\"') = 1 OR
+							(
+								(
+									strpos(lower(part), 'insert into ' || TG_TABLE_NAME) = 1 OR
+									strpos(lower(part), 'insert into \"' || TG_TABLE_NAME || '\"') = 1
+								) AND
+								TG_TABLE_SCHEMA = search_path_schema
+							)
+						THEN
 						_sql := part;
 						END IF;
 					end loop;

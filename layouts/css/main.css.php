@@ -574,6 +574,17 @@ a.invisiblelayerlink:hover{
 	margin-top: 10px;
 }
 
+select[name="geom_from_layer"] {
+	width: 250px;
+}
+
+.suggests {
+	width: 450px;
+	height: auto;
+	padding:4px; 
+	margin:-2px -17px -4px -4px;
+}
+
 #params_table{
 	width: 1000px
 }
@@ -1637,7 +1648,7 @@ thead.gle th {
 	position: relative;
 	padding: 0px 5px;
 	min-width: 30px;
-	height: 32px;
+	height: 32px;	
 }
 
 .gle_attribute_value input[type="checkbox"] {
@@ -1667,7 +1678,7 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]), table.t
 	border: 1px solid #777;
 }
 
-table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([type=checkbox]) {
+table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=radio]):not([type=checkbox]) {
 	height: 25px;
 }
 

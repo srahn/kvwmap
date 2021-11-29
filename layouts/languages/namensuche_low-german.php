@@ -1,4 +1,4 @@
-﻿<?php
+<?php
  $strTitle="Egendömer dörchschnöckern";
  $strPerson="Person";
  $strGebiet="Gebiet";

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
   $strTitle="Biên tập tác vụ";
   $strAsteriskRequired="Cần đi�?n đủ thông tin cho những trư�?ng có dấu *";  
   $strDataBankID="Số ID của CSDL";

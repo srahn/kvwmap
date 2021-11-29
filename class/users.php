@@ -1100,15 +1100,19 @@ class user {
 					, language = '" . $formvars['language'] . "'
 					" . ($formvars['fontsize_gle'] ? ", fontsize_gle = '" . $formvars['fontsize_gle'] . "'" : "") . "
 					, highlighting = '" . ($formvars['highlighting'] != '' ? "1" : "0") . "'
+					, result_color = '" . $formvars['result_color'] . "'
+					, result_hatching = '" . (value_of($formvars, 'result_hatching') == '' ? '0' : '1') . "'
+					, result_transparency = '" . $formvars['result_transparency'] . "'
+					, runningcoords = '" . (value_of($formvars, 'runningcoords') == '' ? '0' : '1') . "'
+					, showmapfunctions = '" . ($formvars['showmapfunctions'] == '' ? '0' : '1') . "'
+					, showlayeroptions = '" . ($formvars['showlayeroptions'] == '' ? '0' : '1') . "'
+					, showrollenfilter = '" . (value_of($formvars, 'showrollenfilter') == '' ? '0' : '1') . "'
+					, menue_buttons = '" . (value_of($formvars, 'menue_buttons') == '' ? '0' : '1') . "'
+					" . (value_of($formvars, 'redline_text_color')  != '' ? ", `redline_text_color`  = '" . $formvars['redline_text_color']  . "'" : '') . "
+					" . (value_of($formvars, 'redline_font_family') != '' ? ", `redline_font_family` = '" . $formvars['redline_font_family'] . "'" : '') . "
+					" . (value_of($formvars, 'redline_font_size')   != '' ? ", `redline_font_size`   = '" . $formvars['redline_font_size']   . "'" : '') . "
+					" . (value_of($formvars, 'redline_font_weight') != '' ? ", `redline_font_weight` = '" . $formvars['redline_font_weight'] . "'" : '') . "
 			";
-			$sql.=',result_color="'.$formvars['result_color'].'"';
-			$sql.=',result_hatching = "' . (value_of($formvars, 'result_hatching') == '' ? '0' : '1') . '"';
-			$sql.=',result_transparency="'.$formvars['result_transparency'].'"';
-			$sql.=',runningcoords = "' . (value_of($formvars, 'runningcoords') == '' ? '0' : '1') . '"';
-			$sql.=',showmapfunctions = "' . ($formvars['showmapfunctions'] == '' ? '0' : '1') . '"';
-			$sql.=',showlayeroptions = "' . ($formvars['showlayeroptions'] == '' ? '0' : '1') . '"';
-			$sql.=',showrollenfilter = "' . (value_of($formvars, 'showrollenfilter') == '' ? '0' : '1') . '"';
-			$sql.=',menue_buttons = "' . (value_of($formvars, 'menue_buttons') == '' ? '0' : '1') . '"';
 
 			if(value_of($formvars, 'singlequery') != '') $sql.=',singlequery="1"';
 			else $sql.=',singlequery="0"';

@@ -1,7 +1,5 @@
-﻿<?php
-	$strTel="Tel."; 
-	$strEMail="e-mail"; 
-	$strTitle="dane użytkownika"; 
+<?php
+	$strTitle="dane użytkownika";
 	$strOrganisation="Organisation";
-	$strPosition="Position";	
+	$strPosition="Position";
 ?>

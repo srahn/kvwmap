@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strLayer="Layer";
 	$strAsteriskRequired="Werte mit * mussen eingetragen werden";
 	$strBaseParameters="Basis-Parameter";
@@ -79,7 +79,10 @@
 	$strWMSAuthPassword="wms_auth_password";
 	$strDocument_path="Dokumente Ordner";
 	$strDescribtion="Kurzbeschreibung";
-	$strDataOwner="Datenherr";
+	$strDataSource = 'Quellenangaben';
+	$strDataOwnerName = 'Ansprechpartner';
+	$strUpToDateness = 'Aktualität';
+	$strUpdateCycle = 'Aktualisierungszyklus';
 	$strMetaLink="Metadatenlink";
 	$strMaintable="Haupttabelle";
 	$strPrivileges="Rechte";
@@ -111,4 +114,5 @@
   $strNotDublicate = "nicht duplizieren";
 	$strSharedFrom = "Geteilt von Nutzer";
 	$strSharedFromHelp = "Lösche die ID wenn der Layer in der Layerlegende nicht länger als geteilt markiert werden soll.";
+	$strSizeUnits="Sizeunits";
 ?>

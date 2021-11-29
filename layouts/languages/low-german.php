@@ -13,6 +13,8 @@
 	$this->strSave="Spiekern";
 	$this->strTask="Stäe";
 	$this->strYes="Jau";
+	$this->strTelephone="Telefon";
+	$this->strEmail="E-Mail";
 	$this->TaskChangeWarning="In düöse Stäe geiht de Funkschoon nich!";
 	$this->strButtonBack="Trügg";  
 	$this->strCancel="Afbreken";

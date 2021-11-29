@@ -1,4 +1,4 @@
-﻿<?php
+<?php
  $strTitle="Adress dörchschnöckern";
  $strGem="Gemeen";
  $strStreet="Stroot";

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitle="Brukerdaten Editor";
 	$strDataBankID="Datenbank ID";
 	$strName="Achternaam";
@@ -15,8 +15,6 @@
 	$strNewPassword="Nieges Passwoort";
 	$strReEnterPassword='Nochmaal';
 	$strAuthorizeTask="Berechtigte Stäen";
-	$strTelephone="Telefoon";
-	$strEmail="Email";
 	$strOrganisation="Organisation";
 	$strPosition="Position";
 	$strShareRollenlayerAllowedCheckboxText = "Darf Rollenlayer mit anderen Nutzern teilen.";

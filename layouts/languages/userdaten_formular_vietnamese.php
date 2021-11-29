@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitle="Biên tập thông tin người dùng";
 	$strDataBankID="Số ID CSDL";
 	$strName="Họ";
@@ -15,8 +15,6 @@
 	$strNewPassword="New Password";
 	$strReEnterPassword="Nhập lại mã khóa";
 	$strAuthorizeTask="Xác nhận tác vụ";
-	$strTelephone="Điện thoại";
-	$strEmail="e-mail";
 	$strOrganisation="cơ quan";
 	$strPosition="vị trí";
 	$strShareRollenlayerAllowedLabel = "Share Layer";

@@ -7,6 +7,7 @@ $geom_tablename = '';
 $geomtype = '';
 $dimension = '';
 $privileg = '';
+$visibility = '';
 # Variablensubstitution
 $layer = $this->qlayerset[$i];
 if($this->currentform == 'document.GUI2')$size = 40;
@@ -108,6 +109,7 @@ if ($doit == true) {
 						if (is_array($layer['attributes']['privileg'])) {
 							if (value_of($layer['shape'][$k], value_of($layer['attributes'], 'Editiersperre')) == 't') {
 								$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
+								$privileg = 0;
 							}
 						}
 						?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
@@ -342,7 +344,7 @@ if ($doit == true) {
 									else{		# bei WFS-Layern
 			?>						<table cellspacing="0" cellpadding="0">
 											<tr>
-												<td style="padding: 0 0 0 5;"><a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2wkt('<? echo $layer['shape'][$k]['wfs_geom']; ?>', '<? echo $layer['epsg_code']; ?>');"><div class="button zoom_normal"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+												<td style="padding: 0 0 0 5;"><a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2wkt('<? echo $layer['shape'][$k]['wfs_bbox'] ?: $layer['shape'][$k]['wfs_geom']; ?>', '<? echo $layer['epsg_code']; ?>');"><div class="button zoom_normal"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 											</tr>
 										</table>
 			<?															
@@ -369,6 +371,7 @@ if ($doit == true) {
 				</tr>
 			<?
 					$layer['attributes']['privileg'] = $definierte_attribute_privileges;
+					$privileg = $layer['attributes']['privileg'][$index];
 				}
 				if(value_of($this->formvars, 'printversion') == ''){
 			?>

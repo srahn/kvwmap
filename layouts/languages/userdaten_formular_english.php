@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitle="User Data Editor";
 	$strDataBankID="Data bank ID";
 	$strName="Name";
@@ -15,8 +15,6 @@
 	$strNewPassword="New Password";
 	$strReEnterPassword="Repeat";
 	$strAuthorizeTask="Authorize task";
-	$strTelephone="Phone";
-	$strEmail="E-mail";
 	$strOrganisation="Organisation";
 	$strPosition="Position";
 	$strShareRollenlayerAllowedLabel = "Share Layer";

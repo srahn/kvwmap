@@ -12,7 +12,9 @@
 	$this->strPleaseSelect = "proszę wybrać"; 
 	$this->strSave = "zapisz"; 
 	$this->strTask = "miejsce"; 
-	$this->strYes = "tak"; 
+	$this->strYes = "tak";
+	$this->strEmail = 'email';
+	$this->strTelephone = 'Tel.';
 	$this->TaskChangeWarning = "Nie masz uprawnień do wykonania tej funkcji."; 
 	$this->strButtonBack = "cofnij"; 
 	$this->strCancel = "anuluj"; 

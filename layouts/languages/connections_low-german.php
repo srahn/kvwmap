@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitle="Datenbankverbindungen";
 	$strName="Name";
 	$strHost="Host";

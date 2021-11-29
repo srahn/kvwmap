@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strSave="Save";
 	$strSaveTitle = 'Save and zoom to total geometry extent';
 	$strSaveWithoutZoom="Save without Zoom";

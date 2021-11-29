@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitle="Nutzerdaten Editor";
 	$strDataBankID="Datenbank ID";
 	$strName="Nachname";
@@ -15,8 +15,6 @@
 	$strNewPassword="Neues Passwort";
 	$strReEnterPassword='Wiederholung';
 	$strAuthorizeTask="Berechtigte Stellen";
-	$strTelephone="Telefon";
-	$strEmail="Email";
 	$strOrganisation="Organisation";
 	$strPosition="Position";
 	$strSendEmail="Mail senden";

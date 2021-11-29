@@ -44,7 +44,7 @@
 					if ($has_shared_group) {
 						$colspan += 1;
 					} ?>
-					<td colspan="<? echo $colspan; ?>" align="right"><a class="btn btn-new" href="index.php?go=Layergruppe_Editor"><i titel="Legt eine neue Layergruppe an." class="fa fa-plus" style="color: white; margin-bottom: 10px"></i>&nbsp;Neue&nbsp;Gruppe</a></td>
+					<td colspan="<? echo $colspan; ?>" align="right"><a class="btn btn-new" href="index.php?go=Layergruppe_Editor"><i titel="Legt eine neue Layergruppe an." class="fa fa-plus" style="color: white; margin-bottom: 10px"></i> <?php echo  $strCreateLayerGroup; ?></a></td>
 				</tr><?php
 				for ($i = 0; $i < count($this->layergruppen); $i++) { ?>
 					<tr id="group_<?php echo $this->layergruppen[$i]->get('id'); ?>" onMouseover="this.bgColor='<?php echo BG_TR; ?>'" onMouseout="this.bgColor=''">

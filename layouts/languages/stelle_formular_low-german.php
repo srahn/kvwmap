@@ -1,4 +1,4 @@
-﻿<?php
+<?php
   $strTitle="Stäeeditor";
   $strAsteriskRequired="Weerte mit een * mööst du indragen";
   $strDataBankID="Datenbank ID";

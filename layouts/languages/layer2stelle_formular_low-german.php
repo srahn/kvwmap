@@ -1,4 +1,4 @@
-﻿<?php
+<?php
  $strTitle="Layeregenschopten in de Stäe";
  $strTask="de Stäe";
  $strQueryable="befrogbar";

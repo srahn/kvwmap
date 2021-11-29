@@ -5,7 +5,7 @@
  */
 
 function get_url(){	# die Konstante URL kann durch diese Funktion ersetzt werden
-	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_URL]";
+	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_NAME]";
 }
 
 function quote($var, $type = NULL){
@@ -2015,7 +2015,9 @@ function send_image_not_found($img) {
 }
 
 function value_of($array, $key) {
-	if(!is_array($array))$array = array();
+	if (!is_array($array)) {
+		$array = array();
+	}
 	return (array_key_exists($key, $array) ? $array[$key] :	'');
 }
 

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strPasswordCheck0 = 'Das Passwort muss 3 der 4 Kriterien: Kleinbuchstaben, Großbuchstaben, Zahlen und Sonderzeichen enthalten.';
 	$strLCLetters = 'ein Kleinbuchstaben';
 	$strUCLetters = 'ein Großbuchstaben';

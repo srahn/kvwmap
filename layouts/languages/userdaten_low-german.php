@@ -1,8 +1,5 @@
-﻿<?php
-  
-  $strTel="Telefoon";
-  $strEMail="E-Mail";
-  $strTitle="Brukerdaten";
+<?php
+	$strTitle="Brukerdaten";
 	$strOrganisation="Organisation";
 	$strPosition="Position";	
 	$strShareRollenlayerAllowedLabel = "Layer Teilen";

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strLayer="Layer";
   $strAsteriskRequired="Fields marked with an asterisk * are required";
 	$strBaseParameters="Base-Parameter";
@@ -73,7 +73,10 @@
 	$strWMSAuthPassword="wms_auth_password";
 	$strDocument_path="Document Path";
 	$strDescribtion="Short Description";
-	$strDataOwner="Data-Owner";
+	$strDataSource = 'Data source';
+	$strDataOwnerName = 'Data owner';
+	$strUpToDateness = 'Up-to-dateness';
+	$strUpdateCycle = 'Update cylce';
 	$strMetaLink="Metadata-Link";
 	$strMaintable="Main Table";
 	$strPrivileges="Privileges";
@@ -105,3 +108,4 @@
 	$strNotDublicate = "not duplicate";
 	$strSharedFrom = "Shared from user";
 	$strSharedFromHelp = "Remove the ID when the layer not any longer should be marked as shared by another user in layer legend.";
+	$strSizeUnits="Sizeunits";

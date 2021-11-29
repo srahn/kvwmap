@@ -1,4 +1,4 @@
-﻿<?php
+<?php
   $strTitle="Task Editor";
   $strAsteriskRequired="Fields marked with an asterisk * are required";
   $strDataBankID="Database ID";
