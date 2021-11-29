@@ -18424,7 +18424,8 @@ class db_mapObj{
   function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false){
 		global $language;
 		$attributes = array(
-			'name' => array()
+			'name' => array(),
+			'tab' => array()
 		);
 		$einschr = '';
 
