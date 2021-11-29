@@ -14167,13 +14167,18 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							# EPSG-Code des Layers der Abgefragt werden soll
 							$layer_epsg=$layerset[$i]['epsg_code'];
 
-							if($client_epsg == 4326){
+							if ($client_epsg == 4326 OR $layer_epsg == 4326) {
 								$center_y = ($rect->maxy+$rect->miny)/2;
 								$cos_lat = cos(pi() * $center_y/180.0);
 								$lat_adj = sqrt(1 + $cos_lat * $cos_lat)/sqrt(2);
-								$rand_in_metern = $layerset[$i]['tolerance'] * $pixsize * $lat_adj * 111000;
+								if($client_epsg == 4326){
+									$distance = $layerset[$i]['tolerance'] * $pixsize * $lat_adj * 111000;
+								}
+								else if ($layer_epsg == 4326) {
+									$distance = $layerset[$i]['tolerance'] * $pixsize / $lat_adj / 111000;
+								}
 							}
-							else $rand_in_metern = $rand;
+							else $distance = $rand;
 
 							# Bildung der Where-Klausel für die räumliche Abfrage mit der searchbox
 							$searchbox_wkt ="POLYGON((";
@@ -14204,7 +14209,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									$sql_where =" AND " . $the_geom." && st_geomfromtext('" . $loosesearchbox_wkt."'," . $client_epsg.")";
 									$sql_where.=" AND st_distance(" . $the_geom.",st_geomfromtext('POINT(" . $rect->minx." " . $rect->miny.")'," . $client_epsg."))";
 								}
-								$sql_where.=" <= " . $rand_in_metern;
+								$sql_where.=" <= " . $distance;
 							}
 							# ---------- Suche über Polygon ---------- #
 							else {
