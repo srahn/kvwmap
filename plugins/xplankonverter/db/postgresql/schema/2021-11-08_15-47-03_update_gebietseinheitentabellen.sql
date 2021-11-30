@@ -1,8 +1,8 @@
 BEGIN;
 
-  ALTER TABLE xplankonverter.bundeslaender SET SCHEMA gebietseinheiten;
-
   CREATE SCHEMA IF NOT EXISTS gebietseinheiten;
+
+  ALTER TABLE IF EXISTS xplankonverter.bundeslaender SET SCHEMA gebietseinheiten;
 
   DROP TABLE IF EXISTS gebietseinheiten.gemeindeteile;
   DROP TABLE IF EXISTS gebietseinheiten.gemeinden;
