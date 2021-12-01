@@ -160,7 +160,7 @@ class Nachweis {
 					id_nachweis IN (" . $ids . ") and db_action = 'UPDATE'";
 			if (!$ret[0]) {
 				$rest = pg_fetch_row($ret[1]);
-				echo (count($ids) - $rest);
+				echo (count($ids) - $rest[0]);
 			}
 		}
 	}
