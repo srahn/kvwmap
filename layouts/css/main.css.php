@@ -1534,8 +1534,8 @@ a:hover .preview_image{
 	opacity: 1;
 	position: fixed;
 	display: none;
-	top:20%;
-	left:45%;
+	top: 48%;
+	left: 45%;
 	min-width:250px;
 	max-width: 550px;
 /*	height:90px; */
@@ -1543,7 +1543,7 @@ a:hover .preview_image{
 	overflow: auto;
 	font-size: 17px;
 	font-family: SourceSansPro2;
-	margin:-45px 0 0 -100px;
+	margin: -300px 0 0 -100px;
 	padding: 10px;
 	text-align: center;
 	line-height: 20px;
