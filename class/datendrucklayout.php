@@ -1889,7 +1889,7 @@ class ddl {
     $this->debug->write("<p>file:kvwmap class:ddl->delete_layout :",4);
     $this->database->execSQL($sql,4, 1);
     
-    $sql = "DELETE FROM ddl2stelle WHERE ddl_id = ".(int)$formvars['selected_layout_id'];					
+    $sql = "DELETE FROM ddl2stelle WHERE ddl_id = ".(int)$formvars['selected_layout_id'];
     $this->debug->write("<p>file:kvwmap class:ddl->delete_layout :",4);
     $this->database->execSQL($sql,4, 1);
   }
@@ -1907,23 +1907,32 @@ class ddl {
     }
     return $elements;
   }
-  
-  function load_texts($ddl_id, $freetext_id = NULL){
+
+	function load_texts($ddl_id, $freetext_id = NULL) {
 		$texts = array();
-    $sql = 'SELECT druckfreitexte.* FROM druckfreitexte, ddl2freitexte';
-    $sql.= ' WHERE ddl2freitexte.ddl_id = '.$ddl_id;
-    $sql.= ' AND ddl2freitexte.freitext_id = druckfreitexte.id';
-		if($freetext_id != NULL)$sql.= ' AND druckfreitexte.id = '.$freetext_id;
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:ddl->load_texts :<br>".$sql,4);
-    $ret1 = $this->database->execSQL($sql, 4, 1);
-    if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs = $this->database->result->fetch_assoc()){
-      $texts[] = $rs;
-    }
-    return $texts;
-  }
-	
+		$sql = "
+			SELECT
+				t.*
+			FROM
+				druckfreitexte t JOIN
+				ddl2freitexte d2t ON t.id = d2t.freitext_id
+			WHERE
+				d2t.ddl_id = " . $ddl_id . "
+				" . ($freetext_id != NULL ? " AND t.id = " . $freetext_id : '') . "
+		";
+		#echo $sql;
+		$this->debug->write("<p>file:kvwmap class:ddl->load_texts :<br>" . $sql, 4);
+		$ret1 = $this->database->execSQL($sql, 4, 1);
+		if ($ret1[0]) {
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4);
+			return 0;
+		}
+		while ($rs = $this->database->result->fetch_assoc()) {
+			$texts[] = $rs;
+		}
+		return $texts;
+	}
+
 	function output_freetext_form($texts, $layer_id, $ddl_id){
 		for($i = 0; $i < @count($texts); $i++){
 			$texts[$i]['text'] = str_replace(';', chr(10), $texts[$i]['text']);

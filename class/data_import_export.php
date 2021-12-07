@@ -1389,7 +1389,7 @@ class data_import_export {
 			# Bei Bedarf auch Metadatendatei mit dazupacken
 			if ($this->formvars['with_metadata_document'] != '' AND $layerset[0]['metalink'] != '') {
 				$metadata_file = IMAGEPATH . $folder. '/' . basename($layerset[0]['metalink']);
-				if (file_put_contents($metadata_file, file_get_contents($layerset[0]['metalink']))) {
+				if (file_put_contents($metadata_file, file_get_contents($layerset[0]['metalink'], false, stream_context_create(array('ssl' => array('verify_peer' => false)))))) {
 					# echo '<br>Metadatendatei heruntergeladen von: ' . $layerset[0]['metalink'];
 					# echo '<br>und gespeichert unter: ' . $metadata_file;
 				}
