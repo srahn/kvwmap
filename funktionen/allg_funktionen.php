@@ -775,6 +775,17 @@ function createRandomPassword($passwordLength) {
   return $password;
 }
 
+function get_remote_ip() {
+	$ip = '172.0.0.1';
+	if (strpos(getenv('REMOTE_ADDR'), '172.') === false) {
+		$ip = getenv('REMOTE_ADDR');
+	}
+	else {
+		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+	}
+	return $ip;
+}
+
 function in_subnet($ip,$net) {
 	$ipparts=explode('.',$ip);
 	$netparts=explode('.',$net);
