@@ -67,11 +67,11 @@
 		$layers = $GUI->Stelle->getLayers('');
 		$mobile_layers = array();
 
-		foreach($layers['ID'] AS $layer_id) {
+		foreach ($layers['ID'] AS $layer_id) {
 			if ($layer_id != '') {
 				# Abfragen der Layerdefinition
 				$layerset = $GUI->user->rolle->getLayer($layer_id);
-				if ($layerset and $layerset[0]['sync'] and $layerset[0]['connectiontype'] == '6') {
+				if ($layerset and $layerset[0]['connectiontype'] == '6') {
 					# Abfragen der Privilegien der Attribute
 					$privileges = $GUI->Stelle->get_attributes_privileges($layer_id);
 
@@ -253,7 +253,8 @@
 			"table_name" => $layerset['maintable'],
 			"schema_name" => $layerset['schema'],
 			"document_path" => $layerset['document_path'],
-			"privileg" => $layerset['privileg']
+			"privileg" => $layerset['privileg'],
+			"sync" => $layerset['sync']
 		);
 		# ToDo use $mapDB->getDocument_Path(...) to get the calculated document_path
 		return $layer;
