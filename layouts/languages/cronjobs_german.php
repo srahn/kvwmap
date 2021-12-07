@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitle = "Cron Job";
 	$strTitle_checkbox = "Aktiviere oder Deaktiviere die Cron Jobs über die Checkboxen.";
 	$strTitle_create_new_cron_job = "Lege einen neuen Job an.";

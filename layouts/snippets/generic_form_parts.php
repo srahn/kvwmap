@@ -5,6 +5,7 @@
 	global $strShowAll;
 	global $strNewEmbeddedPK;
 	global $hover_preview;
+	
 	function output_table($table) {
 		$output = '';
 		if (is_array($table['rows'])) {
@@ -146,6 +147,7 @@
 			$attributes2['dependents'][$j] = '';		// die Array-Elemente sollen keine Visibility-Changer sein, nur das gemeinsame Hidden-Feld oben
 			$attributes2['table_name'][$attributes2['name'][$j]] = $tablename;
 			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);			
+			$dataset2 = $dataset;
 			$dataset2[$tablename.'_oid'] = $oid;
 			$onchange2 = 'buildJSONString(\''.$id.'\', true);';
 			for($e = -1; $e < count_or_0($elements); $e++){
@@ -563,7 +565,7 @@
 						if ($preview['doc_src'] != '') {
 							$datapart .= '<table border="0"><tr><td>';
 							if ($hover_preview) {
-								$onmouseover = 'onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
+								$onmouseover = 'onmouseenter="root.document.getElementById(\'vorschau\').style.border=\'1px solid grey\';root.document.getElementById(\'preview_img\').src=this.src" onmouseleave="root.document.getElementById(\'vorschau\').style.border=\'none\';root.document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
 							}
 							switch ($preview['doc_type']) {
 								case 'local_img' : { # Bilder mit Vorschaubild
@@ -861,9 +863,12 @@
 					if($name == 'lock'){
 						$datapart .= ' type="hidden"';
 					}
-					if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
-						$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
+					if (in_array($attributes['type'][$j], ['numeric', 'float4', 'float8', 'int2', 'int4', 'int8'])) {
+						$value = str_replace('.', ',', $value);
 					}
+					elseif ($attributes['length'][$j]) {
+						$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
+					}				
 					if($size)$datapart .= ' size="'.$size.'"';
 					$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
 					if($attribute_privileg == '0'){ // nur lesbares Attribut
@@ -1216,5 +1221,24 @@
 		if(!empty($class))$output = ' class="'.implode($class, ' ').'"';
 		if(!empty($style))$output.= ' style="'.implode($style, ';').'"';
 		return $output;
+	}
+	
+	function getGeomType($column_geomtype, $layer_datatype){
+		$geomtype = $column_geomtype;
+		# Frage den Geometrietyp aus der Layerdefinition ab, wenn in geometry_columns nur als Geometry definiert.
+		if ($geomtype == 'GEOMETRY' OR empty($geomtype)) {
+			$geomtypes = array('POINT', 'LINESTRING', 'POLYGON');
+			$geomtype = $geomtypes[$layer_datatype];
+		}
+		if ($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY') {
+			$geomtype = 'Polygon';
+		}
+		elseif ($geomtype == 'POINT') {
+			$geomtype = 'Point';
+		}
+		elseif ($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') {
+			$geomtype = 'Line';
+		}
+		return $geomtype;
 	}
 ?>

@@ -239,45 +239,46 @@ class antrag {
 			$row = $row_start;
 			$pagenumber = $i + 1;
 			$pdf->reopenObject($pages[$i]+1);		# die Page-IDs sind komischerweise alle um 1 größer
-			$pdf->addText(395,10,10, 'Seite '.$pagenumber.' von '.$pagecount);
-			$pdf->addText(748,$row+10,14, date('d.m.Y',time()));
-			$pdf->addText(100,$row-=12,20,'<b>Anlage der Vermessungsvorbereitung zur Auftragsnummer '.$this->nr.'</b>');
-			$pdf->addText(330,$row-=20,16,utf8_decode('Liste der ausgegebenen Unterlagen'));
-			$row-=3; $pdf->line(330,$row,557,$row);
-			$row-=3; $pdf->line(330,$row,557,$row);
+			if ($pagecount!=1)$footer = 'Seite '.$pagenumber.' / ';
+			$footer .= $pagecount.' Seite';
+			if ($pagecount!=1)$footer .= 'n';
+			$pdf->addText(395,10,6, $footer);
+			$pdf->addText(765,$row+10,8, date('d.m.Y',time()));
+			$pdf->addText(30,$row-=12,10,'<b>Anlage der Vermessungsvorbereitung zu Auftragsnummer '.$this->nr.'</b>');
+			$pdf->addText(30,$row-=25,10,utf8_decode('Liste der ausgegebenen Unterlagen'));
 			if (defined('ZUSATZ_UEBERGABEPROTOKOLL') AND ZUSATZ_UEBERGABEPROTOKOLL != '') {
-				$pdf->addText(296,$row-=16,12,utf8_decode(ZUSATZ_UEBERGABEPROTOKOLL));
+				$pdf->addText(30,$row-=16,9,utf8_decode(ZUSATZ_UEBERGABEPROTOKOLL));
 			}
 		}
 	}
-	
+
   function erzeugenUbergabeprotokoll_PDF(){
     $pdf=new Cezpdf('A4', 'landscape');
-    $tmp = array('b'=>'Times-Bold.afm','i'=>'Times-Italic.afm','bi'=>'Times-BoldItalic.afm');
+    $tmp = array('b'=>'Helvetica-Bold.afm','i'=>'Helvetica-Oblique.afm','bi'=>'Helvetica-BoldOblique.afm');
 		$pageheight = 595;
-		$margin = 40;
+		$margin = 57;
     $row = $pageheight - $margin;
-		$table_row = $row - 60;
+		$table_row = $row - 80;
 		$table_margin = $pageheight - $table_row;
     $rowGap=3;
     $colGap=3;
-		$pdf->ezSetMargins($table_margin,30,30,30);
-    $pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Times-Roman.afm',$tmp);		
+		$pdf->ezSetMargins($table_margin,30,30,40);
+    $pdf->selectFont(WWWROOT . APPLVERSION . 'fonts/PDFClass/Helvetica.afm',$tmp);		
             
     $cols='';
     $title='';
     # Konfiguration der Tabelle
     # Allgemeine Einstellungen für die ganze Tabelle
-    $options=array('xPos'=>'left','xOrientation'=>'right','rowGap'=>$rowGap,'colGap'=>$colGap,'showLines'=>2 ,'width'=>780,'showHeadings'=>1,'fontSize'=>12, 'shaded'=>0);
+    $options=array('xPos'=>'left','xOrientation'=>'right','rowGap'=>$rowGap,'colGap'=>$colGap,'showLines'=>2, 'lineCol'=> [0.9,0.9,0.9], 'width'=>780,'showHeadings'=>1,'fontSize'=>8, 'shaded'=>0, 'textCol'=> [0.1,0.1,0.1]);
     # Individuelle Einstellungen für die Spalten.
 		foreach($this->FFR[0] as $property => $value){
-			$options['cols'][$property]=array('justification'=>'centre');
+			$options['cols'][$property]=array('justification'=>'left');
 		}		
-		$options['cols']['Datei']=array('justification'=>'left','width'=>210);
-    $options['cols']['gemessen durch']=array('justification'=>'left');
-    $options['cols'][utf8_decode('Gültigkeit')]=array('justification'=>'centre','width'=>62);
-    $pdf->ezSetY($table_row);
-    $pdf->ezTable($this->FFR,$cols,$title,$options);
+		#$options['cols']['FFR']=$options['cols']['KVZ']=$options['cols']['GN']=$options['cols']['FPN']=$options['cols']['KRT']=$options['cols']['PL']=$options['cols']['ERG']=array('justification'=>'center');
+		$options['cols']['Datei']=array('width'=>210);
+		$options['cols'][utf8_decode('Gültigkeit')]=array('width'=>62);
+		$pdf->ezSetY($table_row);
+		$pdf->ezTable($this->FFR,$cols,$title,$options);
 		
 		$this->Seitenkopf($pdf, $row);
 		

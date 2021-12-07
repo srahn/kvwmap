@@ -147,10 +147,10 @@ $SVGvars_querytooltipscript .= '
 		 	else{
 		 		overhead = resx - (mousex + maxwidth + 16);
 		 		if(overhead < 0){
-		 			x = mousex + overhead + 10;	
+		 			x = mousex + overhead + 12;	
 		 		}
 		 		else{
-		 			x = mousex + 5;
+		 			x = mousex + 7;
 		 		}
 		 	}
 		 	if(mousey > (resy/2)){

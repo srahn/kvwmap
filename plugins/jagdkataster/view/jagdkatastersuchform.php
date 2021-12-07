@@ -198,7 +198,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   	if($this->jagdbezirke[$i]['art'] == 'apf'){echo 'Anpachtfläche';}
         ?>
         </td>
-        <td align="center"><a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo LAYER_ID_JAGDBEZIRKE; ?>&value_jagdbezirke_oid=<? echo $this->jagdbezirke[$i][$this->jagdkataster->oid_column]; ?>&operator_oid==&search_nummer=<?php echo $this->formvars['search_nummer']; ?>&jagd_search_name=<?php echo $this->formvars['jagd_search_name']; ?>&search_art=<?php echo $this->formvars['search_art']; ?>&search_status=<?php echo $this->formvars['search_status']; ?>&search_verzicht=<?php echo $this->formvars['search_verzicht']; ?>">Sachdatenanzeige</a></td>
+        <td align="center"><a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo LAYER_ID_JAGDBEZIRKE; ?>&value_<? echo $this->jagdkataster->maintable; ?>_oid=<? echo $this->jagdbezirke[$i][$this->jagdkataster->oid_column]; ?>&operator_<? echo $this->jagdkataster->maintable; ?>_oid==&search_nummer=<?php echo $this->formvars['search_nummer']; ?>&jagd_search_name=<?php echo $this->formvars['jagd_search_name']; ?>&search_art=<?php echo $this->formvars['search_art']; ?>&search_status=<?php echo $this->formvars['search_status']; ?>&search_verzicht=<?php echo $this->formvars['search_verzicht']; ?>">Sachdatenanzeige</a></td>
         <td align="center"><a href="index.php?go=zoomtojagdbezirk&oid=<? echo $this->jagdbezirke[$i][$this->jagdkataster->oid_column]; ?>&nummer=<? echo $this->jagdbezirke[$i]['id'] ?>">zur Karte</a></td>
         <td align="center">
         	<? if($this->Stelle->isFunctionAllowed('Jagdkataster')){ ?>

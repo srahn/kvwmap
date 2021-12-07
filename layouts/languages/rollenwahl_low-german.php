@@ -73,4 +73,9 @@
 	$strHintMenueButtons="Sökst du disse Opschoon ut, warrn fake bruken  Spiespuenkte as egens  Knoop över de Spies anwiest.";
 	$strShowRollenFilter="Wies up Themen-Filter";
 	$strHintShowRollenFilter="Sök disse Opschoon ut, denn hest du de Mööglichkeit dat Thema to filtern.";
+	$strRedlineTextOptions = "Free text Opschoon";
+	$strRedlineTextColor = "Textfarbe";
+	$strRedlineFontFamily = "Fontfamilie";
+	$strRedlineFontSize = "Textgröße";
+	$strRedlineFontWeight = "Schriftschnitt";
 ?>

@@ -38,10 +38,11 @@
 
 	function resetPassword() {
 		var newPassword = Math.random().toString(36).slice(6),
-		loginName = $('form[name="GUI"] input[name="loginname"]').val();
+		loginName = $('form[name="GUI"] input[name="loginname"]').val(),
+		host = window.location.href.split('?')[0];
 		$('#resetPassword').attr(
 			'href',
-			'mailto:' + $('form[name="GUI"] input[name="email"]').val() + '?subject=Neues Passwort für kvwmap&body=Einladung%20f%C3%BCr%20kvwmap%20Nutzer%20' + loginName + '%0A%0ASie werden von der Anwendung auf <? echo (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['CONTEXT_PREFIX']; ?> aufgefordert, ein neues Passwort für kvwmap einzugeben.%0A%0AKlicken Sie dazu bitte auf folgenden Link:%0A<? echo $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['CONTEXT_PREFIX']; ?>/index.php%3Fgo=logout%26login_name=' + loginName + '%26passwort=' + newPassword + '%0AMelden Sie sich mit dem Passwort: ' + newPassword + ' an und vergeben ein neues.%0A%0AMit freundlichen Grüßen%0AIhr GIS-Administrator%0A'
+			'mailto:' + $('form[name="GUI"] input[name="email"]').val() + '?subject=Neues Passwort für kvwmap&body=Einladung%20f%C3%BCr%20kvwmap%20Nutzer%20' + loginName + '%0A%0ASie werden von der Anwendung auf ' + host + ' aufgefordert, ein neues Passwort für kvwmap einzugeben.%0A%0AKlicken Sie dazu bitte auf folgenden Link:%0A' + host + '%3Fgo=logout%26login_name=' + loginName + '%26passwort=' + newPassword + '%0AMelden Sie sich mit dem Passwort: ' + newPassword + ' an und vergeben ein neues.%0A%0AMit freundlichen Grüßen%0AIhr GIS-Administrator%0A'
 		);
 		message('<span style="font-size: larger;">Neues Passwort vergeben</span><br><br>Warten Sie bitte, bis sich das E-Mail-Fenster mit einer vorgefertigten Meldung öffnet. Verschicken Sie dann die Einladung mit dem automatisch generierten Passwort an den Nutzer.<br><span style="color: red">Speichern Sie unbedingt den Datensatz des Benutzers mit den neuen Angaben, nachdem Sie dieses Fenster geschlossen haben, sonst wird das neue Passwort nicht wirksam und der Nutzer kann kein neues Passwort vergeben!</span>',1000,2000,'', 'Verstanden');
 		$('<input>').attr({
@@ -195,12 +196,12 @@
 		</div>
 
 		<div class="form_formular-input form_formular-aic">
-			<div><? echo $strTelephone;?></div>
+			<div><? echo $this->strTelephone;?></div>
 			<div><input name="phon" type="text" value="<? echo $this->formvars['phon']; ?>" maxlength="25"></div>
 		</div>
 
 		<div class="form_formular-input form_formular-aic">
-			<div><? echo $strEmail;?></div>
+			<div><? echo $this->strEmail;?></div>
 			<div>
 				<input name="email" type="text" value="<? echo $this->formvars['email']; ?>" maxlength="100">
 				<a href="mailto:<? echo $this->formvars['email']; ?>" title="<? echo $strSendEmail; ?>"><i class="fa fa-envelope" aria-hidden="true"></i></a>
@@ -329,18 +330,29 @@
 								?>
 							</select>
 						</td>
-					</tr>		
+					</tr>
 				</table>
 			</div>
 		</div>
-
-<?
+		
+		<div class="form_formular-input form_formular-aic">
+			<div><? echo $strShareRollenlayerAllowedLabel; ?></div>
+			<div><input
+							name="share_rollenlayer_allowed"
+							type="checkbox"
+							value="1"
+							<?php echo ($this->formvars['share_rollenlayer_allowed'] ? 'checked' : ''); ?>
+						><?php echo $strShareRollenlayerAllowedCheckboxText; ?>
+						<span data-tooltip="<?php echo $strShareRollenlayerAllowedDescription; ?>"></span>
+			</div>
+		</div>	
+		
+		<?
 	if ($this->formvars['selected_user_id'] > 0) {
 		if (is_array($this->formvars['selstellen'])) {
 			$active_stelle = array_search($this->userdaten[0]['stelle_id'], $this->formvars['selstellen']["ID"]);
 			$active_stelle_bezeichnung = $this->formvars['selstellen']['Bezeichnung'][$active_stelle];
-		}
-?>
+		} ?>
 		<div class="form_formular-input form_formular-aic">
 			<div><? echo $strActiveSite;?></div>
 			<div>

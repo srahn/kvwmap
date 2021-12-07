@@ -147,7 +147,9 @@ function go_switch_nachweisverwaltung($go){
 			else{
 				$GUI->setNachweisAnzeigeparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['showhauptart'],$GUI->formvars['markhauptart']);
 			}
-			$GUI->setNachweisOrder($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['order']);
+			if (isset($GUI->formvars['order'])) {
+				$GUI->setNachweisOrder($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['order']);
+			}
 			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 			$GUI->savedformvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
 			$GUI->formvars=array_merge($GUI->savedformvars,$GUI->formvars);

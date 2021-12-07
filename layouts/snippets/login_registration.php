@@ -1,4 +1,9 @@
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
+<?php
+	$language = (in_array($_REQUEST['language'], array('german', 'english', 'low-german', 'polish', 'vietnamese')) ? $_REQUEST['language'] : 'german');
+	include_once(LAYOUTPATH . 'languages/' . $language . '.php');
+	include_once(LAYOUTPATH . 'languages/login_registration_' . $language . '.php');
+	$bezeichnung_attribute = 'Bezeichnung' . ($language != 'german' ? '_' . $language : '');
+?><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
 	<? include(SNIPPETS . 'login_head.php'); ?>
 	<body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="load()">
 		<form name="login" action="index.php" method="post">
@@ -12,25 +17,25 @@
 					<td align="center">
 						<table cellspacing="0" cellpadding="2" border="0">
 							<tr>
-								<td align="center" colspan="2"><h1 style="margin-bottom: 20px;"><?php echo TITLE . ' Registrierung'; ?></h1></td>
+								<td align="center" colspan="2"><h1 style="margin-bottom: 20px;"><?php echo TITLE . ' ' . $strRegistration; ?></h1></td>
 							</tr>
 							<tr>
-								<td colspan="2">Herzlich Willkommen zur Registrierung am <? echo TITLE; ?>.
+								<td colspan="2"><? echo $strWelcomRegistration . ' ' . TITLE; ?>.
 									<p>
-									<? echo $this->invitation->inviter->get('Vorname') . ' ' . $this->invitation->inviter->get('Name'); ?> hat Sie zur Mitarbeit in der Arbeitsstelle <? echo $this->invitation->stelle->get('bezeichnung'); ?> eingeladen.<br>
-									Vergeben Sie bitte Nutzername und Passwort und passen Sie ggf. Ihre Kontaktdaten an.
+									<b><? echo $this->invitation->inviter->get('Vorname') . ' ' . $this->invitation->inviter->get('Name'); ?><b> <?php echo $strInvitationToTask; ?>: <? echo $this->invitation->stelle->get($bezeichnung_attribute); ?><br>
+									<?php echo $strNameAndContact; ?>
 									<p>
-									<? echo password_erstellungs_hinweis(array('strAnd' => 'und')); ?>
+									<? echo password_erstellungs_hinweis($language); ?>
 									<p>
-									Nach erfolgreicher Registrierung können Sie direkt in der Web-Anwendung <? echo TITLE; ?> arbeiten.
+									<? echo $strWorkWith; ?> arbeiten.
 									<p>
-									Für Rückfragen wenden Sie sich bitte <?
+									<? echo $strRequests; ?> <?
 									if ($this->invitation->inviter->get('email') != '') { ?>
-										per E-Mail an <a href="mailto:<? echo $this->invitation->inviter->get('email'); ?>"><?
+										<? echo $strPerEMail; ?> <a href="mailto:<? echo $this->invitation->inviter->get('email'); ?>"><?
 										echo $this->invitation->inviter->get('Vorname') . ' ' . $this->invitation->inviter->get('Name'); ?></a><?
 									}
 									if ($this->invitation->inviter->get('phon') != '') { ?>
-										oder rufen an unter der Telefonnummer <? echo $this->invitation->inviter->get('phon') . '.';
+										<? echo $strOrCall; ?> <? echo $this->invitation->inviter->get('phon') . '.';
 									} ?>
 								</td>
 							</tr><?
@@ -42,39 +47,39 @@
 								</tr><?
 							} ?>
 							<tr>
-								<td><span class="px16">Name: *</span></td>
+								<td><span class="px16"><? echo $this->strName; ?>: *</span></td>
 								<td>
 									<input style="width: 200px" type="text" value="<? echo $this->formvars['Name']; ?>" name="Name" />
 								</td>
 							</tr>
 							<tr>
-								<td><span class="px16">Vorname: </span></td>
+								<td><span class="px16"><? echo $this->strForeName; ?>: </span></td>
 								<td>
 									<input style="width: 200px" type="text" value="<? echo $this->formvars['Vorname']; ?>" name="Vorname" />
 								</td>
 							</tr>
 							<tr>
-								<td><span class="px16">Namenszusatz: </span></td>
+								<td><span class="px16"><? echo $this->strNameSuffix; ?>: </span></td>
 								<td>
 									<input style="width: 200px" type="text" value="<? echo $this->formvars['Namenszusatz']; ?>" name="Namenszusatz" />
 								</td>
 							</tr>
 							<tr>
-								<td><span class="px16">Nutzername: *</span></td>
+								<td><span class="px16"><? echo $strUserName; ?>: *</span></td>
 								<td>
 									<input style="width: 200px" type="text" value="<? echo $this->formvars['login_name']; ?>" name="login_name" />
 								</td>
 							</tr>
 							<tr>
-								<td><span class="px16">Neues Passwort: *</span></td>
+								<td><span class="px16"><? echo $strNewPassword; ?>: *</span></td>
 								<td><input style="width: 200px" type="password" value="<? echo $this->formvars['new_password']; ?>" id="new_password" name="new_password"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password').attr('type') == 'text') { $('#new_password').attr('type', 'password') } else { $('#new_password').attr('type', 'text'); }"></i></td>
 							</tr>
 							<tr>
-								<td><span class="px16">Wiederholung: *</span></td>
+								<td><span class="px16"><? echo $strNewPassword2; ?>: *</span></td>
 								<td><input style="width: 200px" type="password" value="<? echo $this->formvars['new_password_2']; ?>" id="new_password_2" name="new_password_2"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password_2').attr('type') == 'text') { $('#new_password_2').attr('type', 'password') } else { $('#new_password_2').attr('type', 'text'); }"></i></td>
 							</tr>
 							<tr>
-								<td><span class="px16">Telefon: </span></td>
+								<td><span class="px16"><? echo $strPhonNumber; ?>: </span></td>
 								<td>
 									<input style="width: 200px" type="text" value="<? echo $this->formvars['phon']; ?>" name="phon" />
 								</td>

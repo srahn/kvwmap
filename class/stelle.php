@@ -28,7 +28,6 @@ class stelle {
 	var $pixsize;
 	var $selectedButton;
 	var $database;
-	var $language;
 
 	function __construct($id, $database) {
 		global $debug;
@@ -41,9 +40,10 @@ class stelle {
 	}
 
 	function getsubmenues($id){
+		global $language;
 		$sql ='SELECT menue_id,';
-		if ($this->language != 'german') {
-			$sql.='`name_'.$this->language.'` AS ';
+		if ($language != 'german') {
+			$sql.='`name_'.$language.'` AS ';
 		}
 		$sql .=' name, target, links FROM u_menue2stelle, u_menues';
 		$sql .=' WHERE stelle_id = '.$this->id;
@@ -93,9 +93,10 @@ class stelle {
 	}
 	
   function getName() {
+		global $language;
     $sql ='SELECT ';
-    if ($this->language != 'german' AND $this->language != ''){
-      $sql.='`Bezeichnung_'.$this->language.'` AS ';
+    if ($language != 'german' AND $language != ''){
+      $sql.='`Bezeichnung_'.$language.'` AS ';
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo '<p>SQL zur Abfrage des Stellennamens: ' . $sql;
@@ -110,19 +111,30 @@ class stelle {
   }
 
 	function readDefaultValues() {
+		global $language;
+		if ($language != '' AND $language != 'german') {
+			$name_column = "
+			CASE
+				WHEN s.`Bezeichnung_" . $language . "` != \"\" THEN s.`Bezeichnung_" . $language . "`
+				ELSE s.`Bezeichnung`
+			END AS Bezeichnung";
+		}
+		else {
+			$name_column = "s.`Bezeichnung`";
+		}
+
 		$sql = "
 			SELECT
-				*,";
-		if ($this->language != 'german' AND $this->language != ''){
-      $sql.='`Bezeichnung_'.$this->language.'` AS ';
-    }
-    $sql.="
-				Bezeichnung
+				`ID`," .
+				$name_column . ",
+				`start`,
+				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`, `pgdbhost`, `pgdbname`, `pgdbuser`, `pgdbpasswd`, `ows_title`, `wms_accessconstraints`, `ows_abstract`, `ows_contactperson`, `ows_contactorganization`, `ows_contactemailaddress`, `ows_contactposition`, `ows_fees`, `ows_srs`, `protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `postgres_connection_id`
 			FROM
-				stelle
+				stelle s
 			WHERE
 				ID = " . $this->id . "
 		";
+		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
@@ -158,6 +170,7 @@ class stelle {
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
 		$this->hist_timestamp = $rs['hist_timestamp'];
 		$this->default_user_id = $rs['default_user_id'];
+		$this->show_shared_layers = $rs['show_shared_layers'];
 		$this->style = $rs['style'];
 	}
 
@@ -321,7 +334,7 @@ class stelle {
 		$this->debug->write("<p>file:stelle.php class:stelle->getstellendaten - Abfragen der Stellendaten<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		$rs=$this->database->result->fetch_array();
+		$rs = $this->database->result->fetch_array();
 		return $rs;
 	}
 
@@ -369,10 +382,13 @@ class stelle {
 		$sql.=', check_client_ip="';if($stellendaten['checkClientIP']=='1')$sql.='1';else $sql.='0';$sql.='"';
 		$sql.=', check_password_age="';if($stellendaten['checkPasswordAge']=='1')$sql.='1';else $sql.='0';$sql.='"';
 		$sql.=', allowed_password_age=';if($stellendaten['allowedPasswordAge']!='')$sql.=$stellendaten['allowedPasswordAge'];else $sql.='6';
-		$sql.=', use_layer_aliases="';if($stellendaten['use_layer_aliases']=='1')$sql.='1';else $sql.='0';$sql.='"';
-		$sql.=', hist_timestamp="';if($stellendaten['hist_timestamp']=='1')$sql.='1';else $sql.='0';$sql.='"';
+		$sql.=', use_layer_aliases="';if($stellendaten['use_layer_aliases']=='1')$sql.='1';else $sql.='0';$sql.='",';
+		$sql .= "
+			`hist_timestamp` = " . ($stellendaten['hist_timestamp'] ? "1" : "0") . ",
+			`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . "
+		";
 		# Abfrage starten
-		$ret=$this->database->execSQL($sql,4, 0);
+		$ret = $this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
 			# Fehler bei Datenbankanfrage
 			$ret[1].='<br>Die Stellendaten konnten nicht eingetragen werden.<br>'.$ret[1];
@@ -400,6 +416,7 @@ class stelle {
 
 	# Stelle ändern
 	function Aendern($stellendaten) {
+		$language = $this->database->gui->user->rolle->language;
 		$stelle = ($stellendaten['id'] != '' ? "`ID` = " . $stellendaten['id'] . ", " : "");
 		$wappen = (value_of($stellendaten, 'wappen') != '' ? "`wappen` = '" . $stellendaten['wappen'] . "', " : "");
 		$sql = "
@@ -408,7 +425,9 @@ class stelle {
 			SET" .
 				$stelle .
 				$wappen . "
-				`Bezeichnung` = '" . $stellendaten['bezeichnung'] . "',
+				`Bezeichnung` = '" . $stellendaten['bezeichnung'] . "'," .
+				(array_key_exists('Bezeichnung_' . $language, $stellendaten) ? "
+					`Bezeichnung_" . $language . "` = '" . $stellendaten['Bezeichnung_' . $language] . "'," : "") . "
 				`Referenzkarte_ID` = " . $stellendaten['Referenzkarte_ID'] . ",
 				`minxmax` = '" . $stellendaten['minxmax'] . "',
 				`minymax` = '" . $stellendaten['minymax'] . "',
@@ -437,7 +456,8 @@ class stelle {
 				`use_layer_aliases` = 		'" . (value_of($stellendaten, 'use_layer_aliases') 	== '1'	? "1" : "0") . "',
 				`hist_timestamp` = 				'" . (value_of($stellendaten, 'hist_timestamp') 		== '1'	? "1" : "0") . "',
 				`allowed_password_age` = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "',
-				`default_user_id` = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . "
+				`default_user_id` = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
+				`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . "
 			WHERE
 				ID = " . $this->id . "
 		";
@@ -458,6 +478,7 @@ class stelle {
 			SELECT
 				s.ID,
 				s.Bezeichnung,
+				s.show_shared_layers,
 				(
 					SELECT 
 						group_concat(es.Bezeichnung)
@@ -488,6 +509,7 @@ class stelle {
 			$stellen['ID'][] = $rs['ID'];
 			$stellen['index'][$rs['ID']] = $i;
 			$stellen['Bezeichnung'][] = $rs['Bezeichnung'];
+			$stellen['show_shared_layers'][] = $rs['show_shared_layers'];
 			$stellen['Bezeichnung_parent'][] = $rs['Bezeichnung_parent'];
 			$i++;
 		}
@@ -495,6 +517,7 @@ class stelle {
 	}
 	
 	function getStellenhierarchie() {
+		$this->links = Array();
 		$sql = "
 			SELECT
 				*
@@ -1054,31 +1077,31 @@ class stelle {
 		return 1;
 	}
 
-	function addLayer($layer_ids, $drawingorder, $filter = '', $assign_default_values = false) {
+	function addLayer($layer_ids, $drawingorder, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
-		for ($i=0;$i<count($layer_ids);$i++){
+		for ($i = 0; $i < count($layer_ids); $i++) {
 			$insert = "(
-					`Stelle_ID`,
-					`Layer_ID`,
-					`queryable`,
-					`use_geom`,
-					`drawingorder`,
-					`legendorder`,
-					`minscale`,
-					`maxscale`,
-					`symbolscale`,
-					`offsite`,
-					`transparency`,
-					`Filter`,
-					`template`,
-					`header`,
-					`footer`,
-					`privileg`,
-					`export_privileg`,
-					`postlabelcache`,
-					`requires`
-				)";
+				`Stelle_ID`,
+				`Layer_ID`,
+				`queryable`,
+				`use_geom`,
+				`drawingorder`,
+				`legendorder`,
+				`minscale`,
+				`maxscale`,
+				`symbolscale`,
+				`offsite`,
+				`transparency`,
+				`Filter`,
+				`template`,
+				`header`,
+				`footer`,
+				`privileg`,
+				`export_privileg`,
+				`postlabelcache`,
+				`requires`
+			)";
 			# Einstellungen von der Elternstelle übernehmen
 			$sql = "INSERT INTO used_layer " . $insert . "
 				SELECT
@@ -1147,7 +1170,7 @@ class stelle {
 						template, 
 						NULL,
 						NULL,
-						`privileg`,
+						" . ($privileg == 'editable'? "'1'" : 'privileg') . ",
 						`export_privileg`,
 						postlabelcache,
 						requires
@@ -1243,7 +1266,7 @@ class stelle {
 							" . $layer_ids[$i] . ",
 							name,
 							" . $this->id . ",
-							privileg,
+							" . ($privileg == 'editable'? '1' : 'privileg') . ",
 							query_tooltip 
 						FROM 
 							layer_attributes 
@@ -1721,10 +1744,10 @@ class stelle {
 		$layer = array();
 		$sql = "
 			SELECT
-				l.*,
-				ul.*,
+				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
 				parent_id,
-				ul2.Stelle_ID as used_layer_parent_id
+				GROUP_CONCAT(ul2.Stelle_ID) as used_layer_parent_id,
+				GROUP_CONCAT(s.Bezeichnung) as used_layer_parent_bezeichnung
 			FROM
 				layer AS l 
 				JOIN used_layer AS ul ON l.Layer_ID = ul.Layer_ID
@@ -1732,9 +1755,12 @@ class stelle {
 				LEFT JOIN used_layer AS ul2 ON 
 					l.Layer_ID = ul2.Layer_ID AND	
 					ul2.Stelle_ID = parent_id
+				LEFT JOIN stelle AS s ON s.ID = ul2.Stelle_ID
 			WHERE
 				ul.Stelle_ID = " . $this->id .
 				($Layer_id != '' ? " AND l.Layer_ID = " . $Layer_id : '') . "
+			GROUP BY 
+				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,	parent_id
 		";
 		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);
@@ -1878,6 +1904,7 @@ class stelle {
 	}
 
 	function getGemeindeIDs() {
+		$liste = [];
 		$sql = 'SELECT Gemeinde_ID, Gemarkung, Flur, Flurstueck FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
@@ -1985,7 +2012,7 @@ class stelle {
 	function getWappen() {
 		$sql = "
 			SELECT
-				wappen
+				wappen, wappen_link
 			FROM
 				stelle
 			WHERE
@@ -1994,23 +2021,8 @@ class stelle {
 		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$rs = $this->database->result->fetch_array();
-		return $rs['wappen'];
-	}
-
-	function getWappenLink() {
-		$sql = "
-			SELECT
-				wappen_link
-			FROM
-				stelle
-			WHERE ID = " . $this->id . "
-		";
-		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>" . $sql, 4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$rs = $this->database->result->fetch_array();
-		return $rs['wappen_link'];
+		$rs = $this->database->result->fetch_assoc();
+		return $rs;
 	}
 
 	/**

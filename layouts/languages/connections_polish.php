@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitle="Database Connections";
 	$strName="Name";
 	$strHost="Host";

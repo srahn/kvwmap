@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitle = "Export OGC-Dienst Map-Datei";
 	$strWMSExportWarning = "Diese Funktion speichert die aktuellen Kartendarstellungen mit zusätzlichen Metadaten zum Projekt in einer MapServer Map-Datei ab, sodass die Inhalte in einem OGC konformen Web Map (WMS) und Web Feature Service (WFS) anderen unabhängig von kvwmap zur Verfügung gestellt werden können. Der Speicherort ist:";
 	$strAllOrActiveLayer = "Sollen alle Layer der Stelle ausgegeben werden oder nur die aktiven?";
