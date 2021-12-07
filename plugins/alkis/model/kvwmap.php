@@ -656,7 +656,12 @@
     $FlstNr = formatFlurstkennzALKIS($GUI->formvars['FlstNr']);
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
     # abfragen, ob es sich um eine gültige GemarkungsID handelt
-    $GemkgListe=$Gemarkung->getGemarkungListe(array($GemID),array($GemkgID));
+		if ($GUI->formvars['historical'] != 1) {
+			$GemkgListe=$Gemarkung->getGemarkungListe(array($GemID),array($GemkgID));
+		}
+		else {
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(NULL, array($GemkgID));
+		}
     if(@count($GemkgListe['GemkgID']) > 0){
       # Die Gemarkung ist ausgewählt und gültig aber Flur leer, zoom auf Gemarkung
       if($FlurID==0 OR $FlurID=='-1'){
