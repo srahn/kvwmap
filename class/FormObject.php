@@ -278,7 +278,7 @@ class selectFormObject extends FormObject{
 				if($this->nochange != true){
 					$this->html.=" onchange=\"document.GUI.submit()\">\n";
 				}
-				for ($i=0;$i<count($this->select['option']);$i++) {
+				for ($i=0;$i<@count($this->select['option']);$i++) {
 					$this->html.="<option value=\"".$this->select['option'][$i]['value']."\"";
 					if ($this->select['option'][$i]['selected']) {
 						$this->html.=' selected';
