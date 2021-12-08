@@ -10,6 +10,8 @@
 	$this->strPleaseSelect="Chọn trong danh sách dưới";
 	$this->strNo="Không";
 	$this->strYes="Có";
+  $this->strTel = 'Điện thoại';
+  $this->strEMail = 'e-mail';
 	$this->strTask="Tác vụ";
 	$this->strLayer="Lớp";
 	$this->strDeleteWarningMessage="Bạn có chắc chắn rằng mình muốn xóa?";
@@ -19,9 +21,18 @@
 	$this->strSend="Gửi";
 	$this->strEnter="Thực hiện";
 	$this->strReset="Làm lại";
+	$this->strCoordinates = 'Coordinates';
+	$this->strCoordinate = 'Coordinate';
+	$this->strCoordinateReferenceSystem = 'Coordinate Reference System';
 	$this->strSaveMapViewCommittMassage="Phần bản đồ đang xem đã được lưu";
 	$this->strExceeded = "vượt quá";
 	$this->strShowMore="Hiển thị thêm";
 	$this->strShowLess="Hiển thị ít hơn";
 	$this->strLayerParameters="Layer Parameter";
+	$this->strShareRollenlayer = "Share Layer";
+	$this->strShareRollenLayerLong = "Share this layer for other user in this WebGIS";
+	$this->strLayerSharedFrom = "This Layer was shared by user";
+	$this->strReadable = "Everywhere only readable";
+	$this->strEditableOnlyInThisStelle = "Only editable in this working group";
+	$this->strEditableInAllStellen = "Everywhere editable";
 ?>

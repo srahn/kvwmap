@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $strBookmarks="Bookmarks";
 $strEmptyBookmarks="remove all bookmarks";
 $strRecord="record";

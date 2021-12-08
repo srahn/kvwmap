@@ -1,6 +1,6 @@
 <?php
 	$GUI = $this;
-
+	include(LAYOUTPATH . 'languages/layer_formular_' . $this->user->rolle->language . '.php'); 
 	$this->outputGroup = function($group, $indent = 0) use ($GUI) {
 		$group_layer_ids = $GUI->layers['layers_of_group'][$group['id']];
 		$anzahl_layer = @count($group_layer_ids);
@@ -48,9 +48,9 @@
 							' . htmlentities($GUI->layers['Kurzbeschreibung'][$i]) . '
 						</div>
 					</td>
-					<td style="border-bottom:1px solid #C3C7C3" class="datenherr-column">
+					<td style="border-bottom:1px solid #C3C7C3" class="dataowner_name-column">
 						<div style="width: 200px" valign="top">
-							' . $GUI->layers['Datenherr'][$i] . '
+							' . $GUI->layers['dataowner_name'][$i] . '
 						</div>
 					</td>
 				</tr>';
@@ -101,7 +101,7 @@
 				<input type="checkbox" onclick="$('.layer-column').toggle(); $('#column_options_div').toggle();" checked> Layer<br>
 				<input type="checkbox" onclick="$('.default_drawingorder-column').toggle(); $('#column_options_div').toggle();"> Zeichenreihenfolge<br>
 				<input type="checkbox" onclick="$('.kurzbeschreibung-column').toggle(); $('#column_options_div').toggle();" checked> Kurzbeschreibung<br>
-				<input type="checkbox" onclick="$('.datenherr-column').toggle(); $('#column_options_div').toggle();" checked> Datenherr
+				<input type="checkbox" onclick="$('.dataowner_name-column').toggle(); $('#column_options_div').toggle();" checked> <? echo $strDataOwnerName; ?>
 			</div>
 		</td>
 	</tr>
@@ -113,7 +113,7 @@
 					<th style="border-right:1px solid #C3C7C3" class="layer-column">Layer</th>
 					<th style="border-right:1px solid #C3C7C3" class="default_drawingorder-column">Default<br>Zeichen-<br>reihenfolge</th>
 					<th style="border-right:1px solid #C3C7C3" class="kurzbeschreibung-column">Kurzbeschreibung</th>
-					<th class="datenherr-column">Datenherr</th>
+					<th class="dataowner_name-column"><? echo $strDataOwnerName; ?></th>
 				</tr><?
 				foreach ($this->groups as $group) {
 					if($group['obergruppe'] == '') {

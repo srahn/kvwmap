@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $strSave="zapisz"; 
 $strSaveWithoutZoom="zapisanie tymczasowe danych"; 
 $strArea="powierzchnia"; 

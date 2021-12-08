@@ -1,7 +1,6 @@
 <?php
 
 include(PLUGINS . 'mobile/model/kvwmap.php');
-
 function go_switch_mobile($go){
 	global $GUI;
 	switch($GUI->go) {

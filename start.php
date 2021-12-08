@@ -1,5 +1,8 @@
 <?php
+$language = (in_array($_REQUEST['language'], array('german', 'english', 'low-german', 'polish', 'vietnamese')) ? $_REQUEST['language'] : 'german');
+include_once(LAYOUTPATH . 'languages/start_' . $language . '.php');
 $errors = array();
+
 # Objekt für graphische Benutzeroberfläche erzeugen mit default-Werten
 $GUI = new GUI("map.php", "layouts/css/main.css.php", "html");
 $GUI->user = new stdClass();
@@ -9,6 +12,7 @@ $GUI->allowed_documents = array();
 $GUI->document_loader_name = session_id().rand(0,99999999).'.php';
 $GUI->formvars=$formvars;
 $GUI->echo = false;
+
 
 #################################################################################
 # Setzen der Konstante, ob in die Datenbank geschrieben werden soll oder nicht.
@@ -104,7 +108,7 @@ if (is_logout($GUI->formvars)) {
 		logout();
 	}
 	else {
-		$GUI->add_message('error', 'Logout nicht möglich. Sie sind nicht angemeldet.');
+		$GUI->add_message('info', $strLoggedOutAlready);
 		$GUI->debug->write('Ist schon logged out.', 4, $GUI->echo);
 	}
 	$GUI->formvars['go'] = '';
@@ -601,7 +605,7 @@ function get_permission_in_stelle($GUI) {
 				if ($GUI->Stelle->checkClientIpIsOn()) {
 					$GUI->debug->write('IP-Adresse des Clients wird in dieser Stelle geprüft.', 4);
 
-					if ($GUI->user->clientIpIsValide(getenv('REMOTE_ADDR')) == false) {
+					if ($GUI->user->clientIpIsValide(get_remote_ip()) == false) {
 						$GUI->debug->write('IP-Adresse des Clients ist in der Stelle valid.', 4);
 						$allowed = false;
 						$reason = 'IP not allowed';

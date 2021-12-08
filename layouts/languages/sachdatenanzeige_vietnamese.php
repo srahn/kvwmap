@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strPrint="Print";
 	$strSave="Save";
 	$strbacktomap="back to map";

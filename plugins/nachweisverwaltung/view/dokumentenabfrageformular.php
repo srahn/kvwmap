@@ -6,6 +6,15 @@
 <script type="text/javascript">
 <!--
 
+document.onkeydown = function(ev){
+	var key;
+	ev = ev || event;
+	key = ev.keyCode;
+	if (ev.target.className != 'quicksearch_field' && key == 13) {
+		save();
+	}
+}
+
 function save(){
 	var dokument_art_selected = false;
 	dokument_arten = document.getElementsByName('suchhauptart[]');
@@ -94,15 +103,32 @@ function toggleBetweenSearch(toggle_button, secondfield){
 	}
 }
 
+function update_flur_thematisch(){
+	var option = document.GUI.suchgemarkung.options[document.GUI.suchgemarkung.selectedIndex].text;
+	if (option.substring(option.length - 1) == ')') {		// historische Gemarkungen nur thematisch suchen
+		document.GUI.flur_thematisch.value = 1;
+		document.getElementById('flur_raeumlich').style.display = 'none';
+	}
+	else {
+		document.getElementById('flur_raeumlich').style.display = '';
+	}
+}
+
 function updateGemarkungsauswahl(){
-	if(document.GUI.gemschl2.value == '')document.GUI.gemschl.value = '';
-	else document.GUI.gemschl.value = document.GUI.gemschl1.value+document.GUI.gemschl2.value;
-	selectbyString(document.GUI.suchgemarkung, document.GUI.gemschl.value);
+	if (document.GUI.gemschl2.value == '') {
+		document.GUI.gemschl.value = '';
+	}
+	else {
+		document.GUI.gemschl.value = document.GUI.gemschl1.value+document.GUI.gemschl2.value;
+	}
+	selectbyString(document.GUI.suchgemarkung, document.GUI.gemschl.value);	
+	update_flur_thematisch();
 }
 
 function updateGemarkungsschluessel(value){
 	document.GUI.gemschl1.value = value.substring(0, 2);
 	document.GUI.gemschl2.value = value.substring(2);	
+	update_flur_thematisch();
 }
 
 function clear(){
@@ -305,13 +331,17 @@ else {
 				</tr>
 				<tr>
 					<td align="left" colspan="3">Flur:&nbsp;
-						<div style="position: relative">
+						<div style="position: relative; display: flex">
 							<input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3">
-							&nbsp;&nbsp;&nbsp;						
-							<input type="radio" name="flur_thematisch" <? if($this->formvars['flur_thematisch'] != '1')echo 'checked'; ?> value="0">räumlich
-							&nbsp;&nbsp;&nbsp;
-							<input type="radio" name="flur_thematisch" <? if($this->formvars['flur_thematisch'] == '1')echo 'checked'; ?> value="1">thematisch
-							&nbsp;
+							<div id="flur_raeumlich">
+								&nbsp;&nbsp;&nbsp;
+								<input type="radio" name="flur_thematisch" <? if($this->formvars['flur_thematisch'] != '1')echo 'checked'; ?> value="0">räumlich
+							</div>
+							<div>
+								&nbsp;&nbsp;&nbsp;
+								<input type="radio" name="flur_thematisch" <? if($this->formvars['flur_thematisch'] == '1')echo 'checked'; ?> value="1">thematisch
+								&nbsp;
+							</div>
 							<span style="--left: none" data-tooltip="Bei Auswahl von 'räumlich' erfolgt eine räumliche Suche über die aktuelle Flurgeometrie. Soll stattdessen über die in den Metainformationen gespeicherte Flur gesucht werden, muss 'thematisch' ausgewählt werden."></span>
 						</div>
 					</td>

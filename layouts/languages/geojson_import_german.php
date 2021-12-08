@@ -1,4 +1,4 @@
-﻿<?php
+<?php
  $strTitle="GeoJSON-Import";
  $strFile="GeoJSON-Datei: ";
  $strLoadData="Datei laden";

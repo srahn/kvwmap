@@ -1,5 +1,12 @@
 <?php
 	include(LAYOUTPATH . 'languages/layergroups_' . $this->user->rolle->language . '.php');
+	$has_shared_group = array_reduce(
+		$this->layergruppen,
+		function($has_shared_group, $layergruppe) {
+			return $has_shared_group OR $layergruppe->get('selectable_for_shared_layers');
+		},
+		0
+	);
 ?>
 <script>
 	function group_delete(id) {
@@ -32,8 +39,12 @@
 					<th><a href="index.php?go=Layergruppen_Anzeigen&order=id"><?php echo $this->strID; ?></a></th>
 					<th><a href="index.php?go=Layergruppen_Anzeigen&order=Gruppenname"><?php echo $this->strName; ?></a></th>
 					<th><a href="index.php?go=Layergruppen_Anzeigen&order=obergruppe">Obergruppe</th>
-					<th><a href="index.php?go=Layergruppen_Anzeigen&order=order">Order</a></th>
-					<td colspan="2" align="right"><a class="btn btn-new" href="index.php?go=Layergruppe_Editor"><i titel="Legt eine neue Layergruppe an." class="fa fa-plus" style="color: white; margin-bottom: 10px"></i>&nbsp;Neue&nbsp;Gruppe</a></td>
+					<th><a href="index.php?go=Layergruppen_Anzeigen&order=order">Order</a></th><?
+					$colspan = 2;
+					if ($has_shared_group) {
+						$colspan += 1;
+					} ?>
+					<td colspan="<? echo $colspan; ?>" align="right"><a class="btn btn-new" href="index.php?go=Layergruppe_Editor"><i titel="Legt eine neue Layergruppe an." class="fa fa-plus" style="color: white; margin-bottom: 10px"></i> <?php echo  $strCreateLayerGroup; ?></a></td>
 				</tr><?php
 				for ($i = 0; $i < count($this->layergruppen); $i++) { ?>
 					<tr id="group_<?php echo $this->layergruppen[$i]->get('id'); ?>" onMouseover="this.bgColor='<?php echo BG_TR; ?>'" onMouseout="this.bgColor=''">
@@ -48,7 +59,16 @@
 						</td>
 						<td>
 							<span><?php echo $this->layergruppen[$i]->get('order'); ?></span>
-						</td>
+						</td><?
+						if ($has_shared_group) { ?>
+							<td align="right"><?
+								if ($this->layergruppen[$i]->get('selectable_for_shared_layers')) { ?>
+									<i class="fa fa-share-alt" style="padding: 3px"></i><?
+								} else { ?>
+									&nbsp;<?
+								} ?>
+							</td><?
+						} ?>
 						<td align="right">
 							<a
 								title="<?php echo $this->strChange; ?>"

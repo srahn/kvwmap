@@ -407,7 +407,7 @@
       # Abfragen der Gemarkungen
       # 2006-01-26 pk
       $Gemarkung=new gemarkung('',$GUI->pgdatabase);
-      $GemkgListe=$Gemarkung->getGemarkungListe('','','gmk.GemkgName');
+      $GemkgListe=$Gemarkung->getGemarkungListeAll('','');
       # Erzeugen des Formobjektes für die Gemarkungsauswahl
       $GUI->GemkgFormObj=new FormObject("Gemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['Gemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
 
@@ -578,7 +578,7 @@
 		$sql ='UPDATE rolle_nachweise SET ';
 		$sql.='suchhauptart="'.implode(',', $suchhauptart).'",';
 		$sql.='suchunterart="'.implode(',', $suchunterart).'",';
-		if ($abfrageart!='') { $sql.='abfrageart="'.$abfrageart.'",'; }
+		if ($abfrageart != '') { $sql.='abfrageart="'.$abfrageart.'",'; }
 		$sql.='suchgemarkung="'.$suchgemarkung.'",';
 		$sql.='suchflur="'.$suchflur.'",';
 		$sql.='suchstammnr="'.$stammnr.'",';
@@ -597,7 +597,9 @@
 		$sql.='suchbemerkung="'.$suchbemerkung.'",';
 		$sql.='flur_thematisch="'.$flur_thematisch.'",';
 		$sql.='alle_der_messung="'.$alle_der_messung.'",';
-		$sql.='`order`="'.$order.'",';
+		if ($order != '') {
+			$sql.='`order`="'.$order.'",';
+		}
 		$sql .= 'user_id = '.$user_id;
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		#echo $sql;
@@ -789,17 +791,26 @@
       if ($GUI->nachweis->erg_dokumente==0) {
         # Keine Dokumente zur Auswahl gefunden.
 				$GUI->add_message('error', 'Es konnten keine Dokumente zu der Auswahl gefunden werden. Wählen Sie neue Suchparameter.');
-        $GUI->rechercheFormAnzeigen();				
+				if ($GUI->user->rolle->querymode == 1) {
+					$GUI->nachweisAnzeige();
+				}
+				else {
+					$GUI->rechercheFormAnzeigen();
+				}
       }
       else {
-        # Zoom auf Nachweise
-				for ($i=0; $i < $GUI->nachweis->erg_dokumente; $i++) {
-					$ids[] = $GUI->nachweis->Dokumente[$i]['id'];
+				if ($GUI->user->rolle->querymode == 1) {
+					if (in_array($GUI->formvars['abfrageart'], ['indiv_nr', 'antr_nr'])) {
+						# Zoom auf Nachweise
+						for ($i=0; $i < $GUI->nachweis->erg_dokumente; $i++) {
+							$ids[] = $GUI->nachweis->Dokumente[$i]['id'];
+						}
+						$GUI->loadMap('DataBase');
+						$GUI->zoomToNachweise($GUI->nachweis, $ids, 10);
+						$GUI->user->rolle->saveSettings($GUI->map->extent);
+					}
+					$GUI->zoomed = true;
 				}
-				$GUI->loadMap('DataBase');
-				$GUI->zoomToNachweise($GUI->nachweis, $ids, 10);
-				$GUI->user->rolle->saveSettings($GUI->map->extent);
-				$GUI->zoomed = true;
 				# Anzeige des Rechercheergebnisses
         $GUI->nachweisAnzeige();
       }
@@ -1433,10 +1444,10 @@
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
 		if($GemeindenStelle == NULL){
-			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(NULL, NULL);
 		}
 		else{
-			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
 		}
         
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
@@ -1648,10 +1659,10 @@
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
 		if($GemeindenStelle == NULL){
-			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(NULL, NULL);
 		}
 		else{
-			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
 		}
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
     $GUI->GemkgFormObj=new FormObject("suchgemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['suchgemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);

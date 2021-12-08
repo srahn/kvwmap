@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitel									=	"Sicherungen";
 	$strTitel_single					= "Sicherung";
 	$strName									=	"Name";

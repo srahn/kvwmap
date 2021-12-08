@@ -74,6 +74,9 @@ class wfs{
 					case 'LIKE' : {									# geht noch nicht, weil man den requeststring hierfür url-encoden muss und dann ist er zu lang 
 						$operator = 'PropertyIsLike';
 						$operator_attributes = " wildCard='*' singleChar='.' escape='!'";
+						if (strpos($values[$i], '%') === false) {
+							$values[$i] = '%' . $values[$i] . '%';
+						}
 						$values[$i] = str_replace('%', '*', $values[$i]);
 					}break;
 				}
@@ -136,6 +139,7 @@ class wfs{
 	}
 
 	function extract_features(){
+		$features = array();
 		# liefert die Datensätze einer getfeature-Abfrage (zuvor muss get_feature_request() ausgeführt werden)
 		if (strpos($this->gml, 'gmlx:featureMember') !== false) {
 			$this->parse_gml('gmlx:featureMember');
@@ -190,7 +194,18 @@ class wfs{
 					# evtl. Namespace davor entfernen
 					$this->objects[$i][$j]["tag"] = str_replace($this->namespace . ':', '', $this->objects[$i][$j]["tag"]);
 		  		$features[$i]['value'][$this->objects[$i][$j]["tag"]] = $this->objects[$i][$j]["value"];
-				}
+				}				
+			}
+			if ($features[$i]['value']['gml:lowerCorner'] != '') {
+				$lc = explode(' ', $features[$i]['value']['gml:lowerCorner']);
+				$uc = explode(' ', $features[$i]['value']['gml:upperCorner']);
+				$features[$i]['bbox'] = 'POLYGON((' . 
+																	$features[$i]['value']['gml:lowerCorner'] . ', ' . 
+																	$uc[0] . ' ' . $lc[1] . ', ' . 
+																	$features[$i]['value']['gml:upperCorner'] . ', ' . 
+																	$lc[0] . ' ' . $uc[1] . ', ' . 
+																	$features[$i]['value']['gml:lowerCorner'] . 
+																'))';
 			}
   	}
 	  return $features;

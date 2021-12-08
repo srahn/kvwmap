@@ -57,8 +57,6 @@ class Nachweis {
 				*
       FROM 
 				nachweisverwaltung.n_nachweise
-			WHERE
-				gueltigkeit = 1
 			ORDER BY id
 			";
 		$ret = $this->database->execSQL($sql,4, 1);    
@@ -80,7 +78,6 @@ class Nachweis {
       FROM 
 				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
 			WHERE
-				gueltigkeit = 1 AND
 				b.db_action = 'INSERT'
 			ORDER BY a.id";
 		$ret = $this->database->execSQL($sql,4, 1);    
@@ -97,12 +94,11 @@ class Nachweis {
 	
 	function LENRIS_get_changed_nachweise(){
 		$sql = "
-			SELECT 
+			SELECT DISTINCT
 				a.*
       FROM 
 				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
 			WHERE
-				gueltigkeit = 1 AND 
 				b.db_action = 'UPDATE'
 			ORDER BY a.id";
 		$ret = $this->database->execSQL($sql,4, 1);    
@@ -122,10 +118,9 @@ class Nachweis {
 			SELECT 
 				id_nachweis
       FROM 
-				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
+				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE
-				gueltigkeit = 1 AND 
-				b.db_action = 'DELETE'";
+				db_action = 'DELETE'";
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
       if ($nachweise = pg_fetch_all($ret[1])) {
@@ -147,30 +142,48 @@ class Nachweis {
 			echo $rows;
 		}
 	}
-	
+		
 	function LENRIS_confirm_changed_nachweise($ids){
 		$sql = "
 			DELETE FROM 
 				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE 
 				id_nachweis IN (" . $ids . ") and db_action = 'UPDATE'";
-		$ret = $this->database->execSQL($sql,4, 1);    
-    if (!$ret[0]) {
-			$rows = pg_affected_rows($ret[1]);
-			echo $rows;
+		$ret = $this->database->execSQL($sql,4, 1);
+		if (!$ret[0]) {
+			$sql = "
+				SELECT 
+					count(*)
+				FROM
+					nachweisverwaltung.n_nachweisaenderungen 
+				WHERE 
+					id_nachweis IN (" . $ids . ") and db_action = 'UPDATE'";
+			if (!$ret[0]) {
+				$rest = pg_fetch_row($ret[1]);
+				echo (substr_count($ids, ',') + 1 - $rest[0]);
+			}
 		}
 	}
-	
+
 	function LENRIS_confirm_deleted_nachweise($ids){
 		$sql = "
 			DELETE FROM 
 				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE 
-				id_nachweis IN (" . $ids . ") and db_action = 'DELETE'";
+				id_nachweis IN (" . $ids . ")";		# alle Einträge löschen, da es noch UPDATE-Einträge geben kann
 		$ret = $this->database->execSQL($sql,4, 1);    
     if (!$ret[0]) {
-			$rows = pg_affected_rows($ret[1]);
-			echo $rows;
+			$sql = "
+				SELECT 
+					count(*)
+				FROM
+					nachweisverwaltung.n_nachweisaenderungen 
+				WHERE 
+					id_nachweis IN (" . $ids . ") and db_action = 'DELETE'";
+			if (!$ret[0]) {
+				$rest = pg_fetch_row($ret[1]);
+				echo (substr_count($ids, ',') + 1 - $rest[0]);
+			}
 		}
 	}		
 
