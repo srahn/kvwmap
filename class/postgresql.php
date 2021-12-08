@@ -41,6 +41,7 @@ class pgdatabase {
 	var $pg_text_attribute_types = array('character', 'character varying', 'text', 'timestamp without time zone', 'timestamp with time zone', 'date', 'USER-DEFINED');
 	var $version = POSTGRESVERSION;
 	var $connection_id;
+	var $error;
 
 	function __construct() {
 		global $debug;
@@ -56,6 +57,7 @@ class pgdatabase {
 		$this->type='postgresql';
 		$this->commentsign='--';
 		$this->err_msg = '';
+		$this->error = false;
 		# Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
 		# START TRANSACTION, ROLLBACK und COMMIT unterdrückt, so daß alle anderen SQL
 		# Anweisungen nicht in Transactionsblöcken ablaufen.
@@ -392,6 +394,7 @@ FROM
 			$query = @pg_query($this->dbConn, $sql);
 			//$query=0;
 			if ($query == 0) {
+				$this->error = true;
 				$ret['success'] = false;
 				# erzeuge eine Fehlermeldung;
 				$last_error = pg_last_error($this->dbConn);
