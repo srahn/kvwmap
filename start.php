@@ -605,7 +605,7 @@ function get_permission_in_stelle($GUI) {
 				if ($GUI->Stelle->checkClientIpIsOn()) {
 					$GUI->debug->write('IP-Adresse des Clients wird in dieser Stelle geprüft.', 4);
 
-					if ($GUI->user->clientIpIsValide(getenv('REMOTE_ADDR')) == false) {
+					if ($GUI->user->clientIpIsValide(get_remote_ip()) == false) {
 						$GUI->debug->write('IP-Adresse des Clients ist in der Stelle valid.', 4);
 						$allowed = false;
 						$reason = 'IP not allowed';

@@ -9001,43 +9001,51 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		include(SNIPPETS.'generic_search_mask.php');
 	}
 
-  function GenerischeSuche(){
+	function GenerischeSuche() {
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->titel = value_of($this->formvars, 'titel');
-    $this->main='generic_search.php';
-    $this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, 'import');
-		if($this->layerdaten['Gruppe'])$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
-		$this->layergruppen = $mapdb->get_Groups($this->layergruppen);		# Gruppen mit Pfaden versehen
+		$this->titel = value_of($this->formvars, 'titel');
+		$this->main='generic_search.php';
+		$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, 'import');
+		if ($this->layerdaten['Gruppe']) {
+			$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
+		}
+		$this->layergruppen = $mapdb->get_Groups($this->layergruppen); # Gruppen mit Pfaden versehen
 
-    # wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe
-    if(value_of($this->formvars, 'selected_group_id') AND $this->formvars['selected_layer_id'] == ''){
-    	$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
-    }
-    if(value_of($this->formvars, 'selected_layer_id')){
-    	$data = $mapdb->getData($this->formvars['selected_layer_id']);
-	    $data_explosion = explode(' ', $data);
-	    $this->formvars['columnname'] = $data_explosion[0];
-    	if(value_of($this->formvars, 'map_flag') != ''){
-	    	################# Map ###############################################
-				if(value_of($this->formvars, 'geom_from_layer') == '')$this->formvars['geom_from_layer'] = $this->formvars['selected_layer_id'];
+		# wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe
+		if (value_of($this->formvars, 'selected_group_id') AND $this->formvars['selected_layer_id'] == '') {
+			$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
+		}
+		if (value_of($this->formvars, 'selected_layer_id')) {
+			$data = $mapdb->getData($this->formvars['selected_layer_id']);
+			$data_explosion = explode(' ', $data);
+			$this->formvars['columnname'] = $data_explosion[0];
+			if (value_of($this->formvars, 'map_flag') != '') {
+				################# Map ###############################################
+				if (value_of($this->formvars, 'geom_from_layer') == '') {
+					$this->formvars['geom_from_layer'] = $this->formvars['selected_layer_id'];
+				}
 				$saved_scale = $this->reduce_mapwidth(10);
 				$this->loadMap('DataBase');
-				if(value_of($this->formvars, 'CMD') == '' AND $saved_scale != NULL)$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
-		    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
-		    if(in_array(value_of($this->formvars, 'CMD'), ['Full_Extent', 'recentre', 'zoomin', 'zoomout', 'previous', 'next'])) {
-		      $this->navMap($this->formvars['CMD']);
-		    }
+				if (value_of($this->formvars, 'CMD') == '' AND $saved_scale != NULL) {
+					$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
+				}
+				$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
+				if (in_array(value_of($this->formvars, 'CMD'), ['Full_Extent', 'recentre', 'zoomin', 'zoomout', 'previous', 'next'])) {
+					$this->navMap($this->formvars['CMD']);
+				}
 				$this->drawMap();
-		    $this->saveMap('');
-		    $currenttime=date('Y-m-d H:i:s',time());
-		    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-	    	########################################################################
-    	}
+				$this->saveMap('');
+				$currenttime=date('Y-m-d H:i:s',time());
+				$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+				########################################################################
+			}
 
-			if($this->formvars['selected_layer_id'] > 0)
+			if ($this->formvars['selected_layer_id'] > 0) {
 				$this->layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-			else
+			}
+			else {
 				$this->layerset=$this->user->rolle->getRollenlayer(-$this->formvars['selected_layer_id']);
+			}
 
 			if (empty($this->formvars['anzahl'])) {
 				$this->formvars['anzahl'] = $this->layerset[0]['max_query_rows'] ?: MAXQUERYROWS;
@@ -9047,24 +9055,26 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 			$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
 
-      switch ($this->layerset[0]['connectiontype']) {
-        case MS_POSTGIS : {
-          $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-          $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-          $layerdb->setClientEncoding();
-          $path = $mapdb->getPath($this->formvars['selected_layer_id']);
-          $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-          $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
-          $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
+			switch ($this->layerset[0]['connectiontype']) {
+				case MS_POSTGIS : {
+					$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+					$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+					$layerdb->setClientEncoding();
+					$path = $mapdb->getPath($this->formvars['selected_layer_id']);
+					$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
+					$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
+					$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 
 					# Speichern einer neuen Suchabfrage
-					if(value_of($this->formvars, 'go_plus') == 'Suchabfrage_speichern'){
+					if (value_of($this->formvars, 'go_plus') == 'Suchabfrage_speichern') {
 						$this->user->rolle->save_search($this->attributes, $this->formvars);
 						$this->formvars['searches'] = $this->formvars['search_name'];
 					}
-					if(value_of($this->formvars, 'searchmask_count') == '')$this->formvars['searchmask_count'] = 0;		// darf erst nach dem speichern passieren
+					if (value_of($this->formvars, 'searchmask_count') == '') {
+						$this->formvars['searchmask_count'] = 0;		// darf erst nach dem speichern passieren
+					}
 					# Löschen einer Suchabfrage
-					if(value_of($this->formvars, 'go_plus') == 'Suchabfrage_löschen'){
+					if (value_of($this->formvars, 'go_plus') == 'Suchabfrage_löschen') {
 						$this->user->rolle->delete_search($this->formvars['searches'], $this->formvars['selected_layer_id']);
 						$this->formvars['searches'] = '';
 					}
@@ -9072,56 +9082,58 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$this->searchset=$this->user->rolle->getsearches($this->formvars['selected_layer_id']);
 					# die ausgewählte Suchabfrage laden
 
-					for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
-						if($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
-							$prefix = $m.'_';
+					for ($m = 0; $m <= $this->formvars['searchmask_count']; $m++) {
+						if ($m > 0) {
+							# es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
+							$prefix = $m . '_';
 						}
-						else{
+						else {
 							$prefix = '';
 						}
-						if(value_of($this->formvars, 'searches') != ''){		# die Suchparameter einer gespeicherten Suchabfrage laden
+						if (value_of($this->formvars, 'searches') != '') {
+							# die Suchparameter einer gespeicherten Suchabfrage laden
 							$this->selected_search = $this->user->rolle->getsearch($this->formvars['selected_layer_id'], $this->formvars['searches']);
 							$this->formvars['searchmask_count'] = $this->selected_search[0]['searchmask_number'];
 							# alle Suchparameter leeren
-							for($i = 0; $i < count($this->attributes['name']); $i++){
-								$this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] = '';
-								$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = '';
-								$this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]] = '';
+							for ($i = 0; $i < count($this->attributes['name']); $i++) {
+								$this->formvars[$prefix . 'operator_' . $this->attributes['name'][$i]] = '';
+								$this->formvars[$prefix . 'value_' .    $this->attributes['name'][$i]] = '';
+								$this->formvars[$prefix . 'value2_' .   $this->attributes['name'][$i]] = '';
 							}
 							# die gespeicherten Suchparameter setzen
-							for($i = 0; $i < count($this->selected_search); $i++){
-								if($this->selected_search[$i]['searchmask_number'] == $m){
+							for ($i = 0; $i < count($this->selected_search); $i++) {
+								if ($this->selected_search[$i]['searchmask_number'] == $m) {
 									$this->formvars['searchmask_operator'][$m] = $this->selected_search[$i]['searchmask_operator'];
-									$this->formvars[$prefix.'operator_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['operator'];
-									$this->formvars[$prefix.'value_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value1'];
-									$this->formvars[$prefix.'value2_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value2'];
+									$this->formvars[$prefix.'operator_' . $this->selected_search[$i]['attribute']] = $this->selected_search[$i]['operator'];
+									$this->formvars[$prefix.'value_' .    $this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value1'];
+									$this->formvars[$prefix.'value2_' .   $this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value2'];
 									$this->qlayerset['shape'][0][$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value1'];
 								}
 							}
 						}
-						else{
-							for($i = 0; $i < count($this->attributes['name']); $i++){
+						else {
+							for ($i = 0; $i < count($this->attributes['name']); $i++) {
 								$this->qlayerset['shape'][0][$this->attributes['name'][$i]] = value_of($this->formvars, $prefix.'value_'.$this->attributes['name'][$i]);
 								$this->attributes['operator'][$i] = value_of($this->formvars, $prefix.'operator_'.$this->attributes['name'][$i]);
 							}
 						}
 						# für jede Suchmaske ein eigenes attributes-Array erzeugen, da z.B. die Auswahllisten ja anders sein können
-						$this->{'attributes'.$m} = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true, $this->Stelle->id);
+						$this->{'attributes' . $m} = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true, $this->Stelle->id);
 					}
-        }break;
+				} break;
 
-        case MS_WFS : {
+				case MS_WFS : {
 					$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-          $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], NULL, $privileges['attributenames']);
-					for($i = 0; $i < count($this->attributes['name']); $i++){
-	          $this->qlayerset['shape'][0][$this->attributes['name'][$i]] = $this->formvars['value_'.$this->attributes['name'][$i]];
-	        }
+					$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], NULL, $privileges['attributenames']);
+					for ($i = 0; $i < count($this->attributes['name']); $i++) {
+						$this->qlayerset['shape'][0][$this->attributes['name'][$i]] = $this->formvars['value_' . $this->attributes['name'][$i]];
+					}
 					$this->attributes = $mapdb->add_attribute_values($this->attributes, $this->pgdatabase, $this->qlayerset['shape'], true, $this->Stelle->id);
-        }break;
-      }
-    }
-    $this->output();
-  }
+				} break;
+			}
+		}
+		$this->output();
+	}
 
 	function Suchabfragen_auflisten(){
 		$this->main='list_searches.php';
@@ -9398,7 +9410,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$this->success = false;
 				}
 				else {
-					if ($this->user->rolle->upload_only_file_metadata == 1) {
+					if ($this->user->rolle->upload_only_file_metadata == 1 AND is_array($this->qlayerset) AND is_array($this->qlayerset[0]) AND is_array($this->qlayerset[0]['shape'])) {
 						include_once(CLASSPATH . 'BelatedFile.php');
 						foreach ($this->qlayerset[0]['shape'] AS $dataset) {
 							foreach ($document_attributes AS $document_attribute) {
@@ -10137,7 +10149,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function sachdaten_druck_editor(){
 		global $admin_stellen;
-		include_once(CLASSPATH.'datendrucklayout.php');
+		include_once(CLASSPATH . 'datendrucklayout.php');
 		$ddl=new ddl($this->database, $this);
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->ddl=$ddl;
