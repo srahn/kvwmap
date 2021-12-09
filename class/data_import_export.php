@@ -322,10 +322,7 @@ class data_import_export {
 				return array($custom_table);
 			}
 			else {
-				$sql = "
-					ALTER TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
-					ADD COLUMN IF NOT EXISTS gid SERIAL NOT NULL;
-					" . $this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename) . "
+				$sql = $this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename) . "
 					SELECT
 						geometrytype(the_geom),
 						count(*)
@@ -359,10 +356,12 @@ class data_import_export {
 				$custom_table['error'] = $ret;
 				return array($custom_table);
 			}
-			else {
+			else{
 				$sql = "
-					ALTER TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
-					ADD COLUMN IF NOT EXISTS gid SERIAL NOT NULL;
+					UPDATE 
+						" . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
+					SET 
+						the_geom  = ST_CollectionExtract(st_makevalid(the_geom), 2);
 					" . $this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename) . "
 				";
 				$ret = $pgdatabase->execSQL($sql,4, 0);
@@ -372,11 +371,6 @@ class data_import_export {
 				# waypoints
 				$tablename = 'a'.strtolower(umlaute_umwandeln(basename($filename))).rand(1,1000000);
 				$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, 'waypoints', NULL, NULL, 'UTF8');
-				$sql = "
-					ALTER TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
-					ADD COLUMN IF NOT EXISTS gid SERIAL NOT NULL;
-					" . $this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename) . "
-				";
 				$sql = $this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename);
 				$ret = $pgdatabase->execSQL($sql,4, 0);
 				$custom_table['datatype'] = 0;
@@ -487,8 +481,6 @@ class data_import_export {
 			}
 			else {
 				$sql = "
-					ALTER TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
-					ADD COLUMN IF NOT EXISTS gid SERIAL NOT NULL;
 					SELECT
 						geometrytype(the_geom),
 						count(*)
@@ -540,8 +532,6 @@ class data_import_export {
 			}
 			else {
 				$sql = "
-					ALTER TABLE " . $schema . "." . $tablename . "
-					ADD COLUMN IF NOT EXISTS gid SERIAL NOT NULL;
 					SELECT convert_column_names('" . $schema . "', '" . $tablename . "');
 					SELECT geometrytype(the_geom) AS geometrytype FROM " . $schema . "." . $tablename . " LIMIT 1
 				";
@@ -764,7 +754,6 @@ class data_import_export {
 			if ($ret == '') {
 				$table = $this->formvars['schema_name'] . "." . $this->formvars['table_name'];
 				$sql = "
-					ALTER TABLE " . $table . " ADD COLUMN IF NOT EXISTS gid SERIAL NOT NULL;
 					SELECT
 						count(*),
 						max(geometrytype(the_geom)) AS geometrytype
