@@ -342,7 +342,13 @@ class data_import_export {
 				return array($custom_table);
 			}
 			else{
-				$sql = $this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename);
+				$sql = "
+					UPDATE 
+						" . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
+					SET 
+						the_geom  = ST_CollectionExtract(st_makevalid(the_geom), 2);
+					" . $this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename) . "
+				";
 				$ret = $pgdatabase->execSQL($sql,4, 0);
 				$custom_table['datatype'] = 1;
 				$custom_table['tablename'] = $tablename;
