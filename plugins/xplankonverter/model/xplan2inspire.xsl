@@ -96,55 +96,55 @@
               <base:namespace>
                 <xsl:choose>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1000" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bb/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bb', '.plu/')" />
                     </xsl:when>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1100" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'be/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'be', '.plu/')" />
                     </xsl:when>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1200" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bw/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bw', '.plu/')" />
                     </xsl:when>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1300" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.','by/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.','by', '.plu/')" />
                     </xsl:when>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1400" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hb/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hb', '.plu/')" />
                     </xsl:when>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1500" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'he/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'he', '.plu/')" />
                     </xsl:when>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1600" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hh/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'hh', '.plu/')" />
                     </xsl:when>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1700" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'mv/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'mv', '.plu/')" />
                     </xsl:when>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1800" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'ni/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'ni', '.plu/')" />
                     </xsl:when>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=1900" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'nw/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'nw', '.plu/')" />
                     </xsl:when>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2000" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'rp/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'rp', '.plu/')" />
                     </xsl:when>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2100" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sh/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sh', '.plu/')" />
                     </xsl:when>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2200" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sl/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sl', '.plu/')" />
                     </xsl:when>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2300" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sn/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'sn', '.plu/')" />
                     </xsl:when>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2400" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'st/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'st', '.plu/')" />
                     </xsl:when>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=2500" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'th/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'th', '.plu/')" />
                     </xsl:when>
                     <xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:bundesland=3000" >
-                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bund/')" />
+                        <xsl:value-of select="concat('https://registry.gdi-de.org/id/de.', 'bund', '.plu/')" />
                     </xsl:when>
                 </xsl:choose>
               </base:namespace>
