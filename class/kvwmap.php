@@ -2198,7 +2198,7 @@ echo '			</table>
       $klasse -> set('template', value_of($layerset, 'template'));
       $klasse -> setexpression($classset[$j]['Expression']);
       if ($classset[$j]['text'] != '' AND is_null($layerset['user_labelitem'])) {
-				$klasse->updateFromString("CLASS TEXT '" . $classset[$j]['text'] . "' END");
+				$klasse->settext("'" . trim($classset[$j]['text'], "'") . "'");
       }
       if ($classset[$j]['legendgraphic'] != '') {
 				$imagename = WWWROOT . APPLVERSION . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
