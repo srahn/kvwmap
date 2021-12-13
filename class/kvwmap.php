@@ -6339,36 +6339,6 @@ echo '			</table>
 		return (strpos($pfad, '&original_name=') !== false);
 	}
 
-	/**
-	 * Function return typ of document
-	 * local_img when doc_value is a local img
-	 * local_doc when doc_value is a local file but not an image
-	 * 
-	 * If value is a pfad to a local image return local_img
-	 * If doc_url is set it is an url
-	 * If the url is a link to a video file return video_url
-	 * If the url point to the origin of the server return local_url
-	 * else remote_url
-	 * If nothing of this function returns unknown
-	 */
-	function get_document_type($doc_value, $doc_path, $doc_url) {
-		if (is_local_file($doc_val) AND
-			file_exists(substr($doc_val, 0, strpos($doc_val, '&original_name='))) AND
-			is_readable(substr($doc_val, 0, strpos($doc_val, '&original_name=')))
-		) {
-			if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
-				$doc_type = 'local_img';
-			}
-			elseif ($document_url != '' AND in_array($type, array('mp4'))) {
-				$doc_type = 'local_videostream';
-			}
-			else {
-				$doc_type = 'local_doc';
-			}
-			return 'local_img';
-		}
-	}
-
 	function create_dokument_vorschau($doc_type, $pathinfo) {
 		if ($doc_type == 'local_img') {
 			# für lokale Bilder und PDFs werden automatisch Thumbnails erzeugt
@@ -6427,6 +6397,8 @@ echo '			</table>
 
 		$pfadteil = explode('&original_name=', $value);
 		$dateipfad = $pfadteil[0];
+		$pathinfo = pathinfo($dateipfad);
+		$type = strtolower($pathinfo['extension']);
 
 		if ($document_url != '') {
 			if (in_array($type, array('mp4'))) {
