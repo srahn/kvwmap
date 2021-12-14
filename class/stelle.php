@@ -1505,18 +1505,18 @@ class stelle {
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
-		else{
+		else {
 			$i = 0;
-			while($rs=$this->database->result->fetch_assoc()) {
-				$layer['ID'][]=$rs['Layer_ID'];
-				$layer['Bezeichnung'][]=$rs['Name'];
-				$layer['drawingorder'][]=$rs['drawingorder'];
-				$layer['legendorder'][]=$rs['legendorder'];
-				$layer['Gruppe'][]=$rs['Gruppe'];
+			while ($rs = $this->database->result->fetch_assoc()) {
+				$layer['ID'][] 						= $rs['Layer_ID'];
+				$layer['Bezeichnung'][]		= $rs['Name'];
+				$layer['drawingorder'][]	= $rs['drawingorder'];
+				$layer['legendorder'][]		= $rs['legendorder'];
+				$layer['Gruppe'][]				= $rs['Gruppe'];
 				$layer['layers_of_group'][$rs['Gruppe']][] = $i;
 				$i++;
 			}
-			if($order == 'Name'){
+			if ($order == 'Name') {
 				// Sortieren der Layer unter Berücksichtigung von Umlauten
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
 				$sorted_layer['Bezeichnung'] = $sorted_arrays['array'];
@@ -1744,7 +1744,13 @@ class stelle {
 		$layer = array();
 		$sql = "
 			SELECT
-				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
+				l.Layer_ID,
+				l.Name,
+				l.Gruppe,
+				ul.use_parent_privileges,
+				ul.privileg,
+				ul.export_privileg,
+				ul.requires,
 				parent_id,
 				GROUP_CONCAT(ul2.Stelle_ID) as used_layer_parent_id,
 				GROUP_CONCAT(s.Bezeichnung) as used_layer_parent_bezeichnung
@@ -1760,7 +1766,7 @@ class stelle {
 				ul.Stelle_ID = " . $this->id .
 				($Layer_id != '' ? " AND l.Layer_ID = " . $Layer_id : '') . "
 			GROUP BY 
-				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,	parent_id
+				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg
 		";
 		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);

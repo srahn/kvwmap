@@ -17,7 +17,7 @@ BEGIN;
   );
   CREATE INDEX IF NOT EXISTS kreise_gist ON gebietseinheiten.kreise USING gist (geom);
   DELETE FROM gebietseinheiten.kreise;
-  INSERT INTO gebietseinheiten.kreise (krs_schl, krs_nr, krs_name, geom)
+  /*INSERT INTO gebietseinheiten.kreise (krs_schl, krs_nr, krs_name, geom)
   SELECT
     schluessel::integer AS krs_schl,
     substring(schluessel::character(5), 3, 3) AS krs_nr,
@@ -25,7 +25,7 @@ BEGIN;
     ST_Transform(wkb_geometry, 5650) AS geom
   FROM
     import.kreise_laiv
-  ORDER BY krs_name;
+  ORDER BY krs_name;*/
 
   CREATE TABLE IF NOT EXISTS gebietseinheiten.gemeindeverbaende(
     gvb_schl integer PRIMARY KEY,
@@ -42,7 +42,7 @@ BEGIN;
     ON UPDATE CASCADE ON DELETE CASCADE;
   CREATE INDEX IF NOT EXISTS gemeindeverbaende_gist ON gebietseinheiten.gemeindeverbaende USING gist (geom);
   DELETE FROM gebietseinheiten.gemeindeverbaende;
-  INSERT INTO gebietseinheiten.gemeindeverbaende (gvb_schl, gvb_laiv_schl, gvb_nr, gvb_name, stelle_id, krs_schl, geom)
+  /*INSERT INTO gebietseinheiten.gemeindeverbaende (gvb_schl, gvb_laiv_schl, gvb_nr, gvb_name, stelle_id, krs_schl, geom)
   SELECT DISTINCT
     substring(gem.rs, 1, 9)::integer AS gvb_schl,
     (gvb.zugehoerig || lpad(gvb.schluessel::character(4), 4, '0'))::integer AS gvb_laiv_schl,
@@ -54,7 +54,7 @@ BEGIN;
   FROM
     import.gemeindeverbaende_laiv gvb JOIN
     import.gemeinden_laiv gem ON gvb.schluessel = gem.zugehoerig
-  ORDER BY krs_schl, gvb_schl;
+  ORDER BY krs_schl, gvb_schl;*/
 
   CREATE TABLE IF NOT EXISTS gebietseinheiten.gemeinden(
     gem_schl bigint PRIMARY KEY,
@@ -76,7 +76,7 @@ BEGIN;
   CREATE INDEX IF NOT EXISTS gemeinden_gist ON gebietseinheiten.gemeinden USING gist (geom);
   CREATE INDEX IF NOT EXISTS gemeinden_gist_25833 ON gebietseinheiten.gemeinden USING gist (geom_25833);
   DELETE FROM gebietseinheiten.gemeinden;
-  INSERT INTO gebietseinheiten.gemeinden (gem_schl, ags, rs, gem_nr, gem_name, stelle_id, geom, geom_25833, gvb_schl)
+  /*INSERT INTO gebietseinheiten.gemeinden (gem_schl, ags, rs, gem_nr, gem_name, stelle_id, geom, geom_25833, gvb_schl)
   SELECT
     g.rs::bigint AS gem_schl,
     g.schluessel::character(9) AS ags,
@@ -89,7 +89,7 @@ BEGIN;
     substring(rs, 1, 9)::integer AS gvb_schl
   FROM
     import.gemeinden_laiv g
-  ORDER BY rs;
+  ORDER BY rs;*/
   -- Kennzeichne die Gemeinden, deren Name in gebietseinheiten.gemeinden nicht eindeutig ist.
   UPDATE
     gebietseinheiten.gemeinden g
@@ -145,7 +145,7 @@ BEGIN;
   CREATE INDEX IF NOT EXISTS gemeindeteile_gist ON gebietseinheiten.gemeindeteile USING gist (geom);
   CREATE INDEX IF NOT EXISTS gemeindeteile_gist_25833 ON gebietseinheiten.gemeinden USING gist (geom_25833);
   DELETE FROM gebietseinheiten.gemeindeteile;
-  INSERT INTO gebietseinheiten.gemeindeteile (gtl_schl, gtl_nr, gtl_name, geom, geom_25833, gem_schl)
+  /*INSERT INTO gebietseinheiten.gemeindeteile (gtl_schl, gtl_nr, gtl_name, geom, geom_25833, gem_schl)
   SELECT
     ovz.rs_gemeinde * 10000 + ovz.nr AS gtl_schl,
     lpad(ovz.nr::text, 4, '0') AS gtl_nr,
@@ -160,7 +160,7 @@ BEGIN;
   	ovz.ortsteil_wohnplatz LIKE gtl.gtl_name
   WHERE
     ovz.kennnr = '2'
-  ORDER BY gtl_schl;
+  ORDER BY gtl_schl;*/
 
   -- Planaufstellende Gemeinden
   -- Hier noch mal prüfen wie die gemeindeteile mit den gemeinden verknüpft werden
