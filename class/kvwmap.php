@@ -7289,21 +7289,21 @@ echo '			</table>
     $this->Layer2Stelle_Editor();
   }
 
-  function Layer2Stelle_Editor(){
-    $Stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
-    $this->titel='Layereigenschaften stellenbezogen';
-    $this->main='layer2stelle_formular.php';
-    $result = $Stelle->getLayer($this->formvars['selected_layer_id']);
+	function Layer2Stelle_Editor() {
+		$Stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
+		$this->titel = 'Layereigenschaften stellenbezogen';
+		$this->main = 'layer2stelle_formular.php';
+		$result = $Stelle->getLayer($this->formvars['selected_layer_id']);
 		$this->grouplayers = $Stelle->getLayers($result[0]['Gruppe'], 'Name');
-    $stelle_id = $this->formvars['selected_stelle_id'];
-    $layer_id = $this->formvars['selected_layer_id'];
-    $stellenname = $this->formvars['stellen_name'];
-    $this->formvars = $result[0];
-    $this->formvars['selected_stelle_id'] = $stelle_id;
-    $this->formvars['selected_layer_id'] = $layer_id;
-    $this->formvars['stellen_name'] = $stellenname;
-    $this->output();
-  }
+		$stelle_id = $this->formvars['selected_stelle_id'];
+		$layer_id = $this->formvars['selected_layer_id'];
+		$stellenname = $this->formvars['stellen_name'];
+		$this->formvars = $result[0];
+		$this->formvars['selected_stelle_id'] = $stelle_id;
+		$this->formvars['selected_layer_id'] = $layer_id;
+		$this->formvars['stellen_name'] = $stellenname;
+		$this->output();
+	}
 
   function Layer2Stelle_Reihenfolge(){
     $this->selected_stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
@@ -7555,14 +7555,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	function Layereditor() {
-		$this->titel='Layer Editor';
-		$this->main='layer_formular.php';
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->titel = 'Layer Editor';
+		$this->main = 'layer_formular.php';
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$this->layerdaten = $mapDB->getall_Layer('Name', false, $this->user->id, $this->Stelle->id);
 		# Abfragen der Layerdaten wenn eine layer_id zur Änderung selektiert ist
 		if ($this->formvars['selected_layer_id'] > 0) {
 			$this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], false);
-			if(!$this->use_form_data){
+			if (!$this->use_form_data) {
 				$this->formvars = array_merge($this->formvars, $this->layerdata);
 			}
 			# Abfragen der Stellen des Layer
@@ -9010,7 +9010,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
 		}
 		$this->layergruppen = $mapdb->get_Groups($this->layergruppen); # Gruppen mit Pfaden versehen
-
 		# wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe
 		if (value_of($this->formvars, 'selected_group_id') AND $this->formvars['selected_layer_id'] == '') {
 			$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
@@ -9062,9 +9061,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$layerdb->setClientEncoding();
 					$path = $mapdb->getPath($this->formvars['selected_layer_id']);
 					$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-					$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
-					$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 
+
+					$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
+
+					$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 					# Speichern einer neuen Suchabfrage
 					if (value_of($this->formvars, 'go_plus') == 'Suchabfrage_speichern') {
 						$this->user->rolle->save_search($this->attributes, $this->formvars);
@@ -16539,7 +16540,7 @@ class db_mapObj{
     return $filter;
   }
 
-  function getData($layer_id){
+	function getData($layer_id){
 		global $language;
 		$sql = "
 			SELECT
@@ -16551,11 +16552,14 @@ class db_mapObj{
 				" . ($layer_id < 0 ? "-id" : "`Layer_ID`") . " = " . $layer_id . "
 		";
 		#echo $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->getData - Lesen des Data-Statements des Layers:<br>" . $sql,4);
-    $this->db->execSQL($sql);
-    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-    $rs = $this->db->result->fetch_assoc();
-    $data = replace_params(
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->getData - Lesen des Data-Statements des Layers:<br>" . $sql,4);
+		$this->db->execSQL($sql);
+		if (!$this->db->success) {
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4);
+			return 0;
+		}
+		$rs = $this->db->result->fetch_assoc();
+		$data = replace_params(
 			$rs['Data'],
 			rolle::$layer_params,
 			$this->User_ID,
@@ -16564,8 +16568,8 @@ class db_mapObj{
 			$language,
 			$rs['duplicate_criterion']
 		);
-    return $data;
-  }
+		return $data;
+	}
 
   function getPath($layer_id){
     $sql = "
