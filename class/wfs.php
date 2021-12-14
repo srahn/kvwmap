@@ -213,13 +213,24 @@ class wfs{
 	
 	function get_attributes(){
 		# liefert die Sachattribute eines WFS-Layers (zuvor muss describe_featuretype_request() ausgeführt werden) 
+		# erstmal den richtigen Featuretype finden, falls mehrere geliefert wurden
+		$this->parse_gml('schema');
+		$index = -1;
+		for ($j = 0; $j < count($this->objects[0]); $j++) {
+			if ($this->objects[0][$j]["tag"] == 'element' AND in_array($this->objects[0][$j]["type"], ['open', 'complete']) AND $this->objects[0][$j]["level"] == 2) {
+				$index++;
+				if ($this->objects[0][$j]["attributes"]['name'] == str_replace($this->namespace . ':', '', $this->typename)) {
+					break;
+				}
+			}
+		}
 		$this->parse_gml('sequence');
-		for($j = 0; $j < count($this->objects[0]); $j++){
+		for($j = 0; $j < count($this->objects[$index]); $j++){
 			# nur offene oder komplette element-Tags
-			if(strpos($this->objects[0][$j]["tag"], 'element') !== false AND ($this->objects[0][$j]["type"] == 'complete' OR $this->objects[0][$j]["type"] == 'open')){
+			if(strpos($this->objects[$index][$j]["tag"], 'element') !== false AND ($this->objects[$index][$j]["type"] == 'complete' OR $this->objects[$index][$j]["type"] == 'open')){
 				# und keine Geometrie-Tags
-				if($this->objects[0][$j]["attributes"]["type"] != 'gml:GeometryPropertyType' AND $this->objects[0][$j]["attributes"]["type"] != 'gml:MultiPolygonPropertyType' AND $this->objects[0][$j]["attributes"]["type"] != 'gml:PolygonPropertyType' AND $this->objects[0][$j]["attributes"]["type"] != 'gml:PointPropertyType'){
-	  			$attribute['name'] = $this->objects[0][$j]["attributes"]["name"];
+				if($this->objects[$index][$j]["attributes"]["type"] != 'gml:GeometryPropertyType' AND $this->objects[$index][$j]["attributes"]["type"] != 'gml:MultiPolygonPropertyType' AND $this->objects[$index][$j]["attributes"]["type"] != 'gml:PolygonPropertyType' AND $this->objects[$index][$j]["attributes"]["type"] != 'gml:PointPropertyType'){
+	  			$attribute['name'] = $this->objects[$index][$j]["attributes"]["name"];
 					$attributes[] = $attribute;
 				}
 			}

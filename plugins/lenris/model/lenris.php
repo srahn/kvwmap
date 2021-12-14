@@ -9,8 +9,9 @@ class LENRIS {
   function __construct($database) {
     global $debug;
 		$this->nachweis = new Nachweis($database, NULL);
-    $this->debug=$debug;
-    $this->database=$database;
+    $this->debug = $debug;
+    $this->database = $database;
+		$this->database2 = $database;		// zweites Datenbankobjekt um unabhängig von der Transaktion etwas in die Datenbank zu schreiben
 		$this->clients = $this->get_client_information();
 		$this->dokumentart_mapping = $this->get_dokumentart_mapping();
 		$this->vermessungsstellen_mapping = $this->get_vermessungsstellen_mapping();
@@ -18,21 +19,40 @@ class LENRIS {
 		$this->hauptarten = $this->nachweis->getHauptDokumentarten();
   }
 	
-	public static function log_error($client_id = NULL, $error){
+	function log_error($client_id, $error){
+		$this->database->rollbacktransaction();
 		$output = date("Y-m-d H:i:s") . ': ' . $error . chr(10);
 		$logfile = LOGPATH . 'lenris.err';
 		$fp = fopen($logfile,'a+');	
 		fwrite($fp, $output);
-		if ($client_id) {
-			$lenris->update_client($client_id, 'status = 5, last_error = ' . $output);
-		}
+		$sql = "
+			INSERT INTO 
+				lenris.errors
+				(client_id, time, message)
+			VALUES (
+				" . $client_id . ",
+				'" . $time . "',
+				'" . $error . "'
+			)";
+		$ret = $this->database2->execSQL($sql, 4, 0);
 	}
 	
-	public static function log($msg){
-		$output = date("Y-m-d H:i:s") . ': ' . $msg . chr(10);
+	function log($client_id, $msg){
+		$time = date("Y-m-d H:i:s");
+		$output = $time . ': ' . $msg . chr(10);
 		$logfile = LOGPATH . 'lenris.log';
 		$fp = fopen($logfile,'a+');	
 		fwrite($fp, $output);
+		$sql = "
+			INSERT INTO 
+				lenris.logs
+				(client_id, time, message)
+			VALUES (
+				" . $client_id . ",
+				'" . $time . "',
+				'" . $msg . "'
+			)";
+		$ret = $this->database->execSQL($sql, 4, 0);
 	}
 	
 	function get_client_information($client_id = NULL){
@@ -58,7 +78,7 @@ class LENRIS {
 			return $clients;
 		}
 		else {
-			LENRIS::log_error($client_id, $ret[1]);
+			$this->log_error($client_id, $ret[1]);
 		}
 	}
 	
@@ -92,7 +112,7 @@ class LENRIS {
 			return $rs;
 		}
 		else {
-			LENRIS::log_error($client_id, $ret[1]);
+			$this->log_error($client_id, $ret[1]);
 		}
 	}
 	
@@ -110,7 +130,7 @@ class LENRIS {
 			return $dokumentart_mapping;
 		}
 		else {
-			LENRIS::log_error($ret[1]);
+			$this->log_error($ret[1]);
 		}
 	}
 	
@@ -128,7 +148,7 @@ class LENRIS {
 			return $vermessungsstellen_mapping;
 		}
 		else {
-			LENRIS::log_error($ret[1]);
+			$this->log_error($ret[1]);
 		}
 	}
 		
@@ -153,7 +173,7 @@ class LENRIS {
 				cn.client_id = " . $client_id;
 		$ret = $this->database->execSQL($sql, 4, 0, true);
 		if (!$ret[0]) {
-			LENRIS::log('Alle Nachweise von Client ' . $client_id . ' in n_nachweise gelöscht.');
+			$this->log($client_id, 'Alle Nachweise von Client ' . $client_id . ' in n_nachweise gelöscht.');
 			$sql = "
 				DELETE FROM 
 					lenris.client_nachweise
@@ -161,7 +181,7 @@ class LENRIS {
 					client_id = " . $client_id;
 			$ret = $this->database->execSQL($sql, 4, 0, true);
 			if (!$ret[0]) {
-				LENRIS::log('Alle Nachweise von Client ' . $client_id . ' in client_nachweise gelöscht.');
+				$this->log($client_id, 'Alle Nachweise von Client ' . $client_id . ' in client_nachweise gelöscht.');
 				$sql = "
 					DELETE FROM 
 						lenris.zu_holende_dokumente
@@ -169,29 +189,29 @@ class LENRIS {
 						client_id = " . $client_id;
 				$ret = $this->database->execSQL($sql, 4, 0, true);
 				if (!$ret[0]) {
-					LENRIS::log('Alle Nachweise von Client ' . $client_id . ' in zu_holende_dokumente gelöscht.');
+					$this->log($client_id, 'Alle Nachweise von Client ' . $client_id . ' in zu_holende_dokumente gelöscht.');
 					$output = null;
-					exec("rm -rf /var/www/data/nachweise/" . $client_id, $output, $retval);
+					exec("rm -rf /var/www/data/nachweise/" . $client_id . "/*", $output, $retval);
 					if ($retval == 0) {
-						LENRIS::log('Alle Dokumente von Client ' . $client_id . ' gelöscht.');
+						$this->log($client_id, 'Alle Dokumente von Client ' . $client_id . ' gelöscht.');
 					}
 					else {
-						LENRIS::log_error($client_id, 'Löschen der Dokumente von Client ' . $client_id . ' fehlgeschlagen. ' . $output);
+						$this->log_error($client_id, 'Löschen der Dokumente von Client ' . $client_id . ' fehlgeschlagen. ' . print_r($output, true));
 						return false;
 					}
 				}
 				else {
-					LENRIS::log_error($client_id, $ret[1]);
+					$this->log_error($client_id, $ret[1]);
 					return false;
 				}
 			}
 			else {
-				LENRIS::log_error($client_id, $ret[1]);
+				$this->log_error($client_id, $ret[1]);
 				return false;
 			}
 		}
 		else {
-			LENRIS::log_error($client_id, $ret[1]);
+			$this->log_error($client_id, $ret[1]);
 			return false;
 		}
 		return true;
@@ -212,7 +232,7 @@ class LENRIS {
 			return $docs;
 		}
 		else {
-			LENRIS::log_error($client['client_id'], $ret[1]);
+			$this->log_error($client['client_id'], $ret[1]);
 		}
 	}
 	
@@ -233,6 +253,7 @@ class LENRIS {
 			$dest_path = $downloadable_document['dest_path'];
 			if (!is_dir(dirname($dest_path))) {
 				mkdir(dirname($dest_path), 0777, true);
+				chmod(dirname($dest_path), 0777);
 			}
 			exec('wget -nv --timeout=5 -a ' . LOGPATH . 'lenris.log -O "' . $dest_path . '" "' . $client['url'] . '&go=LENRIS_get_document&document=' . $downloadable_document['source_path'] . '"');
 			if (file_exists($dest_path) AND filesize($dest_path) == 0) {
@@ -289,7 +310,7 @@ class LENRIS {
 			$n['art'] = $this->map_dokumentart($client['client_id'], $n['art']);
 			$n['vermstelle'] = $this->map_vermessungsstelle($client['client_id'], $n['vermstelle']);
 			$newpath = $this->adjust_path($client, $n);
-			$geom = ($n['the_geom'] ? "st_transform('" . $n['the_geom'] . "', 2398)" : 'NULL');
+			$geom = ($n['the_geom'] ? "st_transform('" . $n['the_geom'] . "', 25833)" : 'NULL');
 			$sql = "
 				INSERT INTO
 					nachweisverwaltung.n_nachweise
@@ -353,21 +374,16 @@ class LENRIS {
 					}
 				}
 				else {
-					LENRIS::log_error($client['client_id'], $ret[1]);
+					$this->log_error($client['client_id'], $ret[1]);
 				}
 			}
 			else {
-				LENRIS::log_error($client['client_id'], $ret[1]);
+				$this->log_error($client['client_id'], $ret[1]);
 			}
 		}
 		if ($confirm) {
-			$this->confirm_new_nachweise($client, $inserted_nachweise);
+			return $inserted_nachweise;
 		}
-	}
-	
-	function confirm_new_nachweise($client, $inserted_nachweise){
-		$response = curl_get_contents($client['url'] . '&go=LENRIS_confirm_new_nachweise&ids=' . implode(',', $inserted_nachweise));
-		LENRIS::log('Bestätigung bei ' . $response . ' von ' . count($inserted_nachweise) . ' neuen Nachweisen für Client ' . $client['client_id'] . ' erfolgreich');
 	}
 	
 	function delete_deleted_nachweise($client, $nachweise){
@@ -391,36 +407,41 @@ class LENRIS {
 							client_nachweis_id = " . $n['id_nachweis'];
 						$ret = $this->database->execSQL($sql, 4, 0, true);
 						if (!$ret[0]) {
+							# Datei löschen
+							if (file_exists($rs['link_datei'])){
+								unlink($rs['link_datei']);
+							}
 							$deleted_nachweise[] = $n['id_nachweis'];
+							$sql = "
+								DELETE FROM 
+									lenris.zu_holende_dokumente
+								WHERE
+									client_id = " . $client['client_id'] . " AND 
+									client_nachweis_id = " . $n['id_nachweis'];
+							$ret = $this->database->execSQL($sql, 4, 0, true);
+							if ($ret[0]) {
+								$this->log_error($client['client_id'], $ret[1]);
+							}
 						}
 						else {
-							LENRIS::log_error($client['client_id'] $ret[1]);
-						}
-						# Datei löschen
-						if (file_exists($rs['link_datei'])){
-							unlink($rs['link_datei']);
+							$this->log_error($client['client_id'], $ret[1]);
 						}
 					}
 					else {
-						LENRIS::log_error($client['client_id'], 'Zu löschenden Nachweis nicht in Tabelle nachweisverwaltung.n_nachweise gefunden (client_id = ' . $client['client_id'] . ', client_nachweis_id = ' . $nachweis_client_id . ')');
+						$this->log_error($client['client_id'], 'Zu löschenden Nachweis nicht in Tabelle nachweisverwaltung.n_nachweise gefunden (client_id = ' . $client['client_id'] . ', client_nachweis_id = ' . $n['id_nachweis'] . ')');
 					}
 				}
 				else {
-					LENRIS::log_error($client['client_id'], $ret[1]);
+					$this->log_error($client['client_id'], $ret[1]);
 				}
 			}
 			else {
-				LENRIS::log_error($client['client_id'], 'Zu löschenden Nachweis nicht in Tabelle lenris.client_nachweise gefunden (client_id = ' . $client['client_id'] . ', client_nachweis_id = ' . $nachweis_client_id . ')');
+				$this->log_error($client['client_id'], 'Zu löschenden Nachweis nicht in Tabelle lenris.client_nachweise gefunden (client_id = ' . $client['client_id'] . ', client_nachweis_id = ' . $n['id_nachweis'] . ')');
 			}
 		}
-		$this->confirm_deleted_nachweise($client, $deleted_nachweise);
+		return $deleted_nachweise;
 	}
-	
-	function confirm_deleted_nachweise($client, $deleted_nachweise){
-		$response = curl_get_contents($client['url'] . '&go=LENRIS_confirm_deleted_nachweise&ids=' . implode(',', $deleted_nachweise));
-		LENRIS::log('Bestätigung bei ' . $response . ' von ' . count($deleted_nachweise) . ' gelöschten Nachweisen für Client ' . $client['client_id'] . ' erfolgreich');
-	}	
-	
+		
 	function update_changed_nachweise($client, $nachweise){
 		$updated_nachweise = array();
 		foreach ($nachweise as $n) {
@@ -429,7 +450,7 @@ class LENRIS {
 			if ($rs['nachweis_id'] != '') {
 				$n['art'] = $this->map_dokumentart($client['client_id'], $n['art']);
 				$n['vermstelle'] = $this->map_vermessungsstelle($client['client_id'], $n['vermstelle']);
-				$geom = ($n['the_geom'] ? "st_transform('" . $n['the_geom'] . "', 2398)" : 'NULL');
+				$geom = ($n['the_geom'] ? "st_transform('" . $n['the_geom'] . "', 25833)" : 'NULL');
 				$newpath = $this->adjust_path($client, $n);
 				# Nachweis aktualisieren
 				$sql = "
@@ -449,7 +470,7 @@ class LENRIS {
 						rissnummer = '" . $n['rissnummer'] . "', 
 						bemerkungen = '" . $n['bemerkungen'] . "', 
 						bearbeiter = '" . $n['bearbeiter'] . "', 
-						zeit = '" . $n['zeit'] . "', 
+						zeit = " . ($n['zeit'] ? "'" . $n['zeit'] . "'" : 'NULL') . ", 
 						erstellungszeit = '" . $n['erstellungszeit'] . "', 
 						bemerkungen_intern = '" . $n['bemerkungen_intern'] . "', 
 						geprueft = " . $n['geprueft'] . ", 
@@ -496,29 +517,45 @@ class LENRIS {
 								}
 							}
 							else {
-								LENRIS::log_error($client['client_id'], $ret[1]);
+								$this->log_error($client['client_id'], $ret[1]);
 							}
 						}
 						else {
-							LENRIS::log_error($client['client_id'], $ret[1]);
+							$this->log_error($client['client_id'], $ret[1]);
 						}
 					}
 					$updated_nachweise[] = $n['id'];
 				}
 				else {
-					LENRIS::log_error($client['client_id'], $ret[1]);
+					$this->log_error($client['client_id'], $ret[1]);
 				}
 			}
 			else {
-				LENRIS::log_error($client['client_id'], 'Zu aktualisierenden Nachweis nicht in Tabelle lenris.client_nachweise gefunden (client_id = ' . $client['client_id'] . ', client_nachweis_id = ' . $n['id'] . ')');
+				$this->log_error($client['client_id'], 'Zu aktualisierenden Nachweis nicht in Tabelle lenris.client_nachweise gefunden (client_id = ' . $client['client_id'] . ', client_nachweis_id = ' . $n['id'] . ')');
 			}
 		}
-		$this->confirm_changed_nachweise($client, $updated_nachweise);
+		return $updated_nachweise;
 	}
 	
+	function confirm_new_nachweise($client, $inserted_nachweise){
+		if (!empty($inserted_nachweise)) {
+			$response = curl_get_contents($client['url'] . '&go=LENRIS_confirm_new_nachweise&ids=' . implode(',', $inserted_nachweise));
+			$this->log($client['client_id'], 'Bestätigung bei ' . trim($response) . ' von ' . count($inserted_nachweise) . ' neuen Nachweisen für Client ' . $client['client_id'] . ' erfolgreich');
+		}
+	}	
+	
 	function confirm_changed_nachweise($client, $updated_nachweise){
-		$response = curl_get_contents($client['url'] . '&go=LENRIS_confirm_changed_nachweise&ids=' . implode(',', $updated_nachweise));
-		LENRIS::log('Bestätigung bei ' . $response . ' von ' . count($updated_nachweise) . ' veränderten Nachweisen für Client ' . $client['client_id'] . ' erfolgreich');
+		if (!empty($updated_nachweise)) {
+			$response = curl_get_contents($client['url'] . '&go=LENRIS_confirm_changed_nachweise&ids=' . implode(',', $updated_nachweise));
+			$this->log($client['client_id'], 'Bestätigung bei ' . trim($response) . ' von ' . count($updated_nachweise) . ' veränderten Nachweisen für Client ' . $client['client_id'] . ' erfolgreich');
+		}
+	}	
+	
+	function confirm_deleted_nachweise($client, $deleted_nachweise){
+		if (!empty($deleted_nachweise)) {
+			$response = curl_get_contents($client['url'] . '&go=LENRIS_confirm_deleted_nachweise&ids=' . implode(',', $deleted_nachweise));
+			$this->log($client['client_id'], 'Bestätigung bei ' . trim($response) . ' von ' . count($deleted_nachweise) . ' gelöschten Nachweisen für Client ' . $client['client_id'] . ' erfolgreich');
+		}
 	}	
 	
 }

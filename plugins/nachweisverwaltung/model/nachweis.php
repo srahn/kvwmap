@@ -659,28 +659,28 @@ class Nachweis {
   
 	function CreateNachweisDokumentVorschau($dateiname){		
 		$dir = dirname($dateiname);
-		$dateinamensteil=explode('.',$dateiname);
-		if(mb_strtolower($dateinamensteil[1]) == 'pdf'){
-			$pagecount = getNumPagesPdf($dateiname);
-			if($pagecount > 1)$label = '-pointsize 11 -draw "stroke #0009 fill #0007 stroke-width 2 circle 120,120 200,120 
-																											 stroke none fill white text 98,102 \''.$pagecount.'\'
-																																							text 60,150 \'Seiten\'"';
+		$dateinamensteil = explode('.',$dateiname);
+		$type = mb_strtolower($dateinamensteil[1]);
+		if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
+			if ($type == 'pdf'){
+				$pagecount = getNumPagesPdf($dateiname);
+				if ($pagecount > 1) {
+					$label = '-pointsize 11 -draw "stroke #0009 fill #0007 stroke-width 2 circle 120,120 200,120 
+																												 stroke none fill white text 98,102 \''.$pagecount.'\'
+																																								text 60,150 \'Seiten\'"';
+				}
+			}
+			$command = IMAGEMAGICKPATH.'convert -density 300x300 '.$dateiname.'[0] -quality 75 -background white '.$label.' -flatten -resize 1800x1800\> '.$dateinamensteil[0].'_thumb.jpg';
+			exec($command, $ausgabe, $ret);
 		}
-		$command = IMAGEMAGICKPATH.'convert -density 300x300 '.$dateiname.'[0] -quality 75 -background white '.$label.' -flatten -resize 1800x1800\> '.$dateinamensteil[0].'_thumb.jpg';
-		exec($command, $ausgabe, $ret);
-		if($ret == 1){
-			$type = $dateinamensteil[1];
-  		switch ($type) {  			
-  			default : {
-  				$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
-          $textbox = imagettfbbox(13, 0, WWWROOT.APPLVERSION.'fonts/arial.ttf', '.'.$type);
-          $textwidth = $textbox[2] - $textbox[0] + 13;
-          $blue = ImageColorAllocate ($image, 26, 87, 150);
-          imagettftext($image, 13, 0, 22, 34, $blue, WWWROOT.APPLVERSION.'fonts/arial_bold.ttf', $type);
-          $thumbname = $dateinamensteil[0].'_thumb.jpg';
-          imagejpeg($image, $thumbname);
-  			}
-  		}
+  	else {
+			$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
+			$textbox = imagettfbbox(13, 0, WWWROOT.APPLVERSION.'fonts/arial.ttf', '.'.$type);
+			$textwidth = $textbox[2] - $textbox[0] + 13;
+			$blue = ImageColorAllocate ($image, 26, 87, 150);
+			imagettftext($image, 13, 0, 22, 34, $blue, WWWROOT.APPLVERSION.'fonts/arial_bold.ttf', $type);
+			$thumbname = $dateinamensteil[0].'_thumb.jpg';
+			imagejpeg($image, $thumbname);
 		}
   }
 	
