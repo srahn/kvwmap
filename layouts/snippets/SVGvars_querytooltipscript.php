@@ -108,7 +108,7 @@ $SVGvars_querytooltipscript .= '
 								video = document.createElementNS("http://www.w3.org/1999/xhtml", "video");
 								video.setAttributeNS(null, "height", "100");
 								video.setAttributeNS(null, "width", "140");
-								video.setAttributeNS(null, "controls", "");
+								video.addEventListener("mouseenter", function(evt) { this.setAttributeNS(null, "controls", ""); }, true);
 								video.appendChild(source);
 								foreignObject = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
 								foreignObject.setAttributeNS(null, "height", "100");
