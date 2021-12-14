@@ -1,5 +1,13 @@
 <?
 
+function url2filepath($url, $doc_path, $doc_url) {
+	if ($doc_path == '') {
+		$doc_path = CUSTOM_IMAGE_PATH;
+	}
+	$url_parts = explode($doc_url, $url);
+	return $doc_path . $url_parts[1];
+}
+
 function format_human_filesize($bytes, $precision = 2) {
 	$sz = 'BKMGTP';
 	$factor = floor((strlen($bytes) - 1) / 3);
@@ -504,7 +512,7 @@ class GUI {
 									switch ($attributes['form_element_type'][$j]){
 										case 'Dokument' : {
 											$preview = $this->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url']);
-											$pictures .= '| ' . $preview['thumb_src'];
+											$pictures .= '| ' . ($preview['doc_type'] == 'videostream' ? $preview['doc_src'] : $preview['thumb_src']);
 										}break;
 										case 'Link': {
 											$attribcount++;
@@ -610,8 +618,10 @@ class GUI {
 
 		$pfadteil = explode('&original_name=', $value);
 		$dateipfad = $pfadteil[0];
+		$pathinfo = pathinfo($dateipfad);
+		$type = strtolower($pathinfo['extension']);
 
-		if ($layer['document_url'] != '') {
+		if ($document_url != '') {
 			if (in_array($type, array('mp4'))) {
 				$doc_type = 'videostream';
 			}

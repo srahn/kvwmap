@@ -15182,7 +15182,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									switch ($attributes['form_element_type'][$j]){
 										case 'Dokument' : {
 											$preview = $this->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url']);
-											$pictures .= '| ' . $preview['thumb_src'];
+											$pictures .= '| ' . ($preview['doc_type'] == 'videostream' ? $preview['doc_src'] : $preview['thumb_src']);
 										}break;
 										case 'Link': {
 											$attribcount++;
