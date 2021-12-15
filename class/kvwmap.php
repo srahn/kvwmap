@@ -4036,44 +4036,56 @@ echo '			</table>
       </select>';
   }
 
-  function get_styles(){
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+	function get_styles() {
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$this->layer = $mapDB->get_Layer($this->formvars['layer_id']);
-    $this->classdaten = $mapDB->read_ClassesbyClassid($this->formvars['class_id']);
-    echo'
-      <table width="100%" align="left" border="0" cellspacing="0" cellpadding="3">
-        <tr>
-          <td height="25" valign="top" class="fett">Styles</td>
-					<td align="right">
-						'.($this->layer['editable'] ? '<a href="javascript:add_style();" title="neuer Style"><i style="padding: 6px" class="fa fa-plus buttonlink" aria-hidden="true"></i></a>' : '').'
-					</td>
-        </tr>';
-    if(count($this->classdaten[0]['Style']) > 0){
-      $this->classdaten[0]['Style'] = array_reverse($this->classdaten[0]['Style']);
-      for($i = 0; $i < count($this->classdaten[0]['Style']); $i++){
-        echo'
-          <tr>
-            <td style="';
-							if($this->formvars['style_id'] == $this->classdaten[0]['Style'][$i]['Style_ID']){echo 'background-color:lightsteelblue; ';}
-							echo 'cursor: pointer; border-top: 1px solid #aaa;" id="td1_style_'.$this->classdaten[0]['Style'][$i]['Style_ID'].'" onclick="get_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');">';
-              echo '<img src="'.IMAGEURL.$this->getlegendimage($this->formvars['layer_id'], $this->classdaten[0]['Style'][$i]['Style_ID']).'"></td>';
-              echo '<td align="right" id="td2_style_'.$this->classdaten[0]['Style'][$i]['Style_ID'].'" style="';
-              if($this->formvars['style_id'] == $this->classdaten[0]['Style'][$i]['Style_ID']){echo 'background-color:lightsteelblue; ';}
-              echo 'border-top: 1px solid #aaa;">';
-							if($this->layer['editable']){
-								if($i < count($this->classdaten[0]['Style'])-1){echo '<a href="javascript:movedown_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');" title="in der Zeichenreihenfolge nach unten verschieben"><img src="'.GRAPHICSPATH.'pfeil.gif" border="0"></a>';}
-								if($i > 0){echo '&nbsp;<a href="javascript:moveup_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');" title="in der Zeichenreihenfolge nach oben verschieben"><img src="'.GRAPHICSPATH.'pfeil2.gif" border="0"></a>';}
-								echo html_umlaute('&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:delete_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');" title="löschen"><i style="padding: 6px" class="fa fa-trash" aria-hidden="true"></i></a>');
-							}
-        echo'
-            </td>
-          </tr>
-          ';
-      }
-    }
-    echo'
-      </table>';
-  }
+		$this->classdaten = $mapDB->read_ClassesbyClassid($this->formvars['class_id']); ?>
+		<table width="100%" align="left" border="0" cellspacing="0" cellpadding="3">
+			<tr>
+				<td height="25" valign="top" class="fett">Styles</td>
+				<td align="right"><?
+					if ($this->layer['editable']) { ?>
+						<a href="javascript:add_style();" title="neuer Style"><i style="padding: 6px" class="fa fa-plus buttonlink" aria-hidden="true"></i></a><?
+					} ?>
+				</td>
+			</tr><?
+			if (count($this->classdaten[0]['Style']) > 0) {
+				$this->classdaten[0]['Style'] = array_reverse($this->classdaten[0]['Style']);
+				for ($i = 0; $i < count($this->classdaten[0]['Style']); $i++) { ?>
+					<tr><?
+						$td_id = 'td1_style_' . $this->classdaten[0]['Style'][$i]['Style_ID'];
+						$td_style = ($this->formvars['style_id'] == $this->classdaten[0]['Style'][$i]['Style_ID'] ? 'background-color:lightsteelblue;' : '');
+						$td_onclick = 'get_style(' . $this->classdaten[0]['Style'][$i]['Style_ID'] . ')'; ?>
+						<td id="<? echo $td_id; ?>" style="<? echo $td_style; ?> cursor: pointer; border-top: 1px solid #aaa;" onclick="<? echo $td_onclick; ?>">
+							<img src="<? echo IMAGEURL . $this->getlegendimage($this->formvars['layer_id'], $this->classdaten[0]['Style'][$i]['Style_ID']); ?>">
+						</td><?
+						$td_id = 'td2_style_' . $this->classdaten[0]['Style'][$i]['Style_ID']; ?>
+						<td id="<? echo $td_id; ?>" align="right" style="<? echo $td_style; ?> border-top: 1px solid #aaa;"><?
+							if ($this->layer['editable']) {
+								if ($i < count($this->classdaten[0]['Style']) - 1) { ?>
+									<a
+										href="javascript:movedown_style(<? echo $this->classdaten[0]['Style'][$i]['Style_ID']; ?>);"
+										title="in der Zeichenreihenfolge nach unten verschieben"
+									>
+										<img src="<? echo GRAPHICSPATH; ?>pfeil.gif" border="0">
+									</a><?
+								}
+								if ($i > 0) { ?>
+									&nbsp;<a
+										href="javascript:moveup_style(<? echo $this->classdaten[0]['Style'][$i]['Style_ID']; ?>);"
+										title="in der Zeichenreihenfolge nach oben verschieben"
+									>
+										<img src="<? echo GRAPHICSPATH; ?>pfeil2.gif" border="0">
+									</a><?
+								}
+								echo html_umlaute('&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:delete_style(' . $this->classdaten[0]['Style'][$i]['Style_ID'] . ');" title="löschen"><i style="padding: 6px" class="fa fa-trash" aria-hidden="true"></i></a>');
+							} ?>
+						</td>
+					</tr><?
+				}
+			} ?>
+		</table><?
+	}
 
   function get_labels(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -4200,34 +4212,45 @@ echo '			</table>
     $this->get_labels();
   }
 
-  function get_style(){
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+	function get_style(){
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->layer = $mapDB->get_Layer($this->formvars['layer_id']);
-    $this->styledaten = $mapDB->get_Style($this->formvars['style_id']);
-    if(is_array($this->styledaten)){
-      echo'
-        <table align="left" border="0" cellspacing="0" cellpadding="3">';
-      for($i = 0; $i < count($this->styledaten); $i++){
-        echo'
-          <tr>
-            <td class="px13">';
-              echo key($this->styledaten).'</td><td><input class="styleFormField"';
-              if($i === 0)echo 'onkeyup="if(event.keyCode != 8)get_style(this.value)"';
-              echo ' name="style_'.key($this->styledaten).'" size="11" type="text" value="'.$this->styledaten[key($this->styledaten)].'">';
-        echo'
-            </td>
-          </tr>';
-        next($this->styledaten);
-      }
-			if($this->layer['editable']){
-				echo'
+		$this->styledaten = $mapDB->get_Style($this->formvars['style_id']);
+		if (is_array($this->styledaten)) { ?>
+			<table align="left" border="0" cellspacing="0" cellpadding="3"><?
+				for ($i = 0; $i < count($this->styledaten); $i++) { ?>
 					<tr>
-						<td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="style_save" value="Speichern" onclick="save_style('.$this->styledaten['Style_ID'].')"></td>
+						<td class="px13"><?
+							echo key($this->styledaten); ?>
+						</td>
+						<td>
+							<input
+								class="styleFormField"
+								onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
+								name="style_<? echo key($this->styledaten); ?>"
+								size="11"
+								type="text"
+								value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
+							>
+						</td>
+					</tr><?
+					next($this->styledaten);
+				}
+				if ($this->layer['editable']) { ?>
+					<tr>
+						<td height="30" colspan="2" valign="bottom" align="center">
+							<input
+								type="button"
+								name="style_save"
+								value="Speichern"
+								onclick="save_style(<? echo $this->styledaten['Style_ID']; ?>)"
+							>
+						</td>
 					</tr>
-				</table>';
+				</table><?
 			}
-    }
-  }
+		}
+	}
 
   function save_label(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
