@@ -11544,7 +11544,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			# die neuen Zuweisungen aus dem Formular
       $menues = ($this->formvars['selmenues'] == '' ? array() : explode(', ',$this->formvars['selmenues']));
       $functions = (trim($this->formvars['selfunctions']) == '' ? array() : explode(', ', $this->formvars['selfunctions']));
-      $frames = explode(', ', $this->formvars['selframes']);
+      $frames = (trim($this->formvars['selframes']) == '' ? array() : explode(', ', $this->formvars['selframes']));
 			$layouts = (trim($this->formvars['sellayouts']) == '' ? array() : explode(', ', $this->formvars['sellayouts']));
       $layer = (trim($this->formvars['sellayer']) == '' ? array() : explode(', ', $this->formvars['sellayer']));
       $selectedusers = array_filter(explode(', ',$this->formvars['selusers']));
