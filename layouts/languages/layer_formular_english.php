@@ -62,8 +62,8 @@
 	$strsymbolscale="symbolscale";
 	$stroffsite="offsite";
 	$strOWSParameter="OWS-Parameters";
-	$strStellenAsignment="Usergroup-Asignment";
-	$strDefaultValues="Default-Values for Usergroup-Asignment";
+	$strStellenAsignment="Usergroup-Assignment";
+	$strDefaultValues="Default-Values for Usergroup-Assignment";
 	$strWFS_geom="WFS-Geometry-Attribute";
 	$strQueryMap="QueryMap";
 	$strProcessing="Processing";
