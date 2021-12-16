@@ -42,6 +42,10 @@
 		document.getElementById("svghelp").SVGcoord_input_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
 	
+	function add_buffer_submit(){
+		document.getElementById("svghelp").SVGadd_buffer_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}	
+	
 	function add_parallel_polygon_submit(){
 		document.getElementById("svghelp").SVGadd_parallel_polygon_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}	
@@ -2252,21 +2256,33 @@ function mouseup(evt){
 		bufferfunctions = true;
 		
 		top.document.getElementById("svghelp").SVGadd_parallel_polygon_submit = add_parallel_polygon_submit;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		top.document.getElementById("svghelp").SVGadd_buffer_submit = add_buffer_submit;												// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
-		function add_buffer(){
-			buffer = prompt("Breite des Puffers in Metern:", enclosingForm.bufferwidth.value);
-			if(buffer){
+		function add_buffer(){		
+			var Msg = top.$("#message_box");
+			Msg.show();
+			content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="top.$(\\\'#message_box\\\').hide();" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
+			content+= \'<div style="width:320px;height: 30px">Puffer hinzufügen</div>\';
+			content+= \'<table style="padding: 5px;width: 100%"><tr><td align="right" class="px15">Breite:</td><td><input style="width: 110px" type="text" id="buffer_width" name="buffer_width" value="\'+enclosingForm.bufferwidth.value+\'">&nbsp;m</td></tr>\';
+			content+= \'<tr><td align="right">Anzahl Segmente:&nbsp;</td><td><input style="width: 110px" type="text" id="segment_count" name="segment_count" value="8"></td></tr></table>\';
+			content+= \'<br><input type="button" value="OK" onclick="add_buffer_submit()">\';
+			Msg.html(content);
+		}
+			
+		function add_buffer_submit(){
+			top.$(\'#message_box\').hide();
+			if (enclosingForm.buffer_width.value) {
 				enclosingForm.secondpoly.value = true;
 				enclosingForm.firstpoly.value = true;
-				if(enclosingForm.newpathwkt.value != ""){
-					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.newpathwkt.value+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+				if (enclosingForm.newpathwkt.value != "") {
+					newpathwkt = enclosingForm.newpathwkt.value;
 				}
-				else{
-					if(enclosingForm.newpath.value != ""){
-						newpath = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
-						top.ahah("index.php", "go=spatial_processing&path1="+newpath+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+				else {
+					if (enclosingForm.newpath.value != "") {
+						newpathwkt = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 					}
 				}
+				top.ahah("index.php", "go=spatial_processing&path1="+newpathwkt+"&width="+enclosingForm.buffer_width.value+"&segment_count="+enclosingForm.segment_count.value+"&operation=buffer&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 			}
 		}
 		
