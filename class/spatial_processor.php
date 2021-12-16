@@ -310,10 +310,7 @@ class spatial_processor {
 			}break;
 			
 			case 'buffer':{
-				if ($formvars['width'] == '') {
-					$formvars['width'] = 50;
-				}
-				$result = $this->buffer($polywkt1, $formvars['width']);				
+				$result = $this->buffer($polywkt1, $formvars['width'], $formvars['segment_count']);
 			}break;
 			
 			case 'buffer_ring':{
@@ -428,14 +425,14 @@ class spatial_processor {
 		return $geom;
 	}
  
-  function buffer($geom_1, $width){
+  function buffer($geom_1, $width = 50, $segment_count = 8){
   	if(substr_count($geom_1, ',') == 1){			# wenn Polygon nur aus einem Eckpunkt besteht -> in POINT umwandeln -> Kreis entsteht
   		$geom_1 = $this->pointfrompolygon($geom_1);
   	}
-  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0, 15) as svg FROM (select st_buffer(st_geomfromtext('".$geom_1."'), ".$width.") as geom) as foo";
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0, 15) as svg FROM (select st_buffer(st_geomfromtext('" . $geom_1 . "'), " . $width . ", " . $segment_count . ") as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_assoc($ret[1]);
