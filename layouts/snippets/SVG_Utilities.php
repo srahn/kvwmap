@@ -2264,7 +2264,7 @@ function mouseup(evt){
 			content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="top.$(\\\'#message_box\\\').hide();" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
 			content+= \'<div style="width:320px;height: 30px">Puffer hinzufügen</div>\';
 			content+= \'<table style="padding: 5px;width: 100%"><tr><td align="right" class="px15">Breite:</td><td><input style="width: 110px" type="text" id="buffer_width" name="buffer_width" value="\'+enclosingForm.bufferwidth.value+\'">&nbsp;m</td></tr>\';
-			content+= \'<tr><td align="right">Anzahl Segmente:&nbsp;</td><td><input style="width: 110px" type="text" id="segment_count" name="segment_count" value="8"></td></tr></table>\';
+			content+= \'<tr><td align="right">Segmente im Viertelkreis:&nbsp;</td><td><input style="width: 110px" type="text" id="segment_count" name="segment_count" value="8"></td></tr></table>\';
 			content+= \'<br><input type="button" value="OK" onclick="add_buffer_submit()">\';
 			Msg.html(content);
 		}
