@@ -1305,7 +1305,7 @@ function go_switch_xplankonverter($go) {
 			# echo 'File:' . $_POST['gml_file'] . '<br>';
 			$gml_location = IMAGEPATH . $_POST['gml_file'] . '_' . $GUI->user->id . '.gml';
 
-			$gml_extractor = new Gml_extractor($GUI->pgdatabase, $gml_location, 'xplan_gmlas_' . $GUI->user->id);
+			$gml_extractor = new Gml_extractor($GUI->pgdatabase, $gml_location, 'xplan_gmlas_tmp_' . $GUI->user->id);
 			$gml_extractor->extract_gml_class($GUI->plan_class);
 
 			$GUI->user->rolle->oGeorefExt->minx = $GUI->formvars['minx'];

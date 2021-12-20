@@ -265,7 +265,7 @@ class Validierung extends PgObject {
 	function geometrie_isvalid($regel, $konvertierung) {
 		$this->debug->show('<br>Validate geom_isvalid:', Validierung::$write_debug);
 		$all_geom_isvalid = true;
-		$sourcetype = $regel->is_source_shape_or_gmlas($regel);
+		$sourcetype = $regel->is_source_shape_or_gmlas($regel,$konvertierung->get('id'));
 		# shape or gmlas?
 		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
 
@@ -397,7 +397,7 @@ class Validierung extends PgObject {
 		$all_within_plan = true;
 
 		$sql = $regel->get_convert_sql($konvertierung->get('id'));
-		$sourcetype = $regel->is_source_shape_or_gmlas($regel);
+		$sourcetype = $regel->is_source_shape_or_gmlas($regel,$konvertierung->get('id'));
 		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
 		# Default Shape (the_geom), gmlas (position)
 
@@ -556,7 +556,7 @@ class Validierung extends PgObject {
 		$sql = $regel->get_convert_sql($konvertierung->get('id'));
 
 		# Spaltenname der Geometrie ermitteln
-		$sourcetype = $regel->is_source_shape_or_gmlas($regel);
+		$sourcetype = $regel->is_source_shape_or_gmlas($regel,$konvertierung->get('id'));
 		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
 
 		# Plantyp abfragen
