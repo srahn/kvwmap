@@ -1183,7 +1183,7 @@ function go_switch_xplankonverter($go) {
 			if ($GUI->xplankonverter_is_case_forbidden()) return;
 
 			$filename = XPLANKONVERTER_FILE_PATH . $GUI->formvars['konvertierung_id'] . '/inspire_gml/inspire_' . $GUI->formvars['konvertierung_id'] . '.gml';
-			header('Content-Type: text/xml; subtype="gml/3.3"');
+			header('Content-Disposition: attachment; filename="inspire_' . $GUI->formvars['konvertierung_id'] . '.gml"; subtype="gml/3.3"');
 			echo fread(fopen($filename, "r"), filesize($filename));
 		} break;
 
