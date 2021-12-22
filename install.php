@@ -1,5 +1,4 @@
 <?
-
 ###################################################################
 # kvwmap - Kartenserver für die Verwaltung raumbezogener Daten.	 #
 # Lizenz																													#
@@ -382,6 +381,7 @@ function init_config() {
 	define('WWWROOT', $installpath.$wwwpath);
 	define('APPLVERSION', $applversion . '/');
 	define('WAPPENPATH', 'graphics/wappen/');
+	define('PHPVERSION', 739);
 }
 
 function show_constants() { ?>
@@ -635,43 +635,43 @@ function settings() { ?>
 		<table>
 			<tr>
 				<td>MYSQL_HOST:</td>
-				<td><input type="text" name="MYSQL_HOST" value="<?php echo MYSQL_HOST; ?>"></td>
+				<td><input type="text" name="MYSQL_HOST" value="<?php echo MYSQL_HOST; ?>" size="35"></td>
 			</tr>
 			<tr>
 				<td>MYSQL_DBNAME:</td>
-				<td><input type="text" name="MYSQL_DBNAME" value="<?php echo MYSQL_DBNAME; ?>"></td>
+				<td><input type="text" name="MYSQL_DBNAME" value="<?php echo MYSQL_DBNAME; ?>" size="35"></td>
 			</tr>
 			<tr>
 				<td>MYSQL_USER:</td>
-				<td><input type="text" name="MYSQL_USER" value="<?php echo MYSQL_USER; ?>"></td>
+				<td><input type="text" name="MYSQL_USER" value="<?php echo MYSQL_USER; ?>" size="35"></td>
 			</tr>
 			<tr>
 				<td>MYSQL_PASSWORD:</td>
-				<td><input id="mysql_password" type="password" name="MYSQL_PASSWORD" value="<?php echo MYSQL_PASSWORD; ?>"><i style="margin-left: 5px" class="fa fa-eye" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#mysql_password').attr('type') == 'text') { $('#mysql_password').attr('type', 'password') } else { $('#mysql_password').attr('type', 'text'); }"></i></td>
+				<td><input id="mysql_password" type="password" name="MYSQL_PASSWORD" value="<?php echo MYSQL_PASSWORD; ?>" size="35"><i style="margin-left: 5px" class="fa fa-eye" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#mysql_password').attr('type') == 'text') { $('#mysql_password').attr('type', 'password') } else { $('#mysql_password').attr('type', 'text'); }"></i></td>
 			</tr>
 			<tr>
 				<td>MYSQL_ROOT_PASSWORD:</td>
-				<td><input id="mysql_root_password" type="password" name="MYSQL_ROOT_PASSWORD" value="<?php echo MYSQL_ROOT_PASSWORD; ?>"><i style="margin-left: 5px" class="fa fa-eye" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#mysql_root_password').attr('type') == 'text') { $('#mysql_root_password').attr('type', 'password') } else { $('#mysql_root_password').attr('type', 'text'); }"></i></td>
+				<td><input id="mysql_root_password" type="password" name="MYSQL_ROOT_PASSWORD" value="<?php echo MYSQL_ROOT_PASSWORD; ?>" size="35"><i style="margin-left: 5px" class="fa fa-eye" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#mysql_root_password').attr('type') == 'text') { $('#mysql_root_password').attr('type', 'password') } else { $('#mysql_root_password').attr('type', 'text'); }"></i></td>
 			</tr>
 			<tr>
 				<td>POSTGRES_HOST:</td>
-				<td><input type="text" name="POSTGRES_HOST" value="<?php echo POSTGRES_HOST; ?>"></td>
+				<td><input type="text" name="POSTGRES_HOST" value="<?php echo POSTGRES_HOST; ?>" size="35"></td>
 			</tr>
 			<tr>
 				<td>POSTGRES_DBNAME:</td>
-				<td><input type="text" name="POSTGRES_DBNAME" value="<?php echo POSTGRES_DBNAME; ?>"></td>
+				<td><input type="text" name="POSTGRES_DBNAME" value="<?php echo POSTGRES_DBNAME; ?>" size="35"></td>
 			</tr>
 			<tr>
 				<td>POSTGRES_USER:</td>
-				<td><input type="text" name="POSTGRES_USER" value="<?php echo POSTGRES_USER; ?>"></td>
+				<td><input type="text" name="POSTGRES_USER" value="<?php echo POSTGRES_USER; ?>" size="35"></td>
 			</tr>
 			<tr>
 				<td>POSTGRES_PASSWORD:</td>
-				<td><input id="postgres_password" type="password" name="POSTGRES_PASSWORD" value="<?php echo POSTGRES_PASSWORD; ?>"><i style="margin-left: 5px" class="fa fa-eye" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#postgres_password').attr('type') == 'text') { $('#postgres_password').attr('type', 'password') } else { $('#postgres_password').attr('type', 'text'); }"></i></td>
+				<td><input id="postgres_password" type="password" name="POSTGRES_PASSWORD" value="<?php echo POSTGRES_PASSWORD; ?>" size="35"><i style="margin-left: 5px" class="fa fa-eye" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#postgres_password').attr('type') == 'text') { $('#postgres_password').attr('type', 'password') } else { $('#postgres_password').attr('type', 'text'); }"></i></td>
 			</tr>
 			<tr>
 				<td>POSTGRES_ROOT_PASSWORD:</td>
-				<td><input id="postgres_root_password" type="password" name="POSTGRES_ROOT_PASSWORD" value="<?php echo POSTGRES_ROOT_PASSWORD; ?>"><i style="margin-left: 5px" class="fa fa-eye" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#postgres_root_password').attr('type') == 'text') { $('#postgres_root_password').attr('type', 'password') } else { $('#mysql_password').attr('type', 'text'); }"></i></td>
+				<td><input id="postgres_root_password" type="password" name="POSTGRES_ROOT_PASSWORD" value="<?php echo POSTGRES_ROOT_PASSWORD; ?>" size="35"><i style="margin-left: 5px" class="fa fa-eye" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#postgres_root_password').attr('type') == 'text') { $('#postgres_root_password').attr('type', 'password') } else { $('#postgres_root_password').attr('type', 'text'); }"></i></td>
 			</tr>
 			<tr>
 				<td colspan="2" align="center"><input type="submit" name="go" value="Installation starten"></td>

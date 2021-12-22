@@ -40,6 +40,10 @@ function CustomErrorHandler($errno, $errstr, $errfile, $errline){
 
 set_error_handler("CustomErrorHandler");
 
+if (!file_exists('credentials.php') OR !file_exists('config.php')) {
+	echo '<h1>kvwmap-Server</h1>Die Anwendung kvwmap ist noch nicht fertig eingerichtet.<br>Dazu kann das Script <a href="install.php">install.php</a> verwendet werden.';
+	exit;
+}
 include('credentials.php');
 include('config.php');
 
