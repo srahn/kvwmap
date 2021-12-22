@@ -18786,13 +18786,14 @@ class db_mapObj{
 				if ($classes[$i]['Expression'] == '') {
           return $classes[$i]['Class_ID'];
         }
-				if (strpos($classes[$i]['Expression'], '/') !== false) {		# regex
+				if (strpos($classes[$i]['Expression'], '/') === 0) {		# regex
 					$operator = '~';
+					$classes[$i]['Expression'] = str_replace('/', '', $classes[$i]['Expression']);
 				}
 				else {
 					$operator = '=';
 				}
-        $exp = str_replace(array("'[", "]'", '[', ']', '/'), '', $classes[$i]['Expression']);
+        $exp = str_replace(array("'[", "]'", '[', ']'), '', $classes[$i]['Expression']);
         $exp = str_replace(' eq ', '=', $exp);
         $exp = str_replace(' ne ', '!=', $exp);
 
