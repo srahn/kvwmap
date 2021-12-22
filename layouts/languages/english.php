@@ -73,6 +73,7 @@
 	$this->strAsteriskRequired = "Fields marked with an asterisk * are required";
 	$this->strSurName = "Surname";
 	$this->strForeName = "First name";
+	$this->strLoginName = "Loginname";
 	$this->strUser = "User";
 	$this->strLabel = "Label";
 	$this->strNameSuffix = "Name suffix";

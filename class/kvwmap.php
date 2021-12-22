@@ -8268,6 +8268,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				'email' => $this->invitation->get('email'),
 				'name' => $this->invitation->get('name'),
 				'vorname' => $this->invitation->get('vorname'),
+				'loginname' => $this->invitation->get('loginname'),
 				'stelle_id' => $this->invitation->get('stelle_id'),
 				'inviter_id' => $this->invitation->get('inviter_id')
 			));
@@ -8335,6 +8336,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					'email' => $this->formvars['email'],
 					'name' => $this->formvars['name'],
 					'vorname' => $this->formvars['vorname'],
+					'loginname' => $this->formvars['loginname'],
 					'stelle_id' => $this->formvars['stelle_id'],
 					'inviter_id' => $this->formvars['inviter_id']
 				)
