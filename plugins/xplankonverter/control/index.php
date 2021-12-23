@@ -1183,7 +1183,7 @@ function go_switch_xplankonverter($go) {
 			if ($GUI->xplankonverter_is_case_forbidden()) return;
 
 			$filename = XPLANKONVERTER_FILE_PATH . $GUI->formvars['konvertierung_id'] . '/inspire_gml/inspire_' . $GUI->formvars['konvertierung_id'] . '.gml';
-			header('Content-Type: text/xml; subtype="gml/3.3"');
+			header('Content-Disposition: attachment; filename="inspire_' . $GUI->formvars['konvertierung_id'] . '.gml"; subtype="gml/3.3"');
 			echo fread(fopen($filename, "r"), filesize($filename));
 		} break;
 
@@ -1305,7 +1305,7 @@ function go_switch_xplankonverter($go) {
 			# echo 'File:' . $_POST['gml_file'] . '<br>';
 			$gml_location = IMAGEPATH . $_POST['gml_file'] . '_' . $GUI->user->id . '.gml';
 
-			$gml_extractor = new Gml_extractor($GUI->pgdatabase, $gml_location, 'xplan_gmlas_' . $GUI->user->id);
+			$gml_extractor = new Gml_extractor($GUI->pgdatabase, $gml_location, 'xplan_gmlas_tmp_' . $GUI->user->id);
 			$gml_extractor->extract_gml_class($GUI->plan_class);
 
 			$GUI->user->rolle->oGeorefExt->minx = $GUI->formvars['minx'];

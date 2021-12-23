@@ -759,7 +759,7 @@ class Konvertierung extends PgObject {
 						$result = $regel->convert($this);
 						// TODO: Fix this, currently no gids break the result
 						/*if (!empty($result)) {
-							if($regel->is_source_shape_or_gmlas($regel) != 'gmlas') {
+							if($regel->is_source_shape_or_gmlas($regel,  $this->get($this->identifier)) != 'gmlas') {
 								$regel->rewrite_gml_ids($result);
 							}
 						}*/
@@ -991,10 +991,10 @@ class Konvertierung extends PgObject {
 
 	function destroy_gmlas_and_shape_schemas() {
 		# Destroy the xplan_shapes_ + $konvertierung_id if it exists
-		# Destroy the xplan_gmlas: + $user_id schema if it exists
+		# Destroy the xplan_gmlas: + $konvertierung_id schema if it exists
 		$sql = "
 			DROP SCHEMA IF EXISTS xplan_shapes_" .  $this->get($this->identifier) . " CASCADE;
-			DROP SCHEMA IF EXISTS xplan_gmlas_" .  $this->gui->user->id . " CASCADE;
+			DROP SCHEMA IF EXISTS xplan_gmlas_" .  $this->get($this->identifier) . " CASCADE;
 		";
 		pg_query($this->database->dbConn, $sql);
 	}
