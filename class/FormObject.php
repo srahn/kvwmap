@@ -80,6 +80,9 @@ class FormObject {
 		$this->outputHTML();
 	} # ende constructor
 
+/*
+* parma $options array value, output, attribute, attribute_value, title, style
+*/
 static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $first_option = '-- Bitte Wählen --', $option_style = '', $option_class = '', $onclick = '') {
 	$id = ($id == '' ? $name : $id);
 	if ($multiple != '') $multiple = ' multiple';
