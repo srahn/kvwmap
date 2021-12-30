@@ -1130,12 +1130,22 @@ class data_import_export {
 			$folder = 'Export_' . $this->formvars['layer_name'] . rand(0,10000);
 			mkdir(IMAGEPATH . $folder, 0777);
 			$exportfile = IMAGEPATH . $folder . '/' . str_replace(' ', '_', $layerset[0]['Name']) . '.json';
+			if ($this->formvars['epsg'] != '') {
+				$t_epsg = $this->formvars['epsg'];
+			}
+			elseif ($layerset[0]['epsg'] != '') {
+				$t_epsg = $layerset[0]['epsg'];
+			}
+			else {
+				$t_epsg = '4326';
+			}
+
 			$contenttype = 'application/vnd.geo+json';
-			$command = 'ogr2ogr -f GeoJSON ' . $exportfile . ' "WFS:' . $layerset[0]['connection'] . 'Service=WFS&Request=GetFeature&Version=2.0.0&TypeName=' . $layerset[0]['wms_name'] . '"';
+			$command = 'ogr2ogr -f GeoJSON ' . $exportfile . ' -t_srs "epsg:' . $t_epsg . '" "WFS:' . $layerset[0]['connection'] . 'Service=WFS&Request=GetFeature&Version=2.0.0&TypeName=' . $layerset[0]['wms_name'] . '"';
 			$errorfile = rand(0, 1000000);
 			$command .= ' 2> ' . IMAGEPATH . $errorfile . '.err';
 			$output = array();
-			#echo '<br>' . $command;
+			#echo '<br>' . $command; exit;
 			exec($command, $output, $ret);
 			if ($ret != 0) {
 				$ret = 'Fehler beim Exportieren !<br><br>Befehl:<div class="code">'.$command.'</div><a href="' . IMAGEURL . $errorfile . '.err" target="_blank">Fehlerprotokoll</a>';
