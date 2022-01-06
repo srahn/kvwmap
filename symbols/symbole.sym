@@ -588,4 +588,15 @@ SYMBOLSET
 		IMAGE "hecke.png"
 		TRANSPARENT 1
 	END
+
+	SYMBOL #58
+		NAME "h_line"
+		TYPE VECTOR
+		TRANSPARENT 0
+	 	POINTS
+			0 0
+			1 0
+		END
+	END
+
 END

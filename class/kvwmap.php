@@ -17970,7 +17970,6 @@ class db_mapObj{
 					$names .= quote($formvars['Name_' . $language]) . ", ";
 				}
 			}
-
 			$sql = "
 				INSERT INTO layer (
 					" . ($formvars['id'] != '' ? "`Layer_ID`," : '') . "
@@ -17984,7 +17983,9 @@ class db_mapObj{
 					`styleitem`, `classification`, `cluster_maxdistance`, `tolerance`,
 					`toleranceunits`, `sizeunits`, `epsg_code`, `template`,
 					`queryable`, `use_geom`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`,
-					`wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`,
+					`wms_auth_password`, `wfs_geom`, `selectiontype`,
+					`querymap`,
+					`processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`,
 					`metalink`,
 					`status`,
 					`trigger_function`,
@@ -18059,7 +18060,7 @@ class db_mapObj{
 					'" . $formvars['wms_auth_password'] . "',
 					'" . $formvars['wfs_geom'] . "', -- wfs_geom
 					'" . $formvars['selectiontype'] . "',
-					" . $formvars['querymap'] . ",
+					'" . $formvars['querymap'] . "', -- querymap
 					'" . $formvars['processing'] . "',
 					'" . $formvars['kurzbeschreibung'] . "',
 					'" . $formvars['datasource'] . "',
@@ -18071,7 +18072,7 @@ class db_mapObj{
 					'" . $formvars['metalink'] . "',
 					'" . $formvars['status'] . "',
 					'" . $formvars['trigger_function'] . "',
-					" . ($formvars['sync'] == '' ? 0 : $formvars['sync']) . ", -- sync
+					" . ($formvars['sync'] == '' ? "'0'" : "'" . $formvars['sync'] . "'") . ", -- sync
 			 		" . ($formvars['listed'] == '' ? 0 : "'" . $formvars['listed'] . "'") . ",
 					" . ($formvars['duplicate_from_layer_id'] == '' ? "NULL" : $formvars['duplicate_from_layer_id']) . ",
 					'" . $formvars['duplicate_criterion'] . "',
@@ -19264,13 +19265,22 @@ class db_mapObj{
 					$sql.= '`Name_'.$language.'`, ';
 				}
 			}
-			$sql .= 'Layer_ID, Expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder) VALUES ("' . $attrib['name'] . '",';
-			foreach ($supportedLanguages as $language) {
-				if ($language != 'german'){
-					$sql .= '"' . $attrib['name_' . $language] . '",';
+			$sql .= 'Layer_ID, Expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder) VALUES (
+				"' . $attrib['name'] . '",';
+				foreach ($supportedLanguages as $language) {
+					if ($language != 'german'){
+						$sql .= '"' . $attrib['name_' . $language] . '",';
+					}
 				}
-			}
-			$sql .= $attrib['layer_id'] . ', "' . $attrib['expression'] . '", "' . value_of($attrib, 'classification') . '", "' . value_of($attrib, 'legendgraphic') . '", ' . $attrib['legendimagewidth'] . ', ' . $attrib['legendimageheight'] . ', "' . $attrib['order'] . '", ' . $attrib['legendorder'] . ')';
+				$sql .= $attrib['layer_id'] . ",
+					'" . $attrib['expression'] . "',
+					'" . value_of($attrib, 'classification') . "',
+					'" . value_of($attrib, 'legendgraphic') . "',
+					" . $attrib['legendimagewidth'] . ",
+					" . $attrib['legendimageheight'] . ",
+					" . ($attrib['order'] == '' ? 'NULL' : $attriub['order']) . ", -- order
+					" . ($attrib['legendorder'] == '' ? 'NULL' : $attribut['legendorder']) . " --legendorder
+				)";
 		}
 		else {
 			$class = $classdata; # Classobjekt wurde übergeben
