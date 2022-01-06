@@ -142,6 +142,9 @@
 					$gml_extractor->insert_into_bereich($bereichtable, $konvertierung_id, $GUI->user->id);
 					# Inserts regeln for each possible class loaded with GMLAS
 					$gml_extractor->insert_all_regeln_into_db($konvertierung_id, $GUI->Stelle->id);
+					
+					# directories should be created (if they do no exist yet e.g. for shape export)
+					$konvertierung->create_directories();
 				}
 			} break;
 
