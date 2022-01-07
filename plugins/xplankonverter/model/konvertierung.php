@@ -368,7 +368,7 @@ class Konvertierung extends PgObject {
 							SELECT
 								*
 							FROM
-								xplan_gml. " . strtolower($class_name) . "
+								xplan_gml." . strtolower($class_name) . "
 							WHERE
 								konvertierung_id = " . $this->get($this->identifier) . "
 							AND
@@ -383,7 +383,7 @@ class Konvertierung extends PgObject {
 							SELECT
 								*
 							FROM
-								xplan_gml. " . strtolower($class_name) . "
+								xplan_gml." . strtolower($class_name) . "
 							WHERE
 								konvertierung_id = " . $this->get($this->identifier) . "
 							AND
@@ -398,7 +398,7 @@ class Konvertierung extends PgObject {
 							SELECT
 								*
 							FROM
-								xplan_gml. " . strtolower($class_name) . "
+								xplan_gml." . strtolower($class_name) . "
 							WHERE
 								konvertierung_id = " . $this->get($this->identifier) . "
 							AND
