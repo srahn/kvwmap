@@ -2221,12 +2221,17 @@ echo '			</table>
 				if($dbStyle['maxscale'] != ''){
 					$style->set('maxscaledenom', $dbStyle['maxscale']);
 				}
-				if ($dbStyle['symbolname']!='') {
-          $style->set('symbolname',$dbStyle['symbolname']);
-        }
-        if ($dbStyle['symbol']>0) {
-          $style->set('symbol',$dbStyle['symbol']);
-        }
+				if (substr($dbStyle['symbolname'], 0, 1) == '[') {
+					$style->updateFromString('STYLE SYMBOL ' .$dbStyle['symbolname']. ' END');
+				}
+				else {
+					if ($dbStyle['symbolname']!='') {
+						$style->set('symbolname',$dbStyle['symbolname']);
+					}
+					if ($dbStyle['symbol']>0) {
+						$style->set('symbol',$dbStyle['symbol']);
+					}
+				}				
         if (MAPSERVERVERSION >= 620) {
 					if($dbStyle['geomtransform'] != '') {
 						$style->setGeomTransform($dbStyle['geomtransform']);
@@ -6041,12 +6046,17 @@ echo '			</table>
     $klasse->set('status', MS_ON);
     $dbStyle = $mapDB->get_Style($style_id);
     $style = ms_newStyleObj($klasse);
-    if($dbStyle['symbolname']!='') {
-      $style -> set('symbolname',$dbStyle['symbolname']);
-    }
-    if($dbStyle['symbol']>0) {
-      $style->set('symbol',$dbStyle['symbol']);
-    }
+		if (substr($dbStyle['symbolname'], 0, 1) == '[') {
+			$style->updateFromString('STYLE SYMBOL ' .$dbStyle['symbolname']. ' END');
+		}
+		else {
+			if ($dbStyle['symbolname']!='') {
+				$style->set('symbolname',$dbStyle['symbolname']);
+			}
+			if ($dbStyle['symbol']>0) {
+				$style->set('symbol',$dbStyle['symbol']);
+			}
+		}	
 		if($dbStyle['size'] != ''){
 			if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
 			else $style->updateFromString("STYLE SIZE [" . $dbStyle['size']."] END");
