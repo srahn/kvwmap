@@ -1643,9 +1643,8 @@ class stelle {
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
-		else{
-			while($rs=$this->database->result->fetch_assoc()){
-				 
+		else {
+			while ($rs=$this->database->result->fetch_assoc()){
 				# fremde Layer werden auf Verbindung getestet (erstmal rausgenommen, dauert relativ lange)
 				// if(strpos($rs['connection'], 'host') !== false AND strpos($rs['connection'], 'host=localhost') === false){
 					// $connection = explode(' ', trim($rs['connection']));
@@ -1667,9 +1666,9 @@ class stelle {
 						// continue;
 					// }
 				// }
-				
+
 				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
-				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);				
+				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
 				
 				if($rs['alias'] != '' AND $this->useLayerAliases){
 					$rs['Name'] = $rs['alias'];

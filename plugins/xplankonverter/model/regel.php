@@ -41,7 +41,7 @@ class Regel extends PgObject {
 	/*
 	* Checks which geom column is used in the regel to determine whether the source is shape(the_geom) or gmlas(position)
 	*/
-	function is_source_shape_or_gmlas($regel) {
+	function is_source_shape_or_gmlas($regel,$konvertierung_id) {
 		$user_id = $this->gui->user->id;
 		$full_table_name = $this->get_shape_table_name();
 		$full_table_name_arr = explode('.', $full_table_name);
@@ -55,7 +55,7 @@ class Regel extends PgObject {
 				FROM
 					information_schema.columns
 				WHERE
-					table_schema = 'xplan_shapes_" . $user_id . "'
+					table_schema = 'xplan_shapes_" . $konvertierung_id . "'
 				AND
 					table_name = '" . $table_name . "'
 				AND
@@ -67,7 +67,7 @@ class Regel extends PgObject {
 				FROM
 					information_schema.columns
 				WHERE
-					table_schema = 'xplan_gmlas_" . $user_id . "'
+					table_schema = 'xplan_gmlas_" . $konvertierung_id . "'
 				AND
 					table_name = '" . $table_name . "'
 				AND
@@ -92,7 +92,7 @@ class Regel extends PgObject {
 		$success = true;
 		$konvertierung_id = $konvertierung->get('id');
 		# Check geometry column source
-		$sourcetype = $this->is_source_shape_or_gmlas($this);
+		$sourcetype = $this->is_source_shape_or_gmlas($this, $konvertierung_id);
 		
 		$this->debug->show('Regel validate mit konvertierung_id: ' . $konvertierung_id, Regel::$write_debug);
 		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_vorhanden');
@@ -270,7 +270,7 @@ class Regel extends PgObject {
 		$konvertierung = $this->get_konvertierung();
 		$epsg = $konvertierung->get('output_epsg');
 		# Sourcetype for geom_column
-		$sourcetype = $this->is_source_shape_or_gmlas($regel);
+		$sourcetype = $this->is_source_shape_or_gmlas($regel,$konvertierung->get('id'));
 		# Default Shape, position for gmlas
 		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
 
