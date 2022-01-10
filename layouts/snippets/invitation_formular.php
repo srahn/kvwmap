@@ -20,6 +20,9 @@
 		<label class="fetter" for="name"><? echo $this->strForeName; ?></label>
 		<input name="vorname" type="text" value="<? echo $this->formvars['vorname']; ?>">
 		<div class="clear"></div>
+		<label class="fetter" for="loginname "><? echo $this->strLoginName; ?> *</label>
+		<input name="loginname" type="text" value="<? echo $this->formvars['loginname']; ?>">
+		<div class="clear"></div>		
 		<div style="float: left"><? echo $strWhereShallBeWorked; ?></div>
 		<div class="clear"></div>
 		<label class="fetter" for="stelle_id"><? echo $this->strTask; ?> *</label>

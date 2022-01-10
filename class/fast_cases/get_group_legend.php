@@ -870,12 +870,17 @@ class GUI {
 				if($dbStyle['maxscale'] != ''){
 					$style->set('maxscaledenom', $dbStyle['maxscale']);
 				}
-				if ($dbStyle['symbolname']!='') {
-          $style->set('symbolname',$dbStyle['symbolname']);
-        }
-        if ($dbStyle['symbol']>0) {
-          $style->set('symbol',$dbStyle['symbol']);
-        }
+				if (substr($dbStyle['symbolname'], 0, 1) == '[') {
+					$style->updateFromString('STYLE SYMBOL ' .$dbStyle['symbolname']. ' END');
+				}
+				else {
+					if ($dbStyle['symbolname']!='') {
+						$style->set('symbolname',$dbStyle['symbolname']);
+					}
+					if ($dbStyle['symbol']>0) {
+						$style->set('symbol',$dbStyle['symbol']);
+					}
+				}
         if (MAPSERVERVERSION >= 620) {
 					if($dbStyle['geomtransform'] != '') {
 						$style->setGeomTransform($dbStyle['geomtransform']);

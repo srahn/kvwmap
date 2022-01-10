@@ -884,6 +884,10 @@ class data_import_export {
 	}
 
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb) {
+		$formvars_nln = '';
+		if(!empty($this->formvars['layer_name']) and $this->formvars['layer_name'] != '') {
+			$formvars_nln = '-nln ' . $this->formvars['layer_name'];
+		}
 		$command = 'export PGDATESTYLE="ISO, MDY";'
 			. 'export '
 			. 'PGCLIENTENCODING=UTF-8;'
@@ -891,7 +895,7 @@ class data_import_export {
 			. '-f ' . $exportformat . ' '
 			. '-lco ENCODING=UTF-8 '
 			. '-sql "' . str_replace(["\t", chr(10), chr(13)], [' ', ''], $sql) . '" '
-			. '-nln ' . $this->formvars['layer_name'] . ' '
+			. $formvars_nln . ' '
 			. $exportfile . ' '
 			. 'PG:"' . $layerdb->get_connection_string(true) . ' active_schema=' . $layerdb->schema . '"';
 		$errorfile = rand(0, 1000000);

@@ -2221,12 +2221,17 @@ echo '			</table>
 				if($dbStyle['maxscale'] != ''){
 					$style->set('maxscaledenom', $dbStyle['maxscale']);
 				}
-				if ($dbStyle['symbolname']!='') {
-          $style->set('symbolname',$dbStyle['symbolname']);
-        }
-        if ($dbStyle['symbol']>0) {
-          $style->set('symbol',$dbStyle['symbol']);
-        }
+				if (substr($dbStyle['symbolname'], 0, 1) == '[') {
+					$style->updateFromString('STYLE SYMBOL ' .$dbStyle['symbolname']. ' END');
+				}
+				else {
+					if ($dbStyle['symbolname']!='') {
+						$style->set('symbolname',$dbStyle['symbolname']);
+					}
+					if ($dbStyle['symbol']>0) {
+						$style->set('symbol',$dbStyle['symbol']);
+					}
+				}				
         if (MAPSERVERVERSION >= 620) {
 					if($dbStyle['geomtransform'] != '') {
 						$style->setGeomTransform($dbStyle['geomtransform']);
@@ -6041,12 +6046,17 @@ echo '			</table>
     $klasse->set('status', MS_ON);
     $dbStyle = $mapDB->get_Style($style_id);
     $style = ms_newStyleObj($klasse);
-    if($dbStyle['symbolname']!='') {
-      $style -> set('symbolname',$dbStyle['symbolname']);
-    }
-    if($dbStyle['symbol']>0) {
-      $style->set('symbol',$dbStyle['symbol']);
-    }
+		if (substr($dbStyle['symbolname'], 0, 1) == '[') {
+			$style->updateFromString('STYLE SYMBOL ' .$dbStyle['symbolname']. ' END');
+		}
+		else {
+			if ($dbStyle['symbolname']!='') {
+				$style->set('symbolname',$dbStyle['symbolname']);
+			}
+			if ($dbStyle['symbol']>0) {
+				$style->set('symbol',$dbStyle['symbol']);
+			}
+		}	
 		if($dbStyle['size'] != ''){
 			if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
 			else $style->updateFromString("STYLE SIZE [" . $dbStyle['size']."] END");
@@ -8268,6 +8278,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				'email' => $this->invitation->get('email'),
 				'name' => $this->invitation->get('name'),
 				'vorname' => $this->invitation->get('vorname'),
+				'loginname' => $this->invitation->get('loginname'),
 				'stelle_id' => $this->invitation->get('stelle_id'),
 				'inviter_id' => $this->invitation->get('inviter_id')
 			));
@@ -8335,6 +8346,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					'email' => $this->formvars['email'],
 					'name' => $this->formvars['name'],
 					'vorname' => $this->formvars['vorname'],
+					'loginname' => $this->formvars['loginname'],
 					'stelle_id' => $this->formvars['stelle_id'],
 					'inviter_id' => $this->formvars['inviter_id']
 				)
@@ -19173,13 +19185,14 @@ class db_mapObj{
 				if ($classes[$i]['Expression'] == '') {
           return $classes[$i]['Class_ID'];
         }
-				if (strpos($classes[$i]['Expression'], '/') !== false) {		# regex
+				if (strpos($classes[$i]['Expression'], '/') === 0) {		# regex
 					$operator = '~';
+					$classes[$i]['Expression'] = str_replace('/', '', $classes[$i]['Expression']);
 				}
 				else {
 					$operator = '=';
 				}
-        $exp = str_replace(array("'[", "]'", '[', ']', '/'), '', $classes[$i]['Expression']);
+        $exp = str_replace(array("'[", "]'", '[', ']'), '', $classes[$i]['Expression']);
         $exp = str_replace(' eq ', '=', $exp);
         $exp = str_replace(' ne ', '!=', $exp);
 
