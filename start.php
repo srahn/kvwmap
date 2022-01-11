@@ -101,7 +101,7 @@ if (is_logout($GUI->formvars)) {
 	$GUI->debug->write('Logout angefragt.', 4, $GUI->echo);
 	if (is_logged_in()) {
 		$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
-		if (LOGOUT_ROUTINE != '') {
+		if (LOGOUT_ROUTINE != '' AND file_exists(LOGOUT_ROUTINE) AND is_file(LOGOUT_ROUTINE)) {
 			include(LOGOUT_ROUTINE);
 		}
 		$GUI->debug->write('Logout.', 4, $GUI->echo);
@@ -484,7 +484,7 @@ else {
 		}
 		# Zurücksetzen der veränderten Klassen
 		#$GUI->user->rolle->resetClasses();
-		if (defined('LOGIN_ROUTINE') AND LOGIN_ROUTINE != '') {
+		if (defined('LOGIN_ROUTINE') AND LOGIN_ROUTINE != '' AND file_exists(LOGIN_ROUTINE) AND is_file(LOGIN_ROUTINE)) {
 			include(LOGIN_ROUTINE);
 		}
 		$_SESSION['login_routines'] = false;
