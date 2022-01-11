@@ -2221,12 +2221,17 @@ echo '			</table>
 				if($dbStyle['maxscale'] != ''){
 					$style->set('maxscaledenom', $dbStyle['maxscale']);
 				}
-				if ($dbStyle['symbolname']!='') {
-          $style->set('symbolname',$dbStyle['symbolname']);
-        }
-        if ($dbStyle['symbol']>0) {
-          $style->set('symbol',$dbStyle['symbol']);
-        }
+				if (substr($dbStyle['symbolname'], 0, 1) == '[') {
+					$style->updateFromString('STYLE SYMBOL ' .$dbStyle['symbolname']. ' END');
+				}
+				else {
+					if ($dbStyle['symbolname']!='') {
+						$style->set('symbolname',$dbStyle['symbolname']);
+					}
+					if ($dbStyle['symbol']>0) {
+						$style->set('symbol',$dbStyle['symbol']);
+					}
+				}				
         if (MAPSERVERVERSION >= 620) {
 					if($dbStyle['geomtransform'] != '') {
 						$style->setGeomTransform($dbStyle['geomtransform']);
@@ -6041,12 +6046,17 @@ echo '			</table>
     $klasse->set('status', MS_ON);
     $dbStyle = $mapDB->get_Style($style_id);
     $style = ms_newStyleObj($klasse);
-    if($dbStyle['symbolname']!='') {
-      $style -> set('symbolname',$dbStyle['symbolname']);
-    }
-    if($dbStyle['symbol']>0) {
-      $style->set('symbol',$dbStyle['symbol']);
-    }
+		if (substr($dbStyle['symbolname'], 0, 1) == '[') {
+			$style->updateFromString('STYLE SYMBOL ' .$dbStyle['symbolname']. ' END');
+		}
+		else {
+			if ($dbStyle['symbolname']!='') {
+				$style->set('symbolname',$dbStyle['symbolname']);
+			}
+			if ($dbStyle['symbol']>0) {
+				$style->set('symbol',$dbStyle['symbol']);
+			}
+		}	
 		if($dbStyle['size'] != ''){
 			if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
 			else $style->updateFromString("STYLE SIZE [" . $dbStyle['size']."] END");
@@ -8268,6 +8278,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				'email' => $this->invitation->get('email'),
 				'name' => $this->invitation->get('name'),
 				'vorname' => $this->invitation->get('vorname'),
+				'loginname' => $this->invitation->get('loginname'),
 				'stelle_id' => $this->invitation->get('stelle_id'),
 				'inviter_id' => $this->invitation->get('inviter_id')
 			));
@@ -8335,6 +8346,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					'email' => $this->formvars['email'],
 					'name' => $this->formvars['name'],
 					'vorname' => $this->formvars['vorname'],
+					'loginname' => $this->formvars['loginname'],
 					'stelle_id' => $this->formvars['stelle_id'],
 					'inviter_id' => $this->formvars['inviter_id']
 				)
@@ -17962,89 +17974,73 @@ class db_mapObj{
 		# Erzeugt einen neuen Layer (entweder aus formvars oder aus einem Layerobjekt)
 		if (is_array($layerdata)) {
 			$formvars = $layerdata; # formvars wurden übergeben
-
-			$sql = "INSERT INTO layer (";
-			if ($formvars['id'] != '') {
-				$sql .= "`Layer_ID`, ";
-			}
-			$sql .= "`Name`, ";
-			foreach ($supportedLanguages as $language){
+			$name_columns = '';
+			$names = '';
+			foreach ($supportedLanguages as $language) {
 				if ($language != 'german') {
-					$sql .= "`Name_" . $language."`, ";
+					$name_columns .= "`Name_" . $language."`, ";
+					$names .= quote($formvars['Name_' . $language]) . ", ";
 				}
 			}
-			$sql .="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `styleitem`, `classification`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `queryable`, `use_geom`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `status`, `trigger_function`, `sync`, `listed`, `duplicate_from_layer_id`, `duplicate_criterion`, `shared_from`) VALUES(";
-      if($formvars['id'] != ''){
-        $sql.="'" . $formvars['id']."', ";
-      }
-      $sql .= "'" . $formvars['Name']."', ";
-			foreach ($supportedLanguages as $language){
-				if($language != 'german'){
-					$sql .= "'" . $formvars['Name_'.$language]."', ";
-				}
-			}
-      $sql .= "'" . $formvars['alias']."', ";
-      $sql .= "'" . $formvars['Datentyp']."', ";
-      $sql .= "'" . $formvars['Gruppe']."', ";
-      if($formvars['pfad'] == ''){
-        $sql .= "NULL, ";
-      }
-      else{
-        $sql .= "'" . $formvars['pfad']."', ";
-      }
-    	if($formvars['maintable'] == ''){
-        $sql .= "NULL, ";
-      }
-      else{
-        $sql .= "'" . $formvars['maintable']."', ";
-      }
-			$sql .= "'" . $formvars['oid']."', ";
-      if($formvars['Data'] == ''){
-        $sql .= "NULL, ";
-      }
-      else{
-        $sql .= "'" . $formvars['Data']."', ";
-      }
-      if($formvars['schema'] == ''){
-        $sql .= "NULL, ";
-      }
-      else{
-        $sql .= "'" . $formvars['schema']."', ";
-      }
-      if($formvars['document_path'] == '')$sql .= "NULL, ";
-      else $sql .= "'" . $formvars['document_path']."', ";
-			if($formvars['document_url'] == '')$sql .= "NULL, ";
-      else $sql .= "'" . $formvars['document_url']."', ";
-      $sql .= "'" . $formvars['tileindex']."', ";
-      $sql .= "'" . $formvars['tileitem']."', ";
-      $sql .= "'" . $formvars['labelangleitem']."', ";
-      $sql .= "'" . $formvars['labelitem']."', ";
-      if($formvars['labelmaxscale']==''){$formvars['labelmaxscale']='NULL';}
-      $sql .= $formvars['labelmaxscale'].", ";
-      if($formvars['labelminscale']==''){$formvars['labelminscale']='NULL';}
-      $sql .= $formvars['labelminscale'].", ";
-      $sql .= "'" . $formvars['labelrequires']."', ";
-			$sql .= "'" . $formvars['postlabelcache']."', ";
-      $sql .= "'" . trim($formvars['connection']) ."', ";
-			if ($formvars['connection_id'] == '') {
-				$sql .= "NULL, ";
-			}
-			else {
-				$sql .= "'" . $formvars['connection_id']."', ";
-			}
-      $sql .= "'" . $formvars['printconnection']."', ";
-      $sql .= ($formvars['connectiontype'] =='' ? "6" : $formvars['connectiontype']) .", "; # Set default to postgis layer
-      $sql .= "'" . $formvars['classitem']."', ";
-			$sql .= "'" . $formvars['styleitem']."', ";
-			$sql .= "'" . $formvars['layer_classification']."', ";
-			if($formvars['cluster_maxdistance'] == '')$formvars['cluster_maxdistance'] = 'NULL';
-			$sql .= $formvars['cluster_maxdistance'].", ";
-      if($formvars['tolerance']==''){$formvars['tolerance']='3';}
-      $sql .= $formvars['tolerance'].", ";
-      if($formvars['toleranceunits']==''){$formvars['toleranceunits']='pixels';}
-      $sql .= "'" . $formvars['toleranceunits']."', ";
-			$sql .= "'" . $formvars['sizeunits']."', ";
-      $sql .= "'" . $formvars['epsg_code']."', ";
+			$sql = "
+				INSERT INTO layer (
+					" . ($formvars['id'] != '' ? "`Layer_ID`," : '') . "
+					`Name`,
+					" . $name_columns . "
+					`alias`,
+					`Datentyp`,
+					`Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`,
+					`connectiontype`,
+					`classitem`,
+					`styleitem`, `classification`, `cluster_maxdistance`, `tolerance`,
+					`toleranceunits`, `sizeunits`, `epsg_code`, `template`,
+					`queryable`, `use_geom`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`,
+					`wms_auth_password`, `wfs_geom`, `selectiontype`,
+					`querymap`,
+					`processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`,
+					`metalink`,
+					`status`,
+					`trigger_function`,
+					`sync`,
+					`listed`,
+					`duplicate_from_layer_id`,
+					 `duplicate_criterion`,
+					`shared_from`
+				) VALUES (
+					" . ($formvars['id'] != '' ? $formvars['id'] . ', ' : '') . "
+					" . quote($formvars['Name']) . ",
+					" . $names . "
+					" . quote($formvars['alias']) . ",
+					" . quote_or_null($formvars['Datentyp']) . ",
+					" . quote_or_null($formvars['Gruppe']) . ",
+					" . quote_or_null($formvars['pfad']) . ",
+					" . quote_or_null($formvars['maintable']) . ",
+					" . quote_or_null($formvars['oid']) . ",
+					" . quote_or_null($formvars['Data']) . ",
+					" . quote_or_null($formvars['schema']) . ",
+					" . quote_or_null($formvars['document_path']) . ",
+					" . quote_or_null($formvars['document_url']) . ",
+					" . quote($formvars['tileindex']) . ",
+					" . quote($formvars['tileitem']) . ",
+					" . quote($formvars['labelangleitem']) . ",
+					" . quote($formvars['labelitem']) . ", -- labelitem
+					" . quote_or_null($formvars['labelmaxscale']) . ",
+					" . quote_or_null($formvars['labelminscale']) . ",
+					" . quote($formvars['labelrequires']) . ",
+					" . quote($formvars['postlabelcache']) . ",
+					" . quote(trim($formvars['connection'])) . ",
+					" . quote_or_null($formvars['connection_id']) . ",
+					" . quote($formvars['printconnection']) . ",
+					" . ($formvars['connectiontype'] == '' ? "6" : $formvars['connectiontype']) . ",
+					" . quote($formvars['classitem']) . ", -- classitem
+					" . quote($formvars['styleitem']) . ",
+					" . quote($formvars['layer_classification']) . ",
+					" . quote_or_null($formvars['cluster_maxdistance']) . ",
+					" . ($formvars['tolerance'] == '' ?  '3' : $formvars['tolerance']) . ",
+					" . ($formvars['toleranceunits'] == '' ? "'pixels'" : quote($formvars['toleranceunits'])) . ",
+					" . quote_or_null($formvars['sizeunits']) . ",
+					" . quote($formvars['epsg_code']) . ",
+				";
       $sql .= "'" . $formvars['template']."', ";
       $sql .= "'" . $formvars['queryable']."', ";
 			$sql .= "'" . $formvars['use_geom']."', ";
@@ -18074,9 +18070,9 @@ class db_mapObj{
       $sql .= $formvars['wms_connectiontimeout'] . ",
 					'" . $formvars['wms_auth_username'] . "',
 					'" . $formvars['wms_auth_password'] . "',
-					'" . $formvars['wfs_geom'] . "',
+					'" . $formvars['wfs_geom'] . "', -- wfs_geom
 					'" . $formvars['selectiontype'] . "',
-					'" . $formvars['querymap'] . "',
+					'" . $formvars['querymap'] . "', -- querymap
 					'" . $formvars['processing'] . "',
 					'" . $formvars['kurzbeschreibung'] . "',
 					'" . $formvars['datasource'] . "',
@@ -18088,7 +18084,7 @@ class db_mapObj{
 					'" . $formvars['metalink'] . "',
 					'" . $formvars['status'] . "',
 					'" . $formvars['trigger_function'] . "',
-					" . ($formvars['sync'] == '' ? 0 : "'" . $formvars['sync'] . "'") . ",
+					" . ($formvars['sync'] == '' ? "'0'" : "'" . $formvars['sync'] . "'") . ", -- sync
 			 		" . ($formvars['listed'] == '' ? 0 : "'" . $formvars['listed'] . "'") . ",
 					" . ($formvars['duplicate_from_layer_id'] == '' ? "NULL" : $formvars['duplicate_from_layer_id']) . ",
 					'" . $formvars['duplicate_criterion'] . "',
@@ -18096,46 +18092,74 @@ class db_mapObj{
 				)
 			";
     }
-    else{
-      $layer = $layerdata;      # ein Layerobject wurde übergeben
-      $projection = explode('epsg:', $layer->getProjection());
-      $sql = "INSERT INTO layer (`Name`, `Datentyp`, `Gruppe`, `pfad`, `Data`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `epsg_code`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `trigger_function`, `sync`) VALUES(";
-      $sql .= "'" . $layer->name."', ";
-      $sql .= "'" . $layer->type."', ";
-      $sql .= "'" . $layer->group."', ";
-      $sql .= "'', ";                 # pfad
-      $sql .= "'" . $layer->data."', ";
-      $sql .= "'" . $layer->tileindex."', ";
-      $sql .= "'" . $layer->tileitem."', ";
-      $sql .= "'" . $layer->labelangleitem."', ";
-      $sql .= "'" . $layer->labelitem."', ";
-      $sql .= $layer->labelmaxscale.", ";
-      $sql .= $layer->labelminscale.", ";
-      $sql .= "'" . $layer->labelrequires."', ";
-      $sql .= "'" . $layer->connection."', ";
-      $sql .= $layer->connectiontype.", ";
-      $sql .= "'" . $layer->classitem."', ";
-      $sql .= $layer->tolerance.", ";
-      $sql .= "'" . $layer->toleranceunits."', ";
-      $sql .= "'" . $projection[1]."', ";               # epsg_code
-      $sql .= "'', ";               # ows_srs
-      $sql .= "'', ";               # wms_name
-      $sql .= "'', ";               # wms_server_version
-      $sql .= "'', ";               # wms_format
-      $sql .= "60";                 # wms_connectiontimeout
-      $sql .= "'" . $layer->trigger_function . "', ";
-      $sql .= "'" . $layer->sync . "'";
-      $sql .= ")";
-    }
+		else {
+			$layer = $layerdata;      # ein Layerobject wurde übergeben
+			$projection = explode('epsg:', $layer->getProjection());
+			$sql = "
+				INSERT INTO layer (
+					`Name`,
+					`Datentyp`,
+					`Gruppe`,
+					`pfad`,
+					`Data`,
+					`tileindex`,
+					`tileitem`,
+					`labelangleitem`,
+					`labelitem`,
+					`labelmaxscale`,
+					`labelminscale`,
+					`labelrequires`,
+					`connection`,
+					`connectiontype`,
+					`classitem`,
+					`tolerance`,
+					`toleranceunits`,
+					`epsg_code`,
+					`ows_srs`,
+					`wms_name`,
+					`wms_server_version`,
+					`wms_format`,
+					`wms_connectiontimeout`,
+					`trigger_function`,
+					`sync`
+				) VALUES (
+					'" . $layer->name . "',
+					" . quote($layer->type) . ",
+					'" . $layer->group . "',
+					'',
+					'" . $layer->data . "',
+					'" . $layer->tileindex . "',
+					'" . $layer->tileitem . "',
+					'" . $layer->labelangleitem . "',
+					'" . $layer->labelitem . "',
+					" . $layer->labelmaxscale . ",
+					" . $layer->labelminscale . ",
+					'" . $layer->labelrequires . "',
+					'" . $layer->connection . "',
+					" . $layer->connectiontype.",
+					'" . $layer->classitem . "',
+					" . $layer->tolerance . ",
+					'" . $layer->toleranceunits ."',
+					'" . $projection[1] . "',
+					'',
+					'',
+					'',
+					'',
+					60,
+					'" . $layer->trigger_function . "',
+					" . quote($layer->sync) . "
+				)
+			";
+		}
 
-    #echo '<p>SQL zum Eintragen eines Layers: '. $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->newLayer - Erzeugen eines Layers:<br>" . $sql,4);
-    $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) {
+		#echo '<p>SQL zum Eintragen eines Layers: '. $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->newLayer - Erzeugen eines Layers:<br>" . $sql,4);
+		$ret = $this->db->execSQL($sql);
+		if (!$this->db->success) {
 			return 0;
 		}
-    return $this->db->mysqli->insert_id;
-  }
+		return $this->db->mysqli->insert_id;
+	}
 
 	function save_datatype_attributes($attributes, $database, $formvars){
 		global $supportedLanguages;
@@ -19161,13 +19185,14 @@ class db_mapObj{
 				if ($classes[$i]['Expression'] == '') {
           return $classes[$i]['Class_ID'];
         }
-				if (strpos($classes[$i]['Expression'], '/') !== false) {		# regex
+				if (strpos($classes[$i]['Expression'], '/') === 0) {		# regex
 					$operator = '~';
+					$classes[$i]['Expression'] = str_replace('/', '', $classes[$i]['Expression']);
 				}
 				else {
 					$operator = '=';
 				}
-        $exp = str_replace(array("'[", "]'", '[', ']', '/'), '', $classes[$i]['Expression']);
+        $exp = str_replace(array("'[", "]'", '[', ']'), '', $classes[$i]['Expression']);
         $exp = str_replace(' eq ', '=', $exp);
         $exp = str_replace(' ne ', '!=', $exp);
 
@@ -19253,13 +19278,22 @@ class db_mapObj{
 					$sql.= '`Name_'.$language.'`, ';
 				}
 			}
-			$sql .= 'Layer_ID, Expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder) VALUES ("' . $attrib['name'] . '",';
-			foreach ($supportedLanguages as $language) {
-				if ($language != 'german'){
-					$sql .= '"' . $attrib['name_' . $language] . '",';
+			$sql .= 'Layer_ID, Expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder) VALUES (
+				"' . $attrib['name'] . '",';
+				foreach ($supportedLanguages as $language) {
+					if ($language != 'german'){
+						$sql .= '"' . $attrib['name_' . $language] . '",';
+					}
 				}
-			}
-			$sql .= $attrib['layer_id'] . ', "' . $attrib['expression'] . '", "' . value_of($attrib, 'classification') . '", "' . value_of($attrib, 'legendgraphic') . '", ' . $attrib['legendimagewidth'] . ', ' . $attrib['legendimageheight'] . ', "' . $attrib['order'] . '", ' . $attrib['legendorder'] . ')';
+				$sql .= $attrib['layer_id'] . ",
+					'" . $attrib['expression'] . "',
+					'" . value_of($attrib, 'classification') . "',
+					'" . value_of($attrib, 'legendgraphic') . "',
+					" . $attrib['legendimagewidth'] . ",
+					" . $attrib['legendimageheight'] . ",
+					" . ($attrib['order'] == '' ? 'NULL' : $attriub['order']) . ", -- order
+					" . ($attrib['legendorder'] == '' ? 'NULL' : $attribut['legendorder']) . " --legendorder
+				)";
 		}
 		else {
 			$class = $classdata; # Classobjekt wurde übergeben
