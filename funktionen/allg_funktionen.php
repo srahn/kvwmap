@@ -11,12 +11,16 @@ function get_url(){	# die Konstante URL kann durch diese Funktion ersetzt werden
 function quote($var, $type = NULL){
 	switch ($type) {
 		case 'text' : case 'varchar' : {
-			return "'".$var."'";
+			return "'" . $var . "'";
 		}break;
 		default : {
-			return is_numeric($var) ? $var : "'".$var."'";
+			return is_numeric($var) ? $var : "'" . $var . "'";
 		}
 	}
+}
+
+function quote_or_null($var) {
+	return ($var == '' ? 'NULL' : quote($var));
 }
 
 function pg_quote($column){
