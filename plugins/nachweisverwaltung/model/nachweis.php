@@ -670,7 +670,7 @@ class Nachweis {
 																																								text 60,150 \'Seiten\'"';
 				}
 			}
-			$command = IMAGEMAGICKPATH.'convert -density 300x300 '.$dateiname.'[0] -quality 75 -background white '.$label.' -flatten -resize 1800x1800\> '.$dateinamensteil[0].'_thumb.jpg';
+			$command = IMAGEMAGICKPATH.'convert -density 200x200 '.$dateiname.'[0] -quality 75 -background white '.$label.' -flatten -resize 1800x1800\> '.$dateinamensteil[0].'_thumb.jpg';
 			exec($command, $ausgabe, $ret);
 		}
   	else {
