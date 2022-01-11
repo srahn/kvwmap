@@ -9229,7 +9229,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 		$layerset = $this->user->rolle->getLayer($layer_id);
 		$this->formvars['selected_layer_id'] = $layer_id;
-		$this->formvars['value_'.$layerset[0]['maintable'].'_oid'] = '('.implode(',', $oids).')';
+		$this->formvars['value_'.$layerset[0]['maintable'].'_oid'] = "('" . implode("', '", $oids) . "')";
 		$this->formvars['operator_'.$layerset[0]['maintable'].'_oid'] = 'IN';
 		$this->formvars['anzahl'] = 1000;
 		$this->GenerischeSuche_Suchen();
