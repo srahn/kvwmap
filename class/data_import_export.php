@@ -840,15 +840,24 @@ class data_import_export {
 	}
 
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb) {
-		$command = 'export PGDATESTYLE="ISO, MDY";export PGCLIENTENCODING=UTF-8;'
-			. OGR_BINPATH . 'ogr2ogr -f ' . $exportformat . ' -lco ENCODING=UTF-8 -sql "' . str_replace(["\t", chr(10), chr(13)], [' ', ''], $sql) . '" ' . $exportfile
-			. ' PG:"' . $layerdb->get_connection_string(true) . ' active_schema=' . $layerdb->schema . '"';
+		$command = 'export PGDATESTYLE="ISO, MDY";'
+			. 'export '
+			. 'PGCLIENTENCODING=UTF-8;'
+			. OGR_BINPATH . 'ogr2ogr '
+			. '-f ' . $exportformat . ' '
+			. '-lco ENCODING=UTF-8 '
+			. '-sql "' . str_replace(["\t", chr(10), chr(13)], [' ', ''], $sql) . '" '
+			. '-nln ' . $this->formvars['layer_name'] . ' '
+			. $exportfile . ' '
+			. 'PG:"' . $layerdb->get_connection_string(true) . ' active_schema=' . $layerdb->schema . '"';
 		$errorfile = rand(0, 1000000);
-		$command .= ' 2> '.IMAGEPATH.$errorfile.'.err';
+		$command .= ' 2> ' . IMAGEPATH . $errorfile . '.err';
 		$output = array();
 		#echo '<br>' . $command;
 		exec($command, $output, $ret);
-		if($ret != 0)$ret = 'Fehler beim Exportieren !<br><br>Befehl:<div class="code">'.$command.'</div><a href="' . IMAGEURL . $errorfile . '.err" target="_blank">Fehlerprotokoll</a>';
+		if ($ret != 0) {
+			$ret = 'Fehler beim Exportieren !<br><br>Befehl:<div class="code">'.$command.'</div><a href="' . IMAGEURL . $errorfile . '.err" target="_blank">Fehlerprotokoll</a>';
+		}
 		return $ret;
 	}
 
