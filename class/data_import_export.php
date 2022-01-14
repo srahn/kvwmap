@@ -364,6 +364,22 @@ class data_import_export {
 						" . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
 					SET 
 						the_geom  = ST_CollectionExtract(st_makevalid(the_geom), 2);
+						
+					UPDATE 
+						" . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
+					SET 
+						the_geom = st_multi(geom)
+					FROM (
+						SELECT 
+							line_id, ST_MakeLine(geom) as geom 
+						FROM (
+							SELECT ogc_fid as line_id, (ST_DumpPoints(the_geom)).geom
+							FROM " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . ") my_points
+							WHERE NOT ST_Equals(geom, ST_GeomFromText('POINT(0 0)', 4326))
+						GROUP BY
+							line_id
+					) t
+					WHERE ogc_fid = t.line_id;
 					" . $this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename) . "
 				";
 				$ret = $pgdatabase->execSQL($sql,4, 0);
