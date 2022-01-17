@@ -448,8 +448,7 @@ class Regel extends PgObject {
 	function get_konvertierung() {
 		$konvertierung_id = $this->get('konvertierung_id');
 		if (!empty($this->get('konvertierung_id'))) {
-			#echo '<br>Regel gehört direkt zur Konvertierung: ' . $this->get('konvertierung_id');
-			$this->debug->show('Regel gehört direkt zur Konvertierung: ' . $this->get('konvertierung_id'), true);
+			$this->debug->show('Regel gehört direkt zur Konvertierung: ' . $this->get('konvertierung_id'), false);
 			$konvertierung = Konvertierung::find_by_id($this->gui, 'id', $this->get('konvertierung_id'));
 		}
 		else {
