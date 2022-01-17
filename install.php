@@ -301,7 +301,7 @@ function install() {
 			Setze kvwmap init Password...<?php
 			$sql = "
 				UPDATE connections
-				SET password = '" . KVWMAP_INIT_PASSWORD . "'
+				SET password = '" . POSTGRES_PASSWORD . "'
 				WHERE id = 1
 			";
 			$mysqlKvwmapDb->execSQL($sql, 0, 1);
@@ -352,6 +352,7 @@ function init_config() {
 	$installpath = dirname($rest) . '/';
 	$formvars = $_REQUEST;
 
+	define('PHPVERSION', '7329');
 	define('MYSQL_HOST', ($formvars['MYSQL_HOST'] != '' ? $formvars['MYSQL_HOST'] : 'mysql'));
 	define('MYSQL_USER', ($formvars['MYSQL_USER'] != '' ? $formvars['MYSQL_USER'] : 'kvwmap'));
 	define('MYSQL_PASSWORD', ($formvars['MYSQL_PASSWORD'] != '' ? $formvars['MYSQL_PASSWORD'] : (getenv('KVWMAP_INIT_PASSWORD') == '' ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'))));
