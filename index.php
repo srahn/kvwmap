@@ -1381,6 +1381,11 @@ function go_switch($go, $exit = false) {
 				$GUI->Layer2Stelle_Reihenfolge();
 			} break;
 
+			case 'Layer2Stelle_Reihenfolge_Layerdef' : {
+				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->Layer2Stelle_Reihenfolge_Layerdef();
+			} break;
+
 			case 'Layer2Stelle_Reihenfolge_Speichern' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->Layer2Stelle_ReihenfolgeSpeichern();
