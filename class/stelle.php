@@ -36,7 +36,7 @@ class stelle {
 		$this->log = $log_mysql;
 		$this->id = $id;
 		$this->database = $database;
-		$this->readDefaultValues();
+		$ret = $this->readDefaultValues();
 	}
 
 	function getsubmenues($id){
@@ -136,9 +136,9 @@ class stelle {
 		";
 		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return $ret;
 		}
 		$rs = $this->database->result->fetch_array();
 		$this->Bezeichnung=$rs['Bezeichnung'];

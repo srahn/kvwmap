@@ -204,6 +204,7 @@ else {
 	include_(CLASSPATH . 'bauleitplanung.php');
 }
 include(WWWROOT . APPLVERSION . 'start.php');
+
 $GUI->go = $go;
 
 # Laden der Plugins index.phps
@@ -212,7 +213,6 @@ if (!FAST_CASE) {
 		include(PLUGINS . $kvwmap_plugins[$i] . '/control/index.php');
 	}
 }
-
 # Übergeben des Anwendungsfalles
 $debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
 function go_switch($go, $exit = false) {

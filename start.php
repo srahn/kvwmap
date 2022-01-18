@@ -264,6 +264,12 @@ if (!$show_login_form) {
 	else {
 		$GUI->debug->write('Keine neue Stelle angefragt. Stelle: ' . $GUI->user->stelle_id . ' bleibt.', 4, $GUI->echo);
 		$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->database);
+		if ($GUI->database->errormessage != '') {
+			$GUI->add_message('error', 'Die Stelle kann nicht abgefragt werden. Prüfen Sie ob das Datenmodell der Stelle aktuell ist!');
+			logout();
+			$show_login_form = true;
+			$go = 'login';
+		}
 	}
 
 	# check stelle wenn noch nicht angemeldet gewesen, wenn noch nicht in Stelle angemeldet auch wenn stelle gewechselt wird.
@@ -403,7 +409,6 @@ else {
 		$GUI->user->setOptions($GUI->user->stelle_id, $GUI->formvars);
 		$GUI->user->rolle->readSettings();
 	}
-
 	#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
 	# Rollenbezogene Stellendaten zuweisen
 	$GUI->loadMultiLingualText($GUI->user->rolle->language);
@@ -430,18 +435,19 @@ else {
 		echo $GUI->pgdatabase->err_msg;
 		exit;
 	}
-	
+
 	if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, die Trafos weglassen
 		$GUI->epsg_codes = $GUI->pgdatabase->read_epsg_codes(false);
 		# Umrechnen der für die Stelle eingetragenen Koordinaten in das aktuelle System der Rolle
 		# wenn die EPSG-Codes voneinander abweichen
 		if ($GUI->Stelle->epsg_code != $GUI->user->rolle->epsg_code) {
 			$user_epsg = $epsg_codes[$GUI->user->rolle->epsg_code];
-			if($user_epsg['minx'] != ''){							// Koordinatensystem ist räumlich eingegrenzt
-				if($GUI->Stelle->epsg_code != 4326){
+			if ($user_epsg['minx'] != '') {
+				// Koordinatensystem ist räumlich eingegrenzt
+				if ($GUI->Stelle->epsg_code != 4326) {
 					$projFROM = ms_newprojectionobj("init=epsg:".$GUI->Stelle->epsg_code);
 					$projTO = ms_newprojectionobj("init=epsg:4326");
-					$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);			// max. Stellenextent wird in 4326 transformiert
+					$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO); // max. Stellenextent wird in 4326 transformiert
 				}
 				// Vergleich der Extents und ggfs. Anpassung
 				if($user_epsg['minx'] > $GUI->Stelle->MaxGeorefExt->minx)$GUI->Stelle->MaxGeorefExt->minx = $user_epsg['minx'];
@@ -454,8 +460,8 @@ else {
 			}
 			else {
 				# Umrechnen der maximalen Kartenausdehnung der Stelle
-				$projFROM = ms_newprojectionobj("init=epsg:".$GUI->Stelle->epsg_code);
-				$projTO = ms_newprojectionobj("init=epsg:".$GUI->user->rolle->epsg_code);
+				$projFROM = ms_newprojectionobj("init=epsg:" . $GUI->Stelle->epsg_code);
+				$projTO = ms_newprojectionobj("init=epsg:" . $GUI->user->rolle->epsg_code);
 				$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);
 			}
 		}
