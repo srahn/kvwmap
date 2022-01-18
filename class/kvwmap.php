@@ -355,45 +355,69 @@ class GUI {
 				<tr>
 					<td>
 						<ul>';
-						if ($this->formvars['layer_id'] < 0) {
-							echo '
-								<input type="hidden" name="selected_rollenlayer_id" value="' . (-$this->formvars['layer_id']) . '">
-								<li><span>' . $this->strName . ':</span> <input type="text" name="layer_options_name" value="' . $layer[0]['Name'] . '"></li>';
-							if ($layer[0]['Typ'] == 'import' AND $this->user->share_rollenlayer_allowed AND count($selectable_layer_groups) > 0) {								
-								echo '
-									<li id="shareRollenlayerLink">
-										<a href="javascript:void(0);" onclick="toggle(document.getElementById(\'shareRollenlayerDiv\'))" title="' . $this->strShareRollenLayerLong . '">' . $this->strShareRollenlayer . '</a>
-									</li>
-									<div id="shareRollenlayerDiv" style="display: none">
-										Name korrekt? Dann wähle eine Layergruppe aus:<br>' .
-										implode(
-											'<br>',
-											array_map(
+						if ($this->formvars['layer_id'] < 0) { ?>
+							<input type="hidden" name="selected_rollenlayer_id" value="<? echo (-$this->formvars['layer_id']); ?>">
+							<li>
+								<div style="width: 46px; float: left; padding-top: 3px;"><span><? echo $this->strName; ?>:</span></div>
+								<div style="float: left;">
+									<input
+										type="text"
+										name="layer_options_name"
+										value="<? echo $layer[0]['Name']; ?>"
+										style="width: 199px;"
+										onchange="$('#shared_layer_table_name').val(umlaute_umwandeln(this.value.toLowerCase()));"
+									>
+								</div>
+								<div style="clear: both">
+							</li><?
+							if ($layer[0]['Typ'] == 'import' AND $this->user->share_rollenlayer_allowed AND count($selectable_layer_groups) > 0) { ?>
+								<li id="shareRollenlayerLink">
+									<a
+										href="javascript:void(0);"
+										onclick="toggle(document.getElementById('shareRollenlayerDiv'))"
+										title="<? echo $this->strShareRollenLayerLong; ?>"
+									><? echo  $this->strShareRollenlayer; ?></a>
+								</li>
+								<div id="shareRollenlayerDiv" style="display: none">
+									<div style="margin-bottom: 3px;"><? echo $this->strLayerGroup; ?>:</div><?
+									echo implode(
+										'<br>',
+										array_map(
+											function($group) {
+												return '<input
+													id="shared_layer_group_id"
+													type="radio"
+													name="shared_layer_group_id"
+													value="' . $group['id'] . '"
+													style="vertical-align: text-top"
+													onchange="$(\'#shared_layer_schema_name\').val(umlaute_umwandeln($(this).next().text().toLowerCase()));"
+												><span>' . $group['Gruppenname'] . '</span>';
+											},
+											array_filter(
+												$selectable_layer_groups,
 												function($group) {
-													return '<input
-														type="radio"
-														name="shared_layer_group_id"
-														value="' . $group['id'] . '"
-														style="vertical-align: middle"
-													>' . $group['Gruppenname'];
-												},
-												array_filter(
-													$selectable_layer_groups,
-													function($group) {
-														return array_key_exists('Gruppenname', $group);
-													}
-												)
+													return array_key_exists('Gruppenname', $group);
+												}
 											)
-										) . '<br>
-										<select name="layer_options_privileg" style="margin-bottom: 5px">
-											<option value="readable">' . $this->strReadable . '</option>
-											<option value="editable_only_in_this_stelle" selected>' . $this->strEditableOnlyInThisStelle . '</option>
-											<option value="editable">' . $this->strEditableInAllStellen . '</option>
-										</select><br>
-										<input type="button" onclick="shareRollenlayer(' . (-$this->formvars['layer_id']) . ')" value="' . $this->strShareRollenlayer . '">
-										<input type="button" onclick="toggle(document.getElementById(\'shareRollenlayerDiv\'))" value="' . $this->strCancel . '">
+										)
+									); ?><br>
+									<? echo $this->strSchema; ?>.<? echo $this->strTableName; ?>:<br>
+									<div style="float: left;padding-top: 3px;">
+										<input id="shared_layer_schema_name" type="text" name="shared_layer_schema_name" value="shared" style="width: 80px;">.
 									</div>
-								';
+									<div style="float: left;padding-top: 3px;">
+										<input id="shared_layer_table_name" type="text" name="shared_layer_table_name" value="<? echo umlaute_umwandeln(strtolower($layer[0]['Name'])); ?>" style="width: 181px;">
+									</div>
+									<div style="clear: both">
+
+									<select name="layer_options_privileg" style="margin-top: 3px; margin-bottom: 5px">
+										<option value="readable"><? echo $this->strReadable; ?></option>
+										<option value="editable_only_in_this_stelle" selected><? echo $this->strEditableOnlyInThisStelle; ?></option>
+										<option value="editable"><? echo $this->strEditableInAllStellen; ?></option>
+									</select><br>
+									<input type="button" onclick="shareRollenlayer(<? echo (-$this->formvars['layer_id']); ?>)" value="<? echo $this->strShareRollenlayer; ?>">
+									<input type="button" onclick="toggle(document.getElementById('shareRollenlayerDiv'))" value="<? echo $this->strCancel; ?>">
+								</div><?
 							}
 						}
 						else {
@@ -436,7 +460,7 @@ class GUI {
 						if(in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
 							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">' . $this->strSearch . '</a></li>';
 						}
-						if ($layer[0]['queryable'] AND $layer[0]['privileg'] > 0) {
+						if ($layer[0]['queryable'] AND $layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
 							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '">' . $this->newDataset . '</a></li>';
 						}
 						if ($layer[0]['Class'][0]['Name'] != '') {
@@ -1152,7 +1176,7 @@ echo '			</table>
 				}
 				$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"> </div>';
 			}
-			if($layer['aktivStatus'] == 1 AND isset($layer['Class'][0]) AND $layer['Class'][0]['Name'] != ''){
+			if($layer['aktivStatus'] == 1 AND isset($layer['Class'][0])){
 				if(value_of($layer, 'requires') == '' AND $layer['Layer_ID'] > 0){
 					$legend .= '<input id="classes_'.$layer['Layer_ID'].'" name="classes_'.$layer['Layer_ID'].'" type="hidden" value="'.$layer['showclasses'].'">';
 				}
@@ -1181,86 +1205,88 @@ echo '			</table>
 						}
 						for($k = 0; $k < $maplayer->numclasses; $k++){
 							$class = $maplayer->getClass($layer['Class'][$k]['index']);
-							for($s = 0; $s < $class->numstyles; $s++){
-								$style = $class->getStyle($s);
-								if($maplayer->type > 0){
-									$symbol = $this->map->getSymbolObjectById($style->symbol);
-									if($symbol->type == 1006){ 	# 1006 == hatch
-										$style->set('size', 2*$style->width);					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
-										$style->set('maxsize', 2*$style->width);
+							if ($class->name != '') {
+								for($s = 0; $s < $class->numstyles; $s++){
+									$style = $class->getStyle($s);
+									if($maplayer->type > 0){
+										$symbol = $this->map->getSymbolObjectById($style->symbol);
+										if($symbol->type == 1006){ 	# 1006 == hatch
+											$style->set('size', 2*$style->width);					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
+											$style->set('maxsize', 2*$style->width);
+										}
+										elseif($style->symbolname == ''){
+											$style->set('size', 2);					# size und width bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
+											$style->set('maxsize', 2);
+											$style->set('width', 2);
+											$style->set('maxwidth', 2);
+										}
+										if ($maplayer->type == MS_LAYER_CHART) {
+											$maplayer->set('type', MS_LAYER_POLYGON);		# Bug-Workaround Chart-Typ
+										}
 									}
-									elseif($style->symbolname == ''){
-										$style->set('size', 2);					# size und width bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
-										$style->set('maxsize', 2);
-										$style->set('width', 2);
-										$style->set('maxwidth', 2);
-									}
-									if ($maplayer->type == MS_LAYER_CHART) {
-										$maplayer->set('type', MS_LAYER_POLYGON);		# Bug-Workaround Chart-Typ
+									else{		# Punktlayer
+										if($style->size > 14)$style->set('size', 14);
+										$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
+										$style->set('minsize', $style->size);		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
+										if($class->numstyles == 1){							# wenn es nur einen Style in der Klasse gibt, die Offsets auf 0 setzen, damit man was in der Legende erkennt
+											$style->set('offsety', 0);
+											$style->set('offsetx', 0);
+										}
 									}
 								}
-								else{		# Punktlayer
-									if($style->size > 14)$style->set('size', 14);
-									$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
-									$style->set('minsize', $style->size);		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
-									if($class->numstyles == 1){							# wenn es nur einen Style in der Klasse gibt, die Offsets auf 0 setzen, damit man was in der Legende erkennt
-										$style->set('offsety', 0);
-										$style->set('offsetx', 0);
+								$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
+								if($s > 0 OR $class->status == MS_OFF){
+									$width = $height = '';
+									if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
+									if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
+									$padding = 1;
+									###### eigenes Klassenbild ######
+									if ($layer['Class'][$k]['legendgraphic'] != '') {
+										$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
+										if ($width == '') {
+											$size = getimagesize($imagename);
+											$width = $size[0];
+											$height = $size[1];
+										}
 									}
+									###### generiertes Klassenbild ######
+									else{
+										if($width == '')$width = $legendicon_size['width'][$maplayer->type];
+										if($height == '')$height = $legendicon_size['height'][$maplayer->type];
+										if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){		# generierte Color-Ramp
+											$padding = 0;
+											$newname = rand(0, 1000000).'.jpg';
+											$this->colorramp(IMAGEPATH.$newname, $width, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
+											$imagename = TEMPPATH_REL.$newname;
+										}
+										else{																												# vom Mapserver generiertes Klassenbild
+											$image = $class->createLegendIcon($width, $height);
+											ob_start();
+											$image->saveImage();
+											$image = ob_get_clean();
+											$imagename = 'data:image/jpg;base64,'.base64_encode($image);
+										}
+										$original_class_image = $imagename;
+									}
+									####################################
+									$classid = $layer['Class'][$k]['Class_ID'];
+									if($this->mapDB->disabled_classes['status'][$classid] == '0'){
+										if($height < $width)$height1 = 12;
+										else $height1 = 18;
+										$imagename = 'graphics/inactive'.$height1.'.jpg';
+										$status = 0;
+									}
+									elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
+										$status = 2;
+									}
+									else{
+										$status = 1;
+									}
+									# $original_class_image ist das eigentliche Klassenbild bei Status 1, $imagename das Bild, welches entsprechend des Status gerade gesetzt ist
+									$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onmouseout="mouseOutClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onclick="changeClassStatus('.$classid.',\''.$original_class_image.'\', '.$this->user->rolle->instant_reload.', '.$width.', '.$height.', ' . $maplayer->type . ')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" width="'.$width.'" height="'.$height.'" src="'.$imagename.'"></a>';
 								}
+								$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
 							}
-							$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
-							if($s > 0 OR $class->status == MS_OFF){
-								$width = $height = '';
-								if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
-								if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
-								$padding = 1;
-								###### eigenes Klassenbild ######
-								if ($layer['Class'][$k]['legendgraphic'] != '') {
-									$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
-									if ($width == '') {
-										$size = getimagesize($imagename);
-										$width = $size[0];
-										$height = $size[1];
-									}
-								}
-								###### generiertes Klassenbild ######
-								else{
-									if($width == '')$width = $legendicon_size['width'][$maplayer->type];
-									if($height == '')$height = $legendicon_size['height'][$maplayer->type];
-									if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){		# generierte Color-Ramp
-										$padding = 0;
-										$newname = rand(0, 1000000).'.jpg';
-										$this->colorramp(IMAGEPATH.$newname, $width, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
-										$imagename = TEMPPATH_REL.$newname;
-									}
-									else{																												# vom Mapserver generiertes Klassenbild
-										$image = $class->createLegendIcon($width, $height);
-										ob_start();
-										$image->saveImage();
-										$image = ob_get_clean();
-										$imagename = 'data:image/jpg;base64,'.base64_encode($image);
-									}
-									$original_class_image = $imagename;
-								}
-								####################################
-								$classid = $layer['Class'][$k]['Class_ID'];
-								if($this->mapDB->disabled_classes['status'][$classid] == '0'){
-									if($height < $width)$height1 = 12;
-									else $height1 = 18;
-									$imagename = 'graphics/inactive'.$height1.'.jpg';
-									$status = 0;
-								}
-								elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
-									$status = 2;
-								}
-								else{
-									$status = 1;
-								}
-								# $original_class_image ist das eigentliche Klassenbild bei Status 1, $imagename das Bild, welches entsprechend des Status gerade gesetzt ist
-								$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onmouseout="mouseOutClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onclick="changeClassStatus('.$classid.',\''.$original_class_image.'\', '.$this->user->rolle->instant_reload.', '.$width.', '.$height.', ' . $maplayer->type . ')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" width="'.$width.'" height="'.$height.'" src="'.$imagename.'"></a>';
-							}
-							$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
 						}
 						$legend .= '</table>';
 					}
@@ -7934,7 +7960,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		global $supportedLanguages;
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		if (trim($this->formvars['id']) !='' and $mapDB->id_exists('layer',$this->formvars['id'])) {
-			$table_information = $mapDB->get_table_information($this->Stelle->database->dbName,'layer');
+			$table_information = $mapDB->get_table_information($this->Stelle->database->dbName, 'layer');
 			$this->add_message('error', 'Die Id: ' . $this->formvars['id'] . ' existiert schon. Nächste freie Layer_ID ist ' . $table_information['AUTO_INCREMENT']);
 			$this->use_form_data = true;
 		}
@@ -9241,7 +9267,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 		$layerset = $this->user->rolle->getLayer($layer_id);
 		$this->formvars['selected_layer_id'] = $layer_id;
-		$this->formvars['value_'.$layerset[0]['maintable'].'_oid'] = '('.implode(',', $oids).')';
+		$this->formvars['value_'.$layerset[0]['maintable'].'_oid'] = "('" . implode("', '", $oids) . "')";
 		$this->formvars['operator_'.$layerset[0]['maintable'].'_oid'] = 'IN';
 		$this->formvars['anzahl'] = 1000;
 		$this->GenerischeSuche_Suchen();
@@ -11083,7 +11109,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder.$filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg);
 		$filetype = array_pop(explode('.', $filename));
 		if ($layer_id != NULL) {
-			echo $filename.' importiert';
+			#echo $filename . ' importiert mit layer_id: ' . $layer_id;
 			switch ($after_import_action) {
 				case 'use_geometry' : {
 					if (!in_array($filetype, array('tiff', 'tif', 'geotif'))) {
@@ -15717,7 +15743,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	* reload the map
 	*/
 	function share_rollenlayer() {
-		$shared_table_schema = 'shared';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		if (!$ret = $mapDB->read_RollenLayer($this->formvars['selected_rollenlayer_id'])) {
 			return 0; // do not create the layer
@@ -15733,20 +15758,25 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$layer['old_id'] 			= -$this->formvars['selected_rollenlayer_id'];
 		$layer['Name'] 				= $this->formvars['layer_options_name'];
 		$layer['Gruppe'] 			= $this->formvars['shared_layer_group_id'];
-		$layer['schema'] 			= $shared_table_schema;
+		$shared_layer_schema_name = ($this->formvars['shared_layer_schema_name'] == '' ? 'shared' : $this->formvars['shared_layer_schema_name']);
+		$layer['schema'] 			= $shared_layer_schema_name;
 		# Assume that query has the form "SELECT * FROM rollenlayertable"
 		# as it should be for rollenlayer
 		$rollenlayer_table 		= get_first_word_after($layer['query'], 'FROM');
-		$layer['maintable'] 	= $rollenlayer_table . '_' .  strval(rand(100, 999));
+		$shared_layer_table_name = ($this->formvars['shared_layer_table_name'] == '' ? $rollenlayer_table : $this->formvars['shared_layer_table_name']);
+		if ($this->pgdatabase->table_exists($shared_layer_schema_name, $shared_layer_table_name)) {
+			$shared_layer_table_name = $shared_layer_table_name  . '_' .  strval(rand(100, 999));
+		}
+		$layer['maintable'] = $shared_layer_table_name;
 		$layer['pfad'] 				= str_replace(
 			$rollenlayer_table,
-			$layer['maintable'],
+			$shared_layer_table_name,
 			$layer['query']
 		);
 		unset($layer['query']);
 		$layer['Data'] 				= str_replace(
 			CUSTOM_SHAPE_SCHEMA . '.' . $rollenlayer_table,
-			$shared_table_schema . '.' . $layer['maintable'],
+			$shared_layer_schema_name . '.' . $shared_layer_table_name,
 			$layer['Data']
 		);
 		$layer['queryable'] 			= '1';
@@ -15760,8 +15790,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 		# create share schema if not exists and copy rollenlayer table to shared layer table
 		$sql = "
-			CREATE SCHEMA IF NOT EXISTS " . $shared_table_schema . ";
-			CREATE TABLE " . $shared_table_schema . "." . $layer['maintable'] . " AS
+			CREATE SCHEMA IF NOT EXISTS " . $shared_layer_schema_name . ";
+			CREATE TABLE " . $shared_layer_schema_name . "." . $shared_layer_table_name . " AS
 			SELECT * FROM " . CUSTOM_SHAPE_SCHEMA .  "." . $rollenlayer_table . "
 		";
 
@@ -16655,7 +16685,7 @@ class db_mapObj{
   }
 
 	function getlayerdatabase($layer_id, $host) {
-		#echo '<br>GUI->getlayerdatabase layer_id: ' . $layer_id;
+		#echo '<br>GUI->getlayerdatabase layer_id: ' . $layer_id; exit;
 		$layerdb = new pgdatabase();
 		$rs = $this->get_layer_connection($layer_id);
 		if (@count($rs) == 0) {
@@ -18001,26 +18031,75 @@ class db_mapObj{
 					" . $name_columns . "
 					`alias`,
 					`Datentyp`,
-					`Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `document_url`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `connection_id`, `printconnection`,
+					`Gruppe`,
+					`pfad`,
+					`maintable`,
+					`oid`,
+					`Data`,
+					`schema`,
+					`document_path`,
+					`document_url`,
+					`tileindex`,
+					`tileitem`,
+					`labelangleitem`,
+					`labelitem`,
+					`labelmaxscale`,
+					`labelminscale`,
+					`labelrequires`,
+					`postlabelcache`,
+					`connection`,
+					`connection_id`,
+					`printconnection`,
 					`connectiontype`,
 					`classitem`,
-					`styleitem`, `classification`, `cluster_maxdistance`, `tolerance`,
-					`toleranceunits`, `sizeunits`, `epsg_code`, `template`,
-					`queryable`, `use_geom`, `transparency`, `drawingorder`, `legendorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_keywordlist`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`,
-					`wms_auth_password`, `wfs_geom`, `selectiontype`,
+					`styleitem`,
+					`classification`,
+					`cluster_maxdistance`,
+					`tolerance`,
+					`toleranceunits`,
+					`sizeunits`,
+					`epsg_code`,
+					`template`,
+					`queryable`,
+					`use_geom`,
+					`transparency`,
+					`drawingorder`,
+					`legendorder`,
+					`minscale`,
+					`maxscale`,
+					`symbolscale`,
+					`offsite`,
+					`requires`,
+					`ows_srs`,
+					`wms_name`,
+					`wms_keywordlist`,
+					`wms_server_version`,
+					`wms_format`,
+					`wms_connectiontimeout`,
+					`wms_auth_username`,
+					`wms_auth_password`,
+					`wfs_geom`,
+					`selectiontype`,
 					`querymap`,
-					`processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`,
+					`processing`,
+					`kurzbeschreibung`,
+					`datasource`,
+					`dataowner_name`,
+					`dataowner_email`,
+					`dataowner_tel`,
+					`uptodateness`,
+					`updatecycle`,
 					`metalink`,
 					`status`,
 					`trigger_function`,
 					`sync`,
 					`listed`,
 					`duplicate_from_layer_id`,
-					 `duplicate_criterion`,
+					`duplicate_criterion`,
 					`shared_from`
 				) VALUES (
 					" . ($formvars['id'] != '' ? $formvars['id'] . ', ' : '') . "
-					" . quote($formvars['Name']) . ",
+					" . quote_or_null($formvars['Name']) . ",
 					" . $names . "
 					" . quote($formvars['alias']) . ",
 					" . quote_or_null($formvars['Datentyp']) . ",
@@ -18039,68 +18118,57 @@ class db_mapObj{
 					" . quote_or_null($formvars['labelmaxscale']) . ",
 					" . quote_or_null($formvars['labelminscale']) . ",
 					" . quote($formvars['labelrequires']) . ",
-					" . quote($formvars['postlabelcache']) . ",
-					" . quote(trim($formvars['connection'])) . ",
+					" . quote_or_null($formvars['postlabelcache']) . ",
+					" . quote(trim($formvars['connection'])) . ", -- connection
 					" . quote_or_null($formvars['connection_id']) . ",
 					" . quote($formvars['printconnection']) . ",
-					" . ($formvars['connectiontype'] == '' ? "6" : $formvars['connectiontype']) . ",
+					" . ($formvars['connectiontype'] == '' ? '6' : $formvars['connectiontype']) . ",
 					" . quote($formvars['classitem']) . ", -- classitem
 					" . quote($formvars['styleitem']) . ",
 					" . quote($formvars['layer_classification']) . ",
 					" . quote_or_null($formvars['cluster_maxdistance']) . ",
 					" . ($formvars['tolerance'] == '' ?  '3' : $formvars['tolerance']) . ",
-					" . ($formvars['toleranceunits'] == '' ? "'pixels'" : quote($formvars['toleranceunits'])) . ",
+					" . quote($formvars['toleranceunits'] == '' ? 'pixels' : $formvars['toleranceunits']) . ",
 					" . quote_or_null($formvars['sizeunits']) . ",
 					" . quote($formvars['epsg_code']) . ",
-				";
-      $sql .= "'" . $formvars['template']."', ";
-      $sql .= "'" . $formvars['queryable']."', ";
-			$sql .= "'" . $formvars['use_geom']."', ";
-      if($formvars['transparency']==''){$formvars['transparency']='NULL';}
-      $sql .= $formvars['transparency'].", ";
-      if($formvars['drawingorder']==''){$formvars['drawingorder']='NULL';}
-      $sql .= $formvars['drawingorder'].", ";
-      if($formvars['legendorder']==''){$formvars['legendorder']='NULL';}
-      $sql .= $formvars['legendorder'].", ";
-      if($formvars['minscale']==''){$formvars['minscale']='NULL';}
-      $sql .= $formvars['minscale'].", ";
-      if($formvars['maxscale']==''){$formvars['maxscale']='NULL';}
-      $sql .= $formvars['maxscale'].", ";
-			if($formvars['symbolscale']==''){$formvars['symbolscale']='NULL';}
-      $sql .= $formvars['symbolscale'].", ";
-      $sql .= "'" . $formvars['offsite']."', ";
-			if($formvars['requires']==''){$formvars['requires']='NULL';}
-      $sql .= $formvars['requires'].", ";
-      $sql .= "'" . $formvars['ows_srs']."', ";
-      $sql .= "'" . $formvars['wms_name']."', ";
-			$sql .= "'" . $formvars['wms_keywordlist']."', ";
-      $sql .= "'" . $formvars['wms_server_version']."', ";
-      $sql .= "'" . $formvars['wms_format']."', ";
-      if ($formvars['wms_connectiontimeout']=='') {
-        $formvars['wms_connectiontimeout']='60';
-      }
-      $sql .= $formvars['wms_connectiontimeout'] . ",
-					'" . $formvars['wms_auth_username'] . "',
-					'" . $formvars['wms_auth_password'] . "',
-					'" . $formvars['wfs_geom'] . "', -- wfs_geom
-					'" . $formvars['selectiontype'] . "',
-					'" . $formvars['querymap'] . "', -- querymap
-					'" . $formvars['processing'] . "',
-					'" . $formvars['kurzbeschreibung'] . "',
-					'" . $formvars['datasource'] . "',
-					'" . $formvars['dataowner_name'] . "',
-					'" . $formvars['dataowner_email'] . "',
-					'" . $formvars['dataowner_tel'] . "',
-					'" . $formvars['uptodateness'] . "',
-					'" . $formvars['updatecycle'] . "',
-					'" . $formvars['metalink'] . "',
-					'" . $formvars['status'] . "',
-					'" . $formvars['trigger_function'] . "',
-					" . ($formvars['sync'] == '' ? "'0'" : "'" . $formvars['sync'] . "'") . ", -- sync
-			 		" . ($formvars['listed'] == '' ? 0 : "'" . $formvars['listed'] . "'") . ",
-					" . ($formvars['duplicate_from_layer_id'] == '' ? "NULL" : $formvars['duplicate_from_layer_id']) . ",
-					'" . $formvars['duplicate_criterion'] . "',
-					" . ($formvars['shared_from'] == '' ? "NULL" : $formvars['shared_from']) . "
+					" . quote($formvars['template']) . ",
+					" . quote(($formvars['queryable'] == '' ? '0' : $formvars['queryable']), 'text') . ",
+					" . quote($formvars['use_geom'] == '' ? '1' : $formvars['use_geom']) . ",
+					" . quote_or_null($formvars['transparency']) . ",
+					" . quote_or_null($formvars['drawingorder']) . ",
+					" . quote_or_null($formvars['legendorder']) . ",
+					" . quote_or_null($formvars['minscale']) . ",
+					" . quote_or_null($formvars['maxscale']) . ",
+					" . quote_or_null($formvars['symbolscale']) . ",
+					" . quote($formvars['offsite']) . ",
+					" . quote_or_null($formvars['requires']) . ",
+					" . quote($formvars['ows_srs'] == '' ? 'EPSG:4326' : $formvars['ows_srs']) . ",
+					" . quote($formvars['wms_name']) . ",
+					" . quote($formvars['wms_keywordlist']) . ",
+					" . quote($formvars['wms_server_version'] == '' ? '1.0.0' : $formvars['wms_server_version']) . ",
+					" . quote($formvars['wms_format'] == '' ? 'image/png' : $formvars['wms_format']) . ",
+					" . ($formvars['wms_connectiontimeout'] == '' ? '60' :  $formvars['wms_connectiontimeout']) . ",
+					" . quote($formvars['wms_auth_username']) . ",
+					" . quote($formvars['wms_auth_password']) . ",
+					" . quote($formvars['wfs_geom']) . ",
+					" . quote($formvars['selectiontype']) . ", -- selectiontype
+					" . quote(($formvars['querymap'] == '' ? '0' : $formvars['querymap']), 'text') . ", -- querymap
+					" . quote($formvars['processing']) . ",
+					" . quote($formvars['kurzbeschreibung']) . ",
+					" . quote($formvars['datasource']) . ",
+					" . quote($formvars['dataowner_name']) . ",
+					" . quote($formvars['dataowner_email']) . ",
+					" . quote($formvars['dataowner_tel']) . ",
+					" . quote($formvars['uptodateness']) . ",
+					" . quote($formvars['updatecycle']) . ",
+					" . quote($formvars['metalink']) . ",
+					" . quote($formvars['status']) . ",
+					" . quote($formvars['trigger_function']) . ",
+					" . quote(($formvars['sync'] == '' ? '0' : $formvars['sync']), 'text') . ",
+			 		" . ($formvars['listed'] == '' ? '0' : $formvars['listed']) . ",
+					" . quote_or_null($formvars['duplicate_from_layer_id']) . ",
+					" . quote($formvars['duplicate_criterion']) . ",
+					" . quote_or_null($formvars['shared_from']) . "
 				)
 			";
     }
@@ -19303,8 +19371,8 @@ class db_mapObj{
 					'" . value_of($attrib, 'legendgraphic') . "',
 					" . $attrib['legendimagewidth'] . ",
 					" . $attrib['legendimageheight'] . ",
-					" . ($attrib['order'] == '' ? 'NULL' : $attriub['order']) . ", -- order
-					" . ($attrib['legendorder'] == '' ? 'NULL' : $attribut['legendorder']) . " --legendorder
+					" . ($attrib['order'] == '' ? 'NULL' : $attrib['order']) . ",
+					" . ($attrib['legendorder'] == '' ? 'NULL' : $attrib['legendorder']) . "
 				)";
 		}
 		else {

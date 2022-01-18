@@ -2673,17 +2673,23 @@ function mouseup(evt){
 		if(selected_vertex == vertex){
 			vertex_id_string = vertex.getAttribute("id");
 			vertex_id = vertex_id_string.split("_");
-			svg_path = enclosingForm.newpath.value+"";
-			components = svg_path.split(" ");
-			if(components.length > 10){			// nur loeschen, wenn mindestens 4 Eckpunkte uebrig
-				components.splice(parseInt(vertex_id[1]), 2);
+			svg_path = String(enclosingForm.newpath.value);
+			var components = svg_path.split(" ");
+			if(components.length > 10){			// nur loeschen, wenn mindestens 4 Eckpunkte uebrig			
+				components.splice(parseInt(vertex_id[1]), 2);				
+				if(components[parseInt(vertex_id[1])-1] == "M" && ( components[parseInt(vertex_id[1])+2] == "M" || components[parseInt(vertex_id[1])+2] == undefined)){
+					components.splice(parseInt(vertex_id[1]-1), 3);			// in diesem Fall hat das Teilpolygon nur 2 Eckpunkte und wird komplett entfernt
+				}
+				if(components[parseInt(vertex_id[1])-3] == "M" && ( components[parseInt(vertex_id[1])] == "M" || components[parseInt(vertex_id[1])] == undefined)){
+					components.splice(parseInt(vertex_id[1]-3), 3);			// in diesem Fall hat das Teilpolygon nur 2 Eckpunkte und wird komplett entfernt
+				}
 				if(vertex_id[2] != ""){			// Anfangs und Endpunkt
 					components[parseInt(vertex_id[2])-2] = components[parseInt(vertex_id[1])];
 		  		components[parseInt(vertex_id[2])-1] = components[parseInt(vertex_id[1])+1];
 				}
 				new_svg_path = "M";
 				for(i = 1; i < components.length; i++){
-					if(components[i] != \'\'){
+					if(components[i] != \'\' && components[i] != undefined){
 						new_svg_path = new_svg_path + " " + components[i];
 					}
 				}
@@ -2692,14 +2698,23 @@ function mouseup(evt){
 				if(enclosingForm.newpathwkt.value != ""){			// wenn ein WKT-String da ist, hier auch den Vertex loeschen
 					wktarray = get_array_from_wktstring(enclosingForm.newpathwkt.value);
 					wktarray.splice(parseInt(vertex_id[1]), 2);
+					
+					if(isNaN(wktarray[parseInt(vertex_id[1])-1]) && ( isNaN(wktarray[parseInt(vertex_id[1])+2]) || wktarray[parseInt(vertex_id[1])+2] == undefined)){
+						wktarray.splice(parseInt(vertex_id[1]-1), 3);			// in diesem Fall hat das Teilpolygon nur 2 Eckpunkte und wird komplett entfernt
+					}
+					if(isNaN(wktarray[parseInt(vertex_id[1])-3]) && ( isNaN(wktarray[parseInt(vertex_id[1])]) || wktarray[parseInt(vertex_id[1])] == undefined)){
+						wktarray.splice(parseInt(vertex_id[1]-3), 3);			// in diesem Fall hat das Teilpolygon nur 2 Eckpunkte und wird komplett entfernt
+					}
+					
 					if(vertex_id[2] != ""){			// Anfangs und Endpunkt
 						wktarray[parseInt(vertex_id[2])-2] = wktarray[parseInt(vertex_id[1])];
 						wktarray[parseInt(vertex_id[2])-1] = wktarray[parseInt(vertex_id[1])+1];
 					}
+					console.log(wktarray);
 					wktstring = "";
 					komma = 1;
 					for(i = 0; i < wktarray.length; i++){
-						if(wktarray[i] != ""){
+						if(wktarray[i] != "" && wktarray[i] != undefined){
 							wktstring = wktstring + wktarray[i];
 							if(i > 0 && wktarray[i].lastIndexOf(")") == -1 && wktarray[i+1].lastIndexOf(")") == -1){		// Kommas einfuegen
 								if(komma == 2){

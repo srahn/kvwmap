@@ -63,6 +63,37 @@ function value_of($array, $key) {
 	return (array_key_exists($key, $array) ? $array[$key] :	'');
 }
 
+function umlaute_umwandeln($name) {
+	$name = str_replace('ä', 'ae', $name);
+	$name = str_replace('ü', 'ue', $name);
+	$name = str_replace('ö', 'oe', $name);
+	$name = str_replace('Ä', 'Ae', $name);
+	$name = str_replace('Ü', 'Ue', $name);
+	$name = str_replace('Ö', 'Oe', $name);
+	$name = str_replace('a?', 'ae', $name);
+	$name = str_replace('u?', 'ue', $name);
+	$name = str_replace('o?', 'oe', $name);
+	$name = str_replace('A?', 'ae', $name);
+	$name = str_replace('U?', 'ue', $name);
+	$name = str_replace('O?', 'oe', $name);
+	$name = str_replace('ß', 'ss', $name);
+	$name = str_replace('.', '', $name);
+	$name = str_replace(':', '', $name);
+	$name = str_replace('(', '', $name);
+	$name = str_replace(')', '', $name);
+	$name = str_replace('/', '-', $name);
+	$name = str_replace(' ', '_', $name);
+	$name = str_replace('-', '_', $name);
+	$name = str_replace('?', '_', $name);
+	$name = str_replace('+', '_', $name);
+	$name = str_replace(',', '_', $name);
+	$name = str_replace('*', '_', $name);
+	$name = str_replace('$', '', $name);
+	$name = str_replace('&', '_', $name);
+	$name = iconv("UTF-8", "UTF-8//IGNORE", $name);
+	return $name;
+}
+
 class GUI {
 
   var $alert;
@@ -276,45 +307,69 @@ class GUI {
 				<tr>
 					<td>
 						<ul>';
-						if ($this->formvars['layer_id'] < 0) {
-							echo '
-								<input type="hidden" name="selected_rollenlayer_id" value="' . (-$this->formvars['layer_id']) . '">
-								<li><span>' . $this->strName . ':</span> <input type="text" name="layer_options_name" value="' . $layer[0]['Name'] . '"></li>';
-							if ($layer[0]['Typ'] == 'import' AND $this->user->share_rollenlayer_allowed AND count($selectable_layer_groups) > 0) {
-								echo '
-									<li id="shareRollenlayerLink">
-										<a href="javascript:void(0);" onclick="toggle(document.getElementById(\'shareRollenlayerDiv\'))" title="' . $this->strShareRollenLayerLong . '">' . $this->strShareRollenlayer . '</a>
-									</li>
-									<div id="shareRollenlayerDiv" style="display: none">
-										Name korrekt? Dann wähle eine Layergruppe aus:<br>' .
-										implode(
-											'<br>',
-											array_map(
+						if ($this->formvars['layer_id'] < 0) { ?>
+							<input type="hidden" name="selected_rollenlayer_id" value="<? echo (-$this->formvars['layer_id']); ?>">
+							<li>
+								<div style="width: 46px; float: left; padding-top: 3px;"><span><? echo $this->strName; ?>:</span></div>
+								<div style="float: left;">
+									<input
+										type="text"
+										name="layer_options_name"
+										value="<? echo $layer[0]['Name']; ?>"
+										style="width: 199px;"
+										onchange="$('#shared_layer_table_name').val(umlaute_umwandeln(this.value.toLowerCase()));"
+									>
+								</div>
+								<div style="clear: both">
+							</li><?
+							if ($layer[0]['Typ'] == 'import' AND $this->user->share_rollenlayer_allowed AND count($selectable_layer_groups) > 0) { ?>
+								<li id="shareRollenlayerLink">
+									<a
+										href="javascript:void(0);"
+										onclick="toggle(document.getElementById('shareRollenlayerDiv'))"
+										title="<? echo $this->strShareRollenLayerLong; ?>"
+									><? echo  $this->strShareRollenlayer; ?></a>
+								</li>
+								<div id="shareRollenlayerDiv" style="display: none">
+									<div style="margin-bottom: 3px;"><? echo $this->strLayerGroup; ?>:</div><?
+									echo implode(
+										'<br>',
+										array_map(
+											function($group) {
+												return '<input
+													id="shared_layer_group_id"
+													type="radio"
+													name="shared_layer_group_id"
+													value="' . $group['id'] . '"
+													style="vertical-align: text-top"
+													onchange="$(\'#shared_layer_schema_name\').val(umlaute_umwandeln($(this).next().text().toLowerCase()));"
+												><span>' . $group['Gruppenname'] . '</span>';
+											},
+											array_filter(
+												$selectable_layer_groups,
 												function($group) {
-													return '<input
-														type="radio"
-														name="shared_layer_group_id"
-														value="' . $group['id'] . '"
-														style="vertical-align: middle"
-													>' . $group['Gruppenname'];
-												},
-												array_filter(
-													$selectable_layer_groups,
-													function($group) {
-														return array_key_exists('Gruppenname', $group);
-													}
-												)
+													return array_key_exists('Gruppenname', $group);
+												}
 											)
-										) . '<br>
-										<select name="layer_options_privileg" style="margin-bottom: 5px">
-											<option value="readable">' . $this->strReadable . '</option>
-											<option value="editable_only_in_this_stelle" selected>' . $this->strEditableOnlyInThisStelle . '</option>
-											<option value="editable">' . $this->strEditableInAllStellen . '</option>
-										</select><br>
-										<input type="button" onclick="shareRollenlayer(' . (-$this->formvars['layer_id']) . ')" value="' . $this->strShareRollenlayer . '">
-										<input type="button" onclick="toggle(document.getElementById(\'shareRollenlayerDiv\'))" value="' . $this->strCancel . '">
+										)
+									); ?><br>
+									<? echo $this->strSchema; ?>.<? echo $this->strTableName; ?>:<br>
+									<div style="float: left;padding-top: 3px;">
+										<input id="shared_layer_schema_name" type="text" name="shared_layer_schema_name" value="shared" style="width: 80px;">.
 									</div>
-								';
+									<div style="float: left;padding-top: 3px;">
+										<input id="shared_layer_table_name" type="text" name="shared_layer_table_name" value="<? echo umlaute_umwandeln(strtolower($layer[0]['Name'])); ?>" style="width: 181px;">
+									</div>
+									<div style="clear: both">
+
+									<select name="layer_options_privileg" style="margin-top: 3px; margin-bottom: 5px">
+										<option value="readable"><? echo $this->strReadable; ?></option>
+										<option value="editable_only_in_this_stelle" selected><? echo $this->strEditableOnlyInThisStelle; ?></option>
+										<option value="editable"><? echo $this->strEditableInAllStellen; ?></option>
+									</select><br>
+									<input type="button" onclick="shareRollenlayer(<? echo (-$this->formvars['layer_id']); ?>)" value="<? echo $this->strShareRollenlayer; ?>">
+									<input type="button" onclick="toggle(document.getElementById('shareRollenlayerDiv'))" value="<? echo $this->strCancel; ?>">
+								</div><?
 							}
 						}
 						else {
@@ -357,7 +412,7 @@ class GUI {
 						if(in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
 							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">' . $this->strSearch . '</a></li>';
 						}
-						if ($layer[0]['queryable'] AND $layer[0]['privileg'] > 0) {
+						if ($layer[0]['queryable'] AND $layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
 							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '">' . $this->newDataset . '</a></li>';
 						}
 						if ($layer[0]['Class'][0]['Name'] != '') {
@@ -1105,17 +1160,19 @@ class rolle {
 		}
 
 		if ($LayerName != '') {
-			$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "'";
-			if(is_numeric($LayerName))
-				$layer_name_filter .= " OR l.Layer_ID = " . $LayerName;
-			$layer_name_filter .= ")";
+			if (is_numeric($LayerName)) {
+				$layer_name_filter .= " AND l.Layer_ID = " . $LayerName;
+			}
+			else {
+				$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "')";
+			}
 		}
 
 		$sql = "
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
+				l.alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, l.`schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
 				CASE 
 					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
 					ELSE l.connection 
@@ -1146,16 +1203,19 @@ class rolle {
 				`start_aktiv`,
 				r2ul.showclasses,
 				r2ul.rollenfilter,
-				r2ul.geom_from_layer
+				r2ul.geom_from_layer,
+				las.privileg as privilegfk 
 			FROM
-				used_layer AS ul,
-				u_rolle2used_layer as r2ul,
-				layer AS l
-				LEFT JOIN connections as c ON l.connection_id = c.id
+				layer AS l 
+				JOIN used_layer AS ul ON l.Layer_ID=ul.Layer_ID 
+				JOIN u_rolle2used_layer as r2ul ON r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID 
+				LEFT JOIN connections as c ON l.connection_id = c.id 
+				LEFT JOIN layer_attributes as la ON la.layer_id = ul.Layer_ID AND form_element_type = 'SubformFK' 
+				LEFT JOIN layer_attributes2stelle as las ON 
+					las.stelle_id = ul.Stelle_ID AND 
+					ul.Layer_ID = las.layer_id AND 
+					las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
 			WHERE
-				l.Layer_ID=ul.Layer_ID AND
-				r2ul.Stelle_ID=ul.Stelle_ID AND
-				r2ul.Layer_ID=ul.Layer_ID AND
 				ul.Stelle_ID= " . $this->stelle_id . " AND
 				r2ul.User_ID= " . $this->user_id .
 				$layer_name_filter . "

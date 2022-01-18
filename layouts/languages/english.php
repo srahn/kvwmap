@@ -78,4 +78,7 @@
 	$this->strLabel = "Label";
 	$this->strNameSuffix = "Name suffix";
 	$this->strMetadata="Metadata";
+	$this->strSchema = "Schema";
+	$this->strTableName = "Tablename";
+	$this->strLayerGroup = "Layer group";
 ?>
