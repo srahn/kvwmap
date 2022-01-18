@@ -7336,14 +7336,26 @@ echo '			</table>
 		$this->output();
 	}
 
-  function Layer2Stelle_Reihenfolge(){
-    $this->selected_stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
-    $this->main='layer2stelle_order.php';
-		if($this->formvars['order'] == '')$this->formvars['order'] = 'legendorder, drawingorder desc';
-		if($this->formvars['order'] == 'legendorder, drawingorder desc')$this->groups = $this->selected_stelle->getGroups();
-    $this->layers = $this->selected_stelle->getLayers(NULL, $this->formvars['order']);
-    $this->output();
-  }
+	function Layer2Stelle_Reihenfolge() {
+		$this->selected_stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
+		$this->main='layer2stelle_order.php';
+		if ($this->formvars['order'] == '') {
+			$this->formvars['order'] = 'legendorder, drawingorder desc';
+		}
+		if ($this->formvars['order'] == 'legendorder, drawingorder desc') {
+			$this->groups = $this->selected_stelle->getGroups();
+		}
+		$this->layers = $this->selected_stelle->getLayers(NULL, $this->formvars['order']);
+		$this->output();
+	}
+
+	function Layer2Stelle_Reihenfolge_Layerdef() {
+		$pfad = WWWROOT.APPLVERSION . 'tools/';
+		$file = 'layerdef.json';
+		$this->selected_stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
+		$layerdef = $this->selected_stelle->get_layerdef();
+		echo json_encode($layerdef);
+	}
 
   function Layer2Stelle_ReihenfolgeSpeichern(){
     $Stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);

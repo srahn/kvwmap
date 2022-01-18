@@ -128,7 +128,7 @@ class stelle {
 				`ID`," .
 				$name_column . ",
 				`start`,
-				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`, `pgdbhost`, `pgdbname`, `pgdbuser`, `pgdbpasswd`, `ows_title`, `wms_accessconstraints`, `ows_abstract`, `ows_contactperson`, `ows_contactorganization`, `ows_contactemailaddress`, `ows_contactposition`, `ows_fees`, `ows_srs`, `protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `postgres_connection_id`
+				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `minzoom`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`, `pgdbhost`, `pgdbname`, `pgdbuser`, `pgdbpasswd`, `ows_title`, `wms_accessconstraints`, `ows_abstract`, `ows_contactperson`, `ows_contactorganization`, `ows_contactemailaddress`, `ows_contactposition`, `ows_fees`, `ows_srs`, `protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `postgres_connection_id`
 			FROM
 				stelle s
 			WHERE
@@ -144,6 +144,7 @@ class stelle {
 		$this->Bezeichnung=$rs['Bezeichnung'];
 		$this->MaxGeorefExt = ms_newRectObj();
 		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
+		$this->minzoom = $rs['minzoom'];
 		$this->epsg_code = $rs['epsg_code'];
 		$this->postgres_connection_id = $rs['postgres_connection_id'];
 		# ---> deprecated
@@ -1775,6 +1776,60 @@ class stelle {
 			$layer[] = ($result == 'only_ids' ? $rs['Layer_ID'] : $rs);
 		}
 		return $layer;
+	}
+
+	/*
+	* Function return layerdef for kvportal
+	* It query mapOptions, groups as themes, base and overlay layers
+	* and compose it to a layerdef conform object structure
+	*/
+	function get_layerdef() {
+		#echo 'Stelle->get_layerdef';
+		include_once(CLASSPATH . 'Layer2Stelle.php');
+		include_once(CLASSPATH . 'Layer.php');
+		include_once(CLASSPATH . 'LayerGroup.php');
+
+		$stellen_extent = $this->MaxGeorefExt;
+		$projFROM = ms_newprojectionobj("init=epsg:" . $this->epsg_code);
+		$projTO = ms_newprojectionobj("init=epsg:4326");
+		$stellen_extent->project($projFROM, $projTO);
+
+		$layerdef = (Object) array(
+			'mapOptions' => (Object) array(
+				'center' => (Object) array(
+					'lat' => round(($stellen_extent->maxy - $stellen_extent->miny) / 2 + $stellen_extent->miny, 5),
+					'lng' => round(($stellen_extent->maxx - $stellen_extent->minx) / 2 + $stellen_extent->minx, 5)
+				),
+				'zoom' => $this->minzoom,
+				'maxBounds' => array(
+					array(round($stellen_extent->miny, 5), round($stellen_extent->minx, 5)),
+					array(round($stellen_extent->maxy, 5), round($stellen_extent->maxx, 5))
+				),
+				'minZoom' => $this->minzoom
+			),
+			'default_wms_legend_icon' => 'img/noun_Globe.svg',
+			'themes' => array_map(
+				function($parent) {
+					return $parent->get_layerdef('');
+				},
+				LayerGroup::find_top_parents($this->database->gui, $this->id)
+			),
+			'baseLayers' => array_map(
+				function($layer2Stelle) {
+					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
+					return $layer->get_baselayers_def($this->id);
+				},
+				Layer2Stelle::find_base_layers($this->database->gui, $this->id)
+			),
+			'overlays' => array_map(
+				function($layer2Stelle) {
+					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
+					return $layer->get_overlays_def($this->id);
+				},
+				Layer2Stelle::find_overlay_layers($this->database->gui, $this->id)
+			)
+		);
+		return $layerdef;
 	}
 
 	function get_attributes_privileges($layer_id) {
