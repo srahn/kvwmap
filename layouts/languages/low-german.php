@@ -39,4 +39,7 @@
 	$this->strEditableInAllStellen = "In allen Stellen editierbar";
 	$this->strSettings = "Einstellungen";
 	$this->strMetadata="Metadaten";
+	$this->strSchema = "Schema";
+	$this->strTableName = "Tabellenname";
+	$this->strLayerGroup = "Layergruppe";
 ?>

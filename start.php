@@ -10,7 +10,7 @@ $GUI->user->rolle = new stdClass();
 $GUI->user->rolle->querymode = 0;
 $GUI->allowed_documents = array();
 $GUI->document_loader_name = session_id().rand(0,99999999).'.php';
-$GUI->formvars=$formvars;
+$GUI->formvars = $formvars;
 $GUI->echo = false;
 
 
@@ -341,6 +341,7 @@ if (!$show_login_form) {
 if (is_logged_in()) {
 	if (
 		!defined('AGREEMENT_MESSAGE') OR
+		!is_file(AGREEMENT_MESSAGE) OR
 		AGREEMENT_MESSAGE == '' OR
 		is_agreement_accepted($GUI->user)
 	) {
@@ -365,10 +366,17 @@ if (is_logged_in()) {
 			}
 		}
 		else {
-			$GUI->debug->write('Frage Agreement beim Nutzer ab.', 4, $GUI->echo);
-			$show_login_form = true;
-			$go = 'login_agreement';
-			# login case x
+			if (file_exists(AGREEMENT_MESSAGE)) {
+				$GUI->debug->write('Frage Agreement beim Nutzer ab.', 4, $GUI->echo);
+				$show_login_form = true;
+				$go = 'login_agreement';
+			}
+			else {
+				logout();
+				$show_login_form = true;
+				$GUI->add_message('error', 'Die in der Konfiguration angegebene Datei ' . AGREEMENT_MESSAGE . ' für die Zustimmungserklärung konnte nicht gefunden werden. Informieren Sie den Administrator.');
+				$go = 'login';
+			}
 		}
 	}
 }
