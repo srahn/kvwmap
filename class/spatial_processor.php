@@ -41,8 +41,8 @@ class spatial_processor {
 		$this->rolle = $rolle;
   }
   
-  function split_multi_geometries($wktgeom, $layer_epsg, $client_epsg){
-  	$sql = "select st_multi(ST_geometryN(st_transform(st_geomfromtext('".$wktgeom."', ".$client_epsg."), ".$layer_epsg."),"; 
+  function split_multi_geometries($wktgeom, $layer_epsg, $client_epsg, $geomtype){
+  	$sql = "select " . (substr($geomtype, 0, 5) == 'MULTI'? 'st_multi' : '') . "(ST_geometryN(st_transform(st_geomfromtext('".$wktgeom."', ".$client_epsg."), ".$layer_epsg."),"; 
 		$sql.= "generate_series(1, ST_NumGeometries(st_geomfromtext('".$wktgeom."', ".$client_epsg.")))))";
 		$ret = $this->pgdatabase->execSQL($sql,4, 0);
 		if (!$ret[0]) {
