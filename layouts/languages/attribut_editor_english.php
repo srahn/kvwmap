@@ -8,9 +8,9 @@
 	$strAttributeAtSearch = 'At search';
 	$strForNewDataset = 'For new<br>dataset';
 	$strAttributeVisible = 'visible';
-	$strAttributeNotVisible = 'not sichtbar';
+	$strAttributeNotVisible = 'not visible';
 	$strUseForQuickSearchTitle = 'Use for quick search';
-	$strUseInRasterTemplate = 'Use als preview attribute in raster template';
+	$strUseInRasterTemplate = 'Use as preview attribute in raster template';
 	$strFormularElement = 'Form element type';
 	$strUnderPrevious = 'under the previous';
 	$strBesidePrevious = 'beside the previous';
