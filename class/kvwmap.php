@@ -3509,17 +3509,6 @@ echo '			</table>
 		# Erzeugen der neuen Datensätze
 		for ($i = 0; $i < $count; $i++) { # das ist die Schleife, wie oft insgesamt kopiert werden soll
 			# zunächst als reine Kopie
-			$sql = "
-				SELECT Coalesce(max(".$layerset[0]['oid']."), 0) AS oid FROM " . pg_quote($layerset[0]['maintable']) . "
-			";
-			#echo '<p>SQL zur Abfrage der letzen oid: ' . $sql;
-			$ret = $layerdb->execSQL($sql, 4, 0);
-			if (!$ret['success']) {
-				return array();
-			}
-			$rs = pg_fetch_assoc($ret[1]);
-			$max_oid = $rs['oid'];
-
 			if (count($update_columns) > 0) {
 				$insert_columns = array_merge($attributes, $update_columns);
 				$select_columns = array_merge(
@@ -3546,24 +3535,14 @@ echo '			</table>
 					" . pg_quote($layerset[0]['maintable']) . "
 				WHERE
 					" . implode(' AND ', $where) . "
-			";
+				RETURNING
+					" . $layerset[0]['oid'];
 			#echo '<p>SQL zum kopieren eines Datensatzes: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 0);
 			if (!$ret['success']) {
 				return array();
 			}
 
-			$sql = "
-				SELECT ".$layerset[0]['oid']."
-				FROM " . pg_quote($layerset[0]['maintable']) . "
-				WHERE
-					".$layerset[0]['oid']." > " . quote($max_oid) . "
-			";
-			#echo '<p>SQL zum Abfragen der neuen oids: ' . $sql;
-			$ret = $layerdb->execSQL($sql, 4, 0);
-			if (!$ret['success']) {
-				return array();
-			}
 			$new_oids = array();
 			$d = 0; # Zähler der kopierten Datensätze pro Kopiervorgang
 			while ($rs = pg_fetch_row($ret[1])) { # das ist die Schleife der kopierten Datensätze pro Kopiervorgang
