@@ -168,7 +168,7 @@ class data_import_export {
 		}
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
 
-		if($custom_table['datatype'] != 3){	# kein Raster
+		if ($custom_table['datatype'] != 3){	# kein Raster
 			$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
 			$layerdb->setClientEncoding();
 			$path = $this->formvars['query'];

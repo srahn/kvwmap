@@ -79,5 +79,8 @@
 	$this->strUser = "Nutzer";
 	$this->strLabel = "Bezeichnung";
 	$this->strNameSuffix = "Namenszusatz";
-	$this->strMetadata="Metadaten";
+	$this->strMetadata = "Metadaten";
+	$this->strSchema = "Schema";
+	$this->strTableName = "Tabellenname";
+	$this->strLayerGroup = "Layergruppe";
 ?>
