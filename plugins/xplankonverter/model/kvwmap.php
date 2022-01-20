@@ -12,7 +12,7 @@
 			# Erzeuge Layergruppe und Verzeichnisse nach dem Erzeugen einer Konvertierung
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
 				#echo 'AFTER INSERT';
-				$konvertierung = Konvertierung::find_by_id($GUI, 'oid', $oid);
+				$konvertierung = Konvertierung::find_by_id($GUI, 'id', $oid);
 				# layer_group wird erstellt, wenn diese noch nicht existiert (wird derzeit nicht mehr gelöscht)
 				$layer_group_id = $GUI->get(strtolower($layer_type) . '_layer_group_id');
 				if (empty($layer_group_id)) {
@@ -23,7 +23,7 @@
 
 			case ($fired == 'INSTEAD' AND $event == 'DELETE') : {
 				#echo 'INSTEAD DELETE';
-				$konvertierung = Konvertierung::find_by_id($GUI, 'oid', $oid);
+				$konvertierung = Konvertierung::find_by_id($GUI, 'id', $oid);
 				$konvertierung->destroy();
 			} break;
 
@@ -44,14 +44,14 @@
 		switch(true) {
 			# Passe die SRID der Spalte the_geom an den epsg_code des Shapefiles an.
 			case ($fired == 'AFTER' AND $event == 'UPDATE') : {
-				$shapefile = ShapeFile::find_by_id($GUI, 'oid', $oid);
+				$shapefile = ShapeFile::find_by_id($GUI, 'id', $oid);
 				if ($shapefile->geometry_column_srid() != $shapefile->get(epsg_code))
 					$shapefile->update_geometry_srid();
 			} break;
 
 			case ($fired == 'BEFORE' AND $event == 'DELETE') : {
 				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_shapes Funktion aus.', false);
-				$shapefile = ShapeFile::find_by_id($GUI, 'oid', $oid);
+				$shapefile = ShapeFile::find_by_id($GUI, 'id', $oid);
 				# Delete the layerdefinition in mysql (rolleneinstellungen, layer, classes, styles, etc.)
 				$shapefile->deleteLayer();
 				# Delete the postgis data table that hold the data of the shape file
@@ -178,7 +178,7 @@
 
 			case ($fired == 'AFTER' AND $event == 'INSERT') : {
 				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit id: ' . $oid, false);
-				$regel = Regel::find_by_id($GUI, 'oid', $oid);
+				$regel = Regel::find_by_id($GUI, 'id', $oid);
 				$regel->create_gml_layer();
 				$regel->set('konvertierung_id', $regel->konvertierung->get('id'));
 				$regel->update();
@@ -187,7 +187,7 @@
 
 			case ($fired == 'AFTER' AND $event == 'UPDATE') : {
 				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus mit oid: ' . $oid, false);
-				$regel = Regel::find_by_id($GUI, 'oid', $oid);
+				$regel = Regel::find_by_id($GUI, 'id', $oid);
 				#$regel->delete_gml_layer();
 				$regel->create_gml_layer();
 				$regel->konvertierung->set_status();
@@ -195,7 +195,7 @@
 
 			case ($fired == 'INSTEAD' AND $event == 'DELETE') : {
 				$GUI->debug->show('Führe ' . $fired . ' ' . $event . ' in handle_regel Funktion aus.', false);
-				$regel = Regel::find_by_id($GUI, 'oid', $oid);
+				$regel = Regel::find_by_id($GUI, 'id', $oid);
 				$regel->destroy();
 				$regel->konvertierung->set_status();
 			} break;

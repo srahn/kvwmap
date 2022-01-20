@@ -40,5 +40,23 @@ class LayerClass extends MyObject {
 			$label2class->copy($this->get('id'));
 		}
 	}
-}
-?>
+
+	function get_first_style() {
+		#echo 'LayerClass->get_first_style'; exit;
+		include_once(CLASSPATH . 'Style2Class.php');
+		include_once(CLASSPATH . 'LayerStyle.php');
+		$styles2class = Style2Class::find($this->gui, 'class_id');
+		$style = LayerStyle::find_by_id($this->gui, 'Style_ID', $styles2class[0]->get('style_id'));
+		return $style;
+	}
+
+	function get_layerdef() {
+		#echo 'LayerClass->get_layerdef';
+		$layerdef = (Object) array(
+			'def' => $this->get('Expression'),
+			'name' => $this->get('Name'),
+			'style' => $this->get_first_style()->get_layerdef()
+		);
+		return $layerdef;
+	}
+} ?>

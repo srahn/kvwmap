@@ -35,4 +35,6 @@
 	$this->strReadable = "Everywhere only readable";
 	$this->strEditableOnlyInThisStelle = "Only editable in this working group";
 	$this->strEditableInAllStellen = "Everywhere editable";
+	$this->strSchema = "Schemat";
+	$this->strTableName = "Tablename";
 ?>
