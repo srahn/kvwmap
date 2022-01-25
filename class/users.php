@@ -1112,23 +1112,14 @@ class user {
 					" . (value_of($formvars, 'redline_font_family') != '' ? ", `redline_font_family` = '" . $formvars['redline_font_family'] . "'" : '') . "
 					" . (value_of($formvars, 'redline_font_size')   != '' ? ", `redline_font_size`   = '" . $formvars['redline_font_size']   . "'" : '') . "
 					" . (value_of($formvars, 'redline_font_weight') != '' ? ", `redline_font_weight` = '" . $formvars['redline_font_weight'] . "'" : '') . "
-			";
-
-			if(value_of($formvars, 'singlequery') != '') $sql.=',singlequery="1"';
-			else $sql.=',singlequery="0"';
-			if(value_of($formvars, 'instant_reload') != '') $sql.=',instant_reload="1"';
-			else $sql.=',instant_reload="0"';
-			if(value_of($formvars, 'menu_auto_close') != '') $sql.=',menu_auto_close="1"';
-			else $sql.=',menu_auto_close="0"';
-			$sql .= ', visually_impaired=' . ((value_of($formvars, 'visually_impaired') != '') ? '"1"' : '"0"');
-			if (value_of($formvars, 'querymode') != '') {
-				$sql .= ', querymode="1"';
-			}
-			else $sql.=',querymode="0", overlayx=400, overlayy=150';
-			$sql .= ',geom_edit_first="' . $formvars['geom_edit_first'] . '"';
-			$sql .= "
-				,immer_weiter_erfassen = '" . $formvars['immer_weiter_erfassen'] . "'
-				,upload_only_file_metadata = '" . $formvars['upload_only_file_metadata'] . "'
+					, singlequery = '" . (value_of($formvars, 'singlequery') == '' ? '0' : '1') . "'
+					, instant_reload = '" . (value_of($formvars, 'instant_reload') == '' ? '0' : '1') . "'
+					, menu_auto_close = '" . (value_of($formvars, 'menu_auto_close') == '' ? '0' : '1') . "'
+					, visually_impaired = '" . (value_of($formvars, 'visually_impaired') == '' ? '0' : '1') . "'
+					, querymode = " . (value_of($formvars, 'querymode') != '' ? "'1'" : "'0', overlayx = 400, overlayy = 150") . "
+					, geom_edit_first = '" . $formvars['geom_edit_first'] . "'
+					, immer_weiter_erfassen = " . quote_or_null($formvars['immer_weiter_erfassen']) . "
+					, upload_only_file_metadata = " . quote_or_null($formvars['upload_only_file_metadata']) . "
 			";
 			$sql.=',print_scale = CASE WHEN print_scale = "auto" OR "'.$formvars['print_scale'].'" = "auto" THEN "'.$formvars['print_scale'].'" ELSE print_scale END';
 			if($formvars['hist_timestamp'] != '') $sql.=',hist_timestamp="'.DateTime::createFromFormat('d.m.Y H:i:s', $formvars['hist_timestamp'])->format('Y-m-d H:i:s').'"';

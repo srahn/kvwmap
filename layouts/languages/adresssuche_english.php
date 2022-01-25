@@ -1,8 +1,8 @@
 <?php
- $strTitle="Search Adresses";
+ $strTitle="Search Addresses";
  $strGem="Municipality";
  $strStreet="Street";
- $strHnr="Hausnr.";
+ $strHnr="House No.";
  $strSelected="selected";
  $strExist="existing";
  $strClear="Clear";

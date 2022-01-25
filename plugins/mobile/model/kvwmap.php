@@ -304,6 +304,7 @@
 						'symbol' => $class['Style'][0]['symbol'],
 						'stroke' => ($class['Style'][0]['outlinecolor'] == '-1 -1 -1' ? false : true),
 						'fillColor' => $class['Style'][0]['color'],
+						'fill' => ($class['Style'][0]['color'] == '-1 -1 -1' || $class['Style'][0]['color'] == '' ? false : true),
 						'opacity' => $class['Style'][0]['opacity'],
 						'color' => $class['Style'][0]['outlinecolor'],
 						'weight' => $class['Style'][0]['width'],
