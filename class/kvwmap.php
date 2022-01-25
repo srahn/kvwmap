@@ -19291,8 +19291,8 @@ class db_mapObj{
 					'" . value_of($attrib, 'legendgraphic') . "',
 					" . $attrib['legendimagewidth'] . ",
 					" . $attrib['legendimageheight'] . ",
-					" . ($attrib['order'] == '' ? 'NULL' : $attriub['order']) . ", -- order
-					" . ($attrib['legendorder'] == '' ? 'NULL' : $attribut['legendorder']) . " --legendorder
+					" . (empty($attrib['order']) ? 'NULL' : $attrib['order'])  . ", 
+					" . (empty($attrib['legendorder']) ? 'NULL' : $attrib['legendorder']) . "
 				)";
 		}
 		else {
