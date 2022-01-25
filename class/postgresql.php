@@ -37,10 +37,14 @@ class pgdatabase {
 	var $blocktransaction;
 	var $host;
 	var $port;
+	var $dbname;
+	var $user;
+	var $passwd;
 	var $schema;
 	var $pg_text_attribute_types = array('character', 'character varying', 'text', 'timestamp without time zone', 'timestamp with time zone', 'date', 'USER-DEFINED');
 	var $version = POSTGRESVERSION;
 	var $connection_id;
+	var $error;
 
 	function __construct() {
 		global $debug;
@@ -56,6 +60,7 @@ class pgdatabase {
 		$this->type='postgresql';
 		$this->commentsign='--';
 		$this->err_msg = '';
+		$this->error = false;
 		# Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
 		# START TRANSACTION, ROLLBACK und COMMIT unterdrückt, so daß alle anderen SQL
 		# Anweisungen nicht in Transactionsblöcken ablaufen.
@@ -128,7 +133,8 @@ class pgdatabase {
 			"port='" .		 $credentials['port'] 		. "' " .
 			"dbname='" .	 $credentials['dbname'] 	. "' " .
 			"user='" .		 $credentials['user'] 		. "' " .
-			"password='" . addslashes($credentials['password']) . "'";
+			"password='" . addslashes($credentials['password']) . "' " .
+			"application_name=kvwmap_user_" . $this->gui->user->id;
 		return $connection_string;
 	}
 
@@ -232,8 +238,6 @@ class pgdatabase {
 			$this->connection_id = $connection_id;
 			return true;
 		}
-
-
 	}
 
 	function table_exists($schema, $table) {
@@ -363,6 +367,7 @@ FROM
 
 	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false) {
 		$ret = array(); // Array with results to return
+		$ret['msg'] = '';
 		$strip_context = true;
 
 		switch ($this->loglevel) {
@@ -391,6 +396,7 @@ FROM
 			$query = @pg_query($this->dbConn, $sql);
 			//$query=0;
 			if ($query == 0) {
+				$this->error = true;
 				$ret['success'] = false;
 				# erzeuge eine Fehlermeldung;
 				$last_error = pg_last_error($this->dbConn);
@@ -426,31 +432,38 @@ FROM
 				$ret[1] = $ret['query'] = $query;
 
 				# Prüfe ob eine Fehlermeldung in der Notice steckt
-				$last_notice = pg_last_notice($this->dbConn);
-				if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
-					$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
+				if (PHPVERSION >= 710) {
+					$last_notices = pg_last_notice($this->dbConn, PGSQL_NOTICE_ALL);
 				}
-				# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
-				if ($last_notice != '' AND ($this->gui->notices == NULL OR !in_array($last_notice, $this->gui->notices))) {
-					$this->gui->notices[] = $last_notice;
-					if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
-						# Parse als JSON String
-						$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
-						if ($notice_obj AND array_key_exists('success', $notice_obj)) {
-							if (!$notice_obj['success']) {
-								$ret['success'] = false;
-							}
-							if (array_key_exists('msg_type', $notice_obj)) {
-								$ret['type'] = $notice_obj['msg_type'];
-							}
-							if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
-								$ret['msg'] = $notice_obj['msg'];
+				else {
+					$last_notices = array(pg_last_notice($this->dbConn));
+				}
+				foreach ($last_notices as $last_notice) {
+					if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
+						$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
+					}
+					# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
+					if ($last_notice != '' AND ($this->gui->notices == NULL OR !in_array($last_notice, $this->gui->notices))) {
+						$this->gui->notices[] = $last_notice;
+						if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
+							# Parse als JSON String
+							$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
+							if ($notice_obj AND array_key_exists('success', $notice_obj)) {
+								if (!$notice_obj['success']) {
+									$ret['success'] = false;
+								}
+								if (array_key_exists('msg_type', $notice_obj)) {
+									$ret['type'] = $notice_obj['msg_type'];
+								}
+								if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
+									$ret['msg'] = $notice_obj['msg'];
+								}
 							}
 						}
-					}
-					else {
-						# Gebe Noticetext wie er ist zurück
-						$ret['msg'] = $last_notice;
+						else {
+							# Gebe Noticetext wie er ist zurück
+							$ret['msg'] .= $last_notice.chr(10).chr(10);
+						}
 					}
 				}
 
@@ -1159,7 +1172,7 @@ FROM
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON ARRAY[f.istgebucht] <@ s.an ";
 		}
 		else{
-			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf ";
+			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf OR ARRAY[f.istgebucht] <@ s.an ";
 		}
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="WHERE f.flurstueckskennzeichen = '" . $FlurstKennz . "' ";
@@ -1189,7 +1202,7 @@ FROM
 			if($fiktiv){
 				$sql.="JOIN alkis.ax_buchungsstelle s ON ARRAY[f.istgebucht] <@ s.an ";
 			}
-			else $sql.="JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf ";
+			else $sql.="JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf OR ARRAY[f.istgebucht] <@ s.an ";
 			
 			$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
@@ -1198,7 +1211,7 @@ FROM
 			$sql.=", b.bezeichnung as gbname FROM alkis.ax_buchungsblatt g ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
-			$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR (s.verweistauf IS NULL AND f.istgebucht = ANY(s.an)) ";		# angepasst wegen Gebäudeeigentum bei 13274300200046______
+			$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR (s.buchungsart != 2103 AND f.istgebucht = ANY(s.an)) ";		# angepasst wegen Gebäudeeigentum (2103) bei 13274300200046______
 			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
 			$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";		
 		}
@@ -1253,6 +1266,50 @@ FROM
     }
     return $Liste;
   }
+	
+  function getGemarkungListeAll($ganzeGemID, $GemkgID){
+    $sql ="
+			SELECT DISTINCT 
+				pp.schluesselgesamt as GemkgID, pp.gemarkungsname as Name, gem.bezeichnung as gemeindename, gem.schluesselgesamt as gemeinde 
+			FROM 
+				alkis.ax_gemeinde AS gem, 
+				alkis.pp_gemarkung as pp 
+			WHERE 
+				pp.gemeinde=gem.gemeinde AND 
+				pp.kreis=gem.kreis AND 
+				gem.endet IS NULL ";
+		if($ganzeGemID[0]!='' OR $GemkgID[0]!=''){
+			$sql.="AND (FALSE ";
+			if($ganzeGemID[0]!=''){
+				$sql.=" OR gem.schluesselgesamt IN ('".implode("','", $ganzeGemID)."')";
+			}
+			if($GemkgID[0]!=''){
+				$sql.=" OR pp.schluesselgesamt IN ('".implode("','", $GemkgID)."')";
+			}
+			$sql.=")";
+		}
+		$sql .="
+			UNION
+			SELECT DISTINCT 
+				schluesselgesamt as GemkgID, bezeichnung || ' (hist.)' as Name, '' as gemeindename, '' as gemeinde 
+			FROM 
+				alkis.ax_gemarkung
+			WHERE 
+				endet IS NULL AND
+				'http://www.lverma-mv.de/_fdv#7040' = any(zeigtaufexternes_art)
+		";
+    $sql.=" ORDER BY Name";
+    #echo $sql;
+    $queryret=$this->execSQL($sql, 4, 0);
+    if ($queryret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    while ($rs=pg_fetch_assoc($queryret[1])) {
+      $Liste['GemkgID'][]=$rs['gemkgid'];
+      $Liste['Name'][]=$rs['name'];
+      $Liste['gemeinde'][]=$rs['gemeinde'];
+      $Liste['Bezeichnung'][]=$rs['name']." (".$rs['gemkgid'].") ".$rs['gemeindename'];
+    }
+    return $Liste;
+  }	
     
   function getGemeindeListeByKreisGemeinden($Gemeinden){
     $sql ="SELECT DISTINCT g.schluesselgesamt AS id, g.bezeichnung AS name";
@@ -2934,42 +2991,54 @@ FROM
     return $ret;
   }
 
-  function getMetadata($md) {
-    $sql ="SELECT oid,* FROM md_metadata WHERE (1=1)";
-    if ($md['oid']!='') {
-      $sql.=" AND oid=".(int)$md['oid'];
-    }
-    if ($md['mdfileid']!='') {
-      $sql.=" AND mdfileid=".(int)$md['mdfileid'];
-    }
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]==0) {
-      while($rs=pg_fetch_array($ret[1])) {
-        $mdresult[]=$rs;
-      }
-      $ret[1]=$mdresult;
-    }
-    return $ret;
-  }
+	function getMetadata($md) {
+		# ToDo überarbeiten fuer Postgres Version 12
+		$sql = "
+			SELECT
+				oid, *
+			FROM
+				md_metadata
+			WHERE
+				true" .
+				($md['oid'] != '' 			? " AND oid = " . (int)$md['oid'] : '') .
+				($md['mdfileid'] != '' 	? " AND mdfileid = " . (int)$md['mdfileid'] : '') . "
+		";
+		$ret = $this->execSQL($sql, 4, 0);
+		if ($ret[0]==0) {
+			while ($rs=pg_fetch_array($ret[1])) {
+				$mdresult[] = $rs;
+			}
+			$ret[1] = $mdresult;
+		}
+		return $ret;
+	}
 
-##################################################
-# Funktionen fï¿½r administrative Grenzen
-##################################################
+	##################################################
+	# functions for administrative Grenzen
+	##################################################
   function truncateAdmKreise() {
     $sql ="TRUNCATE adm_landkreise";
     return $this->execSQL($sql, 4, 0);
   }
 
-  function insertAdmKreis($colnames,$row) {
-    $sql ="INSERT INTO adm_landkreis";
-    $sql.=" ('".$colnames[0];
-    for ($i=1;$i<count($row);$i++) { $sql.=",".$colnames[$i];}
-    $sql.=")";
-    $sql.=" VALUES ('".$row[0]."'";
-    for ($i=1;$i<count($row);$i++) { $sql.=",'".$row[$i]."'";}
-    $sql.=")";
-    return $this->execSQL($sql, 4, 0);
-  }
+	function insertAdmKreis($colnames,$row) {
+		$sql = "
+			INSERT INTO adm_landkreis (" .
+				implode(', ', $colnames) . "
+			) VALUES (" .
+				implode(
+					', ',
+					array_map(
+						function($r) {
+							return "'" . $r . "'";
+						},
+						$row
+					)
+				) . "
+			)
+		";
+		return $this->execSQL($sql, 4, 0);
+	}
 
 ##################################################
 # Funktionen der Anwendung kvwmap
@@ -3014,8 +3083,8 @@ FROM
     # initiates a transaction block, that is, all statements
     # after BEGIN command will be executed in a single transaction
     # until an explicit COMMIT or ROLLBACK is given
-    if ($this->blocktransaction==0) {
-      $ret=$this->execSQL('START TRANSACTION',4, 1);
+    if ($this->blocktransaction == 0) {
+      $ret=$this->execSQL('BEGIN', 4, 1);
     }
     return $ret;
   }
@@ -3025,8 +3094,8 @@ FROM
     # und Abbrechen der Transaktion
     # rolls back the current transaction and causes all the updates
     # made by the transaction to be discarded
-    if ($this->blocktransaction==0) {
-      $ret=$this->execSQL('ROLLBACK',4, 1);
+    if ($this->blocktransaction == 0) {
+      $ret=$this->execSQL('ROLLBACK',4 , 1);
     }
     return $ret;
   }
@@ -3035,8 +3104,8 @@ FROM
     # Gueltigmachen und Beenden der Transaktion
     # commits the current transaction. All changes made by the transaction
     # become visible to others and are guaranteed to be durable if a crash occurs
-    if ($this->blocktransaction==0) {
-      $ret=$this->execSQL('COMMIT',4, 1);
+    if ($this->blocktransaction == 0) {
+      $ret = $this->execSQL('COMMIT', 4, 1);
     }
     return $ret;
   }
@@ -3066,4 +3135,12 @@ FROM
   	}
   }
 
+	function drop_table($schema_name, $table_name) {
+		$sql = "
+			DROP TABLE IF EXISTS " . $schema_name . "." . $table_name . "
+		";
+		#echo '<br>SQL: ' . $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		return $ret;
+	}
 }

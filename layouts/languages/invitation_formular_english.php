@@ -1,4 +1,8 @@
-﻿<?php
-	$strTitelEdit="Invite User";
-	$strTitelNew="Change user invitation";
+<?php
+	$strTitelEdit = "Change user invitation";
+	$strTitelNew = "Invite User";
+	$strWhoShallBeInvided = "Who shall be invited?";
+	$strWhereShallBeWorked = "In which task group shall the user work?";
+	$strToken = "Token";
+	$strSendInvitationPerEMail = "Send Invitation per E-Mail";
 ?>

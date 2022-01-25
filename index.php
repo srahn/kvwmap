@@ -40,6 +40,10 @@ function CustomErrorHandler($errno, $errstr, $errfile, $errline){
 
 set_error_handler("CustomErrorHandler");
 
+if (!file_exists('credentials.php') OR !file_exists('config.php')) {
+	echo '<h1>kvwmap-Server</h1>Die Anwendung kvwmap ist noch nicht fertig eingerichtet.<br>Dazu kann das Script <a href="install.php">install.php</a> verwendet werden.';
+	exit;
+}
 include('credentials.php');
 include('config.php');
 
@@ -200,6 +204,7 @@ else {
 	include_(CLASSPATH . 'bauleitplanung.php');
 }
 include(WWWROOT . APPLVERSION . 'start.php');
+
 $GUI->go = $go;
 
 # Laden der Plugins index.phps
@@ -208,7 +213,6 @@ if (!FAST_CASE) {
 		include(PLUGINS . $kvwmap_plugins[$i] . '/control/index.php');
 	}
 }
-
 # Übergeben des Anwendungsfalles
 $debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
 function go_switch($go, $exit = false) {
@@ -242,8 +246,10 @@ function go_switch($go, $exit = false) {
 					$GUI->navMap($GUI->formvars['CMD']);
 				}
 				$GUI->saveMap('');
-				$currenttime=date('Y-m-d H:i:s',time());
-				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				if (!in_array($GUI->formvars['CMD'], ['next', 'previous'])) {
+					$currenttime=date('Y-m-d H:i:s',time());
+					$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				}
 				$GUI->drawMap();
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
@@ -284,46 +290,6 @@ function go_switch($go, $exit = false) {
 			case 'show_snippet' : {
 				$GUI->checkCaseAllowed($go);
 				$GUI->show_snippet();
-			} break;
-
-			case 'Sicherungen_anzeigen' : {
-				$GUI->checkCaseAllowed($go);
-				$GUI->Sicherungen_anzeigen();
-			} break;
-
-			case 'Sicherung_editieren' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->Sicherung_editieren();
-			} break;
-
-			case 'Sicherung_speichern' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->Sicherung_speichern();
-			} break;
-
-			case 'Sicherung_loeschen' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->Sicherung_loeschen();
-			} break;
-
-			case 'sicherungsinhalt_editieren' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->sicherungsinhalt_editieren();
-			} break;
-
-			case 'sicherungsinhalt_speichern' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->sicherungsinhalt_speichern();
-			} break;
-
-			case 'sicherungsinhalt_loeschen' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->sicherungsinhalt_loeschen();
-			} break;
-
-			case 'write_backup_plan' : {
-				$GUI->checkCaseAllowed('Sicherungen_anzeigen');
-				$GUI->write_backup_plan();
 			} break;
 
 			case 'openCustomSubform' : {
@@ -479,12 +445,12 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
-			case 'getSVG_vertices' : {
-				$GUI->getSVG_vertices();
+			case 'getSVG_all_vertices' : {
+				$GUI->getSVG_all_vertices();
 			} break;
 
-			case 'getSVG_foreign_vertices' : {
-				$GUI->getSVG_foreign_vertices();
+			case 'getSVG_vertices' : {
+				$GUI->getSVG_vertices();
 			} break;
 
 			case 'ResizeMap2Window' : {
@@ -1399,9 +1365,25 @@ function go_switch($go, $exit = false) {
 				$GUI->LayerAnzeigen();
 			} break;
 
+			case 'delete_shared_layer' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->LayerLoeschen(true); # Delete maintable too if possible
+				$GUI->add_message('notice', 'Geteilten Layer erfolgreich gelöscht!');
+				$GUI->loadMap('DataBase');
+				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+				$GUI->saveMap('');
+				$GUI->drawMap();
+				$GUI->output();
+			} break;
+
 			case 'Layer2Stelle_Reihenfolge' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->Layer2Stelle_Reihenfolge();
+			} break;
+
+			case 'Layer2Stelle_Reihenfolge_Layerdef' : {
+				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->Layer2Stelle_Reihenfolge_Layerdef();
 			} break;
 
 			case 'Layer2Stelle_Reihenfolge_Speichern' : {
@@ -1751,6 +1733,17 @@ function go_switch($go, $exit = false) {
 
 			case 'delete_rollenlayer' : {
 				$GUI->deleteRollenlayer();
+			} break;
+
+			case 'share_rollenlayer': {
+				$GUI->checkCaseAllowed('share_rollenlayer');
+				$GUI->share_rollenlayer();
+				$GUI->loadMap('DataBase');
+				$currenttime = date('Y-m-d H:i:s',time());
+				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap', $GUI->user->rolle->last_time_id);
+				$GUI->saveMap('');
+				$GUI->drawMap();
+				$GUI->output();
 			} break;
 
 			default : {

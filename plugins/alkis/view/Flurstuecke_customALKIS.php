@@ -85,8 +85,8 @@ hide_versions = function(flst){
 	$gesamt = $this->qlayerset[$i]['count'];
   $anzObj = @count($this->qlayerset[$i]['shape']);
 	if($gesamt == '')$gesamt = $anzObj;
-	$von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + 1;
-	$bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + $this->formvars['anzahl'];
+	$von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] ?: 0 + 1;
+	$bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] ?: 0 + $this->formvars['anzahl'];
   if ($anzObj>0) {
 		$this->found = 'true';
 	?>
@@ -144,7 +144,7 @@ hide_versions = function(flst){
       }
 			if($flst->FlurstNr){
 				echo '<a href="#'.$flst->FlurstKennz.'">Gemarkung: '.$gemkg.' - Flur: '.ltrim($flur,"0").' - Flurst&uuml;ck: '.$zaehler.$nenner.'</a>';
-				if($flst->Nachfolger != '')echo ' (H)';
+				if($flst->Nachfolger != '' OR $flst->hist_alb == 1)echo ' (H)';
 				echo '<br>';
 			}
 			else{
@@ -350,7 +350,7 @@ hide_versions = function(flst){
 												<td><?php 
 													$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $flst->beginnt);
 													$endet = DateTime::createFromFormat('d.m.Y H:i:s', $flst->endet);
-													if($flst->Nachfolger != ''){
+													if($flst->Nachfolger != '' OR $flst->hist_alb == 1){
 														echo "historisches&nbsp;Flurst&uuml;ck"; 
 														if($flst->endet != ''){
 															if($this->Stelle->hist_timestamp AND ($timestamp == NULL OR $timestamp < $beginnt OR $timestamp >= $endet)){
@@ -845,11 +845,12 @@ hide_versions = function(flst){
 												Auszug:
 												<select style="width: 130px" onchange="this.options[this.selectedIndex].onchange();this.selectedIndex=0">
 													<option>-- Auswahl --</option>
+													<? if($flst->Nachfolger == '' AND $flst->hist_alb != 1){ ?>
 													<? if($this->Stelle->funktionen['MV0510']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0510&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis</option><? } ?>
 													<? if($this->Stelle->funktionen['MV0550']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0550&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis</option><? } ?>
 													<? if($this->Stelle->funktionen['MV0520']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0520&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis mit Bodenschätzung</option><? } ?>
 													<? if($this->Stelle->funktionen['MV0560']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0560&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis mit Bodenschätzung</option><? } ?>
-
+													<? } ?>
 													<? if($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=30&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurst&uuml;cksdaten</option><? } ?>
 													<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=35&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurst&uuml;cksdaten&nbsp;mit&nbsp;Eigent&uuml;mer</option><? } ?>
 													<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']){ ?><option onchange="window.open('index.php?go=ALB_Anzeige&formnummer=40&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>

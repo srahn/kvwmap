@@ -314,10 +314,7 @@ class administration{
 		$name = trim($name);
 		#echo '<p>' . $name . ' prefix vor behandlung' . $this->config_params[$name]['prefix'];
 		if ($this->config_params[$name]['prefix'] != '') {
-			if ($this->config_params[$name]['value'] == '') {
-				return NULL;
-			}
-			#echo '<p>' . $name . ' prefix' . print_r(explode('.', $this->config_params[$name]['prefix']), true);
+			#echo '<p>' . $name . ' prefix: ' . print_r(explode('.', $this->config_params[$name]['prefix']), true);
 			foreach (explode('.', $this->config_params[$name]['prefix']) as $prefix_constant) {
 				#echo '<br>part : ' . $prefix_constant;
 				$prefix_value .= $this->get_real_value($prefix_constant);
@@ -474,44 +471,6 @@ class administration{
 			else $description.= trim($config_line, " \t#/");
 		}
 		return $constants;
-	}
-
-	/*
-	* This function writes the config and the crontab for backups
-	*/
-	function write_backup_config_and_cron($gui) {
-
-		$backup_path = '/var/www/sicherungen/';
-
-		Administration::deleteDir($backup_path);
-		mkdir($backup_path);
-
-		$this->get_config_params();
-
-		include_once(CLASSPATH . 'Sicherung.php');
-		$sicherungen = Sicherung::find($gui);
-		$return = array( 'count_export' => 0
-										,'count_skip' 	=> 0
-										,'crontab'			=> ''
-										);
-		$app = rtrim($this->config_params['APPLVERSION']['value'], '/');
-		$fh=fopen('/var/www/sicherungen/kvwmap_backup_crontab_' . $app, 'w');
-		fwrite($fh, 'SHELL=/bin/bash' . PHP_EOL);
-		fwrite($fh, 'PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin' . PHP_EOL);
-		foreach($sicherungen AS $sicherung) {
-			if ($sicherung->get_valid_for_fileexport()){
-				$return['count_export'] = $return['count_export'] + 1;
-				$sicherung->write_config_files($gui, $backup_path, $app);
-				$cronline = $sicherung->get_cronjob_interval() . ' root	/home/gisadmin/kvwmap-server/scripte/sicherung/backup.sh /home/gisadmin/www/sicherungen/' . $app . '_' . $sicherung->get('id') . PHP_EOL;
-				fwrite($fh, $cronline);
-				$return['crontab'] = $return['crontab'] . $cronline . '<br>';
-			}
-			else {
-				$return['count_skip'] = $return['count_skip'] + 1;
-			}
-		}
-		fclose($fh);
-		return $return;
 	}
 
 	public static function deleteDir($dirPath) {

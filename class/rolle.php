@@ -77,23 +77,30 @@ class rolle {
 				ELSE l.`Name`
 			END AS Name";
 		}
-		else
+		else {
 			$name_column = "l.Name";
+		}
 
 		if ($LayerName != '') {
-			$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "'";
-			if(is_numeric($LayerName))
-				$layer_name_filter .= " OR l.Layer_ID = " . $LayerName;
-			$layer_name_filter .= ")";
+			if (is_numeric($LayerName)) {
+				$layer_name_filter .= " AND l.Layer_ID = " . $LayerName;
+			}
+			else {
+				$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "')";
+			}
 		}
 
 		$sql = "
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
-				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
-				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function,
+				l.alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, l.`schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
+				CASE 
+					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
+					ELSE l.connection 
+				END as connection, 
+				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
+				wfs_geom, selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
 				sync,
 				ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
@@ -101,8 +108,9 @@ class rolle {
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
 				l.labelitem as original_labelitem,
-				l.duplicate_from_layer_id,
-				l.duplicate_criterion,
+				l.`duplicate_from_layer_id`,
+				l.`duplicate_criterion`,
+				l.`shared_from`,
 				ul.`postlabelcache`,
 				`Filter`,
 				r2ul.gle_view,
@@ -117,16 +125,19 @@ class rolle {
 				`start_aktiv`,
 				r2ul.showclasses,
 				r2ul.rollenfilter,
-				r2ul.geom_from_layer
+				r2ul.geom_from_layer,
+				las.privileg as privilegfk 
 			FROM
-				used_layer AS ul,
-				u_rolle2used_layer as r2ul,
-				layer AS l
-				LEFT JOIN connections as c ON l.connection_id = c.id
+				layer AS l 
+				JOIN used_layer AS ul ON l.Layer_ID=ul.Layer_ID 
+				JOIN u_rolle2used_layer as r2ul ON r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID 
+				LEFT JOIN connections as c ON l.connection_id = c.id 
+				LEFT JOIN layer_attributes as la ON la.layer_id = ul.Layer_ID AND form_element_type = 'SubformFK' 
+				LEFT JOIN layer_attributes2stelle as las ON 
+					las.stelle_id = ul.Stelle_ID AND 
+					ul.Layer_ID = las.layer_id AND 
+					las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
 			WHERE
-				l.Layer_ID=ul.Layer_ID AND
-				r2ul.Stelle_ID=ul.Stelle_ID AND
-				r2ul.Layer_ID=ul.Layer_ID AND
 				ul.Stelle_ID= " . $this->stelle_id . " AND
 				r2ul.User_ID= " . $this->user_id .
 				$layer_name_filter . "
@@ -320,11 +331,11 @@ class rolle {
 		if($timestamp != ''){
 			$time = new DateTime(DateTime::createFromFormat('d.m.Y H:i:s', $timestamp)->format('Y-m-d H:i:s'));
 			$sql.='hist_timestamp="'.$time->format('Y-m-d H:i:s').'"';
-			showAlert('Der Zeitpunkt der ALKIS-Historie wurde auf '.$time->format('d.m.Y H:i:s').' geändert.');
+			showAlert('Der Zeitpunkt für historische Daten wurde auf '.$time->format('d.m.Y H:i:s').' geändert.');
 		}
 		else{
 			$sql.='hist_timestamp = NULL';
-			if(rolle::$hist_timestamp != '')showAlert('Der Zeitpunkt der ALKIS-Historie ist jetzt wieder aktuell.');
+			if(rolle::$hist_timestamp != '')showAlert('Der Zeitpunkt für historische Daten ist jetzt wieder aktuell.');
 		}
 		$sql.=' WHERE stelle_id='.$this->stelle_id.' AND user_id='.$this->user_id;		
 		#echo $sql;
@@ -413,7 +424,7 @@ class rolle {
 				rolle::$hist_timestamp = $this->hist_timestamp_de = '';
 				#rolle::$hist_timestamp = '';
 			}
-			$this->selectedButton=$rs['selectedButton'];
+			$this->selectedButton = $rs['selectedButton'];
 			$buttons = explode(',', $rs['buttons']);
 			$this->back = in_array('back', $buttons);
 			$this->forward = in_array('forward', $buttons);
@@ -433,6 +444,10 @@ class rolle {
 			$this->freearrow = in_array('freearrow', $buttons);
 			$this->gps = in_array('gps', $buttons);
 			$this->geom_buttons = explode(',', str_replace(' ', '', $rs['geom_buttons']));
+			$this->redline_text_color = $rs['redline_text_color'];
+			$this->redline_font_family = $rs['redline_font_family'];
+			$this->redline_font_size = $rs['redline_font_size'];
+			$this->redline_font_weight = $rs['redline_font_weight'];
 			return 1;
 		}
 		else {
@@ -970,16 +985,29 @@ class rolle {
 				concat('(', rollenfilter, ')') as Filter
 			FROM
 				rollenlayer AS l
-			" . (count($where) > 0 ? "WHERE " . implode(" AND ", $where) : '') . "
+			WHERE
+				l.stelle_id = " . $this->stelle_id . " AND
+				l.user_id = " . $this->user_id . "
 		";
-
+		if ($LayerName != '') {
+			$sql .=' AND (l.Name LIKE "'.$LayerName.'" ';
+			if (is_numeric($LayerName)) {
+				$sql .= 'OR l.id = "' . $LayerName . '")';
+			}
+			else {
+				$sql .= ')';
+			}
+		}
+		if ($typ != NULL){
+			$sql .= " AND Typ = '" . $typ . "'";
+		}
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
 		while ($rs = $this->database->result->fetch_assoc()) {
-			$layer[]=$rs;
+			$layer[] = $rs;
 		}
 		return $layer;
 	}
@@ -1389,7 +1417,11 @@ class rolle {
 					`menu_auto_close`,
 					`layer_params`,
 					`visually_impaired`,
-					`menue_buttons`
+					`menue_buttons`,
+					`redline_text_color`,
+					`redline_font_family`,
+					`redline_font_size`,
+					`redline_font_weight`
 				) 
 				SELECT ".
 					$user_id.", ".
@@ -1430,7 +1462,11 @@ class rolle {
 					`menu_auto_close`,
 					`layer_params`,
 					`visually_impaired`,
-					`menue_buttons`
+					`menue_buttons`,
+					`redline_text_color`,
+					`redline_font_family`,
+					`redline_font_size`,
+					`redline_font_weight`
 				FROM
 					`rolle`
 				WHERE
@@ -1690,7 +1726,7 @@ class rolle {
 			}
 			
 			# Test ob Untergruppen in den Gruppen vorhanden sind
-			$sql ='SELECT u_groups.id FROM u_groups, u_groups2rolle as r2g WHERE u_groups.id NOT IN ('.implode(',', $gruppen_ids).') AND u_groups.obergruppe IN ('.implode(',', $gruppen_ids).') AND ';
+			$sql ='SELECT u_groups.id, u_groups.obergruppe FROM u_groups, u_groups2rolle as r2g WHERE u_groups.id NOT IN ('.implode(',', $gruppen_ids).') AND u_groups.obergruppe IN ('.implode(',', $gruppen_ids).') AND ';
 			$sql.='r2g.id = u_groups.id AND ';
 			$sql.='r2g.user_id = '.$user_id.' AND ';
 			$sql.='r2g.stelle_id = '.$stelle_id;
@@ -1698,19 +1734,21 @@ class rolle {
 			$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-			$rs_subgroups = $this->database->result->fetch_assoc();
+			while ($rs = $this->database->result->fetch_assoc()) {
+				$rs_subgroups[$rs['obergruppe']] = $rs['obergruppe'];		# ein Array mit den GruppenIDs, die noch Untergruppen haben
+			}
 			
-			if($rs_layer[$gruppen_ids[0]] == ''){					# wenn die erste Gruppe, also die Gruppe des Layers keine Layer hat, diese löschen
+			if($rs_layer[$gruppen_ids[0]] == '' AND $rs_subgroups[$gruppen_ids[0]] == ''){					# wenn die erste Gruppe, also die Gruppe des Layers weder Layer noch Untergruppen hat, diese löschen
 				$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` = '.$gruppen_ids[0].';';
-				if($rs_layer == '' AND !$rs_subgroups[0]){				# wenn darüberhinaus keine Layer oder Untergruppen in den Gruppen darüber vorhanden sind, diese auch löschen
+				$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
+				$this->database->execSQL($sql);
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+				if($rs_layer == '' AND empty($rs_subgroups)){				# wenn darüberhinaus keine Layer oder Untergruppen in den Gruppen darüber vorhanden sind, diese auch löschen
 					$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` IN ('.implode(',', $gruppen_ids).');';
 					$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
 					$this->database->execSQL($sql);
 					if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 				}
-				$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
-				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 			}
 		}
 		return 1;

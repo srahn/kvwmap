@@ -5,6 +5,7 @@
 	global $strShowAll;
 	global $strNewEmbeddedPK;
 	global $hover_preview;
+	
 	function output_table($table) {
 		$output = '';
 		if (is_array($table['rows'])) {
@@ -146,6 +147,7 @@
 			$attributes2['dependents'][$j] = '';		// die Array-Elemente sollen keine Visibility-Changer sein, nur das gemeinsame Hidden-Feld oben
 			$attributes2['table_name'][$attributes2['name'][$j]] = $tablename;
 			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);			
+			$dataset2 = $dataset;
 			$dataset2[$tablename.'_oid'] = $oid;
 			$onchange2 = 'buildJSONString(\''.$id.'\', true);';
 			for($e = -1; $e < count_or_0($elements); $e++){
@@ -559,85 +561,47 @@
 
 				case 'Dokument': {
 					if ($value != '') {
-						$dokumentpfad = $value;
-						$pfadteil = explode('&original_name=', $dokumentpfad);
-						$dateipfad = $pfadteil[0];
-						if ($layer['document_url'] != '') {
-							$remote_url = false;
-							$port = parse_url($layer['document_url'], PHP_URL_PORT);
-							if ($_SERVER['HTTP_HOST'] != parse_url($layer['document_url'], PHP_URL_HOST) . ($port != '' ? ':' . $port : '')) {
-								# die URL verweist auf einen anderen Server
-								$remote_url = true;
+						$preview = $gui->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url']);
+						if ($preview['doc_src'] != '') {
+							$datapart .= '<table border="0"><tr><td>';
+							if ($hover_preview) {
+								$onmouseover = 'onmouseenter="root.document.getElementById(\'vorschau\').style.border=\'1px solid grey\';root.document.getElementById(\'preview_img\').src=this.src" onmouseleave="root.document.getElementById(\'vorschau\').style.border=\'none\';root.document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
 							}
-							$dateipfad = url2filepath($dateipfad, $layer['document_path'], $layer['document_url']);
-						}
-						if ($dateipfad != '') {
-							if (file_exists($dateipfad) OR $remote_url) {
-								$pathinfo = pathinfo($dateipfad);
-								$type = strtolower($pathinfo['extension']);
-								$thumbname = $gui->get_dokument_vorschau(
-									array(
-										$pathinfo['dirname'] . '/' . $pathinfo['filename'],
-										$pathinfo['extension']
-									),
-									$remote_url
-								);
-								if ($layer['document_url'] != '') {
-									$original_name = basename($dateipfad);
-									$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
-									$target = 'target="_blank"';
-									if(dirname($thumbname).'/' == IMAGEPATH){
-										$thumbname = IMAGEURL.basename($thumbname);
-									}
-									else{
-										$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
-									}
-								}
-								else {
-									$original_name = $pfadteil[1];
-									$gui->allowed_documents[] = addslashes($dateipfad);
-									$gui->allowed_documents[] = addslashes($thumbname);
-									$url = IMAGEURL.$gui->document_loader_name.'?dokument='; # absoluter Dateipfad
-								}
-								$datapart .= '<table border="0"><tr><td>';
-								if ($hover_preview) {
-									$onmouseover = 'onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
-								}
-								# Bilder mit Vorschaubild
-								if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
-									$datapart .= '<a href="' . $url . $dokumentpfad . '" ' . $target . '><img class="preview_image" src="' . $url . $thumbname . '" ' . $onmouseover . '></a>';
-								}
-								# Videostream
-								elseif ($layer['document_url'] != '' AND in_array($type, array('mp4'))) {
+							switch ($preview['doc_type']) {
+								case 'local_img' : { # Bilder mit Vorschaubild
+									$datapart .= '<a href="' . $preview['doc_src'] . '" ' . $preview['target'] . '><img class="preview_image" src="' . $preview['thumb_src'] . '" ' . $onmouseover . '></a>';
+								} break;
+
+								case 'local_doc' : case 'remote_url' : { # lokale Dateien oder fremde URLs
+									$datapart .= '<a href="' . $preview['doc_src'] . '" ' . $preview['target'] . '><img class="preview_doc" src="' . $preview['thumb_src'] . '"></a>';
+								} break;
+
+								case 'videostream' : { # Videostream
 									$datapart .= '
-										<video width="'.PREVIEW_IMAGE_WIDTH.'" controls>
-											<source src="'.$dokumentpfad.'" type="video/mp4">
+										<video width="' . PREVIEW_IMAGE_WIDTH . '" controls>
+											<source src="' . $preview['doc_src'] . '" type="video/mp4">
 										</video>
-										';
-								}
-								# Rest
-								else {
-									$datapart .= '<a href="' . $url . $dokumentpfad . '" ' . $target . '><img class="preview_doc" src="' . $url . $thumbname . '"></a>';
-								}
-								$datapart .= '<br>';
-								if ($attribute_privileg != '0' AND !$lock[$k]) {
-									//$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\');"><span>Dokument <br>löschen</span></a>';
-									$datapart .= '<a href="javascript:delete_document(\'' . $fieldname . '\', ' . $layer_id . ', \'' . $gui->formvars['fromobject'] . '\', \'' . $gui->formvars['targetobject'] . '\',  \'' . $gui->formvars['reload'] . '\');"><span>Dokument löschen</span></a>';
-								}
-								$datapart .= '</td></tr>';
-								$datapart .= '<tr><td colspan="2"><span id="image_original_name">' . $original_name . ' (' . human_filesize($dateipfad) . ')</span></td></tr>';
-								$datapart .= '</table>';
+									';
+								} break;
 							}
-							else {
-								$datapart .= '<div>';
-								$datapart .= 'Oooops!<p>';
-								$datapart .= 'Die Datei ' . $dateipfad . ' wurde nicht auf dem Server gefunden.';
-								if ($layer['document_url'] == '') {
-									$datapart .= '<br>Der originale Name der Datei war ' . $pfadteil[1];
-								}
-								$datapart .= '<br>Laden Sie die Datei neu auf den Server hoch oder fragen Sie Ihren Administrator warum die Datei auf dem Server fehlt und lassen Sie sie wiederherstellen.';
-								$datapart .= '</div>';
+							$datapart .= '<br>';
+							if ($attribute_privileg != '0' AND !$lock[$k]) {
+								//$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\');"><span>Dokument <br>löschen</span></a>';
+								$datapart .= '<a href="javascript:delete_document(\'' . $fieldname . '\', ' . $layer_id . ', \'' . $gui->formvars['fromobject'] . '\', \'' . $gui->formvars['targetobject'] . '\',  \'' . $gui->formvars['reload'] . '\');"><span>Dokument löschen</span></a>';
 							}
+							$datapart .= '</td></tr>';
+							$datapart .= '<tr><td colspan="2"><span id="image_original_name">' . $preview['original_name'] . ' (' . $preview['filesize'] . ')</span></td></tr>';
+							$datapart .= '</table>';
+						}
+						else {
+							$datapart .= '<div>';
+							$datapart .= 'Oooops!<p>';
+							$datapart .= 'Die Datei ' . $dateipfad . ' wurde nicht auf dem Server gefunden.';
+							if ($layer['document_url'] == '') {
+								$datapart .= '<br>Der originale Name der Datei war ' . $preview['original_name'];
+							}
+							$datapart .= '<br>Laden Sie die Datei neu auf den Server hoch oder fragen Sie Ihren Administrator warum die Datei auf dem Server fehlt und lassen Sie sie wiederherstellen.';
+							$datapart .= '</div>';
 						}
 						$datapart .= '<input type="hidden" name="'.$fieldname.'_alt" class="' . $field_class . '" value="' . htmlspecialchars($value) . '">';
 					}
@@ -899,9 +863,12 @@
 					if($name == 'lock'){
 						$datapart .= ' type="hidden"';
 					}
-					if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
-						$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
+					if (in_array($attributes['type'][$j], ['numeric', 'float4', 'float8', 'int2', 'int4', 'int8'])) {
+						$value = str_replace('.', ',', $value);
 					}
+					elseif ($attributes['length'][$j]) {
+						$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
+					}				
 					if($size)$datapart .= ' size="'.$size.'"';
 					$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
 					if($attribute_privileg == '0'){ // nur lesbares Attribut
@@ -1254,5 +1221,24 @@
 		if(!empty($class))$output = ' class="'.implode($class, ' ').'"';
 		if(!empty($style))$output.= ' style="'.implode($style, ';').'"';
 		return $output;
+	}
+	
+	function getGeomType($column_geomtype, $layer_datatype){
+		$geomtype = $column_geomtype;
+		# Frage den Geometrietyp aus der Layerdefinition ab, wenn in geometry_columns nur als Geometry definiert.
+		if ($geomtype == 'GEOMETRY' OR empty($geomtype)) {
+			$geomtypes = array('POINT', 'LINESTRING', 'POLYGON');
+			$geomtype = $geomtypes[$layer_datatype];
+		}
+		if ($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY') {
+			$geomtype = 'Polygon';
+		}
+		elseif ($geomtype == 'POINT') {
+			$geomtype = 'Point';
+		}
+		elseif ($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') {
+			$geomtype = 'Line';
+		}
+		return $geomtype;
 	}
 ?>

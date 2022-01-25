@@ -40,6 +40,7 @@ class jagdkataster {
     $this->debug=$debug;
     $this->database=$database;
 		$this->oid_column = $layer[0]['oid'];
+		$this->maintable = $layer[0]['maintable'];
   }
 
   function zoomTojagdbezirk($oid, $border) {

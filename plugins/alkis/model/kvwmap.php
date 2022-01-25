@@ -554,11 +554,21 @@
 		$selFlstID = explode(', ',$GUI->formvars['selFlstID']);
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
 		$Gemarkung=new gemarkung('',$GUI->pgdatabase);
-		if($GemeindenStelle == NULL){
-			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+		if ($GUI->formvars['historical'] != 1) {
+			if($GemeindenStelle == NULL){
+				$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+			}
+			else{
+				$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+			}
 		}
-		else{
-			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+		else {
+			if($GemeindenStelle == NULL){
+				$GemkgListe=$Gemarkung->getGemarkungListeAll(NULL, NULL);
+			}
+			else{
+				$GemkgListe=$Gemarkung->getGemarkungListeAll(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+			}
 		}
 		$GUI->land_schluessel = substr($GemkgListe['GemkgID'][0], 0, 2);
     // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
@@ -582,7 +592,7 @@
       $Flur=new Flur('','','',$GUI->pgdatabase);
     	$FlurListe=$Flur->getFlurListe($GemkgID, $GemeindenStelle['eingeschr_gemarkung'][$GemkgID], $GUI->formvars['historical']);
       # Erzeugen des Formobjektes für die Flurauswahl
-      if (count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
+      if (@count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
       $FlurFormObj=new selectFormObject("FlurID","select",$FlurListe['FlurID'],array($FlurID),$FlurListe['Name'],"1","","",NULL);
       $FlurFormObj->insertOption(-1,0,'--Auswahl--',0);
       $FlurFormObj->outputHTML();
@@ -646,7 +656,12 @@
     $FlstNr = formatFlurstkennzALKIS($GUI->formvars['FlstNr']);
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
     # abfragen, ob es sich um eine gültige GemarkungsID handelt
-    $GemkgListe=$Gemarkung->getGemarkungListe(array($GemID),array($GemkgID));
+		if ($GUI->formvars['historical'] != 1) {
+			$GemkgListe=$Gemarkung->getGemarkungListe(array($GemID),array($GemkgID));
+		}
+		else {
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(NULL, array($GemkgID));
+		}
     if(@count($GemkgListe['GemkgID']) > 0){
       # Die Gemarkung ist ausgewählt und gültig aber Flur leer, zoom auf Gemarkung
       if($FlurID==0 OR $FlurID=='-1'){
@@ -1158,7 +1173,7 @@
 		$GUI->main = PLUGINS.'alkis/view/grundbuchblattsuchform.php';
     $grundbuch = new grundbuch('', '', $GUI->pgdatabase);
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
-    if($GemeindenStelle != ''){   // Stelle ist auf Gemeinden eingeschränkt
+    if (!empty($GemeindenStelle)){   // Stelle ist auf Gemeinden eingeschränkt
       $Gemarkung=new gemarkung('',$GUI->pgdatabase);
 			$ganze_gemarkungen = array_keys($GemeindenStelle['ganze_gemarkung']);
 			if (!empty($GemeindenStelle['ganze_gemeinde'])) {
@@ -1187,7 +1202,7 @@
 		##########################
     if($GUI->formvars['Bezirk'] != ''){
     	if($GUI->formvars['selBlatt'])$GUI->selblattliste = explode(', ',$GUI->formvars['selBlatt']);
-			if($GemeindenStelle != ''){   // Stelle ist auf Gemeinden eingeschränkt
+			if(!empty($GemeindenStelle)){   // Stelle ist auf Gemeinden eingeschränkt
 				$GUI->blattliste = $grundbuch->getGrundbuchblattlisteByGemkgIDs($GUI->formvars['Bezirk'], $ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung'], $GemeindenStelle['ganze_flur'], $GemeindenStelle['eingeschr_flur']);
 			}
 			else{

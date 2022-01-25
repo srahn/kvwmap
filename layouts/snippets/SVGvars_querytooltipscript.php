@@ -55,6 +55,9 @@ $SVGvars_querytooltipscript .= '
 			var box = new Array();																					// array mit den BBoxen der Sachdatentexte
 			var texts = new Array();																				// array mit den Sachdatentexten
 			var pics = new Array;																						// array mit den Bildern	
+			var video;
+			var source;
+			var foreignObject;
 			var tooltip = document.getElementById("querytooltip");
 			var tooltipframe = document.getElementById("frame");
 			var tooltipgroup = document.getElementById("tooltipgroup");
@@ -96,17 +99,37 @@ $SVGvars_querytooltipscript .= '
 							}
 							else{
 								xpos = 5;
-							}
+							}							
 							pics[i] = new Array();
-							pics[i][j] = document.createElementNS("http://www.w3.org/2000/svg", "image");
-							pics[i][j].setAttributeNS(null, "id", "pic_"+i+j);
-							pics[i][j].setAttributeNS(null, "height", "100");
-							pics[i][j].setAttributeNS(null, "width", "140");
-							pics[i][j].setAttributeNS(null, "preserveAspectRatio" , "xMinYMin meet");
-							pics[i][j].setAttributeNS(null, "x", xpos);
-							pics[i][j].setAttributeNS(null, "y", ypos);
-							pics[i][j].setAttributeNS(null, "opacity", 1);
-							pics[i][j].setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", elements[j]);
+							if (elements[j].slice(-3).toLowerCase() == \'mp4\') {
+								source = document.createElementNS("http://www.w3.org/1999/xhtml", "source");
+								source.setAttributeNS(null, "src", elements[j]);
+								source.setAttributeNS(null, "type", "video/mp4");
+								video = document.createElementNS("http://www.w3.org/1999/xhtml", "video");
+								video.setAttributeNS(null, "height", "100");
+								video.setAttributeNS(null, "width", "140");
+								video.addEventListener("mouseenter", function(evt) { this.setAttributeNS(null, "controls", ""); }, true);
+								video.appendChild(source);
+								foreignObject = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
+								foreignObject.setAttributeNS(null, "height", "100");
+								foreignObject.setAttributeNS(null, "width", "140");
+								foreignObject.setAttributeNS(null, "x", xpos);
+								foreignObject.setAttributeNS(null, "y", ypos);
+								foreignObject.appendChild(video);
+								pics[i][j] = document.createElementNS("http://www.w3.org/2000/svg", "g");
+								pics[i][j].appendChild(foreignObject);
+							}
+							else {
+								pics[i][j] = document.createElementNS("http://www.w3.org/2000/svg", "image");
+								pics[i][j].setAttributeNS(null, "id", "pic_"+i+j);
+								pics[i][j].setAttributeNS(null, "height", "100");
+								pics[i][j].setAttributeNS(null, "width", "140");
+								pics[i][j].setAttributeNS(null, "preserveAspectRatio" , "xMinYMin meet");
+								pics[i][j].setAttributeNS(null, "x", xpos);
+								pics[i][j].setAttributeNS(null, "y", ypos);
+								pics[i][j].setAttributeNS(null, "opacity", 1);
+								pics[i][j].setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", elements[j]);
+							}
 							tooltipcontent.appendChild(pics[i][j]);
 							ypos = ypos + 110;
 							if(maxwidth < 140){
@@ -119,7 +142,7 @@ $SVGvars_querytooltipscript .= '
 				}
 				tooltipframe.setAttribute("x", xpos-8);
 				tooltipframe.setAttribute("y", -20); 				
-				tooltipframe.setAttribute("width", maxwidth + 8);
+				tooltipframe.setAttribute("width", maxwidth + 16);
 				tooltipframe.setAttribute("height", ypos + 6);
 				updatetooltipposition(tooltipgroup);															// Tooltipposition updaten
 				tooltipgroup.setAttribute(\'visibility\', \'visible\');
@@ -141,16 +164,16 @@ $SVGvars_querytooltipscript .= '
 		 			x = 5;
 		 		}
 		 		else{
-		 			x = mousex - (maxwidth)-7;
+		 			x = mousex - (maxwidth)-18;
 		 		}
 		 	}
 		 	else{
 		 		overhead = resx - (mousex + maxwidth + 16);
 		 		if(overhead < 0){
-		 			x = mousex + overhead + 10;	
+		 			x = mousex + overhead + 12;	
 		 		}
 		 		else{
-		 			x = mousex + 5;
+		 			x = mousex + 7;
 		 		}
 		 	}
 		 	if(mousey > (resy/2)){

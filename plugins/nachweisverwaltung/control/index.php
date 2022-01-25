@@ -6,6 +6,46 @@ include_once(PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Kl
 function go_switch_nachweisverwaltung($go){
 	global $GUI;	
 	switch($go){
+		case 'LENRIS_get_all_nachweise' : {
+			$GUI->checkCaseAllowed('LENRIS');
+			$GUI->LENRIS_get_all_nachweise();
+	  } break;
+		
+		case 'LENRIS_get_new_nachweise' : {
+			$GUI->checkCaseAllowed('LENRIS');
+			$GUI->LENRIS_get_new_nachweise();
+	  } break;
+		
+		case 'LENRIS_get_changed_nachweise' : {
+			$GUI->checkCaseAllowed('LENRIS');
+			$GUI->LENRIS_get_changed_nachweise();
+	  } break;		
+		
+		case 'LENRIS_get_deleted_nachweise' : {
+			$GUI->checkCaseAllowed('LENRIS');
+			$GUI->LENRIS_get_deleted_nachweise();
+	  } break;
+		
+		case 'LENRIS_confirm_new_nachweise' : {
+			$GUI->checkCaseAllowed('LENRIS');
+			$GUI->LENRIS_confirm_new_nachweise();
+	  } break;
+		
+		case 'LENRIS_confirm_changed_nachweise' : {
+			$GUI->checkCaseAllowed('LENRIS');
+			$GUI->LENRIS_confirm_changed_nachweise();
+	  } break;
+		
+		case 'LENRIS_confirm_deleted_nachweise' : {
+			$GUI->checkCaseAllowed('LENRIS');
+			$GUI->LENRIS_confirm_deleted_nachweise();
+	  } break;
+		
+		case 'LENRIS_get_document' : {
+			$GUI->checkCaseAllowed('LENRIS');
+			$GUI->LENRIS_get_document();
+	  } break;		
+		
 		case 'Antraege_Anzeigen' : {
 			$GUI->checkCaseAllowed('Antraege_Anzeigen');
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
@@ -107,7 +147,9 @@ function go_switch_nachweisverwaltung($go){
 			else{
 				$GUI->setNachweisAnzeigeparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['showhauptart'],$GUI->formvars['markhauptart']);
 			}
-			$GUI->setNachweisOrder($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['order']);
+			if (isset($GUI->formvars['order'])) {
+				$GUI->setNachweisOrder($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['order']);
+			}
 			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 			$GUI->savedformvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
 			$GUI->formvars=array_merge($GUI->savedformvars,$GUI->formvars);

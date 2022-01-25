@@ -54,9 +54,6 @@ CREATE TABLE nachweisverwaltung.fp_punkte_alkis
   gehoertzu character varying,
   datei character varying,
   CONSTRAINT fp_punkte_alkis_pkey PRIMARY KEY (ogc_fid)
-)
-WITH (
-  OIDS=TRUE
 );
 SELECT AddGeometryColumn('nachweisverwaltung', 'fp_punkte_alkis','wkb_geometry',25833,'POINT', 3);
 
@@ -150,9 +147,6 @@ CREATE TABLE nachweisverwaltung.fp_afismv
   ellipsoidhoehe character varying,
   hoehe character varying,
   CONSTRAINT fp_afismv_pkey PRIMARY KEY (ogc_fid)
-)
-WITH (
-  OIDS=FALSE
 );
 
 SELECT AddGeometryColumn('nachweisverwaltung', 'fp_afismv','wkb_geometry',25833,'POINT', 2);
@@ -186,7 +180,7 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_pp_afismv AS
             ELSE ((substr(fp_afismv.punktkennung::text, 1, 4) || '/'::text) || fp_afismv.punktkennung::text) || '.tif'::text
         END AS datei,
         CASE
-            WHEN fp_afismv.hoehe IS NULL THEN st_force_3d(st_transform(fp_afismv.wkb_geometry, 25833))
+            WHEN fp_afismv.hoehe IS NULL THEN st_force3d(st_transform(fp_afismv.wkb_geometry, 25833))
             ELSE st_setsrid(st_makepoint("substring"(fp_afismv.x::text, 3)::double precision, fp_afismv.y::double precision, fp_afismv.hoehe::double precision), 25833)
         END AS wkb_geometry
    FROM nachweisverwaltung.fp_afismv;
@@ -355,7 +349,7 @@ CREATE OR REPLACE VIEW nachweisverwaltung.fp_besondererbauwerkspunkt AS
     au.genauigkeitsstufe AS gst,
     au.koordinatenstatus AS kst,
     au.hinweise AS hin,
-    st_force_3d(au.wkb_geometry) AS wkb_geometry
+    st_force3d(au.wkb_geometry) AS wkb_geometry
    FROM alkis.ax_besondererbauwerkspunkt bwp,
     alkis.ax_punktortau au
   WHERE bwp.gml_id::text = au.istteilvon::text
@@ -435,7 +429,7 @@ UNION
     ag.genauigkeitsstufe AS gst,
     ag.koordinatenstatus AS kst,
     ag.hinweise AS hin,
-    st_force_3d(ag.wkb_geometry) AS wkb_geometry
+    st_force3d(ag.wkb_geometry) AS wkb_geometry
    FROM alkis.ax_besondererbauwerkspunkt bwp,
     alkis.ax_punktortag ag
   WHERE bwp.gml_id::text = ag.istteilvon::text;
@@ -596,7 +590,7 @@ UNION
     ag.genauigkeitsstufe AS gst,
     ag.koordinatenstatus AS kst,
     ag.hinweise AS hin,
-    st_force_3d(ag.wkb_geometry) AS wkb_geometry
+    st_force3d(ag.wkb_geometry) AS wkb_geometry
    FROM alkis.ax_besonderergebaeudepunkt gebp,
     alkis.ax_punktortag ag
   WHERE gebp.gml_id::text = ag.istteilvon::text;
@@ -867,7 +861,7 @@ UNION
     NULL::character varying AS beziehtsichauf,
     NULL::character varying AS gehoertzu,
     NULL::character varying AS datei,
-    st_force_3d(ta.wkb_geometry) AS wkb_geometry
+    st_force3d(ta.wkb_geometry) AS wkb_geometry
    FROM alkis.ax_grenzpunkt gp,
     alkis.ax_punktortta ta
   WHERE gp.gml_id::text = ta.istteilvon::text;

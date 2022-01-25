@@ -151,6 +151,7 @@ $legendheight = $this->map->height + 20;
 		margin-left: 20px;
 	}
 	.dokein-title{
+		position: relative;
 		margin-bottom: 3px;
 	}
 	#dokein-head-attributes {
@@ -270,7 +271,7 @@ $legendheight = $this->map->height + 20;
 					<? if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!=''){ ?>
 					<ul>
 						<li><a href="index.php?go=Nachweisrechercheformular_Senden&abfrageart=indiv_nr&suchhauptart=&suchgemarkung=<? echo $this->formvars['Gemarkung']; ?>&suchflur=<? echo $this->formvars['Flur']; ?>&flur_thematisch=1&such<? echo NACHWEIS_PRIMARY_ATTRIBUTE.'='.$this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]; if(NACHWEIS_SECONDARY_ATTRIBUTE != '')echo '&such'.NACHWEIS_SECONDARY_ATTRIBUTE.'='.$this->formvars[NACHWEIS_SECONDARY_ATTRIBUTE];; ?>">alle der Messung anzeigen</a></li>
-						<li><a href="index.php?go=Nachweisanzeige&suchgueltigkeit=<? echo $this->formvars['suchgueltigkeit']; ?>&suchgeprueft=<? echo $this->formvars['suchgeprueft']; ?>&order=<? echo $this->formvars['order']; ?>&richtung=<? echo $this->formvars['richtung'].'&selected_nachweis='.$this->formvars['id'].'#'.$this->formvars['id']; ?>">zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a></li>
+						<li><a href="javascript:void(0);" onclick="overlay_link('go=Nachweisanzeige&suchgueltigkeit=<? echo $this->formvars['suchgueltigkeit']; ?>&suchgeprueft=<? echo $this->formvars['suchgeprueft']; ?>&order=<? echo $this->formvars['order']; ?>&richtung=<? echo $this->formvars['richtung'].'&selected_nachweis='.$this->formvars['id'].'&auswahl=1&time=' . time() . '#'.$this->formvars['id']; ?>', true)">zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a></li>
 					</ul>
 					<? } ?>
 				</div>

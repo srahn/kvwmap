@@ -74,6 +74,9 @@ class wfs{
 					case 'LIKE' : {									# geht noch nicht, weil man den requeststring hierfür url-encoden muss und dann ist er zu lang 
 						$operator = 'PropertyIsLike';
 						$operator_attributes = " wildCard='*' singleChar='.' escape='!'";
+						if (strpos($values[$i], '%') === false) {
+							$values[$i] = '%' . $values[$i] . '%';
+						}
 						$values[$i] = str_replace('%', '*', $values[$i]);
 					}break;
 				}
@@ -130,8 +133,13 @@ class wfs{
     }
     $this->objects = $objects;
 	}
+	
+	function rename_features(){
+		$this->gml = preg_replace('/\w+_feature/', 'gml:featureMember', $this->gml);
+	}
 
-	function extract_features() {
+	function extract_features(){
+		$features = array();
 		# liefert die Datensätze einer getfeature-Abfrage (zuvor muss get_feature_request() ausgeführt werden)
 		if (strpos($this->gml, 'gmlx:featureMember') !== false) {
 			$this->parse_gml('gmlx:featureMember');
@@ -186,7 +194,18 @@ class wfs{
 					# evtl. Namespace davor entfernen
 					$this->objects[$i][$j]["tag"] = str_replace($this->namespace . ':', '', $this->objects[$i][$j]["tag"]);
 		  		$features[$i]['value'][$this->objects[$i][$j]["tag"]] = $this->objects[$i][$j]["value"];
-				}
+				}				
+			}
+			if ($features[$i]['value']['gml:lowerCorner'] != '') {
+				$lc = explode(' ', $features[$i]['value']['gml:lowerCorner']);
+				$uc = explode(' ', $features[$i]['value']['gml:upperCorner']);
+				$features[$i]['bbox'] = 'POLYGON((' . 
+																	$features[$i]['value']['gml:lowerCorner'] . ', ' . 
+																	$uc[0] . ' ' . $lc[1] . ', ' . 
+																	$features[$i]['value']['gml:upperCorner'] . ', ' . 
+																	$lc[0] . ' ' . $uc[1] . ', ' . 
+																	$features[$i]['value']['gml:lowerCorner'] . 
+																'))';
 			}
   	}
 	  return $features;
@@ -194,13 +213,24 @@ class wfs{
 	
 	function get_attributes(){
 		# liefert die Sachattribute eines WFS-Layers (zuvor muss describe_featuretype_request() ausgeführt werden) 
+		# erstmal den richtigen Featuretype finden, falls mehrere geliefert wurden
+		$this->parse_gml('schema');
+		$index = -1;
+		for ($j = 0; $j < count($this->objects[0]); $j++) {
+			if ($this->objects[0][$j]["tag"] == 'element' AND in_array($this->objects[0][$j]["type"], ['open', 'complete']) AND $this->objects[0][$j]["level"] == 2) {
+				$index++;
+				if ($this->objects[0][$j]["attributes"]['name'] == str_replace($this->namespace . ':', '', $this->typename)) {
+					break;
+				}
+			}
+		}
 		$this->parse_gml('sequence');
-		for($j = 0; $j < count($this->objects[0]); $j++){
+		for($j = 0; $j < count($this->objects[$index]); $j++){
 			# nur offene oder komplette element-Tags
-			if(strpos($this->objects[0][$j]["tag"], 'element') !== false AND ($this->objects[0][$j]["type"] == 'complete' OR $this->objects[0][$j]["type"] == 'open')){
+			if(strpos($this->objects[$index][$j]["tag"], 'element') !== false AND ($this->objects[$index][$j]["type"] == 'complete' OR $this->objects[$index][$j]["type"] == 'open')){
 				# und keine Geometrie-Tags
-				if($this->objects[0][$j]["attributes"]["type"] != 'gml:GeometryPropertyType' AND $this->objects[0][$j]["attributes"]["type"] != 'gml:MultiPolygonPropertyType' AND $this->objects[0][$j]["attributes"]["type"] != 'gml:PolygonPropertyType' AND $this->objects[0][$j]["attributes"]["type"] != 'gml:PointPropertyType'){
-	  			$attribute['name'] = $this->objects[0][$j]["attributes"]["name"];
+				if($this->objects[$index][$j]["attributes"]["type"] != 'gml:GeometryPropertyType' AND $this->objects[$index][$j]["attributes"]["type"] != 'gml:MultiPolygonPropertyType' AND $this->objects[$index][$j]["attributes"]["type"] != 'gml:PolygonPropertyType' AND $this->objects[$index][$j]["attributes"]["type"] != 'gml:PointPropertyType'){
+	  			$attribute['name'] = $this->objects[$index][$j]["attributes"]["name"];
 					$attributes[] = $attribute;
 				}
 			}

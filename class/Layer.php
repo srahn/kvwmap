@@ -13,6 +13,11 @@ class Layer extends MyObject {
 		return $layer->find_where($where);
 	}
 
+	public static	function find_by_id($gui, $id) {
+		$layer = new Layer($gui);
+		return $layer->find_by('Layer_ID', $id);
+	}
+
 	public static	function find_by_name($gui, $name) {
 		$layer = new Layer($gui);
 		$layers = $layer->find_where("Name LIKE '" . $name . "'");
@@ -111,7 +116,36 @@ class Layer extends MyObject {
 		}
 	}
 
-	
+	/*
+	* Function return true, if table of this layer is used at least in on other layer
+	* It searches for layers with same maintable and schema
+	* or schema.maintable used in Data exclude it self
+	* @return boolean true if at least one other layer uses the table els false
+	*/
+	function tableUsedFromOtherLayers() {
+		$data = $this->data;
+		$layers = $this->find_where("
+			(
+				(
+					`maintable` = '" . $this->get('maintable') . "' AND
+					`schema` = '" . $this->get('schema') . "'
+				) OR
+				`Data` LIKE '%" . $this->get('schema') . "." . $this->get('maintable') . "%'
+			) AND
+			`Layer_ID` != " . $this->get($this->identifier) . "
+		");
+		$this->data = $data;
+		return (count($layers) > 0);
+	}
+
+	function delete() {
+		#echo '<br>Class Layer Method delete';
+		$ret = parent::delete();
+		if (MYSQLVERSION > 412) {
+			parent::reset_auto_increment();
+		}
+		return $ret;
+	}
 
 	function get_subform_layers() {
 		include_once(CLASSPATH . 'LayerAttribute.php');
@@ -165,6 +199,100 @@ class Layer extends MyObject {
 				$layers
 			)
 		) . '</li></ul>';
+	}
+
+	function get_group_name() {
+		include_once(CLASSPATH . 'LayerGroup.php');
+		$group = LayerGroup::find_by_id($this->gui, $this->get('Gruppe'));
+		return $group->get('Gruppenname');
+	}
+
+	function get_baselayers_def($stelle_id) {
+		$this->debug->show('<p>Layer->get_baselayers_def for stelle_id: ' . $stelle_id, MyObject::$write_debug);
+		include_once(CLASSPATH . 'LayerClass.php');
+		include_once(CLASSPATH . 'LayerAttribute.php');
+
+		$layerAttributes = new stdClass();
+		foreach (LayerAttribute::find_visible($this->gui, $stelle_id, $this->get('Layer_ID')) AS $attr) {
+			$key = $attr->get('name');
+			$value = ($attr->get('alias') == '' ? $attr->get('name') : $attr->get('alias'));
+			$layerAttributes->$key = $value;
+		}
+		$layerdef = (Object) array(
+			'img' => 'wind_power.svg',
+			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
+			'options' => (Object) array(
+				'attribution' => $this->get('datasource')
+			),
+			'shortLabel' => $this->get('Name'),
+			'url' => $this->get('Data'),
+			'url2' => URL . APPLVERSION . 'index.php'
+		);
+		return $layerdef;
+	}
+
+	function get_overlays_def($stelle_id) {
+		$this->debug->show('<p>Layer->get_overlays_def for stelle_id: ' . $stelle_id, MyObject::$write_debug);
+		include_once(CLASSPATH . 'LayerClass.php');
+		include_once(CLASSPATH . 'LayerAttribute.php');
+
+		$layerAttributes = new stdClass();
+		foreach (LayerAttribute::find_visible($this->gui, $stelle_id, $this->get('Layer_ID')) AS $attr) {
+			$key = $attr->get('name');
+			$value = ($attr->get('alias') == '' ? $attr->get('name') : $attr->get('alias'));
+			$layerAttributes->$key = $value;
+		}
+		$layerdef = (Object) array(
+			'abstract' => $this->get('kurzbeschreibung'),
+			'actuality' => $this->get('uptodateness'),
+			'actualityCircle' => $this->get('updatecycle'),
+			'backgroundColor' => '#c1ffd8',
+			'classes' => array_map(
+				function($class) {
+					return $class->get_layerdef();
+				},
+				LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'))
+			),
+			'contactEMail' => $this->get('dataowner_email'),
+			'contactPersonName' => $this->get('dataowner_name'),
+			'contactPhon' => $this->get('dataowner_tel'),
+			'contactOrganisation' => $this->get('datasource'),
+			'geomType' => array('Point', 'Line', 'Polygon')[$this->get('Datentyp')],
+			'icon' => (Object) array(
+				'iconUrl' => 'icons/Windenergie/Onshore/EA-Icons_Windenergieanlagen Onshore.svg',
+				'iconSize' => array(30, 30),
+				'iconAnchor' => array(7, 0),
+				'popupAnchor' => array(0, 0)
+			),
+			'infoAttribute' => ($this->get('labelitem') != '' ? $this->get('labelitem') : $this->get('oid')),
+			'img' => 'wind_power.svg',
+			'hideEmptyLayerAttributes' => true,
+			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
+			'layerAttributes' => $layerAttributes,
+			'options' => (Object) array(
+				'attribution' => $this->get('dataowner_name'),
+#				'transparent' => true,
+#				'crs' => '',
+#				'version' => '',
+#				'layers' => '',
+#				'format' => '',
+#				'opacity' => 1
+			),
+			'params' => (Object) array(
+				'gast' => $stelle_id,
+				'go' => 'Daten_Export_Exportieren',
+				'selected_layer_id' => $this->get('Layer_ID'),
+				'export_format' =>  'GeoJSON',
+				'browserwidth' => 800,
+				'browserheight' => 600,
+				'epsg' => 4326,
+				'all' => 1
+			),
+			'thema' => $this->get_group_name() . '|' . $this->get('Name'),
+			'type' => 'GeoJSON',
+			'url' => URL . APPLVERSION . 'index.php'
+		);
+		return $layerdef;
 	}
 }
 ?>

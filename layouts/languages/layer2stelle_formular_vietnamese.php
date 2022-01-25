@@ -1,4 +1,4 @@
-﻿<?php
+<?php
   $strTitle="Layereigenschaften stellenbezogen";
   $strTask="của tác vụ đang thực hiện";
   $strQueryable="Khả năng truy vấn";

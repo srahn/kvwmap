@@ -242,7 +242,7 @@ class gemarkung {
   }
 	
   function getGemarkungListeAll($ganzeGemID, $GemkgID) {
-    # Abfragen aller Gemarkungen (auch der untergegangenen) mit seinen GemeindeNamen (todo)
+    # Abfragen aller Gemarkungen (auch der untergegangenen) mit seinen GemeindeNamen
     $Liste=$this->database->getGemarkungListeAll($ganzeGemID, $GemkgID);
     return $Liste;
   }	
@@ -287,7 +287,6 @@ class eigentuemer {
 		$sql.="LEFT JOIN alkis.ax_anschrift a ON p.hat = a.gml_id ";
     $sql.="WHERE p.gml_id = '".$gml_id."') as foo";
     #echo $sql;
-    $query=pg_query($sql);
   	$ret=$this->database->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     $rs=pg_fetch_array($ret[1]);

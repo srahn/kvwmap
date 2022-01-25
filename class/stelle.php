@@ -28,7 +28,6 @@ class stelle {
 	var $pixsize;
 	var $selectedButton;
 	var $database;
-	var $language;
 
 	function __construct($id, $database) {
 		global $debug;
@@ -37,13 +36,14 @@ class stelle {
 		$this->log = $log_mysql;
 		$this->id = $id;
 		$this->database = $database;
-		$this->readDefaultValues();
+		$ret = $this->readDefaultValues();
 	}
 
 	function getsubmenues($id){
+		global $language;
 		$sql ='SELECT menue_id,';
-		if ($this->language != 'german') {
-			$sql.='`name_'.$this->language.'` AS ';
+		if ($language != 'german') {
+			$sql.='`name_'.$language.'` AS ';
 		}
 		$sql .=' name, target, links FROM u_menue2stelle, u_menues';
 		$sql .=' WHERE stelle_id = '.$this->id;
@@ -93,9 +93,10 @@ class stelle {
 	}
 	
   function getName() {
+		global $language;
     $sql ='SELECT ';
-    if ($this->language != 'german' AND $this->language != ''){
-      $sql.='`Bezeichnung_'.$this->language.'` AS ';
+    if ($language != 'german' AND $language != ''){
+      $sql.='`Bezeichnung_'.$language.'` AS ';
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo '<p>SQL zur Abfrage des Stellennamens: ' . $sql;
@@ -110,23 +111,34 @@ class stelle {
   }
 
 	function readDefaultValues() {
+		global $language;
+		if ($language != '' AND $language != 'german') {
+			$name_column = "
+			CASE
+				WHEN s.`Bezeichnung_" . $language . "` != \"\" THEN s.`Bezeichnung_" . $language . "`
+				ELSE s.`Bezeichnung`
+			END AS Bezeichnung";
+		}
+		else {
+			$name_column = "s.`Bezeichnung`";
+		}
+
 		$sql = "
 			SELECT
-				*,";
-		if ($this->language != 'german' AND $this->language != ''){
-      $sql.='`Bezeichnung_'.$this->language.'` AS ';
-    }
-    $sql.="
-				Bezeichnung
+				`ID`," .
+				$name_column . ",
+				`start`,
+				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`, `pgdbhost`, `pgdbname`, `pgdbuser`, `pgdbpasswd`, `ows_title`, `wms_accessconstraints`, `ows_abstract`, `ows_contactperson`, `ows_contactorganization`, `ows_contactemailaddress`, `ows_contactposition`, `ows_fees`, `ows_srs`, `protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `postgres_connection_id`
 			FROM
-				stelle
+				stelle s
 			WHERE
 				ID = " . $this->id . "
 		";
+		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return $ret;
 		}
 		$rs = $this->database->result->fetch_array();
 		$this->Bezeichnung=$rs['Bezeichnung'];
@@ -158,6 +170,7 @@ class stelle {
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
 		$this->hist_timestamp = $rs['hist_timestamp'];
 		$this->default_user_id = $rs['default_user_id'];
+		$this->show_shared_layers = $rs['show_shared_layers'];
 		$this->style = $rs['style'];
 	}
 
@@ -321,7 +334,7 @@ class stelle {
 		$this->debug->write("<p>file:stelle.php class:stelle->getstellendaten - Abfragen der Stellendaten<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		$rs=$this->database->result->fetch_array();
+		$rs = $this->database->result->fetch_array();
 		return $rs;
 	}
 
@@ -369,10 +382,13 @@ class stelle {
 		$sql.=', check_client_ip="';if($stellendaten['checkClientIP']=='1')$sql.='1';else $sql.='0';$sql.='"';
 		$sql.=', check_password_age="';if($stellendaten['checkPasswordAge']=='1')$sql.='1';else $sql.='0';$sql.='"';
 		$sql.=', allowed_password_age=';if($stellendaten['allowedPasswordAge']!='')$sql.=$stellendaten['allowedPasswordAge'];else $sql.='6';
-		$sql.=', use_layer_aliases="';if($stellendaten['use_layer_aliases']=='1')$sql.='1';else $sql.='0';$sql.='"';
-		$sql.=', hist_timestamp="';if($stellendaten['hist_timestamp']=='1')$sql.='1';else $sql.='0';$sql.='"';
+		$sql.=', use_layer_aliases="';if($stellendaten['use_layer_aliases']=='1')$sql.='1';else $sql.='0';$sql.='",';
+		$sql .= "
+			`hist_timestamp` = " . ($stellendaten['hist_timestamp'] ? "1" : "0") . ",
+			`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . "
+		";
 		# Abfrage starten
-		$ret=$this->database->execSQL($sql,4, 0);
+		$ret = $this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
 			# Fehler bei Datenbankanfrage
 			$ret[1].='<br>Die Stellendaten konnten nicht eingetragen werden.<br>'.$ret[1];
@@ -400,6 +416,7 @@ class stelle {
 
 	# Stelle ändern
 	function Aendern($stellendaten) {
+		$language = $this->database->gui->user->rolle->language;
 		$stelle = ($stellendaten['id'] != '' ? "`ID` = " . $stellendaten['id'] . ", " : "");
 		$wappen = (value_of($stellendaten, 'wappen') != '' ? "`wappen` = '" . $stellendaten['wappen'] . "', " : "");
 		$sql = "
@@ -408,7 +425,9 @@ class stelle {
 			SET" .
 				$stelle .
 				$wappen . "
-				`Bezeichnung` = '" . $stellendaten['bezeichnung'] . "',
+				`Bezeichnung` = '" . $stellendaten['bezeichnung'] . "'," .
+				(array_key_exists('Bezeichnung_' . $language, $stellendaten) ? "
+					`Bezeichnung_" . $language . "` = '" . $stellendaten['Bezeichnung_' . $language] . "'," : "") . "
 				`Referenzkarte_ID` = " . $stellendaten['Referenzkarte_ID'] . ",
 				`minxmax` = '" . $stellendaten['minxmax'] . "',
 				`minymax` = '" . $stellendaten['minymax'] . "',
@@ -437,7 +456,8 @@ class stelle {
 				`use_layer_aliases` = 		'" . (value_of($stellendaten, 'use_layer_aliases') 	== '1'	? "1" : "0") . "',
 				`hist_timestamp` = 				'" . (value_of($stellendaten, 'hist_timestamp') 		== '1'	? "1" : "0") . "',
 				`allowed_password_age` = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "',
-				`default_user_id` = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . "
+				`default_user_id` = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
+				`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . "
 			WHERE
 				ID = " . $this->id . "
 		";
@@ -458,6 +478,7 @@ class stelle {
 			SELECT
 				s.ID,
 				s.Bezeichnung,
+				s.show_shared_layers,
 				(
 					SELECT 
 						group_concat(es.Bezeichnung)
@@ -488,6 +509,7 @@ class stelle {
 			$stellen['ID'][] = $rs['ID'];
 			$stellen['index'][$rs['ID']] = $i;
 			$stellen['Bezeichnung'][] = $rs['Bezeichnung'];
+			$stellen['show_shared_layers'][] = $rs['show_shared_layers'];
 			$stellen['Bezeichnung_parent'][] = $rs['Bezeichnung_parent'];
 			$i++;
 		}
@@ -495,6 +517,7 @@ class stelle {
 	}
 	
 	function getStellenhierarchie() {
+		$this->links = Array();
 		$sql = "
 			SELECT
 				*
@@ -694,8 +717,17 @@ class stelle {
 	}
 
 	function isMenueAllowed($menuename){
-		$sql = "SELECT distinct a.* from u_menues as a, u_menue2stelle as b ";
-		$sql.= "WHERE links LIKE 'index.php?go=".$menuename."%' AND b.menue_id = a.id AND b.stelle_id = ".$this->id;
+		$sql = "
+			SELECT
+				distinct a.*
+			FROM
+				u_menues as a,
+				u_menue2stelle as b
+			WHERE
+				links LIKE 'index.php?go=" . $menuename . "%' AND
+				b.menue_id = a.id AND
+				b.stelle_id = " . $this->id . "
+		";
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->isMenueAllowed - Guckt ob der Menuepunkt der Stelle zugeordnet ist:<br>".$sql,4);
 		$this->database->execSQL($sql);
@@ -769,7 +801,7 @@ class stelle {
 		# Füge Einstellungen der Elternstellen zur Stelle hinzu
 		foreach($selected_parents AS $new_parent_id) {
 			$parent_stelle = new stelle($new_parent_id, $this->database);
-			$menues = $this->merge_menues($menues, $parent_stelle->getMenue(0));
+			$menues = $this->sort_menues(array_merge($menues, $parent_stelle->getMenue(0, 'only_ids')));
 			$functions = array_values(array_unique(array_merge($functions, $parent_stelle->getFunktionen('only_ids'))));
 			$layouts = array_values(array_unique(array_merge($layouts, $ddl->load_layouts($new_parent_id, '', '', '', 'only_ids'))));
 			$frames = array_values(array_unique(array_merge($frames, $document->load_frames($new_parent_id, false, 'only_ids'))));
@@ -779,20 +811,27 @@ class stelle {
 		return $results;
 	}
 
-	function merge_menues($menues, $new_menues){
-		$menue_objects = empty($menues) ? array() : Menue::find($this, ' id IN ('.implode(',', $menues).')', 'FIELD(id, '.implode(',', $menues).')');
-		$insert_index = 0;
-		for($i = 0; $i < count($new_menues['ID']); $i++){
-			if($new_menues['menueebene'][$i] == 1){
-				while($menue_objects[$insert_index]->data['menueebene'] == 1 AND $menue_objects[$insert_index]->data['order'] < $new_menues['ORDER'][$i]){
-					$insert_index++;
-				}
-			}
-			array_splice($menue_objects, $insert_index, 0, [(object)['data' => ['id' => $new_menues['ID'][$i], 'order' => $new_menues['ORDER'][$i], 'name' => $new_menues['Bezeichnung'][$i]]]]);
-			$insert_index++;
+	function sort_menues($menues){
+		# sortiert zunächst die Menüs von Ebene 1 nach order und dann innerhalb der Obermenüpunkte die Untermenüpunkte nach order
+		$sql = '
+			SELECT 
+				CASE WHEN m.menueebene = 1 THEN m.`order` ELSE om.`order` END as order1, 
+				CASE WHEN m.menueebene = 1 THEN m.`id` ELSE m.`obermenue` END as order2,
+				m.`id`
+			FROM `u_menues` as m 
+			LEFT JOIN `u_menues` as om ON om.id = m.obermenue
+			WHERE
+				m.id IN (' . implode(',', $menues) . ')
+			ORDER BY order1, order2, m.menueebene, m.`order`
+		';
+		$this->database->execSQL($sql);
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
-		foreach($menue_objects as $menue){
-			$result[] = $menue->data['id'];
+		else{
+			while($rs=$this->database->result->fetch_array()) {
+				$result[] = $rs['id'];
+			}
 		}
 		return $result;
 	}
@@ -1038,31 +1077,31 @@ class stelle {
 		return 1;
 	}
 
-	function addLayer($layer_ids, $drawingorder, $filter = '', $assign_default_values = false) {
+	function addLayer($layer_ids, $drawingorder, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
-		for ($i=0;$i<count($layer_ids);$i++){
+		for ($i = 0; $i < count($layer_ids); $i++) {
 			$insert = "(
-					`Stelle_ID`,
-					`Layer_ID`,
-					`queryable`,
-					`use_geom`,
-					`drawingorder`,
-					`legendorder`,
-					`minscale`,
-					`maxscale`,
-					`symbolscale`,
-					`offsite`,
-					`transparency`,
-					`Filter`,
-					`template`,
-					`header`,
-					`footer`,
-					`privileg`,
-					`export_privileg`,
-					`postlabelcache`,
-					`requires`
-				)";
+				`Stelle_ID`,
+				`Layer_ID`,
+				`queryable`,
+				`use_geom`,
+				`drawingorder`,
+				`legendorder`,
+				`minscale`,
+				`maxscale`,
+				`symbolscale`,
+				`offsite`,
+				`transparency`,
+				`Filter`,
+				`template`,
+				`header`,
+				`footer`,
+				`privileg`,
+				`export_privileg`,
+				`postlabelcache`,
+				`requires`
+			)";
 			# Einstellungen von der Elternstelle übernehmen
 			$sql = "INSERT INTO used_layer " . $insert . "
 				SELECT
@@ -1131,7 +1170,7 @@ class stelle {
 						template, 
 						NULL,
 						NULL,
-						`privileg`,
+						" . ($privileg == 'editable'? "'1'" : 'privileg') . ",
 						`export_privileg`,
 						postlabelcache,
 						requires
@@ -1164,7 +1203,7 @@ class stelle {
 
 			if (!$assign_default_values AND $this->database->mysqli->affected_rows > 0) {
 				$insert = "
-					INSERT INTO layer_attributes2stelle (
+					INSERT IGNORE INTO layer_attributes2stelle (
 						layer_id,
 						attributename,
 						stelle_id,
@@ -1227,7 +1266,7 @@ class stelle {
 							" . $layer_ids[$i] . ",
 							name,
 							" . $this->id . ",
-							privileg,
+							" . ($privileg == 'editable'? '1' : 'privileg') . ",
 							query_tooltip 
 						FROM 
 							layer_attributes 
@@ -1466,18 +1505,18 @@ class stelle {
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
-		else{
+		else {
 			$i = 0;
-			while($rs=$this->database->result->fetch_assoc()) {
-				$layer['ID'][]=$rs['Layer_ID'];
-				$layer['Bezeichnung'][]=$rs['Name'];
-				$layer['drawingorder'][]=$rs['drawingorder'];
-				$layer['legendorder'][]=$rs['legendorder'];
-				$layer['Gruppe'][]=$rs['Gruppe'];
+			while ($rs = $this->database->result->fetch_assoc()) {
+				$layer['ID'][] 						= $rs['Layer_ID'];
+				$layer['Bezeichnung'][]		= $rs['Name'];
+				$layer['drawingorder'][]	= $rs['drawingorder'];
+				$layer['legendorder'][]		= $rs['legendorder'];
+				$layer['Gruppe'][]				= $rs['Gruppe'];
 				$layer['layers_of_group'][$rs['Gruppe']][] = $i;
 				$i++;
 			}
-			if($order == 'Name'){
+			if ($order == 'Name') {
 				// Sortieren der Layer unter Berücksichtigung von Umlauten
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
 				$sorted_layer['Bezeichnung'] = $sorted_arrays['array'];
@@ -1533,6 +1572,8 @@ class stelle {
 		}
 		else{
 			while($rs=$this->database->result->fetch_array()) {
+				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
+				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
 				if($rs['alias'] != '' AND $this->useLayerAliases){
 					$rs['Name'] = $rs['alias'];
 				}
@@ -1602,9 +1643,8 @@ class stelle {
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
-		else{
-			while($rs=$this->database->result->fetch_assoc()){
-				 
+		else {
+			while ($rs=$this->database->result->fetch_assoc()){
 				# fremde Layer werden auf Verbindung getestet (erstmal rausgenommen, dauert relativ lange)
 				// if(strpos($rs['connection'], 'host') !== false AND strpos($rs['connection'], 'host=localhost') === false){
 					// $connection = explode(' ', trim($rs['connection']));
@@ -1626,9 +1666,9 @@ class stelle {
 						// continue;
 					// }
 				// }
-				
+
 				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
-				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);				
+				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
 				
 				if($rs['alias'] != '' AND $this->useLayerAliases){
 					$rs['Name'] = $rs['alias'];
@@ -1703,10 +1743,16 @@ class stelle {
 		$layer = array();
 		$sql = "
 			SELECT
-				l.*,
-				ul.*,
+				l.Layer_ID,
+				l.Name,
+				l.Gruppe,
+				ul.use_parent_privileges,
+				ul.privileg,
+				ul.export_privileg,
+				ul.requires,
 				parent_id,
-				ul2.Stelle_ID as used_layer_parent_id
+				GROUP_CONCAT(ul2.Stelle_ID) as used_layer_parent_id,
+				GROUP_CONCAT(s.Bezeichnung) as used_layer_parent_bezeichnung
 			FROM
 				layer AS l 
 				JOIN used_layer AS ul ON l.Layer_ID = ul.Layer_ID
@@ -1714,9 +1760,12 @@ class stelle {
 				LEFT JOIN used_layer AS ul2 ON 
 					l.Layer_ID = ul2.Layer_ID AND	
 					ul2.Stelle_ID = parent_id
+				LEFT JOIN stelle AS s ON s.ID = ul2.Stelle_ID
 			WHERE
 				ul.Stelle_ID = " . $this->id .
 				($Layer_id != '' ? " AND l.Layer_ID = " . $Layer_id : '') . "
+			GROUP BY 
+				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg
 		";
 		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);
@@ -1726,6 +1775,61 @@ class stelle {
 			$layer[] = ($result == 'only_ids' ? $rs['Layer_ID'] : $rs);
 		}
 		return $layer;
+	}
+
+	/*
+	* Function return layerdef for kvportal
+	* It query mapOptions, groups as themes, base and overlay layers
+	* and compose it to a layerdef conform object structure
+	*/
+	function get_layerdef() {
+		#echo 'Stelle->get_layerdef';
+		include_once(CLASSPATH . 'Layer2Stelle.php');
+		include_once(CLASSPATH . 'Layer.php');
+		include_once(CLASSPATH . 'LayerGroup.php');
+
+		$stellendaten = $this->getstellendaten();
+		$stellenextent = $this->MaxGeorefExt;
+		$projFROM = ms_newprojectionobj("init=epsg:" . $this->epsg_code);
+		$projTO = ms_newprojectionobj("init=epsg:4326");
+		$stellenextent->project($projFROM, $projTO);
+
+		$layerdef = (Object) array(
+			'mapOptions' => (Object) array(
+				'center' => (Object) array(
+					'lat' => round(($stellenextent->maxy - $stellenextent->miny) / 2 + $stellenextent->miny, 5),
+					'lng' => round(($stellenextent->maxx - $stellenextent->minx) / 2 + $stellenextent->minx, 5)
+				),
+				'zoom' => $stellendaten['minzoom'],
+				'maxBounds' => array(
+					array(round($stellenextent->miny, 5), round($stellenextent->minx, 5)),
+					array(round($stellenextent->maxy, 5), round($stellenextent->maxx, 5))
+				),
+				'minZoom' => $stellendaten['minzoom']
+			),
+			'default_wms_legend_icon' => 'img/noun_Globe.svg',
+			'themes' => array_map(
+				function($parent) {
+					return $parent->get_layerdef('');
+				},
+				LayerGroup::find_top_parents($this->database->gui, $this->id)
+			),
+			'baseLayers' => array_map(
+				function($layer2Stelle) {
+					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
+					return $layer->get_baselayers_def($this->id);
+				},
+				Layer2Stelle::find_base_layers($this->database->gui, $this->id)
+			),
+			'overlays' => array_map(
+				function($layer2Stelle) {
+					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
+					return $layer->get_overlays_def($this->id);
+				},
+				Layer2Stelle::find_overlay_layers($this->database->gui, $this->id)
+			)
+		);
+		return $layerdef;
 	}
 
 	function get_attributes_privileges($layer_id) {
@@ -1753,7 +1857,7 @@ class stelle {
 
 	function parse_path($database, $path, $privileges, $attributes = NULL){
 		$newattributesstring = '';
-		$path = str_replace(array("\r\n", "\n"), ' ', $path);
+		$path = str_replace(["\r\n", "\n", "\t"], ' ', $path);
 		$distinctpos = strpos(strtolower($path), 'distinct');
 		if($distinctpos !== false && $distinctpos < 10){
 			$offset = $distinctpos+8;
@@ -1860,6 +1964,7 @@ class stelle {
 	}
 
 	function getGemeindeIDs() {
+		$liste = [];
 		$sql = 'SELECT Gemeinde_ID, Gemarkung, Flur, Flurstueck FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
@@ -1967,7 +2072,7 @@ class stelle {
 	function getWappen() {
 		$sql = "
 			SELECT
-				wappen
+				wappen, wappen_link
 			FROM
 				stelle
 			WHERE
@@ -1976,23 +2081,8 @@ class stelle {
 		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$rs = $this->database->result->fetch_array();
-		return $rs['wappen'];
-	}
-
-	function getWappenLink() {
-		$sql = "
-			SELECT
-				wappen_link
-			FROM
-				stelle
-			WHERE ID = " . $this->id . "
-		";
-		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>" . $sql, 4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$rs = $this->database->result->fetch_array();
-		return $rs['wappen_link'];
+		$rs = $this->database->result->fetch_assoc();
+		return $rs;
 	}
 
 	/**

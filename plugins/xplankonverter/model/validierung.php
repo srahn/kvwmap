@@ -80,6 +80,32 @@ class Validierung extends PgObject {
 		return $regeln_existieren;
 	}
 
+	function plan_attribute_has_value() {
+		$has_value = true;
+		$sql = "
+			SELECT
+				count(*) = 1 AS has_value
+			FROM
+				xplan_gml.xp_plan
+			WHERE
+				konvertierung_id = " . $this->konvertierung_id . " AND
+				" . implode(' AND ', json_decode(str_replace('}', ']', str_replace('{', '[', $this->get('functionsargumente'))))) . "
+		";
+		$this->debug->show('plan_attribute_has_value sql: ' . $sql, false);
+		$result = pg_fetch_assoc(pg_query($this->database->dbConn, $sql));
+		$has_value = $result['has_value'] == 't';
+		$validierungsergebnis = new Validierungsergebnis($this->gui);
+		$validierungsergebnis->create(
+			array(
+				'konvertierung_id' => $this->konvertierung_id,
+				'validierung_id' => $this->get('id'),
+				'status' => ($has_value ? 'Erfolg' : 'Fehler'),
+				'msg' => $this->get('msg_' . ($has_value ? 'success' : 'error'))
+			)
+		);
+		return $has_value;
+	}
+
 	function sql_ausfuehrbar($regel) {
 		$this->debug->show('<br>Validiere ob sql_ausfuehrbar: ', Validierung::$write_debug);
 		$ausfuehrbar = true;
@@ -216,10 +242,13 @@ class Validierung extends PgObject {
 					'validierung_id' => $this->get('id'),
 					'status' => 'Warnung',
 					'regel_id' => $regel_id,
-					'shape_gid' => $row['gid'],
 					'msg' => 'Objekt mit gid: ' . $row['gid']. ' in Shape: ' . $regel->get_shape_table_name() . ' hat keine Geometrie.'
 				)
 			);
+			// gid may not appear in gmlas-data, therefore optional
+			if($row['gid'] != '') {
+					$validierungsergebnis->shape_gid = $row['gid'];
+				}
 			$geometrie_vorhanden = false;
 		}
 
@@ -236,7 +265,7 @@ class Validierung extends PgObject {
 	function geometrie_isvalid($regel, $konvertierung) {
 		$this->debug->show('<br>Validate geom_isvalid:', Validierung::$write_debug);
 		$all_geom_isvalid = true;
-		$sourcetype = $regel->is_source_shape_or_gmlas($regel);
+		$sourcetype = $regel->is_source_shape_or_gmlas($regel,$konvertierung->get('id'));
 		# shape or gmlas?
 		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
 
@@ -319,16 +348,19 @@ class Validierung extends PgObject {
 			while ($row = pg_fetch_assoc($result)) {
 				$this->debug->show('<br>geometrie mit gid: ' . $row['gid'] . ' ist nicht valid', Validierung::$write_debug);
 				$validierungsergebnis = new Validierungsergebnis($this->gui);
+
 				$validierungsergebnis->create(
 					array(
 						'konvertierung_id' => $konvertierung->get('id'),
 						'validierung_id' => $this->get('id'),
 						'status' => 'Fehler',
 						'regel_id' => $regel->get('id'),
-						'shape_gid' => $row['gid'],
 						'msg' => 'Regel: ' . $regel->get('name') . '. Objekt mit gid: ' . $row['gid'] . ' in Shape: ' . $regel->get_shape_table_name() . ' ist nicht valide. Grund: ' . $row['validreason']
 					)
 				);
+				if($row['gid'] != '') {
+					$validierungsergebnis->shape_gid = $row['gid'];
+				}
 				$all_geom_isvalid = false;
 			}
 		}
@@ -365,7 +397,7 @@ class Validierung extends PgObject {
 		$all_within_plan = true;
 
 		$sql = $regel->get_convert_sql($konvertierung->get('id'));
-		$sourcetype = $regel->is_source_shape_or_gmlas($regel);
+		$sourcetype = $regel->is_source_shape_or_gmlas($regel,$konvertierung->get('id'));
 		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
 		# Default Shape (the_geom), gmlas (position)
 
@@ -479,10 +511,12 @@ class Validierung extends PgObject {
 							'validierung_id' => $this->get('id'),
 							'status' => ($row['distance'] > 100 ? 'Fehler' : 'Warnung'),
 							'regel_id' => $regel->get('id'),
-							'shape_gid' => $row['gid'],
 							'msg' => 'Objekt mit' . ($sourcetype == 'gmlas' ? '' : ' gid: ' . $row['gid']). ' in Shape: ' . $regel->get_shape_table_name() . ' ist außerhalb des räumlichen Geltungsbereiches des Planes.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
 						)
 					);
+					if($row['gid'] != '') {
+					$validierungsergebnis->shape_gid = $row['gid'];
+				}
 					$all_within_plan = false;
 				}
 			}
@@ -522,7 +556,7 @@ class Validierung extends PgObject {
 		$sql = $regel->get_convert_sql($konvertierung->get('id'));
 
 		# Spaltenname der Geometrie ermitteln
-		$sourcetype = $regel->is_source_shape_or_gmlas($regel);
+		$sourcetype = $regel->is_source_shape_or_gmlas($regel,$konvertierung->get('id'));
 		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
 
 		# Plantyp abfragen
@@ -629,10 +663,12 @@ class Validierung extends PgObject {
 							'validierung_id' => $this->get('id'),
 							'status' => ($row['distance'] > 100 ? 'Fehler' : 'Warnung'),
 							'regel_id' => $regel->get('id'),
-							'shape_gid' => $row['gid'],
 							'msg' => 'Objekt mit gid: ' . $row['gid']. ' in Shape: ' . $regel->get_shape_table_name() . ' ist außerhalb des räumlichen Geltungsbereiches seines Planbereiches.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
 						)
 					);
+					if($row['gid'] != '') {
+					$validierungsergebnis->shape_gid = $row['gid'];
+				}
 					$all_within_bereich = false;
 				}
 			}

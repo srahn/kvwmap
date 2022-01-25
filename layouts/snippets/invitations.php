@@ -29,11 +29,11 @@
 		<td>
 			<table width="100%" border="0" cellspacing="0" cellpadding="2">
 				<tr>
-					<th><a href="index.php?go=Einladungen_Anzeigen&order=token">Kennung</a></th>
+					<th><a href="index.php?go=Einladungen_Anzeigen&order=token"><? echo $strToken; ?></a></th>
 					<th><a href="index.php?go=Einladungen_Anzeigen&order=email">E-Mail</a></th>
-					<th><a href="index.php?go=Einladungen_Anzeigen&order=stelle_id">Stelle</a></th>
-					<th><a href="index.php?go=Einladungen_Anzeigen&order=name">Nutzer</th>
-					<th><a href="index.php?go=Einladungen_Anzeigen&order=completed">Registriert</a></th>
+					<th><a href="index.php?go=Einladungen_Anzeigen&order=stelle_id"><? echo $strTask; ?></a></th>
+					<th><a href="index.php?go=Einladungen_Anzeigen&order=name"><? echo $this->strUser; ?></th>
+					<th><a href="index.php?go=Einladungen_Anzeigen&order=completed"><? echo $strRegistered; ?></a></th>
 					<th>&nbsp;</th>
 					<th>&nbsp;</th>
 				</tr><?php
@@ -74,7 +74,7 @@
 	</tr>
 	<tr>
 		<td align="center" style="padding-top: 20px">
-			<a class="btn btn-new" href="index.php?go=Einladung_Editor"><i titel="Legt eine neue Einladung an." class="fa fa-plus" style="color: white; margin-bottom: 10px"></i>&nbsp;Neue&nbsp;Einladung</a>
+			<a class="btn btn-new" href="index.php?go=Einladung_Editor" titel="Legt eine neue Einladung an."><i class="fa fa-plus" style="color: white; margin-bottom: 10px"></i> <?php echo $strInviteNewUser; ?></a>
 		</td>
 	</tr>
 </table>

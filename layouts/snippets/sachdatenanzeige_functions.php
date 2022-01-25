@@ -21,7 +21,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	}
 	
 	adjustHref = function(link){
-		if (link.href.substring(0,9) == 'index.php' && link.target != 'root' && enclosingForm.name == 'GUI2') {
+		if (link.href.indexOf('index.php?') != -1 && link.target != 'root' && enclosingForm.name == 'GUI2') {
 			link.href = link.href.replace('?', '?window_type=overlay&');
 		}
 	}
@@ -102,11 +102,11 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		tab.classList.add("active_tab");
 		var groups_to_close = dataset.querySelectorAll('.tab');
 		[].forEach.call(groups_to_close, function (group){
-			group.style.display = 'none';
+			group.style.visibility = 'collapse';
 		});
 		var groups_to_open = dataset.querySelectorAll('.tab_' + layer_id + '_' + k + '_' + tabname);
 		[].forEach.call(groups_to_open, function (group){
-			group.style.display = '';
+			group.style.visibility = 'visible';
 		});
 	}
 	
@@ -125,8 +125,8 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			var name_dependent = scope.querySelector('#name_'+layer_id+'_'+dependent+'_'+k);
 			var value_dependent = scope.querySelector('#value_'+layer_id+'_'+dependent+'_'+k);
 			if(field_has_value(object, operator, value)){
-				if(name_dependent != null)name_dependent.style.visibility = 'visible';
-				value_dependent.style.visibility = 'visible';
+				if(name_dependent != null)name_dependent.style.visibility = 'inherit';
+				value_dependent.style.visibility = 'inherit';
 			}
 			else{
 				if(name_dependent != null)name_dependent.style.visibility = 'hidden';
@@ -158,6 +158,20 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				row.closest('div').closest('tr').style.display = group_display;
 			}
 		})
+		// visibility of tabs
+		if (document.querySelector('.gle_tabs.tab_' + layer_id + '_' + k) != null) {
+			tabs = [].slice.call(document.querySelector('.gle_tabs.tab_' + layer_id + '_' + k).children);
+			tabs.forEach(function(tab){
+				tab_display = 'none';
+				tab_groups = [].slice.call(document.querySelectorAll('.tab.tab_' + tab.classList[0]));
+				tab_groups.forEach(function(tab_group){
+					if (tab_group.style.display != 'none') {
+						tab_display = '';
+					}
+				})
+				tab.style.display = tab_display;
+			})
+		}
 	}
 
 	field_has_value = function(field, operator, value) {
@@ -786,7 +800,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		params = 'go=zoom2wkt&wkt='+wkt+'&epsg='+epsg;
 		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
 			startwaiting();
-			get_map_ajax(params, '', '');
+			root.get_map_ajax(params, '', '');
 		}
 		else{
 			window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen

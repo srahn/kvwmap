@@ -17,10 +17,10 @@
 	font-family: SourceSansPro3;
 	font-size: 20px;
 	margin-bottom: 0px;
-	margin-top: 20px;
+	margin-top: 10px;
 }
 #nds_titel p {
-	margin: -15px 0px 0px 0px;
+	margin: 0px 0px 0px 0px;
 }
 #nds_formular {
 	margin: 40px 0px 20px 0px;
@@ -47,7 +47,7 @@
 	display:flex;
 	flex-flow: row nowrap;
 	justify-content: center;
-	margin-bottom: 30px;
+	margin-bottom: 15px;
 }
 #nds_submit>div {
 	display: flex;
@@ -64,6 +64,10 @@
 #nds_submit span {
 	margin: auto;
 	margin-left: 3px;
+}
+
+#nds_edit #dataset_operations {
+	display: none;
 }
 </style>
 

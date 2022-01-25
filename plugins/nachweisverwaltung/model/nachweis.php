@@ -46,6 +46,152 @@ class Nachweis {
     $this->database=$database;
     $this->client_epsg=$client_epsg;
   }
+	
+	function LENRIS_get_all_nachweise(){
+		ini_set('memory_limit', '8192M');
+		set_time_limit(1800);
+		$sql = "
+			DELETE FROM 
+				nachweisverwaltung.n_nachweisaenderungen;
+			SELECT 
+				*
+      FROM 
+				nachweisverwaltung.n_nachweise
+			ORDER BY id
+			";
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				foreach ($nachweise as $index => $nachweis) {
+					$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', @filemtime($nachweis['link_datei']));
+				}
+				$json = json_encode($nachweise);
+				echo $json;
+			}
+		}
+	}
+	
+	function LENRIS_get_new_nachweise(){
+		$sql = "
+			SELECT 
+				a.*
+      FROM 
+				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
+			WHERE
+				b.db_action = 'INSERT'
+			ORDER BY a.id";
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				foreach ($nachweise as $index => $nachweis) {
+					$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', @filemtime($nachweis['link_datei']));
+				}
+				$json = json_encode($nachweise);
+				echo $json;
+			}
+		}
+	}
+	
+	function LENRIS_get_changed_nachweise(){
+		$sql = "
+			SELECT DISTINCT
+				a.*
+      FROM 
+				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
+			WHERE
+				b.db_action = 'UPDATE'
+			ORDER BY a.id";
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				foreach ($nachweise as $index => $nachweis) {
+					$nachweise[$index]['document_last_modified'] = date('Y-m-d H:i:s', @filemtime($nachweis['link_datei']));
+				}
+				$json = json_encode($nachweise);
+				echo $json;
+			}
+		}
+	}
+	
+	function LENRIS_get_deleted_nachweise(){
+		$sql = "
+			SELECT 
+				id_nachweis
+      FROM 
+				nachweisverwaltung.n_nachweisaenderungen 
+			WHERE
+				db_action = 'DELETE'";
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+      if ($nachweise = pg_fetch_all($ret[1])) {
+				$json = json_encode($nachweise);
+				echo $json;
+			}
+		}
+	}	
+	
+	function LENRIS_confirm_new_nachweise($ids){
+		$sql = "
+			DELETE FROM 
+				nachweisverwaltung.n_nachweisaenderungen 
+			WHERE 
+				id_nachweis IN (" . $ids . ") and db_action = 'INSERT'";
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+			$rows = pg_affected_rows($ret[1]);
+			echo $rows;
+		}
+	}
+		
+	function LENRIS_confirm_changed_nachweise($ids){
+		$sql = "
+			DELETE FROM 
+				nachweisverwaltung.n_nachweisaenderungen 
+			WHERE 
+				id_nachweis IN (" . $ids . ") and db_action = 'UPDATE'";
+		$ret = $this->database->execSQL($sql,4, 1);
+		if (!$ret[0]) {
+			$sql = "
+				SELECT 
+					count(*)
+				FROM
+					nachweisverwaltung.n_nachweisaenderungen 
+				WHERE 
+					id_nachweis IN (" . $ids . ") and db_action = 'UPDATE'";
+			if (!$ret[0]) {
+				$rest = pg_fetch_row($ret[1]);
+				echo (substr_count($ids, ',') + 1 - $rest[0]);
+			}
+		}
+	}
+
+	function LENRIS_confirm_deleted_nachweise($ids){
+		$sql = "
+			DELETE FROM 
+				nachweisverwaltung.n_nachweisaenderungen 
+			WHERE 
+				id_nachweis IN (" . $ids . ")";		# alle Einträge löschen, da es noch UPDATE-Einträge geben kann
+		$ret = $this->database->execSQL($sql,4, 1);    
+    if (!$ret[0]) {
+			$sql = "
+				SELECT 
+					count(*)
+				FROM
+					nachweisverwaltung.n_nachweisaenderungen 
+				WHERE 
+					id_nachweis IN (" . $ids . ") and db_action = 'DELETE'";
+			if (!$ret[0]) {
+				$rest = pg_fetch_row($ret[1]);
+				echo (substr_count($ids, ',') + 1 - $rest[0]);
+			}
+		}
+	}		
+
+	function LENRIS_get_document($document){
+		if (strpos($document, NACHWEISDOCPATH) !== false AND file_exists($document)) {
+			readfile($document);
+		}
+	}
 
 	function check_documentpath($old_dataset){		
 		$ret=$this->getNachweise($old_dataset['id'],'','','','','','','','bySingleID','','');
@@ -127,16 +273,16 @@ class Nachweis {
 		}
 	}
 	
-  function getZielDateiName($formvars) {
+  function getZielDateiName($formvars, $nachweis_primary_attribute = NACHWEIS_PRIMARY_ATTRIBUTE, $nachweis_secondary_attribute = NACHWEIS_SECONDARY_ATTRIBUTE) {
     #2005-11-24_pk
     $pathparts=pathinfo($formvars['Bilddatei_name']);
-		if($formvars[NACHWEIS_PRIMARY_ATTRIBUTE] == ''){		# primäres Ordungskriterium leer -> Nachweis-ID nehmen
+		if($formvars[$nachweis_primary_attribute] == ''){		# primäres Ordungskriterium leer -> Nachweis-ID nehmen
 			$id = $secondary.str_pad(($formvars['id'] ?: $this->get_next_nachweis_id()), RISSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
 		}
 		else{
-			$id = $this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]);
+			$id = $this->buildNachweisNr($formvars[$nachweis_primary_attribute], $formvars[$nachweis_secondary_attribute]);
 		}
-    $zieldateiname=$formvars['flurid'].'-'.$id.'-'.$formvars['artname'].'-'.str_pad(trim($formvars['Blattnr']),3,'0',STR_PAD_LEFT).'.'.$pathparts['extension'];
+    $zieldateiname = $formvars['flurid'].'-'.$id.'-'.$formvars['artname'].'-'.str_pad(trim($formvars['Blattnr']),3,'0',STR_PAD_LEFT).'.'.$pathparts['extension'];
     #echo $zieldateiname;
     return $zieldateiname;
   }
@@ -256,13 +402,20 @@ class Nachweis {
     return $art;
   }	
   
-  function getDokumentarten(){
+  function getDokumentarten($grouped_by_hauptart = true){
   	$sql="SELECT id, art, geometrie_relevant, hauptart, sortierung, abkuerzung, pok_pflicht::integer FROM nachweisverwaltung.n_dokumentarten order by sortierung, art"; 
     $ret=$this->database->execSQL($sql,4, 0);    
     if (!$ret[0]) {
-      while($rs=pg_fetch_assoc($ret[1])){
-				$art[$rs['hauptart']][$rs['id']] = $rs;
-      }
+			if ($grouped_by_hauptart) {
+				while($rs=pg_fetch_assoc($ret[1])){
+					$art[$rs['hauptart']][$rs['id']] = $rs;
+				}
+			}
+			else {
+				while($rs=pg_fetch_assoc($ret[1])){
+					$art[$rs['id']] = $rs;
+				}
+			}
     }
     return $art;
   }
@@ -495,8 +648,8 @@ class Nachweis {
     return $ret;
   }
 
-  static function buildNachweisNr($primary, $secondary){
-  	if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
+  static function buildNachweisNr($primary, $secondary, $nachweis_primary_attribute = NACHWEIS_PRIMARY_ATTRIBUTE){
+  	if($nachweis_primary_attribute == 'rissnummer'){
   		return $secondary.str_pad($primary, RISSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
   	}
   	else{
@@ -506,28 +659,28 @@ class Nachweis {
   
 	function CreateNachweisDokumentVorschau($dateiname){		
 		$dir = dirname($dateiname);
-		$dateinamensteil=explode('.',$dateiname);
-		if(mb_strtolower($dateinamensteil[1]) == 'pdf'){
-			$pagecount = getNumPagesPdf($dateiname);
-			if($pagecount > 1)$label = '-pointsize 11 -draw "stroke #0009 fill #0007 stroke-width 2 circle 120,120 200,120 
-																											 stroke none fill white text 98,102 \''.$pagecount.'\'
-																																							text 60,150 \'Seiten\'"';
+		$dateinamensteil = explode('.',$dateiname);
+		$type = mb_strtolower($dateinamensteil[1]);
+		if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
+			if ($type == 'pdf'){
+				$pagecount = getNumPagesPdf($dateiname);
+				if ($pagecount > 1) {
+					$label = '-pointsize 11 -draw "stroke #0009 fill #0007 stroke-width 2 circle 120,120 200,120 
+																												 stroke none fill white text 98,102 \''.$pagecount.'\'
+																																								text 60,150 \'Seiten\'"';
+				}
+			}
+			$command = IMAGEMAGICKPATH.'convert -density 200x200 '.$dateiname.'[0] -quality 75 -background white '.$label.' -flatten -resize 1800x1800\> '.$dateinamensteil[0].'_thumb.jpg';
+			exec($command, $ausgabe, $ret);
 		}
-		$command = IMAGEMAGICKPATH.'convert -density 300x300 '.$dateiname.'[0] -quality 75 -background white '.$label.' -flatten -resize 1800x1800\> '.$dateinamensteil[0].'_thumb.jpg';
-		exec($command, $ausgabe, $ret);
-		if($ret == 1){
-			$type = $dateinamensteil[1];
-  		switch ($type) {  			
-  			default : {
-  				$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
-          $textbox = imagettfbbox(13, 0, WWWROOT.APPLVERSION.'fonts/arial.ttf', '.'.$type);
-          $textwidth = $textbox[2] - $textbox[0] + 13;
-          $blue = ImageColorAllocate ($image, 26, 87, 150);
-          imagettftext($image, 13, 0, 22, 34, $blue, WWWROOT.APPLVERSION.'fonts/arial_bold.ttf', $type);
-          $thumbname = $dateinamensteil[0].'_thumb.jpg';
-          imagejpeg($image, $thumbname);
-  			}
-  		}
+  	else {
+			$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
+			$textbox = imagettfbbox(13, 0, WWWROOT.APPLVERSION.'fonts/arial.ttf', '.'.$type);
+			$textwidth = $textbox[2] - $textbox[0] + 13;
+			$blue = ImageColorAllocate ($image, 26, 87, 150);
+			imagettftext($image, 13, 0, 22, 34, $blue, WWWROOT.APPLVERSION.'fonts/arial_bold.ttf', $type);
+			$thumbname = $dateinamensteil[0].'_thumb.jpg';
+			imagejpeg($image, $thumbname);
 		}
   }
 	
@@ -1314,14 +1467,18 @@ class Nachweis {
     return $result;
   }
 	
-	function Geometrieuebernahme($ref_geom, $id){
+	function Geometrieuebernahme($ref_geom, $id, $gepruefte_Nachweise_bearbeiten){
+		if (!$gepruefte_Nachweise_bearbeiten) {
+			$condition = ' AND geprueft = 0';
+		}
 		$sql = "UPDATE nachweisverwaltung.n_nachweise n 
 						SET the_geom = (
 							SELECT st_union(n2.the_geom) 
 							FROM nachweisverwaltung.n_nachweise n2
 							WHERE n2.id IN (".implode(',', $ref_geom).")
 						)
-						WHERE n.id IN (".implode(',', $id).")";
+						WHERE n.id IN (".implode(',', $id).") " .
+						$condition;
 		$ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0])$result[0]='Fehler bei der Geometrieübernahme!';
     else $result[1]='Geometrien erfolgreich übernommen!';

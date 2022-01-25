@@ -57,7 +57,7 @@
 	$strHintColor="Choose the color which should be used for search results and imported layers.";
 	$strHintInstantReload="If you activate this option, the map is going to be reloaded immediately after you are activating or disactivating a theme.";
 	$strHintMenuAutoClose="If you activate this option, there will be only one menue opened at the same time.";
-	$strHintVisuallyImpaired="If you select this option, the surface and the work will be simplified in the reading mode. This setting is particularly suitable for people with visually imairance. It, however, some functions are hidden.";
+	$strHintVisuallyImpaired="If you select this option, the surface and the work will be simplified in the reading mode. This setting is particularly suitable for people with visual impairment. When activated, however, some functions are hidden.";
 	$strHintZoomFactor="Choose the factor you want to zoom with in and out.";
 	$strHintMapSize="Choose the size of the map if the computed size does not fit.";
 	$strHintMapExtent="Coordinates of the lower left and upper right corner points in the selected first map projection.";
@@ -81,4 +81,9 @@
 	$strHintPrintScale="If you activate the first option, a suitable printing scale will be calculated automatically. On the second option, the last used printing scale is used.";
 	$strShowRollenFilter="Show Layer Filter";
 	$strHintShowRollenFilter="If you activate this option, you are able to set a filter in the layer-options.";
+	$strRedlineTextOptions = "Feetext options";
+	$strRedlineTextColor = "Text color";
+	$strRedlineFontFamily = "Font family";
+	$strRedlineFontSize = "Font size";
+	$strRedlineFontWeight = "Font weight";
 ?>  

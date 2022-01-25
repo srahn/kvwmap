@@ -43,4 +43,6 @@
 	$strWappenLink="Wappen-Link";
 	$strcheckClientIP="IP-Adressen überprüfen";
 	$strhist_timestamp="historische Zeitstempel zulassen";
+	$strShowSharedLayersText = "Freigegebene Layer in dieser Stelle anzeigen.";
+	$strShowSharedLayersDescription = "Wenn diese Einstellung gesetzt ist, werden Layer, die von Nutzern mit dem Recht Rollenlayer für andere freizugeben dieser Stelle zugewiesen und für alle Nutzer dieser Stelle als Layer angezeigt. In der Legende werden diese Layer kenntlich gemacht und in den Optionen des Layers angezeigt welcher Nutzer den Layer freigegeben hat.";
 ?>

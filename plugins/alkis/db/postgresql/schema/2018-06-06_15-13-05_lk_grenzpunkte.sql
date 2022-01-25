@@ -3,7 +3,7 @@ BEGIN;
 DROP VIEW alkis.lk_grenzpunkte;
 
 CREATE OR REPLACE VIEW alkis.lk_grenzpunkte AS
-	SELECT o.oid,
+	SELECT 
 	o.gml_id,
 	o.punktkennung,
 	ltrim(to_char("substring"(o.punktkennung::text, 1, 9)::integer, '999 99 99 99'::text), ' '::text) AS nbz,

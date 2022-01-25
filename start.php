@@ -1,5 +1,8 @@
 <?php
+$language = (in_array($_REQUEST['language'], array('german', 'english', 'low-german', 'polish', 'vietnamese')) ? $_REQUEST['language'] : 'german');
+include_once(LAYOUTPATH . 'languages/start_' . $language . '.php');
 $errors = array();
+
 # Objekt für graphische Benutzeroberfläche erzeugen mit default-Werten
 $GUI = new GUI("map.php", "layouts/css/main.css.php", "html");
 $GUI->user = new stdClass();
@@ -7,8 +10,9 @@ $GUI->user->rolle = new stdClass();
 $GUI->user->rolle->querymode = 0;
 $GUI->allowed_documents = array();
 $GUI->document_loader_name = session_id().rand(0,99999999).'.php';
-$GUI->formvars=$formvars;
+$GUI->formvars = $formvars;
 $GUI->echo = false;
+
 
 #################################################################################
 # Setzen der Konstante, ob in die Datenbank geschrieben werden soll oder nicht.
@@ -97,14 +101,14 @@ if (is_logout($GUI->formvars)) {
 	$GUI->debug->write('Logout angefragt.', 4, $GUI->echo);
 	if (is_logged_in()) {
 		$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
-		if (LOGOUT_ROUTINE != '') {
+		if (LOGOUT_ROUTINE != '' AND file_exists(LOGOUT_ROUTINE) AND is_file(LOGOUT_ROUTINE)) {
 			include(LOGOUT_ROUTINE);
 		}
 		$GUI->debug->write('Logout.', 4, $GUI->echo);
 		logout();
 	}
 	else {
-		$GUI->add_message('error', 'Logout nicht möglich. Sie sind nicht angemeldet.');
+		$GUI->add_message('info', $strLoggedOutAlready);
 		$GUI->debug->write('Ist schon logged out.', 4, $GUI->echo);
 	}
 	$GUI->formvars['go'] = '';
@@ -260,6 +264,12 @@ if (!$show_login_form) {
 	else {
 		$GUI->debug->write('Keine neue Stelle angefragt. Stelle: ' . $GUI->user->stelle_id . ' bleibt.', 4, $GUI->echo);
 		$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->database);
+		if ($GUI->database->errormessage != '') {
+			$GUI->add_message('error', 'Die Stelle kann nicht abgefragt werden. Prüfen Sie ob das Datenmodell der Stelle aktuell ist!');
+			logout();
+			$show_login_form = true;
+			$go = 'login';
+		}
 	}
 
 	# check stelle wenn noch nicht angemeldet gewesen, wenn noch nicht in Stelle angemeldet auch wenn stelle gewechselt wird.
@@ -337,6 +347,7 @@ if (!$show_login_form) {
 if (is_logged_in()) {
 	if (
 		!defined('AGREEMENT_MESSAGE') OR
+		!is_file(AGREEMENT_MESSAGE) OR
 		AGREEMENT_MESSAGE == '' OR
 		is_agreement_accepted($GUI->user)
 	) {
@@ -361,10 +372,17 @@ if (is_logged_in()) {
 			}
 		}
 		else {
-			$GUI->debug->write('Frage Agreement beim Nutzer ab.', 4, $GUI->echo);
-			$show_login_form = true;
-			$go = 'login_agreement';
-			# login case x
+			if (file_exists(AGREEMENT_MESSAGE)) {
+				$GUI->debug->write('Frage Agreement beim Nutzer ab.', 4, $GUI->echo);
+				$show_login_form = true;
+				$go = 'login_agreement';
+			}
+			else {
+				logout();
+				$show_login_form = true;
+				$GUI->add_message('error', 'Die in der Konfiguration angegebene Datei ' . AGREEMENT_MESSAGE . ' für die Zustimmungserklärung konnte nicht gefunden werden. Informieren Sie den Administrator.');
+				$go = 'login';
+			}
 		}
 	}
 }
@@ -391,7 +409,6 @@ else {
 		$GUI->user->setOptions($GUI->user->stelle_id, $GUI->formvars);
 		$GUI->user->rolle->readSettings();
 	}
-
 	#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
 	# Rollenbezogene Stellendaten zuweisen
 	$GUI->loadMultiLingualText($GUI->user->rolle->language);
@@ -418,18 +435,19 @@ else {
 		echo $GUI->pgdatabase->err_msg;
 		exit;
 	}
-	
+
 	if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, die Trafos weglassen
 		$GUI->epsg_codes = $GUI->pgdatabase->read_epsg_codes(false);
 		# Umrechnen der für die Stelle eingetragenen Koordinaten in das aktuelle System der Rolle
 		# wenn die EPSG-Codes voneinander abweichen
 		if ($GUI->Stelle->epsg_code != $GUI->user->rolle->epsg_code) {
 			$user_epsg = $epsg_codes[$GUI->user->rolle->epsg_code];
-			if($user_epsg['minx'] != ''){							// Koordinatensystem ist räumlich eingegrenzt
-				if($GUI->Stelle->epsg_code != 4326){
+			if ($user_epsg['minx'] != '') {
+				// Koordinatensystem ist räumlich eingegrenzt
+				if ($GUI->Stelle->epsg_code != 4326) {
 					$projFROM = ms_newprojectionobj("init=epsg:".$GUI->Stelle->epsg_code);
 					$projTO = ms_newprojectionobj("init=epsg:4326");
-					$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);			// max. Stellenextent wird in 4326 transformiert
+					$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO); // max. Stellenextent wird in 4326 transformiert
 				}
 				// Vergleich der Extents und ggfs. Anpassung
 				if($user_epsg['minx'] > $GUI->Stelle->MaxGeorefExt->minx)$GUI->Stelle->MaxGeorefExt->minx = $user_epsg['minx'];
@@ -442,8 +460,8 @@ else {
 			}
 			else {
 				# Umrechnen der maximalen Kartenausdehnung der Stelle
-				$projFROM = ms_newprojectionobj("init=epsg:".$GUI->Stelle->epsg_code);
-				$projTO = ms_newprojectionobj("init=epsg:".$GUI->user->rolle->epsg_code);
+				$projFROM = ms_newprojectionobj("init=epsg:" . $GUI->Stelle->epsg_code);
+				$projTO = ms_newprojectionobj("init=epsg:" . $GUI->user->rolle->epsg_code);
 				$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);
 			}
 		}
@@ -480,7 +498,7 @@ else {
 		}
 		# Zurücksetzen der veränderten Klassen
 		#$GUI->user->rolle->resetClasses();
-		if (defined('LOGIN_ROUTINE') AND LOGIN_ROUTINE != '') {
+		if (defined('LOGIN_ROUTINE') AND LOGIN_ROUTINE != '' AND file_exists(LOGIN_ROUTINE) AND is_file(LOGIN_ROUTINE)) {
 			include(LOGIN_ROUTINE);
 		}
 		$_SESSION['login_routines'] = false;
@@ -590,7 +608,7 @@ function get_permission_in_stelle($GUI) {
 			$GUI->debug->write('Passwort ist abgelaufen.', 4, $GUI->echo);
 			$allowed = false;
 			$reason = 'password expired';
-			$errmsg = 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist in der Stelle ' . $GUI->stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gütligkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten. Geben Sie ein neues Passwort ein und notieren Sie es sich.';
+			$errmsg = 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist in der Stelle ' . $GUI->stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gültigkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten. Geben Sie ein neues Passwort ein und notieren Sie es sich.';
 		}
 		else {
 			$GUI->debug->write('Passwort ist nicht abgelaufen.', 4, $GUI->echo);
@@ -601,7 +619,7 @@ function get_permission_in_stelle($GUI) {
 				if ($GUI->Stelle->checkClientIpIsOn()) {
 					$GUI->debug->write('IP-Adresse des Clients wird in dieser Stelle geprüft.', 4);
 
-					if ($GUI->user->clientIpIsValide(getenv('REMOTE_ADDR')) == false) {
+					if ($GUI->user->clientIpIsValide(get_remote_ip()) == false) {
 						$GUI->debug->write('IP-Adresse des Clients ist in der Stelle valid.', 4);
 						$allowed = false;
 						$reason = 'IP not allowed';

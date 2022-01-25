@@ -1,5 +1,24 @@
 <?
 
+function url2filepath($url, $doc_path, $doc_url) {
+	if ($doc_path == '') {
+		$doc_path = CUSTOM_IMAGE_PATH;
+	}
+	$url_parts = explode($doc_url, $url);
+	return $doc_path . $url_parts[1];
+}
+
+function format_human_filesize($bytes, $precision = 2) {
+	$sz = 'BKMGTP';
+	$factor = floor((strlen($bytes) - 1) / 3);
+	return sprintf("%." . $precision. "f", $bytes / pow(1024, $factor)) . ' ' . @$sz[$factor] . 'B';
+}
+
+function human_filesize($file) {
+	$bytes = @filesize($file);
+	return format_human_filesize($bytes);
+}
+
 function pg_quote($column){
 	return ctype_lower($column) ? $column : '"'.$column.'"';
 }
@@ -492,25 +511,8 @@ class GUI {
 								foreach($values as $value){
 									switch ($attributes['form_element_type'][$j]){
 										case 'Dokument' : {
-											$dokumentpfad = $value;
-											$pfadteil = explode('&original_name=', $dokumentpfad);
-											$dateiname = $pfadteil[0];
-											if($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
-											$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
-											$original_name = $pfadteil[1];
-											$dateinamensteil=explode('.', $dateiname);
-											$type = $dateinamensteil[1];
-											$thumbname = $this->get_dokument_vorschau($dateinamensteil);
-											if($layer['document_url'] != ''){
-												$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
-												$url = '';
-											}
-											else{
-												$this->allowed_documents[] = addslashes($dateiname);
-												$this->allowed_documents[] = addslashes($thumbname);
-												$url = IMAGEURL.$this->document_loader_name.'?dokument=';
-											}
-											$pictures .= '| '.$url.$thumbname;
+											$preview = $this->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url']);
+											$pictures .= '| ' . ($preview['doc_type'] == 'videostream' ? $preview['doc_src'] : $preview['thumb_src']);
 										}break;
 										case 'Link': {
 											$attribcount++;
@@ -587,30 +589,94 @@ class GUI {
     }
   }
 
-  function get_dokument_vorschau($dateinamensteil){
-		$type = strtolower($dateinamensteil[1]);
-  	$dokument = $dateinamensteil[0].'.'.$dateinamensteil[1];
-		if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){			// für Bilder und PDFs werden automatisch Thumbnails erzeugt
-			$thumbname = $dateinamensteil[0].'_thumb.jpg';
-			if(!file_exists($thumbname)){
-				exec(IMAGEMAGICKPATH.'convert -filter Hanning '.$dokument.'[0] -quality 75 -background white -flatten -resize '.PREVIEW_IMAGE_WIDTH.'x1000\> '.$thumbname);
+	function create_dokument_vorschau($doc_type, $pathinfo) {
+		if ($doc_type == 'local_img') {
+			# für lokale Bilder und PDFs werden automatisch Thumbnails erzeugt
+			$thumbname = $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg';
+			if (!file_exists($thumbname)) {
+				$command = IMAGEMAGICKPATH . 'convert -filter Hanning "' . $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '.' . $pathinfo['extension'] . '"[0] -quality 75 -background white -flatten -resize ' . PREVIEW_IMAGE_WIDTH . 'x1000\> "' . $thumbname . '"';
+				#echo 'Erzeuge Thumbnail mit commando: ' . $command;
+				exec($command);
 			}
 		}
-		else{																// alle anderen Dokumenttypen bekommen entsprechende Dokumentensymbole als Vorschaubild
-			$dateinamensteil[1] = 'gif';
-  		switch ($type) {
-  			default : {
-  				$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
-          $blue = ImageColorAllocate ($image, 26, 87, 150);
-					if(strlen($type) > 3)$xoffset = 4;
-          imagettftext($image, 12, 0, 23-$xoffset, 34, $blue, WWWROOT.APPLVERSION.'fonts/SourceSansPro-Semibold.ttf', $type);
-          $thumbname = IMAGEPATH.rand(0,100000).'.gif';
-          imagegif($image, $thumbname);
-  			}
-  		}
-  	}
+		else {
+			#	alle anderen Dokumenttypen oder Dateien auf fremden Servern bekommen entsprechende Dokumentensymbole als Vorschaubild
+			$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
+			$blue = ImageColorAllocate ($image, 26, 87, 150);
+			if (strlen(strtolower($pathinfo['extension'])) > 3) {
+				$xoffset = 4;
+			}
+			imagettftext($image, 12, 0, 23-$xoffset, 34, $blue, WWWROOT.APPLVERSION.'fonts/SourceSansPro-Semibold.ttf', $pathinfo['extension']);
+			$thumbname = IMAGEPATH.rand(0,100000).'.gif';
+			imagegif($image, $thumbname);
+		}
 		return $thumbname;
-  }
+	}
+
+	function get_dokument_vorschau($value, $document_path, $document_url) {
+		$doc_src = $doc_type = $thumb_src = $original_name = $target = $filesize = '';
+
+		$pfadteil = explode('&original_name=', $value);
+		$dateipfad = $pfadteil[0];
+		$pathinfo = pathinfo($dateipfad);
+		$type = strtolower($pathinfo['extension']);
+
+		if ($document_url != '') {
+			if (in_array($type, array('mp4'))) {
+				$doc_type = 'videostream';
+			}
+			else if (parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST) != parse_url($document_url, PHP_URL_HOST)) {
+				# die URL verweist auf einen anderen Server
+				$doc_type = 'remote_url';
+			}
+			$dateipfad = url2filepath($dateipfad, $document_path, $document_url);
+		}
+		if (file_exists($dateipfad) OR $doc_type != '') {
+			$pathinfo = pathinfo($dateipfad);
+			if ($doc_type == '') {
+				$type = strtolower($pathinfo['extension']);
+				if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
+					$doc_type = 'local_img';
+				}
+				else {
+					$doc_type = 'local_doc';
+				}
+			}
+
+			$thumbname = $this->create_dokument_vorschau($doc_type, $pathinfo);
+
+			if ($document_url != '') {
+				$original_name = basename($dateipfad);
+				$doc_src = $value; # URL zu der Datei (komplette URL steht schon in $value)
+				$target = 'target="_blank"';
+				if (dirname($thumbname).'/' == IMAGEPATH){
+					$thumbname = IMAGEURL.basename($thumbname);
+				}
+				else {
+					$thumbname = dirname($value).'/'.basename($thumbname);
+				}
+				$thumb_src = $thumbname;
+			}
+			else {
+				$original_name = $pfadteil[1];
+				$this->allowed_documents[] = addslashes($dateipfad);
+				$this->allowed_documents[] = addslashes($thumbname);
+				$url = IMAGEURL . $this->document_loader_name . '?dokument=';
+				$doc_src = $url . $value;
+				$thumb_src = $url . $thumbname;
+			}
+			$filesize = human_filesize($dateipfad);
+		}
+
+		return array(
+			'doc_src' => $doc_src,
+			'doc_type' => $doc_type,
+			'thumb_src' => $thumb_src,
+			'original_name' => $original_name,
+			'target' => $target,
+			'filesize' => $filesize
+		);
+	}
 
 	function write_document_loader(){
 		$handle = fopen(IMAGEPATH.$this->document_loader_name, 'w');
@@ -1201,37 +1267,47 @@ class rolle {
 		$layer_name_filter = '';
 		
 		# Abfragen der Layer in der Rolle
-		if($language != 'german') {
+		if ($language != 'german') {
 			$name_column = "
 			CASE
 				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
 				ELSE l.`Name`
 			END AS Name";
 		}
-		else
+		else {
 			$name_column = "l.Name";
+		}
 
 		if ($LayerName != '') {
-			$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "'";
-			if(is_numeric($LayerName))
-				$layer_name_filter .= " OR l.Layer_ID = " . $LayerName;
-			$layer_name_filter .= ")";
+			if (is_numeric($LayerName)) {
+				$layer_name_filter .= " AND l.Layer_ID = " . $LayerName;
+			}
+			else {
+				$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "')";
+			}
 		}
 
 		$sql = "
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, printconnection,
-				classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
-				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function, ul.`queryable`, ul.`drawingorder`,
+				l.alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, l.`schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
+				CASE 
+					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
+					ELSE l.connection 
+				END as connection, 
+				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
+				wfs_geom, selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
+				sync,
+				ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
 				l.labelitem as original_labelitem,
-				l.duplicate_from_layer_id,
-				l.duplicate_criterion,
+				l.`duplicate_from_layer_id`,
+				l.`duplicate_criterion`,
+				l.`shared_from`,
 				ul.`postlabelcache`,
 				`Filter`,
 				r2ul.gle_view,
@@ -1246,16 +1322,19 @@ class rolle {
 				`start_aktiv`,
 				r2ul.showclasses,
 				r2ul.rollenfilter,
-				r2ul.geom_from_layer
+				r2ul.geom_from_layer,
+				las.privileg as privilegfk 
 			FROM
-				used_layer AS ul,
-				u_rolle2used_layer as r2ul,
-				layer AS l
-				LEFT JOIN connections as c ON l.connection_id = c.id
+				layer AS l 
+				JOIN used_layer AS ul ON l.Layer_ID=ul.Layer_ID 
+				JOIN u_rolle2used_layer as r2ul ON r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID 
+				LEFT JOIN connections as c ON l.connection_id = c.id 
+				LEFT JOIN layer_attributes as la ON la.layer_id = ul.Layer_ID AND form_element_type = 'SubformFK' 
+				LEFT JOIN layer_attributes2stelle as las ON 
+					las.stelle_id = ul.Stelle_ID AND 
+					ul.Layer_ID = las.layer_id AND 
+					las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
 			WHERE
-				l.Layer_ID=ul.Layer_ID AND
-				r2ul.Stelle_ID=ul.Stelle_ID AND
-				r2ul.Layer_ID=ul.Layer_ID AND
 				ul.Stelle_ID= " . $this->stelle_id . " AND
 				r2ul.User_ID= " . $this->user_id .
 				$layer_name_filter . "

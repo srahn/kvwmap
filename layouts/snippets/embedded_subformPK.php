@@ -77,10 +77,12 @@
 								if ($layer['attributes']['visible'][$j]) {
 									$explosion = explode(';', $layer['attributes']['group'][$j]);
 									if ($explosion[1] != 'collapsed') { ?>
-										<td class="gle-attribute-name">
+										<td class="gle-attribute-name" style="height: auto">
+										<? if ($layer['attributes']['labeling'][$j] != 2) { ?>
 											<a href="javascript:reload_subform_list('<? echo $this->formvars['targetobject']; ?>', 1, '', '', '&orderby<? echo $layer['Layer_ID']; ?>=<? echo $layer['attributes']['name'][$j]; ?>')" title="Sortieren nach <? echo $layer['attributes']['name'][$j]; ?>"><?
 												echo attribute_name($layer['Layer_ID'], $layer['attributes'], $j, 0, $this->user->rolle->fontsize_gle, false); ?>
 											</a>
+										<? } ?>
 										</td><?
 									}
 								}
@@ -138,7 +140,7 @@
 		} ?>
 		<div style="width: 100%;text-align: center;margin-top: 4px">
 	<? if ($anzObj > 0){
-			if ($this->formvars['list_edit']) { ?>
+			if ($editable AND $this->formvars['list_edit']) { ?>
 				<a tabindex="1" class="buttonlink" href="javascript:reload_subform_list('<? echo $this->formvars['targetobject']; ?>', 0)"><span><? echo $this->strCancel; ?></span></a>
 			<? }
 			if($editable OR $layer['template'] == 'generic_layer_editor_doc_raster.php'){ ?>
@@ -199,37 +201,26 @@
 								} break;
 
 								case 'Dokument' : {
-									if ($dataset[$attributes['name'][$j]]!='') {
-										$dokumentpfad = $dataset[$attributes['name'][$j]];
-										$pfadteil = explode('&original_name=', $dokumentpfad);
-										$dateiname = $pfadteil[0];
-										if ($layer['document_url'] != '')$dateiname = url2filepath($dateiname, $layer['document_path'], $layer['document_url']);
-										$pathinfo = pathinfo($dateiname);
-										$type = strtolower($pathinfo['extension']);
-										$thumbname = $this->get_dokument_vorschau(
-											array(
-												$pathinfo['dirname'] . '/' . $pathinfo['filename'],
-												$pathinfo['extension']
-											)
-										);
-										if ($layer['document_url'] != '') {
-											$url = '';										# URL zu der Datei (komplette URL steht schon in $dokumentpfad)
-											$target = 'target="_blank"';
-											$thumbname = dirname($dokumentpfad).'/'.basename($thumbname);
+									if ($dataset[$attributes['name'][$j]] != '') {
+										$preview = $this->get_dokument_vorschau($dataset[$attributes['name'][$j]], $layer['document_path'], $layer['document_url']);
+										switch ($preview['doc_type']) {
+											case 'local_img' : {	# Bilder mit Vorschaubild
+												$preview_link = '<a class="preview_link" ' . $preview['target'] . ' href="' . $preview['doc_src'] . '"><img class="preview_image" src="' . $preview['thumb_src'] . '"></a>';
+											}break;
+											
+											case 'local_doc' : case 'remote_url' : {	# lokale Dateien oder fremde URLs
+												$preview_link = '<a class="preview_link" ' . $preview['target'] . ' href="' . $preview['doc_src'] . '"><img class="preview_doc" src="' . $preview['thumb_src'] . '"></a>';
+											}break;
+											
+											case 'videostream' : {	# Videostream
+												$preview_link = '
+													<video width="'.PREVIEW_IMAGE_WIDTH.'" controls>
+														<source src="' . $preview['doc_src'] . '" type="video/mp4">
+													</video>
+													';
+											}break;
 										}
-										else {
-											$original_name = $pfadteil[1];
-											$this->allowed_documents[] = addslashes($dateiname);
-											$this->allowed_documents[] = addslashes($thumbname);
-											$url = IMAGEURL.$this->document_loader_name.'?dokument=';			# absoluter Dateipfad
-										}
-										if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ) {
-											$preview = '<a class="preview_link" '.$target.' href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a>';
-										}
-										else {
-											$preview = '<a class="preview_link" '.$target.' href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'"></a>';
-										}
-										$output[$p] = '<table><tr><td>'.$original_name.'</td>';
+										$output[$p] = '<table><tr><td>' . $preview['original_name'] . '</td>';
 									}
 									else {
 										$output[$p] = '<table><tr><td></td>';
@@ -253,7 +244,7 @@
 					}
 				}
 				echo '<tr style="border: none">
-								<td'. get_td_class_or_style(array($dataset[$attributes['style']], 'subFormListItem')) . '>'.($preview != ''? $preview.'</td><td valign="top">' : '');
+								<td'. get_td_class_or_style(array($dataset[$attributes['style']], 'subFormListItem')) . '>'.($preview_link != ''? $preview_link.'</td><td valign="top">' : '');
 								
 				if ($this->formvars['embedded'] == 'true') {
 					echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:void(0);" onclick="checkForUnsavedChanges(event);if (document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&reload='.$this->formvars['reload'].'&attribute_privileg='.$this->formvars['attribute_privileg'].'\', new Array(document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].'\');">'.implode(' ', $output).'</a><div class="subForm" id="subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>';
