@@ -1602,6 +1602,7 @@ thead.gle th {
 	border-left: none;
 	background-color: #fff;
 	color: #aaa;
+	white-space: nowrap;
 }
 
 .gle_tabs > div.active_tab{
