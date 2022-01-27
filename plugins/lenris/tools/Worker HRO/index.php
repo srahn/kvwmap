@@ -18,7 +18,7 @@
 		set_time_limit(1800);
 		$sql = "
 			DELETE FROM 
-				lenris_worker;
+				n_nachweisaenderungen;
 			SELECT
 				" . $select . "				
       FROM 
@@ -40,7 +40,7 @@
 			SELECT
 				" . $select . "
       FROM 
-				risse a JOIN lenris_worker as b on a.id = b.id_nachweis
+				risse a JOIN n_nachweisaenderungen as b on a.id = b.id_nachweis
 			WHERE
 				b.db_action = 'INSERT'
 			ORDER BY a.id";
@@ -59,7 +59,7 @@
 			SELECT DISTINCT
 				" . $select . "
       FROM 
-				risse a JOIN lenris_worker as b on a.id = b.id_nachweis
+				risse a JOIN n_nachweisaenderungen as b on a.id = b.id_nachweis
 			WHERE
 				b.db_action = 'UPDATE'
 			ORDER BY a.id";
@@ -78,7 +78,7 @@
 			SELECT 
 				id_nachweis
       FROM 
-				lenris_worker 
+				n_nachweisaenderungen 
 			WHERE
 				db_action = 'DELETE'";
 		$ret = execSQL($sql);
@@ -91,7 +91,7 @@
 	function LENRIS_confirm_new_nachweise($ids){
 		$sql = "
 			DELETE FROM 
-				lenris_worker 
+				n_nachweisaenderungen 
 			WHERE 
 				id_nachweis IN (" . $ids . ") and db_action = 'INSERT'";
 		$ret = execSQL($sql);
@@ -102,7 +102,7 @@
 	function LENRIS_confirm_changed_nachweise($ids){
 		$sql = "
 			DELETE FROM 
-				lenris_worker 
+				n_nachweisaenderungen 
 			WHERE 
 				id_nachweis IN (" . $ids . ") and db_action = 'UPDATE'";
 		$ret = execSQL($sql);
@@ -110,7 +110,7 @@
 			SELECT 
 				count(*)
 			FROM
-				lenris_worker 
+				n_nachweisaenderungen 
 			WHERE 
 				id_nachweis IN (" . $ids . ") and db_action = 'UPDATE'";
 		$ret = execSQL($sql);
@@ -121,7 +121,7 @@
 	function LENRIS_confirm_deleted_nachweise($ids){
 		$sql = "
 			DELETE FROM 
-				lenris_worker 
+				n_nachweisaenderungen 
 			WHERE 
 				id_nachweis IN (" . $ids . ")";		# alle Einträge löschen, da es noch UPDATE-Einträge geben kann
 		$ret = execSQL($sql);
@@ -129,7 +129,7 @@
 			SELECT 
 				count(*)
 			FROM
-				lenris_worker 
+				n_nachweisaenderungen 
 			WHERE 
 				id_nachweis IN (" . $ids . ") and db_action = 'DELETE'";
 		$ret = execSQL($sql);
