@@ -63,10 +63,6 @@ for ($i = 0; $i < count($kvwmap_plugins); $i++) {
 	}
 }
 
-if (!defined('EPSGCODE_ALKIS')) {
-	define('EPSGCODE_ALKIS', -1);	// EPSGCODE_ALKIS ist nur bei Verwendung des Plugin alkis definiert
-}
-
 include(CLASSPATH . 'log.php');
 
 if (DEBUG_LEVEL > 0) {
